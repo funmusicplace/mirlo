@@ -1,25 +1,66 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, User } from "@prisma/client";
 import { Request, Response } from "express";
+import { pick } from "lodash";
+import {
+  userAuthenticated,
+  userHasPermission,
+} from "../../../../../auth/passport";
+import processFile, { processImage } from "../../../../../utils/process-file";
+
 const prisma = new PrismaClient();
+
+type Params = {
+  trackGroupId: number;
+  userId: number;
+};
 
 export default function () {
   const operations = {
-    PUT,
-    DELETE,
+    PUT: [userAuthenticated, userHasPermission("owner"), PUT],
+    DELETE: [userAuthenticated, userHasPermission("owner"), DELETE],
   };
 
   async function PUT(req: Request, res: Response) {
-    const { userId, trackGroupId } = req.params;
-
+    const { userId, trackGroupId } = req.params as unknown as Params;
+    const data = req.body;
+    const loggedInUser = req.user as User;
+    console.log("data", data);
     try {
-      // TODO: filter trackGroup by userId
-      const post = await prisma.trackGroup.update({
-        where: { id: Number(trackGroupId) },
-        data: {},
+      const artist = await prisma.artist.findFirst({
+        where: {
+          userId: loggedInUser.id,
+          id: Number(data.artistId),
+        },
       });
 
-      res.json(post);
+      if (!artist) {
+        res.json({
+          error: "Artist must belong to user",
+        });
+        throw new Error("Artist must belong to user");
+      }
+
+      await prisma.trackGroup.updateMany({
+        where: { id: Number(trackGroupId), artistId: artist.id },
+        data: pick(data, [
+          "title",
+          "releaseDate",
+          "published",
+          "type",
+          "about",
+        ]),
+      });
+      console.log("files", req.body);
+      const file = req.body.files.file;
+      // TODO: Remove prior files
+      // FIXME: Only allow uploading of one file.
+      const fileResult = await processImage({ req, res })(file, trackGroupId);
+
+      // trackgroup.set("cover", file.filename);
+
+      res.json({ message: "Success" });
     } catch (error) {
+      console.log("error", error);
       res.json({
         error: `TrackGroup with ID ${trackGroupId} does not exist in the database`,
       });

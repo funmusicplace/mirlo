@@ -1,0 +1,107 @@
+---
+services:
+  redis:
+    networks:
+      - redis-network
+    command:
+      - redis-server
+      - "--appendonly"
+      - "yes"
+      - "--requirepass ${REDIS_PASSWORD}"
+    image: redis
+    container_name: nomads-redis
+    restart: always
+    expose:
+      - 6379
+    ports:
+      - "${REDIS_HOST_PORT:-6379}:${REDIS_PORT:-6379}"
+
+  api:
+    networks:
+      - api-network
+      - redis-network
+    env_file:
+      - .env
+    build: .
+    command: /bin/sh -c "yarn && yarn migrate && yarn dev:api"
+    container_name: nomads-api
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
+    depends_on:
+      - redis
+      - pgsql
+    ports:
+      - "${APP_HOST_PORT:-3000}:3000"
+    # restart: always
+    volumes:
+      - ~/.ssh:/root/.ssh
+      - ./:/var/www/api
+      - ${MEDIA_LOCATION:-./data/media/}ultimatemember:/data/ultimatemember
+      - ${MEDIA_LOCATION:-./data/media/}incoming:/data/media/incoming
+      - ${MEDIA_LOCATION:-./data/media/}audio:/data/media/audio
+      - ${MEDIA_LOCATION:-./data/media/}images:/data/media/images
+
+  background:
+    networks:
+      - api-network
+      - redis-network
+    env_file:
+      - .env
+    build: background
+    # command: /bin/sh -c "yarn && yarn migrate && yarn start:dev"
+    container_name: nomads-background
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
+    depends_on:
+      - redis
+      - pgsql
+      - api
+    # restart: always
+    volumes:
+      - ~/.ssh:/root/.ssh
+      - ./:/var/www/api
+      - ${MEDIA_LOCATION:-./data/media/}incoming:/data/media/incoming
+      - ${MEDIA_LOCATION:-./data/media/}audio:/data/media/audio
+      - ${MEDIA_LOCATION:-./data/media/}images:/data/media/images
+
+  pgsql:
+    image: postgres:14-alpine
+    env_file:
+      - .env
+    volumes:
+      - ./data/pgsql:/var/lib/postgresql/data
+      - ./data/pgsql_backups:/backups
+    container_name: nomads-pgsql
+    networks:
+      api-network:
+        aliases:
+          - pgsql
+    ports:
+      - '${POSTGRES_LOCAL_MACHINE_PORT:-5432}:5432'
+
+  # nginx:
+  #   restart: always
+  #   container_name: resonate-nginx
+  #   networks:
+  #     - api-network
+  #   volumes:
+  #     - ./data/web-root:/var/www/html
+  #     - ./data/certbot-etc:/etc/letsencrypt
+  #     - ./data/certbot-var:/var/lib/letsencrypt
+  #     - ${MEDIA_LOCATION:-./data/media/}incoming:/data/media/incoming
+  #     - ${MEDIA_LOCATION:-./data/media/}audio:/data/media/audio
+  #     - ${MEDIA_LOCATION:-./data/media/}images:/data/media/images
+  #   build:
+  #     context: ./nginx
+  #     target: ${IMAGE:-local-image}
+    # ports:
+    #   - "${NGINX_PORT:-80}:80"
+    #   - 443:443
+
+networks:
+  api-network:
+    driver: bridge
+  redis-network:
+    driver: bridge
+
+version: "3.7"

@@ -30,6 +30,7 @@ const AlbumForm: React.FC<{
     type: TrackGroup["type"];
     releaseDate: string;
     about: string;
+    newCover: File[];
   }>({
     defaultValues: existing ?? {
       published: false,
@@ -45,13 +46,16 @@ const AlbumForm: React.FC<{
       type: string;
       releaseDate: string;
       about: string;
+      newCover: File[];
       // cover: string | File[];
     }) => {
       if (user?.id) {
         try {
           setIsSaving(true);
           let savedId = existingId;
+          console.log("existingId", existingId);
           if (existingId) {
+            console.log("aving");
             await api.put(`users/${user.id}/trackGroups/${existingId}`, {
               ...pick(data, [
                 "title",
@@ -60,10 +64,12 @@ const AlbumForm: React.FC<{
                 "releaseDate",
                 "about",
               ]),
+              artistId: artist.id,
+              cover: data.newCover,
             });
           } else {
             const newGroup = await api.post<
-              { title?: string; artistId: number },
+              { title?: string; artistId: number; cover?: File[] },
               { id: number }
             >(`users/${user.id}/trackGroups`, {
               ...pick(data, [
@@ -73,6 +79,7 @@ const AlbumForm: React.FC<{
                 "releaseDate",
                 "about",
               ]),
+              cover: data.newCover,
               artistId: artist.id,
             });
             savedId = newGroup.id;
@@ -126,18 +133,16 @@ const AlbumForm: React.FC<{
         }}
       >
         Cover:
-        {/* {existing?.images && (
-          <img src={existing.images.small?.url} alt="album cover" />
-        )} */}
+        {existing?.cover && <img src={existing.cover.url} alt="album cover" />}
       </FormComponent>
-      {/* <FormComponent>
+      <FormComponent>
         <InputEl
           type="file"
           id="audio"
-          {...register("cover")}
+          {...register("newCover")}
           accept="image/*"
         />
-      </FormComponent> */}
+      </FormComponent>
       <FormComponent>
         Type:{" "}
         <SelectEl defaultValue="lp" {...register("type")}>

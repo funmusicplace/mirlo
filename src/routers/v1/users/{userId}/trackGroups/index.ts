@@ -8,6 +8,7 @@ export default function () {
     POST,
   };
 
+  // FIXME: only get trackgroups belonging to artists belonging to a user
   async function GET(req: Request, res: Response) {
     const { artistId } = req.query;
 
@@ -58,6 +59,8 @@ export default function () {
     },
   };
 
+  // FIXME: only allow creation of trackgroups for users that belong to the
+  // logged in user
   async function POST(req: Request, res: Response) {
     const { title, about, artistId, published, releaseDate, enabled } =
       req.body;

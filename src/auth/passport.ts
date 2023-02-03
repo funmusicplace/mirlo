@@ -79,8 +79,8 @@ export const userAuthenticated = (req: Request, res: Response, next: any) => {
 };
 
 export const userHasPermission = (role: "admin" | "owner") => {
+  // FIXME: this doesn't do anythign!
   return (req: Request, res: Response, next: any) => {
-    console.log("req", req.url, req.user);
     return next();
   };
 };

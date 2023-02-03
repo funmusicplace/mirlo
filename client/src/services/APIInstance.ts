@@ -4,6 +4,7 @@ const APIInstance = (apiRoot: string) => {
   const authEndpoints = ["profile", "login", "logout", "refresh", "signup"];
 
   const apiRequest = async (endpoint: string, options?: RequestInit) => {
+    console.log("apiRequest", endpoint, options);
     const root = authEndpoints.includes(endpoint) ? auth : api;
     const req = new Request(`${root}${endpoint}`, options);
 
@@ -39,7 +40,7 @@ const APIInstance = (apiRoot: string) => {
       options?: RequestInit
     ): Promise<R> => {
       return apiRequest(endpoint, {
-        method: "POST",
+        method: "PUT",
         credentials: "include",
         headers: {
           Accept: "application/json",

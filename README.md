@@ -11,16 +11,30 @@ Main libraries:
 
 ### Download and install
 
+#### For the API:
+
 ```
 git clone <repository>
 cd nomads
-yarn install
-# Seed the DB
-npx prisma migrate dev
-# Install the client
-cd client && yarn install
-# Go back to root
-cd ../
-# run both the client and the back-end
-yarn dev
+docker-compose up
 ```
+
+Go to `localhost:3000/docs` and see the Swagger API docs.
+
+#### For the client:
+
+```
+cd client
+yarn
+yarn start
+```
+
+### Making changes to background jobs.
+
+Changes in background jobs aren't detected. You'll need to restart the docker container for them:
+
+```
+docker-compose up --no-deps background
+```
+
+### Running migrations

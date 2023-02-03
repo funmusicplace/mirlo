@@ -5,7 +5,7 @@ import cookieParser from "cookie-parser";
 import passport from "passport";
 import { initialize } from "express-openapi";
 import swaggerUi from "swagger-ui-express";
-
+import cors from "cors";
 import * as dotenv from "dotenv";
 dotenv.config();
 
@@ -21,7 +21,6 @@ const prisma = new PrismaClient();
 const app = express();
 
 if (process.env.NODE_ENV === "development") {
-  var cors = require("cors");
   app.use(
     cors({
       origin: ["http://localhost:8080", "http://localhost:3000"],

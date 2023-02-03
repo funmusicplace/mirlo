@@ -47,7 +47,6 @@ router.post(`/signup`, async (req, res, next) => {
 router.post(
   "/login",
   async (req, res, next) => {
-    console.log("login");
     try {
       const { email, password } = req.body;
       const foundUser = await prisma.user.findFirst({
@@ -56,7 +55,6 @@ router.post(
         },
       });
       if (foundUser) {
-        console.log("found a user", foundUser);
         const match = await bcrypt.compare(password, foundUser.password);
         if (match) {
           res.locals.user = foundUser;
@@ -78,7 +76,6 @@ router.post(
   },
   async (req, res) => {
     let user;
-    console.log("local", res.locals.user);
     if (res.locals.user) {
       user = res.locals.user;
     } else {
@@ -91,15 +88,12 @@ router.post(
       email: user.email,
       id: user.id,
     };
-    console.log("payload", payload);
 
     const accessToken = jwt.sign(payload, jwt_secret, {
       expiresIn: "10m",
     });
-    console.log("accesToken", accessToken);
 
     const refreshToken = jwt.sign(payload, refresh_secret, { expiresIn: "1d" });
-    console.log("refreshToken", refreshToken);
     res
       .cookie("jwt", accessToken, {
         httpOnly: true,

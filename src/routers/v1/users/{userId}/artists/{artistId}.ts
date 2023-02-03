@@ -1,5 +1,10 @@
 import { PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
+import {
+  userAuthenticated,
+  userHasPermission,
+  userLoggedInWithoutRedirect,
+} from "../../../../../auth/passport";
 const prisma = new PrismaClient();
 
 type Params = {
@@ -9,9 +14,9 @@ type Params = {
 
 export default function () {
   const operations = {
-    PUT,
-    GET,
-    DELETE,
+    PUT: [userAuthenticated, userHasPermission("owner"), PUT],
+    GET: [userLoggedInWithoutRedirect, GET],
+    DELETE: [userAuthenticated, userHasPermission("owner"), DELETE],
   };
 
   async function PUT(req: Request, res: Response) {
@@ -128,7 +133,7 @@ export default function () {
 
   async function DELETE(req: Request, res: Response) {
     const { userId, artistId } = req.params as unknown as Params;
-    const artist = await prisma.artist.deleteMany({
+    await prisma.artist.deleteMany({
       where: {
         id: Number(artistId),
         userId: Number(userId),

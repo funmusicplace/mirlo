@@ -1,6 +1,5 @@
 import { PrismaClient, User } from "@prisma/client";
 import { Request, Response } from "express";
-import passport from "passport";
 import {
   userAuthenticated,
   userHasPermission,
@@ -23,6 +22,7 @@ export default function () {
   async function GET(req: Request, res: Response) {
     const { userId } = req.params as unknown as Params;
     const loggedInUser = req.user as User;
+
     if (userId) {
       const where = {
         userId: Number(userId),
@@ -71,6 +71,7 @@ export default function () {
     },
   };
 
+  // FIXME: only allow creation for logged in user.
   async function POST(req: Request, res: Response) {
     const { name } = req.body;
     const { userId } = req.params as unknown as Params;

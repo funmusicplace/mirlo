@@ -2,6 +2,8 @@ import { css } from "@emotion/css";
 import React from "react";
 import { useForm } from "react-hook-form";
 import api from "services/api";
+import Button from "./common/Button";
+import { InputEl } from "./common/Input";
 
 type SignupInputs = {
   email: string;
@@ -29,12 +31,12 @@ function Signup() {
       >
         <h2>Register</h2>
         <label>name: </label>
-        <input type="input" {...register("name")} />
+        <InputEl type="input" {...register("name")} />
         <label>email: </label>
-        <input type="email" {...register("email")} />
+        <InputEl type="email" {...register("email")} />
         <label>password: </label>
-        <input {...register("password")} type="password" />
-        <button type="submit">Sign up</button>
+        <InputEl {...register("password")} type="password" />
+        <Button type="submit">Sign up</Button>
       </form>
     </div>
   );
