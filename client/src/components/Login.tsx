@@ -5,7 +5,8 @@ import { useGlobalStateContext } from "../state/GlobalState";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import Button from "./common/Button";
-import Input, { InputEl } from "./common/Input";
+import { InputEl } from "./common/Input";
+import { useSnackbar } from "state/SnackbarContext";
 
 type SignupInputs = {
   email: string;
@@ -16,19 +17,25 @@ function Login() {
   const { dispatch } = useGlobalStateContext();
   const { register, handleSubmit } = useForm<SignupInputs>();
   const navigate = useNavigate();
+  const snackbar = useSnackbar();
 
   const onSubmit = React.useCallback(
     async (data: SignupInputs) => {
-      await api.post("login", data);
-
-      const user = await api.get<LoggedInUser>("profile");
-      dispatch({
-        type: "setLoggedInUser",
-        user,
-      });
-      navigate("/");
+      try {
+        await api.post("login", data);
+        const user = await api.get<LoggedInUser>("profile");
+        dispatch({
+          type: "setLoggedInUser",
+          user,
+        });
+        navigate("/");
+      } catch (e: unknown) {
+        console.log("snack", (e as Error).message);
+        snackbar((e as Error).message, { type: "warning" });
+        console.error(e);
+      }
     },
-    [dispatch, navigate]
+    [dispatch, navigate, snackbar]
   );
 
   return (
@@ -43,6 +50,7 @@ function Login() {
         onSubmit={handleSubmit(onSubmit)}
       >
         <h2>Log in</h2>
+
         <label>email: </label>
         <InputEl type="email" {...register("email")} />
         <label>password: </label>

@@ -1,5 +1,7 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
+import processor from "../../../trackGroups/processor";
+
 const prisma = new PrismaClient();
 
 export default function () {
@@ -20,9 +22,13 @@ export default function () {
       where,
       include: {
         tracks: true,
+        cover: true,
       },
     });
-    res.json(results);
+
+    res.json({
+      results: results.map(processor.single),
+    });
   }
 
   GET.apiDoc = {
@@ -62,19 +68,25 @@ export default function () {
   // FIXME: only allow creation of trackgroups for users that belong to the
   // logged in user
   async function POST(req: Request, res: Response) {
-    const { title, about, artistId, published, releaseDate, enabled } =
-      req.body;
-    const result = await prisma.trackGroup.create({
-      data: {
-        title,
-        about,
-        artist: { connect: { id: artistId } },
-        published,
-        releaseDate: new Date(releaseDate),
-        enabled,
-      },
-    });
-    res.json(result);
+    try {
+      const { title, about, artistId, published, releaseDate, enabled } =
+        req.body;
+      const trackgroup = await prisma.trackGroup.create({
+        data: {
+          title,
+          about,
+          artist: { connect: { id: artistId } },
+          published,
+          releaseDate: new Date(releaseDate),
+          enabled,
+        },
+      });
+      res.json({ trackgroup });
+    } catch (e) {
+      res.status(500).json({
+        error: "Something went wrong while trying to create a trackgroup",
+      });
+    }
   }
 
   POST.apiDoc = {

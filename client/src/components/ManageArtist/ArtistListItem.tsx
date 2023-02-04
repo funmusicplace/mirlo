@@ -13,7 +13,6 @@ const ArtistListItem: React.FC<{
   artist: Artist;
   reload: () => Promise<void>;
 }> = ({ artist, reload }) => {
-  console.log("artist", artist);
   const [manageTrackgroup, setManageTrackgroup] = React.useState<TrackGroup>();
   const [addingNewAlbum, setAddingNewAlbum] = React.useState(false);
   const [isEditing, setIsEditing] = React.useState(false);
@@ -22,20 +21,20 @@ const ArtistListItem: React.FC<{
 
   const reloadWrapper = React.useCallback(async () => {
     if (albumId) {
-      const tg = await api.get<TrackGroup>(
+      const tg = await api.get<{ trackgroup: TrackGroup }>(
         `users/${artist.userId}/trackGroups/${albumId}`
       );
-      setManageTrackgroup(tg);
+      setManageTrackgroup(tg.trackgroup);
     }
     await reload();
   }, [albumId, artist.userId, reload]);
 
   React.useEffect(() => {
     const callback = async () => {
-      const trackGroups = await api.get<TrackGroup[]>(
+      const trackGroups = await api.get<{ results: TrackGroup[] }>(
         `users/${artist.userId}/trackGroups`
       );
-      setTrackGroups(trackGroups);
+      setTrackGroups(trackGroups.results);
     };
     callback();
   }, [artist.userId]);

@@ -114,7 +114,7 @@ router.post(
 
 router.get("/logout", (req, res) => {
   if (req.cookies["jwt"]) {
-    res.clearCookie("jwt").status(200).json({
+    res.clearCookie("jwt").clearCookie("refresh").status(200).json({
       message: "You have logged out",
     });
   } else {
@@ -144,7 +144,7 @@ router.get("/profile", userAuthenticated, async (req, res) => {
 router.post("/refresh", (req, res) => {
   if (req.cookies?.refresh) {
     // Destructuring refreshToken from cookie
-    const refreshToken = req.cookies.jwt;
+    const refreshToken = req.cookies.refresh;
     // Verifying refresh token
     jwt.verify(
       refreshToken,
@@ -152,6 +152,7 @@ router.post("/refresh", (req, res) => {
       {},
       async (err: VerifyErrors | null, decoded?: JwtPayload | string) => {
         if (err) {
+          console.log("err", err);
           // Wrong Refesh Token
           return res.status(406).json({ message: "Unauthorized" });
         } else {

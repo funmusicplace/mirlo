@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 
-const dotenv = require("dotenv-safe");
+import dotenv from "dotenv-safe";
 dotenv.config();
 
-const yargs = require("yargs");
-const { Worker } = require("bullmq");
-const winston = require("winston");
-const convertAudioJob = require("./convert-audio");
-const audioDurationJob = require("./audio-duration");
+import yargs from "yargs";
+import { Job, Worker } from "bullmq";
+import winston from "winston";
+import convertAudioJob from "./convert-audio";
+// import audioDurationJob from "./audio-duration";
 import optimizeImage from "./optimize-image";
 
 import { REDIS_CONFIG } from "../config/redis";
@@ -35,22 +35,26 @@ const workerOptions = {
 
 yargs // eslint-disable-line
   .command("run", "starts file processing queue", (argv: any) => {
-    console.log("STARTING WORKER QUEUE");
+    logger.info("STARTING WORKER QUEUE");
     audioQueue();
-    audioDurationQueue();
+    // audioDurationQueue();
     imageQueue();
   })
   .help().argv;
 
 async function imageQueue() {
   const worker = new Worker("optimize-image", optimizeImage, workerOptions);
-  logger.info("Optimize image worker started");
+  logger.info("Optimize Image worker started");
 
-  worker.on("completed", (job: any) => {
+  worker.on("ready", () => {
+    console.log("worker is ready");
+  });
+
+  worker.on("completed", (job: Job) => {
     logger.info("completed:optimize-image");
   });
 
-  worker.on("failed", (job: any, err: any) => {
+  worker.on("failed", (job?: Job, err?: any) => {
     logger.error("failed:optimize-image", err);
   });
 
@@ -76,19 +80,19 @@ async function audioQueue() {
   });
 }
 
-function audioDurationQueue() {
-  const worker = new Worker("audio-duration", audioDurationJob, workerOptions);
-  logger.info("Audio duration worker started");
+// function audioDurationQueue() {
+//   const worker = new Worker("audio-duration", audioDurationJob, workerOptions);
+//   logger.info("Audio duration worker started");
 
-  worker.on("completed", (job: any) => {
-    logger.info("completed:audio-duration");
-  });
+//   worker.on("completed", (job: any) => {
+//     logger.info("completed:audio-duration");
+//   });
 
-  worker.on("failed", (job: any, err: any) => {
-    logger.error("failed:audio-duration", err);
-  });
+//   worker.on("failed", (job: any, err: any) => {
+//     logger.error("failed:audio-duration", err);
+//   });
 
-  worker.on("error", (err: any) => {
-    logger.error("error:audio-duration", err);
-  });
-}
+//   worker.on("error", (err: any) => {
+//     logger.error("error:audio-duration", err);
+//   });
+// }

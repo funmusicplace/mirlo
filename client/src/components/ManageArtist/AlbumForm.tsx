@@ -30,7 +30,7 @@ const AlbumForm: React.FC<{
     type: TrackGroup["type"];
     releaseDate: string;
     about: string;
-    newCover: File[];
+    coverFile: File[];
   }>({
     defaultValues: existing ?? {
       published: false,
@@ -46,16 +46,13 @@ const AlbumForm: React.FC<{
       type: string;
       releaseDate: string;
       about: string;
-      newCover: File[];
-      // cover: string | File[];
+      coverFile: File[];
     }) => {
       if (user?.id) {
         try {
           setIsSaving(true);
           let savedId = existingId;
-          console.log("existingId", existingId);
           if (existingId) {
-            console.log("aving");
             await api.put(`users/${user.id}/trackGroups/${existingId}`, {
               ...pick(data, [
                 "title",
@@ -65,7 +62,6 @@ const AlbumForm: React.FC<{
                 "about",
               ]),
               artistId: artist.id,
-              cover: data.newCover,
             });
           } else {
             const newGroup = await api.post<
@@ -79,15 +75,22 @@ const AlbumForm: React.FC<{
                 "releaseDate",
                 "about",
               ]),
-              cover: data.newCover,
               artistId: artist.id,
             });
             savedId = newGroup.id;
           }
           // data cover is a string if the form hasn't been changed.
-          // if (savedId && data.cover[0] && typeof data.cover[0] !== "string") {
-          //   await uploadTrackGroupCover(savedId, data.cover[0]);
-          // }
+          if (
+            savedId &&
+            data.coverFile[0] &&
+            typeof data.coverFile[0] !== "string"
+          ) {
+            console.log("data", data.coverFile);
+            await api.uploadFile(
+              `users/${user.id}/trackGroups/${savedId}/cover`,
+              data.coverFile
+            );
+          }
           snackbar("Trackgroup updated", { type: "success" });
           onClose?.();
         } catch (e) {
@@ -133,13 +136,15 @@ const AlbumForm: React.FC<{
         }}
       >
         Cover:
-        {existing?.cover && <img src={existing.cover.url} alt="album cover" />}
+        {existing?.cover && (
+          <img src={existing.cover.sizes?.[120]} alt="album cover" />
+        )}
       </FormComponent>
       <FormComponent>
         <InputEl
           type="file"
           id="audio"
-          {...register("newCover")}
+          {...register("coverFile")}
           accept="image/*"
         />
       </FormComponent>

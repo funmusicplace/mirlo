@@ -1,6 +1,6 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, User } from "@prisma/client";
 
-import { Request, response, Response } from "express";
+import { Request, Response } from "express";
 import { TokenExpiredError } from "jsonwebtoken";
 import passport from "passport";
 import passportJWT from "passport-jwt";
@@ -62,8 +62,8 @@ export const userLoggedInWithoutRedirect = (
         return next(err);
       }
       if (info instanceof TokenExpiredError) {
-        res.status(401);
-        return next(info);
+        res.status(401).json({ error: info.message });
+        return;
       }
       if (!user) {
         return next();
@@ -75,12 +75,24 @@ export const userLoggedInWithoutRedirect = (
 };
 
 export const userAuthenticated = (req: Request, res: Response, next: any) => {
-  passport.authenticate("jwt", { session: false })(req, res, next);
+  try {
+    passport.authenticate("jwt", { session: false })(req, res, next);
+  } catch (e) {
+    console.log("checking jwt");
+    res.status(401).json({ error: "Unauthorized" });
+  }
 };
 
 export const userHasPermission = (role: "admin" | "owner") => {
-  // FIXME: this doesn't do anythign!
+  // FIXME: exception for admin?
   return (req: Request, res: Response, next: any) => {
+    const { userId } = req.params as unknown as { userId: number };
+    const loggedInUser = req.user as User;
+
+    if (Number(userId) !== loggedInUser.id) {
+      res.status(401).json({ error: "Unauthorized" });
+    }
+
     return next();
   };
 };

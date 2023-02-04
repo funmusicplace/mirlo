@@ -7,7 +7,7 @@ import path from "path";
 import shasum from "shasum";
 import winston from "winston";
 import dimensions from "image-size";
-
+import { fromFile } from "file-type";
 // import { Track, File } from "../db/models";
 
 import sharpConfig from "../config/sharp";
@@ -41,7 +41,7 @@ const logger = winston.createLogger({
 });
 
 const queueOptions = {
-  prefix: "resonate",
+  prefix: "nomads",
   connection: REDIS_CONFIG,
 };
 
@@ -126,9 +126,21 @@ audioDurationQueueEvents.on("completed", async (jobId: any) => {
   }
 });
 
-const imageQueue = new Queue("optimize-image", queueOptions);
+export const imageQueue = new Queue("optimize-image", queueOptions);
 
 const imageQueueEvents = new QueueEvents("optimize-image", queueOptions);
+
+imageQueueEvents.on("stalled", () => {
+  console.log("stalled");
+});
+
+imageQueueEvents.on("added", () => {
+  console.log("started a job");
+});
+
+imageQueueEvents.on("error", () => {
+  console.log("errored");
+});
 
 imageQueueEvents.on("completed", async (jobId: any) => {
   logger.info(`Job with id ${jobId} has been completed`);
@@ -153,11 +165,13 @@ imageQueueEvents.on("completed", async (jobId: any) => {
   }
 });
 
-export const processImage = (ctx: { req: Request; res: Response }) => {
+export const processTrackGroupCover = (ctx: {
+  req: Request;
+  res: Response;
+}) => {
   return async (file: any, trackGroupId: number) => {
-    const { size: fileSize, filepath } = file;
-    const FileType = await import("file-type");
-    const type = await FileType.fileTypeFromFile(filepath);
+    const { size: fileSize, path: filepath } = file;
+    const type = await fromFile(filepath);
     const mime = type !== null && type !== undefined ? type.mime : file.type;
     const isImage = SUPPORTED_IMAGE_MIME_TYPES.includes(mime);
 
@@ -167,22 +181,24 @@ export const processImage = (ctx: { req: Request; res: Response }) => {
     }
 
     const buffer = await fs.readFile(filepath);
-    const sha1sum = shasum(buffer);
+    // const sha1sum = shasum(buffer);
 
-    const image = await prisma.trackGroupCover.create({
-      data: {
+    const image = await prisma.trackGroupCover.upsert({
+      create: {
         originalFilename: file.originalFilename,
-        trackGroupId,
+        trackGroupId: Number(trackGroupId),
+      },
+      update: {
+        originalFilename: file.originalFilename,
+      },
+      where: {
+        trackGroupId: Number(trackGroupId),
       },
     });
 
     const { config = "artwork" }: { config: "artwork" | "avatar" | "banner" } =
       ctx.req.body; // sharp config key
-    console.log("config", config);
-    const { width, height } = await dimensions(
-      path.join(BASE_DATA_DIR, `/data/media/incoming/${image.id}`)
-    );
-    console.log("width", width, height);
+    const { width, height } = await dimensions(filepath);
 
     // const image = await prisma.image.findFirst({
     //   where: {
@@ -190,18 +206,19 @@ export const processImage = (ctx: { req: Request; res: Response }) => {
     //   },
     // });
 
-    const metadata = file.metadata || {};
+    // const metadata = file.metadata || {};
 
-    file.metadata = Object.assign(metadata, {
-      dimensions: { width, height },
-    });
+    // file.metadata = Object.assign(metadata, {
+    //   dimensions: { width, height },
+    // });
 
-    await file.save();
+    // await file.save();
 
     logger.info("Adding image to queue");
 
     imageQueue.add("optimize-image", {
-      filename: image.id,
+      filepath,
+      destination: image.id,
       config: sharpConfig.config[config],
     });
 
@@ -216,10 +233,9 @@ export const processImage = (ctx: { req: Request; res: Response }) => {
  */
 export const processAudio = (ctx: { req: Request; res: Response }) => {
   return async (file: any) => {
-    const { size: fileSize, filepath } = file;
-    const FileType = await import("file-type");
+    const { size: fileSize, path: filepath } = file;
 
-    const type = await FileType.fileTypeFromFile(filepath);
+    const type = await fromFile(filepath);
     const mime = type !== null && type !== undefined ? type.mime : file.type;
 
     const isAudio = SUPPORTED_AUDIO_MIME_TYPES.includes(mime);
@@ -315,5 +331,5 @@ export const processAudio = (ctx: { req: Request; res: Response }) => {
 
 export default {
   processAudio,
-  processImage,
+  processTrackGroupCover,
 };

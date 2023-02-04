@@ -16,10 +16,23 @@ import api from "services/api";
 //   updateTrackGroup,
 // } from "services/api/Admin";
 
+interface TrackGroupFormData {
+  coverFile: File[];
+  title: string;
+  published: boolean;
+  enabled: boolean;
+  id: number;
+  type: "lp" | "ep" | "album" | "single";
+  releaseDate: string;
+  about: string;
+  artistId: number;
+  cover: { id: number; url: string };
+}
+
 export const TrackGroupDetails: React.FC = () => {
   const { trackgroupId } = useParams();
   const snackbar = useSnackbar();
-  const { register, handleSubmit, reset } = useForm();
+  const { register, handleSubmit, reset } = useForm<TrackGroupFormData>();
   const [isLoading, setIsLoading] = React.useState(false);
 
   const [trackgroup, setTrackgroup] = React.useState<TrackGroup>();
@@ -42,14 +55,20 @@ export const TrackGroupDetails: React.FC = () => {
   }, [fetchTrackWrapper, trackgroupId]);
 
   const doSave = React.useCallback(
-    async (data: unknown) => {
+    async (data: TrackGroupFormData) => {
       if (trackgroupId) {
         try {
           setIsLoading(true);
-          await api.put<TrackGroup, TrackGroup>(
+          await api.put<TrackGroupFormData, TrackGroup>(
             `trackGroups/${trackgroupId}`,
-            data as TrackGroup
+            data
           );
+          if (data.coverFile[0] && typeof data.coverFile[0] !== "string") {
+            await api.uploadFile(
+              `trackGroups/${trackgroupId}/cover`,
+              data.coverFile
+            );
+          }
           snackbar("Successfully updated track group", { type: "success" });
         } catch (e) {
           console.error(e);
@@ -82,7 +101,7 @@ export const TrackGroupDetails: React.FC = () => {
           About: <TextArea {...register("about")} />
         </FormComponent>
         <FormComponent style={{ display: "flex" }}>
-          <input type="checkbox" id="private" {...register("private")} />
+          <input type="checkbox" id="private" {...register("published")} />
           <label htmlFor="private">
             Is private?
             <small>
@@ -95,15 +114,6 @@ export const TrackGroupDetails: React.FC = () => {
           <label htmlFor="enabled">
             Is enabled?
             <small>Enabled albums can be made public by the artist</small>
-          </label>
-        </FormComponent>
-        <FormComponent style={{ display: "flex" }}>
-          <input id="featured" type="checkbox" {...register("featured")} />
-          <label htmlFor="featured">
-            Is featured?
-            <small>
-              Featured albums will appear in featured lists on Resonate
-            </small>
           </label>
         </FormComponent>
 

@@ -9,13 +9,18 @@ import cors from "cors";
 import * as dotenv from "dotenv";
 dotenv.config();
 
-// import api from "./routers/v1";
-import trackGroups from "./routers/v1/trackGroups/index";
+import apiDoc from "./routers/v1/api-doc";
+import {
+  BullMQAdapter,
+  createBullBoard,
+  ExpressAdapter,
+} from "@bull-board/express";
+
 import auth from "./routers/auth";
-// Loads the JWT strategy
+
 import "./auth/passport";
 
-import apiDoc from "./routers/v1/api-doc";
+import { imageQueue } from "./utils/process-file";
 
 const prisma = new PrismaClient();
 const app = express();
@@ -48,6 +53,7 @@ const routes = [
   "users/{userId}/artists/{artistId}",
   "users/{userId}/trackGroups",
   "users/{userId}/trackGroups/{trackGroupId}",
+  "users/{userId}/trackGroups/{trackGroupId}/cover",
   "users/{userId}/tracks",
   "users/{userId}/tracks/{trackId}",
   "users/{userId}/posts/{postId}/publish",
@@ -81,7 +87,6 @@ app.use(
   })
 );
 
-// app.use("/api/v1", api);
 app.use("/auth", auth);
 
 app.use(express.static("public"));
@@ -89,6 +94,19 @@ app.use(express.static("public"));
 // app.use(function (req, res, next) {
 //   res.sendFile(path.join(__dirname, "../", "public", "app.html"));
 // });
+app.use("/images", express.static("data/media/images"));
+app.use("/audio", express.static("data/media/audio"));
+
+// Setting up a bull worker dashboard
+if (process.env.NODE_ENV === "development") {
+  const serverAdapter = new ExpressAdapter();
+  createBullBoard({
+    queues: [new BullMQAdapter(imageQueue)],
+    serverAdapter: serverAdapter,
+  });
+  serverAdapter.setBasePath("/admin/queues");
+  app.use("/admin/queues", serverAdapter.getRouter());
+}
 
 const server = app.listen(3000, () =>
   console.info(`

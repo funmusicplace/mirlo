@@ -31,7 +31,7 @@ interface TrackGroup {
   about: string;
   artistId: number;
   tracks: Track[];
-  cover: { id: number; url: string };
+  cover: { id: number; url: string; sizes?: { [key: number]: string } };
 }
 
 interface Artist {

@@ -29,6 +29,8 @@ yarn
 yarn start
 ```
 
+## Background Jobs
+
 ### Making changes to background jobs.
 
 Changes in background jobs aren't detected. You'll need to restart the docker container for them:
@@ -36,5 +38,17 @@ Changes in background jobs aren't detected. You'll need to restart the docker co
 ```
 docker-compose up --no-deps background
 ```
+
+## Workers (Uploading Music, Images, Etc)
+
+If you want to upload music or upload images, you'll need a worker running.
+
+```sh
+docker exec -it nomads-api node src/jobs/queue-worker.js run
+```
+
+> NOTE: this is done automatically by the `nomads-background` container in docker.
+
+> NOTE: In local development you can see the worker queue at /admin/queues on the server
 
 ### Running migrations

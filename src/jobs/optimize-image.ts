@@ -4,10 +4,12 @@ import path from "path";
 import bytes from "bytes";
 
 import tempSharpConfig from "../config/sharp";
+import { Job } from "bullmq";
 
 const { defaultOptions, config: sharpConfig } = tempSharpConfig;
 
-const BASE_DATA_DIR = process.env.BASE_DATA_DIR || "/";
+const MEDIA_LOCATION_INCOMING = process.env.MEDIA_LOCATION_INCOMING || "/";
+
 const logger = winston.createLogger({
   level: "info",
   format: winston.format.json(),
@@ -27,25 +29,17 @@ const logger = winston.createLogger({
  * Convert and optimize track artworks to mozjpeg and webp
  */
 
-interface Job {
-  data: {
-    filename: any;
-    config?: { artwork: { webp: { [key: string]: any } } };
-  };
-}
-
 const optimizeImage = async (job: Job) => {
   logger.info("optimizing");
-  const { filename, config = sharpConfig.artwork } = job.data;
+  const { filepath, config = sharpConfig.artwork, destination } = job.data;
 
   logger.info(`passed ${JSON.stringify(config)}`);
-  logger.info("base", BASE_DATA_DIR);
-  const input = path.join(BASE_DATA_DIR, `/data/media/incoming/${filename}`);
-
+  logger.info(`base ${MEDIA_LOCATION_INCOMING}`);
+  logger.info(`input: ${filepath}`);
   try {
     const profiler = logger.startTimer();
 
-    logger.info(`starting to optimize images ${filename}`);
+    logger.info(`starting to optimize images ${filepath}`);
 
     const promises = Object.entries(config)
       .map(([key, value]) => {
@@ -71,9 +65,10 @@ const optimizeImage = async (job: Job) => {
           }) => {
             const { width, height, suffix = `-x${width}` } = variant;
             const dest = path.join(
-              BASE_DATA_DIR,
-              `/data/media/images/${filename}${suffix}${ext}`
+              `/data/media/images/${destination}${suffix}${ext}`
             );
+
+            logger.info(`Destination: ${dest}`);
 
             let buffer: any;
 
@@ -85,7 +80,7 @@ const optimizeImage = async (job: Job) => {
                 variant.extract
               );
 
-              buffer = await sharp(input).extract(extractOptions).toBuffer();
+              buffer = await sharp(filepath).extract(extractOptions).toBuffer();
             }
 
             const resizeOptions = Object.assign(
@@ -104,7 +99,7 @@ const optimizeImage = async (job: Job) => {
               variant.outputOptions || {}
             );
 
-            buffer = await sharp(buffer || input)
+            buffer = await sharp(buffer || filepath)
               .resize(resizeOptions)
               [outputType](outputOptions)
               .toBuffer();

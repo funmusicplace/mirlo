@@ -1,11 +1,10 @@
 import { PrismaClient, User } from "@prisma/client";
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { pick } from "lodash";
 import {
   userAuthenticated,
   userHasPermission,
-} from "../../../../../auth/passport";
-import processFile, { processImage } from "../../../../../utils/process-file";
+} from "../../../../../../auth/passport";
 
 const prisma = new PrismaClient();
 
@@ -18,13 +17,49 @@ export default function () {
   const operations = {
     PUT: [userAuthenticated, userHasPermission("owner"), PUT],
     DELETE: [userAuthenticated, userHasPermission("owner"), DELETE],
+    GET,
   };
 
-  async function PUT(req: Request, res: Response) {
+  async function GET(req: Request, res: Response, next: NextFunction) {
+    const { userId, trackGroupId } = req.params as unknown as Params;
+
+    try {
+      const artists = await prisma.artist.findMany({
+        where: {
+          userId: Number(userId),
+        },
+      });
+
+      const trackgroup = await prisma.trackGroup.findFirst({
+        where: {
+          artistId: { in: artists.map((a) => a.id) },
+          id: Number(trackGroupId),
+        },
+        include: {
+          cover: true,
+        },
+      });
+
+      if (!trackgroup) {
+        res.status(400).json({
+          error: "Trackgroup must belong to user",
+        });
+        return next();
+      }
+
+      res.status(200).json({ trackgroup });
+    } catch (e) {
+      console.error(e);
+      res.status(500).json({
+        error: "Something went wrong",
+      });
+    }
+  }
+
+  async function PUT(req: Request, res: Response, next: NextFunction) {
     const { userId, trackGroupId } = req.params as unknown as Params;
     const data = req.body;
     const loggedInUser = req.user as User;
-    console.log("data", data);
     try {
       const artist = await prisma.artist.findFirst({
         where: {
@@ -34,10 +69,10 @@ export default function () {
       });
 
       if (!artist) {
-        res.json({
+        res.status(400).json({
           error: "Artist must belong to user",
         });
-        throw new Error("Artist must belong to user");
+        return next();
       }
 
       await prisma.trackGroup.updateMany({
@@ -50,17 +85,10 @@ export default function () {
           "about",
         ]),
       });
-      console.log("files", req.body);
-      const file = req.body.files.file;
-      // TODO: Remove prior files
-      // FIXME: Only allow uploading of one file.
-      const fileResult = await processImage({ req, res })(file, trackGroupId);
-
-      // trackgroup.set("cover", file.filename);
 
       res.json({ message: "Success" });
     } catch (error) {
-      console.log("error", error);
+      console.error("error", error);
       res.json({
         error: `TrackGroup with ID ${trackGroupId} does not exist in the database`,
       });

@@ -1,12 +1,13 @@
 import { css } from "@emotion/css";
 import React from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { API_ROOT } from "./../constants";
 import { useGlobalStateContext } from "./../state/GlobalState";
 import Button from "./common/Button";
 
 const Header = () => {
   const { state, dispatch } = useGlobalStateContext();
+  const navigate = useNavigate();
   return (
     <header
       className={css`
@@ -28,6 +29,7 @@ const Header = () => {
                   type: "setLoggedInUser",
                   user: undefined,
                 });
+                navigate("/");
               }}
               className={css`
                 padding: 0.25rem 0.5rem;

@@ -1,8 +1,10 @@
 import { css, injectGlobal } from "@emotion/css";
-import React from "react";
-import { Outlet } from "react-router-dom";
+import Snackbar from "components/common/Snackbar";
+import React, { useContext, useState } from "react";
+import { Outlet, useNavigate } from "react-router-dom";
 import api from "services/api";
 import { useGlobalStateContext } from "state/GlobalState";
+import SnackbarContext from "state/SnackbarContext";
 import Header from "./components/Header";
 
 injectGlobal`
@@ -91,18 +93,44 @@ injectGlobal`
 `;
 
 function App() {
-  const { state } = useGlobalStateContext();
+  const { state, dispatch } = useGlobalStateContext();
+  const { isDisplayed } = useContext(SnackbarContext);
+  const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
+  const userId = state.user?.id;
+
   React.useEffect(() => {
-    let interval: NodeJS.Timer | null = null;
-    if (state.user) {
-      interval = setInterval(async () => {
+    const callback = async () => {
+      console.log("calling callback");
+      try {
         await api.post("refresh", {});
+        const user = await api.get<LoggedInUser>("profile");
+        dispatch({
+          type: "setLoggedInUser",
+          user,
+        });
+      } catch (e) {
+        console.error("Error refreshing token", e);
+        dispatch({
+          type: "setLoggedInUser",
+          user: undefined,
+        });
+        navigate("/login");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    callback();
+    let interval: NodeJS.Timer | null = null;
+
+    if (userId) {
+      interval = setInterval(async () => {
+        callback();
       }, 1000 * 60 * 5); // refresh every 5 minutes
-    } else {
-      api.post("refresh", {});
     }
     return () => (interval ? clearInterval(interval) : undefined);
-  }, [state.user]);
+  }, [userId, dispatch, navigate]);
 
   return (
     <div
@@ -111,8 +139,14 @@ function App() {
         flex-direction: column;
       `}
     >
-      <Header />
-      <Outlet />
+      {isDisplayed && <Snackbar />}
+      {isLoading && <>Loading...</>}
+      {!isLoading && (
+        <>
+          <Header />
+          <Outlet />
+        </>
+      )}
     </div>
   );
 }
