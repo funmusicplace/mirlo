@@ -59,15 +59,17 @@ const TrackRow: React.FC<{
   //   setTrackPlays(playCount[0]?.count);
   // }, [track.id]);
 
+  const userId = user?.id;
+
   const onDeleteClick = React.useCallback(async () => {
     try {
-      await api.delete(`track/${track.id}`);
+      await api.delete(`users/${userId}/tracks/${track.id}`);
       await reload?.();
       snackbar("Deleted track", { type: "success" });
     } catch (e) {
       console.error(e);
     }
-  }, [track.id, reload, snackbar]);
+  }, [track.id, userId, reload, snackbar]);
 
   // React.useEffect(() => {
   //   if (loadedRef.current) {
@@ -148,14 +150,14 @@ const TrackRow: React.FC<{
           text-overflow: ellipsis;
         `}
       >
-        {track.artist?.id && (
+        {track.trackGroup?.artist?.id && (
           <Link
             onClick={(e) => {
               e.stopPropagation();
             }}
-            to={`/library/artist/${track.artist?.id}`}
+            to={`/library/artist/${track.trackGroup?.artist?.id}`}
           >
-            {track.artist?.name}
+            {track.trackGroup?.artist?.name}
           </Link>
         )}
       </td>

@@ -27,12 +27,13 @@ export function calculateRemainingCost(count: number) {
   return 1022 - cost;
 }
 
-export function buildHLSURL(id: string, loggedInUser: boolean) {
+export function buildHLSURL(id: number, loggedInUser: boolean): string {
   // We assume we're using full OIDC
   // if (loggedInUser) {
   //   return `${API}user/stream/${id}/playlist.m3u8`;
   // }
   // return `${API}stream/${id}`;
+  return "";
 }
 
 export const determineNewTrackOrder = produce(

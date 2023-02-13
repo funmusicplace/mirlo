@@ -18,6 +18,7 @@ import Admin from "components/Admin/Admin";
 import AdminUsers from "components/Admin/Users";
 import AdminTrackGroups from "components/Admin/Trackgroups";
 import AdminTracks from "components/Admin/Tracks";
+import ManageArtist from "components/ManageArtist/ManageArtist";
 
 const router = createBrowserRouter([
   {
@@ -41,6 +42,7 @@ const router = createBrowserRouter([
         path: "manage",
         element: <Manage />,
       },
+      { path: "manage/artists/:artistId", element: <ManageArtist /> },
       {
         path: "admin",
         element: <Admin />,

@@ -5,12 +5,13 @@ import {
   userAuthenticated,
   userHasPermission,
 } from "../../../../../../auth/passport";
+import { doesTrackGroupBelongToUser } from "../../../../../../utils/ownership";
 
 const prisma = new PrismaClient();
 
 type Params = {
-  trackGroupId: number;
-  userId: number;
+  trackGroupId: string;
+  userId: string;
 };
 
 export default function () {
@@ -24,21 +25,10 @@ export default function () {
     const { userId, trackGroupId } = req.params as unknown as Params;
 
     try {
-      const artists = await prisma.artist.findMany({
-        where: {
-          userId: Number(userId),
-        },
-      });
-
-      const trackgroup = await prisma.trackGroup.findFirst({
-        where: {
-          artistId: { in: artists.map((a) => a.id) },
-          id: Number(trackGroupId),
-        },
-        include: {
-          cover: true,
-        },
-      });
+      const trackgroup = await doesTrackGroupBelongToUser(
+        Number(trackGroupId),
+        Number(userId)
+      );
 
       if (!trackgroup) {
         res.status(400).json({

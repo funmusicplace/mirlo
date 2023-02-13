@@ -1,5 +1,6 @@
 import { css, injectGlobal } from "@emotion/css";
 import Snackbar from "components/common/Snackbar";
+import Player from "components/Player";
 import React, { useContext, useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import api from "services/api";
@@ -145,6 +146,7 @@ function App() {
         <>
           <Header />
           <Outlet />
+          <Player />
         </>
       )}
     </div>

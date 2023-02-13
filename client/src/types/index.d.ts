@@ -17,8 +17,11 @@ interface Track {
   status: "preview" | "must-own";
   artistId: number;
   trackGroup: TrackGroup;
-  artist: Artist;
+  trackGroupId: number;
   image: Image;
+  audio: {
+    url: string;
+  };
 }
 
 interface TrackGroup {
@@ -29,6 +32,7 @@ interface TrackGroup {
   type: "lp" | "ep" | "album" | "single";
   releaseDate: string;
   about: string;
+  artist: Artist;
   artistId: number;
   tracks: Track[];
   cover: { id: number; url: string; sizes?: { [key: number]: string } };

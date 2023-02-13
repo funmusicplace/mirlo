@@ -1,26 +1,43 @@
 import { PrismaClient } from "@prisma/client";
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
+import {
+  userAuthenticated,
+  userHasPermission,
+} from "../../../../../../auth/passport";
+import { doesTrackBelongToUser } from "../../../../../../utils/ownership";
 
 const prisma = new PrismaClient();
 
 export default function () {
   const operations = {
-    PUT,
-    DELETE,
+    PUT: [userAuthenticated, userHasPermission("owner"), PUT],
+    DELETE: [userAuthenticated, userHasPermission("owner"), DELETE],
     GET,
   };
 
   // FIXME: only allow updating of tracks owned by userId
-  async function PUT(req: Request, res: Response) {
+  async function PUT(req: Request, res: Response, next: NextFunction) {
     const { trackId, userId } = req.params;
-
+    console.log("PUTTING");
     try {
-      const post = await prisma.track.update({
+      const track = await doesTrackBelongToUser(
+        Number(trackId),
+        Number(userId)
+      );
+
+      if (!track) {
+        res.status(400).json({
+          error: "Track must belong to user",
+        });
+        return next();
+      }
+
+      await prisma.track.update({
         where: { id: Number(trackId) },
         data: {},
       });
 
-      res.json(post);
+      res.json({ message: "Success" });
     } catch (error) {
       res.json({
         error: `Track with ID ${trackId} does not exist in the database`,
@@ -67,15 +84,23 @@ export default function () {
     },
   };
 
-  // FIXME: only allow updating of tracks owned by userId
-  async function DELETE(req: Request, res: Response) {
+  async function DELETE(req: Request, res: Response, next: NextFunction) {
     const { userId, trackId } = req.params;
-    const post = await prisma.track.delete({
+
+    const track = await doesTrackBelongToUser(Number(trackId), Number(userId));
+
+    if (!track) {
+      res.status(400).json({
+        error: "Track must belong to user",
+      });
+      return next();
+    }
+    await prisma.track.delete({
       where: {
         id: Number(trackId),
       },
     });
-    res.json(post);
+    res.json({ message: "Success" });
   }
 
   DELETE.apiDoc = {

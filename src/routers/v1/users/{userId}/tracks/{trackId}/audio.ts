@@ -1,11 +1,12 @@
 import { PrismaClient, User } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
-import multer from "multer";
+import multer, { Multer } from "multer";
 import {
   userAuthenticated,
   userHasPermission,
 } from "../../../../../../auth/passport";
-import processTrackGroupCover from "../../../../../../utils/processTrackGroupCover";
+import { doesTrackBelongToUser } from "../../../../../../utils/ownership";
+import { processTrackAudio } from "../../../../../../utils/processTrackAudio";
 
 const upload = multer({
   dest: process.env.MEDIA_LOCATION_INCOMING ?? "/data/media/incoming",
@@ -14,7 +15,7 @@ const upload = multer({
 const prisma = new PrismaClient();
 
 type Params = {
-  trackGroupId: number;
+  trackId: string;
   userId: number;
 };
 
@@ -27,32 +28,20 @@ export default function () {
     PUT: [
       userAuthenticated,
       userHasPermission("owner"),
-      // upload.single("file"),
       upload.array("upload"),
       PUT,
     ],
   };
 
   async function PUT(req: Request, res: Response, next: NextFunction) {
-    const { trackGroupId } = req.params as unknown as Params;
+    const { trackId } = req.params as unknown as Params;
     const loggedInUser = req.user as User;
     try {
-      const artists = await prisma.artist.findMany({
-        where: {
-          userId: Number(loggedInUser.id),
-        },
-      });
+      const track = doesTrackBelongToUser(Number(trackId), loggedInUser.id);
 
-      const trackgroup = await prisma.trackGroup.findFirst({
-        where: {
-          artistId: { in: artists.map((a) => a.id) },
-          id: Number(trackGroupId),
-        },
-      });
-
-      if (!trackgroup) {
+      if (!track) {
         res.status(400).json({
-          error: "Trackgroup must belong to user",
+          error: "Track must belong to user",
         });
         return next();
       }
@@ -60,16 +49,14 @@ export default function () {
       // TODO: Remove prior files
       // FIXME: Only allow uploading of one file.
       if (req.files && isFileArray(req.files)) {
-        await processTrackGroupCover({ req, res })(req.files[0], trackGroupId);
+        await processTrackAudio({ req, res })(req.files[0], Number(trackId));
       }
-
-      // trackgroup.set("cover", file.filename);
 
       res.json({ message: "Success" });
     } catch (error) {
-      console.error("Cover error", error);
+      console.log("error", error);
       res.status(400).json({
-        error: `TrackGroup with ID ${trackGroupId} does not exist in the database`,
+        error: `Track with ID ${trackId} does not exist in the database`,
       });
     }
   }
@@ -85,7 +72,7 @@ export default function () {
       },
       {
         in: "path",
-        name: "trackGroupId",
+        name: "trackId",
         required: true,
         type: "string",
       },

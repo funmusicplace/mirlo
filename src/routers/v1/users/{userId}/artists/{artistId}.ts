@@ -90,7 +90,7 @@ export default function () {
           userId: Number(userId),
         },
       });
-      res.json(artist);
+      res.json({ artist: artist[0] });
     } else {
       res.status(400);
       res.json({

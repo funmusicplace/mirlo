@@ -8,13 +8,14 @@ export default function () {
     GET,
   };
 
+  // FIXME: only do published tracks
   async function GET(req: Request, res: Response) {
     const { id }: { id?: string } = req.params;
 
-    const post = await prisma.trackGroup.findUnique({
+    const trackGroup = await prisma.trackGroup.findUnique({
       where: { id: Number(id) },
     });
-    res.json(post);
+    res.json({ trackGroup });
   }
 
   GET.apiDoc = {

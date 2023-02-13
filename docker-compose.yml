@@ -55,7 +55,7 @@ services:
       - redis
       - pgsql
       - api
-    # restart: always
+    restart: always
     volumes:
       - ~/.ssh:/root/.ssh
       - ./:/var/www/api

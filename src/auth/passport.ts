@@ -78,21 +78,20 @@ export const userAuthenticated = (req: Request, res: Response, next: any) => {
   try {
     passport.authenticate("jwt", { session: false })(req, res, next);
   } catch (e) {
-    console.log("checking jwt");
+    console.log("asdf");
     res.status(401).json({ error: "Unauthorized" });
   }
 };
 
 export const userHasPermission = (role: "admin" | "owner") => {
-  // FIXME: exception for admin?
   return (req: Request, res: Response, next: any) => {
     const { userId } = req.params as unknown as { userId: number };
     const loggedInUser = req.user as User;
 
-    if (Number(userId) !== loggedInUser.id) {
+    // FIXME: ignore if user is admin.
+    if (role === "owner" && Number(userId) !== loggedInUser.id) {
       res.status(401).json({ error: "Unauthorized" });
     }
-
     return next();
   };
 };

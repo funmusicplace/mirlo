@@ -3,45 +3,63 @@ import Button from "components/common/Button";
 import Table from "components/common/Table";
 import React from "react";
 import { FaCheck, FaEye, FaPen } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import api from "services/api";
+import { useGlobalStateContext } from "state/GlobalState";
 import ArtistForm from "./ArtistForm";
 import ManageAlbumForm from "./ManageAlbumForm";
 import NewAlbumForm from "./NewAlbumForm";
 
-const ArtistListItem: React.FC<{
-  artist: Artist;
-  reload: () => Promise<void>;
-}> = ({ artist, reload }) => {
+const ManageArtist: React.FC<{}> = () => {
+  const {
+    state: { user },
+  } = useGlobalStateContext();
+  const { artistId } = useParams();
+  const [artist, setArtist] = React.useState<Artist>();
   const [manageTrackgroup, setManageTrackgroup] = React.useState<TrackGroup>();
   const [addingNewAlbum, setAddingNewAlbum] = React.useState(false);
   const [isEditing, setIsEditing] = React.useState(false);
   const [trackGroups, setTrackGroups] = React.useState<TrackGroup[]>([]);
   const albumId = manageTrackgroup?.id;
 
-  const reloadWrapper = React.useCallback(async () => {
-    if (albumId) {
-      const tg = await api.get<{ trackgroup: TrackGroup }>(
-        `users/${artist.userId}/trackGroups/${albumId}`
-      );
-      setManageTrackgroup(tg.trackgroup);
-    }
-    await reload();
-  }, [albumId, artist.userId, reload]);
+  const userId = user?.id;
 
+  // const reloadWrapper = React.useCallback(async () => {
+  //   if (albumId) {
+  //     const tg = await api.get<{ trackgroup: TrackGroup }>(
+  //       `users/${artist.userId}/trackGroups/${albumId}`
+  //     );
+  //     setManageTrackgroup(tg.trackgroup);
+  //   }
+  //   await reload();
+  // }, [albumId, artist.userId, reload]);
+
+  console.log("artistId", artistId, userId);
   React.useEffect(() => {
     const callback = async () => {
-      const trackGroups = await api.get<{ results: TrackGroup[] }>(
-        `users/${artist.userId}/trackGroups`
-      );
-      setTrackGroups(trackGroups.results);
+      if (userId) {
+        const result = await api.get<{ artist: Artist }>(
+          `users/${userId}/artists/${artistId}`
+        );
+        console.log("result", result);
+        setArtist(result.artist);
+        const trackGroups = await api.get<{ results: TrackGroup[] }>(
+          `users/${userId}/trackGroups`
+        );
+        setTrackGroups(trackGroups.results);
+      }
     };
     callback();
-  }, [artist.userId]);
+  }, [userId, artistId]);
+
+  console.log("artist", artist);
+
+  if (!artist) {
+    return null;
+  }
 
   return (
     <div
-      key={artist.id}
       className={css`
         margin-bottom: 2rem;
       `}
@@ -50,7 +68,9 @@ const ArtistListItem: React.FC<{
         open={isEditing}
         onClose={() => setIsEditing(false)}
         existing={artist}
-        reload={reloadWrapper}
+        reload={() => {
+          return Promise.resolve();
+        }}
       />
       <div
         className={css`
@@ -119,7 +139,9 @@ const ArtistListItem: React.FC<{
           open={!!manageTrackgroup}
           trackgroup={manageTrackgroup}
           onClose={() => setManageTrackgroup(undefined)}
-          reload={reloadWrapper}
+          reload={() => {
+            return Promise.resolve();
+          }}
           artist={artist}
         />
       )}
@@ -134,11 +156,13 @@ const ArtistListItem: React.FC<{
       <NewAlbumForm
         open={addingNewAlbum}
         onClose={() => setAddingNewAlbum(false)}
-        reload={reload}
+        reload={() => {
+          return Promise.resolve();
+        }}
         artist={artist}
       />
     </div>
   );
 };
 
-export default ArtistListItem;
+export default ManageArtist;

@@ -38,6 +38,7 @@ const AlbumForm: React.FC<{
   });
 
   const existingId = existing?.id;
+  const userId = user?.id;
 
   const doSave = React.useCallback(
     async (data: {
@@ -48,12 +49,12 @@ const AlbumForm: React.FC<{
       about: string;
       coverFile: File[];
     }) => {
-      if (user?.id) {
+      if (userId) {
         try {
           setIsSaving(true);
           let savedId = existingId;
           if (existingId) {
-            await api.put(`users/${user.id}/trackGroups/${existingId}`, {
+            await api.put(`users/${userId}/trackGroups/${existingId}`, {
               ...pick(data, [
                 "title",
                 "private",
@@ -67,7 +68,7 @@ const AlbumForm: React.FC<{
             const newGroup = await api.post<
               { title?: string; artistId: number; cover?: File[] },
               { id: number }
-            >(`users/${user.id}/trackGroups`, {
+            >(`users/${userId}/trackGroups`, {
               ...pick(data, [
                 "title",
                 "private",
@@ -85,9 +86,8 @@ const AlbumForm: React.FC<{
             data.coverFile[0] &&
             typeof data.coverFile[0] !== "string"
           ) {
-            console.log("data", data.coverFile);
             await api.uploadFile(
-              `users/${user.id}/trackGroups/${savedId}/cover`,
+              `users/${userId}/trackGroups/${savedId}/cover`,
               data.coverFile
             );
           }
@@ -101,7 +101,7 @@ const AlbumForm: React.FC<{
         }
       }
     },
-    [reload, existingId, snackbar, artist.id, onClose, user?.id]
+    [reload, existingId, snackbar, artist.id, onClose, userId]
   );
 
   return (
@@ -143,7 +143,7 @@ const AlbumForm: React.FC<{
       <FormComponent>
         <InputEl
           type="file"
-          id="audio"
+          id="image"
           {...register("coverFile")}
           accept="image/*"
         />

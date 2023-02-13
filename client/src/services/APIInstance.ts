@@ -71,9 +71,7 @@ const APIInstance = (apiRoot: string) => {
 
     uploadFile: async (endpoint: string, files: File[]) => {
       var fd = new FormData();
-      console.log("files", files);
       for (let i = 0; i < files.length; i++) {
-        console.log("file", files[i]);
         fd.append("upload", files[i]);
       }
       return apiRequest(endpoint, {
@@ -95,6 +93,10 @@ const APIInstance = (apiRoot: string) => {
         method: "DELETE",
         credentials: "include",
       });
+    },
+
+    streamUrl: (track: Track): string => {
+      return `${apiRoot}${track.audio.url}`;
     },
   };
 };

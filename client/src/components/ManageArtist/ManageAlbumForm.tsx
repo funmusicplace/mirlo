@@ -3,6 +3,7 @@ import Modal from "components/common/Modal";
 import TrackTable from "../common/TrackTable";
 import AlbumForm from "./AlbumForm";
 import NewTrack from "./NewTrack";
+import api from "services/api";
 
 export interface ShareableTrackgroup {
   creatorId: number;
@@ -24,6 +25,17 @@ export const ManageAlbumForm: React.FC<{
     }
   }, [trackgroup.tracks]);
 
+  const reloadTrackGroup = React.useCallback(async () => {
+    try {
+      const response = await api.get<{ trackgroup: TrackGroup }>(
+        `users/${artist.userId}/trackGroups/${trackgroup.id}`
+      );
+      setTracks(response.trackgroup.tracks);
+    } catch (e) {
+      console.log(e);
+    }
+  }, [artist.userId, trackgroup.id]);
+
   return (
     <Modal open={open} onClose={onClose}>
       {/* There is some overly complex state management going on here with the reloads being passed around */}
@@ -33,7 +45,7 @@ export const ManageAlbumForm: React.FC<{
         editable
         trackGroupId={trackgroup.id}
         owned
-        reload={reload}
+        reload={reloadTrackGroup}
       />
       <NewTrack trackgroup={trackgroup} reload={reload} />
     </Modal>

@@ -20,7 +20,8 @@ import auth from "./routers/auth";
 
 import "./auth/passport";
 
-import { imageQueue } from "./utils/process-file";
+import { imageQueue } from "./utils/processTrackGroupCover";
+import { audioQueue } from "./utils/processTrackAudio";
 
 const prisma = new PrismaClient();
 const app = express();
@@ -44,6 +45,7 @@ const routes = [
   "trackGroups/{id}",
   "tracks",
   "tracks/{id}",
+  "tracks/{id}/stream/{segment}",
   "artists",
   "artists/{id}",
   "posts/{id}",
@@ -55,6 +57,7 @@ const routes = [
   "users/{userId}/trackGroups/{trackGroupId}",
   "users/{userId}/trackGroups/{trackGroupId}/cover",
   "users/{userId}/tracks",
+  "users/{userId}/tracks/{trackId}/audio",
   "users/{userId}/tracks/{trackId}",
   "users/{userId}/posts/{postId}/publish",
   "users/{userId}/posts/{postId}",
@@ -75,6 +78,10 @@ initialize({
     path: "/v1/" + r,
     module: require(`./routers/v1/${r}`),
   })),
+  errorMiddleware: (err, req, res, next) => {
+    res.status(err.status).json({ errors: err.errors });
+    next();
+  },
 });
 
 app.use(
@@ -89,6 +96,12 @@ app.use(
 
 app.use("/auth", auth);
 
+// app.use("/", (req, res) => {
+//   res.status(200).json({
+//     hello: "world",
+//   });
+// });
+
 app.use(express.static("public"));
 
 // app.use(function (req, res, next) {
@@ -101,14 +114,14 @@ app.use("/audio", express.static("data/media/audio"));
 if (process.env.NODE_ENV === "development") {
   const serverAdapter = new ExpressAdapter();
   createBullBoard({
-    queues: [new BullMQAdapter(imageQueue)],
+    queues: [new BullMQAdapter(imageQueue), new BullMQAdapter(audioQueue)],
     serverAdapter: serverAdapter,
   });
   serverAdapter.setBasePath("/admin/queues");
   app.use("/admin/queues", serverAdapter.getRouter());
 }
 
-const server = app.listen(3000, () =>
+app.listen(3000, () =>
   console.info(`
 🚀 Server ready at: http://localhost:3000`)
 );

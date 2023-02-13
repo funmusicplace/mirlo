@@ -30,7 +30,6 @@ function Login() {
         });
         navigate("/");
       } catch (e: unknown) {
-        console.log("snack", (e as Error).message);
         snackbar((e as Error).message, { type: "warning" });
         console.error(e);
       }

@@ -13,8 +13,8 @@ const CustomButton = styled.button<Compactable>`
   border: none;
   transition: 0.25s background-color, 0.25s color;
   font-size: 1rem;
+  font-weight: bold;
   line-height: 1rem;
-  margin-right: 0.25rem;
 
   ${(props) => {
     switch (props.variant) {
@@ -50,7 +50,7 @@ const CustomButton = styled.button<Compactable>`
         return `
           padding: ${props.compact ? ".3rem .5rem" : "1rem"};
           background-color:  ${props.theme.colors.primary};
-          color: white;
+          color: ${props.theme.colors.text};
 
           &:hover:not(:disabled) {
             background-color: ${props.theme.colors.primaryHighlight};
@@ -58,6 +58,7 @@ const CustomButton = styled.button<Compactable>`
         `;
     }
   }}
+
   align-items: center;
   display: inline-flex;
   border-radius: 6px;

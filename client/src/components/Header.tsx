@@ -1,6 +1,7 @@
 import { css } from "@emotion/css";
 import React from "react";
 import { NavLink, useNavigate } from "react-router-dom";
+import { theme } from "utils/theme";
 import { API_ROOT } from "./../constants";
 import { useGlobalStateContext } from "./../state/GlobalState";
 import Button from "./common/Button";
@@ -12,10 +13,21 @@ const Header = () => {
     <header
       className={css`
         display: flex;
-        justify-content: flex-end;
+        justify-content: space-between;
+        align-items: center;
         padding: 0.5rem 1rem;
+        background-color: ${theme.colors.primaryHighlight};
+        margin-bottom: 1rem;
       `}
     >
+      <h1
+        className={css`
+          color: ${theme.colors.text};
+          margin-top: -0.1rem;
+        `}
+      >
+        nomads...
+      </h1>
       <menu className={css``}>
         {state.user && (
           <>
@@ -47,7 +59,13 @@ const Header = () => {
         {!state.user && (
           <>
             <NavLink to="/login">
-              <Button>log in</Button>
+              <Button
+                className={css`
+                  margin-right: 0.75rem;
+                `}
+              >
+                log in
+              </Button>
             </NavLink>
             <NavLink to="/signup">
               <Button>sign up</Button>

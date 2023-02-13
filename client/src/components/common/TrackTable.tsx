@@ -82,15 +82,11 @@ export const TrackTable: React.FC<{
 
   const reloadWrapper = React.useCallback(async () => {
     if (trackGroupId) {
-      // const fetchGroup = isPlaylist ? fetchUserPlaylist : fetchUserTrackGroup;
-      const newTracks = await api.get<TrackGroup>(`trackGroup/${trackGroupId}`);
-      fetchTracks(newTracks.tracks);
-
       if (reload) {
         await reload();
       }
     }
-  }, [fetchTracks, trackGroupId, reload]);
+  }, [reload, trackGroupId]);
 
   if (isLoading) {
     return <CenteredSpinner />;

@@ -1,12 +1,11 @@
 import { css } from "@emotion/css";
 import React from "react";
 
-import BackButton from "../common/BackButton";
 import api from "services/api";
 import Button from "../common/Button";
 import CreateNewArtistForm from "./ArtistForm";
-import ArtistListItem from "./ArtistListItem";
 import { useGlobalStateContext } from "state/GlobalState";
+import { Link } from "react-router-dom";
 
 export const Manage: React.FC = () => {
   const { state } = useGlobalStateContext();
@@ -41,8 +40,6 @@ export const Manage: React.FC = () => {
           padding: 0 1rem;
         `}
       >
-        <BackButton />
-
         <div
           className={css`
             display: flex;
@@ -54,26 +51,28 @@ export const Manage: React.FC = () => {
             }
           `}
         >
-          <h2 className={css``}>Manage</h2>
-          <Button
-            onClick={() => {
-              setCreatingNewArtist(true);
-            }}
-            style={{ marginTop: "1rem" }}
-          >
-            Create new artist
-          </Button>
+          <h2 className={css``}>Manage: Artists</h2>
+
           <CreateNewArtistForm
             open={creatingNewArtist}
             onClose={() => setCreatingNewArtist(false)}
             reload={fetchArtists}
           />
         </div>
-        <h3>Your artists</h3>
 
         {artists.map((a) => (
-          <ArtistListItem artist={a} key={a.id} reload={fetchArtists} />
+          <Link key={a.id} to={`artists/${a.id}`}>
+            {a.name}
+          </Link>
         ))}
+        <Button
+          onClick={() => {
+            setCreatingNewArtist(true);
+          }}
+          style={{ marginTop: "1rem" }}
+        >
+          Create new artist
+        </Button>
       </div>
     </>
   );

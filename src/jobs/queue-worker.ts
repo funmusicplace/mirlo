@@ -46,10 +46,6 @@ async function imageQueue() {
   const worker = new Worker("optimize-image", optimizeImage, workerOptions);
   logger.info("Optimize Image worker started");
 
-  worker.on("ready", () => {
-    console.log("worker is ready");
-  });
-
   worker.on("completed", (job: Job) => {
     logger.info("completed:optimize-image");
   });

@@ -63,7 +63,7 @@ model TrackGroup {
 model Track {
   id           Int         @id @default(autoincrement())
   trackGroup   TrackGroup  @relation(fields: [trackGroupId], references: [id])
-  trackGroupId Int         @unique
+  trackGroupId Int
   title        String?
   audio        TrackAudio?
   createdAt    DateTime    @default(now())

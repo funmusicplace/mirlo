@@ -52,3 +52,9 @@ docker exec -it nomads-api node src/jobs/queue-worker.js run
 > NOTE: In local development you can see the worker queue at /admin/queues on the server
 
 ### Running migrations
+
+To make changes to the database, change the schema.prisma file and then run:
+
+```
+docker exec -it nomads-api npx prisma dev
+```

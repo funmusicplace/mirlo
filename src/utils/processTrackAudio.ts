@@ -9,7 +9,7 @@ import winston from "winston";
 import dimensions from "image-size";
 import { fromFile } from "file-type";
 // import { Track, File } from "../db/models";
-
+import mm from "music-metadata";
 import sharpConfig from "../config/sharp";
 
 import {
@@ -24,10 +24,14 @@ const prisma = new PrismaClient();
 
 const BASE_DATA_DIR = process.env.BASE_DATA_DIR || "/";
 
+const buildTrackStreamURL = (trackId: number) => {
+  return `/v1/tracks/${trackId}/stream/playlist.m3u8`;
+};
+
 const logger = winston.createLogger({
   level: "info",
   format: winston.format.json(),
-  defaultMeta: { service: "process-file" },
+  defaultMeta: { service: "processTrackAudio" },
   transports: [
     new winston.transports.Console({
       level: "debug",
@@ -45,7 +49,7 @@ const queueOptions = {
   connection: REDIS_CONFIG,
 };
 
-const audioQueue = new Queue("convert-audio", queueOptions);
+export const audioQueue = new Queue("convert-audio", queueOptions);
 
 const audioQueueEvents = new QueueEvents("convert-audio", queueOptions);
 
@@ -126,113 +130,11 @@ audioDurationQueueEvents.on("completed", async (jobId: any) => {
   }
 });
 
-export const imageQueue = new Queue("optimize-image", queueOptions);
-
-const imageQueueEvents = new QueueEvents("optimize-image", queueOptions);
-
-imageQueueEvents.on("stalled", () => {
-  console.log("stalled");
-});
-
-imageQueueEvents.on("added", () => {
-  console.log("started a job");
-});
-
-imageQueueEvents.on("error", () => {
-  console.log("errored");
-});
-
-imageQueueEvents.on("completed", async (jobId: any) => {
-  logger.info(`Job with id ${jobId} has been completed`);
-
-  try {
-    const job = await imageQueue.getJob(jobId);
-    if (job) {
-      // FIXME: post image processing updates
-      // await File.update(
-      //   {
-      //     status: "ok",
-      //   },
-      //   {
-      //     where: {
-      //       id: job.data.filename, // uuid
-      //     },
-      //   }
-      // );
-    }
-  } catch (err) {
-    logger.error(err);
-  }
-});
-
-export const processTrackGroupCover = (ctx: {
-  req: Request;
-  res: Response;
-}) => {
-  return async (file: any, trackGroupId: number) => {
-    const { size: fileSize, path: filepath } = file;
-    const type = await fromFile(filepath);
-    const mime = type !== null && type !== undefined ? type.mime : file.type;
-    const isImage = SUPPORTED_IMAGE_MIME_TYPES.includes(mime);
-
-    if (!isImage) {
-      ctx.res.status(400);
-      throw `File type not supported: ${mime}`;
-    }
-
-    const buffer = await fs.readFile(filepath);
-    // const sha1sum = shasum(buffer);
-
-    const image = await prisma.trackGroupCover.upsert({
-      create: {
-        originalFilename: file.originalFilename,
-        trackGroupId: Number(trackGroupId),
-      },
-      update: {
-        originalFilename: file.originalFilename,
-      },
-      where: {
-        trackGroupId: Number(trackGroupId),
-      },
-    });
-
-    const { config = "artwork" }: { config: "artwork" | "avatar" | "banner" } =
-      ctx.req.body; // sharp config key
-    const { width, height } = await dimensions(filepath);
-
-    // const image = await prisma.image.findFirst({
-    //   where: {
-    //     id: filename,
-    //   },
-    // });
-
-    // const metadata = file.metadata || {};
-
-    // file.metadata = Object.assign(metadata, {
-    //   dimensions: { width, height },
-    // });
-
-    // await file.save();
-
-    logger.info("Adding image to queue");
-
-    imageQueue.add("optimize-image", {
-      filepath,
-      destination: image.id,
-      config: sharpConfig.config[config],
-    });
-
-    return image;
-  };
-};
-
 /*
- * Process a file then queue it for upload
- * @param {object} ctx Koa context
- * @returns {Promise} Promise object containing image
+ * Process an audio then queue it for upload
  */
-export const processAudio = (ctx: { req: Request; res: Response }) => {
-  return async (file: any) => {
+export const processTrackAudio = (ctx: { req: Request; res: Response }) => {
+  return async (file: any, trackId: number) => {
     const { size: fileSize, path: filepath } = file;
 
     const type = await fromFile(filepath);
@@ -248,27 +150,27 @@ export const processAudio = (ctx: { req: Request; res: Response }) => {
     const buffer = await fs.readFile(filepath);
     const sha1sum = shasum(buffer);
 
-    // create record for original file
-    // const result = await File.create(
-    //   {
-    //     ownerId: (ctx.req.user as User).id,
-    //     filename: file.originalFilename, // original file name
-    //     size: fileSize,
-    //     mime,
-    //     hash: sha1sum,
-    //   },
-    //   { raw: true }
-    // );
-
-    // const { id: filename, filename: originalFilename } = result.dataValues; // uuid/v4
-
-    const audio = await prisma.trackAudio.create({
-      data: {
+    const audio = await prisma.trackAudio.upsert({
+      create: {
+        trackId,
+        url: buildTrackStreamURL(trackId),
         originalFilename: file.originalFilename,
         size: fileSize,
         hash: sha1sum,
       },
+      update: {
+        trackId,
+        originalFilename: file.originalFilename,
+        url: buildTrackStreamURL(trackId),
+        size: fileSize,
+        hash: sha1sum,
+      },
+      where: {
+        trackId: Number(trackId),
+      },
     });
+
+    logger.info(`Created audio ${audio.id}`);
 
     try {
       await fs.rename(
@@ -286,8 +188,6 @@ export const processAudio = (ctx: { req: Request; res: Response }) => {
 
     logger.info("Parsing audio metadata");
 
-    const mm = await import("music-metadata");
-
     const metadata = await mm.parseFile(
       path.join(BASE_DATA_DIR, `/data/media/incoming/${audio.id}`),
       {
@@ -297,8 +197,6 @@ export const processAudio = (ctx: { req: Request; res: Response }) => {
     );
 
     logger.info("Done parsing audio metadata");
-
-    logger.info("Creating new track");
 
     // TODO: extract metadata from file and put it on the
     // const track = await Track.create({
@@ -329,7 +227,4 @@ export const processAudio = (ctx: { req: Request; res: Response }) => {
   };
 };
 
-export default {
-  processAudio,
-  processTrackGroupCover,
-};
+export default processTrackAudio;

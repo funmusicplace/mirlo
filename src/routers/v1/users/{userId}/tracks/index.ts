@@ -1,12 +1,16 @@
 import { PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
+import {
+  userAuthenticated,
+  userHasPermission,
+} from "../../../../../auth/passport";
 
 const prisma = new PrismaClient();
 
 export default function () {
   const operations = {
     GET,
-    POST,
+    POST: [userAuthenticated, userHasPermission("owner"), POST],
   };
 
   // FIXME: filter tracks to those owned by a user
@@ -47,17 +51,24 @@ export default function () {
   // FIXME: only allow creation of tracks belonging to a user
   async function POST(req: Request, res: Response) {
     const { title, trackGroupId } = req.body;
-    const result = await prisma.track.create({
-      data: {
-        title,
-        trackGroup: {
-          connect: {
-            id: Number(trackGroupId),
+    try {
+      const track = await prisma.track.create({
+        data: {
+          title,
+          trackGroup: {
+            connect: {
+              id: Number(trackGroupId),
+            },
           },
         },
-      },
-    });
-    res.json(result);
+      });
+      res.json({ track });
+    } catch (e) {
+      console.error(e);
+      res
+        .status(500)
+        .json({ error: "Something went wrong creating the trackgroup" });
+    }
   }
 
   // FIXME: document POST
