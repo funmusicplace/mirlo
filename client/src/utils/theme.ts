@@ -9,6 +9,7 @@ export const theme = {
     warning: "#f04e37",
     success: "#4cdb5f",
   },
+  borderRadius: ".5rem",
 };
 
 /**

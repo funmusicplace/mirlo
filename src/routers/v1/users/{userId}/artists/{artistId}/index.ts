@@ -4,7 +4,7 @@ import {
   userAuthenticated,
   userHasPermission,
   userLoggedInWithoutRedirect,
-} from "../../../../../auth/passport";
+} from "../../../../../../auth/passport";
 const prisma = new PrismaClient();
 
 type Params = {

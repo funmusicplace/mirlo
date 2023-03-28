@@ -14,14 +14,11 @@ export default function () {
     try {
       const postData = await prisma.post.findUnique({
         where: { id: Number(postId) },
-        select: {
-          published: true,
-        },
       });
 
       const updatedPost = await prisma.post.update({
         where: { id: Number(postId) || undefined },
-        data: { published: !postData?.published },
+        data: { publishedAt: new Date() },
       });
       res.json(updatedPost);
     } catch (error) {

@@ -1,10 +1,14 @@
 import { PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
+import {
+  userAuthenticated,
+  userHasPermission,
+} from "../../../../../../auth/passport";
 const prisma = new PrismaClient();
 
 export default function () {
   const operations = {
-    DELETE,
+    DELETE: [userAuthenticated, userHasPermission("owner"), DELETE],
     GET,
   };
 

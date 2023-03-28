@@ -16,6 +16,10 @@ const CustomButton = styled.button<Compactable>`
   font-weight: bold;
   line-height: 1rem;
 
+  &:hover:not(:disabled) {
+    cursor: pointer;
+  }
+
   ${(props) => {
     switch (props.variant) {
       case "link":
@@ -51,26 +55,25 @@ const CustomButton = styled.button<Compactable>`
           padding: ${props.compact ? ".3rem .5rem" : "1rem"};
           background-color:  ${props.theme.colors.primary};
           color: ${props.theme.colors.text};
+          border: 2px solid ${props.theme.colors.primary};
 
           &:hover:not(:disabled) {
+            border: 2px solid ${props.theme.colors.primary};
             background-color: ${props.theme.colors.primaryHighlight};
           }
+
         `;
     }
   }}
 
   align-items: center;
   display: inline-flex;
-  border-radius: 6px;
+  border-radius: ${(props) => props.theme.borderRadius};
   justify-content: center;
   white-space: nowrap;
 
   &[disabled] {
     opacity: 0.6;
-  }
-
-  &:hover:not(:disabled) {
-    cursor: pointer;
   }
 
   & .startIcon {

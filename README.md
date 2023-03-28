@@ -56,5 +56,5 @@ docker exec -it nomads-api node src/jobs/queue-worker.js run
 To make changes to the database, change the schema.prisma file and then run:
 
 ```
-docker exec -it nomads-api npx prisma dev
+docker exec -it nomads-api npx prisma migrate dev
 ```

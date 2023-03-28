@@ -1,6 +1,30 @@
-import { PrismaClient, TrackGroup } from "@prisma/client";
+import {
+  PrismaClient,
+  TrackGroup,
+  ArtistSubscriptionTier,
+} from "@prisma/client";
 
 const prisma = new PrismaClient();
+
+export const doesSubscriptionTierBelongToUser = async (
+  subscriptionId: number,
+  userId: number
+): Promise<ArtistSubscriptionTier | null> => {
+  const artists = await prisma.artist.findMany({
+    where: {
+      userId: Number(userId),
+    },
+  });
+
+  const subscription = await prisma.artistSubscriptionTier.findFirst({
+    where: {
+      artistId: { in: artists.map((a) => a.id) },
+      id: Number(subscriptionId),
+    },
+  });
+
+  return subscription;
+};
 
 export const doesTrackGroupBelongToUser = async (
   trackGroupId: number,

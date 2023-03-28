@@ -10,7 +10,7 @@ export default function () {
 
   async function GET(req: Request, res: Response) {
     const trackGroups = await prisma.trackGroup.findMany();
-    res.json(trackGroups);
+    res.json({ results: trackGroups });
   }
 
   GET.apiDoc = {

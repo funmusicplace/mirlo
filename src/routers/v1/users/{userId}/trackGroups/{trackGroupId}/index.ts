@@ -1,7 +1,8 @@
-import { PrismaClient, User } from "@prisma/client";
+import { Artist, PrismaClient, User } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
 import { pick } from "lodash";
 import {
+  contentBelongsToLoggedInUserArtist,
   userAuthenticated,
   userHasPermission,
 } from "../../../../../../auth/passport";
@@ -16,8 +17,8 @@ type Params = {
 
 export default function () {
   const operations = {
-    PUT: [userAuthenticated, userHasPermission("owner"), PUT],
-    DELETE: [userAuthenticated, userHasPermission("owner"), DELETE],
+    PUT: [userAuthenticated, contentBelongsToLoggedInUserArtist(), PUT],
+    DELETE: [userAuthenticated, contentBelongsToLoggedInUserArtist(), DELETE],
     GET,
   };
 
@@ -50,20 +51,14 @@ export default function () {
     const { userId, trackGroupId } = req.params as unknown as Params;
     const data = req.body;
     const loggedInUser = req.user as User;
+
     try {
-      const artist = await prisma.artist.findFirst({
+      const artist = (await prisma.artist.findFirst({
         where: {
           userId: loggedInUser.id,
           id: Number(data.artistId),
         },
-      });
-
-      if (!artist) {
-        res.status(400).json({
-          error: "Artist must belong to user",
-        });
-        return next();
-      }
+      })) as Artist; // By now we know that the artist exists
 
       await prisma.trackGroup.updateMany({
         where: { id: Number(trackGroupId), artistId: artist.id },

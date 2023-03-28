@@ -1,11 +1,16 @@
 import { PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
+import {
+  userAuthenticated,
+  userHasPermission,
+} from "../../../../auth/passport";
 
 const prisma = new PrismaClient();
 
 export default function () {
   const operations = {
     GET,
+    PUT: [userAuthenticated, userHasPermission("owner"), PUT],
   };
 
   async function GET(req: Request, res: Response) {
@@ -42,6 +47,26 @@ export default function () {
       },
     },
   };
+
+  async function PUT(req: Request, res: Response) {
+    const { userId } = req.params as unknown as { userId: number };
+    const { email, name } = req.body;
+
+    const user = await prisma.user.update({
+      select: {
+        email: true,
+        name: true,
+      },
+      where: {
+        id: Number(userId),
+      },
+      data: {
+        email,
+        name,
+      },
+    });
+    res.json(user);
+  }
 
   return operations;
 }

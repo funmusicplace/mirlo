@@ -56,6 +56,16 @@ const apiDoc = {
         },
       },
     },
+    ArtistSubscriptionTier: {
+      type: "object",
+      required: ["name"],
+      properties: {
+        string: {
+          description: "name of the subscription",
+          type: "string",
+        },
+      },
+    },
   },
   paths: {},
 };

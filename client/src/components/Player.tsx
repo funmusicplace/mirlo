@@ -4,18 +4,28 @@ import { css } from "@emotion/css";
 import { Helmet } from "react-helmet";
 
 // import { fetchTrack } from "../services/Api";
-import { MdQueueMusic } from "react-icons/md";
-import { ImShuffle } from "react-icons/im";
+import { ImLoop, ImShuffle } from "react-icons/im";
 import { Link, useNavigate } from "react-router-dom";
 import { bp } from "../constants";
-import Button from "./common/Button";
 import ImageWithPlaceholder from "./common/ImageWithPlaceholder";
 import IconButton from "./common/IconButton";
 import { AudioWrapper } from "./AudioWrapper";
 import Spinner from "./common/Spinner";
-import { useGlobalStateContext } from "state/GlobalState";
+import { GlobalState, useGlobalStateContext } from "state/GlobalState";
 import api from "services/api";
+import styled from "@emotion/styled";
 // import TrackPopup from "./common/TrackPopup";
+
+const LoopingIndicator = styled.span`
+  position: absolute;
+  font-size: 0.5rem;
+  padding: 0.15rem 0.2rem;
+  background-color: ${(props) => props.theme.colors.primary};
+  border-radius: 100%;
+  color: white;
+  top: -0.25rem;
+  right: -0.25rem;
+`;
 
 const playerClass = css`
   min-height: 48px;
@@ -44,21 +54,9 @@ const playerClass = css`
   }
 `;
 
-const trackInfo = css`
-  display: flex;
-  align-items: center;
-  flex-grow: 1;
-  margin-right: 0.5rem;
-
-  @media (max-width: ${bp.small}px) {
-    width: 100%;
-    align-items: flex-start;
-  }
-`;
-
 const Player = () => {
   const {
-    state: { playerQueueIds, currentlyPlayingIndex, user, shuffle },
+    state: { playerQueueIds, currentlyPlayingIndex, user, shuffle, looping },
     dispatch,
   } = useGlobalStateContext();
   let navigate = useNavigate();
@@ -111,7 +109,7 @@ const Player = () => {
   ]);
 
   const onClickQueue = React.useCallback(() => {
-    navigate("/library/queue");
+    navigate("/queue");
   }, [navigate]);
 
   const onShuffle = React.useCallback(() => {
@@ -147,6 +145,16 @@ const Player = () => {
     }
   }, [currentTrack]);
 
+  const onLoop = React.useCallback(() => {
+    let nextLooping: GlobalState["looping"] = undefined;
+    if (looping === undefined) {
+      nextLooping = "loopTrack";
+    } else if (looping === "loopTrack") {
+      nextLooping = "loopQueue";
+    }
+    dispatch({ type: "setLooping", looping: nextLooping });
+  }, [dispatch, looping]);
+
   return (
     <div className={playerClass}>
       <Helmet>
@@ -157,32 +165,88 @@ const Player = () => {
         )}
       </Helmet>
       {currentTrack && (
-        <div className={trackInfo}>
-          <ImageWithPlaceholder
-            src={currentTrack.trackGroup.cover?.url}
-            size={50}
-            alt={currentTrack.title}
+        <div
+          className={css`
+            display: flex;
+            align-items: center;
+            flex-grow: 1;
+            margin-right: 0.5rem;
+
+            @media (max-width: ${bp.small}px) {
+              width: 100%;
+              justify-content: space-between;
+            }
+          `}
+        >
+          <div
             className={css`
-              background-color: #efefef;
-              margin-right: 0.5rem;
+              display: flex;
+              align-items: center;
             `}
-          />
-          <div>
-            <div>{currentTrack.title}</div>
-            <div>{currentTrack.trackGroup.title}</div>
+          >
+            <ImageWithPlaceholder
+              src={currentTrack.trackGroup.cover?.url}
+              size={50}
+              alt={currentTrack.title}
+              className={css`
+                background-color: #efefef;
+                margin-right: 0.5rem;
+              `}
+            />
             <div>
-              <Link to={`/library/artist/${currentTrack.artistId}`}>
-                {currentTrack.trackGroup?.artist?.name}
-              </Link>
+              <div>{currentTrack.title}</div>
+              <div>{currentTrack.trackGroup.title}</div>
+              <div>
+                <Link to={`/artist/${currentTrack.artistId}`}>
+                  {currentTrack.trackGroup?.artist?.name}
+                </Link>
+              </div>
             </div>
           </div>
 
           {/* <TrackPopup trackId={currentTrack.id} compact /> */}
+          <div>
+            <IconButton
+              color={shuffle ? "primary" : undefined}
+              compact
+              onClick={onShuffle}
+            >
+              <ImShuffle />
+            </IconButton>
+            <IconButton
+              color={looping ? "primary" : undefined}
+              compact
+              onClick={onLoop}
+              className={css`
+                margin-left: 1rem;
+                margin-right: 1rem;
+                position: relative;
+              `}
+            >
+              <ImLoop />
+              {looping === "loopTrack" && (
+                <LoopingIndicator>1</LoopingIndicator>
+              )}
+            </IconButton>
+          </div>
         </div>
       )}
+
       {!currentTrack && isLoading && <Spinner size="small" />}
       {!currentTrack && !isLoading && (
-        <div className={trackInfo}>
+        <div
+          className={css`
+            display: flex;
+            align-items: center;
+            flex-grow: 1;
+            margin-right: 0.5rem;
+
+            @media (max-width: ${bp.small}px) {
+              width: 100%;
+              align-items: flex-start;
+            }
+          `}
+        >
           Current queue is empty, click on something to play!
         </div>
       )}
@@ -198,15 +262,8 @@ const Player = () => {
         `}
       >
         {currentTrack && <AudioWrapper currentTrack={currentTrack} />}
-        <IconButton
-          color={shuffle ? "primary" : undefined}
-          compact
-          onClick={onShuffle}
-        >
-          <ImShuffle />
-        </IconButton>
 
-        <Button
+        {/* <Button
           onClick={onClickQueue}
           compact
           data-cy="queue"
@@ -220,7 +277,7 @@ const Player = () => {
           startIcon={<MdQueueMusic style={{}} />}
         >
           Queue
-        </Button>
+        </Button> */}
       </div>
     </div>
   );

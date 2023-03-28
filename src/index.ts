@@ -1,6 +1,5 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 import express from "express";
-import path from "path";
 import cookieParser from "cookie-parser";
 import passport from "passport";
 import { initialize } from "express-openapi";
@@ -48,11 +47,13 @@ const routes = [
   "tracks/{id}/stream/{segment}",
   "artists",
   "artists/{id}",
+  "posts",
   "posts/{id}",
   "users",
   "users/{userId}",
   "users/{userId}/artists",
   "users/{userId}/artists/{artistId}",
+  "users/{userId}/artists/{artistId}/subscriptions",
   "users/{userId}/trackGroups",
   "users/{userId}/trackGroups/{trackGroupId}",
   "users/{userId}/trackGroups/{trackGroupId}/cover",

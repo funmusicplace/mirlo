@@ -10,22 +10,27 @@ const APIInstance = (apiRoot: string) => {
     const root = authEndpoints.includes(endpoint) ? auth : api;
     const req = new Request(`${root}${endpoint}`, options);
 
-    const resp = await fetch(req);
-    const json = await resp.json();
+    try {
+      const resp = await fetch(req);
+      const json = await resp.json();
 
-    if (resp.status === 401 && json.error === "jwt expired") {
-      try {
-        await apiRequest("refresh", { method: "POST" });
-        return await apiRequest(endpoint, options);
-      } catch (e) {
-        throw new Error("Log in expired");
+      if (resp.status === 401 && json.error === "jwt expired") {
+        try {
+          await apiRequest("refresh", { method: "POST" });
+          return await apiRequest(endpoint, options);
+        } catch (e) {
+          throw new Error("Log in expired");
+        }
       }
-    }
 
-    if (resp.status >= 400) {
-      throw new Error(json.error);
+      if (resp.status >= 400) {
+        throw new Error(json.error);
+      }
+      return json;
+    } catch (e) {
+      console.error(e);
+      throw new Error("Something went wrong");
     }
-    return json;
   };
 
   return {
@@ -55,6 +60,7 @@ const APIInstance = (apiRoot: string) => {
       data: T,
       options?: RequestInit
     ): Promise<R> => {
+      console.log("putting");
       return apiRequest<R>(endpoint, {
         method: "PUT",
         credentials: "include",

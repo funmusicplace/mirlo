@@ -16,5 +16,6 @@ declare module "@emotion/react" {
       warning: string;
       success: string;
     };
+    borderRadius: string;
   }
 }

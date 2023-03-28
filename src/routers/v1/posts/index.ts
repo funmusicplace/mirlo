@@ -9,19 +9,19 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response) {
-    const tracks = await prisma.track.findMany();
-    res.json({ results: tracks });
+    const posts = await prisma.post.findMany();
+    res.json({ results: posts });
   }
 
   GET.apiDoc = {
-    summary: "Returns all tracks",
+    summary: "Returns all published posts",
     responses: {
       200: {
-        description: "A list of tracks",
+        description: "A list of published posts",
         schema: {
           type: "array",
           items: {
-            $ref: "#/definitions/Track",
+            $ref: "#/definitions/Post",
           },
         },
       },

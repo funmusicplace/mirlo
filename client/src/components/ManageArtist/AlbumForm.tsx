@@ -44,7 +44,7 @@ const AlbumForm: React.FC<{
     async (data: {
       title: string;
       published: boolean;
-      type: string;
+      type: TrackGroup["type"];
       releaseDate: string;
       about: string;
       coverFile: File[];
@@ -54,16 +54,22 @@ const AlbumForm: React.FC<{
           setIsSaving(true);
           let savedId = existingId;
           if (existingId) {
-            await api.put(`users/${userId}/trackGroups/${existingId}`, {
-              ...pick(data, [
-                "title",
-                "private",
-                "type",
-                "releaseDate",
-                "about",
-              ]),
-              artistId: artist.id,
-            });
+            const sending = pick(data, [
+              "title",
+              "private",
+              "type",
+              "releaseDate",
+              "about",
+            ]);
+            console.log("sending", sending);
+            await api.put<Partial<TrackGroup>, TrackGroup>(
+              `users/${userId}/trackGroups/${existingId}`,
+              {
+                ...sending,
+                artistId: artist.id,
+              }
+            );
+            console.log("saving");
           } else {
             const newGroup = await api.post<
               { title?: string; artistId: number; cover?: File[] },
@@ -94,6 +100,7 @@ const AlbumForm: React.FC<{
           snackbar("Trackgroup updated", { type: "success" });
           onClose?.();
         } catch (e) {
+          console.error("e", e);
           snackbar("There was a problem with the API", { type: "warning" });
         } finally {
           setIsSaving(false);

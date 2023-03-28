@@ -11,10 +11,11 @@ export default function () {
   async function GET(req: Request, res: Response) {
     const { id }: { id?: string } = req.params;
 
-    const post = await prisma.track.findUnique({
+    const artist = await prisma.artist.findUnique({
       where: { id: Number(id) },
     });
-    res.json(post);
+    console.log("artist", artist);
+    res.json(artist);
   }
 
   GET.apiDoc = {

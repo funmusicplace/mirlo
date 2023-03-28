@@ -23,7 +23,7 @@ services:
     env_file:
       - .env
     build: .
-    command: /bin/sh -c "yarn && yarn migrate && yarn dev:api"
+    command: /bin/sh -c "yarn && yarn migrate:deploy && yarn dev:api"
     container_name: nomads-api
     environment:
       - NODE_ENV=${NODE_ENV:-development}
@@ -32,7 +32,7 @@ services:
       - pgsql
     ports:
       - "${APP_HOST_PORT:-3000}:3000"
-    # restart: always
+    restart: always
     volumes:
       - ~/.ssh:/root/.ssh
       - ./:/var/www/api

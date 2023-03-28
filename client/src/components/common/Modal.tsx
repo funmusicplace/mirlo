@@ -5,6 +5,7 @@ import { bp } from "../../constants";
 import IconButton from "./IconButton";
 import ReactDOM from "react-dom";
 import Background from "./Background";
+import { theme } from "utils/theme";
 
 const wrapper = css`
   position: fixed;
@@ -32,6 +33,7 @@ const Content = styled.div<ContentProps>`
   flex-direction: column;
   width: ${(props) => (props.size === "small" ? "40%" : "80%")};
   animation: 300ms ease-out forwards slide-up;
+  border-radius: ${(props) => props.theme.borderRadius};
 
   @media (max-width: ${bp.medium}px) {
     width: 90%;

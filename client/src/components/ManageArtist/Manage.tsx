@@ -6,6 +6,7 @@ import Button from "../common/Button";
 import CreateNewArtistForm from "./ArtistForm";
 import { useGlobalStateContext } from "state/GlobalState";
 import { Link } from "react-router-dom";
+import { theme } from "utils/theme";
 
 export const Manage: React.FC = () => {
   const { state } = useGlobalStateContext();
@@ -37,7 +38,7 @@ export const Manage: React.FC = () => {
           top: calc(48px + 3rem);
           left: 0;
           overflow-x: hidden;
-          padding: 0 1rem;
+          padding: 0;
         `}
       >
         <div
@@ -60,19 +61,50 @@ export const Manage: React.FC = () => {
           />
         </div>
 
-        {artists.map((a) => (
-          <Link key={a.id} to={`artists/${a.id}`}>
-            {a.name}
-          </Link>
-        ))}
-        <Button
-          onClick={() => {
-            setCreatingNewArtist(true);
-          }}
-          style={{ marginTop: "1rem" }}
+        <div
+          className={css`
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: stretch;
+            margin-top: 1rem;
+          `}
         >
-          Create new artist
-        </Button>
+          {artists.map((a) => (
+            <Link
+              key={a.id}
+              to={`artists/${a.id}`}
+              className={css`
+                flex-grow: 1;
+                text-align: center;
+                padding: 1rem;
+                border: 4px solid ${theme.colors.primaryHighlight};
+                margin: 0.25rem;
+                border-radius: 6px;
+                max-width: 49%;
+                line-height: 1;
+              `}
+            >
+              {a.name}
+            </Link>
+          ))}
+          <Button
+            onClick={() => {
+              setCreatingNewArtist(true);
+            }}
+            className={css`
+              flex-grow: 1;
+              text-align: center;
+              padding: 1rem;
+              margin: 0.25rem;
+              border-radius: 6px;
+              max-width: 49%;
+              border: 4px solid ${theme.colors.primaryHighlight} !important;
+            `}
+          >
+            Create new artist
+          </Button>
+        </div>
       </div>
     </>
   );

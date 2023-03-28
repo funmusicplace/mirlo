@@ -1,13 +1,17 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
+import {
+  contentBelongsToLoggedInUserArtist,
+  userAuthenticated,
+} from "../../../../../auth/passport";
 import processor from "../../../trackGroups/processor";
 
 const prisma = new PrismaClient();
 
 export default function () {
   const operations = {
-    GET,
-    POST,
+    GET: [userAuthenticated, GET],
+    POST: [userAuthenticated, contentBelongsToLoggedInUserArtist(), POST],
   };
 
   // FIXME: only get trackgroups belonging to artists belonging to a user

@@ -4,7 +4,8 @@
   "license": "GPL-3.0",
   "scripts": {
     "test": "mocha test",
-    "migrate": "npx prisma migrate dev",
+    "migrate": "DEBUG=prisma:client npx prisma migrate dev",
+    "migrate:deploy": "DEBUG=prisma:client npx prisma migrate deploy",
     "build": "cd client && yarn build && cd .. && cp -R client/build/* public && mv public/index.html public/app.html",
     "dev:api": "NODE_ENV=development PORT=3000 nodemon src/index.ts",
     "dev": "concurrently \"yarn dev:api\" \"cd client && PORT=8080 yarn start\""
@@ -12,7 +13,7 @@
   "dependencies": {
     "@bull-board/express": "^4.11.0",
     "@gumlet/react-hls-player": "^1.0.1",
-    "@prisma/client": "4.8.0",
+    "@prisma/client": "4.11.0",
     "@types/react-helmet": "^6.1.6",
     "bcryptjs": "^2.4.3",
     "bullmq": "^3.5.10",
@@ -37,6 +38,7 @@
     "passport": "^0.6.0",
     "passport-jwt": "^4.0.0",
     "react-helmet": "^6.1.0",
+    "react-markdown": "^8.0.5",
     "sharp": "^0.31.3",
     "shasum": "^1.0.2",
     "swagger-ui-express": "^4.6.0",
@@ -67,7 +69,7 @@
     "concurrently": "^7.6.0",
     "mocha": "^10.2.0",
     "nodemon": "^2.0.20",
-    "prisma": "4.8.0",
+    "prisma": "4.11.0",
     "supertest": "^6.3.3",
     "ts-node": "10.9.1",
     "typescript": "4.9.4"

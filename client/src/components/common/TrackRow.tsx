@@ -135,7 +135,7 @@ const TrackRow: React.FC<{
             onClick={(e) => {
               e.stopPropagation();
             }}
-            to={`/library/trackgroup/${track.trackGroup.id}`}
+            to={`/trackgroup/${track.trackGroup.id}`}
           >
             {track.trackGroup.title}
           </Link>
@@ -155,7 +155,7 @@ const TrackRow: React.FC<{
             onClick={(e) => {
               e.stopPropagation();
             }}
-            to={`/library/artist/${track.trackGroup?.artist?.id}`}
+            to={`/artist/${track.trackGroup?.artist?.id}`}
           >
             {track.trackGroup?.artist?.name}
           </Link>

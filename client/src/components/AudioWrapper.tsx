@@ -1,30 +1,12 @@
 import { css } from "@emotion/css";
-import styled from "@emotion/styled";
-// import { GlobalState, useGlobalStateContext } from "";
+
 import React from "react";
-// import AudioPlayer from "react-h5-audio-player";
 import ReactHlsPlayer from "@gumlet/react-hls-player";
-import { ImLoop } from "react-icons/im";
-// import { getToken } from "services/Api";
-// import { registerPlay } from "../services/api/User";
 import api from "services/api";
 
-import { buildHLSURL } from "../utils/tracks";
 import IconButton from "./common/IconButton";
 import { FaBackward, FaForward, FaPause, FaPlay } from "react-icons/fa";
-// import H5AudioPlayer from "react-h5-audio-player";
-import { GlobalState, useGlobalStateContext } from "state/GlobalState";
-
-const LoopingIndicator = styled.span`
-  position: absolute;
-  font-size: 0.5rem;
-  padding: 0.15rem 0.2rem;
-  background-color: ${(props) => props.theme.colors.primary};
-  border-radius: 100%;
-  color: white;
-  top: -0.25rem;
-  right: -0.25rem;
-`;
+import { useGlobalStateContext } from "state/GlobalState";
 
 function isEqualDurations(n1: number, n2: number) {
   return Math.abs(n1 - n2) < 0.00001;
@@ -140,22 +122,11 @@ export const AudioWrapper: React.FC<{
     determineIfShouldPlay();
   }, [determineIfShouldPlay]);
 
-  const onLoop = React.useCallback(() => {
-    let nextLooping: GlobalState["looping"] = undefined;
-    if (looping === undefined) {
-      nextLooping = "loopTrack";
-    } else if (looping === "loopTrack") {
-      nextLooping = "loopQueue";
-    }
-    dispatch({ type: "setLooping", looping: nextLooping });
-  }, [dispatch, looping]);
-
   const streamUrl = api.streamUrl(currentTrack);
   const duration = playerRef.current?.duration ?? 0;
   const currentSeconds = playerRef.current?.currentTime ?? 0;
   const percent = currentSeconds / duration;
 
-  console.log("streamUrl", streamUrl);
   return (
     <>
       <>
@@ -212,19 +183,6 @@ export const AudioWrapper: React.FC<{
         </div>
       </>
       {currentTime}
-      <IconButton
-        color={looping ? "primary" : undefined}
-        compact
-        onClick={onLoop}
-        className={css`
-          margin-left: 1rem;
-          margin-right: 1rem;
-          position: relative;
-        `}
-      >
-        <ImLoop />
-        {looping === "loopTrack" && <LoopingIndicator>1</LoopingIndicator>}
-      </IconButton>
     </>
   );
 };

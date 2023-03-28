@@ -8,56 +8,83 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  name      String?
-  password  String   @default("")
-  refresh   String?
-  artists   Artist[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-  isAdmin   Boolean  @default(false)
+  id                     Int                      @id @default(autoincrement())
+  email                  String                   @unique
+  name                   String?
+  password               String                   @default("")
+  refresh                String?
+  artists                Artist[]
+  createdAt              DateTime                 @default(now())
+  updatedAt              DateTime                 @default(now()) @updatedAt
+  isAdmin                Boolean                  @default(false)
+  ArtistUserSubscription ArtistUserSubscription[]
 }
 
 model Post {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-  title     String
-  content   String?
-  published Boolean  @default(false)
-  viewCount Int      @default(0)
-  author    Artist?  @relation(fields: [authorId], references: [id])
-  authorId  Int?
+  id          Int      @id @default(autoincrement())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+  title       String
+  content     String?
+  publishedAt DateTime @default(now())
+  viewCount   Int      @default(0)
+  artist      Artist?  @relation(fields: [artistId], references: [id])
+  artistId    Int?
 }
 
 model Artist {
-  id          Int          @id @default(autoincrement())
-  name        String
-  bio         String?
-  user        User         @relation(fields: [userId], references: [id])
-  userId      Int
-  posts       Post[]
-  trackgroups TrackGroup[]
-  enabled     Boolean      @default(false)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @default(now()) @updatedAt
+  id                     Int                      @id @default(autoincrement())
+  name                   String
+  bio                    String?
+  user                   User                     @relation(fields: [userId], references: [id])
+  userId                 Int
+  posts                  Post[]
+  trackgroups            TrackGroup[]
+  enabled                Boolean                  @default(false)
+  createdAt              DateTime                 @default(now())
+  updatedAt              DateTime                 @default(now()) @updatedAt
+  ArtistSubscriptionTier ArtistSubscriptionTier[]
+  ArtistUserSubscription ArtistUserSubscription[]
+}
+
+model ArtistSubscriptionTier {
+  id            Int      @id @default(autoincrement())
+  name          String
+  description   String   @default("")
+  artistId      Int
+  artist        Artist   @relation(fields: [artistId], references: [id])
+  minAmount     String?
+  allowVariable Boolean?
+  maxAmount     String?
+  defaultAmount String?
+}
+
+model ArtistUserSubscription {
+  id                       Int     @id @default(autoincrement())
+  artistSubscriptionTierId Int
+  artistSubscriptionTier   Artist  @relation(fields: [artistSubscriptionTierId], references: [id])
+  userId                   Int
+  user                     User    @relation(fields: [userId], references: [id])
+  amount                   String
+  stripeId                 String?
 }
 
 model TrackGroup {
-  id          Int              @id @default(autoincrement())
-  about       String?
-  artist      Artist           @relation(fields: [artistId], references: [id])
-  artistId    Int              @unique
-  title       String?
-  tracks      Track[]
-  cover       TrackGroupCover?
-  published   Boolean          @default(false)
-  type        String?
-  releaseDate DateTime         @default(now())
-  enabled     Boolean          @default(false)
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  id           Int              @id @default(autoincrement())
+  about        String?
+  artist       Artist           @relation(fields: [artistId], references: [id])
+  artistId     Int              @unique
+  title        String?
+  tracks       Track[]
+  cover        TrackGroupCover?
+  published    Boolean          @default(false)
+  type         String?
+  releaseDate  DateTime         @default(now())
+  enabled      Boolean          @default(false)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  minPrice     String?
+  isPriceFixed Boolean          @default(false)
 }
 
 model Track {

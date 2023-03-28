@@ -19,6 +19,8 @@ import AdminUsers from "components/Admin/Users";
 import AdminTrackGroups from "components/Admin/Trackgroups";
 import AdminTracks from "components/Admin/Tracks";
 import ManageArtist from "components/ManageArtist/ManageArtist";
+import Home from "components/Home";
+import Artist from "components/Artist";
 
 const router = createBrowserRouter([
   {
@@ -26,6 +28,8 @@ const router = createBrowserRouter([
     element: <App />,
     errorElement: <ErrorPage />,
     children: [
+      { path: "", element: <Home /> },
+      { path: "artist/:artistId", element: <Artist /> },
       {
         path: "signup",
         element: <Signup />,

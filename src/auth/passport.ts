@@ -1,6 +1,6 @@
 import { PrismaClient, User } from "@prisma/client";
 
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { TokenExpiredError } from "jsonwebtoken";
 import passport from "passport";
 import passportJWT from "passport-jwt";
@@ -78,19 +78,54 @@ export const userAuthenticated = (req: Request, res: Response, next: any) => {
   try {
     passport.authenticate("jwt", { session: false })(req, res, next);
   } catch (e) {
-    console.log("asdf");
     res.status(401).json({ error: "Unauthorized" });
   }
 };
 
 export const userHasPermission = (role: "admin" | "owner") => {
-  return (req: Request, res: Response, next: any) => {
+  return (req: Request, res: Response, next: NextFunction) => {
     const { userId } = req.params as unknown as { userId: number };
     const loggedInUser = req.user as User;
 
     // FIXME: ignore if user is admin.
     if (role === "owner" && Number(userId) !== loggedInUser.id) {
       res.status(401).json({ error: "Unauthorized" });
+    }
+    return next();
+  };
+};
+
+export const contentBelongsToLoggedInUserArtist = () => {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    const { userId } = req.params as unknown as { userId: string };
+    console.log("attempting to test user");
+    const data = req.body;
+
+    const artistId = data.artistId ?? req.params.artistId;
+    const loggedInUser = req.user as User;
+
+    if (loggedInUser.id !== Number(userId)) {
+      console.log("not right user");
+      res.status(400).json({
+        error: `Artist must belong to user`,
+      });
+      return next(`Artist must belong to user`);
+    }
+    console.log("got here");
+
+    const artist = await prisma.artist.findFirstOrThrow({
+      where: {
+        userId: loggedInUser.id,
+        id: Number(artistId),
+      },
+    });
+
+    if (!artist) {
+      console.log("no artist");
+      res.status(400).json({
+        error: "Artist must belong to user",
+      });
+      return next("Artist must belong to user");
     }
     return next();
   };
