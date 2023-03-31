@@ -4,13 +4,8 @@ import React from "react";
 import { FaEye, FaPen } from "react-icons/fa";
 import { Link, useParams } from "react-router-dom";
 import api from "services/api";
-import ReactMarkdown from "react-markdown";
 import { useGlobalStateContext } from "state/GlobalState";
 import ArtistForm from "./ArtistForm";
-import ManageAlbumForm from "./ManageAlbumForm";
-import NewAlbumForm from "./NewAlbumForm";
-import NewPostForm from "./NewPostForm";
-import TrackGroupCard from "./TrackGroupCard";
 import ManageArtistPosts from "./ManageArtistPosts";
 import ManageArtistAlbums from "./ManageArtistAlbums";
 import ManageArtistSubscriptionTiers from "./ManageArtistSubscriptionTiers";
@@ -21,30 +16,17 @@ const ManageArtist: React.FC<{}> = () => {
   } = useGlobalStateContext();
   const { artistId } = useParams();
   const [artist, setArtist] = React.useState<Artist>();
-  const [manageTrackgroup, setManageTrackgroup] = React.useState<TrackGroup>();
-  const [addingNewAlbum, setAddingNewAlbum] = React.useState(false);
-  const [addingNewPost, setAddingNewPost] = React.useState(false);
 
   const [isEditing, setIsEditing] = React.useState(false);
-  const [trackGroups, setTrackGroups] = React.useState<TrackGroup[]>([]);
-  const [posts, setPosts] = React.useState<Post[]>([]);
 
   const userId = user?.id;
   React.useEffect(() => {
     const callback = async () => {
       if (userId) {
-        const result = await api.get<{ artist: Artist }>(
+        const { result } = await api.get<Artist>(
           `users/${userId}/artists/${artistId}`
         );
-        setArtist(result.artist);
-        const fetchedTrackGroups = await api.get<{ results: TrackGroup[] }>(
-          `users/${userId}/trackGroups?artistId=${artistId}`
-        );
-        setTrackGroups(fetchedTrackGroups.results);
-        const fetchedPosts = await api.get<{ results: Post[] }>(
-          `users/${userId}/posts?artistId=${artistId}`
-        );
-        setPosts(fetchedPosts.results);
+        setArtist(result);
       }
     };
     callback();

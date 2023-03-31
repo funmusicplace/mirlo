@@ -21,8 +21,8 @@ export const AdminTracks: React.FC = () => {
   // });
   React.useEffect(() => {
     const callback = async () => {
-      const trackGroups = await api.get<Track[]>("tracks");
-      setResults(trackGroups);
+      const { results } = await api.getMany<Track>("tracks");
+      setResults(results);
     };
     callback();
   }, []);
@@ -39,6 +39,8 @@ export const AdminTracks: React.FC = () => {
     },
     [navigate]
   );
+
+  console.log("track", results);
 
   return (
     <div

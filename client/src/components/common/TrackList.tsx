@@ -103,12 +103,6 @@ const TrackLIWrapper: React.FC<{
           : ""
       }
     >
-      <ClickToPlay
-        trackId={track.id}
-        title={track.title}
-        image={track.image.small ?? { width: 120, height: 120 }}
-        playActionIntercept={addTracksToQueue}
-      />
       <SmallTileDetails
         title={track.title}
         subtitle={

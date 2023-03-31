@@ -10,7 +10,7 @@ export default function () {
   // FIXME: document GET
   async function GET(req: Request, res: Response) {
     const users = await prisma.user.findMany();
-    res.json(users);
+    res.json({ results: users });
   }
   return operations;
 }

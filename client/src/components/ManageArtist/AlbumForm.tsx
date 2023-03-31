@@ -32,7 +32,10 @@ const AlbumForm: React.FC<{
     about: string;
     coverFile: File[];
   }>({
-    defaultValues: existing ?? {
+    defaultValues: {
+      ...existing,
+      releaseDate: existing?.releaseDate.split("T")[0],
+    } ?? {
       published: false,
     },
   });
@@ -54,14 +57,16 @@ const AlbumForm: React.FC<{
           setIsSaving(true);
           let savedId = existingId;
           if (existingId) {
-            const sending = pick(data, [
-              "title",
-              "private",
-              "type",
-              "releaseDate",
-              "about",
-            ]);
-            console.log("sending", sending);
+            const sending = {
+              ...pick(data, [
+                "title",
+                "private",
+                "type",
+                "releaseDate",
+                "about",
+              ]),
+              releaseDate: new Date(data.releaseDate).toISOString(),
+            };
             await api.put<Partial<TrackGroup>, TrackGroup>(
               `users/${userId}/trackGroups/${existingId}`,
               {
@@ -69,7 +74,6 @@ const AlbumForm: React.FC<{
                 artistId: artist.id,
               }
             );
-            console.log("saving");
           } else {
             const newGroup = await api.post<
               { title?: string; artistId: number; cover?: File[] },

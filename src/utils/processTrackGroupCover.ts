@@ -88,10 +88,20 @@ export const processTrackGroupCover = (ctx: {
   req: Request;
   res: Response;
 }) => {
-  return async (file: any, trackGroupId: number) => {
+  return async (
+    file: {
+      originalname: string;
+      filename: string;
+      path: string;
+      mimetype: string;
+      size: number;
+    },
+    trackGroupId: number
+  ) => {
     const { size: fileSize, path: filepath } = file;
     const type = await fromFile(filepath);
-    const mime = type !== null && type !== undefined ? type.mime : file.type;
+    const mime =
+      type !== null && type !== undefined ? type.mime : file.mimetype;
     const isImage = SUPPORTED_IMAGE_MIME_TYPES.includes(mime);
 
     if (!isImage) {
@@ -100,16 +110,16 @@ export const processTrackGroupCover = (ctx: {
       throw `File type not supported: ${mime}`;
     }
 
-    const buffer = await fs.readFile(filepath);
+    console.log("file", file);
     // const sha1sum = shasum(buffer);
 
     const image = await prisma.trackGroupCover.upsert({
       create: {
-        originalFilename: file.originalFilename,
+        originalFilename: file.originalname,
         trackGroupId: Number(trackGroupId),
       },
       update: {
-        originalFilename: file.originalFilename,
+        originalFilename: file.originalname,
       },
       where: {
         trackGroupId: Number(trackGroupId),

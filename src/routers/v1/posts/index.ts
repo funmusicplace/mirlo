@@ -9,7 +9,14 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response) {
-    const posts = await prisma.post.findMany();
+    const posts = await prisma.post.findMany({
+      where: {
+        publishedAt: { lte: new Date() },
+      },
+      include: {
+        artist: true,
+      },
+    });
     res.json({ results: posts });
   }
 

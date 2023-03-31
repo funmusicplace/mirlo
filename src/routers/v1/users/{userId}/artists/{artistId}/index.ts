@@ -84,13 +84,13 @@ export default function () {
   async function GET(req: Request, res: Response) {
     const { userId, artistId } = req.params as unknown as Params;
     if (userId) {
-      const artist = await prisma.artist.findMany({
+      const artist = await prisma.artist.findFirst({
         where: {
           id: Number(artistId),
           userId: Number(userId),
         },
       });
-      res.json({ artist: artist[0] });
+      res.json({ result: artist });
     } else {
       res.status(400);
       res.json({

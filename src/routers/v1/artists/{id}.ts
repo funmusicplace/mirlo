@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
+import processor from "../trackGroups/processor";
 
 const prisma = new PrismaClient();
 
@@ -11,11 +12,37 @@ export default function () {
   async function GET(req: Request, res: Response) {
     const { id }: { id?: string } = req.params;
 
-    const artist = await prisma.artist.findUnique({
-      where: { id: Number(id) },
+    const artist = await prisma.artist.findFirst({
+      where: { id: Number(id), enabled: true },
+      include: {
+        trackGroups: {
+          where: {
+            published: true,
+            releaseDate: {
+              lte: new Date(),
+            },
+          },
+          include: {
+            tracks: true,
+            cover: true,
+          },
+        },
+        subscriptionTiers: true,
+        posts: {
+          where: {
+            publishedAt: {
+              lte: new Date(),
+            },
+          },
+        },
+      },
     });
-    console.log("artist", artist);
-    res.json(artist);
+    res.json({
+      result: {
+        ...artist,
+        trackGroups: artist?.trackGroups.map(processor.single),
+      },
+    });
   }
 
   GET.apiDoc = {

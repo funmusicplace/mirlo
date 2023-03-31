@@ -5,10 +5,13 @@ import bytes from "bytes";
 
 import tempSharpConfig from "../config/sharp";
 import { Job } from "bullmq";
+import { PrismaClient } from "@prisma/client";
+import { uniq } from "lodash";
 
 const { defaultOptions, config: sharpConfig } = tempSharpConfig;
 
 const MEDIA_LOCATION_INCOMING = process.env.MEDIA_LOCATION_INCOMING || "/";
+const prisma = new PrismaClient();
 
 const logger = winston.createLogger({
   level: "info",
@@ -100,6 +103,7 @@ const optimizeImage = async (job: Job) => {
             );
 
             buffer = await sharp(buffer || filepath)
+              .rotate()
               .resize(resizeOptions)
               [outputType](outputOptions)
               .toBuffer();
@@ -110,30 +114,45 @@ const optimizeImage = async (job: Job) => {
               buffer = await sharp(buffer).blur(variant.blur.sigma).toBuffer();
             }
 
-            return new Promise((resolve, reject) => {
+            const results = await new Promise((resolve, reject) => {
               return sharp(buffer)
                 .toFile(dest)
-                .then((result: any) => {
-                  logger.info(
-                    `Converted and optimized image to ${result.format}`,
-                    {
-                      size: bytes(result.size),
-                      ratio: `${result.width}x${result.height})`,
-                    }
-                  );
+                .then(
+                  async (result: {
+                    format: string;
+                    size: number;
+                    width: number;
+                    height: number;
+                  }) => {
+                    logger.info(
+                      `Converted and optimized image to ${result.format}`,
+                      {
+                        size: bytes(result.size),
+                        ratio: `${result.width}x${result.height})`,
+                      }
+                    );
 
-                  return resolve(result);
-                })
+                    return resolve(result);
+                  }
+                )
                 .catch((err: any) => {
                   return reject(err);
                 });
             });
+
+            return results;
           }
         );
       })
       .flat(1);
 
-    await Promise.all(promises);
+    const results = await Promise.all(promises);
+    const urls = uniq(results.map((r) => `${destination}-x${r.width}`));
+    console.log("results", urls);
+    await prisma.trackGroupCover.update({
+      where: { id: destination },
+      data: { url: urls },
+    });
 
     profiler.done({ message: "Done optimizing image" });
 

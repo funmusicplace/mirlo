@@ -23,11 +23,11 @@ const ManageArtistAlbums: React.FC<{}> = () => {
   React.useEffect(() => {
     const callback = async () => {
       if (userId) {
-        const result = await api.get<{ artist: Artist }>(
+        const { result } = await api.get<Artist>(
           `users/${userId}/artists/${artistId}`
         );
-        setArtist(result.artist);
-        const fetchedTrackGroups = await api.get<{ results: TrackGroup[] }>(
+        setArtist(result);
+        const fetchedTrackGroups = await api.getMany<TrackGroup>(
           `users/${userId}/trackGroups?artistId=${artistId}`
         );
         setTrackGroups(fetchedTrackGroups.results);

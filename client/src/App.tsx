@@ -2,7 +2,7 @@ import { css, injectGlobal } from "@emotion/css";
 import Snackbar from "components/common/Snackbar";
 import Player from "components/Player";
 import React, { useContext, useState } from "react";
-import { Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import api from "services/api";
 import { useGlobalStateContext } from "state/GlobalState";
 import SnackbarContext from "state/SnackbarContext";
@@ -54,7 +54,7 @@ injectGlobal`
   }
 
   h3 {
-    font-size: 1.8rem;
+    font-size: 1.7rem;
     padding-bottom: 1rem;
   }
 
@@ -120,7 +120,7 @@ function App() {
         const user = await api.get<LoggedInUser>("profile");
         dispatch({
           type: "setLoggedInUser",
-          user,
+          user: user.result,
         });
       } catch (e) {
         console.error("Error refreshing token", e);
@@ -150,7 +150,7 @@ function App() {
       }, 1000 * 60 * 5); // refresh every 5 minutes
     }
     return () => (interval ? clearInterval(interval) : undefined);
-  }, [userId, dispatch, navigate]);
+  }, [userId, dispatch, navigate, location.pathname]);
 
   return (
     <div

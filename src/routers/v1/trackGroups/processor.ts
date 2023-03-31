@@ -12,15 +12,14 @@ export default {
     ...tg,
     cover: {
       ...tg.cover,
-      sizes: sharpConfig.config.artwork.jpeg.variants.reduce(
-        (aggr, v) => ({
+      sizes: tg.cover?.url.reduce((aggr, url) => {
+        return {
           ...aggr,
-          [v.width]: tg.cover
-            ? `${process.env.STATIC_MEDIA_HOST}/images/${tg.cover.id}-x${v.width}.jpg`
-            : null,
-        }),
-        {}
-      ),
+          [url.split(
+            "-x"
+          )[1]]: `${process.env.STATIC_MEDIA_HOST}/images/${url}.jpg`,
+        };
+      }, {}),
     },
   }),
 };

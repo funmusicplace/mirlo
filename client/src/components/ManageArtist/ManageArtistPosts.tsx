@@ -3,38 +3,63 @@ import Button from "components/common/Button";
 import React from "react";
 import { useParams } from "react-router-dom";
 import api from "services/api";
-import ReactMarkdown from "react-markdown";
 import { useGlobalStateContext } from "state/GlobalState";
 import NewPostForm from "./NewPostForm";
 import Box from "components/common/Box";
 import { FaPen, FaTrash } from "react-icons/fa";
+import PostContent from "components/common/PostContent";
+import { useSnackbar } from "state/SnackbarContext";
+import PostForm from "./PostForm";
+import Modal from "components/common/Modal";
 
 const ManageArtistPosts: React.FC<{}> = () => {
   const {
     state: { user },
   } = useGlobalStateContext();
+  const snackbar = useSnackbar();
   const { artistId } = useParams();
   const [artist, setArtist] = React.useState<Artist>();
   const [addingNewPost, setAddingNewPost] = React.useState(false);
+  const [managePost, setManagePost] = React.useState<Post>();
 
   const [posts, setPosts] = React.useState<Post[]>([]);
 
   const userId = user?.id;
+
+  const fetchPosts = React.useCallback(async () => {
+    if (userId) {
+      const fetchedPosts = await api.getMany<Post>(
+        `users/${userId}/posts?artistId=${artistId}`
+      );
+      setPosts(fetchedPosts.results);
+    }
+  }, [artistId, userId]);
+
   React.useEffect(() => {
     const callback = async () => {
       if (userId) {
-        const result = await api.get<{ artist: Artist }>(
+        const { result } = await api.get<Artist>(
           `users/${userId}/artists/${artistId}`
         );
-        setArtist(result.artist);
-        const fetchedPosts = await api.get<{ results: Post[] }>(
-          `users/${userId}/posts?artistId=${artistId}`
-        );
-        setPosts(fetchedPosts.results);
+        setArtist(result);
       }
     };
     callback();
-  }, [userId, artistId]);
+    fetchPosts();
+  }, [userId, artistId, fetchPosts]);
+
+  const deletePost = React.useCallback(
+    async (postId: number) => {
+      try {
+        await api.delete(`users/${userId}/posts/${postId}`);
+        snackbar("Post deleted", { type: "success" });
+        fetchPosts();
+      } catch (e) {
+        console.error(e);
+      }
+    },
+    [fetchPosts, snackbar, userId]
+  );
 
   if (!artist) {
     return null;
@@ -58,7 +83,11 @@ const ManageArtistPosts: React.FC<{}> = () => {
           >
             <strong>{p.title}:</strong>
             <div>
-              <Button compact startIcon={<FaPen />}>
+              <Button
+                compact
+                startIcon={<FaPen />}
+                onClick={() => setManagePost(p)}
+              >
                 Edit
               </Button>
               <Button
@@ -67,14 +96,26 @@ const ManageArtistPosts: React.FC<{}> = () => {
                 `}
                 compact
                 startIcon={<FaTrash />}
+                onClick={() => deletePost(p.id)}
               >
                 Delete
               </Button>
             </div>
           </div>
-          <ReactMarkdown>{p.content}</ReactMarkdown>
+          <PostContent content={p.content} />
         </Box>
       ))}
+      {managePost && (
+        <Modal open={!!managePost} onClose={() => setManagePost(undefined)}>
+          <PostForm
+            existing={managePost}
+            reload={() => {
+              return fetchPosts();
+            }}
+            artist={artist}
+          />
+        </Modal>
+      )}
       <Button
         onClick={() => {
           setAddingNewPost(true);

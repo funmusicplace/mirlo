@@ -13,7 +13,7 @@ export default function () {
     const post = await prisma.post.findUnique({
       where: { id: Number(id) },
     });
-    res.json(post);
+    res.json({ result: post });
   }
 
   GET.apiDoc = {

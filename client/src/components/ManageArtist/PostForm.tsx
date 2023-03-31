@@ -3,18 +3,16 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import Button from "../common/Button";
 import { InputEl } from "../common/Input";
-import { SelectEl } from "../common/Select";
 import TextArea from "../common/TextArea";
 import FormComponent from "components/common/FormComponent";
 import { useSnackbar } from "state/SnackbarContext";
 import { pick } from "lodash";
-import { css } from "@emotion/css";
 import LoadingSpinner from "components/common/LoadingSpinner";
 import api from "../../services/api";
 import { useGlobalStateContext } from "state/GlobalState";
 
 const PostForm: React.FC<{
-  existing?: TrackGroup;
+  existing?: Post;
   reload: () => Promise<void>;
   artist: Artist;
   onClose?: () => void;
@@ -24,14 +22,22 @@ const PostForm: React.FC<{
   } = useGlobalStateContext();
   const snackbar = useSnackbar();
   const [isSaving, setIsSaving] = React.useState(false);
+
+  const publishedAt = existing ? new Date(existing.publishedAt) : new Date();
+  publishedAt.setMinutes(
+    publishedAt.getMinutes() - publishedAt.getTimezoneOffset()
+  );
+
   const { register, handleSubmit } = useForm<{
     title: string;
     publishedAt: string;
     content: string;
   }>({
-    defaultValues: existing ?? {
-      publishedAt: new Date().toISOString(),
-    },
+    defaultValues: existing
+      ? { ...existing, publishedAt: publishedAt.toISOString().slice(0, 16) }
+      : {
+          publishedAt: publishedAt.toISOString().slice(0, 16),
+        },
   });
 
   const existingId = existing?.id;
@@ -42,23 +48,22 @@ const PostForm: React.FC<{
       if (userId) {
         try {
           setIsSaving(true);
-          let savedId = existingId;
           if (existingId) {
+            // const timezoneOffset =
             await api.put(`users/${userId}/posts/${existingId}`, {
-              ...pick(data, ["title", "publishedAt", "content"]),
+              ...pick(data, ["title", "content"]),
+              publishedAt: new Date(data.publishedAt + ":00").toISOString(),
               artistId: artist.id,
             });
           } else {
-            const newGroup = await api.post<
+            await api.post<
               { title?: string; artistId: number; cover?: File[] },
               { id: number }
             >(`users/${userId}/posts`, {
               ...pick(data, ["title", "content", "publishedAt"]),
               artistId: artist.id,
             });
-            savedId = newGroup.id;
           }
-          // data cover is a string if the form hasn't been changed.
 
           snackbar("Post updated", { type: "success" });
           onClose?.();
@@ -86,7 +91,8 @@ const PostForm: React.FC<{
         Title: <InputEl {...register("title")} />
       </FormComponent>
       <FormComponent>
-        Publication date: <InputEl type="date" {...register("publishedAt")} />
+        Publication date:{" "}
+        <InputEl type="datetime-local" {...register("publishedAt")} />
       </FormComponent>
       <FormComponent>
         Content: <TextArea {...register("content")} />

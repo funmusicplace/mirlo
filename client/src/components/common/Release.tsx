@@ -35,7 +35,7 @@ const Release: React.FC<{ release: ReleaseDetails }> = ({ release }) => {
             height: release.image?.small?.height ?? 120,
           }}
           title={release.title ?? ""}
-          groupId={release.id}
+          trackGroupId={release.id}
           trackGroupType="trackgroup"
           className={css`
             margin: 0 1rem 1rem 0;

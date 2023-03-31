@@ -23,7 +23,7 @@ export default function () {
         audio: true,
       },
     });
-    res.json({ track });
+    res.json({ result: track });
   }
 
   GET.apiDoc = {

@@ -9,7 +9,11 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response) {
-    const trackGroups = await prisma.trackGroup.findMany();
+    const trackGroups = await prisma.trackGroup.findMany({
+      where: {
+        published: true,
+      },
+    });
     res.json({ results: trackGroups });
   }
 

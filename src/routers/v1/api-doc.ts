@@ -58,10 +58,18 @@ const apiDoc = {
     },
     ArtistSubscriptionTier: {
       type: "object",
-      required: ["name"],
+      required: ["name", "description"],
       properties: {
-        string: {
+        name: {
           description: "name of the subscription",
+          type: "string",
+        },
+        description: {
+          description: "description of the subscription",
+          type: "string",
+        },
+        minAmount: {
+          description: "minimum amount of the subscription",
           type: "string",
         },
       },

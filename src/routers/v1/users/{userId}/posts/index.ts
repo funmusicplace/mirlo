@@ -17,7 +17,6 @@ export default function () {
   // artists the user owns
   async function POST(req: Request, res: Response) {
     const { title, content, artistId } = req.body;
-    console.log("posting", req.body);
     const result = await prisma.post.create({
       data: {
         title,

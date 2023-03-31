@@ -11,6 +11,7 @@ import LoadingSpinner from "components/common/LoadingSpinner";
 import api from "../../services/api";
 import { useGlobalStateContext } from "state/GlobalState";
 import Box from "components/common/Box";
+import CurrencyInput from "react-currency-input-field";
 
 const SubscriptionForm: React.FC<{
   artist: Artist;
@@ -25,10 +26,12 @@ const SubscriptionForm: React.FC<{
   const { register, handleSubmit } = useForm<{
     name: string;
     description: string;
+    minAmount: string;
   }>({
     defaultValues: existing ?? {
       name: "",
       description: "",
+      minAmount: "",
     },
   });
 
@@ -37,12 +40,12 @@ const SubscriptionForm: React.FC<{
   const artistId = artist.id;
 
   const doSave = React.useCallback(
-    async (data: { name: string; description: string }) => {
+    async (data: { name: string; description: string; minAmount: string }) => {
       if (userId) {
         try {
           setIsSaving(true);
           if (existingId) {
-            const sending = pick(data, ["name", "description"]);
+            const sending = pick(data, ["name", "description", "minAmount"]);
             await api.put<
               Partial<ArtistSubscriptionTier>,
               ArtistSubscriptionTier
@@ -78,12 +81,17 @@ const SubscriptionForm: React.FC<{
     <Box>
       <form onSubmit={handleSubmit(doSave)}>
         <h4>
-          {existing ? "Edit" : "New"} Subscription for {artist.name}
+          {existing ? "Edit" : "New"} Subscription Tier for {artist.name}
         </h4>
 
         <FormComponent>
           name: <InputEl {...register("name")} />
         </FormComponent>
+        <FormComponent>
+          minimum amount:{" "}
+          <InputEl as={CurrencyInput} {...register("minAmount")} />
+        </FormComponent>
+
         <FormComponent>
           description: <TextArea {...register("description")} />
         </FormComponent>

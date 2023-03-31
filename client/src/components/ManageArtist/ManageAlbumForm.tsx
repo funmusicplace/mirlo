@@ -27,10 +27,10 @@ export const ManageAlbumForm: React.FC<{
 
   const reloadTrackGroup = React.useCallback(async () => {
     try {
-      const response = await api.get<{ trackgroup: TrackGroup }>(
+      const { result } = await api.get<TrackGroup>(
         `users/${artist.userId}/trackGroups/${trackgroup.id}`
       );
-      setTracks(response.trackgroup.tracks);
+      setTracks(result.tracks);
     } catch (e) {
       console.log(e);
     }

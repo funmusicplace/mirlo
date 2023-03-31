@@ -1,26 +1,65 @@
 import { PrismaClient } from "@prisma/client";
-import { Request, Response } from "express";
-import {
-  userAuthenticated,
-  userHasPermission,
-} from "../../../../../../auth/passport";
+import { NextFunction, Request, Response } from "express";
+import { userAuthenticated } from "../../../../../../auth/passport";
 const prisma = new PrismaClient();
+
+const doesPostBelongToUser = () => {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    const { userId, postId } = req.params;
+
+    if (userId && postId) {
+      const post = await prisma.post.findFirst({
+        where: {
+          artist: {
+            userId: Number(userId),
+          },
+        },
+      });
+      if (post) {
+        return next();
+      } else {
+        res.status(400).json({
+          error: `Post must belong to user`,
+        });
+        return next(`Post must belong to user`);
+      }
+    } else {
+      res.status(400).json({
+        error: `Bad request`,
+      });
+      return next(`userId and postId are required`);
+    }
+  };
+};
 
 export default function () {
   const operations = {
-    DELETE: [userAuthenticated, userHasPermission("owner"), DELETE],
+    PUT: [userAuthenticated, doesPostBelongToUser(), PUT],
+    DELETE: [userAuthenticated, doesPostBelongToUser(), DELETE],
     GET,
   };
 
-  // FIXME: only allow delete of posts belonging to user
-  async function DELETE(req: Request, res: Response) {
-    const { userId, postId } = req.params;
-    const post = await prisma.post.delete({
+  async function PUT(req: Request, res: Response) {
+    const { postId } = req.params;
+
+    const post = await prisma.post.update({
+      data: req.body,
       where: {
         id: Number(postId),
       },
     });
-    res.json(post);
+    res.json({ result: post });
+  }
+
+  // FIXME: only allow delete of posts belonging to user
+  async function DELETE(req: Request, res: Response) {
+    const { userId, postId } = req.params;
+    await prisma.post.delete({
+      where: {
+        id: Number(postId),
+      },
+    });
+    res.json({ message: "Success" });
   }
 
   DELETE.apiDoc = {
@@ -28,7 +67,7 @@ export default function () {
     parameters: [
       {
         in: "path",
-        name: "id",
+        name: "postId",
         required: true,
         type: "string",
       },

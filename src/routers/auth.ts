@@ -138,7 +138,7 @@ router.get("/profile", userAuthenticated, async (req, res) => {
     },
   });
 
-  res.status(200).json(foundUser);
+  res.status(200).json({ result: foundUser });
 });
 
 router.post("/refresh", (req, res) => {

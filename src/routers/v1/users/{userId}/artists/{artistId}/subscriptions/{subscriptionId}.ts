@@ -30,12 +30,17 @@ export default function () {
         return next();
       }
 
-      await prisma.artistSubscriptionTier.update({
+      const updatedTier = await prisma.artistSubscriptionTier.update({
         where: { id: Number(subscriptionId) },
-        data: {},
+        data: {
+          name: req.body.name,
+          description: req.body.description,
+          // TODO: make sure minAmount is alphanumeric
+          minAmount: req.body.minAmount.replace(",", ""),
+        },
       });
 
-      res.json({ message: "Success" });
+      res.json({ result: updatedTier });
     } catch (error) {
       res.json({
         error: `Subscription with ID ${subscriptionId} does not exist in the database`,
@@ -55,6 +60,12 @@ export default function () {
       {
         in: "path",
         name: "userId",
+        required: true,
+        type: "string",
+      },
+      {
+        in: "path",
+        name: "artistId",
         required: true,
         type: "string",
       },
@@ -83,10 +94,10 @@ export default function () {
   };
 
   async function DELETE(req: Request, res: Response, next: NextFunction) {
-    const { userId, trackId } = req.params;
+    const { userId, subscriptionId } = req.params;
 
     const track = await doesSubscriptionTierBelongToUser(
-      Number(trackId),
+      Number(subscriptionId),
       Number(userId)
     );
 
@@ -96,9 +107,9 @@ export default function () {
       });
       return next();
     }
-    await prisma.track.delete({
+    await prisma.artistSubscriptionTier.delete({
       where: {
-        id: Number(trackId),
+        id: Number(subscriptionId),
       },
     });
     res.json({ message: "Success" });
@@ -110,6 +121,12 @@ export default function () {
       {
         in: "path",
         name: "subscriptionId",
+        required: true,
+        type: "string",
+      },
+      {
+        in: "path",
+        name: "artistId",
         required: true,
         type: "string",
       },

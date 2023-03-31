@@ -1,7 +1,6 @@
 import { css } from "@emotion/css";
 // import Button from "components/common/Button";
 import IconButton from "components/common/IconButton";
-import Input from "components/common/Input";
 import Modal from "components/common/Modal";
 // import Select from "components/common/Select";
 import Table from "components/common/Table";
@@ -14,7 +13,6 @@ import api from "services/api";
 
 export const AdminUsers: React.FC = () => {
   // const [q, setQ] = React.useState("");
-  const [filterString, setFilterString] = React.useState("");
   const navigate = useNavigate();
   const { userId } = useParams();
   const [openModal, setOpenModal] = React.useState(false);
@@ -34,8 +32,8 @@ export const AdminUsers: React.FC = () => {
 
   React.useEffect(() => {
     const callback = async () => {
-      const trackGroups = await api.get<User[]>("users");
-      setResults(trackGroups);
+      const { results } = await api.getMany<User>("users");
+      setResults(results);
     };
     callback();
   }, []);

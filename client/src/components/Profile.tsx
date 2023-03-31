@@ -28,10 +28,10 @@ function Profile() {
   });
 
   const fetchProfile = React.useCallback(async () => {
-    const profile = await api.get<LoggedInUser>("profile");
+    const { result } = await api.get<LoggedInUser>("profile");
     dispatch({
       type: "setLoggedInUser",
-      user: profile,
+      user: result,
     });
   }, [dispatch]);
 

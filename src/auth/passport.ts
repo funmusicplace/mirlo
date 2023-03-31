@@ -98,20 +98,17 @@ export const userHasPermission = (role: "admin" | "owner") => {
 export const contentBelongsToLoggedInUserArtist = () => {
   return async (req: Request, res: Response, next: NextFunction) => {
     const { userId } = req.params as unknown as { userId: string };
-    console.log("attempting to test user");
     const data = req.body;
 
     const artistId = data.artistId ?? req.params.artistId;
     const loggedInUser = req.user as User;
 
     if (loggedInUser.id !== Number(userId)) {
-      console.log("not right user");
       res.status(400).json({
         error: `Artist must belong to user`,
       });
       return next(`Artist must belong to user`);
     }
-    console.log("got here");
 
     const artist = await prisma.artist.findFirstOrThrow({
       where: {
@@ -121,7 +118,6 @@ export const contentBelongsToLoggedInUserArtist = () => {
     });
 
     if (!artist) {
-      console.log("no artist");
       res.status(400).json({
         error: "Artist must belong to user",
       });

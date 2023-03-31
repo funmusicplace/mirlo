@@ -10,8 +10,8 @@ export const UserDetails: React.FC = () => {
   const [user, setUser] = React.useState<User>();
 
   const fetchUserWrapper = React.useCallback(async (id: string) => {
-    const fetchedUser = await api.get<User>(`users/${id}`);
-    setUser(fetchedUser);
+    const { result } = await api.get<User>(`users/${id}`);
+    setUser(result);
   }, []);
 
   React.useEffect(() => {

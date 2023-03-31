@@ -39,10 +39,10 @@ export const TrackGroupDetails: React.FC = () => {
 
   const fetchTrackWrapper = React.useCallback(
     async (id: string) => {
-      const fetchedTrackgroup = await api.get<TrackGroup>(`trackGroups/${id}`);
-      setTrackgroup(fetchedTrackgroup);
+      const { result } = await api.get<TrackGroup>(`trackGroups/${id}`);
+      setTrackgroup(result);
       reset({
-        ...fetchedTrackgroup,
+        ...result,
       });
     },
     [reset]

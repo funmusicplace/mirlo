@@ -18,7 +18,6 @@ export default function () {
   // FIXME: only allow updating of tracks owned by userId
   async function PUT(req: Request, res: Response, next: NextFunction) {
     const { trackId, userId } = req.params;
-    console.log("PUTTING");
     try {
       const track = await doesTrackBelongToUser(
         Number(trackId),
@@ -136,10 +135,10 @@ export default function () {
   async function GET(req: Request, res: Response) {
     const { trackId, userId } = req.params;
 
-    const post = await prisma.track.findUnique({
+    const track = await prisma.track.findUnique({
       where: { id: Number(trackId) },
     });
-    res.json(post);
+    res.json({ result: track });
   }
 
   GET.apiDoc = {

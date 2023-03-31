@@ -93,18 +93,16 @@ const Wrapper = styled.div<WrapperProps>`
 `;
 
 const ClickToPlay: React.FC<{
-  groupId?: number;
-  trackId?: number;
+  trackGroupId: number;
   title: string;
   image?: { width: number; height: number; url: string };
   className?: string;
   trackGroupType?: "playlist" | "trackgroup";
   playActionIntercept?: (trackId: number) => void;
 }> = ({
-  groupId,
+  trackGroupId,
   title,
   image,
-  trackId,
   className,
   playActionIntercept,
   trackGroupType,
@@ -114,52 +112,40 @@ const ClickToPlay: React.FC<{
     dispatch,
   } = useGlobalStateContext();
   const displayMessage = useSnackbar();
+  const [trackIds, setTrackIds] = React.useState<number[]>([]);
 
   const onClickPlay = React.useCallback(async () => {
     let ids: number[] = [];
-    if (groupId) {
+    if (trackGroupId) {
       // const fetchFunction =
       // trackGroupType === "playlist" ? fetchPlaylist : fetchTrackGroup;
-      const result = await api.get<TrackGroup>(`trackGroup/${groupId}`);
+      const { result } = await api.get<TrackGroup>(
+        `trackGroups/${trackGroupId}`
+      );
       ids = result.tracks.map((item) => item.id);
-    } else if (trackId) {
-      if (playActionIntercept) {
-        playActionIntercept(trackId);
-        return;
-      } else {
-        if (playerQueueIds.includes(trackId)) {
-          const indexOfTrack = playerQueueIds.indexOf(trackId);
-          const newTracks = playerQueueIds.slice(indexOfTrack);
-          ids = [...newTracks];
-        } else {
-          ids = [trackId];
-        }
-      }
+      setTrackIds(ids);
     }
     dispatch({
       type: "startPlayingIds",
       playerQueueIds: ids,
     });
-  }, [dispatch, groupId, trackId, playerQueueIds, playActionIntercept]);
+  }, [dispatch, trackGroupId]);
 
   const onClickQueue = React.useCallback(async () => {
-    if (groupId) {
+    if (trackGroupId) {
       // const fetchFunction =
       // trackGroupType === "playlist" ? fetchPlaylist : fetchTrackGroup;
-      await api.get<TrackGroup>(`trackGroup/${groupId}`).then((result) => {
-        dispatch({
-          type: "addTrackIdsToBackOfQueue",
-          idsToAdd: result.tracks.map((item) => item.id),
+      await api
+        .get<TrackGroup>(`trackGroups/${trackGroupId}`)
+        .then(({ result }) => {
+          dispatch({
+            type: "addTrackIdsToBackOfQueue",
+            idsToAdd: result.tracks.map((item) => item.id),
+          });
         });
-      });
-    } else if (trackId) {
-      dispatch({
-        type: "addTrackIdsToBackOfQueue",
-        idsToAdd: [trackId],
-      });
     }
     displayMessage("Added to queue");
-  }, [dispatch, groupId, trackId, displayMessage]);
+  }, [dispatch, trackGroupId, displayMessage]);
 
   const onPause = React.useCallback(async () => {
     dispatch({ type: "setPlaying", playing: false });
@@ -168,7 +154,7 @@ const ClickToPlay: React.FC<{
   const currentlyPlaying =
     playing &&
     currentlyPlayingIndex !== undefined &&
-    playerQueueIds[currentlyPlayingIndex] === trackId;
+    trackIds.includes(playerQueueIds[currentlyPlayingIndex]);
 
   return (
     <Wrapper

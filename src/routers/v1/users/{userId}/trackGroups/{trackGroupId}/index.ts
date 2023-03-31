@@ -38,7 +38,7 @@ export default function () {
         return next();
       }
 
-      res.status(200).json({ trackgroup });
+      res.status(200).json({ result: trackgroup });
     } catch (e) {
       console.error(e);
       res.status(500).json({
@@ -74,7 +74,7 @@ export default function () {
       res.json({ message: "Success" });
     } catch (error) {
       console.error("error", error);
-      res.json({
+      res.status(400).json({
         error: `TrackGroup with ID ${trackGroupId} does not exist in the database`,
       });
     }

@@ -23,10 +23,10 @@ function Login() {
     async (data: SignupInputs) => {
       try {
         await api.post("login", data);
-        const user = await api.get<LoggedInUser>("profile");
+        const { result } = await api.get<LoggedInUser>("profile");
         dispatch({
           type: "setLoggedInUser",
-          user,
+          user: result,
         });
         navigate("/");
       } catch (e: unknown) {

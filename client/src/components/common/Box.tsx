@@ -5,6 +5,10 @@ const Box = styled.div`
   background-color: #f5f5f5;
   border-radius: ${(props) => props.theme.borderRadius};
   padding: 1rem 1.5rem;
+
+  input {
+    background: white;
+  }
 `;
 
 export default Box;

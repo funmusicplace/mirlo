@@ -5,7 +5,7 @@ import { Helmet } from "react-helmet";
 
 // import { fetchTrack } from "../services/Api";
 import { ImLoop, ImShuffle } from "react-icons/im";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { bp } from "../constants";
 import ImageWithPlaceholder from "./common/ImageWithPlaceholder";
 import IconButton from "./common/IconButton";
@@ -59,7 +59,7 @@ const Player = () => {
     state: { playerQueueIds, currentlyPlayingIndex, user, shuffle, looping },
     dispatch,
   } = useGlobalStateContext();
-  let navigate = useNavigate();
+  // let navigate = useNavigate();
   const [currentTrack, setCurrentTrack] = React.useState<Track>();
   const [isLoading, setIsLoading] = React.useState(false);
   const userId = user?.id;
@@ -68,11 +68,11 @@ const Player = () => {
     async (id: number) => {
       setIsLoading(true);
       try {
-        const { track } = await api.get<{ track: Track }>(`tracks/${id}`);
+        const { result } = await api.get<Track>(`tracks/${id}`);
         if (userId) {
-          setCurrentTrack(track);
+          setCurrentTrack(result);
         } else {
-          setCurrentTrack(track);
+          setCurrentTrack(result);
         }
       } catch {
         setCurrentTrack(undefined);
@@ -108,9 +108,9 @@ const Player = () => {
     currentTrackId,
   ]);
 
-  const onClickQueue = React.useCallback(() => {
-    navigate("/queue");
-  }, [navigate]);
+  // const onClickQueue = React.useCallback(() => {
+  //   navigate("/queue");
+  // }, [navigate]);
 
   const onShuffle = React.useCallback(() => {
     dispatch({ type: "setShuffle", shuffle: !shuffle });

@@ -17,7 +17,7 @@ export const Manage: React.FC = () => {
 
   const fetchArtists = React.useCallback(async () => {
     if (userId) {
-      const fetchedArtists = await api.get<Paginated<Artist>>(
+      const fetchedArtists = await api.getMany<Artist>(
         `users/${userId}/artists`
       );
       if (fetchedArtists) {

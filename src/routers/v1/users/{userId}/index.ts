@@ -16,10 +16,10 @@ export default function () {
   async function GET(req: Request, res: Response) {
     const { userId }: { userId?: string } = req.params;
 
-    const post = await prisma.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: { id: Number(userId) },
     });
-    res.json(post);
+    res.json({ result: user });
   }
 
   GET.apiDoc = {

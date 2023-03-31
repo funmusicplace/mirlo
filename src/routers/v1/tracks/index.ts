@@ -9,7 +9,16 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response) {
-    const tracks = await prisma.track.findMany();
+    const tracks = await prisma.track.findMany({
+      include: {
+        trackGroup: {
+          include: {
+            artist: true,
+          },
+        },
+        audio: true,
+      },
+    });
     res.json({ results: tracks });
   }
 

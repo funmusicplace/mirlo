@@ -19,10 +19,10 @@ export const TrackDetails: React.FC = () => {
 
   const fetchTrackWrapper = React.useCallback(
     async (id: string) => {
-      const fetchedTrack = await api.get<Track>(`tracks/${id}`);
-      setTrack(fetchedTrack);
+      const { result } = await api.get<Track>(`tracks/${id}`);
+      setTrack(result);
       reset({
-        ...fetchedTrack,
+        ...result,
       });
     },
     [reset]

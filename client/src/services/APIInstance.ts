@@ -28,7 +28,6 @@ const APIInstance = (apiRoot: string) => {
       }
       return json;
     } catch (e) {
-      console.error(e);
       throw new Error("Something went wrong");
     }
   };
@@ -60,7 +59,6 @@ const APIInstance = (apiRoot: string) => {
       data: T,
       options?: RequestInit
     ): Promise<R> => {
-      console.log("putting");
       return apiRequest<R>(endpoint, {
         method: "PUT",
         credentials: "include",
@@ -87,8 +85,15 @@ const APIInstance = (apiRoot: string) => {
       });
     },
 
-    get: async <R>(endpoint: string): Promise<R> => {
-      return apiRequest<R>(endpoint, {
+    get: async <R>(endpoint: string): Promise<{ result: R }> => {
+      return apiRequest<{ result: R }>(endpoint, {
+        method: "GET",
+        credentials: "include",
+      });
+    },
+
+    getMany: async <R>(endpoint: string): Promise<{ results: R[] }> => {
+      return apiRequest<{ results: R[] }>(endpoint, {
         method: "GET",
         credentials: "include",
       });

@@ -35,7 +35,7 @@ interface TrackGroup {
   artist: Artist;
   artistId: number;
   tracks: Track[];
-  cover: { id: number; url: string; sizes?: { [key: number]: string } };
+  cover?: { id: number; url: string; sizes?: { [key: number]: string } };
 }
 
 interface Post {
@@ -43,6 +43,7 @@ interface Post {
   id: number;
   content: string;
   publishedAt: string;
+  artist: Artist;
 }
 
 interface Artist {
@@ -52,6 +53,8 @@ interface Artist {
   id: number;
   trackGroups: TrackGroup[];
   payPalClientId?: string;
+  posts: Post[];
+  subscriptionTiers: ArtistSubscriptionTier[];
 }
 
 interface Image {
@@ -74,7 +77,7 @@ interface ArtistSubscriptionTier {
   id: number;
   artistId: number;
   artist: number;
-  amount: string;
+  minAmount?: string;
   name: string;
   description: string;
 }

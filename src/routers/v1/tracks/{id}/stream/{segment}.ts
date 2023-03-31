@@ -18,7 +18,6 @@ export const fetchFile = async (
   try {
     await fsPromises.stat(path.join(ROOT, alias));
   } catch (e) {
-    console.log("couldn't find file", e);
     res.status(404);
     return;
   }

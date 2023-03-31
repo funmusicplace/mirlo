@@ -22,8 +22,8 @@ export const AdminTrackGroups: React.FC = () => {
 
   React.useEffect(() => {
     const callback = async () => {
-      const trackGroups = await api.get<TrackGroup[]>("trackgroups");
-      setResults(trackGroups);
+      const { results } = await api.getMany<TrackGroup>("trackgroups");
+      setResults(results);
     };
     callback();
   }, []);
