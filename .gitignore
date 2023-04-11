@@ -3,3 +3,5 @@ dist/
 *.env*
 /data
 error.log
+client/build
+package-lock.json

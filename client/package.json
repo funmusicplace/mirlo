@@ -21,6 +21,7 @@
     "react-helmet": "^6.1.0",
     "react-hook-form": "^7.40.0",
     "react-icons": "^4.7.1",
+    "react-markdown": "^8.0.6",
     "react-router-dom": "^6.4.5",
     "react-scripts": "5.0.1",
     "remark-gfm": "^3.0.1",
