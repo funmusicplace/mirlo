@@ -1,3 +1,5 @@
 #!/bin/sh
 
-docker-compose up
+echo "Running START.sh Script"
+
+docker-compose up -d

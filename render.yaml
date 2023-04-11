@@ -7,6 +7,8 @@ services:
     buildCommand: yarn build
     staticPublishPath: ./build
     pullRequestPreviewsEnabled: true # optional
+    domains:
+      - blackbrd-client.onrender.com
   #   buildFilter:
   #     paths:
   #     - src/**/*.js
@@ -35,6 +37,15 @@ services:
     # startCommand: /bin/sh -c "yarn && yarn migrate:deploy && yarn dev:api"
     plan: free # Supposedly this should be free but 
     dockerCommand: ./start.sh
+    envVars: 
+      - key: APP_HOST
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: REFRESH_TOKEN_SECRET
+        sync: false
+      - key: DATABASE_URL
+        sync: false
     # envVars:
     #   - key: REDIS_HOST
     #     fromService:
