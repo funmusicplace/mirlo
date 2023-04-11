@@ -1,0 +1,155 @@
+services:
+  # A Docker web service
+  - type: web
+    name: api
+    env: docker
+    repo: https://github.com/funmusicplace/nomads.git # optional
+    region: oregon # optional (defaults to oregon)
+    branch: main # optional (defaults to master)
+    domains:
+      - blackbrd.onrender.com
+    startCommand: /bin/sh -c "yarn && yarn migrate:deploy && yarn dev:api"
+    envVars:
+      - key: REDIS_HOST
+        fromService:
+          type: redis
+          name: lightning
+          property: host # available properties are listed below
+      - key: REDIS_PORT
+        fromService:
+          type: redis
+          name: lightning
+          property: port
+      - fromGroup: conc-settings
+  # A private Minio instance
+  # - type: pserv
+  #   name: minio
+  #   env: docker
+  #   repo: https://github.com/render-examples/minio.git # optional
+  #   envVars:
+  #   - key: MINIO_ROOT_PASSWORD
+  #     generateValue: true # will generate a base64-encoded 256-bit secret
+  #   - key: MINIO_ROOT_USER
+  #     sync: false # placeholder for a value to be added in the dashboard
+  #   - key: PORT
+  #     value: 10000
+  #   disk:
+  #     name: data
+  #     mountPath: /data
+  #     sizeGB: 10 # optional
+  # A Ruby web service
+  # - type: web
+  #   name: sinatra
+  #   env: ruby
+  #   repo: https://github.com/renderinc/sinatra-example.git
+  #   scaling:
+  #     minInstances: 1
+  #     maxInstances: 3
+  #     targetMemoryPercent: 60 # optional if targetCPUPercent is set
+  #     targetCPUPercent: 60 # optional if targetMemory is set
+  #   buildCommand: bundle install
+  #   startCommand: bundle exec ruby main.rb
+  #   domains:
+  #     - test0.render.com
+  #     - test1.render.com
+  #   envVars:
+  #     - key: STRIPE_API_KEY
+  #       value: Z2V0IG91dHRhIGhlcmUhCg
+  #     - key: DB_URL
+  #       fromDatabase:
+  #         name: elephant
+  #         property: connectionString
+  #     - key: MINIO_ROOT_PASSWORD
+  #       fromService:
+  #         type: pserv
+  #         name: minio
+  #         envVarKey: MINIO_ROOT_PASSWORD
+
+  #   autoDeploy: false # optional
+  # A Python cron job that runs every hour
+  # - type: cron
+  #   name: date
+  #   env: python
+  #   schedule: "0 * * * *"
+  #   buildCommand: "true" # ensure it's a string
+  #   startCommand: date
+  #   repo: https://github.com/render-examples/docker.git # optional
+  # A background worker that consumes a queue
+  - type: worker
+    name: background
+    env: docker
+    dockerfilePath: ./background/Dockerfile # optional
+    # dockerContext: ./background/src # optional
+    branch: main # optional
+    envVars:
+      - key: REDIS_HOST
+        fromService:
+          type: redis
+          name: lightning
+          property: host # available properties are listed below
+      - key: REDIS_PORT
+        fromService:
+          type: redis
+          name: lightning
+          property: port
+      - fromGroup: conc-settings
+  # A static site
+  # - type: web
+  #   name: my blog
+  #   env: static
+  #   buildCommand: yarn build
+  #   staticPublishPath: ./build
+  #   pullRequestPreviewsEnabled: true # optional
+  #   buildFilter:
+  #     paths:
+  #     - src/**/*.js
+  #     ignoredPaths:
+  #     - src/**/*.test.js
+  #   headers:
+  #     - path: /*
+  #       name: X-Frame-Options
+  #       value: sameorigin
+  #   routes:
+  #     - type: redirect
+  #       source: /old
+  #       destination: /new
+  #     - type: rewrite
+  #       source: /a/*
+  #       destination: /a
+  # A Redis instance
+  - type: redis
+    name: redis
+    ipAllowList: # required
+      - source: 0.0.0.0/0
+        description: everywhere
+    plan: free # optional (defaults to starter)
+    maxmemoryPolicy: noeviction # optional (defaults to allkeys-lru)
+
+databases:
+  - name: elephant
+    databaseName: mydb # optional (Render may add a suffix)
+    user: adrian # optional
+    ipAllowList: # optional (defaults to allow all)
+      - source: 203.0.113.4/30
+        description: office
+      - source: 198.51.100.1
+        description: home
+
+  - name: private database
+    databaseName: private
+    ipAllowList: [] # only allow internal connections
+
+
+envVarGroups:
+  - name: conc-settings
+    envVars:
+      - key: CONCURRENCY
+        value: 2
+      - key: SECRET
+        generateValue: true
+      - key: USER_PROVIDED_SECRET
+        sync: false
+  - name: stripe
+    envVars:
+      - key: STRIPE_API_URL
+        value: https://api.stripe.com/v2

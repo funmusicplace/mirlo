@@ -4,7 +4,7 @@ import request from "supertest";
 
 describe("api/user", () => {
   it("should GET /", async () => {
-    const response = await request("localhost:3000")
+    const response = await request(process.env.APP_HOST)
       .get("/api/user")
       .set("Accept", "application/json");
 

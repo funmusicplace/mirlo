@@ -13,6 +13,14 @@ export default function () {
       where: {
         published: true,
       },
+      include: {
+        artist: {
+          select: {
+            name: true,
+            id: true,
+          },
+        },
+      },
     });
     res.json({ results: trackGroups });
   }

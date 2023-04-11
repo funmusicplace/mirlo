@@ -4,7 +4,7 @@ import request from "supertest";
 
 describe("auth", () => {
   it.only("should POST /signup", async () => {
-    const response = await request("http://localhost:3000")
+    const response = await request(process.env.APP_HOST)
       .get("/api/signup")
       .set("Accept", "application/json");
 

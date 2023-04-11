@@ -16,6 +16,7 @@ export default function () {
       where: { id: Number(id), published: true },
       include: {
         tracks: true,
+        artist: true,
         cover: true,
       },
     });

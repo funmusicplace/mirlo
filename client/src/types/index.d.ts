@@ -22,6 +22,7 @@ interface Track {
   audio: {
     url: string;
   };
+  isPreview: boolean;
 }
 
 interface TrackGroup {

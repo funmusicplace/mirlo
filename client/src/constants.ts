@@ -1,4 +1,4 @@
-export const API_ROOT = "http://localhost:3000";
+export const API_ROOT = process.env.APP_HOST;
 
 export const bp = {
   small: "430",

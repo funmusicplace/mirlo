@@ -54,9 +54,9 @@ export const AdminTrackGroups: React.FC = () => {
             <tr>
               <th>Title</th>
               <th>Type</th>
-              <th>Private?</th>
+              {/* <th>Private?</th> */}
               <th>Enabled?</th>
-              <th>Featured?</th>
+              {/* <th>Featured?</th> */}
               <th>Artist</th>
               <th>Release date</th>
               <th />
@@ -71,7 +71,7 @@ export const AdminTrackGroups: React.FC = () => {
                 <td>{trackgroup.enabled ? <FaCheck /> : undefined}</td>
                 {/* <td>{trackgroup.featured ? <FaCheck /> : undefined}</td> */}
 
-                {/* <td>{trackgroup.creator?.displayName}</td> */}
+                <td>{trackgroup.artist?.name}</td>
                 <td>{trackgroup.releaseDate}</td>
                 <td className="alignRight">
                   <IconButton

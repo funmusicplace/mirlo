@@ -95,6 +95,7 @@ model Track {
   audio        TrackAudio?
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
+  isPreview    Boolean     @default(true)
 }
 
 model TrackGroupCover {

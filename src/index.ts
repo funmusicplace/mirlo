@@ -28,7 +28,10 @@ const app = express();
 if (process.env.NODE_ENV === "development") {
   app.use(
     cors({
-      origin: ["http://localhost:8080", "http://localhost:3000"],
+      origin: [
+        "http://localhost:8080",
+        process.env.APP_HOST ?? "http://localhost:3000",
+      ],
       credentials: true,
     })
   );
@@ -91,7 +94,7 @@ app.use(
   swaggerUi.serve,
   swaggerUi.setup(undefined, {
     swaggerOptions: {
-      url: "http://localhost:3000/api-docs",
+      url: `${process.env.APP_HOST ?? "http://localhost:3000"}/api-docs`,
     },
   })
 );
@@ -125,5 +128,5 @@ if (process.env.NODE_ENV === "development") {
 
 app.listen(3000, () =>
   console.info(`
-🚀 Server ready at: http://localhost:3000`)
+🚀 Server ready at: ${process.env.APP_HOST}`)
 );
