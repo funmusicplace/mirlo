@@ -2,13 +2,14 @@ services:
   # A Docker web service
   - type: web
     name: api
-    env: node
+    env: docker
     repo: https://github.com/funmusicplace/nomads.git # optional
+    region: oregon # optional (defaults to oregon)
     branch: main # optional (defaults to master)
     domains:
       - blackbrd.onrender.com
-    buildCommand: yarn build
-    startCommand: yarn && yarn migrate:deploy && yarn staging
+    startCommand: /bin/sh -c "yarn && yarn migrate:deploy && yarn dev:api"
+    plan: free
     envVars:
       - key: REDIS_HOST
         fromService:
@@ -75,28 +76,30 @@ services:
   #   startCommand: date
   #   repo: https://github.com/render-examples/docker.git # optional
   # A background worker that consumes a queue
-  - type: worker
-    name: background
-    env: docker
-    dockerfilePath: ./background/Dockerfile # optional
-    # dockerContext: ./background/src # optional
-    branch: main # optional
-    envVars:
-      - key: REDIS_HOST
-        fromService:
-          type: redis
-          name: lightning
-          property: host # available properties are listed below
-      - key: REDIS_PORT
-        fromService:
-          type: redis
-          name: lightning
-          property: port
-      - fromGroup: conc-settings
+  # - type: worker
+  #   name: background
+  #   env: docker
+  #   plan: starter # optional (defaults to starter)
+  #   dockerfilePath: ./background/Dockerfile # optional
+  #   # dockerContext: ./background/src # optional
+  #   branch: main # optional
+  #   envVars:
+  #     - key: REDIS_HOST
+  #       fromService:
+  #         type: redis
+  #         name: lightning
+  #         property: host # available properties are listed below
+  #     - key: REDIS_PORT
+  #       fromService:
+  #         type: redis
+  #         name: lightning
+  #         property: port
+  #     - fromGroup: conc-settings
   # A static site
   - type: web
     name: client
     env: static
+    plan: free
     buildCommand: yarn build
     staticPublishPath: ./client/build
     pullRequestPreviewsEnabled: true # optional
@@ -105,10 +108,10 @@ services:
   #     - src/**/*.js
   #     ignoredPaths:
   #     - src/**/*.test.js
-    headers:
-      - path: /*
-        name: X-Frame-Options
-        value: sameorigin
+  #   headers:
+  #     - path: /*
+  #       name: X-Frame-Options
+  #       value: sameorigin
   #   routes:
   #     - type: redirect
   #       source: /old
@@ -117,39 +120,39 @@ services:
   #       source: /a/*
   #       destination: /a
   # A Redis instance
-  - type: redis
-    name: redis
-    ipAllowList: # required
-      - source: 0.0.0.0/0
-        description: everywhere
-    plan: free # optional (defaults to starter)
-    maxmemoryPolicy: noeviction # optional (defaults to allkeys-lru)
+  # - type: redis
+  #   name: redis
+  #   ipAllowList: # required
+  #     - source: 0.0.0.0/0
+  #       description: everywhere
+  #   plan: free # optional (defaults to starter)
+  #   maxmemoryPolicy: noeviction # optional (defaults to allkeys-lru)
 
-databases:
-  - name: elephant
-    databaseName: mydb # optional (Render may add a suffix)
-    user: adrian # optional
-    ipAllowList: # optional (defaults to allow all)
-      - source: 203.0.113.4/30
-        description: office
-      - source: 198.51.100.1
-        description: home
+# databases:
+#   - name: elephant
+#     databaseName: mydb # optional (Render may add a suffix)
+#     user: adrian # optional
+#     ipAllowList: # optional (defaults to allow all)
+#       - source: 203.0.113.4/30
+#         description: office
+#       - source: 198.51.100.1
+#         description: home
 
-  - name: private database
-    databaseName: private
-    ipAllowList: [] # only allow internal connections
+#   - name: private database
+#     databaseName: private
+#     ipAllowList: [] # only allow internal connections
 
 
-envVarGroups:
-  - name: conc-settings
-    envVars:
-      - key: CONCURRENCY
-        value: 2
-      - key: SECRET
-        generateValue: true
-      - key: USER_PROVIDED_SECRET
-        sync: false
-  - name: stripe
-    envVars:
-      - key: STRIPE_API_URL
-        value: https://api.stripe.com/v2
+# envVarGroups:
+#   - name: conc-settings
+#     envVars:
+#       - key: CONCURRENCY
+#         value: 2
+#       - key: SECRET
+#         generateValue: true
+#       - key: USER_PROVIDED_SECRET
+#         sync: false
+#   - name: stripe
+#     envVars:
+#       - key: STRIPE_API_URL
+#         value: https://api.stripe.com/v2
