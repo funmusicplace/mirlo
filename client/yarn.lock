@@ -1324,6 +1324,13 @@
     minimatch "^3.1.2"
     strip-json-comments "^3.1.1"
 
+"@gumlet/react-hls-player@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@gumlet/react-hls-player/-/react-hls-player-1.0.1.tgz#3cb03a88f93934c1855f7915315663b9fd4d14db"
+  integrity sha512-3dT/d7xhc8lEqNeuMnIJcu9f723JncuW19ilX9w55fV//2HgpEsr7RzWB8Fix/+TnPQF5AzVK/4l63saE5E9Pw==
+  dependencies:
+    hls.js "^1.2.7"
+
 "@humanwhocodes/config-array@^0.11.6":
   version "0.11.8"
   resolved "https://registry.npmjs.org/@humanwhocodes/config-array/-/config-array-0.11.8.tgz"
@@ -4933,6 +4940,11 @@ hi-base32@^0.5.0:
   version "0.5.1"
   resolved "https://registry.yarnpkg.com/hi-base32/-/hi-base32-0.5.1.tgz#1279f2ddae2673219ea5870c2121d2a33132857e"
   integrity sha512-EmBBpvdYh/4XxsnUybsPag6VikPYnN30td+vQk+GI3qpahVEG9+gTkG0aXVxTjBqQ5T6ijbWIu77O+C5WFWsnA==
+
+hls.js@^1.2.7:
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/hls.js/-/hls.js-1.4.0.tgz#e73af3e7c8d4310a2bcc92d5ade362dfb781fef7"
+  integrity sha512-VEjg7Rx5FlE9TB3MIn0HPgq3J+vR7EoQnjaqMCk/ISEaCOSZlAFh4g867f1QkSxZiq9kHeUZo+iH16X7VS3jKA==
 
 hoist-non-react-statics@^3.3.1:
   version "3.3.2"
