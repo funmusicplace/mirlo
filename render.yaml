@@ -8,20 +8,21 @@ services:
     branch: main # optional (defaults to master)
     domains:
       - blackbrd.onrender.com
-    startCommand: /bin/sh -c "yarn && yarn migrate:deploy && yarn dev:api"
+    # startCommand: /bin/sh -c "yarn && yarn migrate:deploy && yarn dev:api"
     plan: free
-    envVars:
-      - key: REDIS_HOST
-        fromService:
-          type: redis
-          name: lightning
-          property: host # available properties are listed below
-      - key: REDIS_PORT
-        fromService:
-          type: redis
-          name: lightning
-          property: port
-      - fromGroup: conc-settings
+    dockerCommand: 
+    # envVars:
+    #   - key: REDIS_HOST
+    #     fromService:
+    #       type: redis
+    #       name: lightning
+    #       property: host # available properties are listed below
+    #   - key: REDIS_PORT
+    #     fromService:
+    #       type: redis
+    #       name: lightning
+    #       property: port
+    #   - fromGroup: conc-settings
   # A private Minio instance
   # - type: pserv
   #   name: minio
