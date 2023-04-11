@@ -2,13 +2,13 @@ services:
   # A Docker web service
   - type: web
     name: api
-    env: docker
+    env: node
     repo: https://github.com/funmusicplace/nomads.git # optional
-    region: oregon # optional (defaults to oregon)
     branch: main # optional (defaults to master)
     domains:
       - blackbrd.onrender.com
-    startCommand: /bin/sh -c "yarn && yarn migrate:deploy && yarn dev:api"
+    buildCommand: yarn build
+    startCommand: yarn && yarn migrate:deploy && yarn staging
     envVars:
       - key: REDIS_HOST
         fromService:
@@ -94,21 +94,21 @@ services:
           property: port
       - fromGroup: conc-settings
   # A static site
-  # - type: web
-  #   name: my blog
-  #   env: static
-  #   buildCommand: yarn build
-  #   staticPublishPath: ./build
-  #   pullRequestPreviewsEnabled: true # optional
+  - type: web
+    name: client
+    env: static
+    buildCommand: yarn build
+    staticPublishPath: ./client/build
+    pullRequestPreviewsEnabled: true # optional
   #   buildFilter:
   #     paths:
   #     - src/**/*.js
   #     ignoredPaths:
   #     - src/**/*.test.js
-  #   headers:
-  #     - path: /*
-  #       name: X-Frame-Options
-  #       value: sameorigin
+    headers:
+      - path: /*
+        name: X-Frame-Options
+        value: sameorigin
   #   routes:
   #     - type: redirect
   #       source: /old
