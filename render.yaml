@@ -1,4 +1,28 @@
 services:
+  # A static site
+  - type: web
+    name: client
+    env: static
+    rootDir: client
+    buildCommand: yarn build
+    staticPublishPath: ./build
+    pullRequestPreviewsEnabled: true # optional
+  #   buildFilter:
+  #     paths:
+  #     - src/**/*.js
+  #     ignoredPaths:
+  #     - src/**/*.test.js
+  #   headers:
+  #     - path: /*
+  #       name: X-Frame-Options
+  #       value: sameorigin
+  #   routes:
+  #     - type: redirect
+  #       source: /old
+  #       destination: /new
+  #     - type: rewrite
+  #       source: /a/*
+  #       destination: /a
   # A Docker web service
   - type: web
     name: api
@@ -96,29 +120,7 @@ services:
   #         name: lightning
   #         property: port
   #     - fromGroup: conc-settings
-  # A static site
-  - type: web
-    name: client
-    env: static
-    buildCommand: yarn build
-    staticPublishPath: ./client/build
-    pullRequestPreviewsEnabled: true # optional
-  #   buildFilter:
-  #     paths:
-  #     - src/**/*.js
-  #     ignoredPaths:
-  #     - src/**/*.test.js
-  #   headers:
-  #     - path: /*
-  #       name: X-Frame-Options
-  #       value: sameorigin
-  #   routes:
-  #     - type: redirect
-  #       source: /old
-  #       destination: /new
-  #     - type: rewrite
-  #       source: /a/*
-  #       destination: /a
+
   # A Redis instance
   # - type: redis
   #   name: redis
