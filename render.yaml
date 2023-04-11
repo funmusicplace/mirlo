@@ -39,15 +39,15 @@ services:
     # dockerCommand: ./start.sh
     dockerfilePath: ./prod.Dockerfile
     dockerContext: .
-    envVars: 
-      - key: APP_HOST
-        sync: false
-      - key: JWT_SECRET
-        sync: false
-      - key: REFRESH_TOKEN_SECRET
-        sync: false
-      - key: DATABASE_URL
-        sync: false
+    # envVars: 
+    #   - key: APP_HOST
+    #     sync: false
+    #   - key: JWT_SECRET
+    #     sync: false
+    #   - key: REFRESH_TOKEN_SECRET
+    #     sync: false
+    #   - key: DATABASE_URL
+    #     sync: false
     # envVars:
     #   - key: REDIS_HOST
     #     fromService:
