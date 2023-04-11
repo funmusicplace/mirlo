@@ -9,7 +9,7 @@ services:
     domains:
       - blackbrd.onrender.com
     # startCommand: /bin/sh -c "yarn && yarn migrate:deploy && yarn dev:api"
-    plan: free
+    plan: starter # Supposedly this should be free but 
     dockerCommand: ./start.sh
     # envVars:
     #   - key: REDIS_HOST
@@ -100,7 +100,6 @@ services:
   - type: web
     name: client
     env: static
-    plan: standard
     buildCommand: yarn build
     staticPublishPath: ./client/build
     pullRequestPreviewsEnabled: true # optional
