@@ -13,4 +13,4 @@ COPY --from=ffmpeg / /
 
 EXPOSE 3000
 
-# CMD [ "yarn", "dev:api" ]
+CMD [ "yarn", "staging" ]
