@@ -37,6 +37,7 @@ services:
     # startCommand: /bin/sh -c "yarn && yarn migrate:deploy && yarn dev:api"
     plan: free # Supposedly this should be free but 
     dockerCommand: ./start.sh
+    dockerfilePath: ./prod.Dockerfile
     envVars: 
       - key: APP_HOST
         sync: false

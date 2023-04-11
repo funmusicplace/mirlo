@@ -2,4 +2,4 @@
 
 echo "Running START.sh Script"
 
-docker-compose up -d
+yarn staging
