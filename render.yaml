@@ -38,6 +38,7 @@ services:
     plan: free # Supposedly this should be free but 
     # dockerCommand: ./start.sh
     dockerfilePath: ./prod.Dockerfile
+    dockerContext: .
     envVars: 
       - key: APP_HOST
         sync: false
