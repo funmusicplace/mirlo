@@ -1,6 +1,6 @@
 #!/bin/sh
 
-echo "Running START.sh Script"
+echo Running START.sh Script
 
 yarn install 
 yarn migrate:deploy

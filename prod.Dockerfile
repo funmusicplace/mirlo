@@ -7,6 +7,7 @@ WORKDIR /var/www/api
 
 COPY . . 
 RUN yarn install --force
+RUN yarn migrate:deploy
 
 # copy ffmpeg bins
 COPY --from=ffmpeg / /

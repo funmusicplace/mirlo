@@ -28,13 +28,16 @@ services:
   # A Docker web service
   - type: web
     name: api
-    env: docker
+    env: node
+    # env: docker
     repo: https://github.com/funmusicplace/nomads.git # optional
     region: oregon # optional (defaults to oregon)
     branch: main # optional (defaults to master)
     plan: free # Supposedly this should be free but 
     # dockerCommand: ./start.sh
-    dockerfilePath: ./prod.Dockerfile
+    # dockerfilePath: ./prod.Dockerfile
+    buildCommand: yarn install && yarn migrate:deploy
+    startCommand: yarn staging
     envVars: 
       - key: DATABASE_URL
         fromDatabase:
