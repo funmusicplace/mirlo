@@ -8,13 +8,13 @@ datasource db {
 }
 
 model Client {
-  id                 Int      @id @default(autoincrement())
+  id                 Int       @id @default(autoincrement())
   applicationName    String
   applicationUrl     String
   allowedCorsOrigins String[]
   updatedAt          DateTime
   createdAt          DateTime
-  deletedAt          DateTime
+  deletedAt          DateTime?
 }
 
 model User {
