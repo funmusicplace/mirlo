@@ -6,7 +6,9 @@ services:
     rootDir: client
     buildCommand: yarn build
     staticPublishPath: ./build
-    pullRequestPreviewsEnabled: true # optional
+    pullRequestPreviewsEnabled: true # optional\
+    envVars: 
+      fromGroup: blackbrd
 
   # A node web service
   - type: web
