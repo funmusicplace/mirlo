@@ -42,16 +42,16 @@ services:
           property: connectionString
       - fromGroup: blackbrd
     # envVars:
-    #   - key: REDIS_HOST
-    #     fromService:
-    #       type: redis
-    #       name: lightning
-    #       property: host # available properties are listed below
-    #   - key: REDIS_PORT
-    #     fromService:
-    #       type: redis
-    #       name: lightning
-    #       property: port
+      - key: REDIS_HOST
+        fromService:
+          type: redis
+          name: lightning
+          property: host # available properties are listed below
+      - key: REDIS_PORT
+        fromService:
+          type: redis
+          name: lightning
+          property: port
     #   - fromGroup: conc-settings
   # A private Minio instance
   # - type: pserv
