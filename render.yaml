@@ -109,7 +109,7 @@ databases:
   #       description: home
 
   # - name: private database
-  #   databaseName: private
+  #   databaseName: private 
     # ipAllowList: [] # only allow internal connections
 
 
