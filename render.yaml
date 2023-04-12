@@ -21,10 +21,10 @@ services:
     # dockerfilePath: ./prod.Dockerfile
     buildCommand: yarn install && yarn migrate:deploy
     startCommand: yarn staging
-    # disk:
-    #   name: data
-    #   mountPath: /data
-    #   sizeGB: 2 # optional
+    disk:
+      name: data
+      mountPath: /data
+      sizeGB: 2 # optional
     envVars: 
       - key: DATABASE_URL
         fromDatabase:
@@ -41,7 +41,6 @@ services:
           type: redis
           name: redis
           property: port
-    #   - fromGroup: conc-settings
   # A private Minio instance
   # - type: pserv
   #   name: minio
