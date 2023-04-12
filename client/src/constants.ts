@@ -1,4 +1,4 @@
-export const API_ROOT = process.env.APP_HOST;
+export const API_ROOT = process.env.API_DOMAIN;
 
 export const bp = {
   small: "430",
