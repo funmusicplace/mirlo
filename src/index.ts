@@ -26,20 +26,17 @@ import { flatten } from "lodash";
 const prisma = new PrismaClient();
 const app = express();
 
-// if (process.env.NODE_ENV === "development") {
 app.use(async (...args) => {
   const clients = await prisma.client.findMany();
   const origin = [
     ...flatten(clients.map((c) => c.allowedCorsOrigins)),
     process.env.API_DOMAIN ?? "http://localhost:3000",
   ];
-  console.log("origin", origin);
   return cors({
     origin,
     credentials: true,
   })(...args);
 });
-// }
 
 app.use(express.json());
 app.use(cookieParser());

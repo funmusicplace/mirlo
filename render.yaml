@@ -9,6 +9,10 @@ services:
     pullRequestPreviewsEnabled: true # optional
     envVars: 
       - fromGroup: blackbrd
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
 
   # A node web service
   - type: web
