@@ -21,15 +21,18 @@ import "./auth/passport";
 
 import { imageQueue } from "./utils/processTrackGroupCover";
 import { audioQueue } from "./utils/processTrackAudio";
+import { flatten } from "lodash";
 
 const prisma = new PrismaClient();
 const app = express();
+
+const clients = await prisma.client.findMany();
 
 if (process.env.NODE_ENV === "development") {
   app.use(
     cors({
       origin: [
-        "http://localhost:8080",
+        ...flatten(clients.map((c) => c.allowedCorsOrigins)),
         process.env.API_DOMAIN ?? "http://localhost:3000",
       ],
       credentials: true,
