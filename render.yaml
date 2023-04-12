@@ -25,20 +25,42 @@ services:
   #     - type: rewrite
   #       source: /a/*
   #       destination: /a
-  # A Docker web service
+  # 
+  # Our Node API
+  # 
   - type: web
-    name: api
-    env: docker
-    repo: https://github.com/funmusicplace/nomads.git # optional
-    region: oregon # optional (defaults to oregon)
-    branch: main # optional (defaults to master)
+    plan: free
     domains:
       - blackbrd.onrender.com
-    # startCommand: /bin/sh -c "yarn && yarn migrate:deploy && yarn dev:api"
-    plan: free # Supposedly this should be free but 
-    # dockerCommand: ./start.sh
-    dockerfilePath: ./prod.Dockerfile
-    dockerContext: .
+    branch: main
+    repo: https://github.com/funmusicplace/nomads.git
+    name: api
+    startCommand: yarn && yarn migrate:deploy && yarn staging
+    envVars:
+      - key: REDIS_HOST
+        fromService:
+          type: redis
+          name: lightning
+          property: host # available properties are listed below
+      - key: REDIS_PORT
+        fromService:
+          type: redis
+          name: lightning
+          property: port
+  # A Docker web service
+  # - type: web
+  #   name: api
+  #   env: docker
+  #   repo: https://github.com/funmusicplace/nomads.git # optional
+  #   region: oregon # optional (defaults to oregon)
+  #   branch: main # optional (defaults to master)
+  #   domains:
+  #     - blackbrd.onrender.com
+  #   # startCommand: /bin/sh -c "yarn && yarn migrate:deploy && yarn dev:api"
+  #   plan: free # Supposedly this should be free but 
+  #   # dockerCommand: ./start.sh
+  #   dockerfilePath: ./prod.Dockerfile
+  #   dockerContext: .
     # envVars: 
     #   - key: APP_HOST
     #     sync: false
@@ -135,13 +157,13 @@ services:
   #     - fromGroup: conc-settings
 
   # A Redis instance
-  # - type: redis
-  #   name: redis
-  #   ipAllowList: # required
-  #     - source: 0.0.0.0/0
-  #       description: everywhere
-  #   plan: free # optional (defaults to starter)
-  #   maxmemoryPolicy: noeviction # optional (defaults to allkeys-lru)
+  - type: redis
+    name: redis
+    ipAllowList: # required
+      - source: 0.0.0.0/0
+        description: everywhere
+    plan: free # optional (defaults to starter)
+    maxmemoryPolicy: noeviction # optional (defaults to allkeys-lru)
 
 # databases:
 #   - name: elephant
