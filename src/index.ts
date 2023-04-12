@@ -126,7 +126,7 @@ if (process.env.NODE_ENV === "development") {
   app.use("/admin/queues", serverAdapter.getRouter());
 }
 
-app.listen(3000, () =>
+app.listen(process.env.PORT, () =>
   console.info(`
 🚀 Server ready at: ${process.env.APP_HOST}`)
 );
