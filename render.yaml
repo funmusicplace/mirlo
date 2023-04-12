@@ -128,13 +128,13 @@ services:
   #     - fromGroup: conc-settings
 
   # A Redis instance
-  # - type: redis
-  #   name: redis
-  #   ipAllowList: # required
-  #     - source: 0.0.0.0/0
-  #       description: everywhere
-  #   plan: free # optional (defaults to starter)
-  #   maxmemoryPolicy: noeviction # optional (defaults to allkeys-lru)
+  - type: redis
+    name: redis
+    ipAllowList: # required
+      - source: 0.0.0.0/0
+        description: everywhere
+    plan: free # optional (defaults to starter)
+    maxmemoryPolicy: noeviction # optional (defaults to allkeys-lru)
 
 databases:
   - name: blackbrd
