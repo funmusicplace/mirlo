@@ -33,7 +33,7 @@ services:
     region: oregon # optional (defaults to oregon)
     branch: main # optional (defaults to master)
     plan: free # Supposedly this should be free but 
-    dockerCommand: ./start.sh
+    # dockerCommand: ./start.sh
     dockerfilePath: ./prod.Dockerfile
     envVars: 
       - key: DATABASE_URL

@@ -12,3 +12,5 @@ RUN yarn install --force
 COPY --from=ffmpeg / /
 
 EXPOSE 3000
+
+CMD [ "yarn", "staging" ]
