@@ -8,23 +8,7 @@ services:
     staticPublishPath: ./build
     pullRequestPreviewsEnabled: true # optional
 
-  #   buildFilter:
-  #     paths:
-  #     - src/**/*.js
-  #     ignoredPaths:
-  #     - src/**/*.test.js
-  #   headers:
-  #     - path: /*
-  #       name: X-Frame-Options
-  #       value: sameorigin
-  #   routes:
-  #     - type: redirect
-  #       source: /old
-  #       destination: /new
-  #     - type: rewrite
-  #       source: /a/*
-  #       destination: /a
-  # A Docker web service
+  # A node web service
   - type: web
     name: api
     env: node
@@ -32,15 +16,15 @@ services:
     repo: https://github.com/funmusicplace/nomads.git # optional
     region: oregon # optional (defaults to oregon)
     branch: main # optional (defaults to master)
-    plan: free # Supposedly this should be free but 
+    plan: starter # Supposedly this should be free but 
     # dockerCommand: ./start.sh
     # dockerfilePath: ./prod.Dockerfile
     buildCommand: yarn install && yarn migrate:deploy
     startCommand: yarn staging
-    disk:
-      name: data
-      mountPath: /data
-      sizeGB: 2 # optional
+    # disk:
+    #   name: data
+    #   mountPath: /data
+    #   sizeGB: 2 # optional
     envVars: 
       - key: DATABASE_URL
         fromDatabase:
