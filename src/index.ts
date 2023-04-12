@@ -29,12 +29,13 @@ const app = express();
 if (process.env.NODE_ENV === "development") {
   app.use(async (...args) => {
     const clients = await prisma.client.findMany();
-
+    const origin = [
+      ...flatten(clients.map((c) => c.allowedCorsOrigins)),
+      process.env.API_DOMAIN ?? "http://localhost:3000",
+    ];
+    console.log("origin", origin);
     return cors({
-      origin: [
-        ...flatten(clients.map((c) => c.allowedCorsOrigins)),
-        process.env.API_DOMAIN ?? "http://localhost:3000",
-      ],
+      origin,
       credentials: true,
     })(...args);
   });
