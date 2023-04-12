@@ -70,10 +70,10 @@ services:
   #     sync: false # placeholder for a value to be added in the dashboard
   #   - key: PORT
   #     value: 10000
-    disk:
-      name: data
-      mountPath: /data
-      sizeGB: 2 # optional
+    # disk:
+    #   name: data
+    #   mountPath: /data
+    #   sizeGB: 2 # optional
   # A Python cron job that runs every hour
   # - type: cron
   #   name: date
