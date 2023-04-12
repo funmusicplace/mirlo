@@ -32,22 +32,15 @@ services:
     repo: https://github.com/funmusicplace/nomads.git # optional
     region: oregon # optional (defaults to oregon)
     branch: main # optional (defaults to master)
-    # domains:
-    #   - blackbrd.onrender.com
-    # startCommand: /bin/sh -c "yarn && yarn migrate:deploy && yarn dev:api"
     plan: free # Supposedly this should be free but 
     dockerCommand: ./start.sh
     dockerfilePath: ./prod.Dockerfile
-    
     envVars: 
-      - key: APP_HOST
-        sync: false
-      - key: JWT_SECRET
-        sync: false
-      - key: REFRESH_TOKEN_SECRET
-        sync: false
       - key: DATABASE_URL
-        sync: false
+        fromDatabase:
+          name: blackbrd
+          property: connectionString
+      - fromGroup: blackbrd
     # envVars:
     #   - key: REDIS_HOST
     #     fromService:
@@ -143,19 +136,19 @@ services:
   #   plan: free # optional (defaults to starter)
   #   maxmemoryPolicy: noeviction # optional (defaults to allkeys-lru)
 
-# databases:
-#   - name: elephant
-#     databaseName: mydb # optional (Render may add a suffix)
-#     user: adrian # optional
-#     ipAllowList: # optional (defaults to allow all)
-#       - source: 203.0.113.4/30
-#         description: office
-#       - source: 198.51.100.1
-#         description: home
+databases:
+  - name: blackbrd
+    # databaseName: postgres # optional (Render may add a suffix)
+    user: blackbrd # optional
+  #   ipAllowList: # optional (defaults to allow all)
+  #     - source: 203.0.113.4/30
+  #       description: office
+  #     - source: 198.51.100.1
+  #       description: home
 
-#   - name: private database
-#     databaseName: private
-#     ipAllowList: [] # only allow internal connections
+  # - name: private database
+  #   databaseName: private
+    ipAllowList: [] # only allow internal connections
 
 
 # envVarGroups:
