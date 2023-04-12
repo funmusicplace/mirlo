@@ -13,4 +13,4 @@ COPY --from=ffmpeg / /
 
 EXPOSE 3000
 
-CMD [ "yarn", "staging" ]
+CMD [ "./start.sh" ]
