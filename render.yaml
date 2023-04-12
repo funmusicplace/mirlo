@@ -110,7 +110,7 @@ databases:
 
   # - name: private database
   #   databaseName: private
-    ipAllowList: [] # only allow internal connections
+    # ipAllowList: [] # only allow internal connections
 
 
 # envVarGroups:
