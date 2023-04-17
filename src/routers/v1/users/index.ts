@@ -1,44 +1,16 @@
 import { PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
+import { userHasPermission } from "../../../auth/passport";
 const prisma = new PrismaClient();
 
 export default function () {
   const operations = {
-    GET,
+    GET: [userHasPermission("admin"), GET],
   };
 
-  // FIXME: document GET
   async function GET(req: Request, res: Response) {
     const users = await prisma.user.findMany();
     res.json({ results: users });
   }
   return operations;
 }
-
-// router.get("/feed", async (req, res) => {
-//   const { searchString, skip, take, orderBy } = req.query;
-
-//   const or: Prisma.PostWhereInput = searchString
-//     ? {
-//         OR: [
-//           { title: { contains: searchString as string } },
-//           { content: { contains: searchString as string } },
-//         ],
-//       }
-//     : {};
-
-//   const posts = await prisma.post.findMany({
-//     where: {
-//       published: true,
-//       ...or,
-//     },
-//     include: { author: true },
-//     take: Number(take) || undefined,
-//     skip: Number(skip) || undefined,
-//     orderBy: {
-//       updatedAt: orderBy as Prisma.SortOrder,
-//     },
-//   });
-
-//   res.json(posts);
-// });

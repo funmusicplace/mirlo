@@ -40,8 +40,6 @@ export const AdminTracks: React.FC = () => {
     [navigate]
   );
 
-  console.log("track", results);
-
   return (
     <div
       className={css`

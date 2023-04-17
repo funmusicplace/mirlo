@@ -32,7 +32,6 @@ export const AudioWrapper: React.FC<{
     dispatch,
   } = useGlobalStateContext();
   const [currentTime, setCurrentTime] = React.useState("0:00");
-  // const legacyPlayerRef = React.useRef<H5AudioPlayer>(null);
   const playerRef = React.useRef<HTMLVideoElement>(null);
 
   const [mostlyListened, setMostlyListened] = React.useState(false);

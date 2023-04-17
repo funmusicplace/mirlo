@@ -32,7 +32,7 @@ export const ManageAlbumForm: React.FC<{
       );
       setTracks(result.tracks);
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
   }, [artist.userId, trackgroup.id]);
 

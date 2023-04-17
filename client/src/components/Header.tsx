@@ -1,8 +1,8 @@
 import { css } from "@emotion/css";
 import React from "react";
-import { FaCross, FaTimes } from "react-icons/fa";
+import { FaTimes } from "react-icons/fa";
 import { ImMenu } from "react-icons/im";
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { colorShade, theme } from "utils/theme";
 import { API_ROOT } from "./../constants";
 import { useGlobalStateContext } from "./../state/GlobalState";
@@ -45,7 +45,7 @@ const Header = () => {
           margin-top: -0.1rem;
         `}
       >
-        <Link to="/">nomads...</Link>
+        <Link to="/">blackbird...</Link>
       </h1>
       {isMenuOpen && (
         <div

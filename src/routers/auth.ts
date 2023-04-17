@@ -135,6 +135,19 @@ router.get("/profile", userAuthenticated, async (req, res) => {
       email: true,
       id: true,
       name: true,
+      artistUserSubscriptions: {
+        select: {
+          artistSubscriptionTier: {
+            select: {
+              artist: true,
+              name: true,
+            },
+          },
+          id: true,
+          userId: true,
+          amount: true,
+        },
+      },
     },
   });
 

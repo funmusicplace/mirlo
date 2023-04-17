@@ -28,6 +28,13 @@ const APIInstance = (apiRoot: string) => {
       }
       return json;
     } catch (e) {
+      console.log("e", e);
+      if (
+        e instanceof Error &&
+        (e.message.includes("NetworkError") || e.name === "NetworkError")
+      ) {
+        throw new Error("NetworkError");
+      }
       throw new Error("Something went wrong");
     }
   };

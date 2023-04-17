@@ -1,6 +1,8 @@
 import React from "react";
 
 import styled from "@emotion/styled";
+import LoadingSpinner from "./LoadingSpinner";
+import { css } from "@emotion/css";
 
 export interface Compactable {
   compact?: boolean;
@@ -98,6 +100,7 @@ export interface ButtonProps extends Compactable {
   style?: React.CSSProperties;
   className?: string;
   type?: React.ButtonHTMLAttributes<HTMLButtonElement>["type"];
+  isLoading?: boolean;
 }
 
 export const Button: React.FC<ButtonProps> = ({
@@ -106,10 +109,18 @@ export const Button: React.FC<ButtonProps> = ({
   startIcon,
   endIcon,
   disabled,
+  isLoading,
   ...props
 }) => {
   return (
     <CustomButton onClick={onClick} disabled={disabled} {...props}>
+      {isLoading && (
+        <LoadingSpinner
+          className={css`
+            margin-right: 0.5rem;
+          `}
+        />
+      )}
       {startIcon ? <span className="startIcon">{startIcon}</span> : ""}
       {children}
       {endIcon ? <span className="endIcon">{endIcon}</span> : ""}

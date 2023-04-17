@@ -2,6 +2,7 @@ import { css, injectGlobal } from "@emotion/css";
 import Snackbar from "components/common/Snackbar";
 import Player from "components/Player";
 import React, { useContext, useState } from "react";
+import { Helmet } from "react-helmet";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import api from "services/api";
 import { useGlobalStateContext } from "state/GlobalState";
@@ -122,22 +123,29 @@ function App() {
           type: "setLoggedInUser",
           user: user.result,
         });
-      } catch (e) {
-        console.error("Error refreshing token", e);
-        dispatch({
-          type: "setLoggedInUser",
-          user: undefined,
-        });
-        if (
-          !(
-            location.pathname.includes("login") ||
-            location.pathname.includes("signup")
-          )
-        ) {
-          navigate("/login");
-        }
-      } finally {
         setIsLoading(false);
+      } catch (e) {
+        if (e instanceof Error && e.message.includes("NetworkError")) {
+          console.error(
+            "Problem with the network, gonna just do nothing for now, we might want to throw up an error in the future"
+          );
+          setTimeout(callback, 1000 * 10);
+        } else {
+          setIsLoading(false);
+          console.error("Error refreshing token", e);
+          dispatch({
+            type: "setLoggedInUser",
+            user: undefined,
+          });
+          if (
+            !(
+              location.pathname.includes("login") ||
+              location.pathname.includes("signup")
+            )
+          ) {
+            navigate("/login");
+          }
+        }
       }
     };
 
@@ -153,32 +161,37 @@ function App() {
   }, [userId, dispatch, navigate, location.pathname]);
 
   return (
-    <div
-      className={css`
-        display: flex;
-        flex-direction: column;
-      `}
-    >
-      {isDisplayed && <Snackbar />}
-      {isLoading && <>Loading...</>}
-      {!isLoading && (
-        <>
-          <Header />
-          <div
-            className={css`
-              max-width: 600px;
-              padding: 1rem;
-              margin: 0 auto;
-              margin-bottom: 4rem;
-              width: 100%;
-            `}
-          >
-            <Outlet />
-          </div>
-          <Player />
-        </>
-      )}
-    </div>
+    <>
+      <Helmet>
+        <title>blackbird</title>
+      </Helmet>
+      <div
+        className={css`
+          display: flex;
+          flex-direction: column;
+        `}
+      >
+        {isDisplayed && <Snackbar />}
+        {isLoading && <>Loading...</>}
+        {!isLoading && (
+          <>
+            <Header />
+            <div
+              className={css`
+                max-width: 600px;
+                padding: 1rem;
+                margin: 0 auto;
+                margin-bottom: 4rem;
+                width: 100%;
+              `}
+            >
+              <Outlet />
+            </div>
+            <Player />
+          </>
+        )}
+      </div>
+    </>
   );
 }
 

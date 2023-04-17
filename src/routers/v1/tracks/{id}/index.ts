@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
+import processor from "../../trackGroups/processor";
 
 const prisma = new PrismaClient();
 
@@ -18,12 +19,18 @@ export default function () {
         trackGroup: {
           include: {
             artist: true,
+            cover: true,
           },
         },
         audio: true,
       },
     });
-    res.json({ result: track });
+    res.json({
+      result: {
+        ...track,
+        trackGroup: track ? processor.single(track.trackGroup) : {},
+      },
+    });
   }
 
   GET.apiDoc = {

@@ -47,8 +47,6 @@ export default function () {
 
   // TODO: GET documentation
 
-  // FIXME: only allow creation of trackgroups for users that belong to the
-  // logged in user
   async function POST(req: Request, res: Response) {
     const { artistId } = req.params as unknown as Params;
 

@@ -54,7 +54,6 @@ export default function () {
     const { id, segment }: { id?: string; segment?: string } = req.params;
     try {
       const user = req.user as User;
-      console.log("segment", segment);
       const track = await prisma.track.findUnique({
         where: { id: Number(id) },
         include: {

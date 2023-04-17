@@ -6,7 +6,7 @@ export default {
   single: (
     tg: TrackGroup & {
       cover: TrackGroupCover | null;
-      tracks: Track[];
+      tracks?: Track[];
     }
   ) => ({
     ...tg,

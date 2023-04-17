@@ -32,13 +32,25 @@ app.use(async (...args) => {
     ...flatten(clients.map((c) => c.allowedCorsOrigins)),
     process.env.API_DOMAIN ?? "http://localhost:3000",
   ];
+  if (process.env.NODE_ENV === "development") {
+    origin.push("http://localhost:8080"); // Just... for ease of coding
+  }
   return cors({
     origin,
     credentials: true,
   })(...args);
 });
 
-app.use(express.json());
+app.use(
+  express.json({
+    limit: "5mb",
+    verify: (req, res, buf) => {
+      // See https://stackoverflow.com/a/70951912/154392
+      // @ts-ignore
+      req.rawBody = buf.toString();
+    },
+  })
+);
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 app.use(passport.initialize());
@@ -51,10 +63,12 @@ const routes = [
   "tracks/{id}/stream/{segment}",
   "artists",
   "artists/{id}",
+  "artists/{id}/subscribe",
   "posts",
   "posts/{id}",
   "users",
   "users/{userId}",
+  "users/{userId}/subscriptions",
   "users/{userId}/artists",
   "users/{userId}/artists/{artistId}",
   "users/{userId}/artists/{artistId}/subscriptions",
@@ -69,6 +83,9 @@ const routes = [
   "users/{userId}/posts/{postId}",
   "users/{userId}/posts/drafts",
   "users/{userId}/posts",
+  "checkout",
+  "checkout/accounts",
+  "checkout/webhook",
 ];
 
 initialize({
@@ -102,14 +119,10 @@ app.use(
 
 app.use("/auth", auth);
 
-// app.use("/", (req, res) => {
-//   res.status(200).json({
-//     hello: "world",
-//   });
-// });
-
 app.use(express.static("public"));
 
+// TODO: figure this out, as it's would the app to run on one
+// instance.
 // app.use(function (req, res, next) {
 //   res.sendFile(path.join(__dirname, "../", "public", "app.html"));
 // });
@@ -126,6 +139,13 @@ if (process.env.NODE_ENV === "development") {
   serverAdapter.setBasePath("/admin/queues");
   app.use("/admin/queues", serverAdapter.getRouter());
 }
+
+// This has to be the last thing used so that other things don't get over-written
+app.use("/", (req, res) => {
+  res.status(200).json({
+    blackbird: "singing in the dead of night",
+  });
+});
 
 app.listen(process.env.PORT, () =>
   console.info(`

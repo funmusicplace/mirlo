@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
-import processor from "../trackGroups/processor";
+import processor from "../../trackGroups/processor";
 
 const prisma = new PrismaClient();
 

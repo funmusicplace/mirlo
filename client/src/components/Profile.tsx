@@ -5,10 +5,13 @@ import { Link } from "react-router-dom";
 import { useSnackbar } from "state/SnackbarContext";
 import api from "../services/api";
 import { useGlobalStateContext } from "../state/GlobalState";
+import Box from "./common/Box";
 import Button from "./common/Button";
 import FormComponent from "./common/FormComponent";
 import { InputEl } from "./common/Input";
 import LoadingSpinner from "./common/LoadingSpinner";
+import Money from "./common/Money";
+import Pill from "./common/Pill";
 
 function Profile() {
   const {
@@ -64,31 +67,64 @@ function Profile() {
   }
 
   return (
-    <form
-      onSubmit={handleSubmit(doSave)}
+    <div
       className={css`
         display: flex;
         flex-direction: column;
       `}
     >
-      <h2>Profile</h2>
-      <FormComponent>
-        Email:
-        <InputEl {...register("email")} />
-      </FormComponent>
-      <FormComponent>
-        Name:
-        <InputEl {...register("name")} />
-      </FormComponent>
-      <Button
-        type="submit"
-        disabled={isSaving}
-        startIcon={isSaving ? <LoadingSpinner /> : undefined}
+      <form
+        onSubmit={handleSubmit(doSave)}
+        className={css`
+          display: flex;
+          flex-direction: column;
+        `}
       >
-        Update profile
-      </Button>
-      <Link to="/manage">Manage</Link>
-    </form>
+        <h2>Profile</h2>
+        <FormComponent>
+          Email:
+          <InputEl {...register("email")} />
+        </FormComponent>
+        <FormComponent>
+          Name:
+          <InputEl {...register("name")} />
+        </FormComponent>
+        <Button
+          type="submit"
+          disabled={isSaving}
+          startIcon={isSaving ? <LoadingSpinner /> : undefined}
+        >
+          Update profile
+        </Button>
+      </form>
+      <Box style={{ marginTop: "1rem" }}>
+        <h2>Artists you support</h2>
+        <ul
+          className={css`
+            margin-top: 1rem;
+            list-style: none;
+
+            li {
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+            }
+          `}
+        >
+          {user.artistUserSubscriptions?.map((s) => (
+            <li>
+              {s.artistSubscriptionTier.artist.name}:{" "}
+              <Money amount={s.amount / 100} />
+              /month
+              <Pill>{s.artistSubscriptionTier.name}</Pill>
+            </li>
+          ))}
+        </ul>
+      </Box>
+      <Link to="/manage" style={{ marginTop: "1rem" }}>
+        <Button style={{ width: "100%" }}>Manage artists</Button>
+      </Link>
+    </div>
   );
 }
 

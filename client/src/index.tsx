@@ -20,7 +20,7 @@ import AdminTrackGroups from "components/Admin/Trackgroups";
 import AdminTracks from "components/Admin/Tracks";
 import ManageArtist from "components/ManageArtist/ManageArtist";
 import Home from "components/Home";
-import Artist from "components/Artist";
+import Artist from "components/Artist/Artist";
 
 const router = createBrowserRouter([
   {

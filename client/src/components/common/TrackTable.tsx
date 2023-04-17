@@ -111,11 +111,8 @@ export const TrackTable: React.FC<{
             key={track.id}
             track={track}
             addTracksToQueue={addTracksToQueue}
-            trackGroupId={trackGroupId}
             reload={reloadWrapper}
-            isPlaylist={isPlaylist}
             handleDrop={handleDrop}
-            owned={owned}
           />
         ))}
         {displayTracks.length === 0 && (

@@ -3,36 +3,18 @@ import React from "react";
 import { FaPause, FaPlay, FaTrash } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { useGlobalStateContext } from "state/GlobalState";
-// import { isTrackWithUserCounts } from "typeguards";
 import useDraggableTrack from "utils/useDraggableTrack";
 
-// import { FavoriteTrack } from "./FavoriteTrack";
 import IconButton from "./IconButton";
-// import TrackPopup from "./TrackPopup";
-// import styled from "@emotion/styled";
-// import { colorShade } from "utils/theme";
 import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
 
 const TrackRow: React.FC<{
   track: Track;
-  trackGroupId?: number;
-  isPlaylist?: boolean;
   addTracksToQueue: (id: number) => void;
   reload: () => Promise<void>;
-  owned?: boolean;
   handleDrop: (val: React.DragEvent<HTMLTableRowElement>) => void;
-}> = ({
-  track,
-  addTracksToQueue,
-  trackGroupId,
-  reload,
-  handleDrop,
-  owned,
-  isPlaylist,
-}) => {
-  // const [trackPlays, setTrackPlays] = React.useState(track);
-  const loadedRef = React.useRef(false);
+}> = ({ track, addTracksToQueue, reload, handleDrop }) => {
   const snackbar = useSnackbar();
   const {
     state: { playerQueueIds, playing, currentlyPlayingIndex, user },

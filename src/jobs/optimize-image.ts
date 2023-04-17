@@ -148,7 +148,7 @@ const optimizeImage = async (job: Job) => {
 
     const results = await Promise.all(promises);
     const urls = uniq(results.map((r) => `${destination}-x${r.width}`));
-    console.log("results", urls);
+
     await prisma.trackGroupCover.update({
       where: { id: destination },
       data: { url: urls },

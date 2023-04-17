@@ -49,7 +49,7 @@ export default function () {
   };
 
   async function PUT(req: Request, res: Response) {
-    const { userId } = req.params as unknown as { userId: number };
+    const { userId } = req.params as unknown as { userId: string };
     const { email, name } = req.body;
 
     const user = await prisma.user.update({

@@ -15,7 +15,7 @@ const prisma = new PrismaClient();
 
 type Params = {
   trackGroupId: number;
-  userId: number;
+  userId: string;
 };
 
 const isFileArray = (entity: unknown): entity is Express.Multer.File[] => {

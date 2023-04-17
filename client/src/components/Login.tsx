@@ -56,6 +56,14 @@ function Login() {
         <InputEl {...register("password")} type="password" />
         <Button type="submit">Log in</Button>
       </form>
+      <img
+        alt="blackbird"
+        src="/images/blackbird.png"
+        className={css`
+          width: 100%;
+          padding: 4rem 0;
+        `}
+      />
     </div>
   );
 }

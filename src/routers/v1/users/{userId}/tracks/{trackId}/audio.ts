@@ -12,11 +12,9 @@ const upload = multer({
   dest: process.env.MEDIA_LOCATION_INCOMING ?? "/data/media/incoming",
 });
 
-const prisma = new PrismaClient();
-
 type Params = {
   trackId: string;
-  userId: number;
+  userId: string;
 };
 
 const isFileArray = (entity: unknown): entity is Express.Multer.File[] => {

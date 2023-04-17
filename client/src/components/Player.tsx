@@ -171,6 +171,7 @@ const Player = () => {
             align-items: center;
             flex-grow: 1;
             margin-right: 0.5rem;
+            justify-content: space-between;
 
             @media (max-width: ${bp.small}px) {
               width: 100%;
@@ -182,10 +183,11 @@ const Player = () => {
             className={css`
               display: flex;
               align-items: center;
+              margin-right: 1rem;
             `}
           >
             <ImageWithPlaceholder
-              src={currentTrack.trackGroup.cover?.url}
+              src={currentTrack.trackGroup.cover?.sizes?.[60]}
               size={50}
               alt={currentTrack.title}
               className={css`
@@ -210,6 +212,7 @@ const Player = () => {
               color={shuffle ? "primary" : undefined}
               compact
               onClick={onShuffle}
+              style={{ fontSize: "2rem" }}
             >
               <ImShuffle />
             </IconButton>
@@ -218,8 +221,8 @@ const Player = () => {
               compact
               onClick={onLoop}
               className={css`
+                font-size: 2rem !important;
                 margin-left: 1rem;
-                margin-right: 1rem;
                 position: relative;
               `}
             >
@@ -233,7 +236,7 @@ const Player = () => {
       )}
 
       {!currentTrack && isLoading && <Spinner size="small" />}
-      {!currentTrack && !isLoading && (
+      {/* {!currentTrack && !isLoading && (
         <div
           className={css`
             display: flex;
@@ -249,7 +252,7 @@ const Player = () => {
         >
           Current queue is empty, click on something to play!
         </div>
-      )}
+      )} */}
       <div
         className={css`
           display: flex;

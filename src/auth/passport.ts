@@ -84,11 +84,17 @@ export const userAuthenticated = (req: Request, res: Response, next: any) => {
 
 export const userHasPermission = (role: "admin" | "owner") => {
   return (req: Request, res: Response, next: NextFunction) => {
-    const { userId } = req.params as unknown as { userId: number };
+    const { userId } = req.params as unknown as { userId: string };
     const loggedInUser = req.user as User;
 
-    // FIXME: ignore if user is admin.
-    if (role === "owner" && Number(userId) !== loggedInUser.id) {
+    if (
+      role === "owner" &&
+      Number(userId) !== loggedInUser.id &&
+      !loggedInUser.isAdmin
+    ) {
+      res.status(401).json({ error: "Unauthorized" });
+    }
+    if (role === "admin" && !loggedInUser.isAdmin) {
       res.status(401).json({ error: "Unauthorized" });
     }
     return next();

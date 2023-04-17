@@ -9,6 +9,7 @@ interface LoggedInUser {
   email: string;
   name: string;
   id: number;
+  artistUserSubscriptions?: ArtistUserSubscription[];
 }
 
 interface Track {
@@ -77,8 +78,14 @@ interface User {
 interface ArtistSubscriptionTier {
   id: number;
   artistId: number;
-  artist: number;
+  artist: Artist;
   minAmount?: string;
   name: string;
   description: string;
+}
+
+interface ArtistUserSubscription {
+  amount: number;
+  artistSubscriptionTierId: number;
+  artistSubscriptionTier: ArtistSubscriptionTier;
 }

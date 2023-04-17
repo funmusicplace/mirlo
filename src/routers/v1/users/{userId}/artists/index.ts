@@ -10,7 +10,7 @@ const prisma = new PrismaClient();
 
 type Params = {
   artistId: number;
-  userId: number;
+  userId: string;
 };
 
 export default function () {

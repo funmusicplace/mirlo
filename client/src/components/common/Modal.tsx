@@ -5,7 +5,6 @@ import { bp } from "../../constants";
 import IconButton from "./IconButton";
 import ReactDOM from "react-dom";
 import Background from "./Background";
-import { theme } from "utils/theme";
 
 const wrapper = css`
   position: fixed;

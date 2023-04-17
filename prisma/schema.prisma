@@ -18,16 +18,16 @@ model Client {
 }
 
 model User {
-  id                     Int                      @id @default(autoincrement())
-  email                  String                   @unique
-  name                   String?
-  password               String                   @default("")
-  refresh                String?
-  artists                Artist[]
-  createdAt              DateTime                 @default(now())
-  updatedAt              DateTime                 @default(now()) @updatedAt
-  isAdmin                Boolean                  @default(false)
-  ArtistUserSubscription ArtistUserSubscription[]
+  id                      Int                      @id @default(autoincrement())
+  email                   String                   @unique
+  name                    String?
+  password                String                   @default("")
+  refresh                 String?
+  artists                 Artist[]
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @default(now()) @updatedAt
+  isAdmin                 Boolean                  @default(false)
+  artistUserSubscriptions ArtistUserSubscription[]
 }
 
 model Post {
@@ -58,32 +58,37 @@ model Artist {
 }
 
 model ArtistSubscriptionTier {
-  id            Int      @id @default(autoincrement())
-  name          String
-  description   String   @default("")
-  artistId      Int
-  artist        Artist   @relation(fields: [artistId], references: [id])
-  minAmount     String?
-  allowVariable Boolean?
-  maxAmount     String?
-  defaultAmount String?
+  id                      Int                      @id @default(autoincrement())
+  name                    String
+  description             String                   @default("")
+  artistId                Int
+  artist                  Artist                   @relation(fields: [artistId], references: [id])
+  minAmount               String?
+  allowVariable           Boolean?
+  maxAmount               String?
+  defaultAmount           String?
+  artistUserSubscriptions ArtistUserSubscription[]
 }
 
 model ArtistUserSubscription {
-  id                       Int     @id @default(autoincrement())
+  id                       Int                    @id @default(autoincrement())
   artistSubscriptionTierId Int
-  artistSubscriptionTier   Artist  @relation(fields: [artistSubscriptionTierId], references: [id])
+  artistSubscriptionTier   ArtistSubscriptionTier @relation(fields: [artistSubscriptionTierId], references: [id])
   userId                   Int
-  user                     User    @relation(fields: [userId], references: [id])
+  user                     User                   @relation(fields: [userId], references: [id])
   amount                   String
   stripeId                 String?
+  artist                   Artist?                @relation(fields: [artistId], references: [id])
+  artistId                 Int?
+
+  @@unique([userId, artistSubscriptionTierId])
 }
 
 model TrackGroup {
   id           Int              @id @default(autoincrement())
   about        String?
   artist       Artist           @relation(fields: [artistId], references: [id])
-  artistId     Int              @unique
+  artistId     Int
   title        String?
   tracks       Track[]
   cover        TrackGroupCover?
