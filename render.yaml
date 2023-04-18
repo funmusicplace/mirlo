@@ -41,12 +41,12 @@ services:
       - key: REDIS_HOST
         fromService:
           type: redis
-          name: redis
+          name: lightning
           property: host # available properties are listed below
       - key: REDIS_PORT
         fromService:
           type: redis
-          name: redis
+          name: lightning
           property: port
       - key: MINIO_ROOT_PASSWORD
         fromService:
@@ -127,7 +127,7 @@ services:
 
   # A Redis instance
   - type: redis
-    name: redis
+    name: lightning
     ipAllowList: # required
       - source: 0.0.0.0/0
         description: everywhere
