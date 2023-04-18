@@ -70,7 +70,7 @@ services:
           property: host # available properties are listed below
   
   # A private minIO instance
-  - type: pserv
+  - type: web # Should probably be pserv
     name: minio
     env: docker
     plan: free
