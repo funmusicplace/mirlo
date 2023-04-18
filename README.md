@@ -36,7 +36,7 @@ yarn start
 Changes in background jobs aren't detected. You'll need to restart the docker container for them:
 
 ```
-docker-compose up --no-deps background
+docker-compose up -d --force-recreate --no-deps background
 ```
 
 ## Workers (Uploading Music, Images, Etc)

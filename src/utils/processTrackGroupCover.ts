@@ -1,28 +1,30 @@
 import { Request, Response } from "express";
-import { User, PrismaClient } from "@prisma/client";
+import { PrismaClient, TrackGroupCover } from "@prisma/client";
 
 import { Queue, QueueEvents } from "bullmq";
-import { promises as fs } from "fs";
-import path from "path";
-import shasum from "shasum";
 import winston from "winston";
 import dimensions from "image-size";
 import { fromFile } from "file-type";
-// import { Track, File } from "../db/models";
+import * as Minio from "minio";
 
 import sharpConfig from "../config/sharp";
 
-import {
-  // FIXME: HIGH_RES_AUDIO_MIME_TYPES,
-  SUPPORTED_AUDIO_MIME_TYPES,
-  SUPPORTED_IMAGE_MIME_TYPES,
-} from "../config/supported-media-types";
+import { SUPPORTED_IMAGE_MIME_TYPES } from "../config/supported-media-types";
 import { REDIS_CONFIG } from "../config/redis";
 import sendMail from "../jobs/send-mail";
+import { createBucketIfNotExists, incomingCoversBucket } from "./minio";
 
 const prisma = new PrismaClient();
 
-const BASE_DATA_DIR = process.env.BASE_DATA_DIR || "/";
+type ConfigTypes = "artwork" | "avatar" | "banner";
+
+const {
+  MINIO_HOST = "",
+  MINIO_ROOT_USER = "",
+  MINIO_ROOT_PASSWORD = "",
+  MINIO_PORT = 9000,
+  NODE_ENV,
+} = process.env;
 
 const logger = winston.createLogger({
   level: "info",
@@ -38,6 +40,16 @@ const logger = winston.createLogger({
       level: "error",
     }),
   ],
+});
+
+// Instantiate the minio client with the endpoint
+// and access keys as shown below.
+const minioClient = new Minio.Client({
+  endPoint: MINIO_HOST,
+  port: +MINIO_PORT,
+  useSSL: NODE_ENV !== "development",
+  accessKey: MINIO_ROOT_USER,
+  secretKey: MINIO_ROOT_PASSWORD,
 });
 
 const queueOptions = {
@@ -98,20 +110,17 @@ export const processTrackGroupCover = (ctx: {
     },
     trackGroupId: number
   ) => {
-    const { size: fileSize, path: filepath } = file;
+    const { size: fileSize, path: filepath, filename } = file;
     const type = await fromFile(filepath);
     const mime =
       type !== null && type !== undefined ? type.mime : file.mimetype;
     const isImage = SUPPORTED_IMAGE_MIME_TYPES.includes(mime);
 
     if (!isImage) {
-      console.log("not image");
+      logger.error("Not an image");
       ctx.res.status(400);
       throw `File type not supported: ${mime}`;
     }
-
-    console.log("file", file);
-    // const sha1sum = shasum(buffer);
 
     const image = await prisma.trackGroupCover.upsert({
       create: {
@@ -126,8 +135,7 @@ export const processTrackGroupCover = (ctx: {
       },
     });
 
-    const { config = "artwork" }: { config: "artwork" | "avatar" | "banner" } =
-      ctx.req.body; // sharp config key
+    const { config = "artwork" }: { config: ConfigTypes } = ctx.req.body; // sharp config key
     const { width, height } = await dimensions(filepath);
 
     // const image = await prisma.image.findFirst({
@@ -142,15 +150,25 @@ export const processTrackGroupCover = (ctx: {
     //   dimensions: { width, height },
     // });
 
-    // await file.save();
+    logger.info("Uploading image to object storage");
 
-    logger.info("Adding image to queue");
+    await createBucketIfNotExists(minioClient, incomingCoversBucket, logger);
 
-    imageQueue.add("optimize-image", {
-      filepath,
-      destination: image.id,
-      config: sharpConfig.config[config],
-    });
+    logger.info(
+      `Going to put a file on MinIO Bucket ${incomingCoversBucket}: ${image.id}, ${filepath}`
+    );
+    minioClient
+      .fPutObject(incomingCoversBucket, image.id, filepath)
+      .then((objInfo: { etag: string }) => {
+        logger.info("File put on minIO", objInfo);
+        logger.info("Adding image to queue");
+
+        imageQueue.add("optimize-image", {
+          filepath,
+          destination: image.id,
+          config: sharpConfig.config[config],
+        });
+      });
 
     return image;
   };

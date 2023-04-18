@@ -9,6 +9,9 @@ import processTrackGroupCover from "../../../../../../utils/processTrackGroupCov
 
 const upload = multer({
   dest: process.env.MEDIA_LOCATION_INCOMING ?? "/data/media/incoming",
+  limits: {
+    fileSize: 2000000,
+  },
 });
 
 const prisma = new PrismaClient();
@@ -56,6 +59,7 @@ export default function () {
         });
         return next();
       }
+      console.log("Processing trackgroup covers");
 
       // TODO: Remove prior files
       // FIXME: Only allow uploading of one file.

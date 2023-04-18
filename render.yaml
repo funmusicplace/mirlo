@@ -27,7 +27,8 @@ services:
     # dockerfilePath: ./prod.Dockerfile
     buildCommand: yarn install && yarn migrate:deploy
     startCommand: yarn staging
-    disk:
+    disk: # this disk gets used to receive uploads. They should get moved to the 
+          # minIO service and deleted after upload
       name: data
       mountPath: /data
       sizeGB: 2 # optional
@@ -47,50 +48,81 @@ services:
           type: redis
           name: redis
           property: port
-  # A private Minio instance
-  # - type: pserv
-  #   name: minio
-  #   env: docker
-  #   repo: https://github.com/render-examples/minio.git # optional
-  #   envVars:
-  #   - key: MINIO_ROOT_PASSWORD
-  #     generateValue: true # will generate a base64-encoded 256-bit secret
-  #   - key: MINIO_ROOT_USER
-  #     sync: false # placeholder for a value to be added in the dashboard
-  #   - key: PORT
-  #     value: 10000
-    # disk:
-    #   name: data
-    #   mountPath: /data
-    #   sizeGB: 2 # optional
-  # A Python cron job that runs every hour
-  # - type: cron
-  #   name: date
-  #   env: python
-  #   schedule: "0 * * * *"
-  #   buildCommand: "true" # ensure it's a string
-  #   startCommand: date
-  #   repo: https://github.com/render-examples/docker.git # optional
-  # A background worker that consumes a queue
-  # - type: worker
-  #   name: background
-  #   env: docker
-  #   plan: starter # optional (defaults to starter)
-  #   dockerfilePath: ./background/Dockerfile # optional
-  #   # dockerContext: ./background/src # optional
-  #   branch: main # optional
-  #   envVars:
-  #     - key: REDIS_HOST
-  #       fromService:
-  #         type: redis
-  #         name: lightning
-  #         property: host # available properties are listed below
-  #     - key: REDIS_PORT
-  #       fromService:
-  #         type: redis
-  #         name: lightning
-  #         property: port
-  #     - fromGroup: conc-settings
+      - key: MINIO_ROOT_PASSWORD
+        fromService:
+          type: pserv
+          name: minio
+          envVarKey: MINIO_ROOT_PASSWORD
+      - key: MINIO_ROOT_USER
+        fromService:
+          type: pserv
+          name: minio
+          envVarKey: MINIO_ROOT_USER
+      - key: MINIO_PORT
+        fromService:
+          type: pserv
+          name: minio
+          envVarKey: PORT
+      - key: MINIO_HOST
+        fromService:
+          type: pserv
+          name: minio
+          property: host # available properties are listed below
+  
+  # A private minIO instance
+  - type: pserv
+    name: minio
+    env: docker
+    plan: free
+    repo: https://github.com/render-examples/minio.git # optional
+    envVars:
+    - key: MINIO_ROOT_PASSWORD
+      generateValue: true # will generate a base64-encoded 256-bit secret
+      fromGroup: blackbrd
+    - key: PORT
+      value: 10000
+    disk:
+      name: data
+      mountPath: /data
+      sizeGB: 2 # optional
+  # A worker
+  - type: worker
+    name: background
+    env: docker
+    plan: starter # optional (defaults to starter)
+    dockerfilePath: ./background/Dockerfile # optional
+    # dockerContext: ./background/src # optional
+    envVars:
+      - key: REDIS_HOST
+        fromService:
+          type: redis
+          name: lightning
+          property: host # available properties are listed below
+      - key: REDIS_PORT
+        fromService:
+          type: redis
+          name: lightning
+          property: port
+      - key: MINIO_ROOT_PASSWORD
+        fromService:
+          type: pserv
+          name: minio
+          envVarKey: MINIO_ROOT_PASSWORD
+      - key: MINIO_ROOT_USER
+        fromService:
+          type: pserv
+          name: minio
+          envVarKey: MINIO_ROOT_USER
+      - key: MINIO_PORT
+        fromService:
+          type: pserv
+          name: minio
+          envVarKey: PORT
+      - key: MINIO_HOST
+        fromService:
+          type: pserv
+          name: minio
+          property: host # available properties are listed below
 
   # A Redis instance
   - type: redis

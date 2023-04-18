@@ -7,11 +7,33 @@ import tempSharpConfig from "../config/sharp";
 import { Job } from "bullmq";
 import { PrismaClient } from "@prisma/client";
 import { uniq } from "lodash";
+import * as Minio from "minio";
+import {
+  createBucketIfNotExists,
+  finalCoversBucket,
+  incomingCoversBucket,
+} from "../utils/minio";
 
 const { defaultOptions, config: sharpConfig } = tempSharpConfig;
 
-const MEDIA_LOCATION_INCOMING = process.env.MEDIA_LOCATION_INCOMING || "/";
+const {
+  MINIO_HOST = "",
+  MINIO_ROOT_USER = "",
+  MINIO_ROOT_PASSWORD = "",
+  MINIO_PORT = 9000,
+  NODE_ENV,
+} = process.env;
 const prisma = new PrismaClient();
+
+// Instantiate the minio client with the endpoint
+// and access keys as shown below.
+const minioClient = new Minio.Client({
+  endPoint: MINIO_HOST,
+  port: +MINIO_PORT,
+  useSSL: NODE_ENV !== "development",
+  accessKey: MINIO_ROOT_USER,
+  secretKey: MINIO_ROOT_PASSWORD,
+});
 
 const logger = winston.createLogger({
   level: "info",
@@ -28,22 +50,56 @@ const logger = winston.createLogger({
   ],
 });
 
+async function getObjectFromMinio(
+  filename: string
+): Promise<{ buffer: Buffer; size: number }> {
+  return new Promise(
+    (resolve: (result: { buffer: Buffer; size: number }) => any, reject) => {
+      logger.info(
+        `Getting object from MinIO Bucket ${incomingCoversBucket}: ${filename}`
+      );
+      const buff: Buffer[] = [];
+      var size = 0;
+      minioClient
+        .getObject(incomingCoversBucket, filename)
+        .then(function (dataStream) {
+          logger.info("Got stream");
+          dataStream.on("data", async function (chunk) {
+            buff.push(chunk);
+            size += chunk.length;
+          });
+          dataStream.on("end", function () {
+            logger.info("End. Total size = " + size);
+            resolve({ buffer: Buffer.concat(buff), size });
+          });
+          dataStream.on("error", function (err) {
+            logger.error(err);
+            reject(err);
+          });
+        })
+        .catch(reject);
+    }
+  );
+}
+
 /**
  * Convert and optimize track artworks to mozjpeg and webp
  */
 
 const optimizeImage = async (job: Job) => {
-  logger.info("optimizing");
   const { filepath, config = sharpConfig.artwork, destination } = job.data;
 
-  logger.info(`passed ${JSON.stringify(config)}`);
-  logger.info(`base ${MEDIA_LOCATION_INCOMING}`);
-  logger.info(`input: ${filepath}`);
+  // logger.info(`passed ${JSON.stringify(config)}`);
+  // logger.info(`base ${MEDIA_LOCATION_INCOMING}`);
+  // logger.info(`input: ${filepath}`);
   try {
     const profiler = logger.startTimer();
 
-    logger.info(`starting to optimize images ${filepath}`);
+    logger.info(`Starting to optimize images ${destination}`);
+    const { buffer, size } = await getObjectFromMinio(destination);
+    await createBucketIfNotExists(minioClient, finalCoversBucket, logger);
 
+    logger.info(`Got object of size ${size}`);
     const promises = Object.entries(config)
       .map(([key, value]) => {
         const outputType = key as "webp" | "jpeg"; // output type (jpeg, webp)
@@ -67,24 +123,10 @@ const optimizeImage = async (job: Job) => {
             suffix?: any;
           }) => {
             const { width, height, suffix = `-x${width}` } = variant;
-            const dest = path.join(
-              `/data/media/images/${destination}${suffix}${ext}`
-            );
 
-            logger.info(`Destination: ${dest}`);
+            const finalFileName = `${destination}${suffix}${ext}`;
 
-            let buffer: any;
-
-            if (variant.extract) {
-              logger.info({ extract: variant.extract });
-
-              const extractOptions = Object.assign(
-                { width, height },
-                variant.extract
-              );
-
-              buffer = await sharp(filepath).extract(extractOptions).toBuffer();
-            }
+            logger.info(`Destination: ${finalFileName}`);
 
             const resizeOptions = Object.assign(
               {
@@ -102,45 +144,30 @@ const optimizeImage = async (job: Job) => {
               variant.outputOptions || {}
             );
 
-            buffer = await sharp(buffer || filepath)
+            logger.info("getting object from MinIO");
+
+            let newBuffer = await sharp(buffer)
               .rotate()
               .resize(resizeOptions)
               [outputType](outputOptions)
               .toBuffer();
+            logger.info("created size of object");
 
-            if (variant.blur) {
-              logger.info({ blur: variant.blur.sigma });
+            logger.info("Uploading image to bucket");
+            await minioClient.putObject(
+              finalCoversBucket,
+              finalFileName,
+              newBuffer
+            );
 
-              buffer = await sharp(buffer).blur(variant.blur.sigma).toBuffer();
-            }
-
-            const results = await new Promise((resolve, reject) => {
-              return sharp(buffer)
-                .toFile(dest)
-                .then(
-                  async (result: {
-                    format: string;
-                    size: number;
-                    width: number;
-                    height: number;
-                  }) => {
-                    logger.info(
-                      `Converted and optimized image to ${result.format}`,
-                      {
-                        size: bytes(result.size),
-                        ratio: `${result.width}x${result.height})`,
-                      }
-                    );
-
-                    return resolve(result);
-                  }
-                )
-                .catch((err: any) => {
-                  return reject(err);
-                });
+            logger.info(`Converted and optimized image to ${outputType}`, {
+              ratio: `${width}x${height})`,
             });
-
-            return results;
+            return {
+              width: width,
+              height: height,
+              format: outputType,
+            };
           }
         );
       })
@@ -148,13 +175,16 @@ const optimizeImage = async (job: Job) => {
 
     const results = await Promise.all(promises);
     const urls = uniq(results.map((r) => `${destination}-x${r.width}`));
-
+    logger.info(`Saving URLs [${urls.join(", ")}]`);
     await prisma.trackGroupCover.update({
       where: { id: destination },
       data: { url: urls },
     });
 
     profiler.done({ message: "Done optimizing image" });
+    logger.info(`Removing from Bucket ${incomingCoversBucket}`);
+
+    await minioClient.removeObject(incomingCoversBucket, destination);
 
     return Promise.resolve();
   } catch (err) {
