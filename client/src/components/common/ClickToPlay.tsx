@@ -117,12 +117,12 @@ const ClickToPlay: React.FC<{
   const onClickPlay = React.useCallback(async () => {
     let ids: number[] = [];
     if (trackGroupId) {
-      // const fetchFunction =
-      // trackGroupType === "playlist" ? fetchPlaylist : fetchTrackGroup;
       const { result } = await api.get<TrackGroup>(
         `trackGroups/${trackGroupId}`
       );
-      ids = result.tracks.map((item) => item.id);
+      ids = result.tracks
+        .filter((item) => item.isPreview)
+        .map((item) => item.id);
       setTrackIds(ids);
     }
     dispatch({
@@ -133,14 +133,14 @@ const ClickToPlay: React.FC<{
 
   const onClickQueue = React.useCallback(async () => {
     if (trackGroupId) {
-      // const fetchFunction =
-      // trackGroupType === "playlist" ? fetchPlaylist : fetchTrackGroup;
       await api
         .get<TrackGroup>(`trackGroups/${trackGroupId}`)
         .then(({ result }) => {
           dispatch({
             type: "addTrackIdsToBackOfQueue",
-            idsToAdd: result.tracks.map((item) => item.id),
+            idsToAdd: result.tracks
+              .filter((item) => item.isPreview)
+              .map((item) => item.id),
           });
         });
     }

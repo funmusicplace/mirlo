@@ -24,10 +24,12 @@ const AlbumForm: React.FC<{
   } = useGlobalStateContext();
   const snackbar = useSnackbar();
   const [isSaving, setIsSaving] = React.useState(false);
+  console.log("existing", existing);
   const { register, handleSubmit } = useForm<{
     published: boolean;
     title: string;
     type: TrackGroup["type"];
+    minPrice: string;
     releaseDate: string;
     about: string;
     coverFile: File[];
@@ -35,6 +37,7 @@ const AlbumForm: React.FC<{
     defaultValues: {
       ...existing,
       releaseDate: existing?.releaseDate.split("T")[0],
+      minPrice: `${existing?.minPrice ? existing.minPrice / 100 : ""}`,
     } ?? {
       published: false,
     },
@@ -48,6 +51,7 @@ const AlbumForm: React.FC<{
       title: string;
       published: boolean;
       type: TrackGroup["type"];
+      minPrice: string;
       releaseDate: string;
       about: string;
       coverFile: File[];
@@ -55,6 +59,7 @@ const AlbumForm: React.FC<{
       if (userId) {
         try {
           setIsSaving(true);
+          console.log("saving", data);
           let savedId = existingId;
           if (existingId) {
             const sending = {
@@ -65,6 +70,7 @@ const AlbumForm: React.FC<{
                 "releaseDate",
                 "about",
               ]),
+              minPrice: data.minPrice ? +data.minPrice * 100 : undefined,
               releaseDate: new Date(data.releaseDate).toISOString(),
             };
             await api.put<Partial<TrackGroup>, TrackGroup>(
@@ -76,7 +82,12 @@ const AlbumForm: React.FC<{
             );
           } else {
             const newGroup = await api.post<
-              { title?: string; artistId: number; cover?: File[] },
+              {
+                title?: string;
+                artistId: number;
+                cover?: File[];
+                minPrice?: number;
+              },
               { id: number }
             >(`users/${userId}/trackGroups`, {
               ...pick(data, [
@@ -85,7 +96,9 @@ const AlbumForm: React.FC<{
                 "type",
                 "releaseDate",
                 "about",
+                "minPrice",
               ]),
+              minPrice: data.minPrice ? +data.minPrice * 100 : undefined,
               artistId: artist.id,
             });
             savedId = newGroup.id;
@@ -166,11 +179,16 @@ const AlbumForm: React.FC<{
           <option value="ep">EP</option>
         </SelectEl>
       </FormComponent>
+
       <FormComponent>
         Release date: <InputEl type="date" {...register("releaseDate")} />
       </FormComponent>
       <FormComponent>
         About: <TextArea {...register("about")} />
+      </FormComponent>
+      <FormComponent>
+        Price:
+        <InputEl type="number" {...register("minPrice")} />
       </FormComponent>
       <Button
         type="submit"

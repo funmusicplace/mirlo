@@ -6,6 +6,7 @@ import path from "path";
 
 const prisma = new PrismaClient();
 
+// FIXME: REplace with MEDIA_LOCATIOn
 const ROOT = "/data/media/audio";
 
 export const fetchFile = async (

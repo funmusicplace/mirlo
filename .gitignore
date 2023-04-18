@@ -5,3 +5,4 @@ dist/
 error.log
 client/build
 package-lock.json
+yarn-error.log

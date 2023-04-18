@@ -82,7 +82,7 @@ export default function () {
           artist: { connect: { id: artistId } },
           published,
           releaseDate: new Date(releaseDate),
-          enabled,
+          adminEnabled: enabled,
         },
       });
       res.json({ trackgroup });

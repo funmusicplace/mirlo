@@ -12,6 +12,9 @@ export default function () {
   async function GET(req: Request, res: Response) {
     const { id }: { id?: string } = req.params;
 
+    if (!id) {
+      return res.status(400);
+    }
     const artist = await prisma.artist.findFirst({
       where: { id: Number(id), enabled: true },
       include: {

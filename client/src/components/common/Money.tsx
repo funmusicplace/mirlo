@@ -1,4 +1,7 @@
-export const Money: React.FC<{ amount?: number | string }> = ({ amount }) => {
+export const Money: React.FC<{
+  amount?: number | string;
+  currency?: string;
+}> = ({ amount, currency = "USD" }) => {
   if (!amount) {
     return <>-</>;
   }
@@ -6,7 +9,7 @@ export const Money: React.FC<{ amount?: number | string }> = ({ amount }) => {
     <>
       {new Intl.NumberFormat("us", {
         style: "currency",
-        currency: "USD",
+        currency,
       }).format(+amount)}
     </>
   );

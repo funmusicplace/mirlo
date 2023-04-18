@@ -99,27 +99,32 @@ function Profile() {
       </form>
       <Box style={{ marginTop: "1rem" }}>
         <h2>Artists you support</h2>
-        <ul
-          className={css`
-            margin-top: 1rem;
-            list-style: none;
+        {(user.artistUserSubscriptions?.length ?? 0) > 0 && (
+          <ul
+            className={css`
+              margin-top: 1rem;
+              list-style: none;
 
-            li {
-              display: flex;
-              align-items: center;
-              justify-content: space-between;
-            }
-          `}
-        >
-          {user.artistUserSubscriptions?.map((s) => (
-            <li>
-              {s.artistSubscriptionTier.artist.name}:{" "}
-              <Money amount={s.amount / 100} />
-              /month
-              <Pill>{s.artistSubscriptionTier.name}</Pill>
-            </li>
-          ))}
-        </ul>
+              li {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+              }
+            `}
+          >
+            {user.artistUserSubscriptions?.map((s) => (
+              <li>
+                {s.artistSubscriptionTier.artist.name}:{" "}
+                <Money amount={s.amount / 100} />
+                /month
+                <Pill>{s.artistSubscriptionTier.name}</Pill>
+              </li>
+            ))}
+          </ul>
+        )}
+        {user.artistUserSubscriptions?.length === 0 && (
+          <>You don't support any artists yet</>
+        )}
       </Box>
       <Link to="/manage" style={{ marginTop: "1rem" }}>
         <Button style={{ width: "100%" }}>Manage artists</Button>

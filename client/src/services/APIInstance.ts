@@ -1,3 +1,6 @@
+import b64ToBlob from "b64-to-blob";
+import fileSaver from "file-saver";
+
 const APIInstance = (apiRoot: string) => {
   const api = `${apiRoot}/v1/`;
   const auth = `${apiRoot}/auth/`;
@@ -5,19 +8,25 @@ const APIInstance = (apiRoot: string) => {
 
   const apiRequest = async <R>(
     endpoint: string,
-    options?: RequestInit
+    requestOptions?: RequestInit,
+    options?: {
+      text?: boolean;
+    }
   ): Promise<R> => {
     const root = authEndpoints.includes(endpoint) ? auth : api;
-    const req = new Request(`${root}${endpoint}`, options);
+    const req = new Request(`${root}${endpoint}`, requestOptions);
 
     try {
       const resp = await fetch(req);
+      if (options?.text) {
+        return resp.text() as R;
+      }
       const json = await resp.json();
 
       if (resp.status === 401 && json.error === "jwt expired") {
         try {
           await apiRequest("refresh", { method: "POST" });
-          return await apiRequest(endpoint, options);
+          return await apiRequest(endpoint, requestOptions);
         } catch (e) {
           throw new Error("Log in expired");
         }
@@ -115,6 +124,24 @@ const APIInstance = (apiRoot: string) => {
 
     streamUrl: (track: Track): string => {
       return `${apiRoot}${track.audio.url}`;
+    },
+
+    getFile: (filename: string, endpoint: string) => {
+      return apiRequest<string>(
+        endpoint,
+        {
+          method: "GET",
+          credentials: "include",
+        },
+        {
+          text: true,
+        }
+      ).then((text) => {
+        console.log("success", text);
+        const blob = b64ToBlob(text, "application/zip");
+        fileSaver.saveAs(blob, `${filename}.zip`);
+        return;
+      });
     },
   };
 };

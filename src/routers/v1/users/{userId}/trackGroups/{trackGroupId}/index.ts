@@ -68,6 +68,7 @@ export default function () {
           "published",
           "type",
           "about",
+          "minPrice",
         ]),
       });
 

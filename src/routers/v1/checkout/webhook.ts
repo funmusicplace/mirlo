@@ -12,29 +12,43 @@ const stripe = new Stripe(STRIPE_KEY ?? "", {
 });
 
 const handleCheckoutSession = async (session: Stripe.Checkout.Session) => {
-  const { tierId, userId } = session.metadata as unknown as {
+  console.log("session", session);
+  const { tierId, userId, trackGroupId } = session.metadata as unknown as {
     tierId: number;
     userId: number;
+    trackGroupId: number;
   };
   if (tierId && userId) {
     await prisma.artistUserSubscription.upsert({
       create: {
-        artistSubscriptionTierId: +tierId,
-        userId: +userId,
-        amount: `${session.amount_total ?? "0"}`,
-        stripeId: session.id,
+        artistSubscriptionTierId: Number(tierId),
+        userId: Number(userId),
+        amount: session.amount_total ?? 0,
+        currency: session.currency ?? "USD",
+        stripeId: session.id, // FIXME: should this be session id? Maybe subscriptionId?
       },
       update: {
-        artistSubscriptionTierId: +tierId,
-        userId: +userId,
-        amount: `${session.amount_total ?? "0"}`,
-        stripeId: session.id,
+        artistSubscriptionTierId: Number(tierId),
+        userId: Number(userId),
+        amount: session.amount_total ?? 0,
+        currency: session.currency ?? "USD",
+        stripeId: session.id, // FIXME: should this be session id? Maybe subscriptionId?
       },
       where: {
         userId_artistSubscriptionTierId: {
           userId: Number(userId),
           artistSubscriptionTierId: Number(tierId),
         },
+      },
+    });
+  } else if (trackGroupId && userId) {
+    await prisma.userTrackGroupPurchase.create({
+      data: {
+        userId: Number(userId),
+        trackGroupId: Number(trackGroupId),
+        pricePaid: session.amount_total ?? 0,
+        currencyPaid: session.currency ?? "USD",
+        stripeId: session.id,
       },
     });
   }
@@ -47,7 +61,6 @@ export default function () {
 
   async function POST(req: Request, res: Response) {
     const signature = req.headers["stripe-signature"];
-
     let event = req.body;
     if (STRIPE_WEBHOOK_SIGNING_SECRET && signature) {
       try {

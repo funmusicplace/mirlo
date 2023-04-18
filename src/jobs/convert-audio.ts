@@ -57,7 +57,7 @@ export default async (job: Job) => {
             )
             .addOption("-f", "hls") // HLS format
             .audioChannels(2)
-            .audioBitrate("128k")
+            .audioBitrate("320k")
             .audioFrequency(48000)
             .audioCodec("libfdk_aac") // convert using Fraunhofer FDK AAC
             .on("start", () => {
@@ -101,7 +101,7 @@ export default async (job: Job) => {
             )
             .addOption("-f", "hls") // HLS format
             .audioChannels(2)
-            .audioBitrate("128k")
+            .audioBitrate("320k")
             .audioFrequency(48000)
             .audioCodec("libfdk_aac") // convert using Fraunhofer FDK AAC
             .on("start", () => {

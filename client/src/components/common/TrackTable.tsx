@@ -97,12 +97,8 @@ export const TrackTable: React.FC<{
       <thead>
         <tr>
           <th />
-          <th />
           <th>Title</th>
-          <th>Album</th>
-          <th>Artist</th>
-          <th />
-          <th />
+          <th align="right" />
         </tr>
       </thead>
       <tbody>

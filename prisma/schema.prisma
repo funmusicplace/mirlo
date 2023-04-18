@@ -28,6 +28,8 @@ model User {
   updatedAt               DateTime                 @default(now()) @updatedAt
   isAdmin                 Boolean                  @default(false)
   artistUserSubscriptions ArtistUserSubscription[]
+  country                 String?
+  UserTrackGroupPurchase  UserTrackGroupPurchase[]
 }
 
 model Post {
@@ -63,10 +65,11 @@ model ArtistSubscriptionTier {
   description             String                   @default("")
   artistId                Int
   artist                  Artist                   @relation(fields: [artistId], references: [id])
-  minAmount               String?
+  minAmount               Int? // in cents
   allowVariable           Boolean?
-  maxAmount               String?
-  defaultAmount           String?
+  maxAmount               Int? // in cents
+  defaultAmount           Int? // in cents
+  currency                String                   @default("USD")
   artistUserSubscriptions ArtistUserSubscription[]
 }
 
@@ -76,7 +79,8 @@ model ArtistUserSubscription {
   artistSubscriptionTier   ArtistSubscriptionTier @relation(fields: [artistSubscriptionTierId], references: [id])
   userId                   Int
   user                     User                   @relation(fields: [userId], references: [id])
-  amount                   String
+  amount                   Int // In cents
+  currency                 String                 @default("USD")
   stripeId                 String?
   artist                   Artist?                @relation(fields: [artistId], references: [id])
   artistId                 Int?
@@ -84,22 +88,37 @@ model ArtistUserSubscription {
   @@unique([userId, artistSubscriptionTierId])
 }
 
+model UserTrackGroupPurchase {
+  userId        Int
+  user          User       @relation(fields: [userId], references: [id])
+  trackGroupId  Int
+  trackGroup    TrackGroup @relation(fields: [trackGroupId], references: [id])
+  pricePaid     Int // in cents
+  currencyPaid  String     @default("USD")
+  datePurchased DateTime   @default(now())
+  stripeId      String?
+
+  @@unique([userId, trackGroupId])
+}
+
 model TrackGroup {
-  id           Int              @id @default(autoincrement())
-  about        String?
-  artist       Artist           @relation(fields: [artistId], references: [id])
-  artistId     Int
-  title        String?
-  tracks       Track[]
-  cover        TrackGroupCover?
-  published    Boolean          @default(false)
-  type         String?
-  releaseDate  DateTime         @default(now())
-  enabled      Boolean          @default(false)
-  createdAt    DateTime         @default(now())
-  updatedAt    DateTime         @updatedAt
-  minPrice     String?
-  isPriceFixed Boolean          @default(false)
+  id                     Int                      @id @default(autoincrement())
+  about                  String?
+  artist                 Artist                   @relation(fields: [artistId], references: [id])
+  artistId               Int
+  title                  String?
+  tracks                 Track[]
+  cover                  TrackGroupCover?
+  published              Boolean                  @default(false)
+  type                   String?
+  releaseDate            DateTime                 @default(now())
+  adminEnabled           Boolean                  @default(false)
+  createdAt              DateTime                 @default(now())
+  updatedAt              DateTime                 @updatedAt
+  minPrice               Int? // in cents
+  currency               String?                  @default("USD")
+  isPriceFixed           Boolean                  @default(false)
+  UserTrackGroupPurchase UserTrackGroupPurchase[]
 }
 
 model Track {

@@ -58,6 +58,8 @@ app.use(passport.initialize());
 const routes = [
   "trackGroups",
   "trackGroups/{id}",
+  "trackGroups/{id}/download",
+  "trackGroups/{id}/purchase",
   "tracks",
   "tracks/{id}",
   "tracks/{id}/stream/{segment}",
@@ -69,6 +71,7 @@ const routes = [
   "users",
   "users/{userId}",
   "users/{userId}/subscriptions",
+  "users/{userId}/purchases",
   "users/{userId}/artists",
   "users/{userId}/artists/{artistId}",
   "users/{userId}/artists/{artistId}/subscriptions",

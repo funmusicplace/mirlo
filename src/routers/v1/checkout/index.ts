@@ -23,20 +23,22 @@ export default function () {
     try {
       if (session_id && typeof session_id === "string") {
         const session = await stripe.checkout.sessions.retrieve(session_id);
-        const { clientId, artistId, tierId } = session.metadata as unknown as {
-          clientId: number | null;
-          artistId: number | null;
-          tierId: number | null;
-        };
+        const { clientId, artistId, trackGroupId, tierId } =
+          session.metadata as unknown as {
+            clientId: number | null;
+            artistId: number | null;
+            tierId: number | null;
+            trackGroupId: number | null;
+          };
 
-        if (clientId && tierId && artistId) {
+        if (clientId) {
           const client = await prisma.client.findFirst({
             where: {
               id: +clientId,
             },
           });
 
-          if (client) {
+          if (client && tierId && artistId) {
             // FIXME: We'll probably want clients to be able to define the
             // checkout callbackURL separately from the applicationURL
             // and that callbackURL should probably contain a pattern that
@@ -47,9 +49,20 @@ export default function () {
                   success ? "success" : "canceled"
                 }&tierId=${tierId}`
             );
+          } else if (client && trackGroupId) {
+            // FIXME: We'll probably want clients to be able to define the
+            // checkout callbackURL separately from the applicationURL
+            // and that callbackURL should probably contain a pattern that
+            // they can define
+            res.redirect(
+              client?.applicationUrl +
+                `/artist/${artistId}?trackGroupPurchase=${
+                  success ? "success" : "canceled"
+                }&trackGroupId=${trackGroupId}`
+            );
           } else {
             res.status(500).json({
-              error: "Something went wrong while subscribing the user",
+              error: "Something went wrong while completing a checkout",
             });
           }
         }

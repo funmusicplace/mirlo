@@ -38,6 +38,7 @@ interface TrackGroup {
   artistId: number;
   tracks: Track[];
   cover?: { id: number; url: string; sizes?: { [key: number]: string } };
+  minPrice?: number; // in cents
 }
 
 interface Post {
@@ -88,4 +89,11 @@ interface ArtistUserSubscription {
   amount: number;
   artistSubscriptionTierId: number;
   artistSubscriptionTier: ArtistSubscriptionTier;
+}
+
+interface UserTrackGroupPurchase {
+  userId: number;
+  trackGroupId: number;
+  amountPaid: number;
+  currency: number;
 }

@@ -31,12 +31,14 @@ export default function () {
         return next();
       }
 
-      await prisma.track.update({
+      const newTrack = await prisma.track.update({
         where: { id: Number(trackId) },
-        data: {},
+        data: {
+          title: req.body.title,
+        },
       });
 
-      res.json({ message: "Success" });
+      res.json({ result: newTrack });
     } catch (error) {
       res.json({
         error: `Track with ID ${trackId} does not exist in the database`,
