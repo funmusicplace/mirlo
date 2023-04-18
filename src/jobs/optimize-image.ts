@@ -30,7 +30,7 @@ const prisma = new PrismaClient();
 const minioClient = new Minio.Client({
   endPoint: MINIO_HOST,
   port: +MINIO_PORT,
-  useSSL: NODE_ENV !== "development",
+  useSSL: false, // NODE_ENV !== "development",
   accessKey: MINIO_ROOT_USER,
   secretKey: MINIO_ROOT_PASSWORD,
 });
