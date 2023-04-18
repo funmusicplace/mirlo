@@ -1,13 +1,12 @@
 #!/usr/bin/env node
 
-import dotenv from "dotenv-safe";
+import * as dotenv from "dotenv";
 dotenv.config();
 
 import yargs from "yargs";
 import { Job, Worker } from "bullmq";
 import winston from "winston";
 import convertAudioJob from "./convert-audio";
-// import audioDurationJob from "./audio-duration";
 import optimizeImage from "./optimize-image";
 
 import { REDIS_CONFIG } from "../config/redis";

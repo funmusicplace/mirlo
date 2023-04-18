@@ -89,6 +89,7 @@ services:
     dockerfilePath: ./background/Dockerfile # optional
     # dockerContext: ./background/src # optional
     envVars:
+      - fromGroup: blackbrd
       - key: REDIS_HOST
         fromService:
           type: redis
