@@ -33,6 +33,8 @@ services:
       mountPath: /data
       sizeGB: 2 # optional
     envVars: 
+      - key: NODE_OPTIONS
+        value: --max-old-space-size=512
       - key: DATABASE_URL
         fromDatabase:
           name: blackbrd
