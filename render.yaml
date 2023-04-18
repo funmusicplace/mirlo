@@ -78,13 +78,14 @@ services:
     envVars:
     - key: MINIO_ROOT_PASSWORD
       generateValue: true # will generate a base64-encoded 256-bit secret
-      fromGroup: blackbrd
+    - fromGroup: blackbrd
     - key: PORT
       value: 10000
     disk:
       name: data
       mountPath: /data
       sizeGB: 2 # optional
+
   # A worker
   - type: worker
     name: background
