@@ -42,6 +42,8 @@ const logger = winston.createLogger({
   ],
 });
 
+logger.info(`MinIO is at ${MINIO_HOST}:${MINIO_PORT} ${MINIO_ROOT_USER}`);
+
 // Instantiate the minio client with the endpoint
 // and access keys as shown below.
 const minioClient = new Minio.Client({
