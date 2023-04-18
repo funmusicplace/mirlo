@@ -94,6 +94,7 @@ const optimizeImage = async (job: Job) => {
   // logger.info(`input: ${filepath}`);
   try {
     const profiler = logger.startTimer();
+    logger.info(`MinIO is at ${MINIO_HOST}:${MINIO_PORT} ${MINIO_ROOT_USER}`);
 
     logger.info(`Starting to optimize images ${destination}`);
     const { buffer, size } = await getObjectFromMinio(destination);
