@@ -50,25 +50,25 @@ services:
           property: port
       - key: MINIO_ROOT_PASSWORD
         fromService:
-          type: web
+          type: pserv
           name: minio
           envVarKey: MINIO_ROOT_PASSWORD
       - key: MINIO_PORT
         fromService:
-          type: web
+          type: pserv
           name: minio
           envVarKey: PORT
       - key: MINIO_HOST
         fromService:
-          type: web
+          type: pserv
           name: minio
           property: host # available properties are listed below
   
   # A private minIO instance
-  - type: web # Should probably be pserv
+  - type: pserv # Should probably be pserv
     name: minio
     env: docker
-    plan: free
+    plan: standard
     repo: https://github.com/render-examples/minio.git # optional
     envVars:
     - key: MINIO_ROOT_PASSWORD
@@ -102,17 +102,17 @@ services:
           property: port
       - key: MINIO_ROOT_PASSWORD
         fromService:
-          type: web
+          type: pserv
           name: minio
           envVarKey: MINIO_ROOT_PASSWORD
       - key: MINIO_PORT
         fromService:
-          type: web
+          type: pserv
           name: minio
           envVarKey: PORT
       - key: MINIO_HOST
         fromService:
-          type: web
+          type: pserv
           name: minio
           property: host # available properties are listed below
 
