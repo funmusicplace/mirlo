@@ -26,7 +26,7 @@ services:
     # dockerCommand: ./start.sh
     # dockerfilePath: ./prod.Dockerfile
     buildCommand: yarn install && yarn migrate:deploy
-    startCommand: yarn staging
+    startCommand: yarn staging 
     disk: # this disk gets used to receive uploads. They should get moved to the 
           # minIO service and deleted after upload
       name: data
