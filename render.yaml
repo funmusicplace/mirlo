@@ -50,22 +50,22 @@ services:
           property: port
       - key: MINIO_ROOT_PASSWORD
         fromService:
-          type: pserv
+          type: web
           name: minio
           envVarKey: MINIO_ROOT_PASSWORD
       - key: MINIO_ROOT_USER
         fromService:
-          type: pserv
+          type: web
           name: minio
           envVarKey: MINIO_ROOT_USER
       - key: MINIO_PORT
         fromService:
-          type: pserv
+          type: web
           name: minio
           envVarKey: PORT
       - key: MINIO_HOST
         fromService:
-          type: pserv
+          type: web
           name: minio
           property: host # available properties are listed below
   
@@ -106,22 +106,22 @@ services:
           property: port
       - key: MINIO_ROOT_PASSWORD
         fromService:
-          type: pserv
+          type: web
           name: minio
           envVarKey: MINIO_ROOT_PASSWORD
       - key: MINIO_ROOT_USER
         fromService:
-          type: pserv
+          type: web
           name: minio
           envVarKey: MINIO_ROOT_USER
       - key: MINIO_PORT
         fromService:
-          type: pserv
+          type: web
           name: minio
           envVarKey: PORT
       - key: MINIO_HOST
         fromService:
-          type: pserv
+          type: web
           name: minio
           property: host # available properties are listed below
 
