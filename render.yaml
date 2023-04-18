@@ -91,6 +91,10 @@ services:
     dockerfilePath: ./background/Dockerfile # optional
     # dockerContext: ./background/src # optional
     envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: blackbrd
+          property: connectionString
       - fromGroup: blackbrd
       - key: REDIS_HOST
         fromService:
