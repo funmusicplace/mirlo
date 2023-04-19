@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import { PrismaClient, TrackGroupCover } from "@prisma/client";
 
 import { Queue, QueueEvents } from "bullmq";
 import winston from "winston";
@@ -12,8 +11,7 @@ import sharpConfig from "../config/sharp";
 import { SUPPORTED_IMAGE_MIME_TYPES } from "../config/supported-media-types";
 import { REDIS_CONFIG } from "../config/redis";
 import { createBucketIfNotExists, incomingCoversBucket } from "./minio";
-
-const prisma = new PrismaClient();
+import prisma from "../../prisma/prisma";
 
 type ConfigTypes = "artwork" | "avatar" | "banner";
 

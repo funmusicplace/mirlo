@@ -3,14 +3,13 @@ import { NextFunction, Request, Response } from "express";
 import { pick } from "lodash";
 import Stripe from "stripe";
 import { userAuthenticated } from "../../../../auth/passport";
+import prisma from "../../../../../prisma/prisma";
 
 const { STRIPE_KEY, STRIPE_SUPPORTER_PRODUCT_KEY, API_DOMAIN } = process.env;
 
 const stripe = new Stripe(STRIPE_KEY ?? "", {
   apiVersion: "2022-11-15",
 });
-
-const prisma = new PrismaClient();
 
 type Params = {
   id: string;

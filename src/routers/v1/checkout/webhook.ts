@@ -1,11 +1,8 @@
-import { Artist, PrismaClient, User } from "@prisma/client";
-import express, { NextFunction, Request, Response } from "express";
-import { pick } from "lodash";
+import { Request, Response } from "express";
 import Stripe from "stripe";
-import { userAuthenticated } from "../../../auth/passport";
+import prisma from "../../../../prisma/prisma";
 
 const { STRIPE_KEY, STRIPE_WEBHOOK_SIGNING_SECRET } = process.env;
-const prisma = new PrismaClient();
 
 const stripe = new Stripe(STRIPE_KEY ?? "", {
   apiVersion: "2022-11-15",

@@ -41,7 +41,6 @@ export const serveStatic = async (
       finalCoversBucket,
       req.params.filename
     );
-    console.log("buffer", buffer);
     res.end(buffer, "binary");
     return;
   } catch (e) {

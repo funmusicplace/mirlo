@@ -1,14 +1,12 @@
-import { PrismaClient } from "@prisma/client";
 import express from "express";
-import jwt, { Jwt, JwtPayload, VerifyErrors } from "jsonwebtoken";
-import passport from "passport";
+import jwt, { JwtPayload, VerifyErrors } from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { userAuthenticated } from "../auth/passport";
+import prisma from "../../prisma/prisma";
 
 const jwt_secret = process.env.JWT_SECRET ?? "";
 const refresh_secret = process.env.REFRESH_TOKEN_SECRET ?? "";
 
-const prisma = new PrismaClient();
 const router = express.Router();
 
 async function hashPassword(password: string) {

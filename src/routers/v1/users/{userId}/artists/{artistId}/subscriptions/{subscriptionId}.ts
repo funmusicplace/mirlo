@@ -1,12 +1,10 @@
-import { PrismaClient } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
 import {
   userAuthenticated,
   userHasPermission,
 } from "../../../../../../../auth/passport";
 import { doesSubscriptionTierBelongToUser } from "../../../../../../../utils/ownership";
-
-const prisma = new PrismaClient();
+import prisma from "../../../../../../../../prisma/prisma";
 
 export default function () {
   const operations = {

@@ -1,14 +1,14 @@
-import { PrismaClient, User } from "@prisma/client";
+import { User } from "@prisma/client";
 
 import { NextFunction, Request, Response } from "express";
 import { TokenExpiredError } from "jsonwebtoken";
 import passport from "passport";
 import passportJWT from "passport-jwt";
+import prisma from "../../prisma/prisma";
+
 const JWTStrategy = passportJWT.Strategy;
 
 const secret = process.env.JWT_SECRET;
-
-const prisma = new PrismaClient();
 
 const cookieExtractor = (req: Request) => {
   let jwt = null;

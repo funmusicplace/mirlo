@@ -1,4 +1,4 @@
-import { PrismaClient, User } from "@prisma/client";
+import { User } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
 import multer from "multer";
 import {
@@ -6,6 +6,7 @@ import {
   userHasPermission,
 } from "../../../../../../auth/passport";
 import processTrackGroupCover from "../../../../../../utils/processTrackGroupCover";
+import prisma from "../../../../../../../prisma/prisma";
 
 const upload = multer({
   dest: process.env.MEDIA_LOCATION_INCOMING ?? "/data/media/incoming",
@@ -13,8 +14,6 @@ const upload = multer({
     fileSize: 2000000,
   },
 });
-
-const prisma = new PrismaClient();
 
 type Params = {
   trackGroupId: number;

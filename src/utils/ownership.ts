@@ -1,10 +1,6 @@
-import {
-  PrismaClient,
-  TrackGroup,
-  ArtistSubscriptionTier,
-} from "@prisma/client";
+import { TrackGroup, ArtistSubscriptionTier } from "@prisma/client";
 
-const prisma = new PrismaClient();
+import prisma from "../../prisma/prisma";
 
 export const doesSubscriptionTierBelongToUser = async (
   subscriptionId: number,

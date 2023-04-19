@@ -12,6 +12,7 @@ import {
   getObjectFromMinio,
   incomingCoversBucket,
 } from "../utils/minio";
+import prisma from "../../prisma/prisma";
 
 const { defaultOptions, config: sharpConfig } = tempSharpConfig;
 
@@ -21,7 +22,6 @@ const {
   MINIO_ROOT_PASSWORD = "",
   MINIO_PORT = 9000,
 } = process.env;
-const prisma = new PrismaClient();
 
 // Instantiate the minio client with the endpoint
 // and access keys as shown below.

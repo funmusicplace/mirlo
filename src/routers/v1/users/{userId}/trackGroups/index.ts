@@ -1,12 +1,11 @@
-import { Prisma, PrismaClient } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { Request, Response } from "express";
 import {
   contentBelongsToLoggedInUserArtist,
   userAuthenticated,
 } from "../../../../../auth/passport";
 import processor from "../../../trackGroups/processor";
-
-const prisma = new PrismaClient();
+import prisma from "../../../../../../prisma/prisma";
 
 export default function () {
   const operations = {

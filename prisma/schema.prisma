@@ -26,6 +26,7 @@ model User {
   artists                 Artist[]
   createdAt               DateTime                 @default(now())
   updatedAt               DateTime                 @default(now()) @updatedAt
+  deletedAt               DateTime?
   isAdmin                 Boolean                  @default(false)
   artistUserSubscriptions ArtistUserSubscription[]
   country                 String?
@@ -33,15 +34,17 @@ model User {
 }
 
 model Post {
-  id          Int      @id @default(autoincrement())
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @default(now()) @updatedAt
-  title       String
-  content     String?
-  publishedAt DateTime @default(now())
-  viewCount   Int      @default(0)
-  artist      Artist?  @relation(fields: [artistId], references: [id])
-  artistId    Int?
+  id                 Int       @id @default(autoincrement())
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @default(now()) @updatedAt
+  deletedAt          DateTime?
+  title              String
+  content            String?
+  publishedAt        DateTime  @default(now())
+  viewCount          Int       @default(0)
+  artist             Artist?   @relation(fields: [artistId], references: [id])
+  artistId           Int?
+  forSubscribersOnly Boolean   @default(false)
 }
 
 model Artist {
@@ -55,6 +58,7 @@ model Artist {
   enabled           Boolean                  @default(false)
   createdAt         DateTime                 @default(now())
   updatedAt         DateTime                 @default(now()) @updatedAt
+  deletedAt         DateTime?
   subscriptionTiers ArtistSubscriptionTier[]
   userSubscriptions ArtistUserSubscription[]
 }
@@ -71,6 +75,9 @@ model ArtistSubscriptionTier {
   defaultAmount           Int? // in cents
   currency                String                   @default("USD")
   artistUserSubscriptions ArtistUserSubscription[]
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @default(now()) @updatedAt
+  deletedAt               DateTime?
 }
 
 model ArtistUserSubscription {
@@ -84,6 +91,9 @@ model ArtistUserSubscription {
   stripeId                 String?
   artist                   Artist?                @relation(fields: [artistId], references: [id])
   artistId                 Int?
+  createdAt                DateTime               @default(now())
+  updatedAt                DateTime               @default(now()) @updatedAt
+  deletedAt                DateTime?
 
   @@unique([userId, artistSubscriptionTierId])
 }
@@ -115,6 +125,7 @@ model TrackGroup {
   adminEnabled           Boolean                  @default(false)
   createdAt              DateTime                 @default(now())
   updatedAt              DateTime                 @updatedAt
+  deletedAt              DateTime?
   minPrice               Int? // in cents
   currency               String?                  @default("USD")
   isPriceFixed           Boolean                  @default(false)
@@ -129,6 +140,7 @@ model Track {
   audio        TrackAudio?
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
+  deletedAt    DateTime?
   isPreview    Boolean     @default(true)
 }
 
@@ -139,16 +151,18 @@ model TrackGroupCover {
   trackGroupId     Int        @unique
   createdAt        DateTime   @default(now())
   updatedAt        DateTime   @updatedAt
+  deletedAt        DateTime?
   originalFilename String?
 }
 
 model TrackAudio {
-  id               String   @id @default(uuid()) @db.Uuid
+  id               String    @id @default(uuid()) @db.Uuid
   url              String?
-  track            Track?   @relation(fields: [trackId], references: [id])
-  trackId          Int?     @unique
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  track            Track?    @relation(fields: [trackId], references: [id])
+  trackId          Int?      @unique
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  deletedAt        DateTime?
   originalFilename String?
   duration         Int?
   hash             String?

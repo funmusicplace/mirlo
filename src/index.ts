@@ -1,30 +1,27 @@
-import { PrismaClient } from "@prisma/client";
 import express from "express";
 import cookieParser from "cookie-parser";
 import passport from "passport";
 import { initialize } from "express-openapi";
 import swaggerUi from "swagger-ui-express";
+import { flatten } from "lodash";
 import cors from "cors";
 import * as dotenv from "dotenv";
-dotenv.config();
-
-import apiDoc from "./routers/v1/api-doc";
 import {
   BullMQAdapter,
   createBullBoard,
   ExpressAdapter,
 } from "@bull-board/express";
 
+import apiDoc from "./routers/v1/api-doc";
 import auth from "./routers/auth";
-
 import "./auth/passport";
-
 import { imageQueue } from "./utils/processTrackGroupCover";
 import { audioQueue } from "./utils/processTrackAudio";
-import { flatten } from "lodash";
 import { serveStatic } from "./static";
+import prisma from "../prisma/prisma";
 
-const prisma = new PrismaClient();
+dotenv.config();
+
 const app = express();
 
 app.use(async (...args) => {

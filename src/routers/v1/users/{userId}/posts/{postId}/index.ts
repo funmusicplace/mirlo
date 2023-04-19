@@ -1,7 +1,6 @@
-import { PrismaClient } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
 import { userAuthenticated } from "../../../../../../auth/passport";
-const prisma = new PrismaClient();
+import prisma from "../../../../../../../prisma/prisma";
 
 const doesPostBelongToUser = () => {
   return async (req: Request, res: Response, next: NextFunction) => {
@@ -13,6 +12,7 @@ const doesPostBelongToUser = () => {
           artist: {
             userId: Number(userId),
           },
+          deletedAt: null,
         },
       });
       if (post) {
@@ -36,7 +36,7 @@ export default function () {
   const operations = {
     PUT: [userAuthenticated, doesPostBelongToUser(), PUT],
     DELETE: [userAuthenticated, doesPostBelongToUser(), DELETE],
-    GET,
+    GET: [userAuthenticated, doesPostBelongToUser(), GET],
   };
 
   async function PUT(req: Request, res: Response) {

@@ -1,10 +1,9 @@
-import { PrismaClient, User } from "@prisma/client";
+import { User } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
 import fs from "fs";
 const fsPromises = fs.promises;
 import path from "path";
-
-const prisma = new PrismaClient();
+import prisma from "../../../../../../prisma/prisma";
 
 // FIXME: REplace with MEDIA_LOCATIOn
 const ROOT = "/data/media/audio";

@@ -1,26 +1,20 @@
 import { Request, Response } from "express";
-import { User, PrismaClient } from "@prisma/client";
-
 import { Queue, QueueEvents } from "bullmq";
 import { promises as fs } from "fs";
 import path from "path";
 import shasum from "shasum";
 import winston from "winston";
-import dimensions from "image-size";
 import { fromFile } from "file-type";
-// import { Track, File } from "../db/models";
 import mm from "music-metadata";
-import sharpConfig from "../config/sharp";
 
 import {
   // FIXME: HIGH_RES_AUDIO_MIME_TYPES,
   SUPPORTED_AUDIO_MIME_TYPES,
-  SUPPORTED_IMAGE_MIME_TYPES,
 } from "../config/supported-media-types";
 import { REDIS_CONFIG } from "../config/redis";
 import sendMail from "../jobs/send-mail";
 
-const prisma = new PrismaClient();
+import prisma from "../../prisma/prisma";
 
 const BASE_DATA_DIR = process.env.BASE_DATA_DIR || "/";
 

@@ -27,6 +27,7 @@ const ManageArtistPosts: React.FC<{}> = () => {
   const userId = user?.id;
 
   const fetchPosts = React.useCallback(async () => {
+    console.log("fetching");
     if (userId) {
       const fetchedPosts = await api.getMany<Post>(
         `users/${userId}/posts?artistId=${artistId}`
@@ -107,13 +108,7 @@ const ManageArtistPosts: React.FC<{}> = () => {
       ))}
       {managePost && (
         <Modal open={!!managePost} onClose={() => setManagePost(undefined)}>
-          <PostForm
-            existing={managePost}
-            reload={() => {
-              return fetchPosts();
-            }}
-            artist={artist}
-          />
+          <PostForm existing={managePost} reload={fetchPosts} artist={artist} />
         </Modal>
       )}
       <Button
@@ -129,9 +124,7 @@ const ManageArtistPosts: React.FC<{}> = () => {
       <NewPostForm
         open={addingNewPost}
         onClose={() => setAddingNewPost(false)}
-        reload={() => {
-          return Promise.resolve();
-        }}
+        reload={fetchPosts}
         artist={artist}
       />
     </div>

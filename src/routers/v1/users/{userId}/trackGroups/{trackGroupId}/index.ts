@@ -1,14 +1,12 @@
-import { Artist, PrismaClient, User } from "@prisma/client";
+import { Artist, User } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
 import { pick } from "lodash";
 import {
   contentBelongsToLoggedInUserArtist,
   userAuthenticated,
-  userHasPermission,
 } from "../../../../../../auth/passport";
 import { doesTrackGroupBelongToUser } from "../../../../../../utils/ownership";
-
-const prisma = new PrismaClient();
+import prisma from "../../../../../../../prisma/prisma";
 
 type Params = {
   trackGroupId: string;

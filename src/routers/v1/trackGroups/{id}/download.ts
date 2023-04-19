@@ -1,13 +1,12 @@
 import { PrismaClient, TrackAudio, Track, User } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
-import { userAuthenticated } from "../../../../auth/passport";
 import JSZip from "jszip";
 import fs from "fs";
 import path from "path";
+import { userAuthenticated } from "../../../../auth/passport";
+import prisma from "../../../../../prisma/prisma";
 
 const { MEDIA_LOCATION } = process.env;
-
-const prisma = new PrismaClient();
 
 async function buildZipFileForPath(
   tracks: (Track & {

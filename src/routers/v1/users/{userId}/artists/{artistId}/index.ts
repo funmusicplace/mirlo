@@ -1,11 +1,10 @@
-import { PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
 import {
   userAuthenticated,
   userHasPermission,
   userLoggedInWithoutRedirect,
 } from "../../../../../../auth/passport";
-const prisma = new PrismaClient();
+import prisma from "../../../../../../../prisma/prisma";
 
 type Params = {
   artistId: number;

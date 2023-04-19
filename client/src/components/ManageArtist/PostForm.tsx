@@ -66,6 +66,7 @@ const PostForm: React.FC<{
           }
 
           snackbar("Post updated", { type: "success" });
+          reload?.();
           onClose?.();
         } catch (e) {
           snackbar("There was a problem with the API", { type: "warning" });

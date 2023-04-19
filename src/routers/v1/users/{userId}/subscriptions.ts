@@ -1,12 +1,7 @@
 import { PrismaClient, Prisma, User } from "@prisma/client";
 import { Request, Response } from "express";
-import {
-  userAuthenticated,
-  userHasPermission,
-  userLoggedInWithoutRedirect,
-} from "../../../../auth/passport";
-
-const prisma = new PrismaClient();
+import { userAuthenticated } from "../../../../auth/passport";
+import prisma from "../../../../../prisma/prisma";
 
 type Params = {
   userId: string;
