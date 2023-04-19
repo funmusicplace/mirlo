@@ -45,7 +45,7 @@ const logger = winston.createLogger({
 });
 
 const queueOptions = {
-  prefix: "nomads",
+  prefix: "blackbird",
   connection: REDIS_CONFIG,
 };
 

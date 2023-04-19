@@ -9,7 +9,7 @@ services:
       - "yes"
       - "--requirepass ${REDIS_PASSWORD}"
     image: redis
-    container_name: nomads-redis
+    container_name: blackbird-redis
     restart: always
     expose:
       - 6379
@@ -24,7 +24,7 @@ services:
       - .env
     build: .
     command: /bin/sh -c "yarn && yarn migrate:deploy && yarn dev:api"
-    container_name: nomads-api
+    container_name: blackbird-api
     environment:
       - NODE_ENV=${NODE_ENV:-development}
     depends_on:
@@ -49,7 +49,7 @@ services:
       - .env
     build: background
     # command: /bin/sh -c "yarn && yarn migrate && yarn start:dev"
-    container_name: nomads-background
+    container_name: blackbird-background
     environment:
       - NODE_ENV=${NODE_ENV:-development}
     depends_on:
@@ -67,6 +67,7 @@ services:
 
   minio:
     image: minio/minio
+    container_name: blackbird-minio
     networks:
       api-network:
         aliases:
@@ -86,7 +87,7 @@ services:
     volumes:
       - ./data/pgsql:/var/lib/postgresql/data
       - ./data/pgsql_backups:/backups
-    container_name: nomads-pgsql
+    container_name: blackbird-pgsql
     networks:
       api-network:
         aliases:

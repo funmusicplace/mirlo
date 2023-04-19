@@ -15,7 +15,7 @@ Main libraries:
 
 ```
 git clone <repository>
-cd nomads
+cd blackbird
 docker-compose up
 ```
 
@@ -44,10 +44,10 @@ docker-compose up -d --force-recreate --no-deps background
 If you want to upload music or upload images, you'll need a worker running.
 
 ```sh
-docker exec -it nomads-api node src/jobs/queue-worker.js run
+docker exec -it blackbird-api node src/jobs/queue-worker.js run
 ```
 
-> NOTE: this is done automatically by the `nomads-background` container in docker.
+> NOTE: this is done automatically by the `blackbird-background` container in docker.
 
 > NOTE: In local development you can see the worker queue at /admin/queues on the server
 
@@ -56,7 +56,7 @@ docker exec -it nomads-api node src/jobs/queue-worker.js run
 To make changes to the database, change the schema.prisma file and then run:
 
 ```
-docker exec -it nomads-api npx prisma migrate dev
+docker exec -it blackbird-api npx prisma migrate dev
 ```
 
 ## Stripe

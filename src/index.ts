@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import express from "express";
 import cookieParser from "cookie-parser";
 import passport from "passport";
@@ -22,6 +22,7 @@ import "./auth/passport";
 import { imageQueue } from "./utils/processTrackGroupCover";
 import { audioQueue } from "./utils/processTrackAudio";
 import { flatten } from "lodash";
+import { serveStatic } from "./static";
 
 const prisma = new PrismaClient();
 const app = express();
@@ -129,7 +130,7 @@ app.use(express.static("public"));
 // app.use(function (req, res, next) {
 //   res.sendFile(path.join(__dirname, "../", "public", "app.html"));
 // });
-app.use("/images", express.static("data/media/images"));
+app.use("/images/:filename", serveStatic);
 app.use("/audio", express.static("data/media/audio"));
 
 // Setting up a bull worker dashboard

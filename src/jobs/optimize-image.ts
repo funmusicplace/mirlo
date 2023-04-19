@@ -1,7 +1,5 @@
 import winston from "winston";
 import sharp from "sharp";
-import path from "path";
-import bytes from "bytes";
 
 import tempSharpConfig from "../config/sharp";
 import { Job } from "bullmq";
@@ -11,6 +9,7 @@ import * as Minio from "minio";
 import {
   createBucketIfNotExists,
   finalCoversBucket,
+  getObjectFromMinio,
   incomingCoversBucket,
 } from "../utils/minio";
 
@@ -21,7 +20,6 @@ const {
   MINIO_ROOT_USER = "",
   MINIO_ROOT_PASSWORD = "",
   MINIO_PORT = 9000,
-  NODE_ENV,
 } = process.env;
 const prisma = new PrismaClient();
 
@@ -50,38 +48,6 @@ const logger = winston.createLogger({
   ],
 });
 
-async function getObjectFromMinio(
-  filename: string
-): Promise<{ buffer: Buffer; size: number }> {
-  return new Promise(
-    (resolve: (result: { buffer: Buffer; size: number }) => any, reject) => {
-      logger.info(
-        `Getting object from MinIO Bucket ${incomingCoversBucket}: ${filename}`
-      );
-      const buff: Buffer[] = [];
-      var size = 0;
-      minioClient
-        .getObject(incomingCoversBucket, filename)
-        .then(function (dataStream) {
-          logger.info("Got stream");
-          dataStream.on("data", async function (chunk) {
-            buff.push(chunk);
-            size += chunk.length;
-          });
-          dataStream.on("end", function () {
-            logger.info("End. Total size = " + size);
-            resolve({ buffer: Buffer.concat(buff), size });
-          });
-          dataStream.on("error", function (err) {
-            logger.error(err);
-            reject(err);
-          });
-        })
-        .catch(reject);
-    }
-  );
-}
-
 /**
  * Convert and optimize track artworks to mozjpeg and webp
  */
@@ -89,15 +55,18 @@ async function getObjectFromMinio(
 const optimizeImage = async (job: Job) => {
   const { filepath, config = sharpConfig.artwork, destination } = job.data;
 
-  // logger.info(`passed ${JSON.stringify(config)}`);
-  // logger.info(`base ${MEDIA_LOCATION_INCOMING}`);
-  // logger.info(`input: ${filepath}`);
   try {
     const profiler = logger.startTimer();
     logger.info(`MinIO is at ${MINIO_HOST}:${MINIO_PORT} ${MINIO_ROOT_USER}`);
 
     logger.info(`Starting to optimize images ${destination}`);
-    const { buffer, size } = await getObjectFromMinio(destination);
+    const { buffer, size } = await getObjectFromMinio(
+      minioClient,
+      finalCoversBucket,
+      destination,
+      logger
+    );
+
     await createBucketIfNotExists(minioClient, finalCoversBucket, logger);
 
     logger.info(`Got object of size ${size}`);

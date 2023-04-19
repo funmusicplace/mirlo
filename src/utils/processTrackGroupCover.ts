@@ -11,7 +11,6 @@ import sharpConfig from "../config/sharp";
 
 import { SUPPORTED_IMAGE_MIME_TYPES } from "../config/supported-media-types";
 import { REDIS_CONFIG } from "../config/redis";
-import sendMail from "../jobs/send-mail";
 import { createBucketIfNotExists, incomingCoversBucket } from "./minio";
 
 const prisma = new PrismaClient();
@@ -23,7 +22,6 @@ const {
   MINIO_ROOT_USER = "",
   MINIO_ROOT_PASSWORD = "",
   MINIO_PORT = 9000,
-  NODE_ENV,
 } = process.env;
 
 const logger = winston.createLogger({
@@ -54,7 +52,7 @@ const minioClient = new Minio.Client({
 });
 
 const queueOptions = {
-  prefix: "nomads",
+  prefix: "blackbird",
   connection: REDIS_CONFIG,
 };
 

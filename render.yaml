@@ -19,7 +19,7 @@ services:
     name: api
     env: node
     # env: docker
-    repo: https://github.com/funmusicplace/nomads.git # optional
+    repo: https://github.com/funmusicplace/blackbird.git # optional
     region: oregon # optional (defaults to oregon)
     branch: main # optional (defaults to master)
     plan: starter # Supposedly this should be free but 

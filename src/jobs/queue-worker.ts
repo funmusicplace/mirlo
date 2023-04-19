@@ -28,7 +28,7 @@ const logger = winston.createLogger({
 });
 
 const workerOptions = {
-  prefix: "nomads",
+  prefix: "blackbird",
   connection: REDIS_CONFIG,
 };
 
