@@ -96,7 +96,7 @@ const PostForm: React.FC<{
         <InputEl type="datetime-local" {...register("publishedAt")} />
       </FormComponent>
       <FormComponent>
-        Content: <TextArea {...register("content")} />
+        Content: <TextArea {...register("content")} rows={10} />
       </FormComponent>
       <Button
         type="submit"

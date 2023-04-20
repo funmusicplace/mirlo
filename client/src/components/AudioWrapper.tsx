@@ -129,22 +129,29 @@ export const AudioWrapper: React.FC<{
   return (
     <>
       <>
-        <IconButton onClick={onClickPrevious}>
-          <FaBackward />
-        </IconButton>
-        {!playing && (
-          <IconButton onClick={onPlay}>
-            <FaPlay />
+        <div
+          className={css`
+            display: flex;
+            // margin-right: 1rem;
+          `}
+        >
+          <IconButton onClick={onClickPrevious}>
+            <FaBackward />
           </IconButton>
-        )}
-        {playing && (
-          <IconButton onClick={onPause}>
-            <FaPause />
+          {!playing && (
+            <IconButton onClick={onPlay}>
+              <FaPlay />
+            </IconButton>
+          )}
+          {playing && (
+            <IconButton onClick={onPause}>
+              <FaPause />
+            </IconButton>
+          )}
+          <IconButton onClick={onClickNext}>
+            <FaForward />
           </IconButton>
-        )}
-        <IconButton onClick={onClickNext}>
-          <FaForward />
-        </IconButton>
+        </div>
         <ReactHlsPlayer
           src={streamUrl}
           autoPlay={false}
@@ -164,8 +171,8 @@ export const AudioWrapper: React.FC<{
             height: 0.5rem;
             width: 100%;
             margin-left: 1rem;
-            border-radius: 1rem;
             margin-right: 1rem;
+            border-radius: 1rem;
             background: rgba(0, 0, 0, 0.6);
           `}
         >

@@ -168,6 +168,7 @@ function App() {
     return () => (interval ? clearInterval(interval) : undefined);
   }, [userId, dispatch, navigate, location.pathname]);
 
+  // In the case of a widget we don't show all the wrapper stuff
   if (location.pathname.includes("widget")) {
     return <Outlet />;
   }
