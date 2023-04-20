@@ -7,7 +7,8 @@ const prisma = new PrismaClient();
  */
 
 /**
- * We intercept deletions and soft delete them
+ * We intercept deletions for models with a `deletedAt` field
+ * and instead soft deletes them.
  */
 prisma.$use(async (params, next) => {
   const hasDeletedAtField = Prisma.dmmf.datamodel.models
@@ -24,11 +25,32 @@ prisma.$use(async (params, next) => {
     if (params.action == "deleteMany") {
       // Delete many queries
       params.action = "updateMany";
-      if (params.args.data != undefined) {
+      if (params.args.data !== undefined) {
         params.args.data["deletedAt"] = new Date();
       } else {
         params.args["data"] = { deletedAt: new Date() };
       }
+    }
+    // FIXME: how do we make this work for nested queries?
+    if (params.action === "findFirst") {
+      if (!params.args) {
+        params.args = { where: { deletedAt: null } };
+      } else if (params.args?.where !== undefined) {
+        params.args.where["deletedAt"] = null;
+      } else {
+        params.args.where = { deletedAt: null };
+      }
+    }
+    if (params.action === "findMany") {
+      // params.args["where"].deletedAt = null;
+      if (!params.args) {
+        params.args = { where: { deletedAt: null } };
+      } else if (params.args.where !== undefined) {
+        params.args.where["deletedAt"] = null;
+      } else {
+        params.args.where = { deletedAt: null };
+      }
+      console.log("params", params.args);
     }
   }
   return next(params);

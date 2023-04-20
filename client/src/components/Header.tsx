@@ -36,13 +36,17 @@ const Header = () => {
         align-items: center;
         padding: 0.5rem 1rem;
         background-color: ${theme.colors.primaryHighlight};
-        margin-bottom: 1rem;
+        position: fixed;
+        width: 100%;
+        z-index: 999999;
       `}
     >
       <h1
         className={css`
           color: ${theme.colors.text};
           margin-top: -0.1rem;
+          line-height: 0;
+          font-size: 1.5rem;
         `}
       >
         <Link to="/">blackbird...</Link>
@@ -53,7 +57,8 @@ const Header = () => {
             position: absolute;
             top: 0;
             width: 100%;
-            height: 70%;
+            padding: 0.5rem;
+            padding-bottom: 1rem;
             background: ${theme.colors.primaryHighlight};
           `}
         >

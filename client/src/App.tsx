@@ -1,4 +1,5 @@
 import { css, injectGlobal } from "@emotion/css";
+import LoadingSpinner from "components/common/LoadingSpinner";
 import Snackbar from "components/common/Snackbar";
 import Player from "components/Player";
 import React, { useContext, useState } from "react";
@@ -15,6 +16,7 @@ injectGlobal`
     margin: 0;
     padding: 0;
   }
+
   @font-face {
     font-family: 'Patrick Hand SC';
     font-style: normal;
@@ -37,6 +39,12 @@ injectGlobal`
 
   html {
     font-size: 18px;
+    min-height: 100%;
+  }
+
+  body,
+  #root {
+    min-height: 100%;
   }
 
   h1 {
@@ -160,19 +168,33 @@ function App() {
     return () => (interval ? clearInterval(interval) : undefined);
   }, [userId, dispatch, navigate, location.pathname]);
 
+  if (location.pathname.includes("widget")) {
+    return <Outlet />;
+  }
+
   return (
     <>
-      <Helmet>
-        <title>blackbird</title>
-      </Helmet>
       <div
         className={css`
           display: flex;
           flex-direction: column;
+          min-height: 100%;
         `}
       >
         {isDisplayed && <Snackbar />}
-        {isLoading && <>Loading...</>}
+        {isLoading && (
+          <div
+            className={css`
+              display: flex;
+              height: 100%;
+              justify-content: center;
+              align-items: center;
+              font-size: 4rem;
+            `}
+          >
+            <LoadingSpinner />
+          </div>
+        )}
         {!isLoading && (
           <>
             <Header />
@@ -182,6 +204,7 @@ function App() {
                 padding: 1rem;
                 margin: 0 auto;
                 margin-bottom: 4rem;
+                margin-top: 6rem;
                 width: 100%;
               `}
             >
