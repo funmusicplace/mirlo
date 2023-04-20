@@ -147,14 +147,22 @@ const Header = () => {
           </menu>
         </div>
       )}
-      <IconButton
-        variant="outlined"
-        onClick={() => {
-          setIsMenuOpen(true);
-        }}
+      <div
+        className={css`
+          display: flex;
+          align-items: center;
+        `}
       >
-        <ImMenu color={theme.colors.text} />
-      </IconButton>
+        <Link to="/profile">{state.user?.name}</Link>
+        <IconButton
+          variant="outlined"
+          onClick={() => {
+            setIsMenuOpen(true);
+          }}
+        >
+          <ImMenu color={theme.colors.text} />
+        </IconButton>
+      </div>
     </header>
   );
 };

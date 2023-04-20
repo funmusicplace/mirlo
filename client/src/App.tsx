@@ -3,7 +3,6 @@ import LoadingSpinner from "components/common/LoadingSpinner";
 import Snackbar from "components/common/Snackbar";
 import Player from "components/Player";
 import React, { useContext, useState } from "react";
-import { Helmet } from "react-helmet";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import api from "services/api";
 import { useGlobalStateContext } from "state/GlobalState";
@@ -145,14 +144,14 @@ function App() {
             type: "setLoggedInUser",
             user: undefined,
           });
-          if (
-            !(
-              location.pathname.includes("login") ||
-              location.pathname.includes("signup")
-            )
-          ) {
-            navigate("/login");
-          }
+          // if (
+          //   !(
+          //     location.pathname.includes("login") ||
+          //     location.pathname.includes("signup")
+          //   )
+          // ) {
+          //   navigate("/login");
+          // }
         }
       }
     };

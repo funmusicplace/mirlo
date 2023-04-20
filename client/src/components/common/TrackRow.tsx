@@ -1,7 +1,6 @@
 import { css } from "@emotion/css";
 import React from "react";
 import { FaPause, FaPen, FaPlay, FaSave, FaTrash } from "react-icons/fa";
-import { Link } from "react-router-dom";
 import { useGlobalStateContext } from "state/GlobalState";
 import useDraggableTrack from "utils/useDraggableTrack";
 

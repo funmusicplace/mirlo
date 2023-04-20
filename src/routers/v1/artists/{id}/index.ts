@@ -1,18 +1,28 @@
 import { Request, Response } from "express";
-import processor from "../../trackGroups/processor";
+import { User } from "@prisma/client";
+
+import trackGroupProcessor from "../../trackGroups/processor";
+import postProcessor from "../../posts/processor";
+
 import prisma from "../../../../../prisma/prisma";
+import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
+import { checkIsUserSubscriber } from "../../../../utils/artist";
 
 export default function () {
   const operations = {
-    GET,
+    GET: [userLoggedInWithoutRedirect, GET],
   };
 
   async function GET(req: Request, res: Response) {
     const { id }: { id?: string } = req.params;
+    const user = req.user as User;
 
     if (!id) {
       return res.status(400);
     }
+
+    const isUserSubscriber = await checkIsUserSubscriber(user, Number(id));
+
     const artist = await prisma.artist.findFirst({
       where: { id: Number(id), enabled: true },
       include: {
@@ -34,14 +44,22 @@ export default function () {
             publishedAt: {
               lte: new Date(),
             },
+            deletedAt: null,
           },
         },
       },
     });
+
     res.json({
       result: {
         ...artist,
-        trackGroups: artist?.trackGroups.map(processor.single),
+        posts: artist?.posts.map((p) =>
+          postProcessor.single(
+            p,
+            isUserSubscriber || artist.userId === user?.id
+          )
+        ),
+        trackGroups: artist?.trackGroups.map(trackGroupProcessor.single),
       },
     });
   }

@@ -1,7 +1,5 @@
 import { TrackGroup, Track, TrackGroupCover } from "@prisma/client";
 
-import sharpConfig from "../../../config/sharp";
-
 export const generateCover = (url: string) => {
   return `${process.env.STATIC_MEDIA_HOST}/images/${url}.jpg`;
 };

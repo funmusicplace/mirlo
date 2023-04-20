@@ -3,7 +3,7 @@ import Button from "components/common/Button";
 import Modal from "components/common/Modal";
 import Money from "components/common/Money";
 import React from "react";
-import { FaArrowDown, FaCheckCircle } from "react-icons/fa";
+import { FaArrowDown } from "react-icons/fa";
 import api from "services/api";
 import { useGlobalStateContext } from "state/GlobalState";
 import { useSnackbar } from "state/SnackbarContext";
@@ -25,11 +25,14 @@ const ArtistTrackGroup: React.FC<{
 
   const checkForAlbumOwnership = React.useCallback(async () => {
     try {
-      const { results: purchases } = await api.getMany<UserTrackGroupPurchase>(
-        `users/${userId}/purchases?trackGroupId=${trackGroup.id}`
-      );
+      if (userId) {
+        const { results: purchases } =
+          await api.getMany<UserTrackGroupPurchase>(
+            `users/${userId}/purchases?trackGroupId=${trackGroup.id}`
+          );
 
-      setIsOwned(purchases.length > 0);
+        setIsOwned(purchases.length > 0);
+      }
     } catch (e) {
       console.error(e);
     }

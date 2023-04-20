@@ -2,28 +2,23 @@ import { css } from "@emotion/css";
 import React from "react";
 import { Link } from "react-router-dom";
 import api from "../services/api";
-import { useGlobalStateContext } from "../state/GlobalState";
 import Box from "./common/Box";
 import PostContent from "./common/PostContent";
 
 function Home() {
-  const {
-    state: { user },
-  } = useGlobalStateContext();
   const [posts, setPosts] = React.useState<Post[]>([]);
 
   const fetchPosts = React.useCallback(async () => {
     const fetched = await api.getMany<Post>("posts");
-    setPosts(fetched.results);
+    setPosts(
+      // FIXME: Maybe this should be managed by a filter on the API?
+      fetched.results.filter((p) => !(p.forSubscribersOnly && p.content === ""))
+    );
   }, []);
 
   React.useEffect(() => {
     fetchPosts();
   }, [fetchPosts]);
-
-  if (!user) {
-    return null;
-  }
 
   return (
     <div>

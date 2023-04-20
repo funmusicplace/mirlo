@@ -21,17 +21,19 @@ const ArtistSupport: React.FC<{ artist: Artist }> = ({ artist }) => {
 
   const checkForSubscription = React.useCallback(async () => {
     try {
-      const { results: subscriptions } =
-        await api.getMany<ArtistUserSubscription>(
-          `users/${userId}/subscriptions?artistId=${artist.id}`
+      if (userId) {
+        const { results: subscriptions } =
+          await api.getMany<ArtistUserSubscription>(
+            `users/${userId}/subscriptions?artistId=${artist.id}`
+          );
+        const subscriptionIds = subscriptions.map(
+          (s) => s.artistSubscriptionTierId
         );
-      const subscriptionIds = subscriptions.map(
-        (s) => s.artistSubscriptionTierId
-      );
-      const hasId = artist.subscriptionTiers.find((tier) =>
-        subscriptionIds.includes(tier.id)
-      );
-      setIsSubscribed(!!hasId);
+        const hasId = artist.subscriptionTiers.find((tier) =>
+          subscriptionIds.includes(tier.id)
+        );
+        setIsSubscribed(!!hasId);
+      }
     } catch (e) {
       console.error(e);
     }

@@ -10,7 +10,11 @@ const ArtistAlbums: React.FC<{ artist: Artist }> = ({ artist }) => {
     <div style={{ marginTop: "1rem" }}>
       <h2>Releases</h2>
       {artist.trackGroups?.map((trackGroup) => (
-        <ArtistTrackGroup trackGroup={trackGroup} artist={artist} />
+        <ArtistTrackGroup
+          key={trackGroup.id}
+          trackGroup={trackGroup}
+          artist={artist}
+        />
       ))}
     </div>
   );

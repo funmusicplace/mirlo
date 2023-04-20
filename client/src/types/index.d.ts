@@ -47,6 +47,7 @@ interface Post {
   content: string;
   publishedAt: string;
   artist: Artist;
+  forSubscribersOnly: boolean;
 }
 
 interface Artist {

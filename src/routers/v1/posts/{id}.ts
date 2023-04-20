@@ -1,13 +1,16 @@
 import { Request, Response } from "express";
 import prisma from "../../../../prisma/prisma";
+import { userLoggedInWithoutRedirect } from "../../../auth/passport";
+import { User } from "@prisma/client";
 
 export default function () {
   const operations = {
-    GET,
+    GET: [userLoggedInWithoutRedirect, GET],
   };
 
   async function GET(req: Request, res: Response) {
     const { id }: { id?: string } = req.params;
+    const user = req.user as User;
 
     const post = await prisma.post.findUnique({
       where: { id: Number(id) },

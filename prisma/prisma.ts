@@ -31,26 +31,32 @@ prisma.$use(async (params, next) => {
         params.args["data"] = { deletedAt: new Date() };
       }
     }
+  }
+  return next(params);
+});
+
+/**
+ * We intercept find or findMany on models that have a deletedAt
+ * so that it filters out null values.
+ */
+prisma.$use(async (params, next) => {
+  const hasDeletedAtField = Prisma.dmmf.datamodel.models
+    .find((m) => m.name === params.model)
+    ?.fields.find((field) => field.name === "deletedAt");
+
+  if (!!hasDeletedAtField) {
     // FIXME: how do we make this work for nested queries?
-    if (params.action === "findFirst") {
+    if (params.action === "findFirst" || params.action === "findMany") {
       if (!params.args) {
         params.args = { where: { deletedAt: null } };
-      } else if (params.args?.where !== undefined) {
-        params.args.where["deletedAt"] = null;
-      } else {
+      } else if (!params.args.where) {
         params.args.where = { deletedAt: null };
-      }
-    }
-    if (params.action === "findMany") {
-      // params.args["where"].deletedAt = null;
-      if (!params.args) {
-        params.args = { where: { deletedAt: null } };
-      } else if (params.args.where !== undefined) {
+      } else if (
+        params.args.where !== undefined &&
+        params.args.where.deletedAt === undefined
+      ) {
         params.args.where["deletedAt"] = null;
-      } else {
-        params.args.where = { deletedAt: null };
       }
-      console.log("params", params.args);
     }
   }
   return next(params);

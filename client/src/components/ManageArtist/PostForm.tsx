@@ -10,6 +10,7 @@ import { pick } from "lodash";
 import LoadingSpinner from "components/common/LoadingSpinner";
 import api from "../../services/api";
 import { useGlobalStateContext } from "state/GlobalState";
+import { css } from "@emotion/css";
 
 const PostForm: React.FC<{
   existing?: Post;
@@ -32,6 +33,7 @@ const PostForm: React.FC<{
     title: string;
     publishedAt: string;
     content: string;
+    forSubscribersOnly: boolean;
   }>({
     defaultValues: existing
       ? { ...existing, publishedAt: publishedAt.toISOString().slice(0, 16) }
@@ -51,16 +53,22 @@ const PostForm: React.FC<{
           if (existingId) {
             // const timezoneOffset =
             await api.put(`users/${userId}/posts/${existingId}`, {
-              ...pick(data, ["title", "content"]),
+              ...pick(data, ["title", "content", "forSubscribersOnly"]),
               publishedAt: new Date(data.publishedAt + ":00").toISOString(),
               artistId: artist.id,
             });
           } else {
             await api.post<
-              { title?: string; artistId: number; cover?: File[] },
+              {
+                title?: string;
+                artistId: number;
+                cover?: File[];
+                publishedAt: string;
+              },
               { id: number }
             >(`users/${userId}/posts`, {
-              ...pick(data, ["title", "content", "publishedAt"]),
+              ...pick(data, ["title", "content", "forSubscribersOnly"]),
+              publishedAt: new Date(data.publishedAt + ":00").toISOString(),
               artistId: artist.id,
             });
           }
@@ -97,6 +105,22 @@ const PostForm: React.FC<{
       </FormComponent>
       <FormComponent>
         Content: <TextArea {...register("content")} rows={10} />
+      </FormComponent>
+      <FormComponent
+        className={css`
+          margin-top: 0.5rem;
+          display: flex;
+        `}
+      >
+        <input
+          id="private"
+          type="checkbox"
+          {...register("forSubscribersOnly")}
+        />{" "}
+        <label htmlFor="private">
+          For subscribers only?
+          <small>Is this post for subscribers only?</small>
+        </label>
       </FormComponent>
       <Button
         type="submit"
