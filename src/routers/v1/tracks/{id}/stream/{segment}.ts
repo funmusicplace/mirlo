@@ -20,7 +20,6 @@ export const fetchFile = async (
   segment: string
 ) => {
   const alias = `${filename}/${segment}`;
-  console.log("alias", alias);
   try {
     await minioClient.statObject(finalAudioBucket, alias);
     // await fsPromises.stat(path.join(ROOT, alias));
@@ -31,24 +30,13 @@ export const fetchFile = async (
   }
 
   try {
-    console.log("fetching buffer");
     const { buffer } = await getObjectFromMinio(
       minioClient,
       finalAudioBucket,
       alias
     );
-    // res.setHeader("Content-Type", "application/octet-stream");
-    var readStream = new stream.PassThrough();
-    readStream.end(buffer);
 
-    // res.set("Content-disposition", "attachment; filename=" + segment);
-    // res.set("Content-Type", "text/plain");
-
-    readStream.pipe(res);
-    // res.end(buffer, "binary");
-    // res.download()
-    // await res.sendFile(`/${alias}`, { root: path.join(ROOT) });
-    // }
+    res.end(buffer, "binary");
   } catch (e) {
     console.error("error", e);
     res.status(400);
@@ -83,7 +71,6 @@ export default function () {
       }
 
       if (track.audio) {
-        console.log("found a track", track.audio.id);
         await fetchFile(res, track.audio.id, segment);
       }
     } catch (e) {

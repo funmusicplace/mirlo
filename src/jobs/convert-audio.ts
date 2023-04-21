@@ -97,7 +97,7 @@ export default async (job: Job) => {
     await Promise.all(
       finalFilesInFolder.map(async (file) => {
         logger.info(`Uploading file ${file}`);
-        await minioClient.putObject(
+        await minioClient.fPutObject(
           finalAudioBucket,
           `${audioId}/${file}`,
           `${destinationFolder}/${file}`
