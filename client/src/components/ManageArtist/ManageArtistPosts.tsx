@@ -27,7 +27,6 @@ const ManageArtistPosts: React.FC<{}> = () => {
   const userId = user?.id;
 
   const fetchPosts = React.useCallback(async () => {
-    console.log("fetching");
     if (userId) {
       const fetchedPosts = await api.getMany<Post>(
         `users/${userId}/posts?artistId=${artistId}`

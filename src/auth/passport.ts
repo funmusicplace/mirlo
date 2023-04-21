@@ -101,6 +101,41 @@ export const userHasPermission = (role: "admin" | "owner") => {
   };
 };
 
+export const artistBelongsToLoggedInUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { userId, artistId } = req.params as unknown as {
+    userId: string;
+    artistId: string;
+  };
+
+  const loggedInUser = req.user as User;
+
+  if (loggedInUser.id !== Number(userId)) {
+    res.status(400).json({
+      error: `Artist must belong to user`,
+    });
+    return next(`Artist must belong to user`);
+  }
+
+  const artist = await prisma.artist.findFirstOrThrow({
+    where: {
+      userId: loggedInUser.id,
+      id: Number(artistId),
+    },
+  });
+
+  if (!artist) {
+    res.status(400).json({
+      error: "Artist must belong to user",
+    });
+    return next("Artist must belong to user");
+  }
+  return next();
+};
+
 export const contentBelongsToLoggedInUserArtist = () => {
   return async (req: Request, res: Response, next: NextFunction) => {
     const { userId } = req.params as unknown as { userId: string };

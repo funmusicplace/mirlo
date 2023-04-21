@@ -1,8 +1,11 @@
 import { css } from "@emotion/css";
-import { AudioWrapper } from "components/AudioWrapper";
-import ClickToPlay from "components/common/ClickToPlay";
+// import { AudioWrapper } from "components/AudioWrapper";
+// import ClickToPlay from "components/common/ClickToPlay";
+import IconButton from "components/common/IconButton";
+import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import SmallTileDetails from "components/common/SmallTileDetails";
 import React from "react";
+import { FaPlay } from "react-icons/fa";
 import { useParams } from "react-router-dom";
 import api from "services/api";
 
@@ -33,34 +36,27 @@ const TrackWidget = () => {
             border-radius: 1rem;
           `}
         >
-          {track.isPreview && (
-            <ClickToPlay
-              trackId={track.id}
-              title={track.title}
-              image={{
-                width: 120,
-                height: 120,
-                url: track.trackGroup.cover?.sizes?.[120] ?? "",
-              }}
-            />
-          )}
+          <ImageWithPlaceholder
+            src={track.trackGroup.cover?.sizes?.[120] ?? ""}
+            alt={track.title}
+            size={120}
+          />
 
           <SmallTileDetails
             title={track.title}
             subtitle={track.trackGroup.title}
             footer={track.trackGroup.artist.name}
           />
-          <div
-            className={css`
-              display: flex;
-              flex-direction: column;
-              justify-content: center;
-              align-items: center;
-              flex-grow: 1;
-            `}
-          >
-            <AudioWrapper currentTrack={track} />
-          </div>
+
+          {track.isPreview && (
+            <IconButton
+              onClick={() => {
+                window.parent.postMessage("blackbird:play:track:" + track.id);
+              }}
+            >
+              <FaPlay />
+            </IconButton>
+          )}
         </div>
       )}
     </>

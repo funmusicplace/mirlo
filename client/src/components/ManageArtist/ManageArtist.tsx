@@ -1,25 +1,30 @@
 import { css } from "@emotion/css";
 import Button from "components/common/Button";
 import React from "react";
-import { FaEye, FaPen } from "react-icons/fa";
-import { Link, useParams } from "react-router-dom";
+import { FaEye, FaPen, FaTrash } from "react-icons/fa";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import api from "services/api";
 import { useGlobalStateContext } from "state/GlobalState";
 import ArtistForm from "./ArtistForm";
 import ManageArtistPosts from "./ManageArtistPosts";
 import ManageArtistAlbums from "./ManageArtistAlbums";
 import ManageArtistSubscriptionTiers from "./ManageArtistSubscriptionTiers";
+import { useSnackbar } from "state/SnackbarContext";
+import { theme } from "utils/theme";
 
 const ManageArtist: React.FC<{}> = () => {
   const {
     state: { user },
   } = useGlobalStateContext();
+  const snackbar = useSnackbar();
+  const navigate = useNavigate();
   const { artistId } = useParams();
   const [artist, setArtist] = React.useState<Artist>();
 
   const [isEditing, setIsEditing] = React.useState(false);
 
   const userId = user?.id;
+
   React.useEffect(() => {
     const callback = async () => {
       if (userId) {
@@ -31,6 +36,17 @@ const ManageArtist: React.FC<{}> = () => {
     };
     callback();
   }, [userId, artistId]);
+
+  const onDelete = async () => {
+    try {
+      if (window.confirm("Are you sure you want to delete this artist?")) {
+        await api.delete(`users/${userId}/artists/${artistId}`);
+        navigate("/manage");
+      }
+    } catch (e) {
+      snackbar("Problem deleting artist", { type: "warning" });
+    }
+  };
 
   if (!artist) {
     return null;
@@ -81,6 +97,19 @@ const ManageArtist: React.FC<{}> = () => {
       <ManageArtistAlbums />
       <ManageArtistPosts />
       <ManageArtistSubscriptionTiers />
+
+      <Button
+        compact
+        className={css`
+          color: white !important;
+          border-color: red !important;
+          background-color: ${theme.colors.warning} !important;
+        `}
+        startIcon={<FaTrash />}
+        onClick={onDelete}
+      >
+        Delete artist
+      </Button>
     </div>
   );
 };

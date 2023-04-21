@@ -10,7 +10,13 @@ import sharpConfig from "../config/sharp";
 
 import { SUPPORTED_IMAGE_MIME_TYPES } from "../config/supported-media-types";
 import { REDIS_CONFIG } from "../config/redis";
-import { createBucketIfNotExists, incomingCoversBucket } from "./minio";
+import {
+  createBucketIfNotExists,
+  finalArtistBannerBucket,
+  finalCoversBucket,
+  incomingArtistBannerBucket,
+  incomingCoversBucket,
+} from "./minio";
 import prisma from "../../prisma/prisma";
 
 type ConfigTypes = "artwork" | "avatar" | "banner";
@@ -93,31 +99,85 @@ imageQueueEvents.on("completed", async (jobId: any) => {
   }
 });
 
-export const processTrackGroupCover = (ctx: {
+type APIContext = {
   req: Request;
   res: Response;
-}) => {
-  return async (
-    file: {
-      originalname: string;
-      filename: string;
-      path: string;
-      mimetype: string;
-      size: number;
-    },
-    trackGroupId: number
-  ) => {
-    const { size: fileSize, path: filepath, filename } = file;
-    const type = await fromFile(filepath);
-    const mime =
-      type !== null && type !== undefined ? type.mime : file.mimetype;
-    const isImage = SUPPORTED_IMAGE_MIME_TYPES.includes(mime);
+};
 
-    if (!isImage) {
-      logger.error("Not an image");
-      ctx.res.status(400);
-      throw `File type not supported: ${mime}`;
-    }
+type APIFile = {
+  originalname: string;
+  filename: string;
+  path: string;
+  mimetype: string;
+  size: number;
+};
+
+const checkFileType = async (ctx: APIContext, file: APIFile) => {
+  const { path: filepath } = file;
+  const type = await fromFile(filepath);
+  const mime = type !== null && type !== undefined ? type.mime : file.mimetype;
+  const isImage = SUPPORTED_IMAGE_MIME_TYPES.includes(mime);
+
+  if (!isImage) {
+    logger.error("Not an image");
+    ctx.res.status(400);
+    throw `File type not supported: ${mime}`;
+  }
+
+  return { filepath };
+};
+
+export const processArtistBanner = (ctx: APIContext) => {
+  return async (file: APIFile, artistId: number) => {
+    await checkFileType(ctx, file);
+    console.log("processing artist banner");
+    const image = await prisma.artistBanner.upsert({
+      create: {
+        originalFilename: file.originalname,
+        artistId: artistId,
+      },
+      update: {
+        originalFilename: file.originalname,
+      },
+      where: {
+        artistId,
+      },
+    });
+
+    logger.info(`MinIO is at ${MINIO_HOST}:${MINIO_PORT}`);
+    logger.info("Uploading image to object storage");
+
+    await createBucketIfNotExists(
+      minioClient,
+      incomingArtistBannerBucket,
+      logger
+    );
+
+    logger.info(
+      `Going to put a file on MinIO Bucket ${incomingArtistBannerBucket}: ${image.id}, ${file.path}`
+    );
+
+    minioClient
+      .fPutObject(incomingArtistBannerBucket, image.id, file.path)
+      .then((objInfo: { etag: string }) => {
+        logger.info("File put on minIO", objInfo);
+        logger.info("Adding image to queue");
+
+        imageQueue.add("optimize-image", {
+          filepath: file.path,
+          destination: image.id,
+          model: "artistBanner",
+          incomingMinioBucket: incomingArtistBannerBucket,
+          finalMinioBucket: finalArtistBannerBucket,
+          config: sharpConfig.config["banner"],
+        });
+      });
+  };
+};
+
+export const processTrackGroupCover = (ctx: APIContext) => {
+  return async (file: APIFile, trackGroupId: number) => {
+    await checkFileType(ctx, file);
 
     const image = await prisma.trackGroupCover.upsert({
       create: {
@@ -132,39 +192,27 @@ export const processTrackGroupCover = (ctx: {
       },
     });
 
-    const { config = "artwork" }: { config: ConfigTypes } = ctx.req.body; // sharp config key
-    const { width, height } = await dimensions(filepath);
-
-    // const image = await prisma.image.findFirst({
-    //   where: {
-    //     id: filename,
-    //   },
-    // });
-
-    // const metadata = file.metadata || {};
-
-    // file.metadata = Object.assign(metadata, {
-    //   dimensions: { width, height },
-    // });
-    logger.info(`MinIO is at ${MINIO_HOST}:${MINIO_PORT} ${MINIO_ROOT_USER}`);
-
+    logger.info(`MinIO is at ${MINIO_HOST}:${MINIO_PORT}`);
     logger.info("Uploading image to object storage");
 
     await createBucketIfNotExists(minioClient, incomingCoversBucket, logger);
 
     logger.info(
-      `Going to put a file on MinIO Bucket ${incomingCoversBucket}: ${image.id}, ${filepath}`
+      `Going to put a file on MinIO Bucket ${incomingCoversBucket}: ${image.id}, ${file.path}`
     );
     minioClient
-      .fPutObject(incomingCoversBucket, image.id, filepath)
+      .fPutObject(incomingCoversBucket, image.id, file.path)
       .then((objInfo: { etag: string }) => {
         logger.info("File put on minIO", objInfo);
         logger.info("Adding image to queue");
 
         imageQueue.add("optimize-image", {
-          filepath,
+          filepath: file.path,
           destination: image.id,
-          config: sharpConfig.config[config],
+          model: "trackGroupCover",
+          incomingMinioBucket: incomingCoversBucket,
+          finalMinioBucket: finalCoversBucket,
+          config: sharpConfig.config["artwork"],
         });
       });
 

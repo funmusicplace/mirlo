@@ -24,7 +24,7 @@ const AlbumForm: React.FC<{
   } = useGlobalStateContext();
   const snackbar = useSnackbar();
   const [isSaving, setIsSaving] = React.useState(false);
-  console.log("existing", existing);
+
   const { register, handleSubmit } = useForm<{
     published: boolean;
     title: string;
@@ -59,7 +59,6 @@ const AlbumForm: React.FC<{
       if (userId) {
         try {
           setIsSaving(true);
-          console.log("saving", data);
           let savedId = existingId;
           if (existingId) {
             const sending = {

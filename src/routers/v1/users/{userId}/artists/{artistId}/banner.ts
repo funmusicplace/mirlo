@@ -2,10 +2,13 @@ import { User } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
 import multer from "multer";
 import {
+  artistBelongsToLoggedInUser,
   userAuthenticated,
   userHasPermission,
 } from "../../../../../../auth/passport";
-import processTrackGroupCover from "../../../../../../utils/processImages";
+import processTrackGroupCover, {
+  processArtistBanner,
+} from "../../../../../../utils/processImages";
 import prisma from "../../../../../../../prisma/prisma";
 
 const upload = multer({
@@ -16,7 +19,7 @@ const upload = multer({
 });
 
 type Params = {
-  trackGroupId: number;
+  artistId: string;
   userId: string;
 };
 
@@ -28,57 +31,32 @@ export default function () {
   const operations = {
     PUT: [
       userAuthenticated,
-      userHasPermission("owner"),
-      // upload.single("file"),
+      artistBelongsToLoggedInUser,
       upload.array("upload"),
       PUT,
     ],
   };
 
   async function PUT(req: Request, res: Response, next: NextFunction) {
-    const { trackGroupId } = req.params as unknown as Params;
-    const loggedInUser = req.user as User;
+    const { artistId } = req.params as unknown as Params;
+
     try {
-      const artists = await prisma.artist.findMany({
-        where: {
-          userId: Number(loggedInUser.id),
-        },
-      });
-
-      const trackgroup = await prisma.trackGroup.findFirst({
-        where: {
-          artistId: { in: artists.map((a) => a.id) },
-          id: Number(trackGroupId),
-        },
-      });
-
-      if (!trackgroup) {
-        res.status(400).json({
-          error: "Trackgroup must belong to user",
-        });
-        return next();
-      }
-      console.log("Processing trackgroup covers");
-
-      // TODO: Remove prior files
       // FIXME: Only allow uploading of one file.
       if (req.files && isFileArray(req.files)) {
-        await processTrackGroupCover({ req, res })(req.files[0], trackGroupId);
+        await processArtistBanner({ req, res })(req.files[0], Number(artistId));
       }
-
-      // trackgroup.set("cover", file.filename);
 
       res.json({ message: "Success" });
     } catch (error) {
       console.error("Cover error", error);
       res.status(400).json({
-        error: `TrackGroup with ID ${trackGroupId} does not exist in the database`,
+        error: `TrackGroup with ID ${artistId} does not exist in the database`,
       });
     }
   }
 
   PUT.apiDoc = {
-    summary: "Updates a trackGroup cover belonging to a user",
+    summary: "Updates an artist banner belonging to a user",
     parameters: [
       {
         in: "path",
@@ -88,7 +66,7 @@ export default function () {
       },
       {
         in: "path",
-        name: "trackGroupId",
+        name: "artistId",
         required: true,
         type: "string",
       },
@@ -97,14 +75,14 @@ export default function () {
         name: "file",
         type: "file",
         required: true,
-        description: "The cover to upload",
+        description: "The banner to upload",
       },
     ],
     responses: {
       200: {
-        description: "Updated trackgroup",
+        description: "Updated Artist",
         schema: {
-          $ref: "#/definitions/TrackGroup",
+          type: "object",
         },
       },
       default: {

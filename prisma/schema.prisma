@@ -61,6 +61,30 @@ model Artist {
   deletedAt         DateTime?
   subscriptionTiers ArtistSubscriptionTier[]
   userSubscriptions ArtistUserSubscription[]
+  banner            ArtistBanner?
+  avatar            ArtistAvatar?
+}
+
+model ArtistAvatar {
+  id               String    @id @default(uuid()) @db.Uuid
+  url              String[]
+  artist           Artist    @relation(fields: [artistId], references: [id])
+  artistId         Int       @unique
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  deletedAt        DateTime?
+  originalFilename String?
+}
+
+model ArtistBanner {
+  id               String    @id @default(uuid()) @db.Uuid
+  url              String[]
+  artist           Artist    @relation(fields: [artistId], references: [id])
+  artistId         Int       @unique
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  deletedAt        DateTime?
+  originalFilename String?
 }
 
 model ArtistSubscriptionTier {

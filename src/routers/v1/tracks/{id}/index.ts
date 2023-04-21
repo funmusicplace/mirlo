@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import processor from "../../trackGroups/processor";
+import processor from "../../../../utils/trackGroup";
 import prisma from "../../../../../prisma/prisma";
 
 export default function () {

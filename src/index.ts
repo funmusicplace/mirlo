@@ -15,7 +15,7 @@ import {
 import apiDoc from "./routers/v1/api-doc";
 import auth from "./routers/auth";
 import "./auth/passport";
-import { imageQueue } from "./utils/processTrackGroupCover";
+import { imageQueue } from "./utils/processImages";
 import { audioQueue } from "./utils/processTrackAudio";
 import { serveStatic } from "./static";
 import prisma from "../prisma/prisma";
@@ -72,6 +72,7 @@ const routes = [
   "users/{userId}/purchases",
   "users/{userId}/artists",
   "users/{userId}/artists/{artistId}",
+  "users/{userId}/artists/{artistId}/banner",
   "users/{userId}/artists/{artistId}/subscriptions",
   "users/{userId}/artists/{artistId}/subscriptions/{subscriptionId}",
   "users/{userId}/trackGroups",
@@ -127,7 +128,7 @@ app.use(express.static("public"));
 // app.use(function (req, res, next) {
 //   res.sendFile(path.join(__dirname, "../", "public", "app.html"));
 // });
-app.use("/images/:filename", serveStatic);
+app.use("/images/:bucket/:filename", serveStatic);
 app.use("/audio", express.static("data/media/audio"));
 
 // Setting up a bull worker dashboard

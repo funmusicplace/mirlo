@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 import { User } from "@prisma/client";
 
-import trackGroupProcessor from "../../trackGroups/processor";
-import postProcessor from "../../posts/processor";
+import trackGroupProcessor from "../../../../utils/trackGroup";
+import postProcessor from "../../../../utils/post";
 
 import prisma from "../../../../../prisma/prisma";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";

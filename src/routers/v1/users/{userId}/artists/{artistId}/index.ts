@@ -1,10 +1,11 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import {
+  artistBelongsToLoggedInUser,
   userAuthenticated,
-  userHasPermission,
-  userLoggedInWithoutRedirect,
 } from "../../../../../../auth/passport";
 import prisma from "../../../../../../../prisma/prisma";
+import { convertURLArrayToSizes } from "../../../../../../utils/images";
+import { finalArtistBannerBucket } from "../../../../../../utils/minio";
 
 type Params = {
   artistId: number;
@@ -13,9 +14,9 @@ type Params = {
 
 export default function () {
   const operations = {
-    PUT: [userAuthenticated, userHasPermission("owner"), PUT],
-    GET: [userLoggedInWithoutRedirect, GET],
-    DELETE: [userAuthenticated, userHasPermission("owner"), DELETE],
+    PUT: [userAuthenticated, artistBelongsToLoggedInUser, PUT],
+    GET: [userAuthenticated, artistBelongsToLoggedInUser, GET],
+    DELETE: [userAuthenticated, artistBelongsToLoggedInUser, DELETE],
   };
 
   async function PUT(req: Request, res: Response) {
@@ -88,8 +89,29 @@ export default function () {
           id: Number(artistId),
           userId: Number(userId),
         },
+        include: {
+          banner: {
+            select: {
+              id: true,
+              url: true,
+            },
+          },
+        },
       });
-      res.json({ result: artist });
+      res.json({
+        result: {
+          ...artist,
+          banner: {
+            ...artist?.banner,
+            sizes: artist?.banner?.url
+              ? convertURLArrayToSizes(
+                  artist?.banner.url,
+                  finalArtistBannerBucket
+                )
+              : undefined,
+          },
+        },
+      });
     } else {
       res.status(400);
       res.json({
@@ -130,14 +152,76 @@ export default function () {
     },
   };
 
-  async function DELETE(req: Request, res: Response) {
+  async function DELETE(req: Request, res: Response, next: NextFunction) {
     const { userId, artistId } = req.params as unknown as Params;
-    await prisma.artist.deleteMany({
-      where: {
-        id: Number(artistId),
-        userId: Number(userId),
-      },
-    });
+
+    try {
+      await prisma.artist.deleteMany({
+        where: {
+          id: Number(artistId),
+          userId: Number(userId),
+        },
+      });
+
+      // FIXME: We don't do cascading deletes because of the
+      // soft deletion. That _could_ probably be put into a
+      // a prisma middleware. This is a lot!
+      await prisma.post.deleteMany({
+        where: {
+          artistId: Number(artistId),
+        },
+      });
+
+      await prisma.artistSubscriptionTier.deleteMany({
+        where: {
+          artistId: Number(artistId),
+        },
+      });
+
+      // FIXME: We probably want to go and delete
+      // stripe subscriptions here too.
+      // https://github.com/funmusicplace/blackbird/issues/21
+      await prisma.artistUserSubscription.deleteMany({
+        where: {
+          artistId: Number(artistId),
+        },
+      });
+      const trackGroups = await prisma.trackGroup.findMany({
+        where: {
+          artistId: Number(artistId),
+        },
+      });
+      const tracks = await prisma.track.findMany({
+        where: {
+          trackGroup: {
+            artistId: Number(artistId),
+          },
+        },
+      });
+      await prisma.trackGroup.deleteMany({
+        where: {
+          artistId: Number(artistId),
+        },
+      });
+      await prisma.track.deleteMany({
+        where: {
+          id: { in: tracks.map((t) => t.id) },
+        },
+      });
+      await prisma.trackGroupCover.deleteMany({
+        where: {
+          trackGroupId: { in: trackGroups.map((tg) => tg.id) },
+        },
+      });
+      await prisma.trackAudio.deleteMany({
+        where: {
+          trackId: { in: tracks.map((t) => t.id) },
+        },
+      });
+    } catch (e) {
+      res.status(400);
+      next();
+    }
     res.json({ message: "Success" });
   }
 

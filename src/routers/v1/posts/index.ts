@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { User } from "@prisma/client";
 
-import postProcessor from "./processor";
+import postProcessor from "../../../utils/post";
 
 import prisma from "../../../../prisma/prisma";
 import { userLoggedInWithoutRedirect } from "../../../auth/passport";

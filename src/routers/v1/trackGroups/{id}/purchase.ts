@@ -2,8 +2,9 @@ import { User } from "@prisma/client";
 import { Request, Response } from "express";
 import Stripe from "stripe";
 import { userAuthenticated } from "../../../../auth/passport";
-import { generateCover } from "../processor";
+import { generateFullStaticImageUrl } from "../../../../utils/images";
 import prisma from "../../../../../prisma/prisma";
+import { finalCoversBucket } from "../../../../utils/minio";
 
 const { STRIPE_KEY, STRIPE_PURCHASE_ALBUM_KEY, API_DOMAIN } = process.env;
 
@@ -52,7 +53,12 @@ export default function () {
                 name: `${trackGroup.title} by ${trackGroup.artist.name}`,
                 description: trackGroup.about ?? "",
                 images: trackGroup.cover
-                  ? [generateCover(trackGroup.cover?.url[4])]
+                  ? [
+                      generateFullStaticImageUrl(
+                        trackGroup.cover?.url[4],
+                        finalCoversBucket
+                      ),
+                    ]
                   : [],
               },
             },

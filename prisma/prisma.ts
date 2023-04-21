@@ -9,6 +9,8 @@ const prisma = new PrismaClient();
 /**
  * We intercept deletions for models with a `deletedAt` field
  * and instead soft deletes them.
+ *
+ * It does NOT cascade delete.
  */
 prisma.$use(async (params, next) => {
   const hasDeletedAtField = Prisma.dmmf.datamodel.models
@@ -38,6 +40,8 @@ prisma.$use(async (params, next) => {
 /**
  * We intercept find or findMany on models that have a deletedAt
  * so that it filters out null values.
+ *
+ * It does NOT work for nested `where`, `include`, or `select` things
  */
 prisma.$use(async (params, next) => {
   const hasDeletedAtField = Prisma.dmmf.datamodel.models

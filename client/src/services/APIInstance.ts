@@ -37,7 +37,7 @@ const APIInstance = (apiRoot: string) => {
       }
       return json;
     } catch (e) {
-      console.log("e", e);
+      console.error("e", e);
       if (
         e instanceof Error &&
         (e.message.includes("NetworkError") || e.name === "NetworkError")
@@ -137,7 +137,6 @@ const APIInstance = (apiRoot: string) => {
           text: true,
         }
       ).then((text) => {
-        console.log("success", text);
         const blob = b64ToBlob(text, "application/zip");
         fileSaver.saveAs(blob, `${filename}.zip`);
         return;

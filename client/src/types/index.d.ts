@@ -59,13 +59,13 @@ interface Artist {
   payPalClientId?: string;
   posts: Post[];
   subscriptionTiers: ArtistSubscriptionTier[];
-}
-
-interface Image {
-  small: {
+  banner: {
     url: string;
-    width: number;
-    height: number;
+    sizes: { [key: string]: string };
+  };
+  avatar: {
+    url: string;
+    sizes: { [key: string]: string };
   };
 }
 

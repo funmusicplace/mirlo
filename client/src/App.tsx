@@ -7,6 +7,7 @@ import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import api from "services/api";
 import { useGlobalStateContext } from "state/GlobalState";
 import SnackbarContext from "state/SnackbarContext";
+import useWidgetListener from "utils/useWidgetListener";
 import Header from "./components/Header";
 
 injectGlobal`
@@ -116,6 +117,7 @@ injectGlobal`
 function App() {
   const { state, dispatch } = useGlobalStateContext();
   const { isDisplayed } = useContext(SnackbarContext);
+  useWidgetListener();
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();

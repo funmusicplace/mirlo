@@ -2,6 +2,8 @@ import { Client } from "minio";
 import { Logger } from "winston";
 
 export const incomingCoversBucket = "incoming-covers";
+export const incomingArtistBannerBucket = "incoming-artist-banners";
+export const finalArtistBannerBucket = "final-artist-banners";
 export const finalCoversBucket = "trackgroup-covers";
 
 export const createBucketIfNotExists = async (

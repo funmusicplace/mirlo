@@ -27,7 +27,7 @@ export const serveStatic = async (
   // FIXME: someone who's better at devops than me will have to figure out
   // how we can serve these directly from minio
   try {
-    stat = await minioClient.statObject(finalCoversBucket, req.params.filename);
+    stat = await minioClient.statObject(req.params.bucket, req.params.filename);
   } catch (error) {
     console.error("error stat", error);
     res.status(404);
@@ -38,7 +38,7 @@ export const serveStatic = async (
   try {
     const { buffer } = await getObjectFromMinio(
       minioClient,
-      finalCoversBucket,
+      req.params.bucket,
       req.params.filename
     );
     res.end(buffer, "binary");

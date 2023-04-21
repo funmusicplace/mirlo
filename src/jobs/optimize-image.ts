@@ -53,7 +53,13 @@ const logger = winston.createLogger({
  */
 
 const optimizeImage = async (job: Job) => {
-  const { filepath, config = sharpConfig.artwork, destination } = job.data;
+  const {
+    config = sharpConfig.artwork,
+    destination,
+    model,
+    incomingMinioBucket,
+    finalMinioBucket,
+  } = job.data;
 
   try {
     const profiler = logger.startTimer();
@@ -62,12 +68,12 @@ const optimizeImage = async (job: Job) => {
     logger.info(`Starting to optimize images ${destination}`);
     const { buffer, size } = await getObjectFromMinio(
       minioClient,
-      finalCoversBucket,
+      incomingMinioBucket,
       destination,
       logger
     );
 
-    await createBucketIfNotExists(minioClient, finalCoversBucket, logger);
+    await createBucketIfNotExists(minioClient, finalMinioBucket, logger);
 
     logger.info(`Got object of size ${size}`);
     const promises = Object.entries(config)
@@ -125,7 +131,7 @@ const optimizeImage = async (job: Job) => {
 
             logger.info("Uploading image to bucket");
             await minioClient.putObject(
-              finalCoversBucket,
+              finalMinioBucket,
               finalFileName,
               newBuffer
             );
@@ -146,10 +152,18 @@ const optimizeImage = async (job: Job) => {
     const results = await Promise.all(promises);
     const urls = uniq(results.map((r) => `${destination}-x${r.width}`));
     logger.info(`Saving URLs [${urls.join(", ")}]`);
-    await prisma.trackGroupCover.update({
-      where: { id: destination },
-      data: { url: urls },
-    });
+
+    if (model === "trackGroupCover") {
+      await prisma.trackGroupCover.update({
+        where: { id: destination },
+        data: { url: urls },
+      });
+    } else if (model === "artistBanner") {
+      await prisma.artistBanner.update({
+        where: { id: destination },
+        data: { url: urls },
+      });
+    }
 
     profiler.done({ message: "Done optimizing image" });
     logger.info(`Removing from Bucket ${incomingCoversBucket}`);

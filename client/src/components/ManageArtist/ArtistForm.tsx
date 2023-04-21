@@ -11,6 +11,7 @@ import { css } from "@emotion/css";
 import { useSnackbar } from "state/SnackbarContext";
 import { pick } from "lodash";
 import { useGlobalStateContext } from "state/GlobalState";
+import UploadArtistImage from "./UploadArtistImage";
 // import UploadArtistImage from "./UploadArtistImage";
 
 export interface ShareableTrackgroup {
@@ -67,7 +68,7 @@ export const ArtistForm: React.FC<{
   return (
     <Modal open={open} onClose={onClose} size="small">
       <form onSubmit={handleSubmit(soSave)}>
-        {/* {existing && (
+        {existing && (
           <UploadArtistImage
             existing={existing}
             reload={reload}
@@ -77,7 +78,7 @@ export const ArtistForm: React.FC<{
             maxDimensions="2500x500"
           />
         )}
-        {existing && (
+        {/* {existing && (
           <UploadArtistImage
             existing={existing}
             reload={reload}
