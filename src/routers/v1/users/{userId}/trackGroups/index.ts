@@ -24,7 +24,11 @@ export default function () {
     const results = await prisma.trackGroup.findMany({
       where,
       include: {
-        tracks: true,
+        tracks: {
+          where: {
+            deletedAt: null,
+          },
+        },
         cover: true,
       },
     });

@@ -34,7 +34,9 @@ export default function () {
             },
           },
           include: {
-            tracks: true,
+            tracks: {
+              where: { deletedAt: null },
+            },
             cover: true,
           },
         },

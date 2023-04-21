@@ -8,45 +8,20 @@ import { uniq } from "lodash";
 import * as Minio from "minio";
 import {
   createBucketIfNotExists,
-  finalCoversBucket,
   getObjectFromMinio,
   incomingCoversBucket,
+  minioClient,
 } from "../utils/minio";
 import prisma from "../../prisma/prisma";
+import { logger } from "./queue-worker";
 
 const { defaultOptions, config: sharpConfig } = tempSharpConfig;
 
 const {
   MINIO_HOST = "",
   MINIO_ROOT_USER = "",
-  MINIO_ROOT_PASSWORD = "",
   MINIO_PORT = 9000,
 } = process.env;
-
-// Instantiate the minio client with the endpoint
-// and access keys as shown below.
-const minioClient = new Minio.Client({
-  endPoint: MINIO_HOST,
-  port: +MINIO_PORT,
-  useSSL: false, // NODE_ENV !== "development",
-  accessKey: MINIO_ROOT_USER,
-  secretKey: MINIO_ROOT_PASSWORD,
-});
-
-const logger = winston.createLogger({
-  level: "info",
-  format: winston.format.json(),
-  defaultMeta: { service: "convert-optimize-image" },
-  transports: [
-    new winston.transports.Console({
-      level: "debug",
-    }),
-    new winston.transports.File({
-      filename: "error.log",
-      level: "error",
-    }),
-  ],
-});
 
 /**
  * Convert and optimize track artworks to mozjpeg and webp

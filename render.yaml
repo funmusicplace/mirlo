@@ -89,6 +89,11 @@ services:
     env: docker
     plan: starter # optional (defaults to starter)
     dockerfilePath: ./background/Dockerfile # optional
+    disk: # this disk gets used to process audio. They should get moved to the 
+          # minIO service and deleted after upload
+      name: data
+      mountPath: /data
+      sizeGB: 2 # optional
     # dockerContext: ./background/src # optional
     envVars:
       - key: DATABASE_URL

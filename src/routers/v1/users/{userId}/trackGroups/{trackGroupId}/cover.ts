@@ -58,7 +58,6 @@ export default function () {
         });
         return next();
       }
-      console.log("Processing trackgroup covers");
 
       // TODO: Remove prior files
       // FIXME: Only allow uploading of one file.

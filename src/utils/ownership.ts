@@ -39,7 +39,11 @@ export const doesTrackGroupBelongToUser = async (
     },
     include: {
       cover: true,
-      tracks: true,
+      tracks: {
+        where: {
+          deletedAt: null,
+        },
+      },
     },
   });
   return trackgroup;

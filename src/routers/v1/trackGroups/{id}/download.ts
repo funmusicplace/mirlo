@@ -1,4 +1,4 @@
-import { PrismaClient, TrackAudio, Track, User } from "@prisma/client";
+import { TrackAudio, Track, User } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
 import JSZip from "jszip";
 import fs from "fs";
@@ -47,6 +47,9 @@ export default function () {
             tracks: {
               include: {
                 audio: true,
+              },
+              where: {
+                deletedAt: null,
               },
             },
           },

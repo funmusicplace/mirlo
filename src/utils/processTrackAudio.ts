@@ -13,30 +13,37 @@ import {
 } from "../config/supported-media-types";
 import { REDIS_CONFIG } from "../config/redis";
 import sendMail from "../jobs/send-mail";
+import * as Minio from "minio";
 
 import prisma from "../../prisma/prisma";
+import { logger } from "../logger";
+import { checkFileType } from "./file";
+import { createBucketIfNotExists, incomingAudioBucket } from "./minio";
+
+const {
+  MINIO_HOST = "",
+  MINIO_ROOT_USER = "",
+  MINIO_ROOT_PASSWORD = "",
+  MINIO_PORT = 9000,
+} = process.env;
+
+// FIXME: can this be re-imported like prisma or the logger?
+// Instantiate the minio client with the endpoint
+// and access keys as shown below.
+const minioClient = new Minio.Client({
+  endPoint: MINIO_HOST,
+  port: +MINIO_PORT,
+  useSSL: false,
+  // useSSL: NODE_ENV !== "development",
+  accessKey: MINIO_ROOT_USER,
+  secretKey: MINIO_ROOT_PASSWORD,
+});
 
 const BASE_DATA_DIR = process.env.BASE_DATA_DIR || "/";
 
 const buildTrackStreamURL = (trackId: number) => {
   return `/v1/tracks/${trackId}/stream/playlist.m3u8`;
 };
-
-const logger = winston.createLogger({
-  level: "info",
-  format: winston.format.json(),
-  defaultMeta: { service: "processTrackAudio" },
-  transports: [
-    new winston.transports.Console({
-      level: "debug",
-      format: winston.format.simple(),
-    }),
-    new winston.transports.File({
-      filename: "error.log",
-      level: "error",
-    }),
-  ],
-});
 
 const queueOptions = {
   prefix: "blackbird",
@@ -129,19 +136,9 @@ audioDurationQueueEvents.on("completed", async (jobId: any) => {
  */
 export const processTrackAudio = (ctx: { req: Request; res: Response }) => {
   return async (file: any, trackId: number) => {
-    const { size: fileSize, path: filepath } = file;
+    await checkFileType(ctx, file, SUPPORTED_AUDIO_MIME_TYPES);
 
-    const type = await fromFile(filepath);
-    const mime = type !== null && type !== undefined ? type.mime : file.type;
-
-    const isAudio = SUPPORTED_AUDIO_MIME_TYPES.includes(mime);
-
-    if (!isAudio) {
-      ctx.res.status(400);
-      throw `File type not supported: ${mime}`;
-    }
-
-    const buffer = await fs.readFile(filepath);
+    const buffer = await fs.readFile(file.path);
     const sha1sum = shasum(buffer);
 
     const audio = await prisma.trackAudio.upsert({
@@ -149,14 +146,14 @@ export const processTrackAudio = (ctx: { req: Request; res: Response }) => {
         trackId,
         url: buildTrackStreamURL(trackId),
         originalFilename: file.originalFilename,
-        size: fileSize,
+        size: file.size,
         hash: sha1sum,
       },
       update: {
         trackId,
         originalFilename: file.originalFilename,
         url: buildTrackStreamURL(trackId),
-        size: fileSize,
+        size: file.size,
         hash: sha1sum,
       },
       where: {
@@ -164,60 +161,17 @@ export const processTrackAudio = (ctx: { req: Request; res: Response }) => {
       },
     });
 
-    logger.info(`Created audio ${audio.id}`);
+    logger.info(`MinIO is at ${MINIO_HOST}:${MINIO_PORT}`);
+    logger.info("Uploading image to object storage");
 
-    try {
-      await fs.rename(
-        filepath,
-        path.join(BASE_DATA_DIR, `/data/media/incoming/${audio.id}`)
-      );
-    } catch (e) {
-      logger.error(e);
-    }
-
-    const data = Object.assign({}, audio, {
-      filename: audio.id, // uuid filename
-      filename_orig: audio.originalFilename,
-    });
-
-    logger.info("Parsing audio metadata");
-
-    const metadata = await mm.parseFile(
-      path.join(BASE_DATA_DIR, `/data/media/incoming/${audio.id}`),
-      {
-        duration: true,
-        skipCovers: true,
-      }
+    await createBucketIfNotExists(minioClient, incomingAudioBucket, logger);
+    logger.info(
+      `Going to put a file on MinIO Bucket ${incomingAudioBucket}: ${audio.id}, ${file.path}`
     );
-
-    logger.info("Done parsing audio metadata");
-
-    // TODO: extract metadata from file and put it on the
-    // const track = await Track.create({
-    //   title: metadata.common.title || originalFilename,
-    //   creator_id: ctx.profile.id,
-    //   url: filename,
-    //   duration: metadata.format.duration || 0,
-    //   artist: metadata.common.artist,
-    //   album: metadata.common.album,
-    //   year: metadata.common.year,
-    //   album_artist: metadata.common.albumartist,
-    //   number: metadata.common.track.no,
-    //   createdAt: new Date().getTime() / 1000 | 0
-    // })
-
-    if (!metadata.format.duration) {
-      audioDurationQueue.add("audio-duration", { filename: audio.id });
-    }
-
-    // FIXME: metadata
-    // data.metadata = metadata.common;
-    // data.track = track.get({ plain: true })
+    await minioClient.fPutObject(incomingAudioBucket, audio.id, file.path);
 
     logger.info("Adding audio to convert-audio queue");
-    audioQueue.add("convert-audio", { filename: audio.id });
-
-    return data;
+    audioQueue.add("convert-audio", { audioId: audio.id });
   };
 };
 
