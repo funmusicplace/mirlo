@@ -68,7 +68,8 @@ const ArtistTrackGroup: React.FC<{
       setIsDownloading(true);
       await api.getFile(
         trackGroup.title,
-        `trackGroups/${trackGroup.id}/download`
+        `trackGroups/${trackGroup.id}/download`,
+        "application/zip"
       );
     } catch (e) {
       snackbar("Something went wrong", { type: "warning" });

@@ -126,7 +126,7 @@ const APIInstance = (apiRoot: string) => {
       return `${apiRoot}${track.audio.url}`;
     },
 
-    getFile: (filename: string, endpoint: string) => {
+    getFile: (filename: string, endpoint: string, type: string) => {
       return apiRequest<string>(
         endpoint,
         {
@@ -137,8 +137,15 @@ const APIInstance = (apiRoot: string) => {
           text: true,
         }
       ).then((text) => {
-        const blob = b64ToBlob(text, "application/zip");
-        fileSaver.saveAs(blob, `${filename}.zip`);
+        let blob;
+        if (type === "text/csv") {
+          blob = new Blob([text], {
+            type: "text/csv;charset=utf-8;",
+          });
+        } else {
+          blob = b64ToBlob(text, type);
+        }
+        fileSaver.saveAs(blob, `${filename}.${type.split("/")[1]}`);
         return;
       });
     },

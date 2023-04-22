@@ -70,7 +70,7 @@ const apiDoc = {
         },
         minAmount: {
           description: "minimum amount of the subscription",
-          type: "string",
+          type: "number",
         },
       },
     },

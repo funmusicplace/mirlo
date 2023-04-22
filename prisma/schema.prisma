@@ -113,6 +113,8 @@ model ArtistUserSubscription {
   amount                   Int // In cents
   currency                 String                 @default("USD")
   stripeId                 String?
+  // Not clear why prisma auto creates these
+  // two fields
   artist                   Artist?                @relation(fields: [artistId], references: [id])
   artistId                 Int?
   createdAt                DateTime               @default(now())

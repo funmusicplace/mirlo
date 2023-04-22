@@ -134,6 +134,9 @@ router.get("/profile", userAuthenticated, async (req, res) => {
       id: true,
       name: true,
       artistUserSubscriptions: {
+        where: {
+          deletedAt: null,
+        },
         select: {
           artistSubscriptionTier: {
             select: {

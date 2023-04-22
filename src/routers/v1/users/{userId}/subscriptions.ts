@@ -23,6 +23,7 @@ export default function () {
       if (artistId) {
         where.artistSubscriptionTier = {
           artistId: Number(artistId),
+          deletedAt: null,
         };
       }
       const subsciptions = await prisma.artistUserSubscription.findMany({

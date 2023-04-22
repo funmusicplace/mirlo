@@ -16,6 +16,7 @@ async function buildZipFileForPath(
   var zip = new JSZip();
   tracks.forEach((track) => {
     if (track.title && track.audio) {
+      // FIXME: needs to be built by minio
       const location = path.join(
         MEDIA_LOCATION ?? "",
         "audio",
@@ -82,10 +83,7 @@ export default function () {
     ],
     responses: {
       200: {
-        description: "A trackGroup that matches the id",
-        schema: {
-          $ref: "#/definitions/TrackGroup",
-        },
+        description: "A zip file of trackgroup tracks",
       },
       default: {
         description: "An error occurred",

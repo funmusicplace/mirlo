@@ -23,15 +23,14 @@ const SubscriptionForm: React.FC<{
   } = useGlobalStateContext();
   const snackbar = useSnackbar();
   const [isSaving, setIsSaving] = React.useState(false);
-  const { register, handleSubmit } = useForm<{
+  const { register, handleSubmit, reset } = useForm<{
     name: string;
     description: string;
     minAmount: string;
   }>({
-    defaultValues: existing ?? {
-      name: "",
-      description: "",
-      minAmount: "",
+    defaultValues: {
+      ...existing,
+      minAmount: `${existing?.minAmount ? existing.minAmount / 100 : ""}`,
     },
   });
 
@@ -45,15 +44,16 @@ const SubscriptionForm: React.FC<{
         try {
           setIsSaving(true);
           if (existingId) {
-            const sending = pick(data, ["name", "description", "minAmount"]);
+            const sending = {
+              ...pick(data, ["name", "description", "minAmount"]),
+              minAmount: data.minAmount ? +data.minAmount * 100 : undefined,
+            };
             await api.put<
               Partial<ArtistSubscriptionTier>,
               ArtistSubscriptionTier
             >(
               `users/${userId}/artists/${artistId}/subscriptions/${existingId}`,
-              {
-                ...sending,
-              }
+              sending
             );
           } else {
             await api.post<
@@ -61,10 +61,12 @@ const SubscriptionForm: React.FC<{
               ArtistSubscriptionTier
             >(`users/${userId}/artists/${artistId}/subscriptions/`, {
               ...pick(data, ["name", "description"]),
+              minAmount: data.minAmount ? +data.minAmount * 100 : undefined,
             });
           }
 
           snackbar("Subscription updated", { type: "success" });
+          reset();
           reload();
         } catch (e) {
           console.error("e", e);
@@ -74,7 +76,7 @@ const SubscriptionForm: React.FC<{
         }
       }
     },
-    [userId, existingId, snackbar, reload, artistId]
+    [userId, existingId, snackbar, reset, reload, artistId]
   );
 
   return (

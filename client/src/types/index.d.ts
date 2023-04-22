@@ -81,7 +81,7 @@ interface ArtistSubscriptionTier {
   id: number;
   artistId: number;
   artist: Artist;
-  minAmount?: string;
+  minAmount?: number;
   name: string;
   description: string;
 }

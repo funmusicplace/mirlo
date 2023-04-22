@@ -34,12 +34,14 @@ export default function () {
           name: req.body.name,
           description: req.body.description,
           // TODO: make sure minAmount is alphanumeric
-          minAmount: req.body.minAmount.replace(",", ""),
+          minAmount: +req.body.minAmount,
         },
       });
 
       res.json({ result: updatedTier });
     } catch (error) {
+      console.log("error", error);
+      res.status(400);
       res.json({
         error: `Subscription with ID ${subscriptionId} does not exist in the database`,
       });
