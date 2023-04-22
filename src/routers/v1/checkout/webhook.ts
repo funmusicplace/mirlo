@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import Stripe from "stripe";
 import prisma from "../../../../prisma/prisma";
+import sendMail from "../../../jobs/send-mail";
+import { logger } from "../../../logger";
 
 const { STRIPE_KEY, STRIPE_WEBHOOK_SIGNING_SECRET } = process.env;
 
@@ -8,14 +10,63 @@ const stripe = new Stripe(STRIPE_KEY ?? "", {
   apiVersion: "2022-11-15",
 });
 
-const handleCheckoutSession = async (session: Stripe.Checkout.Session) => {
-  console.log("session", session);
-  const { tierId, userId, trackGroupId } = session.metadata as unknown as {
-    tierId: number;
-    userId: number;
-    trackGroupId: number;
-  };
-  if (tierId && userId) {
+const handleTrackGroupPurhcase = async (
+  userId: number,
+  trackGroupId: number,
+  session: Stripe.Checkout.Session
+) => {
+  try {
+    const purchase = await prisma.userTrackGroupPurchase.create({
+      data: {
+        userId: Number(userId),
+        trackGroupId: Number(trackGroupId),
+        pricePaid: session.amount_total ?? 0,
+        currencyPaid: session.currency ?? "USD",
+        stripeId: session.id,
+      },
+    });
+
+    const user = await prisma.user.findFirst({
+      where: {
+        id: userId,
+      },
+    });
+
+    const trackGroup = await prisma.trackGroup.findFirst({
+      where: {
+        id: trackGroupId,
+      },
+      include: {
+        artist: true,
+      },
+    });
+
+    if (user && trackGroup && purchase) {
+      await sendMail({
+        data: {
+          template: "album-purchase-receipt",
+          message: {
+            to: user.email,
+          },
+          locals: {
+            trackGroup,
+            purchase,
+            host: process.env.APP_HOST,
+          },
+        },
+      });
+    }
+  } catch (e) {
+    logger.error(`Error creating album purchase: ${e}`);
+  }
+};
+
+const handleSubscription = async (
+  userId: number,
+  tierId: number,
+  session: Stripe.Checkout.Session
+) => {
+  try {
     await prisma.artistUserSubscription.upsert({
       create: {
         artistSubscriptionTierId: Number(tierId),
@@ -38,16 +89,25 @@ const handleCheckoutSession = async (session: Stripe.Checkout.Session) => {
         },
       },
     });
+  } catch (e) {
+    logger.error(`Error creating subscription: ${e}`);
+  }
+};
+
+const handleCheckoutSession = async (session: Stripe.Checkout.Session) => {
+  const { tierId, userId, trackGroupId } = session.metadata as unknown as {
+    tierId: string;
+    userId: string;
+    trackGroupId: string;
+  };
+  if (tierId && userId) {
+    await handleSubscription(Number(userId), Number(tierId), session);
   } else if (trackGroupId && userId) {
-    await prisma.userTrackGroupPurchase.create({
-      data: {
-        userId: Number(userId),
-        trackGroupId: Number(trackGroupId),
-        pricePaid: session.amount_total ?? 0,
-        currencyPaid: session.currency ?? "USD",
-        stripeId: session.id,
-      },
-    });
+    await handleTrackGroupPurhcase(
+      Number(userId),
+      Number(trackGroupId),
+      session
+    );
   }
 };
 

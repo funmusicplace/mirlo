@@ -76,7 +76,6 @@ export default function () {
         cancel_url: `${API_DOMAIN}/v1/checkout?canceled=true`,
       });
 
-      // res.redirect(303, session.url ?? "");
       res.status(200).json({
         sessionUrl: session.url,
       });

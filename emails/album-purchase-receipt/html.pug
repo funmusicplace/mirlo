@@ -1,0 +1,19 @@
+doctype html
+html
+  head
+    block head
+      meta(charset="utf-8")
+      meta(name="viewport", content="width=device-width")
+      meta(http-equiv="X-UA-Compatible", content="IE=edge")
+      meta(name="x-apple-disable-message-reformatting")
+      style 
+        include ../style.css
+  body.sans-serif
+    p Wow! 
+    p Thank you for supporting #{trackGroup.artist.name} with your purchase of #{trackGroup.title}.
+    table 
+      tr 
+        td #{trackGroup.title}
+        td #{purchase.pricePaid} #{purchase.currencyPaid}
+    p The album is now available in your collection for unlimited listening and downloading.
+    p Enjoy!
