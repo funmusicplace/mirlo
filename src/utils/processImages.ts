@@ -1,9 +1,4 @@
-import { Request, Response } from "express";
-
 import { Queue, QueueEvents } from "bullmq";
-import winston from "winston";
-import dimensions from "image-size";
-import { fromFile } from "file-type";
 import * as Minio from "minio";
 
 import sharpConfig from "../config/sharp";
@@ -16,44 +11,13 @@ import {
   finalCoversBucket,
   incomingArtistBannerBucket,
   incomingCoversBucket,
+  minioClient,
 } from "./minio";
 import prisma from "../../prisma/prisma";
+import { APIContext, APIFile, checkFileType } from "./file";
+import { logger } from "../jobs/queue-worker";
 
-type ConfigTypes = "artwork" | "avatar" | "banner";
-
-const {
-  MINIO_HOST = "",
-  MINIO_ROOT_USER = "",
-  MINIO_ROOT_PASSWORD = "",
-  MINIO_PORT = 9000,
-} = process.env;
-
-const logger = winston.createLogger({
-  level: "info",
-  format: winston.format.json(),
-  defaultMeta: { service: "process-file" },
-  transports: [
-    new winston.transports.Console({
-      level: "debug",
-      format: winston.format.simple(),
-    }),
-    new winston.transports.File({
-      filename: "error.log",
-      level: "error",
-    }),
-  ],
-});
-
-// Instantiate the minio client with the endpoint
-// and access keys as shown below.
-const minioClient = new Minio.Client({
-  endPoint: MINIO_HOST,
-  port: +MINIO_PORT,
-  useSSL: false,
-  // useSSL: NODE_ENV !== "development",
-  accessKey: MINIO_ROOT_USER,
-  secretKey: MINIO_ROOT_PASSWORD,
-});
+const { MINIO_HOST = "", MINIO_PORT = 9000 } = process.env;
 
 const queueOptions = {
   prefix: "blackbird",
@@ -99,38 +63,10 @@ imageQueueEvents.on("completed", async (jobId: any) => {
   }
 });
 
-type APIContext = {
-  req: Request;
-  res: Response;
-};
-
-type APIFile = {
-  originalname: string;
-  filename: string;
-  path: string;
-  mimetype: string;
-  size: number;
-};
-
-const checkFileType = async (ctx: APIContext, file: APIFile) => {
-  const { path: filepath } = file;
-  const type = await fromFile(filepath);
-  const mime = type !== null && type !== undefined ? type.mime : file.mimetype;
-  const isImage = SUPPORTED_IMAGE_MIME_TYPES.includes(mime);
-
-  if (!isImage) {
-    logger.error("Not an image");
-    ctx.res.status(400);
-    throw `File type not supported: ${mime}`;
-  }
-
-  return { filepath };
-};
-
 export const processArtistBanner = (ctx: APIContext) => {
   return async (file: APIFile, artistId: number) => {
-    await checkFileType(ctx, file);
-    console.log("processing artist banner");
+    await checkFileType(ctx, file, SUPPORTED_IMAGE_MIME_TYPES, logger);
+
     const image = await prisma.artistBanner.upsert({
       create: {
         originalFilename: file.originalname,
@@ -177,7 +113,7 @@ export const processArtistBanner = (ctx: APIContext) => {
 
 export const processTrackGroupCover = (ctx: APIContext) => {
   return async (file: APIFile, trackGroupId: number) => {
-    await checkFileType(ctx, file);
+    await checkFileType(ctx, file, SUPPORTED_IMAGE_MIME_TYPES);
 
     const image = await prisma.trackGroupCover.upsert({
       create: {

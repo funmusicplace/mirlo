@@ -1,6 +1,6 @@
-import { PrismaClient, User } from "@prisma/client";
+import { User } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
-import multer, { Multer } from "multer";
+import multer from "multer";
 import {
   userAuthenticated,
   userHasPermission,

@@ -3,7 +3,13 @@ import { NextFunction, Request, Response } from "express";
 import fs from "fs";
 const fsPromises = fs.promises;
 import path from "path";
+import stream from "stream";
 import prisma from "../../../../../../prisma/prisma";
+import {
+  finalAudioBucket,
+  getObjectFromMinio,
+  minioClient,
+} from "../../../../../utils/minio";
 
 // FIXME: REplace with MEDIA_LOCATIOn
 const ROOT = "/data/media/audio";
@@ -14,35 +20,29 @@ export const fetchFile = async (
   segment: string
 ) => {
   const alias = `${filename}/${segment}`;
-  // We test if this file works with m3u8.
   try {
-    await fsPromises.stat(path.join(ROOT, alias));
+    await minioClient.statObject(finalAudioBucket, alias);
+    // await fsPromises.stat(path.join(ROOT, alias));
   } catch (e) {
     res.status(404);
+    res.send();
     return;
   }
 
-  // if (process.env.NODE_ENV !== "production") {
-  //   try {
-  //     res.send(fs.createReadStream(path.join(ROOT, alias)));
-  //   } catch (e) {
-  //     console.error("error creating stream", e);
-  //     res.status(404);
-  //     return;
-  //   }
-  // } else {
-  // FIXME: is there a way to make it so that nginx serves
-  // this file?
-  // ctx.set({
-  //   'Content-Type': 'audio/mp4',
-  //   // 'Content-Length': filesize, TODO if we have a file metadata
-  //   // 'Content-Disposition': `inline; filename=${filename}${ext}`,
-  //   'X-Accel-Redirect': alias // internal redirect
-  // })
-  // ctx.attachment(filename)
-  // ctx.body = null
-  await res.sendFile(`/${alias}`, { root: path.join(ROOT) });
-  // }
+  try {
+    const { buffer } = await getObjectFromMinio(
+      minioClient,
+      finalAudioBucket,
+      alias
+    );
+
+    res.end(buffer, "binary");
+  } catch (e) {
+    console.error("error", e);
+    res.status(400);
+    res.send();
+    return;
+  }
 };
 
 export default function () {
@@ -53,7 +53,6 @@ export default function () {
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { id, segment }: { id?: string; segment?: string } = req.params;
     try {
-      const user = req.user as User;
       const track = await prisma.track.findUnique({
         where: { id: Number(id) },
         include: {

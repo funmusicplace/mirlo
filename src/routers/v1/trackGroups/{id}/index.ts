@@ -13,7 +13,11 @@ export default function () {
     const trackGroup = await prisma.trackGroup.findFirst({
       where: { id: Number(id), published: true },
       include: {
-        tracks: true,
+        tracks: {
+          where: {
+            deletedAt: null,
+          },
+        },
         artist: true,
         cover: true,
       },

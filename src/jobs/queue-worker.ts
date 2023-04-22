@@ -11,10 +11,10 @@ import optimizeImage from "./optimize-image";
 
 import { REDIS_CONFIG } from "../config/redis";
 
-const logger = winston.createLogger({
+export const logger = winston.createLogger({
   level: "info",
   format: winston.format.json(),
-  defaultMeta: { service: "file-process-queue" },
+  defaultMeta: { service: "background-queue" },
   transports: [
     new winston.transports.Console({
       level: "debug",

@@ -19,7 +19,7 @@ const hlsConfig = {
   xhrSetup: function (xhr: XMLHttpRequest, url: string) {
     // const { token } = getToken();
     // FIXME: need to set cookies on the xhr for the hls
-    // xhr.setRequestHeader("Content-Type", "application/octet-stream");
+    xhr.setRequestHeader("Content-Type", "application/octet-stream");
     // xhr.setRequestHeader("Authorization", `Bearer ${token}`);
   },
 };
@@ -33,7 +33,6 @@ export const AudioWrapper: React.FC<{
   } = useGlobalStateContext();
   const [currentTime, setCurrentTime] = React.useState("0:00");
   const playerRef = React.useRef<HTMLVideoElement>(null);
-  console.log("playerQUeueIds", playerQueueIds);
   const [mostlyListened, setMostlyListened] = React.useState(false);
   const userId = user?.id;
 

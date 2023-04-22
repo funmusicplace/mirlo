@@ -47,7 +47,7 @@ export const ManageAlbumForm: React.FC<{
         owned
         reload={reloadTrackGroup}
       />
-      <NewTrack trackgroup={trackgroup} reload={reload} />
+      <NewTrack trackgroup={trackgroup} reload={reloadTrackGroup} />
     </Modal>
   );
 };
