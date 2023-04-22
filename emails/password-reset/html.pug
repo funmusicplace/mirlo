@@ -1,0 +1,17 @@
+doctype html
+html
+  head
+    block head
+      meta(charset="utf-8")
+      meta(name="viewport", content="width=device-width")
+      meta(http-equiv="X-UA-Compatible", content="IE=edge")
+      meta(name="x-apple-disable-message-reformatting")
+      style 
+        include ../style.css
+  body.sans-serif
+    p Hi!
+    p Someone wants to reset the password for this email
+    p #{user.email}
+    p 
+      a(href=`${host}/password-reset/confirmation/${user.emailConfirmationToken}?email=${user.email}`) Click here to confirm
+    p If this was not you, you can safely ignore this email.

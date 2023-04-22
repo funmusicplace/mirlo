@@ -1,26 +1,10 @@
-import winston from "winston";
 import path from "path";
 import nodemailer from "nodemailer";
 import sendgrid from "nodemailer-sendgrid";
 import Email from "email-templates";
+import { logger } from "../logger";
 
-const logger = winston.createLogger({
-  level: "info",
-  format: winston.format.json(),
-  defaultMeta: { service: "cleanup" },
-  transports: [
-    new winston.transports.Console({
-      level: "debug",
-      format: winston.format.simple(),
-    }),
-    new winston.transports.File({
-      filename: "error.log",
-      level: "error",
-    }),
-  ],
-});
-
-const viewsDir = path.join(__dirname, "../../emails");
+const viewsDir = path.join(__dirname, "../emails");
 
 /**
  * Cleanup incoming folder and more (later)
@@ -31,8 +15,8 @@ const sendMail = async (job: any) => {
     if (process.env.SENDGRID_API_KEY) {
       const email = new Email({
         message: {
-          from: `"Resonate" <${
-            process.env.SENDGRID_SENDER ?? "members@resonate.coop"
+          from: `"Blackbird" <${
+            process.env.SENDGRID_SENDER ?? "no-reply@blackbrd.net"
           }>`,
         },
         juice: true,

@@ -1,0 +1,66 @@
+.sans-serif {
+  font-family: -apple-system, BlinkMacSystemFont,
+    'avenir next', avenir,
+    'helvetica neue', helvetica,
+    ubuntu,
+    roboto, noto,
+    'segoe ui', arial,
+    sans-serif;
+}
+
+p {
+  margin-bottom: .75rem;
+}
+
+.b {
+  font-weight: bold;
+}
+
+.fw6 {
+  font-weight: 600;
+}
+
+.lh-copy {
+  line-height: 1.5;
+}
+
+.mw8 {
+  max-width: 64rem;
+}
+
+.w-100 {
+  width: 100%;
+}
+
+.overflow-auto {
+  overflow: auto;
+}
+
+.bg-white {
+  background-color: #fff;
+}
+
+.pa3 {
+  padding: 1rem;
+}
+
+.pa4 {
+  padding: 2rem;
+}
+
+.stripe-dark:nth-child(odd) {
+  background-color: rgba(0, 0, 0, .1);
+}
+
+.tl {
+  text-align: left;
+}
+
+.f6 {
+  font-size: .875rem;
+}
+
+.center {
+  margin-right: auto;
+  margin-left: auto;
+}

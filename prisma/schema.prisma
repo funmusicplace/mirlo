@@ -18,19 +18,21 @@ model Client {
 }
 
 model User {
-  id                      Int                      @id @default(autoincrement())
-  email                   String                   @unique
-  name                    String?
-  password                String                   @default("")
-  refresh                 String?
-  artists                 Artist[]
-  createdAt               DateTime                 @default(now())
-  updatedAt               DateTime                 @default(now()) @updatedAt
-  deletedAt               DateTime?
-  isAdmin                 Boolean                  @default(false)
-  artistUserSubscriptions ArtistUserSubscription[]
-  country                 String?
-  UserTrackGroupPurchase  UserTrackGroupPurchase[]
+  id                          Int                      @id @default(autoincrement())
+  email                       String                   @unique
+  name                        String?
+  password                    String                   @default("")
+  refresh                     String?
+  artists                     Artist[]
+  createdAt                   DateTime                 @default(now())
+  updatedAt                   DateTime                 @default(now()) @updatedAt
+  deletedAt                   DateTime?
+  isAdmin                     Boolean                  @default(false)
+  artistUserSubscriptions     ArtistUserSubscription[]
+  country                     String?
+  userTrackGroupPurchase      UserTrackGroupPurchase[]
+  emailConfirmationToken      String?                  @default(uuid()) @db.Uuid
+  emailConfirmationExpiration DateTime?                @default(dbgenerated("NOW() + interval '10 min'"))
 }
 
 model Post {

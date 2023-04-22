@@ -1,8 +1,10 @@
-import express from "express";
+import express, { Response } from "express";
 import jwt, { JwtPayload, VerifyErrors } from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { userAuthenticated } from "../auth/passport";
 import prisma from "../../prisma/prisma";
+import sendMail from "../jobs/send-mail";
+import { User } from "@prisma/client";
 
 const jwt_secret = process.env.JWT_SECRET ?? "";
 const refresh_secret = process.env.REFRESH_TOKEN_SECRET ?? "";
@@ -14,7 +16,7 @@ async function hashPassword(password: string) {
 }
 
 router.post(`/signup`, async (req, res, next) => {
-  let { name, email, password } = req.body;
+  let { name, email, password, client } = req.body;
   email = email.toLowerCase();
 
   const existing = await prisma.user.findFirst({
@@ -35,10 +37,64 @@ router.post(`/signup`, async (req, res, next) => {
       select: {
         name: true,
         email: true,
-        artists: true,
+        emailConfirmationToken: true,
       },
     });
+
+    await sendMail({
+      data: {
+        template: "new-user",
+        message: {
+          to: result.email,
+        },
+        locals: {
+          user: result,
+          host: process.env.APP_HOST,
+          client,
+        },
+      },
+    });
+
     res.json(result);
+  }
+});
+
+router.get(`/confirmation/:emailConfirmationToken`, async (req, res, next) => {
+  let { emailConfirmationToken } = req.params;
+
+  let { client, email } = req.query as { client: string; email: string };
+  email = email.toLowerCase();
+
+  const user = await prisma.user.findFirst({
+    where: {
+      email,
+      emailConfirmationToken,
+    },
+  });
+
+  if (!user) {
+    return res.status(404).json({ error: "This user does not exist" });
+  } else if (
+    user.emailConfirmationExpiration &&
+    user.emailConfirmationExpiration < new Date()
+  ) {
+    return res.status(404).json({ error: "Token expired" });
+  } else {
+    const updatedUser = await prisma.user.update({
+      data: {
+        emailConfirmationToken: null,
+        emailConfirmationExpiration: null,
+      },
+      where: {
+        id: user.id,
+      },
+      select: {
+        email: true,
+        id: true,
+      },
+    });
+    setTokens(res, updatedUser);
+    return res.redirect(client);
   }
 });
 
@@ -82,31 +138,11 @@ router.post(
       });
     }
 
-    const payload = {
-      email: user.email,
-      id: user.id,
-    };
+    setTokens(res, user);
 
-    const accessToken = jwt.sign(payload, jwt_secret, {
-      expiresIn: "10m",
+    res.status(200).json({
+      message: "Success",
     });
-
-    const refreshToken = jwt.sign(payload, refresh_secret, { expiresIn: "1d" });
-    res
-      .cookie("jwt", accessToken, {
-        httpOnly: true,
-        sameSite: process.env.NODE_ENV !== "development" ? "strict" : undefined,
-        secure: process.env.NODE_ENV !== "development",
-      })
-      .cookie("refresh", refreshToken, {
-        httpOnly: true,
-        sameSite: process.env.NODE_ENV !== "development" ? "strict" : undefined,
-        secure: process.env.NODE_ENV !== "development",
-      })
-      .status(200)
-      .json({
-        message: "Success",
-      });
   }
 );
 
@@ -182,35 +218,11 @@ router.post("/refresh", (req, res) => {
             return res.status(401).json({ message: "Unauthorized" });
           }
 
-          const payload = {
-            email: foundUser.email,
-            id: foundUser.id,
-          };
+          setTokens(res, foundUser);
 
-          const accessToken = jwt.sign(payload, jwt_secret, {
-            expiresIn: "10m",
+          res.status(200).json({
+            message: "Success",
           });
-          const refreshToken = jwt.sign(payload, refresh_secret, {
-            expiresIn: "1d",
-          });
-
-          return res
-            .cookie("jwt", accessToken, {
-              httpOnly: true,
-              sameSite:
-                process.env.NODE_ENV !== "development" ? "strict" : undefined,
-              secure: process.env.NODE_ENV !== "development",
-            })
-            .cookie("refresh", refreshToken, {
-              httpOnly: true,
-              sameSite:
-                process.env.NODE_ENV !== "development" ? "strict" : undefined,
-              secure: process.env.NODE_ENV !== "development",
-            })
-            .status(200)
-            .json({
-              message: "Success",
-            });
         }
       }
     );
@@ -218,5 +230,31 @@ router.post("/refresh", (req, res) => {
     return res.status(406).json({ message: "Unauthorized" });
   }
 });
+
+const setTokens = (res: Response, user: { email: string; id: number }) => {
+  const payload = {
+    email: user.email,
+    id: user.id,
+  };
+
+  const accessToken = jwt.sign(payload, jwt_secret, {
+    expiresIn: "10m",
+  });
+  const refreshToken = jwt.sign(payload, refresh_secret, {
+    expiresIn: "1d",
+  });
+
+  res
+    .cookie("jwt", accessToken, {
+      httpOnly: true,
+      sameSite: process.env.NODE_ENV !== "development" ? "strict" : undefined,
+      secure: process.env.NODE_ENV !== "development",
+    })
+    .cookie("refresh", refreshToken, {
+      httpOnly: true,
+      sameSite: process.env.NODE_ENV !== "development" ? "strict" : undefined,
+      secure: process.env.NODE_ENV !== "development",
+    });
+};
 
 export default router;

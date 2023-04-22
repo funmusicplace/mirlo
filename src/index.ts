@@ -146,7 +146,7 @@ if (process.env.NODE_ENV === "development") {
 // This has to be the last thing used so that other things don't get over-written
 app.use("/", (req, res) => {
   res.status(200).json({
-    blackbird: "singing in the dead of night",
+    blackbird: "chirp",
   });
 });
 

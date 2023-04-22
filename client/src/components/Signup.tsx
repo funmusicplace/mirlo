@@ -20,9 +20,13 @@ function Signup() {
   const onSubmit = React.useCallback(
     async (data: SignupInputs) => {
       try {
-        await api.post("signup", data, {
-          credentials: undefined,
-        });
+        await api.post(
+          "signup",
+          { ...data, client: process.env.REACT_APP_CLIENT_DOMAIN },
+          {
+            credentials: undefined,
+          }
+        );
         snackbar("Registration success", { type: "success" });
       } catch (e) {
         snackbar((e as Error).message, { type: "warning" });
