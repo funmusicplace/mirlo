@@ -80,6 +80,7 @@ const handleSubscription = async (
         userId: Number(userId),
         amount: session.amount_total ?? 0,
         currency: session.currency ?? "USD",
+        deletedAt: null, // Undelete
         stripeId: session.id, // FIXME: should this be session id? Maybe subscriptionId?
       },
       where: {

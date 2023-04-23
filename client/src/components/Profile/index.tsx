@@ -3,15 +3,13 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
 import { useSnackbar } from "state/SnackbarContext";
-import api from "../services/api";
-import { useGlobalStateContext } from "../state/GlobalState";
-import Box from "./common/Box";
-import Button from "./common/Button";
-import FormComponent from "./common/FormComponent";
-import { InputEl } from "./common/Input";
-import LoadingSpinner from "./common/LoadingSpinner";
-import Money from "./common/Money";
-import Pill from "./common/Pill";
+import api from "../../services/api";
+import { useGlobalStateContext } from "../../state/GlobalState";
+import Button from "../common/Button";
+import FormComponent from "../common/FormComponent";
+import { InputEl } from "../common/Input";
+import LoadingSpinner from "../common/LoadingSpinner";
+import UserSupports from "./UserSupports";
 
 function Profile() {
   const {
@@ -97,35 +95,13 @@ function Profile() {
           Update profile
         </Button>
       </form>
-      <Box style={{ marginTop: "1rem" }}>
-        <h2>Artists you support</h2>
-        {(user.artistUserSubscriptions?.length ?? 0) > 0 && (
-          <ul
-            className={css`
-              margin-top: 1rem;
-              list-style: none;
+      {user.artistUserSubscriptions && (
+        <UserSupports artistUserSubscriptions={user.artistUserSubscriptions} />
+      )}
+      <Link to="/profile/collection" style={{ marginTop: "1rem" }}>
+        <Button style={{ width: "100%" }}>View collection</Button>
+      </Link>
 
-              li {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-              }
-            `}
-          >
-            {user.artistUserSubscriptions?.map((s) => (
-              <li>
-                {s.artistSubscriptionTier.artist.name}:{" "}
-                <Money amount={s.amount / 100} />
-                /month
-                <Pill>{s.artistSubscriptionTier.name}</Pill>
-              </li>
-            ))}
-          </ul>
-        )}
-        {user.artistUserSubscriptions?.length === 0 && (
-          <>You don't support any artists yet</>
-        )}
-      </Box>
       <Link to="/manage" style={{ marginTop: "1rem" }}>
         <Button style={{ width: "100%" }}>Manage artists</Button>
       </Link>

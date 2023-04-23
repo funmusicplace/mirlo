@@ -3,10 +3,11 @@ import React from "react";
 import styled from "@emotion/styled";
 import LoadingSpinner from "./LoadingSpinner";
 import { css } from "@emotion/css";
+import { colorShade } from "utils/theme";
 
 export interface Compactable {
   compact?: boolean;
-  color?: "primary" | "danger";
+  color?: "primary" | "warning";
   variant?: "link" | "outlined";
 }
 
@@ -26,25 +27,34 @@ const CustomButton = styled.button<Compactable>`
     switch (props.variant) {
       case "link":
         return `
-          color: ${props.theme.colors.primary};
+          color: ${props.theme.colors[props.color ?? "primary"]};
           margin-right: 0;
           font-size: inherit;
           line-height: inherit;
 
           &:hover:not(:disabled) {
-            color: ${props.theme.colors.primaryHighlight};
+            color: ${colorShade(
+              props.theme.colors[props.color ?? "primary"],
+              0.5
+            )};
           }
         `;
       case "outlined":
         return `
-          color:  ${props.theme.colors.primary};
+          color:  ${props.theme.colors[props.color ?? "primary"]};
           background-color: transparent;
-          border: 2px solid  ${props.theme.colors.primary};
+          border: 2px solid ${props.theme.colors[props.color ?? "primary"]};
           padding: ${props.compact ? ".3rem .5rem" : "1rem"};
 
           &:hover:not(:disabled) {
-            color: ${props.theme.colors.primaryHighlight};
-            border: 2px solid ${props.theme.colors.primaryHighlight};
+            color: ${colorShade(
+              props.theme.colors[props.color ?? "primary"],
+              0.5
+            )};
+            border: 2px solid ${colorShade(
+              props.theme.colors[props.color ?? "primary"],
+              0.5
+            )};
           }
 
           &[disabled] {
@@ -55,27 +65,26 @@ const CustomButton = styled.button<Compactable>`
       default:
         return `
           padding: ${props.compact ? ".3rem .5rem" : "1rem"};
-          background-color:  ${props.theme.colors.primary};
-          color: ${props.theme.colors.text};
-          border: 2px solid ${props.theme.colors.primary};
+          background-color:  ${props.theme.colors[props.color ?? "primary"]};
+          color: ${
+            props.color === "primary"
+              ? props.theme.colors.text
+              : props.theme.colors.textDark
+          };
+          border: 2px solid ${colorShade(
+            props.theme.colors[props.color ?? "primary"],
+            1
+          )};
 
           &:hover:not(:disabled) {
-            border: 2px solid ${props.theme.colors.primary};
-            background-color: ${props.theme.colors.primaryHighlight};
+            border: 2px solid ${props.theme.colors[props.color ?? "primary"]};
+            background-color: ${colorShade(
+              props.theme.colors[props.color ?? "primary"],
+              -70
+            )};
           }
 
         `;
-    }
-  }}
-
-  ${(props) => {
-    switch (props.color) {
-      case "danger":
-        return `
-        color: white !important;
-        border-color: red !important;
-        background-color: ${props.theme.colors.warning} !important;
-      `;
     }
   }}
 

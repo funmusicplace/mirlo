@@ -23,6 +23,7 @@ import Home from "components/Home";
 import Artist from "components/Artist/Artist";
 import TrackGroupWidget from "components/Widget/TrackGroupWidget";
 import TrackWidget from "components/Widget/TrackWidget";
+import Collection from "components/Collection";
 
 const router = createBrowserRouter([
   {
@@ -46,6 +47,7 @@ const router = createBrowserRouter([
         path: "profile",
         element: <Profile />,
       },
+      { path: "profile/collection", element: <Collection /> },
       {
         path: "manage",
         element: <Manage />,

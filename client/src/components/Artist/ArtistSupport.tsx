@@ -1,3 +1,4 @@
+import { css } from "@emotion/css";
 import React from "react";
 import { useLocation } from "react-router-dom";
 import api from "services/api";
@@ -73,9 +74,15 @@ const ArtistSupport: React.FC<{ artist: Artist }> = ({ artist }) => {
   if (userSubscriptionTier) {
     return (
       <Box>
-        You are supporting this artist at the{" "}
-        <strong>{userSubscriptionTier.name}</strong> tier.
-        <Button compact color="danger" onClick={cancelSubscription}>
+        <p
+          className={css`
+            margin-bottom: 0.5rem;
+          `}
+        >
+          You are supporting this artist at the{" "}
+          <strong>{userSubscriptionTier.name}</strong> tier.
+        </p>
+        <Button compact color="warning" onClick={cancelSubscription}>
           Cancel subscription
         </Button>
       </Box>

@@ -2,6 +2,7 @@ import { Prisma, User } from "@prisma/client";
 import { Request, Response } from "express";
 import { userAuthenticated } from "../../../../auth/passport";
 import prisma from "../../../../../prisma/prisma";
+import trackGroupProcessor from "../../../../utils/trackGroup";
 
 type Params = {
   userId: string;
@@ -26,8 +27,21 @@ export default function () {
       }
       const purchases = await prisma.userTrackGroupPurchase.findMany({
         where,
+        include: {
+          trackGroup: {
+            include: {
+              artist: true,
+              cover: true,
+            },
+          },
+        },
       });
-      res.json({ results: purchases });
+      res.json({
+        results: purchases.map((p) => ({
+          ...p,
+          trackGroup: trackGroupProcessor.single(p.trackGroup),
+        })),
+      });
     } else {
       res.status(401);
       res.json({

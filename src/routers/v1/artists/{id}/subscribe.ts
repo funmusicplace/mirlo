@@ -1,6 +1,6 @@
-import { Artist, PrismaClient, User } from "@prisma/client";
-import { NextFunction, Request, Response } from "express";
-import { pick } from "lodash";
+import { User } from "@prisma/client";
+import { Request, Response } from "express";
+
 import Stripe from "stripe";
 import { userAuthenticated } from "../../../../auth/passport";
 import prisma from "../../../../../prisma/prisma";
@@ -26,6 +26,12 @@ export default function () {
     const { tierId } = req.body;
 
     try {
+      const user = await prisma.user.findFirst({
+        where: {
+          id: userId,
+        },
+      });
+
       const client = await prisma.client.findFirst({});
       const tier = await prisma.artistSubscriptionTier.findFirst({
         where: {
@@ -41,6 +47,7 @@ export default function () {
       }
       const session = await stripe.checkout.sessions.create({
         billing_address_collection: "auto",
+        customer_email: user?.email,
         line_items: [
           {
             price_data: {

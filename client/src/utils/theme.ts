@@ -1,6 +1,6 @@
 export const theme = {
   colors: {
-    primary: "#99f4ff",
+    primary: "#0096a8",
     primaryHighlight: "#bcb3ff",
     text: "#333",
     textDark: "white",
@@ -14,7 +14,7 @@ export const theme = {
 
 /**
  * @param color Hex value format: #ffffff or ffffff
- * @param decimal lighten or darken decimal value, between
+ * @param decimal lighten or darken decimal value, between -255 and +255
  */
 export const colorShade = (col: string, amt: number) => {
   col = col.replace(/^#/, "");

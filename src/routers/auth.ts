@@ -169,15 +169,15 @@ router.get("/profile", userAuthenticated, async (req, res) => {
       email: true,
       id: true,
       name: true,
+      artists: true,
       artistUserSubscriptions: {
         where: {
           deletedAt: null,
         },
         select: {
           artistSubscriptionTier: {
-            select: {
+            include: {
               artist: true,
-              name: true,
             },
           },
           id: true,

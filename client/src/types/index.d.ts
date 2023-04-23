@@ -96,6 +96,7 @@ interface ArtistUserSubscription {
 interface UserTrackGroupPurchase {
   userId: number;
   trackGroupId: number;
+  trackGroup?: TrackGroup;
   amountPaid: number;
   currency: number;
 }
