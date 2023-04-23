@@ -131,7 +131,7 @@ services:
     name: post-publish
     env: node
     repo: https://github.com/funmusicplace/blackbird.git # optional
-    plan: free
+    plan: starter
     startCommand: src/jobs/announce-post-published.ts
     schedule: "*/10 * * * *"
     envVars:
