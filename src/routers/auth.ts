@@ -15,7 +15,7 @@ async function hashPassword(password: string) {
   return await bcrypt.hash(password, 3);
 }
 
-router.post(`/signup`, async (req, res, next) => {
+router.post(`/signup`, async (req, res) => {
   let { name, email, password, client } = req.body;
   email = email.toLowerCase();
 
@@ -49,7 +49,7 @@ router.post(`/signup`, async (req, res, next) => {
         },
         locals: {
           user: result,
-          host: process.env.APP_HOST,
+          host: process.env.API_DOMAIN,
           client,
         },
       },

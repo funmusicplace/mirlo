@@ -45,7 +45,7 @@ function Profile() {
         try {
           setIsSaving(true);
           await api.put(`users/${userId}`, data);
-          snackbar("Trackgroup updated", { type: "success" });
+          snackbar("Profile updated", { type: "success" });
         } catch (e) {
           snackbar("There was a problem with the API", { type: "warning" });
         } finally {

@@ -52,7 +52,7 @@ const announcePublishPost = async () => {
                 subscription: subscription,
                 artist: post.artist,
                 post: post,
-                host: process.env.APP_HOST,
+                host: process.env.API_DOMAIN,
                 client: process.env.REACT_APP_CLIENT_DOMAIN,
               },
             },
