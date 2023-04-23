@@ -7,6 +7,7 @@ import {
 } from "../../../../../../auth/passport";
 import { doesTrackGroupBelongToUser } from "../../../../../../utils/ownership";
 import prisma from "../../../../../../../prisma/prisma";
+import { deleteTrackGroup } from "../../../../../../utils/trackGroup";
 
 type Params = {
   trackGroupId: string;
@@ -15,8 +16,8 @@ type Params = {
 
 export default function () {
   const operations = {
-    PUT: [userAuthenticated, contentBelongsToLoggedInUserArtist(), PUT],
-    DELETE: [userAuthenticated, contentBelongsToLoggedInUserArtist(), DELETE],
+    PUT: [userAuthenticated, contentBelongsToLoggedInUserArtist, PUT],
+    DELETE: [userAuthenticated, contentBelongsToLoggedInUserArtist, DELETE],
     GET,
   };
 
@@ -119,14 +120,11 @@ export default function () {
   };
 
   async function DELETE(req: Request, res: Response) {
-    const { id } = req.params;
-    // FIXME: ensure trackGroup is owned by user
-    const post = await prisma.trackGroup.delete({
-      where: {
-        id: Number(id),
-      },
-    });
-    res.json(post);
+    const { trackGroupId } = req.params as { trackGroupId: string };
+
+    await deleteTrackGroup(Number(trackGroupId));
+
+    res.json({ message: "Success" });
   }
 
   DELETE.apiDoc = {

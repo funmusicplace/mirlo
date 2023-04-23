@@ -6,6 +6,7 @@ import {
 import prisma from "../../../../../../../prisma/prisma";
 import { convertURLArrayToSizes } from "../../../../../../utils/images";
 import { finalArtistBannerBucket } from "../../../../../../utils/minio";
+import { deleteTrackGroup } from "../../../../../../utils/trackGroup";
 
 type Params = {
   artistId: number;
@@ -183,7 +184,7 @@ export default function () {
       // https://github.com/funmusicplace/blackbird/issues/21
       await prisma.artistUserSubscription.deleteMany({
         where: {
-          artistId: Number(artistId),
+          artistSubscriptionTier: { artistId: Number(artistId) },
         },
       });
       const trackGroups = await prisma.trackGroup.findMany({
@@ -191,33 +192,8 @@ export default function () {
           artistId: Number(artistId),
         },
       });
-      const tracks = await prisma.track.findMany({
-        where: {
-          trackGroup: {
-            artistId: Number(artistId),
-          },
-        },
-      });
-      await prisma.trackGroup.deleteMany({
-        where: {
-          artistId: Number(artistId),
-        },
-      });
-      await prisma.track.deleteMany({
-        where: {
-          id: { in: tracks.map((t) => t.id) },
-        },
-      });
-      await prisma.trackGroupCover.deleteMany({
-        where: {
-          trackGroupId: { in: trackGroups.map((tg) => tg.id) },
-        },
-      });
-      await prisma.trackAudio.deleteMany({
-        where: {
-          trackId: { in: tracks.map((t) => t.id) },
-        },
-      });
+
+      await Promise.all(trackGroups.map((tg) => deleteTrackGroup(tg.id)));
     } catch (e) {
       res.status(400);
       next();

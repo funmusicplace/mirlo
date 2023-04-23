@@ -14,7 +14,7 @@ type Params = {
 export default function () {
   const operations = {
     GET: [userAuthenticated, userHasPermission("owner"), GET],
-    POST: [userAuthenticated, contentBelongsToLoggedInUserArtist(), POST],
+    POST: [userAuthenticated, contentBelongsToLoggedInUserArtist, POST],
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {

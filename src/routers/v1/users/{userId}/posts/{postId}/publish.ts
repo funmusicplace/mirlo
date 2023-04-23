@@ -1,9 +1,11 @@
 import { Request, Response } from "express";
 import prisma from "../../../../../../../prisma/prisma";
+import { userAuthenticated } from "../../../../../../auth/passport";
+import { doesPostBelongToUser } from "../../../../../../utils/post";
 
 export default function () {
   const operations = {
-    PUT,
+    PUT: [userAuthenticated, doesPostBelongToUser, PUT],
   };
 
   // FIXME: only allow to publish posts by userId

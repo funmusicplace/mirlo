@@ -36,17 +36,18 @@ model User {
 }
 
 model Post {
-  id                 Int       @id @default(autoincrement())
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @default(now()) @updatedAt
-  deletedAt          DateTime?
-  title              String
-  content            String?
-  publishedAt        DateTime  @default(now())
-  viewCount          Int       @default(0)
-  artist             Artist?   @relation(fields: [artistId], references: [id])
-  artistId           Int?
-  forSubscribersOnly Boolean   @default(false)
+  id                       Int       @id @default(autoincrement())
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime  @default(now()) @updatedAt
+  deletedAt                DateTime?
+  title                    String
+  content                  String?
+  publishedAt              DateTime  @default(now())
+  viewCount                Int       @default(0)
+  artist                   Artist?   @relation(fields: [artistId], references: [id])
+  artistId                 Int?
+  forSubscribersOnly       Boolean   @default(false)
+  hasAnnounceEmailBeenSent Boolean   @default(false)
 }
 
 model Artist {
@@ -62,7 +63,6 @@ model Artist {
   updatedAt         DateTime                 @default(now()) @updatedAt
   deletedAt         DateTime?
   subscriptionTiers ArtistSubscriptionTier[]
-  userSubscriptions ArtistUserSubscription[]
   banner            ArtistBanner?
   avatar            ArtistAvatar?
 }
@@ -90,20 +90,20 @@ model ArtistBanner {
 }
 
 model ArtistSubscriptionTier {
-  id                      Int                      @id @default(autoincrement())
-  name                    String
-  description             String                   @default("")
-  artistId                Int
-  artist                  Artist                   @relation(fields: [artistId], references: [id])
-  minAmount               Int? // in cents
-  allowVariable           Boolean?
-  maxAmount               Int? // in cents
-  defaultAmount           Int? // in cents
-  currency                String                   @default("USD")
-  artistUserSubscriptions ArtistUserSubscription[]
-  createdAt               DateTime                 @default(now())
-  updatedAt               DateTime                 @default(now()) @updatedAt
-  deletedAt               DateTime?
+  id                Int                      @id @default(autoincrement())
+  name              String
+  description       String                   @default("")
+  artistId          Int
+  artist            Artist                   @relation(fields: [artistId], references: [id])
+  minAmount         Int? // in cents
+  allowVariable     Boolean?
+  maxAmount         Int? // in cents
+  defaultAmount     Int? // in cents
+  currency          String                   @default("USD")
+  userSubscriptions ArtistUserSubscription[]
+  createdAt         DateTime                 @default(now())
+  updatedAt         DateTime                 @default(now()) @updatedAt
+  deletedAt         DateTime?
 }
 
 model ArtistUserSubscription {
@@ -115,10 +115,6 @@ model ArtistUserSubscription {
   amount                   Int // In cents
   currency                 String                 @default("USD")
   stripeId                 String?
-  // Not clear why prisma auto creates these
-  // two fields
-  artist                   Artist?                @relation(fields: [artistId], references: [id])
-  artistId                 Int?
   createdAt                DateTime               @default(now())
   updatedAt                DateTime               @default(now()) @updatedAt
   deletedAt                DateTime?

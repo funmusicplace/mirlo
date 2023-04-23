@@ -10,7 +10,7 @@ import prisma from "../../../../../../prisma/prisma";
 export default function () {
   const operations = {
     GET: [userAuthenticated, GET],
-    POST: [userAuthenticated, contentBelongsToLoggedInUserArtist(), POST],
+    POST: [userAuthenticated, contentBelongsToLoggedInUserArtist, POST],
   };
 
   // FIXME: only get trackgroups belonging to artists belonging to a user

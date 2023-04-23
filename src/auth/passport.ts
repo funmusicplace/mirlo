@@ -136,36 +136,38 @@ export const artistBelongsToLoggedInUser = async (
   return next();
 };
 
-export const contentBelongsToLoggedInUserArtist = () => {
-  return async (req: Request, res: Response, next: NextFunction) => {
-    const { userId } = req.params as unknown as { userId: string };
-    const data = req.body;
+export const contentBelongsToLoggedInUserArtist = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { userId } = req.params as unknown as { userId: string };
+  const data = req.body;
 
-    const artistId = data.artistId ?? req.params.artistId;
-    const loggedInUser = req.user as User;
+  const artistId = data.artistId ?? req.params.artistId;
+  const loggedInUser = req.user as User;
 
-    if (loggedInUser.id !== Number(userId)) {
-      res.status(400).json({
-        error: `Artist must belong to user`,
-      });
-      return next(`Artist must belong to user`);
-    }
-
-    const artist = await prisma.artist.findFirstOrThrow({
-      where: {
-        userId: loggedInUser.id,
-        id: Number(artistId),
-      },
+  if (loggedInUser.id !== Number(userId)) {
+    res.status(400).json({
+      error: `Artist must belong to user`,
     });
+    return next(`Artist must belong to user`);
+  }
 
-    if (!artist) {
-      res.status(400).json({
-        error: "Artist must belong to user",
-      });
-      return next("Artist must belong to user");
-    }
-    return next();
-  };
+  const artist = await prisma.artist.findFirstOrThrow({
+    where: {
+      userId: loggedInUser.id,
+      id: Number(artistId),
+    },
+  });
+
+  if (!artist) {
+    res.status(400).json({
+      error: "Artist must belong to user",
+    });
+    return next("Artist must belong to user");
+  }
+  return next();
 };
 
 export default {

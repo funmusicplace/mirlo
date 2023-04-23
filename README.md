@@ -77,3 +77,11 @@ Then to trigger a specific workflow:
 # this is what's needed to store a subscription
 stripe trigger checkout.session.completed --add checkout_session:metadata.userId=3 --add checkout_session:metadata.tierId=2
 ```
+
+## CRON Jobs
+
+Some cron jobs exist:
+
+```
+docker exec -it blackbird-api yarn ts-node src/jobs/announce-post-published.ts
+```

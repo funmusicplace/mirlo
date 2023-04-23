@@ -8,7 +8,9 @@ export const checkIsUserSubscriber = async (user: User, artistId: number) => {
     const subscriber = await prisma.artistUserSubscription.findFirst({
       where: {
         userId: user.id,
-        artistId: artistId,
+        artistSubscriptionTier: {
+          artistId,
+        },
       },
     });
 

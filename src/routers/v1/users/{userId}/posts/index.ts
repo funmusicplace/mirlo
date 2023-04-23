@@ -9,7 +9,7 @@ import prisma from "../../../../../../prisma/prisma";
 
 export default function () {
   const operations = {
-    POST: [userAuthenticated, contentBelongsToLoggedInUserArtist(), POST],
+    POST: [userAuthenticated, contentBelongsToLoggedInUserArtist, POST],
     GET: [userAuthenticated, GET],
   };
 

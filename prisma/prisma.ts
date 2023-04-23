@@ -6,6 +6,21 @@ const prisma = new PrismaClient();
  * Middleware
  */
 
+// @ts-ignore
+prisma.$on("query", (e) => {
+  // @ts-ignore
+  let queryString = e.query;
+  // @ts-ignore
+  JSON.parse(e.params).forEach((param, index) => {
+    queryString = queryString.replace(
+      `$${index + 1}`,
+      typeof param === "string" ? `'${param}'` : param
+    );
+  });
+
+  console.log(queryString);
+});
+
 /**
  * We intercept deletions for models with a `deletedAt` field
  * and instead soft deletes them.
