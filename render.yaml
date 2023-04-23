@@ -133,6 +133,7 @@ services:
     repo: https://github.com/funmusicplace/blackbird.git # optional
     plan: starter
     startCommand: src/jobs/announce-post-published.ts
+    buildCommand: yarn install && yarn migrate:deploy
     schedule: "*/10 * * * *"
     envVars:
       - key: NODE_OPTIONS
