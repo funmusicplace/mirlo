@@ -87,6 +87,7 @@ interface ArtistSubscriptionTier {
 }
 
 interface ArtistUserSubscription {
+  id: number;
   amount: number;
   artistSubscriptionTierId: number;
   artistSubscriptionTier: ArtistSubscriptionTier;

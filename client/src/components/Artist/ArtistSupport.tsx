@@ -1,22 +1,20 @@
-import { css } from "@emotion/css";
 import React from "react";
 import { useLocation } from "react-router-dom";
 import api from "services/api";
 import { useGlobalStateContext } from "state/GlobalState";
-import { useSnackbar } from "state/SnackbarContext";
 import Box from "../common/Box";
 import Button from "../common/Button";
-import Money from "../common/Money";
+import ArtistSupportBox from "./ArtistSupportBox";
 
 const ArtistSupport: React.FC<{ artist: Artist }> = ({ artist }) => {
   const {
     state: { user },
   } = useGlobalStateContext();
-  const [isSubscribed, setIsSubscribed] = React.useState(false);
-  const [isCheckingForSubscription, setIsCheckingForSubscription] =
-    React.useState(false);
+  const [userSubscriptionTier, setUserSubscriptionTier] =
+    React.useState<ArtistSubscriptionTier>();
+  const [userSubscription, setUserSubscription] =
+    React.useState<ArtistUserSubscription>();
   const { search } = useLocation();
-  const snackbar = useSnackbar();
   const userId = user?.id;
 
   const checkForSubscription = React.useCallback(async () => {
@@ -26,13 +24,14 @@ const ArtistSupport: React.FC<{ artist: Artist }> = ({ artist }) => {
           await api.getMany<ArtistUserSubscription>(
             `users/${userId}/subscriptions?artistId=${artist.id}`
           );
+        setUserSubscription(subscriptions[0]);
         const subscriptionIds = subscriptions.map(
           (s) => s.artistSubscriptionTierId
         );
         const hasId = artist.subscriptionTiers.find((tier) =>
           subscriptionIds.includes(tier.id)
         );
-        setIsSubscribed(!!hasId);
+        setUserSubscriptionTier(hasId);
       }
     } catch (e) {
       console.error(e);
@@ -41,45 +40,46 @@ const ArtistSupport: React.FC<{ artist: Artist }> = ({ artist }) => {
 
   React.useEffect(() => {
     checkForSubscription();
-  });
+  }, [checkForSubscription]);
 
   React.useEffect(() => {
     const query = new URLSearchParams(search);
     let interval: NodeJS.Timer | null = null;
     if (query.get("subscribe") === "success") {
-      setIsCheckingForSubscription(true);
-      interval = setInterval(async () => {
+      interval = setTimeout(async () => {
         checkForSubscription();
       }, 1000 * 3);
     }
-    return () => (interval ? clearInterval(interval) : undefined);
+    return () => (interval ? clearTimeout(interval) : undefined);
   }, [checkForSubscription, search]);
 
-  const subscribeToTier = async (tier: ArtistSubscriptionTier) => {
+  const cancelSubscription = React.useCallback(async () => {
     try {
-      setIsCheckingForSubscription(true);
-
-      const response = await api.post<
-        { tierId: number },
-        { sessionUrl: string }
-      >(`artists/${artist.id}/subscribe`, {
-        tierId: tier.id,
-      });
-      window.location.assign(response.sessionUrl);
+      if (userSubscription) {
+        await api.delete(
+          `users/${userId}/subscriptions/${userSubscription.id}`
+        );
+        await checkForSubscription();
+      }
     } catch (e) {
-      snackbar("Something went wrong", { type: "success" });
       console.error(e);
     }
-  };
-
-  const ownedByUser = user && artist.userId === user?.id;
+  }, [checkForSubscription, userId, userSubscription]);
 
   if (!artist) {
     return null;
   }
 
-  if (isSubscribed) {
-    return <Box>Already subscribed!</Box>;
+  if (userSubscriptionTier) {
+    return (
+      <Box>
+        You are supporting this artist at the{" "}
+        <strong>{userSubscriptionTier.name}</strong> tier.
+        <Button compact color="danger" onClick={cancelSubscription}>
+          Cancel subscription
+        </Button>
+      </Box>
+    );
   }
 
   return (
@@ -87,60 +87,7 @@ const ArtistSupport: React.FC<{ artist: Artist }> = ({ artist }) => {
       <h2>Support {artist.name}</h2>
       <div>
         {artist.subscriptionTiers?.map((p) => (
-          <div
-            key={p.id}
-            className={css`
-              margin-bottom: 1rem;
-              margin-top: 1rem;
-              padding-top: 1.5rem;
-              display: flex;
-              flex-direction: column;
-
-              &:not(:first-child) {
-                border-top: 1px solid #efefef;
-              }
-            `}
-          >
-            <div
-              className={css`
-                display: flex;
-                justify-content: space-between;
-
-                h3 {
-                  font-size: 1.2rem;
-                }
-              `}
-            >
-              <h3>{p.name}</h3>
-              <Money amount={p.minAmount} />
-            </div>
-            <p>{p.description}</p>
-            <div
-              className={css`
-                margin-top: 0.5rem;
-              `}
-            >
-              {!ownedByUser && (
-                <Button
-                  compact
-                  onClick={() => subscribeToTier(p)}
-                  isLoading={isCheckingForSubscription}
-                  disabled={isCheckingForSubscription}
-                >
-                  Support at <Money amount={p.minAmount} /> / month
-                </Button>
-              )}
-              {user && ownedByUser && (
-                <Box
-                  className={css`
-                    text-align: center;
-                  `}
-                >
-                  Users will be able to subscribe here
-                </Box>
-              )}
-            </div>
-          </div>
+          <ArtistSupportBox key={p.id} subscriptionTier={p} artist={artist} />
         ))}
       </div>
     </>

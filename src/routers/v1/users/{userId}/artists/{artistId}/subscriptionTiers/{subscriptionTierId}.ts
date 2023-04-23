@@ -1,23 +1,20 @@
 import { NextFunction, Request, Response } from "express";
-import {
-  userAuthenticated,
-  userHasPermission,
-} from "../../../../../../../auth/passport";
+import { userAuthenticated } from "../../../../../../../auth/passport";
 import { doesSubscriptionTierBelongToUser } from "../../../../../../../utils/ownership";
 import prisma from "../../../../../../../../prisma/prisma";
 
 export default function () {
   const operations = {
-    PUT: [userAuthenticated, userHasPermission("owner"), PUT],
-    DELETE: [userAuthenticated, userHasPermission("owner"), DELETE],
+    PUT: [userAuthenticated, PUT],
+    DELETE: [userAuthenticated, DELETE],
   };
 
   async function PUT(req: Request, res: Response, next: NextFunction) {
-    const { subscriptionId, userId } = req.params;
+    const { subscriptionTierId, userId } = req.params;
 
     try {
       const subscriptionTier = await doesSubscriptionTierBelongToUser(
-        Number(subscriptionId),
+        Number(subscriptionTierId),
         Number(userId)
       );
 
@@ -29,7 +26,7 @@ export default function () {
       }
 
       const updatedTier = await prisma.artistSubscriptionTier.update({
-        where: { id: Number(subscriptionId) },
+        where: { id: Number(subscriptionTierId) },
         data: {
           name: req.body.name,
           description: req.body.description,
@@ -43,29 +40,23 @@ export default function () {
       console.log("error", error);
       res.status(400);
       res.json({
-        error: `Subscription with ID ${subscriptionId} does not exist in the database`,
+        error: `Subscription Tier with ID ${subscriptionTierId} does not exist in the database`,
       });
     }
   }
 
   PUT.apiDoc = {
-    summary: "Updates a subscription belonging to a user",
+    summary: "Updates a subscription tier belonging to a user",
     parameters: [
       {
         in: "path",
-        name: "subscriptionId",
+        name: "subscriptionTierId",
         required: true,
         type: "string",
       },
       {
         in: "path",
         name: "userId",
-        required: true,
-        type: "string",
-      },
-      {
-        in: "path",
-        name: "artistId",
         required: true,
         type: "string",
       },
@@ -94,10 +85,9 @@ export default function () {
   };
 
   async function DELETE(req: Request, res: Response, next: NextFunction) {
-    const { userId, subscriptionId } = req.params;
-
+    const { userId, subscriptionTierId } = req.params;
     const track = await doesSubscriptionTierBelongToUser(
-      Number(subscriptionId),
+      Number(subscriptionTierId),
       Number(userId)
     );
 
@@ -109,7 +99,7 @@ export default function () {
     }
     await prisma.artistSubscriptionTier.delete({
       where: {
-        id: Number(subscriptionId),
+        id: Number(subscriptionTierId),
       },
     });
     res.json({ message: "Success" });
@@ -120,7 +110,7 @@ export default function () {
     parameters: [
       {
         in: "path",
-        name: "subscriptionId",
+        name: "subscriptionTierId",
         required: true,
         type: "string",
       },

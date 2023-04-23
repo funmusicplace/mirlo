@@ -98,16 +98,7 @@ const ManageArtist: React.FC<{}> = () => {
       <ManageArtistPosts />
       <ManageArtistSubscriptionTiers />
 
-      <Button
-        compact
-        className={css`
-          color: white !important;
-          border-color: red !important;
-          background-color: ${theme.colors.warning} !important;
-        `}
-        startIcon={<FaTrash />}
-        onClick={onDelete}
-      >
+      <Button compact color="danger" startIcon={<FaTrash />} onClick={onDelete}>
         Delete artist
       </Button>
     </div>

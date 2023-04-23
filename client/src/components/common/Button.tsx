@@ -6,7 +6,7 @@ import { css } from "@emotion/css";
 
 export interface Compactable {
   compact?: boolean;
-  color?: "primary";
+  color?: "primary" | "danger";
   variant?: "link" | "outlined";
 }
 
@@ -65,6 +65,17 @@ const CustomButton = styled.button<Compactable>`
           }
 
         `;
+    }
+  }}
+
+  ${(props) => {
+    switch (props.color) {
+      case "danger":
+        return `
+        color: white !important;
+        border-color: red !important;
+        background-color: ${props.theme.colors.warning} !important;
+      `;
     }
   }}
 

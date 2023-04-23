@@ -69,6 +69,7 @@ export default function () {
         metadata: {
           clientId: client?.id ?? null,
           trackGroupId,
+          artistId: trackGroup.artistId,
           userId,
         },
         mode: "payment",

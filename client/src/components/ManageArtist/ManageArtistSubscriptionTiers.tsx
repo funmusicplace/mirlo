@@ -29,7 +29,7 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
       );
       setArtist(result);
       const fetchedSubscriptions = await api.getMany<ArtistSubscriptionTier>(
-        `users/${userId}/artists/${artistId}/subscriptions`
+        `users/${userId}/artists/${artistId}/subscriptionTiers`
       );
       setTiers(fetchedSubscriptions.results);
     }
@@ -41,7 +41,7 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
       if (userId && artistId) {
         await api.getFile(
           "artist-subscribers",
-          `users/${userId}/artists/${artistId}/subscriptions/download`,
+          `users/${userId}/artists/${artistId}/subscriptionTiers/download`,
           "text/csv"
         );
       }

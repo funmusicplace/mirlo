@@ -52,14 +52,14 @@ const SubscriptionForm: React.FC<{
               Partial<ArtistSubscriptionTier>,
               ArtistSubscriptionTier
             >(
-              `users/${userId}/artists/${artistId}/subscriptions/${existingId}`,
+              `users/${userId}/artists/${artistId}/subscriptionTiers/${existingId}`,
               sending
             );
           } else {
             await api.post<
               Partial<ArtistSubscriptionTier>,
               ArtistSubscriptionTier
-            >(`users/${userId}/artists/${artistId}/subscriptions/`, {
+            >(`users/${userId}/artists/${artistId}/subscriptionTiers/`, {
               ...pick(data, ["name", "description"]),
               minAmount: data.minAmount ? +data.minAmount * 100 : undefined,
             });

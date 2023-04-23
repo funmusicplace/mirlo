@@ -128,7 +128,7 @@ services:
           property: host # available properties are listed below
 
   - type: cron
-    name: jobs
+    name: post-publish
     env: node
     repo: https://github.com/funmusicplace/blackbird.git # optional
     plan: free
