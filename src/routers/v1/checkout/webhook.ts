@@ -51,7 +51,7 @@ const handleTrackGroupPurhcase = async (
           locals: {
             trackGroup,
             purchase,
-            host: process.env.APP_HOST,
+            host: process.env.API_DOMAIN,
           },
         },
       });
