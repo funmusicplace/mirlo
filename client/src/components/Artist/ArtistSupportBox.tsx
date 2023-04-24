@@ -78,7 +78,7 @@ const ArtistSupportBox: React.FC<{
             margin-top: 0.5rem;
           `}
         >
-          {!ownedByUser && (
+          {user && !ownedByUser && (
             <Button
               compact
               onClick={() => subscribeToTier(subscriptionTier)}

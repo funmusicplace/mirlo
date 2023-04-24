@@ -5,6 +5,7 @@ import { bp } from "../../constants";
 import IconButton from "./IconButton";
 import ReactDOM from "react-dom";
 import Background from "./Background";
+import { FaTimes } from "react-icons/fa";
 
 const wrapper = css`
   position: fixed;
@@ -34,6 +35,10 @@ const Content = styled.div<ContentProps>`
   animation: 300ms ease-out forwards slide-up;
   border-radius: ${(props) => props.theme.borderRadius};
 
+  h1 {
+    display: inline-block;
+  }
+
   @media (max-width: ${bp.medium}px) {
     width: 90%;
     position: absolute;
@@ -50,16 +55,11 @@ const Content = styled.div<ContentProps>`
 const close = css`
   color: #aaa;
   float: right;
-  font-size: 28px;
-  font-weight: bold;
   border: none;
   background: none;
-  line-height: 16px;
   cursor: pointer;
   margin-bottom: 0.25rem;
-  margin-right: 0;
-  padding-right: 0 !important;
-  padding-top: 0 !important;
+  font-size: 1rem !important
 
   &:hover,
   &:focus {
@@ -70,9 +70,10 @@ const close = css`
 export const Modal: React.FC<{
   open: boolean;
   children: React.ReactNode;
+  title?: string;
   onClose: () => void;
   size?: "small";
-}> = ({ children, open, onClose, size }) => {
+}> = ({ children, open, onClose, size, title }) => {
   const [container] = React.useState(() => {
     // This will be executed only on the initial render
     // https://reactjs.org/docs/hooks-reference.html#lazy-initial-state
@@ -106,13 +107,23 @@ export const Modal: React.FC<{
       <Background onClick={onCloseWrapper} />
       <div className={wrapper} data-cy="modal">
         <Content size={size}>
-          <div>
+          <div
+            className={css`
+              display: flex;
+              justify-content: space-between;
+              align-items: flex-start;
+              margin-bottom: 1rem;
+            `}
+          >
+            {title && <h2>{title}</h2>}
+
             <IconButton
               className={close}
+              compact
               onClick={onCloseWrapper}
               aria-label="close"
             >
-              &times;
+              <FaTimes />
             </IconButton>
           </div>
           {children}

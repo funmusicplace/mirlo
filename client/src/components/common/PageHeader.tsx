@@ -1,0 +1,29 @@
+import { css } from "@emotion/css";
+import React from "react";
+import { useParams } from "react-router-dom";
+import usePublicArtist from "utils/usePublicArtist";
+
+const PageHeader = () => {
+  const { artistId } = useParams();
+
+  const { artist } = usePublicArtist(artistId);
+
+  const artistBanner = artist?.banner?.sizes;
+  return (
+    <>
+      {artistBanner && (
+        <img
+          src={artistBanner[2500]}
+          alt="Artist banner"
+          className={css`
+            margin-bottom: -6rem;
+            box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.1) inset;
+          `}
+        />
+      )}
+      {!artistBanner && <div style={{ marginTop: "3rem" }}></div>}
+    </>
+  );
+};
+
+export default PageHeader;

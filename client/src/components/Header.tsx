@@ -35,7 +35,7 @@ const Header = () => {
         justify-content: space-between;
         align-items: center;
         padding: 0.5rem 1rem;
-        background-color: ${theme.colors.primaryHighlight};
+        background-color: var(--mi-primary-highlight-color);
         position: fixed;
         width: 100%;
         z-index: 999999;
@@ -43,13 +43,12 @@ const Header = () => {
     >
       <h1
         className={css`
-          color: ${theme.colors.text};
           margin-top: -0.1rem;
           line-height: 0;
           font-size: 1.5rem;
         `}
       >
-        <Link to="/">blackbird...</Link>
+        <Link to="/">mirlo</Link>
       </h1>
       {isMenuOpen && (
         <div
@@ -62,7 +61,7 @@ const Header = () => {
             background: ${theme.colors.primaryHighlight};
           `}
         >
-          <IconButton onClick={() => setIsMenuOpen(false)}>
+          <IconButton onClick={() => setIsMenuOpen(false)} transparent>
             <FaTimes />
           </IconButton>
           <menu
@@ -153,9 +152,28 @@ const Header = () => {
           align-items: center;
         `}
       >
-        <Link to="/profile">{state.user?.name}</Link>
+        <Link
+          to="/profile"
+          className={css`
+            border: 1px solid var(--mi-primary-highlight-color--hover);
+            border-radius: var(--mi-border-radius);
+            padding: 0.25rem 0.75rem;
+            color: var(--normal-background-color);
+            text-decoration: none;
+            background-color: var(--mi-secondary-color);
+            margin-right: 1rem;
+
+            &:hover {
+              background-color: var(--mi-secondary-color--hover);
+              color: var(--mi-);
+            }
+          `}
+        >
+          {state.user?.name}
+        </Link>
         <IconButton
-          variant="outlined"
+          transparent
+          color="primary"
           onClick={() => {
             setIsMenuOpen(true);
           }}

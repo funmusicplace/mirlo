@@ -58,12 +58,13 @@ export const userLoggedInWithoutRedirect = (
     "jwt",
     { session: false },
     (err?: unknown, user?: Express.User, info?: any, status?: unknown) => {
-      if (err) {
-        return next(err);
-      }
-      if (info instanceof TokenExpiredError) {
+      //
+      if (err instanceof TokenExpiredError) {
         res.status(401).json({ error: info.message });
         return;
+      } else if (err) {
+        console.log("err", err);
+        return next(err);
       }
       if (!user) {
         return next();

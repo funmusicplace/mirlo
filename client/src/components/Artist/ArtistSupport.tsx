@@ -1,20 +1,18 @@
-import { css } from "@emotion/css";
 import React from "react";
 import { useLocation } from "react-router-dom";
 import api from "services/api";
 import { useGlobalStateContext } from "state/GlobalState";
-import Box from "../common/Box";
-import Button from "../common/Button";
+import ArtistManageSubscription from "./ArtistManageSubscription";
 import ArtistSupportBox from "./ArtistSupportBox";
 
 const ArtistSupport: React.FC<{ artist: Artist }> = ({ artist }) => {
   const {
     state: { user },
   } = useGlobalStateContext();
-  const [userSubscriptionTier, setUserSubscriptionTier] =
-    React.useState<ArtistSubscriptionTier>();
   const [userSubscription, setUserSubscription] =
     React.useState<ArtistUserSubscription>();
+  const [userSubscriptionTier, setUserSubscriptionTier] =
+    React.useState<ArtistSubscriptionTier>();
   const { search } = useLocation();
   const userId = user?.id;
 
@@ -54,38 +52,17 @@ const ArtistSupport: React.FC<{ artist: Artist }> = ({ artist }) => {
     return () => (interval ? clearTimeout(interval) : undefined);
   }, [checkForSubscription, search]);
 
-  const cancelSubscription = React.useCallback(async () => {
-    try {
-      if (userSubscription) {
-        await api.delete(
-          `users/${userId}/subscriptions/${userSubscription.id}`
-        );
-        await checkForSubscription();
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  }, [checkForSubscription, userId, userSubscription]);
-
   if (!artist) {
     return null;
   }
 
   if (userSubscriptionTier) {
     return (
-      <Box>
-        <p
-          className={css`
-            margin-bottom: 0.5rem;
-          `}
-        >
-          You are supporting this artist at the{" "}
-          <strong>{userSubscriptionTier.name}</strong> tier.
-        </p>
-        <Button compact color="warning" onClick={cancelSubscription}>
-          Cancel subscription
-        </Button>
-      </Box>
+      <ArtistManageSubscription
+        userSubscription={userSubscription}
+        reload={checkForSubscription}
+        userSubscriptionTier={userSubscriptionTier}
+      />
     );
   }
 

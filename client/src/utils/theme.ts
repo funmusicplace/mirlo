@@ -2,9 +2,9 @@ export const theme = {
   colors: {
     primary: "#0096a8",
     primaryHighlight: "#bcb3ff",
-    text: "#333",
+    text: "var(--mi-normal-text-color)",
     textDark: "white",
-    background: "#efefef",
+    background: "var(--mi-normal-background-color)",
     backgroundDark: "#333",
     warning: "#f04e37",
     success: "#4cdb5f",

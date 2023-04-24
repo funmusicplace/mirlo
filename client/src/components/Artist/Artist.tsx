@@ -3,28 +3,20 @@ import React from "react";
 import { FaPen } from "react-icons/fa";
 import { Link, useParams } from "react-router-dom";
 import { useGlobalStateContext } from "state/GlobalState";
-import api from "../../services/api";
 import ArtistSupport from "./ArtistSupport";
 import Box from "../common/Box";
 import Button from "../common/Button";
 import PostContent from "../common/PostContent";
 import ArtistAlbums from "./ArtistAlbums";
+import usePublicArtist from "utils/usePublicArtist";
 
 function Artist() {
   const { artistId } = useParams();
   const {
     state: { user },
   } = useGlobalStateContext();
-  const [artist, setArtist] = React.useState<Artist>();
 
-  const fetchArtist = React.useCallback(async () => {
-    const { result } = await api.get<Artist>(`artists/${artistId}`);
-    setArtist(result);
-  }, [artistId]);
-
-  React.useEffect(() => {
-    fetchArtist();
-  }, [fetchArtist]);
+  const { artist } = usePublicArtist(artistId);
 
   if (!artist) {
     return null;

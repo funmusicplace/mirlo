@@ -1,33 +1,26 @@
 import styled from "@emotion/styled";
-import { colorShade } from "utils/theme";
 import { Compactable } from "./Button";
 
-const IconButton = styled.button<Compactable>`
+const IconButton = styled.button<Compactable & { transparent?: boolean }>`
   border: none;
   color: ${(props) =>
     props.color === "primary"
-      ? props.theme.colors.primary
-      : props.theme.colors.text};
-  background-color: transparent;
-  padding: ${(props) => (props.compact ? "0" : "0.4rem 0.5rem")};
+      ? "var(--mi-primary-color--hover)"
+      : "var(--mi-normal-text-color--hover)"};
+  background-color: var(--mi-icon-button-background-color);
+  padding: ${(props) => (props.compact ? "0.5rem 0.6rem" : "0.6rem 0.7rem")};
   cursor: pointer;
   transition: 0.25s;
-  font-size: ${(props) => (props.compact ? "1rem" : "1.4rem")};
+  font-size: ${(props) => (props.compact ? ".9rem" : "1.2rem")};
   line-height: 0.9;
-  border-radius: 2px;
-
-  @media (prefers-color-scheme: dark) {
-    color: ${(props) => props.theme.colors.textDark};
-  }
+  border-radius: 100%;
 
   &:hover {
     color: ${(props) =>
-      colorShade(
-        props.color === "primary"
-          ? props.theme.colors.primary
-          : props.theme.colors.text,
-        80
-      )};
+      props.color === "primary"
+        ? "var(--mi-primary-color--hover)"
+        : "var(--mi-normal-text-color--hover)"};
+    background-color: var(--mi-icon-button-background-color--hover);
   }
 `;
 

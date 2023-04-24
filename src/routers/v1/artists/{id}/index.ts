@@ -7,6 +7,8 @@ import postProcessor from "../../../../utils/post";
 import prisma from "../../../../../prisma/prisma";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { checkIsUserSubscriber } from "../../../../utils/artist";
+import { finalArtistBannerBucket } from "../../../../utils/minio";
+import { convertURLArrayToSizes } from "../../../../utils/images";
 
 export default function () {
   const operations = {
@@ -40,6 +42,7 @@ export default function () {
             cover: true,
           },
         },
+        banner: true,
         subscriptionTiers: true,
         posts: {
           where: {
@@ -61,6 +64,15 @@ export default function () {
             isUserSubscriber || artist.userId === user?.id
           )
         ),
+        banner: {
+          ...artist?.banner,
+          sizes:
+            artist?.banner &&
+            convertURLArrayToSizes(
+              artist?.banner?.url,
+              finalArtistBannerBucket
+            ),
+        },
         trackGroups: artist?.trackGroups.map(trackGroupProcessor.single),
       },
     });

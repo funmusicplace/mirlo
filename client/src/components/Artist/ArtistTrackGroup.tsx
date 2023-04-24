@@ -85,7 +85,6 @@ const ArtistTrackGroup: React.FC<{
       className={css`
         margin-bottom: 1rem;
         margin-top: 1rem;
-        padding-top: 1.5rem;
         border-top: 1px solid #efefef;
 
         &:nth-child(2) {

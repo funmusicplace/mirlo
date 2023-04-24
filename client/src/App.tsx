@@ -1,5 +1,6 @@
 import { css, injectGlobal } from "@emotion/css";
 import LoadingSpinner from "components/common/LoadingSpinner";
+import PageHeader from "components/common/PageHeader";
 import Snackbar from "components/common/Snackbar";
 import Player from "components/Player";
 import React, { useContext, useState } from "react";
@@ -11,6 +12,33 @@ import useWidgetListener from "utils/useWidgetListener";
 import Header from "./components/Header";
 
 injectGlobal`
+
+  
+
+  html {
+    --mi-normal-background-color: white;
+    --mi-normal-text-color: #333;
+
+    --mi-primary-color: #0096a8;
+    --mi-primary-color--hover: #00C4DB;
+    --mi-secondary-color: #ffb3d0;
+    --mi-secondary-color--hover: #FF80B0;
+
+    --mi-primary-highlight-color: #bcb3ff;
+    --mi-primary-highlight-color--hover: #FFB3D0;
+    --mi-border-radius: .5rem;
+
+    --mi-icon-button-background-color: rgba(0, 0, 0, 0.1);
+    --mi-icon-button-background-color--hover: rgba(0, 0, 0, 0.2);
+  }
+
+  html[data-prefers-mode="dark"] {
+    --mi-normal-background-color: #333;
+    --mi-normal-text-color: white;
+
+    --mi-icon-button-background-color: #363636;
+  }
+
   * {
     box-sizing: border-box;
     margin: 0;
@@ -76,6 +104,10 @@ injectGlobal`
   h5 {
     font-size: 1.2rem;
     padding-bottom: .75rem;
+  }
+
+  a {
+    transition: .25s color, .25s background-color;
   }
 
   h6 {
@@ -201,14 +233,17 @@ function App() {
         {!isLoading && (
           <>
             <Header />
+            <PageHeader />
             <div
               className={css`
-                max-width: 600px;
-                padding: 1rem;
+                max-width: 640px;
+                background-color: var(--mi-normal-background-color);
+                padding: 2rem;
                 margin: 0 auto;
                 margin-bottom: 4rem;
-                margin-top: 6rem;
                 width: 100%;
+                box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.1);
+                border-radius: var(--mi-border-radius);
               `}
             >
               <Outlet />
