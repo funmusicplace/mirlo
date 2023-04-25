@@ -24,6 +24,9 @@ injectGlobal`
     --mi-secondary-color: #ffb3d0;
     --mi-secondary-color--hover: #FF80B0;
 
+    --mi-warning-background-color: #f04e37;
+    --mi-warning-text-color: white;
+
     --mi-primary-highlight-color: #bcb3ff;
     --mi-primary-highlight-color--hover: #FFB3D0;
     --mi-border-radius: .5rem;

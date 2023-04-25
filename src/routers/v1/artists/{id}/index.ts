@@ -54,6 +54,11 @@ export default function () {
         },
       });
 
+      if (!artist) {
+        res.status(404);
+        return;
+      }
+
       res.json({
         result: {
           ...artist,

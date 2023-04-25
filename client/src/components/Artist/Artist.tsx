@@ -19,7 +19,11 @@ function Artist() {
   const { artist } = usePublicArtist(artistId);
 
   if (!artist) {
-    return null;
+    return (
+      <Box>
+        This artist does not exist or it does not have a public presence
+      </Box>
+    );
   }
 
   const ownedByUser = artist.userId === user?.id;
