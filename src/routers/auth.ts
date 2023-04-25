@@ -15,11 +15,16 @@ async function hashPassword(password: string) {
   return await bcrypt.hash(password, 3);
 }
 
-router.post(`/signup`, async (req, res) => {
+router.post(`/signup`, async (req, res, next) => {
   let { name, email, password, client } = req.body;
-  email = email.toLowerCase();
 
+  if (!email || !password) {
+    res.status(400).json({ error: "Email and password must be supplied" });
+    return next();
+  }
   try {
+    email = email.toLowerCase();
+
     const existing = await prisma.user.findFirst({
       where: {
         email,
@@ -65,41 +70,46 @@ router.post(`/signup`, async (req, res) => {
 });
 
 router.get(`/confirmation/:emailConfirmationToken`, async (req, res, next) => {
-  let { emailConfirmationToken } = req.params;
+  try {
+    let { emailConfirmationToken } = req.params;
 
-  let { client, email } = req.query as { client: string; email: string };
-  email = email.toLowerCase();
+    let { client, email } = req.query as { client: string; email: string };
+    email = email.toLowerCase();
 
-  const user = await prisma.user.findFirst({
-    where: {
-      email,
-      emailConfirmationToken,
-    },
-  });
-
-  if (!user) {
-    return res.status(404).json({ error: "This user does not exist" });
-  } else if (
-    user.emailConfirmationExpiration &&
-    user.emailConfirmationExpiration < new Date()
-  ) {
-    return res.status(404).json({ error: "Token expired" });
-  } else {
-    const updatedUser = await prisma.user.update({
-      data: {
-        emailConfirmationToken: null,
-        emailConfirmationExpiration: null,
-      },
+    const user = await prisma.user.findFirst({
       where: {
-        id: user.id,
-      },
-      select: {
-        email: true,
-        id: true,
+        email,
+        emailConfirmationToken,
       },
     });
-    setTokens(res, updatedUser);
-    return res.redirect(client);
+
+    if (!user) {
+      return res.status(404).json({ error: "This user does not exist" });
+    } else if (
+      user.emailConfirmationExpiration &&
+      user.emailConfirmationExpiration < new Date()
+    ) {
+      return res.status(404).json({ error: "Token expired" });
+    } else {
+      const updatedUser = await prisma.user.update({
+        data: {
+          emailConfirmationToken: null,
+          emailConfirmationExpiration: null,
+        },
+        where: {
+          id: user.id,
+        },
+        select: {
+          email: true,
+          id: true,
+        },
+      });
+      setTokens(res, updatedUser);
+      return res.redirect(client);
+    }
+  } catch (e) {
+    console.error(e);
+    res.status(500);
   }
 });
 
