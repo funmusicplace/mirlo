@@ -44,6 +44,10 @@ const playerClass = css`
   @media (max-width: ${bp.small}px) {
     height: 150px;
     flex-direction: column;
+
+    button {
+      font-size: 1.2rem;
+    }
   }
 `;
 
@@ -181,6 +185,7 @@ const Player = () => {
               display: flex;
               align-items: center;
               margin-right: 1rem;
+              margin-bottom: 0.5rem;
             `}
           >
             <ImageWithPlaceholder
@@ -209,7 +214,6 @@ const Player = () => {
               color={shuffle ? "primary" : undefined}
               compact
               onClick={onShuffle}
-              style={{ fontSize: "2rem" }}
             >
               <ImShuffle />
             </IconButton>
@@ -218,7 +222,6 @@ const Player = () => {
               compact
               onClick={onLoop}
               className={css`
-                font-size: 2rem !important;
                 margin-left: 1rem;
                 position: relative;
               `}
