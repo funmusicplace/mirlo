@@ -123,6 +123,7 @@ router.post(
       const foundUser = await prisma.user.findFirst({
         where: {
           email,
+          emailConfirmationToken: null,
         },
       });
       if (foundUser) {

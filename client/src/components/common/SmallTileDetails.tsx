@@ -28,7 +28,7 @@ export const SmallTileDetails: React.FC<{
         </div>
         <div
           className={css`
-            color: #444;
+            color: var(--mi-normal-foreground-color);
             font-size: 1rem;
           `}
         >
@@ -36,7 +36,7 @@ export const SmallTileDetails: React.FC<{
         </div>
         <div
           className={css`
-            color: #444;
+            color: var(--mi-normal-foreground-color);
             font-size: 0.85rem;
             margin-top: 0.25rem;
             ul > li {
