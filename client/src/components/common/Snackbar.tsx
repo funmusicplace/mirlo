@@ -17,7 +17,7 @@ const Container = styled.div<{ variant: Variant }>`
     if (props.variant === "warning") {
       return props.theme.colors.warning;
     }
-    return "#323232";
+    return "var(--mi-normal-background-color)";
   }};
   color: #fff;
   z-index: 1000;
@@ -33,7 +33,7 @@ const Container = styled.div<{ variant: Variant }>`
 
   @media (max-width: ${bp.small}px) {
     bottom: auto;
-    top: 1rem;
+    top: 3rem;
     left: 1rem;
   }
 `;

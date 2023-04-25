@@ -7,6 +7,7 @@ import {
 } from "../../../../../auth/passport";
 
 import prisma from "../../../../../../prisma/prisma";
+import logger from "../../../../../logger";
 
 type Params = {
   artistId: number;
@@ -22,23 +23,27 @@ export default function () {
   async function GET(req: Request, res: Response) {
     const { userId } = req.params as unknown as Params;
     const loggedInUser = req.user as User;
-
-    if (userId) {
-      const where = {
-        userId: Number(userId),
-        ...(loggedInUser && loggedInUser.id === Number(userId)
-          ? {}
-          : { enabled: true }),
-      };
-      const artists = await prisma.artist.findMany({
-        where,
-      });
-      res.json({ results: artists });
-    } else {
-      res.status(400);
-      res.json({
-        error: "Invalid route",
-      });
+    try {
+      if (userId) {
+        const where = {
+          userId: Number(userId),
+          ...(loggedInUser && loggedInUser.id === Number(userId)
+            ? {}
+            : { enabled: true }),
+        };
+        const artists = await prisma.artist.findMany({
+          where,
+        });
+        res.json({ results: artists });
+      } else {
+        res.status(400);
+        res.json({
+          error: "Invalid route",
+        });
+      }
+    } catch (e) {
+      res.status(500);
+      logger.error(`users/{userId}/artists GET ${e}`);
     }
   }
 
@@ -73,19 +78,25 @@ export default function () {
 
   // FIXME: only allow creation for logged in user.
   async function POST(req: Request, res: Response) {
-    const { name } = req.body;
+    const { name, bio } = req.body;
     const { userId } = req.params as unknown as Params;
-    const result = await prisma.artist.create({
-      data: {
-        name,
-        user: {
-          connect: {
-            id: Number(userId),
+    try {
+      const result = await prisma.artist.create({
+        data: {
+          name,
+          bio,
+          user: {
+            connect: {
+              id: Number(userId),
+            },
           },
         },
-      },
-    });
-    res.json(result);
+      });
+      res.json(result);
+    } catch (e) {
+      res.status(500);
+      logger.error(`users/{userId}/artists POST ${e}`);
+    }
   }
 
   POST.apiDoc = {

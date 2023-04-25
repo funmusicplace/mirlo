@@ -68,6 +68,7 @@ export const Manage: React.FC = () => {
             align-items: center;
             justify-content: stretch;
             margin-top: 1rem;
+            flex-wrap: wrap;
           `}
         >
           {artists.map((a) => (

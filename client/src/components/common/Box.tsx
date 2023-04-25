@@ -13,6 +13,11 @@ const Box = styled.div`
   textarea {
     background: var(--mi-normal-background-color);
   }
+
+  @media screen and (max-width: 800px) {
+    // background-color: var(--mi-normal-background-color);
+    padding: 0.5rem 0.7rem;
+  }
 `;
 
 export default Box;

@@ -264,9 +264,16 @@ function App() {
                 margin: 0 auto;
                 width: 100%;
                 ${isArtistPage
-                  ? "box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.1);"
+                  ? `
+                    box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.1);
+                    padding-top: .5rem;
+                    `
                   : ""}
                 border-radius: var(--mi-border-radius);
+
+                @media screen and (max-width: 800px) {
+                  padding: 1rem 1rem 9rem;
+                }
               `}
             >
               <Outlet />

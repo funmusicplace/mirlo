@@ -8,6 +8,7 @@ import {
 import { doesTrackGroupBelongToUser } from "../../../../../../utils/ownership";
 import prisma from "../../../../../../../prisma/prisma";
 import { deleteTrackGroup } from "../../../../../../utils/trackGroup";
+import logger from "../../../../../../logger";
 
 type Params = {
   trackGroupId: string;
@@ -39,7 +40,7 @@ export default function () {
 
       res.status(200).json({ result: trackgroup });
     } catch (e) {
-      console.error(e);
+      logger.error(e);
       res.status(500).json({
         error: "Something went wrong",
       });
@@ -73,7 +74,7 @@ export default function () {
 
       res.json({ message: "Success" });
     } catch (error) {
-      console.error("error", error);
+      logger.error("error", error);
       res.status(400).json({
         error: `TrackGroup with ID ${trackGroupId} does not exist in the database`,
       });
@@ -121,10 +122,14 @@ export default function () {
 
   async function DELETE(req: Request, res: Response) {
     const { trackGroupId } = req.params as { trackGroupId: string };
+    try {
+      await deleteTrackGroup(Number(trackGroupId));
 
-    await deleteTrackGroup(Number(trackGroupId));
-
-    res.json({ message: "Success" });
+      res.json({ message: "Success" });
+    } catch (e) {
+      logger.error(`DELETE /users/{userId}/trackGroups/{trackgroupId} ${e}`);
+      res.status(500);
+    }
   }
 
   DELETE.apiDoc = {

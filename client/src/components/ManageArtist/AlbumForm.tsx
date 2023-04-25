@@ -65,6 +65,7 @@ const AlbumForm: React.FC<{
               ...pick(data, [
                 "title",
                 "private",
+                "published",
                 "type",
                 "releaseDate",
                 "about",
@@ -93,6 +94,7 @@ const AlbumForm: React.FC<{
                 "title",
                 "private",
                 "type",
+                "published",
                 "releaseDate",
                 "about",
                 "minPrice",
