@@ -55,6 +55,7 @@ interface Artist {
   bio: string;
   userId: number;
   id: number;
+  enabled: boolean;
   trackGroups: TrackGroup[];
   payPalClientId?: string;
   posts: Post[];

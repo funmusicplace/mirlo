@@ -57,16 +57,18 @@ const ManageArtist: React.FC<{}> = () => {
         margin-bottom: 2rem;
       `}
     >
-      <div
-        className={css`
-          background-color: var(--mi-warning-background-color);
-          padding: 1rem;
-          color: var(--mi-warning-text-color);
-        `}
-      >
-        This artist has not been enabled by site admin yet! Contact an admin to
-        do so.
-      </div>
+      {!artist.enabled && (
+        <div
+          className={css`
+            background-color: var(--mi-warning-background-color);
+            padding: 1rem;
+            color: var(--mi-warning-text-color);
+          `}
+        >
+          This artist has not been enabled by site admin yet! Contact an admin
+          to do so.
+        </div>
+      )}
       <ArtistForm
         open={isEditing}
         onClose={() => setIsEditing(false)}
