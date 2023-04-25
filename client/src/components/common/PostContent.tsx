@@ -30,7 +30,7 @@ const BlackbirdTransformer = {
   shouldTransform(url: string) {
     const { host, pathname } = new URL(url);
 
-    const includesHost = ["localhost:8080"].includes(host);
+    const includesHost = ["localhost:8080", "mirlo.space"].includes(host);
     const isWidget = pathname.includes("/widget");
     return includesHost && isWidget;
   },
