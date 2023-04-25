@@ -1,4 +1,4 @@
-# FROM jrottenberg/ffmpeg:5.0-alpine as ffmpeg
+FROM jrottenberg/ffmpeg:5.0-alpine as ffmpeg
 
 FROM node:lts-alpine3.16
 # Create app directory
@@ -9,7 +9,7 @@ COPY . .
 RUN yarn install --force
 
 # # copy ffmpeg bins
-# COPY --from=ffmpeg / /
+COPY --from=ffmpeg / /
 
 EXPOSE 3000
 
