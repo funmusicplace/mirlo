@@ -1,7 +1,7 @@
 import { css } from "@emotion/css";
 import ArtistTrackGroup from "components/Artist/ArtistTrackGroup";
+import Box from "components/common/Box";
 import React from "react";
-import { Link } from "react-router-dom";
 import api from "../../services/api";
 import { useGlobalStateContext } from "../../state/GlobalState";
 
@@ -35,6 +35,13 @@ function Profile() {
         flex-direction: column;
       `}
     >
+      {!purchases ||
+        (purchases?.length === 0 && (
+          <Box>
+            There's nothing in your collection yet, support some artists and buy
+            their music!
+          </Box>
+        ))}
       {purchases?.map(
         (purchase) =>
           purchase.trackGroup && (

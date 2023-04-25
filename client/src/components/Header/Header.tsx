@@ -4,10 +4,11 @@ import { FaTimes } from "react-icons/fa";
 import { ImMenu } from "react-icons/im";
 import { Link, useNavigate } from "react-router-dom";
 import { colorShade, theme } from "utils/theme";
-import { API_ROOT } from "./../constants";
-import { useGlobalStateContext } from "./../state/GlobalState";
-import Button from "./common/Button";
-import IconButton from "./common/IconButton";
+import { API_ROOT } from "../../constants";
+import { useGlobalStateContext } from "../../state/GlobalState";
+import Button from "../common/Button";
+import IconButton from "../common/IconButton";
+import HeaderSearch from "./HeaderSearch";
 
 const Header = () => {
   const { state, dispatch } = useGlobalStateContext();
@@ -152,6 +153,7 @@ const Header = () => {
           align-items: center;
         `}
       >
+        <HeaderSearch />
         <Link
           to="/profile"
           className={css`

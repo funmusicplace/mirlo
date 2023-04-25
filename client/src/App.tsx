@@ -9,7 +9,7 @@ import api from "services/api";
 import { useGlobalStateContext } from "state/GlobalState";
 import SnackbarContext from "state/SnackbarContext";
 import useWidgetListener from "utils/useWidgetListener";
-import Header from "./components/Header";
+import Header from "./components/Header/Header";
 
 injectGlobal`
 
@@ -207,6 +207,8 @@ function App() {
     return <Outlet />;
   }
 
+  const isArtistPage = location.pathname.includes("artist");
+
   return (
     <>
       <div
@@ -242,7 +244,9 @@ function App() {
                 margin: 0 auto;
                 margin-bottom: 4rem;
                 width: 100%;
-                box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.1);
+                ${isArtistPage
+                  ? "box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.1);"
+                  : ""}
                 border-radius: var(--mi-border-radius);
               `}
             >

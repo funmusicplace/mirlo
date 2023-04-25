@@ -9,6 +9,7 @@ const PageHeader = () => {
   const { artist } = usePublicArtist(artistId);
 
   const artistBanner = artist?.banner?.sizes;
+
   return (
     <>
       {artistBanner && (

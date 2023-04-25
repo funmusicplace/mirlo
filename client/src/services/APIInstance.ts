@@ -108,8 +108,13 @@ const APIInstance = (apiRoot: string) => {
       });
     },
 
-    getMany: async <R>(endpoint: string): Promise<{ results: R[] }> => {
-      return apiRequest<{ results: R[] }>(endpoint, {
+    getMany: async <R>(
+      endpoint: string,
+      query?: { [key: string]: string }
+    ): Promise<{ results: R[] }> => {
+      const fullEndpoint = convertQueryToSearchParams(endpoint, query);
+
+      return apiRequest<{ results: R[] }>(fullEndpoint, {
         method: "GET",
         credentials: "include",
       });
@@ -150,6 +155,20 @@ const APIInstance = (apiRoot: string) => {
       });
     },
   };
+};
+
+const convertQueryToSearchParams = (
+  endpoint: string,
+  query?: { [key: string]: string }
+) => {
+  if (query) {
+    const searchParams = new URLSearchParams();
+    Object.keys(query).forEach((key) => {
+      searchParams.set(key, query[key]);
+    });
+    return endpoint + "?" + searchParams.toString();
+  }
+  return endpoint;
 };
 
 export default APIInstance;

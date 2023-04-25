@@ -8,6 +8,8 @@ const usePublicArtist = (artistId?: string) => {
     if (artistId) {
       const { result } = await api.get<Artist>(`artists/${artistId}`);
       setArtist(result);
+    } else {
+      setArtist(undefined);
     }
   }, [artistId]);
 
