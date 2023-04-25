@@ -18,64 +18,68 @@ export default function () {
   async function GET(req: Request, res: Response) {
     const { id }: { id?: string } = req.params;
     const user = req.user as User;
-
     if (!id) {
       return res.status(400);
     }
+    try {
+      const isUserSubscriber = await checkIsUserSubscriber(user, Number(id));
 
-    const isUserSubscriber = await checkIsUserSubscriber(user, Number(id));
-
-    const artist = await prisma.artist.findFirst({
-      where: { id: Number(id), enabled: true },
-      include: {
-        trackGroups: {
-          where: {
-            published: true,
-            releaseDate: {
-              lte: new Date(),
+      const artist = await prisma.artist.findFirst({
+        where: { id: Number(id), enabled: true },
+        include: {
+          trackGroups: {
+            where: {
+              published: true,
+              releaseDate: {
+                lte: new Date(),
+              },
+            },
+            include: {
+              tracks: {
+                where: { deletedAt: null },
+              },
+              cover: true,
             },
           },
-          include: {
-            tracks: {
-              where: { deletedAt: null },
+          banner: true,
+          subscriptionTiers: true,
+          posts: {
+            where: {
+              publishedAt: {
+                lte: new Date(),
+              },
+              deletedAt: null,
             },
-            cover: true,
           },
         },
-        banner: true,
-        subscriptionTiers: true,
-        posts: {
-          where: {
-            publishedAt: {
-              lte: new Date(),
-            },
-            deletedAt: null,
-          },
-        },
-      },
-    });
+      });
 
-    res.json({
-      result: {
-        ...artist,
-        posts: artist?.posts.map((p) =>
-          postProcessor.single(
-            p,
-            isUserSubscriber || artist.userId === user?.id
-          )
-        ),
-        banner: {
-          ...artist?.banner,
-          sizes:
-            artist?.banner &&
-            convertURLArrayToSizes(
-              artist?.banner?.url,
-              finalArtistBannerBucket
-            ),
+      res.json({
+        result: {
+          ...artist,
+          posts: artist?.posts.map((p) =>
+            postProcessor.single(
+              p,
+              isUserSubscriber || artist.userId === user?.id
+            )
+          ),
+          banner: {
+            ...artist?.banner,
+            sizes:
+              artist?.banner &&
+              convertURLArrayToSizes(
+                artist?.banner?.url,
+                finalArtistBannerBucket
+              ),
+          },
+          trackGroups: artist?.trackGroups.map(trackGroupProcessor.single),
         },
-        trackGroups: artist?.trackGroups.map(trackGroupProcessor.single),
-      },
-    });
+      });
+    } catch (e) {
+      console.log("sending failure");
+      console.error("artist/{id}", e);
+      res.status(500);
+    }
   }
 
   GET.apiDoc = {
@@ -85,7 +89,7 @@ export default function () {
         in: "path",
         name: "id",
         required: true,
-        type: "string",
+        type: "number",
       },
     ],
     responses: {

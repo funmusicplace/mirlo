@@ -154,25 +154,27 @@ const Header = () => {
         `}
       >
         <HeaderSearch />
-        <Link
-          to="/profile"
-          className={css`
-            border: 1px solid var(--mi-primary-highlight-color--hover);
-            border-radius: var(--mi-border-radius);
-            padding: 0.25rem 0.75rem;
-            color: var(--normal-background-color);
-            text-decoration: none;
-            background-color: var(--mi-secondary-color);
-            margin-right: 1rem;
+        {state.user && (
+          <Link
+            to="/profile"
+            className={css`
+              border: 1px solid var(--mi-primary-highlight-color--hover);
+              border-radius: var(--mi-border-radius);
+              padding: 0.25rem 0.75rem;
+              color: var(--normal-background-color);
+              text-decoration: none;
+              background-color: var(--mi-secondary-color);
+              margin-right: 1rem;
 
-            &:hover {
-              background-color: var(--mi-secondary-color--hover);
-              color: var(--mi-);
-            }
-          `}
-        >
-          {state.user?.name}
-        </Link>
+              &:hover {
+                background-color: var(--mi-secondary-color--hover);
+                color: var(--mi-);
+              }
+            `}
+          >
+            {state.user?.name}
+          </Link>
+        )}
         <IconButton
           transparent
           color="primary"

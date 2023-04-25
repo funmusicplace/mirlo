@@ -14,10 +14,11 @@ const PageHeader = () => {
     <>
       {artistBanner && (
         <img
-          src={artistBanner[2500]}
+          src={artistBanner[1250]}
           alt="Artist banner"
           className={css`
             margin-bottom: -6rem;
+            max-height: 400px;
             box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.1) inset;
           `}
         />
