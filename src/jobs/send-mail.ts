@@ -15,8 +15,8 @@ const sendMail = async (job: any) => {
     if (process.env.SENDGRID_API_KEY) {
       const email = new Email({
         message: {
-          from: `"Blackbird" <${
-            process.env.SENDGRID_SENDER ?? "no-reply@blackbrd.net"
+          from: `"Mirlo" <${
+            process.env.SENDGRID_SENDER ?? "no-reply@mirlo.space"
           }>`,
         },
         juice: true,
@@ -50,6 +50,8 @@ const sendMail = async (job: any) => {
     }
     return Promise.resolve();
   } catch (err) {
+    // @ts-ignore
+    console.error("MirloSendmailError", err.response.body);
     return Promise.reject(err);
   }
 };

@@ -19,43 +19,48 @@ router.post(`/signup`, async (req, res) => {
   let { name, email, password, client } = req.body;
   email = email.toLowerCase();
 
-  const existing = await prisma.user.findFirst({
-    where: {
-      email,
-    },
-  });
-
-  if (existing) {
-    res.status(400).json({ error: "This user exists" });
-  } else {
-    const result = await prisma.user.create({
-      data: {
-        name,
+  try {
+    const existing = await prisma.user.findFirst({
+      where: {
         email,
-        password: await hashPassword(password),
-      },
-      select: {
-        name: true,
-        email: true,
-        emailConfirmationToken: true,
       },
     });
 
-    await sendMail({
-      data: {
-        template: "new-user",
-        message: {
-          to: result.email,
+    if (existing) {
+      res.status(400).json({ error: "This user exists" });
+    } else {
+      const result = await prisma.user.create({
+        data: {
+          name,
+          email,
+          password: await hashPassword(password),
         },
-        locals: {
-          user: result,
-          host: process.env.API_DOMAIN,
-          client,
+        select: {
+          name: true,
+          email: true,
+          emailConfirmationToken: true,
         },
-      },
-    });
+      });
 
-    res.json(result);
+      await sendMail({
+        data: {
+          template: "new-user",
+          message: {
+            to: result.email,
+          },
+          locals: {
+            user: result,
+            host: process.env.API_DOMAIN,
+            client,
+          },
+        },
+      });
+
+      res.json(result);
+    }
+  } catch (e) {
+    console.error("An error was encountered signing up", e);
+    res.status(500);
   }
 });
 
