@@ -10,7 +10,7 @@ import { FaTimes } from "react-icons/fa";
 const wrapper = css`
   position: fixed;
   pointer-events: none;
-  z-index: 1;
+  z-index: 11;
   left: 0;
   top: 0;
   width: 100%;

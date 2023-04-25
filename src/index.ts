@@ -145,6 +145,19 @@ if (process.env.NODE_ENV === "development") {
 }
 
 // This has to be the last thing used so that other things don't get over-written
+app.use("/health", async (req, res) => {
+  try {
+    await prisma.user.findMany({});
+    res.status(200).json({
+      blackbird: "healthy chirp",
+    });
+  } catch (e) {
+    console.error(`health check failed ${e}`);
+    res.status(500);
+  }
+});
+
+// This has to be the last thing used so that other things don't get over-written
 app.use("/", (req, res) => {
   res.status(200).json({
     blackbird: "chirp",
