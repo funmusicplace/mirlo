@@ -10,24 +10,29 @@ export default function () {
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { id }: { id?: string } = req.params;
 
-    const trackGroup = await prisma.trackGroup.findFirst({
-      where: { id: Number(id), published: true },
-      include: {
-        tracks: {
-          where: {
-            deletedAt: null,
+    try {
+      const trackGroup = await prisma.trackGroup.findFirst({
+        where: { id: Number(id), published: true },
+        include: {
+          tracks: {
+            where: {
+              deletedAt: null,
+            },
           },
+          artist: true,
+          cover: true,
         },
-        artist: true,
-        cover: true,
-      },
-    });
+      });
 
-    if (!trackGroup) {
-      res.status(404);
-      return next();
+      if (!trackGroup) {
+        res.status(404);
+        return next();
+      }
+      res.json({ result: trackGroup });
+    } catch (e) {
+      console.error("trackgroups/{id} GET");
+      res.status(500);
     }
-    res.json({ result: trackGroup });
   }
 
   GET.apiDoc = {

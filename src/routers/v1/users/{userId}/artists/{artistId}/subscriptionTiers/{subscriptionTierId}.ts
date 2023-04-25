@@ -85,24 +85,32 @@ export default function () {
   };
 
   async function DELETE(req: Request, res: Response, next: NextFunction) {
-    const { userId, subscriptionTierId } = req.params;
-    const track = await doesSubscriptionTierBelongToUser(
-      Number(subscriptionTierId),
-      Number(userId)
-    );
+    try {
+      const { userId, subscriptionTierId } = req.params;
+      const track = await doesSubscriptionTierBelongToUser(
+        Number(subscriptionTierId),
+        Number(userId)
+      );
 
-    if (!track) {
-      res.status(400).json({
-        error: "ArtistSubscriptionTier must belong to user",
+      if (!track) {
+        res.status(400).json({
+          error: "ArtistSubscriptionTier must belong to user",
+        });
+        return next();
+      }
+      await prisma.artistSubscriptionTier.delete({
+        where: {
+          id: Number(subscriptionTierId),
+        },
       });
-      return next();
+      res.json({ message: "Success" });
+    } catch (e) {
+      console.error(
+        "delete artist/{artistId}/subscriptionTiers/{subscriptionTierId}",
+        e
+      );
+      res.status(500);
     }
-    await prisma.artistSubscriptionTier.delete({
-      where: {
-        id: Number(subscriptionTierId),
-      },
-    });
-    res.json({ message: "Success" });
   }
 
   DELETE.apiDoc = {

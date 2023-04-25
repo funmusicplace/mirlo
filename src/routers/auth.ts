@@ -178,34 +178,39 @@ router.get("/logout", (req, res) => {
 router.get("/profile", userAuthenticated, async (req, res) => {
   const { email } = req.user as { email: string };
 
-  const foundUser = await prisma.user.findFirst({
-    where: {
-      email,
-    },
-    select: {
-      email: true,
-      id: true,
-      name: true,
-      artists: true,
-      artistUserSubscriptions: {
-        where: {
-          deletedAt: null,
-        },
-        select: {
-          artistSubscriptionTier: {
-            include: {
-              artist: true,
-            },
+  try {
+    const foundUser = await prisma.user.findFirst({
+      where: {
+        email,
+      },
+      select: {
+        email: true,
+        id: true,
+        name: true,
+        artists: true,
+        artistUserSubscriptions: {
+          where: {
+            deletedAt: null,
           },
-          id: true,
-          userId: true,
-          amount: true,
+          select: {
+            artistSubscriptionTier: {
+              include: {
+                artist: true,
+              },
+            },
+            id: true,
+            userId: true,
+            amount: true,
+          },
         },
       },
-    },
-  });
+    });
 
-  res.status(200).json({ result: foundUser });
+    res.status(200).json({ result: foundUser });
+  } catch (e) {
+    console.error("auth/profile", e);
+    res.status(500);
+  }
 });
 
 router.post("/refresh", (req, res) => {

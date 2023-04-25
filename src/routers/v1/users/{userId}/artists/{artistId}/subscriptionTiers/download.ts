@@ -15,66 +15,73 @@ export default function () {
 
   // FIXME: only do published tracks
   async function GET(req: Request, res: Response, next: NextFunction) {
-    const { artistId, userId }: { artistId?: string; userId?: string } =
-      req.params;
+    const { artistId }: { artistId?: string; userId?: string } = req.params;
 
-    const subscribers = await prisma.artistUserSubscription.findMany({
-      where: {
-        artistSubscriptionTier: {
-          artistId: Number(artistId),
+    try {
+      const subscribers = await prisma.artistUserSubscription.findMany({
+        where: {
+          artistSubscriptionTier: {
+            artistId: Number(artistId),
+          },
+          deletedAt: null,
         },
-        deletedAt: null,
-      },
-      include: {
-        user: true,
-        artistSubscriptionTier: true,
-      },
-    });
+        include: {
+          user: true,
+          artistSubscriptionTier: true,
+        },
+      });
 
-    if (!subscribers) {
-      res.status(404);
-      return next();
+      if (!subscribers) {
+        res.status(404);
+        return next();
+      }
+
+      return downloadCSVFile(
+        res,
+        "subscribers.csv",
+        [
+          {
+            label: "Email",
+            value: "user.email",
+          },
+          {
+            label: "User",
+            value: "user.name",
+          },
+          {
+            label: "Amount",
+            value: "amount",
+          },
+          {
+            label: "Currency",
+            value: "currency",
+          },
+          {
+            label: "Subscription Tier ID",
+            value: "artistSubscriptionTierId",
+          },
+          {
+            label: "Subscription Tier Name",
+            value: "artistSubscriptionTier.name",
+          },
+          {
+            label: "Created At",
+            value: "createdAt",
+          },
+          {
+            label: "Updated At",
+            value: "updatedAt",
+          },
+        ],
+        subscribers
+      );
+    } catch (e) {
+      console.error(
+        "users/{userId}/artists/{artistId}/subscriptionTiers/download",
+        e
+      );
+      res.status(500);
     }
-
-    return downloadCSVFile(
-      res,
-      "subscribers.csv",
-      [
-        {
-          label: "Email",
-          value: "user.email",
-        },
-        {
-          label: "User",
-          value: "user.name",
-        },
-        {
-          label: "Amount",
-          value: "amount",
-        },
-        {
-          label: "Currency",
-          value: "currency",
-        },
-        {
-          label: "Subscription Tier ID",
-          value: "artistSubscriptionTierId",
-        },
-        {
-          label: "Subscription Tier Name",
-          value: "artistSubscriptionTier.name",
-        },
-        {
-          label: "Created At",
-          value: "createdAt",
-        },
-        {
-          label: "Updated At",
-          value: "updatedAt",
-        },
-      ],
-      subscribers
-    );
   }
 
   GET.apiDoc = {
