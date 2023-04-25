@@ -12,19 +12,14 @@ interface Props extends React.InputHTMLAttributes<HTMLInputElement> {
 }
 
 export const InputEl = styled.input`
-  border: 1px solid #dfdfdf;
+  border: 1px solid var(--mi-shade-background-color);
   border-radius: var(--mi-border-radius);
   padding: 0.5rem;
   font-size: 1rem;
   margin-bottom: 0.5rem;
   width: 100%;
-  color: ${(props) => props.theme.colors.text};
-  background-color: ${(props) => props.theme.colors.background};
-
-  @media (prefers-color-scheme: dark) {
-    color: ${(props) => props.theme.colors.textDark};
-    background-color: ${(props) => props.theme.colors.backgroundDark};
-  }
+  color: var(--mi-normal-foreground-color);
+  background-color: var(--mi-lighten-background-color);
 `;
 
 export const Input: React.FC<Props> = ({ onChange, ...props }) => {

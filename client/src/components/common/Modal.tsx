@@ -24,11 +24,11 @@ type ContentProps = {
 
 const Content = styled.div<ContentProps>`
   pointer-events: auto;
-  background-color: #fefefe;
-  margin: 10% auto; /* 15% from the top and centered */
+  background-color: var(--mi-normal-background-color);
+  margin: 20% auto; /* 15% from the top and centered */
   padding: 20px;
   z-index: 999;
-  border: 1px solid #888;
+  border: 1px solid var(--mi-shade-background-color);
   display: flex;
   flex-direction: column;
   width: ${(props) => (props.size === "small" ? "40%" : "80%")};
@@ -45,10 +45,6 @@ const Content = styled.div<ContentProps>`
     z-index: 9999;
     right: 0;
     left: 0;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    background-color: #333;
   }
 `;
 

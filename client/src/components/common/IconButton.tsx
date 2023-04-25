@@ -6,8 +6,8 @@ const IconButton = styled.button<Compactable & { transparent?: boolean }>`
   color: ${(props) =>
     props.color === "primary"
       ? "var(--mi-primary-color--hover)"
-      : "var(--mi-normal-text-color--hover)"};
-  background-color: var(--mi-icon-button-background-color);
+      : "var(--mi-normal-foreground-color--hover)"};
+  background-color: var(--mi-shade-background-color);
   padding: ${(props) => (props.compact ? "0.5rem 0.6rem" : "0.6rem 0.7rem")};
   cursor: pointer;
   transition: 0.25s;
@@ -19,7 +19,7 @@ const IconButton = styled.button<Compactable & { transparent?: boolean }>`
     color: ${(props) =>
       props.color === "primary"
         ? "var(--mi-primary-color--hover)"
-        : "var(--mi-normal-text-color--hover)"};
+        : "var(--mi-normal-foreground-color--hover)"};
     background-color: var(--mi-icon-button-background-color--hover);
   }
 `;

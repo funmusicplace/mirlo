@@ -10,6 +10,7 @@ import PostContent from "../common/PostContent";
 import ArtistAlbums from "./ArtistAlbums";
 import usePublicArtist from "utils/usePublicArtist";
 import { Helmet } from "react-helmet";
+import LoadingSpinner from "components/common/LoadingSpinner";
 
 function Artist() {
   const { artistId } = useParams();
@@ -17,13 +18,27 @@ function Artist() {
     state: { user },
   } = useGlobalStateContext();
 
-  const { artist } = usePublicArtist(artistId);
+  const { artist, isLoadingArtist } = usePublicArtist(artistId);
 
-  if (!artist) {
+  if (!artist && !isLoadingArtist) {
     return (
       <Box>
         This artist does not exist or it does not have a public presence
       </Box>
+    );
+  } else if (!artist) {
+    return (
+      <div
+        className={css`
+          display: flex;
+          height: 100%;
+          justify-content: center;
+          align-items: center;
+          font-size: 4rem;
+        `}
+      >
+        <LoadingSpinner />
+      </div>
     );
   }
 
@@ -65,7 +80,7 @@ function Artist() {
               padding-top: 1.5rem;
 
               &:not(:first-child) {
-                border-top: 1px solid #efefef;
+                border-top: 1px solid var(--mi-shade-background-color);
               }
             `}
           >

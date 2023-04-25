@@ -3,13 +3,19 @@ import api from "services/api";
 
 const usePublicArtist = (artistId?: string) => {
   const [artist, setArtist] = React.useState<Artist>();
+  const [isLoading, setIsLoading] = React.useState(false);
 
   const fetchArtist = React.useCallback(async () => {
-    if (artistId) {
-      const { result } = await api.get<Artist>(`artists/${artistId}`);
-      setArtist(result);
-    } else {
-      setArtist(undefined);
+    setIsLoading(true);
+    try {
+      if (artistId) {
+        const { result } = await api.get<Artist>(`artists/${artistId}`);
+        setArtist(result);
+      } else {
+        setArtist(undefined);
+      }
+    } finally {
+      setIsLoading(false);
     }
   }, [artistId]);
 
@@ -17,7 +23,7 @@ const usePublicArtist = (artistId?: string) => {
     fetchArtist();
   }, [fetchArtist]);
 
-  return { artist };
+  return { artist, isLoadingArtist: isLoading };
 };
 
 export default usePublicArtist;

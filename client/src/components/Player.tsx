@@ -20,7 +20,7 @@ const LoopingIndicator = styled.span`
   position: absolute;
   font-size: 0.5rem;
   padding: 0.15rem 0.2rem;
-  background-color: ${(props) => props.theme.colors.primary};
+  background-color: var(--mi-primary-color);
   border-radius: 100%;
   color: white;
   top: -0.25rem;
@@ -39,14 +39,7 @@ const playerClass = css`
   z-index: 10;
   bottom: 0;
   filter: drop-shadow(0 0 0.1rem rgba(0, 0, 0, 0.5));
-
-  @media (prefers-color-scheme: dark) {
-    background: #333;
-  }
-
-  @media (prefers-color-scheme: light) {
-    background: #fff;
-  }
+  background-color: var(--mi-normal-background-color);
 
   @media (max-width: ${bp.small}px) {
     height: 150px;
@@ -154,6 +147,10 @@ const Player = () => {
     }
     dispatch({ type: "setLooping", looping: nextLooping });
   }, [dispatch, looping]);
+
+  if (!currentTrack) {
+    return null;
+  }
 
   return (
     <div className={playerClass}>

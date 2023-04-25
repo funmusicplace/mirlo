@@ -2,7 +2,7 @@ export const theme = {
   colors: {
     primary: "#0096a8",
     primaryHighlight: "#bcb3ff",
-    text: "var(--mi-normal-text-color)",
+    text: "var(--mi-normal-foreground-color)",
     textDark: "white",
     background: "var(--mi-normal-background-color)",
     backgroundDark: "#333",

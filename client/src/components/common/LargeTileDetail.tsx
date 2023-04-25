@@ -31,7 +31,7 @@ export const SmallTileDetails: React.FC<{
           <span
             className={css`
               margin-top: 0.5rem;
-              color: #444;
+              color: var(--mi-normal-foreground-color);
               text-decoration: none;
             `}
           >

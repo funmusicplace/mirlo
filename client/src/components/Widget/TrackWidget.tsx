@@ -34,6 +34,7 @@ const TrackWidget = () => {
             padding: 1rem;
             background: white;
             border-radius: 1rem;
+            align-items: center;
           `}
         >
           <ImageWithPlaceholder

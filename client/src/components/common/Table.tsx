@@ -30,11 +30,7 @@ export const Table = styled.table`
 
   & th {
     text-align: left;
-    background-color: #d8d8d8;
-    @media (prefers-color-scheme: dark) {
-      background-color: ${(props) =>
-        colorShade(props.theme.colors.backgroundDark, -20)};
-    }
+    background-color: var(--mi-shade-background-color);
   }
   & td,
   & th {

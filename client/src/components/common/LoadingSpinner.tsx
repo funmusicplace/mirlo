@@ -9,6 +9,7 @@ export const LoadingSpinner: React.FC<{ className?: string }> = ({
     <AiOutlineLoading
       className={
         css`
+          fill: var(--mi-primary-color);
           animation-name: spinning;
           animation-duration: 0.5s;
           animation-iteration-count: infinite;

@@ -13,12 +13,9 @@ import useWidgetListener from "utils/useWidgetListener";
 import Header from "./components/Header/Header";
 
 injectGlobal`
-
-  
-
   html {
     --mi-normal-background-color: white;
-    --mi-normal-text-color: #333;
+    --mi-normal-foreground-color: #333;
 
     --mi-primary-color: #0096a8;
     --mi-primary-color--hover: #00C4DB;
@@ -26,21 +23,26 @@ injectGlobal`
     --mi-secondary-color--hover: #FF80B0;
 
     --mi-warning-background-color: #f04e37;
-    --mi-warning-text-color: white;
+    --mi-warning-foreground-color: white;
 
     --mi-primary-highlight-color: #bcb3ff;
     --mi-primary-highlight-color--hover: #FFB3D0;
-    --mi-border-radius: .5rem;
 
-    --mi-icon-button-background-color: rgba(0, 0, 0, 0.1);
+    --mi-shade-background-color: rgba(0, 0, 0, .1);
+    --mi-lighten-background-color: rgba(255, 255, 255, 0.2);
+
+    --mi-border-radius: .5rem;
+    
+    --mi-icon-button-background-color: var(--mi-shade-background-color);
     --mi-icon-button-background-color--hover: rgba(0, 0, 0, 0.2);
   }
 
-  html[data-prefers-mode="dark"] {
-    --mi-normal-background-color: #333;
-    --mi-normal-text-color: white;
-
-    --mi-icon-button-background-color: #363636;
+  @media (prefers-color-scheme: dark) {
+    html {
+      background: blue;
+      --mi-normal-background-color: #333;
+      --mi-normal-foreground-color: white;
+    }
   }
 
   * {
@@ -62,16 +64,14 @@ injectGlobal`
       U+A720-A7FF;
   }
 
-  @media (prefers-color-scheme: dark) {
-    body {
-      background: #333;
-      color: white;
-    }
-  }
-
   html {
     font-size: 18px;
     min-height: 100%;
+  }
+
+  body {
+    background-color: var(--mi-normal-background-color);
+    color: var(--mi-normal-foreground-color);
   }
 
   body,
@@ -88,6 +88,8 @@ injectGlobal`
       color: black;
     }
   }
+
+  
 
   h2 {
     font-size: 2rem;
@@ -112,11 +114,22 @@ injectGlobal`
 
   a {
     transition: .25s color, .25s background-color;
+    color: var(--mi-primary-color);
   }
 
   h6 {
     font-size: 1.1rem;
     padding-bottom: .75rem;
+  }
+
+  @media (max-width: 800px) {
+    h1 {
+      font-size: 2rem;
+    }
+
+    h2 {
+      font-size: 1.8rem;
+    }
   }
 
   @keyframes slide-down {
@@ -231,7 +244,7 @@ function App() {
           <div
             className={css`
               display: flex;
-              height: 100%;
+              height: 100vh;
               justify-content: center;
               align-items: center;
               font-size: 4rem;
@@ -248,9 +261,8 @@ function App() {
               className={css`
                 max-width: 640px;
                 background-color: var(--mi-normal-background-color);
-                padding: 2rem;
+                padding: 3rem 2rem 9rem;
                 margin: 0 auto;
-                margin-bottom: 4rem;
                 width: 100%;
                 ${isArtistPage
                   ? "box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.1);"
