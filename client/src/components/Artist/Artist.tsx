@@ -9,6 +9,7 @@ import Button from "../common/Button";
 import PostContent from "../common/PostContent";
 import ArtistAlbums from "./ArtistAlbums";
 import usePublicArtist from "utils/usePublicArtist";
+import { Helmet } from "react-helmet";
 
 function Artist() {
   const { artistId } = useParams();
@@ -30,6 +31,10 @@ function Artist() {
 
   return (
     <div>
+      <Helmet>
+        <title>Mirlo: {artist.name}</title>
+        <meta name="description" content={`${artist.name}: ${artist.bio}`} />
+      </Helmet>
       <div
         className={css`
           display: flex;

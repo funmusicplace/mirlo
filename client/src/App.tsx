@@ -4,6 +4,7 @@ import PageHeader from "components/common/PageHeader";
 import Snackbar from "components/common/Snackbar";
 import Player from "components/Player";
 import React, { useContext, useState } from "react";
+import { Helmet } from "react-helmet";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import api from "services/api";
 import { useGlobalStateContext } from "state/GlobalState";
@@ -214,6 +215,10 @@ function App() {
 
   return (
     <>
+      <Helmet>
+        <title>A Mirlo Space</title>
+        <meta name="description" content="A home for all of your music" />
+      </Helmet>
       <div
         className={css`
           display: flex;
