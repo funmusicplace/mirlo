@@ -73,6 +73,8 @@ router.get(`/confirmation/:emailConfirmationToken`, async (req, res, next) => {
   try {
     let { emailConfirmationToken } = req.params;
 
+    // FIXME: should the client be changed from a URL to an id. Probably
+    // And then check that the client exists in the DB.
     let { client, email } = req.query as { client: string; email: string };
     email = email.toLowerCase();
 

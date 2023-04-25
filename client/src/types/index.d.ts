@@ -61,11 +61,11 @@ interface Artist {
   subscriptionTiers: ArtistSubscriptionTier[];
   banner: {
     url: string;
-    sizes: { [key: string]: string };
+    sizes?: { [key: string]: string };
   };
   avatar: {
     url: string;
-    sizes: { [key: string]: string };
+    sizes?: { [key: string]: string };
   };
 }
 

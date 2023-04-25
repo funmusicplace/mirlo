@@ -45,7 +45,7 @@ const UploadArtistImage: React.FC<{
 
   const imageUrl =
     imageType === "banner"
-      ? existing?.banner?.sizes[625]
+      ? existing?.banner?.sizes?.[625]
       : existing?.avatar?.url;
 
   return (
