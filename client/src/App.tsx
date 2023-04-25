@@ -39,7 +39,6 @@ injectGlobal`
 
   @media (prefers-color-scheme: dark) {
     html {
-      background: blue;
       --mi-normal-background-color: #333;
       --mi-normal-foreground-color: white;
     }
