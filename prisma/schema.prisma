@@ -59,7 +59,7 @@ model Artist {
   userId            Int
   posts             Post[]
   trackGroups       TrackGroup[]
-  enabled           Boolean                  @default(false)
+  enabled           Boolean                  @default(true)
   createdAt         DateTime                 @default(now())
   updatedAt         DateTime                 @default(now()) @updatedAt
   deletedAt         DateTime?
@@ -147,7 +147,7 @@ model TrackGroup {
   published              Boolean                  @default(false)
   type                   String?
   releaseDate            DateTime                 @default(now())
-  adminEnabled           Boolean                  @default(false)
+  adminEnabled           Boolean                  @default(true)
   createdAt              DateTime                 @default(now())
   updatedAt              DateTime                 @updatedAt
   deletedAt              DateTime?
