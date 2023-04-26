@@ -27,6 +27,11 @@ export default function () {
 
     try {
       const client = await prisma.client.findFirst({});
+      const user = await prisma.user.findFirst({
+        where: {
+          id: userId,
+        },
+      });
       const trackGroup = await prisma.trackGroup.findFirst({
         where: {
           id: Number(trackGroupId),
@@ -40,46 +45,68 @@ export default function () {
       if (!trackGroup) {
         return res.status(404);
       }
-      const session = await stripe.checkout.sessions.create({
-        billing_address_collection: "auto",
-        line_items: [
-          {
-            price_data: {
-              unit_amount: trackGroup.minPrice ?? 0,
-              currency: trackGroup.currency ?? "USD",
-              // FIXME: it might be a good idea to store products for
-              // a trackGroup at some point.
-              product_data: {
-                name: `${trackGroup.title} by ${trackGroup.artist.name}`,
-                description: trackGroup.about ?? "",
-                images: trackGroup.cover
-                  ? [
-                      generateFullStaticImageUrl(
-                        trackGroup.cover?.url[4],
-                        finalCoversBucket
-                      ),
-                    ]
-                  : [],
-              },
-            },
 
-            quantity: 1,
+      let productKey = trackGroup.stripeProductKey;
+
+      if (!trackGroup.stripeProductKey) {
+        const product = await stripe.products.create({
+          name: `${trackGroup.title} by ${trackGroup.artist.name}`,
+          description: trackGroup.about ?? "",
+          images: trackGroup.cover
+            ? [
+                generateFullStaticImageUrl(
+                  trackGroup.cover?.url[4],
+                  finalCoversBucket
+                ),
+              ]
+            : [],
+        });
+        await prisma.trackGroup.update({
+          where: {
+            id: Number(trackGroupId),
           },
-        ],
-        metadata: {
-          clientId: client?.id ?? null,
-          trackGroupId,
-          artistId: trackGroup.artistId,
-          userId,
-        },
-        mode: "payment",
-        success_url: `${API_DOMAIN}/v1/checkout?success=true&session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${API_DOMAIN}/v1/checkout?canceled=true`,
-      });
+          data: {
+            stripeProductKey: product.id,
+          },
+        });
+        productKey = product.id;
+      }
 
-      res.status(200).json({
-        sessionUrl: session.url,
-      });
+      if (productKey) {
+        const session = await stripe.checkout.sessions.create({
+          billing_address_collection: "auto",
+          customer_email: user?.email,
+          line_items: [
+            {
+              price_data: {
+                unit_amount: trackGroup.minPrice ?? 0,
+                currency: trackGroup.currency ?? "USD",
+                // FIXME: it might be a good idea to store products for
+                // a trackGroup at some point.
+                product: productKey,
+              },
+
+              quantity: 1,
+            },
+          ],
+          metadata: {
+            clientId: client?.id ?? null,
+            trackGroupId,
+            artistId: trackGroup.artistId,
+            userId,
+          },
+          mode: "payment",
+          success_url: `${API_DOMAIN}/v1/checkout?success=true&session_id={CHECKOUT_SESSION_ID}`,
+          cancel_url: `${API_DOMAIN}/v1/checkout?canceled=true`,
+        });
+        res.status(200).json({
+          sessionUrl: session.url,
+        });
+      } else {
+        res.status(500).json({
+          error: "Something went wrong while buying the track group",
+        });
+      }
     } catch (e) {
       console.error(e);
       res.status(500).json({

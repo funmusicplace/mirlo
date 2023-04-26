@@ -42,7 +42,11 @@ export default function () {
             },
           },
           banner: true,
-          subscriptionTiers: true,
+          subscriptionTiers: {
+            where: {
+              deletedAt: null,
+            },
+          },
           posts: {
             where: {
               publishedAt: {
