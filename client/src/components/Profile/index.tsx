@@ -1,6 +1,7 @@
 import { css } from "@emotion/css";
 import React from "react";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { useSnackbar } from "state/SnackbarContext";
 import api from "../../services/api";
@@ -12,6 +13,7 @@ import LoadingSpinner from "../common/LoadingSpinner";
 import UserSupports from "./UserSupports";
 
 function Profile() {
+  const { t } = useTranslation("translation", { keyPrefix: "profile" });
   const {
     state: { user },
     dispatch,
@@ -78,13 +80,13 @@ function Profile() {
           flex-direction: column;
         `}
       >
-        <h2>Profile</h2>
+        <h2>{t("profile")}</h2>
         <FormComponent>
-          Email:
+          {t("email")}
           <InputEl {...register("email")} />
         </FormComponent>
         <FormComponent>
-          Name:
+          {t("name")}
           <InputEl {...register("name")} />
         </FormComponent>
         <Button
@@ -92,18 +94,18 @@ function Profile() {
           disabled={isSaving}
           startIcon={isSaving ? <LoadingSpinner /> : undefined}
         >
-          Update profile
+          {t("updateProfileButton")}
         </Button>
       </form>
       {user.artistUserSubscriptions && (
         <UserSupports artistUserSubscriptions={user.artistUserSubscriptions} />
       )}
       <Link to="/profile/collection" style={{ marginTop: "1rem" }}>
-        <Button style={{ width: "100%" }}>View collection</Button>
+        <Button style={{ width: "100%" }}>{t("viewCollection")}</Button>
       </Link>
 
       <Link to="/manage" style={{ marginTop: "1rem" }}>
-        <Button style={{ width: "100%" }}>Manage artists</Button>
+        <Button style={{ width: "100%" }}>{t("manageArtists")}</Button>
       </Link>
     </div>
   );

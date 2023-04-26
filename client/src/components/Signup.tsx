@@ -1,10 +1,12 @@
 import { css } from "@emotion/css";
 import React from "react";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import api from "services/api";
 import Button from "./common/Button";
 import { InputEl } from "./common/Input";
 import { useSnackbar } from "state/SnackbarContext";
+import Box from "./common/Box";
 
 type SignupInputs = {
   email: string;
@@ -13,8 +15,9 @@ type SignupInputs = {
 };
 
 function Signup() {
+  const { t } = useTranslation("translation", { keyPrefix: "signUp" });
   const snackbar = useSnackbar();
-
+  const [hasRegistered, setHasRegistered] = React.useState(false);
   const { register, handleSubmit } = useForm<SignupInputs>();
 
   const onSubmit = React.useCallback(
@@ -27,14 +30,19 @@ function Signup() {
             credentials: undefined,
           }
         );
-        snackbar("Registration success", { type: "success" });
+        setHasRegistered(true);
+        snackbar(t("success"), { type: "success" });
       } catch (e) {
         snackbar((e as Error).message, { type: "warning" });
         console.error(e);
       }
     },
-    [snackbar]
+    [snackbar, t]
   );
+
+  if (hasRegistered) {
+    return <Box>{t("hasRegistered")}</Box>;
+  }
 
   return (
     <div>
@@ -47,14 +55,14 @@ function Signup() {
         `}
         onSubmit={handleSubmit(onSubmit)}
       >
-        <h2>Register</h2>
-        <label>name: </label>
+        <h2>{t("register")}</h2>
+        <label>{t("name")}</label>
         <InputEl type="input" {...register("name")} />
-        <label>email: </label>
+        <label>{t("email")}</label>
         <InputEl type="email" {...register("email")} />
-        <label>password: </label>
+        <label>{t("password")}</label>
         <InputEl {...register("password")} type="password" />
-        <Button type="submit">Sign up</Button>
+        <Button type="submit">{t("signUpButton")}</Button>
       </form>
       <img
         alt="blackbird"

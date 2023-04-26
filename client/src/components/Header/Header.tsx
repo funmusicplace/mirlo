@@ -2,32 +2,18 @@ import { css } from "@emotion/css";
 import React from "react";
 import { FaTimes } from "react-icons/fa";
 import { ImMenu } from "react-icons/im";
-import { Link, useNavigate } from "react-router-dom";
-import { colorShade, theme } from "utils/theme";
-import { API_ROOT } from "../../constants";
+import { Link } from "react-router-dom";
+import { theme } from "utils/theme";
+
 import { useGlobalStateContext } from "../../state/GlobalState";
-import Button from "../common/Button";
 import IconButton from "../common/IconButton";
 import HeaderSearch from "./HeaderSearch";
+import Menu from "./Menu";
 
 const Header = () => {
-  const { state, dispatch } = useGlobalStateContext();
-  const navigate = useNavigate();
+  const { state } = useGlobalStateContext();
 
   const [isMenuOpen, setIsMenuOpen] = React.useState<boolean>(false);
-
-  const onLogOut = React.useCallback(async () => {
-    await fetch(API_ROOT + "/auth/logout", {
-      method: "GET",
-      credentials: "include",
-    });
-    dispatch({
-      type: "setLoggedInUser",
-      user: undefined,
-    });
-    navigate("/");
-    setIsMenuOpen(false);
-  }, [dispatch, navigate]);
 
   return (
     <header
@@ -65,86 +51,7 @@ const Header = () => {
           <IconButton onClick={() => setIsMenuOpen(false)} transparent>
             <FaTimes />
           </IconButton>
-          <menu
-            className={css`
-              list-style: none;
-
-              & li * {
-                background: transparent !important;
-                width: 100%;
-                text-decoration: none;
-                text-align: center;
-                display: block;
-                color: ${theme.colors.text};
-                font-weight: bold;
-                border-radius: 0;
-                border: none;
-
-                &:hover {
-                  background: ${colorShade(
-                    theme.colors.primaryHighlight,
-                    -50
-                  )} !important;
-                  border: none !important;
-                }
-              }
-            `}
-          >
-            {state.user && (
-              <>
-                <li>
-                  <Button onClick={onLogOut} className={css``}>
-                    Log out
-                  </Button>
-                </li>
-                <li>
-                  <Button
-                    onClick={() => {
-                      setIsMenuOpen(false);
-                      navigate("/profile");
-                    }}
-                  >
-                    Profile
-                  </Button>
-                </li>
-                <li>
-                  <Button
-                    onClick={() => {
-                      setIsMenuOpen(false);
-                      navigate("/manage");
-                    }}
-                  >
-                    Manage
-                  </Button>
-                </li>
-              </>
-            )}
-            {!state.user && (
-              <>
-                <li>
-                  <Button
-                    className={css`
-                      margin-right: 0.75rem;
-                    `}
-                    onClick={() => {
-                      setIsMenuOpen(false);
-                      navigate("/login");
-                    }}
-                  >
-                    log in
-                  </Button>
-                </li>
-                <li
-                  onClick={() => {
-                    setIsMenuOpen(false);
-                    navigate("/signup");
-                  }}
-                >
-                  <Button>sign up</Button>
-                </li>
-              </>
-            )}
-          </menu>
+          <Menu setIsMenuOpen={setIsMenuOpen} />
         </div>
       )}
       <div

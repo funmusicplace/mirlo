@@ -1,11 +1,13 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+
 import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import ErrorPage from "./components/ErrorPage";
+import "./i18n";
 
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Signup from "./components/Signup";
 import Login from "./components/Login";
 import { GlobalStateProvider } from "./state/GlobalState";
