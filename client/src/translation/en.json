@@ -1,0 +1,40 @@
+{
+  "signUp": {
+    "hasRegistered": "Cool! We've sent you an e-mail to confirm your account. Click on the link in it to confirm your email",
+    "register": "Register",
+    "name": "Name:",
+    "email": "Email:",
+    "password": "Password:",
+    "signUpButton": "Sign up",
+    "success": "Registration success!"
+  },
+  "logIn": {
+    "logIn": "Log in",
+    "email": "Email:",
+    "password": "Password:"
+  },
+  "headerMenu": {
+    "logOutSuccess": "Logged out!",
+    "logOut": "Log out",
+    "profile": "Profile",
+    "manage": "Manage artists",
+    "logIn": "Log in",
+    "signUp": "Sign up"
+  },
+  "headerSearch": {
+    "searchSuggestions": "Search suggestions:",
+    "noResults": "Hmm, couldn't find anything for that search"
+  },
+  "profile": {
+    "profile": "Profile",
+    "profileUpdated": "Profile updated",
+    "errorUpdatingProfile": "There was a problem with the API",
+    "email": "Email:",
+    "name": "Name:",
+    "updateProfileButton": "Update profile",
+    "viewCollection": "View collection",
+    "manageArtists": "Manage artists",
+    "artistsYouSupport": "Artists you support",
+    "noSubscriptionsYet": "You don't support any musicians yet"
+  }
+}

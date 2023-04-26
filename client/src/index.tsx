@@ -1,11 +1,13 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+
 import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import ErrorPage from "./components/ErrorPage";
+import "./i18n";
 
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Signup from "./components/Signup";
 import Login from "./components/Login";
 import { GlobalStateProvider } from "./state/GlobalState";
@@ -24,6 +26,7 @@ import Artist from "components/Artist/Artist";
 import TrackGroupWidget from "components/Widget/TrackGroupWidget";
 import TrackWidget from "components/Widget/TrackWidget";
 import Collection from "components/Collection";
+import Post from "components/Post";
 
 const router = createBrowserRouter([
   {
@@ -35,6 +38,7 @@ const router = createBrowserRouter([
       { path: "widget/track/:id", element: <TrackWidget /> },
       { path: "widget/trackgroup/:id", element: <TrackGroupWidget /> },
       { path: "artist/:artistId", element: <Artist /> },
+      { path: "post/:postId", element: <Post /> },
       {
         path: "signup",
         element: <Signup />,

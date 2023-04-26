@@ -102,6 +102,7 @@ model ArtistSubscriptionTier {
   defaultAmount     Int? // in cents
   currency          String                   @default("USD")
   userSubscriptions ArtistUserSubscription[]
+  stripeProductKey  String?
   createdAt         DateTime                 @default(now())
   updatedAt         DateTime                 @default(now()) @updatedAt
   deletedAt         DateTime?
@@ -115,7 +116,7 @@ model ArtistUserSubscription {
   user                     User                   @relation(fields: [userId], references: [id])
   amount                   Int // In cents
   currency                 String                 @default("USD")
-  stripeId                 String?
+  stripeSubscriptionKey    String?
   createdAt                DateTime               @default(now())
   updatedAt                DateTime               @default(now()) @updatedAt
   deletedAt                DateTime?
@@ -124,14 +125,14 @@ model ArtistUserSubscription {
 }
 
 model UserTrackGroupPurchase {
-  userId        Int
-  user          User       @relation(fields: [userId], references: [id])
-  trackGroupId  Int
-  trackGroup    TrackGroup @relation(fields: [trackGroupId], references: [id])
-  pricePaid     Int // in cents
-  currencyPaid  String     @default("USD")
-  datePurchased DateTime   @default(now())
-  stripeId      String?
+  userId           Int
+  user             User       @relation(fields: [userId], references: [id])
+  trackGroupId     Int
+  trackGroup       TrackGroup @relation(fields: [trackGroupId], references: [id])
+  pricePaid        Int // in cents
+  currencyPaid     String     @default("USD")
+  datePurchased    DateTime   @default(now())
+  stripeSessionKey String?
 
   @@unique([userId, trackGroupId])
 }
@@ -154,7 +155,8 @@ model TrackGroup {
   minPrice               Int? // in cents
   currency               String?                  @default("USD")
   isPriceFixed           Boolean                  @default(false)
-  UserTrackGroupPurchase UserTrackGroupPurchase[]
+  userTrackGroupPurchase UserTrackGroupPurchase[]
+  stripeProductKey       String?
 }
 
 model Track {

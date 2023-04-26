@@ -1,12 +1,12 @@
 import { css } from "@emotion/css";
 import React from "react";
 import { useParams } from "react-router-dom";
-import usePublicArtist from "utils/usePublicArtist";
+import usePublicArtist from "utils/usePublicObjectById";
 
 const PageHeader = () => {
   const { artistId } = useParams();
 
-  const { artist } = usePublicArtist(artistId);
+  const { object: artist } = usePublicArtist<Artist>("artists", artistId);
 
   const artistBanner = artist?.banner?.sizes;
 

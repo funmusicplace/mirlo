@@ -8,7 +8,7 @@ import Box from "../common/Box";
 import Button from "../common/Button";
 import PostContent from "../common/PostContent";
 import ArtistAlbums from "./ArtistAlbums";
-import usePublicArtist from "utils/usePublicArtist";
+import usePublicObjectById from "utils/usePublicObjectById";
 import { Helmet } from "react-helmet";
 import LoadingSpinner from "components/common/LoadingSpinner";
 
@@ -18,7 +18,8 @@ function Artist() {
     state: { user },
   } = useGlobalStateContext();
 
-  const { artist, isLoadingArtist } = usePublicArtist(artistId);
+  const { object: artist, isLoadingObject: isLoadingArtist } =
+    usePublicObjectById<Artist>("artists", artistId);
 
   if (!artist && !isLoadingArtist) {
     return (

@@ -1,5 +1,6 @@
 import { css } from "@emotion/css";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import api from "../../services/api";
 import { useGlobalStateContext } from "../../state/GlobalState";
@@ -10,6 +11,7 @@ import Pill from "../common/Pill";
 const UserSupports: React.FC<{
   artistUserSubscriptions: ArtistUserSubscription[];
 }> = ({ artistUserSubscriptions }) => {
+  const { t } = useTranslation("translation", { keyPrefix: "profile" });
   const {
     state: { user },
     dispatch,
@@ -37,7 +39,7 @@ const UserSupports: React.FC<{
         margin-top: 1rem;
       `}
     >
-      <h2>Artists you support</h2>
+      <h2>{t("artistsYouSupport")}</h2>
       {(artistUserSubscriptions?.length ?? 0) > 0 && (
         <ul
           className={css`
@@ -67,9 +69,7 @@ const UserSupports: React.FC<{
           ))}
         </ul>
       )}
-      {artistUserSubscriptions?.length === 0 && (
-        <>You don't support any artists yet</>
-      )}
+      {artistUserSubscriptions?.length === 0 && <>{t("noSubscriptionsYet")}</>}
     </Box>
   );
 };

@@ -32,7 +32,9 @@ function Home() {
             }
           `}
         >
-          <h3>{p.title}</h3>
+          <h3>
+            <Link to={`/post/${p.id}/`}>{p.title}</Link>
+          </h3>
           <em>
             by <Link to={`/artist/${p.artist.id}`}>{p.artist?.name}</Link>
           </em>

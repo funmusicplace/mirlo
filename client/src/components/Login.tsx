@@ -7,6 +7,7 @@ import api from "../services/api";
 import Button from "./common/Button";
 import { InputEl } from "./common/Input";
 import { useSnackbar } from "state/SnackbarContext";
+import { useTranslation } from "react-i18next";
 
 type SignupInputs = {
   email: string;
@@ -14,6 +15,8 @@ type SignupInputs = {
 };
 
 function Login() {
+  const { t } = useTranslation("translation", { keyPrefix: "logIn" });
+
   const { dispatch } = useGlobalStateContext();
   const { register, handleSubmit } = useForm<SignupInputs>();
   const navigate = useNavigate();
@@ -48,13 +51,13 @@ function Login() {
         `}
         onSubmit={handleSubmit(onSubmit)}
       >
-        <h2>Log in</h2>
+        <h2>{t("logIn")}</h2>
 
-        <label>email: </label>
+        <label>{t("email")}</label>
         <InputEl type="email" {...register("email")} />
-        <label>password: </label>
+        <label>{t("password")}</label>
         <InputEl {...register("password")} type="password" />
-        <Button type="submit">Log in</Button>
+        <Button type="submit">{t("logIn")}</Button>
       </form>
       <img
         alt="blackbird"

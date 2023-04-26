@@ -139,8 +139,8 @@ const ArtistTrackGroup: React.FC<{
         size="small"
         open={isPurchasingAlbum}
         onClose={() => setIsPurchasingAlbum(false)}
+        title={`Buying ${trackGroup.title}`}
       >
-        <h3>Buying {trackGroup.title}</h3>
         Price:{" "}
         {trackGroup.minPrice && <Money amount={trackGroup.minPrice / 100} />}
         <Button onClick={purchaseAlbum}>Buy</Button>

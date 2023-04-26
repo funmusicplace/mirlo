@@ -22,7 +22,7 @@ const handleTrackGroupPurhcase = async (
         trackGroupId: Number(trackGroupId),
         pricePaid: session.amount_total ?? 0,
         currencyPaid: session.currency ?? "USD",
-        stripeId: session.id,
+        stripeSessionKey: session.id,
       },
     });
 
@@ -73,7 +73,7 @@ const handleSubscription = async (
         userId: Number(userId),
         amount: session.amount_total ?? 0,
         currency: session.currency ?? "USD",
-        stripeId: session.id, // FIXME: should this be session id? Maybe subscriptionId?
+        stripeSubscriptionKey: session.subscription as string, // FIXME: should this be session id? Maybe subscriptionId?
       },
       update: {
         artistSubscriptionTierId: Number(tierId),
@@ -81,7 +81,7 @@ const handleSubscription = async (
         amount: session.amount_total ?? 0,
         currency: session.currency ?? "USD",
         deletedAt: null, // Undelete
-        stripeId: session.id, // FIXME: should this be session id? Maybe subscriptionId?
+        stripeSubscriptionKey: session.subscription as string, // FIXME: should this be session id? Maybe subscriptionId?
       },
       where: {
         userId_artistSubscriptionTierId: {
@@ -101,6 +101,9 @@ const handleCheckoutSession = async (session: Stripe.Checkout.Session) => {
     userId: string;
     trackGroupId: string;
   };
+  session = await stripe.checkout.sessions.retrieve(session.id, {
+    expand: ["line_items"],
+  });
   if (tierId && userId) {
     await handleSubscription(Number(userId), Number(tierId), session);
   } else if (trackGroupId && userId) {
@@ -138,15 +141,13 @@ export default function () {
       }
     }
 
-    let subscription;
-    let status;
     // Handle the event
     switch (event.type) {
       case "checkout.session.completed":
         // To trigger this event type use
         // stripe trigger checkout.session.completed --add checkout_session:metadata.userId=3 --add checkout_session:metadata.tierId=2
         const session = event.data.object;
-        console.log(`Subscription status is ${session.status}.`);
+        console.log(`Checkout status is ${session.status}.`);
 
         handleCheckoutSession(session);
       default:

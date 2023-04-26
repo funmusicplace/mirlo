@@ -45,38 +45,60 @@ export default function () {
       if (!tier) {
         return res.status(404);
       }
-      const session = await stripe.checkout.sessions.create({
-        billing_address_collection: "auto",
-        customer_email: user?.email,
-        line_items: [
-          {
-            price_data: {
-              unit_amount: tier.minAmount ?? 0,
-              currency: tier.currency ?? "USD",
-              product_data: {
-                name: `Supporting ${tier.artist.name} at ${tier.name}`,
-                description: tier.description,
-              },
-              recurring: { interval: "month" },
-            },
-            quantity: 1,
-          },
-        ],
-        metadata: {
-          clientId: client?.id ?? null,
-          artistId,
-          tierId,
-          userId,
-        },
-        mode: "subscription",
-        success_url: `${API_DOMAIN}/v1/checkout?success=true&session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${API_DOMAIN}/v1/checkout?canceled=true`,
-      });
 
-      // res.redirect(303, session.url ?? "");
-      res.status(200).json({
-        sessionUrl: session.url,
-      });
+      let productKey = tier.stripeProductKey;
+
+      if (!tier.stripeProductKey) {
+        const product = await stripe.products.create({
+          name: `Supporting ${tier.artist.name} at ${tier.name}`,
+          description: tier.description,
+        });
+        await prisma.artistSubscriptionTier.update({
+          where: {
+            id: Number(tierId),
+          },
+          data: {
+            stripeProductKey: product.id,
+          },
+        });
+        productKey = product.id;
+      }
+
+      if (productKey) {
+        const session = await stripe.checkout.sessions.create({
+          billing_address_collection: "auto",
+          customer_email: user?.email,
+          line_items: [
+            {
+              price_data: {
+                unit_amount: tier.minAmount ?? 0,
+                currency: tier.currency ?? "USD",
+                product: productKey,
+                recurring: { interval: "month" },
+              },
+              quantity: 1,
+            },
+          ],
+          metadata: {
+            clientId: client?.id ?? null,
+            artistId,
+            tierId,
+            userId,
+          },
+          mode: "subscription",
+          success_url: `${API_DOMAIN}/v1/checkout?success=true&session_id={CHECKOUT_SESSION_ID}`,
+          cancel_url: `${API_DOMAIN}/v1/checkout?canceled=true`,
+        });
+
+        // res.redirect(303, session.url ?? "");
+        res.status(200).json({
+          sessionUrl: session.url,
+        });
+      } else {
+        res.status(500).json({
+          error: "Something went wrong while subscribing the user",
+        });
+      }
     } catch (e) {
       console.error(e);
       res.status(500).json({
