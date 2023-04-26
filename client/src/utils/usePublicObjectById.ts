@@ -1,29 +1,29 @@
 import React from "react";
 import api from "services/api";
 
-const usePublicArtist = (artistId?: string) => {
-  const [artist, setArtist] = React.useState<Artist>();
+const usePublicObjectById = <T>(endpoint: string, artistId?: string) => {
+  const [object, setObject] = React.useState<T>();
   const [isLoading, setIsLoading] = React.useState(false);
 
   const fetchArtist = React.useCallback(async () => {
     setIsLoading(true);
     try {
       if (artistId) {
-        const { result } = await api.get<Artist>(`artists/${artistId}`);
-        setArtist(result);
+        const { result } = await api.get<T>(`${endpoint}/${artistId}`);
+        setObject(result);
       } else {
-        setArtist(undefined);
+        setObject(undefined);
       }
     } finally {
       setIsLoading(false);
     }
-  }, [artistId]);
+  }, [endpoint, artistId]);
 
   React.useEffect(() => {
     fetchArtist();
   }, [fetchArtist]);
 
-  return { artist, isLoadingArtist: isLoading };
+  return { object, isLoadingObject: isLoading };
 };
 
-export default usePublicArtist;
+export default usePublicObjectById;

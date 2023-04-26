@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import prisma from "../../../../prisma/prisma";
 import { userLoggedInWithoutRedirect } from "../../../auth/passport";
 import { User } from "@prisma/client";
+import logger from "../../../logger";
 
 export default function () {
   const operations = {
@@ -12,10 +13,23 @@ export default function () {
     const { id }: { id?: string } = req.params;
     const user = req.user as User;
 
-    const post = await prisma.post.findUnique({
-      where: { id: Number(id) },
-    });
-    res.json({ result: post });
+    try {
+      const post = await prisma.post.findFirst({
+        where: {
+          id: Number(id),
+          publishedAt: {
+            lte: new Date(),
+          },
+        },
+        include: {
+          artist: true,
+        },
+      });
+      res.json({ result: post });
+    } catch (e) {
+      logger.error(`/posts/{id} GET ${e}`);
+      res.status(500);
+    }
   }
 
   GET.apiDoc = {
