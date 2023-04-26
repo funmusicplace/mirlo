@@ -2,10 +2,13 @@ import { css } from "@emotion/css";
 import { InputEl } from "components/common/Input";
 import LoadingSpinner from "components/common/LoadingSpinner";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import api from "services/api";
 
 const HeaderSearch: React.FC = () => {
+  const { t } = useTranslation("translation", { keyPrefix: "headerSearch" });
+
   const [searchValue, setSearchValue] = React.useState("");
   const [showSuggestions, setShowSuggestions] = React.useState(false);
   const [isSearching, setIsSearching] = React.useState(false);
@@ -62,7 +65,7 @@ const HeaderSearch: React.FC = () => {
             width: 100%;
           `}
         >
-          Search suggestions:
+          {t("searchSuggestions")}
           {isSearching && <LoadingSpinner />}
           {!isSearching && searchResults.length > 0 && (
             <ol
@@ -78,9 +81,7 @@ const HeaderSearch: React.FC = () => {
               ))}
             </ol>
           )}
-          {!isSearching && searchResults.length === 0 && (
-            <>Hmm, couldn't find anything for that result</>
-          )}
+          {!isSearching && searchResults.length === 0 && <>{t("noResults")}</>}
         </div>
       )}
     </div>
