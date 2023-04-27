@@ -12,5 +12,7 @@ html
     p Wow! 
     p An artist you support published a new post!
     p 
-      a(href=`${client}/artist/${artist.id}`) Check it out
+      strong #{post.title}
+    p 
+      a(href=`${client}/post/${post.id}`) Check it out.
     p Enjoy!

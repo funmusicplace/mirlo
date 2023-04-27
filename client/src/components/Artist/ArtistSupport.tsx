@@ -1,4 +1,6 @@
+import Box from "components/common/Box";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
 import api from "services/api";
 import { useGlobalStateContext } from "state/GlobalState";
@@ -9,6 +11,8 @@ const ArtistSupport: React.FC<{ artist: Artist }> = ({ artist }) => {
   const {
     state: { user },
   } = useGlobalStateContext();
+  const { t } = useTranslation("translation", { keyPrefix: "artist" });
+  const [isLoading, setIsLoading] = React.useState(false);
   const [userSubscription, setUserSubscription] =
     React.useState<ArtistUserSubscription>();
   const [userSubscriptionTier, setUserSubscriptionTier] =
@@ -18,6 +22,7 @@ const ArtistSupport: React.FC<{ artist: Artist }> = ({ artist }) => {
 
   const checkForSubscription = React.useCallback(async () => {
     try {
+      setIsLoading(true);
       if (userId) {
         const { results: subscriptions } =
           await api.getMany<ArtistUserSubscription>(
@@ -34,6 +39,8 @@ const ArtistSupport: React.FC<{ artist: Artist }> = ({ artist }) => {
       }
     } catch (e) {
       console.error(e);
+    } finally {
+      setIsLoading(false);
     }
   }, [artist.id, artist.subscriptionTiers, userId]);
 
@@ -56,6 +63,10 @@ const ArtistSupport: React.FC<{ artist: Artist }> = ({ artist }) => {
     return null;
   }
 
+  if (isLoading) {
+    return <Box />;
+  }
+
   if (userSubscriptionTier) {
     return (
       <ArtistManageSubscription
@@ -68,7 +79,7 @@ const ArtistSupport: React.FC<{ artist: Artist }> = ({ artist }) => {
 
   return (
     <>
-      <h2>Support {artist.name}</h2>
+      <h2>{t("support", { artist: artist.name })}</h2>
       <div>
         {artist.subscriptionTiers?.map((p) => (
           <ArtistSupportBox key={p.id} subscriptionTier={p} artist={artist} />

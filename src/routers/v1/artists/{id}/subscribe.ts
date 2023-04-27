@@ -71,6 +71,7 @@ export default function () {
           line_items: [
             {
               price_data: {
+                tax_behavior: "exclusive",
                 unit_amount: tier.minAmount ?? 0,
                 currency: tier.currency ?? "USD",
                 product: productKey,

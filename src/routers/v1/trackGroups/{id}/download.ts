@@ -5,6 +5,11 @@ import fs from "fs";
 import path from "path";
 import { userAuthenticated } from "../../../../auth/passport";
 import prisma from "../../../../../prisma/prisma";
+import {
+  finalAudioBucket,
+  getObjectFromMinio,
+  minioClient,
+} from "../../../../utils/minio";
 
 const { MEDIA_LOCATION } = process.env;
 
@@ -14,19 +19,21 @@ async function buildZipFileForPath(
   })[]
 ) {
   var zip = new JSZip();
-  tracks.forEach((track) => {
-    if (track.title && track.audio) {
-      // FIXME: needs to be built by minio
-      const location = path.join(
-        MEDIA_LOCATION ?? "",
-        "audio",
-        `${track.audio.id}/original.flac`
-      );
-      if (fs.statSync(location).isFile()) {
+  await Promise.all(
+    tracks.map(async (track, index) => {
+      if (track.title && track.audio) {
+        const { buffer } = await getObjectFromMinio(
+          minioClient,
+          finalAudioBucket,
+          `${track.audio.id}/original.flac`
+        );
+        const order = track.order ? track.order : index + 1;
+        const trackTitle = `${order} - ${track.title}.flac`;
+        zip.file(trackTitle, buffer);
       }
-      zip.file(`${track.title}.flac`, fs.readFileSync(location));
-    }
-  });
+    })
+  );
+
   return zip.generateAsync({ type: "base64" });
 }
 
@@ -35,14 +42,19 @@ export default function () {
     GET: [userAuthenticated, GET],
   };
 
-  // FIXME: only do published tracks
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { id: trackGroupId }: { id?: string } = req.params;
     const { id: userId } = req.user as User;
 
     try {
       const purchase = await prisma.userTrackGroupPurchase.findFirst({
-        where: { trackGroupId: Number(trackGroupId), userId: Number(userId) },
+        where: {
+          trackGroupId: Number(trackGroupId),
+          userId: Number(userId),
+          trackGroup: {
+            published: true,
+          },
+        },
         include: {
           trackGroup: {
             include: {

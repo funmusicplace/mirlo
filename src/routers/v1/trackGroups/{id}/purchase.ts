@@ -52,6 +52,7 @@ export default function () {
         const product = await stripe.products.create({
           name: `${trackGroup.title} by ${trackGroup.artist.name}`,
           description: trackGroup.about ?? "",
+          tax_code: "txcd_10401100",
           images: trackGroup.cover
             ? [
                 generateFullStaticImageUrl(
@@ -79,6 +80,7 @@ export default function () {
           line_items: [
             {
               price_data: {
+                tax_behavior: "exclusive",
                 unit_amount: trackGroup.minPrice ?? 0,
                 currency: trackGroup.currency ?? "USD",
                 // FIXME: it might be a good idea to store products for

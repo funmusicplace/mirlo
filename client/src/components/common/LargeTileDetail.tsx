@@ -3,7 +3,7 @@ import React from "react";
 
 export const SmallTileDetails: React.FC<{
   title: string | React.ReactElement;
-  subtitle?: string | React.ReactElement;
+  subtitle?: string | React.ReactElement | null;
   moreActions?: React.ReactElement;
 }> = ({ title, subtitle, moreActions }) => {
   return (

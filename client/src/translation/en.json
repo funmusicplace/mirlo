@@ -36,5 +36,19 @@
     "manageArtists": "Manage artists",
     "artistsYouSupport": "Artists you support",
     "noSubscriptionsYet": "You don't support any musicians yet"
+  },
+  "trackGroupCard": {
+    "download": "Download",
+    "error": "Something went wrong",
+    "buy": "Buy",
+    "released": "Released: {{date}}",
+    "notImplemented": "Buying an album for variable price hasn't been implemented yet"
+  },
+  "artist": {
+    "support": "Support {{artist}}",
+    "doesNotExist": "This artist does not exist or it does not have a public presence",
+    "edit": "Edit",
+    "updates": "Updates",
+    "releases": "Releases"
   }
 }

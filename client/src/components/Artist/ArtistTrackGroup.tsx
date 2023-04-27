@@ -3,6 +3,7 @@ import Button from "components/common/Button";
 import Modal from "components/common/Modal";
 import Money from "components/common/Money";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { FaArrowDown } from "react-icons/fa";
 import api from "services/api";
 import { useGlobalStateContext } from "state/GlobalState";
@@ -14,6 +15,7 @@ const ArtistTrackGroup: React.FC<{
   trackGroup: TrackGroup;
   artist: Artist;
 }> = ({ trackGroup, artist }) => {
+  const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
   const {
     state: { user },
   } = useGlobalStateContext();
@@ -58,7 +60,7 @@ const ArtistTrackGroup: React.FC<{
       );
       window.location.assign(response.sessionUrl);
     } catch (e) {
-      snackbar("Something went wrong", { type: "warning" });
+      snackbar(t("error"), { type: "warning" });
       console.error(e);
     }
   };
@@ -72,7 +74,7 @@ const ArtistTrackGroup: React.FC<{
         "application/zip"
       );
     } catch (e) {
-      snackbar("Something went wrong", { type: "warning" });
+      snackbar(t("error"), { type: "warning" });
       console.error(e);
     } finally {
       setIsDownloading(false);
@@ -114,12 +116,14 @@ const ArtistTrackGroup: React.FC<{
         />
         <SmallTileDetails
           title={trackGroup.title}
-          subtitle={`Released: ${trackGroup.releaseDate.split("T")[0]}`}
+          subtitle={t("released", {
+            date: trackGroup.releaseDate.split("T")[0],
+          })}
         />
         <div style={{ flexGrow: 1 }} />
         {!userIsTrackGroupArtist && !isOwned && (
           <Button compact onClick={() => setIsPurchasingAlbum(true)}>
-            Buy
+            {t("buy")}
           </Button>
         )}
         {isOwned && (
@@ -130,7 +134,7 @@ const ArtistTrackGroup: React.FC<{
               startIcon={<FaArrowDown />}
               onClick={() => downloadAlbum()}
             >
-              Download
+              {t("download")}
             </Button>
           </>
         )}
@@ -141,9 +145,14 @@ const ArtistTrackGroup: React.FC<{
         onClose={() => setIsPurchasingAlbum(false)}
         title={`Buying ${trackGroup.title}`}
       >
-        Price:{" "}
-        {trackGroup.minPrice && <Money amount={trackGroup.minPrice / 100} />}
-        <Button onClick={purchaseAlbum}>Buy</Button>
+        {trackGroup.minPrice && (
+          <>
+            {" "}
+            Price: <Money amount={trackGroup.minPrice / 100} />
+            <Button onClick={purchaseAlbum}>{t("buy")}</Button>
+          </>
+        )}
+        {!trackGroup.minPrice && <>{t("notImplemented")}</>}
       </Modal>
     </div>
   );
