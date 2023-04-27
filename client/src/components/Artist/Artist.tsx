@@ -11,8 +11,11 @@ import ArtistAlbums from "./ArtistAlbums";
 import usePublicObjectById from "utils/usePublicObjectById";
 import { Helmet } from "react-helmet";
 import LoadingSpinner from "components/common/LoadingSpinner";
+import { useTranslation } from "react-i18next";
 
 function Artist() {
+  const { t } = useTranslation("translation", { keyPrefix: "artist" });
+
   const { artistId } = useParams();
   const {
     state: { user },
@@ -22,11 +25,7 @@ function Artist() {
     usePublicObjectById<Artist>("artists", artistId);
 
   if (!artist && !isLoadingArtist) {
-    return (
-      <Box>
-        This artist does not exist or it does not have a public presence
-      </Box>
-    );
+    return <Box>{t("doesNotExist")}</Box>;
   } else if (!artist) {
     return (
       <div
@@ -62,7 +61,7 @@ function Artist() {
         {ownedByUser && (
           <Link to={`/manage/artists/${artist.id}`}>
             <Button compact startIcon={<FaPen />}>
-              Edit
+              {t("edit")}
             </Button>
           </Link>
         )}
@@ -70,7 +69,7 @@ function Artist() {
       <p>{artist.bio}</p>
       <ArtistSupport artist={artist} />
       <ArtistAlbums artist={artist} />
-      <h2>Updates</h2>
+      <h2>{t("updates")}</h2>
       <div>
         {artist.posts?.map((p) => (
           <Box

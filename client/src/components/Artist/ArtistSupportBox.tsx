@@ -41,7 +41,7 @@ const ArtistSupportBox: React.FC<{
 
   return (
     <>
-      <div
+      <Box
         key={subscriptionTier.id}
         className={css`
           margin-bottom: 1rem;
@@ -106,7 +106,7 @@ const ArtistSupportBox: React.FC<{
             </Box>
           )}
         </div>
-      </div>
+      </Box>
     </>
   );
 };

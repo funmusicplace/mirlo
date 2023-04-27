@@ -6,7 +6,7 @@ import remarkGfm from "remark-gfm";
 import remarkEmbedder from "utils/remarkEmbedder";
 
 const PostContentWrapper = styled.div`
-  margin-top: 2rem;
+  margin-top: 0.5rem;
 
   h1 {
     font-size: 1.2rem;
