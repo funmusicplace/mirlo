@@ -4,7 +4,15 @@ import fileSaver from "file-saver";
 const APIInstance = (apiRoot: string) => {
   const api = `${apiRoot}/v1/`;
   const auth = `${apiRoot}/auth/`;
-  const authEndpoints = ["profile", "login", "logout", "refresh", "signup"];
+  const authEndpoints = [
+    "profile",
+    "login",
+    "logout",
+    "refresh",
+    "signup",
+    "password-reset/initiate",
+    "password-reset/set-password",
+  ];
 
   const apiRequest = async <R>(
     endpoint: string,

@@ -11,7 +11,15 @@
   "logIn": {
     "logIn": "Log in",
     "email": "Email:",
-    "password": "Password:"
+    "password": "Password:",
+    "passwordReset": "Forgot your password?"
+  },
+  "passwordReset": {
+    "title": "Reset your password",
+    "email": "Email:",
+    "reset": "Send reset email",
+    "password": "New password",
+    "confirmNewPassword": "Set password"
   },
   "headerMenu": {
     "logOutSuccess": "Logged out!",

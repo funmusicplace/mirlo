@@ -27,6 +27,7 @@ import TrackGroupWidget from "components/Widget/TrackGroupWidget";
 import TrackWidget from "components/Widget/TrackWidget";
 import Collection from "components/Collection";
 import Post from "components/Post";
+import PasswordReset from "components/PasswordReset";
 
 const router = createBrowserRouter([
   {
@@ -50,6 +51,10 @@ const router = createBrowserRouter([
       {
         path: "profile",
         element: <Profile />,
+      },
+      {
+        path: "password-reset",
+        element: <PasswordReset />,
       },
       { path: "profile/collection", element: <Collection /> },
       {

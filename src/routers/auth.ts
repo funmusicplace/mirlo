@@ -4,7 +4,8 @@ import bcrypt from "bcryptjs";
 import { userAuthenticated } from "../auth/passport";
 import prisma from "../../prisma/prisma";
 import sendMail from "../jobs/send-mail";
-import { User } from "@prisma/client";
+import { randomUUID } from "crypto";
+import logger from "../logger";
 
 const jwt_secret = process.env.JWT_SECRET ?? "";
 const refresh_secret = process.env.REFRESH_TOKEN_SECRET ?? "";
@@ -108,6 +109,152 @@ router.get(`/confirmation/:emailConfirmationToken`, async (req, res, next) => {
       });
       setTokens(res, updatedUser);
       return res.redirect(client);
+    }
+  } catch (e) {
+    console.error(e);
+    res.status(500);
+  }
+});
+
+router.get("/password-reset/confirmation/:token", async (req, res, next) => {
+  try {
+    let { token } = req.params as {
+      token: string;
+    };
+    let { email, redirectClient } = req.query as {
+      redirectClient: string;
+      email: string;
+    };
+    email = email.toLowerCase();
+
+    const user = await prisma.user.findFirst({
+      where: {
+        email,
+        passwordResetConfirmationToken: token,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "This user does not exist" });
+    } else if (
+      user.passwordResetConfirmationExpiration &&
+      user.passwordResetConfirmationExpiration < new Date()
+    ) {
+      return res.status(404).json({ error: "Token expired" });
+    } else {
+      return res.redirect(redirectClient + `?token=${token}&email=${email}`);
+    }
+  } catch (e) {
+    logger.info(`Error with password reset ${e}`);
+  }
+});
+
+router.post(`/password-reset/initiate`, async (req, res, next) => {
+  try {
+    // FIXME: should the client be changed from a URL to an id. Probably
+    // And then check that the client exists in the DB.
+    let { redirectClient, email } = req.body as {
+      redirectClient: string;
+      email: string;
+    };
+    email = email.toLowerCase();
+
+    const user = await prisma.user.findFirst({
+      where: {
+        email,
+        emailConfirmationToken: null,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "This user does not exist" });
+    } else {
+      const expirationDate = new Date();
+      expirationDate.setMinutes(new Date().getMinutes() + 30);
+      const token = randomUUID();
+      const result = await prisma.user.update({
+        where: {
+          id: user.id,
+        },
+        data: {
+          passwordResetConfirmationToken: token,
+          passwordResetConfirmationExpiration: expirationDate,
+        },
+        select: {
+          email: true,
+          passwordResetConfirmationToken: true,
+        },
+      });
+      await sendMail({
+        data: {
+          template: "password-reset",
+          message: {
+            to: user.email,
+          },
+          locals: {
+            user: result,
+            host: process.env.API_DOMAIN,
+            redirectClient,
+            token,
+          },
+        },
+      });
+
+      return res.status(200).send({ message: "Success" });
+    }
+  } catch (e) {
+    console.error(e);
+    res.status(500);
+  }
+});
+
+router.post(`/password-reset/set-password`, async (req, res, next) => {
+  try {
+    // FIXME: should the client be changed from a URL to an id. Probably
+    // And then check that the client exists in the DB.
+    let {
+      password: newPassword,
+      token,
+      email,
+    } = req.body as {
+      password: string;
+      email: string;
+      token: string;
+    };
+
+    const user = await prisma.user.findFirst({
+      where: {
+        email,
+        passwordResetConfirmationToken: token,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "This user does not exist" });
+    } else if (
+      user.passwordResetConfirmationExpiration &&
+      user.passwordResetConfirmationExpiration < new Date()
+    ) {
+      return res.status(404).json({ error: "Token expired" });
+    } else {
+      const updatedUser = await prisma.user.update({
+        data: {
+          passwordResetConfirmationToken: null,
+          passwordResetConfirmationExpiration: null,
+          password: await hashPassword(newPassword),
+        },
+        where: {
+          id: user.id,
+        },
+        select: {
+          email: true,
+          id: true,
+        },
+      });
+      setTokens(res, updatedUser);
+      res.status(200).json({
+        message: "Success",
+      });
     }
   } catch (e) {
     console.error(e);

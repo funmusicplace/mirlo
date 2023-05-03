@@ -2,7 +2,7 @@ import { css } from "@emotion/css";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { useGlobalStateContext } from "../state/GlobalState";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import api from "../services/api";
 import Button from "./common/Button";
 import { InputEl } from "./common/Input";
@@ -41,13 +41,18 @@ function Login() {
   );
 
   return (
-    <div>
+    <div
+      className={css`
+        text-align: center;
+      `}
+    >
       <form
         className={css`
           max-width: 200px;
           margin: 0 auto;
           display: flex;
           flex-direction: column;
+          text-align: left;
         `}
         onSubmit={handleSubmit(onSubmit)}
       >
@@ -59,6 +64,17 @@ function Login() {
         <InputEl {...register("password")} type="password" />
         <Button type="submit">{t("logIn")}</Button>
       </form>
+      <Link
+        to="/password-reset"
+        className={css`
+          margin: 0 auto;
+          display: inline-block;
+          margin-top: 1rem;
+        `}
+      >
+        {t("passwordReset")}
+      </Link>
+
       <img
         alt="blackbird"
         src="/images/blackbird.png"
