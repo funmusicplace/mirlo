@@ -70,7 +70,7 @@ services:
   - type: pserv # Should probably be pserv
     name: minio
     env: docker
-    plan: standard
+    plan: starter
     repo: https://github.com/render-examples/minio.git # optional
     envVars:
     - key: MINIO_ROOT_PASSWORD
