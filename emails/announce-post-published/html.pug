@@ -14,5 +14,5 @@ html
     p 
       strong #{post.title}
     p 
-      a(href=`${client}/post/${post.id}`) Check it out.
+      a(href!=`${client}/post/${post.id}`) Check it out.
     p Enjoy!
