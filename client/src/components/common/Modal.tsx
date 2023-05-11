@@ -25,7 +25,13 @@ type ContentProps = {
 const Content = styled.div<ContentProps>`
   pointer-events: auto;
   background-color: var(--mi-normal-background-color);
-  margin: 20% auto; /* 15% from the top and centered */
+  position: absolute;
+  top: 20%;
+  left: 0;
+  right: 0;
+  overflow-y: scroll;
+  margin: 0 auto;
+  max-height: 500px;
   padding: 20px;
   z-index: 999;
   border: 1px solid var(--mi-shade-background-color);
@@ -41,10 +47,6 @@ const Content = styled.div<ContentProps>`
 
   @media (max-width: ${bp.medium}px) {
     width: 90%;
-    position: absolute;
-    z-index: 9999;
-    right: 0;
-    left: 0;
   }
 `;
 

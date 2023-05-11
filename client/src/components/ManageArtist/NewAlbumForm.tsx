@@ -10,7 +10,7 @@ const NewAlbumForm: React.FC<{
   artist: Artist;
 }> = ({ reload, artist, open, onClose }) => {
   return (
-    <Modal open={open} onClose={onClose}>
+    <Modal open={open} onClose={onClose} title={`New album for ${artist.name}`}>
       <AlbumForm {...{ reload, artist }} onClose={onClose} />
     </Modal>
   );

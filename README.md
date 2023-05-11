@@ -85,3 +85,7 @@ Some cron jobs exist:
 ```
 docker exec -it blackbird-api yarn ts-node src/jobs/announce-post-published.ts
 ```
+
+# Credits
+
+Logo created by Lluisa Iborra on [the Noun Project](https://thenounproject.com/icon/bird-818956/)

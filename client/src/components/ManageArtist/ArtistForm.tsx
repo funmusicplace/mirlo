@@ -66,7 +66,7 @@ export const ArtistForm: React.FC<{
   );
 
   return (
-    <Modal open={open} onClose={onClose} size="small">
+    <Modal open={open} onClose={onClose} size="small" title="Create an artist">
       <form onSubmit={handleSubmit(soSave)}>
         {existing && (
           <UploadArtistImage

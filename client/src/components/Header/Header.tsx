@@ -4,7 +4,7 @@ import { FaTimes } from "react-icons/fa";
 import { ImMenu } from "react-icons/im";
 import { Link } from "react-router-dom";
 import { theme } from "utils/theme";
-
+import { ReactComponent as ReactLogo } from "./logo.svg";
 import { useGlobalStateContext } from "../../state/GlobalState";
 import IconButton from "../common/IconButton";
 import HeaderSearch from "./HeaderSearch";
@@ -35,7 +35,22 @@ const Header = () => {
           font-size: 1.5rem;
         `}
       >
-        <Link to="/">mirlo</Link>
+        <Link
+          to="/"
+          className={css`
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+          `}
+        >
+          mirlo
+          <ReactLogo
+            className={css`
+              max-height: 2rem;
+              max-width: 3rem;
+            `}
+          />
+        </Link>
       </h1>
       {isMenuOpen && (
         <div

@@ -131,10 +131,6 @@ const AlbumForm: React.FC<{
 
   return (
     <form onSubmit={handleSubmit(doSave)}>
-      <h4>
-        {existing ? "Edit" : "New"} Album for {artist.name}
-      </h4>
-
       {/* <FormComponent>
         Display artist: <InputEl {...register("display_artist")} />
       </FormComponent> */}
