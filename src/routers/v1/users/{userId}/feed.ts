@@ -3,6 +3,8 @@ import { Request, Response } from "express";
 import { userAuthenticated } from "../../../../auth/passport";
 import prisma from "../../../../../prisma/prisma";
 import trackGroupProcessor from "../../../../utils/trackGroup";
+import postProcessor from "../../../../utils/post";
+import { checkIsUserSubscriber } from "../../../../utils/artist";
 
 type Params = {
   userId: string;
@@ -15,32 +17,35 @@ export default function () {
 
   async function GET(req: Request, res: Response) {
     const { userId } = req.params as unknown as Params;
-    const { trackGroupId } = req.query as unknown as { trackGroupId: string };
 
     const loggedInUser = req.user as User;
+
     if (Number(userId) === Number(loggedInUser.id)) {
-      const where: Prisma.UserTrackGroupPurchaseWhereInput = {
-        userId: Number(userId),
-      };
-      if (trackGroupId) {
-        where.trackGroupId = Number(trackGroupId);
-      }
-      const purchases = await prisma.userTrackGroupPurchase.findMany({
-        where,
-        include: {
-          trackGroup: {
-            include: {
-              artist: true,
-              cover: true,
+      const posts = await prisma.post.findMany({
+        where: {
+          publishedAt: {
+            lte: new Date(),
+          },
+          artist: {
+            subscriptionTiers: {
+              some: {
+                userSubscriptions: {
+                  some: {
+                    userId: loggedInUser.id,
+                  },
+                },
+              },
             },
           },
         },
+        include: {
+          artist: true,
+        },
       });
       res.json({
-        results: purchases.map((p) => ({
-          ...p,
-          trackGroup: trackGroupProcessor.single(p.trackGroup),
-        })),
+        results: await Promise.all(
+          posts.map(async (p) => postProcessor.single(p, true))
+        ),
       });
     } else {
       res.status(401);
@@ -51,7 +56,7 @@ export default function () {
   }
 
   GET.apiDoc = {
-    summary: "Returns user's purchased trackgroups",
+    summary: "Returns user artists",
     parameters: [
       {
         in: "path",
@@ -62,11 +67,11 @@ export default function () {
     ],
     responses: {
       200: {
-        description: "Trackgroups that belong to the user",
+        description: "Subscriptions that belong to the user",
         schema: {
           type: "array",
           items: {
-            $ref: "#/definitions/TrackGroupPurchase",
+            $ref: "#/definitions/Artist",
           },
         },
       },

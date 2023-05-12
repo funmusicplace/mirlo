@@ -71,6 +71,7 @@ const routes = [
   "users/{userId}/subscriptions",
   "users/{userId}/subscriptions/{subscriptionId}",
   "users/{userId}/purchases",
+  "users/{userId}/feed",
   "users/{userId}/artists",
   "users/{userId}/artists/{artistId}",
   "users/{userId}/artists/{artistId}/banner",

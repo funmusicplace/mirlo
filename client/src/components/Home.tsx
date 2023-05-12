@@ -1,20 +1,31 @@
 import { css } from "@emotion/css";
 import React from "react";
 import { Link } from "react-router-dom";
+import { useGlobalStateContext } from "state/GlobalState";
 import api from "../services/api";
 import Box from "./common/Box";
 import PostContent from "./common/PostContent";
 
 function Home() {
+  const {
+    state: { user },
+  } = useGlobalStateContext();
   const [posts, setPosts] = React.useState<Post[]>([]);
 
   const fetchPosts = React.useCallback(async () => {
-    const fetched = await api.getMany<Post>("posts");
-    setPosts(
-      // FIXME: Maybe this should be managed by a filter on the API?
-      fetched.results.filter((p) => !(p.forSubscribersOnly && p.content === ""))
-    );
-  }, []);
+    if (user) {
+      const fetched = await api.getMany<Post>(`users/${user.id}/feed`);
+      setPosts(fetched.results);
+    } else {
+      const fetched = await api.getMany<Post>("posts");
+      setPosts(
+        // FIXME: Maybe this should be managed by a filter on the API?
+        fetched.results.filter(
+          (p) => !(p.forSubscribersOnly && p.content === "")
+        )
+      );
+    }
+  }, [user]);
 
   React.useEffect(() => {
     fetchPosts();
@@ -35,9 +46,11 @@ function Home() {
           <h3>
             <Link to={`/post/${p.id}/`}>{p.title}</Link>
           </h3>
-          <em>
-            by <Link to={`/artist/${p.artist.id}`}>{p.artist?.name}</Link>
-          </em>
+          {p.artist && (
+            <em>
+              by <Link to={`/artist/${p.artist.id}`}>{p.artist?.name}</Link>
+            </em>
+          )}
           <PostContent content={p.content} />
         </Box>
       ))}

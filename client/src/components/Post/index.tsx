@@ -22,9 +22,11 @@ const Post: React.FC = () => {
       >
         <h3>{post.title}</h3>
       </div>
-      <em>
-        by <Link to={`/artist/${post.artist.id}`}>{post.artist?.name}</Link>
-      </em>
+      {post.artist && (
+        <em>
+          by <Link to={`/artist/${post.artist.id}`}>{post.artist?.name}</Link>
+        </em>
+      )}
       <PostContent content={post.content} />
     </>
   );

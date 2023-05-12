@@ -46,7 +46,7 @@ interface Post {
   id: number;
   content: string;
   publishedAt: string;
-  artist: Artist;
+  artist?: Artist;
   forSubscribersOnly: boolean;
 }
 

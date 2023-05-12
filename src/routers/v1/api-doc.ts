@@ -16,6 +16,20 @@ const apiDoc = {
         },
       },
     },
+    TrackGroupPurchase: {
+      type: "object",
+      required: ["userId", "trackGroupId"],
+      properties: {
+        userId: {
+          description: "ID of the user who bought the album",
+          type: "number",
+        },
+        trackGroupId: {
+          description: "ID of the trackGroup",
+          type: "number",
+        },
+      },
+    },
     Artist: {
       type: "object",
       required: ["name"],
