@@ -22,6 +22,10 @@ export default function () {
       include: {
         artist: true,
       },
+      orderBy: {
+        publishedAt: "desc",
+      },
+      take: 20,
     });
     const processedPosts = await Promise.all(
       posts.map(async (p) =>
