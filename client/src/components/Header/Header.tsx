@@ -4,11 +4,13 @@ import { FaTimes } from "react-icons/fa";
 import { ImMenu } from "react-icons/im";
 import { Link } from "react-router-dom";
 import { theme } from "utils/theme";
+import { bp } from "../../constants";
 import { ReactComponent as ReactLogo } from "./logo.svg";
 import { useGlobalStateContext } from "../../state/GlobalState";
 import IconButton from "../common/IconButton";
 import HeaderSearch from "./HeaderSearch";
 import Menu from "./Menu";
+import Background from "components/common/Background";
 
 const Header = () => {
   const { state } = useGlobalStateContext();
@@ -43,7 +45,16 @@ const Header = () => {
             align-items: center;
           `}
         >
-          mirlo
+          <span
+            className={css`
+              display: none;
+              @media (min-width: ${bp.small}px) {
+                display: inline-block;
+              }
+            `}
+          >
+            mirlo
+          </span>
           <ReactLogo
             className={css`
               max-height: 2rem;
@@ -53,21 +64,29 @@ const Header = () => {
         </Link>
       </h1>
       {isMenuOpen && (
-        <div
-          className={css`
-            position: absolute;
-            top: 0;
-            width: 100%;
-            padding: 0.5rem;
-            padding-bottom: 1rem;
-            background: ${theme.colors.primaryHighlight};
-          `}
-        >
-          <IconButton onClick={() => setIsMenuOpen(false)} transparent>
-            <FaTimes />
-          </IconButton>
-          <Menu setIsMenuOpen={setIsMenuOpen} />
-        </div>
+        <>
+          <Background
+            onClick={() => {
+              setIsMenuOpen(false);
+            }}
+          />
+          <div
+            className={css`
+              position: absolute;
+              top: 0;
+              width: 100%;
+              padding: 0.5rem;
+              z-index: 12;
+              padding-bottom: 1rem;
+              background: ${theme.colors.primaryHighlight};
+            `}
+          >
+            <IconButton onClick={() => setIsMenuOpen(false)} transparent>
+              <FaTimes />
+            </IconButton>
+            <Menu setIsMenuOpen={setIsMenuOpen} />
+          </div>
+        </>
       )}
       <div
         className={css`
@@ -91,6 +110,13 @@ const Header = () => {
               &:hover {
                 background-color: var(--mi-secondary-color--hover);
                 color: var(--mi-);
+              }
+
+              @media (max-width: ${bp.small}px) {
+                text-overflow: ellipsis;
+                overflow: hidden;
+                line-break: none;
+                white-space: nowrap;
               }
             `}
           >

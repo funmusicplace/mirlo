@@ -1,10 +1,12 @@
 import { css } from "@emotion/css";
 import { InputEl } from "components/common/Input";
 import LoadingSpinner from "components/common/LoadingSpinner";
+import { bp } from "../../constants";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import api from "services/api";
+import Background from "components/common/Background";
 
 const HeaderSearch: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "headerSearch" });
@@ -57,32 +59,49 @@ const HeaderSearch: React.FC = () => {
         `}
       />
       {showSuggestions && (
-        <div
-          className={css`
-            position: absolute;
-            padding: 1rem;
-            background: var(--mi-normal-background-color);
-            width: 100%;
-          `}
-        >
-          {t("searchSuggestions")}
-          {isSearching && <LoadingSpinner />}
-          {!isSearching && searchResults.length > 0 && (
-            <ol
-              className={css`
-                list-style: none;
+        <>
+          <Background
+            onClick={() => {
+              setShowSuggestions(false);
+              setSearchValue("");
+            }}
+          />
+          <div
+            className={css`
+              position: absolute;
+              padding: 1rem;
+              background: var(--mi-normal-background-color);
+              width: 100%;
+              z-index: 12;
+
+              @media (max-width: ${bp.small}px) {
+                position: fixed;
+                left: 0;
                 margin-top: 1rem;
-              `}
-            >
-              {searchResults.map((r) => (
-                <li key={r.id}>
-                  <Link to={`/artist/${r.id}`}>{r.name}</Link>
-                </li>
-              ))}
-            </ol>
-          )}
-          {!isSearching && searchResults.length === 0 && <>{t("noResults")}</>}
-        </div>
+              }
+            `}
+          >
+            {t("searchSuggestions")}
+            {isSearching && <LoadingSpinner />}
+            {!isSearching && searchResults.length > 0 && (
+              <ol
+                className={css`
+                  list-style: none;
+                  margin-top: 1rem;
+                `}
+              >
+                {searchResults.map((r) => (
+                  <li key={r.id}>
+                    <Link to={`/artist/${r.id}`}>{r.name}</Link>
+                  </li>
+                ))}
+              </ol>
+            )}
+            {!isSearching && searchResults.length === 0 && (
+              <>{t("noResults")}</>
+            )}
+          </div>
+        </>
       )}
     </div>
   );
