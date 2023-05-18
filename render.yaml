@@ -150,7 +150,7 @@ services:
     env: node
     repo: https://github.com/funmusicplace/mirlo.git # optional
     plan: starter
-    startCommand: yarn ts-node src/jobs/announce-post-published.ts
+    startCommand: yarn ts-node src/jobs/send-out-monthly-receipts.ts
     buildCommand: yarn install && yarn migrate:deploy
     schedule: "0 0 1 * *"
     envVars:
