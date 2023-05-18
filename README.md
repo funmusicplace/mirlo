@@ -88,4 +88,6 @@ docker exec -it blackbird-api yarn ts-node src/jobs/announce-post-published.ts
 
 # Credits
 
-Logo created by Lluisa Iborra on [the Noun Project](https://thenounproject.com/icon/bird-818956/)
+Logo created by Lluisa Iborra on [the Noun Project](https://thenounproject.com/icon/bird-818956/).
+
+A lot of the code here was originally written for the [Resonate API](https://github.com/resonatecoop/api) and [UI](https://github.com/resonatecoop/beam/)
