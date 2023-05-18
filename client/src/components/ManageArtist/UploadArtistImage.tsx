@@ -1,9 +1,9 @@
 import { css } from "@emotion/css";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import api from "services/api";
 import { useGlobalStateContext } from "state/GlobalState";
 import { useSnackbar } from "state/SnackbarContext";
-// import { uploadArtistImage } from "services/api/User";
 
 const UploadArtistImage: React.FC<{
   existing: Artist;
@@ -13,6 +13,8 @@ const UploadArtistImage: React.FC<{
   width: string;
   maxDimensions: string;
 }> = ({ existing, reload, imageType, height, width, maxDimensions }) => {
+  const { t } = useTranslation("translation", { keyPrefix: "artistForm" });
+
   const {
     state: { user },
   } = useGlobalStateContext();
@@ -69,7 +71,7 @@ const UploadArtistImage: React.FC<{
               display: block;
             `}
           >
-            Uploading...
+            {t("uploading")}
           </div>
         )}
         {!isUploadingCover && (
@@ -97,7 +99,7 @@ const UploadArtistImage: React.FC<{
                 }
               `}
             >
-              Replace
+              {t("replace")}
             </label>
             <input
               type="file"
@@ -111,7 +113,7 @@ const UploadArtistImage: React.FC<{
           </>
         )}
       </div>
-      <small>For the best effect, upload a {maxDimensions} size image</small>
+      <small>{t("dimensionsTip", { maxDimensions })}</small>
     </div>
   );
 };

@@ -10,8 +10,10 @@ import ManageArtistPosts from "./ManageArtistPosts";
 import ManageArtistAlbums from "./ManageArtistAlbums";
 import ManageArtistSubscriptionTiers from "./ManageArtistSubscriptionTiers";
 import { useSnackbar } from "state/SnackbarContext";
+import { useTranslation } from "react-i18next";
 
 const ManageArtist: React.FC<{}> = () => {
+  const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
   const {
     state: { user },
   } = useGlobalStateContext();
@@ -65,8 +67,7 @@ const ManageArtist: React.FC<{}> = () => {
             color: var(--mi-warning-text-color);
           `}
         >
-          This artist has not been enabled by site admin yet! Contact an admin
-          to do so.
+          {t("notEnabled")}
         </div>
       )}
       <ArtistForm
@@ -86,7 +87,7 @@ const ManageArtist: React.FC<{}> = () => {
           margin-bottom: 2rem;
         `}
       >
-        <h1 style={{ flexGrow: 1 }}>Manage: {artist.name}</h1>
+        <h1 style={{ flexGrow: 1 }}>{t("manage", { artist: artist.name })}</h1>
         <div>
           <Button
             compact
@@ -96,11 +97,11 @@ const ManageArtist: React.FC<{}> = () => {
               margin-right: 0.5rem;
             `}
           >
-            Edit artist details
+            {t("editDetails")}
           </Button>
           <Link to={`/artist/${artist.id}`}>
             <Button compact startIcon={<FaEye />}>
-              View live
+              {t("viewLive")}
             </Button>
           </Link>
         </div>
@@ -115,7 +116,7 @@ const ManageArtist: React.FC<{}> = () => {
         startIcon={<FaTrash />}
         onClick={onDelete}
       >
-        Delete artist
+        {t("deleteArtist")}
       </Button>
     </div>
   );

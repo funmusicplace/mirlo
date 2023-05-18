@@ -11,11 +11,14 @@ import PostContent from "components/common/PostContent";
 import { useSnackbar } from "state/SnackbarContext";
 import PostForm from "./PostForm";
 import Modal from "components/common/Modal";
+import { useTranslation } from "react-i18next";
 
 const ManageArtistPosts: React.FC<{}> = () => {
   const {
     state: { user },
   } = useGlobalStateContext();
+  const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
+
   const snackbar = useSnackbar();
   const { artistId } = useParams();
   const [artist, setArtist] = React.useState<Artist>();
@@ -52,13 +55,13 @@ const ManageArtistPosts: React.FC<{}> = () => {
     async (postId: number) => {
       try {
         await api.delete(`users/${userId}/posts/${postId}`);
-        snackbar("Post deleted", { type: "success" });
+        snackbar(t("postDeleted"), { type: "success" });
         fetchPosts();
       } catch (e) {
         console.error(e);
       }
     },
-    [fetchPosts, snackbar, userId]
+    [fetchPosts, snackbar, userId, t]
   );
 
   if (!artist) {
@@ -67,7 +70,7 @@ const ManageArtistPosts: React.FC<{}> = () => {
 
   return (
     <div>
-      <h2>Posts</h2>
+      <h2>{t("posts")}</h2>
       {posts?.map((p) => (
         <Box
           key={p.id}
@@ -88,7 +91,7 @@ const ManageArtistPosts: React.FC<{}> = () => {
                 startIcon={<FaPen />}
                 onClick={() => setManagePost(p)}
               >
-                Edit
+                {t("edit")}
               </Button>
               <Button
                 className={css`
@@ -98,7 +101,7 @@ const ManageArtistPosts: React.FC<{}> = () => {
                 startIcon={<FaTrash />}
                 onClick={() => deletePost(p.id)}
               >
-                Delete
+                {t("delete")}
               </Button>
             </div>
           </div>
@@ -118,7 +121,7 @@ const ManageArtistPosts: React.FC<{}> = () => {
           width: 100%;
         `}
       >
-        Add new post to {artist.name}
+        {t("addNewPost", { artist: artist.name })}
       </Button>
       <NewPostForm
         open={addingNewPost}

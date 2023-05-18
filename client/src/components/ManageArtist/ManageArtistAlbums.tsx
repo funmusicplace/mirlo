@@ -7,11 +7,13 @@ import { useGlobalStateContext } from "state/GlobalState";
 import ManageAlbumForm from "./ManageAlbumForm";
 import NewAlbumForm from "./NewAlbumForm";
 import TrackGroupCard from "./TrackGroupCard";
+import { useTranslation } from "react-i18next";
 
 const ManageArtistAlbums: React.FC<{}> = () => {
   const {
     state: { user },
   } = useGlobalStateContext();
+  const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
   const { artistId } = useParams();
   const [artist, setArtist] = React.useState<Artist>();
   const [manageTrackgroup, setManageTrackgroup] = React.useState<TrackGroup>();
@@ -46,7 +48,7 @@ const ManageArtistAlbums: React.FC<{}> = () => {
         margin-bottom: 2rem;
       `}
     >
-      <h2>Your albums</h2>
+      <h2>{t("yourAlbums")}</h2>
       <div>
         {trackGroups?.map((album) => (
           <TrackGroupCard
@@ -76,7 +78,7 @@ const ManageArtistAlbums: React.FC<{}> = () => {
           width: 100%;
         `}
       >
-        Add new album to {artist.name}
+        {t("addNewAlbum", { artistName: artist.name })}
       </Button>
       <NewAlbumForm
         open={addingNewAlbum}

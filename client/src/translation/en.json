@@ -58,5 +58,30 @@
     "edit": "Edit",
     "updates": "Updates",
     "releases": "Releases"
+  },
+  "manageArtist": {
+    "notEnabled": "This artist has not been enabled by site admin yet! Contact an admin to do so.",
+    "manage": "Manage {{artist}}",
+    "editDetails": "Edit artist details",
+    "viewLive": "View live",
+    "deleteArtist": "Delete artist"
+  },
+  "artistForm": {
+    "displayName": "Display name",
+    "bio": "Bio",
+    "saveArtist": "Save artist",
+    "createArtist": "Create artist",
+    "newArtist": "New artist",
+    "uploading": "Uploading...",
+    "replace": "Replace",
+    "updatedArtist": "Updated artist",
+    "dimensionsTip": "For the best effect, upload a {{maxDimensions}} size image",
+    "yourAlbums": "Your albums",
+    "addNewAlbum": "Add new album to {{artistName}}",
+    "posts": "Posts",
+    "edit": "Edit",
+    "delete": "Delete",
+    "addNewPost": "Add new post to {{artist}}",
+    "postDeleted": "Post deleted"
   }
 }

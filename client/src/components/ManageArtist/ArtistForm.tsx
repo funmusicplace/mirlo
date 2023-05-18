@@ -12,6 +12,7 @@ import { useSnackbar } from "state/SnackbarContext";
 import { pick } from "lodash";
 import { useGlobalStateContext } from "state/GlobalState";
 import UploadArtistImage from "./UploadArtistImage";
+import { useTranslation } from "react-i18next";
 // import UploadArtistImage from "./UploadArtistImage";
 
 export interface ShareableTrackgroup {
@@ -25,6 +26,8 @@ export const ArtistForm: React.FC<{
   onClose: () => void;
   reload: () => Promise<void>;
 }> = ({ open, onClose, reload, existing }) => {
+  const { t } = useTranslation("translation", { keyPrefix: "artistForm" });
+
   const snackbar = useSnackbar();
   const { state } = useGlobalStateContext();
   const [isSaving, setIsSaving] = React.useState(false);
@@ -53,7 +56,7 @@ export const ArtistForm: React.FC<{
           if (!existingId) {
             onClose();
           }
-          snackbar("Updated artist", { type: "success" });
+          snackbar(t("updatedArtist"), { type: "success" });
         } catch (e) {
           console.error(e);
           snackbar("Something went wrong with the API", { type: "warning" });
@@ -62,7 +65,7 @@ export const ArtistForm: React.FC<{
         }
       }
     },
-    [reload, onClose, existingId, snackbar, state.user]
+    [reload, onClose, existingId, snackbar, state.user, t]
   );
 
   return (
@@ -94,12 +97,12 @@ export const ArtistForm: React.FC<{
             margin-top: 1rem;
           `}
         >
-          <h3>{existing ? existing.name : "New artist"}</h3>
+          <h3>{existing ? existing.name : t("newArtist")}</h3>
           <FormComponent>
-            Display name: <InputEl {...register("name")} />
+            {t("displayName")}: <InputEl {...register("name")} />
           </FormComponent>
           <FormComponent>
-            Bio:
+            {t("bio")}:
             <TextArea {...register("bio")} />
           </FormComponent>
           {/* <FormComponent>
@@ -111,7 +114,7 @@ export const ArtistForm: React.FC<{
             disabled={isSaving}
             startIcon={isSaving ? <LoadingSpinner /> : undefined}
           >
-            {existing ? "Save" : "Create"} artist
+            {existing ? t("saveArtist") : t("createArtist")}
           </Button>
         </div>
       </form>
