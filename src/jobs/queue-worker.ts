@@ -28,7 +28,7 @@ export const logger = winston.createLogger({
 });
 
 const workerOptions = {
-  prefix: "blackbird",
+  prefix: "mirlo",
   connection: REDIS_CONFIG,
 };
 

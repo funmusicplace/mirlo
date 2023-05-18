@@ -9,7 +9,7 @@ const useWidgetListener = () => {
       // identify correctness of message from iframe
       if (
         event.origin === process.env.REACT_APP_CLIENT_DOMAIN &&
-        event.data.includes?.("blackbird")
+        event.data.includes?.("mirlo")
       ) {
         const data = event.data.split(":");
         dispatch({

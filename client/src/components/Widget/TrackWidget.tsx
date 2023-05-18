@@ -52,7 +52,7 @@ const TrackWidget = () => {
           {track.isPreview && (
             <IconButton
               onClick={() => {
-                window.parent.postMessage("blackbird:play:track:" + track.id);
+                window.parent.postMessage("mirlo:play:track:" + track.id);
               }}
             >
               <FaPlay />

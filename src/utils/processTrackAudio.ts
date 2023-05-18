@@ -46,7 +46,7 @@ const buildTrackStreamURL = (trackId: number) => {
 };
 
 const queueOptions = {
-  prefix: "blackbird",
+  prefix: "mirlo",
   connection: REDIS_CONFIG,
 };
 

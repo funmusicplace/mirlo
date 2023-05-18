@@ -19,7 +19,7 @@ services:
     name: api
     env: node
     # env: docker
-    repo: https://github.com/funmusicplace/blackbird.git # optional
+    repo: https://github.com/funmusicplace/mirlo.git # optional
     region: oregon # optional (defaults to oregon)
     branch: main # optional (defaults to master)
     plan: starter # Supposedly this should be free but 
@@ -130,7 +130,7 @@ services:
   - type: cron
     name: post-publish
     env: node
-    repo: https://github.com/funmusicplace/blackbird.git # optional
+    repo: https://github.com/funmusicplace/mirlo.git # optional
     plan: starter
     startCommand: yarn ts-node src/jobs/announce-post-published.ts
     buildCommand: yarn install && yarn migrate:deploy

@@ -5,14 +5,13 @@ import logger from "../logger";
 import { flatten } from "lodash";
 
 const announcePublishPost = async () => {
-  const now = new Date();
-
   const posts = await prisma.post.findMany({
     where: {
       hasAnnounceEmailBeenSent: false,
       publishedAt: {
         lte: new Date(),
       },
+      deletedAt: null,
     },
     include: {
       artist: {
@@ -35,7 +34,6 @@ const announcePublishPost = async () => {
 
   await Promise.all(
     posts.map(async (post) => {
-      console.log("post", post);
       const subscriptions = flatten(
         post.artist?.subscriptionTiers.map((st) => st.userSubscriptions)
       );
@@ -60,14 +58,14 @@ const announcePublishPost = async () => {
         }) ?? []
       );
 
-      // await prisma.post.update({
-      //   where: {
-      //     id: post.id,
-      //   },
-      //   data: {
-      //     hasAnnounceEmailBeenSent: true,
-      //   },
-      // });
+      await prisma.post.update({
+        where: {
+          id: post.id,
+        },
+        data: {
+          hasAnnounceEmailBeenSent: true,
+        },
+      });
     })
   );
 };

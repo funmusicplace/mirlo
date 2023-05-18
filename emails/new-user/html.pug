@@ -10,7 +10,7 @@ html
         include ../style.css
   body.sans-serif
     p Hi!
-    p Someone signed up to blackbird using this email address
+    p Someone signed up to mirlo using this email address
     p #{user.email}
     p 
       a(href!=`${host}/auth/confirmation/${user.emailConfirmationToken}?email=${user.email}&client=${client}`) Click here to confirm

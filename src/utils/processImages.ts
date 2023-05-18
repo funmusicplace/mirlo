@@ -20,7 +20,7 @@ import { logger } from "../jobs/queue-worker";
 const { MINIO_HOST = "", MINIO_PORT = 9000 } = process.env;
 
 const queueOptions = {
-  prefix: "blackbird",
+  prefix: "mirlo",
   connection: REDIS_CONFIG,
 };
 

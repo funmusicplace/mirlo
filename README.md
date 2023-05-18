@@ -1,4 +1,4 @@
-# Blackbird
+# Mirlo
 
 A RESTful API and client.
 
@@ -15,7 +15,7 @@ Main libraries:
 
 ```
 git clone <repository>
-cd blackbird
+cd mirlo
 docker-compose up
 ```
 
@@ -61,7 +61,7 @@ docker exec -it blackbird-api npx prisma migrate dev
 
 ## Stripe
 
-By default blackbird uses Stripe as its payment processor.
+By default Mirlo uses Stripe as its payment processor.
 
 To test webhooks, you'll have to run this:
 
