@@ -12,9 +12,7 @@ import { InputEl } from "./Input";
 const TrackRow: React.FC<{
   track: Track;
   addTracksToQueue: (id: number) => void;
-  reload: () => Promise<void>;
-  handleDrop: (val: React.DragEvent<HTMLTableRowElement>) => void;
-}> = ({ track, addTracksToQueue, reload, handleDrop }) => {
+}> = ({ track, addTracksToQueue }) => {
   const snackbar = useSnackbar();
   const [isEditingTitle, setIsEditingTitle] = React.useState(false);
   const [trackTitle, setTrackTitle] = React.useState(track.title);
@@ -38,32 +36,6 @@ const TrackRow: React.FC<{
     dispatch({ type: "setPlaying", playing: false });
   }, [dispatch]);
 
-  const userId = user?.id;
-
-  const onDeleteClick = React.useCallback(async () => {
-    try {
-      await api.delete(`users/${userId}/tracks/${track.id}`);
-      await reload?.();
-      snackbar("Deleted track", { type: "success" });
-    } catch (e) {
-      console.error(e);
-    }
-  }, [track.id, userId, reload, snackbar]);
-
-  const updateTrackTitle = React.useCallback(async () => {
-    try {
-      await api.put<{ title: string }, unknown>(
-        `users/${userId}/tracks/${track.id}`,
-        {
-          title: trackTitle,
-        }
-      );
-    } catch (e) {
-    } finally {
-      setIsEditingTitle(false);
-    }
-  }, [track.id, trackTitle, userId]);
-
   return (
     <tr
       key={track.id}
@@ -71,7 +43,6 @@ const TrackRow: React.FC<{
       onDragOver={(ev) => ev.preventDefault()}
       draggable={true}
       onDragStart={onDragStart}
-      onDrop={handleDrop}
       onDragEnd={onDragEnd}
       className={css`
         > td > .play-button {
@@ -106,31 +77,9 @@ const TrackRow: React.FC<{
           text-overflow: ellipsis;
         `}
       >
-        {!isEditingTitle && trackTitle}
-        {isEditingTitle && (
-          <InputEl
-            value={trackTitle}
-            onChange={(e) => setTrackTitle(e.target.value)}
-          />
-        )}
+        {trackTitle}
       </td>
-      <td align="right">
-        {isEditingTitle && (
-          <IconButton onClick={updateTrackTitle} title="Delete">
-            <FaSave />
-          </IconButton>
-        )}
-        {!isEditingTitle && (
-          <>
-            <IconButton onClick={() => setIsEditingTitle(true)} title="Delete">
-              <FaPen />
-            </IconButton>
-            <IconButton onClick={onDeleteClick} title="Delete">
-              <FaTrash />
-            </IconButton>
-          </>
-        )}
-      </td>
+      <td>{track.trackGroup.artist.name}</td>
     </tr>
   );
 };

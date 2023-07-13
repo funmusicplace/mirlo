@@ -42,6 +42,7 @@ export default function () {
           artist: true,
         },
       });
+
       res.json({
         results: await Promise.all(
           posts.map(async (p) => postProcessor.single(p, true))

@@ -10,6 +10,7 @@ import { useGlobalStateContext } from "state/GlobalState";
 import { useSnackbar } from "state/SnackbarContext";
 import ClickToPlay from "../common/ClickToPlay";
 import SmallTileDetails from "../common/LargeTileDetail";
+import { Link } from "react-router-dom";
 
 const ArtistTrackGroup: React.FC<{
   trackGroup: TrackGroup;
@@ -81,13 +82,14 @@ const ArtistTrackGroup: React.FC<{
     }
   };
 
+  console.log("trackGroup", trackGroup);
+
   return (
     <div
       key={trackGroup.id}
       className={css`
         margin-bottom: 1rem;
         margin-top: 1rem;
-        border-top: 1px solid #efefef;
 
         &:nth-child(2) {
           border-top: 0;
@@ -115,7 +117,13 @@ const ArtistTrackGroup: React.FC<{
           title={trackGroup.title}
         />
         <SmallTileDetails
-          title={trackGroup.title}
+          title={
+            <Link
+              to={`/artist/${trackGroup.artistId}/trackGroup/${trackGroup.id}`}
+            >
+              {trackGroup.title}
+            </Link>
+          }
           subtitle={t("released", {
             date: trackGroup.releaseDate.split("T")[0],
           })}

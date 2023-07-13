@@ -12,20 +12,23 @@ function Home() {
   } = useGlobalStateContext();
   const [posts, setPosts] = React.useState<Post[]>([]);
 
+  const fetchAllPosts = React.useCallback(async () => {
+    const fetched = await api.getMany<Post>("posts");
+    setPosts(
+      // FIXME: Maybe this should be managed by a filter on the API?
+      fetched.results.filter((p) => !(p.forSubscribersOnly && p.content === ""))
+    );
+  }, []);
+
   const fetchPosts = React.useCallback(async () => {
     if (user) {
       const fetched = await api.getMany<Post>(`users/${user.id}/feed`);
       setPosts(fetched.results);
+      await fetchAllPosts();
     } else {
-      const fetched = await api.getMany<Post>("posts");
-      setPosts(
-        // FIXME: Maybe this should be managed by a filter on the API?
-        fetched.results.filter(
-          (p) => !(p.forSubscribersOnly && p.content === "")
-        )
-      );
+      await fetchAllPosts();
     }
-  }, [user]);
+  }, [user, fetchAllPosts]);
 
   React.useEffect(() => {
     fetchPosts();

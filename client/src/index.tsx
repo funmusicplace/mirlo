@@ -28,6 +28,7 @@ import TrackWidget from "components/Widget/TrackWidget";
 import Collection from "components/Collection";
 import Post from "components/Post";
 import PasswordReset from "components/PasswordReset";
+import TrackGroup from "components/TrackGroup/TrackGroup";
 
 const router = createBrowserRouter([
   {
@@ -38,7 +39,14 @@ const router = createBrowserRouter([
       { path: "", element: <Home /> },
       { path: "widget/track/:id", element: <TrackWidget /> },
       { path: "widget/trackgroup/:id", element: <TrackGroupWidget /> },
-      { path: "artist/:artistId", element: <Artist /> },
+      {
+        path: "artist/:artistId",
+        children: [
+          { path: "", element: <Artist /> },
+          { path: "trackgroup/:trackGroupId", element: <TrackGroup /> },
+        ],
+      },
+
       { path: "post/:postId", element: <Post /> },
       {
         path: "signup",

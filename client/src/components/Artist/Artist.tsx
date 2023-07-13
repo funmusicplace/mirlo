@@ -10,8 +10,8 @@ import PostContent from "../common/PostContent";
 import ArtistAlbums from "./ArtistAlbums";
 import usePublicObjectById from "utils/usePublicObjectById";
 import { Helmet } from "react-helmet";
-import LoadingSpinner from "components/common/LoadingSpinner";
 import { useTranslation } from "react-i18next";
+import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
 
 function Artist() {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
@@ -27,19 +27,7 @@ function Artist() {
   if (!artist && !isLoadingArtist) {
     return <Box>{t("doesNotExist")}</Box>;
   } else if (!artist) {
-    return (
-      <div
-        className={css`
-          display: flex;
-          height: 100%;
-          justify-content: center;
-          align-items: center;
-          font-size: 4rem;
-        `}
-      >
-        <LoadingSpinner />
-      </div>
-    );
+    return <FullPageLoadingSpinner />;
   }
 
   const ownedByUser = artist.userId === user?.id;

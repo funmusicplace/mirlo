@@ -7,7 +7,7 @@ import { determineNewTrackOrder } from "utils/tracks";
 import { CenteredSpinner } from "./Spinner";
 import Table from "./Table";
 import TrackRow from "./TrackRow";
-// import { isIndexedTrack } from "typeguards";
+import TrackRowOwned from "./TrackRowOwned";
 
 export const TrackTable: React.FC<{
   tracks: Track[];
@@ -16,7 +16,7 @@ export const TrackTable: React.FC<{
   editable?: boolean;
   owned?: boolean;
   reload?: () => Promise<void>;
-}> = ({ tracks, trackGroupId, editable, isPlaylist, owned, reload }) => {
+}> = ({ tracks, trackGroupId, editable, owned, reload }) => {
   const [isLoading, setIsLoading] = React.useState(false);
   const {
     state: { user, draggingTrackId },
@@ -102,15 +102,23 @@ export const TrackTable: React.FC<{
         </tr>
       </thead>
       <tbody>
-        {displayTracks?.map((track) => (
-          <TrackRow
-            key={track.id}
-            track={track}
-            addTracksToQueue={addTracksToQueue}
-            reload={reloadWrapper}
-            handleDrop={handleDrop}
-          />
-        ))}
+        {displayTracks?.map((track) =>
+          owned ? (
+            <TrackRow
+              key={track.id}
+              track={track}
+              addTracksToQueue={addTracksToQueue}
+            />
+          ) : (
+            <TrackRowOwned
+              key={track.id}
+              track={track}
+              addTracksToQueue={addTracksToQueue}
+              reload={reloadWrapper}
+              handleDrop={handleDrop}
+            />
+          )
+        )}
         {displayTracks.length === 0 && (
           <tr>
             <td colSpan={999} style={{ textAlign: "center" }}>
