@@ -174,7 +174,7 @@ services:
 
 databases:
   - name: blackbrd
-    plan: free
+    plan: standard
     # databaseName: postgres # optional (Render may add a suffix)
     user: blackbrd # optional
   #   ipAllowList: # optional (defaults to allow all)
