@@ -1,23 +1,19 @@
 import { css } from "@emotion/css";
 import React from "react";
-import { FaPause, FaPen, FaPlay, FaSave, FaTrash } from "react-icons/fa";
+import { FaPause, FaPlay } from "react-icons/fa";
 import { useGlobalStateContext } from "state/GlobalState";
 import useDraggableTrack from "utils/useDraggableTrack";
 
 import IconButton from "./IconButton";
-import api from "services/api";
-import { useSnackbar } from "state/SnackbarContext";
-import { InputEl } from "./Input";
 
 const TrackRow: React.FC<{
   track: Track;
+  trackGroup: TrackGroup;
   addTracksToQueue: (id: number) => void;
-}> = ({ track, addTracksToQueue }) => {
-  const snackbar = useSnackbar();
-  const [isEditingTitle, setIsEditingTitle] = React.useState(false);
-  const [trackTitle, setTrackTitle] = React.useState(track.title);
+}> = ({ track, addTracksToQueue, trackGroup }) => {
+  const [trackTitle] = React.useState(track.title);
   const {
-    state: { playerQueueIds, playing, currentlyPlayingIndex, user },
+    state: { playerQueueIds, playing, currentlyPlayingIndex },
     dispatch,
   } = useGlobalStateContext();
   const { onDragStart, onDragEnd } = useDraggableTrack();
@@ -45,6 +41,12 @@ const TrackRow: React.FC<{
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
       className={css`
+        border-bottom: 1px solid lightgrey;
+
+        :first-child {
+          border-top: 1px solid lightgrey;
+        }
+
         > td > .play-button {
           opacity: 0;
         }
@@ -53,7 +55,11 @@ const TrackRow: React.FC<{
         }
       `}
     >
-      <td>
+      <td
+        className={css`
+          width: 40px;
+        `}
+      >
         {(!playing || currentPlayingTrackId !== track.id) && (
           <IconButton compact className="play-button" onClick={onTrackPlay}>
             <FaPlay />
@@ -79,7 +85,7 @@ const TrackRow: React.FC<{
       >
         {trackTitle}
       </td>
-      <td>{track.trackGroup.artist.name}</td>
+      <td>{trackGroup.artist.name}</td>
     </tr>
   );
 };

@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import prisma from "../../../../../prisma/prisma";
+import processor from "../../../../utils/trackGroup";
 
 export default function () {
   const operations = {
@@ -28,7 +29,7 @@ export default function () {
         res.status(404);
         return next();
       }
-      res.json({ result: trackGroup });
+      res.json({ result: processor.single(trackGroup) });
     } catch (e) {
       console.error("trackgroups/{id} GET");
       res.status(500);

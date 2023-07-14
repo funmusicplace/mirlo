@@ -82,7 +82,7 @@ const ArtistTrackGroup: React.FC<{
     }
   };
 
-  console.log("trackGroup", trackGroup);
+  const date = new Date(trackGroup.releaseDate);
 
   return (
     <div
@@ -124,9 +124,16 @@ const ArtistTrackGroup: React.FC<{
               {trackGroup.title}
             </Link>
           }
-          subtitle={t("released", {
-            date: trackGroup.releaseDate.split("T")[0],
-          })}
+          subtitle={
+            <em>
+              {t("released", {
+                date: date.toLocaleDateString("en-US", {
+                  month: "short",
+                  year: "numeric",
+                }),
+              })}
+            </em>
+          }
         />
         <div style={{ flexGrow: 1 }} />
         {!userIsTrackGroupArtist && !isOwned && (
