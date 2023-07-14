@@ -71,13 +71,13 @@ services:
     name: minio
     env: docker
     plan: starter
-    repo: https://github.com/render-examples/minio.git#fbc6d6d93932ea213bbc51642825768208cb2701 # optional
+    repo: https://github.com/render-examples/minio.git # optional
     envVars:
     - key: MINIO_ROOT_PASSWORD
       generateValue: true # will generate a base64-encoded 256-bit secret
     - fromGroup: blackbrd
     - key: PORT
-      value: 9000
+      value: 10000
     disk:
       name: data
       mountPath: /data
