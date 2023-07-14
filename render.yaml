@@ -77,7 +77,7 @@ services:
       generateValue: true # will generate a base64-encoded 256-bit secret
     - fromGroup: blackbrd
     - key: PORT
-      value: 9000
+      value: 10000
     disk:
       name: data
       mountPath: /data
