@@ -64,7 +64,11 @@
     "manage": "Manage {{artist}}",
     "editDetails": "Edit artist details",
     "viewLive": "View live",
-    "deleteArtist": "Delete artist"
+    "deleteArtist": "Delete artist",
+    "addNewAlbum": "Add new album",
+    "edit": "Edit",
+    "delete": "Delete",
+    "addNewPost": "Add new post"
   },
   "artistForm": {
     "displayName": "Display name",
