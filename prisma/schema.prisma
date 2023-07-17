@@ -197,4 +197,5 @@ model TrackAudio {
   duration         Int?
   hash             String?
   size             Int?
+  fileExtension    String?
 }

@@ -32,5 +32,5 @@ export const checkFileType = async (
     throw `File type not supported: ${mime}`;
   }
 
-  return { filepath };
+  return { filepath, ext: type?.ext, mimetype: type?.mime };
 };

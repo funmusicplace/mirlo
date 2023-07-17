@@ -68,7 +68,9 @@
     "addNewAlbum": "Add new album",
     "edit": "Edit",
     "delete": "Delete",
-    "addNewPost": "Add new post"
+    "addNewPost": "Add new post",
+    "posts": "Your posts",
+    "yourAlbums": "Your albums"
   },
   "artistForm": {
     "displayName": "Display name",

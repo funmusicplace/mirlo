@@ -86,6 +86,10 @@ Some cron jobs exist:
 docker exec -it blackbird-api yarn ts-node src/jobs/announce-post-published.ts
 ```
 
+## MinIO
+
+You can access dev MinIO at localhost:9001 with the MINIO_ROOT_USER and MINIO_ROOT_PASSWORD you set in .env
+
 # Credits
 
 Logo created by Lluisa Iborra on [the Noun Project](https://thenounproject.com/icon/bird-818956/).

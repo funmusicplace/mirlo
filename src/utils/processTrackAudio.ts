@@ -136,7 +136,7 @@ audioDurationQueueEvents.on("completed", async (jobId: any) => {
  */
 export const processTrackAudio = (ctx: { req: Request; res: Response }) => {
   return async (file: any, trackId: number) => {
-    await checkFileType(ctx, file, SUPPORTED_AUDIO_MIME_TYPES);
+    const fileType = await checkFileType(ctx, file, SUPPORTED_AUDIO_MIME_TYPES);
 
     const buffer = await fs.readFile(file.path);
     const sha1sum = shasum(buffer);
@@ -148,6 +148,7 @@ export const processTrackAudio = (ctx: { req: Request; res: Response }) => {
         originalFilename: file.originalFilename,
         size: file.size,
         hash: sha1sum,
+        fileExtension: fileType.ext,
       },
       update: {
         trackId,
@@ -155,6 +156,7 @@ export const processTrackAudio = (ctx: { req: Request; res: Response }) => {
         url: buildTrackStreamURL(trackId),
         size: file.size,
         hash: sha1sum,
+        fileExtension: fileType.ext,
       },
       where: {
         trackId: Number(trackId),

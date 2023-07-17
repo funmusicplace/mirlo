@@ -94,7 +94,7 @@ export const NewTrack: React.FC<{
           type="file"
           id="audio"
           {...register("trackFile")}
-          accept="audio/mpeg,audio/flac,audio/wav"
+          accept="audio/mpeg,audio/flac,audio/wav,audio/x-flac,audio/aac,audio/aiff,audio/x-m4a"
         />
       </FormComponent>
       <Button

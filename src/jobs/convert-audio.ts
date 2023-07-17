@@ -3,6 +3,7 @@ import { Job } from "bullmq";
 import path from "path";
 import ffmpeg from "fluent-ffmpeg";
 import { promises as fsPromises } from "fs";
+import { fromBuffer } from "file-type";
 
 import { logger } from "./queue-worker";
 import {
@@ -47,9 +48,12 @@ export default async (job: Job) => {
       await fsPromises.mkdir(destinationFolder, { recursive: true });
     }
 
-    // FIXME, right now we're limiting to flac, but we should allow other
-    // lossless audio formats to upload
-    await fsPromises.writeFile(`${destinationFolder}/original.flac`, buffer);
+    const fileType = await fromBuffer(buffer);
+
+    await fsPromises.writeFile(
+      `${destinationFolder}/original.${fileType?.ext ?? "flac"}`,
+      buffer
+    );
 
     const profiler = logger.startTimer();
     await new Promise((resolve, reject) => {

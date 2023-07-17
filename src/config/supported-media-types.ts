@@ -11,6 +11,7 @@ export const SUPPORTED_AUDIO_MIME_TYPES = [
   "audio/aiff",
   "audio/mp4",
   "audio/vnd.wave",
+  "audio/mpeg",
   "audio/x-flac",
   "audio/x-m4a",
 ];

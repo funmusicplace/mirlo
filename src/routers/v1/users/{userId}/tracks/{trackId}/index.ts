@@ -5,7 +5,6 @@ import {
 } from "../../../../../../auth/passport";
 import { doesTrackBelongToUser } from "../../../../../../utils/ownership";
 import prisma from "../../../../../../../prisma/prisma";
-import { minioClient } from "../../../../../../utils/minio";
 
 export default function () {
   const operations = {
