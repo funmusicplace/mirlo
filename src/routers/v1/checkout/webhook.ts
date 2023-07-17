@@ -4,11 +4,9 @@ import prisma from "../../../../prisma/prisma";
 import sendMail from "../../../jobs/send-mail";
 import { logger } from "../../../logger";
 
-const { STRIPE_KEY, STRIPE_WEBHOOK_SIGNING_SECRET } = process.env;
+const { STRIPE_WEBHOOK_SIGNING_SECRET } = process.env;
 
-const stripe = new Stripe(STRIPE_KEY ?? "", {
-  apiVersion: "2022-11-15",
-});
+import stripe from "../../../utils/stripe";
 
 const handleTrackGroupPurhcase = async (
   userId: number,

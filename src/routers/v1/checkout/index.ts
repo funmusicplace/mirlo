@@ -1,12 +1,7 @@
 import { Request, Response } from "express";
-import Stripe from "stripe";
 import prisma from "../../../../prisma/prisma";
 
-const { STRIPE_KEY } = process.env;
-
-const stripe = new Stripe(STRIPE_KEY ?? "", {
-  apiVersion: "2022-11-15",
-});
+import stripe from "../../../utils/stripe";
 
 export default function () {
   const operations = {

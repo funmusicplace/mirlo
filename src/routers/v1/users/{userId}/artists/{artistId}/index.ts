@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from "express";
+import Stripe from "stripe";
 import {
   artistBelongsToLoggedInUser,
   userAuthenticated,
@@ -7,6 +8,7 @@ import prisma from "../../../../../../../prisma/prisma";
 import { convertURLArrayToSizes } from "../../../../../../utils/images";
 import { finalArtistBannerBucket } from "../../../../../../utils/minio";
 import { deleteTrackGroup } from "../../../../../../utils/trackGroup";
+import stripe from "../../../../../../utils/stripe";
 
 type Params = {
   artistId: number;
@@ -167,6 +169,7 @@ export default function () {
       // FIXME: We don't do cascading deletes because of the
       // soft deletion. That _could_ probably be put into a
       // a prisma middleware. This is a lot!
+      // https://github.com/funmusicplace/mirlo/issues/19
       await prisma.post.deleteMany({
         where: {
           artistId: Number(artistId),
@@ -179,14 +182,24 @@ export default function () {
         },
       });
 
-      // FIXME: We probably want to go and delete
-      // stripe subscriptions here too.
-      // https://github.com/funmusicplace/blackbird/issues/21
+      const stripeSubscriptions = await prisma.artistUserSubscription.findMany({
+        where: {
+          artistSubscriptionTier: { artistId: Number(artistId) },
+        },
+      });
+      await Promise.all(
+        stripeSubscriptions.map(async (sub) => {
+          if (sub.stripeSubscriptionKey) {
+            await stripe.subscriptions.cancel(sub.stripeSubscriptionKey);
+          }
+        })
+      );
       await prisma.artistUserSubscription.deleteMany({
         where: {
           artistSubscriptionTier: { artistId: Number(artistId) },
         },
       });
+
       const trackGroups = await prisma.trackGroup.findMany({
         where: {
           artistId: Number(artistId),

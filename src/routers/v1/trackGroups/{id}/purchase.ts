@@ -1,16 +1,13 @@
 import { User } from "@prisma/client";
 import { Request, Response } from "express";
-import Stripe from "stripe";
 import { userAuthenticated } from "../../../../auth/passport";
 import { generateFullStaticImageUrl } from "../../../../utils/images";
 import prisma from "../../../../../prisma/prisma";
 import { finalCoversBucket } from "../../../../utils/minio";
 
-const { STRIPE_KEY, STRIPE_PURCHASE_ALBUM_KEY, API_DOMAIN } = process.env;
+const { API_DOMAIN } = process.env;
 
-const stripe = new Stripe(STRIPE_KEY ?? "", {
-  apiVersion: "2022-11-15",
-});
+import stripe from "../../../../utils/stripe";
 
 type Params = {
   id: string;
@@ -83,8 +80,6 @@ export default function () {
                 tax_behavior: "exclusive",
                 unit_amount: trackGroup.minPrice ?? 0,
                 currency: trackGroup.currency ?? "USD",
-                // FIXME: it might be a good idea to store products for
-                // a trackGroup at some point.
                 product: productKey,
               },
 

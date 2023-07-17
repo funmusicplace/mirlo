@@ -1,15 +1,12 @@
 import { User } from "@prisma/client";
 import { Request, Response } from "express";
 
-import Stripe from "stripe";
 import { userAuthenticated } from "../../../../auth/passport";
 import prisma from "../../../../../prisma/prisma";
 
-const { STRIPE_KEY, STRIPE_SUPPORTER_PRODUCT_KEY, API_DOMAIN } = process.env;
+const { API_DOMAIN } = process.env;
 
-const stripe = new Stripe(STRIPE_KEY ?? "", {
-  apiVersion: "2022-11-15",
-});
+import stripe from "../../../../utils/stripe";
 
 type Params = {
   id: string;
