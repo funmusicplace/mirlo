@@ -121,6 +121,10 @@ export const AudioWrapper: React.FC<{
   }, [determineIfShouldPlay]);
 
   const streamUrl = api.streamUrl(currentTrack);
+
+  if (!streamUrl) {
+    return null;
+  }
   const duration = playerRef.current?.duration ?? 0;
   const currentSeconds = playerRef.current?.currentTime ?? 0;
   const percent = currentSeconds / duration;

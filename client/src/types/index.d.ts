@@ -20,7 +20,7 @@ interface Track {
   trackGroup: TrackGroup;
   trackGroupId: number;
   image: Image;
-  audio: {
+  audio?: {
     url: string;
   };
   isPreview: boolean;

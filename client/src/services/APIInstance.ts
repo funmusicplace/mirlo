@@ -135,8 +135,12 @@ const APIInstance = (apiRoot: string) => {
       });
     },
 
-    streamUrl: (track: Track): string => {
-      return `${apiRoot}${track.audio.url}`;
+    streamUrl: (track: Track): string | undefined => {
+      if (track.audio) {
+        return `${apiRoot}${track.audio.url}`;
+      } else {
+        return undefined;
+      }
     },
 
     getFile: (filename: string, endpoint: string, type: string) => {
