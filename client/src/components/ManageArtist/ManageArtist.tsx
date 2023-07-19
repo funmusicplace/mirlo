@@ -99,7 +99,7 @@ const ManageArtist: React.FC<{}> = () => {
           >
             {t("editDetails")}
           </Button>
-          <Link to={`/artist/${artist.id}`}>
+          <Link to={`/${artist.urlSlug ?? artist.id}`}>
             <Button compact startIcon={<FaEye />}>
               {t("viewLive")}
             </Button>

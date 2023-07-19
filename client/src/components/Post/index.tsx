@@ -24,7 +24,10 @@ const Post: React.FC = () => {
       </div>
       {post.artist && (
         <em>
-          by <Link to={`/artist/${post.artist.id}`}>{post.artist?.name}</Link>
+          by{" "}
+          <Link to={`/${post.artist.urlSlug ?? post.artist.id}`}>
+            {post.artist?.name}
+          </Link>
         </em>
       )}
       <PostContent content={post.content} />

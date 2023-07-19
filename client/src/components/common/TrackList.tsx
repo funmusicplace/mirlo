@@ -107,7 +107,7 @@ const TrackLIWrapper: React.FC<{
         title={track.title}
         subtitle={
           <>
-            <Link to={`/artist/${track.trackGroup?.artist?.id}`}>
+            <Link to={`/${track.trackGroup?.artist?.id}`}>
               {track.trackGroup?.artist?.name}
             </Link>
             {" - "}

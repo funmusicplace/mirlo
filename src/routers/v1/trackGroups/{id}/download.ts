@@ -85,6 +85,9 @@ export default function () {
     } catch (e) {
       console.error("trackGroups/{id}/download", e);
       res.status(500);
+      res.send({
+        error: "Error downloading trackGroup",
+      });
     }
   }
 

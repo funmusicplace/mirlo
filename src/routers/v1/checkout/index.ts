@@ -36,7 +36,7 @@ export default function () {
             // they can define
             res.redirect(
               client?.applicationUrl +
-                `/artist/${artistId}?subscribe=${
+                `/${artistId}?subscribe=${
                   success ? "success" : "canceled"
                 }&tierId=${tierId}`
             );
@@ -47,7 +47,7 @@ export default function () {
             // they can define
             res.redirect(
               client?.applicationUrl +
-                `/artist/${artistId}?trackGroupPurchase=${
+                `/${artistId}?trackGroupPurchase=${
                   success ? "success" : "canceled"
                 }&trackGroupId=${trackGroupId}`
             );

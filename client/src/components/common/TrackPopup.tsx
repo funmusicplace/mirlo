@@ -237,19 +237,6 @@
 //                 </ListButton>
 //               </li>
 //             )}
-//             {artistId && (
-//               <li>
-//                 <NavLinkAsButton
-//                   to={`/library/artist/${artistId}`}
-//                   onClick={() => {
-//                     setIsMenuOpen(false);
-//                   }}
-//                 >
-//                   <FaFont />
-//                   Artist page
-//                 </NavLinkAsButton>
-//               </li>
-//             )}
 //           </ul>
 //         </Modal>
 //       )}

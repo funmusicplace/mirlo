@@ -92,7 +92,7 @@ const HeaderSearch: React.FC = () => {
               >
                 {searchResults.map((r) => (
                   <li key={r.id}>
-                    <Link to={`/artist/${r.id}`}>{r.name}</Link>
+                    <Link to={`/${r.id}`}>{r.name}</Link>
                   </li>
                 ))}
               </ol>

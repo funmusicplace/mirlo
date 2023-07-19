@@ -24,10 +24,10 @@ export default function () {
 
   async function PUT(req: Request, res: Response) {
     const { userId, artistId } = req.params as unknown as Params;
-    const { bio, name } = req.body;
+    const { bio, name, urlSlug } = req.body;
 
     try {
-      const artist = await prisma.artist.updateMany({
+      const updatedCount = await prisma.artist.updateMany({
         where: {
           id: Number(artistId),
           userId: Number(userId),
@@ -35,9 +35,20 @@ export default function () {
         data: {
           bio,
           name,
+          urlSlug,
         },
       });
-      res.json(artist);
+
+      if (updatedCount) {
+        const artist = await prisma.artist.findFirst({
+          where: { id: Number(artistId) },
+        });
+        res.json({ artist });
+      } else {
+        res.json({
+          error: "An unknown error occurred",
+        });
+      }
     } catch (error) {
       res.json({
         error: `Artist with ID ${artistId} does not exist for user ${userId}`,

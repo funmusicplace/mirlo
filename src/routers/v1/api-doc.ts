@@ -34,8 +34,16 @@ const apiDoc = {
       type: "object",
       required: ["name"],
       properties: {
-        string: {
+        name: {
           description: "Name of the artist",
+          type: "string",
+        },
+        bio: {
+          description: "A little bit about the artist",
+          type: ["string", "null"],
+        },
+        urlSlug: {
+          description: "The string that will appear in the URL",
           type: "string",
         },
       },

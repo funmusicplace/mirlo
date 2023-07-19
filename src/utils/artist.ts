@@ -18,3 +18,15 @@ export const checkIsUserSubscriber = async (user: User, artistId: number) => {
   }
   return userSubscriber;
 };
+
+export const findArtistIdForURLSlug = async (id: string) => {
+  if (Number.isNaN(Number(id))) {
+    const artist = await prisma.artist.findFirst({
+      where: {
+        urlSlug: id,
+      },
+    });
+    id = `${artist?.id ?? id}`;
+  }
+  return id;
+};

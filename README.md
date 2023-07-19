@@ -13,7 +13,7 @@ Main libraries:
 
 #### For the API:
 
-```
+```sh
 git clone <repository>
 cd mirlo
 docker-compose up
@@ -23,7 +23,7 @@ Go to `localhost:3000/docs` and see the Swagger API docs.
 
 #### For the client:
 
-```
+```sh
 cd client
 yarn
 yarn start
@@ -35,7 +35,7 @@ yarn start
 
 Changes in background jobs aren't detected. You'll need to restart the docker container for them:
 
-```
+```sh
 docker-compose up -d --force-recreate --no-deps background
 ```
 
@@ -55,7 +55,7 @@ docker exec -it blackbird-api node src/jobs/queue-worker.js run
 
 To make changes to the database, change the schema.prisma file and then run:
 
-```
+```sh
 docker exec -it blackbird-api npx prisma migrate dev
 ```
 
@@ -65,7 +65,7 @@ By default Mirlo uses Stripe as its payment processor.
 
 To test webhooks, you'll have to run this:
 
-```
+```sh
 stripe listen --forward-to localhost:3000/v1/checkout/webhook
 ```
 
@@ -73,7 +73,7 @@ This will forward all stripe webhooks to your localhost:3000, and send them to t
 
 Then to trigger a specific workflow:
 
-```
+```sh
 # this is what's needed to store a subscription
 stripe trigger checkout.session.completed --add checkout_session:metadata.userId=3 --add checkout_session:metadata.tierId=2
 ```
@@ -82,7 +82,7 @@ stripe trigger checkout.session.completed --add checkout_session:metadata.userId
 
 Some cron jobs exist:
 
-```
+```sh
 docker exec -it blackbird-api yarn ts-node src/jobs/announce-post-published.ts
 ```
 

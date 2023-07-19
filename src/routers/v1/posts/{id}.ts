@@ -29,6 +29,9 @@ export default function () {
     } catch (e) {
       logger.error(`/posts/{id} GET ${e}`);
       res.status(500);
+      res.send({
+        error: "Error finding post",
+      });
     }
   }
 

@@ -68,6 +68,7 @@ model Artist {
   subscriptionTiers ArtistSubscriptionTier[]
   banner            ArtistBanner?
   avatar            ArtistAvatar?
+  urlSlug           String                   @unique
 }
 
 model ArtistAvatar {

@@ -57,7 +57,7 @@ const UserSupports: React.FC<{
             <li>
               <span>
                 <strong>
-                  <Link to={`/artist/${s.artistSubscriptionTier.artist.id}`}>
+                  <Link to={`/${s.artistSubscriptionTier.artist.urlSlug}`}>
                     {s.artistSubscriptionTier.artist.name}
                   </Link>
                 </strong>

@@ -6,7 +6,10 @@ import postProcessor from "../../../../utils/post";
 
 import prisma from "../../../../../prisma/prisma";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
-import { checkIsUserSubscriber } from "../../../../utils/artist";
+import {
+  checkIsUserSubscriber,
+  findArtistIdForURLSlug,
+} from "../../../../utils/artist";
 import { finalArtistBannerBucket } from "../../../../utils/minio";
 import { convertURLArrayToSizes } from "../../../../utils/images";
 
@@ -16,16 +19,20 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response) {
-    const { id }: { id?: string } = req.params;
+    let { id }: { id?: string } = req.params;
     const user = req.user as User;
     if (!id) {
       return res.status(400);
     }
     try {
+      id = await findArtistIdForURLSlug(id);
       const isUserSubscriber = await checkIsUserSubscriber(user, Number(id));
 
       const artist = await prisma.artist.findFirst({
-        where: { id: Number(id), enabled: true },
+        where: {
+          id: Number(id),
+          enabled: true,
+        },
         include: {
           trackGroups: {
             where: {
@@ -98,7 +105,7 @@ export default function () {
         in: "path",
         name: "id",
         required: true,
-        type: "number",
+        type: "string",
       },
     ],
     responses: {

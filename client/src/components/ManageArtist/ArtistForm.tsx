@@ -31,8 +31,12 @@ export const ArtistForm: React.FC<{
   const snackbar = useSnackbar();
   const { state } = useGlobalStateContext();
   const [isSaving, setIsSaving] = React.useState(false);
-  const { register, handleSubmit } = useForm<{ name: string; bio: string }>({
-    defaultValues: existing,
+  const { register, handleSubmit } = useForm<{
+    name: string;
+    bio: string;
+    urlSlug: string;
+  }>({
+    defaultValues: { name: "", bio: "", urlSlug: "", ...existing },
   });
 
   const existingId = existing?.id;
@@ -42,13 +46,14 @@ export const ArtistForm: React.FC<{
       if (state.user?.id) {
         try {
           setIsSaving(true);
+          const sending = pick(data, ["bio", "name", "urlSlug"]);
           if (existingId) {
-            await api.put(`artist${existingId}`, {
-              ...pick(data, ["bio", "name"]),
+            await api.put(`users/${state.user.id}/artists/${existingId}`, {
+              ...sending,
             });
           } else {
             await api.post(`users/${state.user.id}/artists`, {
-              ...pick(data, ["bio", "name"]),
+              ...sending,
             });
           }
 
@@ -100,6 +105,10 @@ export const ArtistForm: React.FC<{
           <h3>{existing ? existing.name : t("newArtist")}</h3>
           <FormComponent>
             {t("displayName")}: <InputEl {...register("name")} />
+          </FormComponent>
+          <FormComponent>
+            {t("urlSlug")}: <InputEl {...register("urlSlug")} />
+            <small>Must be unique</small>
           </FormComponent>
           <FormComponent>
             {t("bio")}:

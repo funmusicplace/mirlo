@@ -41,6 +41,7 @@
     "passport-jwt": "^4.0.0",
     "sharp": "^0.31.3",
     "shasum": "^1.0.2",
+    "slugify": "^1.6.6",
     "stripe": "^12.0.0",
     "swagger-ui-express": "^4.6.0",
     "winston": "^3.8.2",

@@ -39,14 +39,6 @@ const router = createBrowserRouter([
       { path: "", element: <Home /> },
       { path: "widget/track/:id", element: <TrackWidget /> },
       { path: "widget/trackgroup/:id", element: <TrackGroupWidget /> },
-      {
-        path: "artist/:artistId",
-        children: [
-          { path: "", element: <Artist /> },
-          { path: "trackgroup/:trackGroupId", element: <TrackGroup /> },
-        ],
-      },
-
       { path: "post/:postId", element: <Post /> },
       {
         path: "signup",
@@ -86,6 +78,13 @@ const router = createBrowserRouter([
             path: "tracks",
             element: <AdminTracks />,
           },
+        ],
+      },
+      {
+        path: ":artistId",
+        children: [
+          { path: "", element: <Artist /> },
+          { path: "trackgroup/:trackGroupId", element: <TrackGroup /> },
         ],
       },
     ],

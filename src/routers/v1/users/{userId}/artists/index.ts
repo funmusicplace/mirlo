@@ -1,5 +1,5 @@
 import { User } from "@prisma/client";
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import {
   userAuthenticated,
   userHasPermission,
@@ -8,6 +8,7 @@ import {
 
 import prisma from "../../../../../../prisma/prisma";
 import logger from "../../../../../logger";
+import slugify from "slugify";
 
 type Params = {
   artistId: number;
@@ -77,14 +78,15 @@ export default function () {
   };
 
   // FIXME: only allow creation for logged in user.
-  async function POST(req: Request, res: Response) {
-    const { name, bio } = req.body;
+  async function POST(req: Request, res: Response, next: NextFunction) {
+    const { name, bio, urlSlug } = req.body;
     const { userId } = req.params as unknown as Params;
     try {
       const result = await prisma.artist.create({
         data: {
           name,
           bio,
+          urlSlug: urlSlug ?? slugify(name),
           user: {
             connect: {
               id: Number(userId),
@@ -96,6 +98,9 @@ export default function () {
     } catch (e) {
       res.status(500);
       logger.error(`users/{userId}/artists POST ${e}`);
+      res.send({
+        error: `Error creating user`,
+      });
     }
   }
 

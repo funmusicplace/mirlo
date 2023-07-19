@@ -75,6 +75,7 @@
   "artistForm": {
     "displayName": "Display name",
     "bio": "Bio",
+    "urlSlug": "Text that will appear in the URL",
     "saveArtist": "Save artist",
     "createArtist": "Create artist",
     "newArtist": "New artist",

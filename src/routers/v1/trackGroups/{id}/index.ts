@@ -33,6 +33,9 @@ export default function () {
     } catch (e) {
       console.error("trackgroups/{id} GET");
       res.status(500);
+      res.send({
+        error: "Error finding trackGroup",
+      });
     }
   }
 

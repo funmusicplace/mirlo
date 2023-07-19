@@ -51,7 +51,7 @@ function Home() {
           </h3>
           {p.artist && (
             <em>
-              by <Link to={`/artist/${p.artist.id}`}>{p.artist?.name}</Link>
+              by <Link to={`/${p.artist.id}`}>{p.artist?.name}</Link>
             </em>
           )}
           <PostContent content={p.content} />

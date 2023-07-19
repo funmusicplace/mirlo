@@ -53,6 +53,7 @@ interface Post {
 interface Artist {
   name: string;
   bio: string;
+  urlSlug?: string;
   userId: number;
   id: number;
   enabled: boolean;
