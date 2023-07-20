@@ -8,7 +8,6 @@ import {
   SUPPORTED_AUDIO_MIME_TYPES,
 } from "../config/supported-media-types";
 import { REDIS_CONFIG } from "../config/redis";
-import * as Minio from "minio";
 
 import prisma from "../../prisma/prisma";
 import { logger } from "../logger";

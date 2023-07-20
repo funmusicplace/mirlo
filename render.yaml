@@ -44,7 +44,7 @@ services:
         fromService:
           type: redis
           name: redis
-          property: host # available properties are listed below
+          property: host
       - key: REDIS_PORT
         fromService:
           type: redis
@@ -66,10 +66,10 @@ services:
         fromService:
           type: pserv
           name: minio
-          property: host # available properties are listed below
+          property: host
   
   # A private minIO instance
-  - type: web
+  - type: pserv
     name: minio
     env: docker
     plan: starter
