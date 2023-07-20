@@ -140,7 +140,7 @@ export const processTrackAudio = (ctx: { req: Request; res: Response }) => {
     });
 
     logger.info(`MinIO is at ${MINIO_HOST}:${MINIO_API_PORT}`);
-    logger.info("Uploading image to object storage");
+    logger.info("Uploading trackAudio to temporary storage");
 
     await createBucketIfNotExists(minioClient, incomingAudioBucket, logger);
     logger.info(

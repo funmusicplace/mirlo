@@ -15,6 +15,7 @@ const {
   MINIO_ROOT_USER = "",
   MINIO_ROOT_PASSWORD = "",
   MINIO_API_PORT = 9000,
+  NODE_ENV,
 } = process.env;
 
 // Instantiate the minio client with the endpoint
@@ -22,7 +23,7 @@ const {
 export const minioClient = new Minio.Client({
   endPoint: MINIO_HOST,
   port: +MINIO_API_PORT,
-  useSSL: false, // FIXME: NODE_ENV !== "development",
+  useSSL: NODE_ENV !== "development",
   accessKey: MINIO_ROOT_USER,
   secretKey: MINIO_ROOT_PASSWORD,
 });
@@ -32,6 +33,7 @@ export const createBucketIfNotExists = async (
   bucket: string,
   logger?: Logger
 ) => {
+  logger?.info("NODE_ENV", process.env.NODE_ENV);
   logger?.info("Checking if a bucket exists");
   const exists = await minioClient.bucketExists(bucket);
 

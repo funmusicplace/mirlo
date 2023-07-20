@@ -17,7 +17,7 @@ import prisma from "../../prisma/prisma";
 import { APIContext, APIFile, checkFileType } from "./file";
 import { logger } from "../jobs/queue-worker";
 
-const { MINIO_HOST = "", MINIO_PORT = 9000 } = process.env;
+const { MINIO_HOST = "", MINIO_API_PORT = 9000 } = process.env;
 
 const queueOptions = {
   prefix: "mirlo",
@@ -80,7 +80,7 @@ export const processArtistBanner = (ctx: APIContext) => {
       },
     });
 
-    logger.info(`MinIO is at ${MINIO_HOST}:${MINIO_PORT}`);
+    logger.info(`MinIO is at ${MINIO_HOST}:${MINIO_API_PORT}`);
     logger.info("Uploading image to object storage");
 
     await createBucketIfNotExists(
@@ -128,7 +128,7 @@ export const processTrackGroupCover = (ctx: APIContext) => {
       },
     });
 
-    logger.info(`MinIO is at ${MINIO_HOST}:${MINIO_PORT}`);
+    logger.info(`MinIO is at ${MINIO_HOST}:${MINIO_API_PORT}`);
     logger.info("Uploading image to object storage");
 
     await createBucketIfNotExists(minioClient, incomingCoversBucket, logger);

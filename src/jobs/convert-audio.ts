@@ -18,7 +18,7 @@ import { Readable } from "stream";
 const {
   MINIO_HOST = "",
   MINIO_ROOT_USER = "",
-  MINIO_PORT = 9000,
+  MINIO_API_PORT = 9000,
 } = process.env;
 
 export default async (job: Job) => {
@@ -27,7 +27,9 @@ export default async (job: Job) => {
   try {
     const destinationFolder = `/data/media/processing/${audioId}`;
 
-    logger.info(`MinIO is at ${MINIO_HOST}:${MINIO_PORT} ${MINIO_ROOT_USER}`);
+    logger.info(
+      `MinIO is at ${MINIO_HOST}:${MINIO_API_PORT} ${MINIO_ROOT_USER}`
+    );
 
     logger.info(`Starting to optimize audio ${audioId}`);
     const { buffer } = await getObjectFromMinio(

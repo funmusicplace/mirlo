@@ -1,22 +1,6 @@
 import { NextFunction, Request, Response } from "express";
-import * as Minio from "minio";
-import { finalCoversBucket, getObjectFromMinio } from "./utils/minio";
-
-const {
-  MINIO_HOST = "",
-  MINIO_ROOT_USER = "",
-  MINIO_ROOT_PASSWORD = "",
-  MINIO_PORT = 9000,
-} = process.env;
-
-const minioClient = new Minio.Client({
-  endPoint: MINIO_HOST,
-  port: +MINIO_PORT,
-  useSSL: false,
-  // useSSL: NODE_ENV !== "development",
-  accessKey: MINIO_ROOT_USER,
-  secretKey: MINIO_ROOT_PASSWORD,
-});
+import { getObjectFromMinio } from "./utils/minio";
+import { minioClient } from "./utils/minio";
 
 export const serveStatic = async (
   req: Request,

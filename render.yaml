@@ -107,7 +107,7 @@ services:
         fromService:
           type: redis
           name: redis
-          property: host # available properties are listed below
+          property: host
       - key: REDIS_PORT
         fromService:
           type: redis
@@ -127,7 +127,7 @@ services:
         fromService:
           type: web
           name: minio
-          property: host # available properties are listed below
+          property: host
 
   - type: cron
     name: post-publish

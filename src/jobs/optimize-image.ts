@@ -20,7 +20,7 @@ const { defaultOptions, config: sharpConfig } = tempSharpConfig;
 const {
   MINIO_HOST = "",
   MINIO_ROOT_USER = "",
-  MINIO_PORT = 9000,
+  MINIO_API_PORT = 9000,
 } = process.env;
 
 /**
@@ -38,7 +38,9 @@ const optimizeImage = async (job: Job) => {
 
   try {
     const profiler = logger.startTimer();
-    logger.info(`MinIO is at ${MINIO_HOST}:${MINIO_PORT} ${MINIO_ROOT_USER}`);
+    logger.info(
+      `MinIO is at ${MINIO_HOST}:${MINIO_API_PORT} ${MINIO_ROOT_USER}`
+    );
 
     logger.info(`Starting to optimize images ${destination}`);
     const { buffer, size } = await getObjectFromMinio(
