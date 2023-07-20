@@ -1,45 +1,22 @@
 import { Request, Response } from "express";
 import { Queue, QueueEvents } from "bullmq";
 import { promises as fs } from "fs";
-import path from "path";
 import shasum from "shasum";
-import winston from "winston";
-import { fromFile } from "file-type";
-import mm from "music-metadata";
 
 import {
   // FIXME: HIGH_RES_AUDIO_MIME_TYPES,
   SUPPORTED_AUDIO_MIME_TYPES,
 } from "../config/supported-media-types";
 import { REDIS_CONFIG } from "../config/redis";
-import sendMail from "../jobs/send-mail";
 import * as Minio from "minio";
 
 import prisma from "../../prisma/prisma";
 import { logger } from "../logger";
 import { checkFileType } from "./file";
 import { createBucketIfNotExists, incomingAudioBucket } from "./minio";
+import { minioClient } from "./minio";
 
-const {
-  MINIO_HOST = "",
-  MINIO_ROOT_USER = "",
-  MINIO_ROOT_PASSWORD = "",
-  MINIO_API_PORT = 9000,
-} = process.env;
-
-// FIXME: can this be re-imported like prisma or the logger?
-// Instantiate the minio client with the endpoint
-// and access keys as shown below.
-const minioClient = new Minio.Client({
-  endPoint: MINIO_HOST,
-  port: +MINIO_API_PORT,
-  useSSL: false,
-  // useSSL: NODE_ENV !== "development",
-  accessKey: MINIO_ROOT_USER,
-  secretKey: MINIO_ROOT_PASSWORD,
-});
-
-const BASE_DATA_DIR = process.env.BASE_DATA_DIR || "/";
+const { MINIO_HOST = "", MINIO_API_PORT = 9000 } = process.env;
 
 const buildTrackStreamURL = (trackId: number) => {
   return `/v1/tracks/${trackId}/stream/playlist.m3u8`;

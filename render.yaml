@@ -69,7 +69,7 @@ services:
           property: host # available properties are listed below
   
   # A private minIO instance
-  - type: pserv # Should probably be pserv
+  - type: pserv
     name: minio
     env: docker
     plan: starter
@@ -78,7 +78,7 @@ services:
     - key: MINIO_ROOT_PASSWORD
       generateValue: true # will generate a base64-encoded 256-bit secret
     - fromGroup: blackbrd
-    - key: CONSOLE_PORT
+    - key: PORT
       value: 10000
     disk:
       name: data
