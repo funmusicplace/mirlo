@@ -14,14 +14,14 @@ const {
   MINIO_HOST = "",
   MINIO_ROOT_USER = "",
   MINIO_ROOT_PASSWORD = "",
-  MINIO_PORT = 9000,
+  MINIO_API_PORT = 9000,
 } = process.env;
 
 // Instantiate the minio client with the endpoint
 // and access keys as shown below.
 export const minioClient = new Minio.Client({
   endPoint: MINIO_HOST,
-  port: +MINIO_PORT,
+  port: +MINIO_API_PORT,
   useSSL: false, // NODE_ENV !== "development",
   accessKey: MINIO_ROOT_USER,
   secretKey: MINIO_ROOT_PASSWORD,

@@ -24,7 +24,7 @@ const {
   MINIO_HOST = "",
   MINIO_ROOT_USER = "",
   MINIO_ROOT_PASSWORD = "",
-  MINIO_PORT = 9000,
+  MINIO_API_PORT = 9000,
 } = process.env;
 
 // FIXME: can this be re-imported like prisma or the logger?
@@ -32,7 +32,7 @@ const {
 // and access keys as shown below.
 const minioClient = new Minio.Client({
   endPoint: MINIO_HOST,
-  port: +MINIO_PORT,
+  port: +MINIO_API_PORT,
   useSSL: false,
   // useSSL: NODE_ENV !== "development",
   accessKey: MINIO_ROOT_USER,
@@ -163,7 +163,7 @@ export const processTrackAudio = (ctx: { req: Request; res: Response }) => {
       },
     });
 
-    logger.info(`MinIO is at ${MINIO_HOST}:${MINIO_PORT}`);
+    logger.info(`MinIO is at ${MINIO_HOST}:${MINIO_API_PORT}`);
     logger.info("Uploading image to object storage");
 
     await createBucketIfNotExists(minioClient, incomingAudioBucket, logger);

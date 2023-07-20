@@ -60,6 +60,8 @@ services:
           type: pserv
           name: minio
           envVarKey: PORT
+      - key: MINIO_API_PORT
+        value: 9000
       - key: MINIO_HOST
         fromService:
           type: pserv
