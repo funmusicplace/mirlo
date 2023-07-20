@@ -8,7 +8,7 @@
     "migrate:deploy": "DEBUG=prisma:client npx prisma migrate deploy",
     "build": "cd client && yarn build && cd .. && cp -R client/build/* public && mv public/index.html public/app.html",
     "dev:api": "NODE_ENV=development PORT=3000 nodemon src/index.ts",
-    "staging": "NODE_ENV=production ts-node src/index.ts",
+    "staging": "NODE_ENV=production nodemon src/index.ts",
     "dev": "concurrently \"yarn dev:api\" \"cd client && PORT=8080 yarn start\""
   },
   "dependencies": {
