@@ -33,7 +33,7 @@ export const createBucketIfNotExists = async (
   bucket: string,
   logger?: Logger
 ) => {
-  logger?.info(`NODE_ENV ${process.env.NODE_ENV}`);
+  logger?.info(`NODE_ENV ${NODE_ENV}`);
   logger?.info("Checking if a bucket exists");
   const exists = await minioClient.bucketExists(bucket);
 
