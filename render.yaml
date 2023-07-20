@@ -78,7 +78,7 @@ services:
     - key: MINIO_ROOT_PASSWORD
       generateValue: true # will generate a base64-encoded 256-bit secret
     - fromGroup: blackbrd
-    - key: PORT
+    - key: CONSOLE_PORT
       value: 10000
     disk:
       name: data
