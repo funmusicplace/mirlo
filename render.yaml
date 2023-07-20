@@ -35,8 +35,6 @@ services:
     envVars: 
       - key: NODE_OPTIONS
         value: --max-old-space-size=512
-      - key: NODE_ENV
-        value: production
       - key: DATABASE_URL
         fromDatabase:
           name: blackbrd
