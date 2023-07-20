@@ -73,7 +73,7 @@ services:
     name: minio
     env: docker
     plan: starter
-    repo: https://github.com/render-examples/minio.git # optional
+    dockerfilePath: './minio/Dockerfile'
     envVars:
     - key: MINIO_ROOT_PASSWORD
       generateValue: true # will generate a base64-encoded 256-bit secret
