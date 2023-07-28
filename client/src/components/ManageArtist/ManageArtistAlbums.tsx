@@ -22,21 +22,23 @@ const ManageArtistAlbums: React.FC<{}> = () => {
   const [trackGroups, setTrackGroups] = React.useState<TrackGroup[]>([]);
 
   const userId = user?.id;
+
+  const fetchTrackGroups = React.useCallback(async () => {
+    if (userId) {
+      const { result } = await api.get<Artist>(
+        `users/${userId}/artists/${artistId}`
+      );
+      setArtist(result);
+      const fetchedTrackGroups = await api.getMany<TrackGroup>(
+        `users/${userId}/trackGroups?artistId=${artistId}`
+      );
+      setTrackGroups(fetchedTrackGroups.results);
+    }
+  }, [artistId, userId]);
+
   React.useEffect(() => {
-    const callback = async () => {
-      if (userId) {
-        const { result } = await api.get<Artist>(
-          `users/${userId}/artists/${artistId}`
-        );
-        setArtist(result);
-        const fetchedTrackGroups = await api.getMany<TrackGroup>(
-          `users/${userId}/trackGroups?artistId=${artistId}`
-        );
-        setTrackGroups(fetchedTrackGroups.results);
-      }
-    };
-    callback();
-  }, [userId, artistId]);
+    fetchTrackGroups();
+  }, [fetchTrackGroups]);
 
   if (!artist) {
     return null;
@@ -64,7 +66,7 @@ const ManageArtistAlbums: React.FC<{}> = () => {
           trackgroup={manageTrackgroup}
           onClose={() => setManageTrackgroup(undefined)}
           reload={() => {
-            return Promise.resolve();
+            return fetchTrackGroups();
           }}
           artist={artist}
         />
@@ -84,7 +86,7 @@ const ManageArtistAlbums: React.FC<{}> = () => {
         open={addingNewAlbum}
         onClose={() => setAddingNewAlbum(false)}
         reload={() => {
-          return Promise.resolve();
+          return fetchTrackGroups();
         }}
         artist={artist}
       />

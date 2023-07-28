@@ -15,6 +15,7 @@ const TrackGroupCard: React.FC<{
       className={css`
         display: flex;
         width: 100%;
+        margin-bottom: 0.25rem;
       `}
     >
       <ClickToPlay
