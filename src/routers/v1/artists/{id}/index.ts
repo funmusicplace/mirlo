@@ -92,7 +92,6 @@ export default function () {
         },
       });
     } catch (e) {
-      console.log("sending failure");
       console.error("artist/{id}", e);
       res.status(500);
     }

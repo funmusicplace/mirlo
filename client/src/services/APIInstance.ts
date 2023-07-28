@@ -45,14 +45,14 @@ const APIInstance = (apiRoot: string) => {
       }
       return json;
     } catch (e) {
-      console.error("e", e);
+      console.error("API Instance catching error", e);
       if (
         e instanceof Error &&
         (e.message.includes("NetworkError") || e.name === "NetworkError")
       ) {
         throw new Error("NetworkError");
       }
-      throw new Error("Something went wrong");
+      throw e;
     }
   };
 

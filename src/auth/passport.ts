@@ -63,7 +63,6 @@ export const userLoggedInWithoutRedirect = (
         res.status(401).json({ error: info.message });
         return;
       } else if (err) {
-        console.log("err", err);
         return next(err);
       }
       if (!user) {

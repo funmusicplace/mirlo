@@ -59,7 +59,6 @@ function TrackGroup() {
   } else if (!trackGroup) {
     return <FullPageLoadingSpinner />;
   }
-  console.log("tracks", trackGroup.tracks);
 
   return (
     <div>

@@ -72,6 +72,21 @@
     "posts": "Your posts",
     "yourAlbums": "Your albums"
   },
+  "manageAlbum": {
+    "editAlbum": "Edit album",
+    "title": "Title",
+    "isPublished": "Is it published?",
+    "publishedDescription": "Published albums can be bought and listened to.",
+    "cover": "Cover",
+    "type": "Type",
+    "lp": "LP",
+    "ep": "EP",
+    "releaseDate": "Release date",
+    "about": "About",
+    "price": "Price",
+    "saveAlbum": "Save album",
+    "submitAlbum": "Submit album"
+  },
   "artistForm": {
     "displayName": "Display name",
     "bio": "Bio",

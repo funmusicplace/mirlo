@@ -4,6 +4,7 @@ import TrackTable from "./ManageTrackTable";
 import AlbumForm from "./AlbumForm";
 import NewTrack from "./NewTrack";
 import api from "services/api";
+import { useTranslation } from "react-i18next";
 
 export interface ShareableTrackgroup {
   creatorId: number;
@@ -18,6 +19,7 @@ export const ManageAlbumForm: React.FC<{
   reload: () => Promise<void>;
 }> = ({ open, trackgroup, onClose, reload, artist }) => {
   const [tracks, setTracks] = React.useState<Track[]>([]);
+  const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
 
   React.useEffect(() => {
     if (trackgroup.tracks) {
@@ -33,13 +35,19 @@ export const ManageAlbumForm: React.FC<{
       setTracks(result.tracks);
     } catch (e) {
       console.error(e);
+    } finally {
+      await reload();
     }
-  }, [artist.userId, trackgroup.id]);
+  }, [artist.userId, trackgroup.id, reload]);
 
   return (
-    <Modal open={open} onClose={onClose}>
+    <Modal open={open} onClose={onClose} title={t("editAlbum") ?? ""}>
       {/* There is some overly complex state management going on here with the reloads being passed around */}
-      <AlbumForm existing={trackgroup} reload={reload} artist={artist} />
+      <AlbumForm
+        existing={trackgroup}
+        reload={reloadTrackGroup}
+        artist={artist}
+      />
       <TrackTable
         tracks={tracks}
         editable

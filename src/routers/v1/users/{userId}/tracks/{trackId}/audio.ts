@@ -52,7 +52,6 @@ export default function () {
 
       res.json({ message: "Success" });
     } catch (error) {
-      console.log("error", error);
       res.status(400).json({
         error: `Track with ID ${trackId} does not exist in the database`,
       });

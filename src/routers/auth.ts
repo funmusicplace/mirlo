@@ -372,7 +372,6 @@ router.post("/refresh", (req, res) => {
       {},
       async (err: VerifyErrors | null, decoded?: JwtPayload | string) => {
         if (err) {
-          console.log("err", err);
           // Wrong Refesh Token
           return res.status(406).json({ message: "Unauthorized" });
         } else {

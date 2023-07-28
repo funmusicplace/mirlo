@@ -12,6 +12,8 @@ import { css } from "@emotion/css";
 import LoadingSpinner from "components/common/LoadingSpinner";
 import api from "../../services/api";
 import { useGlobalStateContext } from "state/GlobalState";
+import useErrorHandler from "services/useErrorHandler";
+import { useTranslation } from "react-i18next";
 
 const AlbumForm: React.FC<{
   existing?: TrackGroup;
@@ -23,7 +25,9 @@ const AlbumForm: React.FC<{
     state: { user },
   } = useGlobalStateContext();
   const snackbar = useSnackbar();
+  const errorHandler = useErrorHandler();
   const [isSaving, setIsSaving] = React.useState(false);
+  const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
 
   const { register, handleSubmit } = useForm<{
     published: boolean;
@@ -118,15 +122,14 @@ const AlbumForm: React.FC<{
           snackbar("Trackgroup updated", { type: "success" });
           onClose?.();
         } catch (e) {
-          console.error("e", e);
-          snackbar("There was a problem with the API", { type: "warning" });
+          errorHandler(e);
         } finally {
           setIsSaving(false);
           await reload();
         }
       }
     },
-    [reload, existingId, snackbar, artist.id, onClose, userId]
+    [userId, existingId, snackbar, onClose, artist.id, errorHandler, reload]
   );
 
   return (
@@ -135,7 +138,7 @@ const AlbumForm: React.FC<{
         Display artist: <InputEl {...register("display_artist")} />
       </FormComponent> */}
       <FormComponent>
-        Title: <InputEl {...register("title")} />
+        {t("title")}: <InputEl {...register("title")} />
       </FormComponent>
       <FormComponent
         className={css`
@@ -145,8 +148,8 @@ const AlbumForm: React.FC<{
       >
         <input id="private" type="checkbox" {...register("published")} />{" "}
         <label htmlFor="private">
-          Is published?
-          <small>published albums can be bought and listened to</small>
+          {t("isPublished")}
+          <small>{t("publishedDescription")}</small>
         </label>
       </FormComponent>
       <FormComponent
@@ -156,7 +159,7 @@ const AlbumForm: React.FC<{
           alignItems: "flex-start",
         }}
       >
-        Cover:
+        {t("cover")}:
         {existing?.cover && (
           <img src={existing.cover.sizes?.[120]} alt="album cover" />
         )}
@@ -170,7 +173,7 @@ const AlbumForm: React.FC<{
         />
       </FormComponent>
       <FormComponent>
-        Type:{" "}
+        {t("type")}:{" "}
         <SelectEl defaultValue="lp" {...register("type")}>
           <option value="lp">LP</option>
           <option value="ep">EP</option>
@@ -178,13 +181,13 @@ const AlbumForm: React.FC<{
       </FormComponent>
 
       <FormComponent>
-        Release date: <InputEl type="date" {...register("releaseDate")} />
+        {t("releaseDate")}: <InputEl type="date" {...register("releaseDate")} />
       </FormComponent>
       <FormComponent>
-        About: <TextArea {...register("about")} />
+        {t("about")}: <TextArea {...register("about")} />
       </FormComponent>
       <FormComponent>
-        Price:
+        {t("price")}:
         <InputEl type="number" {...register("minPrice")} />
       </FormComponent>
       <Button
@@ -192,7 +195,7 @@ const AlbumForm: React.FC<{
         disabled={isSaving}
         startIcon={isSaving ? <LoadingSpinner /> : undefined}
       >
-        {existing ? "Save" : "Submit"} Album
+        {existing ? t("saveAlbum") : t("submitAlbum")}
       </Button>
     </form>
   );

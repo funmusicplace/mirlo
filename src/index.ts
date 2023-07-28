@@ -19,6 +19,7 @@ import { imageQueue } from "./utils/processImages";
 import { audioQueue } from "./utils/processTrackAudio";
 import { serveStatic } from "./static";
 import prisma from "../prisma/prisma";
+import { MulterError } from "multer";
 
 dotenv.config();
 
@@ -107,7 +108,11 @@ initialize({
     module: require(`./routers/v1/${r}`),
   })),
   errorMiddleware: (err, req, res, next) => {
-    res.status(err.status).json({ errors: err.errors });
+    console.error("error middleware", err.status, err);
+    if (err instanceof MulterError) {
+      res.status(400).json({ error: err.message });
+    }
+    res.status(err.status).json({ error: err.errors });
     next();
   },
 });

@@ -6,7 +6,6 @@ const usePublicObjectById = <T>(endpoint: string, artistId?: string) => {
   const [isLoading, setIsLoading] = React.useState(false);
 
   const fetchArtist = React.useCallback(async () => {
-    console.log("artistId", artistId);
     setIsLoading(true);
     try {
       if (artistId) {

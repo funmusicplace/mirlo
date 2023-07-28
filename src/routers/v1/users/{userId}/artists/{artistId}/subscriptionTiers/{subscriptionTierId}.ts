@@ -37,7 +37,6 @@ export default function () {
 
       res.json({ result: updatedTier });
     } catch (error) {
-      console.log("error", error);
       res.status(400);
       res.json({
         error: `Subscription Tier with ID ${subscriptionTierId} does not exist in the database`,

@@ -12,6 +12,7 @@ import api from "../../services/api";
 import { useGlobalStateContext } from "state/GlobalState";
 import Box from "components/common/Box";
 import CurrencyInput from "react-currency-input-field";
+import useErrorHandler from "services/useErrorHandler";
 
 const SubscriptionForm: React.FC<{
   artist: Artist;
@@ -22,6 +23,7 @@ const SubscriptionForm: React.FC<{
     state: { user },
   } = useGlobalStateContext();
   const snackbar = useSnackbar();
+  const errorHandler = useErrorHandler();
   const [isSaving, setIsSaving] = React.useState(false);
   const { register, handleSubmit, reset } = useForm<{
     name: string;
@@ -69,8 +71,7 @@ const SubscriptionForm: React.FC<{
           reset();
           reload();
         } catch (e) {
-          console.error("e", e);
-          snackbar("There was a problem with the API", { type: "warning" });
+          errorHandler(e);
         } finally {
           setIsSaving(false);
         }

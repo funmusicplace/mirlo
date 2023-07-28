@@ -17,7 +17,6 @@ export default function () {
   };
 
   async function DELETE(req: Request, res: Response, next: NextFunction) {
-    console.log("params", req.params);
     const { userId, subscriptionId } = req.params as unknown as Params;
     const loggedInUser = req.user as User;
 
