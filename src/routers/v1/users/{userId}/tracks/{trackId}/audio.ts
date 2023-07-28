@@ -10,6 +10,9 @@ import { processTrackAudio } from "../../../../../../utils/processTrackAudio";
 
 const upload = multer({
   dest: process.env.MEDIA_LOCATION_INCOMING ?? "/data/media/incoming",
+  limits: {
+    fileSize: 4000000000,
+  },
 });
 
 type Params = {
