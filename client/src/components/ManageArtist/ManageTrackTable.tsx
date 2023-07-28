@@ -4,18 +4,18 @@ import { useGlobalStateContext } from "state/GlobalState";
 import api from "services/api";
 
 import { determineNewTrackOrder } from "utils/tracks";
-import { CenteredSpinner } from "./Spinner";
-import Table from "./Table";
-import TrackRowOwned from "./TrackRowOwned";
+import { CenteredSpinner } from "../common/Spinner";
+import Table from "../common/Table";
+import ManageTrackRow from "./ManageTrackRow";
 
-export const TrackTable: React.FC<{
+export const ManageTrackTable: React.FC<{
   tracks: Track[];
   isPlaylist?: boolean;
   trackGroupId?: number;
   editable?: boolean;
   owned?: boolean;
   reload?: () => Promise<void>;
-}> = ({ tracks, trackGroupId, editable, owned, reload }) => {
+}> = ({ tracks, trackGroupId, editable, reload }) => {
   const [isLoading, setIsLoading] = React.useState(false);
   const {
     state: { user, draggingTrackId },
@@ -102,7 +102,7 @@ export const TrackTable: React.FC<{
       </thead>
       <tbody>
         {displayTracks?.map((track) => (
-          <TrackRowOwned
+          <ManageTrackRow
             key={track.id}
             track={track}
             addTracksToQueue={addTracksToQueue}
@@ -122,4 +122,4 @@ export const TrackTable: React.FC<{
   );
 };
 
-export default TrackTable;
+export default ManageTrackTable;

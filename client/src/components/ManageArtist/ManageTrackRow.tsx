@@ -4,18 +4,17 @@ import { FaPause, FaPen, FaPlay, FaSave, FaTrash } from "react-icons/fa";
 import { useGlobalStateContext } from "state/GlobalState";
 import useDraggableTrack from "utils/useDraggableTrack";
 
-import IconButton from "./IconButton";
+import IconButton from "../common/IconButton";
 import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
-import { InputEl } from "./Input";
+import { InputEl } from "../common/Input";
 
-const TrackRowOwned: React.FC<{
+const ManageTrackRow: React.FC<{
   track: Track;
-  owned?: boolean;
   addTracksToQueue: (id: number) => void;
   reload: () => Promise<void>;
   handleDrop: (val: React.DragEvent<HTMLTableRowElement>) => void;
-}> = ({ track, addTracksToQueue, reload, handleDrop, owned }) => {
+}> = ({ track, addTracksToQueue, reload, handleDrop }) => {
   const snackbar = useSnackbar();
   const [isEditingTitle, setIsEditingTitle] = React.useState(false);
   const [trackTitle, setTrackTitle] = React.useState(track.title);
@@ -121,7 +120,7 @@ const TrackRowOwned: React.FC<{
             <FaSave />
           </IconButton>
         )}
-        {owned && !isEditingTitle && (
+        {!isEditingTitle && (
           <>
             <IconButton
               compact
@@ -139,4 +138,4 @@ const TrackRowOwned: React.FC<{
     </tr>
   );
 };
-export default TrackRowOwned;
+export default ManageTrackRow;

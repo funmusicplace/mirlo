@@ -1,6 +1,6 @@
 import React from "react";
 import Modal from "components/common/Modal";
-import TrackTable from "../common/TrackTable";
+import TrackTable from "./ManageTrackTable";
 import AlbumForm from "./AlbumForm";
 import NewTrack from "./NewTrack";
 import api from "services/api";
