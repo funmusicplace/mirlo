@@ -90,6 +90,10 @@ docker exec -it blackbird-api yarn ts-node src/jobs/announce-post-published.ts
 
 You can access dev MinIO at localhost:9001 with the MINIO_ROOT_USER and MINIO_ROOT_PASSWORD you set in .env
 
+## Database
+
+If you want to do logging in the database, you need to uncomment the `log` line in the `prisma/prisma.ts` file.
+
 # Credits
 
 Logo created by Lluisa Iborra on [the Noun Project](https://thenounproject.com/icon/bird-818956/).

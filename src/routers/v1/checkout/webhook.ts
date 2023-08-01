@@ -8,6 +8,10 @@ const { STRIPE_WEBHOOK_SIGNING_SECRET } = process.env;
 
 import stripe from "../../../utils/stripe";
 
+// NOTE: if you are running Mirlo locally, the only way to get these
+// webhooks to be triggered is by running the stripe CLI. See the README
+// for details.
+
 const handleTrackGroupPurhcase = async (
   userId: number,
   trackGroupId: number,
@@ -65,12 +69,13 @@ const handleSubscription = async (
   session: Stripe.Checkout.Session
 ) => {
   try {
-    await prisma.artistUserSubscription.upsert({
+    const results = await prisma.artistUserSubscription.upsert({
       create: {
         artistSubscriptionTierId: Number(tierId),
         userId: Number(userId),
         amount: session.amount_total ?? 0,
         currency: session.currency ?? "USD",
+        deletedAt: null,
         stripeSubscriptionKey: session.subscription as string, // FIXME: should this be session id? Maybe subscriptionId?
       },
       update: {

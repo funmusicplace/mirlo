@@ -6,7 +6,9 @@ import prisma from "../../../../../prisma/prisma";
 
 const { API_DOMAIN } = process.env;
 
-import stripe from "../../../../utils/stripe";
+import stripe, {
+  createSubscriptionStripeProduct,
+} from "../../../../utils/stripe";
 
 type Params = {
   id: string;
@@ -43,23 +45,7 @@ export default function () {
         return res.status(404);
       }
 
-      let productKey = tier.stripeProductKey;
-
-      if (!tier.stripeProductKey) {
-        const product = await stripe.products.create({
-          name: `Supporting ${tier.artist.name} at ${tier.name}`,
-          description: tier.description ?? "Thank you for your support!",
-        });
-        await prisma.artistSubscriptionTier.update({
-          where: {
-            id: Number(tierId),
-          },
-          data: {
-            stripeProductKey: product.id,
-          },
-        });
-        productKey = product.id;
-      }
+      const productKey = await createSubscriptionStripeProduct(tier);
 
       if (productKey) {
         const session = await stripe.checkout.sessions.create({

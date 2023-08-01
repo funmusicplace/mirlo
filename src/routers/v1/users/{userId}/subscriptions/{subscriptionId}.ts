@@ -5,6 +5,7 @@ import {
 } from "../../../../../auth/passport";
 import prisma from "../../../../../../prisma/prisma";
 import { User } from "@prisma/client";
+import stripe from "../../../../../utils/stripe";
 
 type Params = {
   subscriptionId: number;
@@ -25,21 +26,41 @@ export default function () {
       return next();
     }
     try {
+      const subscription = await prisma.artistUserSubscription.findFirst({
+        where: {
+          id: Number(subscriptionId),
+          userId: Number(userId),
+        },
+      });
+      if (subscription?.stripeSubscriptionKey) {
+        try {
+          await stripe.subscriptions.cancel(subscription.stripeSubscriptionKey);
+        } catch (e) {
+          if (e instanceof Error) {
+            e.message.includes("No such subscription");
+            console.error("Weird, no subscription", e.message);
+          }
+        }
+      }
       await prisma.artistUserSubscription.deleteMany({
         where: {
           id: Number(subscriptionId),
           userId: Number(userId),
         },
       });
+      res.json({ message: "Success" });
     } catch (e) {
+      console.error(
+        `DELETE /v1/users/{userId}/subscriptions/{subscriptionId}`,
+        e
+      );
       res.status(400);
       next();
     }
-    res.json({ message: "Success" });
   }
 
   DELETE.apiDoc = {
-    summary: "Deletes an subscription belonging to a user",
+    summary: "Deletes a subscription belonging to a user",
     parameters: [
       {
         in: "path",
