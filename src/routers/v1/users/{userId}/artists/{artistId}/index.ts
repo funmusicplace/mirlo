@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response } from "express";
-import Stripe from "stripe";
 import {
   artistBelongsToLoggedInUser,
   userAuthenticated,
@@ -7,11 +6,10 @@ import {
 import prisma from "../../../../../../../prisma/prisma";
 import { convertURLArrayToSizes } from "../../../../../../utils/images";
 import { finalArtistBannerBucket } from "../../../../../../utils/minio";
-import { deleteTrackGroup } from "../../../../../../utils/trackGroup";
-import stripe from "../../../../../../utils/stripe";
+import { deleteArtist } from "../../../../../../utils/artist";
 
 type Params = {
-  artistId: number;
+  artistId: string;
   userId: string;
 };
 
@@ -170,54 +168,7 @@ export default function () {
     const { userId, artistId } = req.params as unknown as Params;
 
     try {
-      await prisma.artist.deleteMany({
-        where: {
-          id: Number(artistId),
-          userId: Number(userId),
-        },
-      });
-
-      // FIXME: We don't do cascading deletes because of the
-      // soft deletion. That _could_ probably be put into a
-      // a prisma middleware. This is a lot!
-      // https://github.com/funmusicplace/mirlo/issues/19
-      await prisma.post.deleteMany({
-        where: {
-          artistId: Number(artistId),
-        },
-      });
-
-      await prisma.artistSubscriptionTier.deleteMany({
-        where: {
-          artistId: Number(artistId),
-        },
-      });
-
-      const stripeSubscriptions = await prisma.artistUserSubscription.findMany({
-        where: {
-          artistSubscriptionTier: { artistId: Number(artistId) },
-        },
-      });
-      await Promise.all(
-        stripeSubscriptions.map(async (sub) => {
-          if (sub.stripeSubscriptionKey) {
-            await stripe.subscriptions.cancel(sub.stripeSubscriptionKey);
-          }
-        })
-      );
-      await prisma.artistUserSubscription.deleteMany({
-        where: {
-          artistSubscriptionTier: { artistId: Number(artistId) },
-        },
-      });
-
-      const trackGroups = await prisma.trackGroup.findMany({
-        where: {
-          artistId: Number(artistId),
-        },
-      });
-
-      await Promise.all(trackGroups.map((tg) => deleteTrackGroup(tg.id)));
+      await deleteArtist(Number(userId), Number(artistId));
     } catch (e) {
       res.status(400);
       next();

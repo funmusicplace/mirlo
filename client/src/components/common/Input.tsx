@@ -20,6 +20,10 @@ export const InputEl = styled.input`
   width: 100%;
   color: var(--mi-normal-foreground-color);
   background-color: var(--mi-lighten-background-color);
+
+  &[disabled] {
+    background-color: var(--mi-shade-background-color);
+  }
 `;
 
 export const Input: React.FC<Props> = ({ onChange, ...props }) => {

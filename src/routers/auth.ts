@@ -311,9 +311,13 @@ router.post(
   }
 );
 
+export const clearJWT = (res: Response) => {
+  return res.clearCookie("jwt").clearCookie("refresh");
+};
+
 router.get("/logout", (req, res) => {
   if (req.cookies["jwt"]) {
-    res.clearCookie("jwt").clearCookie("refresh").status(200).json({
+    clearJWT(res).status(200).json({
       message: "You have logged out",
     });
   } else {
@@ -325,7 +329,6 @@ router.get("/logout", (req, res) => {
 
 router.get("/profile", userAuthenticated, async (req, res) => {
   const { email } = req.user as { email: string };
-
   try {
     const foundUser = await prisma.user.findFirst({
       where: {
@@ -373,7 +376,8 @@ router.post("/refresh", (req, res) => {
       async (err: VerifyErrors | null, decoded?: JwtPayload | string) => {
         if (err) {
           // Wrong Refesh Token
-          return res.status(406).json({ message: "Unauthorized" });
+          clearJWT(res);
+          return res.status(406).json({ error: "Unauthorized" });
         } else {
           // Correct token we send a new access token
 

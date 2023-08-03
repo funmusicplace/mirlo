@@ -30,7 +30,6 @@ const APIInstance = (apiRoot: string) => {
         return resp.text() as R;
       }
       const json = await resp.json();
-
       if (resp.status === 401 && json.error === "jwt expired") {
         try {
           await apiRequest("refresh", { method: "POST" });

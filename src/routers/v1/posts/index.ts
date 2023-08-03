@@ -14,32 +14,36 @@ export default function () {
 
   async function GET(req: Request, res: Response) {
     const user = req.user as User;
-
-    const posts = await prisma.post.findMany({
-      where: {
-        publishedAt: { lte: new Date() },
-      },
-      include: {
-        artist: true,
-      },
-      orderBy: {
-        publishedAt: "desc",
-      },
-      take: 20,
-    });
-    const processedPosts = await Promise.all(
-      posts.map(async (p) =>
-        postProcessor.single(
-          p,
-          (p.artistId
-            ? await checkIsUserSubscriber(user, p.artistId)
-            : false) || p.artist?.userId === user?.id
+    try {
+      const posts = await prisma.post.findMany({
+        where: {
+          publishedAt: { lte: new Date() },
+        },
+        include: {
+          artist: true,
+        },
+        orderBy: {
+          publishedAt: "desc",
+        },
+        take: 20,
+      });
+      const processedPosts = await Promise.all(
+        posts.map(async (p) =>
+          postProcessor.single(
+            p,
+            (p.artistId
+              ? await checkIsUserSubscriber(user, p.artistId)
+              : false) || p.artist?.userId === user?.id
+          )
         )
-      )
-    );
-    res.json({
-      results: processedPosts,
-    });
+      );
+      res.json({
+        results: processedPosts,
+      });
+    } catch (e) {
+      console.error(`/v1/posts ${e}`);
+      res.status(400);
+    }
   }
 
   GET.apiDoc = {

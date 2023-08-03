@@ -31,7 +31,7 @@ prisma.$on("query", (e) => {
 
 /**
  * We intercept deletions for models with a `deletedAt` field
- * and instead soft deletes them.
+ * and instead soft delete them.
  *
  * It does NOT cascade delete.
  */

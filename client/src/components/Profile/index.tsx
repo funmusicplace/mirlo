@@ -2,8 +2,10 @@ import { css } from "@emotion/css";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useSnackbar } from "state/SnackbarContext";
+import { API_ROOT } from "../../constants";
+
 import api from "../../services/api";
 import { useGlobalStateContext } from "../../state/GlobalState";
 import Button from "../common/Button";
@@ -11,6 +13,7 @@ import FormComponent from "../common/FormComponent";
 import { InputEl } from "../common/Input";
 import LoadingSpinner from "../common/LoadingSpinner";
 import UserSupports from "./UserSupports";
+import useErrorHandler from "services/useErrorHandler";
 
 function Profile() {
   const { t } = useTranslation("translation", { keyPrefix: "profile" });
@@ -19,7 +22,8 @@ function Profile() {
     dispatch,
   } = useGlobalStateContext();
   const [isSaving, setIsSaving] = React.useState(false);
-
+  const errorHandler = useErrorHandler();
+  const navigate = useNavigate();
   const { register, handleSubmit } = useForm<{
     email: string;
     name: string;
@@ -45,18 +49,45 @@ function Profile() {
     async (data: { email?: string; name: string }) => {
       if (userId) {
         try {
-          setIsSaving(true);
-          await api.put(`users/${userId}`, data);
-          snackbar("Profile updated", { type: "success" });
+          const emailChanged = data.email !== user?.email;
+          const confirmed = emailChanged
+            ? window.confirm(
+                "You will receive a confirmation email from Mirlo that you will have to act on before continuing to use Mirlo"
+              )
+            : true;
+          if (confirmed) {
+            setIsSaving(true);
+            await api.put(`users/${userId}`, {
+              ...data,
+              client: process.env.REACT_APP_CLIENT_DOMAIN,
+            });
+            snackbar(t("profileUpdated"), { type: "success" });
+          }
         } catch (e) {
-          snackbar("There was a problem with the API", { type: "warning" });
+          errorHandler(e);
         } finally {
           setIsSaving(false);
         }
       }
     },
-    [snackbar, userId]
+    [snackbar, userId, user?.email, errorHandler, t]
   );
+
+  const deleteAccount = React.useCallback(async () => {
+    const confirmed = window.confirm(t("areYouSureDeleteAccount") ?? "");
+    if (confirmed) {
+      await api.delete(`users/${userId}`);
+      await fetch(API_ROOT + "/auth/logout", {
+        method: "GET",
+        credentials: "include",
+      });
+      dispatch({
+        type: "setLoggedInUser",
+        user: undefined,
+      });
+      navigate("/");
+    }
+  }, [t, userId, navigate, dispatch]);
 
   React.useEffect(() => {
     fetchProfile();
@@ -83,7 +114,11 @@ function Profile() {
         <h2>{t("profile")}</h2>
         <FormComponent>
           {t("email")}
-          <InputEl {...register("email")} />
+          <InputEl {...register("email")} disabled />
+          <small>
+            Changing your email has been disabled for now. Please contact an
+            admin if you want to do so
+          </small>
         </FormComponent>
         <FormComponent>
           {t("name")}
@@ -107,6 +142,17 @@ function Profile() {
       <Link to="/manage" style={{ marginTop: "1rem" }}>
         <Button style={{ width: "100%" }}>{t("manageArtists")}</Button>
       </Link>
+      <Button
+        style={{
+          width: "100%",
+          backgroundColor: "var(--mi-warning-background-color)",
+          borderColor: "var(--mi-darken-warning-background-color)",
+          marginTop: "1rem",
+        }}
+        onClick={deleteAccount}
+      >
+        {t("deleteAccount")}
+      </Button>
     </div>
   );
 }

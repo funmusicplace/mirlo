@@ -43,7 +43,9 @@
     "viewCollection": "View collection",
     "manageArtists": "Manage artists",
     "artistsYouSupport": "Artists you support",
-    "noSubscriptionsYet": "You don't support any musicians yet"
+    "noSubscriptionsYet": "You don't support any musicians yet",
+    "areYouSureDeleteAccount": "Are you sure you want to delete your account?",
+    "deleteAccount": "Delete account"
   },
   "trackGroupCard": {
     "download": "Download",

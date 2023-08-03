@@ -41,7 +41,7 @@ passport.use(
         })
         .then((foundUser) => {
           if (!foundUser) {
-            done("Unauthorized", false);
+            done(null, false);
           }
           done(null, jwtPayload);
         });

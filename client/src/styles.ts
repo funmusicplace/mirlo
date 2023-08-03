@@ -4,10 +4,12 @@ const styles = `html {
 
   --mi-primary-color: #0096a8;
   --mi-primary-color--hover: #00C4DB;
+
   --mi-secondary-color: #ffb3d0;
   --mi-secondary-color--hover: #FF80B0;
 
   --mi-warning-background-color: #f04e37;
+  --mi-darken-warning-background-color: #df250b;
   --mi-warning-foreground-color: white;
 
   --mi-primary-highlight-color: #bcb3ff;

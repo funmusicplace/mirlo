@@ -49,8 +49,7 @@ export default function () {
         ),
       });
     } else {
-      res.status(401);
-      res.json({
+      res.status(401).json({
         error: "Invalid route",
       });
     }

@@ -1,11 +1,8 @@
-import winston from "winston";
 import sharp from "sharp";
 
 import tempSharpConfig from "../config/sharp";
 import { Job } from "bullmq";
-import { PrismaClient } from "@prisma/client";
 import { uniq } from "lodash";
-import * as Minio from "minio";
 import {
   createBucketIfNotExists,
   getObjectFromMinio,

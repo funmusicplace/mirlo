@@ -1,4 +1,3 @@
-import { PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
 import { userHasPermission } from "../../../auth/passport";
 import prisma from "../../../../prisma/prisma";

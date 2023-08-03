@@ -108,11 +108,11 @@ initialize({
     module: require(`./routers/v1/${r}`),
   })),
   errorMiddleware: (err, req, res, next) => {
-    console.error("error middleware", err.status, err);
+    console.error("inside error middleware", err.status, err, err.status);
     if (err instanceof MulterError) {
       res.status(400).json({ error: err.message });
     }
-    res.status(err.status).json({ error: err.errors });
+    res.status(err.status ?? 500).json({ error: err.errors });
     next();
   },
 });
