@@ -7,6 +7,11 @@ const FormComponent = styled.div`
     display: flex;
     flex-direction: column;
     margin-left: 0.5rem;
+    margin-bottom: 0.25rem;
+  }
+
+  input {
+    margin-top: 0.25rem;
   }
 `;
 

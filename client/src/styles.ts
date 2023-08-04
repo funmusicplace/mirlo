@@ -17,8 +17,10 @@ const styles = `html {
 
   --mi-shade-background-color: rgba(0, 0, 0, .1);
   --mi-lighten-background-color: rgba(255, 255, 255, 0.2);
+  --mi-box-color: var(--mi-secondary-color);
 
-  --mi-border-radius: .5rem;
+  --mi-border-radius: 1rem;
+  --mi-border-radius-focus: 1.5rem;
   
   --mi-icon-button-background-color: var(--mi-shade-background-color);
   --mi-icon-button-background-color--hover: rgba(0, 0, 0, 0.2);
@@ -76,9 +78,9 @@ h1 {
 }
 
 h2 {
-  font-size: 2rem;
+  font-size: 1.9rem;
   line-height: 1.5;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.4rem;
 }
 
 h3 {

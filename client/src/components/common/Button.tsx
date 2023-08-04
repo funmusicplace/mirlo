@@ -14,7 +14,7 @@ export interface Compactable {
 const CustomButton = styled.button<Compactable>`
   background: none;
   border: none;
-  transition: 0.25s background-color, 0.25s color;
+  transition: 0.25s background-color, 0.25s color, 0.4s border-radius;
   font-size: 1rem;
   font-weight: bold;
   line-height: 1rem;
@@ -90,12 +90,16 @@ const CustomButton = styled.button<Compactable>`
 
   align-items: center;
   display: inline-flex;
-  border-radius: ${(props) => props.theme.borderRadius};
+  border-radius: var(--mi-border-radius);
   justify-content: center;
   white-space: nowrap;
 
   &[disabled] {
     opacity: 0.6;
+  }
+
+  &:hover {
+    border-radius: var(--mi-border-radius-focus);
   }
 
   & .startIcon {

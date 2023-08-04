@@ -46,6 +46,7 @@ const Menu: React.FC<{ setIsMenuOpen: (bool: boolean) => void }> = ({
           border: none;
 
           &:hover {
+            border-radius: 0;
             background: ${colorShade(
               theme.colors.primaryHighlight,
               -50

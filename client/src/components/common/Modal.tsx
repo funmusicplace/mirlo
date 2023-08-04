@@ -39,7 +39,7 @@ const Content = styled.div<ContentProps>`
   flex-direction: column;
   width: ${(props) => (props.size === "small" ? "40%" : "80%")};
   animation: 300ms ease-out forwards slide-up;
-  border-radius: ${(props) => props.theme.borderRadius};
+  border-radius: var(--mi-border-radius);
 
   h1 {
     display: inline-block;

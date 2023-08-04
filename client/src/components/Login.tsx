@@ -8,6 +8,7 @@ import Button from "./common/Button";
 import { InputEl } from "./common/Input";
 import { useSnackbar } from "state/SnackbarContext";
 import { useTranslation } from "react-i18next";
+import FormComponent from "./common/FormComponent";
 
 type SignupInputs = {
   email: string;
@@ -58,10 +59,14 @@ function Login() {
       >
         <h2>{t("logIn")}</h2>
 
-        <label>{t("email")}</label>
-        <InputEl type="email" {...register("email")} />
-        <label>{t("password")}</label>
-        <InputEl {...register("password")} type="password" />
+        <FormComponent>
+          <label>{t("email")}</label>
+          <InputEl type="email" {...register("email")} />
+        </FormComponent>
+        <FormComponent>
+          <label>{t("password")}</label>
+          <InputEl {...register("password")} type="password" />
+        </FormComponent>
         <Button type="submit">{t("logIn")}</Button>
       </form>
       <Link
@@ -73,6 +78,17 @@ function Login() {
         `}
       >
         {t("passwordReset")}
+      </Link>
+      <br />
+      <Link
+        to="/signup"
+        className={css`
+          margin: 0 auto;
+          display: inline-block;
+          margin-top: 1rem;
+        `}
+      >
+        {t("signUp")}
       </Link>
 
       <img

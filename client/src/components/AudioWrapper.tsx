@@ -136,6 +136,10 @@ export const AudioWrapper: React.FC<{
           className={css`
             display: flex;
             // margin-right: 1rem;
+
+            button {
+              margin-right: 0.25rem;
+            }
           `}
         >
           <IconButton onClick={onClickPrevious}>

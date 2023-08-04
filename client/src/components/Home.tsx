@@ -5,6 +5,8 @@ import { useGlobalStateContext } from "state/GlobalState";
 import api from "../services/api";
 import Box from "./common/Box";
 import PostContent from "./common/PostContent";
+import Button from "./common/Button";
+import { FaArrowRight } from "react-icons/fa";
 
 function Home() {
   const {
@@ -35,12 +37,37 @@ function Home() {
   }, [fetchPosts]);
 
   return (
-    <div>
+    <div className={css``}>
+      {!user && (
+        <div
+          className={css`
+            font-size: 2rem;
+            padding-bottom: 2rem;
+          `}
+        >
+          <p>
+            Direct support for musicians. Buy their music. Collectively owned
+            and managed.
+          </p>
+          <Link to="signup">
+            <Button
+              className={css`
+                margin-top: 1.5rem;
+              `}
+              endIcon={<FaArrowRight />}
+            >
+              Get started
+            </Button>
+          </Link>
+        </div>
+      )}
+      <h2>Latest posts from the community:</h2>
       {posts.map((p) => (
         <Box
           key={p.id}
           className={css`
             margin-bottom: 1rem;
+
             h3 {
               padding-bottom: 0.4rem;
             }

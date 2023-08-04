@@ -216,17 +216,15 @@ const Player = () => {
           <div>
             <IconButton
               color={shuffle ? "primary" : undefined}
-              compact
               onClick={onShuffle}
             >
               <ImShuffle />
             </IconButton>
             <IconButton
               color={looping ? "primary" : undefined}
-              compact
               onClick={onLoop}
               className={css`
-                margin-left: 1rem;
+                margin-left: 0.25rem;
                 position: relative;
               `}
             >

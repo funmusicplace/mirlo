@@ -6,13 +6,15 @@
     "email": "Email:",
     "password": "Password:",
     "signUpButton": "Sign up",
-    "success": "Registration success!"
+    "success": "Registration success!",
+    "logIn": "Alrieady have an account? Log in"
   },
   "logIn": {
     "logIn": "Log in",
     "email": "Email:",
     "password": "Password:",
-    "passwordReset": "Forgot your password?"
+    "passwordReset": "Forgot your password?",
+    "signUp": "Don't have an account yet? Sign up"
   },
   "passwordReset": {
     "title": "Reset your password",
@@ -60,6 +62,9 @@
     "edit": "Edit",
     "updates": "Updates",
     "releases": "Releases"
+  },
+  "post": {
+    "edit": "Edit"
   },
   "manageArtist": {
     "notEnabled": "This artist has not been enabled by site admin yet! Contact an admin to do so.",

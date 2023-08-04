@@ -7,6 +7,8 @@ import Button from "./common/Button";
 import { InputEl } from "./common/Input";
 import { useSnackbar } from "state/SnackbarContext";
 import Box from "./common/Box";
+import { Link } from "react-router-dom";
+import FormComponent from "./common/FormComponent";
 
 type SignupInputs = {
   email: string;
@@ -45,25 +47,46 @@ function Signup() {
   }
 
   return (
-    <div>
+    <div
+      className={css`
+        text-align: center;
+      `}
+    >
       <form
         className={css`
-          max-width: 200px;
+          max-width: 230px;
           margin: 0 auto;
           display: flex;
+          text-align: left;
           flex-direction: column;
         `}
         onSubmit={handleSubmit(onSubmit)}
       >
         <h2>{t("register")}</h2>
-        <label>{t("name")}</label>
-        <InputEl type="input" {...register("name")} />
-        <label>{t("email")}</label>
-        <InputEl type="email" {...register("email")} />
-        <label>{t("password")}</label>
-        <InputEl {...register("password")} type="password" />
+        <FormComponent>
+          <label>{t("name")}</label>
+          <InputEl type="input" {...register("name")} />
+        </FormComponent>
+        <FormComponent>
+          <label>{t("email")}</label>
+          <InputEl type="email" {...register("email")} />
+        </FormComponent>
+        <FormComponent>
+          <label>{t("password")}</label>
+          <InputEl {...register("password")} type="password" />
+        </FormComponent>
         <Button type="submit">{t("signUpButton")}</Button>
       </form>
+      <Link
+        to="/login"
+        className={css`
+          margin: 0 auto;
+          display: inline-block;
+          margin-top: 1rem;
+        `}
+      >
+        {t("logIn")}
+      </Link>
       <img
         alt="blackbird"
         src="/images/blackbird.png"
