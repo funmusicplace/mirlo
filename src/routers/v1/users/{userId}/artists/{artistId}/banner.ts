@@ -1,14 +1,10 @@
-import { User } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
 import multer from "multer";
 import {
   artistBelongsToLoggedInUser,
   userAuthenticated,
-  userHasPermission,
 } from "../../../../../../auth/passport";
-import processTrackGroupCover, {
-  processArtistBanner,
-} from "../../../../../../utils/processImages";
+import { processArtistBanner } from "../../../../../../utils/processImages";
 import prisma from "../../../../../../../prisma/prisma";
 
 const upload = multer({

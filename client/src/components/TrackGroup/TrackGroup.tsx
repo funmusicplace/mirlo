@@ -75,7 +75,21 @@ function TrackGroup() {
           justify-content: space-between;
         `}
       >
-        <h1>{artist.name}</h1>
+        <div>
+          <h1
+            className={css`
+              line-height: 1;
+            `}
+          >
+            {trackGroup.title}
+          </h1>
+          {artist && (
+            <em>
+              by{" "}
+              <Link to={`/${artist.urlSlug ?? artist.id}`}>{artist?.name}</Link>
+            </em>
+          )}
+        </div>
         {ownedByUser && (
           <Link to={`/manage/artists/${artist.id}`}>
             <Button compact startIcon={<FaPen />}>
@@ -84,7 +98,6 @@ function TrackGroup() {
           </Link>
         )}
       </div>
-      <p>{artist.bio}</p>
       <ArtistTrackGroup trackGroup={trackGroup} artist={artist} />
       <PublicTrackGroupListing
         tracks={trackGroup.tracks}

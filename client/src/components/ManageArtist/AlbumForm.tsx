@@ -181,7 +181,8 @@ const AlbumForm: React.FC<{
       </FormComponent>
 
       <FormComponent>
-        {t("releaseDate")}: <InputEl type="date" {...register("releaseDate")} />
+        {t("releaseDate")}:{" "}
+        <InputEl type="date" {...register("releaseDate")} required />
       </FormComponent>
       <FormComponent>
         {t("about")}: <TextArea {...register("about")} />

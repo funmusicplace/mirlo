@@ -61,7 +61,8 @@
     "doesNotExist": "This artist does not exist or it does not have a public presence",
     "edit": "Edit",
     "updates": "Updates",
-    "releases": "Releases"
+    "releases": "Releases",
+    "noSubscriptionTiersYet": "This artist hasn't added any subscription tiers yet."
   },
   "post": {
     "edit": "Edit"

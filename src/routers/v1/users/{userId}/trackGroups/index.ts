@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Prisma, User } from "@prisma/client";
 import { Request, Response } from "express";
 import {
   contentBelongsToLoggedInUserArtist,
@@ -75,9 +75,11 @@ export default function () {
   // FIXME: only allow creation of trackgroups for users that belong to the
   // logged in user
   async function POST(req: Request, res: Response) {
+    const { title, about, artistId, published, releaseDate, enabled } =
+      req.body;
+    const user = req.user as User;
+
     try {
-      const { title, about, artistId, published, releaseDate, enabled } =
-        req.body;
       const trackgroup = await prisma.trackGroup.create({
         data: {
           title,
@@ -90,6 +92,7 @@ export default function () {
       });
       res.json({ trackgroup });
     } catch (e) {
+      console.error(`POST users/${user.id}/trackGroups`, e);
       res.status(500).json({
         error: "Something went wrong while trying to create a trackgroup",
       });
