@@ -14,7 +14,7 @@ import prisma from "../../../../../../../prisma/prisma";
 const upload = multer({
   dest: process.env.MEDIA_LOCATION_INCOMING ?? "/data/media/incoming",
   limits: {
-    fileSize: 2000000,
+    fileSize: 10000000, // 10mb seems reasonable for a cover
   },
 });
 
