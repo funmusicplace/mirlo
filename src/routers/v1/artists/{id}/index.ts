@@ -10,7 +10,10 @@ import {
   checkIsUserSubscriber,
   findArtistIdForURLSlug,
 } from "../../../../utils/artist";
-import { finalArtistBannerBucket } from "../../../../utils/minio";
+import {
+  finalArtistAvatarBucket,
+  finalArtistBannerBucket,
+} from "../../../../utils/minio";
 import { convertURLArrayToSizes } from "../../../../utils/images";
 
 export default function () {
@@ -49,6 +52,7 @@ export default function () {
             },
           },
           banner: true,
+          avatar: true,
           subscriptionTiers: {
             where: {
               deletedAt: null,
@@ -86,6 +90,15 @@ export default function () {
               convertURLArrayToSizes(
                 artist?.banner?.url,
                 finalArtistBannerBucket
+              ),
+          },
+          avatar: {
+            ...artist?.avatar,
+            sizes:
+              artist?.avatar &&
+              convertURLArrayToSizes(
+                artist?.avatar?.url,
+                finalArtistAvatarBucket
               ),
           },
           trackGroups: artist?.trackGroups.map(trackGroupProcessor.single),

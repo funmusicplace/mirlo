@@ -1,5 +1,4 @@
 import { css } from "@emotion/css";
-import React from "react";
 import { FaPen } from "react-icons/fa";
 import { Link, useParams } from "react-router-dom";
 import { useGlobalStateContext } from "state/GlobalState";
@@ -12,6 +11,7 @@ import usePublicObjectById from "utils/usePublicObjectById";
 import { Helmet } from "react-helmet";
 import { useTranslation } from "react-i18next";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
+import { MetaCard } from "components/common/MetaCard";
 
 function Artist() {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
@@ -34,10 +34,11 @@ function Artist() {
 
   return (
     <div>
-      <Helmet>
-        <title>Mirlo: {artist.name}</title>
-        <meta name="description" content={`${artist.name}: ${artist.bio}`} />
-      </Helmet>
+      <MetaCard
+        title={artist.name}
+        description={artist.bio}
+        image={artist.avatar?.sizes?.[500] ?? artist.banner?.sizes?.[625]}
+      />
       <div
         className={css`
           display: flex;

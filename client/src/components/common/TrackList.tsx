@@ -111,7 +111,7 @@ const TrackLIWrapper: React.FC<{
               {track.trackGroup?.artist?.name}
             </Link>
             {" - "}
-            <Link to={`/trackgroup/${track.trackGroup.id}`}>
+            <Link to={`/tg/${track.trackGroup.id}`}>
               {track.trackGroup?.title}
             </Link>
           </>

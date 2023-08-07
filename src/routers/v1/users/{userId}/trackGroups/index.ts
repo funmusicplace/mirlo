@@ -6,6 +6,7 @@ import {
 } from "../../../../../auth/passport";
 import processor from "../../../../../utils/trackGroup";
 import prisma from "../../../../../../prisma/prisma";
+import slugify from "slugify";
 
 export default function () {
   const operations = {
@@ -88,6 +89,7 @@ export default function () {
           published,
           releaseDate: new Date(releaseDate),
           adminEnabled: enabled,
+          urlSlug: slugify(title),
         },
       });
       res.json({ trackgroup });

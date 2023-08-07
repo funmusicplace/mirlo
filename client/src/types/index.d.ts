@@ -39,6 +39,7 @@ interface TrackGroup {
   tracks: Track[];
   cover?: { id: number; url: string; sizes?: { [key: number]: string } };
   minPrice?: number; // in cents
+  urlSlug?: string;
 }
 
 interface Post {
@@ -61,11 +62,11 @@ interface Artist {
   payPalClientId?: string;
   posts: Post[];
   subscriptionTiers: ArtistSubscriptionTier[];
-  banner: {
+  banner?: {
     url: string;
     sizes?: { [key: string]: string };
   };
-  avatar: {
+  avatar?: {
     url: string;
     sizes?: { [key: string]: string };
   };

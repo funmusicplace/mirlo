@@ -118,7 +118,11 @@ const ArtistTrackGroup: React.FC<{
         />
         <SmallTileDetails
           title={
-            <Link to={`/${trackGroup.artistId}/trackGroup/${trackGroup.id}`}>
+            <Link
+              to={`/${artist.urlSlug ?? trackGroup.artistId}/tg/${
+                trackGroup.urlSlug ?? trackGroup.id
+              }`}
+            >
               {trackGroup.title}
             </Link>
           }

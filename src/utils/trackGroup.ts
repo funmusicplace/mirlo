@@ -2,6 +2,7 @@ import { TrackGroup, Track, TrackGroupCover } from "@prisma/client";
 import prisma from "../../prisma/prisma";
 import { convertURLArrayToSizes, generateFullStaticImageUrl } from "./images";
 import { finalCoversBucket } from "./minio";
+import { findArtistIdForURLSlug } from "./artist";
 
 /**
  * We use our own custom function to handle this until we
@@ -46,6 +47,29 @@ export const deleteTrackGroup = async (trackGroupId: number) => {
       trackId: { in: tracks.map((t) => t.id) },
     },
   });
+};
+
+export const findTrackGroupIdForSlug = async (
+  id: string,
+  artistId?: string
+) => {
+  if (Number.isNaN(Number(id))) {
+    if (!artistId) {
+      throw new Error(
+        "Searching for a TrackGroup by slug requires an artistId"
+      );
+    }
+    artistId = await findArtistIdForURLSlug(artistId);
+    console.log("filtering by artistId", artistId);
+    const artist = await prisma.trackGroup.findFirst({
+      where: {
+        urlSlug: id,
+        artistId: Number(artistId),
+      },
+    });
+    id = `${artist?.id ?? id}`;
+  }
+  return id;
 };
 
 export default {

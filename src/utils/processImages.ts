@@ -7,8 +7,10 @@ import { SUPPORTED_IMAGE_MIME_TYPES } from "../config/supported-media-types";
 import { REDIS_CONFIG } from "../config/redis";
 import {
   createBucketIfNotExists,
+  finalArtistAvatarBucket,
   finalArtistBannerBucket,
   finalCoversBucket,
+  incomingArtistAvatarBucket,
   incomingArtistBannerBucket,
   incomingCoversBucket,
   minioClient,
@@ -62,6 +64,54 @@ imageQueueEvents.on("completed", async (jobId: any) => {
     logger.error(err);
   }
 });
+
+export const processArtistAvatar = (ctx: APIContext) => {
+  return async (file: APIFile, artistId: number) => {
+    await checkFileType(ctx, file, SUPPORTED_IMAGE_MIME_TYPES, logger);
+
+    const image = await prisma.artistAvatar.upsert({
+      create: {
+        originalFilename: file.originalname,
+        artistId: artistId,
+      },
+      update: {
+        originalFilename: file.originalname,
+      },
+      where: {
+        artistId,
+      },
+    });
+
+    logger.info(`MinIO is at ${MINIO_HOST}:${MINIO_API_PORT}`);
+    logger.info("Uploading image to object storage");
+
+    await createBucketIfNotExists(
+      minioClient,
+      incomingArtistAvatarBucket,
+      logger
+    );
+
+    logger.info(
+      `Going to put a file on MinIO Bucket ${incomingArtistAvatarBucket}: ${image.id}, ${file.path}`
+    );
+
+    minioClient
+      .fPutObject(incomingArtistBannerBucket, image.id, file.path)
+      .then((objInfo: { etag: string }) => {
+        logger.info("File put on minIO", objInfo);
+        logger.info("Adding image to queue");
+
+        imageQueue.add("optimize-image", {
+          filepath: file.path,
+          destination: image.id,
+          model: "artistAvatar",
+          incomingMinioBucket: incomingArtistAvatarBucket,
+          finalMinioBucket: finalArtistAvatarBucket,
+          config: sharpConfig.config["banner"],
+        });
+      });
+  };
+};
 
 export const processArtistBanner = (ctx: APIContext) => {
   return async (file: APIFile, artistId: number) => {

@@ -1,18 +1,17 @@
 import { css } from "@emotion/css";
-import React from "react";
 import { FaPen } from "react-icons/fa";
 import { Link, useParams } from "react-router-dom";
 import { useGlobalStateContext } from "state/GlobalState";
 import Box from "../common/Box";
 import Button from "../common/Button";
 import usePublicObjectById from "utils/usePublicObjectById";
-import { Helmet } from "react-helmet";
 import LoadingSpinner from "components/common/LoadingSpinner";
 import { useTranslation } from "react-i18next";
 import ArtistTrackGroup from "components/Artist/ArtistTrackGroup";
 import ArtistSupport from "components/Artist/ArtistSupport";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
 import PublicTrackGroupListing from "components/common/PublicTrackGroupListing";
+import { MetaCard } from "components/common/MetaCard";
 
 function TrackGroup() {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
@@ -26,7 +25,11 @@ function TrackGroup() {
     usePublicObjectById<Artist>("artists", artistId);
 
   const { object: trackGroup, isLoadingObject: isLoadingTrackGroup } =
-    usePublicObjectById<TrackGroup>("trackGroups", trackGroupId);
+    usePublicObjectById<TrackGroup>(
+      "trackGroups",
+      trackGroupId,
+      `?artistId=${artistId}`
+    );
 
   if (!artist && !isLoadingArtist) {
     return <Box>{t("doesNotExist")}</Box>;
@@ -62,12 +65,11 @@ function TrackGroup() {
 
   return (
     <div>
-      <Helmet>
-        <title>
-          Mirlo: {artist.name} - {TrackGroup.name}{" "}
-        </title>
-        <meta name="description" content={`${artist.name}: ${artist.bio}`} />
-      </Helmet>
+      <MetaCard
+        title={trackGroup.title}
+        description={trackGroup.about ?? "An album on Mirlo"}
+        image={trackGroup.cover?.sizes?.[300]}
+      />
       <div
         className={css`
           display: flex;

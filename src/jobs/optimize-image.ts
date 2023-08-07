@@ -137,6 +137,11 @@ const optimizeImage = async (job: Job) => {
         where: { id: destination },
         data: { url: urls },
       });
+    } else if (model === "artistAvatar") {
+      await prisma.artistAvatar.update({
+        where: { id: destination },
+        data: { url: urls },
+      });
     }
 
     profiler.done({ message: "Done optimizing image" });

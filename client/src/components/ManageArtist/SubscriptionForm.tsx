@@ -77,7 +77,7 @@ const SubscriptionForm: React.FC<{
         }
       }
     },
-    [userId, existingId, snackbar, reset, reload, artistId]
+    [userId, existingId, snackbar, reset, reload, artistId, errorHandler]
   );
 
   return (

@@ -84,7 +84,7 @@ const router = createBrowserRouter([
         path: ":artistId",
         children: [
           { path: "", element: <Artist /> },
-          { path: "trackgroup/:trackGroupId", element: <TrackGroup /> },
+          { path: "tg/:trackGroupId", element: <TrackGroup /> },
         ],
       },
     ],

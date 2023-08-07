@@ -81,6 +81,11 @@ function App() {
       <Helmet>
         <title>A Mirlo Space</title>
         <meta name="description" content="A home for all of your music" />
+
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="A Mirlo Space" />
+        <meta property="og:description" content="A home for all your music" />
+        <meta property="og:image" content="/images/blackbird.png" />
       </Helmet>
       <div
         className={css`
@@ -111,7 +116,7 @@ function App() {
               className={css`
                 max-width: 640px;
                 background-color: var(--mi-normal-background-color);
-                padding: 3rem 2rem 9rem;
+                padding: 2rem 2rem 9rem;
                 margin: 0 auto;
                 width: 100%;
                 ${isArtistPage

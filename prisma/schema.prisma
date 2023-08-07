@@ -69,6 +69,7 @@ model Artist {
   banner            ArtistBanner?
   avatar            ArtistAvatar?
   urlSlug           String                   @unique
+  properties        Json?
 }
 
 model ArtistAvatar {
@@ -160,6 +161,9 @@ model TrackGroup {
   isPriceFixed           Boolean                  @default(false)
   userTrackGroupPurchase UserTrackGroupPurchase[]
   stripeProductKey       String?
+  urlSlug                String
+
+  @@unique([artistId, urlSlug])
 }
 
 model Track {

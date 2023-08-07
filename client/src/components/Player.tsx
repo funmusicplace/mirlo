@@ -152,18 +152,18 @@ const Player = () => {
     dispatch({ type: "setLooping", looping: nextLooping });
   }, [dispatch, looping]);
 
-  if (!currentTrack) {
+  if (!currentTrack?.title) {
     return null;
   }
 
   return (
     <div className={playerClass}>
       <Helmet>
-        {currentTrack && (
-          <title>
-            {currentTrack.trackGroup?.artist?.name} - {currentTrack.title}
-          </title>
-        )}
+        <title>
+          {currentTrack
+            ? `${currentTrack.trackGroup?.artist?.name} - ${currentTrack.title}`
+            : ""}
+        </title>
       </Helmet>
       {currentTrack && (
         <div

@@ -4,6 +4,10 @@ import * as Minio from "minio";
 
 export const incomingArtistBannerBucket = "incoming-artist-banners";
 export const finalArtistBannerBucket = "artist-banners";
+
+export const incomingArtistAvatarBucket = "incoming-artist-banners";
+export const finalArtistAvatarBucket = "artist-avatars";
+
 export const incomingCoversBucket = "incoming-covers";
 export const finalCoversBucket = "trackgroup-covers";
 

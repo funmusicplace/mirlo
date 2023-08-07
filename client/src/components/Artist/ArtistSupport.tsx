@@ -68,7 +68,9 @@ const ArtistSupport: React.FC<{ artist: Artist }> = ({ artist }) => {
   }
 
   if (artist.subscriptionTiers.length === 0) {
-    return <Box>{t("noSubscriptionTiersYet")}</Box>;
+    return (
+      <Box style={{ marginTop: "1rem" }}>{t("noSubscriptionTiersYet")}</Box>
+    );
   }
 
   if (userSubscriptionTier) {
