@@ -8,10 +8,11 @@ import Button from "../common/Button";
 import PostContent from "../common/PostContent";
 import ArtistAlbums from "./ArtistAlbums";
 import usePublicObjectById from "utils/usePublicObjectById";
-import { Helmet } from "react-helmet";
 import { useTranslation } from "react-i18next";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
 import { MetaCard } from "components/common/MetaCard";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 function Artist() {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
@@ -55,7 +56,16 @@ function Artist() {
           </Link>
         )}
       </div>
-      <p>{artist.bio}</p>
+      <ReactMarkdown
+        className={css`
+          ul {
+            margin-left: 1rem;
+          }
+        `}
+        remarkPlugins={[remarkGfm]}
+      >
+        {artist.bio}
+      </ReactMarkdown>
       <ArtistSupport artist={artist} />
       <ArtistAlbums artist={artist} />
       <h2>{t("updates")}</h2>
