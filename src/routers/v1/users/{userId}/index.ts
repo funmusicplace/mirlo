@@ -9,6 +9,7 @@ import sendMail from "../../../../jobs/send-mail";
 import { randomUUID } from "crypto";
 import { deleteArtist } from "../../../../utils/artist";
 import stripe from "../../../../utils/stripe";
+import { deleteUser } from "../../../../utils/user";
 
 export default function () {
   const operations = {
@@ -94,33 +95,9 @@ export default function () {
   }
 
   async function DELETE(req: Request, res: Response, next: NextFunction) {
-    const { userId } = req.params as unknown as { userId: string };
     const user = req.user as User;
     try {
-      const userArtists = await prisma.artist.findMany({
-        where: { userId: Number(userId) },
-      });
-      await Promise.all(
-        userArtists.map((artist) => deleteArtist(Number(userId), artist.id))
-      );
-
-      const stripeSubscriptions = await prisma.artistUserSubscription.findMany({
-        where: { userId: user.id },
-      });
-      await Promise.all(
-        stripeSubscriptions.map(async (sub) => {
-          if (sub.stripeSubscriptionKey) {
-            await stripe.subscriptions.cancel(sub.stripeSubscriptionKey);
-          }
-        })
-      );
-      await prisma.artistUserSubscription.deleteMany({
-        where: {
-          userId: user.id,
-        },
-      });
-      await prisma.user.delete({ where: { id: user.id } });
-      res.status(200);
+      deleteUser(user.id);
     } catch (e) {
       res.status(400);
       next();
