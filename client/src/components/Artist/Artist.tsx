@@ -60,6 +60,7 @@ function Artist() {
         className={css`
           ul {
             margin-left: 1rem;
+            margin-bottom: 1rem;
           }
         `}
         remarkPlugins={[remarkGfm]}

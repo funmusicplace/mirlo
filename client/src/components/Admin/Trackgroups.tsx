@@ -68,7 +68,7 @@ export const AdminTrackGroups: React.FC = () => {
                 <td>{trackgroup.title}</td>
                 <td>{trackgroup.type}</td>
                 {/* <td>{trackgroup.private ? <FaCheck /> : undefined}</td> */}
-                <td>{trackgroup.enabled ? <FaCheck /> : undefined}</td>
+                <td>{trackgroup.adminEnabled ? <FaCheck /> : undefined}</td>
                 {/* <td>{trackgroup.featured ? <FaCheck /> : undefined}</td> */}
 
                 <td>{trackgroup.artist?.name}</td>

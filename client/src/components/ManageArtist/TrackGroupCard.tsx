@@ -5,6 +5,7 @@ import ClickToPlay from "components/common/ClickToPlay";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { FaCheck, FaTimes } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 const TrackGroupCard: React.FC<{
   album: TrackGroup;
@@ -18,6 +19,10 @@ const TrackGroupCard: React.FC<{
         display: flex;
         width: 100%;
         margin-bottom: 0.25rem;
+
+        &:not(:first-child) {
+          margin-top: 1rem;
+        }
       `}
     >
       <ClickToPlay
@@ -50,7 +55,6 @@ const TrackGroupCard: React.FC<{
           {album.title}
         </div>
         <div>Published: {album.published ? <FaCheck /> : <FaTimes />}</div>
-        <div>Enabled: {album.enabled ? <FaCheck /> : <FaTimes />}</div>
         <div>
           <strong>Tracks:</strong> {album.tracks.length}
         </div>
@@ -77,14 +81,11 @@ const TrackGroupCard: React.FC<{
           >
             {t("manageAlbum")}
           </Button>
-          <Button
-            compact
-            onClick={() => {
-              setManageTrackgroup(album);
-            }}
-          >
-            {t("viewLive")}
-          </Button>
+          {album.published && (
+            <Link to={`/${album.artist?.urlSlug}/tg/${album.urlSlug}`}>
+              <Button compact>{t("viewLive")}</Button>
+            </Link>
+          )}
         </div>
       </div>
     </Box>

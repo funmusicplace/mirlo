@@ -29,7 +29,7 @@ interface Track {
 interface TrackGroup {
   title: string;
   published: boolean;
-  enabled: boolean;
+  adminEnabled: boolean;
   id: number;
   type: "lp" | "ep" | "album" | "single";
   releaseDate: string;
