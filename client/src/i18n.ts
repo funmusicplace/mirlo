@@ -1,8 +1,13 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
+import { TransifexI18next } from "@transifex/i18next";
 
 import * as en from "translation/en.json";
 
+const txBackend = new TransifexI18next({
+  token: "public token",
+  // other options from @transifex/native init function
+});
 // the translations
 // (tip move them in a JSON file and import them,
 // or even better, manage them separated from your code: https://react.i18next.com/guides/multiple-translation-files)
@@ -14,6 +19,7 @@ const resources = {
 
 i18n
   .use(initReactI18next) // passes i18n down to react-i18next
+  .use(txBackend)
   .init({
     resources,
     lng: "en", // language to use, more information here: https://www.i18next.com/overview/configuration-options#languages-namespaces-resources
