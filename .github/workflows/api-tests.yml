@@ -45,7 +45,7 @@ jobs:
         run: sleep 30s
 
       - name: Run tests
-        run: docker exec blackbird-api yarn mocha test --exit
+        run: docker exec blackbird-api yarn test --exit
 
       - name: Stop containers
         if: always()
