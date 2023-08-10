@@ -38,7 +38,7 @@ jobs:
         run: yarn install --force
 
       - name: Start containers
-        run: docker-compose -f docker-compose.yml -f test.docker-compose.yml up -d
+        run: docker-compose -f docker-compose.yml -f test.docker-compose.yml up
 
       - name: Sleep to give things time to start
         run: sleep 30s
