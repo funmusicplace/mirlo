@@ -40,9 +40,11 @@ jobs:
       - name: Start containers
         run: docker-compose -f docker-compose.yml -f test.docker-compose.yml up -d
 
-
       - name: Sleep to give things time to start
         run: sleep 30s
+
+      - name: Print logs just to see
+        run: docker logs blackbird-api
 
       - name: Run tests
         run: docker exec blackbird-api yarn test
