@@ -78,7 +78,8 @@
     "delete": "Delete",
     "addNewPost": "Add new post",
     "posts": "Your posts",
-    "yourAlbums": "Your albums"
+    "yourAlbums": "Your albums",
+    "manageAlbum": "Manage"
   },
   "manageAlbum": {
     "editAlbum": "Edit album",

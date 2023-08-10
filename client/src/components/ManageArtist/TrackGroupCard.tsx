@@ -3,12 +3,14 @@ import Box from "components/common/Box";
 import Button from "components/common/Button";
 import ClickToPlay from "components/common/ClickToPlay";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { FaCheck, FaTimes } from "react-icons/fa";
 
 const TrackGroupCard: React.FC<{
   album: TrackGroup;
   setManageTrackgroup: (tg: TrackGroup) => void;
 }> = ({ album, setManageTrackgroup }) => {
+  const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
   return (
     <Box
       key={album.id}
@@ -71,8 +73,17 @@ const TrackGroupCard: React.FC<{
             onClick={() => {
               setManageTrackgroup(album);
             }}
+            style={{ marginRight: "1rem" }}
           >
-            Manage
+            {t("manageAlbum")}
+          </Button>
+          <Button
+            compact
+            onClick={() => {
+              setManageTrackgroup(album);
+            }}
+          >
+            {t("viewLive")}
           </Button>
         </div>
       </div>

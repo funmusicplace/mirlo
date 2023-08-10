@@ -5,7 +5,7 @@ import { TransifexI18next } from "@transifex/i18next";
 import * as en from "translation/en.json";
 
 const txBackend = new TransifexI18next({
-  token: "public token",
+  token: process.env.REACT_APP_TRANSIFEX_TOKEN,
   // other options from @transifex/native init function
 });
 // the translations
@@ -17,12 +17,20 @@ const resources = {
   },
 };
 
+const userLanguage = navigator.language;
+
+const finishedLanguages = ["en"];
+
+const defaultLanguage = finishedLanguages.find((lang) =>
+  userLanguage.startsWith(lang)
+);
+
 i18n
   .use(initReactI18next) // passes i18n down to react-i18next
   .use(txBackend)
   .init({
-    resources,
-    lng: "en", // language to use, more information here: https://www.i18next.com/overview/configuration-options#languages-namespaces-resources
+    // resources,
+    lng: defaultLanguage ?? "en", // language to use, more information here: https://www.i18next.com/overview/configuration-options#languages-namespaces-resources
     // you can use the i18n.changeLanguage function to change the language manually: https://www.i18next.com/overview/api#changelanguage
     // if you're using a language detector, do not define the lng option
 
