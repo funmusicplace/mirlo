@@ -19,8 +19,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v1
 
+      - run: echo ::set-output name=NODE_VERSION::$(cat .nvmrc)
+        id: nvm
+
       - name: Install node
         uses: actions/setup-node@v1
+        with:
+          node-version: ${{ steps.nvm.outputs.NODE_VERSION }}
 
       - name: Copy env file
         run: |
