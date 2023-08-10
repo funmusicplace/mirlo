@@ -1,0 +1,47 @@
+name: Unit tests
+
+on:
+  push:
+    branches:
+      - main
+      - features/**
+      - dependabot/**
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  docker:
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+
+      - name: Install node
+        uses: actions/setup-node@v1
+
+      - name: Copy env file
+        run: |
+          cp .env.example .env
+
+      - name: Echo CI
+        run: echo ${CI}
+
+      - name: Install
+        run: yarn install --force
+
+      - name: Start containers
+        run: docker-compose -f docker-compose.yml -f test.docker-compose.yml up -d --build
+
+
+      - name: Sleep to give things time to start
+        run: sleep 30s
+
+      - name: Run tests
+        run: docker exec blackbird-api yarn mocha test --exit
+
+      - name: Stop containers
+        if: always()
+        run: docker-compose down
