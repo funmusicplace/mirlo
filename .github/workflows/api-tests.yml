@@ -47,7 +47,7 @@ jobs:
         run: docker logs blackbird-api
 
       - name: Run tests
-        run: docker exec blackbird-api yarn test
+        run: docker exec blackbird-api yarn test --exit
 
       - name: Stop containers
         if: always()
