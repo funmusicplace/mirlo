@@ -8,6 +8,7 @@ import { deleteUser } from "../../src/utils/user";
 
 const baseURL = `${process.env.APP_HOST}/v1/`;
 
+console.log("base_url", baseURL);
 describe("artists", () => {
   beforeEach(async () => {
     await prisma.$executeRaw`DELETE FROM "Artist";`;
