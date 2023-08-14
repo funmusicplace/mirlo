@@ -134,6 +134,15 @@ function App() {
             >
               <Outlet />
             </div>
+            <div
+              className={css`
+                text-align: center;
+                display: block;
+              `}
+            >
+              Questions? <a href="mailto:mirlodotspace@proton.me">Contact us</a>
+              .
+            </div>
             <Player />
           </>
         )}
