@@ -85,19 +85,22 @@ export const userAuthenticated = (req: Request, res: Response, next: any) => {
 export const userHasPermission = (role: "admin" | "owner") => {
   return (req: Request, res: Response, next: NextFunction) => {
     const { userId } = req.params as unknown as { userId: string };
-    const loggedInUser = req.user as User;
+    const loggedInUser = req.user as User | undefined;
 
-    if (
-      role === "owner" &&
-      Number(userId) !== loggedInUser.id &&
-      !loggedInUser.isAdmin
-    ) {
+    if (!loggedInUser) {
       res.status(401).json({ error: "Unauthorized" });
+    } else {
+      if (
+        role === "owner" &&
+        Number(userId) !== loggedInUser.id &&
+        !loggedInUser.isAdmin
+      ) {
+        res.status(401).json({ error: "Unauthorized" });
+      }
+      if (role === "admin" && !loggedInUser.isAdmin) {
+        res.status(401).json({ error: "Unauthorized" });
+      }
     }
-    if (role === "admin" && !loggedInUser.isAdmin) {
-      res.status(401).json({ error: "Unauthorized" });
-    }
-    return next();
   };
 };
 
@@ -111,27 +114,31 @@ export const artistBelongsToLoggedInUser = async (
     artistId: string;
   };
 
-  const loggedInUser = req.user as User;
+  const loggedInUser = req.user as User | undefined;
 
-  if (loggedInUser.id !== Number(userId)) {
-    res.status(400).json({
-      error: `Artist must belong to user`,
+  if (!loggedInUser) {
+    res.status(401).json({ error: "Unauthorized" });
+  } else {
+    if (loggedInUser.id !== Number(userId)) {
+      res.status(400).json({
+        error: `Artist must belong to user`,
+      });
+      return next(`Artist must belong to user`);
+    }
+
+    const artist = await prisma.artist.findFirstOrThrow({
+      where: {
+        userId: loggedInUser.id,
+        id: Number(artistId),
+      },
     });
-    return next(`Artist must belong to user`);
-  }
 
-  const artist = await prisma.artist.findFirstOrThrow({
-    where: {
-      userId: loggedInUser.id,
-      id: Number(artistId),
-    },
-  });
-
-  if (!artist) {
-    res.status(400).json({
-      error: "Artist must belong to user",
-    });
-    return next("Artist must belong to user");
+    if (!artist) {
+      res.status(400).json({
+        error: "Artist must belong to user",
+      });
+      return next("Artist must belong to user");
+    }
   }
   return next();
 };
@@ -145,27 +152,31 @@ export const contentBelongsToLoggedInUserArtist = async (
   const data = req.body;
 
   const artistId = data.artistId ?? req.params.artistId;
-  const loggedInUser = req.user as User;
+  const loggedInUser = req.user as User | undefined;
 
-  if (loggedInUser.id !== Number(userId)) {
-    res.status(400).json({
-      error: `Artist must belong to user`,
+  if (!loggedInUser) {
+    res.status(401).json({ error: "Unauthorized" });
+  } else {
+    if (loggedInUser.id !== Number(userId)) {
+      res.status(400).json({
+        error: `Artist must belong to user`,
+      });
+      return next(`Artist must belong to user`);
+    }
+
+    const artist = await prisma.artist.findFirstOrThrow({
+      where: {
+        userId: loggedInUser.id,
+        id: Number(artistId),
+      },
     });
-    return next(`Artist must belong to user`);
-  }
 
-  const artist = await prisma.artist.findFirstOrThrow({
-    where: {
-      userId: loggedInUser.id,
-      id: Number(artistId),
-    },
-  });
-
-  if (!artist) {
-    res.status(400).json({
-      error: "Artist must belong to user",
-    });
-    return next("Artist must belong to user");
+    if (!artist) {
+      res.status(400).json({
+        error: "Artist must belong to user",
+      });
+      return next("Artist must belong to user");
+    }
   }
   return next();
 };
