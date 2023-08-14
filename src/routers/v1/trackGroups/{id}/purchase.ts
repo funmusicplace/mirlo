@@ -20,6 +20,7 @@ export default function () {
 
   async function POST(req: Request, res: Response) {
     const { id: trackGroupId } = req.params as unknown as Params;
+    const { price } = req.body as unknown as { price?: string }; // In cents
     const { id: userId } = req.user as User;
 
     try {
@@ -48,7 +49,10 @@ export default function () {
       if (!trackGroup.stripeProductKey) {
         const product = await stripe.products.create({
           name: `${trackGroup.title} by ${trackGroup.artist.name}`,
-          description: trackGroup.about ?? "",
+          description:
+            trackGroup.about && trackGroup.about !== ""
+              ? trackGroup.about
+              : `The album ${trackGroup.title} by ${trackGroup.artist.name}.`,
           tax_code: "txcd_10401100",
           images: trackGroup.cover
             ? [
@@ -78,7 +82,10 @@ export default function () {
             {
               price_data: {
                 tax_behavior: "exclusive",
-                unit_amount: trackGroup.minPrice ?? 0,
+                unit_amount:
+                  (price ? Number(price) : undefined) ??
+                  trackGroup.minPrice ??
+                  0,
                 currency: trackGroup.currency ?? "USD",
                 product: productKey,
               },

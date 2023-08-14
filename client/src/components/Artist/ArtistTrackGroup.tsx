@@ -11,6 +11,7 @@ import { useSnackbar } from "state/SnackbarContext";
 import ClickToPlay from "../common/ClickToPlay";
 import SmallTileDetails from "../common/LargeTileDetail";
 import { Link } from "react-router-dom";
+import BuyTrackGroup from "components/TrackGroup/Buy";
 
 const ArtistTrackGroup: React.FC<{
   trackGroup: TrackGroup;
@@ -162,14 +163,7 @@ const ArtistTrackGroup: React.FC<{
         onClose={() => setIsPurchasingAlbum(false)}
         title={`Buying ${trackGroup.title}`}
       >
-        {trackGroup.minPrice && (
-          <>
-            {" "}
-            Price: <Money amount={trackGroup.minPrice / 100} />
-            <Button onClick={purchaseAlbum}>{t("buy")}</Button>
-          </>
-        )}
-        {!trackGroup.minPrice && <>{t("notImplemented")}</>}
+        <BuyTrackGroup trackGroup={trackGroup} />
       </Modal>
     </div>
   );

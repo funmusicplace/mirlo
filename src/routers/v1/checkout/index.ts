@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import prisma from "../../../../prisma/prisma";
 
 import stripe from "../../../utils/stripe";
@@ -8,11 +8,12 @@ export default function () {
     GET: [GET],
   };
 
-  async function GET(req: Request, res: Response) {
+  async function GET(req: Request, res: Response, next: NextFunction) {
     const { success, session_id } = req.query;
-
+    console.log("accessing checkout");
     try {
       if (session_id && typeof session_id === "string") {
+        console.log("has session");
         const session = await stripe.checkout.sessions.retrieve(session_id);
         const { clientId, artistId, trackGroupId, tierId } =
           session.metadata as unknown as {
@@ -21,7 +22,6 @@ export default function () {
             tierId: number | null;
             trackGroupId: number | null;
           };
-
         if (clientId) {
           const client = await prisma.client.findFirst({
             where: {
@@ -56,6 +56,10 @@ export default function () {
               error: "Something went wrong while completing a checkout",
             });
           }
+        } else {
+          res.redirect(
+            process.env.REACT_APP_CLIENT_DOMAIN ?? "https://mirlo.space"
+          );
         }
       } else {
         res

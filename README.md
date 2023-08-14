@@ -63,6 +63,8 @@ docker exec -it blackbird-api npx prisma migrate dev
 
 By default Mirlo uses Stripe as its payment processor.
 
+> NOTE: Every 90 days you'll have to re-log-in to the stripe CLI with `stripe login`
+
 To test webhooks, you'll have to run this:
 
 ```sh
