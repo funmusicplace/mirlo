@@ -1,7 +1,6 @@
 import { css } from "@emotion/css";
 import Button from "components/common/Button";
 import Modal from "components/common/Modal";
-import Money from "components/common/Money";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { FaArrowDown } from "react-icons/fa";
@@ -51,21 +50,6 @@ const ArtistTrackGroup: React.FC<{
   }
 
   const userIsTrackGroupArtist = user && artist.userId === user?.id;
-
-  const purchaseAlbum = async () => {
-    try {
-      setIsPurchasingAlbum(true);
-
-      const response = await api.post<{}, { sessionUrl: string }>(
-        `trackGroups/${trackGroup.id}/purchase`,
-        {}
-      );
-      window.location.assign(response.sessionUrl);
-    } catch (e) {
-      snackbar(t("error"), { type: "warning" });
-      console.error(e);
-    }
-  };
 
   const downloadAlbum = async () => {
     try {

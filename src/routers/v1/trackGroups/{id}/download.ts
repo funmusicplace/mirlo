@@ -17,23 +17,21 @@ async function buildZipFileForPath(
   })[]
 ) {
   var zip = new JSZip();
-  await Promise.all(
-    tracks.map(async (track, index) => {
-      if (track.title && track.audio) {
-        logger.info("Fetching file for tracks");
-        console.info("Console log just for kicks");
-        const { buffer } = await getObjectFromMinio(
-          minioClient,
-          finalAudioBucket,
-          `${track.audio.id}/original.${track.audio.fileExtension}`
-        );
-        logger.info("fetched file for tracks");
-        const order = track.order ? track.order : index + 1;
-        const trackTitle = `${order} - ${track.title}.${track.audio.fileExtension}`;
-        zip.file(trackTitle, buffer);
-      }
-    })
-  );
+  for (let i = 0; i < tracks.length; i++) {
+    const track = tracks[i];
+    if (track.title && track.audio) {
+      logger.info(`Fetching file for tracks ${track.title}`);
+      const { buffer } = await getObjectFromMinio(
+        minioClient,
+        finalAudioBucket,
+        `${track.audio.id}/original.${track.audio.fileExtension}`
+      );
+      logger.info(`Fetched file for tracks ${track.title}`);
+      const order = track.order ? track.order : i + 1;
+      const trackTitle = `${order} - ${track.title}.${track.audio.fileExtension}`;
+      zip.file(trackTitle, buffer);
+    }
+  }
   logger.info("Done building zip");
 
   return zip.generateAsync({ type: "base64" });
