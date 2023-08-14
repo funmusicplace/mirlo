@@ -1,8 +1,8 @@
 import { TrackAudio, Track, User } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
 import JSZip from "jszip";
-import fs from "fs";
-import path from "path";
+import { logger } from "../../../../logger";
+
 import { userAuthenticated } from "../../../../auth/passport";
 import prisma from "../../../../../prisma/prisma";
 import {
@@ -10,8 +10,6 @@ import {
   getObjectFromMinio,
   minioClient,
 } from "../../../../utils/minio";
-
-const { MEDIA_LOCATION } = process.env;
 
 async function buildZipFileForPath(
   tracks: (Track & {
@@ -22,17 +20,21 @@ async function buildZipFileForPath(
   await Promise.all(
     tracks.map(async (track, index) => {
       if (track.title && track.audio) {
+        logger.info("Fetching file for tracks");
+        console.info("Console log just for kicks");
         const { buffer } = await getObjectFromMinio(
           minioClient,
           finalAudioBucket,
           `${track.audio.id}/original.${track.audio.fileExtension}`
         );
+        logger.info("fetched file for tracks");
         const order = track.order ? track.order : index + 1;
         const trackTitle = `${order} - ${track.title}.${track.audio.fileExtension}`;
         zip.file(trackTitle, buffer);
       }
     })
   );
+  logger.info("Done building zip");
 
   return zip.generateAsync({ type: "base64" });
 }
