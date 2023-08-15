@@ -24,12 +24,14 @@ async function buildZipFileForPath(
       const { buffer } = await getObjectFromMinio(
         minioClient,
         finalAudioBucket,
-        `${track.audio.id}/original.${track.audio.fileExtension}`
+        `${track.audio.id}/original.${track.audio.fileExtension}`,
+        logger
       );
       logger.info(`Fetched file for tracks ${track.title}`);
       const order = track.order ? track.order : i + 1;
       const trackTitle = `${order} - ${track.title}.${track.audio.fileExtension}`;
       zip.file(trackTitle, buffer);
+      logger.info(`Added track to zip file ${track.title}`);
     }
   }
   logger.info("Done building zip");
