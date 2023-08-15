@@ -17,7 +17,7 @@ async function hashPassword(password: string) {
 }
 
 router.post(`/signup`, async (req, res, next) => {
-  let { name, email, password, client } = req.body;
+  let { name, email, password, client: clientURL } = req.body;
 
   if (!email || !password) {
     res.status(400).json({ error: "Email and password must be supplied" });
@@ -32,7 +32,15 @@ router.post(`/signup`, async (req, res, next) => {
       },
     });
 
-    if (existing) {
+    const client = await prisma.client.findFirst({
+      where: {
+        applicationUrl: clientURL,
+      },
+    });
+
+    if (!client) {
+      res.status(400).json({ error: "This client does not exist " });
+    } else if (existing) {
       res.status(400).json({ error: "This user exists" });
     } else {
       const result = await prisma.user.create({
@@ -44,6 +52,7 @@ router.post(`/signup`, async (req, res, next) => {
         select: {
           name: true,
           email: true,
+          id: true,
           emailConfirmationToken: true,
         },
       });
@@ -57,7 +66,7 @@ router.post(`/signup`, async (req, res, next) => {
           locals: {
             user: result,
             host: process.env.API_DOMAIN,
-            client,
+            client: client.id,
           },
         },
       });
@@ -76,16 +85,27 @@ router.get(`/confirmation/:emailConfirmationToken`, async (req, res, next) => {
 
     // FIXME: should the client be changed from a URL to an id. Probably
     // And then check that the client exists in the DB.
-    let { client, email } = req.query as { client: string; email: string };
-    email = email.toLowerCase();
+    let { client: clientID, user: userId } = req.query as {
+      client: string;
+      user: string;
+    };
 
     const user = await prisma.user.findFirst({
       where: {
-        email,
+        id: Number(userId),
         emailConfirmationToken,
       },
     });
 
+    const client = await prisma.client.findFirst({
+      where: {
+        id: Number(clientID),
+      },
+    });
+
+    if (!client) {
+      return res.status(404).json({ error: "This client does not exist" });
+    }
     if (!user) {
       return res.status(404).json({ error: "This user does not exist" });
     } else if (
@@ -108,7 +128,7 @@ router.get(`/confirmation/:emailConfirmationToken`, async (req, res, next) => {
         },
       });
       setTokens(res, updatedUser);
-      return res.redirect(client);
+      return res.redirect(client.applicationUrl);
     }
   } catch (e) {
     console.error(e);
