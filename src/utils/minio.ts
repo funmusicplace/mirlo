@@ -92,13 +92,12 @@ export async function getFileFromMinio(
 ): Promise<{ filePath: string }> {
   return new Promise(
     async (resolve: (result: { filePath: string }) => any, reject) => {
-      const rootFolder = `${MEDIA_LOCATION_DOWNLOAD_CACHE}/${destinationFolderName}`;
       logger?.info(
-        `Getting object from MinIO Bucket ${bucket}: ${filename} in ${rootFolder}`
+        `Getting object from MinIO Bucket ${bucket}: ${filename} in ${destinationFolderName}`
       );
-      await fs.mkdirSync(`${rootFolder}`, { recursive: true });
+      await fs.mkdirSync(`${destinationFolderName}`, { recursive: true });
 
-      const filePath = `${rootFolder}/${
+      const filePath = `${destinationFolderName}/${
         destinationFilePath ?? `${bucket}_${filename}`
       }`;
 

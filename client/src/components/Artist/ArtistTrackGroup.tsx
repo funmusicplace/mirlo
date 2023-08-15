@@ -54,11 +54,15 @@ const ArtistTrackGroup: React.FC<{
   const downloadAlbum = async () => {
     try {
       setIsDownloading(true);
-      await api.getFile(
-        trackGroup.title,
+      await api.downloadFileDirectly(
         `trackGroups/${trackGroup.id}/download`,
-        "application/zip"
+        `${trackGroup.title}.zip`
       );
+      // await api.getFile(
+      //   trackGroup.title,
+      //   `trackGroups/${trackGroup.id}/download`,
+      //   "application/zip"
+      // );
     } catch (e) {
       snackbar(t("error"), { type: "warning" });
       console.error(e);

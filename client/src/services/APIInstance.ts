@@ -142,6 +142,12 @@ const APIInstance = (apiRoot: string) => {
       }
     },
 
+    downloadFileDirectly: (fromEndpoint: string, filename: string) => {
+      console.log("url", `${api}${fromEndpoint}`);
+      fileSaver.saveAs(`${api}${fromEndpoint}`, filename);
+      return;
+    },
+
     getFile: (filename: string, endpoint: string, type: string) => {
       return apiRequest<string>(
         endpoint,
