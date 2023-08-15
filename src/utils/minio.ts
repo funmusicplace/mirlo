@@ -93,7 +93,9 @@ export async function getFileFromMinio(
   return new Promise(
     async (resolve: (result: { filePath: string }) => any, reject) => {
       const rootFolder = `${MEDIA_LOCATION_DOWNLOAD_CACHE}/${destinationFolderName}`;
-      logger?.info(`Getting object from MinIO Bucket ${bucket}: ${filename}`);
+      logger?.info(
+        `Getting object from MinIO Bucket ${bucket}: ${filename} in ${rootFolder}`
+      );
       await fs.mkdirSync(`${rootFolder}`, { recursive: true });
 
       const filePath = `${rootFolder}/${
