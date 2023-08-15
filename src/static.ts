@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { getObjectFromMinio } from "./utils/minio";
+import { getBufferFromMinio } from "./utils/minio";
 import { minioClient } from "./utils/minio";
 
 export const serveStatic = async (
@@ -20,7 +20,7 @@ export const serveStatic = async (
   }
 
   try {
-    const { buffer } = await getObjectFromMinio(
+    const { buffer } = await getBufferFromMinio(
       minioClient,
       req.params.bucket,
       req.params.filename

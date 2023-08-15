@@ -5,7 +5,7 @@ import { Job } from "bullmq";
 import { uniq } from "lodash";
 import {
   createBucketIfNotExists,
-  getObjectFromMinio,
+  getBufferFromMinio,
   incomingCoversBucket,
   minioClient,
 } from "../utils/minio";
@@ -40,7 +40,7 @@ const optimizeImage = async (job: Job) => {
     );
 
     logger.info(`Starting to optimize images ${destination}`);
-    const { buffer, size } = await getObjectFromMinio(
+    const { buffer, size } = await getBufferFromMinio(
       minioClient,
       incomingMinioBucket,
       destination,

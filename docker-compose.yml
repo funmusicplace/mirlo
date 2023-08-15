@@ -38,6 +38,8 @@ services:
       - ~/.ssh:/root/.ssh
       - ./:/var/www/api
       - ${MEDIA_LOCATION:-./data/media/}incoming:/data/media/incoming
+      - ${MEDIA_LOCATION:-./data/media/}downloadCache:/data/media/downloadCache
+
       # - ${MEDIA_LOCATION:-./data/media/}audio:/data/media/audio
       # - ${MEDIA_LOCATION:-./data/media/}images:/data/media/images
 
@@ -93,7 +95,7 @@ services:
         aliases:
           - pgsql
     ports:
-      - '${POSTGRES_LOCAL_MACHINE_PORT:-5432}:5432'
+      - "${POSTGRES_LOCAL_MACHINE_PORT:-5432}:5432"
 
   # nginx:
   #   restart: always
@@ -110,9 +112,9 @@ services:
   #   build:
   #     context: ./nginx
   #     target: ${IMAGE:-local-image}
-    # ports:
-    #   - "${NGINX_PORT:-80}:80"
-    #   - 443:443
+  # ports:
+  #   - "${NGINX_PORT:-80}:80"
+  #   - 443:443
 
 networks:
   api-network:

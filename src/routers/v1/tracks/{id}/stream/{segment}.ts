@@ -7,7 +7,7 @@ import stream from "stream";
 import prisma from "../../../../../../prisma/prisma";
 import {
   finalAudioBucket,
-  getObjectFromMinio,
+  getBufferFromMinio,
   minioClient,
 } from "../../../../../utils/minio";
 
@@ -30,7 +30,7 @@ export const fetchFile = async (
   }
 
   try {
-    const { buffer } = await getObjectFromMinio(
+    const { buffer } = await getBufferFromMinio(
       minioClient,
       finalAudioBucket,
       alias

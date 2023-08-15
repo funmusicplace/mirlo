@@ -9,7 +9,7 @@ import { logger } from "./queue-worker";
 import {
   createBucketIfNotExists,
   finalAudioBucket,
-  getObjectFromMinio,
+  getBufferFromMinio,
   incomingAudioBucket,
   minioClient,
 } from "../utils/minio";
@@ -32,7 +32,7 @@ export default async (job: Job) => {
     );
 
     logger.info(`Starting to optimize audio ${audioId}`);
-    const { buffer } = await getObjectFromMinio(
+    const { buffer } = await getBufferFromMinio(
       minioClient,
       incomingAudioBucket,
       audioId,

@@ -1,6 +1,7 @@
 import { Client } from "minio";
 import { Logger } from "winston";
 import * as Minio from "minio";
+import fs from "fs";
 
 export const incomingArtistBannerBucket = "incoming-artist-banners";
 export const finalArtistBannerBucket = "artist-banners";
@@ -20,6 +21,7 @@ const {
   MINIO_ROOT_PASSWORD = "",
   MINIO_API_PORT = 9000,
   NODE_ENV,
+  MEDIA_LOCATION_DOWNLOAD_CACHE = "",
 } = process.env;
 
 // Instantiate the minio client with the endpoint
@@ -47,7 +49,7 @@ export const createBucketIfNotExists = async (
   }
 };
 
-export async function getObjectFromMinio(
+export async function getBufferFromMinio(
   minioClient: Client,
   bucket: string,
   filename: string,
@@ -69,6 +71,55 @@ export async function getObjectFromMinio(
           dataStream.on("end", function () {
             logger?.info("End. Total size = " + size);
             resolve({ buffer: Buffer.concat(buff), size });
+          });
+          dataStream.on("error", function (err) {
+            logger?.error(err);
+            reject(err);
+          });
+        })
+        .catch(reject);
+    }
+  );
+}
+
+export async function getFileFromMinio(
+  minioClient: Client,
+  bucket: string,
+  filename: string,
+  destinationFolderName?: string,
+  destinationFilePath?: string,
+  logger?: Logger
+): Promise<{ filePath: string }> {
+  return new Promise(
+    async (resolve: (result: { filePath: string }) => any, reject) => {
+      const rootFolder = `${MEDIA_LOCATION_DOWNLOAD_CACHE}/${destinationFolderName}`;
+      logger?.info(`Getting object from MinIO Bucket ${bucket}: ${filename}`);
+      await fs.mkdirSync(`${rootFolder}`, { recursive: true });
+
+      const filePath = `${rootFolder}/${
+        destinationFilePath ?? `${bucket}_${filename}`
+      }`;
+
+      const writableStream = fs.createWriteStream(`${filePath}`);
+      // var size = 0;
+      minioClient
+        .getObject(bucket, filename)
+        .then(function (dataStream) {
+          logger?.info("Got stream");
+          dataStream.on("data", async function (chunk) {
+            // buff.push(chunk);
+            writableStream.write(chunk);
+            // size += chunk.length;
+          });
+          dataStream.on("end", function () {
+            // logger?.info("End. Total size = " + size);
+            writableStream.end();
+            writableStream.on("finish", () => {
+              console.log(`Everything exists at filePath  ${filePath}`);
+              resolve({ filePath });
+            });
+            // resolve({ buffer: Buffer.concat(buff), size });
+            resolve;
           });
           dataStream.on("error", function (err) {
             logger?.error(err);
