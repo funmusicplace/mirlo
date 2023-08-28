@@ -6,6 +6,8 @@ export const Footer = () => {
       className={css`
         text-align: center;
         display: block;
+        margin-bottom: 4rem;
+        margin-top: 2rem;
       `}
     >
       Questions? <a href="mailto:mirlodotspace@proton.me">Contact us</a>. Want

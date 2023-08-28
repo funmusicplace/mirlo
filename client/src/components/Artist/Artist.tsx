@@ -71,6 +71,7 @@ function Artist() {
       <ArtistAlbums artist={artist} />
       <h2>{t("updates")}</h2>
       <div>
+        {artist.posts?.length === 0 && <>{t("noUpdates")}</>}
         {artist.posts?.map((p) => (
           <Box
             key={p.id}

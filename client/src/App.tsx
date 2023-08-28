@@ -117,15 +117,10 @@ function App() {
               className={css`
                 max-width: 640px;
                 background-color: var(--mi-normal-background-color);
-                padding: 2rem 2rem 9rem;
+                padding: 2rem 2rem 4rem;
                 margin: 0 auto;
                 width: 100%;
-                ${isArtistPage
-                  ? `
-                    box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.1);
-                    padding-top: .5rem;
-                    `
-                  : ""}
+
                 border-radius: var(--mi-border-radius);
 
                 @media screen and (max-width: 800px) {
