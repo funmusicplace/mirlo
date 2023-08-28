@@ -127,7 +127,7 @@ const ArtistTrackGroup: React.FC<{
           }
         />
         <div style={{ flexGrow: 1 }} />
-        {!userIsTrackGroupArtist && !isOwned && (
+        {user && !userIsTrackGroupArtist && !isOwned && (
           <Button compact onClick={() => setIsPurchasingAlbum(true)}>
             {t("buy")}
           </Button>

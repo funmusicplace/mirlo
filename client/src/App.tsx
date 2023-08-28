@@ -12,6 +12,7 @@ import SnackbarContext from "state/SnackbarContext";
 import useWidgetListener from "utils/useWidgetListener";
 import Header from "./components/Header/Header";
 import globalCSS from "./styles";
+import { Footer } from "components/Footer";
 injectGlobal(globalCSS);
 
 function App() {
@@ -134,15 +135,7 @@ function App() {
             >
               <Outlet />
             </div>
-            <div
-              className={css`
-                text-align: center;
-                display: block;
-              `}
-            >
-              Questions? <a href="mailto:mirlodotspace@proton.me">Contact us</a>
-              .
-            </div>
+            <Footer />
             <Player />
           </>
         )}
