@@ -181,16 +181,25 @@ export const AudioWrapper: React.FC<{
             margin-right: 1rem;
             border-radius: 1rem;
             background: rgba(0, 0, 0, 0.6);
+            cursor: pointer;
           `}
+          onClick={(event: React.MouseEvent<HTMLDivElement>) => {
+            const divWidth = event.currentTarget.offsetWidth;
+            const clickX = event.clientX - event.currentTarget.offsetLeft;
+            const clickPercent = clickX / divWidth;
+
+            playerRef.current?.fastSeek(clickPercent * duration);
+          }}
         >
           <div
             className={css`
               height: 100%;
               overflow: none;
               border-radius: 1rem;
-              transition: 1s width;
+              transition: 0.1s width;
               width: ${percent * 100}%;
               background: rgba(0, 0, 0, 0.2);
+              pointer-events: none;
             `}
           ></div>
         </div>

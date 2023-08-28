@@ -10,10 +10,8 @@ export default function () {
 
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { success, session_id } = req.query;
-    console.log("accessing checkout");
     try {
       if (session_id && typeof session_id === "string") {
-        console.log("has session");
         const session = await stripe.checkout.sessions.retrieve(session_id);
         const { clientId, artistId, trackGroupId, tierId } =
           session.metadata as unknown as {

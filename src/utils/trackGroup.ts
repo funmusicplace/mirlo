@@ -60,7 +60,7 @@ export const findTrackGroupIdForSlug = async (
       );
     }
     artistId = await findArtistIdForURLSlug(artistId);
-    console.log("filtering by artistId", artistId);
+
     const artist = await prisma.trackGroup.findFirst({
       where: {
         urlSlug: id,
