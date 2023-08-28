@@ -25,13 +25,6 @@ export default function () {
         where: { artistId: Number(artistId) },
       });
 
-      if (!subscriptions) {
-        res.status(400).json({
-          error: "ArtistSubscriptionTier must belong to user",
-        });
-        return next();
-      }
-
       res.status(200).json({ results: subscriptions });
     } catch (e) {
       console.error(e);

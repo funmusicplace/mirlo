@@ -126,6 +126,7 @@ const ManageTrackRow: React.FC<{
               compact
               onClick={() => setIsEditingTitle(true)}
               title="Delete"
+              style={{ marginRight: "1rem" }}
             >
               <FaPen />
             </IconButton>

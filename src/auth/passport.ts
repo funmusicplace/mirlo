@@ -101,6 +101,7 @@ export const userHasPermission = (role: "admin" | "owner") => {
         res.status(401).json({ error: "Unauthorized" });
       }
     }
+    return next();
   };
 };
 
