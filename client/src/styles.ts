@@ -8,6 +8,8 @@ const styles = `html {
   --mi-secondary-color: #ffb3d0;
   --mi-secondary-color--hover: #FF80B0;
 
+  --mi-success-background-color: #4cdb5f;
+
   --mi-warning-background-color: #f04e37;
   --mi-darken-warning-background-color: #df250b;
   --mi-warning-foreground-color: white;

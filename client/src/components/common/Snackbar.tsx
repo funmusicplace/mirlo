@@ -11,13 +11,7 @@ const Container = styled.div<{ variant: Variant }>`
   align-items: center;
   justify-content: center;
   background: ${(props) => {
-    if (props.variant === "success") {
-      return props.theme.colors.success;
-    }
-    if (props.variant === "warning") {
-      return props.theme.colors.warning;
-    }
-    return "var(--mi-normal-background-color)";
+    return `var(--mi-${props.variant ?? "normal"}-background-color)`;
   }};
   color: #fff;
   z-index: 1000;

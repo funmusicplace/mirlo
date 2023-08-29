@@ -69,7 +69,6 @@ const AlbumForm: React.FC<{
               ...pick(data, [
                 "title",
                 "private",
-                "published",
                 "type",
                 "releaseDate",
                 "about",
@@ -98,7 +97,6 @@ const AlbumForm: React.FC<{
                 "title",
                 "private",
                 "type",
-                "published",
                 "releaseDate",
                 "about",
                 "minPrice",
@@ -139,18 +137,6 @@ const AlbumForm: React.FC<{
       </FormComponent> */}
       <FormComponent>
         {t("title")}: <InputEl {...register("title")} />
-      </FormComponent>
-      <FormComponent
-        className={css`
-          margin-top: 0.5rem;
-          display: flex;
-        `}
-      >
-        <input id="private" type="checkbox" {...register("published")} />{" "}
-        <label htmlFor="private">
-          {t("isPublished")}
-          <small>{t("publishedDescription")}</small>
-        </label>
       </FormComponent>
       <FormComponent
         style={{

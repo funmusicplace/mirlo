@@ -5,6 +5,8 @@ import AlbumForm from "./AlbumForm";
 import NewTrack from "./NewTrack";
 import api from "services/api";
 import { useTranslation } from "react-i18next";
+import Button from "components/common/Button";
+import { useSnackbar } from "state/SnackbarContext";
 
 export interface ShareableTrackgroup {
   creatorId: number;
@@ -20,6 +22,7 @@ export const ManageAlbumForm: React.FC<{
 }> = ({ open, trackgroup, onClose, reload, artist }) => {
   const [tracks, setTracks] = React.useState<Track[]>([]);
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
+  const snackbar = useSnackbar();
 
   React.useEffect(() => {
     if (trackgroup.tracks) {
@@ -40,6 +43,20 @@ export const ManageAlbumForm: React.FC<{
     }
   }, [artist.userId, trackgroup.id, reload]);
 
+  const publishTrackGroup = React.useCallback(async () => {
+    try {
+      await api.put(
+        `users/${artist.userId}/trackGroups/${trackgroup.id}/publish`,
+        {}
+      );
+      snackbar(t("publishedSuccess"), { type: "success" });
+    } catch (e) {
+      console.error(e);
+    } finally {
+      await reload();
+    }
+  }, [artist.userId, trackgroup.id, snackbar, t, reload]);
+
   return (
     <Modal open={open} onClose={onClose} title={t("editAlbum") ?? ""}>
       {/* There is some overly complex state management going on here with the reloads being passed around */}
@@ -48,6 +65,9 @@ export const ManageAlbumForm: React.FC<{
         reload={reloadTrackGroup}
         artist={artist}
       />
+      <div>
+        <Button onClick={publishTrackGroup}>{t("publish")}</Button>
+      </div>
       <TrackTable
         tracks={tracks}
         editable

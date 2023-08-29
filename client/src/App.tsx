@@ -75,8 +75,6 @@ function App() {
     return <Outlet />;
   }
 
-  const isArtistPage = location.pathname.includes("artist");
-
   return (
     <>
       <Helmet>

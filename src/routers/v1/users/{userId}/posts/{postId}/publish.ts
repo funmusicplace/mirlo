@@ -13,10 +13,6 @@ export default function () {
     const { postId, userId } = req.params;
 
     try {
-      const postData = await prisma.post.findUnique({
-        where: { id: Number(postId) },
-      });
-
       const updatedPost = await prisma.post.update({
         where: { id: Number(postId) || undefined },
         data: { publishedAt: new Date() },

@@ -199,7 +199,7 @@ model TrackAudio {
   updatedAt        DateTime  @updatedAt
   deletedAt        DateTime?
   originalFilename String?
-  duration         Int?
+  duration         Int? // In seconds
   hash             String?
   size             Int?
   fileExtension    String?

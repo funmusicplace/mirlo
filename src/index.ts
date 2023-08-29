@@ -82,6 +82,7 @@ const routes = [
   "users/{userId}/artists/{artistId}/subscriptionTiers/{subscriptionTierId}",
   "users/{userId}/trackGroups",
   "users/{userId}/trackGroups/{trackGroupId}",
+  "users/{userId}/trackGroups/{trackGroupId}/publish",
   "users/{userId}/trackGroups/{trackGroupId}/cover",
   "users/{userId}/tracks",
   "users/{userId}/tracks/{trackId}/audio",
