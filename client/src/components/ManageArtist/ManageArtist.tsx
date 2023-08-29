@@ -54,11 +54,7 @@ const ManageArtist: React.FC<{}> = () => {
   }
 
   return (
-    <div
-      className={css`
-        margin-bottom: 2rem;
-      `}
-    >
+    <div className={css``}>
       {!artist.enabled && (
         <div
           className={css`
@@ -84,7 +80,6 @@ const ManageArtist: React.FC<{}> = () => {
           width: 100%;
           justify-content: flex-end;
           flex-direction: column;
-          margin-bottom: 2rem;
         `}
       >
         <h1 style={{ flexGrow: 1 }}>{t("manage", { artist: artist.name })}</h1>

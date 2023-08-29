@@ -116,7 +116,7 @@ export async function getFileFromMinio(
             // logger?.info("End. Total size = " + size);
             writableStream.end();
             writableStream.on("finish", () => {
-              console.log(`Everything exists at filePath  ${filePath}`);
+              logger?.info(`Everything exists at filePath  ${filePath}`);
               resolve({ filePath });
             });
             // resolve({ buffer: Buffer.concat(buff), size });

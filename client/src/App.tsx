@@ -115,7 +115,7 @@ function App() {
               className={css`
                 max-width: 640px;
                 background-color: var(--mi-normal-background-color);
-                padding: 2rem 2rem 4rem;
+                padding: 2rem 2rem 2rem;
                 margin: 0 auto;
                 width: 100%;
 

@@ -80,7 +80,9 @@
     "addNewPost": "Add new post",
     "posts": "Your posts",
     "yourAlbums": "Your albums",
-    "manageAlbum": "Manage"
+    "manageAlbum": "Manage",
+    "publish": "Publish",
+    "publishedSuccess": "Your album has been published. People will be able to buy it after the release date!"
   },
   "manageAlbum": {
     "editAlbum": "Edit album",

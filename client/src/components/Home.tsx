@@ -22,15 +22,19 @@ function Home() {
     );
   }, []);
 
+  const userId = user?.id;
+
   const fetchPosts = React.useCallback(async () => {
-    if (user) {
-      const fetched = await api.getMany<Post>(`users/${user.id}/feed`);
+    if (userId) {
+      const fetched = await api.getMany<Post>(`users/${userId}/feed`);
       setPosts(fetched.results);
-      await fetchAllPosts();
+      if (fetched.results.length === 0) {
+        await fetchAllPosts();
+      }
     } else {
       await fetchAllPosts();
     }
-  }, [user, fetchAllPosts]);
+  }, [userId, fetchAllPosts]);
 
   React.useEffect(() => {
     fetchPosts();

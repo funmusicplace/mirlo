@@ -132,7 +132,7 @@ const ArtistTrackGroup: React.FC<{
             {t("buy")}
           </Button>
         )}
-        {isOwned && (
+        {(userIsTrackGroupArtist || isOwned) && (
           <>
             <Button
               compact

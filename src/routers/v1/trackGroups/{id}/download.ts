@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from "express";
 import JSZip, { folder } from "jszip";
 import { logger } from "../../../../logger";
 import fs from "fs";
-
+import archiver from "archiver";
 import { userAuthenticated } from "../../../../auth/passport";
 import prisma from "../../../../../prisma/prisma";
 import {
@@ -11,6 +11,7 @@ import {
   getFileFromMinio,
   minioClient,
 } from "../../../../utils/minio";
+import { doesTrackGroupBelongToUser } from "../../../../utils/ownership";
 const { MEDIA_LOCATION_DOWNLOAD_CACHE = "" } = process.env;
 
 async function buildZipFileForPath(
@@ -19,44 +20,70 @@ async function buildZipFileForPath(
   })[],
   folderName: string
 ) {
-  const rootFolder = `${MEDIA_LOCATION_DOWNLOAD_CACHE}/${folderName}`;
+  return new Promise(async (resolve: (value: string) => void, reject) => {
+    const rootFolder = `${MEDIA_LOCATION_DOWNLOAD_CACHE}/${folderName}`;
 
-  var zip = new JSZip();
-  for (let i = 0; i < tracks.length; i++) {
-    const track = tracks[i];
-    if (track.title && track.audio) {
-      logger.info(`Fetching file for tracks ${track.title}`);
-      const order = track.order ? track.order : i + 1;
-      const trackTitle = `${order} - ${track.title}.${track.audio.fileExtension}`;
+    const output = fs.createWriteStream(`${rootFolder}.zip`);
+    const archive = archiver("zip", {
+      zlib: { level: 9 }, // Sets the compression level.
+    });
 
-      const { filePath } = await getFileFromMinio(
-        minioClient,
-        finalAudioBucket,
-        `${track.audio.id}/original.${track.audio.fileExtension}`,
-        rootFolder,
-        trackTitle,
-        logger
+    // listen for all archive data to be written
+    // 'close' event is fired only when a file descriptor is involved
+    output.on("close", function () {
+      logger.info(archive.pointer() + " total bytes");
+      logger.info(
+        "archiver has been finalized and the output file descriptor has closed."
       );
-      logger.info(`Fetched file for tracks ${filePath}`);
-      const file = await fs.readFileSync(filePath);
-      // Getting a buffer of the file to put it in the zip might
-      // still be an issue for our memory issues.
-      zip.file(trackTitle, file.buffer);
-      logger.info(`Added track to zip file ${track.title}`);
-    }
-  }
-  logger.info("Done compiling zip, putting it on the filesystem");
-  return new Promise((resolve: (value: string) => void, reject) => {
-    zip
-      .generateNodeStream({ type: "nodebuffer", streamFiles: true })
-      .pipe(fs.createWriteStream(`${rootFolder}.zip`))
-      .on("finish", () => {
-        resolve(`${rootFolder}.zip`);
-        logger.info(`Wrote to zip ${rootFolder}`);
-      });
-  });
+      resolve(`${rootFolder}.zip`);
+    });
+    // This event is fired when the data source is drained no matter what was the data source.
+    // It is not part of this library but rather from the NodeJS Stream API.
+    // @see: https://nodejs.org/api/stream.html#stream_event_end
+    output.on("end", function () {
+      logger.info("Data has been drained");
+    });
 
-  // return zip.generateAsync({ type: "base64" });
+    // good practice to catch warnings (ie stat failures and other non-blocking errors)
+    archive.on("warning", function (err) {
+      if (err.code === "ENOENT") {
+        // log warning
+      } else {
+        // throw error
+        throw err;
+      }
+    });
+
+    // good practice to catch this error explicitly
+    archive.on("error", function (err) {
+      throw err;
+    });
+    archive.pipe(output);
+
+    for (let i = 0; i < tracks.length; i++) {
+      const track = tracks[i];
+      if (track.title && track.audio) {
+        logger.info(`Fetching file for tracks ${track.title}`);
+        const order = track.order ? track.order : i + 1;
+        const trackTitle = `${order} - ${track.title}.${track.audio.fileExtension}`;
+
+        const { filePath } = await getFileFromMinio(
+          minioClient,
+          finalAudioBucket,
+          `${track.audio.id}/original.${track.audio.fileExtension}`,
+          rootFolder,
+          trackTitle,
+          logger
+        );
+        logger.info(`Fetched file for tracks ${filePath}`);
+
+        archive.append(fs.createReadStream(filePath), { name: trackTitle });
+        logger.info(`Added track to zip file ${track.title}`);
+      }
+    }
+    logger.info("Done compiling zip, putting it on the filesystem");
+    archive.finalize();
+  });
 }
 
 export default function () {
@@ -69,13 +96,22 @@ export default function () {
     const { id: userId } = req.user as User;
 
     try {
+      const isCreator = await doesTrackGroupBelongToUser(
+        Number(trackGroupId),
+        userId
+      );
+
       const purchase = await prisma.userTrackGroupPurchase.findFirst({
         where: {
           trackGroupId: Number(trackGroupId),
-          userId: Number(userId),
-          trackGroup: {
-            published: true,
-          },
+          ...(!isCreator
+            ? {
+                userId: Number(userId),
+                trackGroup: {
+                  published: true,
+                },
+              }
+            : {}),
         },
         include: {
           trackGroup: {

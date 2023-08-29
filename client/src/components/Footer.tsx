@@ -6,7 +6,7 @@ export const Footer = () => {
       className={css`
         text-align: center;
         display: block;
-        margin-bottom: 4rem;
+        margin-bottom: 7rem;
         margin-top: 2rem;
       `}
     >
