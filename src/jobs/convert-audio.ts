@@ -58,7 +58,15 @@ export default async (job: Job) => {
     );
 
     const profiler = logger.startTimer();
-    await new Promise((resolve, reject) => {
+
+    const data = await new Promise((resolve, reject) => {
+      ffmpeg(Readable.from(buffer)).ffprobe((err, data) => {
+        resolve(data);
+      });
+    });
+
+    const duration = await new Promise((resolve, reject) => {
+      let duration = 0;
       ffmpeg(Readable.from(buffer))
         .noVideo()
         .outputOptions("-movflags", "+faststart")
@@ -81,16 +89,19 @@ export default async (job: Job) => {
           logger.error(err.message);
           reject(err);
         })
-        .on("end", async () => {
+        .on("progress", (data: { timemark: string }) => {
+          if (data.timemark.includes(":")) {
+            const timeArray = data.timemark.split(":");
+            duration =
+              Math.round(+timeArray[0]) * 60 * 60 +
+              Math.round(+timeArray[1]) * 60 +
+              Math.round(+timeArray[2]);
+          }
+        })
+        .on("end", async (data) => {
           profiler.done({ message: "Done converting to m3u8" });
 
-          // // FIXME: should this point to the trim track?
-          // const stat = await fsPromises.stat(
-          //   path.join(`${audioId}/playlist.m3u8`)
-          // );
-
-          // return resolve(stat);
-          resolve(true);
+          resolve(duration);
         })
         .save(path.join(`${destinationFolder}/playlist.m3u8`));
     });
@@ -113,6 +124,10 @@ export default async (job: Job) => {
 
     await minioClient.removeObject(incomingAudioBucket, audioId);
     await fsPromises.rm(destinationFolder, { recursive: true });
+    return {
+      duration,
+      ...(typeof data === "object" ? data : {}),
+    };
   } catch (e) {
     logger.error("Error creating audio folder", e);
   }

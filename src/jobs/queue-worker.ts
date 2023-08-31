@@ -74,20 +74,3 @@ async function audioQueue() {
     logger.error("error:convert-audio", err);
   });
 }
-
-// function audioDurationQueue() {
-//   const worker = new Worker("audio-duration", audioDurationJob, workerOptions);
-//   logger.info("Audio duration worker started");
-
-//   worker.on("completed", (job: any) => {
-//     logger.info("completed:audio-duration");
-//   });
-
-//   worker.on("failed", (job: any, err: any) => {
-//     logger.error("failed:audio-duration", err);
-//   });
-
-//   worker.on("error", (err: any) => {
-//     logger.error("error:audio-duration", err);
-//   });
-// }

@@ -30,82 +30,34 @@ export const audioQueue = new Queue("convert-audio", queueOptions);
 
 const audioQueueEvents = new QueueEvents("convert-audio", queueOptions);
 
-audioQueueEvents.on("completed", async (jobId: any) => {
-  logger.info(`Job with id ${jobId} has been completed`);
+audioQueueEvents.on(
+  "completed",
+  async (result: { jobId: string; returnvalue?: any }) => {
+    logger.info(
+      `Job with id ${JSON.stringify(result.jobId)} has been completed`
+    );
 
-  try {
-    const job = await audioQueue.getJob(jobId);
-
-    if (job) {
-      const file = await prisma.trackAudio.findFirst({
-        where: {
-          id: job.data.filename,
-        },
-      });
-      if (file) {
-        logger.info("found audio file");
-        // FIXME: Add metadata to a track
-        // const metadata = file.metadata || { variants: [] };
-        // const variants = metadata.variants || [];
-
-        // for (const result of job.returnvalue) {
-        //   variants.push({
-        //     format: "m4a",
-        //     size: result.size,
-        //     name: "audiofile",
-        //   });
-        // }
-
-        // metadata.variants = variants;
-
-        // await File.update(
-        //   {
-        //     // metadata: metadata,
-        //     status: "ok",
-        //   },
-        //   {
-        //     where: {
-        //       id: job.data.filename, // uuid
-        //     },
-        //   }
-        // );
+    try {
+      const job = await audioQueue.getJob(result.jobId);
+      if (job) {
+        await prisma.trackAudio.update({
+          where: {
+            id: job.data.audioId,
+          },
+          data: {
+            duration:
+              typeof result.returnvalue?.duration === "number"
+                ? result.returnvalue.duration
+                : null,
+          },
+        });
+        logger.info("updated trackAudio");
       }
+    } catch (err) {
+      logger.error(err);
     }
-  } catch (err) {
-    logger.error(err);
   }
-});
-
-const audioDurationQueue = new Queue("audio-duration", queueOptions);
-
-const audioDurationQueueEvents = new QueueEvents(
-  "audio-duration",
-  queueOptions
 );
-
-audioDurationQueueEvents.on("completed", async (jobId: any) => {
-  try {
-    const job = await audioDurationQueue.getJob(jobId);
-
-    if (job) {
-      // FIXME: add duration to a track
-      // const file = await File.findOne({
-      //   where: {
-      //     id: job.data.filename,
-      //   },
-      // });
-      // const track = await Track.findOne({
-      //   where: {
-      //     url: file.id,
-      //   },
-      // });
-      // track.duration = job.returnvalue;
-      // await track.save();
-    }
-  } catch (err) {
-    logger.error(err);
-  }
-});
 
 /*
  * Process an audio then queue it for upload
@@ -116,7 +68,6 @@ export const processTrackAudio = (ctx: { req: Request; res: Response }) => {
 
     const buffer = await fs.readFile(file.path);
     const sha1sum = shasum(buffer);
-
     const audio = await prisma.trackAudio.upsert({
       create: {
         trackId,
