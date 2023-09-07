@@ -70,6 +70,7 @@ model Artist {
   avatar            ArtistAvatar?
   urlSlug           String                   @unique
   properties        Json?
+  trackArtists      TrackArtist[]
 }
 
 model ArtistAvatar {
@@ -166,19 +167,6 @@ model TrackGroup {
   @@unique([artistId, urlSlug])
 }
 
-model Track {
-  id           Int         @id @default(autoincrement())
-  order        Int         @default(0)
-  trackGroup   TrackGroup  @relation(fields: [trackGroupId], references: [id])
-  trackGroupId Int
-  title        String?
-  audio        TrackAudio?
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
-  deletedAt    DateTime?
-  isPreview    Boolean     @default(true)
-}
-
 model TrackGroupCover {
   id               String     @id @default(uuid()) @db.Uuid
   url              String[]
@@ -188,6 +176,31 @@ model TrackGroupCover {
   updatedAt        DateTime   @updatedAt
   deletedAt        DateTime?
   originalFilename String?
+}
+
+model Track {
+  id           Int           @id @default(autoincrement())
+  order        Int           @default(0)
+  trackGroup   TrackGroup    @relation(fields: [trackGroupId], references: [id])
+  trackGroupId Int
+  title        String?
+  audio        TrackAudio?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  deletedAt    DateTime?
+  isPreview    Boolean       @default(true)
+  trackArtists TrackArtist[]
+  metadata     Json?
+}
+
+model TrackArtist {
+  id         String  @id @default(uuid()) @db.Uuid
+  trackId    Int
+  track      Track   @relation(fields: [trackId], references: [id])
+  artistName String?
+  artistId   Int?
+  artist     Artist? @relation(fields: [artistId], references: [id])
+  role       String?
 }
 
 model TrackAudio {
