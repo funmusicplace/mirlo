@@ -40,7 +40,7 @@ audioQueueEvents.on(
     try {
       const job = await audioQueue.getJob(result.jobId);
       if (job) {
-        await prisma.trackAudio.update({
+        const audio = await prisma.trackAudio.update({
           where: {
             id: job.data.audioId,
           },
@@ -51,6 +51,17 @@ audioQueueEvents.on(
                 : null,
           },
         });
+
+        if (audio && audio.trackId) {
+          await prisma.track.update({
+            where: {
+              id: audio.trackId,
+            },
+            data: {
+              metadata: result.returnvalue,
+            },
+          });
+        }
         logger.info("updated trackAudio");
       }
     } catch (err) {
