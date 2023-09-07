@@ -1,9 +1,10 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import {
   userAuthenticated,
   userHasPermission,
 } from "../../../../../auth/passport";
 import prisma from "../../../../../../prisma/prisma";
+import { doesTrackGroupBelongToUser } from "../../../../../utils/ownership";
 
 export default function () {
   const operations = {
@@ -46,11 +47,22 @@ export default function () {
     },
   };
 
-  // FIXME: only allow creation of tracks belonging to a user
-  async function POST(req: Request, res: Response) {
-    const { title, trackGroupId } = req.body;
+  async function POST(req: Request, res: Response, next: NextFunction) {
+    const { userId } = req.params;
+    const { title, trackGroupId, trackArtists } = req.body;
     try {
-      const track = await prisma.track.create({
+      console.log("request body", req.body);
+      const trackGroup = await doesTrackGroupBelongToUser(
+        Number(trackGroupId),
+        Number(userId)
+      );
+      if (!trackGroup) {
+        res.status(400).json({
+          error: "Trackgroup must belong to user",
+        });
+        return next();
+      }
+      const createdTrack = await prisma.track.create({
         data: {
           title,
           trackGroup: {
@@ -58,6 +70,18 @@ export default function () {
               id: Number(trackGroupId),
             },
           },
+          trackArtists: {
+            create: trackArtists,
+          },
+        },
+      });
+      const track = await prisma.track.findFirst({
+        where: {
+          id: createdTrack.id,
+        },
+        include: {
+          trackGroup: true,
+          trackArtists: true,
         },
       });
       res.json({ track });

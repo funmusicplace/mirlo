@@ -31,7 +31,7 @@ const Content = styled.div<ContentProps>`
   right: 0;
   overflow-y: scroll;
   margin: 0 auto;
-  max-height: 500px;
+  max-height: 600px;
   padding: 20px;
   z-index: 999;
   border: 1px solid var(--mi-shade-background-color);

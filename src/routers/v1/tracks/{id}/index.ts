@@ -20,6 +20,7 @@ export default function () {
             cover: true,
           },
         },
+        trackArtists: true,
         audio: true,
       },
     });

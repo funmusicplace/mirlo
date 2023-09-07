@@ -24,6 +24,11 @@ interface Track {
     url: string;
   };
   isPreview: boolean;
+  trackArtists?: {
+    role?: string;
+    artistId?: number;
+    artistName?: string;
+  }[];
 }
 
 interface TrackGroup {
