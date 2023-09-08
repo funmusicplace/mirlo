@@ -1,9 +1,7 @@
 import React from "react";
 import { css } from "@emotion/css";
-// import "react-h5-audio-player/lib/styles.css";
 import { Helmet } from "react-helmet";
 
-// import { fetchTrack } from "../services/Api";
 import { ImLoop, ImShuffle } from "react-icons/im";
 import { Link } from "react-router-dom";
 import { bp } from "../constants";
@@ -14,7 +12,6 @@ import Spinner from "./common/Spinner";
 import { GlobalState, useGlobalStateContext } from "state/GlobalState";
 import api from "services/api";
 import styled from "@emotion/styled";
-// import TrackPopup from "./common/TrackPopup";
 
 const LoopingIndicator = styled.span`
   position: absolute;

@@ -1,32 +1,105 @@
 import { css } from "@emotion/css";
+import { AudioWrapper } from "components/AudioWrapper";
 // import { AudioWrapper } from "components/AudioWrapper";
 // import ClickToPlay from "components/common/ClickToPlay";
 import IconButton from "components/common/IconButton";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import SmallTileDetails from "components/common/SmallTileDetails";
 import React from "react";
-import { FaPlay } from "react-icons/fa";
+import { FaPause, FaPlay } from "react-icons/fa";
 import { useParams } from "react-router-dom";
 import api from "services/api";
+import { useGlobalStateContext } from "state/GlobalState";
+
+function inIframe() {
+  try {
+    return window.self !== window.top;
+  } catch (e) {
+    return true;
+  }
+}
+
+function inMirlo() {
+  try {
+    console.log(
+      "window.top?.location",
+      window.top?.location,
+      process.env.REACT_APP_CLIENT_DOMAIN
+    );
+    return window.top?.location.origin === process.env.REACT_APP_CLIENT_DOMAIN;
+  } catch (e) {
+    return false;
+  }
+}
 
 const TrackWidget = () => {
   const params = useParams();
+  const {
+    state: { playing },
+    dispatch,
+  } = useGlobalStateContext();
+
   const [track, setTrack] = React.useState<Track>();
+  const [isLoading, setIsLoading] = React.useState(true);
+
+  const embeddedInMirlo = inIframe() && inMirlo();
 
   React.useEffect(() => {
     const callback = async () => {
+      setIsLoading(true);
       try {
         const results = await api.get<Track>(`tracks/${params.id}`);
         setTrack(results.result);
       } catch (e) {
         console.error("e", e);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     callback();
   }, [params.id]);
+
+  const onPause = React.useCallback(
+    (e: any) => {
+      console.log("setting playing to false");
+      if (track && embeddedInMirlo) {
+        window.parent.postMessage("mirlo:pause:track:" + track.id);
+      } else {
+        dispatch({ type: "setPlaying", playing: false });
+      }
+    },
+    [dispatch, embeddedInMirlo, track]
+  );
+
+  const playMusic = React.useCallback(() => {
+    if (track) {
+      if (embeddedInMirlo) {
+        console.log("in mirlo");
+        window.parent.postMessage("mirlo:play:track:" + track.id);
+      } else {
+        console.log("not in mirlo");
+        dispatch({ type: "setPlaying", playing: true });
+      }
+    }
+  }, [track, dispatch, embeddedInMirlo]);
+
+  console.log("notInMirlo", !embeddedInMirlo);
+
   return (
     <>
+      {!track && !isLoading && (
+        <div
+          className={css`
+            display: flex;
+            width: 100%;
+            justify-content: center;
+            padding: 1rem;
+          `}
+        >
+          That track doesn't exist
+        </div>
+      )}
       {track && (
         <div
           className={css`
@@ -50,14 +123,35 @@ const TrackWidget = () => {
           />
 
           {track.isPreview && (
-            <IconButton
-              onClick={() => {
-                window.parent.postMessage("mirlo:play:track:" + track.id);
-              }}
-            >
-              <FaPlay />
-            </IconButton>
+            <>
+              {!playing && (
+                <IconButton onClick={playMusic}>
+                  <FaPlay />
+                </IconButton>
+              )}
+              {(playing || embeddedInMirlo) && (
+                <IconButton onClick={onPause}>
+                  <FaPause />
+                </IconButton>
+              )}
+            </>
           )}
+        </div>
+      )}
+      {track && !embeddedInMirlo && (
+        <div
+          className={css`
+            display: flex;
+            align-items: center;
+            width: 100%;
+            padding: 0 1rem;
+
+            & > div {
+              max-width: ;
+            }
+          `}
+        >
+          <AudioWrapper currentTrack={track} hideControls />
         </div>
       )}
     </>

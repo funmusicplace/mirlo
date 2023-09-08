@@ -12,10 +12,19 @@ const useWidgetListener = () => {
         event.data.includes?.("mirlo")
       ) {
         const data = event.data.split(":");
-        dispatch({
-          type: "startPlayingIds",
-          playerQueueIds: [+data[3]],
-        });
+        const action = data[1];
+
+        if (action === "play") {
+          dispatch({
+            type: "startPlayingIds",
+            playerQueueIds: [+data[3]],
+          });
+        } else if (action === "pause") {
+          dispatch({
+            type: "setPlaying",
+            playing: false,
+          });
+        }
       }
     });
   }, [dispatch]);

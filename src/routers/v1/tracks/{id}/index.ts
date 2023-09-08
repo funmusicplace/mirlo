@@ -11,7 +11,7 @@ export default function () {
   async function GET(req: Request, res: Response) {
     const { id }: { id?: string } = req.params;
 
-    const track = await prisma.track.findUnique({
+    const track = await prisma.track.findFirst({
       where: { id: Number(id) },
       include: {
         trackGroup: {
