@@ -31,8 +31,8 @@ jobs:
         run: |
           cp .env.example .env
 
-      - name: Echo CI
-        run: echo ${CI}
+      # - name: Echo CI
+      #   run: echo ${CI}
 
       - name: Install
         run: yarn install --force

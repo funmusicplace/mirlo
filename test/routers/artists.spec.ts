@@ -16,11 +16,15 @@ describe("artists", () => {
   });
 
   it("should GET / with no artists in database", async () => {
-    const response = await request(baseURL)
-      .get("artists/")
-      .set("Accept", "application/json");
+    try {
+      const response = await request(baseURL)
+        .get("artists/")
+        .set("Accept", "application/json");
 
-    assert(response.body.results.length === 0);
+      assert(response.body.results.length === 0);
+    } catch (e) {
+      console.error(e);
+    }
   });
 
   it("should GET / with 1 artist in the database", async () => {

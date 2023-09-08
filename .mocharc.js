@@ -1,6 +1,6 @@
 const shouldWatch = process.env.CI === "true" ? false : true;
-console.log("process", process.env.CI);
-console.log("shouldWatch", shouldWatch);
+
+console.log("Watching... ", shouldWatch);
 
 module.exports = {
   extension: ["ts"],
