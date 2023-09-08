@@ -4,11 +4,9 @@ dotenv.config();
 import { describe, it } from "mocha";
 import request from "supertest";
 import prisma from "../../prisma/prisma";
-import { deleteUser } from "../../src/utils/user";
 
 const baseURL = `${process.env.API_DOMAIN}/v1/`;
-// const baseURL = `http://api:3000/v1/`;
-console.log("base_url", baseURL);
+
 describe("artists", () => {
   beforeEach(async () => {
     try {

@@ -26,7 +26,8 @@ const hlsConfig = {
 
 export const AudioWrapper: React.FC<{
   currentTrack: Track;
-}> = ({ currentTrack }) => {
+  hideControls?: boolean;
+}> = ({ currentTrack, hideControls = false }) => {
   const {
     state: { playerQueueIds, currentlyPlayingIndex, user, playing, looping },
     dispatch,
@@ -132,33 +133,38 @@ export const AudioWrapper: React.FC<{
   return (
     <>
       <>
-        <div
-          className={css`
-            display: flex;
-            // margin-right: 1rem;
+        {!hideControls && (
+          <div
+            className={css`
+              display: flex;
+              // margin-right: 1rem;
 
-            button {
-              margin-right: 0.25rem;
-            }
-          `}
-        >
-          <IconButton onClick={onClickPrevious}>
-            <FaBackward />
-          </IconButton>
-          {!playing && (
-            <IconButton onClick={onPlay}>
-              <FaPlay />
-            </IconButton>
-          )}
-          {playing && (
-            <IconButton onClick={onPause}>
-              <FaPause />
-            </IconButton>
-          )}
-          <IconButton onClick={onClickNext}>
-            <FaForward />
-          </IconButton>
-        </div>
+              button {
+                margin-right: 0.25rem;
+              }
+            `}
+          >
+            <>
+              <IconButton onClick={onClickPrevious}>
+                <FaBackward />
+              </IconButton>
+              {!playing && (
+                <IconButton onClick={onPlay}>
+                  <FaPlay />
+                </IconButton>
+              )}
+              {playing && (
+                <IconButton onClick={onPause}>
+                  <FaPause />
+                </IconButton>
+              )}
+              <IconButton onClick={onClickNext}>
+                <FaForward />
+              </IconButton>
+            </>
+          </div>
+        )}
+
         <ReactHlsPlayer
           src={streamUrl}
           autoPlay={false}
