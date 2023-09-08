@@ -27,6 +27,7 @@ services:
     container_name: blackbird-api
     environment:
       - NODE_ENV=${NODE_ENV:-test}
+      - CI=${CI:-false}
     depends_on:
       - redis
       - pgsql

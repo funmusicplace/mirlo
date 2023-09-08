@@ -1,5 +1,7 @@
 const shouldWatch = process.env.CI === "true" ? false : true;
 
+console.log("Watching... ", shouldWatch);
+
 module.exports = {
   extension: ["ts"],
   spec: "test/**/*.spec.ts",

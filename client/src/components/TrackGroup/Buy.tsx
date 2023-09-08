@@ -1,4 +1,3 @@
-import { css } from "@emotion/css";
 import Button from "components/common/Button";
 import Money from "components/common/Money";
 import React from "react";

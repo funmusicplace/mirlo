@@ -6,13 +6,17 @@ import request from "supertest";
 import prisma from "../../prisma/prisma";
 import { deleteUser } from "../../src/utils/user";
 
-const baseURL = `${process.env.APP_HOST}/v1/`;
-
+const baseURL = `${process.env.API_DOMAIN}/v1/`;
+// const baseURL = `http://api:3000/v1/`;
 console.log("base_url", baseURL);
 describe("artists", () => {
   beforeEach(async () => {
-    await prisma.$executeRaw`DELETE FROM "Artist";`;
-    await prisma.$executeRaw`DELETE FROM "User";`;
+    try {
+      await prisma.$executeRaw`DELETE FROM "Artist";`;
+      await prisma.$executeRaw`DELETE FROM "User";`;
+    } catch (e) {
+      console.error(e);
+    }
   });
 
   it("should GET / with no artists in database", async () => {

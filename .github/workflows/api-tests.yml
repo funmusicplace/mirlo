@@ -31,8 +31,8 @@ jobs:
         run: |
           cp .env.example .env
 
-      - name: Echo CI
-        run: echo ${CI}
+      # - name: Echo CI
+      #   run: echo ${CI}
 
       - name: Install
         run: yarn install --force
@@ -47,7 +47,7 @@ jobs:
         run: docker logs blackbird-api
 
       - name: Run tests
-        run: docker exec blackbird-api yarn test --exit
+        run: docker exec -e API_DOMAIN=http://api:3000 blackbird-api yarn test --exit
 
       - name: Stop containers
         if: always()
