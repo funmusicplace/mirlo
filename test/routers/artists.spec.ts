@@ -6,7 +6,8 @@ import request from "supertest";
 import prisma from "../../prisma/prisma";
 import { deleteUser } from "../../src/utils/user";
 
-const baseURL = `${process.env.APP_HOST}/v1/`;
+// process.env.APP_HOST
+const baseURL = `http://api:3000/v1/`;
 
 console.log("base_url", baseURL);
 describe("artists", () => {
