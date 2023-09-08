@@ -2,7 +2,7 @@ import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import { TransifexI18next } from "@transifex/i18next";
 
-import * as en from "translation/en.json";
+// import * as en from "translation/en.json";
 
 const txBackend = new TransifexI18next({
   token: process.env.REACT_APP_TRANSIFEX_TOKEN,
@@ -11,11 +11,11 @@ const txBackend = new TransifexI18next({
 // the translations
 // (tip move them in a JSON file and import them,
 // or even better, manage them separated from your code: https://react.i18next.com/guides/multiple-translation-files)
-const resources = {
-  en: {
-    translation: en,
-  },
-};
+// const resources = {
+//   en: {
+//     translation: en,
+//   },
+// };
 
 const userLanguage = navigator.language;
 
