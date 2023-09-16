@@ -92,6 +92,7 @@ function App() {
         {isDisplayed && <Snackbar />}
 
         <Header />
+
         <PageHeader />
         <div
           className={css`
@@ -108,6 +109,29 @@ function App() {
             }
           `}
         >
+          <div
+            className={css`
+              background-color: var(--mi-warning-background-color);
+              color: var(--mi-warning-foreground-color);
+              padding: 1rem;
+              border-radius: 1rem;
+              margin-bottom: 1rem;
+
+              a {
+                color: var(--mi-warning-foreground-color);
+              }
+            `}
+          >
+            Hi! We're really excited about this project and looking forward to
+            having you use it. However, we're in very heavy alpha state right
+            now, so you should know that a) payments do not work and b) your
+            data might disappear! If you find anything broken, please let us
+            know{" "}
+            <a href="https://github.com/funmusicplace/mirlo/issues">
+              on GitHub
+            </a>{" "}
+            or <a href="https://discord.gg/VjKq26raKX">on the Discord</a>.
+          </div>
           <Outlet />
         </div>
         <Footer />
