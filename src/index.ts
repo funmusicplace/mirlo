@@ -28,7 +28,20 @@ const app = express();
 app.use(async (...args) => {
   const clients = await prisma.client.findMany();
   const origin = [
-    ...flatten(clients.map((c) => c.allowedCorsOrigins)),
+    ...flatten(
+      clients.map((c) =>
+        c.allowedCorsOrigins.map((origin) => {
+          if (origin.startsWith("regex:")) {
+            console.log(
+              "its a regex",
+              new RegExp(origin.replace("regex:", ""))
+            );
+            return new RegExp(origin.replace("regex:", ""));
+          }
+          return origin;
+        })
+      )
+    ),
     process.env.API_DOMAIN ?? "http://localhost:3000",
   ];
   if (process.env.NODE_ENV === "development") {
