@@ -45,9 +45,17 @@ const Header = () => {
             align-items: center;
           `}
         >
+          <ReactLogo
+            className={css`
+              max-height: 2rem;
+              max-width: 3rem;
+              margin-right: 0.5rem;
+            `}
+          />
           <span
             className={css`
               display: none;
+              color: var(--mi-primary-color);
               @media (min-width: ${bp.small}px) {
                 display: inline-block;
               }
@@ -55,12 +63,6 @@ const Header = () => {
           >
             mirlo
           </span>
-          <ReactLogo
-            className={css`
-              max-height: 2rem;
-              max-width: 3rem;
-            `}
-          />
         </Link>
       </h1>
       {isMenuOpen && (
@@ -130,7 +132,7 @@ const Header = () => {
             setIsMenuOpen(true);
           }}
         >
-          <ImMenu color={theme.colors.text} />
+          <ImMenu color={"var(--mi-primary-color)"} />
         </IconButton>
       </div>
     </header>

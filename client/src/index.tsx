@@ -29,6 +29,7 @@ import Collection from "components/Collection";
 import Post from "components/Post";
 import PasswordReset from "components/PasswordReset";
 import TrackGroup from "components/TrackGroup/TrackGroup";
+import About from "components/About";
 
 const router = createBrowserRouter([
   {
@@ -37,6 +38,8 @@ const router = createBrowserRouter([
     errorElement: <ErrorPage />,
     children: [
       { path: "", element: <Home /> },
+      { path: "about", element: <About /> },
+
       { path: "widget/track/:id", element: <TrackWidget /> },
       { path: "widget/trackgroup/:id", element: <TrackGroupWidget /> },
       { path: "post/:postId", element: <Post /> },

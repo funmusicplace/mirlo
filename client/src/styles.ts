@@ -2,7 +2,7 @@ const styles = `html {
   --mi-normal-background-color: white;
   --mi-normal-foreground-color: #333;
 
-  --mi-primary-color: #0096a8;
+  --mi-primary-color: #be3455;
   --mi-primary-color--hover: #00C4DB;
 
   --mi-secondary-color: #ffb3d0;

@@ -1,9 +1,8 @@
 import { css, injectGlobal } from "@emotion/css";
-import LoadingSpinner from "components/common/LoadingSpinner";
 import PageHeader from "components/common/PageHeader";
 import Snackbar from "components/common/Snackbar";
 import Player from "components/Player";
-import React, { useContext, useState } from "react";
+import React, { useContext } from "react";
 import { Helmet } from "react-helmet";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import api from "services/api";
@@ -19,7 +18,6 @@ function App() {
   const { state, dispatch } = useGlobalStateContext();
   const { isDisplayed } = useContext(SnackbarContext);
   useWidgetListener();
-  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
   const userId = state.user?.id;
@@ -33,7 +31,6 @@ function App() {
           type: "setLoggedInUser",
           user: user.result,
         });
-        setIsLoading(false);
       } catch (e) {
         if (e instanceof Error && e.message.includes("NetworkError")) {
           console.error(
@@ -41,7 +38,6 @@ function App() {
           );
           setTimeout(callback, 1000 * 10);
         } else {
-          setIsLoading(false);
           console.error("Error refreshing token", e);
           dispatch({
             type: "setLoggedInUser",
@@ -94,44 +90,52 @@ function App() {
         `}
       >
         {isDisplayed && <Snackbar />}
-        {isLoading && (
+
+        <Header />
+
+        <PageHeader />
+        <div
+          className={css`
+            max-width: 640px;
+            background-color: var(--mi-normal-background-color);
+            padding: 2rem 2rem 2rem;
+            margin: 0 auto;
+            width: 100%;
+
+            border-radius: var(--mi-border-radius);
+
+            @media screen and (max-width: 800px) {
+              padding: 1rem 1rem 9rem;
+            }
+          `}
+        >
           <div
             className={css`
-              display: flex;
-              height: 100vh;
-              justify-content: center;
-              align-items: center;
-              font-size: 4rem;
+              background-color: var(--mi-warning-background-color);
+              color: var(--mi-warning-foreground-color);
+              padding: 1rem;
+              border-radius: 1rem;
+              margin-bottom: 1rem;
+
+              a {
+                color: var(--mi-warning-foreground-color);
+              }
             `}
           >
-            <LoadingSpinner />
+            Hi! We're really excited about this project and looking forward to
+            having you use it. However, we're in very heavy alpha state right
+            now, so you should know that a) payments do not work and b) your
+            data might disappear! If you find anything broken, please let us
+            know{" "}
+            <a href="https://github.com/funmusicplace/mirlo/issues">
+              on GitHub
+            </a>{" "}
+            or <a href="https://discord.gg/VjKq26raKX">on the Discord</a>.
           </div>
-        )}
-        {!isLoading && (
-          <>
-            <Header />
-            <PageHeader />
-            <div
-              className={css`
-                max-width: 640px;
-                background-color: var(--mi-normal-background-color);
-                padding: 2rem 2rem 2rem;
-                margin: 0 auto;
-                width: 100%;
-
-                border-radius: var(--mi-border-radius);
-
-                @media screen and (max-width: 800px) {
-                  padding: 1rem 1rem 9rem;
-                }
-              `}
-            >
-              <Outlet />
-            </div>
-            <Footer />
-            <Player />
-          </>
-        )}
+          <Outlet />
+        </div>
+        <Footer />
+        <Player />
       </div>
     </>
   );

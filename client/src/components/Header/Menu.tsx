@@ -110,6 +110,14 @@ const Menu: React.FC<{ setIsMenuOpen: (bool: boolean) => void }> = ({
           </li>
         </>
       )}
+      <li
+        onClick={() => {
+          setIsMenuOpen(false);
+          navigate("/about");
+        }}
+      >
+        <Button>{t("about")}</Button>
+      </li>
     </menu>
   );
 };
