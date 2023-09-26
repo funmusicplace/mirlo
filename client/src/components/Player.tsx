@@ -12,6 +12,7 @@ import Spinner from "./common/Spinner";
 import { GlobalState, useGlobalStateContext } from "state/GlobalState";
 import api from "services/api";
 import styled from "@emotion/styled";
+import { isTrackOwnedOrPreview } from "utils/tracks";
 
 const LoopingIndicator = styled.span`
   position: absolute;
@@ -153,6 +154,8 @@ const Player = () => {
     return null;
   }
 
+  console.log("currentTrack", currentTrack);
+
   return (
     <div className={playerClass}>
       <Helmet>
@@ -263,7 +266,9 @@ const Player = () => {
           }
         `}
       >
-        {currentTrack && <AudioWrapper currentTrack={currentTrack} />}
+        {currentTrack && isTrackOwnedOrPreview(currentTrack, user) && (
+          <AudioWrapper currentTrack={currentTrack} />
+        )}
 
         {/* <Button
           onClick={onClickQueue}

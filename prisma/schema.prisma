@@ -143,26 +143,26 @@ model UserTrackGroupPurchase {
 }
 
 model TrackGroup {
-  id                     Int                      @id @default(autoincrement())
-  about                  String?
-  artist                 Artist                   @relation(fields: [artistId], references: [id])
-  artistId               Int
-  title                  String?
-  tracks                 Track[]
-  cover                  TrackGroupCover?
-  published              Boolean                  @default(false)
-  type                   String?
-  releaseDate            DateTime                 @default(now())
-  adminEnabled           Boolean                  @default(true)
-  createdAt              DateTime                 @default(now())
-  updatedAt              DateTime                 @updatedAt
-  deletedAt              DateTime?
-  minPrice               Int? // in cents
-  currency               String?                  @default("USD")
-  isPriceFixed           Boolean                  @default(false)
-  userTrackGroupPurchase UserTrackGroupPurchase[]
-  stripeProductKey       String?
-  urlSlug                String
+  id                      Int                      @id @default(autoincrement())
+  about                   String?
+  artist                  Artist                   @relation(fields: [artistId], references: [id])
+  artistId                Int
+  title                   String?
+  tracks                  Track[]
+  cover                   TrackGroupCover?
+  published               Boolean                  @default(false)
+  type                    String?
+  releaseDate             DateTime                 @default(now())
+  adminEnabled            Boolean                  @default(true)
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+  deletedAt               DateTime?
+  minPrice                Int? // in cents
+  currency                String?                  @default("USD")
+  isPriceFixed            Boolean                  @default(false)
+  userTrackGroupPurchases UserTrackGroupPurchase[]
+  stripeProductKey        String?
+  urlSlug                 String
 
   @@unique([artistId, urlSlug])
 }

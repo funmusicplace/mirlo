@@ -5,7 +5,7 @@ import { useGlobalStateContext } from "state/GlobalState";
 import useDraggableTrack from "utils/useDraggableTrack";
 
 import IconButton from "./IconButton";
-import { fmtMSS } from "utils/tracks";
+import { fmtMSS, isTrackOwnedOrPreview } from "utils/tracks";
 
 const TrackRow: React.FC<{
   track: Track;
@@ -14,7 +14,7 @@ const TrackRow: React.FC<{
 }> = ({ track, addTracksToQueue, trackGroup }) => {
   const [trackTitle] = React.useState(track.title);
   const {
-    state: { playerQueueIds, playing, currentlyPlayingIndex },
+    state: { playerQueueIds, playing, currentlyPlayingIndex, user },
     dispatch,
   } = useGlobalStateContext();
   const { onDragStart, onDragEnd } = useDraggableTrack();
@@ -33,6 +33,8 @@ const TrackRow: React.FC<{
     dispatch({ type: "setPlaying", playing: false });
   }, [dispatch]);
 
+  const canPlayTrack = isTrackOwnedOrPreview(track, user, trackGroup);
+
   return (
     <tr
       key={track.id}
@@ -42,10 +44,10 @@ const TrackRow: React.FC<{
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
       className={css`
-        border-bottom: 1px solid lightgrey;
-
+        border-bottom: 1px solid var(--mi-lighter-foreground-color);
+        ${!canPlayTrack ? `color: var(--mi-light-foreground-color);` : ""}
         :first-child {
-          border-top: 1px solid lightgrey;
+          border-top: 1px solid var(--mi-lighter-foreground-color);
         }
 
         > td > .play-button {
@@ -56,26 +58,28 @@ const TrackRow: React.FC<{
         }
       `}
     >
-      <td
-        className={css`
-          width: 40px;
-        `}
-      >
-        {(!playing || currentPlayingTrackId !== track.id) && (
-          <IconButton compact className="play-button" onClick={onTrackPlay}>
-            <FaPlay />
-          </IconButton>
-        )}
-        {playing && currentPlayingTrackId === track.id && (
-          <IconButton
-            compact
-            data-cy="track-row-pause-button"
-            onClick={onTrackPause}
-          >
-            <FaPause />
-          </IconButton>
-        )}
-      </td>
+      {canPlayTrack && (
+        <td
+          className={css`
+            width: 40px;
+          `}
+        >
+          {(!playing || currentPlayingTrackId !== track.id) && (
+            <IconButton compact className="play-button" onClick={onTrackPlay}>
+              <FaPlay />
+            </IconButton>
+          )}
+          {playing && currentPlayingTrackId === track.id && (
+            <IconButton
+              compact
+              data-cy="track-row-pause-button"
+              onClick={onTrackPause}
+            >
+              <FaPause />
+            </IconButton>
+          )}
+        </td>
+      )}
       <td
         className={css`
           width: 40%;

@@ -29,3 +29,22 @@ export const isEqualDurations = (n1: number, n2: number) => {
 export const fmtMSS = (s: number) => {
   return (s - (s %= 60)) / 60 + (9 < s ? ":" : ":0") + s;
 };
+
+export const isTrackOwnedOrPreview = (
+  track: Track,
+  user?: LoggedInUser,
+  trackGroup?: TrackGroup
+): boolean => {
+  if (track.isPreview) {
+    return true;
+  }
+  if (!user) {
+    return false;
+  }
+  const lookInTrackGroup = trackGroup ?? track.trackGroup;
+  const ownsTrack = lookInTrackGroup.artist.userId === user.id;
+  const boughtTrack = !!lookInTrackGroup.userTrackGroupPurchases?.find(
+    (utgp) => utgp.userId === user.id
+  );
+  return ownsTrack || boughtTrack;
+};

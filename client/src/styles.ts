@@ -1,6 +1,8 @@
 const styles = `html {
   --mi-normal-background-color: white;
   --mi-normal-foreground-color: #333;
+  --mi-light-foreground-color: #888;
+  --mi-lighter-foreground-color: #eee;
 
   --mi-primary-color: #be3455;
   --mi-primary-color--hover: #00C4DB;

@@ -65,8 +65,6 @@ const ManageTrackRow: React.FC<{
     }
   }, [track.id, trackTitle, userId]);
 
-  // console.log("track", track);
-
   return (
     <tr
       key={track.id}

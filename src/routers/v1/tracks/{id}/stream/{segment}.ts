@@ -1,18 +1,12 @@
 import { User } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
-import fs from "fs";
-const fsPromises = fs.promises;
-import path from "path";
-import stream from "stream";
+
 import prisma from "../../../../../../prisma/prisma";
 import {
   finalAudioBucket,
   getBufferFromMinio,
   minioClient,
 } from "../../../../../utils/minio";
-
-// FIXME: REplace with MEDIA_LOCATIOn
-const ROOT = "/data/media/audio";
 
 export const fetchFile = async (
   res: Response,
@@ -51,6 +45,7 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
+    // FIXME: limit plays to owned songs unless preview
     const { id, segment }: { id?: string; segment?: string } = req.params;
     try {
       const track = await prisma.track.findUnique({

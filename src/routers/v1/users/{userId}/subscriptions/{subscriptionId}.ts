@@ -1,8 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import {
-  artistBelongsToLoggedInUser,
-  userAuthenticated,
-} from "../../../../../auth/passport";
+import { userAuthenticated } from "../../../../../auth/passport";
 import prisma from "../../../../../../prisma/prisma";
 import { User } from "@prisma/client";
 import stripe from "../../../../../utils/stripe";

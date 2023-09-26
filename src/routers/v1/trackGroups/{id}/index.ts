@@ -3,15 +3,19 @@ import prisma from "../../../../../prisma/prisma";
 import processor, {
   findTrackGroupIdForSlug,
 } from "../../../../utils/trackGroup";
+import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
+import { User } from "@prisma/client";
 
 export default function () {
   const operations = {
-    GET,
+    GET: [userLoggedInWithoutRedirect, GET],
   };
 
   // FIXME: only do published tracks
   async function GET(req: Request, res: Response, next: NextFunction) {
     let { id }: { id?: string } = req.params;
+    const loggedInUser = req.user as User;
+
     const { artistId }: { artistId: string } = req.query as {
       artistId: string;
     };
@@ -34,6 +38,16 @@ export default function () {
           },
           artist: true,
           cover: true,
+          ...(loggedInUser
+            ? {
+                userTrackGroupPurchases: {
+                  where: { userId: loggedInUser.id },
+                  select: {
+                    userId: true,
+                  },
+                },
+              }
+            : {}),
         },
       });
 

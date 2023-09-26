@@ -1,15 +1,17 @@
 import { Request, Response } from "express";
 import processor from "../../../../utils/trackGroup";
 import prisma from "../../../../../prisma/prisma";
+import { User } from "@prisma/client";
+import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 
 export default function () {
   const operations = {
-    GET,
+    GET: [userLoggedInWithoutRedirect, GET],
   };
 
-  // FIXME: only do published tracks
   async function GET(req: Request, res: Response) {
     const { id }: { id?: string } = req.params;
+    const loggedInUser = req.user as User;
 
     const track = await prisma.track.findFirst({
       where: { id: Number(id) },
@@ -18,12 +20,23 @@ export default function () {
           include: {
             artist: true,
             cover: true,
+            ...(loggedInUser
+              ? {
+                  userTrackGroupPurchases: {
+                    where: { userId: loggedInUser.id },
+                    select: {
+                      userId: true,
+                    },
+                  },
+                }
+              : {}),
           },
         },
         trackArtists: true,
         audio: true,
       },
     });
+
     res.json({
       result: {
         ...track,

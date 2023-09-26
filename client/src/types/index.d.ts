@@ -46,6 +46,7 @@ interface TrackGroup {
   cover?: { id: number; url: string; sizes?: { [key: number]: string } };
   minPrice?: number; // in cents
   urlSlug?: string;
+  userTrackGroupPurchases?: { userId: number }[];
 }
 
 interface Post {
