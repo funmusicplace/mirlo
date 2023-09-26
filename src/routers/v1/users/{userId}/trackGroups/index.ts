@@ -29,6 +29,9 @@ export default function () {
           where: {
             deletedAt: null,
           },
+          include: {
+            audio: true,
+          },
         },
         artist: true,
         cover: true,

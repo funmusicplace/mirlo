@@ -8,6 +8,7 @@ import IconButton from "../common/IconButton";
 import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
 import { InputEl } from "../common/Input";
+import { fmtMSS } from "utils/tracks";
 
 const ManageTrackRow: React.FC<{
   track: Track;
@@ -64,6 +65,8 @@ const ManageTrackRow: React.FC<{
     }
   }, [track.id, trackTitle, userId]);
 
+  // console.log("track", track);
+
   return (
     <tr
       key={track.id}
@@ -114,6 +117,7 @@ const ManageTrackRow: React.FC<{
           />
         )}
       </td>
+      <td>{track.audio?.duration && fmtMSS(track.audio?.duration)}</td>
       <td align="right">
         {isEditingTitle && (
           <IconButton onClick={updateTrackTitle} title="Delete">

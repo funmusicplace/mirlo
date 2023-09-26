@@ -32,10 +32,6 @@ app.use(async (...args) => {
       clients.map((c) =>
         c.allowedCorsOrigins.map((origin) => {
           if (origin.startsWith("regex:")) {
-            console.log(
-              "its a regex",
-              new RegExp(origin.replace("regex:", ""))
-            );
             return new RegExp(origin.replace("regex:", ""));
           }
           return origin;

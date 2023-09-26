@@ -51,7 +51,6 @@ export default function () {
     const { userId } = req.params;
     const { title, trackGroupId, trackArtists } = req.body;
     try {
-      console.log("request body", req.body);
       const trackGroup = await doesTrackGroupBelongToUser(
         Number(trackGroupId),
         Number(userId)

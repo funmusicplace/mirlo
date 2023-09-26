@@ -42,9 +42,6 @@ const remarkEmbedder = ({ cache, transformers, handleHTML, handleError }) => {
         }
   );
   return (tree) => {
-    // const utilVisit = import("unist-util-visit");
-    // console.log("utilVisit", utilVisit);
-    // const { visit } = utilVisit;
     const nodeAndURL = [];
     visit(tree, "paragraph", (paragraphNode) => {
       if (paragraphNode.children.length !== 1) {

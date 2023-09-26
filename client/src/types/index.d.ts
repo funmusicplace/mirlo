@@ -22,6 +22,7 @@ interface Track {
   image: Image;
   audio?: {
     url: string;
+    duration: number; // in seconds
   };
   isPreview: boolean;
   trackArtists?: {

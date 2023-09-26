@@ -21,11 +21,6 @@ function inIframe() {
 
 function inMirlo() {
   try {
-    console.log(
-      "window.top?.location",
-      window.top?.location,
-      process.env.REACT_APP_CLIENT_DOMAIN
-    );
     return window.top?.location.origin === process.env.REACT_APP_CLIENT_DOMAIN;
   } catch (e) {
     return false;
@@ -62,7 +57,6 @@ const TrackWidget = () => {
 
   const onPause = React.useCallback(
     (e: any) => {
-      console.log("setting playing to false");
       if (track && embeddedInMirlo) {
         window.parent.postMessage("mirlo:pause:track:" + track.id);
       } else {
@@ -75,16 +69,12 @@ const TrackWidget = () => {
   const playMusic = React.useCallback(() => {
     if (track) {
       if (embeddedInMirlo) {
-        console.log("in mirlo");
         window.parent.postMessage("mirlo:play:track:" + track.id);
       } else {
-        console.log("not in mirlo");
         dispatch({ type: "setPlaying", playing: true });
       }
     }
   }, [track, dispatch, embeddedInMirlo]);
-
-  console.log("notInMirlo", !embeddedInMirlo);
 
   return (
     <>

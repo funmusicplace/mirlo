@@ -43,7 +43,7 @@ export const doesTrackGroupBelongToUser = async (
         where: {
           deletedAt: null,
         },
-        include: { trackArtists: true },
+        include: { trackArtists: true, audio: true },
       },
     },
   });

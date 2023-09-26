@@ -37,6 +37,7 @@ export const ManageTrackTable: React.FC<{
         if (trackGroupId) {
           setDisplayTracks(newTracks);
 
+          // FIXME: this endpoint isn't implemented
           await api.put(`trackGroup/${trackGroupId}/tracks`, {
             tracks: newTracks.map((t) => t.id),
           });
@@ -95,9 +96,10 @@ export const ManageTrackTable: React.FC<{
     <Table style={{ marginBottom: "1.5rem", marginTop: "1.5rem" }}>
       <thead>
         <tr>
-          <th />
+          <th style={{ maxWidth: "2rem" }} />
           <th>Title</th>
-          <th align="right" />
+          <th>Duration</th>
+          <th align="right">Manage</th>
         </tr>
       </thead>
       <tbody>

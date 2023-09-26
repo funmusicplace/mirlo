@@ -5,6 +5,7 @@ import { useGlobalStateContext } from "state/GlobalState";
 import useDraggableTrack from "utils/useDraggableTrack";
 
 import IconButton from "./IconButton";
+import { fmtMSS } from "utils/tracks";
 
 const TrackRow: React.FC<{
   track: Track;
@@ -86,6 +87,7 @@ const TrackRow: React.FC<{
         {trackTitle}
       </td>
       <td>{trackGroup.artist.name}</td>
+      <td>{track.audio?.duration && fmtMSS(track.audio.duration)}</td>
     </tr>
   );
 };

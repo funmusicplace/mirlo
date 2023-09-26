@@ -7,13 +7,7 @@ import api from "services/api";
 import IconButton from "./common/IconButton";
 import { FaBackward, FaForward, FaPause, FaPlay } from "react-icons/fa";
 import { useGlobalStateContext } from "state/GlobalState";
-
-function isEqualDurations(n1: number, n2: number) {
-  return Math.abs(n1 - n2) < 0.00001;
-}
-function fmtMSS(s: number) {
-  return (s - (s %= 60)) / 60 + (9 < s ? ":" : ":0") + s;
-}
+import { fmtMSS, isEqualDurations } from "utils/tracks";
 
 const hlsConfig = {
   xhrSetup: function (xhr: XMLHttpRequest, url: string) {

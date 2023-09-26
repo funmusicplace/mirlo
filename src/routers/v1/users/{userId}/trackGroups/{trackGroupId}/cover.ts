@@ -50,6 +50,18 @@ export default function () {
           artistId: { in: artists.map((a) => a.id) },
           id: Number(trackGroupId),
         },
+        include: {
+          tracks: {
+            where: {
+              deletedAt: null,
+            },
+            include: {
+              audio: true,
+            },
+          },
+          artist: true,
+          cover: true,
+        },
       });
 
       if (!trackgroup) {
