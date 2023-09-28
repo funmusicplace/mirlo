@@ -3,7 +3,6 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useSnackbar } from "state/SnackbarContext";
-import { colorShade, theme } from "utils/theme";
 import { API_ROOT } from "../../constants";
 import { useGlobalStateContext } from "../../state/GlobalState";
 import Button from "../common/Button";
@@ -40,17 +39,14 @@ const Menu: React.FC<{ setIsMenuOpen: (bool: boolean) => void }> = ({
           text-decoration: none;
           text-align: center;
           display: block;
-          color: ${theme.colors.text};
+          color: var(--mi-normal-background-color);
           font-weight: bold;
           border-radius: 0;
           border: none;
 
           &:hover {
             border-radius: 0;
-            background: ${colorShade(
-              theme.colors.primaryHighlight,
-              -50
-            )} !important;
+            background: var(--mi-normal-foreground-color) !important;
             border: none !important;
           }
         }
@@ -100,14 +96,14 @@ const Menu: React.FC<{ setIsMenuOpen: (bool: boolean) => void }> = ({
               {t("logIn")}
             </Button>
           </li>
-          <li
+          {/* <li
             onClick={() => {
               setIsMenuOpen(false);
               navigate("/signup");
             }}
           >
             <Button>{t("signUp")}</Button>
-          </li>
+          </li> */}
         </>
       )}
       <li

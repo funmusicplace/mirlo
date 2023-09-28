@@ -4,7 +4,7 @@ const styles = `html {
   --mi-light-foreground-color: #888;
   --mi-lighter-foreground-color: #eee;
 
-  --mi-primary-color: #be3455;
+  --mi-primary-color: #282828;
   --mi-primary-color--hover: #00C4DB;
 
   --mi-secondary-color: #ffb3d0;
@@ -29,6 +29,8 @@ const styles = `html {
   --mi-icon-button-background-color: var(--mi-shade-background-color);
   --mi-icon-button-background-color--hover: rgba(0, 0, 0, 0.2);
 }
+
+
 
 @media (prefers-color-scheme: dark) {
   html {

@@ -24,7 +24,7 @@ const Header = () => {
         justify-content: space-between;
         align-items: center;
         padding: 0.5rem 1rem;
-        background-color: var(--mi-primary-highlight-color);
+        background-color: var(--mi-normal-foreground-color);
         position: fixed;
         width: 100%;
         z-index: 999999;
@@ -55,7 +55,7 @@ const Header = () => {
           <span
             className={css`
               display: none;
-              color: var(--mi-primary-color);
+              color: var(--mi-normal-background-color);
               @media (min-width: ${bp.small}px) {
                 display: inline-block;
               }
@@ -83,7 +83,13 @@ const Header = () => {
               background: ${theme.colors.primaryHighlight};
             `}
           >
-            <IconButton onClick={() => setIsMenuOpen(false)} transparent>
+            <IconButton
+              onClick={() => setIsMenuOpen(false)}
+              transparent
+              className={css`
+                background: var(--mi-light-foreground-color);
+              `}
+            >
               <FaTimes />
             </IconButton>
             <Menu setIsMenuOpen={setIsMenuOpen} />
@@ -127,12 +133,11 @@ const Header = () => {
         )}
         <IconButton
           transparent
-          color="primary"
           onClick={() => {
             setIsMenuOpen(true);
           }}
         >
-          <ImMenu color={"var(--mi-primary-color)"} />
+          <ImMenu color={"var(--mi-foreground-color)"} />
         </IconButton>
       </div>
     </header>

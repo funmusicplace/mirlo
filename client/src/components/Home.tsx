@@ -43,17 +43,19 @@ function Home() {
   return (
     <div className={css``}>
       {!user && (
-        <div
-          className={css`
-            font-size: 2rem;
-            padding-bottom: 2rem;
-          `}
-        >
-          <p>
+        <div>
+          <p
+            className={css`
+              font-size: 2rem;
+              padding-bottom: 2rem;
+              font-weight: bold;
+              font-family: "Roboto Slab", serif;
+            `}
+          >
             Direct support for musicians. Buy their music. Collectively owned
             and managed.
           </p>
-          <Link to="signup">
+          {/* <Link to="signup">
             <Button
               className={css`
                 margin-top: 1.5rem;
@@ -62,10 +64,11 @@ function Home() {
             >
               Get started
             </Button>
-          </Link>
+          </Link> */}
+          <span>Coming soon!</span>
         </div>
       )}
-      <h2>Latest posts from the community:</h2>
+      {/* <h2>Latest posts from the community:</h2>
       {posts.map((p) => (
         <Box
           key={p.id}
@@ -90,7 +93,7 @@ function Home() {
           )}
           <PostContent content={p.content} />
         </Box>
-      ))}
+      ))} */}
     </div>
   );
 }

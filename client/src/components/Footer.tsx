@@ -8,6 +8,7 @@ export const Footer = () => {
         display: block;
         margin-bottom: 7rem;
         margin-top: 2rem;
+        padding: 1rem;
       `}
     >
       Questions? <a href="mailto:mirlodotspace@proton.me">Contact us</a>. Want
