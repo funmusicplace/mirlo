@@ -16,7 +16,7 @@ export const Footer = () => {
         display: block;
         padding: 1rem;
         max-width: 640px;
-        margin: 1rem auto 1rem;
+        margin: 1rem auto 9rem;
       `}
     >
       <p

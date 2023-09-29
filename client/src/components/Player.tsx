@@ -154,6 +154,8 @@ const Player = () => {
     return null;
   }
 
+  console.log("currentTrack", currentTrack);
+
   return (
     <div className={playerClass}>
       <Helmet>
@@ -188,7 +190,7 @@ const Player = () => {
           >
             <ImageWithPlaceholder
               src={currentTrack.trackGroup.cover?.sizes?.[60]}
-              size={50}
+              size={60}
               alt={currentTrack.title}
               className={css`
                 background-color: #efefef;

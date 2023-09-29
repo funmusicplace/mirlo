@@ -36,6 +36,7 @@ model User {
   emailConfirmationExpiration         DateTime?                @default(dbgenerated("NOW() + interval '10 min'"))
   passwordResetConfirmationToken      String?
   passwordResetConfirmationExpiration DateTime?
+  stripeAccountId                     String?
 }
 
 model Post {

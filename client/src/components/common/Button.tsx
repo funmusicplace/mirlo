@@ -41,20 +41,16 @@ const CustomButton = styled.button<Compactable>`
         `;
       case "outlined":
         return `
-          color:  ${props.theme.colors[props.color ?? "primary"]};
+          color:  var(--mi-${props.color ?? "primary"}-color);
           background-color: transparent;
-          border: 2px solid ${props.theme.colors[props.color ?? "primary"]};
+          border: 2px solid var(--mi-${props.color ?? "primary"}-color);
           padding: ${props.compact ? ".3rem .5rem" : "1rem"};
 
           &:hover:not(:disabled) {
-            color: ${colorShade(
-              props.theme.colors[props.color ?? "primary"],
-              0.5
-            )};
-            border: 2px solid ${colorShade(
-              props.theme.colors[props.color ?? "primary"],
-              0.5
-            )};
+            color: var(--mi-${props.color ?? "primary"}-color--hover);
+            border: 2px solid var(--mi-${
+              props.color ?? "primary"
+            }-color--hover);
           }
 
           &[disabled] {

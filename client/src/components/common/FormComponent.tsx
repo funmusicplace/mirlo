@@ -13,6 +13,10 @@ const FormComponent = styled.div`
   input {
     margin-top: 0.25rem;
   }
+
+  .error {
+    color: var(--mi-warning-color);
+  }
 `;
 
 export default FormComponent;

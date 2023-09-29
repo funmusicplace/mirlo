@@ -31,7 +31,11 @@ export const ArtistForm: React.FC<{
   const snackbar = useSnackbar();
   const { state } = useGlobalStateContext();
   const [isSaving, setIsSaving] = React.useState(false);
-  const { register, handleSubmit } = useForm<{
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<{
     name: string;
     bio: string;
     urlSlug: string;
@@ -39,14 +43,33 @@ export const ArtistForm: React.FC<{
     defaultValues: { name: "", bio: "", urlSlug: "", ...existing },
   });
 
+  const validation = React.useCallback(
+    async (value: string) => {
+      if (state.user) {
+        try {
+          const response = await api.get<{ exists: boolean }>(
+            `users/${state.user.id}/testExistence?urlSlug=${value}`
+          );
+          return !response.result.exists;
+        } catch (e) {
+          return true;
+        }
+      }
+      return true;
+    },
+    [state.user]
+  );
+
   const existingId = existing?.id;
 
   const soSave = React.useCallback(
     async (data: Partial<Artist>) => {
+      console.log("data", data);
       if (state.user?.id) {
         try {
           setIsSaving(true);
           const sending = pick(data, ["bio", "name", "urlSlug"]);
+          console.log("sending", sending);
           if (existingId) {
             await api.put(`users/${state.user.id}/artists/${existingId}`, {
               ...sending,
@@ -104,11 +127,24 @@ export const ArtistForm: React.FC<{
         >
           <h3>{existing ? existing.name : t("newArtist")}</h3>
           <FormComponent>
-            {t("displayName")}: <InputEl {...register("name")} />
+            {t("displayName")}:{" "}
+            <InputEl {...register("name", { required: true })} />
           </FormComponent>
+
           <FormComponent>
-            {t("urlSlug")}: <InputEl {...register("urlSlug")} />
+            {t("urlSlug")}:{" "}
+            <InputEl
+              {...register("urlSlug", {
+                validate: { unique: validation },
+              })}
+            />
             <small>Must be unique</small>
+            {errors.urlSlug && (
+              <small className="error">
+                {errors.urlSlug.type === "unique" &&
+                  " This needs to be unique, try something else"}
+              </small>
+            )}
           </FormComponent>
           <FormComponent>
             {t("bio")}:

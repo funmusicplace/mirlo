@@ -100,6 +100,8 @@ const TrackWidget = () => {
             background: var(--mi-normal-background-color);
             border-radius: 1rem;
             align-items: center;
+            height: 100%;
+            box-sizing: border-box;
           `}
         >
           <ImageWithPlaceholder

@@ -30,6 +30,7 @@ import Post from "components/Post";
 import PasswordReset from "components/PasswordReset";
 import TrackGroup from "components/TrackGroup/TrackGroup";
 import About from "components/About";
+import { AuthWrapper } from "components/AuthWrapper";
 
 const router = createBrowserRouter([
   {
@@ -53,33 +54,73 @@ const router = createBrowserRouter([
       },
       {
         path: "profile",
-        element: <Profile />,
+        element: (
+          <AuthWrapper>
+            <Profile />
+          </AuthWrapper>
+        ),
       },
       {
         path: "password-reset",
         element: <PasswordReset />,
       },
-      { path: "profile/collection", element: <Collection /> },
+      {
+        path: "profile/collection",
+        element: (
+          <AuthWrapper>
+            <Collection />
+          </AuthWrapper>
+        ),
+      },
       {
         path: "manage",
-        element: <Manage />,
+        element: (
+          <AuthWrapper>
+            {" "}
+            <Manage />
+          </AuthWrapper>
+        ),
       },
-      { path: "manage/artists/:artistId", element: <ManageArtist /> },
+      {
+        path: "manage/artists/:artistId",
+        element: (
+          <AuthWrapper>
+            <ManageArtist />
+          </AuthWrapper>
+        ),
+      },
       {
         path: "admin",
-        element: <Admin />,
+        element: (
+          <AuthWrapper>
+            <Admin />
+          </AuthWrapper>
+        ),
         children: [
           {
             path: "users",
-            element: <AdminUsers />,
+            element: (
+              <AuthWrapper>
+                <AdminUsers />
+              </AuthWrapper>
+            ),
           },
           {
             path: "trackGroups",
-            element: <AdminTrackGroups />,
+            element: (
+              <AuthWrapper>
+                <AdminTrackGroups />
+              </AuthWrapper>
+            ),
           },
           {
             path: "tracks",
-            element: <AdminTracks />,
+            element: (
+              <AuthWrapper>
+                {" "}
+                <AdminTracks />
+              </AuthWrapper>
+            ),
           },
         ],
       },

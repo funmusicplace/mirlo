@@ -103,7 +103,7 @@ function App() {
             ${userId ? "display: flex;" : ""}
 
             @media (min-width: ${bp.small}px) {
-              padding: 2rem 2rem 2rem;
+              padding: 1rem 2rem 2rem;
               max-width: 1080px;
             }
 

@@ -81,8 +81,10 @@ const routes = [
   "users/{userId}/subscriptions",
   "users/{userId}/subscriptions/{subscriptionId}",
   "users/{userId}/purchases",
+  "users/{userId}/connectStripe",
   "users/{userId}/feed",
   "users/{userId}/artists",
+  "users/{userId}/testExistence",
   "users/{userId}/artists/{artistId}",
   "users/{userId}/artists/{artistId}/banner",
   "users/{userId}/artists/{artistId}/avatar",
@@ -101,7 +103,6 @@ const routes = [
   "users/{userId}/posts/drafts",
   "users/{userId}/posts",
   "checkout",
-  "checkout/accounts",
   "checkout/webhook",
 ];
 

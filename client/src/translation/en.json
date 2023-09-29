@@ -77,6 +77,10 @@
   "post": {
     "edit": "Edit"
   },
+  "manage": {
+    "error": "Something went wrong",
+    "setUpBankAccount": "Set up bank account"
+  },
   "manageArtist": {
     "notEnabled": "This artist has not been enabled by site admin yet! Contact an admin to do so.",
     "manage": "Manage {{artist}}",

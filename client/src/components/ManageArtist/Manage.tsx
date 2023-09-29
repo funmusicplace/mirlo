@@ -6,12 +6,15 @@ import Button from "../common/Button";
 import CreateNewArtistForm from "./ArtistForm";
 import { useGlobalStateContext } from "state/GlobalState";
 import { Link } from "react-router-dom";
-import { theme } from "utils/theme";
+import { useSnackbar } from "state/SnackbarContext";
+import { useTranslation } from "react-i18next";
 
 export const Manage: React.FC = () => {
   const { state } = useGlobalStateContext();
   const [artists, setArtists] = React.useState<Artist[]>([]);
   const [creatingNewArtist, setCreatingNewArtist] = React.useState(false);
+  const snackbar = useSnackbar();
+  const { t } = useTranslation("translation", { keyPrefix: "manage" });
 
   const userId = state.user?.id;
 
@@ -25,6 +28,19 @@ export const Manage: React.FC = () => {
       }
     }
   }, [userId]);
+
+  const setUpBankAccount = React.useCallback(async () => {
+    try {
+      const response = await api.post<{}, { accountUrl: string }>(
+        `users/${userId}/connectStripe`,
+        {}
+      );
+      window.location.assign(response.accountUrl);
+    } catch (e) {
+      snackbar(t("error"), { type: "warning" });
+      console.error(e);
+    }
+  }, [snackbar, t, userId]);
 
   React.useEffect(() => {
     fetchArtists();
@@ -44,9 +60,7 @@ export const Manage: React.FC = () => {
         <div
           className={css`
             display: flex;
-            align-items: center;
-            justify-content: space-between;
-
+            flex-direction: column;
             button {
               margin-top: 0 !important;
             }
@@ -54,57 +68,52 @@ export const Manage: React.FC = () => {
         >
           <h2 className={css``}>Manage: Artists</h2>
 
-          <CreateNewArtistForm
-            open={creatingNewArtist}
-            onClose={() => setCreatingNewArtist(false)}
-            reload={fetchArtists}
-          />
-        </div>
-
-        <div
-          className={css`
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: stretch;
-            margin-top: 1rem;
-            flex-wrap: wrap;
-          `}
-        >
-          {artists.map((a) => (
-            <Link
-              key={a.id}
-              to={`artists/${a.id}`}
+          <div
+            className={css`
+              width: 100%;
+              display: flex;
+              align-items: center;
+              justify-content: stretch;
+              margin-top: 1rem;
+              flex-wrap: wrap;
+            `}
+          >
+            {artists.map((a) => (
+              <Link
+                key={a.id}
+                to={`artists/${a.id}`}
+                className={css`
+                  margin-right: 1rem;
+                `}
+              >
+                <Button variant="outlined">{a.name}</Button>
+              </Link>
+            ))}
+            <Button
+              onClick={() => {
+                setCreatingNewArtist(true);
+              }}
               className={css`
                 flex-grow: 1;
                 text-align: center;
-                padding: 1rem;
-                border: 4px solid ${theme.colors.primaryHighlight};
-                margin: 0.25rem;
                 border-radius: 6px;
-                max-width: 49%;
-                line-height: 1;
               `}
             >
-              {a.name}
-            </Link>
-          ))}
-          <Button
-            onClick={() => {
-              setCreatingNewArtist(true);
-            }}
+              Create new artist
+            </Button>
+            <CreateNewArtistForm
+              open={creatingNewArtist}
+              onClose={() => setCreatingNewArtist(false)}
+              reload={fetchArtists}
+            />
+          </div>
+          <div
             className={css`
-              flex-grow: 1;
-              text-align: center;
-              padding: 1rem;
-              margin: 0.25rem;
-              border-radius: 6px;
-              max-width: 49%;
-              border: 4px solid ${theme.colors.primaryHighlight} !important;
+              margin-top: 1rem;
             `}
           >
-            Create new artist
-          </Button>
+            <Button onClick={setUpBankAccount}>{t("setUpBankAccount")}</Button>
+          </div>
         </div>
       </div>
     </>

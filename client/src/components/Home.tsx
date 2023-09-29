@@ -76,6 +76,9 @@ function Home() {
               @media (min-width: ${bp.small}px) {
                 display: inline-block;
               }
+              @media (prefers-color-scheme: dark) {
+                filter: invert(0.6);
+              }
             `}
           />
           <div className={css``}>

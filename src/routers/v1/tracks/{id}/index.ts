@@ -12,37 +12,44 @@ export default function () {
   async function GET(req: Request, res: Response) {
     const { id }: { id?: string } = req.params;
     const loggedInUser = req.user as User;
-
-    const track = await prisma.track.findFirst({
-      where: { id: Number(id) },
-      include: {
-        trackGroup: {
-          include: {
-            artist: true,
-            cover: true,
-            ...(loggedInUser
-              ? {
-                  userTrackGroupPurchases: {
-                    where: { userId: loggedInUser.id },
-                    select: {
-                      userId: true,
+    try {
+      const track = await prisma.track.findFirst({
+        where: { id: Number(id) },
+        include: {
+          trackGroup: {
+            include: {
+              artist: true,
+              cover: true,
+              ...(loggedInUser
+                ? {
+                    userTrackGroupPurchases: {
+                      where: { userId: loggedInUser.id },
+                      select: {
+                        userId: true,
+                      },
                     },
-                  },
-                }
-              : {}),
+                  }
+                : {}),
+            },
           },
+          trackArtists: true,
+          audio: true,
         },
-        trackArtists: true,
-        audio: true,
-      },
-    });
+      });
 
-    res.json({
-      result: {
-        ...track,
-        trackGroup: track ? processor.single(track.trackGroup) : {},
-      },
-    });
+      res.json({
+        result: {
+          ...track,
+          trackGroup: track ? processor.single(track.trackGroup) : {},
+        },
+      });
+    } catch (e) {
+      console.error("tracks/{id} GET", e);
+      res.status(500);
+      res.send({
+        error: "Error finding trackGroup",
+      });
+    }
   }
 
   GET.apiDoc = {
