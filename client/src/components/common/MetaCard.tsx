@@ -17,10 +17,9 @@ export const MetaCard: React.FC<{
         name="twitter:description"
         content="A music distribution and patronage site."
       />
-      <meta name="twitter:image" content="" />
       <meta
         property="twitter:image"
-        content={image ?? "/android-chrome-192x192.png"}
+        content={image ?? "/android-chrome-512x512.png"}
       />
     </Helmet>
   );

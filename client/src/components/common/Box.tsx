@@ -2,8 +2,9 @@ import styled from "@emotion/styled";
 
 const Box = styled.div`
   width: 100%;
-  padding: 1rem 1.5rem 1.5rem;
+  padding: 1rem 1.5rem 1rem;
   transition: 0.4s border-radius;
+  background-color: var(--mi-lighter-background-color);
 
   input {
     background: var(--mi-lighter-background-color);

@@ -96,7 +96,6 @@ const TrackWidget = () => {
           className={css`
             display: flex;
             padding: 1rem;
-            border: 1px solid var(--mi-lighter-foreground-color);
             background: var(--mi-normal-background-color);
             border-radius: 1rem;
             align-items: center;

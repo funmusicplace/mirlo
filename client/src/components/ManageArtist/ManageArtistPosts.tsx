@@ -12,6 +12,7 @@ import { useSnackbar } from "state/SnackbarContext";
 import PostForm from "./PostForm";
 import Modal from "components/common/Modal";
 import { useTranslation } from "react-i18next";
+import { MdAdd } from "react-icons/md";
 
 const ManageArtistPosts: React.FC<{}> = () => {
   const {
@@ -70,7 +71,26 @@ const ManageArtistPosts: React.FC<{}> = () => {
 
   return (
     <div>
-      <h2>{t("posts")}</h2>
+      <div
+        className={css`
+          display: flex;
+          width: 100%;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 0.5rem;
+        `}
+      >
+        <h2>{t("posts")}</h2>
+        <Button
+          onClick={() => {
+            setAddingNewPost(true);
+          }}
+          startIcon={<MdAdd />}
+          compact
+        >
+          {t("addNewPost", { artist: artist.name })}
+        </Button>
+      </div>
       {posts?.map((p) => (
         <Box
           key={p.id}
@@ -113,16 +133,7 @@ const ManageArtistPosts: React.FC<{}> = () => {
           <PostForm existing={managePost} reload={fetchPosts} artist={artist} />
         </Modal>
       )}
-      <Button
-        onClick={() => {
-          setAddingNewPost(true);
-        }}
-        className={css`
-          width: 100%;
-        `}
-      >
-        {t("addNewPost", { artist: artist.name })}
-      </Button>
+
       <NewPostForm
         open={addingNewPost}
         onClose={() => setAddingNewPost(false)}

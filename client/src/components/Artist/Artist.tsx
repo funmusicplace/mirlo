@@ -73,8 +73,13 @@ function Artist() {
       </ReactMarkdown>
       <ArtistSupport artist={artist} />
       <ArtistAlbums artist={artist} />
-      <h2>{t("updates")}</h2>
-      <div>
+      <div
+        className={css`
+          margin-top: 1rem;
+        `}
+      >
+        <h2>{t("updates")}</h2>
+
         {artist.posts?.length === 0 && <>{t("noUpdates")}</>}
         {artist.posts?.map((p) => (
           <Box
@@ -82,7 +87,6 @@ function Artist() {
             className={css`
               margin-bottom: 1rem;
               margin-top: 1rem;
-              padding: 0 !important;
               padding-top: 1.5rem;
 
               &:not(:first-child) {
