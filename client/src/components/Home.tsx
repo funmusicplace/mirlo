@@ -122,6 +122,9 @@ function Home() {
               , <a href="https://discord.gg/VjKq26raKX">join our Discord</a>, or{" "}
               <a href="mailto:mirlodotspace@proton.me">email us</a>.
             </p>
+            <p>
+              Already have an account? <Link to="/login">Log in</Link>.
+            </p>
           </div>
         </div>
       )}
