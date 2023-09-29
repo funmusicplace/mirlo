@@ -49,6 +49,7 @@ const ArtistSupportBox: React.FC<{
           padding-top: 1.5rem;
           display: flex;
           flex-direction: column;
+          border: 1px solid var(--mi-lighter-foreground-color);
 
           &:not(:first-child) {
             border-top: 1px solid #efefef;

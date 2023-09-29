@@ -7,6 +7,7 @@ import api from "../services/api";
 import Box from "./common/Box";
 import PostContent from "./common/PostContent";
 import Logo from "./common/Logo";
+import { bp } from "../constants";
 // import Button from "./common/Button";
 // import { FaArrowRight } from "react-icons/fa";
 
@@ -47,12 +48,14 @@ function Home() {
       className={
         !userId
           ? css`
-              min-height: calc(100vh - 350px);
+              flex-grow: 1;
               display: flex;
               align-items: center;
+              flex-grow: 1;
             `
           : css`
               min-height: calc(100vh - 350px);
+              width: 100%;
             `
       }
     >
@@ -68,9 +71,12 @@ function Home() {
             src="/images/blackbird.png"
             className={css`
               width: 100%;
-              // padding: 4rem 0;
               margin-right: 3rem;
+              display: none;
               transform: scaleX(-1);
+              @media (min-width: ${bp.small}px) {
+                display: inline-block;
+              }
             `}
           />
           <div className={css``}>
@@ -101,9 +107,7 @@ function Home() {
               target="_blank"
               rel="noreferrer"
             >
-              <Button className={css``}>
-                Want to stay in the loop? Sign up to our mailing list
-              </Button>
+              <Button className={css``}>Sign up to our mailing list</Button>
             </a>
           </div>
         </div>

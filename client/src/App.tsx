@@ -12,6 +12,8 @@ import useWidgetListener from "utils/useWidgetListener";
 import Header from "./components/Header/Header";
 import globalCSS from "./styles";
 import { Footer } from "components/Footer";
+import { bp } from "./constants";
+
 injectGlobal(globalCSS);
 
 function App() {
@@ -86,7 +88,7 @@ function App() {
         className={css`
           display: flex;
           flex-direction: column;
-          min-height: 100%;
+          min-height: 100vh;
         `}
       >
         {isDisplayed && <Snackbar />}
@@ -96,43 +98,24 @@ function App() {
         <PageHeader />
         <div
           className={css`
-            max-width: 900px;
             background-color: var(--mi-normal-background-color);
-            padding: 2rem 2rem 2rem;
             margin: 0 auto;
             width: 100%;
-
+            flex-grow: 1;
             border-radius: var(--mi-border-radius);
+            display: flex;
+            ${userId ? "display: flex;" : ""}
+
+            @media (min-width: ${bp.small}px) {
+              padding: 2rem 2rem 2rem;
+              max-width: 900px;
+            }
 
             @media screen and (max-width: 800px) {
-              padding: 1rem 1rem 9rem;
+              padding: 1rem 1rem 1rem;
             }
           `}
         >
-          {userId && (
-            <div
-              className={css`
-                background-color: var(--mi-warning-background-color);
-                color: var(--mi-warning-foreground-color);
-                padding: 1rem;
-                border-radius: 1rem;
-                margin-bottom: 1rem;
-
-                a {
-                  color: var(--mi-warning-foreground-color);
-                }
-              `}
-            >
-              Hi! We're really excited about this project and looking forward to
-              having you use it. We've closed sign-ups but are looking for
-              testers - we're in very heavy alpha state right now. If you find
-              anything broken, or want to get involved, please let us know{" "}
-              <a href="https://github.com/funmusicplace/mirlo/issues">
-                on GitHub
-              </a>{" "}
-              or <a href="https://discord.gg/VjKq26raKX">on the Discord</a>.
-            </div>
-          )}
           <Outlet />
         </div>
         <Footer />

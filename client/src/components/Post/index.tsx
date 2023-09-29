@@ -24,7 +24,12 @@ const Post: React.FC = () => {
   const ownedByUser = post.artist?.userId === user?.id;
 
   return (
-    <>
+    <div
+      className={css`
+        margin-top: 1rem;
+        width: 100%;
+      `}
+    >
       <div
         className={css`
           display: flex;
@@ -49,7 +54,7 @@ const Post: React.FC = () => {
         </em>
       )}
       <PostContent content={post.content} />
-    </>
+    </div>
   );
 };
 

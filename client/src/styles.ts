@@ -1,6 +1,9 @@
 const styles = `html {
   --mi-normal-background-color: #ffeedb;
   --mi-light-background-color: #ffffee;
+  --mi-lighter-background-color: rgba(255, 255, 255, 0.4);
+  --mi-shade-background-color: rgba(0, 0, 0, .05);
+
   --mi-normal-foreground-color: #3e363f;
   --mi-light-foreground-color: #888;
   --mi-lighter-foreground-color: #bbb;
@@ -13,15 +16,15 @@ const styles = `html {
 
   --mi-success-background-color: #4cdb5f;
 
-  --mi-warning-background-color: #f04e37;
+  --mi-warning-color: #f04e37;
+  --mi-warning-color--hover: #f26f59;
+  --mi-warning-background-color: var(--mi-warning-color);
   --mi-darken-warning-background-color: #df250b;
   --mi-warning-foreground-color: white;
 
   --mi-primary-highlight-color: #bcb3ff;
   --mi-primary-highlight-color--hover: #FFB3D0;
-
-  --mi-shade-background-color: rgba(0, 0, 0, .1);
-  --mi-lighten-background-color: rgba(255, 255, 255, 0.2);
+);
   --mi-box-color: var(--mi-secondary-color);
 
   --mi-border-radius: 4px;

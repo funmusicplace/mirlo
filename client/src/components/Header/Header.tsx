@@ -49,7 +49,7 @@ const Header = () => {
             align-items: center;
           `}
         >
-          <Logo />
+          <Logo collapse />
         </Link>
       </h1>
       {isMenuOpen && (
@@ -94,12 +94,11 @@ const Header = () => {
           <Link
             to="/profile"
             className={css`
-              border: 1px solid var(--mi-primary-highlight-color--hover);
               border-radius: var(--mi-border-radius);
               padding: 0.25rem 0.75rem;
               color: var(--normal-background-color);
               text-decoration: none;
-              background-color: var(--mi-secondary-color);
+              background-color: var(--mi-shade-background-color);
               margin-right: 1rem;
 
               &:hover {
@@ -124,7 +123,7 @@ const Header = () => {
             setIsMenuOpen(true);
           }}
         >
-          <ImMenu color={"var(--mi-foreground-color)"} />
+          <ImMenu color={"var(--mi-normal-foreground-color)"} />
         </IconButton>
       </div>
     </header>

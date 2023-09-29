@@ -64,7 +64,11 @@ function TrackGroup() {
   }
 
   return (
-    <div>
+    <div
+      className={css`
+        width: 100%;
+      `}
+    >
       <MetaCard
         title={trackGroup.title}
         description={trackGroup.about ?? "An album on Mirlo"}

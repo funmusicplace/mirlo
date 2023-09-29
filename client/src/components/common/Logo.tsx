@@ -3,7 +3,9 @@ import { css } from "@emotion/css";
 import { bp } from "../../constants";
 import { ReactComponent as ReactLogo } from "./../Header/logo.svg";
 
-export const Logo = () => {
+export const Logo: React.FC<{ collapse?: boolean }> = ({
+  collapse = false,
+}) => {
   return (
     <div
       className={css`
@@ -20,11 +22,12 @@ export const Logo = () => {
       />
       <span
         className={css`
-          display: none;
+          ${collapse ? "display: none;" : "display: inline-block;"}
           font-family: "Roboto Slab", serif;
           font-size: 1.5rem;
-          font-weight: 600;
+          font-weight: 500;
           color: var(--mi-normal-foreground-color);
+
           @media (min-width: ${bp.small}px) {
             display: inline-block;
           }

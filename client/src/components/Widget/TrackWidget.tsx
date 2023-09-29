@@ -10,6 +10,7 @@ import { FaPause, FaPlay } from "react-icons/fa";
 import { useParams } from "react-router-dom";
 import api from "services/api";
 import { useGlobalStateContext } from "state/GlobalState";
+import { isTrackOwnedOrPreview } from "utils/tracks";
 
 function inIframe() {
   try {
@@ -30,7 +31,7 @@ function inMirlo() {
 const TrackWidget = () => {
   const params = useParams();
   const {
-    state: { playing },
+    state: { playing, user },
     dispatch,
   } = useGlobalStateContext();
 
@@ -95,6 +96,7 @@ const TrackWidget = () => {
           className={css`
             display: flex;
             padding: 1rem;
+            border: 1px solid var(--mi-lighter-foreground-color);
             background: var(--mi-normal-background-color);
             border-radius: 1rem;
             align-items: center;
@@ -112,10 +114,19 @@ const TrackWidget = () => {
             footer={track.trackGroup.artist.name}
           />
 
-          {track.isPreview && (
+          {isTrackOwnedOrPreview(track, user) && (
             <>
               {!playing && (
-                <IconButton onClick={playMusic}>
+                <IconButton
+                  onClick={playMusic}
+                  className={
+                    playing || embeddedInMirlo
+                      ? css`
+                          margin-right: 0.5rem;
+                        `
+                      : ""
+                  }
+                >
                   <FaPlay />
                 </IconButton>
               )}

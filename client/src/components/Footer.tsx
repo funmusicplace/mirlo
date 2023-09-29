@@ -18,8 +18,8 @@ export const Footer = () => {
         `}
       >
         Mirlo is under construction. If you'd like to contribute check out{" "}
-        <a href="https://github.com/funmusicplace/mirlo/">the code on GitHub</a>{" "}
-        or <a href="https://discord.gg/VjKq26raKX">join our Discord</a>, or{" "}
+        <a href="https://github.com/funmusicplace/mirlo/">the code on GitHub</a>
+        , <a href="https://discord.gg/VjKq26raKX">join our Discord</a>, or{" "}
         <a href="mailto:mirlodotspace@proton.me">email us</a>.
       </p>
       <p>

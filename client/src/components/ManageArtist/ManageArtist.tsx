@@ -54,7 +54,11 @@ const ManageArtist: React.FC<{}> = () => {
   }
 
   return (
-    <div className={css``}>
+    <div
+      className={css`
+        width: 100%;
+      `}
+    >
       {!artist.enabled && (
         <div
           className={css`

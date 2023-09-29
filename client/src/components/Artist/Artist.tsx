@@ -34,7 +34,11 @@ function Artist() {
   const ownedByUser = artist.userId === user?.id;
 
   return (
-    <div>
+    <div
+      className={css`
+        width: 100%;
+      `}
+    >
       <MetaCard
         title={artist.name}
         description={artist.bio}
@@ -78,6 +82,7 @@ function Artist() {
             className={css`
               margin-bottom: 1rem;
               margin-top: 1rem;
+              padding: 0 !important;
               padding-top: 1.5rem;
 
               &:not(:first-child) {
