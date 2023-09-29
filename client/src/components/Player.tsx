@@ -154,8 +154,6 @@ const Player = () => {
     return null;
   }
 
-  console.log("currentTrack", currentTrack);
-
   return (
     <div className={playerClass}>
       <Helmet>

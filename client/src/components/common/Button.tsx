@@ -65,19 +65,14 @@ const CustomButton = styled.button<Compactable>`
       default:
         return `
           padding: ${props.compact ? ".3rem .5rem" : "1rem"};
-          background-color:  ${props.theme.colors[props.color ?? "primary"]};
+          background-color:  var(--mi-${props.color ?? "primary"}-color);
           color: ${
             props.color === "primary"
               ? props.theme.colors.text
               : props.theme.colors.textDark
           };
-          border: 2px solid ${colorShade(
-            props.theme.colors[props.color ?? "primary"],
-            1
-          )};
 
           &:hover:not(:disabled) {
-            border: 2px solid ${props.theme.colors[props.color ?? "primary"]};
             background-color: ${colorShade(
               props.theme.colors[props.color ?? "primary"],
               -70

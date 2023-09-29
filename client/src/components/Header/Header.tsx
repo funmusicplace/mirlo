@@ -3,7 +3,6 @@ import React from "react";
 import { FaTimes } from "react-icons/fa";
 import { ImMenu } from "react-icons/im";
 import { Link } from "react-router-dom";
-import { theme } from "utils/theme";
 import { bp } from "../../constants";
 import { ReactComponent as ReactLogo } from "./logo.svg";
 import { useGlobalStateContext } from "../../state/GlobalState";
@@ -80,7 +79,7 @@ const Header = () => {
               padding: 0.5rem;
               z-index: 12;
               padding-bottom: 1rem;
-              background: ${theme.colors.primaryHighlight};
+              background: var(--mi-primary-color);
             `}
           >
             <IconButton

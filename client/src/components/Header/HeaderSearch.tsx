@@ -56,6 +56,10 @@ const HeaderSearch: React.FC = () => {
         onChange={onChange}
         className={css`
           margin-bottom: 0 !important;
+
+          &::placeholder {
+            color: white;
+          }
         `}
       />
       {showSuggestions && (
