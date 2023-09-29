@@ -1,44 +1,44 @@
 import { css } from "@emotion/css";
 import React from "react";
-import { Link } from "react-router-dom";
+// import { Link } from "react-router-dom";
 import { useGlobalStateContext } from "state/GlobalState";
-import api from "../services/api";
-import Box from "./common/Box";
-import PostContent from "./common/PostContent";
-import Button from "./common/Button";
-import { FaArrowRight } from "react-icons/fa";
+// import api from "../services/api";
+// import Box from "./common/Box";
+// import PostContent from "./common/PostContent";
+// import Button from "./common/Button";
+// import { FaArrowRight } from "react-icons/fa";
 
 function Home() {
   const {
     state: { user },
   } = useGlobalStateContext();
-  const [posts, setPosts] = React.useState<Post[]>([]);
+  // const [posts, setPosts] = React.useState<Post[]>([]);
 
-  const fetchAllPosts = React.useCallback(async () => {
-    const fetched = await api.getMany<Post>("posts");
-    setPosts(
-      // FIXME: Maybe this should be managed by a filter on the API?
-      fetched.results.filter((p) => !(p.forSubscribersOnly && p.content === ""))
-    );
-  }, []);
+  // const fetchAllPosts = React.useCallback(async () => {
+  //   const fetched = await api.getMany<Post>("posts");
+  //   setPosts(
+  //     // FIXME: Maybe this should be managed by a filter on the API?
+  //     fetched.results.filter((p) => !(p.forSubscribersOnly && p.content === ""))
+  //   );
+  // }, []);
 
-  const userId = user?.id;
+  // const userId = user?.id;
 
-  const fetchPosts = React.useCallback(async () => {
-    if (userId) {
-      const fetched = await api.getMany<Post>(`users/${userId}/feed`);
-      setPosts(fetched.results);
-      if (fetched.results.length === 0) {
-        await fetchAllPosts();
-      }
-    } else {
-      await fetchAllPosts();
-    }
-  }, [userId, fetchAllPosts]);
+  // const fetchPosts = React.useCallback(async () => {
+  //   if (userId) {
+  //     const fetched = await api.getMany<Post>(`users/${userId}/feed`);
+  //     setPosts(fetched.results);
+  //     if (fetched.results.length === 0) {
+  //       await fetchAllPosts();
+  //     }
+  //   } else {
+  //     await fetchAllPosts();
+  //   }
+  // }, [userId, fetchAllPosts]);
 
-  React.useEffect(() => {
-    fetchPosts();
-  }, [fetchPosts]);
+  // React.useEffect(() => {
+  //   fetchPosts();
+  // }, [fetchPosts]);
 
   return (
     <div className={css``}>
@@ -65,7 +65,14 @@ function Home() {
               Get started
             </Button>
           </Link> */}
-          <span>Coming soon!</span>
+          <span
+            className={css`
+              text-align: center;
+            `}
+          >
+            Coming soon!
+          </span>
+          <div className="ml-embedded" data-form="sMEitj"></div>
         </div>
       )}
       {/* <h2>Latest posts from the community:</h2>
