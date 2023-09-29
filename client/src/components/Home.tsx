@@ -69,6 +69,7 @@ function Home() {
             src="/images/blackbird.png"
             className={css`
               width: 100%;
+              max-width: 270px;
               margin-right: 3rem;
               display: none;
               transform: scaleX(-1);
