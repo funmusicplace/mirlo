@@ -18,44 +18,50 @@ export default function () {
   async function POST(req: Request, res: Response) {
     const { userId } = req.params as unknown as Params;
     const loggedInUser = req.user as User;
-    if (Number(userId) === Number(loggedInUser.id)) {
-      const user = await prisma.user.findUnique({
-        where: { id: Number(userId) },
-      });
-      if (user) {
-        let accountId = user.stripeAccountId;
-        if (!accountId) {
-          const account = await stripe.accounts.create({
-            country: "US", // FIXME: we need to register users country
-            type: "standard",
-            business_profile: { name: user.name ?? "" },
-          });
-          await prisma.user.update({
-            where: {
-              id: user.id,
-            },
-            data: {
-              stripeAccountId: account.id,
-            },
-          });
-          accountId = account.id;
-        }
-
-        const accountLink = await stripe.accountLinks.create({
-          account: accountId,
-          refresh_url: "",
-          return_url: "",
-          type: "account_onboarding",
+    try {
+      if (Number(userId) === Number(loggedInUser.id)) {
+        const user = await prisma.user.findUnique({
+          where: { id: Number(userId) },
         });
-        console.log("account", accountId, accountLink);
+        if (user) {
+          let accountId = user.stripeAccountId;
+          if (!accountId) {
+            const account = await stripe.accounts.create({
+              country: "US", // FIXME: we need to register users country
+              type: "standard",
+              business_profile: { name: user.name ?? "" },
+            });
+            await prisma.user.update({
+              where: {
+                id: user.id,
+              },
+              data: {
+                stripeAccountId: account.id,
+              },
+            });
+            accountId = account.id;
+          }
 
-        res.status(200).json({
-          accountUrl: accountLink.url,
+          const accountLink = await stripe.accountLinks.create({
+            account: accountId,
+            refresh_url: "",
+            return_url: "",
+            type: "account_onboarding",
+          });
+          console.log("account", accountId, accountLink);
+
+          res.status(200).json({
+            accountUrl: accountLink.url,
+          });
+        }
+      } else {
+        res.status(401).json({
+          error: "Invalid route",
         });
       }
-    } else {
-      res.status(401).json({
-        error: "Invalid route",
+    } catch (e) {
+      res.json({
+        error: `Stripe Connect doesn't work yet`,
       });
     }
   }
