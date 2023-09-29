@@ -1,7 +1,14 @@
 import { css } from "@emotion/css";
 import { Link } from "react-router-dom";
+import { useGlobalStateContext } from "state/GlobalState";
 
 export const Footer = () => {
+  const {
+    state: { user },
+  } = useGlobalStateContext();
+  if (!user?.id) {
+    return null;
+  }
   return (
     <div
       className={css`

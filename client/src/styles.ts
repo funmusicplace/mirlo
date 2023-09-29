@@ -50,7 +50,7 @@ const styles = `html {
 }
 
 html {
-  font-size: 18px;
+  font-size: 20px;
   min-height: 100%;
 }
 

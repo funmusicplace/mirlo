@@ -109,6 +109,19 @@ function Home() {
             >
               <Button className={css``}>Sign up to our mailing list</Button>
             </a>
+            <p
+              className={css`
+                margin-bottom: 1rem;
+                margin-top: 2rem;
+              `}
+            >
+              Mirlo is under construction. If you'd like to contribute check out{" "}
+              <a href="https://github.com/funmusicplace/mirlo/">
+                the code on GitHub
+              </a>
+              , <a href="https://discord.gg/VjKq26raKX">join our Discord</a>, or{" "}
+              <a href="mailto:mirlodotspace@proton.me">email us</a>.
+            </p>
           </div>
         </div>
       )}
