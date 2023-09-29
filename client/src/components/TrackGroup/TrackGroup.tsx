@@ -12,6 +12,7 @@ import ArtistSupport from "components/Artist/ArtistSupport";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
 import PublicTrackGroupListing from "components/common/PublicTrackGroupListing";
 import { MetaCard } from "components/common/MetaCard";
+import ReactMarkdown from "react-markdown";
 
 function TrackGroup() {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
@@ -105,6 +106,15 @@ function TrackGroup() {
             </Button>
           </Link>
         )}
+      </div>
+      <div
+        className={css`
+          margin: 1.25rem 0;
+          border-left: 5px solid var(--mi-lighter-background-color);
+          padding: 0.5rem 1rem;
+        `}
+      >
+        <ReactMarkdown>{trackGroup.about}</ReactMarkdown>
       </div>
       <ArtistTrackGroup trackGroup={trackGroup} artist={artist} />
       <PublicTrackGroupListing

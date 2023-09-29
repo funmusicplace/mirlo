@@ -1,7 +1,7 @@
 const styles = `html {
   --mi-normal-background-color: #ffeedb;
   --mi-light-background-color: #ffffee;
-  --mi-lighter-background-color: rgba(255, 255, 255, 0.4);
+  --mi-lighten-background-color: rgba(255, 255, 255, 0.4);
   --mi-shade-background-color: rgba(0, 0, 0, .05);
 
   --mi-normal-foreground-color: #3e363f;

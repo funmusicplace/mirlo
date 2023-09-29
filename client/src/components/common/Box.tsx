@@ -4,14 +4,14 @@ const Box = styled.div`
   width: 100%;
   padding: 1rem 1.5rem 1rem;
   transition: 0.4s border-radius;
-  background-color: var(--mi-lighter-background-color);
+  background-color: var(--mi-lighten-background-color);
 
   input {
-    background: var(--mi-lighter-background-color);
+    background: var(--mi-lighten-background-color);
   }
 
   textarea {
-    background: var(--mi-lighter-background-color);
+    background: var(--mi-lighten-background-color);
   }
 
   @media screen and (max-width: 800px) {

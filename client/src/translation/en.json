@@ -110,7 +110,8 @@
     "about": "About",
     "price": "Price",
     "saveAlbum": "Save album",
-    "submitAlbum": "Submit album"
+    "submitAlbum": "Submit album",
+    "publish": "Publish"
   },
   "artistForm": {
     "displayName": "Display name",

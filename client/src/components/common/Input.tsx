@@ -19,7 +19,7 @@ export const InputEl = styled.input`
   margin-bottom: 0.5rem;
   width: 100%;
   color: var(--mi-normal-foreground-color);
-  background-color: var(--mi-lighter-background-color);
+  background-color: var(--mi-lighten-background-color);
   transition: 0.4ss border-radius;
 
   &[disabled] {

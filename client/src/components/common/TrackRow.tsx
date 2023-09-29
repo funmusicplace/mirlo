@@ -49,7 +49,7 @@ const TrackRow: React.FC<{
         ${!canPlayTrack ? `color: var(--mi-light-foreground-color);` : ""}
 
         :nth-child(odd) {
-          background-color: var(--mi-lighter-background-color);
+          background-color: var(--mi-lighten-background-color);
         }
 
         > td > .play-button {

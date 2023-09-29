@@ -6,7 +6,7 @@ export const TextArea = styled.textarea`
   font-size: 1rem;
   margin-bottom: 0.5rem;
   width: 100%;
-  background-color: var(--mi-lighter-background-color);
+  background-color: var(--mi-lighten-background-color);
   border-radius: var(--mi-border-radius);
   color: var(--mi-normal-foreground-color);
 `;
