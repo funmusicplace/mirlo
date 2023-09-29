@@ -123,10 +123,9 @@ function App() {
             `}
           >
             Hi! We're really excited about this project and looking forward to
-            having you use it. However, we're in very heavy alpha state right
-            now, so you should know that a) payments do not work and b) your
-            data might disappear! If you find anything broken, please let us
-            know{" "}
+            having you use it. We've closed sign-ups but are looking for testers
+            - we're in very heavy alpha state right now. If you find anything
+            broken, or want to get involved, please let us know{" "}
             <a href="https://github.com/funmusicplace/mirlo/issues">
               on GitHub
             </a>{" "}
