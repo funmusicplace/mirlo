@@ -35,7 +35,6 @@ export const ManageAlbumForm: React.FC<{
       const { result } = await api.get<TrackGroup>(
         `users/${artist.userId}/trackGroups/${trackgroup.id}`
       );
-      console.log("reloading", result.tracks);
       setTracks(result.tracks);
     } catch (e) {
       console.error(e);

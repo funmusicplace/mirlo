@@ -211,6 +211,9 @@ export const stateReducer = produce((draft: GlobalState, action: Actions) => {
       break;
     case "setPlaying":
       draft.playing = action.playing;
+      if (draft.currentlyPlayingIndex === undefined) {
+        draft.currentlyPlayingIndex = 0;
+      }
       break;
     case "setDraggingTrackId":
       draft.draggingTrackId = action.draggingTrackId;
