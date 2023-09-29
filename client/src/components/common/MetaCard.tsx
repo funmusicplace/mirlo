@@ -4,7 +4,8 @@ export const MetaCard: React.FC<{
   title: string;
   description: string;
   image?: string;
-}> = ({ title, description, image }) => {
+  player?: string;
+}> = ({ title, description, image, player }) => {
   return (
     <Helmet>
       <title>Mirlo: {title}</title>
@@ -17,11 +18,11 @@ export const MetaCard: React.FC<{
         name="twitter:description"
         content="A music distribution and patronage site."
       />
-      <meta name="twitter:image" content="" />
       <meta
         property="twitter:image"
-        content={image ?? "/android-chrome-192x192.png"}
+        content={image ?? "/android-chrome-512x512.png"}
       />
+      {player && <meta property="twitter:player" content={player} />}
     </Helmet>
   );
 };

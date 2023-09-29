@@ -132,7 +132,14 @@ function Home() {
       )}
       {user && posts.length > 0 && (
         <>
-          <h2>Latest posts from the community:</h2>
+          <h2
+            className={css`
+              margin-top: 1rem;
+              margin-bottom: 1rem;
+            `}
+          >
+            Latest posts from the community:
+          </h2>
           {posts.map((p) => (
             <Box
               key={p.id}

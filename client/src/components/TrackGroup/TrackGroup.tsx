@@ -85,6 +85,8 @@ function TrackGroup() {
           <h1
             className={css`
               line-height: 1;
+              margin-top: 1rem;
+              margin-bottom: 0.5rem;
             `}
           >
             {trackGroup.title}

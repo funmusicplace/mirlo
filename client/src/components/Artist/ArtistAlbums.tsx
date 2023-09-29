@@ -5,7 +5,7 @@ import ArtistTrackGroup from "./ArtistTrackGroup";
 const ArtistAlbums: React.FC<{ artist: Artist }> = ({ artist }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
 
-  if (!artist) {
+  if (!artist || artist.trackGroups.length === 0) {
     return null;
   }
 

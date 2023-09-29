@@ -41,7 +41,7 @@ jobs:
         run: docker-compose -f docker-compose.yml -f test.docker-compose.yml up -d
 
       - name: Sleep to give things time to start
-        run: sleep 30s
+        run: sleep 60s
 
       - name: Print logs just to see
         run: docker logs blackbird-api

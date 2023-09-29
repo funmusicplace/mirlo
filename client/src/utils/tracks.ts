@@ -48,3 +48,7 @@ export const isTrackOwnedOrPreview = (
   );
   return ownsTrack || boughtTrack;
 };
+
+export const widgetUrl = (trackId: number) => {
+  return process.env.REACT_APP_CLIENT_DOMAIN + `/widget/track/${trackId}`;
+};

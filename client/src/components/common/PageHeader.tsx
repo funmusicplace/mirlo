@@ -20,6 +20,7 @@ const PageHeader = () => {
             margin-bottom: -6rem;
             max-height: 400px;
             box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.1) inset;
+            margin-top: 66px;
 
             @media screen and (max-width: 800px) {
               margin-bottom: 0;

@@ -124,6 +124,8 @@ export const AudioWrapper: React.FC<{
   const currentSeconds = playerRef.current?.currentTime ?? 0;
   const percent = currentSeconds / duration;
 
+  // console.log("playing", playerRef.current);
+
   return (
     <>
       <>
@@ -176,12 +178,12 @@ export const AudioWrapper: React.FC<{
         <div
           className={css`
             height: 0.5rem;
-            width: 100%;
             margin-left: 1rem;
             margin-right: 1rem;
             border-radius: 1rem;
             background: rgba(0, 0, 0, 0.6);
             cursor: pointer;
+            width: 100%;
           `}
           onClick={(event: React.MouseEvent<HTMLDivElement>) => {
             const divWidth = event.currentTarget.offsetWidth;
@@ -204,7 +206,15 @@ export const AudioWrapper: React.FC<{
           ></div>
         </div>
       </>
-      {currentTime}
+      <div
+        className={css`
+          width: 100px;
+          text-align: right;
+          font-family: mono;
+        `}
+      >
+        {currentTime}
+      </div>
     </>
   );
 };

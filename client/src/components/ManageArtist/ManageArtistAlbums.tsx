@@ -8,6 +8,7 @@ import ManageAlbumForm from "./ManageAlbumForm";
 import NewAlbumForm from "./NewAlbumForm";
 import TrackGroupCard from "./TrackGroupCard";
 import { useTranslation } from "react-i18next";
+import { MdAdd } from "react-icons/md";
 
 const ManageArtistAlbums: React.FC<{}> = () => {
   const {
@@ -47,19 +48,46 @@ const ManageArtistAlbums: React.FC<{}> = () => {
   return (
     <div
       className={css`
-        margin-bottom: 2rem;
+        margin-top: 2rem;
+        margin-bottom: 1.5rem;
       `}
     >
-      <h2>{t("yourAlbums")}</h2>
-      <div>
-        {trackGroups?.map((album) => (
-          <TrackGroupCard
-            album={album}
-            key={album.id}
-            setManageTrackgroup={setManageTrackgroup}
-          />
-        ))}
+      <div
+        className={css`
+          display: flex;
+          width: 100%;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 0.5rem;
+        `}
+      >
+        <h2>{t("yourAlbums")}</h2>
+
+        <Button
+          onClick={() => {
+            setAddingNewAlbum(true);
+          }}
+          startIcon={<MdAdd />}
+          compact
+        >
+          {t("addNewAlbum", { artistName: artist.name })}
+        </Button>
       </div>
+      {trackGroups.length > 0 && (
+        <div
+          className={css`
+            margin-bottom: 1rem;
+          `}
+        >
+          {trackGroups?.map((album) => (
+            <TrackGroupCard
+              album={album}
+              key={album.id}
+              setManageTrackgroup={setManageTrackgroup}
+            />
+          ))}
+        </div>
+      )}
       {manageTrackgroup && (
         <ManageAlbumForm
           open={!!manageTrackgroup}
@@ -71,17 +99,7 @@ const ManageArtistAlbums: React.FC<{}> = () => {
           artist={artist}
         />
       )}
-      <Button
-        onClick={() => {
-          setAddingNewAlbum(true);
-        }}
-        className={css`
-          margin-top: 2rem;
-          width: 100%;
-        `}
-      >
-        {t("addNewAlbum", { artistName: artist.name })}
-      </Button>
+
       <NewAlbumForm
         open={addingNewAlbum}
         onClose={() => setAddingNewAlbum(false)}

@@ -6,6 +6,7 @@ import api from "services/api";
 import { useGlobalStateContext } from "state/GlobalState";
 import ArtistManageSubscription from "./ArtistManageSubscription";
 import ArtistSupportBox from "./ArtistSupportBox";
+import { css } from "@emotion/css";
 
 const ArtistSupport: React.FC<{ artist: Artist }> = ({ artist }) => {
   const {
@@ -68,7 +69,15 @@ const ArtistSupport: React.FC<{ artist: Artist }> = ({ artist }) => {
   }
 
   if (artist.subscriptionTiers.length === 0) {
-    return <Box>{t("noSubscriptionTiersYet")}</Box>;
+    return (
+      <Box
+        className={css`
+          text-align: center;
+        `}
+      >
+        {t("noSubscriptionTiersYet")}
+      </Box>
+    );
   }
 
   if (userSubscriptionTier) {

@@ -64,12 +64,10 @@ export const ArtistForm: React.FC<{
 
   const soSave = React.useCallback(
     async (data: Partial<Artist>) => {
-      console.log("data", data);
       if (state.user?.id) {
         try {
           setIsSaving(true);
           const sending = pick(data, ["bio", "name", "urlSlug"]);
-          console.log("sending", sending);
           if (existingId) {
             await api.put(`users/${state.user.id}/artists/${existingId}`, {
               ...sending,

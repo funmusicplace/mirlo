@@ -4,13 +4,14 @@ import { AudioWrapper } from "components/AudioWrapper";
 // import ClickToPlay from "components/common/ClickToPlay";
 import IconButton from "components/common/IconButton";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
+import { MetaCard } from "components/common/MetaCard";
 import SmallTileDetails from "components/common/SmallTileDetails";
 import React from "react";
 import { FaPause, FaPlay } from "react-icons/fa";
 import { useParams } from "react-router-dom";
 import api from "services/api";
 import { useGlobalStateContext } from "state/GlobalState";
-import { isTrackOwnedOrPreview } from "utils/tracks";
+import { isTrackOwnedOrPreview, widgetUrl } from "utils/tracks";
 
 function inIframe() {
   try {
@@ -72,6 +73,7 @@ const TrackWidget = () => {
       if (embeddedInMirlo) {
         window.parent.postMessage("mirlo:play:track:" + track.id);
       } else {
+        dispatch({ type: "setPlayerQueueIds", playerQueueIds: [track.id] });
         dispatch({ type: "setPlaying", playing: true });
       }
     }
@@ -96,7 +98,6 @@ const TrackWidget = () => {
           className={css`
             display: flex;
             padding: 1rem;
-            border: 1px solid var(--mi-lighter-foreground-color);
             background: var(--mi-normal-background-color);
             border-radius: 1rem;
             align-items: center;
@@ -104,6 +105,14 @@ const TrackWidget = () => {
             box-sizing: border-box;
           `}
         >
+          <MetaCard
+            title={`${track.title} by ${
+              track.trackGroup.artist?.name ?? "Unknown"
+            }`}
+            description={track.trackGroup.title}
+            image={track.trackGroup.cover?.sizes?.[120]}
+            player={widgetUrl(track.id)}
+          />
           <ImageWithPlaceholder
             src={track.trackGroup.cover?.sizes?.[120] ?? ""}
             alt={track.title}
@@ -113,7 +122,7 @@ const TrackWidget = () => {
           <SmallTileDetails
             title={track.title}
             subtitle={track.trackGroup.title}
-            footer={track.trackGroup.artist.name}
+            footer={track.trackGroup.artist?.name ?? "Unknown"}
           />
 
           {isTrackOwnedOrPreview(track, user) && (

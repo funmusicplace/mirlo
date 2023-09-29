@@ -86,7 +86,14 @@ const ManageArtist: React.FC<{}> = () => {
           flex-direction: column;
         `}
       >
-        <h1 style={{ flexGrow: 1 }}>{t("manage", { artist: artist.name })}</h1>
+        <h1
+          className={css`
+            flex-grow: 1;
+            margin-bottom: 0.25rem;
+          `}
+        >
+          {t("manage", { artist: artist.name })}
+        </h1>
         <div>
           <Button
             compact

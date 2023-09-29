@@ -1,5 +1,6 @@
 import { css } from "@emotion/css";
 import Button from "components/common/Button";
+import { MetaCard } from "components/common/MetaCard";
 import PostContent from "components/common/PostContent";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -30,6 +31,11 @@ const Post: React.FC = () => {
         width: 100%;
       `}
     >
+      <MetaCard
+        title={`${post.title} by ${post.artist?.name}`}
+        description={post.content.slice(0, 500)}
+      />
+
       <div
         className={css`
           display: flex;
