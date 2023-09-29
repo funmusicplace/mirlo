@@ -57,7 +57,6 @@ const Player = () => {
   // let navigate = useNavigate();
   const [currentTrack, setCurrentTrack] = React.useState<Track>();
   const [isLoading, setIsLoading] = React.useState(false);
-  const [notVisible, setNotVisible] = React.useState(false);
   const userId = user?.id;
 
   const fetchTrackCallback = React.useCallback(
@@ -91,7 +90,7 @@ const Player = () => {
   React.useEffect(() => {
     if (playerQueueIdsLength && playerQueueIdAtIndex) {
       if (currentTrackId !== playerQueueIdAtIndex) {
-        setCurrentTrack(undefined);
+        // setCurrentTrack(undefined);
         fetchTrackCallback(playerQueueIdAtIndex);
       }
     } else {
@@ -124,9 +123,7 @@ const Player = () => {
   }, [dispatch]);
 
   React.useEffect(() => {
-    let timer: any;
     if (currentTrack) {
-      clearTimeout(timer);
       if ("mediaSession" in navigator) {
         navigator.mediaSession.metadata = new MediaMetadata({
           title: currentTrack.title,
@@ -140,14 +137,7 @@ const Player = () => {
           ],
         });
       }
-    } else {
-      timer = setTimeout(() => {
-        setNotVisible(true);
-      }, 30000);
     }
-    return () => {
-      clearTimeout(timer);
-    };
   }, [currentTrack]);
 
   const onLoop = React.useCallback(() => {
@@ -160,7 +150,7 @@ const Player = () => {
     dispatch({ type: "setLooping", looping: nextLooping });
   }, [dispatch, looping]);
 
-  if (notVisible) {
+  if (!currentTrack) {
     return null;
   }
 

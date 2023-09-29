@@ -124,6 +124,8 @@ export const AudioWrapper: React.FC<{
   const currentSeconds = playerRef.current?.currentTime ?? 0;
   const percent = currentSeconds / duration;
 
+  // console.log("playing", playerRef.current);
+
   return (
     <>
       <>

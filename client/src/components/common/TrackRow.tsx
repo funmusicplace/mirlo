@@ -1,17 +1,19 @@
 import { css } from "@emotion/css";
 import React from "react";
-import { FaPause, FaPlay } from "react-icons/fa";
+import { FaLink, FaPause, FaPlay } from "react-icons/fa";
 import { useGlobalStateContext } from "state/GlobalState";
 import useDraggableTrack from "utils/useDraggableTrack";
 
 import IconButton from "./IconButton";
-import { fmtMSS, isTrackOwnedOrPreview } from "utils/tracks";
+import { fmtMSS, isTrackOwnedOrPreview, widgetUrl } from "utils/tracks";
+import { useSnackbar } from "state/SnackbarContext";
 
 const TrackRow: React.FC<{
   track: Track;
   trackGroup: TrackGroup;
   addTracksToQueue: (id: number) => void;
 }> = ({ track, addTracksToQueue, trackGroup }) => {
+  const snackbar = useSnackbar();
   const [trackTitle] = React.useState(track.title);
   const {
     state: { playerQueueIds, playing, currentlyPlayingIndex, user },
@@ -44,10 +46,10 @@ const TrackRow: React.FC<{
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
       className={css`
-        border-bottom: 1px solid var(--mi-lighter-foreground-color);
         ${!canPlayTrack ? `color: var(--mi-light-foreground-color);` : ""}
-        :first-child {
-          border-top: 1px solid var(--mi-lighter-foreground-color);
+
+        :nth-child(odd) {
+          background-color: var(--mi-lighter-background-color);
         }
 
         > td > .play-button {
@@ -92,6 +94,17 @@ const TrackRow: React.FC<{
       </td>
       <td>{trackGroup.artist.name}</td>
       <td>{track.audio?.duration && fmtMSS(track.audio.duration)}</td>
+      <td align="right">
+        <IconButton
+          compact
+          onClick={() => {
+            navigator.clipboard.writeText(widgetUrl(track.id));
+            snackbar("Copied track url", { type: "success" });
+          }}
+        >
+          <FaLink />
+        </IconButton>
+      </td>
     </tr>
   );
 };

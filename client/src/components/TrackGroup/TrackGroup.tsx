@@ -86,6 +86,7 @@ function TrackGroup() {
             className={css`
               line-height: 1;
               margin-top: 1rem;
+              margin-bottom: 0.5rem;
             `}
           >
             {trackGroup.title}
