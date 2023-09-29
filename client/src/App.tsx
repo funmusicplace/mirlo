@@ -108,7 +108,7 @@ function App() {
 
             @media (min-width: ${bp.small}px) {
               padding: 2rem 2rem 2rem;
-              max-width: 900px;
+              max-width: 1080px;
             }
 
             @media screen and (max-width: 800px) {

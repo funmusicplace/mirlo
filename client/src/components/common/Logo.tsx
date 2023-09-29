@@ -25,7 +25,7 @@ export const Logo: React.FC<{ collapse?: boolean }> = ({
           ${collapse ? "display: none;" : "display: inline-block;"}
           font-family: "Roboto Slab", serif;
           font-size: 1.5rem;
-          font-weight: 500;
+          font-weight: 400;
           color: var(--mi-normal-foreground-color);
 
           @media (min-width: ${bp.small}px) {
