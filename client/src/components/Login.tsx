@@ -80,7 +80,7 @@ function Login() {
         {t("passwordReset")}
       </Link>
       <br />
-      <Link
+      {/* <Link
         to="/signup"
         className={css`
           margin: 0 auto;
@@ -89,7 +89,7 @@ function Login() {
         `}
       >
         {t("signUp")}
-      </Link>
+      </Link> */}
 
       <img
         alt="blackbird"
