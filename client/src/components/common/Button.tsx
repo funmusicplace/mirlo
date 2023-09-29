@@ -73,10 +73,9 @@ const CustomButton = styled.button<Compactable>`
           };
 
           &:hover:not(:disabled) {
-            background-color: ${colorShade(
-              props.theme.colors[props.color ?? "primary"],
-              -70
-            )};
+            background-color: var(--mi-${
+              props.color ?? "primary"
+            }-color--hover);
           }
 
         `;

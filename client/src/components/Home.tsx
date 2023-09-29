@@ -6,6 +6,7 @@ import Button from "./common/Button";
 import api from "../services/api";
 import Box from "./common/Box";
 import PostContent from "./common/PostContent";
+import Logo from "./common/Logo";
 // import Button from "./common/Button";
 // import { FaArrowRight } from "react-icons/fa";
 
@@ -15,13 +16,13 @@ function Home() {
   } = useGlobalStateContext();
   const [posts, setPosts] = React.useState<Post[]>([]);
 
-  // const fetchAllPosts = React.useCallback(async () => {
-  //   const fetched = await api.getMany<Post>("posts");
-  //   setPosts(
-  //     // FIXME: Maybe this should be managed by a filter on the API?
-  //     fetched.results.filter((p) => !(p.forSubscribersOnly && p.content === ""))
-  //   );
-  // }, []);
+  const fetchAllPosts = React.useCallback(async () => {
+    const fetched = await api.getMany<Post>("posts");
+    setPosts(
+      // FIXME: Maybe this should be managed by a filter on the API?
+      fetched.results.filter((p) => !(p.forSubscribersOnly && p.content === ""))
+    );
+  }, []);
 
   const userId = user?.id;
 
@@ -29,34 +30,63 @@ function Home() {
     if (userId) {
       const fetched = await api.getMany<Post>(`users/${userId}/feed`);
       setPosts(fetched.results);
-      // if (fetched.results.length === 0) {
-      //   await fetchAllPosts();
-      // }
+      if (fetched.results.length === 0) {
+        await fetchAllPosts();
+      }
     } else {
       // await fetchAllPosts();
     }
-  }, [userId]);
+  }, [userId, fetchAllPosts]);
 
   React.useEffect(() => {
     fetchPosts();
   }, [fetchPosts]);
 
   return (
-    <div className={css``}>
+    <div
+      className={
+        !userId
+          ? css`
+              min-height: calc(100vh - 350px);
+              display: flex;
+              align-items: center;
+            `
+          : css`
+              min-height: calc(100vh - 350px);
+            `
+      }
+    >
       {!user && (
-        <div>
-          <p
+        <div
+          className={css`
+            display: flex;
+            align-items: center;
+          `}
+        >
+          <img
+            alt="blackbird"
+            src="/images/blackbird.png"
             className={css`
-              font-size: 2rem;
-              padding-bottom: 2rem;
-              font-weight: bold;
-              font-family: "Roboto Slab", serif;
+              width: 100%;
+              // padding: 4rem 0;
+              margin-right: 3rem;
+              transform: scaleX(-1);
             `}
-          >
-            Direct support for musicians. Buy their music. Collectively owned
-            and managed.
-          </p>
-          {/* <Link to="signup">
+          />
+          <div className={css``}>
+            <Logo />
+            <p
+              className={css`
+                margin-top: 1rem;
+                font-size: 2rem;
+                padding-bottom: 2rem;
+                font-weight: bold;
+              `}
+            >
+              Direct support for musicians. Buy their music. Collectively owned
+              and managed.
+            </p>
+            {/* <Link to="signup">
             <Button
               className={css`
                 margin-top: 1.5rem;
@@ -66,29 +96,19 @@ function Home() {
               Get started
             </Button>
           </Link> */}
-          <span
-            className={css`
-              text-align: center;
-            `}
-          >
-            Coming soon!
-          </span>
-          <a
-            href="https://dashboard.mailerlite.com/forms/396303/100612617721087214/share"
-            target="_blank"
-            rel="noreferrer"
-          >
-            <Button
-              className={css`
-                margin-top: 1rem;
-              `}
+            <a
+              href="https://dashboard.mailerlite.com/forms/396303/100612617721087214/share"
+              target="_blank"
+              rel="noreferrer"
             >
-              Want to stay in the loop? Sign up to our mailing list
-            </Button>
-          </a>
+              <Button className={css``}>
+                Want to stay in the loop? Sign up to our mailing list
+              </Button>
+            </a>
+          </div>
         </div>
       )}
-      {user && (
+      {user && posts.length > 0 && (
         <>
           <h2>Latest posts from the community:</h2>
           {posts.map((p) => (

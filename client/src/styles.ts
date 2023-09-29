@@ -1,11 +1,12 @@
 const styles = `html {
-  --mi-normal-background-color: white;
-  --mi-normal-foreground-color: #333;
+  --mi-normal-background-color: #ffeedb;
+  --mi-light-background-color: #ffffee;
+  --mi-normal-foreground-color: #3e363f;
   --mi-light-foreground-color: #888;
-  --mi-lighter-foreground-color: #eee;
+  --mi-lighter-foreground-color: #bbb;
 
-  --mi-primary-color: #282828;
-  --mi-primary-color--hover: #00C4DB;
+  --mi-primary-color: #e75a7c;
+  --mi-primary-color--hover: #f77b99;
 
   --mi-secondary-color: #ffb3d0;
   --mi-secondary-color--hover: #FF80B0;
@@ -45,19 +46,6 @@ const styles = `html {
   padding: 0;
 }
 
-@font-face {
-  font-family: 'Patrick Hand SC';
-  font-style: normal;
-  font-weight: 400;
-  src: local('Patrick Hand SC'),
-    local('PatrickHandSC-Regular'),
-    url(https://fonts.gstatic.com/s/patrickhandsc/v4/OYFWCgfCR-7uHIovjUZXsZ71Uis0Qeb9Gqo8IZV7ckE.woff2)
-      format('woff2');
-  unicode-range: U+0100-024f, U+1-1eff,
-    U+20a0-20ab, U+20ad-20cf, U+2c60-2c7f,
-    U+A720-A7FF;
-}
-
 html {
   font-size: 18px;
   min-height: 100%;
@@ -66,6 +54,7 @@ html {
 body {
   background-color: var(--mi-normal-background-color);
   color: var(--mi-normal-foreground-color);
+  font-family: 'Lora', serif;
 }
 
 body,

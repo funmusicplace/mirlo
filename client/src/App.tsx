@@ -96,7 +96,7 @@ function App() {
         <PageHeader />
         <div
           className={css`
-            max-width: 640px;
+            max-width: 900px;
             background-color: var(--mi-normal-background-color);
             padding: 2rem 2rem 2rem;
             margin: 0 auto;
@@ -109,28 +109,30 @@ function App() {
             }
           `}
         >
-          <div
-            className={css`
-              background-color: var(--mi-warning-background-color);
-              color: var(--mi-warning-foreground-color);
-              padding: 1rem;
-              border-radius: 1rem;
-              margin-bottom: 1rem;
-
-              a {
+          {userId && (
+            <div
+              className={css`
+                background-color: var(--mi-warning-background-color);
                 color: var(--mi-warning-foreground-color);
-              }
-            `}
-          >
-            Hi! We're really excited about this project and looking forward to
-            having you use it. We've closed sign-ups but are looking for testers
-            - we're in very heavy alpha state right now. If you find anything
-            broken, or want to get involved, please let us know{" "}
-            <a href="https://github.com/funmusicplace/mirlo/issues">
-              on GitHub
-            </a>{" "}
-            or <a href="https://discord.gg/VjKq26raKX">on the Discord</a>.
-          </div>
+                padding: 1rem;
+                border-radius: 1rem;
+                margin-bottom: 1rem;
+
+                a {
+                  color: var(--mi-warning-foreground-color);
+                }
+              `}
+            >
+              Hi! We're really excited about this project and looking forward to
+              having you use it. We've closed sign-ups but are looking for
+              testers - we're in very heavy alpha state right now. If you find
+              anything broken, or want to get involved, please let us know{" "}
+              <a href="https://github.com/funmusicplace/mirlo/issues">
+                on GitHub
+              </a>{" "}
+              or <a href="https://discord.gg/VjKq26raKX">on the Discord</a>.
+            </div>
+          )}
           <Outlet />
         </div>
         <Footer />

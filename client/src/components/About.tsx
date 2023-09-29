@@ -1,5 +1,7 @@
 import { css } from "@emotion/css";
 import { Trans, useTranslation } from "react-i18next";
+import { MetaCard } from "./common/MetaCard";
+import { Link } from "react-router-dom";
 
 const About: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "about" });
@@ -12,6 +14,12 @@ const About: React.FC = () => {
         }
       `}
     >
+      <MetaCard
+        title="About"
+        description="The music industry does not work for musicians or listeners and needs
+        a radical re-imagination."
+      />
+      <Link to="/">&#8612; Home</Link>
       <h1>{t("about")}</h1>
       <p>{t("intro")}</p>
       <h2>{t("ourMission")}</h2>
