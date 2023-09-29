@@ -13,6 +13,7 @@ import Header from "./components/Header/Header";
 import globalCSS from "./styles";
 import { Footer } from "components/Footer";
 import { bp } from "./constants";
+import { MetaCard } from "components/common/MetaCard";
 
 injectGlobal(globalCSS);
 
@@ -75,15 +76,11 @@ function App() {
 
   return (
     <>
-      <Helmet>
-        <title>A Mirlo Space</title>
-        <meta name="description" content="A home for all of your music" />
-
-        <meta property="og:type" content="website" />
-        <meta property="og:title" content="A Mirlo Space" />
-        <meta property="og:description" content="A home for all your music" />
-        <meta property="og:image" content="/images/blackbird.png" />
-      </Helmet>
+      <MetaCard
+        title="Mirlo"
+        description="A music distribution and patronage site"
+        image="/android-chrome-512x512.png"
+      />
       <div
         className={css`
           display: flex;
