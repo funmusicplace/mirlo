@@ -8,6 +8,7 @@ import Box from "./common/Box";
 import PostContent from "./common/PostContent";
 import Logo from "./common/Logo";
 import { bp } from "../constants";
+import { MetaCard } from "./common/MetaCard";
 // import Button from "./common/Button";
 // import { FaArrowRight } from "react-icons/fa";
 

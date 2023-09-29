@@ -5,7 +5,10 @@
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <link
+      rel="apple-touch-icon"
+      href="%PUBLIC_URL%/android-chrome-192x192.png"
+    />
 
     <link
       rel="apple-touch-icon"
@@ -30,6 +33,19 @@
       name="description"
       content="A music distribution and patronage site"
     />
+    <meta property="og:url" content="https://mirlo.space/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Mirlo" />
+    <meta
+      property="og:description"
+      content="A music distribution and patronage site"
+    />
+    <meta
+      property="og:image"
+      content="%PUBLIC_URL%/android-chrome-192x192.png"
+    />
+    <meta property="twitter:domain" content="mirlo.space" />
+    <meta property="twitter:url" content="https://mirlo.space/" />
 
     <!--
       manifest.json provides metadata used when your web app is installed on a
@@ -45,30 +61,7 @@
       work correctly both with client-side routing and a non-root public URL.
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
-    <title>A Mirlo Space</title>
-    <!-- MailerLite Universal -->
-    <script>
-      (function (w, d, e, u, f, l, n) {
-        (w[f] =
-          w[f] ||
-          function () {
-            (w[f].q = w[f].q || []).push(arguments);
-          }),
-          (l = d.createElement(e)),
-          (l.async = 1),
-          (l.src = u),
-          (n = d.getElementsByTagName(e)[0]),
-          n.parentNode.insertBefore(l, n);
-      })(
-        window,
-        document,
-        "script",
-        "https://assets.mailerlite.com/js/universal.js",
-        "ml"
-      );
-      ml("account", "396303");
-    </script>
-    <!-- End MailerLite Universal -->
+    <title>Mirlo</title>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>

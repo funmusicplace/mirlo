@@ -16,8 +16,9 @@ const About: React.FC = () => {
     >
       <MetaCard
         title="About"
-        description="The music industry does not work for musicians or listeners and needs
-        a radical re-imagination."
+        description="Mirlo is a community of musicians, listeners, and coders who are
+        daring to re-imagine the music industry: taking lessons learned in working in the
+        solidarity economy and applying them to our process and product."
       />
       <Link to="/">&#8612; Home</Link>
       <h1>{t("about")}</h1>
