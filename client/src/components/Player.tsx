@@ -26,7 +26,7 @@ const LoopingIndicator = styled.span`
 `;
 
 const playerClass = css`
-  min-height: 48px;
+  min-height: 129px;
   border-bottom: 1px solid grey;
   display: flex;
   align-items: center;
@@ -57,6 +57,7 @@ const Player = () => {
   // let navigate = useNavigate();
   const [currentTrack, setCurrentTrack] = React.useState<Track>();
   const [isLoading, setIsLoading] = React.useState(false);
+  const [notVisible, setNotVisible] = React.useState(false);
   const userId = user?.id;
 
   const fetchTrackCallback = React.useCallback(
@@ -123,7 +124,9 @@ const Player = () => {
   }, [dispatch]);
 
   React.useEffect(() => {
+    let timer: any;
     if (currentTrack) {
+      clearTimeout(timer);
       if ("mediaSession" in navigator) {
         navigator.mediaSession.metadata = new MediaMetadata({
           title: currentTrack.title,
@@ -137,7 +140,14 @@ const Player = () => {
           ],
         });
       }
+    } else {
+      timer = setTimeout(() => {
+        setNotVisible(true);
+      }, 30000);
     }
+    return () => {
+      clearTimeout(timer);
+    };
   }, [currentTrack]);
 
   const onLoop = React.useCallback(() => {
@@ -150,11 +160,9 @@ const Player = () => {
     dispatch({ type: "setLooping", looping: nextLooping });
   }, [dispatch, looping]);
 
-  if (!currentTrack?.title) {
+  if (notVisible) {
     return null;
   }
-
-  console.log("currentTrack", currentTrack);
 
   return (
     <div className={playerClass}>
@@ -165,7 +173,7 @@ const Player = () => {
             : ""}
         </title>
       </Helmet>
-      {currentTrack && (
+      {
         <div
           className={css`
             display: flex;
@@ -189,17 +197,17 @@ const Player = () => {
             `}
           >
             <ImageWithPlaceholder
-              src={currentTrack.trackGroup.cover?.sizes?.[60]}
+              src={currentTrack?.trackGroup.cover?.sizes?.[60]}
               size={60}
-              alt={currentTrack.title}
+              alt={currentTrack?.title ?? "Loading album"}
               className={css`
                 background-color: #efefef;
                 margin-right: 0.5rem;
               `}
             />
             <div>
-              <div>{currentTrack.title}</div>
-              {currentTrack.trackGroup && (
+              <div>{currentTrack?.title}</div>
+              {currentTrack?.trackGroup && (
                 <>
                   <div>{currentTrack.trackGroup.title}</div>
                   <div>
@@ -235,7 +243,7 @@ const Player = () => {
             </IconButton>
           </div>
         </div>
-      )}
+      }
 
       {!currentTrack && isLoading && <Spinner size="small" />}
       {/* {!currentTrack && !isLoading && (
