@@ -3,7 +3,6 @@ import PageHeader from "components/common/PageHeader";
 import Snackbar from "components/common/Snackbar";
 import Player from "components/Player";
 import React, { useContext } from "react";
-import { Helmet } from "react-helmet";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import api from "services/api";
 import { useGlobalStateContext } from "state/GlobalState";
