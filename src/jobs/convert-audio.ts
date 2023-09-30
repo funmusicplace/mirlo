@@ -65,6 +65,103 @@ export default async (job: Job) => {
       });
     });
 
+    if (fileType?.ext !== "wav") {
+      await new Promise((resolve, reject) => {
+        ffmpeg(Readable.from(buffer))
+          .toFormat("wav")
+          .on("error", (err: { message: unknown }) => {
+            logger.error(err.message);
+          })
+          .on("end", (err: { message: unknown }) => {
+            logger.info("Done converting to wav");
+            resolve("done");
+          })
+          .save(path.join(`${destinationFolder}/generated.wav`));
+      });
+    }
+
+    if (fileType?.ext !== "flac") {
+      await new Promise((resolve, reject) => {
+        ffmpeg(Readable.from(buffer))
+          .toFormat("flac")
+          .audioCodec("flac")
+          .on("error", (err: { message: unknown }) => {
+            logger.error(err.message);
+          })
+          .on("end", (err: { message: unknown }) => {
+            logger.info("Done converting to flac");
+            resolve("done");
+          })
+          .save(path.join(`${destinationFolder}/generated.flac`));
+      });
+    }
+
+    if (fileType?.ext !== "opus") {
+      await new Promise((resolve, reject) => {
+        ffmpeg(Readable.from(buffer))
+          .noVideo()
+          .outputOptions("-movflags", "+faststart", "-f", "ipod")
+          .toFormat("opus")
+          .audioCodec("opus")
+          .on("error", (err: { message: unknown }) => {
+            logger.error(err.message);
+          })
+          .on("end", (err: { message: unknown }) => {
+            logger.info("Done converting to opus");
+            resolve("done");
+          })
+          .save(path.join(`${destinationFolder}/generated.opus`));
+      });
+    }
+
+    await new Promise((resolve, reject) => {
+      ffmpeg(Readable.from(buffer))
+        .noVideo()
+        .toFormat("mp3")
+        .audioCodec("libmp3lame")
+        .audioBitrate("128")
+        .on("error", (err: { message: unknown }) => {
+          logger.error(err.message);
+        })
+        .on("end", () => {
+          logger.info("Done converting to mp3@128");
+          resolve("done");
+        })
+        .save(path.join(`${destinationFolder}/generated-128.mp3`));
+    });
+
+    await new Promise((resolve, reject) => {
+      ffmpeg(Readable.from(buffer))
+        .noVideo()
+        .toFormat("mp3")
+        .audioCodec("libmp3lame")
+        .audioBitrate("256")
+        .on("error", (err: { message: unknown }) => {
+          logger.error(err.message);
+        })
+        .on("end", () => {
+          logger.info("Done converting to mp3@256");
+          resolve("done");
+        })
+        .save(path.join(`${destinationFolder}/generated-256.mp3`));
+    });
+
+    await new Promise((resolve, reject) => {
+      ffmpeg(Readable.from(buffer))
+        .noVideo()
+        .toFormat("mp3")
+        .audioCodec("libmp3lame")
+        .audioBitrate("320")
+        .on("error", (err: { message: unknown }) => {
+          logger.error(err.message);
+        })
+        .on("end", () => {
+          logger.info("Done converting to mp3@320");
+          resolve("done");
+        })
+        .save(path.join(`${destinationFolder}/generated-320.mp3`));
+    });
+
     const duration = await new Promise((resolve, reject) => {
       let duration = 0;
       ffmpeg(Readable.from(buffer))
