@@ -174,6 +174,7 @@ export const AudioWrapper: React.FC<{
           onEnded={onEnded}
           playerRef={playerRef}
           onTimeUpdate={onListen}
+          playsInline
         />
         <div
           className={css`

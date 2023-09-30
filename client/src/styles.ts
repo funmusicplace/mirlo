@@ -40,6 +40,7 @@ const styles = `html {
   html {
     --mi-normal-background-color: #333;
     --mi-normal-foreground-color: white;
+    --mi-lighten-background-color: rgba(255, 255, 255, 0.05);
   }
 }
 
