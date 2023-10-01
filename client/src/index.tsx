@@ -31,6 +31,7 @@ import PasswordReset from "components/PasswordReset";
 import TrackGroup from "components/TrackGroup/TrackGroup";
 import About from "components/About";
 import { AuthWrapper } from "components/AuthWrapper";
+import Signup from "components/Signup";
 
 const router = createBrowserRouter([
   {
@@ -44,10 +45,10 @@ const router = createBrowserRouter([
       { path: "widget/track/:id", element: <TrackWidget /> },
       { path: "widget/trackgroup/:id", element: <TrackGroupWidget /> },
       { path: "post/:postId", element: <Post /> },
-      // {
-      //   path: "signup",
-      //   element: <Signup />,
-      // },
+      {
+        path: "signup",
+        element: <Signup />,
+      },
       {
         path: "login",
         element: <Login />,

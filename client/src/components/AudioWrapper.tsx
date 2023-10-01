@@ -117,6 +117,14 @@ export const AudioWrapper: React.FC<{
 
   const streamUrl = api.streamUrl(currentTrack);
 
+  console.log("streamUrl", streamUrl);
+  console.log(
+    "playerQueueIds, currentlyPlayingIndex, playing",
+    playerQueueIds,
+    currentlyPlayingIndex,
+    playing
+  );
+
   if (!streamUrl) {
     return null;
   }

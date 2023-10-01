@@ -90,7 +90,6 @@ function Login() {
       >
         {t("signUp")}
       </Link> */}
-
       <img
         alt="blackbird"
         src="/images/blackbird.png"

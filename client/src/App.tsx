@@ -23,7 +23,7 @@ function App() {
   const navigate = useNavigate();
   const location = useLocation();
   const userId = state.user?.id;
-  const isPlaying = state.playing;
+  const isPlaying = state.playerQueueIds;
 
   React.useEffect(() => {
     const callback = async () => {
@@ -95,9 +95,12 @@ function App() {
         <PageHeader />
         <div
           className={css`
+            flex-grow: 1;
+            display: flex;
+
             ${isPlaying
               ? `
-            margin-bottom: 130px;`
+            padding-bottom: 130px;`
               : ``}
           `}
         >
@@ -106,10 +109,10 @@ function App() {
               background-color: var(--mi-normal-background-color);
               margin: 0 auto;
               width: 100%;
-              flex-grow: 1;
               border-radius: var(--mi-border-radius);
               display: flex;
               ${userId ? "display: flex;" : ""}
+              flex-grow: 1;
 
               @media (min-width: ${bp.small}px) {
                 padding: 1rem 2rem 2rem;
