@@ -40,7 +40,7 @@ const playerClass = css`
   background-color: var(--mi-normal-background-color);
 
   @media (max-width: ${bp.small}px) {
-    height: 150px;
+    height: 190px;
     flex-direction: column;
 
     button {
@@ -180,6 +180,7 @@ const Player = () => {
 
             @media (max-width: ${bp.small}px) {
               width: 100%;
+              flex-grow: initial;
               justify-content: space-between;
             }
           `}
@@ -267,6 +268,7 @@ const Player = () => {
           flex-grow: 1;
           @media (max-width: ${bp.small}px) {
             width: 100%;
+            flex-grow: initial;
           }
         `}
       >
