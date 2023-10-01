@@ -102,10 +102,12 @@ export const AudioWrapper: React.FC<{
       playing
     ) {
       if (playerRef?.current) {
+        playerRef.current.playsInline = true;
         playerRef.current.play();
       }
     } else if (playerRef?.current && playing === false) {
       if (playerRef?.current) {
+        playerRef.current.playsInline = true;
         playerRef.current.pause();
       }
     }
