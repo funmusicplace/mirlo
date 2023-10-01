@@ -95,21 +95,26 @@ export const AudioWrapper: React.FC<{
   }, [dispatch]);
 
   const determineIfShouldPlay = React.useCallback(() => {
-    if (
-      currentTrack &&
-      currentlyPlayingIndex !== undefined &&
-      currentTrack.id === playerQueueIds[currentlyPlayingIndex] &&
-      playing
-    ) {
-      if (playerRef?.current) {
-        playerRef.current.playsInline = true;
-        playerRef.current.play();
+    try {
+      if (
+        currentTrack &&
+        currentlyPlayingIndex !== undefined &&
+        currentTrack.id === playerQueueIds[currentlyPlayingIndex] &&
+        playing
+      ) {
+        if (playerRef?.current) {
+          playerRef.current.setAttribute("muted", "");
+          playerRef.current.playsInline = true;
+          playerRef.current.play();
+        }
+      } else if (playerRef?.current && playing === false) {
+        if (playerRef?.current) {
+          playerRef.current.playsInline = true;
+          playerRef.current.pause();
+        }
       }
-    } else if (playerRef?.current && playing === false) {
-      if (playerRef?.current) {
-        playerRef.current.playsInline = true;
-        playerRef.current.pause();
-      }
+    } catch (e) {
+      console.error("an error happened", e);
     }
   }, [currentTrack, currentlyPlayingIndex, playerQueueIds, playing]);
 
