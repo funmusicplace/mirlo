@@ -23,6 +23,7 @@ function App() {
   const navigate = useNavigate();
   const location = useLocation();
   const userId = state.user?.id;
+  const isPlaying = state.playing;
 
   React.useEffect(() => {
     const callback = async () => {
@@ -94,27 +95,37 @@ function App() {
         <PageHeader />
         <div
           className={css`
-            background-color: var(--mi-normal-background-color);
-            margin: 0 auto;
-            width: 100%;
-            flex-grow: 1;
-            border-radius: var(--mi-border-radius);
-            display: flex;
-            ${userId ? "display: flex;" : ""}
-
-            @media (min-width: ${bp.small}px) {
-              padding: 1rem 2rem 2rem;
-              max-width: 1080px;
-            }
-
-            @media screen and (max-width: 800px) {
-              padding: 1rem 1rem 1rem;
-            }
+            ${isPlaying
+              ? `
+            margin-bottom: 130px;`
+              : ``}
           `}
         >
-          <Outlet />
+          <div
+            className={css`
+              background-color: var(--mi-normal-background-color);
+              margin: 0 auto;
+              width: 100%;
+              flex-grow: 1;
+              border-radius: var(--mi-border-radius);
+              display: flex;
+              ${userId ? "display: flex;" : ""}
+
+              @media (min-width: ${bp.small}px) {
+                padding: 1rem 2rem 2rem;
+                max-width: 1080px;
+              }
+
+              @media screen and (max-width: 800px) {
+                padding: 1rem 1rem 1rem;
+              }
+            `}
+          >
+            <Outlet />
+          </div>
+          <Footer />
         </div>
-        <Footer />
+
         <Player />
       </div>
     </>
