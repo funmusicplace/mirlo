@@ -154,12 +154,6 @@ const Player = () => {
     return null;
   }
 
-  console.log("currentTrack", currentTrack);
-  console.log(
-    "is track owned or preview",
-    isTrackOwnedOrPreview(currentTrack, user)
-  );
-
   return (
     <div className={playerClass}>
       <Helmet>
