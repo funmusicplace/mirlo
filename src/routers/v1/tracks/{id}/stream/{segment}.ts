@@ -7,6 +7,8 @@ import {
   getBufferFromMinio,
   minioClient,
 } from "../../../../../utils/minio";
+import { userLoggedInWithoutRedirect } from "../../../../../auth/passport";
+import { canUserListenToTrack } from "../../../../../utils/ownership";
 
 export const fetchFile = async (
   res: Response,
@@ -41,12 +43,13 @@ export const fetchFile = async (
 
 export default function () {
   const operations = {
-    GET,
+    GET: [userLoggedInWithoutRedirect, GET],
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
-    // FIXME: limit plays to owned songs unless preview
     const { id, segment }: { id?: string; segment?: string } = req.params;
+    const user = req.user as User | undefined;
+
     try {
       const track = await prisma.track.findUnique({
         where: { id: Number(id) },
@@ -60,7 +63,12 @@ export default function () {
         },
       });
 
-      if (!track) {
+      const isUserAbleToListenToTrack = await canUserListenToTrack(
+        track?.id,
+        user?.id
+      );
+
+      if (!track || !isUserAbleToListenToTrack) {
         res.status(404);
         return next();
       }

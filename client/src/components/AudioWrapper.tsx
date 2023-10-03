@@ -14,6 +14,7 @@ const hlsConfig = {
     // const { token } = getToken();
     // FIXME: need to set cookies on the xhr for the hls
     xhr.setRequestHeader("Content-Type", "application/octet-stream");
+    xhr.withCredentials = true;
     // xhr.setRequestHeader("Authorization", `Bearer ${token}`);
   },
 };
@@ -32,23 +33,13 @@ export const AudioWrapper: React.FC<{
   const userId = user?.id;
 
   const onEnded = React.useCallback(async () => {
-    if (!mostlyListened && currentTrack && userId) {
-      try {
-        console.log(
-          "we want to log plays happened, but probably on the server"
-        );
-        // await registerPlay(currentTrack.id);
-      } catch (e) {
-        console.error(e);
-      }
-    }
     if (looping === "loopTrack") {
       playerRef.current?.play();
     } else {
       dispatch({ type: "incrementCurrentlyPlayingIndex" });
     }
     setMostlyListened(false);
-  }, [currentTrack, dispatch, looping, mostlyListened, userId]);
+  }, [dispatch, looping]);
 
   const onListen = React.useCallback(
     async (e: any) => {
@@ -124,22 +115,12 @@ export const AudioWrapper: React.FC<{
 
   const streamUrl = api.streamUrl(currentTrack);
 
-  console.log("streamUrl", streamUrl);
-  console.log(
-    "playerQueueIds, currentlyPlayingIndex, playing",
-    playerQueueIds,
-    currentlyPlayingIndex,
-    playing
-  );
-
   if (!streamUrl) {
     return null;
   }
   const duration = playerRef.current?.duration ?? 0;
   const currentSeconds = playerRef.current?.currentTime ?? 0;
   const percent = currentSeconds / duration;
-
-  // console.log("playing", playerRef.current);
 
   return (
     <>
