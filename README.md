@@ -21,6 +21,12 @@ docker-compose up
 
 Go to `localhost:3000/docs` and see the Swagger API docs.
 
+This should run the **seeding** script by default. If it doesn't do so, you can add run the seed by running:
+
+```sh
+docker exec -it blackbird-api npx prisma db seed
+```
+
 #### For the client:
 
 ```sh
@@ -53,7 +59,7 @@ docker exec -it blackbird-api node src/jobs/queue-worker.js run
 
 ### Running migrations
 
-To make changes to the database, change the schema.prisma file and then run:
+Migrations will run automatically on `docker-compose up`. To make changes to the database, change the schema.prisma file and then run:
 
 ```sh
 docker exec -it blackbird-api npx prisma migrate dev

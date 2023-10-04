@@ -12,7 +12,7 @@ const refresh_secret = process.env.REFRESH_TOKEN_SECRET ?? "";
 
 const router = express.Router();
 
-async function hashPassword(password: string) {
+export async function hashPassword(password: string) {
   return await bcrypt.hash(password, 3);
 }
 

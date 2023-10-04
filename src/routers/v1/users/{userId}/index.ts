@@ -5,10 +5,6 @@ import {
 } from "../../../../auth/passport";
 import { Prisma, User } from "@prisma/client";
 import prisma from "../../../../../prisma/prisma";
-import sendMail from "../../../../jobs/send-mail";
-import { randomUUID } from "crypto";
-import { deleteArtist } from "../../../../utils/artist";
-import stripe from "../../../../utils/stripe";
 import { deleteUser } from "../../../../utils/user";
 
 export default function () {
