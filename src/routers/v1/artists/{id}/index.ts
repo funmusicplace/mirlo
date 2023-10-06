@@ -15,6 +15,7 @@ import {
   finalArtistBannerBucket,
 } from "../../../../utils/minio";
 import { convertURLArrayToSizes } from "../../../../utils/images";
+import { isNumber } from "lodash";
 
 export default function () {
   const operations = {
@@ -24,7 +25,8 @@ export default function () {
   async function GET(req: Request, res: Response) {
     let { id }: { id?: string } = req.params;
     const user = req.user as User;
-    if (!id) {
+    console.log("id", id);
+    if (!id || id === "undefined") {
       return res.status(400);
     }
     try {

@@ -1,10 +1,8 @@
-import { Prisma, User } from "@prisma/client";
+import { User } from "@prisma/client";
 import { Request, Response } from "express";
 import { userAuthenticated } from "../../../../auth/passport";
 import prisma from "../../../../../prisma/prisma";
-import trackGroupProcessor from "../../../../utils/trackGroup";
 import postProcessor from "../../../../utils/post";
-import { checkIsUserSubscriber } from "../../../../utils/artist";
 
 type Params = {
   userId: string;

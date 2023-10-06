@@ -12,12 +12,13 @@ type Params = {
 
 export default function () {
   const operations = {
-    POST: [userAuthenticated, POST],
+    GET: [userAuthenticated, GET],
   };
 
-  async function POST(req: Request, res: Response) {
+  async function GET(req: Request, res: Response) {
     const { userId } = req.params as unknown as Params;
     const loggedInUser = req.user as User;
+
     try {
       if (Number(userId) === Number(loggedInUser.id)) {
         const user = await prisma.user.findUnique({
@@ -28,7 +29,7 @@ export default function () {
           if (!accountId) {
             const account = await stripe.accounts.create({
               country: "US", // FIXME: we need to register users country
-              type: "standard",
+              type: "express",
               business_profile: { name: user.name ?? "" },
             });
             await prisma.user.update({
@@ -50,9 +51,10 @@ export default function () {
           });
           console.log("account", accountId, accountLink);
 
-          res.status(200).json({
-            accountUrl: accountLink.url,
-          });
+          res.redirect(accountLink.url);
+          // res.status(200).json({
+          //   accountUrl: accountLink.url,
+          // });
         }
       } else {
         res.status(401).json({
@@ -60,6 +62,7 @@ export default function () {
         });
       }
     } catch (e) {
+      console.error(e);
       res.json({
         error: `Stripe Connect doesn't work yet`,
       });

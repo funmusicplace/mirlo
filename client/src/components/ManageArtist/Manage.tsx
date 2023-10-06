@@ -31,11 +31,7 @@ export const Manage: React.FC = () => {
 
   const setUpBankAccount = React.useCallback(async () => {
     try {
-      const response = await api.post<{}, { accountUrl: string }>(
-        `users/${userId}/connectStripe`,
-        {}
-      );
-      window.location.assign(response.accountUrl);
+      window.location.assign(api.root + `users/${userId}/connectStripe`);
     } catch (e) {
       snackbar(t("error"), { type: "warning" });
       console.error(e);
