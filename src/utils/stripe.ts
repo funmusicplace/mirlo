@@ -2,9 +2,7 @@ import Stripe from "stripe";
 import prisma from "../../prisma/prisma";
 import { Prisma } from "@prisma/client";
 
-const { STRIPE_KEY, API_DOMAIN } = process.env;
-
-console.log("stripe", STRIPE_KEY);
+const { STRIPE_KEY } = process.env;
 
 const stripe = new Stripe(STRIPE_KEY ?? "", {
   apiVersion: "2022-11-15",

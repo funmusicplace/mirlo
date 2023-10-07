@@ -13,12 +13,17 @@ import { useGlobalStateContext } from "state/GlobalState";
 import Box from "components/common/Box";
 import CurrencyInput from "react-currency-input-field";
 import useErrorHandler from "services/useErrorHandler";
+import { useTranslation } from "react-i18next";
 
 const SubscriptionForm: React.FC<{
   artist: Artist;
   existing?: ArtistSubscriptionTier;
   reload: () => void;
 }> = ({ artist, existing, reload }) => {
+  const { t } = useTranslation("translation", {
+    keyPrefix: "subscriptionForm",
+  });
+
   const {
     state: { user },
   } = useGlobalStateContext();
@@ -67,7 +72,7 @@ const SubscriptionForm: React.FC<{
             });
           }
 
-          snackbar("Subscription updated", { type: "success" });
+          snackbar("subscriptionUpdated", { type: "success" });
           reset();
           reload();
         } catch (e) {
@@ -83,20 +88,20 @@ const SubscriptionForm: React.FC<{
   return (
     <Box>
       <form onSubmit={handleSubmit(doSave)}>
-        <h4>
-          {existing ? "Edit" : "New"} Subscription Tier for {artist.name}
-        </h4>
+        <h4>{t("editSubscriptionTierFor", { artistName: artist.name })}</h4>
 
         <FormComponent>
-          name: <InputEl {...register("name")} />
+          {t("name")}
+          <InputEl {...register("name")} />
         </FormComponent>
         <FormComponent>
-          minimum amount:{" "}
+          {t("minimumAmount")}
           <InputEl as={CurrencyInput} {...register("minAmount")} />
         </FormComponent>
 
         <FormComponent>
-          description: <TextArea {...register("description")} />
+          {t("description")}
+          <TextArea {...register("description")} />
         </FormComponent>
         <Button
           type="submit"
@@ -104,7 +109,7 @@ const SubscriptionForm: React.FC<{
           compact
           startIcon={isSaving ? <LoadingSpinner /> : undefined}
         >
-          {existing ? "Save" : "Create"} Subscription
+          {existing ? t("saveSubscription") : t("createSubscription")}
         </Button>
       </form>
     </Box>

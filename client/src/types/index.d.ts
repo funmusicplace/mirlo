@@ -69,6 +69,7 @@ interface Artist {
   payPalClientId?: string;
   posts: Post[];
   subscriptionTiers: ArtistSubscriptionTier[];
+  properties?: { colors: { primary: string; secondary: string } };
   banner?: {
     url: string;
     sizes?: { [key: string]: string };

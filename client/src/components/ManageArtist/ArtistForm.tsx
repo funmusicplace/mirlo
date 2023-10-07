@@ -1,7 +1,7 @@
 import React from "react";
 import Modal from "components/common/Modal";
 import Button from "../common/Button";
-import { useForm } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import api from "services/api";
 import { InputEl } from "../common/Input";
 import LoadingSpinner from "components/common/LoadingSpinner";
@@ -13,6 +13,7 @@ import { pick } from "lodash";
 import { useGlobalStateContext } from "state/GlobalState";
 import UploadArtistImage from "./UploadArtistImage";
 import { useTranslation } from "react-i18next";
+import ColorInput from "./ColorInput";
 // import UploadArtistImage from "./UploadArtistImage";
 
 export interface ShareableTrackgroup {
@@ -31,17 +32,30 @@ export const ArtistForm: React.FC<{
   const snackbar = useSnackbar();
   const { state } = useGlobalStateContext();
   const [isSaving, setIsSaving] = React.useState(false);
+  const defaultValues = {
+    name: "",
+    bio: "",
+    urlSlug: "",
+    ...existing,
+    properties: {
+      colors: { primary: "#e75a7c", secondary: "#ffb3d0" },
+      ...existing?.properties,
+    },
+  };
+  const methods = useForm<{
+    name: string;
+    bio: string;
+    urlSlug: string;
+    properties: { colors: { primary: string; secondary: string } };
+  }>({
+    defaultValues,
+  });
+
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<{
-    name: string;
-    bio: string;
-    urlSlug: string;
-  }>({
-    defaultValues: { name: "", bio: "", urlSlug: "", ...existing },
-  });
+  } = methods;
 
   const validation = React.useCallback(
     async (value: string) => {
@@ -67,7 +81,12 @@ export const ArtistForm: React.FC<{
       if (state.user?.id) {
         try {
           setIsSaving(true);
-          const sending = pick(data, ["bio", "name", "urlSlug"]);
+          const sending = pick(data, [
+            "bio",
+            "name",
+            "urlSlug",
+            "properties.colors",
+          ]);
           if (existingId) {
             await api.put(`users/${state.user.id}/artists/${existingId}`, {
               ...sending,
@@ -95,19 +114,26 @@ export const ArtistForm: React.FC<{
   );
 
   return (
-    <Modal open={open} onClose={onClose} size="small" title="Create an artist">
-      <form onSubmit={handleSubmit(soSave)}>
-        {existing && (
-          <UploadArtistImage
-            existing={existing}
-            reload={reload}
-            imageType="banner"
-            height="125px"
-            width="100%"
-            maxDimensions="2500x500"
-          />
-        )}
-        {/* {existing && (
+    <Modal
+      open={open}
+      onClose={onClose}
+      size="small"
+      title={existing ? "Edit artist" : "Create an artist"}
+    >
+      <FormProvider {...methods}>
+        <form onSubmit={handleSubmit(soSave)}>
+          {existing && (
+            <UploadArtistImage
+              existing={existing}
+              reload={reload}
+              imageType="banner"
+              height="125px"
+              width="100%"
+              maxDimensions="2500x500"
+            />
+          )}
+
+          {/* {existing && (
           <UploadArtistImage
             existing={existing}
             reload={reload}
@@ -118,49 +144,63 @@ export const ArtistForm: React.FC<{
           />
         )} */}
 
-        <div
-          className={css`
-            margin-top: 1rem;
-          `}
-        >
-          <h3>{existing ? existing.name : t("newArtist")}</h3>
-          <FormComponent>
-            {t("displayName")}:{" "}
-            <InputEl {...register("name", { required: true })} />
-          </FormComponent>
-
-          <FormComponent>
-            {t("urlSlug")}:{" "}
-            <InputEl
-              {...register("urlSlug", {
-                validate: { unique: validation },
-              })}
-            />
-            <small>Must be unique</small>
-            {errors.urlSlug && (
-              <small className="error">
-                {errors.urlSlug.type === "unique" &&
-                  " This needs to be unique, try something else"}
-              </small>
+          <div
+            className={css`
+              margin-top: 1rem;
+            `}
+          >
+            <h3>{existing ? existing.name : t("newArtist")}</h3>
+            <FormComponent>
+              {t("displayName")}:{" "}
+              <InputEl {...register("name", { required: true })} />
+            </FormComponent>
+            {existing && (
+              <ColorInput
+                name="properties.colors.primary"
+                title={t("primaryColor")}
+              />
             )}
-          </FormComponent>
-          <FormComponent>
-            {t("bio")}:
-            <TextArea {...register("bio")} />
-          </FormComponent>
-          {/* <FormComponent>
+            {existing && (
+              <ColorInput
+                name="properties.colors.secondary"
+                title={t("secondaryColor")}
+              />
+            )}
+
+            <FormComponent>
+              {t("urlSlug")}:{" "}
+              <InputEl
+                {...register("urlSlug", {
+                  validate: { unique: validation },
+                  disabled: !!existing,
+                })}
+              />
+              <small>Must be unique</small>
+              {errors.urlSlug && (
+                <small className="error">
+                  {errors.urlSlug.type === "unique" &&
+                    " This needs to be unique, try something else"}
+                </small>
+              )}
+            </FormComponent>
+            <FormComponent>
+              {t("bio")}:
+              <TextArea {...register("bio")} />
+            </FormComponent>
+            {/* <FormComponent>
             Email: <InputEl type="email" {...register("email")} />
           </FormComponent> */}
 
-          <Button
-            type="submit"
-            disabled={isSaving}
-            startIcon={isSaving ? <LoadingSpinner /> : undefined}
-          >
-            {existing ? t("saveArtist") : t("createArtist")}
-          </Button>
-        </div>
-      </form>
+            <Button
+              type="submit"
+              disabled={isSaving}
+              startIcon={isSaving ? <LoadingSpinner /> : undefined}
+            >
+              {existing ? t("saveArtist") : t("createArtist")}
+            </Button>
+          </div>
+        </form>
+      </FormProvider>
     </Modal>
   );
 };
