@@ -35,7 +35,11 @@ export default function () {
           id: Number(trackGroupId),
         },
         include: {
-          artist: true,
+          artist: {
+            include: {
+              user: true,
+            },
+          },
           cover: true,
         },
       });
@@ -74,35 +78,41 @@ export default function () {
         productKey = product.id;
       }
 
-      if (productKey) {
-        const session = await stripe.checkout.sessions.create({
-          billing_address_collection: "auto",
-          customer_email: user?.email,
-          line_items: [
-            {
-              price_data: {
-                tax_behavior: "exclusive",
-                unit_amount:
-                  (price ? Number(price) : undefined) ??
-                  trackGroup.minPrice ??
-                  0,
-                currency: trackGroup.currency ?? "USD",
-                product: productKey,
-              },
+      console.log("artist", trackGroup.artist.user.stripeAccountId);
 
-              quantity: 1,
+      if (productKey) {
+        const session = await stripe.checkout.sessions.create(
+          {
+            billing_address_collection: "auto",
+            customer_email: user?.email,
+            line_items: [
+              {
+                price_data: {
+                  tax_behavior: "exclusive",
+                  unit_amount:
+                    (price ? Number(price) : undefined) ??
+                    trackGroup.minPrice ??
+                    0,
+                  currency: trackGroup.currency ?? "USD",
+                  product: productKey,
+                },
+
+                quantity: 1,
+              },
+            ],
+
+            metadata: {
+              clientId: client?.id ?? null,
+              trackGroupId,
+              artistId: trackGroup.artistId,
+              userId,
             },
-          ],
-          metadata: {
-            clientId: client?.id ?? null,
-            trackGroupId,
-            artistId: trackGroup.artistId,
-            userId,
+            mode: "payment",
+            success_url: `${API_DOMAIN}/v1/checkout?success=true&session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${API_DOMAIN}/v1/checkout?canceled=true`,
           },
-          mode: "payment",
-          success_url: `${API_DOMAIN}/v1/checkout?success=true&session_id={CHECKOUT_SESSION_ID}`,
-          cancel_url: `${API_DOMAIN}/v1/checkout?canceled=true`,
-        });
+          { stripeAccount: trackGroup.artist.user.stripeAccountId ?? undefined }
+        );
         res.status(200).json({
           sessionUrl: session.url,
         });

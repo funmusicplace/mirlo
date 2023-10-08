@@ -86,6 +86,8 @@ Then to trigger a specific workflow:
 stripe trigger checkout.session.completed --add checkout_session:metadata.userId=3 --add checkout_session:metadata.tierId=2
 ```
 
+You'll also want fake Stripe data. You can find [the details on that here](https://stripe.com/docs/connect/testing).
+
 ## CRON Jobs
 
 Some cron jobs exist:

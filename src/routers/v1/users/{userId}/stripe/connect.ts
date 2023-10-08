@@ -1,9 +1,9 @@
 import { User } from "@prisma/client";
 import { Request, Response } from "express";
-import { userAuthenticated } from "../../../../auth/passport";
-import prisma from "../../../../../prisma/prisma";
+import { userAuthenticated } from "../../../../../auth/passport";
+import prisma from "../../../../../../prisma/prisma";
 
-import stripe from "../../../../utils/stripe";
+import stripe from "../../../../../utils/stripe";
 const { API_DOMAIN } = process.env;
 
 type Params = {
@@ -26,10 +26,12 @@ export default function () {
         });
         if (user) {
           let accountId = user.stripeAccountId;
+          const client = await prisma.client.findFirst({});
+
           if (!accountId) {
             const account = await stripe.accounts.create({
               country: "US", // FIXME: we need to register users country
-              type: "express",
+              type: "standard",
               business_profile: { name: user.name ?? "" },
             });
             await prisma.user.update({
@@ -45,16 +47,12 @@ export default function () {
 
           const accountLink = await stripe.accountLinks.create({
             account: accountId,
-            refresh_url: "",
-            return_url: "",
+            refresh_url: `${API_DOMAIN}/v1/users/${userId}/stripe/connect`,
+            return_url: `${client?.applicationUrl}/manage?stripeConnect=done`,
             type: "account_onboarding",
           });
-          console.log("account", accountId, accountLink);
 
           res.redirect(accountLink.url);
-          // res.status(200).json({
-          //   accountUrl: accountLink.url,
-          // });
         }
       } else {
         res.status(401).json({
