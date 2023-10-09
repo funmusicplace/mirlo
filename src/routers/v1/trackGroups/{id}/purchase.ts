@@ -30,6 +30,7 @@ export default function () {
           id: userId,
         },
       });
+
       const trackGroup = await prisma.trackGroup.findFirst({
         where: {
           id: Number(trackGroupId),
@@ -46,6 +47,14 @@ export default function () {
 
       if (!trackGroup) {
         return res.status(404);
+      }
+
+      const stripeAccountId = trackGroup.artist.user.stripeAccountId;
+
+      if (!stripeAccountId) {
+        return res.status(400).json({
+          error: "Artist not set up with a payment processor yet",
+        });
       }
 
       let productKey = trackGroup.stripeProductKey;
@@ -78,9 +87,7 @@ export default function () {
         productKey = product.id;
       }
 
-      console.log("artist", trackGroup.artist.user.stripeAccountId);
-
-      if (productKey) {
+      if (productKey && stripeAccountId) {
         const session = await stripe.checkout.sessions.create(
           {
             billing_address_collection: "auto",
@@ -111,7 +118,7 @@ export default function () {
             success_url: `${API_DOMAIN}/v1/checkout?success=true&session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${API_DOMAIN}/v1/checkout?canceled=true`,
           },
-          { stripeAccount: trackGroup.artist.user.stripeAccountId ?? undefined }
+          { stripeAccount: stripeAccountId }
         );
         res.status(200).json({
           sessionUrl: session.url,
