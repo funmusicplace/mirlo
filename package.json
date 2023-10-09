@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@bull-board/express": "^4.11.0",
-    "@prisma/client": "4.11.0",
+    "@prisma/client": "5",
     "archiver": "^6.0.0",
     "bcryptjs": "^2.4.3",
     "bullmq": "^3.5.10",
@@ -40,7 +40,7 @@
     "nodemailer-sendgrid": "^1.0.3",
     "passport": "^0.6.0",
     "passport-jwt": "^4.0.0",
-    "prisma": "4.11.0",
+    "prisma": "5",
     "sharp": "^0.31.3",
     "shasum": "^1.0.2",
     "slugify": "^1.6.6",
