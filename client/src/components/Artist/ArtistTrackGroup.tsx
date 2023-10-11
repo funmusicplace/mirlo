@@ -8,13 +8,13 @@ import PurchaseOrDownloadAlbum from "components/TrackGroup/PurchaseOrDownloadAlb
 const ArtistTrackGroup: React.FC<{
   trackGroup: TrackGroup;
 }> = ({ trackGroup }) => {
-  const {
-    state: { artist },
-  } = useArtistContext();
+  const { state } = useArtistContext();
 
-  if (!trackGroup || !artist) {
+  if (!trackGroup || (!state?.artist && !trackGroup.artist)) {
     return null;
   }
+
+  const { artist } = state ?? trackGroup;
 
   return (
     <div
@@ -61,7 +61,7 @@ const ArtistTrackGroup: React.FC<{
           `}
         >
           <Link
-            to={`/${artist.urlSlug ?? trackGroup.artistId}/tg/${
+            to={`/${artist?.urlSlug ?? trackGroup.artistId}/tg/${
               trackGroup.urlSlug ?? trackGroup.id
             }`}
           >

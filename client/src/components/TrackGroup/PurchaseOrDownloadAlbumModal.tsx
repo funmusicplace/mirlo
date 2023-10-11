@@ -20,11 +20,8 @@ const PurchaseOrDownloadAlbum: React.FC<{
   const [isPurchasingAlbum, setIsPurchasingAlbum] = React.useState(false);
   const [isOwned, setIsOwned] = React.useState(false);
   const [isDownloading, setIsDownloading] = React.useState(false);
-  const {
-    state: { artist, userStripeStatus },
-  } = useArtistContext();
+  const { state } = useArtistContext();
 
-  console.log("userStripe", userStripeStatus);
   const userId = user?.id;
 
   const checkForAlbumOwnership = React.useCallback(async () => {
@@ -46,11 +43,11 @@ const PurchaseOrDownloadAlbum: React.FC<{
     checkForAlbumOwnership();
   }, [checkForAlbumOwnership]);
 
-  if (!trackGroup || !artist) {
+  if (!trackGroup || !state?.artist) {
     return null;
   }
 
-  const userIsTrackGroupArtist = user && artist.userId === user?.id;
+  const userIsTrackGroupArtist = user && state?.artist.userId === user?.id;
 
   const downloadAlbum = async () => {
     try {
@@ -78,7 +75,7 @@ const PurchaseOrDownloadAlbum: React.FC<{
         {user &&
           !userIsTrackGroupArtist &&
           !isOwned &&
-          userStripeStatus?.chargesEnabled && (
+          state?.userStripeStatus?.chargesEnabled && (
             <Button compact onClick={() => setIsPurchasingAlbum(true)}>
               {t("buy")}
             </Button>
