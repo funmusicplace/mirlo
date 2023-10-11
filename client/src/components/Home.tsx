@@ -89,6 +89,10 @@ function Home() {
                 font-size: 2rem;
                 padding-bottom: 2rem;
                 font-weight: bold;
+
+                @media screen and (max-width: ${bp.medium}px) {
+                  font-size: 1.5rem;
+                }
               `}
             >
               Direct support for musicians. Buy their music. Collectively owned

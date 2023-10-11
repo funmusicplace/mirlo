@@ -126,6 +126,7 @@ function TrackGroup() {
       <div
         className={css`
           display: flex;
+          align-items: flex-start;
 
           @media screen and (max-width: ${bp.medium}px) {
             flex-direction: column;

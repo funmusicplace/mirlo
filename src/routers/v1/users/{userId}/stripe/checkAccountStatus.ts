@@ -19,36 +19,30 @@ export default function () {
     const loggedInUser = req.user as User;
 
     try {
-      if (Number(userId) === Number(loggedInUser.id)) {
-        const user = await prisma.user.findUnique({
-          where: { id: Number(userId) },
-        });
-        if (user) {
-          let accountId = user.stripeAccountId;
+      const user = await prisma.user.findUnique({
+        where: { id: Number(userId) },
+      });
+      if (user) {
+        let accountId = user.stripeAccountId;
 
-          if (!accountId) {
-            res.status(200).json({
-              result: {
-                chargesEnabled: false,
-                detailsSubmitted: false,
-              },
-            });
-          } else {
-            const account = await stripe.accounts.retrieve(accountId);
-            res.status(200).json({
-              result: {
-                chargesEnabled: account.charges_enabled,
-                detailsSubmitted: account.details_submitted,
-              },
-            });
-          }
+        if (!accountId) {
+          res.status(200).json({
+            result: {
+              chargesEnabled: false,
+              ...(loggedInUser ? { detailsSubmitted: false } : {}),
+            },
+          });
+        } else {
+          const account = await stripe.accounts.retrieve(accountId);
+          res.status(200).json({
+            result: {
+              chargesEnabled: account.charges_enabled,
+              ...(loggedInUser
+                ? { detailsSubmitted: account.details_submitted }
+                : {}),
+            },
+          });
         }
-      } else {
-        res.status(200).json({
-          result: {
-            chargesEnabled: false,
-          },
-        });
       }
     } catch (e) {
       console.error(e);

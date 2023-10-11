@@ -58,7 +58,7 @@ html {
 body {
   background-color: var(--mi-normal-background-color);
   color: var(--mi-normal-foreground-color);
-  font-family: 'Lora', serif;
+  font-family: Ariel, sans-serif;
 }
 
 body,

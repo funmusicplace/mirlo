@@ -60,30 +60,36 @@ const TrackRow: React.FC<{
             padding: 0.15rem 0.3rem;
           }
         }
+
+        button {
+          font-size: 16px;
+        }
       `}
     >
-      {canPlayTrack && (
-        <td
-          className={css`
-            width: 40px;
-          `}
-        >
-          {(!playing || currentPlayingTrackId !== track.id) && (
-            <IconButton compact className="play-button" onClick={onTrackPlay}>
-              <FaPlay />
-            </IconButton>
-          )}
-          {playing && currentPlayingTrackId === track.id && (
-            <IconButton
-              compact
-              data-cy="track-row-pause-button"
-              onClick={onTrackPause}
-            >
-              <FaPause />
-            </IconButton>
-          )}
-        </td>
-      )}
+      <td
+        className={css`
+          width: 30px;
+        `}
+      >
+        {canPlayTrack && (
+          <>
+            {(!playing || currentPlayingTrackId !== track.id) && (
+              <IconButton compact className="play-button" onClick={onTrackPlay}>
+                <FaPlay />
+              </IconButton>
+            )}
+            {playing && currentPlayingTrackId === track.id && (
+              <IconButton
+                compact
+                data-cy="track-row-pause-button"
+                onClick={onTrackPause}
+              >
+                <FaPause />
+              </IconButton>
+            )}
+          </>
+        )}
+      </td>
       <td
         className={css`
           max-width: 100px;

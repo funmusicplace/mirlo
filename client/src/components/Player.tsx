@@ -195,6 +195,10 @@ const Player = () => {
               className={css`
                 background-color: #efefef;
                 margin-right: 0.5rem;
+
+                @media (max-width: ${bp.small}px) {
+                  display: none;
+                }
               `}
             />
             <div>
