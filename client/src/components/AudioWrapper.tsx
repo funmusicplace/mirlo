@@ -1,12 +1,12 @@
-import { css } from "@emotion/css";
+// import { css } from "@emotion/css";
 
 import React from "react";
 import ReactHlsPlayer from "@gumlet/react-hls-player";
 import api from "services/api";
 
 import { useGlobalStateContext } from "state/GlobalState";
-import { fmtMSS } from "utils/tracks";
-import { bp } from "../constants";
+// import { fmtMSS } from "utils/tracks";
+// import { bp } from "../constants";
 import SongTimeDisplay from "./common/SongTimeDisplay";
 
 const hlsConfig = {
@@ -27,7 +27,7 @@ export const AudioWrapper: React.FC<{
     state: { playerQueueIds, currentlyPlayingIndex, user, playing, looping },
     dispatch,
   } = useGlobalStateContext();
-  const [currentTime, setCurrentTime] = React.useState("0:00");
+  // const [currentTime, setCurrentTime] = React.useState("0:00");
   const [mostlyListened, setMostlyListened] = React.useState(false);
   const userId = user?.id;
   const playerRef = React.useRef<HTMLVideoElement>(null);
@@ -43,7 +43,7 @@ export const AudioWrapper: React.FC<{
 
   const onListen = React.useCallback(
     async (e: any) => {
-      setCurrentTime(fmtMSS(e.target.currentTime.toFixed()));
+      // setCurrentTime(fmtMSS(e.target.currentTime.toFixed()));
       if (
         !mostlyListened &&
         currentTrack &&
@@ -103,16 +103,6 @@ export const AudioWrapper: React.FC<{
   return (
     <>
       <>
-        {!hideControls && (
-          <div
-            className={css`
-              display: flex;
-            `}
-          >
-            <></>
-          </div>
-        )}
-
         <ReactHlsPlayer
           src={streamUrl}
           autoPlay={false}
@@ -130,7 +120,7 @@ export const AudioWrapper: React.FC<{
         />
         <SongTimeDisplay playerRef={playerRef} />
       </>
-      <div
+      {/* <div
         className={css`
           width: 100px;
           text-align: right;
@@ -142,7 +132,7 @@ export const AudioWrapper: React.FC<{
         `}
       >
         {currentTime}
-      </div>
+      </div> */}
     </>
   );
 };

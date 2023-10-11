@@ -21,7 +21,8 @@ const playerClass = css`
   min-height: 90px;
   border-bottom: 1px solid grey;
   display: flex;
-  align-items: center;
+  align-items: stretch;
+  flex-direction: column;
   justify-content: space-between;
   position: fixed;
   width: 100%;
@@ -130,12 +131,20 @@ const Player = () => {
 
   return (
     <div className={playerClass}>
+      <Helmet>
+        <title>
+          {currentTrack
+            ? `${currentTrack.trackGroup?.artist?.name} - ${currentTrack.title}`
+            : ""}
+        </title>
+      </Helmet>
       <div
         className={css`
           display: flex;
           align-items: center;
           justify-content: flex-end;
           flex-grow: 1;
+          margin-bottom: 0.25rem;
 
           @media (max-width: ${bp.small}px) {
             width: 100%;
@@ -147,14 +156,8 @@ const Player = () => {
           <AudioWrapper currentTrack={currentTrack} />
         )}
       </div>
-      <Helmet>
-        <title>
-          {currentTrack
-            ? `${currentTrack.trackGroup?.artist?.name} - ${currentTrack.title}`
-            : ""}
-        </title>
-      </Helmet>
-      {
+
+      <div>
         <div
           className={css`
             display: flex;
@@ -206,12 +209,13 @@ const Player = () => {
           {/* <TrackPopup trackId={currentTrack.id} compact /> */}
           <div
             className={css`
+              display: inline-block;
               button {
                 margin-right: 0.25rem;
               }
             `}
           >
-            <div
+            <span
               className={css`
                 @media (max-width: ${bp.small}px) {
                   display: none;
@@ -220,18 +224,18 @@ const Player = () => {
             >
               <ShuffleButton />
               <LoopButton />
-            </div>
-            <div>
+            </span>
+            <span>
               <PreviousButton />
               {!playing && <PlayButton />}
               {playing && <PauseButton />}
               <NextButton />
-            </div>
+            </span>
           </div>
         </div>
-      }
 
-      {!currentTrack && isLoading && <Spinner size="small" />}
+        {!currentTrack && isLoading && <Spinner size="small" />}
+      </div>
     </div>
   );
 };

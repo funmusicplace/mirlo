@@ -15,6 +15,8 @@ export const SongTimeDisplay: React.FC<{
         background: rgba(0, 0, 0, 0.05);
         cursor: pointer;
         width: 100%;
+        top: 0;
+        position: absolute;
       `}
       onClick={(event: React.MouseEvent<HTMLDivElement>) => {
         const divWidth = event.currentTarget.offsetWidth;
