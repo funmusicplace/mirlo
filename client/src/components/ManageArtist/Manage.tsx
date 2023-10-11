@@ -12,6 +12,8 @@ import { useTranslation } from "react-i18next";
 export const Manage: React.FC = () => {
   const { state } = useGlobalStateContext();
   const [artists, setArtists] = React.useState<Artist[]>([]);
+  const [stripeAccountStatus, setStripeAccountStatus] =
+    React.useState<AccountStatus>();
   const [creatingNewArtist, setCreatingNewArtist] = React.useState(false);
   const snackbar = useSnackbar();
   const { t } = useTranslation("translation", { keyPrefix: "manage" });
@@ -26,16 +28,17 @@ export const Manage: React.FC = () => {
       if (fetchedArtists) {
         setArtists(fetchedArtists.results);
       }
+
+      const checkAccountStatus = await api.get<AccountStatus>(
+        `users/${userId}/stripe/checkAccountStatus`
+      );
+      setStripeAccountStatus(checkAccountStatus.result);
     }
   }, [userId]);
 
   const setUpBankAccount = React.useCallback(async () => {
     try {
-      const response = await api.post<{}, { accountUrl: string }>(
-        `users/${userId}/connectStripe`,
-        {}
-      );
-      window.location.assign(response.accountUrl);
+      window.location.assign(api.root + `users/${userId}/stripe/connect`);
     } catch (e) {
       snackbar(t("error"), { type: "warning" });
       console.error(e);
@@ -112,7 +115,17 @@ export const Manage: React.FC = () => {
               margin-top: 1rem;
             `}
           >
-            <Button onClick={setUpBankAccount}>{t("setUpBankAccount")}</Button>
+            {!stripeAccountStatus?.detailsSubmitted && (
+              <Button onClick={setUpBankAccount}>
+                {t("setUpBankAccount")}
+              </Button>
+            )}
+            {!stripeAccountStatus?.chargesEnabled && (
+              <>We're waiting on stripe to verify your account</>
+            )}
+            {stripeAccountStatus?.chargesEnabled && (
+              <>Stripe account verified!</>
+            )}
           </div>
         </div>
       </div>

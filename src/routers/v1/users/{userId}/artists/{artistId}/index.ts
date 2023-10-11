@@ -6,7 +6,10 @@ import {
 import prisma from "../../../../../../../prisma/prisma";
 import { convertURLArrayToSizes } from "../../../../../../utils/images";
 import { finalArtistBannerBucket } from "../../../../../../utils/minio";
-import { deleteArtist } from "../../../../../../utils/artist";
+import {
+  deleteArtist,
+  findArtistIdForURLSlug,
+} from "../../../../../../utils/artist";
 
 type Params = {
   artistId: string;
@@ -22,9 +25,10 @@ export default function () {
 
   async function PUT(req: Request, res: Response) {
     const { userId, artistId } = req.params as unknown as Params;
-    const { bio, name, urlSlug } = req.body;
+    const { bio, name, urlSlug, properties } = req.body;
 
     try {
+      // FIXME: check type of properties object.
       const updatedCount = await prisma.artist.updateMany({
         where: {
           id: Number(artistId),
@@ -34,6 +38,7 @@ export default function () {
           bio,
           name,
           urlSlug,
+          properties,
         },
       });
 
@@ -95,10 +100,12 @@ export default function () {
 
   async function GET(req: Request, res: Response) {
     const { userId, artistId } = req.params as unknown as Params;
+    const castArtistId = await findArtistIdForURLSlug(artistId);
+
     if (userId) {
       const artist = await prisma.artist.findFirst({
         where: {
-          id: Number(artistId),
+          id: Number(castArtistId),
           userId: Number(userId),
         },
         include: {

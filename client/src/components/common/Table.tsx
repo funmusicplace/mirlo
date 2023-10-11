@@ -9,12 +9,10 @@ export const Table = styled.table`
   & tbody tr {
     transition: 0.25s background-color;
     &:nth-of-type(odd) {
-      background-color: ${(props) =>
-        colorShade(props.theme.colors.background, -10)};
+      background-color: var(--mi-lighten-background-color);
 
       @media (prefers-color-scheme: dark) {
-        background-color: ${(props) =>
-          colorShade(props.theme.colors.backgroundDark, -10)};
+        background-color: var(--mi-darken-background-color);
       }
     }
     &:hover {
@@ -39,6 +37,13 @@ export const Table = styled.table`
   & td.alignRight,
   & th.alignRight {
     text-align: right;
+  }
+
+  @media screen and (max-width: 800px) {
+    & td,
+    &th {
+      padding: 0.25rem 0.5rem;
+    }
   }
 `;
 

@@ -47,7 +47,6 @@ function Profile() {
           purchase.trackGroup && (
             <ArtistTrackGroup
               trackGroup={purchase.trackGroup}
-              artist={purchase.trackGroup.artist}
               key={purchase.trackGroupId}
             />
           )

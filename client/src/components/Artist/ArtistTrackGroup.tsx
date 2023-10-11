@@ -1,77 +1,20 @@
 import { css } from "@emotion/css";
-import Button from "components/common/Button";
-import Modal from "components/common/Modal";
 import React from "react";
-import { useTranslation } from "react-i18next";
-import { FaArrowDown } from "react-icons/fa";
-import api from "services/api";
-import { useGlobalStateContext } from "state/GlobalState";
-import { useSnackbar } from "state/SnackbarContext";
 import ClickToPlay from "../common/ClickToPlay";
-import SmallTileDetails from "../common/LargeTileDetail";
 import { Link } from "react-router-dom";
-import BuyTrackGroup from "components/TrackGroup/Buy";
+import { useArtistContext } from "state/ArtistContext";
+import PurchaseOrDownloadAlbum from "components/TrackGroup/PurchaseOrDownloadAlbumModal";
 
 const ArtistTrackGroup: React.FC<{
   trackGroup: TrackGroup;
-  artist: Artist;
-}> = ({ trackGroup, artist }) => {
-  const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
+}> = ({ trackGroup }) => {
   const {
-    state: { user },
-  } = useGlobalStateContext();
-  const snackbar = useSnackbar();
-  const [isPurchasingAlbum, setIsPurchasingAlbum] = React.useState(false);
-  const [isOwned, setIsOwned] = React.useState(false);
-  const [isDownloading, setIsDownloading] = React.useState(false);
-  const userId = user?.id;
+    state: { artist },
+  } = useArtistContext();
 
-  const checkForAlbumOwnership = React.useCallback(async () => {
-    try {
-      if (userId) {
-        const { results: purchases } =
-          await api.getMany<UserTrackGroupPurchase>(
-            `users/${userId}/purchases?trackGroupId=${trackGroup.id}`
-          );
-
-        setIsOwned(purchases.length > 0);
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  }, [trackGroup.id, userId]);
-
-  React.useEffect(() => {
-    checkForAlbumOwnership();
-  });
-
-  if (!trackGroup) {
+  if (!trackGroup || !artist) {
     return null;
   }
-
-  const userIsTrackGroupArtist = user && artist.userId === user?.id;
-
-  const downloadAlbum = async () => {
-    try {
-      setIsDownloading(true);
-      await api.downloadFileDirectly(
-        `trackGroups/${trackGroup.id}/download`,
-        `${trackGroup.title}.zip`
-      );
-      // await api.getFile(
-      //   trackGroup.title,
-      //   `trackGroups/${trackGroup.id}/download`,
-      //   "application/zip"
-      // );
-    } catch (e) {
-      snackbar(t("error"), { type: "warning" });
-      console.error(e);
-    } finally {
-      setIsDownloading(false);
-    }
-  };
-
-  const date = new Date(trackGroup.releaseDate);
 
   return (
     <div
@@ -79,7 +22,9 @@ const ArtistTrackGroup: React.FC<{
       className={css`
         margin-bottom: 1rem;
         margin-top: 1rem;
-
+        display: inline-block;
+        max-width: 300px;
+        margin-right: 0.5rem;
         &:nth-child(2) {
           border-top: 0;
         }
@@ -87,7 +32,8 @@ const ArtistTrackGroup: React.FC<{
     >
       <div
         className={css`
-          display: flex;
+          display: inline-flex;
+          flex-direction: column;
           align-items: flex-start;
           justify-content: space-between;
 
@@ -98,61 +44,32 @@ const ArtistTrackGroup: React.FC<{
       >
         <ClickToPlay
           image={{
-            width: 120,
-            height: 120,
-            url: trackGroup.cover?.sizes?.[120] ?? "",
+            width: 300,
+            height: 300,
+            url: trackGroup.cover?.sizes?.[300] ?? "",
           }}
           trackGroupId={trackGroup.id}
           title={trackGroup.title}
         />
-        <SmallTileDetails
-          title={
-            <Link
-              to={`/${artist.urlSlug ?? trackGroup.artistId}/tg/${
-                trackGroup.urlSlug ?? trackGroup.id
-              }`}
-            >
-              {trackGroup.title}
-            </Link>
-          }
-          subtitle={
-            <em>
-              {t("released", {
-                date: date.toLocaleDateString("en-US", {
-                  month: "short",
-                  year: "numeric",
-                }),
-              })}
-            </em>
-          }
-        />
-        <div style={{ flexGrow: 1 }} />
-        {user && !userIsTrackGroupArtist && !isOwned && (
-          <Button compact onClick={() => setIsPurchasingAlbum(true)}>
-            {t("buy")}
-          </Button>
-        )}
-        {(userIsTrackGroupArtist || isOwned) && (
-          <>
-            <Button
-              compact
-              isLoading={isDownloading}
-              startIcon={<FaArrowDown />}
-              onClick={() => downloadAlbum()}
-            >
-              {t("download")}
-            </Button>
-          </>
-        )}
+        <div
+          className={css`
+            display: flex;
+            justify-content: space-between;
+            align-items: top;
+            width: 100%;
+            padding-top: 0.5rem;
+          `}
+        >
+          <Link
+            to={`/${artist.urlSlug ?? trackGroup.artistId}/tg/${
+              trackGroup.urlSlug ?? trackGroup.id
+            }`}
+          >
+            {trackGroup.title}
+          </Link>
+          <PurchaseOrDownloadAlbum trackGroup={trackGroup} />
+        </div>
       </div>
-      <Modal
-        size="small"
-        open={isPurchasingAlbum}
-        onClose={() => setIsPurchasingAlbum(false)}
-        title={`Buying ${trackGroup.title}`}
-      >
-        <BuyTrackGroup trackGroup={trackGroup} />
-      </Modal>
     </div>
   );
 };

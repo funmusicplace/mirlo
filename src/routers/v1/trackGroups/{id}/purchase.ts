@@ -30,18 +30,31 @@ export default function () {
           id: userId,
         },
       });
+
       const trackGroup = await prisma.trackGroup.findFirst({
         where: {
           id: Number(trackGroupId),
         },
         include: {
-          artist: true,
+          artist: {
+            include: {
+              user: true,
+            },
+          },
           cover: true,
         },
       });
 
       if (!trackGroup) {
         return res.status(404);
+      }
+
+      const stripeAccountId = trackGroup.artist.user.stripeAccountId;
+
+      if (!stripeAccountId) {
+        return res.status(400).json({
+          error: "Artist not set up with a payment processor yet",
+        });
       }
 
       let productKey = trackGroup.stripeProductKey;
@@ -74,35 +87,39 @@ export default function () {
         productKey = product.id;
       }
 
-      if (productKey) {
-        const session = await stripe.checkout.sessions.create({
-          billing_address_collection: "auto",
-          customer_email: user?.email,
-          line_items: [
-            {
-              price_data: {
-                tax_behavior: "exclusive",
-                unit_amount:
-                  (price ? Number(price) : undefined) ??
-                  trackGroup.minPrice ??
-                  0,
-                currency: trackGroup.currency ?? "USD",
-                product: productKey,
-              },
+      if (productKey && stripeAccountId) {
+        const session = await stripe.checkout.sessions.create(
+          {
+            billing_address_collection: "auto",
+            customer_email: user?.email,
+            line_items: [
+              {
+                price_data: {
+                  tax_behavior: "exclusive",
+                  unit_amount:
+                    (price ? Number(price) : undefined) ??
+                    trackGroup.minPrice ??
+                    0,
+                  currency: trackGroup.currency ?? "USD",
+                  product: productKey,
+                },
 
-              quantity: 1,
+                quantity: 1,
+              },
+            ],
+
+            metadata: {
+              clientId: client?.id ?? null,
+              trackGroupId,
+              artistId: trackGroup.artistId,
+              userId,
             },
-          ],
-          metadata: {
-            clientId: client?.id ?? null,
-            trackGroupId,
-            artistId: trackGroup.artistId,
-            userId,
+            mode: "payment",
+            success_url: `${API_DOMAIN}/v1/checkout?success=true&session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${API_DOMAIN}/v1/checkout?canceled=true`,
           },
-          mode: "payment",
-          success_url: `${API_DOMAIN}/v1/checkout?success=true&session_id={CHECKOUT_SESSION_ID}`,
-          cancel_url: `${API_DOMAIN}/v1/checkout?canceled=true`,
-        });
+          { stripeAccount: stripeAccountId }
+        );
         res.status(200).json({
           sessionUrl: session.url,
         });

@@ -1,42 +1,47 @@
 import { css } from "@emotion/css";
 import { FaPen } from "react-icons/fa";
-import { Link, useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useGlobalStateContext } from "state/GlobalState";
 import ArtistSupport from "./ArtistSupport";
 import Box from "../common/Box";
 import Button from "../common/Button";
 import PostContent from "../common/PostContent";
 import ArtistAlbums from "./ArtistAlbums";
-import usePublicObjectById from "utils/usePublicObjectById";
 import { useTranslation } from "react-i18next";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
 import { MetaCard } from "components/common/MetaCard";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { useArtistContext } from "state/ArtistContext";
 
 function Artist() {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
 
-  const { artistId } = useParams();
   const {
     state: { user },
   } = useGlobalStateContext();
 
-  const { object: artist, isLoadingObject: isLoadingArtist } =
-    usePublicObjectById<Artist>("artists", artistId);
+  const {
+    state: { artist, isLoading },
+  } = useArtistContext();
 
-  if (!artist && !isLoadingArtist) {
+  if (!artist && !isLoading) {
     return <Box>{t("doesNotExist")}</Box>;
   } else if (!artist) {
     return <FullPageLoadingSpinner />;
   }
 
   const ownedByUser = artist.userId === user?.id;
+  const artistColor = artist?.properties?.colors;
 
   return (
     <div
       className={css`
         width: 100%;
+
+        a {
+          color: ${artistColor?.primary ? artistColor.primary : "inherit"};
+        }
       `}
     >
       <MetaCard
@@ -71,8 +76,8 @@ function Artist() {
       >
         {artist.bio}
       </ReactMarkdown>
-      <ArtistSupport artist={artist} />
       <ArtistAlbums artist={artist} />
+      <ArtistSupport artist={artist} />
       <div
         className={css`
           margin-top: 1rem;

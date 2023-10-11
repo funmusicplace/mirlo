@@ -1,9 +1,9 @@
 import { User } from "@prisma/client";
 import { Request, Response } from "express";
-import { userAuthenticated } from "../../../../auth/passport";
-import prisma from "../../../../../prisma/prisma";
+import { userAuthenticated } from "../../../../../auth/passport";
+import prisma from "../../../../../../prisma/prisma";
 
-import stripe from "../../../../utils/stripe";
+import stripe from "../../../../../utils/stripe";
 const { API_DOMAIN } = process.env;
 
 type Params = {
@@ -12,12 +12,13 @@ type Params = {
 
 export default function () {
   const operations = {
-    POST: [userAuthenticated, POST],
+    GET: [userAuthenticated, GET],
   };
 
-  async function POST(req: Request, res: Response) {
+  async function GET(req: Request, res: Response) {
     const { userId } = req.params as unknown as Params;
     const loggedInUser = req.user as User;
+
     try {
       if (Number(userId) === Number(loggedInUser.id)) {
         const user = await prisma.user.findUnique({
@@ -25,6 +26,8 @@ export default function () {
         });
         if (user) {
           let accountId = user.stripeAccountId;
+          const client = await prisma.client.findFirst({});
+
           if (!accountId) {
             const account = await stripe.accounts.create({
               country: "US", // FIXME: we need to register users country
@@ -44,15 +47,12 @@ export default function () {
 
           const accountLink = await stripe.accountLinks.create({
             account: accountId,
-            refresh_url: "",
-            return_url: "",
+            refresh_url: `${API_DOMAIN}/v1/users/${userId}/stripe/connect`,
+            return_url: `${client?.applicationUrl}/manage?stripeConnect=done`,
             type: "account_onboarding",
           });
-          console.log("account", accountId, accountLink);
 
-          res.status(200).json({
-            accountUrl: accountLink.url,
-          });
+          res.redirect(accountLink.url);
         }
       } else {
         res.status(401).json({
@@ -60,6 +60,7 @@ export default function () {
         });
       }
     } catch (e) {
+      console.error(e);
       res.json({
         error: `Stripe Connect doesn't work yet`,
       });

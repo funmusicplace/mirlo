@@ -11,6 +11,7 @@ import ManageArtistAlbums from "./ManageArtistAlbums";
 import ManageArtistSubscriptionTiers from "./ManageArtistSubscriptionTiers";
 import { useSnackbar } from "state/SnackbarContext";
 import { useTranslation } from "react-i18next";
+import { useArtistContext } from "state/ArtistContext";
 
 const ManageArtist: React.FC<{}> = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
@@ -20,23 +21,13 @@ const ManageArtist: React.FC<{}> = () => {
   const snackbar = useSnackbar();
   const navigate = useNavigate();
   const { artistId } = useParams();
-  const [artist, setArtist] = React.useState<Artist>();
+  const {
+    state: { artist },
+  } = useArtistContext();
 
   const [isEditing, setIsEditing] = React.useState(false);
 
   const userId = user?.id;
-
-  React.useEffect(() => {
-    const callback = async () => {
-      if (userId) {
-        const { result } = await api.get<Artist>(
-          `users/${userId}/artists/${artistId}`
-        );
-        setArtist(result);
-      }
-    };
-    callback();
-  }, [userId, artistId]);
 
   const onDelete = async () => {
     try {
@@ -116,12 +107,7 @@ const ManageArtist: React.FC<{}> = () => {
       <ManageArtistPosts />
       <ManageArtistSubscriptionTiers />
 
-      <Button
-        compact
-        color="warning"
-        startIcon={<FaTrash />}
-        onClick={onDelete}
-      >
+      <Button compact role="warning" startIcon={<FaTrash />} onClick={onDelete}>
         {t("deleteArtist")}
       </Button>
     </div>

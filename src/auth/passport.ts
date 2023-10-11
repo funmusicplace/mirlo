@@ -5,6 +5,7 @@ import { TokenExpiredError } from "jsonwebtoken";
 import passport from "passport";
 import passportJWT from "passport-jwt";
 import prisma from "../../prisma/prisma";
+import { findArtistIdForURLSlug } from "../utils/artist";
 
 const JWTStrategy = passportJWT.Strategy;
 
@@ -113,6 +114,7 @@ export const artistBelongsToLoggedInUser = async (
     userId: string;
     artistId: string;
   };
+  const castArtistId = await findArtistIdForURLSlug(artistId);
 
   const loggedInUser = req.user as User | undefined;
 
@@ -129,7 +131,7 @@ export const artistBelongsToLoggedInUser = async (
     const artist = await prisma.artist.findFirstOrThrow({
       where: {
         userId: loggedInUser.id,
-        id: Number(artistId),
+        id: Number(castArtistId),
       },
     });
 

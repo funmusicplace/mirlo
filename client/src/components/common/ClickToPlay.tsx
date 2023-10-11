@@ -1,9 +1,8 @@
 import styled from "@emotion/styled";
-import { useSnackbar } from "state/SnackbarContext";
+// import { useSnackbar } from "state/SnackbarContext";
 import React from "react";
 
 import { FaPause, FaPlay } from "react-icons/fa";
-import { MdQueue } from "react-icons/md";
 import { bp } from "../../constants";
 
 import { useGlobalStateContext } from "state/GlobalState";
@@ -103,7 +102,7 @@ const ClickToPlay: React.FC<{
     state: { playing, playerQueueIds, currentlyPlayingIndex },
     dispatch,
   } = useGlobalStateContext();
-  const displayMessage = useSnackbar();
+  // const displayMessage = useSnackbar();
   const [trackIds, setTrackIds] = React.useState<number[]>([]);
 
   const onClickPlay = React.useCallback(async () => {
@@ -127,28 +126,28 @@ const ClickToPlay: React.FC<{
     });
   }, [dispatch, trackGroupId, trackId]);
 
-  const onClickQueue = React.useCallback(async () => {
-    if (trackGroupId) {
-      await api
-        .get<TrackGroup>(`trackGroups/${trackGroupId}`)
-        .then(({ result }) => {
-          dispatch({
-            type: "addTrackIdsToBackOfQueue",
-            idsToAdd: result.tracks
-              .filter((item) => item.isPreview)
-              .map((item) => item.id),
-          });
-        });
-    } else if (trackId) {
-      await api.get<Track>(`tracks/${trackId}`).then(({ result }) => {
-        dispatch({
-          type: "addTrackIdsToBackOfQueue",
-          idsToAdd: [trackId],
-        });
-      });
-    }
-    displayMessage("Added to queue");
-  }, [trackGroupId, trackId, displayMessage, dispatch]);
+  // const onClickQueue = React.useCallback(async () => {
+  //   if (trackGroupId) {
+  //     await api
+  //       .get<TrackGroup>(`trackGroups/${trackGroupId}`)
+  //       .then(({ result }) => {
+  //         dispatch({
+  //           type: "addTrackIdsToBackOfQueue",
+  //           idsToAdd: result.tracks
+  //             .filter((item) => item.isPreview)
+  //             .map((item) => item.id),
+  //         });
+  //       });
+  //   } else if (trackId) {
+  //     await api.get<Track>(`tracks/${trackId}`).then(({ result }) => {
+  //       dispatch({
+  //         type: "addTrackIdsToBackOfQueue",
+  //         idsToAdd: [trackId],
+  //       });
+  //     });
+  //   }
+  //   displayMessage("Added to queue");
+  // }, [trackGroupId, trackId, displayMessage, dispatch]);
 
   const onPause = React.useCallback(async () => {
     dispatch({ type: "setPlaying", playing: false });
@@ -176,9 +175,9 @@ const ClickToPlay: React.FC<{
             Pause
           </Button>
         )}
-        <Button onClick={onClickQueue} startIcon={<MdQueue />} compact>
+        {/* <Button onClick={onClickQueue} startIcon={<MdQueue />} compact>
           Queue
-        </Button>
+        </Button> */}
       </PlayWrapper>
       {currentlyPlaying && (
         <PlayingMusicBars

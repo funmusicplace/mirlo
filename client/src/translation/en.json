@@ -95,6 +95,8 @@
     "yourAlbums": "Your albums",
     "manageAlbum": "Manage",
     "publish": "Publish",
+    "primaryColor": "Primary color",
+    "secondaryColor": "Secondary color",
     "publishedSuccess": "Your album has been published. People will be able to buy it after the release date!"
   },
   "manageAlbum": {
@@ -131,5 +133,14 @@
     "delete": "Delete",
     "addNewPost": "Add new post to {{artist}}",
     "postDeleted": "Post deleted"
+  },
+  "subscriptionForm": {
+    "subscriptionUpdated": "Subscription updated",
+    "name": "Name: ",
+    "minimumAmount": "Minimum amount: ",
+    "description": "Description",
+    "saveSubscription": "Save subscription",
+    "createSubscription": "Create subscription",
+    "editSubscriptionTierFor": "Edit subscription tier for {{artistName"
   }
 }
