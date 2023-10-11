@@ -1,10 +1,9 @@
 import { User } from "@prisma/client";
 import { Request, Response } from "express";
-import { userAuthenticated } from "../../../../../auth/passport";
+import { userLoggedInWithoutRedirect } from "../../../../../auth/passport";
 import prisma from "../../../../../../prisma/prisma";
 
 import stripe from "../../../../../utils/stripe";
-const { API_DOMAIN } = process.env;
 
 type Params = {
   userId: string;
@@ -12,7 +11,7 @@ type Params = {
 
 export default function () {
   const operations = {
-    GET: [userAuthenticated, GET],
+    GET: [userLoggedInWithoutRedirect, GET],
   };
 
   async function GET(req: Request, res: Response) {
