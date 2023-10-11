@@ -24,7 +24,6 @@ const styles = `html {
 
   --mi-primary-highlight-color: #bcb3ff;
   --mi-primary-highlight-color--hover: #FFB3D0;
-);
   --mi-box-color: var(--mi-secondary-color);
 
   --mi-border-radius: 4px;

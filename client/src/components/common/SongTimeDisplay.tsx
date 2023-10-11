@@ -7,15 +7,12 @@ export const SongTimeDisplay: React.FC<{
   const duration = playerRef.current?.duration ?? 0;
   const currentSeconds = playerRef.current?.currentTime ?? 0;
   const percent = currentSeconds / duration;
-
+  console.log("duration", playerRef.current?.duration);
   return (
     <div
       className={css`
-        height: 0.5rem;
-        margin-left: 1rem;
-        margin-right: 1rem;
-        border-radius: 1rem;
-        background: rgba(0, 0, 0, 0.6);
+        height: 0.25rem;
+        background: rgba(0, 0, 0, 0.05);
         cursor: pointer;
         width: 100%;
       `}
@@ -23,18 +20,19 @@ export const SongTimeDisplay: React.FC<{
         const divWidth = event.currentTarget.offsetWidth;
         const clickX = event.clientX - event.currentTarget.offsetLeft;
         const clickPercent = clickX / divWidth;
-
-        playerRef.current?.fastSeek(clickPercent * duration);
+        console.log("clicking", clickPercent * duration);
+        if (isFinite(clickPercent) && isFinite(duration)) {
+          playerRef.current?.fastSeek(clickPercent * duration);
+        }
       }}
     >
       <div
         className={css`
           height: 100%;
           overflow: none;
-          border-radius: 1rem;
           transition: 0.1s width;
           width: ${percent * 100}%;
-          background: rgba(0, 0, 0, 0.2);
+          background: var(--mi-primary-color);
           pointer-events: none;
         `}
       ></div>

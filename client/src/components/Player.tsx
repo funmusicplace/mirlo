@@ -12,14 +12,17 @@ import api from "services/api";
 import { isTrackOwnedOrPreview } from "utils/tracks";
 import LoopButton from "./common/LoopButton";
 import ShuffleButton from "./common/ShuffleButton";
+import NextButton from "./common/NextButton";
+import PauseButton from "./common/PauseButton";
+import PlayButton from "./common/PlayButton";
+import PreviousButton from "./common/PreviousButton";
 
 const playerClass = css`
-  min-height: 129px;
+  min-height: 90px;
   border-bottom: 1px solid grey;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem;
   position: fixed;
   width: 100%;
   z-index: 10;
@@ -28,7 +31,7 @@ const playerClass = css`
   background-color: var(--mi-normal-background-color);
 
   @media (max-width: ${bp.small}px) {
-    height: 190px;
+    // height: 140px;
     flex-direction: column;
 
     button {
@@ -39,7 +42,7 @@ const playerClass = css`
 
 const Player = () => {
   const {
-    state: { playerQueueIds, currentlyPlayingIndex, user, shuffle },
+    state: { playerQueueIds, currentlyPlayingIndex, user, playing },
     dispatch,
   } = useGlobalStateContext();
   // let navigate = useNavigate();
@@ -127,6 +130,23 @@ const Player = () => {
 
   return (
     <div className={playerClass}>
+      <div
+        className={css`
+          display: flex;
+          align-items: center;
+          justify-content: flex-end;
+          flex-grow: 1;
+
+          @media (max-width: ${bp.small}px) {
+            width: 100%;
+            flex-grow: initial;
+          }
+        `}
+      >
+        {currentTrack && isTrackOwnedOrPreview(currentTrack, user) && (
+          <AudioWrapper currentTrack={currentTrack} />
+        )}
+      </div>
       <Helmet>
         <title>
           {currentTrack
@@ -186,35 +206,32 @@ const Player = () => {
           {/* <TrackPopup trackId={currentTrack.id} compact /> */}
           <div
             className={css`
-              @media (max-width: ${bp.small}px) {
-                display: none;
+              button {
+                margin-right: 0.25rem;
               }
             `}
           >
-            <ShuffleButton />
-            <LoopButton />
+            <div
+              className={css`
+                @media (max-width: ${bp.small}px) {
+                  display: none;
+                }
+              `}
+            >
+              <ShuffleButton />
+              <LoopButton />
+            </div>
+            <div>
+              <PreviousButton />
+              {!playing && <PlayButton />}
+              {playing && <PauseButton />}
+              <NextButton />
+            </div>
           </div>
         </div>
       }
 
       {!currentTrack && isLoading && <Spinner size="small" />}
-
-      <div
-        className={css`
-          display: flex;
-          align-items: center;
-          justify-content: flex-end;
-          flex-grow: 1;
-          @media (max-width: ${bp.small}px) {
-            width: 100%;
-            flex-grow: initial;
-          }
-        `}
-      >
-        {currentTrack && isTrackOwnedOrPreview(currentTrack, user) && (
-          <AudioWrapper currentTrack={currentTrack} />
-        )}
-      </div>
     </div>
   );
 };

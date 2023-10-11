@@ -17,6 +17,7 @@ import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 
 import PurchaseOrDownloadAlbum from "./PurchaseOrDownloadAlbumModal";
 import { bp } from "../../constants";
+import MarkdownWrapper from "components/common/MarkdownWrapper";
 
 function TrackGroup() {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
@@ -150,7 +151,9 @@ function TrackGroup() {
           padding: 0.5rem 0.25rem;
         `}
       >
-        <ReactMarkdown>{trackGroup.about}</ReactMarkdown>
+        <MarkdownWrapper>
+          <ReactMarkdown>{trackGroup.about}</ReactMarkdown>
+        </MarkdownWrapper>
         <div
           className={css`
             margin-top: 1rem;

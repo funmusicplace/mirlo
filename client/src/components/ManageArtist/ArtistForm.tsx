@@ -38,7 +38,12 @@ export const ArtistForm: React.FC<{
     urlSlug: "",
     ...existing,
     properties: {
-      colors: { primary: "#e75a7c", secondary: "#ffb3d0" },
+      colors: {
+        primary: "#e75a7c",
+        secondary: "#ffb3d0",
+        background: "var(--mi-normal-background-color)",
+        foreground: "var(--mi-normal-foreground-color)",
+      },
       ...existing?.properties,
     },
   };
@@ -155,16 +160,24 @@ export const ArtistForm: React.FC<{
               <InputEl {...register("name", { required: true })} />
             </FormComponent>
             {existing && (
-              <ColorInput
-                name="properties.colors.primary"
-                title={t("primaryColor")}
-              />
-            )}
-            {existing && (
-              <ColorInput
-                name="properties.colors.secondary"
-                title={t("secondaryColor")}
-              />
+              <>
+                <ColorInput
+                  name="properties.colors.primary"
+                  title={t("primaryColor")}
+                />
+                <ColorInput
+                  name="properties.colors.secondary"
+                  title={t("secondaryColor")}
+                />
+                <ColorInput
+                  name="properties.colors.background"
+                  title={t("backgroundColor")}
+                />
+                <ColorInput
+                  name="properties.colors.foreground"
+                  title={t("foregroundColor")}
+                />
+              </>
             )}
 
             <FormComponent>

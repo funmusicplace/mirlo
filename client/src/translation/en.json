@@ -97,6 +97,8 @@
     "publish": "Publish",
     "primaryColor": "Primary color",
     "secondaryColor": "Secondary color",
+    "backgroundColor": "Background color",
+    "foregroundColor": "Foreground color (text color)",
     "publishedSuccess": "Your album has been published. People will be able to buy it after the release date!"
   },
   "manageAlbum": {

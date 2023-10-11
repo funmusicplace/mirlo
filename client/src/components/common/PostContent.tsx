@@ -1,29 +1,10 @@
 import { css } from "@emotion/css";
-import styled from "@emotion/styled";
 import React from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 // import remarkEmbedder from "@remark-embedder/core";
 import remarkEmbedder from "utils/remarkEmbedder";
-
-const PostContentWrapper = styled.div`
-  margin-top: 0.5rem;
-
-  h1 {
-    font-size: 1.2rem;
-  }
-  h2 {
-    font-size: 1.1rem;
-  }
-
-  p {
-    margin-bottom: 0.75rem;
-  }
-
-  iframe {
-    margin: 1rem 0;
-  }
-`;
+import MarkdownWrapper from "./MarkdownWrapper";
 
 const BlackbirdTransformer = {
   name: "BlackbirdTransformer",
@@ -48,7 +29,7 @@ const PostContent: React.FC<{
   content: string;
 }> = ({ content }) => {
   return (
-    <PostContentWrapper>
+    <MarkdownWrapper>
       <ReactMarkdown
         className={css`
           ul {
@@ -62,7 +43,7 @@ const PostContent: React.FC<{
       >
         {content}
       </ReactMarkdown>
-    </PostContentWrapper>
+    </MarkdownWrapper>
   );
 };
 

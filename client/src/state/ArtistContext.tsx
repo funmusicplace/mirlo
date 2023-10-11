@@ -84,6 +84,7 @@ export const ArtistProvider: React.FC<{
       const checkAccountStatus = await api.get<AccountStatus>(
         `users/${artist.userId}/stripe/checkAccountStatus`
       );
+
       dispatch({
         type: "setState",
         state: {

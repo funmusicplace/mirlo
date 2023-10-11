@@ -13,6 +13,7 @@ import { MetaCard } from "components/common/MetaCard";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { useArtistContext } from "state/ArtistContext";
+import MarkdownWrapper from "components/common/MarkdownWrapper";
 
 function Artist() {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
@@ -65,17 +66,9 @@ function Artist() {
           </Link>
         )}
       </div>
-      <ReactMarkdown
-        className={css`
-          ul {
-            margin-left: 1rem;
-            margin-bottom: 1rem;
-          }
-        `}
-        remarkPlugins={[remarkGfm]}
-      >
-        {artist.bio}
-      </ReactMarkdown>
+      <MarkdownWrapper>
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>{artist.bio}</ReactMarkdown>
+      </MarkdownWrapper>
       <ArtistAlbums artist={artist} />
       <ArtistSupport artist={artist} />
       <div

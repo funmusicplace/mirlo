@@ -6,12 +6,8 @@ import api from "services/api";
 
 import { useGlobalStateContext } from "state/GlobalState";
 import { fmtMSS } from "utils/tracks";
-import NextButton from "./common/NextButton";
-import PreviousButton from "./common/PreviousButton";
-import PlayButton from "./common/PlayButton";
-import PauseButton from "./common/PauseButton";
-import SongTimeDisplay from "./common/SongTimeDisplay";
 import { bp } from "../constants";
+import SongTimeDisplay from "./common/SongTimeDisplay";
 
 const hlsConfig = {
   xhrSetup: function (xhr: XMLHttpRequest, url: string) {
@@ -32,9 +28,9 @@ export const AudioWrapper: React.FC<{
     dispatch,
   } = useGlobalStateContext();
   const [currentTime, setCurrentTime] = React.useState("0:00");
-  const playerRef = React.useRef<HTMLVideoElement>(null);
   const [mostlyListened, setMostlyListened] = React.useState(false);
   const userId = user?.id;
+  const playerRef = React.useRef<HTMLVideoElement>(null);
 
   const onEnded = React.useCallback(async () => {
     if (looping === "loopTrack") {
@@ -43,7 +39,7 @@ export const AudioWrapper: React.FC<{
       dispatch({ type: "incrementCurrentlyPlayingIndex" });
     }
     setMostlyListened(false);
-  }, [dispatch, looping]);
+  }, [playerRef, dispatch, looping]);
 
   const onListen = React.useCallback(
     async (e: any) => {
@@ -88,7 +84,7 @@ export const AudioWrapper: React.FC<{
     } catch (e) {
       console.error("an error happened", e);
     }
-  }, [currentTrack, currentlyPlayingIndex, playerQueueIds, playing]);
+  }, [currentTrack, currentlyPlayingIndex, playerQueueIds, playerRef, playing]);
 
   React.useEffect(() => {
     determineIfShouldPlay();
@@ -111,18 +107,9 @@ export const AudioWrapper: React.FC<{
           <div
             className={css`
               display: flex;
-
-              button {
-                margin-right: 0.25rem;
-              }
             `}
           >
-            <>
-              <PreviousButton />
-              {!playing && <PlayButton />}
-              {playing && <PauseButton />}
-              <NextButton />
-            </>
+            <></>
           </div>
         )}
 
