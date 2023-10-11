@@ -36,8 +36,6 @@ export const Manage: React.FC = () => {
     }
   }, [userId]);
 
-  console.log("stripe", stripeAccountStatus);
-
   const setUpBankAccount = React.useCallback(async () => {
     try {
       window.location.assign(api.root + `users/${userId}/stripe/connect`);

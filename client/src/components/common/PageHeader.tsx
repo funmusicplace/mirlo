@@ -9,7 +9,6 @@ const PageHeader = () => {
   const { object: artist } = usePublicArtist<Artist>("artists", artistId);
 
   const artistBanner = artist?.banner?.sizes;
-  console.log("artistBanner", artistBanner);
 
   return (
     <>

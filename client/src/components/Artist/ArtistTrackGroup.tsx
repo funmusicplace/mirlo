@@ -16,7 +16,6 @@ const ArtistTrackGroup: React.FC<{
     return null;
   }
 
-  console.log("track", trackGroup);
   return (
     <div
       key={trackGroup.id}
