@@ -32,11 +32,16 @@ function Artist() {
   }
 
   const ownedByUser = artist.userId === user?.id;
+  const artistColor = artist?.properties?.colors;
 
   return (
     <div
       className={css`
         width: 100%;
+
+        a {
+          color: ${artistColor?.primary ? artistColor.primary : "inherit"};
+        }
       `}
     >
       <MetaCard
@@ -71,8 +76,8 @@ function Artist() {
       >
         {artist.bio}
       </ReactMarkdown>
-      <ArtistSupport artist={artist} />
       <ArtistAlbums artist={artist} />
+      <ArtistSupport artist={artist} />
       <div
         className={css`
           margin-top: 1rem;

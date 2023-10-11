@@ -4,7 +4,7 @@ import { Compactable } from "./Button";
 const IconButton = styled.button<Compactable & { transparent?: boolean }>`
   border: none;
   color: ${(props) =>
-    props.color === "primary"
+    props.role === "primary"
       ? "var(--mi-primary-color--hover)"
       : "var(--mi-lighter-foreground-color)"};
   background-color: var(--mi-shade-background-color);
@@ -17,7 +17,7 @@ const IconButton = styled.button<Compactable & { transparent?: boolean }>`
 
   &:hover {
     color: ${(props) =>
-      props.color === "primary"
+      props.role === "primary"
         ? "var(--mi-primary-color--hover)"
         : "var(--mi-lighter-foreground-color)"};
     background-color: var(--mi-icon-button-background-color--hover);

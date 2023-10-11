@@ -5,6 +5,8 @@ import { useGlobalStateContext } from "state/GlobalState";
 import { CenteredSpinner } from "./Spinner";
 import Table from "./Table";
 import TrackRow from "./TrackRow";
+import { css } from "@emotion/css";
+import { bp } from "../../constants";
 
 export const PublicTrackGroupListing: React.FC<{
   tracks: Track[];
@@ -44,7 +46,15 @@ export const PublicTrackGroupListing: React.FC<{
   }
 
   return (
-    <Table style={{ marginBottom: "1.5rem", marginTop: "1.5rem" }}>
+    <Table
+      className={css`
+        margin: 0 0.5rem;
+
+        @media screen and (max-width: ${bp.medium}px) {
+          margin: 0.5rem 0;
+        }
+      `}
+    >
       <tbody>
         {displayTracks?.map((track) => (
           <TrackRow

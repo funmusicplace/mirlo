@@ -170,6 +170,7 @@ const Player = () => {
             align-items: center;
             flex-grow: 1;
             margin-right: 0.5rem;
+            font-size: 18px;
             justify-content: space-between;
 
             @media (max-width: ${bp.small}px) {
@@ -214,13 +215,13 @@ const Player = () => {
           {/* <TrackPopup trackId={currentTrack.id} compact /> */}
           <div>
             <IconButton
-              color={shuffle ? "primary" : undefined}
+              role={shuffle ? "primary" : undefined}
               onClick={onShuffle}
             >
               <ImShuffle />
             </IconButton>
             <IconButton
-              color={looping ? "primary" : undefined}
+              role={looping ? "primary" : undefined}
               onClick={onLoop}
               className={css`
                 margin-left: 0.25rem;

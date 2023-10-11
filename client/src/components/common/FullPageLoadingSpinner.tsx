@@ -13,6 +13,12 @@ export const FullPageLoadingSpinner: React.FC<{ className?: string }> = ({
         justify-content: center;
         align-items: center;
         font-size: 4rem;
+        position: absolute;
+        top: 0;
+        right: 0;
+        left: 0;
+        bottom: 0;
+        background-color: var(--mi-shade-background-color);
       `}
     >
       <LoadingSpinner />

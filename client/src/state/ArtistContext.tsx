@@ -7,6 +7,8 @@ import api from "services/api";
 export interface ArtistState {
   artist?: Artist;
   isLoading?: boolean;
+  userStripeStatus?: AccountStatus;
+  isArtistContext?: boolean;
 }
 
 type SetState = {
@@ -44,7 +46,8 @@ export const stateReducer = produce((draft: ArtistState, action: Actions) => {
     default:
       break;
   }
-  return draft;
+
+  return { ...draft, isArtistContext: true };
 });
 
 const ArtistContext = createContext(
@@ -60,26 +63,35 @@ export const ArtistProvider: React.FC<{
   } = useGlobalStateContext();
   const userId = user?.id;
   const { artistId } = useParams();
-  const [state, dispatch] = React.useReducer(stateReducer, {});
+  const [state, dispatch] = React.useReducer(stateReducer, {
+    isArtistContext: true,
+  });
 
   React.useEffect(() => {
     const callback = async () => {
+      let artist;
       dispatch({ type: "setIsLoading", isLoading: true });
       if (managedArtist) {
         const { result } = await api.get<Artist>(
           `users/${userId}/artists/${artistId}`
         );
-        dispatch({
-          type: "setState",
-          state: { isLoading: false, artist: result },
-        });
+        artist = result;
       } else {
         const { result } = await api.get<Artist>(`artists/${artistId}`);
-        dispatch({
-          type: "setState",
-          state: { isLoading: false, artist: result },
-        });
+        artist = result;
       }
+
+      const checkAccountStatus = await api.get<AccountStatus>(
+        `users/${artist.userId}/stripe/checkAccountStatus`
+      );
+      dispatch({
+        type: "setState",
+        state: {
+          isLoading: false,
+          artist,
+          userStripeStatus: checkAccountStatus.result,
+        },
+      });
     };
     callback();
   }, [managedArtist, userId, artistId]);
@@ -92,6 +104,6 @@ export const ArtistProvider: React.FC<{
 };
 
 export const useArtistContext = () => {
-  const [state, dispatch] = React.useContext(ArtistContext);
-  return { state, dispatch };
+  const artistContext = React.useContext(ArtistContext);
+  return { state: artistContext[0], dispatch: artistContext[1] };
 };

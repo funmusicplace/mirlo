@@ -7,6 +7,7 @@ import useDraggableTrack from "utils/useDraggableTrack";
 import IconButton from "./IconButton";
 import { fmtMSS, isTrackOwnedOrPreview, widgetUrl } from "utils/tracks";
 import { useSnackbar } from "state/SnackbarContext";
+import { bp } from "../../constants";
 
 const TrackRow: React.FC<{
   track: Track;
@@ -48,15 +49,16 @@ const TrackRow: React.FC<{
       className={css`
         ${!canPlayTrack ? `color: var(--mi-light-foreground-color);` : ""}
 
-        :nth-child(odd) {
-          background-color: var(--mi-lighten-background-color);
-        }
-
-        > td > .play-button {
-          opacity: 0;
-        }
         &:hover > td > .play-button {
           opacity: 1;
+        }
+        font-size: 18px;
+
+        @media screen and (max-width: ${bp.medium}px) {
+          font-size: 16px;
+          td {
+            padding: 0.15rem 0.3rem;
+          }
         }
       `}
     >
@@ -84,15 +86,26 @@ const TrackRow: React.FC<{
       )}
       <td
         className={css`
+          max-width: 100px;
           width: 40%;
           overflow: hidden;
-          whitespace: nowrap;
+          white-space: nowrap;
           text-overflow: ellipsis;
         `}
       >
         {trackTitle}
       </td>
-      <td>{trackGroup.artist.name}</td>
+      <td
+        className={css`
+          max-width: 100px;
+          width: 40%;
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+        `}
+      >
+        {trackGroup.artist.name}
+      </td>
       <td>{track.audio?.duration && fmtMSS(track.audio.duration)}</td>
       <td align="right">
         <IconButton

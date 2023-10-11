@@ -111,3 +111,8 @@ interface UserTrackGroupPurchase {
   amountPaid: number;
   currency: number;
 }
+
+type AccountStatus = {
+  chargesEnabled: boolean;
+  detailsSubmitted: boolean;
+};

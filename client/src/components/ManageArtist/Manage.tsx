@@ -9,11 +9,6 @@ import { Link } from "react-router-dom";
 import { useSnackbar } from "state/SnackbarContext";
 import { useTranslation } from "react-i18next";
 
-type AccountStatus = {
-  chargesEnabled: boolean;
-  detailsSubmitted: boolean;
-};
-
 export const Manage: React.FC = () => {
   const { state } = useGlobalStateContext();
   const [artists, setArtists] = React.useState<Artist[]>([]);

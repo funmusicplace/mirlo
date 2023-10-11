@@ -3,12 +3,13 @@ import React from "react";
 import styled from "@emotion/styled";
 import LoadingSpinner from "./LoadingSpinner";
 import { css } from "@emotion/css";
-import { colorShade } from "utils/theme";
+import { useArtistContext } from "state/ArtistContext";
 
 export interface Compactable {
   compact?: boolean;
-  color?: "primary" | "warning";
+  role?: "primary" | "secondary" | "warning";
   variant?: "link" | "outlined";
+  color?: string;
 }
 
 const CustomButton = styled.button<Compactable>`
@@ -27,30 +28,49 @@ const CustomButton = styled.button<Compactable>`
     switch (props.variant) {
       case "link":
         return `
-          color: ${props.theme.colors[props.color ?? "primary"]};
+          color: ${
+            props.color
+              ? props.color
+              : `var(--mi-${props.role ?? "primary"}-color)`
+          };
           margin-right: 0;
           font-size: inherit;
           line-height: inherit;
 
           &:hover:not(:disabled) {
-            color: ${colorShade(
-              props.theme.colors[props.color ?? "primary"],
-              0.5
-            )};
+            color: ${
+              props.color
+                ? props.color
+                : `var(--mi-${props.role ?? "primary"}-color--hover)`
+            };
           }
         `;
       case "outlined":
         return `
-          color:  var(--mi-${props.color ?? "primary"}-color);
+          color: ${
+            props.color
+              ? props.color
+              : `var(--mi-${props.role ?? "primary"}-color)`
+          };
           background-color: transparent;
-          border: 2px solid var(--mi-${props.color ?? "primary"}-color);
+          border: 2px solid ${
+            props.color
+              ? props.color
+              : `var(--mi-${props.role ?? "primary"}-color)`
+          };
           padding: ${props.compact ? ".3rem .5rem" : "1rem"};
 
           &:hover:not(:disabled) {
-            color: var(--mi-${props.color ?? "primary"}-color--hover);
-            border: 2px solid var(--mi-${
-              props.color ?? "primary"
-            }-color--hover);
+            color: ${
+              props.color
+                ? props.color
+                : `var(--mi-${props.role ?? "primary"}-color--hover)`
+            };
+            border: 2px solid ${
+              props.color
+                ? props.color
+                : `var(--mi-${props.role ?? "primary"}-color--hover)`
+            };
           }
 
           &[disabled] {
@@ -61,17 +81,23 @@ const CustomButton = styled.button<Compactable>`
       default:
         return `
           padding: ${props.compact ? ".3rem .5rem" : "1rem"};
-          background-color:  var(--mi-${props.color ?? "primary"}-color);
+          background-color:  ${
+            props.color
+              ? props.color
+              : `var(--mi-${props.role ?? "primary"}-color)`
+          };
           color: ${
-            props.color === "primary"
+            props.role === "primary"
               ? props.theme.colors.text
               : props.theme.colors.textDark
           };
 
           &:hover:not(:disabled) {
-            background-color: var(--mi-${
-              props.color ?? "primary"
-            }-color--hover);
+            background-color: ${
+              props.color
+                ? props.color
+                : `var(--mi-${props.role ?? "primary"}-color--hover)`
+            };
           }
 
         `;
@@ -92,13 +118,13 @@ const CustomButton = styled.button<Compactable>`
     border-radius: var(--mi-border-radius-focus);
   }
 
-  & .startIcon {
+  & .startIcon:not(.collapsed) {
     margin-top: 0.1rem;
     margin-right: 0.5rem;
     line-height: 0.785rem;
   }
 
-  & .endIcon {
+  & .endIcon:not(.collapsed) {
     margin-top: 0.1rem;
     margin-left: 0.5rem;
     line-height: 0.785rem;
@@ -115,6 +141,7 @@ export interface ButtonProps extends Compactable {
   className?: string;
   type?: React.ButtonHTMLAttributes<HTMLButtonElement>["type"];
   isLoading?: boolean;
+  collapse?: boolean;
 }
 
 export const Button: React.FC<ButtonProps> = ({
@@ -124,10 +151,25 @@ export const Button: React.FC<ButtonProps> = ({
   endIcon,
   disabled,
   isLoading,
+  collapse,
+  role,
   ...props
 }) => {
+  const artistContext = useArtistContext();
+
+  const artistColor =
+    artistContext?.state?.isArtistContext &&
+    artistContext?.state?.artist?.properties?.colors;
+
   return (
-    <CustomButton onClick={onClick} disabled={disabled} {...props}>
+    <CustomButton
+      onClick={onClick}
+      disabled={disabled}
+      color={
+        artistColor ? (artistColor as any)?.[role ?? "primary"] : undefined
+      }
+      {...props}
+    >
       {isLoading && (
         <LoadingSpinner
           className={css`
@@ -135,8 +177,14 @@ export const Button: React.FC<ButtonProps> = ({
           `}
         />
       )}
-      {startIcon ? <span className="startIcon">{startIcon}</span> : ""}
-      {children}
+      {startIcon ? (
+        <span className={`startIcon ${collapse ? "collapsed" : ""}`}>
+          {startIcon}
+        </span>
+      ) : (
+        ""
+      )}
+      {!collapse && children}
       {endIcon ? <span className="endIcon">{endIcon}</span> : ""}
     </CustomButton>
   );

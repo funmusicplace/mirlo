@@ -45,8 +45,10 @@ export default function () {
           }
         }
       } else {
-        res.status(401).json({
-          error: "Invalid route",
+        res.status(200).json({
+          result: {
+            chargesEnabled: false,
+          },
         });
       }
     } catch (e) {

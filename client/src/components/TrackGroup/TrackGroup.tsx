@@ -7,23 +7,27 @@ import Button from "../common/Button";
 import usePublicObjectById from "utils/usePublicObjectById";
 import LoadingSpinner from "components/common/LoadingSpinner";
 import { useTranslation } from "react-i18next";
-import ArtistTrackGroup from "components/Artist/ArtistTrackGroup";
 import ArtistSupport from "components/Artist/ArtistSupport";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
 import PublicTrackGroupListing from "components/common/PublicTrackGroupListing";
 import { MetaCard } from "components/common/MetaCard";
 import ReactMarkdown from "react-markdown";
+import { useArtistContext } from "state/ArtistContext";
+import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
+
+import PurchaseOrDownloadAlbum from "./PurchaseOrDownloadAlbumModal";
+import { bp } from "../../constants";
 
 function TrackGroup() {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
 
+  const {
+    state: { artist, isLoading: isLoadingArtist, userStripeStatus },
+  } = useArtistContext();
   const { artistId, trackGroupId } = useParams();
   const {
     state: { user },
   } = useGlobalStateContext();
-
-  const { object: artist, isLoadingObject: isLoadingArtist } =
-    usePublicObjectById<Artist>("artists", artistId);
 
   const { object: trackGroup, isLoadingObject: isLoadingTrackGroup } =
     usePublicObjectById<TrackGroup>(
@@ -68,6 +72,10 @@ function TrackGroup() {
     <div
       className={css`
         width: 100%;
+
+        a {
+          color: ${artist.properties?.colors.primary};
+        }
       `}
     >
       <MetaCard
@@ -80,6 +88,7 @@ function TrackGroup() {
           display: flex;
           align-items: center;
           justify-content: space-between;
+          margin-bottom: 0.5rem;
         `}
       >
         <div>
@@ -99,29 +108,57 @@ function TrackGroup() {
             </em>
           )}
         </div>
-        {ownedByUser && (
-          <Link to={`/manage/artists/${artist.id}`}>
-            <Button compact startIcon={<FaPen />}>
-              {t("edit")}
-            </Button>
-          </Link>
-        )}
+        <div
+          className={css`
+            text-align: right;
+          `}
+        >
+          {ownedByUser && (
+            <Link to={`/manage/artists/${artist.id}`}>
+              <Button compact startIcon={<FaPen />}>
+                {t("edit")}
+              </Button>
+            </Link>
+          )}
+          <PurchaseOrDownloadAlbum trackGroup={trackGroup} />
+        </div>
+      </div>
+      <div
+        className={css`
+          display: flex;
+
+          @media screen and (max-width: ${bp.medium}px) {
+            flex-direction: column;
+          }
+        `}
+      >
+        <ImageWithPlaceholder
+          src={trackGroup.cover?.sizes?.[600]}
+          alt={trackGroup.title}
+          size={600}
+        />
+        <PublicTrackGroupListing
+          tracks={trackGroup.tracks}
+          trackGroup={trackGroup}
+        />
       </div>
       <div
         className={css`
           margin: 1.25rem 0;
           border-left: 5px solid var(--mi-lighter-background-color);
-          padding: 0.5rem 1rem;
+          padding: 0.5rem 0.25rem;
         `}
       >
         <ReactMarkdown>{trackGroup.about}</ReactMarkdown>
+        Released:{" "}
+        <em>
+          {new Date(trackGroup.releaseDate).toLocaleDateString("en-US", {
+            month: "short",
+            year: "numeric",
+          })}
+        </em>
       </div>
-      <ArtistTrackGroup trackGroup={trackGroup} artist={artist} />
-      <PublicTrackGroupListing
-        tracks={trackGroup.tracks}
-        trackGroup={trackGroup}
-      />
-      <ArtistSupport artist={artist} />
+      {userStripeStatus?.chargesEnabled && <ArtistSupport artist={artist} />}
     </div>
   );
 }

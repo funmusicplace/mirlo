@@ -40,8 +40,9 @@ export const ImageWithPlaceholder: React.FC<{
           height={size}
           className={className}
           style={{
-            width: `${size}px`,
-            height: `${size}px`,
+            width: "100%",
+            maxWidth: `${size}px`,
+            height: `100%`,
           }}
         />
       )}
