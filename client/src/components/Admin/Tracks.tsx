@@ -63,7 +63,7 @@ export const AdminTracks: React.FC = () => {
               <tr key={track.id}>
                 <td>{track.title}</td>
                 <td>{track.trackGroup.title}</td>
-                <td>{track.trackGroup.artist.name}</td>
+                <td>{track.trackGroup.artist?.name}</td>
                 <td>{track.isPreview}</td>
 
                 <td className="alignRight">

@@ -110,7 +110,7 @@ const TrackRow: React.FC<{
           text-overflow: ellipsis;
         `}
       >
-        {trackGroup.artist.name}
+        {trackGroup.artist?.name}
       </td>
       <td>{track.audio?.duration && fmtMSS(track.audio.duration)}</td>
       <td align="right">

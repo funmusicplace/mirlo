@@ -42,7 +42,7 @@ export const isTrackOwnedOrPreview = (
     return false;
   }
   const lookInTrackGroup = trackGroup ?? track.trackGroup;
-  const ownsTrack = lookInTrackGroup.artist.userId === user.id;
+  const ownsTrack = lookInTrackGroup.artist?.userId === user.id;
   const boughtTrack = !!lookInTrackGroup.userTrackGroupPurchases?.find(
     (utgp) => utgp.userId === user.id
   );

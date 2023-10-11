@@ -64,6 +64,7 @@ const Player = () => {
       setIsLoading(true);
       try {
         const { result } = await api.get<Track>(`tracks/${id}`);
+
         if (userId) {
           setCurrentTrack(result);
         } else {

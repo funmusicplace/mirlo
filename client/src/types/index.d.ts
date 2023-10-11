@@ -40,7 +40,7 @@ interface TrackGroup {
   type: "lp" | "ep" | "album" | "single";
   releaseDate: string;
   about: string;
-  artist: Artist;
+  artist?: Artist;
   artistId: number;
   tracks: Track[];
   cover?: { id: number; url: string; sizes?: { [key: number]: string } };
