@@ -151,13 +151,20 @@ function TrackGroup() {
         `}
       >
         <ReactMarkdown>{trackGroup.about}</ReactMarkdown>
-        Released:{" "}
-        <em>
-          {new Date(trackGroup.releaseDate).toLocaleDateString("en-US", {
-            month: "short",
-            year: "numeric",
-          })}
-        </em>
+        <div
+          className={css`
+            margin-top: 1rem;
+            color: var(--mi-light-foreground-color);
+          `}
+        >
+          Released:{" "}
+          <em>
+            {new Date(trackGroup.releaseDate).toLocaleDateString("en-US", {
+              month: "short",
+              year: "numeric",
+            })}
+          </em>
+        </div>
       </div>
       {userStripeStatus?.chargesEnabled && <ArtistSupport artist={artist} />}
     </div>

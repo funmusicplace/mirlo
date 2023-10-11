@@ -2,28 +2,16 @@ import React from "react";
 import { css } from "@emotion/css";
 import { Helmet } from "react-helmet";
 
-import { ImLoop, ImShuffle } from "react-icons/im";
 import { Link } from "react-router-dom";
 import { bp } from "../constants";
 import ImageWithPlaceholder from "./common/ImageWithPlaceholder";
-import IconButton from "./common/IconButton";
 import { AudioWrapper } from "./AudioWrapper";
 import Spinner from "./common/Spinner";
-import { GlobalState, useGlobalStateContext } from "state/GlobalState";
+import { useGlobalStateContext } from "state/GlobalState";
 import api from "services/api";
-import styled from "@emotion/styled";
 import { isTrackOwnedOrPreview } from "utils/tracks";
-
-const LoopingIndicator = styled.span`
-  position: absolute;
-  font-size: 0.5rem;
-  padding: 0.15rem 0.2rem;
-  background-color: var(--mi-primary-color);
-  border-radius: 100%;
-  color: white;
-  top: -0.25rem;
-  right: -0.25rem;
-`;
+import LoopButton from "./common/LoopButton";
+import ShuffleButton from "./common/ShuffleButton";
 
 const playerClass = css`
   min-height: 129px;
@@ -51,7 +39,7 @@ const playerClass = css`
 
 const Player = () => {
   const {
-    state: { playerQueueIds, currentlyPlayingIndex, user, shuffle, looping },
+    state: { playerQueueIds, currentlyPlayingIndex, user, shuffle },
     dispatch,
   } = useGlobalStateContext();
   // let navigate = useNavigate();
@@ -104,14 +92,6 @@ const Player = () => {
     currentTrackId,
   ]);
 
-  // const onClickQueue = React.useCallback(() => {
-  //   navigate("/queue");
-  // }, [navigate]);
-
-  const onShuffle = React.useCallback(() => {
-    dispatch({ type: "setShuffle", shuffle: !shuffle });
-  }, [dispatch, shuffle]);
-
   React.useEffect(() => {
     if ("mediaSession" in navigator) {
       navigator.mediaSession.setActionHandler("nexttrack", () => {
@@ -140,16 +120,6 @@ const Player = () => {
       }
     }
   }, [currentTrack]);
-
-  const onLoop = React.useCallback(() => {
-    let nextLooping: GlobalState["looping"] = undefined;
-    if (looping === undefined) {
-      nextLooping = "loopTrack";
-    } else if (looping === "loopTrack") {
-      nextLooping = "loopQueue";
-    }
-    dispatch({ type: "setLooping", looping: nextLooping });
-  }, [dispatch, looping]);
 
   if (!currentTrack) {
     return null;
@@ -196,10 +166,6 @@ const Player = () => {
               className={css`
                 background-color: #efefef;
                 margin-right: 0.5rem;
-
-                @media (max-width: ${bp.small}px) {
-                  display: none;
-                }
               `}
             />
             <div>
@@ -218,48 +184,21 @@ const Player = () => {
           </div>
 
           {/* <TrackPopup trackId={currentTrack.id} compact /> */}
-          <div>
-            <IconButton
-              role={shuffle ? "primary" : undefined}
-              onClick={onShuffle}
-            >
-              <ImShuffle />
-            </IconButton>
-            <IconButton
-              role={looping ? "primary" : undefined}
-              onClick={onLoop}
-              className={css`
-                margin-left: 0.25rem;
-                position: relative;
-              `}
-            >
-              <ImLoop />
-              {looping === "loopTrack" && (
-                <LoopingIndicator>1</LoopingIndicator>
-              )}
-            </IconButton>
+          <div
+            className={css`
+              @media (max-width: ${bp.small}px) {
+                display: none;
+              }
+            `}
+          >
+            <ShuffleButton />
+            <LoopButton />
           </div>
         </div>
       }
 
       {!currentTrack && isLoading && <Spinner size="small" />}
-      {/* {!currentTrack && !isLoading && (
-        <div
-          className={css`
-            display: flex;
-            align-items: center;
-            flex-grow: 1;
-            margin-right: 0.5rem;
 
-            @media (max-width: ${bp.small}px) {
-              width: 100%;
-              align-items: flex-start;
-            }
-          `}
-        >
-          Current queue is empty, click on something to play!
-        </div>
-      )} */}
       <div
         className={css`
           display: flex;
@@ -275,22 +214,6 @@ const Player = () => {
         {currentTrack && isTrackOwnedOrPreview(currentTrack, user) && (
           <AudioWrapper currentTrack={currentTrack} />
         )}
-
-        {/* <Button
-          onClick={onClickQueue}
-          compact
-          data-cy="queue"
-          variant="outlined"
-          className={css`
-            margin-left: 2rem;
-            @media (max-width: ${bp.small}px) {
-              display: none;
-            }
-          `}
-          startIcon={<MdQueueMusic style={{}} />}
-        >
-          Queue
-        </Button> */}
       </div>
     </div>
   );
