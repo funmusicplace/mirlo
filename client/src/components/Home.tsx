@@ -2,12 +2,10 @@ import { css } from "@emotion/css";
 import React from "react";
 import { Link } from "react-router-dom";
 import { useGlobalStateContext } from "state/GlobalState";
-import Button from "./common/Button";
 import api from "../services/api";
 import Box from "./common/Box";
 import PostContent from "./common/PostContent";
 import Logo from "./common/Logo";
-import { bp } from "../constants";
 
 function Home() {
   const {
