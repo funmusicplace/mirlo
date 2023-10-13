@@ -102,7 +102,7 @@ function Home() {
             >
               <h1
                 className={css`
-                  font-size: 32px;
+                  font-size: 1.75rem;
                   font-weight: 400;
                   line-height: 1.25;
                 `}
@@ -131,58 +131,57 @@ function Home() {
                   target="_blank"
                   rel="noreferrer"
                   className={css`
+                    display: block;
+                    height: 51px;
+                    border-radius: 9999px !important;
+                    font-weight: bold;
+                    font-size: 1rem;
+                    align-items: center;
+                    display: inline-flex;
+                    line-height: 1rem;
+                    padding: 1rem;
                     text-decoration: none;
-                    color: var(--mi-white) !important;
                     &:hover {
                       text-decoration: underline;
                     }
+
+                    background-color: var(--mi-pink);
+                    color: var(--mi-white) !important;
                   `}
                 >
-                  <Button
-                    className={css`
-                      height: 51px;
-                      color: inherit !important;
-                      border-radius: 9999px !important;
-                    `}
-                  >
-                    Get on the mailing list
-                  </Button>
+                  Get on the mailing list
                 </a>
                 <Link
                   to="/login"
                   className={css`
+                    display: block;
+                    height: 51px;
+                    border-radius: 9999px !important;
+                    font-weight: bold;
+                    font-size: 1rem;
+                    align-items: center;
+                    display: inline-flex;
+                    line-height: 1rem;
+                    padding: 1rem;
                     text-decoration: none;
-                    color: var(--mi-white) !important;
-
-                    @media (prefers-color-scheme: dark) {
-                      color: var(--mi-black) !important;
-                    }
-
                     &:hover {
                       text-decoration: underline;
                     }
+
+                    background-color: var(--mi-black) !important;
+                    color: var(--mi-white) !important;
+                    @media (prefers-color-scheme: dark) {
+                      background-color: var(--mi-white) !important;
+                      color: var(--mi-black) !important;
+                    }
                   `}
                 >
-                  <Button
-                    className={css`
-                      height: 51px;
-                      background-color: var(--mi-black) !important;
-                      color: inherit !important;
-                      border-radius: 9999px !important;
-
-                      @media (prefers-color-scheme: dark) {
-                        background-color: var(--mi-white) !important;
-                        color: var(--mi-black) !important;
-                      }
-                    `}
-                  >
-                    Log in
-                  </Button>
+                  Log in
                 </Link>
               </div>
               <p
                 className={css`
-                  font-size: 18px;
+                  font-size: 0.875rem;
                   line-height: 1.5;
                 `}
               >
