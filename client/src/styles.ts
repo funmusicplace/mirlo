@@ -1,15 +1,19 @@
 const styles = `html {
-  --mi-normal-background-color: #ffeedb;
+  --mi-black: #3E363F;
+  --mi-white: #FFEEDB;
+  --mi-pink: #BE3455;
+
+  --mi-normal-background-color: var(--mi-white);
   --mi-light-background-color: #ffffee;
   --mi-lighten-background-color: rgba(255, 255, 255, 0.4);
   --mi-shade-background-color: rgba(0, 0, 0, .05);
 
-  --mi-normal-foreground-color: #3e363f;
+  --mi-normal-foreground-color: var(--mi-black);
   --mi-light-foreground-color: #888;
   --mi-lighter-foreground-color: #bbb;
 
-  --mi-primary-color: #e75a7c;
-  --mi-primary-color--hover: #f77b99;
+  --mi-primary-color: var(--mi-pink);
+  --mi-primary-color--hover: var(--mi-pink);
 
   --mi-secondary-color: #ffb3d0;
   --mi-secondary-color--hover: #FF80B0;
@@ -31,14 +35,18 @@ const styles = `html {
   
   --mi-icon-button-background-color: var(--mi-shade-background-color);
   --mi-icon-button-background-color--hover: rgba(0, 0, 0, 0.2);
+
+  --mi-font-family-stack: 'Arial', -apple-system, BlinkMacSystemFont,
+    'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans',
+    'Droid Sans', 'Helvetica Neue', sans-serif;
 }
 
 
 
 @media (prefers-color-scheme: dark) {
   html {
-    --mi-normal-background-color: #333;
-    --mi-normal-foreground-color: white;
+    --mi-normal-background-color: var(--mi-black);
+    --mi-normal-foreground-color: var(--mi-white);
     --mi-lighten-background-color: rgba(255, 255, 255, 0.05);
   }
 }
@@ -57,7 +65,7 @@ html {
 body {
   background-color: var(--mi-normal-background-color);
   color: var(--mi-normal-foreground-color);
-  font-family: Ariel, sans-serif;
+  font-family: var(--mi-font-family-stack);
 }
 
 body,
@@ -96,11 +104,6 @@ h5 {
   padding-bottom: .75rem;
 }
 
-a {
-  transition: .25s color, .25s background-color;
-  color: var(--mi-primary-color);
-}
-
 h6 {
   font-size: 1.1rem;
   padding-bottom: .75rem;
@@ -114,6 +117,21 @@ h6 {
   h2 {
     font-size: 1.8rem;
   }
+}
+
+a {
+  transition: .25s color, .25s background-color;
+  color: var(--mi-primary-color);
+}
+
+@media (prefers-color-scheme: dark) {
+  a {
+    color: #F27D98;
+  }
+}
+
+button {
+  font-family: var(--mi-font-family-stack);
 }
 
 @keyframes slide-down {

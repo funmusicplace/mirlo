@@ -77,6 +77,13 @@ const CustomButton = styled.button<Compactable>`
             color: #ddd;
             border-color: #ddd;
           }
+
+          @media (prefers-color-scheme: dark) {
+            color: #F27D98;
+            &:hover:not(:disabled) {
+              color: #F27D98;
+            }
+          }
         `;
       default:
         return `
@@ -112,10 +119,6 @@ const CustomButton = styled.button<Compactable>`
 
   &[disabled] {
     opacity: 0.6;
-  }
-
-  &:hover {
-    border-radius: var(--mi-border-radius-focus);
   }
 
   & .startIcon:not(.collapsed) {
