@@ -133,7 +133,7 @@ function Home() {
                   className={css`
                     display: block;
                     height: 51px;
-                    border-radius: 9999px !important;
+                    border-radius: 9999px;
                     font-weight: bold;
                     font-size: 1rem;
                     align-items: center;
@@ -146,7 +146,7 @@ function Home() {
                     }
 
                     background-color: var(--mi-pink);
-                    color: var(--mi-white) !important;
+                    color: var(--mi-white);
                   `}
                 >
                   Get on the mailing list
@@ -156,7 +156,7 @@ function Home() {
                   className={css`
                     display: block;
                     height: 51px;
-                    border-radius: 9999px !important;
+                    border-radius: 9999px;
                     font-weight: bold;
                     font-size: 1rem;
                     align-items: center;
@@ -168,11 +168,11 @@ function Home() {
                       text-decoration: underline;
                     }
 
-                    background-color: var(--mi-black) !important;
-                    color: var(--mi-white) !important;
+                    background-color: var(--mi-black);
+                    color: var(--mi-white);
                     @media (prefers-color-scheme: dark) {
-                      background-color: var(--mi-white) !important;
-                      color: var(--mi-black) !important;
+                      background-color: var(--mi-white);
+                      color: var(--mi-black);
                     }
                   `}
                 >
