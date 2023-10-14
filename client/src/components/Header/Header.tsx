@@ -49,7 +49,24 @@ const Header = () => {
             align-items: center;
           `}
         >
-          <Logo collapse />
+          <span
+            className={css`
+              @media (max-width: ${bp.medium}px) {
+                display: none;
+              }
+            `}
+          >
+            <Logo />
+          </span>
+          <span
+            className={css`
+              @media (min-width: ${bp.medium}px) {
+                display: none;
+              }
+            `}
+          >
+            <Logo noWordmark />
+          </span>
         </Link>
       </h1>
       {isMenuOpen && (

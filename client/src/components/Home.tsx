@@ -2,12 +2,10 @@ import { css } from "@emotion/css";
 import React from "react";
 import { Link } from "react-router-dom";
 import { useGlobalStateContext } from "state/GlobalState";
-import Button from "./common/Button";
 import api from "../services/api";
 import Box from "./common/Box";
 import PostContent from "./common/PostContent";
 import Logo from "./common/Logo";
-import { bp } from "../constants";
 
 function Home() {
   const {
@@ -62,43 +60,55 @@ function Home() {
           className={css`
             display: flex;
             align-items: center;
+            justify-content: center;
           `}
         >
-          <img
-            alt="blackbird"
-            src="/images/blackbird.png"
+          <div
             className={css`
-              width: 100%;
-              max-width: 270px;
-              margin-right: 3rem;
               display: none;
-              transform: scaleX(-1);
-              @media (min-width: ${bp.small}px) {
-                display: inline-block;
+
+              @media (min-width: 768px) {
+                display: block;
+                background-image: url("/images/blackbird-light.webp");
+                background-size: contain;
+                background-repeat: no-repeat;
+                width: 370px;
+                height: 285px;
+                margin-right: 60px;
               }
-              @media (prefers-color-scheme: dark) {
-                filter: invert(0.6);
+
+              @media (min-width: 768px) and (prefers-color-scheme: dark) {
+                background-image: url("/images/blackbird-dark.webp");
               }
             `}
           />
-          <div className={css``}>
+          <div
+            className={css`
+              display: flex;
+              flex-direction: column;
+              gap: 48px;
+              max-width: 500px;
+            `}
+          >
             <Logo />
-            <p
+            <div
               className={css`
-                margin-top: 1rem;
-                font-size: 2rem;
-                padding-bottom: 2rem;
-                font-weight: bold;
-
-                @media screen and (max-width: ${bp.medium}px) {
-                  font-size: 1.5rem;
-                }
+                display: flex;
+                flex-direction: column;
+                gap: 24px;
               `}
             >
-              Direct support for musicians. Buy their music. Collectively owned
-              and managed.
-            </p>
-            {/* <Link to="signup">
+              <h1
+                className={css`
+                  font-size: 1.75rem;
+                  font-weight: 400;
+                  line-height: 1.25;
+                `}
+              >
+                Direct support for musicians. Buy their music. Collectively
+                owned and managed.
+              </h1>
+              {/* <Link to="signup">
             <Button
               className={css`
                 margin-top: 1.5rem;
@@ -108,29 +118,80 @@ function Home() {
               Get started
             </Button>
           </Link> */}
-            <a
-              href="https://dashboard.mailerlite.com/forms/396303/100612617721087214/share"
-              target="_blank"
-              rel="noreferrer"
-            >
-              <Button className={css``}>Sign up to our mailing list</Button>
-            </a>
-            <p
-              className={css`
-                margin-bottom: 1rem;
-                margin-top: 2rem;
-              `}
-            >
-              Mirlo is under construction. If you'd like to contribute check out{" "}
-              <a href="https://github.com/funmusicplace/mirlo/">
-                the code on GitHub
-              </a>
-              , <a href="https://discord.gg/VjKq26raKX">join our Discord</a>, or{" "}
-              <a href="mailto:mirlodotspace@proton.me">email us</a>.
-            </p>
-            <p>
-              Already have an account? <Link to="/login">Log in</Link>.
-            </p>
+              <div
+                className={css`
+                  display: flex;
+                  gap: 16px;
+                `}
+              >
+                <a
+                  href="https://dashboard.mailerlite.com/forms/396303/100612617721087214/share"
+                  target="_blank"
+                  rel="noreferrer"
+                  className={css`
+                    display: block;
+                    height: 51px;
+                    border-radius: 9999px;
+                    font-weight: bold;
+                    font-size: 1rem;
+                    align-items: center;
+                    display: inline-flex;
+                    line-height: 1rem;
+                    padding: 1rem;
+                    text-decoration: none;
+                    &:hover {
+                      text-decoration: underline;
+                    }
+
+                    background-color: var(--mi-pink);
+                    color: var(--mi-white);
+                  `}
+                >
+                  Get on the mailing list
+                </a>
+                <Link
+                  to="/login"
+                  className={css`
+                    display: block;
+                    height: 51px;
+                    border-radius: 9999px;
+                    font-weight: bold;
+                    font-size: 1rem;
+                    align-items: center;
+                    display: inline-flex;
+                    line-height: 1rem;
+                    padding: 1rem;
+                    text-decoration: none;
+                    &:hover {
+                      text-decoration: underline;
+                    }
+
+                    background-color: var(--mi-black);
+                    color: var(--mi-white);
+                    @media (prefers-color-scheme: dark) {
+                      background-color: var(--mi-white);
+                      color: var(--mi-black);
+                    }
+                  `}
+                >
+                  Log in
+                </Link>
+              </div>
+              <p
+                className={css`
+                  font-size: 0.875rem;
+                  line-height: 1.5;
+                `}
+              >
+                Mirlo is under construction. If you'd like to contribute check
+                out{" "}
+                <a href="https://github.com/funmusicplace/mirlo/">
+                  the code on GitHub
+                </a>
+                , <a href="https://discord.gg/VjKq26raKX">join our Discord</a>,
+                or <a href="mailto:mirlodotspace@proton.me">email us</a>.
+              </p>
+            </div>
           </div>
         </div>
       )}
