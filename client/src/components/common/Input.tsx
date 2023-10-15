@@ -12,18 +12,18 @@ interface Props extends React.InputHTMLAttributes<HTMLInputElement> {
 }
 
 export const InputEl = styled.input`
-  border: 1px solid var(--mi-shade-background-color);
+  border: 1px solid ${(props) => props.theme.colors.translucentShade};
   border-radius: var(--mi-border-radius);
   padding: 0.5rem 0.75rem;
   font-size: 1rem;
   margin-bottom: 0.5rem;
   width: 100%;
   color: var(--mi-normal-foreground-color);
-  background-color: var(--mi-lighten-background-color);
+  background-color: ${(props) => props.theme.colors.translucentTint};
   transition: 0.4ss border-radius;
 
   &[disabled] {
-    background-color: var(--mi-shade-background-color);
+    background-color: ${(props) => props.theme.colors.translucentShade};
   }
 
   &:focus {

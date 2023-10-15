@@ -7,7 +7,7 @@ const IconButton = styled.button<Compactable & { transparent?: boolean }>`
     props.role === "primary"
       ? "var(--mi-primary-color--hover)"
       : "var(--mi-lighter-foreground-color)"};
-  background-color: var(--mi-shade-background-color);
+  background-color: ${(props) => props.theme.colors.translucentShade};
   padding: ${(props) => (props.compact ? "0.5rem 0.6rem" : "0.6rem 0.7rem")};
   cursor: pointer;
   transition: 0.25s;

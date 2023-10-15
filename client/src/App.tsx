@@ -79,15 +79,12 @@ function App() {
         description="A music distribution and patronage site"
         image="/android-chrome-512x512.png"
       />
-      <Global styles={(theme) => reactCss`
+      <Global
+        styles={(theme) => reactCss`
         html {
           --mi-black: #3E363F;
           --mi-white: #FFEEDB;
           --mi-pink: #BE3455;
-        
-          --mi-light-background-color: #ffffee;
-          --mi-lighten-background-color: rgba(255, 255, 255, 0.4);
-          --mi-shade-background-color: rgba(0, 0, 0, .05);
         
           --mi-normal-foreground-color: var(--mi-black);
           --mi-light-foreground-color: #888;
@@ -114,7 +111,7 @@ function App() {
           --mi-border-radius: 4px;
           --mi-border-radius-focus: 8px;
           
-          --mi-icon-button-background-color: var(--mi-shade-background-color);
+          --mi-icon-button-background-color: ${theme.colors.translucentShade};
           --mi-icon-button-background-color--hover: rgba(0, 0, 0, 0.2);
         
           --mi-font-family-stack: 'Arial', -apple-system, BlinkMacSystemFont,
@@ -125,7 +122,6 @@ function App() {
         @media (prefers-color-scheme: dark) {
           html {
             --mi-normal-foreground-color: var(--mi-white);
-            --mi-lighten-background-color: rgba(255, 255, 255, 0.05);
           }
         }
         
@@ -249,7 +245,8 @@ function App() {
             transform: rotate(360deg);
           }
         }
-      `} />
+      `}
+      />
       <div
         className={css`
           display: flex;

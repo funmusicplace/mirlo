@@ -34,7 +34,7 @@ const Content = styled.div<ContentProps>`
   max-height: 600px;
   padding: 20px;
   z-index: 999;
-  border: 1px solid var(--mi-shade-background-color);
+  border: 1px solid ${(props) => props.theme.colors.translucentShade};
   display: flex;
   flex-direction: column;
   width: ${(props) => (props.size === "small" ? "40%" : "80%")};

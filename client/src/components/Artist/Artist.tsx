@@ -1,4 +1,6 @@
+/** @jsxImportSource @emotion/react */
 import { css } from "@emotion/css";
+import { css as reactCss } from "@emotion/react"
 import { FaPen } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { useGlobalStateContext } from "state/GlobalState";
@@ -82,13 +84,13 @@ function Artist() {
         {artist.posts?.map((p) => (
           <Box
             key={p.id}
-            className={css`
+            css={(theme) => reactCss`
               margin-bottom: 1rem;
               margin-top: 1rem;
               padding-top: 1.5rem;
 
               &:not(:first-child) {
-                border-top: 1px solid var(--mi-shade-background-color);
+                border-top: 1px solid ${theme.colors.translucentShade};
               }
             `}
           >

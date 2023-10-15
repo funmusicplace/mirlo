@@ -1,4 +1,5 @@
-import { css } from "@emotion/css";
+/** @jsxImportSource @emotion/react */
+import { css as reactCss } from "@emotion/react"
 import React from "react";
 import LoadingSpinner from "./LoadingSpinner";
 
@@ -7,7 +8,7 @@ export const FullPageLoadingSpinner: React.FC<{ className?: string }> = ({
 }) => {
   return (
     <div
-      className={css`
+      css={(theme) => reactCss`
         display: flex;
         height: 100%;
         justify-content: center;
@@ -18,7 +19,7 @@ export const FullPageLoadingSpinner: React.FC<{ className?: string }> = ({
         right: 0;
         left: 0;
         bottom: 0;
-        background-color: var(--mi-shade-background-color);
+        background-color: ${theme.colors.translucentShade};
       `}
     >
       <LoadingSpinner />

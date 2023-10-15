@@ -9,10 +9,10 @@ export const Table = styled.table`
   & tbody tr {
     transition: 0.25s background-color;
     &:nth-of-type(odd) {
-      background-color: var(--mi-lighten-background-color);
+      background-color: ${(props) => props.theme.colors.translucentTint};
 
       @media (prefers-color-scheme: dark) {
-        background-color: var(--mi-darken-background-color);
+        background-color: ${(props) => props.theme.colors.translucentShade};
       }
     }
     &:hover {
@@ -28,7 +28,7 @@ export const Table = styled.table`
 
   & th {
     text-align: left;
-    background-color: var(--mi-shade-background-color);
+    background-color: ${(props) => props.theme.colors.translucentShade};
   }
   & td,
   & th {

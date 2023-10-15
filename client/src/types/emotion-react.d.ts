@@ -15,6 +15,8 @@ declare module "@emotion/react" {
       backgroundDark: string;
       warning: string;
       success: string;
+      translucentTint: string;
+      translucentShade: string;
     };
     borderRadius: string;
   }

@@ -112,12 +112,12 @@ const Header = () => {
         {state.user && (
           <Link
             to="/profile"
-            className={css`
+            css={(theme) => reactCss`
               border-radius: var(--mi-border-radius);
               padding: 0.25rem 0.75rem;
               color: var(--normal-background-color);
               text-decoration: none;
-              background-color: var(--mi-shade-background-color);
+              background-color: ${theme.colors.translucentShade};
               margin-right: 1rem;
 
               &:hover {
