@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { colorShade } from "utils/theme";
+import colorShade from "utils/colorShade";
 
 export const Table = styled.table`
   width: 100%;

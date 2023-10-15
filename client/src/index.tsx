@@ -14,7 +14,7 @@ import Profile from "./components/Profile";
 import Manage from "./components/ManageArtist/Manage";
 import { SnackBarContextProvider } from "state/SnackbarContext";
 import { ThemeProvider } from "@emotion/react";
-import { theme } from "utils/theme";
+import theme from "utils/theme";
 import Admin from "components/Admin/Admin";
 import AdminUsers from "components/Admin/Users";
 import AdminTrackGroups from "components/Admin/Trackgroups";
