@@ -1,4 +1,6 @@
+/** @jsxImportSource @emotion/react */
 import { css } from "@emotion/css";
+import { css as reactCss } from "@emotion/react"
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
@@ -30,7 +32,7 @@ const Menu: React.FC<{ setIsMenuOpen: (bool: boolean) => void }> = ({
 
   return (
     <menu
-      className={css`
+      css={(theme) => reactCss`
         list-style: none;
 
         & li * {
@@ -39,7 +41,7 @@ const Menu: React.FC<{ setIsMenuOpen: (bool: boolean) => void }> = ({
           text-decoration: none;
           text-align: center;
           display: block;
-          color: var(--mi-normal-background-color);
+          color: ${theme.colors.background}; /* TODO: use text token */
           font-weight: bold;
           border-radius: 0;
           border: none;

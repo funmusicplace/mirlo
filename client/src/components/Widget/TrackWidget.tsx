@@ -1,4 +1,6 @@
+/** @jsxImportSource @emotion/react */
 import { css } from "@emotion/css";
+import { css as reactCss } from "@emotion/react"
 import { AudioWrapper } from "components/AudioWrapper";
 // import { AudioWrapper } from "components/AudioWrapper";
 // import ClickToPlay from "components/common/ClickToPlay";
@@ -95,10 +97,10 @@ const TrackWidget = () => {
       )}
       {track && (
         <div
-          className={css`
+          css={(theme) => reactCss`
             display: flex;
             padding: 1rem;
-            background: var(--mi-normal-background-color);
+            background: ${theme.colors.background};
             border-radius: 1rem;
             align-items: center;
             height: 100%;

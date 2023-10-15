@@ -79,13 +79,12 @@ function App() {
         description="A music distribution and patronage site"
         image="/android-chrome-512x512.png"
       />
-      <Global styles={reactCss`
+      <Global styles={(theme) => reactCss`
         html {
           --mi-black: #3E363F;
           --mi-white: #FFEEDB;
           --mi-pink: #BE3455;
         
-          --mi-normal-background-color: var(--mi-white);
           --mi-light-background-color: #ffffee;
           --mi-lighten-background-color: rgba(255, 255, 255, 0.4);
           --mi-shade-background-color: rgba(0, 0, 0, .05);
@@ -125,7 +124,6 @@ function App() {
         
         @media (prefers-color-scheme: dark) {
           html {
-            --mi-normal-background-color: var(--mi-black);
             --mi-normal-foreground-color: var(--mi-white);
             --mi-lighten-background-color: rgba(255, 255, 255, 0.05);
           }
@@ -144,7 +142,7 @@ function App() {
         
         body {
           margin: 0;
-          background-color: var(--mi-normal-background-color);
+          background-color: ${theme.colors.background};
           color: var(--mi-normal-foreground-color);
           font-family: var(--mi-font-family-stack);
           -webkit-font-smoothing: auto;
@@ -278,7 +276,6 @@ function App() {
         >
           <div
             className={css`
-              background-color: var(--mi-normal-background-color);
               margin: 0 auto;
               width: 100%;
               border-radius: var(--mi-border-radius);

@@ -24,7 +24,7 @@ type ContentProps = {
 
 const Content = styled.div<ContentProps>`
   pointer-events: auto;
-  background-color: var(--mi-normal-background-color);
+  background-color: ${(props) => props.theme.colors.background};
   position: absolute;
   top: 20%;
   left: 0;

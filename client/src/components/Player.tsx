@@ -1,7 +1,8 @@
+/** @jsxImportSource @emotion/react */
 import React from "react";
 import { css } from "@emotion/css";
+import { css as reactCss } from "@emotion/react"
 import { Helmet } from "react-helmet";
-
 import { Link } from "react-router-dom";
 import { bp } from "../constants";
 import ImageWithPlaceholder from "./common/ImageWithPlaceholder";
@@ -16,30 +17,6 @@ import NextButton from "./common/NextButton";
 import PauseButton from "./common/PauseButton";
 import PlayButton from "./common/PlayButton";
 import PreviousButton from "./common/PreviousButton";
-
-const playerClass = css`
-  min-height: 90px;
-  border-bottom: 1px solid grey;
-  display: flex;
-  align-items: stretch;
-  flex-direction: column;
-  justify-content: space-between;
-  position: fixed;
-  width: 100%;
-  z-index: 10;
-  bottom: 0;
-  filter: drop-shadow(0 0 0.1rem rgba(0, 0, 0, 0.5));
-  background-color: var(--mi-normal-background-color);
-
-  @media (max-width: ${bp.small}px) {
-    // height: 140px;
-    flex-direction: column;
-
-    button {
-      font-size: 1.2rem;
-    }
-  }
-`;
 
 const Player = () => {
   const {
@@ -130,7 +107,29 @@ const Player = () => {
   }
 
   return (
-    <div className={playerClass}>
+    <div css={(theme) => reactCss`
+      min-height: 90px;
+      border-bottom: 1px solid grey;
+      display: flex;
+      align-items: stretch;
+      flex-direction: column;
+      justify-content: space-between;
+      position: fixed;
+      width: 100%;
+      z-index: 10;
+      bottom: 0;
+      filter: drop-shadow(0 0 0.1rem rgba(0, 0, 0, 0.5));
+      background-color: ${theme.colors.background};
+
+      @media (max-width: ${bp.small}px) {
+        // height: 140px;
+        flex-direction: column;
+
+        button {
+          font-size: 1.2rem;
+        }
+      }
+    `}>
       <Helmet>
         <title>
           {currentTrack

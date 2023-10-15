@@ -15,7 +15,7 @@ const Box = styled.div`
   }
 
   @media screen and (max-width: 800px) {
-    // background-color: var(--mi-normal-background-color);
+    // background-color: ${(props) => props.theme.colors.background};
     padding: 0.5rem 0.7rem;
   }
 `;

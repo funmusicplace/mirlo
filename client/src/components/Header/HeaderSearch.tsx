@@ -1,4 +1,6 @@
+/** @jsxImportSource @emotion/react */
 import { css } from "@emotion/css";
+import { css as reactCss } from "@emotion/react"
 import { InputEl } from "components/common/Input";
 import LoadingSpinner from "components/common/LoadingSpinner";
 import { bp } from "../../constants";
@@ -72,10 +74,10 @@ const HeaderSearch: React.FC = () => {
             }}
           />
           <div
-            className={css`
+            css={(theme) => reactCss`
               position: absolute;
               padding: 1rem;
-              background: var(--mi-normal-background-color);
+              background: ${theme.colors.background};
               width: 100%;
               z-index: 12;
 

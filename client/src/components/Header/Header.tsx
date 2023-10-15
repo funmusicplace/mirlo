@@ -1,4 +1,6 @@
+/** @jsxImportSource @emotion/react */
 import { css } from "@emotion/css";
+import { css as reactCss } from "@emotion/react"
 import React from "react";
 import { FaTimes } from "react-icons/fa";
 import { ImMenu } from "react-icons/im";
@@ -22,12 +24,12 @@ const Header = () => {
 
   return (
     <header
-      className={css`
+      css={(theme) => reactCss`
         display: flex;
         justify-content: space-between;
         align-items: center;
         padding: 0.5rem 1rem;
-        background-color: var(--mi-normal-background-color);
+        background-color: ${theme.colors.background};
         position: fixed;
         width: 100%;
         z-index: 999999;
