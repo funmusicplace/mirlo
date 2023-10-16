@@ -85,15 +85,12 @@ function App() {
           --mi-black: #3E363F;
           --mi-white: #FFEEDB;
           --mi-pink: #BE3455;
-                
-          --mi-primary-color--hover: var(--mi-pink);
-        
+                        
           --mi-secondary-color: #ffb3d0;
           --mi-secondary-color--hover: #FF80B0;
         
           --mi-success-background-color: #4cdb5f;
         
-          --mi-warning-color--hover: #f26f59;
           --mi-darken-warning-background-color: #df250b;
           --mi-warning-foreground-color: white;
         

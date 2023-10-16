@@ -145,6 +145,7 @@ function Profile() {
         <Button style={{ width: "100%" }}>{t("manageArtists")}</Button>
       </Link>
       <Button
+        role="warning"
         css={(theme) => reactCss`
           background-color: ${theme.colors.warning};
         `}

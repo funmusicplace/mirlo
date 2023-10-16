@@ -42,7 +42,8 @@ const CustomButton = styled.button<Compactable>`
             color: ${
               props.color
                 ? props.color
-                : `var(--mi-${props.role ?? "primary"}-color--hover)`
+                : (props.role === "warning" && props.theme.colors.warning) ||
+                  props.theme.colors.primary
             };
           }
         `;
@@ -67,12 +68,14 @@ const CustomButton = styled.button<Compactable>`
             color: ${
               props.color
                 ? props.color
-                : `var(--mi-${props.role ?? "primary"}-color--hover)`
+                : (props.role === "warning" && props.theme.colors.warning) ||
+                  props.theme.colors.primary
             };
             border: 2px solid ${
               props.color
                 ? props.color
-                : `var(--mi-${props.role ?? "primary"}-color--hover)`
+                : (props.role === "warning" && props.theme.colors.warning) ||
+                  props.theme.colors.primary
             };
           }
 
@@ -107,7 +110,8 @@ const CustomButton = styled.button<Compactable>`
             background-color: ${
               props.color
                 ? props.color
-                : `var(--mi-${props.role ?? "primary"}-color--hover)`
+                : (props.role === "warning" && props.theme.colors.warning) ||
+                  props.theme.colors.primary
             };
           }
 
@@ -175,6 +179,7 @@ export const Button: React.FC<ButtonProps> = ({
       color={
         artistColor ? (artistColor as any)?.[role ?? "primary"] : undefined
       }
+      role={role}
       {...props}
     >
       {isLoading && (
