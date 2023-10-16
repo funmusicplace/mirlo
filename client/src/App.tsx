@@ -86,7 +86,6 @@ function App() {
           --mi-white: #FFEEDB;
           --mi-pink: #BE3455;
                         
-          --mi-secondary-color: #ffb3d0;
           --mi-secondary-color--hover: #FF80B0;
         
           --mi-success-background-color: #4cdb5f;
@@ -96,7 +95,6 @@ function App() {
         
           --mi-primary-highlight-color: #bcb3ff;
           --mi-primary-highlight-color--hover: #FFB3D0;
-          --mi-box-color: var(--mi-secondary-color);
         
           --mi-border-radius: 4px;
           --mi-border-radius-focus: 8px;

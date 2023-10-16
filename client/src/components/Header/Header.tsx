@@ -120,11 +120,6 @@ const Header = () => {
               background-color: ${theme.colors.translucentShade};
               margin-right: 1rem;
 
-              &:hover {
-                background-color: var(--mi-secondary-color--hover);
-                color: var(--mi-);
-              }
-
               @media (max-width: ${bp.small}px) {
                 text-overflow: ellipsis;
                 overflow: hidden;
