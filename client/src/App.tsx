@@ -86,7 +86,6 @@ function App() {
           --mi-white: #FFEEDB;
           --mi-pink: #BE3455;
                                         
-          --mi-darken-warning-background-color: #df250b;
           --mi-warning-foreground-color: white;
         
           --mi-primary-highlight-color: #bcb3ff;

@@ -151,7 +151,6 @@ function Profile() {
         `}
         style={{
           width: "100%",
-          borderColor: "var(--mi-darken-warning-background-color)",
           marginTop: "1rem",
         }}
         onClick={deleteAccount}
