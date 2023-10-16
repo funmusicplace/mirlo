@@ -47,7 +47,7 @@ const TrackRow: React.FC<{
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
       className={css`
-        ${!canPlayTrack ? `color: var(--mi-light-foreground-color);` : ""}
+        ${!canPlayTrack ? `color: #888;` : ""}
 
         &:hover > td > .play-button {
           opacity: 1;

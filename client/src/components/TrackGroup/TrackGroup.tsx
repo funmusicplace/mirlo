@@ -157,7 +157,7 @@ function TrackGroup() {
         <div
           className={css`
             margin-top: 1rem;
-            color: var(--mi-light-foreground-color);
+            color: #888;
           `}
         >
           Released:{" "}

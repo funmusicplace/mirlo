@@ -33,7 +33,7 @@ const Header = () => {
         position: fixed;
         width: 100%;
         z-index: 999999;
-        border-bottom: 1px solid var(--mi-light-foreground-color);
+        border-bottom: 1px solid #888;
       `}
     >
       <h1
@@ -86,7 +86,7 @@ const Header = () => {
               padding: 0.5rem;
               z-index: 12;
               padding-bottom: 1rem;
-              background: var(--mi-light-foreground-color);
+              background: #888;
             `}
           >
             <IconButton
