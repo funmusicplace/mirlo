@@ -31,7 +31,8 @@ const CustomButton = styled.button<Compactable>`
           color: ${
             props.color
               ? props.color
-              : `var(--mi-${props.role ?? "primary"}-color)`
+              : (props.role === "warning" && props.theme.colors.warning) ||
+                props.theme.colors.primary
           };
           margin-right: 0;
           font-size: inherit;
@@ -50,13 +51,15 @@ const CustomButton = styled.button<Compactable>`
           color: ${
             props.color
               ? props.color
-              : `var(--mi-${props.role ?? "primary"}-color)`
+              : (props.role === "warning" && props.theme.colors.warning) ||
+                props.theme.colors.primary
           };
           background-color: transparent;
           border: 2px solid ${
             props.color
               ? props.color
-              : `var(--mi-${props.role ?? "primary"}-color)`
+              : (props.role === "warning" && props.theme.colors.warning) ||
+                props.theme.colors.primary
           };
           padding: ${props.compact ? ".3rem .5rem" : "1rem"};
 
@@ -91,7 +94,8 @@ const CustomButton = styled.button<Compactable>`
           background-color:  ${
             props.color
               ? props.color
-              : `var(--mi-${props.role ?? "primary"}-color)`
+              : (props.role === "warning" && props.theme.colors.warning) ||
+                props.theme.colors.primary
           };
           color: ${
             props.role === "primary"

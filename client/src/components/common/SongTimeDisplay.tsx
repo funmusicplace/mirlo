@@ -1,5 +1,7 @@
+/** @jsxImportSource @emotion/react */
 import React from "react";
 import { css } from "@emotion/css";
+import { css as reactCss } from "@emotion/react";
 
 export const SongTimeDisplay: React.FC<{
   playerRef: React.RefObject<HTMLVideoElement>;
@@ -29,12 +31,12 @@ export const SongTimeDisplay: React.FC<{
       }}
     >
       <div
-        className={css`
+        css={(theme) => reactCss`
           height: 100%;
           overflow: none;
           transition: 0.1s width;
           width: ${percent * 100}%;
-          background: var(--mi-primary-color);
+          background: ${theme.colors.primary};
           pointer-events: none;
         `}
       ></div>

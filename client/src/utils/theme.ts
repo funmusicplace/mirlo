@@ -2,7 +2,7 @@ import { color } from "./mirloDesignScales";
 
 const dark = {
   colors: {
-    primary: "#0096a8",
+    primary: color.pink.main,
     primaryHighlight: "#bcb3ff",
     text: color.white,
     textDark: color.white,
@@ -18,7 +18,7 @@ const dark = {
 
 const light = {
   colors: {
-    primary: "#0096a8",
+    primary: color.pink.main,
     primaryHighlight: "#bcb3ff",
     text: color.black,
     textDark: color.black,

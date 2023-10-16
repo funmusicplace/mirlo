@@ -10,7 +10,7 @@ const LoopingIndicator = styled.span`
   position: absolute;
   font-size: 0.5rem;
   padding: 0.15rem 0.2rem;
-  background-color: var(--mi-primary-color);
+  background-color: ${(props) => props.theme.colors.primary};
   border-radius: 100%;
   color: white;
   top: -0.25rem;

@@ -86,7 +86,6 @@ function App() {
           --mi-white: #FFEEDB;
           --mi-pink: #BE3455;
                 
-          --mi-primary-color: var(--mi-pink);
           --mi-primary-color--hover: var(--mi-pink);
         
           --mi-secondary-color: #ffb3d0;
@@ -188,7 +187,7 @@ function App() {
         
         a {
           transition: .25s color, .25s background-color;
-          color: var(--mi-primary-color);
+          color: ${theme.colors.primary};
         }
         
         @media (prefers-color-scheme: dark) {
