@@ -1,4 +1,6 @@
+/** @jsxImportSource @emotion/react */
 import { css } from "@emotion/css";
+import { css as reactCss } from "@emotion/react"
 import React from "react";
 
 export const SmallTileDetails: React.FC<{
@@ -27,16 +29,16 @@ export const SmallTileDetails: React.FC<{
           {title}
         </div>
         <div
-          className={css`
-            color: var(--mi-normal-foreground-color);
+          css={(theme) => reactCss`
+            color: ${theme.colors.text};
             font-size: 1rem;
           `}
         >
           {subtitle}
         </div>
         <div
-          className={css`
-            color: var(--mi-normal-foreground-color);
+          css={(theme) => reactCss`
+            color: ${theme.colors.text};
             font-size: 0.85rem;
             margin-top: 0.25rem;
             ul > li {

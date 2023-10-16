@@ -1,6 +1,6 @@
 /** @jsxImportSource @emotion/react */
 import { css } from "@emotion/css";
-import { css as reactCss } from "@emotion/react"
+import { css as reactCss } from "@emotion/react";
 import React from "react";
 import { FaTimes } from "react-icons/fa";
 import { ImMenu } from "react-icons/im";
@@ -92,8 +92,8 @@ const Header = () => {
             <IconButton
               onClick={() => setIsMenuOpen(false)}
               transparent
-              className={css`
-                color: var(--mi-normal-foreground-color);
+              css={(theme) => reactCss`
+                color: ${theme.colors.text};
               `}
             >
               <FaTimes />
@@ -142,7 +142,7 @@ const Header = () => {
             setIsMenuOpen(true);
           }}
         >
-          <ImMenu color={"var(--mi-normal-foreground-color)"} />
+          <ImMenu />
         </IconButton>
       </div>
     </header>

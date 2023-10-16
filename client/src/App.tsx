@@ -86,7 +86,6 @@ function App() {
           --mi-white: #FFEEDB;
           --mi-pink: #BE3455;
         
-          --mi-normal-foreground-color: var(--mi-black);
           --mi-light-foreground-color: #888;
           --mi-lighter-foreground-color: #bbb;
         
@@ -119,12 +118,6 @@ function App() {
             'Droid Sans', 'Helvetica Neue', sans-serif;
         }
         
-        @media (prefers-color-scheme: dark) {
-          html {
-            --mi-normal-foreground-color: var(--mi-white);
-          }
-        }
-        
         * {
           box-sizing: border-box;
           margin: 0;
@@ -139,10 +132,11 @@ function App() {
         body {
           margin: 0;
           background-color: ${theme.colors.background};
-          color: var(--mi-normal-foreground-color);
+          color: ${theme.colors.text};
           font-family: var(--mi-font-family-stack);
           -webkit-font-smoothing: auto;
-          -moz-osx-font-smoothing: auto;}
+          -moz-osx-font-smoothing: auto;
+        }
         
         body,
         #root {

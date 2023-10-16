@@ -8,7 +8,7 @@ export const TextArea = styled.textarea`
   width: 100%;
   background-color: ${(props) => props.theme.colors.translucentTint};
   border-radius: var(--mi-border-radius);
-  color: var(--mi-normal-foreground-color);
+  color: ${(props) => props.theme.colors.text};
 `;
 
 export default TextArea;

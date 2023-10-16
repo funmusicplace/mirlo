@@ -1,6 +1,6 @@
 /** @jsxImportSource @emotion/react */
 import { css } from "@emotion/css";
-import { css as reactCss } from "@emotion/react"
+import { css as reactCss } from "@emotion/react";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
@@ -48,7 +48,8 @@ const Menu: React.FC<{ setIsMenuOpen: (bool: boolean) => void }> = ({
 
           &:hover {
             border-radius: 0;
-            background: var(--mi-normal-foreground-color) !important;
+            /* TODO: use text token */
+            background: ${theme.colors.text} !important;
             border: none !important;
           }
         }

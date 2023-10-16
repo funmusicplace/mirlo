@@ -18,7 +18,7 @@ export const InputEl = styled.input`
   font-size: 1rem;
   margin-bottom: 0.5rem;
   width: 100%;
-  color: var(--mi-normal-foreground-color);
+  color: ${(props) => props.theme.colors.text};
   background-color: ${(props) => props.theme.colors.translucentTint};
   transition: 0.4ss border-radius;
 
