@@ -141,6 +141,9 @@ const Header = () => {
           onClick={() => {
             setIsMenuOpen(true);
           }}
+          css={(theme) => reactCss`
+            color: ${theme.colors.text};
+          `}
         >
           <ImMenu />
         </IconButton>
