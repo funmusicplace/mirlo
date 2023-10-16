@@ -85,9 +85,7 @@ function App() {
           --mi-black: #3E363F;
           --mi-white: #FFEEDB;
           --mi-pink: #BE3455;
-        
-          --mi-lighter-foreground-color: #bbb;
-        
+                
           --mi-primary-color: var(--mi-pink);
           --mi-primary-color--hover: var(--mi-pink);
         

@@ -4,9 +4,7 @@ import { Compactable } from "./Button";
 const IconButton = styled.button<Compactable & { transparent?: boolean }>`
   border: none;
   color: ${(props) =>
-    props.role === "primary"
-      ? "var(--mi-primary-color--hover)"
-      : "var(--mi-lighter-foreground-color)"};
+    props.role === "primary" ? "var(--mi-primary-color--hover)" : "#bbb"};
   background-color: ${(props) => props.theme.colors.translucentShade};
   padding: ${(props) => (props.compact ? "0.5rem 0.6rem" : "0.6rem 0.7rem")};
   cursor: pointer;
@@ -17,9 +15,7 @@ const IconButton = styled.button<Compactable & { transparent?: boolean }>`
 
   &:hover {
     color: ${(props) =>
-      props.role === "primary"
-        ? "var(--mi-primary-color--hover)"
-        : "var(--mi-lighter-foreground-color)"};
+      props.role === "primary" ? "var(--mi-primary-color--hover)" : "#bbb"};
     background-color: var(--mi-icon-button-background-color--hover);
   }
 `;

@@ -1,6 +1,6 @@
 /** @jsxImportSource @emotion/react */
 import { css } from "@emotion/css";
-import { css as reactCss } from "@emotion/react"
+import { css as reactCss } from "@emotion/react";
 import { InputEl } from "components/common/Input";
 import LoadingSpinner from "components/common/LoadingSpinner";
 import { bp } from "../../constants";
@@ -58,11 +58,7 @@ const HeaderSearch: React.FC = () => {
         onChange={onChange}
         className={css`
           margin-bottom: 0 !important;
-          border: 1px solid var(--mi-lighter-foreground-color)
-
-          &::placeholder {
-            color: white;
-          }
+          border: 1px solid #bbb;
         `}
       />
       {showSuggestions && (
