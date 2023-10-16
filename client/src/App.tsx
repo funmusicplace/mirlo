@@ -93,9 +93,7 @@ function App() {
         
           --mi-success-background-color: #4cdb5f;
         
-          --mi-warning-color: #f04e37;
           --mi-warning-color--hover: #f26f59;
-          --mi-warning-background-color: var(--mi-warning-color);
           --mi-darken-warning-background-color: #df250b;
           --mi-warning-foreground-color: white;
         

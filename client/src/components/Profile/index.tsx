@@ -1,4 +1,6 @@
+/** @jsxImportSource @emotion/react */
 import { css } from "@emotion/css";
+import { css as reactCss } from "@emotion/react";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -143,9 +145,11 @@ function Profile() {
         <Button style={{ width: "100%" }}>{t("manageArtists")}</Button>
       </Link>
       <Button
+        css={(theme) => reactCss`
+          background-color: ${theme.colors.warning};
+        `}
         style={{
           width: "100%",
-          backgroundColor: "var(--mi-warning-background-color)",
           borderColor: "var(--mi-darken-warning-background-color)",
           marginTop: "1rem",
         }}

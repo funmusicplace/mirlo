@@ -1,4 +1,6 @@
+/** @jsxImportSource @emotion/react */
 import { css } from "@emotion/css";
+import { css as reactCss } from "@emotion/react";
 import Button from "components/common/Button";
 import React from "react";
 import { FaEye, FaPen, FaTrash } from "react-icons/fa";
@@ -52,8 +54,8 @@ const ManageArtist: React.FC<{}> = () => {
     >
       {!artist.enabled && (
         <div
-          className={css`
-            background-color: var(--mi-warning-background-color);
+          css={(theme) => reactCss`
+            background-color: ${theme.colors.warning};
             padding: 1rem;
             color: var(--mi-warning-text-color);
           `}

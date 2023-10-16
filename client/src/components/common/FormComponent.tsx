@@ -15,7 +15,7 @@ const FormComponent = styled.div`
   }
 
   .error {
-    color: var(--mi-warning-color);
+    color: ${(props) => props.theme.colors.warning};
   }
 `;
 
