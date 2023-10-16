@@ -143,6 +143,9 @@ const Header = () => {
           }}
           css={(theme) => reactCss`
             color: ${theme.colors.text};
+            &:hover {
+              color: ${theme.colors.text};
+            }
           `}
         >
           <ImMenu />
