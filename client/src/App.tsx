@@ -82,12 +82,6 @@ function App() {
       />
       <Global
         styles={(theme) => reactCss`
-        html {
-          --mi-font-family-stack: 'Arial', -apple-system, BlinkMacSystemFont,
-            'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans',
-            'Droid Sans', 'Helvetica Neue', sans-serif;
-        }
-        
         * {
           box-sizing: border-box;
           margin: 0;
@@ -103,7 +97,7 @@ function App() {
           margin: 0;
           background-color: ${theme.colors.background};
           color: ${theme.colors.text};
-          font-family: var(--mi-font-family-stack);
+          font-family: ${theme.typography.fontFamily};
           -webkit-font-smoothing: auto;
           -moz-osx-font-smoothing: auto;
         }
@@ -171,7 +165,7 @@ function App() {
         }
         
         button {
-          font-family: var(--mi-font-family-stack);
+          font-family: ${theme.typography.fontFamily};
         }
 
         code {

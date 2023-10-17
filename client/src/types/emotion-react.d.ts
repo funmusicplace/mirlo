@@ -19,5 +19,8 @@ declare module "@emotion/react" {
       translucentShade: string;
     };
     borderRadius: string;
+    typography: {
+      fontFamily: string;
+    };
   }
 }

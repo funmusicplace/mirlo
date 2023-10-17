@@ -1,5 +1,10 @@
 import { color } from "./mirloDesignScales";
 
+const typography = {
+  fontFamily:
+    "'Arial', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif",
+};
+
 const dark = {
   colors: {
     primary: color.pink.main,
@@ -14,6 +19,7 @@ const dark = {
     translucentShade: "rgba(0, 0, 0, .05)",
   },
   borderRadius: ".2rem",
+  typography,
 };
 
 const light = {
@@ -30,6 +36,7 @@ const light = {
     translucentShade: "rgba(0, 0, 0, .05)",
   },
   borderRadius: ".2rem",
+  typography,
 };
 
 export default { dark, light };
