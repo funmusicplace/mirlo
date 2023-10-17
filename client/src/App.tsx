@@ -83,7 +83,6 @@ function App() {
       <Global
         styles={(theme) => reactCss`
         html {
-          --mi-black: #3E363F;
           --mi-white: #FFEEDB;
           --mi-pink: #BE3455;
 

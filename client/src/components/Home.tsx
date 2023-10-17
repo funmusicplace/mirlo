@@ -1,4 +1,6 @@
+/** @jsxImportSource @emotion/react */
 import { css } from "@emotion/css";
+import { css as reactCss } from "@emotion/react";
 import React from "react";
 import { Link } from "react-router-dom";
 import { useGlobalStateContext } from "state/GlobalState";
@@ -151,7 +153,7 @@ function Home() {
                 </a>
                 <Link
                   to="/login"
-                  className={css`
+                  css={(theme) => reactCss`
                     display: block;
                     height: 51px;
                     border-radius: 9999px;
@@ -166,11 +168,11 @@ function Home() {
                       text-decoration: underline;
                     }
 
-                    background-color: var(--mi-black);
+                    background-color: ${theme.colors.background};
                     color: var(--mi-white);
                     @media (prefers-color-scheme: dark) {
                       background-color: var(--mi-white);
-                      color: var(--mi-black);
+                      color: ${theme.colors.text};
                     }
                   `}
                 >
