@@ -154,9 +154,13 @@ const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
 
+const darkMode =
+  window.matchMedia &&
+  window.matchMedia("(prefers-color-scheme: dark)").matches;
+
 root.render(
   <React.StrictMode>
-    <ThemeProvider theme={theme}>
+    <ThemeProvider theme={darkMode ? theme.dark : theme.light}>
       <GlobalStateProvider>
         <SnackBarContextProvider>
           <RouterProvider router={router} />
