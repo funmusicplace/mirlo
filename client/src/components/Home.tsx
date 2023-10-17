@@ -145,7 +145,7 @@ function Home() {
                       text-decoration: underline;
                     }
 
-                    background-color: var(--mi-pink);
+                    background-color: ${theme.colors.primary};
                     color: ${theme.colors.text};
                   `}
                 >
