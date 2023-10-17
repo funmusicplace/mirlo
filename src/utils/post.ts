@@ -5,7 +5,7 @@ import prisma from "../../prisma/prisma";
 export default {
   single: (post: Post, isUserSubscriber?: boolean) => ({
     ...post,
-    content: isUserSubscriber || !post.forSubscribersOnly ? post.content : "",
+    content: isUserSubscriber || !post.isPublic ? post.content : "",
   }),
 };
 

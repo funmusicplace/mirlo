@@ -424,7 +424,7 @@ router.post("/refresh", (req, res) => {
   }
 });
 
-const setTokens = (res: Response, user: { email: string; id: number }) => {
+export const buildTokens = (user: { email: string; id: number }) => {
   const payload = {
     email: user.email,
     id: user.id,
@@ -436,6 +436,12 @@ const setTokens = (res: Response, user: { email: string; id: number }) => {
   const refreshToken = jwt.sign(payload, refresh_secret, {
     expiresIn: "1d",
   });
+
+  return { accessToken, refreshToken };
+};
+
+const setTokens = (res: Response, user: { email: string; id: number }) => {
+  const { accessToken, refreshToken } = buildTokens(user);
 
   res
     .cookie("jwt", accessToken, {

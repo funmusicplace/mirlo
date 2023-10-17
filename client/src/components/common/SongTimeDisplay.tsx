@@ -7,7 +7,6 @@ export const SongTimeDisplay: React.FC<{
   const duration = playerRef.current?.duration ?? 0;
   const currentSeconds = playerRef.current?.currentTime ?? 0;
   const percent = currentSeconds / duration;
-  console.log("duration", playerRef.current?.duration);
   return (
     <div
       className={css`
