@@ -25,10 +25,6 @@ export const InputEl = styled.input`
   &[disabled] {
     background-color: ${(props) => props.theme.colors.translucentShade};
   }
-
-  &:focus {
-    border-radius: var(--mi-border-radius-focus);
-  }
 `;
 
 export const Input: React.FC<Props> = ({ onChange, ...props }) => {

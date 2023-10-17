@@ -86,8 +86,6 @@ function App() {
           --mi-black: #3E363F;
           --mi-white: #FFEEDB;
           --mi-pink: #BE3455;
-                                                        
-          --mi-border-radius-focus: 8px;
           
           --mi-icon-button-background-color: ${theme.colors.translucentShade};
           --mi-icon-button-background-color--hover: rgba(0, 0, 0, 0.2);
