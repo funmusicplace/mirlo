@@ -115,7 +115,7 @@ const Header = () => {
             css={(theme) => reactCss`
               border-radius: ${theme.borderRadius};
               padding: 0.25rem 0.75rem;
-              color: var(--normal-background-color);
+              color: ${theme.colors.text};
               text-decoration: none;
               background-color: ${theme.colors.translucentShade};
               margin-right: 1rem;

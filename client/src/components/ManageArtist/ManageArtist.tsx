@@ -57,7 +57,6 @@ const ManageArtist: React.FC<{}> = () => {
           css={(theme) => reactCss`
             background-color: ${theme.colors.warning};
             padding: 1rem;
-            color: var(--mi-warning-text-color);
           `}
         >
           {t("notEnabled")}
