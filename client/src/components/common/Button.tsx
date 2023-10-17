@@ -121,7 +121,7 @@ const CustomButton = styled.button<Compactable>`
 
   align-items: center;
   display: inline-flex;
-  border-radius: var(--mi-border-radius);
+  border-radius: ${(props) => props.theme.borderRadius};
   justify-content: center;
   white-space: nowrap;
 

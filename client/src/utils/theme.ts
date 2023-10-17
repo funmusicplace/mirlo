@@ -13,7 +13,7 @@ const dark = {
     translucentTint: "rgba(255, 255, 255, 0.05)",
     translucentShade: "rgba(0, 0, 0, .05)",
   },
-  borderRadius: ".5rem",
+  borderRadius: ".2rem",
 };
 
 const light = {
@@ -29,7 +29,7 @@ const light = {
     translucentTint: "rgba(255, 255, 255, 0.4)",
     translucentShade: "rgba(0, 0, 0, .05)",
   },
-  borderRadius: ".5rem",
+  borderRadius: ".2rem",
 };
 
 export default { dark, light };

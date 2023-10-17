@@ -13,7 +13,7 @@ interface Props extends React.InputHTMLAttributes<HTMLInputElement> {
 
 export const InputEl = styled.input`
   border: 1px solid ${(props) => props.theme.colors.translucentShade};
-  border-radius: var(--mi-border-radius);
+  border-radius: ${(props) => props.theme.borderRadius};
   padding: 0.5rem 0.75rem;
   font-size: 1rem;
   margin-bottom: 0.5rem;

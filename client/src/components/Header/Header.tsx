@@ -113,7 +113,7 @@ const Header = () => {
           <Link
             to="/profile"
             css={(theme) => reactCss`
-              border-radius: var(--mi-border-radius);
+              border-radius: ${theme.borderRadius};
               padding: 0.25rem 0.75rem;
               color: var(--normal-background-color);
               text-decoration: none;

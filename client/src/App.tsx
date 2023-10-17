@@ -1,3 +1,4 @@
+/** @jsxImportSource @emotion/react */
 import { css } from "@emotion/css";
 import { Global, css as reactCss } from "@emotion/react";
 import PageHeader from "components/common/PageHeader";
@@ -86,7 +87,6 @@ function App() {
           --mi-white: #FFEEDB;
           --mi-pink: #BE3455;
                                                         
-          --mi-border-radius: 4px;
           --mi-border-radius-focus: 8px;
           
           --mi-icon-button-background-color: ${theme.colors.translucentShade};
@@ -245,10 +245,10 @@ function App() {
           `}
         >
           <div
-            className={css`
+            css={(theme) => reactCss`
               margin: 0 auto;
               width: 100%;
-              border-radius: var(--mi-border-radius);
+              border-radius: ${theme.borderRadius};
               display: flex;
               ${userId ? "display: flex;" : ""}
               flex-grow: 1;
