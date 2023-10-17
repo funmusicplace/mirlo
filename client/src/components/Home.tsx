@@ -130,7 +130,7 @@ function Home() {
                   href="https://dashboard.mailerlite.com/forms/396303/100612617721087214/share"
                   target="_blank"
                   rel="noreferrer"
-                  className={css`
+                  css={(theme) => reactCss`
                     display: block;
                     height: 51px;
                     border-radius: 9999px;
@@ -146,7 +146,7 @@ function Home() {
                     }
 
                     background-color: var(--mi-pink);
-                    color: var(--mi-white);
+                    color: ${theme.colors.text};
                   `}
                 >
                   Get on the mailing list
@@ -169,11 +169,7 @@ function Home() {
                     }
 
                     background-color: ${theme.colors.background};
-                    color: var(--mi-white);
-                    @media (prefers-color-scheme: dark) {
-                      background-color: var(--mi-white);
-                      color: ${theme.colors.text};
-                    }
+                    color: ${theme.colors.text};
                   `}
                 >
                   Log in

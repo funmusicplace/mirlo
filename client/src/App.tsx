@@ -83,7 +83,6 @@ function App() {
       <Global
         styles={(theme) => reactCss`
         html {
-          --mi-white: #FFEEDB;
           --mi-pink: #BE3455;
 
           --mi-font-family-stack: 'Arial', -apple-system, BlinkMacSystemFont,
