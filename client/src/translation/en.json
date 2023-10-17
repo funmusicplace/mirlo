@@ -143,6 +143,6 @@
     "description": "Description",
     "saveSubscription": "Save subscription",
     "createSubscription": "Create subscription",
-    "editSubscriptionTierFor": "Edit subscription tier for {{artistName"
+    "editSubscriptionTierFor": "Edit subscription tier for {{artistName}}"
   }
 }
