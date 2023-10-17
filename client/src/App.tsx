@@ -86,9 +86,7 @@ function App() {
           --mi-black: #3E363F;
           --mi-white: #FFEEDB;
           --mi-pink: #BE3455;
-          
-          --mi-icon-button-background-color--hover: rgba(0, 0, 0, 0.2);
-        
+
           --mi-font-family-stack: 'Arial', -apple-system, BlinkMacSystemFont,
             'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans',
             'Droid Sans', 'Helvetica Neue', sans-serif;

@@ -16,7 +16,7 @@ const IconButton = styled.button<Compactable & { transparent?: boolean }>`
   &:hover {
     color: ${(props) =>
       props.role === "primary" ? props.theme.colors.primary : "#bbb"};
-    background-color: var(--mi-icon-button-background-color--hover);
+    background-color: rgba(0, 0, 0, 0.2);
   }
 `;
 
