@@ -111,7 +111,7 @@ describe("artists/{id}/feed", () => {
     });
 
     const response = await request(baseURL)
-      .get(`artists/${artist.id}/feed?format=xml`)
+      .get(`artists/${artist.id}/feed?format=rss`)
       .set("Accept", "application/json");
 
     assert(response.statusCode === 200);

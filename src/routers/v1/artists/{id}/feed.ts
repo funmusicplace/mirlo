@@ -90,7 +90,7 @@ export default function () {
         }
       }
 
-      if (format === "xml") {
+      if (format === "rss") {
         // TODO: probably want to convert this to some sort of module
         const client = await prisma.client.findFirst({
           where: {
@@ -113,7 +113,7 @@ export default function () {
 
           feed.item({
             title: p.title,
-            description: html, // FIXME: This will have to be turned from markdown to html?
+            description: html,
             url: `${client?.applicationUrl}/post/${p.id}`,
             date: p.publishedAt,
           });
