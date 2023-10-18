@@ -82,7 +82,11 @@ const TrackGroupCard: React.FC<{
             {t("manageAlbum")}
           </Button>
           {album.published && (
-            <Link to={`/${album.artist?.urlSlug}/tg/${album.urlSlug}`}>
+            <Link
+              to={`/${
+                album.artist?.urlSlug?.toLowerCase() ?? album.artistId
+              }/tg/${album.urlSlug}`}
+            >
               <Button compact>{t("viewLive")}</Button>
             </Link>
           )}

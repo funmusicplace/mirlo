@@ -54,7 +54,7 @@ const Post: React.FC = () => {
       {post.artist && (
         <em>
           by{" "}
-          <Link to={`/${post.artist.urlSlug ?? post.artist.id}`}>
+          <Link to={`/${post.artist.urlSlug?.toLowerCase() ?? post.artistId}`}>
             {post.artist?.name}
           </Link>
         </em>

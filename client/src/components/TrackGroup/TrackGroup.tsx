@@ -105,7 +105,9 @@ function TrackGroup() {
           {artist && (
             <em>
               by{" "}
-              <Link to={`/${artist.urlSlug ?? artist.id}`}>{artist?.name}</Link>
+              <Link to={`/${artist.urlSlug?.toLowerCase() ?? artist.id}`}>
+                {artist?.name}
+              </Link>
             </em>
           )}
         </div>

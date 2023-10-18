@@ -63,7 +63,7 @@ export const findTrackGroupIdForSlug = async (
 
     const artist = await prisma.trackGroup.findFirst({
       where: {
-        urlSlug: id,
+        urlSlug: { equals: id, mode: "insensitive" },
         artistId: Number(artistId),
       },
     });

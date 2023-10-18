@@ -86,7 +86,7 @@ export default function () {
         data: {
           name,
           bio,
-          urlSlug: urlSlug ?? slugify(name),
+          urlSlug: urlSlug.toLowerCase() ?? slugify(name.toLowerCase()),
           user: {
             connect: {
               id: Number(userId),

@@ -25,7 +25,7 @@ export const findArtistIdForURLSlug = async (id: string) => {
   if (Number.isNaN(Number(id))) {
     const artist = await prisma.artist.findFirst({
       where: {
-        urlSlug: id,
+        urlSlug: { equals: id, mode: "insensitive" },
       },
     });
     id = `${artist?.id ?? id}`;

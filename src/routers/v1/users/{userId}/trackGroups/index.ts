@@ -92,7 +92,7 @@ export default function () {
           published,
           releaseDate: new Date(releaseDate),
           adminEnabled: true,
-          urlSlug: slugify(title),
+          urlSlug: slugify(title).toLowerCase(),
         },
       });
       res.json({ trackgroup });

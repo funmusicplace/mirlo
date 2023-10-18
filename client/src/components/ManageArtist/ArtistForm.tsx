@@ -67,7 +67,9 @@ export const ArtistForm: React.FC<{
       if (state.user) {
         try {
           const response = await api.get<{ exists: boolean }>(
-            `users/${state.user.id}/testExistence?urlSlug=${value}`
+            `users/${
+              state.user.id
+            }/testExistence?urlSlug=${value.toLowerCase()}`
           );
           return !response.result.exists;
         } catch (e) {
@@ -92,6 +94,7 @@ export const ArtistForm: React.FC<{
             "urlSlug",
             "properties.colors",
           ]);
+          sending.urlSlug = sending.urlSlug?.toLowerCase();
           if (existingId) {
             await api.put(`users/${state.user.id}/artists/${existingId}`, {
               ...sending,
