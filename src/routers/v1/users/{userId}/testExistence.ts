@@ -16,7 +16,7 @@ export default function () {
     try {
       const artist = await prisma.artist.findFirst({
         where: {
-          urlSlug,
+          urlSlug: { equals: urlSlug, mode: "insensitive" },
         },
       });
       if (artist) {

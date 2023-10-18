@@ -61,7 +61,7 @@ const ArtistTrackGroup: React.FC<{
           `}
         >
           <Link
-            to={`/${artist?.urlSlug ?? trackGroup.artistId}/tg/${
+            to={`/${artist?.urlSlug ?? trackGroup.artistId}/release/${
               trackGroup.urlSlug ?? trackGroup.id
             }`}
           >

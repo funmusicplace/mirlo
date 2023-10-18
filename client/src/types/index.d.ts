@@ -56,6 +56,7 @@ interface Post {
   publishedAt: string;
   artist?: Artist;
   isPublic: boolean;
+  artistId?: number;
 }
 
 interface Artist {

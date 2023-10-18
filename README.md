@@ -16,6 +16,7 @@ Main libraries:
 ```sh
 git clone <repository>
 cd mirlo
+cp .env.example .env
 docker-compose up
 ```
 

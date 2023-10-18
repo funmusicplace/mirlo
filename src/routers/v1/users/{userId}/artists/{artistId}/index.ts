@@ -37,7 +37,7 @@ export default function () {
         data: {
           bio,
           name,
-          urlSlug,
+          urlSlug: urlSlug.toLowerCase(),
           properties,
         },
       });
