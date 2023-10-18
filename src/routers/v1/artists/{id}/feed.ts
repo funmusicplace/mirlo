@@ -1,8 +1,12 @@
 import { Request, Response } from "express";
 import { User, Prisma } from "@prisma/client";
 
+import RSS from "rss";
+import showdown from "showdown";
+
 import prisma from "../../../../../prisma/prisma";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
+import { findArtistIdForURLSlug } from "../../../../utils/artist";
 
 export default function () {
   const operations = {
@@ -10,10 +14,12 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response) {
-    const { id } = req.params;
+    let { id }: { id?: string } = req.params;
+    const { format } = req.query;
     const user = req.user as User;
 
     try {
+      id = await findArtistIdForURLSlug(id);
       const artist = await prisma.artist.findFirst({
         where: {
           id: Number(id),
@@ -84,9 +90,46 @@ export default function () {
         }
       }
 
-      res.json({
-        results: posts,
-      });
+      if (format === "xml") {
+        // TODO: probably want to convert this to some sort of module
+        const client = await prisma.client.findFirst({
+          where: {
+            applicationName: "frontend",
+          },
+        });
+
+        const feed = new RSS({
+          title: `${artist.name} Posts`,
+          description: artist.bio ?? undefined,
+          feed_url: `${process.env.API_DOMAIN}/v1/${artist.urlSlug}/feed?format=rss`,
+          site_url: `${client?.applicationUrl}/${artist.urlSlug}`,
+        });
+        const converter = new showdown.Converter();
+
+        for (const p of posts) {
+          // const content = p.content;
+          const text = p.content ?? "";
+          const html = converter.makeHtml(text);
+          // const content = await unified
+          //   .unified()
+          //   .use(remarkParse)
+          //   .use(remarkHtml)
+          //   .process(p.content ?? "");
+          feed.item({
+            title: p.title,
+            description: html, // FIXME: This will have to be turned from markdown to html?
+            url: `${client?.applicationUrl}/post/${p.id}`,
+            date: p.publishedAt,
+          });
+        }
+
+        res.set("Content-Type", "application/rss+xml");
+        res.send(feed.xml());
+      } else {
+        res.json({
+          results: posts,
+        });
+      }
     } catch (e) {
       console.error(`/v1/artists/{id}/feed ${e}`);
       res.status(400);

@@ -5,17 +5,15 @@ import { describe, it } from "mocha";
 import request from "supertest";
 import prisma from "../../../prisma/prisma";
 import { buildTokens } from "../../../src/routers/auth";
+import Parser from "rss-parser";
+import { clearTables } from "../../utils";
 
 const baseURL = `${process.env.API_DOMAIN}/v1/`;
 
 describe("artists/{id}/feed", () => {
   beforeEach(async () => {
     try {
-      await prisma.$executeRaw`DELETE FROM "ArtistUserSubscription";`;
-      await prisma.$executeRaw`DELETE FROM "ArtistSubscriptionTier";`;
-      await prisma.$executeRaw`DELETE FROM "Post";`;
-      await prisma.$executeRaw`DELETE FROM "Artist";`;
-      await prisma.$executeRaw`DELETE FROM "User";`;
+      await clearTables();
     } catch (e) {
       console.error(e);
     }
@@ -84,6 +82,50 @@ describe("artists/{id}/feed", () => {
     assert(response.statusCode === 200);
     assert(response.body.results.length === 1);
     assert(response.body.results[0].title === postTitle);
+  });
+
+  it("should GET / a public post and display it in RSS", async () => {
+    const user = await prisma.user.create({
+      data: {
+        email: "test@test.com",
+      },
+    });
+    const artist = await prisma.artist.create({
+      data: {
+        name: "Test artist",
+        urlSlug: "test-artist",
+        userId: user.id,
+        enabled: true,
+      },
+    });
+
+    const postTitle = "Test post";
+
+    await prisma.post.create({
+      data: {
+        title: postTitle,
+        artistId: artist.id,
+        isPublic: true,
+        content: "# HI",
+      },
+    });
+
+    const response = await request(baseURL)
+      .get(`artists/${artist.id}/feed?format=xml`)
+      .set("Accept", "application/json");
+
+    assert(response.statusCode === 200);
+    let parser = new Parser();
+    const obj = await parser.parseString(response.text);
+    assert(response.text);
+    assert.equal(
+      obj.feedUrl,
+      `${process.env.API_DOMAIN}/v1/${artist.urlSlug}/feed?format=rss`
+    );
+    assert.equal(obj.title, `${artist.name} Posts`);
+    assert.equal(obj.items.length, 1);
+    assert(obj.items[0].content?.includes("<h1"));
+    assert.equal(obj.items[0].title, postTitle);
   });
 
   it("should not GET / a hidden post", async () => {
@@ -213,8 +255,6 @@ describe("artists/{id}/feed", () => {
     const postTitle = "Test post";
     const minTier = artist.subscriptionTiers[0];
     const maxTier = artist.subscriptionTiers[1];
-
-    console.log("minTier", minTier);
 
     await prisma.post.create({
       data: {
