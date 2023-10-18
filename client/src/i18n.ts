@@ -21,7 +21,7 @@ const resources = {
 
 const userLanguage = navigator.language;
 
-const finishedLanguages = ["en"];
+const finishedLanguages = ["en", "fr"];
 
 const defaultLanguage = finishedLanguages.find((lang) =>
   userLanguage.startsWith(lang)
