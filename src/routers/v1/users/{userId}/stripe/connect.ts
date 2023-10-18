@@ -30,7 +30,6 @@ export default function () {
 
           if (!accountId) {
             const account = await stripe.accounts.create({
-              country: "US", // FIXME: we need to register users country
               type: "standard",
               business_profile: { name: user.name ?? "" },
             });

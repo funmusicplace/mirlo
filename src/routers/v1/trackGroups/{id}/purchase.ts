@@ -60,22 +60,27 @@ export default function () {
       let productKey = trackGroup.stripeProductKey;
 
       if (!trackGroup.stripeProductKey) {
-        const product = await stripe.products.create({
-          name: `${trackGroup.title} by ${trackGroup.artist.name}`,
-          description:
-            trackGroup.about && trackGroup.about !== ""
-              ? trackGroup.about
-              : `The album ${trackGroup.title} by ${trackGroup.artist.name}.`,
-          tax_code: "txcd_10401100",
-          images: trackGroup.cover
-            ? [
-                generateFullStaticImageUrl(
-                  trackGroup.cover?.url[4],
-                  finalCoversBucket
-                ),
-              ]
-            : [],
-        });
+        const product = await stripe.products.create(
+          {
+            name: `${trackGroup.title} by ${trackGroup.artist.name}`,
+            description:
+              trackGroup.about && trackGroup.about !== ""
+                ? trackGroup.about
+                : `The album ${trackGroup.title} by ${trackGroup.artist.name}.`,
+            tax_code: "txcd_10401100",
+            images: trackGroup.cover
+              ? [
+                  generateFullStaticImageUrl(
+                    trackGroup.cover?.url[4],
+                    finalCoversBucket
+                  ),
+                ]
+              : [],
+          },
+          {
+            stripeAccount: stripeAccountId,
+          }
+        );
         await prisma.trackGroup.update({
           where: {
             id: Number(trackGroupId),
@@ -115,7 +120,7 @@ export default function () {
               userId,
             },
             mode: "payment",
-            success_url: `${API_DOMAIN}/v1/checkout?success=true&session_id={CHECKOUT_SESSION_ID}`,
+            success_url: `${API_DOMAIN}/v1/checkout?success=true&stripeAccountId=${stripeAccountId}&session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${API_DOMAIN}/v1/checkout?canceled=true`,
           },
           { stripeAccount: stripeAccountId }

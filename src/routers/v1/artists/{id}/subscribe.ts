@@ -56,7 +56,10 @@ export default function () {
         });
       }
 
-      const productKey = await createSubscriptionStripeProduct(tier);
+      const productKey = await createSubscriptionStripeProduct(
+        tier,
+        stripeAccountId
+      );
 
       if (productKey) {
         const session = await stripe.checkout.sessions.create(
@@ -82,7 +85,7 @@ export default function () {
               userId,
             },
             mode: "subscription",
-            success_url: `${API_DOMAIN}/v1/checkout?success=true&session_id={CHECKOUT_SESSION_ID}`,
+            success_url: `${API_DOMAIN}/v1/checkout?success=true&stripeAccountId=${stripeAccountId}&session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${API_DOMAIN}/v1/checkout?canceled=true`,
           },
           {
