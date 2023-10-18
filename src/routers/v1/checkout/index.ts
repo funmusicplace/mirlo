@@ -9,10 +9,15 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
-    const { success, session_id } = req.query;
+    const { success, session_id, stripeAccountId } = req.query;
     try {
-      if (session_id && typeof session_id === "string") {
-        const session = await stripe.checkout.sessions.retrieve(session_id);
+      if (
+        typeof session_id === "string" &&
+        typeof stripeAccountId === "string"
+      ) {
+        const session = await stripe.checkout.sessions.retrieve(session_id, {
+          stripeAccount: stripeAccountId,
+        });
         const { clientId, artistId, trackGroupId, tierId } =
           session.metadata as unknown as {
             clientId: number | null;

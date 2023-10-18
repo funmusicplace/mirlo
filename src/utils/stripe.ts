@@ -9,7 +9,8 @@ const stripe = new Stripe(STRIPE_KEY ?? "", {
 });
 
 export const createSubscriptionStripeProduct = async (
-  tier: Prisma.ArtistSubscriptionTierGetPayload<{ include: { artist: true } }>
+  tier: Prisma.ArtistSubscriptionTierGetPayload<{ include: { artist: true } }>,
+  stripeAccountId: string
 ) => {
   let productKey = tier.stripeProductKey;
   if (productKey) {
@@ -26,10 +27,15 @@ export const createSubscriptionStripeProduct = async (
   }
 
   if (!productKey) {
-    const product = await stripe.products.create({
-      name: `Supporting ${tier.artist.name} at ${tier.name}`,
-      description: tier.description ?? "Thank you for your support!",
-    });
+    const product = await stripe.products.create(
+      {
+        name: `Supporting ${tier.artist.name} at ${tier.name}`,
+        description: tier.description ?? "Thank you for your support!",
+      },
+      {
+        stripeAccount: stripeAccountId,
+      }
+    );
     await prisma.artistSubscriptionTier.update({
       where: {
         id: Number(tier.id),
