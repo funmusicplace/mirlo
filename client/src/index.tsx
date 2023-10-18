@@ -138,7 +138,7 @@ const router = createBrowserRouter([
             ),
           },
           {
-            path: "tg/:trackGroupId",
+            path: "release/:trackGroupId",
             element: (
               <ArtistProvider>
                 <TrackGroup />
