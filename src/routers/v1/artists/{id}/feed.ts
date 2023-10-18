@@ -110,11 +110,7 @@ export default function () {
           // const content = p.content;
           const text = p.content ?? "";
           const html = converter.makeHtml(text);
-          // const content = await unified
-          //   .unified()
-          //   .use(remarkParse)
-          //   .use(remarkHtml)
-          //   .process(p.content ?? "");
+
           feed.item({
             title: p.title,
             description: html, // FIXME: This will have to be turned from markdown to html?
