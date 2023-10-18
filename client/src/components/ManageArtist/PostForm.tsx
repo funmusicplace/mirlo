@@ -33,7 +33,7 @@ const PostForm: React.FC<{
     title: string;
     publishedAt: string;
     content: string;
-    forSubscribersOnly: boolean;
+    isPublic: boolean;
   }>({
     defaultValues: existing
       ? { ...existing, publishedAt: publishedAt.toISOString().slice(0, 16) }
@@ -53,7 +53,7 @@ const PostForm: React.FC<{
           if (existingId) {
             // const timezoneOffset =
             await api.put(`users/${userId}/posts/${existingId}`, {
-              ...pick(data, ["title", "content", "forSubscribersOnly"]),
+              ...pick(data, ["title", "content", "isPublic"]),
               publishedAt: new Date(data.publishedAt + ":00").toISOString(),
               artistId: artist.id,
             });
@@ -67,7 +67,7 @@ const PostForm: React.FC<{
               },
               { id: number }
             >(`users/${userId}/posts`, {
-              ...pick(data, ["title", "content", "forSubscribersOnly"]),
+              ...pick(data, ["title", "content", "isPublic"]),
               publishedAt: new Date(data.publishedAt + ":00").toISOString(),
               artistId: artist.id,
             });
@@ -112,11 +112,7 @@ const PostForm: React.FC<{
           display: flex;
         `}
       >
-        <input
-          id="private"
-          type="checkbox"
-          {...register("forSubscribersOnly")}
-        />{" "}
+        <input id="private" type="checkbox" {...register("isPublic")} />{" "}
         <label htmlFor="private">
           For subscribers only?
           <small>Is this post for subscribers only?</small>

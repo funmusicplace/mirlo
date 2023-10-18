@@ -3,15 +3,15 @@ import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
 import request from "supertest";
-import prisma from "../../prisma/prisma";
+import prisma from "../../../prisma/prisma";
+import { clearTables } from "../../utils";
 
 const baseURL = `${process.env.API_DOMAIN}/v1/`;
 
 describe("artists", () => {
   beforeEach(async () => {
     try {
-      await prisma.$executeRaw`DELETE FROM "Artist";`;
-      await prisma.$executeRaw`DELETE FROM "User";`;
+      await clearTables();
     } catch (e) {
       console.error(e);
     }

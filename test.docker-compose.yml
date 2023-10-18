@@ -28,6 +28,7 @@ services:
     environment:
       - NODE_ENV=${NODE_ENV:-test}
       - CI=${CI:-false}
+      - API_DOMAIN=http://api:3000
     depends_on:
       - redis
       - pgsql

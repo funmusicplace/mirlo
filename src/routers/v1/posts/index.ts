@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { User } from "@prisma/client";
+import { User, Prisma } from "@prisma/client";
 
 import postProcessor from "../../../utils/post";
 
@@ -15,10 +15,43 @@ export default function () {
   async function GET(req: Request, res: Response) {
     const user = req.user as User;
     try {
+      let where: Prisma.PostWhereInput = {
+        publishedAt: { lte: new Date() },
+        isPublic: true,
+      };
+
+      if (user) {
+        delete where.isPublic;
+        where.OR = [
+          {
+            isPublic: true,
+          },
+          {
+            minimumSubscriptionTier: {
+              userSubscriptions: {
+                some: {
+                  userId: user.id,
+                },
+              },
+            },
+          },
+          {
+            postSubscriptionTiers: {
+              some: {
+                artistSubscriptionTier: {
+                  userSubscriptions: {
+                    some: {
+                      userId: user.id,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        ];
+      }
       const posts = await prisma.post.findMany({
-        where: {
-          publishedAt: { lte: new Date() },
-        },
+        where,
         include: {
           artist: true,
         },

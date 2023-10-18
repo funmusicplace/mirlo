@@ -14,6 +14,8 @@
   "dependencies": {
     "@bull-board/express": "^4.11.0",
     "@prisma/client": "5",
+    "@types/rss": "^0.0.30",
+    "@types/showdown": "^2.0.2",
     "archiver": "^6.0.0",
     "bcryptjs": "^2.4.3",
     "bullmq": "^3.5.10",
@@ -41,8 +43,10 @@
     "passport": "^0.6.0",
     "passport-jwt": "^4.0.0",
     "prisma": "5",
+    "rss": "^1.2.2",
     "sharp": "^0.31.3",
     "shasum": "^1.0.2",
+    "showdown": "^2.1.0",
     "slugify": "^1.6.6",
     "stripe": "^12.0.0",
     "swagger-ui-express": "^4.6.0",
@@ -79,6 +83,7 @@
     "concurrently": "^7.6.0",
     "mocha": "^10.2.0",
     "nodemon": "^2.0.20",
+    "rss-parser": "^3.13.0",
     "supertest": "^6.3.3"
   },
   "prisma": {

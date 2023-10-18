@@ -17,7 +17,7 @@ function Home() {
     const fetched = await api.getMany<Post>("posts");
     setPosts(
       // FIXME: Maybe this should be managed by a filter on the API?
-      fetched.results.filter((p) => !(p.forSubscribersOnly && p.content === ""))
+      fetched.results.filter((p) => !(p.isPublic && p.content === ""))
     );
   }, []);
 
