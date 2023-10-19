@@ -99,7 +99,6 @@ const handleSubscription = async (
 };
 
 const handleCheckoutSession = async (session: Stripe.Checkout.Session) => {
-  session;
   const { tierId, userId, trackGroupId, stripeAccountId } =
     session.metadata as unknown as {
       tierId: string;
@@ -107,6 +106,7 @@ const handleCheckoutSession = async (session: Stripe.Checkout.Session) => {
       trackGroupId: string;
       stripeAccountId: string;
     };
+  console.log("handle checkout session", stripeAccountId, tierId, trackGroupId);
   session = await stripe.checkout.sessions.retrieve(
     session.id,
     {
