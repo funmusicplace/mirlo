@@ -13,8 +13,6 @@ import { GlobalStateProvider } from "./state/GlobalState";
 import Profile from "./components/Profile";
 import Manage from "./components/ManageArtist/Manage";
 import { SnackBarContextProvider } from "state/SnackbarContext";
-import { ThemeProvider } from "@emotion/react";
-import theme from "utils/theme";
 import Admin from "components/Admin/Admin";
 import AdminUsers from "components/Admin/Users";
 import AdminTrackGroups from "components/Admin/Trackgroups";
@@ -154,19 +152,13 @@ const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
 
-const darkMode =
-  window.matchMedia &&
-  window.matchMedia("(prefers-color-scheme: dark)").matches;
-
 root.render(
   <React.StrictMode>
-    <ThemeProvider theme={darkMode ? theme.dark : theme.light}>
-      <GlobalStateProvider>
-        <SnackBarContextProvider>
-          <RouterProvider router={router} />
-        </SnackBarContextProvider>
-      </GlobalStateProvider>
-    </ThemeProvider>
+    <GlobalStateProvider>
+      <SnackBarContextProvider>
+        <RouterProvider router={router} />
+      </SnackBarContextProvider>
+    </GlobalStateProvider>
   </React.StrictMode>
 );
 

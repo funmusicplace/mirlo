@@ -15,15 +15,42 @@ import { Footer } from "components/Footer";
 import { bp } from "./constants";
 import { MetaCard } from "components/common/MetaCard";
 import GlobalStyles from "components/GlobalStyles";
+import { ThemeProvider } from "@emotion/react";
+import mirloTheme from "utils/theme";
 
 function App() {
   const { state, dispatch } = useGlobalStateContext();
   const { isDisplayed } = useContext(SnackbarContext);
+  const [theme, setTheme] = React.useState(
+    window.matchMedia &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? mirloTheme.dark
+      : mirloTheme.light
+  );
   useWidgetListener();
   const navigate = useNavigate();
   const location = useLocation();
   const userId = state.user?.id;
   const isPlaying = state.playerQueueIds;
+
+  React.useEffect(() => {
+    function handleChangeColorScheme(event: MediaQueryListEvent) {
+      if (event.matches) {
+        setTheme(mirloTheme.dark);
+      } else {
+        setTheme(mirloTheme.light);
+      }
+    }
+    window.matchMedia &&
+      window
+        .matchMedia("(prefers-color-scheme: dark)")
+        .addEventListener("change", handleChangeColorScheme);
+    return () => {
+      window
+        .matchMedia("(prefers-color-scheme: dark)")
+        .removeEventListener("change", handleChangeColorScheme);
+    };
+  });
 
   React.useEffect(() => {
     const callback = async () => {
@@ -75,7 +102,7 @@ function App() {
   }
 
   return (
-    <>
+    <ThemeProvider theme={theme}>
       <MetaCard
         title="Mirlo"
         description="A music distribution and patronage site"
@@ -132,7 +159,7 @@ function App() {
 
         <Player />
       </div>
-    </>
+    </ThemeProvider>
   );
 }
 
