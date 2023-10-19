@@ -83,6 +83,7 @@ export default function () {
               artistId,
               tierId,
               userId,
+              stripeAccountId,
             },
             mode: "subscription",
             success_url: `${API_DOMAIN}/v1/checkout?success=true&stripeAccountId=${stripeAccountId}&session_id={CHECKOUT_SESSION_ID}`,

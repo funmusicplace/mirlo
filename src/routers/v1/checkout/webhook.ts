@@ -99,14 +99,21 @@ const handleSubscription = async (
 };
 
 const handleCheckoutSession = async (session: Stripe.Checkout.Session) => {
-  const { tierId, userId, trackGroupId } = session.metadata as unknown as {
-    tierId: string;
-    userId: string;
-    trackGroupId: string;
-  };
-  session = await stripe.checkout.sessions.retrieve(session.id, {
-    expand: ["line_items"],
-  });
+  session;
+  const { tierId, userId, trackGroupId, stripeAccountId } =
+    session.metadata as unknown as {
+      tierId: string;
+      userId: string;
+      trackGroupId: string;
+      stripeAccountId: string;
+    };
+  session = await stripe.checkout.sessions.retrieve(
+    session.id,
+    {
+      expand: ["line_items"],
+    },
+    { stripeAccount: stripeAccountId }
+  );
   if (tierId && userId) {
     await handleSubscription(Number(userId), Number(tierId), session);
   } else if (trackGroupId && userId) {
