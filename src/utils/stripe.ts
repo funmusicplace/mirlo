@@ -15,7 +15,9 @@ export const createSubscriptionStripeProduct = async (
   let productKey = tier.stripeProductKey;
   if (productKey) {
     try {
-      const product = await stripe.products.retrieve(productKey);
+      const product = await stripe.products.retrieve(productKey, {
+        stripeAccount: stripeAccountId,
+      });
     } catch (e) {
       if (e instanceof Error) {
         if (e.message.includes("No such product")) {

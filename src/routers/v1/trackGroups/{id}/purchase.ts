@@ -118,6 +118,7 @@ export default function () {
               trackGroupId,
               artistId: trackGroup.artistId,
               userId,
+              stripeAccountId,
             },
             mode: "payment",
             success_url: `${API_DOMAIN}/v1/checkout?success=true&stripeAccountId=${stripeAccountId}&session_id={CHECKOUT_SESSION_ID}`,
