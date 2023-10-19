@@ -39,4 +39,6 @@ const light = {
   typography,
 };
 
-export default { dark, light };
+const theme = { dark, light };
+
+export default theme;
