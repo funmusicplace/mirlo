@@ -145,8 +145,8 @@ function Home() {
                       text-decoration: underline;
                     }
 
-                    background-color: ${theme.colors.primary};
-                    color: ${theme.colors.text};
+                    background-color: ${theme.colors.pink.main};
+                    color: ${theme.colors.white};
                   `}
                 >
                   Get on the mailing list
@@ -168,8 +168,16 @@ function Home() {
                       text-decoration: underline;
                     }
 
-                    background-color: ${theme.colors.background};
-                    color: ${theme.colors.text};
+                    background-color: ${
+                      theme.type === "dark"
+                        ? theme.colors.white
+                        : theme.colors.black
+                    };
+                    color: ${
+                      theme.type === "dark"
+                        ? theme.colors.black
+                        : theme.colors.white
+                    };
                   `}
                 >
                   Log in

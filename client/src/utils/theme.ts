@@ -1,11 +1,13 @@
 import { color } from "./mirloDesignScales";
+import { Theme } from "@emotion/react";
 
 const typography = {
   fontFamily:
     "'Arial', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif",
 };
 
-const dark = {
+const dark: Theme = {
+  type: "dark",
   colors: {
     primary: color.pink.main,
     primaryHighlight: "#bcb3ff",
@@ -17,12 +19,14 @@ const dark = {
     success: "#4cdb5f",
     translucentTint: "rgba(255, 255, 255, 0.05)",
     translucentShade: "rgba(0, 0, 0, .05)",
+    ...color,
   },
   borderRadius: ".2rem",
   typography,
 };
 
-const light = {
+const light: Theme = {
+  type: "light",
   colors: {
     primary: color.pink.main,
     primaryHighlight: "#bcb3ff",
@@ -34,6 +38,7 @@ const light = {
     success: "#4cdb5f",
     translucentTint: "rgba(255, 255, 255, 0.4)",
     translucentShade: "rgba(0, 0, 0, .05)",
+    ...color,
   },
   borderRadius: ".2rem",
   typography,

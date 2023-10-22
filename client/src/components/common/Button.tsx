@@ -98,12 +98,19 @@ const CustomButton = styled.button<Compactable>`
             props.color
               ? props.color
               : (props.role === "warning" && props.theme.colors.warning) ||
-                props.theme.colors.primary
+                (props.role === "primary" && props.theme.colors.pink.main) ||
+                (props.role === "secondary" &&
+                  (props.theme.type === "dark"
+                    ? props.theme.colors.white
+                    : props.theme.colors.black))
           };
           color: ${
-            props.role === "primary"
-              ? props.theme.colors.text
-              : props.theme.colors.textDark
+            (props.role === "warning" && props.theme.colors.white) ||
+            (props.role === "primary" && props.theme.colors.white) ||
+            (props.role === "secondary" &&
+              (props.theme.type === "dark"
+                ? props.theme.colors.black
+                : props.theme.colors.white))
           };
 
           &:hover:not(:disabled) {
@@ -179,7 +186,7 @@ export const Button: React.FC<ButtonProps> = ({
       color={
         artistColor ? (artistColor as any)?.[role ?? "primary"] : undefined
       }
-      role={role}
+      role={role || "primary"}
       {...props}
     >
       {isLoading && (
