@@ -7,11 +7,15 @@ import api from "services/api";
 import { useGlobalStateContext } from "state/GlobalState";
 import ManageSubscriptionTierBox from "./ManageSubscriptionTierBox";
 import SubscriptionForm from "./SubscriptionForm";
+import { useTranslation } from "react-i18next";
 
 const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
   const {
     state: { user },
   } = useGlobalStateContext();
+  const { t } = useTranslation("translation", {
+    keyPrefix: "manageSubscriptions",
+  });
 
   const { artistId } = useParams();
   const [isLoadingSubscriberData, setIsLoadingSubscriberData] =
@@ -91,7 +95,7 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
           onClick={downloadSubscriberData}
           isLoading={isLoadingSubscriberData}
         >
-          Download subscriber data
+          {t("downloadSubscriberData")}
         </Button>
       </div>
       {manageTier && (

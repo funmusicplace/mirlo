@@ -6,6 +6,7 @@ import { useSnackbar } from "state/SnackbarContext";
 import { API_ROOT } from "../../constants";
 import { useGlobalStateContext } from "../../state/GlobalState";
 import Button from "../common/Button";
+import api from "services/api";
 
 const Menu: React.FC<{ setIsMenuOpen: (bool: boolean) => void }> = ({
   setIsMenuOpen,
@@ -14,6 +15,32 @@ const Menu: React.FC<{ setIsMenuOpen: (bool: boolean) => void }> = ({
   const { state, dispatch } = useGlobalStateContext();
   const navigate = useNavigate();
   const snackbar = useSnackbar();
+  const [artists, setArtists] = React.useState<Artist[]>([]);
+  const [stripeAccountStatus, setStripeAccountStatus] =
+    React.useState<AccountStatus>();
+
+  const userId = state.user?.id;
+
+  const fetchArtists = React.useCallback(async () => {
+    if (userId) {
+      const fetchedArtists = await api.getMany<Artist>(
+        `users/${userId}/artists`
+      );
+      if (fetchedArtists) {
+        setArtists(fetchedArtists.results);
+      }
+
+      const checkAccountStatus = await api.get<AccountStatus>(
+        `users/${userId}/stripe/checkAccountStatus`
+      );
+      setStripeAccountStatus(checkAccountStatus.result);
+    }
+  }, [userId]);
+
+  React.useEffect(() => {
+    fetchArtists();
+  }, [fetchArtists]);
+
   const onLogOut = React.useCallback(async () => {
     await fetch(API_ROOT + "/auth/logout", {
       method: "GET",
@@ -35,18 +62,20 @@ const Menu: React.FC<{ setIsMenuOpen: (bool: boolean) => void }> = ({
 
         & li * {
           background: transparent !important;
-          width: 100%;
+          // width: 100%;
+          width: 200px;
           text-decoration: none;
-          text-align: center;
+          text-align: right;
           display: block;
-          color: var(--mi-normal-background-color);
-          font-weight: bold;
+          color: var(--mi-normal-foreground-color);
+          font-weight: normal;
           border-radius: 0;
+          padding: 0.5rem;
           border: none;
 
           &:hover {
             border-radius: 0;
-            background: var(--mi-normal-foreground-color) !important;
+            background: var(--mi-lighten-background-color) !important;
             border: none !important;
           }
         }
@@ -54,11 +83,6 @@ const Menu: React.FC<{ setIsMenuOpen: (bool: boolean) => void }> = ({
     >
       {state.user && (
         <>
-          <li>
-            <Button onClick={onLogOut} className={css``}>
-              {t("logOut")}
-            </Button>
-          </li>
           <li>
             <Button
               onClick={() => {
@@ -69,14 +93,23 @@ const Menu: React.FC<{ setIsMenuOpen: (bool: boolean) => void }> = ({
               {t("profile")}
             </Button>
           </li>
+          {artists.map((a) => {
+            return (
+              <li>
+                <Button
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    navigate(`/manage/artists/${a.id}`);
+                  }}
+                >
+                  {a.name}
+                </Button>
+              </li>
+            );
+          })}
           <li>
-            <Button
-              onClick={() => {
-                setIsMenuOpen(false);
-                navigate("/manage");
-              }}
-            >
-              {t("manage")}
+            <Button onClick={onLogOut} className={css``}>
+              {t("logOut")}
             </Button>
           </li>
         </>

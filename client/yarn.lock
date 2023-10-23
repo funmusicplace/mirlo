@@ -7778,6 +7778,11 @@ parent-module@^1.0.0:
   dependencies:
     callsites "^3.0.0"
 
+parse-audio-metadata@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/parse-audio-metadata/-/parse-audio-metadata-1.2.0.tgz#4a2a3ddec8e0492d71ff2bc23e106a5be7b8c09a"
+  integrity sha512-TdSFkdYPe3os/tmRzIJNdr++hC0wTR4NwqzQ1IbbMT4evalZiN539hMaBUCTBQ4i8UFltVPkFWm3VN9Wx/fiSg==
+
 parse-json@^5.0.0, parse-json@^5.2.0:
   version "5.2.0"
   resolved "https://registry.npmjs.org/parse-json/-/parse-json-5.2.0.tgz"

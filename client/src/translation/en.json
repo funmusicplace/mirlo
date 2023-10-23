@@ -78,8 +78,12 @@
     "edit": "Edit"
   },
   "manage": {
+    "manageArtists": "Manage artists",
     "error": "Something went wrong",
-    "setUpBankAccount": "Set up bank account"
+    "setUpBankAccount": "Set up bank account",
+    "createNewArtist": "Create new artist account",
+    "waitingOnStripe": "We're waiting on stripe to verify your account",
+    "stripeAccountVerified": "Stripe account verified!"
   },
   "manageArtist": {
     "notEnabled": "This artist has not been enabled by site admin yet! Contact an admin to do so.",
@@ -115,7 +119,9 @@
     "price": "Price",
     "saveAlbum": "Save album",
     "submitAlbum": "Submit album",
-    "publish": "Publish"
+    "publish": "Publish",
+    "uploadTracks": "Upload tracks",
+    "addTheFollowingTracks": "We'll add the following tracks"
   },
   "artistForm": {
     "displayName": "Display name",
@@ -135,6 +141,9 @@
     "delete": "Delete",
     "addNewPost": "Add new post to {{artist}}",
     "postDeleted": "Post deleted"
+  },
+  "manageSubscriptions": {
+    "downloadSubscriberData": "Download subscriber data"
   },
   "subscriptionForm": {
     "subscriptionUpdated": "Subscription updated",

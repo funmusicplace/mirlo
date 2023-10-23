@@ -23,6 +23,7 @@
     "hast-util-from-parse5": "^7.1.2",
     "i18next": "^22.4.15",
     "lodash": "^4.17.21",
+    "parse-audio-metadata": "^1.2.0",
     "parse5": "^7.1.2",
     "react": "^18.2.0",
     "react-currency-input-field": "^3.6.10",
