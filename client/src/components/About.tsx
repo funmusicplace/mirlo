@@ -2,16 +2,15 @@ import { css } from "@emotion/css";
 import { Trans, useTranslation } from "react-i18next";
 import { MetaCard } from "./common/MetaCard";
 import { Link } from "react-router-dom";
+import MarkdownWrapper from "./common/MarkdownWrapper";
 
 const About: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "about" });
 
   return (
-    <div
+    <MarkdownWrapper
       className={css`
-        p {
-          margin: 1rem 0;
-        }
+        margin-top: 2rem;
       `}
     >
       <MetaCard
@@ -42,7 +41,7 @@ const About: React.FC = () => {
       </Trans>
       <h2>{t("behindThePlatform")}</h2>
       <p>{t("behindThePlatformText")}</p>
-    </div>
+    </MarkdownWrapper>
   );
 };
 

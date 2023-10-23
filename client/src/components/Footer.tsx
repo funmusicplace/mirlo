@@ -30,7 +30,7 @@ export const Footer = () => {
         <a href="mailto:mirlodotspace@proton.me">email us</a>.
       </p>
       <p>
-        <Link to="/about">About us</Link>.
+        <Link to="/about">About us</Link> <Link to="/faq">FAQ</Link>
       </p>
     </div>
   );
