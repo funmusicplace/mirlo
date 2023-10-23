@@ -9,6 +9,9 @@ const MarkdownWrapper = styled.div`
   h2 {
     font-size: 1.1rem;
   }
+  h3 {
+    font-size: 1rem;
+  }
 
   p {
     margin-bottom: 0.75rem;
