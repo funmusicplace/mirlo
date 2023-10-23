@@ -134,7 +134,7 @@ initialize({
 app.use(
   "/docs",
   swaggerUi.serve,
-  swaggerUi.setup(undefined, {
+  swaggerUi.setup(apiDoc, {
     swaggerOptions: {
       url: `${process.env.API_DOMAIN ?? "http://localhost:3000"}/api-docs`,
     },
