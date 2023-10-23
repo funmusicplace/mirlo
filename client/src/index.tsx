@@ -33,6 +33,7 @@ import About from "components/About";
 import { AuthWrapper } from "components/AuthWrapper";
 import Signup from "components/Signup";
 import { ArtistProvider } from "state/ArtistContext";
+import FAQ from "components/FAQ";
 
 const router = createBrowserRouter([
   {
@@ -42,6 +43,7 @@ const router = createBrowserRouter([
     children: [
       { path: "", element: <Home /> },
       { path: "about", element: <About /> },
+      { path: "faq", element: <FAQ /> },
 
       { path: "widget/track/:id", element: <TrackWidget /> },
       { path: "widget/trackgroup/:id", element: <TrackGroupWidget /> },

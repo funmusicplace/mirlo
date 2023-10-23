@@ -105,7 +105,8 @@ const routes = [
   "users/{userId}/posts/drafts",
   "users/{userId}/posts",
   "checkout",
-  "checkout/webhook",
+  "webhooks/stripe",
+  "webhooks/stripe/connect",
 ];
 
 initialize({

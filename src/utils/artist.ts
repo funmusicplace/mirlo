@@ -1,4 +1,4 @@
-import { User } from "@prisma/client";
+import { User, ArtistUserSubscription } from "@prisma/client";
 import prisma from "../../prisma/prisma";
 import stripe from "./stripe";
 import { deleteTrackGroup } from "./trackGroup";
@@ -51,24 +51,15 @@ export const deleteArtist = async (userId: number, artistId: number) => {
     },
   });
 
+  await deleteStripeSubscriptions({
+    artistSubscriptionTier: { artistId: Number(artistId) },
+  });
+
   await prisma.artistSubscriptionTier.deleteMany({
     where: {
       artistId: Number(artistId),
     },
   });
-
-  const stripeSubscriptions = await prisma.artistUserSubscription.findMany({
-    where: {
-      artistSubscriptionTier: { artistId: Number(artistId) },
-    },
-  });
-  await Promise.all(
-    stripeSubscriptions.map(async (sub) => {
-      if (sub.stripeSubscriptionKey) {
-        await stripe.subscriptions.cancel(sub.stripeSubscriptionKey);
-      }
-    })
-  );
   await prisma.artistUserSubscription.deleteMany({
     where: {
       artistSubscriptionTier: { artistId: Number(artistId) },
@@ -82,4 +73,36 @@ export const deleteArtist = async (userId: number, artistId: number) => {
   });
 
   await Promise.all(trackGroups.map((tg) => deleteTrackGroup(tg.id)));
+};
+
+export const deleteStripeSubscriptions = async (
+  where: { userId: number } | { artistSubscriptionTier: { artistId: number } }
+) => {
+  const stripeSubscriptions = await prisma.artistUserSubscription.findMany({
+    where,
+    include: {
+      artistSubscriptionTier: true,
+    },
+  });
+  await Promise.all(
+    stripeSubscriptions.map(async (sub) => {
+      if (sub.stripeSubscriptionKey) {
+        const artistUser = await prisma.user.findFirst({
+          where: {
+            artists: {
+              some: {
+                id: sub.artistSubscriptionTier.artistId,
+              },
+            },
+          },
+        });
+        if (artistUser?.stripeAccountId) {
+          await stripe.subscriptions.cancel(sub.stripeSubscriptionKey, {
+            stripeAccount: artistUser?.stripeAccountId,
+          });
+        }
+        await stripe.subscriptions.cancel(sub.stripeSubscriptionKey);
+      }
+    })
+  );
 };

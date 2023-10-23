@@ -28,10 +28,27 @@ export default function () {
           id: Number(subscriptionId),
           userId: Number(userId),
         },
+        include: {
+          artistSubscriptionTier: true,
+        },
       });
       if (subscription?.stripeSubscriptionKey) {
+        const artistUser = await prisma.user.findFirst({
+          where: {
+            artists: {
+              some: {
+                id: subscription.artistSubscriptionTier.artistId,
+              },
+            },
+          },
+        });
         try {
-          await stripe.subscriptions.cancel(subscription.stripeSubscriptionKey);
+          if (artistUser?.stripeAccountId) {
+            await stripe.subscriptions.cancel(
+              subscription.stripeSubscriptionKey,
+              { stripeAccount: artistUser?.stripeAccountId }
+            );
+          }
         } catch (e) {
           if (e instanceof Error) {
             e.message.includes("No such subscription");

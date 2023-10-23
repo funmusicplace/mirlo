@@ -30,7 +30,7 @@ export default function () {
 
           if (!accountId) {
             const account = await stripe.accounts.create({
-              type: "standard",
+              type: "express",
               business_profile: { name: user.name ?? "" },
             });
             await prisma.user.update({

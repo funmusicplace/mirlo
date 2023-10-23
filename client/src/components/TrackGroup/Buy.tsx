@@ -11,7 +11,7 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup }> = ({
   trackGroup,
 }) => {
   const [chosenPrice, setChosenPrice] = React.useState(
-    `${trackGroup.minPrice ?? 5}`
+    `${trackGroup.minPrice ? trackGroup.minPrice / 100 : 5}`
   );
   const snackbar = useSnackbar();
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
