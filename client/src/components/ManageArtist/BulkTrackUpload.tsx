@@ -11,6 +11,8 @@ import { useGlobalStateContext } from "state/GlobalState";
 import Table from "components/common/Table";
 import { useTranslation } from "react-i18next";
 import parseAudioMetadata from "parse-audio-metadata";
+import { css } from "@emotion/css";
+import { fmtMSS } from "utils/tracks";
 
 export interface ShareableTrackgroup {
   creatorId: number;
@@ -23,6 +25,29 @@ interface FormData {
   trackFiles: FileList;
   trackArtists: { artistName?: string; artistId?: string; role?: string }[];
 }
+
+const fileListIntoArray = (fileList: FileList) => {
+  if (fileList?.length > 0) {
+    const files = [];
+
+    for (let i = 0; i < fileList.length; i++) {
+      const file = fileList.item(i);
+      if (file) {
+        files.push(file);
+      }
+    }
+    return files;
+  }
+
+  return [];
+};
+
+const parse = async (files: File[]) => {
+  const parsed = await Promise.all(
+    files.map(async (file) => await parseAudioMetadata(file))
+  );
+  return parsed;
+};
 
 export const BulkTrackUpload: React.FC<{
   trackgroup: TrackGroup;
@@ -53,28 +78,27 @@ export const BulkTrackUpload: React.FC<{
       try {
         if (userId) {
           setIsSaving(true);
-          const trackArtists = data.trackArtists
-            .filter((ta) => !(ta.artistName === "" && ta.artistId === ""))
-            .map((ta) => ({
-              ...ta,
-              artistId: ta.artistId ? +ta.artistId : undefined,
-            }));
-          const result = await api.post<Partial<Track>, { track: Track }>(
-            `users/${userId}/tracks`,
-            {
-              ...data,
-              artistId: trackgroup.artistId,
-              trackGroupId: trackgroup.id,
-              trackArtists,
-            }
-          );
 
-          if (data.trackFiles[0] && typeof data.trackFiles[0] !== "string")
-            // await api.uploadFile(
-            //   `users/${userId}/tracks/${result.track.id}/audio`,
-            //   data.trackFiles
-            // );
-            snackbar("Track uploaded", { type: "success" });
+          const fileArray = fileListIntoArray(data.trackFiles);
+          await Promise.all(
+            fileArray.map(async (f) => {
+              console.log("parsed", f);
+              const parsed = await parseAudioMetadata(f);
+              const result = await api.post<Partial<Track>, { track: Track }>(
+                `users/${userId}/tracks`,
+                {
+                  ...parsed,
+                  artistId: trackgroup.artistId,
+                  trackGroupId: trackgroup.id,
+                }
+              );
+              await api.uploadFile(
+                `users/${userId}/tracks/${result.track.id}/audio`,
+                [f]
+              );
+            })
+          );
+          snackbar("Tracks uploaded", { type: "success" });
         }
       } catch (e) {
         console.error(e);
@@ -84,49 +108,63 @@ export const BulkTrackUpload: React.FC<{
         await reload();
       }
     },
-    [userId, trackgroup.artistId, trackgroup.id, snackbar, reload]
+    [userId, snackbar, trackgroup.artistId, trackgroup.id, reload]
   );
 
-  React.useEffect(() => {
-    const parse = async (files: File[]) => {
-      const parsed = await Promise.all(
-        files.map(async (file) => await parseAudioMetadata(file))
-      );
+  const processUploadedFiles = React.useCallback((filesToProcess: FileList) => {
+    const filesToParse = fileListIntoArray(filesToProcess);
+    (async () => {
+      const parsed = await parse(filesToParse);
+
       setParsedFiles(parsed);
-    };
-    console.log("trackFiles", trackFiles);
-    if (trackFiles?.length > 0) {
-      const files = [];
+    })();
+  }, []);
 
-      for (let i = 0; i < trackFiles.length; i++) {
-        const file = trackFiles.item(i);
-        if (file) {
-          files.push(file);
-        }
-      }
-      parse(files);
-      // setParsedFiles(files);
-    }
-  }, [trackFiles]);
-
-  console.log("parsed", parsedFiles);
+  React.useEffect(() => {
+    processUploadedFiles(trackFiles);
+  }, [processUploadedFiles, trackFiles]);
 
   return (
-    <form onSubmit={handleSubmit(doAddTrack)}>
+    <form
+      onSubmit={handleSubmit(doAddTrack)}
+      className={css`
+        margin-top: 1rem;
+      `}
+    >
       <h4>{t("uploadTracks")}</h4>
       {parsedFiles && (
         <>
           {t("addTheFollowingTracks")}
           <Table>
-            {parsedFiles.map((t) => (
+            <thead>
               <tr>
-                <td>{t.title}</td>
-                <td>{t.artist}</td>
-                <td>{JSON.stringify(t)}</td>
+                <th>Title</th>
+                <th>Artist</th>
+                <th>Duration</th>
+                <th>Metadata</th>
               </tr>
-            ))}
+            </thead>
+            <tbody>
+              {parsedFiles.map((t) => (
+                <tr>
+                  <td>{t.title}</td>
+                  <td>{t.artist}</td>
+                  <td>{t.duration && fmtMSS(+t.duration)}</td>
+                  <td>{JSON.stringify(t)}</td>
+                </tr>
+              ))}
+            </tbody>
           </Table>
         </>
+      )}
+      {parsedFiles.length > 0 && (
+        <Button
+          type="submit"
+          disabled={isSaving}
+          startIcon={isSaving ? <LoadingSpinner /> : undefined}
+        >
+          {t("uploadTracks")}
+        </Button>
       )}
       <FormComponent>
         <InputEl
@@ -137,13 +175,6 @@ export const BulkTrackUpload: React.FC<{
           accept="audio/mpeg,audio/flac,audio/wav,audio/x-flac,audio/aac,audio/aiff,audio/x-m4a"
         />
       </FormComponent>
-      <Button
-        type="submit"
-        disabled={isSaving}
-        startIcon={isSaving ? <LoadingSpinner /> : undefined}
-      >
-        {t("uploadTracks")}
-      </Button>
     </form>
   );
 };

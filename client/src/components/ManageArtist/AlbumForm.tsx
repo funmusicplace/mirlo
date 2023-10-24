@@ -16,7 +16,7 @@ import { useTranslation } from "react-i18next";
 
 const AlbumForm: React.FC<{
   existing?: TrackGroup;
-  reload: () => Promise<void>;
+  reload: () => Promise<void> | void;
   artist: Artist;
   onClose?: () => void;
 }> = ({ reload, artist, existing, onClose }) => {

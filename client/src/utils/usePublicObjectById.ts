@@ -31,7 +31,7 @@ const usePublicObjectById = <T>(
     fetchArtist();
   }, [fetchArtist]);
 
-  return { object, isLoadingObject: isLoading };
+  return { object, isLoadingObject: isLoading, reload: fetchArtist };
 };
 
 export default usePublicObjectById;

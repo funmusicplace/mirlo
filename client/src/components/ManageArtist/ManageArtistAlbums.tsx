@@ -80,11 +80,7 @@ const ManageArtistAlbums: React.FC<{}> = () => {
           `}
         >
           {trackGroups?.map((album) => (
-            <TrackGroupCard
-              album={album}
-              key={album.id}
-              setManageTrackgroup={setManageTrackgroup}
-            />
+            <TrackGroupCard album={album} key={album.id} />
           ))}
         </div>
       )}
