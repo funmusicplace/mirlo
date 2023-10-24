@@ -16,6 +16,7 @@ import NextButton from "./common/NextButton";
 import PauseButton from "./common/PauseButton";
 import PlayButton from "./common/PlayButton";
 import PreviousButton from "./common/PreviousButton";
+import { isEmpty } from "lodash";
 
 const playerClass = css`
   min-height: 90px;
@@ -125,7 +126,7 @@ const Player = () => {
     }
   }, [currentTrack]);
 
-  if (!currentTrack) {
+  if (!currentTrack || isEmpty(currentTrack.trackGroup)) {
     return null;
   }
 

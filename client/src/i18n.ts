@@ -27,9 +27,12 @@ const defaultLanguage = finishedLanguages.find((lang) =>
   userLanguage.startsWith(lang)
 );
 
+if (hasTransifex) {
+  i18n.use(txBackend);
+}
+
 i18n
   .use(initReactI18next) // passes i18n down to react-i18next
-  .use(hasTransifex ? txBackend : undefined)
   .init({
     ...(!hasTransifex ? { resources } : {}),
     lng: defaultLanguage ?? "en", // language to use, more information here: https://www.i18next.com/overview/configuration-options#languages-namespaces-resources
