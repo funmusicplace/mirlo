@@ -9,7 +9,8 @@
     "build": "cd client && yarn build && cd .. && cp -R client/build/* public && mv public/index.html public/app.html",
     "dev:api": "NODE_ENV=development PORT=3000 nodemon src/index.ts",
     "staging": "NODE_ENV=production nodemon src/index.ts",
-    "dev": "concurrently \"yarn dev:api\" \"cd client && PORT=8080 yarn start\""
+    "dev": "concurrently \"yarn dev:api\" \"cd client && PORT=8080 yarn start\"",
+    "prepare": "husky install"
   },
   "dependencies": {
     "@bull-board/express": "^4.11.0",
@@ -30,6 +31,7 @@
     "express-openapi": "^12.1.0",
     "file-type": "16",
     "fluent-ffmpeg": "^2.1.2",
+    "husky": "^8.0.3",
     "image-size": "^1.0.2",
     "json2csv": "^6.0.0-alpha.2",
     "jsonwebtoken": "^8.5.1",

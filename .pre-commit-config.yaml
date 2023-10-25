@@ -1,0 +1,13 @@
+repos:
+- repo: local
+  hooks:
+    - id: husky-run-pre-commit
+      name: husky
+      language: system
+      entry: .husky/pre-commit
+      pass_filenames: false
+- repo: https://github.com/commitizen-tools/commitizen
+  rev: v2.20.0
+  hooks:
+    - id: commitizen
+      stages: [commit-msg]
