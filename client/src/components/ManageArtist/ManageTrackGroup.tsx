@@ -33,13 +33,15 @@ const ManageTrackGroup: React.FC<{}> = () => {
     >
       <h1>{t("editAlbum")}</h1>
       <AlbumForm existing={trackGroup} reload={reload} artist={artist} />
-      <ManageTrackTable
-        tracks={trackGroup.tracks}
-        editable
-        trackGroupId={trackGroup.id}
-        owned
-        reload={reload}
-      />
+      {trackGroup.tracks?.length > 0 && (
+        <ManageTrackTable
+          tracks={trackGroup.tracks}
+          editable
+          trackGroupId={trackGroup.id}
+          owned
+          reload={reload}
+        />
+      )}
       <BulkTrackUpload trackgroup={trackGroup} reload={reload} />
     </div>
   );

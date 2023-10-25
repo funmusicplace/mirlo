@@ -216,6 +216,7 @@ model TrackArtist {
   artistId   Int?
   artist     Artist? @relation(fields: [artistId], references: [id])
   role       String?
+  isCoAuthor Boolean @default(false)
 }
 
 model TrackAudio {

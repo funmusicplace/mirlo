@@ -121,7 +121,18 @@
     "submitAlbum": "Submit album",
     "publish": "Publish",
     "uploadTracks": "Upload tracks",
-    "addTheFollowingTracks": "We'll add the following tracks"
+    "addTheFollowingTracks": "We'll add the following tracks",
+    "addNewArtist": "Add new artist",
+    "preview": "Preview",
+    "mustOwn": "Must own",
+    "trackTitle": "Track title",
+    "trackTitleHelp": "The title of the track",
+    "artists": "Artists",
+    "trackArtistsHelp": "Who are the artists involved in making the track? List as many as you like, alongside their role",
+    "status": "Status",
+    "statusHelp": "Can the user listen to the track without owning it? If it's 'preview' then they can.",
+    "metadata": "Metadata",
+    "coAuthorCheck": "Is this artist a co-author? ie. Should they be listed in the track listings?"
   },
   "artistForm": {
     "displayName": "Display name",
