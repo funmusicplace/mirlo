@@ -7,6 +7,7 @@ import { API_ROOT } from "../../constants";
 import { useGlobalStateContext } from "../../state/GlobalState";
 import Button from "../common/Button";
 import api from "services/api";
+import { FaCheck } from "react-icons/fa";
 
 const Menu: React.FC<{ setIsMenuOpen: (bool: boolean) => void }> = ({
   setIsMenuOpen,
@@ -60,7 +61,7 @@ const Menu: React.FC<{ setIsMenuOpen: (bool: boolean) => void }> = ({
       className={css`
         list-style: none;
 
-        & li * {
+        & li > * {
           background: transparent !important;
           // width: 100%;
           width: 200px;
@@ -71,6 +72,10 @@ const Menu: React.FC<{ setIsMenuOpen: (bool: boolean) => void }> = ({
           font-weight: normal;
           border-radius: 0;
           padding: 0.5rem;
+
+          display: flex;
+          align-items: flex-end;
+          justify-content: flex-end;
           border: none;
 
           &:hover {
@@ -93,6 +98,19 @@ const Menu: React.FC<{ setIsMenuOpen: (bool: boolean) => void }> = ({
               {t("profile")}
             </Button>
           </li>
+          {artists.length > 0 && stripeAccountStatus?.chargesEnabled && (
+            <li>
+              <Button
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  navigate("/manage");
+                }}
+                startIcon={<FaCheck />}
+              >
+                Payouts enabled
+              </Button>
+            </li>
+          )}
           {artists.map((a) => {
             return (
               <li>

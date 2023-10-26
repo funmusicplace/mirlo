@@ -1,6 +1,5 @@
 import { css } from "@emotion/css";
 import React from "react";
-import { FaTimes } from "react-icons/fa";
 import { ImMenu } from "react-icons/im";
 import { Link } from "react-router-dom";
 import { bp } from "../../constants";
