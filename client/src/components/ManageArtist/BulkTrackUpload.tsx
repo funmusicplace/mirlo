@@ -3,7 +3,6 @@ import Button from "../common/Button";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import api from "services/api";
 import { InputEl } from "../common/Input";
-import { SelectEl } from "../common/Select";
 import FormComponent from "components/common/FormComponent";
 import { useSnackbar } from "state/SnackbarContext";
 import LoadingSpinner from "components/common/LoadingSpinner";
@@ -16,7 +15,7 @@ import parseAudioMetadata from "id3-parser";
 import { convertFileToBuffer } from "id3-parser/lib/util";
 import { BulkTrackUploadRow } from "./BulkTrackUploadRow";
 import Tooltip from "components/common/Tooltip";
-import { FaQuestion, FaQuestionCircle } from "react-icons/fa";
+import { FaQuestionCircle } from "react-icons/fa";
 
 export interface ShareableTrackgroup {
   creatorId: number;
@@ -29,7 +28,7 @@ export interface TrackData {
   title: string;
   status: Track["status"];
   track: string;
-  metadata: { [key: string]: any };
+  id3: { [key: string]: any };
   trackArtists: { artistName?: string; artistId?: number; role?: string }[];
 }
 
@@ -81,7 +80,10 @@ export const BulkTrackUpload: React.FC<{
 }> = ({ trackgroup, reload }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const methods = useForm<FormData>();
-  const { register, handleSubmit, watch, control } = methods;
+  const { register, handleSubmit, watch, control, reset } = methods;
+  const [uploadJobs, setUploadJobs] = React.useState<
+    { jobId: string; jobStatus: string }[]
+  >([]);
   const { fields, replace } = useFieldArray({
     control,
     name: "tracks",
@@ -105,35 +107,48 @@ export const BulkTrackUpload: React.FC<{
           setIsSaving(true);
 
           console.log("data", data.tracks);
-          // await Promise.all(
-          //   fileArray.map(async (f) => {
-          //     console.log("parsed", f);
-          //     const parsed = await parseAudioMetadata(f);
-          //     const result = await api.post<Partial<Track>, { track: Track }>(
-          //       `users/${userId}/tracks`,
-          //       {
-          //         ...parsed,
-          //         artistId: trackgroup.artistId,
-          //         trackGroupId: trackgroup.id,
-          //       }
-          //     );
-          //     await api.uploadFile(
-          //       `users/${userId}/tracks/${result.track.id}/audio`,
-          //       [f]
-          //     );
-          //   })
-          // );
-          snackbar("Tracks uploaded", { type: "success" });
+          const uploadJobIds = await Promise.all(
+            data.tracks.map(async (f) => {
+              console.log("parsed", f);
+              const result = await api.post<Partial<Track>, { track: Track }>(
+                `users/${userId}/tracks`,
+                {
+                  ...f,
+                  artistId: trackgroup.artistId,
+                  trackGroupId: trackgroup.id,
+                  trackArtists: f.trackArtists.map((a) => ({
+                    ...a,
+                    artistId:
+                      a.artistId && isFinite(+a.artistId)
+                        ? +a.artistId
+                        : undefined,
+                  })),
+                }
+              );
+              const jobInfo = await api.uploadFile(
+                `users/${userId}/tracks/${result.track.id}/audio`,
+                [f.file]
+              );
+
+              return jobInfo.result.jobId;
+            })
+          );
+          console.log("uploadJobIds", uploadJobIds);
+          setUploadJobs(
+            uploadJobIds.map((id) => ({ jobId: id, jobStatus: "waiting" }))
+          );
+
+          snackbar("Uploading tracks...", { type: "success" });
         }
       } catch (e) {
         console.error(e);
         snackbar("There was a problem with the API", { type: "warning" });
       } finally {
         setIsSaving(false);
-        await reload();
+        // await reload();
       }
     },
-    [userId, snackbar, reload]
+    [userId, snackbar, trackgroup.artistId, trackgroup.id]
   );
 
   const processUploadedFiles = React.useCallback(
@@ -141,12 +156,11 @@ export const BulkTrackUpload: React.FC<{
       const filesToParse = fileListIntoArray(filesToProcess);
       (async () => {
         const parsed = await parse(filesToParse);
-        console.log("parsed", parsed);
         replace(
           parsed
             .sort((a, b) => (a.metadata.track > b.metadata.track ? 1 : -1))
             .map((p) => ({
-              metadata: p.metadata,
+              id3: p.metadata,
               duration: p.metadata.duration,
               track: p.metadata.track,
               file: p.file,
@@ -166,12 +180,36 @@ export const BulkTrackUpload: React.FC<{
         );
       })();
     },
-    [replace]
+    [replace, trackgroup.artist?.name, trackgroup.artistId]
   );
+
+  React.useEffect(() => {
+    let timer: NodeJS.Timer | undefined;
+    if (uploadJobs.length > 0) {
+      timer = setInterval(async () => {
+        const result = await api.getMany<{ jobStatus: string; jobId: string }>(
+          `jobs?${uploadJobs.map((job) => `ids=${job.jobId}&`).join("")}`
+        );
+
+        if (result.results.some((r) => r.jobStatus !== "completed")) {
+          setUploadJobs(result.results);
+        } else {
+          setUploadJobs([]);
+          await reload();
+          reset();
+        }
+      }, 3000);
+    }
+    return () => clearInterval(timer);
+  }, [reload, uploadJobs, reset]);
 
   React.useEffect(() => {
     processUploadedFiles(trackFiles);
   }, [processUploadedFiles, trackFiles]);
+
+  const disableUploadButton = isSaving || uploadJobs.length > 0;
+
+  console.log("uploadJobs", uploadJobs);
 
   return (
     <FormProvider {...methods}>
@@ -206,6 +244,11 @@ export const BulkTrackUpload: React.FC<{
                 <tr>
                   <th
                     className={css`
+                      min-width: 50px;
+                    `}
+                  ></th>
+                  <th
+                    className={css`
                       min-width: 200px;
                     `}
                   >
@@ -226,20 +269,25 @@ export const BulkTrackUpload: React.FC<{
                       <FaQuestionCircle />
                     </Tooltip>
                   </th>
-                  <th>{t("metadata")})</th>
+                  <th className="alignRight">{t("metadata")}</th>
                 </tr>
               </thead>
               <tbody>
                 {fields.map((t, idx) => (
-                  <BulkTrackUploadRow track={t} key={t.title} index={idx} />
+                  <BulkTrackUploadRow
+                    track={t}
+                    key={t.title}
+                    index={idx}
+                    uploadingState={uploadJobs?.[idx]?.jobStatus}
+                  />
                 ))}
               </tbody>
             </Table>
             {fields.length > 0 && (
               <Button
                 type="submit"
-                disabled={isSaving}
-                startIcon={isSaving ? <LoadingSpinner /> : undefined}
+                disabled={disableUploadButton}
+                startIcon={disableUploadButton ? <LoadingSpinner /> : undefined}
               >
                 {t("uploadTracks")}
               </Button>
@@ -251,6 +299,7 @@ export const BulkTrackUpload: React.FC<{
           <InputEl
             type="file"
             id="audio"
+            disabled={disableUploadButton}
             multiple
             {...register("trackFiles")}
             accept="audio/mpeg,audio/flac,audio/wav,audio/x-flac,audio/aac,audio/aiff,audio/x-m4a"

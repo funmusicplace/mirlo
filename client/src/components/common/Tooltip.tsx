@@ -1,10 +1,11 @@
 import styled from "@emotion/styled";
 import React from "react";
 
-const TooltipWrapper = styled.div`
+const TooltipWrapper = styled.div<{ underline: boolean }>`
   position: relative;
   display: inline-block;
-  border-bottom: 1px dotted black;
+
+  ${(props) => (props.underline ? "border-bottom: 1px dotted black" : "")};
 
   &:hover .tooltiptext {
     visibility: visible;
@@ -43,9 +44,10 @@ const TooltipText = styled.span`
 export const Tooltip: React.FC<{
   hoverText: string;
   children: React.ReactNode;
-}> = ({ children, hoverText }) => {
+  underline?: boolean;
+}> = ({ children, hoverText, underline = true }) => {
   return (
-    <TooltipWrapper>
+    <TooltipWrapper underline={underline}>
       {children}
       <TooltipText className="tooltiptext">{hoverText}</TooltipText>
     </TooltipWrapper>

@@ -132,7 +132,8 @@
     "status": "Status",
     "statusHelp": "Can the user listen to the track without owning it? If it's 'preview' then they can.",
     "metadata": "Metadata",
-    "coAuthorCheck": "Is this artist a co-author? ie. Should they be listed in the track listings?"
+    "coAuthorCheck": "Is this artist a co-author? ie. Should they be listed in the track listings?",
+    "moreTrackDetails": "More track details"
   },
   "artistForm": {
     "displayName": "Display name",

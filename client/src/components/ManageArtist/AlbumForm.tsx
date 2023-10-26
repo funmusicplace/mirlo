@@ -170,7 +170,7 @@ const AlbumForm: React.FC<{
         <InputEl type="date" {...register("releaseDate")} required />
       </FormComponent>
       <FormComponent>
-        {t("about")}: <TextArea {...register("about")} />
+        {t("about")}: <TextArea {...register("about")} rows={7} />
       </FormComponent>
       <FormComponent>
         {t("price")}:
