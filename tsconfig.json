@@ -4,6 +4,7 @@
     "outDir": "dist",
     "strict": true,
     "lib": ["esnext"],
-    "esModuleInterop": true
-  }
+    "esModuleInterop": true,
+  },
+  "exclude": ["client", "data", "node_modules"],
 }

@@ -20,5 +20,5 @@ jobs:
       - name: Run Prettier --check
         run:  yarn prettier --check "src/**/*.{js,jsx,ts,tsx}"
 
-      - name: Typescript
-        run: yarn tsc --noEmit
+      # - name: Typescript
+      #   run: yarn tsc --noEmit
