@@ -3,10 +3,11 @@ import { css } from "@emotion/css";
 
 export const SongTimeDisplay: React.FC<{
   playerRef: React.RefObject<HTMLVideoElement>;
-}> = ({ playerRef }) => {
+  currentSeconds: number;
+}> = ({ playerRef, currentSeconds }) => {
   const duration = playerRef.current?.duration ?? 0;
-  const currentSeconds = playerRef.current?.currentTime ?? 0;
   const percent = currentSeconds / duration;
+
   return (
     <div
       className={css`
