@@ -116,8 +116,7 @@ function Profile() {
           {t("email")}
           <InputEl {...register("email")} disabled />
           <small>
-            Changing your email has been disabled for now. Please contact an
-            admin if you want to do so
+            {t("changingEmailDisabled")}
           </small>
         </FormComponent>
         <FormComponent>

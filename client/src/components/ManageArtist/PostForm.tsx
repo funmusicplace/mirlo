@@ -11,6 +11,7 @@ import LoadingSpinner from "components/common/LoadingSpinner";
 import api from "../../services/api";
 import { useGlobalStateContext } from "state/GlobalState";
 import { css } from "@emotion/css";
+import { useTranslation } from "react-i18next";
 
 const PostForm: React.FC<{
   existing?: Post;
@@ -23,6 +24,8 @@ const PostForm: React.FC<{
   } = useGlobalStateContext();
   const snackbar = useSnackbar();
   const [isSaving, setIsSaving] = React.useState(false);
+  const {t} = useTranslation("translation",{keyPrefix : "postForm"})
+
 
   const publishedAt = existing ? new Date(existing.publishedAt) : new Date();
   publishedAt.setMinutes(
@@ -97,14 +100,14 @@ const PostForm: React.FC<{
         Display artist: <InputEl {...register("display_artist")} />
       </FormComponent> */}
       <FormComponent>
-        Title: <InputEl {...register("title")} />
+        {t("title")} <InputEl {...register("title")} />
       </FormComponent>
       <FormComponent>
-        Publication date:{" "}
+        {t("publicationDate")}{" "}
         <InputEl type="datetime-local" {...register("publishedAt")} />
       </FormComponent>
       <FormComponent>
-        Content: <TextArea {...register("content")} rows={10} />
+        {t("content")} <TextArea {...register("content")} rows={10} />
       </FormComponent>
       <FormComponent
         className={css`
@@ -114,8 +117,8 @@ const PostForm: React.FC<{
       >
         <input id="private" type="checkbox" {...register("isPublic")} />{" "}
         <label htmlFor="private">
-          For subscribers only?
-          <small>Is this post for subscribers only?</small>
+          {t("isSubscriptionOnly")}
+          <small>{t("postForm")}</small>
         </label>
       </FormComponent>
       <Button
@@ -123,7 +126,7 @@ const PostForm: React.FC<{
         disabled={isSaving}
         startIcon={isSaving ? <LoadingSpinner /> : undefined}
       >
-        {existing ? "Save" : "Save new"} post
+        {existing ? t("save") : t("saveNew")} {t("post")}
       </Button>
     </form>
   );

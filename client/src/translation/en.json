@@ -56,14 +56,23 @@
     "artistsYouSupport": "Artists you support",
     "noSubscriptionsYet": "You don't support any musicians yet",
     "areYouSureDeleteAccount": "Are you sure you want to delete your account?",
-    "deleteAccount": "Delete account"
+    "deleteAccount": "Delete account",
+    "changingEmailDisabled": "Changing your email has been disabled for now. Please contact an admin if you want to do so",
+    "collectionEmpty": "There's nothing in your collection yet, support some artists and buy their music!"
   },
   "trackGroupCard": {
     "download": "Download",
     "error": "Something went wrong",
     "buy": "Buy",
     "released": "Released: {{date}}",
-    "notImplemented": "Buying an album for variable price hasn't been implemented yet"
+    "notImplemented": "Buying an album for variable price hasn't been implemented yet",
+    "title": "Title:",
+    "published": "Published:",
+    "tracks": "Tracks:",
+    "releaseDate": "Release date:",
+    "price": "Price:",
+    "nameYourPrice": "Name your price in USD:",
+    "buyingTrackGroup": "Buying "
   },
   "artist": {
     "support": "Support {{artist}}",
@@ -72,14 +81,20 @@
     "updates": "Updates",
     "noUpdates": "There are no updates yet for this artist",
     "releases": "Releases",
-    "noSubscriptionTiersYet": "This artist hasn't added any subscription tiers yet."
+    "noSubscriptionTiersYet": "This artist hasn't added any subscription tiers yet.",
+    "unknown": "Unknown"
   },
   "post": {
     "edit": "Edit"
   },
   "manage": {
     "error": "Something went wrong",
-    "setUpBankAccount": "Set up bank account"
+    "setUpBankAccount": "Set up bank account",
+    "stripeAccountVerified": "Stripe account verified!",
+    "waitingStripeAccountVerification": "We're waiting on stripe to verify your account",
+    "downloadSubscriberData": "Downlaod Subscriber Data",
+    "subscriptionTiers": "Your subscription tiers",
+    "createNewArtist": "Create new artist"
   },
   "manageArtist": {
     "notEnabled": "This artist has not been enabled by site admin yet! Contact an admin to do so.",
@@ -144,5 +159,162 @@
     "saveSubscription": "Save subscription",
     "createSubscription": "Create subscription",
     "editSubscriptionTierFor": "Edit subscription tier for {{artistName}}"
+  },
+  "footer": {
+    "underConstruction": "Mirlo is under construction. If you'd like to contribute check out <1>the code on GitHub</1>, <2>join our Discord</2>, or <3>email us</3>.",
+    "aboutUs": "<1>About us</1> <2>FAQ</2>"
+  },
+  "admin": {
+    "users": "Users",
+    "trackgroups": "Trackgroups",
+    "tracks": "Tracks"
+  },
+  "trackDetails": {
+    "track": "Track:",
+    "saveButton": "Save track",
+    "trackDoesntExist": "That track doesn't exist",
+    "saveTrackForm": {
+      "title": "Title",
+      "status": "Status",
+      "options": {
+        "freePaid": "Free + Paid",
+        "hidden": "Hidden",
+        "free": "Free",
+        "paid": "Paid",
+        "deleted": "Deleted"
+      }
+    }
+  },
+  "trackGroupDetails": {
+    "trackgroup": "Track Group:",
+    "title": "Title:",
+    "type": "Type:",
+    "releaseDate": "Release date:",
+    "released": "Released",
+    "about": "About:",
+    "isPrivate": "Is private?",
+    "privateAlbumDescription": "Private albums can not be listened to by Resonate users",
+    "isEnabled": "Is enabled?",
+    "enabledAlbumDescription": "Enabled albums can be made public by the artist",
+    "saveTrackGroupButton": "Save track group"
+  },
+  "manageSubscriptionTierBox": {
+    "edit": "Edit",
+    "delete": "Delete"
+  },
+  "manageTrackTable": {
+    "titleColumn": "Title",
+    "durationColumn": "Duration",
+    "manageColumn": "Manage",
+    "noTracksMessage": "There's no tracks yet in this playlist!",
+    "emptyTracklist": "There's no tracks yet in this playlist!"
+  },
+  "mewTrack": {
+    "newTrack": "New Track",
+    "title:": "Title",
+    "status:": "Status",
+    "statusPreview": "Preview",
+    "statusMustOwn": "Must own",
+    "trackFile": "Upload Track File",
+    "creditArtistQuestion": "Want to credit an artist on this track?",
+    "artistNameFormatQuestionColumn": "How the artist's name should appear publicly",
+    "existingArtistQuestionColumn": "Is this an existing artist in Mirlo? Add their ID if so.",
+    "artistRoleColumn": "What role did the artist have?",
+    "artist": "Artist",
+    "addAdditionalArtists": "Add additional artists",
+    "addTrackButton": "Add track"
+  },
+  "postForm": {
+    "title": "Title:",
+    "publicationDate": "Publication date:",
+    "content": "Content",
+    "isSubscriptionOnly": "For subscribers only?",
+    "isSubscriptionPostOnly": "Is this post for subscribers only?",
+    "post": "post",
+    "save": "Save",
+    "saveNew": "Save new"
+  },
+  "errorPage": {
+    "reactError": "React Error ",
+    "unexpectedError": "Sorry, an unexpected error has occurred."
+  },
+  "home": {
+    "support": "Direct support for musicians. Buy their music. Collectively owned and managed.",
+    "mailingList": "Get on the mailing list",
+    "logIn": "Log in",
+    "mirloConstruction": "Mirlo is under construction. If you'd like to contribute, check out <github>the code on GitHub</github>, <discord>join our Discord</discord>, or <email>email us</email>.",
+    "latestCommunityPost": "Latest posts from the community:"
+  },
+  "faq": {
+    "title": "Frequently Asked Questions (FAQ)",
+    "home": "Home",
+    "faqDescription": "Some frequently asked questions about MirloThe people doing it",
+    "whatWeBuilding": "What we're building",
+    "people": "The people doing it ",
+    "questions": {
+      "whatIsMirlo": {
+        "question": "What is Mirlo?",
+        "answer": "Mirlo provides a user-friendly space to help musicians sell music, manage subscriptions, and share with their supporters."
+      },
+      "howDoesMirloWork": {
+        "question": "How does Mirlo work?",
+        "answer": "Mirlo allows musicians to set up pages to host their music and set up tiers of monthly support. Fans can then purchase those albums or support musicians through monthly payments and get updates from them when they post on Mirlo."
+      },
+      "howMuchDoesMirloCost": {
+        "question": "How much does Mirlo cost?",
+        "answer": "Once incorporated, we’ll explore a number of funding structures. We’re aiming for musicians to get as much of the price of their albums and subscriptions as possible while still supporting the workers and infrastructure of the co-op. We will likely add ways for purchasers to support the platform directly."
+      },
+      "whatMakesMirloDifferent": {
+        "question": "What makes Mirlo different from other products?",
+        "answer": "Mirlo allows for direct and ongoing support of artists. It’s different from other crowdfunding platforms because it:",
+        "answerBulletpoint1": "is rooted in mutual aid and an explicitly anti-capitalist and anti-oppressive practice;",
+        "answerBulletpoint2": "is stewared by a worker co-op, which intends to exit-to-community as a multi-stakeholder cooperative;",
+        "answerBulletpoint3": "It’s open source and is working together with other similar products to build towards a standard-based and sustainable ecosystem."
+      },
+      "longTermGoals": {
+        "question": "What are the long term goals of Mirlo?",
+        "answer": "We believe that the community is the platform and our goals, informed by our <1>Observations and Intent</1>, will grow and change along with the community. That said, we would like to make it easier for other groups (like music labels or other co-ops) to install the software. We’d also like to look into building plug-ins and other tools that are useful for artists (for example, plug-ins that help to make your music available on aggregators like Distrokids or other platforms)."
+      },
+      "shortTermGoals": {
+        "question": "What are the short term goals of Mirlo?",
+        "answer": "We’d like to release a minimum viable product that allows Artists to sell digital music in a few file formats People to become “patrons” of artists Compensate workers who are contributing to Mirlo's success To cover costs, we would aim to initially take a fairly small cut (if at all) via tips and patronage via our page on the platform (maybe with some fundraising releases)."
+      },
+      "mainBlockers": {
+        "question": "What are the main blockers facing Mirlo?",
+        "answer": "Our main blocker is incorporation! If you are a lawyer or know someone who is a lawyer specialized in co-op law, <1>please reach out</1>!"
+      },
+      "productRoadmap": {
+        "question": "What’s on your product roadmap?",
+        "answer": "We’re still aiming to get to a minimum viable product, for which you can track progress on our <1>GitHub issues tracker</1>."
+      },
+      "heardOfProjectX": {
+        "question": "Have you heard of \"project x\"?",
+        "answer": "Probably! As individuals we’ve worked with and in Resonate and Ampled, and we’re in touch with a couple of other projects that are doing very similar things like jam.coop, faircamp, and some others. We’re hoping to continue talking to these folks and build towards standardization of resources and tech APIs so that our services can talk to each other and musicians can easily switch between them. If there’s a project you want to talk about, bring it up in our <1>Discord</1>!"
+      },
+      "howDoPayoutsWork": {
+        "question": "How do payouts work?",
+        "answer": "We use Stripe to process payments. Artists will have to create an account with Stripe, linking their bank account or debit card to the service to receive payouts. Then as users purchase their albums or subscribe to them, this money will be sent directly to their Stripe account."
+      },
+      "howAreYouStructured": {
+        "question": "How are you structured?",
+        "answer": "Mirlo is currently a collective of people interested in building a worker-coop accountable to a community that uses its product. We’re a part of Fun Music Place, which is a community having wider conversations about the music industry. We’re actively writing bylaws for incorporation, and will be a part of the US Federation of Worker Cooperatives when we’re done. As the product grows and proves to be sustainable we’re aiming to <1>Exit to Community</1>."
+      },
+      "howAreDecisionsMade": {
+        "question": "How are decisions made?",
+        "answer": "Mirlo is maintained by a worker co-operative heavily rooted in a community of musicians and other interested people. Every feature on the platform is developed with input and insights from the community."
+      },
+      "howCanIGetInTouch": {
+        "question": "How can I get in touch?",
+        "answer": "Our community is primarily hanging out on the <1>Discord</1> of our parent project <2>Fun Music Place</2>. Come say hi!"
+      },
+      "areYouOpenSource": {
+        "question": "Are you open source?",
+        "answer": "Yes! And we want your help 🙂. <1>Check out our code</1>."
+      },
+      "canIHelpWithTesting": {
+        "question": "Can I help with testing?",
+        "answer": "Yes please! Reach out to either LLK or Si on the <1>Discord</1> to get started."
+      }
+    }
   }
 }

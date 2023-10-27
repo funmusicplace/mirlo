@@ -10,6 +10,7 @@ import api from "services/api";
 import { useGlobalStateContext } from "state/GlobalState";
 import { useSnackbar } from "state/SnackbarContext";
 import SubscriptionForm from "./SubscriptionForm";
+import { useTranslation } from "react-i18next";
 
 const ManageSubscriptionTierBox: React.FC<{
   tier: ArtistSubscriptionTier;
@@ -23,6 +24,7 @@ const ManageSubscriptionTierBox: React.FC<{
 
   const { artistId } = useParams();
   const [manageTier, setManageTier] = React.useState<ArtistSubscriptionTier>();
+  const {t} = useTranslation("translation", { keyPrefix: "manageSubscriptionTierBox"})
 
   const userId = user?.id;
 
@@ -66,7 +68,7 @@ const ManageSubscriptionTierBox: React.FC<{
             startIcon={<FaPen />}
             onClick={() => setManageTier(tier)}
           >
-            Edit
+            {t("edit")}
           </Button>
           <Button
             className={css`
@@ -76,7 +78,7 @@ const ManageSubscriptionTierBox: React.FC<{
             startIcon={<FaTrash />}
             onClick={() => deleteTier(tier.id)}
           >
-            Delete
+            {t("delete")}
           </Button>
         </div>
       </div>

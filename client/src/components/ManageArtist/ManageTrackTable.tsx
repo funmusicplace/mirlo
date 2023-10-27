@@ -7,6 +7,7 @@ import { determineNewTrackOrder } from "utils/tracks";
 import { CenteredSpinner } from "../common/Spinner";
 import Table from "../common/Table";
 import ManageTrackRow from "./ManageTrackRow";
+import { useTranslation } from "react-i18next";
 
 export const ManageTrackTable: React.FC<{
   tracks: Track[];
@@ -23,6 +24,7 @@ export const ManageTrackTable: React.FC<{
   } = useGlobalStateContext();
   const userId = user?.id;
   const [displayTracks, setDisplayTracks] = React.useState<Track[]>([]);
+  const { t } = useTranslation("translation", { keyPrefix: "manageTrackTable" })
 
   const handleDrop = React.useCallback(
     async (ev: React.DragEvent<HTMLTableRowElement>) => {
@@ -96,10 +98,9 @@ export const ManageTrackTable: React.FC<{
     <Table style={{ marginBottom: "1.5rem", marginTop: "1.5rem" }}>
       <thead>
         <tr>
-          <th style={{ maxWidth: "2rem" }} />
-          <th>Title</th>
-          <th>Duration</th>
-          <th align="right">Manage</th>
+          <th>{t("titleColumn")}</th>
+          <th>{t("durationColumn")}</th>
+          <th align="right">{t("manageColumn")}</th>
         </tr>
       </thead>
       <tbody>
@@ -115,7 +116,7 @@ export const ManageTrackTable: React.FC<{
         {displayTracks.length === 0 && (
           <tr>
             <td colSpan={999} style={{ textAlign: "center" }}>
-              There's no tracks yet in this playlist!
+              {t("emptyTracklist")}
             </td>
           </tr>
         )}

@@ -33,11 +33,11 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup }> = ({
     <>
       {trackGroup.minPrice && (
         <>
-          Price: <Money amount={trackGroup.minPrice / 100} />, or
+          {} <Money amount={trackGroup.minPrice / 100} />, or
         </>
       )}
       <div>
-        Name your price in USD:
+        {t("nameYourPrice")}
         <Input
           value={chosenPrice}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {

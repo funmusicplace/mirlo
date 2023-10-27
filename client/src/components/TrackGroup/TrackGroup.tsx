@@ -162,7 +162,7 @@ function TrackGroup() {
             color: var(--mi-light-foreground-color);
           `}
         >
-          Released:{" "}
+          {t("trackGroupDetails.released")}{" "}
           <em>
             {new Date(trackGroup.releaseDate).toLocaleDateString("en-US", {
               month: "short",

@@ -98,7 +98,7 @@ const PurchaseOrDownloadAlbum: React.FC<{
         size="small"
         open={isPurchasingAlbum}
         onClose={() => setIsPurchasingAlbum(false)}
-        title={`Buying ${trackGroup.title}`}
+        title={`${t("buyingTrackGroup")} ${trackGroup.title}`}
       >
         <BuyTrackGroup trackGroup={trackGroup} />
       </Modal>

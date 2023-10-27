@@ -9,6 +9,7 @@ import { useSnackbar } from "state/SnackbarContext";
 import LoadingSpinner from "components/common/LoadingSpinner";
 import { useGlobalStateContext } from "state/GlobalState";
 import Table from "components/common/Table";
+import { useTranslation } from "react-i18next";
 
 export interface ShareableTrackgroup {
   creatorId: number;
@@ -37,6 +38,7 @@ export const NewTrack: React.FC<{
   } = useGlobalStateContext();
 
   const [isSaving, setIsSaving] = React.useState(false);
+  const {t} = useTranslation("translation", {keyPrefix : "newTrack"})
   const snackbar = useSnackbar();
 
   const userId = user?.id;
@@ -82,15 +84,15 @@ export const NewTrack: React.FC<{
 
   return (
     <form onSubmit={handleSubmit(doAddTrack)}>
-      <h4>New Track</h4>
+      <h4>{t("newTrack")}</h4>
       <FormComponent>
-        Title: <InputEl {...register("title")} />
+         <InputEl {...register("title")} />
       </FormComponent>
       <FormComponent>
-        Status:{" "}
+        {t("status")} :{" "}
         <SelectEl defaultValue="paid" {...register("status")}>
-          <option value="preview">Preview</option>
-          <option value="must-own">Must own</option>
+          <option value="preview">{t("statusPreview")}</option>
+          <option value="must-own">{t("statusMustOwn")}</option>
         </SelectEl>
       </FormComponent>
       <FormComponent>
@@ -102,29 +104,29 @@ export const NewTrack: React.FC<{
         />
       </FormComponent>
       <FormComponent>
-        Want to credit an artist on this track?
+        {t("creditArtistQuestion")}
         <Table>
           <thead>
             <tr>
               <th />
               <th>
                 {" "}
-                <small>How the artist's name should appear publically</small>
+                <small>{t("artistNameFormatQuestionColumn")}</small>
               </th>
               <th>
                 <small>
-                  Is this an existing artist in Mirlo? Add their ID if so.
+                  {t("existingArtistQuestionColumn")}
                 </small>
               </th>
               <th>
-                <small>What role did the artist have?</small>
+                <small>{t("artistRoleColumn")}</small>
               </th>
             </tr>
           </thead>
           <tbody>
             {fields.map((f, number) => (
               <tr>
-                <td>Artist</td>
+                <td>{t("artist")}</td>
                 <td>
                   <InputEl {...register(`trackArtists.${number}.artistName`)} />
                 </td>
@@ -139,7 +141,7 @@ export const NewTrack: React.FC<{
           </tbody>
         </Table>
         <Button compact type="button" onClick={() => append({})}>
-          Add additional artists
+          {t("addAdditionalArtists")}
         </Button>
       </FormComponent>
       <Button
@@ -147,7 +149,7 @@ export const NewTrack: React.FC<{
         disabled={isSaving}
         startIcon={isSaving ? <LoadingSpinner /> : undefined}
       >
-        Add track
+        {t("addTrackButton")}
       </Button>
     </form>
   );
