@@ -33,7 +33,7 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup }> = ({
     <>
       {trackGroup.minPrice && (
         <>
-          {} <Money amount={trackGroup.minPrice / 100} />, or
+          {t("price")} <Money amount={trackGroup.minPrice / 100} />, or
         </>
       )}
       <div>
