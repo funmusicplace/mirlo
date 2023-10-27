@@ -20,7 +20,7 @@ module.exports = async (job) => {
     // see: https://github.com/Borewit/music-metadata/issues/543
     // https://github.com/Borewit/music-metadata/pull/584 partially addressed?
     const duration = await getAudioDuration(
-      path.join(BASE_DATA_DIR, `/data/media/incoming/${filename}`)
+      path.join(BASE_DATA_DIR, `/data/media/incoming/${filename}`),
     );
 
     return Promise.resolve(duration);

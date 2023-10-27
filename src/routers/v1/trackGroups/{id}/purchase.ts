@@ -72,14 +72,14 @@ export default function () {
               ? [
                   generateFullStaticImageUrl(
                     trackGroup.cover?.url[4],
-                    finalCoversBucket
+                    finalCoversBucket,
                   ),
                 ]
               : [],
           },
           {
             stripeAccount: stripeAccountId,
-          }
+          },
         );
         await prisma.trackGroup.update({
           where: {
@@ -124,7 +124,7 @@ export default function () {
             success_url: `${API_DOMAIN}/v1/checkout?success=true&stripeAccountId=${stripeAccountId}&session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${API_DOMAIN}/v1/checkout?canceled=true`,
           },
-          { stripeAccount: stripeAccountId }
+          { stripeAccount: stripeAccountId },
         );
         res.status(200).json({
           sessionUrl: session.url,

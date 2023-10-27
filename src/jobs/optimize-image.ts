@@ -36,7 +36,7 @@ const optimizeImage = async (job: Job) => {
   try {
     const profiler = logger.startTimer();
     logger.info(
-      `MinIO is at ${MINIO_HOST}:${MINIO_API_PORT} ${MINIO_ROOT_USER}`
+      `MinIO is at ${MINIO_HOST}:${MINIO_API_PORT} ${MINIO_ROOT_USER}`,
     );
 
     logger.info(`Starting to optimize images ${destination}`);
@@ -44,7 +44,7 @@ const optimizeImage = async (job: Job) => {
       minioClient,
       incomingMinioBucket,
       destination,
-      logger
+      logger,
     );
 
     await createBucketIfNotExists(minioClient, finalMinioBucket, logger);
@@ -84,14 +84,14 @@ const optimizeImage = async (job: Job) => {
                 height,
                 withoutEnlargement: true,
               },
-              variant.resize || {}
+              variant.resize || {},
             );
 
             const outputOptions = Object.assign(
               {},
               defaultOptions[outputType].outputOptions,
               options,
-              variant.outputOptions || {}
+              variant.outputOptions || {},
             );
 
             logger.info("getting object from MinIO");
@@ -107,7 +107,7 @@ const optimizeImage = async (job: Job) => {
             await minioClient.putObject(
               finalMinioBucket,
               finalFileName,
-              newBuffer
+              newBuffer,
             );
 
             logger.info(`Converted and optimized image to ${outputType}`, {
@@ -118,7 +118,7 @@ const optimizeImage = async (job: Job) => {
               height: height,
               format: outputType,
             };
-          }
+          },
         );
       })
       .flat(1);

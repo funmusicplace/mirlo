@@ -58,7 +58,7 @@ export default function () {
 
       const productKey = await createSubscriptionStripeProduct(
         tier,
-        stripeAccountId
+        stripeAccountId,
       );
 
       if (productKey) {
@@ -91,7 +91,7 @@ export default function () {
           },
           {
             stripeAccount: stripeAccountId,
-          }
+          },
         );
 
         // res.redirect(303, session.url ?? "");

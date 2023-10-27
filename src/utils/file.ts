@@ -19,7 +19,7 @@ export const checkFileType = async (
   ctx: APIContext,
   file: APIFile,
   mimeTypes: string[],
-  logger?: Logger
+  logger?: Logger,
 ) => {
   const { path: filepath } = file;
   const type = await fromFile(filepath);

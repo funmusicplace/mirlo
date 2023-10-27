@@ -19,7 +19,7 @@ export default function () {
     try {
       const isCreator = await doesTrackGroupBelongToUser(
         Number(trackGroupId),
-        userId
+        userId,
       );
 
       const purchase = await prisma.userTrackGroupPurchase.findFirst({
@@ -59,7 +59,7 @@ export default function () {
         purchase.trackGroup.tracks as unknown as (Track & {
           audio: TrackAudio | null;
         })[],
-        purchase.trackGroup.id.toString()
+        purchase.trackGroup.id.toString(),
       );
 
       logger.info(`Put zip in location ${zip}`);

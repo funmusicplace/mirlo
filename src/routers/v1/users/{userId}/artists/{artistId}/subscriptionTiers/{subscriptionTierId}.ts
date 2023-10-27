@@ -15,7 +15,7 @@ export default function () {
     try {
       const subscriptionTier = await doesSubscriptionTierBelongToUser(
         Number(subscriptionTierId),
-        Number(userId)
+        Number(userId),
       );
 
       if (!subscriptionTier) {
@@ -88,7 +88,7 @@ export default function () {
       const { userId, subscriptionTierId } = req.params;
       const track = await doesSubscriptionTierBelongToUser(
         Number(subscriptionTierId),
-        Number(userId)
+        Number(userId),
       );
 
       if (!track) {
@@ -106,7 +106,7 @@ export default function () {
     } catch (e) {
       console.error(
         "delete artist/{artistId}/subscriptionTiers/{subscriptionTierId}",
-        e
+        e,
       );
       res.status(500);
     }

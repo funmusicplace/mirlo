@@ -66,9 +66,9 @@ export default function () {
             p,
             (p.artistId
               ? await checkIsUserSubscriber(user, p.artistId)
-              : false) || p.artist?.userId === user?.id
-          )
-        )
+              : false) || p.artist?.userId === user?.id,
+          ),
+        ),
       );
       res.json({
         results: processedPosts,

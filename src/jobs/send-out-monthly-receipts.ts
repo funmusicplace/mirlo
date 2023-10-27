@@ -33,7 +33,7 @@ const sendOutMonthlyReceipts = async () => {
     Object.keys(groupedSubscriptions).map(async (userId) => {
       const userSubscriptions = groupedSubscriptions[userId];
       logger.info(
-        `user ${userId} subscribes to ${userSubscriptions.length} artists`
+        `user ${userId} subscribes to ${userSubscriptions.length} artists`,
       );
 
       return sendMail({
@@ -50,7 +50,7 @@ const sendOutMonthlyReceipts = async () => {
           },
         },
       });
-    })
+    }),
   );
 };
 

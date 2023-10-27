@@ -88,11 +88,11 @@ export const processArtistAvatar = (ctx: APIContext) => {
     await createBucketIfNotExists(
       minioClient,
       incomingArtistAvatarBucket,
-      logger
+      logger,
     );
 
     logger.info(
-      `Going to put a file on MinIO Bucket ${incomingArtistAvatarBucket}: ${image.id}, ${file.path}`
+      `Going to put a file on MinIO Bucket ${incomingArtistAvatarBucket}: ${image.id}, ${file.path}`,
     );
 
     minioClient
@@ -136,11 +136,11 @@ export const processArtistBanner = (ctx: APIContext) => {
     await createBucketIfNotExists(
       minioClient,
       incomingArtistBannerBucket,
-      logger
+      logger,
     );
 
     logger.info(
-      `Going to put a file on MinIO Bucket ${incomingArtistBannerBucket}: ${image.id}, ${file.path}`
+      `Going to put a file on MinIO Bucket ${incomingArtistBannerBucket}: ${image.id}, ${file.path}`,
     );
 
     minioClient
@@ -184,7 +184,7 @@ export const processTrackGroupCover = (ctx: APIContext) => {
     await createBucketIfNotExists(minioClient, incomingCoversBucket, logger);
 
     logger.info(
-      `Going to put a file on MinIO Bucket ${incomingCoversBucket}: ${image.id}, ${file.path}`
+      `Going to put a file on MinIO Bucket ${incomingCoversBucket}: ${image.id}, ${file.path}`,
     );
     minioClient
       .fPutObject(incomingCoversBucket, image.id, file.path)

@@ -73,12 +73,12 @@ export default function () {
             value: "updatedAt",
           },
         ],
-        subscribers
+        subscribers,
       );
     } catch (e) {
       console.error(
         "users/{userId}/artists/{artistId}/subscriptionTiers/download",
-        e
+        e,
       );
       res.status(500);
     }

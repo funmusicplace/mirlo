@@ -35,7 +35,7 @@ const announcePublishPost = async () => {
   await Promise.all(
     posts.map(async (post) => {
       const subscriptions = flatten(
-        post.artist?.subscriptionTiers.map((st) => st.userSubscriptions)
+        post.artist?.subscriptionTiers.map((st) => st.userSubscriptions),
       );
       logger.info(`mailing post: ${post.title} to ${subscriptions.length}`);
       await Promise.all(
@@ -55,7 +55,7 @@ const announcePublishPost = async () => {
               },
             },
           });
-        }) ?? []
+        }) ?? [],
       );
 
       await prisma.post.update({
@@ -66,7 +66,7 @@ const announcePublishPost = async () => {
           hasAnnounceEmailBeenSent: true,
         },
       });
-    })
+    }),
   );
 };
 

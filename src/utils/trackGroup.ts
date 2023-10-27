@@ -61,12 +61,12 @@ export const deleteTrackGroup = async (trackGroupId: number) => {
 
 export const findTrackGroupIdForSlug = async (
   id: string,
-  artistId?: string
+  artistId?: string,
 ) => {
   if (Number.isNaN(Number(id))) {
     if (!artistId) {
       throw new Error(
-        "Searching for a TrackGroup by slug requires an artistId"
+        "Searching for a TrackGroup by slug requires an artistId",
       );
     }
     artistId = await findArtistIdForURLSlug(artistId);
@@ -88,7 +88,7 @@ export default {
     tg: TrackGroup & {
       cover: TrackGroupCover | null;
       tracks?: Track[];
-    }
+    },
   ) => ({
     ...tg,
     cover: {
@@ -104,7 +104,7 @@ export async function buildZipFileForPath(
   tracks: (Track & {
     audio: TrackAudio | null;
   })[],
-  folderName: string
+  folderName: string,
 ) {
   return new Promise(async (resolve: (value: string) => void, reject) => {
     const rootFolder = `${MEDIA_LOCATION_DOWNLOAD_CACHE}/${folderName}`;
@@ -119,7 +119,7 @@ export async function buildZipFileForPath(
     output.on("close", function () {
       logger.info(archive.pointer() + " total bytes");
       logger.info(
-        "archiver has been finalized and the output file descriptor has closed."
+        "archiver has been finalized and the output file descriptor has closed.",
       );
       resolve(`${rootFolder}.zip`);
     });
@@ -159,7 +159,7 @@ export async function buildZipFileForPath(
           `${track.audio.id}/original.${track.audio.fileExtension}`,
           rootFolder,
           trackTitle,
-          logger
+          logger,
         );
         logger.info(`Fetched file for tracks ${filePath}`);
 

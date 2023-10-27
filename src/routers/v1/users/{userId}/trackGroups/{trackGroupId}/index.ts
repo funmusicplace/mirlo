@@ -28,7 +28,7 @@ export default function () {
     try {
       const trackgroup = await doesTrackGroupBelongToUser(
         Number(trackGroupId),
-        Number(userId)
+        Number(userId),
       );
 
       if (!trackgroup) {

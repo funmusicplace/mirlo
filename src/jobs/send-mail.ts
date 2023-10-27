@@ -30,7 +30,7 @@ const sendMail = async (job: any) => {
         ? nodemailer.createTransport(
             sendgrid({
               apiKey: process.env.SENDGRID_API_KEY!,
-            })
+            }),
           )
         : { jsonTransport: true },
     });

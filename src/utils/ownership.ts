@@ -4,7 +4,7 @@ import prisma from "../../prisma/prisma";
 
 export const doesSubscriptionTierBelongToUser = async (
   subscriptionId: number,
-  userId: number
+  userId: number,
 ): Promise<ArtistSubscriptionTier | null> => {
   const artists = await prisma.artist.findMany({
     where: {
@@ -24,7 +24,7 @@ export const doesSubscriptionTierBelongToUser = async (
 
 export const doesTrackGroupBelongToUser = async (
   trackGroupId: number,
-  userId: number
+  userId: number,
 ): Promise<TrackGroup | null> => {
   const artists = await prisma.artist.findMany({
     where: {
@@ -52,7 +52,7 @@ export const doesTrackGroupBelongToUser = async (
 
 export const doesTrackBelongToUser = async (
   trackId: number,
-  userId: number
+  userId: number,
 ) => {
   const track = await prisma.track.findUnique({
     where: {
@@ -62,7 +62,7 @@ export const doesTrackBelongToUser = async (
   if (track) {
     const trackGroup = await doesTrackGroupBelongToUser(
       track?.trackGroupId,
-      userId
+      userId,
     );
     if (trackGroup) {
       return track;
@@ -74,7 +74,7 @@ export const doesTrackBelongToUser = async (
 
 export const canUserListenToTrack = async (
   trackId?: number,
-  userId?: number
+  userId?: number,
 ) => {
   if (!trackId) {
     return false;

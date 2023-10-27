@@ -53,7 +53,7 @@ export default function () {
       if (req.files && isFileArray(req.files)) {
         jobId = await processTrackAudio({ req, res })(
           req.files[0],
-          Number(trackId)
+          Number(trackId),
         );
       }
 

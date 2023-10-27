@@ -35,8 +35,8 @@ app.use(async (...args) => {
             return new RegExp(origin.replace("regex:", ""));
           }
           return origin;
-        })
-      )
+        }),
+      ),
     ),
     process.env.API_DOMAIN ?? "http://localhost:3000",
   ];
@@ -57,7 +57,7 @@ app.use(
       // @ts-ignore
       req.rawBody = buf.toString();
     },
-  })
+  }),
 );
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
@@ -140,7 +140,7 @@ app.use(
     swaggerOptions: {
       url: `${process.env.API_DOMAIN ?? "http://localhost:3000"}/api-docs`,
     },
-  })
+  }),
 );
 
 app.use("/auth", auth);
@@ -188,5 +188,5 @@ app.use("/", (req, res) => {
 
 app.listen(process.env.PORT, () =>
   console.info(`
-🚀 Server ready at: ${process.env.API_DOMAIN}`)
+🚀 Server ready at: ${process.env.API_DOMAIN}`),
 );

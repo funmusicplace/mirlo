@@ -19,7 +19,7 @@ export default function () {
     try {
       const track = await doesTrackBelongToUser(
         Number(trackId),
-        Number(userId)
+        Number(userId),
       );
 
       if (!track) {

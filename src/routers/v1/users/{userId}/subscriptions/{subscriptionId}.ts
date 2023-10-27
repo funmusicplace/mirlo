@@ -46,7 +46,7 @@ export default function () {
           if (artistUser?.stripeAccountId) {
             await stripe.subscriptions.cancel(
               subscription.stripeSubscriptionKey,
-              { stripeAccount: artistUser?.stripeAccountId }
+              { stripeAccount: artistUser?.stripeAccountId },
             );
           }
         } catch (e) {
@@ -66,7 +66,7 @@ export default function () {
     } catch (e) {
       console.error(
         `DELETE /v1/users/{userId}/subscriptions/{subscriptionId}`,
-        e
+        e,
       );
       res.status(400);
       next();

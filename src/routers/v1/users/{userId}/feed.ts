@@ -43,7 +43,7 @@ export default function () {
 
       res.json({
         results: await Promise.all(
-          posts.map(async (p) => postProcessor.single(p, true))
+          posts.map(async (p) => postProcessor.single(p, true)),
         ),
       });
     } else {

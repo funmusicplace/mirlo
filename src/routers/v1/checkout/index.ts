@@ -41,7 +41,7 @@ export default function () {
               client?.applicationUrl +
                 `/${artistId}?subscribe=${
                   success ? "success" : "canceled"
-                }&tierId=${tierId}`
+                }&tierId=${tierId}`,
             );
           } else if (client && trackGroupId && artistId) {
             // FIXME: We'll probably want clients to be able to define the
@@ -52,7 +52,7 @@ export default function () {
               client?.applicationUrl +
                 `/${artistId}?trackGroupPurchase=${
                   success ? "success" : "canceled"
-                }&trackGroupId=${trackGroupId}`
+                }&trackGroupId=${trackGroupId}`,
             );
           } else {
             res.status(500).json({
@@ -61,7 +61,7 @@ export default function () {
           }
         } else {
           res.redirect(
-            process.env.REACT_APP_CLIENT_DOMAIN ?? "https://mirlo.space"
+            process.env.REACT_APP_CLIENT_DOMAIN ?? "https://mirlo.space",
           );
         }
       } else {

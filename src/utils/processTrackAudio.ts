@@ -34,7 +34,7 @@ audioQueueEvents.on(
   "completed",
   async (result: { jobId: string; returnvalue?: any }) => {
     logger.info(
-      `Job with id ${JSON.stringify(result.jobId)} has been completed`
+      `Job with id ${JSON.stringify(result.jobId)} has been completed`,
     );
 
     try {
@@ -67,7 +67,7 @@ audioQueueEvents.on(
     } catch (err) {
       logger.error(err);
     }
-  }
+  },
 );
 
 /*
@@ -107,7 +107,7 @@ export const processTrackAudio = (ctx: { req: Request; res: Response }) => {
 
     await createBucketIfNotExists(minioClient, incomingAudioBucket, logger);
     logger.info(
-      `Going to put a file on MinIO Bucket ${incomingAudioBucket}: ${audio.id}, ${file.path}`
+      `Going to put a file on MinIO Bucket ${incomingAudioBucket}: ${audio.id}, ${file.path}`,
     );
     await minioClient.fPutObject(incomingAudioBucket, audio.id, file.path);
 

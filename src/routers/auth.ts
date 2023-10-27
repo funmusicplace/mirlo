@@ -328,7 +328,7 @@ router.post(
     res.status(200).json({
       message: "Success",
     });
-  }
+  },
 );
 
 export const clearJWT = (res: Response) => {
@@ -417,7 +417,7 @@ router.post("/refresh", (req, res) => {
             message: "Success",
           });
         }
-      }
+      },
     );
   } else {
     return res.status(406).json({ message: "Unauthorized" });

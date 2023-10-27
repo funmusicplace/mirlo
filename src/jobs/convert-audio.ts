@@ -29,7 +29,7 @@ export default async (job: Job) => {
     const destinationFolder = `/data/media/processing/${audioId}`;
 
     logger.info(
-      `MinIO is at ${MINIO_HOST}:${MINIO_API_PORT} ${MINIO_ROOT_USER}`
+      `MinIO is at ${MINIO_HOST}:${MINIO_API_PORT} ${MINIO_ROOT_USER}`,
     );
 
     logger.info(`Starting to optimize audio ${audioId}`);
@@ -37,13 +37,13 @@ export default async (job: Job) => {
       minioClient,
       incomingAudioBucket,
       audioId,
-      logger
+      logger,
     );
 
     await createBucketIfNotExists(minioClient, finalAudioBucket, logger);
 
     logger.info(
-      `checking if folder exists, if not creating it ${destinationFolder}`
+      `checking if folder exists, if not creating it ${destinationFolder}`,
     );
     try {
       await fsPromises.stat(destinationFolder);
@@ -55,7 +55,7 @@ export default async (job: Job) => {
 
     await fsPromises.writeFile(
       `${destinationFolder}/original.${fileType?.ext ?? "flac"}`,
-      buffer
+      buffer,
     );
 
     const profiler = logger.startTimer();
@@ -173,7 +173,7 @@ export default async (job: Job) => {
         .addOption("-hls_list_size", "0") // Maxmimum number of playlist entries (0 means all entries/infinite)
         .addOption(
           "-hls_segment_filename",
-          `${destinationFolder}/segment-%03d.ts`
+          `${destinationFolder}/segment-%03d.ts`,
         )
         .addOption("-f", "hls") // HLS format
         .audioChannels(2)
@@ -215,9 +215,9 @@ export default async (job: Job) => {
         await minioClient.fPutObject(
           finalAudioBucket,
           `${audioId}/${file}`,
-          `${destinationFolder}/${file}`
+          `${destinationFolder}/${file}`,
         );
-      })
+      }),
     );
 
     await minioClient.removeObject(incomingAudioBucket, audioId);

@@ -8,7 +8,7 @@ export const deleteUser = async (userId: number) => {
     where: { userId: Number(userId) },
   });
   await Promise.all(
-    userArtists.map((artist) => deleteArtist(Number(userId), artist.id))
+    userArtists.map((artist) => deleteArtist(Number(userId), artist.id)),
   );
 
   await deleteStripeSubscriptions({ userId });

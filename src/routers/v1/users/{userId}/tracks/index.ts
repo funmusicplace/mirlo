@@ -53,7 +53,7 @@ export default function () {
     try {
       const trackGroup = await doesTrackGroupBelongToUser(
         Number(trackGroupId),
-        Number(userId)
+        Number(userId),
       );
       if (!trackGroup) {
         res.status(400).json({

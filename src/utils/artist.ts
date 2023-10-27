@@ -76,7 +76,7 @@ export const deleteArtist = async (userId: number, artistId: number) => {
 };
 
 export const deleteStripeSubscriptions = async (
-  where: { userId: number } | { artistSubscriptionTier: { artistId: number } }
+  where: { userId: number } | { artistSubscriptionTier: { artistId: number } },
 ) => {
   const stripeSubscriptions = await prisma.artistUserSubscription.findMany({
     where,
@@ -103,6 +103,6 @@ export const deleteStripeSubscriptions = async (
         }
         await stripe.subscriptions.cancel(sub.stripeSubscriptionKey);
       }
-    })
+    }),
   );
 };

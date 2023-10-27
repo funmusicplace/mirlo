@@ -12,7 +12,7 @@ export default {
 export const doesPostBelongToUser = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   const { userId, postId } = req.params;
 

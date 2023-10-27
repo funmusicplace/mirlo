@@ -37,7 +37,7 @@ export const minioClient = new Minio.Client({
 export const createBucketIfNotExists = async (
   minioClient: Client,
   bucket: string,
-  logger?: Logger
+  logger?: Logger,
 ) => {
   logger?.info(`NODE_ENV ${NODE_ENV}`);
   logger?.info("Checking if a bucket exists");
@@ -53,7 +53,7 @@ export async function getBufferFromMinio(
   minioClient: Client,
   bucket: string,
   filename: string,
-  logger?: Logger
+  logger?: Logger,
 ): Promise<{ buffer: Buffer; size: number }> {
   return new Promise(
     (resolve: (result: { buffer: Buffer; size: number }) => any, reject) => {
@@ -78,7 +78,7 @@ export async function getBufferFromMinio(
           });
         })
         .catch(reject);
-    }
+    },
   );
 }
 
@@ -88,12 +88,12 @@ export async function getFileFromMinio(
   filename: string,
   destinationFolderName?: string,
   destinationFilePath?: string,
-  logger?: Logger
+  logger?: Logger,
 ): Promise<{ filePath: string }> {
   return new Promise(
     async (resolve: (result: { filePath: string }) => any, reject) => {
       logger?.info(
-        `Getting object from MinIO Bucket ${bucket}: ${filename} in ${destinationFolderName}`
+        `Getting object from MinIO Bucket ${bucket}: ${filename} in ${destinationFolderName}`,
       );
       await fs.mkdirSync(`${destinationFolderName}`, { recursive: true });
 
@@ -128,6 +128,6 @@ export async function getFileFromMinio(
           });
         })
         .catch(reject);
-    }
+    },
   );
 }

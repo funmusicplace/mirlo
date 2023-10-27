@@ -46,14 +46,14 @@ passport.use(
           }
           done(null, jwtPayload);
         });
-    }
-  )
+    },
+  ),
 );
 
 export const userLoggedInWithoutRedirect = (
   req: Request,
   res: Response,
-  next: any
+  next: any,
 ) => {
   passport.authenticate(
     "jwt",
@@ -70,7 +70,7 @@ export const userLoggedInWithoutRedirect = (
       }
       req.user = user;
       return next();
-    }
+    },
   )(req, res, next);
 };
 
@@ -108,7 +108,7 @@ export const userHasPermission = (role: "admin" | "owner") => {
 export const artistBelongsToLoggedInUser = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   const { userId, artistId } = req.params as unknown as {
     userId: string;
@@ -148,7 +148,7 @@ export const artistBelongsToLoggedInUser = async (
 export const contentBelongsToLoggedInUserArtist = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   const { userId } = req.params as unknown as { userId: string };
   const data = req.body;

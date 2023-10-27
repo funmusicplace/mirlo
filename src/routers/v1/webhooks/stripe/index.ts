@@ -21,7 +21,7 @@ export default function () {
     const event = await verifyStripeSignature(
       req,
       res,
-      STRIPE_WEBHOOK_SIGNING_SECRET
+      STRIPE_WEBHOOK_SIGNING_SECRET,
     );
 
     // Handle the event

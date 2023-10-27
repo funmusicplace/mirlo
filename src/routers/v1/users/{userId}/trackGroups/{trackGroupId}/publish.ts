@@ -13,7 +13,7 @@ export default function () {
     try {
       const trackGroup = await doesTrackGroupBelongToUser(
         Number(trackGroupId),
-        Number(userId)
+        Number(userId),
       );
       const updatedTrackgroup = await prisma.trackGroup.update({
         where: { id: Number(trackGroupId) || undefined },

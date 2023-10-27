@@ -5,7 +5,7 @@ import { minioClient } from "./utils/minio";
 export const serveStatic = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   let stat;
   // FIXME: someone who's better at devops than me will have to figure out
@@ -23,7 +23,7 @@ export const serveStatic = async (
     const { buffer } = await getBufferFromMinio(
       minioClient,
       req.params.bucket,
-      req.params.filename
+      req.params.filename,
     );
     res.end(buffer, "binary");
     return;

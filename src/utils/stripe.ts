@@ -13,7 +13,7 @@ const stripe = new Stripe(STRIPE_KEY ?? "", {
 
 export const createSubscriptionStripeProduct = async (
   tier: Prisma.ArtistSubscriptionTierGetPayload<{ include: { artist: true } }>,
-  stripeAccountId: string
+  stripeAccountId: string,
 ) => {
   let productKey = tier.stripeProductKey;
   if (productKey) {
@@ -39,7 +39,7 @@ export const createSubscriptionStripeProduct = async (
       },
       {
         stripeAccount: stripeAccountId,
-      }
+      },
     );
     await prisma.artistSubscriptionTier.update({
       where: {
@@ -57,7 +57,7 @@ export const createSubscriptionStripeProduct = async (
 export const verifyStripeSignature = async (
   req: Request,
   res: Response,
-  signingSecret?: string
+  signingSecret?: string,
 ) => {
   const signature = req.headers["stripe-signature"];
   let event = req.body;
@@ -68,12 +68,12 @@ export const verifyStripeSignature = async (
         // @ts-ignore
         req.rawBody,
         signature ?? "",
-        signingSecret
+        signingSecret,
       );
     } catch (e) {
       console.log(
         `⚠️  Webhook signature verification failed.`,
-        (e as Error).message
+        (e as Error).message,
       );
       return res.sendStatus(400);
     }
@@ -85,7 +85,7 @@ export const verifyStripeSignature = async (
 const handleTrackGroupPurhcase = async (
   userId: number,
   trackGroupId: number,
-  session: Stripe.Checkout.Session
+  session: Stripe.Checkout.Session,
 ) => {
   try {
     const purchase = await prisma.userTrackGroupPurchase.create({
@@ -136,7 +136,7 @@ const handleTrackGroupPurhcase = async (
 const handleSubscription = async (
   userId: number,
   tierId: number,
-  session: Stripe.Checkout.Session
+  session: Stripe.Checkout.Session,
 ) => {
   try {
     const results = await prisma.artistUserSubscription.upsert({
@@ -169,7 +169,7 @@ const handleSubscription = async (
 };
 
 export const handleCheckoutSession = async (
-  session: Stripe.Checkout.Session
+  session: Stripe.Checkout.Session,
 ) => {
   const { tierId, userId, trackGroupId, stripeAccountId } =
     session.metadata as unknown as {
@@ -184,7 +184,7 @@ export const handleCheckoutSession = async (
     {
       expand: ["line_items"],
     },
-    { stripeAccount: stripeAccountId }
+    { stripeAccount: stripeAccountId },
   );
   if (tierId && userId) {
     await handleSubscription(Number(userId), Number(tierId), session);
@@ -192,7 +192,7 @@ export const handleCheckoutSession = async (
     await handleTrackGroupPurhcase(
       Number(userId),
       Number(trackGroupId),
-      session
+      session,
     );
   }
 };

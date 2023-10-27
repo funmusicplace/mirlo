@@ -125,7 +125,7 @@ export default function () {
             sizes: artist?.banner?.url
               ? convertURLArrayToSizes(
                   artist?.banner.url,
-                  finalArtistBannerBucket
+                  finalArtistBannerBucket,
                 )
               : undefined,
           },

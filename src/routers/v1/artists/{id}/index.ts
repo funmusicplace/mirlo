@@ -81,8 +81,8 @@ export default function () {
           posts: artist?.posts.map((p) =>
             postProcessor.single(
               p,
-              isUserSubscriber || artist.userId === user?.id
-            )
+              isUserSubscriber || artist.userId === user?.id,
+            ),
           ),
           banner: {
             ...artist?.banner,
@@ -90,7 +90,7 @@ export default function () {
               artist?.banner &&
               convertURLArrayToSizes(
                 artist?.banner?.url,
-                finalArtistBannerBucket
+                finalArtistBannerBucket,
               ),
           },
           avatar: {
@@ -99,7 +99,7 @@ export default function () {
               artist?.avatar &&
               convertURLArrayToSizes(
                 artist?.avatar?.url,
-                finalArtistAvatarBucket
+                finalArtistAvatarBucket,
               ),
           },
           trackGroups: artist?.trackGroups.map(trackGroupProcessor.single),

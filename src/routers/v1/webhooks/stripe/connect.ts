@@ -24,7 +24,7 @@ export default function () {
     const event = await verifyStripeSignature(
       req,
       res,
-      STRIPE_WEBHOOK_CONNECT_SIGNING_SECRET
+      STRIPE_WEBHOOK_CONNECT_SIGNING_SECRET,
     );
     logger.info(`Event for stripe account ${event.account}`);
 

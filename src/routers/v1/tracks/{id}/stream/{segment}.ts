@@ -13,7 +13,7 @@ import { canUserListenToTrack } from "../../../../../utils/ownership";
 export const fetchFile = async (
   res: Response,
   filename: string,
-  segment: string
+  segment: string,
 ) => {
   const alias = `${filename}/${segment}`;
   try {
@@ -29,7 +29,7 @@ export const fetchFile = async (
     const { buffer } = await getBufferFromMinio(
       minioClient,
       finalAudioBucket,
-      alias
+      alias,
     );
 
     res.end(buffer, "binary");
@@ -65,7 +65,7 @@ export default function () {
 
       const isUserAbleToListenToTrack = await canUserListenToTrack(
         track?.id,
-        user?.id
+        user?.id,
       );
 
       if (!track || !isUserAbleToListenToTrack) {

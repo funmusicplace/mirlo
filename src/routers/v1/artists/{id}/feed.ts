@@ -82,8 +82,8 @@ export default function () {
               p.postSubscriptionTiers.find(
                 (t) =>
                   userSubscription.artistSubscriptionTierId ===
-                  t.artistSubscriptionTierId
-              )
+                  t.artistSubscriptionTierId,
+              ),
           );
         } else {
           posts.filter((p) => p.isPublic);
