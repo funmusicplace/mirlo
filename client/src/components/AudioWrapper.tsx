@@ -29,6 +29,7 @@ export const AudioWrapper: React.FC<{
   } = useGlobalStateContext();
   // const [currentTime, setCurrentTime] = React.useState("0:00");
   const [mostlyListened, setMostlyListened] = React.useState(false);
+  const [currentSeconds, setCurrentSeconds] = React.useState(0);
   const userId = user?.id;
   const playerRef = React.useRef<HTMLVideoElement>(null);
 
@@ -58,6 +59,7 @@ export const AudioWrapper: React.FC<{
           console.error(e);
         }
       }
+      setCurrentSeconds(e.target.currentTime);
     },
     [currentTrack, mostlyListened, userId]
   );
@@ -102,37 +104,22 @@ export const AudioWrapper: React.FC<{
 
   return (
     <>
-      <>
-        <ReactHlsPlayer
-          src={streamUrl}
-          autoPlay={false}
-          style={{ display: "none" }}
-          // controls={true}
-          // @ts-ignore
-          hlsConfig={hlsConfig}
-          width="100%"
-          height="2rem"
-          onPlay={onPlay}
-          onEnded={onEnded}
-          playerRef={playerRef}
-          onTimeUpdate={onListen}
-          playsInline
-        />
-        <SongTimeDisplay playerRef={playerRef} />
-      </>
-      {/* <div
-        className={css`
-          width: 100px;
-          text-align: right;
-          font-family: mono;
-
-          @media (max-width: ${bp.small}px) {
-            display: none;
-          }
-        `}
-      >
-        {currentTime}
-      </div> */}
+      <ReactHlsPlayer
+        src={streamUrl}
+        autoPlay={false}
+        style={{ display: "none" }}
+        // controls={true}
+        // @ts-ignore
+        hlsConfig={hlsConfig}
+        width="100%"
+        height="2rem"
+        onPlay={onPlay}
+        onEnded={onEnded}
+        playerRef={playerRef}
+        onTimeUpdate={onListen}
+        playsInline
+      />
+      <SongTimeDisplay playerRef={playerRef} currentSeconds={currentSeconds} />
     </>
   );
 };
