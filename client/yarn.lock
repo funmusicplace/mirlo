@@ -5621,6 +5621,11 @@ icss-utils@^5.0.0, icss-utils@^5.1.0:
   resolved "https://registry.npmjs.org/icss-utils/-/icss-utils-5.1.0.tgz"
   integrity sha512-soFhflCVWLfRNOPU3iv5Z9VUdT44xFRbzjLsEzSr5AQmgqPMTHdU3PMT1Cf1ssx8fLNJDA1juftYl+PUcv3MqA==
 
+id3-parser@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/id3-parser/-/id3-parser-3.0.0.tgz#efc467d1e9386b80589e4d31bddae18b10e1f537"
+  integrity sha512-ubxxh6inGy2VM4N3L1F8uFQXKgKoFgFuT3BSEg7e+5bbSu7pw91tQqxVhUdJVg3jbzZYZJFaej29o8shfJ/GGg==
+
 idb@^7.0.1:
   version "7.1.1"
   resolved "https://registry.npmjs.org/idb/-/idb-7.1.1.tgz"
@@ -7777,6 +7782,11 @@ parent-module@^1.0.0:
   integrity sha512-GQ2EWRpQV8/o+Aw8YqtfZZPfNRWZYkbidE9k5rpl/hC3vtHHBfGm2Ifi6qWV+coDGkrUKZAxE3Lot5kcsRlh+g==
   dependencies:
     callsites "^3.0.0"
+
+parse-audio-metadata@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/parse-audio-metadata/-/parse-audio-metadata-1.2.0.tgz#4a2a3ddec8e0492d71ff2bc23e106a5be7b8c09a"
+  integrity sha512-TdSFkdYPe3os/tmRzIJNdr++hC0wTR4NwqzQ1IbbMT4evalZiN539hMaBUCTBQ4i8UFltVPkFWm3VN9Wx/fiSg==
 
 parse-json@^5.0.0, parse-json@^5.2.0:
   version "5.2.0"

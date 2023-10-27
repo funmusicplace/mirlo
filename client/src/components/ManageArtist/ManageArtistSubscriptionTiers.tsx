@@ -13,6 +13,9 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
   const {
     state: { user },
   } = useGlobalStateContext();
+  const { t } = useTranslation("translation", {
+    keyPrefix: "manageSubscriptions",
+  });
 
   const { artistId } = useParams();
   const [isLoadingSubscriberData, setIsLoadingSubscriberData] =
@@ -21,7 +24,7 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
   const [manageTier, setManageTier] = React.useState<ArtistSubscriptionTier>();
   const [tiers, setTiers] = React.useState<ArtistSubscriptionTier[]>([]);
 
-  const { t } = useTranslation("translation", { keyPrefix: "manage" });
+  const { t:tManage } = useTranslation("translation", { keyPrefix: "manage" });
 
   const userId = user?.id;
 
@@ -70,7 +73,7 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
         margin-top: 2rem;
       `}
     >
-      <h2>{t("subscriptionTiers")}</h2>
+      <h2>{tManage("subscriptionTiers")}</h2>
       <div
         className={css`
           margin-bottom: 1rem;

@@ -72,6 +72,7 @@ audioQueueEvents.on(
 
 /*
  * Process an audio then queue it for upload
+ * FIXME: convert this to be stream based.
  */
 export const processTrackAudio = (ctx: { req: Request; res: Response }) => {
   return async (file: any, trackId: number) => {
@@ -111,7 +112,8 @@ export const processTrackAudio = (ctx: { req: Request; res: Response }) => {
     await minioClient.fPutObject(incomingAudioBucket, audio.id, file.path);
 
     logger.info("Adding audio to convert-audio queue");
-    audioQueue.add("convert-audio", { audioId: audio.id });
+    const job = await audioQueue.add("convert-audio", { audioId: audio.id });
+    return job.id;
   };
 };
 

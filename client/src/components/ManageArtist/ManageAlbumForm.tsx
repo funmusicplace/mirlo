@@ -1,8 +1,7 @@
 import React from "react";
 import Modal from "components/common/Modal";
-import TrackTable from "./ManageTrackTable";
+import ManageTrackTable from "./ManageTrackTable";
 import AlbumForm from "./AlbumForm";
-import NewTrack from "./NewTrack";
 import api from "services/api";
 import { useTranslation } from "react-i18next";
 import Button from "components/common/Button";
@@ -68,14 +67,13 @@ export const ManageAlbumForm: React.FC<{
       <div>
         <Button onClick={publishTrackGroup}>{t("publish")}</Button>
       </div>
-      <TrackTable
+      <ManageTrackTable
         tracks={tracks}
         editable
         trackGroupId={trackgroup.id}
         owned
         reload={reloadTrackGroup}
       />
-      <NewTrack trackgroup={trackgroup} reload={reloadTrackGroup} />
     </Modal>
   );
 };

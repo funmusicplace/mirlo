@@ -88,13 +88,15 @@
     "edit": "Edit"
   },
   "manage": {
+    "manageArtists": "Manage artists",
     "error": "Something went wrong",
     "setUpBankAccount": "Set up bank account",
     "stripeAccountVerified": "Stripe account verified!",
     "waitingStripeAccountVerification": "We're waiting on stripe to verify your account",
     "downloadSubscriberData": "Downlaod Subscriber Data",
     "subscriptionTiers": "Your subscription tiers",
-    "createNewArtist": "Create new artist"
+    "createNewArtist": "Create new artist",
+    "waitingOnStripe": "We're waiting on stripe to verify your account"
   },
   "manageArtist": {
     "notEnabled": "This artist has not been enabled by site admin yet! Contact an admin to do so.",
@@ -130,7 +132,21 @@
     "price": "Price",
     "saveAlbum": "Save album",
     "submitAlbum": "Submit album",
-    "publish": "Publish"
+    "publish": "Publish",
+    "uploadTracks": "Upload tracks",
+    "addTheFollowingTracks": "We'll add the following tracks",
+    "addNewArtist": "Add new artist",
+    "preview": "Preview",
+    "mustOwn": "Must own",
+    "trackTitle": "Track title",
+    "trackTitleHelp": "The title of the track",
+    "artists": "Artists",
+    "trackArtistsHelp": "Who are the artists involved in making the track? List as many as you like, alongside their role",
+    "status": "Status",
+    "statusHelp": "Can the user listen to the track without owning it? If it's 'preview' then they can.",
+    "metadata": "Metadata",
+    "coAuthorCheck": "Is this artist a co-author? ie. Should they be listed in the track listings?",
+    "moreTrackDetails": "More track details"
   },
   "artistForm": {
     "displayName": "Display name",
@@ -150,6 +166,9 @@
     "delete": "Delete",
     "addNewPost": "Add new post to {{artist}}",
     "postDeleted": "Post deleted"
+  },
+  "manageSubscriptions": {
+    "downloadSubscriberData": "Download subscriber data"
   },
   "subscriptionForm": {
     "subscriptionUpdated": "Subscription updated",

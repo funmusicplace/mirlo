@@ -16,7 +16,7 @@ import { useTranslation } from "react-i18next";
 
 const AlbumForm: React.FC<{
   existing?: TrackGroup;
-  reload: () => Promise<void>;
+  reload: () => Promise<void> | void;
   artist: Artist;
   onClose?: () => void;
 }> = ({ reload, artist, existing, onClose }) => {
@@ -170,7 +170,7 @@ const AlbumForm: React.FC<{
         <InputEl type="date" {...register("releaseDate")} required />
       </FormComponent>
       <FormComponent>
-        {t("about")}: <TextArea {...register("about")} />
+        {t("about")}: <TextArea {...register("about")} rows={7} />
       </FormComponent>
       <FormComponent>
         {t("price")}:

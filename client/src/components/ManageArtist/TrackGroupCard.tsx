@@ -9,8 +9,7 @@ import { Link } from "react-router-dom";
 
 const TrackGroupCard: React.FC<{
   album: TrackGroup;
-  setManageTrackgroup: (tg: TrackGroup) => void;
-}> = ({ album, setManageTrackgroup }) => {
+}> = ({ album }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
   const { t: trackGroupCardTranslation } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
   return (
@@ -73,15 +72,11 @@ const TrackGroupCard: React.FC<{
             margin-top: 0.5rem;
           `}
         >
-          <Button
-            compact
-            onClick={() => {
-              setManageTrackgroup(album);
-            }}
-            style={{ marginRight: "1rem" }}
-          >
-            {t("manageAlbum")}
-          </Button>
+          <Link to={`/manage/artists/${album.artistId}/release/${album.id}`}>
+            <Button compact style={{ marginRight: "1rem" }}>
+              {t("manageAlbum")}
+            </Button>
+          </Link>
           {album.published && (
             <Link
               to={`/${

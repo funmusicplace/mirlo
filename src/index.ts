@@ -107,6 +107,7 @@ const routes = [
   "checkout",
   "webhooks/stripe",
   "webhooks/stripe/connect",
+  "jobs",
 ];
 
 initialize({
