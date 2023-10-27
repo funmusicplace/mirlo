@@ -69,7 +69,7 @@ export const Manage: React.FC = () => {
             }
           `}
         >
-          <h2 className={css``}>Manage: Artists</h2>
+          <h2 className={css``}>{t("manageArtists")}</h2>
 
           <div
             className={css`
@@ -102,7 +102,7 @@ export const Manage: React.FC = () => {
                 border-radius: 6px;
               `}
             >
-              Create new artist
+              {t("createNewArtistAccount")}
             </Button>
             <CreateNewArtistForm
               open={creatingNewArtist}
@@ -121,10 +121,10 @@ export const Manage: React.FC = () => {
               </Button>
             )}
             {!stripeAccountStatus?.chargesEnabled && (
-              <>We're waiting on stripe to verify your account</>
+              <>{t("waitingOnStripe")}</>
             )}
             {stripeAccountStatus?.chargesEnabled && (
-              <>Stripe account verified!</>
+              <>{t("stripeAccountVerified")}</>
             )}
           </div>
         </div>

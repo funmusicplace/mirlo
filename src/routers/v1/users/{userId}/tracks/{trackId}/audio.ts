@@ -47,13 +47,17 @@ export default function () {
         return next();
       }
 
+      let jobId = null;
       // TODO: Remove prior files
       // FIXME: Only allow uploading of one file.
       if (req.files && isFileArray(req.files)) {
-        await processTrackAudio({ req, res })(req.files[0], Number(trackId));
+        jobId = await processTrackAudio({ req, res })(
+          req.files[0],
+          Number(trackId)
+        );
       }
 
-      res.json({ message: "Success" });
+      res.json({ result: { jobId } });
     } catch (error) {
       res.status(400).json({
         error: `Track with ID ${trackId} does not exist in the database`,

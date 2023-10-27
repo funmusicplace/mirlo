@@ -13,7 +13,6 @@ import { logger } from "../logger";
 import fs from "fs";
 import archiver from "archiver";
 
-import { doesTrackGroupBelongToUser } from "./ownership";
 const { MEDIA_LOCATION_DOWNLOAD_CACHE = "" } = process.env;
 /**
  * We use our own custom function to handle this until we

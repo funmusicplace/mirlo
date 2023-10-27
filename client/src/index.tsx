@@ -34,6 +34,7 @@ import { AuthWrapper } from "components/AuthWrapper";
 import Signup from "components/Signup";
 import { ArtistProvider } from "state/ArtistContext";
 import FAQ from "components/FAQ";
+import ManageTrackGroup from "components/ManageArtist/ManageTrackGroup";
 
 const router = createBrowserRouter([
   {
@@ -90,6 +91,16 @@ const router = createBrowserRouter([
           <AuthWrapper>
             <ArtistProvider managedArtist>
               <ManageArtist />
+            </ArtistProvider>
+          </AuthWrapper>
+        ),
+      },
+      {
+        path: "manage/artists/:artistId/release/:trackGroupId",
+        element: (
+          <AuthWrapper>
+            <ArtistProvider managedArtist>
+              <ManageTrackGroup />
             </ArtistProvider>
           </AuthWrapper>
         ),

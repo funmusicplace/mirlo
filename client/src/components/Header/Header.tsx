@@ -1,6 +1,5 @@
 import { css } from "@emotion/css";
 import React from "react";
-import { FaTimes } from "react-icons/fa";
 import { ImMenu } from "react-icons/im";
 import { Link } from "react-router-dom";
 import { bp } from "../../constants";
@@ -79,23 +78,15 @@ const Header = () => {
           <div
             className={css`
               position: absolute;
-              top: 0;
-              width: 100%;
+              top: 70px;
+              right: 0;
+              // width: 100%;
               padding: 0.5rem;
               z-index: 12;
               padding-bottom: 1rem;
-              background: var(--mi-light-foreground-color);
+              background: var(--mi-normal-background-color);
             `}
           >
-            <IconButton
-              onClick={() => setIsMenuOpen(false)}
-              transparent
-              className={css`
-                color: var(--mi-normal-foreground-color);
-              `}
-            >
-              <FaTimes />
-            </IconButton>
             <Menu setIsMenuOpen={setIsMenuOpen} />
           </div>
         </>
@@ -107,33 +98,7 @@ const Header = () => {
         `}
       >
         <HeaderSearch />
-        {state.user && (
-          <Link
-            to="/profile"
-            className={css`
-              border-radius: var(--mi-border-radius);
-              padding: 0.25rem 0.75rem;
-              color: var(--normal-background-color);
-              text-decoration: none;
-              background-color: var(--mi-shade-background-color);
-              margin-right: 1rem;
 
-              &:hover {
-                background-color: var(--mi-secondary-color--hover);
-                color: var(--mi-);
-              }
-
-              @media (max-width: ${bp.small}px) {
-                text-overflow: ellipsis;
-                overflow: hidden;
-                line-break: none;
-                white-space: nowrap;
-              }
-            `}
-          >
-            {state.user?.name}
-          </Link>
-        )}
         <IconButton
           transparent
           onClick={() => {
