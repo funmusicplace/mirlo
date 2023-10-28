@@ -1,8 +1,9 @@
 import React from "react";
 import api from "services/api";
 
-const usePublicObjectById = <T>(
+const useGetUserObjectById = <T>(
   endpoint: string,
+  userId?: number,
   id?: string,
   queryParams?: string
 ) => {
@@ -14,9 +15,9 @@ const usePublicObjectById = <T>(
     try {
       if (queryParams) {
       }
-      if (id) {
+      if (userId && id) {
         const { result } = await api.get<T>(
-          `${endpoint}/${id}${queryParams ?? ""}`
+          `users/${userId}/${endpoint}/${id}${queryParams ?? ""}`
         );
         setObject(result);
       } else {
@@ -25,7 +26,7 @@ const usePublicObjectById = <T>(
     } finally {
       setIsLoading(false);
     }
-  }, [endpoint, id, queryParams]);
+  }, [endpoint, id, queryParams, userId]);
 
   React.useEffect(() => {
     fetchObject();
@@ -34,4 +35,4 @@ const usePublicObjectById = <T>(
   return { object, isLoadingObject: isLoading, reload: fetchObject };
 };
 
-export default usePublicObjectById;
+export default useGetUserObjectById;
