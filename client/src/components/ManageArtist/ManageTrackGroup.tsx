@@ -4,19 +4,26 @@ import { useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useArtistContext } from "state/ArtistContext";
 import AlbumForm from "./AlbumForm";
-import usePublicObjectById from "utils/usePublicObjectById";
 import BulkTrackUpload from "./BulkTrackUpload";
 import ManageTrackTable from "./ManageTrackTable";
+import useGetUserObjectById from "utils/useGetUserObjectById";
+import { useGlobalStateContext } from "state/GlobalState";
 
 const ManageTrackGroup: React.FC<{}> = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const { artistId, trackGroupId } = useParams();
   const {
+    state: { user },
+  } = useGlobalStateContext();
+  const {
     state: { artist },
   } = useArtistContext();
 
-  const { object: trackGroup, reload } = usePublicObjectById<TrackGroup>(
+  const userId = user?.id;
+
+  const { object: trackGroup, reload } = useGetUserObjectById<TrackGroup>(
     "trackGroups",
+    userId,
     trackGroupId,
     `?artistId=${artistId}`
   );
