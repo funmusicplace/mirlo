@@ -22,7 +22,6 @@ export const SongTimeDisplay: React.FC<{
         const divWidth = event.currentTarget.offsetWidth;
         const clickX = event.clientX - event.currentTarget.offsetLeft;
         const clickPercent = clickX / divWidth;
-        console.log("clicking", clickPercent * duration);
         if (isFinite(clickPercent) && isFinite(duration)) {
           playerRef.current?.fastSeek(clickPercent * duration);
         }

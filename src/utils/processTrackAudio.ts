@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { Queue, QueueEvents } from "bullmq";
-import { promises as fs } from "fs";
+import fs, { promises as fsPromises } from "fs";
 import shasum from "shasum";
 
 import {
@@ -37,6 +37,7 @@ audioQueueEvents.on(
       `Job with id ${JSON.stringify(result.jobId)} has been completed`
     );
 
+    console.log("return value", result.returnvalue);
     try {
       const job = await audioQueue.getJob(result.jobId);
       if (job) {
@@ -78,15 +79,14 @@ export const processTrackAudio = (ctx: { req: Request; res: Response }) => {
   return async (file: any, trackId: number) => {
     const fileType = await checkFileType(ctx, file, SUPPORTED_AUDIO_MIME_TYPES);
 
-    const buffer = await fs.readFile(file.path);
-    const sha1sum = shasum(buffer);
+    const stream = fs.createReadStream(file.path);
     const audio = await prisma.trackAudio.upsert({
       create: {
         trackId,
         url: buildTrackStreamURL(trackId),
         originalFilename: file.originalFilename,
         size: file.size,
-        hash: sha1sum,
+        // hash: sha1sum,
         fileExtension: fileType.ext,
       },
       update: {
@@ -94,7 +94,7 @@ export const processTrackAudio = (ctx: { req: Request; res: Response }) => {
         originalFilename: file.originalFilename,
         url: buildTrackStreamURL(trackId),
         size: file.size,
-        hash: sha1sum,
+        // hash: sha1sum,
         fileExtension: fileType.ext,
       },
       where: {
@@ -109,7 +109,7 @@ export const processTrackAudio = (ctx: { req: Request; res: Response }) => {
     logger.info(
       `Going to put a file on MinIO Bucket ${incomingAudioBucket}: ${audio.id}, ${file.path}`
     );
-    await minioClient.fPutObject(incomingAudioBucket, audio.id, file.path);
+    await minioClient.putObject(incomingAudioBucket, audio.id, stream);
 
     logger.info("Adding audio to convert-audio queue");
     const job = await audioQueue.add("convert-audio", { audioId: audio.id });

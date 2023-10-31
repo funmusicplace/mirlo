@@ -24,8 +24,6 @@ export const BulkTrackUploadRow: React.FC<{
     name: `tracks.${index}.trackArtists`,
   });
 
-  console.log("uploadingState", uploadingState);
-
   return (
     <>
       <tr

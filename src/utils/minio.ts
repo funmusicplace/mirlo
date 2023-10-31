@@ -108,9 +108,7 @@ export async function getFileFromMinio(
         .then(function (dataStream) {
           logger?.info("Got stream");
           dataStream.on("data", async function (chunk) {
-            // buff.push(chunk);
             writableStream.write(chunk);
-            // size += chunk.length;
           });
           dataStream.on("end", function () {
             // logger?.info("End. Total size = " + size);

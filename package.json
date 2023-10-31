@@ -32,6 +32,7 @@
     "file-type": "16",
     "fluent-ffmpeg": "^2.1.2",
     "husky": "^8.0.3",
+    "id3-parser": "^3.0.0",
     "image-size": "^1.0.2",
     "json2csv": "^6.0.0-alpha.2",
     "jsonwebtoken": "^8.5.1",

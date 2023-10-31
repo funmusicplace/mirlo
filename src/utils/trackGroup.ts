@@ -153,6 +153,7 @@ export async function buildZipFileForPath(
         const order = track.order ? track.order : i + 1;
         const trackTitle = `${order} - ${track.title}.${track.audio.fileExtension}`;
 
+        // FIXME: can this be turned into an async stream?
         const { filePath } = await getFileFromMinio(
           minioClient,
           finalAudioBucket,

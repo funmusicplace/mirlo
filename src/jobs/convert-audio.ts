@@ -2,8 +2,14 @@ import { Job } from "bullmq";
 
 import path from "path";
 import ffmpeg from "fluent-ffmpeg";
-import fs, { promises as fsPromises } from "fs";
-import { fromBuffer } from "file-type";
+import fs, {
+  createReadStream,
+  createWriteStream,
+  promises as fsPromises,
+} from "fs";
+import { fromBuffer, fromStream } from "file-type";
+import { PassThrough, Stream, pipeline } from "stream";
+import id3parser from "id3-parser";
 
 import { logger } from "./queue-worker";
 import {
@@ -21,7 +27,49 @@ const {
   MINIO_API_PORT = 9000,
 } = process.env;
 
-// FIXME: Convert this to be stream based.
+const generateDestination = (
+  format: string,
+  destinationFolder: string,
+  audioBitrate?: string
+) => {
+  const fileName = `generated${
+    audioBitrate ? "." + audioBitrate : ""
+  }.${format}`;
+
+  return `${destinationFolder}/${fileName}`;
+};
+
+const formats = [
+  {
+    format: "wav",
+    // defaults to codec pcm_s16le
+  },
+  {
+    format: "flac",
+    audioCodec: "flac",
+  },
+  {
+    format: "opus",
+    audioCodec: "opus",
+    audioBitrate: undefined,
+  },
+  {
+    format: "mp3",
+    audioCodec: "libmp3lame",
+    audioBitrate: "128",
+  },
+  {
+    format: "mp3",
+    audioCodec: "libmp3lame",
+    audioBitrate: "256",
+  },
+  {
+    format: "mp3",
+    audioCodec: "libmp3lame",
+    audioBitrate: "320",
+  },
+];
+
 export default async (job: Job) => {
   const { audioId } = job.data;
 
@@ -32,140 +80,107 @@ export default async (job: Job) => {
       `MinIO is at ${MINIO_HOST}:${MINIO_API_PORT} ${MINIO_ROOT_USER}`
     );
 
-    logger.info(`Starting to optimize audio ${audioId}`);
-    const { buffer } = await getBufferFromMinio(
-      minioClient,
-      incomingAudioBucket,
-      audioId,
-      logger
-    );
-
-    await createBucketIfNotExists(minioClient, finalAudioBucket, logger);
-
     logger.info(
       `checking if folder exists, if not creating it ${destinationFolder}`
     );
+
+    await createBucketIfNotExists(minioClient, finalAudioBucket, logger);
     try {
       await fsPromises.stat(destinationFolder);
     } catch (e) {
       await fsPromises.mkdir(destinationFolder, { recursive: true });
     }
 
-    const fileType = await fromBuffer(buffer);
+    logger.info(`Starting to optimize audio ${audioId}`);
 
-    await fsPromises.writeFile(
-      `${destinationFolder}/original.${fileType?.ext ?? "flac"}`,
-      buffer
+    const probeStream = await minioClient.getObject(
+      incomingAudioBucket,
+      audioId
     );
 
-    const profiler = logger.startTimer();
+    let fileType: string | undefined;
+    let data: any;
 
-    const data = await new Promise((resolve, reject) => {
-      ffmpeg(Readable.from(buffer)).ffprobe((err, data) => {
+    logger.info(
+      `Processing with ffprobe to see if we can get duration ${audioId}`
+    );
+
+    await new Promise((resolve, reject) => {
+      ffmpeg(probeStream).ffprobe(async (err, result) => {
+        // console.log("result", result);
+        fileType = result?.format?.format_name;
+        data = result;
+
+        logger.info(`File type: ${JSON.stringify(fileType)}`);
+
         resolve(data);
       });
     });
 
-    if (fileType?.ext !== "wav") {
-      await new Promise((resolve, reject) => {
-        ffmpeg(Readable.from(buffer))
-          .toFormat("wav")
-          .on("error", (err: { message: unknown }) => {
-            logger.error(err.message);
-          })
-          .on("end", (err: { message: unknown }) => {
-            logger.info("Done converting to wav");
-            resolve("done");
-          })
-          .save(path.join(`${destinationFolder}/generated.wav`));
-      });
-    }
+    await new Promise(async (resolve, reject) => {
+      const originalStream = await minioClient.getObject(
+        incomingAudioBucket,
+        audioId
+      );
 
-    if (fileType?.ext !== "flac") {
-      await new Promise((resolve, reject) => {
-        ffmpeg(Readable.from(buffer))
-          .toFormat("flac")
-          .audioCodec("flac")
-          .on("error", (err: { message: unknown }) => {
-            logger.error(err.message);
-          })
-          .on("end", (err: { message: unknown }) => {
-            logger.info("Done converting to flac");
-            resolve("done");
-          })
-          .save(path.join(`${destinationFolder}/generated.flac`));
+      const originalWritable = createWriteStream(
+        `${destinationFolder}/original.${fileType}`
+      ).on("close", () => {
+        resolve(0);
       });
-    }
+      originalStream.pipe(originalWritable);
+    });
 
-    if (fileType?.ext !== "opus") {
+    const profiler = logger.startTimer();
+
+    for (const formatDetails of formats) {
       await new Promise((resolve, reject) => {
-        ffmpeg(Readable.from(buffer))
+        const { format, audioBitrate, audioCodec } = formatDetails;
+
+        logger.info(`Processing stream for ${format}`);
+
+        const destination = generateDestination(
+          format,
+          destinationFolder,
+          audioBitrate
+        );
+
+        const processor = ffmpeg(
+          createReadStream(`${destinationFolder}/original.${fileType}`)
+        )
           .noVideo()
-          .outputOptions("-movflags", "+faststart", "-f", "ipod")
-          .toFormat("opus")
-          .audioCodec("opus")
+          .toFormat(format)
+          .on("stderr", function (stderrLine) {
+            // logger.info("Stderr output: " + stderrLine);
+          })
           .on("error", (err: { message: unknown }) => {
-            logger.error(err.message);
+            logger.error(`Error converting to ${format}: ${err.message}`);
+            reject(err);
           })
-          .on("end", (err: { message: unknown }) => {
-            logger.info("Done converting to opus");
-            resolve("done");
-          })
-          .save(path.join(`${destinationFolder}/generated.opus`));
+          .on("end", () => {
+            logger.info(`Done converting to ${format}`);
+            resolve(null);
+          });
+
+        if (format === "mp3") {
+          processor.addOptions("-write_xing", "0");
+        }
+        if (audioCodec) {
+          processor.audioCodec(audioCodec);
+        }
+        if (audioBitrate) {
+          processor.audioBitrate(audioBitrate);
+        }
+
+        processor.save(destination);
       });
     }
 
-    await new Promise((resolve, reject) => {
-      ffmpeg(Readable.from(buffer))
-        .noVideo()
-        .toFormat("mp3")
-        .audioCodec("libmp3lame")
-        .audioBitrate("128")
-        .on("error", (err: { message: unknown }) => {
-          logger.error(err.message);
-        })
-        .on("end", () => {
-          logger.info("Done converting to mp3@128");
-          resolve("done");
-        })
-        .save(path.join(`${destinationFolder}/generated-128.mp3`));
-    });
+    const hlsStream = await minioClient.getObject(incomingAudioBucket, audioId);
 
-    await new Promise((resolve, reject) => {
-      ffmpeg(Readable.from(buffer))
-        .noVideo()
-        .toFormat("mp3")
-        .audioCodec("libmp3lame")
-        .audioBitrate("256")
-        .on("error", (err: { message: unknown }) => {
-          logger.error(err.message);
-        })
-        .on("end", () => {
-          logger.info("Done converting to mp3@256");
-          resolve("done");
-        })
-        .save(path.join(`${destinationFolder}/generated-256.mp3`));
-    });
-
-    await new Promise((resolve, reject) => {
-      ffmpeg(Readable.from(buffer))
-        .noVideo()
-        .toFormat("mp3")
-        .audioCodec("libmp3lame")
-        .audioBitrate("320")
-        .on("error", (err: { message: unknown }) => {
-          logger.error(err.message);
-        })
-        .on("end", () => {
-          logger.info("Done converting to mp3@320");
-          resolve("done");
-        })
-        .save(path.join(`${destinationFolder}/generated-320.mp3`));
-    });
-
-    const duration = await new Promise((resolve, reject) => {
+    const duration = await new Promise(async (resolve, reject) => {
       let duration = 0;
-      ffmpeg(Readable.from(buffer))
+      ffmpeg(hlsStream)
         .noVideo()
         .outputOptions("-movflags", "+faststart")
         .addOption("-start_number", "0") // start the first .ts segment at index 0
@@ -184,12 +199,13 @@ export default async (job: Job) => {
           logger.info("Converting original to hls");
         })
         .on("error", (err: { message: unknown }) => {
-          logger.error(err.message);
+          logger.error(`Error converting to hls: ${err.message}`);
           reject(err);
         })
         .on("progress", (data: { timemark: string }) => {
           if (data.timemark.includes(":")) {
             const timeArray = data.timemark.split(":");
+            // console.log("timeArray", timeArray);
             duration =
               Math.round(+timeArray[0]) * 60 * 60 +
               Math.round(+timeArray[1]) * 60 +
@@ -197,36 +213,54 @@ export default async (job: Job) => {
           }
         })
         .on("end", async (data) => {
-          profiler.done({ message: "Done converting to m3u8" });
-
           resolve(duration);
         })
-        .save(path.join(`${destinationFolder}/playlist.m3u8`));
+        .save(`${destinationFolder}/playlist.m3u8`);
     });
-    logger.info("Done creating audio folder, starting upload to MinIO");
 
     const finalFilesInFolder = await fsPromises.readdir(destinationFolder);
-
-    logger.info(`finalFilesInFolder: ${finalFilesInFolder.join(", ")}`);
 
     await Promise.all(
       finalFilesInFolder.map(async (file) => {
         logger.info(`Uploading file ${file}`);
-        await minioClient.fPutObject(
+        const uploadStream = await createReadStream(
+          `${destinationFolder}/${file}`
+        );
+        await minioClient.putObject(
           finalAudioBucket,
           `${audioId}/${file}`,
-          `${destinationFolder}/${file}`
+          uploadStream
         );
       })
     );
 
+    profiler.done({ message: "Done converting to audio" });
+
+    logger.info(`Done processing streams ${audioId}`);
+
     await minioClient.removeObject(incomingAudioBucket, audioId);
     await fsPromises.rm(destinationFolder, { recursive: true });
-    return {
-      duration,
-      ...(typeof data === "object" ? data : {}),
-    };
+    logger.info(`Cleaned up ${destinationFolder}`);
+    const response = { ...(data ?? {}), duration };
+    logger.info(`Data: ${JSON.stringify(response)}`);
+    return response;
   } catch (e) {
     logger.error("Error creating audio folder", e);
   }
 };
+
+function addDebugEvents(stream: Stream, name: string) {
+  [
+    "close",
+    "drain",
+    "error",
+    "finish",
+    "pipe",
+    "unpipe",
+    "data",
+    "end",
+    "readable",
+  ].map((eventName) =>
+    stream.on(eventName, () => console.log(`${name}-${eventName}`))
+  );
+}

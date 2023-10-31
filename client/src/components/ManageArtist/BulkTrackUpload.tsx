@@ -106,10 +106,8 @@ export const BulkTrackUpload: React.FC<{
         if (userId) {
           setIsSaving(true);
 
-          console.log("data", data.tracks);
           const uploadJobIds = await Promise.all(
             data.tracks.map(async (f) => {
-              console.log("parsed", f);
               const result = await api.post<Partial<Track>, { track: Track }>(
                 `users/${userId}/tracks`,
                 {
@@ -133,7 +131,6 @@ export const BulkTrackUpload: React.FC<{
               return jobInfo.result.jobId;
             })
           );
-          console.log("uploadJobIds", uploadJobIds);
           setUploadJobs(
             uploadJobIds.map((id) => ({ jobId: id, jobStatus: "waiting" }))
           );
@@ -208,8 +205,6 @@ export const BulkTrackUpload: React.FC<{
   }, [processUploadedFiles, trackFiles]);
 
   const disableUploadButton = isSaving || uploadJobs.length > 0;
-
-  console.log("uploadJobs", uploadJobs);
 
   return (
     <FormProvider {...methods}>
