@@ -181,9 +181,17 @@ app.use("/health", async (req, res) => {
 
 // This has to be the last thing used so that other things don't get over-written
 app.use("/", (req, res) => {
-  res.status(200).json({
-    mirlo: "chirp",
-  });
+  if (req.url !== "/") {
+    // console.log("req", req, res);
+    console.log("not the right url");
+    res.status(404).json({
+      error: "Page not found",
+    });
+  } else {
+    res.status(200).json({
+      mirlo: "chirp",
+    });
+  }
 });
 
 app.listen(process.env.PORT, () =>

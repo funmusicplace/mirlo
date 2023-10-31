@@ -23,6 +23,7 @@ const PurchaseOrDownloadAlbum: React.FC<{
   const { state } = useArtistContext();
 
   const userId = user?.id;
+  const loggedInUserIsAdmin = user?.isAdmin;
 
   const checkForAlbumOwnership = React.useCallback(async () => {
     try {
@@ -56,11 +57,6 @@ const PurchaseOrDownloadAlbum: React.FC<{
         `trackGroups/${trackGroup.id}/download`,
         `${trackGroup.title}.zip`
       );
-      // await api.getFile(
-      //   trackGroup.title,
-      //   `trackGroups/${trackGroup.id}/download`,
-      //   "application/zip"
-      // );
     } catch (e) {
       snackbar(t("error"), { type: "warning" });
       console.error(e);
@@ -80,7 +76,7 @@ const PurchaseOrDownloadAlbum: React.FC<{
               {t("buy")}
             </Button>
           )}
-        {(userIsTrackGroupArtist || isOwned) && (
+        {(userIsTrackGroupArtist || isOwned || loggedInUserIsAdmin) && (
           <>
             <Button
               compact

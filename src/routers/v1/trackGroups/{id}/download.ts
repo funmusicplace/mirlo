@@ -14,56 +14,84 @@ export default function () {
 
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { id: trackGroupId }: { id?: string } = req.params;
-    const { id: userId } = req.user as User;
+    const { id: userId, isAdmin } = req.user as User;
 
     try {
-      const isCreator = await doesTrackGroupBelongToUser(
-        Number(trackGroupId),
-        userId
-      );
-
-      const purchase = await prisma.userTrackGroupPurchase.findFirst({
-        where: {
-          trackGroupId: Number(trackGroupId),
-          ...(!isCreator
-            ? {
-                userId: Number(userId),
-                trackGroup: {
-                  published: true,
-                },
-              }
-            : {}),
-        },
+      const trackGroupInclude = {
         include: {
-          trackGroup: {
+          tracks: {
             include: {
-              tracks: {
-                include: {
-                  audio: true,
-                },
-                where: {
-                  deletedAt: null,
-                },
-              },
+              audio: true,
+            },
+            where: {
+              deletedAt: null,
             },
           },
         },
-      });
+      };
 
-      if (!purchase) {
+      let trackGroup;
+
+      if (!isAdmin) {
+        const isCreator = await doesTrackGroupBelongToUser(
+          Number(trackGroupId),
+          userId
+        );
+        logger.info(`trackGroupId: ${trackGroupId} isCreator: ${isCreator}`);
+
+        const purchase = await prisma.userTrackGroupPurchase.findFirst({
+          where: {
+            trackGroupId: Number(trackGroupId),
+            ...(!isCreator
+              ? {
+                  userId: Number(userId),
+                  trackGroup: {
+                    published: true,
+                  },
+                }
+              : {}),
+          },
+          include: {
+            trackGroup: trackGroupInclude,
+          },
+        });
+
+        if (!purchase) {
+          logger.info(`trackGroupId: ${trackGroupId} no purchase found `);
+          res.status(404);
+          return next();
+        }
+        trackGroup = purchase.trackGroup;
+      } else {
+        logger.info(`trackGroupId: ${trackGroupId} isAdmin `);
+        trackGroup = await prisma.trackGroup.findFirst({
+          where: {
+            id: Number(trackGroupId),
+          },
+          ...trackGroupInclude,
+        });
+      }
+
+      logger.info("Found a trackgroup");
+
+      if (!trackGroup) {
         res.status(404);
         return next();
       }
+
       const zip = await buildZipFileForPath(
         // FIXME: why is this being picky about typing?
-        purchase.trackGroup.tracks as unknown as (Track & {
+        trackGroup.tracks as unknown as (Track & {
           audio: TrackAudio | null;
         })[],
-        purchase.trackGroup.id.toString()
+        trackGroup.id.toString()
       );
 
-      logger.info(`Put zip in location ${zip}`);
-
+      logger.info(`Put zip at ${zip}`);
+      res.set(
+        "Content-Disposition",
+        `attachment; filename="${trackGroup.title}"`
+      );
       res.sendFile(zip);
     } catch (e) {
       console.error("trackGroups/{id}/download", e);

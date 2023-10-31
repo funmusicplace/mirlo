@@ -44,7 +44,7 @@ passport.use(
           if (!foundUser) {
             done(null, false);
           }
-          done(null, jwtPayload);
+          done(null, { ...jwtPayload, isAdmin: foundUser?.isAdmin });
         });
     }
   )

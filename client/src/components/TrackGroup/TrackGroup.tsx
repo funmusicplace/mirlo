@@ -20,7 +20,9 @@ import { bp } from "../../constants";
 import MarkdownWrapper from "components/common/MarkdownWrapper";
 
 function TrackGroup() {
-  const { t } = useTranslation("translation", { keyPrefix: "artist" });
+  const { t } = useTranslation("translation", {
+    keyPrefix: "trackGroupDetails",
+  });
 
   const {
     state: { artist, isLoading: isLoadingArtist, userStripeStatus },
@@ -162,7 +164,7 @@ function TrackGroup() {
             color: var(--mi-light-foreground-color);
           `}
         >
-          {t("trackGroupDetails.released")}{" "}
+          {t("released")}{" "}
           <em>
             {new Date(trackGroup.releaseDate).toLocaleDateString("en-US", {
               month: "short",
