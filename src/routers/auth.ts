@@ -359,6 +359,7 @@ router.get("/profile", userAuthenticated, async (req, res) => {
         id: true,
         name: true,
         artists: true,
+        isAdmin: true,
         artistUserSubscriptions: {
           where: {
             deletedAt: null,

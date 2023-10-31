@@ -10,6 +10,7 @@ interface LoggedInUser {
   name: string;
   id: number;
   artistUserSubscriptions?: ArtistUserSubscription[];
+  isAdmin: boolean;
 }
 
 interface Track {

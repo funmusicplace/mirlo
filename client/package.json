@@ -38,12 +38,12 @@
     "react-router-dom": "^6.4.5",
     "react-scripts": "5.0.1",
     "remark-gfm": "^3.0.1",
-    "typescript": "^4.9.4",
+    "typescript": "5.1.6",
     "unist-util-visit": "^4.1.2",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "PORT=8080 REACT_APP_API_DOMAIN=http://localhost:3000 REACT_APP_CLIENT_DOMAIN=http://localhost:8080 react-scripts start",
+    "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

@@ -32,6 +32,7 @@ docker exec -it blackbird-api npx prisma db seed
 
 ```sh
 cd client
+cp .env.example .env
 yarn
 yarn start
 ```
