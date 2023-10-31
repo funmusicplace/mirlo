@@ -192,17 +192,13 @@
     "track": "Track:",
     "saveButton": "Save track",
     "trackDoesntExist": "That track doesn't exist",
-    "saveTrackForm": {
-      "title": "Title",
-      "status": "Status",
-      "options": {
-        "freePaid": "Free + Paid",
-        "hidden": "Hidden",
-        "free": "Free",
-        "paid": "Paid",
-        "deleted": "Deleted"
-      }
-    }
+    "saveTrackForm.title": "Title",
+    "saveTrackForm.status": "Status",
+    "saveTrackForm.options.freePaid": "Free + Paid",
+    "saveTrackForm.options.hidden": "Hidden",
+    "saveTrackForm.options.free": "Free",
+    "saveTrackForm.options.paid": "Paid",
+    "saveTrackForm.options.deleted": "Deleted"
   },
   "trackGroupDetails": {
     "trackgroup": "Track Group:",
@@ -270,70 +266,38 @@
     "faqDescription": "Some frequently asked questions about MirloThe people doing it",
     "whatWeBuilding": "What we're building",
     "people": "The people doing it ",
-    "questions": {
-      "whatIsMirlo": {
-        "question": "What is Mirlo?",
-        "answer": "Mirlo provides a user-friendly space to help musicians sell music, manage subscriptions, and share with their supporters."
-      },
-      "howDoesMirloWork": {
-        "question": "How does Mirlo work?",
-        "answer": "Mirlo allows musicians to set up pages to host their music and set up tiers of monthly support. Fans can then purchase those albums or support musicians through monthly payments and get updates from them when they post on Mirlo."
-      },
-      "howMuchDoesMirloCost": {
-        "question": "How much does Mirlo cost?",
-        "answer": "Once incorporated, we’ll explore a number of funding structures. We’re aiming for musicians to get as much of the price of their albums and subscriptions as possible while still supporting the workers and infrastructure of the co-op. We will likely add ways for purchasers to support the platform directly."
-      },
-      "whatMakesMirloDifferent": {
-        "question": "What makes Mirlo different from other products?",
-        "answer": "Mirlo allows for direct and ongoing support of artists. It’s different from other crowdfunding platforms because it:",
-        "answerBulletpoint1": "is rooted in mutual aid and an explicitly anti-capitalist and anti-oppressive practice;",
-        "answerBulletpoint2": "is stewared by a worker co-op, which intends to exit-to-community as a multi-stakeholder cooperative;",
-        "answerBulletpoint3": "It’s open source and is working together with other similar products to build towards a standard-based and sustainable ecosystem."
-      },
-      "longTermGoals": {
-        "question": "What are the long term goals of Mirlo?",
-        "answer": "We believe that the community is the platform and our goals, informed by our <1>Observations and Intent</1>, will grow and change along with the community. That said, we would like to make it easier for other groups (like music labels or other co-ops) to install the software. We’d also like to look into building plug-ins and other tools that are useful for artists (for example, plug-ins that help to make your music available on aggregators like Distrokids or other platforms)."
-      },
-      "shortTermGoals": {
-        "question": "What are the short term goals of Mirlo?",
-        "answer": "We’d like to release a minimum viable product that allows Artists to sell digital music in a few file formats People to become “patrons” of artists Compensate workers who are contributing to Mirlo's success To cover costs, we would aim to initially take a fairly small cut (if at all) via tips and patronage via our page on the platform (maybe with some fundraising releases)."
-      },
-      "mainBlockers": {
-        "question": "What are the main blockers facing Mirlo?",
-        "answer": "Our main blocker is incorporation! If you are a lawyer or know someone who is a lawyer specialized in co-op law, <1>please reach out</1>!"
-      },
-      "productRoadmap": {
-        "question": "What’s on your product roadmap?",
-        "answer": "We’re still aiming to get to a minimum viable product, for which you can track progress on our <1>GitHub issues tracker</1>."
-      },
-      "heardOfProjectX": {
-        "question": "Have you heard of \"project x\"?",
-        "answer": "Probably! As individuals we’ve worked with and in Resonate and Ampled, and we’re in touch with a couple of other projects that are doing very similar things like jam.coop, faircamp, and some others. We’re hoping to continue talking to these folks and build towards standardization of resources and tech APIs so that our services can talk to each other and musicians can easily switch between them. If there’s a project you want to talk about, bring it up in our <1>Discord</1>!"
-      },
-      "howDoPayoutsWork": {
-        "question": "How do payouts work?",
-        "answer": "We use Stripe to process payments. Artists will have to create an account with Stripe, linking their bank account or debit card to the service to receive payouts. Then as users purchase their albums or subscribe to them, this money will be sent directly to their Stripe account."
-      },
-      "howAreYouStructured": {
-        "question": "How are you structured?",
-        "answer": "Mirlo is currently a collective of people interested in building a worker-coop accountable to a community that uses its product. We’re a part of Fun Music Place, which is a community having wider conversations about the music industry. We’re actively writing bylaws for incorporation, and will be a part of the US Federation of Worker Cooperatives when we’re done. As the product grows and proves to be sustainable we’re aiming to <1>Exit to Community</1>."
-      },
-      "howAreDecisionsMade": {
-        "question": "How are decisions made?",
-        "answer": "Mirlo is maintained by a worker co-operative heavily rooted in a community of musicians and other interested people. Every feature on the platform is developed with input and insights from the community."
-      },
-      "howCanIGetInTouch": {
-        "question": "How can I get in touch?",
-        "answer": "Our community is primarily hanging out on the <1>Discord</1> of our parent project <2>Fun Music Place</2>. Come say hi!"
-      },
-      "areYouOpenSource": {
-        "question": "Are you open source?",
-        "answer": "Yes! And we want your help 🙂. <1>Check out our code</1>."
-      },
-      "canIHelpWithTesting": {
-        "question": "Can I help with testing?",
-        "answer": "Yes please! Reach out to either LLK or Si on the <1>Discord</1> to get started."
-      }
-    }
+    "questions.whatIsMirlo.question": "What is Mirlo?",
+    "questions.whatIsMirlo.answer": "Mirlo provides a user-friendly space to help musicians sell music, manage subscriptions, and share with their supporters.",
+    "questions.howDoesMirloWork.question": "How does Mirlo work?",
+    "questions.howDoesMirloWorkanswer": "Mirlo allows musicians to set up pages to host their music and set up tiers of monthly support. Fans can then purchase those albums or support musicians through monthly payments and get updates from them when they post on Mirlo.",
+    "questions.howMuchDoesMirloCost.question": "How much does Mirlo cost?",
+    "questions.howMuchDoesMirloCost.answer": "Once incorporated, we’ll explore a number of funding structures. We’re aiming for musicians to get as much of the price of their albums and subscriptions as possible while still supporting the workers and infrastructure of the co-op. We will likely add ways for purchasers to support the platform directly.",
+    "questions.whatMakesMirloDifferent.question": "What makes Mirlo different from other products?",
+    "questions.whatMakesMirloDifferent.answer": "Mirlo allows for direct and ongoing support of artists. It’s different from other crowdfunding platforms because it:",
+    "questions.whatMakesMirloDifferent.answerBulletpoint1": "is rooted in mutual aid and an explicitly anti-capitalist and anti-oppressive practice;",
+    "questions.whatMakesMirloDifferent.answerBulletpoint2": "is stewared by a worker co-op, which intends to exit-to-community as a multi-stakeholder cooperative;",
+    "questions.whatMakesMirloDifferent.answerBulletpoint3": "It’s open source and is working together with other similar products to build towards a standard-based and sustainable ecosystem.",
+    "questions.longTermGoals.question": "What are the long term goals of Mirlo?",
+    "questions.longTermGoals.answer": "We believe that the community is the platform and our goals, informed by our <1>Observations and Intent</1>, will grow and change along with the community. That said, we would like to make it easier for other groups (like music labels or other co-ops) to install the software. We’d also like to look into building plug-ins and other tools that are useful for artists (for example, plug-ins that help to make your music available on aggregators like Distrokids or other platforms).",
+    "questions.shortTermGoals.question": "What are the short term goals of Mirlo?",
+    "questions.shortTermGoals.answer": "We’d like to release a minimum viable product that allows Artists to sell digital music in a few file formats People to become “patrons” of artists Compensate workers who are contributing to Mirlo's success To cover costs, we would aim to initially take a fairly small cut (if at all) via tips and patronage via our page on the platform (maybe with some fundraising releases).",
+    "questions.mainBlockers.question": "What are the main blockers facing Mirlo?",
+    "questions.mainBlockers.answer": "Our main blocker is incorporation! If you are a lawyer or know someone who is a lawyer specialized in co-op law, <1>please reach out</1>!",
+    "questions.productRoadmap.question": "What’s on your product roadmap?",
+    "questions.productRoadmap.answer": "We’re still aiming to get to a minimum viable product, for which you can track progress on our <1>GitHub issues tracker</1>.",
+    "questions.heardOfProjectX.question": "Have you heard of \"project x\"?",
+    "questions.heardOfProjectXanswer": "Probably! As individuals we’ve worked with and in Resonate and Ampled, and we’re in touch with a couple of other projects that are doing very similar things like jam.coop, faircamp, and some others. We’re hoping to continue talking to these folks and build towards standardization of resources and tech APIs so that our services can talk to each other and musicians can easily switch between them. If there’s a project you want to talk about, bring it up in our <1>Discord</1>!",
+    "questions.howDoPayoutsWork.question": "How do payouts work?",
+    "questions.howDoPayoutsWork.answer": "We use Stripe to process payments. Artists will have to create an account with Stripe, linking their bank account or debit card to the service to receive payouts. Then as users purchase their albums or subscribe to them, this money will be sent directly to their Stripe account.",
+    "questions.howAreYouStructured.question": "How are you structured?",
+    "questions.howAreYouStructured.answer": "Mirlo is currently a collective of people interested in building a worker-coop accountable to a community that uses its product. We’re a part of Fun Music Place, which is a community having wider conversations about the music industry. We’re actively writing bylaws for incorporation, and will be a part of the US Federation of Worker Cooperatives when we’re done. As the product grows and proves to be sustainable we’re aiming to <1>Exit to Community</1>.",
+    "questions.howAreDecisionsMade.question": "How are decisions made?",
+    "questions.howAreDecisionsMade.answer": "Mirlo is maintained by a worker co-operative heavily rooted in a community of musicians and other interested people. Every feature on the platform is developed with input and insights from the community.",
+    "questions.howCanIGetInTouch.question": "How can I get in touch?",
+    "questions.howCanIGetInTouch.answer": "Our community is primarily hanging out on the <1>Discord</1> of our parent project <2>Fun Music Place</2>. Come say hi!",
+    "questions.areYouOpenSource.question": "Are you open source?",
+    "questions.areYouOpenSource.answer": "Yes! And we want your help 🙂. <1>Check out our code</1>.",
+    "questions.canIHelpWithTesting.question": "Can I help with testing?",
+    "questions.canIHelpWithTesting.answer": "Yes please! Reach out to either LLK or Si on the <1>Discord</1> to get started."
   }
 }
