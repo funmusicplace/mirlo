@@ -196,6 +196,8 @@ function Home() {
                     discord: <a href="https://discord.gg/VjKq26raKX"></a>,
                     // eslint-disable-next-line jsx-a11y/anchor-has-content
                     email: <a href="mailto:mirlodotspace@proton.me"></a>,
+                    // eslint-disable-next-line jsx-a11y/anchor-has-content
+                    faq: <a href="/faq"></a>,
                   }}
                 />
               </p>
