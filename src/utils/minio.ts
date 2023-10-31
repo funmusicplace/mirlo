@@ -131,3 +131,24 @@ export async function getFileFromMinio(
     }
   );
 }
+
+export const getObjectList = async (
+  bucket: string,
+  prefix: string
+): Promise<{ name: string }[]> => {
+  return await new Promise((resolve, reject) => {
+    const data: { name: string }[] = [];
+    const stream = minioClient.listObjects(bucket, prefix, true);
+    stream.on("data", function (obj) {
+      data.push(obj);
+    });
+    stream.on("end", function () {
+      console.log(data);
+      resolve(data);
+    });
+    stream.on("error", function (err) {
+      console.log(err);
+      reject(err);
+    });
+  });
+};

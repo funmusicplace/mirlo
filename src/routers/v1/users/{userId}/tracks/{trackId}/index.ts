@@ -5,6 +5,12 @@ import {
 } from "../../../../../../auth/passport";
 import { doesTrackBelongToUser } from "../../../../../../utils/ownership";
 import prisma from "../../../../../../../prisma/prisma";
+import {
+  finalAudioBucket,
+  getObjectList,
+  incomingAudioBucket,
+  minioClient,
+} from "../../../../../../utils/minio";
 
 export default function () {
   const operations = {
@@ -84,10 +90,11 @@ export default function () {
   };
 
   async function DELETE(req: Request, res: Response, next: NextFunction) {
-    const { userId, trackId } = req.params;
+    const { userId, trackId: trackIdString } = req.params;
 
-    const track = await doesTrackBelongToUser(Number(trackId), Number(userId));
-
+    const trackId = Number(trackIdString);
+    const track = await doesTrackBelongToUser(trackId, Number(userId));
+    console.log("deleting track");
     if (!track) {
       res.status(400).json({
         error: "Track must belong to user",
@@ -95,13 +102,43 @@ export default function () {
       return next();
     }
 
-    await prisma.track.delete({
-      where: {
-        id: Number(trackId),
-      },
-    });
+    try {
+      await prisma.track.delete({
+        where: {
+          id: trackId,
+        },
+      });
 
-    res.json({ message: "Success" });
+      const audio = await prisma.trackAudio.findFirst({
+        where: {
+          trackId: trackId,
+        },
+      });
+      if (audio) {
+        const objects = await getObjectList(finalAudioBucket, audio.id);
+
+        await minioClient.removeObjects(
+          finalAudioBucket,
+          objects.map((o) => o.name)
+        );
+        await prisma.trackAudio.delete({
+          where: {
+            trackId: trackId,
+          },
+        });
+      }
+
+      await prisma.trackArtist.deleteMany({
+        where: {
+          trackId: trackId,
+        },
+      });
+
+      res.json({ message: "Success" });
+    } catch (e) {
+      console.error("DELETE /users/{userId}/tracks/{trackId", e);
+      res.status(500).json({ error: e });
+    }
   }
 
   DELETE.apiDoc = {
