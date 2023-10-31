@@ -4,6 +4,7 @@ import Box from "components/common/Box";
 import React from "react";
 import api from "../../services/api";
 import { useGlobalStateContext } from "../../state/GlobalState";
+import { useTranslation } from "react-i18next";
 
 function Profile() {
   const {
@@ -12,6 +13,7 @@ function Profile() {
   const userId = user?.id;
 
   const [purchases, setPurchases] = React.useState<UserTrackGroupPurchase[]>();
+  const { t } = useTranslation("translation", {keyPrefix : "profile"});
 
   const fetchTrackGroups = React.useCallback(async () => {
     const { results } = await api.getMany<UserTrackGroupPurchase>(
@@ -38,8 +40,7 @@ function Profile() {
       {!purchases ||
         (purchases?.length === 0 && (
           <Box>
-            There's nothing in your collection yet, support some artists and buy
-            their music!
+             {t("collectionEmpty")}
           </Box>
         ))}
       {purchases?.map(

@@ -24,6 +24,8 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
   const [manageTier, setManageTier] = React.useState<ArtistSubscriptionTier>();
   const [tiers, setTiers] = React.useState<ArtistSubscriptionTier[]>([]);
 
+  const { t:tManage } = useTranslation("translation", { keyPrefix: "manage" });
+
   const userId = user?.id;
 
   const loadSubscriptions = React.useCallback(async () => {
@@ -71,7 +73,7 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
         margin-top: 2rem;
       `}
     >
-      <h2>Your subscription tiers</h2>
+      <h2>{tManage("subscriptionTiers")}</h2>
       <div
         className={css`
           margin-bottom: 1rem;

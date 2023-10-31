@@ -7,6 +7,7 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { useParams } from "react-router-dom";
 import api from "services/api";
+import { useTranslation } from "react-i18next";
 // import { AdminTrack, fetchTrack, updateTrack } from "services/api/Admin";
 
 export const TrackDetails: React.FC = () => {
@@ -16,6 +17,8 @@ export const TrackDetails: React.FC = () => {
   const [isLoading, setIsLoading] = React.useState(false);
 
   const [track, setTrack] = React.useState<Track>();
+
+  const { t } = useTranslation("translation", { keyPrefix: "trackDetails"})
 
   const fetchTrackWrapper = React.useCallback(
     async (id: string) => {
@@ -51,21 +54,23 @@ export const TrackDetails: React.FC = () => {
     [trackId, snackbar]
   );
 
+  
+
   return (
     <>
-      <h3>Track: {track?.title}</h3>
+      <h3>{t("track")} {track?.title}</h3>
       <form onSubmit={handleSubmit(doSave)}>
         <div>
-          Title: <InputEl {...register("title")} />
+          {t("saveTrackForm.title")} <InputEl {...register("title")} />
         </div>
         <div>
-          Status:{" "}
+          {t("saveTrackForm.status")}
           <SelectEl defaultValue="paid" {...register("status")}>
-            <option value="free+paid">Free + Paid</option>
-            <option value="hidden">Hidden</option>
-            <option value="free">Free</option>
-            <option value="paid">Paid</option>
-            <option value="deleted">Deleted</option>
+            <option value="free+paid">{t("saveTrackForm.option.freePaid")}</option>
+            <option value="hidden">{t("saveTrackForm.option.hidden")}</option>
+            <option value="free">{t("saveTrackForm.option.free")}</option>
+            <option value="paid">{t("saveTrackForm.option.paid")}</option>
+            <option value="deleted">{t("saveTrackForm.option.deleted")}</option>
           </SelectEl>
         </div>
 
@@ -75,7 +80,7 @@ export const TrackDetails: React.FC = () => {
           disabled={isLoading}
           startIcon={isLoading ? <LoadingSpinner /> : undefined}
         >
-          Save track
+          {t("saveButton")}
         </Button>
       </form>
     </>

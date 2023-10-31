@@ -7,6 +7,7 @@ import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import { MetaCard } from "components/common/MetaCard";
 import SmallTileDetails from "components/common/SmallTileDetails";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { FaPause, FaPlay } from "react-icons/fa";
 import { useParams } from "react-router-dom";
 import api from "services/api";
@@ -38,6 +39,8 @@ const TrackWidget = () => {
 
   const [track, setTrack] = React.useState<Track>();
   const [isLoading, setIsLoading] = React.useState(true);
+  const {t} = useTranslation("translation", {keyPrefix : "trackDetails"})
+  const {t:artistTranslation} = useTranslation("translation", {keyPrefix : "artist"})
 
   const embeddedInMirlo = inIframe() && inMirlo();
 
@@ -90,7 +93,7 @@ const TrackWidget = () => {
             padding: 1rem;
           `}
         >
-          That track doesn't exist
+          {t("trackDoesntExist")}
         </div>
       )}
       {track && (
@@ -122,7 +125,7 @@ const TrackWidget = () => {
           <SmallTileDetails
             title={track.title}
             subtitle={track.trackGroup.title}
-            footer={track.trackGroup.artist?.name ?? "Unknown"}
+            footer={track.trackGroup.artist?.name ?? artistTranslation("unknown")  as string}
           />
 
           {isTrackOwnedOrPreview(track, user) && (

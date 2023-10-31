@@ -1,8 +1,10 @@
 import { css } from "@emotion/css";
+import { Trans, useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { useGlobalStateContext } from "state/GlobalState";
 
 export const Footer = () => {
+  const { t } = useTranslation("translation", { keyPrefix: "footer" });
   const {
     state: { user },
   } = useGlobalStateContext();
@@ -19,18 +21,22 @@ export const Footer = () => {
         margin: 1rem auto 1rem;
       `}
     >
-      <p
+     <p
         className={css`
           margin-bottom: 1rem;
         `}
       >
-        Mirlo is under construction. If you'd like to contribute check out{" "}
-        <a href="https://github.com/funmusicplace/mirlo/">the code on GitHub</a>
-        , <a href="https://discord.gg/VjKq26raKX">join our Discord</a>, or{" "}
-        <a href="mailto:mirlodotspace@proton.me">email us</a>.
+        <Trans t={t} i18nKey="underConstruction">
+          Mirlo is under construction. If you'd like to contribute check out
+          <a href="https://github.com/funmusicplace/mirlo/">the code on GitHub</a>
+          , <a href="https://discord.gg/VjKq26raKX">join our Discord</a>, or
+          <a href="mailto:mirlodotspace@proton.me">email us</a>.
+        </Trans>
       </p>
       <p>
-        <Link to="/about">About us</Link> <Link to="/faq">FAQ</Link>
+        <Trans t={t} i18nKey="aboutUs">
+          <Link to="/about">About us</Link> <Link to="/faq">FAQ</Link>
+        </Trans>
       </p>
     </div>
   );

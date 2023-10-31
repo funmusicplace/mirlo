@@ -11,6 +11,7 @@ const TrackGroupCard: React.FC<{
   album: TrackGroup;
 }> = ({ album }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
+  const { t: trackGroupCardTranslation } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
   return (
     <Box
       key={album.id}
@@ -50,15 +51,15 @@ const TrackGroupCard: React.FC<{
         `}
       >
         <div>
-          <strong>Title: </strong>
+          <strong>{trackGroupCardTranslation("title")} </strong>
           {album.title}
         </div>
-        <div>Published: {album.published ? <FaCheck /> : <FaTimes />}</div>
+        <div>{trackGroupCardTranslation("published")} {album.published ? <FaCheck /> : <FaTimes />}</div>
         <div>
-          <strong>Tracks:</strong> {album.tracks.length}
+          <strong>{trackGroupCardTranslation("tracks")}</strong> {album.tracks.length}
         </div>
         <div>
-          <strong>Release date: </strong>
+          <strong>{trackGroupCardTranslation("releaseDate")} </strong>
           {album.releaseDate?.split("T")[0]}
         </div>
 

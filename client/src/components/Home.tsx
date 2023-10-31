@@ -6,12 +6,14 @@ import api from "../services/api";
 import Box from "./common/Box";
 import PostContent from "./common/PostContent";
 import Logo from "./common/Logo";
+import { Trans, useTranslation } from "react-i18next";
 
 function Home() {
   const {
     state: { user },
   } = useGlobalStateContext();
   const [posts, setPosts] = React.useState<Post[]>([]);
+  const { t } = useTranslation("translation", { keyPrefix: "home" });
 
   const fetchAllPosts = React.useCallback(async () => {
     const fetched = await api.getMany<Post>("posts");
@@ -105,8 +107,7 @@ function Home() {
                   line-height: 1.25;
                 `}
               >
-                Direct support for musicians. Buy their music. Collectively
-                owned and managed.
+                {t("support")}
               </h1>
               {/* <Link to="signup">
             <Button
@@ -147,7 +148,7 @@ function Home() {
                     color: var(--mi-white);
                   `}
                 >
-                  Get on the mailing list
+                  {t("mailingList")}
                 </a>
                 <Link
                   to="/login"
@@ -174,7 +175,7 @@ function Home() {
                     }
                   `}
                 >
-                  Log in
+                  {t("logIn")}
                 </Link>
               </div>
               <p
@@ -183,13 +184,20 @@ function Home() {
                   line-height: 1.5;
                 `}
               >
-                Mirlo is under construction. If you'd like to contribute check
-                out{" "}
-                <a href="https://github.com/funmusicplace/mirlo/">
-                  the code on GitHub
-                </a>
-                , <a href="https://discord.gg/VjKq26raKX">join our Discord</a>,
-                or <a href="mailto:mirlodotspace@proton.me">email us</a>.
+                <Trans
+                  t={t}
+                  i18nKey="mirloConstruction"
+                  components={{
+                    github: (
+                      // eslint-disable-next-line jsx-a11y/anchor-has-content
+                      <a href="https://github.com/funmusicplace/mirlo/"></a>
+                    ),
+                    // eslint-disable-next-line jsx-a11y/anchor-has-content,
+                    discord: <a href="https://discord.gg/VjKq26raKX"></a>,
+                    // eslint-disable-next-line jsx-a11y/anchor-has-content
+                    email: <a href="mailto:mirlodotspace@proton.me"></a>,
+                  }}
+                />
               </p>
             </div>
           </div>
@@ -203,7 +211,7 @@ function Home() {
               margin-bottom: 1rem;
             `}
           >
-            Latest posts from the community:
+            {t("latestCommunityPost")}
           </h2>
           {posts.map((p) => (
             <Box
