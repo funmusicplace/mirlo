@@ -13,7 +13,7 @@ function Home() {
     state: { user },
   } = useGlobalStateContext();
   const [posts, setPosts] = React.useState<Post[]>([]);
-  const { t } = useTranslation("translation", { keyPrefix: "home" })
+  const { t } = useTranslation("translation", { keyPrefix: "home" });
 
   const fetchAllPosts = React.useCallback(async () => {
     const fetched = await api.getMany<Post>("posts");
@@ -188,8 +188,13 @@ function Home() {
                   t={t}
                   i18nKey="mirloConstruction"
                   components={{
-                    github: <a href="https://github.com/funmusicplace/mirlo/"></a>,
+                    github: (
+                      // eslint-disable-next-line jsx-a11y/anchor-has-content
+                      <a href="https://github.com/funmusicplace/mirlo/"></a>
+                    ),
+                    // eslint-disable-next-line jsx-a11y/anchor-has-content,
                     discord: <a href="https://discord.gg/VjKq26raKX"></a>,
+                    // eslint-disable-next-line jsx-a11y/anchor-has-content
                     email: <a href="mailto:mirlodotspace@proton.me"></a>,
                   }}
                 />
