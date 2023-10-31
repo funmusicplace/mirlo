@@ -8,9 +8,14 @@ import BulkTrackUpload from "./BulkTrackUpload";
 import ManageTrackTable from "./ManageTrackTable";
 import useGetUserObjectById from "utils/useGetUserObjectById";
 import { useGlobalStateContext } from "state/GlobalState";
+import api from "services/api";
+import { useSnackbar } from "state/SnackbarContext";
+import Button from "components/common/Button";
 
 const ManageTrackGroup: React.FC<{}> = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
+  const snackbar = useSnackbar();
+
   const { artistId, trackGroupId } = useParams();
   const {
     state: { user },
@@ -27,6 +32,24 @@ const ManageTrackGroup: React.FC<{}> = () => {
     trackGroupId,
     `?artistId=${artistId}`
   );
+
+  const artistUserId = artist?.userId;
+
+  const publishTrackGroup = React.useCallback(async () => {
+    try {
+      if (artistUserId && trackGroupId) {
+        await api.put(
+          `users/${artistUserId}/trackGroups/${trackGroupId}/publish`,
+          {}
+        );
+        snackbar(t("publishedSuccess"), { type: "success" });
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      await reload();
+    }
+  }, [artistUserId, trackGroupId, snackbar, t, reload]);
 
   if (!trackGroup || !artist) {
     return null;
@@ -49,6 +72,9 @@ const ManageTrackGroup: React.FC<{}> = () => {
           reload={reload}
         />
       )}
+      <div>
+        <Button onClick={publishTrackGroup}>{t("publish")}</Button>
+      </div>
       <BulkTrackUpload trackgroup={trackGroup} reload={reload} />
     </div>
   );
