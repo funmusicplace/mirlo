@@ -2525,6 +2525,11 @@ iconv-lite@0.6.3:
   dependencies:
     safer-buffer ">= 2.1.2 < 3.0.0"
 
+id3-parser@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/id3-parser/-/id3-parser-3.0.0.tgz#efc467d1e9386b80589e4d31bddae18b10e1f537"
+  integrity sha512-ubxxh6inGy2VM4N3L1F8uFQXKgKoFgFuT3BSEg7e+5bbSu7pw91tQqxVhUdJVg3jbzZYZJFaej29o8shfJ/GGg==
+
 ieee754@^1.1.13, ieee754@^1.2.1:
   version "1.2.1"
   resolved "https://registry.npmjs.org/ieee754/-/ieee754-1.2.1.tgz"

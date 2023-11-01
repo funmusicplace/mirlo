@@ -106,6 +106,10 @@ You can access dev MinIO at localhost:9001 with the MINIO_ROOT_USER and MINIO_RO
 
 If you want to do logging in the database, you need to uncomment the `log` line in the `prisma/prisma.ts` file.
 
+## Tests
+
+See the [test/README.md](/test/README.md) instructions.
+
 # Credits
 
 Logo created by Lluisa Iborra on [the Noun Project](https://thenounproject.com/icon/bird-818956/).
