@@ -7,7 +7,6 @@ import TextArea from "../common/TextArea";
 import FormComponent from "components/common/FormComponent";
 import { useSnackbar } from "state/SnackbarContext";
 import { pick } from "lodash";
-import LoadingSpinner from "components/common/LoadingSpinner";
 import api from "../../services/api";
 import { useGlobalStateContext } from "state/GlobalState";
 import Box from "components/common/Box";
@@ -103,12 +102,7 @@ const SubscriptionForm: React.FC<{
           {t("description")}
           <TextArea {...register("description")} />
         </FormComponent>
-        <Button
-          type="submit"
-          disabled={isSaving}
-          compact
-          startIcon={isSaving ? <LoadingSpinner /> : undefined}
-        >
+        <Button type="submit" disabled={isSaving} compact isLoading={isSaving}>
           {existing ? t("saveSubscription") : t("createSubscription")}
         </Button>
       </form>

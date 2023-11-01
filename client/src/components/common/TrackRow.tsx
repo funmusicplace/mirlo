@@ -1,13 +1,13 @@
 import { css } from "@emotion/css";
 import React from "react";
-import { FaLink, FaPause, FaPlay } from "react-icons/fa";
+import { FaLink } from "react-icons/fa";
 import { useGlobalStateContext } from "state/GlobalState";
-import useDraggableTrack from "utils/useDraggableTrack";
 
 import IconButton from "./IconButton";
 import { fmtMSS, isTrackOwnedOrPreview, widgetUrl } from "utils/tracks";
 import { useSnackbar } from "state/SnackbarContext";
 import { bp } from "../../constants";
+import TrackRowPlayControl from "./TrackRowPlayControl";
 
 const TrackRow: React.FC<{
   track: Track;
@@ -17,24 +17,8 @@ const TrackRow: React.FC<{
   const snackbar = useSnackbar();
   const [trackTitle] = React.useState(track.title);
   const {
-    state: { playerQueueIds, playing, currentlyPlayingIndex, user },
-    dispatch,
+    state: { user },
   } = useGlobalStateContext();
-  const { onDragStart, onDragEnd } = useDraggableTrack();
-
-  const currentPlayingTrackId =
-    currentlyPlayingIndex !== undefined
-      ? playerQueueIds[currentlyPlayingIndex]
-      : undefined;
-
-  const onTrackPlay = React.useCallback(() => {
-    addTracksToQueue(track.id);
-    dispatch({ type: "setPlaying", playing: true });
-  }, [dispatch, addTracksToQueue, track.id]);
-
-  const onTrackPause = React.useCallback(() => {
-    dispatch({ type: "setPlaying", playing: false });
-  }, [dispatch]);
 
   const canPlayTrack = isTrackOwnedOrPreview(track, user, trackGroup);
 
@@ -42,16 +26,9 @@ const TrackRow: React.FC<{
     <tr
       key={track.id}
       id={`${track.id}`}
-      onDragOver={(ev) => ev.preventDefault()}
-      draggable={true}
-      onDragStart={onDragStart}
-      onDragEnd={onDragEnd}
       className={css`
         ${!canPlayTrack ? `color: var(--mi-light-foreground-color);` : ""}
 
-        &:hover > td > .play-button {
-          opacity: 1;
-        }
         font-size: 18px;
 
         @media screen and (max-width: ${bp.medium}px) {
@@ -64,6 +41,19 @@ const TrackRow: React.FC<{
         button {
           font-size: 16px;
         }
+
+        > td > .play-button {
+          display: none;
+        }
+        > td > .track-number {
+          display: block;
+        }
+        &:hover > td > .play-button {
+          display: block;
+        }
+        &:hover > td > .track-number {
+          display: none;
+        }
       `}
     >
       <td
@@ -72,22 +62,11 @@ const TrackRow: React.FC<{
         `}
       >
         {canPlayTrack && (
-          <>
-            {(!playing || currentPlayingTrackId !== track.id) && (
-              <IconButton compact className="play-button" onClick={onTrackPlay}>
-                <FaPlay />
-              </IconButton>
-            )}
-            {playing && currentPlayingTrackId === track.id && (
-              <IconButton
-                compact
-                data-cy="track-row-pause-button"
-                onClick={onTrackPause}
-              >
-                <FaPause />
-              </IconButton>
-            )}
-          </>
+          <TrackRowPlayControl
+            trackId={track.id}
+            trackNumber={track.order}
+            onTrackPlayCallback={addTracksToQueue}
+          />
         )}
       </td>
       <td

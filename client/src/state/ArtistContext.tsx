@@ -65,6 +65,7 @@ export const ArtistProvider: React.FC<{
   const { artistId } = useParams();
   const [state, dispatch] = React.useReducer(stateReducer, {
     isArtistContext: true,
+    isLoading: true,
   });
 
   React.useEffect(() => {

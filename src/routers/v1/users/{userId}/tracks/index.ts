@@ -49,7 +49,8 @@ export default function () {
 
   async function POST(req: Request, res: Response, next: NextFunction) {
     const { userId } = req.params;
-    const { title, trackGroupId, trackArtists } = req.body;
+    const { title, trackGroupId, trackArtists, order, metadata, isPreview } =
+      req.body;
     try {
       const trackGroup = await doesTrackGroupBelongToUser(
         Number(trackGroupId),
@@ -64,6 +65,9 @@ export default function () {
       const createdTrack = await prisma.track.create({
         data: {
           title,
+          order,
+          isPreview,
+          metadata,
           trackGroup: {
             connect: {
               id: Number(trackGroupId),

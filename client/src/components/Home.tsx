@@ -188,6 +188,8 @@ function Home() {
                   t={t}
                   i18nKey="mirloConstruction"
                   components={{
+                    // eslint-disable-next-line jsx-a11y/anchor-has-content
+                    faq: <a href="/faq"></a>,
                     github: (
                       // eslint-disable-next-line jsx-a11y/anchor-has-content
                       <a href="https://github.com/funmusicplace/mirlo/"></a>
@@ -196,8 +198,6 @@ function Home() {
                     discord: <a href="https://discord.gg/VjKq26raKX"></a>,
                     // eslint-disable-next-line jsx-a11y/anchor-has-content
                     email: <a href="mailto:mirlodotspace@proton.me"></a>,
-                    // eslint-disable-next-line jsx-a11y/anchor-has-content
-                    faq: <a href="/faq"></a>,
                   }}
                 />
               </p>

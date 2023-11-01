@@ -8,7 +8,6 @@ import TextArea from "../common/TextArea";
 import FormComponent from "components/common/FormComponent";
 import { useSnackbar } from "state/SnackbarContext";
 import { pick } from "lodash";
-import LoadingSpinner from "components/common/LoadingSpinner";
 import api from "../../services/api";
 import { useGlobalStateContext } from "state/GlobalState";
 import useErrorHandler from "services/useErrorHandler";
@@ -160,8 +159,10 @@ const AlbumForm: React.FC<{
       <FormComponent>
         {t("type")}:{" "}
         <SelectEl defaultValue="lp" {...register("type")}>
-          <option value="lp">LP</option>
-          <option value="ep">EP</option>
+          <option value="lp">{t("lp")}</option>
+          <option value="ep">{t("ep")}</option>
+          <option value="single">{t("single")}</option>
+          <option value="compilation">{t("compilation")}</option>
         </SelectEl>
       </FormComponent>
 
@@ -176,12 +177,12 @@ const AlbumForm: React.FC<{
         {t("price")}:
         <InputEl type="number" {...register("minPrice")} />
       </FormComponent>
-      <Button
-        type="submit"
-        disabled={isSaving}
-        startIcon={isSaving ? <LoadingSpinner /> : undefined}
-      >
-        {existing ? t("saveAlbum") : t("submitAlbum")}
+      <Button type="submit" disabled={isSaving} isLoading={isSaving}>
+        {existing
+          ? existing.published
+            ? t("saveDraft")
+            : t("update")
+          : t("submitAlbum")}
       </Button>
     </form>
   );

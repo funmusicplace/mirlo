@@ -7,7 +7,6 @@ import TextArea from "../common/TextArea";
 import FormComponent from "components/common/FormComponent";
 import { useSnackbar } from "state/SnackbarContext";
 import { pick } from "lodash";
-import LoadingSpinner from "components/common/LoadingSpinner";
 import api from "../../services/api";
 import { useGlobalStateContext } from "state/GlobalState";
 import { css } from "@emotion/css";
@@ -24,8 +23,7 @@ const PostForm: React.FC<{
   } = useGlobalStateContext();
   const snackbar = useSnackbar();
   const [isSaving, setIsSaving] = React.useState(false);
-  const {t} = useTranslation("translation",{keyPrefix : "postForm"})
-
+  const { t } = useTranslation("translation", { keyPrefix: "postForm" });
 
   const publishedAt = existing ? new Date(existing.publishedAt) : new Date();
   publishedAt.setMinutes(
@@ -121,11 +119,7 @@ const PostForm: React.FC<{
           <small>{t("postForm")}</small>
         </label>
       </FormComponent>
-      <Button
-        type="submit"
-        disabled={isSaving}
-        startIcon={isSaving ? <LoadingSpinner /> : undefined}
-      >
+      <Button type="submit" disabled={isSaving} isLoading={isSaving}>
         {existing ? t("save") : t("saveNew")} {t("post")}
       </Button>
     </form>

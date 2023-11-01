@@ -1,25 +1,20 @@
 import { Job } from "bullmq";
 
-import path from "path";
 import ffmpeg from "fluent-ffmpeg";
-import fs, {
+import {
   createReadStream,
   createWriteStream,
   promises as fsPromises,
 } from "fs";
-import { fromBuffer, fromStream } from "file-type";
-import { PassThrough, Stream, pipeline } from "stream";
-import id3parser from "id3-parser";
+import { Stream } from "stream";
 
 import { logger } from "./queue-worker";
 import {
   createBucketIfNotExists,
   finalAudioBucket,
-  getBufferFromMinio,
   incomingAudioBucket,
   minioClient,
 } from "../utils/minio";
-import { Readable } from "stream";
 
 const {
   MINIO_HOST = "",
@@ -107,7 +102,6 @@ export default async (job: Job) => {
 
     await new Promise((resolve, reject) => {
       ffmpeg(probeStream).ffprobe(async (err, result) => {
-        // console.log("result", result);
         fileType = result?.format?.format_name;
         data = result;
 
@@ -205,7 +199,6 @@ export default async (job: Job) => {
         .on("progress", (data: { timemark: string }) => {
           if (data.timemark.includes(":")) {
             const timeArray = data.timemark.split(":");
-            // console.log("timeArray", timeArray);
             duration =
               Math.round(+timeArray[0]) * 60 * 60 +
               Math.round(+timeArray[1]) * 60 +
@@ -248,19 +241,3 @@ export default async (job: Job) => {
     logger.error("Error creating audio folder", e);
   }
 };
-
-function addDebugEvents(stream: Stream, name: string) {
-  [
-    "close",
-    "drain",
-    "error",
-    "finish",
-    "pipe",
-    "unpipe",
-    "data",
-    "end",
-    "readable",
-  ].map((eventName) =>
-    stream.on(eventName, () => console.log(`${name}-${eventName}`))
-  );
-}

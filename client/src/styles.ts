@@ -58,7 +58,7 @@ const styles = `html {
 }
 
 html {
-  font-size: 20px;
+  font-size: 16px;
   min-height: 100%;
 }
 

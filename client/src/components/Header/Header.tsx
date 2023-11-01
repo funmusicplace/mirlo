@@ -30,7 +30,7 @@ const Header = () => {
         position: fixed;
         width: 100%;
         z-index: 999999;
-        border-bottom: 1px solid var(--mi-light-foreground-color);
+        border-bottom: 1px solid var(--mi-shade-background-color);
       `}
     >
       <h1

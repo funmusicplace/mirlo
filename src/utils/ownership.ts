@@ -39,11 +39,13 @@ export const doesTrackGroupBelongToUser = async (
     },
     include: {
       cover: true,
+      artist: true,
       tracks: {
         where: {
           deletedAt: null,
         },
         include: { trackArtists: true, audio: true },
+        orderBy: { order: "asc" },
       },
     },
   });

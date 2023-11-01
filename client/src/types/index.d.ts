@@ -21,6 +21,7 @@ interface Track {
   trackGroup: TrackGroup;
   trackGroupId: number;
   image: Image;
+  order: number;
   audio?: {
     url: string;
     duration: number; // in seconds
@@ -30,6 +31,7 @@ interface Track {
     role?: string;
     artistId?: number;
     artistName?: string;
+    isCoAuthor?: boolean;
   }[];
 }
 

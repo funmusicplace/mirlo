@@ -4,7 +4,6 @@ import Button from "../common/Button";
 import { FormProvider, useForm } from "react-hook-form";
 import api from "services/api";
 import { InputEl } from "../common/Input";
-import LoadingSpinner from "components/common/LoadingSpinner";
 import FormComponent from "components/common/FormComponent";
 import TextArea from "components/common/TextArea";
 import { css } from "@emotion/css";
@@ -207,11 +206,7 @@ export const ArtistForm: React.FC<{
             Email: <InputEl type="email" {...register("email")} />
           </FormComponent> */}
 
-            <Button
-              type="submit"
-              disabled={isSaving}
-              startIcon={isSaving ? <LoadingSpinner /> : undefined}
-            >
+            <Button type="submit" disabled={isSaving} isLoading={isSaving}>
               {existing ? t("saveArtist") : t("createArtist")}
             </Button>
           </div>

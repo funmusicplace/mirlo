@@ -126,8 +126,11 @@
     "cover": "Cover",
     "type": "Type",
     "lp": "LP",
+    "view": "View live",
     "ep": "EP",
+    "single": "Single",
     "releaseDate": "Release date",
+    "compilation": "Compilation",
     "about": "About",
     "price": "Price",
     "saveAlbum": "Save album",
@@ -146,7 +149,11 @@
     "statusHelp": "Can the user listen to the track without owning it? If it's 'preview' then they can.",
     "metadata": "Metadata",
     "coAuthorCheck": "Is this artist a co-author? ie. Should they be listed in the track listings?",
-    "moreTrackDetails": "More track details"
+    "moreTrackDetails": "More track details",
+    "saveDraft": "Save draft",
+    "createAlbum": "Create album",
+    "update": "Update",
+    "makePrivate": "Make private"
   },
   "artistForm": {
     "displayName": "Display name",
@@ -180,8 +187,8 @@
     "editSubscriptionTierFor": "Edit subscription tier for {{artistName}}"
   },
   "footer": {
-    "underConstruction": "Mirlo is under construction. If you'd like to contribute check out <1>the code on GitHub</1>, <2>join our Discord</2>, or <3>email us</3>.",
-    "aboutUs": "<1>About us</1> <2>FAQ</2>"
+    "underConstruction": "Mirlo is under construction. If you'd like to contribute check out <github>the code on GitHub</github>, <discord>join our Discord</discord>, or <email>email us</email>.",
+    "aboutUs": "<about>About us</about>, <faq>FAQ</faq>"
   },
   "admin": {
     "users": "Users",
@@ -204,6 +211,7 @@
     "trackgroup": "Track Group:",
     "title": "Title:",
     "type": "Type:",
+    "edit": "Edit",
     "releaseDate": "Release date:",
     "released": "Released",
     "about": "About:",
@@ -211,7 +219,8 @@
     "privateAlbumDescription": "Private albums can not be listened to by Resonate users",
     "isEnabled": "Is enabled?",
     "enabledAlbumDescription": "Enabled albums can be made public by the artist",
-    "saveTrackGroupButton": "Save track group"
+    "saveTrackGroupButton": "Save track group",
+    "doesNotExist": "This album does not exist or it does not have a public presence"
   },
   "manageSubscriptionTierBox": {
     "edit": "Edit",

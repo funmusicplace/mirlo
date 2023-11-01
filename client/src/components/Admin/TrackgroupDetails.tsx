@@ -5,7 +5,6 @@ import LoadingSpinner from "components/common/LoadingSpinner";
 import { SelectEl } from "components/common/Select";
 import TextArea from "components/common/TextArea";
 import { useSnackbar } from "state/SnackbarContext";
-import { pick } from "lodash";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { useParams } from "react-router-dom";
@@ -35,7 +34,9 @@ export const TrackGroupDetails: React.FC = () => {
   const snackbar = useSnackbar();
   const { register, handleSubmit, reset } = useForm<TrackGroupFormData>();
   const [isLoading, setIsLoading] = React.useState(false);
-  const {t} = useTranslation("translation", {keyPrefix : "trackGroupDetails"})
+  const { t } = useTranslation("translation", {
+    keyPrefix: "trackGroupDetails",
+  });
 
   const [trackgroup, setTrackgroup] = React.useState<TrackGroup>();
 
@@ -84,7 +85,9 @@ export const TrackGroupDetails: React.FC = () => {
 
   return (
     <>
-      <h3>{t("trackgroup")} {trackgroup?.title}</h3>
+      <h3>
+        {t("trackgroup")} {trackgroup?.title}
+      </h3>
       <form onSubmit={handleSubmit(doSave)}>
         <FormComponent>
           {t("title")} <InputEl {...register("title")} />
@@ -97,7 +100,8 @@ export const TrackGroupDetails: React.FC = () => {
           </SelectEl>
         </FormComponent>
         <FormComponent>
-          {t("releaseDate")} <InputEl type="date" {...register("releaseDate")} />
+          {t("releaseDate")}{" "}
+          <InputEl type="date" {...register("releaseDate")} />
         </FormComponent>
         <FormComponent>
           {t("about")} <TextArea {...register("about")} />
@@ -106,9 +110,7 @@ export const TrackGroupDetails: React.FC = () => {
           <input type="checkbox" id="private" {...register("published")} />
           <label htmlFor="private">
             {t("isPrivate")}
-            <small>
-              {t("privateAlbumDescription")}
-            </small>
+            <small>{t("privateAlbumDescription")}</small>
           </label>
         </FormComponent>
         <FormComponent style={{ display: "flex" }}>
@@ -123,7 +125,7 @@ export const TrackGroupDetails: React.FC = () => {
           type="submit"
           style={{ marginTop: "1rem" }}
           disabled={isLoading}
-          startIcon={isLoading ? <LoadingSpinner /> : undefined}
+          isLoading={isLoading}
         >
           {t("saveTrackGroupButton")}
         </Button>

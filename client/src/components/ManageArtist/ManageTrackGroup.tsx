@@ -1,6 +1,6 @@
 import { css } from "@emotion/css";
 import React from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useArtistContext } from "state/ArtistContext";
 import AlbumForm from "./AlbumForm";
@@ -8,13 +8,11 @@ import BulkTrackUpload from "./BulkTrackUpload";
 import ManageTrackTable from "./ManageTrackTable";
 import useGetUserObjectById from "utils/useGetUserObjectById";
 import { useGlobalStateContext } from "state/GlobalState";
-import api from "services/api";
-import { useSnackbar } from "state/SnackbarContext";
 import Button from "components/common/Button";
+import PublishButton from "./PublisButton";
 
 const ManageTrackGroup: React.FC<{}> = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
-  const snackbar = useSnackbar();
 
   const { artistId, trackGroupId } = useParams();
   const {
@@ -33,24 +31,6 @@ const ManageTrackGroup: React.FC<{}> = () => {
     `?artistId=${artistId}`
   );
 
-  const artistUserId = artist?.userId;
-
-  const publishTrackGroup = React.useCallback(async () => {
-    try {
-      if (artistUserId && trackGroupId) {
-        await api.put(
-          `users/${artistUserId}/trackGroups/${trackGroupId}/publish`,
-          {}
-        );
-        snackbar(t("publishedSuccess"), { type: "success" });
-      }
-    } catch (e) {
-      console.error(e);
-    } finally {
-      await reload();
-    }
-  }, [artistUserId, trackGroupId, snackbar, t, reload]);
-
   if (!trackGroup || !artist) {
     return null;
   }
@@ -61,7 +41,20 @@ const ManageTrackGroup: React.FC<{}> = () => {
         width: 100%;
       `}
     >
-      <h1>{t("editAlbum")}</h1>
+      <div
+        className={css`
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        `}
+      >
+        <h1>{t("editAlbum")}</h1>
+        <Link
+          to={`/${artist.urlSlug?.toLowerCase()}/release/${trackGroup.urlSlug?.toLowerCase()}`}
+        >
+          <Button compact>{t("view")}</Button>
+        </Link>
+      </div>
       <AlbumForm existing={trackGroup} reload={reload} artist={artist} />
       {trackGroup.tracks?.length > 0 && (
         <ManageTrackTable
@@ -72,9 +65,9 @@ const ManageTrackGroup: React.FC<{}> = () => {
           reload={reload}
         />
       )}
-      <div>
-        <Button onClick={publishTrackGroup}>{t("publish")}</Button>
-      </div>
+      {trackGroup.tracks?.length > 0 && (
+        <PublishButton trackGroup={trackGroup} reload={reload} />
+      )}
       <BulkTrackUpload trackgroup={trackGroup} reload={reload} />
     </div>
   );

@@ -5,7 +5,6 @@ import { useGlobalStateContext } from "state/GlobalState";
 import Box from "../common/Box";
 import Button from "../common/Button";
 import usePublicObjectById from "utils/usePublicObjectById";
-import LoadingSpinner from "components/common/LoadingSpinner";
 import { useTranslation } from "react-i18next";
 import ArtistSupport from "components/Artist/ArtistSupport";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
@@ -42,19 +41,7 @@ function TrackGroup() {
   if (!artist && !isLoadingArtist) {
     return <Box>{t("doesNotExist")}</Box>;
   } else if (!artist) {
-    return (
-      <div
-        className={css`
-          display: flex;
-          height: 100%;
-          justify-content: center;
-          align-items: center;
-          font-size: 4rem;
-        `}
-      >
-        <LoadingSpinner />
-      </div>
-    );
+    return <FullPageLoadingSpinner />;
   }
 
   const ownedByUser = artist.userId === user?.id;
@@ -116,10 +103,14 @@ function TrackGroup() {
         <div
           className={css`
             text-align: right;
+            display: flex;
           `}
         >
           {ownedByUser && (
-            <Link to={`/manage/artists/${artist.id}`}>
+            <Link
+              to={`/manage/artists/${artist.id}/release/${trackGroup.id}`}
+              style={{ marginRight: "1rem" }}
+            >
               <Button compact startIcon={<FaPen />}>
                 {t("edit")}
               </Button>

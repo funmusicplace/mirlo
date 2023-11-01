@@ -24,7 +24,9 @@ export const ManageTrackTable: React.FC<{
   } = useGlobalStateContext();
   const userId = user?.id;
   const [displayTracks, setDisplayTracks] = React.useState<Track[]>([]);
-  const { t } = useTranslation("translation", { keyPrefix: "manageTrackTable" })
+  const { t } = useTranslation("translation", {
+    keyPrefix: "manageTrackTable",
+  });
 
   const handleDrop = React.useCallback(
     async (ev: React.DragEvent<HTMLTableRowElement>) => {
@@ -37,16 +39,25 @@ export const ManageTrackTable: React.FC<{
           draggingTrackId
         );
         if (trackGroupId) {
+          console.log(
+            "tracks",
+            newTracks.map((t) => t.id)
+          );
           setDisplayTracks(newTracks);
 
           // FIXME: this endpoint isn't implemented
-          await api.put(`trackGroup/${trackGroupId}/tracks`, {
-            tracks: newTracks.map((t) => t.id),
-          });
+          await api.put(
+            `users/${userId}/trackGroups/${trackGroupId}/trackOrder`,
+            {
+              trackIds: newTracks.map((t) => t.id),
+            }
+          );
+
+          reload?.();
         }
       }
     },
-    [displayTracks, editable, trackGroupId, draggingTrackId]
+    [editable, draggingTrackId, displayTracks, trackGroupId, reload, userId]
   );
 
   const fetchTracks = React.useCallback(
@@ -98,9 +109,10 @@ export const ManageTrackTable: React.FC<{
     <Table style={{ marginBottom: "1.5rem", marginTop: "1.5rem" }}>
       <thead>
         <tr>
+          <th />
           <th>{t("titleColumn")}</th>
           <th>{t("durationColumn")}</th>
-          <th align="right">{t("manageColumn")}</th>
+          <th className="alignRight">{t("manageColumn")}</th>
         </tr>
       </thead>
       <tbody>
