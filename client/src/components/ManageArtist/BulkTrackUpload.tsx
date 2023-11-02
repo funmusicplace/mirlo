@@ -29,7 +29,12 @@ export interface TrackData {
   status: Track["status"];
   track: string;
   id3: { [key: string]: any };
-  trackArtists: { artistName?: string; artistId?: number; role?: string }[];
+  trackArtists: {
+    artistName?: string;
+    artistId?: number;
+    role?: string;
+    isCoAuthor?: boolean;
+  }[];
 }
 
 interface FormData {
@@ -108,20 +113,24 @@ export const BulkTrackUpload: React.FC<{
 
           const uploadJobIds = await Promise.all(
             data.tracks.map(async (f) => {
+              const packet = {
+                title: f.title,
+                metadata: f,
+                artistId: trackgroup.artistId,
+                isPreview: f.status === "preview",
+                order: Number(f.track),
+                trackGroupId: trackgroup.id,
+                trackArtists: f.trackArtists.map((a) => ({
+                  ...a,
+                  artistId:
+                    a.artistId && isFinite(+a.artistId)
+                      ? +a.artistId
+                      : undefined,
+                })),
+              };
               const result = await api.post<Partial<Track>, { track: Track }>(
                 `users/${userId}/tracks`,
-                {
-                  ...f,
-                  artistId: trackgroup.artistId,
-                  trackGroupId: trackgroup.id,
-                  trackArtists: f.trackArtists.map((a) => ({
-                    ...a,
-                    artistId:
-                      a.artistId && isFinite(+a.artistId)
-                        ? +a.artistId
-                        : undefined,
-                  })),
-                }
+                packet
               );
               const jobInfo = await api.uploadFile(
                 `users/${userId}/tracks/${result.track.id}/audio`,

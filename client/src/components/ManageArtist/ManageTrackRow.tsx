@@ -1,6 +1,6 @@
 import { css } from "@emotion/css";
 import React from "react";
-import { FaPause, FaPen, FaPlay, FaSave, FaTrash } from "react-icons/fa";
+import { FaPen, FaSave, FaTrash } from "react-icons/fa";
 import { useGlobalStateContext } from "state/GlobalState";
 import useDraggableTrack from "utils/useDraggableTrack";
 
@@ -9,6 +9,7 @@ import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
 import { InputEl } from "../common/Input";
 import { fmtMSS } from "utils/tracks";
+import TrackRowPlayControl from "components/common/TrackRowPlayControl";
 
 const ManageTrackRow: React.FC<{
   track: Track;
@@ -20,24 +21,9 @@ const ManageTrackRow: React.FC<{
   const [isEditingTitle, setIsEditingTitle] = React.useState(false);
   const [trackTitle, setTrackTitle] = React.useState(track.title);
   const {
-    state: { playerQueueIds, playing, currentlyPlayingIndex, user },
-    dispatch,
+    state: { user },
   } = useGlobalStateContext();
   const { onDragStart, onDragEnd } = useDraggableTrack();
-
-  const currentPlayingTrackId =
-    currentlyPlayingIndex !== undefined
-      ? playerQueueIds[currentlyPlayingIndex]
-      : undefined;
-
-  const onTrackPlay = React.useCallback(() => {
-    addTracksToQueue(track.id);
-    dispatch({ type: "setPlaying", playing: true });
-  }, [dispatch, addTracksToQueue, track.id]);
-
-  const onTrackPause = React.useCallback(() => {
-    dispatch({ type: "setPlaying", playing: false });
-  }, [dispatch]);
 
   const userId = user?.id;
 
@@ -76,28 +62,25 @@ const ManageTrackRow: React.FC<{
       onDragEnd={onDragEnd}
       className={css`
         > td > .play-button {
-          opacity: 0;
+          display: none;
+        }
+        > td > .track-number {
+          display: block;
         }
         &:hover > td > .play-button {
-          opacity: 1;
+          display: block;
+        }
+        &:hover > td > .track-number {
+          display: none;
         }
       `}
     >
       <td>
-        {(!playing || currentPlayingTrackId !== track.id) && (
-          <IconButton compact className="play-button" onClick={onTrackPlay}>
-            <FaPlay />
-          </IconButton>
-        )}
-        {playing && currentPlayingTrackId === track.id && (
-          <IconButton
-            compact
-            data-cy="track-row-pause-button"
-            onClick={onTrackPause}
-          >
-            <FaPause />
-          </IconButton>
-        )}
+        <TrackRowPlayControl
+          trackId={track.id}
+          trackNumber={track.order}
+          onTrackPlayCallback={addTracksToQueue}
+        />
       </td>
       <td
         className={css`
@@ -116,7 +99,7 @@ const ManageTrackRow: React.FC<{
         )}
       </td>
       <td>{track.audio?.duration && fmtMSS(track.audio?.duration)}</td>
-      <td align="right">
+      <td className="alignRight">
         {isEditingTitle && (
           <IconButton onClick={updateTrackTitle} title="Delete">
             <FaSave />

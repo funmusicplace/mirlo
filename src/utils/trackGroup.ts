@@ -1,14 +1,8 @@
 import { TrackGroup, TrackAudio, Track, TrackGroupCover } from "@prisma/client";
 import prisma from "../../prisma/prisma";
 import { convertURLArrayToSizes, generateFullStaticImageUrl } from "./images";
-import {
-  finalCoversBucket,
-  finalAudioBucket,
-  getFileFromMinio,
-  minioClient,
-} from "./minio";
+import { finalCoversBucket, finalAudioBucket, minioClient } from "./minio";
 import { findArtistIdForURLSlug } from "./artist";
-import JSZip, { folder } from "jszip";
 import { logger } from "../logger";
 import fs from "fs";
 import archiver from "archiver";
@@ -153,19 +147,18 @@ export async function buildZipFileForPath(
         const order = track.order ? track.order : i + 1;
         const trackTitle = `${order} - ${track.title}.${track.audio.fileExtension}`;
 
-        // FIXME: can this be turned into an async stream?
-        const { filePath } = await getFileFromMinio(
-          minioClient,
-          finalAudioBucket,
-          `${track.audio.id}/original.${track.audio.fileExtension}`,
-          rootFolder,
-          trackTitle,
-          logger
-        );
-        logger.info(`Fetched file for tracks ${filePath}`);
+        try {
+          const trackStream = await minioClient.getObject(
+            finalAudioBucket,
+            `${track.audio.id}/original.${track.audio.fileExtension}`
+          );
+          logger.info(`Fetched file for tracks ${track.audio.id}`);
 
-        archive.append(fs.createReadStream(filePath), { name: trackTitle });
-        logger.info(`Added track to zip file ${track.title}`);
+          archive.append(trackStream, { name: trackTitle });
+          logger.info(`Added track to zip file ${track.title}`);
+        } catch (e) {
+          logger.error(`File not found on MinIO: ${track.audio.id}, skipping`);
+        }
       }
     }
     logger.info("Done compiling zip, putting it on the filesystem");

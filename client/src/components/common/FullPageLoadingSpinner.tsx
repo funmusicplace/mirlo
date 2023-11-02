@@ -13,6 +13,7 @@ export const FullPageLoadingSpinner: React.FC<{ className?: string }> = ({
         justify-content: center;
         align-items: center;
         font-size: 4rem;
+        width: 100%;
         position: absolute;
         top: 0;
         right: 0;

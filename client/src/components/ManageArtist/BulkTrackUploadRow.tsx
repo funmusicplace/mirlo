@@ -76,6 +76,7 @@ export const BulkTrackUploadRow: React.FC<{
                       margin-top: 1rem;
                     }
                   `}
+                  key={a.id}
                 >
                   <div>
                     <InputEl

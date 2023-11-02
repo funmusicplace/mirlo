@@ -94,7 +94,6 @@ export default function () {
 
     const trackId = Number(trackIdString);
     const track = await doesTrackBelongToUser(trackId, Number(userId));
-    console.log("deleting track");
     if (!track) {
       res.status(400).json({
         error: "Track must belong to user",

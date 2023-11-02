@@ -110,14 +110,21 @@ const Player = () => {
 
   React.useEffect(() => {
     if (currentTrack) {
+      console.log("currentTrack", currentTrack);
       if ("mediaSession" in navigator) {
         navigator.mediaSession.metadata = new MediaMetadata({
           title: currentTrack.title,
-          artist: currentTrack.trackGroup?.artist?.name ?? "",
+          artist:
+            currentTrack.trackArtists
+              ?.filter((ta) => ta.isCoAuthor)
+              .map((ta) => ta.artistName)
+              .join(", ") ??
+            currentTrack.trackGroup?.artist?.name ??
+            "",
           album: currentTrack.trackGroup?.title ?? "",
           artwork: [
             {
-              src: currentTrack.trackGroup.cover?.url ?? "",
+              src: currentTrack.trackGroup.cover?.sizes?.[1200] ?? "",
               type: "image/png",
             },
           ],

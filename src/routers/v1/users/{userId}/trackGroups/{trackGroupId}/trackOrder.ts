@@ -1,6 +1,5 @@
 import { User } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
-import multer from "multer";
 import {
   userAuthenticated,
   userHasPermission,
@@ -9,58 +8,65 @@ import processTrackGroupCover from "../../../../../../utils/processImages";
 import prisma from "../../../../../../../prisma/prisma";
 import { doesTrackGroupBelongToUser } from "../../../../../../utils/ownership";
 
-const upload = multer({
-  dest: process.env.MEDIA_LOCATION_INCOMING ?? "/data/media/incoming",
-  limits: {
-    fileSize: 10000000, // 10mb seems reasonable for a cover
-  },
-});
-
 type Params = {
   trackGroupId: number;
   userId: string;
 };
 
-const isFileArray = (entity: unknown): entity is Express.Multer.File[] => {
-  return true;
-};
-
 export default function () {
   const operations = {
-    PUT: [
-      userAuthenticated,
-      userHasPermission("owner"),
-      // upload.single("file"),
-      upload.array("upload"),
-      PUT,
-    ],
+    PUT: [userAuthenticated, userHasPermission("owner"), PUT],
   };
 
   async function PUT(req: Request, res: Response, next: NextFunction) {
     const { trackGroupId } = req.params as unknown as Params;
+    const { trackIds } = req.body;
     const loggedInUser = req.user as User;
     try {
-      const trackgroup = await doesTrackGroupBelongToUser(
+      const trackGroup = await doesTrackGroupBelongToUser(
         Number(trackGroupId),
         loggedInUser.id
       );
 
-      if (!trackgroup) {
-        res.status(400).json({
+      if (!trackGroup) {
+        res.status(401).json({
           error: "Trackgroup must belong to user",
         });
         return next();
       }
 
-      // TODO: Remove prior files
-      // FIXME: Only allow uploading of one file.
-      if (req.files && isFileArray(req.files)) {
-        await processTrackGroupCover({ req, res })(req.files[0], trackGroupId);
-      }
+      await Promise.all(
+        trackIds.map(async (trackId: number, idx: number) => {
+          const track = await prisma.track.update({
+            where: {
+              trackGroupId: trackGroup.id,
+              id: trackId,
+            },
+            data: {
+              order: idx + 1,
+            },
+          });
+        })
+      );
 
-      res.json({ message: "Success" });
+      const updatedTrackGroup = await prisma.trackGroup.findFirst({
+        where: { id: trackGroup.id },
+        include: {
+          tracks: {
+            orderBy: { order: "asc" },
+            where: {
+              deletedAt: null,
+            },
+          },
+        },
+      });
+
+      res.json({ result: updatedTrackGroup });
     } catch (error) {
-      console.error("Cover error", error);
+      console.error(
+        "users/{userId}/trackGroups/{trackGroupId}/trackOrder",
+        error
+      );
       res.status(400).json({
         error: `TrackGroup with ID ${trackGroupId} does not exist in the database`,
       });
@@ -83,11 +89,21 @@ export default function () {
         type: "string",
       },
       {
-        in: "formData",
-        name: "file",
-        type: "file",
+        in: "body",
+        name: "trackIds",
         required: true,
-        description: "The cover to upload",
+        schema: {
+          type: "object",
+          required: ["trackIds"],
+          properties: {
+            trackIds: {
+              type: "array",
+              items: {
+                type: "number",
+              },
+            },
+          },
+        },
       },
     ],
     responses: {

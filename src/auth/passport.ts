@@ -96,8 +96,7 @@ export const userHasPermission = (role: "admin" | "owner") => {
         !loggedInUser.isAdmin
       ) {
         res.status(401).json({ error: "Unauthorized" });
-      }
-      if (role === "admin" && !loggedInUser.isAdmin) {
+      } else if (role === "admin" && !loggedInUser.isAdmin) {
         res.status(401).json({ error: "Unauthorized" });
       }
     }

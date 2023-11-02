@@ -25,7 +25,7 @@ const PageHeader = () => {
             margin-bottom: -6rem;
             max-height: 400px;
             box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.1) inset;
-            margin-top: ${user ? "66px" : "0"};
+            margin-top: ${user ? "55px" : "0"};
 
             @media screen and (max-width: ${bp.medium}px) {
               margin-bottom: 0;

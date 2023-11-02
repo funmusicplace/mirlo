@@ -6,7 +6,7 @@ import request from "supertest";
 import prisma from "../../../prisma/prisma";
 import { buildTokens } from "../../../src/routers/auth";
 import Parser from "rss-parser";
-import { clearTables } from "../../utils";
+import { clearTables, createArtist, createUser } from "../../utils";
 
 const baseURL = `${process.env.API_DOMAIN}/v1/`;
 
@@ -134,14 +134,7 @@ describe("artists/{id}/feed", () => {
         email: "test@test.com",
       },
     });
-    const artist = await prisma.artist.create({
-      data: {
-        name: "Test artist",
-        urlSlug: "test-artist",
-        userId: user.id,
-        enabled: true,
-      },
-    });
+    const artist = await createArtist(user.id);
 
     const postTitle = "Test post";
 
@@ -168,10 +161,8 @@ describe("artists/{id}/feed", () => {
         email: "test@test.com",
       },
     });
-    const followerUser = await prisma.user.create({
-      data: {
-        email: "follower@follower.com",
-      },
+    const { user: followerUser, accessToken } = await createUser({
+      email: "follower@follower.com",
     });
     const artist = await prisma.artist.create({
       data: {
@@ -209,16 +200,14 @@ describe("artists/{id}/feed", () => {
       },
     });
 
-    const { accessToken } = buildTokens(followerUser);
-
     const response = await request(baseURL)
       .get(`artists/${artist.id}/feed`)
       .set("Cookie", [`jwt=${accessToken}`])
       .set("Accept", "application/json");
 
-    assert(response.statusCode === 200);
-    assert(response.body.results.length === 1);
-    assert(response.body.results[0].title === postTitle);
+    assert.equal(response.statusCode, 200);
+    assert.equal(response.body.results.length, 1);
+    assert.equal(response.body.results[0].title, postTitle);
   });
 
   it("should GET / a hidden post if the user is subscribed above the minimum tier", async () => {
@@ -227,10 +216,8 @@ describe("artists/{id}/feed", () => {
         email: "test@test.com",
       },
     });
-    const followerUser = await prisma.user.create({
-      data: {
-        email: "follower@follower.com",
-      },
+    const { user: followerUser, accessToken } = await createUser({
+      email: "follower@follower.com",
     });
     const artist = await prisma.artist.create({
       data: {
@@ -273,13 +260,10 @@ describe("artists/{id}/feed", () => {
       },
     });
 
-    const { accessToken } = buildTokens(followerUser);
-
     const response = await request(baseURL)
       .get(`artists/${artist.id}/feed`)
       .set("Cookie", [`jwt=${accessToken}`])
       .set("Accept", "application/json");
-
     assert.equal(response.statusCode, 200);
     assert.equal(response.body.results.length, 1);
     assert.equal(response.body.results[0].title, postTitle);

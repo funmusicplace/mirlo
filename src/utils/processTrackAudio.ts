@@ -37,7 +37,6 @@ audioQueueEvents.on(
       `Job with id ${JSON.stringify(result.jobId)} has been completed`
     );
 
-    console.log("return value", result.returnvalue);
     try {
       const job = await audioQueue.getJob(result.jobId);
       if (job) {
@@ -46,6 +45,7 @@ audioQueueEvents.on(
             id: job.data.audioId,
           },
           data: {
+            uploadState: "SUCCESS",
             duration:
               typeof result.returnvalue?.duration === "number"
                 ? result.returnvalue.duration
@@ -71,6 +71,28 @@ audioQueueEvents.on(
   }
 );
 
+audioQueueEvents.on("stalled", async (result: { jobId: string }) => {
+  logger.info(`jobId ${result.jobId} stalled: Marking audio as error`);
+
+  try {
+    const job = await audioQueue.getJob(result.jobId);
+    if (job) {
+      await prisma.trackAudio.update({
+        where: {
+          id: job.data.audioId,
+        },
+        data: {
+          uploadState: "ERROR",
+        },
+      });
+
+      logger.info("Updated trackAudio");
+    }
+  } catch (err) {
+    logger.error(err);
+  }
+});
+
 /*
  * Process an audio then queue it for upload
  * FIXME: convert this to be stream based.
@@ -88,6 +110,7 @@ export const processTrackAudio = (ctx: { req: Request; res: Response }) => {
         size: file.size,
         // hash: sha1sum,
         fileExtension: fileType.ext,
+        uploadState: "STARTED",
       },
       update: {
         trackId,
@@ -96,6 +119,7 @@ export const processTrackAudio = (ctx: { req: Request; res: Response }) => {
         size: file.size,
         // hash: sha1sum,
         fileExtension: fileType.ext,
+        uploadState: "STARTED",
       },
       where: {
         trackId: Number(trackId),

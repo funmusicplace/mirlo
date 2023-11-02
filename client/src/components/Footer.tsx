@@ -21,22 +21,35 @@ export const Footer = () => {
         margin: 1rem auto 1rem;
       `}
     >
-     <p
+      <p
         className={css`
           margin-bottom: 1rem;
         `}
       >
-        <Trans t={t} i18nKey="underConstruction">
-          Mirlo is under construction. If you'd like to contribute check out
-          <a href="https://github.com/funmusicplace/mirlo/">the code on GitHub</a>
-          , <a href="https://discord.gg/VjKq26raKX">join our Discord</a>, or
-          <a href="mailto:mirlodotspace@proton.me">email us</a>.
-        </Trans>
+        <Trans
+          t={t}
+          i18nKey="underConstruction"
+          components={{
+            github: (
+              // eslint-disable-next-line jsx-a11y/anchor-has-content
+              <a href="https://github.com/funmusicplace/mirlo/"></a>
+            ),
+            // eslint-disable-next-line jsx-a11y/anchor-has-content,
+            discord: <a href="https://discord.gg/VjKq26raKX"></a>,
+            // eslint-disable-next-line jsx-a11y/anchor-has-content
+            email: <a href="mailto:mirlodotspace@proton.me"></a>,
+          }}
+        />
       </p>
       <p>
-        <Trans t={t} i18nKey="aboutUs">
-          <Link to="/about">About us</Link> <Link to="/faq">FAQ</Link>
-        </Trans>
+        <Trans
+          t={t}
+          i18nKey="aboutUs"
+          components={{
+            faq: <Link to="/faq"></Link>,
+            about: <Link to="/about"></Link>,
+          }}
+        />
       </p>
     </div>
   );

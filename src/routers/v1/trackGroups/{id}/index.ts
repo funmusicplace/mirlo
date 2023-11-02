@@ -35,6 +35,7 @@ export default function () {
             include: {
               audio: true,
             },
+            orderBy: { order: "asc" },
           },
           artist: true,
           cover: true,

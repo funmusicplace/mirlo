@@ -220,16 +220,23 @@ model TrackArtist {
 }
 
 model TrackAudio {
-  id               String    @id @default(uuid()) @db.Uuid
+  id               String       @id @default(uuid()) @db.Uuid
   url              String?
-  track            Track?    @relation(fields: [trackId], references: [id])
-  trackId          Int?      @unique
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+  track            Track?       @relation(fields: [trackId], references: [id])
+  trackId          Int?         @unique
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
   deletedAt        DateTime?
   originalFilename String?
   duration         Int? // In seconds
   hash             String?
   size             Int?
   fileExtension    String?
+  uploadState      UploadState? @default(STARTED)
+}
+
+enum UploadState {
+  SUCCESS
+  ERROR
+  STARTED
 }

@@ -11,7 +11,6 @@ import { useGlobalStateContext } from "../../state/GlobalState";
 import Button from "../common/Button";
 import FormComponent from "../common/FormComponent";
 import { InputEl } from "../common/Input";
-import LoadingSpinner from "../common/LoadingSpinner";
 import UserSupports from "./UserSupports";
 import useErrorHandler from "services/useErrorHandler";
 
@@ -115,19 +114,13 @@ function Profile() {
         <FormComponent>
           {t("email")}
           <InputEl {...register("email")} disabled />
-          <small>
-            {t("changingEmailDisabled")}
-          </small>
+          <small>{t("changingEmailDisabled")}</small>
         </FormComponent>
         <FormComponent>
           {t("name")}
           <InputEl {...register("name")} />
         </FormComponent>
-        <Button
-          type="submit"
-          disabled={isSaving}
-          startIcon={isSaving ? <LoadingSpinner /> : undefined}
-        >
+        <Button type="submit" disabled={isSaving} isLoading={isSaving}>
           {t("updateProfileButton")}
         </Button>
       </form>

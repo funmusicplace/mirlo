@@ -38,7 +38,7 @@ export const NewTrack: React.FC<{
   } = useGlobalStateContext();
 
   const [isSaving, setIsSaving] = React.useState(false);
-  const {t} = useTranslation("translation", {keyPrefix : "newTrack"})
+  const { t } = useTranslation("translation", { keyPrefix: "newTrack" });
   const snackbar = useSnackbar();
 
   const userId = user?.id;
@@ -86,7 +86,7 @@ export const NewTrack: React.FC<{
     <form onSubmit={handleSubmit(doAddTrack)}>
       <h4>{t("newTrack")}</h4>
       <FormComponent>
-         <InputEl {...register("title")} />
+        <InputEl {...register("title")} />
       </FormComponent>
       <FormComponent>
         {t("status")} :{" "}
@@ -114,9 +114,7 @@ export const NewTrack: React.FC<{
                 <small>{t("artistNameFormatQuestionColumn")}</small>
               </th>
               <th>
-                <small>
-                  {t("existingArtistQuestionColumn")}
-                </small>
+                <small>{t("existingArtistQuestionColumn")}</small>
               </th>
               <th>
                 <small>{t("artistRoleColumn")}</small>
@@ -144,11 +142,7 @@ export const NewTrack: React.FC<{
           {t("addAdditionalArtists")}
         </Button>
       </FormComponent>
-      <Button
-        type="submit"
-        disabled={isSaving}
-        startIcon={isSaving ? <LoadingSpinner /> : undefined}
-      >
+      <Button type="submit" disabled={isSaving} isLoading={isSaving}>
         {t("addTrackButton")}
       </Button>
     </form>
