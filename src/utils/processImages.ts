@@ -186,23 +186,24 @@ export const processTrackGroupCover = (ctx: APIContext) => {
     logger.info(
       `Going to put a file on MinIO Bucket ${incomingCoversBucket}: ${image.id}, ${file.path}`
     );
-    minioClient
-      .fPutObject(incomingCoversBucket, image.id, file.path)
-      .then((objInfo: { etag: string }) => {
-        logger.info("File put on minIO", objInfo);
-        logger.info("Adding image to queue");
+    const objInfo = await minioClient.fPutObject(
+      incomingCoversBucket,
+      image.id,
+      file.path
+    );
+    logger.info("File put on minIO", objInfo);
+    logger.info("Adding image to queue");
 
-        imageQueue.add("optimize-image", {
-          filepath: file.path,
-          destination: image.id,
-          model: "trackGroupCover",
-          incomingMinioBucket: incomingCoversBucket,
-          finalMinioBucket: finalCoversBucket,
-          config: sharpConfig.config["artwork"],
-        });
-      });
+    const job = await imageQueue.add("optimize-image", {
+      filepath: file.path,
+      destination: image.id,
+      model: "trackGroupCover",
+      incomingMinioBucket: incomingCoversBucket,
+      finalMinioBucket: finalCoversBucket,
+      config: sharpConfig.config["artwork"],
+    });
 
-    return image;
+    return job.id;
   };
 };
 

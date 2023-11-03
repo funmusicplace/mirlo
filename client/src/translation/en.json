@@ -136,7 +136,8 @@
     "saveAlbum": "Save album",
     "submitAlbum": "Submit album",
     "publish": "Publish",
-    "uploadTracks": "Upload tracks",
+    "uploadTracks": "Bulk upload tracks",
+    "uploadTracksDescription": "Attach files from your computer to get started uploading tracks",
     "addTheFollowingTracks": "We'll add the following tracks",
     "addNewArtist": "Add new artist",
     "preview": "Preview",
@@ -145,7 +146,7 @@
     "trackTitleHelp": "The title of the track",
     "artists": "Artists",
     "trackArtistsHelp": "Who are the artists involved in making the track? List as many as you like, alongside their role",
-    "status": "Status",
+    "status": "Is it a preview?",
     "statusHelp": "Can the user listen to the track without owning it? If it's 'preview' then they can.",
     "metadata": "Metadata",
     "coAuthorCheck": "Is this artist a co-author? ie. Should they be listed in the track listings?",
@@ -231,7 +232,13 @@
     "durationColumn": "Duration",
     "manageColumn": "Manage",
     "noTracksMessage": "There's no tracks yet in this playlist!",
-    "emptyTracklist": "There's no tracks yet in this playlist!"
+    "emptyTracklist": "There's no tracks yet in this playlist!",
+    "delete": "Delete",
+    "edit": "Edit",
+    "listedArtists": "Listed artists",
+    "status": "Can be played without purchase?",
+    "statusPreview": "Preview",
+    "statusMustOwn": "Must own"
   },
   "mewTrack": {
     "newTrack": "New Track",

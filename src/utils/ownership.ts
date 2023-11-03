@@ -25,7 +25,7 @@ export const doesSubscriptionTierBelongToUser = async (
 export const doesTrackGroupBelongToUser = async (
   trackGroupId: number,
   userId: number
-): Promise<TrackGroup | null> => {
+) => {
   const artists = await prisma.artist.findMany({
     where: {
       userId: Number(userId),

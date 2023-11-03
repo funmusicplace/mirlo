@@ -1,6 +1,6 @@
 import React from "react";
 
-import { useForm } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import Button from "../common/Button";
 import { InputEl } from "../common/Input";
 import { SelectEl } from "../common/Select";
@@ -12,6 +12,8 @@ import api from "../../services/api";
 import { useGlobalStateContext } from "state/GlobalState";
 import useErrorHandler from "services/useErrorHandler";
 import { useTranslation } from "react-i18next";
+import useJobStatusCheck from "utils/useJobStatusCheck";
+import UploadImage from "./UploadImage";
 
 const AlbumForm: React.FC<{
   existing?: TrackGroup;
@@ -27,7 +29,7 @@ const AlbumForm: React.FC<{
   const [isSaving, setIsSaving] = React.useState(false);
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
 
-  const { register, handleSubmit } = useForm<{
+  const methods = useForm<{
     published: boolean;
     title: string;
     type: TrackGroup["type"];
@@ -44,6 +46,8 @@ const AlbumForm: React.FC<{
       published: false,
     },
   });
+  const { register, handleSubmit, reset } = methods;
+  const { uploadJobs, setUploadJobs } = useJobStatusCheck({ reload, reset });
 
   const existingId = existing?.id;
   const userId = user?.id;
@@ -62,18 +66,13 @@ const AlbumForm: React.FC<{
         try {
           setIsSaving(true);
           let savedId = existingId;
+          const sending = {
+            ...pick(data, ["title", "private", "type", "about"]),
+            minPrice: data.minPrice ? +data.minPrice * 100 : undefined,
+            releaseDate: new Date(data.releaseDate).toISOString(),
+          };
+
           if (existingId) {
-            const sending = {
-              ...pick(data, [
-                "title",
-                "private",
-                "type",
-                "releaseDate",
-                "about",
-              ]),
-              minPrice: data.minPrice ? +data.minPrice * 100 : undefined,
-              releaseDate: new Date(data.releaseDate).toISOString(),
-            };
             await api.put<Partial<TrackGroup>, TrackGroup>(
               `users/${userId}/trackGroups/${existingId}`,
               {
@@ -91,15 +90,7 @@ const AlbumForm: React.FC<{
               },
               { id: number }
             >(`users/${userId}/trackGroups`, {
-              ...pick(data, [
-                "title",
-                "private",
-                "type",
-                "releaseDate",
-                "about",
-                "minPrice",
-              ]),
-              minPrice: data.minPrice ? +data.minPrice * 100 : undefined,
+              ...sending,
               artistId: artist.id,
             });
             savedId = newGroup.id;
@@ -110,10 +101,13 @@ const AlbumForm: React.FC<{
             data.coverFile[0] &&
             typeof data.coverFile[0] !== "string"
           ) {
-            await api.uploadFile(
+            const jobInfo = await api.uploadFile(
               `users/${userId}/trackGroups/${savedId}/cover`,
               data.coverFile
             );
+            setUploadJobs([
+              { jobId: jobInfo.result.jobId, jobStatus: "waiting" },
+            ]);
           }
           snackbar("Trackgroup updated", { type: "success" });
           onClose?.();
@@ -125,66 +119,73 @@ const AlbumForm: React.FC<{
         }
       }
     },
-    [userId, existingId, snackbar, onClose, artist.id, errorHandler, reload]
+    [
+      userId,
+      existingId,
+      snackbar,
+      onClose,
+      artist.id,
+      setUploadJobs,
+      errorHandler,
+      reload,
+    ]
   );
 
   return (
-    <form onSubmit={handleSubmit(doSave)}>
-      {/* <FormComponent>
-        Display artist: <InputEl {...register("display_artist")} />
-      </FormComponent> */}
-      <FormComponent>
-        {t("title")}: <InputEl {...register("title")} />
-      </FormComponent>
-      <FormComponent
-        style={{
-          flexDirection: "column",
-          display: "flex",
-          alignItems: "flex-start",
-        }}
-      >
-        {t("cover")}:
-        {existing?.cover && (
-          <img src={existing.cover.sizes?.[120]} alt="album cover" />
-        )}
-      </FormComponent>
-      <FormComponent>
-        <InputEl
-          type="file"
-          id="image"
-          {...register("coverFile")}
-          accept="image/*"
-        />
-      </FormComponent>
-      <FormComponent>
-        {t("type")}:{" "}
-        <SelectEl defaultValue="lp" {...register("type")}>
-          <option value="lp">{t("lp")}</option>
-          <option value="ep">{t("ep")}</option>
-          <option value="single">{t("single")}</option>
-          <option value="compilation">{t("compilation")}</option>
-        </SelectEl>
-      </FormComponent>
+    <FormProvider {...methods}>
+      <form onSubmit={handleSubmit(doSave)}>
+        <FormComponent>
+          {t("title")}: <InputEl {...register("title")} />
+        </FormComponent>
+        <FormComponent
+          style={{
+            flexDirection: "column",
+            display: "flex",
+            alignItems: "flex-start",
+          }}
+        >
+          {t("cover")}:
+          <UploadImage
+            formName="coverFile"
+            existingCover={existing?.cover?.sizes?.[120]}
+            updatedAt={existing?.updatedAt}
+            isLoading={
+              uploadJobs?.[0]?.jobStatus !== undefined &&
+              uploadJobs?.[0]?.jobStatus !== "completed"
+            }
+          />
+        </FormComponent>
 
-      <FormComponent>
-        {t("releaseDate")}:{" "}
-        <InputEl type="date" {...register("releaseDate")} required />
-      </FormComponent>
-      <FormComponent>
-        {t("about")}: <TextArea {...register("about")} rows={7} />
-      </FormComponent>
-      <FormComponent>
-        {t("price")}:
-        <InputEl type="number" {...register("minPrice")} />
-      </FormComponent>
-      <Button type="submit" disabled={isSaving} isLoading={isSaving}>
-        {existing
-          ? existing.published
-            ? t("saveDraft")
-            : t("update")
-          : t("submitAlbum")}
-      </Button>
-    </form>
+        <FormComponent>
+          {t("type")}:{" "}
+          <SelectEl defaultValue="lp" {...register("type")}>
+            <option value="lp">{t("lp")}</option>
+            <option value="ep">{t("ep")}</option>
+            <option value="single">{t("single")}</option>
+            <option value="compilation">{t("compilation")}</option>
+          </SelectEl>
+        </FormComponent>
+
+        <FormComponent>
+          {t("releaseDate")}:{" "}
+          <InputEl type="date" {...register("releaseDate")} required />
+        </FormComponent>
+        <FormComponent>
+          {t("about")}: <TextArea {...register("about")} rows={7} />
+        </FormComponent>
+        <FormComponent>
+          {t("price")}:
+          <InputEl type="number" {...register("minPrice")} />
+        </FormComponent>
+        <Button type="submit" disabled={isSaving} isLoading={isSaving}>
+          {existing
+            ? existing.published
+              ? t("update")
+              : t("saveDraft")
+            : t("submitAlbum")}
+        </Button>
+      </form>
+    </FormProvider>
   );
 };
 

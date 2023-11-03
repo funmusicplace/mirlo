@@ -52,13 +52,17 @@ export default function () {
         return next();
       }
 
+      let jobId = null;
       // TODO: Remove prior files
       // FIXME: Only allow uploading of one file.
       if (req.files && isFileArray(req.files)) {
-        await processTrackGroupCover({ req, res })(req.files[0], trackGroupId);
+        jobId = await processTrackGroupCover({ req, res })(
+          req.files[0],
+          trackGroupId
+        );
       }
 
-      res.json({ message: "Success" });
+      res.json({ result: { jobId } });
     } catch (error) {
       console.error("Cover error", error);
       res.status(400).json({
