@@ -60,13 +60,28 @@ const ArtistTrackGroup: React.FC<{
             padding-top: 0.5rem;
           `}
         >
-          <Link
-            to={`/${artist?.urlSlug ?? artist?.id}/release/${
-              trackGroup.urlSlug ?? trackGroup.id
-            }`}
+          <div
+            className={css`
+              display: flex;
+              flex-direction: column;
+
+              a:first-child {
+                font-weight: bold;
+                margin-bottom: 0.4rem;
+              }
+            `}
           >
-            {trackGroup.title}
-          </Link>
+            <Link
+              to={`/${artist?.urlSlug ?? artist?.id}/release/${
+                trackGroup.urlSlug ?? trackGroup.id
+              }`}
+            >
+              {trackGroup.title}
+            </Link>
+            <Link to={`/${artist?.urlSlug ?? artist?.id}/`}>
+              {trackGroup.artist?.name}
+            </Link>
+          </div>
           <PurchaseOrDownloadAlbum trackGroup={trackGroup} />
         </div>
       </div>

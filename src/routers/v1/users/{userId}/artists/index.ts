@@ -15,6 +15,22 @@ type Params = {
   userId: string;
 };
 
+const forbiddenNames = [
+  "mirlo",
+  "admin",
+  "manage",
+  "profile",
+  "signup",
+  "about",
+  "pages",
+  "widget",
+  "post",
+  "login",
+  "password-reset",
+  "artists",
+  "releases",
+];
+
 export default function () {
   const operations = {
     GET: [userLoggedInWithoutRedirect, GET],
@@ -82,6 +98,14 @@ export default function () {
     const { name, bio, urlSlug } = req.body;
     const { userId } = req.params as unknown as Params;
     try {
+      if (forbiddenNames.includes(urlSlug)) {
+        res.status(400);
+        res.send({
+          error: `"urlSlug" can't be one of: ${forbiddenNames.join(", ")}`,
+        });
+        return next();
+      }
+
       const result = await prisma.artist.create({
         data: {
           name,
