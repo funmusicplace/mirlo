@@ -16,6 +16,7 @@ import { convertFileToBuffer } from "id3-parser/lib/util";
 import { BulkTrackUploadRow } from "./BulkTrackUploadRow";
 import Tooltip from "components/common/Tooltip";
 import { FaQuestionCircle } from "react-icons/fa";
+import useJobStatusCheck from "utils/useJobStatusCheck";
 
 export interface ShareableTrackgroup {
   creatorId: number;
@@ -86,9 +87,7 @@ export const BulkTrackUpload: React.FC<{
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const methods = useForm<FormData>();
   const { register, handleSubmit, watch, control, reset } = methods;
-  const [uploadJobs, setUploadJobs] = React.useState<
-    { jobId: string; jobStatus: string }[]
-  >([]);
+  const { uploadJobs, setUploadJobs } = useJobStatusCheck({ reload, reset });
   const { fields, replace } = useFieldArray({
     control,
     name: "tracks",
@@ -154,7 +153,7 @@ export const BulkTrackUpload: React.FC<{
         // await reload();
       }
     },
-    [userId, snackbar, trackgroup.artistId, trackgroup.id]
+    [userId, setUploadJobs, snackbar, trackgroup.artistId, trackgroup.id]
   );
 
   const processUploadedFiles = React.useCallback(
@@ -190,26 +189,6 @@ export const BulkTrackUpload: React.FC<{
   );
 
   React.useEffect(() => {
-    let timer: NodeJS.Timer | undefined;
-    if (uploadJobs.length > 0) {
-      timer = setInterval(async () => {
-        const result = await api.getMany<{ jobStatus: string; jobId: string }>(
-          `jobs?${uploadJobs.map((job) => `ids=${job.jobId}&`).join("")}`
-        );
-
-        if (result.results.some((r) => r.jobStatus !== "completed")) {
-          setUploadJobs(result.results);
-        } else {
-          setUploadJobs([]);
-          await reload();
-          reset();
-        }
-      }, 3000);
-    }
-    return () => clearInterval(timer);
-  }, [reload, uploadJobs, reset]);
-
-  React.useEffect(() => {
     processUploadedFiles(trackFiles);
   }, [processUploadedFiles, trackFiles]);
 
@@ -224,7 +203,8 @@ export const BulkTrackUpload: React.FC<{
         `}
       >
         <h4>{t("uploadTracks")}</h4>
-        {fields && (
+        <p>{t("uploadTracksDescription")}</p>
+        {fields.length > 0 && (
           <>
             {t("addTheFollowingTracks")}
             <Table

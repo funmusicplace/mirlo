@@ -5,6 +5,7 @@ import {
   contentBelongsToLoggedInUserArtist,
   userAuthenticated,
 } from "../../../../../../auth/passport";
+import processor from "../../../../../../utils/trackGroup";
 import { doesTrackGroupBelongToUser } from "../../../../../../utils/ownership";
 import prisma from "../../../../../../../prisma/prisma";
 import { deleteTrackGroup } from "../../../../../../utils/trackGroup";
@@ -19,7 +20,7 @@ export default function () {
   const operations = {
     PUT: [userAuthenticated, contentBelongsToLoggedInUserArtist, PUT],
     DELETE: [userAuthenticated, contentBelongsToLoggedInUserArtist, DELETE],
-    GET,
+    GET: [userAuthenticated, GET],
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
@@ -38,7 +39,7 @@ export default function () {
         return next();
       }
 
-      res.status(200).json({ result: trackgroup });
+      res.status(200).json({ result: processor.single(trackgroup) });
     } catch (e) {
       logger.error(e);
       res.status(500).json({

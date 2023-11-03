@@ -46,6 +46,7 @@ interface TrackGroup {
   artist?: Artist;
   artistId: number;
   tracks: Track[];
+  updatedAt: string;
   cover?: { id: number; url: string; sizes?: { [key: number]: string } };
   minPrice?: number; // in cents
   urlSlug?: string;

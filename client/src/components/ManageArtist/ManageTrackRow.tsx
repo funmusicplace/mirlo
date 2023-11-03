@@ -10,6 +10,7 @@ import { useSnackbar } from "state/SnackbarContext";
 import { InputEl } from "../common/Input";
 import { fmtMSS } from "utils/tracks";
 import TrackRowPlayControl from "components/common/TrackRowPlayControl";
+import { useTranslation } from "react-i18next";
 
 const ManageTrackRow: React.FC<{
   track: Track;
@@ -17,6 +18,10 @@ const ManageTrackRow: React.FC<{
   reload: () => Promise<void>;
   handleDrop: (val: React.DragEvent<HTMLTableRowElement>) => void;
 }> = ({ track, addTracksToQueue, reload, handleDrop }) => {
+  const { t } = useTranslation("translation", {
+    keyPrefix: "manageTrackTable",
+  });
+
   const snackbar = useSnackbar();
   const [isEditingTitle, setIsEditingTitle] = React.useState(false);
   const [trackTitle, setTrackTitle] = React.useState(track.title);
@@ -98,7 +103,13 @@ const ManageTrackRow: React.FC<{
           />
         )}
       </td>
-      <td>{track.audio?.duration && fmtMSS(track.audio?.duration)}</td>
+      <td>
+        {track.trackArtists?.map((artist) => artist.artistName).join(", ")}
+      </td>
+      <td>{t(track.isPreview ? "statusPreview" : "statusMustOwn")}</td>
+      <td className="alignRight">
+        {track.audio?.duration && fmtMSS(track.audio?.duration)}
+      </td>
       <td className="alignRight">
         {isEditingTitle && (
           <IconButton onClick={updateTrackTitle} title="Delete">
@@ -110,12 +121,16 @@ const ManageTrackRow: React.FC<{
             <IconButton
               compact
               onClick={() => setIsEditingTitle(true)}
-              title="Delete"
+              title={t("edit") ?? ""}
               style={{ marginRight: "1rem" }}
             >
               <FaPen />
             </IconButton>
-            <IconButton compact onClick={onDeleteClick} title="Delete">
+            <IconButton
+              compact
+              onClick={onDeleteClick}
+              title={t("delete") ?? ""}
+            >
               <FaTrash />
             </IconButton>
           </>
