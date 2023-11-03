@@ -107,6 +107,16 @@ const router = createBrowserRouter([
         ),
       },
       {
+        path: "manage/artists/:artistId/new-release",
+        element: (
+          <AuthWrapper>
+            <ArtistProvider managedArtist>
+              <ManageTrackGroup />
+            </ArtistProvider>
+          </AuthWrapper>
+        ),
+      },
+      {
         path: "admin",
         element: (
           <AuthWrapper>

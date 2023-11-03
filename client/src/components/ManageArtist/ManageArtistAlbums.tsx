@@ -1,14 +1,13 @@
 import { css } from "@emotion/css";
 import Button from "components/common/Button";
 import React from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import api from "services/api";
 import { useGlobalStateContext } from "state/GlobalState";
 import ManageAlbumForm from "./ManageAlbumForm";
 import NewAlbumForm from "./NewAlbumForm";
 import TrackGroupCard from "./TrackGroupCard";
 import { useTranslation } from "react-i18next";
-import { MdAdd } from "react-icons/md";
 
 const ManageArtistAlbums: React.FC<{}> = () => {
   const {
@@ -63,15 +62,11 @@ const ManageArtistAlbums: React.FC<{}> = () => {
       >
         <h2>{t("yourAlbums")}</h2>
 
-        <Button
-          onClick={() => {
-            setAddingNewAlbum(true);
-          }}
-          startIcon={<MdAdd />}
-          compact
-        >
-          {t("addNewAlbum", { artistName: artist.name })}
-        </Button>
+        <Link to="new-release">
+          <Button compact>
+            {t("addNewAlbum", { artistName: artist.name })}
+          </Button>
+        </Link>
       </div>
       {trackGroups.length > 0 && (
         <div

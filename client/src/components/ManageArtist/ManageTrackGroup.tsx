@@ -31,7 +31,9 @@ const ManageTrackGroup: React.FC<{}> = () => {
     `?artistId=${artistId}`
   );
 
-  if (!trackGroup || !artist) {
+  console.log("trackGroup", trackGroup);
+
+  if (!artist) {
     return null;
   }
 
@@ -48,15 +50,17 @@ const ManageTrackGroup: React.FC<{}> = () => {
           justify-content: space-between;
         `}
       >
-        <h1>{t("editAlbum")}</h1>
-        <Link
-          to={`/${artist.urlSlug?.toLowerCase()}/release/${trackGroup.urlSlug?.toLowerCase()}`}
-        >
-          <Button compact>{t("view")}</Button>
-        </Link>
+        <h1>{t(trackGroup ? "editAlbum" : "createAlbum")}</h1>
+        {trackGroup && (
+          <Link
+            to={`/${artist.urlSlug?.toLowerCase()}/release/${trackGroup.urlSlug?.toLowerCase()}`}
+          >
+            <Button compact>{t("view")}</Button>
+          </Link>
+        )}
       </div>
       <AlbumForm existing={trackGroup} reload={reload} artist={artist} />
-      {trackGroup.tracks?.length > 0 && (
+      {trackGroup && trackGroup?.tracks?.length > 0 && (
         <ManageTrackTable
           tracks={trackGroup.tracks}
           editable
@@ -65,10 +69,12 @@ const ManageTrackGroup: React.FC<{}> = () => {
           reload={reload}
         />
       )}
-      {trackGroup.tracks?.length > 0 && (
+      {trackGroup && trackGroup.tracks?.length > 0 && (
         <PublishButton trackGroup={trackGroup} reload={reload} />
       )}
-      <BulkTrackUpload trackgroup={trackGroup} reload={reload} />
+      {trackGroup && (
+        <BulkTrackUpload trackgroup={trackGroup} reload={reload} />
+      )}
     </div>
   );
 };

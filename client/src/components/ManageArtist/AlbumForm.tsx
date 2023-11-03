@@ -14,6 +14,7 @@ import useErrorHandler from "services/useErrorHandler";
 import { useTranslation } from "react-i18next";
 import useJobStatusCheck from "utils/useJobStatusCheck";
 import UploadImage from "./UploadImage";
+import { useNavigate } from "react-router-dom";
 
 const AlbumForm: React.FC<{
   existing?: TrackGroup;
@@ -48,7 +49,8 @@ const AlbumForm: React.FC<{
   });
   const { register, handleSubmit, reset } = methods;
   const { uploadJobs, setUploadJobs } = useJobStatusCheck({ reload, reset });
-
+  const navigate = useNavigate();
+  const [newAlbumId, setNewAlbumId] = React.useState<number>();
   const existingId = existing?.id;
   const userId = user?.id;
 
@@ -88,12 +90,14 @@ const AlbumForm: React.FC<{
                 cover?: File[];
                 minPrice?: number;
               },
-              { id: number }
+              { trackGroup: { id: number } }
             >(`users/${userId}/trackGroups`, {
               ...sending,
               artistId: artist.id,
             });
-            savedId = newGroup.id;
+            console.log("new", newGroup.trackGroup);
+            savedId = newGroup.trackGroup.id;
+            setNewAlbumId(savedId);
           }
           // data cover is a string if the form hasn't been changed.
           if (
@@ -109,7 +113,12 @@ const AlbumForm: React.FC<{
               { jobId: jobInfo.result.jobId, jobStatus: "waiting" },
             ]);
           }
-          snackbar("Trackgroup updated", { type: "success" });
+          snackbar(
+            existingId ? t("trackGroupUpdated") : t("trackGroupCreated"),
+            {
+              type: "success",
+            }
+          );
           onClose?.();
         } catch (e) {
           errorHandler(e);
@@ -120,6 +129,7 @@ const AlbumForm: React.FC<{
       }
     },
     [
+      t,
       userId,
       existingId,
       snackbar,
@@ -130,6 +140,15 @@ const AlbumForm: React.FC<{
       reload,
     ]
   );
+  console.log("uplooadJobs", uploadJobs, isSaving);
+  const isDisabled = isSaving || (uploadJobs && uploadJobs.length > 0);
+
+  React.useEffect(() => {
+    if (uploadJobs && uploadJobs.length === 0 && newAlbumId) {
+      navigate(`/manage/artists/${artist.id}/release/${newAlbumId}`);
+      reload();
+    }
+  }, [artist.id, navigate, newAlbumId, reload, uploadJobs]);
 
   return (
     <FormProvider {...methods}>
@@ -177,7 +196,7 @@ const AlbumForm: React.FC<{
           {t("price")}:
           <InputEl type="number" {...register("minPrice")} />
         </FormComponent>
-        <Button type="submit" disabled={isSaving} isLoading={isSaving}>
+        <Button type="submit" disabled={isDisabled} isLoading={isDisabled}>
           {existing
             ? existing.published
               ? t("update")

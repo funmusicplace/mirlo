@@ -45,6 +45,7 @@ function Login() {
     <div
       className={css`
         text-align: center;
+        margin: 0 auto;
       `}
     >
       <form
