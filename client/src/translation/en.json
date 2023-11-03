@@ -9,6 +9,9 @@
     "success": "Registration success!",
     "logIn": "Alrieady have an account? Log in"
   },
+  "releases": {
+    "recentReleases": "Recent releases"
+  },
   "about": {
     "about": "About",
     "intro": "Mirlo provides a user-friendly space to help musicians sell music, manage subscriptions, and share with their supporters.",
@@ -154,7 +157,9 @@
     "saveDraft": "Save draft",
     "createAlbum": "Create album",
     "update": "Update",
-    "makePrivate": "Make private"
+    "makePrivate": "Make private",
+    "trackGroupUpdated": "Album updated",
+    "trackGroupCreated": "Album created"
   },
   "artistForm": {
     "displayName": "Display name",

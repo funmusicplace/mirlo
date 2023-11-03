@@ -7,6 +7,7 @@ import Box from "./common/Box";
 import PostContent from "./common/PostContent";
 import Logo from "./common/Logo";
 import { Trans, useTranslation } from "react-i18next";
+import Releases from "./Releases";
 
 function Home() {
   const {
@@ -205,6 +206,7 @@ function Home() {
           </div>
         </div>
       )}
+      <Releases />
       {user && posts.length > 0 && (
         <>
           <h2
