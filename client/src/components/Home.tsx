@@ -206,7 +206,7 @@ function Home() {
           </div>
         </div>
       )}
-      <Releases />
+      {user && <Releases />}
       {user && posts.length > 0 && (
         <>
           <h2
