@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import prisma from "../../../../prisma/prisma";
+import processor from "../../../utils/trackGroup";
 
 export default function () {
   const operations = {
@@ -15,12 +16,14 @@ export default function () {
         artist: {
           select: {
             name: true,
+            urlSlug: true,
             id: true,
           },
         },
+        cover: true,
       },
     });
-    res.json({ results: trackGroups });
+    res.json({ results: trackGroups.map(processor.single) });
   }
 
   GET.apiDoc = {

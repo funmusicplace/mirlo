@@ -29,7 +29,7 @@ export const createUser = async (data: Prisma.UserCreateArgs["data"]) => {
 
 export const createArtist = async (
   userId: number,
-  data?: Prisma.ArtistCreateArgs["data"]
+  data?: Partial<Prisma.ArtistCreateArgs["data"]>
 ) => {
   const artist = await prisma.artist.create({
     data: {
@@ -37,6 +37,21 @@ export const createArtist = async (
       urlSlug: data?.urlSlug ?? "test-artist",
       userId: userId,
       enabled: data?.enabled ?? true,
+    },
+  });
+  return artist;
+};
+
+export const createTrackGroup = async (
+  artistId: number,
+  data?: Partial<Prisma.TrackGroupCreateArgs["data"]>
+) => {
+  const artist = await prisma.trackGroup.create({
+    data: {
+      title: data?.title ?? "Test artist",
+      urlSlug: data?.urlSlug ?? "test-artist",
+      artistId: artistId,
+      published: data?.published ?? true,
     },
   });
   return artist;

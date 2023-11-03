@@ -35,6 +35,7 @@ import Signup from "components/Signup";
 import { ArtistProvider } from "state/ArtistContext";
 import FAQ from "components/FAQ";
 import ManageTrackGroup from "components/ManageArtist/ManageTrackGroup";
+import Releases from "components/Releases";
 
 const router = createBrowserRouter([
   {
@@ -43,8 +44,8 @@ const router = createBrowserRouter([
     errorElement: <ErrorPage />,
     children: [
       { path: "", element: <Home /> },
-      { path: "about", element: <About /> },
-      { path: "faq", element: <FAQ /> },
+      { path: "pages/about", element: <About /> },
+      { path: "pages/faq", element: <FAQ /> },
 
       { path: "widget/track/:id", element: <TrackWidget /> },
       { path: "widget/trackgroup/:id", element: <TrackGroupWidget /> },
@@ -138,6 +139,10 @@ const router = createBrowserRouter([
             ),
           },
         ],
+      },
+      {
+        path: "releases",
+        element: <Releases />,
       },
       {
         path: ":artistId",
