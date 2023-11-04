@@ -95,7 +95,6 @@ const AlbumForm: React.FC<{
               ...sending,
               artistId: artist.id,
             });
-            console.log("new", newGroup.trackGroup);
             savedId = newGroup.trackGroup.id;
             setNewAlbumId(savedId);
           }
@@ -140,7 +139,6 @@ const AlbumForm: React.FC<{
       reload,
     ]
   );
-  console.log("uplooadJobs", uploadJobs, isSaving);
   const isDisabled = isSaving || (uploadJobs && uploadJobs.length > 0);
 
   React.useEffect(() => {

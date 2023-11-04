@@ -11,6 +11,7 @@ import {
   incomingAudioBucket,
   minioClient,
 } from "../../../../../../utils/minio";
+import { deleteTrack } from "../../../../../../utils/tracks";
 
 export default function () {
   const operations = {
@@ -102,36 +103,7 @@ export default function () {
     }
 
     try {
-      await prisma.track.delete({
-        where: {
-          id: trackId,
-        },
-      });
-
-      const audio = await prisma.trackAudio.findFirst({
-        where: {
-          trackId: trackId,
-        },
-      });
-      if (audio) {
-        const objects = await getObjectList(finalAudioBucket, audio.id);
-
-        await minioClient.removeObjects(
-          finalAudioBucket,
-          objects.map((o) => o.name)
-        );
-        await prisma.trackAudio.delete({
-          where: {
-            trackId: trackId,
-          },
-        });
-      }
-
-      await prisma.trackArtist.deleteMany({
-        where: {
-          trackId: trackId,
-        },
-      });
+      await deleteTrack(trackId);
 
       res.json({ message: "Success" });
     } catch (e) {

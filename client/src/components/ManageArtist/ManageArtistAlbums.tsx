@@ -4,8 +4,6 @@ import React from "react";
 import { Link, useParams } from "react-router-dom";
 import api from "services/api";
 import { useGlobalStateContext } from "state/GlobalState";
-import ManageAlbumForm from "./ManageAlbumForm";
-import NewAlbumForm from "./NewAlbumForm";
 import TrackGroupCard from "./TrackGroupCard";
 import { useTranslation } from "react-i18next";
 
@@ -16,8 +14,6 @@ const ManageArtistAlbums: React.FC<{}> = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
   const { artistId } = useParams();
   const [artist, setArtist] = React.useState<Artist>();
-  const [manageTrackgroup, setManageTrackgroup] = React.useState<TrackGroup>();
-  const [addingNewAlbum, setAddingNewAlbum] = React.useState(false);
 
   const [trackGroups, setTrackGroups] = React.useState<TrackGroup[]>([]);
 
@@ -75,30 +71,14 @@ const ManageArtistAlbums: React.FC<{}> = () => {
           `}
         >
           {trackGroups?.map((album) => (
-            <TrackGroupCard album={album} key={album.id} />
+            <TrackGroupCard
+              album={album}
+              key={album.id}
+              reload={fetchTrackGroups}
+            />
           ))}
         </div>
       )}
-      {manageTrackgroup && (
-        <ManageAlbumForm
-          open={!!manageTrackgroup}
-          trackgroup={manageTrackgroup}
-          onClose={() => setManageTrackgroup(undefined)}
-          reload={() => {
-            return fetchTrackGroups();
-          }}
-          artist={artist}
-        />
-      )}
-
-      <NewAlbumForm
-        open={addingNewAlbum}
-        onClose={() => setAddingNewAlbum(false)}
-        reload={() => {
-          return fetchTrackGroups();
-        }}
-        artist={artist}
-      />
     </div>
   );
 };

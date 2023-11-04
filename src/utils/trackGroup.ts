@@ -6,6 +6,7 @@ import { findArtistIdForURLSlug } from "./artist";
 import { logger } from "../logger";
 import fs from "fs";
 import archiver from "archiver";
+import { deleteTrack } from "./tracks";
 
 const { MEDIA_LOCATION_DOWNLOAD_CACHE = "" } = process.env;
 /**
@@ -28,27 +29,11 @@ export const deleteTrackGroup = async (trackGroupId: number) => {
     },
   });
 
-  await prisma.track.deleteMany({
-    where: {
-      trackGroupId: Number(trackGroupId),
-    },
-  });
-
-  await prisma.track.deleteMany({
-    where: {
-      trackGroupId: Number(trackGroupId),
-    },
-  });
+  await Promise.all(tracks.map(async (track) => await deleteTrack(track.id)));
 
   await prisma.trackGroupCover.deleteMany({
     where: {
       trackGroupId: Number(trackGroupId),
-    },
-  });
-
-  await prisma.trackAudio.deleteMany({
-    where: {
-      trackId: { in: tracks.map((t) => t.id) },
     },
   });
 };

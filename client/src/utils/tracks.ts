@@ -1,5 +1,4 @@
 import produce from "immer";
-// import { API, getToken } from "../services/Api";
 
 export function buildHLSURL(id: number, loggedInUser: boolean): string {
   // We assume we're using full OIDC

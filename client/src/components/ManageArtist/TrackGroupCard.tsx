@@ -4,14 +4,44 @@ import Button from "components/common/Button";
 import ClickToPlay from "components/common/ClickToPlay";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { FaCheck, FaTimes } from "react-icons/fa";
+import { FaCheck, FaTimes, FaTrash } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import api from "services/api";
+import { useGlobalStateContext } from "state/GlobalState";
+import { useSnackbar } from "state/SnackbarContext";
 
 const TrackGroupCard: React.FC<{
   album: TrackGroup;
-}> = ({ album }) => {
+  reload: () => Promise<void>;
+}> = ({ album, reload }) => {
+  const {
+    state: { user },
+  } = useGlobalStateContext();
+  const snackbar = useSnackbar();
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
-  const { t: trackGroupCardTranslation } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
+  const { t: trackGroupCardTranslation } = useTranslation("translation", {
+    keyPrefix: "trackGroupCard",
+  });
+
+  const userId = user?.id;
+  const releaseDate = new Date(album.releaseDate);
+  const currentDate = new Date();
+
+  const deleteTrackGroup = React.useCallback(async () => {
+    try {
+      const confirmed = window.confirm(t("deleteTrackGroupConfirm") ?? "");
+      if (confirmed) {
+        await api.delete(`users/${userId}/trackGroups/${album.id}`);
+        snackbar(t("albumDeleted"), { type: "success" });
+      }
+    } catch (e) {
+      console.error(e);
+      snackbar(t("somethingWentWrong"), { type: "warning" });
+    } finally {
+      reload?.();
+    }
+  }, [t, userId, album.id, snackbar, reload]);
+
   return (
     <Box
       key={album.id}
@@ -54,9 +84,13 @@ const TrackGroupCard: React.FC<{
           <strong>{trackGroupCardTranslation("title")} </strong>
           {album.title}
         </div>
-        <div>{trackGroupCardTranslation("published")} {album.published ? <FaCheck /> : <FaTimes />}</div>
         <div>
-          <strong>{trackGroupCardTranslation("tracks")}</strong> {album.tracks.length}
+          {trackGroupCardTranslation("published")}{" "}
+          {album.published ? <FaCheck /> : <FaTimes />}
+        </div>
+        <div>
+          <strong>{trackGroupCardTranslation("tracks")}</strong>{" "}
+          {album.tracks.length}
         </div>
         <div>
           <strong>{trackGroupCardTranslation("releaseDate")} </strong>
@@ -70,12 +104,18 @@ const TrackGroupCard: React.FC<{
             justify-content: flex-end !important;
             text-align: right;
             margin-top: 0.5rem;
+
+            & > * {
+              margin-right: 1rem;
+            }
+
+            & > :last-child {
+              margin-right: 0;
+            }
           `}
         >
           <Link to={`/manage/artists/${album.artistId}/release/${album.id}`}>
-            <Button compact style={{ marginRight: "1rem" }}>
-              {t("manageAlbum")}
-            </Button>
+            <Button compact>{t("manageAlbum")}</Button>
           </Link>
           {album.published && (
             <Link
@@ -85,6 +125,11 @@ const TrackGroupCard: React.FC<{
             >
               <Button compact>{t("viewLive")}</Button>
             </Link>
+          )}
+          {!album.published && releaseDate > currentDate && (
+            <Button compact startIcon={<FaTrash />} onClick={deleteTrackGroup}>
+              {t("delete")}
+            </Button>
           )}
         </div>
       </div>

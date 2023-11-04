@@ -31,8 +31,6 @@ const ManageTrackGroup: React.FC<{}> = () => {
     `?artistId=${artistId}`
   );
 
-  console.log("trackGroup", trackGroup);
-
   if (!artist) {
     return null;
   }
