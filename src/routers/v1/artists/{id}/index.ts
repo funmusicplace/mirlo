@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { Post, User } from "@prisma/client";
 
 import trackGroupProcessor from "../../../../utils/trackGroup";
@@ -22,7 +22,7 @@ export default function () {
     GET: [userLoggedInWithoutRedirect, GET],
   };
 
-  async function GET(req: Request, res: Response) {
+  async function GET(req: Request, res: Response, next: NextFunction) {
     let { id }: { id?: string } = req.params;
     const user = req.user as User;
     if (!id || id === "undefined") {
@@ -75,7 +75,7 @@ export default function () {
 
       if (!artist) {
         res.status(404);
-        return;
+        return next();
       }
 
       res.json({
