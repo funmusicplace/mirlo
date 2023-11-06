@@ -302,6 +302,7 @@ export const BulkTrackUpload: React.FC<{
                       <FaQuestionCircle />
                     </Tooltip>
                   </th>
+                  <th className="alignRight">{t("duration")}</th>
                   <th>
                     {t("status")}{" "}
                     <Tooltip hoverText={t("statusHelp")}>
