@@ -125,12 +125,14 @@ const CustomButton = styled.button<Compactable>`
     margin-top: 0.1rem;
     margin-right: 0.5rem;
     line-height: 0.785rem;
+    font-size: 0.785rem;
   }
 
   & .endIcon:not(.collapsed) {
     margin-top: 0.1rem;
     margin-left: 0.5rem;
     line-height: 0.785rem;
+    font-size: 0.785rem;
   }
 `;
 

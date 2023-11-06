@@ -110,7 +110,6 @@ const Player = () => {
 
   React.useEffect(() => {
     if (currentTrack) {
-      console.log("currentTrack", currentTrack);
       if ("mediaSession" in navigator) {
         navigator.mediaSession.metadata = new MediaMetadata({
           title: currentTrack.title,

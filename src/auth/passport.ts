@@ -6,6 +6,7 @@ import passport from "passport";
 import passportJWT from "passport-jwt";
 import prisma from "../../prisma/prisma";
 import { findArtistIdForURLSlug } from "../utils/artist";
+import { findTrackGroupIdForSlug } from "../utils/trackGroup";
 
 const JWTStrategy = passportJWT.Strategy;
 
@@ -144,6 +145,47 @@ export const artistBelongsToLoggedInUser = async (
   return next();
 };
 
+export const trackGroupBelongsToLoggedInUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { userId, trackGroupId } = req.params as unknown as {
+    userId: string;
+    trackGroupId: string;
+  };
+
+  const loggedInUser = req.user as User | undefined;
+
+  if (!loggedInUser) {
+    res.status(401).json({ error: "Unauthorized" });
+  } else {
+    if (loggedInUser.id !== Number(userId)) {
+      res.status(400).json({
+        error: `TrackGroup must belong to user`,
+      });
+      return next(`TrackGroup must belong to user`);
+    }
+
+    const trackGroup = await prisma.trackGroup.findFirstOrThrow({
+      where: {
+        artist: {
+          userId: loggedInUser.id,
+        },
+        id: Number(trackGroupId),
+      },
+    });
+
+    if (!trackGroup) {
+      res.status(400).json({
+        error: "TrackGroup must belong to user",
+      });
+      return next("TrackGroup must belong to user");
+    }
+  }
+  return next();
+};
+
 export const contentBelongsToLoggedInUserArtist = async (
   req: Request,
   res: Response,
@@ -153,6 +195,7 @@ export const contentBelongsToLoggedInUserArtist = async (
   const data = req.body;
 
   const artistId = data.artistId ?? req.params.artistId;
+
   const loggedInUser = req.user as User | undefined;
 
   if (!loggedInUser) {

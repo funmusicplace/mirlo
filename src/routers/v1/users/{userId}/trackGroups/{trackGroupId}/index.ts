@@ -3,6 +3,7 @@ import { NextFunction, Request, Response } from "express";
 import { pick } from "lodash";
 import {
   contentBelongsToLoggedInUserArtist,
+  trackGroupBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../../auth/passport";
 import processor from "../../../../../../utils/trackGroup";
@@ -19,13 +20,12 @@ type Params = {
 export default function () {
   const operations = {
     PUT: [userAuthenticated, contentBelongsToLoggedInUserArtist, PUT],
-    DELETE: [userAuthenticated, contentBelongsToLoggedInUserArtist, DELETE],
-    GET: [userAuthenticated, GET],
+    DELETE: [userAuthenticated, trackGroupBelongsToLoggedInUser, DELETE],
+    GET: [userAuthenticated, trackGroupBelongsToLoggedInUser, GET],
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { userId, trackGroupId } = req.params as unknown as Params;
-
     try {
       const trackgroup = await doesTrackGroupBelongToUser(
         Number(trackGroupId),
@@ -121,9 +121,24 @@ export default function () {
     },
   };
 
-  async function DELETE(req: Request, res: Response) {
-    const { trackGroupId } = req.params as { trackGroupId: string };
+  async function DELETE(req: Request, res: Response, next: NextFunction) {
+    const { trackGroupId, userId } = req.params as {
+      trackGroupId: string;
+      userId: string;
+    };
     try {
+      const trackgroup = await doesTrackGroupBelongToUser(
+        Number(trackGroupId),
+        Number(userId)
+      );
+
+      if (!trackgroup) {
+        res.status(400).json({
+          error: "Trackgroup must belong to user",
+        });
+        return next();
+      }
+
       await deleteTrackGroup(Number(trackGroupId));
 
       res.json({ message: "Success" });
