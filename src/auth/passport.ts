@@ -6,7 +6,6 @@ import passport from "passport";
 import passportJWT from "passport-jwt";
 import prisma from "../../prisma/prisma";
 import { findArtistIdForURLSlug } from "../utils/artist";
-import { findTrackGroupIdForSlug } from "../utils/trackGroup";
 
 const JWTStrategy = passportJWT.Strategy;
 

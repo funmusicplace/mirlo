@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { User } from "@prisma/client";
+import { Post, User } from "@prisma/client";
 
 import trackGroupProcessor from "../../../../utils/trackGroup";
 import postProcessor from "../../../../utils/post";
@@ -29,46 +29,49 @@ export default function () {
       return res.status(400);
     }
     try {
-      id = await findArtistIdForURLSlug(id);
+      const parsedId = await findArtistIdForURLSlug(id);
       const isUserSubscriber = await checkIsUserSubscriber(user, Number(id));
 
-      const artist = await prisma.artist.findFirst({
-        where: {
-          id: Number(id),
-          enabled: true,
-        },
-        include: {
-          trackGroups: {
-            where: {
-              published: true,
-              releaseDate: {
-                lte: new Date(),
+      let artist: any;
+      if (parsedId) {
+        artist = await prisma.artist.findFirst({
+          where: {
+            id: parsedId,
+            enabled: true,
+          },
+          include: {
+            trackGroups: {
+              where: {
+                published: true,
+                releaseDate: {
+                  lte: new Date(),
+                },
+              },
+              include: {
+                tracks: {
+                  where: { deletedAt: null },
+                },
+                cover: true,
               },
             },
-            include: {
-              tracks: {
-                where: { deletedAt: null },
+            banner: true,
+            avatar: true,
+            subscriptionTiers: {
+              where: {
+                deletedAt: null,
               },
-              cover: true,
             },
-          },
-          banner: true,
-          avatar: true,
-          subscriptionTiers: {
-            where: {
-              deletedAt: null,
-            },
-          },
-          posts: {
-            where: {
-              publishedAt: {
-                lte: new Date(),
+            posts: {
+              where: {
+                publishedAt: {
+                  lte: new Date(),
+                },
+                deletedAt: null,
               },
-              deletedAt: null,
             },
           },
-        },
-      });
+        });
+      }
 
       if (!artist) {
         res.status(404);
@@ -78,7 +81,7 @@ export default function () {
       res.json({
         result: {
           ...artist,
-          posts: artist?.posts.map((p) =>
+          posts: artist?.posts.map((p: Post) =>
             postProcessor.single(
               p,
               isUserSubscriber || artist.userId === user?.id
@@ -106,7 +109,7 @@ export default function () {
         },
       });
     } catch (e) {
-      console.error("artist/{id}", e);
+      console.error(`artist/${id}`, e);
       res.status(500);
     }
   }

@@ -30,7 +30,10 @@ export const findArtistIdForURLSlug = async (id: string) => {
     });
     id = `${artist?.id ?? id}`;
   }
-  return id;
+  if (Number.isNaN(Number(id))) {
+    return undefined;
+  }
+  return Number(id);
 };
 
 export const deleteArtist = async (userId: number, artistId: number) => {
