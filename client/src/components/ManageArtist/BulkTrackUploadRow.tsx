@@ -51,6 +51,7 @@ export const BulkTrackUploadRow: React.FC<{
           )}
         </td>
         <td>
+          <InputEl {...register(`tracks.${index}.order`)} />
           <InputEl {...register(`tracks.${index}.title`)} />
         </td>
         <td>

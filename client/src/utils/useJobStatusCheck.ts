@@ -27,7 +27,7 @@ const useJobStatusCheck = ({
           await reload();
           reset?.();
         }
-      }, 3000);
+      }, 5000);
     }
     return () => clearInterval(timer);
   }, [reload, uploadJobs, reset]);
