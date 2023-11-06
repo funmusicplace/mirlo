@@ -37,7 +37,7 @@ export default function () {
         data: {
           bio,
           name,
-          urlSlug: urlSlug.toLowerCase(),
+          ...(urlSlug ? { urlSlug: urlSlug?.toLowerCase() } : {}),
           properties,
         },
       });
@@ -53,7 +53,8 @@ export default function () {
         });
       }
     } catch (error) {
-      res.json({
+      console.error(`users/${userId}/artists/${artistId}`, error);
+      res.status(500).json({
         error: `Artist with ID ${artistId} does not exist for user ${userId}`,
       });
     }

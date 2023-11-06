@@ -30,8 +30,7 @@ export default function () {
     }
     try {
       const parsedId = await findArtistIdForURLSlug(id);
-      const isUserSubscriber = await checkIsUserSubscriber(user, Number(id));
-
+      let isUserSubscriber = false;
       let artist: any;
       if (parsedId) {
         artist = await prisma.artist.findFirst({
@@ -71,6 +70,7 @@ export default function () {
             },
           },
         });
+        isUserSubscriber = await checkIsUserSubscriber(user, parsedId);
       }
 
       if (!artist) {
