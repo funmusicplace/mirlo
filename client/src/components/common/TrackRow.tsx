@@ -1,6 +1,6 @@
 import { css } from "@emotion/css";
 import React from "react";
-import { FaLink } from "react-icons/fa";
+import { FiLink } from "react-icons/fi";
 import { useGlobalStateContext } from "state/GlobalState";
 
 import IconButton from "./IconButton";
@@ -29,9 +29,14 @@ const TrackRow: React.FC<{
       className={css`
         ${!canPlayTrack ? `color: var(--mi-light-foreground-color);` : ""}
 
+        button, button:hover {
+          color: var(--mi-normal-foreground-color);
+          background: transparent;
+        }
+
         font-size: 18px;
 
-        @media screen and (max-width: ${bp.medium}px) {
+        @media screen and (max-width: ${bp.small}px) {
           font-size: 16px;
           td {
             padding: 0.15rem 0.3rem;
@@ -39,7 +44,7 @@ const TrackRow: React.FC<{
         }
 
         button {
-          font-size: 16px;
+          font-size: 14px;
         }
 
         > td > .play-button {
@@ -58,7 +63,12 @@ const TrackRow: React.FC<{
     >
       <td
         className={css`
-          width: 30px;
+          height: 30px;
+          button {
+            //* padding: .5rem;
+            background: none;
+          }
+          }
         `}
       >
         {canPlayTrack && (
@@ -70,28 +80,57 @@ const TrackRow: React.FC<{
         )}
       </td>
       <td
-        className={css`
-          max-width: 100px;
-          width: 40%;
+      className={css`
+        width:100%;
+        padding: 0rem;
+        margin: 0rem;
+      `}
+        >
+      <div
+      className={css`
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        padding: .1rem;
+        margin-bottom: .05rem;
+        justify-content: space-between;
+        align-items: center;
+
+        @media screen and (max-width: ${bp.small}px) {
+        flex-wrap: nowrap;
+        }
+      `}
+        >
+      <td
+       className={css`
           overflow: hidden;
-          white-space: nowrap;
           text-overflow: ellipsis;
+          @media screen and (max-width: ${bp.medium}px) {
+            font-size: .8rem;
+          }
+
+          @media screen and (max-width: ${bp.small}px) {
+              td {
+                padding: 0.15rem 0.3rem;
+              }
         `}
       >
         {trackTitle}
       </td>
       <td
-        className={css`
-          max-width: 100px;
-          width: 40%;
-          overflow: hidden;
-          white-space: nowrap;
-          text-overflow: ellipsis;
-        `}
-      >
-        {trackGroup.artist?.name}
+      className={css`
+          font-size: .9rem;
+        @media screen and (max-width: ${bp.medium}px) {
+          font-size: .7rem;
+          font-weight: bold;
+          td {
+            padding: 0.15rem 0.3rem;
+          }
+        }
+      `}
+        >{track.audio?.duration && fmtMSS(track.audio.duration)}</td>
+      </div>
       </td>
-      <td>{track.audio?.duration && fmtMSS(track.audio.duration)}</td>
       <td align="right">
         <IconButton
           compact
@@ -100,7 +139,7 @@ const TrackRow: React.FC<{
             snackbar("Copied track url", { type: "success" });
           }}
         >
-          <FaLink />
+          <FiLink />
         </IconButton>
       </td>
     </tr>

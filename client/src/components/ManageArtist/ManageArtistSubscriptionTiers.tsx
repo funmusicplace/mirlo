@@ -4,6 +4,7 @@ import Modal from "components/common/Modal";
 import React from "react";
 import { useParams } from "react-router-dom";
 import api from "services/api";
+import { bp } from "../../constants";
 import { useGlobalStateContext } from "state/GlobalState";
 import ManageSubscriptionTierBox from "./ManageSubscriptionTierBox";
 import SubscriptionForm from "./SubscriptionForm";
@@ -69,8 +70,12 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
   return (
     <div
       className={css`
-        margin-bottom: 2rem;
-        margin-top: 2rem;
+        padding: .5rem 2rem 2rem 2rem;
+
+        @media screen and (max-width: ${bp.medium}px) {
+          border-radius: 0;
+          padding: 1rem .5rem 0rem;
+        }
       `}
     >
       <h2>{tManage("subscriptionTiers")}</h2>

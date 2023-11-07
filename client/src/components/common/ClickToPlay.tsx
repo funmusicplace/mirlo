@@ -22,8 +22,8 @@ const PlayWrapper = styled.div<WrapperProps>`
   position: absolute;
   align-items: center;
   justify-content: center;
-  width: ${(props) => props.width}px;
-  height: ${(props) => props.height}px;
+  width: 100%;
+  height: 100%;
   top: 0;
   opacity: 0;
   background-color: rgba(0, 0, 0, 0.2);
@@ -37,7 +37,7 @@ const PlayWrapper = styled.div<WrapperProps>`
     font-size: 1rem;
 
     &:nth-of-type(1) {
-      margin-bottom: 0.5rem;
+      margin-bottom: 0rem;
     }
 
     &:hover:not(:disabled) {
@@ -50,7 +50,7 @@ const PlayWrapper = styled.div<WrapperProps>`
     opacity: 1;
   }
 
-  @media (max-width: ${bp.medium}px) {
+  @media (max-width: ${bp.small}px) {
     width: 100%;
     opacity: 1;
     bottom: 0;
@@ -71,11 +71,12 @@ const Wrapper = styled.div<WrapperProps>`
   max-width: 100%;
   overflow: clip;
   width: ${(props) => props.width}px;
-  height: ${(props) => props.height}px;
+
 
   img {
     width: 100%;
     height: 100%;
+    border: 1px solid rgba(255, 255, 255, .05);
     text-align: center;
     display: block;
     // padding-top: ${(props) => props.height / 2 - 12}px;
@@ -95,7 +96,7 @@ const ClickToPlay: React.FC<{
   trackGroupId?: number;
   trackId?: number;
   title: string;
-  image?: { width: number; height: number; url: string };
+  image?: { width: number; height: number; url: string;};
   className?: string;
 }> = ({ trackGroupId, trackId, title, image, className }) => {
   const {

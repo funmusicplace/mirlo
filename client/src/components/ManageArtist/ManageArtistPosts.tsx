@@ -5,6 +5,7 @@ import { useParams } from "react-router-dom";
 import api from "services/api";
 import { useGlobalStateContext } from "state/GlobalState";
 import NewPostForm from "./NewPostForm";
+import { bp } from "../../constants";
 import Box from "components/common/Box";
 import { FaPen, FaTrash } from "react-icons/fa";
 import PostContent from "components/common/PostContent";
@@ -70,14 +71,21 @@ const ManageArtistPosts: React.FC<{}> = () => {
   }
 
   return (
-    <div>
+    <div className={css`
+      padding: .5rem 2rem 1rem 2rem;
+
+      @media screen and (max-width: ${bp.medium}px) {
+        border-radius: 0;
+        padding: 1rem .5rem 0rem;
+      `}
+    >
       <div
         className={css`
           display: flex;
           width: 100%;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: 0.5rem;
+          padding-bottom: 0.5rem;
         `}
       >
         <h2>{t("posts")}</h2>

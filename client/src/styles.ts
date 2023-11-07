@@ -1,12 +1,12 @@
 const styles = `html {
-  --mi-black: #3E363F;
-  --mi-white: #FFEEDB;
+  --mi-black: #0e0e0e;
+  --mi-white: #f5f0f0;
   --mi-pink: #BE3455;
 
   --mi-normal-background-color: var(--mi-white);
-  --mi-light-background-color: #ffffee;
+  --mi-light-background-color: #ffffff;
   --mi-lighten-background-color: rgba(255, 255, 255, 0.4);
-  --mi-shade-background-color: rgba(0, 0, 0, .05);
+  --mi-shade-background-color: rgba(50, 0, 0, .1);
 
   --mi-normal-foreground-color: var(--mi-black);
   --mi-light-foreground-color: #888;
@@ -32,7 +32,7 @@ const styles = `html {
 
   --mi-border-radius: 4px;
   --mi-border-radius-focus: 8px;
-  
+
   --mi-icon-button-background-color: var(--mi-shade-background-color);
   --mi-icon-button-background-color--hover: rgba(0, 0, 0, 0.2);
 
@@ -47,7 +47,8 @@ const styles = `html {
   html {
     --mi-normal-background-color: var(--mi-black);
     --mi-normal-foreground-color: var(--mi-white);
-    --mi-lighten-background-color: rgba(255, 255, 255, 0.05);
+    --mi-shade-background-color: rgba(0, 0, 0, 0.2);
+    --mi-light-background-color: #1e191f;
   }
 }
 
@@ -58,7 +59,7 @@ const styles = `html {
 }
 
 html {
-  font-size: 16px;
+  font-size: 18px;
   min-height: 100%;
 }
 
@@ -76,6 +77,7 @@ body,
 h1 {
   font-size: 2.5rem;
   line-height: 2;
+  font-weight: normal;
 
   a {
     text-decoration: none;
@@ -84,8 +86,9 @@ h1 {
 }
 
 h2 {
-  font-size: 1.9rem;
+  font-size: 1.5rem;
   line-height: 1.5;
+  font-weight: normal;
   margin-bottom: 0.4rem;
 }
 
@@ -94,7 +97,7 @@ h3 {
   padding-bottom: 1rem;
 }
 
-h4 { 
+h4 {
   font-size: 1.4rem;
   padding-bottom: .75rem;
 }
@@ -115,7 +118,8 @@ h6 {
   }
 
   h2 {
-    font-size: 1.8rem;
+    font-size: 1.3rem;
+    margin-bottom: 0rem;
   }
 }
 

@@ -6,6 +6,7 @@ import api from "services/api";
 import { useGlobalStateContext } from "state/GlobalState";
 import TrackGroupCard from "./TrackGroupCard";
 import { useTranslation } from "react-i18next";
+import { bp } from "../../constants";
 
 const ManageArtistAlbums: React.FC<{}> = () => {
   const {
@@ -43,8 +44,12 @@ const ManageArtistAlbums: React.FC<{}> = () => {
   return (
     <div
       className={css`
-        margin-top: 2rem;
-        margin-bottom: 1.5rem;
+        padding: .5rem 2rem 0rem 2rem;
+
+        @media screen and (max-width: ${bp.medium}px) {
+          border-radius: 0;
+          padding: 1rem .5rem 0rem;
+        }
       `}
     >
       <div
@@ -67,7 +72,7 @@ const ManageArtistAlbums: React.FC<{}> = () => {
       {trackGroups.length > 0 && (
         <div
           className={css`
-            margin-bottom: 1rem;
+            padding-bottom: 1rem;
           `}
         >
           {trackGroups?.map((album) => (

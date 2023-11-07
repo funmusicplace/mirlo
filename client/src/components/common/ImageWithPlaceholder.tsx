@@ -51,8 +51,9 @@ export const ImageWithPlaceholder: React.FC<{
           style={{
             backgroundColor: "#c1006d",
             display: "block",
-            width: `${size}px`,
-            height: `${size}px`,
+            width: `100%`,
+            height: `100%`,
+            aspectRatio: "1/1",
           }}
           className={className}
         />

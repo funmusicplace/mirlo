@@ -56,10 +56,12 @@ const HeaderSearch: React.FC = () => {
         onChange={onChange}
         className={css`
           margin-bottom: 0 !important;
-          border: 1px solid var(--mi-lighter-foreground-color)
+          border: 1px solid var(--mi-lighter-foreground-color);
+          background: var(--mi-light-background-color) !important;
 
           &::placeholder {
-            color: white;
+            color: var(--mi-normal-foreground-color) !important;
+            opacity: .3;
           }
         `}
       />

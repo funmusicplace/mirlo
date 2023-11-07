@@ -59,15 +59,47 @@ function TrackGroup() {
   }
 
   return (
+<div
+  className={css`
+    ${!user ? "min-height: calc(100vh - 70px);" : ""}
+    ${user ? "min-height: calc(100vh - 130px);" : ""}
+    ${!user ? "margin-top: 3vh;" : ""}
+    ${user ? "margin-top: 1rem;" : ""}
+    display: flex;
+    align-items: center;
+  `}>
     <div
       className={css`
         width: 100%;
+        align-items: center;
+
+        td {
+          padding: 0rem .4rem 0rem 0rem !important;
+          margin: .1rem 0rem !important;
+        }
 
         a {
           color: ${artist.properties?.colors.primary};
         }
+
+        @media screen and (max-width: ${bp.small}px) {
+          td {
+            padding: .2rem 0.1rem .2rem 0rem !important;
+          }
+        }
       `}
     >
+    <div className={css`
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    @media screen and (max-width: ${bp.small}px) {
+      padding-top: 0px;
+
+    ${user ? "padding-top: 0px;" : ""}
+
+    `}>
       <MetaCard
         title={trackGroup.title}
         description={trackGroup.about ?? "An album on Mirlo"}
@@ -76,23 +108,30 @@ function TrackGroup() {
       <div
         className={css`
           display: flex;
+          margin-top: 1rem;
           align-items: center;
           justify-content: space-between;
           margin-bottom: 0.5rem;
+          align-items: stretch;
         `}
       >
         <div>
           <h1
             className={css`
+              font-size: 32px;
               line-height: 1;
-              margin-top: 1rem;
               margin-bottom: 0.5rem;
             `}
           >
             {trackGroup.title}
           </h1>
           {artist && (
-            <em>
+            <em
+              className={css`
+                font-size: 18px;
+                font-style: normal;
+              `}
+            >
               by{" "}
               <Link to={`/${artist.urlSlug?.toLowerCase() ?? artist.id}`}>
                 {artist?.name}
@@ -122,22 +161,82 @@ function TrackGroup() {
       <div
         className={css`
           display: flex;
-          align-items: flex-start;
+          justify-content: space-between;
+          flex-wrap: nowrap;
 
-          @media screen and (max-width: ${bp.medium}px) {
+          @media screen and (max-width: ${bp.small}px) {
             flex-direction: column;
           }
         `}
       >
+      <div
+        className={css`
+          display: flex;
+          flex: 45%;
+          max-width: 45%;
+          flex-direction: column;
+
+
+          @media screen and (max-width: ${bp.small}px) {
+            flex: 100%;
+            max-width: 100%;
+            width: 100%;
+            min-width: 100%;
+            flex-direction: column;
+          }
+        `}>
+
+      <div
+        className={css`
+          border: 1px solid rgba(255, 255, 255, .05);
+        `}>
         <ImageWithPlaceholder
-          src={trackGroup.cover?.sizes?.[600]}
+          src={trackGroup.cover?.sizes?.[960]}
           alt={trackGroup.title}
-          size={600}
+          size={960}
         />
+        </div>
+        <div
+          className={css`
+            margin-top: .5rem;
+            color: var(--mi-light-foreground-color);
+            font-size: 16px;
+            em {
+              font-style: normal;}
+
+            @media screen and (max-width: ${bp.medium}px) {
+              font-size: 14px;
+              margin-bottom: 1rem;
+            }
+
+          `}
+        >
+          {t("released")}{" "}
+          <em>
+            {new Date(trackGroup.releaseDate).toLocaleDateString("en-US", {
+              month: "long",
+              year: "numeric",
+            })}
+          </em>
+        </div>
+        </div>
+        <div
+          className={css`
+            max-width: 59%;
+            flex: 59%;
+            @media screen and (max-width: ${bp.small}px) {
+              max-width: 100%;
+              flex: 100%;
+            margin-left: 0;
+
+          `}
+        >
         <PublicTrackGroupListing
           tracks={trackGroup.tracks}
           trackGroup={trackGroup}
         />
+        </div>
+      </div>
       </div>
       <div
         className={css`
@@ -149,22 +248,10 @@ function TrackGroup() {
         <MarkdownWrapper>
           <ReactMarkdown>{trackGroup.about}</ReactMarkdown>
         </MarkdownWrapper>
-        <div
-          className={css`
-            margin-top: 1rem;
-            color: var(--mi-light-foreground-color);
-          `}
-        >
-          {t("released")}{" "}
-          <em>
-            {new Date(trackGroup.releaseDate).toLocaleDateString("en-US", {
-              month: "short",
-              year: "numeric",
-            })}
-          </em>
-        </div>
+
       </div>
       {userStripeStatus?.chargesEnabled && <ArtistSupport artist={artist} />}
+    </div>
     </div>
   );
 }

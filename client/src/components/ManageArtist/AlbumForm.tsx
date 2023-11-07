@@ -1,5 +1,5 @@
 import React from "react";
-
+import { css } from "@emotion/css";
 import { FormProvider, useForm } from "react-hook-form";
 import Button from "../common/Button";
 import { InputEl } from "../common/Input";
@@ -149,6 +149,12 @@ const AlbumForm: React.FC<{
   }, [artist.id, navigate, newAlbumId, reload, uploadJobs]);
 
   return (
+    <div
+      className={css`
+        background: var(--mi-light-background-color);
+        padding: 2rem;
+      `}
+    >
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(doSave)}>
         <FormComponent>
@@ -202,7 +208,7 @@ const AlbumForm: React.FC<{
             : t("submitAlbum")}
         </Button>
       </form>
-    </FormProvider>
+    </FormProvider></div>
   );
 };
 

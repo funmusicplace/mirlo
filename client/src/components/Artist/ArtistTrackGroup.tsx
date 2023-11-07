@@ -4,6 +4,7 @@ import ClickToPlay from "../common/ClickToPlay";
 import { Link } from "react-router-dom";
 import { useArtistContext } from "state/ArtistContext";
 import PurchaseOrDownloadAlbum from "components/TrackGroup/PurchaseOrDownloadAlbumModal";
+import { bp } from "../../constants";
 
 const ArtistTrackGroup: React.FC<{
   trackGroup: TrackGroup;
@@ -21,36 +22,46 @@ const ArtistTrackGroup: React.FC<{
       key={trackGroup.id}
       className={css`
         margin-bottom: 1rem;
-        margin-top: 1rem;
         display: inline-block;
-        max-width: 300px;
-        margin-right: 0.5rem;
-        &:nth-child(2) {
+        padding: 0 0.5%;
+        max-width: 33%;
+        flex: 33%;
+
+        &:nth-child(3) {
           border-top: 0;
+          margin-right: 0;
+        }
+
+        @media screen and (max-width: ${bp.medium}px) {
+          max-width: 49.9%;
+          flex: 49.9%;
+          padding: 0 1%;
+          margin-bottom: 0.5rem;
+          margin-top: 0.5rem;
+
+          button {
+            padding: 0.2rem 0.4rem;
+          }
+          &:nth-child(1) {
+            border-top: 0;
+          }
+          @media screen and (max-width: ${bp.small}px) {
+            font-size: 0.8rem;
+          }
         }
       `}
     >
-      <div
-        className={css`
-          display: inline-flex;
-          flex-direction: column;
-          align-items: flex-start;
-          justify-content: space-between;
-
-          & > :first-child {
-            margin-right: 0.5rem;
-          }
-        `}
-      >
+      <div>
         <ClickToPlay
           image={{
-            width: 300,
-            height: 300,
-            url: trackGroup.cover?.sizes?.[300] ?? "",
+            width: 400,
+            height: 400,
+            url: trackGroup.cover?.sizes?.[600] ?? "",
           }}
           trackGroupId={trackGroup.id}
           title={trackGroup.title}
         />
+
         <div
           className={css`
             display: flex;
@@ -66,7 +77,7 @@ const ArtistTrackGroup: React.FC<{
               flex-direction: column;
 
               a:first-child {
-                font-weight: bold;
+                font-weight: normal;
                 margin-bottom: 0.4rem;
               }
             `}
@@ -75,6 +86,14 @@ const ArtistTrackGroup: React.FC<{
               to={`/${artist?.urlSlug ?? artist?.id}/release/${
                 trackGroup.urlSlug ?? trackGroup.id
               }`}
+              className={css`
+                text-decoration: none;
+                padding-right: 0.5rem;
+
+                :hover {
+                  text-decoration: underline;
+                }
+              `}
             >
               {trackGroup.title}
             </Link>

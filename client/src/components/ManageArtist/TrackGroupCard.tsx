@@ -9,6 +9,7 @@ import { Link } from "react-router-dom";
 import api from "services/api";
 import { useGlobalStateContext } from "state/GlobalState";
 import { useSnackbar } from "state/SnackbarContext";
+import { bp } from "../../constants";
 
 const TrackGroupCard: React.FC<{
   album: TrackGroup;
@@ -49,24 +50,30 @@ const TrackGroupCard: React.FC<{
         display: flex;
         width: 100%;
         margin-bottom: 0.25rem;
+        padding: 1rem 1rem 1rem;
 
         &:not(:first-child) {
           margin-top: 1rem;
         }
+        @media screen and (max-width: ${bp.medium}px) {
+          font-size: 0.8rem;
+        }
       `}
     >
-      <ClickToPlay
-        trackGroupId={album.id}
-        title={album.title}
-        image={{
-          url: album.cover?.sizes?.[120] ?? "",
-          width: 120,
-          height: 120,
-        }}
-        className={css`
-          margin-right: 1rem;
-        `}
-      />
+      <div>
+        <ClickToPlay
+          trackGroupId={album.id}
+          title={album.title}
+          image={{
+            url: album.cover?.sizes?.[300] ?? "",
+            width: 150,
+            height: 150,
+          }}
+          className={css`
+            margin-right: 1rem;
+          `}
+        />
+      </div>
 
       <div
         className={css`
@@ -77,6 +84,18 @@ const TrackGroupCard: React.FC<{
           > div {
             display: flex;
             justify-content: space-between;
+          }
+
+          @media screen and (max-width: ${bp.medium}px) {
+            font-size: 0.8rem;
+            > div {
+              justify-content: flex-start;
+              flex-wrap: wrap;
+
+              &:not(:first-child) {
+                margin-top: 0.5rem;
+              }
+            }
           }
         `}
       >
@@ -111,6 +130,13 @@ const TrackGroupCard: React.FC<{
 
             & > :last-child {
               margin-right: 0;
+            }
+
+            @media screen and (max-width: ${bp.medium}px) {
+              justify-content: space-between !important;
+
+            button {
+              font-size: .7rem;
             }
           `}
         >

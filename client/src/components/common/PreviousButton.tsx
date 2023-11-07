@@ -1,6 +1,6 @@
 import React from "react";
 
-import { FaBackward } from "react-icons/fa";
+import { MdSkipPrevious } from "react-icons/md";
 import IconButton from "./IconButton";
 import { useGlobalStateContext } from "state/GlobalState";
 
@@ -13,7 +13,7 @@ export const PreviousButton: React.FC = () => {
 
   return (
     <IconButton onClick={onClickPrevious}>
-      <FaBackward />
+      <MdSkipPrevious/>
     </IconButton>
   );
 };
