@@ -16,9 +16,10 @@ const CustomButton = styled.button<Compactable>`
   background: none;
   border: none;
   transition: 0.25s background-color, 0.25s color, 0.4s border-radius;
-  font-size: 1rem;
+  font-size: .9rem;
   font-weight: bold;
   line-height: 1rem;
+  margin-bottom: .2rem;
 
   &:hover:not(:disabled) {
     cursor: pointer;

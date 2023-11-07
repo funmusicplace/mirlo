@@ -1,6 +1,6 @@
 import React from "react";
 
-import { FaForward } from "react-icons/fa";
+import { MdSkipNext } from "react-icons/md";
 import IconButton from "./IconButton";
 import { useGlobalStateContext } from "state/GlobalState";
 
@@ -16,7 +16,7 @@ export const NextButton: React.FC = () => {
 
   return (
     <IconButton onClick={onClickNext}>
-      <FaForward />
+      <MdSkipNext />
     </IconButton>
   );
 };

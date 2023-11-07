@@ -1,6 +1,6 @@
 import React from "react";
 
-import { ImShuffle } from "react-icons/im";
+import { RxShuffle } from "react-icons/rx";
 import IconButton from "./IconButton";
 import { useGlobalStateContext } from "state/GlobalState";
 
@@ -15,7 +15,7 @@ export const ShuffleButton: React.FC = () => {
   }, [dispatch, shuffle]);
   return (
     <IconButton role={shuffle ? "primary" : undefined} onClick={onShuffle}>
-      <ImShuffle />
+      <RxShuffle />
     </IconButton>
   );
 };
