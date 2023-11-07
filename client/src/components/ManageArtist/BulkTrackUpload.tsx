@@ -20,6 +20,7 @@ import useJobStatusCheck from "utils/useJobStatusCheck";
 import { Buffer } from "buffer";
 import process from "process";
 import { IAudioMetadata, ICommonTagsResult } from "music-metadata/lib/type";
+import { pickBy } from "lodash";
 
 if (typeof window !== "undefined" && typeof window.Buffer === "undefined") {
   window.Buffer = Buffer;
@@ -139,7 +140,11 @@ export const BulkTrackUpload: React.FC<{
       if (firstTrack) {
         const packet = {
           title: firstTrack.t.title,
-          metadata: firstTrack.t.metadata,
+          metadata: pickBy(firstTrack.t.metadata, [
+            "format",
+            "common",
+            "native",
+          ]),
           artistId: trackgroup.artistId,
           isPreview: firstTrack.t.status === "preview",
           order: firstTrack.order,
@@ -186,6 +191,11 @@ export const BulkTrackUpload: React.FC<{
       try {
         if (userId) {
           setIsSaving(true);
+          snackbar(t("uploadingTracks"), {
+            type: "success",
+            timeout: 10000,
+            position: "center",
+          });
 
           await uploadNextTrack(
             data.tracks.map((t, i) => ({
@@ -193,11 +203,6 @@ export const BulkTrackUpload: React.FC<{
               t,
             }))
           );
-          snackbar(t("uploadingTracks"), {
-            type: "success",
-            timeout: 10000,
-            position: "center",
-          });
         }
       } catch (e) {
         console.error(e);
