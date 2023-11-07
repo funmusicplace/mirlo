@@ -9,7 +9,6 @@ export const Table = styled.table`
   & tbody tr {
     transition: 0.25s background-color;
     &:nth-of-type(odd) {
-      background-color: var(--mi-lighten-background-color);
 
       @media (prefers-color-scheme: dark) {
         background-color: var(--mi-darken-background-color);
@@ -32,7 +31,8 @@ export const Table = styled.table`
   }
   & td,
   & th {
-    padding: 0.5rem 1rem;
+    padding: .1rem .3rem 0.1rem 1rem;
+    margin: 0rem;
   }
   & td.alignRight,
   & th.alignRight {

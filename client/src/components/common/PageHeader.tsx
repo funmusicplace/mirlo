@@ -5,6 +5,7 @@ import { bp } from "../../constants";
 import { useGlobalStateContext } from "state/GlobalState";
 
 const PageHeader = () => {
+
   const { artistId, trackGroupId } = useParams();
 
   const {
@@ -18,24 +19,62 @@ const PageHeader = () => {
   return (
     <>
       {artistBanner && !trackGroupId && (
+        <div
+        className={css`
+          ${user ? "margin-top: 60px;" : "height: calc(34vh);"}
+          height: calc(36vh);
+          min-height: calc(14rem-55px);
+          position: fixed;
+          overflow: hidden;
+          width: 100%;
+          display: flex;
+          justify-content: center;
+          //* border-bottom: solid 4px; *//
+          box-shadow: inset 1em -2em .8em -1.3em rgba(0, 0, 0, .4);
+          @media screen and (max-width: ${bp.medium}px) {
+            position: relative;
+            //* height: 180px; *//
+            height: 100%;
+          }
+        `}
+      >
+      <div
+      className={css`
+        display: flex;
+        //* max-width: 1250px; *//
+        width: 100%;
+        min-height: 100%;
+
+        @media screen and (max-width: ${bp.medium}px) {
+        min-height: 100%;
+        }
+
+      `}
+    >
         <img
-          src={artistBanner?.[1250]}
+          src={artistBanner?.[2500]}
           alt="Artist banner"
           className={css`
-            margin-bottom: -6rem;
-            max-height: 400px;
-            box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.1) inset;
-            margin-top: ${user ? "55px" : "0"};
+            width: 100%;
+            z-index: -1;
+            object-fit: cover;
 
             @media screen and (max-width: ${bp.medium}px) {
-              margin-bottom: 0;
-              margin-top: ${user ? "3rem" : "0"};
+            object-fit: contain;
             }
           `}
-        />
+        /></div>
+        </div>
       )}
-      {(!artistBanner || trackGroupId) && user && (
-        <div style={{ marginTop: "3rem" }}></div>
+      {(!artistBanner || trackGroupId) && (
+
+          <div
+          className={css`
+            margin-top: 60px;
+            }
+          `}
+        >
+        </div>
       )}
     </>
   );
