@@ -24,7 +24,6 @@ const Releases = () => {
         className={css`
           display: flex;
           flex-wrap: wrap;
-          justify-content: space-between;
         `}
       >
         {trackGroups?.map((trackGroup) => (
