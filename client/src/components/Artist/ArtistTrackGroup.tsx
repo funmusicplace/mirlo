@@ -23,7 +23,7 @@ const ArtistTrackGroup: React.FC<{
       className={css`
         margin-bottom: 1rem;
         display: inline-block;
-        padding: 0 .5%;
+        padding: 0 0.5%;
         max-width: 33%;
         flex: 33%;
 
@@ -36,23 +36,22 @@ const ArtistTrackGroup: React.FC<{
           max-width: 49.9%;
           flex: 49.9%;
           padding: 0 1%;
-          margin-bottom: .5rem;
-          margin-top: .5rem;
+          margin-bottom: 0.5rem;
+          margin-top: 0.5rem;
 
           button {
-            padding: .2rem .4rem;
+            padding: 0.2rem 0.4rem;
           }
           &:nth-child(1) {
             border-top: 0;
           }
           @media screen and (max-width: ${bp.small}px) {
-                      font-size: .8rem;
+            font-size: 0.8rem;
           }
         }
       `}
     >
       <div>
-
         <ClickToPlay
           image={{
             width: 400,
@@ -75,7 +74,7 @@ const ArtistTrackGroup: React.FC<{
           <div
             className={css`
               display: flex;
-              flex-direction: row;
+              flex-direction: column;
 
               a:first-child {
                 font-weight: normal;
@@ -83,20 +82,21 @@ const ArtistTrackGroup: React.FC<{
               }
             `}
           >
-          <Link
-            to={`/${artist?.urlSlug ?? artist?.id}/release/${
-              trackGroup.urlSlug ?? trackGroup.id
-            }`}
-            className={css`
+            <Link
+              to={`/${artist?.urlSlug ?? artist?.id}/release/${
+                trackGroup.urlSlug ?? trackGroup.id
+              }`}
+              className={css`
                 text-decoration: none;
-                padding-right: .5rem;
+                padding-right: 0.5rem;
 
                 :hover {
                   text-decoration: underline;
                 }
-            `}>
-            {trackGroup.title}
-          </Link>
+              `}
+            >
+              {trackGroup.title}
+            </Link>
             <Link to={`/${artist?.urlSlug ?? artist?.id}/`}>
               {trackGroup.artist?.name}
             </Link>
