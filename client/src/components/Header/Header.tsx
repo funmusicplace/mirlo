@@ -30,7 +30,7 @@ const Header = () => {
         position: fixed;
         width: 100%;
         z-index: 999999;
-        border-bottom: 1px solid var(--mi-shade-background-color);
+        border-bottom: 1px solid var(--mi-light-foreground-color);
       `}
     >
       <h1
@@ -78,7 +78,7 @@ const Header = () => {
           <div
             className={css`
               position: absolute;
-              top: 70px;
+              top: 64px;
               right: 0;
               // width: 100%;
               padding: 0.5rem;
