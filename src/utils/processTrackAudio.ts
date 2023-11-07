@@ -135,8 +135,12 @@ export const processTrackAudio = (ctx: { req: Request; res: Response }) => {
     );
     await minioClient.putObject(incomingAudioBucket, audio.id, stream);
 
+    console.log("audio", audio);
     logger.info("Adding audio to convert-audio queue");
-    const job = await audioQueue.add("convert-audio", { audioId: audio.id });
+    const job = await audioQueue.add("convert-audio", {
+      audioId: audio.id,
+      fileExtension: audio.fileExtension,
+    });
     return job.id;
   };
 };

@@ -1,9 +1,9 @@
 import styled from "@emotion/styled";
-import SnackbarContext, { Variant } from "state/SnackbarContext";
+import SnackbarContext, { Position, Variant } from "state/SnackbarContext";
 import React from "react";
 import { bp } from "../../constants";
 
-const Container = styled.div<{ variant: Variant }>`
+const Container = styled.div<{ variant: Variant; position?: Position }>`
   position: fixed;
   bottom: 1rem;
   right: 1rem;
@@ -11,9 +11,13 @@ const Container = styled.div<{ variant: Variant }>`
   align-items: center;
   justify-content: center;
   background: ${(props) => {
-    return `var(--mi-${props.variant ?? "normal"}-background-color)`;
+    return `var(--mi-${props.variant ?? "light"}-background-color)`;
   }};
-  color: #fff;
+  ${(props) => {
+    return props.variant
+      ? `color: var(--mi-white); font-weight: bold;`
+      : `color: var(--mi-light-foreground-color)`;
+  }};
   z-index: 1000;
   margin: 16px;
   border-radius: 4px;
@@ -30,6 +34,18 @@ const Container = styled.div<{ variant: Variant }>`
     top: 3rem;
     left: 1rem;
   }
+
+  ${(props) => {
+    return props.position === "center"
+      ? `
+      margin: 0 auto;
+      top: 50%;
+      left: 2rem;
+      right: 2rem;
+      bottom: auto;
+    `
+      : "";
+  }}
 `;
 
 const Label = styled.div`
@@ -54,7 +70,7 @@ const Dismiss = styled.div`
 const Snackbar: React.FC = () => {
   const snackbarCtx = React.useContext(SnackbarContext);
   return (
-    <Container variant={snackbarCtx.variant}>
+    <Container variant={snackbarCtx.variant} position={snackbarCtx.position}>
       <Label>{snackbarCtx.msg}</Label>
       <Dismiss onClick={snackbarCtx.onClose}>&times;</Dismiss>
     </Container>

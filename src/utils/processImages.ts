@@ -42,11 +42,11 @@ imageQueueEvents.on("error", () => {
   console.log("errored");
 });
 
-imageQueueEvents.on("completed", async (jobId: any) => {
-  logger.info(`Job with id ${jobId} has been completed`);
+imageQueueEvents.on("completed", async (result: { jobId: string }) => {
+  logger.info(`Job with id ${result.jobId} has been completed`);
 
   try {
-    const job = await imageQueue.getJob(jobId);
+    const job = await imageQueue.getJob(result.jobId);
     if (job) {
       // FIXME: post image processing updates
       // await File.update(

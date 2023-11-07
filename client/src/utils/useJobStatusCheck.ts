@@ -20,7 +20,11 @@ const useJobStatusCheck = ({
           `jobs?${uploadJobs.map((job) => `ids=${job.jobId}&`).join("")}`
         );
 
-        if (result.results.some((r) => r.jobStatus !== "completed")) {
+        if (
+          result.results.some(
+            (r) => r.jobStatus !== "completed" && r.jobStatus !== "unknown"
+          )
+        ) {
           setUploadJobs(result.results);
         } else {
           setUploadJobs([]);

@@ -88,6 +88,7 @@ function App() {
           min-height: 100vh;
         `}
       >
+        {/* <Snackbar /> */}
         {isDisplayed && <Snackbar />}
 
         <Header />

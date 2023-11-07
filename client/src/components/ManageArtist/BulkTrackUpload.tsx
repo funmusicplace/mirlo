@@ -170,9 +170,15 @@ export const BulkTrackUpload: React.FC<{
         setTimeout(async () => {
           await uploadNextTrack(remainingTracks);
         }, 5000);
+      } else {
+        snackbar(t("doneUploading"), {
+          type: "success",
+          timeout: 10000,
+          position: "center",
+        });
       }
     },
-    [setUploadJobs, trackgroup.artistId, trackgroup.id, userId]
+    [setUploadJobs, trackgroup.artistId, trackgroup.id, userId, snackbar, t]
   );
 
   const doAddTrack = React.useCallback(
@@ -187,17 +193,22 @@ export const BulkTrackUpload: React.FC<{
               t,
             }))
           );
-          snackbar("Uploading tracks...", { type: "success" });
+          snackbar(t("uploadingTracks"), {
+            type: "success",
+            timeout: 10000,
+            position: "center",
+          });
         }
       } catch (e) {
         console.error(e);
-        snackbar("There was a problem with the API", { type: "warning" });
+        snackbar("There was a problem with the API", {
+          type: "warning",
+        });
       } finally {
         setIsSaving(false);
-        // await reload();
       }
     },
-    [userId, uploadNextTrack, snackbar]
+    [userId, uploadNextTrack, t, snackbar]
   );
 
   const processUploadedFiles = React.useCallback(
