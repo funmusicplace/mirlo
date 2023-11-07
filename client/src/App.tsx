@@ -108,21 +108,29 @@ function App() {
         >
           <div
             className={css`
-              background-color: var(--mi-normal-background-color);
+              //* background-color: var(--mi-light-background-color); *//
+
               margin: 0 auto;
+              ${!userId ? "margin-top: -60px;" : ""}
               width: 100%;
               border-radius: var(--mi-border-radius);
               display: flex;
+              z-index: 1;
               ${userId ? "display: flex;" : ""}
               flex-grow: 1;
 
               @media (min-width: ${bp.small}px) {
-                padding: 1rem 2rem 2rem;
-                max-width: 1080px;
+                padding: 0rem 2rem 2rem;
+                max-width: calc(1080px + 0rem);
               }
 
               @media screen and (max-width: 800px) {
-                padding: 1rem 1rem 1rem;
+                ${!userId ? "margin-top: -60px;" : ""}
+                padding: 0rem 0rem .0rem;
+
+                > div {
+                  padding: .5rem .5rem .5rem;
+                }
               }
             `}
           >
