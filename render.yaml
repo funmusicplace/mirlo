@@ -83,7 +83,7 @@ services:
     disk:
       name: data
       mountPath: /data
-      sizeGB: 2 # optional
+      sizeGB: 50 # optional
 
   # A worker
   - type: worker
