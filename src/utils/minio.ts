@@ -141,11 +141,10 @@ export const getObjectList = async (
       data.push(obj);
     });
     stream.on("end", function () {
-      console.log(data);
       resolve(data);
     });
     stream.on("error", function (err) {
-      console.log(err);
+      console.error(err);
       reject(err);
     });
   });
