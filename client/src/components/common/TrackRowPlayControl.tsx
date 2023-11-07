@@ -1,4 +1,5 @@
-import { FaPause, FaPlay } from "react-icons/fa";
+import { VscPlay } from "react-icons/vsc";
+import { TfiControlPause } from "react-icons/tfi";
 import IconButton from "./IconButton";
 import { useGlobalStateContext } from "state/GlobalState";
 import React from "react";
@@ -32,12 +33,12 @@ const TrackRowPlayControl: React.FC<{
         <>
           <span
             className="track-number"
-            style={{ width: "2.2rem", textAlign: "center" }}
+            style={{ width: "2rem", textAlign: "center" }}
           >
             {trackNumber}
           </span>
           <IconButton compact className="play-button" onClick={onTrackPlay}>
-            <FaPlay />
+            <VscPlay />
           </IconButton>
         </>
       )}
@@ -47,7 +48,7 @@ const TrackRowPlayControl: React.FC<{
           data-cy="track-row-pause-button"
           onClick={onTrackPause}
         >
-          <FaPause />
+          <TfiControlPause />
         </IconButton>
       )}
     </>
