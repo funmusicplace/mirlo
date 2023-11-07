@@ -163,7 +163,10 @@
     "update": "Update",
     "makePrivate": "Make private",
     "trackGroupUpdated": "Album updated",
-    "trackGroupCreated": "Album created"
+    "trackGroupCreated": "Album created",
+    "doneUploading": "Uploaded all tracks, we still need to process them on our servers, but you can now safely close the browser",
+
+    "uploadingTracks": "Uploading tracks, this could take several minutes, please don't close the browser"
   },
   "artistForm": {
     "displayName": "Display name",

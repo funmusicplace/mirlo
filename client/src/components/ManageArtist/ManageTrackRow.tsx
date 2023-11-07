@@ -56,6 +56,8 @@ const ManageTrackRow: React.FC<{
     }
   }, [track.id, trackTitle, userId]);
 
+  const uploadState = track.audio?.uploadState;
+
   return (
     <tr
       key={track.id}
@@ -78,6 +80,7 @@ const ManageTrackRow: React.FC<{
         &:hover > td > .track-number {
           display: none;
         }
+        ${uploadState !== "SUCCESS" && `opacity: .5;`}
       `}
     >
       <td>
@@ -95,7 +98,16 @@ const ManageTrackRow: React.FC<{
           text-overflow: ellipsis;
         `}
       >
-        {!isEditingTitle && trackTitle}
+        {!isEditingTitle && (
+          <>
+            <div>{trackTitle}</div>
+            <small>
+              {uploadState !== "SUCCESS"
+                ? "Still processing"
+                : "Done uploading"}
+            </small>
+          </>
+        )}
         {isEditingTitle && (
           <InputEl
             value={trackTitle}
@@ -123,6 +135,7 @@ const ManageTrackRow: React.FC<{
               onClick={() => setIsEditingTitle(true)}
               title={t("edit") ?? ""}
               style={{ marginRight: "1rem" }}
+              disabled={uploadState !== "SUCCESS"}
             >
               <FaPen />
             </IconButton>
@@ -130,6 +143,7 @@ const ManageTrackRow: React.FC<{
               compact
               onClick={onDeleteClick}
               title={t("delete") ?? ""}
+              disabled={uploadState !== "SUCCESS"}
             >
               <FaTrash />
             </IconButton>

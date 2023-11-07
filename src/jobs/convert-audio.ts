@@ -66,7 +66,7 @@ const formats = [
 ];
 
 export default async (job: Job) => {
-  const { audioId } = job.data;
+  const { audioId, fileExtension } = job.data;
 
   try {
     const destinationFolder = `/data/media/processing/${audioId}`;
@@ -86,44 +86,11 @@ export default async (job: Job) => {
       await fsPromises.mkdir(destinationFolder, { recursive: true });
     }
 
-    logger.info(`Starting to optimize audio ${audioId}`);
+    const originalPath = `${destinationFolder}/original.${fileExtension}`;
 
-    const probeStream = await minioClient.getObject(
-      incomingAudioBucket,
-      audioId
-    );
+    await minioClient.fGetObject(incomingAudioBucket, audioId, originalPath);
 
-    let fileType: string | undefined;
     let data: any;
-
-    logger.info(
-      `Processing with ffprobe to see if we can get duration ${audioId}`
-    );
-
-    await new Promise((resolve, reject) => {
-      ffmpeg(probeStream).ffprobe(async (err, result) => {
-        fileType = result?.format?.format_name;
-        data = result;
-
-        logger.info(`File type: ${JSON.stringify(fileType)}`);
-
-        resolve(data);
-      });
-    });
-
-    await new Promise(async (resolve, reject) => {
-      const originalStream = await minioClient.getObject(
-        incomingAudioBucket,
-        audioId
-      );
-
-      const originalWritable = createWriteStream(
-        `${destinationFolder}/original.${fileType}`
-      ).on("close", () => {
-        resolve(0);
-      });
-      originalStream.pipe(originalWritable);
-    });
 
     const profiler = logger.startTimer();
 
@@ -139,9 +106,7 @@ export default async (job: Job) => {
           audioBitrate
         );
 
-        const processor = ffmpeg(
-          createReadStream(`${destinationFolder}/original.${fileType}`)
-        )
+        const processor = ffmpeg(createReadStream(originalPath))
           .noVideo()
           .toFormat(format)
           .on("stderr", function (stderrLine) {
@@ -170,7 +135,7 @@ export default async (job: Job) => {
       });
     }
 
-    const hlsStream = await minioClient.getObject(incomingAudioBucket, audioId);
+    const hlsStream = await createReadStream(originalPath);
 
     const duration = await new Promise(async (resolve, reject) => {
       let duration = 0;
@@ -215,7 +180,6 @@ export default async (job: Job) => {
 
     await Promise.all(
       finalFilesInFolder.map(async (file) => {
-        logger.info(`Uploading file ${file}`);
         const uploadStream = await createReadStream(
           `${destinationFolder}/${file}`
         );
@@ -224,6 +188,7 @@ export default async (job: Job) => {
           `${audioId}/${file}`,
           uploadStream
         );
+        logger.info(`Uploading file ${file}`);
       })
     );
 
@@ -232,6 +197,7 @@ export default async (job: Job) => {
     logger.info(`Done processing streams ${audioId}`);
 
     await minioClient.removeObject(incomingAudioBucket, audioId);
+    logger.info(`Cleaned up incoming minio folder for ${audioId}`);
     await fsPromises.rm(destinationFolder, { recursive: true });
     logger.info(`Cleaned up ${destinationFolder}`);
     const response = { ...(data ?? {}), duration };
