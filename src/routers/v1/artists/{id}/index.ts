@@ -1,5 +1,5 @@
-import { Request, Response } from "express";
-import { User } from "@prisma/client";
+import { NextFunction, Request, Response } from "express";
+import { Post, User } from "@prisma/client";
 
 import trackGroupProcessor from "../../../../utils/trackGroup";
 import postProcessor from "../../../../utils/post";
@@ -22,63 +22,66 @@ export default function () {
     GET: [userLoggedInWithoutRedirect, GET],
   };
 
-  async function GET(req: Request, res: Response) {
+  async function GET(req: Request, res: Response, next: NextFunction) {
     let { id }: { id?: string } = req.params;
     const user = req.user as User;
     if (!id || id === "undefined") {
       return res.status(400);
     }
     try {
-      id = await findArtistIdForURLSlug(id);
-      const isUserSubscriber = await checkIsUserSubscriber(user, Number(id));
-
-      const artist = await prisma.artist.findFirst({
-        where: {
-          id: Number(id),
-          enabled: true,
-        },
-        include: {
-          trackGroups: {
-            where: {
-              published: true,
-              releaseDate: {
-                lte: new Date(),
+      const parsedId = await findArtistIdForURLSlug(id);
+      let isUserSubscriber = false;
+      let artist: any;
+      if (parsedId) {
+        artist = await prisma.artist.findFirst({
+          where: {
+            id: parsedId,
+            enabled: true,
+          },
+          include: {
+            trackGroups: {
+              where: {
+                published: true,
+                releaseDate: {
+                  lte: new Date(),
+                },
+              },
+              include: {
+                tracks: {
+                  where: { deletedAt: null },
+                },
+                cover: true,
               },
             },
-            include: {
-              tracks: {
-                where: { deletedAt: null },
+            banner: true,
+            avatar: true,
+            subscriptionTiers: {
+              where: {
+                deletedAt: null,
               },
-              cover: true,
             },
-          },
-          banner: true,
-          avatar: true,
-          subscriptionTiers: {
-            where: {
-              deletedAt: null,
-            },
-          },
-          posts: {
-            where: {
-              publishedAt: {
-                lte: new Date(),
+            posts: {
+              where: {
+                publishedAt: {
+                  lte: new Date(),
+                },
+                deletedAt: null,
               },
-              deletedAt: null,
             },
           },
-        },
-      });
+        });
+        isUserSubscriber = await checkIsUserSubscriber(user, parsedId);
+      }
 
       if (!artist) {
         res.status(404);
-        return;
+        return next();
       }
 
       res.json({
         result: {
           ...artist,
-          posts: artist?.posts.map((p) =>
+          posts: artist?.posts.map((p: Post) =>
             postProcessor.single(
               p,
               isUserSubscriber || artist.userId === user?.id
@@ -106,7 +109,7 @@ export default function () {
         },
       });
     } catch (e) {
-      console.error("artist/{id}", e);
+      console.error(`artist/${id}`, e);
       res.status(500);
     }
   }

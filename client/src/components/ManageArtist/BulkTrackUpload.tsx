@@ -1,6 +1,7 @@
 import React from "react";
 import Button from "../common/Button";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
+import { parseBlob } from "music-metadata-browser";
 import api from "services/api";
 import { InputEl } from "../common/Input";
 import FormComponent from "components/common/FormComponent";
@@ -11,12 +12,22 @@ import Table from "components/common/Table";
 import { useTranslation } from "react-i18next";
 // import parseAudioMetadata from "parse-audio-metadata";
 import { css } from "@emotion/css";
-import parseAudioMetadata from "id3-parser";
-import { convertFileToBuffer } from "id3-parser/lib/util";
 import { BulkTrackUploadRow } from "./BulkTrackUploadRow";
 import Tooltip from "components/common/Tooltip";
 import { FaQuestionCircle } from "react-icons/fa";
 import useJobStatusCheck from "utils/useJobStatusCheck";
+
+import { Buffer } from "buffer";
+import process from "process";
+import { IAudioMetadata, ICommonTagsResult } from "music-metadata/lib/type";
+
+if (typeof window !== "undefined" && typeof window.Buffer === "undefined") {
+  window.Buffer = Buffer;
+}
+
+if (typeof window !== "undefined" && typeof window.process === "undefined") {
+  window.process = process;
+}
 
 export interface ShareableTrackgroup {
   creatorId: number;
@@ -24,12 +35,12 @@ export interface ShareableTrackgroup {
 }
 
 export interface TrackData {
-  duration: number;
+  duration?: number;
   file: File;
   title: string;
   status: Track["status"];
-  track: string;
-  id3: { [key: string]: any };
+  order: string;
+  metadata: { [key: string]: any };
   trackArtists: {
     artistName?: string;
     artistId?: number;
@@ -59,23 +70,41 @@ const fileListIntoArray = (fileList: FileList) => {
   return [];
 };
 
-interface MetaData {
-  duration: number;
-  title: string;
-  artist: string;
-  track: string;
-}
-
 const parse = async (
   files: File[]
-): Promise<{ file: File; metadata: MetaData }[]> => {
+): Promise<
+  {
+    file: File;
+    metadata: IAudioMetadata;
+  }[]
+> => {
   const parsed = await Promise.all(
-    files.map(async (file) => ({
-      file,
-      metadata: (await parseAudioMetadata(
-        await convertFileToBuffer(file)
-      )) as unknown as MetaData,
-    }))
+    files.map(async (file) => {
+      try {
+        const parsedFile = await parseBlob(file);
+        const metadata = parsedFile.common;
+        return {
+          file,
+          metadata: {
+            ...parsedFile,
+            common: {
+              title: metadata.title ?? file.name,
+              ...parsedFile.common,
+            },
+          },
+        };
+      } catch (e) {
+        console.error("Error parsing metadata", e);
+        return {
+          file,
+          metadata: {
+            common: {
+              title: file.name,
+            } as ICommonTagsResult,
+          } as IAudioMetadata,
+        };
+      }
+    })
   );
   return parsed;
 };
@@ -104,45 +133,60 @@ export const BulkTrackUpload: React.FC<{
 
   const userId = user?.id;
 
+  const uploadNextTrack = React.useCallback(
+    async (remainingTracks: { order: number; t: TrackData }[]) => {
+      const firstTrack = remainingTracks.pop();
+      if (firstTrack) {
+        const packet = {
+          title: firstTrack.t.title,
+          metadata: firstTrack.t.metadata,
+          artistId: trackgroup.artistId,
+          isPreview: firstTrack.t.status === "preview",
+          order: firstTrack.order,
+          trackGroupId: trackgroup.id,
+          trackArtists: firstTrack.t.trackArtists.map((a) => ({
+            ...a,
+            artistId:
+              a.artistId && isFinite(+a.artistId) ? +a.artistId : undefined,
+          })),
+        };
+
+        const result = await api.post<Partial<Track>, { track: Track }>(
+          `users/${userId}/tracks`,
+          packet
+        );
+        const jobInfo = await api.uploadFile(
+          `users/${userId}/tracks/${result.track.id}/audio`,
+          [firstTrack.t.file]
+        );
+
+        const jobId = jobInfo.result.jobId;
+
+        setUploadJobs((existingJobs) => [
+          ...(existingJobs ?? []),
+          { jobId, jobStatus: "waiting" },
+        ]);
+
+        setTimeout(async () => {
+          await uploadNextTrack(remainingTracks);
+        }, 5000);
+      }
+    },
+    [setUploadJobs, trackgroup.artistId, trackgroup.id, userId]
+  );
+
   const doAddTrack = React.useCallback(
     async (data: FormData) => {
       try {
         if (userId) {
           setIsSaving(true);
 
-          const uploadJobIds = await Promise.all(
-            data.tracks.map(async (f) => {
-              const packet = {
-                title: f.title,
-                metadata: f,
-                artistId: trackgroup.artistId,
-                isPreview: f.status === "preview",
-                order: Number(f.track),
-                trackGroupId: trackgroup.id,
-                trackArtists: f.trackArtists.map((a) => ({
-                  ...a,
-                  artistId:
-                    a.artistId && isFinite(+a.artistId)
-                      ? +a.artistId
-                      : undefined,
-                })),
-              };
-              const result = await api.post<Partial<Track>, { track: Track }>(
-                `users/${userId}/tracks`,
-                packet
-              );
-              const jobInfo = await api.uploadFile(
-                `users/${userId}/tracks/${result.track.id}/audio`,
-                [f.file]
-              );
-
-              return jobInfo.result.jobId;
-            })
+          await uploadNextTrack(
+            data.tracks.map((t, i) => ({
+              order: Number.isFinite(+t.order) ? Number(t.order) : i + 1,
+              t,
+            }))
           );
-          setUploadJobs(
-            uploadJobIds.map((id) => ({ jobId: id, jobStatus: "waiting" }))
-          );
-
           snackbar("Uploading tracks...", { type: "success" });
         }
       } catch (e) {
@@ -153,7 +197,7 @@ export const BulkTrackUpload: React.FC<{
         // await reload();
       }
     },
-    [userId, setUploadJobs, snackbar, trackgroup.artistId, trackgroup.id]
+    [userId, uploadNextTrack, snackbar]
   );
 
   const processUploadedFiles = React.useCallback(
@@ -161,26 +205,37 @@ export const BulkTrackUpload: React.FC<{
       const filesToParse = fileListIntoArray(filesToProcess);
       (async () => {
         const parsed = await parse(filesToParse);
+
         replace(
           parsed
-            .sort((a, b) => (a.metadata.track > b.metadata.track ? 1 : -1))
-            .map((p) => ({
-              id3: p.metadata,
-              duration: p.metadata.duration,
-              track: p.metadata.track,
+            .sort((a, b) =>
+              (a.metadata.common.track.no ?? 0) >
+              (b.metadata.common.track.no ?? 0)
+                ? 1
+                : -1
+            )
+            .map((p, i) => ({
+              metadata: p.metadata,
+              order: `${
+                p.metadata.common.track.no &&
+                Number.isFinite(+p.metadata.common.track.no)
+                  ? Number(p.metadata.common.track.no)
+                  : i + 1
+              }`,
+              duration: p.metadata.format.duration,
               file: p.file,
-              title: p.metadata.title,
+              title: p.metadata.common.title ?? "",
               status: "must-own",
-              trackArtists: [
-                {
-                  artistName: p.metadata.artist,
+              trackArtists:
+                p.metadata.common.artists?.map((artist) => ({
+                  artistName: artist ?? "",
+                  role: "",
                   isCoAuthor: true,
                   artistId:
-                    p.metadata.artist === trackgroup.artist?.name
+                    artist === trackgroup.artist?.name
                       ? trackgroup.artistId
                       : undefined,
-                },
-              ],
+                })) ?? [],
             }))
         );
       })();
@@ -247,6 +302,7 @@ export const BulkTrackUpload: React.FC<{
                       <FaQuestionCircle />
                     </Tooltip>
                   </th>
+                  <th className="alignRight">{t("duration")}</th>
                   <th>
                     {t("status")}{" "}
                     <Tooltip hoverText={t("statusHelp")}>

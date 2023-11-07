@@ -51,7 +51,7 @@ export const stateReducer = produce((draft: ArtistState, action: Actions) => {
 });
 
 const ArtistContext = createContext(
-  {} as [ArtistState, React.Dispatch<Actions>]
+  {} as [ArtistState, React.Dispatch<Actions>, () => Promise<void>]
 );
 
 export const ArtistProvider: React.FC<{
@@ -68,38 +68,54 @@ export const ArtistProvider: React.FC<{
     isLoading: true,
   });
 
-  React.useEffect(() => {
-    const callback = async () => {
-      let artist;
-      dispatch({ type: "setIsLoading", isLoading: true });
-      if (managedArtist) {
-        const { result } = await api.get<Artist>(
-          `users/${userId}/artists/${artistId}`
-        );
-        artist = result;
-      } else {
-        const { result } = await api.get<Artist>(`artists/${artistId}`);
-        artist = result;
-      }
+  const fetchArtist = React.useCallback(async () => {
+    let artist;
 
-      const checkAccountStatus = await api.get<AccountStatus>(
-        `users/${artist.userId}/stripe/checkAccountStatus`
+    if (managedArtist) {
+      const { result } = await api.get<Artist>(
+        `users/${userId}/artists/${artistId}`
       );
+      artist = result;
+    } else {
+      const { result } = await api.get<Artist>(`artists/${artistId}`);
+      artist = result;
+    }
 
-      dispatch({
-        type: "setState",
-        state: {
-          isLoading: false,
-          artist,
-          userStripeStatus: checkAccountStatus.result,
-        },
-      });
-    };
-    callback();
-  }, [managedArtist, userId, artistId]);
+    return artist;
+  }, [artistId, managedArtist, userId]);
+
+  const refreshArtist = React.useCallback(async () => {
+    const artist = await fetchArtist();
+    dispatch({
+      type: "setArtist",
+      artist,
+    });
+  }, [fetchArtist]);
+
+  const initialLoad = React.useCallback(async () => {
+    dispatch({ type: "setIsLoading", isLoading: true });
+
+    const artist = await fetchArtist();
+    const checkAccountStatus = await api.get<AccountStatus>(
+      `users/${artist.userId}/stripe/checkAccountStatus`
+    );
+
+    dispatch({
+      type: "setState",
+      state: {
+        isLoading: false,
+        artist,
+        userStripeStatus: checkAccountStatus.result,
+      },
+    });
+  }, [fetchArtist]);
+
+  React.useEffect(() => {
+    initialLoad();
+  }, [initialLoad]);
 
   return (
-    <ArtistContext.Provider value={[state, dispatch]}>
+    <ArtistContext.Provider value={[state, dispatch, refreshArtist]}>
       {children}
     </ArtistContext.Provider>
   );
@@ -107,5 +123,9 @@ export const ArtistProvider: React.FC<{
 
 export const useArtistContext = () => {
   const artistContext = React.useContext(ArtistContext);
-  return { state: artistContext[0], dispatch: artistContext[1] };
+  return {
+    state: artistContext[0],
+    dispatch: artistContext[1],
+    refresh: artistContext[2],
+  };
 };

@@ -26,7 +26,7 @@ export const isEqualDurations = (n1: number, n2: number) => {
 };
 
 export const fmtMSS = (s: number) => {
-  return (s - (s %= 60)) / 60 + (9 < s ? ":" : ":0") + s;
+  return (s - (s %= 60)) / 60 + (9 < s ? ":" : ":0") + s.toFixed(2);
 };
 
 export const isTrackOwnedOrPreview = (

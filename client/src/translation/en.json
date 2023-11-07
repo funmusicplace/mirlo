@@ -136,6 +136,7 @@
     "ep": "EP",
     "single": "Single",
     "releaseDate": "Release date",
+    "duration": "Duration",
     "compilation": "Compilation",
     "about": "About",
     "price": "Price",
@@ -181,7 +182,11 @@
     "edit": "Edit",
     "delete": "Delete",
     "addNewPost": "Add new post to {{artist}}",
-    "postDeleted": "Post deleted"
+    "postDeleted": "Post deleted",
+    "primaryColor": "Primary color",
+    "secondaryColor": "Secondary color",
+    "backgroundColor": "Background color",
+    "foregroundColor": "Normal text color"
   },
   "manageSubscriptions": {
     "downloadSubscriberData": "Download subscriber data"

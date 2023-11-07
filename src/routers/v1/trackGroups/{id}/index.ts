@@ -25,32 +25,35 @@ export default function () {
     try {
       id = await findTrackGroupIdForSlug(id, artistId);
 
-      const trackGroup = await prisma.trackGroup.findFirst({
-        where: { id: Number(id), published: true },
-        include: {
-          tracks: {
-            where: {
-              deletedAt: null,
+      let trackGroup;
+      if (id) {
+        trackGroup = await prisma.trackGroup.findFirst({
+          where: { id: Number(id), published: true },
+          include: {
+            tracks: {
+              where: {
+                deletedAt: null,
+              },
+              include: {
+                audio: true,
+              },
+              orderBy: { order: "asc" },
             },
-            include: {
-              audio: true,
-            },
-            orderBy: { order: "asc" },
-          },
-          artist: true,
-          cover: true,
-          ...(loggedInUser
-            ? {
-                userTrackGroupPurchases: {
-                  where: { userId: loggedInUser.id },
-                  select: {
-                    userId: true,
+            artist: true,
+            cover: true,
+            ...(loggedInUser
+              ? {
+                  userTrackGroupPurchases: {
+                    where: { userId: loggedInUser.id },
+                    select: {
+                      userId: true,
+                    },
                   },
-                },
-              }
-            : {}),
-        },
-      });
+                }
+              : {}),
+          },
+        });
+      }
 
       if (!trackGroup) {
         res.status(404);

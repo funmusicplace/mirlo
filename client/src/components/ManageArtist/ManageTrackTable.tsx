@@ -39,10 +39,6 @@ export const ManageTrackTable: React.FC<{
           draggingTrackId
         );
         if (trackGroupId) {
-          console.log(
-            "tracks",
-            newTracks.map((t) => t.id)
-          );
           setDisplayTracks(newTracks);
 
           // FIXME: this endpoint isn't implemented

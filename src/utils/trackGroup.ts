@@ -48,15 +48,19 @@ export const findTrackGroupIdForSlug = async (
         "Searching for a TrackGroup by slug requires an artistId"
       );
     }
-    artistId = await findArtistIdForURLSlug(artistId);
+    const parsedArtistId = await findArtistIdForURLSlug(artistId);
 
-    const artist = await prisma.trackGroup.findFirst({
-      where: {
-        urlSlug: { equals: id, mode: "insensitive" },
-        artistId: Number(artistId),
-      },
-    });
-    id = `${artist?.id ?? id}`;
+    if (parsedArtistId) {
+      const artist = await prisma.trackGroup.findFirst({
+        where: {
+          urlSlug: { equals: id, mode: "insensitive" },
+          artistId: parsedArtistId,
+        },
+      });
+      id = `${artist?.id ?? id}`;
+    } else {
+      return undefined;
+    }
   }
   return id;
 };

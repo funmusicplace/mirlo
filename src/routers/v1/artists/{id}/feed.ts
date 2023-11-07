@@ -19,15 +19,18 @@ export default function () {
     const user = req.user as User;
 
     try {
-      id = await findArtistIdForURLSlug(id);
-      const artist = await prisma.artist.findFirst({
-        where: {
-          id: Number(id),
-        },
-        include: {
-          subscriptionTiers: true,
-        },
-      });
+      const parsedId = await findArtistIdForURLSlug(id);
+      let artist;
+      if (parsedId) {
+        artist = await prisma.artist.findFirst({
+          where: {
+            id: Number(parsedId),
+          },
+          include: {
+            subscriptionTiers: true,
+          },
+        });
+      }
 
       if (!artist) {
         return res.status(404).json({
@@ -36,7 +39,7 @@ export default function () {
       }
       let where: Prisma.PostWhereInput = {
         publishedAt: { lte: new Date() },
-        artistId: Number(id),
+        artistId: Number(parsedId),
         isPublic: true,
       };
 

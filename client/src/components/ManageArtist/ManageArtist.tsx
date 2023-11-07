@@ -12,6 +12,9 @@ import ManageArtistSubscriptionTiers from "./ManageArtistSubscriptionTiers";
 import { useSnackbar } from "state/SnackbarContext";
 import { useTranslation } from "react-i18next";
 import { useArtistContext } from "state/ArtistContext";
+import MarkdownWrapper from "components/common/MarkdownWrapper";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 const ManageArtist: React.FC<{}> = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
@@ -23,6 +26,7 @@ const ManageArtist: React.FC<{}> = () => {
   const { artistId } = useParams();
   const {
     state: { artist },
+    refresh,
   } = useArtistContext();
 
   const [isEditing, setIsEditing] = React.useState(false);
@@ -66,7 +70,7 @@ const ManageArtist: React.FC<{}> = () => {
         onClose={() => setIsEditing(false)}
         existing={artist}
         reload={() => {
-          return Promise.resolve();
+          return refresh();
         }}
       />
       <div
@@ -85,6 +89,11 @@ const ManageArtist: React.FC<{}> = () => {
         >
           {t("manage", { artist: artist.name })}
         </h1>
+        <MarkdownWrapper>
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            {artist.bio}
+          </ReactMarkdown>
+        </MarkdownWrapper>
         <div>
           <Button
             compact
