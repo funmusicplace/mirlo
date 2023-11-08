@@ -8,7 +8,8 @@ const TrackRowPlayControl: React.FC<{
   trackNumber: number;
   trackId: number;
   onTrackPlayCallback?: (trackId: number) => void;
-}> = ({ trackId, trackNumber, onTrackPlayCallback }) => {
+  isDisabled?: boolean;
+}> = ({ trackId, trackNumber, onTrackPlayCallback, isDisabled }) => {
   const {
     state: { playerQueueIds, playing, currentlyPlayingIndex },
     dispatch,
@@ -32,14 +33,16 @@ const TrackRowPlayControl: React.FC<{
       {(!playing || currentPlayingTrackId !== trackId) && (
         <>
           <span
-            className="track-number"
+            className={!isDisabled ? "track-number" : ""}
             style={{ width: "2rem", textAlign: "center" }}
           >
             {trackNumber}
           </span>
-          <IconButton compact className="play-button" onClick={onTrackPlay}>
-            <VscPlay />
-          </IconButton>
+          {!isDisabled && (
+            <IconButton compact className="play-button" onClick={onTrackPlay}>
+              <VscPlay />
+            </IconButton>
+          )}
         </>
       )}
       {playing && currentPlayingTrackId === trackId && (

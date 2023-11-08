@@ -17,7 +17,9 @@ export const BulkTrackUploadRow: React.FC<{
   track: TrackData;
   index: number;
   uploadingState?: string;
-}> = ({ track, index, uploadingState }) => {
+  isSaving?: boolean;
+  remove: (index: number) => void;
+}> = ({ track, index, uploadingState, isSaving, remove }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const [showMoreDetails, setShowMoreDetails] = React.useState(false);
   const { register, control } = useFormContext();
@@ -26,15 +28,15 @@ export const BulkTrackUploadRow: React.FC<{
     name: `tracks.${index}.trackArtists`,
   });
 
-  const { remove: removeFromTracks } = useFieldArray({
-    control,
-    name: "tracks",
-  });
+  const removeOnClick = React.useCallback(() => {
+    remove(index);
+  }, [index, remove]);
+
   return (
     <>
       <tr
         className={css`
-          ${uploadingState
+          ${uploadingState || isSaving
             ? `
             opacity: .4;
             pointer-events: none;
@@ -45,7 +47,7 @@ export const BulkTrackUploadRow: React.FC<{
         <td>
           {!uploadingState && (
             <>
-              <IconButton onClick={() => removeFromTracks()}>
+              <IconButton onClick={removeOnClick} type="button">
                 <FaTrash />
               </IconButton>
             </>

@@ -21,7 +21,8 @@ const AlbumForm: React.FC<{
   reload: () => Promise<void> | void;
   artist: Artist;
   onClose?: () => void;
-}> = ({ reload, artist, existing, onClose }) => {
+  isLoading?: boolean;
+}> = ({ reload, artist, existing, onClose, isLoading }) => {
   const {
     state: { user },
   } = useGlobalStateContext();
@@ -149,6 +150,17 @@ const AlbumForm: React.FC<{
       reload();
     }
   }, [artist.id, navigate, newAlbumId, reload, uploadJobs]);
+
+  React.useEffect(() => {
+    if (!isLoading) {
+      const newValues = {
+        ...existing,
+        releaseDate: existing?.releaseDate.split("T")[0],
+        minPrice: `${existing?.minPrice ? existing.minPrice / 100 : ""}`,
+      };
+      reset(newValues);
+    }
+  }, [isLoading, existing, reset]);
 
   return (
     <div

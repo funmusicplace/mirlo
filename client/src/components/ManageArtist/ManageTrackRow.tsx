@@ -88,6 +88,7 @@ const ManageTrackRow: React.FC<{
           trackId={track.id}
           trackNumber={track.order}
           onTrackPlayCallback={addTracksToQueue}
+          isDisabled={uploadState !== "SUCCESS"}
         />
       </td>
       <td
