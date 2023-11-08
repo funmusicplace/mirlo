@@ -126,6 +126,7 @@
   },
   "manageAlbum": {
     "editAlbum": "Edit album",
+    "viewArtist": "Back to artist",
     "title": "Title",
     "isPublished": "Is it published?",
     "publishedDescription": "Published albums can be bought and listened to.",

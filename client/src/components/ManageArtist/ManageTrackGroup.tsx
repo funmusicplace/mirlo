@@ -24,7 +24,11 @@ const ManageTrackGroup: React.FC<{}> = () => {
 
   const userId = user?.id;
 
-  const { object: trackGroup, reload } = useGetUserObjectById<TrackGroup>(
+  const {
+    object: trackGroup,
+    reload,
+    isLoadingObject,
+  } = useGetUserObjectById<TrackGroup>(
     "trackGroups",
     userId,
     trackGroupId,
@@ -49,15 +53,26 @@ const ManageTrackGroup: React.FC<{}> = () => {
         `}
       >
         <h1>{t(trackGroup ? "editAlbum" : "createAlbum")}</h1>
-        {trackGroup && (
-          <Link
-            to={`/${artist.urlSlug?.toLowerCase()}/release/${trackGroup.urlSlug?.toLowerCase()}`}
-          >
-            <Button compact>{t("view")}</Button>
+        <div>
+          {trackGroup && (
+            <Link
+              to={`/${artist.urlSlug?.toLowerCase()}/release/${trackGroup.urlSlug?.toLowerCase()}`}
+              style={{ marginRight: ".5rem" }}
+            >
+              <Button compact>{t("view")}</Button>
+            </Link>
+          )}
+          <Link to={`/manage/artists/${artist.id}/`}>
+            <Button compact>{t("viewArtist")}</Button>
           </Link>
-        )}
+        </div>
       </div>
-      <AlbumForm existing={trackGroup} reload={reload} artist={artist} />
+      <AlbumForm
+        existing={trackGroup}
+        reload={reload}
+        artist={artist}
+        isLoading={isLoadingObject}
+      />
       {trackGroup && trackGroup?.tracks?.length > 0 && (
         <ManageTrackTable
           tracks={trackGroup.tracks}

@@ -118,7 +118,7 @@ export const BulkTrackUpload: React.FC<{
   const methods = useForm<FormData>();
   const { register, handleSubmit, watch, control, reset } = methods;
   const { uploadJobs, setUploadJobs } = useJobStatusCheck({ reload, reset });
-  const { fields, replace } = useFieldArray({
+  const { fields, replace, remove } = useFieldArray({
     control,
     name: "tracks",
   });
@@ -335,6 +335,8 @@ export const BulkTrackUpload: React.FC<{
                     key={t.title}
                     index={idx}
                     uploadingState={uploadJobs?.[idx]?.jobStatus}
+                    isSaving={isSaving}
+                    remove={remove}
                   />
                 ))}
               </tbody>

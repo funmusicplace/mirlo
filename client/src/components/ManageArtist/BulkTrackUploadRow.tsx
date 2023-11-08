@@ -3,7 +3,7 @@ import React from "react";
 import IconButton from "components/common/IconButton";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { InputEl } from "components/common/Input";
-import { FaCheck, FaEllipsisV, FaPlus } from "react-icons/fa";
+import { FaCheck, FaEllipsisV, FaPlus, FaTrash } from "react-icons/fa";
 import { css } from "@emotion/css";
 import Button from "components/common/Button";
 import { useTranslation } from "react-i18next";
@@ -17,7 +17,9 @@ export const BulkTrackUploadRow: React.FC<{
   track: TrackData;
   index: number;
   uploadingState?: string;
-}> = ({ track, index, uploadingState }) => {
+  isSaving?: boolean;
+  remove: (index: number) => void;
+}> = ({ track, index, uploadingState, isSaving, remove }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const [showMoreDetails, setShowMoreDetails] = React.useState(false);
   const { register, control } = useFormContext();
@@ -26,11 +28,15 @@ export const BulkTrackUploadRow: React.FC<{
     name: `tracks.${index}.trackArtists`,
   });
 
+  const removeOnClick = React.useCallback(() => {
+    remove(index);
+  }, [index, remove]);
+
   return (
     <>
       <tr
         className={css`
-          ${uploadingState
+          ${uploadingState || isSaving
             ? `
             opacity: .4;
             pointer-events: none;
@@ -39,6 +45,13 @@ export const BulkTrackUploadRow: React.FC<{
         `}
       >
         <td>
+          {!uploadingState && (
+            <>
+              <IconButton onClick={removeOnClick} type="button">
+                <FaTrash />
+              </IconButton>
+            </>
+          )}
           {uploadingState === "completed" && (
             <div
               className={css`

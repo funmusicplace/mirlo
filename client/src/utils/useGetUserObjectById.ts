@@ -8,7 +8,7 @@ const useGetUserObjectById = <T>(
   queryParams?: string
 ) => {
   const [object, setObject] = React.useState<T>();
-  const [isLoading, setIsLoading] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(true);
 
   const fetchObject = React.useCallback(async () => {
     setIsLoading(true);
