@@ -110,6 +110,15 @@ If you want to do logging in the database, you need to uncomment the `log` line 
 
 See the [test/README.md](/test/README.md) instructions.
 
+## Apple Chip Errors w/ Docker
+
+If you get errors when running the backbird-api and blackbird-background service like `Error relocating /usr/lib/libgcc_s.so.1: unsupported relocation type 7`, you'll need to follow these steps.
+
+1. In terminal run `softwareupdate --install-rosetta`
+2. In Docker Desktop, go to Settings -> General and ensure `Use Rosetta for x86/amd64 emulation on Apple Silicon` is checked.
+3. Delete any previously created images
+4. Run `DOCKER_DEFAULT_PLATFORM=linux/amd64 docker compose up`
+
 # Credits
 
 Logo created by Lluisa Iborra on [the Noun Project](https://thenounproject.com/icon/bird-818956/).
