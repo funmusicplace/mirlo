@@ -58,6 +58,8 @@ const ManageTrackRow: React.FC<{
 
   const uploadState = track.audio?.uploadState;
 
+  const isDisabled = track.audio && uploadState !== "SUCCESS";
+
   return (
     <tr
       key={track.id}
@@ -80,7 +82,7 @@ const ManageTrackRow: React.FC<{
         &:hover > td > .track-number {
           display: none;
         }
-        ${uploadState !== "SUCCESS" && `opacity: .5;`}
+        ${isDisabled ? `opacity: .5;` : ""}
       `}
     >
       <td>
@@ -88,7 +90,7 @@ const ManageTrackRow: React.FC<{
           trackId={track.id}
           trackNumber={track.order}
           onTrackPlayCallback={addTracksToQueue}
-          isDisabled={uploadState !== "SUCCESS"}
+          isDisabled={isDisabled}
         />
       </td>
       <td
@@ -136,7 +138,7 @@ const ManageTrackRow: React.FC<{
               onClick={() => setIsEditingTitle(true)}
               title={t("edit") ?? ""}
               style={{ marginRight: "1rem" }}
-              disabled={uploadState !== "SUCCESS"}
+              disabled={isDisabled}
             >
               <FaPen />
             </IconButton>
@@ -144,7 +146,7 @@ const ManageTrackRow: React.FC<{
               compact
               onClick={onDeleteClick}
               title={t("delete") ?? ""}
-              disabled={uploadState !== "SUCCESS"}
+              disabled={isDisabled}
             >
               <FaTrash />
             </IconButton>

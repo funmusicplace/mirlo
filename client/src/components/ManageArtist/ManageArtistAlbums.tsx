@@ -44,11 +44,10 @@ const ManageArtistAlbums: React.FC<{}> = () => {
   return (
     <div
       className={css`
-        padding: .5rem 2rem 0rem 2rem;
-
+        padding: 0.5rem 0 2rem 0;
         @media screen and (max-width: ${bp.medium}px) {
           border-radius: 0;
-          padding: 1rem .5rem 0rem;
+          padding: 1rem 0.5rem 0rem;
         }
       `}
     >

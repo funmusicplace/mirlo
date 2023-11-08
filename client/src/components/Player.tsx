@@ -19,7 +19,6 @@ import PreviousButton from "./common/PreviousButton";
 import { isEmpty } from "lodash";
 
 const playerClass = css`
-
   border-bottom: 1px solid grey;
   display: flex;
   flex-direction: column;
@@ -30,9 +29,10 @@ const playerClass = css`
   bottom: 0;
   filter: drop-shadow(0 0 0.1rem rgba(0, 0, 0, 0.5));
   background-color: var(--mi-light-background-color);
+  height: 73px;
 
   @media (max-width: ${bp.small}px) {
-    // height: 140px;
+    height: 140px;
     flex-direction: column;
 
     button {
@@ -142,7 +142,6 @@ const Player = () => {
             ? `${currentTrack.trackGroup?.artist?.name} - ${currentTrack.title}`
             : ""}
         </title>
-
       </Helmet>
       <div
         className={css`
@@ -189,50 +188,56 @@ const Player = () => {
               align-items: center;
 
               margin-right: 1rem;
-              margin-left: .5rem;
+              margin-left: 0.5rem;
               margin-bottom: 0.5rem;
               margin-top: 0.5rem;
             `}
           >
-            <ImageWithPlaceholder
-              src={currentTrack?.trackGroup.cover?.sizes?.[120]}
-              size={45}
-              alt={currentTrack?.title ?? "Loading album"}
-              className={css`
-                background-color: #efefef;
-                margin-right: 0.5rem;
-                min-height: 100%;
-                min-width: 50px;
-              `}
-            />
+            <div>
+              <ImageWithPlaceholder
+                src={currentTrack?.trackGroup.cover?.sizes?.[120]}
+                size={45}
+                alt={currentTrack?.title ?? "Loading album"}
+                className={css`
+                  background-color: #efefef;
+                  margin-right: 0.5rem;
+                  min-height: 100%;
+                  min-width: 50px;
+                `}
+              />
+            </div>
             <div
               className={css`
-                width:80%;
+                width: 80%;
                 display: flex;
                 flex-direction: column;
               `}
             >
               <div
-              className={css`
-                overflow: hidden;
-                white-space: nowrap;
-                text-overflow: ellipsis;
-              `}
-              >{currentTrack?.title}</div>
+                className={css`
+                  overflow: hidden;
+                  white-space: nowrap;
+                  text-overflow: ellipsis;
+                `}
+              >
+                {currentTrack?.title}
+              </div>
               {currentTrack?.trackGroup && (
                 <>
                   <div
-                  className={css`
-                    font-size: .7rem;
-                    text-transform: capitalize;
-                    color: var(--mi-light-foreground-color);
-                    white-space: nowrap;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                  `}
-                  >{currentTrack.trackGroup.title}</div>
+                    className={css`
+                      font-size: 0.7rem;
+                      text-transform: capitalize;
+                      color: var(--mi-light-foreground-color);
+                      white-space: nowrap;
+                      overflow: hidden;
+                      text-overflow: ellipsis;
+                    `}
+                  >
+                    {currentTrack.trackGroup.title}
+                  </div>
                   <div
-                  className={css`
+                    className={css`
                     font-size: .7rem;
                     text-transform: capitalize;
                     overflow: hidden;
@@ -261,43 +266,44 @@ const Player = () => {
             `}
           >
             <span
-            className={css`
-              display: flex;
-              align-items: center;
-
-              button {
-                background: transparent;
-                font-size: 1rem;
-              }
-              button:hover {
-                color: var(--mi-normal-foreground-color) !important;
-                background: var(--mi-normal-background-color) !important;
-              }
-
-              @media (max-width: ${bp.small}px) {
-                margin-right: .5rem;
-                max-width: 50%
-              }
-            `}>
-            <span
               className={css`
                 display: flex;
                 align-items: center;
 
                 button {
-                  background-color: transparent;
+                  background: transparent;
+                  font-size: 1rem;
+                }
+                button:hover {
+                  color: var(--mi-normal-foreground-color) !important;
+                  background: var(--mi-normal-background-color) !important;
                 }
 
                 @media (max-width: ${bp.small}px) {
-                  display: none;
+                  margin-right: 0.5rem;
+                  max-width: 50%;
                 }
               `}
             >
-              <ShuffleButton />
-              <LoopButton />
-            </span>
+              <span
+                className={css`
+                  display: flex;
+                  align-items: center;
+
+                  button {
+                    background-color: transparent;
+                  }
+
+                  @media (max-width: ${bp.small}px) {
+                    display: none;
+                  }
+                `}
+              >
+                <ShuffleButton />
+                <LoopButton />
+              </span>
               <div
-              className={css`
+                className={css`
 
                 @media (max-width: ${bp.small}px) {
                     button {
@@ -306,25 +312,25 @@ const Player = () => {
                     }
               `}
               >
-              <PreviousButton />
+                <PreviousButton />
               </div>
               <div
-              className={css`
-                    button {
-                      color: var(--mi-normal-foreground-color);
-                      font-size: 1rem !important;
+                className={css`
+                  button {
+                    color: var(--mi-normal-foreground-color);
+                    font-size: 1rem !important;
 
-                      button:hover {
-                        color: var(--mi-normal-foreground-color) !important;
-                      }
+                    button:hover {
+                      color: var(--mi-normal-foreground-color) !important;
                     }
-              `}
+                  }
+                `}
               >
-              {!playing && <PlayButton />}
-              {playing && <PauseButton />}
+                {!playing && <PlayButton />}
+                {playing && <PauseButton />}
               </div>
               <div
-              className={css`
+                className={css`
 
                 @media (max-width: ${bp.small}px) {
                     button {
@@ -334,7 +340,7 @@ const Player = () => {
                     }
               `}
               >
-              <NextButton />
+                <NextButton />
               </div>
             </span>
           </div>

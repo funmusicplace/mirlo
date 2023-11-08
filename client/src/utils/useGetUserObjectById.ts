@@ -9,6 +9,7 @@ const useGetUserObjectById = <T>(
 ) => {
   const [object, setObject] = React.useState<T>();
   const [isLoading, setIsLoading] = React.useState(true);
+  const [finishedFirstLoad, setFinishedFirstLoad] = React.useState(false);
 
   const fetchObject = React.useCallback(async () => {
     setIsLoading(true);
@@ -20,6 +21,7 @@ const useGetUserObjectById = <T>(
           `users/${userId}/${endpoint}/${id}${queryParams ?? ""}`
         );
         setObject(result);
+        setFinishedFirstLoad(true);
       } else {
         setObject(undefined);
       }
@@ -32,7 +34,12 @@ const useGetUserObjectById = <T>(
     fetchObject();
   }, [fetchObject]);
 
-  return { object, isLoadingObject: isLoading, reload: fetchObject };
+  return {
+    object,
+    isLoadingObject: isLoading,
+    reload: fetchObject,
+    finishedFirstLoad,
+  };
 };
 
 export default useGetUserObjectById;

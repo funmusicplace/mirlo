@@ -71,8 +71,9 @@ const ManageArtistPosts: React.FC<{}> = () => {
   }
 
   return (
-    <div className={css`
-      padding: .5rem 2rem 1rem 2rem;
+    <div
+      className={css`
+      padding: 0.5rem 0 2rem 0;
 
       @media screen and (max-width: ${bp.medium}px) {
         border-radius: 0;

@@ -53,80 +53,65 @@ export const Manage: React.FC = () => {
     <>
       <div
         className={css`
-          z-index: 1;
-          top: calc(48px + 3rem);
-          left: 0;
-          overflow-x: hidden;
-          padding: 0;
+          display: flex;
+          flex-direction: column;
+          button {
+            margin-top: 0 !important;
+          }
         `}
       >
+        <h2 className={css``}>{t("manageArtists")}</h2>
+
         <div
           className={css`
+            width: 100%;
             display: flex;
-            flex-direction: column;
-            button {
-              margin-top: 0 !important;
-            }
+            align-items: center;
+            justify-content: stretch;
+            margin-top: 1rem;
+            flex-wrap: wrap;
           `}
         >
-          <h2 className={css``}>{t("manageArtists")}</h2>
-
-          <div
-            className={css`
-              width: 100%;
-              display: flex;
-              align-items: center;
-              justify-content: stretch;
-              margin-top: 1rem;
-              flex-wrap: wrap;
-            `}
-          >
-            {artists.map((a) => (
-              <Link
-                key={a.id}
-                to={`artists/${a.id}`}
-                className={css`
-                  margin-right: 1rem;
-                `}
-              >
-                <Button variant="outlined">{a.name}</Button>
-              </Link>
-            ))}
-            <Button
-              onClick={() => {
-                setCreatingNewArtist(true);
-              }}
+          {artists.map((a) => (
+            <Link
+              key={a.id}
+              to={`artists/${a.id}`}
               className={css`
-                flex-grow: 1;
-                text-align: center;
-                border-radius: 6px;
+                margin-right: 1rem;
               `}
             >
-              {t("createNewArtist")}
-            </Button>
-            <CreateNewArtistForm
-              open={creatingNewArtist}
-              onClose={() => setCreatingNewArtist(false)}
-              reload={fetchArtists}
-            />
-          </div>
-          <div
+              <Button variant="outlined">{a.name}</Button>
+            </Link>
+          ))}
+          <Button
+            onClick={() => {
+              setCreatingNewArtist(true);
+            }}
             className={css`
-              margin-top: 1rem;
+              flex-grow: 1;
+              text-align: center;
+              border-radius: 6px;
             `}
           >
-            {!stripeAccountStatus?.detailsSubmitted && (
-              <Button onClick={setUpBankAccount}>
-                {t("setUpBankAccount")}
-              </Button>
-            )}
-            {!stripeAccountStatus?.chargesEnabled && (
-              t("waitingStripeAccountVerification")
-            )}
-            {stripeAccountStatus?.chargesEnabled && (
-                t("stripeAccountVerified")
-            )}
-          </div>
+            {t("createNewArtist")}
+          </Button>
+          <CreateNewArtistForm
+            open={creatingNewArtist}
+            onClose={() => setCreatingNewArtist(false)}
+            reload={fetchArtists}
+          />
+        </div>
+        <div
+          className={css`
+            margin-top: 1rem;
+          `}
+        >
+          {!stripeAccountStatus?.detailsSubmitted && (
+            <Button onClick={setUpBankAccount}>{t("setUpBankAccount")}</Button>
+          )}
+          {!stripeAccountStatus?.chargesEnabled &&
+            t("waitingStripeAccountVerification")}
+          {stripeAccountStatus?.chargesEnabled && t("stripeAccountVerified")}
         </div>
       </div>
     </>

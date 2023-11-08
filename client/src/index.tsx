@@ -36,6 +36,9 @@ import { ArtistProvider } from "state/ArtistContext";
 import FAQ from "components/FAQ";
 import ManageTrackGroup from "components/ManageArtist/ManageTrackGroup";
 import Releases from "components/Releases";
+import ManageContainer from "components/ManageArtist/ManageContainer";
+import ManageArtistContainer from "components/ManageArtist/ManageArtistContainer";
+import ArtistContainer from "components/Artist/ArtistContainer";
 
 const router = createBrowserRouter([
   {
@@ -82,40 +85,63 @@ const router = createBrowserRouter([
         path: "manage",
         element: (
           <AuthWrapper>
-            <Manage />
+            <ManageContainer />
           </AuthWrapper>
         ),
+        children: [
+          {
+            path: "",
+            element: (
+              <AuthWrapper>
+                <Manage />
+              </AuthWrapper>
+            ),
+          },
+          {
+            path: "artists/:artistId",
+            element: (
+              <AuthWrapper>
+                <ArtistProvider managedArtist>
+                  <ManageArtistContainer />
+                </ArtistProvider>
+              </AuthWrapper>
+            ),
+            children: [
+              {
+                path: "",
+                element: (
+                  <AuthWrapper>
+                    <ArtistProvider managedArtist>
+                      <ManageArtist />
+                    </ArtistProvider>
+                  </AuthWrapper>
+                ),
+              },
+              {
+                path: "release/:trackGroupId",
+                element: (
+                  <AuthWrapper>
+                    <ArtistProvider managedArtist>
+                      <ManageTrackGroup />
+                    </ArtistProvider>
+                  </AuthWrapper>
+                ),
+              },
+              {
+                path: "new-release",
+                element: (
+                  <AuthWrapper>
+                    <ArtistProvider managedArtist>
+                      <ManageTrackGroup />
+                    </ArtistProvider>
+                  </AuthWrapper>
+                ),
+              },
+            ],
+          },
+        ],
       },
-      {
-        path: "manage/artists/:artistId",
-        element: (
-          <AuthWrapper>
-            <ArtistProvider managedArtist>
-              <ManageArtist />
-            </ArtistProvider>
-          </AuthWrapper>
-        ),
-      },
-      {
-        path: "manage/artists/:artistId/release/:trackGroupId",
-        element: (
-          <AuthWrapper>
-            <ArtistProvider managedArtist>
-              <ManageTrackGroup />
-            </ArtistProvider>
-          </AuthWrapper>
-        ),
-      },
-      {
-        path: "manage/artists/:artistId/new-release",
-        element: (
-          <AuthWrapper>
-            <ArtistProvider managedArtist>
-              <ManageTrackGroup />
-            </ArtistProvider>
-          </AuthWrapper>
-        ),
-      },
+
       {
         path: "admin",
         element: (
@@ -156,22 +182,19 @@ const router = createBrowserRouter([
       },
       {
         path: ":artistId",
+        element: (
+          <ArtistProvider>
+            <ArtistContainer />
+          </ArtistProvider>
+        ),
         children: [
           {
             path: "",
-            element: (
-              <ArtistProvider>
-                <Artist />
-              </ArtistProvider>
-            ),
+            element: <Artist />,
           },
           {
             path: "release/:trackGroupId",
-            element: (
-              <ArtistProvider>
-                <TrackGroup />
-              </ArtistProvider>
-            ),
+            element: <TrackGroup />,
           },
         ],
       },
