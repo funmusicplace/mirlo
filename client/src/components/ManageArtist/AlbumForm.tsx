@@ -30,6 +30,12 @@ const AlbumForm: React.FC<{
   const [isSaving, setIsSaving] = React.useState(false);
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
 
+  const defaultValues = {
+    ...existing,
+    releaseDate: existing?.releaseDate.split("T")[0],
+    minPrice: `${existing?.minPrice ? existing.minPrice / 100 : ""}`,
+  };
+
   const methods = useForm<{
     published: boolean;
     title: string;
@@ -39,11 +45,7 @@ const AlbumForm: React.FC<{
     about: string;
     coverFile: File[];
   }>({
-    defaultValues: {
-      ...existing,
-      releaseDate: existing?.releaseDate.split("T")[0],
-      minPrice: `${existing?.minPrice ? existing.minPrice / 100 : ""}`,
-    } ?? {
+    defaultValues: defaultValues ?? {
       published: false,
     },
   });
@@ -155,60 +157,61 @@ const AlbumForm: React.FC<{
         padding: 2rem;
       `}
     >
-    <FormProvider {...methods}>
-      <form onSubmit={handleSubmit(doSave)}>
-        <FormComponent>
-          {t("title")}: <InputEl {...register("title")} />
-        </FormComponent>
-        <FormComponent
-          style={{
-            flexDirection: "column",
-            display: "flex",
-            alignItems: "flex-start",
-          }}
-        >
-          {t("cover")}:
-          <UploadImage
-            formName="coverFile"
-            existingCover={existing?.cover?.sizes?.[120]}
-            updatedAt={existing?.updatedAt}
-            isLoading={
-              uploadJobs?.[0]?.jobStatus !== undefined &&
-              uploadJobs?.[0]?.jobStatus !== "completed"
-            }
-          />
-        </FormComponent>
+      <FormProvider {...methods}>
+        <form onSubmit={handleSubmit(doSave)}>
+          <FormComponent>
+            {t("title")}: <InputEl {...register("title")} />
+          </FormComponent>
+          <FormComponent
+            style={{
+              flexDirection: "column",
+              display: "flex",
+              alignItems: "flex-start",
+            }}
+          >
+            {t("cover")}:
+            <UploadImage
+              formName="coverFile"
+              existingCover={existing?.cover?.sizes?.[120]}
+              updatedAt={existing?.updatedAt}
+              isLoading={
+                uploadJobs?.[0]?.jobStatus !== undefined &&
+                uploadJobs?.[0]?.jobStatus !== "completed"
+              }
+            />
+          </FormComponent>
 
-        <FormComponent>
-          {t("type")}:{" "}
-          <SelectEl defaultValue="lp" {...register("type")}>
-            <option value="lp">{t("lp")}</option>
-            <option value="ep">{t("ep")}</option>
-            <option value="single">{t("single")}</option>
-            <option value="compilation">{t("compilation")}</option>
-          </SelectEl>
-        </FormComponent>
+          <FormComponent>
+            {t("type")}:{" "}
+            <SelectEl defaultValue="lp" {...register("type")}>
+              <option value="lp">{t("lp")}</option>
+              <option value="ep">{t("ep")}</option>
+              <option value="single">{t("single")}</option>
+              <option value="compilation">{t("compilation")}</option>
+            </SelectEl>
+          </FormComponent>
 
-        <FormComponent>
-          {t("releaseDate")}:{" "}
-          <InputEl type="date" {...register("releaseDate")} required />
-        </FormComponent>
-        <FormComponent>
-          {t("about")}: <TextArea {...register("about")} rows={7} />
-        </FormComponent>
-        <FormComponent>
-          {t("price")}:
-          <InputEl type="number" {...register("minPrice")} />
-        </FormComponent>
-        <Button type="submit" disabled={isDisabled} isLoading={isDisabled}>
-          {existing
-            ? existing.published
-              ? t("update")
-              : t("saveDraft")
-            : t("submitAlbum")}
-        </Button>
-      </form>
-    </FormProvider></div>
+          <FormComponent>
+            {t("releaseDate")}:{" "}
+            <InputEl type="date" {...register("releaseDate")} required />
+          </FormComponent>
+          <FormComponent>
+            {t("about")}: <TextArea {...register("about")} rows={7} />
+          </FormComponent>
+          <FormComponent>
+            {t("price")}:
+            <InputEl type="number" {...register("minPrice")} />
+          </FormComponent>
+          <Button type="submit" disabled={isDisabled} isLoading={isDisabled}>
+            {existing
+              ? existing.published
+                ? t("update")
+                : t("saveDraft")
+              : t("submitAlbum")}
+          </Button>
+        </form>
+      </FormProvider>
+    </div>
   );
 };
 

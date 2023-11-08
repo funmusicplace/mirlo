@@ -24,7 +24,11 @@ const ManageTrackGroup: React.FC<{}> = () => {
 
   const userId = user?.id;
 
-  const { object: trackGroup, reload } = useGetUserObjectById<TrackGroup>(
+  const {
+    object: trackGroup,
+    reload,
+    isLoadingObject,
+  } = useGetUserObjectById<TrackGroup>(
     "trackGroups",
     userId,
     trackGroupId,
@@ -57,7 +61,9 @@ const ManageTrackGroup: React.FC<{}> = () => {
           </Link>
         )}
       </div>
-      <AlbumForm existing={trackGroup} reload={reload} artist={artist} />
+      {!isLoadingObject && (
+        <AlbumForm existing={trackGroup} reload={reload} artist={artist} />
+      )}
       {trackGroup && trackGroup?.tracks?.length > 0 && (
         <ManageTrackTable
           tracks={trackGroup.tracks}

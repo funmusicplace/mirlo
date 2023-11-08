@@ -3,7 +3,7 @@ import React from "react";
 import IconButton from "components/common/IconButton";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { InputEl } from "components/common/Input";
-import { FaCheck, FaEllipsisV, FaPlus } from "react-icons/fa";
+import { FaCheck, FaEllipsisV, FaPlus, FaTrash } from "react-icons/fa";
 import { css } from "@emotion/css";
 import Button from "components/common/Button";
 import { useTranslation } from "react-i18next";
@@ -26,6 +26,10 @@ export const BulkTrackUploadRow: React.FC<{
     name: `tracks.${index}.trackArtists`,
   });
 
+  const { remove: removeFromTracks } = useFieldArray({
+    control,
+    name: "tracks",
+  });
   return (
     <>
       <tr
@@ -39,6 +43,13 @@ export const BulkTrackUploadRow: React.FC<{
         `}
       >
         <td>
+          {!uploadingState && (
+            <>
+              <IconButton onClick={() => removeFromTracks()}>
+                <FaTrash />
+              </IconButton>
+            </>
+          )}
           {uploadingState === "completed" && (
             <div
               className={css`
