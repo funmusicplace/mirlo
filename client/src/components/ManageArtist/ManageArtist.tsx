@@ -74,6 +74,9 @@ const ManageArtist: React.FC<{}> = () => {
           width: 100%;
           justify-content: flex-end;
           flex-direction: column;
+
+          @media screen and (max-width: ${bp.medium}px) {
+            padding: 0 .5rem;
         `}
       >
         <div>
@@ -105,6 +108,9 @@ const ManageArtist: React.FC<{}> = () => {
           @media screen and (max-width: ${bp.medium}px) {
             border-radius: 0;
             padding: 1rem 0.5rem 0rem;
+            > div > div  {
+              padding: 2rem;
+            }
           }
         `}
       >
