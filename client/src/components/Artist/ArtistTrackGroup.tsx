@@ -23,28 +23,42 @@ const ArtistTrackGroup: React.FC<{
       className={css`
         margin-bottom: 1rem;
         display: inline-block;
-        padding: 0 0.5%;
-        max-width: 33%;
-        flex: 33%;
+        max-width: 33.3%;
+        flex: 33.3%;
+        padding: 0 .25rem;
 
-        &:nth-child(3) {
+        &:nth-child(3n + 1) {
           border-top: 0;
-          margin-right: 0;
+          padding-right:.5rem;
+          padding-left: 0rem;
+        }
+
+        &:nth-child(3n) {
+          border-top: 0;
+          padding-left: .5rem;
+          padding-right: 0rem;
         }
 
         @media screen and (max-width: ${bp.medium}px) {
-          max-width: 49.9%;
-          flex: 49.9%;
-          padding: 0 1%;
+          max-width: 50%;
+          flex: 50%;
           margin-bottom: 0.5rem;
           margin-top: 0.5rem;
+
+          &:nth-child(odd) {
+            padding-left: 0rem;
+            padding-right: 0.25rem;
+          }
+
+          &:nth-child(even) {
+            padding-right: 0rem;
+            padding-left: 0.25rem;
+          }
 
           button {
             padding: 0.2rem 0.4rem;
           }
-          &:nth-child(1) {
-            border-top: 0;
-          }
+
           @media screen and (max-width: ${bp.small}px) {
             font-size: 0.8rem;
           }
