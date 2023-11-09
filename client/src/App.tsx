@@ -109,7 +109,7 @@ function App() {
           <div
             className={css`
               margin: 0 auto;
-              ${!userId ? "margin-top: -60px;" : ""}
+
               width: 100%;
               border-radius: var(--mi-border-radius);
               display: flex;
@@ -121,12 +121,16 @@ function App() {
                 padding: 0rem 2rem 2rem;
                 max-width: calc(1080px + 0rem);
               }
-
+              @media screen and (max-width: ${bp.medium}px) {
+              button {
+                font-size: .7rem;
+              }
+              }
               @media screen and (max-width: 800px) {
-                ${!userId ? "margin-top: -60px;" : ""}
+
                 padding: 0rem 0rem .0rem;
 
-                > div {
+                > div > div {
                   padding: 0.5rem 0.5rem 0.5rem;
                 }
               }
