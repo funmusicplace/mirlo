@@ -1,5 +1,6 @@
 import { css } from "@emotion/css";
 import React from "react";
+import { bp } from "../../constants";
 import { Link, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useArtistContext } from "state/ArtistContext";
@@ -40,6 +41,9 @@ const ManageTrackGroup: React.FC<{}> = () => {
       className={css`
         width: 100%;
         padding-bottom: 1rem;
+        @media screen and (max-width: ${bp.medium}px) {
+          padding: .5rem;
+        }
       `}
     >
       <div

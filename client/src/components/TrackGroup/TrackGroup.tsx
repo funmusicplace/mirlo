@@ -73,6 +73,9 @@ function TrackGroup() {
         display: flex;
         align-items: center;
         width: 100%;
+
+        @media screen and (max-width: ${bp.small}px) {
+          margin-top: 0rem;
       `}
     >
       <MetaCard

@@ -33,7 +33,7 @@ const ArtistAlbums: React.FC<{ artist: Artist }> = ({ artist }) => {
     >
       <div
         className={css`
-          padding: 0.5rem 0 2rem 0;
+          padding-top: 0.5rem;
           display: flex;
           justify-content: space-between;
           flex-wrap: wrap;
@@ -59,7 +59,7 @@ const ArtistAlbums: React.FC<{ artist: Artist }> = ({ artist }) => {
           flex-wrap: wrap;
 
           @media screen and (max-width: ${bp.medium}px) {
-            padding: 0rem 0rem 0rem 0rem;
+            padding: 0rem 0.5rem 0rem 0.5rem;
           }
         `}
       >
