@@ -129,10 +129,6 @@ function App() {
               @media screen and (max-width: 800px) {
 
                 padding: 0rem 0rem .0rem;
-
-                > div > div {
-                  padding: 0.5rem 0.5rem 0.5rem;
-                }
               }
             `}
           >
