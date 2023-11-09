@@ -44,8 +44,6 @@ export const PublicTrackGroupListing: React.FC<{
     return <CenteredSpinner />;
   }
 
-  console.log("loaned", displayTracks.length);
-
   return (
     <Table
       className={css`

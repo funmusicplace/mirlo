@@ -14,7 +14,7 @@ const TooltipWrapper = styled.div<{ underline: boolean }>`
 
 const TooltipText = styled.span`
   visibility: hidden;
-  width: 200px;
+  min-width: 200px;
   background-color: black;
   color: #fff;
   text-align: center;
