@@ -25,7 +25,7 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
   const [manageTier, setManageTier] = React.useState<ArtistSubscriptionTier>();
   const [tiers, setTiers] = React.useState<ArtistSubscriptionTier[]>([]);
 
-  const { t:tManage } = useTranslation("translation", { keyPrefix: "manage" });
+  const { t: tManage } = useTranslation("translation", { keyPrefix: "manage" });
 
   const userId = user?.id;
 
@@ -70,11 +70,11 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
   return (
     <div
       className={css`
-        padding: .5rem 2rem 2rem 2rem;
+        padding: 0.5rem 0 2rem 0;
 
         @media screen and (max-width: ${bp.medium}px) {
           border-radius: 0;
-          padding: 1rem .5rem 0rem;
+          padding: 1rem 0.5rem 0rem;
         }
       `}
     >

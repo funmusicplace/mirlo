@@ -12,20 +12,19 @@ export const PublicTrackGroupListing: React.FC<{
   tracks: Track[];
   trackGroup: TrackGroup;
 }> = ({ tracks, trackGroup }) => {
-  const [isLoading, setIsLoading] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(true);
   const { dispatch } = useGlobalStateContext();
   const [displayTracks, setDisplayTracks] = React.useState<Track[]>([]);
 
   const fetchTracks = React.useCallback(async (checkTracks: Track[]) => {
-    const cloned = cloneDeep(checkTracks);
-
-    setDisplayTracks(cloned);
     setIsLoading(false);
   }, []);
 
   React.useEffect(() => {
     setIsLoading(true);
-    fetchTracks(tracks);
+    const cloned = cloneDeep(tracks);
+    setDisplayTracks(cloned);
+    setIsLoading(false);
   }, [tracks, fetchTracks]);
 
   const addTracksToQueue = React.useCallback(
@@ -45,12 +44,12 @@ export const PublicTrackGroupListing: React.FC<{
     return <CenteredSpinner />;
   }
 
+  console.log("loaned", displayTracks.length);
+
   return (
     <Table
       className={css`
-
         margin: 0 0.5rem;
-
         @media screen and (max-width: ${bp.medium}px) {
           margin: 0;
         }
@@ -65,7 +64,7 @@ export const PublicTrackGroupListing: React.FC<{
             trackGroup={trackGroup}
           />
         ))}
-        {displayTracks.length === 0 && (
+        {!isLoading && displayTracks.length === 0 && (
           <tr>
             <td colSpan={999} style={{ textAlign: "center" }}>
               There's no tracks yet in this playlist!

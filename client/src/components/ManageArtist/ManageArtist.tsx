@@ -10,7 +10,6 @@ import ArtistForm from "./ArtistForm";
 import ManageArtistPosts from "./ManageArtistPosts";
 import ManageArtistAlbums from "./ManageArtistAlbums";
 import ManageArtistSubscriptionTiers from "./ManageArtistSubscriptionTiers";
-import ArtistHeaderSection from "../common/ArtistHeaderSection";
 import { useSnackbar } from "state/SnackbarContext";
 import { useTranslation } from "react-i18next";
 import { useArtistContext } from "state/ArtistContext";
@@ -31,8 +30,6 @@ const ManageArtist: React.FC<{}> = () => {
 
   const [isEditing, setIsEditing] = React.useState(false);
 
-  const artistBanner = artist?.banner?.sizes;
-
   const userId = user?.id;
 
   const onDelete = async () => {
@@ -51,31 +48,7 @@ const ManageArtist: React.FC<{}> = () => {
   }
 
   return (
-    <div
-      className={css`
-        filter: drop-shadow(0 0 .5rem rgba(50, 50, 50, .3));
-        width: 100%;
-        ${user ? "margin-top: calc(16vh);" : "height: ;"}
-        ${!user ? "margin-top: calc(16vh);" : "height: ;"}
-        ${!artistBanner ? "margin-top: 0px;" : "height: ;"}
-        background: var(--mi-light-background-color);
-        max-width: calc(1080px + 4rem);
-
-        a {
-        }
-
-        @media screen and (max-width: ${bp.medium}px) {
-          padding: 0rem !important;
-          ${user ? "margin-top: 0px;" : "height: ;"}
-          ${!user ? "margin-top: 0px;" : "height: ;"}
-          //* ${user ? "margin-top: 240px;" : "height: ;"}
-          ${!user ? "margin-top: 240px;" : "height: ;"} *//
-        }
-      `}
-    >
-<ArtistHeaderSection artist={artist} />
-
-
+    <>
       {!artist.enabled && (
         <div
           className={css`
@@ -103,29 +76,7 @@ const ManageArtist: React.FC<{}> = () => {
           flex-direction: column;
         `}
       >
-        {/*<h1
-          className={css`
-            flex-grow: 1;
-            margin-bottom: 0.25rem;
-          `}
-        >
-          {t("manage", { artist: artist.name })}
-        </h1>
-        <MarkdownWrapper>
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>
-            {artist.bio}
-          </ReactMarkdown>
-        </MarkdownWrapper>
-        <div>*/}
-        <div
-        className={css`
-          padding: 0 2rem;
-
-          @media screen and (max-width: ${bp.medium}px) {
-            padding: 0rem .5rem 0rem;
-          }
-        `}
-      >
+        <div>
           <Button
             compact
             startIcon={<FaPen />}
@@ -149,19 +100,24 @@ const ManageArtist: React.FC<{}> = () => {
       <ManageArtistSubscriptionTiers />
       <div
         className={css`
-          padding: .5rem 2rem 2rem 2rem;
+          padding: 0.5rem 0 2rem 0;
 
           @media screen and (max-width: ${bp.medium}px) {
             border-radius: 0;
-            padding: 1rem .5rem 0rem;
+            padding: 1rem 0.5rem 0rem;
           }
         `}
       >
-      <Button compact role="warning" startIcon={<FaTrash />} onClick={onDelete}>
-        {t("deleteArtist")}
-      </Button>
+        <Button
+          compact
+          role="warning"
+          startIcon={<FaTrash />}
+          onClick={onDelete}
+        >
+          {t("deleteArtist")}
+        </Button>
       </div>
-    </div>
+    </>
   );
 };
 

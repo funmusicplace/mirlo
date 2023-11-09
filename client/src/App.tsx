@@ -108,8 +108,6 @@ function App() {
         >
           <div
             className={css`
-              //* background-color: var(--mi-light-background-color); *//
-
               margin: 0 auto;
               ${!userId ? "margin-top: -60px;" : ""}
               width: 100%;
@@ -129,7 +127,7 @@ function App() {
                 padding: 0rem 0rem .0rem;
 
                 > div {
-                  padding: .5rem .5rem .5rem;
+                  padding: 0.5rem 0.5rem 0.5rem;
                 }
               }
             `}

@@ -80,29 +80,29 @@ const TrackRow: React.FC<{
         )}
       </td>
       <td
-      className={css`
-        width:100%;
-        padding: 0rem;
-        margin: 0rem;
-      `}
-        >
-      <div
-      className={css`
-        display: flex;
-        flex-direction: row;
-        flex-wrap: nowrap;
-        padding: .1rem;
-        margin-bottom: .05rem;
-        justify-content: space-between;
-        align-items: center;
+        className={css`
+          width: 100%;
+          padding: 0rem;
+          margin: 0rem;
+        `}
+      >
+        <div
+          className={css`
+            display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            padding: 0.1rem;
+            margin-bottom: 0.05rem;
+            justify-content: space-between;
+            align-items: center;
 
-        @media screen and (max-width: ${bp.small}px) {
-        flex-wrap: nowrap;
-        }
-      `}
+            @media screen and (max-width: ${bp.small}px) {
+              flex-wrap: nowrap;
+            }
+          `}
         >
-      <td
-       className={css`
+          <div
+            className={css`
           overflow: hidden;
           text-overflow: ellipsis;
           @media screen and (max-width: ${bp.medium}px) {
@@ -114,22 +114,24 @@ const TrackRow: React.FC<{
                 padding: 0.15rem 0.3rem;
               }
         `}
-      >
-        {trackTitle}
-      </td>
-      <td
-      className={css`
-          font-size: .9rem;
-        @media screen and (max-width: ${bp.medium}px) {
-          font-size: .7rem;
-          font-weight: bold;
-          td {
-            padding: 0.15rem 0.3rem;
-          }
-        }
-      `}
-        >{track.audio?.duration && fmtMSS(track.audio.duration)}</td>
-      </div>
+          >
+            {trackTitle}
+          </div>
+          <div
+            className={css`
+              font-size: 0.9rem;
+              @media screen and (max-width: ${bp.medium}px) {
+                font-size: 0.7rem;
+                font-weight: bold;
+                td {
+                  padding: 0.15rem 0.3rem;
+                }
+              }
+            `}
+          >
+            {track.audio?.duration && fmtMSS(track.audio.duration)}
+          </div>
+        </div>
       </td>
       <td align="right">
         <IconButton

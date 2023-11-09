@@ -39,8 +39,10 @@ const TrackWidget = () => {
 
   const [track, setTrack] = React.useState<Track>();
   const [isLoading, setIsLoading] = React.useState(true);
-  const {t} = useTranslation("translation", {keyPrefix : "trackDetails"})
-  const {t:artistTranslation} = useTranslation("translation", {keyPrefix : "artist"})
+  const { t } = useTranslation("translation", { keyPrefix: "trackDetails" });
+  const { t: artistTranslation } = useTranslation("translation", {
+    keyPrefix: "artist",
+  });
 
   const embeddedInMirlo = inIframe() && inMirlo();
 
@@ -84,7 +86,7 @@ const TrackWidget = () => {
 
   return (
     <>
-      {!track && !isLoading && (
+      {(!track || !track.id) && !isLoading && (
         <div
           className={css`
             display: flex;
@@ -96,7 +98,7 @@ const TrackWidget = () => {
           {t("trackDoesntExist")}
         </div>
       )}
-      {track && (
+      {track?.id && (
         <div
           className={css`
             display: flex;
@@ -125,7 +127,10 @@ const TrackWidget = () => {
           <SmallTileDetails
             title={track.title}
             subtitle={track.trackGroup.title}
-            footer={track.trackGroup.artist?.name ?? artistTranslation("unknown")  as string}
+            footer={
+              track.trackGroup.artist?.name ??
+              (artistTranslation("unknown") as string)
+            }
           />
 
           {isTrackOwnedOrPreview(track, user) && (

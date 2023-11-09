@@ -6,6 +6,7 @@ export const ImageWithPlaceholder: React.FC<{
   size: number;
   className?: string;
 }> = ({ src, alt, size, className }) => {
+  const [isChecking, setIsChecking] = React.useState(false);
   const [checkedSrc, setCheckedSrc] = React.useState<string>();
 
   // FIXME: this is less than elegant. For every image we're
@@ -14,6 +15,7 @@ export const ImageWithPlaceholder: React.FC<{
   // exist we shouldn't be returning them on the API.
   React.useEffect(() => {
     const prefetchSrc = async () => {
+      setIsChecking(true);
       try {
         if (src) {
           const img = new Image();
@@ -24,6 +26,8 @@ export const ImageWithPlaceholder: React.FC<{
         }
       } catch {
         console.error("src returns 404", src);
+      } finally {
+        setIsChecking(false);
       }
     };
 
@@ -32,7 +36,7 @@ export const ImageWithPlaceholder: React.FC<{
 
   return (
     <>
-      {checkedSrc && (
+      {!isChecking && checkedSrc && (
         <img
           src={checkedSrc}
           alt={alt}
@@ -46,10 +50,10 @@ export const ImageWithPlaceholder: React.FC<{
           }}
         />
       )}
-      {!checkedSrc && (
+      {!isChecking && !checkedSrc && (
         <div
           style={{
-            backgroundColor: "#c1006d",
+            backgroundColor: "var(--mi-shade-background-color)",
             display: "block",
             width: `100%`,
             height: `100%`,
