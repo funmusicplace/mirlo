@@ -22,6 +22,7 @@ interface Track {
   trackGroupId: number;
   image: Image;
   order: number;
+  metadata: { [key: string]: any };
   audio?: {
     url: string;
     duration: number; // in seconds

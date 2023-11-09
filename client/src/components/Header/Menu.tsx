@@ -7,18 +7,16 @@ import { API_ROOT } from "../../constants";
 import { useGlobalStateContext } from "../../state/GlobalState";
 import Button from "../common/Button";
 import api from "services/api";
-import { FaCheck } from "react-icons/fa";
 
-const Menu: React.FC<{ setIsMenuOpen: (bool: boolean) => void }> = ({
-  setIsMenuOpen,
-}) => {
+const Menu: React.FC = (props) => {
+  const { setIsMenuOpen } = props as {
+    setIsMenuOpen: (val: boolean) => void;
+  };
   const { t } = useTranslation("translation", { keyPrefix: "headerMenu" });
   const { state, dispatch } = useGlobalStateContext();
   const navigate = useNavigate();
   const snackbar = useSnackbar();
   const [artists, setArtists] = React.useState<Artist[]>([]);
-  const [stripeAccountStatus, setStripeAccountStatus] =
-    React.useState<AccountStatus>();
 
   const userId = state.user?.id;
 
@@ -30,11 +28,6 @@ const Menu: React.FC<{ setIsMenuOpen: (bool: boolean) => void }> = ({
       if (fetchedArtists) {
         setArtists(fetchedArtists.results);
       }
-
-      const checkAccountStatus = await api.get<AccountStatus>(
-        `users/${userId}/stripe/checkAccountStatus`
-      );
-      setStripeAccountStatus(checkAccountStatus.result);
     }
   }, [userId]);
 
@@ -98,22 +91,19 @@ const Menu: React.FC<{ setIsMenuOpen: (bool: boolean) => void }> = ({
               {t("profile")}
             </Button>
           </li>
-          {artists.length > 0 && stripeAccountStatus?.chargesEnabled && (
-            <li>
-              <Button
-                onClick={() => {
-                  setIsMenuOpen(false);
-                  navigate("/manage");
-                }}
-                startIcon={<FaCheck />}
-              >
-                Payouts enabled
-              </Button>
-            </li>
-          )}
+          <li>
+            <Button
+              onClick={() => {
+                setIsMenuOpen(false);
+                navigate("/manage");
+              }}
+            >
+              {t("manage")}
+            </Button>
+          </li>
           {artists.map((a) => {
             return (
-              <li>
+              <li key={a.id}>
                 <Button
                   onClick={() => {
                     setIsMenuOpen(false);
@@ -147,14 +137,6 @@ const Menu: React.FC<{ setIsMenuOpen: (bool: boolean) => void }> = ({
               {t("logIn")}
             </Button>
           </li>
-          {/* <li
-            onClick={() => {
-              setIsMenuOpen(false);
-              navigate("/signup");
-            }}
-          >
-            <Button>{t("signUp")}</Button>
-          </li> */}
         </>
       )}
       <li

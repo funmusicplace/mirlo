@@ -241,7 +241,7 @@ export const BulkTrackUpload: React.FC<{
               duration: p.metadata.format.duration,
               file: p.file,
               title: p.metadata.common.title ?? "",
-              status: "must-own",
+              status: "preview",
               trackArtists:
                 p.metadata.common.artists?.map((artist) => ({
                   artistName: artist ?? "",

@@ -165,8 +165,8 @@
     "makePrivate": "Make private",
     "trackGroupUpdated": "Album updated",
     "trackGroupCreated": "Album created",
+    "updatedTrack": "Updated track info",
     "doneUploading": "Uploaded all tracks, we still need to process them on our servers, but you can now safely close the browser",
-
     "uploadingTracks": "Uploading tracks, this could take several minutes, please don't close the browser"
   },
   "artistForm": {
@@ -255,7 +255,8 @@
     "listedArtists": "Listed artists",
     "status": "Can be played without purchase?",
     "statusPreview": "Preview",
-    "statusMustOwn": "Must own"
+    "statusMustOwn": "Must own",
+    "doneUploadingTrack": "Processed track"
   },
   "mewTrack": {
     "newTrack": "New Track",
@@ -290,7 +291,7 @@
     "support": "Direct support for musicians. Buy their music. Collectively owned and managed.",
     "mailingList": "Get on the mailing list",
     "logIn": "Log in",
-    "mirloConstruction": "Mirlo is under construction. If you'd like to contribute, check out our <faq>FAQ</faq>, <github>the code on GitHub</github>, <discord>join our Discord</discord>, or <email>email us</email>.",
+    "mirloConstruction": "Mirlo is under construction. If you'd like to contribute, check out our <about>About page</about>, <faq>FAQ</faq>, <github>the code on GitHub</github>, <discord>join our Discord</discord>, or <email>email us</email>.",
     "latestCommunityPost": "Latest posts from the community:"
   },
   "faq": {

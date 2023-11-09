@@ -1,19 +1,15 @@
 import { css } from "@emotion/css";
-import React from "react";
-import { ImMenu } from "react-icons/im";
 import { Link } from "react-router-dom";
 import { bp } from "../../constants";
 import { useGlobalStateContext } from "../../state/GlobalState";
-import IconButton from "../common/IconButton";
 import HeaderSearch from "./HeaderSearch";
 import Menu from "./Menu";
-import Background from "components/common/Background";
 import Logo from "components/common/Logo";
+import DropdownMenu from "components/common/DropdownMenu";
+import { ImMenu } from "react-icons/im";
 
 const Header = () => {
   const { state } = useGlobalStateContext();
-
-  const [isMenuOpen, setIsMenuOpen] = React.useState<boolean>(false);
 
   if (!state.user?.id) {
     return null;
@@ -68,29 +64,6 @@ const Header = () => {
           </span>
         </Link>
       </h1>
-      {isMenuOpen && (
-        <>
-          <Background
-            onClick={() => {
-              setIsMenuOpen(false);
-            }}
-          />
-          <div
-            className={css`
-              position: absolute;
-              top: 64px;
-              right: 0;
-              // width: 100%;
-              padding: 0.5rem;
-              z-index: 12;
-              padding-bottom: 1rem;
-              background: var(--mi-normal-background-color);
-            `}
-          >
-            <Menu setIsMenuOpen={setIsMenuOpen} />
-          </div>
-        </>
-      )}
       <div
         className={css`
           display: flex;
@@ -99,14 +72,9 @@ const Header = () => {
       >
         <HeaderSearch />
 
-        <IconButton
-          transparent
-          onClick={() => {
-            setIsMenuOpen(true);
-          }}
-        >
-          <ImMenu color={"var(--mi-normal-foreground-color)"} />
-        </IconButton>
+        <DropdownMenu icon={<ImMenu />}>
+          <Menu />
+        </DropdownMenu>
       </div>
     </header>
   );
