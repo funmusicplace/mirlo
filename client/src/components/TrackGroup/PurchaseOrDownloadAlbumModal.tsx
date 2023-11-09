@@ -2,12 +2,11 @@ import Button from "components/common/Button";
 import Modal from "components/common/Modal";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { FaArrowDown } from "react-icons/fa";
 import api from "services/api";
 import { useGlobalStateContext } from "state/GlobalState";
-import { useSnackbar } from "state/SnackbarContext";
 import BuyTrackGroup from "components/TrackGroup/Buy";
 import { useArtistContext } from "state/ArtistContext";
+import DownloadAlbumButton from "components/common/DownloadAlbumButton";
 
 const PurchaseOrDownloadAlbum: React.FC<{
   trackGroup: TrackGroup;
@@ -16,14 +15,11 @@ const PurchaseOrDownloadAlbum: React.FC<{
   const {
     state: { user },
   } = useGlobalStateContext();
-  const snackbar = useSnackbar();
   const [isPurchasingAlbum, setIsPurchasingAlbum] = React.useState(false);
   const [isOwned, setIsOwned] = React.useState(false);
-  const [isDownloading, setIsDownloading] = React.useState(false);
   const { state } = useArtistContext();
 
   const userId = user?.id;
-  const loggedInUserIsAdmin = user?.isAdmin;
 
   const checkForAlbumOwnership = React.useCallback(async () => {
     try {
@@ -50,21 +46,6 @@ const PurchaseOrDownloadAlbum: React.FC<{
 
   const userIsTrackGroupArtist = user && state?.artist.userId === user?.id;
 
-  const downloadAlbum = async () => {
-    try {
-      setIsDownloading(true);
-      await api.downloadFileDirectly(
-        `trackGroups/${trackGroup.id}/download`,
-        `${trackGroup.title}.zip`
-      );
-    } catch (e) {
-      snackbar(t("error"), { type: "warning" });
-      console.error(e);
-    } finally {
-      setIsDownloading(false);
-    }
-  };
-
   return (
     <>
       <div>
@@ -76,18 +57,8 @@ const PurchaseOrDownloadAlbum: React.FC<{
               {t("buy")}
             </Button>
           )}
-        {(userIsTrackGroupArtist || isOwned || loggedInUserIsAdmin) && (
-          <>
-            <Button
-              compact
-              collapse
-              isLoading={isDownloading}
-              startIcon={<FaArrowDown />}
-              onClick={() => downloadAlbum()}
-            >
-              {t("download")}
-            </Button>
-          </>
+        {(userIsTrackGroupArtist || isOwned) && (
+          <DownloadAlbumButton trackGroup={trackGroup} />
         )}
       </div>
       <Modal

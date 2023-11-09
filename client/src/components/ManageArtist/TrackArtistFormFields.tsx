@@ -6,15 +6,15 @@ import { useTranslation } from "react-i18next";
 
 const TrackArtistFormFields: React.FC<{
   a: Record<"id", string>;
-  index: number;
+  trackArtistsKey: string;
   artistIndex: number;
-}> = ({ a, index, artistIndex }) => {
+}> = ({ a, trackArtistsKey, artistIndex }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const { register, control } = useFormContext();
 
   const { fields, remove } = useFieldArray({
     control,
-    name: `tracks.${index}.trackArtists`,
+    name: trackArtistsKey,
   });
 
   return (
@@ -35,22 +35,20 @@ const TrackArtistFormFields: React.FC<{
     >
       <div>
         <InputEl
-          {...register(
-            `tracks.${index}.trackArtists.${artistIndex}.artistName`
-          )}
+          {...register(`${trackArtistsKey}.${artistIndex}.artistName`)}
           placeholder="Artist name"
           key={a.id}
         />
         <InputEl
-          {...register(`tracks.${index}.trackArtists.${artistIndex}.role`)}
+          {...register(`${trackArtistsKey}.${artistIndex}.role`)}
           placeholder="Role"
         />
         <InputEl
-          {...register(`tracks.${index}.trackArtists.${artistIndex}.artistId`)}
+          {...register(`${trackArtistsKey}.${artistIndex}.artistId`)}
           placeholder="ID if the artist exists in Mirlo"
         />
         <label
-          htmlFor={`${index}.${artistIndex}.isCoAuthor`}
+          htmlFor={`${trackArtistsKey}.${artistIndex}.isCoAuthor`}
           className={css`
             display: flex;
             padding: 0.25rem;
@@ -62,11 +60,9 @@ const TrackArtistFormFields: React.FC<{
           `}
         >
           <InputEl
-            id={`${index}.${artistIndex}.isCoAuthor`}
+            id={`${trackArtistsKey}.${artistIndex}.isCoAuthor`}
             type="checkbox"
-            {...register(
-              `tracks.${index}.trackArtists.${artistIndex}.isCoAuthor`
-            )}
+            {...register(`${trackArtistsKey}.${artistIndex}.isCoAuthor`)}
           />
           {t("coAuthorCheck")}
         </label>

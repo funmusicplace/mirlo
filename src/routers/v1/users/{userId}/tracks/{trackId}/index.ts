@@ -13,6 +13,17 @@ import {
 } from "../../../../../../utils/minio";
 import { deleteTrack } from "../../../../../../utils/tracks";
 
+interface TrackBody {
+  title: string;
+  isPreview: boolean;
+  trackArtists: {
+    artistName: string;
+    id: string;
+    artistId: number;
+    role: string;
+  }[];
+}
+
 export default function () {
   const operations = {
     PUT: [userAuthenticated, userHasPermission("owner"), PUT],
@@ -23,6 +34,7 @@ export default function () {
   // FIXME: only allow updating of tracks owned by userId
   async function PUT(req: Request, res: Response, next: NextFunction) {
     const { trackId, userId } = req.params;
+    const { title, isPreview, trackArtists } = req.body as TrackBody;
     try {
       const track = await doesTrackBelongToUser(
         Number(trackId),
@@ -39,7 +51,54 @@ export default function () {
       const newTrack = await prisma.track.update({
         where: { id: Number(trackId) },
         data: {
-          title: req.body.title,
+          title: title,
+          isPreview: isPreview,
+        },
+      });
+
+      const currentTrackArtists = await prisma.trackArtist.findMany({
+        where: {
+          trackId: Number(trackId),
+        },
+      });
+
+      let trackArtistIds = trackArtists.map((ta) => ta.id);
+
+      const newTrackArtists = trackArtists.filter((ta) => !ta.id);
+      const existingTrackArtists = trackArtists.filter((ta) => ta.id);
+      const oldTrackArtists = currentTrackArtists.filter(
+        (ta) => !trackArtistIds.includes(ta.id)
+      );
+
+      await prisma.trackArtist.createMany({
+        data: newTrackArtists.map((nta) => ({
+          trackId: Number(trackId),
+          artistId: nta.artistId,
+          artistName: nta.artistName,
+          role: nta.role,
+        })),
+      });
+
+      await Promise.all(
+        existingTrackArtists.map((eta) =>
+          prisma.trackArtist.update({
+            where: {
+              id: eta.id,
+            },
+            data: {
+              artistId: eta.artistId,
+              artistName: eta.artistName,
+              role: eta.role,
+            },
+          })
+        )
+      );
+
+      await prisma.trackArtist.deleteMany({
+        where: {
+          id: {
+            in: oldTrackArtists.map((ota) => ota.id),
+          },
         },
       });
 

@@ -42,7 +42,7 @@ const ManageTrackGroup: React.FC<{}> = () => {
         width: 100%;
         padding-bottom: 1rem;
         @media screen and (max-width: ${bp.medium}px) {
-          padding: .5rem;
+          padding: 0.5rem;
         }
       `}
     >
@@ -82,11 +82,13 @@ const ManageTrackGroup: React.FC<{}> = () => {
           reload={reload}
         />
       )}
-      {trackGroup && trackGroup.tracks?.length > 0 && (
-        <PublishButton trackGroup={trackGroup} reload={reload} />
-      )}
+
       {trackGroup && (
         <BulkTrackUpload trackgroup={trackGroup} reload={reload} />
+      )}
+      <hr style={{ marginTop: "1rem", marginBottom: "1rem" }} />
+      {trackGroup && trackGroup.tracks?.length > 0 && (
+        <PublishButton trackGroup={trackGroup} reload={reload} />
       )}
     </div>
   );

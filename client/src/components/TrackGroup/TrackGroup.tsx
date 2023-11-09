@@ -17,6 +17,8 @@ import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import PurchaseOrDownloadAlbum from "./PurchaseOrDownloadAlbumModal";
 import { bp } from "../../constants";
 import MarkdownWrapper from "components/common/MarkdownWrapper";
+import DropdownMenu from "components/common/DropdownMenu";
+import TrackGroupAdminMenu from "./TrackGroupAdminMenu";
 
 function TrackGroup() {
   const { t } = useTranslation("translation", {
@@ -63,13 +65,15 @@ function TrackGroup() {
   return (
     <div
       className={css`
-        ${!user
-          ? `
+        ${
+          !user
+            ? `
             min-height: calc(100vh - 70px);
             margin-top: 3vh;`
-          : `
+            : `
             min-height: calc(100vh - 130px);
-            margin-top: 1rem;`}
+            margin-top: 1rem;`
+        }
         display: flex;
         align-items: center;
         width: 100%;
@@ -167,6 +171,11 @@ function TrackGroup() {
                 </Link>
               )}
               <PurchaseOrDownloadAlbum trackGroup={trackGroup} />
+              {user?.isAdmin && (
+                <DropdownMenu>
+                  <TrackGroupAdminMenu trackGroup={trackGroup} />
+                </DropdownMenu>
+              )}
             </div>
           </div>
           <div

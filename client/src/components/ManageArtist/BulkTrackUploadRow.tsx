@@ -12,6 +12,7 @@ import LoadingSpinner from "components/common/LoadingSpinner";
 import TrackArtistFormFields from "./TrackArtistFormFields";
 import { fmtMSS } from "utils/tracks";
 import SelectTrackPreview from "./SelectTrackPreview";
+import ManageTrackArtists from "./ManageTrackArtists";
 
 export const BulkTrackUploadRow: React.FC<{
   track: TrackData;
@@ -22,11 +23,7 @@ export const BulkTrackUploadRow: React.FC<{
 }> = ({ track, index, uploadingState, isSaving, remove }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const [showMoreDetails, setShowMoreDetails] = React.useState(false);
-  const { register, control } = useFormContext();
-  const { fields, append } = useFieldArray({
-    control,
-    name: `tracks.${index}.trackArtists`,
-  });
+  const { register } = useFormContext();
 
   const removeOnClick = React.useCallback(() => {
     remove(index);
@@ -70,44 +67,15 @@ export const BulkTrackUploadRow: React.FC<{
           <InputEl {...register(`tracks.${index}.title`)} />
         </td>
         <td>
-          <div
-            className={css`
-              display: flex;
-              flex-direction: column;
-              align-items: flex-end;
-            `}
-          >
-            <div>
-              {fields.map((a, artistIndex) => (
-                <TrackArtistFormFields
-                  a={a}
-                  artistIndex={artistIndex}
-                  index={index}
-                  key={a.id}
-                />
-              ))}
-            </div>
-            <Button
-              onClick={() => {
-                append({ artistName: "" });
-              }}
-              type="button"
-              className={css`
-                margin-left: 1rem;
-              `}
-              compact
-              startIcon={<FaPlus />}
-              variant="outlined"
-            >
-              {t("addNewArtist")}
-            </Button>
-          </div>
+          <ManageTrackArtists
+            trackArtistsKey={`tracks.${index}.trackArtists`}
+          />
         </td>
         <td className="alignRight">
           {track.duration && fmtMSS(+track.duration)}
         </td>
         <td>
-          <SelectTrackPreview index={index} />
+          <SelectTrackPreview statusKey={`tracks.${index}.status`} />
         </td>
         <td className="alignRight">
           <div

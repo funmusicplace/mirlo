@@ -110,16 +110,6 @@ function Home() {
               >
                 {t("support")}
               </h1>
-              {/* <Link to="signup">
-            <Button
-              className={css`
-                margin-top: 1.5rem;
-              `}
-              endIcon={<FaArrowRight />}
-            >
-              Get started
-            </Button>
-          </Link> */}
               <div
                 className={css`
                   display: flex;
@@ -189,6 +179,8 @@ function Home() {
                   t={t}
                   i18nKey="mirloConstruction"
                   components={{
+                    // eslint-disable-next-line jsx-a11y/anchor-has-content
+                    about: <a href="/pages/about"></a>,
                     // eslint-disable-next-line jsx-a11y/anchor-has-content
                     faq: <a href="/pages/faq"></a>,
                     github: (

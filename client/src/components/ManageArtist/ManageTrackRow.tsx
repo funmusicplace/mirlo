@@ -1,16 +1,16 @@
 import { css } from "@emotion/css";
 import React from "react";
-import { FaPen, FaSave, FaTrash } from "react-icons/fa";
+import { FaPen, FaTrash } from "react-icons/fa";
 import { useGlobalStateContext } from "state/GlobalState";
 import useDraggableTrack from "utils/useDraggableTrack";
 
 import IconButton from "../common/IconButton";
 import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
-import { InputEl } from "../common/Input";
 import { fmtMSS } from "utils/tracks";
 import TrackRowPlayControl from "components/common/TrackRowPlayControl";
 import { useTranslation } from "react-i18next";
+import EditTrackRow from "./EditTrackRow";
 
 const ManageTrackRow: React.FC<{
   track: Track;
@@ -23,8 +23,7 @@ const ManageTrackRow: React.FC<{
   });
 
   const snackbar = useSnackbar();
-  const [isEditingTitle, setIsEditingTitle] = React.useState(false);
-  const [trackTitle, setTrackTitle] = React.useState(track.title);
+  const [isEditing, setIsEditing] = React.useState(false);
   const {
     state: { user },
   } = useGlobalStateContext();
@@ -42,23 +41,19 @@ const ManageTrackRow: React.FC<{
     }
   }, [track.id, userId, reload, snackbar]);
 
-  const updateTrackTitle = React.useCallback(async () => {
-    try {
-      await api.put<{ title: string }, unknown>(
-        `users/${userId}/tracks/${track.id}`,
-        {
-          title: trackTitle,
-        }
-      );
-    } catch (e) {
-    } finally {
-      setIsEditingTitle(false);
-    }
-  }, [track.id, trackTitle, userId]);
-
   const uploadState = track.audio?.uploadState;
 
   const isDisabled = track.audio && uploadState !== "SUCCESS";
+
+  const onCancelEditing = React.useCallback(() => {
+    setIsEditing(false);
+
+    reload();
+  }, [reload]);
+
+  if (isEditing) {
+    return <EditTrackRow track={track} onCancelEditing={onCancelEditing} />;
+  }
 
   return (
     <tr
@@ -101,22 +96,14 @@ const ManageTrackRow: React.FC<{
           text-overflow: ellipsis;
         `}
       >
-        {!isEditingTitle && (
-          <>
-            <div>{trackTitle}</div>
-            <small>
-              {uploadState !== "SUCCESS"
-                ? "Still processing"
-                : "Done uploading"}
-            </small>
-          </>
-        )}
-        {isEditingTitle && (
-          <InputEl
-            value={trackTitle}
-            onChange={(e) => setTrackTitle(e.target.value)}
-          />
-        )}
+        <>
+          <div>{track.title}</div>
+          <small>
+            {uploadState !== "SUCCESS"
+              ? "Still processing"
+              : t("doneUploadingTrack")}
+          </small>
+        </>
       </td>
       <td>
         {track.trackArtists?.map((artist) => artist.artistName).join(", ")}
@@ -126,32 +113,23 @@ const ManageTrackRow: React.FC<{
         {track.audio?.duration && fmtMSS(track.audio?.duration)}
       </td>
       <td className="alignRight">
-        {isEditingTitle && (
-          <IconButton onClick={updateTrackTitle} title="Delete">
-            <FaSave />
-          </IconButton>
-        )}
-        {!isEditingTitle && (
-          <>
-            <IconButton
-              compact
-              onClick={() => setIsEditingTitle(true)}
-              title={t("edit") ?? ""}
-              style={{ marginRight: "1rem" }}
-              disabled={isDisabled}
-            >
-              <FaPen />
-            </IconButton>
-            <IconButton
-              compact
-              onClick={onDeleteClick}
-              title={t("delete") ?? ""}
-              disabled={isDisabled}
-            >
-              <FaTrash />
-            </IconButton>
-          </>
-        )}
+        <IconButton
+          compact
+          onClick={() => setIsEditing(true)}
+          title={t("edit") ?? ""}
+          style={{ marginRight: ".25rem" }}
+          disabled={isDisabled}
+        >
+          <FaPen />
+        </IconButton>
+        <IconButton
+          compact
+          onClick={onDeleteClick}
+          title={t("delete") ?? ""}
+          disabled={isDisabled}
+        >
+          <FaTrash />
+        </IconButton>
       </td>
     </tr>
   );
