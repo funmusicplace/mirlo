@@ -2,7 +2,7 @@ import React from "react";
 import IconButton from "components/common/IconButton";
 import { useForm, FormProvider } from "react-hook-form";
 import { InputEl } from "components/common/Input";
-import { FaEllipsisV, FaSave, FaTimes } from "react-icons/fa";
+import { FaEllipsisV, FaSave, FaTimes, FaUpload } from "react-icons/fa";
 import { css } from "@emotion/css";
 import { useTranslation } from "react-i18next";
 import Tooltip from "components/common/Tooltip";
@@ -13,21 +13,25 @@ import ManageTrackArtists from "./ManageTrackArtists";
 import api from "services/api";
 import { useGlobalStateContext } from "state/GlobalState";
 import { useSnackbar } from "state/SnackbarContext";
+import useJobStatusCheck from "utils/useJobStatusCheck";
 
 interface FormData {
   title: string;
   status: "preview" | "must-own";
+  trackFile: FileList;
   trackArtists: { artistName: string; artistRole: string; artistId: number }[];
 }
 
 const EditTrackRow: React.FC<{
   track: Track;
-  uploadingState?: string;
-  isSaving?: boolean;
   onCancelEditing: () => void;
-}> = ({ track, uploadingState, isSaving, onCancelEditing: cancelEditing }) => {
+}> = ({ track, onCancelEditing: cancelEditing }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const [showMoreDetails, setShowMoreDetails] = React.useState(false);
+  const { uploadJobs, setUploadJobs } = useJobStatusCheck({
+    reload: cancelEditing,
+  });
+
   const methods = useForm<FormData>({
     defaultValues: {
       title: track.title,
@@ -54,7 +58,6 @@ const EditTrackRow: React.FC<{
 
   const onSave = React.useCallback(
     async (formData: FormData) => {
-      console.log("formData", formData);
       try {
         const packet = {
           title: formData.title,
@@ -66,26 +69,35 @@ const EditTrackRow: React.FC<{
           })),
         };
 
-        const result = await api.put<Partial<Track>, { track: Track }>(
+        await api.put<Partial<Track>, { track: Track }>(
           `users/${userId}/tracks/${trackId}`,
           packet
         );
-        console.log("result", result);
+
+        const jobInfo = await api.uploadFile(
+          `users/${userId}/tracks/${trackId}/audio`,
+          [formData.trackFile[0]]
+        );
+        const jobId = jobInfo.result.jobId;
+        setUploadJobs([{ jobId, jobStatus: "waiting" }]);
+
         snackbar(t("updatedTrack"), { type: "success" });
-        cancelEditing();
       } catch (e) {
         console.error(e);
       } finally {
       }
     },
-    [cancelEditing, snackbar, t, trackId, userId]
+    [setUploadJobs, snackbar, t, trackId, userId]
   );
+
+  const uploadingState = uploadJobs?.[0]?.jobStatus;
+  let isDisabled = uploadingState || uploadJobs.length > 0;
 
   return (
     <FormProvider {...methods}>
       <tr
         className={css`
-          ${uploadingState || isSaving
+          ${isDisabled
             ? `
             opacity: .4;
             pointer-events: none;
@@ -94,6 +106,39 @@ const EditTrackRow: React.FC<{
         `}
       >
         <td>
+          {!uploadingState && (
+            <Tooltip hoverText={t("replaceTrackAudio")}>
+              <label
+                htmlFor={`track.${trackId}`}
+                className={css`
+                  width: 2rem;
+                  cursor: pointer;
+                  height: 2rem;
+                  display: flex;
+                  justify-content: center;
+                  align-items: center;
+                  background-color: var(--mi-shade-background-color);
+                  border-radius: var(--mi-border-radius);
+                `}
+              >
+                <FaUpload />
+                <input
+                  type="file"
+                  className={css`
+                    display: none;
+
+                    &::file-selector-button {
+                      display: none;
+                    }
+                  `}
+                  placeholder="Replace"
+                  id={`track.${trackId}`}
+                  {...register("trackFile")}
+                  accept="audio/mpeg,audio/flac,audio/wav,audio/x-flac,audio/aac,audio/aiff,audio/x-m4a"
+                />
+              </label>
+            </Tooltip>
+          )}
           <TrackUploadingState uploadingState={uploadingState} />
         </td>
         <td>

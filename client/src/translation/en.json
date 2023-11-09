@@ -166,6 +166,9 @@
     "trackGroupUpdated": "Album updated",
     "trackGroupCreated": "Album created",
     "updatedTrack": "Updated track info",
+    "dropFilesHere": "Drop files here",
+    "or": "or",
+    "replaceTrackAudio": "Replace audio",
     "doneUploading": "Uploaded all tracks, we still need to process them on our servers, but you can now safely close the browser",
     "uploadingTracks": "Uploading tracks, this could take several minutes, please don't close the browser"
   },

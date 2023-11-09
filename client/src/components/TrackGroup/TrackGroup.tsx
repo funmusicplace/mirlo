@@ -49,14 +49,12 @@ function TrackGroup() {
   const ownedByUser = artist.userId === user?.id;
 
   if (!artist && !isLoadingArtist) {
-    console.log("no artist");
     return <Box>{t("doesNotExist")}</Box>;
   } else if (!artist) {
     return <FullPageLoadingSpinner />;
   }
 
   if (!trackGroup && !isLoadingTrackGroup) {
-    console.log("no trackgroup");
     return <Box>{t("doesNotExist")}</Box>;
   } else if (!trackGroup) {
     return <FullPageLoadingSpinner />;

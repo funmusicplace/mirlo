@@ -59,8 +59,12 @@ export default function () {
 
       res.json({ result: { jobId } });
     } catch (error) {
-      res.status(400).json({
-        error: `Track with ID ${trackId} does not exist in the database`,
+      console.error(
+        `users/${req.params.userId}/tracks/${trackId}/audio`,
+        error
+      );
+      res.status(500).json({
+        error: `There was a problem with the API`,
       });
     }
   }

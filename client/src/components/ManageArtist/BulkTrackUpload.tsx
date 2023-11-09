@@ -354,14 +354,35 @@ export const BulkTrackUpload: React.FC<{
         )}
 
         <FormComponent>
-          <InputEl
-            type="file"
-            id="audio"
-            disabled={disableUploadButton}
-            multiple
-            {...register("trackFiles")}
-            accept="audio/mpeg,audio/flac,audio/wav,audio/x-flac,audio/aac,audio/aiff,audio/x-m4a"
-          />
+          <label
+            htmlFor="audio"
+            className={css`
+              position: relative;
+              display: flex;
+              gap: 10px;
+              flex-direction: column;
+              justify-content: center;
+              align-items: center;
+              height: 200px;
+              padding: 20px;
+              border-radius: 10px;
+              border: 2px dashed #555;
+              color: #444;
+              cursor: pointer;
+              transition: background 0.2s ease-in-out, border 0.2s ease-in-out;
+            `}
+          >
+            <div>{t("dropFilesHere")}</div>
+            {t("or")}
+            <InputEl
+              type="file"
+              id="audio"
+              disabled={disableUploadButton}
+              multiple
+              {...register("trackFiles")}
+              accept="audio/mpeg,audio/flac,audio/wav,audio/x-flac,audio/aac,audio/aiff,audio/x-m4a"
+            />
+          </label>
         </FormComponent>
       </form>
     </FormProvider>
