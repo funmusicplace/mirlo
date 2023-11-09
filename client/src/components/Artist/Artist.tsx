@@ -9,7 +9,7 @@ import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
 import { useArtistContext } from "state/ArtistContext";
 
 const artistsectionClass = css`
-  padding: 1rem 0;
+
   background: var(--mi-light-background-color);
   @media screen and (max-width: ${bp.medium}px) {
     padding: 0.5rem !important;
