@@ -34,8 +34,7 @@ const PageHeader = () => {
             box-shadow: inset 1em -2em 0.8em -1.3em rgba(0, 0, 0, 0.4);
             @media screen and (max-width: ${bp.medium}px) {
               position: relative;
-              //* height: 180px; *//
-              height: 100%;
+              max-height: 20vw;
             }
           `}
         >
@@ -60,7 +59,7 @@ const PageHeader = () => {
                 object-fit: cover;
 
                 @media screen and (max-width: ${bp.medium}px) {
-                  object-fit: contain;
+                  object-fit: cover;
                 }
               `}
             />
