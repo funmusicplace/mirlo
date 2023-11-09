@@ -1,15 +1,13 @@
 import { TrackData } from "./BulkTrackUpload";
 import React from "react";
 import IconButton from "components/common/IconButton";
-import { useFieldArray, useFormContext } from "react-hook-form";
+import { useFormContext } from "react-hook-form";
 import { InputEl } from "components/common/Input";
-import { FaCheck, FaEllipsisV, FaPlus, FaTrash } from "react-icons/fa";
+import { FaCheck, FaEllipsisV, FaTrash } from "react-icons/fa";
 import { css } from "@emotion/css";
-import Button from "components/common/Button";
 import { useTranslation } from "react-i18next";
 import Tooltip from "components/common/Tooltip";
 import LoadingSpinner from "components/common/LoadingSpinner";
-import TrackArtistFormFields from "./TrackArtistFormFields";
 import { fmtMSS } from "utils/tracks";
 import SelectTrackPreview from "./SelectTrackPreview";
 import ManageTrackArtists from "./ManageTrackArtists";
