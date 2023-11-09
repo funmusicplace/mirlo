@@ -1,12 +1,14 @@
 import { css } from "@emotion/css";
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import usePublicArtist from "utils/usePublicObjectById";
 import { bp } from "../../constants";
 import { useGlobalStateContext } from "state/GlobalState";
 
 const PageHeader = () => {
-  const { artistId, trackGroupId } = useParams();
+  const { pathname } = useLocation();
 
+  const isManage = pathname.includes("manage");
+  const { artistId, trackGroupId } = useParams();
   const {
     state: { user },
   } = useGlobalStateContext();
@@ -17,7 +19,7 @@ const PageHeader = () => {
 
   return (
     <>
-      {artistBanner && !trackGroupId && (
+      {artistBanner && (!trackGroupId || isManage) && (
         <div
           className={css`
             ${user ? "margin-top: 60px;" : "height: calc(34vh);"}
@@ -65,7 +67,7 @@ const PageHeader = () => {
           </div>
         </div>
       )}
-      {(!artistBanner || trackGroupId) && (
+      {(!artistBanner || (trackGroupId && !isManage)) && (
         <div
           className={css`
             margin-top: 60px;

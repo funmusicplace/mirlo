@@ -25,7 +25,7 @@ const ArtistContainer: React.FC<{}> = () => {
       {!trackGroupId && (
         <>
           <ArtistPageWrapper artistBanner={!!artistBanner}>
-            <ArtistHeaderSection artist={artist} />
+            {!trackGroupId && <ArtistHeaderSection artist={artist} />}
 
             {!artist.enabled && (
               <div

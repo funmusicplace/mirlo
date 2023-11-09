@@ -36,7 +36,7 @@ export const ImageWithPlaceholder: React.FC<{
 
   return (
     <>
-      {checkedSrc && (
+      {!isChecking && checkedSrc && (
         <img
           src={checkedSrc}
           alt={alt}
@@ -50,7 +50,7 @@ export const ImageWithPlaceholder: React.FC<{
           }}
         />
       )}
-      {!checkedSrc && (
+      {!isChecking && !checkedSrc && (
         <div
           style={{
             backgroundColor: "var(--mi-shade-background-color)",

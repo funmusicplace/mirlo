@@ -1,8 +1,6 @@
 import { css } from "@emotion/css";
 import { bp } from "../../constants";
-import { useGlobalStateContext } from "state/GlobalState";
 import ArtistSupport from "./ArtistSupport";
-import ArtistHeaderSection from "../common/ArtistHeaderSection";
 import Box from "../common/Box";
 import PostContent from "../common/PostContent";
 import ArtistAlbums from "./ArtistAlbums";
@@ -21,10 +19,6 @@ const artistsectionClass = css`
 
 function Artist() {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
-
-  const {
-    state: { user },
-  } = useGlobalStateContext();
 
   const {
     state: { artist, isLoading },

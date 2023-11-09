@@ -22,6 +22,11 @@ const IconButton = styled.button<Compactable & { transparent?: boolean }>`
         : "var(--mi-lighter-foreground-color)"};
     background-color: var(--mi-icon-button-background-color--hover);
   }
+
+  & svg {
+    display: block;
+    // height: 1rem;
+  }
 `;
 
 export default IconButton;

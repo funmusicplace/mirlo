@@ -10,7 +10,6 @@ import ArtistForm from "./ArtistForm";
 import ManageArtistPosts from "./ManageArtistPosts";
 import ManageArtistAlbums from "./ManageArtistAlbums";
 import ManageArtistSubscriptionTiers from "./ManageArtistSubscriptionTiers";
-import ArtistHeaderSection from "../common/ArtistHeaderSection";
 import { useSnackbar } from "state/SnackbarContext";
 import { useTranslation } from "react-i18next";
 import { useArtistContext } from "state/ArtistContext";
@@ -30,8 +29,6 @@ const ManageArtist: React.FC<{}> = () => {
   } = useArtistContext();
 
   const [isEditing, setIsEditing] = React.useState(false);
-
-  const artistBanner = artist?.banner?.sizes;
 
   const userId = user?.id;
 

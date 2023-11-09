@@ -1,7 +1,7 @@
 import { css } from "@emotion/css";
 import React from "react";
 import { bp } from "../../constants";
-import { Outlet, useParams } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import ArtistHeaderSection from "../common/ArtistHeaderSection";
 import { useTranslation } from "react-i18next";
 import { useArtistContext } from "state/ArtistContext";
@@ -17,7 +17,7 @@ export const ArtistPageWrapper = styled.div<{ artistBanner: boolean }>`
   }
 
   margin-top: calc(16vh);
-  ${(props) => (!props.artistBanner ? "margin-top: 0px;" : "height: ;")}
+  ${(props) => (!props.artistBanner ? "margin-top: 0px;" : "")}
   background: var(--mi-light-background-color);
   max-width: calc(1080px + 4rem);
 
@@ -31,7 +31,6 @@ export const ArtistPageWrapper = styled.div<{ artistBanner: boolean }>`
 const ManageArtist: React.FC<{}> = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
 
-  const { trackGroupId } = useParams();
   const {
     state: { artist },
   } = useArtistContext();
@@ -44,7 +43,7 @@ const ManageArtist: React.FC<{}> = () => {
 
   return (
     <ArtistPageWrapper artistBanner={!!artistBanner}>
-      {!trackGroupId && <ArtistHeaderSection artist={artist} isManage />}
+      <ArtistHeaderSection artist={artist} />
 
       {!artist.enabled && (
         <div

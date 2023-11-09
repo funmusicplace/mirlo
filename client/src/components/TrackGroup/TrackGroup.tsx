@@ -47,12 +47,14 @@ function TrackGroup() {
   const ownedByUser = artist.userId === user?.id;
 
   if (!artist && !isLoadingArtist) {
+    console.log("no artist");
     return <Box>{t("doesNotExist")}</Box>;
   } else if (!artist) {
     return <FullPageLoadingSpinner />;
   }
 
   if (!trackGroup && !isLoadingTrackGroup) {
+    console.log("no trackgroup");
     return <Box>{t("doesNotExist")}</Box>;
   } else if (!trackGroup) {
     return <FullPageLoadingSpinner />;
@@ -61,14 +63,23 @@ function TrackGroup() {
   return (
     <div
       className={css`
-        ${!user ? "min-height: calc(100vh - 70px);" : ""}
-        ${user ? "min-height: calc(100vh - 130px);" : ""}
-        ${!user ? "margin-top: 3vh;" : ""}
-        ${user ? "margin-top: 1rem;" : ""}
+        ${!user
+          ? `
+            min-height: calc(100vh - 70px);
+            margin-top: 3vh;`
+          : `
+            min-height: calc(100vh - 130px);
+            margin-top: 1rem;`}
         display: flex;
         align-items: center;
+        width: 100%;
       `}
     >
+      <MetaCard
+        title={trackGroup.title}
+        description={trackGroup.about ?? "An album on Mirlo"}
+        image={trackGroup.cover?.sizes?.[300]}
+      />
       <div
         className={css`
           width: 100%;
@@ -98,16 +109,9 @@ function TrackGroup() {
 
             @media screen and (max-width: ${bp.small}px) {
               padding-top: 0px;
-
-            ${user ? "padding-top: 0px;" : ""}
-
+            }
           `}
         >
-          <MetaCard
-            title={trackGroup.title}
-            description={trackGroup.about ?? "An album on Mirlo"}
-            image={trackGroup.cover?.sizes?.[300]}
-          />
           <div
             className={css`
               display: flex;
@@ -146,6 +150,7 @@ function TrackGroup() {
               className={css`
                 text-align: right;
                 display: flex;
+                align-items: flex-start;
               `}
             >
               {ownedByUser && (
@@ -228,14 +233,14 @@ function TrackGroup() {
             </div>
             <div
               className={css`
-            max-width: 59%;
-            flex: 59%;
-            @media screen and (max-width: ${bp.small}px) {
-              max-width: 100%;
-              flex: 100%;
-            margin-left: 0;
-
-          `}
+                max-width: 59%;
+                flex: 59%;
+                @media screen and (max-width: ${bp.small}px) {
+                  max-width: 100%;
+                  flex: 100%;
+                  margin-left: 0;
+                }
+              `}
             >
               <PublicTrackGroupListing
                 tracks={trackGroup.tracks}

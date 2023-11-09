@@ -39,6 +39,7 @@ const ManageTrackGroup: React.FC<{}> = () => {
     <div
       className={css`
         width: 100%;
+        padding-bottom: 1rem;
       `}
     >
       <div
