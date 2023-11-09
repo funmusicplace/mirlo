@@ -32,7 +32,6 @@ const playerClass = css`
   height: 73px;
 
   @media (max-width: ${bp.small}px) {
-    height: 140px;
     flex-direction: column;
 
     button {
@@ -334,7 +333,6 @@ const Player = () => {
 
                 @media (max-width: ${bp.small}px) {
                     button {
-
                       padding: 0em 0em 0em .5em;
                       background: transparent;
                     }
