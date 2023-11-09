@@ -23,6 +23,7 @@ export const ArtistPageWrapper = styled.div<{ artistBanner: boolean }>`
 
   @media screen and (max-width: ${bp.medium}px) {
     padding: 0rem !important;
+    width: 100%;
     margin-top: 0px;
     margin-top: 0px;
   }
