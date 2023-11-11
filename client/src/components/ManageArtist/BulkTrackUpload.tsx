@@ -173,7 +173,7 @@ export const BulkTrackUpload: React.FC<{
 
         setTimeout(async () => {
           await uploadNextTrack(remainingTracks);
-        }, 10000);
+        }, 30000);
       } else {
         setIsSaving(false);
 
