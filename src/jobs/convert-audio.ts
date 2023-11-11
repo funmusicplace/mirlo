@@ -98,7 +98,11 @@ export default async (job: Job) => {
       await new Promise((resolve, reject) => {
         const { format, audioBitrate, audioCodec } = formatDetails;
 
-        logger.info(`Processing stream for ${format}`);
+        logger.info(
+          `Processing stream for ${format}${
+            audioBitrate ? `@${audioBitrate}` : ""
+          }`
+        );
 
         const destination = generateDestination(
           format,
@@ -117,7 +121,11 @@ export default async (job: Job) => {
             reject(err);
           })
           .on("end", () => {
-            logger.info(`Done converting to ${format}`);
+            logger.info(
+              `Done converting to ${format}${
+                audioBitrate ? `@${audioBitrate}` : ""
+              }`
+            );
             resolve(null);
           });
 

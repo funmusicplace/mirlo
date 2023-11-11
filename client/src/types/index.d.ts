@@ -26,7 +26,7 @@ interface Track {
   audio?: {
     url: string;
     duration: number; // in seconds
-    uploadState: "STARTED" | "SUCCESS";
+    uploadState: "STARTED" | "SUCCESS" | "ERROR";
   };
   isPreview: boolean;
   trackArtists?: {

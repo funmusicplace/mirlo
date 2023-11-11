@@ -93,52 +93,84 @@ audioQueueEvents.on("stalled", async (result: { jobId: string }) => {
   }
 });
 
+audioQueueEvents.on("error", async (error) => {
+  logger.error(`jobId ${JSON.stringify(error)} had an error`);
+});
+
 /*
  * Process an audio then queue it for upload
  * FIXME: convert this to be stream based.
  */
 export const processTrackAudio = (ctx: { req: Request; res: Response }) => {
-  return async (file: any, trackId: number) => {
-    const fileType = await checkFileType(ctx, file, SUPPORTED_AUDIO_MIME_TYPES);
-
-    const stream = fs.createReadStream(file.path);
-    const audio = await prisma.trackAudio.upsert({
-      create: {
-        trackId,
-        url: buildTrackStreamURL(trackId),
-        originalFilename: file.originalFilename,
-        size: file.size,
-        fileExtension: fileType.ext,
-        uploadState: "STARTED",
-      },
-      update: {
-        trackId,
-        originalFilename: file.originalFilename,
-        url: buildTrackStreamURL(trackId),
-        size: file.size,
-        fileExtension: fileType.ext,
-        uploadState: "STARTED",
-      },
-      where: {
-        trackId: Number(trackId),
-      },
-    });
-
+  return async (trackId: number) => {
     logger.info(`MinIO is at ${MINIO_HOST}:${MINIO_API_PORT}`);
     logger.info("Uploading trackAudio to temporary storage");
 
     await createBucketIfNotExists(minioClient, incomingAudioBucket, logger);
-    logger.info(
-      `Going to put a file on MinIO Bucket ${incomingAudioBucket}: ${audio.id}, ${file.path}`
-    );
-    await minioClient.putObject(incomingAudioBucket, audio.id, stream);
-    await fsPromises.rm(file.path);
-    logger.info("Adding audio to convert-audio queue");
-    const job = await audioQueue.add("convert-audio", {
-      audioId: audio.id,
-      fileExtension: audio.fileExtension,
+
+    ctx.req.pipe(ctx.req.busboy);
+
+    const jobId = await new Promise((resolve, reject) => {
+      ctx.req.busboy.on("file", async (fieldname, file, fileInfo) => {
+        const extension = fileInfo.filename.split(".").pop();
+        const audio = await prisma.trackAudio.upsert({
+          create: {
+            trackId,
+            url: buildTrackStreamURL(trackId),
+            originalFilename: fileInfo.filename,
+            fileExtension: extension,
+            uploadState: "STARTED",
+          },
+          update: {
+            trackId,
+            originalFilename: fileInfo.filename,
+            url: buildTrackStreamURL(trackId),
+            fileExtension: extension,
+            uploadState: "STARTED",
+          },
+          where: {
+            trackId: Number(trackId),
+          },
+        });
+
+        logger.info(
+          `Going to put a file on MinIO Bucket ${incomingAudioBucket}: ${audio.id}, ${fileInfo.filename}`
+        );
+        await minioClient.putObject(incomingAudioBucket, audio.id, file);
+        logger.info("Adding audio to convert-audio queue");
+        const job = await audioQueue.add("convert-audio", {
+          audioId: audio.id,
+          fileExtension: audio.fileExtension,
+        });
+        resolve(job.id);
+      });
     });
-    return job.id;
+    return jobId;
+
+    // const stream = fs.createReadStream(file.path);
+    // const audio = await prisma.trackAudio.upsert({
+    //   create: {
+    //     trackId,
+    //     url: buildTrackStreamURL(trackId),
+    //     originalFilename: file.originalFilename,
+    //     size: file.size,
+    //     fileExtension: fileType.ext,
+    //     uploadState: "STARTED",
+    //   },
+    //   update: {
+    //     trackId,
+    //     originalFilename: file.originalFilename,
+    //     url: buildTrackStreamURL(trackId),
+    //     size: file.size,
+    //     fileExtension: fileType.ext,
+    //     uploadState: "STARTED",
+    //   },
+    //   where: {
+    //     trackId: Number(trackId),
+    //   },
+    // });
+
+    // await fsPromises.rm(file.path);
   };
 };
 

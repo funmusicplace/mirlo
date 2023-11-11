@@ -310,6 +310,13 @@
     "@types/connect" "*"
     "@types/node" "*"
 
+"@types/busboy@*":
+  version "1.5.3"
+  resolved "https://registry.yarnpkg.com/@types/busboy/-/busboy-1.5.3.tgz#016c68692c767f0cf9d23c90a85a9c322f92cbc5"
+  integrity sha512-YMBLFN/xBD8bnqywIlGyYqsNFXu6bsiY7h3Ae0kO17qEuTjsqeyYMRPSUDacIKIquws2Y6KjmxAyNx8xB3xQbw==
+  dependencies:
+    "@types/node" "*"
+
 "@types/bytes@^3.1.1":
   version "3.1.1"
   resolved "https://registry.yarnpkg.com/@types/bytes/-/bytes-3.1.1.tgz#67a876422e660dc4c10a27f3e5bcfbd5455f01d0"
@@ -319,6 +326,15 @@
   version "0.12.2"
   resolved "https://registry.yarnpkg.com/@types/caseless/-/caseless-0.12.2.tgz#f65d3d6389e01eeb458bd54dc8f52b95a9463bc8"
   integrity sha512-6ckxMjBBD8URvjB6J3NcnuAn5Pkl7t3TizAg+xdlzzQGSPSmBcXf8KoIH0ua/i+tio+ZRUHEXp0HEmvaR4kt0w==
+
+"@types/connect-busboy@^1.0.3":
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@types/connect-busboy/-/connect-busboy-1.0.3.tgz#23c84d620691fa72b316487e3ec85242d7d419e3"
+  integrity sha512-FLLWzsEgRBPSkeLE2Ab+GvuV1RuSN5oZvXbhpPyCv/QSKujTeOXTIJ/cuiE0++bZ9jMomP3vduXI3mUrS6XWcA==
+  dependencies:
+    "@types/busboy" "*"
+    "@types/express" "*"
+    "@types/node" "*"
 
 "@types/connect@*":
   version "3.4.35"
@@ -1332,6 +1348,13 @@ concurrently@^7.6.0:
     supports-color "^8.1.0"
     tree-kill "^1.2.2"
     yargs "^17.3.1"
+
+connect-busboy@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/connect-busboy/-/connect-busboy-1.0.0.tgz#7ac826e4c60e09934e049c406866f235efdc3d59"
+  integrity sha512-dKON178N/CpPSeJ8E+kfOekSUBx0nQo5kyIekry7YpM+qRhgHmSRVUN5D2hpLA8SQBV0ZNMF/aG7njDzE8Gl2A==
+  dependencies:
+    busboy "^1.0.0"
 
 consolidate@^0.16.0:
   version "0.16.0"
