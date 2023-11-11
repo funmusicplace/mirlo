@@ -18,6 +18,7 @@ const styles = `html {
   --mi-secondary-color: #ffb3d0;
   --mi-secondary-color--hover: #FF80B0;
 
+  --mi-info-background-color: #5C899C;
   --mi-success-background-color: #4cdb5f;
 
   --mi-warning-color: #f04e37;

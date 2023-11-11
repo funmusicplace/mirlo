@@ -174,7 +174,7 @@ export const BulkTrackUpload: React.FC<{
 
         setTimeout(async () => {
           await uploadNextTrack(remainingTracks);
-        }, 5000);
+        }, 10000);
       } else {
         snackbar(t("doneUploading"), {
           type: "success",
@@ -275,12 +275,44 @@ export const BulkTrackUpload: React.FC<{
       >
         <h4>{t("uploadTracks")}</h4>
         <p>{t("uploadTracksDescription")}</p>
+        <FormComponent>
+          <label
+            htmlFor="audio"
+            className={css`
+              position: relative;
+              display: flex;
+              gap: 10px;
+              flex-direction: column;
+              justify-content: center;
+              align-items: center;
+              height: 200px;
+              padding: 20px;
+              border-radius: 10px;
+              border: 2px dashed #555;
+              color: #444;
+              cursor: pointer;
+              transition: background 0.2s ease-in-out, border 0.2s ease-in-out;
+            `}
+          >
+            <div>{t("dropFilesHere")}</div>
+            {t("or")}
+            <InputEl
+              type="file"
+              id="audio"
+              disabled={disableUploadButton}
+              multiple
+              {...register("trackFiles")}
+              accept="audio/mpeg,audio/flac,audio/wav,audio/x-flac,audio/aac,audio/aiff,audio/x-m4a"
+            />
+          </label>
+        </FormComponent>
         {fields.length > 0 && (
           <>
-            {t("addTheFollowingTracks")}
+            <p>{t("addTheFollowingTracks")}</p>
             <Table
               className={css`
                 font-size: 14px;
+                margin: 1rem 0;
                 input {
                   margin-bottom: 0;
                   font-size: 14px;
@@ -352,38 +384,6 @@ export const BulkTrackUpload: React.FC<{
             )}
           </>
         )}
-
-        <FormComponent>
-          <label
-            htmlFor="audio"
-            className={css`
-              position: relative;
-              display: flex;
-              gap: 10px;
-              flex-direction: column;
-              justify-content: center;
-              align-items: center;
-              height: 200px;
-              padding: 20px;
-              border-radius: 10px;
-              border: 2px dashed #555;
-              color: #444;
-              cursor: pointer;
-              transition: background 0.2s ease-in-out, border 0.2s ease-in-out;
-            `}
-          >
-            <div>{t("dropFilesHere")}</div>
-            {t("or")}
-            <InputEl
-              type="file"
-              id="audio"
-              disabled={disableUploadButton}
-              multiple
-              {...register("trackFiles")}
-              accept="audio/mpeg,audio/flac,audio/wav,audio/x-flac,audio/aac,audio/aiff,audio/x-m4a"
-            />
-          </label>
-        </FormComponent>
       </form>
     </FormProvider>
   );

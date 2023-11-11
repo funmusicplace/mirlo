@@ -66,7 +66,7 @@ const formats = [
 ];
 
 export default async (job: Job) => {
-  const { audioId, fileExtension } = job.data;
+  const { audioId, fileExtension, incomingFileLocation } = job.data;
 
   try {
     const destinationFolder = `/data/media/processing/${audioId}`;

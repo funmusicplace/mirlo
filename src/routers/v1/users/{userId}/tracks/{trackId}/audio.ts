@@ -39,7 +39,7 @@ export default function () {
     const loggedInUser = req.user as User;
     try {
       const track = doesTrackBelongToUser(Number(trackId), loggedInUser.id);
-
+      console.log(isFileArray(req.files) && req.files?.[0]);
       if (!track) {
         res.status(400).json({
           error: "Track must belong to user",
