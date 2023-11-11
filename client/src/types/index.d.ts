@@ -45,6 +45,7 @@ interface TrackGroup {
   type: "lp" | "ep" | "album" | "single";
   releaseDate: string;
   about: string;
+  credits: string;
   artist?: Artist;
   artistId: number;
   tracks: Track[];

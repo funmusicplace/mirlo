@@ -178,6 +178,7 @@ model TrackGroup {
   userTrackGroupPurchases UserTrackGroupPurchase[]
   stripeProductKey        String?
   urlSlug                 String
+  credits                 String?
 
   @@unique([artistId, urlSlug])
 }

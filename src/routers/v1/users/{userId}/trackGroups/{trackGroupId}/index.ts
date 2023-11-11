@@ -70,6 +70,7 @@ export default function () {
           "type",
           "about",
           "minPrice",
+          "credits",
         ]),
       });
 
