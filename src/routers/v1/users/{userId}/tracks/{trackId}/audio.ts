@@ -7,13 +7,13 @@ import {
 } from "../../../../../../auth/passport";
 import { doesTrackBelongToUser } from "../../../../../../utils/ownership";
 import { processTrackAudio } from "../../../../../../utils/processTrackAudio";
-
-const upload = multer({
-  dest: process.env.MEDIA_LOCATION_INCOMING ?? "/data/media/incoming",
-  limits: {
-    fileSize: 4000000000,
-  },
-});
+import busboy from "connect-busboy";
+// const upload = multer({
+//   dest: process.env.MEDIA_LOCATION_INCOMING ?? "/data/media/incoming",
+//   limits: {
+//     fileSize: 4000000000,
+//   },
+// });
 
 type Params = {
   trackId: string;
@@ -29,7 +29,13 @@ export default function () {
     PUT: [
       userAuthenticated,
       userHasPermission("owner"),
-      upload.array("upload"),
+      // upload.array("upload"),
+      busboy({
+        highWaterMark: 2 * 1024 * 1024,
+        limits: {
+          fileSize: 40 * 1024 * 1024,
+        },
+      }),
       PUT,
     ],
   };
@@ -39,7 +45,7 @@ export default function () {
     const loggedInUser = req.user as User;
     try {
       const track = doesTrackBelongToUser(Number(trackId), loggedInUser.id);
-      console.log(isFileArray(req.files) && req.files?.[0]);
+
       if (!track) {
         res.status(400).json({
           error: "Track must belong to user",
@@ -47,15 +53,26 @@ export default function () {
         return next();
       }
 
+      // req.busboy.on('file', (fieldname, file, filename) => {
+      //   console.log(`Upload of '${filename}' started`);
+
+      //   // Create a write stream of the new file
+      //   // const fstream = fs.createWriteStream(path.join(uploadPath, filename));
+      //   // Pipe it trough
+      //   file.pipe(fstream);
+
+      //   // On finish of the upload
+      //   fstream.on('close', () => {
+      //       console.log(`Upload of '${filename}' finished`);
+      //       res.redirect('back');
+      //   });
+      // });
+
       let jobId = null;
-      // TODO: Remove prior files
       // FIXME: Only allow uploading of one file.
-      if (req.files && isFileArray(req.files)) {
-        jobId = await processTrackAudio({ req, res })(
-          req.files[0],
-          Number(trackId)
-        );
-      }
+      // if (req.files && isFileArray(req.files)) {
+      jobId = await processTrackAudio({ req, res })(Number(trackId));
+      // }
 
       res.json({ result: { jobId } });
     } catch (error) {

@@ -6,11 +6,9 @@ import api from "services/api";
 import { InputEl } from "../common/Input";
 import FormComponent from "components/common/FormComponent";
 import { useSnackbar } from "state/SnackbarContext";
-import LoadingSpinner from "components/common/LoadingSpinner";
 import { useGlobalStateContext } from "state/GlobalState";
 import Table from "components/common/Table";
 import { useTranslation } from "react-i18next";
-// import parseAudioMetadata from "parse-audio-metadata";
 import { css } from "@emotion/css";
 import { BulkTrackUploadRow } from "./BulkTrackUploadRow";
 import Tooltip from "components/common/Tooltip";
@@ -122,6 +120,7 @@ export const BulkTrackUpload: React.FC<{
     control,
     name: "tracks",
   });
+  const [isProcessing, setIsProcessing] = React.useState(false);
 
   const {
     state: { user },
@@ -176,6 +175,8 @@ export const BulkTrackUpload: React.FC<{
           await uploadNextTrack(remainingTracks);
         }, 10000);
       } else {
+        setIsSaving(false);
+
         snackbar(t("doneUploading"), {
           type: "success",
           timeout: 10000,
@@ -209,8 +210,6 @@ export const BulkTrackUpload: React.FC<{
         snackbar("There was a problem with the API", {
           type: "warning",
         });
-      } finally {
-        setIsSaving(false);
       }
     },
     [userId, uploadNextTrack, t, snackbar]
@@ -218,6 +217,7 @@ export const BulkTrackUpload: React.FC<{
 
   const processUploadedFiles = React.useCallback(
     (filesToProcess: FileList) => {
+      setIsProcessing(true);
       const filesToParse = fileListIntoArray(filesToProcess);
       (async () => {
         const parsed = await parse(filesToParse);
@@ -254,6 +254,7 @@ export const BulkTrackUpload: React.FC<{
                 })) ?? [],
             }))
         );
+        setIsProcessing(false);
       })();
     },
     [replace, trackgroup.artist?.name, trackgroup.artistId]
@@ -377,7 +378,7 @@ export const BulkTrackUpload: React.FC<{
               <Button
                 type="submit"
                 disabled={disableUploadButton}
-                startIcon={disableUploadButton ? <LoadingSpinner /> : undefined}
+                isLoading={disableUploadButton || isProcessing}
               >
                 {t("uploadTracks")}
               </Button>

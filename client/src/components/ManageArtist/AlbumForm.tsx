@@ -16,6 +16,17 @@ import useJobStatusCheck from "utils/useJobStatusCheck";
 import UploadImage from "./UploadImage";
 import { useNavigate } from "react-router-dom";
 
+interface FormData {
+  published: boolean;
+  title: string;
+  type: TrackGroup["type"];
+  minPrice: string;
+  releaseDate: string;
+  credits: string;
+  about: string;
+  coverFile: File[];
+}
+
 const AlbumForm: React.FC<{
   existing?: TrackGroup;
   reload: () => Promise<void> | void;
@@ -36,15 +47,7 @@ const AlbumForm: React.FC<{
     minPrice: `${existing?.minPrice ? existing.minPrice / 100 : ""}`,
   };
 
-  const methods = useForm<{
-    published: boolean;
-    title: string;
-    type: TrackGroup["type"];
-    minPrice: string;
-    releaseDate: string;
-    about: string;
-    coverFile: File[];
-  }>({
+  const methods = useForm<FormData>({
     defaultValues: defaultValues ?? {
       published: false,
     },
@@ -57,21 +60,13 @@ const AlbumForm: React.FC<{
   const userId = user?.id;
 
   const doSave = React.useCallback(
-    async (data: {
-      title: string;
-      published: boolean;
-      type: TrackGroup["type"];
-      minPrice: string;
-      releaseDate: string;
-      about: string;
-      coverFile: File[];
-    }) => {
+    async (data: FormData) => {
       if (userId) {
         try {
           setIsSaving(true);
           let savedId = existingId;
           const sending = {
-            ...pick(data, ["title", "private", "type", "about"]),
+            ...pick(data, ["title", "private", "type", "about", "credits"]),
             minPrice: data.minPrice ? +data.minPrice * 100 : undefined,
             releaseDate: new Date(data.releaseDate).toISOString(),
           };
@@ -196,6 +191,9 @@ const AlbumForm: React.FC<{
           </FormComponent>
           <FormComponent>
             {t("about")}: <TextArea {...register("about")} rows={7} />
+          </FormComponent>
+          <FormComponent>
+            {t("credits")}: <TextArea {...register("credits")} rows={5} />
           </FormComponent>
           <FormComponent>
             {t("price")}:

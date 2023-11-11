@@ -42,8 +42,8 @@ const ManageTrackRow: React.FC<{
   }, [track.id, userId, reload, snackbar]);
 
   const uploadState = track.audio?.uploadState;
-
-  const isDisabled = track.audio && uploadState !== "SUCCESS";
+  const isDisabled = track.audio && uploadState === "STARTED";
+  const isError = uploadState === "ERROR";
 
   const onCancelEditing = React.useCallback(() => {
     setIsEditing(false);
@@ -77,6 +77,7 @@ const ManageTrackRow: React.FC<{
         &:hover > td > .track-number {
           display: none;
         }
+        ${isError ? `background-color: red;` : ""}
         ${isDisabled ? `opacity: .5;` : ""}
       `}
     >
@@ -99,9 +100,9 @@ const ManageTrackRow: React.FC<{
         <>
           <div>{track.title}</div>
           <small>
-            {uploadState !== "SUCCESS"
-              ? "Still processing"
-              : t("doneUploadingTrack")}
+            {uploadState === "SUCCESS" && t("doneUploadingTrack")}
+            {uploadState === "STARTED" && t("stillProcessing")}
+            {uploadState === "ERROR" && t("thereWasAnError")}
           </small>
         </>
       </td>

@@ -26,7 +26,7 @@ interface Track {
   audio?: {
     url: string;
     duration: number; // in seconds
-    uploadState: "STARTED" | "SUCCESS";
+    uploadState: "STARTED" | "SUCCESS" | "ERROR";
   };
   isPreview: boolean;
   trackArtists?: {
@@ -45,6 +45,7 @@ interface TrackGroup {
   type: "lp" | "ep" | "album" | "single";
   releaseDate: string;
   about: string;
+  credits: string;
   artist?: Artist;
   artistId: number;
   tracks: Track[];
