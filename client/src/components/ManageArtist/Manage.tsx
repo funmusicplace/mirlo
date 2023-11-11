@@ -8,6 +8,7 @@ import { useGlobalStateContext } from "state/GlobalState";
 import { Link } from "react-router-dom";
 import { useSnackbar } from "state/SnackbarContext";
 import { useTranslation } from "react-i18next";
+import Box from "components/common/Box";
 
 export const Manage: React.FC = () => {
   const { state } = useGlobalStateContext();
@@ -106,12 +107,17 @@ export const Manage: React.FC = () => {
             margin-top: 1rem;
           `}
         >
-          {!stripeAccountStatus?.detailsSubmitted && (
-            <Button onClick={setUpBankAccount}>{t("setUpBankAccount")}</Button>
-          )}
-          {!stripeAccountStatus?.chargesEnabled &&
-            t("waitingStripeAccountVerification")}
-          {stripeAccountStatus?.chargesEnabled && t("stripeAccountVerified")}
+          <h2>Payment management</h2>
+          <Box variant="info">
+            {!stripeAccountStatus?.chargesEnabled &&
+              t("waitingStripeAccountVerification")}
+            {stripeAccountStatus?.chargesEnabled && t("stripeAccountVerified")}
+          </Box>
+          <Button onClick={setUpBankAccount}>
+            {stripeAccountStatus?.detailsSubmitted
+              ? t("updateBankAccount")
+              : t("setUpBankAccount")}
+          </Button>
         </div>
       </div>
     </>

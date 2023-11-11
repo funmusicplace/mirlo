@@ -26,11 +26,13 @@ export default function () {
         });
         if (user) {
           let accountId = user.stripeAccountId;
+          const alreadyExisted = !accountId;
           const client = await prisma.client.findFirst({});
 
           if (!accountId) {
             const account = await stripe.accounts.create({
-              type: "express",
+              type: "standard",
+              email: user.email,
               business_profile: { name: user.name ?? "" },
             });
             await prisma.user.update({
@@ -48,7 +50,7 @@ export default function () {
             account: accountId,
             refresh_url: `${API_DOMAIN}/v1/users/${userId}/stripe/connect`,
             return_url: `${client?.applicationUrl}/manage?stripeConnect=done`,
-            type: "account_onboarding",
+            type: alreadyExisted ? "account_update" : "account_onboarding",
           });
 
           res.redirect(accountLink.url);

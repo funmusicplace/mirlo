@@ -94,12 +94,13 @@
     "manageArtists": "Manage artists",
     "error": "Something went wrong",
     "setUpBankAccount": "Set up bank account",
-    "stripeAccountVerified": "Stripe account verified!",
+    "stripeAccountVerified": "Stripe account verified! This means you'll be able to receive payments for purchases.",
     "waitingStripeAccountVerification": "We're waiting on stripe to verify your account",
     "downloadSubscriberData": "Downlaod Subscriber Data",
     "subscriptionTiers": "Your subscription tiers",
     "createNewArtist": "Create new artist",
-    "waitingOnStripe": "We're waiting on stripe to verify your account"
+    "waitingOnStripe": "We're waiting on stripe to verify your account",
+    "updateBankAccount": "Change bank account information"
   },
   "manageArtist": {
     "notEnabled": "This artist has not been enabled by site admin yet! Contact an admin to do so.",
