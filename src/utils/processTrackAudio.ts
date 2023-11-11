@@ -108,7 +108,6 @@ export const processTrackAudio = (ctx: { req: Request; res: Response }) => {
         url: buildTrackStreamURL(trackId),
         originalFilename: file.originalFilename,
         size: file.size,
-        // hash: sha1sum,
         fileExtension: fileType.ext,
         uploadState: "STARTED",
       },
@@ -117,7 +116,6 @@ export const processTrackAudio = (ctx: { req: Request; res: Response }) => {
         originalFilename: file.originalFilename,
         url: buildTrackStreamURL(trackId),
         size: file.size,
-        // hash: sha1sum,
         fileExtension: fileType.ext,
         uploadState: "STARTED",
       },
@@ -134,7 +132,7 @@ export const processTrackAudio = (ctx: { req: Request; res: Response }) => {
       `Going to put a file on MinIO Bucket ${incomingAudioBucket}: ${audio.id}, ${file.path}`
     );
     await minioClient.putObject(incomingAudioBucket, audio.id, stream);
-
+    await fsPromises.rm(file.path);
     logger.info("Adding audio to convert-audio queue");
     const job = await audioQueue.add("convert-audio", {
       audioId: audio.id,
