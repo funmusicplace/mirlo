@@ -28,7 +28,11 @@ export default function () {
       let trackGroup;
       if (id) {
         trackGroup = await prisma.trackGroup.findFirst({
-          where: { id: Number(id), published: true },
+          where: {
+            id: Number(id),
+            published: true,
+            tracks: { some: { audio: { uploadState: "SUCCESS" } } },
+          },
           include: {
             tracks: {
               where: {
