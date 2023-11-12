@@ -44,11 +44,23 @@ const ArtistSupportBox: React.FC<{
       <Box
         key={subscriptionTier.id}
         className={css`
+          max-width: 33%;
+          flex: 33%;
           margin-bottom: 1rem;
           margin-top: 1rem;
           padding-top: 1.5rem;
           display: flex;
           flex-direction: column;
+
+          &:nth-child(3n + 1) {
+          border-top: 0;
+          margin-right:.5rem;
+        }
+
+        &:nth-child(3n) {
+          border-top: 0;
+          margin-left: .5rem;
+        }
         `}
       >
         <div
