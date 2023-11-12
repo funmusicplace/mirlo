@@ -21,7 +21,7 @@ const ArtistTrackGroup: React.FC<{
     <div
       key={trackGroup.id}
       className={css`
-        margin-bottom: 1rem;
+        margin-bottom: .5rem;
         display: inline-block;
         max-width: 33.3%;
         flex: 33.3%;
@@ -92,8 +92,21 @@ const ArtistTrackGroup: React.FC<{
 
               a:first-child {
                 font-weight: normal;
-                margin-bottom: 0.4rem;
+                margin-bottom: .2rem;
               }
+              a:last-child {
+                font-size: .8rem;
+                font-weight: bold;
+              }
+
+              a {
+                text-decoration: none;
+              }
+
+
+              a:hover {
+                  text-decoration: underline;
+                }
             `}
           >
             <Link
@@ -101,12 +114,7 @@ const ArtistTrackGroup: React.FC<{
                 trackGroup.urlSlug ?? trackGroup.id
               }`}
               className={css`
-                text-decoration: none;
                 padding-right: 0.5rem;
-
-                :hover {
-                  text-decoration: underline;
-                }
               `}
             >
               {trackGroup.title}
