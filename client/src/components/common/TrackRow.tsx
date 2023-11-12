@@ -55,6 +55,7 @@ const TrackRow: React.FC<{
         }
         &:hover > td > .play-button {
           display: block;
+          width: 2rem;
         }
         &:hover > td > .track-number {
           display: none;
