@@ -93,7 +93,11 @@ const ArtistSupport: React.FC<{ artist: Artist }> = ({ artist }) => {
   return (
     <>
       <h2>{t("support", { artist: artist.name })}</h2>
-      <div>
+      <div
+        className={css`
+          display: flex;
+        `}
+      >
         {artist.subscriptionTiers?.map((p) => (
           <ArtistSupportBox key={p.id} subscriptionTier={p} artist={artist} />
         ))}

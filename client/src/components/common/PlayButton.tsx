@@ -17,7 +17,7 @@ export const PlayButton: React.FC = () => {
           button {
             font-size: 1.4rem;
             margin-right: 0.25rem;
-            padding: .7rem .7rem .7rem .9rem;
+            padding: .7rem .6rem .7rem .8rem;
             border: solid 1.5px var(--mi-normal-foreground-color);
             border-color: var(--mi-normal-foreground-color);
             background-color: var(--mi-normal-foreground-color);

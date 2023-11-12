@@ -220,9 +220,9 @@ function Home() {
                 }
               `}
             >
-              <h3>
+              <h5>
                 <Link to={`/post/${p.id}/`}>{p.title}</Link>
-              </h3>
+              </h5>
               {p.artist && (
                 <em>
                   by{" "}

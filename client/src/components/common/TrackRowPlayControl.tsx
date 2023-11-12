@@ -50,7 +50,8 @@ const TrackRowPlayControl: React.FC<{
           compact
           data-cy="track-row-pause-button"
           onClick={onTrackPause}
-        >
+          style={{ width: "2rem", textAlign: "center" }}
+          >
           <TfiControlPause />
         </IconButton>
       )}
