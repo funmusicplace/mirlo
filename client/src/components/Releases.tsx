@@ -18,8 +18,12 @@ const Releases = () => {
   }, []);
 
   return (
-    <div>
-      <h1>{t("recentReleases")}</h1>
+    <div
+        className={css`
+        margin-top: 1rem;
+        `}
+      >
+      <h2>{t("recentReleases")}</h2>
       <div
         className={css`
           display: flex;

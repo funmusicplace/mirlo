@@ -61,7 +61,7 @@ export const Manage: React.FC = () => {
           }
         `}
       >
-        <h2 className={css``}>{t("manageArtists")}</h2>
+        <h1 className={css``}>{t("manageArtists")}</h1>
 
         <div
           className={css`

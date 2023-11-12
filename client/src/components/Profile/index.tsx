@@ -110,7 +110,7 @@ function Profile() {
           flex-direction: column;
         `}
       >
-        <h2>{t("profile")}</h2>
+        <h1>{t("profile")}</h1>
         <FormComponent>
           {t("email")}
           <InputEl {...register("email")} disabled />
