@@ -187,15 +187,20 @@ const Player = () => {
               align-items: center;
 
               margin-right: 1rem;
-              margin-left: 0.5rem;
-              margin-bottom: 0.5rem;
-              margin-top: 0.5rem;
+              margin-left: 1rem;
+              margin-bottom: 0.3rem;
+              padding-top: 0.5rem;
+
+              @media (max-width: ${bp.small}px) {
+              margin-right: .5rem;
+              margin-left: .5rem;
+            }
             `}
           >
             <div>
               <ImageWithPlaceholder
                 src={currentTrack?.trackGroup.cover?.sizes?.[120]}
-                size={45}
+                size={50}
                 alt={currentTrack?.title ?? "Loading album"}
                 className={css`
                   background-color: #efefef;
@@ -207,9 +212,14 @@ const Player = () => {
             </div>
             <div
               className={css`
-                width: 80%;
+                max-width: 80%;
+                flex: 80%;
                 display: flex;
                 flex-direction: column;
+                @media (max-width: ${bp.small}px) {
+                max-width: 70%;
+                flex: 70%;
+            }
               `}
             >
               <div
