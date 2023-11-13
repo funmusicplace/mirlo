@@ -8,6 +8,7 @@ import { finalCoversBucket } from "../../../../utils/minio";
 const { API_DOMAIN } = process.env;
 
 import stripe from "../../../../utils/stripe";
+import { subscribeUserToArtist } from "../../../../utils/artist";
 
 type Params = {
   id: string;
@@ -39,6 +40,7 @@ export default function () {
           artist: {
             include: {
               user: true,
+              subscriptionTiers: true,
             },
           },
           cover: true,
@@ -48,6 +50,8 @@ export default function () {
       if (!trackGroup) {
         return res.status(404);
       }
+
+      await subscribeUserToArtist(trackGroup?.artist, user);
 
       const stripeAccountId = trackGroup.artist.user.stripeAccountId;
 

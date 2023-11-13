@@ -1,4 +1,8 @@
-import { User, ArtistUserSubscription } from "@prisma/client";
+import {
+  User,
+  ArtistUserSubscription,
+  ArtistSubscriptionTier,
+} from "@prisma/client";
 import prisma from "../../prisma/prisma";
 import stripe from "./stripe";
 import { deleteTrackGroup } from "./trackGroup";
@@ -34,6 +38,35 @@ export const findArtistIdForURLSlug = async (id: string) => {
     return undefined;
   }
   return Number(id);
+};
+
+export const subscribeUserToArtist = async (
+  artist: { subscriptionTiers: ArtistSubscriptionTier[]; id: number },
+  user?: User | null
+) => {
+  const defaultTier = artist.subscriptionTiers.find(
+    (tier) => tier.isDefaultTier
+  );
+
+  if (user && defaultTier) {
+    const isSubscribed = await prisma.artistUserSubscription.findFirst({
+      where: {
+        userId: user.id,
+        artistSubscriptionTier: {
+          artistId: artist.id,
+        },
+      },
+    });
+    if (!isSubscribed) {
+      await prisma.artistUserSubscription.create({
+        data: {
+          artistSubscriptionTierId: defaultTier.id,
+          userId: user.id,
+          amount: 0,
+        },
+      });
+    }
+  }
 };
 
 export const deleteArtist = async (userId: number, artistId: number) => {

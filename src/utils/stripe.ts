@@ -109,7 +109,11 @@ const handleTrackGroupPurhcase = async (
         id: trackGroupId,
       },
       include: {
-        artist: true,
+        artist: {
+          include: {
+            subscriptionTiers: true,
+          },
+        },
       },
     });
 

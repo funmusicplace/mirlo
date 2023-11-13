@@ -74,8 +74,13 @@
     "tracks": "Tracks:",
     "releaseDate": "Release date:",
     "price": "Price:",
+    "getDownloadLink": "Get download link email",
+    "email": "Email",
     "nameYourPrice": "Name your price in USD:",
-    "buyingTrackGroup": "Buying "
+    "buyingTrackGroup": "Buying {{title}}",
+    "lessThanMin": "{{artistName}} has set a mimimum price of {{minPrice}} for this purchase",
+    "moreThan1": "Pay 1 {{currency}} or more to add this release to your Mirlo collection and directly support {{artistName}}",
+    "justDownload": "Want to just download the album? Enter your email and we'll email you a download link. You'll get added to the artist's mailing list"
   },
   "artist": {
     "support": "Support {{artist}}",
