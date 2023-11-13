@@ -1,7 +1,7 @@
 import { css } from "@emotion/css";
 import Button from "components/common/Button";
 import { MetaCard } from "components/common/MetaCard";
-import PostContent from "components/common/PostContent";
+import MarkdownContent from "components/common/MarkdownContent";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { FaPen } from "react-icons/fa";
@@ -59,7 +59,7 @@ const Post: React.FC = () => {
           </Link>
         </em>
       )}
-      <PostContent content={post.content} />
+      <MarkdownContent content={post.content} />
     </div>
   );
 };

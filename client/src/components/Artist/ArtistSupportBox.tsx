@@ -6,6 +6,7 @@ import { useSnackbar } from "state/SnackbarContext";
 import Box from "../common/Box";
 import Button from "../common/Button";
 import Money from "../common/Money";
+import MarkdownContent from "components/common/MarkdownContent";
 
 const ArtistSupportBox: React.FC<{
   subscriptionTier: ArtistSubscriptionTier;
@@ -80,7 +81,7 @@ const ArtistSupportBox: React.FC<{
             }
           />
         </div>
-        <p>{subscriptionTier.description}</p>
+        <MarkdownContent content={subscriptionTier.description} />
         <div
           className={css`
             margin-top: 0.5rem;

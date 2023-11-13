@@ -6,6 +6,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import MarkdownWrapper from "components/common/MarkdownWrapper";
 import styled from "@emotion/styled";
+import MarkdownContent from "./MarkdownContent";
 
 const H1 = styled.h1`
   font-size: 50px;
@@ -83,18 +84,7 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
         >
           <Header>
             <H1>{artist.name}</H1>
-            <MarkdownWrapper
-              className={css`
-                margin: 0rem !important;
-              `}
-            >
-              <ReactMarkdown
-                className={remarkClass}
-                remarkPlugins={[remarkGfm]}
-              >
-                {artist.bio}
-              </ReactMarkdown>
-            </MarkdownWrapper>
+            <MarkdownContent content={artist.bio} />
           </Header>
         </div>
       )}
@@ -110,18 +100,7 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
         >
           <Header>
             <H1>{artist.name}</H1>
-            <MarkdownWrapper
-              className={css`
-                margin: 0rem !important;
-              `}
-            >
-              <ReactMarkdown
-                className={remarkClass}
-                remarkPlugins={[remarkGfm]}
-              >
-                {artist.bio}
-              </ReactMarkdown>
-            </MarkdownWrapper>
+            <MarkdownContent content={artist.bio} />
           </Header>
         </div>
       )}
