@@ -11,6 +11,7 @@ import useGetUserObjectById from "utils/useGetUserObjectById";
 import { useGlobalStateContext } from "state/GlobalState";
 import Button from "components/common/Button";
 import PublishButton from "./PublisButton";
+import NewAlbumForm from "./NewAlbumForm";
 
 const ManageTrackGroup: React.FC<{}> = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
@@ -71,7 +72,7 @@ const ManageTrackGroup: React.FC<{}> = () => {
       {trackGroupId && trackGroup && (
         <AlbumForm existing={trackGroup} reload={reload} artist={artist} />
       )}
-      {!trackGroupId && <AlbumForm reload={reload} artist={artist} />}
+      {!trackGroupId && <NewAlbumForm reload={reload} artist={artist} />}
 
       {trackGroup && trackGroup?.tracks?.length > 0 && (
         <ManageTrackTable

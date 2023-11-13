@@ -1,17 +1,10 @@
 import { Request, Response } from "express";
 import { Queue, QueueEvents } from "bullmq";
-import fs, { promises as fsPromises } from "fs";
-import shasum from "shasum";
 
-import {
-  // FIXME: HIGH_RES_AUDIO_MIME_TYPES,
-  SUPPORTED_AUDIO_MIME_TYPES,
-} from "../config/supported-media-types";
 import { REDIS_CONFIG } from "../config/redis";
 
 import prisma from "../../prisma/prisma";
 import { logger } from "../logger";
-import { checkFileType } from "./file";
 import { createBucketIfNotExists, incomingAudioBucket } from "./minio";
 import { minioClient } from "./minio";
 

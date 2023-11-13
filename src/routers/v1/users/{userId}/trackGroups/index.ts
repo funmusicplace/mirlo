@@ -80,7 +80,7 @@ export default function () {
   // FIXME: only allow creation of trackgroups for users that belong to the
   // logged in user
   async function POST(req: Request, res: Response) {
-    const { title, about, artistId, published, releaseDate, credits } =
+    const { title, about, artistId, published, releaseDate, credits, type } =
       req.body;
     const user = req.user as User;
 
@@ -90,6 +90,7 @@ export default function () {
           title,
           about,
           credits,
+          type,
           artist: { connect: { id: artistId } },
           published,
           releaseDate: new Date(releaseDate),
