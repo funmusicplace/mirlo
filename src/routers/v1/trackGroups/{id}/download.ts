@@ -1,7 +1,7 @@
 import { TrackAudio, Track, User } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
 import { logger } from "../../../../logger";
-import { userAuthenticated } from "../../../../auth/passport";
+import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import prisma from "../../../../../prisma/prisma";
 
 import { doesTrackGroupBelongToUser } from "../../../../utils/ownership";
@@ -9,12 +9,12 @@ import { buildZipFileForPath } from "../../../../utils/trackGroup";
 
 export default function () {
   const operations = {
-    GET: [userAuthenticated, GET],
+    GET: [userLoggedInWithoutRedirect, GET],
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { id: trackGroupId }: { id?: string } = req.params;
-    const { id: userId, isAdmin } = req.user as User;
+    const { email, token } = req.query as { email: string; token: string };
 
     try {
       const trackGroupInclude = {
@@ -32,50 +32,110 @@ export default function () {
 
       let trackGroup;
 
-      if (!isAdmin) {
-        const isCreator = await doesTrackGroupBelongToUser(
-          Number(trackGroupId),
-          userId
-        );
-        logger.info(`trackGroupId: ${trackGroupId} isCreator: ${isCreator}`);
+      if (req.user) {
+        const { id: userId, isAdmin } = req.user as User;
 
-        const purchase = await prisma.userTrackGroupPurchase.findFirst({
-          where: {
-            trackGroupId: Number(trackGroupId),
-            ...(!isCreator
-              ? {
-                  userId: Number(userId),
-                  trackGroup: {
-                    published: true,
-                  },
-                }
-              : {}),
-          },
-          include: {
-            trackGroup: trackGroupInclude,
-          },
-        });
+        if (!isAdmin) {
+          const isCreator = await doesTrackGroupBelongToUser(
+            Number(trackGroupId),
+            userId
+          );
+          logger.info(`trackGroupId: ${trackGroupId} isCreator: ${isCreator}`);
 
-        if (!purchase) {
-          logger.info(`trackGroupId: ${trackGroupId} no purchase found `);
-          res.status(404);
-          return next();
+          const purchase = await prisma.userTrackGroupPurchase.findFirst({
+            where: {
+              trackGroupId: Number(trackGroupId),
+              ...(!isCreator
+                ? {
+                    userId: Number(userId),
+                    trackGroup: {
+                      published: true,
+                    },
+                  }
+                : {}),
+            },
+            include: {
+              trackGroup: trackGroupInclude,
+            },
+          });
+
+          if (!purchase) {
+            logger.info(`trackGroupId: ${trackGroupId} no purchase found `);
+            res.status(404);
+            return next();
+          }
+          await prisma.userTrackGroupPurchase.updateMany({
+            data: {
+              singleDownloadToken: null,
+            },
+            where: {
+              userId: purchase.userId,
+              trackGroupId: purchase.trackGroupId,
+            },
+          });
+          trackGroup = purchase.trackGroup;
+        } else {
+          logger.info(
+            `trackGroupId: ${trackGroupId} being downloaded by admin`
+          );
+          trackGroup = await prisma.trackGroup.findFirst({
+            where: {
+              id: Number(trackGroupId),
+            },
+            ...trackGroupInclude,
+          });
         }
-        trackGroup = purchase.trackGroup;
       } else {
-        logger.info(`trackGroupId: ${trackGroupId} isAdmin `);
-        trackGroup = await prisma.trackGroup.findFirst({
-          where: {
-            id: Number(trackGroupId),
-          },
-          ...trackGroupInclude,
+        logger.info(
+          `trackGroupId: ${trackGroupId} being downloaded by a non-logged in user`
+        );
+        const user = await prisma.user.findFirst({
+          where: { email },
         });
+
+        if (user) {
+          const purchase = await prisma.userTrackGroupPurchase.findFirst({
+            where: {
+              userId: user?.id,
+              singleDownloadToken: token,
+              trackGroupId: Number(trackGroupId),
+              trackGroup: {
+                published: true,
+              },
+            },
+            include: {
+              trackGroup: trackGroupInclude,
+            },
+          });
+
+          if (!purchase) {
+            logger.info(
+              `trackGroupId: ${trackGroupId} no purchase record found `
+            );
+            res.status(404);
+            return next();
+          }
+
+          await prisma.userTrackGroupPurchase.updateMany({
+            where: {
+              userId: user?.id,
+              trackGroupId: Number(trackGroupId),
+            },
+            data: {
+              singleDownloadToken: null,
+            },
+          });
+
+          trackGroup = purchase.trackGroup;
+        }
       }
 
       logger.info("Found a trackgroup");
 
       if (!trackGroup) {
-        res.status(404);
+        res.status(404).json({
+          error: "No trackGroup found",
+        });
         return next();
       }
 

@@ -6,13 +6,12 @@ import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
 
 import { Input } from "components/common/Input";
-import FormComponent from "components/common/FormComponent";
+import FreeDownload from "./FreeDownload";
 
 const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup }> = ({
   trackGroup,
 }) => {
   const minPrice = trackGroup.minPrice;
-  const [email, setEmail] = React.useState("");
   const [chosenPrice, setChosenPrice] = React.useState(
     `${minPrice ? minPrice / 100 : 5}`
   );
@@ -31,18 +30,6 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup }> = ({
       console.error(e);
     }
   }, [chosenPrice, snackbar, t, trackGroup.id]);
-
-  const downloadAlbumAnyway = React.useCallback(async () => {
-    try {
-      await api.post<{}, { sessionUrl: string }>(
-        `trackGroups/${trackGroup.id}/freeDownload`,
-        { email }
-      );
-    } catch (e) {
-      snackbar(t("error"), { type: "warning" });
-      console.error(e);
-    }
-  }, [email, snackbar, t, trackGroup.id]);
 
   const lessThan1 = Number.isNaN(Number(chosenPrice))
     ? true
@@ -87,40 +74,7 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup }> = ({
           })}
         </strong>
       )}
-      {lessThan1 && (
-        <div style={{ marginTop: "1rem" }}>
-          <strong>
-            {t("moreThan1", {
-              currency: trackGroup.currency,
-              artistName: trackGroup.artist?.name,
-            })}
-          </strong>
-          <form style={{ marginTop: "1rem" }}>
-            <p style={{ marginBottom: "1rem" }}>{t("justDownload")}</p>
-            <FormComponent>
-              {t("email")}
-              <Input
-                name="email"
-                type="email"
-                required
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  setEmail(e.target.value);
-                }}
-              />
-            </FormComponent>
-            <Button
-              type="submit"
-              onClick={(e) => {
-                e.preventDefault();
-                downloadAlbumAnyway();
-                console.log("submitting");
-              }}
-            >
-              {t("getDownloadLink")}
-            </Button>
-          </form>
-        </div>
-      )}
+      <FreeDownload trackGroup={trackGroup} chosenPrice={chosenPrice} />
     </>
   );
 };

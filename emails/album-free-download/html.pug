@@ -1,0 +1,29 @@
+doctype html
+html
+  head
+    block head
+      meta(charset="utf-8")
+      meta(name="viewport", content="width=device-width")
+      meta(http-equiv="X-UA-Compatible", content="IE=edge")
+      meta(name="x-apple-disable-message-reformatting")
+      style 
+        include ../style.css
+  body.sans-serif
+    p Woohoo! 
+    p 
+      | Here's your free download of 
+      strong #{trackGroup.title} 
+      | by 
+      strong #{trackGroup.artist.name}.
+    table 
+      tr 
+        td #{trackGroup.title}
+        td 
+          a(href!=`${host}/v1/trackGroups/${trackGroup.id}/download?token=${token}&email=${email}`) #{trackGroup.artist.name}
+
+    p 
+    p 
+      | Consider supporting 
+      a(href!=`${client}/${trackGroup.artist.urlSlug}`) #{trackGroup.artist.name}
+      | with a subscription or a purchase.
+    p Enjoy!

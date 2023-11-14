@@ -95,7 +95,6 @@ const NewAlbumForm: React.FC<{
 
   React.useEffect(() => {
     if (uploadJobs && uploadJobs.length === 0 && newAlbumId) {
-      console.log("uploading is done", newAlbumId);
       navigate(`/manage/artists/${artist.id}/release/${newAlbumId}`);
       reload();
     }
