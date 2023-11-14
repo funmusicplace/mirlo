@@ -11,6 +11,7 @@ import { useGlobalStateContext } from "state/GlobalState";
 import { useSnackbar } from "state/SnackbarContext";
 import SubscriptionForm from "./SubscriptionForm";
 import { useTranslation } from "react-i18next";
+import MarkdownContent from "components/common/MarkdownContent";
 
 const ManageSubscriptionTierBox: React.FC<{
   tier: ArtistSubscriptionTier;
@@ -24,7 +25,9 @@ const ManageSubscriptionTierBox: React.FC<{
 
   const { artistId } = useParams();
   const [manageTier, setManageTier] = React.useState<ArtistSubscriptionTier>();
-  const {t} = useTranslation("translation", { keyPrefix: "manageSubscriptionTierBox"})
+  const { t } = useTranslation("translation", {
+    keyPrefix: "manageSubscriptionTierBox",
+  });
 
   const userId = user?.id;
 
@@ -82,7 +85,7 @@ const ManageSubscriptionTierBox: React.FC<{
           </Button>
         </div>
       </div>
-      <div>{tier.description}</div>
+      <MarkdownContent content={tier.description} />
       {manageTier && (
         <Modal
           open={!!manageTier}

@@ -86,14 +86,21 @@ export default function () {
   async function DELETE(req: Request, res: Response, next: NextFunction) {
     try {
       const { userId, subscriptionTierId } = req.params;
-      const track = await doesSubscriptionTierBelongToUser(
+      const tier = await doesSubscriptionTierBelongToUser(
         Number(subscriptionTierId),
         Number(userId)
       );
 
-      if (!track) {
+      if (!tier) {
         res.status(400).json({
           error: "ArtistSubscriptionTier must belong to user",
+        });
+        return next();
+      }
+
+      if (tier.isDefaultTier) {
+        res.status(400).json({
+          error: "Can't delete the default tier",
         });
         return next();
       }

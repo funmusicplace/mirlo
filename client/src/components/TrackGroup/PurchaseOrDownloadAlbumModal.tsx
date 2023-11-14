@@ -17,7 +17,7 @@ const PurchaseOrDownloadAlbum: React.FC<{
   } = useGlobalStateContext();
   const [isPurchasingAlbum, setIsPurchasingAlbum] = React.useState(false);
   const [isOwned, setIsOwned] = React.useState(false);
-  const { state } = useArtistContext();
+  const { state: artistState } = useArtistContext();
 
   const userId = user?.id;
 
@@ -40,11 +40,12 @@ const PurchaseOrDownloadAlbum: React.FC<{
     checkForAlbumOwnership();
   }, [checkForAlbumOwnership]);
 
-  if (!trackGroup || !state?.artist) {
+  if (!trackGroup || !artistState?.artist) {
     return null;
   }
 
-  const userIsTrackGroupArtist = user && state?.artist.userId === user?.id;
+  const userIsTrackGroupArtist =
+    user && artistState?.artist.userId === user?.id;
 
   return (
     <>
@@ -52,7 +53,7 @@ const PurchaseOrDownloadAlbum: React.FC<{
         {user &&
           !userIsTrackGroupArtist &&
           !isOwned &&
-          state?.userStripeStatus?.chargesEnabled && (
+          artistState?.userStripeStatus?.chargesEnabled && (
             <Button compact onClick={() => setIsPurchasingAlbum(true)}>
               {t("buy")}
             </Button>
@@ -65,7 +66,7 @@ const PurchaseOrDownloadAlbum: React.FC<{
         size="small"
         open={isPurchasingAlbum}
         onClose={() => setIsPurchasingAlbum(false)}
-        title={`${t("buyingTrackGroup")} ${trackGroup.title}`}
+        title={t("buyingTrackGroup", { title: trackGroup.title }) ?? ""}
       >
         <BuyTrackGroup trackGroup={trackGroup} />
       </Modal>

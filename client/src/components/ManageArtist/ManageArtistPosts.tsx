@@ -8,7 +8,7 @@ import NewPostForm from "./NewPostForm";
 import { bp } from "../../constants";
 import Box from "components/common/Box";
 import { FaPen, FaTrash } from "react-icons/fa";
-import PostContent from "components/common/PostContent";
+import MarkdownContent from "components/common/MarkdownContent";
 import { useSnackbar } from "state/SnackbarContext";
 import PostForm from "./PostForm";
 import Modal from "components/common/Modal";
@@ -134,7 +134,7 @@ const ManageArtistPosts: React.FC<{}> = () => {
               </Button>
             </div>
           </div>
-          <PostContent content={p.content} />
+          <MarkdownContent content={p.content} />
         </Box>
       ))}
       {managePost && (

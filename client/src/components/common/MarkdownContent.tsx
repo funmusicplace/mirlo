@@ -25,7 +25,7 @@ const BlackbirdTransformer = {
   },
 };
 
-const PostContent: React.FC<{
+const MarkdownContent: React.FC<{
   content: string;
 }> = ({ content }) => {
   return (
@@ -47,4 +47,4 @@ const PostContent: React.FC<{
   );
 };
 
-export default PostContent;
+export default MarkdownContent;

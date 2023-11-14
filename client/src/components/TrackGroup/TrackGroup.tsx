@@ -10,15 +10,14 @@ import ArtistSupport from "components/Artist/ArtistSupport";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
 import PublicTrackGroupListing from "components/common/PublicTrackGroupListing";
 import { MetaCard } from "components/common/MetaCard";
-import ReactMarkdown from "react-markdown";
 import { useArtistContext } from "state/ArtistContext";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 
 import PurchaseOrDownloadAlbum from "./PurchaseOrDownloadAlbumModal";
 import { bp } from "../../constants";
-import MarkdownWrapper from "components/common/MarkdownWrapper";
 import DropdownMenu from "components/common/DropdownMenu";
 import TrackGroupAdminMenu from "./TrackGroupAdminMenu";
+import MarkdownContent from "components/common/MarkdownContent";
 
 function TrackGroup() {
   const { t } = useTranslation("translation", {
@@ -266,9 +265,7 @@ function TrackGroup() {
             padding: 0.5rem 0.25rem;
           `}
         >
-          <MarkdownWrapper>
-            <ReactMarkdown>{trackGroup.about}</ReactMarkdown>
-          </MarkdownWrapper>
+          <MarkdownContent content={trackGroup.about} />
         </div>
 
         <div
@@ -278,9 +275,7 @@ function TrackGroup() {
             padding: 0.5rem 0.25rem;
           `}
         >
-          <MarkdownWrapper>
-            <ReactMarkdown>{trackGroup.credits}</ReactMarkdown>
-          </MarkdownWrapper>
+          <MarkdownContent content={trackGroup.credits} />
         </div>
         {userStripeStatus?.chargesEnabled && <ArtistSupport artist={artist} />}
       </div>

@@ -2,14 +2,13 @@ import { css } from "@emotion/css";
 import { bp } from "../../constants";
 import ArtistSupport from "./ArtistSupport";
 import Box from "../common/Box";
-import PostContent from "../common/PostContent";
+import MarkdownContent from "../common/MarkdownContent";
 import ArtistAlbums from "./ArtistAlbums";
 import { useTranslation } from "react-i18next";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
 import { useArtistContext } from "state/ArtistContext";
 
 const artistsectionClass = css`
-
   background: var(--mi-light-background-color);
   @media screen and (max-width: ${bp.medium}px) {
     padding: 0.5rem !important;
@@ -61,7 +60,7 @@ function Artist() {
             >
               <h5>{p.title}</h5>
             </div>
-            <PostContent content={p.content} />
+            <MarkdownContent content={p.content} />
           </Box>
         ))}
       </div>

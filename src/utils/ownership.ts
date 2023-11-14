@@ -1,4 +1,4 @@
-import { TrackGroup, ArtistSubscriptionTier } from "@prisma/client";
+import { ArtistSubscriptionTier } from "@prisma/client";
 
 import prisma from "../../prisma/prisma";
 

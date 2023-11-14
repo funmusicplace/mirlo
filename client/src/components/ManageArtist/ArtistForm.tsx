@@ -13,7 +13,6 @@ import { useGlobalStateContext } from "state/GlobalState";
 import UploadArtistImage from "./UploadArtistImage";
 import { useTranslation } from "react-i18next";
 import ColorInput from "./ColorInput";
-// import UploadArtistImage from "./UploadArtistImage";
 
 export interface ShareableTrackgroup {
   creatorId: number;

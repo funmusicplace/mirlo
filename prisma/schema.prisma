@@ -126,6 +126,7 @@ model ArtistSubscriptionTier {
   deletedAt             DateTime?
   minimumTierForPost    Post[]
   postSubscriptionTiers PostSubscriptionTier[]
+  isDefaultTier         Boolean?                 @default(false)
 }
 
 model ArtistUserSubscription {
@@ -145,14 +146,15 @@ model ArtistUserSubscription {
 }
 
 model UserTrackGroupPurchase {
-  userId           Int
-  user             User       @relation(fields: [userId], references: [id])
-  trackGroupId     Int
-  trackGroup       TrackGroup @relation(fields: [trackGroupId], references: [id])
-  pricePaid        Int // in cents
-  currencyPaid     String     @default("USD")
-  datePurchased    DateTime   @default(now())
-  stripeSessionKey String?
+  userId              Int
+  user                User       @relation(fields: [userId], references: [id])
+  trackGroupId        Int
+  trackGroup          TrackGroup @relation(fields: [trackGroupId], references: [id])
+  pricePaid           Int // in cents
+  currencyPaid        String     @default("USD")
+  datePurchased       DateTime   @default(now())
+  stripeSessionKey    String?
+  singleDownloadToken String?
 
   @@unique([userId, trackGroupId])
 }

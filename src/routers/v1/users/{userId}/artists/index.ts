@@ -116,6 +116,14 @@ export default function () {
               id: Number(userId),
             },
           },
+          subscriptionTiers: {
+            create: {
+              name: "follow",
+              description: "follow an artist",
+              minAmount: 0,
+              isDefaultTier: true,
+            },
+          },
         },
       });
       res.json(result);

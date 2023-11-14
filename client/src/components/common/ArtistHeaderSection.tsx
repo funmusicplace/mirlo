@@ -2,10 +2,8 @@ import { css } from "@emotion/css";
 import { useParams } from "react-router-dom";
 import { bp } from "../../constants";
 import { MetaCard } from "components/common/MetaCard";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import MarkdownWrapper from "components/common/MarkdownWrapper";
 import styled from "@emotion/styled";
+import MarkdownContent from "./MarkdownContent";
 
 const H1 = styled.h1`
   font-size: 50px;
@@ -36,19 +34,6 @@ const Header = styled.div`
     padding: 0rem 0.5rem 0rem;
     border: solid grey;
     border-width: 0px 0px 1px 0px;
-  }
-`;
-
-const remarkClass = css`
-  margin: 0rem !important;
-  padding-bottom: 1rem;
-  border-bottom: solid 1px;
-
-  @media screen and (max-width: ${bp.medium}px) {
-    border-bottom: solid 0px;
-    font-size: 0.8rem;
-    padding-bottom: 0rem;
-    color: grey;
   }
 `;
 
@@ -83,18 +68,7 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
         >
           <Header>
             <H1>{artist.name}</H1>
-            <MarkdownWrapper
-              className={css`
-                margin: 0rem !important;
-              `}
-            >
-              <ReactMarkdown
-                className={remarkClass}
-                remarkPlugins={[remarkGfm]}
-              >
-                {artist.bio}
-              </ReactMarkdown>
-            </MarkdownWrapper>
+            <MarkdownContent content={artist.bio} />
           </Header>
         </div>
       )}
@@ -110,18 +84,7 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
         >
           <Header>
             <H1>{artist.name}</H1>
-            <MarkdownWrapper
-              className={css`
-                margin: 0rem !important;
-              `}
-            >
-              <ReactMarkdown
-                className={remarkClass}
-                remarkPlugins={[remarkGfm]}
-              >
-                {artist.bio}
-              </ReactMarkdown>
-            </MarkdownWrapper>
+            <MarkdownContent content={artist.bio} />
           </Header>
         </div>
       )}
