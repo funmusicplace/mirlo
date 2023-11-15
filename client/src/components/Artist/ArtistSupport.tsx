@@ -7,6 +7,7 @@ import { useGlobalStateContext } from "state/GlobalState";
 import ArtistManageSubscription from "./ArtistManageSubscription";
 import ArtistSupportBox from "./ArtistSupportBox";
 import { css } from "@emotion/css";
+import { bp } from "../../constants";
 
 const ArtistSupport: React.FC<{ artist: Artist }> = ({ artist }) => {
   const {
@@ -68,7 +69,7 @@ const ArtistSupport: React.FC<{ artist: Artist }> = ({ artist }) => {
     return <Box />;
   }
 
-  if (artist.subscriptionTiers.length === 0) {
+  if (artist.subscriptionTiers?.length === 0) {
     return (
       <Box
         className={css`
@@ -96,6 +97,10 @@ const ArtistSupport: React.FC<{ artist: Artist }> = ({ artist }) => {
       <div
         className={css`
           display: flex;
+
+          @media (max-width: ${bp.small}px) {
+            flex-direction: column;
+          }
         `}
       >
         {artist.subscriptionTiers?.map((p) => (

@@ -1,41 +1,30 @@
 const styles = `html {
   --mi-black: #0e0e0e;
-  --mi-white: #f5f0f0;
+  --mi-white: #ffffff;
   --mi-pink: #BE3455;
 
   --mi-normal-background-color: var(--mi-white);
-  --mi-light-background-color: #ffffff;
-  --mi-lighten-background-color: rgba(255, 255, 255, 0.4);
-  --mi-shade-background-color: rgba(50, 0, 0, .1);
+  --mi-lighten-background-color: rgba(255, 255, 255, 0.5);
+  --mi-darken-background-color: rgba(50, 0, 0, .1);
 
   --mi-normal-foreground-color: var(--mi-black);
   --mi-light-foreground-color: #888;
   --mi-lighter-foreground-color: #bbb;
 
   --mi-primary-color: var(--mi-pink);
-  --mi-primary-color--hover: var(--mi-pink);
-
   --mi-secondary-color: #ffb3d0;
-  --mi-secondary-color--hover: #FF80B0;
 
   --mi-info-background-color: #5C899C;
   --mi-success-background-color: #4cdb5f;
 
   --mi-warning-color: #f04e37;
-  --mi-warning-color--hover: #f26f59;
   --mi-warning-background-color: var(--mi-warning-color);
   --mi-darken-warning-background-color: #df250b;
-  --mi-warning-foreground-color: white;
-
-  --mi-primary-highlight-color: #bcb3ff;
-  --mi-primary-highlight-color--hover: #FFB3D0;
-  --mi-box-color: var(--mi-secondary-color);
 
   --mi-border-radius: 4px;
   --mi-border-radius-focus: 8px;
 
-  --mi-icon-button-background-color: var(--mi-shade-background-color);
-  --mi-icon-button-background-color--hover: rgba(0, 0, 0, 0.2);
+  --mi-icon-button-background-color: var(--mi-darken-background-color);
 
   --mi-font-family-stack: 'Arial', -apple-system, BlinkMacSystemFont,
     'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans',
@@ -48,8 +37,8 @@ const styles = `html {
   html {
     --mi-normal-background-color: var(--mi-black);
     --mi-normal-foreground-color: var(--mi-white);
-    --mi-shade-background-color: rgba(0, 0, 0, 0.2);
-    --mi-light-background-color: #1e191f;
+    --mi-darken-background-color: rgba(0, 0, 0, 0.2);
+    --mi-lighten-background-color: rgba(255, 255, 255, 0.2);
   }
 }
 

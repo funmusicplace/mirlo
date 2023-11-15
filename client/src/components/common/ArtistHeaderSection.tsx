@@ -59,7 +59,6 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
             overflow: hidden;
             align-items: flex-end;
             justify-content: space-around;
-            background: var(--mi-light-background-color);
 
             @media screen and (max-width: ${bp.medium}px) {
               background: var(--mi-normal-background-color);

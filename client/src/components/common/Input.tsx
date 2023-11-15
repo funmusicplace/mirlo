@@ -12,7 +12,7 @@ interface Props extends React.InputHTMLAttributes<HTMLInputElement> {
 }
 
 export const InputEl = styled.input`
-  border: 1px solid var(--mi-shade-background-color);
+  border: 1px solid var(--mi-darken-background-color);
   border-radius: var(--mi-border-radius);
   padding: 0.5rem 0.75rem;
   font-size: 1rem;
@@ -23,7 +23,7 @@ export const InputEl = styled.input`
   transition: 0.4ss border-radius;
 
   &[disabled] {
-    background-color: var(--mi-shade-background-color);
+    background-color: var(--mi-darken-background-color);
   }
 
   &:focus {

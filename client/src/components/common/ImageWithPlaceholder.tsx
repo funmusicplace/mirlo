@@ -53,7 +53,7 @@ export const ImageWithPlaceholder: React.FC<{
       {!isChecking && !checkedSrc && (
         <div
           style={{
-            backgroundColor: "var(--mi-shade-background-color)",
+            backgroundColor: "var(--mi-darken-background-color)",
             display: "block",
             width: `100%`,
             height: `100%`,

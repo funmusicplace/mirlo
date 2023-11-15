@@ -20,21 +20,20 @@ const Box = styled.div<{ variant?: "success" | "info" }>`
         `;
       default:
         return `
-          background-color: var(--mi-shade-background-color);
+          // background-color: var(--mi-lighten-background-color);
         `;
     }
   }}
 
   input {
-    background: var(--mi-light-background-color);
+    background: var(--mi-lighten-background-color);
   }
 
   textarea {
-    background: var(--mi-light-background-color);
+    background: var(--mi-lighten-background-color);
   }
 
   @media screen and (max-width: 800px) {
-    // background-color: var(--mi-normal-background-color);
     padding: 0.5rem 0.7rem;
   }
 `;

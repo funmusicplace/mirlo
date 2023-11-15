@@ -18,27 +18,6 @@ import PlayButton from "./common/PlayButton";
 import PreviousButton from "./common/PreviousButton";
 import { isEmpty } from "lodash";
 
-const playerClass = css`
-  border-bottom: 1px solid grey;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  position: fixed;
-  width: 100%;
-  z-index: 10;
-  bottom: 0;
-  filter: drop-shadow(0 0 0.1rem rgba(0, 0, 0, 0.5));
-  background-color: var(--mi-light-background-color);
-  height: 73px;
-
-  @media (max-width: ${bp.small}px) {
-    flex-direction: column;
-
-    button {
-    }
-  }
-`;
-
 const Player = () => {
   const {
     state: { playerQueueIds, currentlyPlayingIndex, user, playing },
@@ -134,7 +113,28 @@ const Player = () => {
   }
 
   return (
-    <div className={playerClass}>
+    <div
+      className={css`
+        border-bottom: 1px solid grey;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        position: fixed;
+        width: 100%;
+        z-index: 10;
+        bottom: 0;
+        filter: drop-shadow(0 0 0.1rem rgba(0, 0, 0, 0.5));
+        background-color: var(--mi-normal-background-color);
+        height: 73px;
+
+        @media (max-width: ${bp.small}px) {
+          flex-direction: column;
+
+          button {
+          }
+        }
+      `}
+    >
       <Helmet>
         <title>
           {currentTrack
@@ -192,9 +192,9 @@ const Player = () => {
               padding-top: 0.5rem;
 
               @media (max-width: ${bp.small}px) {
-              margin-right: .5rem;
-              margin-left: .5rem;
-            }
+                margin-right: 0.5rem;
+                margin-left: 0.5rem;
+              }
             `}
           >
             <div>
@@ -217,9 +217,9 @@ const Player = () => {
                 display: flex;
                 flex-direction: column;
                 @media (max-width: ${bp.small}px) {
-                max-width: 70%;
-                flex: 70%;
-            }
+                  max-width: 70%;
+                  flex: 70%;
+                }
               `}
             >
               <div

@@ -24,8 +24,8 @@ const ManageArtist: React.FC<{}> = () => {
   const { artistId } = useParams();
 
   const {
-    state: { artist },
     refresh,
+    state: { artist },
   } = useArtistContext();
 
   const [isEditing, setIsEditing] = React.useState(false);
@@ -108,7 +108,7 @@ const ManageArtist: React.FC<{}> = () => {
           @media screen and (max-width: ${bp.medium}px) {
             border-radius: 0;
             padding: 1rem 0.5rem 0rem;
-            > div > div  {
+            > div > div {
               padding: 2rem;
             }
           }

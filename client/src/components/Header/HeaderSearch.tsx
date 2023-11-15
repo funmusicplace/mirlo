@@ -57,11 +57,11 @@ const HeaderSearch: React.FC = () => {
         className={css`
           margin-bottom: 0 !important;
           border: 1px solid var(--mi-lighter-foreground-color);
-          background: var(--mi-light-background-color) !important;
+          background: var(--mi-lighten-background-color) !important;
 
           &::placeholder {
             color: var(--mi-normal-foreground-color) !important;
-            opacity: .3;
+            opacity: 0.3;
           }
         `}
       />

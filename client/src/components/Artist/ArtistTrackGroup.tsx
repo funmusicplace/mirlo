@@ -2,9 +2,9 @@ import { css } from "@emotion/css";
 import React from "react";
 import ClickToPlay from "../common/ClickToPlay";
 import { Link } from "react-router-dom";
-import { useArtistContext } from "state/ArtistContext";
 import PurchaseOrDownloadAlbum from "components/TrackGroup/PurchaseOrDownloadAlbumModal";
 import { bp } from "../../constants";
+import { useArtistContext } from "state/ArtistContext";
 
 const ArtistTrackGroup: React.FC<{
   trackGroup: TrackGroup;
@@ -21,21 +21,21 @@ const ArtistTrackGroup: React.FC<{
     <div
       key={trackGroup.id}
       className={css`
-        margin-bottom: .5rem;
+        margin-bottom: 0.5rem;
         display: inline-block;
         max-width: 33.3%;
         flex: 33.3%;
-        padding: 0 .25rem;
+        padding: 0 0.25rem;
 
         &:nth-child(3n + 1) {
           border-top: 0;
-          padding-right:.5rem;
+          padding-right: 0.5rem;
           padding-left: 0rem;
         }
 
         &:nth-child(3n) {
           border-top: 0;
-          padding-left: .5rem;
+          padding-left: 0.5rem;
           padding-right: 0rem;
         }
 
@@ -92,10 +92,10 @@ const ArtistTrackGroup: React.FC<{
 
               a:first-child {
                 font-weight: normal;
-                margin-bottom: .2rem;
+                margin-bottom: 0.2rem;
               }
               a:last-child {
-                font-size: .8rem;
+                font-size: 0.8rem;
                 font-weight: bold;
               }
 
@@ -103,10 +103,9 @@ const ArtistTrackGroup: React.FC<{
                 text-decoration: none;
               }
 
-
               a:hover {
-                  text-decoration: underline;
-                }
+                text-decoration: underline;
+              }
             `}
           >
             <Link

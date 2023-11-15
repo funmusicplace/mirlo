@@ -7,6 +7,7 @@ import Box from "../common/Box";
 import Button from "../common/Button";
 import Money from "../common/Money";
 import MarkdownContent from "components/common/MarkdownContent";
+import { bp } from "../../constants";
 
 const ArtistSupportBox: React.FC<{
   subscriptionTier: ArtistSubscriptionTier;
@@ -45,8 +46,8 @@ const ArtistSupportBox: React.FC<{
       <Box
         key={subscriptionTier.id}
         className={css`
+          background-color: var(--mi-darken-background-color);
           max-width: 33%;
-          flex: 33%;
           margin-bottom: 1rem;
           margin-top: 1rem;
           padding-top: 1.5rem;
@@ -54,14 +55,20 @@ const ArtistSupportBox: React.FC<{
           flex-direction: column;
 
           &:nth-child(3n + 1) {
-          border-top: 0;
-          margin-right:.5rem;
-        }
+            border-top: 0;
+            margin-right: 0.5rem;
+          }
 
-        &:nth-child(3n) {
-          border-top: 0;
-          margin-left: .5rem;
-        }
+          &:nth-child(3n) {
+            border-top: 0;
+            margin-left: 0.5rem;
+          }
+
+          @media (max-width: ${bp.small}px) {
+            max-width: 100%;
+            width: 100%;
+            flex-grow: 1;
+          }
         `}
       >
         <div
@@ -109,6 +116,7 @@ const ArtistSupportBox: React.FC<{
             <Box
               className={css`
                 text-align: center;
+                background-color: var(--mi-darken-background-color);
               `}
             >
               Users will be able to subscribe here

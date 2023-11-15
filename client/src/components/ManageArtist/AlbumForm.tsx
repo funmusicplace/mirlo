@@ -107,11 +107,7 @@ const AlbumForm: React.FC<{
   const isDisabled = isSaving || (uploadJobs && uploadJobs.length > 0);
 
   return (
-    <div
-      className={css`
-        background: var(--mi-light-background-color);
-      `}
-    >
+    <div>
       <FormProvider {...methods}>
         <form onSubmit={handleSubmit(doSave)}>
           <AlbumFormContent

@@ -21,6 +21,7 @@ function App() {
   const { isDisplayed } = useContext(SnackbarContext);
   useWidgetListener();
   const navigate = useNavigate();
+
   const location = useLocation();
   const userId = state.user?.id;
   const isPlaying = state.playerQueueIds;
@@ -74,6 +75,8 @@ function App() {
     return <Outlet />;
   }
 
+  const artistColors = state.artist?.properties?.colors;
+
   return (
     <>
       <MetaCard
@@ -86,6 +89,27 @@ function App() {
           display: flex;
           flex-direction: column;
           min-height: 100vh;
+          background-color: var(--mi-normal-background-color);
+
+          ${artistColors &&
+          `
+          ${
+            artistColors.background &&
+            `--mi-normal-background-color: ${artistColors.background};`
+          }
+          ${
+            artistColors.primary &&
+            `--mi-primary-color: ${artistColors.primary};`
+          }
+          ${
+            artistColors.secondary &&
+            `--mi-secondary-color: ${artistColors.secondary};`
+          }
+          ${
+            artistColors.foreground &&
+            `--mi-normal-foreground-color: ${artistColors.foreground};`
+          }
+          `}
         `}
       >
         {/* <Snackbar /> */}
@@ -122,13 +146,12 @@ function App() {
                 max-width: calc(1080px + 0rem);
               }
               @media screen and (max-width: ${bp.medium}px) {
-              button {
-                font-size: .7rem;
-              }
+                button {
+                  font-size: 0.7rem;
+                }
               }
               @media screen and (max-width: 800px) {
-
-                padding: 0rem 0rem .0rem;
+                padding: 0rem 0rem 0rem;
 
                 > div {
                   padding: 0.5rem 0.5rem 0.5rem;
