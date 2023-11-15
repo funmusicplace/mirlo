@@ -56,6 +56,7 @@ export default function () {
             subscriptionTiers: {
               where: {
                 deletedAt: null,
+                isDefaultTier: false,
               },
             },
             posts: {

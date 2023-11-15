@@ -58,11 +58,20 @@ export const subscribeUserToArtist = async (
       },
     });
     if (!isSubscribed) {
-      await prisma.artistUserSubscription.create({
-        data: {
+      await prisma.artistUserSubscription.upsert({
+        create: {
           artistSubscriptionTierId: defaultTier.id,
           userId: user.id,
           amount: 0,
+        },
+        update: {
+          deletedAt: null,
+        },
+        where: {
+          userId_artistSubscriptionTierId: {
+            userId: user.id,
+            artistSubscriptionTierId: defaultTier.id,
+          },
         },
       });
     }

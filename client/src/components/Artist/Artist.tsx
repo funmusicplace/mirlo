@@ -7,8 +7,10 @@ import ArtistAlbums from "./ArtistAlbums";
 import { useTranslation } from "react-i18next";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
 import { useArtistContext } from "state/ArtistContext";
+import styled from "@emotion/styled";
 
-const artistsectionClass = css`
+export const ArtistSection = styled.div`
+  margin-top: 2rem;
   @media screen and (max-width: ${bp.medium}px) {
     padding: 0.5rem !important;
   }
@@ -30,10 +32,10 @@ function Artist() {
   return (
     <>
       <ArtistAlbums artist={artist} />
-      <div className={artistsectionClass}>
+      <ArtistSection>
         <ArtistSupport artist={artist} />
-      </div>
-      <div className={artistsectionClass}>
+      </ArtistSection>
+      <ArtistSection>
         <h2>{t("updates")}</h2>
 
         {artist.posts?.length === 0 && <>{t("noUpdates")}</>}
@@ -61,7 +63,7 @@ function Artist() {
             <MarkdownContent content={p.content} />
           </Box>
         ))}
-      </div>
+      </ArtistSection>
     </>
   );
 }

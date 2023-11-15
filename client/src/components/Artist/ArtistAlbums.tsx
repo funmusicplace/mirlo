@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 import Button from "../common/Button";
 import { FaPen } from "react-icons/fa";
 import { useGlobalStateContext } from "state/GlobalState";
+import { ArtistSection } from "./Artist";
 
 const ArtistAlbums: React.FC<{ artist: Artist }> = ({ artist }) => {
   const {
@@ -23,14 +24,7 @@ const ArtistAlbums: React.FC<{ artist: Artist }> = ({ artist }) => {
   }
 
   return (
-    <div
-      style={{ marginTop: "0rem" }}
-      className={css`
-        @media screen and (max-width: ${bp.medium}px) {
-          border-radius: 0;
-        }
-      `}
-    >
+    <ArtistSection>
       <div
         className={css`
           padding-top: 0.5rem;
@@ -67,7 +61,7 @@ const ArtistAlbums: React.FC<{ artist: Artist }> = ({ artist }) => {
           <ArtistTrackGroup key={trackGroup.id} trackGroup={trackGroup} />
         ))}
       </div>
-    </div>
+    </ArtistSection>
   );
 };
 

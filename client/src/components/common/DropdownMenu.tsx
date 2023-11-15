@@ -9,7 +9,8 @@ import { FaEllipsisV } from "react-icons/fa";
 const Header: React.FC<{
   children: React.ReactElement;
   icon?: React.ReactElement;
-}> = ({ children, icon }) => {
+  compact?: boolean;
+}> = ({ children, icon, compact }) => {
   const [isMenuOpen, setIsMenuOpen] = React.useState<boolean>(false);
 
   if (!icon) {
@@ -49,6 +50,7 @@ const Header: React.FC<{
 
       <IconButton
         transparent
+        compact={compact}
         onClick={() => {
           setIsMenuOpen(true);
         }}

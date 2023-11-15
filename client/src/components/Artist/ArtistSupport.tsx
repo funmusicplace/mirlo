@@ -2,16 +2,18 @@ import Box from "components/common/Box";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
-import api from "services/api";
 import { useGlobalStateContext } from "state/GlobalState";
 import ArtistManageSubscription from "./ArtistManageSubscription";
 import ArtistSupportBox from "./ArtistSupportBox";
 import { css } from "@emotion/css";
 import { bp } from "../../constants";
+import FollowArtist from "components/common/FollowArtist";
+import HeaderDiv from "components/common/HeaderDiv";
 
 const ArtistSupport: React.FC<{ artist: Artist }> = ({ artist }) => {
   const {
     state: { user },
+    refreshLoggedInUser,
   } = useGlobalStateContext();
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const [isLoading, setIsLoading] = React.useState(false);
@@ -22,20 +24,20 @@ const ArtistSupport: React.FC<{ artist: Artist }> = ({ artist }) => {
   const { search } = useLocation();
   const userId = user?.id;
 
+  const userSubscriptions = user?.artistUserSubscriptions;
   const checkForSubscription = React.useCallback(async () => {
     try {
       setIsLoading(true);
       if (userId) {
-        const { results: subscriptions } =
-          await api.getMany<ArtistUserSubscription>(
-            `users/${userId}/subscriptions?artistId=${artist.id}`
-          );
-        setUserSubscription(subscriptions[0]);
-        const subscriptionIds = subscriptions.map(
-          (s) => s.artistSubscriptionTierId
+        const sub = userSubscriptions?.find(
+          (aus) =>
+            !aus.artistSubscriptionTier.isDefaultTier &&
+            aus.artistSubscriptionTier.artistId === artist.id
         );
-        const hasId = artist.subscriptionTiers.find((tier) =>
-          subscriptionIds.includes(tier.id)
+        setUserSubscription(sub);
+
+        const hasId = artist.subscriptionTiers.find(
+          (tier) => sub?.artistSubscriptionTierId === tier.id
         );
         setUserSubscriptionTier(hasId);
       }
@@ -44,7 +46,7 @@ const ArtistSupport: React.FC<{ artist: Artist }> = ({ artist }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [artist.id, artist.subscriptionTiers, userId]);
+  }, [artist.id, artist.subscriptionTiers, userSubscriptions, userId]);
 
   React.useEffect(() => {
     checkForSubscription();
@@ -55,11 +57,11 @@ const ArtistSupport: React.FC<{ artist: Artist }> = ({ artist }) => {
     let interval: NodeJS.Timer | null = null;
     if (query.get("subscribe") === "success") {
       interval = setTimeout(async () => {
-        checkForSubscription();
+        refreshLoggedInUser();
       }, 1000 * 3);
     }
     return () => (interval ? clearTimeout(interval) : undefined);
-  }, [checkForSubscription, search]);
+  }, [refreshLoggedInUser, search]);
 
   if (!artist) {
     return null;
@@ -67,18 +69,6 @@ const ArtistSupport: React.FC<{ artist: Artist }> = ({ artist }) => {
 
   if (isLoading) {
     return <Box />;
-  }
-
-  if (artist.subscriptionTiers?.length === 0) {
-    return (
-      <Box
-        className={css`
-          text-align: center;
-        `}
-      >
-        {t("noSubscriptionTiersYet")}
-      </Box>
-    );
   }
 
   if (userSubscriptionTier) {
@@ -93,7 +83,19 @@ const ArtistSupport: React.FC<{ artist: Artist }> = ({ artist }) => {
 
   return (
     <>
-      <h2>{t("support", { artist: artist.name })}</h2>
+      <HeaderDiv>
+        <h2>{t("support", { artist: artist.name })}</h2>
+        <FollowArtist artistId={artist.id} />
+      </HeaderDiv>
+      {artist.subscriptionTiers.length === 0 && (
+        <Box
+          className={css`
+            text-align: center;
+          `}
+        >
+          {t("noSubscriptionTiersYet")}
+        </Box>
+      )}
       <div
         className={css`
           display: flex;

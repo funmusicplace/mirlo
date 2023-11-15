@@ -22,7 +22,7 @@ export default function () {
 
     try {
       const subscriptions = await prisma.artistSubscriptionTier.findMany({
-        where: { artistId: Number(artistId), isDefaultTier: false },
+        where: { artistId: Number(artistId), NOT: { isDefaultTier: true } },
       });
 
       res.status(200).json({ results: subscriptions });

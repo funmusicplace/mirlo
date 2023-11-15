@@ -4,6 +4,8 @@ import { bp } from "../../constants";
 import { MetaCard } from "components/common/MetaCard";
 import styled from "@emotion/styled";
 import MarkdownContent from "./MarkdownContent";
+import HeaderDiv from "./HeaderDiv";
+import FollowArtist from "./FollowArtist";
 
 const H1 = styled.h1`
   font-size: 50px;
@@ -66,7 +68,10 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
           `}
         >
           <Header>
-            <H1>{artist.name}</H1>
+            <HeaderDiv>
+              <H1>{artist.name}</H1>
+              <FollowArtist artistId={artist.id} />
+            </HeaderDiv>
             <MarkdownContent content={artist.bio} />
           </Header>
         </div>

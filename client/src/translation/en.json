@@ -84,6 +84,8 @@
     "justDownloadNoUser": "Want to just download the album? Enter your email and we'll email you a download link. You'll get added to the artist's mailing list"
   },
   "artist": {
+    "follow": "Follow",
+    "unfollow": "Stop following",
     "support": "Support {{artist}}",
     "doesNotExist": "This artist does not exist or it does not have a public presence",
     "edit": "Edit",
@@ -91,7 +93,9 @@
     "noUpdates": "There are no updates yet for this artist",
     "releases": "Releases",
     "noSubscriptionTiersYet": "This artist hasn't added any subscription tiers yet.",
-    "unknown": "Unknown"
+    "unknown": "Unknown",
+    "toFollowThisArtist": "To follow this artist please <1>sign up</1> with a user account or <2>log in</2>.",
+    "followArtist": "Follow {{artistName}}"
   },
   "post": {
     "edit": "Edit"

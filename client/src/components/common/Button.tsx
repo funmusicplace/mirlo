@@ -163,10 +163,11 @@ export const Button: React.FC<ButtonProps> = ({
         <LoadingSpinner
           className={css`
             margin-right: 0.5rem;
+            fill: var(--mi-normal-background-color);
           `}
         />
       )}
-      {startIcon ? (
+      {!isLoading && startIcon ? (
         <span className={`startIcon ${collapse ? "collapsed" : ""}`}>
           {startIcon}
         </span>
