@@ -1,14 +1,5 @@
 import produce from "immer";
 
-export function buildHLSURL(id: number, loggedInUser: boolean): string {
-  // We assume we're using full OIDC
-  // if (loggedInUser) {
-  //   return `${API}user/stream/${id}/playlist.m3u8`;
-  // }
-  // return `${API}stream/${id}`;
-  return "";
-}
-
 export const determineNewTrackOrder = produce(
   (oldTracks: Track[], droppedInId: number, draggingTrackId: number) => {
     const dragIdx = oldTracks.findIndex(

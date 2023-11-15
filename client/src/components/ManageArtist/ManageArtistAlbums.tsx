@@ -7,6 +7,8 @@ import { useGlobalStateContext } from "state/GlobalState";
 import TrackGroupCard from "./TrackGroupCard";
 import { useTranslation } from "react-i18next";
 import { bp } from "../../constants";
+import { useArtistContext } from "state/ArtistContext";
+import LoadingBlocks from "components/Artist/LoadingBlocks";
 
 const ManageArtistAlbums: React.FC<{}> = () => {
   const {
@@ -14,7 +16,9 @@ const ManageArtistAlbums: React.FC<{}> = () => {
   } = useGlobalStateContext();
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
   const { artistId } = useParams();
-  const [artist, setArtist] = React.useState<Artist>();
+  const {
+    state: { isLoading },
+  } = useArtistContext();
 
   const [trackGroups, setTrackGroups] = React.useState<TrackGroup[]>([]);
 
@@ -22,10 +26,6 @@ const ManageArtistAlbums: React.FC<{}> = () => {
 
   const fetchTrackGroups = React.useCallback(async () => {
     if (userId) {
-      const { result } = await api.get<Artist>(
-        `users/${userId}/artists/${artistId}`
-      );
-      setArtist(result);
       const fetchedTrackGroups = await api.getMany<TrackGroup>(
         `users/${userId}/trackGroups?artistId=${artistId}`
       );
@@ -36,10 +36,6 @@ const ManageArtistAlbums: React.FC<{}> = () => {
   React.useEffect(() => {
     fetchTrackGroups();
   }, [fetchTrackGroups]);
-
-  if (!artist) {
-    return null;
-  }
 
   return (
     <div
@@ -63,11 +59,10 @@ const ManageArtistAlbums: React.FC<{}> = () => {
         <h2>{t("yourAlbums")}</h2>
 
         <Link to="new-release">
-          <Button compact>
-            {t("addNewAlbum", { artistName: artist.name })}
-          </Button>
+          <Button compact>{t("addNewAlbum")}</Button>
         </Link>
       </div>
+      {isLoading && <LoadingBlocks />}
       {trackGroups.length > 0 && (
         <div
           className={css`

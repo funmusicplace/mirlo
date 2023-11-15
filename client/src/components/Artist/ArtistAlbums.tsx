@@ -17,6 +17,7 @@ const ArtistAlbums: React.FC<{ artist: Artist }> = ({ artist }) => {
 
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
 
+  console.log("artist", artist.trackGroups);
   if (!artist || artist.trackGroups.length === 0) {
     return null;
   }

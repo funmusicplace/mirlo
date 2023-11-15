@@ -39,25 +39,23 @@ function TrackGroup() {
       `?artistId=${artistId}`
     );
 
-  if (!artist && !isLoadingArtist) {
-    return <Box>{t("doesNotExist")}</Box>;
-  } else if (!artist) {
-    return <FullPageLoadingSpinner />;
-  }
-
-  const ownedByUser = artist.userId === user?.id;
+  console.log("artist", artist);
 
   if (!artist && !isLoadingArtist) {
     return <Box>{t("doesNotExist")}</Box>;
   } else if (!artist) {
     return <FullPageLoadingSpinner />;
   }
+
+  console.log("trackGroup", trackGroup);
 
   if (!trackGroup && !isLoadingTrackGroup) {
     return <Box>{t("doesNotExist")}</Box>;
   } else if (!trackGroup) {
     return <FullPageLoadingSpinner />;
   }
+
+  const ownedByUser = artist.userId === user?.id;
 
   return (
     <div

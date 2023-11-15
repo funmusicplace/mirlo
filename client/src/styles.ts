@@ -4,8 +4,10 @@ const styles = `html {
   --mi-pink: #BE3455;
 
   --mi-normal-background-color: var(--mi-white);
-  --mi-lighten-background-color: rgba(255, 255, 255, 0.5);
+  --mi-lighten-background-color: rgba(255, 255, 255, 0.2);
+  --mi-lighten-x-background-color: rgba(255, 255, 255, 0.5);
   --mi-darken-background-color: rgba(50, 0, 0, .1);
+  --mi-darken-x-background-color: rgba(50, 0, 0, .2);
 
   --mi-normal-foreground-color: var(--mi-black);
   --mi-light-foreground-color: #888;

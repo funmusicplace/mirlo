@@ -16,8 +16,8 @@ const Container = styled.div<{ artistBanner: boolean }>`
   }
 
   margin-top: calc(16vh);
+
   ${(props) => (!props.artistBanner ? "margin-top: 0px;" : "")}
-  background: var(--mi-normal-background-color);
   max-width: calc(1080px + 4rem);
 
   @media screen and (max-width: ${bp.medium}px) {
@@ -34,8 +34,8 @@ export const ArtistPageWrapper: React.FC<{
     <Container artistBanner={artistBanner}>
       <div
         className={css`
-          background-color: var(--mi-lighten-background-color);
-          padding: 0 2rem;
+          background: var(--mi-normal-background-color);
+          padding: 0 2rem 2rem;
           height: 100%;
           @media screen and (max-width: ${bp.medium}px) {
             padding: 0rem !important;

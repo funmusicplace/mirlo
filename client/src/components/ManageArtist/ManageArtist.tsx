@@ -13,6 +13,7 @@ import ManageArtistSubscriptionTiers from "./ManageArtistSubscriptionTiers";
 import { useSnackbar } from "state/SnackbarContext";
 import { useTranslation } from "react-i18next";
 import { useArtistContext } from "state/ArtistContext";
+import Box from "components/common/Box";
 
 const ManageArtist: React.FC<{}> = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
@@ -25,7 +26,7 @@ const ManageArtist: React.FC<{}> = () => {
 
   const {
     refresh,
-    state: { artist },
+    state: { artist, isLoading },
   } = useArtistContext();
 
   const [isEditing, setIsEditing] = React.useState(false);
@@ -43,13 +44,13 @@ const ManageArtist: React.FC<{}> = () => {
     }
   };
 
-  if (!artist) {
-    return null;
+  if (!artist && !isLoading) {
+    return <Box>{t("doesNotExist")}</Box>;
   }
 
   return (
     <>
-      {!artist.enabled && (
+      {artist && !artist.enabled && (
         <div
           className={css`
             background-color: var(--mi-warning-background-color);
@@ -60,14 +61,17 @@ const ManageArtist: React.FC<{}> = () => {
           {t("notEnabled")}
         </div>
       )}
-      <ArtistForm
-        open={isEditing}
-        onClose={() => setIsEditing(false)}
-        existing={artist}
-        reload={() => {
-          return refresh();
-        }}
-      />
+
+      {artist && (
+        <ArtistForm
+          open={isEditing}
+          onClose={() => setIsEditing(false)}
+          existing={artist}
+          reload={() => {
+            return refresh();
+          }}
+        />
+      )}
       <div
         className={css`
           display: flex;
@@ -91,8 +95,8 @@ const ManageArtist: React.FC<{}> = () => {
           >
             {t("editDetails")}
           </Button>
-          <Link to={`/${artist.urlSlug?.toLowerCase() ?? artist.id}`}>
-            <Button compact startIcon={<FaEye />}>
+          <Link to={`/${artist?.urlSlug?.toLowerCase() ?? artist?.id}`}>
+            <Button compact startIcon={<FaEye />} disabled={!artist}>
               {t("viewLive")}
             </Button>
           </Link>

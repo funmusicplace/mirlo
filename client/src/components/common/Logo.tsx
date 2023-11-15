@@ -9,7 +9,7 @@ export const Logo: React.FC<{ noWordmark?: boolean }> = ({
       {!noWordmark && (
         <path
           className={css`
-            fill: #3e363f;
+            fill: var(--mi-normal-foreground-color);
             @media (prefers-color-scheme: dark) {
               fill: #fffffa;
             }
@@ -19,7 +19,7 @@ export const Logo: React.FC<{ noWordmark?: boolean }> = ({
       )}
       <path
         className={css`
-          fill: #3e363f;
+          fill: var(--mi-normal-foreground-color);
           @media (prefers-color-scheme: dark) {
             fill: #fffff5;
           }
@@ -28,7 +28,7 @@ export const Logo: React.FC<{ noWordmark?: boolean }> = ({
       />
       <path
         className={css`
-          fill: #ffeedb;
+          fill: var(--mi-normal-background-color);
           @media (prefers-color-scheme: dark) {
             fill: var(--mi-lighten-background-color);
           }

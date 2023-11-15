@@ -13,6 +13,7 @@ import globalCSS from "./styles";
 import { Footer } from "components/Footer";
 import { bp } from "./constants";
 import { MetaCard } from "components/common/MetaCard";
+import useArtistColors from "utils/useArtistColors";
 
 injectGlobal(globalCSS);
 
@@ -23,6 +24,8 @@ function App() {
   const navigate = useNavigate();
 
   const location = useLocation();
+
+  const artistColors = useArtistColors();
   const userId = state.user?.id;
   const isPlaying = state.playerQueueIds;
 
@@ -75,8 +78,6 @@ function App() {
     return <Outlet />;
   }
 
-  const artistColors = state.artist?.properties?.colors;
-
   return (
     <>
       <MetaCard
@@ -89,7 +90,6 @@ function App() {
           display: flex;
           flex-direction: column;
           min-height: 100vh;
-          background-color: var(--mi-normal-background-color);
 
           ${artistColors &&
           `
@@ -107,9 +107,12 @@ function App() {
           }
           ${
             artistColors.foreground &&
-            `--mi-normal-foreground-color: ${artistColors.foreground};`
+            `--mi-normal-foreground-color: ${artistColors.foreground} !important;`
           }
           `}
+
+          background-color: var(--mi-normal-background-color);
+          color: var(--mi-normal-foreground-color);
         `}
       >
         {/* <Snackbar /> */}

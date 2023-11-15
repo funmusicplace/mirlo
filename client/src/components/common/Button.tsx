@@ -3,7 +3,6 @@ import React from "react";
 import styled from "@emotion/styled";
 import LoadingSpinner from "./LoadingSpinner";
 import { css } from "@emotion/css";
-import { useGlobalStateContext } from "state/GlobalState";
 
 export interface Compactable {
   compact?: boolean;

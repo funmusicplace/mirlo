@@ -11,7 +11,6 @@ export default function () {
     GET: [userLoggedInWithoutRedirect, GET],
   };
 
-  // FIXME: only do published tracks
   async function GET(req: Request, res: Response, next: NextFunction) {
     let { id }: { id?: string } = req.params;
     const loggedInUser = req.user as User;
@@ -24,7 +23,6 @@ export default function () {
     }
     try {
       id = await findTrackGroupIdForSlug(id, artistId);
-
       let trackGroup;
       if (id) {
         trackGroup = await prisma.trackGroup.findFirst({
@@ -58,6 +56,7 @@ export default function () {
           },
         });
       }
+      console.log("");
 
       if (!trackGroup) {
         res.status(404);

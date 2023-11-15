@@ -42,9 +42,7 @@ export default function () {
             trackGroups: {
               where: {
                 published: true,
-                releaseDate: {
-                  lte: new Date(),
-                },
+                tracks: { some: { audio: { uploadState: "SUCCESS" } } },
               },
               include: {
                 tracks: {

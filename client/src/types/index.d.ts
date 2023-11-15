@@ -67,6 +67,13 @@ interface Post {
   artistId?: number;
 }
 
+type ArtistColors = {
+  primary: string;
+  secondary: string;
+  background: string;
+  foreground: string;
+};
+
 interface Artist {
   name: string;
   bio: string;
@@ -79,12 +86,7 @@ interface Artist {
   posts: Post[];
   subscriptionTiers: ArtistSubscriptionTier[];
   properties?: {
-    colors: {
-      primary: string;
-      secondary: string;
-      background: string;
-      foreground: string;
-    };
+    colors: ArtistColors;
   };
   banner?: {
     url: string;
