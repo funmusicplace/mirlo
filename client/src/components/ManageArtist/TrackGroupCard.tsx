@@ -51,6 +51,7 @@ const TrackGroupCard: React.FC<{
         width: 100%;
         margin-bottom: 0.25rem;
         padding: 1rem 1rem 1rem;
+        background-color: var(--mi-darken-background-color);
 
         &:not(:first-child) {
           margin-top: 1rem;

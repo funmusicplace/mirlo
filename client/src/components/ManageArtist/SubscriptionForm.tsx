@@ -13,6 +13,7 @@ import Box from "components/common/Box";
 import CurrencyInput from "react-currency-input-field";
 import useErrorHandler from "services/useErrorHandler";
 import { useTranslation } from "react-i18next";
+import { css } from "@emotion/css";
 
 const SubscriptionForm: React.FC<{
   artist: Artist;
@@ -85,7 +86,11 @@ const SubscriptionForm: React.FC<{
   );
 
   return (
-    <Box>
+    <Box
+      className={css`
+        background-color: var(--mi-darken-background-color);
+      `}
+    >
       <form onSubmit={handleSubmit(doSave)}>
         <h4>{t("editSubscriptionTierFor", { artistName: artist.name })}</h4>
 

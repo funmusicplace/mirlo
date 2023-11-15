@@ -39,25 +39,23 @@ function TrackGroup() {
       `?artistId=${artistId}`
     );
 
-  if (!artist && !isLoadingArtist) {
-    return <Box>{t("doesNotExist")}</Box>;
-  } else if (!artist) {
-    return <FullPageLoadingSpinner />;
-  }
-
-  const ownedByUser = artist.userId === user?.id;
+  console.log("artist", artist);
 
   if (!artist && !isLoadingArtist) {
     return <Box>{t("doesNotExist")}</Box>;
   } else if (!artist) {
     return <FullPageLoadingSpinner />;
   }
+
+  console.log("trackGroup", trackGroup);
 
   if (!trackGroup && !isLoadingTrackGroup) {
     return <Box>{t("doesNotExist")}</Box>;
   } else if (!trackGroup) {
     return <FullPageLoadingSpinner />;
   }
+
+  const ownedByUser = artist.userId === user?.id;
 
   return (
     <div
@@ -261,7 +259,7 @@ function TrackGroup() {
         <div
           className={css`
             margin: 1.25rem 0;
-            border-left: 5px solid var(--mi-lighter-background-color);
+            border-left: 5px solid var(--mi-lighten-background-color);
             padding: 0.5rem 0.25rem;
           `}
         >
@@ -271,7 +269,7 @@ function TrackGroup() {
         <div
           className={css`
             margin: 1.25rem 0;
-            border-left: 5px solid var(--mi-lighter-background-color);
+            border-left: 5px solid var(--mi-lighten-background-color);
             padding: 0.5rem 0.25rem;
           `}
         >

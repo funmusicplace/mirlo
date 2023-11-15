@@ -67,6 +67,13 @@ interface Post {
   artistId?: number;
 }
 
+type ArtistColors = {
+  primary: string;
+  secondary: string;
+  background: string;
+  foreground: string;
+};
+
 interface Artist {
   name: string;
   bio: string;
@@ -78,7 +85,9 @@ interface Artist {
   payPalClientId?: string;
   posts: Post[];
   subscriptionTiers: ArtistSubscriptionTier[];
-  properties?: { colors: { primary: string; secondary: string } };
+  properties?: {
+    colors: ArtistColors;
+  };
   banner?: {
     url: string;
     sizes?: { [key: string]: string };

@@ -49,7 +49,14 @@ export const ArtistForm: React.FC<{
     name: string;
     bio: string;
     urlSlug: string;
-    properties: { colors: { primary: string; secondary: string } };
+    properties: {
+      colors: {
+        primary: string;
+        secondary: string;
+        background: string;
+        foreground: string;
+      };
+    };
   }>({
     defaultValues,
   });

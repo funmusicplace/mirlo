@@ -17,6 +17,7 @@ const ArtistAlbums: React.FC<{ artist: Artist }> = ({ artist }) => {
 
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
 
+  console.log("artist", artist.trackGroups);
   if (!artist || artist.trackGroups.length === 0) {
     return null;
   }
@@ -27,7 +28,6 @@ const ArtistAlbums: React.FC<{ artist: Artist }> = ({ artist }) => {
       className={css`
         @media screen and (max-width: ${bp.medium}px) {
           border-radius: 0;
-          background: var(--mi-light-background-color);
         }
       `}
     >

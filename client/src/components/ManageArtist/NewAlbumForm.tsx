@@ -1,5 +1,4 @@
 import React from "react";
-import { css } from "@emotion/css";
 import { FormProvider, useForm } from "react-hook-form";
 import Button from "../common/Button";
 
@@ -101,26 +100,20 @@ const NewAlbumForm: React.FC<{
   }, [artist.id, navigate, newAlbumId, reload, uploadJobs]);
 
   return (
-    <div
-      className={css`
-        background: var(--mi-light-background-color);
-      `}
-    >
-      <FormProvider {...methods}>
-        <form onSubmit={handleSubmit(doSave)}>
-          <AlbumFormContent
-            isLoadingImage={
-              uploadJobs?.[0]?.jobStatus !== undefined &&
-              uploadJobs?.[0]?.jobStatus !== "completed"
-            }
-          />
+    <FormProvider {...methods}>
+      <form onSubmit={handleSubmit(doSave)}>
+        <AlbumFormContent
+          isLoadingImage={
+            uploadJobs?.[0]?.jobStatus !== undefined &&
+            uploadJobs?.[0]?.jobStatus !== "completed"
+          }
+        />
 
-          <Button type="submit" disabled={isDisabled} isLoading={isDisabled}>
-            {t("submitAlbum")}
-          </Button>
-        </form>
-      </FormProvider>
-    </div>
+        <Button type="submit" disabled={isDisabled} isLoading={isDisabled}>
+          {t("submitAlbum")}
+        </Button>
+      </form>
+    </FormProvider>
   );
 };
 

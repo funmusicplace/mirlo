@@ -95,11 +95,6 @@ type SetUserCredits = {
   credits: number;
 };
 
-// type SetUserPlaylists = {
-//   type: "setUserPlaylists";
-//   playlists: { id: string; title: string }[];
-// };
-
 type Actions =
   | SetLoggedInUser
   | SetState
@@ -117,7 +112,6 @@ type Actions =
   | IncrementCurrentlyPlayingIndex
   | DecrementCurrentlyPlayingIndex
   | SetUserCredits
-  // | SetUserPlaylists
   | IncrementFavoriteStatusFlag;
 
 export const stateReducer = produce((draft: GlobalState, action: Actions) => {
