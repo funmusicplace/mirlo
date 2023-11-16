@@ -49,7 +49,7 @@ export default function () {
   }
 
   async function PUT(req: Request, res: Response, next: NextFunction) {
-    const { userId, trackGroupId } = req.params as unknown as Params;
+    const { trackGroupId } = req.params as unknown as Params;
     const data = req.body;
     const loggedInUser = req.user as User;
 

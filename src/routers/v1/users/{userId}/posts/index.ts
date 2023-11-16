@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Prisma, User } from "@prisma/client";
 import { Request, Response } from "express";
 import {
   contentBelongsToLoggedInUserArtist,
@@ -13,18 +13,47 @@ export default function () {
     GET: [userAuthenticated, GET],
   };
 
-  // FIXME: only allow creation of posts for
-  // artists the user owns
   async function POST(req: Request, res: Response) {
-    const { title, content, artistId } = req.body;
-    const result = await prisma.post.create({
-      data: {
-        title,
-        content,
-        artist: { connect: { id: artistId } },
-      },
-    });
-    res.json(result);
+    const { title, content, artistId, isPublic, minimumSubscriptionTierId } =
+      req.body as unknown as {
+        title: string;
+        content: string;
+        artistId: number;
+        isPublic: boolean;
+        minimumSubscriptionTierId: number;
+      };
+    const user = req.user as User;
+    try {
+      const validTier = await prisma.artistSubscriptionTier.findFirst({
+        where: {
+          artistId,
+          id: minimumSubscriptionTierId,
+        },
+      });
+
+      if (validTier) {
+        const result = await prisma.post.create({
+          data: {
+            title,
+            content,
+            isPublic,
+            artist: { connect: { id: artistId } },
+            minimumSubscriptionTier: {
+              connect: { id: validTier?.id },
+            },
+          },
+        });
+        res.json({ result });
+      } else {
+        res
+          .status(404)
+          .json({ error: "That tier doesn't belong to the current artist" });
+      }
+    } catch (e) {
+      console.log(`POST users/${user?.id}/posts`, e);
+      res.status(500);
+      res.json({ error: e });
+    }
   }
   // FIXME: document POST
 

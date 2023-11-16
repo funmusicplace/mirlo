@@ -5,22 +5,32 @@ const useGetUserObjectById = <T>(
   endpoint: string,
   userId?: number,
   id?: string,
-  queryParams?: string
+  queryParams?: string,
+  options?: { multiple?: boolean }
 ) => {
   const [object, setObject] = React.useState<T>();
+  const [objects, setObjects] = React.useState<T[]>();
+
   const [isLoading, setIsLoading] = React.useState(true);
   const [finishedFirstLoad, setFinishedFirstLoad] = React.useState(false);
 
   const fetchObject = React.useCallback(async () => {
     setIsLoading(true);
     try {
-      if (queryParams) {
-      }
       if (userId && id) {
-        const { result } = await api.get<T>(
-          `users/${userId}/${endpoint}/${id}${queryParams ?? ""}`
-        );
-        setObject(result);
+        if (options?.multiple) {
+          const response = await api.getMany<T>(
+            `users/${userId}/${endpoint}/${id}${queryParams ?? ""}`
+          );
+          console.log("response", response);
+          setObjects(response.results);
+        } else {
+          const response = await api.get<T>(
+            `users/${userId}/${endpoint}/${id}${queryParams ?? ""}`
+          );
+          console.log("response", response);
+          setObject(response.result);
+        }
         setFinishedFirstLoad(true);
       } else {
         setObject(undefined);
@@ -28,7 +38,7 @@ const useGetUserObjectById = <T>(
     } finally {
       setIsLoading(false);
     }
-  }, [endpoint, id, queryParams, userId]);
+  }, [endpoint, id, options?.multiple, queryParams, userId]);
 
   React.useEffect(() => {
     fetchObject();
@@ -36,6 +46,7 @@ const useGetUserObjectById = <T>(
 
   return {
     object,
+    objects,
     isLoadingObject: isLoading,
     reload: fetchObject,
     finishedFirstLoad,

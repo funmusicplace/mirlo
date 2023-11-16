@@ -85,7 +85,7 @@ export default function () {
     const user = req.user as User;
 
     try {
-      const trackGroup = await prisma.trackGroup.create({
+      const result = await prisma.trackGroup.create({
         data: {
           title,
           about,
@@ -98,7 +98,7 @@ export default function () {
           urlSlug: slugify(title).toLowerCase(),
         },
       });
-      res.json({ trackGroup });
+      res.json({ result });
     } catch (e) {
       console.error(`POST users/${user.id}/trackGroups`, e);
       res.status(500).json({

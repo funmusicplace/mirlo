@@ -117,6 +117,7 @@
   "manageArtist": {
     "notEnabled": "This artist has not been enabled by site admin yet! Contact an admin to do so.",
     "manage": "Manage {{artist}}",
+    "editPost": "Edit post",
     "editDetails": "Edit artist details",
     "viewLive": "View live",
     "deleteArtist": "Delete artist",
@@ -293,14 +294,18 @@
     "addTrackButton": "Add track"
   },
   "postForm": {
+    "newBlogPostFor": "New blog post for {{ artistName }}",
     "title": "Title:",
     "publicationDate": "Publication date:",
     "content": "Content",
-    "isSubscriptionOnly": "For subscribers only?",
-    "isSubscriptionPostOnly": "Is this post for subscribers only?",
+    "isSubscriptionOnly": "Is this post public?",
+    "isSubscriptionPostOnly": "Should anyone be able to read this post?",
     "post": "post",
     "save": "Save",
-    "saveNew": "Save new"
+    "editPost": "Edit post",
+    "saveNew": "Save new",
+    "follow": "Everyone who pressed the follow button on your profile",
+    "ifNotPublic": "If not public, which of your subscription tier should be the minimum tier to receive your update?"
   },
   "errorPage": {
     "reactError": "React Error ",
