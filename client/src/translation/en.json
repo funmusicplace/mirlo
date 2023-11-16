@@ -7,7 +7,8 @@
     "password": "Password:",
     "signUpButton": "Sign up",
     "success": "Registration success!",
-    "logIn": "Alrieady have an account? Log in"
+    "logIn": "Alrieady have an account? Log in",
+    "receiveMailingList": "Stay up to date with Mirlo and our product by signing up to our mailing list"
   },
   "releases": {
     "recentReleases": "Recent releases"

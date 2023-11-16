@@ -37,6 +37,7 @@ model User {
   passwordResetConfirmationToken      String?
   passwordResetConfirmationExpiration DateTime?
   stripeAccountId                     String?
+  receiveMailingList                  Boolean                  @default(false)
 }
 
 model Post {
