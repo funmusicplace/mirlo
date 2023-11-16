@@ -37,10 +37,10 @@ export const ArtistForm: React.FC<{
     ...existing,
     properties: {
       colors: {
-        primary: "#e75a7c",
-        secondary: "#ffb3d0",
-        background: "var(--mi-normal-background-color)",
-        foreground: "var(--mi-normal-foreground-color)",
+        primary: "",
+        secondary: "",
+        background: "",
+        foreground: "",
       },
       ...existing?.properties,
     },

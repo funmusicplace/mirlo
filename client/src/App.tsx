@@ -13,7 +13,7 @@ import globalCSS from "./styles";
 import { Footer } from "components/Footer";
 import { bp } from "./constants";
 import { MetaCard } from "components/common/MetaCard";
-import useArtistColors from "utils/useArtistColors";
+import ArtistColorsWrapper from "components/ArtistColorsWrapper";
 
 injectGlobal(globalCSS);
 
@@ -25,7 +25,6 @@ function App() {
 
   const location = useLocation();
 
-  const artistColors = useArtistColors();
   const userId = state.user?.id;
   const isPlaying = state.playerQueueIds;
 
@@ -85,97 +84,84 @@ function App() {
         description="A music distribution and patronage site"
         image="/android-chrome-512x512.png"
       />
-      <div
-        className={css`
-          display: flex;
-          flex-direction: column;
-          min-height: 100vh;
+      <ArtistColorsWrapper>
+        <>
+          {/* <Snackbar /> */}
+          {isDisplayed && <Snackbar />}
 
-          ${artistColors &&
-          `
-          ${
-            artistColors.background &&
-            `--mi-normal-background-color: ${artistColors.background};`
-          }
-          ${
-            artistColors.primary &&
-            `--mi-primary-color: ${artistColors.primary};`
-          }
-          ${
-            artistColors.secondary &&
-            `--mi-secondary-color: ${artistColors.secondary};`
-          }
-          ${
-            artistColors.foreground &&
-            `--mi-normal-foreground-color: ${artistColors.foreground} !important;`
-          }
-          `}
+          <Header />
 
-          background-color: var(--mi-normal-background-color);
-          color: var(--mi-normal-foreground-color);
-        `}
-      >
-        {/* <Snackbar /> */}
-        {isDisplayed && <Snackbar />}
-
-        <Header />
-
-        <div
-          className={css`
-
-            @media screen and (max-width: ${bp.medium}px) {
-                display: none !important;
-            }
-          `}
-        ><PageHeader /></div>
-        <div
-          className={css`
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-
-            ${isPlaying
-              ? `
-            padding-bottom: 130px;`
-              : ``}
-          `}
-        >
           <div
             className={css`
-              margin: 0 auto;
-
-              width: 100%;
-              border-radius: var(--mi-border-radius);
-              display: flex;
-              z-index: 1;
-              ${userId ? "display: flex;" : ""}
-              flex-grow: 1;
-
-              @media (min-width: ${bp.small}px) {
-                padding: 0rem 2rem 2rem;
-                max-width: calc(1080px + 0rem);
-              }
               @media screen and (max-width: ${bp.medium}px) {
-                button {
-                  font-size: 0.7rem;
-                }
-              }
-              @media screen and (max-width: 800px) {
-                padding: 0rem 0rem 0rem;
-
-                > div {
-                  padding: 0.5rem 0.5rem 0.5rem;
-                }
+                display: none !important;
               }
             `}
           >
-            <Outlet />
+            <PageHeader />
           </div>
-          <Footer />
-        </div>
+          <div
+            className={css`
+              flex-grow: 1;
+              display: flex;
+              flex-direction: column;
 
-        <Player />
-      </div>
+              ${isPlaying
+                ? `
+            padding-bottom: 130px;`
+                : ``}
+            `}
+          >
+            <div
+              className={css`
+                flex-grow: 1;
+                display: flex;
+                flex-direction: column;
+
+                ${isPlaying
+                  ? `
+            padding-bottom: 130px;`
+                  : ``}
+              `}
+            >
+              <div
+                className={css`
+                  margin: 0 auto;
+
+                  width: 100%;
+                  border-radius: var(--mi-border-radius);
+                  display: flex;
+                  z-index: 1;
+                  ${userId ? "display: flex;" : ""}
+                  flex-grow: 1;
+
+                  @media (min-width: ${bp.small}px) {
+                    padding: 0rem 2rem 2rem;
+                    max-width: calc(1080px + 0rem);
+                  }
+                  @media screen and (max-width: ${bp.medium}px) {
+                    button {
+                      font-size: 0.7rem;
+                    }
+                  }
+                  @media screen and (max-width: 800px) {
+                    padding: 0rem 0rem 0rem;
+
+                    > div {
+                      padding: 0.5rem 0.5rem 0.5rem;
+                    }
+                  }
+                `}
+              >
+                <Outlet />
+              </div>
+              <Footer />
+            </div>
+
+            <Player />
+          </div>
+        </>
+      </ArtistColorsWrapper>
     </>
   );
 }

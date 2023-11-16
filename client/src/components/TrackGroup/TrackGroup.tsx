@@ -39,15 +39,11 @@ function TrackGroup() {
       `?artistId=${artistId}`
     );
 
-  console.log("artist", artist);
-
   if (!artist && !isLoadingArtist) {
     return <Box>{t("doesNotExist")}</Box>;
   } else if (!artist) {
     return <FullPageLoadingSpinner />;
   }
-
-  console.log("trackGroup", trackGroup);
 
   if (!trackGroup && !isLoadingTrackGroup) {
     return <Box>{t("doesNotExist")}</Box>;

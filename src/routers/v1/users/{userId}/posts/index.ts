@@ -50,7 +50,7 @@ export default function () {
           .json({ error: "That tier doesn't belong to the current artist" });
       }
     } catch (e) {
-      console.log(`POST users/${user?.id}/posts`, e);
+      console.error(`POST users/${user?.id}/posts`, e);
       res.status(500);
       res.json({ error: e });
     }

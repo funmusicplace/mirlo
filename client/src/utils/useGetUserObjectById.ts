@@ -22,13 +22,11 @@ const useGetUserObjectById = <T>(
           const response = await api.getMany<T>(
             `users/${userId}/${endpoint}/${id}${queryParams ?? ""}`
           );
-          console.log("response", response);
           setObjects(response.results);
         } else {
           const response = await api.get<T>(
             `users/${userId}/${endpoint}/${id}${queryParams ?? ""}`
           );
-          console.log("response", response);
           setObject(response.result);
         }
         setFinishedFirstLoad(true);
