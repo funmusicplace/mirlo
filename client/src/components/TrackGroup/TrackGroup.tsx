@@ -167,7 +167,7 @@ function TrackGroup() {
               )}
               <PurchaseOrDownloadAlbum trackGroup={trackGroup} />
               {user?.isAdmin && (
-                <DropdownMenu>
+                <DropdownMenu compact>
                   <TrackGroupAdminMenu trackGroup={trackGroup} />
                 </DropdownMenu>
               )}

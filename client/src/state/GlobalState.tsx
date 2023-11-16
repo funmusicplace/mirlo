@@ -1,6 +1,7 @@
 import React, { createContext } from "react";
 import produce from "immer";
 import { clone, pullAt, shuffle } from "lodash";
+import api from "services/api";
 
 export interface GlobalState {
   user?: LoggedInUser;
@@ -265,5 +266,13 @@ export const GlobalStateProvider: React.FC<GlobalStateProviderProps> = ({
 export const useGlobalStateContext = () => {
   const [state, dispatch] = React.useContext(GlobalContext);
 
-  return { state, dispatch };
+  const refreshLoggedInUser = React.useCallback(async () => {
+    const user = await api.get<LoggedInUser>("profile");
+    dispatch({
+      type: "setLoggedInUser",
+      user: user.result,
+    });
+  }, [dispatch]);
+
+  return { state, dispatch, refreshLoggedInUser };
 };

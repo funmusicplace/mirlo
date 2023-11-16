@@ -113,6 +113,7 @@ interface ArtistSubscriptionTier {
   minAmount?: number;
   name: string;
   description: string;
+  isDefaultTier: boolean;
 }
 
 interface ArtistUserSubscription {

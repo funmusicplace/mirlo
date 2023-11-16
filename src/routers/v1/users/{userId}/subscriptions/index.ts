@@ -1,4 +1,4 @@
-import { PrismaClient, Prisma, User } from "@prisma/client";
+import { Prisma, User } from "@prisma/client";
 import { Request, Response } from "express";
 import { userAuthenticated } from "../../../../../auth/passport";
 import prisma from "../../../../../../prisma/prisma";
@@ -20,10 +20,12 @@ export default function () {
       if (Number(userId) === Number(loggedInUser.id)) {
         const where: Prisma.ArtistUserSubscriptionWhereInput = {
           userId: Number(userId),
+          artistSubscriptionTier: { isDefaultTier: false },
         };
         if (artistId) {
           where.artistSubscriptionTier = {
             artistId: Number(artistId),
+            isDefaultTier: false,
             deletedAt: null,
           };
         }

@@ -126,7 +126,7 @@ model ArtistSubscriptionTier {
   deletedAt             DateTime?
   minimumTierForPost    Post[]
   postSubscriptionTiers PostSubscriptionTier[]
-  isDefaultTier         Boolean?                 @default(false)
+  isDefaultTier         Boolean                  @default(false)
 }
 
 model ArtistUserSubscription {
