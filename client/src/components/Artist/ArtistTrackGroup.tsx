@@ -18,6 +18,7 @@ const ArtistTrackGroup: React.FC<{
   const { artist } = state ?? trackGroup;
 
   return (
+
     <div
       key={trackGroup.id}
       className={css`
@@ -25,7 +26,10 @@ const ArtistTrackGroup: React.FC<{
         display: inline-block;
         max-width: 33.3%;
         flex: 33.3%;
-        padding: 0 0.25rem;
+        padding: 0 .25rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
 
         &:nth-child(3n + 1) {
           border-top: 0;
@@ -42,8 +46,8 @@ const ArtistTrackGroup: React.FC<{
         @media screen and (max-width: ${bp.medium}px) {
           max-width: 50%;
           flex: 50%;
-          margin-bottom: 0.5rem;
-          margin-top: 0.5rem;
+          margin-bottom: 1rem;
+          margin-top: 0rem;
 
           &:nth-child(odd) {
             padding-left: 0rem;
@@ -80,7 +84,7 @@ const ArtistTrackGroup: React.FC<{
           className={css`
             display: flex;
             justify-content: space-between;
-            align-items: top;
+            align-items: start;
             width: 100%;
             padding-top: 0.5rem;
           `}
@@ -89,6 +93,7 @@ const ArtistTrackGroup: React.FC<{
             className={css`
               display: flex;
               flex-direction: column;
+              width: 100%;
 
               a:first-child {
                 font-weight: normal;
@@ -101,6 +106,8 @@ const ArtistTrackGroup: React.FC<{
 
               a {
                 text-decoration: none;
+                text-overflow: ellipsis;
+                overflow: hidden;
               }
 
               a:hover {
@@ -111,18 +118,17 @@ const ArtistTrackGroup: React.FC<{
             <Link
               to={`/${artist?.urlSlug ?? artist?.id}/release/${
                 trackGroup.urlSlug ?? trackGroup.id
-              }`}
-              className={css`
-                padding-right: 0.5rem;
-              `}
-            >
+              }`}>
               {trackGroup.title}
             </Link>
             <Link to={`/${artist?.urlSlug ?? artist?.id}/`}>
               {trackGroup.artist?.name}
             </Link>
           </div>
-          <PurchaseOrDownloadAlbum trackGroup={trackGroup} />
+          <PurchaseOrDownloadAlbum trackGroup={trackGroup}
+          className={css`
+          `}
+          />
         </div>
       </div>
     </div>

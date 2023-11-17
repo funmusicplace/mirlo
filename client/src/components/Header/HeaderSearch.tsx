@@ -56,13 +56,25 @@ const HeaderSearch: React.FC = () => {
         onChange={onChange}
         className={css`
           margin-bottom: 0 !important;
-          border: 1px solid var(--mi-lighter-foreground-color);
-          background: var(--mi-lighten-background-color) !important;
+          border: 1px solid var(--mi-lighten-foreground-color);
+          background: var(--mi-white) !important;
 
           &::placeholder {
             color: var(--mi-normal-foreground-color) !important;
             opacity: 0.3;
           }
+          @media screen and (max-width: ${bp.medium}px) {
+            opacity: .7;
+          }
+
+          @media (prefers-color-scheme: dark) {
+            &::placeholder {
+              color: var(--mi-black) !important;
+              opacity: 0.3;
+            }
+          }
+
+
         `}
       />
       {showSuggestions && (
@@ -77,7 +89,7 @@ const HeaderSearch: React.FC = () => {
             className={css`
               position: absolute;
               padding: 1rem;
-              background: var(--mi-normal-background-color);
+              background: var(--mi-white);
               width: 100%;
               z-index: 12;
 

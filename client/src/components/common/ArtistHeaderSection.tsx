@@ -9,13 +9,16 @@ import FollowArtist from "./FollowArtist";
 
 const H1 = styled.h1`
   font-size: 50px;
-  line-height: 3.5rem;
+  font-size: 2.6vmax;
+  line-height: 2.8vmax;
   padding-top: 1.5rem;
 
   @media screen and (max-width: ${bp.medium}px) {
     font-size: 32px;
+    font-size: 3vmax;
+    line-height: 3vmax;
     padding-top: 0.5rem;
-    line-height: 2rem;
+    padding-bottom: 0rem;
   }
 `;
 
@@ -26,16 +29,23 @@ const Header = styled.div`
   align-items: left;
   justify-content: space-between;
   flex-grow: 1;
+  border-bottom: solid 1px var(--mi-light-foreground-color);
 
   p {
-    margin-bottom: 0.5rem !important;
+    margin-bottom: 2rem;
   }
 
   @media screen and (max-width: ${bp.medium}px) {
+    font-size: .7em;
+    line-height: 1rem;
     border-radius: 0;
     padding: 0rem 0.5rem 0rem;
     border: solid grey;
     border-width: 0px 0px 1px 0px;
+    p {
+      margin-bottom: 0em !important;
+      padding-bottom: .5rem;
+    }
   }
 `;
 

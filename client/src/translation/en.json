@@ -61,7 +61,8 @@
     "areYouSureDeleteAccount": "Are you sure you want to delete your account?",
     "deleteAccount": "Delete account",
     "changingEmailDisabled": "Changing your email has been disabled for now. Please contact an admin if you want to do so",
-    "collectionEmpty": "There's nothing in your collection yet, support some artists and buy their music!"
+    "collectionEmpty": "There's nothing in your collection yet, support some artists and buy their music!",
+    "yourCollection" : "Your collection"
   },
   "trackGroupCard": {
     "download": "Download",
@@ -95,7 +96,8 @@
     "noSubscriptionTiersYet": "This artist hasn't added any subscription tiers yet.",
     "unknown": "Unknown",
     "toFollowThisArtist": "To follow this artist please <1>sign up</1> with a user account or <2>log in</2>.",
-    "followArtist": "Follow {{artistName}}"
+    "followArtist": "Follow {{artistName}}",
+    "month": "mois"
   },
   "post": {
     "edit": "Edit"
@@ -309,7 +311,7 @@
     "mailingList": "Get on the mailing list",
     "logIn": "Log in",
     "mirloConstruction": "Mirlo is under construction. If you'd like to contribute, check out our <about>About page</about>, <faq>FAQ</faq>, <github>the code on GitHub</github>, <discord>join our Discord</discord>, or <email>email us</email>.",
-    "latestCommunityPost": "Latest posts from the community:"
+    "latestCommunityPost": "Latest posts from the community"
   },
   "faq": {
     "title": "Frequently Asked Questions (FAQ)",

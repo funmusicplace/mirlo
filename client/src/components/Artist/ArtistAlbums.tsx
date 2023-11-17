@@ -25,6 +25,16 @@ const ArtistAlbums: React.FC<{ artist: Artist }> = ({ artist }) => {
 
   return (
     <ArtistSection>
+    <div
+      style={{ marginTop: "0rem" }}
+      className={css`
+          margin-bottom: 2rem;
+        @media screen and (max-width: ${bp.medium}px) {
+          border-radius: 0;
+          background: var(--mi-light-background-color);
+        }
+      `}
+    >
       <div
         className={css`
           padding-top: 0.5rem;
@@ -41,7 +51,7 @@ const ArtistAlbums: React.FC<{ artist: Artist }> = ({ artist }) => {
         <h2>{t("releases")}</h2>
         {ownedByUser && (
           <Link to={`/manage/artists/${artist.id}`}>
-            <Button compact startIcon={<FaPen />}>
+            <Button compact transparent startIcon={<FaPen />}>
               {t("edit")}
             </Button>
           </Link>
@@ -53,14 +63,14 @@ const ArtistAlbums: React.FC<{ artist: Artist }> = ({ artist }) => {
           flex-wrap: wrap;
 
           @media screen and (max-width: ${bp.medium}px) {
-            padding: 0rem 0.5rem 0rem 0.5rem;
+            padding: 0rem 0.5rem 1rem 0.5rem;
           }
         `}
       >
         {artist.trackGroups?.map((trackGroup) => (
           <ArtistTrackGroup key={trackGroup.id} trackGroup={trackGroup} />
         ))}
-      </div>
+      </div></div>
     </ArtistSection>
   );
 };

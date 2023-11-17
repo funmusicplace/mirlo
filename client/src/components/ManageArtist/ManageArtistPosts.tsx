@@ -114,7 +114,7 @@ const ManageArtistPosts: React.FC<{}> = () => {
               justify-content: space-between;
             `}
           >
-            <strong>{p.title}:</strong>
+            <strong>{p.title}</strong>
             <div>
               <Button
                 compact

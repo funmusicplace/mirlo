@@ -1,4 +1,5 @@
 import styled from "@emotion/styled";
+import { bp } from "../../constants";
 
 type WrapperProps = {
   width: number;
@@ -14,14 +15,15 @@ const Wrapper = styled.div<WrapperProps>`
   display: flex;
   align-items: center;
   justify-content: center;
-  width: ${(props) => props.width}px;
-  height: ${(props) => props.height}px;
+  width: 100%;
+  height: 100%;
 
   div {
     justify-content: space-between;
-    height: 20px;
-    width: 20px;
+    height: 40px;
+    width: 40px;
     display: flex;
+    filter: drop-shadow(0 0 1rem black);
   }
 
   @keyframes bounce {
@@ -37,6 +39,10 @@ const Wrapper = styled.div<WrapperProps>`
       transform: scaleY(0.5); /* scale down to 50% */
     }
 
+    70% {
+      transform: scaleY(0.4); /* scale down to 40% */
+    }
+
     80% {
       transform: scaleY(0.75); /* scale up to 75% */
     }
@@ -47,12 +53,12 @@ const Wrapper = styled.div<WrapperProps>`
   }
 
   span {
-    width: 5px;
-    height: 100%;
-    background-color: ${(props) => props.theme.colors.primary};
-    border-radius: 3px;
+    width: 4px;
+    height: 80%;
+    background-color: white;
+    border-radius: 0px;
     transform-origin: bottom;
-    animation: bounce 2.2s ease infinite alternate;
+    animation: bounce 3.3s ease infinite alternate;
     content: "";
   }
 
@@ -64,6 +70,29 @@ const Wrapper = styled.div<WrapperProps>`
     &:nth-of-type(3) {
       animation-delay: -3.7s; /* Start mid-way of return of animation */
     }
+    &:nth-of-type(4) {
+      animation-delay: -4.6s; /* Start mid-way of return of animation */
+    }
+    &:nth-of-type(5) {
+      animation-delay: -5.7s; /* Start mid-way of return of animation */
+    }
+    &:nth-of-type(6) {
+      animation-delay: -6.8s; /* Start mid-way of return of animation */
+    }
+  }
+
+  @media (max-width: ${bp.small}px) {
+
+    div {
+      height: 30px;
+      width: 30px;
+      filter: drop-shadow(10px 10px 4rem crimson);
+    }
+
+    span {
+      width: 3px;
+    }
+
   }
 `;
 
@@ -74,6 +103,10 @@ export const PlayingMusicBars: React.FC<{ width: number; height: number }> = ({
   return (
     <Wrapper width={width} height={height}>
       <div>
+        <span />
+        <span />
+        <span />
+        <span />
         <span />
         <span />
         <span />

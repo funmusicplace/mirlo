@@ -6,6 +6,7 @@ import { useSnackbar } from "state/SnackbarContext";
 import Box from "../common/Box";
 import Button from "../common/Button";
 import Money from "../common/Money";
+import { useTranslation } from "react-i18next";
 import MarkdownContent from "components/common/MarkdownContent";
 import { bp } from "../../constants";
 
@@ -13,6 +14,7 @@ const ArtistSupportBox: React.FC<{
   subscriptionTier: ArtistSubscriptionTier;
   artist: Artist;
 }> = ({ subscriptionTier, artist }) => {
+  const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const {
     state: { user },
   } = useGlobalStateContext();
@@ -47,38 +49,72 @@ const ArtistSupportBox: React.FC<{
         key={subscriptionTier.id}
         className={css`
           background-color: var(--mi-darken-background-color);
-          max-width: 33%;
           margin-bottom: 1rem;
-          margin-top: 1rem;
-          padding-top: 1.5rem;
+          padding: 0 !important;
           display: flex;
           flex-direction: column;
+          justify-content: space-between;
+          outline: solid 1px grey;
+
+          max-width: 32.3%;
+          flex: 32.3%;
+
+          button {
+            width: 100%;
+            white-space: normal !important;
+            margin-top: 1rem;
+            padding: .5rem .5rem;
+          }
 
           &:nth-child(3n + 1) {
-            border-top: 0;
-            margin-right: 0.5rem;
+            margin-right: 1.5%;
           }
 
           &:nth-child(3n) {
-            border-top: 0;
-            margin-left: 0.5rem;
+            margin-left: 1.5%;
           }
 
-          @media (max-width: ${bp.small}px) {
-            max-width: 100%;
-            width: 100%;
-            flex-grow: 1;
+        @media screen and (max-width: ${bp.medium}px) {
+          h3 {
+            font-size: 1rem;
           }
+          max-width: 48.7%;
+          flex: 48.7%;
+
+          margin-bottom: 0rem;
+          margin-top: 0.5rem;
+
+          &:nth-child(odd) {
+            margin-left: 0rem;
+            margin-right: 2.5%;
+          }
+        }
+
+        @media screen and (max-width: ${bp.small}px) {
+          h3 {
+            font-size: 1rem;
+          }
+
+          font-size: .875rem;
+          max-width: 100%;
+          flex: 100%;
+          &:nth-child(odd) {
+            margin-right: 0rem;
+          }
+        }
         `}
       >
         <div
           className={css`
-            display: flex;
-            justify-content: space-between;
-
+            padding: 1.5rem;
+            border-bottom: solid 1px grey;
             h3 {
-              font-size: 1.2rem;
+              font-size: 1rem;
+              padding-bottom: .5rem;
             }
+            @media screen and (max-width: ${bp.small}px) {
+              padding: 1rem;
+              }
           `}
         >
           <h3>{subscriptionTier.name}</h3>
@@ -86,12 +122,49 @@ const ArtistSupportBox: React.FC<{
             amount={
               subscriptionTier.minAmount ? subscriptionTier.minAmount / 100 : 0
             }
-          />
+          /> / {t("month")}
         </div>
-        <MarkdownContent content={subscriptionTier.description} />
         <div
           className={css`
-            margin-top: 0.5rem;
+            padding: 1.5rem 1.5rem 0 1.5rem;
+            height: 100%;
+            p {
+              display: flex;
+              align-items: flex-start;
+            }
+            @media screen and (max-width: ${bp.small}px) {
+              padding: 1rem 1rem 0 1rem;
+              }
+          `}
+        >
+        <MarkdownContent content={subscriptionTier.description}/>
+        </div>
+        <div
+          className={css`
+            margin: 0rem 0.5rem 0.5rem 0.5rem;
+
+            {/* Button {
+              background-color: var(--mi-darken-x-background-color);
+              color: var(--mi-normal-foreground-color);
+              text-transform: uppercase;
+              border-radius: 0px;
+              padding: 1rem 0 1rem 0 !important;
+              margin: 0;
+            }
+            Button:hover {
+              background-color: var(--mi-normal-foreground-color) !important;
+              color: var(--mi-normal-background-color);
+            } */}
+
+            Button {
+              text-transform: uppercase;
+
+              margin: 0;
+            }
+            Button:hover {
+              background-color: var(--mi-normal-foreground-color) !important;
+              color: var(--mi-normal-background-color);
+            }
           `}
         >
           {user && !ownedByUser && (
@@ -101,7 +174,8 @@ const ArtistSupportBox: React.FC<{
               isLoading={isCheckingForSubscription}
               disabled={isCheckingForSubscription}
             >
-              Support at{" "}
+              Support
+              {/* at{" "}
               <Money
                 amount={
                   subscriptionTier.minAmount
@@ -109,7 +183,7 @@ const ArtistSupportBox: React.FC<{
                     : 0
                 }
               />{" "}
-              / month
+              / month */}
             </Button>
           )}
           {user && ownedByUser && (
@@ -117,6 +191,7 @@ const ArtistSupportBox: React.FC<{
               className={css`
                 text-align: center;
                 background-color: var(--mi-darken-background-color);
+                margin-bottom: 0;
               `}
             >
               Users will be able to subscribe here

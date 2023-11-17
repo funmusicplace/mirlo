@@ -67,6 +67,7 @@ const FollowArtist: React.FC<{ artistId: number }> = ({ artistId }) => {
       </Modal>
       <Button
         compact
+        transparent
         type="button"
         onClick={onFollowClick}
         isLoading={isLoading}

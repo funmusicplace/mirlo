@@ -8,11 +8,6 @@ export const Table = styled.table`
 
   & tbody tr {
     transition: 0.25s background-color;
-    &:nth-of-type(odd) {
-      @media (prefers-color-scheme: dark) {
-        background-color: var(--mi-darken-background-color);
-      }
-    }
     &:hover {
       background-color: ${(props) =>
         colorShade(props.theme.colors.background, -40)} !important;

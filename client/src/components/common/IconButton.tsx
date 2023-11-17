@@ -8,7 +8,7 @@ const IconButton = styled.button<Compactable & { transparent?: boolean }>`
       ? "var(--mi-primary-color)"
       : "var(--mi-lighter-foreground-color)"};
   background-color: var(--mi-darken-background-color);
-  padding: ${(props) => (props.compact ? "0.5rem 0.55rem" : "0.6rem 0.7rem")};
+  padding: ${(props) => (props.compact ? "0.5rem 0.5rem" : "0.6rem 0.6rem")};
   transition: 0.25s;
   font-size: ${(props) => (props.compact ? ".9rem" : "1.2rem")};
   line-height: 0.9;

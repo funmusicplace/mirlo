@@ -22,19 +22,21 @@ const PageHeader = () => {
       {artistBanner && (!trackGroupId || isManage) && (
         <div
           className={css`
-            ${user ? "margin-top: 60px;" : "height: calc(34vh);"}
-            height: calc(36vh);
-            min-height: calc(14rem-55px);
+            // ${user ? "margin-top: 55px;" : "height: calc(34vh);"}
             position: fixed;
-            overflow: hidden;
+            height: 100%;
             width: 100%;
+            overflow: hidden;
             display: flex;
             justify-content: center;
             //* border-bottom: solid 4px; *//
             box-shadow: inset 1em -2em 0.8em -1.3em rgba(0, 0, 0, 0.4);
             @media screen and (max-width: ${bp.medium}px) {
-              position: relative;
-              max-height: 20vw;
+              ${user ? "margin-top: 0px;" : "height: calc(34vh);"}
+              // --header-cover-sticky-height: 48px;
+              // top: calc(var(--header-cover-sticky-height) - 25vw);
+              top: 0px;
+              position: absolute;
             }
           `}
         >
@@ -69,7 +71,9 @@ const PageHeader = () => {
       {(!artistBanner || (trackGroupId && !isManage)) && (
         <div
           className={css`
-            margin-top: 60px;
+            margin-top: 55px;
+            @media screen and (max-width: ${bp.medium}px) {
+            margin-top: 0px;
             }
           `}
         ></div>

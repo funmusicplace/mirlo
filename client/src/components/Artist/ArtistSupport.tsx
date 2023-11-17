@@ -99,6 +99,7 @@ const ArtistSupport: React.FC<{ artist: Artist }> = ({ artist }) => {
       <div
         className={css`
           display: flex;
+          flex-wrap: wrap;
 
           @media (max-width: ${bp.small}px) {
             flex-direction: column;
@@ -106,7 +107,7 @@ const ArtistSupport: React.FC<{ artist: Artist }> = ({ artist }) => {
         `}
       >
         {artist.subscriptionTiers?.map((p) => (
-          <ArtistSupportBox key={p.id} subscriptionTier={p} artist={artist} />
+          <ArtistSupportBox key={p.id} subscriptionTier={p} artist={artist}/>
         ))}
       </div>
     </>

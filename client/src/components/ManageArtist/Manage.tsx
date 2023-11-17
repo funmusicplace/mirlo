@@ -4,6 +4,7 @@ import React from "react";
 import api from "services/api";
 import Button from "../common/Button";
 import CreateNewArtistForm from "./ArtistForm";
+import { bp } from "../../constants";
 import { useGlobalStateContext } from "state/GlobalState";
 import { Link } from "react-router-dom";
 import { useSnackbar } from "state/SnackbarContext";
@@ -59,6 +60,10 @@ export const Manage: React.FC = () => {
           button {
             margin-top: 0 !important;
           }
+          @media screen and (max-width: ${bp.medium}px) {
+            padding: .5rem;
+          }
+
         `}
       >
         <h1 className={css``}>{t("manageArtists")}</h1>

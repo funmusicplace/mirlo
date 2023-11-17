@@ -6,6 +6,7 @@ import { css } from "@emotion/css";
 
 export interface Compactable {
   compact?: boolean;
+  transparent?: boolean;
   role?: "primary" | "secondary" | "warning";
   variant?: "link" | "outlined";
   color?: string;
@@ -14,7 +15,7 @@ export interface Compactable {
 const CustomButton = styled.button<Compactable>`
   background: none;
   border: none;
-  transition: 0.25s background-color, 0.25s color, 0.4s border-radius,
+  // transition: 0.25s background-color, 0.25s color, 0.25s border-radius,
     0.25s filter;
   font-size: 0.9rem;
   font-weight: bold;
@@ -89,8 +90,12 @@ const CustomButton = styled.button<Compactable>`
       default:
         return `
           padding: ${props.compact ? ".3rem .5rem" : "1rem"};
-          background-color:  var(--mi-${props.role ?? "primary"}-color);
-          color: ${
+          background-color:  var(--mi-${props.role ?? "secondary"}-color);
+          background-color:  ${props.transparent ? "transparent" : ""};
+          color:  var(--mi-${props.role ?? "primary"}-color);
+          color:  ${props.transparent ? "var(--mi-primary-color)" : ""};
+
+          // color: ${
             props.role === "primary"
               ? props.theme.colors.text
               : props.theme.colors.textDark
@@ -98,6 +103,7 @@ const CustomButton = styled.button<Compactable>`
 
           &:hover:not(:disabled) {
             background-color: var(--mi-${props.role ?? "primary"}-color);
+            color: var(--mi-${props.role ?? "secondary"}-color);
           }
 
         `;
@@ -105,7 +111,7 @@ const CustomButton = styled.button<Compactable>`
   }}
 
   &:hover:not(:disabled) {
-    filter: brightness(0.85);
+    filter:  saturate(50%) ;
   }
 
   align-items: center;

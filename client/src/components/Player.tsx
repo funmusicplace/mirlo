@@ -123,9 +123,14 @@ const Player = () => {
         width: 100%;
         z-index: 10;
         bottom: 0;
+        color: var(--mi-black);
         filter: drop-shadow(0 0 0.1rem rgba(0, 0, 0, 0.5));
-        background-color: var(--mi-normal-background-color);
-        height: 73px;
+        background-color: var(--mi-darken-x-background-color);
+        // height: 73px;
+
+        a {
+          color: var(--mi-black);
+        }
 
         @media (max-width: ${bp.small}px) {
           flex-direction: column;
@@ -133,6 +138,15 @@ const Player = () => {
           button {
           }
         }
+
+        @media (prefers-color-scheme: dark) {
+          color: white;
+          a {
+            color: white;
+          }
+        }
+
+
       `}
     >
       <Helmet>
@@ -158,7 +172,7 @@ const Player = () => {
         `}
       >
         {currentTrack && isTrackOwnedOrPreview(currentTrack, user) && (
-          <AudioWrapper currentTrack={currentTrack} />
+          <AudioWrapper currentTrack={currentTrack}/>
         )}
       </div>
 
@@ -171,7 +185,11 @@ const Player = () => {
             paddin-right: 0.5rem;
             font-size: 16px;
             justify-content: space-between;
-            background-color: var(--mi-normal-background-color);
+            background-color: #f5f0f0;
+
+            @media (prefers-color-scheme: dark) {
+              background-color: #0e0e0e;
+            }
 
             @media (max-width: ${bp.small}px) {
               flex-grow: initial;
@@ -200,13 +218,13 @@ const Player = () => {
             <div>
               <ImageWithPlaceholder
                 src={currentTrack?.trackGroup.cover?.sizes?.[120]}
-                size={50}
+                size={45}
                 alt={currentTrack?.title ?? "Loading album"}
                 className={css`
                   background-color: #efefef;
                   margin-right: 0.5rem;
                   min-height: 100%;
-                  min-width: 50px;
+                  min-width: 45px;
                 `}
               />
             </div>
@@ -235,9 +253,9 @@ const Player = () => {
                 <>
                   <div
                     className={css`
-                      font-size: 0.7rem;
+                      font-size: 0.8rem;
                       text-transform: capitalize;
-                      color: var(--mi-light-foreground-color);
+                      color: grey;
                       white-space: nowrap;
                       overflow: hidden;
                       text-overflow: ellipsis;
@@ -247,7 +265,7 @@ const Player = () => {
                   </div>
                   <div
                     className={css`
-                    font-size: .7rem;
+                    font-size: .8rem;
                     text-transform: capitalize;
                     overflow: hidden;
                     white-space: nowrap;
@@ -281,16 +299,26 @@ const Player = () => {
 
                 button {
                   background: transparent;
-                  font-size: 1rem;
+                  font-size: 1.2rem;
                 }
                 button:hover {
-                  color: var(--mi-normal-foreground-color) !important;
+                  color: var(--mi-white) !important;
                   background: var(--mi-normal-background-color) !important;
                 }
 
                 @media (max-width: ${bp.small}px) {
                   margin-right: 0.5rem;
                   max-width: 50%;
+                }
+                @media (prefers-color-scheme: dark) {
+                  color: white;
+                  button {
+                    color: white !important;
+                  }
+                  button:hover {
+                    color: var(--mi-normal-foreground-color) !important;
+                    background: var(--mi-normal-background-color) !important;
+                  }
                 }
               `}
             >
@@ -301,6 +329,7 @@ const Player = () => {
 
                   button {
                     background-color: transparent;
+                    color: var(--mi-black);
                   }
 
                   @media (max-width: ${bp.small}px) {
@@ -313,7 +342,9 @@ const Player = () => {
               </span>
               <div
                 className={css`
-
+                button {
+                  color: var(--mi-black);
+                }
                 @media (max-width: ${bp.small}px) {
                     button {
                       padding: 0em .5em 0em 0em;
@@ -326,11 +357,12 @@ const Player = () => {
               <div
                 className={css`
                   button {
-                    color: var(--mi-normal-foreground-color);
-                    font-size: 1rem !important;
+                    color: var(--mi-black);
+                    font-size: 1.2rem !important;
 
                     button:hover {
                       color: var(--mi-normal-foreground-color) !important;
+                      filter: saturate(0);
                     }
                   }
                 `}
@@ -340,7 +372,9 @@ const Player = () => {
               </div>
               <div
                 className={css`
-
+                  button {
+                    color: var(--mi-black);
+                  }
                 @media (max-width: ${bp.small}px) {
                     button {
                       padding: 0em 0em 0em .5em;
