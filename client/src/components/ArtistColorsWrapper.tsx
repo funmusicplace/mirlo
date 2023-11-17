@@ -10,8 +10,6 @@ const ArtistColorsWrapper: React.FC<{ children: React.ReactElement }> = ({
 }) => {
   const artistColors = useArtistColors();
 
-  console.log("artistColors", artistColors);
-
   return (
     <div
       className={css`

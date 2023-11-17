@@ -1,6 +1,9 @@
 import { User } from "@prisma/client";
 import { Request, Response } from "express";
-import { userAuthenticated } from "../../../../auth/passport";
+import {
+  userAuthenticated,
+  userLoggedInWithoutRedirect,
+} from "../../../../auth/passport";
 import { generateFullStaticImageUrl } from "../../../../utils/images";
 import prisma from "../../../../../prisma/prisma";
 import { finalCoversBucket } from "../../../../utils/minio";
@@ -16,21 +19,29 @@ type Params = {
 
 export default function () {
   const operations = {
-    POST: [userAuthenticated, POST],
+    POST: [userLoggedInWithoutRedirect, POST],
   };
 
   async function POST(req: Request, res: Response) {
     const { id: trackGroupId } = req.params as unknown as Params;
-    const { price } = req.body as unknown as { price?: string }; // In cents
-    const { id: userId } = req.user as User;
+    let { price, email } = req.body as unknown as {
+      price?: string; // In cents
+      email?: string;
+    };
+    const loggedInUser = req.user as User;
 
     try {
       const client = await prisma.client.findFirst({});
-      const user = await prisma.user.findFirst({
-        where: {
-          id: userId,
-        },
-      });
+
+      if (loggedInUser) {
+        const { id: userId } = loggedInUser;
+        const user = await prisma.user.findFirst({
+          where: {
+            id: userId,
+          },
+        });
+        email = user?.email;
+      }
 
       const trackGroup = await prisma.trackGroup.findFirst({
         where: {
@@ -51,7 +62,9 @@ export default function () {
         return res.status(404);
       }
 
-      await subscribeUserToArtist(trackGroup?.artist, user);
+      if (loggedInUser) {
+        await subscribeUserToArtist(trackGroup?.artist, loggedInUser);
+      }
 
       const stripeAccountId = trackGroup.artist.user.stripeAccountId;
 
@@ -100,7 +113,7 @@ export default function () {
         const session = await stripe.checkout.sessions.create(
           {
             billing_address_collection: "auto",
-            customer_email: user?.email,
+            customer_email: loggedInUser?.email ?? email,
             line_items: [
               {
                 price_data: {
@@ -121,7 +134,8 @@ export default function () {
               clientId: client?.id ?? null,
               trackGroupId,
               artistId: trackGroup.artistId,
-              userId,
+              userId: loggedInUser?.id,
+              userEmail: email ?? null,
               stripeAccountId,
             },
             mode: "payment",
