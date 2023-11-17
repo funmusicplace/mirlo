@@ -1,6 +1,6 @@
 import { css } from "@emotion/css";
 import React from "react";
-
+import { bp } from "../../constants";
 import IconButton from "../common/IconButton";
 
 import Background from "components/common/Background";
@@ -33,12 +33,25 @@ const Header: React.FC<{
           <div
             className={css`
               position: absolute;
-              top: 2.5rem;
-              right: 0;
+              top: 2.9rem;
+              right: -1em;
               padding: 0.5rem;
               z-index: 12;
               padding-bottom: 1rem;
-              background: var(--mi-normal-background-color);
+              overflow: hidden;
+              text-overflow: ellipsis;
+              background: var(--mi-white);
+              button {
+                color: var(--mi-black);
+              }
+
+              @media (prefers-color-scheme: dark) {
+                background: var(--mi-black);
+                button {
+                  color: var(--mi-white);
+                }
+              }
+
             `}
           >
             {React.Children.map(children, (child) =>
@@ -54,7 +67,13 @@ const Header: React.FC<{
         onClick={() => {
           setIsMenuOpen(true);
         }}
-      >
+
+          className={css`
+            @media (max-width: ${bp.small}px) {
+            background-color: var(--mi-normal-background-color) !important;
+            }
+          `}
+        >
         {icon}
       </IconButton>
     </div>

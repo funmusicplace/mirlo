@@ -61,7 +61,7 @@ const Menu: React.FC = (props) => {
           text-decoration: none;
           text-align: right;
           display: block;
-          color: var(--mi-normal-foreground-color);
+          color: var(--mi-black);
           font-weight: normal;
           border-radius: 0;
           padding: 0.5rem;
@@ -73,8 +73,19 @@ const Menu: React.FC = (props) => {
 
           &:hover {
             border-radius: 0;
-            background: var(--mi-lighten-background-color) !important;
+            background: var(--mi-black) !important;
+            color: var(--mi-white) !important;
             border: none !important;
+          }
+        }
+        @media (prefers-color-scheme: dark) {
+          & li > * {
+            background-color: var(--mi-black);
+            color: var(--mi-white);
+
+            &:hover {
+              color: var(--mi-black) !important;
+            }
           }
         }
       `}
