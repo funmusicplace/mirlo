@@ -27,14 +27,32 @@ const TrackRow: React.FC<{
       key={track.id}
       id={`${track.id}`}
       className={css`
-        ${!canPlayTrack ? `color: var(--mi-light-foreground-color);` : ""}
+        ${!canPlayTrack ? `color: var(--mi-lighten-foreground-color);` : ""}
+        :hover {
+          color: var(--mi-normal-background-color) !important;
+          background-color: var(--mi-normal-foreground-color) !important;
 
-        button, button:hover {
+          button {
+            color: var(--mi-normal-background-color);
+            background: transparent;
+          }
+        }
+        button {
           color: var(--mi-normal-foreground-color);
+          background: transparent;
+        }
+        button:hover {
+          color: var(--mi-normal-background-color);
           background: transparent;
         }
 
         font-size: 18px;
+
+        {//*  :hover {
+          transform: scale(1.02, 1.02);
+          transition: transform .1s ease-in-out;
+          font-size: 1.1rem;
+        }  *//}
 
         @media screen and (max-width: ${bp.small}px) {
           font-size: 16px;
@@ -65,10 +83,14 @@ const TrackRow: React.FC<{
       <td
         className={css`
           height: 30px;
+
           button {
-            //* padding: .5rem;
+            padding: .5rem .65rem !important;
             background: none;
           }
+          button:hover {
+            padding: .5rem .65rem !important;
+            background: none;
           }
         `}
       >
@@ -95,7 +117,7 @@ const TrackRow: React.FC<{
             padding: 0.1rem;
             margin-bottom: 0.05rem;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-end;
 
             @media screen and (max-width: ${bp.small}px) {
               flex-wrap: nowrap;
@@ -106,6 +128,7 @@ const TrackRow: React.FC<{
             className={css`
           overflow: hidden;
           text-overflow: ellipsis;
+
           @media screen and (max-width: ${bp.medium}px) {
             font-size: .8rem;
           }
