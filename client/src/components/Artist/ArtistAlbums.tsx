@@ -43,7 +43,7 @@ const ArtistAlbums: React.FC<{ artist: Artist }> = ({ artist }) => {
           align-items: center;
 
           @media screen and (max-width: ${bp.medium}px) {
-            padding: 0.5rem 0.5rem 0rem;
+            padding: 0rem 0rem 0rem;
           }
         `}
       >
@@ -62,7 +62,7 @@ const ArtistAlbums: React.FC<{ artist: Artist }> = ({ artist }) => {
           flex-wrap: wrap;
 
           @media screen and (max-width: ${bp.medium}px) {
-            padding: 0rem 0.5rem 1rem 0.5rem;
+            padding: 0rem 0rem 1rem 0rem;
           }
         `}
       >
