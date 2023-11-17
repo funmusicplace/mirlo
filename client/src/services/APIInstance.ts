@@ -58,7 +58,6 @@ const APIInstance = (apiRoot: string) => {
   return {
     root: api,
     request: apiRequest,
-
     post: async <T, R>(
       endpoint: string,
       data: T,

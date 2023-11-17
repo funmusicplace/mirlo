@@ -7,7 +7,8 @@
     "password": "Password:",
     "signUpButton": "Sign up",
     "success": "Registration success!",
-    "logIn": "Alrieady have an account? Log in"
+    "logIn": "Alrieady have an account? Log in",
+    "receiveMailingList": "Stay up to date with Mirlo and our product by signing up to our mailing list"
   },
   "releases": {
     "recentReleases": "Recent releases"
@@ -65,6 +66,8 @@
     "yourCollection" : "Your collection"
   },
   "trackGroupCard": {
+    "notLoggedIn": "We'll need your email address to send you a one-time download link of the album. In the future you'll be able to create an account and access what you've bought.",
+    "albumExists": "An album has already been bought using this email address, you can finish creating an account to see it in your collection. Do you want to proceed anyway?",
     "download": "Download",
     "error": "Something went wrong",
     "buy": "Buy",
@@ -117,6 +120,7 @@
   "manageArtist": {
     "notEnabled": "This artist has not been enabled by site admin yet! Contact an admin to do so.",
     "manage": "Manage {{artist}}",
+    "editPost": "Edit post",
     "editDetails": "Edit artist details",
     "viewLive": "View live",
     "deleteArtist": "Delete artist",
@@ -293,14 +297,18 @@
     "addTrackButton": "Add track"
   },
   "postForm": {
+    "newBlogPostFor": "New blog post for {{ artistName }}",
     "title": "Title:",
     "publicationDate": "Publication date:",
     "content": "Content",
-    "isSubscriptionOnly": "For subscribers only?",
-    "isSubscriptionPostOnly": "Is this post for subscribers only?",
+    "isSubscriptionOnly": "Is this post public?",
+    "isSubscriptionPostOnly": "Should anyone be able to read this post?",
     "post": "post",
     "save": "Save",
-    "saveNew": "Save new"
+    "editPost": "Edit post",
+    "saveNew": "Save new",
+    "follow": "Everyone who pressed the follow button on your profile",
+    "ifNotPublic": "If not public, which of your subscription tier should be the minimum tier to receive your update?"
   },
   "errorPage": {
     "reactError": "React Error ",

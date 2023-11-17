@@ -1,5 +1,6 @@
 import { css } from "@emotion/css";
 import Button from "components/common/Button";
+import FormCheckbox from "components/common/FormCheckbox";
 import { InputEl } from "components/common/Input";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -47,25 +48,10 @@ const TrackArtistFormFields: React.FC<{
           {...register(`${trackArtistsKey}.${artistIndex}.artistId`)}
           placeholder="ID if the artist exists in Mirlo"
         />
-        <label
-          htmlFor={`${trackArtistsKey}.${artistIndex}.isCoAuthor`}
-          className={css`
-            display: flex;
-            padding: 0.25rem;
-            align-items: center;
-            font-size: 0.8rem;
-            input {
-              width: 2rem;
-            }
-          `}
-        >
-          <InputEl
-            id={`${trackArtistsKey}.${artistIndex}.isCoAuthor`}
-            type="checkbox"
-            {...register(`${trackArtistsKey}.${artistIndex}.isCoAuthor`)}
-          />
-          {t("coAuthorCheck")}
-        </label>
+        <FormCheckbox
+          keyName={`${trackArtistsKey}.${artistIndex}.isCoAuthor`}
+          description={t("coAuthorCheck")}
+        />
       </div>
       {fields.length > 1 && (
         <Button

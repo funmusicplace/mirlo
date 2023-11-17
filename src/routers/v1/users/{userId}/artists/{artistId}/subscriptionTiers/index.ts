@@ -19,10 +19,14 @@ export default function () {
 
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { artistId } = req.params as unknown as Params;
+    const { includeDefault } = req.query as { includeDefault?: boolean };
 
     try {
       const subscriptions = await prisma.artistSubscriptionTier.findMany({
-        where: { artistId: Number(artistId), NOT: { isDefaultTier: true } },
+        where: {
+          artistId: Number(artistId),
+          ...(includeDefault ? {} : { isDefaultTier: false }),
+        },
       });
 
       res.status(200).json({ results: subscriptions });

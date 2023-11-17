@@ -76,7 +76,7 @@ By default Mirlo uses Stripe as its payment processor.
 To test webhooks, you'll have to run this:
 
 ```sh
-stripe listen --forward-to localhost:3000/v1/checkout/webhook
+stripe listen --forward-to localhost:3000/v1/webhooks/stripe
 ```
 
 This will forward all stripe webhooks to your localhost:3000, and send them to the checkout/webhook URL. It'll also spit out a `STRIPE_WEBHOOK_SIGNING_SECRET`. You'll need to set that in the .env file.

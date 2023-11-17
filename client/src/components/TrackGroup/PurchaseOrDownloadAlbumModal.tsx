@@ -52,8 +52,7 @@ const PurchaseOrDownloadAlbum: React.FC<{
   return (
     <>
       <div>
-        {user &&
-          !userIsTrackGroupArtist &&
+        {!userIsTrackGroupArtist &&
           !isOwned &&
           artistState?.userStripeStatus?.chargesEnabled && (
 

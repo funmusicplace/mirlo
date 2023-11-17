@@ -3,6 +3,11 @@ import React from "react";
 
 export const SelectEl = styled.select`
   font-size: 1rem;
+  max-width: 100%;
+
+  option {
+    padding: 0.5rem;
+  }
 `;
 
 export const Select: React.FC<{

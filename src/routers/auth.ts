@@ -17,7 +17,13 @@ export async function hashPassword(password: string) {
 }
 
 router.post(`/signup`, async (req, res, next) => {
-  let { name, email, password, client: clientURL } = req.body;
+  let {
+    name,
+    email,
+    password,
+    client: clientURL,
+    receiveMailingList,
+  } = req.body;
 
   if (!email || !password) {
     res.status(400).json({ error: "Email and password must be supplied" });
@@ -47,12 +53,14 @@ router.post(`/signup`, async (req, res, next) => {
         data: {
           name,
           email,
+          receiveMailingList,
           password: await hashPassword(password),
         },
         select: {
           name: true,
           email: true,
           id: true,
+          receiveMailingList,
           emailConfirmationToken: true,
         },
       });

@@ -4,6 +4,7 @@ import { Prisma } from "@prisma/client";
 import { logger } from "../logger";
 import sendMail from "../jobs/send-mail";
 import { Request, Response } from "express";
+import { randomUUID } from "crypto";
 
 const { STRIPE_KEY } = process.env;
 
@@ -85,18 +86,42 @@ export const verifyStripeSignature = async (
 const handleTrackGroupPurhcase = async (
   userId: number,
   trackGroupId: number,
-  session: Stripe.Checkout.Session
+  session: Stripe.Checkout.Session,
+  newUser: boolean
 ) => {
   try {
-    const purchase = await prisma.userTrackGroupPurchase.create({
-      data: {
+    const token = randomUUID();
+    let purchase = await prisma.userTrackGroupPurchase.findFirst({
+      where: {
         userId: Number(userId),
         trackGroupId: Number(trackGroupId),
-        pricePaid: session.amount_total ?? 0,
-        currencyPaid: session.currency ?? "USD",
-        stripeSessionKey: session.id,
       },
     });
+    if (purchase) {
+      await prisma.userTrackGroupPurchase.update({
+        where: {
+          userId_trackGroupId: {
+            userId: Number(userId),
+            trackGroupId: Number(trackGroupId),
+          },
+        },
+        data: {
+          singleDownloadToken: token,
+        },
+      });
+    }
+    if (!purchase) {
+      purchase = await prisma.userTrackGroupPurchase.create({
+        data: {
+          userId: Number(userId),
+          trackGroupId: Number(trackGroupId),
+          pricePaid: session.amount_total ?? 0,
+          currencyPaid: session.currency ?? "USD",
+          stripeSessionKey: session.id,
+          singleDownloadToken: token,
+        },
+      });
+    }
 
     const user = await prisma.user.findFirst({
       where: {
@@ -120,13 +145,16 @@ const handleTrackGroupPurhcase = async (
     if (user && trackGroup && purchase) {
       await sendMail({
         data: {
-          template: "album-purchase-receipt",
+          template: newUser ? "album-download" : "album-purchase-receipt",
           message: {
             to: user.email,
           },
           locals: {
             trackGroup,
             purchase,
+            token,
+            email: user.email,
+            client: process.env.REACT_APP_CLIENT_DOMAIN,
             host: process.env.API_DOMAIN,
           },
         },
@@ -175,14 +203,17 @@ const handleSubscription = async (
 export const handleCheckoutSession = async (
   session: Stripe.Checkout.Session
 ) => {
-  const { tierId, userId, trackGroupId, stripeAccountId } =
+  let { tierId, userEmail, userId, trackGroupId, stripeAccountId } =
     session.metadata as unknown as {
       tierId: string;
+      userEmail: string;
       userId: string;
       trackGroupId: string;
       stripeAccountId: string;
     };
-  console.log("handle checkout session", stripeAccountId, tierId, trackGroupId);
+  logger.info(
+    `handle checkout session ${stripeAccountId}, ${tierId}, ${trackGroupId}`
+  );
   session = await stripe.checkout.sessions.retrieve(
     session.id,
     {
@@ -190,13 +221,32 @@ export const handleCheckoutSession = async (
     },
     { stripeAccount: stripeAccountId }
   );
-  if (tierId && userId) {
+  let newUser = false;
+  // If the user doesn't exist, we create one with an existing userEmail
+  if (!userId && userEmail) {
+    newUser = true; // If this is true the user wasn't logged in when making the purchase
+    let user = await prisma.user.findFirst({
+      where: {
+        email: userEmail,
+      },
+    });
+    if (!user) {
+      user = await prisma.user.create({
+        data: {
+          email: userEmail,
+        },
+      });
+    }
+    userId = `${user?.id}`;
+  }
+  if (tierId && userEmail) {
     await handleSubscription(Number(userId), Number(tierId), session);
   } else if (trackGroupId && userId) {
     await handleTrackGroupPurhcase(
       Number(userId),
       Number(trackGroupId),
-      session
+      session,
+      newUser
     );
   }
 };

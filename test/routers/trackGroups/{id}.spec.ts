@@ -14,6 +14,8 @@ import { randomUUID } from "crypto";
 
 const baseURL = `${process.env.API_DOMAIN}/v1/`;
 
+const requestApp = request(baseURL);
+
 describe("trackGroups/{id}", () => {
   beforeEach(async () => {
     try {
@@ -25,7 +27,7 @@ describe("trackGroups/{id}", () => {
 
   describe("/", () => {
     it("should GET / 404", async () => {
-      const response = await request(baseURL)
+      const response = await requestApp
         .get("trackGroups/1")
         .set("Accept", "application/json");
 
@@ -33,9 +35,44 @@ describe("trackGroups/{id}", () => {
     });
   });
 
+  describe("/purchase", () => {
+    it("should POST / 400 if artist not set up with stripe", async () => {
+      const { user } = await createUser({
+        email: "artist@artist.com",
+      });
+      const artist = await createArtist(user.id);
+      const trackGroup = await createTrackGroup(artist.id);
+
+      const response = await requestApp
+        .post(`trackGroups/${trackGroup.id}/purchase`)
+        .set("Accept", "application/json");
+      assert.equal(response.status, 400);
+      assert.equal(
+        response.body.error,
+        "Artist not set up with a payment processor yet"
+      );
+    });
+
+    // FIXME: https://github.com/funmusicplace/mirlo/issues/248
+    it.skip("should POST / 200", async () => {
+      const { user } = await createUser({
+        email: "artist@artist.com",
+        stripeAccountId: "aRandomWord",
+      });
+      const artist = await createArtist(user.id);
+      const trackGroup = await createTrackGroup(artist.id);
+
+      const response = await requestApp
+        .post(`trackGroups/${trackGroup.id}/purchase`)
+        .set("Accept", "application/json");
+
+      assert.equal(response.status, 400);
+    });
+  });
+
   describe("/download", () => {
     it("should GET / 404", async () => {
-      const response = await request(baseURL)
+      const response = await requestApp
         .get("trackGroups/1/download")
         .set("Accept", "application/json");
 
@@ -48,7 +85,7 @@ describe("trackGroups/{id}", () => {
       });
       const artist = await createArtist(user.id);
       const trackGroup = await createTrackGroup(artist.id);
-      const response = await request(baseURL)
+      const response = await requestApp
         .get(`trackGroups/${trackGroup.id}/download`)
         .set("Accept", "application/json");
 
@@ -75,7 +112,7 @@ describe("trackGroups/{id}", () => {
         },
       });
 
-      const response = await request(baseURL)
+      const response = await requestApp
         .get(
           `trackGroups/${trackGroup.id}/download?token=${purchase.singleDownloadToken}&email=${purchaser.email}`
         )
@@ -117,7 +154,7 @@ describe("trackGroups/{id}", () => {
         },
       });
 
-      const response = await request(baseURL)
+      const response = await requestApp
         .get(`trackGroups/${trackGroup.id}/download`)
         .set("Accept", "application/json")
         .set("Cookie", [`jwt=${accessToken}`]);
@@ -141,7 +178,7 @@ describe("trackGroups/{id}", () => {
 
   describe("/emailDownload", () => {
     it("should POST / 404", async () => {
-      const response = await request(baseURL)
+      const response = await requestApp
         .post("trackGroups/1/emailDownload")
         .set("Accept", "application/json");
 
@@ -159,7 +196,7 @@ describe("trackGroups/{id}", () => {
       const { accessToken } = await createUser({
         email: "purchaser@artist.com",
       });
-      const response = await request(baseURL)
+      const response = await requestApp
         .post(`trackGroups/${trackGroup.id}/emailDownload`)
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
@@ -182,7 +219,7 @@ describe("trackGroups/{id}", () => {
       const { accessToken } = await createUser({
         email: "purchaser@artist.com",
       });
-      const response = await request(baseURL)
+      const response = await requestApp
         .post(`trackGroups/${trackGroup.id}/emailDownload`)
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
