@@ -22,7 +22,10 @@ const Container = styled.div<{ artistBanner: boolean }>`
 
   @media screen and (max-width: ${bp.medium}px) {
     padding: 0rem !important;
-    margin-top: 0px;
+    width: 100%;
+    // margin-top: 55px;
+    // margin-top: 30vw;
+    margin-top: 0;
   }
 `;
 
