@@ -19,9 +19,12 @@ export const PlayButton: React.FC = () => {
             margin-right: 0.25rem;
             padding: .7rem .6rem .7rem .8rem;
             border: solid 1.5px var(--mi-normal-foreground-color);
-            border-color: var(--mi-normal-foreground-color);
-            background-color: var(--mi-normal-foreground-color);
-            color: var(--mi-normal-background-color);
+            border-color: var(--mi-white);
+            background-color: var(--mi-black);
+            color: var(--mi-white);
+          }
+          button:hover {
+            border: solid 1.5px var(--mi-normal-foreground-color);
           }
       `}
       >

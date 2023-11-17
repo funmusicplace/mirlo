@@ -12,7 +12,7 @@ export const SongTimeDisplay: React.FC<{
     <div
       className={css`
         height: 0.25rem;
-        background: var(--mi-lighten-background-color);
+        filter: brightness(1);
         cursor: pointer;
         width: 100%;
         top: 0;
@@ -33,7 +33,7 @@ export const SongTimeDisplay: React.FC<{
           overflow: none;
           transition: 0.1s width;
           width: ${percent * 100}%;
-          background: var(--mi-primary-color);
+          background: var(--mi-normal-background-color);
           pointer-events: none;
         `}
       ></div>
