@@ -19,8 +19,8 @@ export const InputEl = styled.input`
   margin-bottom: 0.5rem;
   width: 100%;
   color: var(--mi-normal-foreground-color);
-  background-color: var(--mi-lighten-background-color);
-  transition: 0.4ss border-radius;
+  background-color: var(--mi-lighten-x-background-color);
+  transition: 0.4s border-radius;
 
   &[disabled] {
     background-color: var(--mi-darken-background-color);
