@@ -204,3 +204,5 @@ app.listen(process.env.PORT, () =>
   console.info(`
 🚀 Server ready at: ${process.env.API_DOMAIN}`)
 );
+
+export default app;

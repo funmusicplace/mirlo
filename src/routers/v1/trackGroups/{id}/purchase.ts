@@ -109,8 +109,6 @@ export default function () {
         productKey = product.id;
       }
 
-      console.log("loggedInsuser", loggedInUser?.email, email);
-
       if (productKey && stripeAccountId) {
         const session = await stripe.checkout.sessions.create(
           {
@@ -156,6 +154,7 @@ export default function () {
       }
     } catch (e) {
       console.error(e);
+
       res.status(500).json({
         error: "Something went wrong while buying the track group",
       });

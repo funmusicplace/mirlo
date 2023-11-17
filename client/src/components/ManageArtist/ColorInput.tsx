@@ -4,7 +4,6 @@ import { InputEl } from "components/common/Input";
 import { useFormContext } from "react-hook-form";
 
 const generateColor = (name: string) => {
-  console.log("name", name);
   if (["background", "foreground"].includes(name)) {
     return `var(--mi-normal-${name}-color)`;
   }
@@ -17,7 +16,6 @@ export const ColorInput: React.FC<{ name: string; title: string }> = ({
 }) => {
   const { watch, register } = useFormContext();
   const color = watch(name);
-  console.log("color", color, color !== "");
   return (
     <FormComponent>
       {title}
