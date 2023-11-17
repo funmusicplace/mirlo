@@ -3,6 +3,13 @@ import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
 import { useFormContext } from "react-hook-form";
 
+const generateColor = (name: string) => {
+  if (["background", "foreground"].includes(name)) {
+    return `var(--mi-normal-${name}-color)`;
+  }
+  return `var(--mi-${name}-color)`;
+};
+
 export const ColorInput: React.FC<{ name: string; title: string }> = ({
   name,
   title,
@@ -23,7 +30,9 @@ export const ColorInput: React.FC<{ name: string; title: string }> = ({
             display: inline-block;
             width: 2rem;
             margin: 0.25rem 0.15rem 0.5rem;
-            background-color: ${color};
+            background-color: ${color !== ""
+              ? color
+              : generateColor(name.split(".")[2])};
           `}
         ></span>
         <InputEl {...register(name)} />

@@ -1,7 +1,6 @@
 import { css } from "@emotion/css";
 import Button from "components/common/Button";
 import React from "react";
-import { useParams } from "react-router-dom";
 import api from "services/api";
 import { useGlobalStateContext } from "state/GlobalState";
 import NewPostForm from "./NewPostForm";
@@ -14,6 +13,7 @@ import PostForm from "./PostForm";
 import Modal from "components/common/Modal";
 import { useTranslation } from "react-i18next";
 import { MdAdd } from "react-icons/md";
+import { useArtistContext } from "state/ArtistContext";
 
 const ManageArtistPosts: React.FC<{}> = () => {
   const {
@@ -22,15 +22,17 @@ const ManageArtistPosts: React.FC<{}> = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
 
   const snackbar = useSnackbar();
-  const { artistId } = useParams();
-  const [artist, setArtist] = React.useState<Artist>();
+  const {
+    state: { artist },
+  } = useArtistContext();
+
   const [addingNewPost, setAddingNewPost] = React.useState(false);
   const [managePost, setManagePost] = React.useState<Post>();
 
   const [posts, setPosts] = React.useState<Post[]>([]);
 
   const userId = user?.id;
-
+  const artistId = artist?.id;
   const fetchPosts = React.useCallback(async () => {
     if (userId) {
       const fetchedPosts = await api.getMany<Post>(
@@ -41,17 +43,8 @@ const ManageArtistPosts: React.FC<{}> = () => {
   }, [artistId, userId]);
 
   React.useEffect(() => {
-    const callback = async () => {
-      if (userId) {
-        const { result } = await api.get<Artist>(
-          `users/${userId}/artists/${artistId}`
-        );
-        setArtist(result);
-      }
-    };
-    callback();
     fetchPosts();
-  }, [userId, artistId, fetchPosts]);
+  }, [fetchPosts]);
 
   const deletePost = React.useCallback(
     async (postId: number) => {
@@ -139,7 +132,11 @@ const ManageArtistPosts: React.FC<{}> = () => {
         </Box>
       ))}
       {managePost && (
-        <Modal open={!!managePost} onClose={() => setManagePost(undefined)}>
+        <Modal
+          open={!!managePost}
+          onClose={() => setManagePost(undefined)}
+          title={t("editPost") ?? ""}
+        >
           <PostForm existing={managePost} reload={fetchPosts} artist={artist} />
         </Modal>
       )}

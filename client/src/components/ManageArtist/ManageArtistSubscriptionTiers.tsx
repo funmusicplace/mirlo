@@ -2,13 +2,15 @@ import { css } from "@emotion/css";
 import Button from "components/common/Button";
 import Modal from "components/common/Modal";
 import React from "react";
-import { useParams } from "react-router-dom";
 import api from "services/api";
 import { bp } from "../../constants";
 import { useGlobalStateContext } from "state/GlobalState";
 import ManageSubscriptionTierBox from "./ManageSubscriptionTierBox";
 import SubscriptionForm from "./SubscriptionForm";
 import { useTranslation } from "react-i18next";
+import { useArtistContext } from "state/ArtistContext";
+import useGetUserObjectById from "utils/useGetUserObjectById";
+import { useParams } from "react-router-dom";
 
 const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
   const {
@@ -18,29 +20,25 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
     keyPrefix: "manageSubscriptions",
   });
 
-  const { artistId } = useParams();
   const [isLoadingSubscriberData, setIsLoadingSubscriberData] =
     React.useState(false);
-  const [artist, setArtist] = React.useState<Artist>();
+  const {
+    state: { artist },
+  } = useArtistContext();
+  const { artistId } = useParams();
   const [manageTier, setManageTier] = React.useState<ArtistSubscriptionTier>();
-  const [tiers, setTiers] = React.useState<ArtistSubscriptionTier[]>([]);
+  const { objects: tiers, reload } =
+    useGetUserObjectById<ArtistSubscriptionTier>(
+      "artists",
+      user?.id,
+      artistId,
+      `/subscriptionTiers`,
+      { multiple: true }
+    );
 
   const { t: tManage } = useTranslation("translation", { keyPrefix: "manage" });
 
   const userId = user?.id;
-
-  const loadSubscriptions = React.useCallback(async () => {
-    if (userId) {
-      const { result } = await api.get<Artist>(
-        `users/${userId}/artists/${artistId}`
-      );
-      setArtist(result);
-      const fetchedSubscriptions = await api.getMany<ArtistSubscriptionTier>(
-        `users/${userId}/artists/${artistId}/subscriptionTiers`
-      );
-      setTiers(fetchedSubscriptions.results);
-    }
-  }, [artistId, userId]);
 
   const downloadSubscriberData = React.useCallback(async () => {
     setIsLoadingSubscriberData(true);
@@ -58,10 +56,6 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
       setIsLoadingSubscriberData(false);
     }
   }, [artistId, userId]);
-
-  React.useEffect(() => {
-    loadSubscriptions();
-  }, [loadSubscriptions]);
 
   if (!artist) {
     return null;
@@ -88,7 +82,7 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
           <ManageSubscriptionTierBox
             tier={tier}
             key={tier.id}
-            reload={loadSubscriptions}
+            reload={reload}
             artist={artist}
           />
         ))}
@@ -114,13 +108,13 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
           {/* There is some overly complex state management going on here with the reloads being passed around */}
           <SubscriptionForm
             existing={manageTier}
-            reload={() => loadSubscriptions()}
+            reload={() => reload()}
             artist={artist}
           />
         </Modal>
       )}
 
-      <SubscriptionForm artist={artist} reload={loadSubscriptions} />
+      <SubscriptionForm artist={artist} reload={reload} />
     </div>
   );
 };

@@ -69,6 +69,7 @@ const routes = [
   "trackGroups/{id}",
   "trackGroups/{id}/download",
   "trackGroups/{id}/purchase",
+  "trackGroups/{id}/testOwns",
   "trackGroups/{id}/emailDownload",
   "tracks",
   "tracks/{id}",
@@ -203,3 +204,5 @@ app.listen(process.env.PORT, () =>
   console.info(`
 🚀 Server ready at: ${process.env.API_DOMAIN}`)
 );
+
+export default app;

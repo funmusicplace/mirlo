@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next";
 import { bp } from "../../constants";
 import { useArtistContext } from "state/ArtistContext";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
+import { FaPlus } from "react-icons/fa";
 
 const ManageArtistAlbums: React.FC<{}> = () => {
   const {
@@ -59,7 +60,9 @@ const ManageArtistAlbums: React.FC<{}> = () => {
         <h2>{t("yourAlbums")}</h2>
 
         <Link to="new-release">
-          <Button compact>{t("addNewAlbum")}</Button>
+          <Button compact startIcon={<FaPlus />}>
+            {t("addNewAlbum")}
+          </Button>
         </Link>
       </div>
       {isLoading && <LoadingBlocks />}

@@ -56,12 +56,12 @@ const NewAlbumForm: React.FC<{
               cover?: File[];
               minPrice?: number;
             },
-            { trackGroup: { id: number } }
+            { result: { id: number } }
           >(`users/${userId}/trackGroups`, {
             ...sending,
             artistId: artist.id,
           });
-          const savedId = newGroup.trackGroup.id;
+          const savedId = newGroup.result.id;
 
           if (
             savedId &&

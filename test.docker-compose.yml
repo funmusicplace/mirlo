@@ -35,7 +35,7 @@ services:
       - minio
     ports:
       - "${APP_HOST_PORT:-3000}:3000"
-    restart: always
+    restart: on-failure
     volumes:
       - ~/.ssh:/root/.ssh
       - ./:/var/www/api

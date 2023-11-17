@@ -11,6 +11,16 @@ import api from "../../services/api";
 import { useGlobalStateContext } from "state/GlobalState";
 import { css } from "@emotion/css";
 import { useTranslation } from "react-i18next";
+import { SelectEl } from "components/common/Select";
+import useGetUserObjectById from "utils/useGetUserObjectById";
+
+type FormData = {
+  title: string;
+  publishedAt: string;
+  content: string;
+  isPublic: boolean;
+  minimumTier: string;
+};
 
 const PostForm: React.FC<{
   existing?: Post;
@@ -24,18 +34,25 @@ const PostForm: React.FC<{
   const snackbar = useSnackbar();
   const [isSaving, setIsSaving] = React.useState(false);
   const { t } = useTranslation("translation", { keyPrefix: "postForm" });
+  const { objects: tiers } = useGetUserObjectById<ArtistSubscriptionTier>(
+    "artists",
+    user?.id,
+    `${artist.id}`,
+    `/subscriptionTiers?includeDefault=true`,
+    { multiple: true }
+  );
+
+  React.useEffect(() => {
+    const callback = async () => {};
+    callback();
+  }, [artist]);
 
   const publishedAt = existing ? new Date(existing.publishedAt) : new Date();
   publishedAt.setMinutes(
     publishedAt.getMinutes() - publishedAt.getTimezoneOffset()
   );
 
-  const { register, handleSubmit } = useForm<{
-    title: string;
-    publishedAt: string;
-    content: string;
-    isPublic: boolean;
-  }>({
+  const { register, handleSubmit, watch } = useForm<FormData>({
     defaultValues: existing
       ? { ...existing, publishedAt: publishedAt.toISOString().slice(0, 16) }
       : {
@@ -43,21 +60,27 @@ const PostForm: React.FC<{
         },
   });
 
+  const isPublic = watch("isPublic");
+  const minimumTier = watch("minimumTier");
+
   const existingId = existing?.id;
   const userId = user?.id;
 
   const doSave = React.useCallback(
-    async (data: { title: string; publishedAt: string; content: string }) => {
+    async (data: FormData) => {
       if (userId) {
         try {
           setIsSaving(true);
+          const picked = {
+            ...pick(data, ["title", "content", "isPublic"]),
+            publishedAt: new Date(data.publishedAt + ":00").toISOString(),
+            artistId: artist.id,
+            minimumSubscriptionTierId: isFinite(+data.minimumTier)
+              ? Number(data.minimumTier)
+              : undefined,
+          };
           if (existingId) {
-            // const timezoneOffset =
-            await api.put(`users/${userId}/posts/${existingId}`, {
-              ...pick(data, ["title", "content", "isPublic"]),
-              publishedAt: new Date(data.publishedAt + ":00").toISOString(),
-              artistId: artist.id,
-            });
+            await api.put(`users/${userId}/posts/${existingId}`, picked);
           } else {
             await api.post<
               {
@@ -67,11 +90,7 @@ const PostForm: React.FC<{
                 publishedAt: string;
               },
               { id: number }
-            >(`users/${userId}/posts`, {
-              ...pick(data, ["title", "content", "isPublic"]),
-              publishedAt: new Date(data.publishedAt + ":00").toISOString(),
-              artistId: artist.id,
-            });
+            >(`users/${userId}/posts`, picked);
           }
 
           snackbar("Post updated", { type: "success" });
@@ -90,13 +109,6 @@ const PostForm: React.FC<{
 
   return (
     <form onSubmit={handleSubmit(doSave)}>
-      <h4>
-        {existing ? "Edit" : "New"} blog post for {artist.name}
-      </h4>
-
-      {/* <FormComponent>
-        Display artist: <InputEl {...register("display_artist")} />
-      </FormComponent> */}
       <FormComponent>
         {t("title")} <InputEl {...register("title")} />
       </FormComponent>
@@ -116,10 +128,44 @@ const PostForm: React.FC<{
         <input id="private" type="checkbox" {...register("isPublic")} />{" "}
         <label htmlFor="private">
           {t("isSubscriptionOnly")}
-          <small>{t("postForm")}</small>
+          <small>{t("isSubscriptionPostOnly")}</small>
         </label>
       </FormComponent>
-      <Button type="submit" disabled={isSaving} isLoading={isSaving}>
+      {!isPublic && (
+        <FormComponent>
+          <label
+            className={css`
+              display: block;
+              margin-bottom: 0.5rem;
+            `}
+          >
+            {t("ifNotPublic")}
+          </label>
+          <SelectEl {...register("minimumTier")}>
+            <option value="">None</option>
+            {tiers?.map((tier) => (
+              <option value={tier.id}>
+                {tier.name} -{" "}
+                {tier.isDefaultTier ? t("follow") : tier.description}
+              </option>
+            ))}
+          </SelectEl>
+          {minimumTier && (
+            <small>
+              The mimimum tier will be{" "}
+              <em>
+                {tiers?.find((tier) => `${tier.id}` === minimumTier)?.name}
+              </em>
+              .
+            </small>
+          )}
+        </FormComponent>
+      )}
+      <Button
+        type="submit"
+        disabled={isSaving || (minimumTier === "" && !isPublic)}
+        isLoading={isSaving}
+      >
         {existing ? t("save") : t("saveNew")} {t("post")}
       </Button>
     </form>

@@ -10,6 +10,7 @@ import { useForm } from "react-hook-form";
 import { useParams } from "react-router-dom";
 import api from "services/api";
 import { useTranslation } from "react-i18next";
+import FormCheckbox from "components/common/FormCheckbox";
 // import {
 //   AdminTrackGroup,
 //   fetchTrackGroup,
@@ -107,18 +108,10 @@ export const TrackGroupDetails: React.FC = () => {
           {t("about")} <TextArea {...register("about")} />
         </FormComponent>
         <FormComponent style={{ display: "flex" }}>
-          <input type="checkbox" id="private" {...register("published")} />
-          <label htmlFor="private">
-            {t("isPrivate")}
-            <small>{t("privateAlbumDescription")}</small>
-          </label>
+          <FormCheckbox keyName="published" description={t("isPrivate")} />
         </FormComponent>
         <FormComponent style={{ display: "flex" }}>
-          <input type="checkbox" id="enabled" {...register("enabled")} />
-          <label htmlFor="enabled">
-            {t("isEnabled")}
-            <small>{t("enabledAlbumDescription")}</small>
-          </label>
+          <FormCheckbox keyName="enabled" description={t("isEnabled")} />
         </FormComponent>
 
         <Button

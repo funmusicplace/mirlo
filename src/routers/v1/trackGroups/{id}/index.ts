@@ -56,7 +56,6 @@ export default function () {
           },
         });
       }
-      console.log("");
 
       if (!trackGroup) {
         res.status(404);
