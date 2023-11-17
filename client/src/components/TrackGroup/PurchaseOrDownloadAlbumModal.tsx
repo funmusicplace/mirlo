@@ -1,6 +1,8 @@
 import Button from "components/common/Button";
 import Modal from "components/common/Modal";
 import React from "react";
+import { bp } from "../../constants";
+import { css } from "@emotion/css";
 import { useTranslation } from "react-i18next";
 import api from "services/api";
 import { useGlobalStateContext } from "state/GlobalState";
@@ -54,9 +56,38 @@ const PurchaseOrDownloadAlbum: React.FC<{
           !userIsTrackGroupArtist &&
           !isOwned &&
           artistState?.userStripeStatus?.chargesEnabled && (
+
+            <div
+            className={css`
+
+              margin-top: -.2rem;
+
+              button {
+                font-size: .75rem;
+                text-transform: uppercase;
+                background: transparent;
+                padding: 0.1rem .5rem;
+                border: 1px solid;
+                border-radius: 0px;
+              }
+              button:hover {
+                color: var(--mi-normal-background-color);
+                background-color: var(--mi-normal-foreground-color) !important;
+              }
+
+              @media screen and (max-width: ${bp.small}px) {
+                button {
+                  font-size: .6rem;
+                  padding: 0rem .3rem;
+                }
+              }
+            `}
+
+          >
             <Button compact onClick={() => setIsPurchasingAlbum(true)}>
               {t("buy")}
             </Button>
+            </div>
           )}
         {(userIsTrackGroupArtist || isOwned) && (
           <DownloadAlbumButton trackGroup={trackGroup} />
