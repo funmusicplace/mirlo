@@ -3,8 +3,9 @@ import { userAuthenticated } from "../../../../auth/passport";
 import prisma from "../../../../../prisma/prisma";
 
 type Query = {
-  urlSlug: string;
+  urlSlug?: string;
   artistId?: number;
+  email?: string;
 };
 
 export default function () {
@@ -13,24 +14,31 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response) {
-    const { artistId, urlSlug } = req.query as unknown as Query;
+    const { artistId, urlSlug, email } = req.query as unknown as Query;
     try {
       let exists = false;
-      if (!artistId) {
-        const artist = await prisma.artist.findFirst({
-          where: {
-            urlSlug: { equals: urlSlug, mode: "insensitive" },
-          },
+      if (email) {
+        const user = await prisma.user.findFirst({
+          where: { email },
         });
-        exists = !!artist;
-      } else {
-        const trackGroup = await prisma.trackGroup.findFirst({
-          where: {
-            urlSlug: { equals: urlSlug, mode: "insensitive" },
-            artistId: Number(artistId),
-          },
-        });
-        exists = !!trackGroup;
+        exists = !!user;
+      } else if (urlSlug) {
+        if (!artistId) {
+          const artist = await prisma.artist.findFirst({
+            where: {
+              urlSlug: { equals: urlSlug, mode: "insensitive" },
+            },
+          });
+          exists = !!artist;
+        } else {
+          const trackGroup = await prisma.trackGroup.findFirst({
+            where: {
+              urlSlug: { equals: urlSlug, mode: "insensitive" },
+              artistId: Number(artistId),
+            },
+          });
+          exists = !!trackGroup;
+        }
       }
       res.status(200);
       res.json({ result: { exists } });

@@ -5,90 +5,102 @@ import { useTranslation } from "react-i18next";
 import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
 
-import { Input } from "components/common/Input";
+import { InputEl } from "components/common/Input";
 import FreeDownload from "./FreeDownload";
-import { useGlobalStateContext } from "state/GlobalState";
 import FormComponent from "components/common/FormComponent";
+import { FormProvider, useForm } from "react-hook-form";
+import EmailInput from "./EmailInput";
+
+interface FormData {
+  chosenPrice: string;
+  userEmail: string;
+}
+
+const testOwnership = async (trackGroupId: number, email: string) => {
+  try {
+    const response = await api.get<{ exists: boolean }>(
+      `trackGroups/${trackGroupId}/testOwns?email=${email.toLowerCase()}`
+    );
+    return response.result.exists;
+  } catch (e) {
+    return false;
+  }
+};
 
 const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup }> = ({
   trackGroup,
 }) => {
-  const {
-    state: { user },
-  } = useGlobalStateContext();
   const minPrice = trackGroup.minPrice;
-  const [chosenPrice, setChosenPrice] = React.useState(
-    `${minPrice ? minPrice / 100 : 5}`
-  );
-  const [email, setEmail] = React.useState("");
+  const methods = useForm<FormData>({
+    defaultValues: {
+      chosenPrice: `${minPrice ? minPrice / 100 : 5}`,
+      userEmail: "",
+    },
+    reValidateMode: "onBlur",
+  });
+  const { register, watch, handleSubmit, formState } = methods;
+  const chosenPrice = watch("chosenPrice");
+
   const snackbar = useSnackbar();
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
 
   const purchaseAlbum = React.useCallback(
-    async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-      e.preventDefault();
+    async (data: FormData) => {
       try {
-        const response = await api.post<{}, { sessionUrl: string }>(
-          `trackGroups/${trackGroup.id}/purchase`,
-          { price: chosenPrice ? Number(chosenPrice) * 100 : undefined, email }
-        );
-        window.location.assign(response.sessionUrl);
+        const alreadyOwns = await testOwnership(trackGroup.id, data.userEmail);
+        const confirmed = alreadyOwns
+          ? window.confirm(t("albumExists") ?? "")
+          : true;
+
+        if (confirmed) {
+          const response = await api.post<{}, { sessionUrl: string }>(
+            `trackGroups/${trackGroup.id}/purchase`,
+            {
+              price: data.chosenPrice
+                ? Number(data.chosenPrice) * 100
+                : undefined,
+              email: data.userEmail,
+            }
+          );
+          window.location.assign(response.sessionUrl);
+        }
       } catch (e) {
         snackbar(t("error"), { type: "warning" });
         console.error(e);
       }
     },
-    [chosenPrice, email, snackbar, t, trackGroup.id]
+    [snackbar, t, trackGroup.id]
   );
 
-  const lessThan1 = Number.isNaN(Number(chosenPrice))
-    ? true
-    : Number(chosenPrice) < 1;
+  const lessThan1 = !isFinite(+chosenPrice) ? true : Number(chosenPrice) < 1;
 
   let lessThanMin = false;
   if (minPrice) {
-    lessThanMin = Number.isNaN(Number(chosenPrice))
+    lessThanMin = isFinite(+chosenPrice)
       ? false
       : Number(chosenPrice) < minPrice / 100;
   }
 
   return (
-    <>
+    <FormProvider {...methods}>
       {trackGroup.minPrice && (
         <>
           {t("price")} <Money amount={trackGroup.minPrice / 100} />, or
         </>
       )}
-      <form>
+      <form onSubmit={handleSubmit(purchaseAlbum)}>
         <FormComponent>
           {t("nameYourPrice")}
-          <Input
-            value={chosenPrice}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              setChosenPrice(e.target.value);
-            }}
-            name="price"
+          <InputEl
+            {...register("chosenPrice")}
+            type="number"
             min={trackGroup.minPrice}
           />
         </FormComponent>
-        {!user && (
-          <FormComponent>
-            {t("email")}
-            <Input
-              value={email}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                setEmail(e.target.value);
-              }}
-              name="email"
-              type="email"
-              required
-            />
-          </FormComponent>
-        )}
+        <EmailInput trackGroupId={trackGroup.id} />
         <Button
-          onClick={purchaseAlbum}
           type="submit"
-          disabled={!!lessThan1 || lessThanMin || (!user && email === "")}
+          disabled={!!lessThan1 || lessThanMin || !formState.isValid}
         >
           {t("buy")}
         </Button>
@@ -105,7 +117,7 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup }> = ({
         </strong>
       )}
       <FreeDownload trackGroup={trackGroup} chosenPrice={chosenPrice} />
-    </>
+    </FormProvider>
   );
 };
 

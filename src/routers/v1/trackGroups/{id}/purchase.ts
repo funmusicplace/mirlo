@@ -28,7 +28,7 @@ export default function () {
       price?: string; // In cents
       email?: string;
     };
-    const loggedInUser = req.user as User;
+    const loggedInUser = req.user as User | undefined;
 
     try {
       const client = await prisma.client.findFirst({});
@@ -109,6 +109,8 @@ export default function () {
         productKey = product.id;
       }
 
+      console.log("loggedInsuser", loggedInUser?.email, email);
+
       if (productKey && stripeAccountId) {
         const session = await stripe.checkout.sessions.create(
           {
@@ -134,7 +136,7 @@ export default function () {
               clientId: client?.id ?? null,
               trackGroupId,
               artistId: trackGroup.artistId,
-              userId: loggedInUser?.id,
+              userId: loggedInUser?.id ?? null,
               userEmail: email ?? null,
               stripeAccountId,
             },
