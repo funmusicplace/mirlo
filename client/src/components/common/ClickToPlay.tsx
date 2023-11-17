@@ -2,7 +2,6 @@ import styled from "@emotion/styled";
 // import { useSnackbar } from "state/SnackbarContext";
 import React from "react";
 import { VscPlay } from "react-icons/vsc";
-import { TfiControlPause } from "react-icons/tfi";
 import { bp } from "../../constants";
 
 import { useGlobalStateContext } from "state/GlobalState";
@@ -178,9 +177,6 @@ const ClickToPlay: React.FC<{
   //   displayMessage("Added to queue");
   // }, [trackGroupId, trackId, displayMessage, dispatch]);
 
-  const onPause = React.useCallback(async () => {
-    dispatch({ type: "setPlaying", playing: false });
-  }, [dispatch]);
 
   const currentlyPlaying =
     playing &&

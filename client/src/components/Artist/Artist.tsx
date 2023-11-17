@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { bp } from "../../constants";
 import ArtistSupport from "./ArtistSupport";
 import Box from "../common/Box";
-import MarkdownContent from "../common/MarkdownContent";
 import ArtistAlbums from "./ArtistAlbums";
 import { useTranslation } from "react-i18next";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";

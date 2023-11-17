@@ -5,7 +5,6 @@ import { Link } from "react-router-dom";
 import { useGlobalStateContext } from "state/GlobalState";
 import api from "../services/api";
 import Box from "./common/Box";
-import MarkdownContent from "./common/MarkdownContent";
 import Logo from "./common/Logo";
 import { Trans, useTranslation } from "react-i18next";
 import Releases from "./Releases";
