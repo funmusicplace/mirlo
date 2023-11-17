@@ -1,4 +1,5 @@
 import { css } from "@emotion/css";
+import { bp } from "../constants";
 import React from "react";
 import { Link } from "react-router-dom";
 import { useGlobalStateContext } from "state/GlobalState";
@@ -93,7 +94,7 @@ function Home() {
               max-width: 500px;
             `}
           >
-            <Logo />
+            <Logo/>
             <div
               className={css`
                 display: flex;
@@ -210,29 +211,116 @@ function Home() {
             {t("latestCommunityPost")}
           </h2>
           {posts.map((p) => (
+            <Link to={`/post/${p.id}/`}
+            className={css`
+              width: 100%;
+              `}
+            >
+            <div
+            className={css`
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              margin: 0 0 2rem 0;
+              width: 100%;
+              overflow: hidden;
+              white-space: ellipsis;
+              outline: solid 1px grey;
+              transition: .2s ease-in-out;
+              background-color: var(--mi-light-background-color);
+
+              :hover {
+                background-color: var(--mi-normal-background-color);
+                transition: .2s ease-in-out;
+              }
+
+              @media screen and (max-width: ${bp.medium}px) {
+                padding: 0rem !important;
+              `}
+            >
+
             <Box
               key={p.id}
               className={css`
-                margin-bottom: 1rem;
-
-                h3 {
-                  padding-bottom: 0.4rem;
+                border-bottom: solid 1px grey;
+                @media screen and (max-width: ${bp.medium}px) {
+                  width: 100% !important;
+                  padding: 2rem 2rem !important;
+                }
+                @media screen and (max-width: ${bp.small}px) {
+                  padding: 1rem 1rem !important;
+                  font-size: .875rem !important;
                 }
               `}
             >
-              <h5>
-                <Link to={`/post/${p.id}/`}>{p.title}</Link>
-              </h5>
-              {p.artist && (
-                <em>
-                  by{" "}
-                  <Link to={`/${p.artist.urlSlug ?? p.artist.id}`}>
-                    {p.artist?.name}
-                  </Link>
-                </em>
-              )}
-              <MarkdownContent content={p.content} />
-            </Box>
+              <div
+                className={css`
+                  padding-bottom: 1rem;
+                `}
+              >
+                {/* <h5>{p.title}</h5> */}
+                <div
+                  className={css`
+                    display: flex;
+                    justify-content: space-between;
+                    flex-wrap: wrap;
+                    align-items: center;
+                  `}
+                >
+                <h4
+                  className={css`
+                    padding-bottom: .5rem;
+                    margin-right: 1rem;
+
+                  `}
+                >
+                  <Link to={`/post/${p.id}/`}
+                    className={css`
+                      font-weight: normal;
+                      text-align: center;
+                    `}
+                  >{p.title}</Link>
+                </h4>
+                <span
+                  className={css`
+                    color: grey;
+                    margin-bottom: 1rem;
+                  `}
+                >
+                  {new Date(p.publishedAt).toLocaleDateString(
+                    "en-US",
+                    {
+                      weekday: 'long',
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    }
+                  )}
+                </span></div>
+                {p.artist && (
+                  <em>
+                    by{" "}
+                    <Link to={`/${p.artist.urlSlug ?? p.artist.id}`}>
+                      {p.artist?.name}
+                    </Link>
+                  </em>
+                )}
+              </div>
+
+              <div>
+              <span
+                className={css`
+                  white-space: nowrap;
+                  display:block;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                  color: var(--mi-normal-foreground-color);
+                `}
+              >
+               {/* <MarkdownContent content={p.content} />*/}
+               {p.content}
+              </span></div>
+            </Box></div></Link>
           ))}
         </>
       )}
