@@ -120,7 +120,14 @@ function App() {
 
         <Header />
 
-        <PageHeader />
+        <div
+          className={css`
+
+            @media screen and (max-width: ${bp.medium}px) {
+                display: none !important;
+            }
+          `}
+        ><PageHeader /></div>
         <div
           className={css`
             flex-grow: 1;
