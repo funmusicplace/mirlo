@@ -2,7 +2,7 @@ import styled from "@emotion/styled";
 
 const Box = styled.div<{ variant?: "success" | "info" }>`
   width: 100%;
-  padding: 1rem 1rem 1rem;
+  padding: 1.5rem;
   transition: 0.4s border-radius;
   margin-bottom: 0.5rem;
 
@@ -14,7 +14,7 @@ const Box = styled.div<{ variant?: "success" | "info" }>`
           color: var(--mi-white);
         `;
       case "info":
-        return `  
+        return `
           background-color: var(--mi-info-background-color);
           color: var(--mi-white);
         `;
@@ -35,6 +35,7 @@ const Box = styled.div<{ variant?: "success" | "info" }>`
 
   @media screen and (max-width: 800px) {
     padding: 0.5rem 0.7rem;
+    // background-color: var(--mi-normal-background-color);
   }
 `;
 
