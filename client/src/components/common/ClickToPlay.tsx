@@ -1,8 +1,8 @@
 import styled from "@emotion/styled";
 // import { useSnackbar } from "state/SnackbarContext";
 import React from "react";
-
-import { FaPause, FaPlay } from "react-icons/fa";
+import { VscPlay } from "react-icons/vsc";
+import { TfiControlPause } from "react-icons/tfi";
 import { bp } from "../../constants";
 
 import { useGlobalStateContext } from "state/GlobalState";
@@ -31,17 +31,25 @@ const PlayWrapper = styled.div<WrapperProps>`
   border: 0;
   transition: 0.5s;
 
+  .startIcon {
+    margin-right: 0rem !important;
+  }
+
   button {
     color: white;
     background-color: transparent;
+    width: 3em;
+    height: 3em;
+    border-radius: 50px;
     font-size: 1rem;
+    padding: .8rem .7rem .9rem .9rem;
 
     &:nth-of-type(1) {
-      margin-bottom: 0rem;
+      margin-left: 0rem;
     }
 
     &:hover:not(:disabled) {
-      background-color: rgba(0, 0, 0, 0.5);
+      background-color: rgba(255, 255, 255, 0.5);
     }
   }
 
@@ -51,17 +59,33 @@ const PlayWrapper = styled.div<WrapperProps>`
   }
 
   @media (max-width: ${bp.small}px) {
-    width: 100%;
+    background-color: transparent !important;
+    width: 32px;
+    height: 29px;
     opacity: 1;
-    bottom: 0;
+    right: 0em;
+    bottom: 0em;
     top: auto;
-    height: 100%;
     position: absolute;
 
     button {
       font-size: 0.8rem;
-      border: 1px solid white;
-      background-color: rgba(0, 0, 0, 0.2);
+      border-radius: 0px;
+      border: solid 0px;
+      background-color: rgba(0, 0, 0, .7);
+      padding: .8rem .8rem .9rem .9rem;
+      width: 2.4em;
+      height: 2.4em;
+    }
+    button:active {
+      font-size: 0.8rem;
+      background-color: rgba(0, 0, 0, .7);
+      padding: .8rem .8rem .9rem .9rem;
+      width: 2.2em;
+      height: 2.2em;
+    }
+    .startIcon {
+      font-size: 1rem !important;
     }
   }
 `;
@@ -69,8 +93,12 @@ const PlayWrapper = styled.div<WrapperProps>`
 const Wrapper = styled.div<WrapperProps>`
   position: relative;
   max-width: 100%;
-  overflow: clip;
   width: ${(props) => props.width}px;
+
+
+    .startIcon {
+      font-size: 1.3rem !important;
+    }
 
 
   img {
@@ -167,15 +195,21 @@ const ClickToPlay: React.FC<{
     >
       <PlayWrapper width={image?.width ?? 0} height={image?.height ?? 0}>
         {!currentlyPlaying && (
-          <Button onClick={onClickPlay} startIcon={<FaPlay />} compact>
-            Play
+          <Button onClick={onClickPlay} startIcon={<VscPlay />} compact>
+
           </Button>
         )}
-        {currentlyPlaying && (
-          <Button onClick={onPause} startIcon={<FaPause />} compact>
-            Pause
+        {/* {currentlyPlaying && (
+          <Button onClick={onPause} startIcon={<TfiControlPause
+            className={css`
+                margin-right: .1rem;
+                display: none;
+                opacity: 0 !important;
+            `}
+          />} compact>
+
           </Button>
-        )}
+        )}*/}
         {/* <Button onClick={onClickQueue} startIcon={<MdQueue />} compact>
           Queue
         </Button> */}
