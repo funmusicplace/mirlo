@@ -93,7 +93,7 @@ const CustomButton = styled.button<Compactable>`
           background-color:  var(--mi-${props.role ?? "secondary"}-color);
           background-color:  ${props.transparent ? "transparent" : ""};
           color:  var(--mi-${props.role ?? "primary"}-color);
-          color:  ${props.transparent ? "var(--mi-primary-color)" : ""};
+          color:  ${props.transparent ? "var(--mi-normal-foreground-color)" : ""};
 
           // color: ${
             props.role === "primary"
