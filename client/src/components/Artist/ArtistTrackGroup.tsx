@@ -83,6 +83,7 @@ const ArtistTrackGroup: React.FC<{
           className={css`
             display: flex;
             justify-content: space-between;
+            flex-wrap: wrap;
             align-items: start;
             width: 100%;
             padding-top: 0.5rem;
@@ -92,7 +93,7 @@ const ArtistTrackGroup: React.FC<{
             className={css`
               display: flex;
               flex-direction: column;
-              width: 100%;
+              width: 80%;
 
               a:first-child {
                 font-weight: normal;

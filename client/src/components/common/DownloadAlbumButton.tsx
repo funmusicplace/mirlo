@@ -44,7 +44,8 @@ const DownloadAlbumButton: React.FC<{
             compact
             collapse
             className={css`
-              font-size: 1.5rem;
+              margin-top: -0.3rem;
+              font-size: 1.5rem !important;
               background: transparent;
               padding: 0;
 
@@ -54,7 +55,7 @@ const DownloadAlbumButton: React.FC<{
               }
 
               @media screen and (max-width: ${bp.small}px) {
-                font-size: 1.1rem;
+                font-size: 1rem !important;
               }
             `}
             isLoading={isDownloading}
