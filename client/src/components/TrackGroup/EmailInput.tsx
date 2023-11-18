@@ -6,7 +6,7 @@ import { useGlobalStateContext } from "state/GlobalState";
 import FormComponent from "components/common/FormComponent";
 import { useFormContext } from "react-hook-form";
 
-const EmailInput: React.FC<{ trackGroupId: number }> = ({ trackGroupId }) => {
+const EmailInput: React.FC = () => {
   const {
     state: { user },
   } = useGlobalStateContext();

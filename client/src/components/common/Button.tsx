@@ -3,6 +3,7 @@ import React from "react";
 import styled from "@emotion/styled";
 import LoadingSpinner from "./LoadingSpinner";
 import { css } from "@emotion/css";
+import { bp } from "../../constants";
 
 export interface Compactable {
   compact?: boolean;
@@ -10,22 +11,28 @@ export interface Compactable {
   role?: "primary" | "secondary" | "warning";
   variant?: "link" | "outlined";
   color?: string;
+  uppercase?: boolean;
 }
 
 const CustomButton = styled.button<Compactable>`
   background: none;
   border: none;
-  // transition: 0.25s background-color, 0.25s color, 0.25s border-radius,
+  transition: 0.25s background-color, 0.25s color, 0.25s border-radius,
     0.25s filter;
-  font-size: 0.9rem;
+  font-size: 1rem;
   font-weight: bold;
   line-height: 1rem;
   margin-bottom: 0.2rem;
+
+  @media screen and (max-width: ${bp.medium}px) {
+    font-size: 0.8rem;
+  }
 
   &:hover:not(:disabled) {
     cursor: pointer;
   }
 
+  ${(props) => (props.uppercase ? "text-transform: uppercase;" : "")}
   ${(props) => {
     switch (props.variant) {
       case "link":
@@ -111,7 +118,7 @@ const CustomButton = styled.button<Compactable>`
   }}
 
   &:hover:not(:disabled) {
-    filter:  saturate(50%) ;
+    filter: saturate(50%);
   }
 
   align-items: center;

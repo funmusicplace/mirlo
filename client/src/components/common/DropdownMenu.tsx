@@ -51,7 +51,6 @@ const Header: React.FC<{
                   color: var(--mi-white);
                 }
               }
-
             `}
           >
             {React.Children.map(children, (child) =>
@@ -67,13 +66,12 @@ const Header: React.FC<{
         onClick={() => {
           setIsMenuOpen(true);
         }}
-
-          className={css`
-            @media (max-width: ${bp.small}px) {
+        className={css`
+          @media (max-width: ${bp.small}px) {
             background-color: var(--mi-normal-background-color) !important;
-            }
-          `}
-        >
+          }
+        `}
+      >
         {icon}
       </IconButton>
     </div>

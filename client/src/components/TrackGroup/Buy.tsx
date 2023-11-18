@@ -97,7 +97,7 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup }> = ({
             min={trackGroup.minPrice}
           />
         </FormComponent>
-        <EmailInput trackGroupId={trackGroup.id} />
+        <EmailInput />
         <Button
           type="submit"
           disabled={!!lessThan1 || lessThanMin || !formState.isValid}
