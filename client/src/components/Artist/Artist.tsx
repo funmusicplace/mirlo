@@ -44,7 +44,7 @@ function Artist() {
         padding-bottom: 1.5rem;
         padding: 1rem 0rem;
         @media screen and (max-width: ${bp.medium}px) {
-          padding: 0.5rem !important;
+          padding: 0rem !important;
         }
       `}
     >
