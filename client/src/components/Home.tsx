@@ -232,6 +232,9 @@ function Home() {
                 background-color: var(--mi-normal-background-color);
                 transition: .2s ease-in-out;
               }
+              a:hover {
+                text-decoration: none !important;
+              }
 
               @media screen and (max-width: ${bp.medium}px) {
                 padding: 0rem !important;
