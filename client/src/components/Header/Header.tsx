@@ -100,6 +100,10 @@ const Header = () => {
 
           @media (prefers-color-scheme: dark) {
             background-color: #232428;
+
+            @media screen and (max-width: ${bp.medium}px) {
+          background-color: transparent;
+          border-bottom: 1px solid transparent;} 
           }
         `}
       >
