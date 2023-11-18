@@ -14,7 +14,7 @@ import { ImMenu } from "react-icons/im";
 const Header = () => {
   const { state } = useGlobalStateContext();
 
-  const { artistId } = useParams();
+  const { artistId, trackGroupId } = useParams();
 
   const { object: artist } = usePublicArtist<Artist>("artists", artistId);
 
@@ -32,18 +32,21 @@ const Header = () => {
         z-index: 999999;
 
         @media screen and (max-width: ${bp.medium}px) {
-          background-color: transparent;
+          ${artistBanner ? "background-color: transparent;" : ""}
+          ${artistBanner ? "top: calc(var(--header-cover-sticky-height) - 24.2vw);" : ""}
+          ${artistBanner ? "aspect-ratio: 4 / 1;" : ""}
+          ${!artistBanner ? "border-bottom: 1px solid var(--mi-light-foreground-color);" : ""}
+
+          ${trackGroupId ? "aspect-ratio: 0;" : ""}
+
           border-bottom: 1px solid transparent;
 
           --header-cover-sticky-height: 55px;
           position: sticky;
-          top: calc(var(--header-cover-sticky-height) - 24.2vw);
+
           z-index: 999999;
-          ${artistBanner ? "aspect-ratio: 4 / 1;" : ""}
-          ${!artistBanner
-            ? "border-bottom: 1px solid var(--mi-light-foreground-color);"
-            : ""}
-        width: auto;
+
+          width: auto;
           min-height: auto;
         }
       `}
@@ -60,7 +63,6 @@ const Header = () => {
       <div
         className={css`
           position: absolute;
-          backdrop-filter: blur(calc(100vh \100));
           height: 100%;
           width: 100%;
           @media screen and (min-width: ${bp.medium}px) {
@@ -90,7 +92,7 @@ const Header = () => {
 
           @media screen and (max-width: ${bp.medium}px) {
             padding: 0.5rem 0.5rem;
-            background-color: transparent;
+            b${artistBanner ? "background-color: transparent;" : ""}
             border-bottom: 1px solid transparent;
             //--header-cover-sticky-height: 48px;
             position: sticky;
@@ -102,8 +104,8 @@ const Header = () => {
             background-color: #232428;
 
             @media screen and (max-width: ${bp.medium}px) {
-          background-color: transparent;
-          border-bottom: 1px solid transparent;} 
+          ${artistBanner ? "background-color: transparent;" : ""}
+          border-bottom: 1px solid transparent;}
           }
         `}
       >
