@@ -153,6 +153,8 @@ const ArtistSupportBox: React.FC<{
             }
           `}
         >
+          {/* FIXME: remove once we have a real stripe account
+           */}
           {user && !ownedByUser && (
             <Button
               compact
