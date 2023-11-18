@@ -139,11 +139,7 @@ function App() {
                     padding: 0rem 2rem 2rem;
                     max-width: calc(1080px + 0rem);
                   }
-                  @media screen and (max-width: ${bp.medium}px) {
-                    button {
-                      font-size: 0.7rem;
-                    }
-                  }
+
                   @media screen and (max-width: 800px) {
                     padding: 0rem 0rem 0rem;
 

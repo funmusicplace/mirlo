@@ -18,7 +18,6 @@ const ArtistTrackGroup: React.FC<{
   const { artist } = state ?? trackGroup;
 
   return (
-
     <div
       key={trackGroup.id}
       className={css`
@@ -26,7 +25,7 @@ const ArtistTrackGroup: React.FC<{
         display: inline-block;
         max-width: 33.3%;
         flex: 33.3%;
-        padding: 0 .25rem;
+        padding: 0 0.25rem;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -118,17 +117,15 @@ const ArtistTrackGroup: React.FC<{
             <Link
               to={`/${artist?.urlSlug ?? artist?.id}/release/${
                 trackGroup.urlSlug ?? trackGroup.id
-              }`}>
+              }`}
+            >
               {trackGroup.title}
             </Link>
             <Link to={`/${artist?.urlSlug ?? artist?.id}/`}>
               {trackGroup.artist?.name}
             </Link>
           </div>
-          <PurchaseOrDownloadAlbum trackGroup={trackGroup}
-          className={css`
-          `}
-          />
+          <PurchaseOrDownloadAlbum trackGroup={trackGroup} />
         </div>
       </div>
     </div>

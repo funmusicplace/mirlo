@@ -19,7 +19,11 @@ export const PauseButton: React.FC = () => {
     [dispatch]
   );
 
-  return <div className={css`button {
+  return (
+    <div>
+      <IconButton
+        onClick={onPause}
+        className={css`
           font-size: 1.4rem;
           margin-right: 0.25rem;
           padding: 0.75rem 0.7rem 0.65rem 0.7rem;
@@ -27,13 +31,12 @@ export const PauseButton: React.FC = () => {
           border-color: var(--mi-normal-foreground-color);
           background-color: var(--mi-normal-foreground-color);
           color: var(--mi-normal-background-color);
-        }
-        button:hover {
-        }`}>
-      <IconButton onClick={onPause}>
+        `}
+      >
         <TfiControlPause />
       </IconButton>
-    </div>;
+    </div>
+  );
 };
 
 export default PauseButton;

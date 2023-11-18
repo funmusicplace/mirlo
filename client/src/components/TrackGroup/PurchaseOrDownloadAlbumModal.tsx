@@ -55,37 +55,37 @@ const PurchaseOrDownloadAlbum: React.FC<{
         {!userIsTrackGroupArtist &&
           !isOwned &&
           artistState?.userStripeStatus?.chargesEnabled && (
-
             <div
-            className={css`
+              className={css`
+                margin-top: -0.2rem;
 
-              margin-top: -.2rem;
-
-              button {
-                font-size: .75rem;
-                text-transform: uppercase;
-                background: transparent;
-                padding: 0.1rem .5rem;
-                border: 1px solid;
-                border-radius: 0px;
-              }
-              button:hover {
-                color: var(--mi-normal-background-color);
-                background-color: var(--mi-normal-foreground-color) !important;
-              }
-
-              @media screen and (max-width: ${bp.small}px) {
                 button {
-                  font-size: .6rem;
-                  padding: 0rem .3rem;
+                  background: transparent;
+                  padding: 0.1rem 0.5rem;
+                  border: 1px solid;
+                  border-radius: 0px;
                 }
-              }
-            `}
+                button:hover {
+                  color: var(--mi-normal-background-color);
+                  background-color: var(
+                    --mi-normal-foreground-color
+                  ) !important;
+                }
 
-          >
-            <Button compact onClick={() => setIsPurchasingAlbum(true)}>
-              {t("buy")}
-            </Button>
+                @media screen and (max-width: ${bp.small}px) {
+                  button {
+                    padding: 0.2rem 0.5rem;
+                  }
+                }
+              `}
+            >
+              <Button
+                compact
+                onClick={() => setIsPurchasingAlbum(true)}
+                uppercase
+              >
+                {t("buy")}
+              </Button>
             </div>
           )}
         {(userIsTrackGroupArtist || isOwned) && (

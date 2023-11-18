@@ -63,7 +63,7 @@ const ArtistSupportBox: React.FC<{
             width: 100%;
             white-space: normal !important;
             margin-top: 1rem;
-            padding: .5rem .5rem;
+            padding: 0.5rem 0.5rem;
           }
 
           &:nth-child(3n + 1) {
@@ -74,34 +74,34 @@ const ArtistSupportBox: React.FC<{
             margin-left: 1.5%;
           }
 
-        @media screen and (max-width: ${bp.medium}px) {
-          h3 {
-            font-size: 1rem;
-          }
-          max-width: 48.7%;
-          flex: 48.7%;
+          @media screen and (max-width: ${bp.medium}px) {
+            h3 {
+              font-size: 1rem;
+            }
+            max-width: 48.7%;
+            flex: 48.7%;
 
-          margin-bottom: 0rem;
-          margin-top: 0.5rem;
+            margin-bottom: 0rem;
+            margin-top: 0.5rem;
 
-          &:nth-child(odd) {
-            margin-left: 0rem;
-            margin-right: 2.5%;
-          }
-        }
-
-        @media screen and (max-width: ${bp.small}px) {
-          h3 {
-            font-size: 1rem;
+            &:nth-child(odd) {
+              margin-left: 0rem;
+              margin-right: 2.5%;
+            }
           }
 
-          font-size: .875rem;
-          max-width: 100%;
-          flex: 100%;
-          &:nth-child(odd) {
-            margin-right: 0rem;
+          @media screen and (max-width: ${bp.small}px) {
+            h3 {
+              font-size: 1rem;
+            }
+
+            font-size: 0.875rem;
+            max-width: 100%;
+            flex: 100%;
+            &:nth-child(odd) {
+              margin-right: 0rem;
+            }
           }
-        }
         `}
       >
         <div
@@ -110,11 +110,11 @@ const ArtistSupportBox: React.FC<{
             border-bottom: solid 1px grey;
             h3 {
               font-size: 1rem;
-              padding-bottom: .5rem;
+              padding-bottom: 0.5rem;
             }
             @media screen and (max-width: ${bp.small}px) {
               padding: 1rem;
-              }
+            }
           `}
         >
           <h3>{subscriptionTier.name}</h3>
@@ -122,7 +122,8 @@ const ArtistSupportBox: React.FC<{
             amount={
               subscriptionTier.minAmount ? subscriptionTier.minAmount / 100 : 0
             }
-          /> / {t("month")}
+          />{" "}
+          / {t("month")}
         </div>
         <div
           className={css`
@@ -134,34 +135,19 @@ const ArtistSupportBox: React.FC<{
             }
             @media screen and (max-width: ${bp.small}px) {
               padding: 1rem 1rem 0 1rem;
-              }
+            }
           `}
         >
-        <MarkdownContent content={subscriptionTier.description}/>
+          <MarkdownContent content={subscriptionTier.description} />
         </div>
         <div
           className={css`
             margin: 0rem 0.5rem 0.5rem 0.5rem;
 
-            {/* Button {
-              background-color: var(--mi-darken-x-background-color);
-              color: var(--mi-normal-foreground-color);
-              text-transform: uppercase;
-              border-radius: 0px;
-              padding: 1rem 0 1rem 0 !important;
+            button {
               margin: 0;
             }
-            Button:hover {
-              background-color: var(--mi-normal-foreground-color) !important;
-              color: var(--mi-normal-background-color);
-            } */}
-
-            Button {
-              text-transform: uppercase;
-
-              margin: 0;
-            }
-            Button:hover {
+            button:hover {
               background-color: var(--mi-normal-foreground-color) !important;
               color: var(--mi-normal-background-color);
             }
@@ -170,20 +156,12 @@ const ArtistSupportBox: React.FC<{
           {user && !ownedByUser && (
             <Button
               compact
+              uppercase
               onClick={() => subscribeToTier(subscriptionTier)}
               isLoading={isCheckingForSubscription}
               disabled={isCheckingForSubscription}
             >
               Support
-              {/* at{" "}
-              <Money
-                amount={
-                  subscriptionTier.minAmount
-                    ? subscriptionTier.minAmount / 100
-                    : 0
-                }
-              />{" "}
-              / month */}
             </Button>
           )}
           {user && ownedByUser && (

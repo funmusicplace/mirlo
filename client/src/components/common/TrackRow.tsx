@@ -85,11 +85,11 @@ const TrackRow: React.FC<{
           height: 30px;
 
           button {
-            padding: .5rem .65rem !important;
+            padding: 0.5rem 0.65rem !important;
             background: none;
           }
           button:hover {
-            padding: .5rem .65rem !important;
+            padding: 0.5rem 0.65rem !important;
             background: none;
           }
         `}

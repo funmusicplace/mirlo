@@ -145,8 +145,6 @@ const Player = () => {
             color: white;
           }
         }
-
-
       `}
     >
       <Helmet>
@@ -172,7 +170,7 @@ const Player = () => {
         `}
       >
         {currentTrack && isTrackOwnedOrPreview(currentTrack, user) && (
-          <AudioWrapper currentTrack={currentTrack}/>
+          <AudioWrapper currentTrack={currentTrack} />
         )}
       </div>
 
@@ -261,7 +259,11 @@ const Player = () => {
                       text-overflow: ellipsis;
                     `}
                   >
-                    {currentTrack.trackGroup.title}
+                    <Link
+                      to={`/${currentTrack.trackGroup.artist?.urlSlug}/release/${currentTrack.trackGroup.urlSlug}`}
+                    >
+                      {currentTrack.trackGroup.title}
+                    </Link>
                   </div>
                   <div
                     className={css`

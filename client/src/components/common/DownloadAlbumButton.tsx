@@ -39,34 +39,31 @@ const DownloadAlbumButton: React.FC<{
   return (
     <>
       <>
-      <div
-      className={css`
-        button {
-          font-size: 1.5rem;
-          background: transparent;
-          padding: 0;
-        }
-        button:hover {
-          color: var(--mi-normal-background-color);
-          background-color: var(--mi-normal-foreground-color) !important;
-        }
+        <div>
+          <Button
+            compact
+            collapse
+            className={css`
+              font-size: 1.5rem;
+              background: transparent;
+              padding: 0;
 
-        @media screen and (max-width: ${bp.small}px) {
-          button {
-            font-size: 1.1rem;
-          }
-        }
-      `}
-      >
-        <Button
-          compact
-          collapse
-          isLoading={isDownloading}
-          startIcon={<AiOutlineDownload />}
-          onClick={() => downloadAlbum()}>
-          {t("download")}
-        </Button>
-      </div>
+              &:hover {
+                color: var(--mi-normal-background-color);
+                background-color: var(--mi-normal-foreground-color) !important;
+              }
+
+              @media screen and (max-width: ${bp.small}px) {
+                font-size: 1.1rem;
+              }
+            `}
+            isLoading={isDownloading}
+            startIcon={<AiOutlineDownload />}
+            onClick={() => downloadAlbum()}
+          >
+            {t("download")}
+          </Button>
+        </div>
       </>
     </>
   );

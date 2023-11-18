@@ -21,17 +21,23 @@ export default function () {
 
   async function POST(req: Request, res: Response) {
     const { id: artistId } = req.params as unknown as Params;
-    const { id: userId } = req.user as User;
-    const { tierId } = req.body;
+    let { tierId, email } = req.body;
+
+    const loggedInUser = req.user as User | undefined;
 
     try {
-      const user = await prisma.user.findFirst({
-        where: {
-          id: userId,
-        },
-      });
-
       const client = await prisma.client.findFirst({});
+
+      if (loggedInUser) {
+        const { id: userId } = loggedInUser;
+        const user = await prisma.user.findFirst({
+          where: {
+            id: userId,
+          },
+        });
+        email = user?.email;
+      }
+
       const tier = await prisma.artistSubscriptionTier.findFirst({
         where: {
           id: tierId,
@@ -65,7 +71,7 @@ export default function () {
         const session = await stripe.checkout.sessions.create(
           {
             billing_address_collection: "auto",
-            customer_email: user?.email,
+            customer_email: loggedInUser?.email ?? email,
             line_items: [
               {
                 price_data: {
@@ -82,7 +88,8 @@ export default function () {
               clientId: client?.id ?? null,
               artistId,
               tierId,
-              userId,
+              userId: loggedInUser?.id ?? null,
+              userEmail: email ?? null,
               stripeAccountId,
             },
             mode: "subscription",
@@ -94,7 +101,6 @@ export default function () {
           }
         );
 
-        // res.redirect(303, session.url ?? "");
         res.status(200).json({
           sessionUrl: session.url,
         });
