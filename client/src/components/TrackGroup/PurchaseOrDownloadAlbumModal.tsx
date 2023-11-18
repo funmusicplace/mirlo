@@ -61,6 +61,7 @@ const PurchaseOrDownloadAlbum: React.FC<{
 
                 button {
                   background: transparent;
+                  color: var(--mi-normal-foreground-color) !important;
                   padding: 0;
                   // border: 1px solid;
                 }

@@ -93,7 +93,7 @@ const ArtistTrackGroup: React.FC<{
             className={css`
               display: flex;
               flex-direction: column;
-              width: 75%;
+              width: 80%;
 
               a:first-child {
                 font-weight: normal;
