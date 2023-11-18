@@ -255,8 +255,8 @@ function TrackGroup() {
         <div
           className={css`
             margin: 1.25rem 0;
-            border-left: 5px solid var(--mi-lighten-background-color);
-            padding: 0.5rem 0.25rem;
+            // border-left: 0px solid var(--mi-lighten-background-color);
+            padding: 0.5rem 0. 25rem;
           `}
         >
           <MarkdownContent content={trackGroup.about} />
@@ -265,7 +265,7 @@ function TrackGroup() {
         <div
           className={css`
             margin: 1.25rem 0;
-            border-left: 5px solid var(--mi-lighten-background-color);
+            // border-left: 0px solid var(--mi-lighten-background-color);
             padding: 0.5rem 0.25rem;
           `}
         >
