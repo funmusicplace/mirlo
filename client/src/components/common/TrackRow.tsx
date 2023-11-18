@@ -42,11 +42,10 @@ const TrackRow: React.FC<{
           background: transparent;
         }
         button:hover {
-          color: var(--mi-normal-background-color);
+          color: var(--mi-normal-background-color) !important;
           background: transparent;
         }
 
-        font-size: 18px;
 
         {//*  :hover {
           transform: scale(1.02, 1.02);
@@ -54,12 +53,7 @@ const TrackRow: React.FC<{
           font-size: 1.1rem;
         }  *//}
 
-        @media screen and (max-width: ${bp.small}px) {
-          font-size: 16px;
-          td {
-            padding: 0.15rem 0.3rem;
-          }
-        }
+
 
         button {
           font-size: 14px;
@@ -78,6 +72,15 @@ const TrackRow: React.FC<{
         &:hover > td > .track-number {
           display: none;
         }
+        @media screen and (max-width: ${bp.small}px) {
+          td {
+            padding: 0.15rem 0.3rem;
+          }
+          span {
+            width: 1rem !important;
+            margin-right: 1rem !important;
+          }
+        }
       `}
     >
       <td
@@ -85,12 +88,22 @@ const TrackRow: React.FC<{
           height: 30px;
 
           button {
-            padding: 0.5rem 0.65rem !important;
+            padding: .5rem .65rem .5rem .4rem !important;
             background: none;
           }
           button:hover {
-            padding: 0.5rem 0.65rem !important;
-            background: none;
+            padding: .5rem .65rem .5rem .4rem !important;
+            background: none !important;
+          }
+          @media screen and (max-width: ${bp.small}px) {
+            button {
+              padding: .5rem .65rem .5rem .1rem !important;
+              background: none;
+            }
+            button:hover {
+              padding: .5rem .65rem .5rem .1rem !important;
+              background: none !important;
+            }
           }
         `}
       >
@@ -115,7 +128,7 @@ const TrackRow: React.FC<{
             flex-direction: row;
             flex-wrap: nowrap;
             padding: 0.1rem;
-            margin-bottom: 0.05rem;
+            margin-bottom: 0rem;
             justify-content: space-between;
             align-items: flex-end;
 
@@ -130,7 +143,7 @@ const TrackRow: React.FC<{
           text-overflow: ellipsis;
 
           @media screen and (max-width: ${bp.medium}px) {
-            font-size: .8rem;
+            font-size: .9rem;
           }
 
           @media screen and (max-width: ${bp.small}px) {

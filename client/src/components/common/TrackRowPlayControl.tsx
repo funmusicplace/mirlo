@@ -34,7 +34,7 @@ const TrackRowPlayControl: React.FC<{
         <>
           <span
             className={!isDisabled ? "track-number" : ""}
-            style={{ width: "2rem", textAlign: "center" }}
+            style={{ width: "1.5rem", textAlign: "center", margin: "0rem .5rem 0rem 0rem" }}
           >
             {trackNumber}
           </span>

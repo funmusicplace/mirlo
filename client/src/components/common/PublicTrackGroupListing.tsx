@@ -48,7 +48,7 @@ export const PublicTrackGroupListing: React.FC<{
     <Table
       className={css`
         margin: 0 0.5rem;
-        @media screen and (max-width: ${bp.medium}px) {
+        @media screen and (max-width: ${bp.small}px) {
           margin: 0;
         }
       `}
