@@ -153,7 +153,7 @@ const ArtistSupportBox: React.FC<{
             }
           `}
         >
-          {user && !ownedByUser && (
+          {!ownedByUser && (
             <Button
               compact
               uppercase
