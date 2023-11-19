@@ -101,6 +101,7 @@ function Profile() {
       className={css`
         display: flex;
         flex-direction: column;
+        padding: 0rem 0.5rem;
       `}
     >
       <form
