@@ -55,6 +55,7 @@ interface TrackGroup {
   minPrice?: number; // in cents
   urlSlug?: string;
   userTrackGroupPurchases?: { userId: number }[];
+  userTrackGroupWishlist?: { userId: number }[];
 }
 
 interface Post {

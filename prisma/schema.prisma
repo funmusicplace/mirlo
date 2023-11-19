@@ -193,7 +193,7 @@ model TrackGroup {
   stripeProductKey        String?
   urlSlug                 String
   credits                 String?
-  UserTrackGroupWishlist  UserTrackGroupWishlist[]
+  userTrackGroupWishlist  UserTrackGroupWishlist[]
 
   @@unique([artistId, urlSlug])
 }

@@ -67,6 +67,12 @@ Migrations will run automatically on `docker-compose up`. To make changes to the
 docker exec -it blackbird-api npx prisma migrate dev
 ```
 
+If your typescript for prisma is ever out of date, you can re-generate it with:
+
+```sh
+docker exec -it blackbird-api npx prisma generate
+```
+
 ## Stripe
 
 By default Mirlo uses Stripe as its payment processor.

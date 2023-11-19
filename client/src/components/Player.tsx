@@ -327,8 +327,6 @@ const Player = () => {
                   margin-right: 0.5rem;
                   max-width: 50%;
                 }
-
-
               `}
             >
               <span
@@ -357,7 +355,6 @@ const Player = () => {
               </div>
               <div
                 className={css`
-
                   button {
                     color: var(--mi-white);
                     background-color: var(--mi-black);
@@ -365,26 +362,23 @@ const Player = () => {
                   }
 
                   button:hover {
-                      border-color: var(--mi-black);
+                    border-color: var(--mi-black);
+                    color: var(--mi-black) !important;
+                    background-color: var(--mi-white);
+                  }
+
+                  @media (prefers-color-scheme: dark) {
+                    button {
+                      color: var(--mi-white);
+                      background: var(--mi-black);
+                      border-color: grey;
+                    }
+                    button:hover {
+                      border-color: var(--mi-white);
                       color: var(--mi-black) !important;
-                      background-color: var(--mi-white);
+                      background-color: var(--mi-white) !important;
                     }
-
-                      @media (prefers-color-scheme: dark) {
-
-                        button {
-                          color: var(--mi-white);
-                          background: var(--mi-black);
-                          border-color: grey;
-                        }
-                        button:hover {
-                          border-color: var(--mi-white);
-                          color: var(--mi-black) !important;
-                          background-color: var(--mi-white) !important;
-                        }
-                    }
-
-
+                  }
                 `}
               >
                 {!playing && <PlayButton />}

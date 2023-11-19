@@ -18,15 +18,17 @@ const TrackRow: React.FC<{
   const { dispatch } = useGlobalStateContext();
   const [trackTitle] = React.useState(track.title);
   const {
-    state: { user },
+    state: { user, playing },
   } = useGlobalStateContext();
 
   const canPlayTrack = isTrackOwnedOrPreview(track, user, trackGroup);
 
   const onTrackPlay = React.useCallback(() => {
-    addTracksToQueue?.(track.id);
-    dispatch({ type: "setPlaying", playing: true });
-  }, [addTracksToQueue, dispatch, track.id]);
+    if (!playing) {
+      addTracksToQueue?.(track.id);
+      dispatch({ type: "setPlaying", playing: true });
+    }
+  }, [addTracksToQueue, dispatch, playing, track.id]);
 
   return (
     <tr
@@ -114,13 +116,12 @@ const TrackRow: React.FC<{
           }
         `}
       >
-        {canPlayTrack && (
-          <TrackRowPlayControl
-            trackId={track.id}
-            trackNumber={track.order}
-            onTrackPlayCallback={addTracksToQueue}
-          />
-        )}
+        <TrackRowPlayControl
+          trackId={track.id}
+          canPlayTrack={canPlayTrack}
+          trackNumber={track.order}
+          onTrackPlayCallback={addTracksToQueue}
+        />
       </td>
       <td
         className={css`

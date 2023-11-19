@@ -14,22 +14,21 @@ export const PlayButton: React.FC = () => {
   return (
     <div
       className={css`
-          button {
-            font-size: 1.4rem;
-            margin-right: 0.25rem;
-            padding: .7rem .6rem .7rem .8rem;
-            border: solid 1.5px var(--mi-normal-foreground-color);
-            border-color: var(--mi-white);
-            background-color: var(--mi-black);
-            color: var(--mi-white);
-          }
+        button {
+          font-size: 1.4rem;
+          margin-right: 0.25rem;
+          padding: 0.7rem 0.6rem 0.7rem 0.8rem;
+          border: solid 1.5px var(--mi-normal-foreground-color);
+          border-color: var(--mi-white);
+          background-color: var(--mi-black);
+          color: var(--mi-white);
+        }
       `}
-      >
-    <IconButton onClick={onPlay}>
-
-      <VscPlay  />
-
-    </IconButton></div>
+    >
+      <IconButton onClick={onPlay}>
+        <VscPlay />
+      </IconButton>
+    </div>
   );
 };
 

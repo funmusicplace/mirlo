@@ -8,8 +8,15 @@ const TrackRowPlayControl: React.FC<{
   trackNumber: number;
   trackId: number;
   onTrackPlayCallback?: (trackId: number) => void;
+  canPlayTrack: boolean;
   isDisabled?: boolean;
-}> = ({ trackId, trackNumber, onTrackPlayCallback, isDisabled }) => {
+}> = ({
+  trackId,
+  trackNumber,
+  onTrackPlayCallback,
+  canPlayTrack,
+  isDisabled,
+}) => {
   const {
     state: { playerQueueIds, playing, currentlyPlayingIndex },
     dispatch,
@@ -20,6 +27,7 @@ const TrackRowPlayControl: React.FC<{
       : undefined;
 
   const onTrackPlay = React.useCallback(() => {
+    console.log("triggering play");
     onTrackPlayCallback?.(trackId);
     dispatch({ type: "setPlaying", playing: true });
   }, [dispatch, onTrackPlayCallback, trackId]);
@@ -34,11 +42,15 @@ const TrackRowPlayControl: React.FC<{
         <>
           <span
             className={!isDisabled ? "track-number" : ""}
-            style={{ width: "1.5rem", textAlign: "center", margin: "0rem .5rem 0rem 0rem" }}
+            style={{
+              width: "1.5rem",
+              textAlign: "center",
+              margin: "0rem .5rem 0rem 0rem",
+            }}
           >
             {trackNumber}
           </span>
-          {!isDisabled && (
+          {canPlayTrack && !isDisabled && (
             <IconButton compact className="play-button" onClick={onTrackPlay}>
               <VscPlay />
             </IconButton>
@@ -51,7 +63,7 @@ const TrackRowPlayControl: React.FC<{
           data-cy="track-row-pause-button"
           onClick={onTrackPause}
           style={{ width: "2rem", textAlign: "center" }}
-          >
+        >
           <TfiControlPause />
         </IconButton>
       )}

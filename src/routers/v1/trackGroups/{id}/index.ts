@@ -51,6 +51,12 @@ export default function () {
                       userId: true,
                     },
                   },
+                  userTrackGroupWishlist: {
+                    where: { userId: loggedInUser.id },
+                    select: {
+                      userId: true,
+                    },
+                  },
                 }
               : {}),
           },

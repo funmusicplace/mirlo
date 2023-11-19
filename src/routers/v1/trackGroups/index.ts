@@ -11,6 +11,7 @@ export default function () {
     const trackGroups = await prisma.trackGroup.findMany({
       where: {
         published: true,
+        tracks: { some: { audio: { uploadState: "SUCCESS" } } },
       },
       include: {
         artist: {
