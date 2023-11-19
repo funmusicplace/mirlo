@@ -35,6 +35,9 @@ export default function () {
             tracks: {
               where: {
                 deletedAt: null,
+                audio: {
+                  uploadState: "SUCCESS",
+                },
               },
               include: {
                 audio: true,
@@ -64,7 +67,7 @@ export default function () {
       }
 
       if (!trackGroup) {
-        res.status(404);
+        res.status(404).json({ error: `TrackGroup with id ${id} not found` });
         return next();
       }
       res.json({ result: processor.single(trackGroup) });
