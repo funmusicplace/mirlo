@@ -15,17 +15,26 @@ const TrackRow: React.FC<{
   addTracksToQueue: (id: number) => void;
 }> = ({ track, addTracksToQueue, trackGroup }) => {
   const snackbar = useSnackbar();
+  const { dispatch } = useGlobalStateContext();
   const [trackTitle] = React.useState(track.title);
   const {
-    state: { user },
+    state: { user, playing },
   } = useGlobalStateContext();
 
   const canPlayTrack = isTrackOwnedOrPreview(track, user, trackGroup);
+
+  const onTrackPlay = React.useCallback(() => {
+    if (!playing) {
+      addTracksToQueue?.(track.id);
+      dispatch({ type: "setPlaying", playing: true });
+    }
+  }, [addTracksToQueue, dispatch, playing, track.id]);
 
   return (
     <tr
       key={track.id}
       id={`${track.id}`}
+      onClick={onTrackPlay}
       className={css`
         ${!canPlayTrack ? `color: var(--mi-lighten-foreground-color);` : ""}
         :hover {
@@ -88,32 +97,31 @@ const TrackRow: React.FC<{
           height: 30px;
 
           button {
-            padding: .5rem .65rem .5rem .4rem !important;
+            padding: 0.5rem 0.65rem 0.5rem 0.4rem !important;
             background: none;
           }
           button:hover {
-            padding: .5rem .65rem .5rem .4rem !important;
+            padding: 0.5rem 0.65rem 0.5rem 0.4rem !important;
             background: none !important;
           }
           @media screen and (max-width: ${bp.small}px) {
             button {
-              padding: .5rem .65rem .5rem .1rem !important;
+              padding: 0.5rem 0.65rem 0.5rem 0.1rem !important;
               background: none;
             }
             button:hover {
-              padding: .5rem .65rem .5rem .1rem !important;
+              padding: 0.5rem 0.65rem 0.5rem 0.1rem !important;
               background: none !important;
             }
           }
         `}
       >
-        {canPlayTrack && (
-          <TrackRowPlayControl
-            trackId={track.id}
-            trackNumber={track.order}
-            onTrackPlayCallback={addTracksToQueue}
-          />
-        )}
+        <TrackRowPlayControl
+          trackId={track.id}
+          canPlayTrack={canPlayTrack}
+          trackNumber={track.order}
+          onTrackPlayCallback={addTracksToQueue}
+        />
       </td>
       <td
         className={css`

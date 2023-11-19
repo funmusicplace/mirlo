@@ -14,6 +14,24 @@ const IconButton = styled.button<Compactable & { transparent?: boolean }>`
   line-height: 0.9;
   border-radius: 100%;
 
+  ${(props) => {
+    switch (props.variant) {
+      case "link":
+        return `
+          color: var(--mi-${props.role ?? "primary"}-color);
+          margin-right: 0;
+          font-size: inherit;
+          line-height: inherit;
+
+          &:hover:not(:disabled) {
+            color: var(--mi-${props.role ?? "primary"}-color);
+          }
+        `;
+      default:
+        return ``;
+    }
+  }}
+
   &:hover:not([disabled]) {
     cursor: pointer;
     color: ${(props) =>

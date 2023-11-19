@@ -1,4 +1,6 @@
 import assert from "node:assert";
+import { Prisma } from "@prisma/client";
+
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
@@ -40,6 +42,20 @@ describe("trackGroups", () => {
 
     assert.equal(response.body.results.length, 1);
     assert.equal(response.body.results[0].title, trackGroup.title);
+    assert(response.statusCode === 200);
+  });
+
+  it("should GET / not get without tracks", async () => {
+    const { user } = await createUser({ email: "test@testcom" });
+    const artist = await createArtist(user.id);
+    await createTrackGroup(artist.id, {
+      tracks: [] as Prisma.TrackCreateNestedManyWithoutTrackGroupInput,
+    });
+    const response = await request(baseURL)
+      .get("trackGroups")
+      .set("Accept", "application/json");
+
+    assert.equal(response.body.results.length, 0);
     assert(response.statusCode === 200);
   });
 

@@ -9,6 +9,7 @@ export const clearTables = async () => {
   await prisma.$executeRaw`DELETE FROM "TrackArtist";`;
   await prisma.$executeRaw`DELETE FROM "TrackAudio";`;
   await prisma.$executeRaw`DELETE FROM "Track";`;
+  await prisma.$executeRaw`DELETE FROM "UserTrackGroupWishlist";`;
   await prisma.$executeRaw`DELETE FROM "UserTrackGroupPurchase";`;
   await prisma.$executeRaw`DELETE FROM "TrackGroup";`;
   await prisma.$executeRaw`DELETE FROM "Artist";`;
@@ -54,6 +55,18 @@ export const createTrackGroup = async (
       urlSlug: data?.urlSlug ?? "test-artist",
       artistId: artistId,
       published: data?.published ?? true,
+      tracks: {
+        create: data?.tracks ?? [
+          {
+            title: "test track",
+            audio: {
+              create: {
+                uploadState: "SUCCESS",
+              },
+            },
+          },
+        ],
+      },
     },
   });
   return artist;

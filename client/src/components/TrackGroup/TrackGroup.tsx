@@ -18,6 +18,7 @@ import { bp } from "../../constants";
 import DropdownMenu from "components/common/DropdownMenu";
 import TrackGroupAdminMenu from "./TrackGroupAdminMenu";
 import MarkdownContent from "components/common/MarkdownContent";
+import Wishlist from "./Wishlist";
 
 function TrackGroup() {
   const { t } = useTranslation("translation", {
@@ -117,7 +118,7 @@ function TrackGroup() {
               align-items: center;
               justify-content: space-between;
               margin-bottom: 0.5rem;
-              align-items: stretch;
+              align-items: flex-start;
             `}
           >
             <div>
@@ -161,6 +162,7 @@ function TrackGroup() {
                   </Button>
                 </Link>
               )}
+              <Wishlist trackGroup={trackGroup} />
               <PurchaseOrDownloadAlbum trackGroup={trackGroup} />
               {user?.isAdmin && (
                 <DropdownMenu compact>
@@ -256,7 +258,7 @@ function TrackGroup() {
           className={css`
             margin: 1.25rem 0;
             // border-left: 0px solid var(--mi-lighten-background-color);
-            padding: 0.5rem 0. 25rem;
+            padding: 0.5rem 0 25rem;
           `}
         >
           <MarkdownContent content={trackGroup.about} />
