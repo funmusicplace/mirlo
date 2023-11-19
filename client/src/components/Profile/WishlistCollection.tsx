@@ -33,7 +33,10 @@ function WishlistCollection() {
 
   return (
     <>
-      <div>
+      <div 
+        className={css`
+            padding: 0rem 0.5rem;
+          `}>
         <h1>{t("yourWishlist")}</h1>
         <div
           className={css`
