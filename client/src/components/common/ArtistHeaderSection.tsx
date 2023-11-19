@@ -126,7 +126,27 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
           `}
         >
           <Header>
-            <H1>{artist.name}</H1>
+            <div className={css`
+            display: flex;
+            align-items: center;
+          `}>
+            <div><H1>{artist.name}</H1></div>
+            <div>
+                {!isManage && <FollowArtist artistId={artist.id} />}
+                {!isManage && user?.id === artist.userId && (
+                  <Link to={`/manage/artists/${artist.id}`}>
+                    <Button
+                      compact
+                      transparent
+                      type="button"
+                      startIcon={<FaPen />}
+                    >
+                      {t("edit")}
+                    </Button>
+                  </Link>
+                )}
+              </div>
+              </div>
             <MarkdownContent content={artist.bio} />
           </Header>
         </div>
