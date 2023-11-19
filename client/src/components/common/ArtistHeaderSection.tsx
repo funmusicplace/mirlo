@@ -90,8 +90,11 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
           `}
         >
           <Header>
-            <HeaderDiv>
-              <H1>{artist.name}</H1>
+            <HeaderDiv className={css`
+            display: flex;
+            align-items: center;
+          `}>
+              <div><H1>{artist.name}</H1></div>
               <div>
                 {!isManage && <FollowArtist artistId={artist.id} />}
                 {!isManage && user?.id === artist.userId && (
