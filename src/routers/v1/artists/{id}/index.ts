@@ -15,7 +15,6 @@ import {
   finalArtistBannerBucket,
 } from "../../../../utils/minio";
 import { convertURLArrayToSizes } from "../../../../utils/images";
-import { isNumber } from "lodash";
 
 export default function () {
   const operations = {

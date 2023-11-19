@@ -1,9 +1,6 @@
 import { User } from "@prisma/client";
 import { Request, Response } from "express";
-import {
-  userAuthenticated,
-  userLoggedInWithoutRedirect,
-} from "../../../../auth/passport";
+import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { generateFullStaticImageUrl } from "../../../../utils/images";
 import prisma from "../../../../../prisma/prisma";
 import { finalCoversBucket } from "../../../../utils/minio";

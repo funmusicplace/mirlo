@@ -35,6 +35,72 @@ describe("trackGroups/{id}", () => {
     });
   });
 
+  describe("/wishlist", () => {
+    it("should POST / 200 should create a wishlist item for a trackgroup", async () => {
+      const { user, accessToken } = await createUser({
+        email: "artist@artist.com",
+      });
+      const artist = await createArtist(user.id);
+      const trackGroup = await createTrackGroup(artist.id);
+
+      const response = await requestApp
+        .post(`trackGroups/${trackGroup.id}/wishlist`)
+        .send({ wishlist: true })
+        .set("Accept", "application/json")
+        .set("Cookie", [`jwt=${accessToken}`]);
+
+      assert.equal(response.status, 200);
+
+      const exists = await prisma.userTrackGroupWishlist.findFirst({
+        where: {
+          userId: user.id,
+          trackGroupId: trackGroup.id,
+        },
+      });
+
+      assert.notEqual(exists, null);
+    });
+
+    it("should POST / 200 should delete a wishlist item for a trackgroup", async () => {
+      const { user, accessToken } = await createUser({
+        email: "artist@artist.com",
+      });
+      const artist = await createArtist(user.id);
+      const trackGroup = await createTrackGroup(artist.id);
+
+      const response = await requestApp
+        .post(`trackGroups/${trackGroup.id}/wishlist`)
+        .send({ wishlist: false })
+        .set("Accept", "application/json")
+        .set("Cookie", [`jwt=${accessToken}`]);
+
+      assert.equal(response.status, 200);
+
+      const exists = await prisma.userTrackGroupWishlist.findFirst({
+        where: {
+          userId: user.id,
+          trackGroupId: trackGroup.id,
+        },
+      });
+
+      assert.equal(exists, null);
+    });
+
+    it("should POST / 404 if no trackgroup", async () => {
+      const { accessToken } = await createUser({
+        email: "artist@artist.com",
+      });
+
+      const response = await requestApp
+        .post(`trackGroups/1/wishlist`)
+        .send({ wishlist: false })
+        .set("Accept", "application/json")
+        .set("Cookie", [`jwt=${accessToken}`]);
+
+      assert.equal(response.status, 404);
+    });
+  });
+
   describe("/purchase", () => {
     it("should POST / 400 if artist not set up with stripe", async () => {
       const { user } = await createUser({

@@ -24,7 +24,6 @@ const TrackRow: React.FC<{
   const canPlayTrack = isTrackOwnedOrPreview(track, user, trackGroup);
 
   const onTrackPlay = React.useCallback(() => {
-    console.log("playing");
     addTracksToQueue?.(track.id);
     dispatch({ type: "setPlaying", playing: true });
   }, [addTracksToQueue, dispatch, track.id]);
