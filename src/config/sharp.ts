@@ -28,16 +28,16 @@ export default {
     banner: {
       webp: {
         variants: [
-          { width: 2500, height: 500 },
-          { width: 1250, height: 250 },
-          { width: 625, height: 125 },
+          { width: 2500, height: 2500 },
+          { width: 1250, height: 1250 },
+          { width: 625, height: 625 },
         ],
       },
       jpeg: {
         variants: [
-          { width: 2500, height: 500 },
-          { width: 1250, height: 250 },
-          { width: 625, height: 125 },
+          { width: 2500, height: 2500 },
+          { width: 1250, height: 1250 },
+          { width: 625, height: 625 },
         ],
       },
     },
