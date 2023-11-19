@@ -3,7 +3,7 @@ import React from "react";
 import { bp } from "../../constants";
 import { css } from "@emotion/css";
 import { useTranslation } from "react-i18next";
-import { AiOutlineDownload } from "react-icons/ai";
+import { RiDownloadLine } from "react-icons/ri";
 import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
 import { useArtistContext } from "state/ArtistContext";
@@ -44,10 +44,9 @@ const DownloadAlbumButton: React.FC<{
             compact
             collapse
             className={css`
-              margin-top: -0.3rem;
-              font-size: 1.5rem !important;
+              margin-top: 0rem;
+              font-size: 1.2rem;
               background: transparent;
-              padding: 0;
 
               &:hover {
                 color: var(--mi-normal-background-color);
@@ -55,11 +54,11 @@ const DownloadAlbumButton: React.FC<{
               }
 
               @media screen and (max-width: ${bp.small}px) {
-                font-size: 1rem !important;
+                height: .5rem;
               }
             `}
             isLoading={isDownloading}
-            startIcon={<AiOutlineDownload />}
+            startIcon={<RiDownloadLine />}
             onClick={() => downloadAlbum()}
           >
             {t("download")}
