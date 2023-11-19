@@ -23,9 +23,6 @@ export const PlayButton: React.FC = () => {
             background-color: var(--mi-black);
             color: var(--mi-white);
           }
-          button:hover {
-            border: solid 1.5px var(--mi-normal-foreground-color);
-          }
       `}
       >
     <IconButton onClick={onPlay}>

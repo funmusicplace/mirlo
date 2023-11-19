@@ -41,11 +41,6 @@ export const LoopButton: React.FC = () => {
       className={css`
         margin-left: 0.25rem;
         position: relative;
-
-
-                :hover {
-                  background: white !important;
-                }
       `}
     >
       <RxLoop />

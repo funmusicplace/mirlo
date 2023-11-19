@@ -300,39 +300,41 @@ const Player = () => {
                 align-items: center;
 
                 button {
+                  color: black;
                   background: transparent;
+                  font-size: 1.2rem !important;
+                }
+
+                button:hover {
+                  color: var(--mi-black) !important;
+                  background-color: var(--mi-white);
                   font-size: 1.2rem;
                 }
-                button:hover {
-                  color: var(--mi-white) !important;
-                  background: var(--mi-normal-background-color) !important;
+
+                @media (prefers-color-scheme: dark) {
+                  color: white;
+                  button {
+                    color: white;
+                  }
+                  button:hover {
+                    color: var(--mi-white) !important;
+                    background-color: var(--mi-white);
+                    font-size: 1.2rem;
+                  }
                 }
 
                 @media (max-width: ${bp.small}px) {
                   margin-right: 0.5rem;
                   max-width: 50%;
                 }
-                @media (prefers-color-scheme: dark) {
-                  color: white;
-                  button {
-                    color: white !important;
-                  }
-                  button:hover {
-                    color: var(--mi-normal-foreground-color) !important;
-                    background: var(--mi-normal-background-color) !important;
-                  }
-                }
+
+
               `}
             >
               <span
                 className={css`
                   display: flex;
                   align-items: center;
-
-                  button {
-                    background-color: transparent;
-                    color: var(--mi-black);
-                  }
 
                   @media (max-width: ${bp.small}px) {
                     display: none;
@@ -344,9 +346,6 @@ const Player = () => {
               </span>
               <div
                 className={css`
-                button {
-                  color: var(--mi-black);
-                }
                 @media (max-width: ${bp.small}px) {
                     button {
                       padding: 0em .5em 0em 0em;
@@ -358,15 +357,34 @@ const Player = () => {
               </div>
               <div
                 className={css`
-                  button {
-                    color: var(--mi-black);
-                    font-size: 1.2rem !important;
 
-                    button:hover {
-                      color: var(--mi-normal-foreground-color) !important;
-                      filter: saturate(0);
-                    }
+                  button {
+                    color: var(--mi-white);
+                    background-color: var(--mi-black);
+                    border-color: var(--mi-black);
                   }
+
+                  button:hover {
+                      border-color: var(--mi-black);
+                      color: var(--mi-black) !important;
+                      background-color: var(--mi-white);
+                    }
+
+                      @media (prefers-color-scheme: dark) {
+
+                        button {
+                          color: var(--mi-white);
+                          background: var(--mi-black);
+                          border-color: grey;
+                        }
+                        button:hover {
+                          border-color: var(--mi-white);
+                          color: var(--mi-black) !important;
+                          background-color: var(--mi-white) !important;
+                        }
+                    }
+
+
                 `}
               >
                 {!playing && <PlayButton />}
@@ -374,9 +392,6 @@ const Player = () => {
               </div>
               <div
                 className={css`
-                  button {
-                    color: var(--mi-black);
-                  }
                 @media (max-width: ${bp.small}px) {
                     button {
                       padding: 0em 0em 0em .5em;

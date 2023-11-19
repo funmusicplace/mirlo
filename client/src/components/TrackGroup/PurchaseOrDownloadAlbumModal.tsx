@@ -62,24 +62,24 @@ const PurchaseOrDownloadAlbum: React.FC<{
           artistState?.userStripeStatus?.chargesEnabled && (
             <div
               className={css`
-                margin-top: -0.2rem;
+                margin-top: 0rem;
 
                 button {
                   background: transparent;
-                  padding: 0.1rem 0.5rem;
-                  border: 1px solid;
-                  border-radius: 0px;
+                  color: var(--mi-normal-foreground-color) !important;
+                  padding: 0;
+                  // border: 1px solid;
                 }
                 button:hover {
-                  color: var(--mi-normal-background-color);
-                  background-color: var(
-                    --mi-normal-foreground-color
-                  ) !important;
+                  color: var(--mi-normal-foreground-color) !important;
+                  background-color: transparent !important;
+                  text-decoration: underline;
                 }
 
                 @media screen and (max-width: ${bp.small}px) {
                   button {
-                    padding: 0.2rem 0.5rem;
+                    padding: 0;
+                    font-size: .75rem;
                   }
                 }
               `}
@@ -87,7 +87,6 @@ const PurchaseOrDownloadAlbum: React.FC<{
               <Button
                 compact
                 onClick={() => setIsPurchasingAlbum(true)}
-                uppercase
               >
                 {t("buy")}
               </Button>

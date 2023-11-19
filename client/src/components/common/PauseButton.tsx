@@ -24,10 +24,10 @@ export const PauseButton: React.FC = () => {
       <IconButton
         onClick={onPause}
         className={css`
-          font-size: 1.4rem;
+          font-size: 1.6rem;
           margin-right: 0.25rem;
-          padding: 0.75rem 0.7rem 0.65rem 0.7rem;
-          border: solid 1.5px var(--mi-normal-foreground-color);
+          padding: 0.75rem 0.7rem 0.65rem 0.7rem !important;
+          border: solid 1.5px !important;
           border-color: var(--mi-normal-foreground-color);
           background-color: var(--mi-normal-foreground-color);
           color: var(--mi-normal-background-color);

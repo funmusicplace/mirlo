@@ -58,6 +58,10 @@ function Artist() {
         flex-direction: column;
         align-items: center;
 
+        a:hover {
+          text-decoration: none !important;
+        }
+
         @media screen and (max-width: ${bp.medium}px) {
           padding: 0rem !important;
           background: var(--mi-light-background-color);
