@@ -124,7 +124,8 @@ function TrackGroup() {
             <h1
               className={css`
                 font-size: 32px;
-                line-height: 35px;
+                line-height: 42px;
+                margin-bottom: .2rem;
               `}
             >
               {trackGroup.title}
@@ -137,7 +138,7 @@ function TrackGroup() {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: .5rem;
+            margin-bottom: .6rem;
           `}
         >
         <div>
