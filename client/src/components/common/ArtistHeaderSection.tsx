@@ -126,7 +126,7 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
           `}
         >
           <Header>
-            <div className={css`
+            <HeaderDiv className={css`
             display: flex;
             align-items: center;
           `}>
