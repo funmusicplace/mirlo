@@ -66,7 +66,11 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
   const artistBanner = artist?.banner?.sizes;
 
   return (
-    <div>
+    <div
+      className={css`
+        margin-bottom: 1rem;
+      `}
+    >
       <MetaCard
         title={artist.name}
         description={artist.bio}
