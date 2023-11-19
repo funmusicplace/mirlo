@@ -21,6 +21,9 @@ import MarkdownContent from "components/common/MarkdownContent";
 import Wishlist from "./Wishlist";
 
 function TrackGroup() {
+  const { t } = useTranslation("translation", {
+    keyPrefix: "trackGroupDetails",
+  });
 
   const {
     state: { artist, isLoading: isLoadingArtist, userStripeStatus },
