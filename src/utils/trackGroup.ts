@@ -42,7 +42,9 @@ export const findTrackGroupIdForSlug = async (
   id: string,
   artistId?: string
 ) => {
+  logger.info(`findTrackGroupIdForSlug: (${id}, ${artistId})`);
   if (Number.isNaN(Number(id))) {
+    logger.info(`findTrackGroupIdForSlug: it's a string`);
     if (!artistId) {
       throw new Error(
         "Searching for a TrackGroup by slug requires an artistId"
@@ -50,18 +52,22 @@ export const findTrackGroupIdForSlug = async (
     }
     const parsedArtistId = await findArtistIdForURLSlug(artistId);
 
+    logger.info(`findTrackGroupIdForSlug: parsedArtistId: ${parsedArtistId}`);
     if (parsedArtistId) {
-      const artist = await prisma.trackGroup.findFirst({
+      const trackGroup = await prisma.trackGroup.findFirst({
         where: {
           urlSlug: { equals: id, mode: "insensitive" },
           artistId: parsedArtistId,
         },
       });
-      id = `${artist?.id ?? id}`;
+      id = `${trackGroup?.id ?? id}`;
     } else {
+      logger.info("findTrackGroupIdForSlug: returning undefind");
       return undefined;
     }
   }
+  logger.info(`findTrackGroupIdForSlug: returning ${id}`);
+
   return id;
 };
 
