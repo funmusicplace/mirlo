@@ -80,6 +80,7 @@ const TrackGroupCard: React.FC<{
         className={css`
           display: flex;
           flex-direction: column;
+          justify-content: space-between;
           width: 100%;
 
           > div {
@@ -89,6 +90,11 @@ const TrackGroupCard: React.FC<{
 
           @media screen and (max-width: ${bp.medium}px) {
             font-size: 0.8rem;
+
+            strong {
+              margin-right: .5rem;
+            }
+
             > div {
               justify-content: flex-start;
               flex-wrap: wrap;
@@ -97,6 +103,8 @@ const TrackGroupCard: React.FC<{
                 margin-top: 0.5rem;
               }
             }
+
+
           }
         `}
       >
@@ -105,7 +113,7 @@ const TrackGroupCard: React.FC<{
           {album.title}
         </div>
         <div>
-          {trackGroupCardTranslation("published")}{" "}
+          <strong>{trackGroupCardTranslation("published")}</strong>{" "}
           {album.published ? <FaCheck /> : <FaTimes />}
         </div>
         <div>

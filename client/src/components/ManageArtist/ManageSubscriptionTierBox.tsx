@@ -69,20 +69,22 @@ const ManageSubscriptionTierBox: React.FC<{
         <div>
           <Button
             compact
+            transparent
             startIcon={<FaPen />}
             onClick={() => setManageTier(tier)}
           >
-            {t("edit")}
+            {/*{t("edit")}*/}
           </Button>
           <Button
             className={css`
               margin-left: 0.5rem;
             `}
             compact
+            transparent
             startIcon={<FaTrash />}
             onClick={() => deleteTier(tier.id)}
           >
-            {t("delete")}
+            {/*{t("delete")}*/}
           </Button>
         </div>
       </div>

@@ -83,7 +83,7 @@ const ManageArtistPosts: React.FC<{}> = () => {
         `}
       >
         <h2>{t("posts")}</h2>
-        <Button
+        <Button transparent
           onClick={() => {
             setAddingNewPost(true);
           }}
@@ -111,20 +111,21 @@ const ManageArtistPosts: React.FC<{}> = () => {
             <div>
               <Button
                 compact
+                transparent
                 startIcon={<FaPen />}
                 onClick={() => setManagePost(p)}
-              >
-                {t("edit")}
+              >  {/* {t("edit")} */}
               </Button>
               <Button
                 className={css`
                   margin-left: 0.5rem;
                 `}
                 compact
+                transparent
                 startIcon={<FaTrash />}
                 onClick={() => deletePost(p.id)}
               >
-                {t("delete")}
+                {/*{t("delete")}*/}
               </Button>
             </div>
           </div>

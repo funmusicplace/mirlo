@@ -8,7 +8,8 @@ import styled from "@emotion/styled";
 import { useArtistContext } from "state/ArtistContext";
 
 const Container = styled.div<{ artistBanner: boolean }>`
-  filter: drop-shadow(0 0 0.5rem rgba(50, 50, 50, 0.3));
+
+
   width: 100%;
 
   @media screen and (max-width: ${bp.medium}px) {
@@ -37,6 +38,7 @@ export const ArtistPageWrapper: React.FC<{
     <Container artistBanner={artistBanner}>
       <div
         className={css`
+          ${artistBanner ? "filter: drop-shadow(0 0 0.5rem rgba(50, 50, 50, 0.3));" : ""}
           background: var(--mi-normal-background-color);
           padding: 0 2rem 2rem;
           height: 100%;

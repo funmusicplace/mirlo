@@ -90,7 +90,6 @@ const ManageArtist: React.FC<{}> = () => {
             onClick={() => setIsEditing(true)}
             className={css`
               margin-right: 0.5rem;
-              margin-top: 1rem;
             `}
           >
             {t("editDetails")}

@@ -44,7 +44,7 @@ const ManageArtistAlbums: React.FC<{}> = () => {
         padding: 0.5rem 0 2rem 0;
         @media screen and (max-width: ${bp.medium}px) {
           border-radius: 0;
-          padding: 1rem 0.5rem 0rem;
+          padding: .5rem 0.5rem 0rem;
         }
       `}
     >
@@ -53,14 +53,14 @@ const ManageArtistAlbums: React.FC<{}> = () => {
           display: flex;
           width: 100%;
           justify-content: space-between;
-          align-items: center;
+          align-items: flex-start;
           margin-bottom: 0.5rem;
         `}
       >
         <h2>{t("yourAlbums")}</h2>
 
         <Link to="new-release">
-          <Button compact startIcon={<FaPlus />}>
+          <Button compact transparent startIcon={<FaPlus />}>
             {t("addNewAlbum")}
           </Button>
         </Link>
