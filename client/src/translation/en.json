@@ -104,7 +104,7 @@
     "unknown": "Unknown",
     "toFollowThisArtist": "To follow this artist please <1>sign up</1> with a user account or <2>log in</2>.",
     "followArtist": "Follow {{artistName}}",
-    "month": "mois"
+    "month": "month"
   },
   "post": {
     "edit": "Edit"
