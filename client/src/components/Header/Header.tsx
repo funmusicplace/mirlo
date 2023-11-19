@@ -92,7 +92,7 @@ const Header = () => {
 
           @media screen and (max-width: ${bp.medium}px) {
             padding: 0.5rem 0.5rem;
-            b${artistBanner ? "background-color: transparent;" : ""}
+            ${artistBanner ? "background-color: transparent;" : ""}
             border-bottom: 1px solid transparent;
             //--header-cover-sticky-height: 48px;
             position: sticky;

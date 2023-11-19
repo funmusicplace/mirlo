@@ -10,7 +10,6 @@ import api from "services/api";
 import { useGlobalStateContext } from "state/GlobalState";
 import { useSnackbar } from "state/SnackbarContext";
 import SubscriptionForm from "./SubscriptionForm";
-import { useTranslation } from "react-i18next";
 import MarkdownContent from "components/common/MarkdownContent";
 
 const ManageSubscriptionTierBox: React.FC<{
@@ -25,9 +24,6 @@ const ManageSubscriptionTierBox: React.FC<{
 
   const { artistId } = useParams();
   const [manageTier, setManageTier] = React.useState<ArtistSubscriptionTier>();
-  const { t } = useTranslation("translation", {
-    keyPrefix: "manageSubscriptionTierBox",
-  });
 
   const userId = user?.id;
 
@@ -69,20 +65,22 @@ const ManageSubscriptionTierBox: React.FC<{
         <div>
           <Button
             compact
+            transparent
             startIcon={<FaPen />}
             onClick={() => setManageTier(tier)}
           >
-            {t("edit")}
+            {/*{t("edit")}*/}
           </Button>
           <Button
             className={css`
               margin-left: 0.5rem;
             `}
             compact
+            transparent
             startIcon={<FaTrash />}
             onClick={() => deleteTier(tier.id)}
           >
-            {t("delete")}
+            {/*{t("delete")}*/}
           </Button>
         </div>
       </div>

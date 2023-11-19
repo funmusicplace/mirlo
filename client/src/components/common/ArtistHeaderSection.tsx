@@ -66,7 +66,11 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
   const artistBanner = artist?.banner?.sizes;
 
   return (
-    <div>
+    <div
+      className={css`
+        margin-bottom: 1rem;
+      `}
+    >
       <MetaCard
         title={artist.name}
         description={artist.bio}
@@ -86,8 +90,11 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
           `}
         >
           <Header>
-            <HeaderDiv>
-              <H1>{artist.name}</H1>
+            <HeaderDiv className={css`
+            display: flex;
+            align-items: center;
+          `}>
+              <div><H1>{artist.name}</H1></div>
               <div>
                 {!isManage && <FollowArtist artistId={artist.id} />}
                 {!isManage && user?.id === artist.userId && (
@@ -119,7 +126,27 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
           `}
         >
           <Header>
-            <H1>{artist.name}</H1>
+            <HeaderDiv className={css`
+            display: flex;
+            align-items: center;
+          `}>
+            <div><H1>{artist.name}</H1></div>
+            <div>
+                {!isManage && <FollowArtist artistId={artist.id} />}
+                {!isManage && user?.id === artist.userId && (
+                  <Link to={`/manage/artists/${artist.id}`}>
+                    <Button
+                      compact
+                      transparent
+                      type="button"
+                      startIcon={<FaPen />}
+                    >
+                      {t("edit")}
+                    </Button>
+                  </Link>
+                )}
+              </div>
+            </HeaderDiv>
             <MarkdownContent content={artist.bio} />
           </Header>
         </div>

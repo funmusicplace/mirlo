@@ -48,8 +48,16 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
         }
       `}
     >
-      <HeaderDiv>
-        <h2>{tManage("subscriptionTiers")}</h2>
+      <HeaderDiv
+        className={css`
+          @media screen and (max-width: ${bp.medium}px) {
+            flex-direction: column;
+            align-items: flex-start !important;
+            margin-bottom: .5rem;
+          }
+        `}
+      >
+        <div><h2>{tManage("subscriptionTiers")}</h2></div>
 
         <ArtistSubscriberDataDownload />
       </HeaderDiv>
