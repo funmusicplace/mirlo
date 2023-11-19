@@ -25,9 +25,6 @@ const ManageSubscriptionTierBox: React.FC<{
 
   const { artistId } = useParams();
   const [manageTier, setManageTier] = React.useState<ArtistSubscriptionTier>();
-  const { t } = useTranslation("translation", {
-    keyPrefix: "manageSubscriptionTierBox",
-  });
 
   const userId = user?.id;
 
