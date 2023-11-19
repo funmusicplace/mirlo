@@ -111,66 +111,77 @@ function TrackGroup() {
             }
           `}
         >
-          <div
-            className={css`
-              display: flex;
-              margin-top: 1rem;
-              align-items: center;
-              justify-content: space-between;
-              margin-bottom: 0.5rem;
-              align-items: flex-start;
-            `}
-          >
-            <div>
-              <h1
-                className={css`
-                  font-size: 32px;
-                  line-height: 1;
-                  margin-bottom: 0.5rem;
-                `}
-              >
-                {trackGroup.title}
-              </h1>
-              {artist && (
-                <em
-                  className={css`
-                    font-size: 18px;
-                    font-style: normal;
-                  `}
-                >
-                  by{" "}
-                  <Link to={`/${artist.urlSlug?.toLowerCase() ?? artist.id}`}>
-                    {artist?.name}
-                  </Link>
-                </em>
-              )}
-            </div>
-            <div
+        <div
+          className={css`
+            display: flex;
+            margin-top: 1rem;
+            align-items: center;
+            justify-content: space-between;
+            align-items: flex-start;
+          `}
+        >
+          <div>
+            <h1
               className={css`
-                text-align: right;
-                display: flex;
-                align-items: flex-start;
+                font-size: 32px;
+                line-height: 35px;
               `}
             >
-              {ownedByUser && (
-                <Link
-                  to={`/manage/artists/${artist.id}/release/${trackGroup.id}`}
-                  style={{ marginRight: "1rem" }}
-                >
-                  <Button compact startIcon={<FaPen />}>
-                    {t("edit")}
-                  </Button>
-                </Link>
-              )}
-              <Wishlist trackGroup={trackGroup} />
-              <PurchaseOrDownloadAlbum trackGroup={trackGroup} />
-              {user?.isAdmin && (
-                <DropdownMenu compact>
-                  <TrackGroupAdminMenu trackGroup={trackGroup} />
-                </DropdownMenu>
-              )}
-            </div>
+              {trackGroup.title}
+            </h1>
           </div>
+        </div>
+
+        <div
+          className={css`
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: .5rem;
+          `}
+        >
+        <div>
+        {artist && (
+          <em
+            className={css`
+              font-size: 18px;
+              font-style: normal;
+            `}
+          >
+            by{" "}
+            <Link to={`/${artist.urlSlug?.toLowerCase() ?? artist.id}`}>
+              {artist?.name}
+            </Link>
+          </em>
+        )}
+        </div>
+          <div
+            className={css`
+              text-align: right;
+              display: flex;
+              align-items: center;
+            `}
+          >
+            {ownedByUser && (
+              <Link
+                to={`/manage/artists/${artist.id}/release/${trackGroup.id}`}
+                style={{ marginRight: "1rem" }}
+              >
+                <Button compact startIcon={<FaPen />}>
+                  {t("edit")}
+                </Button>
+              </Link>
+            )}
+
+            <PurchaseOrDownloadAlbum trackGroup={trackGroup}/>
+            {user?.isAdmin && (<div className={css`padding-left: 1rem; `}>
+              <DropdownMenu compact>
+                <TrackGroupAdminMenu trackGroup={trackGroup} />
+              </DropdownMenu></div>
+            )}
+          </div>
+        </div>
+
           <div
             className={css`
               display: flex;
@@ -212,6 +223,16 @@ function TrackGroup() {
               <div
                 className={css`
                   margin-top: 0.5rem;
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: flex-start;
+
+                  @media screen and (max-width: ${bp.medium}px) {
+                    margin-bottom: 1rem;
+                  }
+                `}
+              ><div
+                className={css`
                   color: var(--mi-light-foreground-color);
                   font-size: 16px;
                   em {
@@ -220,7 +241,6 @@ function TrackGroup() {
 
                   @media screen and (max-width: ${bp.medium}px) {
                     font-size: 14px;
-                    margin-bottom: 1rem;
                   }
                 `}
               >
@@ -233,7 +253,8 @@ function TrackGroup() {
                       year: "numeric",
                     }
                   )}
-                </em>
+                </em></div>
+                <Wishlist trackGroup={trackGroup} />
               </div>
             </div>
             <div
@@ -258,7 +279,7 @@ function TrackGroup() {
           className={css`
             margin: 1.25rem 0;
             // border-left: 0px solid var(--mi-lighten-background-color);
-            padding: 0.5rem 0 25rem;
+            padding: 0.5rem 0 .25rem;
           `}
         >
           <MarkdownContent content={trackGroup.about} />
