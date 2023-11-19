@@ -10,7 +10,6 @@ import api from "services/api";
 import { useGlobalStateContext } from "state/GlobalState";
 import { useSnackbar } from "state/SnackbarContext";
 import SubscriptionForm from "./SubscriptionForm";
-import { useTranslation } from "react-i18next";
 import MarkdownContent from "components/common/MarkdownContent";
 
 const ManageSubscriptionTierBox: React.FC<{
