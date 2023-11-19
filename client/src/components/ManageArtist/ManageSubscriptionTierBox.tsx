@@ -51,6 +51,7 @@ const ManageSubscriptionTierBox: React.FC<{
       key={tier.id}
       className={css`
         margin-bottom: 0.5rem;
+        background: var(--mi-darken-background-color);
       `}
     >
       <div

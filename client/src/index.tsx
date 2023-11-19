@@ -25,7 +25,7 @@ import Home from "components/Home";
 import Artist from "components/Artist/Artist";
 import TrackGroupWidget from "components/Widget/TrackGroupWidget";
 import TrackWidget from "components/Widget/TrackWidget";
-import Collection from "components/Collection";
+import Collection from "components/Profile/Collection";
 import Post from "components/Post";
 import PasswordReset from "components/PasswordReset";
 import TrackGroup from "components/TrackGroup/TrackGroup";
@@ -39,6 +39,8 @@ import Releases from "components/Releases";
 import ManageContainer from "components/ManageArtist/ManageContainer";
 import ManageArtistContainer from "components/ManageArtist/ManageArtistContainer";
 import ArtistContainer from "components/Artist/ArtistContainer";
+import ProfileContainer from "components/Profile/ProfileContainer";
+import WishlistCollection from "components/Profile/WishlistCollection";
 
 const router = createBrowserRouter([
   {
@@ -61,26 +63,34 @@ const router = createBrowserRouter([
         path: "login",
         element: <Login />,
       },
-      {
-        path: "profile",
-        element: (
-          <AuthWrapper>
-            <Profile />
-          </AuthWrapper>
-        ),
-      },
+
       {
         path: "password-reset",
         element: <PasswordReset />,
       },
       {
-        path: "profile/collection",
+        path: "profile",
         element: (
           <AuthWrapper>
-            <Collection />
+            <ProfileContainer />
           </AuthWrapper>
         ),
+        children: [
+          {
+            path: "",
+            element: <Profile />,
+          },
+          {
+            path: "collection",
+            element: <Collection />,
+          },
+          {
+            path: "wishlist",
+            element: <WishlistCollection />,
+          },
+        ],
       },
+
       {
         path: "manage",
         element: (

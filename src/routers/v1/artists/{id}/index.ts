@@ -57,6 +57,9 @@ export default function () {
                 deletedAt: null,
                 isDefaultTier: false,
               },
+              orderBy: {
+                minAmount: "asc",
+              },
             },
             posts: {
               where: {

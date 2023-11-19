@@ -1,11 +1,15 @@
 import { css } from "@emotion/css";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { bp } from "../../constants";
 import { MetaCard } from "components/common/MetaCard";
 import styled from "@emotion/styled";
 import MarkdownContent from "./MarkdownContent";
 import HeaderDiv from "./HeaderDiv";
 import FollowArtist from "./FollowArtist";
+import { useGlobalStateContext } from "state/GlobalState";
+import Button from "./Button";
+import { FaPen } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
 
 const H1 = styled.h1`
   font-size: 50px;
@@ -36,7 +40,7 @@ const Header = styled.div`
   }
 
   @media screen and (max-width: ${bp.medium}px) {
-    font-size: .7em;
+    font-size: 0.7em;
     line-height: 1rem;
     border-radius: 0;
     padding: 0rem 0.5rem 0rem;
@@ -44,7 +48,7 @@ const Header = styled.div`
     border-width: 0px 0px 1px 0px;
     p {
       margin-bottom: 0em !important;
-      padding-bottom: .5rem;
+      padding-bottom: 0.5rem;
     }
   }
 `;
@@ -53,6 +57,10 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
   artist,
   isManage,
 }) => {
+  const { t } = useTranslation("translation", { keyPrefix: "artist" });
+  const {
+    state: { user },
+  } = useGlobalStateContext();
   const { trackGroupId } = useParams();
 
   const artistBanner = artist?.banner?.sizes;
@@ -80,7 +88,21 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
           <Header>
             <HeaderDiv>
               <H1>{artist.name}</H1>
-              <FollowArtist artistId={artist.id} />
+              <div>
+                {!isManage && <FollowArtist artistId={artist.id} />}
+                {!isManage && user?.id === artist.userId && (
+                  <Link to={`/manage/artists/${artist.id}`}>
+                    <Button
+                      compact
+                      transparent
+                      type="button"
+                      startIcon={<FaPen />}
+                    >
+                      {t("edit")}
+                    </Button>
+                  </Link>
+                )}
+              </div>
             </HeaderDiv>
             <MarkdownContent content={artist.bio} />
           </Header>
