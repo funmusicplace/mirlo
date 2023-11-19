@@ -217,6 +217,11 @@ function Home() {
             >
             <div
             className={css`
+
+              a:hover {
+                text-decoration: none !important;
+              }
+
               display: flex;
               flex-direction: column;
               align-items: center;
@@ -228,12 +233,19 @@ function Home() {
               transition: .2s ease-in-out;
               background-color: var(--mi-light-background-color);
 
+              > :last-child {
+                color: var(--mi-primary-color) !important;
+                background: var(--mi-secondary-color);
+              }
+
+
               :hover {
                 background-color: var(--mi-normal-background-color);
                 transition: .2s ease-in-out;
-              }
-              a:hover {
-                text-decoration: none !important;
+                > :last-child {
+                  background: var(--mi-primary-color);
+                  color: var(--mi-secondary-color) !important;
+                }
               }
 
               @media screen and (max-width: ${bp.medium}px) {
@@ -244,7 +256,6 @@ function Home() {
             <Box
               key={p.id}
               className={css`
-                border-bottom: solid 1px grey;
                 @media screen and (max-width: ${bp.medium}px) {
                   width: 100% !important;
                   padding: 2rem 2rem !important;
@@ -257,6 +268,7 @@ function Home() {
             >
               <div
                 className={css`
+
                   padding-bottom: 1rem;
                 `}
               >
@@ -322,7 +334,18 @@ function Home() {
                {/* <MarkdownContent content={p.content} />*/}
                {p.content}
               </span></div>
-            </Box></div></Link>
+            </Box>
+            <div
+              className={css`
+                color: var(--mi-normal-background-color) !important;
+                text-align: center;
+                width: 100%;
+                height: 100%;
+                transition: 0.2s ease-in-out;
+              `}
+            >
+              read more
+            </div></div></Link>
           ))}
         </>
       )}
