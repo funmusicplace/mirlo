@@ -38,6 +38,7 @@ model User {
   passwordResetConfirmationExpiration DateTime?
   stripeAccountId                     String?
   receiveMailingList                  Boolean                  @default(false)
+  UserTrackGroupWishlist              UserTrackGroupWishlist[]
 }
 
 model Post {
@@ -160,6 +161,16 @@ model UserTrackGroupPurchase {
   @@unique([userId, trackGroupId])
 }
 
+model UserTrackGroupWishlist {
+  userId       Int
+  user         User       @relation(fields: [userId], references: [id])
+  trackGroupId Int
+  trackGroup   TrackGroup @relation(fields: [trackGroupId], references: [id])
+  createdAt    DateTime   @default(now())
+
+  @@unique([userId, trackGroupId])
+}
+
 model TrackGroup {
   id                      Int                      @id @default(autoincrement())
   about                   String?
@@ -182,6 +193,7 @@ model TrackGroup {
   stripeProductKey        String?
   urlSlug                 String
   credits                 String?
+  UserTrackGroupWishlist  UserTrackGroupWishlist[]
 
   @@unique([artistId, urlSlug])
 }
