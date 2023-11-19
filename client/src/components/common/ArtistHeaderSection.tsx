@@ -146,7 +146,7 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
                   </Link>
                 )}
               </div>
-              </div>
+            </HeaderDiv>
             <MarkdownContent content={artist.bio} />
           </Header>
         </div>
