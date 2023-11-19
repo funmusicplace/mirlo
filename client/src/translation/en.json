@@ -37,6 +37,7 @@
   },
   "headerMenu": {
     "logOutSuccess": "Logged out!",
+    "collection": "Collection",
     "logOut": "Log out",
     "profile": "Profile",
     "manage": "Manage artists",
@@ -63,7 +64,9 @@
     "deleteAccount": "Delete account",
     "changingEmailDisabled": "Changing your email has been disabled for now. Please contact an admin if you want to do so",
     "collectionEmpty": "There's nothing in your collection yet, support some artists and buy their music!",
-    "yourCollection" : "Your collection"
+    "yourCollection": "Your collection",
+    "collection": "Collection",
+    "wishlist": "Wishlist"
   },
   "trackGroupCard": {
     "notLoggedIn": "We'll need your email address to send you a one-time download link of the album. In the future you'll be able to create an account and access what you've bought.",

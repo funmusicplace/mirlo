@@ -74,13 +74,14 @@ const EditTrackRow: React.FC<{
           packet
         );
 
-        const jobInfo = await api.uploadFile(
-          `users/${userId}/tracks/${trackId}/audio`,
-          [formData.trackFile[0]]
-        );
-        const jobId = jobInfo.result.jobId;
-        setUploadJobs([{ jobId, jobStatus: "waiting" }]);
-
+        if (formData.trackFile.length > 0) {
+          const jobInfo = await api.uploadFile(
+            `users/${userId}/tracks/${trackId}/audio`,
+            [formData.trackFile[0]]
+          );
+          const jobId = jobInfo.result.jobId;
+          setUploadJobs([{ jobId, jobStatus: "waiting" }]);
+        }
         snackbar(t("updatedTrack"), { type: "success" });
       } catch (e) {
         console.error(e);

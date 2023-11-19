@@ -84,6 +84,7 @@ const ManageTrackRow: React.FC<{
       <td>
         <TrackRowPlayControl
           trackId={track.id}
+          canPlayTrack={true}
           trackNumber={track.order}
           onTrackPlayCallback={addTracksToQueue}
           isDisabled={isDisabled}

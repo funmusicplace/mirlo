@@ -106,6 +106,16 @@ const Menu: React.FC = (props) => {
             <Button
               onClick={() => {
                 setIsMenuOpen(false);
+                navigate("/profile/collection");
+              }}
+            >
+              {t("collection")}
+            </Button>
+          </li>
+          <li>
+            <Button
+              onClick={() => {
+                setIsMenuOpen(false);
                 navigate("/manage");
               }}
             >

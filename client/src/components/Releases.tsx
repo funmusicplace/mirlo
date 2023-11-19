@@ -19,10 +19,10 @@ const Releases = () => {
 
   return (
     <div
-        className={css`
+      className={css`
         margin-top: 1rem;
-        `}
-      >
+      `}
+    >
       <h2>{t("recentReleases")}</h2>
       <div
         className={css`

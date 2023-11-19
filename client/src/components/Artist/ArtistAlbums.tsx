@@ -24,52 +24,53 @@ const ArtistAlbums: React.FC<{ artist: Artist }> = ({ artist }) => {
 
   return (
     <ArtistSection>
-    <div
-      style={{ marginTop: "0rem" }}
-      className={css`
+      <div
+        style={{ marginTop: "0rem" }}
+        className={css`
           margin-bottom: 2rem;
-        @media screen and (max-width: ${bp.medium}px) {
-          border-radius: 0;
-          background: var(--mi-light-background-color);
-        }
-      `}
-    >
-      <div
-        className={css`
-          padding-top: 0.5rem;
-          display: flex;
-          justify-content: space-between;
-          flex-wrap: wrap;
-          align-items: center;
-
           @media screen and (max-width: ${bp.medium}px) {
-            padding: 0rem 0rem 0rem;
+            border-radius: 0;
+            background: var(--mi-light-background-color);
           }
         `}
       >
-        <h2>{t("releases")}</h2>
-        {ownedByUser && (
-          <Link to={`/manage/artists/${artist.id}`}>
-            <Button compact transparent startIcon={<FaPen />}>
-              {t("edit")}
-            </Button>
-          </Link>
-        )}
+        <div
+          className={css`
+            padding-top: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            align-items: center;
+
+            @media screen and (max-width: ${bp.medium}px) {
+              padding: 0rem 0rem 0rem;
+            }
+          `}
+        >
+          <h2>{t("releases")}</h2>
+          {ownedByUser && (
+            <Link to={`/manage/artists/${artist.id}`}>
+              <Button compact transparent startIcon={<FaPen />}>
+                {t("edit")}
+              </Button>
+            </Link>
+          )}
+        </div>
+        <div
+          className={css`
+            display: flex;
+            flex-wrap: wrap;
+
+            @media screen and (max-width: ${bp.medium}px) {
+              padding: 0rem 0rem 1rem 0rem;
+            }
+          `}
+        >
+          {artist.trackGroups?.map((trackGroup) => (
+            <ArtistTrackGroup key={trackGroup.id} trackGroup={trackGroup} />
+          ))}
+        </div>
       </div>
-      <div
-        className={css`
-          display: flex;
-          flex-wrap: wrap;
-
-          @media screen and (max-width: ${bp.medium}px) {
-            padding: 0rem 0rem 1rem 0rem;
-          }
-        `}
-      >
-        {artist.trackGroups?.map((trackGroup) => (
-          <ArtistTrackGroup key={trackGroup.id} trackGroup={trackGroup} />
-        ))}
-      </div></div>
     </ArtistSection>
   );
 };

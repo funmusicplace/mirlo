@@ -88,6 +88,7 @@ const routes = [
   "users/{userId}/subscriptions",
   "users/{userId}/subscriptions/{subscriptionId}",
   "users/{userId}/purchases",
+  "users/{userId}/wishlist",
   "users/{userId}/stripe/connect",
   "users/{userId}/stripe/checkAccountStatus",
   "users/{userId}/feed",

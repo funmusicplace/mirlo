@@ -13,6 +13,7 @@ import { useGlobalStateContext } from "state/GlobalState";
 import UploadArtistImage from "./UploadArtistImage";
 import { useTranslation } from "react-i18next";
 import ColorInput from "./ColorInput";
+import { useArtistContext } from "state/ArtistContext";
 
 export interface ShareableTrackgroup {
   creatorId: number;
@@ -26,7 +27,7 @@ export const ArtistForm: React.FC<{
   reload: () => Promise<void>;
 }> = ({ open, onClose, reload, existing }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artistForm" });
-
+  const { refresh } = useArtistContext();
   const snackbar = useSnackbar();
   const { state } = useGlobalStateContext();
   const [isSaving, setIsSaving] = React.useState(false);
@@ -88,9 +89,11 @@ export const ArtistForm: React.FC<{
 
   const existingId = existing?.id;
 
+  const userId = state.user?.id;
+
   const soSave = React.useCallback(
     async (data: Partial<Artist>) => {
-      if (state.user?.id) {
+      if (userId) {
         try {
           setIsSaving(true);
           const sending = pick(data, [
@@ -101,16 +104,17 @@ export const ArtistForm: React.FC<{
           ]);
           sending.urlSlug = sending.urlSlug?.toLowerCase();
           if (existingId) {
-            await api.put(`users/${state.user.id}/artists/${existingId}`, {
+            await api.put(`users/${userId}/artists/${existingId}`, {
               ...sending,
             });
           } else {
-            await api.post(`users/${state.user.id}/artists`, {
+            await api.post(`users/${userId}/artists`, {
               ...sending,
             });
           }
 
           await reload();
+          await refresh();
           if (!existingId) {
             onClose();
           }
@@ -123,7 +127,7 @@ export const ArtistForm: React.FC<{
         }
       }
     },
-    [reload, onClose, existingId, snackbar, state.user, t]
+    [userId, existingId, reload, refresh, snackbar, t, onClose]
   );
 
   return (

@@ -67,7 +67,7 @@ const ManageArtist: React.FC<{}> = () => {
   return (
     <ArtistPageWrapper artistBanner={!!artistBanner}>
       <>
-        <ArtistHeaderSection artist={artist} />
+        <ArtistHeaderSection artist={artist} isManage />
 
         {!artist.enabled && (
           <div

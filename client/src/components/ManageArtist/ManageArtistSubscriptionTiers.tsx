@@ -1,8 +1,6 @@
 import { css } from "@emotion/css";
-import Button from "components/common/Button";
 import Modal from "components/common/Modal";
 import React from "react";
-import api from "services/api";
 import { bp } from "../../constants";
 import { useGlobalStateContext } from "state/GlobalState";
 import ManageSubscriptionTierBox from "./ManageSubscriptionTierBox";
@@ -11,17 +9,14 @@ import { useTranslation } from "react-i18next";
 import { useArtistContext } from "state/ArtistContext";
 import useGetUserObjectById from "utils/useGetUserObjectById";
 import { useParams } from "react-router-dom";
+import ArtistSubscriberDataDownload from "./ArtistSubscriberDataDownload";
+import HeaderDiv from "components/common/HeaderDiv";
 
 const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
   const {
     state: { user },
   } = useGlobalStateContext();
-  const { t } = useTranslation("translation", {
-    keyPrefix: "manageSubscriptions",
-  });
 
-  const [isLoadingSubscriberData, setIsLoadingSubscriberData] =
-    React.useState(false);
   const {
     state: { artist },
   } = useArtistContext();
@@ -38,25 +33,6 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
 
   const { t: tManage } = useTranslation("translation", { keyPrefix: "manage" });
 
-  const userId = user?.id;
-
-  const downloadSubscriberData = React.useCallback(async () => {
-    setIsLoadingSubscriberData(true);
-    try {
-      if (userId && artistId) {
-        await api.getFile(
-          "artist-subscribers",
-          `users/${userId}/artists/${artistId}/subscriptionTiers/download`,
-          "text/csv"
-        );
-      }
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setIsLoadingSubscriberData(false);
-    }
-  }, [artistId, userId]);
-
   if (!artist) {
     return null;
   }
@@ -72,7 +48,11 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
         }
       `}
     >
-      <h2>{tManage("subscriptionTiers")}</h2>
+      <HeaderDiv>
+        <h2>{tManage("subscriptionTiers")}</h2>
+
+        <ArtistSubscriberDataDownload />
+      </HeaderDiv>
       <div
         className={css`
           margin-bottom: 1rem;
@@ -87,18 +67,7 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
           />
         ))}
       </div>
-      <div
-        className={css`
-          padding-bottom: 2rem;
-        `}
-      >
-        <Button
-          onClick={downloadSubscriberData}
-          isLoading={isLoadingSubscriberData}
-        >
-          {t("downloadSubscriberData")}
-        </Button>
-      </div>
+
       {manageTier && (
         <Modal
           open={!!manageTier}
