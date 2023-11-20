@@ -1,5 +1,5 @@
 import { css } from "@emotion/css";
-import { Link, useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { bp } from "../../constants";
 import { MetaCard } from "components/common/MetaCard";
 import styled from "@emotion/styled";
@@ -62,15 +62,12 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
   const {
     state: { user },
   } = useGlobalStateContext();
-  const { trackGroupId } = useParams();
-
-  const artistBanner = artist?.banner?.sizes;
 
   return (
     <div
       className={css`
         margin-bottom: 1rem;
-        padding-top: .5rem;
+        padding-top: 0.5rem;
         @media screen and (max-width: ${bp.medium}px) {
           margin-bottom: 0rem;
         }
@@ -81,86 +78,50 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
         description={artist.bio}
         image={artist.avatar?.sizes?.[500] ?? artist?.banner?.sizes?.[625]}
       />
-      {artistBanner && (!trackGroupId || isManage) && (
-        <div
-          className={css`
-            display: flex;
-            overflow: hidden;
-            align-items: flex-end;
-            justify-content: space-around;
-
-            @media screen and (max-width: ${bp.medium}px) {
-              background: var(--mi-normal-background-color);
-            }
-          `}
-        >
-          <Header>
-            <HeaderDiv className={css`
-            display: flex;
-            align-items: center;
-          `}>
-              <div><H1>{artist.name}</H1></div>
-              <div>
-                {!isManage && <FollowArtist artistId={artist.id}/>}
-                {!isManage && user?.id === artist.userId && (
-                  <Link to={`/manage/artists/${artist.id}`}>
-                    <Button
-                      compact
-                      transparent
-                      type="button"
-                      startIcon={<FaPen />}
-                    >
-                      {t("edit")}
-                    </Button>
-                  </Link>
-                )}
-              </div>
-
-            </HeaderDiv>
-            <div className={css` filter: brightness(75%); opacity: .8;`}>
-            <MarkdownContent content={artist.bio}/>
-            </div>
-          </Header>
-        </div>
-      )}
-
-      {(!artistBanner || trackGroupId) && (
-        <div
-          className={css`
-            display: flex;
-            overflow: hidden;
-            align-items: flex-end;
-            justify-content: space-around;
-          `}
-        >
-          <Header>
-            <HeaderDiv className={css`
-            display: flex;
-            align-items: center;
-          `}>
-            <div><H1>{artist.name}</H1></div>
+      <div
+        className={css`
+          display: flex;
+          overflow: hidden;
+          align-items: flex-end;
+          justify-content: space-around;
+        `}
+      >
+        <Header>
+          <HeaderDiv
+            className={css`
+              display: flex;
+              align-items: center;
+            `}
+          >
             <div>
-                {!isManage && <FollowArtist artistId={artist.id}/>}
-                {!isManage && user?.id === artist.userId && (
-                  <Link to={`/manage/artists/${artist.id}`}>
-                    <Button
-                      compact
-                      transparent
-                      type="button"
-                      startIcon={<FaPen />}
-                    >
-                      {t("edit")}
-                    </Button>
-                  </Link>
-                )}
-              </div>
-            </HeaderDiv>
-            <div className={css` filter: brightness(75%); opacity: .8;`}>
-            <MarkdownContent content={artist.bio}/>
+              <H1>{artist.name}</H1>
             </div>
-          </Header>
-        </div>
-      )}
+            <div>
+              {!isManage && <FollowArtist artistId={artist.id} />}
+              {!isManage && user?.id === artist.userId && (
+                <Link to={`/manage/artists/${artist.id}`}>
+                  <Button
+                    compact
+                    transparent
+                    type="button"
+                    startIcon={<FaPen />}
+                  >
+                    {t("edit")}
+                  </Button>
+                </Link>
+              )}
+            </div>
+          </HeaderDiv>
+          <div
+            className={css`
+              filter: brightness(75%);
+              opacity: 0.8;
+            `}
+          >
+            <MarkdownContent content={artist.bio} />
+          </div>
+        </Header>{" "}
+      </div>
     </div>
   );
 };

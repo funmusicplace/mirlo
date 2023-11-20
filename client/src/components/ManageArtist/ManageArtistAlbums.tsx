@@ -6,10 +6,11 @@ import api from "services/api";
 import { useGlobalStateContext } from "state/GlobalState";
 import TrackGroupCard from "./TrackGroupCard";
 import { useTranslation } from "react-i18next";
-import { bp } from "../../constants";
 import { useArtistContext } from "state/ArtistContext";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import { FaPlus } from "react-icons/fa";
+import HeaderDiv from "components/common/HeaderDiv";
+import ManageSectionWrapper from "./ManageSectionWrapper";
 
 const ManageArtistAlbums: React.FC<{}> = () => {
   const {
@@ -39,25 +40,8 @@ const ManageArtistAlbums: React.FC<{}> = () => {
   }, [fetchTrackGroups]);
 
   return (
-    <div
-      className={css`
-        padding: 0.5rem 0 2rem 0;
-        @media screen and (max-width: ${bp.medium}px) {
-          border-radius: 0;
-          padding-top: .5rem;
-          padding: var(--mi-side-paddings-xsmall);
-        }
-      `}
-    >
-      <div
-        className={css`
-          display: flex;
-          width: 100%;
-          justify-content: space-between;
-          align-items: flex-start;
-          margin-bottom: 0.5rem;
-        `}
-      >
+    <ManageSectionWrapper>
+      <HeaderDiv>
         <h2>{t("yourAlbums")}</h2>
 
         <Link to="new-release">
@@ -65,7 +49,7 @@ const ManageArtistAlbums: React.FC<{}> = () => {
             {t("addNewAlbum")}
           </Button>
         </Link>
-      </div>
+      </HeaderDiv>
       {isLoading && <LoadingBlocks />}
       {trackGroups.length > 0 && (
         <div
@@ -82,7 +66,7 @@ const ManageArtistAlbums: React.FC<{}> = () => {
           ))}
         </div>
       )}
-    </div>
+    </ManageSectionWrapper>
   );
 };
 
