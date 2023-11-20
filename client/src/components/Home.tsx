@@ -249,7 +249,7 @@ function Home() {
               }
 
               @media screen and (max-width: ${bp.medium}px) {
-                padding: 0rem !important;
+                padding: 0rem !important;}
               `}
             >
 

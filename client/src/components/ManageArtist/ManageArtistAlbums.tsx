@@ -44,7 +44,8 @@ const ManageArtistAlbums: React.FC<{}> = () => {
         padding: 0.5rem 0 2rem 0;
         @media screen and (max-width: ${bp.medium}px) {
           border-radius: 0;
-          padding: .5rem 0.5rem 0rem;
+          padding-top: .5rem;
+          padding: var(--mi-side-paddings-xsmall);
         }
       `}
     >

@@ -144,7 +144,9 @@ function App() {
                     padding: 0rem 0rem 0rem;
 
                     > div {
-                      padding: 0.5rem 0.5rem 0.5rem;
+                      padding: var(--mi-side-paddings-xsmall);
+                      padding-top: 0.5rem;
+                      padding-bottom: 0.5rem;
                     }
                   }
                 `}

@@ -63,7 +63,7 @@ const ArtistTrackGroup: React.FC<{
           }
 
           @media screen and (max-width: ${bp.small}px) {
-            font-size: 0.8rem;
+            font-size: var(--mi-font-size-small);
           }
         }
       `}
@@ -100,7 +100,7 @@ const ArtistTrackGroup: React.FC<{
                 margin-bottom: 0.2rem;
               }
               a:last-child {
-                font-size: 0.8rem;
+                font-size: font-size: var(--mi-font-size-small);
                 font-weight: bold;
               }
 

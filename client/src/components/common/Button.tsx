@@ -33,7 +33,7 @@ const CustomButton = styled.button<Compactable>`
     cursor: pointer;
   }
   @media screen and (max-width: ${bp.small}px) {
-    font-size: 0.7rem;
+    font-size: 0.8rem;
   }
 
   ${(props) => (props.uppercase ? "text-transform: uppercase;" : "")}

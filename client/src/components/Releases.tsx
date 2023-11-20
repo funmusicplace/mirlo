@@ -3,6 +3,7 @@ import ArtistTrackGroup from "./Artist/ArtistTrackGroup";
 import api from "services/api";
 import { css } from "@emotion/css";
 import { useTranslation } from "react-i18next";
+import { bp } from "../constants";
 
 const Releases = () => {
   const { t } = useTranslation("translation", { keyPrefix: "releases" });
@@ -21,6 +22,10 @@ const Releases = () => {
     <div
       className={css`
         margin-top: 1rem;
+
+        @media screen and (max-width: ${bp.medium}px) {
+            margin-top: 0rem;
+          }
       `}
     >
       <h2>{t("recentReleases")}</h2>

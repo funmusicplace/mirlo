@@ -92,7 +92,9 @@ const Header = () => {
           }
 
           @media screen and (max-width: ${bp.medium}px) {
-            padding: 0.5rem 0.5rem;
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+            padding: var(--mi-side-paddings-xsmall);
             ${artistBanner ? "background-color: transparent;" : ""}
             border-bottom: 1px solid transparent;
             //--header-cover-sticky-height: 48px;

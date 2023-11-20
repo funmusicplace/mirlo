@@ -41,13 +41,18 @@ const ArtistAlbums: React.FC<{ artist: Artist }> = ({ artist }) => {
             justify-content: space-between;
             flex-wrap: wrap;
             align-items: center;
+            margin-bottom: 0.7rem;
 
             @media screen and (max-width: ${bp.medium}px) {
               padding: 0rem 0rem 0rem;
             }
           `}
         >
-          <h2>{t("releases")}</h2>
+          <h2
+          className={css`
+            margin-bottom: 0rem;
+          `}
+        >{t("releases")}</h2>
           {ownedByUser && (
             <Link to={`/manage/artists/${artist.id}`}>
               <Button compact transparent startIcon={<FaPen />}>
