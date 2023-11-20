@@ -5,10 +5,15 @@ import {
 } from "../../../../../../auth/passport";
 import prisma from "../../../../../../../prisma/prisma";
 import { convertURLArrayToSizes } from "../../../../../../utils/images";
-import { finalArtistBannerBucket } from "../../../../../../utils/minio";
+import {
+  finalArtistAvatarBucket,
+  finalArtistBannerBucket,
+} from "../../../../../../utils/minio";
 import {
   deleteArtist,
   findArtistIdForURLSlug,
+  processSingleArtist,
+  singleInclude,
 } from "../../../../../../utils/artist";
 
 type Params = {
@@ -99,7 +104,7 @@ export default function () {
     },
   };
 
-  async function GET(req: Request, res: Response) {
+  async function GET(req: Request, res: Response, next: NextFunction) {
     const { userId, artistId } = req.params as unknown as Params;
     const castArtistId = await findArtistIdForURLSlug(artistId);
 
@@ -109,28 +114,16 @@ export default function () {
           id: Number(castArtistId),
           userId: Number(userId),
         },
-        include: {
-          banner: {
-            select: {
-              id: true,
-              url: true,
-            },
-          },
-        },
+        include: singleInclude,
       });
+
+      if (!artist) {
+        res.status(404);
+        return next();
+      }
+
       res.json({
-        result: {
-          ...artist,
-          banner: {
-            ...artist?.banner,
-            sizes: artist?.banner?.url
-              ? convertURLArrayToSizes(
-                  artist?.banner.url,
-                  finalArtistBannerBucket
-                )
-              : undefined,
-          },
-        },
+        result: processSingleArtist(artist, Number(userId)),
       });
     } else {
       res.status(400);

@@ -14,11 +14,43 @@ import UploadArtistImage from "./UploadArtistImage";
 import { useTranslation } from "react-i18next";
 import ColorInput from "./ColorInput";
 import { useArtistContext } from "state/ArtistContext";
+import useJobStatusCheck from "utils/useJobStatusCheck";
 
 export interface ShareableTrackgroup {
   creatorId: number;
   slug: string;
 }
+
+type FormData = {
+  name: string;
+  bio: string;
+  urlSlug: string;
+  banner: File[];
+  avatar: File[];
+  properties: {
+    colors: {
+      primary: string;
+      secondary: string;
+      background: string;
+      foreground: string;
+    };
+  };
+};
+
+const generateDefaults = (existing?: Artist) => ({
+  name: existing?.name ?? "",
+  bio: existing?.bio ?? "",
+  urlSlug: existing?.urlSlug ?? "",
+  properties: {
+    colors: {
+      primary: "",
+      secondary: "",
+      background: "",
+      foreground: "",
+    },
+    ...existing?.properties,
+  },
+});
 
 export const ArtistForm: React.FC<{
   existing?: Artist;
@@ -31,42 +63,29 @@ export const ArtistForm: React.FC<{
   const snackbar = useSnackbar();
   const { state } = useGlobalStateContext();
   const [isSaving, setIsSaving] = React.useState(false);
-  const defaultValues = {
-    name: "",
-    bio: "",
-    urlSlug: "",
-    ...existing,
-    properties: {
-      colors: {
-        primary: "",
-        secondary: "",
-        background: "",
-        foreground: "",
-      },
-      ...existing?.properties,
-    },
-  };
-  const methods = useForm<{
-    name: string;
-    bio: string;
-    urlSlug: string;
-    properties: {
-      colors: {
-        primary: string;
-        secondary: string;
-        background: string;
-        foreground: string;
-      };
-    };
-  }>({
-    defaultValues,
+
+  const methods = useForm<FormData>({
+    defaultValues: generateDefaults(existing),
   });
 
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = methods;
+
+  const resetWrapper = React.useCallback(() => {
+    reset(generateDefaults(existing));
+  }, [existing, reset]);
+
+  const { uploadJobs: uploadBannerJobs, setUploadJobs: setUploadBanner } =
+    useJobStatusCheck({ reload, reset: resetWrapper });
+  const { uploadJobs: uploadAvatarJobs, setUploadJobs: setUploadAvatar } =
+    useJobStatusCheck({
+      reload,
+      reset: resetWrapper,
+    });
 
   const validation = React.useCallback(
     async (value: string) => {
@@ -92,7 +111,7 @@ export const ArtistForm: React.FC<{
   const userId = state.user?.id;
 
   const soSave = React.useCallback(
-    async (data: Partial<Artist>) => {
+    async (data: FormData) => {
       if (userId) {
         try {
           setIsSaving(true);
@@ -113,6 +132,37 @@ export const ArtistForm: React.FC<{
             });
           }
 
+          const jobIds = [];
+          if (
+            existingId &&
+            data.banner[0] &&
+            typeof data.banner[0] !== "string"
+          ) {
+            const jobInfo = await api.uploadFile(
+              `users/${userId}/artists/${existingId}/banner`,
+              data.banner
+            );
+            jobIds.push(jobInfo.result.jobId);
+
+            setUploadBanner([
+              { jobId: jobInfo.result.jobId, jobStatus: "waiting" },
+            ]);
+          }
+
+          if (
+            existingId &&
+            data.avatar[0] &&
+            typeof data.avatar[0] !== "string"
+          ) {
+            const jobInfo = await api.uploadFile(
+              `users/${userId}/artists/${existingId}/avatar`,
+              data.avatar
+            );
+
+            setUploadAvatar([
+              { jobId: jobInfo.result.jobId, jobStatus: "waiting" },
+            ]);
+          }
           await reload();
           await refresh();
           if (!existingId) {
@@ -127,7 +177,17 @@ export const ArtistForm: React.FC<{
         }
       }
     },
-    [userId, existingId, reload, refresh, snackbar, t, onClose]
+    [
+      userId,
+      existingId,
+      reload,
+      refresh,
+      snackbar,
+      t,
+      setUploadBanner,
+      setUploadAvatar,
+      onClose,
+    ]
   );
 
   return (
@@ -146,20 +206,28 @@ export const ArtistForm: React.FC<{
               imageType="banner"
               height="125px"
               width="100%"
-              maxDimensions="2500x500"
+              maxDimensions="2500x2500"
+              isLoading={
+                uploadBannerJobs?.[0]?.jobStatus !== undefined &&
+                uploadBannerJobs?.[0]?.jobStatus !== "completed"
+              }
             />
           )}
 
-          {/* {existing && (
-          <UploadArtistImage
-            existing={existing}
-            reload={reload}
-            imageType="avatar"
-            height="120px"
-            width="120px"
-            maxDimensions="1500x1500"
-          />
-        )} */}
+          {existing && (
+            <UploadArtistImage
+              existing={existing}
+              reload={reload}
+              imageType="avatar"
+              height="120px"
+              width="120px"
+              maxDimensions="1500x1500"
+              isLoading={
+                uploadAvatarJobs?.[0]?.jobStatus !== undefined &&
+                uploadAvatarJobs?.[0]?.jobStatus !== "completed"
+              }
+            />
+          )}
 
           <div
             className={css`
@@ -204,7 +272,7 @@ export const ArtistForm: React.FC<{
               {errors.urlSlug && (
                 <small className="error">
                   {errors.urlSlug.type === "unique" &&
-                    " This needs to be unique, try something else"}
+                    "This needs to be unique, try something else"}
                 </small>
               )}
             </FormComponent>

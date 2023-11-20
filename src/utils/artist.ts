@@ -2,10 +2,22 @@ import {
   User,
   ArtistUserSubscription,
   ArtistSubscriptionTier,
+  Artist,
+  Post,
+  ArtistBanner,
+  ArtistAvatar,
+  TrackGroup,
+  TrackGroupCover,
+  Track,
+  Prisma,
 } from "@prisma/client";
 import prisma from "../../prisma/prisma";
 import stripe from "./stripe";
-import { deleteTrackGroup } from "./trackGroup";
+import trackGroupProcessor, { deleteTrackGroup } from "./trackGroup";
+import postProcessor from "./post";
+import { convertURLArrayToSizes } from "./images";
+import { finalArtistAvatarBucket, finalArtistBannerBucket } from "./minio";
+import { DefaultArgs } from "@prisma/client/runtime/library";
 
 export const checkIsUserSubscriber = async (user: User, artistId: number) => {
   let userSubscriber = false;
@@ -150,4 +162,74 @@ export const deleteStripeSubscriptions = async (
       }
     })
   );
+};
+
+export const singleInclude: Prisma.ArtistInclude<DefaultArgs> = {
+  trackGroups: {
+    where: {
+      published: true,
+      tracks: { some: { audio: { uploadState: "SUCCESS" } } },
+    },
+    include: {
+      tracks: {
+        where: { deletedAt: null },
+      },
+      cover: true,
+    },
+  },
+  banner: true,
+  avatar: true,
+  subscriptionTiers: {
+    where: {
+      deletedAt: null,
+      isDefaultTier: false,
+    },
+    orderBy: {
+      minAmount: "asc",
+    },
+  },
+  posts: {
+    where: {
+      publishedAt: {
+        lte: new Date(),
+      },
+      deletedAt: null,
+    },
+  },
+};
+
+interface LocalArtist extends Artist {
+  posts: Post[];
+  banner: ArtistBanner | null;
+  avatar: ArtistAvatar | null;
+  trackGroups: (TrackGroup & {
+    cover?: TrackGroupCover | null;
+    tracks?: Track[];
+  })[];
+}
+
+export const processSingleArtist = (
+  artist: LocalArtist,
+  userId?: number,
+  isUserSubscriber?: boolean
+) => {
+  return {
+    ...artist,
+    posts: artist?.posts.map((p: Post) =>
+      postProcessor.single(p, isUserSubscriber || artist.userId === userId)
+    ),
+    banner: {
+      ...artist?.banner,
+      sizes:
+        artist?.banner &&
+        convertURLArrayToSizes(artist?.banner?.url, finalArtistBannerBucket),
+    },
+    avatar: {
+      ...artist?.avatar,
+      sizes:
+        artist?.avatar &&
+        convertURLArrayToSizes(artist?.avatar?.url, finalArtistAvatarBucket),
+    },
+    trackGroups: artist?.trackGroups.map(trackGroupProcessor.single),
+  };
 };

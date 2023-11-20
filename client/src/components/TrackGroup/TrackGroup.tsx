@@ -111,77 +111,83 @@ function TrackGroup() {
             }
           `}
         >
-        <div
-          className={css`
-            display: flex;
-            margin-top: 1rem;
-            align-items: center;
-            justify-content: space-between;
-            align-items: flex-start;
-          `}
-        >
-          <div>
-            <h1
-              className={css`
-                font-size: 32px;
-                line-height: 42px;
-                margin-bottom: .2rem;
-              `}
-            >
-              {trackGroup.title}
-            </h1>
-          </div>
-        </div>
-
-        <div
-          className={css`
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: .6rem;
-          `}
-        >
-        <div>
-        {artist && (
-          <em
-            className={css`
-              font-size: 18px;
-              font-style: normal;
-            `}
-          >
-            by{" "}
-            <Link to={`/${artist.urlSlug?.toLowerCase() ?? artist.id}`}>
-              {artist?.name}
-            </Link>
-          </em>
-        )}
-        </div>
           <div
             className={css`
-              text-align: right;
               display: flex;
+              margin-top: 1rem;
               align-items: center;
+              justify-content: space-between;
+              align-items: flex-start;
             `}
           >
-            {ownedByUser && (
-              <Link
-                to={`/manage/artists/${artist.id}/release/${trackGroup.id}`}
-                style={{ marginRight: "1rem" }}
+            <div>
+              <h1
+                className={css`
+                  font-size: 32px;
+                  line-height: 42px;
+                  margin-bottom: 0.2rem;
+                `}
               >
-                <Button compact startIcon={<FaPen />}>
-                  {t("edit")}
-                </Button>
-              </Link>
-            )}
-
-            <PurchaseOrDownloadAlbum trackGroup={trackGroup}/>
-            {user?.isAdmin && (<div className={css`padding-left: 1rem; `}>
-              <DropdownMenu compact>
-                <TrackGroupAdminMenu trackGroup={trackGroup} />
-              </DropdownMenu></div>
-            )}
+                {trackGroup.title}
+              </h1>
+            </div>
           </div>
-        </div>
+
+          <div
+            className={css`
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              margin-bottom: 0.6rem;
+            `}
+          >
+            <div>
+              {artist && (
+                <em
+                  className={css`
+                    font-size: 18px;
+                    font-style: normal;
+                  `}
+                >
+                  by{" "}
+                  <Link to={`/${artist.urlSlug?.toLowerCase() ?? artist.id}`}>
+                    {artist?.name}
+                  </Link>
+                </em>
+              )}
+            </div>
+            <div
+              className={css`
+                text-align: right;
+                display: flex;
+                align-items: center;
+              `}
+            >
+              {ownedByUser && (
+                <Link
+                  to={`/manage/artists/${artist.id}/release/${trackGroup.id}`}
+                  style={{ marginRight: "1rem" }}
+                >
+                  <Button compact startIcon={<FaPen />}>
+                    {t("edit")}
+                  </Button>
+                </Link>
+              )}
+
+              <PurchaseOrDownloadAlbum trackGroup={trackGroup} />
+              {user?.isAdmin && (
+                <div
+                  className={css`
+                    padding-left: 1rem;
+                  `}
+                >
+                  <DropdownMenu compact>
+                    <TrackGroupAdminMenu trackGroup={trackGroup} />
+                  </DropdownMenu>
+                </div>
+              )}
+            </div>
+          </div>
 
           <div
             className={css`
@@ -232,29 +238,31 @@ function TrackGroup() {
                     margin-bottom: 1rem;
                   }
                 `}
-              ><div
-                className={css`
-                  color: var(--mi-light-foreground-color);
-                  font-size: 16px;
-                  em {
-                    font-style: normal;
-                  }
-
-                  @media screen and (max-width: ${bp.medium}px) {
-                    font-size: 14px;
-                  }
-                `}
               >
-                {t("released")}{" "}
-                <em>
-                  {new Date(trackGroup.releaseDate).toLocaleDateString(
-                    "en-US",
-                    {
-                      month: "long",
-                      year: "numeric",
+                <div
+                  className={css`
+                    color: var(--mi-light-foreground-color);
+                    font-size: 16px;
+                    em {
+                      font-style: normal;
                     }
-                  )}
-                </em></div>
+
+                    @media screen and (max-width: ${bp.medium}px) {
+                      font-size: 14px;
+                    }
+                  `}
+                >
+                  {t("released")}{" "}
+                  <em>
+                    {new Date(trackGroup.releaseDate).toLocaleDateString(
+                      "en-US",
+                      {
+                        month: "long",
+                        year: "numeric",
+                      }
+                    )}
+                  </em>
+                </div>
                 <Wishlist trackGroup={trackGroup} />
               </div>
             </div>
@@ -279,8 +287,7 @@ function TrackGroup() {
         <div
           className={css`
             margin: 1.25rem 0;
-            // border-left: 0px solid var(--mi-lighten-background-color);
-            padding: 0.5rem 0 .25rem;
+            padding: 0.5rem 0 0.25rem;
           `}
         >
           <MarkdownContent content={trackGroup.about} />
@@ -289,7 +296,6 @@ function TrackGroup() {
         <div
           className={css`
             margin: 1.25rem 0;
-            // border-left: 0px solid var(--mi-lighten-background-color);
             padding: 0.5rem 0.25rem;
           `}
         >

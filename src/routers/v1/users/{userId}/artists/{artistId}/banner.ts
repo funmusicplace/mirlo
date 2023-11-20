@@ -37,16 +37,19 @@ export default function () {
     const { artistId } = req.params as unknown as Params;
 
     try {
-      // FIXME: Only allow uploading of one file.
+      let jobId = null;
       if (req.files && isFileArray(req.files)) {
-        await processArtistBanner({ req, res })(req.files[0], Number(artistId));
+        jobId = await processArtistBanner({ req, res })(
+          req.files[0],
+          Number(artistId)
+        );
       }
 
-      res.json({ message: "Success" });
+      res.json({ result: { jobId } });
     } catch (error) {
-      console.error("Cover error", error);
-      res.status(400).json({
-        error: `TrackGroup with ID ${artistId} does not exist in the database`,
+      console.error("Banner error", error);
+      res.status(500).json({
+        error: `Error occurred while processing banner for ${artistId}`,
       });
     }
   }

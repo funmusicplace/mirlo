@@ -27,7 +27,6 @@ const TrackRowPlayControl: React.FC<{
       : undefined;
 
   const onTrackPlay = React.useCallback(() => {
-    console.log("triggering play");
     onTrackPlayCallback?.(trackId);
     dispatch({ type: "setPlaying", playing: true });
   }, [dispatch, onTrackPlayCallback, trackId]);

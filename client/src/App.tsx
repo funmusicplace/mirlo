@@ -120,7 +120,7 @@ function App() {
 
                 ${isPlaying
                   ? `
-            padding-bottom: 130px;`
+            padding-bottom: 30px;`
                   : ``}
               `}
             >

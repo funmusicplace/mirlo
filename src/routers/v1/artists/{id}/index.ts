@@ -9,6 +9,8 @@ import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import {
   checkIsUserSubscriber,
   findArtistIdForURLSlug,
+  processSingleArtist,
+  singleInclude,
 } from "../../../../utils/artist";
 import {
   finalArtistAvatarBucket,
@@ -37,78 +39,22 @@ export default function () {
             id: parsedId,
             enabled: true,
           },
-          include: {
-            trackGroups: {
-              where: {
-                published: true,
-                tracks: { some: { audio: { uploadState: "SUCCESS" } } },
-              },
-              include: {
-                tracks: {
-                  where: { deletedAt: null },
-                },
-                cover: true,
-              },
-            },
-            banner: true,
-            avatar: true,
-            subscriptionTiers: {
-              where: {
-                deletedAt: null,
-                isDefaultTier: false,
-              },
-              orderBy: {
-                minAmount: "asc",
-              },
-            },
-            posts: {
-              where: {
-                publishedAt: {
-                  lte: new Date(),
-                },
-                deletedAt: null,
-              },
-            },
-          },
+          include: singleInclude,
         });
         isUserSubscriber = await checkIsUserSubscriber(user, parsedId);
-      }
 
-      if (!artist) {
+        if (!artist) {
+          res.status(404);
+          return next();
+        }
+
+        res.json({
+          result: processSingleArtist(artist, user?.id, isUserSubscriber),
+        });
+      } else {
         res.status(404);
         return next();
       }
-
-      res.json({
-        result: {
-          ...artist,
-          posts: artist?.posts.map((p: Post) =>
-            postProcessor.single(
-              p,
-              isUserSubscriber || artist.userId === user?.id
-            )
-          ),
-          banner: {
-            ...artist?.banner,
-            sizes:
-              artist?.banner &&
-              convertURLArrayToSizes(
-                artist?.banner?.url,
-                finalArtistBannerBucket
-              ),
-          },
-          avatar: {
-            ...artist?.avatar,
-            sizes:
-              artist?.avatar &&
-              convertURLArrayToSizes(
-                artist?.avatar?.url,
-                finalArtistAvatarBucket
-              ),
-          },
-          trackGroups: artist?.trackGroups.map(trackGroupProcessor.single),
-        },
-      });
     } catch (e) {
       console.error(`artist/${id}`, e);
       res.status(500);

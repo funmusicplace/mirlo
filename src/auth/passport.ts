@@ -156,31 +156,35 @@ export const trackGroupBelongsToLoggedInUser = async (
 
   const loggedInUser = req.user as User | undefined;
 
-  if (!loggedInUser) {
-    res.status(401).json({ error: "Unauthorized" });
-  } else {
-    if (loggedInUser.id !== Number(userId)) {
-      res.status(400).json({
-        error: `TrackGroup must belong to user`,
-      });
-      return next(`TrackGroup must belong to user`);
-    }
+  try {
+    if (!loggedInUser) {
+      res.status(401).json({ error: "Unauthorized" });
+    } else {
+      if (loggedInUser.id !== Number(userId)) {
+        res.status(400).json({
+          error: `TrackGroup must belong to user`,
+        });
+        return next(`TrackGroup must belong to user`);
+      }
 
-    const trackGroup = await prisma.trackGroup.findFirstOrThrow({
-      where: {
-        artist: {
-          userId: loggedInUser.id,
+      const trackGroup = await prisma.trackGroup.findFirst({
+        where: {
+          artist: {
+            userId: loggedInUser.id,
+          },
+          id: Number(trackGroupId),
         },
-        id: Number(trackGroupId),
-      },
-    });
-
-    if (!trackGroup) {
-      res.status(400).json({
-        error: "TrackGroup must belong to user",
       });
-      return next("TrackGroup must belong to user");
+
+      if (!trackGroup) {
+        res.status(400).json({
+          error: "TrackGroup must belong to user",
+        });
+        return next("TrackGroup must belong to user");
+      }
     }
+  } catch (e) {
+    return res.status(500).json({ error: "Something went wrong on the API" });
   }
   return next();
 };
@@ -207,7 +211,7 @@ export const contentBelongsToLoggedInUserArtist = async (
       return next(`Artist must belong to user`);
     }
 
-    const artist = await prisma.artist.findFirstOrThrow({
+    const artist = await prisma.artist.findFirst({
       where: {
         userId: loggedInUser.id,
         id: Number(artistId),

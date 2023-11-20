@@ -2,12 +2,14 @@ import { cloneDeep } from "lodash";
 import React from "react";
 import { useGlobalStateContext } from "state/GlobalState";
 import api from "services/api";
+import { bp } from "../../constants";
 
 import { determineNewTrackOrder } from "utils/tracks";
 import { CenteredSpinner } from "../common/Spinner";
 import Table from "../common/Table";
 import ManageTrackRow from "./ManageTrackRow";
 import { useTranslation } from "react-i18next";
+import { css } from "@emotion/css";
 
 export const ManageTrackTable: React.FC<{
   tracks: Track[];
@@ -102,7 +104,62 @@ export const ManageTrackTable: React.FC<{
   }
 
   return (
-    <Table style={{ marginBottom: "1.5rem", marginTop: "1.5rem" }}>
+    <Table
+      className={css`
+        margin-bottom: 1.5rem;
+        margin-top: 1.5rem;
+
+        @media screen and (max-width: ${bp.medium}px) {
+          display: block;
+
+          & thead,
+          tbody,
+          td,
+          tr,
+          th {
+            display: block;
+          }
+
+          thead {
+            position: absolute;
+            top: -9999px;
+            left: -9999px;
+          }
+
+          tr {
+            border: 1px solid #ccc;
+          }
+
+          td {
+            /* Behave  like a "row" */
+            border: none;
+            border-bottom: 1px solid #eee;
+            position: relative;
+            padding-left: 50%;
+            width: 100%;
+            display: flex;
+            align-items: center;
+          }
+
+          td:before {
+            /* Now like a table header */
+            display: inline-block;
+            min-width: 40%;
+            padding-right: 10px;
+            // white-space: nowrap;
+          }
+
+          td.alignRight {
+            text-align: left !important;
+          }
+        }
+        @media screen and (min-width: ${bp.medium}px) {
+          td:before {
+            display: none;
+          }
+        }
+      `}
+    >
       <thead>
         <tr>
           <th />
