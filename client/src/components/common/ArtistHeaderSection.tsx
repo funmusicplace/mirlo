@@ -28,7 +28,7 @@ const H1 = styled.h1`
 const Header = styled.div`
   display: flex;
   width: 100%;
-  flex-direction: column;
+  flex-direction: row;
   align-items: left;
   justify-content: space-between;
   flex-grow: 1;
