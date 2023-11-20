@@ -53,6 +53,9 @@ const Menu: React.FC = (props) => {
     <menu
       className={css`
         list-style: none;
+        button {
+          font-size: var(--mi-font-size-normal);
+        }
 
         & li > * {
           background: transparent !important;
@@ -67,7 +70,7 @@ const Menu: React.FC = (props) => {
           padding: 0.5rem;
 
           display: flex;
-          align-items: flex-end;
+          align-items: center;
           justify-content: flex-end;
           border: none;
 

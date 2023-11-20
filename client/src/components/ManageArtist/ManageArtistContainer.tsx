@@ -9,12 +9,7 @@ import { useArtistContext } from "state/ArtistContext";
 
 const Container = styled.div<{ artistBanner: boolean }>`
 
-
   width: 100%;
-
-  @media screen and (max-width: ${bp.medium}px) {
-    padding: var(--mi-side-paddings-xsmall);
-  }
 
   margin-top: calc(16vh);
 
@@ -22,11 +17,11 @@ const Container = styled.div<{ artistBanner: boolean }>`
   max-width: calc(1080px + 4rem);
 
   @media screen and (max-width: ${bp.medium}px) {
+    padding: var(--mi-side-paddings-xsmall);
     padding: 0rem !important;
     width: 100%;
-    // margin-top: 55px;
-    // margin-top: 30vw;
-    margin-top: 0;
+    margin-top: 0px;
+    ${(props) => (!props.artistBanner ? "margin-top: 0px;" : "")}
   }
 `;
 
@@ -35,7 +30,12 @@ export const ArtistPageWrapper: React.FC<{
   artistBanner: boolean;
 }> = ({ children, artistBanner }) => {
   return (
-    <Container artistBanner={artistBanner}>
+    <Container artistBanner={artistBanner}
+      className={css`
+        @media screen and (max-width: ${bp.medium}px) {
+        }
+      `}
+    >
       <div
         className={css`
           ${artistBanner ? "filter: drop-shadow(0 0 0.5rem rgba(50, 50, 50, 0.3));" : ""}
@@ -69,6 +69,8 @@ const ManageArtist: React.FC<{}> = () => {
   return (
     <ArtistPageWrapper artistBanner={!!artistBanner}>
       <>
+
+
         <ArtistHeaderSection artist={artist} isManage />
 
         {!artist.enabled && (

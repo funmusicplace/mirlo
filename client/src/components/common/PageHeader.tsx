@@ -32,11 +32,11 @@ const PageHeader = () => {
             //* border-bottom: solid 4px; *//
             box-shadow: inset 1em -2em 0.8em -1.3em rgba(0, 0, 0, 0.4);
             @media screen and (max-width: ${bp.medium}px) {
+              position: absolute;
               ${user ? "margin-top: 0px;" : "height: calc(34vh);"}
               // --header-cover-sticky-height: 48px;
               // top: calc(var(--header-cover-sticky-height) - 25vw);
               top: 0px;
-              position: absolute;
             }
           `}
         >

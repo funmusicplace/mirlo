@@ -165,7 +165,7 @@ const Player = () => {
 
           @media (max-width: ${bp.small}px) {
             width: 100%;
-            flex-grow: initial;
+            flex-grow: initial; 
           }
         `}
       >
@@ -181,7 +181,7 @@ const Player = () => {
             align-items: center;
             flex-grow: 1;
             paddin-right: 0.5rem;
-            font-size: 16px;
+            font-size: var(--mi-font-size-small);
             justify-content: space-between;
             background-color: #f5f0f0;
 
@@ -190,6 +190,7 @@ const Player = () => {
             }
 
             @media (max-width: ${bp.small}px) {
+              font-size: var(--mi-font-size-xsmall);
               flex-grow: initial;
               justify-content: space-between;
             }
@@ -216,13 +217,13 @@ const Player = () => {
             <div>
               <ImageWithPlaceholder
                 src={currentTrack?.trackGroup.cover?.sizes?.[120]}
-                size={45}
+                size={48}
                 alt={currentTrack?.title ?? "Loading album"}
                 className={css`
                   background-color: #efefef;
                   margin-right: 0.5rem;
                   min-height: 100%;
-                  min-width: 45px;
+                  min-width: 48px;
                 `}
               />
             </div>
@@ -251,7 +252,7 @@ const Player = () => {
                 <>
                   <div
                     className={css`
-                      font-size: 0.8rem;
+                      opacity: .6;
                       text-transform: capitalize;
                       color: grey;
                       white-space: nowrap;
@@ -267,8 +268,8 @@ const Player = () => {
                   </div>
                   <div
                     className={css`
-                    font-size: .8rem;
                     text-transform: capitalize;
+                    font-weight: bold;
                     overflow: hidden;
                     white-space: nowrap;
                     text-overflow: ellipsis;

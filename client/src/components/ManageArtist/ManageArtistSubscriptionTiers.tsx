@@ -46,7 +46,7 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
           border-radius: 0;
           padding-top: 1rem;
           padding: var(--mi-side-paddings-xsmall);
-          
+
         }
       `}
     >
