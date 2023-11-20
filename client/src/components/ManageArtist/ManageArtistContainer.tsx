@@ -13,7 +13,7 @@ const Container = styled.div<{ artistBanner: boolean }>`
   width: 100%;
 
   @media screen and (max-width: ${bp.medium}px) {
-    padding: 0rem 0.5rem 0rem;
+    padding: var(--mi-side-paddings-xsmall);
   }
 
   margin-top: calc(16vh);

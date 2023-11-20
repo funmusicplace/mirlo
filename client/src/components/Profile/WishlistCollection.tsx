@@ -33,7 +33,11 @@ function WishlistCollection() {
 
   return (
     <>
-      <div>
+      <div
+        className={css`
+          padding: var(--mi-side-paddings-xsmall);
+        `}
+      >
         <h1>{t("yourWishlist")}</h1>
         <div
           className={css`

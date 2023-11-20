@@ -13,7 +13,9 @@ export const ArtistSection = styled.div`
   background: var(--mi-light-background-color);
   margin-bottom: 2rem;
   @media screen and (max-width: ${bp.medium}px) {
-    padding: 0.5rem !important;
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+    padding: var(--mi-side-paddings-xsmall);
   }
 `;
 

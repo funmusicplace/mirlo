@@ -80,7 +80,9 @@ const ManageArtist: React.FC<{}> = () => {
           flex-direction: column;
 
           @media screen and (max-width: ${bp.medium}px) {
-            padding: 0 .5rem;
+            padding: var(--mi-side-paddings-xsmall);
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
         `}
       >
         <div>
@@ -110,7 +112,8 @@ const ManageArtist: React.FC<{}> = () => {
 
           @media screen and (max-width: ${bp.medium}px) {
             border-radius: 0;
-            padding: 1rem 0.5rem 0rem;
+            padding-top: 1rem;
+            padding: var(--mi-side-paddings-xsmall);
             > div > div {
               padding: 2rem;
             }

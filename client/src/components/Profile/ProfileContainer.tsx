@@ -17,9 +17,15 @@ const ProfileContainer: React.FC = () => {
           overflow-x: hidden;
           padding: 0 !important;
           width: 100%;
+          padding: var(--mi-side-paddings-xsmall);
         `}
       >
-        <Tabs>
+        <Tabs
+          className={css`
+            padding: var(--mi-side-paddings-xsmall);
+            margin-right: 0 !important;
+          `}
+        >
           <li>
             <NavLink end to="/profile">
               {t("profile")}

@@ -44,7 +44,9 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
 
         @media screen and (max-width: ${bp.medium}px) {
           border-radius: 0;
-          padding: 1rem 0.5rem 0rem;
+          padding-top: 1rem;
+          padding: var(--mi-side-paddings-xsmall);
+          
         }
       `}
     >

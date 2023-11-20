@@ -35,7 +35,7 @@ function Profile() {
     <>
       <div
         className={css`
-          padding: 0rem .5rem;
+          padding: var(--mi-side-paddings-xsmall);
         `}
       >
         <h1>{t("yourCollection")}</h1>

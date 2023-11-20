@@ -32,17 +32,20 @@ const Header = () => {
         z-index: 999999;
 
         @media screen and (max-width: ${bp.medium}px) {
+          position: sticky;
           ${artistBanner ? "background-color: transparent;" : ""}
           ${artistBanner ? "top: calc(var(--header-cover-sticky-height) - 24.2vw);" : ""}
           ${artistBanner ? "aspect-ratio: 4 / 1;" : ""}
           ${!artistBanner ? "border-bottom: 1px solid var(--mi-light-foreground-color);" : ""}
 
           ${trackGroupId ? "aspect-ratio: 0;" : ""}
+          ${trackGroupId ? "top: 0px;" : ""}
+          ${trackGroupId ? "position: relative;" : ""}
+
 
           border-bottom: 1px solid transparent;
 
           --header-cover-sticky-height: 55px;
-          position: sticky;
 
           z-index: 999999;
 
@@ -77,8 +80,6 @@ const Header = () => {
           align-items: center;
           padding: 0.5rem 1rem;
           background-color: #ede8e8;
-
-          position: fixed;
           width: 100%;
           z-index: 999999;
           border-bottom: 1px solid rgba(255, 255, 255, 0.2);
@@ -91,7 +92,9 @@ const Header = () => {
           }
 
           @media screen and (max-width: ${bp.medium}px) {
-            padding: 0.5rem 0.5rem;
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+            padding: var(--mi-side-paddings-xsmall);
             ${artistBanner ? "background-color: transparent;" : ""}
             border-bottom: 1px solid transparent;
             //--header-cover-sticky-height: 48px;

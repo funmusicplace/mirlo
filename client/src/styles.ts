@@ -31,6 +31,15 @@ const styles = `html {
   --mi-font-family-stack: 'Arial', -apple-system, BlinkMacSystemFont,
     'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans',
     'Droid Sans', 'Helvetica Neue', sans-serif;
+
+  --mi-font-size-normal: 1rem;
+  --mi-font-size-small: .875rem;
+  --mi-font-size-xsmall: .75rem;
+
+  --mi-side-paddings-normal: 0rem 2rem;
+  --mi-side-paddings-small: 0rem 1rem;
+  --mi-side-paddings-xsmall: 0rem 0.5rem;
+
 }
 
 

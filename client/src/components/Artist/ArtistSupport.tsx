@@ -83,8 +83,16 @@ const ArtistSupport: React.FC<{ artist: Artist }> = ({ artist }) => {
 
   return (
     <>
-      <HeaderDiv>
-        <h2>{t("support", { artist: artist.name })}</h2>
+      <HeaderDiv
+      className={css`
+        margin-bottom: 0.7rem;
+      `}
+    >
+        <h2
+        className={css`
+          margin-bottom: 0rem;
+        `}
+      >{t("support", { artist: artist.name })}</h2>
         <FollowArtist artistId={artist.id} />
       </HeaderDiv>
       {artist.subscriptionTiers.length === 0 && (

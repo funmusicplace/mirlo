@@ -61,7 +61,9 @@ export const Manage: React.FC = () => {
             margin-top: 0 !important;
           }
           @media screen and (max-width: ${bp.medium}px) {
-            padding: .5rem;
+            padding: var(--mi-side-paddings-xsmall);
+            padding-top: .5rem;
+            padding-bottom: .5rem;
           }
 
         `}
