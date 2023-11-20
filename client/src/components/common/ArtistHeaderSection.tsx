@@ -4,18 +4,17 @@ import { bp } from "../../constants";
 import { MetaCard } from "components/common/MetaCard";
 import styled from "@emotion/styled";
 import MarkdownContent from "./MarkdownContent";
-import HeaderDiv from "./HeaderDiv";
 import FollowArtist from "./FollowArtist";
 import { useGlobalStateContext } from "state/GlobalState";
 import Button from "./Button";
 import { FaPen } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
+import HeaderDiv from "./HeaderDiv";
 
 const H1 = styled.h1`
   font-size: 50px;
   font-size: 2.6vmax;
   line-height: 2.8vmax;
-  padding-top: 1.5rem;
 
   @media screen and (max-width: ${bp.medium}px) {
     font-size: 32px;
@@ -87,40 +86,56 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
         `}
       >
         <Header>
-          <HeaderDiv
-            className={css`
-              display: flex;
-              align-items: center;
-            `}
-          >
-            <div>
-              <H1>{artist.name}</H1>
-            </div>
-            <div>
-              {!isManage && <FollowArtist artistId={artist.id} />}
-              {!isManage && user?.id === artist.userId && (
-                <Link to={`/manage/artists/${artist.id}`}>
-                  <Button
-                    compact
-                    transparent
-                    type="button"
-                    startIcon={<FaPen />}
-                  >
-                    {t("edit")}
-                  </Button>
-                </Link>
-              )}
-            </div>
-          </HeaderDiv>
           <div
             className={css`
-              filter: brightness(75%);
-              opacity: 0.8;
+              display: flex;
+              padding-top: 1.5rem;
+              margin-bottom: 1.5rem;
+              align-items: flex-start;
             `}
           >
-            <MarkdownContent content={artist.bio} />
+            {artist.avatar?.sizes?.[300] && (
+              <img
+                src={artist.avatar?.sizes?.[120]}
+                alt="Artist avatar"
+                className={css`
+                  margin-right: 1rem;
+                `}
+              />
+            )}
+            <div
+              className={css`
+                width: 100%;
+              `}
+            >
+              <HeaderDiv
+                className={css`
+                  align-items: flex-start !important;
+                `}
+              >
+                <div>
+                  <H1>{artist.name}</H1>
+                </div>
+                <div>
+                  {!isManage && <FollowArtist artistId={artist.id} />}
+                  {!isManage && user?.id === artist.userId && (
+                    <Link to={`/manage/artists/${artist.id}`}>
+                      <Button
+                        compact
+                        transparent
+                        type="button"
+                        startIcon={<FaPen />}
+                      >
+                        {t("edit")}
+                      </Button>
+                    </Link>
+                  )}
+                </div>
+              </HeaderDiv>
+              <MarkdownContent content={artist.bio} />
+            </div>
           </div>
-        </Header>{" "}
+        </Header>
       </div>
     </div>
   );

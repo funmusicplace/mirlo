@@ -81,7 +81,7 @@ const ManageTrackRow: React.FC<{
         ${isDisabled ? `opacity: .5;` : ""}
       `}
     >
-      <td className={css``}>
+      <td>
         <TrackRowPlayControl
           trackId={track.id}
           canPlayTrack={true}

@@ -1,4 +1,4 @@
-import { Artist, Post } from "@prisma/client";
+import { Post } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
 import prisma from "../../prisma/prisma";
 

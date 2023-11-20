@@ -92,10 +92,12 @@ interface Artist {
   banner?: {
     url: string;
     sizes?: { [key: string]: string };
+    updatedAt: string;
   };
   avatar?: {
     url: string;
     sizes?: { [key: string]: string };
+    updatedAt: string;
   };
 }
 

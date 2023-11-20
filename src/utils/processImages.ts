@@ -95,26 +95,30 @@ export const processArtistAvatar = (ctx: APIContext) => {
       `Going to put a file on MinIO Bucket ${incomingArtistAvatarBucket}: ${image.id}, ${file.path}`
     );
 
-    minioClient
-      .fPutObject(incomingArtistBannerBucket, image.id, file.path)
-      .then((objInfo: { etag: string }) => {
-        logger.info("File put on minIO", objInfo);
-        logger.info("Adding image to queue");
+    const objInfo = await minioClient.fPutObject(
+      incomingArtistBannerBucket,
+      image.id,
+      file.path
+    );
+    logger.info("File put on minIO", objInfo);
+    logger.info("Adding image to queue");
 
-        imageQueue.add("optimize-image", {
-          filepath: file.path,
-          destination: image.id,
-          model: "artistAvatar",
-          incomingMinioBucket: incomingArtistAvatarBucket,
-          finalMinioBucket: finalArtistAvatarBucket,
-          config: sharpConfig.config["banner"],
-        });
-      });
+    const job = await imageQueue.add("optimize-image", {
+      filepath: file.path,
+      destination: image.id,
+      model: "artistAvatar",
+      incomingMinioBucket: incomingArtistAvatarBucket,
+      finalMinioBucket: finalArtistAvatarBucket,
+      config: sharpConfig.config["avatar"],
+    });
+
+    return job.id;
   };
 };
 
 export const processArtistBanner = (ctx: APIContext) => {
   return async (file: APIFile, artistId: number) => {
+    console.log("processing artist banner", file);
     await checkFileType(ctx, file, SUPPORTED_IMAGE_MIME_TYPES, logger);
 
     const image = await prisma.artistBanner.upsert({
@@ -143,21 +147,24 @@ export const processArtistBanner = (ctx: APIContext) => {
       `Going to put a file on MinIO Bucket ${incomingArtistBannerBucket}: ${image.id}, ${file.path}`
     );
 
-    minioClient
-      .fPutObject(incomingArtistBannerBucket, image.id, file.path)
-      .then((objInfo: { etag: string }) => {
-        logger.info("File put on minIO", objInfo);
-        logger.info("Adding image to queue");
+    const objInfo = await minioClient.fPutObject(
+      incomingArtistBannerBucket,
+      image.id,
+      file.path
+    );
 
-        imageQueue.add("optimize-image", {
-          filepath: file.path,
-          destination: image.id,
-          model: "artistBanner",
-          incomingMinioBucket: incomingArtistBannerBucket,
-          finalMinioBucket: finalArtistBannerBucket,
-          config: sharpConfig.config["banner"],
-        });
-      });
+    logger.info("File put on minIO", objInfo);
+    logger.info("Adding image to queue");
+
+    const job = await imageQueue.add("optimize-image", {
+      filepath: file.path,
+      destination: image.id,
+      model: "artistBanner",
+      incomingMinioBucket: incomingArtistBannerBucket,
+      finalMinioBucket: finalArtistBannerBucket,
+      config: sharpConfig.config["banner"],
+    });
+    return job.id;
   };
 };
 

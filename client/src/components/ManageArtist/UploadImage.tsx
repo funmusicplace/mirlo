@@ -25,7 +25,13 @@ const UploadImage: React.FC<{
         `}
       >
         {existingCover && (image?.length === 0 || image === undefined) && (
-          <img src={existingImage} alt="album cover" />
+          <img
+            src={existingImage}
+            className={css`
+              max-width: 120px;
+            `}
+            alt={formName}
+          />
         )}
         {image?.length > 0 && (
           <img
@@ -33,7 +39,7 @@ const UploadImage: React.FC<{
             className={css`
               max-width: 120px;
             `}
-            alt="album cover"
+            alt={formName}
           />
         )}
         {isLoading && (
@@ -53,7 +59,7 @@ const UploadImage: React.FC<{
       <InputEl
         type="file"
         id="image"
-        {...register("coverFile")}
+        {...register(formName)}
         accept="image/*"
       />
     </>

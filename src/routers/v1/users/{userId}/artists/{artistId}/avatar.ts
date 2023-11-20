@@ -4,7 +4,7 @@ import {
   artistBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../../auth/passport";
-import { processArtistBanner } from "../../../../../../utils/processImages";
+import { processArtistAvatar } from "../../../../../../utils/processImages";
 
 const upload = multer({
   dest: process.env.MEDIA_LOCATION_INCOMING ?? "/data/media/incoming",
@@ -36,12 +36,15 @@ export default function () {
     const { artistId } = req.params as unknown as Params;
 
     try {
-      // FIXME: Only allow uploading of one file.
+      let jobId = null;
       if (req.files && isFileArray(req.files)) {
-        await processArtistBanner({ req, res })(req.files[0], Number(artistId));
+        jobId = await processArtistAvatar({ req, res })(
+          req.files[0],
+          Number(artistId)
+        );
       }
 
-      res.json({ message: "Success" });
+      res.json({ result: { jobId } });
     } catch (error) {
       console.error("Cover error", error);
       res.status(400).json({

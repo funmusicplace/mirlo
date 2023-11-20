@@ -6,7 +6,6 @@ import {
   userHasPermission,
 } from "../../../../../../auth/passport";
 import processTrackGroupCover from "../../../../../../utils/processImages";
-import prisma from "../../../../../../../prisma/prisma";
 import { doesTrackGroupBelongToUser } from "../../../../../../utils/ownership";
 
 const upload = multer({
@@ -30,7 +29,6 @@ export default function () {
     PUT: [
       userAuthenticated,
       userHasPermission("owner"),
-      // upload.single("file"),
       upload.array("upload"),
       PUT,
     ],

@@ -75,7 +75,7 @@ export default {
   cover: generateFullStaticImageUrl,
   single: (
     tg: TrackGroup & {
-      cover: TrackGroupCover | null;
+      cover?: TrackGroupCover | null;
       tracks?: Track[];
     }
   ) => ({
