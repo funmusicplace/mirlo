@@ -53,10 +53,10 @@ function Profile() {
                 flex-direction: row;
                 flex-wrap: wrap;
                 a:first-child {
-                  font-size: .9rem;
+                  font-size: var(--mi-font-size-small);
                 }
                 a:last-child {
-                  font-size: .8rem;
+                  ffont-size: var(--mi-font-size-small);
                 }
 
                 > div {
