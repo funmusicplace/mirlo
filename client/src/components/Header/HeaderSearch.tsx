@@ -66,14 +66,13 @@ const HeaderSearch: React.FC = () => {
           @media screen and (max-width: ${bp.medium}px) {
             opacity: .7;
           }
-
           @media (prefers-color-scheme: dark) {
+            color: var(--mi-black) !important;
             &::placeholder {
               color: var(--mi-black) !important;
               opacity: 0.3;
             }
           }
-
 
         `}
       />
@@ -97,6 +96,14 @@ const HeaderSearch: React.FC = () => {
                 position: fixed;
                 left: 0;
                 margin-top: 1rem;
+              }
+
+              @media (prefers-color-scheme: dark) {
+                color: var(--mi-black) !important;
+                &::placeholder {
+                  color: var(--mi-black) !important;
+                  opacity: 0.3;
+                }
               }
             `}
           >

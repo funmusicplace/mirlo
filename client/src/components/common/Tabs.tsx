@@ -9,7 +9,7 @@ const Tabs = styled.ul`
     display: inline-block;
     margin-right: 1rem;
     a {
-      color: ${(props) => props.theme.colors.text};
+      color: ${props => props.theme.colors.text};
       text-decoration: none;
       padding: 0.25rem 0.5rem 0.25rem 0.25rem;
       display: block;
@@ -17,17 +17,17 @@ const Tabs = styled.ul`
       transition: 0.1s border-bottom;
 
       &.active {
-        border-bottom: 3px solid ${(props) => props.theme.colors.primary};
+        border-bottom: 3px solid ${props => props.theme.colors.primary};
         margin-bottom: -3px;
       }
 
       &:hover {
-        border-bottom: 3px solid ${(props) => props.theme.colors.primary};
+        border-bottom: 3px solid ${props => props.theme.colors.primary};
         margin-bottom: -3px;
       }
 
       @media (prefers-color-scheme: dark) {
-        color: ${(props) => props.theme.colors.textDark};
+        color: ${props => props.theme.colors.textDark};
       }
     }
   }

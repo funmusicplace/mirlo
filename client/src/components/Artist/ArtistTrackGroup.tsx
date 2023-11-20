@@ -100,13 +100,14 @@ const ArtistTrackGroup: React.FC<{
                 margin-bottom: 0.2rem;
               }
               a:last-child {
-                font-size: font-size: var(--mi-font-size-small);
+                font-size: var(--mi-font-size-xsmall);
                 font-weight: bold;
               }
 
               a {
                 text-decoration: none;
                 text-overflow: ellipsis;
+
                 overflow: hidden;
               }
 

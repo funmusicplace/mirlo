@@ -131,6 +131,8 @@ function Home() {
                     line-height: 1rem;
                     padding: 1rem;
                     text-decoration: none;
+                    text-align: center;
+
                     &:hover {
                       text-decoration: underline;
                     }
@@ -154,6 +156,7 @@ function Home() {
                     line-height: 1rem;
                     padding: 1rem;
                     text-decoration: none;
+                    text-align: center;
                     &:hover {
                       text-decoration: underline;
                     }
