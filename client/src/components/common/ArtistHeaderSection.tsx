@@ -70,7 +70,7 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
     <div
       className={css`
         margin-bottom: 1rem;
-        padding-top: .5rem;
+        padding-top: 0.5rem;
         @media screen and (max-width: ${bp.medium}px) {
           margin-bottom: 0rem;
         }
@@ -95,13 +95,17 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
           `}
         >
           <Header>
-            <HeaderDiv className={css`
-            display: flex;
-            align-items: center;
-          `}>
-              <div><H1>{artist.name}</H1></div>
+            <HeaderDiv
+              className={css`
+                display: flex;
+                align-items: center;
+              `}
+            >
               <div>
-                {!isManage && <FollowArtist artistId={artist.id}/>}
+                <H1>{artist.name}</H1>
+              </div>
+              <div>
+                {!isManage && <FollowArtist artistId={artist.id} />}
                 {!isManage && user?.id === artist.userId && (
                   <Link to={`/manage/artists/${artist.id}`}>
                     <Button
@@ -115,10 +119,14 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
                   </Link>
                 )}
               </div>
-
             </HeaderDiv>
-            <div className={css` filter: brightness(75%); opacity: .8;`}>
-            <MarkdownContent content={artist.bio}/>
+            <div
+              className={css`
+                filter: brightness(75%);
+                opacity: 0.8;
+              `}
+            >
+              <MarkdownContent content={artist.bio} />
             </div>
           </Header>
         </div>
@@ -134,13 +142,17 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
           `}
         >
           <Header>
-            <HeaderDiv className={css`
-            display: flex;
-            align-items: center;
-          `}>
-            <div><H1>{artist.name}</H1></div>
-            <div>
-                {!isManage && <FollowArtist artistId={artist.id}/>}
+            <HeaderDiv
+              className={css`
+                display: flex;
+                align-items: center;
+              `}
+            >
+              <div>
+                <H1>{artist.name}</H1>
+              </div>
+              <div>
+                {!isManage && <FollowArtist artistId={artist.id} />}
                 {!isManage && user?.id === artist.userId && (
                   <Link to={`/manage/artists/${artist.id}`}>
                     <Button
@@ -155,8 +167,13 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
                 )}
               </div>
             </HeaderDiv>
-            <div className={css` filter: brightness(75%); opacity: .8;`}>
-            <MarkdownContent content={artist.bio}/>
+            <div
+              className={css`
+                filter: brightness(75%);
+                opacity: 0.8;
+              `}
+            >
+              <MarkdownContent content={artist.bio} />
             </div>
           </Header>
         </div>

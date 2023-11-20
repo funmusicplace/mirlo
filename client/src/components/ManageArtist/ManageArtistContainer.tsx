@@ -3,14 +3,13 @@ import React from "react";
 import { bp } from "../../constants";
 import { Outlet } from "react-router-dom";
 import ArtistHeaderSection from "../common/ArtistHeaderSection";
+import { useGlobalStateContext } from "state/GlobalState";
 import { useTranslation } from "react-i18next";
 import styled from "@emotion/styled";
 import { useArtistContext } from "state/ArtistContext";
 
-const Container = styled.div<{ artistBanner: boolean }>`
-
+const Container = styled.div<{ artistBanner: boolean; userId?: number }>`
   width: 100%;
-
   margin-top: calc(16vh);
 
   ${(props) => (!props.artistBanner ? "margin-top: 0px;" : "")}
@@ -20,7 +19,8 @@ const Container = styled.div<{ artistBanner: boolean }>`
     padding: var(--mi-side-paddings-xsmall);
     padding: 0rem !important;
     width: 100%;
-    margin-top: 0px;
+    ${(props) => (props.artistBanner ? "margin-top: 0px;" : "")}
+    ${(props) => (!props.userId ? "margin-top: 13vh;" : "")}
     ${(props) => (!props.artistBanner ? "margin-top: 0px;" : "")}
   }
 `;
@@ -29,16 +29,17 @@ export const ArtistPageWrapper: React.FC<{
   children: React.ReactElement;
   artistBanner: boolean;
 }> = ({ children, artistBanner }) => {
+  const {
+    state: { user },
+  } = useGlobalStateContext();
+  const userId = user?.id;
   return (
-    <Container artistBanner={artistBanner}
-      className={css`
-        @media screen and (max-width: ${bp.medium}px) {
-        }
-      `}
-    >
+    <Container userId={userId} artistBanner={artistBanner}>
       <div
         className={css`
-          ${artistBanner ? "filter: drop-shadow(0 0 0.5rem rgba(50, 50, 50, 0.3));" : ""}
+          ${artistBanner
+            ? "filter: drop-shadow(0 0 0.5rem rgba(50, 50, 50, 0.3));"
+            : ""}
           background: var(--mi-normal-background-color);
           padding: 0 2rem 2rem;
           height: 100%;
@@ -69,8 +70,6 @@ const ManageArtist: React.FC<{}> = () => {
   return (
     <ArtistPageWrapper artistBanner={!!artistBanner}>
       <>
-
-
         <ArtistHeaderSection artist={artist} isManage />
 
         {!artist.enabled && (
