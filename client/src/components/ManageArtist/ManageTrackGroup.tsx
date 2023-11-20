@@ -1,6 +1,4 @@
-import { css } from "@emotion/css";
 import React from "react";
-import { bp } from "../../constants";
 import { Link, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useArtistContext } from "state/ArtistContext";
@@ -12,6 +10,8 @@ import { useGlobalStateContext } from "state/GlobalState";
 import Button from "components/common/Button";
 import PublishButton from "./PublisButton";
 import NewAlbumForm from "./NewAlbumForm";
+import HeaderDiv from "components/common/HeaderDiv";
+import ManageSectionWrapper from "./ManageSectionWrapper";
 
 const ManageTrackGroup: React.FC<{}> = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
@@ -38,24 +38,8 @@ const ManageTrackGroup: React.FC<{}> = () => {
   }
 
   return (
-    <div
-      className={css`
-        width: 100%;
-        padding-bottom: 1rem;
-        @media screen and (max-width: ${bp.medium}px) {
-          padding: var(--mi-side-paddings-xsmall);
-          padding-top: 0.5rem;
-          padding-bottom: 0.5rem;
-        }
-      `}
-    >
-      <div
-        className={css`
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-        `}
-      >
+    <ManageSectionWrapper>
+      <HeaderDiv>
         <h1>{t(trackGroup ? "editAlbum" : "createAlbum")}</h1>
         <div>
           {trackGroup && (
@@ -70,7 +54,7 @@ const ManageTrackGroup: React.FC<{}> = () => {
             <Button compact>{t("viewArtist")}</Button>
           </Link>
         </div>
-      </div>
+      </HeaderDiv>
       {trackGroupId && trackGroup && (
         <AlbumForm existing={trackGroup} reload={reload} artist={artist} />
       )}
@@ -93,7 +77,7 @@ const ManageTrackGroup: React.FC<{}> = () => {
       {trackGroup && trackGroup.tracks?.length > 0 && (
         <PublishButton trackGroup={trackGroup} reload={reload} />
       )}
-    </div>
+    </ManageSectionWrapper>
   );
 };
 

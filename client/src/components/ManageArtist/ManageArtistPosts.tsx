@@ -4,7 +4,6 @@ import React from "react";
 import api from "services/api";
 import { useGlobalStateContext } from "state/GlobalState";
 import NewPostForm from "./NewPostForm";
-import { bp } from "../../constants";
 import Box from "components/common/Box";
 import { FaPen, FaTrash } from "react-icons/fa";
 import MarkdownContent from "components/common/MarkdownContent";
@@ -14,6 +13,8 @@ import Modal from "components/common/Modal";
 import { useTranslation } from "react-i18next";
 import { MdAdd } from "react-icons/md";
 import { useArtistContext } from "state/ArtistContext";
+import HeaderDiv from "components/common/HeaderDiv";
+import { ManageSectionWrapper } from "./ManageSectionWrapper";
 
 const ManageArtistPosts: React.FC<{}> = () => {
   const {
@@ -64,27 +65,11 @@ const ManageArtistPosts: React.FC<{}> = () => {
   }
 
   return (
-    <div
-      className={css`
-      padding: 0.5rem 0 2rem 0;
-
-      @media screen and (max-width: ${bp.medium}px) {
-        border-radius: 0;
-        padding-top: 1rem;
-        padding: var(--mi-side-paddings-xsmall);
-      `}
-    >
-      <div
-        className={css`
-          display: flex;
-          width: 100%;
-          justify-content: space-between;
-          align-items: center;
-          padding-bottom: 0.5rem;
-        `}
-      >
+    <ManageSectionWrapper>
+      <HeaderDiv>
         <h2>{t("posts")}</h2>
-        <Button transparent
+        <Button
+          transparent
           onClick={() => {
             setAddingNewPost(true);
           }}
@@ -93,7 +78,7 @@ const ManageArtistPosts: React.FC<{}> = () => {
         >
           {t("addNewPost", { artist: artist.name })}
         </Button>
-      </div>
+      </HeaderDiv>
       {posts?.map((p) => (
         <Box
           key={p.id}
@@ -115,7 +100,9 @@ const ManageArtistPosts: React.FC<{}> = () => {
                 transparent
                 startIcon={<FaPen />}
                 onClick={() => setManagePost(p)}
-              >  {/* {t("edit")} */}
+              >
+                {" "}
+                {/* {t("edit")} */}
               </Button>
               <Button
                 className={css`
@@ -149,7 +136,7 @@ const ManageArtistPosts: React.FC<{}> = () => {
         reload={fetchPosts}
         artist={artist}
       />
-    </div>
+    </ManageSectionWrapper>
   );
 };
 

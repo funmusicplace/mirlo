@@ -34,9 +34,13 @@ const Header = () => {
         @media screen and (max-width: ${bp.medium}px) {
           position: sticky;
           ${artistBanner ? "background-color: transparent;" : ""}
-          ${artistBanner ? "top: calc(var(--header-cover-sticky-height) - 24.2vw);" : ""}
+          ${artistBanner
+            ? "top: calc(var(--header-cover-sticky-height) - 24.2vw);"
+            : ""}
           ${artistBanner ? "aspect-ratio: 4 / 1;" : ""}
-          ${!artistBanner ? "border-bottom: 1px solid var(--mi-light-foreground-color);" : ""}
+          ${!artistBanner
+            ? "border-bottom: 1px solid var(--mi-light-foreground-color);"
+            : ""}
 
           ${trackGroupId ? "aspect-ratio: 0;" : ""}
           ${trackGroupId ? "top: 0px;" : ""}
@@ -97,9 +101,7 @@ const Header = () => {
             padding: var(--mi-side-paddings-xsmall);
             ${artistBanner ? "background-color: transparent;" : ""}
             border-bottom: 1px solid transparent;
-            //--header-cover-sticky-height: 48px;
             position: sticky;
-            // top: calc(var(--header-cover-sticky-height) - 25vw);
             top: 0;
           }
 
@@ -107,8 +109,9 @@ const Header = () => {
             background-color: #232428;
 
             @media screen and (max-width: ${bp.medium}px) {
-          ${artistBanner ? "background-color: transparent;" : ""}
-          border-bottom: 1px solid transparent;}
+              ${artistBanner ? "background-color: transparent;" : ""}
+              border-bottom: 1px solid transparent;
+            }
           }
         `}
       >
