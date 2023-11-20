@@ -93,7 +93,7 @@ function Home() {
               max-width: 500px;
             `}
           >
-            <Logo/>
+            <Logo />
             <div
               className={css`
                 display: flex;
@@ -213,142 +213,143 @@ function Home() {
             {t("latestCommunityPost")}
           </h2>
           {posts.map((p) => (
-            <Link to={`/post/${p.id}/`}
-            className={css`
-              width: 100%;
-              `}
-            >
-            <div
-            className={css`
-
-              a:hover {
-                text-decoration: none !important;
-              }
-
-              display: flex;
-              flex-direction: column;
-              align-items: center;
-              margin: 0 0 2rem 0;
-              width: 100%;
-              overflow: hidden;
-              white-space: ellipsis;
-              outline: solid 1px grey;
-              transition: .2s ease-in-out;
-              background-color: var(--mi-light-background-color);
-
-              > :last-child {
-                color: var(--mi-primary-color) !important;
-                background: var(--mi-secondary-color);
-              }
-
-
-              :hover {
-                background-color: var(--mi-normal-background-color);
-                transition: .2s ease-in-out;
-                > :last-child {
-                  background: var(--mi-primary-color);
-                  color: var(--mi-secondary-color) !important;
-                }
-              }
-
-              @media screen and (max-width: ${bp.medium}px) {
-                padding: 0rem !important;}
-              `}
-            >
-
-            <Box
-              key={p.id}
+            <Link
+              to={`/post/${p.id}/`}
               className={css`
-                @media screen and (max-width: ${bp.medium}px) {
-                  width: 100% !important;
-                  padding: 2rem 2rem !important;
-                }
-                @media screen and (max-width: ${bp.small}px) {
-                  padding: 1rem 1rem !important;
-                  font-size: .875rem !important;
-                }
+                width: 100%;
               `}
             >
               <div
                 className={css`
+                  a:hover {
+                    text-decoration: none !important;
+                  }
 
-                  padding-bottom: 1rem;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  margin: 0 0 2rem 0;
+                  width: 100%;
+                  overflow: hidden;
+                  white-space: ellipsis;
+                  outline: solid 1px grey;
+                  transition: 0.2s ease-in-out;
+                  background-color: var(--mi-light-background-color);
+
+                  > :last-child {
+                    color: var(--mi-primary-color) !important;
+                    background: var(--mi-secondary-color);
+                  }
+
+                  :hover {
+                    background-color: var(--mi-normal-background-color);
+                    transition: 0.2s ease-in-out;
+                    > :last-child {
+                      background: var(--mi-primary-color);
+                      color: var(--mi-secondary-color) !important;
+                    }
+                  }
+
+                  @media screen and (max-width: ${bp.medium}px) {
+                    padding: 0rem !important;
+                  }
                 `}
               >
-                {/* <h5>{p.title}</h5> */}
+                <Box
+                  key={p.id}
+                  className={css`
+                    @media screen and (max-width: ${bp.medium}px) {
+                      width: 100% !important;
+                      padding: 2rem 2rem !important;
+                    }
+                    @media screen and (max-width: ${bp.small}px) {
+                      padding: 1rem 1rem !important;
+                      font-size: 0.875rem !important;
+                    }
+                  `}
+                >
+                  <div
+                    className={css`
+                      padding-bottom: 1rem;
+                    `}
+                  >
+                    {/* <h5>{p.title}</h5> */}
+                    <div
+                      className={css`
+                        display: flex;
+                        justify-content: space-between;
+                        flex-wrap: wrap;
+                        align-items: center;
+                      `}
+                    >
+                      <h4
+                        className={css`
+                          padding-bottom: 0.5rem;
+                          margin-right: 1rem;
+                        `}
+                      >
+                        <Link
+                          to={`/post/${p.id}/`}
+                          className={css`
+                            font-weight: normal;
+                            text-align: center;
+                          `}
+                        >
+                          {p.title}
+                        </Link>
+                      </h4>
+                      <span
+                        className={css`
+                          color: grey;
+                          margin-bottom: 1rem;
+                        `}
+                      >
+                        {new Date(p.publishedAt).toLocaleDateString("en-US", {
+                          weekday: "long",
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })}
+                      </span>
+                    </div>
+                    {p.artist && (
+                      <em>
+                        by{" "}
+                        <Link to={`/${p.artist.urlSlug ?? p.artist.id}`}>
+                          {p.artist?.name}
+                        </Link>
+                      </em>
+                    )}
+                  </div>
+
+                  <div>
+                    <span
+                      className={css`
+                        white-space: nowrap;
+                        display: block;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        color: var(--mi-normal-foreground-color);
+                      `}
+                    >
+                      {/* <MarkdownContent content={p.content} />*/}
+                      {p.content}
+                    </span>
+                  </div>
+                </Box>
                 <div
                   className={css`
-                    display: flex;
-                    justify-content: space-between;
-                    flex-wrap: wrap;
-                    align-items: center;
+                    color: var(--mi-normal-background-color) !important;
+                    text-align: center;
+                    width: 100%;
+                    height: 100%;
+                    transition: 0.2s ease-in-out;
                   `}
                 >
-                <h4
-                  className={css`
-                    padding-bottom: .5rem;
-                    margin-right: 1rem;
-
-                  `}
-                >
-                  <Link to={`/post/${p.id}/`}
-                    className={css`
-                      font-weight: normal;
-                      text-align: center;
-                    `}
-                  >{p.title}</Link>
-                </h4>
-                <span
-                  className={css`
-                    color: grey;
-                    margin-bottom: 1rem;
-                  `}
-                >
-                  {new Date(p.publishedAt).toLocaleDateString(
-                    "en-US",
-                    {
-                      weekday: 'long',
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                    }
-                  )}
-                </span></div>
-                {p.artist && (
-                  <em>
-                    by{" "}
-                    <Link to={`/${p.artist.urlSlug ?? p.artist.id}`}>
-                      {p.artist?.name}
-                    </Link>
-                  </em>
-                )}
+                  read more
+                </div>
               </div>
-
-              <div>
-              <span
-                className={css`
-                  white-space: nowrap;
-                  display:block;
-                  overflow: hidden;
-                  text-overflow: ellipsis;
-                  color: var(--mi-normal-foreground-color);
-                `}
-              >
-               {/* <MarkdownContent content={p.content} />*/}
-               {p.content}
-              </span></div>
-            </Box>
-            <div
-              className={css`
-                color: var(--mi-normal-background-color) !important;
-                text-align: center;
-                width: 100%;
-                height: 100%;
-                transition: 0.2s ease-in-out;
-              `}
-            >
-              read more
-            </div></div></Link>
+            </Link>
           ))}
         </>
       )}

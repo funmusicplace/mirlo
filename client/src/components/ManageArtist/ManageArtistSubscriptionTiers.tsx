@@ -1,7 +1,6 @@
 import { css } from "@emotion/css";
 import Modal from "components/common/Modal";
 import React from "react";
-import { bp } from "../../constants";
 import { useGlobalStateContext } from "state/GlobalState";
 import ManageSubscriptionTierBox from "./ManageSubscriptionTierBox";
 import SubscriptionForm from "./SubscriptionForm";
@@ -11,6 +10,7 @@ import useGetUserObjectById from "utils/useGetUserObjectById";
 import { useParams } from "react-router-dom";
 import ArtistSubscriberDataDownload from "./ArtistSubscriberDataDownload";
 import HeaderDiv from "components/common/HeaderDiv";
+import { ManageSectionWrapper } from "./ManageSectionWrapper";
 
 const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
   const {
@@ -38,28 +38,9 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
   }
 
   return (
-    <div
-      className={css`
-        padding: 0.5rem 0 2rem 0;
-
-        @media screen and (max-width: ${bp.medium}px) {
-          border-radius: 0;
-          padding-top: 1rem;
-          padding: var(--mi-side-paddings-xsmall);
-
-        }
-      `}
-    >
-      <HeaderDiv
-        className={css`
-          @media screen and (max-width: ${bp.medium}px) {
-            flex-direction: column;
-            align-items: flex-start !important;
-            margin-bottom: .5rem;
-          }
-        `}
-      >
-        <div><h2>{tManage("subscriptionTiers")}</h2></div>
+    <ManageSectionWrapper>
+      <HeaderDiv>
+        <h2>{tManage("subscriptionTiers")}</h2>
 
         <ArtistSubscriberDataDownload />
       </HeaderDiv>
@@ -94,7 +75,7 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
       )}
 
       <SubscriptionForm artist={artist} reload={reload} />
-    </div>
+    </ManageSectionWrapper>
   );
 };
 

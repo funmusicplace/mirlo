@@ -23,7 +23,7 @@ const Player = () => {
     state: { playerQueueIds, currentlyPlayingIndex, user, playing },
     dispatch,
   } = useGlobalStateContext();
-  // let navigate = useNavigate();
+
   const [currentTrack, setCurrentTrack] = React.useState<Track>();
   const [isLoading, setIsLoading] = React.useState(false);
   const userId = user?.id;
