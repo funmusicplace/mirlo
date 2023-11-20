@@ -87,6 +87,7 @@ const Menu: React.FC = (props) => {
             color: var(--mi-white);
 
             &:hover {
+              background-color: var(--mi-white) !important;
               color: var(--mi-black) !important;
             }
           }
