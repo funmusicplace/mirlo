@@ -81,7 +81,7 @@ const ManageTrackRow: React.FC<{
         ${isDisabled ? `opacity: .5;` : ""}
       `}
     >
-      <td>
+      <td className={css``}>
         <TrackRowPlayControl
           trackId={track.id}
           canPlayTrack={true}
@@ -96,25 +96,52 @@ const ManageTrackRow: React.FC<{
           overflow: hidden;
           whitespace: nowrap;
           text-overflow: ellipsis;
+
+          &:before {
+            content: "${t("titleColumn")}: ";
+          }
         `}
       >
-        <>
+        <div>
           <div>{track.title}</div>
           <small>
             {uploadState === "SUCCESS" && t("doneUploadingTrack")}
             {uploadState === "STARTED" && t("stillProcessing")}
             {uploadState === "ERROR" && t("thereWasAnError")}
           </small>
-        </>
+        </div>
       </td>
-      <td>
+      <td
+        className={css`
+          &:before {
+            content: "${t("listedArtists")}: ";
+          }
+        `}
+      >
         {track.trackArtists?.map((artist) => artist.artistName).join(", ")}
       </td>
-      <td>{t(track.isPreview ? "statusPreview" : "statusMustOwn")}</td>
-      <td className="alignRight">
+      <td
+        className={css`
+          &:before {
+            content: "${t("status")}: ";
+          }
+        `}
+      >
+        {t(track.isPreview ? "statusPreview" : "statusMustOwn")}
+      </td>
+      <td
+        className={
+          "alignRight " +
+          css`
+            &:before {
+              content: "${t("durationColumn")}: ";
+            }
+          `
+        }
+      >
         {track.audio?.duration && fmtMSS(track.audio?.duration)}
       </td>
-      <td className="alignRight">
+      <td>
         <IconButton
           compact
           onClick={() => setIsEditing(true)}
