@@ -90,7 +90,7 @@ const EditTrackRow: React.FC<{
       } finally {
       }
     },
-    [setUploadJobs, snackbar, t, trackId, userId]
+    [onCancelEditing, setUploadJobs, snackbar, t, trackId, userId]
   );
 
   const uploadingState = uploadJobs?.[0]?.jobStatus;
