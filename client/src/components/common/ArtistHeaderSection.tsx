@@ -12,14 +12,12 @@ import { useTranslation } from "react-i18next";
 import HeaderDiv from "./HeaderDiv";
 
 const H1 = styled.h1`
-  font-size: 50px;
-  font-size: 2.6vmax;
-  line-height: 2.8vmax;
+  font-size: 45px;
+  line-height: 50px;
 
   @media screen and (max-width: ${bp.medium}px) {
-    font-size: 32px;
-    font-size: 3.2vmax;
-    line-height: 3.2vmax;
+    font-size: 27px;
+    line-height: 32px;
     padding-top: 0rem;
     padding-bottom: 0rem;
   }
@@ -36,7 +34,7 @@ const Header = styled.div`
   font-size: var(--mi-font-size-normal);
 
   p {
-    margin-bottom: 2rem;
+    // margin-bottom: 2rem;
   }
 
   @media screen and (max-width: ${bp.medium}px) {
@@ -44,6 +42,7 @@ const Header = styled.div`
     line-height: 1rem;
     border-radius: 0;
     padding: var(--mi-side-paddings-xsmall);
+    padding-bottom: 0.5rem;
     border: solid grey;
     border-width: 0px 0px 1px 0px;
     p {
@@ -95,37 +94,64 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
               display: flex;
               padding-top: 1rem;
               margin-bottom: 1rem;
-              align-items: flex-start;
+              align-items: center;
 
               @media screen and (max-width: ${bp.medium}px) {
                 padding-top: 0.5rem;
-                margin-bottom: 0.5rem;
+                margin-bottom: 0rem;
               }
             `}
           >
             {artist.avatar?.sizes?.[300] && (
-              <img
-                src={artist.avatar?.sizes?.[120]}
-                alt="Artist avatar"
+              <div
                 className={css`
-                  margin-right: 1rem;
+                  max-width: 120px;
+                  padding-right: 1rem;
+
+                  @media screen and (max-width: ${bp.medium}px) {
+                    max-width: 80px;
+                    padding-bottom: 0rem;
+                    margin-bottom: 0rem;
+                  }
                 `}
-              />
+              >
+                <img
+                  src={artist.avatar?.sizes?.[300]}
+                  alt="Artist avatar"
+                  className={css`
+                    width: 100%;
+                    border-radius: 100px;
+                    border: solid 1px var(--mi-lighter-foreground-color);
+                  `}
+                />{" "}
+              </div>
             )}
+
             <div
               className={css`
                 width: 100%;
+                display: flex;
+                flex-direction: column;
               `}
             >
               <HeaderDiv
                 className={css`
                   align-items: flex-start !important;
+                  padding-bottom: 0 !important;
+                  @media screen and (max-width: ${bp.medium}px) {
+                    margin-bottom: 0rem !important;
+                  }
                 `}
               >
                 <div>
                   <H1>{artist.name}</H1>
                 </div>
-                <div>
+                <div
+                  className={css`
+                    text-align: right;
+                    margin-top: 5px;
+                  `}
+                >
                   {!isManage && <FollowArtist artistId={artist.id} />}
                   {!isManage && user?.id === artist.userId && (
                     <Link to={`/manage/artists/${artist.id}`}>
@@ -141,7 +167,12 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
                   )}
                 </div>
               </HeaderDiv>
-              <MarkdownContent content={artist.bio} />
+              <MarkdownContent
+                content={artist.bio}
+                className={css`
+                  markdownWrapper {
+                `}
+              />
             </div>
           </div>
         </Header>

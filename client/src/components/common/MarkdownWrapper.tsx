@@ -2,7 +2,7 @@ import styled from "@emotion/styled";
 
 const MarkdownWrapper = styled.div`
   margin-top: 0.5rem;
-  filter: brightness(75%);
+  // filter: brightness(75%);
   opacity: 0.8;
 
   h1 {
