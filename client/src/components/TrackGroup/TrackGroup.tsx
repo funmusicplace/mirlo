@@ -117,6 +117,7 @@ function TrackGroup() {
               className={css`
                 display: flex;
                 margin-top: 1rem;
+                margin-bottom: 0.5rem;
                 align-items: center;
                 justify-content: flex-start;
                 align-items: center;
