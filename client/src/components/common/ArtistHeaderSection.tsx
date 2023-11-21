@@ -171,10 +171,22 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
                 content={artist.bio}
                 className={css`
                   markdownWrapper {
+                  @media screen and (max-width: ${bp.medium}px) {
+                    display: none;
+                  }
                 `}
               />
             </div>
           </div>
+          <MarkdownContent
+                content={artist.bio}
+                className={css`
+                  markdownWrapper {
+                  @media screen and (min-width: ${bp.medium}px) {
+                    display: none;
+                  }
+                `}
+              />
         </Header>
       </div>
     </div>
