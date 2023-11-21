@@ -53,6 +53,7 @@ const HeaderSearch: React.FC = () => {
         name="search"
         value={searchValue}
         placeholder="Search artists"
+        data-lpignore="true"
         onChange={onChange}
         className={css`
           margin-bottom: 0 !important;
@@ -64,7 +65,7 @@ const HeaderSearch: React.FC = () => {
             opacity: 0.3;
           }
           @media screen and (max-width: ${bp.medium}px) {
-            opacity: .7;
+            opacity: 0.7;
           }
           @media (prefers-color-scheme: dark) {
             color: var(--mi-black) !important;
@@ -73,7 +74,6 @@ const HeaderSearch: React.FC = () => {
               opacity: 0.3;
             }
           }
-
         `}
       />
       {showSuggestions && (
