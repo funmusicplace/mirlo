@@ -51,6 +51,9 @@ const styles = `html {
     --mi-darken-background-color: rgba(0, 0, 0, 0.03);
     --mi-lighten-background-color: rgba(255, 255, 255, 0.2);
 
+    --mi-lighter-foreground-color: #888;
+    --mi-light-foreground-color: #bbb;
+
     --mi-primary-color: var(--mi-white);
     --mi-secondary-color: var(--mi-pink);
   }
