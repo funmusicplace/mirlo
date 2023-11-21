@@ -75,6 +75,7 @@ const ArtistSupportBox: React.FC<{
           }
 
           @media screen and (max-width: ${bp.medium}px) {
+            
             h3 {
               font-size: 1rem;
             }

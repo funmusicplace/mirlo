@@ -21,6 +21,7 @@ const ArtistAlbums: React.FC<{ artist: Artist }> = ({ artist }) => {
           margin-bottom: 2rem;
           @media screen and (max-width: ${bp.medium}px) {
             border-radius: 0;
+              margin-bottom: 0rem;
             background: var(--mi-light-background-color);
           }
         `}
@@ -40,7 +41,7 @@ const ArtistAlbums: React.FC<{ artist: Artist }> = ({ artist }) => {
             flex-wrap: wrap;
 
             @media screen and (max-width: ${bp.medium}px) {
-              padding: 0rem 0rem 1rem 0rem;
+              padding: 0rem 0rem 0rem 0rem;
             }
           `}
         >

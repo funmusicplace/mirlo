@@ -217,13 +217,19 @@ function Home() {
               to={`/post/${p.id}/`}
               className={css`
                 width: 100%;
+                :hover {
+                  text-decoration: none !important;
+                  filter: brightness(90%);
+                }
+                @media (prefers-color-scheme: dark) {
+                  :hover {
+                    filter: brightness(110%);
+                  }
+                }
               `}
             >
               <div
                 className={css`
-                  a:hover {
-                    text-decoration: none !important;
-                  }
 
                   display: flex;
                   flex-direction: column;

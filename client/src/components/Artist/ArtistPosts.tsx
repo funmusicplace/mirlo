@@ -14,7 +14,7 @@ const ArtistPosts: React.FC<{ artist: Artist }> = ({ artist }) => {
   }
 
   return (
-    <ArtistSection>
+    <div>
       <h2
         className={css`
           margin-bottom: 0rem;
@@ -51,6 +51,15 @@ const ArtistPosts: React.FC<{ artist: Artist }> = ({ artist }) => {
             key={p.id}
             className={css`
               width: 100%;
+              :hover {
+                text-decoration: none !important;
+                filter: brightness(90%);
+              }
+              @media (prefers-color-scheme: dark) {
+                :hover {
+                  filter: brightness(110%);
+                }
+              }
             `}
           >
             <div
@@ -58,7 +67,7 @@ const ArtistPosts: React.FC<{ artist: Artist }> = ({ artist }) => {
                 display: flex;
                 flex-direction: column;
                 align-items: center;
-                margin: 0 0 2rem 0;
+                margin: 0 0 1rem 0;
                 width: 100%;
                 overflow: hidden;
                 white-space: ellipsis;
@@ -95,8 +104,8 @@ const ArtistPosts: React.FC<{ artist: Artist }> = ({ artist }) => {
                     padding: 2rem 2rem !important;
                   }
                   @media screen and (max-width: ${bp.small}px) {
-                    padding: 1rem 1rem !important;
-                    font-size: 0.875rem !important;
+                    padding: 1.5rem 1.5rem !important;
+                    font-size: var(--mi-font-size-small) !important;
                   }
                 `}
               >
@@ -174,7 +183,7 @@ const ArtistPosts: React.FC<{ artist: Artist }> = ({ artist }) => {
           </Link>
         ))}
       </div>
-    </ArtistSection>
+      </div>
   );
 };
 

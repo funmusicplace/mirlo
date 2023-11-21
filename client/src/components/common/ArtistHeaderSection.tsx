@@ -93,9 +93,14 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
           <div
             className={css`
               display: flex;
-              padding-top: 1.5rem;
-              margin-bottom: 1.5rem;
+              padding-top: 1rem;
+              margin-bottom: 1rem;
               align-items: flex-start;
+
+              @media screen and (max-width: ${bp.medium}px) {
+                padding-top: 0.5rem;
+                margin-bottom: 0.5rem;
+              }
             `}
           >
             {artist.avatar?.sizes?.[300] && (

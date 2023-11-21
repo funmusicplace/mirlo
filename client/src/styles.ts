@@ -38,7 +38,7 @@ const styles = `html {
 
   --mi-side-paddings-normal: 0rem 2rem;
   --mi-side-paddings-small: 0rem 1rem;
-  --mi-side-paddings-xsmall: 0rem 0.5rem;
+  --mi-side-paddings-xsmall: 0rem 1rem;
 
 }
 

@@ -9,9 +9,9 @@ const HeaderDiv = styled.div`
   padding-bottom: 0.5rem;
 
   @media screen and (max-width: ${bp.medium}px) {
-    flex-direction: column;
     align-items: flex-start !important;
     margin-bottom: 0.5rem;
+    padding-bottom: 0rem;
   }
 `;
 
