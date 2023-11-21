@@ -3,7 +3,6 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { bp } from "../../constants";
 import { Link } from "react-router-dom";
-import { ArtistSection } from "./Artist";
 import Box from "components/common/Box";
 
 const ArtistPosts: React.FC<{ artist: Artist }> = ({ artist }) => {
