@@ -149,7 +149,6 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
                 <div
                   className={css`
                     text-align: right;
-                    margin-top: 5px;
                   `}
                 >
                   {!isManage && <FollowArtist artistId={artist.id} />}
