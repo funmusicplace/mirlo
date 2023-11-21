@@ -81,6 +81,8 @@ const EditTrackRow: React.FC<{
           );
           const jobId = jobInfo.result.jobId;
           setUploadJobs([{ jobId, jobStatus: "waiting" }]);
+        } else {
+          onCancelEditing();
         }
         snackbar(t("updatedTrack"), { type: "success" });
       } catch (e) {
