@@ -38,7 +38,7 @@ const styles = `html {
 
   --mi-side-paddings-normal: 0rem 2rem;
   --mi-side-paddings-small: 0rem 1rem;
-  --mi-side-paddings-xsmall: 0rem 0.5rem;
+  --mi-side-paddings-xsmall: 0rem 1rem;
 
 }
 
@@ -50,6 +50,9 @@ const styles = `html {
     --mi-normal-foreground-color: var(--mi-white);
     --mi-darken-background-color: rgba(0, 0, 0, 0.03);
     --mi-lighten-background-color: rgba(255, 255, 255, 0.2);
+
+    --mi-lighter-foreground-color: #888;
+    --mi-light-foreground-color: #bbb;
 
     --mi-primary-color: var(--mi-white);
     --mi-secondary-color: var(--mi-pink);

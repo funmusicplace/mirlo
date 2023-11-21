@@ -6,6 +6,7 @@ const Box = styled.div<{ variant?: "success" | "info" }>`
   transition: 0.4s border-radius;
   margin-bottom: 0.5rem;
 
+
   ${(props) => {
     switch (props.variant) {
       case "success":
