@@ -36,7 +36,7 @@ const TrackRow: React.FC<{
       id={`${track.id}`}
       onClick={onTrackPlay}
       className={css`
-        ${!canPlayTrack ? `color: var(--mi-lighten-foreground-color);` : ""}
+        ${!canPlayTrack ? `opacity: .5;` : ""}
         :hover {
           color: var(--mi-normal-background-color) !important;
           background-color: var(--mi-normal-foreground-color) !important;

@@ -61,7 +61,7 @@ function TrackGroup() {
           !user
             ? `
             min-height: calc(100vh - 70px);
-            margin-top: 3vh;`
+            margin-top: 0vh;`
             : `
             min-height: calc(100vh - 130px);
             margin-top: 1rem;`
