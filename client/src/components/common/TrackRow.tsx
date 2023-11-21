@@ -18,17 +18,17 @@ const TrackRow: React.FC<{
   const { dispatch } = useGlobalStateContext();
   const [trackTitle] = React.useState(track.title);
   const {
-    state: { user, playing },
+    state: { user },
   } = useGlobalStateContext();
 
   const canPlayTrack = isTrackOwnedOrPreview(track, user, trackGroup);
 
   const onTrackPlay = React.useCallback(() => {
-    if (!playing && canPlayTrack) {
+    if (canPlayTrack) {
       addTracksToQueue?.(track.id);
       dispatch({ type: "setPlaying", playing: true });
     }
-  }, [addTracksToQueue, canPlayTrack, dispatch, playing, track.id]);
+  }, [addTracksToQueue, canPlayTrack, dispatch, track.id]);
 
   return (
     <tr
