@@ -109,7 +109,7 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
                   padding-right: 1rem;
 
                   @media screen and (max-width: ${bp.medium}px) {
-                    max-width: 50px;
+                    max-width: 60px;
                     padding-bottom: 0rem;
                     margin-bottom: 0rem;
                   }
