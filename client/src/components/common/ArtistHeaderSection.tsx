@@ -12,12 +12,12 @@ import { useTranslation } from "react-i18next";
 import HeaderDiv from "./HeaderDiv";
 
 const H1 = styled.h1`
-  font-size: 45px;
-  line-height: 50px;
+  font-size: 2.7rem;
+  line-height: 2.9rem;
 
   @media screen and (max-width: ${bp.medium}px) {
-    font-size: 27px;
-    line-height: 32px;
+    font-size: 1.2rem;
+    line-height: 1.3rem;
     padding-top: 0rem;
     padding-bottom: 0rem;
   }
