@@ -7,11 +7,15 @@ import Table from "./Table";
 import TrackRow from "./TrackRow";
 import { css } from "@emotion/css";
 import { bp } from "../../constants";
+import { isTrackOwnedOrPreview } from "utils/tracks";
 
 export const PublicTrackGroupListing: React.FC<{
   tracks: Track[];
   trackGroup: TrackGroup;
 }> = ({ tracks, trackGroup }) => {
+  const {
+    state: { user },
+  } = useGlobalStateContext();
   const [isLoading, setIsLoading] = React.useState(true);
   const { dispatch } = useGlobalStateContext();
   const [displayTracks, setDisplayTracks] = React.useState<Track[]>([]);
@@ -34,10 +38,13 @@ export const PublicTrackGroupListing: React.FC<{
         type: "startPlayingIds",
         playerQueueIds: tracks
           .slice(idx, tracks.length)
+          .filter((track) => {
+            return isTrackOwnedOrPreview(track, user, trackGroup);
+          })
           .map((track) => track.id),
       });
     },
-    [dispatch, tracks]
+    [dispatch, trackGroup, tracks, user]
   );
 
   if (isLoading) {

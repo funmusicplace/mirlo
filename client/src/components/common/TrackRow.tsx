@@ -18,17 +18,17 @@ const TrackRow: React.FC<{
   const { dispatch } = useGlobalStateContext();
   const [trackTitle] = React.useState(track.title);
   const {
-    state: { user, playing },
+    state: { user },
   } = useGlobalStateContext();
 
   const canPlayTrack = isTrackOwnedOrPreview(track, user, trackGroup);
 
   const onTrackPlay = React.useCallback(() => {
-    if (!playing && canPlayTrack) {
+    if (canPlayTrack) {
       addTracksToQueue?.(track.id);
       dispatch({ type: "setPlaying", playing: true });
     }
-  }, [addTracksToQueue, canPlayTrack, dispatch, playing, track.id]);
+  }, [addTracksToQueue, canPlayTrack, dispatch, track.id]);
 
   return (
     <tr
@@ -36,36 +36,31 @@ const TrackRow: React.FC<{
       id={`${track.id}`}
       onClick={onTrackPlay}
       className={css`
-        ${!canPlayTrack ? `color: var(--mi-lighten-foreground-color);` : ""}
-        :hover {
+        ${!canPlayTrack
+          ? `color: var(--mi-normal-foreground-color); opacity: .3;`
+          : ""}
+
+        &:hover {
           color: var(--mi-normal-background-color) !important;
-          background-color: var(--mi-normal-foreground-color) !important;
+          ${!canPlayTrack
+            ? `background-color: var(--mi-normal-foreground-color);`
+            : `background-color: var(--mi-normal-foreground-color) !important;`}
 
           button {
             color: var(--mi-normal-background-color);
             background: transparent;
           }
         }
+
         button {
           color: var(--mi-normal-foreground-color);
           background: transparent;
-        }
-        button:hover {
-          color: var(--mi-normal-background-color) !important;
-          background: transparent;
-        }
+          font-size: 0.8rem;
 
-
-        {//*  :hover {
-          transform: scale(1.02, 1.02);
-          transition: transform .1s ease-in-out;
-          font-size: 1.1rem;
-        }  *//}
-
-
-
-        button {
-          font-size: 14px;
+          &:hover {
+            color: var(--mi-normal-background-color) !important;
+            background: transparent;
+          }
         }
 
         > td > .play-button {

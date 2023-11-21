@@ -178,7 +178,7 @@ export default async (job: Job) => {
               Math.round(+timeArray[2]);
           }
         })
-        .on("end", async (data) => {
+        .on("end", async () => {
           resolve(duration);
         })
         .save(`${destinationFolder}/playlist.m3u8`);
