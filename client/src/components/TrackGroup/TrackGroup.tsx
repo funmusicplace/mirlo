@@ -302,6 +302,9 @@ function TrackGroup() {
         <div
           className={css`
             display: flex;
+            @media screen and (max-width: ${bp.small}px) {
+              flex-direction: column;
+            }
           `}
         >
           <div
@@ -310,6 +313,12 @@ function TrackGroup() {
               margin: 1.25rem 0 1.25rem;
               padding: 0.5rem 2rem 0.25rem 0rem;
               border-right: 1px solid;
+              @media screen and (max-width: ${bp.small}px) {
+                max-width: 100%;
+                margin: 1.25rem 0 1.25rem;
+                padding: 0.5rem 0rem 0.25rem 0rem;
+                border-right: 0;
+              }
             `}
           >
             <MarkdownContent content={trackGroup.about} />
@@ -321,6 +330,10 @@ function TrackGroup() {
               padding: 0.5rem 0.25rem 0.5rem 2rem;
               font-size: var(--mi-font-size-small);
               color: var(--mi-lighter-foreground-color);
+              @media screen and (max-width: ${bp.small}px) {
+                max-width: 100%;
+                padding: 0.5rem 0.25rem 0.5rem 0rem;
+              }
             `}
           >
             <MarkdownContent content={trackGroup.credits} />
