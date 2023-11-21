@@ -1,6 +1,7 @@
 import { css } from "@emotion/css";
 import { FaPen } from "react-icons/fa";
 import { Link, useParams } from "react-router-dom";
+import ClickToPlayAlbum from "../common/ClickToPlayAlbum";
 import { useGlobalStateContext } from "state/GlobalState";
 import Box from "../common/Box";
 import Button from "../common/Button";
@@ -111,25 +112,38 @@ function TrackGroup() {
             }
           `}
         >
-          <div
-            className={css`
-              display: flex;
-              margin-top: 1rem;
-              align-items: center;
-              justify-content: space-between;
-              align-items: flex-start;
-            `}
-          >
-            <div>
-              <h1
-                className={css`
-                  font-size: 32px;
-                  line-height: 42px;
-                  margin-bottom: 0.2rem;
-                `}
-              >
-                {trackGroup.title}
-              </h1>
+          <div>
+            <div
+              className={css`
+                display: flex;
+                margin-top: 1rem;
+                align-items: center;
+                justify-content: flex-start;
+                align-items: center;
+              `}
+            >
+              {" "}
+              <div className={css``}>
+                <ClickToPlayAlbum
+                  trackGroupId={trackGroup.id}
+                  title={trackGroup.title}
+                  className={css`
+                    width: 50px !important;
+                    margin-right: 10px;
+                  `}
+                />
+              </div>
+              <div>
+                <h1
+                  className={css`
+                    font-size: 32px;
+                    line-height: 42px;
+                    margin-bottom: 0.2rem;
+                  `}
+                >
+                  {trackGroup.title}
+                </h1>
+              </div>
             </div>
           </div>
 
@@ -286,20 +300,30 @@ function TrackGroup() {
         </div>
         <div
           className={css`
-            margin: 1.25rem 0;
-            padding: 0.5rem 0 0.25rem;
+            display: flex;
           `}
         >
-          <MarkdownContent content={trackGroup.about} />
-        </div>
+          <div
+            className={css`
+              max-width: 70%;
+              margin: 1.25rem 0 1.25rem;
+              padding: 0.5rem 2rem 0.25rem 0rem;
+              border-right: 1px solid;
+            `}
+          >
+            <MarkdownContent content={trackGroup.about} />
+          </div>
 
-        <div
-          className={css`
-            margin: 1.25rem 0;
-            padding: 0.5rem 0.25rem;
-          `}
-        >
-          <MarkdownContent content={trackGroup.credits} />
+          <div
+            className={css`
+              margin: 1.25rem 0;
+              padding: 0.5rem 0.25rem 0.5rem 2rem;
+              font-size: var(--mi-font-size-small);
+              color: var(--mi-lighter-foreground-color);
+            `}
+          >
+            <MarkdownContent content={trackGroup.credits} />
+          </div>
         </div>
         {userStripeStatus?.chargesEnabled && <ArtistSupport artist={artist} />}
       </div>
