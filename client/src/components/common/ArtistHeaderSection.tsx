@@ -135,12 +135,12 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
               className={css`
                 width: 100%;
                 display: flex;
-                min-height: 85px;
+                ${artistAvatar ? "min-height: 85px;" : ""}
                 ${artistAvatar ? "margin-left: 1rem;" : ""}
                 flex-direction: column;
                 justify-content: center;
                 @media screen and (max-width: ${bp.medium}px) {
-                  min-height: 50px;
+                  ${artistAvatar ? "min-height: 50px;" : ""}
                   ${artistAvatar ? "margin-left: .5rem;" : ""}
                 }
               `}
@@ -156,7 +156,7 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
               >
                 <div
                   className={css`
-                    min-height: 50px;
+                    ${artistAvatar ? "min-height: 50px;" : ""}
                     display: flex;
                     align-items: center;
                     justify-content: space-between;
