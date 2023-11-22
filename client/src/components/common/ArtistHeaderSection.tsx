@@ -78,7 +78,7 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
       <MetaCard
         title={artist.name}
         description={artist.bio}
-        image={artist.avatar?.sizes?.[500] ?? artist?.banner?.sizes?.[625]}
+        image={artist.avatar?.sizes?.[500] ?? artist?.banner?.sizes?.[1200]}
       />
       <div
         className={css`
