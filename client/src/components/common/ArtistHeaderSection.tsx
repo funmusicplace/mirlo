@@ -71,6 +71,7 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
         @media screen and (max-width: ${bp.medium}px) {
           margin-bottom: 0rem;
           padding-top: 0.3rem;
+          ${!artistAvatar ? "padding-top: 0.5rem;" : ""}
         }
       `}
     >
