@@ -54,6 +54,7 @@ const PurchaseOrDownloadAlbum: React.FC<{
   const userIsTrackGroupArtist =
     user && artistState?.artist.userId === user?.id;
 
+  console.log("isOwned", isOwned, artistState?.userStripeStatus);
   return (
     <>
       <div>
@@ -79,15 +80,12 @@ const PurchaseOrDownloadAlbum: React.FC<{
                 @media screen and (max-width: ${bp.small}px) {
                   button {
                     padding: 0;
-                    font-size: .75rem;
+                    font-size: 0.75rem;
                   }
                 }
               `}
             >
-              <Button
-                compact
-                onClick={() => setIsPurchasingAlbum(true)}
-              >
+              <Button compact onClick={() => setIsPurchasingAlbum(true)}>
                 {t("buy")}
               </Button>
             </div>

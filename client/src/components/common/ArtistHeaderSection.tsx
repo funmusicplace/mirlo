@@ -10,6 +10,7 @@ import Button from "./Button";
 import { FaPen } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 import HeaderDiv from "./HeaderDiv";
+import ArtistFormLinks from "components/ManageArtist/ArtistFormLinks";
 
 const H1 = styled.h1<{ artistAvatar: boolean }>`
   font-size: 2.4rem;
@@ -136,13 +137,11 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
               className={css`
                 width: 100%;
                 display: flex;
-                ${artistAvatar ? "min-height: 85px;" : ""}
-                ${artistAvatar ? "margin-left: 1rem;" : ""}
+                ${artistAvatar ? "min-height: 85px; margin-left: 1rem;" : ""}
                 flex-direction: column;
                 justify-content: center;
                 @media screen and (max-width: ${bp.medium}px) {
-                  ${artistAvatar ? "min-height: 50px;" : ""}
-                  ${artistAvatar ? "margin-left: .5rem;" : ""}
+                  ${artistAvatar ? "min-height: 50px; margin-left: .5rem;" : ""}
                 }
               `}
             >
@@ -193,32 +192,31 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
                   </div>
                 </div>
               </HeaderDiv>
-              <div
-                className={css`
-                  padding-bottom: 0.2rem;
-                  ${artistAvatar ? "display: none;" : ""}
-                `}
-              >
+              {isManage && <ArtistFormLinks />}
+
+              {!artistAvatar && (
                 <MarkdownContent
                   content={artist.bio}
                   className={css`
+                    padding-bottom: 0.2rem;
+
                     ${!artistAvatar ? "margin-bottom: .7rem !important" : ""}
                   `}
                 />
-              </div>
+              )}
             </div>
           </div>
-          <div
-            className={css`
-              ${!artistAvatar ? "display: none;" : ""}
-              ${artistAvatar ? "padding-bottom: .5rem;" : ""}
-              @media screen and (max-width: ${bp.medium}px) {
-                ${artistAvatar ? "padding-bottom: .2rem;" : ""}
-              }
-            `}
-          >
-            <MarkdownContent content={artist.bio} />
-          </div>
+          {artistAvatar && (
+            <MarkdownContent
+              content={artist.bio}
+              className={css`
+                padding-bottom: 0.5rem;
+                @media screen and (max-width: ${bp.medium}px) {
+                  ${artistAvatar ? "padding-bottom: .2rem;" : ""}
+                }
+              `}
+            />
+          )}
         </Header>
       </div>
     </div>

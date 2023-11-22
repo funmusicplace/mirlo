@@ -94,7 +94,7 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup }> = ({
           <InputEl
             {...register("chosenPrice")}
             type="number"
-            min={trackGroup.minPrice}
+            min={trackGroup.minPrice ? trackGroup.minPrice / 100 : 0}
           />
         </FormComponent>
         <EmailInput />

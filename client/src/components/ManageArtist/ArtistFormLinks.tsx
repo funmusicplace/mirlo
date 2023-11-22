@@ -40,7 +40,6 @@ const ArtistFormLinks = () => {
   const links = watch(`linkArray`);
 
   const addDisabled = links?.[links.length - 1]?.url === "";
-  console.log("addDisabled", addDisabled);
 
   const doSave = React.useCallback(
     async (data: FormData) => {
@@ -62,7 +61,7 @@ const ArtistFormLinks = () => {
 
   if (!isEditing) {
     return (
-      <>
+      <div>
         <div>
           {artist?.links.map((l) => (
             <a
@@ -85,7 +84,7 @@ const ArtistFormLinks = () => {
         <Button compact onClick={() => setIsEditing(true)}>
           {t("editLinks")}
         </Button>
-      </>
+      </div>
     );
   }
 
