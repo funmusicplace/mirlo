@@ -26,7 +26,9 @@ const UploadArtistImage: React.FC<{
         margin-bottom: 1rem;
       `}
     >
-      {imageType}
+      <label>
+        <strong>{t(imageType)}</strong>
+      </label>
       <div
         className={css`
           position: relative;

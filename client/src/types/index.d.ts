@@ -83,7 +83,7 @@ interface Artist {
   id: number;
   enabled: boolean;
   trackGroups: TrackGroup[];
-  payPalClientId?: string;
+  links: string[];
   posts: Post[];
   subscriptionTiers: ArtistSubscriptionTier[];
   properties?: {

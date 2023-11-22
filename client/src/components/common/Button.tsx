@@ -12,6 +12,7 @@ export interface Compactable {
   variant?: "link" | "outlined";
   color?: string;
   uppercase?: boolean;
+  onlyIcon?: boolean;
 }
 
 const CustomButton = styled.button<Compactable>`
@@ -23,17 +24,16 @@ const CustomButton = styled.button<Compactable>`
   font-weight: bold;
   line-height: 1rem;
   height: 1.6rem;
-  margin-bottom: 0.2rem;
 
   @media screen and (max-width: ${bp.medium}px) {
+    font-size: 0.8rem;
+  }
+  @media screen and (max-width: ${bp.small}px) {
     font-size: 0.8rem;
   }
 
   &:hover:not(:disabled) {
     cursor: pointer;
-  }
-  @media screen and (max-width: ${bp.small}px) {
-    font-size: 0.8rem;
   }
 
   ${(props) => (props.uppercase ? "text-transform: uppercase;" : "")}
@@ -104,12 +104,8 @@ const CustomButton = styled.button<Compactable>`
           background-color:  var(--mi-${props.role ?? "secondary"}-color);
           background-color:  ${props.transparent ? "transparent" : ""};
           color:  var(--mi-${props.role ?? "primary"}-color);
-          color:  ${props.transparent ? "var(--mi-normal-foreground-color)" : ""};
-
-          // color: ${
-            props.role === "primary"
-              ? props.theme.colors.text
-              : props.theme.colors.textDark
+          color:  ${
+            props.transparent ? "var(--mi-normal-foreground-color)" : ""
           };
 
           &:hover:not(:disabled) {
@@ -137,7 +133,7 @@ const CustomButton = styled.button<Compactable>`
 
   & .startIcon:not(.collapsed) {
     margin-top: 0.1rem;
-    margin-right: 0.5rem;
+    margin-right: ${(props) => (props.onlyIcon ? "0px" : "0.5rem")};
     line-height: 0.785rem;
     font-size: 0.785rem;
   }
@@ -152,7 +148,7 @@ const CustomButton = styled.button<Compactable>`
 
 export interface ButtonProps extends Compactable {
   onClick?: React.MouseEventHandler<HTMLButtonElement>;
-  children: React.ReactNode;
+  children?: React.ReactNode;
   startIcon?: React.ReactElement;
   endIcon?: React.ReactElement;
   disabled?: boolean;
@@ -175,7 +171,12 @@ export const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   return (
-    <CustomButton onClick={onClick} disabled={disabled} {...props}>
+    <CustomButton
+      onClick={onClick}
+      disabled={disabled}
+      onlyIcon={!children}
+      {...props}
+    >
       {isLoading && (
         <LoadingSpinner
           className={css`

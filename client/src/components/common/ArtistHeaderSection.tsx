@@ -20,6 +20,7 @@ const H1 = styled.h1<{ artistAvatar: boolean }>`
     line-height: 1.3rem;
     padding-top: 0rem;
     padding-bottom: 0rem;
+    ${(props) => (!props.artistAvatar ? "font-size: 1.5rem !important" : "")}
   }
 `;
 
@@ -163,15 +164,7 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
                     width: 100%;
                   `}
                 >
-                  <H1
-                    className={css`
-                      @media screen and (max-width: ${bp.medium}px) {
-                        ${!artistAvatar ? "font-size: 1.5rem !important" : ""}
-                      }
-                    `}
-                  >
-                    {artist.name}
-                  </H1>
+                  <H1 artistAvatar={!!artistAvatar}>{artist.name}</H1>
 
                   <div
                     className={css`

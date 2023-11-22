@@ -27,15 +27,20 @@ const BlackbirdTransformer = {
 
 const MarkdownContent: React.FC<{
   content: string;
-}> = ({ content }) => {
+  className?: string;
+}> = ({ content, className }) => {
   return (
     <MarkdownWrapper>
       <ReactMarkdown
-        className={css`
-          ul {
-            margin-left: 1rem;
-          }
-        `}
+        className={
+          css`
+            ul {
+              margin-left: 1rem;
+            }
+          ` +
+          " " +
+          className
+        }
         remarkPlugins={[
           remarkGfm,
           [remarkEmbedder, { transformers: [BlackbirdTransformer] }],

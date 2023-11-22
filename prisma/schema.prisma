@@ -86,6 +86,7 @@ model Artist {
   urlSlug           String                   @unique
   properties        Json?
   trackArtists      TrackArtist[]
+  links             String[]
 }
 
 model ArtistAvatar {

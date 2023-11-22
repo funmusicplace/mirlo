@@ -6,7 +6,6 @@ import { InputEl } from "../common/Input";
 import { SelectEl } from "../common/Select";
 import FormComponent from "components/common/FormComponent";
 import { useSnackbar } from "state/SnackbarContext";
-import LoadingSpinner from "components/common/LoadingSpinner";
 import { useGlobalStateContext } from "state/GlobalState";
 import Table from "components/common/Table";
 import { useTranslation } from "react-i18next";
