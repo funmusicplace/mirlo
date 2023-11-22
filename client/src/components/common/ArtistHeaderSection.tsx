@@ -220,7 +220,10 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
           <div
             className={css`
               ${!artistAvatar ? "display: none;" : ""}
-              ${artistAvatar ? "padding-bottom: .2rem;" : ""}
+              ${artistAvatar ? "padding-bottom: .5rem;" : ""}
+              @media screen and (max-width: ${bp.medium}px) {
+                ${artistAvatar ? "padding-bottom: .2rem;" : ""}
+              }
             `}
           >
             <MarkdownContent content={artist.bio} />
