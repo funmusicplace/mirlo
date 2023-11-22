@@ -123,7 +123,6 @@ function TrackGroup() {
                 align-items: center;
               `}
             >
-              {" "}
               <div className={css``}>
                 <ClickToPlayAlbum
                   trackGroupId={trackGroup.id}
@@ -315,7 +314,6 @@ function TrackGroup() {
               border-right: 1px solid;
               @media screen and (max-width: ${bp.small}px) {
                 max-width: 100%;
-                margin: 1.25rem 0 1.25rem;
                 padding: 0.5rem 0rem 0.25rem 0rem;
                 border-right: 0;
               }
@@ -329,7 +327,7 @@ function TrackGroup() {
               margin: 1.25rem 0;
               padding: 0.5rem 0.25rem 0.5rem 2rem;
               font-size: var(--mi-font-size-small);
-              color: var(--mi-lighter-foreground-color);
+              opacity: 0.5;
               @media screen and (max-width: ${bp.small}px) {
                 max-width: 100%;
                 padding: 0.5rem 0.25rem 0.5rem 0rem;

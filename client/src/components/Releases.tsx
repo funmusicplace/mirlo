@@ -47,7 +47,6 @@ const Releases = () => {
           flex-wrap: wrap;
         `}
       >
-        {" "}
         <div
           className={css`
               display: flex;

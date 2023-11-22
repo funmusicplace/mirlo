@@ -163,17 +163,15 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
                     width: 100%;
                   `}
                 >
-                  <div>
-                    <H1
-                      className={css`
-                        @media screen and (max-width: ${bp.medium}px) {
-                          ${!artistAvatar ? "font-size: 1.5rem !important" : ""}
-                        }
-                      `}
-                    >
-                      {artist.name}
-                    </H1>
-                  </div>
+                  <H1
+                    className={css`
+                      @media screen and (max-width: ${bp.medium}px) {
+                        ${!artistAvatar ? "font-size: 1.5rem !important" : ""}
+                      }
+                    `}
+                  >
+                    {artist.name}
+                  </H1>
 
                   <div
                     className={css`
@@ -204,8 +202,8 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
               </HeaderDiv>
               <div
                 className={css`
+                  padding-bottom: 0.2rem;
                   ${artistAvatar ? "display: none;" : ""}
-                  ${!artistAvatar ? "padding-bottom: .2rem;" : ""}
                 `}
               >
                 <MarkdownContent
