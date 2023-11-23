@@ -123,7 +123,13 @@ function TrackGroup() {
                 align-items: center;
               `}
             >
-              <div className={css``}>
+              <div
+                className={css`
+                  @media screen and (max-width: ${bp.small}px) {
+                    display: none;
+                  }
+                `}
+              >
                 <ClickToPlayAlbum
                   trackGroupId={trackGroup.id}
                   title={trackGroup.title}
@@ -136,8 +142,8 @@ function TrackGroup() {
               <div>
                 <h1
                   className={css`
-                    font-size: 32px;
-                    line-height: 42px;
+                    font-size: 2rem;
+                    line-height: 2.2rem;
                     margin-bottom: 0.2rem;
                   `}
                 >
@@ -247,16 +253,12 @@ function TrackGroup() {
                   display: flex;
                   justify-content: space-between;
                   align-items: flex-start;
-
-                  @media screen and (max-width: ${bp.medium}px) {
-                    margin-bottom: 1rem;
-                  }
                 `}
               >
                 <div
                   className={css`
                     color: var(--mi-light-foreground-color);
-                    font-size: 16px;
+                    font-size: 1rem;
                     em {
                       font-style: normal;
                     }
@@ -278,6 +280,23 @@ function TrackGroup() {
                   </em>
                 </div>
                 <Wishlist trackGroup={trackGroup} />
+              </div>
+              <div
+                className={css`
+                  margin-bottom: 0.5rem;
+                  @media screen and (min-width: ${bp.small}px) {
+                    display: none;
+                  }
+                `}
+              >
+                <ClickToPlayAlbum
+                  trackGroupId={trackGroup.id}
+                  title={trackGroup.title}
+                  className={css`
+                    width: 50px !important;
+                    margin-right: 10px;
+                  `}
+                />
               </div>
             </div>
             <div

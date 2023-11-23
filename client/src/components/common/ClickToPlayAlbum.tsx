@@ -2,12 +2,13 @@ import styled from "@emotion/styled";
 // import { useSnackbar } from "state/SnackbarContext";
 import React from "react";
 import { VscPlay } from "react-icons/vsc";
-import { TfiControlPause } from "react-icons/tfi";
+// import { TfiControlPause } from "react-icons/tfi";
 import { bp } from "../../constants";
 import { useGlobalStateContext } from "state/GlobalState";
 import api from "services/api";
 import Button from "./Button";
 import { css } from "@emotion/css";
+import PauseButton from "../common/PauseButton";
 type WrapperProps = {
   width: number;
   height: number;
@@ -26,11 +27,13 @@ const PlayWrapper = styled.div<WrapperProps>`
   button {
     background-color: var(--mi-secondary-color);
     color: var(--mi-primary-color);
-    width: 3em;
-    height: 3em;
+    width: 3rem;
+    height: 3rem;
     border-radius: 50px;
     font-size: 1rem;
     padding: 0.8rem 0.7rem 0.9rem 0.9rem;
+    border: 0px !important;
+    margin: 0 !important;
 
     &:nth-of-type(1) {
       margin-left: 0rem;
@@ -158,6 +161,21 @@ const ClickToPlayAlbum: React.FC<{
           ></Button>
         )}
         {currentlyPlaying && (
+          <div
+            className={css`
+              button {
+                width: 3rem !important;
+                height: 3rem !important;
+                font-size: 1.4rem !important;
+                padding-left: 0.8rem !important;
+              }
+            `}
+          >
+            <PauseButton />
+          </div>
+        )}
+
+        {/* {currentlyPlaying && (
           <Button
             onClick={onPause}
             startIcon={
@@ -171,7 +189,7 @@ const ClickToPlayAlbum: React.FC<{
             compact
           ></Button>
         )}
-        {/* <Button onClick={onClickQueue} startIcon={<MdQueue />} compact>
+        <Button onClick={onClickQueue} startIcon={<MdQueue />} compact>
           Queue
         </Button> */}
       </PlayWrapper>
