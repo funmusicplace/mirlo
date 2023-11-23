@@ -66,11 +66,6 @@ const Wrapper = styled.div<WrapperProps>`
 
   @media (max-width: ${bp.medium}px) {
     position: relative;
-
-    img {
-      width: ${(props) => (props.width < 420 ? `${props.width}px` : "100%")};
-      height: ${(props) => (props.height < 420 ? `${props.height}px` : "auto")};
-    }
   }
 `;
 
