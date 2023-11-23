@@ -55,6 +55,8 @@ function TrackGroup() {
 
   const ownedByUser = artist.userId === user?.id;
 
+  const trackGroupCredits = trackGroup.credits;
+
   return (
     <div
       className={css`
@@ -330,7 +332,7 @@ function TrackGroup() {
               max-width: 70%;
               margin: 1.25rem 0 1.25rem;
               padding: 0.5rem 2rem 0.25rem 0rem;
-              border-right: 1px solid;
+              ${trackGroupCredits ? "border-right: 1px solid;" : ""}
               @media screen and (max-width: ${bp.small}px) {
                 max-width: 100%;
                 padding: 0.5rem 0rem 0.25rem 0rem;
