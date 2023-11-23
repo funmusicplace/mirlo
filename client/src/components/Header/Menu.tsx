@@ -55,6 +55,7 @@ const Menu: React.FC = (props) => {
         list-style: none;
         button {
           font-size: var(--mi-font-size-normal);
+          height: auto;
         }
 
         & li > * {
@@ -64,10 +65,12 @@ const Menu: React.FC = (props) => {
           text-decoration: none;
           text-align: right;
           display: block;
+          white-space: normal;
           color: var(--mi-black);
           font-weight: normal;
           border-radius: 0;
           padding: 0.5rem;
+          margin: 0rem;
 
           display: flex;
           align-items: center;
@@ -135,7 +138,15 @@ const Menu: React.FC = (props) => {
                     navigate(`/manage/artists/${a.id}`);
                   }}
                 >
-                  {a.name}
+                  <div
+                    className={css`
+                      font-weight: bold;
+                      opacity: 0.7;
+                      font-size: 0.9rem;
+                    `}
+                  >
+                    {a.name}
+                  </div>
                 </Button>
               </li>
             );
