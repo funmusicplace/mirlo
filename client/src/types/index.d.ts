@@ -56,6 +56,7 @@ interface TrackGroup {
   urlSlug?: string;
   userTrackGroupPurchases?: { userId: number }[];
   userTrackGroupWishlist?: { userId: number }[];
+  platformPercent: number;
 }
 
 interface Post {
@@ -117,6 +118,7 @@ interface ArtistSubscriptionTier {
   name: string;
   description: string;
   isDefaultTier: boolean;
+  platformPercent: number;
 }
 
 interface ArtistUserSubscription {

@@ -54,7 +54,6 @@ const PurchaseOrDownloadAlbum: React.FC<{
   const userIsTrackGroupArtist =
     user && artistState?.artist.userId === user?.id;
 
-  console.log("isOwned", isOwned, artistState?.userStripeStatus);
   return (
     <>
       <div>

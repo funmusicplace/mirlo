@@ -9,6 +9,7 @@ import Money from "../common/Money";
 import { useTranslation } from "react-i18next";
 import MarkdownContent from "components/common/MarkdownContent";
 import { bp } from "../../constants";
+import PlatformPercent from "components/common/PlatformPercent";
 
 const ArtistSupportBox: React.FC<{
   subscriptionTier: ArtistSubscriptionTier;
@@ -75,7 +76,6 @@ const ArtistSupportBox: React.FC<{
           }
 
           @media screen and (max-width: ${bp.medium}px) {
-            
             h3 {
               font-size: 1rem;
             }
@@ -157,15 +157,25 @@ const ArtistSupportBox: React.FC<{
           {/* FIXME: remove once we have a real stripe account
            */}
           {user && !ownedByUser && (
-            <Button
-              compact
-              uppercase
-              onClick={() => subscribeToTier(subscriptionTier)}
-              isLoading={isCheckingForSubscription}
-              disabled={isCheckingForSubscription}
-            >
-              Support
-            </Button>
+            <>
+              <Button
+                compact
+                uppercase
+                onClick={() => subscribeToTier(subscriptionTier)}
+                isLoading={isCheckingForSubscription}
+                disabled={isCheckingForSubscription}
+              >
+                Support
+              </Button>
+              <PlatformPercent
+                percent={subscriptionTier.platformPercent}
+                chosenPrice={
+                  subscriptionTier?.minAmount
+                    ? subscriptionTier.minAmount / 100
+                    : 0
+                }
+              />
+            </>
           )}
           {user && ownedByUser && (
             <Box

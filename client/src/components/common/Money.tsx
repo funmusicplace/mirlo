@@ -1,6 +1,6 @@
 export const moneyDisplay = ({
   amount,
-  currency,
+  currency = "USD",
 }: {
   amount?: number | string;
   currency?: string;
