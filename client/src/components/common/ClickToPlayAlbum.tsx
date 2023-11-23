@@ -135,17 +135,6 @@ const ClickToPlayAlbum: React.FC<{
     currentlyPlayingIndex !== undefined &&
     trackIds.includes(playerQueueIds[currentlyPlayingIndex]);
 
-  const onPause = React.useCallback(
-    (e: any) => {
-      // onPause gets triggered both onEnded and onPause, so we need
-      // a way to differntiate those.
-      if (!isEqualDurations(e.target.currentTime, e.target.duration)) {
-        dispatch({ type: "setPlaying", playing: false });
-      }
-    },
-    [dispatch]
-  );
-
   return (
     <Wrapper
       width={image?.width ?? 0}
@@ -175,21 +164,7 @@ const ClickToPlayAlbum: React.FC<{
           </div>
         )}
 
-        {/* {currentlyPlaying && (
-          <Button
-            onClick={onPause}
-            startIcon={
-              <TfiControlPause
-                className={css`
-                  margin-right: 0.2rem;
-                  margin-top: 0.1rem;
-                `}
-              />
-            }
-            compact
-          ></Button>
-        )}
-        <Button onClick={onClickQueue} startIcon={<MdQueue />} compact>
+        {/*  <Button onClick={onClickQueue} startIcon={<MdQueue />} compact>
           Queue
         </Button> */}
       </PlayWrapper>
