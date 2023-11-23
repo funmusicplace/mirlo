@@ -83,16 +83,14 @@ const ArtistSupport: React.FC<{ artist: Artist }> = ({ artist }) => {
 
   return (
     <>
-      <HeaderDiv
-      className={css`
-        margin-bottom: 0.7rem;
-      `}
-    >
+      <HeaderDiv>
         <h2
-        className={css`
-          margin-bottom: 0rem;
-        `}
-      >{t("support", { artist: artist.name })}</h2>
+          className={css`
+            margin-bottom: 0rem;
+          `}
+        >
+          {t("support", { artist: artist.name })}
+        </h2>
         <FollowArtist artistId={artist.id} />
       </HeaderDiv>
       {artist.subscriptionTiers.length === 0 && (
@@ -115,7 +113,7 @@ const ArtistSupport: React.FC<{ artist: Artist }> = ({ artist }) => {
         `}
       >
         {artist.subscriptionTiers?.map((p) => (
-          <ArtistSupportBox key={p.id} subscriptionTier={p} artist={artist}/>
+          <ArtistSupportBox key={p.id} subscriptionTier={p} artist={artist} />
         ))}
       </div>
     </>
