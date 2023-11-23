@@ -30,6 +30,8 @@ export default {
         variants: [
           { width: 2500, height: 2500 },
           { width: 1250, height: 1250 },
+          { width: 1200, height: 630 },
+          { width: 1024, height: 1024 },
           { width: 625, height: 625 },
         ],
       },
@@ -37,6 +39,8 @@ export default {
         variants: [
           { width: 2500, height: 2500 },
           { width: 1250, height: 1250 },
+          { width: 1200, height: 630 },
+          { width: 1024, height: 1024 },
           { width: 625, height: 625 },
         ],
       },

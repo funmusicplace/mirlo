@@ -32,7 +32,6 @@ const apiDoc = {
     },
     Artist: {
       type: "object",
-      required: ["name"],
       properties: {
         name: {
           description: "Name of the artist",

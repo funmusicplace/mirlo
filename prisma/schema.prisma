@@ -86,6 +86,7 @@ model Artist {
   urlSlug           String                   @unique
   properties        Json?
   trackArtists      TrackArtist[]
+  links             String[]
 }
 
 model ArtistAvatar {
@@ -129,6 +130,7 @@ model ArtistSubscriptionTier {
   minimumTierForPost    Post[]
   postSubscriptionTiers PostSubscriptionTier[]
   isDefaultTier         Boolean                  @default(false)
+  platformPercent       Int?                     @default(5)
 }
 
 model ArtistUserSubscription {
@@ -194,6 +196,7 @@ model TrackGroup {
   urlSlug                 String
   credits                 String?
   userTrackGroupWishlist  UserTrackGroupWishlist[]
+  platformPercent         Int?                     @default(5)
 
   @@unique([artistId, urlSlug])
 }

@@ -53,26 +53,7 @@ export default function () {
         return next();
       }
 
-      // req.busboy.on('file', (fieldname, file, filename) => {
-      //   console.log(`Upload of '${filename}' started`);
-
-      //   // Create a write stream of the new file
-      //   // const fstream = fs.createWriteStream(path.join(uploadPath, filename));
-      //   // Pipe it trough
-      //   file.pipe(fstream);
-
-      //   // On finish of the upload
-      //   fstream.on('close', () => {
-      //       console.log(`Upload of '${filename}' finished`);
-      //       res.redirect('back');
-      //   });
-      // });
-
-      let jobId = null;
-      // FIXME: Only allow uploading of one file.
-      // if (req.files && isFileArray(req.files)) {
-      jobId = await processTrackAudio({ req, res })(Number(trackId));
-      // }
+      const jobId = await processTrackAudio({ req, res })(Number(trackId));
 
       res.json({ result: { jobId } });
     } catch (error) {

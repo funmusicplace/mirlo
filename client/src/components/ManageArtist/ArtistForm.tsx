@@ -12,9 +12,9 @@ import { pick } from "lodash";
 import { useGlobalStateContext } from "state/GlobalState";
 import UploadArtistImage from "./UploadArtistImage";
 import { useTranslation } from "react-i18next";
-import ColorInput from "./ColorInput";
 import { useArtistContext } from "state/ArtistContext";
 import useJobStatusCheck from "utils/useJobStatusCheck";
+import ArtistFormColors from "./ArtistFormColors";
 
 export interface ShareableTrackgroup {
   creatorId: number;
@@ -194,71 +194,56 @@ export const ArtistForm: React.FC<{
     <Modal
       open={open}
       onClose={onClose}
-      size="small"
       title={existing ? "Edit artist" : "Create an artist"}
     >
       <FormProvider {...methods}>
         <form onSubmit={handleSubmit(soSave)}>
-          {existing && (
-            <UploadArtistImage
-              existing={existing}
-              reload={reload}
-              imageType="banner"
-              height="125px"
-              width="100%"
-              maxDimensions="2500x2500"
-              isLoading={
-                uploadBannerJobs?.[0]?.jobStatus !== undefined &&
-                uploadBannerJobs?.[0]?.jobStatus !== "completed"
-              }
-            />
-          )}
+          <div
+            className={css`
+              display: flex;
+            `}
+          >
+            {existing && (
+              <UploadArtistImage
+                existing={existing}
+                reload={reload}
+                imageType="banner"
+                height="125px"
+                width="100%"
+                maxDimensions="2500x2500"
+                isLoading={
+                  uploadBannerJobs?.[0]?.jobStatus !== undefined &&
+                  uploadBannerJobs?.[0]?.jobStatus !== "completed"
+                }
+              />
+            )}
 
-          {existing && (
-            <UploadArtistImage
-              existing={existing}
-              reload={reload}
-              imageType="avatar"
-              height="120px"
-              width="120px"
-              maxDimensions="1500x1500"
-              isLoading={
-                uploadAvatarJobs?.[0]?.jobStatus !== undefined &&
-                uploadAvatarJobs?.[0]?.jobStatus !== "completed"
-              }
-            />
-          )}
+            {existing && (
+              <UploadArtistImage
+                existing={existing}
+                reload={reload}
+                imageType="avatar"
+                height="120px"
+                width="120px"
+                maxDimensions="1500x1500"
+                isLoading={
+                  uploadAvatarJobs?.[0]?.jobStatus !== undefined &&
+                  uploadAvatarJobs?.[0]?.jobStatus !== "completed"
+                }
+              />
+            )}
+          </div>
 
           <div
             className={css`
               margin-top: 1rem;
             `}
           >
-            <h3>{existing ? existing.name : t("newArtist")}</h3>
             <FormComponent>
               {t("displayName")}:{" "}
               <InputEl {...register("name", { required: true })} />
             </FormComponent>
-            {existing && (
-              <>
-                <ColorInput
-                  name="properties.colors.primary"
-                  title={t("primaryColor")}
-                />
-                <ColorInput
-                  name="properties.colors.secondary"
-                  title={t("secondaryColor")}
-                />
-                <ColorInput
-                  name="properties.colors.background"
-                  title={t("backgroundColor")}
-                />
-                <ColorInput
-                  name="properties.colors.foreground"
-                  title={t("foregroundColor")}
-                />
-              </>
-            )}
+            {existing && <ArtistFormColors />}
 
             <FormComponent>
               {t("urlSlug")}:{" "}
@@ -278,11 +263,8 @@ export const ArtistForm: React.FC<{
             </FormComponent>
             <FormComponent>
               {t("bio")}:
-              <TextArea {...register("bio")} />
+              <TextArea {...register("bio")} rows={7} />
             </FormComponent>
-            {/* <FormComponent>
-            Email: <InputEl type="email" {...register("email")} />
-          </FormComponent> */}
 
             <Button type="submit" disabled={isSaving} isLoading={isSaving}>
               {existing ? t("saveArtist") : t("createArtist")}

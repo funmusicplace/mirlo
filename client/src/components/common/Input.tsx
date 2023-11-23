@@ -16,7 +16,6 @@ export const InputEl = styled.input`
   border-radius: var(--mi-border-radius);
   padding: 0.5rem 0.75rem;
   font-size: 1rem;
-  margin-bottom: 0.5rem;
   width: 100%;
   color: var(--mi-normal-foreground-color);
   background-color: var(--mi-lighten-x-background-color);

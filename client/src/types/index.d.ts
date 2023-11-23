@@ -56,6 +56,7 @@ interface TrackGroup {
   urlSlug?: string;
   userTrackGroupPurchases?: { userId: number }[];
   userTrackGroupWishlist?: { userId: number }[];
+  platformPercent: number;
 }
 
 interface Post {
@@ -83,7 +84,7 @@ interface Artist {
   id: number;
   enabled: boolean;
   trackGroups: TrackGroup[];
-  payPalClientId?: string;
+  links: string[];
   posts: Post[];
   subscriptionTiers: ArtistSubscriptionTier[];
   properties?: {
@@ -117,6 +118,7 @@ interface ArtistSubscriptionTier {
   name: string;
   description: string;
   isDefaultTier: boolean;
+  platformPercent: number;
 }
 
 interface ArtistUserSubscription {

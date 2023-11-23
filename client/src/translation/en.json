@@ -104,7 +104,12 @@
     "unknown": "Unknown",
     "toFollowThisArtist": "To follow this artist please <1>sign up</1> with a user account or <2>log in</2>.",
     "followArtist": "Follow {{artistName}}",
-    "month": "month"
+    "month": "month",
+    "addNewLink": "Add new link",
+    "saveLinks": "Save links",
+    "editLinks": "Edit links",
+    "cancel": "Cancel",
+    "platformPercent": "{{ percent }}% ({{ money }}) of this purchase will go to maintain Mirlo."
   },
   "post": {
     "edit": "Edit"
@@ -210,10 +215,13 @@
     "yourAlbums": "Your albums",
     "addNewAlbum": "Add new album to {{artistName}}",
     "posts": "Posts",
+    "banner": "Background",
+    "avatar": "Avatar",
     "edit": "Edit",
     "delete": "Delete",
     "addNewPost": "Add new post to {{artist}}",
     "postDeleted": "Post deleted",
+    "customColors": "Custom colors",
     "primaryColor": "Primary color",
     "secondaryColor": "Secondary color",
     "backgroundColor": "Background color",

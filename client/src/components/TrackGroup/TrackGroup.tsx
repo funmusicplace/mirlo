@@ -80,7 +80,7 @@ function TrackGroup() {
       <MetaCard
         title={trackGroup.title}
         description={trackGroup.about ?? "An album on Mirlo"}
-        image={trackGroup.cover?.sizes?.[300]}
+        image={trackGroup.cover?.sizes?.[600]}
       />
       <div
         className={css`

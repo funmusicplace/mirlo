@@ -10,6 +10,7 @@ import FreeDownload from "./FreeDownload";
 import FormComponent from "components/common/FormComponent";
 import { FormProvider, useForm } from "react-hook-form";
 import EmailInput from "./EmailInput";
+import PlatformPercent from "components/common/PlatformPercent";
 
 interface FormData {
   chosenPrice: string;
@@ -30,6 +31,7 @@ const testOwnership = async (trackGroupId: number, email: string) => {
 const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup }> = ({
   trackGroup,
 }) => {
+  console.log("trackGorup", trackGroup);
   const minPrice = trackGroup.minPrice;
   const methods = useForm<FormData>({
     defaultValues: {
@@ -94,9 +96,13 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup }> = ({
           <InputEl
             {...register("chosenPrice")}
             type="number"
-            min={trackGroup.minPrice}
+            min={trackGroup.minPrice ? trackGroup.minPrice / 100 : 0}
           />
         </FormComponent>
+        <PlatformPercent
+          percent={trackGroup.platformPercent}
+          chosenPrice={chosenPrice}
+        />
         <EmailInput />
         <Button
           type="submit"
