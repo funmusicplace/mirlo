@@ -66,8 +66,6 @@ export default function () {
         });
       }
 
-      console.log("trackGroup", trackGroup);
-
       if (!trackGroup) {
         res.status(404).json({ error: `TrackGroup with id ${id} not found` });
         return next();
