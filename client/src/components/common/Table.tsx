@@ -14,7 +14,7 @@ export const Table = styled.table`
 
       @media (prefers-color-scheme: dark) {
         background-color: ${(props) =>
-          colorShade(props.theme.colors.backgroundDark, -40)} !important;
+          colorShade(props.theme.colors.background, -40)} !important;
       }
     }
   }

@@ -11,15 +11,13 @@ import { FaPen } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 import HeaderDiv from "./HeaderDiv";
 
-const H1 = styled.h1`
-  font-size: 50px;
-  font-size: 2.6vmax;
-  line-height: 2.8vmax;
+const H1 = styled.h1<{ artistAvatar: boolean }>`
+  font-size: 2.4rem;
+  line-height: 2.5rem;
 
   @media screen and (max-width: ${bp.medium}px) {
-    font-size: 32px;
-    font-size: 3.2vmax;
-    line-height: 3.2vmax;
+    font-size: 1.2rem;
+    line-height: 1.3rem;
     padding-top: 0rem;
     padding-bottom: 0rem;
   }
@@ -36,7 +34,7 @@ const Header = styled.div`
   font-size: var(--mi-font-size-normal);
 
   p {
-    margin-bottom: 2rem;
+    margin-bottom: 0rem !important;
   }
 
   @media screen and (max-width: ${bp.medium}px) {
@@ -44,8 +42,10 @@ const Header = styled.div`
     line-height: 1rem;
     border-radius: 0;
     padding: var(--mi-side-paddings-xsmall);
+    padding-bottom: 0rem;
     border: solid grey;
     border-width: 0px 0px 1px 0px;
+    margin-bottom: 0rem !important;
     p {
       margin-bottom: 0em !important;
       padding-bottom: 0.5rem;
@@ -62,13 +62,15 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
     state: { user },
   } = useGlobalStateContext();
 
+  const artistAvatar = artist?.avatar?.sizes;
+
   return (
     <div
       className={css`
         margin-bottom: 1rem;
-        padding-top: 0.5rem;
         @media screen and (max-width: ${bp.medium}px) {
           margin-bottom: 0rem;
+          padding-top: 0.5rem;
         }
       `}
     >
@@ -95,54 +97,134 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
               display: flex;
               padding-top: 1rem;
               margin-bottom: 1rem;
-              align-items: flex-start;
+              ${artistAvatar ? "margin-bottom: 0.2rem;" : ""}
+              align-items: center;
 
               @media screen and (max-width: ${bp.medium}px) {
-                padding-top: 0.5rem;
-                margin-bottom: 0.5rem;
+                padding-top: 0rem;
+                margin-bottom: 0rem;
               }
             `}
           >
             {artist.avatar?.sizes?.[300] && (
-              <img
-                src={artist.avatar?.sizes?.[120]}
-                alt="Artist avatar"
+              <div
                 className={css`
-                  margin-right: 1rem;
+                  max-width: 85px;
+                  display: flex;
+
+                  @media screen and (max-width: ${bp.medium}px) {
+                    max-width: 50px;
+                    padding-bottom: 0rem;
+                    margin-bottom: 0rem;
+                  }
                 `}
-              />
+              >
+                <img
+                  src={artist.avatar?.sizes?.[300]}
+                  alt="Artist avatar"
+                  className={css`
+                    width: 100%;
+                    border-radius: 100px;
+                    border: solid 1px var(--mi-lighter-foreground-color);
+                  `}
+                />
+              </div>
             )}
+
             <div
               className={css`
                 width: 100%;
+                display: flex;
+                ${artistAvatar ? "min-height: 85px;" : ""}
+                ${artistAvatar ? "margin-left: 1rem;" : ""}
+                flex-direction: column;
+                justify-content: center;
+                @media screen and (max-width: ${bp.medium}px) {
+                  ${artistAvatar ? "min-height: 50px;" : ""}
+                  ${artistAvatar ? "margin-left: .5rem;" : ""}
+                }
               `}
             >
               <HeaderDiv
                 className={css`
-                  align-items: flex-start !important;
+                  align-items: center !important;
+                  padding-bottom: 0 !important;
+                  @media screen and (max-width: ${bp.medium}px) {
+                    margin: 0rem !important;
+                  }
                 `}
               >
-                <div>
-                  <H1>{artist.name}</H1>
-                </div>
-                <div>
-                  {!isManage && <FollowArtist artistId={artist.id} />}
-                  {!isManage && user?.id === artist.userId && (
-                    <Link to={`/manage/artists/${artist.id}`}>
-                      <Button
-                        compact
-                        transparent
-                        type="button"
-                        startIcon={<FaPen />}
-                      >
-                        {t("edit")}
-                      </Button>
-                    </Link>
-                  )}
+                <div
+                  className={css`
+                    ${artistAvatar ? "min-height: 50px;" : ""}
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    width: 100%;
+                  `}
+                >
+                  <H1
+                    className={css`
+                      @media screen and (max-width: ${bp.medium}px) {
+                        ${!artistAvatar ? "font-size: 1.5rem !important" : ""}
+                      }
+                    `}
+                  >
+                    {artist.name}
+                  </H1>
+
+                  <div
+                    className={css`
+                      text-align: right;
+                      display: flex;
+                      flex-direction: column;
+                      padding-left: 1rem;
+                      @media screen and (max-width: ${bp.medium}px) {
+                        padding-left: 0.3rem;
+                      }
+                    `}
+                  >
+                    {!isManage && <FollowArtist artistId={artist.id} />}
+                    {!isManage && user?.id === artist.userId && (
+                      <Link to={`/manage/artists/${artist.id}`}>
+                        <Button
+                          compact
+                          transparent
+                          type="button"
+                          startIcon={<FaPen />}
+                        >
+                          {t("edit")}
+                        </Button>
+                      </Link>
+                    )}
+                  </div>
                 </div>
               </HeaderDiv>
-              <MarkdownContent content={artist.bio} />
+              <div
+                className={css`
+                  padding-bottom: 0.2rem;
+                  ${artistAvatar ? "display: none;" : ""}
+                `}
+              >
+                <MarkdownContent
+                  content={artist.bio}
+                  className={css`
+                    ${!artistAvatar ? "margin-bottom: .7rem !important" : ""}
+                  `}
+                />
+              </div>
             </div>
+          </div>
+          <div
+            className={css`
+              ${!artistAvatar ? "display: none;" : ""}
+              ${artistAvatar ? "padding-bottom: .5rem;" : ""}
+              @media screen and (max-width: ${bp.medium}px) {
+                ${artistAvatar ? "padding-bottom: .2rem;" : ""}
+              }
+            `}
+          >
+            <MarkdownContent content={artist.bio} />
           </div>
         </Header>
       </div>

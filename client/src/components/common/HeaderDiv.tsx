@@ -10,6 +10,7 @@ const HeaderDiv = styled.div`
 
   @media screen and (max-width: ${bp.medium}px) {
     align-items: flex-start !important;
+    flex-wrap: wrap;
     margin-bottom: 0.5rem;
     padding-bottom: 0rem;
   }

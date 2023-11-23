@@ -96,6 +96,9 @@ const ManageTrackRow: React.FC<{
           overflow: hidden;
           whitespace: nowrap;
           text-overflow: ellipsis;
+          &:hover {
+            background-color: transparent !important;
+          }
 
           &:before {
             content: "${t("titleColumn")}: ";
