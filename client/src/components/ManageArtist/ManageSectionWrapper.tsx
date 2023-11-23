@@ -9,7 +9,7 @@ export const ManageSectionWrapper = styled.div`
   @media screen and (max-width: ${bp.medium}px) {
     border-radius: 0;
     padding: var(--mi-side-paddings-xsmall);
-    padding-top: 1rem;
+    padding-top: 0rem;
   }
 `;
 

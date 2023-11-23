@@ -58,6 +58,7 @@ const TrackGroupCard: React.FC<{
         }
         @media screen and (max-width: ${bp.medium}px) {
           font-size: 0.8rem;
+          padding: 0rem !important;
         }
       `}
     >
@@ -90,9 +91,11 @@ const TrackGroupCard: React.FC<{
 
           @media screen and (max-width: ${bp.medium}px) {
             font-size: 0.8rem;
+            padding: 0.5rem 0rem;
+            padding-right: 0.5rem;
 
             strong {
-              margin-right: .5rem;
+              margin-right: 0.5rem;
             }
 
             > div {
@@ -103,8 +106,6 @@ const TrackGroupCard: React.FC<{
                 margin-top: 0.5rem;
               }
             }
-
-
           }
         `}
       >

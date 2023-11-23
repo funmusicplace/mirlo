@@ -96,7 +96,7 @@ const ManageTrackRow: React.FC<{
           overflow: hidden;
           whitespace: nowrap;
           text-overflow: ellipsis;
-          :hover {
+          &:hover {
             background-color: transparent !important;
           }
 

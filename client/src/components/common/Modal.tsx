@@ -48,7 +48,7 @@ const Content = styled.div<ContentProps>`
 
   @media (max-width: ${bp.medium}px) {
     width: 100%;
-    padding: 10px;
+    padding: 1rem;
   }
 `;
 

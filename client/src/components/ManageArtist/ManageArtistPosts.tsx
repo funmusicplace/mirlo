@@ -11,7 +11,7 @@ import { useSnackbar } from "state/SnackbarContext";
 import PostForm from "./PostForm";
 import Modal from "components/common/Modal";
 import { useTranslation } from "react-i18next";
-import { MdAdd } from "react-icons/md";
+import { FaPlus } from "react-icons/fa";
 import { useArtistContext } from "state/ArtistContext";
 import HeaderDiv from "components/common/HeaderDiv";
 import { ManageSectionWrapper } from "./ManageSectionWrapper";
@@ -73,7 +73,7 @@ const ManageArtistPosts: React.FC<{}> = () => {
           onClick={() => {
             setAddingNewPost(true);
           }}
-          startIcon={<MdAdd />}
+          startIcon={<FaPlus />}
           compact
         >
           {t("addNewPost", { artist: artist.name })}

@@ -11,7 +11,7 @@ import { FaPen } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 import HeaderDiv from "./HeaderDiv";
 
-const H1 = styled.h1`
+const H1 = styled.h1<{ artistAvatar: boolean }>`
   font-size: 2.4rem;
   line-height: 2.5rem;
 
@@ -127,7 +127,7 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
                     border-radius: 100px;
                     border: solid 1px var(--mi-lighter-foreground-color);
                   `}
-                />{" "}
+                />
               </div>
             )}
 
