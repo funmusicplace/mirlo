@@ -41,7 +41,7 @@ const PlayWrapper = styled.div<WrapperProps>`
     height: 3em;
     border-radius: 50px;
     font-size: 1rem;
-    padding: .8rem .7rem .9rem .9rem;
+    padding: 0.8rem 0.7rem 0.9rem 0.9rem;
 
     &:nth-of-type(1) {
       margin-left: 0rem;
@@ -60,7 +60,7 @@ const PlayWrapper = styled.div<WrapperProps>`
   @media (max-width: ${bp.small}px) {
     background-color: transparent !important;
     width: 32px;
-    height: 29px;
+    height: 32px;
     opacity: 1;
     right: 0em;
     bottom: 0em;
@@ -71,15 +71,15 @@ const PlayWrapper = styled.div<WrapperProps>`
       font-size: 0.8rem;
       border-radius: 0px;
       border: solid 0px;
-      background-color: rgba(0, 0, 0, .7);
-      padding: .8rem .8rem .9rem .9rem;
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 0.8rem 0.8rem 0.9rem 0.9rem;
       width: 2.4em;
       height: 2.4em;
     }
     button:active {
       font-size: 0.8rem;
-      background-color: rgba(0, 0, 0, .7);
-      padding: .8rem .8rem .9rem .9rem;
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 0.8rem 0.8rem 0.9rem 0.9rem;
       width: 2.2em;
       height: 2.2em;
     }
@@ -94,16 +94,14 @@ const Wrapper = styled.div<WrapperProps>`
   max-width: 100%;
   width: ${(props) => props.width}px;
 
-
-    .startIcon {
-      font-size: 1.3rem !important;
-    }
-
+  .startIcon {
+    font-size: 1.3rem !important;
+  }
 
   img {
     width: 100%;
     height: 100%;
-    border: 1px solid rgba(255, 255, 255, .05);
+    border: 1px solid rgba(255, 255, 255, 0.05);
     text-align: center;
     display: block;
     // padding-top: ${(props) => props.height / 2 - 12}px;
@@ -123,7 +121,7 @@ const ClickToPlay: React.FC<{
   trackGroupId?: number;
   trackId?: number;
   title: string;
-  image?: { width: number; height: number; url: string;};
+  image?: { width: number; height: number; url: string };
   className?: string;
 }> = ({ trackGroupId, trackId, title, image, className }) => {
   const {
@@ -177,7 +175,6 @@ const ClickToPlay: React.FC<{
   //   displayMessage("Added to queue");
   // }, [trackGroupId, trackId, displayMessage, dispatch]);
 
-
   const currentlyPlaying =
     playing &&
     currentlyPlayingIndex !== undefined &&
@@ -191,9 +188,11 @@ const ClickToPlay: React.FC<{
     >
       <PlayWrapper width={image?.width ?? 0} height={image?.height ?? 0}>
         {!currentlyPlaying && (
-          <Button onClick={onClickPlay} startIcon={<VscPlay />} compact>
-
-          </Button>
+          <Button
+            onClick={onClickPlay}
+            startIcon={<VscPlay />}
+            compact
+          ></Button>
         )}
         {/* {currentlyPlaying && (
           <Button onClick={onPause} startIcon={<TfiControlPause
