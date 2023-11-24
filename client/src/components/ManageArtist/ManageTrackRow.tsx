@@ -42,7 +42,13 @@ const ManageTrackRow: React.FC<{
   }, [track.id, userId, reload, snackbar]);
 
   const uploadState = track.audio?.uploadState;
-  const isDisabled = track.audio && uploadState === "STARTED";
+  const createdDate = track.audio
+    ? new Date(track.audio.createdAt).getTime()
+    : 0;
+  const is2HoursAgo = new Date().getTime() - 7200000; // 2hrs in miliseconds
+  const isOlderThan4Hours = createdDate < is2HoursAgo;
+  const isDisabled =
+    track.audio && uploadState === "STARTED" && !isOlderThan4Hours;
   const isError = uploadState === "ERROR";
 
   const onCancelEditing = React.useCallback(() => {

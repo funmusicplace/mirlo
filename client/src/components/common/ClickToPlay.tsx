@@ -1,14 +1,12 @@
 import styled from "@emotion/styled";
-// import { useSnackbar } from "state/SnackbarContext";
 import React from "react";
-import { VscPlay } from "react-icons/vsc";
 import { bp } from "../../constants";
 
 import { useGlobalStateContext } from "state/GlobalState";
 import api from "services/api";
-import Button from "./Button";
 import ImageWithPlaceholder from "./ImageWithPlaceholder";
 import { PlayingMusicBars } from "./PlayingMusicBars";
+import PlayButton from "./PlayButton";
 
 type WrapperProps = {
   width: number;
@@ -154,29 +152,6 @@ const ClickToPlay: React.FC<{
     });
   }, [dispatch, trackGroupId, trackId]);
 
-  // const onClickQueue = React.useCallback(async () => {
-  //   if (trackGroupId) {
-  //     await api
-  //       .get<TrackGroup>(`trackGroups/${trackGroupId}`)
-  //       .then(({ result }) => {
-  //         dispatch({
-  //           type: "addTrackIdsToBackOfQueue",
-  //           idsToAdd: result.tracks
-  //             .filter((item) => item.isPreview)
-  //             .map((item) => item.id),
-  //         });
-  //       });
-  //   } else if (trackId) {
-  //     await api.get<Track>(`tracks/${trackId}`).then(({ result }) => {
-  //       dispatch({
-  //         type: "addTrackIdsToBackOfQueue",
-  //         idsToAdd: [trackId],
-  //       });
-  //     });
-  //   }
-  //   displayMessage("Added to queue");
-  // }, [trackGroupId, trackId, displayMessage, dispatch]);
-
   const currentlyPlaying =
     playing &&
     currentlyPlayingIndex !== undefined &&
@@ -189,27 +164,7 @@ const ClickToPlay: React.FC<{
       className={className}
     >
       <PlayWrapper width={image?.width ?? 0} height={image?.height ?? 0}>
-        {!currentlyPlaying && (
-          <Button
-            onClick={onClickPlay}
-            startIcon={<VscPlay />}
-            compact
-          ></Button>
-        )}
-        {/* {currentlyPlaying && (
-          <Button onClick={onPause} startIcon={<TfiControlPause
-            className={css`
-                margin-right: .1rem;
-                display: none;
-                opacity: 0 !important;
-            `}
-          />} compact>
-
-          </Button>
-        )}*/}
-        {/* <Button onClick={onClickQueue} startIcon={<MdQueue />} compact>
-          Queue
-        </Button> */}
+        {!currentlyPlaying && <PlayButton onPlay={onClickPlay} />}
       </PlayWrapper>
       {currentlyPlaying && (
         <PlayingMusicBars

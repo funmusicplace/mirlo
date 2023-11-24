@@ -13,14 +13,13 @@ import { isTrackOwnedOrPreview } from "utils/tracks";
 import LoopButton from "./common/LoopButton";
 import ShuffleButton from "./common/ShuffleButton";
 import NextButton from "./common/NextButton";
-import PauseButton from "./common/PauseButton";
-import PlayButton from "./common/PlayButton";
 import PreviousButton from "./common/PreviousButton";
 import { isEmpty } from "lodash";
+import { PlayControlButton } from "./common/PlayControlButton";
 
 const Player = () => {
   const {
-    state: { playerQueueIds, currentlyPlayingIndex, user, playing },
+    state: { playerQueueIds, currentlyPlayingIndex, user },
     dispatch,
   } = useGlobalStateContext();
 
@@ -165,7 +164,7 @@ const Player = () => {
 
           @media (max-width: ${bp.small}px) {
             width: 100%;
-            flex-grow: initial; 
+            flex-grow: initial;
           }
         `}
       >
@@ -252,7 +251,7 @@ const Player = () => {
                 <>
                   <div
                     className={css`
-                      opacity: .6;
+                      opacity: 0.6;
                       text-transform: capitalize;
                       color: grey;
                       white-space: nowrap;
@@ -354,37 +353,7 @@ const Player = () => {
               >
                 <PreviousButton />
               </div>
-              <div
-                className={css`
-                  button {
-                    color: var(--mi-white);
-                    background-color: var(--mi-black);
-                    border-color: var(--mi-black);
-                  }
-
-                  button:hover {
-                    border-color: var(--mi-black);
-                    color: var(--mi-black) !important;
-                    background-color: var(--mi-white);
-                  }
-
-                  @media (prefers-color-scheme: dark) {
-                    button {
-                      color: var(--mi-white);
-                      background: var(--mi-black);
-                      border-color: grey;
-                    }
-                    button:hover {
-                      border-color: var(--mi-white);
-                      color: var(--mi-black) !important;
-                      background-color: var(--mi-white) !important;
-                    }
-                  }
-                `}
-              >
-                {!playing && <PlayButton />}
-                {playing && <PauseButton />}
-              </div>
+              <PlayControlButton />
               <div
                 className={css`
                 @media (max-width: ${bp.small}px) {

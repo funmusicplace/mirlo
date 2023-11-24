@@ -134,7 +134,6 @@ function TrackGroup() {
               >
                 <ClickToPlayAlbum
                   trackGroupId={trackGroup.id}
-                  title={trackGroup.title}
                   className={css`
                     width: 50px !important;
                     margin-right: 10px;
@@ -294,7 +293,6 @@ function TrackGroup() {
               >
                 <ClickToPlayAlbum
                   trackGroupId={trackGroup.id}
-                  title={trackGroup.title}
                   className={css`
                     width: 50px !important;
                     margin-right: 10px;

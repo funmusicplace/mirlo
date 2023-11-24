@@ -31,7 +31,6 @@ const testOwnership = async (trackGroupId: number, email: string) => {
 const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup }> = ({
   trackGroup,
 }) => {
-  console.log("trackGorup", trackGroup);
   const minPrice = trackGroup.minPrice;
   const methods = useForm<FormData>({
     defaultValues: {
