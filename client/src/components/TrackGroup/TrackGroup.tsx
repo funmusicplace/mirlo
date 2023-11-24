@@ -254,13 +254,14 @@ function TrackGroup() {
                   margin-top: 0.5rem;
                   display: flex;
                   justify-content: space-between;
-                  align-items: flex-start;
+                  align-items: center;
                 `}
               >
                 <div
                   className={css`
                     color: var(--mi-light-foreground-color);
                     font-size: 1rem;
+                    height: 1.5rem;
                     em {
                       font-style: normal;
                     }
@@ -353,6 +354,7 @@ function TrackGroup() {
               @media screen and (max-width: ${bp.small}px) {
                 max-width: 100%;
                 padding: 0.5rem 0.25rem 0.5rem 0rem;
+                border-left: 0;
               }
             `}
           >
