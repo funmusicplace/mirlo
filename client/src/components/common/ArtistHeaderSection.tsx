@@ -11,6 +11,7 @@ import { FaPen } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 import HeaderDiv from "./HeaderDiv";
 import ArtistFormLinks from "components/ManageArtist/ArtistFormLinks";
+import Avatar from "components/Artist/Avatar";
 
 const H1 = styled.h1<{ artistAvatar: boolean }>`
   font-size: 2.4rem;
@@ -79,7 +80,7 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
       <MetaCard
         title={artist.name}
         description={artist.bio}
-        image={artist.avatar?.sizes?.[500] ?? artist?.banner?.sizes?.[1200]}
+        image={artistAvatar?.[500] ?? artistAvatar?.[1200]}
       />
       <div
         className={css`
@@ -108,30 +109,7 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
               }
             `}
           >
-            {artist.avatar?.sizes?.[300] && (
-              <div
-                className={css`
-                  max-width: 85px;
-                  display: flex;
-
-                  @media screen and (max-width: ${bp.medium}px) {
-                    max-width: 50px;
-                    padding-bottom: 0rem;
-                    margin-bottom: 0rem;
-                  }
-                `}
-              >
-                <img
-                  src={artist.avatar?.sizes?.[300]}
-                  alt="Artist avatar"
-                  className={css`
-                    width: 100%;
-                    border-radius: 100px;
-                    border: solid 1px var(--mi-lighter-foreground-color);
-                  `}
-                />
-              </div>
-            )}
+            <Avatar avatar={artistAvatar?.[300]} />
 
             <div
               className={css`
@@ -147,7 +125,6 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
             >
               <HeaderDiv
                 className={css`
-                  align-items: center !important;
                   padding-bottom: 0 !important;
                   @media screen and (max-width: ${bp.medium}px) {
                     margin: 0rem !important;

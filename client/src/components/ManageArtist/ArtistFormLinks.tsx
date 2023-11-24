@@ -30,7 +30,7 @@ const ArtistFormLinks = () => {
   const snackbar = useSnackbar();
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const { register, control, watch, handleSubmit, reset } = useForm<FormData>({
-    defaultValues: { linkArray: artist?.links.map((l) => ({ url: l })) ?? [] },
+    defaultValues: { linkArray: artist?.links?.map((l) => ({ url: l })) ?? [] },
   });
   const { fields, append, remove } = useFieldArray({
     control,
@@ -63,7 +63,7 @@ const ArtistFormLinks = () => {
     return (
       <div>
         <div>
-          {artist?.links.map((l) => (
+          {artist?.links?.map((l) => (
             <a
               href="l"
               className={css`

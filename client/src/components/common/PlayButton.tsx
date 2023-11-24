@@ -4,10 +4,12 @@ import { VscPlay } from "react-icons/vsc";
 import IconButton from "./IconButton";
 import { useGlobalStateContext } from "state/GlobalState";
 
-export const PlayButton: React.FC = () => {
+export const PlayButton: React.FC<{ onPlay?: () => Promise<void> | void }> = ({
+  onPlay,
+}) => {
   const { dispatch } = useGlobalStateContext();
 
-  const onPlay = React.useCallback(() => {
+  const onPlayCallback = React.useCallback(() => {
     dispatch({ type: "setPlaying", playing: true });
   }, [dispatch]);
 
@@ -25,7 +27,7 @@ export const PlayButton: React.FC = () => {
         }
       `}
     >
-      <IconButton onClick={onPlay}>
+      <IconButton onClick={onPlay ?? onPlayCallback}>
         <VscPlay />
       </IconButton>
     </div>

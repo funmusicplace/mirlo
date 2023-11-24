@@ -25,6 +25,7 @@ interface Track {
   metadata: { [key: string]: any };
   audio?: {
     url: string;
+    createdAt: string;
     duration: number; // in seconds
     uploadState: "STARTED" | "SUCCESS" | "ERROR";
   };
@@ -84,7 +85,7 @@ interface Artist {
   id: number;
   enabled: boolean;
   trackGroups: TrackGroup[];
-  links: string[];
+  links?: string[];
   posts: Post[];
   subscriptionTiers: ArtistSubscriptionTier[];
   properties?: {
