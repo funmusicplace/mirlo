@@ -27,13 +27,13 @@ const app = express();
 
 const isDev = process.env.NODE_ENV === "development";
 
-const limiter = rateLimit({
-  windowMs: 60 * 1000, // 1 minute
-  limit: 100, // Limit each IP to 100 requests per `window`
-  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-});
-
 if (!isDev) {
+  const limiter = rateLimit({
+    windowMs: 60 * 1000, // 1 minute
+    limit: 100, // Limit each IP to 100 requests per `window`
+    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  });
+
   app.use(limiter);
 }
 
@@ -141,14 +141,18 @@ app.use(
   })
 );
 
-// Set a rate limiter on all auth endpoints to be only 5 requests a minute
-const authLimiter = rateLimit({
-  windowMs: 60 * 1000, // 1 minute
-  limit: 5, // Limit each IP to 100 requests per `window`
-  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-});
+if (!isDev) {
+  // Set a rate limiter on all auth endpoints to be only 5 requests a minute
+  const authLimiter = rateLimit({
+    windowMs: 60 * 1000, // 1 minute
+    limit: 10, // Limit each IP to 100 requests per `window`
+    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  });
 
-app.use("/auth", authLimiter, auth);
+  app.use("/auth", authLimiter, auth);
+} else {
+  app.use("/auth", auth);
+}
 
 app.use(express.static("public"));
 
