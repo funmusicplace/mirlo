@@ -3,8 +3,6 @@ import cookieParser from "cookie-parser";
 import passport from "passport";
 import { initialize } from "express-openapi";
 import swaggerUi from "swagger-ui-express";
-import { flatten } from "lodash";
-import cors from "cors";
 import * as dotenv from "dotenv";
 import {
   BullMQAdapter,
@@ -20,34 +18,26 @@ import { audioQueue } from "./utils/processTrackAudio";
 import { serveStatic } from "./static";
 import prisma from "../prisma/prisma";
 import { MulterError } from "multer";
+import { rateLimit } from "express-rate-limit";
+import { corsCheck } from "./auth/cors";
 
 dotenv.config();
 
 const app = express();
 
-app.use(async (...args) => {
-  const clients = await prisma.client.findMany();
-  const origin = [
-    ...flatten(
-      clients.map((c) =>
-        c.allowedCorsOrigins.map((origin) => {
-          if (origin.startsWith("regex:")) {
-            return new RegExp(origin.replace("regex:", ""));
-          }
-          return origin;
-        })
-      )
-    ),
-    process.env.API_DOMAIN ?? "http://localhost:3000",
-  ];
-  if (process.env.NODE_ENV === "development") {
-    origin.push("http://localhost:8080"); // Just... for ease of coding
-  }
-  return cors({
-    origin,
-    credentials: true,
-  })(...args);
+const isDev = process.env.NODE_ENV === "development";
+
+const limiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  limit: 50, // Limit each IP to 100 requests per `window`
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
 });
+
+if (isDev) {
+  app.use(limiter);
+}
+
+app.use(corsCheck);
 
 app.use(
   express.json({
@@ -151,7 +141,14 @@ app.use(
   })
 );
 
-app.use("/auth", auth);
+// Set a rate limiter on all auth endpoints to be only 5 requests a minute
+const authLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  limit: 5, // Limit each IP to 100 requests per `window`
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+});
+
+app.use("/auth", authLimiter, auth);
 
 app.use(express.static("public"));
 
@@ -164,7 +161,7 @@ app.use("/images/:bucket/:filename", serveStatic);
 app.use("/audio", express.static("data/media/audio"));
 
 // Setting up a bull worker dashboard
-if (process.env.NODE_ENV === "development") {
+if (isDev) {
   const serverAdapter = new ExpressAdapter();
   createBullBoard({
     queues: [new BullMQAdapter(imageQueue), new BullMQAdapter(audioQueue)],
