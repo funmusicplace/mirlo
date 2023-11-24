@@ -59,11 +59,12 @@ const PlayWrapper = styled.div<WrapperProps>`
 
   @media (max-width: ${bp.small}px) {
     background-color: transparent !important;
-    width: 32px;
-    height: 32px;
     opacity: 1;
-    right: 0em;
+    width: 0.5rem;
+    height: 2rem;
+    right: 0rem;
     bottom: 0em;
+    margin-right: 0.75rem;
     top: auto;
     position: absolute;
 
@@ -75,6 +76,7 @@ const PlayWrapper = styled.div<WrapperProps>`
       padding: 0.8rem 0.8rem 0.9rem 0.9rem;
       width: 2.4em;
       height: 2.4em;
+      margin-bottom: 0;
     }
     button:active {
       font-size: 0.8rem;
