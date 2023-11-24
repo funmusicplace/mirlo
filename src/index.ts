@@ -29,11 +29,11 @@ const isDev = process.env.NODE_ENV === "development";
 
 const limiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
-  limit: 50, // Limit each IP to 100 requests per `window`
+  limit: 100, // Limit each IP to 100 requests per `window`
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
 });
 
-if (isDev) {
+if (!isDev) {
   app.use(limiter);
 }
 

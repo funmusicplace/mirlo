@@ -92,6 +92,46 @@ export const AudioWrapper: React.FC<{
     determineIfShouldPlay();
   }, [determineIfShouldPlay]);
 
+  React.useEffect(() => {
+    if (currentTrack) {
+      if ("mediaSession" in navigator) {
+        const artist = currentTrack.trackArtists
+          ?.filter((ta) => ta.isCoAuthor)
+          .map((ta) => ta.artistName)
+          .join(", ");
+
+        console.log(
+          "track",
+          currentTrack.trackGroup.cover?.sizes?.[1200] ?? ""
+        );
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: currentTrack.title,
+          artist: (artist || currentTrack.trackGroup?.artist?.name) ?? "",
+          album: currentTrack.trackGroup?.title ?? "",
+          artwork: [
+            {
+              src: currentTrack.trackGroup.cover?.sizes?.[1200] ?? "",
+              type: "image/jpeg",
+              sizes: "1200x1200",
+            },
+          ],
+        });
+        navigator.mediaSession.setActionHandler("previoustrack", () =>
+          dispatch({ type: "decrementCurrentlyPlayingIndex" })
+        );
+        navigator.mediaSession.setActionHandler("nexttrack", () =>
+          dispatch({ type: "incrementCurrentlyPlayingIndex" })
+        );
+
+        navigator.mediaSession.setActionHandler("seekto", (details) => {
+          if (playerRef.current && details.seekTime) {
+            playerRef.current.currentTime = details.seekTime;
+          }
+        });
+      }
+    }
+  }, [currentTrack, dispatch]);
+
   const streamUrl = api.streamUrl(currentTrack);
 
   const onPlay = React.useCallback(() => {
