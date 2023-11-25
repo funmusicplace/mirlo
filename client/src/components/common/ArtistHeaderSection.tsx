@@ -12,6 +12,7 @@ import { useTranslation } from "react-i18next";
 import HeaderDiv from "./HeaderDiv";
 import ArtistFormLinks from "components/ManageArtist/ArtistFormLinks";
 import Avatar from "components/Artist/Avatar";
+import ArtistFormLocation from "components/ManageArtist/ArtistFormLocation";
 
 const H1 = styled.h1<{ artistAvatar: boolean }>`
   font-size: 2.4rem;
@@ -157,7 +158,8 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
                   </div>
                 </div>
               </HeaderDiv>
-              {isManage && <ArtistFormLinks />}
+              <ArtistFormLinks isManage={!!isManage} />
+              <ArtistFormLocation isManage={!!isManage} />
 
               {!artistAvatar && (
                 <MarkdownContent

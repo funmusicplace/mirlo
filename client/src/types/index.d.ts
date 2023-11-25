@@ -83,6 +83,7 @@ interface Artist {
   urlSlug?: string;
   userId: number;
   id: number;
+  location?: string;
   enabled: boolean;
   trackGroups: TrackGroup[];
   links?: string[];

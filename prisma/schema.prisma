@@ -87,6 +87,7 @@ model Artist {
   properties        Json?
   trackArtists      TrackArtist[]
   links             String[]
+  location          String?
 }
 
 model ArtistAvatar {

@@ -22,7 +22,7 @@ services:
     repo: https://github.com/funmusicplace/mirlo.git # optional
     region: oregon # optional (defaults to oregon)
     branch: main # optional (defaults to master)
-    plan: starter # Supposedly this should be free but 
+    plan: standard # Supposedly this should be free but 
     # dockerCommand: ./start.sh
     # dockerfilePath: ./prod.Dockerfile
     buildCommand: yarn install && yarn migrate:deploy
@@ -34,7 +34,7 @@ services:
       sizeGB: 20 
     envVars: 
       - key: NODE_OPTIONS
-        value: --max-old-space-size=400
+        value: --max-old-space-size=1512
       - key: DATABASE_URL
         fromDatabase:
           name: blackbrd
@@ -95,7 +95,7 @@ services:
           # minIO service and deleted after upload
       name: data
       mountPath: /data
-      sizeGB: 2 # optional
+      sizeGB: 20 # optional
     # dockerContext: ./background/src # optional
     envVars:
       - key: DATABASE_URL
