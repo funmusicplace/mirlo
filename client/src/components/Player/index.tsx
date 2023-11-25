@@ -2,20 +2,19 @@ import React from "react";
 import { css } from "@emotion/css";
 import { Helmet } from "react-helmet";
 
-import { Link } from "react-router-dom";
-import { bp } from "../constants";
-import ImageWithPlaceholder from "./common/ImageWithPlaceholder";
-import { AudioWrapper } from "./AudioWrapper";
-import Spinner from "./common/Spinner";
+import { bp } from "../../constants";
+import { AudioWrapper } from "../AudioWrapper";
+import Spinner from "../common/Spinner";
 import { useGlobalStateContext } from "state/GlobalState";
 import api from "services/api";
 import { isTrackOwnedOrPreview } from "utils/tracks";
-import LoopButton from "./common/LoopButton";
-import ShuffleButton from "./common/ShuffleButton";
-import NextButton from "./common/NextButton";
-import PreviousButton from "./common/PreviousButton";
+import LoopButton from "../common/LoopButton";
+import ShuffleButton from "../common/ShuffleButton";
+import NextButton from "../common/NextButton";
+import PreviousButton from "../common/PreviousButton";
 import { isEmpty } from "lodash";
-import { PlayControlButton } from "./common/PlayControlButton";
+import { PlayControlButton } from "../common/PlayControlButton";
+import PlayingTrackDetails from "./PlayingTrackDetails";
 
 const Player = () => {
   const {
@@ -82,30 +81,6 @@ const Player = () => {
       });
     }
   }, [dispatch]);
-
-  React.useEffect(() => {
-    if (currentTrack) {
-      if ("mediaSession" in navigator) {
-        navigator.mediaSession.metadata = new MediaMetadata({
-          title: currentTrack.title,
-          artist:
-            currentTrack.trackArtists
-              ?.filter((ta) => ta.isCoAuthor)
-              .map((ta) => ta.artistName)
-              .join(", ") ??
-            currentTrack.trackGroup?.artist?.name ??
-            "",
-          album: currentTrack.trackGroup?.title ?? "",
-          artwork: [
-            {
-              src: currentTrack.trackGroup.cover?.sizes?.[1200] ?? "",
-              type: "image/png",
-            },
-          ],
-        });
-      }
-    }
-  }, [currentTrack]);
 
   if (!currentTrack || isEmpty(currentTrack.trackGroup)) {
     return null;
@@ -195,96 +170,7 @@ const Player = () => {
             }
           `}
         >
-          <div
-            className={css`
-              width: 40%;
-              flex: 40%;
-              display: flex;
-              align-items: center;
-
-              margin-right: 1rem;
-              margin-left: 1rem;
-              margin-bottom: 0.3rem;
-              padding-top: 0.5rem;
-
-              @media (max-width: ${bp.small}px) {
-                margin-right: 0.5rem;
-                margin-left: 0.5rem;
-              }
-            `}
-          >
-            <div>
-              <ImageWithPlaceholder
-                src={currentTrack?.trackGroup.cover?.sizes?.[120]}
-                size={48}
-                alt={currentTrack?.title ?? "Loading album"}
-                className={css`
-                  background-color: #efefef;
-                  margin-right: 0.5rem;
-                  min-height: 100%;
-                  min-width: 48px;
-                `}
-              />
-            </div>
-            <div
-              className={css`
-                max-width: 80%;
-                flex: 80%;
-                display: flex;
-                flex-direction: column;
-                @media (max-width: ${bp.small}px) {
-                  max-width: 70%;
-                  flex: 70%;
-                }
-              `}
-            >
-              <div
-                className={css`
-                  overflow: hidden;
-                  white-space: nowrap;
-                  text-overflow: ellipsis;
-                `}
-              >
-                {currentTrack?.title}
-              </div>
-              {currentTrack?.trackGroup && (
-                <>
-                  <div
-                    className={css`
-                      opacity: 0.6;
-                      text-transform: capitalize;
-                      color: grey;
-                      white-space: nowrap;
-                      overflow: hidden;
-                      text-overflow: ellipsis;
-                    `}
-                  >
-                    <Link
-                      to={`/${currentTrack.trackGroup.artist?.urlSlug}/release/${currentTrack.trackGroup.urlSlug}`}
-                    >
-                      {currentTrack.trackGroup.title}
-                    </Link>
-                  </div>
-                  <div
-                    className={css`
-                    text-transform: capitalize;
-                    font-weight: bold;
-                    overflow: hidden;
-                    white-space: nowrap;
-                    text-overflow: ellipsis;
-                    }
-                  `}
-                  >
-                    <Link to={`/${currentTrack.trackGroup.artistId}`}>
-                      {currentTrack.trackGroup.artist?.name}
-                    </Link>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* <TrackPopup trackId={currentTrack.id} compact /> */}
+          <PlayingTrackDetails currentTrack={currentTrack} />
           <div
             className={css`
               display: inline-block;
@@ -344,12 +230,13 @@ const Player = () => {
               </span>
               <div
                 className={css`
-                @media (max-width: ${bp.small}px) {
+                  @media (max-width: ${bp.small}px) {
                     button {
-                      padding: 0em .5em 0em 0em;
+                      padding: 0em 0.5em 0em 0em;
                       background: transparent;
                     }
-              `}
+                  }
+                `}
               >
                 <PreviousButton />
               </div>

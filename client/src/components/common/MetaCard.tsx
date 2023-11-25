@@ -22,8 +22,16 @@ export const MetaCard: React.FC<{
         property="og:image"
         content={image ?? "/android-chrome-192x192.png"}
       />
-      {image && <meta property="twitter:card" content="summary_large_image" />}{" "}
-      {player && <meta property="twitter:player" content={player} />}
+      {image && (
+        <meta property="twitter:card" content={player ? "player" : "summary"} />
+      )}
+      {player && (
+        <>
+          <meta property="twitter:player" content={player} />
+          <meta property="twitter:player:width" content="600" />
+          <meta property="twitter:player:width" content="162" />
+        </>
+      )}
     </Helmet>
   );
 };

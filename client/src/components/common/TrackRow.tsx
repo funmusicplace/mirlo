@@ -176,7 +176,8 @@ const TrackRow: React.FC<{
       <td align="right">
         <IconButton
           compact
-          onClick={() => {
+          onClick={(e) => {
+            e.stopPropagation();
             navigator.clipboard.writeText(widgetUrl(track.id));
             snackbar("Copied track url", { type: "success" });
           }}

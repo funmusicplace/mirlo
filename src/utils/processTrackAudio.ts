@@ -27,12 +27,16 @@ audioQueueEvents.on(
   "completed",
   async (result: { jobId: string; returnvalue?: any }) => {
     logger.info(
-      `Job with id ${JSON.stringify(result.jobId)} has been completed`
+      `Job with id ${JSON.stringify(
+        result.jobId
+      )} has been completed, ${JSON.stringify(result.returnvalue)}`
     );
 
     try {
       const job = await audioQueue.getJob(result.jobId);
-      if (job) {
+      if (result.returnvalue.error) {
+        console.error("There was an error processing the job");
+      } else if (job) {
         const audio = await prisma.trackAudio.update({
           where: {
             id: job.data.audioId,

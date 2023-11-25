@@ -72,15 +72,16 @@ export default function () {
       }
 
       let productKey = trackGroup.stripeProductKey;
+      const about =
+        trackGroup.about && trackGroup.about !== ""
+          ? trackGroup.about
+          : `The album ${trackGroup.title} by ${trackGroup.artist.name}.`;
 
       if (!trackGroup.stripeProductKey) {
         const product = await stripe.products.create(
           {
             name: `${trackGroup.title} by ${trackGroup.artist.name}`,
-            description:
-              trackGroup.about && trackGroup.about !== ""
-                ? trackGroup.about
-                : `The album ${trackGroup.title} by ${trackGroup.artist.name}.`,
+            description: about,
             tax_code: "txcd_10401100",
             images: trackGroup.cover
               ? [
@@ -106,27 +107,30 @@ export default function () {
         productKey = product.id;
       }
 
+      const priceNumber =
+        (price ? Number(price) : undefined) ?? trackGroup.minPrice ?? 0;
+
       if (productKey && stripeAccountId) {
         const session = await stripe.checkout.sessions.create(
           {
             billing_address_collection: "auto",
             customer_email: loggedInUser?.email ?? email,
+            payment_intent_data: {
+              application_fee_amount:
+                (priceNumber * (trackGroup.platformPercent ?? 5)) / 100,
+            },
             line_items: [
               {
                 price_data: {
                   tax_behavior: "exclusive",
-                  unit_amount:
-                    (price ? Number(price) : undefined) ??
-                    trackGroup.minPrice ??
-                    0,
-                  currency: trackGroup.currency ?? "USD",
+                  unit_amount: priceNumber,
+                  currency: trackGroup.currency?.toLowerCase() ?? "usd",
                   product: productKey,
                 },
 
                 quantity: 1,
               },
             ],
-
             metadata: {
               clientId: client?.id ?? null,
               trackGroupId,

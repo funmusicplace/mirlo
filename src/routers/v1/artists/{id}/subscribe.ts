@@ -1,10 +1,7 @@
 import { User } from "@prisma/client";
 import { Request, Response } from "express";
 
-import {
-  userAuthenticated,
-  userLoggedInWithoutRedirect,
-} from "../../../../auth/passport";
+import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import prisma from "../../../../../prisma/prisma";
 
 const { API_DOMAIN } = process.env;
@@ -75,6 +72,10 @@ export default function () {
           {
             billing_address_collection: "auto",
             customer_email: loggedInUser?.email ?? email,
+            payment_intent_data: {
+              application_fee_amount:
+                ((tier.minAmount ?? 0) * (tier.platformPercent ?? 5)) / 100,
+            },
             line_items: [
               {
                 price_data: {
