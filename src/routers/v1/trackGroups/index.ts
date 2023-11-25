@@ -13,6 +13,9 @@ export default function () {
         published: true,
         tracks: { some: { audio: { uploadState: "SUCCESS" } } },
       },
+      orderBy: {
+        createdAt: "desc",
+      },
       include: {
         artist: {
           select: {

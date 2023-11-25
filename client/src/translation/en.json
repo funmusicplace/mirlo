@@ -293,7 +293,8 @@
     "status": "Can be played without purchase?",
     "statusPreview": "Preview",
     "statusMustOwn": "Must own",
-    "doneUploadingTrack": "Processed track"
+    "doneUploadingTrack": "Processed track",
+    "stillProcessing": "Still processing audio"
   },
   "mewTrack": {
     "newTrack": "New Track",
