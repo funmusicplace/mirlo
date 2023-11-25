@@ -62,13 +62,8 @@ const ArtistFormLocation: React.FC<{ isManage: boolean }> = ({ isManage }) => {
             className={css`
               opacity: 0.7;
               text-transform: capitalize;
-              svg {
-                margin-right: 0.5rem;
-                display: none;
-              }
             `}
           >
-            <FaMapPin />
             {artist?.location}
           </div>
         )}
