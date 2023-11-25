@@ -95,7 +95,7 @@ services:
           # minIO service and deleted after upload
       name: data
       mountPath: /data
-      sizeGB: 2 # optional
+      sizeGB: 20 # optional
     # dockerContext: ./background/src # optional
     envVars:
       - key: DATABASE_URL

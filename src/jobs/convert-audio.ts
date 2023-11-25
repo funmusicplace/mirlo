@@ -1,12 +1,7 @@
 import { Job } from "bullmq";
 
 import ffmpeg from "fluent-ffmpeg";
-import {
-  createReadStream,
-  createWriteStream,
-  promises as fsPromises,
-} from "fs";
-import { Stream } from "stream";
+import { createReadStream, promises as fsPromises } from "fs";
 
 import { logger } from "./queue-worker";
 import {
@@ -213,5 +208,6 @@ export default async (job: Job) => {
     return response;
   } catch (e) {
     logger.error("Error creating audio folder", e);
+    return { error: e };
   }
 };

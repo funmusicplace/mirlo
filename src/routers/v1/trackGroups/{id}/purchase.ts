@@ -124,7 +124,7 @@ export default function () {
                 price_data: {
                   tax_behavior: "exclusive",
                   unit_amount: priceNumber,
-                  currency: trackGroup.currency ?? "USD",
+                  currency: trackGroup.currency?.toLowerCase() ?? "usd",
                   product: productKey,
                 },
 
