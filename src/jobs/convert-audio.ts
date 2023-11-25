@@ -190,19 +190,17 @@ export default async (job: Job) => {
 
     const finalFilesInFolder = await fsPromises.readdir(destinationFolder);
 
-    await Promise.all(
-      finalFilesInFolder.map(async (file) => {
-        const uploadStream = await createReadStream(
-          `${destinationFolder}/${file}`
-        );
-        await minioClient.putObject(
-          finalAudioBucket,
-          `${audioId}/${file}`,
-          uploadStream
-        );
-        logger.info(`Uploading file ${file}`);
-      })
-    );
+    for await (const file of finalFilesInFolder) {
+      const uploadStream = await createReadStream(
+        `${destinationFolder}/${file}`
+      );
+      await minioClient.putObject(
+        finalAudioBucket,
+        `${audioId}/${file}`,
+        uploadStream
+      );
+      logger.info(`Uploading file ${file}`);
+    }
 
     profiler.done({ message: "Done converting to audio" });
 
