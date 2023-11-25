@@ -42,7 +42,7 @@ const Header = styled.div`
 
   @media screen and (max-width: ${bp.medium}px) {
     font-size: var(--mi-font-size-small);
-    line-height: 1rem;
+    line-height: var(--mi-font-size-normal);
     border-radius: 0;
     padding: var(--mi-side-paddings-xsmall);
     padding-bottom: 0rem;
@@ -51,7 +51,7 @@ const Header = styled.div`
     margin-bottom: 0rem !important;
     p {
       margin-bottom: 0em !important;
-      padding-bottom: 0.5rem;
+      padding-bottom: 0rem;
     }
   }
 `;
@@ -154,18 +154,6 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
                     `}
                   >
                     {!isManage && <FollowArtist artistId={artist.id} />}
-                    {!isManage && user?.id === artist.userId && (
-                      <Link to={`/manage/artists/${artist.id}`}>
-                        <Button
-                          compact
-                          transparent
-                          type="button"
-                          startIcon={<FaPen />}
-                        >
-                          {t("edit")}
-                        </Button>
-                      </Link>
-                    )}
                   </div>
                 </div>
               </HeaderDiv>
@@ -176,24 +164,39 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
                   content={artist.bio}
                   className={css`
                     padding-bottom: 0.2rem;
-
-                    ${!artistAvatar ? "margin-bottom: .7rem !important" : ""}
                   `}
                 />
               )}
             </div>
           </div>
-          {artistAvatar && (
-            <MarkdownContent
-              content={artist.bio}
-              className={css`
-                padding-bottom: 0.5rem;
-                @media screen and (max-width: ${bp.medium}px) {
-                  ${artistAvatar ? "padding-bottom: .2rem;" : ""}
-                }
-              `}
-            />
-          )}
+          <div
+            className={css`
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              flex-wrap: wrap;
+              margin-bottom: 0.5rem;
+            `}
+          >
+            {artistAvatar && (
+              <MarkdownContent
+                content={artist.bio}
+                className={css`
+                  padding-bottom: 0.5rem;
+                  @media screen and (max-width: ${bp.medium}px) {
+                    ${artistAvatar ? "padding-bottom: .2rem;" : ""}
+                  }
+                `}
+              />
+            )}
+            {!isManage && user?.id === artist.userId && (
+              <Link to={`/manage/artists/${artist.id}`}>
+                <Button compact transparent type="button" startIcon={<FaPen />}>
+                  {t("edit")}
+                </Button>
+              </Link>
+            )}
+          </div>
         </Header>
       </div>
     </div>
