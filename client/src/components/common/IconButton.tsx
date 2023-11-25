@@ -37,8 +37,8 @@ const IconButton = styled.button<Compactable & { transparent?: boolean }>`
     color: ${(props) =>
       props.role === "primary"
         ? "var(--mi-primary-color)"
-        : "var(--mi-lighter-foreground-color)"};
-    background-color: var(--mi-icon-button-background-color);
+        : "var(--mi-black)"};
+    background-color: var(--mi-white);
   }
 
   & svg {

@@ -10,7 +10,7 @@ import { useArtistContext } from "state/ArtistContext";
 
 const Container = styled.div<{ artistBanner: boolean; userId?: number }>`
   width: 100%;
-  margin-top: calc(16vh);
+  margin-top: calc(12vh);
 
   ${(props) => (!props.artistBanner ? "margin-top: 0px;" : "")}
   max-width: calc(1080px + 4rem);

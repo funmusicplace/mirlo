@@ -61,12 +61,15 @@ const Header: React.FC<{
       )}
 
       <IconButton
-        transparent
         compact={compact}
         onClick={() => {
           setIsMenuOpen(true);
         }}
         className={css`
+          button:hover {
+            color: var(--mi-white) !important;
+            background-color: var(--mi-black);
+          }
           @media (max-width: ${bp.small}px) {
             background-color: var(--mi-normal-background-color) !important;
           }
