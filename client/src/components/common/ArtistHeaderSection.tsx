@@ -169,7 +169,6 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
                     </div>
                   </div>
                 </HeaderDiv>
-                {/* <ArtistFormLinks isManage={!!isManage} /> */}
                 <ArtistFormLocation isManage={!!isManage} />
               </div>
               {!artistAvatar && <MarkdownContent content={artist.bio} />}
