@@ -62,10 +62,9 @@ export const Manage: React.FC = () => {
           }
           @media screen and (max-width: ${bp.medium}px) {
             padding: var(--mi-side-paddings-xsmall);
-            padding-top: .5rem;
-            padding-bottom: .5rem;
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
           }
-
         `}
       >
         <h1 className={css``}>{t("manageArtists")}</h1>
@@ -99,6 +98,7 @@ export const Manage: React.FC = () => {
               flex-grow: 1;
               text-align: center;
               border-radius: 6px;
+              justify-self: none;
             `}
           >
             {t("createNewArtist")}

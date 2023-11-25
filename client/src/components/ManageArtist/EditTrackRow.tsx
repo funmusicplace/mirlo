@@ -14,6 +14,7 @@ import api from "services/api";
 import { useGlobalStateContext } from "state/GlobalState";
 import { useSnackbar } from "state/SnackbarContext";
 import useJobStatusCheck from "utils/useJobStatusCheck";
+import LoadingSpinner from "components/common/LoadingSpinner";
 
 interface FormData {
   title: string;
@@ -26,6 +27,7 @@ const EditTrackRow: React.FC<{
   track: Track;
   onCancelEditing: () => void;
 }> = ({ track, onCancelEditing: cancelEditing }) => {
+  const [isSaving, setIsSaving] = React.useState(false);
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const [showMoreDetails, setShowMoreDetails] = React.useState(false);
   const { uploadJobs, setUploadJobs } = useJobStatusCheck({
@@ -59,6 +61,7 @@ const EditTrackRow: React.FC<{
   const onSave = React.useCallback(
     async (formData: FormData) => {
       try {
+        setIsSaving(true);
         const packet = {
           title: formData.title,
           isPreview: formData.status === "preview",
@@ -88,19 +91,20 @@ const EditTrackRow: React.FC<{
       } catch (e) {
         console.error(e);
       } finally {
+        setIsSaving(false);
       }
     },
     [onCancelEditing, setUploadJobs, snackbar, t, trackId, userId]
   );
 
   const uploadingState = uploadJobs?.[0]?.jobStatus;
-  let isDisabled = uploadingState || uploadJobs.length > 0;
+  let isDisabled = !!(uploadingState || uploadJobs.length > 0);
 
   return (
     <FormProvider {...methods}>
       <tr
         className={css`
-          ${isDisabled
+          ${isDisabled || isSaving
             ? `
             opacity: .4;
             pointer-events: none;
@@ -109,7 +113,9 @@ const EditTrackRow: React.FC<{
         `}
       >
         <td>
-          {!uploadingState && (
+          {isSaving && <LoadingSpinner />}
+
+          {!uploadingState && !isSaving && (
             <Tooltip hoverText={t("replaceTrackAudio")}>
               <label
                 htmlFor={`track.${trackId}`}
@@ -126,6 +132,7 @@ const EditTrackRow: React.FC<{
               >
                 <FaUpload />
                 <input
+                  disabled={isSaving || isDisabled}
                   type="file"
                   className={css`
                     display: none;
@@ -142,10 +149,10 @@ const EditTrackRow: React.FC<{
               </label>
             </Tooltip>
           )}
-          <TrackUploadingState uploadingState={uploadingState} />
+          {!isSaving && <TrackUploadingState uploadingState={uploadingState} />}
         </td>
         <td>
-          <InputEl {...register(`title`)} />
+          <InputEl {...register(`title`)} disabled={isSaving || isDisabled} />
         </td>
         <td>
           <ManageTrackArtists trackArtistsKey={`trackArtists`} />
@@ -161,12 +168,14 @@ const EditTrackRow: React.FC<{
             compact
             onClick={onCancelEditing}
             type="button"
+            disabled={isSaving || isDisabled}
             style={{ marginRight: ".25rem" }}
           >
             <FaTimes />
           </IconButton>
           <IconButton
             compact
+            disabled={isSaving || isDisabled}
             onClick={methods.handleSubmit(onSave)}
             type="button"
             style={{ marginRight: ".25rem" }}
@@ -175,6 +184,7 @@ const EditTrackRow: React.FC<{
           </IconButton>
           <Tooltip hoverText={t("moreTrackDetails")} underline={false}>
             <IconButton
+              disabled={isSaving || isDisabled}
               compact
               onClick={() => setShowMoreDetails((val) => !val)}
               type="button"
