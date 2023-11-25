@@ -20,10 +20,13 @@ const H1 = styled.h1<{ artistAvatar: boolean }>`
 
   @media screen and (max-width: ${bp.medium}px) {
     font-size: 1.2rem;
-    line-height: 1.3rem;
+    line-height: 1.4rem;
     padding-top: 0rem;
     padding-bottom: 0rem;
-    ${(props) => (!props.artistAvatar ? "font-size: 1.5rem !important" : "")}
+    ${(props) =>
+      !props.artistAvatar
+        ? "font-size: 1.5rem !important; line-height: 2rem;"
+        : ""}
   }
 `;
 
@@ -33,6 +36,7 @@ const Header = styled.div`
   flex-direction: column;
   align-items: left;
   justify-content: space-between;
+  padding-bottom: 0.5rem;
   flex-grow: 1;
   border-bottom: solid 1px var(--mi-light-foreground-color);
   font-size: var(--mi-font-size-normal);
@@ -46,7 +50,7 @@ const Header = styled.div`
     line-height: var(--mi-font-size-normal);
     border-radius: 0;
     padding: var(--mi-side-paddings-xsmall);
-    padding-bottom: 0rem;
+    padding-bottom: 0.5rem;
     border: solid grey;
     border-width: 0px 0px 1px 0px;
     margin-bottom: 0rem !important;
@@ -71,9 +75,7 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
   return (
     <div
       className={css`
-        margin-bottom: 1rem;
         @media screen and (max-width: ${bp.medium}px) {
-          margin-bottom: 0rem;
           padding-top: 0.5rem;
         }
       `}
@@ -100,8 +102,8 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
             className={css`
               display: flex;
               padding-top: 1rem;
-              margin-bottom: 1rem;
-              ${artistAvatar ? "margin-bottom: 0.2rem;" : ""}
+              margin-bottom: 0.5rem;
+              ${artistAvatar ? "margin-bottom: 0.3rem;" : ""}
               align-items: center;
 
               @media screen and (max-width: ${bp.medium}px) {
@@ -124,51 +126,53 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
                 }
               `}
             >
-              <HeaderDiv
+              <div
                 className={css`
-                  padding-bottom: 0 !important;
-                  @media screen and (max-width: ${bp.medium}px) {
-                    margin: 0rem !important;
-                  }
+                  width: 100%;
+                  ${!artistAvatar ? "padding-bottom: .5rem;" : ""}
                 `}
               >
-                <div
+                <HeaderDiv
                   className={css`
-                    ${artistAvatar ? "min-height: 50px;" : ""}
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-between;
-                    width: 100%;
+                    padding-bottom: 0 !important;
+                    @media screen and (max-width: ${bp.medium}px) {
+                      margin: 0rem !important;
+                    }
                   `}
                 >
-                  <H1 artistAvatar={!!artistAvatar}>{artist.name}</H1>
-
                   <div
                     className={css`
-                      text-align: right;
+                      min-height: 50px;
                       display: flex;
-                      flex-direction: column;
-                      padding-left: 1rem;
+                      align-items: center;
+                      justify-content: space-between;
+                      width: 100%;
                       @media screen and (max-width: ${bp.medium}px) {
-                        padding-left: 0.3rem;
+                        min-height: auto;
                       }
                     `}
                   >
-                    {!isManage && <FollowArtist artistId={artist.id} />}
-                  </div>
-                </div>
-              </HeaderDiv>
-              <ArtistFormLinks isManage={!!isManage} />
-              <ArtistFormLocation isManage={!!isManage} />
+                    <H1 artistAvatar={!!artistAvatar}>{artist.name}</H1>
 
-              {!artistAvatar && (
-                <MarkdownContent
-                  content={artist.bio}
-                  className={css`
-                    padding-bottom: 0.2rem;
-                  `}
-                />
-              )}
+                    <div
+                      className={css`
+                        text-align: right;
+                        display: flex;
+                        flex-direction: column;
+                        padding-left: 1rem;
+                        @media screen and (max-width: ${bp.medium}px) {
+                          padding-left: 0.3rem;
+                        }
+                      `}
+                    >
+                      {!isManage && <FollowArtist artistId={artist.id} />}
+                    </div>
+                  </div>
+                </HeaderDiv>
+                {/* <ArtistFormLinks isManage={!!isManage} /> */}
+                <ArtistFormLocation isManage={!!isManage} />
+              </div>
+              {!artistAvatar && <MarkdownContent content={artist.bio} />}
             </div>
           </div>
           <div
@@ -177,7 +181,6 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
               justify-content: space-between;
               align-items: center;
               flex-wrap: wrap;
-              margin-bottom: 0.5rem;
             `}
           >
             {artistAvatar && (
@@ -200,6 +203,18 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
             )}
           </div>
         </Header>
+      </div>
+      <div
+        className={css`
+          display: flex;
+          justify-content: flex-end;
+          padding-top: 0.5rem;
+          @media screen and (max-width: ${bp.medium}px) {
+            display: none;
+          }
+        `}
+      >
+        <ArtistFormLinks isManage={!!isManage} />
       </div>
     </div>
   );

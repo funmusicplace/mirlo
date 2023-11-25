@@ -74,7 +74,6 @@ const ArtistFormLinks: React.FC<{ isManage: boolean }> = ({ isManage }) => {
                 display: inline-flex;
                 align-items: center;
                 margin-right: 0.75rem;
-                margin-bottom: 0.5rem;
 
                 > svg {
                   margin-right: 0.5rem;
