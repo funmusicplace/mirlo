@@ -23,21 +23,21 @@ const ArtistTrackGroup: React.FC<{
       className={css`
         margin-bottom: 0.5rem;
         display: inline-block;
-        max-width: 31.5%;
-        flex: 31.5%;
+        max-width: 32.2%;
+        flex: 32.2%;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
 
         &:nth-child(3n + 1) {
           border-top: 0;
-          margin-right: 2.6%;
+          margin-right: 1.7%;
           margin-left: 0rem;
         }
 
         &:nth-child(3n) {
           border-top: 0;
-          margin-left: 2.6%;
+          margin-left: 1.7%;
           margin-right: 0rem;
         }
 
