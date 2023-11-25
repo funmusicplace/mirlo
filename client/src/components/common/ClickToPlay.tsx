@@ -25,7 +25,7 @@ const PlayWrapper = styled.div<WrapperProps>`
   opacity: 0;
   background-color: rgba(0, 0, 0, 0.2);
   color: white;
-  border: 0;
+  border: 1px solid rgba(255, 255, 255, 0.05);
   transition: 0.5s;
 
   .startIcon {
@@ -39,14 +39,16 @@ const PlayWrapper = styled.div<WrapperProps>`
     height: 3em;
     border-radius: 50px;
     font-size: 1rem;
-    padding: 0.8rem 0.7rem 0.9rem 0.9rem;
+    padding: 0.9rem;
+    padding-left: 1rem;
 
     &:nth-of-type(1) {
-      margin-left: 0rem;
+      margin: 0rem;
     }
 
     &:hover:not(:disabled) {
       background-color: rgba(255, 255, 255, 0.5);
+      color: var(--mi-black);
     }
   }
 
@@ -58,33 +60,25 @@ const PlayWrapper = styled.div<WrapperProps>`
   @media (max-width: ${bp.small}px) {
     background-color: transparent !important;
     opacity: 1;
-    width: 0.5rem;
-    height: 2rem;
-    right: 0rem;
-    bottom: 0em;
-    margin-right: 0.75rem;
-    top: auto;
-    position: absolute;
+    justify-content: flex-end;
+    align-items: flex-end;
 
     button {
-      font-size: 0.8rem;
+      width: 2em;
+      height: 2em;
+      font-size: 1.1rem;
+      padding: 0rem;
+      padding-left: 0.6rem;
+      margin: auto;
       border-radius: 0px;
-      border: solid 0px;
+      border: none;
       background-color: rgba(0, 0, 0, 0.7);
-      padding: 0.8rem 0.8rem 0.9rem 0.9rem;
-      width: 2.4em;
-      height: 2.4em;
-      margin-bottom: 0;
     }
     button:active {
       font-size: 0.8rem;
       background-color: rgba(0, 0, 0, 0.7);
-      padding: 0.8rem 0.8rem 0.9rem 0.9rem;
-      width: 2.2em;
-      height: 2.2em;
     }
     .startIcon {
-      font-size: 1rem !important;
     }
   }
 `;
