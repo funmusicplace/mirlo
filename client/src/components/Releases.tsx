@@ -63,12 +63,12 @@ const Releases = () => {
               > div {
                 flex: 23%;
                 max-width: 23%;
-                margin-left: 0rem;
-                margin-right: 2%;
+                margin-left: 0 !important;
+                margin-right: 2% !important;
                 padding: 0 !important;
 
                 :nth-child(4n) {
-                margin-left: 0rem;
+                margin-left: 0;
                 }
 
                 @media screen and (max-width: ${bp.medium}px) {
@@ -82,12 +82,12 @@ const Releases = () => {
 
                   max-width: 32%;
                   flex: 32%;
-                  margin-right: 2%;
+                  margin-right: 2% !important;
 
                   :nth-child(3n) {
                     border-top: 0;
-                    margin-left: 0rem;
-                    margin-right: 0rem;
+                    margin-left: 0rem !important;
+                    margin-right: 0rem !important;
                   }
                 }
 
@@ -98,13 +98,13 @@ const Releases = () => {
                   margin-bottom: 1rem;
 
                   &:nth-child(odd) {
-                    margin-left: 0rem;
-                    margin-right: 1.5%;
+                    margin-left: 0rem !important;
+                    margin-right: 1.5% !important;
                   }
 
                   &:nth-child(even) {
-                    margin-right: 0rem;
-                    margin-left: 1.5%;
+                    margin-right: 0rem !important;
+                    margin-left: 1.5% !important;
                   }
               }
             `}
