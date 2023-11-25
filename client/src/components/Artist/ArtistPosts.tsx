@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next";
 import { bp } from "../../constants";
 import { Link } from "react-router-dom";
 import Box from "components/common/Box";
-import PostCard from "components/common/PostCard";
 
 const ArtistPosts: React.FC<{ artist: Artist }> = ({ artist }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
