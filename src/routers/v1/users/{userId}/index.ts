@@ -51,7 +51,7 @@ export default function () {
 
   async function PUT(req: Request, res: Response, next: NextFunction) {
     const { userId } = req.params as unknown as { userId: string };
-    const { email, name, client } = req.body;
+    const { email, name, country } = req.body;
     const user = req.user as User;
 
     if (user.id !== Number(userId)) {
@@ -60,15 +60,17 @@ export default function () {
     }
 
     try {
-      let data: Prisma.UserUpdateInput = { name };
-      const emailChanged = email !== user.email;
-      if (emailChanged) {
-        res
-          .json({
-            error:
-              "It's not yet possible to change the user's email via the API",
-          })
-          .status(400);
+      let data: Prisma.UserUpdateInput = { name, country };
+      if (email) {
+        const emailChanged = email !== user.email;
+        if (emailChanged) {
+          res
+            .json({
+              error:
+                "It's not yet possible to change the user's email via the API",
+            })
+            .status(400);
+        }
       }
 
       await prisma.user.update({
@@ -76,6 +78,7 @@ export default function () {
           email: true,
           name: true,
           emailConfirmationToken: true,
+          country: true,
         },
         where: {
           id: Number(userId),

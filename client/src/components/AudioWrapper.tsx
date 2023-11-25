@@ -100,10 +100,6 @@ export const AudioWrapper: React.FC<{
           .map((ta) => ta.artistName)
           .join(", ");
 
-        console.log(
-          "track",
-          currentTrack.trackGroup.cover?.sizes?.[1200] ?? ""
-        );
         navigator.mediaSession.metadata = new MediaMetadata({
           title: currentTrack.title,
           artist: (artist || currentTrack.trackGroup?.artist?.name) ?? "",

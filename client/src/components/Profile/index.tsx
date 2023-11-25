@@ -1,6 +1,6 @@
 import { css } from "@emotion/css";
 import React from "react";
-import { useForm } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 import { useSnackbar } from "state/SnackbarContext";
@@ -23,7 +23,7 @@ function Profile() {
   const [isSaving, setIsSaving] = React.useState(false);
   const errorHandler = useErrorHandler();
   const navigate = useNavigate();
-  const { register, handleSubmit } = useForm<{
+  const methods = useForm<{
     email: string;
     name: string;
   }>({
@@ -32,6 +32,7 @@ function Profile() {
       name: user?.name,
     },
   });
+  const { register, handleSubmit } = methods;
 
   const fetchProfile = React.useCallback(async () => {
     const { result } = await api.get<LoggedInUser>("profile");
@@ -97,56 +98,60 @@ function Profile() {
   }
 
   return (
-    <div
-      className={css`
-        display: flex;
-        flex-direction: column;
-        padding: var(--mi-side-paddings-xsmall);
-      `}
-    >
-      <form
-        onSubmit={handleSubmit(doSave)}
+    <FormProvider {...methods}>
+      <div
         className={css`
           display: flex;
           flex-direction: column;
+          padding: var(--mi-side-paddings-xsmall);
         `}
       >
-        <h1>{t("profile")}</h1>
-        <FormComponent>
-          {t("email")}
-          <InputEl {...register("email")} disabled />
-          <small>{t("changingEmailDisabled")}</small>
-        </FormComponent>
-        <FormComponent>
-          {t("name")}
-          <InputEl {...register("name")} />
-        </FormComponent>
-        <Button type="submit" disabled={isSaving} isLoading={isSaving}>
-          {t("updateProfileButton")}
-        </Button>
-      </form>
-      {user.artistUserSubscriptions && (
-        <UserSupports artistUserSubscriptions={user.artistUserSubscriptions} />
-      )}
-      <Link to="/profile/collection" style={{ marginTop: "1rem" }}>
-        <Button style={{ width: "100%" }}>{t("viewCollection")}</Button>
-      </Link>
+        <form
+          onSubmit={handleSubmit(doSave)}
+          className={css`
+            display: flex;
+            flex-direction: column;
+          `}
+        >
+          <h1>{t("profile")}</h1>
+          <FormComponent>
+            {t("email")}
+            <InputEl {...register("email")} disabled />
+            <small>{t("changingEmailDisabled")}</small>
+          </FormComponent>
+          <FormComponent>
+            {t("name")}
+            <InputEl {...register("name")} />
+          </FormComponent>
+          <Button type="submit" disabled={isSaving} isLoading={isSaving}>
+            {t("updateProfileButton")}
+          </Button>
+        </form>
+        {user.artistUserSubscriptions && (
+          <UserSupports
+            artistUserSubscriptions={user.artistUserSubscriptions}
+          />
+        )}
+        <Link to="/profile/collection" style={{ marginTop: "1rem" }}>
+          <Button style={{ width: "100%" }}>{t("viewCollection")}</Button>
+        </Link>
 
-      <Link to="/manage" style={{ marginTop: "1rem" }}>
-        <Button style={{ width: "100%" }}>{t("manageArtists")}</Button>
-      </Link>
-      <Button
-        style={{
-          width: "100%",
-          backgroundColor: "var(--mi-warning-background-color)",
-          borderColor: "var(--mi-darken-warning-background-color)",
-          marginTop: "1rem",
-        }}
-        onClick={deleteAccount}
-      >
-        {t("deleteAccount")}
-      </Button>
-    </div>
+        <Link to="/manage" style={{ marginTop: "1rem" }}>
+          <Button style={{ width: "100%" }}>{t("manageArtists")}</Button>
+        </Link>
+        <Button
+          style={{
+            width: "100%",
+            backgroundColor: "var(--mi-warning-background-color)",
+            borderColor: "var(--mi-darken-warning-background-color)",
+            marginTop: "1rem",
+          }}
+          onClick={deleteAccount}
+        >
+          {t("deleteAccount")}
+        </Button>
+      </div>
+    </FormProvider>
   );
 }
 
