@@ -26,7 +26,7 @@ const styles = `html {
   --mi-border-radius: 2px;
   --mi-border-radius-focus: 8px;
 
-  --mi-icon-button-background-color: var(--mi-darken-background-color);
+  --mi-icon-button-background-color: var(--mi-darken-x-background-color);
 
   --mi-font-family-stack: 'Arial', -apple-system, BlinkMacSystemFont,
     'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans',
