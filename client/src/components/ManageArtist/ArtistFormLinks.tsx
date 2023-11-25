@@ -69,7 +69,7 @@ const ArtistFormLinks: React.FC<{ isManage: boolean }> = ({ isManage }) => {
         <div>
           {artist?.links?.map((l) => (
             <a
-              href="l"
+              href={l}
               className={css`
                 display: inline-flex;
                 align-items: center;

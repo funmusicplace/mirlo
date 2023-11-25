@@ -10,6 +10,7 @@ import { Link } from "react-router-dom";
 import { useSnackbar } from "state/SnackbarContext";
 import { useTranslation } from "react-i18next";
 import Box from "components/common/Box";
+import CountrySelect from "./CountrySelectForm";
 
 export const Manage: React.FC = () => {
   const { state } = useGlobalStateContext();
@@ -115,6 +116,7 @@ export const Manage: React.FC = () => {
           `}
         >
           <h2>Payment management</h2>
+          <CountrySelect />
           <Box variant="info">
             {!stripeAccountStatus?.chargesEnabled &&
               t("waitingStripeAccountVerification")}

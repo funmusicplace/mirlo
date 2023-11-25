@@ -150,7 +150,7 @@ const ManageTrackRow: React.FC<{
       >
         {track.audio?.duration && fmtMSS(track.audio?.duration)}
       </td>
-      <td>
+      <td align="right">
         <IconButton
           compact
           onClick={() => setIsEditing(true)}
