@@ -6,7 +6,7 @@ const HeaderDiv = styled.div`
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding-bottom: 0.5rem;
+  padding-bottom: 0.7rem;
 
   @media screen and (max-width: ${bp.medium}px) {
     align-items: flex-start !important;
