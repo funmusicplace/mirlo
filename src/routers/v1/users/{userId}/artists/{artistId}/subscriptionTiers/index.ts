@@ -5,6 +5,7 @@ import {
   userHasPermission,
 } from "../../../../../../../auth/passport";
 import prisma from "../../../../../../../../prisma/prisma";
+import { User } from "@prisma/client";
 
 type Params = {
   artistId: string;
@@ -42,8 +43,15 @@ export default function () {
 
   async function POST(req: Request, res: Response) {
     const { artistId } = req.params as unknown as Params;
+    const user = req.user as User;
 
     try {
+      const userForCurrency = await prisma.user.findFirst({
+        where: { id: user.id },
+        select: {
+          country: true,
+        },
+      });
       const {
         name,
         description,
@@ -59,6 +67,7 @@ export default function () {
           description,
           minAmount,
           maxAmount,
+          currency: userForCurrency?.country ?? "USD",
           allowVariable,
           defaultAmount,
         },
