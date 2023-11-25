@@ -108,6 +108,8 @@
     "addNewLink": "Add new link",
     "saveLinks": "Save links",
     "editLinks": "Edit links",
+    "editLocation": "Edit location",
+    "saveLocation": "Save location",
     "cancel": "Cancel",
     "platformPercent": "{{ percent }}% ({{ money }}) of this purchase will go to maintain Mirlo."
   },
