@@ -99,7 +99,7 @@ export default async (job: Job) => {
         const { format, audioBitrate, audioCodec } = formatDetails;
 
         logger.info(
-          `Processing stream for ${format}${
+          `audioId ${audioId}: Processing stream for ${format}${
             audioBitrate ? `@${audioBitrate}` : ""
           }`
         );
@@ -122,7 +122,7 @@ export default async (job: Job) => {
           })
           .on("end", () => {
             logger.info(
-              `Done converting to ${format}${
+              `audioId ${audioId}: Done converting to ${format}${
                 audioBitrate ? `@${audioBitrate}` : ""
               }`
             );
@@ -165,7 +165,7 @@ export default async (job: Job) => {
         .audioFrequency(48000)
         .audioCodec("libfdk_aac") // convert using Fraunhofer FDK AAC
         .on("start", () => {
-          logger.info("Converting original to hls");
+          logger.info("audioId ${audioId}: Converting original to hls");
         })
         .on("error", (err: { message: unknown }) => {
           logger.error(`Error converting to hls: ${err.message}`);
@@ -199,15 +199,15 @@ export default async (job: Job) => {
         `${audioId}/${file}`,
         uploadStream
       );
-      logger.info(`Uploading file ${file}`);
+      logger.info(`audioId ${audioId}: Uploading file ${file}`);
     }
 
     profiler.done({ message: "Done converting to audio" });
 
-    logger.info(`Done processing streams ${audioId}`);
+    logger.info(`audioId ${audioId}: Done processing streams`);
 
     await minioClient.removeObject(incomingAudioBucket, audioId);
-    logger.info(`Cleaned up incoming minio folder for ${audioId}`);
+    logger.info(`audioId ${audioId}: Cleaned up incoming minio folder`);
     await fsPromises.rm(destinationFolder, { recursive: true });
     logger.info(`Cleaned up ${destinationFolder}`);
     const response = { ...(data ?? {}), duration };

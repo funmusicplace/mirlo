@@ -303,7 +303,7 @@ export const BulkTrackUpload: React.FC<{
               disabled={disableUploadButton}
               multiple
               {...register("trackFiles")}
-              accept="audio/mpeg,audio/flac,audio/wav,audio/x-flac,audio/aac,audio/aiff,audio/x-m4a"
+              accept="audio/flac,audio/wav,audio/x-flac,audio/aac,audio/aiff,audio/x-m4a"
             />
           </label>
         </FormComponent>

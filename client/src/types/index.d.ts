@@ -11,6 +11,7 @@ interface LoggedInUser {
   id: number;
   artistUserSubscriptions?: ArtistUserSubscription[];
   isAdmin: boolean;
+  country?: string;
 }
 
 interface Track {

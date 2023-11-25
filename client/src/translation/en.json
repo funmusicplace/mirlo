@@ -126,7 +126,9 @@
     "subscriptionTiers": "Your subscription tiers",
     "createNewArtist": "Create new artist",
     "waitingOnStripe": "We're waiting on stripe to verify your account",
-    "updateBankAccount": "Change bank account information"
+    "updateBankAccount": "Change bank account information",
+    "countryCurrencyCode": "Country currency code:",
+    "saveCountryCode": "Save"
   },
   "manageArtist": {
     "notEnabled": "This artist has not been enabled by site admin yet! Contact an admin to do so.",
@@ -293,7 +295,8 @@
     "status": "Can be played without purchase?",
     "statusPreview": "Preview",
     "statusMustOwn": "Must own",
-    "doneUploadingTrack": "Processed track"
+    "doneUploadingTrack": "Processed track",
+    "stillProcessing": "Still processing audio"
   },
   "mewTrack": {
     "newTrack": "New Track",
