@@ -42,6 +42,7 @@ const DownloadAlbumButton: React.FC<{
         <div>
           <Button
             compact
+            transparent
             collapse
             className={css`
               margin-top: 0rem;
@@ -54,7 +55,7 @@ const DownloadAlbumButton: React.FC<{
               }
 
               @media screen and (max-width: ${bp.small}px) {
-                height: .5rem;
+                height: 0.5rem;
               }
             `}
             isLoading={isDownloading}
