@@ -61,7 +61,8 @@ const formats = [
 ];
 
 export default async (job: Job) => {
-  const { audioId, fileExtension, incomingFileLocation } = job.data;
+  const { audioId, fileExtension } = job.data;
+  let progress = 10;
 
   try {
     const destinationFolder = `/data/media/processing/${audioId}`;
@@ -88,6 +89,10 @@ export default async (job: Job) => {
     let data: any;
 
     const profiler = logger.startTimer();
+
+    await job.updateProgress(progress);
+
+    const formatProgressInterval = 70 / formats.length;
 
     for (const formatDetails of formats) {
       await new Promise((resolve, reject) => {
@@ -136,6 +141,8 @@ export default async (job: Job) => {
 
         processor.save(destination);
       });
+      progress += formatProgressInterval;
+      await job.updateProgress(progress);
     }
 
     const hlsStream = await createReadStream(originalPath);
@@ -178,6 +185,8 @@ export default async (job: Job) => {
         })
         .save(`${destinationFolder}/playlist.m3u8`);
     });
+
+    await job.updateProgress(90);
 
     const finalFilesInFolder = await fsPromises.readdir(destinationFolder);
 
