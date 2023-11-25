@@ -15,7 +15,7 @@ interface FormData {
   linkArray: { url: string }[];
 }
 
-const ArtistFormLinks = () => {
+const ArtistFormLinks: React.FC<{ isManage: boolean }> = ({ isManage }) => {
   const [isEditing, setIsEditing] = React.useState(false);
   const {
     state: { artist },
@@ -61,7 +61,11 @@ const ArtistFormLinks = () => {
 
   if (!isEditing) {
     return (
-      <div>
+      <div
+        className={css`
+          margin-bottom: 0.25rem;
+        `}
+      >
         <div>
           {artist?.links?.map((l) => (
             <a
@@ -81,9 +85,11 @@ const ArtistFormLinks = () => {
             </a>
           ))}
         </div>
-        <Button compact onClick={() => setIsEditing(true)}>
-          {t("editLinks")}
-        </Button>
+        {isManage && (
+          <Button compact onClick={() => setIsEditing(true)}>
+            {t("editLinks")}
+          </Button>
+        )}
       </div>
     );
   }

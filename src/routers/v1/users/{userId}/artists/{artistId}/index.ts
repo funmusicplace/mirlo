@@ -30,7 +30,7 @@ export default function () {
 
   async function PUT(req: Request, res: Response) {
     const { userId, artistId } = req.params as unknown as Params;
-    const { bio, name, urlSlug, properties, links } = req.body;
+    const { bio, name, urlSlug, properties, links, location } = req.body;
 
     try {
       // FIXME: check type of properties object.
@@ -43,6 +43,7 @@ export default function () {
           bio,
           name,
           links,
+          location,
           ...(urlSlug ? { urlSlug: urlSlug?.toLowerCase() } : {}),
           properties,
         },
