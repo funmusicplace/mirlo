@@ -223,60 +223,53 @@ function Home() {
                 }
                 @media (prefers-color-scheme: dark) {
                   :hover {
-                    filter: brightness(110%);
+                    filter: brightness(140%);
                   }
                 }
               `}
             >
-              <div
+              <Box
+                key={p.id}
                 className={css`
-
-                  display: flex;
-                  flex-direction: column;
-                  align-items: center;
-                  margin: 0 0 2rem 0;
-                  width: 100%;
-                  overflow: hidden;
-                  white-space: ellipsis;
-                  outline: solid 1px grey;
-                  transition: 0.2s ease-in-out;
-                  background-color: var(--mi-light-background-color);
-
-                  > :last-child {
-                    color: var(--mi-primary-color) !important;
-                    background: var(--mi-secondary-color);
-                  }
-
-                  :hover {
-                    background-color: var(--mi-normal-background-color);
-                    transition: 0.2s ease-in-out;
-                    > :last-child {
-                      background: var(--mi-primary-color);
-                      color: var(--mi-secondary-color) !important;
-                    }
-                  }
-
+                  border: solid 1px grey;
+                  margin-bottom: 0.5rem !important;
+                  padding: 0 !important;
+                  justify-content: space-between;
                   @media screen and (max-width: ${bp.medium}px) {
-                    padding: 0rem !important;
+                    width: 100% !important;
+                  }
+                  @media screen and (max-width: ${bp.small}px) {
+                    font-size: var(--mi-font-size-small) !important;
                   }
                 `}
               >
-                <Box
-                  key={p.id}
+                <div
                   className={css`
-                    @media screen and (max-width: ${bp.medium}px) {
-                      width: 100% !important;
-                      padding: 2rem 2rem !important;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: flex-start;
+                    padding: 1rem;
+                    margin: 0;
+                    width: 100%;
+                    overflow: hidden;
+                    transition: 0.2s ease-in-out;
+                    background-color: var(--mi-light-background-color);
+
+                    :hover {
+                      background-color: var(--mi-darken-background-color);
+                      transition: 0.2s ease-in-out;
                     }
-                    @media screen and (max-width: ${bp.small}px) {
-                      padding: 1rem 1rem !important;
-                      font-size: 0.875rem !important;
+                    @media (prefers-color-scheme: dark) {
+                    :hover {
+                      background-color: var(--mi-lighten-background-color);
+                      transition: 0.2s ease-in-out;
                     }
                   `}
                 >
                   <div
                     className={css`
                       padding-bottom: 1rem;
+                      width: 100%;
                     `}
                   >
                     {/* <h5>{p.title}</h5> */}
@@ -284,14 +277,15 @@ function Home() {
                       className={css`
                         display: flex;
                         justify-content: space-between;
-                        flex-wrap: wrap;
                         align-items: center;
+                        flex-wrap: wrap;
+                        margin-bottom: 0.5rem;
                       `}
                     >
                       <h4
                         className={css`
-                          padding-bottom: 0.5rem;
-                          margin-right: 1rem;
+                          padding-bottom: 0.3rem;
+                          text-align: center;
                         `}
                       >
                         <Link
@@ -307,7 +301,6 @@ function Home() {
                       <span
                         className={css`
                           color: grey;
-                          margin-bottom: 1rem;
                         `}
                       >
                         {new Date(p.publishedAt).toLocaleDateString("en-US", {
@@ -328,7 +321,11 @@ function Home() {
                     )}
                   </div>
 
-                  <div>
+                  <div
+                    className={css`
+                      width: 100%;
+                    `}
+                  >
                     <span
                       className={css`
                         white-space: nowrap;
@@ -342,19 +339,20 @@ function Home() {
                       {p.content}
                     </span>
                   </div>
-                </Box>
-                <div
+                  {/*<div
                   className={css`
                     color: var(--mi-normal-background-color) !important;
                     text-align: center;
-                    width: 100%;
+                    width: 20%;
                     height: 100%;
+                    padding: 0.2rem;
                     transition: 0.2s ease-in-out;
                   `}
-                >
+                  >
                   read more
+                </div>*/}
                 </div>
-              </div>
+              </Box>
             </Link>
           ))}
         </>
