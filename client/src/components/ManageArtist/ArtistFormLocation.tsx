@@ -1,11 +1,10 @@
 import { useTranslation } from "react-i18next";
-import { useFieldArray, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { InputEl } from "components/common/Input";
 import Button from "components/common/Button";
 import { css } from "@emotion/css";
-import { FaMapPin, FaPlus, FaSave, FaTimes, FaTrash } from "react-icons/fa";
+import { FaMapPin, FaSave, FaTimes } from "react-icons/fa";
 import React from "react";
-import LinkIconDisplay from "components/common/LinkIconDisplay";
 import api from "services/api";
 import { useArtistContext } from "state/ArtistContext";
 import { useGlobalStateContext } from "state/GlobalState";
