@@ -32,8 +32,6 @@ const CustomButton = styled.button<Compactable>`
   }
   @media screen and (max-width: ${bp.small}px) {
     font-size: 0.8rem;
-    height: ${(props) => (props.onlyIcon ? "1.5rem" : "")};
-    width: ${(props) => (props.onlyIcon ? "1.5rem" : "")};
   }
 
   &:hover:not(:disabled) {

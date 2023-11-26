@@ -284,7 +284,6 @@ function TrackGroup() {
                     button {
                       margin-left: 0.5rem;
                       background: var(--mi-darken-background-color);
-                      );
                     }
                   `}
                 >
