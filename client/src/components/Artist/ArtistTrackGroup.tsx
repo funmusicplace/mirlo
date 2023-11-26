@@ -83,7 +83,7 @@ const ArtistTrackGroup: React.FC<{
             display: flex;
             justify-content: space-between;
             flex-wrap: nowrap;
-            align-items: start;
+            align-items: center;
             width: 100%;
             padding-top: 0.5rem;
             @media screen and (min-width: ${bp.medium}px) {

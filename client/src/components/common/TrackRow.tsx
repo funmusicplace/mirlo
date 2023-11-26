@@ -3,7 +3,7 @@ import React from "react";
 import { FiLink } from "react-icons/fi";
 import { useGlobalStateContext } from "state/GlobalState";
 
-import IconButton from "./IconButton";
+import Button from "./Button";
 import { fmtMSS, isTrackOwnedOrPreview, widgetUrl } from "utils/tracks";
 import { useSnackbar } from "state/SnackbarContext";
 import { bp } from "../../constants";
@@ -135,6 +135,10 @@ const TrackRow: React.FC<{
             justify-content: space-between;
             align-items: flex-end;
 
+            :hover {
+              cursor: pointer;
+            }
+
             @media screen and (max-width: ${bp.small}px) {
               flex-wrap: nowrap;
             }
@@ -174,16 +178,23 @@ const TrackRow: React.FC<{
         </div>
       </td>
       <td align="right">
-        <IconButton
+        <Button
           compact
+          transparent
           onClick={(e) => {
             e.stopPropagation();
             navigator.clipboard.writeText(widgetUrl(track.id));
             snackbar("Copied track url", { type: "success" });
           }}
+          className={css`
+            :hover {
+              background: transparent !important;
+              opacity: 0.6;
+            }
+          `}
         >
           <FiLink />
-        </IconButton>
+        </Button>
       </td>
     </tr>
   );

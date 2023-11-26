@@ -145,7 +145,6 @@ function TrackGroup() {
                   className={css`
                     font-size: 2rem;
                     line-height: 2.2rem;
-                    margin-bottom: 0.2rem;
                   `}
                 >
                   {trackGroup.title}
@@ -194,8 +193,6 @@ function TrackGroup() {
                   </Button>
                 </Link>
               )}
-
-              <PurchaseOrDownloadAlbum trackGroup={trackGroup} />
               {user?.isAdmin && (
                 <div
                   className={css`
@@ -266,7 +263,7 @@ function TrackGroup() {
                     }
 
                     @media screen and (max-width: ${bp.medium}px) {
-                      font-size: 14px;
+                      font-size: var(--mi-font-size-small);
                     }
                   `}
                 >
@@ -281,7 +278,19 @@ function TrackGroup() {
                     )}
                   </em>
                 </div>
-                <Wishlist trackGroup={trackGroup} />
+                <div
+                  className={css`
+                    display: flex;
+                    button {
+                      margin-left: 0.5rem;
+                      background: var(--mi-darken-background-color);
+                      );
+                    }
+                  `}
+                >
+                  <PurchaseOrDownloadAlbum trackGroup={trackGroup} />
+                  <Wishlist trackGroup={trackGroup} />
+                </div>
               </div>
               <div
                 className={css`

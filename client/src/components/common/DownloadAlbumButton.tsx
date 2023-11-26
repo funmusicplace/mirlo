@@ -1,4 +1,4 @@
-import Button from "components/common/Button";
+import IconButton from "components/common/IconButton";
 import React from "react";
 import { bp } from "../../constants";
 import { css } from "@emotion/css";
@@ -40,30 +40,20 @@ const DownloadAlbumButton: React.FC<{
     <>
       <>
         <div>
-          <Button
+          <IconButton
             compact
             transparent
-            collapse
             className={css`
               margin-top: 0rem;
               font-size: 1.2rem;
               background: transparent;
-
-              &:hover {
-                color: var(--mi-normal-background-color);
-                background-color: var(--mi-normal-foreground-color) !important;
-              }
-
-              @media screen and (max-width: ${bp.small}px) {
-                height: 0.5rem;
-              }
             `}
             isLoading={isDownloading}
             startIcon={<RiDownloadLine />}
             onClick={() => downloadAlbum()}
           >
-            {t("download")}
-          </Button>
+            <RiDownloadLine />
+          </IconButton>
         </div>
       </>
     </>

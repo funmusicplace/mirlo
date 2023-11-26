@@ -67,7 +67,7 @@ const Header: React.FC<{
         }}
         className={css`
           button:hover {
-            color: var(--mi-white) !important;
+            color: var(--mi-white);
             background-color: var(--mi-black);
           }
           @media (max-width: ${bp.small}px) {

@@ -60,7 +60,6 @@ const Menu: React.FC = (props) => {
 
         & li > * {
           background: transparent !important;
-          // width: 100%;
           width: 200px;
           text-decoration: none;
           text-align: right;
