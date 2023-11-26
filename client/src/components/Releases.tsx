@@ -1,5 +1,6 @@
 import React from "react";
 import ArtistTrackGroup from "./Artist/ArtistTrackGroup";
+import TrackgroupGrid from "components/common/TrackgroupGrid";
 import api from "services/api";
 import { css } from "@emotion/css";
 import { useTranslation } from "react-i18next";
@@ -47,73 +48,11 @@ const Releases = () => {
           flex-wrap: wrap;
         `}
       >
-        <div
-          className={css`
-              display: flex;
-              width: 100%;
-              flex-direction: row;
-              flex-wrap: wrap;
-              white-space: nowrap;
-              a:first-child {
-                font-size: var(--mi-font-size-small);
-              }
-              a:last-child {
-                font-size: var(--mi-font-size-small);
-              }
-
-              > div {
-                flex: 23%;
-                max-width: 23%;
-                margin-left: 0 !important;
-                margin-right: 2% !important;
-                padding: 0 !important;
-
-                :nth-child(4n) {
-                margin-left: 0;
-                }
-
-                @media screen and (max-width: ${bp.medium}px) {
-
-                  a:first-child {
-                    font-size: var(--mi-font-size-xsmall);
-                  }
-                  a:last-child {
-                    font-size: var(--mi-font-size-xsmall);
-                  }
-
-                  max-width: 32%;
-                  flex: 32%;
-                  margin-right: 2% !important;
-
-                  :nth-child(3n) {
-                    border-top: 0;
-                    margin-left: 0rem !important;
-                    margin-right: 0rem !important;
-                  }
-                }
-
-                @media screen and (max-width: ${bp.small}px) {
-
-                  max-width: 48.5%;
-                  flex: 48.5%;
-                  margin-bottom: 1rem;
-
-                  &:nth-child(odd) {
-                    margin-left: 0rem !important;
-                    margin-right: 1.5% !important;
-                  }
-
-                  &:nth-child(even) {
-                    margin-right: 0rem !important;
-                    margin-left: 1.5% !important;
-                  }
-              }
-            `}
-        >
+        <TrackgroupGrid>
           {trackGroups?.map((trackGroup) => (
             <ArtistTrackGroup key={trackGroup.id} trackGroup={trackGroup} />
           ))}
-        </div>
+        </TrackgroupGrid>
       </div>
     </div>
   );
