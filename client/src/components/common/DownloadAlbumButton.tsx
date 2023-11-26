@@ -1,6 +1,5 @@
 import IconButton from "components/common/IconButton";
 import React from "react";
-import { bp } from "../../constants";
 import { css } from "@emotion/css";
 import { useTranslation } from "react-i18next";
 import { RiDownloadLine } from "react-icons/ri";
