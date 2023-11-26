@@ -25,7 +25,6 @@ const ArtistTrackGroup: React.FC<{
         display: inline-block;
         max-width: 32.2%;
         flex: 32.2%;
-        white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
 
@@ -83,7 +82,7 @@ const ArtistTrackGroup: React.FC<{
           className={css`
             display: flex;
             justify-content: space-between;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
             align-items: start;
             width: 100%;
             padding-top: 0.5rem;
@@ -96,7 +95,7 @@ const ArtistTrackGroup: React.FC<{
             className={css`
               display: flex;
               flex-direction: column;
-              width: 80%;
+              width: 100%;
 
               a:first-child {
                 font-weight: normal;
@@ -111,7 +110,6 @@ const ArtistTrackGroup: React.FC<{
               a {
                 text-decoration: none;
                 text-overflow: ellipsis;
-
                 overflow: hidden;
               }
 

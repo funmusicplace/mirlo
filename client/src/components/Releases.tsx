@@ -53,6 +53,7 @@ const Releases = () => {
               width: 100%;
               flex-direction: row;
               flex-wrap: wrap;
+              white-space: nowrap;
               a:first-child {
                 font-size: var(--mi-font-size-small);
               }
