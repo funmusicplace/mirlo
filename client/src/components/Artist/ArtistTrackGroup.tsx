@@ -40,6 +40,10 @@ const ArtistTrackGroup: React.FC<{
           margin-right: 0rem;
         }
 
+        button {
+          padding: 0.35rem 0.35rem;
+        }
+
         @media screen and (max-width: ${bp.medium}px) {
           max-width: 48.5%;
           flex: 48.5%;
@@ -57,12 +61,12 @@ const ArtistTrackGroup: React.FC<{
             margin-left: 1.5%;
           }
 
-          button {
-            padding: 0.2rem 0.4rem;
-          }
-
           @media screen and (max-width: ${bp.small}px) {
             font-size: var(--mi-font-size-small);
+
+            button {
+              padding: 0.25rem 0.25rem;
+            }
           }
         }
       `}
@@ -83,7 +87,7 @@ const ArtistTrackGroup: React.FC<{
             display: flex;
             justify-content: space-between;
             flex-wrap: nowrap;
-            align-items: center;
+            align-items: start;
             width: 100%;
             padding-top: 0.5rem;
             @media screen and (min-width: ${bp.medium}px) {
