@@ -55,6 +55,9 @@ const PlayingTrackDetails: React.FC<{ currentTrack: Track }> = ({
             overflow: hidden;
             white-space: nowrap;
             text-overflow: ellipsis;
+            @media (max-width: ${bp.small}px) {
+            font-size: var(--mi-font-size-normal);
+          }
           `}
         >
           {currentTrack?.title}
