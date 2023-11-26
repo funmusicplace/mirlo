@@ -84,7 +84,7 @@ body,
 
 h1 {
   font-size: 2.5rem;
-  line-height: 2;
+  line-height: 2em;
   font-weight: normal;
 
   a {

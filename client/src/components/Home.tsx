@@ -204,14 +204,18 @@ function Home() {
       {user && <Releases />}
       {user && posts.length > 0 && (
         <>
-          <h2
+          <h1
             className={css`
-              margin-top: 1rem;
               margin-bottom: 1rem;
+              margin-top: 2em;
+              line-height: 1em;
+              @media screen and (max-width: ${bp.medium}px) {
+                margin-bottom: 0.5rem;
+              }
             `}
           >
             {t("latestCommunityPost")}
-          </h2>
+          </h1>
           {posts.map((p) => (
             <Link
               to={`/post/${p.id}/`}

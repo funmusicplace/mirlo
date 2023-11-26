@@ -22,24 +22,22 @@ const Releases = () => {
   return (
     <div
       className={css`
-        margin-top: 1rem;
-
         @media screen and (max-width: ${bp.medium}px) {
-          margin-top: 0rem;
           margin-bottom: 0rem;
         }
       `}
     >
-      <h2
+      <h1
         className={css`
           margin-bottom: 1rem;
+          line-height: 1em;
           @media screen and (max-width: ${bp.medium}px) {
             margin-bottom: 0.5rem;
           }
         `}
       >
         {t("recentReleases")}
-      </h2>
+      </h1>
       <div
         className={css`
           display: flex;
