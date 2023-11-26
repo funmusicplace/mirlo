@@ -83,7 +83,6 @@ const Header = () => {
           justify-content: space-between;
           align-items: center;
           padding: 0.5rem 1rem;
-          background-color: #ede8e8;
           width: 100%;
           z-index: 999999;
           position: sticky;
