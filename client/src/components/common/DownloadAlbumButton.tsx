@@ -1,4 +1,4 @@
-import IconButton from "components/common/IconButton";
+import Button from "components/common/Button";
 import React from "react";
 import { css } from "@emotion/css";
 import { useTranslation } from "react-i18next";
@@ -39,9 +39,10 @@ const DownloadAlbumButton: React.FC<{
     <>
       <>
         <div>
-          <IconButton
+          <Button
             compact
             transparent
+            onlyIcon
             className={css`
               margin-top: 0rem;
               font-size: 1.2rem;
@@ -50,9 +51,7 @@ const DownloadAlbumButton: React.FC<{
             isLoading={isDownloading}
             startIcon={<RiDownloadLine />}
             onClick={() => downloadAlbum()}
-          >
-            <RiDownloadLine />
-          </IconButton>
+          ></Button>
         </div>
       </>
     </>
