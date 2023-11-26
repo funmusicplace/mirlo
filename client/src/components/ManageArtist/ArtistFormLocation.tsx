@@ -52,20 +52,14 @@ const ArtistFormLocation: React.FC<{ isManage: boolean }> = ({ isManage }) => {
 
   if (!isEditing) {
     return (
-      <div
-        className={css`
-          margin-bottom: 0.5rem;
-        `}
-      >
+      <div>
         {artist?.location && (
           <div
             className={css`
-              svg {
-                margin-right: 0.5rem;
-              }
+              opacity: 0.7;
+              text-transform: capitalize;
             `}
           >
-            <FaMapPin />
             {artist?.location}
           </div>
         )}

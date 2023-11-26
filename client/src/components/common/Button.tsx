@@ -24,12 +24,16 @@ const CustomButton = styled.button<Compactable>`
   font-weight: bold;
   line-height: 1rem;
   height: 1.6rem;
+  height: ${(props) => (props.onlyIcon ? "2rem" : "")};
+  width: ${(props) => (props.onlyIcon ? "2rem" : "")};
 
   @media screen and (max-width: ${bp.medium}px) {
     font-size: 0.8rem;
   }
   @media screen and (max-width: ${bp.small}px) {
     font-size: 0.8rem;
+    height: ${(props) => (props.onlyIcon ? "1.5rem" : "")};
+    width: ${(props) => (props.onlyIcon ? "1.5rem" : "")};
   }
 
   &:hover:not(:disabled) {
@@ -101,6 +105,8 @@ const CustomButton = styled.button<Compactable>`
       default:
         return `
           padding: ${props.compact ? ".3rem .5rem" : "1rem"};
+          
+          padding: ${props.onlyIcon ? ".5rem .5rem" : ".6rem .6rem"};
           background-color:  var(--mi-${props.role ?? "secondary"}-color);
           background-color:  ${props.transparent ? "transparent" : ""};
           color:  var(--mi-${props.role ?? "primary"}-color);
@@ -124,6 +130,7 @@ const CustomButton = styled.button<Compactable>`
   align-items: center;
   display: inline-flex;
   border-radius: var(--mi-border-radius);
+  border-radius: ${(props) => (props.onlyIcon ? "100%" : "")};
   justify-content: center;
   white-space: nowrap;
 
@@ -136,6 +143,7 @@ const CustomButton = styled.button<Compactable>`
     margin-right: ${(props) => (props.onlyIcon ? "0px" : "0.5rem")};
     line-height: 0.785rem;
     font-size: 0.785rem;
+    font-size: ${(props) => (props.onlyIcon ? ".9rem" : "")};
   }
 
   & .endIcon:not(.collapsed) {

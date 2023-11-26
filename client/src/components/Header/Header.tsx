@@ -83,10 +83,8 @@ const Header = () => {
           justify-content: space-between;
           align-items: center;
           padding: 0.5rem 1rem;
-          background-color: #ede8e8;
           width: 100%;
           z-index: 999999;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.2);
           position: sticky;
           top: 0px;
           height: 55px;
@@ -106,7 +104,7 @@ const Header = () => {
           }
 
           @media (prefers-color-scheme: dark) {
-            background-color: #232428;
+            background-color: transparent;
 
             @media screen and (max-width: ${bp.medium}px) {
               ${artistBanner ? "background-color: transparent;" : ""}

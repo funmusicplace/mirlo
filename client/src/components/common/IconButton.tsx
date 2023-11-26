@@ -7,7 +7,6 @@ const IconButton = styled.button<Compactable & { transparent?: boolean }>`
     props.role === "primary"
       ? "var(--mi-primary-color)"
       : "var(--mi-lighter-foreground-color)"};
-  background-color: var(--mi-darken-background-color);
   padding: ${(props) => (props.compact ? "0.5rem 0.5rem" : "0.6rem 0.6rem")};
   transition: 0.25s;
   font-size: ${(props) => (props.compact ? ".9rem" : "1.2rem")};
@@ -35,15 +34,12 @@ const IconButton = styled.button<Compactable & { transparent?: boolean }>`
   &:hover:not([disabled]) {
     cursor: pointer;
     color: ${(props) =>
-      props.role === "primary"
-        ? "var(--mi-primary-color)"
-        : "var(--mi-lighter-foreground-color)"};
-    background-color: var(--mi-icon-button-background-color);
+      props.role === "primary" ? "var(--mi-primary-color)" : "var(--mi-black)"};
+    background-color: var(--mi-secondary-color);
   }
 
   & svg {
     display: block;
-    // height: 1rem;
   }
 `;
 

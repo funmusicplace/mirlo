@@ -75,7 +75,6 @@ const PlayWrapper = styled.div<WrapperProps>`
       background-color: rgba(0, 0, 0, 0.7);
     }
     button:active {
-      font-size: 0.8rem;
       background-color: rgba(0, 0, 0, 0.7);
     }
     .startIcon {

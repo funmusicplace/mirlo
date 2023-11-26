@@ -68,7 +68,6 @@ const PurchaseOrDownloadAlbum: React.FC<{
                   background: transparent;
                   color: var(--mi-normal-foreground-color) !important;
                   padding: 0;
-                  // border: 1px solid;
                 }
                 button:hover {
                   color: var(--mi-normal-foreground-color) !important;
