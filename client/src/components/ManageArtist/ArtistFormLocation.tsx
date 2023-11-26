@@ -52,11 +52,7 @@ const ArtistFormLocation: React.FC<{ isManage: boolean }> = ({ isManage }) => {
 
   if (!isEditing) {
     return (
-      <div
-        className={css`
-          margin-bottom: 0rem;
-        `}
-      >
+      <div>
         {artist?.location && (
           <div
             className={css`
