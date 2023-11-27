@@ -135,7 +135,7 @@ const TrackRow: React.FC<{
             justify-content: space-between;
             align-items: flex-end;
 
-            :hover {
+            &:hover {
               cursor: pointer;
             }
 
