@@ -8,6 +8,7 @@ const TrackgroupGrid = styled.div`
               flex-direction: row;
               flex-wrap: wrap;
               white-space: nowrap;
+
               a:first-child {
                 font-size: var(--mi-font-size-small);
               }
@@ -23,10 +24,10 @@ const TrackgroupGrid = styled.div`
                 padding: 0 !important;
 
                 :nth-child(4n) {
-                margin-left: 0 !important;
-                margin-right: 0 !important;
+                  margin-left: 0 !important;
+                  margin-right: 0 !important;
                 }
-
+                
                 @media screen and (max-width: ${bp.medium}px) {
 
                   a:first-child {
@@ -49,7 +50,7 @@ const TrackgroupGrid = styled.div`
                   :nth-child(4n) {
                     margin-left: 0 !important;
                     margin-right: 2% !important;
-                }
+                  }
                 }
 
                 @media screen and (max-width: ${bp.small}px) {
@@ -57,7 +58,7 @@ const TrackgroupGrid = styled.div`
                   max-width: 48.5%;
                   flex: 48.5%;
                   margin-bottom: 1rem;
-
+                  
                   &:nth-child(odd) {
                     margin-left: 0rem !important;
                     margin-right: 1.5% !important;
