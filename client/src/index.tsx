@@ -101,50 +101,38 @@ const router = createBrowserRouter([
         children: [
           {
             path: "",
-            element: (
-              <AuthWrapper>
-                <Manage />
-              </AuthWrapper>
-            ),
+            element: <Manage />,
           },
           {
             path: "artists/:artistId",
             element: (
-              <AuthWrapper>
-                <ArtistProvider managedArtist>
-                  <ManageArtistContainer />
-                </ArtistProvider>
-              </AuthWrapper>
+              <ArtistProvider managedArtist>
+                <ManageArtistContainer />
+              </ArtistProvider>
             ),
             children: [
               {
                 path: "",
                 element: (
-                  <AuthWrapper>
-                    <ArtistProvider managedArtist>
-                      <ManageArtist />
-                    </ArtistProvider>
-                  </AuthWrapper>
+                  <ArtistProvider managedArtist>
+                    <ManageArtist />
+                  </ArtistProvider>
                 ),
               },
               {
                 path: "release/:trackGroupId",
                 element: (
-                  <AuthWrapper>
-                    <ArtistProvider managedArtist>
-                      <ManageTrackGroup />
-                    </ArtistProvider>
-                  </AuthWrapper>
+                  <ArtistProvider managedArtist>
+                    <ManageTrackGroup />
+                  </ArtistProvider>
                 ),
               },
               {
                 path: "new-release",
                 element: (
-                  <AuthWrapper>
-                    <ArtistProvider managedArtist>
-                      <ManageTrackGroup />
-                    </ArtistProvider>
-                  </AuthWrapper>
+                  <ArtistProvider managedArtist>
+                    <ManageTrackGroup />
+                  </ArtistProvider>
                 ),
               },
             ],
@@ -162,27 +150,15 @@ const router = createBrowserRouter([
         children: [
           {
             path: "users",
-            element: (
-              <AuthWrapper>
-                <AdminUsers />
-              </AuthWrapper>
-            ),
+            element: <AdminUsers />,
           },
           {
             path: "trackGroups",
-            element: (
-              <AuthWrapper>
-                <AdminTrackGroups />
-              </AuthWrapper>
-            ),
+            element: <AdminTrackGroups />,
           },
           {
             path: "tracks",
-            element: (
-              <AuthWrapper>
-                <AdminTracks />
-              </AuthWrapper>
-            ),
+            element: <AdminTracks />,
           },
         ],
       },

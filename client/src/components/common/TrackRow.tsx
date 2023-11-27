@@ -180,7 +180,6 @@ const TrackRow: React.FC<{
       <td align="right">
         <Button
           compact
-          iconOnly
           transparent
           onClick={(e) => {
             e.stopPropagation();
