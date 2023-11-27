@@ -29,10 +29,19 @@ const Releases = () => {
     >
       <h1
         className={css`
+          padding-bottom: 0.5rem;
           margin-bottom: 1rem;
           line-height: 1em;
           @media screen and (max-width: ${bp.medium}px) {
             margin-bottom: 0.5rem;
+          }
+          @media screen and (min-width: ${bp.medium}px) {
+            position: sticky;
+            top: 55px;
+            background-color: var(--mi-normal-background-color);
+            z-index: +1;
+
+            border-bottom: solid 1px white;
           }
         `}
       >
