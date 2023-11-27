@@ -26,14 +26,22 @@ const TrackRowPlayControl: React.FC<{
       ? playerQueueIds[currentlyPlayingIndex]
       : undefined;
 
-  const onTrackPlay = React.useCallback(() => {
-    onTrackPlayCallback?.(trackId);
-    dispatch({ type: "setPlaying", playing: true });
-  }, [dispatch, onTrackPlayCallback, trackId]);
+  const onTrackPlay = React.useCallback(
+    (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+      e.stopPropagation();
+      onTrackPlayCallback?.(trackId);
+      dispatch({ type: "setPlaying", playing: true });
+    },
+    [dispatch, onTrackPlayCallback, trackId]
+  );
 
-  const onTrackPause = React.useCallback(() => {
-    dispatch({ type: "setPlaying", playing: false });
-  }, [dispatch]);
+  const onTrackPause = React.useCallback(
+    (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+      e.stopPropagation();
+      dispatch({ type: "setPlaying", playing: false });
+    },
+    [dispatch]
+  );
 
   return (
     <>

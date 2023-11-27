@@ -4,6 +4,7 @@ import React from "react";
 export const SelectEl = styled.select`
   font-size: 1rem;
   max-width: 100%;
+  padding: 0.5rem;
 
   option {
     padding: 0.5rem;

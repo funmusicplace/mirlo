@@ -4,7 +4,7 @@ import { convertURLArrayToSizes, generateFullStaticImageUrl } from "./images";
 import { finalCoversBucket, finalAudioBucket, minioClient } from "./minio";
 import { findArtistIdForURLSlug } from "./artist";
 import { logger } from "../logger";
-import fs from "fs";
+import fs, { promises as fsPromises } from "fs";
 import archiver from "archiver";
 import { deleteTrack } from "./tracks";
 
@@ -86,16 +86,35 @@ export default {
   }),
 };
 
+export type FormatOptions =
+  | "flac"
+  | "wav"
+  | "opus"
+  | "320.mp3"
+  | "256.mp3"
+  | "128.mp3";
+
 export async function buildZipFileForPath(
   tracks: (Track & {
     audio: TrackAudio | null;
   })[],
-  folderName: string
+  folderName: string,
+  format: FormatOptions = "flac"
 ) {
   return new Promise(async (resolve: (value: string) => void, reject) => {
     const rootFolder = `${MEDIA_LOCATION_DOWNLOAD_CACHE}/${folderName}`;
+    const zipLocation = `${rootFolder}.${format}.zip`;
+    try {
+      const exists = await fsPromises.stat(zipLocation);
+      if (exists) {
+        logger.info(`${folderName}.${format}: exists at ${zipLocation}`);
+        return resolve(zipLocation);
+      }
+    } catch (e) {
+      logger.info(`${folderName}.${format}: No existing zip`);
+    }
 
-    const output = fs.createWriteStream(`${rootFolder}.zip`);
+    const output = fs.createWriteStream(zipLocation);
     const archive = archiver("zip", {
       zlib: { level: 9 }, // Sets the compression level.
     });
@@ -107,7 +126,7 @@ export async function buildZipFileForPath(
       logger.info(
         "archiver has been finalized and the output file descriptor has closed."
       );
-      resolve(`${rootFolder}.zip`);
+      resolve(zipLocation);
     });
     // This event is fired when the data source is drained no matter what was the data source.
     // It is not part of this library but rather from the NodeJS Stream API.
@@ -135,21 +154,27 @@ export async function buildZipFileForPath(
     for (let i = 0; i < tracks.length; i++) {
       const track = tracks[i];
       if (track.title && track.audio) {
-        logger.info(`Fetching file for tracks ${track.title}`);
+        logger.info(
+          `${track.audio.id}: Fetching file for tracks ${track.title}`
+        );
         const order = track.order ? track.order : i + 1;
-        const trackTitle = `${order} - ${track.title}.${track.audio.fileExtension}`;
+        const trackTitle = `${order} - ${track.title}.${format}`;
 
+        const trackLocation = `${track.audio.id}/generated.${format}`;
+        logger.info(`${track.audio.id}: Fetching ${trackLocation}`);
         try {
           const trackStream = await minioClient.getObject(
             finalAudioBucket,
-            `${track.audio.id}/original.${track.audio.fileExtension}`
+            trackLocation
           );
-          logger.info(`Fetched file for tracks ${track.audio.id}`);
+          logger.info(`${track.audio.id}: Fetched file for tracks`);
 
           archive.append(trackStream, { name: trackTitle });
-          logger.info(`Added track to zip file ${track.title}`);
+          logger.info(
+            `${track.audio.id}: Added track to zip file ${track.title}`
+          );
         } catch (e) {
-          logger.error(`File not found on MinIO: ${track.audio.id}, skipping`);
+          logger.error(`${track.audio.id}: File not found on MinIO skipping`);
         }
       }
     }

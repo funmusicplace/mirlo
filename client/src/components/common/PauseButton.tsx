@@ -5,7 +5,9 @@ import IconButton from "./IconButton";
 import { useGlobalStateContext } from "state/GlobalState";
 import { isEqualDurations } from "utils/tracks";
 
-export const PauseButton: React.FC = () => {
+export const PauseButton: React.FC<{ className?: string }> = ({
+  className,
+}) => {
   const { dispatch } = useGlobalStateContext();
 
   const onPause = React.useCallback(
@@ -23,15 +25,19 @@ export const PauseButton: React.FC = () => {
     <div>
       <IconButton
         onClick={onPause}
-        className={css`
-          font-size: 1.6rem;
-          margin-right: 0.25rem;
-          padding: 0.75rem 0.7rem 0.65rem 0.7rem !important;
-          border: solid 1.5px !important;
-          border-color: var(--mi-normal-foreground-color);
-          background-color: var(--mi-normal-foreground-color);
-          color: var(--mi-normal-background-color);
-        `}
+        className={
+          css`
+            font-size: 1.6rem;
+            margin-right: 0.25rem;
+            padding: 0.75rem 0.7rem 0.65rem 0.7rem !important;
+            border: solid 1.5px !important;
+            border-color: var(--mi-normal-foreground-color);
+            background-color: var(--mi-normal-foreground-color);
+            color: var(--mi-normal-background-color);
+          ` +
+          " " +
+          className
+        }
       >
         <TfiControlPause />
       </IconButton>

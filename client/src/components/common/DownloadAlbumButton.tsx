@@ -6,25 +6,25 @@ import { RiDownloadLine } from "react-icons/ri";
 import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
 import { useArtistContext } from "state/ArtistContext";
+import Modal from "./Modal";
+import Select from "./Select";
+
+const formats = ["flac", "wav", "opus", "320.mp3", "256.mp3", "128.mp3"];
 
 const DownloadAlbumButton: React.FC<{
   trackGroup: TrackGroup;
 }> = ({ trackGroup }) => {
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
-
+  const [chosenFormat, setChosenFormat] = React.useState(formats[0]);
+  const [isPopupOpen, setIsPopupOpen] = React.useState(false);
   const snackbar = useSnackbar();
   const [isDownloading, setIsDownloading] = React.useState(false);
   const { state } = useArtistContext();
-
-  if (!trackGroup || !state?.artist) {
-    return null;
-  }
-
-  const downloadAlbum = async () => {
+  const downloadAlbum = React.useCallback(async () => {
     try {
       setIsDownloading(true);
       await api.downloadFileDirectly(
-        `trackGroups/${trackGroup.id}/download`,
+        `trackGroups/${trackGroup.id}/download?format=${chosenFormat}`,
         `${trackGroup.title}.zip`
       );
     } catch (e) {
@@ -33,28 +33,52 @@ const DownloadAlbumButton: React.FC<{
     } finally {
       setIsDownloading(false);
     }
-  };
+  }, [chosenFormat, snackbar, t, trackGroup.id, trackGroup.title]);
+
+  if (!trackGroup || !state?.artist) {
+    return null;
+  }
 
   return (
-    <>
-      <>
-        <div>
-          <Button
-            compact
-            transparent
-            onlyIcon
-            className={css`
-              margin-top: 0rem;
-              font-size: 1.2rem;
-              background: transparent;
-            `}
-            isLoading={isDownloading}
-            startIcon={<RiDownloadLine />}
-            onClick={() => downloadAlbum()}
-          ></Button>
-        </div>
-      </>
-    </>
+    <div>
+      <Modal
+        title={t("download") ?? ""}
+        open={isPopupOpen}
+        size="small"
+        onClose={() => setIsPopupOpen(false)}
+      >
+        <p>What file type do you want to download?</p>
+        <Select
+          value={chosenFormat}
+          onChange={(e) => setChosenFormat(e.target.value)}
+          options={formats.map((format) => ({ value: format, label: format }))}
+        />
+        <Button
+          compact
+          className={css`
+            margin-top: 0.5rem;
+            font-size: 1.2rem;
+            background: transparent;
+          `}
+          isLoading={isDownloading}
+          onClick={() => downloadAlbum()}
+        >
+          Download
+        </Button>
+      </Modal>
+      <Button
+        compact
+        transparent
+        onlyIcon
+        className={css`
+          margin-top: 0rem;
+          font-size: 1.2rem;
+          background: transparent;
+        `}
+        startIcon={<RiDownloadLine />}
+        onClick={() => setIsPopupOpen(true)}
+      />
+    </div>
   );
 };
 

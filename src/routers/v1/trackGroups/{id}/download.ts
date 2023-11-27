@@ -5,7 +5,10 @@ import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import prisma from "../../../../../prisma/prisma";
 
 import { doesTrackGroupBelongToUser } from "../../../../utils/ownership";
-import { buildZipFileForPath } from "../../../../utils/trackGroup";
+import {
+  FormatOptions,
+  buildZipFileForPath,
+} from "../../../../utils/trackGroup";
 
 export default function () {
   const operations = {
@@ -14,7 +17,11 @@ export default function () {
 
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { id: trackGroupId }: { id?: string } = req.params;
-    const { email, token } = req.query as { email: string; token: string };
+    const { email, token, format } = req.query as {
+      format?: FormatOptions;
+      email: string;
+      token: string;
+    };
 
     try {
       const trackGroupInclude = {
@@ -144,7 +151,8 @@ export default function () {
         trackGroup.tracks as unknown as (Track & {
           audio: TrackAudio | null;
         })[],
-        trackGroup.id.toString()
+        trackGroup.id.toString(),
+        format
       );
 
       logger.info(`Put zip at ${zip}`);

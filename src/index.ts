@@ -132,8 +132,11 @@ initialize({
     console.error("inside error middleware", err.status, err, err.status);
     if (err instanceof MulterError) {
       res.status(400).json({ error: err.message });
+    } else if ((res.statusCode = 429)) {
+      res.json({ error: "Too many requests" });
+    } else {
+      res.status(err.status ?? 500).json({ error: err.errors });
     }
-    res.status(err.status ?? 500).json({ error: err.errors });
     next();
   },
 });
@@ -152,8 +155,8 @@ if (!isDev) {
   // Set a rate limiter on all auth endpoints to be only 5 requests a minute
   const authLimiter = rateLimit({
     windowMs: 60 * 1000, // 1 minute
-    limit: 50, // Limit each IP to 100 requests per `window`
-    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+    limit: 100, // Limit each IP to 100 requests per `window`
+    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers,
   });
 
   app.use("/auth", authLimiter, auth);
