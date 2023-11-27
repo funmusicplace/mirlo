@@ -109,7 +109,6 @@ const ArtistTrackGroup: React.FC<{
               }
               a:last-child {
                 font-size: var(--mi-font-size-xsmall);
-                font-weight: bold;
                 color: var(--mi-light-foreground-color);
               }
 
