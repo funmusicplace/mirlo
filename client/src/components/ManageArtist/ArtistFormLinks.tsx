@@ -10,6 +10,7 @@ import api from "services/api";
 import { useArtistContext } from "state/ArtistContext";
 import { useGlobalStateContext } from "state/GlobalState";
 import { useSnackbar } from "state/SnackbarContext";
+import { FaPen } from "react-icons/fa";
 
 interface FormData {
   linkArray: { url: string }[];
@@ -64,6 +65,8 @@ const ArtistFormLinks: React.FC<{ isManage: boolean }> = ({ isManage }) => {
       <div
         className={css`
           margin-bottom: 0.25rem;
+          display: flex;
+          align-items: center;
         `}
       >
         <div>
@@ -85,7 +88,12 @@ const ArtistFormLinks: React.FC<{ isManage: boolean }> = ({ isManage }) => {
           ))}
         </div>
         {isManage && (
-          <Button compact onClick={() => setIsEditing(true)}>
+          <Button
+            compact
+            transparent
+            onClick={() => setIsEditing(true)}
+            startIcon={<FaPen />}
+          >
             {t("editLinks")}
           </Button>
         )}

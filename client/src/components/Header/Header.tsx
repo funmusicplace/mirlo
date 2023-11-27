@@ -29,11 +29,13 @@ const Header = () => {
       className={css`
         position: fixed;
         width: 100%;
-        z-index: 999999;
+        z-index: 999;
+        background-color: #f5f0f0;
+        ${trackGroupId ? "background-color: transparent;" : ""}
+        ${artistBanner ? "background-color: transparent;" : ""}
 
         @media screen and (max-width: ${bp.medium}px) {
           position: sticky;
-          ${artistBanner ? "background-color: transparent;" : ""}
           ${artistBanner
             ? "top: calc(var(--header-cover-sticky-height) - 24.2vw);"
             : ""}
@@ -51,10 +53,20 @@ const Header = () => {
 
           --header-cover-sticky-height: 55px;
 
-          z-index: 999999;
+          z-index: 999;
 
           width: auto;
           min-height: auto;
+        }
+
+        @media (prefers-color-scheme: dark) {
+          background-color: var(--mi-black);
+          ${trackGroupId ? "background-color: transparent;" : ""}
+          ${artistBanner ? "background-color: transparent;" : ""}
+
+          @media screen and (max-width: ${bp.medium}px) {
+            border-bottom: 1px solid transparent;
+          }
         }
       `}
     >
@@ -101,15 +113,6 @@ const Header = () => {
             border-bottom: 1px solid transparent;
             position: sticky;
             top: 0;
-          }
-
-          @media (prefers-color-scheme: dark) {
-            background-color: transparent;
-
-            @media screen and (max-width: ${bp.medium}px) {
-              ${artistBanner ? "background-color: transparent;" : ""}
-              border-bottom: 1px solid transparent;
-            }
           }
         `}
       >

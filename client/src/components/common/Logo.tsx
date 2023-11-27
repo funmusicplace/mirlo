@@ -9,6 +9,7 @@ export const Logo: React.FC<{ noWordmark?: boolean }> = ({
       xmlns="http://www.w3.org/2000/svg"
       width="119"
       height="40"
+      viewBox="0 0 119 40"
       className={css`
         fill: var(--mi-black);
         @media (prefers-color-scheme: dark) {

@@ -66,6 +66,8 @@ const ArtistTrackGroup: React.FC<{
 
             button {
               padding: 0.25rem 0.25rem;
+              height: 1.4rem;
+              width: 1.4rem;
             }
           }
         }
@@ -107,7 +109,6 @@ const ArtistTrackGroup: React.FC<{
               }
               a:last-child {
                 font-size: var(--mi-font-size-xsmall);
-                font-weight: bold;
                 color: var(--mi-light-foreground-color);
               }
 
