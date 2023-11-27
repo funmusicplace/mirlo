@@ -9,6 +9,7 @@ import api from "services/api";
 import { useArtistContext } from "state/ArtistContext";
 import { useGlobalStateContext } from "state/GlobalState";
 import { useSnackbar } from "state/SnackbarContext";
+import { FaPen } from "react-icons/fa";
 
 interface FormData {
   location: string;
@@ -52,7 +53,12 @@ const ArtistFormLocation: React.FC<{ isManage: boolean }> = ({ isManage }) => {
 
   if (!isEditing) {
     return (
-      <div>
+      <div
+        className={css`
+          display: flex;
+          align-items: center;
+        `}
+      >
         {artist?.location && (
           <div
             className={css`
@@ -64,7 +70,15 @@ const ArtistFormLocation: React.FC<{ isManage: boolean }> = ({ isManage }) => {
           </div>
         )}
         {isManage && (
-          <Button compact onClick={() => setIsEditing(true)}>
+          <Button
+            transparent
+            compact
+            onClick={() => setIsEditing(true)}
+            startIcon={<FaPen />}
+            className={css`
+              margin-left: 0.5rem;
+            `}
+          >
             {t("editLocation")}
           </Button>
         )}
