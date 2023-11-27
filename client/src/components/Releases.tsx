@@ -1,14 +1,20 @@
 import React from "react";
 import ArtistTrackGroup from "./Artist/ArtistTrackGroup";
 import TrackgroupGrid from "components/common/TrackgroupGrid";
+import { useGlobalStateContext } from "state/GlobalState";
 import api from "services/api";
 import { css } from "@emotion/css";
 import { useTranslation } from "react-i18next";
 import { bp } from "../constants";
 
 const Releases = () => {
+  const {
+    state: { user },
+  } = useGlobalStateContext();
   const { t } = useTranslation("translation", { keyPrefix: "releases" });
   const [trackGroups, setTrackGroups] = React.useState<TrackGroup[]>([]);
+
+  const userId = user?.id;
 
   React.useEffect(() => {
     const callback = async () => {
@@ -38,10 +44,10 @@ const Releases = () => {
           @media screen and (min-width: ${bp.medium}px) {
             position: sticky;
             top: 55px;
+            ${!userId ? "top: 0; padding-top: .5rem;" : ""}
             background-color: var(--mi-normal-background-color);
             z-index: +1;
-
-            border-bottom: solid 1px white;
+            border-bottom: solid 1px var(--mi-lighter-foreground-color);
           }
         `}
       >

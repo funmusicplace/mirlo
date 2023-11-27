@@ -219,7 +219,7 @@ function Home() {
                 top: 55px;
                 background-color: var(--mi-normal-background-color);
                 z-index: +1;
-                border-bottom: solid 1px white;
+                border-bottom: solid 1px var(--mi-lighter-foreground-color);
               }
             `}
           >
