@@ -25,7 +25,7 @@ const H1 = styled.h1<{ artistAvatar: boolean }>`
     padding-bottom: 0rem;
     ${(props) =>
       !props.artistAvatar
-        ? "font-size: 1.5rem !important; line-height: 2rem;"
+        ? "font-size: 1.3rem !important; line-height: 2rem;"
         : ""}
   }
 `;
