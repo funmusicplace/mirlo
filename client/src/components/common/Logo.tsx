@@ -7,7 +7,7 @@ export const Logo: React.FC<{ noWordmark?: boolean }> = ({
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width="100"
+      width="119"
       height="40"
       viewBox="0 0 119 40"
       className={css`
