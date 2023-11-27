@@ -42,7 +42,7 @@ const Post: React.FC = () => {
           justify-content: space-between;
         `}
       >
-        <h3>{post.title}</h3>
+        <h1>{post.title}</h1>
         {ownedByUser && (
           <Link to={`/manage/artists/${post.artist?.id}`}>
             <Button compact startIcon={<FaPen />}>
@@ -59,7 +59,12 @@ const Post: React.FC = () => {
           </Link>
         </em>
       )}
-      <MarkdownContent content={post.content} />
+      <MarkdownContent
+        content={post.content}
+        className={css`
+          padding-top: 1rem;
+        `}
+      />
     </div>
   );
 };
