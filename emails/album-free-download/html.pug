@@ -19,9 +19,12 @@ html
       tr 
         td #{trackGroup.title}
         td 
-          a(href!=`${host}/v1/trackGroups/${trackGroup.id}/download?token=${token}&email=${email}`) #{trackGroup.artist.name}
-
-    p 
+          a(href!=`${host}/v1/trackGroups/${trackGroup.id}/download?token=${token}&email=${email}&format=flac`) flac
+          a(href!=`${host}/v1/trackGroups/${trackGroup.id}/download?token=${token}&email=${email}&format=wav`) wav
+          a(href!=`${host}/v1/trackGroups/${trackGroup.id}/download?token=${token}&email=${email}&format=opus`) opus
+          a(href!=`${host}/v1/trackGroups/${trackGroup.id}/download?token=${token}&email=${email}&format=320.mp3`) mp3@320
+          a(href!=`${host}/v1/trackGroups/${trackGroup.id}/download?token=${token}&email=${email}&format=256.mp3`) mp3@256
+          a(href!=`${host}/v1/trackGroups/${trackGroup.id}/download?token=${token}&email=${email}&format=128.mp3`) mp3@128
     p 
       | Consider supporting 
       a(href!=`${client}/${trackGroup.artist.urlSlug}`) #{trackGroup.artist.name}
