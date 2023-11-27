@@ -212,6 +212,15 @@ function Home() {
               @media screen and (max-width: ${bp.medium}px) {
                 margin-bottom: 0.5rem;
               }
+              @media screen and (min-width: ${bp.medium}px) {
+                position: sticky;
+                padding-bottom: 1rem;
+                margin-bottom: 1rem;
+                top: 55px;
+                background-color: var(--mi-normal-background-color);
+                z-index: +1;
+                border-bottom: solid 1px white;
+              }
             `}
           >
             {t("latestCommunityPost")}
