@@ -180,21 +180,21 @@ const TrackRow: React.FC<{
       <td align="right">
         <Button
           compact
+          iconOnly
           transparent
           onClick={(e) => {
             e.stopPropagation();
             navigator.clipboard.writeText(widgetUrl(track.id));
             snackbar("Copied track url", { type: "success" });
           }}
+          startIcon={<FiLink />}
           className={css`
             :hover {
               background: transparent !important;
               opacity: 0.6;
             }
           `}
-        >
-          <FiLink />
-        </Button>
+        ></Button>
       </td>
     </tr>
   );
