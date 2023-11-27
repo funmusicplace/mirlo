@@ -38,7 +38,9 @@ const Content = styled.div<ContentProps>`
   border: 1px solid var(--mi-darken-background-color);
   display: flex;
   flex-direction: column;
-  width: ${(props) => (props.size === "small" ? "40%" : "80%")};
+  width: ${(props) => (props.size === "small" ? "30%" : "80%")};
+  min-width: 400px;
+
   animation: 300ms ease-out forwards slide-up;
   border-radius: var(--mi-border-radius);
 
@@ -46,7 +48,7 @@ const Content = styled.div<ContentProps>`
     display: inline-block;
   }
 
-  @media (max-width: ${bp.medium}px) {
+  @media (max-width: ${bp.small}px) {
     width: 100%;
     padding: 1rem;
   }
