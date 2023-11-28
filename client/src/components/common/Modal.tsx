@@ -39,7 +39,6 @@ const Content = styled.div<ContentProps>`
   display: flex;
   flex-direction: column;
   width: ${(props) => (props.size === "small" ? "30%" : "80%")};
-  min-width: 400px;
 
   animation: 300ms ease-out forwards slide-up;
   border-radius: var(--mi-border-radius);
