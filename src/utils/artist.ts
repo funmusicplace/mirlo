@@ -180,6 +180,9 @@ export const singleInclude: Prisma.ArtistInclude<DefaultArgs> = {
       published: true,
       tracks: { some: { audio: { uploadState: "SUCCESS" } } },
     },
+    orderBy: {
+      releaseDate: "desc",
+    },
     include: {
       tracks: {
         where: { deletedAt: null },
