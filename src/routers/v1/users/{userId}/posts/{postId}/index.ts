@@ -2,6 +2,8 @@ import { NextFunction, Request, Response } from "express";
 import { userAuthenticated } from "../../../../../../auth/passport";
 import prisma from "../../../../../../../prisma/prisma";
 import { doesPostBelongToUser } from "../../../../../../utils/post";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import { pick } from "lodash";
 
 export default function () {
   const operations = {
@@ -10,27 +12,66 @@ export default function () {
     GET: [userAuthenticated, doesPostBelongToUser, GET],
   };
 
-  async function PUT(req: Request, res: Response) {
+  async function PUT(req: Request, res: Response, next: NextFunction) {
     const { postId } = req.params;
+    try {
+      const {
+        title,
+        artistId,
+        content,
+        isPublic,
+        publishedAt,
+        minimumSubscriptionTierId,
+      } = req.body;
 
-    const post = await prisma.post.update({
-      data: req.body,
-      where: {
-        id: Number(postId),
-      },
-    });
-    res.json({ result: post });
+      if (minimumSubscriptionTierId !== undefined) {
+        const validTier = await prisma.artistSubscriptionTier.findFirst({
+          where: {
+            artistId,
+            id: minimumSubscriptionTierId,
+          },
+        });
+
+        if (!validTier) {
+          return res.status(400).json({
+            error: "That subscription tier isn't associated with the artist",
+          });
+        }
+      }
+
+      console.log("valid", req.body);
+      const post = await prisma.post.update({
+        data: {
+          title,
+          artistId,
+          content,
+          isPublic,
+          publishedAt,
+          minimumSubscriptionTierId,
+        },
+        where: {
+          id: Number(postId),
+        },
+      });
+      res.json({ result: post });
+    } catch (e) {
+      next(e);
+    }
   }
 
   // FIXME: only allow delete of posts belonging to user
-  async function DELETE(req: Request, res: Response) {
+  async function DELETE(req: Request, res: Response, next: NextFunction) {
     const { userId, postId } = req.params;
-    await prisma.post.delete({
-      where: {
-        id: Number(postId),
-      },
-    });
-    res.json({ message: "Success" });
+    try {
+      await prisma.post.delete({
+        where: {
+          id: Number(postId),
+        },
+      });
+      res.json({ message: "Success" });
+    } catch (e) {
+      next(e);
+    }
   }
 
   DELETE.apiDoc = {

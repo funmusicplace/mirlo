@@ -20,8 +20,6 @@ const {
   MINIO_ROOT_USER = "",
   MINIO_ROOT_PASSWORD = "",
   MINIO_API_PORT = 9000,
-  NODE_ENV,
-  MEDIA_LOCATION_DOWNLOAD_CACHE = "",
 } = process.env;
 
 // Instantiate the minio client with the endpoint
@@ -39,12 +37,11 @@ export const createBucketIfNotExists = async (
   bucket: string,
   logger?: Logger
 ) => {
-  logger?.info(`NODE_ENV ${NODE_ENV}`);
-  logger?.info("Checking if a bucket exists");
+  logger?.info("minio: Checking if a bucket exists");
   const exists = await minioClient.bucketExists(bucket);
 
   if (!exists) {
-    logger?.info("Need to create bucket");
+    logger?.info("minio: Need to create bucket");
     await minioClient.makeBucket(bucket);
   }
 };

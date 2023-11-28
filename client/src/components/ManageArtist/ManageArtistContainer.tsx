@@ -1,7 +1,7 @@
 import { css } from "@emotion/css";
 import React from "react";
 import { bp } from "../../constants";
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import ArtistHeaderSection from "../common/ArtistHeaderSection";
 import { useGlobalStateContext } from "state/GlobalState";
 import { useTranslation } from "react-i18next";
@@ -56,12 +56,26 @@ export const ArtistPageWrapper: React.FC<{
 
 const ManageArtist: React.FC<{}> = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
-
+  const navigate = useNavigate();
   const {
-    state: { artist },
+    state: { user },
+  } = useGlobalStateContext();
+  const {
+    state: { artist, isLoading },
   } = useArtistContext();
 
   const artistBanner = artist?.banner?.sizes;
+
+  React.useEffect(() => {
+    if (
+      !isLoading &&
+      (artist === undefined ||
+        user === undefined ||
+        artist?.userId !== user?.id)
+    ) {
+      navigate("/manage");
+    }
+  }, [artist, user, navigate, isLoading]);
 
   if (!artist) {
     return null;

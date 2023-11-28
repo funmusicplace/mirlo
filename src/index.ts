@@ -17,9 +17,9 @@ import { imageQueue } from "./utils/processImages";
 import { audioQueue } from "./utils/processTrackAudio";
 import { serveStatic } from "./static";
 import prisma from "../prisma/prisma";
-import { MulterError } from "multer";
 import { rateLimit } from "express-rate-limit";
 import { corsCheck } from "./auth/cors";
+import errorHandler from "./utils/error";
 
 dotenv.config();
 
@@ -128,17 +128,7 @@ initialize({
     path: "/v1/" + r,
     module: require(`./routers/v1/${r}`),
   })),
-  errorMiddleware: (err, req, res, next) => {
-    console.error("inside error middleware", err.status, err, err.status);
-    if (err instanceof MulterError) {
-      res.status(400).json({ error: err.message });
-    } else if ((res.statusCode = 429)) {
-      res.json({ error: "Too many requests" });
-    } else {
-      res.status(err.status ?? 500).json({ error: err.errors });
-    }
-    next();
-  },
+  errorMiddleware: errorHandler,
 });
 
 app.use(

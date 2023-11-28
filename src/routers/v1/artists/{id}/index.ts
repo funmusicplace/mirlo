@@ -1,8 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { Post, User } from "@prisma/client";
-
-import trackGroupProcessor from "../../../../utils/trackGroup";
-import postProcessor from "../../../../utils/post";
+import { User } from "@prisma/client";
 
 import prisma from "../../../../../prisma/prisma";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
@@ -12,11 +9,6 @@ import {
   processSingleArtist,
   singleInclude,
 } from "../../../../utils/artist";
-import {
-  finalArtistAvatarBucket,
-  finalArtistBannerBucket,
-} from "../../../../utils/minio";
-import { convertURLArrayToSizes } from "../../../../utils/images";
 
 export default function () {
   const operations = {

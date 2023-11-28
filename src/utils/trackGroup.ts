@@ -59,11 +59,12 @@ export const findTrackGroupIdForSlug = async (
       });
       id = `${trackGroup?.id ?? id}`;
     } else {
-      logger.info("findTrackGroupIdForSlug: returning undefind");
+      logger.info(
+        `findTrackGroupIdForSlug: returning undefined for id: ${id} artistId: ${artistId}`
+      );
       return undefined;
     }
   }
-  logger.info(`findTrackGroupIdForSlug: original: ${id}; returning ${id}`);
 
   return id;
 };
