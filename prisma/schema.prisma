@@ -39,6 +39,7 @@ model User {
   stripeAccountId                     String?
   receiveMailingList                  Boolean                  @default(false)
   UserTrackGroupWishlist              UserTrackGroupWishlist[]
+  plays                               TrackPlay[]
 }
 
 model Post {
@@ -226,6 +227,7 @@ model Track {
   isPreview    Boolean       @default(true)
   trackArtists TrackArtist[]
   metadata     Json?
+  plays        TrackPlay[]
 }
 
 model TrackArtist {
@@ -259,4 +261,14 @@ enum UploadState {
   SUCCESS
   ERROR
   STARTED
+}
+
+model TrackPlay {
+  id        String   @id @default(uuid()) @db.Uuid
+  trackId   Int
+  track     Track    @relation(fields: [trackId], references: [id])
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  owned     Boolean  @default(false)
 }
