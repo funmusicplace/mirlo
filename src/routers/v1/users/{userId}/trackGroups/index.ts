@@ -24,6 +24,9 @@ export default function () {
     }
     const results = await prisma.trackGroup.findMany({
       where,
+      orderBy: {
+        releaseDate: "desc",
+      },
       include: {
         tracks: {
           where: {

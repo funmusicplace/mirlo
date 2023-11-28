@@ -55,6 +55,7 @@ export const createTrackGroup = async (
       urlSlug: data?.urlSlug ?? "test-artist",
       artistId: artistId,
       published: data?.published ?? true,
+      releaseDate: data?.releaseDate,
       tracks: {
         create: data?.tracks ?? [
           {
