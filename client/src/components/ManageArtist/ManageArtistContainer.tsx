@@ -61,20 +61,21 @@ const ManageArtist: React.FC<{}> = () => {
     state: { user },
   } = useGlobalStateContext();
   const {
-    state: { artist },
+    state: { artist, isLoading },
   } = useArtistContext();
 
   const artistBanner = artist?.banner?.sizes;
 
   React.useEffect(() => {
     if (
-      artist === undefined ||
-      user === undefined ||
-      artist?.userId !== user?.id
+      !isLoading &&
+      (artist === undefined ||
+        user === undefined ||
+        artist?.userId !== user?.id)
     ) {
       navigate("/manage");
     }
-  }, [artist, user, navigate]);
+  }, [artist, user, navigate, isLoading]);
 
   if (!artist) {
     return null;
