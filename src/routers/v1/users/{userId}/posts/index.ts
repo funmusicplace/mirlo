@@ -1,5 +1,5 @@
 import { Prisma, User } from "@prisma/client";
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import {
   contentBelongsToLoggedInUserArtist,
   userAuthenticated,
@@ -13,7 +13,7 @@ export default function () {
     GET: [userAuthenticated, GET],
   };
 
-  async function POST(req: Request, res: Response) {
+  async function POST(req: Request, res: Response, next: NextFunction) {
     const { title, content, artistId, isPublic, minimumSubscriptionTierId } =
       req.body as unknown as {
         title: string;
@@ -50,9 +50,7 @@ export default function () {
           .json({ error: "That tier doesn't belong to the current artist" });
       }
     } catch (e) {
-      console.error(`POST users/${user?.id}/posts`, e);
-      res.status(500);
-      res.json({ error: e });
+      next(e);
     }
   }
   // FIXME: document POST
