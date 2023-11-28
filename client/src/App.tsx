@@ -147,6 +147,7 @@ function App() {
                       padding: var(--mi-side-paddings-xsmall);
                       padding-top: 0.5rem;
                       padding-bottom: 0.5rem;
+                      width: 100%;
                     }
                   }
                 `}

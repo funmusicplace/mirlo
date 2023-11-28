@@ -133,7 +133,7 @@ const TrackRow: React.FC<{
             padding: 0.1rem;
             margin-bottom: 0rem;
             justify-content: space-between;
-            align-items: flex-end;
+            align-items: center;
 
             &:hover {
               cursor: pointer;
@@ -167,6 +167,7 @@ const TrackRow: React.FC<{
               @media screen and (max-width: ${bp.medium}px) {
                 font-size: 0.7rem;
                 font-weight: bold;
+                margin-left: 0.2rem;
                 td {
                   padding: 0.15rem 0.3rem;
                 }
@@ -180,7 +181,6 @@ const TrackRow: React.FC<{
       <td align="right">
         <Button
           compact
-          iconOnly
           transparent
           onClick={(e) => {
             e.stopPropagation();
@@ -189,6 +189,9 @@ const TrackRow: React.FC<{
           }}
           startIcon={<FiLink />}
           className={css`
+            .startIcon {
+              padding-left: 1rem;
+            }
             :hover {
               background: transparent !important;
               opacity: 0.6;
