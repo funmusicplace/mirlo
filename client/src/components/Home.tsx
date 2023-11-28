@@ -298,7 +298,7 @@ function Home() {
                       <h4
                         className={css`
                           padding-bottom: 0.3rem;
-                          text-align: center;
+                          text-align: left;
                         `}
                       >
                         <Link
