@@ -4,11 +4,6 @@ import { Request, Response } from "express";
 import { userAuthenticated } from "../../../../auth/passport";
 import prisma from "../../../../../prisma/prisma";
 
-const { API_DOMAIN } = process.env;
-
-import stripe, {
-  createSubscriptionStripeProduct,
-} from "../../../../utils/stripe";
 import { subscribeUserToArtist } from "../../../../utils/artist";
 
 type Params = {

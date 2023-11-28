@@ -200,6 +200,7 @@
     "dropFilesHere": "Drop files here",
     "or": "or",
     "replaceTrackAudio": "Replace audio",
+    "publishSuccess": "Publish success",
     "stillProcessing": "Still processing audio",
     "thereWasAnError": "There was an error uploading this track",
     "doneUploading": "Uploaded all tracks, we still need to process them on our servers, but you can now safely close the browser",
