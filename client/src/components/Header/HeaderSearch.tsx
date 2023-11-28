@@ -54,6 +54,8 @@ const HeaderSearch: React.FC = () => {
         value={searchValue}
         placeholder="Search artists"
         data-lpignore="true"
+        id="search"
+        type="search"
         onChange={onChange}
         className={css`
           margin-bottom: 0 !important;
