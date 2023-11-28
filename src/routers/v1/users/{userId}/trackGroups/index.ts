@@ -17,10 +17,22 @@ export default function () {
   // FIXME: only get trackgroups belonging to artists belonging to a user
   async function GET(req: Request, res: Response) {
     const { artistId } = req.query;
-
+    const user = req.user as User;
     let where: Prisma.TrackGroupWhereInput = {};
     if (artistId) {
       where.artistId = Number(artistId);
+    } else {
+      const artists = await prisma.artist.findMany({
+        where: {
+          userId: user.id,
+        },
+        select: {
+          id: true,
+        },
+      });
+      where.artistId = {
+        in: artists.map((a) => a.id),
+      };
     }
     const results = await prisma.trackGroup.findMany({
       where,
@@ -110,7 +122,7 @@ export default function () {
           published,
           minPrice,
           currency: userForCurrency?.country ?? "USD",
-          releaseDate: new Date(releaseDate),
+          releaseDate: releaseDate ? new Date(releaseDate) : undefined,
           adminEnabled: true,
           urlSlug: slugify(title).toLowerCase(),
         },

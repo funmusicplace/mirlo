@@ -100,9 +100,4 @@ describe("trackGroups", () => {
       assert(response.statusCode === 200);
     });
   });
-
-  describe("POST", () => {
-    it.skip("should POST an album successfully", () => {});
-    it.skip("should not POST an album when artistId doesn't belong to user", () => {});
-  });
 });

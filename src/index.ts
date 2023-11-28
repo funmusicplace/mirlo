@@ -132,7 +132,7 @@ initialize({
     console.error("inside error middleware", err.status, err, err.status);
     if (err instanceof MulterError) {
       res.status(400).json({ error: err.message });
-    } else if ((res.statusCode = 429)) {
+    } else if (res.statusCode === 429) {
       res.json({ error: "Too many requests" });
     } else {
       res.status(err.status ?? 500).json({ error: err.errors });
