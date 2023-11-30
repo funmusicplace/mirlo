@@ -98,6 +98,17 @@ export const subscribeUserToArtist = async (
       });
     }
   }
+
+  const subscriptions = await prisma.artistUserSubscription.findMany({
+    where: {
+      userId: user?.id,
+      artistSubscriptionTier: {
+        artistId: artist.id,
+      },
+    },
+  });
+
+  return subscriptions;
 };
 
 export const deleteArtist = async (userId: number, artistId: number) => {

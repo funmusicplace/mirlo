@@ -35,10 +35,10 @@ export default function () {
       });
 
       if (artist) {
-        await subscribeUserToArtist(artist, user);
+        const results = await subscribeUserToArtist(artist, user);
 
         res.status(200).json({
-          message: "success",
+          results,
         });
       } else {
         res.status(404).json({
