@@ -7,6 +7,7 @@ import { Request, Response } from "express";
 import { randomUUID } from "crypto";
 import { Session } from "inspector";
 import { registerPurchase } from "./trackGroup";
+import { registerSubscription } from "./subscriptionTier";
 
 const { STRIPE_KEY } = process.env;
 
@@ -167,37 +168,12 @@ const handleSubscription = async (
   session: Stripe.Checkout.Session
 ) => {
   try {
-    const artistUserSubscription = await prisma.artistUserSubscription.upsert({
-      create: {
-        artistSubscriptionTierId: Number(tierId),
-        userId: Number(userId),
-        amount: session.amount_total ?? 0,
-        currency: session.currency ?? "USD",
-        deletedAt: null,
-        stripeSubscriptionKey: session.subscription as string, // FIXME: should this be session id? Maybe subscriptionId?
-      },
-      update: {
-        artistSubscriptionTierId: Number(tierId),
-        userId: Number(userId),
-        amount: session.amount_total ?? 0,
-        currency: session.currency ?? "USD",
-        deletedAt: null, // Undelete
-        stripeSubscriptionKey: session.subscription as string, // FIXME: should this be session id? Maybe subscriptionId?
-      },
-      where: {
-        userId_artistSubscriptionTierId: {
-          userId: Number(userId),
-          artistSubscriptionTierId: Number(tierId),
-        },
-      },
-      select: {
-        user: true,
-        artistSubscriptionTier: {
-          select: {
-            artist: true,
-          },
-        },
-      },
+    const artistUserSubscription = await registerSubscription({
+      userId: Number(userId),
+      tierId: Number(tierId),
+      amount: session.amount_total ?? 0,
+      currency: session.currency ?? "USD",
+      paymentProcessorKey: session.subscription as string, // FIXME: should this be session id? Maybe subscriptionId?
     });
 
     if (artistUserSubscription) {
