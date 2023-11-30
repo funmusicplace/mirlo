@@ -2,8 +2,6 @@ import { NextFunction, Request, Response } from "express";
 import { userAuthenticated } from "../../../../../../auth/passport";
 import prisma from "../../../../../../../prisma/prisma";
 import { doesPostBelongToUser } from "../../../../../../utils/post";
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
-import { pick } from "lodash";
 
 export default function () {
   const operations = {

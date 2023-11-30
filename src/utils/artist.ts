@@ -98,6 +98,17 @@ export const subscribeUserToArtist = async (
       });
     }
   }
+
+  const subscriptions = await prisma.artistUserSubscription.findMany({
+    where: {
+      userId: user?.id,
+      artistSubscriptionTier: {
+        artistId: artist.id,
+      },
+    },
+  });
+
+  return subscriptions;
 };
 
 export const deleteArtist = async (userId: number, artistId: number) => {
@@ -179,6 +190,9 @@ export const singleInclude: Prisma.ArtistInclude<DefaultArgs> = {
     where: {
       published: true,
       tracks: { some: { audio: { uploadState: "SUCCESS" } } },
+    },
+    orderBy: {
+      releaseDate: "desc",
     },
     include: {
       tracks: {

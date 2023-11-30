@@ -164,7 +164,7 @@ export const ArtistForm: React.FC<{
             ]);
           }
           await reload();
-          await refresh();
+          await refresh?.();
           if (!existingId) {
             onClose();
           }

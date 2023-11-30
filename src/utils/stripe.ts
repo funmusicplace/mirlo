@@ -6,6 +6,8 @@ import sendMail from "../jobs/send-mail";
 import { Request, Response } from "express";
 import { randomUUID } from "crypto";
 import { Session } from "inspector";
+import { registerPurchase } from "./trackGroup";
+import { registerSubscription } from "./subscriptionTier";
 
 const { STRIPE_KEY } = process.env;
 
@@ -91,38 +93,13 @@ const handleTrackGroupPurhcase = async (
   newUser: boolean
 ) => {
   try {
-    const token = randomUUID();
-    let purchase = await prisma.userTrackGroupPurchase.findFirst({
-      where: {
-        userId: Number(userId),
-        trackGroupId: Number(trackGroupId),
-      },
+    const purchase = await registerPurchase({
+      userId: Number(userId),
+      trackGroupId: Number(trackGroupId),
+      pricePaid: session.amount_total ?? 0,
+      currencyPaid: session.currency ?? "USD",
+      paymentProcessorKey: session.id,
     });
-    if (purchase) {
-      await prisma.userTrackGroupPurchase.update({
-        where: {
-          userId_trackGroupId: {
-            userId: Number(userId),
-            trackGroupId: Number(trackGroupId),
-          },
-        },
-        data: {
-          singleDownloadToken: token,
-        },
-      });
-    }
-    if (!purchase) {
-      purchase = await prisma.userTrackGroupPurchase.create({
-        data: {
-          userId: Number(userId),
-          trackGroupId: Number(trackGroupId),
-          pricePaid: session.amount_total ?? 0,
-          currencyPaid: session.currency ?? "USD",
-          stripeSessionKey: session.id,
-          singleDownloadToken: token,
-        },
-      });
-    }
 
     const user = await prisma.user.findFirst({
       where: {
@@ -138,6 +115,7 @@ const handleTrackGroupPurhcase = async (
         artist: {
           include: {
             subscriptionTiers: true,
+            user: true,
           },
         },
       },
@@ -153,10 +131,28 @@ const handleTrackGroupPurhcase = async (
           locals: {
             trackGroup,
             purchase,
-            token,
+            token: purchase.singleDownloadToken,
             email: user.email,
             client: process.env.REACT_APP_CLIENT_DOMAIN,
             host: process.env.API_DOMAIN,
+          },
+        },
+      });
+
+      const pricePaid = purchase.pricePaid / 100;
+
+      await sendMail({
+        data: {
+          template: "album-purchase-artist-notification",
+          message: {
+            to: trackGroup.artist.user.email,
+          },
+          locals: {
+            trackGroup,
+            purchase,
+            pricePaid,
+            platformCut: ((trackGroup.platformPercent ?? 5) * pricePaid) / 100,
+            email: user.email,
           },
         },
       });
@@ -172,37 +168,12 @@ const handleSubscription = async (
   session: Stripe.Checkout.Session
 ) => {
   try {
-    const artistUserSubscription = await prisma.artistUserSubscription.upsert({
-      create: {
-        artistSubscriptionTierId: Number(tierId),
-        userId: Number(userId),
-        amount: session.amount_total ?? 0,
-        currency: session.currency ?? "USD",
-        deletedAt: null,
-        stripeSubscriptionKey: session.subscription as string, // FIXME: should this be session id? Maybe subscriptionId?
-      },
-      update: {
-        artistSubscriptionTierId: Number(tierId),
-        userId: Number(userId),
-        amount: session.amount_total ?? 0,
-        currency: session.currency ?? "USD",
-        deletedAt: null, // Undelete
-        stripeSubscriptionKey: session.subscription as string, // FIXME: should this be session id? Maybe subscriptionId?
-      },
-      where: {
-        userId_artistSubscriptionTierId: {
-          userId: Number(userId),
-          artistSubscriptionTierId: Number(tierId),
-        },
-      },
-      select: {
-        user: true,
-        artistSubscriptionTier: {
-          select: {
-            artist: true,
-          },
-        },
-      },
+    const artistUserSubscription = await registerSubscription({
+      userId: Number(userId),
+      tierId: Number(tierId),
+      amount: session.amount_total ?? 0,
+      currency: session.currency ?? "USD",
+      paymentProcessorKey: session.subscription as string, // FIXME: should this be session id? Maybe subscriptionId?
     });
 
     if (artistUserSubscription) {

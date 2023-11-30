@@ -11,6 +11,7 @@ export const MetaCard: React.FC<{
       <title>Mirlo: {title}</title>
       <meta name="description" content={title} />
       <meta property="og:title" content={title} />
+      <meta property="og:url" content={window.location.pathname} />
       <meta property="og:description" content={description} />
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={description} />
@@ -27,6 +28,12 @@ export const MetaCard: React.FC<{
       )}
       {player && (
         <>
+          <meta property="og:type" content="song" />
+          <meta property="og:video" content={player} />
+          <meta property="og:video:secure_url" content={player} />
+          <meta property="og:video:type" content="text/html" />
+          <meta property="og:video:height" content="600" />
+          <meta property="og:video:width" content=" 162" />
           <meta property="twitter:player" content={player} />
           <meta property="twitter:player:width" content="600" />
           <meta property="twitter:player:width" content="162" />

@@ -7,6 +7,7 @@ import { logger } from "../logger";
 import fs, { promises as fsPromises } from "fs";
 import archiver from "archiver";
 import { deleteTrack } from "./tracks";
+import { randomUUID } from "crypto";
 
 const { MEDIA_LOCATION_DOWNLOAD_CACHE = "" } = process.env;
 /**
@@ -183,3 +184,52 @@ export async function buildZipFileForPath(
     archive.finalize();
   });
 }
+
+export const registerPurchase = async ({
+  userId,
+  trackGroupId,
+  pricePaid,
+  currencyPaid,
+  paymentProcessorKey,
+}: {
+  userId: number;
+  pricePaid: number;
+  currencyPaid: string;
+  paymentProcessorKey: string;
+  trackGroupId: number;
+}) => {
+  const token = randomUUID();
+
+  let purchase = await prisma.userTrackGroupPurchase.findFirst({
+    where: {
+      userId: Number(userId),
+      trackGroupId: Number(trackGroupId),
+    },
+  });
+  if (purchase) {
+    await prisma.userTrackGroupPurchase.update({
+      where: {
+        userId_trackGroupId: {
+          userId: Number(userId),
+          trackGroupId: Number(trackGroupId),
+        },
+      },
+      data: {
+        singleDownloadToken: token,
+      },
+    });
+  }
+  if (!purchase) {
+    purchase = await prisma.userTrackGroupPurchase.create({
+      data: {
+        userId: Number(userId),
+        trackGroupId: Number(trackGroupId),
+        pricePaid,
+        currencyPaid,
+        stripeSessionKey: paymentProcessorKey,
+        singleDownloadToken: token,
+      },
+    });
+  }
+  return purchase;
+};

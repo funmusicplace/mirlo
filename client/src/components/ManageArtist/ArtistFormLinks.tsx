@@ -70,22 +70,30 @@ const ArtistFormLinks: React.FC<{ isManage: boolean }> = ({ isManage }) => {
         `}
       >
         <div>
-          {artist?.links?.map((l) => (
-            <a
-              href={l}
-              className={css`
-                display: inline-flex;
-                align-items: center;
-                margin-right: 0.75rem;
+          {artist?.links?.map((l) => {
+            let url;
+            try {
+              url = new URL(l).origin.replace(/https?:\/\//, "");
+            } catch (e) {
+              url = l.split("/")[0];
+            }
+            return (
+              <a
+                href={l}
+                className={css`
+                  display: inline-flex;
+                  align-items: center;
+                  margin-right: 0.75rem;
 
-                > svg {
-                  margin-right: 0.5rem;
-                }
-              `}
-            >
-              <LinkIconDisplay url={l} /> {l.replace(/https?:\/\//, "")}
-            </a>
-          ))}
+                  > svg {
+                    margin-right: 0.5rem;
+                  }
+                `}
+              >
+                <LinkIconDisplay url={l} /> {url}
+              </a>
+            );
+          })}
         </div>
         {isManage && (
           <Button

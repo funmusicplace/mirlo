@@ -16,12 +16,18 @@ const FollowArtist: React.FC<{ artistId: number }> = ({ artistId }) => {
   const artistContext = useArtistContext();
   const localArtistId = artistId ?? artistContext?.state?.artist?.id;
   const artistUserSubscriptions = user?.artistUserSubscriptions;
-
+  const [isSubscribed, setIsSubscribed] = React.useState(
+    !!user?.artistUserSubscriptions?.find(
+      (aus) =>
+        aus.artistSubscriptionTier.artistId &&
+        !aus.artistSubscriptionTier.isDefaultTier
+    )
+  );
   const [isFollowing, setIsFollowing] = React.useState(
     !!user?.artistUserSubscriptions?.find(
       (aus) =>
-        aus.artistSubscriptionTier.isDefaultTier &&
-        aus.artistSubscriptionTier.artistId === localArtistId
+        aus.artistSubscriptionTier.artistId === localArtistId &&
+        aus.artistSubscriptionTier.isDefaultTier
     )
   );
 
@@ -29,12 +35,21 @@ const FollowArtist: React.FC<{ artistId: number }> = ({ artistId }) => {
   const [isLoading, setIsLoading] = React.useState(false);
 
   React.useEffect(() => {
+    console.log("looking in", artistUserSubscriptions, localArtistId);
     const found = artistUserSubscriptions?.find(
       (aus) =>
         aus.artistSubscriptionTier.isDefaultTier &&
         aus.artistSubscriptionTier.artistId === localArtistId
     );
+    console.log("\tfound?", !!found);
     setIsFollowing(!!found);
+
+    const foundSubscribed = artistUserSubscriptions?.find(
+      (aus) =>
+        !aus.artistSubscriptionTier.isDefaultTier &&
+        aus.artistSubscriptionTier.artistId === localArtistId
+    );
+    setIsSubscribed(!!foundSubscribed);
   }, [artistUserSubscriptions, localArtistId]);
 
   const onFollowClick = React.useCallback(async () => {
@@ -53,6 +68,10 @@ const FollowArtist: React.FC<{ artistId: number }> = ({ artistId }) => {
       setIsLoading(false);
     }
   }, [isFollowing, localArtistId, refreshLoggedInUser, user]);
+
+  if (isSubscribed) {
+    return <>Subscribed</>;
+  }
 
   return (
     <>

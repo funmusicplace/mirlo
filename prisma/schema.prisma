@@ -33,12 +33,13 @@ model User {
   country                             String?
   userTrackGroupPurchase              UserTrackGroupPurchase[]
   emailConfirmationToken              String?                  @default(uuid()) @db.Uuid
-  emailConfirmationExpiration         DateTime?                @default(dbgenerated("NOW() + interval '10 min'"))
+  emailConfirmationExpiration         DateTime?                @default(dbgenerated("NOW() + '10 min'::interval"))
   passwordResetConfirmationToken      String?
   passwordResetConfirmationExpiration DateTime?
   stripeAccountId                     String?
   receiveMailingList                  Boolean                  @default(false)
-  UserTrackGroupWishlist              UserTrackGroupWishlist[]
+  wishlist                            UserTrackGroupWishlist[]
+  plays                               TrackPlay[]
 }
 
 model Post {
@@ -226,6 +227,7 @@ model Track {
   isPreview    Boolean       @default(true)
   trackArtists TrackArtist[]
   metadata     Json?
+  plays        TrackPlay[]
 }
 
 model TrackArtist {
@@ -259,4 +261,15 @@ enum UploadState {
   SUCCESS
   ERROR
   STARTED
+}
+
+model TrackPlay {
+  id        String   @id @default(uuid()) @db.Uuid
+  trackId   Int
+  track     Track    @relation(fields: [trackId], references: [id])
+  userId    Int?
+  user      User?    @relation(fields: [userId], references: [id])
+  ip        String?
+  createdAt DateTime @default(now())
+  owned     Boolean  @default(false)
 }
