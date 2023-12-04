@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import Modal from "components/common/Modal";
 import React from "react";
 import { bp } from "../../constants";
@@ -6,9 +5,10 @@ import { css } from "@emotion/css";
 import { useTranslation } from "react-i18next";
 import api from "services/api";
 import { useGlobalStateContext } from "state/GlobalState";
-import BuyTrackGroup from "components/TrackGroup/Buy";
+import BuyTrackGroup from "components/TrackGroup/BuyTrackGroup";
 import { useArtistContext } from "state/ArtistContext";
 import DownloadAlbumButton from "components/common/DownloadAlbumButton";
+import Button from "components/common/Button";
 
 const PurchaseOrDownloadAlbum: React.FC<{
   trackGroup: TrackGroup;
@@ -54,6 +54,17 @@ const PurchaseOrDownloadAlbum: React.FC<{
   const userIsTrackGroupArtist =
     user && artistState?.artist.userId === user?.id;
 
+  const isBeforeReleaseDate = new Date(trackGroup.releaseDate) > new Date();
+
+  const purchaseText = isBeforeReleaseDate ? "preOrder" : "buy";
+  const purchaseTitle = isBeforeReleaseDate
+    ? "preOrderingTrackGroup"
+    : "buyingTrackGroup";
+
+  if (isBeforeReleaseDate && !userId) {
+    return null;
+  }
+
   return (
     <>
       <div>
@@ -63,59 +74,50 @@ const PurchaseOrDownloadAlbum: React.FC<{
             <div
               className={css`
                 margin-top: 0rem;
-
-                button {
+              `}
+            >
+              <Button
+                variant="link"
+                className={css`
                   background: transparent;
                   color: var(--mi-normal-foreground-color) !important;
                   padding: 0;
-                }
-                button:hover {
-                  color: var(--mi-normal-foreground-color) !important;
-                  background-color: transparent !important;
-                  text-decoration: underline;
-                }
 
-                @media screen and (max-width: ${bp.small}px) {
-                  button {
+                  font-weight: bold;
+                  margin-left: 0.2rem;
+
+                  &:hover {
+                    color: var(--mi-normal-foreground-color) !important;
+                    background-color: transparent !important;
+                    text-decoration: underline;
+                  }
+
+                  @media screen and (max-width: ${bp.small}px) {
+                    font-size: var(--mi-font-size-xsmall);
                     padding: 0;
                     font-size: 0.75rem;
                   }
-                }
-              `}
-            >
-              <Link
-                onClick={() => setIsPurchasingAlbum(true)}
-                to={""}
-                className={css`
-                  font-weight: bold;
-                  margin-left: 0.2rem;
-                  @media screen and (max-width: ${bp.small}px) {
-                    font-size: var(--mi-font-size-xsmall);
-                  }
                 `}
+                compact
+                onClick={() => setIsPurchasingAlbum(true)}
               >
-                Acheter
-              </Link>
+                {t(purchaseText)}
+              </Button>
             </div>
           )}
-        {(userIsTrackGroupArtist || isOwned) && (
+        {(userIsTrackGroupArtist || isOwned) && !isBeforeReleaseDate && (
           <DownloadAlbumButton trackGroup={trackGroup} />
         )}
       </div>
-      <div
-        className={css`
-          overflow-y: hidden !important;
-        `}
+
+      <Modal
+        size="small"
+        open={isPurchasingAlbum}
+        onClose={() => setIsPurchasingAlbum(false)}
+        title={t(purchaseTitle, { title: trackGroup.title }) ?? ""}
       >
-        <Modal
-          size="small"
-          open={isPurchasingAlbum}
-          onClose={() => setIsPurchasingAlbum(false)}
-          title={t("buyingTrackGroup", { title: trackGroup.title }) ?? ""}
-        >
-          <BuyTrackGroup trackGroup={trackGroup} />
-        </Modal>
-      </div>
+        <BuyTrackGroup trackGroup={trackGroup} />
+      </Modal>
     </>
   );
 };

@@ -122,6 +122,8 @@ const handleTrackGroupPurhcase = async (
     });
 
     if (user && trackGroup && purchase) {
+      const isBeforeReleaseDate = new Date(trackGroup.releaseDate) > new Date();
+
       await sendMail({
         data: {
           template: newUser ? "album-download" : "album-purchase-receipt",
@@ -131,6 +133,7 @@ const handleTrackGroupPurhcase = async (
           locals: {
             trackGroup,
             purchase,
+            isBeforeReleaseDate,
             token: purchase.singleDownloadToken,
             email: user.email,
             client: process.env.REACT_APP_CLIENT_DOMAIN,

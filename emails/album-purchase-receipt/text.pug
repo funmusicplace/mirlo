@@ -1,9 +1,15 @@
 | Wow!
 |
+if isBeforeReleaseDate 
+| Thank you for supporting #{trackGroup.artist.name} with your pre-order of #{trackGroup.title}
+else
 | Thank you for supporting #{trackGroup.artist.name} with your purchase of #{trackGroup.title}
 |
 | #{trackGroup.title}
 | #{purchase.pricePaid / 100}: #{purchase.currencyPaid}
 | 
+if isBeforeReleaseDate
+| The album will become available in your collection for unlimited listening and downloading once it is released.
+else 
 | The album is now available in your collection for unlimited listening and downloading.
 | Enjoy!

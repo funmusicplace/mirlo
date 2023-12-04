@@ -114,7 +114,7 @@ const ArtistSupport: React.FC<{ artist: Artist }> = ({ artist }) => {
         className={css`
           display: flex;
           flex-wrap: wrap;
-          justify-content: center;
+          justify-content: flex-start;
 
           @media (max-width: ${bp.small}px) {
             flex-direction: column;

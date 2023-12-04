@@ -41,6 +41,13 @@ const PublishButton: React.FC<{
     }
   }, [artistUserId, trackGroupId, snackbar, t, reload]);
 
+  const beforeReleaseDate = new Date(trackGroup.releaseDate) > new Date();
+
+  const publishButton = beforeReleaseDate ? "publishPreorder" : "publish";
+  const privateButton = beforeReleaseDate
+    ? "makePreorderPrivate"
+    : "makePrivate";
+
   return (
     <div>
       <Button
@@ -51,13 +58,13 @@ const PublishButton: React.FC<{
           margin-right: 0.75rem;
         `}
       >
-        {trackGroup.published ? t("makePrivate") : t("publish")}
+        {t(trackGroup.published ? privateButton : publishButton)}
       </Button>
       {trackGroup.published && (
         <Link
           to={`/${artist?.urlSlug?.toLowerCase()}/release/${trackGroup.urlSlug?.toLowerCase()}`}
         >
-          <Button>{t("view")}</Button>
+          <Button>{t(beforeReleaseDate ? "viewPreorder" : "view")}</Button>
         </Link>
       )}
     </div>
