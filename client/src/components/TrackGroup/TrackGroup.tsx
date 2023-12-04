@@ -248,6 +248,7 @@ function TrackGroup() {
               <div
                 className={css`
                   margin-top: 0.5rem;
+                  margin-bottom: 0.5rem;
                   display: flex;
                   justify-content: space-between;
                   align-items: center;
@@ -257,7 +258,6 @@ function TrackGroup() {
                   className={css`
                     color: var(--mi-light-foreground-color);
                     font-size: 1rem;
-                    height: 1.5rem;
                     em {
                       font-style: normal;
                     }
@@ -281,9 +281,13 @@ function TrackGroup() {
                 <div
                   className={css`
                     display: flex;
+                    align-items: center;
                     button {
                       margin-left: 0.5rem;
                       background: var(--mi-darken-background-color);
+                    }
+                    a {
+                      font-size: var(--mi-font-size-normal);
                     }
                   `}
                 >

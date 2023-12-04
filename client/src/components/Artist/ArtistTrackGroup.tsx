@@ -86,14 +86,17 @@ const ArtistTrackGroup: React.FC<{
 
         <div
           className={css`
+            margin-bottom: 0.5rem;
+            padding-top: 0.5rem;
             display: flex;
             justify-content: space-between;
             flex-wrap: nowrap;
             align-items: start;
+            min-height: 2.5rem;
             width: 100%;
-            padding-top: 0.5rem;
-            @media screen and (min-width: ${bp.medium}px) {
-              margin-bottom: 1rem;
+            @media screen and (max-width: ${bp.medium}px) {
+              align-items: start;
+              margin-bottom: 0rem;
             }
           `}
         >
@@ -134,7 +137,21 @@ const ArtistTrackGroup: React.FC<{
               {trackGroup.artist?.name}
             </Link>
           </div>
-          <PurchaseOrDownloadAlbum trackGroup={trackGroup} />
+          <div
+            className={css`
+              button {
+                margin-top: -0.25rem;
+              }
+              @media screen and (max-width: ${bp.small}px) {
+                button {
+                  margin-top: -0.1rem;
+                  color: var(--mi-light-foreground-color);
+                }
+              }
+            `}
+          >
+            <PurchaseOrDownloadAlbum trackGroup={trackGroup} />
+          </div>
         </div>
       </div>
     </div>

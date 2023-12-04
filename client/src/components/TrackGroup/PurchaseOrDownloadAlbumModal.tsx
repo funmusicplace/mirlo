@@ -1,4 +1,4 @@
-import Button from "components/common/Button";
+import { Link } from "react-router-dom";
 import Modal from "components/common/Modal";
 import React from "react";
 import { bp } from "../../constants";
@@ -83,23 +83,39 @@ const PurchaseOrDownloadAlbum: React.FC<{
                 }
               `}
             >
-              <Button compact onClick={() => setIsPurchasingAlbum(true)}>
-                {t("buy")}
-              </Button>
+              <Link
+                onClick={() => setIsPurchasingAlbum(true)}
+                to={""}
+                className={css`
+                  font-weight: bold;
+                  margin-left: 0.2rem;
+                  @media screen and (max-width: ${bp.small}px) {
+                    font-size: var(--mi-font-size-xsmall);
+                  }
+                `}
+              >
+                Acheter
+              </Link>
             </div>
           )}
         {(userIsTrackGroupArtist || isOwned) && (
           <DownloadAlbumButton trackGroup={trackGroup} />
         )}
       </div>
-      <Modal
-        size="small"
-        open={isPurchasingAlbum}
-        onClose={() => setIsPurchasingAlbum(false)}
-        title={t("buyingTrackGroup", { title: trackGroup.title }) ?? ""}
+      <div
+        className={css`
+          overflow-y: hidden !important;
+        `}
       >
-        <BuyTrackGroup trackGroup={trackGroup} />
-      </Modal>
+        <Modal
+          size="small"
+          open={isPurchasingAlbum}
+          onClose={() => setIsPurchasingAlbum(false)}
+          title={t("buyingTrackGroup", { title: trackGroup.title }) ?? ""}
+        >
+          <BuyTrackGroup trackGroup={trackGroup} />
+        </Modal>
+      </div>
     </>
   );
 };

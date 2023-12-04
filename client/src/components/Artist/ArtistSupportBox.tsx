@@ -109,6 +109,7 @@ const ArtistSupportBox: React.FC<{
           className={css`
             padding: 1.5rem;
             border-bottom: solid 1px grey;
+            text-align: center;
             h3 {
               font-size: 1rem;
               padding-bottom: 0.5rem;
@@ -118,7 +119,13 @@ const ArtistSupportBox: React.FC<{
             }
           `}
         >
-          <h3>{subscriptionTier.name}</h3>
+          <h3
+            className={css`
+              text-transform: uppercase;
+            `}
+          >
+            {subscriptionTier.name}
+          </h3>
           <Money
             amount={
               subscriptionTier.minAmount ? subscriptionTier.minAmount / 100 : 0
@@ -128,7 +135,7 @@ const ArtistSupportBox: React.FC<{
         </div>
         <div
           className={css`
-            padding: 1.5rem 1.5rem 0 1.5rem;
+            padding: 1.5rem 1.5rem 0.5rem 1.5rem;
             height: 100%;
             p {
               display: flex;

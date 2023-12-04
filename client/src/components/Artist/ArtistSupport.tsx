@@ -91,7 +91,15 @@ const ArtistSupport: React.FC<{ artist: Artist }> = ({ artist }) => {
         >
           {t("support", { artist: artist.name })}
         </h2>
-        <FollowArtist artistId={artist.id} />
+        <div
+          className={css`
+            @media (max-width: ${bp.small}px) {
+              margin-top: 0.15rem;
+            }
+          `}
+        >
+          <FollowArtist artistId={artist.id} />
+        </div>
       </HeaderDiv>
       {artist.subscriptionTiers.length === 0 && (
         <Box
