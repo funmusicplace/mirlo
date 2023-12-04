@@ -40,7 +40,7 @@ const Content = styled.div<ContentProps>`
   border: 1px solid var(--mi-darken-background-color);
   display: flex;
   flex-direction: column;
-  width: ${(props) => (props.size === "small" ? "30%" : "80%")};
+  width: ${(props) => (props.size === "small" ? "40%" : "80%")};
 
   animation: 300ms ease-out forwards slide-up;
   border-radius: var(--mi-border-radius-x);
@@ -62,7 +62,6 @@ const Content = styled.div<ContentProps>`
   }
 
   @media (max-width: ${bp.small}px) {
-    top: 80px;
     width: 100%;
     padding: 1rem;
     padding-top: 0;
