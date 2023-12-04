@@ -44,7 +44,7 @@ const Releases = () => {
           @media screen and (min-width: ${bp.medium}px) {
             position: sticky;
             top: 55px;
-            ${!userId ? "top: 0; padding-top: .5rem;" : ""}
+            ${!userId ? "top: -0.1rem; padding-top: .5rem;" : ""}
             background-color: var(--mi-normal-background-color);
             z-index: +1;
             border-bottom: solid 1px var(--mi-lighter-foreground-color);
