@@ -117,7 +117,8 @@ const ArtistFormLinks: React.FC<{ isManage: boolean }> = ({ isManage }) => {
             max-width: 50%;
             display: flex;
             align-items: center;
-            margin-bottom: 0.25rem;
+            margin-bottom: 1rem;
+            margin-left: 0.5rem;
 
             > svg {
               margin-right: 0.5rem;
@@ -140,13 +141,18 @@ const ArtistFormLinks: React.FC<{ isManage: boolean }> = ({ isManage }) => {
       ))}
       <div
         className={css`
+          display: flex;
+          align-items: center;
+          margin-bottom: 1rem;
           button {
+            margin-left: 0.2rem;
             margin-right: 0.5rem;
           }
         `}
       >
         <Button
           compact
+          transparent
           onClick={() => append({ url: "" })}
           disabled={addDisabled}
           startIcon={<FaPlus />}

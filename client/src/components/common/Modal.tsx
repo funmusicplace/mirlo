@@ -11,12 +11,14 @@ import HeaderDiv from "./HeaderDiv";
 const wrapper = css`
   position: fixed;
   pointer-events: none;
-  z-index: 12;
+  z-index: 999;
   left: 0;
   top: 0;
   width: 100%;
   height: 100%;
   overflow: auto;
+  display: flex;
+  align-items: center;
 `;
 
 type ContentProps = {
@@ -27,21 +29,33 @@ const Content = styled.div<ContentProps>`
   pointer-events: auto;
   background-color: var(--mi-normal-background-color);
   position: absolute;
-  top: 20%;
   left: 0;
   right: 0;
-  overflow-y: scroll;
+  overflow-y: auto;
+  max-width: 1080px;
   margin: 0 auto;
-  max-height: 600px;
+  max-height: calc(100vh - 80px);
   padding: 20px;
-  z-index: 999;
+  padding-top: 0;
   border: 1px solid var(--mi-darken-background-color);
   display: flex;
   flex-direction: column;
-  width: ${(props) => (props.size === "small" ? "30%" : "80%")};
+  width: ${(props) => (props.size === "small" ? "40%" : "80%")};
 
   animation: 300ms ease-out forwards slide-up;
-  border-radius: var(--mi-border-radius);
+  border-radius: var(--mi-border-radius-x);
+
+  ::-webkit-scrollbar {
+    width: 5px;
+  }
+  ::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+    border-radius: 5px;
+  }
+  ::-webkit-scrollbar-thumb {
+    border-radius: 5px;
+    -webkit-box-shadow: inset 0 0 6px;
+  }
 
   h1 {
     display: inline-block;
@@ -50,6 +64,7 @@ const Content = styled.div<ContentProps>`
   @media (max-width: ${bp.small}px) {
     width: 100%;
     padding: 1rem;
+    padding-top: 0;
   }
 `;
 
@@ -108,7 +123,22 @@ export const Modal: React.FC<{
       <Background onClick={onCloseWrapper} />
       <div className={wrapper} data-cy="modal">
         <Content size={size}>
-          <HeaderDiv>
+          <HeaderDiv
+            className={css`
+            position: sticky;
+            top: 0;
+            padding-top: 1rem;
+            margin-bottom: .5rem;
+            background-color: inherit;
+            border-bottom: solid 1px var(--mi-light-foreground-color);
+            z-index: +1;
+
+            h2 {
+              margin-bottom: 0;
+            }
+              }
+            `}
+          >
             {title && <h2>{title}</h2>}
 
             <IconButton
