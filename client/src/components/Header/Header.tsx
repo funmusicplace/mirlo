@@ -96,7 +96,7 @@ const Header = () => {
           align-items: center;
           padding: 0.5rem 1rem;
           width: 100%;
-          z-index: 999999;
+          z-index: 99;
           position: sticky;
           top: 0px;
           height: 55px;
