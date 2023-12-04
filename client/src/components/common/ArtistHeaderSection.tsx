@@ -146,6 +146,7 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
                       display: flex;
                       align-items: center;
                       justify-content: space-between;
+                      word-break: break-word;
                       width: 100%;
                       @media screen and (max-width: ${bp.medium}px) {
                         min-height: auto;
