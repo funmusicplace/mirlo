@@ -10,10 +10,16 @@ html
         include ../style.css
   body.sans-serif
     p Wow! 
-    p Thank you for supporting #{trackGroup.artist.name} with your purchase of #{trackGroup.title}.
+    if isBeforeReleaseDate
+      p Thank you for supporting #{trackGroup.artist.name} with your pre-order of #{trackGroup.title}.
+    else
+      p Thank you for supporting #{trackGroup.artist.name} with your purchase of #{trackGroup.title}.
     table 
       tr 
         td #{trackGroup.title}
         td #{purchase.pricePaid / 100} #{purchase.currencyPaid}
-    p The album is now available in your collection for unlimited listening and downloading.
+    if isBeforeReleaseDate
+      p The album will become available in your collection for unlimited listening and downloading once it is released.
+    else 
+      p The album is now available in your collection for unlimited listening and downloading.
     p Enjoy!

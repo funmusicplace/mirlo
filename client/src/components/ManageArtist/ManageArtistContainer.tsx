@@ -1,7 +1,7 @@
 import { css } from "@emotion/css";
 import React from "react";
 import { bp } from "../../constants";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import ArtistHeaderSection from "../common/ArtistHeaderSection";
 import { useGlobalStateContext } from "state/GlobalState";
 import { useTranslation } from "react-i18next";
@@ -63,6 +63,7 @@ const ManageArtist: React.FC<{}> = () => {
   const {
     state: { artist, isLoading },
   } = useArtistContext();
+  const location = useLocation();
 
   const artistBanner = artist?.banner?.sizes;
 
@@ -81,10 +82,12 @@ const ManageArtist: React.FC<{}> = () => {
     return null;
   }
 
+  const isRelease = location.pathname.includes("/release/");
+
   return (
     <ArtistPageWrapper artistBanner={!!artistBanner}>
       <>
-        <ArtistHeaderSection artist={artist} isManage />
+        {!isRelease && <ArtistHeaderSection artist={artist} isManage />}
 
         {!artist.enabled && (
           <div

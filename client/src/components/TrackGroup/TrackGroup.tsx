@@ -20,6 +20,7 @@ import DropdownMenu from "components/common/DropdownMenu";
 import TrackGroupAdminMenu from "./TrackGroupAdminMenu";
 import MarkdownContent from "components/common/MarkdownContent";
 import Wishlist from "./Wishlist";
+import ReleaseDate from "./ReleaseDate";
 
 function TrackGroup() {
   const { t } = useTranslation("translation", {
@@ -254,30 +255,7 @@ function TrackGroup() {
                   align-items: center;
                 `}
               >
-                <div
-                  className={css`
-                    color: var(--mi-light-foreground-color);
-                    font-size: 1rem;
-                    em {
-                      font-style: normal;
-                    }
-
-                    @media screen and (max-width: ${bp.medium}px) {
-                      font-size: var(--mi-font-size-small);
-                    }
-                  `}
-                >
-                  {t("released")}{" "}
-                  <em>
-                    {new Date(trackGroup.releaseDate).toLocaleDateString(
-                      "en-US",
-                      {
-                        month: "long",
-                        year: "numeric",
-                      }
-                    )}
-                  </em>
-                </div>
+                <ReleaseDate releaseDate={trackGroup.releaseDate} />
                 <div
                   className={css`
                     display: flex;

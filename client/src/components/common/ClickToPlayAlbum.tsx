@@ -51,23 +51,44 @@ const ClickToPlayAlbum: React.FC<{
   className?: string;
 }> = ({ trackGroupId, image, className }) => {
   const {
-    state: { playing, playerQueueIds, currentlyPlayingIndex },
+    state: { playing, user, playerQueueIds, currentlyPlayingIndex },
     dispatch,
   } = useGlobalStateContext();
   const [trackIds, setTrackIds] = React.useState<number[]>([]);
+
+  const userId = user?.id;
 
   React.useEffect(() => {
     const callback = async () => {
       const { result } = await api.get<TrackGroup>(
         `trackGroups/${trackGroupId}`
       );
-      const ids = result.tracks
-        .filter((item) => item.isPreview)
-        .map((item) => item.id);
-      setTrackIds(ids);
+      try {
+        let isOwned = false;
+        if (userId) {
+          const userIsTrackGroupArtist = result.artist?.userId === userId;
+
+          if (!userIsTrackGroupArtist) {
+            const { results: purchases } =
+              await api.getMany<UserTrackGroupPurchase>(
+                `users/${userId}/purchases?trackGroupId=${trackGroupId}`
+              );
+
+            isOwned = purchases.length > 0;
+          } else {
+            isOwned = true;
+          }
+        }
+        const ids = result.tracks
+          .filter((item) => item.isPreview || isOwned)
+          .map((item) => item.id);
+        setTrackIds(ids);
+      } catch (e) {
+        console.error(e);
+      }
     };
     callback();
-  }, [trackGroupId]);
+  }, [trackGroupId, userId]);
 
   const onClickPlay = React.useCallback(async () => {
     dispatch({

@@ -35,13 +35,11 @@ const FollowArtist: React.FC<{ artistId: number }> = ({ artistId }) => {
   const [isLoading, setIsLoading] = React.useState(false);
 
   React.useEffect(() => {
-    console.log("looking in", artistUserSubscriptions, localArtistId);
     const found = artistUserSubscriptions?.find(
       (aus) =>
         aus.artistSubscriptionTier.isDefaultTier &&
         aus.artistSubscriptionTier.artistId === localArtistId
     );
-    console.log("\tfound?", !!found);
     setIsFollowing(!!found);
 
     const foundSubscribed = artistUserSubscriptions?.find(

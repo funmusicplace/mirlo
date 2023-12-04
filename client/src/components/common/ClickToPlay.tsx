@@ -112,11 +112,10 @@ const Wrapper = styled.div<WrapperProps>`
 
 const ClickToPlay: React.FC<{
   trackGroupId?: number;
-  trackId?: number;
   title: string;
   image?: { width: number; height: number; url: string };
   className?: string;
-}> = ({ trackGroupId, trackId, title, image, className }) => {
+}> = ({ trackGroupId, title, image, className }) => {
   const {
     state: { playing, playerQueueIds, currentlyPlayingIndex },
     dispatch,
@@ -134,16 +133,12 @@ const ClickToPlay: React.FC<{
         .filter((item) => item.isPreview)
         .map((item) => item.id);
       setTrackIds(ids);
-    } else if (trackId) {
-      const { result } = await api.get<Track>(`tracks/${trackId}`);
-      ids = [result.id];
-      setTrackIds(ids);
     }
     dispatch({
       type: "startPlayingIds",
       playerQueueIds: ids,
     });
-  }, [dispatch, trackGroupId, trackId]);
+  }, [dispatch, trackGroupId]);
 
   const currentlyPlaying =
     playing &&

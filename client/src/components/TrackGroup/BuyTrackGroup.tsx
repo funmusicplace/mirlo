@@ -11,6 +11,7 @@ import FormComponent from "components/common/FormComponent";
 import { FormProvider, useForm } from "react-hook-form";
 import EmailInput from "./EmailInput";
 import PlatformPercent from "components/common/PlatformPercent";
+import { css } from "@emotion/css";
 
 interface FormData {
   chosenPrice: string;
@@ -82,6 +83,9 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup }> = ({
       : Number(chosenPrice) < minPrice / 100;
   }
 
+  const isBeforeReleaseDate = new Date(trackGroup.releaseDate) > new Date();
+  const purchaseText = isBeforeReleaseDate ? "preOrder" : "buy";
+
   return (
     <FormProvider {...methods}>
       {trackGroup.minPrice && (
@@ -107,21 +111,32 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup }> = ({
           type="submit"
           disabled={!!lessThan1 || lessThanMin || !formState.isValid}
         >
-          {t("buy")}
+          {t(purchaseText)}
         </Button>
+        <p
+          className={css`
+            margin-top: 1rem;
+          `}
+        >
+          <small>{t("downloadDisclaimer")}</small>
+        </p>
       </form>
-      {trackGroup.minPrice && lessThanMin && (
-        <strong>
-          {t("lessThanMin", {
-            minPrice: moneyDisplay({
-              amount: trackGroup.minPrice / 100,
-              currency: trackGroup.currency,
-            }),
-            artistName: trackGroup.artist?.name,
-          })}
-        </strong>
+      {!isBeforeReleaseDate && (
+        <>
+          {trackGroup.minPrice && lessThanMin && (
+            <strong>
+              {t("lessThanMin", {
+                minPrice: moneyDisplay({
+                  amount: trackGroup.minPrice / 100,
+                  currency: trackGroup.currency,
+                }),
+                artistName: trackGroup.artist?.name,
+              })}
+            </strong>
+          )}
+          <FreeDownload trackGroup={trackGroup} chosenPrice={chosenPrice} />
+        </>
       )}
-      <FreeDownload trackGroup={trackGroup} chosenPrice={chosenPrice} />
     </FormProvider>
   );
 };
