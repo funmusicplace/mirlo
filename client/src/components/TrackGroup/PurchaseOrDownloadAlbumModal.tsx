@@ -94,7 +94,7 @@ const PurchaseOrDownloadAlbum: React.FC<{
                   }
                 `}
               >
-                Acheter
+                {t("buy")}
               </Link>
             </div>
           )}
