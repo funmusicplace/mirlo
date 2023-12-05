@@ -6,7 +6,7 @@ import { bp } from "../../constants";
 import api from "services/api";
 import { InputEl } from "../common/Input";
 import FormComponent from "components/common/FormComponent";
-import FormSectionWrapper from "components/common/FormSectionWrapper";
+import styled from "@emotion/styled";
 import TextArea from "components/common/TextArea";
 import { css } from "@emotion/css";
 import { useSnackbar } from "state/SnackbarContext";
@@ -22,6 +22,9 @@ export interface ShareableTrackgroup {
   creatorId: number;
   slug: string;
 }
+const FormSectionWrapper = styled.div`
+  margin-top: 2rem;
+`;
 
 type FormData = {
   name: string;
