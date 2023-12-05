@@ -7,7 +7,7 @@ import { clearTables, createArtist, createUser } from "../utils";
 import cleanUpTrackGroups from "../../src/jobs/clean-up-trackgroups";
 import assert from "node:assert";
 
-describe.only("clean-up-trackgroups", () => {
+describe("clean-up-trackgroups", () => {
   beforeEach(async () => {
     try {
       await clearTables();
