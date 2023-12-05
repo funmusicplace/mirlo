@@ -3,9 +3,6 @@ import styled from "@emotion/styled";
 const MarkdownWrapper = styled.div`
   margin-top: 0.5rem;
   opacity: 0.9;
-  max-width: 700px;
-  margin: auto;
-  font-size: 18px;
 
   h1 {
     margin-top: 1rem;
