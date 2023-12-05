@@ -1,7 +1,5 @@
-import { User } from "@prisma/client";
 import prisma from "../../prisma/prisma";
 import { deleteArtist, deleteStripeSubscriptions } from "./artist";
-import stripe from "./stripe";
 
 export const deleteUser = async (userId: number) => {
   const userArtists = await prisma.artist.findMany({
