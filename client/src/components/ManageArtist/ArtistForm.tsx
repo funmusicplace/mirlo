@@ -6,6 +6,7 @@ import { bp } from "../../constants";
 import api from "services/api";
 import { InputEl } from "../common/Input";
 import FormComponent from "components/common/FormComponent";
+import FormSectionWrapper from "components/common/FormSectionWrapper";
 import TextArea from "components/common/TextArea";
 import { css } from "@emotion/css";
 import { useSnackbar } from "state/SnackbarContext";
@@ -260,19 +261,11 @@ export const ArtistForm: React.FC<{
               {t("displayName")}:{" "}
               <InputEl {...register("name", { required: true })} />
             </FormComponent>
-            <div
-              className={css`
-                margin-top: 2rem;
-              `}
-            >
+            <FormSectionWrapper>
               {existing && <ArtistFormColors />}
-            </div>
+            </FormSectionWrapper>
 
-            <div
-              className={css`
-                margin-top: 2rem;
-              `}
-            >
+            <FormSectionWrapper>
               <FormComponent>
                 {t("urlSlug")}:{" "}
                 <InputEl
@@ -289,18 +282,14 @@ export const ArtistForm: React.FC<{
                   </small>
                 )}
               </FormComponent>
-            </div>
+            </FormSectionWrapper>
 
-            <div
-              className={css`
-                margin-top: 2rem;
-              `}
-            >
+            <FormSectionWrapper>
               <FormComponent>
                 {t("bio")}:
                 <TextArea {...register("bio")} rows={7} />
               </FormComponent>
-            </div>
+            </FormSectionWrapper>
 
             <Button type="submit" disabled={isSaving} isLoading={isSaving}>
               {existing ? t("saveArtist") : t("createArtist")}
