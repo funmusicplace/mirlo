@@ -135,6 +135,7 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
                 <HeaderDiv
                   className={css`
                     padding-bottom: 0 !important;
+                    margin-bottom: 0rem !important;
                     @media screen and (max-width: ${bp.medium}px) {
                       margin: 0rem !important;
                     }
