@@ -7,6 +7,13 @@ const HeaderDiv = styled.div`
   justify-content: space-between;
   width: 100%;
   padding-bottom: 0.7rem;
+  margin-bottom: 0.5rem;
+  h2 {
+    margin-bottom: 0;
+  }
+  button {
+    height: 2rem;
+  }
 
   @media screen and (max-width: ${bp.medium}px) {
     align-items: flex-start !important;
