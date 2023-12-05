@@ -6,7 +6,7 @@ const MarkdownWrapper = styled.div`
   opacity: 0.8;
 
   h1 {
-    font-size: 1.5rem;
+    margin-bottom: 1rem;
   }
   h2 {
     font-size: 1.2rem;
