@@ -27,6 +27,8 @@ const ArtistFormColors = () => {
 
           span {
             margin: 0.6rem 0.5rem 0.3rem 0rem;
+            padding: 0.1rem;
+            border-radius: 100px;
           }
 
           @media (max-width: ${bp.medium}px) {
