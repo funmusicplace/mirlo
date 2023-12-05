@@ -54,4 +54,4 @@ const sendOutMonthlyReceipts = async () => {
   );
 };
 
-sendOutMonthlyReceipts();
+export default sendOutMonthlyReceipts;

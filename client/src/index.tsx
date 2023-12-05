@@ -29,11 +29,11 @@ import Collection from "components/Profile/Collection";
 import Post from "components/Post";
 import PasswordReset from "components/PasswordReset";
 import TrackGroup from "components/TrackGroup/TrackGroup";
-import About from "components/About";
+import About from "components/pages/About";
 import { AuthWrapper } from "components/AuthWrapper";
 import Signup from "components/Signup";
 import { ArtistProvider } from "state/ArtistContext";
-import FAQ from "components/FAQ";
+import FAQ from "components/pages/FAQ";
 import ManageTrackGroup from "components/ManageArtist/ManageTrackGroup";
 import Releases from "components/Releases";
 import ManageContainer from "components/ManageArtist/ManageContainer";
@@ -41,6 +41,7 @@ import ManageArtistContainer from "components/ManageArtist/ManageArtistContainer
 import ArtistContainer from "components/Artist/ArtistContainer";
 import ProfileContainer from "components/Profile/ProfileContainer";
 import WishlistCollection from "components/Profile/WishlistCollection";
+import MarkdownContent from "components/common/MarkdownContent";
 
 const router = createBrowserRouter([
   {
@@ -51,6 +52,10 @@ const router = createBrowserRouter([
       { path: "", element: <Home /> },
       { path: "pages/about", element: <About /> },
       { path: "pages/faq", element: <FAQ /> },
+      {
+        path: "pages/cookie-policy",
+        element: <MarkdownContent source="/pages/CookiePolicy.md" />,
+      },
 
       { path: "widget/track/:id", element: <TrackWidget /> },
       { path: "widget/trackgroup/:id", element: <TrackGroupWidget /> },

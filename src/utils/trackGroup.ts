@@ -10,6 +10,7 @@ import { deleteTrack } from "./tracks";
 import { randomUUID } from "crypto";
 
 const { MEDIA_LOCATION_DOWNLOAD_CACHE = "" } = process.env;
+
 /**
  * We use our own custom function to handle this until we
  * can figure out a way to soft delete cascade. Maybe
@@ -17,26 +18,31 @@ const { MEDIA_LOCATION_DOWNLOAD_CACHE = "" } = process.env;
  *
  * @param trackGroupId
  */
-export const deleteTrackGroup = async (trackGroupId: number) => {
+export const deleteTrackGroup = async (
+  trackGroupId: number,
+  deleteAll?: boolean
+) => {
   await prisma.trackGroup.delete({
     where: {
       id: Number(trackGroupId),
     },
   });
 
-  const tracks = await prisma.track.findMany({
-    where: {
-      trackGroupId,
-    },
-  });
+  if (deleteAll) {
+    const tracks = await prisma.track.findMany({
+      where: {
+        trackGroupId,
+      },
+    });
 
-  await Promise.all(tracks.map(async (track) => await deleteTrack(track.id)));
+    await Promise.all(tracks.map(async (track) => await deleteTrack(track.id)));
 
-  await prisma.trackGroupCover.deleteMany({
-    where: {
-      trackGroupId: Number(trackGroupId),
-    },
-  });
+    await prisma.trackGroupCover.deleteMany({
+      where: {
+        trackGroupId: Number(trackGroupId),
+      },
+    });
+  }
 };
 
 export const findTrackGroupIdForSlug = async (

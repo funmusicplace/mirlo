@@ -8,6 +8,7 @@ import Box from "./common/Box";
 import Logo from "./common/Logo";
 import { Trans, useTranslation } from "react-i18next";
 import Releases from "./Releases";
+import MarkdownContent from "./common/MarkdownContent";
 
 function Home() {
   const {
@@ -348,22 +349,9 @@ function Home() {
                         color: var(--mi-normal-foreground-color);
                       `}
                     >
-                      {/* <MarkdownContent content={p.content} />*/}
-                      {p.content}
+                      <MarkdownContent content={p.content} />
                     </span>
                   </div>
-                  {/*<div
-                  className={css`
-                    color: var(--mi-normal-background-color) !important;
-                    text-align: center;
-                    width: 20%;
-                    height: 100%;
-                    padding: 0.2rem;
-                    transition: 0.2s ease-in-out;
-                  `}
-                  >
-                  read more
-                </div>*/}
                 </div>
               </Box>
             </Link>

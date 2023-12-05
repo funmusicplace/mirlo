@@ -1,9 +1,9 @@
 import React from "react";
 import { css } from "@emotion/css";
 import { Trans, useTranslation } from "react-i18next";
-import { MetaCard } from "./common/MetaCard";
+import { MetaCard } from "../common/MetaCard";
 import { Link } from "react-router-dom";
-import MarkdownWrapper from "./common/MarkdownWrapper";
+import MarkdownWrapper from "../common/MarkdownWrapper";
 
 const FAQ: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "faq" });

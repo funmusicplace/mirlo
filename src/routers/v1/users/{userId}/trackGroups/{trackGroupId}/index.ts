@@ -140,7 +140,7 @@ export default function () {
         return next();
       }
 
-      await deleteTrackGroup(Number(trackGroupId));
+      await deleteTrackGroup(Number(trackGroupId), true);
 
       res.json({ message: "Success" });
     } catch (e) {

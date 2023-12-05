@@ -5,6 +5,7 @@ import remarkGfm from "remark-gfm";
 // import remarkEmbedder from "@remark-embedder/core";
 import remarkEmbedder from "utils/remarkEmbedder";
 import MarkdownWrapper from "./MarkdownWrapper";
+import LoadingSpinner from "./LoadingSpinner";
 
 const BlackbirdTransformer = {
   name: "BlackbirdTransformer",
@@ -26,9 +27,23 @@ const BlackbirdTransformer = {
 };
 
 const MarkdownContent: React.FC<{
-  content: string;
+  content?: string;
+  source?: string;
   className?: string;
-}> = ({ content, className }) => {
+}> = ({ content: externalContent, source, className }) => {
+  const [content, setContent] = React.useState(externalContent);
+  React.useEffect(() => {
+    const callback = async () => {
+      if (source) {
+        const sourceContent = await fetch(source).then((resp) => resp.text());
+        setContent(sourceContent);
+      }
+    };
+    callback();
+  }, [source]);
+  if (!content) {
+    return <LoadingSpinner />;
+  }
   return (
     <MarkdownWrapper>
       <ReactMarkdown

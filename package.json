@@ -14,8 +14,10 @@
   },
   "dependencies": {
     "@bull-board/express": "^4.11.0",
+    "@faker-js/faker": "^8.3.1",
     "@prisma/client": "5",
     "@types/connect-busboy": "^1.0.3",
+    "@types/faker": "^6.6.9",
     "@types/rss": "^0.0.30",
     "@types/showdown": "^2.0.2",
     "archiver": "^6.0.0",
