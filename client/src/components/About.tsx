@@ -11,6 +11,9 @@ const About: React.FC = () => {
     <MarkdownWrapper
       className={css`
         margin-top: 2rem;
+        max-width: var(--mi-container-small);
+        margin: auto;
+        font-size: 18px;
       `}
     >
       <MetaCard

@@ -28,6 +28,9 @@ const Post: React.FC = () => {
   return (
     <div
       className={css`
+        max-width: var(--mi-container-small);
+        margin: auto;
+        font-size: 18px;
         margin-top: 1rem;
         display: flex;
         justify-content: center;

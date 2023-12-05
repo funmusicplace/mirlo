@@ -41,6 +41,10 @@ const styles = `html {
   --mi-side-paddings-small: 0rem 1rem;
   --mi-side-paddings-xsmall: 0rem .7rem;
 
+  --mi-container-full: 100%;
+  --mi-container-big: 1080px;
+  --mi-container-small: 700px;
+
 }
 
 
