@@ -66,6 +66,7 @@ const Menu: React.FC = (props) => {
           display: block;
           white-space: normal;
           color: var(--mi-black);
+          word-break: break-word;
           font-weight: normal;
           border-radius: 0;
           padding: 0.5rem;
