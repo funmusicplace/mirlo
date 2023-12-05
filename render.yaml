@@ -148,11 +148,11 @@ services:
     branch: main # optional (defaults to master)
 
   - type: cron
-    name: monthly-receipts
+    name: monthly-tasks
     env: node
     repo: https://github.com/funmusicplace/mirlo.git # optional
     plan: starter
-    startCommand: yarn ts-node src/jobs/send-out-monthly-receipts.ts
+    startCommand: yarn ts-node src/jobs/monthly-tasks.ts
     buildCommand: yarn install && yarn migrate:deploy
     schedule: "0 0 1 * *"
     envVars:

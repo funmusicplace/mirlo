@@ -3,9 +3,7 @@ import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
 import request from "supertest";
-import prisma from "../../../../prisma/prisma";
-import { buildTokens } from "../../../../src/routers/auth";
-import Parser from "rss-parser";
+
 import { clearTables } from "../../../utils";
 
 const baseURL = `${process.env.API_DOMAIN}/v1/`;
