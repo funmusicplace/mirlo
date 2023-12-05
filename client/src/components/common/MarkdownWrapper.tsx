@@ -2,18 +2,21 @@ import styled from "@emotion/styled";
 
 const MarkdownWrapper = styled.div`
   margin-top: 0.5rem;
-  // filter: brightness(75%);
-  opacity: 0.8;
+  opacity: 0.9;
+  max-width: 700px;
+  margin: auto;
+  font-size: 18px;
 
   h1 {
+    margin-top: 1rem;
     margin-bottom: 1rem;
   }
   h2 {
-    font-size: 1.2rem;
+    font-size: 1.4rem;
     margin-bottom: 1rem;
   }
   h3 {
-    font-size: 1rem;
+    font-size: 1.2rem;
   }
 
   p {
