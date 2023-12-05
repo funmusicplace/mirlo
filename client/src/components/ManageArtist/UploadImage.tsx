@@ -1,6 +1,7 @@
 import { css } from "@emotion/css";
 import { InputEl } from "components/common/Input";
 import LoadingSpinner from "components/common/LoadingSpinner";
+import { bp } from "../../constants";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 
@@ -22,13 +23,17 @@ const UploadImage: React.FC<{
       <div
         className={css`
           position: relative;
+          margin-bottom: 0.5rem;
         `}
       >
         {existingCover && (image?.length === 0 || image === undefined) && (
           <img
             src={existingImage}
             className={css`
-              max-width: 120px;
+              max-width: 150px;
+              @media (max-width: ${bp.medium}px) {
+                max-width: 100%;
+              }
             `}
             alt={formName}
           />
@@ -37,7 +42,10 @@ const UploadImage: React.FC<{
           <img
             src={URL.createObjectURL(image[0])}
             className={css`
-              max-width: 120px;
+              max-width: 150px;
+              @media (max-width: ${bp.medium}px) {
+                max-width: 100%;
+              }
             `}
             alt={formName}
           />

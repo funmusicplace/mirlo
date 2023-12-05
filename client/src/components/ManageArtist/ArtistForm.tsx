@@ -2,6 +2,7 @@ import React from "react";
 import Modal from "components/common/Modal";
 import Button from "../common/Button";
 import { FormProvider, useForm } from "react-hook-form";
+import { bp } from "../../constants";
 import api from "services/api";
 import { InputEl } from "../common/Input";
 import FormComponent from "components/common/FormComponent";
@@ -203,35 +204,51 @@ export const ArtistForm: React.FC<{
               display: flex;
             `}
           >
-            {existing && (
-              <UploadArtistImage
-                existing={existing}
-                reload={reload}
-                imageType="banner"
-                height="125px"
-                width="100%"
-                maxDimensions="2500x2500"
-                isLoading={
-                  uploadBannerJobs?.[0]?.jobStatus !== undefined &&
-                  uploadBannerJobs?.[0]?.jobStatus !== "completed"
+            <div
+              className={css`
+                flex: 50%;
+                @media (max-width: ${bp.medium}px) {
+                  flex-direction: column;
                 }
-              />
-            )}
+              `}
+            >
+              {existing && (
+                <UploadArtistImage
+                  existing={existing}
+                  reload={reload}
+                  imageType="banner"
+                  height="200px"
+                  width="100%"
+                  maxDimensions="2500x2500"
+                  isLoading={
+                    uploadBannerJobs?.[0]?.jobStatus !== undefined &&
+                    uploadBannerJobs?.[0]?.jobStatus !== "completed"
+                  }
+                />
+              )}
+            </div>
 
-            {existing && (
-              <UploadArtistImage
-                existing={existing}
-                reload={reload}
-                imageType="avatar"
-                height="120px"
-                width="120px"
-                maxDimensions="1500x1500"
-                isLoading={
-                  uploadAvatarJobs?.[0]?.jobStatus !== undefined &&
-                  uploadAvatarJobs?.[0]?.jobStatus !== "completed"
-                }
-              />
-            )}
+            <div
+              className={css`
+                flex: 50%;
+                margin-left: 1rem;
+              `}
+            >
+              {existing && (
+                <UploadArtistImage
+                  existing={existing}
+                  reload={reload}
+                  imageType="avatar"
+                  height="200px"
+                  width="100%"
+                  maxDimensions="1500x1500"
+                  isLoading={
+                    uploadAvatarJobs?.[0]?.jobStatus !== undefined &&
+                    uploadAvatarJobs?.[0]?.jobStatus !== "completed"
+                  }
+                />
+              )}
+            </div>
           </div>
 
           <div
@@ -243,28 +260,47 @@ export const ArtistForm: React.FC<{
               {t("displayName")}:{" "}
               <InputEl {...register("name", { required: true })} />
             </FormComponent>
-            {existing && <ArtistFormColors />}
+            <div
+              className={css`
+                margin-top: 2rem;
+              `}
+            >
+              {existing && <ArtistFormColors />}
+            </div>
 
-            <FormComponent>
-              {t("urlSlug")}:{" "}
-              <InputEl
-                {...register("urlSlug", {
-                  validate: { unique: validation },
-                  disabled: !!existing,
-                })}
-              />
-              <small>Must be unique</small>
-              {errors.urlSlug && (
-                <small className="error">
-                  {errors.urlSlug.type === "unique" &&
-                    "This needs to be unique, try something else"}
-                </small>
-              )}
-            </FormComponent>
-            <FormComponent>
-              {t("bio")}:
-              <TextArea {...register("bio")} rows={7} />
-            </FormComponent>
+            <div
+              className={css`
+                margin-top: 2rem;
+              `}
+            >
+              <FormComponent>
+                {t("urlSlug")}:{" "}
+                <InputEl
+                  {...register("urlSlug", {
+                    validate: { unique: validation },
+                    disabled: !!existing,
+                  })}
+                />
+                <small>Must be unique</small>
+                {errors.urlSlug && (
+                  <small className="error">
+                    {errors.urlSlug.type === "unique" &&
+                      "This needs to be unique, try something else"}
+                  </small>
+                )}
+              </FormComponent>
+            </div>
+
+            <div
+              className={css`
+                margin-top: 2rem;
+              `}
+            >
+              <FormComponent>
+                {t("bio")}:
+                <TextArea {...register("bio")} rows={7} />
+              </FormComponent>
+            </div>
 
             <Button type="submit" disabled={isSaving} isLoading={isSaving}>
               {existing ? t("saveArtist") : t("createArtist")}

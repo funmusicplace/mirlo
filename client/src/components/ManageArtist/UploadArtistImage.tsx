@@ -18,7 +18,7 @@ const UploadArtistImage: React.FC<{
   const imageUrl =
     imageType === "banner"
       ? existing?.banner?.sizes?.[625]
-      : existing?.avatar?.sizes?.[120];
+      : existing?.avatar?.sizes?.[300];
 
   return (
     <div
@@ -26,14 +26,21 @@ const UploadArtistImage: React.FC<{
         margin-bottom: 1rem;
       `}
     >
-      <label>
-        <strong>{t(imageType)}</strong>
-      </label>
+      <div
+        className={css`
+          margin-bottom: 0.5rem;
+        `}
+      >
+        <label>
+          <strong>{t(imageType)}</strong>
+        </label>
+      </div>
       <div
         className={css`
           position: relative;
           width: ${width};
           min-height: ${height};
+          margin-bottom: 0.5rem;
         `}
       >
         <UploadImage

@@ -24,7 +24,7 @@ const styles = `html {
   --mi-darken-warning-background-color: #df250b;
 
   --mi-border-radius: 3px;
-  --mi-border-radius-x: 20px;
+  --mi-border-radius-x: 15px;
   --mi-border-radius-focus: 8px;
 
   --mi-icon-button-background-color: var(--mi-darken-x-background-color);

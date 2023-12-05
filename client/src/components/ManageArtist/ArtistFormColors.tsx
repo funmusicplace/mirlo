@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import ColorInput from "./ColorInput";
 import { css } from "@emotion/css";
+import { bp } from "../../constants";
 
 const ArtistFormColors = () => {
   const { t } = useTranslation("translation", { keyPrefix: "artistForm" });
@@ -15,6 +16,26 @@ const ArtistFormColors = () => {
           display: flex;
           margin-top: 0.5rem;
           margin-bottom: 0.75rem;
+
+          div {
+            margin-right: 1rem;
+          }
+
+          div:last-child {
+            margin-right: 0rem;
+          }
+
+          span {
+            margin: 0.6rem 0.5rem 0.3rem 0rem;
+          }
+
+          @media (max-width: ${bp.medium}px) {
+            flex-direction: column;
+
+            div {
+              margin-right: 0;
+            }
+          }
         `}
       >
         <ColorInput
