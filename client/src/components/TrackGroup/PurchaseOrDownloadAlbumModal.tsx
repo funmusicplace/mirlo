@@ -3,6 +3,7 @@ import React from "react";
 import { bp } from "../../constants";
 import { css } from "@emotion/css";
 import { useTranslation } from "react-i18next";
+import { useParams } from "react-router-dom";
 import api from "services/api";
 import { useGlobalStateContext } from "state/GlobalState";
 import BuyTrackGroup from "components/TrackGroup/BuyTrackGroup";
@@ -22,7 +23,7 @@ const PurchaseOrDownloadAlbum: React.FC<{
   const { state: artistState } = useArtistContext();
 
   const userId = user?.id;
-
+  const { trackGroupId } = useParams();
   const checkForAlbumOwnership = React.useCallback(async () => {
     try {
       if (userId) {
@@ -77,25 +78,39 @@ const PurchaseOrDownloadAlbum: React.FC<{
               `}
             >
               <Button
-                variant="link"
+                variant="outlined"
                 className={css`
-                  background: transparent;
-                  color: var(--mi-normal-foreground-color) !important;
-                  padding: 0;
-
-                  font-weight: bold;
-                  margin-left: 0.2rem;
-
-                  &:hover {
-                    color: var(--mi-normal-foreground-color) !important;
-                    background-color: transparent !important;
-                    text-decoration: underline;
-                  }
+                  display: block !important;
+                  ${!trackGroupId ? "display: none !important;" : ""}
+                  height: 2rem !important;
 
                   @media screen and (max-width: ${bp.small}px) {
+                    display: none !important;
                     font-size: var(--mi-font-size-xsmall);
                     padding: 0;
                     font-size: 0.75rem;
+                  }
+                `}
+                compact
+                onClick={() => setIsPurchasingAlbum(true)}
+              >
+                {t(purchaseText)}
+              </Button>
+              <Button
+                variant="link"
+                className={css`
+                  display: none !important;
+                  ${!trackGroupId ? "display: block !important;" : ""}
+                  color: var(--mi-normal-foreground-color) !important;
+                  margin: 0.01rem 0 0 0.3rem !important;
+                  &:hover {
+                    text-decoration: underline;
+                  }
+                  font-size: var(--mi-font-size-xsmall);
+                  font-size: 0.75rem;
+
+                  @media screen and (max-width: ${bp.small}px) {
+                    display: block !important;
                   }
                 `}
                 compact

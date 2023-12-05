@@ -23,7 +23,7 @@ const CustomButton = styled.button<Compactable>`
   font-size: 1rem;
   font-weight: bold;
   line-height: 1rem;
-  height: 1.6rem;
+  height: 1.8rem;
   height: ${(props) => (props.onlyIcon ? "2rem" : "")};
   width: ${(props) => (props.onlyIcon ? "2rem" : "")};
 
@@ -49,6 +49,11 @@ const CustomButton = styled.button<Compactable>`
               : `var(--mi-${props.role ?? "primary"}-color)`
           };
           margin-right: 0;
+          margin-left: .3rem;
+          padding: 0 !important;
+          height: auto !important;
+          width: auto !important;
+          background-color: transparent !important;
           font-size: inherit;
           line-height: inherit;
 
@@ -68,7 +73,7 @@ const CustomButton = styled.button<Compactable>`
               : `var(--mi-${props.role ?? "primary"}-color)`
           };
           background-color: transparent;
-          border: 2px solid ${
+          border: 1px solid ${
             props.color
               ? props.color
               : `var(--mi-${props.role ?? "primary"}-color)`
@@ -79,9 +84,14 @@ const CustomButton = styled.button<Compactable>`
             color: ${
               props.color
                 ? props.color
-                : `var(--mi-${props.role ?? "primary"}-color)`
+                : `var(--mi-${props.role ?? "secondary"}-color)`
             };
-            border: 2px solid ${
+            background-color: ${
+              props.color
+                ? props.color
+                : `var(--mi-${props.role ?? "primary"}-color)`
+            };            
+            border: 1px solid ${
               props.color
                 ? props.color
                 : `var(--mi-${props.role ?? "primary"}-color)`
@@ -91,13 +101,6 @@ const CustomButton = styled.button<Compactable>`
           &[disabled] {
             color: #ddd;
             border-color: #ddd;
-          }
-
-          @media (prefers-color-scheme: dark) {
-            color: #F27D98;
-            &:hover:not(:disabled) {
-              color: #F27D98;
-            }
           }
         `;
       default:
