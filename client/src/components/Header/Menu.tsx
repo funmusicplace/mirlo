@@ -119,7 +119,11 @@ const Menu: React.FC = (props) => {
               {t("collection")}
             </Button>
           </li>
-          <li>
+          <li
+            className={css`
+              border-bottom: solid 1px var(--mi-lighter-foreground-color);
+            `}
+          >
             <Button
               onClick={() => {
                 setIsMenuOpen(false);
@@ -151,7 +155,11 @@ const Menu: React.FC = (props) => {
               </li>
             );
           })}
-          <li>
+          <li
+            className={css`
+              border-top: solid 1px var(--mi-lighter-foreground-color);
+            `}
+          >
             <Button onClick={onLogOut} className={css``}>
               {t("logOut")}
             </Button>
@@ -178,7 +186,7 @@ const Menu: React.FC = (props) => {
       <li
         onClick={() => {
           setIsMenuOpen(false);
-          navigate("/about");
+          navigate("/pages/about");
         }}
       >
         <Button>{t("about")}</Button>
