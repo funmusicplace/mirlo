@@ -47,10 +47,7 @@ export default function () {
 
       res.json({ result: { jobId } });
     } catch (error) {
-      console.error("Banner error", error);
-      res.status(500).json({
-        error: `Error occurred while processing banner for ${artistId}`,
-      });
+      next(error);
     }
   }
 

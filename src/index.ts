@@ -113,6 +113,7 @@ const routes = [
   "webhooks/stripe",
   "webhooks/stripe/connect",
   "jobs",
+  "admin/tasks",
 ];
 
 initialize({

@@ -20,10 +20,6 @@ type Params = {
   userId: string;
 };
 
-const isFileArray = (entity: unknown): entity is Express.Multer.File[] => {
-  return true;
-};
-
 export default function () {
   const operations = {
     PUT: [

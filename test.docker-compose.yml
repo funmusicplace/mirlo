@@ -42,9 +42,6 @@ services:
       - ${MEDIA_LOCATION:-./data/media/}incoming:/data/media/incoming
       - ${MEDIA_LOCATION:-./data/media/}downloadCache:/data/media/downloadCache
 
-      # - ${MEDIA_LOCATION:-./data/media/}audio:/data/media/audio
-      # - ${MEDIA_LOCATION:-./data/media/}images:/data/media/images
-
   background:
     networks:
       - api-network
@@ -66,8 +63,6 @@ services:
       - ~/.ssh:/root/.ssh
       - ./:/var/www/api
       - ${MEDIA_LOCATION:-./data/media/}processing:/data/media/processing
-      # - ${MEDIA_LOCATION:-./data/media/}audio:/data/media/audio
-      # - ${MEDIA_LOCATION:-./data/media/}images:/data/media/images
 
   minio:
     image: minio/minio

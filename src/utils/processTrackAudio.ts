@@ -144,29 +144,6 @@ export const processTrackAudio = (ctx: { req: Request; res: Response }) => {
     });
     return jobId;
 
-    // const stream = fs.createReadStream(file.path);
-    // const audio = await prisma.trackAudio.upsert({
-    //   create: {
-    //     trackId,
-    //     url: buildTrackStreamURL(trackId),
-    //     originalFilename: file.originalFilename,
-    //     size: file.size,
-    //     fileExtension: fileType.ext,
-    //     uploadState: "STARTED",
-    //   },
-    //   update: {
-    //     trackId,
-    //     originalFilename: file.originalFilename,
-    //     url: buildTrackStreamURL(trackId),
-    //     size: file.size,
-    //     fileExtension: fileType.ext,
-    //     uploadState: "STARTED",
-    //   },
-    //   where: {
-    //     trackId: Number(trackId),
-    //   },
-    // });
-
     // await fsPromises.rm(file.path);
   };
 };
