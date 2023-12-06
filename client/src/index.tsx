@@ -26,7 +26,7 @@ import Artist from "components/Artist/Artist";
 import TrackGroupWidget from "components/Widget/TrackGroupWidget";
 import TrackWidget from "components/Widget/TrackWidget";
 import Collection from "components/Profile/Collection";
-import Post from "components/Post";
+import Post, { pageMarkdownWrapper } from "components/Post";
 import PasswordReset from "components/PasswordReset";
 import TrackGroup from "components/TrackGroup/TrackGroup";
 import About from "components/pages/About";
@@ -54,7 +54,11 @@ const router = createBrowserRouter([
       { path: "pages/faq", element: <FAQ /> },
       {
         path: "pages/cookie-policy",
-        element: <MarkdownContent source="/pages/CookiePolicy.md" />,
+        element: (
+          <div className={pageMarkdownWrapper}>
+            <MarkdownContent source="/pages/CookiePolicy.md" />
+          </div>
+        ),
       },
 
       { path: "widget/track/:id", element: <TrackWidget /> },
