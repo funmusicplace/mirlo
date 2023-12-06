@@ -86,9 +86,9 @@ export const userHasPermission = (role: "admin" | "owner") => {
   return (req: Request, res: Response, next: NextFunction) => {
     const { userId } = req.params as unknown as { userId: string };
     const loggedInUser = req.user as User | undefined;
-
     if (!loggedInUser) {
       res.status(401).json({ error: "Unauthorized" });
+      return;
     } else {
       if (
         role === "owner" &&
@@ -96,8 +96,10 @@ export const userHasPermission = (role: "admin" | "owner") => {
         !loggedInUser.isAdmin
       ) {
         res.status(401).json({ error: "Unauthorized" });
+        return;
       } else if (role === "admin" && !loggedInUser.isAdmin) {
         res.status(401).json({ error: "Unauthorized" });
+        return;
       }
     }
     return next();
