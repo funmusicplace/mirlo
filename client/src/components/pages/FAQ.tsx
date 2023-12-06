@@ -1,5 +1,4 @@
 import React from "react";
-import { css } from "@emotion/css";
 import { Trans, useTranslation } from "react-i18next";
 import { MetaCard } from "../common/MetaCard";
 import { Link } from "react-router-dom";
@@ -11,14 +10,7 @@ const FAQ: React.FC = () => {
 
   return (
     <div className={pageMarkdownWrapper}>
-      <MarkdownWrapper
-        className={css`
-          margin-top: 2rem;
-          max-width: var(--mi-container-small);
-          margin: auto;
-          font-size: 18px;
-        `}
-      >
+      <MarkdownWrapper>
         <MetaCard
           title={t("title")}
           description="Some frequently asked questions about Mirlo"
@@ -95,8 +87,8 @@ const FAQ: React.FC = () => {
           t={t}
           i18nKey="questions.howAreYouStructured.answer"
           components={{
-            // eslint-disable-next-line jsx-a11y/anchor-has-content
             1: (
+              // eslint-disable-next-line jsx-a11y/anchor-has-content
               <a href="https://www.colorado.edu/lab/medlab/exit-to-community" />
             ),
           }}
