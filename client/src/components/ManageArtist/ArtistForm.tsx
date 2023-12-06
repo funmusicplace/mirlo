@@ -199,6 +199,7 @@ export const ArtistForm: React.FC<{
     >
       <div
         className={css`
+          margin-top: 0.5rem;
           label {
             display: block;
             font-size: 1.5rem;
