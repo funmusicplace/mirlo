@@ -32,7 +32,7 @@ const UploadArtistImage: React.FC<{
         `}
       >
         <label>
-          <strong>{t(imageType)}</strong>
+          <h2>{t(imageType)}</h2>
         </label>
       </div>
       <div

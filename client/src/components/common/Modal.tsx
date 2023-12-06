@@ -139,6 +139,7 @@ export const Modal: React.FC<{
 
             h2 {
               margin-bottom: 0;
+              font-weight: bold;
             }
               }
             `}

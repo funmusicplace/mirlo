@@ -6,7 +6,6 @@ import { bp } from "../../constants";
 import api from "services/api";
 import { InputEl } from "../common/Input";
 import FormComponent from "components/common/FormComponent";
-import styled from "@emotion/styled";
 import TextArea from "components/common/TextArea";
 import { css } from "@emotion/css";
 import { useSnackbar } from "state/SnackbarContext";
@@ -22,9 +21,6 @@ export interface ShareableTrackgroup {
   creatorId: number;
   slug: string;
 }
-const FormSectionWrapper = styled.div`
-  margin-top: 2rem;
-`;
 
 type FormData = {
   name: string;
@@ -255,44 +251,35 @@ export const ArtistForm: React.FC<{
             </div>
           </div>
 
-          <div
-            className={css`
-              margin-top: 1rem;
-            `}
-          >
+          <div>
             <FormComponent>
-              {t("displayName")}:{" "}
+              <h2>{t("displayName")} </h2>
               <InputEl {...register("name", { required: true })} />
             </FormComponent>
-            <FormSectionWrapper>
-              {existing && <ArtistFormColors />}
-            </FormSectionWrapper>
 
-            <FormSectionWrapper>
-              <FormComponent>
-                {t("urlSlug")}:{" "}
-                <InputEl
-                  {...register("urlSlug", {
-                    validate: { unique: validation },
-                    disabled: !!existing,
-                  })}
-                />
-                <small>Must be unique</small>
-                {errors.urlSlug && (
-                  <small className="error">
-                    {errors.urlSlug.type === "unique" &&
-                      "This needs to be unique, try something else"}
-                  </small>
-                )}
-              </FormComponent>
-            </FormSectionWrapper>
+            <FormComponent>{existing && <ArtistFormColors />}</FormComponent>
 
-            <FormSectionWrapper>
-              <FormComponent>
-                {t("bio")}:
-                <TextArea {...register("bio")} rows={7} />
-              </FormComponent>
-            </FormSectionWrapper>
+            <FormComponent>
+              <h2>{t("urlSlug")} </h2>
+              <InputEl
+                {...register("urlSlug", {
+                  validate: { unique: validation },
+                  disabled: !!existing,
+                })}
+              />
+              <small>Must be unique</small>
+              {errors.urlSlug && (
+                <small className="error">
+                  {errors.urlSlug.type === "unique" &&
+                    "This needs to be unique, try something else"}
+                </small>
+              )}
+            </FormComponent>
+
+            <FormComponent>
+              <h2>{t("bio")}</h2>
+              <TextArea {...register("bio")} rows={7} />
+            </FormComponent>
 
             <Button type="submit" disabled={isSaving} isLoading={isSaving}>
               {existing ? t("saveArtist") : t("createArtist")}

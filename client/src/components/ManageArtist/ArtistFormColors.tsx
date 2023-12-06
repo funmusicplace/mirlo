@@ -8,17 +8,17 @@ const ArtistFormColors = () => {
   return (
     <>
       <label>
-        <strong>{t("customColors")}</strong>
+        <h2>{t("customColors")}</h2>
       </label>
 
       <div
         className={css`
           display: flex;
-          margin-top: 0.5rem;
           margin-bottom: 0.75rem;
 
           div {
             margin-right: 1rem;
+            margin-top: 0;
           }
 
           div:last-child {

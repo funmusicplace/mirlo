@@ -3,6 +3,8 @@ import styled from "@emotion/styled";
 const FormComponent = styled.div`
   margin-bottom: 0.75rem;
 
+  margin-top: 2rem;
+
   input[type="checkbox"] + label {
     display: flex;
     flex-direction: column;
