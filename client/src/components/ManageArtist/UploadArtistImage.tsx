@@ -31,9 +31,7 @@ const UploadArtistImage: React.FC<{
           margin-bottom: 0.5rem;
         `}
       >
-        <label>
-          <h2>{t(imageType)}</h2>
-        </label>
+        <label>{t(imageType)}</label>
       </div>
       <div
         className={css`

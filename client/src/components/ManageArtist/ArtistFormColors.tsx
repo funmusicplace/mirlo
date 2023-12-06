@@ -10,9 +10,10 @@ const ArtistFormColors = () => {
       <label
         className={css`
           display: flex;
+          margin-bottom: 0rem;
         `}
       >
-        <h2>{t("customColors")}</h2>
+        {t("customColors")}
       </label>
 
       <div
