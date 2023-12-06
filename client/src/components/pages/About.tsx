@@ -1,4 +1,3 @@
-import { css } from "@emotion/css";
 import { Trans, useTranslation } from "react-i18next";
 import { pageMarkdownWrapper } from "components/Post/index";
 import { MetaCard } from "../common/MetaCard";
