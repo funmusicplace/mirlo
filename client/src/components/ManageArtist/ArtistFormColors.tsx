@@ -9,7 +9,6 @@ const ArtistFormColors = () => {
     <>
       <label
         className={css`
-          display: flex;
           margin-bottom: 0rem;
         `}
       >

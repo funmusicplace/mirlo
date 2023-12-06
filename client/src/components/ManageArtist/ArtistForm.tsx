@@ -200,8 +200,9 @@ export const ArtistForm: React.FC<{
       <div
         className={css`
           label {
+            display: block;
             font-size: 1.5rem;
-            line-height: 3rem;
+            margin-bottom: 1rem;
           }
         `}
       >
