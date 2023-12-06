@@ -7,7 +7,11 @@ const ArtistFormColors = () => {
   const { t } = useTranslation("translation", { keyPrefix: "artistForm" });
   return (
     <>
-      <label>
+      <label
+        className={css`
+          display: flex;
+        `}
+      >
         <h2>{t("customColors")}</h2>
       </label>
 

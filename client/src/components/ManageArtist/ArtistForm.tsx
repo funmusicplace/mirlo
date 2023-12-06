@@ -197,96 +197,105 @@ export const ArtistForm: React.FC<{
       onClose={onClose}
       title={existing ? "Edit artist" : "Create an artist"}
     >
-      <FormProvider {...methods}>
-        <form onSubmit={handleSubmit(soSave)}>
-          <div
-            className={css`
-              display: flex;
-            `}
-          >
+      <div
+        className={css`
+          label {
+            font-size: 1.5rem;
+            line-height: 2.5rem;
+          }
+        `}
+      >
+        <FormProvider {...methods}>
+          <form onSubmit={handleSubmit(soSave)}>
             <div
               className={css`
-                flex: 50%;
-                @media (max-width: ${bp.medium}px) {
-                  flex-direction: column;
-                }
+                display: flex;
               `}
             >
-              {existing && (
-                <UploadArtistImage
-                  existing={existing}
-                  reload={reload}
-                  imageType="banner"
-                  height="200px"
-                  width="100%"
-                  maxDimensions="2500x2500"
-                  isLoading={
-                    uploadBannerJobs?.[0]?.jobStatus !== undefined &&
-                    uploadBannerJobs?.[0]?.jobStatus !== "completed"
+              <div
+                className={css`
+                  flex: 50%;
+                  @media (max-width: ${bp.medium}px) {
+                    flex-direction: column;
                   }
-                />
-              )}
+                `}
+              >
+                {existing && (
+                  <UploadArtistImage
+                    existing={existing}
+                    reload={reload}
+                    imageType="banner"
+                    height="200px"
+                    width="100%"
+                    maxDimensions="2500x2500"
+                    isLoading={
+                      uploadBannerJobs?.[0]?.jobStatus !== undefined &&
+                      uploadBannerJobs?.[0]?.jobStatus !== "completed"
+                    }
+                  />
+                )}
+              </div>
+
+              <div
+                className={css`
+                  flex: 50%;
+                  margin-left: 1rem;
+                `}
+              >
+                {existing && (
+                  <UploadArtistImage
+                    existing={existing}
+                    reload={reload}
+                    imageType="avatar"
+                    height="200px"
+                    width="100%"
+                    maxDimensions="1500x1500"
+                    isLoading={
+                      uploadAvatarJobs?.[0]?.jobStatus !== undefined &&
+                      uploadAvatarJobs?.[0]?.jobStatus !== "completed"
+                    }
+                  />
+                )}
+              </div>
             </div>
 
-            <div
-              className={css`
-                flex: 50%;
-                margin-left: 1rem;
-              `}
-            >
-              {existing && (
-                <UploadArtistImage
-                  existing={existing}
-                  reload={reload}
-                  imageType="avatar"
-                  height="200px"
-                  width="100%"
-                  maxDimensions="1500x1500"
-                  isLoading={
-                    uploadAvatarJobs?.[0]?.jobStatus !== undefined &&
-                    uploadAvatarJobs?.[0]?.jobStatus !== "completed"
-                  }
+            <div>
+              <FormComponent>
+                <label>{t("displayName")} </label>
+                <InputEl {...register("name", { required: true })} />
+              </FormComponent>
+
+              <FormComponent>{existing && <ArtistFormColors />}</FormComponent>
+
+              <FormComponent>
+                <label>{t("urlSlug")} </label>
+                <InputEl
+                  {...register("urlSlug", {
+                    validate: { unique: validation },
+                    disabled: !!existing,
+                  })}
                 />
-              )}
+                <small>Must be unique</small>
+                {errors.urlSlug && (
+                  <small className="error">
+                    {errors.urlSlug.type === "unique" &&
+                      "This needs to be unique, try something else"}
+                  </small>
+                )}
+              </FormComponent>
+
+              <FormComponent>
+                <label>{t("bio")}</label>
+                <TextArea {...register("bio")} rows={7} />
+              </FormComponent>
+
+              <Button type="submit" disabled={isSaving} isLoading={isSaving}>
+                {existing ? t("saveArtist") : t("createArtist")}
+              </Button>
             </div>
-          </div>
-
-          <div>
-            <FormComponent>
-              <h2>{t("displayName")} </h2>
-              <InputEl {...register("name", { required: true })} />
-            </FormComponent>
-
-            <FormComponent>{existing && <ArtistFormColors />}</FormComponent>
-
-            <FormComponent>
-              <h2>{t("urlSlug")} </h2>
-              <InputEl
-                {...register("urlSlug", {
-                  validate: { unique: validation },
-                  disabled: !!existing,
-                })}
-              />
-              <small>Must be unique</small>
-              {errors.urlSlug && (
-                <small className="error">
-                  {errors.urlSlug.type === "unique" &&
-                    "This needs to be unique, try something else"}
-                </small>
-              )}
-            </FormComponent>
-
-            <FormComponent>
-              <h2>{t("bio")}</h2>
-              <TextArea {...register("bio")} rows={7} />
-            </FormComponent>
-
-            <Button type="submit" disabled={isSaving} isLoading={isSaving}>
-              {existing ? t("saveArtist") : t("createArtist")}
-            </Button>
-          </div>
-        </form>
-      </FormProvider>
+          </form>
+        </FormProvider>
+      </div>
     </Modal>
   );
 };
