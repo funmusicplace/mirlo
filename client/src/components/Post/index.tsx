@@ -10,6 +10,13 @@ import { useGlobalStateContext } from "state/GlobalState";
 import usePublicObjectById from "utils/usePublicObjectById";
 import { bp } from "../../constants";
 
+export const pageMarkdownWrapper = css`
+  margin-top: 2rem;
+  max-width: var(--mi-container-small);
+  margin: auto;
+  font-size: 18px;
+`;
+
 const Post: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "post" });
 
@@ -26,67 +33,66 @@ const Post: React.FC = () => {
   const ownedByUser = post.artist?.userId === user?.id;
 
   return (
-    <div
-      className={css`
-        max-width: var(--mi-container-small);
-        margin: auto;
-        font-size: 18px;
-        margin-top: 1rem;
-        display: flex;
-        justify-content: center;
-        width: 100%;
-        h1 {
-          margin-bottom: 0.5rem;
-        }
-
-        @media (min-width: ${bp.medium}px) {
-          font-size: 1.2rem;
-          font-weight: 100;
-          line-height: 1.5rem;
-        }
-      `}
-    >
-      <MetaCard
-        title={`${post.title} by ${post.artist?.name}`}
-        description={post.content.slice(0, 500)}
-      />
+    <div className={pageMarkdownWrapper}>
       <div
         className={css`
-          flex: 100%;
-          max-width: 700px;
+          margin-top: 1rem;
+          display: flex;
+          justify-content: center;
+          width: 100%;
+          h1 {
+            margin-bottom: 0.5rem;
+          }
+
+          @media (min-width: ${bp.medium}px) {
+            font-size: 1.2rem;
+            font-weight: 100;
+            line-height: 1.5rem;
+          }
         `}
       >
+        <MetaCard
+          title={`${post.title} by ${post.artist?.name}`}
+          description={post.content.slice(0, 500)}
+        />
         <div
           className={css`
-            display: flex;
-            justify-content: space-between;
+            flex: 100%;
+            max-width: 700px;
           `}
         >
-          <h1>{post.title}</h1>
-          {ownedByUser && (
-            <Link to={`/manage/artists/${post.artist?.id}`}>
-              <Button compact startIcon={<FaPen />}>
-                {t("edit")}
-              </Button>
-            </Link>
+          <div
+            className={css`
+              display: flex;
+              justify-content: space-between;
+            `}
+          >
+            <h1>{post.title}</h1>
+            {ownedByUser && (
+              <Link to={`/manage/artists/${post.artist?.id}`}>
+                <Button compact startIcon={<FaPen />}>
+                  {t("edit")}
+                </Button>
+              </Link>
+            )}
+          </div>
+          {post.artist && (
+            <em>
+              by{" "}
+              <Link
+                to={`/${post.artist.urlSlug?.toLowerCase() ?? post.artistId}`}
+              >
+                {post.artist?.name}
+              </Link>
+            </em>
           )}
+          <MarkdownContent
+            content={post.content}
+            className={css`
+              padding-top: 1rem;
+            `}
+          />
         </div>
-        {post.artist && (
-          <em>
-            by{" "}
-            <Link
-              to={`/${post.artist.urlSlug?.toLowerCase() ?? post.artistId}`}
-            >
-              {post.artist?.name}
-            </Link>
-          </em>
-        )}
-        <MarkdownContent
-          content={post.content}
-          className={css`
-            padding-top: 1rem;
-          `}
-        />
       </div>
     </div>
   );
