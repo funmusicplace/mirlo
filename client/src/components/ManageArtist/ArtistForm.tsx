@@ -202,8 +202,13 @@ export const ArtistForm: React.FC<{
           margin-top: 0.5rem;
           label {
             display: block;
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
+            font-size: 1.4rem;
+            margin-bottom: 0.7rem;
+          }
+          @media (max-width: ${bp.medium}px) {
+            label {
+              font-size: 1.3rem;
+            }
           }
         `}
       >
@@ -276,6 +281,9 @@ export const ArtistForm: React.FC<{
                     validate: { unique: validation },
                     disabled: !!existing,
                   })}
+                  className={css`
+                    margin-bottom: 0.5rem;
+                  `}
                 />
                 <small>Must be unique</small>
                 {errors.urlSlug && (

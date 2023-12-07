@@ -23,6 +23,8 @@ export const InputEl = styled.input`
 
   &[disabled] {
     background-color: var(--mi-darken-background-color);
+    border: solid 1px var(--mi-lighten-background-color);
+    color: var(--mi-lighter-foreground-color);
   }
 
   &:focus {

@@ -120,6 +120,11 @@ const CustomButton = styled.button<Compactable>`
             color: var(--mi-${props.role ?? "secondary"}-color);
           }
 
+            @media screen and (max-width: ${bp.small}px) {
+              font-size: 0.8rem;
+              padding: ${props.onlyIcon ? ".5rem .5rem" : ".25rem .25rem"};
+            }
+
         `;
     }
   }}

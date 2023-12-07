@@ -7,22 +7,21 @@ const ArtistFormColors = () => {
   const { t } = useTranslation("translation", { keyPrefix: "artistForm" });
   return (
     <>
-      <label
-        className={css`
-          margin-bottom: 0rem;
-        `}
-      >
-        {t("customColors")}
-      </label>
+      <label>{t("customColors")}</label>
 
       <div
         className={css`
           display: flex;
           margin-bottom: 0.75rem;
 
-          div {
+          > div {
             margin-right: 1rem;
-            margin-top: 0;
+            margin-top: 0rem;
+          }
+
+          > div > div {
+            margin-right: 1rem;
+            margin-top: 0.25rem;
           }
 
           div:last-child {
@@ -30,9 +29,15 @@ const ArtistFormColors = () => {
           }
 
           span {
-            margin: 0.6rem 0.5rem 0.3rem 0rem;
-            padding: 0.1rem;
+            margin: 0rem 0.5rem 0rem 0rem;
+            padding: 1.5rem;
+            height: auto;
+            width: 2rem;
             border-radius: 100px;
+          }
+
+          input {
+            margin-top: 0rem !important;
           }
 
           @media (max-width: ${bp.medium}px) {
