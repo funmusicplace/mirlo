@@ -23,7 +23,6 @@ const UploadImage: React.FC<{
       <div
         className={css`
           position: relative;
-          margin-bottom: 0.5rem;
         `}
       >
         {existingCover && (image?.length === 0 || image === undefined) && (

@@ -23,6 +23,7 @@ const UploadArtistImage: React.FC<{
   return (
     <div
       className={css`
+        height: 100%;
         margin-bottom: 1rem;
       `}
     >
@@ -41,14 +42,39 @@ const UploadArtistImage: React.FC<{
           margin-bottom: 0.5rem;
         `}
       >
-        <UploadImage
-          formName={imageType}
-          existingCover={imageUrl}
-          updatedAt={existing[imageType]?.updatedAt}
-          isLoading={isLoading}
-        />
+        <div
+          className={css`
+            display: flex;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            img {
+              margin-right: 1rem;
+              flex: 45%;
+              width: 100%;
+            }
+            input {
+              flex: 45%;
+              width: 45%;
+            }
+          `}
+        >
+          <UploadImage
+            formName={imageType}
+            existingCover={imageUrl}
+            updatedAt={existing[imageType]?.updatedAt}
+            isLoading={isLoading}
+          />
+          <small
+            className={css`
+              width: 100%;
+              flex: 100%;
+              margin-top: 0.5rem;
+            `}
+          >
+            {t("dimensionsTip", { maxDimensions })}
+          </small>
+        </div>
       </div>
-      <small>{t("dimensionsTip", { maxDimensions })}</small>
     </div>
   );
 };

@@ -232,7 +232,7 @@ export const ArtistForm: React.FC<{
                     existing={existing}
                     reload={reload}
                     imageType="banner"
-                    height="200px"
+                    height="auto"
                     width="100%"
                     maxDimensions="2500x2500"
                     isLoading={
@@ -254,7 +254,7 @@ export const ArtistForm: React.FC<{
                     existing={existing}
                     reload={reload}
                     imageType="avatar"
-                    height="200px"
+                    height="auto"
                     width="100%"
                     maxDimensions="1500x1500"
                     isLoading={
