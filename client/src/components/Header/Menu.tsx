@@ -155,12 +155,25 @@ const Menu: React.FC = (props) => {
               </li>
             );
           })}
-          <li
-            className={css`
-              border-top: solid 1px var(--mi-lighter-foreground-color);
-            `}
-          >
-            <Button onClick={onLogOut} className={css``}>
+          {state?.user?.isAdmin && (
+            <li>
+              <Button
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  navigate("/admin");
+                }}
+              >
+                {t("admin")}
+              </Button>
+            </li>
+          )}
+          <li>
+            <Button
+              onClick={onLogOut}
+              className={css`
+                border-top: solid 1px var(--mi-lighter-foreground-color);
+              `}
+            >
               {t("logOut")}
             </Button>
           </li>

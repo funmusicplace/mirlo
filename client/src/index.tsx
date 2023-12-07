@@ -60,7 +60,14 @@ const router = createBrowserRouter([
           </div>
         ),
       },
-
+      {
+        path: "pages/privacy",
+        element: <MarkdownContent source="/pages/Privacy.md" />,
+      },
+      {
+        path: "pages/terms",
+        element: <MarkdownContent source="/pages/Terms.md" />,
+      },
       { path: "widget/track/:id", element: <TrackWidget /> },
       { path: "widget/trackgroup/:id", element: <TrackGroupWidget /> },
       { path: "post/:postId", element: <Post /> },
@@ -152,7 +159,7 @@ const router = createBrowserRouter([
       {
         path: "admin",
         element: (
-          <AuthWrapper>
+          <AuthWrapper adminOnly>
             <Admin />
           </AuthWrapper>
         ),

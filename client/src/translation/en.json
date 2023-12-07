@@ -257,7 +257,10 @@
   "admin": {
     "users": "Users",
     "trackgroups": "Trackgroups",
-    "tracks": "Tracks"
+    "tracks": "Tracks",
+    "callServerTasks": "Call server tasks",
+    "whatTaskCall": "What task do you want to call on the server?",
+    "submitServerTask": "Submit server task"
   },
   "trackDetails": {
     "track": "Track:",
