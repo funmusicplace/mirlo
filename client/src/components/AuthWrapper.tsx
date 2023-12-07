@@ -2,9 +2,10 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useGlobalStateContext } from "state/GlobalState";
 
-export const AuthWrapper: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+export const AuthWrapper: React.FC<{
+  children: React.ReactNode;
+  adminOnly?: boolean;
+}> = ({ children, adminOnly }) => {
   const navigate = useNavigate();
   const {
     state: { user },
@@ -14,9 +15,16 @@ export const AuthWrapper: React.FC<{ children: React.ReactNode }> = ({
     if (!user) {
       navigate("/");
     }
-  }, [navigate, user]);
+    if (adminOnly && !user?.isAdmin) {
+      navigate("/");
+    }
+  }, [adminOnly, navigate, user]);
 
   if (!user) {
+    return null;
+  }
+
+  if (adminOnly && !user.isAdmin) {
     return null;
   }
 
