@@ -106,7 +106,6 @@ const CustomButton = styled.button<Compactable>`
       default:
         return `
           padding: ${props.compact ? ".3rem .5rem" : "1rem"};
-          
           padding: ${props.onlyIcon ? ".5rem .5rem" : ".6rem .6rem"};
           background-color:  var(--mi-${props.role ?? "secondary"}-color);
           background-color:  ${props.transparent ? "transparent" : ""};
@@ -122,7 +121,7 @@ const CustomButton = styled.button<Compactable>`
 
             @media screen and (max-width: ${bp.small}px) {
               font-size: 0.8rem;
-              padding: ${props.onlyIcon ? ".5rem .5rem" : ".25rem .25rem"};
+              padding: ${props.transparent ? ".5rem .25rem .5rem .25rem" : ""};
             }
 
         `;
