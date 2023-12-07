@@ -349,7 +349,8 @@ function Home() {
                         color: var(--mi-normal-foreground-color);
                       `}
                     >
-                      <MarkdownContent content={p.content} />
+                      {/* <MarkdownContent content={p.content} />*/}
+                      {p.content}
                     </span>
                   </div>
                 </div>
