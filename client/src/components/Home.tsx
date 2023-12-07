@@ -8,7 +8,6 @@ import Box from "./common/Box";
 import Logo from "./common/Logo";
 import { Trans, useTranslation } from "react-i18next";
 import Releases from "./Releases";
-import MarkdownContent from "./common/MarkdownContent";
 
 function Home() {
   const {
