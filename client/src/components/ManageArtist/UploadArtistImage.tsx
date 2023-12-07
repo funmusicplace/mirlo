@@ -18,32 +18,63 @@ const UploadArtistImage: React.FC<{
   const imageUrl =
     imageType === "banner"
       ? existing?.banner?.sizes?.[625]
-      : existing?.avatar?.sizes?.[120];
+      : existing?.avatar?.sizes?.[300];
 
   return (
     <div
       className={css`
+        height: 100%;
         margin-bottom: 1rem;
       `}
     >
-      <label>
-        <strong>{t(imageType)}</strong>
-      </label>
+      <div
+        className={css`
+          margin-bottom: 0.5rem;
+        `}
+      >
+        <label>{t(imageType)}</label>
+      </div>
       <div
         className={css`
           position: relative;
           width: ${width};
           min-height: ${height};
+          margin-bottom: 0.5rem;
         `}
       >
-        <UploadImage
-          formName={imageType}
-          existingCover={imageUrl}
-          updatedAt={existing[imageType]?.updatedAt}
-          isLoading={isLoading}
-        />
+        <div
+          className={css`
+            display: flex;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            img {
+              margin-right: 1rem;
+              flex: 45%;
+              width: 100%;
+            }
+            input {
+              flex: 45%;
+              width: 45%;
+            }
+          `}
+        >
+          <UploadImage
+            formName={imageType}
+            existingCover={imageUrl}
+            updatedAt={existing[imageType]?.updatedAt}
+            isLoading={isLoading}
+          />
+          <small
+            className={css`
+              width: 100%;
+              flex: 100%;
+              margin-top: 0.5rem;
+            `}
+          >
+            {t("dimensionsTip", { maxDimensions })}
+          </small>
+        </div>
       </div>
-      <small>{t("dimensionsTip", { maxDimensions })}</small>
     </div>
   );
 };

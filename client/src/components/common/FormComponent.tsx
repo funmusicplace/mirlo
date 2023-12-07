@@ -1,7 +1,8 @@
 import styled from "@emotion/styled";
 
 const FormComponent = styled.div`
-  margin-bottom: 0.75rem;
+  margin-bottom: 1.5rem;
+  margin-top: 0.75rem;
 
   input[type="checkbox"] + label {
     display: flex;
@@ -16,6 +17,10 @@ const FormComponent = styled.div`
 
   .error {
     color: var(--mi-warning-color);
+  }
+
+  > div > div {
+    margin-bottom: 1rem;
   }
 `;
 

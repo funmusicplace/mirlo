@@ -10,6 +10,7 @@ export const ManageSectionWrapper = styled.div`
     border-radius: 0;
     padding: var(--mi-side-paddings-xsmall);
     padding-top: 0rem;
+    padding-bottom: 1rem;
   }
 `;
 

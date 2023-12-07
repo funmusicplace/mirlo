@@ -24,7 +24,7 @@ const styles = `html {
   --mi-darken-warning-background-color: #df250b;
 
   --mi-border-radius: 3px;
-  --mi-border-radius-x: 20px;
+  --mi-border-radius-x: 15px;
   --mi-border-radius-focus: 8px;
 
   --mi-icon-button-background-color: var(--mi-darken-x-background-color);
@@ -40,6 +40,10 @@ const styles = `html {
   --mi-side-paddings-normal: 0rem 2rem;
   --mi-side-paddings-small: 0rem 1rem;
   --mi-side-paddings-xsmall: 0rem .7rem;
+
+  --mi-container-full: 100%;
+  --mi-container-big: 1080px;
+  --mi-container-small: 700px;
 
 }
 
@@ -85,7 +89,7 @@ body,
 
 h1 {
   font-size: 2.5rem;
-  line-height: 2em;
+  line-height: 3rem;
   font-weight: normal;
 
   a {

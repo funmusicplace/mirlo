@@ -46,7 +46,7 @@ const Content = styled.div<ContentProps>`
   border-radius: var(--mi-border-radius-x);
 
   ::-webkit-scrollbar {
-    width: 5px;
+    width: 3px;
   }
   ::-webkit-scrollbar-track {
     -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
@@ -64,7 +64,11 @@ const Content = styled.div<ContentProps>`
   @media (max-width: ${bp.small}px) {
     width: 100%;
     padding: 1rem;
+    min-height: calc(90vh - 80px);
     padding-top: 0;
+    bottom: 0;
+    border-radius: var(--mi-border-radius-focus) var(--mi-border-radius-focus) 0
+      0;
   }
 `;
 
@@ -135,6 +139,7 @@ export const Modal: React.FC<{
 
             h2 {
               margin-bottom: 0;
+              font-weight: bold;
             }
               }
             `}

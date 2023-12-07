@@ -111,7 +111,7 @@ const ArtistSupportBox: React.FC<{
             border-bottom: solid 1px grey;
             text-align: center;
             h3 {
-              font-size: 1rem;
+              font-size: 1.2rem;
               padding-bottom: 0.5rem;
             }
             @media screen and (max-width: ${bp.small}px) {
@@ -121,7 +121,7 @@ const ArtistSupportBox: React.FC<{
         >
           <h3
             className={css`
-              text-transform: uppercase;
+              text-transform: Capitalize;
             `}
           >
             {subscriptionTier.name}

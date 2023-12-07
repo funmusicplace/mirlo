@@ -86,6 +86,7 @@ export const Manage: React.FC = () => {
               to={`artists/${a.id}`}
               className={css`
                 margin-right: 1rem;
+                margin-bottom: 1rem;
               `}
             >
               <Button variant="outlined">{a.name}</Button>

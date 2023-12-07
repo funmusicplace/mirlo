@@ -2,6 +2,7 @@ import React from "react";
 import Modal from "components/common/Modal";
 import Button from "../common/Button";
 import { FormProvider, useForm } from "react-hook-form";
+import { bp } from "../../constants";
 import api from "services/api";
 import { InputEl } from "../common/Input";
 import FormComponent from "components/common/FormComponent";
@@ -196,82 +197,115 @@ export const ArtistForm: React.FC<{
       onClose={onClose}
       title={existing ? "Edit artist" : "Create an artist"}
     >
-      <FormProvider {...methods}>
-        <form onSubmit={handleSubmit(soSave)}>
-          <div
-            className={css`
-              display: flex;
-            `}
-          >
-            {existing && (
-              <UploadArtistImage
-                existing={existing}
-                reload={reload}
-                imageType="banner"
-                height="125px"
-                width="100%"
-                maxDimensions="2500x2500"
-                isLoading={
-                  uploadBannerJobs?.[0]?.jobStatus !== undefined &&
-                  uploadBannerJobs?.[0]?.jobStatus !== "completed"
-                }
-              />
-            )}
+      <div
+        className={css`
+          margin-top: 0.5rem;
+          label {
+            display: block;
+            font-size: 1.4rem;
+            margin-bottom: 0.7rem;
+          }
+          @media (max-width: ${bp.medium}px) {
+            label {
+              font-size: 1.3rem;
+            }
+          }
+        `}
+      >
+        <FormProvider {...methods}>
+          <form onSubmit={handleSubmit(soSave)}>
+            <div
+              className={css`
+                display: flex;
+              `}
+            >
+              <div
+                className={css`
+                  flex: 50%;
+                  @media (max-width: ${bp.medium}px) {
+                    flex-direction: column;
+                  }
+                `}
+              >
+                {existing && (
+                  <UploadArtistImage
+                    existing={existing}
+                    reload={reload}
+                    imageType="banner"
+                    height="auto"
+                    width="100%"
+                    maxDimensions="2500x2500"
+                    isLoading={
+                      uploadBannerJobs?.[0]?.jobStatus !== undefined &&
+                      uploadBannerJobs?.[0]?.jobStatus !== "completed"
+                    }
+                  />
+                )}
+              </div>
 
-            {existing && (
-              <UploadArtistImage
-                existing={existing}
-                reload={reload}
-                imageType="avatar"
-                height="120px"
-                width="120px"
-                maxDimensions="1500x1500"
-                isLoading={
-                  uploadAvatarJobs?.[0]?.jobStatus !== undefined &&
-                  uploadAvatarJobs?.[0]?.jobStatus !== "completed"
-                }
-              />
-            )}
-          </div>
+              <div
+                className={css`
+                  flex: 50%;
+                  margin-left: 1rem;
+                `}
+              >
+                {existing && (
+                  <UploadArtistImage
+                    existing={existing}
+                    reload={reload}
+                    imageType="avatar"
+                    height="auto"
+                    width="100%"
+                    maxDimensions="1500x1500"
+                    isLoading={
+                      uploadAvatarJobs?.[0]?.jobStatus !== undefined &&
+                      uploadAvatarJobs?.[0]?.jobStatus !== "completed"
+                    }
+                  />
+                )}
+              </div>
+            </div>
 
-          <div
-            className={css`
-              margin-top: 1rem;
-            `}
-          >
-            <FormComponent>
-              {t("displayName")}:{" "}
-              <InputEl {...register("name", { required: true })} />
-            </FormComponent>
-            {existing && <ArtistFormColors />}
+            <div>
+              <FormComponent>
+                <label>{t("displayName")} </label>
+                <InputEl {...register("name", { required: true })} />
+              </FormComponent>
 
-            <FormComponent>
-              {t("urlSlug")}:{" "}
-              <InputEl
-                {...register("urlSlug", {
-                  validate: { unique: validation },
-                  disabled: !!existing,
-                })}
-              />
-              <small>Must be unique</small>
-              {errors.urlSlug && (
-                <small className="error">
-                  {errors.urlSlug.type === "unique" &&
-                    "This needs to be unique, try something else"}
-                </small>
-              )}
-            </FormComponent>
-            <FormComponent>
-              {t("bio")}:
-              <TextArea {...register("bio")} rows={7} />
-            </FormComponent>
+              <FormComponent>{existing && <ArtistFormColors />}</FormComponent>
 
-            <Button type="submit" disabled={isSaving} isLoading={isSaving}>
-              {existing ? t("saveArtist") : t("createArtist")}
-            </Button>
-          </div>
-        </form>
-      </FormProvider>
+              <FormComponent>
+                <label>{t("urlSlug")} </label>
+                <InputEl
+                  {...register("urlSlug", {
+                    validate: { unique: validation },
+                    disabled: !!existing,
+                  })}
+                  className={css`
+                    margin-bottom: 0.5rem;
+                  `}
+                />
+                <small>Must be unique</small>
+                {errors.urlSlug && (
+                  <small className="error">
+                    {errors.urlSlug.type === "unique" &&
+                      "This needs to be unique, try something else"}
+                  </small>
+                )}
+              </FormComponent>
+
+              <FormComponent>
+                <label>{t("bio")}</label>
+                <TextArea {...register("bio")} rows={7} />
+              </FormComponent>
+
+              <Button type="submit" disabled={isSaving} isLoading={isSaving}>
+                {existing ? t("saveArtist") : t("createArtist")}
+              </Button>
+            </div>
+          </form>
+        </FormProvider>
+      </div>
     </Modal>
   );
 };
