@@ -37,15 +37,26 @@ const Releases = () => {
         className={css`
           padding-bottom: 0.5rem;
           margin-bottom: 1rem;
+          padding-top: 0.5rem;
           line-height: 1em;
+          position: sticky;
+          top: -0.01rem;
+          z-index: +1;
+          border-bottom: solid 1px var(--mi-lighter-foreground-color);
+          background-color: var(--mi-normal-background-color);
+
           @media screen and (max-width: ${bp.medium}px) {
             margin-bottom: 0.5rem;
           }
+
+          @media screen and (max-width: ${bp.small}px) {
+            font-size: 1.8rem;
+          }
+
           @media screen and (min-width: ${bp.medium}px) {
             position: sticky;
             top: 55px;
             ${!userId ? "top: -0.1rem; padding-top: .5rem;" : ""}
-            background-color: var(--mi-normal-background-color);
             z-index: +1;
             border-bottom: solid 1px var(--mi-lighter-foreground-color);
           }

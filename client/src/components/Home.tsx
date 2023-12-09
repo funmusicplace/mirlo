@@ -207,20 +207,26 @@ function Home() {
         <>
           <h1
             className={css`
+              position: sticky;
+              top: 0;
+              background-color: var(--mi-normal-background-color);
+              border-bottom: solid 1px var(--mi-lighter-foreground-color);
+              padding: 0.5rem 0;
+              z-index: +1;
               margin-bottom: 1rem;
               margin-top: 2em;
               line-height: 1em;
+
               @media screen and (max-width: ${bp.medium}px) {
                 margin-bottom: 0.5rem;
               }
+              @media screen and (max-width: ${bp.small}px) {
+                font-size: 1.8rem;
+              }
               @media screen and (min-width: ${bp.medium}px) {
                 position: sticky;
-                padding-bottom: 1rem;
                 margin-bottom: 1rem;
                 top: 55px;
-                background-color: var(--mi-normal-background-color);
-                z-index: +1;
-                border-bottom: solid 1px var(--mi-lighter-foreground-color);
               }
             `}
           >
@@ -228,9 +234,11 @@ function Home() {
           </h1>
           <div
             className={css`
+              margin-top: 1rem;
               display: flex;
               flex-wrap: wrap;
               justify-content: space-between;
+
               a {
                 width: 32%;
               }
@@ -239,28 +247,38 @@ function Home() {
                 padding: 0rem !important;
                 background: var(--mi-light-background-color);
               }
+
+              @media screen and (max-width: ${bp.medium}px) {
+                flex-direction: column;
+
+                a {
+                  width: 100%;
+                }
+              }
             `}
           >
             {posts.map((p) => (
               <Link
                 to={`/post/${p.id}/`}
                 className={css`
-                  display: block;
-                  margin-bottom: 0.5rem;
+                  display: flex;
+                  margin-bottom: 1.5rem;
                   border-radius: 5px;
-                  filter: brightness(100%);
+                  background-color: var(--mi-darken-background-color);
+                  filter: brightness(95%);
+                  width: 100%;
+
                   :hover {
-                    text-decoration: none;
-                    background-color: var(--mi-darken-background-color);
                     transition: 0.2s ease-in-out;
-                    filter: brightness(95%);
+                    text-decoration: none;
+                    background-color: rgba(50, 0, 0, 0.07);
+                    filter: brightness(90%);
                   }
 
                   @media (prefers-color-scheme: dark) {
                     :hover {
-                      background-color: var(--mi-lighten-background-color);
-                      transition: 0.2s ease-in-out;
                       filter: brightness(120%);
+                      background-color: rgba(100, 100, 100, 0.2);
                     }
                   }
                 `}
@@ -268,7 +286,7 @@ function Home() {
                 <Overlay width="100%" height="100%"></Overlay>
                 <PostCard
                   width="100%"
-                  height="300px"
+                  height="350px"
                   dateposition="100%"
                   p={p}
                 ></PostCard>

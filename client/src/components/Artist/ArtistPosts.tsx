@@ -51,15 +51,16 @@ const ArtistPosts: React.FC<{ artist: Artist }> = ({ artist }) => {
             className={css`
               display: flex;
               margin-bottom: 0.5rem;
-              border-radius: 5px;
+              border-radius: 10px;
               background-color: var(--mi-darken-background-color);
-              filter: brightness(100%);
+              filter: brightness(95%);
               width: 100%;
 
               :hover {
                 transition: 0.2s ease-in-out;
                 text-decoration: none;
-                background-color: var(--mi-darken-background-color);
+                background-color: rgba(50, 0, 0, 0.07);
+                filter: brightness(90%);
               }
               @media (prefers-color-scheme: dark) {
                 :hover {
