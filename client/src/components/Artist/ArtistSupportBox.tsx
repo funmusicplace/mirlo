@@ -51,11 +51,11 @@ const ArtistSupportBox: React.FC<{
         className={css`
           background-color: var(--mi-darken-background-color);
           margin-bottom: 1rem;
-          padding: 0 !important;
+          padding: 0 1.5rem !important;
           display: flex;
           flex-direction: column;
           justify-content: space-between;
-          outline: solid 1px grey;
+          outline: var(--mi-border-solid-narrow);
 
           max-width: 32.3%;
           flex: 32.3%;
@@ -107,8 +107,8 @@ const ArtistSupportBox: React.FC<{
       >
         <div
           className={css`
-            padding: 1.5rem;
-            border-bottom: solid 1px grey;
+            padding: 1.5rem 0;
+            border-bottom: var(--mi-border-solid-narrow);
             text-align: center;
             h3 {
               font-size: 1.2rem;
@@ -135,14 +135,13 @@ const ArtistSupportBox: React.FC<{
         </div>
         <div
           className={css`
-            padding: 1.5rem 1.5rem 0.5rem 1.5rem;
+            padding-top: 1rem;
             height: 100%;
             p {
               display: flex;
               align-items: flex-start;
             }
             @media screen and (max-width: ${bp.small}px) {
-              padding: 1rem 1rem 0 1rem;
             }
           `}
         >
@@ -150,7 +149,7 @@ const ArtistSupportBox: React.FC<{
         </div>
         <div
           className={css`
-            margin: 0rem 0.5rem 0.5rem 0.5rem;
+            margin: 0.5rem 0;
 
             button {
               margin: 0;

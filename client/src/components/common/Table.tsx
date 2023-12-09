@@ -33,7 +33,7 @@ export const Table = styled.table`
     text-align: right;
   }
 
-  @media screen and (max-width: 800px) {
+  @media screen and (max-width: 768px) {
     & td,
     &th {
       padding: 0.25rem 0.5rem;

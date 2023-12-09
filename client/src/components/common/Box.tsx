@@ -1,4 +1,5 @@
 import styled from "@emotion/styled";
+import { bp } from "../../constants";
 
 const Box = styled.div<{ variant?: "success" | "info" }>`
   width: 100%;
@@ -34,7 +35,7 @@ const Box = styled.div<{ variant?: "success" | "info" }>`
     background: var(--mi-lighten-background-color);
   }
 
-  @media screen and (max-width: 800px) {
+  @media screen and (max-width: ${bp.medium}px) {
     padding: 0.5rem 0.7rem;
     // background-color: var(--mi-normal-background-color);
   }

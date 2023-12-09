@@ -4,11 +4,11 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { useGlobalStateContext } from "state/GlobalState";
 import api from "../services/api";
-import Box from "./common/Box";
 import Logo from "./common/Logo";
 import { Trans, useTranslation } from "react-i18next";
 import Releases from "./Releases";
-import MarkdownContent from "./common/MarkdownContent";
+import Overlay from "./common/Overlay";
+import PostCard from "./common/PostCard";
 
 function Home() {
   const {
@@ -207,155 +207,92 @@ function Home() {
         <>
           <h1
             className={css`
+              position: sticky;
+              top: 0;
+              background-color: var(--mi-normal-background-color);
+              border-bottom: solid 1px var(--mi-lighter-foreground-color);
+              padding: 0.5rem 0;
+              z-index: +1;
               margin-bottom: 1rem;
               margin-top: 2em;
               line-height: 1em;
+
               @media screen and (max-width: ${bp.medium}px) {
                 margin-bottom: 0.5rem;
               }
+              @media screen and (max-width: ${bp.small}px) {
+                font-size: 1.8rem;
+              }
               @media screen and (min-width: ${bp.medium}px) {
                 position: sticky;
-                padding-bottom: 1rem;
                 margin-bottom: 1rem;
                 top: 55px;
-                background-color: var(--mi-normal-background-color);
-                z-index: +1;
-                border-bottom: solid 1px var(--mi-lighter-foreground-color);
               }
             `}
           >
             {t("latestCommunityPost")}
           </h1>
-          {posts.map((p) => (
-            <Link
-              to={`/post/${p.id}/`}
-              className={css`
-                width: 100%;
-                :hover {
-                  text-decoration: none !important;
-                  filter: brightness(90%);
+          <div
+            className={css`
+              margin-top: 1rem;
+              display: flex;
+              flex-wrap: wrap;
+              justify-content: space-between;
+
+              a {
+                width: 32%;
+              }
+
+              @media screen and (max-width: ${bp.medium}px) {
+                padding: 0rem !important;
+                background: var(--mi-light-background-color);
+              }
+
+              @media screen and (max-width: ${bp.medium}px) {
+                flex-direction: column;
+
+                a {
+                  width: 100%;
                 }
-                @media (prefers-color-scheme: dark) {
-                  :hover {
-                    filter: brightness(140%);
-                  }
-                }
-              `}
-            >
-              <Box
-                key={p.id}
+              }
+            `}
+          >
+            {posts.map((p) => (
+              <Link
+                to={`/post/${p.id}/`}
                 className={css`
-                  border: solid 1px grey;
-                  margin-bottom: 0.5rem !important;
-                  padding: 0 !important;
-                  justify-content: space-between;
-                  @media screen and (max-width: ${bp.medium}px) {
-                    width: 100% !important;
+                  display: flex;
+                  margin-bottom: 1.5rem;
+                  border-radius: 5px;
+                  background-color: var(--mi-darken-background-color);
+                  filter: brightness(95%);
+                  width: 100%;
+
+                  :hover {
+                    transition: 0.2s ease-in-out;
+                    text-decoration: none;
+                    background-color: rgba(50, 0, 0, 0.07);
+                    filter: brightness(90%);
                   }
-                  @media screen and (max-width: ${bp.small}px) {
-                    font-size: var(--mi-font-size-small) !important;
+
+                  @media (prefers-color-scheme: dark) {
+                    :hover {
+                      filter: brightness(120%);
+                      background-color: rgba(100, 100, 100, 0.2);
+                    }
                   }
                 `}
               >
-                <div
-                  className={css`
-                    display: flex;
-                    flex-direction: column;
-                    align-items: flex-start;
-                    padding: 1rem;
-                    margin: 0;
-                    width: 100%;
-                    overflow: hidden;
-                    transition: 0.2s ease-in-out;
-                    background-color: var(--mi-light-background-color);
-
-                    :hover {
-                      background-color: var(--mi-darken-background-color);
-                      transition: 0.2s ease-in-out;
-                    }
-                    @media (prefers-color-scheme: dark) {
-                    :hover {
-                      background-color: var(--mi-lighten-background-color);
-                      transition: 0.2s ease-in-out;
-                    }
-                  `}
-                >
-                  <div
-                    className={css`
-                      padding-bottom: 1rem;
-                      width: 100%;
-                    `}
-                  >
-                    {/* <h5>{p.title}</h5> */}
-                    <div
-                      className={css`
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                        flex-wrap: wrap;
-                        margin-bottom: 0.5rem;
-                      `}
-                    >
-                      <h4
-                        className={css`
-                          padding-bottom: 0.3rem;
-                          text-align: left;
-                        `}
-                      >
-                        <Link
-                          to={`/post/${p.id}/`}
-                          className={css`
-                            font-weight: normal;
-                            text-align: center;
-                          `}
-                        >
-                          {p.title}
-                        </Link>
-                      </h4>
-                      <span
-                        className={css`
-                          color: grey;
-                        `}
-                      >
-                        {new Date(p.publishedAt).toLocaleDateString("en-US", {
-                          weekday: "long",
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        })}
-                      </span>
-                    </div>
-                    {p.artist && (
-                      <em>
-                        by{" "}
-                        <Link to={`/${p.artist.urlSlug ?? p.artist.id}`}>
-                          {p.artist?.name}
-                        </Link>
-                      </em>
-                    )}
-                  </div>
-
-                  <div
-                    className={css`
-                      width: 100%;
-                    `}
-                  >
-                    <span
-                      className={css`
-                        white-space: nowrap;
-                        display: block;
-                        overflow: hidden;
-                        text-overflow: ellipsis;
-                        color: var(--mi-normal-foreground-color);
-                      `}
-                    >
-                      <MarkdownContent content={p.content} />
-                    </span>
-                  </div>
-                </div>
-              </Box>
-            </Link>
-          ))}
+                <Overlay width="100%" height="100%"></Overlay>
+                <PostCard
+                  width="100%"
+                  height="350px"
+                  dateposition="100%"
+                  p={p}
+                ></PostCard>
+              </Link>
+            ))}
+          </div>
         </>
       )}
     </div>

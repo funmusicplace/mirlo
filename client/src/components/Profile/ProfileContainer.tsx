@@ -18,6 +18,9 @@ const ProfileContainer: React.FC = () => {
           padding: 0 !important;
           width: 100%;
           padding: var(--mi-side-paddings-xsmall);
+          h1 {
+            margin: 0.7rem 0;
+          }
         `}
       >
         <Tabs
