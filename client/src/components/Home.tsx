@@ -4,11 +4,11 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { useGlobalStateContext } from "state/GlobalState";
 import api from "../services/api";
-import Box from "./common/Box";
 import Logo from "./common/Logo";
 import { Trans, useTranslation } from "react-i18next";
 import Releases from "./Releases";
-import MarkdownContent from "./common/MarkdownContent";
+import Overlay from "./common/Overlay";
+import PostCard from "./common/PostCard";
 
 function Home() {
   const {
@@ -226,136 +226,55 @@ function Home() {
           >
             {t("latestCommunityPost")}
           </h1>
-          {posts.map((p) => (
-            <Link
-              to={`/post/${p.id}/`}
-              className={css`
-                width: 100%;
-                :hover {
-                  text-decoration: none !important;
-                  filter: brightness(90%);
-                }
-                @media (prefers-color-scheme: dark) {
-                  :hover {
-                    filter: brightness(140%);
-                  }
-                }
-              `}
-            >
-              <Box
-                key={p.id}
-                className={css`
-                  border: solid 1px grey;
-                  margin-bottom: 0.5rem !important;
-                  padding: 0 !important;
-                  justify-content: space-between;
-                  @media screen and (max-width: ${bp.medium}px) {
-                    width: 100% !important;
-                  }
-                  @media screen and (max-width: ${bp.small}px) {
-                    font-size: var(--mi-font-size-small) !important;
-                  }
-                `}
-              >
-                <div
-                  className={css`
-                    display: flex;
-                    flex-direction: column;
-                    align-items: flex-start;
-                    padding: 1rem;
-                    margin: 0;
-                    width: 100%;
-                    overflow: hidden;
-                    transition: 0.2s ease-in-out;
-                    background-color: var(--mi-light-background-color);
+          <div
+            className={css`
+              display: flex;
+              flex-wrap: wrap;
+              justify-content: space-between;
+              a {
+                width: 32%;
+              }
 
-                    :hover {
-                      background-color: var(--mi-darken-background-color);
-                      transition: 0.2s ease-in-out;
-                    }
-                    @media (prefers-color-scheme: dark) {
+              @media screen and (max-width: ${bp.medium}px) {
+                padding: 0rem !important;
+                background: var(--mi-light-background-color);
+              }
+            `}
+          >
+            {posts.map((p) => (
+              <Link
+                to={`/post/${p.id}/`}
+                className={css`
+                  display: block;
+                  margin-bottom: 0.5rem;
+                  border-radius: 5px;
+                  filter: brightness(100%);
+                  :hover {
+                    text-decoration: none;
+                    background-color: var(--mi-darken-background-color);
+                    transition: 0.2s ease-in-out;
+                    filter: brightness(95%);
+                  }
+
+                  @media (prefers-color-scheme: dark) {
                     :hover {
                       background-color: var(--mi-lighten-background-color);
                       transition: 0.2s ease-in-out;
+                      filter: brightness(120%);
                     }
-                  `}
-                >
-                  <div
-                    className={css`
-                      padding-bottom: 1rem;
-                      width: 100%;
-                    `}
-                  >
-                    {/* <h5>{p.title}</h5> */}
-                    <div
-                      className={css`
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                        flex-wrap: wrap;
-                        margin-bottom: 0.5rem;
-                      `}
-                    >
-                      <h4
-                        className={css`
-                          padding-bottom: 0.3rem;
-                          text-align: left;
-                        `}
-                      >
-                        <Link
-                          to={`/post/${p.id}/`}
-                          className={css`
-                            font-weight: normal;
-                            text-align: center;
-                          `}
-                        >
-                          {p.title}
-                        </Link>
-                      </h4>
-                      <span
-                        className={css`
-                          color: grey;
-                        `}
-                      >
-                        {new Date(p.publishedAt).toLocaleDateString("en-US", {
-                          weekday: "long",
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        })}
-                      </span>
-                    </div>
-                    {p.artist && (
-                      <em>
-                        by{" "}
-                        <Link to={`/${p.artist.urlSlug ?? p.artist.id}`}>
-                          {p.artist?.name}
-                        </Link>
-                      </em>
-                    )}
-                  </div>
-
-                  <div
-                    className={css`
-                      width: 100%;
-                    `}
-                  >
-                    <span
-                      className={css`
-                        white-space: nowrap;
-                        display: block;
-                        overflow: hidden;
-                        text-overflow: ellipsis;
-                        color: var(--mi-normal-foreground-color);
-                      `}
-                    >
-                      <MarkdownContent content={p.content} />
-                    </span>
-                  </div>
-                </div>
-              </Box>
-            </Link>
-          ))}
+                  }
+                `}
+              >
+                <Overlay width="100%" height="100%"></Overlay>
+                <PostCard
+                  width="100%"
+                  height="300px"
+                  dateposition="100%"
+                  p={p}
+                ></PostCard>
+              </Link>
+            ))}
+          </div>
         </>
       )}
     </div>

@@ -27,6 +27,8 @@ const styles = `html {
   --mi-border-radius-x: 15px;
   --mi-border-radius-focus: 8px;
 
+  --mi-border-solid-narrow: solid 1px rgba(125, 125, 125, 0.5);
+
   --mi-icon-button-background-color: var(--mi-darken-x-background-color);
 
   --mi-font-family-stack: 'Arial', -apple-system, BlinkMacSystemFont,
@@ -124,9 +126,10 @@ h6 {
   padding-bottom: .75rem;
 }
 
-@media (max-width: 800px) {
+@media (max-width: 768px) {
   h1 {
     font-size: 2rem;
+    line-height: 2.5rem;
   }
 
   h2 {

@@ -117,6 +117,7 @@ function App() {
                 flex-grow: 1;
                 display: flex;
                 flex-direction: column;
+                width: 100%;
 
                 ${isPlaying
                   ? `
@@ -127,7 +128,6 @@ function App() {
               <div
                 className={css`
                   margin: 0 auto;
-
                   width: 100%;
                   border-radius: var(--mi-border-radius);
                   display: flex;
@@ -140,7 +140,7 @@ function App() {
                     max-width: calc(1080px + 0rem);
                   }
 
-                  @media screen and (max-width: 800px) {
+                  @media screen and (max-width: ${bp.medium}px) {
                     padding: 0rem 0rem 0rem;
 
                     > div {
