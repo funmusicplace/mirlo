@@ -9,6 +9,36 @@ import { Trans, useTranslation } from "react-i18next";
 import Releases from "./Releases";
 import Overlay from "./common/Overlay";
 import PostCard from "./common/PostCard";
+import styled from "@emotion/styled";
+import WidthContainer from "./common/WidthContainer";
+
+export const SectionHeader = styled.div<{ userId?: number }>`
+  position: sticky !important;
+  padding-bottom: 0;
+  line-height: 1em;
+  z-index: +1;
+  padding-top: 0.75rem;
+  border-bottom: solid 1px var(--mi-lighter-foreground-color);
+  border-top: solid 1px var(--mi-lighter-foreground-color);
+  background-color: var(--mi-normal-background-color);
+  z-index: +1;
+  ${(props) => (!props.userId ? "top: -0.1rem; padding-top: .75rem;" : "")}
+  top: 55px;
+
+  h5 {
+    text-transform: uppercase;
+    font-weight: normal;
+    color: var(--mi-pink);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    h5 {
+      text-transform: uppercase;
+      font-weight: normal;
+      color: pink;
+    }
+  }
+`;
 
 function Home() {
   const {
@@ -205,94 +235,74 @@ function Home() {
       {user && <Releases />}
       {user && posts.length > 0 && (
         <>
-          <h1
-            className={css`
-              position: sticky;
-              top: 0;
-              background-color: var(--mi-normal-background-color);
-              border-bottom: solid 1px var(--mi-lighter-foreground-color);
-              padding: 0.5rem 0;
-              z-index: +1;
-              margin-bottom: 1rem;
-              margin-top: 2em;
-              line-height: 1em;
-
-              @media screen and (max-width: ${bp.medium}px) {
-                margin-bottom: 0.5rem;
-              }
-              @media screen and (max-width: ${bp.small}px) {
-                font-size: 1.8rem;
-              }
-              @media screen and (min-width: ${bp.medium}px) {
-                position: sticky;
-                margin-bottom: 1rem;
-                top: 55px;
-              }
-            `}
-          >
-            {t("latestCommunityPost")}
-          </h1>
-          <div
-            className={css`
-              margin-top: 1rem;
-              display: flex;
-              flex-wrap: wrap;
-              justify-content: space-between;
-
-              a {
-                width: 32%;
-              }
-
-              @media screen and (max-width: ${bp.medium}px) {
-                padding: 0rem !important;
-                background: var(--mi-light-background-color);
-              }
-
-              @media screen and (max-width: ${bp.medium}px) {
-                flex-direction: column;
+          <SectionHeader>
+            <WidthContainer variant="big" justify="center">
+              <h5>{t("latestCommunityPost")}</h5>
+            </WidthContainer>
+          </SectionHeader>
+          <WidthContainer variant="big" justify="center">
+            <div
+              className={css`
+                margin-top: 1rem;
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: space-between;
 
                 a {
-                  width: 100%;
+                  width: 32%;
                 }
-              }
-            `}
-          >
-            {posts.map((p) => (
-              <Link
-                to={`/post/${p.id}/`}
-                className={css`
-                  display: flex;
-                  margin-bottom: 1.5rem;
-                  border-radius: 5px;
-                  background-color: var(--mi-darken-background-color);
-                  filter: brightness(95%);
-                  width: 100%;
 
-                  :hover {
-                    transition: 0.2s ease-in-out;
-                    text-decoration: none;
-                    background-color: rgba(50, 0, 0, 0.07);
-                    filter: brightness(90%);
+                @media screen and (max-width: ${bp.medium}px) {
+                  padding: 0rem !important;
+                  background: var(--mi-light-background-color);
+                }
+
+                @media screen and (max-width: ${bp.medium}px) {
+                  flex-direction: column;
+
+                  a {
+                    width: 100%;
                   }
+                }
+              `}
+            >
+              {posts.map((p) => (
+                <Link
+                  to={`/post/${p.id}/`}
+                  className={css`
+                    display: flex;
+                    margin-bottom: 1.5rem;
+                    border-radius: 5px;
+                    background-color: var(--mi-darken-background-color);
+                    filter: brightness(95%);
+                    width: 100%;
 
-                  @media (prefers-color-scheme: dark) {
                     :hover {
-                      filter: brightness(120%);
-                      background-color: rgba(100, 100, 100, 0.2);
+                      transition: 0.2s ease-in-out;
+                      text-decoration: none;
+                      background-color: rgba(50, 0, 0, 0.07);
+                      filter: brightness(90%);
                     }
-                  }
-                `}
-              >
-                <Overlay width="100%" height="100%"></Overlay>
-                <PostCard
-                  width="100%"
-                  height="350px"
-                  dateposition="100%"
-                  p={p}
-                ></PostCard>
-              </Link>
-            ))}
-          </div>
+
+                    @media (prefers-color-scheme: dark) {
+                      :hover {
+                        filter: brightness(120%);
+                        background-color: rgba(100, 100, 100, 0.2);
+                      }
+                    }
+                  `}
+                >
+                  <Overlay width="100%" height="100%"></Overlay>
+                  <PostCard
+                    width="100%"
+                    height="350px"
+                    dateposition="100%"
+                    p={p}
+                  ></PostCard>
+                </Link>
+              ))}
+            </div>
+          </WidthContainer>
         </>
       )}
     </div>
