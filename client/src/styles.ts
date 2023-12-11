@@ -44,8 +44,9 @@ const styles = `html {
   --mi-side-paddings-xsmall: 0rem .7rem;
 
   --mi-container-full: 100%;
-  --mi-container-big: 1080px;
-  --mi-container-small: 700px;
+  --mi-container-big: 1106px;
+  --mi-container-medium: 700px;
+  --mi-container-small: 300px;
 
 }
 
