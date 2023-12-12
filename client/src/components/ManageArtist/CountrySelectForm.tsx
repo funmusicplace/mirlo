@@ -45,17 +45,32 @@ const CountrySelect = () => {
     <form onSubmit={handleSubmit(doSave)}>
       <FormComponent
         className={css`
+          display: flex;
           * {
             margin-top: 0.5rem;
           }
           button {
-            height: 2.4rem;
-            margin-left: 0.5rem;
+            height: 100%;
+            margin: 0 0 0 0.5rem;
+          }
+          select {
+            margin: 0 !important;
           }
         `}
       >
         <label>{t("countryCurrencyCode")} </label>
-        <div>
+        <div
+          className={css`
+            display: flex;
+            align-items: flex-end;
+            button {
+              margin: 0 0 0 0.5rem;
+            }
+            select {
+              margin: 0 !important;
+            }
+          `}
+        >
           <SelectEl {...register("country")}>
             {stripeCountryCodes.map((cc) => (
               <option value={cc} key={cc}>
