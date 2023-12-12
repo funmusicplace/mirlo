@@ -9,7 +9,6 @@ import styled from "@emotion/styled";
 import ArtistPosts from "./ArtistPosts";
 
 export const ArtistSection = styled.div`
-  background: var(--mi-light-background-color);
   margin-bottom: 2rem;
 
   @media screen and (max-width: ${bp.medium}px) {
