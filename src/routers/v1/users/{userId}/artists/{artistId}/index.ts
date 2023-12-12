@@ -4,11 +4,7 @@ import {
   userAuthenticated,
 } from "../../../../../../auth/passport";
 import prisma from "../../../../../../../prisma/prisma";
-import { convertURLArrayToSizes } from "../../../../../../utils/images";
-import {
-  finalArtistAvatarBucket,
-  finalArtistBannerBucket,
-} from "../../../../../../utils/minio";
+
 import {
   deleteArtist,
   findArtistIdForURLSlug,
@@ -53,7 +49,7 @@ export default function () {
         const artist = await prisma.artist.findFirst({
           where: { id: Number(artistId) },
         });
-        res.json({ artist });
+        res.json({ result: artist });
       } else {
         res.json({
           error: "An unknown error occurred",

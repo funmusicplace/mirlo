@@ -1,6 +1,6 @@
 {
   "signUp": {
-    "hasRegistered": "Cool! We've sent you an e-mail to confirm your account. Click on the link in it to confirm your email",
+    "hasRegistered": "Cool! We've sent you an e-mail to confirm your account. Click on the link in it to proceed.",
     "register": "Register",
     "name": "Name:",
     "email": "Email:",
@@ -296,6 +296,14 @@
   "manageSubscriptionTierBox": {
     "edit": "Edit",
     "delete": "Delete"
+  },
+  "welcome": {
+    "enterANameToGetStarted": "Enter a name to get started",
+    "letsGetStarted": "Let's get started!",
+    "looksGood": "Looks good!",
+    "addAnAvatar": "Add an avatar",
+    "next": "Next",
+    "takeMeToTheArtistPage": "Take me to the artist page"
   },
   "manageTrackTable": {
     "titleColumn": "Title",

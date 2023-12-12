@@ -37,13 +37,17 @@ const MarkdownContent: React.FC<{
       if (source) {
         const sourceContent = await fetch(source).then((resp) => resp.text());
         setContent(sourceContent);
+      } else {
+        setContent(externalContent ?? "");
       }
     };
     callback();
-  }, [source]);
-  if (!content) {
+  }, [externalContent, source]);
+
+  if (content === undefined || content === null) {
     return <LoadingSpinner />;
   }
+
   return (
     <MarkdownWrapper>
       <ReactMarkdown

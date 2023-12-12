@@ -10,19 +10,53 @@ import Box from "./common/Box";
 import { Link } from "react-router-dom";
 import FormComponent from "./common/FormComponent";
 import Checkbox from "./common/FormCheckbox";
+import styled from "@emotion/styled";
 
 type SignupInputs = {
   email: string;
   name: string;
   password: string;
   receiveMailingList: boolean;
+  accountType: "listener";
 };
+
+const ArtistToggle = styled(FormComponent)`
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  input {
+    display: none;
+  }
+  label {
+    width: 50%;
+    margin: 0.5rem;
+    border: 1px solid var(--mi-darken-x-background-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  span {
+    text-align: center;
+    display: block;
+    padding: 1rem;
+    transition: 0.5s background-color;
+  }
+
+  input:checked + span {
+    background-color: var(--mi-info-background-color);
+    color: var(--mi-white);
+  }
+`;
 
 function Signup() {
   const { t } = useTranslation("translation", { keyPrefix: "signUp" });
   const snackbar = useSnackbar();
   const [hasRegistered, setHasRegistered] = React.useState(false);
-  const methods = useForm<SignupInputs>();
+  const methods = useForm<SignupInputs>({
+    defaultValues: {
+      accountType: "listener",
+    },
+  });
   const { register, handleSubmit } = methods;
 
   const onSubmit = React.useCallback(
@@ -46,7 +80,17 @@ function Signup() {
   );
 
   if (hasRegistered) {
-    return <Box>{t("hasRegistered")}</Box>;
+    return (
+      <Box
+        className={css`
+          margin: 0 auto;
+          max-width: 320px;
+          text-align: center;
+        `}
+      >
+        {t("hasRegistered")}
+      </Box>
+    );
   }
 
   return (
@@ -58,7 +102,7 @@ function Signup() {
       >
         <form
           className={css`
-            max-width: 230px;
+            max-width: 320px;
             margin: 0 auto;
             display: flex;
             text-align: left;
@@ -85,6 +129,20 @@ function Signup() {
               description={t("receiveMailingList")}
             />
           </FormComponent>
+          <ArtistToggle>
+            <label>
+              <input
+                type="radio"
+                value="listener"
+                {...register("accountType")}
+              />
+              <span>I'm just here to listen</span>
+            </label>
+            <label>
+              <input type="radio" value="artist" {...register("accountType")} />
+              <span>I want to share my music</span>
+            </label>
+          </ArtistToggle>
           <Button type="submit">{t("signUpButton")}</Button>
         </form>
         <Link

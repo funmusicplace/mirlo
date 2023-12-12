@@ -23,6 +23,7 @@ router.post(`/signup`, async (req, res, next) => {
     password,
     client: clientURL,
     receiveMailingList,
+    accountType,
   } = req.body;
 
   if (!email || !password) {
@@ -72,6 +73,7 @@ router.post(`/signup`, async (req, res, next) => {
             to: result.email,
           },
           locals: {
+            accountType,
             user: result,
             host: process.env.API_DOMAIN,
             client: client.id,
@@ -93,8 +95,13 @@ router.get(`/confirmation/:emailConfirmationToken`, async (req, res, next) => {
 
     // FIXME: should the client be changed from a URL to an id. Probably
     // And then check that the client exists in the DB.
-    let { client: clientID, user: userId } = req.query as {
+    let {
+      client: clientID,
+      user: userId,
+      accountType,
+    } = req.query as {
       client: string;
+      accountType: "artist" | "listener";
       user: string;
     };
 
@@ -136,7 +143,10 @@ router.get(`/confirmation/:emailConfirmationToken`, async (req, res, next) => {
         },
       });
       setTokens(res, updatedUser);
-      return res.redirect(client.applicationUrl);
+      if (accountType === "artist") {
+        return res.redirect(`${client.applicationUrl}/manage/welcome`);
+      }
+      return res.redirect(`${client.applicationUrl}`);
     }
   } catch (e) {
     console.error(e);

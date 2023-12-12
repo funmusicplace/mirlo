@@ -75,7 +75,7 @@ export const verifyStripeSignature = async (
         signingSecret
       );
     } catch (e) {
-      console.log(
+      console.error(
         `⚠️  Webhook signature verification failed.`,
         (e as Error).message
       );

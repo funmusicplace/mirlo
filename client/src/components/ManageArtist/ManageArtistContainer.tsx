@@ -27,14 +27,14 @@ const Container = styled.div<{ artistBanner: boolean; userId?: number }>`
 
 export const ArtistPageWrapper: React.FC<{
   children: React.ReactElement;
-  artistBanner: boolean;
+  artistBanner?: boolean;
 }> = ({ children, artistBanner }) => {
   const {
     state: { user },
   } = useGlobalStateContext();
   const userId = user?.id;
   return (
-    <Container userId={userId} artistBanner={artistBanner}>
+    <Container userId={userId} artistBanner={!!artistBanner}>
       <div
         className={css`
           ${artistBanner

@@ -14,8 +14,8 @@ import { useGlobalStateContext } from "state/GlobalState";
 import UploadArtistImage from "./UploadArtistImage";
 import { useTranslation } from "react-i18next";
 import { useArtistContext } from "state/ArtistContext";
-import useJobStatusCheck from "utils/useJobStatusCheck";
 import ArtistFormColors from "./ArtistFormColors";
+import ArtistSlugInput from "./ArtistSlugInput";
 
 export interface ShareableTrackgroup {
   creatorId: number;
@@ -69,43 +69,7 @@ export const ArtistForm: React.FC<{
     defaultValues: generateDefaults(existing),
   });
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = methods;
-
-  const resetWrapper = React.useCallback(() => {
-    reset(generateDefaults(existing));
-  }, [existing, reset]);
-
-  const { uploadJobs: uploadBannerJobs, setUploadJobs: setUploadBanner } =
-    useJobStatusCheck({ reload, reset: resetWrapper });
-  const { uploadJobs: uploadAvatarJobs, setUploadJobs: setUploadAvatar } =
-    useJobStatusCheck({
-      reload,
-      reset: resetWrapper,
-    });
-
-  const validation = React.useCallback(
-    async (value: string) => {
-      if (state.user) {
-        try {
-          const response = await api.get<{ exists: boolean }>(
-            `users/${
-              state.user.id
-            }/testExistence?urlSlug=${value.toLowerCase()}`
-          );
-          return !response.result.exists;
-        } catch (e) {
-          return true;
-        }
-      }
-      return true;
-    },
-    [state.user]
-  );
+  const { register, handleSubmit } = methods;
 
   const existingId = existing?.id;
 
@@ -133,37 +97,6 @@ export const ArtistForm: React.FC<{
             });
           }
 
-          const jobIds = [];
-          if (
-            existingId &&
-            data.banner[0] &&
-            typeof data.banner[0] !== "string"
-          ) {
-            const jobInfo = await api.uploadFile(
-              `users/${userId}/artists/${existingId}/banner`,
-              data.banner
-            );
-            jobIds.push(jobInfo.result.jobId);
-
-            setUploadBanner([
-              { jobId: jobInfo.result.jobId, jobStatus: "waiting" },
-            ]);
-          }
-
-          if (
-            existingId &&
-            data.avatar[0] &&
-            typeof data.avatar[0] !== "string"
-          ) {
-            const jobInfo = await api.uploadFile(
-              `users/${userId}/artists/${existingId}/avatar`,
-              data.avatar
-            );
-
-            setUploadAvatar([
-              { jobId: jobInfo.result.jobId, jobStatus: "waiting" },
-            ]);
-          }
           await reload();
           await refresh?.();
           if (!existingId) {
@@ -178,17 +111,7 @@ export const ArtistForm: React.FC<{
         }
       }
     },
-    [
-      userId,
-      existingId,
-      reload,
-      refresh,
-      snackbar,
-      t,
-      setUploadBanner,
-      setUploadAvatar,
-      onClose,
-    ]
+    [userId, existingId, reload, refresh, snackbar, t, onClose]
   );
 
   return (
@@ -230,15 +153,10 @@ export const ArtistForm: React.FC<{
                 {existing && (
                   <UploadArtistImage
                     existing={existing}
-                    reload={reload}
                     imageType="banner"
                     height="auto"
                     width="100%"
                     maxDimensions="2500x2500"
-                    isLoading={
-                      uploadBannerJobs?.[0]?.jobStatus !== undefined &&
-                      uploadBannerJobs?.[0]?.jobStatus !== "completed"
-                    }
                   />
                 )}
               </div>
@@ -252,15 +170,10 @@ export const ArtistForm: React.FC<{
                 {existing && (
                   <UploadArtistImage
                     existing={existing}
-                    reload={reload}
                     imageType="avatar"
                     height="auto"
                     width="100%"
                     maxDimensions="1500x1500"
-                    isLoading={
-                      uploadAvatarJobs?.[0]?.jobStatus !== undefined &&
-                      uploadAvatarJobs?.[0]?.jobStatus !== "completed"
-                    }
                   />
                 )}
               </div>
@@ -276,22 +189,7 @@ export const ArtistForm: React.FC<{
 
               <FormComponent>
                 <label>{t("urlSlug")} </label>
-                <InputEl
-                  {...register("urlSlug", {
-                    validate: { unique: validation },
-                    disabled: !!existing,
-                  })}
-                  className={css`
-                    margin-bottom: 0.5rem;
-                  `}
-                />
-                <small>Must be unique</small>
-                {errors.urlSlug && (
-                  <small className="error">
-                    {errors.urlSlug.type === "unique" &&
-                      "This needs to be unique, try something else"}
-                  </small>
-                )}
+                <ArtistSlugInput isDisabled={!!existing} />
               </FormComponent>
 
               <FormComponent>

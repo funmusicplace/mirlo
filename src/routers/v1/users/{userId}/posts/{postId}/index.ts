@@ -37,7 +37,6 @@ export default function () {
         }
       }
 
-      console.log("valid", req.body);
       const post = await prisma.post.update({
         data: {
           title,
