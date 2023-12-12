@@ -97,6 +97,7 @@ const ManageArtistPosts: React.FC<{}> = () => {
             <div>
               <Button
                 compact
+                onlyIcon
                 transparent
                 startIcon={<FaPen />}
                 onClick={() => setManagePost(p)}
