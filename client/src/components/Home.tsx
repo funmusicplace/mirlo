@@ -26,6 +26,7 @@ export const SectionHeader = styled.div<{ userId?: number }>`
 
   h5 {
     text-transform: uppercase;
+    margin: var(--mi-side-paddings-xsmall);
     font-weight: normal;
     color: var(--mi-pink);
   }
