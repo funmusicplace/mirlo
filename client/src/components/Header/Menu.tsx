@@ -119,11 +119,7 @@ const Menu: React.FC = (props) => {
               {t("collection")}
             </Button>
           </li>
-          <li
-            className={css`
-              border-bottom: solid 1px var(--mi-lighter-foreground-color);
-            `}
-          >
+          <li>
             <Button
               onClick={() => {
                 setIsMenuOpen(false);
@@ -133,28 +129,37 @@ const Menu: React.FC = (props) => {
               {t("manage")}
             </Button>
           </li>
-          {artists.map((a) => {
-            return (
-              <li key={a.id}>
-                <Button
-                  onClick={() => {
-                    setIsMenuOpen(false);
-                    navigate(`/manage/artists/${a.id}`);
-                  }}
-                >
-                  <div
-                    className={css`
-                      font-weight: bold;
-                      opacity: 0.7;
-                      font-size: 0.9rem;
-                    `}
+
+          <div
+            className={css`
+              border-bottom: var(--mi-border);
+              border-top: var(--mi-border);
+              margin: 0.5rem 0;
+            `}
+          >
+            {artists.map((a) => {
+              return (
+                <li key={a.id}>
+                  <Button
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      navigate(`/manage/artists/${a.id}`);
+                    }}
                   >
-                    {a.name}
-                  </div>
-                </Button>
-              </li>
-            );
-          })}
+                    <div
+                      className={css`
+                        font-weight: bold;
+                        opacity: 0.7;
+                        font-size: 0.9rem;
+                      `}
+                    >
+                      {a.name}
+                    </div>
+                  </Button>
+                </li>
+              );
+            })}
+          </div>
           {state?.user?.isAdmin && (
             <li>
               <Button
