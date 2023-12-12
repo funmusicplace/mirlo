@@ -34,7 +34,6 @@ const ArtistPosts: React.FC<{ artist: Artist }> = ({ artist }) => {
 
           @media screen and (max-width: ${bp.medium}px) {
             padding: 0rem !important;
-            background: var(--mi-light-background-color);
           }
         `}
       >
