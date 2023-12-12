@@ -9,12 +9,13 @@ const FlexWrapper = styled.div`
 
 const WidthWrapper = styled.div<{
   variant?: Sizes;
+  hasPaddings?: boolean;
 }>`
   ${(props) => {
     switch (props.variant) {
       case "full":
         return `
-        max-width: var(--mi-container-full-width);
+        max-width: var(--mi-container-full);
         `;
       case "big":
         return `
@@ -47,7 +48,6 @@ export const WidthContainer: React.FC<{
     <FlexWrapper
       className={css`
         justify-content: ${justify};
-        }
       `}
     >
       <WidthWrapper variant={variant}>{children}</WidthWrapper>

@@ -17,10 +17,9 @@ export const SectionHeader = styled.div<{ userId?: number }>`
   padding-bottom: 0;
   line-height: 1em;
   z-index: +1;
-  padding-top: 0.75rem;
-  border-bottom: solid 1px var(--mi-lighter-foreground-color);
-  border-top: solid 1px var(--mi-lighter-foreground-color);
-  background-color: var(--mi-normal-background-color);
+  border-bottom: var(--mi-border);
+  border-top: var(--mi-border);
+  background-color: var(--mi-light-background-color);
   z-index: +1;
   ${(props) => (!props.userId ? "top: -0.1rem; padding-top: .75rem;" : "")}
   top: 55px;
@@ -33,9 +32,14 @@ export const SectionHeader = styled.div<{ userId?: number }>`
 
   @media (prefers-color-scheme: dark) {
     h5 {
-      text-transform: uppercase;
-      font-weight: normal;
       color: pink;
+    }
+  }
+
+  @media screen and (max-width: ${bp.medium}px) {
+    top: -0.1rem;
+    h5 {
+      margin: var(--mi-side-paddings-xsmall);
     }
   }
 `;
@@ -252,9 +256,8 @@ function Home() {
                   width: 32%;
                 }
 
-                @media screen and (max-width: ${bp.medium}px) {
-                  padding: 0rem !important;
-                  background: var(--mi-light-background-color);
+                @media screen and (max-width: ${bp.xlarge}px) {
+                  padding: var(--mi-side-paddings-xsmall);
                 }
 
                 @media screen and (max-width: ${bp.medium}px) {

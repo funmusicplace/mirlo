@@ -12,7 +12,7 @@ import { bp } from "../../constants";
 
 export const pageMarkdownWrapper = css`
   margin-top: 2rem;
-  max-width: var(--mi-container-small);
+  max-width: var(--mi-container-medium);
   margin: auto;
   font-size: 18px;
 `;

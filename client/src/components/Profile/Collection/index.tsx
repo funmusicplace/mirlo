@@ -6,6 +6,7 @@ import React from "react";
 import api from "../../../services/api";
 import { useGlobalStateContext } from "../../../state/GlobalState";
 import { useTranslation } from "react-i18next";
+import WidthContainer from "components/common/WidthContainer";
 
 function Profile() {
   const {
@@ -38,29 +39,31 @@ function Profile() {
           padding: var(--mi-side-paddings-xsmall);
         `}
       >
-        <h1>{t("yourCollection")}</h1>
-        <div
-          className={css`
-            display: flex;
-            width: 100%;
-            flex-direction: row;
-            flex-wrap: wrap;
-          `}
-        >
-          <TrackgroupGrid>
-            {!purchases ||
-              (purchases?.length === 0 && <Box>{t("collectionEmpty")}</Box>)}
-            {purchases?.map(
-              (purchase) =>
-                purchase.trackGroup && (
-                  <ArtistTrackGroup
-                    trackGroup={purchase.trackGroup}
-                    key={purchase.trackGroupId}
-                  />
-                )
-            )}
-          </TrackgroupGrid>
-        </div>
+        <WidthContainer variant="big" justify="center">
+          <h1>{t("yourCollection")}</h1>
+          <div
+            className={css`
+              display: flex;
+              width: 100%;
+              flex-direction: row;
+              flex-wrap: wrap;
+            `}
+          >
+            <TrackgroupGrid>
+              {!purchases ||
+                (purchases?.length === 0 && <Box>{t("collectionEmpty")}</Box>)}
+              {purchases?.map(
+                (purchase) =>
+                  purchase.trackGroup && (
+                    <ArtistTrackGroup
+                      trackGroup={purchase.trackGroup}
+                      key={purchase.trackGroupId}
+                    />
+                  )
+              )}
+            </TrackgroupGrid>
+          </div>
+        </WidthContainer>
       </div>
     </>
   );

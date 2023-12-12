@@ -47,6 +47,7 @@ const Releases = () => {
               width: 100%;
               flex-direction: row;
               flex-wrap: wrap;
+              padding: var(--mi-side-paddings-xsmall);
             `}
           >
             <TrackgroupGrid>

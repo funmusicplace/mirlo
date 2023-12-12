@@ -11,6 +11,7 @@ import { useSnackbar } from "state/SnackbarContext";
 import { useTranslation } from "react-i18next";
 import Box from "components/common/Box";
 import CountrySelect from "./CountrySelectForm";
+import WidthContainer from "components/common/WidthContainer";
 
 export const Manage: React.FC = () => {
   const { state } = useGlobalStateContext();
@@ -68,67 +69,83 @@ export const Manage: React.FC = () => {
           }
         `}
       >
-        <h1 className={css``}>{t("manageArtists")}</h1>
+        <WidthContainer variant="medium" justify="center">
+          <h1 className={css``}>{t("manageArtists")}</h1>
 
-        <div
-          className={css`
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: stretch;
-            margin-top: 1rem;
-            flex-wrap: wrap;
-          `}
-        >
-          {artists.map((a) => (
-            <Link
-              key={a.id}
-              to={`artists/${a.id}`}
-              className={css`
-                margin-right: 1rem;
-                margin-bottom: 1rem;
-              `}
-            >
-              <Button variant="outlined">{a.name}</Button>
-            </Link>
-          ))}
-          <Button
-            onClick={() => {
-              setCreatingNewArtist(true);
-            }}
+          <div
             className={css`
-              flex-grow: 1;
-              text-align: center;
-              border-radius: 6px;
-              justify-self: none;
+              display: flex;
+              flex-direction: column;
             `}
           >
-            {t("createNewArtist")}
-          </Button>
-          <CreateNewArtistForm
-            open={creatingNewArtist}
-            onClose={() => setCreatingNewArtist(false)}
-            reload={fetchArtists}
-          />
-        </div>
-        <div
-          className={css`
-            margin-top: 1rem;
-          `}
-        >
-          <h2>Payment management</h2>
-          <CountrySelect />
-          <Box variant="info">
-            {!stripeAccountStatus?.chargesEnabled &&
-              t("waitingStripeAccountVerification")}
-            {stripeAccountStatus?.chargesEnabled && t("stripeAccountVerified")}
-          </Box>
-          <Button onClick={setUpBankAccount}>
-            {stripeAccountStatus?.detailsSubmitted
-              ? t("updateBankAccount")
-              : t("setUpBankAccount")}
-          </Button>
-        </div>
+            <div
+              className={css`
+                width: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: stretch;
+                margin-top: 1rem;
+                flex-wrap: wrap;
+              `}
+            >
+              {artists.map((a) => (
+                <Link
+                  key={a.id}
+                  to={`artists/${a.id}`}
+                  className={css`
+                    margin-right: 1rem;
+                    margin-bottom: 1rem;
+                  `}
+                >
+                  <Button variant="outlined">{a.name}</Button>
+                </Link>
+              ))}
+              <div
+                className={css`
+                  width: 100%;
+                `}
+              >
+                <Button
+                  onClick={() => {
+                    setCreatingNewArtist(true);
+                  }}
+                  className={css`
+                    flex-grow: 1;
+                    text-align: center;
+                    border-radius: 6px;
+                    justify-self: none;
+                  `}
+                >
+                  {t("createNewArtist")}
+                </Button>
+              </div>
+            </div>
+            <CreateNewArtistForm
+              open={creatingNewArtist}
+              onClose={() => setCreatingNewArtist(false)}
+              reload={fetchArtists}
+            />
+          </div>
+          <div
+            className={css`
+              margin-top: 1rem;
+            `}
+          >
+            <h2>Payment management</h2>
+            <CountrySelect />
+            <Box variant="info">
+              {!stripeAccountStatus?.chargesEnabled &&
+                t("waitingStripeAccountVerification")}
+              {stripeAccountStatus?.chargesEnabled &&
+                t("stripeAccountVerified")}
+            </Box>
+            <Button onClick={setUpBankAccount}>
+              {stripeAccountStatus?.detailsSubmitted
+                ? t("updateBankAccount")
+                : t("setUpBankAccount")}
+            </Button>
+          </div>
+        </WidthContainer>
       </div>
     </>
   );

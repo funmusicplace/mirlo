@@ -32,9 +32,9 @@ const Content = styled.div<ContentProps>`
   left: 0;
   right: 0;
   overflow-y: auto;
-  max-width: 1080px;
+  max-width: var(--mi-container-medium);
   margin: 0 auto;
-  max-height: calc(100vh - 80px);
+  max-height: calc(100vh - 150px);
   padding: 20px;
   padding-top: 0;
   border: 1px solid var(--mi-darken-background-color);
@@ -46,15 +46,15 @@ const Content = styled.div<ContentProps>`
   border-radius: var(--mi-border-radius-x);
 
   ::-webkit-scrollbar {
-    width: 3px;
+    width: 2px;
   }
   ::-webkit-scrollbar-track {
-    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
-    border-radius: 5px;
+    background-color: inset 0 0 0px rgba(0, 0, 0);
+    border-radius: 4px;
   }
   ::-webkit-scrollbar-thumb {
-    border-radius: 5px;
-    -webkit-box-shadow: inset 0 0 6px;
+    border-radius: 4px;
+    background-color: grey;
   }
 
   h1 {

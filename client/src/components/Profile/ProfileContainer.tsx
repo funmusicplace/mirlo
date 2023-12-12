@@ -1,5 +1,7 @@
 import { css } from "@emotion/css";
 import Tabs from "components/common/Tabs";
+import WidthContainer from "components/common/WidthContainer";
+import { bp } from "../../constants";
 import React from "react";
 import { useTranslation } from "react-i18next";
 
@@ -17,30 +19,50 @@ const ProfileContainer: React.FC = () => {
           overflow-x: hidden;
           padding: 0 !important;
           width: 100%;
-          padding: var(--mi-side-paddings-xsmall);
           h1 {
             margin: 0.7rem 0;
           }
         `}
       >
-        <Tabs
+        <div
           className={css`
-            padding: var(--mi-side-paddings-xsmall);
-            margin-right: 0 !important;
+            border-top: var(--mi-border);
+            border-bottom: var(--mi-border);
+            background-color: var(--mi-light-background-color);
           `}
         >
-          <li>
-            <NavLink end to="/profile">
-              {t("profile")}
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/profile/collection">{t("collection")}</NavLink>
-          </li>
-          <li>
-            <NavLink to="/profile/wishlist">{t("wishlist")}</NavLink>
-          </li>
-        </Tabs>
+          <WidthContainer variant="big" justify="center">
+            <Tabs
+              className={css`
+                padding: 0;
+                text-transform: uppercase;
+                @media (prefers-color-scheme: dark) {
+                  color: pink;
+                }
+                @media screen and (max-width: ${bp.xlarge}px) {
+                  padding: var(--mi-side-paddings-xsmall);
+                }
+                @media screen and (max-width: ${bp.medium}px) {
+                  a {
+                    font-size: 1rem !important;
+                  }
+                }
+              `}
+            >
+              <li>
+                <NavLink end to="/profile">
+                  {t("profile")}
+                </NavLink>
+              </li>
+              <li>
+                <NavLink to="/profile/collection">{t("collection")}</NavLink>
+              </li>
+              <li>
+                <NavLink to="/profile/wishlist">{t("wishlist")}</NavLink>
+              </li>
+            </Tabs>
+          </WidthContainer>
+        </div>
 
         <Outlet />
       </div>
