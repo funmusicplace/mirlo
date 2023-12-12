@@ -23,7 +23,7 @@ const CustomButton = styled.button<Compactable>`
   font-size: 1rem;
   font-weight: bold;
   line-height: 1rem;
-  height: 1.8rem;
+  height: 2rem;
   height: ${(props) => (props.onlyIcon ? "2rem" : "")};
   width: ${(props) => (props.onlyIcon ? "2rem" : "")};
 
