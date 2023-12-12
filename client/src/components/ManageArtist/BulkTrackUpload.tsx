@@ -290,6 +290,7 @@ export const BulkTrackUpload: React.FC<{
               padding: 20px;
               border-radius: 10px;
               border: 2px dashed #555;
+              width: 100%;
               color: #444;
               cursor: pointer;
               transition: background 0.2s ease-in-out, border 0.2s ease-in-out;
