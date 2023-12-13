@@ -12,6 +12,7 @@ import PublishButton from "./PublisButton";
 import NewAlbumForm from "./NewAlbumForm";
 import HeaderDiv from "components/common/HeaderDiv";
 import ManageSectionWrapper from "./ManageSectionWrapper";
+import { css } from "@emotion/css";
 
 const ManageTrackGroup: React.FC<{}> = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
@@ -38,7 +39,11 @@ const ManageTrackGroup: React.FC<{}> = () => {
   }
 
   return (
-    <ManageSectionWrapper>
+    <ManageSectionWrapper
+      className={css`
+        padding-top: 1rem !important;
+      `}
+    >
       <HeaderDiv>
         <h1>{t(trackGroup ? "editAlbum" : "createAlbum")}</h1>
         <div>

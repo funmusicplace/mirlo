@@ -131,25 +131,10 @@ function App() {
                   width: 100%;
                   border-radius: var(--mi-border-radius);
                   display: flex;
+                  justify-content: center;
                   z-index: 1;
                   ${userId ? "display: flex;" : ""}
                   flex-grow: 1;
-
-                  @media (min-width: ${bp.small}px) {
-                    padding: 0rem 2rem 2rem;
-                    max-width: calc(1080px + 0rem);
-                  }
-
-                  @media screen and (max-width: ${bp.medium}px) {
-                    padding: 0rem 0rem 0rem;
-
-                    > div {
-                      padding: var(--mi-side-paddings-xsmall);
-                      padding-top: 0.5rem;
-                      padding-bottom: 0.5rem;
-                      width: 100%;
-                    }
-                  }
                 `}
               >
                 <Outlet />

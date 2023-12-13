@@ -123,6 +123,16 @@ const PostForm: React.FC<{
         className={css`
           margin-top: 0.5rem;
           display: flex;
+          flex-direction: row !important;
+          align-items: center !important;
+          input {
+            margin: 0 !important;
+            height: 1rem;
+            width: 1rem;
+          }
+          label {
+            margin-bottom: 0 !important;
+          }
         `}
       >
         <input id="private" type="checkbox" {...register("isPublic")} />{" "}
@@ -144,10 +154,7 @@ const PostForm: React.FC<{
           <SelectEl {...register("minimumTier")}>
             <option value="">None</option>
             {tiers?.map((tier) => (
-              <option value={tier.id}>
-                {tier.name} -{" "}
-                {tier.isDefaultTier ? t("follow") : tier.description}
-              </option>
+              <option value={tier.id}>{tier.name}</option>
             ))}
           </SelectEl>
           {minimumTier && (

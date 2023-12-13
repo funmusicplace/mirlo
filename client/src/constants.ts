@@ -4,6 +4,6 @@ export const bp = {
   small: "576",
   medium: "768",
   large: "992",
-  xl: "1200",
-  xxl: "1400",
+  xlarge: "1200",
+  xxlarge: "1400",
 };

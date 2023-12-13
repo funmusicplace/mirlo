@@ -55,7 +55,7 @@ const ArtistSupportBox: React.FC<{
           display: flex;
           flex-direction: column;
           justify-content: space-between;
-          outline: var(--mi-border-solid-narrow);
+          outline: var(--mi-border);
 
           max-width: 32.3%;
           flex: 32.3%;
@@ -108,7 +108,7 @@ const ArtistSupportBox: React.FC<{
         <div
           className={css`
             padding: 1.5rem 0;
-            border-bottom: var(--mi-border-solid-narrow);
+            border-bottom: var(--mi-border);
             text-align: center;
             h3 {
               font-size: 1.2rem;

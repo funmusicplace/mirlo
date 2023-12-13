@@ -1,20 +1,16 @@
 import React from "react";
 import ArtistTrackGroup from "./Artist/ArtistTrackGroup";
 import TrackgroupGrid from "components/common/TrackgroupGrid";
-import { useGlobalStateContext } from "state/GlobalState";
 import api from "services/api";
 import { css } from "@emotion/css";
 import { useTranslation } from "react-i18next";
 import { bp } from "../constants";
+import WidthContainer from "./common/WidthContainer";
+import { SectionHeader } from "./Home";
 
 const Releases = () => {
-  const {
-    state: { user },
-  } = useGlobalStateContext();
   const { t } = useTranslation("translation", { keyPrefix: "releases" });
   const [trackGroups, setTrackGroups] = React.useState<TrackGroup[]>([]);
-
-  const userId = user?.id;
 
   React.useEffect(() => {
     const callback = async () => {
@@ -28,55 +24,39 @@ const Releases = () => {
   return (
     <div
       className={css`
+        min-height: calc(100vh - 110px);
         @media screen and (max-width: ${bp.medium}px) {
           margin-bottom: 0rem;
         }
       `}
     >
-      <h1
-        className={css`
-          padding-bottom: 0.5rem;
-          margin-bottom: 1rem;
-          padding-top: 0.5rem;
-          line-height: 1em;
-          position: sticky;
-          top: -0.01rem;
-          z-index: +1;
-          border-bottom: solid 1px var(--mi-lighter-foreground-color);
-          background-color: var(--mi-normal-background-color);
-
-          @media screen and (max-width: ${bp.medium}px) {
-            margin-bottom: 0.5rem;
-          }
-
-          @media screen and (max-width: ${bp.small}px) {
-            font-size: 1.8rem;
-          }
-
-          @media screen and (min-width: ${bp.medium}px) {
-            position: sticky;
-            top: 55px;
-            ${!userId ? "top: -0.1rem; padding-top: .5rem;" : ""}
-            z-index: +1;
-            border-bottom: solid 1px var(--mi-lighter-foreground-color);
-          }
-        `}
-      >
-        {t("recentReleases")}
-      </h1>
+      <SectionHeader>
+        <WidthContainer variant="big" justify="center">
+          <h5>{t("recentReleases")}</h5>
+        </WidthContainer>
+      </SectionHeader>
       <div
         className={css`
-          display: flex;
-          width: 100%;
-          flex-direction: row;
-          flex-wrap: wrap;
+          padding-top: 1rem;
         `}
       >
-        <TrackgroupGrid>
-          {trackGroups?.map((trackGroup) => (
-            <ArtistTrackGroup key={trackGroup.id} trackGroup={trackGroup} />
-          ))}
-        </TrackgroupGrid>
+        <WidthContainer variant="big" justify="center">
+          <div
+            className={css`
+              display: flex;
+              width: 100%;
+              flex-direction: row;
+              flex-wrap: wrap;
+              padding: var(--mi-side-paddings-xsmall);
+            `}
+          >
+            <TrackgroupGrid>
+              {trackGroups?.map((trackGroup) => (
+                <ArtistTrackGroup key={trackGroup.id} trackGroup={trackGroup} />
+              ))}
+            </TrackgroupGrid>
+          </div>
+        </WidthContainer>
       </div>
     </div>
   );

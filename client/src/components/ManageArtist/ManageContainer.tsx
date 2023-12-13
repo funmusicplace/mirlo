@@ -1,4 +1,5 @@
 import { css } from "@emotion/css";
+import WidthContainer from "components/common/WidthContainer";
 import React from "react";
 
 import { Outlet } from "react-router-dom";
@@ -16,7 +17,9 @@ const ManageContainer: React.FC = () => {
           width: 100%;
         `}
       >
-        <Outlet />
+        <WidthContainer variant="big" justify="center">
+          <Outlet />
+        </WidthContainer>
       </div>
     </>
   );

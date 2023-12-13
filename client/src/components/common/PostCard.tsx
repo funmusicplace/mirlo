@@ -33,7 +33,6 @@ const PostCard: React.FC<{
           width: 100%;
           overflow: hidden;
           transition: 0.2s ease-in-out;
-          background-color: var(--mi-light-background-color);
         `}
       >
         {p.artist && (

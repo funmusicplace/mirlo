@@ -13,6 +13,7 @@ import FormComponent from "../common/FormComponent";
 import { InputEl } from "../common/Input";
 import UserSupports from "./UserSupports";
 import useErrorHandler from "services/useErrorHandler";
+import WidthContainer from "components/common/WidthContainer";
 
 function Profile() {
   const { t } = useTranslation("translation", { keyPrefix: "profile" });
@@ -106,50 +107,65 @@ function Profile() {
           padding: var(--mi-side-paddings-xsmall);
         `}
       >
-        <form
-          onSubmit={handleSubmit(doSave)}
-          className={css`
-            display: flex;
-            flex-direction: column;
-          `}
-        >
-          <h1>{t("profile")}</h1>
-          <FormComponent>
-            {t("email")}
-            <InputEl {...register("email")} disabled />
-            <small>{t("changingEmailDisabled")}</small>
-          </FormComponent>
-          <FormComponent>
-            {t("name")}
-            <InputEl {...register("name")} />
-          </FormComponent>
-          <Button type="submit" disabled={isSaving} isLoading={isSaving}>
-            {t("updateProfileButton")}
-          </Button>
-        </form>
-        {user.artistUserSubscriptions && (
-          <UserSupports
-            artistUserSubscriptions={user.artistUserSubscriptions}
-          />
-        )}
-        <Link to="/profile/collection" style={{ marginTop: "1rem" }}>
-          <Button style={{ width: "100%" }}>{t("viewCollection")}</Button>
-        </Link>
-
-        <Link to="/manage" style={{ marginTop: "1rem" }}>
-          <Button style={{ width: "100%" }}>{t("manageArtists")}</Button>
-        </Link>
-        <Button
-          style={{
-            width: "100%",
-            backgroundColor: "var(--mi-warning-background-color)",
-            borderColor: "var(--mi-darken-warning-background-color)",
-            marginTop: "1rem",
-          }}
-          onClick={deleteAccount}
-        >
-          {t("deleteAccount")}
-        </Button>
+        <WidthContainer variant="medium" justify="center">
+          <form
+            onSubmit={handleSubmit(doSave)}
+            className={css`
+              display: flex;
+              flex-direction: column;
+            `}
+          >
+            <h1>{t("profile")}</h1>
+            <FormComponent>
+              {t("email")}
+              <InputEl {...register("email")} disabled />
+              <small
+                className={css`
+                  margin-top: 0.5rem;
+                `}
+              >
+                {t("changingEmailDisabled")}
+              </small>
+            </FormComponent>
+            <FormComponent>
+              {t("name")}
+              <InputEl {...register("name")} />
+            </FormComponent>
+            <Button type="submit" disabled={isSaving} isLoading={isSaving}>
+              {t("updateProfileButton")}
+            </Button>
+          </form>
+          <div
+            className={css`
+              button {
+                margin-top: 0.5rem;
+              }
+            `}
+          >
+            {user.artistUserSubscriptions && (
+              <UserSupports
+                artistUserSubscriptions={user.artistUserSubscriptions}
+              />
+            )}
+            <Link to="/profile/collection" style={{ marginTop: "1rem" }}>
+              <Button style={{ width: "100%" }}>{t("viewCollection")}</Button>
+            </Link>
+            <Link to="/manage" style={{ marginTop: "1rem" }}>
+              <Button style={{ width: "100%" }}>{t("manageArtists")}</Button>
+            </Link>
+            <Button
+              style={{
+                width: "100%",
+                backgroundColor: "var(--mi-warning-background-color)",
+                borderColor: "var(--mi-darken-warning-background-color)",
+                marginTop: "1rem",
+              }}
+              onClick={deleteAccount}
+            >
+              {t("deleteAccount")}
+            </Button>
+          </div>
+        </WidthContainer>
       </div>
     </FormProvider>
   );

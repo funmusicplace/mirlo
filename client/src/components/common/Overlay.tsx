@@ -6,7 +6,7 @@ const Overlay: React.FC<{
 }> = ({ height, width }) => {
   const overlay = css`
     display: block;
-    border: var(--mi-border-solid-narrow);
+    border: var(--mi-border);
     width: ${width};
     min-height: ${height};
     margin: 0 auto 0 auto;
