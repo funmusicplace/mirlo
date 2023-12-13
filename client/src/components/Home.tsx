@@ -101,6 +101,7 @@ function Home() {
             align-items: center;
             justify-content: center;
             width: 100%;
+            padding: var(--mi-side-paddings-xsmall);
           `}
         >
           <div
