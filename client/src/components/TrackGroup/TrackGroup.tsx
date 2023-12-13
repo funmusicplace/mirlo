@@ -75,6 +75,7 @@ function TrackGroup() {
         display: flex;
         align-items: center;
         width: 100%;
+        padding: var(--mi-side-paddings-xsmall);
 
         @media screen and (max-width: ${bp.small}px) {
           margin-top: 0rem;
