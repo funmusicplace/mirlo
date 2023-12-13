@@ -1,24 +1,90 @@
 import styled from "@emotion/styled";
 import React from "react";
 import { bp } from "../../constants";
-
 import { useGlobalStateContext } from "state/GlobalState";
 import api from "services/api";
 import ImageWithPlaceholder from "./ImageWithPlaceholder";
 import { PlayingMusicBars } from "./PlayingMusicBars";
 import PlayButton from "./PlayButton";
+import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import Wishlist from "components/TrackGroup/Wishlist";
+import PurchaseOrDownloadAlbum from "components/TrackGroup/PurchaseOrDownloadAlbumModal";
+import PauseButton from "./PauseButton";
 
 type WrapperProps = {
   width: number;
   height: number;
 };
 
+const TrackgroupButtons = styled.div`
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+  display: flex;
+  justify-content: flex-end;
+
+  div {
+    width: 100%;
+    button {
+      padding: 0;
+      height: 3rem !important;
+      color: white !important;
+      font-weight: normal;
+      font-size: 1.3rem;
+      text-transform: uppercase;
+      width: 100%;
+      height: 3rem;
+    }
+  }
+  ul {
+    z-index: 2;
+    display: flex;
+    justify-content: flex-end;
+    list-style-type: none;
+    button {
+      width: 3rem;
+      height: 3rem;
+    }
+  }
+  @media (max-width: ${bp.medium}px) {
+    ul {
+      button {
+        font-size: 1.1rem;
+        width: 2rem !important;
+        height: 2rem !important;
+        margin: 0 !important;
+        padding: 0 0 0 0.4rem !important;
+      }
+    }
+  }
+  @media (max-width: ${bp.small}px) {
+    div:first-child {
+      display: none;
+    }
+    div:last-child {
+      display: block !important;
+    }
+    ul {
+      button {
+        font-size: 1.1rem;
+        width: 2rem !important;
+        height: 2rem !important;
+        margin: 0 !important;
+        padding: 0 0 0 0.4rem !important;
+      }
+      li:first-child {
+        display: none;
+      }
+    }
+  }
+`;
+
 const PlayWrapper = styled.div<WrapperProps>`
   display: flex;
   flex-direction: column;
   position: absolute;
-  align-items: center;
-  justify-content: center;
+
   width: 100%;
   height: 100%;
   top: 0;
@@ -33,17 +99,22 @@ const PlayWrapper = styled.div<WrapperProps>`
   }
 
   button {
-    color: white;
-    background-color: transparent;
-    width: 3em;
-    height: 3em;
-    border-radius: 50px;
-    font-size: 1rem;
-    padding: 0.9rem;
-    padding-left: 1rem;
+    font-size: 1.4rem;
+    right: 0;
+    bottom: 0;
+    padding: 0rem;
+    padding-left: 0.8rem;
+    margin: auto;
+    border-radius: 0px;
+    border: var(--mi-border);
+    background-color: rgba(0, 0, 0, 0.7);
 
     &:nth-of-type(1) {
       margin: 0rem;
+    }
+
+    &:last-child {
+      padding-left: 0.9rem;
     }
 
     &:hover:not(:disabled) {
@@ -63,21 +134,8 @@ const PlayWrapper = styled.div<WrapperProps>`
     justify-content: flex-end;
     align-items: flex-end;
 
-    button {
-      width: 2em;
-      height: 2em;
-      font-size: 1.1rem;
-      padding: 0rem;
-      padding-left: 0.6rem;
-      margin: auto;
-      border-radius: 0px;
-      border: none;
-      background-color: rgba(0, 0, 0, 0.7);
-    }
     button:active {
       background-color: rgba(0, 0, 0, 0.7);
-    }
-    .startIcon {
     }
   }
 `;
@@ -91,6 +149,32 @@ const Wrapper = styled.div<WrapperProps>`
     font-size: 1.3rem !important;
   }
 
+  a {
+    display: flex;
+    justify-content: center;
+    position: absolute;
+    z-index: 1;
+    text-align: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    text-decoration: none;
+    text-transform: uppercase;
+    font-size: var(--mi-font-size-small);
+  }
+
+  p {
+    min-width: 50%;
+    margin: auto;
+    margin-bottom: 25%;
+    background: var(--mi-lighten-background-color);
+    border-radius: var(--mi-border-radius);
+    padding: 0.5rem;
+    text-align: center;
+    text-decoration: none;
+    text-transform: uppercase;
+    font-size: var(--mi-font-size-small);
+  }
   img {
     width: 100%;
     height: 100%;
@@ -102,26 +186,38 @@ const Wrapper = styled.div<WrapperProps>`
 
   @media (max-width: ${bp.medium}px) {
     position: relative;
+    p {
+      font-size: var(--mi-font-size-xsmall);
+    }
 
     img {
       width: ${(props) => (props.width < 420 ? `${props.width}px` : "100%")};
       height: ${(props) => (props.height < 420 ? `${props.height}px` : "auto")};
     }
   }
+  @media (max-width: ${bp.small}px) {
+    p {
+      display: none;
+    }
+  }
 `;
 
 const ClickToPlay: React.FC<{
+  trackGroup: TrackGroup;
+  artist?: Artist;
   trackGroupId?: number;
   title: string;
   image?: { width: number; height: number; url: string };
   className?: string;
-}> = ({ trackGroupId, title, image, className }) => {
+}> = ({ trackGroup, artist, trackGroupId, title, image, className }) => {
   const {
     state: { playing, playerQueueIds, currentlyPlayingIndex },
     dispatch,
   } = useGlobalStateContext();
   // const displayMessage = useSnackbar();
   const [trackIds, setTrackIds] = React.useState<number[]>([]);
+
+  const { t } = useTranslation("translation", { keyPrefix: "clickToPlay" });
 
   const onClickPlay = React.useCallback(async () => {
     let ids: number[] = [];
@@ -152,15 +248,33 @@ const ClickToPlay: React.FC<{
       className={className}
     >
       <PlayWrapper width={image?.width ?? 0} height={image?.height ?? 0}>
-        {!currentlyPlaying && <PlayButton onPlay={onClickPlay} />}
+        <Link
+          to={`/${artist?.urlSlug ?? artist?.id}/release/${
+            trackGroup?.urlSlug ?? trackGroup?.id
+          }`}
+        ></Link>
+        <TrackgroupButtons>
+          <PurchaseOrDownloadAlbum trackGroup={trackGroup} />
+          <ul>
+            <li>
+              <Wishlist trackGroup={trackGroup} />
+            </li>
+
+            <li>{!currentlyPlaying && <PlayButton onPlay={onClickPlay} />}</li>
+
+            <li>{currentlyPlaying && <PauseButton />}</li>
+          </ul>
+        </TrackgroupButtons>
+
+        <p>{t("goToAlbum")}</p>
       </PlayWrapper>
+
       {currentlyPlaying && (
         <PlayingMusicBars
           width={image?.width ?? 0}
           height={image?.height ?? 0}
         />
       )}
-
       {image && (
         <ImageWithPlaceholder src={image.url} alt={title} size={image.width} />
       )}
