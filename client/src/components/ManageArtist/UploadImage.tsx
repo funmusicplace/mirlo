@@ -98,13 +98,11 @@ const UploadImage: React.FC<{
   rounded?: boolean;
   width?: string;
   height?: string;
-  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }> = ({
   formName,
   existingCover,
   isLoading,
   updatedAt,
-  onChange,
   rounded,
   width,
   height,
@@ -147,7 +145,6 @@ const UploadImage: React.FC<{
         id={`${formName}image`}
         {...register(formName)}
         accept="image/*"
-        onChange={onChange}
       />
     </div>
   );

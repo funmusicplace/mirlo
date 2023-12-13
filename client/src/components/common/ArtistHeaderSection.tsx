@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { bp } from "../../constants";
 import { MetaCard } from "components/common/MetaCard";
 import styled from "@emotion/styled";
-import MarkdownContent from "./MarkdownContent";
 import FollowArtist from "./FollowArtist";
 import { useGlobalStateContext } from "state/GlobalState";
 import Button from "./Button";
