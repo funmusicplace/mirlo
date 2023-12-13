@@ -12,6 +12,7 @@ import UploadArtistImage from "./UploadArtistImage";
 import { FaArrowRight } from "react-icons/fa";
 import { css } from "@emotion/css";
 import { useNavigate } from "react-router-dom";
+import useErrorHandler from "services/useErrorHandler";
 
 const PageWrapper = styled.div`
   padding: 1rem;
@@ -46,6 +47,7 @@ const Welcome = () => {
   const {
     state: { user },
   } = useGlobalStateContext();
+  const errorHandler = useErrorHandler();
   const navigate = useNavigate();
   const userId = user?.id;
   const [isLoading, setIsLoading] = React.useState(false);
@@ -85,12 +87,13 @@ const Welcome = () => {
         }
         setStep((s) => s + 1);
       } catch (e) {
+        errorHandler(e);
         console.error(e);
       } finally {
         setIsLoading(false);
       }
     },
-    [localArtist, localArtistLink, navigate, reset, step, userId]
+    [errorHandler, localArtist, localArtistLink, navigate, reset, step, userId]
   );
 
   const currentStepValue = getValues(steps[step] as keyof FormData);

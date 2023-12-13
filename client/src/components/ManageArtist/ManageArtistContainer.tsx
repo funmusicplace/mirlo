@@ -82,7 +82,9 @@ const ManageArtist: React.FC<{}> = () => {
     return null;
   }
 
-  const isRelease = location.pathname.includes("/release/");
+  const isRelease =
+    location.pathname.includes("/release/") ||
+    location.pathname.includes("/new-release");
 
   return (
     <ArtistPageWrapper artistBanner={!!artistBanner}>
