@@ -16,11 +16,10 @@ export const SectionHeader = styled.div<{ userId?: number }>`
   position: sticky !important;
   padding-bottom: 0;
   line-height: 1em;
-  z-index: +1;
   border-bottom: var(--mi-border);
   border-top: var(--mi-border);
   background-color: var(--mi-light-background-color);
-  z-index: +1;
+  z-index: 3;
   ${(props) => (!props.userId ? "top: -0.1rem; padding-top: .75rem;" : "")}
   top: 55px;
 
