@@ -68,12 +68,13 @@ const DownloadAlbumButton: React.FC<{
       </Modal>
       <Button
         compact
-        transparent
         onlyIcon
         className={css`
           margin-top: 0rem;
           font-size: 1.2rem;
           background: transparent;
+          color: var(--mi-primary-color);
+          margin-left: 0.2rem;
         `}
         startIcon={<RiDownloadLine />}
         onClick={() => setIsPopupOpen(true)}

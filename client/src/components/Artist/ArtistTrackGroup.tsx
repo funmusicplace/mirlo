@@ -82,6 +82,8 @@ const ArtistTrackGroup: React.FC<{
           }}
           trackGroupId={trackGroup.id}
           title={trackGroup.title}
+          trackGroup={trackGroup}
+          artist={artist}
         />
 
         <div
@@ -145,12 +147,24 @@ const ArtistTrackGroup: React.FC<{
               @media screen and (max-width: ${bp.small}px) {
                 button {
                   margin-top: -0.1rem;
-                  color: var(--mi-light-foreground-color);
+                  opacity: 0.5;
                 }
+              }
+
+              @media screen and (min-width: ${bp.small}px) {
+                display: none!;
               }
             `}
           >
-            <PurchaseOrDownloadAlbum trackGroup={trackGroup} />
+            <div
+              className={css`
+                @media screen and (min-width: ${bp.small}px) {
+                  display: none;
+                }
+              `}
+            >
+              <PurchaseOrDownloadAlbum trackGroup={trackGroup} />
+            </div>
           </div>
         </div>
       </div>

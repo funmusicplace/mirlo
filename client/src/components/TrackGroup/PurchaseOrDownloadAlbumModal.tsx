@@ -68,27 +68,37 @@ const PurchaseOrDownloadAlbum: React.FC<{
 
   return (
     <>
-      <div>
+      <div
+        className={css`
+          z-index: 2;
+        `}
+      >
         {!userIsTrackGroupArtist &&
           !isOwned &&
           artistState?.userStripeStatus?.chargesEnabled && (
             <div
               className={css`
                 margin-top: 0rem;
+                z-index: 2;
               `}
             >
               <Button
                 variant="outlined"
                 className={css`
                   display: block !important;
-                  ${!trackGroupId ? "display: none !important;" : ""}
                   height: 2rem !important;
 
                   @media screen and (max-width: ${bp.small}px) {
-                    display: none !important;
                     font-size: var(--mi-font-size-xsmall);
                     padding: 0;
                     font-size: 0.75rem;
+                    
+                    ${
+                      trackGroupId
+                        ? "display: block !important;"
+                        : "display: none !important;"
+                    }
+                  }
                   }
                 `}
                 compact
@@ -100,7 +110,6 @@ const PurchaseOrDownloadAlbum: React.FC<{
                 variant="link"
                 className={css`
                   display: none !important;
-                  ${!trackGroupId ? "display: block !important;" : ""}
                   color: var(--mi-normal-foreground-color) !important;
                   margin: 0.01rem 0 0 0.3rem !important;
                   &:hover {
@@ -110,7 +119,9 @@ const PurchaseOrDownloadAlbum: React.FC<{
                   font-size: 0.75rem;
 
                   @media screen and (max-width: ${bp.small}px) {
-                    display: block !important;
+                    ${trackGroupId
+                      ? "display: none !important;"
+                      : "display: block !important;"}
                   }
                 `}
                 compact

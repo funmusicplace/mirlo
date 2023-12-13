@@ -116,6 +116,9 @@
     "cancel": "Cancel",
     "platformPercent": "{{ percent }}% ({{ money }}) of this purchase will go to maintain Mirlo."
   },
+  "clickToPlay": {
+    "goToAlbum": "Go To Album"
+  },
   "post": {
     "edit": "Edit"
   },

@@ -7,7 +7,6 @@ type WrapperProps = {
 };
 
 const Wrapper = styled.div<WrapperProps>`
-  position: absolute;
   bottom: 0;
   right: 0;
   left: 0;
@@ -20,10 +19,12 @@ const Wrapper = styled.div<WrapperProps>`
 
   div {
     justify-content: space-between;
-    height: 40px;
-    width: 40px;
+    height: 60px;
+    width: 60px;
     display: flex;
-    filter: drop-shadow(0 0 1rem black);
+    filter: drop-shadow(0 0 1rem rgba(55, 55, 55, 0.5));
+    position: absolute;
+    top: 40%;
   }
 
   @keyframes bounce {
@@ -53,7 +54,7 @@ const Wrapper = styled.div<WrapperProps>`
   }
 
   span {
-    width: 4px;
+    width: 5px;
     height: 80%;
     background-color: white;
     border-radius: 0px;
@@ -82,7 +83,6 @@ const Wrapper = styled.div<WrapperProps>`
   }
 
   @media (max-width: ${bp.small}px) {
-
     div {
       height: 30px;
       width: 30px;
@@ -92,7 +92,6 @@ const Wrapper = styled.div<WrapperProps>`
     span {
       width: 3px;
     }
-
   }
 `;
 
