@@ -19,8 +19,8 @@ const Wrapper = styled.div<WrapperProps>`
 
   div {
     justify-content: space-between;
-    height: 60px;
-    width: 60px;
+    height: 50px;
+    width: 50px;
     display: flex;
     filter: drop-shadow(0 0 1rem rgba(55, 55, 55, 0.5));
     position: absolute;
@@ -81,12 +81,12 @@ const Wrapper = styled.div<WrapperProps>`
       animation-delay: -6.8s; /* Start mid-way of return of animation */
     }
   }
-
-  @media (max-width: ${bp.small}px) {
+  @media (max-width: ${bp.large}px) {
     div {
-      height: 30px;
-      width: 30px;
+      height: 40px;
+      width: 40px;
       filter: drop-shadow(10px 10px 4rem crimson);
+      top: 38%;
     }
 
     span {

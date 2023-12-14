@@ -47,7 +47,7 @@ const TrackgroupButtons = styled.div`
       height: 3rem;
     }
   }
-  @media (max-width: ${bp.medium}px) {
+  @media (max-width: ${bp.large}px) {
     ul {
       button {
         font-size: 1.1rem;
@@ -184,7 +184,7 @@ const Wrapper = styled.div<WrapperProps>`
     // padding-top: ${(props) => props.height / 2 - 12}px;
   }
 
-  @media (max-width: ${bp.medium}px) {
+  @media (max-width: ${bp.large}px) {
     position: relative;
     p {
       font-size: var(--mi-font-size-xsmall);
