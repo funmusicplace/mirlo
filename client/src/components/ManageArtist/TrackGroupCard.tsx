@@ -13,8 +13,10 @@ import { bp } from "../../constants";
 
 const TrackGroupCard: React.FC<{
   album: TrackGroup;
+  trackGroup: TrackGroup;
+  artist: Artist;
   reload: () => Promise<void>;
-}> = ({ album, reload }) => {
+}> = ({ album, reload, trackGroup, artist }) => {
   const {
     state: { user },
   } = useGlobalStateContext();
@@ -66,11 +68,14 @@ const TrackGroupCard: React.FC<{
         <ClickToPlay
           trackGroupId={album.id}
           title={album.title}
+          trackGroup={trackGroup}
+          artist={artist}
           image={{
             url: album.cover?.sizes?.[300] ?? "",
             width: 150,
             height: 150,
           }}
+          isManage
           className={css`
             margin-right: 1rem;
           `}

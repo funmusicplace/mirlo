@@ -17,11 +17,12 @@ type WrapperProps = {
   height: number;
 };
 
-const TrackgroupButtons = styled.div`
+const TrackgroupButtons = styled.div<{ isManage: boolean }>`
+  // ${(props) => (!props.isManage ? "display: none;" : "display: flex;")};
+  display: flex;
   width: 100%;
   position: absolute;
   bottom: 0;
-  display: flex;
   justify-content: flex-end;
 
   div {
@@ -166,10 +167,10 @@ const Wrapper = styled.div<WrapperProps>`
   p {
     min-width: 50%;
     margin: auto;
-    margin-bottom: 25%;
+    margin-bottom: 4rem;
     background: var(--mi-lighten-background-color);
     border-radius: var(--mi-border-radius);
-    padding: 0.5rem;
+    padding: 0.35rem;
     text-align: center;
     text-decoration: none;
     text-transform: uppercase;
@@ -183,13 +184,14 @@ const Wrapper = styled.div<WrapperProps>`
     display: block;
     // padding-top: ${(props) => props.height / 2 - 12}px;
   }
-
-  @media (max-width: ${bp.medium}px) {
-    position: relative;
+  @media (max-width: ${bp.large}px) {
     p {
       font-size: var(--mi-font-size-xsmall);
     }
+  }
 
+  @media (max-width: ${bp.medium}px) {
+    position: relative;
     img {
       width: ${(props) => (props.width < 420 ? `${props.width}px` : "100%")};
       height: ${(props) => (props.height < 420 ? `${props.height}px` : "auto")};
@@ -209,7 +211,16 @@ const ClickToPlay: React.FC<{
   title: string;
   image?: { width: number; height: number; url: string };
   className?: string;
-}> = ({ trackGroup, artist, trackGroupId, title, image, className }) => {
+  isManage: boolean;
+}> = ({
+  trackGroup,
+  artist,
+  trackGroupId,
+  title,
+  image,
+  className,
+  isManage,
+}) => {
   const {
     state: { playing, playerQueueIds, currentlyPlayingIndex },
     dispatch,
@@ -253,12 +264,10 @@ const ClickToPlay: React.FC<{
             trackGroup?.urlSlug ?? trackGroup?.id
           }`}
         ></Link>
-        <TrackgroupButtons>
-          <PurchaseOrDownloadAlbum trackGroup={trackGroup} />
+        <TrackgroupButtons isManage>
+          {!isManage && <PurchaseOrDownloadAlbum trackGroup={trackGroup} />}
           <ul>
-            <li>
-              <Wishlist trackGroup={trackGroup} />
-            </li>
+            <li>{!isManage && <Wishlist trackGroup={trackGroup} />}</li>
 
             <li>{!currentlyPlaying && <PlayButton onPlay={onClickPlay} />}</li>
 

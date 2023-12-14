@@ -19,8 +19,8 @@ const Wrapper = styled.div<WrapperProps>`
 
   div {
     justify-content: space-between;
-    height: 60px;
-    width: 60px;
+    height: 50px;
+    width: 50px;
     display: flex;
     filter: drop-shadow(0 0 1rem rgba(55, 55, 55, 0.5));
     position: absolute;
@@ -55,7 +55,7 @@ const Wrapper = styled.div<WrapperProps>`
 
   span {
     width: 5px;
-    height: 80%;
+    height: 70%;
     background-color: white;
     border-radius: 0px;
     transform-origin: bottom;
@@ -82,11 +82,12 @@ const Wrapper = styled.div<WrapperProps>`
     }
   }
 
-  @media (max-width: ${bp.small}px) {
+  @media (max-width: ${bp.large}px) {
     div {
       height: 30px;
       width: 30px;
       filter: drop-shadow(10px 10px 4rem crimson);
+      top: 45%;
     }
 
     span {
