@@ -42,6 +42,10 @@ const TrackgroupButtons = styled.div`
     display: flex;
     justify-content: flex-end;
     list-style-type: none;
+
+    li:first-child > button {
+      padding-left: 0.8rem;
+    }
     button {
       width: 3rem;
       height: 3rem;
