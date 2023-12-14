@@ -5,11 +5,21 @@ import ArtistTrackGroup from "./ArtistTrackGroup";
 import { bp } from "../../constants";
 import { ArtistSection } from "./Artist";
 import HeaderDiv from "components/common/HeaderDiv";
+import { useGlobalStateContext } from "state/GlobalState";
+import { Link } from "react-router-dom";
+import { FaPlus } from "react-icons/fa";
+import Button from "components/common/Button";
 
 const ArtistAlbums: React.FC<{ artist: Artist }> = ({ artist }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
+  const {
+    state: { user },
+  } = useGlobalStateContext();
 
-  if (!artist || artist.trackGroups.length === 0) {
+  if (
+    !artist ||
+    (artist.trackGroups.length === 0 && artist.userId !== user?.id)
+  ) {
     return null;
   }
 
@@ -33,6 +43,13 @@ const ArtistAlbums: React.FC<{ artist: Artist }> = ({ artist }) => {
           >
             {t("releases")}
           </h2>
+          {artist.userId === user?.id && (
+            <Link to={`/manage/artists/${artist.id}/new-release`}>
+              <Button compact transparent startIcon={<FaPlus />}>
+                {t("addNewAlbum")}
+              </Button>
+            </Link>
+          )}
         </HeaderDiv>
         <div
           className={css`

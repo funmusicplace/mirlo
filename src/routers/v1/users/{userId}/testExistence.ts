@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { userAuthenticated } from "../../../../auth/passport";
 import prisma from "../../../../../prisma/prisma";
 
@@ -6,6 +6,7 @@ type Query = {
   urlSlug?: string;
   artistId?: number;
   email?: string;
+  forArtistId?: string;
 };
 
 export default function () {
@@ -13,8 +14,9 @@ export default function () {
     GET: [userAuthenticated, GET],
   };
 
-  async function GET(req: Request, res: Response) {
-    const { artistId, urlSlug, email } = req.query as unknown as Query;
+  async function GET(req: Request, res: Response, next: NextFunction) {
+    const { artistId, urlSlug, email, forArtistId } =
+      req.query as unknown as Query;
     try {
       let exists = false;
       if (email) {
@@ -26,7 +28,10 @@ export default function () {
         if (!artistId) {
           const artist = await prisma.artist.findFirst({
             where: {
-              urlSlug: { equals: urlSlug, mode: "insensitive" },
+              AND: {
+                urlSlug: { equals: urlSlug, mode: "insensitive" },
+                ...(forArtistId ? { id: { not: Number(forArtistId) } } : {}),
+              },
             },
           });
           exists = !!artist;
@@ -42,11 +47,8 @@ export default function () {
       }
       res.status(200);
       res.json({ result: { exists } });
-    } catch {
-      res.status(400);
-      res.json({
-        error: "Invalid route",
-      });
+    } catch (e) {
+      next(e);
     }
   }
 

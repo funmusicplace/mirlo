@@ -10,11 +10,15 @@ const errorHandler = (
 ) => {
   console.error(`ERROR: ${req.method} ${req.path}`, err);
   if (err instanceof PrismaClientKnownRequestError) {
-    res
-      .status(400)
-      .json({
-        error: `Something went wrong with the data supplied. Admin should check the logs`,
-      });
+    console.log("err", err.cause, err.name, err.code, err.meta);
+    let message = `Something went wrong with the data supplied. Admin should check the logs`;
+
+    if (err.meta && err.code === "P2002") {
+      message = `Value is not unique: ${err.meta?.target}`;
+    }
+    res.status(400).json({
+      error: message,
+    });
   }
   if (err instanceof MulterError) {
     res.status(400).json({ error: err.message });

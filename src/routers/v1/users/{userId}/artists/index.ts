@@ -110,7 +110,7 @@ export default function () {
         data: {
           name,
           bio,
-          urlSlug: urlSlug.toLowerCase() ?? slugify(name.toLowerCase()),
+          urlSlug: urlSlug?.toLowerCase() ?? slugify(name.toLowerCase()),
           user: {
             connect: {
               id: Number(userId),
@@ -126,13 +126,9 @@ export default function () {
           },
         },
       });
-      res.json(result);
+      res.json({ result });
     } catch (e) {
-      res.status(500);
-      logger.error(`users/{userId}/artists POST ${e}`);
-      res.send({
-        error: `Error creating user`,
-      });
+      next(e);
     }
   }
 

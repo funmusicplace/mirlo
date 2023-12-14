@@ -42,6 +42,7 @@ import ArtistContainer from "components/Artist/ArtistContainer";
 import ProfileContainer from "components/Profile/ProfileContainer";
 import WishlistCollection from "components/Profile/WishlistCollection";
 import MarkdownContent from "components/common/MarkdownContent";
+import Welcome from "components/ManageArtist/Welcome";
 
 const router = createBrowserRouter([
   {
@@ -106,7 +107,6 @@ const router = createBrowserRouter([
           },
         ],
       },
-
       {
         path: "manage",
         element: (
@@ -119,6 +119,7 @@ const router = createBrowserRouter([
             path: "",
             element: <Manage />,
           },
+          { path: "welcome", element: <Welcome /> },
           {
             path: "artists/:artistId",
             element: (

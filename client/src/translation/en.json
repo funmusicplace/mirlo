@@ -1,6 +1,6 @@
 {
   "signUp": {
-    "hasRegistered": "Cool! We've sent you an e-mail to confirm your account. Click on the link in it to confirm your email",
+    "hasRegistered": "Cool! We've sent you an e-mail to confirm your account. Click on the link in it to proceed.",
     "register": "Register",
     "name": "Name:",
     "email": "Email:",
@@ -108,6 +108,10 @@
     "toFollowThisArtist": "To follow this artist please <1>sign up</1> with a user account or <2>log in</2>.",
     "followArtist": "Follow {{artistName}}",
     "month": "month",
+    "noBioYet": "You haven't added a biography for your artist yet",
+    "addNewAlbum": "Add new album",
+    "saveBio": "Save bio",
+    "editBioButton": "Edit artist bio",
     "addNewLink": "Add new link",
     "saveLinks": "Save links",
     "editLinks": "Edit links",
@@ -296,6 +300,14 @@
   "manageSubscriptionTierBox": {
     "edit": "Edit",
     "delete": "Delete"
+  },
+  "welcome": {
+    "enterANameToGetStarted": "Enter a name to get started",
+    "letsGetStarted": "Let's get started!",
+    "looksGood": "Looks good!",
+    "addAnAvatar": "Add an avatar",
+    "next": "Next",
+    "takeMeToTheArtistPage": "Take me to the artist page"
   },
   "manageTrackTable": {
     "titleColumn": "Title",

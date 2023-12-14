@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { bp } from "../../constants";
 import { MetaCard } from "components/common/MetaCard";
 import styled from "@emotion/styled";
-import MarkdownContent from "./MarkdownContent";
 import FollowArtist from "./FollowArtist";
 import { useGlobalStateContext } from "state/GlobalState";
 import Button from "./Button";
@@ -13,6 +12,7 @@ import HeaderDiv from "./HeaderDiv";
 import ArtistFormLinks from "components/ManageArtist/ArtistFormLinks";
 import Avatar from "components/Artist/Avatar";
 import ArtistFormLocation from "components/ManageArtist/ArtistFormLocation";
+import ArtistHeaderDescription from "components/Artist/ArtistHeaderDescription";
 
 const H1 = styled.h1<{ artistAvatar: boolean }>`
   font-size: 2.4rem;
@@ -173,7 +173,7 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
                 </HeaderDiv>
                 <ArtistFormLocation isManage={!!isManage} />
               </div>
-              {!artistAvatar && <MarkdownContent content={artist.bio} />}
+              {!artistAvatar && <ArtistHeaderDescription />}
             </div>
           </div>
           <div
@@ -184,17 +184,7 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
               flex-wrap: wrap;
             `}
           >
-            {artistAvatar && (
-              <MarkdownContent
-                content={artist.bio}
-                className={css`
-                  padding-bottom: 0.5rem;
-                  @media screen and (max-width: ${bp.medium}px) {
-                    ${artistAvatar ? "padding-bottom: .2rem;" : ""}
-                  }
-                `}
-              />
-            )}
+            {artistAvatar && <ArtistHeaderDescription />}
             {!isManage && user?.id === artist.userId && (
               <Link to={`/manage/artists/${artist.id}`}>
                 <Button compact transparent type="button" startIcon={<FaPen />}>

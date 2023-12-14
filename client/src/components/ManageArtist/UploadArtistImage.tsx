@@ -2,24 +2,81 @@ import { css } from "@emotion/css";
 import React from "react";
 import { useTranslation } from "react-i18next";
 
-import UploadImage from "./UploadImage";
+import api from "services/api";
+import useJobStatusCheck from "utils/useJobStatusCheck";
+import { useSnackbar } from "state/SnackbarContext";
+import { InputEl } from "components/common/Input";
+
+import { Img, Spinner, UploadPrompt } from "./UploadImage";
+
+const getExistingImage = (existing: Artist, imageType: "banner" | "avatar") => {
+  const image = existing[imageType];
+  if (!image) {
+    return undefined;
+  }
+  const actualImageLocation =
+    imageType === "banner" ? image?.sizes?.[625] : image?.sizes?.[300];
+  return `${actualImageLocation}/?updatedAt=${image?.updatedAt}`;
+};
 
 const UploadArtistImage: React.FC<{
   existing: Artist;
   imageType: "avatar" | "banner";
-  reload: () => Promise<void>;
   height: string;
   width: string;
   maxDimensions: string;
-  isLoading?: boolean;
-}> = ({ existing, imageType, height, width, maxDimensions, isLoading }) => {
+}> = ({ existing, imageType, height, width, maxDimensions }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artistForm" });
+  const snackbar = useSnackbar();
 
-  const imageUrl =
-    imageType === "banner"
-      ? existing?.banner?.sizes?.[625]
-      : existing?.avatar?.sizes?.[300];
+  const [existingImage, setExistingImage] = React.useState(
+    getExistingImage(existing, imageType)
+  );
+  const [isSaving, setIsSaving] = React.useState(false);
+  const resetWrapper = React.useCallback(async () => {
+    const result = await api.get<Artist>(
+      `users/${existing.userId}/artists/${existing.id}/`
+    );
 
+    const image = getExistingImage(result.result, imageType);
+
+    setExistingImage(image);
+  }, [existing.id, existing.userId, imageType]);
+
+  const { uploadJobs, setUploadJobs } = useJobStatusCheck({
+    reload: () => {},
+    reset: resetWrapper,
+  });
+
+  const callback = React.useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      setIsSaving(true);
+      try {
+        const file = e.target.files?.[0];
+        if (file) {
+          const jobInfo = await api.uploadFile(
+            `users/${existing.userId}/artists/${existing.id}/${imageType}`,
+            [file]
+          );
+          setUploadJobs([
+            { jobId: jobInfo.result.jobId, jobStatus: "waiting" },
+          ]);
+        }
+      } catch (e) {
+        snackbar("Something went wrong", { type: "warning" });
+        console.error(e);
+      } finally {
+        setIsSaving(false);
+      }
+    },
+    [existing.id, existing.userId, imageType, setUploadJobs, snackbar]
+  );
+
+  const isLoading =
+    uploadJobs?.[0]?.jobStatus !== undefined &&
+    uploadJobs?.[0]?.jobStatus !== "completed";
+
+  const rounded = imageType === "avatar" ? true : false;
   return (
     <div
       className={css`
@@ -29,16 +86,7 @@ const UploadArtistImage: React.FC<{
     >
       <div
         className={css`
-          margin-bottom: 0.5rem;
-        `}
-      >
-        <label>{t(imageType)}</label>
-      </div>
-      <div
-        className={css`
           position: relative;
-          width: ${width};
-          min-height: ${height};
           margin-bottom: 0.5rem;
         `}
       >
@@ -47,8 +95,9 @@ const UploadArtistImage: React.FC<{
             display: flex;
             align-items: flex-start;
             flex-wrap: wrap;
+            flex-direction: column;
+
             img {
-              margin-right: 1rem;
               flex: 45%;
               width: 100%;
             }
@@ -56,13 +105,28 @@ const UploadArtistImage: React.FC<{
               flex: 45%;
               width: 45%;
             }
+
+            label {
+              position: relative;
+            }
           `}
         >
-          <UploadImage
-            formName={imageType}
-            existingCover={imageUrl}
-            updatedAt={existing[imageType]?.updatedAt}
-            isLoading={isLoading}
+          <label htmlFor={`${imageType}image`}>
+            {existingImage && (
+              <Img src={existingImage} alt={imageType} rounded={rounded} />
+            )}
+
+            {!existingImage && (
+              <UploadPrompt width={width} height={height} rounded={rounded} />
+            )}
+            {(isLoading || isSaving) && <Spinner rounded={rounded} />}
+          </label>
+
+          <InputEl
+            type="file"
+            id={`${imageType}image`}
+            accept="image/*"
+            onChange={callback}
           />
           <small
             className={css`
