@@ -9,16 +9,17 @@ const Wishlist: React.FC<{ trackGroup: TrackGroup }> = ({ trackGroup }) => {
   const {
     state: { user },
   } = useGlobalStateContext();
+  // console.log("trackGroup", user);
 
   const [isInWishlist, setIsInWishlist] = React.useState(
-    trackGroup.userTrackGroupWishlist?.length !== 0
+    !!user?.wishlist?.find((w) => w.trackGroupId === trackGroup.id)
   );
 
   const onClick = React.useCallback(async () => {
-    setIsInWishlist((val) => !val);
     await api.post(`trackGroups/${trackGroup.id}/wishlist`, {
       wishlist: !isInWishlist,
     });
+    setIsInWishlist((val) => !val);
   }, [isInWishlist, trackGroup.id]);
 
   if (!user) {

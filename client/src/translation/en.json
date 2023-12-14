@@ -43,7 +43,8 @@
     "manage": "Manage artists",
     "logIn": "Log in",
     "signUp": "Sign up",
-    "about": "About"
+    "about": "About",
+    "admin": "Admin"
   },
   "headerSearch": {
     "searchSuggestions": "Search suggestions:",

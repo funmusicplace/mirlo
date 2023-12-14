@@ -5,19 +5,23 @@ const MarkdownWrapper = styled.div`
   opacity: 0.9;
 
   h1 {
+    font-weight: bold;
     margin-top: 1rem;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
   }
+
   h2 {
+    font-weight: bold;
     font-size: 1.4rem;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
   }
+
   h3 {
     font-size: 1.2rem;
   }
 
   p {
-    margin-bottom: 1rem;
+    margin-bottom: 0.75rem;
   }
 
   iframe {

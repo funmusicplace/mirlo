@@ -73,9 +73,11 @@ const TrackRow: React.FC<{
           display: block;
           width: 2rem;
         }
-        &:hover > td > .track-number {
+        ${canPlayTrack
+          ? `&:hover > td > .track-number {
           display: none;
-        }
+        }`
+          : ""}
         @media screen and (max-width: ${bp.small}px) {
           td {
             padding: 0.15rem 0.3rem;

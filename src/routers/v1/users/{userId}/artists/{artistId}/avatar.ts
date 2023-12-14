@@ -46,10 +46,7 @@ export default function () {
 
       res.json({ result: { jobId } });
     } catch (error) {
-      console.error("Cover error", error);
-      res.status(400).json({
-        error: `TrackGroup with ID ${artistId} does not exist in the database`,
-      });
+      next(error);
     }
   }
 

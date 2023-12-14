@@ -218,7 +218,7 @@ const ClickToPlay: React.FC<{
     state: { playing, playerQueueIds, currentlyPlayingIndex },
     dispatch,
   } = useGlobalStateContext();
-  // const displayMessage = useSnackbar();
+
   const [trackIds, setTrackIds] = React.useState<number[]>([]);
 
   const { t } = useTranslation("translation", { keyPrefix: "clickToPlay" });
@@ -229,6 +229,7 @@ const ClickToPlay: React.FC<{
       const { result } = await api.get<TrackGroup>(
         `trackGroups/${trackGroupId}`
       );
+      console.log("trackGroups", result);
       ids = result.tracks
         .filter((item) => item.isPreview)
         .map((item) => item.id);

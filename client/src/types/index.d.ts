@@ -12,6 +12,10 @@ interface LoggedInUser {
   artistUserSubscriptions?: ArtistUserSubscription[];
   isAdmin: boolean;
   country?: string;
+  wishlist?: {
+    userId: number;
+    trackGroupId: number;
+  }[];
 }
 
 interface Track {

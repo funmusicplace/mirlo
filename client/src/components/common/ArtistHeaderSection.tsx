@@ -41,10 +41,6 @@ const Header = styled.div`
   border-bottom: solid 1px var(--mi-light-foreground-color);
   font-size: var(--mi-font-size-normal);
 
-  p {
-    margin-bottom: 0rem !important;
-  }
-
   @media screen and (max-width: ${bp.medium}px) {
     font-size: var(--mi-font-size-small);
     line-height: var(--mi-font-size-normal);
@@ -54,10 +50,6 @@ const Header = styled.div`
     border: solid grey;
     border-width: 0px 0px 1px 0px;
     margin-bottom: 0rem !important;
-    p {
-      margin-bottom: 0em !important;
-      padding-bottom: 0rem;
-    }
   }
 `;
 

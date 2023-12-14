@@ -1,4 +1,3 @@
-import { css } from "@emotion/css";
 import React from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -51,15 +50,7 @@ const MarkdownContent: React.FC<{
   return (
     <MarkdownWrapper>
       <ReactMarkdown
-        className={
-          css`
-            ul {
-              margin-left: 1rem;
-            }
-          ` +
-          " " +
-          className
-        }
+        className={className}
         remarkPlugins={[
           remarkGfm,
           [remarkEmbedder, { transformers: [BlackbirdTransformer] }],

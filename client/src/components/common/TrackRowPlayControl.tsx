@@ -48,7 +48,7 @@ const TrackRowPlayControl: React.FC<{
       {(!playing || currentPlayingTrackId !== trackId) && (
         <>
           <span
-            className={!isDisabled ? "track-number" : ""}
+            className="track-number"
             style={{
               width: "1.5rem",
               textAlign: "center",

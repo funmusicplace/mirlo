@@ -28,6 +28,9 @@ export default function () {
           artistId: Number(artistId),
           ...(includeDefault ? {} : { isDefaultTier: false }),
         },
+        orderBy: {
+          minAmount: "asc",
+        },
       });
 
       res.status(200).json({ results: subscriptions });

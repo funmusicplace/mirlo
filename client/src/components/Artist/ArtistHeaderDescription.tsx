@@ -93,6 +93,7 @@ const ArtistHeaderDescription: React.FC = () => {
         <TextArea
           {...register(`bio`)}
           placeholder="Let listeners know a bit about yourself"
+          rows={8}
         />
         <Button
           compact
