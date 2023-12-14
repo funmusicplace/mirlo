@@ -1,7 +1,6 @@
 import { css } from "@emotion/css";
 import Box from "components/common/Box";
 import Button from "components/common/Button";
-import ClickToPlay from "components/common/ClickToPlay";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { FaCheck, FaTimes, FaTrash } from "react-icons/fa";
@@ -10,11 +9,14 @@ import api from "services/api";
 import { useGlobalStateContext } from "state/GlobalState";
 import { useSnackbar } from "state/SnackbarContext";
 import { bp } from "../../constants";
+import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 
 const TrackGroupCard: React.FC<{
   album: TrackGroup;
+  trackGroup: TrackGroup;
+  artist: Artist;
   reload: () => Promise<void>;
-}> = ({ album, reload }) => {
+}> = ({ album, trackGroup, artist, reload }) => {
   const {
     state: { user },
   } = useGlobalStateContext();
@@ -50,7 +52,7 @@ const TrackGroupCard: React.FC<{
         display: flex;
         width: 100%;
         margin-bottom: 0.25rem;
-        padding: 1rem 1rem 1rem;
+        padding: 0 !important;
         background-color: var(--mi-darken-background-color);
 
         &:not(:first-child) {
@@ -58,40 +60,64 @@ const TrackGroupCard: React.FC<{
         }
         @media screen and (max-width: ${bp.medium}px) {
           font-size: 0.8rem;
-          padding: 0rem !important;
         }
       `}
     >
-      <div>
-        <ClickToPlay
-          trackGroupId={album.id}
-          title={album.title}
-          image={{
-            url: album.cover?.sizes?.[300] ?? "",
-            width: 150,
-            height: 150,
-          }}
+      <div
+        className={css`
+          flex: 20%;
+          max-width: 20%;
+
+          @media screen and (max-width: ${bp.medium}px) {
+            flex: 45%;
+            max-width: 45%;
+          }
+        `}
+      >
+        <div
           className={css`
-            margin-right: 1rem;
+            @media screen and (max-width: ${bp.medium}px) {
+              margin-right: 0;
+            }
           `}
-        />
+        >
+          <Link
+            to={`/${artist?.urlSlug ?? artist?.id}/release/${
+              album?.urlSlug ?? album?.id
+            }`}
+          >
+            <ImageWithPlaceholder
+              src={album.cover?.sizes?.[600]}
+              alt={album.title}
+              size={250}
+            />
+          </Link>
+        </div>
       </div>
 
       <div
         className={css`
+          flex: 80%;
           display: flex;
           flex-direction: column;
           justify-content: space-between;
           width: 100%;
+          padding: 1rem;
 
           > div {
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-start;
+          }
+
+          strong {
+            margin-right: 1rem;
           }
 
           @media screen and (max-width: ${bp.medium}px) {
+            flex: 55%;
+            max-width: 55%;
             font-size: 0.8rem;
-            padding: 0.5rem 0rem;
+            padding: 0.5rem;
             padding-right: 0.5rem;
 
             strong {
@@ -110,7 +136,7 @@ const TrackGroupCard: React.FC<{
         `}
       >
         <div>
-          <strong>{trackGroupCardTranslation("title")} </strong>
+          <strong>{trackGroupCardTranslation("title")}</strong>
           {album.title}
         </div>
         <div>

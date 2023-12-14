@@ -16,6 +16,10 @@ const ManageArtistAlbums: React.FC<{}> = () => {
   const {
     state: { user },
   } = useGlobalStateContext();
+  const {
+    state: { artist },
+  } = useArtistContext();
+
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
   const { artistId } = useParams();
   const {
@@ -59,6 +63,7 @@ const ManageArtistAlbums: React.FC<{}> = () => {
         >
           {trackGroups?.map((album) => (
             <TrackGroupCard
+              artist={artist}
               album={album}
               key={album.id}
               reload={fetchTrackGroups}
