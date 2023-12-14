@@ -14,6 +14,7 @@ export const pageMarkdownWrapper = css`
   margin-top: 2rem;
   max-width: var(--mi-container-medium);
   margin: auto;
+  padding: var(--mi-side-paddings-xsmall);
   font-size: 18px;
 `;
 
