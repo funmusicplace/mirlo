@@ -119,6 +119,7 @@
     "editLocation": "Edit location",
     "saveLocation": "Save location",
     "cancel": "Cancel",
+    "platformPercentDisclaimer": "Mirlo is evaluating the platform percentage and seeking input from musicians in the next few weeks.",
     "platformPercent": "{{ percent }}% ({{ money }}) of this purchase will go to maintain Mirlo."
   },
   "clickToPlay": {
