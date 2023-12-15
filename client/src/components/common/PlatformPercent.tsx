@@ -2,6 +2,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { moneyDisplay } from "./Money";
 import { css } from "@emotion/css";
+import { FiAlertCircle } from "react-icons/fi";
 
 const PlatformPercent: React.FC<{
   percent: number;
@@ -29,6 +30,13 @@ const PlatformPercent: React.FC<{
         percent,
         money: moneyDisplay({ amount }),
       })}
+      <span
+        className={css`
+          margin-left: 0.2rem;
+        `}
+      >
+        <FiAlertCircle /> {t("platformPercentDisclaimer")}
+      </span>
     </div>
   );
 };

@@ -9,7 +9,7 @@ export interface Compactable {
   compact?: boolean;
   transparent?: boolean;
   role?: "primary" | "secondary" | "warning";
-  variant?: "link" | "outlined";
+  variant?: "link" | "outlined" | "default";
   color?: string;
   uppercase?: boolean;
   onlyIcon?: boolean;

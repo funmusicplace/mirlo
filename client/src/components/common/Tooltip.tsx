@@ -15,29 +15,31 @@ const TooltipWrapper = styled.div<{ underline: boolean }>`
 const TooltipText = styled.span`
   visibility: hidden;
   min-width: 200px;
+  font-size: 1rem;
+  line-height: 1rem;
   background-color: black;
   color: #fff;
   text-align: center;
   padding: 0.5rem;
   border-radius: 6px;
+  margin-top: 0.75rem;
 
-  /* Position the tooltip text - see examples below! */
   position: absolute;
-  z-index: 1;
+  z-index: 9999;
 
-  bottom: 100%;
+  top: 100%;
   left: 50%;
   margin-left: -100px;
 
   &:after {
     content: " ";
     position: absolute;
-    top: 100%; /* At the bottom of the tooltip */
+    bottom: 100%; /* At the bottom of the tooltip */
     left: 50%;
     margin-left: -5px;
     border-width: 5px;
     border-style: solid;
-    border-color: black transparent transparent transparent;
+    border-color: transparent transparent black transparent;
   }
 `;
 
