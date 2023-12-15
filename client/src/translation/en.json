@@ -308,7 +308,8 @@
     "looksGood": "Looks good!",
     "addAnAvatar": "Add an avatar",
     "next": "Next",
-    "takeMeToTheArtistPage": "Take me to the artist page"
+    "takeMeToTheArtistPage": "Take me to the artist page",
+    "addAlbum": "Add album"
   },
   "manageTrackTable": {
     "titleColumn": "Title",

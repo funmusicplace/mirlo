@@ -13,6 +13,8 @@ import NewAlbumForm from "./NewAlbumForm";
 import HeaderDiv from "components/common/HeaderDiv";
 import ManageSectionWrapper from "./ManageSectionWrapper";
 import { css } from "@emotion/css";
+import { FaChevronLeft } from "react-icons/fa";
+import Tooltip from "components/common/Tooltip";
 
 const ManageTrackGroup: React.FC<{}> = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
@@ -45,19 +47,45 @@ const ManageTrackGroup: React.FC<{}> = () => {
       `}
     >
       <HeaderDiv>
-        <h1>{t(trackGroup ? "editAlbum" : "createAlbum")}</h1>
-        <div>
-          {trackGroup && (
+        <h1
+          className={css`
+            display: flex;
+            align-items: center;
+          `}
+        >
+          <Tooltip hoverText="Back to artist" underline={false}>
             <Link
-              to={`/${artist.urlSlug?.toLowerCase()}/release/${trackGroup.urlSlug?.toLowerCase()}`}
-              style={{ marginRight: ".5rem" }}
+              className={css`
+                display: flex;
+                align-items: center;
+              `}
+              to={`/manage/artists/${artist.id}/`}
             >
-              <Button compact>{t("view")}</Button>
+              <FaChevronLeft
+                className={css`
+                  margin-right: 0.5rem;
+                  font-size: 1.6rem;
+                `}
+              />
+              {artist.name}
             </Link>
+          </Tooltip>
+          <span
+            className={css`
+              margin-left: 0.75rem;
+            `}
+          >
+            / {t(trackGroup ? "editAlbum" : "createAlbum")}
+          </span>
+        </h1>
+        <div
+          className={css`
+            display: flex;
+          `}
+        >
+          {trackGroup && trackGroup.tracks?.length > 0 && (
+            <PublishButton trackGroup={trackGroup} reload={reload} />
           )}
-          <Link to={`/manage/artists/${artist.id}/`}>
-            <Button compact>{t("viewArtist")}</Button>
-          </Link>
         </div>
       </HeaderDiv>
       {trackGroupId && trackGroup && (

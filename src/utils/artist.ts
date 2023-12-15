@@ -219,6 +219,9 @@ export const singleInclude: Prisma.ArtistInclude<DefaultArgs> = {
       },
       deletedAt: null,
     },
+    orderBy: {
+      publishedAt: "asc",
+    },
   },
 };
 

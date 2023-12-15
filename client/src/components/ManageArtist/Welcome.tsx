@@ -9,9 +9,9 @@ import React from "react";
 import ArtistSlugInput from "./ArtistSlugInput";
 import api from "services/api";
 import UploadArtistImage from "./UploadArtistImage";
-import { FaArrowRight } from "react-icons/fa";
+import { FaArrowRight, FaPlus } from "react-icons/fa";
 import { css } from "@emotion/css";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import useErrorHandler from "services/useErrorHandler";
 
 const PageWrapper = styled.div`
@@ -142,9 +142,22 @@ const Welcome = () => {
               }
             `}
           >
+            {steps[step] === "avatar" && localArtist && (
+              <Link to={`/manage/artists/${localArtist.id}/new-release`}>
+                <Button
+                  isLoading={isLoading}
+                  compact
+                  disabled={isButtonDisabled}
+                  startIcon={<FaPlus />}
+                >
+                  {t("addAlbum")}
+                </Button>
+              </Link>
+            )}
             <Button
               isLoading={isLoading}
               compact
+              variant={steps[step] === "avatar" ? "outlined" : undefined}
               disabled={isButtonDisabled}
               type="submit"
               onClick={handleSubmit(onClickNext)}
@@ -154,19 +167,17 @@ const Welcome = () => {
             </Button>
 
             {step > 0 && steps[step] !== "avatar" && (
-              <Button
-                isLoading={isLoading}
-                compact
-                variant="outlined"
-                disabled={isButtonDisabled}
-                type="submit"
-                onClick={() => {
-                  navigate(localArtistLink);
-                }}
-                endIcon={<FaArrowRight />}
-              >
-                {t("takeMeToTheArtistPage")}
-              </Button>
+              <Link to={localArtistLink}>
+                <Button
+                  isLoading={isLoading}
+                  compact
+                  variant="outlined"
+                  disabled={isButtonDisabled}
+                  endIcon={<FaArrowRight />}
+                >
+                  {t("takeMeToTheArtistPage")}
+                </Button>
+              </Link>
             )}
           </div>
         </PageWrapper>
