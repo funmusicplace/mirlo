@@ -50,6 +50,9 @@ export const Footer = () => {
           components={{
             faq: <Link to="/pages/faq"></Link>,
             about: <Link to="/pages/about"></Link>,
+            terms: <Link to="/pages/terms"></Link>,
+            privacy: <Link to="/pages/privacy"></Link>,
+            cookie: <Link to="/pages/cookie-policy"></Link>,
           }}
         />
       </p>

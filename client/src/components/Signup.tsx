@@ -1,7 +1,7 @@
 import { css } from "@emotion/css";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import api from "services/api";
 import Button from "./common/Button";
 import { InputEl } from "./common/Input";
@@ -11,6 +11,7 @@ import { Link } from "react-router-dom";
 import FormComponent from "./common/FormComponent";
 import Checkbox from "./common/FormCheckbox";
 import styled from "@emotion/styled";
+import WidthContainer from "./common/WidthContainer";
 
 type SignupInputs = {
   email: string;
@@ -21,25 +22,32 @@ type SignupInputs = {
 };
 
 const ArtistToggle = styled(FormComponent)`
+  margin-top: 0rem;
   display: flex;
   flex-direction: row;
   align-items: stretch;
+
   input {
     display: none;
   }
+
   label {
     width: 50%;
-    margin: 0.5rem;
+    margin: 0 0.5rem;
     border: 1px solid var(--mi-darken-x-background-color);
     display: flex;
     align-items: center;
     justify-content: center;
   }
+
   span {
     text-align: center;
     display: block;
-    padding: 1rem;
+    padding: 0.75rem;
     transition: 0.5s background-color;
+    display: flex;
+    align-items: center;
+    height: 100%;
   }
 
   input:checked + span {
@@ -95,11 +103,7 @@ function Signup() {
 
   return (
     <FormProvider {...methods}>
-      <div
-        className={css`
-          text-align: center;
-        `}
-      >
+      <WidthContainer variant="small">
         <form
           className={css`
             max-width: 320px;
@@ -143,6 +147,21 @@ function Signup() {
               <span>I want to share my music</span>
             </label>
           </ArtistToggle>
+          <div
+            className={css`
+              margin-bottom: 0.5rem;
+            `}
+          >
+            <Trans
+              t={t}
+              i18nKey="termsAndPrivacy"
+              components={{
+                terms: <Link to="/pages/terms"></Link>,
+                privacy: <Link to="/pages/privacy"></Link>,
+                cookie: <Link to="/pages/cookie-policy"></Link>,
+              }}
+            />{" "}
+          </div>
           <Button type="submit">{t("signUpButton")}</Button>
         </form>
         <Link
@@ -163,7 +182,7 @@ function Signup() {
             padding: 4rem 0;
           `}
         />
-      </div>
+      </WidthContainer>
     </FormProvider>
   );
 }
