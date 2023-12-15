@@ -1,8 +1,8 @@
 import styled from "@emotion/styled";
 
 const FormComponent = styled.div<{ direction?: "row" | "column" }>`
-  margin-bottom: 1rem;
-  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
+  margin-top: 0.5rem;
 
   display: flex;
   flex-direction: column;

@@ -25,6 +25,7 @@ const styles = `html {
   --mi-warning-color: #f04e37;
   --mi-warning-background-color: var(--mi-warning-color);
   --mi-darken-warning-background-color: #df250b;
+  --mi-link-color: var(--mi-pink);
 
   --mi-border-radius: 3px;
   --mi-border-radius-x: 15px;
@@ -161,7 +162,7 @@ h6 {
 
 a {
   transition: .25s color, .25s background-color;
-  color: var(--normal-foreground-color);
+  color: var(--mi-link-color);
   text-decoration: none;
 }
 a:hover {

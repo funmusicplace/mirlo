@@ -42,12 +42,12 @@ const WidthWrapper = styled.div<{
 export const WidthContainer: React.FC<{
   children: React.ReactNode;
   variant: Sizes;
-  justify: string;
+  justify?: string;
 }> = ({ children, variant, justify }) => {
   return (
     <FlexWrapper
       className={css`
-        justify-content: ${justify};
+        justify-content: ${justify ?? "flex-start"};
       `}
     >
       <WidthWrapper variant={variant}>{children}</WidthWrapper>

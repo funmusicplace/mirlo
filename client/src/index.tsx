@@ -63,11 +63,19 @@ const router = createBrowserRouter([
       },
       {
         path: "pages/privacy",
-        element: <MarkdownContent source="/pages/Privacy.md" />,
+        element: (
+          <div className={pageMarkdownWrapper}>
+            <MarkdownContent source="/pages/Privacy.md" />
+          </div>
+        ),
       },
       {
         path: "pages/terms",
-        element: <MarkdownContent source="/pages/Terms.md" />,
+        element: (
+          <div className={pageMarkdownWrapper}>
+            <MarkdownContent source="/pages/Terms.md" />
+          </div>
+        ),
       },
       { path: "widget/track/:id", element: <TrackWidget /> },
       { path: "widget/trackgroup/:id", element: <TrackGroupWidget /> },
