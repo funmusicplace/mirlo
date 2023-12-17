@@ -2,6 +2,7 @@ import { css } from "@emotion/css";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import { Link } from "react-router-dom";
 import { bp } from "../../constants";
+import { getReleaseUrl } from "utils/artist";
 
 const PlayingTrackDetails: React.FC<{ currentTrack: Track }> = ({
   currentTrack,
@@ -72,11 +73,16 @@ const PlayingTrackDetails: React.FC<{ currentTrack: Track }> = ({
                 text-overflow: ellipsis;
               `}
             >
-              <Link
-                to={`/${currentTrack.trackGroup.artist?.urlSlug}/release/${currentTrack.trackGroup.urlSlug}`}
-              >
-                {currentTrack.trackGroup.title}
-              </Link>
+              {currentTrack.trackGroup.artist && (
+                <Link
+                  to={getReleaseUrl(
+                    currentTrack.trackGroup.artist,
+                    currentTrack.trackGroup
+                  )}
+                >
+                  {currentTrack.trackGroup.title}
+                </Link>
+              )}
             </div>
             <div
               className={css`
