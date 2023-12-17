@@ -10,13 +10,13 @@ import { useGlobalStateContext } from "state/GlobalState";
 import { useSnackbar } from "state/SnackbarContext";
 import { bp } from "../../constants";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
+import { getReleaseUrl } from "utils/artist";
 
 const TrackGroupCard: React.FC<{
   album: TrackGroup;
-  trackGroup: TrackGroup;
   artist: Artist;
   reload: () => Promise<void>;
-}> = ({ album, trackGroup, artist, reload }) => {
+}> = ({ album, artist, reload }) => {
   const {
     state: { user },
   } = useGlobalStateContext();
@@ -81,11 +81,7 @@ const TrackGroupCard: React.FC<{
             }
           `}
         >
-          <Link
-            to={`/${artist?.urlSlug ?? artist?.id}/release/${
-              album?.urlSlug ?? album?.id
-            }`}
-          >
+          <Link to={getReleaseUrl(artist, album)}>
             <ImageWithPlaceholder
               src={album.cover?.sizes?.[600]}
               alt={album.title}
@@ -179,12 +175,8 @@ const TrackGroupCard: React.FC<{
           <Link to={`/manage/artists/${album.artistId}/release/${album.id}`}>
             <Button compact>{t("manageAlbum")}</Button>
           </Link>
-          {album.published && (
-            <Link
-              to={`/${
-                album.artist?.urlSlug?.toLowerCase() ?? album.artistId
-              }/release/${album.urlSlug}`}
-            >
+          {album.artist && album.published && (
+            <Link to={getReleaseUrl(album.artist, album)}>
               <Button compact>{t("viewLive")}</Button>
             </Link>
           )}
