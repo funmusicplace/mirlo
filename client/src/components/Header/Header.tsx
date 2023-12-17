@@ -138,7 +138,7 @@ const Header = () => {
                 }
               `}
             >
-              <Logo />
+              <Logo artistId />
             </span>
             <span
               className={css`
@@ -147,7 +147,7 @@ const Header = () => {
                 }
               `}
             >
-              <Logo noWordmark />
+              <Logo artistId noWordmark />
             </span>
           </Link>
         </h1>
