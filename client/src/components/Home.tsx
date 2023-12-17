@@ -128,7 +128,7 @@ function Home() {
               max-width: 500px;
             `}
           >
-            <Logo />
+            <Logo artistId />
             <div
               className={css`
                 display: flex;
