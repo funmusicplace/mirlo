@@ -95,7 +95,7 @@ const HeaderSearch: React.FC = () => {
               z-index: 12;
               word-break: break-word;
               a {
-                color: var(--mi-normal-foreground-color);
+                color: var(--mi-black) !important;
               }
 
               @media (max-width: ${bp.small}px) {
@@ -105,7 +105,7 @@ const HeaderSearch: React.FC = () => {
               }
 
               @media (prefers-color-scheme: dark) {
-                color: var(--mi-black) !important;
+                color: var(--mi-black) 
                 &::placeholder {
                   color: var(--mi-black) !important;
                   opacity: 0.3;
