@@ -327,8 +327,7 @@ router.post(
         });
       }
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ error });
+      next(error);
     }
   },
   async (req, res) => {
@@ -365,7 +364,7 @@ router.get("/logout", (req, res) => {
   }
 });
 
-router.get("/profile", userAuthenticated, async (req, res) => {
+router.get("/profile", userAuthenticated, async (req, res, next) => {
   const { email } = req.user as { email: string };
   try {
     const foundUser = await prisma.user.findFirst({
@@ -400,8 +399,7 @@ router.get("/profile", userAuthenticated, async (req, res) => {
 
     res.status(200).json({ result: foundUser });
   } catch (e) {
-    console.error("auth/profile", e);
-    res.status(500);
+    next(e);
   }
 });
 
