@@ -176,7 +176,7 @@ function Home() {
                       text-decoration: underline;
                     }
 
-                    background-color: var(--mi-pink);
+                    background-color: var(--mi-secondary-color);
                     color: var(--mi-white);
                   `}
                 >

@@ -69,7 +69,7 @@ const styles = `html {
     --mi-lighter-background-color: #282828;
 
     --mi-primary-color: var(--mi-white);
-    --mi-secondary-color: var(--mi-pink);
+    --mi-secondary-color: #BE3455;
 
     --mi-pink: #EA8B99;
   }
@@ -187,6 +187,7 @@ a:hover {
 @media (prefers-color-scheme: dark) {
   a {
     text-decoration: none;
+    color: var(--mi-pink);
   }
 }
 
