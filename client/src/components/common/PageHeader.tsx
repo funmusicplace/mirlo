@@ -29,6 +29,7 @@ const PageHeader = () => {
             width: 100%;
             overflow: hidden;
             display: flex;
+            top: 0;
             justify-content: center;
             box-shadow: inset 1em -2em 0.8em -1.3em rgba(0, 0, 0, 0.4);
             @media screen and (max-width: ${bp.medium}px) {
@@ -69,7 +70,7 @@ const PageHeader = () => {
       {(!artistBanner || (trackGroupId && !isManage)) && (
         <div
           className={css`
-            margin-top: 55px;
+            // margin-top: 55px;
             @media screen and (max-width: ${bp.medium}px) {
               margin-top: 0px;
             }

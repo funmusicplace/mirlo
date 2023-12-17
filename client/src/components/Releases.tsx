@@ -24,6 +24,9 @@ const Releases = () => {
   return (
     <div
       className={css`
+        a {
+          color: var(--mi-normal-foreground-color);
+        }
         min-height: calc(100vh - 110px);
         @media screen and (max-width: ${bp.medium}px) {
           margin-bottom: 0rem;
@@ -37,7 +40,7 @@ const Releases = () => {
       </SectionHeader>
       <div
         className={css`
-          padding-top: 1rem;
+          padding-top: 0.25rem;
         `}
       >
         <WidthContainer variant="big" justify="center">

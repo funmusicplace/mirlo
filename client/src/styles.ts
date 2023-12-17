@@ -32,6 +32,8 @@ const styles = `html {
   --mi-border-radius-focus: 8px;
 
   --mi-border: solid 1px rgba(125, 125, 125, 0.5);
+  
+  --header-cover-sticky-height: 55px;
 
   --mi-icon-button-background-color: var(--mi-darken-x-background-color);
 
@@ -67,7 +69,9 @@ const styles = `html {
     --mi-lighter-background-color: #282828;
 
     --mi-primary-color: var(--mi-white);
-    --mi-secondary-color: var(--mi-pink);
+    --mi-secondary-color: #BE3455;
+
+    --mi-pink: #EA8B99;
   }
 }
 
@@ -131,6 +135,17 @@ h6 {
   padding-bottom: .75rem;
 }
 
+.active {
+  top: -60px;
+  z-index: 999;
+  transition: top 0.4s ease-out;
+}
+
+.hidden {
+  top: 0;
+  transition: top 0.4s ease-out;
+}
+
 @media (max-width: 768px) {
   h1 {
     font-size: 2rem;
@@ -172,6 +187,7 @@ a:hover {
 @media (prefers-color-scheme: dark) {
   a {
     text-decoration: none;
+    color: var(--mi-pink);
   }
 }
 
