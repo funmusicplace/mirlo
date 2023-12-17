@@ -24,7 +24,6 @@ const Avatar: React.FC<{ avatar?: string }> = ({ avatar }) => {
         className={css`
           width: 100%;
           border-radius: 100px;
-          border: solid 1px var(--mi-lighter-foreground-color);
         `}
       />
     </div>
