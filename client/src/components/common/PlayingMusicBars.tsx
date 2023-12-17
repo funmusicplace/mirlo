@@ -24,6 +24,7 @@ const Wrapper = styled.div<WrapperProps>`
     display: flex;
     filter: drop-shadow(0 0 1rem rgba(55, 55, 55, 0.5));
     position: absolute;
+    z-index: 0;
     top: 40%;
   }
 
