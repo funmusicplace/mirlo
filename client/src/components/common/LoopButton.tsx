@@ -14,8 +14,8 @@ const LoopingIndicator = styled.span`
   background-color: var(--mi-primary-color);
   border-radius: 100%;
   color: white;
-  top: .2rem;
-  right: .2rem;
+  top: 0.2rem;
+  right: 0.2rem;
 `;
 
 export const LoopButton: React.FC = () => {
@@ -41,6 +41,7 @@ export const LoopButton: React.FC = () => {
       className={css`
         margin-left: 0.25rem;
         position: relative;
+        ${looping ? "color: var(--mi-link-color) !important;" : ""}
       `}
     >
       <RxLoop />
