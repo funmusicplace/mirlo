@@ -32,6 +32,8 @@ const styles = `html {
   --mi-border-radius-focus: 8px;
 
   --mi-border: solid 1px rgba(125, 125, 125, 0.5);
+  
+  --header-cover-sticky-height: 55px;
 
   --mi-icon-button-background-color: var(--mi-darken-x-background-color);
 
@@ -68,6 +70,8 @@ const styles = `html {
 
     --mi-primary-color: var(--mi-white);
     --mi-secondary-color: var(--mi-pink);
+
+    --mi-pink: #EA8B99;
   }
 }
 
@@ -129,6 +133,17 @@ h5 {
 h6 {
   font-size: 1.1rem;
   padding-bottom: .75rem;
+}
+
+.active {
+  top: -60px;
+  z-index: 999;
+  transition: top 0.4s ease-out;
+}
+
+.hidden {
+  top: 0;
+  transition: top 0.4s ease-out;
 }
 
 @media (max-width: 768px) {

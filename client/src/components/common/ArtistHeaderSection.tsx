@@ -36,7 +36,6 @@ const Header = styled.div`
   flex-direction: column;
   align-items: left;
   justify-content: space-between;
-  padding-bottom: 0.5rem;
   flex-grow: 1;
   border-bottom: solid 1px var(--mi-light-foreground-color);
   font-size: var(--mi-font-size-normal);
@@ -46,7 +45,6 @@ const Header = styled.div`
     line-height: var(--mi-font-size-normal);
     border-radius: 0;
     padding: var(--mi-side-paddings-xsmall);
-    padding-bottom: 0.5rem;
     border: solid grey;
     border-width: 0px 0px 1px 0px;
     margin-bottom: 0rem !important;

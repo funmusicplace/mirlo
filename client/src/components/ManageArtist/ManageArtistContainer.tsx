@@ -10,10 +10,16 @@ import { useArtistContext } from "state/ArtistContext";
 
 const Container = styled.div<{ artistBanner: boolean; userId?: number }>`
   width: 100%;
-  margin-top: calc(12vh);
-
-  ${(props) => (!props.artistBanner ? "margin-top: 0px;" : "")}
+  padding: var(--mi-side-paddings-normal);
+  ${(props) =>
+    !props.artistBanner ? "margin-top: 0px;" : "margin-top: calc(8vh);"}
+  ${(props) =>
+    props.userId ? "margin-top: calc(8vh - 39px);" : "margin-top: calc(8vh);"}
   max-width: calc(1080px + 4rem);
+
+  @media screen and (max-width: ${bp.large}px) {
+    padding: var(--mi-side-paddings-xsmall);
+  }
 
   @media screen and (max-width: ${bp.medium}px) {
     padding: var(--mi-side-paddings-xsmall);
@@ -43,6 +49,11 @@ export const ArtistPageWrapper: React.FC<{
           background: var(--mi-normal-background-color);
           padding: 0 2rem 2rem;
           height: 100%;
+
+          a {
+            color: var(--mi-normal-foreground-color);
+            font-weight: normal;
+          }
           @media screen and (max-width: ${bp.medium}px) {
             padding: 0rem !important;
           }

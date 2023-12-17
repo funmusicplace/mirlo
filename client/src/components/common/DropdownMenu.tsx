@@ -33,7 +33,7 @@ const Header: React.FC<{
           <div
             className={css`
               position: absolute;
-              top: 2.9rem;
+              top: 2.7rem;
               right: -1em;
               padding: 0.5rem;
               z-index: 12;
