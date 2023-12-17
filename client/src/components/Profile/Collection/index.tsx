@@ -49,9 +49,9 @@ function Profile() {
               flex-wrap: wrap;
             `}
           >
+            {!purchases ||
+              (purchases?.length === 0 && <Box>{t("collectionEmpty")}</Box>)}
             <TrackgroupGrid>
-              {!purchases ||
-                (purchases?.length === 0 && <Box>{t("collectionEmpty")}</Box>)}
               {purchases?.map(
                 (purchase) =>
                   purchase.trackGroup && (
