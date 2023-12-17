@@ -93,6 +93,10 @@ const HeaderSearch: React.FC = () => {
               background: var(--mi-white);
               width: 100%;
               z-index: 12;
+              word-break: break-word;
+              a {
+                color: var(--mi-normal-foreground-color);
+              }
 
               @media (max-width: ${bp.small}px) {
                 position: fixed;
