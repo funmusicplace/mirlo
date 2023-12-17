@@ -59,6 +59,7 @@ export const Manage: React.FC = () => {
         className={css`
           display: flex;
           flex-direction: column;
+          padding: 1rem;
           button {
             margin-top: 0 !important;
           }
