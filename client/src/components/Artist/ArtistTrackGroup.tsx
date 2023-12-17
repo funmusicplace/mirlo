@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import PurchaseOrDownloadAlbum from "components/TrackGroup/PurchaseOrDownloadAlbumModal";
 import { bp } from "../../constants";
 import { useArtistContext } from "state/ArtistContext";
+import { getArtistUrlReference, getTrackGroupUrlReference } from "utils/artist";
 
 const ArtistTrackGroup: React.FC<{
   trackGroup: TrackGroup;
@@ -128,16 +129,20 @@ const ArtistTrackGroup: React.FC<{
               }
             `}
           >
-            <Link
-              to={`/${artist?.urlSlug ?? artist?.id}/release/${
-                trackGroup.urlSlug ?? trackGroup.id
-              }`}
-            >
-              {trackGroup.title}
-            </Link>
-            <Link to={`/${artist?.urlSlug ?? artist?.id}/`}>
-              {trackGroup.artist?.name}
-            </Link>
+            {artist && (
+              <Link
+                to={`/${getArtistUrlReference(
+                  artist
+                )}/release/${getTrackGroupUrlReference(trackGroup)}`}
+              >
+                {trackGroup.title}
+              </Link>
+            )}
+            {artist && (
+              <Link to={`/${getArtistUrlReference(artist)}/`}>
+                {trackGroup.artist?.name}
+              </Link>
+            )}
           </div>
           <div
             className={css`
