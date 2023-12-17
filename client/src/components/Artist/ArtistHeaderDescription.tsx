@@ -1,6 +1,5 @@
 import { css } from "@emotion/css";
 import MarkdownContent from "components/common/MarkdownContent";
-import { bp } from "../../constants";
 import { useGlobalStateContext } from "state/GlobalState";
 import { useTranslation } from "react-i18next";
 import Button from "components/common/Button";
@@ -25,7 +24,6 @@ const ArtistHeaderDescription: React.FC = () => {
     refresh,
   } = useArtistContext();
   const snackbar = useSnackbar();
-  const artistAvatar = artist?.avatar?.sizes;
 
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const [isEditing, setIsEditing] = React.useState(false);
@@ -60,21 +58,27 @@ const ArtistHeaderDescription: React.FC = () => {
   );
   if (!isEditing) {
     return (
-      <div>
+      <div
+        className={css`
+          display: flex;
+          align-items: center;
+        `}
+      >
         <MarkdownContent
           content={bio}
           className={css`
-            padding-bottom: 0.5rem;
-            @media screen and (max-width: ${bp.medium}px) {
-              ${artistAvatar ? "padding-bottom: .2rem;" : ""}
-            }
+            padding-top: 0.5rem;
           `}
         />
         {user && user.id === artist?.userId && (
           <Button
             compact
+            transparent
             onClick={() => setIsEditing(true)}
             startIcon={<FaPen />}
+            className={css`
+              margin-left: 0.2rem;
+            `}
           >
             {t("editBioButton")}
           </Button>
