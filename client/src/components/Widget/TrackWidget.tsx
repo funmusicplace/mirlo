@@ -2,7 +2,6 @@ import { css } from "@emotion/css";
 import { AudioWrapper } from "components/AudioWrapper";
 // import { AudioWrapper } from "components/AudioWrapper";
 // import ClickToPlay from "components/common/ClickToPlay";
-import IconButton from "components/common/IconButton";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import { MetaCard } from "components/common/MetaCard";
 import PauseButton from "components/common/PauseButton";
@@ -10,8 +9,6 @@ import PlayButton from "components/common/PlayButton";
 import SmallTileDetails from "components/common/SmallTileDetails";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { TfiControlPause } from "react-icons/tfi";
-import { VscPlay } from "react-icons/vsc";
 import { useParams } from "react-router-dom";
 import api from "services/api";
 import { useGlobalStateContext } from "state/GlobalState";
@@ -37,7 +34,6 @@ const TrackWidget = () => {
   const params = useParams();
   const {
     state: { playing, user },
-    dispatch,
   } = useGlobalStateContext();
 
   const [track, setTrack] = React.useState<Track>();
@@ -64,28 +60,6 @@ const TrackWidget = () => {
 
     callback();
   }, [params.id]);
-
-  const onPause = React.useCallback(
-    (e: any) => {
-      if (track && embeddedInMirlo) {
-        window.parent.postMessage("mirlo:pause:track:" + track.id);
-      } else {
-        dispatch({ type: "setPlaying", playing: false });
-      }
-    },
-    [dispatch, embeddedInMirlo, track]
-  );
-
-  const playMusic = React.useCallback(() => {
-    if (track) {
-      if (embeddedInMirlo) {
-        window.parent.postMessage("mirlo:play:track:" + track.id);
-      } else {
-        dispatch({ type: "setPlayerQueueIds", playerQueueIds: [track.id] });
-        dispatch({ type: "setPlaying", playing: true });
-      }
-    }
-  }, [track, dispatch, embeddedInMirlo]);
 
   return (
     <>
