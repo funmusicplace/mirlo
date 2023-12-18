@@ -116,11 +116,11 @@ const TrackWidget = () => {
               track.trackGroup.artist?.name ?? "Unknown"
             }`}
             description={track.trackGroup.title}
-            image={track.trackGroup.cover?.sizes?.[120]}
+            image={track.trackGroup.cover?.sizes?.[300]}
             player={widgetUrl(track.id)}
           />
           <ImageWithPlaceholder
-            src={track.trackGroup.cover?.sizes?.[120] ?? ""}
+            src={track.trackGroup.cover?.sizes?.[300] ?? ""}
             alt={track.title}
             size={120}
           />
