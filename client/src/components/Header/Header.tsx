@@ -55,12 +55,12 @@ const HeaderWrapper = styled.div<{
     display: flex;
     align-items: flex-start;
     ${(props) =>
-      props.artistBanner && props.show
+      props.artistBanner && !props.trackGroupId && props.show
         ? "top: calc(var(--header-cover-sticky-height) - 25vw); aspect-ratio: 4 / 1; width: auto; min-height: auto; transition: top 0.4s ease-out;"
         : ""}
     ${(props) =>
-      props.artistBanner && !props.show
-        ? "top: calc(var(--header-cover-sticky-height) - 39vw); aspect-ratio: 4 / 1; width: auto; min-height: auto; transition: top 0.4s ease-out;"
+      props.artistBanner && !props.trackGroupId && !props.show
+        ? "top: calc(var(--header-cover-sticky-height) - 50vw); aspect-ratio: 4 / 1; width: auto; min-height: auto; transition: top 0.4s ease-out;"
         : ""}
     ${(props) => (props.trackGroupId ? "aspect-ratio: 0;" : "")}
     @media (prefers-color-scheme: dark) {
