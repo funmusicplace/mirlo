@@ -84,7 +84,6 @@ const TrackWidget = () => {
             flex-direction: column;
             width: 100%;
             padding: 1rem;
-            margin: 0.2rem;
             border-radius: 0.3rem;
             box-sizing: border-box;
             height: 100%;
