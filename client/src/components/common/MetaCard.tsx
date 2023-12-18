@@ -26,19 +26,16 @@ export const MetaCard: React.FC<{
       {image && (
         <meta property="twitter:card" content={player ? "player" : "summary"} />
       )}
-      {player && (
-        <>
-          <meta property="og:type" content="song" />
-          <meta property="og:video" content={player} />
-          <meta property="og:video:secure_url" content={player} />
-          <meta property="og:video:type" content="text/html" />
-          <meta property="og:video:height" content="600" />
-          <meta property="og:video:width" content=" 162" />
-          <meta property="twitter:player" content={player} />
-          <meta property="twitter:player:width" content="600" />
-          <meta property="twitter:player:width" content="162" />
-        </>
-      )}
+      {player && <meta property="og:type" content="song" />}
+      {player && <meta property="og:type" content="song" />}
+      {player && <meta property="og:video" content={player} />}
+      {player && <meta property="og:video:secure_url" content={player} />}
+      {player && <meta property="og:video:type" content="text/html" />}
+      {player && <meta property="og:video:height" content="600" />}
+      {player && <meta property="og:video:width" content=" 162" />}
+      {player && <meta property="twitter:player" content={player} />}
+      {player && <meta property="twitter:player:width" content="600" />}
+      {player && <meta property="twitter:player:width" content="162" />}
     </Helmet>
   );
 };
