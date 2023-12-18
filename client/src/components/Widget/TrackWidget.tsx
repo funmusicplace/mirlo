@@ -143,6 +143,7 @@ const TrackWidget = () => {
                     playing || embeddedInMirlo
                       ? css`
                           margin-right: 0.5rem;
+                          padding: 0.7rem 0.6rem 0.7rem 0.8rem;
                         `
                       : ""
                   }
@@ -151,7 +152,12 @@ const TrackWidget = () => {
                 </IconButton>
               )}
               {(playing || embeddedInMirlo) && (
-                <IconButton onClick={onPause}>
+                <IconButton
+                  onClick={onPause}
+                  className={css`
+                    padding: 0.75rem 0.7rem 0.65rem 0.7rem !important;
+                  `}
+                >
                   <TfiControlPause />
                 </IconButton>
               )}
