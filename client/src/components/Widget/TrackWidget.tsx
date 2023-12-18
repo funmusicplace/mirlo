@@ -143,7 +143,7 @@ const TrackWidget = () => {
                     playing || embeddedInMirlo
                       ? css`
                           margin-right: 0.5rem;
-                          padding: 0.7rem 0.6rem 0.7rem 0.8rem;
+                          padding: 0.7rem 0.6rem 0.7rem 0.8rem !important;
                         `
                       : ""
                   }
