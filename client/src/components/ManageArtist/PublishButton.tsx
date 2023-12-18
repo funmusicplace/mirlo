@@ -6,6 +6,7 @@ import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
 import Button from "components/common/Button";
 import { css } from "@emotion/css";
+import { getReleaseUrl } from "utils/artist";
 
 const PublishButton: React.FC<{
   trackGroup: TrackGroup;
@@ -60,10 +61,8 @@ const PublishButton: React.FC<{
       >
         {t(trackGroup.published ? privateButton : publishButton)}
       </Button>
-      {trackGroup.published && (
-        <Link
-          to={`/${artist?.urlSlug?.toLowerCase()}/release/${trackGroup.urlSlug?.toLowerCase()}`}
-        >
+      {artist && trackGroup.published && (
+        <Link to={getReleaseUrl(artist, trackGroup)}>
           <Button>{t(beforeReleaseDate ? "viewPreorder" : "view")}</Button>
         </Link>
       )}

@@ -11,6 +11,7 @@ import { useTranslation } from "react-i18next";
 import Wishlist from "components/TrackGroup/Wishlist";
 import PurchaseOrDownloadAlbum from "components/TrackGroup/PurchaseOrDownloadAlbumModal";
 import PauseButton from "./PauseButton";
+import { getReleaseUrl } from "utils/artist";
 
 type WrapperProps = {
   width: number;
@@ -254,11 +255,7 @@ const ClickToPlay: React.FC<{
       className={className}
     >
       <PlayWrapper width={image?.width ?? 0} height={image?.height ?? 0}>
-        <Link
-          to={`/${artist?.urlSlug ?? artist?.id}/release/${
-            trackGroup?.urlSlug ?? trackGroup?.id
-          }`}
-        ></Link>
+        {artist && <Link to={getReleaseUrl(artist, trackGroup)}></Link>}
         <TrackgroupButtons>
           <PurchaseOrDownloadAlbum trackGroup={trackGroup} />
           <ul>

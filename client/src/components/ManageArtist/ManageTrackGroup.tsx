@@ -7,7 +7,7 @@ import BulkTrackUpload from "./BulkTrackUpload";
 import ManageTrackTable from "./ManageTrackTable";
 import useGetUserObjectById from "utils/useGetUserObjectById";
 import { useGlobalStateContext } from "state/GlobalState";
-import PublishButton from "./PublisButton";
+import PublishButton from "./PublishButton";
 import NewAlbumForm from "./NewAlbumForm";
 import HeaderDiv from "components/common/HeaderDiv";
 import ManageSectionWrapper from "./ManageSectionWrapper";

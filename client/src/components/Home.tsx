@@ -26,9 +26,11 @@ export const SectionHeader = styled.div<{ userId?: number }>`
     margin: var(--mi-side-paddings-xsmall);
     font-weight: normal;
     color: var(--mi-pink);
+    padding-bottom: 0 !important;
   }
 
   @media (prefers-color-scheme: dark) {
+    background-color: var(--mi-normal-background-color);
     h5 {
       color: pink;
     }
@@ -172,7 +174,7 @@ function Home() {
                       text-decoration: underline;
                     }
 
-                    background-color: var(--mi-pink);
+                    background-color: var(--mi-secondary-color);
                     color: var(--mi-white);
                   `}
                 >

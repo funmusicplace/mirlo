@@ -61,14 +61,15 @@ const ManageArtistAlbums: React.FC<{}> = () => {
             padding-bottom: 1rem;
           `}
         >
-          {trackGroups?.map((album) => (
-            <TrackGroupCard
-              artist={artist}
-              album={album}
-              key={album.id}
-              reload={fetchTrackGroups}
-            />
-          ))}
+          {artist &&
+            trackGroups?.map((album) => (
+              <TrackGroupCard
+                artist={artist}
+                album={album}
+                key={album.id}
+                reload={fetchTrackGroups}
+              />
+            ))}
         </div>
       )}
     </ManageSectionWrapper>

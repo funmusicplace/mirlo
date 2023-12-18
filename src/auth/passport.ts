@@ -6,6 +6,7 @@ import passport from "passport";
 import passportJWT from "passport-jwt";
 import prisma from "../../prisma/prisma";
 import { findArtistIdForURLSlug } from "../utils/artist";
+import logger from "../logger";
 
 const JWTStrategy = passportJWT.Strategy;
 
@@ -58,7 +59,7 @@ export const userLoggedInWithoutRedirect = (
   passport.authenticate(
     "jwt",
     { session: false },
-    (err?: unknown, user?: Express.User, info?: any, status?: unknown) => {
+    (err?: unknown, user?: Express.User, info?: any) => {
       if (err instanceof TokenExpiredError) {
         res.status(401).json({ error: info.message });
         return;
@@ -78,6 +79,7 @@ export const userAuthenticated = (req: Request, res: Response, next: any) => {
   try {
     passport.authenticate("jwt", { session: false })(req, res, next);
   } catch (e) {
+    logger.info(`failed user authentication check ${e}`);
     res.status(401).json({ error: "Unauthorized" });
   }
 };
