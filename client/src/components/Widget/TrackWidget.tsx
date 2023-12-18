@@ -66,6 +66,7 @@ const TrackWidget = () => {
       {(!track || !track.id) && !isLoading && (
         <div
           className={css`
+            border: var(--mi-border);
             display: flex;
             width: 100%;
             justify-content: center;
@@ -78,6 +79,7 @@ const TrackWidget = () => {
       {track?.id && (
         <div
           className={css`
+            border: var(--mi-border);
             display: flex;
             padding: 1rem;
             background: var(--mi-normal-background-color);
