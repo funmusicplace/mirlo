@@ -5,6 +5,8 @@ import { AudioWrapper } from "components/AudioWrapper";
 import IconButton from "components/common/IconButton";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import { MetaCard } from "components/common/MetaCard";
+import PauseButton from "components/common/PauseButton";
+import PlayButton from "components/common/PlayButton";
 import SmallTileDetails from "components/common/SmallTileDetails";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -137,30 +139,17 @@ const TrackWidget = () => {
           {isTrackOwnedOrPreview(track, user) && (
             <>
               {!playing && (
-                <IconButton
-                  onClick={playMusic}
+                <PlayButton
                   className={
                     playing || embeddedInMirlo
                       ? css`
                           margin-right: 0.5rem;
-                          padding: 0.7rem 0.6rem 0.7rem 0.8rem !important;
                         `
-                      : "padding: 0.7rem 0.6rem 0.7rem 0.8rem !important;"
+                      : ""
                   }
-                >
-                  <VscPlay />
-                </IconButton>
+                />
               )}
-              {(playing || embeddedInMirlo) && (
-                <IconButton
-                  onClick={onPause}
-                  className={css`
-                    padding: 0.75rem 0.7rem 0.65rem 0.7rem !important;
-                  `}
-                >
-                  <TfiControlPause />
-                </IconButton>
-              )}
+              {(playing || embeddedInMirlo) && <PauseButton />}
             </>
           )}
         </div>
