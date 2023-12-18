@@ -113,6 +113,28 @@ const TrackWidget = () => {
             }
           />
 
+          {track && !embeddedInMirlo && (
+            <div
+              className={css`
+                display: flex;
+                align-items: center;
+                width: 100%;
+                padding: 0 1rem;
+                margin-top: -1rem;
+
+                & > div {
+                  max-width: ;
+                }
+              `}
+            >
+              <AudioWrapper
+                currentTrack={track}
+                hideControls
+                position="relative"
+              />
+            </div>
+          )}
+
           {isTrackOwnedOrPreview(track, user) && (
             <>
               {!playing && (
@@ -129,23 +151,6 @@ const TrackWidget = () => {
               {(playing || embeddedInMirlo) && <PauseButton />}
             </>
           )}
-        </div>
-      )}
-      {track && !embeddedInMirlo && (
-        <div
-          className={css`
-            display: flex;
-            align-items: center;
-            width: 100%;
-            padding: 0 1rem;
-            margin-top: -1rem;
-
-            & > div {
-              max-width: ;
-            }
-          `}
-        >
-          <AudioWrapper currentTrack={track} hideControls position="relative" />
         </div>
       )}
     </>
