@@ -82,8 +82,9 @@ const TrackWidget = () => {
             border: var(--mi-border);
             display: flex;
             padding: 1rem;
+            margin: 0.2rem;
             background: var(--mi-normal-background-color);
-            border-radius: 1rem;
+            border-radius: 0.3rem;
             align-items: center;
             height: 100%;
             box-sizing: border-box;
@@ -137,6 +138,7 @@ const TrackWidget = () => {
             align-items: center;
             width: 100%;
             padding: 0 1rem;
+            margin-top: -1rem;
 
             & > div {
               max-width: ;
