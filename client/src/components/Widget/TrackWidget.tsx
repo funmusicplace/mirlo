@@ -139,13 +139,7 @@ const TrackWidget = () => {
               {!playing && (
                 <IconButton
                   onClick={playMusic}
-                  className={
-                    playing || embeddedInMirlo
-                      ? css`
-                          margin-right: 0.5rem;
-                        `
-                      : ""
-                  }
+                  className={playing || embeddedInMirlo ? css`` : ""}
                 >
                   <VscPlay />
                 </IconButton>
