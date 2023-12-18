@@ -61,7 +61,6 @@ const HeaderSearch: React.FC = () => {
           margin-bottom: 0 !important;
           border: 1px solid var(--mi-lighten-foreground-color);
           background: var(--mi-white) !important;
-
           &::placeholder {
             color: var(--mi-normal-foreground-color) !important;
             opacity: 0.3;
@@ -94,7 +93,8 @@ const HeaderSearch: React.FC = () => {
               width: 100%;
               z-index: 12;
               word-break: break-word;
-                color: var(--mi-black) !important;
+              color: var(--mi-black) !important;
+              
               a {
                 color: var(--mi-black) !important;
               }
