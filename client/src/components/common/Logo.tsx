@@ -2,9 +2,8 @@ import React from "react";
 import { css } from "@emotion/css";
 import { useParams } from "react-router-dom";
 
-export const Logo: React.FC<{ noWordmark?: boolean; artistId: boolean }> = ({
+export const Logo: React.FC<{ noWordmark?: boolean }> = ({
   noWordmark = false,
-  artistId: boolean,
 }) => {
   const { artistId } = useParams();
   return (
