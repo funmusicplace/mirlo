@@ -79,57 +79,64 @@ const TrackWidget = () => {
       {track?.id && (
         <div
           className={css`
-            border: var(--mi-border);
             display: flex;
+            border: var(--mi-border);
+            flex-direction: column;
+            width: 100%;
             padding: 1rem;
             margin: 0.2rem;
-            background: var(--mi-normal-background-color);
             border-radius: 0.3rem;
-            align-items: center;
-            height: 100%;
             box-sizing: border-box;
+            height: 100%;
+            background: var(--mi-normal-background-color);
           `}
         >
-          <MetaCard
-            title={`${track.title} by ${
-              track.trackGroup.artist?.name ?? "Unknown"
-            }`}
-            description={track.trackGroup.title}
-            image={track.trackGroup.cover?.sizes?.[300]}
-            player={widgetUrl(track.id)}
-          />
-          <ImageWithPlaceholder
-            src={track.trackGroup.cover?.sizes?.[300] ?? ""}
-            alt={track.title}
-            size={120}
-          />
+          <div
+            className={css`
+              display: flex;
+              align-items: center;
+            `}
+          >
+            <MetaCard
+              title={`${track.title} by ${
+                track.trackGroup.artist?.name ?? "Unknown"
+              }`}
+              description={track.trackGroup.title}
+              image={track.trackGroup.cover?.sizes?.[300]}
+              player={widgetUrl(track.id)}
+            />
+            <ImageWithPlaceholder
+              src={track.trackGroup.cover?.sizes?.[300] ?? ""}
+              alt={track.title}
+              size={120}
+            />
 
-          <SmallTileDetails
-            title={track.title}
-            subtitle={track.trackGroup.title}
-            footer={
-              track.trackGroup.artist?.name ??
-              (artistTranslation("unknown") as string)
-            }
-          />
+            <SmallTileDetails
+              title={track.title}
+              subtitle={track.trackGroup.title}
+              footer={
+                track.trackGroup.artist?.name ??
+                (artistTranslation("unknown") as string)
+              }
+            />
 
-          {isTrackOwnedOrPreview(track, user) && (
-            <>
-              {!playing && (
-                <PlayButton
-                  className={
-                    playing || embeddedInMirlo
-                      ? css`
-                          margin-right: 0.5rem;
-                        `
-                      : ""
-                  }
-                />
-              )}
-              {(playing || embeddedInMirlo) && <PauseButton />}
-            </>
-          )}
-
+            {isTrackOwnedOrPreview(track, user) && (
+              <>
+                {!playing && (
+                  <PlayButton
+                    className={
+                      playing || embeddedInMirlo
+                        ? css`
+                            margin-right: 0.5rem;
+                          `
+                        : ""
+                    }
+                  />
+                )}
+                {(playing || embeddedInMirlo) && <PauseButton />}
+              </>
+            )}
+          </div>
           {track && !embeddedInMirlo && (
             <div
               className={css`
