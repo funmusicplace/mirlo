@@ -145,7 +145,7 @@ const TrackWidget = () => {
                           margin-right: 0.5rem;
                           padding: 0.7rem 0.6rem 0.7rem 0.8rem !important;
                         `
-                      : ""
+                      : "padding: 0.7rem 0.6rem 0.7rem 0.8rem !important;"
                   }
                 >
                   <VscPlay />
