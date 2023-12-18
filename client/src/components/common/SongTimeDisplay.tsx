@@ -2,9 +2,10 @@ import React from "react";
 import { css } from "@emotion/css";
 
 export const SongTimeDisplay: React.FC<{
+  position: string;
   playerRef: React.RefObject<HTMLVideoElement>;
   currentSeconds: number;
-}> = ({ playerRef, currentSeconds }) => {
+}> = ({ playerRef, currentSeconds, position }) => {
   const duration = playerRef.current?.duration ?? 0;
   const percent = currentSeconds / duration;
 
@@ -16,7 +17,7 @@ export const SongTimeDisplay: React.FC<{
         cursor: pointer;
         width: 100%;
         top: 0;
-        position: absolute;
+        position: ${position};
       `}
       onClick={(event: React.MouseEvent<HTMLDivElement>) => {
         const divWidth = event.currentTarget.offsetWidth;

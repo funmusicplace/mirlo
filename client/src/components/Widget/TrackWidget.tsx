@@ -139,7 +139,13 @@ const TrackWidget = () => {
               {!playing && (
                 <IconButton
                   onClick={playMusic}
-                  className={playing || embeddedInMirlo ? css`` : ""}
+                  className={
+                    playing || embeddedInMirlo
+                      ? css`
+                          margin-right: 0.5rem;
+                        `
+                      : ""
+                  }
                 >
                   <VscPlay />
                 </IconButton>
@@ -166,7 +172,7 @@ const TrackWidget = () => {
             }
           `}
         >
-          <AudioWrapper currentTrack={track} hideControls />
+          <AudioWrapper currentTrack={track} hideControls position="relative" />
         </div>
       )}
     </>
