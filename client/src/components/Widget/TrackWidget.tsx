@@ -8,7 +8,8 @@ import { MetaCard } from "components/common/MetaCard";
 import SmallTileDetails from "components/common/SmallTileDetails";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { FaPause, FaPlay } from "react-icons/fa";
+import { TfiControlPause } from "react-icons/tfi";
+import { VscPlay } from "react-icons/vsc";
 import { useParams } from "react-router-dom";
 import api from "services/api";
 import { useGlobalStateContext } from "state/GlobalState";
@@ -146,12 +147,12 @@ const TrackWidget = () => {
                       : ""
                   }
                 >
-                  <FaPlay />
+                  <VscPlay />
                 </IconButton>
               )}
               {(playing || embeddedInMirlo) && (
                 <IconButton onClick={onPause}>
-                  <FaPause />
+                  <TfiControlPause />
                 </IconButton>
               )}
             </>
