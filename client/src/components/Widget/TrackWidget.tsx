@@ -143,7 +143,8 @@ const TrackWidget = () => {
                 display: flex;
                 align-items: center;
                 width: 100%;
-                padding: 0.5rem 1rem;
+                margin-top: 0.5rem;
+                padding: 1rem 0 0 0;
 
                 & > div {
                   max-width: ;
