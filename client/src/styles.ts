@@ -51,7 +51,7 @@ const styles = `html {
 
   --mi-container-full: 100%;
   --mi-container-big: 1106px;
-  --mi-container-medium: 700px;
+  --mi-container-medium: 768px;
   --mi-container-small: 300px;
 
 }

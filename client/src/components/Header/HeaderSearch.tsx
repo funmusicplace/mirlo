@@ -61,7 +61,6 @@ const HeaderSearch: React.FC = () => {
           margin-bottom: 0 !important;
           border: 1px solid var(--mi-lighten-foreground-color);
           background: var(--mi-white) !important;
-
           &::placeholder {
             color: var(--mi-normal-foreground-color) !important;
             opacity: 0.3;
@@ -93,6 +92,12 @@ const HeaderSearch: React.FC = () => {
               background: var(--mi-white);
               width: 100%;
               z-index: 12;
+              word-break: break-word;
+              color: var(--mi-black) !important;
+              
+              a {
+                color: var(--mi-black) !important;
+              }
 
               @media (max-width: ${bp.small}px) {
                 position: fixed;
@@ -101,7 +106,7 @@ const HeaderSearch: React.FC = () => {
               }
 
               @media (prefers-color-scheme: dark) {
-                color: var(--mi-black) !important;
+                color: var(--mi-black) 
                 &::placeholder {
                   color: var(--mi-black) !important;
                   opacity: 0.3;

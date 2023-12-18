@@ -16,10 +16,8 @@ export const SectionHeader = styled.div<{ userId?: number }>`
   position: sticky !important;
   padding-bottom: 0;
   line-height: 1rem;
-  // border-bottom: var(--mi-border);
-  // border-top: var(--mi-border);
   background-color: var(--mi-normal-background-color);
-  z-index: 3;
+  z-index: 5;
   margin-top: 0.25rem;
   ${(props) =>
     !props.userId ? "top: -0.1rem; padding: .85rem 0 .65rem 0;" : ""}
@@ -240,90 +238,102 @@ function Home() {
           </div>
         </div>
       )}
-      {user && <Releases />}
-      {user && posts.length > 0 && (
-        <>
-          <SectionHeader
-            className={css`
-              background-color: var(--mi-light-background-color) !important;
-            `}
-          >
-            <WidthContainer variant="big" justify="center">
-              <h5>{t("latestCommunityPost")}</h5>
-            </WidthContainer>
-          </SectionHeader>
+      <div
+        className={css`
+          padding-top: 1rem;
+        `}
+      >
+        {user && <Releases />}
+        {user && posts.length > 0 && (
+          <>
+            <div
+              className={css`
+                padding-top: 1rem;
 
-          <div
-            className={css`
-              background-color: var(--mi-light-background-color);
+                background-color: var(--mi-light-background-color);
+              `}
+            >
+              <SectionHeader
+                className={css`
+                  background-color: var(--mi-light-background-color) !important;
+                `}
+              >
+                <WidthContainer variant="big" justify="center">
+                  <h5>{t("latestCommunityPost")}</h5>
+                </WidthContainer>
+              </SectionHeader>
 
-              a {
-                color: var(--mi-normal-foreground-color);
-              }
-            `}
-          >
-            <WidthContainer variant="big" justify="center">
               <div
                 className={css`
-                  margin: var(--mi-side-paddings-xsmall);
-                  margin-top: 1rem;
-                  display: flex;
-                  flex-wrap: wrap;
-                  justify-content: space-between;
-
                   a {
-                    width: 32%;
-                  }
-
-                  @media screen and (max-width: ${bp.medium}px) {
-                    flex-direction: column;
-
-                    a {
-                      width: 100%;
-                    }
+                    color: var(--mi-normal-foreground-color);
                   }
                 `}
               >
-                {posts.map((p) => (
-                  <Link
-                    to={`/post/${p.id}/`}
+                <WidthContainer variant="big" justify="center">
+                  <div
                     className={css`
+                      margin: var(--mi-side-paddings-xsmall);
+                      margin-top: 1rem;
                       display: flex;
-                      margin-bottom: 1.5rem;
-                      border-radius: 5px;
-                      background-color: var(--mi-darken-background-color);
-                      filter: brightness(95%);
-                      width: 100%;
+                      flex-wrap: wrap;
+                      justify-content: space-between;
 
-                      :hover {
-                        transition: 0.2s ease-in-out;
-                        text-decoration: none;
-                        background-color: rgba(50, 0, 0, 0.07);
-                        filter: brightness(90%);
+                      a {
+                        width: 32%;
                       }
 
-                      @media (prefers-color-scheme: dark) {
-                        :hover {
-                          filter: brightness(120%);
-                          background-color: rgba(100, 100, 100, 0.2);
+                      @media screen and (max-width: ${bp.medium}px) {
+                        flex-direction: column;
+
+                        a {
+                          width: 100%;
                         }
                       }
                     `}
                   >
-                    <Overlay width="100%" height="100%"></Overlay>
-                    <PostCard
-                      width="100%"
-                      height="350px"
-                      dateposition="100%"
-                      p={p}
-                    ></PostCard>
-                  </Link>
-                ))}
+                    {posts.map((p) => (
+                      <Link
+                        to={`/post/${p.id}/`}
+                        className={css`
+                          display: flex;
+                          margin-bottom: 1.5rem;
+                          border-radius: 5px;
+                          background-color: var(--mi-darken-background-color);
+                          filter: brightness(95%);
+                          width: 100%;
+
+                          :hover {
+                            transition: 0.2s ease-in-out;
+                            text-decoration: none;
+                            background-color: rgba(50, 0, 0, 0.07);
+                            filter: brightness(90%);
+                          }
+
+                          @media (prefers-color-scheme: dark) {
+                            :hover {
+                              filter: brightness(120%);
+                              background-color: rgba(100, 100, 100, 0.2);
+                            }
+                          }
+                        `}
+                      >
+                        <Overlay width="100%" height="100%"></Overlay>
+                        <PostCard
+                          width="100%"
+                          height="350px"
+                          dateposition="100%"
+                          p={p}
+                        ></PostCard>
+                      </Link>
+                    ))}
+                  </div>
+                </WidthContainer>
               </div>
-            </WidthContainer>
-          </div>
-        </>
-      )}
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }

@@ -89,7 +89,6 @@ const Player = () => {
   return (
     <div
       className={css`
-        border-bottom: 1px solid grey;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
@@ -98,7 +97,7 @@ const Player = () => {
         z-index: 10;
         bottom: 0;
         color: var(--mi-black);
-        filter: drop-shadow(0 0 0.1rem rgba(0, 0, 0, 0.5));
+        filter: drop-shadow(0 0 0.1rem rgba(0, 0, 0, 0.3));
         background-color: var(--mi-darken-x-background-color);
         // height: 73px;
 
@@ -148,9 +147,20 @@ const Player = () => {
         )}
       </div>
 
-      <div>
+      <div
+        className={css`
+          width: 100%;
+          margin: auto;
+          background-color: var(--mi-normal-background-color);
+
+          @media (prefers-color-scheme: dark) {
+            background-color: #0e0e0e;
+          }
+        `}
+      >
         <div
           className={css`
+            margin: 0 auto;
             display: flex;
             align-items: center;
             flex-grow: 1;
@@ -171,6 +181,7 @@ const Player = () => {
           `}
         >
           <PlayingTrackDetails currentTrack={currentTrack} />
+
           <div
             className={css`
               display: inline-block;
@@ -225,8 +236,9 @@ const Player = () => {
                   }
                 `}
               >
-                <ShuffleButton />
                 <LoopButton />
+
+                <ShuffleButton />
               </span>
               <div
                 className={css`

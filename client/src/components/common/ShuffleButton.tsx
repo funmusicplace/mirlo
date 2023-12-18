@@ -3,6 +3,7 @@ import React from "react";
 import { RxShuffle } from "react-icons/rx";
 import IconButton from "./IconButton";
 import { useGlobalStateContext } from "state/GlobalState";
+import { css } from "@emotion/css";
 
 export const ShuffleButton: React.FC = () => {
   const {
@@ -14,7 +15,13 @@ export const ShuffleButton: React.FC = () => {
     dispatch({ type: "setShuffle", shuffle: !shuffle });
   }, [dispatch, shuffle]);
   return (
-    <IconButton role={shuffle ? "primary" : undefined} onClick={onShuffle}>
+    <IconButton
+      role={shuffle ? "secondary" : undefined}
+      onClick={onShuffle}
+      className={css`
+        ${shuffle ? "color: var(--mi-link-color) !important;" : ""}
+      `}
+    >
       <RxShuffle />
     </IconButton>
   );

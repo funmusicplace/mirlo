@@ -22,11 +22,13 @@ const ProfileContainer: React.FC = () => {
           h1 {
             margin: 0.7rem 0;
           }
+          a {
+            color: var(--mi-normal-foreground-color);
+          }
         `}
       >
         <div
           className={css`
-            border-top: var(--mi-border);
             border-bottom: var(--mi-border);
             background-color: var(--mi-light-background-color);
           `}

@@ -45,48 +45,55 @@ const ManageTrackGroup: React.FC<{}> = () => {
         padding-top: 1rem !important;
       `}
     >
-      <HeaderDiv>
-        <h1
-          className={css`
-            display: flex;
-            align-items: center;
-          `}
-        >
-          <Tooltip hoverText="Back to artist" underline={false}>
-            <Link
-              className={css`
-                display: flex;
-                align-items: center;
-              `}
-              to={`/manage/artists/${artist.id}/`}
-            >
-              <FaChevronLeft
-                className={css`
-                  margin-right: 0.5rem;
-                  font-size: 1.6rem;
-                `}
-              />
-              {artist.name}
-            </Link>
-          </Tooltip>
-          <span
+      <div
+        className={css`
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+        `}
+      >
+        <Tooltip hoverText="Back to artist" underline={false}>
+          <Link
             className={css`
-              margin-left: 0.75rem;
+              display: flex;
+              align-items: center;
+              font-size: 1.2rem;
+              padding-bottom: 1rem;
+            `}
+            to={`/manage/artists/${artist.id}/`}
+          >
+            <FaChevronLeft
+              className={css`
+                margin-right: 0.5rem;
+                font-size: 1.2rem;
+              `}
+            />
+            {artist.name}
+          </Link>
+        </Tooltip>
+        <HeaderDiv>
+          <h1
+            className={css`
+              display: flex;
+              align-items: center;
             `}
           >
-            / {t(trackGroup ? "editAlbum" : "createAlbum")}
-          </span>
-        </h1>
-        <div
-          className={css`
-            display: flex;
-          `}
-        >
-          {trackGroup && trackGroup.tracks?.length > 0 && (
-            <PublishButton trackGroup={trackGroup} reload={reload} />
-          )}
-        </div>
-      </HeaderDiv>
+            <span className={css``}>
+              {t(trackGroup ? "editAlbum" : "createAlbum")}
+            </span>
+          </h1>
+          <div
+            className={css`
+              display: flex;
+              align-items: center;
+            `}
+          >
+            {trackGroup && trackGroup.tracks?.length > 0 && (
+              <PublishButton trackGroup={trackGroup} reload={reload} />
+            )}
+          </div>
+        </HeaderDiv>
+      </div>
       {trackGroupId && trackGroup && (
         <AlbumForm existing={trackGroup} reload={reload} artist={artist} />
       )}

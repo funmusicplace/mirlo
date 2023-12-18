@@ -33,11 +33,11 @@ const Header: React.FC<{
           <div
             className={css`
               position: absolute;
-              top: 2.7rem;
-              right: -1em;
+              top: 47px;
+              border-radius: var(--mi-border-radius);
+              right: 0em;
               padding: 0.5rem;
               z-index: 12;
-              padding-bottom: 1rem;
               overflow: hidden;
               text-overflow: ellipsis;
               background: var(--mi-white);

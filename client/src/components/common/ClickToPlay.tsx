@@ -90,6 +90,8 @@ const PlayWrapper = styled.div<WrapperProps>`
   flex-direction: column;
   position: absolute;
 
+  z-index: 4;
+
   width: 100%;
   height: 100%;
   top: 0;
@@ -129,7 +131,7 @@ const PlayWrapper = styled.div<WrapperProps>`
   }
 
   &:hover {
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.6);
     opacity: 1;
   }
 
@@ -171,7 +173,6 @@ const Wrapper = styled.div<WrapperProps>`
   p {
     min-width: 50%;
     margin: auto;
-    margin-bottom: 25%;
     background: var(--mi-lighten-background-color);
     border-radius: var(--mi-border-radius);
     padding: 0.5rem;

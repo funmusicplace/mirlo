@@ -11,6 +11,7 @@ import usePublicObjectById from "utils/usePublicObjectById";
 import { bp } from "../../constants";
 
 export const pageMarkdownWrapper = css`
+  width: 100%;
   margin-top: 2rem;
   max-width: var(--mi-container-medium);
   margin: auto;
@@ -37,7 +38,7 @@ const Post: React.FC = () => {
     <div className={pageMarkdownWrapper}>
       <div
         className={css`
-          margin-top: 1rem;
+          margin-top: 2rem;
           display: flex;
           justify-content: center;
           width: 100%;
@@ -78,7 +79,11 @@ const Post: React.FC = () => {
             )}
           </div>
           {post.artist && (
-            <em>
+            <em
+              className={css`
+                font-style: normal;
+              `}
+            >
               by{" "}
               <Link
                 to={`/${post.artist.urlSlug?.toLowerCase() ?? post.artistId}`}

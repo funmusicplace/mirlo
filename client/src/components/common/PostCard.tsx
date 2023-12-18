@@ -24,6 +24,10 @@ const PostCard: React.FC<{
         @media screen and (max-width: ${bp.small}px) {
           font-size: var(--mi-font-size-small) !important;
         }
+
+        @media (prefers-color-scheme: dark) {
+          background-color: var(--mi-normal-background-color);
+        }
       `}
     >
       <div

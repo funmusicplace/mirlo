@@ -44,39 +44,60 @@ const ArtistPosts: React.FC<{ artist: Artist }> = ({ artist }) => {
         >
           {artist.posts?.length === 0 && <>{t("noUpdates")}</>}
         </div>
-        {artist.posts?.map((p) => (
-          <Link
-            to={`/post/${p.id}/`}
-            className={css`
-              display: flex;
-              margin-bottom: 0.5rem;
-              border-radius: 10px;
-              background-color: var(--mi-darken-background-color);
-              filter: brightness(95%);
-              width: 100%;
+        <div
+          className={css`
+            margin-top: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
 
-              :hover {
-                transition: 0.2s ease-in-out;
-                text-decoration: none;
-                background-color: rgba(50, 0, 0, 0.07);
-                filter: brightness(90%);
+            a {
+              width: 32.4%;
+            }
+
+            @media screen and (max-width: ${bp.medium}px) {
+              flex-direction: column;
+
+              a {
+                width: 100%;
               }
-              @media (prefers-color-scheme: dark) {
+            }
+          `}
+        >
+          {artist.posts?.map((p) => (
+            <Link
+              to={`/post/${p.id}/`}
+              className={css`
+                display: flex;
+                margin-bottom: 1rem;
+                border-radius: 10px;
+                background-color: var(--mi-darken-background-color);
+                filter: brightness(95%);
+                width: 100%;
+
                 :hover {
+                  transition: 0.2s ease-in-out;
+                  text-decoration: none;
+                  background-color: rgba(50, 0, 0, 0.07);
                   filter: brightness(90%);
                 }
-              }
-            `}
-          >
-            <Overlay width="100%" height="165px"></Overlay>
-            <PostCard
-              width="100%"
-              height="165px"
-              dateposition="auto"
-              p={p}
-            ></PostCard>
-          </Link>
-        ))}
+                @media (prefers-color-scheme: dark) {
+                  :hover {
+                    filter: brightness(90%);
+                  }
+                }
+              `}
+            >
+              <Overlay width="100%" height="100%"></Overlay>
+              <PostCard
+                width="100%"
+                height="350px"
+                dateposition="auto"
+                p={p}
+              ></PostCard>
+            </Link>
+          ))}
+        </div>
       </div>
     </div>
   );
