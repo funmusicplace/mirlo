@@ -76,7 +76,7 @@ const HeaderWrapper = styled.div<{
 
 const Header = () => {
   function useShow() {
-    const [Show, setShow] = useState("{}");
+    const [show, setShow] = useState("");
 
     useEffect(() => {
       let lastScrollY = window.scrollY;
