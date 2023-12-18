@@ -135,13 +135,13 @@ h6 {
   padding-bottom: .75rem;
 }
 
-.active {
+.hidden {
   top: -60px;
   z-index: 999;
   transition: top 0.4s ease-out;
 }
 
-.hidden {
+.active {
   top: 0;
   transition: top 0.4s ease-out;
 }

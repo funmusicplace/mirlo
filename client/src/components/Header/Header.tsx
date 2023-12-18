@@ -16,7 +16,7 @@ import { useState, useEffect } from "react";
 const HeaderWrapper = styled.div<{
   artistBanner: boolean;
   artistId: boolean;
-  show: boolean;
+  show: string;
   trackGroupId: boolean;
 }>`
   position: sticky;
@@ -55,13 +55,15 @@ const HeaderWrapper = styled.div<{
     display: flex;
     align-items: flex-start;
     ${(props) =>
-      props.artistBanner && !props.trackGroupId && props.show
+      props.artistBanner && !props.trackGroupId && props.show === "up"
         ? "top: calc(var(--header-cover-sticky-height) - 25vw); aspect-ratio: 4 / 1; width: auto; min-height: auto; transition: top 0.4s ease-out;"
         : ""}
     ${(props) =>
-      props.artistBanner && !props.trackGroupId && !props.show
+      props.artistBanner && !props.trackGroupId && props.show === "down"
         ? "top: calc(var(--header-cover-sticky-height) - 50vw); aspect-ratio: 4 / 1; width: auto; min-height: auto; transition: top 0.4s ease-out;"
         : ""}
+
+
     ${(props) => (props.trackGroupId ? "aspect-ratio: 0;" : "")}
     @media (prefers-color-scheme: dark) {
       ${(props) =>
@@ -73,29 +75,31 @@ const HeaderWrapper = styled.div<{
 `;
 
 const Header = () => {
-  const [show, setShow] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
+  function useShow() {
+    const [Show, setShow] = useState("{}");
 
-  useEffect(() => {
-    const controlNavbar = () => {
-      if (window.scrollY > lastScrollY) {
-        // if scroll down hide the navbar
-        setShow(false);
-      } else {
-        // if scroll up show the navbar
-        setShow(true);
-      }
+    useEffect(() => {
+      let lastScrollY = window.scrollY;
 
-      // remember current page location to use in the next move
-      setLastScrollY(window.scrollY);
-    };
-    window.addEventListener("scroll", controlNavbar);
+      const updateShow = () => {
+        const scrollY = window.scrollY;
+        const direction = scrollY > lastScrollY ? "down" : "up";
+        if (
+          direction !== Show &&
+          (scrollY - lastScrollY > 10 || scrollY - lastScrollY < -10)
+        ) {
+          setShow(direction);
+        }
+        lastScrollY = scrollY > 0 ? scrollY : 0;
+      };
+      window.addEventListener("scroll", updateShow); // add event listener
+      return () => {
+        window.removeEventListener("scroll", updateShow); // clean up
+      };
+    }, [Show]);
 
-    // cleanup function
-    return () => {
-      window.removeEventListener("scroll", controlNavbar);
-    };
-  }, [lastScrollY]);
+    return Show;
+  }
 
   const { state } = useGlobalStateContext();
 
@@ -105,13 +109,15 @@ const Header = () => {
 
   const artistBanner = artist?.banner?.sizes;
 
+  const show = useShow();
+
   if (!state.user?.id) {
     return null;
   }
 
   return (
     <HeaderWrapper
-      className={`active ${show && "hidden"}`}
+      className={`${show === "down" ? "hidden" : "active"}`}
       artistBanner={!!artistBanner}
       show={show}
       trackGroupId={!!trackGroupId}
