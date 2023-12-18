@@ -124,6 +124,7 @@ function Home() {
           />
           <div
             className={css`
+              padding-top: 5vh;
               display: flex;
               flex-direction: column;
               gap: 48px;
