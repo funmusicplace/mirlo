@@ -22,7 +22,8 @@ const hlsConfig = {
 export const AudioWrapper: React.FC<{
   currentTrack: Track;
   hideControls?: boolean;
-}> = ({ currentTrack, hideControls = false }) => {
+  position: string;
+}> = ({ currentTrack, hideControls = false, position }) => {
   const {
     state: { playerQueueIds, currentlyPlayingIndex, user, playing, looping },
     dispatch,
@@ -155,7 +156,11 @@ export const AudioWrapper: React.FC<{
         onTimeUpdate={onListen}
         playsInline
       />
-      <SongTimeDisplay playerRef={playerRef} currentSeconds={currentSeconds} />
+      <SongTimeDisplay
+        playerRef={playerRef}
+        currentSeconds={currentSeconds}
+        position={position}
+      />
     </>
   );
 };

@@ -143,7 +143,7 @@ const Player = () => {
         `}
       >
         {currentTrack && isTrackOwnedOrPreview(currentTrack, user) && (
-          <AudioWrapper currentTrack={currentTrack} />
+          <AudioWrapper currentTrack={currentTrack} position="absolute" />
         )}
       </div>
 
