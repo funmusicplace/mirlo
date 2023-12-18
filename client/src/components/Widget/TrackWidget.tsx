@@ -132,7 +132,7 @@ const TrackWidget = () => {
                     }
                   />
                 )}
-                {(playing || embeddedInMirlo) && <PauseButton />}
+                {playing && <PauseButton />}
               </>
             )}
           </div>
