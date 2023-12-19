@@ -17,6 +17,10 @@ export const pageMarkdownWrapper = css`
   margin: auto;
   padding: var(--mi-side-paddings-xsmall);
   font-size: 18px;
+
+  p {
+    line-height: 1.8rem;
+  }
 `;
 
 const Post: React.FC = () => {

@@ -325,6 +325,10 @@ function TrackGroup() {
                 max-width: 70%;
                 margin: 1.25rem 0 1.25rem;
                 padding: 0.5rem 2rem 0.25rem 0rem;
+
+                p {
+                  line-height: 1.5rem;
+                }
                 @media screen and (max-width: ${bp.small}px) {
                   max-width: 100%;
                   padding: 0.5rem 0rem 0.25rem 0rem;
@@ -341,6 +345,10 @@ function TrackGroup() {
                 padding: 0.5rem 0.25rem 0.5rem 2rem;
                 font-size: var(--mi-font-size-small);
                 opacity: 0.5;
+
+                p {
+                  line-height: 1.3rem;
+                }
                 ${trackGroupCredits ? "border-left: 1px solid;" : ""}
                 @media screen and (max-width: ${bp.small}px) {
                   max-width: 100%;

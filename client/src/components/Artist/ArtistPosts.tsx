@@ -50,14 +50,12 @@ const ArtistPosts: React.FC<{ artist: Artist }> = ({ artist }) => {
             display: flex;
             flex-wrap: wrap;
             justify-content: space-between;
-
+            width: 100%;
             a {
               width: 32.4%;
             }
-
             @media screen and (max-width: ${bp.medium}px) {
               flex-direction: column;
-
               a {
                 width: 100%;
               }
