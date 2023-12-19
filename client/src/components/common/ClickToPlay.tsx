@@ -53,6 +53,12 @@ const TrackgroupButtons = styled.div`
     }
   }
   @media (max-width: ${bp.large}px) {
+    div {
+      button {
+        height: 2rem !important;
+        font-size: 1rem;
+      }
+    }
     ul {
       button {
         font-size: 1.1rem;
