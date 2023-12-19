@@ -45,14 +45,15 @@ export const SmallTileDetails: React.FC<{
           className={css`
             color: var(--mi-normal-foreground-color);
             font-size: 1rem;
-            opacity: 0.7;
             margin-bottom: 1rem;
+            opacity: 0.7;
 
             @media screen and (max-width: ${bp.medium}px) {
               font-size: var(--mi-font-size-small);
             }
 
             @media screen and (max-width: ${bp.small}px) {
+              margin-bottom: 0;
               font-size: var(--mi-font-size-xsmall);
             }
           `}
