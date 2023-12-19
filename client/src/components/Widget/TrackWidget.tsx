@@ -109,7 +109,6 @@ const TrackWidget = () => {
               alt={track.title}
               size={120}
             />
-
             <SmallTileDetails
               title={track.title}
               subtitle={track.trackGroup.title}
@@ -121,40 +120,65 @@ const TrackWidget = () => {
 
             {isTrackOwnedOrPreview(track, user) && (
               <>
-                {!playing && (
+                {(!playing || embeddedInMirlo) && (
                   <PlayButton
                     className={
                       playing || embeddedInMirlo
                         ? css`
                             margin-right: 0.5rem;
+                            width: 3rem;
+                            height: 3rem;
                           `
-                        : ""
+                        : "height: 3rem; width: 3rem;"
                     }
                   />
                 )}
-                {playing && <PauseButton />}
+                {(playing || embeddedInMirlo) && (
+                  <PauseButton
+                    className={css`
+                      width: 3rem;
+                      height: 3rem;
+                      padding-left: 0.8rem !important;
+                      background-color: var(--mi-normal-background-color);
+                      :hover {
+                        border-color: var(
+                          --mi-normal-foreground-color
+                        ) !important;
+                      }
+                    `}
+                  />
+                )}
               </>
             )}
           </div>
           {track && !embeddedInMirlo && (
             <div
               className={css`
-                display: flex;
-                align-items: center;
-                width: 100%;
-                margin-top: 0.5rem;
-                padding: 1rem 0 0 0;
-
-                & > div {
-                  max-width: ;
-                }
+                border-bottom: solid 0.25rem var(--mi-lighten-background-color);
+                margin-top: 1rem;
               `}
             >
-              <AudioWrapper
-                currentTrack={track}
-                hideControls
-                position="relative"
-              />
+              <div
+                className={css`
+                  display: flex;
+                  align-items: center;
+                  width: 100%;
+                  margin-top: -1rem;
+                  padding: 1rem 0 0 0;
+                  position: relative;
+                  bottom: -0.25rem;
+
+                  & > div {
+                    max-width: ;
+                  }
+                `}
+              >
+                <AudioWrapper
+                  currentTrack={track}
+                  hideControls
+                  position="relative"
+                />
+              </div>
             </div>
           )}
         </div>

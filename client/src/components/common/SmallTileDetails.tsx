@@ -1,4 +1,5 @@
 import { css } from "@emotion/css";
+import { bp } from "../../constants";
 import React from "react";
 
 export const SmallTileDetails: React.FC<{
@@ -11,17 +12,31 @@ export const SmallTileDetails: React.FC<{
     <>
       <div
         className={css`
-          margin-left: 1rem;
-          margin-top: 1rem;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-start;
+          padding-right: 0.5rem;
+          padding-left: 1rem;
+          width: 100%;
+          height: 100%;
+          > div {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: wrap;
+          }
         `}
       >
         <div
           className={css`
             margin-bottom: 0.5rem;
-            font-size: 1.1rem;
+            font-size: 1.4rem;
+
+            @media screen and (max-width: ${bp.medium}px) {
+              font-size: 1.2rem;
+            }
+            @media screen and (max-width: ${bp.small}px) {
+              font-size: var(--mi-font-size-normal);
+            }
           `}
         >
           {title}
@@ -30,6 +45,16 @@ export const SmallTileDetails: React.FC<{
           className={css`
             color: var(--mi-normal-foreground-color);
             font-size: 1rem;
+            opacity: 0.7;
+            margin-bottom: 1rem;
+
+            @media screen and (max-width: ${bp.medium}px) {
+              font-size: var(--mi-font-size-small);
+            }
+
+            @media screen and (max-width: ${bp.small}px) {
+              font-size: var(--mi-font-size-xsmall);
+            }
           `}
         >
           {subtitle}
@@ -44,9 +69,17 @@ export const SmallTileDetails: React.FC<{
               margin-left: 0;
               padding-left: 0;
             }
+
+            @media screen and (max-width: ${bp.medium}px) {
+              font-size: var(--mi-font-size-small);
+            }
+
+            @media screen and (max-width: ${bp.small}px) {
+              font-size: var(--mi-font-size-xsmall);
+            }
           `}
         >
-          {footer}
+          {"by"} {footer}
         </div>
       </div>
       <div
