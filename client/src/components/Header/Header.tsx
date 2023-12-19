@@ -85,7 +85,7 @@ const Header = () => {
         const scrollY = window.scrollY;
         const direction = scrollY > lastScrollY ? "down" : "up";
         if (
-          direction !== Show &&
+          direction !== show &&
           (scrollY - lastScrollY > 10 || scrollY - lastScrollY < -10)
         ) {
           setShow(direction);
@@ -96,9 +96,9 @@ const Header = () => {
       return () => {
         window.removeEventListener("scroll", updateShow); // clean up
       };
-    }, [Show]);
+    }, [show]);
 
-    return Show;
+    return show;
   }
 
   const { state } = useGlobalStateContext();
