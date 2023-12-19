@@ -120,7 +120,7 @@ const TrackWidget = () => {
 
             {isTrackOwnedOrPreview(track, user) && (
               <>
-                {(!playing || embeddedInMirlo) && (
+                {!playing && (
                   <PlayButton
                     className={
                       playing || embeddedInMirlo
@@ -133,7 +133,7 @@ const TrackWidget = () => {
                     }
                   />
                 )}
-                {(playing || embeddedInMirlo) && (
+                {playing && (
                   <PauseButton
                     className={css`
                       width: 3rem;
@@ -141,9 +141,8 @@ const TrackWidget = () => {
                       padding-left: 0.8rem !important;
                       background-color: var(--mi-normal-background-color);
                       :hover {
-                        border-color: var(
-                          --mi-normal-foreground-color
-                        ) !important;
+                        padding-left: 0.8rem !important;
+                        border: solid 1.5px var(--mi-normal-foreground-color) !important;
                       }
                     `}
                   />
