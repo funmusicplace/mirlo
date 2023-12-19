@@ -47,6 +47,11 @@ const PostCard: React.FC<{
           >
             <div
               className={css`
+                white-space: nowrap;
+                width: 100%;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                padding-right: 3rem;
                 position: absolute;
                 z-index: +1;
               `}
