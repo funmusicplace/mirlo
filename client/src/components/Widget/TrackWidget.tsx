@@ -2,13 +2,14 @@ import { css } from "@emotion/css";
 import { AudioWrapper } from "components/AudioWrapper";
 // import { AudioWrapper } from "components/AudioWrapper";
 // import ClickToPlay from "components/common/ClickToPlay";
+import IconButton from "components/common/IconButton";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import { MetaCard } from "components/common/MetaCard";
-import PauseButton from "components/common/PauseButton";
-import PlayButton from "components/common/PlayButton";
 import SmallTileDetails from "components/common/SmallTileDetails";
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { TfiControlPause } from "react-icons/tfi";
+import { VscPlay } from "react-icons/vsc";
 import { useParams } from "react-router-dom";
 import api from "services/api";
 import { useGlobalStateContext } from "state/GlobalState";
@@ -34,6 +35,7 @@ const TrackWidget = () => {
   const params = useParams();
   const {
     state: { playing, user },
+    dispatch,
   } = useGlobalStateContext();
 
   const [track, setTrack] = React.useState<Track>();
@@ -61,6 +63,28 @@ const TrackWidget = () => {
     callback();
   }, [params.id]);
 
+  const onPause = React.useCallback(
+    (e: any) => {
+      if (track && embeddedInMirlo) {
+        window.parent.postMessage("mirlo:pause:track:" + track.id);
+      } else {
+        dispatch({ type: "setPlaying", playing: false });
+      }
+    },
+    [dispatch, embeddedInMirlo, track]
+  );
+
+  const playMusic = React.useCallback(() => {
+    if (track) {
+      if (embeddedInMirlo) {
+        window.parent.postMessage("mirlo:play:track:" + track.id);
+      } else {
+        dispatch({ type: "setPlayerQueueIds", playerQueueIds: [track.id] });
+        dispatch({ type: "setPlaying", playing: true });
+      }
+    }
+  }, [track, dispatch, embeddedInMirlo]);
+
   return (
     <>
       {(!track || !track.id) && !isLoading && (
@@ -83,7 +107,7 @@ const TrackWidget = () => {
             border: var(--mi-border);
             flex-direction: column;
             width: 100%;
-            padding: 1rem;
+            padding: 0.5rem;
             border-radius: 0.3rem;
             box-sizing: border-box;
             height: 100%;
@@ -109,6 +133,7 @@ const TrackWidget = () => {
               alt={track.title}
               size={120}
             />
+
             <SmallTileDetails
               title={track.title}
               subtitle={track.trackGroup.title}
@@ -120,34 +145,40 @@ const TrackWidget = () => {
 
             {isTrackOwnedOrPreview(track, user) && (
               <>
-                {(!playing || embeddedInMirlo) && (
-                  <PlayButton
-                    className={
-                      playing || embeddedInMirlo
-                        ? css`
-                            margin-right: 0.5rem;
-                            width: 3rem;
-                            height: 3rem;
-                          `
-                        : "height: 3rem; width: 3rem;"
-                    }
-                  />
-                )}
-                {(playing || embeddedInMirlo) && (
-                  <PauseButton
-                    className={css`
-                      width: 3rem;
-                      height: 3rem;
-                      padding-left: 0.8rem !important;
+                <div
+                  className={css`
+                    button {
+                      font-size: 1.4rem !important;
                       background-color: var(--mi-normal-background-color);
-                      :hover {
-                        border-color: var(
-                          --mi-normal-foreground-color
-                        ) !important;
-                      }
-                    `}
-                  />
-                )}
+                      border: solid 1.5px var(--mi-normal-foreground-color) !important;
+                      width: 3rem !important;
+                      height: 3rem !important;
+                    }
+                  `}
+                >
+                  {!playing && (
+                    <IconButton
+                      onClick={playMusic}
+                      className={css`
+                          padding-left: 0.85rem !important;
+                        }
+                      `}
+                    >
+                      <VscPlay />
+                    </IconButton>
+                  )}
+                  {(playing || embeddedInMirlo) && (
+                    <IconButton
+                      onClick={onPause}
+                      className={css`
+                          padding: 0.75rem !important;
+                        }
+                      `}
+                    >
+                      <TfiControlPause />
+                    </IconButton>
+                  )}
+                </div>
               </>
             )}
           </div>
@@ -155,7 +186,7 @@ const TrackWidget = () => {
             <div
               className={css`
                 border-bottom: solid 0.25rem var(--mi-lighten-background-color);
-                margin-top: 1rem;
+                margin-top: 0.5rem;
               `}
             >
               <div
