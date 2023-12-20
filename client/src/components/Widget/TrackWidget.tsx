@@ -160,8 +160,10 @@ const TrackWidget = () => {
                     <IconButton
                       onClick={playMusic}
                       className={css`
-                          padding-left: 0.85rem !important;
-                        }
+                        padding-left: 0.85rem !important;
+                        ${!playing || embeddedInMirlo
+                          ? "display: none;"
+                          : "display: block;"}
                       `}
                     >
                       <VscPlay />
@@ -172,6 +174,11 @@ const TrackWidget = () => {
                       onClick={onPause}
                       className={css`
                           padding: 0.75rem !important;
+                          ${
+                            playing || embeddedInMirlo
+                              ? "display: none;"
+                              : "display: block;"
+                          }
                         }
                       `}
                     >
