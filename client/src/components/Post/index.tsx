@@ -129,8 +129,6 @@ const Post: React.FC = () => {
             </em>
           )}
           <MarkdownContent
-            isPage={true}
-            isPage={true}
             content={post.content}
             className={css`
               padding-top: 1rem;
