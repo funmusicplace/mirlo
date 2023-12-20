@@ -48,9 +48,9 @@ export const pageMarkdownWrapper = css`
     margin-bottom: 0.5rem;
   }
 
-  @media (min-width: ${bp.medium}px) {
+  @media (max-width: ${bp.medium}px) {
     p {
-      line-height: 1.6rem;
+      line-height: 1.6rem !important;
     }
   }
 `;
@@ -129,6 +129,7 @@ const Post: React.FC = () => {
             </em>
           )}
           <MarkdownContent
+            isPage={true}
             isPage={true}
             content={post.content}
             className={css`
