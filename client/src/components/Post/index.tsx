@@ -24,7 +24,8 @@ export const pageMarkdownWrapper = css`
   }
 
   h2 {
-    font-size: 1.5rem !important;
+    font-weight: normal !important;
+    font-size: 1.7rem !important;
     margin-top: 1rem;
     margin-bottom: 1rem !important;
   }
