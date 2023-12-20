@@ -29,7 +29,7 @@ export const SmallTileDetails: React.FC<{
         <div
           className={css`
             margin-bottom: 0.5rem;
-            font-size: 1.4rem;
+            font-size: 1.6rem;
 
             @media screen and (max-width: ${bp.medium}px) {
               font-size: 1.2rem;
@@ -45,9 +45,13 @@ export const SmallTileDetails: React.FC<{
           className={css`
             color: var(--mi-normal-foreground-color);
             font-size: 1rem;
-            opacity: 0.7;
             margin-bottom: 1rem;
-
+            span:first-child {
+              opacity: 0.5;
+            }
+            span:last-child {
+              opacity: 0.9;
+            }
             @media screen and (max-width: ${bp.medium}px) {
               font-size: var(--mi-font-size-small);
             }
@@ -57,7 +61,8 @@ export const SmallTileDetails: React.FC<{
             }
           `}
         >
-          {subtitle}
+          <span>from </span>
+          <span>"{subtitle}"</span>
         </div>
         <div
           className={css`
