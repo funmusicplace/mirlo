@@ -55,6 +55,10 @@ const HeaderWrapper = styled.div<{
     display: flex;
     align-items: flex-start;
     ${(props) =>
+      props.artistBanner && !props.trackGroupId
+        ? "top: calc(var(--header-cover-sticky-height) - 25vw); aspect-ratio: 4 / 1; width: auto; min-height: auto; transition: top 0.4s ease-out;"
+        : ""}
+    ${(props) =>
       props.artistBanner && !props.trackGroupId && props.show === "up"
         ? "top: calc(var(--header-cover-sticky-height) - 25vw); aspect-ratio: 4 / 1; width: auto; min-height: auto; transition: top 0.4s ease-out;"
         : ""}
