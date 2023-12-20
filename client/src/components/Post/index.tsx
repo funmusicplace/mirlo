@@ -17,9 +17,41 @@ export const pageMarkdownWrapper = css`
   margin: auto;
   padding: var(--mi-side-paddings-xsmall);
   font-size: 18px;
+  line-height: 1.7rem;
+
+  h1 {
+    font-weight: normal !important;
+  }
+
+  h2 {
+    font-size: 1.5rem !important;
+    margin-top: 1rem;
+    margin-bottom: 1rem !important;
+  }
 
   p {
-    line-height: 1.8rem;
+    margin-bottom: 1.7rem !important;
+    line-height: 1.7rem !important;
+  }
+
+  iframe {
+    margin: 0 !important;
+  }
+
+  ul {
+    margin-left: 1rem;
+    margin-bottom: 2rem;
+    line-height: 1.7rem;
+  }
+
+  li {
+    margin-bottom: 0.5rem;
+  }
+
+  @media (min-width: ${bp.medium}px) {
+    p {
+      line-height: 1.6rem;
+    }
   }
 `;
 
@@ -97,6 +129,7 @@ const Post: React.FC = () => {
             </em>
           )}
           <MarkdownContent
+            isPage={true}
             content={post.content}
             className={css`
               padding-top: 1rem;
