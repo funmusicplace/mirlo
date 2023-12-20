@@ -17,9 +17,42 @@ export const pageMarkdownWrapper = css`
   margin: auto;
   padding: var(--mi-side-paddings-xsmall);
   font-size: 18px;
+  line-height: 1.7rem;
+
+  h1 {
+    font-weight: normal !important;
+  }
+
+  h2 {
+    font-weight: normal !important;
+    font-size: 1.7rem !important;
+    margin-top: 1rem;
+    margin-bottom: 1rem !important;
+  }
 
   p {
-    line-height: 1.8rem;
+    margin-bottom: 1.7rem !important;
+    line-height: 1.7rem !important;
+  }
+
+  iframe {
+    margin: 0 !important;
+  }
+
+  ul {
+    margin-left: 1rem;
+    margin-bottom: 2rem;
+    line-height: 1.7rem;
+  }
+
+  li {
+    margin-bottom: 0.5rem;
+  }
+
+  @media (max-width: ${bp.medium}px) {
+    p {
+      line-height: 1.6rem !important;
+    }
   }
 `;
 
