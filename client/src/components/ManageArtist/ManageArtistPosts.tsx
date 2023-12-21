@@ -16,6 +16,7 @@ import { useArtistContext } from "state/ArtistContext";
 import HeaderDiv from "components/common/HeaderDiv";
 import { ManageSectionWrapper } from "./ManageSectionWrapper";
 import { formatDate } from "components/TrackGroup/ReleaseDate";
+import { Link } from "react-router-dom";
 
 const ManageArtistPosts: React.FC<{}> = () => {
   const {
@@ -91,10 +92,10 @@ const ManageArtistPosts: React.FC<{}> = () => {
           `}
         >
           <HeaderDiv>
-            <div>
+            <Link to={`/post/${p.id}`}>
               <strong>{p.title}</strong> published{" "}
               {formatDate({ date: p.publishedAt, i18n })}
-            </div>
+            </Link>
             <div>
               <Button
                 compact

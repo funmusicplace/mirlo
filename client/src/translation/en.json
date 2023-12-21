@@ -127,7 +127,8 @@
     "goToAlbum": "Go To Album"
   },
   "post": {
-    "edit": "Edit"
+    "edit": "Edit",
+    "notAvailable": "The artist has not made this post's content publicly available"
   },
   "manage": {
     "manageArtists": "Manage artists",

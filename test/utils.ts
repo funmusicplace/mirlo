@@ -57,6 +57,7 @@ export const createPost = async (
     data: {
       title: data?.title ?? "Test title",
       artistId: artistId,
+      isPublic: data?.isPublic ?? true,
       content: data?.content ?? "The content",
     },
   });

@@ -1,17 +1,18 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import prisma from "../../../../prisma/prisma";
 import { userLoggedInWithoutRedirect } from "../../../auth/passport";
 import { User } from "@prisma/client";
-import logger from "../../../logger";
+import postProcessor from "../../../utils/post";
+import { checkIsUserSubscriber } from "../../../utils/artist";
 
 export default function () {
   const operations = {
     GET: [userLoggedInWithoutRedirect, GET],
   };
 
-  async function GET(req: Request, res: Response) {
+  async function GET(req: Request, res: Response, next: NextFunction) {
     const { id }: { id?: string } = req.params;
-    const user = req.user as User;
+    const user = req.user as User | undefined;
 
     try {
       const post = await prisma.post.findFirst({
@@ -25,13 +26,20 @@ export default function () {
           artist: true,
         },
       });
-      res.json({ result: post });
-    } catch (e) {
-      logger.error(`/posts/{id} GET ${e}`);
-      res.status(500);
-      res.send({
-        error: "Error finding post",
+
+      if (!post) {
+        return res.status(404).json({ error: "Post not found" });
+      }
+      const isUserSubscriber = await checkIsUserSubscriber(user, post.artistId);
+      console.log("isUserSubscriber", isUserSubscriber, !post.isPublic);
+      res.json({
+        result: postProcessor.single(
+          post,
+          isUserSubscriber || post.artist?.userId === user?.id
+        ),
       });
+    } catch (e) {
+      next(e);
     }
   }
 
