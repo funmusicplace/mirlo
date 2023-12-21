@@ -65,6 +65,9 @@ export default function () {
 
     const posts = await prisma.post.findMany({
       where,
+      orderBy: {
+        publishedAt: "desc",
+      },
     });
 
     res.json({

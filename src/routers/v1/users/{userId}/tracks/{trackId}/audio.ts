@@ -8,12 +8,6 @@ import {
 import { doesTrackBelongToUser } from "../../../../../../utils/ownership";
 import { processTrackAudio } from "../../../../../../utils/processTrackAudio";
 import busboy from "connect-busboy";
-// const upload = multer({
-//   dest: process.env.MEDIA_LOCATION_INCOMING ?? "/data/media/incoming",
-//   limits: {
-//     fileSize: 4000000000,
-//   },
-// });
 
 type Params = {
   trackId: string;
@@ -25,7 +19,6 @@ export default function () {
     PUT: [
       userAuthenticated,
       userHasPermission("owner"),
-      // upload.array("upload"),
       busboy({
         highWaterMark: 2 * 1024 * 1024,
         limits: {
