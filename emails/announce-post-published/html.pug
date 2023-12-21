@@ -9,10 +9,11 @@ html
       style 
         include ../style.css
   body.sans-serif
-    p Wow! 
-    p An artist you support published a new post!
+    p  
+    p #{artist.name} just published a new post on Mirlo: 
+    h2 #{post.title}
     p 
-      strong #{post.title}
-    p 
-      a(href!=`${client}/post/${post.id}`) Check it out.
-    p Enjoy!
+      a(href!=`${client}/post/${post.id}`) Read it on Mirlo.
+    div 
+      | !{post.htmlContent}
+    

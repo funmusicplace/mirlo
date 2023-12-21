@@ -101,7 +101,7 @@ You'll also want fake Stripe data. You can find [the details on that here](https
 Some cron jobs exist:
 
 ```sh
-docker exec -it blackbird-api yarn ts-node src/jobs/announce-post-published.ts
+docker exec -it blackbird-api yarn ts-node src/jobs/every-minute-tasks.ts
 ```
 
 ## MinIO

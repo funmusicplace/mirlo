@@ -2,11 +2,11 @@ import { Request, Response } from "express";
 import { User, Prisma } from "@prisma/client";
 
 import RSS from "rss";
-import showdown from "showdown";
 
 import prisma from "../../../../../prisma/prisma";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { findArtistIdForURLSlug } from "../../../../utils/artist";
+import { markdownAsHtml } from "../../../../utils/post";
 
 export default function () {
   const operations = {
@@ -107,16 +107,11 @@ export default function () {
           feed_url: `${process.env.API_DOMAIN}/v1/${artist.urlSlug}/feed?format=rss`,
           site_url: `${client?.applicationUrl}/${artist.urlSlug}`,
         });
-        const converter = new showdown.Converter();
 
         for (const p of posts) {
-          // const content = p.content;
-          const text = p.content ?? "";
-          const html = converter.makeHtml(text);
-
           feed.item({
             title: p.title,
-            description: html,
+            description: markdownAsHtml(p.content),
             url: `${client?.applicationUrl}/post/${p.id}`,
             date: p.publishedAt,
           });
