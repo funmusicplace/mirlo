@@ -7,7 +7,7 @@ import { clearTables, createArtist, createPost, createUser } from "../utils";
 import announcePublishPost from "../../src/jobs/announce-post-published";
 import prisma from "../../prisma/prisma";
 
-describe.only("announce-post-published", () => {
+describe("announce-post-published", () => {
   beforeEach(async () => {
     try {
       await clearTables();

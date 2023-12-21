@@ -9,7 +9,6 @@ const Wishlist: React.FC<{ trackGroup: TrackGroup }> = ({ trackGroup }) => {
   const {
     state: { user },
   } = useGlobalStateContext();
-  // console.log("trackGroup", user);
 
   const [isInWishlist, setIsInWishlist] = React.useState(
     !!user?.wishlist?.find((w) => w.trackGroupId === trackGroup.id)

@@ -42,7 +42,6 @@ const announcePublishPost = async () => {
       logger.info(
         `mailing post: ${post.title} to ${subscriptions.length} subscribers`
       );
-      console.log("postContent", postContent);
       await Promise.all(
         subscriptions.map(async (subscription) => {
           return sendMail({

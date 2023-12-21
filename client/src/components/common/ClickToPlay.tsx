@@ -237,7 +237,6 @@ const ClickToPlay: React.FC<{
       const { result } = await api.get<TrackGroup>(
         `trackGroups/${trackGroupId}`
       );
-      console.log("trackGroups", result);
       ids = result.tracks
         .filter((item) => item.isPreview)
         .map((item) => item.id);

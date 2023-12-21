@@ -12,7 +12,7 @@ import {
 } from "@prisma/client";
 import prisma from "../../prisma/prisma";
 import stripe from "./stripe";
-import trackGroupProcessor, { deleteTrackGroup } from "./trackGroup";
+import { deleteTrackGroup, processSingleTrackGroup } from "./trackGroup";
 import postProcessor from "./post";
 import { convertURLArrayToSizes } from "./images";
 import { finalArtistAvatarBucket, finalArtistBannerBucket } from "./minio";
@@ -263,6 +263,6 @@ export const processSingleArtist = (
         artist?.avatar &&
         convertURLArrayToSizes(artist?.avatar?.url, finalArtistAvatarBucket),
     },
-    trackGroups: artist?.trackGroups.map(trackGroupProcessor.single),
+    trackGroups: artist?.trackGroups.map(processSingleTrackGroup),
   };
 };

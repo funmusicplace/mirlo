@@ -1,19 +1,14 @@
 import { User } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
-import multer from "multer";
 import {
   userAuthenticated,
   userHasPermission,
 } from "../../../../../../auth/passport";
-import processTrackGroupCover from "../../../../../../utils/processImages";
 import { doesTrackGroupBelongToUser } from "../../../../../../utils/ownership";
-
-const upload = multer({
-  dest: process.env.MEDIA_LOCATION_INCOMING ?? "/data/media/incoming",
-  limits: {
-    fileSize: 10000000, // 10mb seems reasonable for a cover
-  },
-});
+import busboy from "connect-busboy";
+import processTrackGroupCover from "../../../../../../utils/processTrackGroupCover";
+import prisma from "../../../../../../../prisma/prisma";
+import { deleteTrackGroupCover } from "../../../../../../utils/trackGroup";
 
 type Params = {
   trackGroupId: number;
@@ -29,9 +24,15 @@ export default function () {
     PUT: [
       userAuthenticated,
       userHasPermission("owner"),
-      upload.array("upload"),
+      busboy({
+        highWaterMark: 2 * 1024 * 1024,
+        limits: {
+          fileSize: 4 * 1024 * 1024,
+        },
+      }),
       PUT,
     ],
+    DELETE: [userAuthenticated, userHasPermission("owner"), DELETE],
   };
 
   async function PUT(req: Request, res: Response, next: NextFunction) {
@@ -50,22 +51,13 @@ export default function () {
         return next();
       }
 
-      let jobId = null;
-      // TODO: Remove prior files
-      // FIXME: Only allow uploading of one file.
-      if (req.files && isFileArray(req.files)) {
-        jobId = await processTrackGroupCover({ req, res })(
-          req.files[0],
-          trackGroupId
-        );
-      }
+      const jobId = await processTrackGroupCover({ req, res })(
+        Number(trackGroupId)
+      );
 
       res.json({ result: { jobId } });
     } catch (error) {
-      console.error("Cover error", error);
-      res.status(400).json({
-        error: `TrackGroup with ID ${trackGroupId} does not exist in the database`,
-      });
+      next(error);
     }
   }
 
@@ -107,6 +99,30 @@ export default function () {
       },
     },
   };
+
+  async function DELETE(req: Request, res: Response, next: NextFunction) {
+    const { trackGroupId } = req.params as unknown as Params;
+    const loggedInUser = req.user as User;
+    try {
+      const trackgroup = await doesTrackGroupBelongToUser(
+        Number(trackGroupId),
+        loggedInUser.id
+      );
+
+      if (!trackgroup) {
+        res.status(400).json({
+          error: "Trackgroup must belong to user",
+        });
+        return next();
+      }
+
+      await deleteTrackGroupCover(trackgroup.id);
+
+      res.json({ message: "Success" });
+    } catch (error) {
+      next(error);
+    }
+  }
 
   return operations;
 }

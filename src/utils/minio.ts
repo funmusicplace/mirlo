@@ -44,6 +44,7 @@ export const createBucketIfNotExists = async (
     logger?.info("minio: Need to create bucket");
     await minioClient.makeBucket(bucket);
   }
+  return exists;
 };
 
 export async function getBufferFromMinio(

@@ -31,7 +31,6 @@ export default function () {
         return res.status(404).json({ error: "Post not found" });
       }
       const isUserSubscriber = await checkIsUserSubscriber(user, post.artistId);
-      console.log("isUserSubscriber", isUserSubscriber, !post.isPublic);
       res.json({
         result: postProcessor.single(
           post,

@@ -16,7 +16,12 @@ import {
   minioClient,
 } from "./minio";
 import prisma from "../../prisma/prisma";
-import { APIContext, APIFile, checkFileType } from "./file";
+import {
+  APIContext,
+  APIFile,
+  checkFileType,
+  checkFileTypeFromStream,
+} from "./file";
 import { logger } from "../jobs/queue-worker";
 
 const { MINIO_HOST = "", MINIO_API_PORT = 9000 } = process.env;
@@ -35,7 +40,7 @@ imageQueueEvents.on("stalled", () => {
 });
 
 imageQueueEvents.on("added", () => {
-  console.log("started a job");
+  logger.info("started a job");
 });
 
 imageQueueEvents.on("error", () => {
@@ -64,6 +69,8 @@ imageQueueEvents.on("completed", async (result: { jobId: string }) => {
     logger.error(err);
   }
 });
+
+export default imageQueue;
 
 export const processArtistAvatar = (ctx: APIContext) => {
   return async (file: APIFile, artistId: number) => {
@@ -167,51 +174,3 @@ export const processArtistBanner = (ctx: APIContext) => {
     return job.id;
   };
 };
-
-export const processTrackGroupCover = (ctx: APIContext) => {
-  return async (file: APIFile, trackGroupId: number) => {
-    await checkFileType(ctx, file, SUPPORTED_IMAGE_MIME_TYPES);
-
-    const image = await prisma.trackGroupCover.upsert({
-      create: {
-        originalFilename: file.originalname,
-        trackGroupId: Number(trackGroupId),
-      },
-      update: {
-        originalFilename: file.originalname,
-      },
-      where: {
-        trackGroupId: Number(trackGroupId),
-      },
-    });
-
-    logger.info(`MinIO is at ${MINIO_HOST}:${MINIO_API_PORT}`);
-    logger.info("Uploading image to object storage");
-
-    await createBucketIfNotExists(minioClient, incomingCoversBucket, logger);
-
-    logger.info(
-      `Going to put a file on MinIO Bucket ${incomingCoversBucket}: ${image.id}, ${file.path}`
-    );
-    const objInfo = await minioClient.fPutObject(
-      incomingCoversBucket,
-      image.id,
-      file.path
-    );
-    logger.info("File put on minIO", objInfo);
-    logger.info("Adding image to queue");
-
-    const job = await imageQueue.add("optimize-image", {
-      filepath: file.path,
-      destination: image.id,
-      model: "trackGroupCover",
-      incomingMinioBucket: incomingCoversBucket,
-      finalMinioBucket: finalCoversBucket,
-      config: sharpConfig.config["artwork"],
-    });
-
-    return job.id;
-  };
-};
-
-export default processTrackGroupCover;
