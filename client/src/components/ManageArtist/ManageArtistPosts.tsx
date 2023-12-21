@@ -15,12 +15,16 @@ import { FaPlus } from "react-icons/fa";
 import { useArtistContext } from "state/ArtistContext";
 import HeaderDiv from "components/common/HeaderDiv";
 import { ManageSectionWrapper } from "./ManageSectionWrapper";
+import { formatDate } from "components/TrackGroup/ReleaseDate";
+import { Link } from "react-router-dom";
 
 const ManageArtistPosts: React.FC<{}> = () => {
   const {
     state: { user },
   } = useGlobalStateContext();
-  const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
+  const { t, i18n } = useTranslation("translation", {
+    keyPrefix: "manageArtist",
+  });
 
   const snackbar = useSnackbar();
   const {
@@ -87,13 +91,11 @@ const ManageArtistPosts: React.FC<{}> = () => {
             background-color: var(--mi-darken-background-color);
           `}
         >
-          <div
-            className={css`
-              display: flex;
-              justify-content: space-between;
-            `}
-          >
-            <strong>{p.title}</strong>
+          <HeaderDiv>
+            <Link to={`/post/${p.id}`}>
+              <strong>{p.title}</strong> published{" "}
+              {formatDate({ date: p.publishedAt, i18n })}
+            </Link>
             <div>
               <Button
                 compact
@@ -117,7 +119,7 @@ const ManageArtistPosts: React.FC<{}> = () => {
                 {/*{t("delete")}*/}
               </Button>
             </div>
-          </div>
+          </HeaderDiv>
           <MarkdownContent content={p.content} />
         </Box>
       ))}

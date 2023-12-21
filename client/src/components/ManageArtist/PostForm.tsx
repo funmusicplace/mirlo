@@ -13,6 +13,7 @@ import { css } from "@emotion/css";
 import { useTranslation } from "react-i18next";
 import { SelectEl } from "components/common/Select";
 import useGetUserObjectById from "utils/useGetUserObjectById";
+import useErrorHandler from "services/useErrorHandler";
 
 type FormData = {
   title: string;
@@ -32,6 +33,7 @@ const PostForm: React.FC<{
     state: { user },
   } = useGlobalStateContext();
   const snackbar = useSnackbar();
+  const errorHandler = useErrorHandler();
   const [isSaving, setIsSaving] = React.useState(false);
   const { t } = useTranslation("translation", { keyPrefix: "postForm" });
   const { objects: tiers } = useGetUserObjectById<ArtistSubscriptionTier>(
@@ -75,9 +77,10 @@ const PostForm: React.FC<{
             ...pick(data, ["title", "content", "isPublic"]),
             publishedAt: new Date(data.publishedAt + ":00").toISOString(),
             artistId: artist.id,
-            minimumSubscriptionTierId: isFinite(+data.minimumTier)
-              ? Number(data.minimumTier)
-              : undefined,
+            minimumSubscriptionTierId:
+              isFinite(+data.minimumTier) && +data.minimumTier !== 0
+                ? Number(data.minimumTier)
+                : undefined,
           };
           if (existingId) {
             await api.put(`users/${userId}/posts/${existingId}`, picked);
@@ -93,18 +96,18 @@ const PostForm: React.FC<{
             >(`users/${userId}/posts`, picked);
           }
 
-          snackbar("Post updated", { type: "success" });
+          snackbar(t("postUpdated"), { type: "success" });
           reload?.();
           onClose?.();
         } catch (e) {
-          snackbar("There was a problem with the API", { type: "warning" });
+          errorHandler(e);
         } finally {
           setIsSaving(false);
           await reload();
         }
       }
     },
-    [reload, existingId, snackbar, artist.id, onClose, userId]
+    [reload, existingId, snackbar, artist.id, errorHandler, onClose, userId, t]
   );
 
   return (

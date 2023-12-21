@@ -1,6 +1,5 @@
 import {
   User,
-  ArtistUserSubscription,
   ArtistSubscriptionTier,
   Artist,
   Post,
@@ -19,8 +18,15 @@ import { convertURLArrayToSizes } from "./images";
 import { finalArtistAvatarBucket, finalArtistBannerBucket } from "./minio";
 import { DefaultArgs } from "@prisma/client/runtime/library";
 
-export const checkIsUserSubscriber = async (user: User, artistId: number) => {
+export const checkIsUserSubscriber = async (
+  user?: User,
+  artistId?: number | null
+) => {
   let userSubscriber = false;
+
+  if (!artistId) {
+    return true;
+  }
 
   if (user) {
     const subscriber = await prisma.artistUserSubscription.findFirst({
@@ -220,7 +226,7 @@ export const singleInclude: Prisma.ArtistInclude<DefaultArgs> = {
       deletedAt: null,
     },
     orderBy: {
-      publishedAt: "asc",
+      publishedAt: "desc",
     },
   },
 };

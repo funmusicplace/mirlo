@@ -73,6 +73,7 @@ interface Post {
   artist?: Artist;
   isPublic: boolean;
   artistId?: number;
+  isContentHidden: boolean;
 }
 
 type ArtistColors = {

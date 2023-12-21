@@ -9,6 +9,7 @@ import { Link, useParams } from "react-router-dom";
 import { useGlobalStateContext } from "state/GlobalState";
 import usePublicObjectById from "utils/usePublicObjectById";
 import { bp } from "../../constants";
+import Box from "components/common/Box";
 
 export const pageMarkdownWrapper = css`
   width: 100%;
@@ -66,13 +67,17 @@ const Post: React.FC = () => {
   const { object: post } = usePublicObjectById<Post>("posts", postId);
 
   if (!post) {
-    return <>No post found</>;
+    return <Box>No post found</Box>;
   }
 
   const ownedByUser = post.artist?.userId === user?.id;
 
   return (
     <div className={pageMarkdownWrapper}>
+      <MetaCard
+        title={`${post.title} by ${post.artist?.name}`}
+        description={post.content.slice(0, 500)}
+      />
       <div
         className={css`
           margin-top: 2rem;
@@ -90,10 +95,6 @@ const Post: React.FC = () => {
           }
         `}
       >
-        <MetaCard
-          title={`${post.title} by ${post.artist?.name}`}
-          description={post.content.slice(0, 500)}
-        />
         <div
           className={css`
             flex: 100%;
@@ -128,6 +129,15 @@ const Post: React.FC = () => {
                 {post.artist?.name}
               </Link>
             </em>
+          )}
+          {post.isContentHidden && (
+            <div
+              className={css`
+                padding: 2rem 0;
+              `}
+            >
+              {t("notAvailable")}
+            </div>
           )}
           <MarkdownContent
             content={post.content}
