@@ -6,7 +6,6 @@ import showdown from "showdown";
 export default {
   single: (post: Post, isUserSubscriber?: boolean) => ({
     ...post,
-    content: isUserSubscriber || post.isPublic ? post.content : "",
     isContentHidden: !(isUserSubscriber || post.isPublic),
   }),
 };

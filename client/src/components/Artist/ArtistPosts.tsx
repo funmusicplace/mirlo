@@ -49,7 +49,9 @@ const ArtistPosts: React.FC<{ artist: Artist }> = ({ artist }) => {
             margin-top: 1rem;
             display: flex;
             flex-wrap: wrap;
-            justify-content: space-between;
+            justify-content: ${artist.posts?.length % 3 === 2
+              ? "flex-start"
+              : "space-between"};
             width: 100%;
             a {
               width: 32.4%;
@@ -67,13 +69,14 @@ const ArtistPosts: React.FC<{ artist: Artist }> = ({ artist }) => {
               to={`/post/${p.id}/`}
               className={css`
                 display: flex;
+                margin-right: ${artist.posts?.length % 3 === 2 ? "1.2%" : ""};
                 margin-bottom: 1rem;
                 border-radius: 10px;
                 background-color: var(--mi-darken-background-color);
                 filter: brightness(95%);
                 width: 100%;
 
-                :hover {
+                &:hover {
                   transition: 0.2s ease-in-out;
                   text-decoration: none;
                   background-color: rgba(50, 0, 0, 0.07);
