@@ -175,7 +175,7 @@ function Home() {
                       text-decoration: underline;
                     }
 
-                    background-color: var(--mi-secondary-color);
+                    background-color: #be3455;
                     color: var(--mi-white);
                   `}
                 >
