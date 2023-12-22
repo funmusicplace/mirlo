@@ -13,6 +13,8 @@ export const clearTables = async () => {
   await prisma.$executeRaw`DELETE FROM "UserTrackGroupPurchase";`;
   await prisma.$executeRaw`DELETE FROM "TrackGroupCover";`;
   await prisma.$executeRaw`DELETE FROM "TrackGroup";`;
+  await prisma.$executeRaw`DELETE FROM "ArtistBanner";`;
+  await prisma.$executeRaw`DELETE FROM "ArtistAvatar";`;
   await prisma.$executeRaw`DELETE FROM "Artist";`;
   await prisma.$executeRaw`DELETE FROM "User";`;
 };

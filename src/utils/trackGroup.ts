@@ -6,6 +6,7 @@ import {
   finalAudioBucket,
   minioClient,
   getObjectList,
+  removeObjectsFromBucket,
 } from "./minio";
 import { findArtistIdForURLSlug } from "./artist";
 import { logger } from "../logger";
@@ -31,12 +32,7 @@ export const deleteTrackGroupCover = async (trackGroupId: number) => {
     });
 
     try {
-      const objects = await getObjectList(finalCoversBucket, cover.id);
-
-      await minioClient.removeObjects(
-        finalAudioBucket,
-        objects.map((o) => o.name)
-      );
+      removeObjectsFromBucket(finalCoversBucket, cover.id);
     } catch (e) {
       console.error("Found no files, that's okay");
     }

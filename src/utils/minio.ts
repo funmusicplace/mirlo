@@ -147,3 +147,15 @@ export const getObjectList = async (
     });
   });
 };
+
+export const removeObjectsFromBucket = async (
+  bucketName: string,
+  prefix: string
+) => {
+  const objects = await getObjectList(bucketName, prefix);
+
+  await minioClient.removeObjects(
+    bucketName,
+    objects.map((o) => o.name)
+  );
+};

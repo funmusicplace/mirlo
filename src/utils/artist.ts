@@ -15,7 +15,13 @@ import stripe from "./stripe";
 import { deleteTrackGroup, processSingleTrackGroup } from "./trackGroup";
 import postProcessor from "./post";
 import { convertURLArrayToSizes } from "./images";
-import { finalArtistAvatarBucket, finalArtistBannerBucket } from "./minio";
+import {
+  finalArtistAvatarBucket,
+  finalArtistBannerBucket,
+  getObjectList,
+  minioClient,
+  removeObjectsFromBucket,
+} from "./minio";
 import { DefaultArgs } from "@prisma/client/runtime/library";
 
 export const checkIsUserSubscriber = async (
@@ -157,6 +163,50 @@ export const deleteArtist = async (userId: number, artistId: number) => {
   });
 
   await Promise.all(trackGroups.map((tg) => deleteTrackGroup(tg.id)));
+};
+
+export const deleteArtistAvatar = async (artistId: number) => {
+  const avatar = await prisma.artistAvatar.findFirst({
+    where: {
+      artistId,
+    },
+  });
+
+  if (avatar) {
+    await prisma.artistAvatar.delete({
+      where: {
+        artistId,
+      },
+    });
+
+    try {
+      removeObjectsFromBucket(finalArtistAvatarBucket, avatar.id);
+    } catch (e) {
+      console.error("Found no files, that's okay");
+    }
+  }
+};
+
+export const deleteArtistBanner = async (artistId: number) => {
+  const banner = await prisma.artistBanner.findFirst({
+    where: {
+      artistId,
+    },
+  });
+
+  if (banner) {
+    await prisma.artistBanner.delete({
+      where: {
+        artistId,
+      },
+    });
+
+    try {
+      removeObjectsFromBucket(finalArtistBannerBucket, banner.id);
+    } catch (e) {
+      console.error("Found no files, that's okay");
+    }
+  }
 };
 
 export const deleteStripeSubscriptions = async (

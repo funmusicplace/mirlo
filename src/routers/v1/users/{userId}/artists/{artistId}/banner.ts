@@ -5,6 +5,9 @@ import {
   userAuthenticated,
 } from "../../../../../../auth/passport";
 import { processArtistBanner } from "../../../../../../utils/processImages";
+import prisma from "../../../../../../../prisma/prisma";
+import { User } from "@prisma/client";
+import { deleteArtistBanner } from "../../../../../../utils/artist";
 
 type Params = {
   artistId: string;
@@ -28,6 +31,7 @@ export default function () {
       }),
       PUT,
     ],
+    DELETE: [userAuthenticated, artistBelongsToLoggedInUser, DELETE],
   };
 
   async function PUT(req: Request, res: Response, next: NextFunction) {
@@ -81,6 +85,32 @@ export default function () {
       },
     },
   };
+
+  async function DELETE(req: Request, res: Response, next: NextFunction) {
+    const { artistId } = req.params as unknown as Params;
+    const loggedInUser = req.user as User;
+    try {
+      const artist = await prisma.artist.findFirst({
+        where: {
+          id: Number(artistId),
+          userId: loggedInUser.id,
+        },
+      });
+
+      if (!artist) {
+        res.status(400).json({
+          error: "artist must belong to user",
+        });
+        return next();
+      }
+
+      await deleteArtistBanner(artist.id);
+
+      res.json({ message: "Success" });
+    } catch (error) {
+      next(error);
+    }
+  }
 
   return operations;
 }

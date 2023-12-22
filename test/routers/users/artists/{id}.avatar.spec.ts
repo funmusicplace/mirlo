@@ -4,23 +4,18 @@ import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
 import request from "supertest";
-import {
-  clearTables,
-  createArtist,
-  createTrackGroup,
-  createUser,
-} from "../../../utils";
+import { clearTables, createArtist, createUser } from "../../../utils";
 import prisma from "../../../../prisma/prisma";
 import {
-  finalCoversBucket,
   minioClient,
   createBucketIfNotExists,
+  finalArtistAvatarBucket,
 } from "../../../../src/utils/minio";
 
 const baseURL = `${process.env.API_DOMAIN}/v1/`;
 const requestApp = request(baseURL);
 
-describe("users/{userId}/trackGroups/{trackGroupId}/cover", () => {
+describe("users/{userId}/artists/{artistId}/avatar", () => {
   beforeEach(async () => {
     try {
       await clearTables();
@@ -30,25 +25,24 @@ describe("users/{userId}/trackGroups/{trackGroupId}/cover", () => {
   });
 
   describe("DELETE", () => {
-    it("should DELETE with one trackGroup", async () => {
+    it("should DELETE with one artist", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
       const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id);
-      await createBucketIfNotExists(minioClient, finalCoversBucket);
+      await createBucketIfNotExists(minioClient, finalArtistAvatarBucket);
 
-      await prisma.trackGroupCover.create({
+      await prisma.artistAvatar.create({
         data: {
-          trackGroupId: trackGroup.id,
+          artistId: artist.id,
         },
       });
 
       const response = await requestApp
-        .delete(`users/${user.id}/trackGroups/${trackGroup.id}/cover`)
+        .delete(`users/${user.id}/artists/${artist.id}/avatar`)
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
 
-      const foundOld = await prisma.trackGroupCover.findFirst({
-        where: { trackGroupId: trackGroup.id },
+      const foundOld = await prisma.artistAvatar.findFirst({
+        where: { artistId: artist.id },
       });
 
       assert.equal(response.statusCode, 200);
