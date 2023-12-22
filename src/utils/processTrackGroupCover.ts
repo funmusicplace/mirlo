@@ -19,6 +19,7 @@ const processTrackGroupCover = (ctx: APIContext) => {
           },
           update: {
             originalFilename: fileInfo.filename,
+            deletedAt: null,
           },
           where: {
             trackGroupId,

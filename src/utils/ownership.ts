@@ -38,7 +38,7 @@ export const doesTrackGroupBelongToUser = async (
       id: Number(trackGroupId),
     },
     include: {
-      cover: true,
+      cover: { where: { deletedAt: null } },
       artist: true,
       tracks: {
         where: {

@@ -247,7 +247,8 @@
     "primaryColor": "Primary color",
     "secondaryColor": "Secondary color",
     "backgroundColor": "Background color",
-    "foregroundColor": "Normal text color"
+    "foregroundColor": "Normal text color",
+    "deleteImage": "Delete image"
   },
   "manageSubscriptions": {
     "downloadSubscriberData": "Download subscriber data"

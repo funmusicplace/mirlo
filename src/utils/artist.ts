@@ -254,11 +254,23 @@ export const singleInclude: Prisma.ArtistInclude<DefaultArgs> = {
       tracks: {
         where: { deletedAt: null },
       },
-      cover: true,
+      cover: {
+        where: {
+          deletedAt: null,
+        },
+      },
     },
   },
-  banner: true,
-  avatar: true,
+  banner: {
+    where: {
+      deletedAt: null,
+    },
+  },
+  avatar: {
+    where: {
+      deletedAt: null,
+    },
+  },
   subscriptionTiers: {
     where: {
       deletedAt: null,
@@ -301,18 +313,28 @@ export const processSingleArtist = (
     posts: artist?.posts.map((p: Post) =>
       postProcessor.single(p, isUserSubscriber || artist.userId === userId)
     ),
-    banner: {
-      ...artist?.banner,
-      sizes:
-        artist?.banner &&
-        convertURLArrayToSizes(artist?.banner?.url, finalArtistBannerBucket),
-    },
-    avatar: {
-      ...artist?.avatar,
-      sizes:
-        artist?.avatar &&
-        convertURLArrayToSizes(artist?.avatar?.url, finalArtistAvatarBucket),
-    },
+    banner: artist?.banner
+      ? {
+          ...artist?.banner,
+          sizes:
+            artist?.banner &&
+            convertURLArrayToSizes(
+              artist?.banner?.url,
+              finalArtistBannerBucket
+            ),
+        }
+      : null,
+    avatar: artist?.avatar
+      ? {
+          ...artist?.avatar,
+          sizes:
+            artist?.avatar &&
+            convertURLArrayToSizes(
+              artist?.avatar?.url,
+              finalArtistAvatarBucket
+            ),
+        }
+      : null,
     trackGroups: artist?.trackGroups.map(processSingleTrackGroup),
   };
 };

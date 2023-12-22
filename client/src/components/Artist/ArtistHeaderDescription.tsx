@@ -62,12 +62,15 @@ const ArtistHeaderDescription: React.FC = () => {
         className={css`
           display: flex;
           align-items: center;
+          justify-content: space-between;
+          width: 100%;
         `}
       >
         <MarkdownContent
           content={bio}
           className={css`
             padding-top: 0.5rem;
+            width: 100%;
           `}
         />
         {user && user.id === artist?.userId && (

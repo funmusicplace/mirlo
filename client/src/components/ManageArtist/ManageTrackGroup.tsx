@@ -14,6 +14,7 @@ import ManageSectionWrapper from "./ManageSectionWrapper";
 import { css } from "@emotion/css";
 import { FaChevronLeft } from "react-icons/fa";
 import Tooltip from "components/common/Tooltip";
+import LoadingBlocks from "components/Artist/LoadingBlocks";
 
 const ManageTrackGroup: React.FC<{}> = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
@@ -23,7 +24,7 @@ const ManageTrackGroup: React.FC<{}> = () => {
     state: { user },
   } = useGlobalStateContext();
   const {
-    state: { artist },
+    state: { artist, isLoading },
   } = useArtistContext();
 
   const userId = user?.id;
@@ -35,7 +36,9 @@ const ManageTrackGroup: React.FC<{}> = () => {
     `?artistId=${artistId}`
   );
 
-  if (!artist) {
+  if (!artist && isLoading) {
+    return <LoadingBlocks />;
+  } else if (!artist) {
     return null;
   }
 

@@ -8,9 +8,27 @@ import { useSnackbar } from "state/SnackbarContext";
 import { InputEl } from "components/common/Input";
 
 import { Img, Spinner, UploadPrompt } from "./UploadImage";
+import Button from "components/common/Button";
 
-const getExistingImage = (existing: Artist, imageType: "banner" | "avatar") => {
-  const image = existing[imageType];
+type ImageType = "banner" | "avatar" | "cover";
+
+export function isTrackgroup(entity: unknown): entity is TrackGroup {
+  if (!entity) {
+    return false;
+  }
+  return (entity as TrackGroup).cover !== undefined;
+}
+
+const getExistingImage = (
+  existing: Artist | TrackGroup,
+  imageType: ImageType
+) => {
+  const image = isTrackgroup(existing)
+    ? existing["cover"]
+    : imageType === "avatar" || imageType === "banner"
+    ? existing[imageType]
+    : undefined;
+
   if (!image) {
     return undefined;
   }
@@ -19,9 +37,19 @@ const getExistingImage = (existing: Artist, imageType: "banner" | "avatar") => {
   return `${actualImageLocation}/?updatedAt=${image?.updatedAt}`;
 };
 
+const buildRootUrl = (existing: TrackGroup | Artist) => {
+  let url = "";
+  if (isTrackgroup(existing)) {
+    url = `users/${existing.artist?.userId}/trackGroups/${existing.id}/`;
+  } else {
+    url = `users/${existing?.userId}/artists/${existing.id}/`;
+  }
+  return url;
+};
+
 const UploadArtistImage: React.FC<{
-  existing: Artist;
-  imageType: "avatar" | "banner";
+  existing: Artist | TrackGroup;
+  imageType: ImageType;
   height: string;
   width: string;
   maxDimensions: string;
@@ -33,20 +61,32 @@ const UploadArtistImage: React.FC<{
     getExistingImage(existing, imageType)
   );
   const [isSaving, setIsSaving] = React.useState(false);
+
   const resetWrapper = React.useCallback(async () => {
-    const result = await api.get<Artist>(
-      `users/${existing.userId}/artists/${existing.id}/`
-    );
+    let result = await api.get<TrackGroup | Artist>(buildRootUrl(existing));
 
     const image = getExistingImage(result.result, imageType);
 
     setExistingImage(image);
-  }, [existing.id, existing.userId, imageType]);
+  }, [existing, imageType]);
 
   const { uploadJobs, setUploadJobs } = useJobStatusCheck({
     reload: () => {},
     reset: resetWrapper,
   });
+
+  const deleteImage = React.useCallback(async () => {
+    setIsSaving(true);
+    try {
+      await api.delete(`${buildRootUrl(existing)}${imageType}`);
+    } catch (e) {
+      snackbar("Something went wrong", { type: "warning" });
+      console.error(e);
+    } finally {
+      setIsSaving(false);
+      resetWrapper();
+    }
+  }, [existing, imageType, resetWrapper, snackbar]);
 
   const callback = React.useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -55,7 +95,7 @@ const UploadArtistImage: React.FC<{
         const file = e.target.files?.[0];
         if (file) {
           const jobInfo = await api.uploadFile(
-            `users/${existing.userId}/artists/${existing.id}/${imageType}`,
+            `${buildRootUrl(existing)}${imageType}`,
             [file]
           );
           setUploadJobs([
@@ -69,7 +109,7 @@ const UploadArtistImage: React.FC<{
         setIsSaving(false);
       }
     },
-    [existing.id, existing.userId, imageType, setUploadJobs, snackbar]
+    [existing, imageType, setUploadJobs, snackbar]
   );
 
   const isLoading =
@@ -77,6 +117,7 @@ const UploadArtistImage: React.FC<{
     uploadJobs?.[0]?.jobStatus !== "completed";
 
   const rounded = imageType === "avatar" ? true : false;
+
   return (
     <div
       className={css`
@@ -137,6 +178,19 @@ const UploadArtistImage: React.FC<{
           >
             {t("dimensionsTip", { maxDimensions })}
           </small>
+          {existingImage && (
+            <small
+              className={css`
+                width: 100%;
+                flex: 100%;
+                margin-top: 0.5rem;
+              `}
+            >
+              <Button onClick={deleteImage} variant="link" type="button">
+                {t("deleteImage")}
+              </Button>
+            </small>
+          )}
         </div>
       </div>
     </div>

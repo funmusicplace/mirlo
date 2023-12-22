@@ -53,9 +53,8 @@ const MarkdownContent: React.FC<{
   }
 
   return (
-    <MarkdownWrapper>
+    <MarkdownWrapper className={className}>
       <ReactMarkdown
-        className={className}
         remarkPlugins={[
           remarkGfm,
           [remarkEmbedder, { transformers: [BlackbirdTransformer] }],

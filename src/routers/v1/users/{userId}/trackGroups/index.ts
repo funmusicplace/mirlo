@@ -34,6 +34,7 @@ export default function () {
         in: artists.map((a) => a.id),
       };
     }
+
     const results = await prisma.trackGroup.findMany({
       where,
       orderBy: {
@@ -49,7 +50,11 @@ export default function () {
           },
         },
         artist: true,
-        cover: true,
+        cover: {
+          where: {
+            deletedAt: null,
+          },
+        },
       },
     });
 

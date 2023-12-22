@@ -253,12 +253,14 @@ export const processSingleTrackGroup = (
   }
 ) => ({
   ...tg,
-  cover: {
-    ...tg.cover,
-    sizes: tg.cover
-      ? convertURLArrayToSizes(tg.cover?.url, finalCoversBucket)
-      : undefined,
-  },
+  cover: tg.cover
+    ? {
+        ...tg.cover,
+        sizes: tg.cover
+          ? convertURLArrayToSizes(tg.cover?.url, finalCoversBucket)
+          : undefined,
+      }
+    : null,
 });
 
 export default {

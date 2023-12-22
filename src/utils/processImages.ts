@@ -36,7 +36,7 @@ export const imageQueue = new Queue("optimize-image", queueOptions);
 const imageQueueEvents = new QueueEvents("optimize-image", queueOptions);
 
 imageQueueEvents.on("stalled", () => {
-  console.log("stalled");
+  logger.info("stalled");
 });
 
 imageQueueEvents.on("added", () => {
@@ -44,7 +44,7 @@ imageQueueEvents.on("added", () => {
 });
 
 imageQueueEvents.on("error", () => {
-  console.log("errored");
+  logger.info("errored");
 });
 
 imageQueueEvents.on("completed", async (result: { jobId: string }) => {
@@ -135,6 +135,7 @@ export const processArtistAvatar = (ctx: APIContext) => {
           },
           update: {
             originalFilename: fileInfo.filename,
+            deletedAt: null,
           },
           where: {
             artistId,
@@ -161,6 +162,7 @@ export const processArtistBanner = (ctx: APIContext) => {
           },
           update: {
             originalFilename: fileInfo.filename,
+            deletedAt: null,
           },
           where: {
             artistId,

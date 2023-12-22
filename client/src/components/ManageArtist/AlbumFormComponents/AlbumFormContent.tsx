@@ -8,11 +8,13 @@ import { InputEl } from "components/common/Input";
 import TextArea from "components/common/TextArea";
 import { SelectEl } from "components/common/Select";
 import UploadImage from "../UploadImage";
+import UploadArtistImage from "../UploadArtistImage";
 
 const AlbumFormContent: React.FC<{
   isLoadingImage: boolean;
   existingFileCover?: string;
-}> = ({ isLoadingImage, existingFileCover }) => {
+  existingObject?: TrackGroup;
+}> = ({ isLoadingImage, existingFileCover, existingObject }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const { register } = useFormContext();
 
@@ -29,11 +31,22 @@ const AlbumFormContent: React.FC<{
         }}
       >
         {t("cover")}:
-        <UploadImage
-          formName="coverFile"
-          isLoading={isLoadingImage}
-          existingCover={existingFileCover}
-        />
+        {!existingObject && (
+          <UploadImage
+            formName="coverFile"
+            isLoading={isLoadingImage}
+            existingCover={existingFileCover}
+          />
+        )}
+        {existingObject && (
+          <UploadArtistImage
+            existing={existingObject}
+            imageType="cover"
+            height="400"
+            width="400"
+            maxDimensions="1500x1500"
+          />
+        )}
       </FormComponent>
 
       <FormComponent>
