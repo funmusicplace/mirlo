@@ -136,7 +136,7 @@ const Menu: React.FC = (props) => {
               border-top: var(--mi-border);
               margin: 0.5rem 0;
               max-height: 190px;
-              overflow: scroll;
+              overflow: auto;
             `}
           >
             {artists.map((a) => {
