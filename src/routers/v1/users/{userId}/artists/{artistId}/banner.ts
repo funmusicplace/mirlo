@@ -1,18 +1,10 @@
 import { NextFunction, Request, Response } from "express";
-import multer from "multer";
+import busboy from "connect-busboy";
 import {
   artistBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../../auth/passport";
 import { processArtistBanner } from "../../../../../../utils/processImages";
-import prisma from "../../../../../../../prisma/prisma";
-
-const upload = multer({
-  dest: process.env.MEDIA_LOCATION_INCOMING ?? "/data/media/incoming",
-  limits: {
-    fileSize: 10000000, // 10mb seems reasonable for a cover
-  },
-});
 
 type Params = {
   artistId: string;
@@ -28,7 +20,12 @@ export default function () {
     PUT: [
       userAuthenticated,
       artistBelongsToLoggedInUser,
-      upload.array("upload"),
+      busboy({
+        highWaterMark: 2 * 1024 * 1024,
+        limits: {
+          fileSize: 4 * 1024 * 1024,
+        },
+      }),
       PUT,
     ],
   };
@@ -38,12 +35,7 @@ export default function () {
 
     try {
       let jobId = null;
-      if (req.files && isFileArray(req.files)) {
-        jobId = await processArtistBanner({ req, res })(
-          req.files[0],
-          Number(artistId)
-        );
-      }
+      jobId = await processArtistBanner({ req, res })(Number(artistId));
 
       res.json({ result: { jobId } });
     } catch (error) {

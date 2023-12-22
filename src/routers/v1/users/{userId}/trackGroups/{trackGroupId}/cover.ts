@@ -7,16 +7,11 @@ import {
 import { doesTrackGroupBelongToUser } from "../../../../../../utils/ownership";
 import busboy from "connect-busboy";
 import processTrackGroupCover from "../../../../../../utils/processTrackGroupCover";
-import prisma from "../../../../../../../prisma/prisma";
 import { deleteTrackGroupCover } from "../../../../../../utils/trackGroup";
 
 type Params = {
   trackGroupId: number;
   userId: string;
-};
-
-const isFileArray = (entity: unknown): entity is Express.Multer.File[] => {
-  return true;
 };
 
 export default function () {

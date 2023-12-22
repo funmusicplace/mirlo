@@ -1,25 +1,14 @@
 import { NextFunction, Request, Response } from "express";
-import multer from "multer";
 import {
   artistBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../../auth/passport";
 import { processArtistAvatar } from "../../../../../../utils/processImages";
-
-const upload = multer({
-  dest: process.env.MEDIA_LOCATION_INCOMING ?? "/data/media/incoming",
-  limits: {
-    fileSize: 10000000, // 10mb seems reasonable for a cover
-  },
-});
+import busboy from "connect-busboy";
 
 type Params = {
   artistId: string;
   userId: string;
-};
-
-const isFileArray = (entity: unknown): entity is Express.Multer.File[] => {
-  return true;
 };
 
 export default function () {
@@ -27,7 +16,12 @@ export default function () {
     PUT: [
       userAuthenticated,
       artistBelongsToLoggedInUser,
-      upload.array("upload"),
+      busboy({
+        highWaterMark: 2 * 1024 * 1024,
+        limits: {
+          fileSize: 4 * 1024 * 1024,
+        },
+      }),
       PUT,
     ],
   };
@@ -37,12 +31,7 @@ export default function () {
 
     try {
       let jobId = null;
-      if (req.files && isFileArray(req.files)) {
-        jobId = await processArtistAvatar({ req, res })(
-          req.files[0],
-          Number(artistId)
-        );
-      }
+      jobId = await processArtistAvatar({ req, res })(Number(artistId));
 
       res.json({ result: { jobId } });
     } catch (error) {
