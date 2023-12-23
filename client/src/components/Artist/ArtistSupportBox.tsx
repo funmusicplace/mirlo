@@ -44,6 +44,18 @@ const ArtistSupportBox: React.FC<{
     }
   };
 
+  const isSubscribed = !!user?.artistUserSubscriptions?.find(
+    (sub) => sub.artistSubscriptionTier.id === subscriptionTier.id
+  );
+
+  const isSubscribedToArtist = !!user?.artistUserSubscriptions?.find(
+    (sub) =>
+      sub.artistSubscriptionTier.artistId === artist.id &&
+      sub.artistSubscriptionTier.id !== subscriptionTier.id
+  );
+
+  console.log("is", isSubscribedToArtist);
+
   const ownedByUser = user && artist.userId === userId;
 
   return (
@@ -162,7 +174,7 @@ const ArtistSupportBox: React.FC<{
             }
           `}
         >
-          {!ownedByUser && (
+          {!ownedByUser && !isSubscribed && !isSubscribedToArtist && (
             <>
               <Button
                 compact
@@ -171,7 +183,7 @@ const ArtistSupportBox: React.FC<{
                 isLoading={isCheckingForSubscription}
                 disabled={isCheckingForSubscription}
               >
-                Support
+                {t("support")}
               </Button>
               <PlatformPercent
                 percent={subscriptionTier.platformPercent}
@@ -183,7 +195,7 @@ const ArtistSupportBox: React.FC<{
               />
             </>
           )}
-          {ownedByUser && (
+          {(isSubscribed || ownedByUser || isSubscribedToArtist) && (
             <Box
               className={css`
                 text-align: center;
@@ -191,7 +203,9 @@ const ArtistSupportBox: React.FC<{
                 margin-bottom: 0;
               `}
             >
-              Users will be able to subscribe here
+              {ownedByUser && t("ableToSupport")}
+              {isSubscribedToArtist && !isSubscribed && t("areSupporting")}
+              {isSubscribed && t("supportAtThisTier")}
             </Box>
           )}
         </div>

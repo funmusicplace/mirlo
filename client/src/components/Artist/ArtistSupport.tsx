@@ -96,7 +96,7 @@ const ArtistSupport: React.FC = () => {
             margin-bottom: 0rem;
           `}
         >
-          {t("support", { artist: artist.name })}
+          {t("supportArtist", { artist: artist.name })}
         </h2>
         <div
           className={css`

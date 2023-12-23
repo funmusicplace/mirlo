@@ -98,8 +98,12 @@
   },
   "artist": {
     "follow": "Follow",
+    "ableToSupport": "Users will be able to subscribe here",
     "unfollow": "Stop following",
-    "support": "Support {{artist}}",
+    "supportArtist": "Support {{artist}}",
+    "supportAtThisTier": "You're supporting at this tier",
+    "areSupporting": "You're supporting this artist!",
+    "support": "Support",
     "doesNotExist": "This artist does not exist or it does not have a public presence",
     "edit": "Edit page",
     "updates": "Updates",
