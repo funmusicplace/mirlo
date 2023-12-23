@@ -3,17 +3,21 @@ import Button from "components/common/Button";
 import React from "react";
 import { bp } from "../../constants";
 import { FaEye, FaPen, FaTrash } from "react-icons/fa";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import {
+  Link,
+  NavLink,
+  Outlet,
+  useNavigate,
+  useParams,
+} from "react-router-dom";
 import api from "services/api";
 import { useGlobalStateContext } from "state/GlobalState";
 import ArtistForm from "./ArtistForm";
-import ManageArtistPosts from "./ManageArtistPosts";
-import ManageArtistAlbums from "./ManageArtistAlbums";
-import ManageArtistSubscriptionTiers from "./ManageArtistSubscriptionTiers";
 import { useSnackbar } from "state/SnackbarContext";
 import { useTranslation } from "react-i18next";
 import { useArtistContext } from "state/ArtistContext";
 import Box from "components/common/Box";
+import Tabs from "components/common/Tabs";
 
 const ManageArtist: React.FC<{}> = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
@@ -103,9 +107,25 @@ const ManageArtist: React.FC<{}> = () => {
           </Link>
         </div>
       </div>
-      <ManageArtistAlbums />
-      <ManageArtistPosts />
-      <ManageArtistSubscriptionTiers />
+      <Tabs>
+        <li>
+          <NavLink to="releases">{t("yourAlbums")}</NavLink>
+        </li>
+        <li>
+          <NavLink to="posts">{t("posts")}</NavLink>
+        </li>
+        {artist && (
+          <li>
+            <NavLink to="tiers">{t("tiers", { artist: artist.name })}</NavLink>
+          </li>
+        )}
+      </Tabs>
+      <Outlet />
+
+      <div>
+        <h2>Danger</h2>
+      </div>
+
       <div
         className={css`
           padding: 0.5rem 0 2rem 0;

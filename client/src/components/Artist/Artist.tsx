@@ -1,15 +1,15 @@
 import { bp } from "../../constants";
-import ArtistSupport from "./ArtistSupport";
 import Box from "../common/Box";
-import ArtistAlbums from "./ArtistAlbums";
 import { useTranslation } from "react-i18next";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
 import { useArtistContext } from "state/ArtistContext";
 import styled from "@emotion/styled";
-import ArtistPosts from "./ArtistPosts";
+import { NavLink, Outlet } from "react-router-dom";
+import Tabs from "components/common/Tabs";
 
 export const ArtistSection = styled.div`
   margin-bottom: 2rem;
+  margin-top: 2rem;
 
   @media screen and (max-width: ${bp.medium}px) {
     padding: var(--mi-side-paddings-xsmall);
@@ -33,12 +33,21 @@ function Artist() {
 
   return (
     <>
-      <ArtistAlbums artist={artist} />
+      <Tabs>
+        <li>
+          <NavLink to="releases">{t("releases")}</NavLink>
+        </li>
+        <li>
+          <NavLink to="posts">{t("updates")}</NavLink>
+        </li>
+        <li>
+          <NavLink to="support">
+            {t("support", { artist: artist.name })}
+          </NavLink>
+        </li>
+      </Tabs>
       <ArtistSection>
-        <ArtistSupport artist={artist} />
-      </ArtistSection>
-      <ArtistSection>
-        <ArtistPosts artist={artist} />
+        <Outlet />
       </ArtistSection>
     </>
   );

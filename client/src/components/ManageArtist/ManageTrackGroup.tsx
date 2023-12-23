@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useArtistContext } from "state/ArtistContext";
 import AlbumForm from "./AlbumForm";
@@ -12,9 +12,8 @@ import NewAlbumForm from "./NewAlbumForm";
 import HeaderDiv from "components/common/HeaderDiv";
 import ManageSectionWrapper from "./ManageSectionWrapper";
 import { css } from "@emotion/css";
-import { FaChevronLeft } from "react-icons/fa";
-import Tooltip from "components/common/Tooltip";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
+import BackToArtistLink from "./BackToArtistLink";
 
 const ManageTrackGroup: React.FC<{}> = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
@@ -55,25 +54,7 @@ const ManageTrackGroup: React.FC<{}> = () => {
           align-items: flex-start;
         `}
       >
-        <Tooltip hoverText="Back to artist" underline={false}>
-          <Link
-            className={css`
-              display: flex;
-              align-items: center;
-              font-size: 1.2rem;
-              padding-bottom: 1rem;
-            `}
-            to={`/manage/artists/${artist.id}/`}
-          >
-            <FaChevronLeft
-              className={css`
-                margin-right: 0.5rem;
-                font-size: 1.2rem;
-              `}
-            />
-            {artist.name}
-          </Link>
-        </Tooltip>
+        <BackToArtistLink />
         <HeaderDiv>
           <h1
             className={css`

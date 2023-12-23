@@ -9,12 +9,17 @@ import { css } from "@emotion/css";
 import { bp } from "../../constants";
 import FollowArtist from "components/common/FollowArtist";
 import HeaderDiv from "components/common/HeaderDiv";
+import { useArtistContext } from "state/ArtistContext";
 
-const ArtistSupport: React.FC<{ artist: Artist }> = ({ artist }) => {
+const ArtistSupport: React.FC = () => {
   const {
     state: { user },
     refreshLoggedInUser,
   } = useGlobalStateContext();
+
+  const {
+    state: { artist },
+  } = useArtistContext();
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const [isLoading, setIsLoading] = React.useState(false);
   const [userSubscription, setUserSubscription] =
@@ -23,8 +28,10 @@ const ArtistSupport: React.FC<{ artist: Artist }> = ({ artist }) => {
     React.useState<ArtistSubscriptionTier>();
   const { search } = useLocation();
   const userId = user?.id;
-
+  const artistId = artist?.id;
   const userSubscriptions = user?.artistUserSubscriptions;
+  const artistTiers = artist?.subscriptionTiers;
+
   const checkForSubscription = React.useCallback(async () => {
     try {
       setIsLoading(true);
@@ -32,11 +39,11 @@ const ArtistSupport: React.FC<{ artist: Artist }> = ({ artist }) => {
         const sub = userSubscriptions?.find(
           (aus) =>
             !aus.artistSubscriptionTier.isDefaultTier &&
-            aus.artistSubscriptionTier.artistId === artist.id
+            aus.artistSubscriptionTier.artistId === artistId
         );
         setUserSubscription(sub);
 
-        const hasId = artist.subscriptionTiers.find(
+        const hasId = artistTiers?.find(
           (tier) => sub?.artistSubscriptionTierId === tier.id
         );
         setUserSubscriptionTier(hasId);
@@ -46,7 +53,7 @@ const ArtistSupport: React.FC<{ artist: Artist }> = ({ artist }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [artist.id, artist.subscriptionTiers, userSubscriptions, userId]);
+  }, [userId, userSubscriptions, artistTiers, artistId]);
 
   React.useEffect(() => {
     checkForSubscription();

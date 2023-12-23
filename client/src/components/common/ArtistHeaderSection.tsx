@@ -158,6 +158,18 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
                       `}
                     >
                       {!isManage && <FollowArtist artistId={artist.id} />}
+                      {!isManage && user?.id === artist.userId && (
+                        <Link to={`/manage/artists/${artist.id}`}>
+                          <Button
+                            compact
+                            transparent
+                            type="button"
+                            startIcon={<FaPen />}
+                          >
+                            {t("edit")}
+                          </Button>
+                        </Link>
+                      )}
                     </div>
                   </div>
                 </HeaderDiv>
@@ -175,13 +187,6 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
             `}
           >
             {artistAvatar && <ArtistHeaderDescription />}
-            {!isManage && user?.id === artist.userId && (
-              <Link to={`/manage/artists/${artist.id}`}>
-                <Button compact transparent type="button" startIcon={<FaPen />}>
-                  {t("edit")}
-                </Button>
-              </Link>
-            )}
           </div>
         </Header>
       </div>

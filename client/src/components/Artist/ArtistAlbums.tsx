@@ -9,12 +9,17 @@ import { useGlobalStateContext } from "state/GlobalState";
 import { Link } from "react-router-dom";
 import { FaPlus } from "react-icons/fa";
 import Button from "components/common/Button";
+import { useArtistContext } from "state/ArtistContext";
 
-const ArtistAlbums: React.FC<{ artist: Artist }> = ({ artist }) => {
+const ArtistAlbums: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const {
     state: { user },
   } = useGlobalStateContext();
+
+  const {
+    state: { artist },
+  } = useArtistContext();
 
   if (
     !artist ||
@@ -36,13 +41,6 @@ const ArtistAlbums: React.FC<{ artist: Artist }> = ({ artist }) => {
         `}
       >
         <HeaderDiv>
-          <h2
-            className={css`
-              margin-bottom: 0rem;
-            `}
-          >
-            {t("releases")}
-          </h2>
           {artist.userId === user?.id && (
             <Link to={`/manage/artists/${artist.id}/new-release`}>
               <Button compact transparent startIcon={<FaPlus />}>

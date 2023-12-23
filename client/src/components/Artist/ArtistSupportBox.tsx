@@ -37,8 +37,10 @@ const ArtistSupportBox: React.FC<{
       });
       window.location.assign(response.sessionUrl);
     } catch (e) {
-      snackbar("Something went wrong", { type: "success" });
+      snackbar("Something went wrong", { type: "warning" });
       console.error(e);
+    } finally {
+      setIsCheckingForSubscription(false);
     }
   };
 
@@ -160,9 +162,7 @@ const ArtistSupportBox: React.FC<{
             }
           `}
         >
-          {/* FIXME: remove once we have a real stripe account
-           */}
-          {user && !ownedByUser && (
+          {!ownedByUser && (
             <>
               <Button
                 compact
@@ -183,7 +183,7 @@ const ArtistSupportBox: React.FC<{
               />
             </>
           )}
-          {user && ownedByUser && (
+          {ownedByUser && (
             <Box
               className={css`
                 text-align: center;

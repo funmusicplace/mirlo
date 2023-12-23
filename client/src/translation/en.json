@@ -105,6 +105,7 @@
     "updates": "Updates",
     "noUpdates": "There are no updates yet for this artist",
     "releases": "Releases",
+    "posts": "Posts",
     "noSubscriptionTiersYet": "This artist hasn't added any subscription tiers yet.",
     "unknown": "Unknown",
     "toFollowThisArtist": "To follow this artist please <1>sign up</1> with a user account or <2>log in</2>.",
@@ -156,6 +157,7 @@
     "delete": "Delete",
     "addNewPost": "Add new post",
     "posts": "Your posts",
+    "tiers": "Support tiers",
     "yourAlbums": "Your albums",
     "manageAlbum": "Manage",
     "publish": "Publish",
@@ -167,6 +169,10 @@
     "albumDeleted": "Album deleted",
     "somethingWentWrong": "Something went wrong",
     "publishedSuccess": "Your album has been published. People will be able to buy it after the release date!"
+  },
+  "managePost": {
+    "managePost": "Manage post",
+    "viewLive": "View live"
   },
   "manageAlbum": {
     "editAlbum": "Edit album",

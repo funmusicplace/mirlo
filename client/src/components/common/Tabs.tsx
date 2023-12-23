@@ -7,27 +7,25 @@ const Tabs = styled.ul`
   > li {
     display: inline-block;
     margin-right: 1rem;
+    margin-top: 0.5rem;
+
     a {
-      color: ${(props) => props.theme.colors.text};
       text-decoration: none;
-      padding: 0rem 0.5rem calc(0.9rem - 2px) 0;
+      padding: 0rem 0.5rem calc(0.9rem - 2px) 0.25rem;
       line-height: 1rem;
       display: block;
       font-size: 1.2rem;
       transition: 0.1s border-bottom;
+      border-bottom: 4px solid transparent;
 
       &.active {
-        border-bottom: 4px solid ${(props) => props.theme.colors.primary};
+        border-bottom: 4px solid var(--mi-primary-color);
         margin-bottom: -2px;
       }
 
       &:hover {
-        border-bottom: 4px solid ${(props) => props.theme.colors.primary};
+        border-bottom: 4px solid var(--mi-primary-color);
         margin-bottom: -2px;
-      }
-
-      @media (prefers-color-scheme: dark) {
-        color: ${(props) => props.theme.colors.textDark};
       }
     }
   }

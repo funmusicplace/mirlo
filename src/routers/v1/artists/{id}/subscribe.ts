@@ -72,9 +72,8 @@ export default function () {
           {
             billing_address_collection: "auto",
             customer_email: loggedInUser?.email ?? email,
-            payment_intent_data: {
-              application_fee_amount:
-                ((tier.minAmount ?? 0) * (tier.platformPercent ?? 5)) / 100,
+            subscription_data: {
+              application_fee_percent: tier.platformPercent ?? 0 / 100,
             },
             line_items: [
               {

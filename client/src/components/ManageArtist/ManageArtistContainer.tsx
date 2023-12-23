@@ -93,14 +93,15 @@ const ManageArtist: React.FC<{}> = () => {
     return null;
   }
 
-  const isRelease =
+  const dontShowHeader =
     location.pathname.includes("/release/") ||
-    location.pathname.includes("/new-release");
+    location.pathname.includes("/new-release") ||
+    location.pathname.includes("/post/");
 
   return (
     <ArtistPageWrapper artistBanner={!!artistBanner}>
       <>
-        {!isRelease && <ArtistHeaderSection artist={artist} isManage />}
+        {!dontShowHeader && <ArtistHeaderSection artist={artist} isManage />}
 
         {!artist.enabled && (
           <div
