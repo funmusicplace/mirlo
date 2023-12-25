@@ -38,8 +38,6 @@ const ManagePost: React.FC<{}> = () => {
     return null;
   }
 
-  console.log("post", post);
-
   const isPublished = post && new Date(post.publishedAt) < new Date();
 
   return (

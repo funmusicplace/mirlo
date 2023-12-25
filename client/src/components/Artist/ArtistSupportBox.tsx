@@ -54,8 +54,6 @@ const ArtistSupportBox: React.FC<{
       sub.artistSubscriptionTier.id !== subscriptionTier.id
   );
 
-  console.log("is", isSubscribedToArtist);
-
   const ownedByUser = user && artist.userId === userId;
 
   return (
