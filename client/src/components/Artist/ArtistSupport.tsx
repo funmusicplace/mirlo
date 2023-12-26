@@ -129,7 +129,7 @@ const ArtistSupport: React.FC = () => {
         `}
       >
         {artist.subscriptionTiers?.map((p) => (
-          <ArtistSupportBox key={p.id} subscriptionTier={p} artist={artist} />
+          <ArtistSupportBox key={p.id} subscriptionTier={p} />
         ))}
       </div>
     </>

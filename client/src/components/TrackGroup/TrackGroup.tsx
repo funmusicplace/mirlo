@@ -59,6 +59,8 @@ function TrackGroup() {
 
   const trackGroupCredits = trackGroup.credits;
 
+  console.log("userStripeStatus", userStripeStatus);
+
   return (
     <WidthContainer variant="big" justify="center">
       <div
@@ -360,9 +362,7 @@ function TrackGroup() {
               <MarkdownContent content={trackGroup.credits} />
             </div>
           </div>
-          {userStripeStatus?.chargesEnabled && (
-            <ArtistSupport artist={artist} />
-          )}
+          {userStripeStatus?.chargesEnabled && <ArtistSupport />}
         </div>
       </div>
     </WidthContainer>

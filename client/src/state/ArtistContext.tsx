@@ -56,11 +56,13 @@ export const stateReducer = produce((draft: ArtistState, action: Actions) => {
       break;
     case "setArtist":
       draft = {
+        ...draft,
         artist: action.artist,
       };
       break;
     case "setIsLoading":
       draft = {
+        ...draft,
         isLoading: action.isLoading,
       };
       break;

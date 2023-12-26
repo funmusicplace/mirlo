@@ -10,16 +10,23 @@ import { useTranslation } from "react-i18next";
 import MarkdownContent from "components/common/MarkdownContent";
 import { bp } from "../../constants";
 import PlatformPercent from "components/common/PlatformPercent";
+import { useArtistContext } from "state/ArtistContext";
+import LoadingBlocks from "./LoadingBlocks";
 
 const ArtistSupportBox: React.FC<{
   subscriptionTier: ArtistSubscriptionTier;
-  artist: Artist;
-}> = ({ subscriptionTier, artist }) => {
+}> = ({ subscriptionTier }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const {
     state: { user },
+    refreshLoggedInUser,
   } = useGlobalStateContext();
+  const {
+    state: { artist },
+    refresh,
+  } = useArtistContext();
   React.useState<ArtistSubscriptionTier>();
+  console.log("artist", artist);
   const [isCheckingForSubscription, setIsCheckingForSubscription] =
     React.useState(false);
   const snackbar = useSnackbar();
@@ -41,10 +48,28 @@ const ArtistSupportBox: React.FC<{
       console.error(e);
     } finally {
       setIsCheckingForSubscription(false);
+      refresh();
+      refreshLoggedInUser();
     }
   };
 
-  const isSubscribed = !!user?.artistUserSubscriptions?.find(
+  const cancelSubscription = async () => {
+    try {
+      await api.delete(`artists/${subscriptionTier.artistId}/subscribe`);
+      refresh();
+      refreshLoggedInUser();
+    } catch (e) {
+      snackbar("Something went wrong", { type: "warning" });
+      console.error(e);
+    } finally {
+    }
+  };
+
+  if (!artist) {
+    return <LoadingBlocks rows={2} />;
+  }
+
+  const isSubscribedToTier = !!user?.artistUserSubscriptions?.find(
     (sub) => sub.artistSubscriptionTier.id === subscriptionTier.id
   );
 
@@ -172,7 +197,7 @@ const ArtistSupportBox: React.FC<{
             }
           `}
         >
-          {!ownedByUser && !isSubscribed && !isSubscribedToArtist && (
+          {!ownedByUser && !isSubscribedToTier && !isSubscribedToArtist && (
             <>
               <Button
                 compact
@@ -193,7 +218,7 @@ const ArtistSupportBox: React.FC<{
               />
             </>
           )}
-          {(isSubscribed || ownedByUser || isSubscribedToArtist) && (
+          {(isSubscribedToTier || ownedByUser || isSubscribedToArtist) && (
             <Box
               className={css`
                 text-align: center;
@@ -201,9 +226,27 @@ const ArtistSupportBox: React.FC<{
                 margin-bottom: 0;
               `}
             >
-              {ownedByUser && t("ableToSupport")}
-              {isSubscribedToArtist && !isSubscribed && t("areSupporting")}
-              {isSubscribed && t("supportAtThisTier")}
+              <p
+                className={css`
+                  margin-bottom: 1rem;
+                `}
+              >
+                {ownedByUser && t("ableToSupport")}
+                {isSubscribedToArtist &&
+                  !isSubscribedToTier &&
+                  t("areSupporting")}
+                {isSubscribedToTier && t("supportAtThisTier")}
+              </p>
+              {user && isSubscribedToArtist && !isSubscribedToTier && (
+                <Button onClick={() => subscribeToTier(subscriptionTier)}>
+                  {t("chooseThisSubscription")}
+                </Button>
+              )}
+              {user && isSubscribedToTier && (
+                <Button onClick={() => cancelSubscription()}>
+                  {t("cancelSubscription")}
+                </Button>
+              )}
             </Box>
           )}
         </div>

@@ -18,8 +18,6 @@ import { convertURLArrayToSizes } from "./images";
 import {
   finalArtistAvatarBucket,
   finalArtistBannerBucket,
-  getObjectList,
-  minioClient,
   removeObjectsFromBucket,
 } from "./minio";
 import { DefaultArgs } from "@prisma/client/runtime/library";
@@ -150,6 +148,7 @@ export const deleteArtist = async (userId: number, artistId: number) => {
       artistId: Number(artistId),
     },
   });
+
   await prisma.artistUserSubscription.deleteMany({
     where: {
       artistSubscriptionTier: { artistId: Number(artistId) },
@@ -210,7 +209,7 @@ export const deleteArtistBanner = async (artistId: number) => {
 };
 
 export const deleteStripeSubscriptions = async (
-  where: { userId: number } | { artistSubscriptionTier: { artistId: number } }
+  where: Prisma.ArtistUserSubscriptionWhereInput
 ) => {
   const stripeSubscriptions = await prisma.artistUserSubscription.findMany({
     where,
@@ -230,15 +229,22 @@ export const deleteStripeSubscriptions = async (
             },
           },
         });
-        if (artistUser?.stripeAccountId) {
-          await stripe.subscriptions.cancel(sub.stripeSubscriptionKey, {
-            stripeAccount: artistUser?.stripeAccountId,
-          });
+        try {
+          if (artistUser?.stripeAccountId) {
+            await stripe.subscriptions.cancel(sub.stripeSubscriptionKey, {
+              stripeAccount: artistUser?.stripeAccountId,
+            });
+          } else {
+            await stripe.subscriptions.cancel(sub.stripeSubscriptionKey);
+          }
+        } catch (e) {
+          console.error("Fail silently on deleting from stripe", e);
         }
-        await stripe.subscriptions.cancel(sub.stripeSubscriptionKey);
       }
     })
-  );
+  ).catch((e) => {
+    console.error("truely a failure");
+  });
 };
 
 export const singleInclude: Prisma.ArtistInclude<DefaultArgs> = {
