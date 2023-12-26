@@ -47,7 +47,7 @@ const ManageArtistAlbums: React.FC<{}> = () => {
     <ManageSectionWrapper>
       <HeaderDiv>
         {trackGroups.length === 0 && <div>You don't have any albums yet</div>}
-        {trackGroups.length && <div />}
+        {trackGroups.length !== 0 && <div />}
         <Link to="new-release">
           <Button compact transparent startIcon={<FaPlus />}>
             {t("addNewAlbum")}

@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { userAuthenticated } from "../../../../../../../auth/passport";
 import { doesSubscriptionTierBelongToUser } from "../../../../../../../utils/ownership";
 import prisma from "../../../../../../../../prisma/prisma";
+import logger from "../../../../../../../logger";
 
 export default function () {
   const operations = {
@@ -24,7 +25,7 @@ export default function () {
         });
         return next();
       }
-
+      logger.info(`Updating tier ${subscriptionTierId}`);
       const updatedTier = await prisma.artistSubscriptionTier.update({
         where: { id: Number(subscriptionTierId) },
         data: {
@@ -37,10 +38,7 @@ export default function () {
 
       res.json({ result: updatedTier });
     } catch (error) {
-      res.status(400);
-      res.json({
-        error: `Subscription Tier with ID ${subscriptionTierId} does not exist in the database`,
-      });
+      next(error);
     }
   }
 
