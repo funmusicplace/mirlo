@@ -26,7 +26,6 @@ const ArtistSupportBox: React.FC<{
     refresh,
   } = useArtistContext();
   React.useState<ArtistSubscriptionTier>();
-  console.log("artist", artist);
   const [isCheckingForSubscription, setIsCheckingForSubscription] =
     React.useState(false);
   const snackbar = useSnackbar();
@@ -226,11 +225,7 @@ const ArtistSupportBox: React.FC<{
                 margin-bottom: 0;
               `}
             >
-              <p
-                className={css`
-                  margin-bottom: 1rem;
-                `}
-              >
+              <p>
                 {ownedByUser && t("ableToSupport")}
                 {isSubscribedToArtist &&
                   !isSubscribedToTier &&
@@ -238,12 +233,22 @@ const ArtistSupportBox: React.FC<{
                 {isSubscribedToTier && t("supportAtThisTier")}
               </p>
               {user && isSubscribedToArtist && !isSubscribedToTier && (
-                <Button onClick={() => subscribeToTier(subscriptionTier)}>
+                <Button
+                  onClick={() => subscribeToTier(subscriptionTier)}
+                  className={css`
+                    margin-top: 1rem;
+                  `}
+                >
                   {t("chooseThisSubscription")}
                 </Button>
               )}
               {user && isSubscribedToTier && (
-                <Button onClick={() => cancelSubscription()}>
+                <Button
+                  onClick={() => cancelSubscription()}
+                  className={css`
+                    margin-top: 1rem;
+                  `}
+                >
                   {t("cancelSubscription")}
                 </Button>
               )}

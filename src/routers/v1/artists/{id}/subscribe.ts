@@ -13,6 +13,7 @@ import stripe, {
   createSubscriptionStripeProduct,
 } from "../../../../utils/stripe";
 import { deleteStripeSubscriptions } from "../../../../utils/artist";
+import logger from "../../../../logger";
 
 type Params = {
   id: string;
@@ -77,18 +78,20 @@ export default function () {
           },
         });
         if (oldTier) {
+          logger.info(
+            `Deleting old subscriptions for ${artistId}, old tier: ${oldTier.id}`
+          );
           await deleteStripeSubscriptions({
             artistSubscriptionTier: { artistId: Number(artistId) },
             userId,
           });
+          await prisma.artistUserSubscription.deleteMany({
+            where: {
+              artistSubscriptionTier: { artistId: Number(artistId) },
+              userId,
+            },
+          });
         }
-
-        await prisma.artistUserSubscription.deleteMany({
-          where: {
-            artistSubscriptionTier: { artistId: Number(artistId) },
-            userId,
-          },
-        });
       }
 
       const newTier = await findTierById(tierId);
@@ -107,6 +110,10 @@ export default function () {
       const productKey = await createSubscriptionStripeProduct(
         newTier,
         stripeAccountId
+      );
+
+      logger.info(
+        `Created a new product for artist ${artistId}, ${productKey}`
       );
 
       if (productKey) {
@@ -145,6 +152,7 @@ export default function () {
             stripeAccount: stripeAccountId,
           }
         );
+        logger.info(`Generated a Stripe checkout session ${session.id}`);
 
         res.status(200).json({
           sessionUrl: session.url,

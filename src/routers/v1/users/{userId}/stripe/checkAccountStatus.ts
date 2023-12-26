@@ -33,12 +33,17 @@ export default function () {
             },
           });
         } else {
-          const account = await stripe.accounts.retrieve(accountId);
+          let account;
+          try {
+            account = await stripe.accounts.retrieve(accountId);
+          } catch (e) {
+            console.error(e);
+          }
           res.status(200).json({
             result: {
-              chargesEnabled: account.charges_enabled,
+              chargesEnabled: account?.charges_enabled ?? false,
               ...(loggedInUser
-                ? { detailsSubmitted: account.details_submitted }
+                ? { detailsSubmitted: account?.details_submitted ?? false }
                 : {}),
             },
           });

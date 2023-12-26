@@ -59,8 +59,6 @@ function TrackGroup() {
 
   const trackGroupCredits = trackGroup.credits;
 
-  console.log("userStripeStatus", userStripeStatus);
-
   return (
     <WidthContainer variant="big" justify="center">
       <div
