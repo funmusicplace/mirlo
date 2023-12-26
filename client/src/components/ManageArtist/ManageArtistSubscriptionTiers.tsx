@@ -4,7 +4,6 @@ import React from "react";
 import { useGlobalStateContext } from "state/GlobalState";
 import ManageSubscriptionTierBox from "./ManageSubscriptionTierBox";
 import SubscriptionForm from "./SubscriptionForm";
-import { useTranslation } from "react-i18next";
 import { useArtistContext } from "state/ArtistContext";
 import useGetUserObjectById from "utils/useGetUserObjectById";
 import { useParams } from "react-router-dom";
@@ -31,8 +30,6 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
       { multiple: true }
     );
 
-  const { t: tManage } = useTranslation("translation", { keyPrefix: "manage" });
-
   if (!artist) {
     return null;
   }
@@ -40,8 +37,7 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
   return (
     <ManageSectionWrapper>
       <HeaderDiv>
-        <h2>{tManage("subscriptionTiers")}</h2>
-
+        <div />
         <ArtistSubscriberDataDownload />
       </HeaderDiv>
       <div

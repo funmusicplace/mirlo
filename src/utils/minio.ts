@@ -44,6 +44,7 @@ export const createBucketIfNotExists = async (
     logger?.info("minio: Need to create bucket");
     await minioClient.makeBucket(bucket);
   }
+  return exists;
 };
 
 export async function getBufferFromMinio(
@@ -145,4 +146,16 @@ export const getObjectList = async (
       reject(err);
     });
   });
+};
+
+export const removeObjectsFromBucket = async (
+  bucketName: string,
+  prefix: string
+) => {
+  const objects = await getObjectList(bucketName, prefix);
+
+  await minioClient.removeObjects(
+    bucketName,
+    objects.map((o) => o.name)
+  );
 };

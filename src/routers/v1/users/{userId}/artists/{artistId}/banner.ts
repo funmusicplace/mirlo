@@ -1,26 +1,17 @@
 import { NextFunction, Request, Response } from "express";
-import multer from "multer";
+import busboy from "connect-busboy";
 import {
   artistBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../../auth/passport";
 import { processArtistBanner } from "../../../../../../utils/processImages";
 import prisma from "../../../../../../../prisma/prisma";
-
-const upload = multer({
-  dest: process.env.MEDIA_LOCATION_INCOMING ?? "/data/media/incoming",
-  limits: {
-    fileSize: 10000000, // 10mb seems reasonable for a cover
-  },
-});
+import { User } from "@prisma/client";
+import { deleteArtistBanner } from "../../../../../../utils/artist";
 
 type Params = {
   artistId: string;
   userId: string;
-};
-
-const isFileArray = (entity: unknown): entity is Express.Multer.File[] => {
-  return true;
 };
 
 export default function () {
@@ -28,9 +19,15 @@ export default function () {
     PUT: [
       userAuthenticated,
       artistBelongsToLoggedInUser,
-      upload.array("upload"),
+      busboy({
+        highWaterMark: 2 * 1024 * 1024,
+        limits: {
+          fileSize: 4 * 1024 * 1024,
+        },
+      }),
       PUT,
     ],
+    DELETE: [userAuthenticated, artistBelongsToLoggedInUser, DELETE],
   };
 
   async function PUT(req: Request, res: Response, next: NextFunction) {
@@ -38,12 +35,7 @@ export default function () {
 
     try {
       let jobId = null;
-      if (req.files && isFileArray(req.files)) {
-        jobId = await processArtistBanner({ req, res })(
-          req.files[0],
-          Number(artistId)
-        );
-      }
+      jobId = await processArtistBanner({ req, res })(Number(artistId));
 
       res.json({ result: { jobId } });
     } catch (error) {
@@ -89,6 +81,32 @@ export default function () {
       },
     },
   };
+
+  async function DELETE(req: Request, res: Response, next: NextFunction) {
+    const { artistId } = req.params as unknown as Params;
+    const loggedInUser = req.user as User;
+    try {
+      const artist = await prisma.artist.findFirst({
+        where: {
+          id: Number(artistId),
+          userId: loggedInUser.id,
+        },
+      });
+
+      if (!artist) {
+        res.status(400).json({
+          error: "artist must belong to user",
+        });
+        return next();
+      }
+
+      await deleteArtistBanner(artist.id);
+
+      res.json({ message: "Success" });
+    } catch (error) {
+      next(error);
+    }
+  }
 
   return operations;
 }

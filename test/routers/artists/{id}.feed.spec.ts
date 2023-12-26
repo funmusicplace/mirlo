@@ -124,7 +124,7 @@ describe("artists/{id}/feed", () => {
     );
     assert.equal(obj.title, `${artist.name} Posts`);
     assert.equal(obj.items.length, 1);
-    assert(obj.items[0].content?.includes("<h1"));
+    assert(obj.items[0].content?.includes("<h2"));
     assert.equal(obj.items[0].title, postTitle);
   });
 

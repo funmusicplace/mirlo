@@ -12,10 +12,14 @@ import {
 } from "@prisma/client";
 import prisma from "../../prisma/prisma";
 import stripe from "./stripe";
-import trackGroupProcessor, { deleteTrackGroup } from "./trackGroup";
+import { deleteTrackGroup, processSingleTrackGroup } from "./trackGroup";
 import postProcessor from "./post";
 import { convertURLArrayToSizes } from "./images";
-import { finalArtistAvatarBucket, finalArtistBannerBucket } from "./minio";
+import {
+  finalArtistAvatarBucket,
+  finalArtistBannerBucket,
+  removeObjectsFromBucket,
+} from "./minio";
 import { DefaultArgs } from "@prisma/client/runtime/library";
 
 export const checkIsUserSubscriber = async (
@@ -144,6 +148,7 @@ export const deleteArtist = async (userId: number, artistId: number) => {
       artistId: Number(artistId),
     },
   });
+
   await prisma.artistUserSubscription.deleteMany({
     where: {
       artistSubscriptionTier: { artistId: Number(artistId) },
@@ -159,8 +164,52 @@ export const deleteArtist = async (userId: number, artistId: number) => {
   await Promise.all(trackGroups.map((tg) => deleteTrackGroup(tg.id)));
 };
 
+export const deleteArtistAvatar = async (artistId: number) => {
+  const avatar = await prisma.artistAvatar.findFirst({
+    where: {
+      artistId,
+    },
+  });
+
+  if (avatar) {
+    await prisma.artistAvatar.delete({
+      where: {
+        artistId,
+      },
+    });
+
+    try {
+      removeObjectsFromBucket(finalArtistAvatarBucket, avatar.id);
+    } catch (e) {
+      console.error("Found no files, that's okay");
+    }
+  }
+};
+
+export const deleteArtistBanner = async (artistId: number) => {
+  const banner = await prisma.artistBanner.findFirst({
+    where: {
+      artistId,
+    },
+  });
+
+  if (banner) {
+    await prisma.artistBanner.delete({
+      where: {
+        artistId,
+      },
+    });
+
+    try {
+      removeObjectsFromBucket(finalArtistBannerBucket, banner.id);
+    } catch (e) {
+      console.error("Found no files, that's okay");
+    }
+  }
+};
+
 export const deleteStripeSubscriptions = async (
-  where: { userId: number } | { artistSubscriptionTier: { artistId: number } }
+  where: Prisma.ArtistUserSubscriptionWhereInput
 ) => {
   const stripeSubscriptions = await prisma.artistUserSubscription.findMany({
     where,
@@ -180,15 +229,22 @@ export const deleteStripeSubscriptions = async (
             },
           },
         });
-        if (artistUser?.stripeAccountId) {
-          await stripe.subscriptions.cancel(sub.stripeSubscriptionKey, {
-            stripeAccount: artistUser?.stripeAccountId,
-          });
+        try {
+          if (artistUser?.stripeAccountId) {
+            await stripe.subscriptions.cancel(sub.stripeSubscriptionKey, {
+              stripeAccount: artistUser?.stripeAccountId,
+            });
+          } else {
+            await stripe.subscriptions.cancel(sub.stripeSubscriptionKey);
+          }
+        } catch (e) {
+          console.error("Fail silently on deleting from stripe", e);
         }
-        await stripe.subscriptions.cancel(sub.stripeSubscriptionKey);
       }
     })
-  );
+  ).catch((e) => {
+    console.error("truely a failure");
+  });
 };
 
 export const singleInclude: Prisma.ArtistInclude<DefaultArgs> = {
@@ -204,11 +260,23 @@ export const singleInclude: Prisma.ArtistInclude<DefaultArgs> = {
       tracks: {
         where: { deletedAt: null },
       },
-      cover: true,
+      cover: {
+        where: {
+          deletedAt: null,
+        },
+      },
     },
   },
-  banner: true,
-  avatar: true,
+  banner: {
+    where: {
+      deletedAt: null,
+    },
+  },
+  avatar: {
+    where: {
+      deletedAt: null,
+    },
+  },
   subscriptionTiers: {
     where: {
       deletedAt: null,
@@ -251,18 +319,28 @@ export const processSingleArtist = (
     posts: artist?.posts.map((p: Post) =>
       postProcessor.single(p, isUserSubscriber || artist.userId === userId)
     ),
-    banner: {
-      ...artist?.banner,
-      sizes:
-        artist?.banner &&
-        convertURLArrayToSizes(artist?.banner?.url, finalArtistBannerBucket),
-    },
-    avatar: {
-      ...artist?.avatar,
-      sizes:
-        artist?.avatar &&
-        convertURLArrayToSizes(artist?.avatar?.url, finalArtistAvatarBucket),
-    },
-    trackGroups: artist?.trackGroups.map(trackGroupProcessor.single),
+    banner: artist?.banner
+      ? {
+          ...artist?.banner,
+          sizes:
+            artist?.banner &&
+            convertURLArrayToSizes(
+              artist?.banner?.url,
+              finalArtistBannerBucket
+            ),
+        }
+      : null,
+    avatar: artist?.avatar
+      ? {
+          ...artist?.avatar,
+          sizes:
+            artist?.avatar &&
+            convertURLArrayToSizes(
+              artist?.avatar?.url,
+              finalArtistAvatarBucket
+            ),
+        }
+      : null,
+    trackGroups: artist?.trackGroups.map(processSingleTrackGroup),
   };
 };

@@ -57,7 +57,12 @@ interface TrackGroup {
   artistId: number;
   tracks: Track[];
   updatedAt: string;
-  cover?: { id: number; url: string; sizes?: { [key: number]: string } };
+  cover?: {
+    updatedAt: string;
+    id: number;
+    url: string;
+    sizes?: { [key: number]: string };
+  };
   minPrice?: number; // in cents
   urlSlug?: string;
   userTrackGroupPurchases?: { userId: number }[];
@@ -100,7 +105,7 @@ interface Artist {
   };
   banner?: {
     url: string;
-    sizes?: { [key: string]: string };
+    sizes?: { [key: number]: string };
     updatedAt: string;
   };
   avatar?: {

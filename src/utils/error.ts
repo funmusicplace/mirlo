@@ -10,7 +10,7 @@ const errorHandler = (
 ) => {
   console.error(`ERROR: ${req.method} ${req.path}`, err);
   if (err instanceof PrismaClientKnownRequestError) {
-    console.log("err", err.cause, err.name, err.code, err.meta);
+    console.error("err", err.cause, err.name, err.code, err.meta);
     let message = `Something went wrong with the data supplied. Admin should check the logs`;
 
     if (err.meta && err.code === "P2002") {

@@ -1,6 +1,10 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import {
+  createBrowserRouter,
+  Navigate,
+  RouterProvider,
+} from "react-router-dom";
 
 import "./index.css";
 import App from "./App";
@@ -43,6 +47,13 @@ import ProfileContainer from "components/Profile/ProfileContainer";
 import WishlistCollection from "components/Profile/WishlistCollection";
 import MarkdownContent from "components/common/MarkdownContent";
 import Welcome from "components/ManageArtist/Welcome";
+import ArtistPosts from "components/Artist/ArtistPosts";
+import ArtistAlbums from "components/Artist/ArtistAlbums";
+import ArtistSupport from "components/Artist/ArtistSupport";
+import ManageArtistAlbums from "components/ManageArtist/ManageArtistAlbums";
+import ManageArtistSubscriptionTiers from "components/ManageArtist/ManageArtistSubscriptionTiers";
+import ManageArtistPosts from "components/ManageArtist/ManageArtistPosts";
+import ManagePost from "components/ManageArtist/ManagePost";
 
 const router = createBrowserRouter([
   {
@@ -138,27 +149,34 @@ const router = createBrowserRouter([
             children: [
               {
                 path: "",
-                element: (
-                  <ArtistProvider managedArtist>
-                    <ManageArtist />
-                  </ArtistProvider>
-                ),
+                element: <ManageArtist />,
+                children: [
+                  { path: "", element: <Navigate to="releases" /> },
+                  {
+                    path: "releases",
+                    element: <ManageArtistAlbums />,
+                  },
+                  {
+                    path: "tiers",
+                    element: <ManageArtistSubscriptionTiers />,
+                  },
+                  {
+                    path: "posts",
+                    element: <ManageArtistPosts />,
+                  },
+                ],
               },
               {
                 path: "release/:trackGroupId",
-                element: (
-                  <ArtistProvider managedArtist>
-                    <ManageTrackGroup />
-                  </ArtistProvider>
-                ),
+                element: <ManageTrackGroup />,
+              },
+              {
+                path: "post/:postId",
+                element: <ManagePost />,
               },
               {
                 path: "new-release",
-                element: (
-                  <ArtistProvider managedArtist>
-                    <ManageTrackGroup />
-                  </ArtistProvider>
-                ),
+                element: <ManageTrackGroup />,
               },
             ],
           },
@@ -202,6 +220,21 @@ const router = createBrowserRouter([
           {
             path: "",
             element: <Artist />,
+            children: [
+              { path: "", element: <Navigate to="releases" /> },
+              {
+                path: "posts",
+                element: <ArtistPosts />,
+              },
+              {
+                path: "releases",
+                element: <ArtistAlbums />,
+              },
+              {
+                path: "support",
+                element: <ArtistSupport />,
+              },
+            ],
           },
           {
             path: "release/:trackGroupId",

@@ -8,9 +8,11 @@ const HeaderDiv = styled.div`
   width: 100%;
   padding-bottom: 0.2rem;
   margin-bottom: 0.5rem;
+
   h2 {
     margin-bottom: 0;
   }
+
   button {
     height: 2rem;
   }

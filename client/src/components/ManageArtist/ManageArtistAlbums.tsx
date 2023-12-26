@@ -46,8 +46,7 @@ const ManageArtistAlbums: React.FC<{}> = () => {
   return (
     <ManageSectionWrapper>
       <HeaderDiv>
-        <h2>{t("yourAlbums")}</h2>
-
+        <div />
         <Link to="new-release">
           <Button compact transparent startIcon={<FaPlus />}>
             {t("addNewAlbum")}

@@ -95,12 +95,12 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response) {
-    const { id }: { id?: string } = req.params;
+    const { postId }: { postId?: string } = req.params;
 
     const post = await prisma.post.findUnique({
-      where: { id: Number(id) },
+      where: { id: Number(postId) },
     });
-    res.json(post);
+    res.json({ result: post });
   }
 
   GET.apiDoc = {
@@ -108,7 +108,13 @@ export default function () {
     parameters: [
       {
         in: "path",
-        name: "id",
+        name: "userId",
+        required: true,
+        type: "string",
+      },
+      {
+        in: "path",
+        name: "postId",
         required: true,
         type: "string",
       },

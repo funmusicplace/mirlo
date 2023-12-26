@@ -1,7 +1,13 @@
 import { TrackGroup, TrackAudio, Track, TrackGroupCover } from "@prisma/client";
 import prisma from "../../prisma/prisma";
 import { convertURLArrayToSizes, generateFullStaticImageUrl } from "./images";
-import { finalCoversBucket, finalAudioBucket, minioClient } from "./minio";
+import {
+  finalCoversBucket,
+  finalAudioBucket,
+  minioClient,
+  getObjectList,
+  removeObjectsFromBucket,
+} from "./minio";
 import { findArtistIdForURLSlug } from "./artist";
 import { logger } from "../logger";
 import fs, { promises as fsPromises } from "fs";
@@ -10,6 +16,28 @@ import { deleteTrack } from "./tracks";
 import { randomUUID } from "crypto";
 
 const { MEDIA_LOCATION_DOWNLOAD_CACHE = "" } = process.env;
+
+export const deleteTrackGroupCover = async (trackGroupId: number) => {
+  const cover = await prisma.trackGroupCover.findFirst({
+    where: {
+      trackGroupId: trackGroupId,
+    },
+  });
+
+  if (cover) {
+    await prisma.trackGroupCover.delete({
+      where: {
+        trackGroupId: trackGroupId,
+      },
+    });
+
+    try {
+      removeObjectsFromBucket(finalCoversBucket, cover.id);
+    } catch (e) {
+      console.error("Found no files, that's okay");
+    }
+  }
+};
 
 /**
  * We use our own custom function to handle this until we
@@ -22,6 +50,8 @@ export const deleteTrackGroup = async (
   trackGroupId: number,
   deleteAll?: boolean
 ) => {
+  await deleteTrackGroupCover(Number(trackGroupId));
+
   await prisma.trackGroup.delete({
     where: {
       id: Number(trackGroupId),
@@ -36,12 +66,6 @@ export const deleteTrackGroup = async (
     });
 
     await Promise.all(tracks.map(async (track) => await deleteTrack(track.id)));
-
-    await prisma.trackGroupCover.deleteMany({
-      where: {
-        trackGroupId: Number(trackGroupId),
-      },
-    });
   }
 };
 
@@ -74,24 +98,6 @@ export const findTrackGroupIdForSlug = async (
   }
 
   return id;
-};
-
-export default {
-  cover: generateFullStaticImageUrl,
-  single: (
-    tg: TrackGroup & {
-      cover?: TrackGroupCover | null;
-      tracks?: Track[];
-    }
-  ) => ({
-    ...tg,
-    cover: {
-      ...tg.cover,
-      sizes: tg.cover
-        ? convertURLArrayToSizes(tg.cover?.url, finalCoversBucket)
-        : undefined,
-    },
-  }),
 };
 
 export type FormatOptions =
@@ -238,4 +244,26 @@ export const registerPurchase = async ({
     });
   }
   return purchase;
+};
+
+export const processSingleTrackGroup = (
+  tg: TrackGroup & {
+    cover?: TrackGroupCover | null;
+    tracks?: Track[];
+  }
+) => ({
+  ...tg,
+  cover: tg.cover
+    ? {
+        ...tg.cover,
+        sizes: tg.cover
+          ? convertURLArrayToSizes(tg.cover?.url, finalCoversBucket)
+          : undefined,
+      }
+    : null,
+});
+
+export default {
+  cover: generateFullStaticImageUrl,
+  single: processSingleTrackGroup,
 };

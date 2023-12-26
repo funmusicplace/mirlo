@@ -65,7 +65,7 @@ describe("posts/{id}", () => {
       assert.equal(response.body.result.content, testContent);
     });
 
-    it("should GET / and hide content if not public", async () => {
+    it("should GET / send hide content boolean if not public", async () => {
       const testContent = faker.lorem.paragraph();
       const { user } = await createUser({
         email: "artist@artist.com",
@@ -80,8 +80,8 @@ describe("posts/{id}", () => {
         .get(`posts/${post.id}`)
         .set("Accept", "application/json");
 
-      assert.notEqual(response.body.result.content, testContent);
-      assert.equal(response.body.result.content, "");
+      assert.equal(response.body.result.content, testContent);
+      assert.equal(response.body.result.isContentHidden, true);
     });
   });
 });

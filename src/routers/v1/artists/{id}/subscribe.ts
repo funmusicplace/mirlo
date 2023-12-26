@@ -1,7 +1,10 @@
 import { User } from "@prisma/client";
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 
-import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
+import {
+  userAuthenticated,
+  userLoggedInWithoutRedirect,
+} from "../../../../auth/passport";
 import prisma from "../../../../../prisma/prisma";
 
 const { API_DOMAIN } = process.env;
@@ -9,17 +12,34 @@ const { API_DOMAIN } = process.env;
 import stripe, {
   createSubscriptionStripeProduct,
 } from "../../../../utils/stripe";
+import { deleteStripeSubscriptions } from "../../../../utils/artist";
 
 type Params = {
   id: string;
 };
 
+const findTierById = async (tierId: number) => {
+  return await prisma.artistSubscriptionTier.findFirst({
+    where: {
+      id: tierId,
+    },
+    include: {
+      artist: {
+        include: {
+          user: true,
+        },
+      },
+    },
+  });
+};
+
 export default function () {
   const operations = {
     POST: [userLoggedInWithoutRedirect, POST],
+    DELETE: [userAuthenticated, DELETE],
   };
 
-  async function POST(req: Request, res: Response) {
+  async function POST(req: Request, res: Response, next: NextFunction) {
     const { id: artistId } = req.params as unknown as Params;
     let { tierId, email } = req.body;
 
@@ -36,34 +56,56 @@ export default function () {
           },
         });
         email = user?.email;
-      }
 
-      const tier = await prisma.artistSubscriptionTier.findFirst({
-        where: {
-          id: tierId,
-        },
-        include: {
-          artist: {
-            include: {
-              user: true,
+        const oldTier = await prisma.artistSubscriptionTier.findFirst({
+          where: {
+            AND: {
+              userSubscriptions: {
+                some: {
+                  userId: userId,
+                },
+              },
+              artistId: Number(artistId),
             },
           },
-        },
-      });
+          include: {
+            artist: {
+              include: {
+                user: true,
+              },
+            },
+          },
+        });
+        if (oldTier) {
+          await deleteStripeSubscriptions({
+            artistSubscriptionTier: { artistId: Number(artistId) },
+            userId,
+          });
+        }
 
-      if (!tier) {
+        await prisma.artistUserSubscription.deleteMany({
+          where: {
+            artistSubscriptionTier: { artistId: Number(artistId) },
+            userId,
+          },
+        });
+      }
+
+      const newTier = await findTierById(tierId);
+
+      if (!newTier) {
         return res.status(404);
       }
-      const stripeAccountId = tier.artist.user.stripeAccountId;
+      const stripeAccountId = newTier.artist.user.stripeAccountId;
 
       if (!stripeAccountId) {
         return res.status(400).json({
-          error: "Artist not set up with a payment processor yet",
+          error: "Artist has not set up with a payment processor yet",
         });
       }
 
       const productKey = await createSubscriptionStripeProduct(
-        tier,
+        newTier,
         stripeAccountId
       );
 
@@ -72,16 +114,15 @@ export default function () {
           {
             billing_address_collection: "auto",
             customer_email: loggedInUser?.email ?? email,
-            payment_intent_data: {
-              application_fee_amount:
-                ((tier.minAmount ?? 0) * (tier.platformPercent ?? 5)) / 100,
+            subscription_data: {
+              application_fee_percent: newTier.platformPercent ?? 0 / 100,
             },
             line_items: [
               {
                 price_data: {
                   tax_behavior: "exclusive",
-                  unit_amount: tier.minAmount ?? 0,
-                  currency: tier.currency ?? "USD",
+                  unit_amount: newTier.minAmount ?? 0,
+                  currency: newTier.currency ?? "USD",
                   product: productKey,
                   recurring: { interval: "month" },
                 },
@@ -114,10 +155,7 @@ export default function () {
         });
       }
     } catch (e) {
-      console.error(e);
-      res.status(500).json({
-        error: "Something went wrong while subscribing the user",
-      });
+      next(e);
     }
   }
 
@@ -156,6 +194,31 @@ export default function () {
       },
     },
   };
+
+  async function DELETE(req: Request, res: Response, next: NextFunction) {
+    const { id: artistId } = req.params as unknown as Params;
+    const loggedInUser = req.user as User;
+
+    try {
+      await deleteStripeSubscriptions({
+        artistSubscriptionTier: { artistId: Number(artistId) },
+        userId: loggedInUser.id,
+      });
+
+      console.log("deleted");
+      await prisma.artistUserSubscription.deleteMany({
+        where: {
+          artistSubscriptionTier: { artistId: Number(artistId) },
+          userId: loggedInUser.id,
+        },
+      });
+      console.log("message");
+
+      res.status(200).json({ message: "success" });
+    } catch (e) {
+      next(e);
+    }
+  }
 
   return operations;
 }

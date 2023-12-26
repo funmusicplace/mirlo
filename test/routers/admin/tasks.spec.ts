@@ -31,7 +31,6 @@ describe("admin/tasks", () => {
         .get("admin/tasks")
         .set("Accept", "application/json");
 
-      console.log("response", response.statusCode, response.body);
       assert(response.statusCode === 401);
     });
     it("should GET / 401 without admin", async () => {

@@ -1,13 +1,21 @@
 import { Post } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
 import prisma from "../../prisma/prisma";
+import showdown from "showdown";
 
 export default {
   single: (post: Post, isUserSubscriber?: boolean) => ({
     ...post,
-    content: isUserSubscriber || post.isPublic ? post.content : "",
     isContentHidden: !(isUserSubscriber || post.isPublic),
   }),
+};
+
+const converter = new showdown.Converter({ headerLevelStart: 2 });
+
+export const markdownAsHtml = (content?: string | null) => {
+  const text = content ?? "";
+  const html = converter.makeHtml(text);
+  return html;
 };
 
 export const doesPostBelongToUser = async (

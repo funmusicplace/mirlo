@@ -114,6 +114,7 @@ const AlbumForm: React.FC<{
               uploadJobs?.[0]?.jobStatus !== undefined &&
               uploadJobs?.[0]?.jobStatus !== "completed"
             }
+            existingObject={existing}
             existingFileCover={existing.cover?.sizes?.[120]}
           />
 

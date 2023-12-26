@@ -71,7 +71,7 @@ const ManageArtistPosts: React.FC<{}> = () => {
   return (
     <ManageSectionWrapper>
       <HeaderDiv>
-        <h2>{t("posts")}</h2>
+        <div />
         <Button
           transparent
           onClick={() => {
@@ -97,16 +97,9 @@ const ManageArtistPosts: React.FC<{}> = () => {
               {formatDate({ date: p.publishedAt, i18n })}
             </Link>
             <div>
-              <Button
-                compact
-                onlyIcon
-                transparent
-                startIcon={<FaPen />}
-                onClick={() => setManagePost(p)}
-              >
-                {" "}
-                {/* {t("edit")} */}
-              </Button>
+              <Link to={`/manage/artists/${p.artistId}/post/${p.id}`}>
+                <Button compact onlyIcon transparent startIcon={<FaPen />} />
+              </Link>
               <Button
                 className={css`
                   margin-left: 0.5rem;
@@ -115,9 +108,7 @@ const ManageArtistPosts: React.FC<{}> = () => {
                 transparent
                 startIcon={<FaTrash />}
                 onClick={() => deletePost(p.id)}
-              >
-                {/*{t("delete")}*/}
-              </Button>
+              ></Button>
             </div>
           </HeaderDiv>
           <MarkdownContent content={p.content} />

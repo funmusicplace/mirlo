@@ -61,15 +61,12 @@ const ArtistHeaderDescription: React.FC = () => {
       <div
         className={css`
           display: flex;
-          align-items: center;
+          flex-direction: column;
+          align-items: flex-start;
+          justify-content: space-between;
+          width: 100%;
         `}
       >
-        <MarkdownContent
-          content={bio}
-          className={css`
-            padding-top: 0.5rem;
-          `}
-        />
         {user && user.id === artist?.userId && (
           <Button
             compact
@@ -83,6 +80,12 @@ const ArtistHeaderDescription: React.FC = () => {
             {t("editBioButton")}
           </Button>
         )}
+        <MarkdownContent
+          content={bio}
+          className={css`
+            width: 100%;
+          `}
+        />
       </div>
     );
   }

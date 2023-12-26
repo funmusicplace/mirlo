@@ -94,8 +94,6 @@ const optimizeImage = async (job: Job) => {
               variant.outputOptions || {}
             );
 
-            logger.info("getting object from MinIO");
-
             let newBuffer = await sharp(buffer)
               .rotate()
               .resize(resizeOptions)

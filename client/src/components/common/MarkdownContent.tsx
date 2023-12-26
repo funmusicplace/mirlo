@@ -12,7 +12,12 @@ const BlackbirdTransformer = {
   shouldTransform(url: string) {
     const { host, pathname } = new URL(url);
 
-    const includesHost = ["localhost:8080", "mirlo.space"].includes(host);
+    const hostArray = ["localhost:8080", "mirlo.space"];
+
+    if (process.env.REACT_APP_CLIENT_DOMAIN?.split("//")[1]) {
+      hostArray.push(process.env.REACT_APP_CLIENT_DOMAIN?.split("//")[1]);
+    }
+    const includesHost = hostArray.includes(host);
     const isWidget = pathname.includes("/widget");
     return includesHost && isWidget;
   },
@@ -48,9 +53,8 @@ const MarkdownContent: React.FC<{
   }
 
   return (
-    <MarkdownWrapper>
+    <MarkdownWrapper className={className}>
       <ReactMarkdown
-        className={className}
         remarkPlugins={[
           remarkGfm,
           [remarkEmbedder, { transformers: [BlackbirdTransformer] }],

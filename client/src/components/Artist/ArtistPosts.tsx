@@ -5,9 +5,17 @@ import { bp } from "../../constants";
 import { Link } from "react-router-dom";
 import Overlay from "components/common/Overlay";
 import PostCard from "components/common/PostCard";
+import { useArtistContext } from "state/ArtistContext";
+import HeaderDiv from "components/common/HeaderDiv";
+import { FaRss } from "react-icons/fa";
+import Button from "components/common/Button";
 
-const ArtistPosts: React.FC<{ artist: Artist }> = ({ artist }) => {
+const ArtistPosts: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
+
+  const {
+    state: { artist },
+  } = useArtistContext();
 
   if (!artist || artist.trackGroups.length === 0) {
     return null;
@@ -15,13 +23,22 @@ const ArtistPosts: React.FC<{ artist: Artist }> = ({ artist }) => {
 
   return (
     <div>
-      <h2
-        className={css`
-          margin-bottom: 0rem;
-        `}
-      >
-        {t("updates")}
-      </h2>
+      <HeaderDiv>
+        <h2
+          className={css`
+            margin-bottom: 0rem;
+          `}
+        >
+          {t("updates")}
+        </h2>
+        <a
+          target="_blank"
+          href={`${process.env.REACT_APP_API_DOMAIN}/v1/artists/${artist.id}/feed?format=rss`}
+          rel="noreferrer"
+        >
+          <Button onlyIcon startIcon={<FaRss />} />
+        </a>
+      </HeaderDiv>
       <div
         className={css`
           display: flex;
@@ -49,7 +66,9 @@ const ArtistPosts: React.FC<{ artist: Artist }> = ({ artist }) => {
             margin-top: 1rem;
             display: flex;
             flex-wrap: wrap;
-            justify-content: space-between;
+            justify-content: ${artist.posts?.length % 3 === 2
+              ? "flex-start"
+              : "space-between"};
             width: 100%;
             a {
               width: 32.4%;
@@ -67,13 +86,14 @@ const ArtistPosts: React.FC<{ artist: Artist }> = ({ artist }) => {
               to={`/post/${p.id}/`}
               className={css`
                 display: flex;
+                margin-right: ${artist.posts?.length % 3 === 2 ? "1.2%" : ""};
                 margin-bottom: 1rem;
                 border-radius: 10px;
                 background-color: var(--mi-darken-background-color);
                 filter: brightness(95%);
                 width: 100%;
 
-                :hover {
+                &:hover {
                   transition: 0.2s ease-in-out;
                   text-decoration: none;
                   background-color: rgba(50, 0, 0, 0.07);
@@ -87,12 +107,7 @@ const ArtistPosts: React.FC<{ artist: Artist }> = ({ artist }) => {
               `}
             >
               <Overlay width="100%" height="100%"></Overlay>
-              <PostCard
-                width="100%"
-                height="350px"
-                dateposition="auto"
-                p={p}
-              ></PostCard>
+              <PostCard width="100%" height="350px" dateposition="auto" p={p} />
             </Link>
           ))}
         </div>
