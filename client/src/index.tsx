@@ -221,7 +221,6 @@ const router = createBrowserRouter([
             path: "",
             element: <Artist />,
             children: [
-              { path: "", element: <Navigate to="releases" /> },
               {
                 path: "posts",
                 element: <ArtistPosts />,

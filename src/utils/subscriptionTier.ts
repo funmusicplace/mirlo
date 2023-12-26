@@ -39,7 +39,7 @@ export const registerSubscription = async ({
     select: {
       user: true,
       artistSubscriptionTier: {
-        select: {
+        include: {
           artist: true,
         },
       },
