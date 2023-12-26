@@ -1,5 +1,4 @@
 import { css } from "@emotion/css";
-import Modal from "components/common/Modal";
 import React from "react";
 import { useGlobalStateContext } from "state/GlobalState";
 import ManageSubscriptionTierBox from "./ManageSubscriptionTierBox";

@@ -17,14 +17,11 @@ const ManageArtistAlbums: React.FC<{}> = () => {
     state: { user },
   } = useGlobalStateContext();
   const {
-    state: { artist },
+    state: { artist, isLoading },
   } = useArtistContext();
 
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
   const { artistId } = useParams();
-  const {
-    state: { isLoading },
-  } = useArtistContext();
 
   const [trackGroups, setTrackGroups] = React.useState<TrackGroup[]>([]);
 
@@ -48,7 +45,7 @@ const ManageArtistAlbums: React.FC<{}> = () => {
       <HeaderDiv>
         {trackGroups.length === 0 && <div>You don't have any albums yet</div>}
         {trackGroups.length !== 0 && <div />}
-        <Link to="new-release">
+        <Link to={`/manage/artists/${artistId}/new-release`}>
           <Button compact transparent startIcon={<FaPlus />}>
             {t("addNewAlbum")}
           </Button>
