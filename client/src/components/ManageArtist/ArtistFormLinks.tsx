@@ -80,6 +80,7 @@ const ArtistFormLinks: React.FC<{ isManage: boolean }> = ({ isManage }) => {
             return (
               <a
                 href={l}
+                key={l}
                 className={css`
                   display: inline-flex;
                   align-items: center;

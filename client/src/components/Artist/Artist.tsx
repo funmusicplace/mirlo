@@ -4,8 +4,9 @@ import { useTranslation } from "react-i18next";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
 import { useArtistContext } from "state/ArtistContext";
 import styled from "@emotion/styled";
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import Tabs from "components/common/Tabs";
+import React from "react";
 
 export const ArtistSection = styled.div`
   margin-bottom: 2rem;
@@ -24,6 +25,23 @@ function Artist() {
   const {
     state: { artist, isLoading },
   } = useArtistContext();
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
+
+  React.useEffect(() => {
+    const subPages = ["posts", "releases", "support"];
+    const end = pathname.split("/")[2];
+
+    if (!subPages.includes(end)) {
+      const navigateTo =
+        (artist?.trackGroups.length ?? 0) > 0
+          ? "releases"
+          : (artist?.posts.length ?? 0) > 0
+          ? "posts"
+          : "support";
+      navigate(navigateTo);
+    }
+  }, [pathname, navigate, artist?.trackGroups.length, artist?.posts.length]);
 
   if (!artist && !isLoading) {
     return <Box>{t("doesNotExist")}</Box>;
