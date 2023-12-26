@@ -1,5 +1,5 @@
 import { User } from "@prisma/client";
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { userLoggedInWithoutRedirect } from "../../../../../auth/passport";
 import prisma from "../../../../../../prisma/prisma";
 
@@ -14,7 +14,7 @@ export default function () {
     GET: [userLoggedInWithoutRedirect, GET],
   };
 
-  async function GET(req: Request, res: Response) {
+  async function GET(req: Request, res: Response, next: NextFunction) {
     const { userId } = req.params as unknown as Params;
     const loggedInUser = req.user as User;
 
@@ -45,10 +45,7 @@ export default function () {
         }
       }
     } catch (e) {
-      console.error(e);
-      res.json({
-        error: `Stripe Connect doesn't work yet`,
-      });
+      next(e);
     }
   }
 

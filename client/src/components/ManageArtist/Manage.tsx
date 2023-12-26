@@ -7,7 +7,7 @@ import CreateNewArtistForm from "./ArtistForm";
 import { bp } from "../../constants";
 import { useGlobalStateContext } from "state/GlobalState";
 import { Link } from "react-router-dom";
-// import { useSnackbar } from "state/SnackbarContext";
+import { useSnackbar } from "state/SnackbarContext";
 import { useTranslation } from "react-i18next";
 import Box from "components/common/Box";
 import CountrySelect from "./CountrySelectForm";
@@ -19,7 +19,7 @@ export const Manage: React.FC = () => {
   const [stripeAccountStatus, setStripeAccountStatus] =
     React.useState<AccountStatus>();
   const [creatingNewArtist, setCreatingNewArtist] = React.useState(false);
-  // const snackbar = useSnackbar();
+  const snackbar = useSnackbar();
   const { t } = useTranslation("translation", { keyPrefix: "manage" });
 
   const userId = state.user?.id;
@@ -40,14 +40,14 @@ export const Manage: React.FC = () => {
     }
   }, [userId]);
 
-  // const setUpBankAccount = React.useCallback(async () => {
-  //   try {
-  //     window.location.assign(api.root + `users/${userId}/stripe/connect`);
-  //   } catch (e) {
-  //     snackbar(t("error"), { type: "warning" });
-  //     console.error(e);
-  //   }
-  // }, [snackbar, t, userId]);
+  const setUpBankAccount = React.useCallback(async () => {
+    try {
+      window.location.assign(api.root + `users/${userId}/stripe/connect`);
+    } catch (e) {
+      snackbar(t("error"), { type: "warning" });
+      console.error(e);
+    }
+  }, [snackbar, t, userId]);
 
   React.useEffect(() => {
     fetchArtists();
@@ -134,17 +134,20 @@ export const Manage: React.FC = () => {
           >
             <h2>Payment management</h2>
             <CountrySelect />
-            <Box variant="info">
-              {!stripeAccountStatus?.chargesEnabled &&
-                t("waitingStripeAccountVerification")}
-              {stripeAccountStatus?.chargesEnabled &&
-                t("stripeAccountVerified")}
-            </Box>
-            {/* <Button onClick={setUpBankAccount}>
+            {stripeAccountStatus?.detailsSubmitted && (
+              <Box variant="info">
+                {!stripeAccountStatus?.chargesEnabled &&
+                  stripeAccountStatus?.detailsSubmitted &&
+                  t("waitingStripeAccountVerification")}
+                {stripeAccountStatus?.chargesEnabled &&
+                  t("stripeAccountVerified")}
+              </Box>
+            )}
+            <Button onClick={setUpBankAccount}>
               {stripeAccountStatus?.detailsSubmitted
                 ? t("updateBankAccount")
                 : t("setUpBankAccount")}
-            </Button> */}
+            </Button>
           </div>
         </WidthContainer>
       </div>
