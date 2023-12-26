@@ -74,7 +74,11 @@ export default function () {
         ]),
       });
 
-      res.json({ message: "Success" });
+      const trackGroup = await prisma.trackGroup.findFirst({
+        where: { id: Number(trackGroupId) },
+      });
+
+      res.json({ result: trackGroup });
     } catch (error) {
       logger.error("error", error);
       res.status(400).json({
