@@ -107,15 +107,23 @@ export const ArtistProvider: React.FC<{
     const artist = await fetchArtist(artistId, managedArtist, userId);
 
     if (artist) {
-      const checkAccountStatus = await api.get<AccountStatus>(
-        `users/${artist.userId}/stripe/checkAccountStatus`
-      );
+      let checkAccountStatus;
+      try {
+        checkAccountStatus = await api.get<AccountStatus>(
+          `users/${artist.userId}/stripe/checkAccountStatus`
+        );
+      } catch (e) {
+        console.error("Stripe didn't work", e);
+      }
       dispatch({
         type: "setState",
         state: {
           isLoading: false,
           artist,
-          userStripeStatus: checkAccountStatus.result,
+          userStripeStatus: checkAccountStatus?.result ?? {
+            detailsSubmitted: false,
+            chargesEnabled: false,
+          },
         },
       });
     }
