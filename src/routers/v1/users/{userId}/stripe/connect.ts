@@ -4,6 +4,7 @@ import { userAuthenticated } from "../../../../../auth/passport";
 import prisma from "../../../../../../prisma/prisma";
 
 import stripe from "../../../../../utils/stripe";
+import logger from "../../../../../logger";
 const { API_DOMAIN } = process.env;
 
 type Params = {
@@ -28,6 +29,9 @@ export default function () {
           let accountId = user.stripeAccountId;
           const alreadyExisted = !!accountId;
           const client = await prisma.client.findFirst({});
+          logger.info(
+            `Connecting ${user.id} to Stripe. Have existing account: ${alreadyExisted} ${accountId}`
+          );
 
           if (!accountId) {
             const account = await stripe.accounts.create({
@@ -44,6 +48,7 @@ export default function () {
               },
             });
             accountId = account.id;
+            logger.info(`Created new stripe account ${account.id}`);
           }
 
           const accountLink = await stripe.accountLinks.create({
@@ -52,6 +57,8 @@ export default function () {
             return_url: `${client?.applicationUrl}/manage?stripeConnect=done`,
             type: alreadyExisted ? "account_update" : "account_onboarding",
           });
+
+          logger.info(`Generated Stripe account link`);
 
           res.redirect(accountLink.url);
         }
