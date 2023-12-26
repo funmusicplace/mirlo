@@ -26,7 +26,7 @@ export default function () {
         });
         if (user) {
           let accountId = user.stripeAccountId;
-          const alreadyExisted = !accountId;
+          const alreadyExisted = !!accountId;
           const client = await prisma.client.findFirst({});
 
           if (!accountId) {
