@@ -1,10 +1,9 @@
 import { css } from "@emotion/css";
-import { FaPen } from "react-icons/fa";
-import { Link, useParams } from "react-router-dom";
+
+import { useParams } from "react-router-dom";
 import ClickToPlayAlbum from "../common/ClickToPlayAlbum";
 import { useGlobalStateContext } from "state/GlobalState";
 import Box from "../common/Box";
-import Button from "../common/Button";
 import usePublicObjectById from "utils/usePublicObjectById";
 import { useTranslation } from "react-i18next";
 import ArtistSupport from "components/Artist/ArtistSupport";
@@ -16,12 +15,12 @@ import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 
 import PurchaseOrDownloadAlbum from "./PurchaseOrDownloadAlbumModal";
 import { bp } from "../../constants";
-import DropdownMenu from "components/common/DropdownMenu";
-import TrackGroupAdminMenu from "./TrackGroupAdminMenu";
+
 import MarkdownContent from "components/common/MarkdownContent";
 import Wishlist from "./Wishlist";
 import ReleaseDate from "./ReleaseDate";
 import WidthContainer from "components/common/WidthContainer";
+import TrackGroupTitle from "./TrackGroupTitle";
 
 function TrackGroup() {
   const { t } = useTranslation("translation", {
@@ -55,12 +54,15 @@ function TrackGroup() {
     return <FullPageLoadingSpinner />;
   }
 
-  const ownedByUser = artist.userId === user?.id;
-
   const trackGroupCredits = trackGroup.credits;
 
   return (
     <WidthContainer variant="big" justify="center">
+      <MetaCard
+        title={trackGroup.title}
+        description={trackGroup.about ?? "An album on Mirlo"}
+        image={trackGroup.cover?.sizes?.[600]}
+      />
       <div
         className={css`
         ${
@@ -81,11 +83,6 @@ function TrackGroup() {
           margin-top: 0rem;
       `}
       >
-        <MetaCard
-          title={trackGroup.title}
-          description={trackGroup.about ?? "An album on Mirlo"}
-          image={trackGroup.cover?.sizes?.[600]}
-        />
         <div
           className={css`
             width: 100%;
@@ -118,98 +115,7 @@ function TrackGroup() {
               }
             `}
           >
-            <div>
-              <div
-                className={css`
-                  display: flex;
-                  margin-top: 1rem;
-                  margin-bottom: 0.5rem;
-                  align-items: center;
-                  justify-content: flex-start;
-                  align-items: center;
-                `}
-              >
-                <div
-                  className={css`
-                    @media screen and (max-width: ${bp.small}px) {
-                      display: none;
-                    }
-                  `}
-                >
-                  <ClickToPlayAlbum
-                    trackGroupId={trackGroup.id}
-                    className={css`
-                      width: 50px !important;
-                      margin-right: 10px;
-                    `}
-                  />
-                </div>
-                <div>
-                  <h1
-                    className={css`
-                      font-size: 2rem;
-                      line-height: 2.2rem;
-                    `}
-                  >
-                    {trackGroup.title}
-                  </h1>
-                </div>
-              </div>
-            </div>
-
-            <div
-              className={css`
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                margin-bottom: 0.6rem;
-              `}
-            >
-              <div>
-                {artist && (
-                  <em
-                    className={css`
-                      font-size: 18px;
-                      font-style: normal;
-                    `}
-                  >
-                    by{" "}
-                    <Link to={`/${artist.urlSlug?.toLowerCase() ?? artist.id}`}>
-                      {artist?.name}
-                    </Link>
-                  </em>
-                )}
-              </div>
-              <div
-                className={css`
-                  text-align: right;
-                  display: flex;
-                  align-items: center;
-                `}
-              >
-                {ownedByUser && (
-                  <Link
-                    to={`/manage/artists/${artist.id}/release/${trackGroup.id}`}
-                    style={{ marginRight: "1rem" }}
-                  >
-                    <Button compact startIcon={<FaPen />}>
-                      {t("edit")}
-                    </Button>
-                  </Link>
-                )}
-                {user?.isAdmin && (
-                  <div
-                    className={css`
-                      padding-left: 1rem;
-                    `}
-                  >
-                    <DropdownMenu compact>
-                      <TrackGroupAdminMenu trackGroup={trackGroup} />
-                    </DropdownMenu>
-                  </div>
-                )}
-              </div>
-            </div>
+            <TrackGroupTitle trackGroup={trackGroup} />
 
             <div
               className={css`
