@@ -224,12 +224,14 @@ export const BulkTrackUpload: React.FC<{
 
         replace(
           parsed
-            .sort((a, b) =>
-              (a.metadata.common.track.no ?? 0) >
-              (b.metadata.common.track.no ?? 0)
-                ? 1
-                : -1
-            )
+            .sort((a, b) => {
+              const firstComparable = a.metadata.common.track.no ?? a.file.name;
+              const secondComparable =
+                b.metadata.common.track.no ?? b.file.name;
+
+              console.log("first", firstComparable, secondComparable);
+              return (firstComparable ?? 0) > (secondComparable ?? 0) ? 1 : -1;
+            })
             .map((p, i) => ({
               metadata: p.metadata,
               order: `${
