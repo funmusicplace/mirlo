@@ -122,7 +122,7 @@ function App() {
 
                 ${isPlaying
                   ? `
-            padding-bottom: 30px;`
+                    padding-bottom: 30px;`
                   : ``}
               `}
             >

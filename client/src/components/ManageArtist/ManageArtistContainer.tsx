@@ -74,6 +74,8 @@ const ManageArtist: React.FC<{}> = () => {
   const {
     state: { artist, isLoading },
   } = useArtistContext();
+
+  console.log("loading in artist manage");
   const location = useLocation();
 
   const artistBanner = artist?.banner?.sizes;

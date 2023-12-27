@@ -42,7 +42,6 @@ const PageHeader = () => {
           <div
             className={css`
               display: flex;
-              //* max-width: 1250px; *//
               width: 100%;
               min-height: 100%;
 
@@ -70,7 +69,6 @@ const PageHeader = () => {
       {(!artistBanner || (trackGroupId && !isManage)) && (
         <div
           className={css`
-            // margin-top: 55px;
             @media screen and (max-width: ${bp.medium}px) {
               margin-top: 0px;
             }
