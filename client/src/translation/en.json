@@ -14,6 +14,10 @@
   "releases": {
     "recentReleases": "Recent releases"
   },
+  "cookies": {
+    "weUseCookies": "We use cookies to keep you logged in and to maintain your music queue.",
+    "gotIt": "Got it!"
+  },
   "about": {
     "about": "About",
     "intro": "Mirlo provides a user-friendly space to help musicians sell music, manage subscriptions, and share with their supporters.",

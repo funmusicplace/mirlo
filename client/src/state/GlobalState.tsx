@@ -14,11 +14,16 @@ export interface GlobalState {
   currentlyPlayingIndex?: number;
   // userPlaylists?: { id: string; title: string }[];
   checkFavoriteStatusFlag?: number;
+  cookieDisclaimerRead?: boolean;
 }
 
 type SetLoggedInUser = {
   type: "setLoggedInUser";
   user?: LoggedInUser;
+};
+
+type setCookieDisclaimerRead = {
+  type: "setCookieDisclaimerRead";
 };
 
 type IncrementFavoriteStatusFlag = {
@@ -113,7 +118,8 @@ type Actions =
   | IncrementCurrentlyPlayingIndex
   | DecrementCurrentlyPlayingIndex
   | SetUserCredits
-  | IncrementFavoriteStatusFlag;
+  | IncrementFavoriteStatusFlag
+  | setCookieDisclaimerRead;
 
 export const stateReducer = produce((draft: GlobalState, action: Actions) => {
   switch (action.type) {
@@ -212,6 +218,9 @@ export const stateReducer = produce((draft: GlobalState, action: Actions) => {
       break;
     case "setDraggingTrackId":
       draft.draggingTrackId = action.draggingTrackId;
+      break;
+    case "setCookieDisclaimerRead":
+      draft.cookieDisclaimerRead = true;
       break;
     default:
       break;
