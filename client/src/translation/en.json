@@ -193,6 +193,7 @@
     "cover": "Cover",
     "type": "Type",
     "lp": "LP",
+    "areYouSurePublish": "Some of your tracks are still processing and won't be available for download. Are you sure?",
     "view": "View live",
     "viewPreorder": "View pre-order",
     "ep": "EP",

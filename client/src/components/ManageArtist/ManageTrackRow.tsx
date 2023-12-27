@@ -23,8 +23,17 @@ const TrackRow = styled("tr")`
   &:hover > td > .play-button {
     display: block;
   }
+
   &:hover > td > .track-number {
     display: none;
+  }
+
+  &:hover {
+    background-color: var(--mi-darken-background-color);
+
+    @media (prefers-color-scheme: dark) {
+      background-color: var(--mi-lighten-background-color);
+    }
   }
 `;
 

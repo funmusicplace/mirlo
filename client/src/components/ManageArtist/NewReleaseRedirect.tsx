@@ -30,7 +30,6 @@ const NewReleaseRedirect: React.FC<{}> = () => {
           }`,
           artistId: artist.id,
         });
-        console.log("newAlbum", newAlbum);
         navigate(`/manage/artists/${artist.id}/release/${newAlbum.result.id}`);
       }
     };

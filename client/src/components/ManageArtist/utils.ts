@@ -13,15 +13,14 @@ export const produceNewStatus = produce(
     const idx = queue.findIndex((i) => i.title === title);
     if (status === 100) {
       queue.splice(idx, 1);
-      console.log("new queue", queue);
       return queue;
     }
-    queue[idx] = {
-      title: queue[idx].title,
-      status: status,
-    };
-    console.log("new queue", queue);
-
+    if (queue?.[idx]) {
+      queue[idx] = {
+        title: queue[idx].title,
+        status: status,
+      };
+    }
     return queue;
   }
 );

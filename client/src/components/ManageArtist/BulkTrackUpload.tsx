@@ -37,6 +37,11 @@ interface FormData {
 
 type OrderedTrackData = { order: number; t: TrackData };
 
+const alertUser = (event: any) => {
+  event.preventDefault();
+  event.returnValue = "";
+};
+
 export const BulkTrackUpload: React.FC<{
   trackgroup: TrackGroup;
   reload: () => Promise<void>;
@@ -57,13 +62,9 @@ export const BulkTrackUpload: React.FC<{
   const userId = user?.id;
 
   const uploadNextTrack = React.useCallback(
-    async (remainingTracks: OrderedTrackData[], allTrackTitles: string[]) => {
+    async (remainingTracks: OrderedTrackData[]) => {
       const firstTrack = remainingTracks.pop();
       if (firstTrack) {
-        const currentTrackIndex = allTrackTitles.findIndex(
-          (id) => id === firstTrack.t.title
-        );
-
         const packet = {
           title: firstTrack.t.title,
           metadata: pickBy(firstTrack.t.metadata, [
@@ -112,11 +113,10 @@ export const BulkTrackUpload: React.FC<{
           }, timeInBetweenUploads / 2);
 
           setTimeout(async () => {
-            console.log("removing index", currentTrackIndex);
-            await uploadNextTrack(remainingTracks, allTrackTitles);
+            await uploadNextTrack(remainingTracks);
           }, timeInBetweenUploads);
         } else {
-          await uploadNextTrack(remainingTracks, allTrackTitles);
+          await uploadNextTrack(remainingTracks);
         }
       } else {
         setUploadQueue([]);
@@ -130,7 +130,7 @@ export const BulkTrackUpload: React.FC<{
   const processUploadedFiles = React.useCallback(
     (filesToProcess: FileList) => {
       const filesToParse = fileListIntoArray(filesToProcess);
-      (async () => {
+      const callback = async () => {
         const parsed = await parse(filesToParse);
         const newTracks = parsed
           .sort((a, b) => {
@@ -145,20 +145,30 @@ export const BulkTrackUpload: React.FC<{
             t,
           }));
         setUploadQueue(newTracks.map((t) => ({ title: t.t.title, status: 5 })));
-        uploadNextTrack(
-          newTracks,
-          newTracks.map((t) => t.t.title)
-        );
-      })();
+        uploadNextTrack(newTracks);
+      };
+
+      callback();
     },
     [trackgroup, uploadNextTrack]
   );
 
   React.useEffect(() => {
-    if (trackFiles?.length > 0) {
+    if (uploadQueue.length === 0 && trackFiles?.length > 0) {
       processUploadedFiles(trackFiles);
     }
-  }, [processUploadedFiles, trackFiles]);
+  }, [processUploadedFiles, trackFiles, uploadQueue.length]);
+
+  React.useEffect(() => {
+    if (uploadQueue.length > 0) {
+      window.addEventListener("beforeunload", alertUser);
+      return () => {
+        window.removeEventListener("beforeunload", alertUser);
+      };
+    } else {
+      window.removeEventListener("beforeunload", alertUser);
+    }
+  }, [uploadQueue.length]);
 
   const disableUploadButton = uploadQueue.length > 0;
 
@@ -176,7 +186,7 @@ export const BulkTrackUpload: React.FC<{
             `}
           >
             {uploadQueue.map((t, idx) => (
-              <BulkTrackUploadRow track={t} />
+              <BulkTrackUploadRow track={t} key={t.title} />
             ))}
           </div>
         )}
