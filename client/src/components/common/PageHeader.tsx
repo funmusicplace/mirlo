@@ -1,22 +1,20 @@
 import { css } from "@emotion/css";
 import { useLocation, useParams } from "react-router-dom";
-import usePublicArtist from "utils/usePublicObjectById";
 import { bp } from "../../constants";
 import { useGlobalStateContext } from "state/GlobalState";
+import { useArtistContext } from "state/ArtistContext";
 
 const PageHeader = () => {
   const { pathname } = useLocation();
 
   const isManage = pathname.includes("manage");
-  const { artistId, trackGroupId } = useParams();
+  const { trackGroupId } = useParams();
   const {
     state: { user },
   } = useGlobalStateContext();
 
-  const { object: artist } = usePublicArtist<Artist>("artists", artistId);
-
-  const artistBanner = artist?.banner?.sizes;
-
+  const artistContext = useArtistContext();
+  const artistBanner = artistContext?.state?.artist?.banner;
   const userId = user?.id;
 
   return (
@@ -51,7 +49,7 @@ const PageHeader = () => {
             `}
           >
             <img
-              src={artistBanner?.[2500]}
+              src={artistBanner?.sizes?.[2500] + `?${artistBanner?.updatedAt}`}
               alt="Artist banner"
               className={css`
                 width: 100%;

@@ -213,14 +213,12 @@ export default function () {
         userId: loggedInUser.id,
       });
 
-      console.log("deleted");
       await prisma.artistUserSubscription.deleteMany({
         where: {
           artistSubscriptionTier: { artistId: Number(artistId) },
           userId: loggedInUser.id,
         },
       });
-      console.log("message");
 
       res.status(200).json({ message: "success" });
     } catch (e) {

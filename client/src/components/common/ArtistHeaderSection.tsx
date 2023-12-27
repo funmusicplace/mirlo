@@ -13,6 +13,8 @@ import ArtistFormLinks from "components/ManageArtist/ArtistFormLinks";
 import Avatar from "components/Artist/Avatar";
 import ArtistFormLocation from "components/ManageArtist/ArtistFormLocation";
 import ArtistHeaderDescription from "components/Artist/ArtistHeaderDescription";
+import { useArtistContext } from "state/ArtistContext";
+import LoadingBlocks from "components/Artist/LoadingBlocks";
 
 const H1 = styled.h1<{ artistAvatar: boolean }>`
   font-size: 2.4rem;
@@ -52,15 +54,23 @@ const Header = styled.div`
 `;
 
 const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
-  artist,
   isManage,
 }) => {
+  const {
+    state: { artist, isLoading },
+  } = useArtistContext();
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const {
     state: { user },
   } = useGlobalStateContext();
 
-  const artistAvatar = artist?.avatar?.sizes;
+  const artistAvatar = artist?.avatar;
+
+  if (!artist && isLoading) {
+    return <LoadingBlocks rows={1} />;
+  } else if (!artist) {
+    return null;
+  }
 
   return (
     <div
@@ -73,7 +83,7 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
       <MetaCard
         title={artist.name}
         description={artist.bio}
-        image={artistAvatar?.[500] ?? artistAvatar?.[1200]}
+        image={artistAvatar?.sizes?.[500] ?? artistAvatar?.sizes?.[1200]}
       />
       <div
         className={css`
@@ -102,7 +112,11 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
               }
             `}
           >
-            <Avatar avatar={artistAvatar?.[300]} />
+            <Avatar
+              avatar={
+                artistAvatar?.sizes?.[300] + `?${artistAvatar?.updatedAt}`
+              }
+            />
 
             <div
               className={css`
