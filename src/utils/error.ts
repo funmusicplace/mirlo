@@ -1,4 +1,7 @@
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import {
+  PrismaClientKnownRequestError,
+  PrismaClientValidationError,
+} from "@prisma/client/runtime/library";
 import { NextFunction, Request, Response } from "express";
 import { MulterError } from "multer";
 
@@ -9,7 +12,13 @@ const errorHandler = (
   next: NextFunction
 ) => {
   console.error(`ERROR: ${req.method} ${req.path}`, err);
-  if (err instanceof PrismaClientKnownRequestError) {
+  if (err instanceof PrismaClientValidationError) {
+    const messageStrings = err.message.split("\n");
+
+    res.status(400).json({
+      error: messageStrings[messageStrings.length - 1],
+    });
+  } else if (err instanceof PrismaClientKnownRequestError) {
     console.error("err", err.cause, err.name, err.code, err.meta);
     let message = `Something went wrong with the data supplied. Admin should check the logs`;
 
@@ -19,15 +28,13 @@ const errorHandler = (
     res.status(400).json({
       error: message,
     });
-  }
-  if (err instanceof MulterError) {
+  } else if (err instanceof MulterError) {
     res.status(400).json({ error: err.message });
   } else if (res.statusCode === 429) {
     res.json({ error: "Too many requests" });
   } else {
     res.status(err.status ?? 500).json({ error: err.errors });
   }
-  next();
 };
 
 export default errorHandler;

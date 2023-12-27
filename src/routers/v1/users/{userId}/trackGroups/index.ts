@@ -1,5 +1,5 @@
 import { Prisma, User } from "@prisma/client";
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import {
   contentBelongsToLoggedInUserArtist,
   userAuthenticated,
@@ -97,7 +97,7 @@ export default function () {
     },
   };
 
-  async function POST(req: Request, res: Response) {
+  async function POST(req: Request, res: Response, next: NextFunction) {
     const {
       title,
       about,
@@ -133,12 +133,9 @@ export default function () {
           urlSlug,
         },
       });
-      res.json({ result });
+      return res.json({ result });
     } catch (e) {
-      console.error(`POST users/${user.id}/trackGroups`, e);
-      res.status(500).json({
-        error: "Something went wrong while trying to create a trackgroup",
-      });
+      next(e);
     }
   }
 

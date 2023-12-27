@@ -212,7 +212,7 @@ export const contentBelongsToLoggedInUserArtist = async (
       res.status(400).json({
         error: `Artist must belong to user`,
       });
-      return next(`Artist must belong to user`);
+      return;
     }
 
     const artist = await prisma.artist.findFirst({
@@ -226,7 +226,7 @@ export const contentBelongsToLoggedInUserArtist = async (
       res.status(400).json({
         error: "Artist must belong to user",
       });
-      return next("Artist must belong to user");
+      return;
     }
   }
   return next();
