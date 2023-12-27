@@ -62,8 +62,6 @@ const AlbumForm: React.FC<{
             releaseDate: new Date(data.releaseDate).toISOString(),
           };
 
-          console.log("sending", sending);
-
           await api.put<Partial<TrackGroup>, TrackGroup>(
             `users/${userId}/trackGroups/${existingId}`,
             {

@@ -107,6 +107,7 @@ export default function () {
       credits,
       type,
       minPrice,
+      urlSlug,
     } = req.body;
     const user = req.user as User;
 
@@ -129,7 +130,7 @@ export default function () {
           currency: userForCurrency?.country ?? "USD",
           releaseDate: releaseDate ? new Date(releaseDate) : undefined,
           adminEnabled: true,
-          urlSlug: slugify(title).toLowerCase(),
+          urlSlug,
         },
       });
       res.json({ result });

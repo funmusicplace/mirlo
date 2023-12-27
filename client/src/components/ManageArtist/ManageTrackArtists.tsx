@@ -6,9 +6,10 @@ import Button from "components/common/Button";
 import { useTranslation } from "react-i18next";
 import { useFieldArray, useFormContext } from "react-hook-form";
 
-const ManageTrackArtists: React.FC<{ trackArtistsKey: string }> = ({
-  trackArtistsKey,
-}) => {
+const ManageTrackArtists: React.FC<{
+  trackArtistsKey: string;
+  disabled?: boolean;
+}> = ({ trackArtistsKey, disabled }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const { control } = useFormContext();
 
@@ -33,6 +34,7 @@ const ManageTrackArtists: React.FC<{ trackArtistsKey: string }> = ({
               artistIndex={artistIndex}
               trackArtistsKey={trackArtistsKey}
               key={a.id}
+              disabled={disabled}
             />
           ))}
         </div>
@@ -45,6 +47,7 @@ const ManageTrackArtists: React.FC<{ trackArtistsKey: string }> = ({
             margin-left: 1rem;
           `}
           compact
+          disabled={disabled}
           startIcon={<FaPlus />}
           variant="outlined"
         >

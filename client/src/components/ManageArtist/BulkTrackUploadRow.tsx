@@ -1,115 +1,60 @@
-import { TrackData } from "./BulkTrackUpload";
 import React from "react";
-import IconButton from "components/common/IconButton";
-import { useFormContext } from "react-hook-form";
-import { InputEl } from "components/common/Input";
-import { FaCheck, FaEllipsisV, FaTrash } from "react-icons/fa";
 import { css } from "@emotion/css";
-import { useTranslation } from "react-i18next";
-import Tooltip from "components/common/Tooltip";
-import LoadingSpinner from "components/common/LoadingSpinner";
-import { fmtMSS } from "utils/tracks";
-import SelectTrackPreview from "./SelectTrackPreview";
-import ManageTrackArtists from "./ManageTrackArtists";
+
+import styled from "@emotion/styled";
+
+export const PercentUpload = styled("div")<{ percentUpload: number }>`
+  position: absolute;
+  height: 100%;
+  opacity: 0.5;
+  transition: 0.2s width;
+  width: ${(props) => props.percentUpload ?? 0}%;
+  ${(props) =>
+    props.percentUpload !== 100
+      ? `
+    animation: 3s shine linear infinite;
+    background: linear-gradient(
+      110deg,
+      var(--mi-pink) 33%,
+      #ec7c98 33%,
+      #ec7c98 38%,
+      var(--mi-pink) 39%,
+      var(--mi-pink) 66%,
+      #ec7c98 66%,
+      #ec7c98 76%,
+      var(--mi-pink) 76%
+    );
+    background-size: 200% 100%;
+
+    @keyframes shine {
+      to {
+        background-position-x: -200%;
+      }
+    }`
+      : `
+    background-color: var(--mi-success-background-color)`}
+`;
 
 export const BulkTrackUploadRow: React.FC<{
-  track: TrackData;
-  index: number;
-  uploadingState?: string;
-  isSaving?: boolean;
-  remove: (index: number) => void;
-}> = ({ track, index, uploadingState, isSaving, remove }) => {
-  const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
-  const [showMoreDetails, setShowMoreDetails] = React.useState(false);
-  const { register } = useFormContext();
-
-  const removeOnClick = React.useCallback(() => {
-    remove(index);
-  }, [index, remove]);
-
+  track: { title: string; status: number };
+}> = ({ track }) => {
   return (
-    <>
-      <tr
+    <div
+      className={css`
+        position: relative;
+        margin-bottom: 0.2rem;
+      `}
+    >
+      <PercentUpload percentUpload={track.status} />
+      <div
         className={css`
-          ${uploadingState || isSaving
-            ? `
-            opacity: .4;
-            pointer-events: none;
-            `
-            : ""}
+          padding: 0.5rem 1rem;
+          position: relative;
+          z-index: 1;
         `}
       >
-        <td>
-          {!uploadingState && (
-            <>
-              <IconButton onClick={removeOnClick} type="button">
-                <FaTrash />
-              </IconButton>
-            </>
-          )}
-          {uploadingState === "completed" && (
-            <div
-              className={css`
-                color: green;
-              `}
-            >
-              <FaCheck />
-            </div>
-          )}
-          {(uploadingState === "waiting" || uploadingState === "active") && (
-            <LoadingSpinner />
-          )}
-        </td>
-        <td>
-          <InputEl {...register(`tracks.${index}.order`)} />
-          <InputEl {...register(`tracks.${index}.title`)} />
-        </td>
-        <td>
-          <ManageTrackArtists
-            trackArtistsKey={`tracks.${index}.trackArtists`}
-          />
-        </td>
-        <td className="alignRight">
-          {track.duration && fmtMSS(+track.duration)}
-        </td>
-        <td>
-          <SelectTrackPreview statusKey={`tracks.${index}.status`} />
-        </td>
-        <td className="alignRight">
-          <div
-            className={css`
-              display: flex;
-              align-items: center;
-            `}
-          >
-            <Tooltip hoverText={t("moreTrackDetails")} underline={false}>
-              <IconButton
-                compact
-                onClick={() => setShowMoreDetails((val) => !val)}
-                type="button"
-              >
-                <FaEllipsisV />
-              </IconButton>
-            </Tooltip>
-          </div>
-        </td>
-      </tr>
-      {showMoreDetails && (
-        <tr>
-          <td colSpan={99}>
-            <div
-              className={css`
-                max-width: 600px;
-                max-height: 200px;
-                overflow: scroll;
-              `}
-            >
-              <strong>raw id3 tag: </strong>
-              {JSON.stringify(track.metadata, null, 2)}
-            </div>
-          </td>
-        </tr>
-      )}
-    </>
+        Uploading {track.title}
+      </div>
+    </div>
   );
 };

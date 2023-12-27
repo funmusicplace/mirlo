@@ -11,6 +11,7 @@ import { doesTrackGroupBelongToUser } from "../../../../../../utils/ownership";
 import prisma from "../../../../../../../prisma/prisma";
 import { deleteTrackGroup } from "../../../../../../utils/trackGroup";
 import logger from "../../../../../../logger";
+import slugify from "slugify";
 
 type Params = {
   trackGroupId: string;
@@ -74,9 +75,21 @@ export default function () {
         ]),
       });
 
-      const trackGroup = await prisma.trackGroup.findFirst({
+      let trackGroup = await prisma.trackGroup.findFirst({
         where: { id: Number(trackGroupId) },
       });
+
+      if (trackGroup?.title && trackGroup?.urlSlug.includes("mi-temp-slug")) {
+        await prisma.trackGroup.update({
+          where: { id: trackGroup.id },
+          data: {
+            urlSlug: slugify(trackGroup.title).toLowerCase(),
+          },
+        });
+        trackGroup = await prisma.trackGroup.findFirst({
+          where: { id: Number(trackGroupId) },
+        });
+      }
 
       res.json({ result: trackGroup });
     } catch (error) {

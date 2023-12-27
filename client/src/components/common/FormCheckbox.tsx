@@ -2,10 +2,11 @@ import { css } from "@emotion/css";
 import { InputEl } from "./Input";
 import { useFormContext } from "react-hook-form";
 
-const FormCheckbox: React.FC<{ keyName: string; description: string }> = ({
-  keyName,
-  description,
-}) => {
+const FormCheckbox: React.FC<{
+  keyName: string;
+  description: string;
+  disabled?: boolean;
+}> = ({ keyName, description, disabled }) => {
   const { register } = useFormContext();
 
   return (
@@ -22,7 +23,12 @@ const FormCheckbox: React.FC<{ keyName: string; description: string }> = ({
         }
       `}
     >
-      <InputEl id={keyName} type="checkbox" {...register(keyName)} />
+      <InputEl
+        id={keyName}
+        type="checkbox"
+        {...register(keyName)}
+        disabled={disabled}
+      />
       {description}
     </label>
   );

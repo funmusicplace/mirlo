@@ -27,8 +27,6 @@ const TrackGroupCard: React.FC<{
   });
 
   const userId = user?.id;
-  const releaseDate = new Date(album.releaseDate);
-  const currentDate = new Date();
 
   const deleteTrackGroup = React.useCallback(async () => {
     try {
@@ -180,7 +178,7 @@ const TrackGroupCard: React.FC<{
               <Button compact>{t("viewLive")}</Button>
             </Link>
           )}
-          {!album.published && releaseDate > currentDate && (
+          {!album.published && (
             <Button compact startIcon={<FaTrash />} onClick={deleteTrackGroup}>
               {t("delete")}
             </Button>

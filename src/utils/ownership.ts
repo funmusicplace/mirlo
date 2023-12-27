@@ -56,22 +56,27 @@ export const doesTrackBelongToUser = async (
   trackId: number,
   userId: number
 ) => {
-  const track = await prisma.track.findUnique({
-    where: {
-      id: trackId,
-    },
-  });
-  if (track) {
-    const trackGroup = await doesTrackGroupBelongToUser(
-      track?.trackGroupId,
-      userId
-    );
-    if (trackGroup) {
-      return track;
+  try {
+    const track = await prisma.track.findUnique({
+      where: {
+        id: trackId,
+      },
+    });
+
+    if (track) {
+      const trackGroup = await doesTrackGroupBelongToUser(
+        track?.trackGroupId,
+        userId
+      );
+      if (trackGroup) {
+        return track;
+      }
+      return null;
     }
     return null;
+  } catch (e) {
+    return null;
   }
-  return null;
 };
 
 export const canUserListenToTrack = async (

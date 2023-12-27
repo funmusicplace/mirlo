@@ -54,6 +54,7 @@ import ManageArtistAlbums from "components/ManageArtist/ManageArtistAlbums";
 import ManageArtistSubscriptionTiers from "components/ManageArtist/ManageArtistSubscriptionTiers";
 import ManageArtistPosts from "components/ManageArtist/ManageArtistPosts";
 import ManagePost from "components/ManageArtist/ManagePost";
+import NewReleaseRedirect from "components/ManageArtist/NewReleaseRedirect";
 
 const router = createBrowserRouter([
   {
@@ -176,7 +177,7 @@ const router = createBrowserRouter([
               },
               {
                 path: "new-release",
-                element: <ManageTrackGroup />,
+                element: <NewReleaseRedirect />,
               },
             ],
           },

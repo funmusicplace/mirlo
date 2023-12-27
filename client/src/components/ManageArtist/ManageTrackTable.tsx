@@ -9,7 +9,62 @@ import { CenteredSpinner } from "../common/Spinner";
 import Table from "../common/Table";
 import ManageTrackRow from "./ManageTrackRow";
 import { useTranslation } from "react-i18next";
-import { css } from "@emotion/css";
+import styled from "@emotion/styled";
+
+const TrackTableComponent = styled(Table)`
+  margin-bottom: 1.5rem;
+  margin-top: 1rem;
+
+  @media screen and (max-width: ${bp.medium}px) {
+    display: block;
+
+    & thead,
+    tbody,
+    td,
+    tr,
+    th {
+      display: block;
+    }
+
+    thead {
+      position: absolute;
+      top: -9999px;
+      left: -9999px;
+    }
+
+    tr {
+      border: 1px solid #ccc;
+    }
+
+    td {
+      /* Behave  like a "row" */
+      border: none;
+      border-bottom: 1px solid #eee;
+      position: relative;
+      padding-left: 50%;
+      width: 100%;
+      display: flex;
+      align-items: center;
+    }
+
+    td:before {
+      /* Now like a table header */
+      display: inline-block;
+      min-width: 40%;
+      padding-right: 10px;
+      // white-space: nowrap;
+    }
+
+    td.alignRight {
+      text-align: left !important;
+    }
+  }
+  @media screen and (min-width: ${bp.medium}px) {
+    td:before {
+      display: none;
+    }
+  }
+`;
 
 export const ManageTrackTable: React.FC<{
   tracks: Track[];
@@ -104,62 +159,7 @@ export const ManageTrackTable: React.FC<{
   }
 
   return (
-    <Table
-      className={css`
-        margin-bottom: 1.5rem;
-        margin-top: 1.5rem;
-
-        @media screen and (max-width: ${bp.medium}px) {
-          display: block;
-
-          & thead,
-          tbody,
-          td,
-          tr,
-          th {
-            display: block;
-          }
-
-          thead {
-            position: absolute;
-            top: -9999px;
-            left: -9999px;
-          }
-
-          tr {
-            border: 1px solid #ccc;
-          }
-
-          td {
-            /* Behave  like a "row" */
-            border: none;
-            border-bottom: 1px solid #eee;
-            position: relative;
-            padding-left: 50%;
-            width: 100%;
-            display: flex;
-            align-items: center;
-          }
-
-          td:before {
-            /* Now like a table header */
-            display: inline-block;
-            min-width: 40%;
-            padding-right: 10px;
-            // white-space: nowrap;
-          }
-
-          td.alignRight {
-            text-align: left !important;
-          }
-        }
-        @media screen and (min-width: ${bp.medium}px) {
-          td:before {
-            display: none;
-          }
-        }
-      `}
-    >
+    <TrackTableComponent>
       <thead>
         <tr>
           <th />
@@ -190,7 +190,7 @@ export const ManageTrackTable: React.FC<{
           </tr>
         )}
       </tbody>
-    </Table>
+    </TrackTableComponent>
   );
 };
 
