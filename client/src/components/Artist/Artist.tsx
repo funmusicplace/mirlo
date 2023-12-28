@@ -52,17 +52,23 @@ function Artist() {
   return (
     <>
       <Tabs>
-        <li>
-          <NavLink to="releases">{t("releases")}</NavLink>
-        </li>
-        <li>
-          <NavLink to="posts">{t("updates")}</NavLink>
-        </li>
-        <li>
-          <NavLink to="support">
-            {t("support", { artist: artist.name })}
-          </NavLink>
-        </li>
+        {(artist?.trackGroups.length ?? 0) > 0 && (
+          <li>
+            <NavLink to="releases">{t("releases")}</NavLink>
+          </li>
+        )}
+        {(artist?.posts.length ?? 0) > 0 && (
+          <li>
+            <NavLink to="posts">{t("updates")}</NavLink>
+          </li>
+        )}
+        {(artist?.subscriptionTiers.length ?? 0) > 0 && (
+          <li>
+            <NavLink to="support">
+              {t("support", { artist: artist.name })}
+            </NavLink>
+          </li>
+        )}
       </Tabs>
       <ArtistSection>
         <Outlet />

@@ -1,5 +1,5 @@
 import prisma from "../../prisma/prisma";
-import { finalAudioBucket, getObjectList, minioClient } from "../utils/minio";
+import { finalAudioBucket, removeObjectsFromBucket } from "../utils/minio";
 
 export const deleteTrack = async (trackId: number) => {
   await prisma.track.delete({
@@ -14,12 +14,8 @@ export const deleteTrack = async (trackId: number) => {
     },
   });
   if (audio) {
-    const objects = await getObjectList(finalAudioBucket, audio.id);
+    await removeObjectsFromBucket(finalAudioBucket, audio.id);
 
-    await minioClient.removeObjects(
-      finalAudioBucket,
-      objects.map((o) => o.name)
-    );
     await prisma.trackAudio.delete({
       where: {
         trackId: trackId,

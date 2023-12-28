@@ -47,11 +47,6 @@ const PurchaseOrDownloadAlbum: React.FC<{
     return null;
   }
 
-  // FIXME: remove once we have a real stripe account
-  if (!userId) {
-    return null;
-  }
-
   const userIsTrackGroupArtist =
     user && artistState?.artist.userId === user?.id;
 

@@ -1,5 +1,4 @@
 import { css } from "@emotion/css";
-import Modal from "components/common/Modal";
 import React from "react";
 import { useGlobalStateContext } from "state/GlobalState";
 import ManageSubscriptionTierBox from "./ManageSubscriptionTierBox";
@@ -20,7 +19,6 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
     state: { artist },
   } = useArtistContext();
   const { artistId } = useParams();
-  const [manageTier, setManageTier] = React.useState<ArtistSubscriptionTier>();
   const { objects: tiers, reload } =
     useGetUserObjectById<ArtistSubscriptionTier>(
       "artists",
@@ -54,21 +52,6 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
           />
         ))}
       </div>
-
-      {manageTier && (
-        <Modal
-          open={!!manageTier}
-          onClose={() => setManageTier(undefined)}
-          size="small"
-        >
-          {/* There is some overly complex state management going on here with the reloads being passed around */}
-          <SubscriptionForm
-            existing={manageTier}
-            reload={() => reload()}
-            artist={artist}
-          />
-        </Modal>
-      )}
 
       <SubscriptionForm artist={artist} reload={reload} />
     </ManageSectionWrapper>

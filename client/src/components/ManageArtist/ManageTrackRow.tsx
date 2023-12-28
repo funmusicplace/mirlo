@@ -11,6 +11,31 @@ import { fmtMSS } from "utils/tracks";
 import TrackRowPlayControl from "components/common/TrackRowPlayControl";
 import { useTranslation } from "react-i18next";
 import EditTrackRow from "./EditTrackRow";
+import styled from "@emotion/styled";
+
+const TrackRow = styled("tr")`
+  > td > .play-button {
+    display: none;
+  }
+  > td > .track-number {
+    display: block;
+  }
+  &:hover > td > .play-button {
+    display: block;
+  }
+
+  &:hover > td > .track-number {
+    display: none;
+  }
+
+  &:hover {
+    background-color: var(--mi-darken-background-color);
+
+    @media (prefers-color-scheme: dark) {
+      background-color: var(--mi-lighten-background-color);
+    }
+  }
+`;
 
 const ManageTrackRow: React.FC<{
   track: Track;
@@ -47,7 +72,7 @@ const ManageTrackRow: React.FC<{
     : 0;
   const is2HoursAgo = new Date().getTime() - 7200000; // 2hrs in miliseconds
   const isOlderThan4Hours = createdDate < is2HoursAgo;
-  const isDisabled =
+  const isAudioDisabled =
     track.audio && uploadState === "STARTED" && !isOlderThan4Hours;
   const isError = uploadState === "ERROR";
 
@@ -62,7 +87,7 @@ const ManageTrackRow: React.FC<{
   }
 
   return (
-    <tr
+    <TrackRow
       key={track.id}
       id={`${track.id}`}
       onDragOver={(ev) => ev.preventDefault()}
@@ -71,20 +96,10 @@ const ManageTrackRow: React.FC<{
       onDrop={handleDrop}
       onDragEnd={onDragEnd}
       className={css`
-        > td > .play-button {
-          display: none;
-        }
-        > td > .track-number {
-          display: block;
-        }
-        &:hover > td > .play-button {
-          display: block;
-        }
-        &:hover > td > .track-number {
-          display: none;
-        }
         ${isError ? `background-color: red;` : ""}
-        ${isDisabled ? `opacity: .5;` : ""}
+        &:hover {
+          cursor: grab;
+        }
       `}
     >
       <td>
@@ -93,7 +108,7 @@ const ManageTrackRow: React.FC<{
           canPlayTrack={true}
           trackNumber={track.order}
           onTrackPlayCallback={addTracksToQueue}
-          isDisabled={isDisabled}
+          isDisabled={isAudioDisabled}
         />
       </td>
       <td
@@ -156,20 +171,14 @@ const ManageTrackRow: React.FC<{
           onClick={() => setIsEditing(true)}
           title={t("edit") ?? ""}
           style={{ marginRight: ".25rem" }}
-          disabled={isDisabled}
         >
           <FaPen />
         </IconButton>
-        <IconButton
-          compact
-          onClick={onDeleteClick}
-          title={t("delete") ?? ""}
-          disabled={isDisabled}
-        >
+        <IconButton compact onClick={onDeleteClick} title={t("delete") ?? ""}>
           <FaTrash />
         </IconButton>
       </td>
-    </tr>
+    </TrackRow>
   );
 };
 export default ManageTrackRow;

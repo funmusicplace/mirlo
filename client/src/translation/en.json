@@ -14,6 +14,10 @@
   "releases": {
     "recentReleases": "Recent releases"
   },
+  "cookies": {
+    "weUseCookies": "We use cookies to keep you logged in and to maintain your music queue.",
+    "gotIt": "Got it!"
+  },
   "about": {
     "about": "About",
     "intro": "Mirlo provides a user-friendly space to help musicians sell music, manage subscriptions, and share with their supporters.",
@@ -189,6 +193,7 @@
     "cover": "Cover",
     "type": "Type",
     "lp": "LP",
+    "areYouSurePublish": "Some of your tracks are still processing and won't be available for download. Are you sure?",
     "view": "View live",
     "viewPreorder": "View pre-order",
     "ep": "EP",
@@ -202,7 +207,7 @@
     "submitAlbum": "Submit album to add tracks",
     "publish": "Publish release",
     "publishPreorder": "Publish pre-order",
-    "uploadTracks": "Bulk upload tracks",
+    "uploadTracks": "Manage tracks",
     "uploadTracksDescription": "Attach files from your computer to get started uploading tracks",
     "addTheFollowingTracks": "We'll add the following tracks",
     "addNewArtist": "Add new artist",
@@ -226,8 +231,9 @@
     "trackGroupUpdated": "Album updated",
     "trackGroupCreated": "Album created",
     "updatedTrack": "Updated track info",
-    "dropFilesHere": "Drop files here",
+    "dropFilesHere": "Drop files here or press \"Browse\"",
     "or": "or",
+    "optionalType": "The type is optional",
     "replaceTrackAudio": "Replace audio",
     "publishSuccess": "Publish success",
     "stillProcessing": "Still processing audio",
@@ -275,7 +281,7 @@
     "editSubscriptionTierFor": "Edit subscription tier for {{artistName}}"
   },
   "footer": {
-    "underConstruction": "Mirlo is under construction. If you'd like to contribute check out <github>the code on GitHub</github>, <discord>join our Discord</discord>, or <email>email us</email>.",
+    "underConstruction": "Interested in joining Mirlo? Reach out! If you'd like to contribute check out <github>the code on GitHub</github>, <discord>join our Discord</discord>, or <email>email us</email>.",
     "aboutUs": "<about>About us</about>, <faq>FAQ</faq>"
   },
   "admin": {
@@ -380,7 +386,7 @@
     "support": "Direct support for musicians. Buy their music. Collectively owned and managed.",
     "mailingList": "Get on the mailing list",
     "logIn": "Log in",
-    "mirloConstruction": "Mirlo is under construction. If you'd like to contribute, check out our <about>About page</about>, <faq>FAQ</faq>, <github>the code on GitHub</github>, <discord>join our Discord</discord>, or <email>email us</email>.",
+    "mirloConstruction": "Mirlo is slowly onboarding musicians. Interested? E-mail us! If you'd like to contribute, check out our <about>About page</about>, <faq>FAQ</faq>, <github>the code on GitHub</github>, <discord>join our Discord</discord>, or <email>email us</email>.",
     "latestCommunityPost": "Latest posts from the community"
   },
   "faq": {

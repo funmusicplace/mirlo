@@ -38,7 +38,9 @@ const AlbumForm: React.FC<{
   const defaultValues = {
     ...existing,
     releaseDate: existing?.releaseDate.split("T")[0],
-    minPrice: `${existing?.minPrice ? existing.minPrice / 100 : ""}`,
+    minPrice: `${
+      existing?.minPrice !== undefined ? existing.minPrice / 100 : ""
+    }`,
   };
 
   const methods = useForm<FormData>({
@@ -70,8 +72,8 @@ const AlbumForm: React.FC<{
 
           if (
             existingId &&
-            data.coverFile[0] &&
-            typeof data.coverFile[0] !== "string"
+            data.coverFile?.[0] &&
+            typeof data.coverFile?.[0] !== "string"
           ) {
             const jobInfo = await api.uploadFile(
               `users/${userId}/trackGroups/${existingId}/cover`,

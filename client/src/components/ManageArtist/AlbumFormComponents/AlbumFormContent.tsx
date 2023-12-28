@@ -6,7 +6,7 @@ import FormComponent from "components/common/FormComponent";
 import { useTranslation } from "react-i18next";
 import { InputEl } from "components/common/Input";
 import TextArea from "components/common/TextArea";
-import { SelectEl } from "components/common/Select";
+// import { SelectEl } from "components/common/Select";
 import UploadImage from "../UploadImage";
 import UploadArtistImage from "../UploadArtistImage";
 
@@ -49,7 +49,7 @@ const AlbumFormContent: React.FC<{
         )}
       </FormComponent>
 
-      <FormComponent>
+      {/* <FormComponent>
         {t("type")}:{" "}
         <SelectEl defaultValue="lp" {...register("type")}>
           <option value="lp">{t("lp")}</option>
@@ -57,7 +57,8 @@ const AlbumFormContent: React.FC<{
           <option value="single">{t("single")}</option>
           <option value="compilation">{t("compilation")}</option>
         </SelectEl>
-      </FormComponent>
+        <small>The type is optional</small>
+      </FormComponent> */}
 
       <FormComponent>
         {t("releaseDate")}:{" "}

@@ -9,6 +9,7 @@ import { InputEl } from "components/common/Input";
 
 import { Img, Spinner, UploadPrompt } from "./UploadImage";
 import Button from "components/common/Button";
+import { useArtistContext } from "state/ArtistContext";
 
 type ImageType = "banner" | "avatar" | "cover";
 
@@ -56,7 +57,7 @@ const UploadArtistImage: React.FC<{
 }> = ({ existing, imageType, height, width, maxDimensions }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artistForm" });
   const snackbar = useSnackbar();
-
+  const { refresh } = useArtistContext();
   const [existingImage, setExistingImage] = React.useState(
     getExistingImage(existing, imageType)
   );
@@ -68,7 +69,8 @@ const UploadArtistImage: React.FC<{
     const image = getExistingImage(result.result, imageType);
 
     setExistingImage(image);
-  }, [existing, imageType]);
+    refresh();
+  }, [existing, imageType, refresh]);
 
   const { uploadJobs, setUploadJobs } = useJobStatusCheck({
     reload: () => {},

@@ -1,24 +1,24 @@
 import React from "react";
-import Button from "../common/Button";
-import { FormProvider, useFieldArray, useForm } from "react-hook-form";
-import { parseBlob } from "music-metadata-browser";
+import { FormProvider, useForm } from "react-hook-form";
 import api from "services/api";
-import { InputEl } from "../common/Input";
 import FormComponent from "components/common/FormComponent";
-import { useSnackbar } from "state/SnackbarContext";
 import { useGlobalStateContext } from "state/GlobalState";
-import Table from "components/common/Table";
 import { useTranslation } from "react-i18next";
 import { css } from "@emotion/css";
 import { BulkTrackUploadRow } from "./BulkTrackUploadRow";
-import Tooltip from "components/common/Tooltip";
-import { FaQuestionCircle } from "react-icons/fa";
-import useJobStatusCheck from "utils/useJobStatusCheck";
 
 import { Buffer } from "buffer";
 import process from "process";
-import { IAudioMetadata, ICommonTagsResult } from "music-metadata/lib/type";
 import { pickBy } from "lodash";
+import {
+  TrackData,
+  UploadField,
+  UploadLabelWrapper,
+  convertMetaData,
+  fileListIntoArray,
+  parse,
+  produceNewStatus,
+} from "./utils";
 
 if (typeof window !== "undefined" && typeof window.Buffer === "undefined") {
   window.Buffer = Buffer;
@@ -28,84 +28,18 @@ if (typeof window !== "undefined" && typeof window.process === "undefined") {
   window.process = process;
 }
 
-export interface ShareableTrackgroup {
-  creatorId: number;
-  slug: string;
-}
-
-export interface TrackData {
-  duration?: number;
-  file: File;
-  title: string;
-  status: Track["status"];
-  order: string;
-  metadata: { [key: string]: any };
-  trackArtists: {
-    artistName?: string;
-    artistId?: number;
-    role?: string;
-    isCoAuthor?: boolean;
-  }[];
-}
+const timeInBetweenUploads = 5000;
 
 interface FormData {
   trackFiles: FileList;
   tracks: TrackData[];
 }
 
-const fileListIntoArray = (fileList: FileList) => {
-  if (fileList?.length > 0) {
-    const files = [];
+type OrderedTrackData = { order: number; t: TrackData };
 
-    for (let i = 0; i < fileList.length; i++) {
-      const file = fileList.item(i);
-      if (file) {
-        files.push(file);
-      }
-    }
-    return files;
-  }
-
-  return [];
-};
-
-const parse = async (
-  files: File[]
-): Promise<
-  {
-    file: File;
-    metadata: IAudioMetadata;
-  }[]
-> => {
-  const parsed = await Promise.all(
-    files.map(async (file) => {
-      try {
-        const parsedFile = await parseBlob(file);
-        const metadata = parsedFile.common;
-        return {
-          file,
-          metadata: {
-            ...parsedFile,
-            common: {
-              title: metadata.title ?? file.name,
-              ...parsedFile.common,
-            },
-          },
-        };
-      } catch (e) {
-        console.error("Error parsing metadata", e);
-        return {
-          file,
-          metadata: {
-            common: {
-              title: file.name,
-            } as ICommonTagsResult,
-          } as IAudioMetadata,
-        };
-      }
-    })
-  );
-  return parsed;
+const alertUser = (event: any) => {
+  event.preventDefault();
+  event.returnValue = "";
 };
 
 export const BulkTrackUpload: React.FC<{
@@ -114,13 +48,10 @@ export const BulkTrackUpload: React.FC<{
 }> = ({ trackgroup, reload }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const methods = useForm<FormData>();
-  const { register, handleSubmit, watch, control, reset } = methods;
-  const { uploadJobs, setUploadJobs } = useJobStatusCheck({ reload, reset });
-  const { fields, replace, remove } = useFieldArray({
-    control,
-    name: "tracks",
-  });
-  const [isProcessing, setIsProcessing] = React.useState(false);
+  const { register, watch, reset } = methods;
+  const [uploadQueue, setUploadQueue] = React.useState<
+    { title: string; status: number }[]
+  >([]);
 
   const {
     state: { user },
@@ -128,13 +59,10 @@ export const BulkTrackUpload: React.FC<{
 
   const trackFiles = watch("trackFiles");
 
-  const [isSaving, setIsSaving] = React.useState(false);
-  const snackbar = useSnackbar();
-
   const userId = user?.id;
 
   const uploadNextTrack = React.useCallback(
-    async (remainingTracks: { order: number; t: TrackData }[]) => {
+    async (remainingTracks: OrderedTrackData[]) => {
       const firstTrack = remainingTracks.pop();
       if (firstTrack) {
         const packet = {
@@ -155,150 +83,119 @@ export const BulkTrackUpload: React.FC<{
           })),
         };
 
-        const result = await api.post<Partial<Track>, { track: Track }>(
+        setUploadQueue((queue) =>
+          produceNewStatus(queue, firstTrack.t.title, 15)
+        );
+
+        const response = await api.post<Partial<Track>, { result: Track }>(
           `users/${userId}/tracks`,
           packet
         );
-        const jobInfo = await api.uploadFile(
-          `users/${userId}/tracks/${result.track.id}/audio`,
+
+        setUploadQueue((queue) =>
+          produceNewStatus(queue, firstTrack.t.title, 25)
+        );
+        await api.uploadFile(
+          `users/${userId}/tracks/${response.result.id}/audio`,
           [firstTrack.t.file]
         );
 
-        const jobId = jobInfo.result.jobId;
-
-        setUploadJobs((existingJobs) => [
-          ...(existingJobs ?? []),
-          { jobId, jobStatus: "waiting" },
-        ]);
-
-        setTimeout(async () => {
-          await uploadNextTrack(remainingTracks);
-        }, 30000);
-      } else {
-        setIsSaving(false);
-
-        snackbar(t("doneUploading"), {
-          type: "success",
-          timeout: 10000,
-          position: "center",
-        });
-      }
-    },
-    [setUploadJobs, trackgroup.artistId, trackgroup.id, userId, snackbar, t]
-  );
-
-  const doAddTrack = React.useCallback(
-    async (data: FormData) => {
-      try {
-        if (userId) {
-          setIsSaving(true);
-          snackbar(t("uploadingTracks"), {
-            type: "success",
-            timeout: 10000,
-            position: "center",
-          });
-
-          await uploadNextTrack(
-            data.tracks.map((t, i) => ({
-              order: Number.isFinite(+t.order) ? Number(t.order) : i + 1,
-              t,
-            }))
+        if (remainingTracks.length !== 0) {
+          setUploadQueue((queue) =>
+            produceNewStatus(queue, firstTrack.t.title, 99)
           );
+
+          setTimeout(async () => {
+            setUploadQueue((queue) =>
+              produceNewStatus(queue, firstTrack.t.title, 100)
+            );
+            reload();
+          }, timeInBetweenUploads / 2);
+
+          setTimeout(async () => {
+            await uploadNextTrack(remainingTracks);
+          }, timeInBetweenUploads);
+        } else {
+          await uploadNextTrack(remainingTracks);
         }
-      } catch (e) {
-        console.error(e);
-        snackbar("There was a problem with the API", {
-          type: "warning",
-        });
+      } else {
+        setUploadQueue([]);
+        reload();
+        reset();
       }
     },
-    [userId, uploadNextTrack, t, snackbar]
+    [reload, reset, trackgroup.artistId, trackgroup.id, userId]
   );
 
   const processUploadedFiles = React.useCallback(
     (filesToProcess: FileList) => {
-      setIsProcessing(true);
       const filesToParse = fileListIntoArray(filesToProcess);
-      (async () => {
+      const callback = async () => {
         const parsed = await parse(filesToParse);
+        const newTracks = parsed
+          .sort((a, b) => {
+            const firstComparable = a.metadata.common.track.no ?? a.file.name;
+            const secondComparable = b.metadata.common.track.no ?? b.file.name;
 
-        replace(
-          parsed
-            .sort((a, b) =>
-              (a.metadata.common.track.no ?? 0) >
-              (b.metadata.common.track.no ?? 0)
-                ? 1
-                : -1
-            )
-            .map((p, i) => ({
-              metadata: p.metadata,
-              order: `${
-                p.metadata.common.track.no &&
-                Number.isFinite(+p.metadata.common.track.no)
-                  ? Number(p.metadata.common.track.no)
-                  : i + 1
-              }`,
-              duration: p.metadata.format.duration,
-              file: p.file,
-              title: p.metadata.common.title ?? "",
-              status: "preview",
-              trackArtists:
-                p.metadata.common.artists?.map((artist) => ({
-                  artistName: artist ?? "",
-                  role: "",
-                  isCoAuthor: true,
-                  artistId:
-                    artist === trackgroup.artist?.name
-                      ? trackgroup.artistId
-                      : undefined,
-                })) ?? [],
-            }))
-        );
-        setIsProcessing(false);
-      })();
+            return (firstComparable ?? 0) > (secondComparable ?? 0) ? 1 : -1;
+          })
+          .map((p, i) => convertMetaData(p, i, trackgroup))
+          .map((t, i) => ({
+            order: Number.isFinite(+t.order) ? Number(t.order) : i + 1,
+            t,
+          }));
+        setUploadQueue(newTracks.map((t) => ({ title: t.t.title, status: 5 })));
+        uploadNextTrack(newTracks);
+      };
+
+      callback();
     },
-    [replace, trackgroup.artist?.name, trackgroup.artistId]
+    [trackgroup, uploadNextTrack]
   );
 
   React.useEffect(() => {
-    processUploadedFiles(trackFiles);
-  }, [processUploadedFiles, trackFiles]);
+    if (uploadQueue.length === 0 && trackFiles?.length > 0) {
+      processUploadedFiles(trackFiles);
+    }
+  }, [processUploadedFiles, trackFiles, uploadQueue.length]);
 
-  const disableUploadButton = isSaving || uploadJobs.length > 0;
+  React.useEffect(() => {
+    if (uploadQueue.length > 0) {
+      window.addEventListener("beforeunload", alertUser);
+      return () => {
+        window.removeEventListener("beforeunload", alertUser);
+      };
+    } else {
+      window.removeEventListener("beforeunload", alertUser);
+    }
+  }, [uploadQueue.length]);
+
+  const disableUploadButton = uploadQueue.length > 0;
 
   return (
     <FormProvider {...methods}>
       <form
-        onSubmit={handleSubmit(doAddTrack)}
         className={css`
           margin-top: 1rem;
         `}
       >
-        <h4>{t("uploadTracks")}</h4>
-        <p>{t("uploadTracksDescription")}</p>
-        <FormComponent>
-          <label
-            htmlFor="audio"
+        {uploadQueue.length > 0 && (
+          <div
             className={css`
-              position: relative;
-              display: flex;
-              gap: 10px;
-              flex-direction: column;
-              justify-content: center;
-              align-items: center;
-              height: 200px;
-              padding: 20px;
-              border-radius: 10px;
-              border: 2px dashed #555;
-              width: 100%;
-              color: #444;
-              cursor: pointer;
-              transition: background 0.2s ease-in-out, border 0.2s ease-in-out;
+              margin-bottom: 1rem;
             `}
           >
+            {uploadQueue.map((t, idx) => (
+              <BulkTrackUploadRow track={t} key={t.title} />
+            ))}
+          </div>
+        )}
+        <p>{t("uploadTracksDescription")}</p>
+        <FormComponent>
+          <UploadLabelWrapper htmlFor="audio" className={css``}>
             <div>{t("dropFilesHere")}</div>
-            {t("or")}
-            <InputEl
+
+            <UploadField
               type="file"
               id="audio"
               disabled={disableUploadButton}
@@ -306,86 +203,8 @@ export const BulkTrackUpload: React.FC<{
               {...register("trackFiles")}
               accept="audio/flac,audio/wav,audio/x-flac,audio/aac,audio/aiff,audio/x-m4a"
             />
-          </label>
+          </UploadLabelWrapper>
         </FormComponent>
-        {fields.length > 0 && (
-          <>
-            <p>{t("addTheFollowingTracks")}</p>
-            <Table
-              className={css`
-                font-size: 14px;
-                margin: 1rem 0;
-                input {
-                  margin-bottom: 0;
-                  font-size: 14px;
-                }
-
-                button {
-                  font-size: 14px;
-                }
-
-                select {
-                  font-size: 14px;
-                }
-              `}
-            >
-              <thead>
-                <tr>
-                  <th
-                    className={css`
-                      min-width: 50px;
-                    `}
-                  ></th>
-                  <th
-                    className={css`
-                      min-width: 200px;
-                    `}
-                  >
-                    {t("trackTitle")}{" "}
-                    <Tooltip hoverText={t("trackTitleHelp")}>
-                      <FaQuestionCircle />
-                    </Tooltip>
-                  </th>
-                  <th>
-                    {t("artists")}{" "}
-                    <Tooltip hoverText={t("trackArtistsHelp")}>
-                      <FaQuestionCircle />
-                    </Tooltip>
-                  </th>
-                  <th className="alignRight">{t("duration")}</th>
-                  <th>
-                    {t("status")}{" "}
-                    <Tooltip hoverText={t("statusHelp")}>
-                      <FaQuestionCircle />
-                    </Tooltip>
-                  </th>
-                  <th className="alignRight">{t("metadata")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {fields.map((t, idx) => (
-                  <BulkTrackUploadRow
-                    track={t}
-                    key={t.title}
-                    index={idx}
-                    uploadingState={uploadJobs?.[idx]?.jobStatus}
-                    isSaving={isSaving}
-                    remove={remove}
-                  />
-                ))}
-              </tbody>
-            </Table>
-            {fields.length > 0 && (
-              <Button
-                type="submit"
-                disabled={disableUploadButton}
-                isLoading={disableUploadButton || isProcessing}
-              >
-                {t("uploadTracks")}
-              </Button>
-            )}
-          </>
-        )}
       </form>
     </FormProvider>
   );

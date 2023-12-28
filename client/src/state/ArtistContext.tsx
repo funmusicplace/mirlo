@@ -1,7 +1,7 @@
 import produce from "immer";
 import React, { createContext } from "react";
 import { useGlobalStateContext } from "./GlobalState";
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import api from "services/api";
 
 export interface ArtistState {
@@ -18,7 +18,7 @@ type SetState = {
 
 type SetArtist = {
   type: "setArtist";
-  artist: Artist;
+  artist?: Artist;
 };
 
 type SetLoading = {
@@ -85,9 +85,10 @@ export const ArtistProvider: React.FC<{
     state: { user },
   } = useGlobalStateContext();
   const userId = user?.id;
+  const { pathname } = useLocation();
   const { artistId } = useParams();
   const [state, dispatch] = React.useReducer(stateReducer, {
-    isArtistContext: true,
+    isArtistContext: artistId ? true : false,
     isLoading: true,
   });
 
@@ -101,37 +102,58 @@ export const ArtistProvider: React.FC<{
     }
   }, [artistId, managedArtist, userId]);
 
-  const initialLoad = React.useCallback(async () => {
-    dispatch({ type: "setIsLoading", isLoading: true });
-
-    const artist = await fetchArtist(artistId, managedArtist, userId);
-
-    if (artist) {
-      let checkAccountStatus;
-      try {
-        checkAccountStatus = await api.get<AccountStatus>(
-          `users/${artist.userId}/stripe/checkAccountStatus`
+  const initialLoad = React.useCallback(
+    async (newPathname: string) => {
+      console.log("artistId", newPathname, artistId);
+      if (artistId) {
+        dispatch({ type: "setIsLoading", isLoading: true });
+        const artist = await fetchArtist(
+          artistId,
+          newPathname.includes("manage"),
+          userId
         );
-      } catch (e) {
-        console.error("Stripe didn't work", e);
-      }
-      dispatch({
-        type: "setState",
-        state: {
-          isLoading: false,
-          artist,
-          userStripeStatus: checkAccountStatus?.result ?? {
-            detailsSubmitted: false,
-            chargesEnabled: false,
+
+        if (artist) {
+          let checkAccountStatus;
+          try {
+            checkAccountStatus = await api.get<AccountStatus>(
+              `users/${artist.userId}/stripe/checkAccountStatus`
+            );
+          } catch (e) {
+            console.error("Stripe didn't work", e);
+          }
+          dispatch({
+            type: "setState",
+            state: {
+              isLoading: false,
+              artist,
+              userStripeStatus: checkAccountStatus?.result ?? {
+                detailsSubmitted: false,
+                chargesEnabled: false,
+              },
+              isArtistContext: true,
+            },
+          });
+        }
+      } else {
+        console.log("we should unset the artist");
+        dispatch({
+          type: "setState",
+          state: {
+            isLoading: false,
+            artist: undefined,
+            userStripeStatus: undefined,
+            isArtistContext: false,
           },
-        },
-      });
-    }
-  }, [artistId, managedArtist, userId]);
+        });
+      }
+    },
+    [artistId, userId]
+  );
 
   React.useEffect(() => {
-    initialLoad();
-  }, [initialLoad]);
+    initialLoad(pathname);
+  }, [initialLoad, pathname]);
 
   return (
     <ArtistContext.Provider value={[state, dispatch, refreshArtist]}>

@@ -8,7 +8,7 @@ const apiDoc = {
   definitions: {
     TrackGroup: {
       type: "object",
-      required: ["title"],
+      required: [],
       properties: {
         string: {
           description: "Title of the trackGroup",

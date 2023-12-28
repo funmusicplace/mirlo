@@ -54,11 +54,17 @@ import ManageArtistAlbums from "components/ManageArtist/ManageArtistAlbums";
 import ManageArtistSubscriptionTiers from "components/ManageArtist/ManageArtistSubscriptionTiers";
 import ManageArtistPosts from "components/ManageArtist/ManageArtistPosts";
 import ManagePost from "components/ManageArtist/ManagePost";
+import NewReleaseRedirect from "components/ManageArtist/NewReleaseRedirect";
+import { css } from "@emotion/css";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <App />,
+    element: (
+      <ArtistProvider>
+        <App />
+      </ArtistProvider>
+    ),
     errorElement: <ErrorPage />,
     children: [
       { path: "", element: <Home /> },
@@ -141,11 +147,7 @@ const router = createBrowserRouter([
           { path: "welcome", element: <Welcome /> },
           {
             path: "artists/:artistId",
-            element: (
-              <ArtistProvider managedArtist>
-                <ManageArtistContainer />
-              </ArtistProvider>
-            ),
+            element: <ManageArtistContainer />,
             children: [
               {
                 path: "",
@@ -176,7 +178,7 @@ const router = createBrowserRouter([
               },
               {
                 path: "new-release",
-                element: <ManageTrackGroup />,
+                element: <NewReleaseRedirect />,
               },
             ],
           },
@@ -207,15 +209,19 @@ const router = createBrowserRouter([
       },
       {
         path: "releases",
-        element: <Releases />,
+        element: (
+          <div
+            className={css`
+              width: 100%;
+            `}
+          >
+            <Releases />
+          </div>
+        ),
       },
       {
         path: ":artistId",
-        element: (
-          <ArtistProvider>
-            <ArtistContainer />
-          </ArtistProvider>
-        ),
+        element: <ArtistContainer />,
         children: [
           {
             path: "",

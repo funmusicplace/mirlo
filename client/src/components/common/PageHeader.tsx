@@ -1,22 +1,20 @@
 import { css } from "@emotion/css";
 import { useLocation, useParams } from "react-router-dom";
-import usePublicArtist from "utils/usePublicObjectById";
 import { bp } from "../../constants";
 import { useGlobalStateContext } from "state/GlobalState";
+import { useArtistContext } from "state/ArtistContext";
 
 const PageHeader = () => {
   const { pathname } = useLocation();
 
   const isManage = pathname.includes("manage");
-  const { artistId, trackGroupId } = useParams();
+  const { trackGroupId } = useParams();
   const {
     state: { user },
   } = useGlobalStateContext();
 
-  const { object: artist } = usePublicArtist<Artist>("artists", artistId);
-
-  const artistBanner = artist?.banner?.sizes;
-
+  const artistContext = useArtistContext();
+  const artistBanner = artistContext?.state?.artist?.banner;
   const userId = user?.id;
 
   return (
@@ -42,7 +40,6 @@ const PageHeader = () => {
           <div
             className={css`
               display: flex;
-              //* max-width: 1250px; *//
               width: 100%;
               min-height: 100%;
 
@@ -52,7 +49,7 @@ const PageHeader = () => {
             `}
           >
             <img
-              src={artistBanner?.[2500]}
+              src={artistBanner?.sizes?.[2500] + `?${artistBanner?.updatedAt}`}
               alt="Artist banner"
               className={css`
                 width: 100%;
@@ -70,7 +67,6 @@ const PageHeader = () => {
       {(!artistBanner || (trackGroupId && !isManage)) && (
         <div
           className={css`
-            // margin-top: 55px;
             @media screen and (max-width: ${bp.medium}px) {
               margin-top: 0px;
             }

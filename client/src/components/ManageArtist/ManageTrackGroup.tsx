@@ -8,7 +8,6 @@ import ManageTrackTable from "./ManageTrackTable";
 import useGetUserObjectById from "utils/useGetUserObjectById";
 import { useGlobalStateContext } from "state/GlobalState";
 import PublishButton from "./PublishButton";
-import NewAlbumForm from "./NewAlbumForm";
 import HeaderDiv from "components/common/HeaderDiv";
 import ManageSectionWrapper from "./ManageSectionWrapper";
 import { css } from "@emotion/css";
@@ -28,7 +27,11 @@ const ManageTrackGroup: React.FC<{}> = () => {
 
   const userId = user?.id;
 
-  const { object: trackGroup, reload } = useGetUserObjectById<TrackGroup>(
+  const {
+    object: trackGroup,
+    reload,
+    isLoadingObject: isLoadingTrackGroup,
+  } = useGetUserObjectById<TrackGroup>(
     "trackGroups",
     userId,
     trackGroupId,
@@ -38,6 +41,10 @@ const ManageTrackGroup: React.FC<{}> = () => {
   if (!artist && isLoading) {
     return <LoadingBlocks />;
   } else if (!artist) {
+    return null;
+  } else if (!trackGroup && isLoadingTrackGroup) {
+    return <LoadingBlocks />;
+  } else if (!trackGroup) {
     return null;
   }
 
@@ -78,10 +85,14 @@ const ManageTrackGroup: React.FC<{}> = () => {
           </div>
         </HeaderDiv>
       </div>
-      {trackGroupId && trackGroup && (
-        <AlbumForm existing={trackGroup} reload={reload} artist={artist} />
-      )}
-      {!trackGroupId && <NewAlbumForm reload={reload} artist={artist} />}
+      <AlbumForm existing={trackGroup} reload={reload} artist={artist} />
+      <h4
+        className={css`
+          margin-top: 1.5rem;
+        `}
+      >
+        {t("uploadTracks")}
+      </h4>
 
       {trackGroup && trackGroup?.tracks?.length > 0 && (
         <ManageTrackTable

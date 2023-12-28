@@ -26,6 +26,13 @@ const PublishButton: React.FC<{
 
   const publishTrackGroup = React.useCallback(async () => {
     setIsPublishing(true);
+    const anyIncomplete = trackGroup.tracks.find(
+      (t) => t.audio?.uploadState !== "SUCCESS"
+    );
+    if (anyIncomplete && !window.confirm(t("areYouSurePublish") ?? "")) {
+      setIsPublishing(false);
+      return;
+    }
     try {
       if (artistUserId && trackGroupId) {
         await api.put(
@@ -40,7 +47,7 @@ const PublishButton: React.FC<{
       await reload();
       setIsPublishing(false);
     }
-  }, [artistUserId, trackGroupId, snackbar, t, reload]);
+  }, [trackGroup.tracks, artistUserId, trackGroupId, snackbar, t, reload]);
 
   const beforeReleaseDate = new Date(trackGroup.releaseDate) > new Date();
 

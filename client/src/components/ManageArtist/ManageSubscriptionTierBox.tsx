@@ -23,7 +23,7 @@ const ManageSubscriptionTierBox: React.FC<{
   const snackbar = useSnackbar();
 
   const { artistId } = useParams();
-  const [manageTier, setManageTier] = React.useState<ArtistSubscriptionTier>();
+  const [manageTier, setManageTier] = React.useState<boolean>();
 
   const userId = user?.id;
 
@@ -57,20 +57,17 @@ const ManageSubscriptionTierBox: React.FC<{
         `}
       >
         <strong>
-          <>
-            {tier.name}:{" "}
-            <Money amount={tier.minAmount ? tier.minAmount / 100 : 0} />
-          </>
+          {tier.name}:{" "}
+          <Money amount={tier.minAmount ? tier.minAmount / 100 : 0} />
         </strong>
         <div>
           <Button
             compact
             transparent
             startIcon={<FaPen />}
-            onClick={() => setManageTier(tier)}
-          >
-            {/*{t("edit")}*/}
-          </Button>
+            onClick={() => setManageTier(true)}
+          />
+
           <Button
             className={css`
               margin-left: 0.5rem;
@@ -79,22 +76,24 @@ const ManageSubscriptionTierBox: React.FC<{
             transparent
             startIcon={<FaTrash />}
             onClick={() => deleteTier(tier.id)}
-          >
-            {/*{t("delete")}*/}
-          </Button>
+          />
         </div>
       </div>
       <MarkdownContent content={tier.description} />
       {manageTier && (
         <Modal
           open={!!manageTier}
+          title="Edit tier"
           onClose={() => setManageTier(undefined)}
           size="small"
         >
           {/* There is some overly complex state management going on here with the reloads being passed around */}
           <SubscriptionForm
-            existing={manageTier}
-            reload={() => reload()}
+            existing={tier}
+            reload={() => {
+              reload();
+              setManageTier(false);
+            }}
             artist={artist}
           />
         </Modal>

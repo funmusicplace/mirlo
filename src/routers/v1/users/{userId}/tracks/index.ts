@@ -87,7 +87,7 @@ export default function () {
           trackArtists: true,
         },
       });
-      res.json({ track });
+      res.json({ result: track });
     } catch (e) {
       console.error(e);
       res

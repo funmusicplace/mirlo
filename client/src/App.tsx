@@ -14,6 +14,7 @@ import { Footer } from "components/Footer";
 import { bp } from "./constants";
 import { MetaCard } from "components/common/MetaCard";
 import ArtistColorsWrapper from "components/ArtistColorsWrapper";
+import CookieDisclaimer from "components/CookieDisclaimer";
 
 injectGlobal(globalCSS);
 
@@ -90,7 +91,7 @@ function App() {
           {isDisplayed && <Snackbar />}
 
           <Header />
-
+          <CookieDisclaimer />
           <div
             className={css`
               @media screen and (max-width: ${bp.medium}px) {
@@ -121,7 +122,7 @@ function App() {
 
                 ${isPlaying
                   ? `
-            padding-bottom: 30px;`
+                    padding-bottom: 30px;`
                   : ``}
               `}
             >

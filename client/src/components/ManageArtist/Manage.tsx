@@ -106,19 +106,18 @@ export const Manage: React.FC = () => {
                   width: 100%;
                 `}
               >
-                <Button
-                  onClick={() => {
-                    setCreatingNewArtist(true);
-                  }}
-                  className={css`
-                    flex-grow: 1;
-                    text-align: center;
-                    border-radius: 6px;
-                    justify-self: none;
-                  `}
-                >
-                  {t("createNewArtist")}
-                </Button>
+                <Link to="/manage/welcome">
+                  <Button
+                    className={css`
+                      flex-grow: 1;
+                      text-align: center;
+                      border-radius: 6px;
+                      justify-self: none;
+                    `}
+                  >
+                    {t("createNewArtist")}
+                  </Button>
+                </Link>
               </div>
             </div>
             <CreateNewArtistForm

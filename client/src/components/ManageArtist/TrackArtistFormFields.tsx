@@ -9,7 +9,8 @@ const TrackArtistFormFields: React.FC<{
   a: Record<"id", string>;
   trackArtistsKey: string;
   artistIndex: number;
-}> = ({ a, trackArtistsKey, artistIndex }) => {
+  disabled?: boolean;
+}> = ({ a, trackArtistsKey, artistIndex, disabled }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const { register, control } = useFormContext();
 
@@ -39,18 +40,22 @@ const TrackArtistFormFields: React.FC<{
           {...register(`${trackArtistsKey}.${artistIndex}.artistName`)}
           placeholder="Artist name"
           key={a.id}
+          disabled={disabled}
         />
         <InputEl
           {...register(`${trackArtistsKey}.${artistIndex}.role`)}
           placeholder="Role"
+          disabled={disabled}
         />
         <InputEl
           {...register(`${trackArtistsKey}.${artistIndex}.artistId`)}
           placeholder="ID if the artist exists in Mirlo"
+          disabled={disabled}
         />
         <FormCheckbox
           keyName={`${trackArtistsKey}.${artistIndex}.isCoAuthor`}
           description={t("coAuthorCheck")}
+          disabled={disabled}
         />
       </div>
       {fields.length > 1 && (
@@ -59,6 +64,7 @@ const TrackArtistFormFields: React.FC<{
           type="button"
           variant="outlined"
           compact
+          disabled={disabled}
         >
           Remove this artist
         </Button>

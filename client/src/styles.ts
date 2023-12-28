@@ -56,8 +56,6 @@ const styles = `html {
 
 }
 
-
-
 @media (prefers-color-scheme: dark) {
   html {
     --mi-normal-background-color: var(--mi-black);
