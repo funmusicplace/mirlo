@@ -44,7 +44,7 @@ const TrackgroupButtons = styled.div`
     justify-content: flex-end;
     list-style-type: none;
 
-    li:first-child > button {
+    li:first-of-type > button {
       padding-left: 0.8rem;
     }
     button {
@@ -70,7 +70,7 @@ const TrackgroupButtons = styled.div`
     }
   }
   @media (max-width: ${bp.small}px) {
-    div:first-child {
+    div:first-of-type {
       display: none;
     }
     div:last-child {
@@ -84,7 +84,7 @@ const TrackgroupButtons = styled.div`
         margin: 0 !important;
         padding: 0 0 0 0.4rem !important;
       }
-      li:first-child {
+      li:first-of-type {
         display: none;
       }
     }

@@ -33,11 +33,11 @@ const StyledSupportBox = styled(Box)`
   max-width: 32.3%;
   flex: 32.3%;
 
-  &:nth-child(3n + 1) {
+  &:nth-of-type(3n + 1) {
     margin-right: 1.5%;
   }
 
-  &:nth-child(3n) {
+  &:nth-of-type(3n) {
     margin-left: 1.5%;
   }
 

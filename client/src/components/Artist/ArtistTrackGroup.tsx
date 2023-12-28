@@ -80,11 +80,11 @@ const TrackGroupInfo = styled.div`
   flex-direction: column;
   width: 100%;
 
-  a:first-child {
+  a:first-of-type {
     font-weight: normal;
     margin-bottom: 0.2rem;
   }
-  a:last-child {
+  a:last-of-type {
     font-size: var(--mi-font-size-xsmall);
     color: var(--mi-light-foreground-color);
   }

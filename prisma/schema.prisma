@@ -31,7 +31,7 @@ model User {
   isAdmin                             Boolean                  @default(false)
   artistUserSubscriptions             ArtistUserSubscription[]
   country                             String?
-  userTrackGroupPurchase              UserTrackGroupPurchase[]
+  userTrackGroupPurchases             UserTrackGroupPurchase[]
   emailConfirmationToken              String?                  @default(uuid()) @db.Uuid
   emailConfirmationExpiration         DateTime?                @default(dbgenerated("NOW() + '10 min'::interval"))
   passwordResetConfirmationToken      String?

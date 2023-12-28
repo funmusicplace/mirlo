@@ -1,11 +1,12 @@
 import express, { Response } from "express";
 import jwt, { JwtPayload, VerifyErrors } from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-import { userAuthenticated } from "../auth/passport";
-import prisma from "../../prisma/prisma";
-import sendMail from "../jobs/send-mail";
+import { userAuthenticated } from "../../auth/passport";
+import prisma from "../../../prisma/prisma";
+import sendMail from "../../jobs/send-mail";
 import { randomUUID } from "crypto";
-import logger from "../logger";
+import logger from "../../logger";
+import profile from "./profile";
 
 const jwt_secret = process.env.JWT_SECRET ?? "";
 const refresh_secret = process.env.REFRESH_TOKEN_SECRET ?? "";
@@ -364,44 +365,7 @@ router.get("/logout", (req, res) => {
   }
 });
 
-router.get("/profile", userAuthenticated, async (req, res, next) => {
-  const { email } = req.user as { email: string };
-  try {
-    const foundUser = await prisma.user.findFirst({
-      where: {
-        email,
-      },
-      select: {
-        email: true,
-        id: true,
-        name: true,
-        artists: true,
-        isAdmin: true,
-        country: true,
-        wishlist: true,
-        artistUserSubscriptions: {
-          where: {
-            deletedAt: null,
-          },
-          select: {
-            artistSubscriptionTier: {
-              include: {
-                artist: true,
-              },
-            },
-            id: true,
-            userId: true,
-            amount: true,
-          },
-        },
-      },
-    });
-
-    res.status(200).json({ result: foundUser });
-  } catch (e) {
-    next(e);
-  }
-});
+router.get("/profile", userAuthenticated, profile);
 
 router.post("/refresh", (req, res) => {
   if (req.cookies?.refresh) {
