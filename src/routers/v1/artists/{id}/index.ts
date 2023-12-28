@@ -31,8 +31,9 @@ export default function () {
             id: parsedId,
             enabled: true,
           },
-          include: singleInclude,
+          include: singleInclude(),
         });
+
         isUserSubscriber = await checkIsUserSubscriber(user, parsedId);
 
         if (!artist) {

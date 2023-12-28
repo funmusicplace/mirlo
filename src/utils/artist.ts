@@ -247,56 +247,58 @@ export const deleteStripeSubscriptions = async (
   });
 };
 
-export const singleInclude: Prisma.ArtistInclude<DefaultArgs> = {
-  trackGroups: {
-    where: {
-      published: true,
-      tracks: { some: { audio: { uploadState: "SUCCESS" } } },
-    },
-    orderBy: {
-      releaseDate: "desc",
-    },
-    include: {
-      tracks: {
-        where: { deletedAt: null },
+export const singleInclude = (): Prisma.ArtistInclude<DefaultArgs> => {
+  return {
+    trackGroups: {
+      where: {
+        published: true,
+        tracks: { some: { audio: { uploadState: "SUCCESS" } } },
       },
-      cover: {
-        where: {
-          deletedAt: null,
+      orderBy: {
+        releaseDate: "desc",
+      },
+      include: {
+        tracks: {
+          where: { deletedAt: null },
+        },
+        cover: {
+          where: {
+            deletedAt: null,
+          },
         },
       },
     },
-  },
-  banner: {
-    where: {
-      deletedAt: null,
-    },
-  },
-  avatar: {
-    where: {
-      deletedAt: null,
-    },
-  },
-  subscriptionTiers: {
-    where: {
-      deletedAt: null,
-      isDefaultTier: false,
-    },
-    orderBy: {
-      minAmount: "asc",
-    },
-  },
-  posts: {
-    where: {
-      publishedAt: {
-        lte: new Date(),
+    banner: {
+      where: {
+        deletedAt: null,
       },
-      deletedAt: null,
     },
-    orderBy: {
-      publishedAt: "desc",
+    avatar: {
+      where: {
+        deletedAt: null,
+      },
     },
-  },
+    subscriptionTiers: {
+      where: {
+        deletedAt: null,
+        isDefaultTier: false,
+      },
+      orderBy: {
+        minAmount: "asc",
+      },
+    },
+    posts: {
+      where: {
+        publishedAt: {
+          lte: new Date(),
+        },
+        deletedAt: null,
+      },
+      orderBy: {
+        publishedAt: "desc",
+      },
+    },
+  };
 };
 
 interface LocalArtist extends Artist {

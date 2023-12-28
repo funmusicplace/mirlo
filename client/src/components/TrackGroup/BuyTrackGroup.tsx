@@ -46,8 +46,6 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup }> = ({
   const userId = user?.id;
   const userIsTrackGroupArtist = user && artistState.artist?.userId === userId;
 
-  console.log("userIsTG Artist", trackGroup.artist);
-
   const minPrice = trackGroup.minPrice;
   const methods = useForm<FormData>({
     defaultValues: {

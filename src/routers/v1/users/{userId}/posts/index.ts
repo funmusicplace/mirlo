@@ -14,14 +14,21 @@ export default function () {
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {
-    const { title, content, artistId, isPublic, minimumSubscriptionTierId } =
-      req.body as unknown as {
-        title: string;
-        content: string;
-        artistId: number;
-        isPublic: boolean;
-        minimumSubscriptionTierId: number;
-      };
+    const {
+      title,
+      content,
+      artistId,
+      isPublic,
+      publishedAt,
+      minimumSubscriptionTierId,
+    } = req.body as unknown as {
+      title: string;
+      content: string;
+      artistId: number;
+      isPublic: boolean;
+      minimumSubscriptionTierId: number;
+      publishedAt: string;
+    };
     const user = req.user as User;
     try {
       const validTier = await prisma.artistSubscriptionTier.findFirst({
@@ -37,6 +44,7 @@ export default function () {
             title,
             content,
             isPublic,
+            publishedAt,
             artist: { connect: { id: artistId } },
             minimumSubscriptionTier: {
               connect: { id: validTier?.id },
