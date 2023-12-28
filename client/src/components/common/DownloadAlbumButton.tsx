@@ -13,7 +13,8 @@ const formats = ["flac", "wav", "opus", "320.mp3", "256.mp3", "128.mp3"];
 
 const DownloadAlbumButton: React.FC<{
   trackGroup: TrackGroup;
-}> = ({ trackGroup }) => {
+  onlyIcon?: boolean;
+}> = ({ trackGroup, onlyIcon }) => {
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
   const [chosenFormat, setChosenFormat] = React.useState(formats[0]);
   const [isPopupOpen, setIsPopupOpen] = React.useState(false);
@@ -68,7 +69,7 @@ const DownloadAlbumButton: React.FC<{
       </Modal>
       <Button
         compact
-        onlyIcon
+        onlyIcon={onlyIcon}
         className={css`
           margin-top: 0rem;
           font-size: 1.2rem;
@@ -78,7 +79,9 @@ const DownloadAlbumButton: React.FC<{
         `}
         startIcon={<RiDownloadLine />}
         onClick={() => setIsPopupOpen(true)}
-      />
+      >
+        {onlyIcon ? "" : "Download"}
+      </Button>
     </div>
   );
 };

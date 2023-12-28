@@ -12,10 +12,11 @@ html
     p Wow! 
     p
       | Thank you for supporting #{artist.name} with your monthly 
-      | support at the #{artistUserSubscription.artistSubscriptionTier.name}.
+      | support at the "#{artistUserSubscription.artistSubscriptionTier.name}" tier.
     table 
       tr 
         td #{artist.name}
         td #{artistUserSubscription.amount / 100} #{artistUserSubscription.currency}
     p To view all your subscriptions log in or create an account with this email address.
     p Enjoy!
+`

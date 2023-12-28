@@ -14,8 +14,8 @@ export const ArtistSection = styled.div`
 
   @media screen and (max-width: ${bp.medium}px) {
     padding: var(--mi-side-paddings-xsmall);
-    padding-top: 0.5rem !important;
-    padding-bottom: 0.5rem !important;
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
   }
 `;
 

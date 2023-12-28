@@ -112,7 +112,7 @@ export default function () {
           id: Number(castArtistId),
           userId: Number(userId),
         },
-        include: singleInclude,
+        include: singleInclude(),
       });
 
       if (!artist) {

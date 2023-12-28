@@ -1,4 +1,5 @@
 import prisma from "../../prisma/prisma";
+import logger from "../logger";
 
 export const registerSubscription = async ({
   tierId,
@@ -36,7 +37,7 @@ export const registerSubscription = async ({
         artistSubscriptionTierId: Number(tierId),
       },
     },
-    select: {
+    include: {
       user: true,
       artistSubscriptionTier: {
         include: {
@@ -45,6 +46,8 @@ export const registerSubscription = async ({
       },
     },
   });
+
+  logger.info(`Updated/created ${artistUserSubscription.id}`);
 
   return artistUserSubscription;
 };

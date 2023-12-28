@@ -104,7 +104,6 @@ export const ArtistProvider: React.FC<{
 
   const initialLoad = React.useCallback(
     async (newPathname: string) => {
-      console.log("artistId", newPathname, artistId);
       if (artistId) {
         dispatch({ type: "setIsLoading", isLoading: true });
         const artist = await fetchArtist(
@@ -136,7 +135,6 @@ export const ArtistProvider: React.FC<{
           });
         }
       } else {
-        console.log("we should unset the artist");
         dispatch({
           type: "setState",
           state: {

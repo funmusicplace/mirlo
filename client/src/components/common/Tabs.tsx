@@ -20,12 +20,10 @@ const Tabs = styled.ul`
 
       &.active {
         border-bottom: 4px solid var(--mi-primary-color);
-        margin-bottom: -2px;
       }
 
       &:hover {
         border-bottom: 4px solid var(--mi-primary-color);
-        margin-bottom: -2px;
       }
     }
   }

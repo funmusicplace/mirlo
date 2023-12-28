@@ -134,7 +134,7 @@ export const UploadLabelWrapper = styled("label")`
   border-radius: 10px;
   border: 2px dashed #555;
   width: 100%;
-  color: #111;
+  color: var(--mi-foreground-color);
   cursor: pointer;
   transition: background 0.2s ease-in-out, border 0.2s ease-in-out;
 `;

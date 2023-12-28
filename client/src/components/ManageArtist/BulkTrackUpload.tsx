@@ -192,7 +192,7 @@ export const BulkTrackUpload: React.FC<{
         )}
         <p>{t("uploadTracksDescription")}</p>
         <FormComponent>
-          <UploadLabelWrapper htmlFor="audio" className={css``}>
+          <UploadLabelWrapper htmlFor="audio">
             <div>{t("dropFilesHere")}</div>
 
             <UploadField
