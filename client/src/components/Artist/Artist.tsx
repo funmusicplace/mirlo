@@ -5,7 +5,7 @@ import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
 import { useArtistContext } from "state/ArtistContext";
 import styled from "@emotion/styled";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
-import Tabs from "components/common/Tabs";
+import { ArtistTabs } from "components/common/Tabs";
 import React from "react";
 
 export const ArtistSection = styled.div`
@@ -51,7 +51,7 @@ function Artist() {
 
   return (
     <>
-      <Tabs>
+      <ArtistTabs>
         {(artist?.trackGroups.length ?? 0) > 0 && (
           <li>
             <NavLink to="releases">{t("releases")}</NavLink>
@@ -69,7 +69,8 @@ function Artist() {
             </NavLink>
           </li>
         )}
-      </Tabs>
+      </ArtistTabs>
+
       <ArtistSection>
         <Outlet />
       </ArtistSection>

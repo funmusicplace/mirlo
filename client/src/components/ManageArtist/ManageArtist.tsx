@@ -17,7 +17,8 @@ import { useSnackbar } from "state/SnackbarContext";
 import { useTranslation } from "react-i18next";
 import { useArtistContext } from "state/ArtistContext";
 import Box from "components/common/Box";
-import Tabs from "components/common/Tabs";
+import { ArtistTabs } from "components/common/Tabs";
+import { ArtistSection } from "components/Artist/Artist";
 
 const ManageArtist: React.FC<{}> = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
@@ -107,7 +108,7 @@ const ManageArtist: React.FC<{}> = () => {
           </Link>
         </div>
       </div>
-      <Tabs>
+      <ArtistTabs>
         <li>
           <NavLink to="releases">{t("yourAlbums")}</NavLink>
         </li>
@@ -119,36 +120,36 @@ const ManageArtist: React.FC<{}> = () => {
             <NavLink to="tiers">{t("tiers", { artist: artist.name })}</NavLink>
           </li>
         )}
-      </Tabs>
+      </ArtistTabs>
       <Outlet />
 
-      <div>
-        <h2>Danger</h2>
-      </div>
+      <ArtistSection>
+        <div>
+          <h2>Danger</h2>
+        </div>
 
-      <div
-        className={css`
-          padding: 0.5rem 0 2rem 0;
+        <div
+          className={css`
+            padding: 0.5rem 0 2rem 0;
 
-          @media screen and (max-width: ${bp.medium}px) {
-            border-radius: 0;
-            padding-top: 1rem;
-            padding: var(--mi-side-paddings-xsmall);
-            > div > div {
-              padding: 2rem;
+            @media screen and (max-width: ${bp.medium}px) {
+              border-radius: 0;
+              padding-top: 1rem;
+              padding: var(--mi-side-paddings-xsmall);
+              padding-bottom: 2rem;
             }
-          }
-        `}
-      >
-        <Button
-          compact
-          role="warning"
-          startIcon={<FaTrash />}
-          onClick={onDelete}
+          `}
         >
-          {t("deleteArtist")}
-        </Button>
-      </div>
+          <Button
+            compact
+            role="warning"
+            startIcon={<FaTrash />}
+            onClick={onDelete}
+          >
+            {t("deleteArtist")}
+          </Button>
+        </div>
+      </ArtistSection>
     </>
   );
 };
