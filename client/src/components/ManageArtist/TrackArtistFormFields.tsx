@@ -29,7 +29,7 @@ const TrackArtistFormFields: React.FC<{
           margin-right: 1rem;
         }
 
-        :not(:first-child) {
+        :not(:first-of-type) {
           margin-top: 1rem;
         }
       `}

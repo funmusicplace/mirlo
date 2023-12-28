@@ -9,10 +9,10 @@ const TrackgroupGrid = styled.div`
               flex-wrap: wrap;
               white-space: nowrap;
 
-              a:first-child {
+              a:first-of-type {
                 font-size: var(--mi-font-size-small);
               }
-              a:last-child {
+              a:last-of-type {
                 font-size: var(--mi-font-size-small);
               }
 
@@ -30,10 +30,10 @@ const TrackgroupGrid = styled.div`
                 
                 @media screen and (max-width: ${bp.medium}px) {
 
-                  a:first-child {
+                  a:first-of-type {
                     font-size: var(--mi-font-size-xsmall);
                   }
-                  a:last-child {
+                  a:last-of-type {
                     font-size: var(--mi-font-size-xsmall);
                   }
 

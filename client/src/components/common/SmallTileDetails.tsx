@@ -46,7 +46,7 @@ export const SmallTileDetails: React.FC<{
             color: var(--mi-normal-foreground-color);
             font-size: 1rem;
             margin-bottom: 1rem;
-            span:first-child {
+            span:first-of-type {
               opacity: 0.5;
             }
             span:last-child {

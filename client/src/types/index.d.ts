@@ -10,6 +10,7 @@ interface LoggedInUser {
   name: string;
   id: number;
   artistUserSubscriptions?: ArtistUserSubscription[];
+  userTrackGroupPurchases?: { trackGroupId: number }[];
   isAdmin: boolean;
   country?: string;
   wishlist?: {

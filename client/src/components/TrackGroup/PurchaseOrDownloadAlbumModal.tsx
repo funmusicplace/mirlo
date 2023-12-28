@@ -2,7 +2,6 @@ import Modal from "components/common/Modal";
 import React from "react";
 import { css } from "@emotion/css";
 import { useTranslation } from "react-i18next";
-import api from "services/api";
 import { useGlobalStateContext } from "state/GlobalState";
 import BuyTrackGroup from "components/TrackGroup/BuyTrackGroup";
 import { useArtistContext } from "state/ArtistContext";
@@ -21,21 +20,20 @@ const PurchaseOrDownloadAlbum: React.FC<{
   const { state: artistState } = useArtistContext();
 
   const userId = user?.id;
+  const purchases = user?.userTrackGroupPurchases;
 
   const checkForAlbumOwnership = React.useCallback(async () => {
     try {
       if (userId) {
-        const { results: purchases } =
-          await api.getMany<UserTrackGroupPurchase>(
-            `users/${userId}/purchases?trackGroupId=${trackGroup.id}`
-          );
-
-        setIsOwned(purchases.length > 0);
+        const purchased = purchases?.find(
+          (p) => p.trackGroupId === trackGroup.id
+        );
+        setIsOwned(!!purchased);
       }
     } catch (e) {
       console.error(e);
     }
-  }, [trackGroup.id, userId]);
+  }, [purchases, trackGroup.id, userId]);
 
   React.useEffect(() => {
     checkForAlbumOwnership();

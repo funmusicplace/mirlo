@@ -53,7 +53,7 @@ const TrackGroupCard: React.FC<{
         padding: 0 !important;
         background-color: var(--mi-darken-background-color);
 
-        &:not(:first-child) {
+        &:not(:first-of-type) {
           margin-top: 1rem;
         }
         @media screen and (max-width: ${bp.medium}px) {
