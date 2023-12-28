@@ -29,24 +29,22 @@ passport.use(
       jwtFromRequest: cookieExtractor,
       secretOrKey: secret,
     },
-    (jwtPayload, done) => {
+    async (jwtPayload, done) => {
       const { expiration, email } = jwtPayload;
 
       if (Date.now() > expiration) {
         done("Unauthorized", false);
       }
-      prisma.user
-        .findFirst({
-          where: {
-            email,
-          },
-        })
-        .then((foundUser) => {
-          if (!foundUser) {
-            done(null, false);
-          }
-          done(null, { ...jwtPayload, isAdmin: foundUser?.isAdmin });
-        });
+      const foundUser = await prisma.user.findFirst({
+        where: {
+          email,
+        },
+      });
+
+      if (!foundUser) {
+        done(null, false);
+      }
+      done(null, { ...jwtPayload, isAdmin: foundUser?.isAdmin });
     }
   )
 );
@@ -54,7 +52,7 @@ passport.use(
 export const userLoggedInWithoutRedirect = (
   req: Request,
   res: Response,
-  next: any
+  next: NextFunction
 ) => {
   passport.authenticate(
     "jwt",
@@ -75,7 +73,11 @@ export const userLoggedInWithoutRedirect = (
   )(req, res, next);
 };
 
-export const userAuthenticated = (req: Request, res: Response, next: any) => {
+export const userAuthenticated = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     passport.authenticate("jwt", { session: false })(req, res, next);
   } catch (e) {
