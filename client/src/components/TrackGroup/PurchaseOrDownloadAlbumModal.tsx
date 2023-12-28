@@ -1,9 +1,7 @@
 import Modal from "components/common/Modal";
 import React from "react";
-import { bp } from "../../constants";
 import { css } from "@emotion/css";
 import { useTranslation } from "react-i18next";
-import { useParams } from "react-router-dom";
 import api from "services/api";
 import { useGlobalStateContext } from "state/GlobalState";
 import BuyTrackGroup from "components/TrackGroup/BuyTrackGroup";
@@ -23,7 +21,7 @@ const PurchaseOrDownloadAlbum: React.FC<{
   const { state: artistState } = useArtistContext();
 
   const userId = user?.id;
-  const { trackGroupId } = useParams();
+
   const checkForAlbumOwnership = React.useCallback(async () => {
     try {
       if (userId) {
@@ -47,9 +45,6 @@ const PurchaseOrDownloadAlbum: React.FC<{
     return null;
   }
 
-  const userIsTrackGroupArtist =
-    user && artistState?.artist.userId === user?.id;
-
   const isBeforeReleaseDate = new Date(trackGroup.releaseDate) > new Date();
 
   const purchaseText = isBeforeReleaseDate ? "preOrder" : "buy";
@@ -61,6 +56,11 @@ const PurchaseOrDownloadAlbum: React.FC<{
     return null;
   }
 
+  const showPurchase =
+    !isOwned && artistState?.userStripeStatus?.chargesEnabled;
+
+  const showDownload = isOwned && !isBeforeReleaseDate;
+
   return (
     <>
       <div
@@ -68,66 +68,24 @@ const PurchaseOrDownloadAlbum: React.FC<{
           z-index: 2;
         `}
       >
-        {!userIsTrackGroupArtist &&
-          !isOwned &&
-          artistState?.userStripeStatus?.chargesEnabled && (
-            <div
-              className={css`
-                margin-top: 0rem;
-                z-index: 2;
-              `}
+        {showPurchase && (
+          <div
+            className={css`
+              margin-top: 0rem;
+              z-index: 2;
+            `}
+          >
+            <Button
+              variant="outlined"
+              compact
+              onClick={() => setIsPurchasingAlbum(true)}
             >
-              <Button
-                variant="outlined"
-                className={css`
-                  display: block !important;
-                  height: 2rem !important;
-
-                  @media screen and (max-width: ${bp.small}px) {
-                    font-size: var(--mi-font-size-xsmall);
-                    padding: 0;
-                    font-size: 0.75rem;
-                    
-                    ${
-                      trackGroupId
-                        ? "display: block !important;"
-                        : "display: none !important;"
-                    }
-                  }
-                  }
-                `}
-                compact
-                onClick={() => setIsPurchasingAlbum(true)}
-              >
-                {t(purchaseText)}
-              </Button>
-              <Button
-                variant="link"
-                className={css`
-                  display: none !important;
-                  color: var(--mi-normal-foreground-color) !important;
-                  margin: 0.01rem 0 0 0.3rem !important;
-                  &:hover {
-                    text-decoration: underline;
-                  }
-                  font-size: var(--mi-font-size-xsmall);
-                  font-size: 0.75rem;
-
-                  @media screen and (max-width: ${bp.small}px) {
-                    ${trackGroupId
-                      ? "display: none !important;"
-                      : "display: block !important;"}
-                  }
-                `}
-                compact
-                onClick={() => setIsPurchasingAlbum(true)}
-              >
-                {t(purchaseText)}
-              </Button>
-            </div>
-          )}
-        {(userIsTrackGroupArtist || isOwned) && !isBeforeReleaseDate && (
-          <DownloadAlbumButton trackGroup={trackGroup} />
+              {t(purchaseText)}
+            </Button>
+          </div>
+        )}
+        {showDownload && (
+          <DownloadAlbumButton trackGroup={trackGroup} onlyIcon />
         )}
       </div>
 

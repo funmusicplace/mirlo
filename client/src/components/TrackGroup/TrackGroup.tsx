@@ -21,6 +21,92 @@ import Wishlist from "./Wishlist";
 import ReleaseDate from "./ReleaseDate";
 import WidthContainer from "components/common/WidthContainer";
 import TrackGroupTitle from "./TrackGroupTitle";
+import styled from "@emotion/styled";
+
+const Container = styled.div<{ user?: LoggedInUser }>`
+  ${(props) =>
+    props.user!
+      ? `
+    min-height: calc(100vh - 70px);
+    margin-top: 0vh;`
+      : `
+    min-height: calc(100vh - 130px);
+    margin-top: 1rem;`}
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: var(--mi-side-paddings-xsmall);
+
+  @media screen and (max-width: ${bp.small}px) {
+    margin-top: 0rem;
+  }
+`;
+
+const ImageWrapper = styled.div`
+  border: 1px solid rgba(255, 255, 255, 0.05);
+`;
+
+const UnderneathImage = styled.div`
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
+
+const SmallScreenPlayWrapper = styled.div`
+  margin-bottom: 0.5rem;
+  @media screen and (min-width: ${bp.small}px) {
+    display: none;
+  }
+`;
+
+const ImageAndDetailsWrapper = styled.div`
+  display: flex;
+  flex: 45%;
+  max-width: 45%;
+  flex-direction: column;
+
+  @media screen and (max-width: ${bp.small}px) {
+    flex: 100%;
+    max-width: 100%;
+    width: 100%;
+    min-width: 100%;
+    flex-direction: column;
+  }
+`;
+
+const AboutWrapper = styled.div`
+  max-width: 70%;
+  margin: 1.25rem 0 1.25rem;
+  padding: 0.5rem 2rem 0.25rem 0rem;
+
+  p {
+    line-height: 1.5rem;
+  }
+  @media screen and (max-width: ${bp.small}px) {
+    max-width: 100%;
+    padding: 0.5rem 0rem 0.25rem 0rem;
+    border-right: 0;
+  }
+`;
+
+const CreditsWrapper = styled.div<{ trackGroupCredits: string }>`
+  margin: 1.25rem 0;
+  padding: 0.5rem 0.25rem 0.5rem 2rem;
+  font-size: var(--mi-font-size-small);
+  opacity: 0.5;
+
+  p {
+    line-height: 1.3rem;
+  }
+  ${(props) => (props.trackGroupCredits ? "border-left: 1px solid;" : "")}
+  @media screen and (max-width: ${bp.small}px) {
+    max-width: 100%;
+    padding: 0.5rem 0.25rem 0.5rem 0rem;
+    border-left: 0;
+  }
+`;
 
 function TrackGroup() {
   const { t } = useTranslation("translation", {
@@ -63,26 +149,7 @@ function TrackGroup() {
         description={trackGroup.about ?? "An album on Mirlo"}
         image={trackGroup.cover?.sizes?.[600]}
       />
-      <div
-        className={css`
-        ${
-          !user
-            ? `
-            min-height: calc(100vh - 70px);
-            margin-top: 0vh;`
-            : `
-            min-height: calc(100vh - 130px);
-            margin-top: 1rem;`
-        }
-        display: flex;
-        align-items: center;
-        width: 100%;
-        padding: var(--mi-side-paddings-xsmall);
-
-        @media screen and (max-width: ${bp.small}px) {
-          margin-top: 0rem;
-      `}
-      >
+      <Container user={user}>
         <div
           className={css`
             width: 100%;
@@ -128,42 +195,15 @@ function TrackGroup() {
                 }
               `}
             >
-              <div
-                className={css`
-                  display: flex;
-                  flex: 45%;
-                  max-width: 45%;
-                  flex-direction: column;
-
-                  @media screen and (max-width: ${bp.small}px) {
-                    flex: 100%;
-                    max-width: 100%;
-                    width: 100%;
-                    min-width: 100%;
-                    flex-direction: column;
-                  }
-                `}
-              >
-                <div
-                  className={css`
-                    border: 1px solid rgba(255, 255, 255, 0.05);
-                  `}
-                >
+              <ImageAndDetailsWrapper>
+                <ImageWrapper>
                   <ImageWithPlaceholder
                     src={trackGroup.cover?.sizes?.[960]}
                     alt={trackGroup.title}
                     size={960}
                   />
-                </div>
-                <div
-                  className={css`
-                    margin-top: 0.5rem;
-                    margin-bottom: 0.5rem;
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                  `}
-                >
+                </ImageWrapper>
+                <UnderneathImage>
                   <ReleaseDate releaseDate={trackGroup.releaseDate} />
                   <div
                     className={css`
@@ -181,15 +221,8 @@ function TrackGroup() {
                     <PurchaseOrDownloadAlbum trackGroup={trackGroup} />
                     <Wishlist trackGroup={trackGroup} />
                   </div>
-                </div>
-                <div
-                  className={css`
-                    margin-bottom: 0.5rem;
-                    @media screen and (min-width: ${bp.small}px) {
-                      display: none;
-                    }
-                  `}
-                >
+                </UnderneathImage>
+                <SmallScreenPlayWrapper>
                   <ClickToPlayAlbum
                     trackGroupId={trackGroup.id}
                     className={css`
@@ -197,8 +230,8 @@ function TrackGroup() {
                       margin-right: 10px;
                     `}
                   />
-                </div>
-              </div>
+                </SmallScreenPlayWrapper>
+              </ImageAndDetailsWrapper>
               <div
                 className={css`
                   max-width: 59%;
@@ -226,49 +259,17 @@ function TrackGroup() {
               }
             `}
           >
-            <div
-              className={css`
-                max-width: 70%;
-                margin: 1.25rem 0 1.25rem;
-                padding: 0.5rem 2rem 0.25rem 0rem;
-
-                p {
-                  line-height: 1.5rem;
-                }
-                @media screen and (max-width: ${bp.small}px) {
-                  max-width: 100%;
-                  padding: 0.5rem 0rem 0.25rem 0rem;
-                  border-right: 0;
-                }
-              `}
-            >
+            <AboutWrapper>
               <MarkdownContent content={trackGroup.about} />
-            </div>
+            </AboutWrapper>
 
-            <div
-              className={css`
-                margin: 1.25rem 0;
-                padding: 0.5rem 0.25rem 0.5rem 2rem;
-                font-size: var(--mi-font-size-small);
-                opacity: 0.5;
-
-                p {
-                  line-height: 1.3rem;
-                }
-                ${trackGroupCredits ? "border-left: 1px solid;" : ""}
-                @media screen and (max-width: ${bp.small}px) {
-                  max-width: 100%;
-                  padding: 0.5rem 0.25rem 0.5rem 0rem;
-                  border-left: 0;
-                }
-              `}
-            >
+            <CreditsWrapper trackGroupCredits={trackGroupCredits}>
               <MarkdownContent content={trackGroup.credits} />
-            </div>
+            </CreditsWrapper>
           </div>
           {userStripeStatus?.chargesEnabled && <ArtistSupport />}
         </div>
-      </div>
+      </Container>
     </WidthContainer>
   );
 }

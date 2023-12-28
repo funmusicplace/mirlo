@@ -12,6 +12,9 @@ import { FormProvider, useForm } from "react-hook-form";
 import EmailInput from "./EmailInput";
 import PlatformPercent from "components/common/PlatformPercent";
 import { css } from "@emotion/css";
+import { useGlobalStateContext } from "state/GlobalState";
+import { useArtistContext } from "state/ArtistContext";
+import Tooltip from "components/common/Tooltip";
 
 interface FormData {
   chosenPrice: string;
@@ -32,6 +35,19 @@ const testOwnership = async (trackGroupId: number, email: string) => {
 const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup }> = ({
   trackGroup,
 }) => {
+  const snackbar = useSnackbar();
+  const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
+
+  const {
+    state: { user },
+  } = useGlobalStateContext();
+  const { state: artistState } = useArtistContext();
+
+  const userId = user?.id;
+  const userIsTrackGroupArtist = user && artistState.artist?.userId === userId;
+
+  console.log("userIsTG Artist", trackGroup.artist);
+
   const minPrice = trackGroup.minPrice;
   const methods = useForm<FormData>({
     defaultValues: {
@@ -42,9 +58,6 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup }> = ({
   });
   const { register, watch, handleSubmit, formState } = methods;
   const chosenPrice = watch("chosenPrice");
-
-  const snackbar = useSnackbar();
-  const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
 
   const purchaseAlbum = React.useCallback(
     async (data: FormData) => {
@@ -88,7 +101,7 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup }> = ({
 
   return (
     <FormProvider {...methods}>
-      {trackGroup.minPrice && (
+      {!!trackGroup.minPrice && trackGroup.minPrice > 0 && (
         <>
           {t("price")} <Money amount={trackGroup.minPrice / 100} />, or
         </>
@@ -107,12 +120,22 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup }> = ({
           chosenPrice={chosenPrice}
         />
         <EmailInput />
-        <Button
-          type="submit"
-          disabled={!!lessThan1 || lessThanMin || !formState.isValid}
-        >
-          {t(purchaseText)}
-        </Button>
+
+        {userIsTrackGroupArtist && (
+          <Tooltip hoverText={t("usersCanPurchase")}>
+            <Button type="submit" disabled>
+              {t(purchaseText)}
+            </Button>
+          </Tooltip>
+        )}
+        {!userIsTrackGroupArtist && (
+          <Button
+            type="submit"
+            disabled={!!lessThan1 || lessThanMin || !formState.isValid}
+          >
+            {t(purchaseText)}
+          </Button>
+        )}
         <p
           className={css`
             margin-top: 1rem;
@@ -123,7 +146,7 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup }> = ({
       </form>
       {!isBeforeReleaseDate && (
         <>
-          {trackGroup.minPrice && lessThanMin && (
+          {!!trackGroup.minPrice && lessThanMin && (
             <strong>
               {t("lessThanMin", {
                 minPrice: moneyDisplay({

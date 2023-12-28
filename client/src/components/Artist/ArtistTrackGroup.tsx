@@ -55,7 +55,6 @@ const TrackGroupWrapper = styled.div`
       button {
         padding: 0.25rem 0.25rem;
         height: 1.4rem;
-        width: 1.4rem;
       }
     }
   }
