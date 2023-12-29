@@ -3,7 +3,6 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import ArtistTrackGroup from "./ArtistTrackGroup";
 import { bp } from "../../constants";
-import { ArtistSection } from "./Artist";
 import HeaderDiv from "components/common/HeaderDiv";
 import { useGlobalStateContext } from "state/GlobalState";
 import { Link } from "react-router-dom";
@@ -29,7 +28,6 @@ const ArtistAlbums: React.FC = () => {
   }
 
   return (
-    <ArtistSection>
       <div
         style={{ marginTop: "0rem" }}
         className={css`
@@ -64,7 +62,6 @@ const ArtistAlbums: React.FC = () => {
           ))}
         </div>
       </div>
-    </ArtistSection>
   );
 };
 
