@@ -5,6 +5,7 @@ import api from "services/api";
 import React from "react";
 import { useArtistContext } from "state/ArtistContext";
 import { ArtistSection } from "components/Artist/Artist";
+import Money from "components/common/Money";
 
 type SupportTier = {
   user: User;
@@ -60,7 +61,9 @@ const Supporters = () => {
                 <td>{r.user.name}</td>
                 <td>{r.user.email}</td>
                 <td>{r.artistSubscriptionTier.name}</td>
-                <td>{r.amount}</td>
+                <td>
+                  <Money amount={r.amount / 100} />
+                </td>
               </tr>
             ))}
           </tbody>
