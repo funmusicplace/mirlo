@@ -51,11 +51,18 @@ export default function () {
             logger.info(`Created new stripe account ${account.id}`);
           }
 
+          let stripeAccount;
+          try {
+            stripeAccount = await stripe.accounts.retrieve(accountId);
+          } catch (e) {
+            console.error(e);
+          }
+
           const accountLink = await stripe.accountLinks.create({
             account: accountId,
             refresh_url: `${API_DOMAIN}/v1/users/${userId}/stripe/connect`,
             return_url: `${client?.applicationUrl}/manage?stripeConnect=done`,
-            type: alreadyExisted ? "account_update" : "account_onboarding",
+            type: "account_onboarding", // FIXME: is it ever possible to pass "account_update" here?
           });
 
           logger.info(`Generated Stripe account link`);
@@ -70,7 +77,7 @@ export default function () {
     } catch (e) {
       console.error(e);
       res.json({
-        error: `Stripe Connect doesn't work yet`,
+        error: `Stripe Connect encountered a problem`,
       });
     }
   }

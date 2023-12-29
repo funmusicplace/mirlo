@@ -48,19 +48,23 @@ const PageHeader = () => {
               }
             `}
           >
-            <img
-              src={artistBanner?.sizes?.[2500] + `?${artistBanner?.updatedAt}`}
-              alt="Artist banner"
-              className={css`
-                width: 100%;
-                z-index: -1;
-                object-fit: cover;
-
-                @media screen and (max-width: ${bp.medium}px) {
-                  object-fit: cover;
+            {artistBanner && (
+              <img
+                src={
+                  artistBanner?.sizes?.[2500] + `?${artistBanner?.updatedAt}`
                 }
-              `}
-            />
+                alt="Artist banner"
+                className={css`
+                  width: 100%;
+                  z-index: -1;
+                  object-fit: cover;
+
+                  @media screen and (max-width: ${bp.medium}px) {
+                    object-fit: cover;
+                  }
+                `}
+              />
+            )}
           </div>
         </div>
       )}

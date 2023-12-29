@@ -5,6 +5,7 @@ const Avatar: React.FC<{ avatar?: string }> = ({ avatar }) => {
   if (!avatar) {
     return null;
   }
+
   return (
     <div
       className={css`

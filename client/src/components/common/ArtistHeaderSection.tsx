@@ -53,6 +53,34 @@ const Header = styled.div`
   }
 `;
 
+const HeaderWrapper = styled.div`
+  display: flex;
+  overflow: hidden;
+  align-items: flex-end;
+  justify-content: space-around;
+
+  @media screen and (max-width: ${bp.medium}px) {
+    background: var(--mi-normal-background-color);
+  }
+`;
+
+const DescriptionWrapperHasAvatar = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+`;
+
+const ArtistActions = styled.div`
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  padding-left: 1rem;
+  @media screen and (max-width: ${bp.medium}px) {
+    padding-left: 0.3rem;
+  }
+`;
+
 const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
   isManage,
 }) => {
@@ -85,18 +113,7 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
         description={artist.bio}
         image={artistAvatar?.sizes?.[500] ?? artistAvatar?.sizes?.[1200]}
       />
-      <div
-        className={css`
-          display: flex;
-          overflow: hidden;
-          align-items: flex-end;
-          justify-content: space-around;
-
-          @media screen and (max-width: ${bp.medium}px) {
-            background: var(--mi-normal-background-color);
-          }
-        `}
-      >
+      <HeaderWrapper>
         <Header>
           <div
             className={css`
@@ -112,11 +129,13 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
               }
             `}
           >
-            <Avatar
-              avatar={
-                artistAvatar?.sizes?.[300] + `?${artistAvatar?.updatedAt}`
-              }
-            />
+            {artistAvatar && (
+              <Avatar
+                avatar={
+                  artistAvatar?.sizes?.[300] + `?${artistAvatar?.updatedAt}`
+                }
+              />
+            )}
 
             <div
               className={css`
@@ -160,17 +179,7 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
                   >
                     <H1 artistAvatar={!!artistAvatar}>{artist.name}</H1>
 
-                    <div
-                      className={css`
-                        text-align: right;
-                        display: flex;
-                        flex-direction: column;
-                        padding-left: 1rem;
-                        @media screen and (max-width: ${bp.medium}px) {
-                          padding-left: 0.3rem;
-                        }
-                      `}
-                    >
+                    <ArtistActions>
                       {!isManage && <FollowArtist artistId={artist.id} />}
                       {!isManage && user?.id === artist.userId && (
                         <Link to={`/manage/artists/${artist.id}`}>
@@ -184,7 +193,7 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
                           </Button>
                         </Link>
                       )}
-                    </div>
+                    </ArtistActions>
                   </div>
                 </HeaderDiv>
                 <ArtistFormLocation isManage={!!isManage} />
@@ -192,18 +201,13 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
               {!artistAvatar && <ArtistHeaderDescription />}
             </div>
           </div>
-          <div
-            className={css`
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              flex-wrap: wrap;
-            `}
-          >
-            {artistAvatar && <ArtistHeaderDescription />}
-          </div>
+          {artistAvatar && (
+            <DescriptionWrapperHasAvatar>
+              <ArtistHeaderDescription />
+            </DescriptionWrapperHasAvatar>
+          )}
         </Header>
-      </div>
+      </HeaderWrapper>
       <div
         className={css`
           display: flex;
