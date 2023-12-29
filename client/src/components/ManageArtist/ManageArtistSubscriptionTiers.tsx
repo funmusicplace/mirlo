@@ -5,8 +5,7 @@ import ManageSubscriptionTierBox from "./ManageSubscriptionTierBox";
 import SubscriptionForm from "./SubscriptionForm";
 import { useArtistContext } from "state/ArtistContext";
 import useGetUserObjectById from "utils/useGetUserObjectById";
-import { useParams } from "react-router-dom";
-import ArtistSubscriberDataDownload from "./ArtistSubscriberDataDownload";
+import { Link, useParams } from "react-router-dom";
 import HeaderDiv from "components/common/HeaderDiv";
 import { ManageSectionWrapper } from "./ManageSectionWrapper";
 
@@ -36,7 +35,7 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
     <ManageSectionWrapper>
       <HeaderDiv>
         <div />
-        <ArtistSubscriberDataDownload />
+        <Link to="supporters">Supporters</Link>
       </HeaderDiv>
       <div
         className={css`

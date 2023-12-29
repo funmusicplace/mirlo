@@ -56,6 +56,7 @@ import ManageArtistPosts from "components/ManageArtist/ManageArtistPosts";
 import ManagePost from "components/ManageArtist/ManagePost";
 import NewReleaseRedirect from "components/ManageArtist/NewReleaseRedirect";
 import { css } from "@emotion/css";
+import Supporters from "components/ManageArtist/Supporters";
 
 const router = createBrowserRouter([
   {
@@ -161,6 +162,10 @@ const router = createBrowserRouter([
                   {
                     path: "tiers",
                     element: <ManageArtistSubscriptionTiers />,
+                  },
+                  {
+                    path: "tiers/supporters",
+                    element: <Supporters />,
                   },
                   {
                     path: "posts",
