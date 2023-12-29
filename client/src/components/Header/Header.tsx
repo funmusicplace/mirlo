@@ -11,13 +11,15 @@ import Logo from "components/common/Logo";
 import DropdownMenu from "components/common/DropdownMenu";
 import { ImMenu } from "react-icons/im";
 import styled from "@emotion/styled";
-import { useState, useEffect } from "react";
+import useShow from "utils/useShow";
+import LogInPopup from "./LogInPopup";
 
 const HeaderWrapper = styled.div<{
-  artistBanner: boolean;
-  artistId: boolean;
-  show: string;
-  trackGroupId: boolean;
+  artistBanner?: boolean;
+  transparent?: boolean;
+  artistId?: boolean;
+  show?: string;
+  trackGroupId?: boolean;
 }>`
   position: sticky;
   width: 100%;
@@ -25,7 +27,7 @@ const HeaderWrapper = styled.div<{
   transition: top 0.4s ease-out;
 
   ${(props) =>
-    props.artistBanner && props.artistId
+    props.transparent
       ? "background: transparent; box-shadow: 0px 1px 10px rgba(0, 0, 0, 0);"
       : "background: var(--mi-light-background-color); box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1);"}
 
@@ -36,7 +38,7 @@ const HeaderWrapper = styled.div<{
 
   @media (prefers-color-scheme: dark) {
     ${(props) =>
-      props.artistBanner && props.artistId
+      props.transparent
         ? "background-color: transparent; box-shadow: 0px 1px 10px rgba(0, 0, 0, 0);"
         : "background-color: #0e0e0e; box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.3); color: pink;"}
     ${(props) =>
@@ -78,34 +80,78 @@ const HeaderWrapper = styled.div<{
   }
 `;
 
-const Header = () => {
-  function useShow() {
-    const [show, setShow] = useState("");
+const LogoWrapper = () => {
+  return (
+    <h1
+      className={css`
+        margin-top: -0.1rem;
+        line-height: 0;
+        font-size: 1.5rem;
+      `}
+    >
+      <Link
+        to="/"
+        className={css`
+          display: flex;
+          justify-content: flex-start;
+          align-items: center;
+        `}
+      >
+        <span
+          className={css`
+            @media (max-width: ${bp.medium}px) {
+              display: none;
+            }
+          `}
+        >
+          <Logo />
+        </span>
+        <span
+          className={css`
+            @media (min-width: ${bp.medium}px) {
+              display: none;
+            }
+          `}
+        >
+          <Logo noWordmark />
+        </span>
+      </Link>
+    </h1>
+  );
+};
 
-    useEffect(() => {
-      let lastScrollY = window.scrollY;
+const Content = styled.div<{ artistId?: string }>`
+  ${(props) =>
+    props.artistId
+      ? "max-width: 100%; transition: all ease-in-out .4s;"
+      : "max-width: 1500px; transition: all ease-in-out .4s;"}
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  width: 100%;
+  z-index: 99;
+  position: sticky;
+  top: 0px;
+  margin: 0 auto;
+  height: var(--header-cover-sticky-height);
 
-      const updateShow = () => {
-        const scrollY = window.scrollY;
-        const direction = scrollY > lastScrollY ? "down" : "up";
-        if (
-          direction !== show &&
-          (scrollY - lastScrollY > 10 || scrollY - lastScrollY < -10)
-        ) {
-          setShow(direction);
-        }
-        lastScrollY = scrollY > 0 ? scrollY : 0;
-      };
-      window.addEventListener("scroll", updateShow); // add event listener
-      return () => {
-        window.removeEventListener("scroll", updateShow); // clean up
-      };
-    }, [show]);
-
-    return show;
+  Button {
+    background-color: var(--mi-normal-background-color);
   }
 
+  @media screen and (max-width: ${bp.medium}px) {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    padding: var(--mi-side-paddings-xsmall);
+    position: sticky;
+    top: 0;
+  }
+`;
+
+const Header = () => {
   const { state } = useGlobalStateContext();
+  const isLoggedIn = !!state.user?.id;
 
   const { artistId, trackGroupId } = useParams();
 
@@ -115,13 +161,20 @@ const Header = () => {
 
   const show = useShow();
 
-  if (!state.user?.id) {
-    return null;
+  if (!isLoggedIn) {
+    return (
+      <HeaderWrapper transparent show={show}>
+        <Content>
+          <div />
+          <LogInPopup />
+        </Content>
+      </HeaderWrapper>
+    );
   }
 
   return (
     <HeaderWrapper
-      className={`${show === "down" ? "hidden" : "active"}`}
+      transparent={!!artistBanner && !!artistId}
       artistBanner={!!artistBanner}
       show={show}
       trackGroupId={!!trackGroupId}
@@ -146,70 +199,8 @@ const Header = () => {
           }
         `}
       ></div>
-      <div
-        className={css`
-          ${artistId
-            ? "max-width: 100%; transition: all ease-in-out .4s;"
-            : "max-width: 1500px; transition: all ease-in-out .4s;"}
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 0.5rem 1rem;
-          width: 100%;
-          z-index: 99;
-          position: sticky;
-          top: 0px;
-          margin: 0 auto;
-          height: var(--header-cover-sticky-height);
-
-          Button {
-            background-color: var(--mi-normal-background-color);
-          }
-
-          @media screen and (max-width: ${bp.medium}px) {
-            padding-top: 0.5rem;
-            padding-bottom: 0.5rem;
-            padding: var(--mi-side-paddings-xsmall);
-            position: sticky;
-            top: 0;
-          }
-        `}
-      >
-        <h1
-          className={css`
-            margin-top: -0.1rem;
-            line-height: 0;
-            font-size: 1.5rem;
-          `}
-        >
-          <Link
-            to="/"
-            className={css`
-              display: flex;
-              justify-content: flex-start;
-              align-items: center;
-            `}
-          >
-            <span
-              className={css`
-                @media (max-width: ${bp.medium}px) {
-                  display: none;
-                }
-              `}
-            >
-              <Logo />
-            </span>
-            <span
-              className={css`
-                @media (min-width: ${bp.medium}px) {
-                  display: none;
-                }
-              `}
-            >
-              <Logo noWordmark />
-            </span>
-          </Link>
-        </h1>
+      <Content artistId={artistId}>
+        <LogoWrapper />
         <div
           className={css`
             display: flex;
@@ -229,7 +220,7 @@ const Header = () => {
             <Menu />
           </DropdownMenu>
         </div>
-      </div>
+      </Content>
     </HeaderWrapper>
   );
 };
