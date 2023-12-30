@@ -91,13 +91,8 @@ const ArtistSupport: React.FC = () => {
   return (
     <>
       <HeaderDiv>
-        <h2
-          className={css`
-            margin-bottom: 0rem;
-          `}
-        >
-          {t("supportArtist", { artist: artist.name })}
-        </h2>
+        <div>
+        </div>
         <div
           className={css`
             @media (max-width: ${bp.small}px) {

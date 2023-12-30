@@ -119,13 +119,12 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
             className={css`
               display: flex;
               padding-top: 1rem;
-              margin-bottom: 0.5rem;
-              ${artistAvatar ? "margin-bottom: 0.3rem;" : ""}
+              ${artistAvatar ? "margin-bottom: 0.75rem;" : ""}
               align-items: center;
 
               @media screen and (max-width: ${bp.medium}px) {
                 padding-top: 0rem;
-                margin-bottom: 0rem;
+                margin-bottom: 0.5rem;
               }
             `}
           >
@@ -145,14 +144,14 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
                 flex-direction: column;
                 justify-content: center;
                 @media screen and (max-width: ${bp.medium}px) {
-                  ${artistAvatar ? "min-height: 50px; margin-left: .5rem;" : ""}
+                  ${artistAvatar ? "min-height: 55px; margin-left: .5rem;" : ""}
                 }
               `}
             >
               <div
                 className={css`
                   width: 100%;
-                  ${!artistAvatar ? "padding-bottom: .5rem;" : ""}
+                  ${!artistAvatar ? "padding-bottom: .75rem;" : ""}
                 `}
               >
                 <HeaderDiv
@@ -177,8 +176,19 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
                       }
                     `}
                   >
+                   <div
+                    className={css`
+                      display: flex;
+                      flex-direction: column;
+                      justify-content: center;
+                      word-break: break-word;
+                      width: 100%;
+                    `}
+                   >
                     <H1 artistAvatar={!!artistAvatar}>{artist.name}</H1>
 
+                    <ArtistFormLocation isManage={!!isManage} />
+                   </div>
                     <ArtistActions>
                       {!isManage && <FollowArtist artistId={artist.id} />}
                       {!isManage && user?.id === artist.userId && (
@@ -196,7 +206,7 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
                     </ArtistActions>
                   </div>
                 </HeaderDiv>
-                <ArtistFormLocation isManage={!!isManage} />
+                
               </div>
               {!artistAvatar && <ArtistHeaderDescription />}
             </div>

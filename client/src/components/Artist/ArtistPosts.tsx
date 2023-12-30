@@ -24,13 +24,8 @@ const ArtistPosts: React.FC = () => {
   return (
     <div>
       <HeaderDiv>
-        <h2
-          className={css`
-            margin-bottom: 0rem;
-          `}
-        >
-          {t("updates")}
-        </h2>
+        <div>
+        </div>
         <a
           target="_blank"
           href={`${process.env.REACT_APP_API_DOMAIN}/v1/artists/${artist.id}/feed?format=rss`}
@@ -63,7 +58,7 @@ const ArtistPosts: React.FC = () => {
         </div>
         <div
           className={css`
-            margin-top: 1rem;
+            margin-top: 0;
             display: flex;
             flex-wrap: wrap;
             justify-content: ${artist.posts?.length % 3 === 2
