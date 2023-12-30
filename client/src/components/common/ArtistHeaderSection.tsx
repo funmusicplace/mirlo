@@ -124,7 +124,7 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
 
               @media screen and (max-width: ${bp.medium}px) {
                 padding-top: 0rem;
-                margin-bottom: 0rem;
+                margin-bottom: 0.5rem;
               }
             `}
           >
@@ -139,10 +139,7 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
             <div
               className={css`
                 width: 100%;
-                height: 100%;
-
-background: var(--mi-darken-background-color);                  display: flex;
-                margin-bottom: .5rem;
+                display: flex;
                 ${artistAvatar ? "min-height: 85px; margin-left: 1rem;" : ""}
                 flex-direction: column;
                 justify-content: center;
