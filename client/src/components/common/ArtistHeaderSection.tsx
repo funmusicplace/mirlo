@@ -159,7 +159,6 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
                   className={css`
                     padding-bottom: 0 !important;
                     margin-bottom: 0rem !important;
-                    background: var(--mi-darken-background-color);
                     @media screen and (max-width: ${bp.medium}px) {
                       margin: 0rem !important;
                     }
@@ -174,7 +173,7 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
                       word-break: break-word;
                       width: 100%;
                       @media screen and (max-width: ${bp.medium}px) {
-                        min-height: auto;
+                        min-height: 100%;
                       }
                     `}
                   >
