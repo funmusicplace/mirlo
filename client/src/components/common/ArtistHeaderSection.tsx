@@ -119,8 +119,7 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
             className={css`
               display: flex;
               padding-top: 1rem;
-              margin-bottom: 0.5rem;
-              ${artistAvatar ? "margin-bottom: 0.3rem;" : ""}
+              ${artistAvatar ? "margin-bottom: 0.75rem;" : ""}
               align-items: center;
 
               @media screen and (max-width: ${bp.medium}px) {
