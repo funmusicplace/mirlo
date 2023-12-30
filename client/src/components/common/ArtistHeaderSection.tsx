@@ -211,7 +211,6 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
               <div
                 className={css`
                   width: 100%;
-                  ${!artistAvatar ? "padding-top: .75rem;" : ""}
                 `}
               >
 <ArtistHeaderDescription />
