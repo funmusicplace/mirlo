@@ -177,10 +177,21 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
                       }
                     `}
                   >
+                   <div
+                    className={css`
+                      min-height: 50px;
+                      display: flex;
+                      flex-direction: column;
+                      justify-content: center;
+                      word-break: break-word;
+                      width: 100%;
+                        min-height: auto;
+                    `}
+                  >
                     <H1 artistAvatar={!!artistAvatar}>{artist.name}</H1>
 
-<ArtistFormLocation isManage={!!isManage} />
-
+                    <ArtistFormLocation isManage={!!isManage} />
+                   </div>
                     <ArtistActions>
                       {!isManage && <FollowArtist artistId={artist.id} />}
                       {!isManage && user?.id === artist.userId && (
