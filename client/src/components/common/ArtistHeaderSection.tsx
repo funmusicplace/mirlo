@@ -151,7 +151,6 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
               <div
                 className={css`
                   width: 100%;
-                  ${!artistAvatar ? "padding-bottom: .75rem;" : ""}
                 `}
               >
                 <HeaderDiv
@@ -208,7 +207,16 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
                 </HeaderDiv>
                 
               </div>
-              {!artistAvatar && <ArtistHeaderDescription />}
+              {!artistAvatar &&
+              <div
+                className={css`
+                  width: 100%;
+                  ${!artistAvatar ? "padding-top: .75rem;" : ""}
+                `}
+              >
+<ArtistHeaderDescription />
+            </div>}
+
             </div>
           </div>
           {artistAvatar && (
