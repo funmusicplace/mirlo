@@ -24,13 +24,8 @@ const ArtistPosts: React.FC = () => {
   return (
     <div>
       <HeaderDiv>
-        <h2
-          className={css`
-            margin-bottom: 0rem;
-          `}
-        >
-          {t("updates")}
-        </h2>
+        <div>
+        </div>
         <a
           target="_blank"
           href={`${process.env.REACT_APP_API_DOMAIN}/v1/artists/${artist.id}/feed?format=rss`}
