@@ -160,15 +160,6 @@ const ArtistTrackGroup: React.FC<{
               }
             `}
           >
-            <div
-              className={css`
-                @media screen and (min-width: ${bp.small}px) {
-                  display: none;
-                }
-              `}
-            >
-              <PurchaseOrDownloadAlbum trackGroup={trackGroup} />
-            </div>
           </div>
         </TrackGroupLinks>
       </div>
