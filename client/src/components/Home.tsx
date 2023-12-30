@@ -275,7 +275,7 @@ function Home() {
                   <div
                     className={css`
                       margin: var(--mi-side-paddings-xsmall);
-                      margin-top: 1rem;
+                      margin-top: 0.5rem;
                       display: flex;
                       flex-wrap: wrap;
                       justify-content: space-between;
@@ -286,6 +286,7 @@ function Home() {
 
                       @media screen and (max-width: ${bp.medium}px) {
                         flex-direction: column;
+                        margin-top: 0.25rem;
 
                         a {
                           width: 100%;
