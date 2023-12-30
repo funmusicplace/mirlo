@@ -2,7 +2,6 @@ import { css } from "@emotion/css";
 import React from "react";
 import ClickToPlay from "../common/ClickToPlay";
 import { Link } from "react-router-dom";
-import PurchaseOrDownloadAlbum from "components/TrackGroup/PurchaseOrDownloadAlbumModal";
 import { bp } from "../../constants";
 import { useArtistContext } from "state/ArtistContext";
 import { getArtistUrlReference, getTrackGroupUrlReference } from "utils/artist";
@@ -160,15 +159,6 @@ const ArtistTrackGroup: React.FC<{
               }
             `}
           >
-            <div
-              className={css`
-                @media screen and (min-width: ${bp.small}px) {
-                  display: none;
-                }
-              `}
-            >
-              <PurchaseOrDownloadAlbum trackGroup={trackGroup} />
-            </div>
           </div>
         </TrackGroupLinks>
       </div>
