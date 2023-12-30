@@ -60,6 +60,7 @@ const ArtistHeaderDescription: React.FC = () => {
     return (
       <div
         className={css`
+          padding-bottom: 0.75rem;
           display: flex;
           flex-direction: column;
           align-items: flex-start;
