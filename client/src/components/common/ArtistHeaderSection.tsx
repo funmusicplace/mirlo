@@ -185,9 +185,8 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
                       justify-content: center;
                       word-break: break-word;
                       width: 100%;
-                        min-height: auto;
                     `}
-                  >
+                   >
                     <H1 artistAvatar={!!artistAvatar}>{artist.name}</H1>
 
                     <ArtistFormLocation isManage={!!isManage} />
