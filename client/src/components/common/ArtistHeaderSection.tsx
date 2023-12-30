@@ -179,7 +179,6 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
                   >
                    <div
                     className={css`
-                      min-height: 50px;
                       display: flex;
                       flex-direction: column;
                       justify-content: center;
