@@ -119,8 +119,6 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
             className={css`
               display: flex;
               padding-top: 1rem;
-
-background: var(--mi-darken-background-color);  
               ${artistAvatar ? "margin-bottom: 0.75rem;" : ""}
               align-items: center;
 
@@ -141,7 +139,9 @@ background: var(--mi-darken-background-color);
             <div
               className={css`
                 width: 100%;
-                display: flex;
+                height: 100%;
+
+background: var(--mi-darken-background-color);                  display: flex;
                 margin-bottom: .5rem;
                 ${artistAvatar ? "min-height: 85px; margin-left: 1rem;" : ""}
                 flex-direction: column;
