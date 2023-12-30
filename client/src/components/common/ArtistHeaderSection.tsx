@@ -147,7 +147,7 @@ background: var(--mi-darken-background-color);                  display: flex;
                 flex-direction: column;
                 justify-content: center;
                 @media screen and (max-width: ${bp.medium}px) {
-                  ${artistAvatar ? "min-height: 50px; margin-left: .5rem;" : ""}
+                  ${artistAvatar ? "min-height: 55px; margin-left: .5rem;" : ""}
                 }
               `}
             >
