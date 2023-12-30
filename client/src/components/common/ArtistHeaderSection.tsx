@@ -1,4 +1,4 @@
-Oimport { css } from "@emotion/css";
+import { css } from "@emotion/css";
 import { Link } from "react-router-dom";
 import { bp } from "../../constants";
 import { MetaCard } from "components/common/MetaCard";
