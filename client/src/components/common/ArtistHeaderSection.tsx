@@ -1,4 +1,4 @@
-import { css } from "@emotion/css";
+Oimport { css } from "@emotion/css";
 import { Link } from "react-router-dom";
 import { bp } from "../../constants";
 import { MetaCard } from "components/common/MetaCard";
@@ -124,7 +124,7 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
 
               @media screen and (max-width: ${bp.medium}px) {
                 padding-top: 0rem;
-                margin-bottom: 0.5rem;
+              ${artistAvatar ? "margin-bottom: 0.5rem;" : ""}
               }
             `}
           >
