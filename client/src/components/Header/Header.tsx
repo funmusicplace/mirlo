@@ -28,19 +28,25 @@ const HeaderWrapper = styled.div<{
 
   ${(props) =>
     props.transparent
-      ? "background: transparent; box-shadow: 0px 1px 10px rgba(0, 0, 0, 0);"
-      : "background: var(--mi-light-background-color); box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1);"}
+      ? `background: transparent; 
+         box-shadow: 0px 1px 10px rgba(0, 0, 0, 0);`
+      : `background: var(--mi-light-background-color); 
+         box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1);`}
 
   ${(props) =>
     props.trackGroupId
-      ? "background-color: var(--mi-normal-background-color) !important; box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1) !important;"
+      ? `background-color: var(--mi-normal-background-color) !important; 
+         box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1) !important;`
       : ""}
 
   @media (prefers-color-scheme: dark) {
     ${(props) =>
       props.transparent
-        ? "background-color: transparent; box-shadow: 0px 1px 10px rgba(0, 0, 0, 0);"
-        : "background-color: #0e0e0e; box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.3); color: pink;"}
+        ? `background-color: transparent; 
+           box-shadow: 0px 1px 10px rgba(0, 0, 0, 0);`
+        : `background-color: #0e0e0e; 
+           box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.3); 
+           color: pink;`}
     ${(props) =>
       props.artistId && !props.artistBanner
         ? "background-color: var(--mi-normal-background-color);"
@@ -56,25 +62,40 @@ const HeaderWrapper = styled.div<{
     position: sticky;
     display: flex;
     align-items: flex-start;
+
     ${(props) =>
       props.artistBanner && !props.trackGroupId
-        ? "top: calc(var(--header-cover-sticky-height) - 25vw); aspect-ratio: 4 / 1; width: auto; min-height: auto; transition: top 0.4s ease-out;"
+        ? `top: calc(var(--header-cover-sticky-height) - 25vw); 
+           aspect-ratio: 4 / 1; 
+           width: auto; 
+           min-height: auto; 
+           transition: top 0.4s ease-out;`
         : ""}
     ${(props) =>
       props.artistBanner && !props.trackGroupId && props.show === "up"
-        ? "top: calc(var(--header-cover-sticky-height) - 25vw); aspect-ratio: 4 / 1; width: auto; min-height: auto; transition: top 0.4s ease-out;"
+        ? `top: calc(var(--header-cover-sticky-height) - 25vw); 
+           aspect-ratio: 4 / 1; 
+           width: auto; 
+           min-height: auto; 
+           transition: top 0.4s ease-out;`
         : ""}
     ${(props) =>
       props.artistBanner && !props.trackGroupId && props.show === "down"
-        ? "top: calc(var(--header-cover-sticky-height) - 50vw); aspect-ratio: 4 / 1; width: auto; min-height: auto; transition: top 0.4s ease-out;"
+        ? `top: calc(var(--header-cover-sticky-height) - 50vw); 
+           aspect-ratio: 4 / 1; 
+           width: auto; 
+           min-height: auto; 
+           transition: top 0.4s ease-out;`
         : ""}
 
 
     ${(props) => (props.trackGroupId ? "aspect-ratio: 0;" : "")}
+
     @media (prefers-color-scheme: dark) {
       ${(props) =>
-        props.artistBanner
-          ? "background: transparent; box-shadow: 0px 1px 10px rgba(0, 0, 0, 0);"
+        props.artistBanner || props.transparent
+          ? `background: transparent; 
+             box-shadow: 0px 1px 10px rgba(0, 0, 0, 0);`
           : "box-shadow: 0px 1px 10px rgba(0, 0, 0, .5);"}
     }
   }

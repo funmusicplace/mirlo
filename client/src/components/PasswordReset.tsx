@@ -104,7 +104,7 @@ function PasswordReset() {
         </form>
       )}
       <img
-        alt="blackbird"
+        alt="a blackbird"
         src="/images/blackbird.png"
         className={css`
           width: 100%;

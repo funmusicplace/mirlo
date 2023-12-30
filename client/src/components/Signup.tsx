@@ -175,7 +175,7 @@ function Signup() {
           {t("logIn")}
         </Link>
         <img
-          alt="blackbird"
+          alt="a blackbird"
           src="/images/blackbird.png"
           className={css`
             width: 100%;
