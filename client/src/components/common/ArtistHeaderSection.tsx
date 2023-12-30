@@ -141,6 +141,7 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
               className={css`
                 width: 100%;
                 display: flex;
+                margin-bottom: .5rem;
                 ${artistAvatar ? "min-height: 85px; margin-left: 1rem;" : ""}
                 flex-direction: column;
                 justify-content: center;
@@ -152,7 +153,7 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
               <div
                 className={css`
                   width: 100%;
-                  ${!artistAvatar ? "padding-bottom: .5rem;" : ""}
+                  ${!artistAvatar ? "padding-bottom: .75rem;" : ""}
                 `}
               >
                 <HeaderDiv
