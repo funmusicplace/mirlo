@@ -58,7 +58,7 @@ const ArtistPosts: React.FC = () => {
         </div>
         <div
           className={css`
-            margin-top: 1rem;
+            margin-top: 0;
             display: flex;
             flex-wrap: wrap;
             justify-content: ${artist.posts?.length % 3 === 2
