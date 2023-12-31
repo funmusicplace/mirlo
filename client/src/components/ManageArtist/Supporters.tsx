@@ -62,7 +62,10 @@ const Supporters = () => {
                 <td>{r.user.email}</td>
                 <td>{r.artistSubscriptionTier.name}</td>
                 <td>
-                  <Money amount={r.amount / 100} />
+                  <Money
+                    amount={r.amount / 100}
+                    currency={r.artistSubscriptionTier.currency}
+                  />
                 </td>
               </tr>
             ))}

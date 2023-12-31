@@ -25,7 +25,7 @@ const cleanUpUserAccounts = async () => {
         name: "deletedUser",
         password: await hashPassword(faker.internet.password()),
         isAdmin: false,
-        country: null,
+        currency: null,
         stripeAccountId: null,
         receiveMailingList: false,
       },

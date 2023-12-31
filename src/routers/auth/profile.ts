@@ -18,7 +18,7 @@ export const profile = async (
         name: true,
         artists: true,
         isAdmin: true,
-        country: true,
+        currency: true,
         wishlist: true,
         userTrackGroupPurchases: {
           select: {

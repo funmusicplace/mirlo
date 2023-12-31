@@ -52,7 +52,7 @@ export default function () {
       const userForCurrency = await prisma.user.findFirst({
         where: { id: user.id },
         select: {
-          country: true,
+          currency: true,
         },
       });
       const {
@@ -70,7 +70,7 @@ export default function () {
           description,
           minAmount,
           maxAmount,
-          currency: userForCurrency?.country ?? "USD",
+          currency: userForCurrency?.currency ?? "USD",
           allowVariable,
           defaultAmount,
         },

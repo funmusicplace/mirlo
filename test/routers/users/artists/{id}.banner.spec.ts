@@ -3,7 +3,6 @@ import assert from "node:assert";
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
-import request from "supertest";
 import { clearTables, createArtist, createUser } from "../../../utils";
 import prisma from "../../../../prisma/prisma";
 import {
@@ -12,8 +11,7 @@ import {
   finalArtistBannerBucket,
 } from "../../../../src/utils/minio";
 
-const baseURL = `${process.env.API_DOMAIN}/v1/`;
-const requestApp = request(baseURL);
+import { requestApp } from "../../utils";
 
 describe("users/{userId}/artists/{artistId}/banner", () => {
   beforeEach(async () => {

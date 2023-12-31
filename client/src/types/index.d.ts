@@ -12,7 +12,7 @@ interface LoggedInUser {
   artistUserSubscriptions?: ArtistUserSubscription[];
   userTrackGroupPurchases?: { trackGroupId: number }[];
   isAdmin: boolean;
-  country?: string;
+  currency?: string;
   wishlist?: {
     userId: number;
     trackGroupId: number;
@@ -128,6 +128,7 @@ interface ArtistSubscriptionTier {
   id: number;
   artistId: number;
   artist: Artist;
+  currency: string;
   minAmount?: number;
   name: string;
   description: string;

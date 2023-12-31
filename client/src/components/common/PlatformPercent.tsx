@@ -7,7 +7,8 @@ import { FiAlertCircle } from "react-icons/fi";
 const PlatformPercent: React.FC<{
   percent: number;
   chosenPrice?: string | number;
-}> = ({ percent, chosenPrice }) => {
+  currency?: string;
+}> = ({ percent, chosenPrice, currency = "USD" }) => {
   const chosenNumber =
     chosenPrice && isFinite(+chosenPrice) ? Number(chosenPrice) : null;
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
@@ -28,7 +29,7 @@ const PlatformPercent: React.FC<{
     >
       {t("platformPercent", {
         percent,
-        money: moneyDisplay({ amount }),
+        money: moneyDisplay({ amount, currency }),
       })}
       <span
         className={css`

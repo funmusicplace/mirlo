@@ -109,7 +109,6 @@ const routes = [
   "users/{userId}/tracks/{trackId}",
   "users/{userId}/posts/{postId}/publish",
   "users/{userId}/posts/{postId}",
-  "users/{userId}/posts/drafts",
   "users/{userId}/posts",
   "checkout",
   "webhooks/stripe",

@@ -58,7 +58,10 @@ const ManageSubscriptionTierBox: React.FC<{
       >
         <strong>
           {tier.name}:{" "}
-          <Money amount={tier.minAmount ? tier.minAmount / 100 : 0} />
+          <Money
+            amount={tier.minAmount ? tier.minAmount / 100 : 0}
+            currency={tier.currency}
+          />
         </strong>
         <div>
           <Button

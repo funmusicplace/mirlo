@@ -10,7 +10,7 @@ export const users: Prisma.UserCreateInput[] = [
     createdAt: new Date(),
     updatedAt: new Date(),
     deletedAt: null,
-    country: null,
+    currency: null,
     emailConfirmationToken: null,
     emailConfirmationExpiration: null,
     passwordResetConfirmationExpiration: null,

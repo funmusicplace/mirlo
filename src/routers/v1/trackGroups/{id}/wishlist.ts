@@ -1,17 +1,8 @@
 import { User } from "@prisma/client";
 import { Request, Response } from "express";
-import {
-  userAuthenticated,
-  userLoggedInWithoutRedirect,
-} from "../../../../auth/passport";
-import { generateFullStaticImageUrl } from "../../../../utils/images";
+import { userAuthenticated } from "../../../../auth/passport";
+
 import prisma from "../../../../../prisma/prisma";
-import { finalCoversBucket } from "../../../../utils/minio";
-
-const { API_DOMAIN } = process.env;
-
-import stripe from "../../../../utils/stripe";
-import { subscribeUserToArtist } from "../../../../utils/artist";
 
 type Params = {
   id: string;

@@ -4,7 +4,6 @@ import { Prisma } from "@prisma/client";
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
-import request from "supertest";
 import {
   clearTables,
   createArtist,
@@ -12,7 +11,7 @@ import {
   createUser,
 } from "../../utils";
 
-const baseURL = `${process.env.API_DOMAIN}/v1/`;
+import { requestApp } from "../utils";
 
 describe("trackGroups", () => {
   beforeEach(async () => {
@@ -25,7 +24,7 @@ describe("trackGroups", () => {
 
   describe("GET", () => {
     it("should GET /", async () => {
-      const response = await request(baseURL)
+      const response = await requestApp
         .get("trackGroups")
         .set("Accept", "application/json");
 
@@ -37,7 +36,7 @@ describe("trackGroups", () => {
       const { user } = await createUser({ email: "test@testcom" });
       const artist = await createArtist(user.id);
       const trackGroup = await createTrackGroup(artist.id);
-      const response = await request(baseURL)
+      const response = await requestApp
         .get("trackGroups")
         .set("Accept", "application/json");
 
@@ -52,7 +51,7 @@ describe("trackGroups", () => {
       await createTrackGroup(artist.id, {
         tracks: [] as Prisma.TrackCreateNestedManyWithoutTrackGroupInput,
       });
-      const response = await request(baseURL)
+      const response = await requestApp
         .get("trackGroups")
         .set("Accept", "application/json");
 
@@ -64,7 +63,7 @@ describe("trackGroups", () => {
       const { user } = await createUser({ email: "test@testcom" });
       const artist = await createArtist(user.id);
       await createTrackGroup(artist.id, { published: false });
-      const response = await request(baseURL)
+      const response = await requestApp
         .get("trackGroups")
         .set("Accept", "application/json");
 
@@ -89,7 +88,7 @@ describe("trackGroups", () => {
         urlSlug: "a-oldest-album",
         releaseDate: "2022-11-28T12:52:08.206Z",
       });
-      const response = await request(baseURL)
+      const response = await requestApp
         .get("trackGroups")
         .set("Accept", "application/json");
 

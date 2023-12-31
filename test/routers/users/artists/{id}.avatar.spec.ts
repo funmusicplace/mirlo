@@ -12,8 +12,7 @@ import {
   finalArtistAvatarBucket,
 } from "../../../../src/utils/minio";
 
-const baseURL = `${process.env.API_DOMAIN}/v1/`;
-const requestApp = request(baseURL);
+import { requestApp } from "../../utils";
 
 describe("users/{userId}/artists/{artistId}/avatar", () => {
   beforeEach(async () => {
