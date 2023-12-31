@@ -73,6 +73,7 @@ const DescriptionWrapperHasAvatar = styled.div`
 
 const ArtistActions = styled.div`
   text-align: right;
+  word-break: normal !important;
   display: flex;
   flex-direction: column;
   padding-left: 1rem;
