@@ -101,7 +101,12 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup }> = ({
     <FormProvider {...methods}>
       {!!trackGroup.minPrice && trackGroup.minPrice > 0 && (
         <>
-          {t("price")} <Money amount={trackGroup.minPrice / 100} />, or
+          {t("price")}{" "}
+          <Money
+            amount={trackGroup.minPrice / 100}
+            currency={trackGroup.currency}
+          />
+          , or
         </>
       )}
       <form onSubmit={handleSubmit(purchaseAlbum)}>
@@ -116,6 +121,7 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup }> = ({
         <PlatformPercent
           percent={trackGroup.platformPercent}
           chosenPrice={chosenPrice}
+          currency={trackGroup.currency}
         />
         <EmailInput />
 

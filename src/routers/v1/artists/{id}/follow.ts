@@ -30,6 +30,7 @@ export default function () {
           id: Number(artistId),
         },
         include: {
+          user: true,
           subscriptionTiers: true,
         },
       });

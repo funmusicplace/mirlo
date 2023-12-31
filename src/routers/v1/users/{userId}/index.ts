@@ -51,7 +51,7 @@ export default function () {
 
   async function PUT(req: Request, res: Response, next: NextFunction) {
     const { userId } = req.params as unknown as { userId: string };
-    const { email, name, country } = req.body;
+    const { email, name, currency } = req.body;
     const user = req.user as User;
 
     if (user.id !== Number(userId)) {
@@ -60,7 +60,7 @@ export default function () {
     }
 
     try {
-      let data: Prisma.UserUpdateInput = { name, country };
+      let data: Prisma.UserUpdateInput = { name, currency };
       if (email) {
         const emailChanged = email !== user.email;
         if (emailChanged) {
@@ -78,7 +78,7 @@ export default function () {
           email: true,
           name: true,
           emailConfirmationToken: true,
-          country: true,
+          currency: true,
         },
         where: {
           id: Number(userId),

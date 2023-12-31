@@ -9,9 +9,9 @@ import api from "services/api";
 import { useGlobalStateContext } from "state/GlobalState";
 import { useSnackbar } from "state/SnackbarContext";
 
-type Form = { country: string };
+type Form = { currency: string };
 
-const CountrySelect = () => {
+const CurrencySelect = () => {
   const { state, refreshLoggedInUser } = useGlobalStateContext();
   const userId = state.user?.id;
 
@@ -20,7 +20,7 @@ const CountrySelect = () => {
 
   const { register, handleSubmit } = useForm<Form>({
     defaultValues: {
-      country: state.user?.country,
+      currency: state.user?.currency,
     },
   });
 
@@ -28,7 +28,7 @@ const CountrySelect = () => {
     async (data: Form) => {
       try {
         await api.put(`users/${userId}`, {
-          country: data.country,
+          currency: data.currency,
         });
         snackbar(t("success"), { type: "success" });
       } catch (e) {
@@ -71,7 +71,7 @@ const CountrySelect = () => {
             }
           `}
         >
-          <SelectEl {...register("country")}>
+          <SelectEl {...register("currency")}>
             {stripeCountryCodes.map((cc) => (
               <option value={cc} key={cc}>
                 {cc}
@@ -222,4 +222,4 @@ const stripeCountryCodes = [
   "ZMW",
 ];
 
-export default CountrySelect;
+export default CurrencySelect;

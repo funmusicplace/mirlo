@@ -2,13 +2,11 @@ import assert from "node:assert";
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
-import request from "supertest";
 import prisma from "../../../prisma/prisma";
-import { buildTokens } from "../../../src/routers/auth";
 import Parser from "rss-parser";
 import { clearTables, createArtist, createUser } from "../../utils";
 
-const baseURL = `${process.env.API_DOMAIN}/v1/`;
+import { requestApp } from "../utils";
 
 describe("artists/{id}/feed", () => {
   beforeEach(async () => {
@@ -20,7 +18,7 @@ describe("artists/{id}/feed", () => {
   });
 
   it("should GET / 404", async () => {
-    const response = await request(baseURL)
+    const response = await requestApp
       .get("artists/1/feed")
       .set("Accept", "application/json");
 
@@ -42,7 +40,7 @@ describe("artists/{id}/feed", () => {
       },
     });
 
-    const response = await request(baseURL)
+    const response = await requestApp
       .get(`artists/${artist.id}/feed`)
       .set("Accept", "application/json");
 
@@ -75,7 +73,7 @@ describe("artists/{id}/feed", () => {
       },
     });
 
-    const response = await request(baseURL)
+    const response = await requestApp
       .get(`artists/${artist.id}/feed`)
       .set("Accept", "application/json");
 
@@ -110,7 +108,7 @@ describe("artists/{id}/feed", () => {
       },
     });
 
-    const response = await request(baseURL)
+    const response = await requestApp
       .get(`artists/${artist.id}/feed?format=rss`)
       .set("Accept", "application/json");
 
@@ -146,7 +144,7 @@ describe("artists/{id}/feed", () => {
       },
     });
 
-    const response = await request(baseURL)
+    const response = await requestApp
       .get(`artists/${artist.id}/feed`)
       .set("Accept", "application/json");
 
@@ -200,7 +198,7 @@ describe("artists/{id}/feed", () => {
       },
     });
 
-    const response = await request(baseURL)
+    const response = await requestApp
       .get(`artists/${artist.id}/feed`)
       .set("Cookie", [`jwt=${accessToken}`])
       .set("Accept", "application/json");
@@ -260,7 +258,7 @@ describe("artists/{id}/feed", () => {
       },
     });
 
-    const response = await request(baseURL)
+    const response = await requestApp
       .get(`artists/${artist.id}/feed`)
       .set("Cookie", [`jwt=${accessToken}`])
       .set("Accept", "application/json");

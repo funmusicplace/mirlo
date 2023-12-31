@@ -30,10 +30,10 @@ model User {
   deletedAt                           DateTime?
   isAdmin                             Boolean                  @default(false)
   artistUserSubscriptions             ArtistUserSubscription[]
-  country                             String?
+  currency                            String?
   userTrackGroupPurchases             UserTrackGroupPurchase[]
   emailConfirmationToken              String?                  @default(uuid()) @db.Uuid
-  emailConfirmationExpiration         DateTime?                @default(dbgenerated("NOW() + '10 min'::interval"))
+  emailConfirmationExpiration         DateTime?                @default(dbgenerated("(NOW() + '00:10:00'::interval)"))
   passwordResetConfirmationToken      String?
   passwordResetConfirmationExpiration DateTime?
   stripeAccountId                     String?

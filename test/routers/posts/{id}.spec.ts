@@ -2,21 +2,10 @@ import assert from "node:assert";
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
-import request from "supertest";
-import {
-  clearTables,
-  createArtist,
-  createPost,
-  createTrackGroup,
-  createUser,
-} from "../../utils";
-import prisma from "../../../prisma/prisma";
-import { randomUUID } from "crypto";
+import { clearTables, createArtist, createPost, createUser } from "../../utils";
+
 import { faker } from "@faker-js/faker";
-
-const baseURL = `${process.env.API_DOMAIN}/v1/`;
-
-const requestApp = request(baseURL);
+import { requestApp } from "../utils";
 
 describe("posts/{id}", () => {
   beforeEach(async () => {

@@ -115,7 +115,7 @@ export default function () {
       const userForCurrency = await prisma.user.findFirst({
         where: { id: user.id },
         select: {
-          country: true,
+          currency: true,
         },
       });
       const result = await prisma.trackGroup.create({
@@ -127,7 +127,7 @@ export default function () {
           artist: { connect: { id: artistId } },
           published,
           minPrice,
-          currency: userForCurrency?.country ?? "USD",
+          currency: userForCurrency?.currency ?? "USD",
           releaseDate: releaseDate ? new Date(releaseDate) : undefined,
           adminEnabled: true,
           urlSlug,
