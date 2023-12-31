@@ -80,6 +80,7 @@ const AboutWrapper = styled.div`
   max-width: 70%;
   margin: 1.25rem 0 1.25rem;
   padding: 0.5rem 2rem 0.25rem 0rem;
+  word-break: break-word !important;
 
   p {
     line-height: 1.5rem;
@@ -96,6 +97,7 @@ const CreditsWrapper = styled.div<{ trackGroupCredits: string }>`
   padding: 0.5rem 0.25rem 0.5rem 2rem;
   font-size: var(--mi-font-size-small);
   opacity: 0.5;
+  word-break: break-word !important;
 
   p {
     line-height: 1.3rem;
