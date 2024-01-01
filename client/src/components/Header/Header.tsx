@@ -63,6 +63,19 @@ const HeaderWrapper = styled.div<{
     display: flex;
     align-items: flex-start;
 
+
+    ${(props) =>
+      props.show === "up"
+        ? `top: 0;
+           transition: top 0.4s ease-out;`
+        : ""}
+    ${(props) =>
+      props.show === "down"
+        ? `top: -60px;
+           transition: top 0.4s ease-out;`
+        : ""}
+
+
     ${(props) =>
       props.artistBanner && !props.trackGroupId
         ? `top: calc(var(--header-cover-sticky-height) - 25vw); 
