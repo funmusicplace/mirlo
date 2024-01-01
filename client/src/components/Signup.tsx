@@ -117,7 +117,11 @@ function Signup() {
           <h2>{t("register")}</h2>
           <FormComponent>
             <label>{t("name")}</label>
-            <InputEl type="input" {...register("name")} />
+            <InputEl
+              type="input"
+              {...register("name")}
+              title="This name doesn't have to be your Artist Name."
+            />
           </FormComponent>
           <FormComponent>
             <label>{t("email")}</label>
