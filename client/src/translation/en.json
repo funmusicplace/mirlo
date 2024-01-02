@@ -274,8 +274,12 @@
     "downloadSubscriberData": "Download subscriber data"
   },
   "subscriptionForm": {
+    "supporters": "View supporters",
     "subscriptionUpdated": "Subscription updated",
     "name": "Name: ",
+    "addNewTier": "Add new tier",
+    "allowVariableDescription": "Allow supporters to enter a larger number?",
+    "newSubscriptionTierFor": "New subscription tier for {{ artistName }}",
     "minimumAmount": "Minimum amount: ",
     "description": "Description",
     "saveSubscription": "Save subscription",

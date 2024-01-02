@@ -32,6 +32,14 @@ const MarkdownWrapper = styled.div`
     margin-left: 1rem;
     margin-bottom: 1rem;
   }
+
+  pre {
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    max-width: 100%;
+    display: block;
+    overflow: scroll;
+  }
 `;
 
 export default MarkdownWrapper;

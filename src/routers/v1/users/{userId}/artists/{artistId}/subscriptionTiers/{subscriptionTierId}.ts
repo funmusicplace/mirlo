@@ -31,6 +31,7 @@ export default function () {
         data: {
           name: req.body.name,
           description: req.body.description,
+          allowVariable: req.body.allowVariable,
           // TODO: make sure minAmount is alphanumeric
           minAmount: +req.body.minAmount,
         },

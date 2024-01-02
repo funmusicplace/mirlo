@@ -6,7 +6,6 @@ import FormComponent from "components/common/FormComponent";
 import { useTranslation } from "react-i18next";
 import { InputEl } from "components/common/Input";
 import TextArea from "components/common/TextArea";
-// import { SelectEl } from "components/common/Select";
 import UploadImage from "../UploadImage";
 import UploadArtistImage from "../UploadArtistImage";
 
