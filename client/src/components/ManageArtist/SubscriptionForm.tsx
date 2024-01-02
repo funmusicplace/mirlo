@@ -22,7 +22,6 @@ const generateDefaultValues = (existing?: ArtistSubscriptionTier) => {
       existing?.minAmount !== undefined ? existing.minAmount / 100 : ""
     }`,
   };
-  console.log("vals", vals);
   return vals;
 };
 const SubscriptionForm: React.FC<{
@@ -40,12 +39,7 @@ const SubscriptionForm: React.FC<{
   const snackbar = useSnackbar();
   const errorHandler = useErrorHandler();
   const [isSaving, setIsSaving] = React.useState(false);
-  console.log(
-    "existing",
-    existing,
-    existing?.minAmount,
-    existing?.minAmount ? existing.minAmount / 100 : ""
-  );
+
   const methods = useForm<{
     name: string;
     description: string;
@@ -114,7 +108,7 @@ const SubscriptionForm: React.FC<{
           </FormComponent>
           <FormComponent>
             {t("minimumAmount")}
-            <InputEl type="number" {...register("minAmount")} />
+            <InputEl type="number" {...(register("minAmount"), { min: 0 })} />
             <small>in {user?.currency}</small>
           </FormComponent>
           <FormCheckbox
