@@ -27,6 +27,17 @@ const HeaderWrapper = styled.div<{
   transition: top 0.4s ease-out;
 
   ${(props) =>
+      props.show === "up"
+        ? `top: 0;
+           transition: top 0.4s ease-out;`
+        : ""}
+  ${(props) =>
+      props.show === "down"
+        ? `top: -60px;
+           transition: top 0.4s ease-out;`
+        : ""}
+
+  ${(props) =>
     props.transparent
       ? `background: transparent; 
          box-shadow: 0px 1px 10px rgba(0, 0, 0, 0);`
@@ -62,19 +73,6 @@ const HeaderWrapper = styled.div<{
     position: sticky;
     display: flex;
     align-items: flex-start;
-
-
-    ${(props) =>
-      props.show === "up"
-        ? `top: 0;
-           transition: top 0.4s ease-out;`
-        : ""}
-    ${(props) =>
-      props.show === "down"
-        ? `top: -60px;
-           transition: top 0.4s ease-out;`
-        : ""}
-
 
     ${(props) =>
       props.artistBanner && !props.trackGroupId
