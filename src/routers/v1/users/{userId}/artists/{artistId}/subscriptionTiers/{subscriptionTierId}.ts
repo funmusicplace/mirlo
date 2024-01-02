@@ -62,7 +62,7 @@ export default function () {
         in: "body",
         name: "subscription",
         schema: {
-          $ref: "#/definitions/ArtistSubscriptionTier",
+          $ref: "#/definitions/ArtistSubscriptionTierUpdate",
         },
       },
     ],
@@ -70,7 +70,7 @@ export default function () {
       200: {
         description: "Updated subscription",
         schema: {
-          $ref: "#/definitions/ArtistSubscriptionTier",
+          $ref: "#/definitions/ArtistSubscriptionTierResult",
         },
       },
       default: {

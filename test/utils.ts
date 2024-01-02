@@ -55,7 +55,7 @@ export const createPost = async (
   artistId: number,
   data?: Partial<Prisma.PostCreateArgs["data"]>
 ) => {
-  const artist = await prisma.post.create({
+  const post = await prisma.post.create({
     data: {
       title: data?.title ?? "Test title",
       artistId: artistId,
@@ -63,7 +63,22 @@ export const createPost = async (
       content: data?.content ?? "The content",
     },
   });
-  return artist;
+  return post;
+};
+
+export const createTier = async (
+  artistId: number,
+  data?: Partial<Prisma.ArtistSubscriptionTierCreateArgs["data"]>
+) => {
+  const tier = await prisma.artistSubscriptionTier.create({
+    data: {
+      minAmount: data?.minAmount,
+      allowVariable: data?.allowVariable,
+      name: data?.name ?? "Test title",
+      artistId: artistId,
+    },
+  });
+  return tier;
 };
 
 export const createTrackGroup = async (
