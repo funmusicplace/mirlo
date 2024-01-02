@@ -32,7 +32,7 @@ const Content = styled.div<ContentProps>`
   left: 0;
   right: 0;
   overflow-y: auto;
-  max-width: var(--mi-container-medium);
+  max-width: var(--mi-container-small);
   margin: 0 auto;
   max-height: calc(100vh - 150px);
   padding: 20px;

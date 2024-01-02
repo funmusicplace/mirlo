@@ -130,6 +130,9 @@
     "editLocation": "Edit location",
     "saveLocation": "Save location",
     "cancel": "Cancel",
+    "howMuch": "Your subscription amount",
+    "mustBeAtLeast": "Must be at least {{minAmount}}",
+    "letsSupport": "Support this artist",
     "cancelSubscription": "Cancel subscription",
     "chooseThisSubscription": "Choose this subscription",
     "platformPercentDisclaimer": "Mirlo is evaluating the platform percentage and seeking input from musicians in the next few weeks.",
@@ -274,8 +277,12 @@
     "downloadSubscriberData": "Download subscriber data"
   },
   "subscriptionForm": {
+    "supporters": "View supporters",
     "subscriptionUpdated": "Subscription updated",
     "name": "Name: ",
+    "addNewTier": "Add new tier",
+    "allowVariableDescription": "Allow supporters to enter a larger number?",
+    "newSubscriptionTierFor": "New subscription tier for {{ artistName }}",
     "minimumAmount": "Minimum amount: ",
     "description": "Description",
     "saveSubscription": "Save subscription",

@@ -1,6 +1,6 @@
 import React from "react";
 
-import { useForm } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import Button from "../common/Button";
 import { InputEl } from "../common/Input";
 import TextArea from "../common/TextArea";
@@ -10,11 +10,20 @@ import { pick } from "lodash";
 import api from "../../services/api";
 import { useGlobalStateContext } from "state/GlobalState";
 import Box from "components/common/Box";
-import CurrencyInput from "react-currency-input-field";
 import useErrorHandler from "services/useErrorHandler";
 import { useTranslation } from "react-i18next";
 import { css } from "@emotion/css";
+import FormCheckbox from "components/common/FormCheckbox";
 
+const generateDefaultValues = (existing?: ArtistSubscriptionTier) => {
+  const vals = {
+    ...existing,
+    minAmount: `${
+      existing?.minAmount !== undefined ? existing.minAmount / 100 : ""
+    }`,
+  };
+  return vals;
+};
 const SubscriptionForm: React.FC<{
   artist: Artist;
   existing?: ArtistSubscriptionTier;
@@ -30,16 +39,16 @@ const SubscriptionForm: React.FC<{
   const snackbar = useSnackbar();
   const errorHandler = useErrorHandler();
   const [isSaving, setIsSaving] = React.useState(false);
-  const { register, handleSubmit, reset } = useForm<{
+
+  const methods = useForm<{
     name: string;
     description: string;
     minAmount: string;
+    allowVariable: boolean;
   }>({
-    defaultValues: {
-      ...existing,
-      minAmount: `${existing?.minAmount ? existing.minAmount / 100 : ""}`,
-    },
+    defaultValues: generateDefaultValues(existing),
   });
+  const { register, handleSubmit, reset } = methods;
 
   const existingId = existing?.id;
   const userId = user?.id;
@@ -50,11 +59,11 @@ const SubscriptionForm: React.FC<{
       if (userId) {
         try {
           setIsSaving(true);
+          const sending = {
+            ...pick(data, ["name", "description", "allowVariable"]),
+            minAmount: data.minAmount ? +data.minAmount * 100 : undefined,
+          };
           if (existingId) {
-            const sending = {
-              ...pick(data, ["name", "description", "minAmount"]),
-              minAmount: data.minAmount ? +data.minAmount * 100 : undefined,
-            };
             await api.put<
               Partial<ArtistSubscriptionTier>,
               ArtistSubscriptionTier
@@ -66,10 +75,10 @@ const SubscriptionForm: React.FC<{
             await api.post<
               Partial<ArtistSubscriptionTier>,
               ArtistSubscriptionTier
-            >(`users/${userId}/artists/${artistId}/subscriptionTiers/`, {
-              ...pick(data, ["name", "description"]),
-              minAmount: data.minAmount ? +data.minAmount * 100 : undefined,
-            });
+            >(
+              `users/${userId}/artists/${artistId}/subscriptionTiers/`,
+              sending
+            );
           }
 
           snackbar("subscriptionUpdated", { type: "success" });
@@ -86,32 +95,42 @@ const SubscriptionForm: React.FC<{
   );
 
   return (
-    <Box
-      className={css`
-        background-color: var(--mi-darken-background-color);
-      `}
-    >
-      <form onSubmit={handleSubmit(doSave)}>
-        <h4>{t("editSubscriptionTierFor", { artistName: artist.name })}</h4>
-
-        <FormComponent>
-          {t("name")}
-          <InputEl {...register("name")} />
-        </FormComponent>
-        <FormComponent>
-          {t("minimumAmount")}
-          <InputEl as={CurrencyInput} {...register("minAmount")} />
-        </FormComponent>
-
-        <FormComponent>
-          {t("description")}
-          <TextArea {...register("description")} />
-        </FormComponent>
-        <Button type="submit" disabled={isSaving} compact isLoading={isSaving}>
-          {existing ? t("saveSubscription") : t("createSubscription")}
-        </Button>
-      </form>
-    </Box>
+    <FormProvider {...methods}>
+      <Box
+        className={css`
+          background-color: var(--mi-darken-background-color);
+        `}
+      >
+        <form onSubmit={handleSubmit(doSave)}>
+          <FormComponent>
+            {t("name")}
+            <InputEl {...register("name")} />
+          </FormComponent>
+          <FormComponent>
+            {t("minimumAmount")}
+            <InputEl type="number" {...(register("minAmount"), { min: 0 })} />
+            <small>in {user?.currency}</small>
+          </FormComponent>
+          <FormCheckbox
+            idPrefix={`${existingId}`}
+            keyName="allowVariable"
+            description={t("allowVariableDescription")}
+          />
+          <FormComponent>
+            {t("description")}
+            <TextArea {...register("description")} />
+          </FormComponent>
+          <Button
+            type="submit"
+            disabled={isSaving}
+            compact
+            isLoading={isSaving}
+          >
+            {existing ? t("saveSubscription") : t("createSubscription")}
+          </Button>
+        </form>
+      </Box>
+    </FormProvider>
   );
 };
 

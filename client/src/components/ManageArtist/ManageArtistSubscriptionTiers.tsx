@@ -8,11 +8,19 @@ import useGetUserObjectById from "utils/useGetUserObjectById";
 import { Link, useParams } from "react-router-dom";
 import HeaderDiv from "components/common/HeaderDiv";
 import { ManageSectionWrapper } from "./ManageSectionWrapper";
+import Modal from "components/common/Modal";
+import { useTranslation } from "react-i18next";
+import Button from "components/common/Button";
+import { FaPlus } from "react-icons/fa";
 
 const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
   const {
     state: { user },
   } = useGlobalStateContext();
+  const [addingNewTier, setAddingNewTier] = React.useState(false);
+  const { t } = useTranslation("translation", {
+    keyPrefix: "subscriptionForm",
+  });
 
   const {
     state: { artist },
@@ -35,7 +43,19 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
     <ManageSectionWrapper>
       <HeaderDiv>
         <div />
-        <Link to="supporters">Supporters</Link>
+        <div>
+          <Link to="supporters">{t("supporters")}</Link>
+          <Button
+            transparent
+            onClick={() => {
+              setAddingNewTier(true);
+            }}
+            startIcon={<FaPlus />}
+            compact
+          >
+            {t("addNewTier")}
+          </Button>
+        </div>
       </HeaderDiv>
       <div
         className={css`
@@ -51,8 +71,13 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
           />
         ))}
       </div>
-
-      <SubscriptionForm artist={artist} reload={reload} />
+      <Modal
+        open={addingNewTier}
+        onClose={() => setAddingNewTier(false)}
+        title={t("newSubscriptionTierFor", { artistName: artist.name }) ?? ""}
+      >
+        <SubscriptionForm artist={artist} reload={reload} />
+      </Modal>
     </ManageSectionWrapper>
   );
 };

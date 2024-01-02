@@ -75,7 +75,7 @@ export default function () {
           defaultAmount,
         },
       });
-      res.json({ subscription });
+      res.json({ result: subscription });
     } catch (e) {
       res.status(500).json({
         error:
@@ -97,7 +97,7 @@ export default function () {
         in: "body",
         name: "subscription",
         schema: {
-          $ref: "#/definitions/ArtistSubscriptionTier",
+          $ref: "#/definitions/ArtistSubscriptionTierCreate",
         },
       },
     ],
@@ -105,7 +105,7 @@ export default function () {
       200: {
         description: "Created artistSubscriptionTier",
         schema: {
-          $ref: "#/definitions/ArtistSubscriptionTier",
+          $ref: "#/definitions/ArtistSubscriptionTierResult",
         },
       },
       default: {

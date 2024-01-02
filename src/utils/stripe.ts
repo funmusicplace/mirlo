@@ -39,7 +39,7 @@ export const createSubscriptionStripeProduct = async (
     const product = await stripe.products.create(
       {
         name: `Supporting ${tier.artist.name} at ${tier.name}`,
-        description: tier.description ?? "Thank you for your support!",
+        description: tier.description || "Thank you for your support!",
       },
       {
         stripeAccount: stripeAccountId,

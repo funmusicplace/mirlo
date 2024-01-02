@@ -31,6 +31,7 @@ export default function () {
         data: {
           name: req.body.name,
           description: req.body.description,
+          allowVariable: req.body.allowVariable,
           // TODO: make sure minAmount is alphanumeric
           minAmount: +req.body.minAmount,
         },
@@ -61,7 +62,7 @@ export default function () {
         in: "body",
         name: "subscription",
         schema: {
-          $ref: "#/definitions/ArtistSubscriptionTier",
+          $ref: "#/definitions/ArtistSubscriptionTierUpdate",
         },
       },
     ],
@@ -69,7 +70,7 @@ export default function () {
       200: {
         description: "Updated subscription",
         schema: {
-          $ref: "#/definitions/ArtistSubscriptionTier",
+          $ref: "#/definitions/ArtistSubscriptionTierResult",
         },
       },
       default: {

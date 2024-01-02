@@ -134,6 +134,7 @@ interface ArtistSubscriptionTier {
   description: string;
   isDefaultTier: boolean;
   platformPercent: number;
+  allowVariable?: boolean;
 }
 
 interface ArtistUserSubscription {

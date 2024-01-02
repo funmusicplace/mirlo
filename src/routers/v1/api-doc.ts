@@ -77,9 +77,43 @@ const apiDoc = {
         },
       },
     },
-    ArtistSubscriptionTier: {
+    ArtistSubscriptionTierResult: {
+      type: "object",
+      properties: {
+        name: {
+          description: "name of the subscription",
+          type: "string",
+        },
+        description: {
+          description: "description of the subscription",
+          type: "string",
+        },
+        minAmount: {
+          description: "minimum amount of the subscription",
+          type: "number",
+        },
+      },
+    },
+    ArtistSubscriptionTierCreate: {
       type: "object",
       required: ["name", "description"],
+      properties: {
+        name: {
+          description: "name of the subscription",
+          type: "string",
+        },
+        description: {
+          description: "description of the subscription",
+          type: "string",
+        },
+        minAmount: {
+          description: "minimum amount of the subscription",
+          type: "number",
+        },
+      },
+    },
+    ArtistSubscriptionTierUpdate: {
+      type: "object",
       properties: {
         name: {
           description: "name of the subscription",
