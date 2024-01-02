@@ -42,7 +42,7 @@ export default function () {
 
   async function POST(req: Request, res: Response, next: NextFunction) {
     const { id: artistId } = req.params as unknown as Params;
-    let { tierId, email } = req.body;
+    let { tierId, email, amount } = req.body;
 
     const loggedInUser = req.user as User | undefined;
 
@@ -128,7 +128,9 @@ export default function () {
               {
                 price_data: {
                   tax_behavior: "exclusive",
-                  unit_amount: newTier.minAmount ?? 0,
+                  unit_amount: newTier.allowVariable
+                    ? amount || newTier.minAmount
+                    : newTier.minAmount ?? 0,
                   currency: newTier.currency ?? "USD",
                   product: productKey,
                   recurring: { interval: "month" },

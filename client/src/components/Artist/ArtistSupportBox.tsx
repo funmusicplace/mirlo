@@ -4,7 +4,6 @@ import api from "services/api";
 import { useGlobalStateContext } from "state/GlobalState";
 import { useSnackbar } from "state/SnackbarContext";
 import Box from "../common/Box";
-import Button from "../common/Button";
 import Money from "../common/Money";
 import { useTranslation } from "react-i18next";
 import MarkdownContent from "components/common/MarkdownContent";
@@ -13,13 +12,9 @@ import PlatformPercent from "components/common/PlatformPercent";
 import { useArtistContext } from "state/ArtistContext";
 import LoadingBlocks from "./LoadingBlocks";
 import styled from "@emotion/styled";
-
-const SupportBoxButton = styled(Button)`
-  width: 100%;
-  white-space: normal !important;
-  margin-top: 1rem;
-  padding: 0.5rem 0.5rem;
-`;
+import ArtistVariableSupport, {
+  SupportBoxButton,
+} from "./ArtistVariableSupport";
 
 const StyledSupportBox = styled(Box)`
   background-color: var(--mi-darken-background-color);
@@ -86,6 +81,7 @@ const ArtistSupportBox: React.FC<{
   React.useState<ArtistSubscriptionTier>();
   const [isCheckingForSubscription, setIsCheckingForSubscription] =
     React.useState(false);
+
   const snackbar = useSnackbar();
   const userId = user?.id;
 
@@ -96,7 +92,7 @@ const ArtistSupportBox: React.FC<{
       const response = await api.post<
         { tierId: number },
         { sessionUrl: string }
-      >(`artists/${subscriptionTier.artistId}/subscribe`, {
+      >(`artists/${tier.artistId}/subscribe`, {
         tierId: tier.id,
       });
       window.location.assign(response.sessionUrl);
@@ -195,15 +191,8 @@ const ArtistSupportBox: React.FC<{
       >
         {!ownedByUser && !isSubscribedToTier && !isSubscribedToArtist && (
           <>
-            <SupportBoxButton
-              compact
-              uppercase
-              onClick={() => subscribeToTier(subscriptionTier)}
-              isLoading={isCheckingForSubscription}
-              disabled={isCheckingForSubscription}
-            >
-              {t("support")}
-            </SupportBoxButton>
+            <ArtistVariableSupport tier={subscriptionTier} />
+
             <PlatformPercent
               percent={subscriptionTier.platformPercent}
               chosenPrice={
@@ -232,6 +221,7 @@ const ArtistSupportBox: React.FC<{
             {user && isSubscribedToArtist && !isSubscribedToTier && (
               <SupportBoxButton
                 onClick={() => subscribeToTier(subscriptionTier)}
+                isLoading={isCheckingForSubscription}
               >
                 {t("chooseThisSubscription")}
               </SupportBoxButton>
