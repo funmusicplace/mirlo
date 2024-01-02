@@ -133,17 +133,6 @@ h6 {
   padding-bottom: .75rem;
 }
 
-.hidden {
-  top: -60px;
-  z-index: 999;
-  transition: top 0.4s ease-out;
-}
-
-.active {
-  top: 0;
-  transition: top 0.4s ease-out;
-}
-
 @media (max-width: 768px) {
   h1 {
     font-size: 2rem;
