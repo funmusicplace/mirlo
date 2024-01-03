@@ -120,7 +120,12 @@ const AlbumForm: React.FC<{
             existingFileCover={existing.cover?.sizes?.[120]}
           />
 
-          <Button type="submit" disabled={isDisabled} isLoading={isDisabled}>
+          <Button
+            variant="big"
+            type="submit"
+            disabled={isDisabled}
+            isLoading={isDisabled}
+          >
             {existing.published ? t("update") : t("saveDraft")}
           </Button>
         </form>

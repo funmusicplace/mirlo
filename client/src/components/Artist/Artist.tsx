@@ -10,7 +10,7 @@ import React from "react";
 
 export const ArtistSection = styled.div`
   margin-bottom: 2rem;
-  margin-top: 1rem;
+  margin-top: 0.5rem;
 
   @media screen and (max-width: ${bp.medium}px) {
     padding: var(--mi-side-paddings-xsmall);

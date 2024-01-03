@@ -19,6 +19,8 @@ const TrackRow = styled("tr")`
   }
   > td > .track-number {
     display: block;
+    padding: 0.4rem;
+    font-size: 0.9rem;
   }
   &:hover > td > .play-button {
     display: block;

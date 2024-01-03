@@ -6,7 +6,7 @@ type Props = {
 
 const Background = styled.div<Props>`
   position: fixed; /* Stay in place */
-  z-index: 11; /* Sit on top */
+  z-index: 999; /* Sit on top */
   left: 0;
   top: 0;
   width: 100%; /* Full width */

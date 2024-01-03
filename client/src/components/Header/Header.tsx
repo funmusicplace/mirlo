@@ -27,15 +27,15 @@ const HeaderWrapper = styled.div<{
   transition: top 0.4s ease-out;
 
   ${(props) =>
-      props.show === "up"
-        ? `top: 0;
+    props.show === "up"
+      ? `top: 0;
            transition: top 0.4s ease-out;`
-        : ""}
+      : ""}
   ${(props) =>
-      props.show === "down"
-        ? `top: -60px;
+    props.show === "down"
+      ? `top: -60px;
            transition: top 0.4s ease-out;`
-        : ""}
+      : ""}
 
   ${(props) =>
     props.transparent
@@ -162,7 +162,7 @@ const Content = styled.div<{ artistId?: string }>`
   align-items: center;
   padding: 0.5rem 1rem;
   width: 100%;
-  z-index: 99;
+  z-index: 999;
   position: sticky;
   top: 0px;
   margin: 0 auto;

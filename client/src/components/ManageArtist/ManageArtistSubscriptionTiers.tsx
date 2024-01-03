@@ -42,8 +42,14 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
   return (
     <ManageSectionWrapper>
       <HeaderDiv>
-        <div />
-        <div>
+        <div
+          className={css`
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+          `}
+        >
           <Link to="supporters">{t("supporters")}</Link>
           <Button
             transparent

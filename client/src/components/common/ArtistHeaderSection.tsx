@@ -6,7 +6,6 @@ import styled from "@emotion/styled";
 import FollowArtist from "./FollowArtist";
 import { useGlobalStateContext } from "state/GlobalState";
 import Button from "./Button";
-import { FaPen } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 import HeaderDiv from "./HeaderDiv";
 import ArtistFormLinks from "components/ManageArtist/ArtistFormLinks";
@@ -176,29 +175,24 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
                       }
                     `}
                   >
-                   <div
-                    className={css`
-                      display: flex;
-                      flex-direction: column;
-                      justify-content: center;
-                      word-break: break-word;
-                      width: 100%;
-                    `}
-                   >
-                    <H1 artistAvatar={!!artistAvatar}>{artist.name}</H1>
+                    <div
+                      className={css`
+                        display: flex;
+                        flex-direction: column;
+                        justify-content: center;
+                        word-break: break-word;
+                        width: 100%;
+                      `}
+                    >
+                      <H1 artistAvatar={!!artistAvatar}>{artist.name}</H1>
 
-                    <ArtistFormLocation isManage={!!isManage} />
-                   </div>
+                      <ArtistFormLocation isManage={!!isManage} />
+                    </div>
                     <ArtistActions>
                       {!isManage && <FollowArtist artistId={artist.id} />}
                       {!isManage && user?.id === artist.userId && (
                         <Link to={`/manage/artists/${artist.id}`}>
-                          <Button
-                            compact
-                            transparent
-                            type="button"
-                            startIcon={<FaPen />}
-                          >
+                          <Button compact variant="big" type="button">
                             {t("edit")}
                           </Button>
                         </Link>
@@ -206,18 +200,17 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
                     </ArtistActions>
                   </div>
                 </HeaderDiv>
-                
               </div>
-              {!artistAvatar &&
-              <div
-                className={css`
-                  width: 100%;
-                  ${!artistAvatar ? "padding-top: .75rem;" : ""}
-                `}
-              >
-<ArtistHeaderDescription />
-            </div>}
-
+              {!artistAvatar && (
+                <div
+                  className={css`
+                    width: 100%;
+                    ${!artistAvatar ? "padding-top: .75rem;" : ""}
+                  `}
+                >
+                  <ArtistHeaderDescription />
+                </div>
+              )}
             </div>
           </div>
           {artistAvatar && (

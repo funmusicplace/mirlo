@@ -32,7 +32,6 @@ const Content = styled.div<ContentProps>`
   left: 0;
   right: 0;
   overflow-y: auto;
-  max-width: var(--mi-container-small);
   margin: 0 auto;
   max-height: calc(100vh - 150px);
   padding: 20px;
@@ -40,7 +39,10 @@ const Content = styled.div<ContentProps>`
   border: 1px solid var(--mi-darken-background-color);
   display: flex;
   flex-direction: column;
-  width: ${(props) => (props.size === "small" ? "40%" : "80%")};
+  ${(props) =>
+    props.size === "small"
+      ? "width: 30%;"
+      : "width: 80%; max-width: var(--mi-container-big);"};
 
   animation: 300ms ease-out forwards slide-up;
   border-radius: var(--mi-border-radius-x);
@@ -61,14 +63,22 @@ const Content = styled.div<ContentProps>`
     display: inline-block;
   }
 
+  @media (max-width: ${bp.xlarge}px) {
+    ${(props) => (props.size === "small" ? "width: 50%;" : "")}
+  }
+
+  @media (max-width: ${bp.large}px) {
+    ${(props) => (props.size === "small" ? "width: 70%;" : "")}
+  }
+
   @media (max-width: ${bp.small}px) {
-    width: 100%;
     padding: 1rem;
-    min-height: calc(90vh - 80px);
+    max-height: calc(90vh - 80px);
+    ${(props) =>
+      props.size === "small"
+        ? "width: 90%;"
+        : "bottom: 0; border-radius: var(--mi-border-radius-focus) var(--mi-border-radius-focus) 0  0; width: 100%;"}
     padding-top: 0;
-    bottom: 0;
-    border-radius: var(--mi-border-radius-focus) var(--mi-border-radius-focus) 0
-      0;
   }
 `;
 
@@ -78,8 +88,9 @@ const close = css`
   border: none;
   background: none;
   cursor: pointer;
-  margin-bottom: 0.25rem;
-  font-size: 1rem !important
+  margin-bottom: 0.7rem;
+  line-height: 1.5rem;
+  font-size: 1rem !important;
 
   &:hover,
   &:focus {
@@ -132,14 +143,16 @@ export const Modal: React.FC<{
             position: sticky;
             top: 0;
             padding-top: 1rem;
+            align-items: center;
             margin-bottom: .5rem;
             background-color: inherit;
             border-bottom: solid 1px var(--mi-light-foreground-color);
-            z-index: +1;
+            z-index: 12;
 
             h2 {
-              margin-bottom: 0;
               font-weight: bold;
+              flex: 90%;
+              max-width: 90%;
             }
               }
             `}

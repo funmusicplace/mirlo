@@ -34,7 +34,7 @@ const getExistingImage = (
     return undefined;
   }
   const actualImageLocation =
-    imageType === "banner" ? image?.sizes?.[625] : image?.sizes?.[300];
+    imageType === "banner" ? image?.sizes?.[625] : image?.sizes?.[600];
   return `${actualImageLocation}/?updatedAt=${image?.updatedAt}`;
 };
 
@@ -145,8 +145,8 @@ const UploadArtistImage: React.FC<{
               width: 100%;
             }
             input {
-              flex: 45%;
-              width: 45%;
+              flex: 100%;
+              width: 100%;
             }
 
             label {

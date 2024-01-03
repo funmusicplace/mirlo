@@ -33,6 +33,7 @@ const TrackTableComponent = styled(Table)`
     }
 
     tr {
+      margin-bottom: 1rem;
       border: 1px solid #ccc;
     }
 
@@ -41,7 +42,6 @@ const TrackTableComponent = styled(Table)`
       border: none;
       border-bottom: 1px solid #eee;
       position: relative;
-      padding-left: 50%;
       width: 100%;
       display: flex;
       align-items: center;
@@ -50,7 +50,7 @@ const TrackTableComponent = styled(Table)`
     td:before {
       /* Now like a table header */
       display: inline-block;
-      min-width: 40%;
+      color: grey;
       padding-right: 10px;
       // white-space: nowrap;
     }
@@ -60,6 +60,9 @@ const TrackTableComponent = styled(Table)`
     }
   }
   @media screen and (min-width: ${bp.medium}px) {
+    td {
+      padding: 0.5rem 0.5rem;
+    }
     td:before {
       display: none;
     }

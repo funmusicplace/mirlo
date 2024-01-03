@@ -60,32 +60,38 @@ const ArtistHeaderDescription: React.FC = () => {
     return (
       <div
         className={css`
-          display: flex;
-          flex-direction: column;
-          align-items: flex-start;
-          justify-content: space-between;
           width: 100%;
+          display: flex;
         `}
       >
-        {user && user.id === artist?.userId && (
-          <Button
-            compact
-            transparent
-            onClick={() => setIsEditing(true)}
-            startIcon={<FaPen />}
-            className={css`
-              margin-left: 0.2rem;
-            `}
-          >
-            {t("editBioButton")}
-          </Button>
-        )}
         <MarkdownContent
           content={bio}
           className={css`
-            width: 100%;
+            width: auto;
           `}
         />
+
+        {user && user.id === artist?.userId && (
+          <div
+            className={css`
+              max-width: 5%;
+              flex: 5%;
+              margin-right: 0.2rem;
+            `}
+          >
+            <Button
+              compact
+              onlyIcon
+              transparent
+              onClick={() => setIsEditing(true)}
+              startIcon={<FaPen />}
+              className={css`
+                margin-top: -0.5rem;
+                margin-left: -0.2rem;
+              `}
+            ></Button>
+          </div>
+        )}
       </div>
     );
   }
@@ -95,6 +101,7 @@ const ArtistHeaderDescription: React.FC = () => {
       <div
         className={css`
           width: 100%;
+          margin-bottom: 0.5rem;
         `}
       >
         <TextArea

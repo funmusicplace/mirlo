@@ -91,8 +91,7 @@ const ArtistSupport: React.FC = () => {
   return (
     <>
       <HeaderDiv>
-        <div>
-        </div>
+        <div />
         <div
           className={css`
             @media (max-width: ${bp.small}px) {
