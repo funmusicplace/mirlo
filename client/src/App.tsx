@@ -109,7 +109,7 @@ function App() {
 
               ${isPlaying
                 ? `
-            padding-bottom: 130px;`
+            padding-bottom: 55px;`
                 : ``}
             `}
           >
@@ -119,11 +119,6 @@ function App() {
                 display: flex;
                 flex-direction: column;
                 width: 100%;
-
-                ${isPlaying
-                  ? `
-                    padding-bottom: 30px;`
-                  : ``}
               `}
             >
               <div
