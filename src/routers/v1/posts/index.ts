@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { User, Prisma } from "@prisma/client";
 
 import postProcessor from "../../../utils/post";
@@ -12,8 +12,9 @@ export default function () {
     GET: [userLoggedInWithoutRedirect, GET],
   };
 
-  async function GET(req: Request, res: Response) {
+  async function GET(req: Request, res: Response, next: NextFunction) {
     const user = req.user as User;
+    const { take, skip } = req.query;
     try {
       let where: Prisma.PostWhereInput = {
         publishedAt: { lte: new Date() },
@@ -58,7 +59,8 @@ export default function () {
         orderBy: {
           publishedAt: "desc",
         },
-        take: 20,
+        take: take ? Number(take) : undefined,
+        skip: skip ? Number(skip) : undefined,
       });
       const processedPosts = await Promise.all(
         posts.map(async (p) =>
@@ -74,8 +76,7 @@ export default function () {
         results: processedPosts,
       });
     } catch (e) {
-      console.error(`/v1/posts ${e}`);
-      res.status(400);
+      next(e);
     }
   }
 

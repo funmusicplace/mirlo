@@ -1,12 +1,12 @@
 import React from "react";
-import ArtistTrackGroup from "./Artist/ArtistTrackGroup";
+import ArtistTrackGroup from "../Artist/ArtistTrackGroup";
 import TrackgroupGrid from "components/common/TrackgroupGrid";
 import api from "services/api";
 import { css } from "@emotion/css";
 import { useTranslation } from "react-i18next";
-import { bp } from "../constants";
-import WidthContainer from "./common/WidthContainer";
-import { SectionHeader } from "./Home/Home";
+import { bp } from "../../constants";
+import WidthContainer from "../common/WidthContainer";
+import { SectionHeader } from "./Home";
 
 const Releases = () => {
   const { t } = useTranslation("translation", { keyPrefix: "releases" });
@@ -14,7 +14,7 @@ const Releases = () => {
 
   React.useEffect(() => {
     const callback = async () => {
-      const results = await api.getMany<TrackGroup>("trackGroups");
+      const results = await api.getMany<TrackGroup>("trackGroups?take=4");
       setTrackGroups(results.results);
     };
 
@@ -22,31 +22,31 @@ const Releases = () => {
   }, []);
 
   return (
-    <div
-      className={css`
-        a {
-          color: var(--mi-normal-foreground-color);
-        }
-        @media screen and (max-width: ${bp.medium}px) {
-          margin-bottom: 0rem;
-        }
-      `}
-    >
-      <SectionHeader>
-        <WidthContainer variant="big" justify="center">
-          <h5>{t("recentReleases")}</h5>
-        </WidthContainer>
-      </SectionHeader>
+    <WidthContainer variant="big">
       <div
         className={css`
-          padding-top: 0.25rem;
+          padding-top: 1rem;
+          width: 100%;
+
+          a {
+            color: var(--mi-normal-foreground-color);
+          }
+          @media screen and (max-width: ${bp.medium}px) {
+            margin-bottom: 0rem;
+          }
         `}
       >
-        <WidthContainer variant="big" justify="center">
+        <SectionHeader>
+          <h5>{t("recentReleases")}</h5>
+        </SectionHeader>
+        <div
+          className={css`
+            padding-top: 0.25rem;
+          `}
+        >
           <div
             className={css`
               display: flex;
-              width: 100%;
               flex-direction: row;
               flex-wrap: wrap;
               padding: var(--mi-side-paddings-xsmall);
@@ -58,9 +58,9 @@ const Releases = () => {
               ))}
             </TrackgroupGrid>
           </div>
-        </WidthContainer>
+        </div>
       </div>
-    </div>
+    </WidthContainer>
   );
 };
 
