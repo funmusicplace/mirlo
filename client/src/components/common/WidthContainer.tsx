@@ -5,9 +5,10 @@ type Sizes = "full" | "big" | "medium" | "small";
 
 const FlexWrapper = styled.div`
   display: flex;
+  width: 100%;
 `;
 
-const WidthWrapper = styled.div<{
+export const WidthWrapper = styled.div<{
   variant?: Sizes;
   hasPaddings?: boolean;
 }>`
@@ -37,6 +38,7 @@ const WidthWrapper = styled.div<{
   }}
 
   width: 100%;
+  margin: 0 auto;
 `;
 
 export const WidthContainer: React.FC<{

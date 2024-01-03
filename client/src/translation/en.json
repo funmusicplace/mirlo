@@ -395,6 +395,7 @@
     "support": "Direct support for musicians. Buy their music. Collectively owned and managed.",
     "mailingList": "Get on the mailing list",
     "logIn": "Log in",
+    "signUp": "Sign up",
     "mirloConstruction": "Mirlo is slowly onboarding musicians. Interested? E-mail us! If you'd like to contribute, check out our <about>About page</about>, <faq>FAQ</faq>, <github>the code on GitHub</github>, <discord>join our Discord</discord>, or <email>email us</email>.",
     "latestCommunityPost": "Latest posts from the community"
   },
