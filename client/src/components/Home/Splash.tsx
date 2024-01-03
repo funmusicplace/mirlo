@@ -3,6 +3,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import Logo from "../common/Logo";
 import { Trans, useTranslation } from "react-i18next";
+import Button from "components/common/Button";
 
 const Splash = () => {
   const { t } = useTranslation("translation", { keyPrefix: "home" });
@@ -68,58 +69,29 @@ const Splash = () => {
               gap: 16px;
             `}
           >
-            <Link
-              to="/signup"
-              className={css`
-                display: block;
-                height: 51px;
-                border-radius: 9999px;
-                font-weight: bold;
-                font-size: 1rem;
-                align-items: center;
-                display: inline-flex;
-                line-height: 1rem;
-                padding: 1rem;
-                text-decoration: none;
-                text-align: center;
-
-                &:hover {
-                  text-decoration: underline;
-                }
-
-                background-color: #be3455;
-                color: var(--mi-white);
-              `}
-            >
-              {t("signUp")}
+            <Link to="/signup">
+              <Button
+                variant="big"
+                className={css`
+                  background-color: #be3455 !important;
+                  color: var(--mi-white) !important;
+                `}
+              >
+                {t("signUp")}
+              </Button>
             </Link>
-            <Link
-              to="/login"
-              className={css`
-                display: block;
-                height: 51px;
-                border-radius: 9999px;
-                font-weight: bold;
-                font-size: 1rem;
-                align-items: center;
-                display: inline-flex;
-                line-height: 1rem;
-                padding: 1rem;
-                text-decoration: none;
-                text-align: center;
-                &:hover {
-                  text-decoration: underline;
-                }
-
-                background-color: var(--mi-black);
-                color: var(--mi-white);
-                @media (prefers-color-scheme: dark) {
-                  background-color: var(--mi-white);
-                  color: var(--mi-black);
-                }
-              `}
-            >
-              {t("logIn")}
+            <Link to="/login">
+              <Button
+                variant="big"
+                className={css`
+                  @media (prefers-color-scheme: dark) {
+                    background-color: var(--mi-white);
+                    color: var(--mi-black);
+                  }
+                `}
+              >
+                {t("logIn")}
+              </Button>
             </Link>
           </div>
           <p

@@ -5,7 +5,7 @@ import api from "services/api";
 import { css } from "@emotion/css";
 import { useTranslation } from "react-i18next";
 import { bp } from "../../constants";
-import WidthContainer, { WidthWrapper } from "../common/WidthContainer";
+import WidthContainer from "../common/WidthContainer";
 import { SectionHeader } from "./Home";
 
 const Releases = () => {
