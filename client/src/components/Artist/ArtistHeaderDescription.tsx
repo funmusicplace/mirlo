@@ -95,6 +95,7 @@ const ArtistHeaderDescription: React.FC = () => {
       <div
         className={css`
           width: 100%;
+          margin-bottom: 0.5rem;
         `}
       >
         <TextArea
