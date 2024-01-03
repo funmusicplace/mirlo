@@ -25,7 +25,7 @@ import AdminUsers from "components/Admin/Users";
 import AdminTrackGroups from "components/Admin/Trackgroups";
 import AdminTracks from "components/Admin/Tracks";
 import ManageArtist from "components/ManageArtist/ManageArtist";
-import Home from "components/Home";
+import Home from "components/Home/Home";
 import Artist from "components/Artist/Artist";
 import TrackGroupWidget from "components/Widget/TrackGroupWidget";
 import TrackWidget from "components/Widget/TrackWidget";

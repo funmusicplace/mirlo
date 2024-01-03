@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import prisma from "../../../../prisma/prisma";
 import processor from "../../../utils/trackGroup";
 
@@ -7,27 +7,35 @@ export default function () {
     GET,
   };
 
-  async function GET(req: Request, res: Response) {
-    const trackGroups = await prisma.trackGroup.findMany({
-      where: {
-        published: true,
-        tracks: { some: { audio: { uploadState: "SUCCESS" } } },
-      },
-      orderBy: {
-        releaseDate: "desc",
-      },
-      include: {
-        artist: {
-          select: {
-            name: true,
-            urlSlug: true,
-            id: true,
-          },
+  async function GET(req: Request, res: Response, next: NextFunction) {
+    const { skip, take } = req.query;
+
+    try {
+      const trackGroups = await prisma.trackGroup.findMany({
+        where: {
+          published: true,
+          tracks: { some: { audio: { uploadState: "SUCCESS" } } },
         },
-        cover: true,
-      },
-    });
-    res.json({ results: trackGroups.map(processor.single) });
+        orderBy: {
+          releaseDate: "desc",
+        },
+        skip: skip ? Number(skip) : undefined,
+        take: take ? Number(take) : undefined,
+        include: {
+          artist: {
+            select: {
+              name: true,
+              urlSlug: true,
+              id: true,
+            },
+          },
+          cover: true,
+        },
+      });
+      res.json({ results: trackGroups.map(processor.single) });
+    } catch (e) {
+      next(e);
+    }
   }
 
   GET.apiDoc = {
