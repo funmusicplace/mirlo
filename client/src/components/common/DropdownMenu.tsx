@@ -37,7 +37,7 @@ const Header: React.FC<{
               border-radius: var(--mi-border-radius);
               right: 0em;
               padding: 0.5rem;
-              z-index: 999;
+              z-index: 11;
               overflow: hidden;
               text-overflow: ellipsis;
               background: var(--mi-white);
