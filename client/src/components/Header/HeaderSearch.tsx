@@ -91,7 +91,7 @@ const HeaderSearch: React.FC = () => {
               padding: 1rem;
               background: var(--mi-white);
               width: 100%;
-              z-index: 12;
+              z-index: 999;
               word-break: break-word;
               color: var(--mi-black) !important;
               
