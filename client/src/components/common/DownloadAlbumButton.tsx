@@ -68,7 +68,6 @@ const DownloadAlbumButton: React.FC<{
         </Button>
       </Modal>
       <Button
-        compact
         onlyIcon={onlyIcon}
         className={css`
           margin-top: 0rem;

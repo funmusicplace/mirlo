@@ -108,6 +108,7 @@ export const Manage: React.FC = () => {
               >
                 <Link to="/manage/welcome">
                   <Button
+                    variant="big"
                     className={css`
                       flex-grow: 1;
                       text-align: center;
@@ -128,7 +129,7 @@ export const Manage: React.FC = () => {
           </div>
           <div
             className={css`
-              margin-top: 1rem;
+              margin-top: 3rem;
             `}
           >
             <h2>Payment management</h2>
@@ -142,7 +143,7 @@ export const Manage: React.FC = () => {
                   t("stripeAccountVerified")}
               </Box>
             )}
-            <Button onClick={setUpBankAccount}>
+            <Button variant="big" onClick={setUpBankAccount}>
               {stripeAccountStatus?.detailsSubmitted
                 ? t("updateBankAccount")
                 : t("setUpBankAccount")}

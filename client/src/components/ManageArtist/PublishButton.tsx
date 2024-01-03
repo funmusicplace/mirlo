@@ -59,6 +59,7 @@ const PublishButton: React.FC<{
   return (
     <div>
       <Button
+        variant="big"
         isLoading={isPublishing}
         onClick={publishTrackGroup}
         disabled={isPublishing}
@@ -70,7 +71,9 @@ const PublishButton: React.FC<{
       </Button>
       {artist && trackGroup.published && (
         <Link to={getReleaseUrl(artist, trackGroup)}>
-          <Button>{t(beforeReleaseDate ? "viewPreorder" : "view")}</Button>
+          <Button variant="big">
+            {t(beforeReleaseDate ? "viewPreorder" : "view")}
+          </Button>
         </Link>
       )}
     </div>

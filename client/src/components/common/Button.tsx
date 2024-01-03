@@ -8,8 +8,9 @@ import { bp } from "../../constants";
 export interface Compactable {
   compact?: boolean;
   transparent?: boolean;
+  thin?: boolean;
   role?: "primary" | "secondary" | "warning";
-  variant?: "link" | "outlined" | "default";
+  variant?: "link" | "big" | "outlined" | "default";
   color?: string;
   uppercase?: boolean;
   onlyIcon?: boolean;
@@ -21,7 +22,6 @@ const CustomButton = styled.button<Compactable>`
   transition: 0.25s background-color, 0.25s color, 0.25s border-radius,
     0.25s filter;
   font-size: 1rem;
-  font-weight: bold;
   line-height: 1rem;
   height: 2rem;
   height: ${(props) => (props.onlyIcon ? "2rem" : "")};
@@ -32,6 +32,10 @@ const CustomButton = styled.button<Compactable>`
   }
   @media screen and (max-width: ${bp.small}px) {
     font-size: 0.8rem;
+    ${(props) =>
+      props.onlyIcon && props.compact
+        ? "height: 1.7rem; width: 1.7rem; font-size: var(--mi-font-size-xsmall);"
+        : ""};
   }
 
   &:hover:not(:disabled) {
@@ -50,6 +54,7 @@ const CustomButton = styled.button<Compactable>`
           };
           margin-right: 0;
           margin-left: .3rem;
+          font-weight: bold;
           padding: 0 !important;
           height: auto !important;
           width: auto !important;
@@ -63,6 +68,47 @@ const CustomButton = styled.button<Compactable>`
                 ? props.color
                 : `var(--mi-${props.role ?? "primary"}-color)`
             };
+          }
+        `;
+
+      case "big":
+        return `
+        
+          color: ${
+            props.color
+              ? props.color
+              : `var(--mi-${props.role ?? "primary"}-color)`
+          };
+          ${props.compact ? "" : "height: 2.5rem; min-width: 5rem;"}
+          border-radius: 9999px !important;
+          background-color: var(--mi-secondary-color);
+          font-weight: bold;
+          align-items: center;
+          display: inline-flex;
+          line-height: 1rem;
+          padding: 1rem;
+          text-decoration: none;
+          text-align: center;
+
+          &:hover:not(:disabled) {
+            color: ${
+              props.color
+                ? props.color
+                : `var(--mi-${props.role ?? "secondary"}-color)`
+            };
+            background-color:  ${
+              props.color
+                ? props.color
+                : `var(--mi-${props.role ?? "primary"}-color)`
+            };
+          }
+          
+          @media screen and (max-width: ${bp.small}px) {
+           ${
+             props.compact
+               ? "padding: .5rem; height: 1.5rem !important;"
+               : "height: 2rem;"
+           };
           }
         `;
       case "outlined":
@@ -79,6 +125,7 @@ const CustomButton = styled.button<Compactable>`
               : `var(--mi-${props.role ?? "primary"}-color)`
           };
           padding: ${props.compact ? ".3rem .5rem" : "1rem"};
+          font-weight: bold;
 
           &:hover:not(:disabled) {
             color: ${
@@ -108,7 +155,12 @@ const CustomButton = styled.button<Compactable>`
           padding: ${props.compact ? ".3rem .5rem" : "1rem"};
           padding: ${props.onlyIcon ? ".5rem .5rem" : ".6rem .6rem"};
           background-color:  var(--mi-${props.role ?? "secondary"}-color);
-          background-color:  ${props.transparent ? "transparent" : ""};
+          ${
+            props.transparent
+              ? "background-color:  transparent; font-weight: bold;"
+              : ""
+          };
+          ${props.thin ? "font-weight: normal !important;" : ""};          
           color:  var(--mi-${props.role ?? "primary"}-color);
           color:  ${
             props.transparent ? "var(--mi-normal-foreground-color)" : ""
@@ -156,6 +208,12 @@ const CustomButton = styled.button<Compactable>`
     margin-left: 0.5rem;
     line-height: 0.785rem;
     font-size: 0.785rem;
+  }
+
+  @media screen and (max-width: ${bp.small}px) {
+  & .startIcon:not(.collapsed) {
+    font-size: ${(props) =>
+      props.onlyIcon ? "var(--mi-font-size-xsmall)" : ""};
   }
 `;
 

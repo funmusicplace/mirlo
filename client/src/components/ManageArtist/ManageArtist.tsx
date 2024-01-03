@@ -31,7 +31,6 @@ export const MainButtons = styled.div`
           @media screen and (max-width: ${bp.medium}px) {
             padding: var(--mi-side-paddings-xsmall);
             padding-top: 0.5rem;
-            padding-bottom: 0.5rem;
             margin-bottom: 0;
       `;
 
@@ -95,17 +94,18 @@ const ManageArtist: React.FC<{}> = () => {
       <MainButtons>
         <div>
           <Button
-            compact
+            variant="big"
             startIcon={<FaPen />}
             onClick={() => setIsEditing(true)}
             className={css`
               margin-right: 0.5rem;
+              margin-bottom: 0.25rem;
             `}
           >
             {t("editDetails")}
           </Button>
           <Link to={`/${artist?.urlSlug?.toLowerCase() ?? artist?.id}`}>
-            <Button compact startIcon={<FaEye />} disabled={!artist}>
+            <Button variant="big" startIcon={<FaEye />} disabled={!artist}>
               {t("viewLive")}
             </Button>
           </Link>

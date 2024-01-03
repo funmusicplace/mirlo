@@ -8,6 +8,7 @@ import ManageTrackTable from "./ManageTrackTable";
 import useGetUserObjectById from "utils/useGetUserObjectById";
 import { useGlobalStateContext } from "state/GlobalState";
 import PublishButton from "./PublishButton";
+import { bp } from "../../constants";
 import HeaderDiv from "components/common/HeaderDiv";
 import ManageSectionWrapper from "./ManageSectionWrapper";
 import { css } from "@emotion/css";
@@ -51,7 +52,11 @@ const ManageTrackGroup: React.FC<{}> = () => {
   return (
     <ManageSectionWrapper
       className={css`
-        padding-top: 1rem !important;
+        padding-top: 2rem !important;
+
+        @media (max-width: ${bp.small}px) {
+          padding-top: 1rem !important;
+        }
       `}
     >
       <div
@@ -77,6 +82,13 @@ const ManageTrackGroup: React.FC<{}> = () => {
             className={css`
               display: flex;
               align-items: center;
+
+              @media (max-width: ${bp.small}px) {
+                width: 100%;
+                flex: 100%;
+                justify-content: flex-end;
+                margin-top: 1rem;
+              }
             `}
           >
             {trackGroup && trackGroup.tracks?.length > 0 && (

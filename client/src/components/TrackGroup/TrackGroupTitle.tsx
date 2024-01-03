@@ -110,7 +110,7 @@ const TrackGroupTitle: React.FC<{ trackGroup: TrackGroup }> = ({
           {ownedByUser && (
             <Link
               to={`/manage/artists/${artist.id}/release/${trackGroup.id}`}
-              style={{ marginRight: "1rem" }}
+              style={{ marginRight: "0" }}
             >
               <Button compact startIcon={<FaPen />}>
                 {t("edit")}

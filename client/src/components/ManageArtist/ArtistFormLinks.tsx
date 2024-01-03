@@ -99,6 +99,7 @@ const ArtistFormLinks: React.FC<{ isManage: boolean }> = ({ isManage }) => {
         {isManage && (
           <Button
             compact
+            thin
             transparent
             onClick={() => setIsEditing(true)}
             startIcon={<FaPen />}
