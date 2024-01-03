@@ -19,6 +19,21 @@ import { useArtistContext } from "state/ArtistContext";
 import Box from "components/common/Box";
 import { ArtistTabs } from "components/common/Tabs";
 import { ArtistSection } from "components/Artist/Artist";
+import styled from "@emotion/styled";
+
+export const MainButtons = styled.div`
+          display: flex;
+          width: 100%;
+          justify-content: flex-end;
+          flex-direction: column;
+          margin-bottom: 1rem;
+
+          @media screen and (max-width: ${bp.medium}px) {
+            padding: var(--mi-side-paddings-xsmall);
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+            margin-bottom: 0;
+      `;
 
 const ManageArtist: React.FC<{}> = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
@@ -77,19 +92,7 @@ const ManageArtist: React.FC<{}> = () => {
           }}
         />
       )}
-      <div
-        className={css`
-          display: flex;
-          width: 100%;
-          justify-content: flex-end;
-          flex-direction: column;
-
-          @media screen and (max-width: ${bp.medium}px) {
-            padding: var(--mi-side-paddings-xsmall);
-            padding-top: 0.5rem;
-            padding-bottom: 0.5rem;
-        `}
-      >
+      <MainButtons>
         <div>
           <Button
             compact
@@ -107,7 +110,7 @@ const ManageArtist: React.FC<{}> = () => {
             </Button>
           </Link>
         </div>
-      </div>
+      </MainButtons>
       <ArtistTabs>
         <li>
           <NavLink to="releases">{t("yourAlbums")}</NavLink>
