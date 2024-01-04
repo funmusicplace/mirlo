@@ -6,6 +6,7 @@ import Releases from "./HomeReleases";
 import styled from "@emotion/styled";
 import Splash from "./Splash";
 import Posts from "./Posts";
+import SupportMirlo from "./SupportMirlo";
 
 export const SectionHeader = styled.div<{ userId?: number }>`
   position: sticky !important;
@@ -53,11 +54,13 @@ function Home() {
         display: flex;
         align-items: center;
         width: 100%;
+        margin-bottom: 5rem;
       `}
     >
       {!user && <Splash />}
 
       <Releases />
+      <SupportMirlo />
       <Posts />
     </div>
   );

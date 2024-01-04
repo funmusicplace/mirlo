@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
 import prisma from "../../../../prisma/prisma";
 import processor from "../../../utils/trackGroup";
@@ -8,14 +9,26 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
-    const { skip, take } = req.query;
+    const { skip: skipQuery, take, orderBy } = req.query;
 
     try {
+      let skip = Number(skipQuery);
+      let where: Prisma.TrackGroupWhereInput = {
+        published: true,
+        tracks: { some: { audio: { uploadState: "SUCCESS" } } },
+      };
+      if (orderBy === "random") {
+        // This isn't ideal, but it'll basically take a random slice
+        // anywhere
+        const itemCount = await prisma.trackGroup.count({ where });
+        skip = Math.max(
+          0,
+          Math.floor(Math.random() * itemCount) - Number(take)
+        );
+      }
+
       const trackGroups = await prisma.trackGroup.findMany({
-        where: {
-          published: true,
-          tracks: { some: { audio: { uploadState: "SUCCESS" } } },
-        },
+        where,
         orderBy: {
           releaseDate: "desc",
         },

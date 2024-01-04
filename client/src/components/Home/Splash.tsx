@@ -4,20 +4,41 @@ import { Link } from "react-router-dom";
 import Logo from "../common/Logo";
 import { Trans, useTranslation } from "react-i18next";
 import Button from "components/common/Button";
+import styled from "@emotion/styled";
+
+export const SplashWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 2rem;
+`;
+
+export const TextWrapper = styled.div`
+  padding-top: 5vh;
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+  max-width: 500px;
+  margin-bottom: 5vh;
+`;
+
+export const SplashTitle = styled.h2`
+  font-size: 1.75rem;
+  font-weight: 400;
+  line-height: 1.25;
+`;
+
+export const SplashButtonWrapper = styled.div`
+  display: flex;
+  gap: 16px;
+`;
 
 const Splash = () => {
   const { t } = useTranslation("translation", { keyPrefix: "home" });
 
   return (
-    <div
-      className={css`
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 100%;
-        padding: var(--mi-side-paddings-xsmall);
-      `}
-    >
+    <SplashWrapper>
       <div
         className={css`
           display: none;
@@ -37,15 +58,7 @@ const Splash = () => {
           }
         `}
       />
-      <div
-        className={css`
-          padding-top: 5vh;
-          display: flex;
-          flex-direction: column;
-          gap: 48px;
-          max-width: 500px;
-        `}
-      >
+      <TextWrapper>
         <Logo />
         <div
           className={css`
@@ -54,21 +67,8 @@ const Splash = () => {
             gap: 24px;
           `}
         >
-          <h1
-            className={css`
-              font-size: 1.75rem;
-              font-weight: 400;
-              line-height: 1.25;
-            `}
-          >
-            {t("support")}
-          </h1>
-          <div
-            className={css`
-              display: flex;
-              gap: 16px;
-            `}
-          >
+          <SplashTitle>{t("support")}</SplashTitle>
+          <SplashButtonWrapper>
             <Link to="/signup">
               <Button
                 variant="big"
@@ -93,7 +93,7 @@ const Splash = () => {
                 {t("logIn")}
               </Button>
             </Link>
-          </div>
+          </SplashButtonWrapper>
           <p
             className={css`
               font-size: 0.875rem;
@@ -120,8 +120,8 @@ const Splash = () => {
             />
           </p>
         </div>
-      </div>
-    </div>
+      </TextWrapper>
+    </SplashWrapper>
   );
 };
 

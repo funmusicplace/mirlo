@@ -14,7 +14,9 @@ const Releases = () => {
 
   React.useEffect(() => {
     const callback = async () => {
-      const results = await api.getMany<TrackGroup>("trackGroups?take=4");
+      const results = await api.getMany<TrackGroup>(
+        "trackGroups?take=4&orderBy=random"
+      );
       setTrackGroups(results.results);
     };
 
