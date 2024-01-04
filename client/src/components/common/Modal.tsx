@@ -143,6 +143,7 @@ export const Modal: React.FC<{
             position: sticky;
             top: 0;
             padding-top: 1rem;
+            display: flex;
             align-items: center;
             margin-bottom: .5rem;
             background-color: inherit;
@@ -154,19 +155,24 @@ export const Modal: React.FC<{
               flex: 90%;
               max-width: 90%;
             }
-              }
+            div {
+              flex: 10%;
+              max-width: 10%;
+            }
             `}
           >
             {title && <h2>{title}</h2>}
-
-            <IconButton
-              className={close}
-              compact
-              onClick={onCloseWrapper}
-              aria-label="close"
-            >
+            
+            <div>
+             <IconButton
+               className={close}
+               compact
+               onClick={onCloseWrapper}
+               aria-label="close"
+             >
               <FaTimes />
-            </IconButton>
+             </IconButton>
+            </div>  
           </HeaderDiv>
           {children}
         </Content>
