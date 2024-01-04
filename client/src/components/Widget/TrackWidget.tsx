@@ -171,6 +171,7 @@ const TrackWidget = () => {
                     <IconButton
                       onClick={onPause}
                       className={css`
+                          display: none;
                           padding: 0.75rem !important;
                         }
                       `}
