@@ -36,7 +36,6 @@ const Content = styled.div<ContentProps>`
   max-height: calc(100vh - 150px);
   padding: 20px;
   padding-top: 0;
-  border: 1px solid var(--mi-darken-background-color);
   display: flex;
   flex-direction: column;
   ${(props) =>
@@ -147,7 +146,6 @@ export const Modal: React.FC<{
             align-items: center;
             margin-bottom: .5rem;
             background-color: inherit;
-            border: solid 1px var(--mi-normal-background-color); 
             border-bottom: solid 1px var(--mi-light-foreground-color);
             z-index: 12;
 
