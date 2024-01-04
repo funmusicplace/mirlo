@@ -11,12 +11,12 @@ export const SplashWrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  height: calc(100vh - 177px);
+  min-height: calc(100vh - 177px);
   width: 100%;
   padding: 2rem;
 
   @media screen and (max-width: ${bp.medium}px) {
-    height: calc(100vh - 170px);
+    min-height: calc(100vh - 170px);
     padding: 0 0.5rem;
   }
 `;
