@@ -27,7 +27,7 @@ export const TextWrapper = styled.div`
   gap: 48px;
   max-width: 500px;
   justify-content: center;
-  padding: 0 1rem 1rem 1rem;
+  padding: 0 1rem 2rem 1rem;
 
   @media screen and (max-width: ${bp.medium}px) {
   }
