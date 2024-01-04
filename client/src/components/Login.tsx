@@ -26,6 +26,7 @@ function Login() {
           margin: 0 auto;
         `}
       >
+        <h2>{t("logIn")}</h2>
         <LogInForm afterLogIn={afterLogIn} />
       </div>
       <Link
