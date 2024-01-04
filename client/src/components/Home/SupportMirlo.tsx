@@ -33,11 +33,11 @@ const SupportMirlo = () => {
         className={css`
           margin: 4rem 0;
           display: flex;
-          height: auto !important;
+          min-height: auto !important;
 
           @media screen and (max-width: ${bp.medium}px) {
             margin: 0;
-            height: calc(100vh - 60px) !important;
+            min-height: calc(100vh - 60px) !important;
             flex-direction: column-reverse;
           }
         `}
