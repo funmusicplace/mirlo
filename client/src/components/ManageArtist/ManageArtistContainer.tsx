@@ -15,7 +15,7 @@ const Container = styled.div<{ artistBanner: boolean; userId?: number }>`
     !props.artistBanner ? "margin-top: 0px;" : "margin-top: calc(8vh);"}
   ${(props) =>
     props.userId ? "margin-top: calc(8vh - 39px);" : "margin-top: calc(8vh);"}
-  max-width: calc(1080px + 4rem);
+  max-width: var(--mi-container-big);
 
   @media screen and (max-width: ${bp.large}px) {
     padding: var(--mi-side-paddings-xsmall);
