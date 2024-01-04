@@ -17,7 +17,7 @@ export const SplashWrapper = styled.div`
 
   @media screen and (max-width: ${bp.medium}px) {
     min-height: calc(100vh - 170px);
-    padding: 0 0.5rem;
+    padding: 0 0.5rem 1rem 0.5rem;
   }
 `;
 
