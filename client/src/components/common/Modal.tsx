@@ -157,6 +157,7 @@ export const Modal: React.FC<{
             div {
               flex: 10%;
               max-width: 10%;
+              background-color: var(--mi-normal-background-color);
             }
             `}
           >
