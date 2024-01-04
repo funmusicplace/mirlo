@@ -149,10 +149,21 @@ const TrackWidget = () => {
                   className={css`
                     button {
                       font-size: 1.4rem !important;
-                      background-color: var(--mi-normal-background-color);
+                      background-color: var(--mi-normal-foreground-color);
+                      color: var(--mi-normal-background-color);
                       border: solid 1.5px var(--mi-normal-foreground-color) !important;
                       width: 3rem !important;
                       height: 3rem !important;
+                    }
+
+                    @media (prefers-color-scheme: dark) {
+                      button {
+                        background-color: var(--mi-normal-foreground-color);
+                        color: var(--mi-normal-background-color);
+                      }
+                      button:hover {
+                        color: var(--mi-normal-foreground-color) !important;
+                      }
                     }
                   `}
                 >
@@ -172,6 +183,7 @@ const TrackWidget = () => {
                       onClick={onPause}
                       className={css`
                           padding: 0.75rem !important;
+                          display: none;
                         }
                       `}
                     >
