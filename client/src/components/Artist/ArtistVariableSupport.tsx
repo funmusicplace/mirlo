@@ -13,7 +13,7 @@ import { useGlobalStateContext } from "state/GlobalState";
 import { useSnackbar } from "state/SnackbarContext";
 
 export const SupportBoxButton = styled(Button)`
-  width: 100%;
+  width: 100% !important;
   white-space: normal !important;
   margin-top: 1rem;
   padding: 0.5rem 0.5rem;
@@ -59,9 +59,8 @@ const ArtistVariableSupport: React.FC<{
 
   return (
     <>
-      {tier.allowVariable ? "var" : "not"}
       <SupportBoxButton
-        compact
+        variant="big"
         uppercase
         onClick={() =>
           tier.allowVariable ? setOpen(true) : subscribeToTier(tier)

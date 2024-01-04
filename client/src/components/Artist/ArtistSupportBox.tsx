@@ -173,8 +173,6 @@ const ArtistSupportBox: React.FC<{
             display: flex;
             align-items: flex-start;
           }
-          @media screen and (max-width: ${bp.small}px) {
-          }
         `}
       >
         <MarkdownContent content={subscriptionTier.description} />
@@ -191,8 +189,17 @@ const ArtistSupportBox: React.FC<{
       >
         {!ownedByUser && !isSubscribedToTier && !isSubscribedToArtist && (
           <>
-            <ArtistVariableSupport tier={subscriptionTier} />
-
+            {" "}
+            <div
+              className={css`
+                display: flex;
+                align-items: center;
+                align-items: stretch;
+                justify-content: stretch;
+              `}
+            >
+              <ArtistVariableSupport tier={subscriptionTier} />
+            </div>
             <PlatformPercent
               percent={subscriptionTier.platformPercent}
               chosenPrice={
@@ -218,19 +225,27 @@ const ArtistSupportBox: React.FC<{
                 t("areSupporting")}
               {isSubscribedToTier && t("supportAtThisTier")}
             </p>
-            {user && isSubscribedToArtist && !isSubscribedToTier && (
-              <SupportBoxButton
-                onClick={() => subscribeToTier(subscriptionTier)}
-                isLoading={isCheckingForSubscription}
-              >
-                {t("chooseThisSubscription")}
-              </SupportBoxButton>
-            )}
-            {user && isSubscribedToTier && (
-              <SupportBoxButton onClick={() => cancelSubscription()}>
-                {t("cancelSubscription")}
-              </SupportBoxButton>
-            )}
+            <div
+              className={css`
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              `}
+            >
+              {user && isSubscribedToArtist && !isSubscribedToTier && (
+                <SupportBoxButton
+                  onClick={() => subscribeToTier(subscriptionTier)}
+                  isLoading={isCheckingForSubscription}
+                >
+                  {t("chooseThisSubscription")}
+                </SupportBoxButton>
+              )}
+              {user && isSubscribedToTier && (
+                <SupportBoxButton onClick={() => cancelSubscription()}>
+                  {t("cancelSubscription")}
+                </SupportBoxButton>
+              )}
+            </div>
           </Box>
         )}
       </div>
