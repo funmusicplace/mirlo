@@ -147,6 +147,7 @@ export const Modal: React.FC<{
             align-items: center;
             margin-bottom: .5rem;
             background-color: inherit;
+            border: solid 1px var(--mi-normal-background-color); 
             border-bottom: solid 1px var(--mi-light-foreground-color);
             z-index: 12;
 
