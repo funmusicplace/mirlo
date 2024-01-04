@@ -15,6 +15,7 @@ export const SectionHeader = styled.div<{ userId?: number }>`
   background-color: var(--mi-normal-background-color);
   z-index: 5;
   margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
   width: 100%;
   ${(props) =>
     !props.userId ? "top: -0.1rem; padding: .85rem 0 .65rem 0;" : ""}
@@ -62,7 +63,6 @@ function Home() {
       `}
     >
       {!user && <Splash />}
-
       <Releases />
       <SupportMirlo />
       <Posts />
