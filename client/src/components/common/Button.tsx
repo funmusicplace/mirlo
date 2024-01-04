@@ -24,8 +24,8 @@ const CustomButton = styled.button<Compactable>`
   font-size: 1rem;
   line-height: 1rem;
   height: 2rem;
-  height: ${(props) => (props.onlyIcon ? "2rem" : "")};
-  width: ${(props) => (props.onlyIcon ? "2rem" : "")};
+  ${(props) => (props.onlyIcon ? "height: 2rem;" : "")};
+  ${(props) => (props.onlyIcon ? "width: 2rem;" : "")};
 
   @media screen and (max-width: ${bp.medium}px) {
     font-size: 0.8rem;
