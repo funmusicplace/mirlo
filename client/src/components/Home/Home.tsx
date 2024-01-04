@@ -55,6 +55,10 @@ function Home() {
         align-items: center;
         width: 100%;
         margin-bottom: 5rem;
+
+        @media screen and (max-width: ${bp.medium}px) {
+          margin-bottom: 3rem;
+        }
       `}
     >
       {!user && <Splash />}

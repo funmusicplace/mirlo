@@ -5,6 +5,7 @@ import Logo from "../common/Logo";
 import { Trans, useTranslation } from "react-i18next";
 import Button from "components/common/Button";
 import styled from "@emotion/styled";
+import { bp } from "../../constants";
 
 export const SplashWrapper = styled.div`
   display: flex;
@@ -12,6 +13,10 @@ export const SplashWrapper = styled.div`
   justify-content: center;
   width: 100%;
   padding: 2rem;
+
+  @media screen and (max-width: ${bp.medium}px) {
+    padding: 0 0.5rem;
+  }
 `;
 
 export const TextWrapper = styled.div`
@@ -21,6 +26,9 @@ export const TextWrapper = styled.div`
   gap: 48px;
   max-width: 500px;
   margin-bottom: 5vh;
+
+  @media screen and (max-width: ${bp.medium}px) {
+    margin-bottom: 1vh
 `;
 
 export const SplashTitle = styled.h2`

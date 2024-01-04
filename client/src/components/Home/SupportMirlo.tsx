@@ -8,6 +8,7 @@ import {
 import Button from "components/common/Button";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { bp } from "../../constants";
 
 const SupportMirlo = () => {
   const { t } = useTranslation("translation", { keyPrefix: "home" });
@@ -16,6 +17,10 @@ const SupportMirlo = () => {
     <SplashWrapper
       className={css`
         margin: 4rem;
+
+        @media screen and (max-width: ${bp.medium}px) {
+          margin: 0;
+        }
       `}
     >
       <TextWrapper>
