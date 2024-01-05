@@ -91,6 +91,7 @@ const TrackWidget = () => {
         <div
           className={css`
             border: var(--mi-border);
+            ${embeddedInMirlo && "min-height: 154px;"}
             display: flex;
             width: 100%;
             justify-content: center;
@@ -108,9 +109,13 @@ const TrackWidget = () => {
             flex-direction: column;
             width: 100%;
             padding: 0.5rem;
+            ${embeddedInMirlo && "min-height: 154px;"}
+            display: flex;
+            flex-direction: column;
+            align-items: space-between;
+            justify-content: stretch;
             border-radius: 0.3rem;
             box-sizing: border-box;
-            height: 100%;
             background: var(--mi-normal-background-color);
           `}
         >
@@ -118,6 +123,7 @@ const TrackWidget = () => {
             className={css`
               display: flex;
               align-items: center;
+              height: 135px;
             `}
           >
             <MetaCard
@@ -131,17 +137,24 @@ const TrackWidget = () => {
             <ImageWithPlaceholder
               src={track.trackGroup.cover?.sizes?.[300] ?? ""}
               alt={track.title}
-              size={120}
+              size={135}
             />
 
-            <SmallTileDetails
-              title={track.title}
-              subtitle={track.trackGroup.title}
-              footer={
-                track.trackGroup.artist?.name ??
-                (artistTranslation("unknown") as string)
-              }
-            />
+            <div
+              className={css`
+                width: 100%;
+                min-width: 30%;
+              `}
+            >
+              <SmallTileDetails
+                title={track.title}
+                subtitle={track.trackGroup.title}
+                footer={
+                  track.trackGroup.artist?.name ??
+                  (artistTranslation("unknown") as string)
+                }
+              />
+            </div>
 
             {isTrackOwnedOrPreview(track, user) && (
               <>
@@ -183,7 +196,7 @@ const TrackWidget = () => {
                       onClick={onPause}
                       className={css`
                           padding: 0.75rem !important;
-                          display: none;
+                          ${embeddedInMirlo && "display: none;"}
                         }
                       `}
                     >

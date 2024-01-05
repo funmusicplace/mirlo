@@ -119,7 +119,7 @@ function App() {
                 display: flex;
                 flex-direction: column;
                 width: 100%;
-                padding-bottom: 55px;
+                padding-bottom: 2rem;
               `}
             >
               <div

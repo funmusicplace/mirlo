@@ -14,7 +14,7 @@ export const SmallTileDetails: React.FC<{
         className={css`
           display: flex;
           flex-direction: column;
-          justify-content: flex-start;
+          justify-content: center;
           padding-right: 0.5rem;
           padding-left: 1rem;
           width: 100%;
@@ -23,6 +23,14 @@ export const SmallTileDetails: React.FC<{
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: wrap;
+          }
+
+          @media screen and (max-width: ${bp.small}px) {
+            > div {
+              overflow: hidden;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+            }
           }
         `}
       >
@@ -36,6 +44,7 @@ export const SmallTileDetails: React.FC<{
             }
             @media screen and (max-width: ${bp.small}px) {
               font-size: var(--mi-font-size-normal);
+              margin-bottom: 0.5rem;
             }
           `}
         >
@@ -58,6 +67,7 @@ export const SmallTileDetails: React.FC<{
 
             @media screen and (max-width: ${bp.small}px) {
               font-size: var(--mi-font-size-xsmall);
+              margin-bottom: 0.5rem;
             }
           `}
         >
@@ -81,6 +91,7 @@ export const SmallTileDetails: React.FC<{
 
             @media screen and (max-width: ${bp.small}px) {
               font-size: var(--mi-font-size-xsmall);
+              margin-bottom: 0.5rem;
             }
           `}
         >
