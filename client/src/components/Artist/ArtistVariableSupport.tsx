@@ -13,7 +13,6 @@ import { useGlobalStateContext } from "state/GlobalState";
 import { useSnackbar } from "state/SnackbarContext";
 
 export const SupportBoxButton = styled(Button)`
-  width: 100% !important;
   white-space: normal !important;
   margin-top: 1rem;
   padding: 0.5rem 0.5rem;
@@ -67,6 +66,9 @@ const ArtistVariableSupport: React.FC<{
         }
         isLoading={isCheckingForSubscription}
         disabled={isCheckingForSubscription}
+        className={css`
+          width: 100%;
+        `}
       >
         {t("support")}
       </SupportBoxButton>
