@@ -11,24 +11,26 @@ export const SplashWrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+  min-height: calc(100vh - 177px);
   width: 100%;
   padding: 2rem;
 
   @media screen and (max-width: ${bp.medium}px) {
-    padding: 0 0.5rem;
+    min-height: calc(100vh - 170px);
+    padding: 0 0.5rem 1rem 0.5rem;
   }
 `;
 
 export const TextWrapper = styled.div`
-  padding-top: 5vh;
   display: flex;
   flex-direction: column;
   gap: 48px;
   max-width: 500px;
-  margin-bottom: 5vh;
+  justify-content: center;
+  padding-bottom: 1rem;
 
   @media screen and (max-width: ${bp.medium}px) {
-    margin-bottom: 1vh
+  }
 `;
 
 export const SplashTitle = styled.h2`
@@ -81,7 +83,22 @@ const Splash = () => {
               <Button
                 variant="big"
                 className={css`
+                  display: block;
+                  height: 51px !important;
+                  border-radius: 9999px;
+                  font-weight: bold;
+                  font-size: 1rem;
+                  align-items: center;
+                  display: inline-flex;
+                  line-height: 1rem;
+                  padding: 1rem;
+                  text-decoration: none;
+                  text-align: center;
                   background-color: #be3455 !important;
+
+                  &:hover {
+                    text-decoration: underline;
+                  }
                   color: var(--mi-white) !important;
                 `}
               >
@@ -92,9 +109,27 @@ const Splash = () => {
               <Button
                 variant="big"
                 className={css`
+                  display: block;
+                  height: 51px !important;
+                  border-radius: 9999px;
+                  font-weight: bold;
+                  font-size: 1rem;
+                  color: var(--mi-white) !important;
+                  align-items: center;
+                  display: inline-flex;
+                  line-height: 1rem;
+                  padding: 1rem;
+                  text-decoration: none;
+                  text-align: center;
+                  &:hover {
+                    text-decoration: underline;
+                  }
+
+                  background-color: var(--mi-black) !important;
+                  color: var(--mi-white);
                   @media (prefers-color-scheme: dark) {
-                    background-color: var(--mi-white);
-                    color: var(--mi-black);
+                    background-color: var(--mi-white) !important;
+                    color: var(--mi-black) !important;
                   }
                 `}
               >

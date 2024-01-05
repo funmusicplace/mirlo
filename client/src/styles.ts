@@ -1,5 +1,5 @@
 const styles = `html {
-  --mi-black: rgba(25,25,25,1);
+  --mi-black: #111;
   --mi-white: #ffffff;
   --mi-pink: #BE3455;
 

@@ -46,8 +46,6 @@ const LogInForm: React.FC<{ afterLogIn: () => void }> = ({ afterLogIn }) => {
       `}
       onSubmit={handleSubmit(onSubmit)}
     >
-      <h2>{t("logIn")}</h2>
-
       <FormComponent>
         <label>{t("email")}</label>
         <InputEl type="email" {...register("email")} />

@@ -21,32 +21,11 @@ const wrapper = css`
   align-items: center;
 `;
 
-type ContentProps = {
-  size?: "small";
-};
-
-const Content = styled.div<ContentProps>`
-  pointer-events: auto;
-  background-color: var(--mi-normal-background-color);
-  position: absolute;
-  left: 0;
-  right: 0;
+const ChildrenWrapper = styled.div<{ title?: boolean }>`
   overflow-y: auto;
-  margin: 0 auto;
-  max-height: calc(100vh - 150px);
   padding: 20px;
-  padding-top: 0;
-  border: 1px solid var(--mi-darken-background-color);
-  display: flex;
-  flex-direction: column;
-  ${(props) =>
-    props.size === "small"
-      ? "width: 30%;"
-      : "width: 80%; max-width: var(--mi-container-big);"};
-
-  animation: 300ms ease-out forwards slide-up;
-  border-radius: var(--mi-border-radius-x);
-
+  margin-bottom: 1rem;
+  margin-left: 0rem;
   ::-webkit-scrollbar {
     width: 2px;
   }
@@ -62,6 +41,45 @@ const Content = styled.div<ContentProps>`
   h1 {
     display: inline-block;
   }
+  I @media (max-width: ${bp.small}px) {
+    margin-bottom: 0;
+    padding: 1rem;
+  }
+`;
+
+type ContentProps = {
+  size?: "small";
+};
+
+const Content = styled.div<ContentProps>`
+  pointer-events: auto;
+  background-color: var(--mi-normal-background-color);
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  max-height: calc(100vh - 150px);
+  padding-top: 0;
+  border: 1px solid var(--mi-darken-background-color);
+  display: flex;
+  flex-direction: column;
+  ${(props) =>
+    props.size === "small"
+      ? "width: 30%;"
+      : "width: 80%; max-width: var(--mi-container-medium);"};
+
+  border-radius: var(--mi-border-radius-x);
+
+  ${(props) =>
+    props.size === "small"
+      ? ""
+      : "bottom: 0; border-radius: var(--mi-border-radius-x) var(--mi-border-radius-x) 0 0; max-height: calc(100vh - 70px);"}
+
+  animation: 300ms ease-out forwards slide-up;
+
+  h1 {
+    display: inline-block;
+  }
 
   @media (max-width: ${bp.xlarge}px) {
     ${(props) => (props.size === "small" ? "width: 50%;" : "")}
@@ -72,7 +90,6 @@ const Content = styled.div<ContentProps>`
   }
 
   @media (max-width: ${bp.small}px) {
-    padding: 1rem;
     max-height: calc(90vh - 80px);
     ${(props) =>
       props.size === "small"
@@ -88,7 +105,6 @@ const close = css`
   border: none;
   background: none;
   cursor: pointer;
-  margin-bottom: 0.7rem;
   line-height: 1.5rem;
   font-size: 1rem !important;
 
@@ -140,20 +156,33 @@ export const Modal: React.FC<{
         <Content size={size}>
           <HeaderDiv
             className={css`
-            position: sticky;
-            top: 0;
-            padding-top: 1rem;
-            align-items: center;
-            margin-bottom: .5rem;
-            background-color: inherit;
-            border-bottom: solid 1px var(--mi-light-foreground-color);
-            z-index: 12;
+              position: sticky;
+              top: 0;
+              padding-top: 1rem;
+              align-items: center;
+              margin-bottom: 0.5rem;
+              background-color: var(--mi-lighter-background-color) !important;
+              padding: 1rem;
+              border-radius: var(--mi-border-radius-x) var(--mi-border-radius-x)
+                0 0;
+              padding-bottom: 0.5rem !important;
+              background-color: inherit;
+              border-bottom: solid 1px rgba(125, 125, 125, 0.3);
+              z-index: 12;
 
-            h2 {
-              font-weight: bold;
-              flex: 90%;
-              max-width: 90%;
-            }
+              ${!title ? "justify-content: flex-end !important;" : ""}
+              button {
+                ${!title ? "margin-bottom: 0.2rem;" : ""}
+              }
+
+              h2 {
+                flex: 85%;
+                max-width: 85%;
+                margin-bottom: 0 !important;
+              }
+
+              @media (prefers-color-scheme: dark) {
+                background-color: #080808 !important;
               }
             `}
           >
@@ -168,7 +197,7 @@ export const Modal: React.FC<{
               <FaTimes />
             </IconButton>
           </HeaderDiv>
-          {children}
+          <ChildrenWrapper>{children}</ChildrenWrapper>
         </Content>
       </div>
     </>,
