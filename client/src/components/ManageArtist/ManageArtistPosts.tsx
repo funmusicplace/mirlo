@@ -91,25 +91,64 @@ const ManageArtistPosts: React.FC<{}> = () => {
             background-color: var(--mi-darken-background-color);
           `}
         >
-          <HeaderDiv>
-            <Link to={`/post/${p.id}`}>
-              <strong>{p.title}</strong> published{" "}
-              {formatDate({ date: p.publishedAt, i18n })}
-            </Link>
-            <div>
-              <Link to={`/manage/artists/${p.artistId}/post/${p.id}`}>
-                <Button compact onlyIcon transparent startIcon={<FaPen />} />
-              </Link>
-              <Button
+          <HeaderDiv
+            className={css`
+              display: flex;
+              flex-direction: column;
+            `}
+          >
+            <div
+              className={css`
+                margin-top: 0.5rem;
+                margin-bottom: 0.5rem;
+                width: 100%;
+                display: flex;
+                justify-content: space-between;
+                padding-bottom: 0.5rem;
+                border-bottom: var(--mi-border);
+              `}
+            >
+              <Link
+                to={`/post/${p.id}`}
                 className={css`
-                  margin-left: 0.5rem;
+                  width: 80%;
+                  display: flex;
+                  flex-direction: column;
+                  justify-content: flex-start;
+                  h2 {
+                    margin-right: 1rem;
+                  }
                 `}
-                compact
-                transparent
-                startIcon={<FaTrash />}
-                onClick={() => deletePost(p.id)}
-              ></Button>
+              >
+                <h2>{p.title}</h2>
+              </Link>
+              <div
+                className={css`
+                  display: flex;
+                `}
+              >
+                <Link to={`/manage/artists/${p.artistId}/post/${p.id}`}>
+                  <Button onlyIcon startIcon={<FaPen />} />
+                </Link>
+                <Button
+                  className={css`
+                    margin-left: 0.5rem;
+                  `}
+                  startIcon={<FaTrash />}
+                  onClick={() => deletePost(p.id)}
+                ></Button>
+              </div>
             </div>
+            <p
+              className={css`
+                color: grey;
+                margin-bottom: 1rem;
+                text-align: left;
+                width: 100%;
+              `}
+            >
+              published {formatDate({ date: p.publishedAt, i18n })}
+            </p>
           </HeaderDiv>
           <MarkdownContent content={p.content} />
         </Box>
