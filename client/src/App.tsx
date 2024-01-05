@@ -27,7 +27,6 @@ function App() {
   const location = useLocation();
 
   const userId = state.user?.id;
-  const isPlaying = state.playerQueueIds;
 
   React.useEffect(() => {
     const callback = async () => {
