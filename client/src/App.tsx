@@ -106,11 +106,7 @@ function App() {
               flex-grow: 1;
               display: flex;
               flex-direction: column;
-
-              ${isPlaying
-                ? `
-            padding-bottom: 55px;`
-                : ``}
+              padding-bottom: 55px;
             `}
           >
             <div
