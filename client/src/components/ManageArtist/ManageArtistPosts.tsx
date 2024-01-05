@@ -103,7 +103,7 @@ const ManageArtistPosts: React.FC<{}> = () => {
                 margin-bottom: 0.5rem;
                 width: 100%;
                 display: flex;
-                justify-content: flex-end;
+                justify-content: space-between;
                 padding-bottom: 0.5rem;
                 border-bottom: var(--mi-border);
               `}
@@ -111,7 +111,7 @@ const ManageArtistPosts: React.FC<{}> = () => {
               <Link
                 to={`/post/${p.id}`}
                 className={css`
-                  width: 100%;
+                  width: 80%;
                   display: flex;
                   flex-direction: column;
                   justify-content: flex-start;
@@ -122,20 +122,29 @@ const ManageArtistPosts: React.FC<{}> = () => {
               >
                 <h2>{p.title}</h2>
               </Link>
-              <Link to={`/manage/artists/${p.artistId}/post/${p.id}`}>
-                <Button onlyIcon startIcon={<FaPen />} />
-              </Link>
-              <Button
+              <div
                 className={css`
-                  margin-left: 0.5rem;
+                  display: flex;
                 `}
-                startIcon={<FaTrash />}
-                onClick={() => deletePost(p.id)}
-              ></Button>
+              >
+                <Link to={`/manage/artists/${p.artistId}/post/${p.id}`}>
+                  <Button onlyIcon startIcon={<FaPen />} />
+                </Link>
+                <Button
+                  className={css`
+                    margin-left: 0.5rem;
+                  `}
+                  startIcon={<FaTrash />}
+                  onClick={() => deletePost(p.id)}
+                ></Button>
+              </div>
             </div>
             <p
               className={css`
                 color: grey;
+                margin-bottom: 1rem;
+                text-align: left;
+                width: 100%;
               `}
             >
               published {formatDate({ date: p.publishedAt, i18n })}

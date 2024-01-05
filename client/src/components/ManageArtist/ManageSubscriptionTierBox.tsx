@@ -11,6 +11,7 @@ import { useGlobalStateContext } from "state/GlobalState";
 import { useSnackbar } from "state/SnackbarContext";
 import SubscriptionForm from "./SubscriptionForm";
 import MarkdownContent from "components/common/MarkdownContent";
+import HeaderDiv from "components/common/HeaderDiv";
 
 const ManageSubscriptionTierBox: React.FC<{
   tier: ArtistSubscriptionTier;
@@ -50,38 +51,48 @@ const ManageSubscriptionTierBox: React.FC<{
         background: var(--mi-darken-background-color);
       `}
     >
-      <div
+      <HeaderDiv
         className={css`
           display: flex;
-          justify-content: space-between;
+          flex-direction: column;
         `}
       >
-        <strong>
-          {tier.name}:{" "}
-          <Money
-            amount={tier.minAmount ? tier.minAmount / 100 : 0}
-            currency={tier.currency}
-          />
-        </strong>
-        <div>
-          <Button
-            compact
-            transparent
-            startIcon={<FaPen />}
-            onClick={() => setManageTier(true)}
-          />
+        <div
+          className={css`
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding-bottom: 1rem;
+            align-items: center;
+            border-bottom: var(--mi-border);
+            strong {
+              text-transform: uppercase;
+            }
+          `}
+        >
+          <strong>
+            {tier.name}:{" "}
+            <Money
+              amount={tier.minAmount ? tier.minAmount / 100 : 0}
+              currency={tier.currency}
+            />
+          </strong>
+          <div>
+            <Button startIcon={<FaPen />} onClick={() => setManageTier(true)} />
 
-          <Button
-            className={css`
-              margin-left: 0.5rem;
-            `}
-            compact
-            transparent
-            startIcon={<FaTrash />}
-            onClick={() => deleteTier(tier.id)}
-          />
+            <Button
+              className={css`
+                margin-left: 0.5rem;
+              `}
+              startIcon={<FaTrash />}
+              onClick={() => deleteTier(tier.id)}
+            />
+          </div>
         </div>
-      </div>
+      </HeaderDiv>
+
       <MarkdownContent content={tier.description} />
       {manageTier && (
         <Modal
