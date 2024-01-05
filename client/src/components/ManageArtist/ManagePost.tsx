@@ -12,6 +12,7 @@ import BackToArtistLink from "./BackToArtistLink";
 import PostForm from "./PostForm";
 import Post from "components/Post";
 import Button from "components/common/Button";
+import { bp } from "constants";
 
 const ManagePost: React.FC<{}> = () => {
   const { t } = useTranslation("translation", { keyPrefix: "managePost" });
@@ -51,6 +52,11 @@ const ManagePost: React.FC<{}> = () => {
           display: flex;
           flex-direction: column;
           align-items: flex-start;
+          padding-top: 1rem;
+
+          @media screen and (max-width: ${bp.medium}px) {
+            padding-top: 0.5rem;
+          }
         `}
       >
         <BackToArtistLink />

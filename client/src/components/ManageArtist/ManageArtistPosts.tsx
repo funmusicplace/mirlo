@@ -91,25 +91,55 @@ const ManageArtistPosts: React.FC<{}> = () => {
             background-color: var(--mi-darken-background-color);
           `}
         >
-          <HeaderDiv>
-            <Link to={`/post/${p.id}`}>
-              <strong>{p.title}</strong> published{" "}
-              {formatDate({ date: p.publishedAt, i18n })}
-            </Link>
-            <div>
+          <HeaderDiv
+            className={css`
+              display: flex;
+              flex-direction: column;
+            `}
+          >
+            <div
+              className={css`
+                margin-top: 0.5rem;
+                margin-bottom: 0.5rem;
+                width: 100%;
+                display: flex;
+                justify-content: flex-end;
+                padding-bottom: 0.5rem;
+                border-bottom: var(--mi-border);
+              `}
+            >
+              <Link
+                to={`/post/${p.id}`}
+                className={css`
+                  width: 100%;
+                  display: flex;
+                  flex-direction: column;
+                  justify-content: flex-start;
+                  h2 {
+                    margin-right: 1rem;
+                  }
+                `}
+              >
+                <h2>{p.title}</h2>
+              </Link>
               <Link to={`/manage/artists/${p.artistId}/post/${p.id}`}>
-                <Button compact onlyIcon transparent startIcon={<FaPen />} />
+                <Button onlyIcon startIcon={<FaPen />} />
               </Link>
               <Button
                 className={css`
                   margin-left: 0.5rem;
                 `}
-                compact
-                transparent
                 startIcon={<FaTrash />}
                 onClick={() => deletePost(p.id)}
               ></Button>
             </div>
+            <p
+              className={css`
+                color: grey;
+              `}
+            >
+              published {formatDate({ date: p.publishedAt, i18n })}
+            </p>
           </HeaderDiv>
           <MarkdownContent content={p.content} />
         </Box>
