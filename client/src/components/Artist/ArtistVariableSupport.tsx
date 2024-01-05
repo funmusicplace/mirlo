@@ -73,6 +73,7 @@ const ArtistVariableSupport: React.FC<{
         {t("support")}
       </SupportBoxButton>
       <Modal
+        size="small"
         open={open}
         onClose={() => setOpen(false)}
         title={t("howMuch") ?? ""}
