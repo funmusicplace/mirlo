@@ -106,11 +106,7 @@ function App() {
               flex-grow: 1;
               display: flex;
               flex-direction: column;
-
-              ${isPlaying
-                ? `
-            padding-bottom: 55px;`
-                : ``}
+              padding-bottom: 65px;
             `}
           >
             <div
@@ -119,7 +115,6 @@ function App() {
                 display: flex;
                 flex-direction: column;
                 width: 100%;
-                padding-bottom: 55px;
               `}
             >
               <div
