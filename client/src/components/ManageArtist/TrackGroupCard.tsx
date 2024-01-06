@@ -61,41 +61,21 @@ const TrackGroupCard: React.FC<{
         }
       `}
     >
-      <div
-        className={css`
-          flex: 20%;
-          max-width: 20%;
-
-          @media screen and (max-width: ${bp.medium}px) {
-            flex: 45%;
-            max-width: 45%;
-          }
-        `}
-      >
-        <div
-          className={css`
-            @media screen and (max-width: ${bp.medium}px) {
-              margin-right: 0;
-            }
-          `}
-        >
-          <Link to={getReleaseUrl(artist, album)}>
-            <ImageWithPlaceholder
-              src={album.cover?.sizes?.[600]}
-              alt={album.title}
-              size={250}
-            />
-          </Link>
-        </div>
-      </div>
+      <Link to={getReleaseUrl(artist, album)}>
+        <ImageWithPlaceholder
+          src={album.cover?.sizes?.[600]}
+          alt={album.title}
+          size={250}
+        />
+      </Link>
 
       <div
         className={css`
-          flex: 80%;
+          flex: 95%;
+          max-width: 95%;
           display: flex;
           flex-direction: column;
           justify-content: space-between;
-          width: 100%;
           padding: 1rem;
 
           > div {
@@ -108,8 +88,8 @@ const TrackGroupCard: React.FC<{
           }
 
           @media screen and (max-width: ${bp.medium}px) {
-            flex: 55%;
-            max-width: 55%;
+            flex: 85%;
+            max-width: 85%;
             font-size: 0.8rem;
             padding: 0.5rem;
             padding-right: 0.5rem;
@@ -164,10 +144,6 @@ const TrackGroupCard: React.FC<{
 
             @media screen and (max-width: ${bp.medium}px) {
               justify-content: space-between !important;
-
-            button {
-              font-size: .7rem;
-            }
           `}
         >
           <Link to={`/manage/artists/${album.artistId}/release/${album.id}`}>
