@@ -1,6 +1,19 @@
 import { css } from "@emotion/css";
 import { bp } from "../../constants";
 import React from "react";
+import styled from "@emotion/styled";
+
+const WidgetSection = styled.div`
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: wrap;
+
+  @media screen and (max-width: ${bp.small}px) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+`;
 
 export const SmallTileDetails: React.FC<{
   title: string | React.ReactElement;
@@ -19,22 +32,9 @@ export const SmallTileDetails: React.FC<{
           padding-left: 1rem;
           width: 100%;
           height: 100%;
-          > div {
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: wrap;
-          }
-
-          @media screen and (max-width: ${bp.small}px) {
-            > div {
-              overflow: hidden;
-              text-overflow: ellipsis;
-              white-space: nowrap;
-            }
-          }
         `}
       >
-        <div
+        <WidgetSection
           className={css`
             margin-bottom: 0.5rem;
             font-size: 1.6rem;
@@ -49,8 +49,8 @@ export const SmallTileDetails: React.FC<{
           `}
         >
           {title}
-        </div>
-        <div
+        </WidgetSection>
+        <WidgetSection
           className={css`
             color: var(--mi-normal-foreground-color);
             font-size: 1rem;
@@ -73,8 +73,8 @@ export const SmallTileDetails: React.FC<{
         >
           <span>from </span>
           <span>"{subtitle}"</span>
-        </div>
-        <div
+        </WidgetSection>
+        <WidgetSection
           className={css`
             color: var(--mi-normal-foreground-color);
             font-size: 0.85rem;
@@ -96,7 +96,7 @@ export const SmallTileDetails: React.FC<{
           `}
         >
           {"by"} {footer}
-        </div>
+        </WidgetSection>
       </div>
       <div
         className={css`

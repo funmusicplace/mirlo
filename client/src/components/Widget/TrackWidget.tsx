@@ -223,10 +223,6 @@ const TrackWidget = () => {
                   padding: 1rem 0 0 0;
                   position: relative;
                   bottom: -0.25rem;
-
-                  & > div {
-                    max-width: ;
-                  }
                 `}
               >
                 <AudioWrapper
