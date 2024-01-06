@@ -31,6 +31,7 @@ const TrackGroupWrapper = styled.div`
 `;
 
 const TrackGroupLinks = styled.div`
+  font-size: var(--mi-font-size-small);
   margin-bottom: 0.5rem;
   padding-top: 0.5rem;
   display: flex;
