@@ -51,7 +51,7 @@ function Profile() {
           >
             {!purchases ||
               (purchases?.length === 0 && <Box>{t("collectionEmpty")}</Box>)}
-            <TrackgroupGrid>
+            <TrackgroupGrid gridNumber={"4"}>
               {purchases?.map(
                 (purchase) =>
                   purchase.trackGroup && (

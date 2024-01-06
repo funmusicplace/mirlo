@@ -9,6 +9,7 @@ import { Link } from "react-router-dom";
 import { FaPlus } from "react-icons/fa";
 import Button from "components/common/Button";
 import { useArtistContext } from "state/ArtistContext";
+import TrackgroupGrid from "components/common/TrackgroupGrid";
 
 const ArtistAlbums: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
@@ -28,40 +29,31 @@ const ArtistAlbums: React.FC = () => {
   }
 
   return (
-      <div
-        style={{ marginTop: "0rem" }}
-        className={css`
-          margin-bottom: 2rem;
-          @media screen and (max-width: ${bp.medium}px) {
-            border-radius: 0;
-            margin-bottom: 0rem;
-          }
-        `}
-      >
-        <HeaderDiv>
-          {artist.userId === user?.id && (
-            <Link to={`/manage/artists/${artist.id}/new-release`}>
-              <Button compact transparent startIcon={<FaPlus />}>
-                {t("addNewAlbum")}
-              </Button>
-            </Link>
-          )}
-        </HeaderDiv>
-        <div
-          className={css`
-            display: flex;
-            flex-wrap: wrap;
-
-            @media screen and (max-width: ${bp.medium}px) {
-              padding: 0rem 0rem 0rem 0rem;
-            }
-          `}
-        >
-          {artist.trackGroups?.map((trackGroup) => (
-            <ArtistTrackGroup key={trackGroup.id} trackGroup={trackGroup} />
-          ))}
-        </div>
-      </div>
+    <div
+      style={{ marginTop: "0rem" }}
+      className={css`
+        margin-bottom: 2rem;
+        @media screen and (max-width: ${bp.medium}px) {
+          border-radius: 0;
+          margin-bottom: 0rem;
+        }
+      `}
+    >
+      <HeaderDiv>
+        {artist.userId === user?.id && (
+          <Link to={`/manage/artists/${artist.id}/new-release`}>
+            <Button compact transparent startIcon={<FaPlus />}>
+              {t("addNewAlbum")}
+            </Button>
+          </Link>
+        )}
+      </HeaderDiv>
+      <TrackgroupGrid gridNumber={"3"} wrap>
+        {artist.trackGroups?.map((trackGroup) => (
+          <ArtistTrackGroup key={trackGroup.id} trackGroup={trackGroup} />
+        ))}
+      </TrackgroupGrid>
+    </div>
   );
 };
 
