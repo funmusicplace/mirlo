@@ -72,17 +72,19 @@ const ManageSubscriptionTierBox: React.FC<{
             }
           `}
         >
-          <strong
+          <div
             className={css`
-              width: 80%;
+              width: 70%;
             `}
           >
-            {tier.name}:{" "}
-            <Money
-              amount={tier.minAmount ? tier.minAmount / 100 : 0}
-              currency={tier.currency}
-            />
-          </strong>
+            <strong>
+              {tier.name}:{" "}
+              <Money
+                amount={tier.minAmount ? tier.minAmount / 100 : 0}
+                currency={tier.currency}
+              />
+            </strong>
+          </div>
           <div>
             <Button startIcon={<FaPen />} onClick={() => setManageTier(true)} />
 
