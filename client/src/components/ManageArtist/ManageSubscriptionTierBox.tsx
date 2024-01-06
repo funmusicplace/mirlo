@@ -72,7 +72,11 @@ const ManageSubscriptionTierBox: React.FC<{
             }
           `}
         >
-          <strong>
+          <strong
+            className={css`
+              width: 80%;
+            `}
+          >
             {tier.name}:{" "}
             <Money
               amount={tier.minAmount ? tier.minAmount / 100 : 0}
