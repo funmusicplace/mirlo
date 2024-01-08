@@ -9,6 +9,22 @@ import { useArtistContext } from "state/ArtistContext";
 import HeaderDiv from "components/common/HeaderDiv";
 import { FaRss } from "react-icons/fa";
 import Button from "components/common/Button";
+import styled from "@emotion/styled";
+
+export const PostGrid = styled.div<{}>`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4% 2.5%;
+
+  @media screen and (max-width: ${bp.large}px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media screen and (max-width: ${bp.medium}px) {
+    grid-template-columns: repeat(1, 1fr);
+    gap: 2%;
+  }
+`;
 
 const ArtistPosts: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
@@ -24,8 +40,7 @@ const ArtistPosts: React.FC = () => {
   return (
     <div>
       <HeaderDiv>
-        <div>
-        </div>
+        <div></div>
         <a
           target="_blank"
           href={`${process.env.REACT_APP_API_DOMAIN}/v1/artists/${artist.id}/feed?format=rss`}
@@ -56,33 +71,12 @@ const ArtistPosts: React.FC = () => {
         >
           {artist.posts?.length === 0 && <>{t("noUpdates")}</>}
         </div>
-        <div
-          className={css`
-            margin-top: 0;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: ${artist.posts?.length % 3 === 2
-              ? "flex-start"
-              : "space-between"};
-            width: 100%;
-            a {
-              width: 32.4%;
-            }
-            @media screen and (max-width: ${bp.medium}px) {
-              flex-direction: column;
-              a {
-                width: 100%;
-              }
-            }
-          `}
-        >
+        <PostGrid>
           {artist.posts?.map((p) => (
             <Link
               to={`/post/${p.id}/`}
               className={css`
                 display: flex;
-                margin-right: ${artist.posts?.length % 3 === 2 ? "1.2%" : ""};
-                margin-bottom: 1rem;
                 border-radius: 10px;
                 background-color: var(--mi-darken-background-color);
                 filter: brightness(95%);
@@ -105,7 +99,7 @@ const ArtistPosts: React.FC = () => {
               <PostCard width="100%" height="350px" dateposition="auto" p={p} />
             </Link>
           ))}
-        </div>
+        </PostGrid>
       </div>
     </div>
   );
