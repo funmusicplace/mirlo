@@ -118,6 +118,19 @@ export default function () {
           currency: true,
         },
       });
+      const existingSlug = await prisma.trackGroup.findFirst({
+        where: {
+          urlSlug,
+        },
+      });
+
+      if (existingSlug) {
+        return res
+          .status(400)
+          .json({
+            error: "Can't create a trackGroup with an existing urlSlug",
+          });
+      }
       const result = await prisma.trackGroup.create({
         data: {
           title,

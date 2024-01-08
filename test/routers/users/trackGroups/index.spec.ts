@@ -146,6 +146,30 @@ describe("users/{userId}/trackGroups", () => {
       assert.equal(response.body.error, "Argument `urlSlug` is missing.");
     });
 
+    it("should fail to POST an album when a slug already exists", async () => {
+      const { user, accessToken } = await createUser({ email: "test@testcom" });
+      const artist = await createArtist(user.id);
+
+      const trackGroup = await createTrackGroup(artist.id);
+
+      const response = await requestApp
+        .post(`users/${user.id}/trackGroups`)
+        .send({
+          artistId: artist.id,
+          minPrice: 500,
+          title: "A title",
+          urlSlug: trackGroup.urlSlug,
+        })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.status, 400);
+      assert.equal(
+        response.body.error,
+        "Can't create a trackGroup with an existing urlSlug"
+      );
+    });
+
     it("should not POST an album when artistId doesn't belong to user", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
       const { user: artistUser } = await createUser({
