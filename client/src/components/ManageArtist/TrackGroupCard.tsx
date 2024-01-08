@@ -61,7 +61,15 @@ const TrackGroupCard: React.FC<{
         }
       `}
     >
-      <Link to={getReleaseUrl(artist, album)}>
+      <Link
+        to={getReleaseUrl(artist, album)}
+        className={css`
+          @media screen and (max-width: ${bp.small}px) {
+            height: 100%;
+            margin: auto;
+          }
+        `}
+      >
         <ImageWithPlaceholder
           src={album.cover?.sizes?.[600]}
           alt={album.title}
