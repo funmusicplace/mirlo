@@ -170,6 +170,25 @@ describe("users/{userId}/trackGroups", () => {
       );
     });
 
+    it("should POST an album with an empty string title", async () => {
+      const { user, accessToken } = await createUser({ email: "test@testcom" });
+      const artist = await createArtist(user.id);
+
+      const response = await requestApp
+        .post(`users/${user.id}/trackGroups`)
+        .send({
+          artistId: artist.id,
+          minPrice: 500,
+          title: "",
+          urlSlug: "mi-temp-slug-new-album",
+        })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.status, 200);
+      assert.equal(response.body.result.title, "");
+    });
+
     it("should not POST an album when artistId doesn't belong to user", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
       const { user: artistUser } = await createUser({

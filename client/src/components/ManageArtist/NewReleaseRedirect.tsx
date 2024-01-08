@@ -24,7 +24,7 @@ const NewReleaseRedirect: React.FC<{}> = () => {
           Partial<TrackGroup>,
           { result: TrackGroup }
         >(`users/${userId}/trackGroups`, {
-          title: "New album",
+          title: "",
           urlSlug: `mi-temp-slug-new-album-${
             artist?.trackGroups.length ?? 0 + 2
           }`,

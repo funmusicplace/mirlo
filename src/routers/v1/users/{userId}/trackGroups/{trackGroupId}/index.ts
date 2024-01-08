@@ -18,6 +18,24 @@ type Params = {
   userId: string;
 };
 
+const findNewSlug = async (
+  slug: string,
+  counter: number,
+  artistId: number
+): Promise<string> => {
+  const verifySlug = await prisma.trackGroup.findFirst({
+    where: {
+      urlSlug: `${slug}`,
+      artistId: artistId,
+    },
+  });
+  if (verifySlug) {
+    return await findNewSlug(`${slug}-${counter + 1}`, counter + 1, artistId);
+  } else {
+    return slug;
+  }
+};
+
 export default function () {
   const operations = {
     PUT: [userAuthenticated, contentBelongsToLoggedInUserArtist, PUT],
@@ -62,28 +80,37 @@ export default function () {
         },
       })) as Artist; // By now we know that the artist exists
 
+      const newValues = pick(data, [
+        "title",
+        "releaseDate",
+        "published",
+        "type",
+        "about",
+        "minPrice",
+        "credits",
+      ]);
+
       await prisma.trackGroup.updateMany({
         where: { id: Number(trackGroupId), artistId: artist.id },
-        data: pick(data, [
-          "title",
-          "releaseDate",
-          "published",
-          "type",
-          "about",
-          "minPrice",
-          "credits",
-        ]),
+        data: newValues,
       });
 
       let trackGroup = await prisma.trackGroup.findFirst({
         where: { id: Number(trackGroupId) },
       });
 
-      if (trackGroup?.title && trackGroup?.urlSlug.includes("mi-temp-slug")) {
+      if (trackGroup?.title && trackGroup.urlSlug.includes("mi-temp-slug")) {
+        let slug = slugify(newValues.title).toLowerCase();
+
+        if (slug === "") {
+          slug = "blank";
+        }
+        const newSlug = await findNewSlug(slug, 0, artist.id);
+        console.log("found from ", slug, newSlug);
         await prisma.trackGroup.update({
           where: { id: trackGroup.id },
           data: {
-            urlSlug: slugify(trackGroup.title).toLowerCase(),
+            urlSlug: newSlug,
           },
         });
         trackGroup = await prisma.trackGroup.findFirst({

@@ -120,16 +120,15 @@ export default function () {
       });
       const existingSlug = await prisma.trackGroup.findFirst({
         where: {
+          artistId: Number(artistId),
           urlSlug,
         },
       });
 
       if (existingSlug) {
-        return res
-          .status(400)
-          .json({
-            error: "Can't create a trackGroup with an existing urlSlug",
-          });
+        return res.status(400).json({
+          error: "Can't create a trackGroup with an existing urlSlug",
+        });
       }
       const result = await prisma.trackGroup.create({
         data: {
