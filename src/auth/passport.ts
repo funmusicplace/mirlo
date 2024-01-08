@@ -127,10 +127,10 @@ export const artistBelongsToLoggedInUser = async (
     res.status(401).json({ error: "Unauthorized" });
   } else {
     if (loggedInUser.id !== Number(userId)) {
-      res.status(400).json({
+      res.status(401).json({
         error: `Artist must belong to user`,
       });
-      return next(`Artist must belong to user`);
+      return;
     }
 
     const artist = await prisma.artist.findFirstOrThrow({
@@ -141,10 +141,10 @@ export const artistBelongsToLoggedInUser = async (
     });
 
     if (!artist) {
-      res.status(400).json({
-        error: "Artist must belong to user",
+      res.status(404).json({
+        error: "Artist not found",
       });
-      return next("Artist must belong to user");
+      return;
     }
   }
   return next();
