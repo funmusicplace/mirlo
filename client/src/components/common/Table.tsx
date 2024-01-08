@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { bp } from "constants";
+import { bp } from "../../constants";
 
 export const Table = styled.table`
   width: 100%;
@@ -40,9 +40,6 @@ export const Table = styled.table`
       font-size: var(--mi-font-size-small);
       padding: 0 0.1rem;
       margin: 0rem;
-      max-width: 100%;
-      text-overflow: ellipsis;
-      overflow: hidden;
     }
   }
 `;

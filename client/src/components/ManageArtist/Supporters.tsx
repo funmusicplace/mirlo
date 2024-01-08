@@ -6,6 +6,19 @@ import React from "react";
 import { useArtistContext } from "state/ArtistContext";
 import { ArtistSection } from "components/Artist/Artist";
 import Money from "components/common/Money";
+import styled from "@emotion/styled";
+import { bp } from "../../constants";
+
+export const SupporterTable = styled(Table)`
+  @media screen and (max-width: ${bp.small}px) {
+    & td,
+    &th {
+      max-width: 90px;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+  }
+`;
 
 type SupportTier = {
   user: User;
@@ -46,7 +59,7 @@ const Supporters = () => {
           <h4>Supporters</h4>
           <ArtistSubscriberDataDownload />
         </HeaderDiv>
-        <Table>
+        <SupporterTable>
           <thead>
             <tr>
               <th>Name</th>
@@ -70,13 +83,13 @@ const Supporters = () => {
               </tr>
             ))}
           </tbody>
-        </Table>
+        </SupporterTable>
       </ArtistSection>
       <ArtistSection>
         <HeaderDiv>
           <h4>Followers</h4>
         </HeaderDiv>
-        <Table>
+        <SupporterTable>
           <thead>
             <tr>
               <th>Name</th>
@@ -91,7 +104,7 @@ const Supporters = () => {
               </tr>
             ))}
           </tbody>
-        </Table>
+        </SupporterTable>
       </ArtistSection>
     </>
   );
