@@ -7,7 +7,7 @@ import React from "react";
 import api from "services/api";
 import PostCard from "components/common/PostCard";
 import Overlay from "components/common/Overlay";
-import { bp } from "../../constants";
+import { PostGrid } from "components/Artist/ArtistPosts";
 
 const Posts = () => {
   const { t } = useTranslation("translation", { keyPrefix: "home" });
@@ -46,39 +46,18 @@ const Posts = () => {
 
           <div
             className={css`
+              margin: var(--mi-side-paddings-xsmall);
               a {
                 color: var(--mi-normal-foreground-color);
               }
             `}
           >
-            <div
-              className={css`
-                margin: var(--mi-side-paddings-xsmall);
-                margin-top: 0.5rem;
-                display: flex;
-                flex-wrap: wrap;
-                justify-content: space-between;
-
-                a {
-                  width: 32%;
-                }
-
-                @media screen and (max-width: ${bp.medium}px) {
-                  flex-direction: column;
-                  margin-top: 0.25rem;
-
-                  a {
-                    width: 100%;
-                  }
-                }
-              `}
-            >
+            <PostGrid>
               {posts.map((p) => (
                 <Link
                   to={`/post/${p.id}/`}
                   className={css`
                     display: flex;
-                    margin-bottom: 1.5rem;
                     border-radius: 5px;
                     background-color: var(--mi-darken-background-color);
                     filter: brightness(95%);
@@ -108,7 +87,7 @@ const Posts = () => {
                   ></PostCard>
                 </Link>
               ))}
-            </div>
+            </PostGrid>
           </div>
         </div>
       </WidthContainer>

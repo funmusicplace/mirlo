@@ -25,44 +25,14 @@ const StyledSupportBox = styled(Box)`
   justify-content: space-between;
   outline: var(--mi-border);
 
-  max-width: 32.3%;
-  flex: 32.3%;
-
-  &:nth-of-type(3n + 1) {
-    margin-right: 1.5%;
-  }
-
-  &:nth-of-type(3n) {
-    margin-left: 1.5%;
-  }
-
   @media screen and (max-width: ${bp.medium}px) {
     h3 {
       font-size: 1rem;
     }
-    max-width: 48.7%;
-    flex: 48.7%;
-
-    margin-bottom: 0rem;
-    margin-top: 0.5rem;
-
-    &:nth-child(odd) {
-      margin-left: 0rem;
-      margin-right: 2.5%;
-    }
   }
 
   @media screen and (max-width: ${bp.small}px) {
-    h3 {
-      font-size: 1rem;
-    }
-
-    font-size: 0.875rem;
-    max-width: 100%;
-    flex: 100%;
-    &:nth-child(odd) {
-      margin-right: 0rem;
-    }
+    font-size: var(--mi-font-size-small);
   }
 `;
 

@@ -10,6 +10,7 @@ import { bp } from "../../constants";
 import FollowArtist from "components/common/FollowArtist";
 import HeaderDiv from "components/common/HeaderDiv";
 import { useArtistContext } from "state/ArtistContext";
+import { PostGrid } from "./ArtistPosts";
 
 const ArtistSupport: React.FC = () => {
   const {
@@ -111,21 +112,11 @@ const ArtistSupport: React.FC = () => {
           {t("noSubscriptionTiersYet")}
         </Box>
       )}
-      <div
-        className={css`
-          display: flex;
-          flex-wrap: wrap;
-          justify-content: flex-start;
-
-          @media (max-width: ${bp.small}px) {
-            flex-direction: column;
-          }
-        `}
-      >
+      <PostGrid>
         {artist.subscriptionTiers?.map((p) => (
           <ArtistSupportBox key={p.id} subscriptionTier={p} />
         ))}
-      </div>
+      </PostGrid>
     </>
   );
 };
