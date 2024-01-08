@@ -84,6 +84,8 @@ const ArtistVariableSupport: React.FC<{
             className={css`
               display: flex;
               align-items: center;
+              margin-bottom: 1rem;
+              margin-top: 1rem;
 
               input {
                 margin-right: 1rem;

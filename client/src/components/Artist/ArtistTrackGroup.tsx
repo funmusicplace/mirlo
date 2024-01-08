@@ -9,57 +9,29 @@ import styled from "@emotion/styled";
 
 const TrackGroupWrapper = styled.div`
   margin-bottom: 0.5rem;
-  display: inline-block;
-  max-width: 32.2%;
-  flex: 32.2%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-
-  &:nth-child(3n + 1) {
-    border-top: 0;
-    margin-right: 1.7%;
-    margin-left: 0rem;
-  }
-
-  &:nth-child(3n) {
-    border-top: 0;
-    margin-left: 1.7%;
-    margin-right: 0rem;
-  }
 
   button {
     padding: 0.35rem 0.35rem;
   }
 
   @media screen and (max-width: ${bp.medium}px) {
-    max-width: 48.5%;
-    flex: 48.5%;
     padding: 0;
     margin-bottom: 1rem;
     margin-top: 0rem;
+  }
 
-    &:nth-child(odd) {
-      margin-left: 0rem;
-      margin-right: 1.5%;
-    }
+  @media screen and (max-width: ${bp.small}px) {
+    font-size: var(--mi-font-size-small);
 
-    &:nth-child(even) {
-      margin-right: 0rem;
-      margin-left: 1.5%;
-    }
-
-    @media screen and (max-width: ${bp.small}px) {
-      font-size: var(--mi-font-size-small);
-
-      button {
-        padding: 0.25rem 0.25rem;
-        height: 1.4rem;
-      }
+    button {
+      padding: 0.25rem 0.25rem;
+      height: 1.4rem;
     }
   }
 `;
 
 const TrackGroupLinks = styled.div`
+  font-size: var(--mi-font-size-small);
   margin-bottom: 0.5rem;
   padding-top: 0.5rem;
   display: flex;
@@ -86,12 +58,6 @@ const TrackGroupInfo = styled.div`
   a:last-of-type {
     font-size: var(--mi-font-size-xsmall);
     color: var(--mi-light-foreground-color);
-  }
-
-  a {
-    text-decoration: none;
-    text-overflow: ellipsis;
-    overflow: hidden;
   }
 
   a:hover {
@@ -158,8 +124,7 @@ const ArtistTrackGroup: React.FC<{
                 display: none!;
               }
             `}
-          >
-          </div>
+          ></div>
         </TrackGroupLinks>
       </div>
     </TrackGroupWrapper>

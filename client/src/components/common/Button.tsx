@@ -104,11 +104,12 @@ const CustomButton = styled.button<Compactable>`
           }
           
           @media screen and (max-width: ${bp.small}px) {
-           ${
-             props.compact
-               ? "padding: .5rem; height: 1.5rem !important;"
-               : "height: 2rem;"
-           };
+            font-size: var(--mi-font-size-normal);
+            ${
+              props.compact
+                ? "padding: .5rem; height: 1.5rem !important;"
+                : "height: 2rem;"
+            };
           }
         `;
       case "outlined":
@@ -170,12 +171,11 @@ const CustomButton = styled.button<Compactable>`
             background-color: var(--mi-${props.role ?? "primary"}-color);
             color: var(--mi-${props.role ?? "secondary"}-color);
           }
-
-            @media screen and (max-width: ${bp.small}px) {
-              font-size: 0.8rem;
-              padding: ${props.transparent ? ".5rem .25rem .5rem .25rem" : ""};
-            }
-
+          
+          @media screen and (max-width: ${bp.small}px) {
+            font-size: var(--mi-font-size-normal);
+            padding: ${props.transparent ? ".5rem .25rem .5rem .25rem" : ""};
+          }
         `;
     }
   }}

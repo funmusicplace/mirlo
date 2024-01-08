@@ -65,7 +65,7 @@ const Releases = () => {
                 padding: var(--mi-side-paddings-xsmall);
               `}
             >
-              <TrackgroupGrid>
+              <TrackgroupGrid gridNumber={"4"}>
                 {trackGroups?.map((trackGroup) => (
                   <ArtistTrackGroup
                     key={trackGroup.id}
