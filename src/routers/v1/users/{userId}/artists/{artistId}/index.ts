@@ -106,28 +106,32 @@ export default function () {
     const { userId, artistId } = req.params as unknown as Params;
     const castArtistId = await findArtistIdForURLSlug(artistId);
 
-    if (userId) {
-      const artist = await prisma.artist.findFirst({
-        where: {
-          id: Number(castArtistId),
-          userId: Number(userId),
-        },
-        include: singleInclude(),
-      });
+    try {
+      if (userId) {
+        const artist = await prisma.artist.findFirst({
+          where: {
+            id: Number(castArtistId),
+            userId: Number(userId),
+          },
+          include: singleInclude(),
+        });
 
-      if (!artist) {
-        res.status(404);
-        return next();
+        if (!artist) {
+          res.status(404).json({
+            error: "Artist not found",
+          });
+        } else {
+          res.json({
+            result: processSingleArtist(artist, Number(userId)),
+          });
+        }
+      } else {
+        res.status(400).json({
+          error: "Invalid route",
+        });
       }
-
-      res.json({
-        result: processSingleArtist(artist, Number(userId)),
-      });
-    } else {
-      res.status(400);
-      res.json({
-        error: "Invalid route",
-      });
+    } catch (e) {
+      next(e);
     }
   }
 
@@ -169,8 +173,7 @@ export default function () {
     try {
       await deleteArtist(Number(userId), Number(artistId));
     } catch (e) {
-      res.status(400);
-      next();
+      return next(e);
     }
     res.json({ message: "Success" });
   }
