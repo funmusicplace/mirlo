@@ -29,6 +29,23 @@ export const Table = styled.table`
       padding: 0.25rem 0.5rem;
     }
   }
+  @media screen and (max-width: 576px) {
+    tr {
+      text-overflow: ellipsis !important;
+      overflow: hidden !important;
+      max-width: 100%;
+      white-space: wrap;
+    }
+
+    & th {
+      font-size: var(--mi-font-size-small);
+      padding: 0 0.1rem;
+      margin: 0rem;
+      max-width: 100%;
+      text-overflow: ellipsis !important;
+      overflow: hidden !important;
+    }
+  }
 `;
 
 export default Table;
