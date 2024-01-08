@@ -115,8 +115,6 @@ const TrackGroupCard: React.FC<{
               }
             }
           }
-          @media screen and (max-width: ${bp.small}px) {
-          }
         `}
       >
         <div>

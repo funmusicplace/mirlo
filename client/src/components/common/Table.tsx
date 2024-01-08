@@ -1,4 +1,5 @@
 import styled from "@emotion/styled";
+import { bp } from "constants";
 
 export const Table = styled.table`
   width: 100%;
@@ -23,16 +24,14 @@ export const Table = styled.table`
     text-align: right;
   }
 
-  @media screen and (max-width: 768px) {
+  @media screen and (max-width: ${bp.medium}px) {
     & td,
     &th {
       padding: 0.25rem 0.5rem;
     }
   }
-  @media screen and (max-width: 576px) {
+  @media screen and (max-width: ${bp.small}px) {
     tr {
-      text-overflow: ellipsis !important;
-      overflow: hidden !important;
       max-width: 100%;
       white-space: wrap;
     }
@@ -42,8 +41,8 @@ export const Table = styled.table`
       padding: 0 0.1rem;
       margin: 0rem;
       max-width: 100%;
-      text-overflow: ellipsis !important;
-      overflow: hidden !important;
+      text-overflow: ellipsis;
+      overflow: hidden;
     }
   }
 `;
