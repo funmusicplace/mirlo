@@ -5,15 +5,14 @@ import {
   finalCoversBucket,
   finalAudioBucket,
   minioClient,
-  getObjectList,
   removeObjectsFromBucket,
 } from "./minio";
 import { findArtistIdForURLSlug } from "./artist";
 import { logger } from "../logger";
-import fs, { promises as fsPromises } from "fs";
 import archiver from "archiver";
 import { deleteTrack } from "./tracks";
 import { randomUUID } from "crypto";
+import { Response } from "express";
 
 const { MEDIA_LOCATION_DOWNLOAD_CACHE = "" } = process.env;
 
@@ -112,41 +111,12 @@ export async function buildZipFileForPath(
   tracks: (Track & {
     audio: TrackAudio | null;
   })[],
-  folderName: string,
-  format: FormatOptions = "flac"
+  format: FormatOptions = "flac",
+  res: Response
 ) {
-  return new Promise(async (resolve: (value: string) => void, reject) => {
-    const rootFolder = `${MEDIA_LOCATION_DOWNLOAD_CACHE}/${folderName}`;
-    const zipLocation = `${rootFolder}.${format}.zip`;
-    try {
-      const exists = await fsPromises.stat(zipLocation);
-      if (exists) {
-        logger.info(`${folderName}.${format}: exists at ${zipLocation}`);
-        return resolve(zipLocation);
-      }
-    } catch (e) {
-      logger.info(`${folderName}.${format}: No existing zip`);
-    }
-
-    const output = fs.createWriteStream(zipLocation);
+  return new Promise(async (resolve: (value?: unknown) => void, reject) => {
     const archive = archiver("zip", {
       zlib: { level: 9 }, // Sets the compression level.
-    });
-
-    // listen for all archive data to be written
-    // 'close' event is fired only when a file descriptor is involved
-    output.on("close", function () {
-      logger.info(archive.pointer() + " total bytes");
-      logger.info(
-        "archiver has been finalized and the output file descriptor has closed."
-      );
-      resolve(zipLocation);
-    });
-    // This event is fired when the data source is drained no matter what was the data source.
-    // It is not part of this library but rather from the NodeJS Stream API.
-    // @see: https://nodejs.org/api/stream.html#stream_event_end
-    output.on("end", function () {
-      logger.info("Data has been drained");
     });
 
     // good practice to catch warnings (ie stat failures and other non-blocking errors)
@@ -163,7 +133,12 @@ export async function buildZipFileForPath(
     archive.on("error", function (err) {
       throw err;
     });
-    archive.pipe(output);
+
+    archive.on("finish", () => {
+      resolve();
+    });
+
+    archive.pipe(res);
 
     for (let i = 0; i < tracks.length; i++) {
       const track = tracks[i];

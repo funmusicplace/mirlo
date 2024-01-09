@@ -146,21 +146,21 @@ export default function () {
         return next();
       }
 
-      const zip = await buildZipFileForPath(
-        // FIXME: why is this being picky about typing?
-        trackGroup.tracks as unknown as (Track & {
-          audio: TrackAudio | null;
-        })[],
-        trackGroup.id.toString(),
-        format
-      );
-
-      logger.info(`Put zip at ${zip}`);
+      res.attachment(`${trackGroup.title}.zip`);
       res.set(
         "Content-Disposition",
         `attachment; filename="${trackGroup.title}"`
       );
-      res.sendFile(zip);
+      await buildZipFileForPath(
+        // FIXME: why is this being picky about typing?
+        trackGroup.tracks as unknown as (Track & {
+          audio: TrackAudio | null;
+        })[],
+        format,
+        res
+      );
+
+      return;
     } catch (e) {
       console.error("trackGroups/{id}/download", e);
       res.status(500);
