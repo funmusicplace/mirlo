@@ -27,11 +27,6 @@ services:
     # dockerfilePath: ./prod.Dockerfile
     buildCommand: yarn install && yarn migrate:deploy
     startCommand: yarn staging 
-    disk: # this disk gets used to receive uploads. They should get moved to the 
-          # minIO service and deleted after upload
-      name: data
-      mountPath: /data
-      sizeGB: 20 
     envVars: 
       - key: NODE_OPTIONS
         value: --max-old-space-size=1512
