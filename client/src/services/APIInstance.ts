@@ -57,6 +57,9 @@ const APIInstance = (apiRoot: string) => {
 
   return {
     root: api,
+    paymentProcessor: {
+      stripeConnect: (userId: number) => api + `users/${userId}/stripe/connect`,
+    },
     request: apiRequest,
     post: async <T, R>(
       endpoint: string,

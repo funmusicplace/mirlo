@@ -19,7 +19,7 @@ const ArtistSupport: React.FC = () => {
   } = useGlobalStateContext();
 
   const {
-    state: { artist },
+    state: { artist, userStripeStatus },
   } = useArtistContext();
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const [isLoading, setIsLoading] = React.useState(false);
@@ -73,6 +73,18 @@ const ArtistSupport: React.FC = () => {
 
   if (!artist) {
     return null;
+  }
+
+  if (!userStripeStatus?.chargesEnabled) {
+    return (
+      <div
+        className={css`
+          margin: 2rem 0;
+        `}
+      >
+        {t("noSubscriptionTiersYet")}
+      </div>
+    );
   }
 
   if (isLoading) {

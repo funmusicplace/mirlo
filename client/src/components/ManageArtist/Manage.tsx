@@ -7,7 +7,6 @@ import CreateNewArtistForm from "./ArtistForm";
 import { bp } from "../../constants";
 import { useGlobalStateContext } from "state/GlobalState";
 import { Link } from "react-router-dom";
-import { useSnackbar } from "state/SnackbarContext";
 import { useTranslation } from "react-i18next";
 import Box from "components/common/Box";
 import CountrySelect from "./CountrySelectForm";
@@ -19,7 +18,6 @@ export const Manage: React.FC = () => {
   const [stripeAccountStatus, setStripeAccountStatus] =
     React.useState<AccountStatus>();
   const [creatingNewArtist, setCreatingNewArtist] = React.useState(false);
-  const snackbar = useSnackbar();
   const { t } = useTranslation("translation", { keyPrefix: "manage" });
 
   const userId = state.user?.id;
@@ -39,15 +37,6 @@ export const Manage: React.FC = () => {
       setStripeAccountStatus(checkAccountStatus.result);
     }
   }, [userId]);
-
-  const setUpBankAccount = React.useCallback(async () => {
-    try {
-      window.location.assign(api.root + `users/${userId}/stripe/connect`);
-    } catch (e) {
-      snackbar(t("error"), { type: "warning" });
-      console.error(e);
-    }
-  }, [snackbar, t, userId]);
 
   React.useEffect(() => {
     fetchArtists();
@@ -143,11 +132,15 @@ export const Manage: React.FC = () => {
                   t("stripeAccountVerified")}
               </Box>
             )}
-            <Button variant="big" onClick={setUpBankAccount}>
-              {stripeAccountStatus?.detailsSubmitted
-                ? t("updateBankAccount")
-                : t("setUpBankAccount")}
-            </Button>
+            {userId && (
+              <a href={api.paymentProcessor.stripeConnect(userId)}>
+                <Button variant="big">
+                  {stripeAccountStatus?.detailsSubmitted
+                    ? t("updateBankAccount")
+                    : t("setUpBankAccount")}
+                </Button>
+              </a>
+            )}
           </div>
         </WidthContainer>
       </div>
