@@ -44,10 +44,6 @@ export const SectionHeader = styled.div<{ userId?: number }>`
 `;
 
 function Home() {
-  const {
-    state: { user },
-  } = useGlobalStateContext();
-
   return (
     <div
       className={css`
@@ -62,7 +58,7 @@ function Home() {
         }
       `}
     >
-      {!user && <Splash />}
+      <Splash />
       <Releases />
       <SupportMirlo />
       <Posts />

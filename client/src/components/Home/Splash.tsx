@@ -6,6 +6,7 @@ import { Trans, useTranslation } from "react-i18next";
 import Button from "components/common/Button";
 import styled from "@emotion/styled";
 import { bp } from "../../constants";
+import { useGlobalStateContext } from "state/GlobalState";
 
 export const SplashWrapper = styled.div`
   display: flex;
@@ -45,6 +46,9 @@ export const SplashButtonWrapper = styled.div`
 `;
 
 const Splash = () => {
+  const {
+    state: { user },
+  } = useGlobalStateContext();
   const { t } = useTranslation("translation", { keyPrefix: "home" });
 
   return (
@@ -78,65 +82,48 @@ const Splash = () => {
           `}
         >
           <SplashTitle>{t("support")}</SplashTitle>
-          <SplashButtonWrapper>
-            <Link to="/signup">
-              <Button
-                variant="big"
-                className={css`
-                  display: block;
-                  height: 51px !important;
-                  border-radius: 9999px;
-                  font-weight: bold;
-                  font-size: 1rem;
-                  align-items: center;
-                  display: inline-flex;
-                  line-height: 1rem;
-                  padding: 1rem;
-                  text-decoration: none;
-                  text-align: center;
-                  background-color: #be3455 !important;
+          {!user && (
+            <SplashButtonWrapper>
+              <Link to="/signup">
+                <Button
+                  variant="big"
+                  className={css`
+                    display: block;
+                    padding: 1.5rem 1rem !important;
+                    background-color: #be3455 !important;
 
-                  &:hover {
-                    text-decoration: underline;
-                  }
-                  color: var(--mi-white) !important;
-                `}
-              >
-                {t("signUp")}
-              </Button>
-            </Link>
-            <Link to="/login">
-              <Button
-                variant="big"
-                className={css`
-                  display: block;
-                  height: 51px !important;
-                  border-radius: 9999px;
-                  font-weight: bold;
-                  font-size: 1rem;
-                  color: var(--mi-white) !important;
-                  align-items: center;
-                  display: inline-flex;
-                  line-height: 1rem;
-                  padding: 1rem;
-                  text-decoration: none;
-                  text-align: center;
-                  &:hover {
-                    text-decoration: underline;
-                  }
+                    &:hover {
+                      text-decoration: underline;
+                    }
+                    color: var(--mi-white) !important;
+                  `}
+                >
+                  {t("signUp")}
+                </Button>
+              </Link>
+              <Link to="/login">
+                <Button
+                  variant="big"
+                  className={css`
+                    color: var(--mi-white) !important;
+                    &:hover {
+                      text-decoration: underline;
+                    }
+                    padding: 1.5rem 1rem !important;
 
-                  background-color: var(--mi-black) !important;
-                  color: var(--mi-white);
-                  @media (prefers-color-scheme: dark) {
-                    background-color: var(--mi-white) !important;
-                    color: var(--mi-black) !important;
-                  }
-                `}
-              >
-                {t("logIn")}
-              </Button>
-            </Link>
-          </SplashButtonWrapper>
+                    background-color: var(--mi-black) !important;
+                    color: var(--mi-white);
+                    @media (prefers-color-scheme: dark) {
+                      background-color: var(--mi-white) !important;
+                      color: var(--mi-black) !important;
+                    }
+                  `}
+                >
+                  {t("logIn")}
+                </Button>
+              </Link>
+            </SplashButtonWrapper>
+          )}
           <p
             className={css`
               font-size: 0.875rem;
@@ -151,6 +138,10 @@ const Splash = () => {
                 about: <a href="/pages/about"></a>,
                 // eslint-disable-next-line jsx-a11y/anchor-has-content
                 faq: <a href="/pages/faq"></a>,
+                office: (
+                  // eslint-disable-next-line jsx-a11y/anchor-has-content
+                  <a href=" https://calendly.com/mirloofficehours/schedule"></a>
+                ),
                 github: (
                   // eslint-disable-next-line jsx-a11y/anchor-has-content
                   <a href="https://github.com/funmusicplace/mirlo/"></a>

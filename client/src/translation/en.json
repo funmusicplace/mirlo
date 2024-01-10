@@ -398,7 +398,7 @@
     "sustainedBy": "Mirlo's work is sustained by our community, not by venture capital",
     "logIn": "Log in",
     "signUp": "Sign up",
-    "mirloConstruction": "Wanna talk more? E-mail us! If you'd like to contribute, check out our <about>About page</about>, <faq>FAQ</faq>, <github>the code on GitHub</github>, <discord>join our Discord</discord>, or <email>email us</email>.",
+    "mirloConstruction": "Wanna talk more? <email>E-mail us</email>, <discord>join our Discord</discord>, or join us <office>for office hours</office>! Also check out our <about>About page</about>, <faq>FAQ</faq>, and <github>the code on GitHub</github>.",
     "latestCommunityPost": "Latest posts from the community"
   },
   "faq": {
