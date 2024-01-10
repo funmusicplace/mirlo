@@ -10,6 +10,8 @@ import { useGlobalStateContext } from "state/GlobalState";
 import usePublicObjectById from "utils/usePublicObjectById";
 import { bp } from "../../constants";
 import Box from "components/common/Box";
+import FollowArtist from "components/common/FollowArtist";
+import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 
 export const pageMarkdownWrapper = css`
   width: 100%;
@@ -117,18 +119,21 @@ const Post: React.FC = () => {
             )}
           </div>
           {post.artist && (
-            <em
-              className={css`
-                font-style: normal;
-              `}
-            >
-              by{" "}
-              <Link
-                to={`/${post.artist.urlSlug?.toLowerCase() ?? post.artistId}`}
+            <SpaceBetweenDiv>
+              <span
+                className={css`
+                  margin-right: 0.25rem;
+                `}
               >
-                {post.artist?.name}
-              </Link>
-            </em>
+                by{" "}
+                <Link
+                  to={`/${post.artist.urlSlug?.toLowerCase() ?? post.artistId}`}
+                >
+                  {post.artist?.name}
+                </Link>
+              </span>
+              {post.artistId && <FollowArtist artistId={post.artistId} />}
+            </SpaceBetweenDiv>
           )}
           {post.isContentHidden && (
             <div

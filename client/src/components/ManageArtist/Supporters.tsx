@@ -1,4 +1,4 @@
-import HeaderDiv from "components/common/HeaderDiv";
+import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import ArtistSubscriberDataDownload from "./ArtistSubscriberDataDownload";
 import Table from "components/common/Table";
 import api from "services/api";
@@ -55,10 +55,10 @@ const Supporters = () => {
   return (
     <>
       <ArtistSection>
-        <HeaderDiv>
+        <SpaceBetweenDiv>
           <h4>Supporters</h4>
           <ArtistSubscriberDataDownload />
-        </HeaderDiv>
+        </SpaceBetweenDiv>
         <SupporterTable>
           <thead>
             <tr>
@@ -86,9 +86,9 @@ const Supporters = () => {
         </SupporterTable>
       </ArtistSection>
       <ArtistSection>
-        <HeaderDiv>
+        <SpaceBetweenDiv>
           <h4>Followers</h4>
-        </HeaderDiv>
+        </SpaceBetweenDiv>
         <SupporterTable>
           <thead>
             <tr>

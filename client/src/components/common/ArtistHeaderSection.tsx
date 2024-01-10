@@ -7,7 +7,7 @@ import FollowArtist from "./FollowArtist";
 import { useGlobalStateContext } from "state/GlobalState";
 import Button from "./Button";
 import { useTranslation } from "react-i18next";
-import HeaderDiv from "./HeaderDiv";
+import SpaceBetweenDiv from "./SpaceBetweenDiv";
 import ArtistFormLinks from "components/ManageArtist/ArtistFormLinks";
 import Avatar from "components/Artist/Avatar";
 import ArtistFormLocation from "components/ManageArtist/ArtistFormLocation";
@@ -153,7 +153,7 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
                   width: 100%;
                 `}
               >
-                <HeaderDiv
+                <SpaceBetweenDiv
                   className={css`
                     padding-bottom: 0 !important;
                     margin-bottom: 0rem !important;
@@ -199,7 +199,7 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
                       )}
                     </ArtistActions>
                   </div>
-                </HeaderDiv>
+                </SpaceBetweenDiv>
               </div>
               {!artistAvatar && (
                 <div

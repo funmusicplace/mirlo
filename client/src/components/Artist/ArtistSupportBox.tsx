@@ -99,7 +99,8 @@ const ArtistSupportBox: React.FC<{
   const isSubscribedToArtist = !!user?.artistUserSubscriptions?.find(
     (sub) =>
       sub.artistSubscriptionTier.artistId === artist.id &&
-      sub.artistSubscriptionTier.id !== subscriptionTier.id
+      sub.artistSubscriptionTier.id !== subscriptionTier.id &&
+      !sub.artistSubscriptionTier.isDefaultTier
   );
 
   const ownedByUser = user && artist.userId === userId;

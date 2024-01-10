@@ -8,7 +8,7 @@ import ArtistSupportBox from "./ArtistSupportBox";
 import { css } from "@emotion/css";
 import { bp } from "../../constants";
 import FollowArtist from "components/common/FollowArtist";
-import HeaderDiv from "components/common/HeaderDiv";
+import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import { useArtistContext } from "state/ArtistContext";
 import { PostGrid } from "./ArtistPosts";
 
@@ -19,7 +19,7 @@ const ArtistSupport: React.FC = () => {
   } = useGlobalStateContext();
 
   const {
-    state: { artist },
+    state: { artist, userStripeStatus },
   } = useArtistContext();
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const [isLoading, setIsLoading] = React.useState(false);
@@ -75,6 +75,18 @@ const ArtistSupport: React.FC = () => {
     return null;
   }
 
+  if (!userStripeStatus?.chargesEnabled) {
+    return (
+      <div
+        className={css`
+          margin: 2rem 0;
+        `}
+      >
+        {t("noSubscriptionTiersYet")}
+      </div>
+    );
+  }
+
   if (isLoading) {
     return <Box />;
   }
@@ -91,7 +103,7 @@ const ArtistSupport: React.FC = () => {
 
   return (
     <>
-      <HeaderDiv>
+      <SpaceBetweenDiv>
         <div />
         <div
           className={css`
@@ -102,7 +114,7 @@ const ArtistSupport: React.FC = () => {
         >
           <FollowArtist artistId={artist.id} />
         </div>
-      </HeaderDiv>
+      </SpaceBetweenDiv>
       {artist.subscriptionTiers.length === 0 && (
         <Box
           className={css`

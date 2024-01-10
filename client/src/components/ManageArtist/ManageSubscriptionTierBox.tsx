@@ -11,7 +11,7 @@ import { useGlobalStateContext } from "state/GlobalState";
 import { useSnackbar } from "state/SnackbarContext";
 import SubscriptionForm from "./SubscriptionForm";
 import MarkdownContent from "components/common/MarkdownContent";
-import HeaderDiv from "components/common/HeaderDiv";
+import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 
 const ManageSubscriptionTierBox: React.FC<{
   tier: ArtistSubscriptionTier;
@@ -51,7 +51,7 @@ const ManageSubscriptionTierBox: React.FC<{
         background: var(--mi-darken-background-color);
       `}
     >
-      <HeaderDiv
+      <SpaceBetweenDiv
         className={css`
           display: flex;
           flex-direction: column;
@@ -97,7 +97,7 @@ const ManageSubscriptionTierBox: React.FC<{
             />
           </div>
         </div>
-      </HeaderDiv>
+      </SpaceBetweenDiv>
 
       <MarkdownContent content={tier.description} />
       {manageTier && (

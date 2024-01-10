@@ -1,7 +1,6 @@
 import { css } from "@emotion/css";
 import { bp } from "../../constants";
 import React from "react";
-import { useGlobalStateContext } from "state/GlobalState";
 import Releases from "./HomeReleases";
 import styled from "@emotion/styled";
 import Splash from "./Splash";
@@ -44,10 +43,6 @@ export const SectionHeader = styled.div<{ userId?: number }>`
 `;
 
 function Home() {
-  const {
-    state: { user },
-  } = useGlobalStateContext();
-
   return (
     <div
       className={css`
@@ -62,7 +57,7 @@ function Home() {
         }
       `}
     >
-      {!user && <Splash />}
+      <Splash />
       <Releases />
       <SupportMirlo />
       <Posts />

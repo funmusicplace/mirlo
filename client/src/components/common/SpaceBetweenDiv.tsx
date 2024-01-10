@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 import { bp } from "../../constants";
 
-const HeaderDiv = styled.div`
+const SpaceBetweenDiv = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -21,4 +21,4 @@ const HeaderDiv = styled.div`
   }
 `;
 
-export default HeaderDiv;
+export default SpaceBetweenDiv;
