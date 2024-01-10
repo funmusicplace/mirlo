@@ -9,7 +9,7 @@ import { useTranslation } from "react-i18next";
 import { useArtistContext } from "state/ArtistContext";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import { FaPlus } from "react-icons/fa";
-import HeaderDiv from "components/common/HeaderDiv";
+import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import ManageSectionWrapper from "./ManageSectionWrapper";
 
 const ManageArtistAlbums: React.FC<{}> = () => {
@@ -42,7 +42,7 @@ const ManageArtistAlbums: React.FC<{}> = () => {
 
   return (
     <ManageSectionWrapper>
-      <HeaderDiv>
+      <SpaceBetweenDiv>
         {trackGroups.length === 0 && <div>You don't have any albums yet</div>}
         {trackGroups.length !== 0 && <div />}
         <Link to={`/manage/artists/${artistId}/new-release`}>
@@ -50,7 +50,7 @@ const ManageArtistAlbums: React.FC<{}> = () => {
             {t("addNewAlbum")}
           </Button>
         </Link>
-      </HeaderDiv>
+      </SpaceBetweenDiv>
       {isLoading && <LoadingBlocks />}
       {trackGroups.length > 0 && (
         <div

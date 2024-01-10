@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 import Overlay from "components/common/Overlay";
 import PostCard from "components/common/PostCard";
 import { useArtistContext } from "state/ArtistContext";
-import HeaderDiv from "components/common/HeaderDiv";
+import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import { FaRss } from "react-icons/fa";
 import Button from "components/common/Button";
 import styled from "@emotion/styled";
@@ -39,7 +39,7 @@ const ArtistPosts: React.FC = () => {
 
   return (
     <div>
-      <HeaderDiv>
+      <SpaceBetweenDiv>
         <div></div>
         <a
           target="_blank"
@@ -48,7 +48,7 @@ const ArtistPosts: React.FC = () => {
         >
           <Button onlyIcon startIcon={<FaRss />} />
         </a>
-      </HeaderDiv>
+      </SpaceBetweenDiv>
       <div
         className={css`
           display: flex;

@@ -1,7 +1,6 @@
 import { css } from "@emotion/css";
 import { bp } from "../../constants";
 import React from "react";
-import { useGlobalStateContext } from "state/GlobalState";
 import Releases from "./HomeReleases";
 import styled from "@emotion/styled";
 import Splash from "./Splash";

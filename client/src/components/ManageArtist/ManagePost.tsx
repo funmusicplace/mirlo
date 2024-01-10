@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useArtistContext } from "state/ArtistContext";
 import useGetUserObjectById from "utils/useGetUserObjectById";
 import { useGlobalStateContext } from "state/GlobalState";
-import HeaderDiv from "components/common/HeaderDiv";
+import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import ManageSectionWrapper from "./ManageSectionWrapper";
 import { css } from "@emotion/css";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
@@ -60,7 +60,7 @@ const ManagePost: React.FC<{}> = () => {
         `}
       >
         <BackToArtistLink />
-        <HeaderDiv>
+        <SpaceBetweenDiv>
           <h1
             className={css`
               display: flex;
@@ -81,7 +81,7 @@ const ManagePost: React.FC<{}> = () => {
               </Link>
             </div>
           )}
-        </HeaderDiv>
+        </SpaceBetweenDiv>
       </div>
       {artist && <PostForm existing={post} reload={reload} artist={artist} />}
     </ManageSectionWrapper>

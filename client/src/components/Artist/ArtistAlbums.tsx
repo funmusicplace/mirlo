@@ -3,7 +3,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import ArtistTrackGroup from "./ArtistTrackGroup";
 import { bp } from "../../constants";
-import HeaderDiv from "components/common/HeaderDiv";
+import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import { useGlobalStateContext } from "state/GlobalState";
 import { Link } from "react-router-dom";
 import { FaPlus } from "react-icons/fa";
@@ -39,7 +39,7 @@ const ArtistAlbums: React.FC = () => {
         }
       `}
     >
-      <HeaderDiv>
+      <SpaceBetweenDiv>
         {artist.userId === user?.id && (
           <Link to={`/manage/artists/${artist.id}/new-release`}>
             <Button compact transparent startIcon={<FaPlus />}>
@@ -47,7 +47,7 @@ const ArtistAlbums: React.FC = () => {
             </Button>
           </Link>
         )}
-      </HeaderDiv>
+      </SpaceBetweenDiv>
       <TrackgroupGrid gridNumber={"3"} wrap>
         {artist.trackGroups?.map((trackGroup) => (
           <ArtistTrackGroup key={trackGroup.id} trackGroup={trackGroup} />

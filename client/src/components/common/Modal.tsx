@@ -6,7 +6,7 @@ import IconButton from "./IconButton";
 import ReactDOM from "react-dom";
 import Background from "./Background";
 import { FaTimes } from "react-icons/fa";
-import HeaderDiv from "./HeaderDiv";
+import SpaceBetweenDiv from "./SpaceBetweenDiv";
 
 const wrapper = css`
   position: fixed;
@@ -154,7 +154,7 @@ export const Modal: React.FC<{
       <Background onClick={onCloseWrapper} />
       <div className={wrapper} data-cy="modal">
         <Content size={size}>
-          <HeaderDiv
+          <SpaceBetweenDiv
             className={css`
               position: sticky;
               top: 0;
@@ -196,7 +196,7 @@ export const Modal: React.FC<{
             >
               <FaTimes />
             </IconButton>
-          </HeaderDiv>
+          </SpaceBetweenDiv>
           <ChildrenWrapper>{children}</ChildrenWrapper>
         </Content>
       </div>

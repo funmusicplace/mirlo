@@ -13,7 +13,7 @@ import Modal from "components/common/Modal";
 import { useTranslation } from "react-i18next";
 import { FaPlus } from "react-icons/fa";
 import { useArtistContext } from "state/ArtistContext";
-import HeaderDiv from "components/common/HeaderDiv";
+import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import { ManageSectionWrapper } from "./ManageSectionWrapper";
 import { formatDate } from "components/TrackGroup/ReleaseDate";
 import { Link } from "react-router-dom";
@@ -70,7 +70,7 @@ const ManageArtistPosts: React.FC<{}> = () => {
 
   return (
     <ManageSectionWrapper>
-      <HeaderDiv>
+      <SpaceBetweenDiv>
         <div />
         <Button
           transparent
@@ -82,7 +82,7 @@ const ManageArtistPosts: React.FC<{}> = () => {
         >
           {t("addNewPost", { artist: artist.name })}
         </Button>
-      </HeaderDiv>
+      </SpaceBetweenDiv>
       {posts?.map((p) => (
         <Box
           key={p.id}
@@ -91,7 +91,7 @@ const ManageArtistPosts: React.FC<{}> = () => {
             background-color: var(--mi-darken-background-color);
           `}
         >
-          <HeaderDiv
+          <SpaceBetweenDiv
             className={css`
               display: flex;
               flex-direction: column;
@@ -149,7 +149,7 @@ const ManageArtistPosts: React.FC<{}> = () => {
             >
               published {formatDate({ date: p.publishedAt, i18n })}
             </p>
-          </HeaderDiv>
+          </SpaceBetweenDiv>
           <MarkdownContent content={p.content} />
         </Box>
       ))}

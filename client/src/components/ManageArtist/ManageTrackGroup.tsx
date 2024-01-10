@@ -9,7 +9,7 @@ import useGetUserObjectById from "utils/useGetUserObjectById";
 import { useGlobalStateContext } from "state/GlobalState";
 import PublishButton from "./PublishButton";
 import { bp } from "../../constants";
-import HeaderDiv from "components/common/HeaderDiv";
+import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import ManageSectionWrapper from "./ManageSectionWrapper";
 import { css } from "@emotion/css";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
@@ -67,7 +67,7 @@ const ManageTrackGroup: React.FC<{}> = () => {
         `}
       >
         <BackToArtistLink />
-        <HeaderDiv>
+        <SpaceBetweenDiv>
           <h1
             className={css`
               display: flex;
@@ -95,7 +95,7 @@ const ManageTrackGroup: React.FC<{}> = () => {
               <PublishButton trackGroup={trackGroup} reload={reload} />
             )}
           </div>
-        </HeaderDiv>
+        </SpaceBetweenDiv>
       </div>
       <AlbumForm existing={trackGroup} reload={reload} artist={artist} />
       <h4

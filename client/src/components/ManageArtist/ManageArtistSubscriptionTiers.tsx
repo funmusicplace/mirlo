@@ -6,7 +6,7 @@ import SubscriptionForm from "./SubscriptionForm";
 import { useArtistContext } from "state/ArtistContext";
 import useGetUserObjectById from "utils/useGetUserObjectById";
 import { Link, useParams } from "react-router-dom";
-import HeaderDiv from "components/common/HeaderDiv";
+import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import { ManageSectionWrapper } from "./ManageSectionWrapper";
 import Modal from "components/common/Modal";
 import { useTranslation } from "react-i18next";
@@ -41,7 +41,7 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
 
   return (
     <ManageSectionWrapper>
-      <HeaderDiv>
+      <SpaceBetweenDiv>
         <div
           className={css`
             display: flex;
@@ -62,7 +62,7 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
             {t("addNewTier")}
           </Button>
         </div>
-      </HeaderDiv>
+      </SpaceBetweenDiv>
       <div
         className={css`
           margin-bottom: 1rem;
