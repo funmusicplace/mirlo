@@ -40,6 +40,16 @@ const MarkdownWrapper = styled.div`
     display: block;
     overflow: scroll;
   }
+
+  p {
+    clear: both;
+  }
+
+  p img {
+    float: left;
+    margin: 0 1rem 1rem 0;
+    width: 150px;
+  }
 `;
 
 export default MarkdownWrapper;
