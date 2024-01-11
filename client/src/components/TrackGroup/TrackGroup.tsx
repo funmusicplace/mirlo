@@ -76,10 +76,16 @@ const ImageAndDetailsWrapper = styled.div`
   }
 `;
 
-const AboutWrapper = styled.div`
-  max-width: 70%;
+const AboutWrapper = styled.div<{
+  trackGroupCredits: string;
+  trackGroupAbout: string;
+}>`
   margin: 1.25rem 0 1.25rem;
-  padding: 0.5rem 2rem 0.25rem 0rem;
+  ${(props) => (props.trackGroupAbout ? "" : "display: none;")}
+  ${(props) =>
+    props.trackGroupCredits
+      ? "padding: 0.5rem 3rem 0.25rem 0rem;"
+      : "padding: 0.5rem 1rem 0.25rem 0rem;"}
 
   p {
     line-height: 1.5rem;
@@ -91,20 +97,35 @@ const AboutWrapper = styled.div`
   }
 `;
 
-const CreditsWrapper = styled.div<{ trackGroupCredits: string }>`
-  margin: 1.25rem 0;
-  padding: 0.5rem 0.25rem 0.5rem 2rem;
+const CreditsWrapper = styled.div<{
+  trackGroupCredits: string;
+  trackGroupAbout: string;
+}>`
   font-size: var(--mi-font-size-small);
   opacity: 0.5;
-
+  height: auto;
   p {
     line-height: 1.3rem;
   }
-  ${(props) => (props.trackGroupCredits ? "border-left: 1px solid;" : "")}
+  ${(props) =>
+    props.trackGroupCredits ? "border-left: 1px solid;" : "display: none;"}
+  ${(props) =>
+    props.trackGroupAbout
+      ? "margin: 1.25rem 0; padding: 0.5rem 0rem 0.5rem 2rem;"
+      : "margin: .25rem 0 1.25rem 0; border-left: none; padding: 0.5rem 0.25rem 0.5rem 0;"}
   @media screen and (max-width: ${bp.small}px) {
     max-width: 100%;
-    padding: 0.5rem 0.25rem 0.5rem 0rem;
+    padding: 0rem 0.25rem 0.5rem 0rem;
     border-left: 0;
+  }
+`;
+
+const TrackgroupInfosWrapper = styled.div`
+  display: grid;
+  grid-template-columns: 65% 35%;
+  @media screen and (max-width: ${bp.small}px) {
+    display: flex;
+    flex-direction: column;
   }
 `;
 
@@ -141,6 +162,7 @@ function TrackGroup() {
   }
 
   const trackGroupCredits = trackGroup.credits;
+  const trackGroupAbout = trackGroup.about;
 
   return (
     <WidthContainer variant="big" justify="center">
@@ -250,23 +272,22 @@ function TrackGroup() {
               </div>
             </div>
           </div>
-          <div
-            className={css`
-              display: flex;
-              justify-content: space-between;
-              @media screen and (max-width: ${bp.small}px) {
-                flex-direction: column;
-              }
-            `}
-          >
-            <AboutWrapper>
+          <TrackgroupInfosWrapper>
+            <AboutWrapper
+              trackGroupAbout={trackGroupAbout}
+              trackGroupCredits={trackGroupCredits}
+            >
               <MarkdownContent content={trackGroup.about} />
             </AboutWrapper>
 
-            <CreditsWrapper trackGroupCredits={trackGroupCredits}>
+            <CreditsWrapper
+              trackGroupCredits={trackGroupCredits}
+              trackGroupAbout={trackGroupAbout}
+            >
               <MarkdownContent content={trackGroup.credits} />
             </CreditsWrapper>
-          </div>
+          </TrackgroupInfosWrapper>
+
           {userStripeStatus?.chargesEnabled && <ArtistSupport />}
         </div>
       </Container>
