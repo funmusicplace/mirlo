@@ -38,7 +38,7 @@ const Supporters = () => {
   React.useEffect(() => {
     const callback = async () => {
       const response = await api.getMany<SupportTier>(
-        `users/${userId}/artists/${artistId}/supporters`
+        `users/${userId}/artists/${artistId}/subscribers`
       );
 
       setSupporters(

@@ -76,6 +76,7 @@ export const createTier = async (
       allowVariable: data?.allowVariable,
       name: data?.name ?? "Test title",
       artistId: artistId,
+      isDefaultTier: data?.isDefaultTier,
     },
   });
   return tier;

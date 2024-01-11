@@ -45,13 +45,7 @@ export default function () {
 
       res.json({ result: { jobId } });
     } catch (error) {
-      console.error(
-        `users/${req.params.userId}/tracks/${trackId}/audio`,
-        error
-      );
-      res.status(500).json({
-        error: `There was a problem with the API`,
-      });
+      next(error);
     }
   }
 

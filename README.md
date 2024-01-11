@@ -37,6 +37,10 @@ yarn
 yarn start
 ```
 
+## Email
+
+On production email gets sent by sendgrid. During local development emails appear in the docker logs for the api.
+
 ## Background Jobs
 
 ### Making changes to background jobs.
