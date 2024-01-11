@@ -273,9 +273,8 @@ function TrackGroup() {
             </div>
           </div>
           <TrackgroupInfosWrapper>
-            <AboutWrapper
+            trackGroupAbout && <AboutWrapper
               trackGroupAbout={trackGroupAbout}
-              trackGroupCredits={trackGroupCredits}
             >
               <MarkdownContent content={trackGroup.about} />
             </AboutWrapper>
