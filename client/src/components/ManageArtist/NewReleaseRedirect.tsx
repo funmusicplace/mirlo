@@ -15,26 +15,38 @@ const NewReleaseRedirect: React.FC<{}> = () => {
     state: { artist },
   } = useArtistContext();
 
-  const userId = user?.id;
+  const [isGeneratingAlbum, setIsGeneratingAlbum] = React.useState(false);
 
-  React.useEffect(() => {
-    const callback = async () => {
-      if (artist) {
+  const userId = user?.id;
+  const artistId = artist?.id;
+
+  const callback = React.useCallback(
+    async (artistId?: number, userId?: number) => {
+      if (artistId) {
+        const userAlbums = await api.getMany(`users/${userId}/trackGroups`);
+
         const newAlbum = await api.post<
           Partial<TrackGroup>,
           { result: TrackGroup }
         >(`users/${userId}/trackGroups`, {
           title: "",
           urlSlug: `mi-temp-slug-new-album-${
-            artist?.trackGroups.length ?? 0 + 2
+            userAlbums.results.length ?? 0 + 2
           }`,
-          artistId: artist.id,
+          artistId: artistId,
         });
-        navigate(`/manage/artists/${artist.id}/release/${newAlbum.result.id}`);
+        navigate(`/manage/artists/${artistId}/release/${newAlbum.result.id}`);
       }
-    };
-    callback();
-  }, [artist, navigate, userId]);
+    },
+    [navigate]
+  );
+
+  React.useEffect(() => {
+    if (!isGeneratingAlbum) {
+      setIsGeneratingAlbum(true);
+      callback(artistId, userId);
+    }
+  }, [artistId, userId, callback, isGeneratingAlbum]);
 
   return <LoadingBlocks />;
 };
