@@ -19,7 +19,7 @@ import ArtistVariableSupport, {
 const StyledSupportBox = styled(Box)`
   background-color: var(--mi-darken-background-color);
   margin-bottom: 1rem;
-  padding: 0 1.5rem !important;
+  padding: 0 1.5rem 1rem 1.5rem !important;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -150,7 +150,7 @@ const ArtistSupportBox: React.FC<{
       </div>
       <div
         className={css`
-          margin: 0.5rem 0;
+          margin: 0.5rem 0 1.25rem;
 
           button:hover {
             background-color: var(--mi-normal-foreground-color) !important;
