@@ -20,7 +20,44 @@ import {
   finalArtistBannerBucket,
   removeObjectsFromBucket,
 } from "./minio";
-import { DefaultArgs } from "@prisma/client/runtime/library";
+import {
+  DefaultArgs,
+  PrismaClientKnownRequestError,
+} from "@prisma/client/runtime/library";
+import sendMail from "../jobs/send-mail";
+import { NextFunction, Request, Response } from "express";
+import { AppError } from "./error";
+
+type Params = {
+  id: string;
+};
+
+export const confirmArtistIdExists = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { id: artistId } = req.params as unknown as Params;
+
+  const artist = await prisma.artist.findFirst({
+    where: {
+      id: Number(artistId),
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  if (!artist) {
+    const error = new AppError({
+      name: "Artist not found",
+      httpCode: 404,
+      description: "Artist not found",
+    });
+    return next(error);
+  }
+  next();
+};
 
 export const checkIsUserSubscriber = async (
   user?: User,
@@ -60,6 +97,44 @@ export const findArtistIdForURLSlug = async (id: string) => {
     return undefined;
   }
   return Number(id);
+};
+
+export const createSubscriptionConfirmation = async (
+  email: string,
+  artist: Artist
+) => {
+  try {
+    const subscriptionConfirmation =
+      await prisma.artistUserSubscriptionConfirmation.create({
+        data: {
+          email: email,
+          artistId: artist.id,
+        },
+      });
+
+    return sendMail({
+      data: {
+        template: "artist-subscription-confirmation",
+        message: {
+          to: email,
+        },
+        locals: {
+          artist,
+          email,
+          token: subscriptionConfirmation.token,
+          host: process.env.API_DOMAIN,
+          client: process.env.REACT_APP_CLIENT_DOMAIN,
+        },
+      },
+    });
+  } catch (e) {
+    if (e instanceof PrismaClientKnownRequestError) {
+      // skip
+      // FIXME: what should we do when a user already exists?
+    } else {
+      throw e;
+    }
+  }
 };
 
 export const subscribeUserToArtist = async (

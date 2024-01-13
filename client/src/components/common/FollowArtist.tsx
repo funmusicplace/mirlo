@@ -4,8 +4,10 @@ import api from "services/api";
 import { FaMinus, FaPlus } from "react-icons/fa";
 import { useArtistContext } from "state/ArtistContext";
 import { useGlobalStateContext } from "state/GlobalState";
-import { Trans, useTranslation } from "react-i18next";
+import { useTranslation } from "react-i18next";
 import Modal from "./Modal";
+
+import FollowArtistNotLoggedInForm from "./FollowArtistNotLoggedInForm";
 
 const FollowArtist: React.FC<{ artistId: number }> = ({ artistId }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
@@ -83,18 +85,7 @@ const FollowArtist: React.FC<{ artistId: number }> = ({ artistId }) => {
           }) ?? ""
         }
       >
-        <p>
-          <Trans
-            t={t}
-            i18nKey="toFollowThisArtist"
-            components={{
-              // eslint-disable-next-line jsx-a11y/anchor-has-content
-              1: <a href="/signup" />,
-              // eslint-disable-next-line jsx-a11y/anchor-has-content
-              2: <a href="/login" />,
-            }}
-          />
-        </p>
+        <FollowArtistNotLoggedInForm artistId={localArtistId} />
       </Modal>
       <Button
         compact

@@ -13,6 +13,19 @@ const announcePublishPost = async () => {
         lte: new Date(),
       },
       deletedAt: null,
+      artist: {
+        subscriptionTiers: {
+          some: {
+            userSubscriptions: {
+              some: {
+                user: {
+                  emailConfirmationToken: null,
+                },
+              },
+            },
+          },
+        },
+      },
     },
     include: {
       artist: {

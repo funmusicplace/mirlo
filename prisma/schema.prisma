@@ -70,25 +70,26 @@ model PostSubscriptionTier {
 }
 
 model Artist {
-  id                Int                      @id @default(autoincrement())
-  name              String
-  bio               String?
-  user              User                     @relation(fields: [userId], references: [id])
-  userId            Int
-  posts             Post[]
-  trackGroups       TrackGroup[]
-  enabled           Boolean                  @default(true)
-  createdAt         DateTime                 @default(now())
-  updatedAt         DateTime                 @default(now()) @updatedAt
-  deletedAt         DateTime?
-  subscriptionTiers ArtistSubscriptionTier[]
-  banner            ArtistBanner?
-  avatar            ArtistAvatar?
-  urlSlug           String                   @unique
-  properties        Json?
-  trackArtists      TrackArtist[]
-  links             String[]
-  location          String?
+  id                                 Int                                  @id @default(autoincrement())
+  name                               String
+  bio                                String?
+  user                               User                                 @relation(fields: [userId], references: [id])
+  userId                             Int
+  posts                              Post[]
+  trackGroups                        TrackGroup[]
+  enabled                            Boolean                              @default(true)
+  createdAt                          DateTime                             @default(now())
+  updatedAt                          DateTime                             @default(now()) @updatedAt
+  deletedAt                          DateTime?
+  subscriptionTiers                  ArtistSubscriptionTier[]
+  banner                             ArtistBanner?
+  avatar                             ArtistAvatar?
+  urlSlug                            String                               @unique
+  properties                         Json?
+  trackArtists                       TrackArtist[]
+  links                              String[]
+  location                           String?
+  artistUserSubscriptionConfirmation ArtistUserSubscriptionConfirmation[]
 }
 
 model ArtistAvatar {
@@ -149,6 +150,17 @@ model ArtistUserSubscription {
   deletedAt                DateTime?
 
   @@unique([userId, artistSubscriptionTierId])
+}
+
+model ArtistUserSubscriptionConfirmation {
+  id              String    @id @default(uuid()) @db.Uuid
+  email           String
+  artistId        Int
+  artist          Artist    @relation(fields: [artistId], references: [id])
+  token           String    @default(uuid())
+  tokenExpiration DateTime? @default(dbgenerated("(NOW() + '01:00:00'::interval)"))
+
+  @@unique([email, artistId])
 }
 
 model UserTrackGroupPurchase {
