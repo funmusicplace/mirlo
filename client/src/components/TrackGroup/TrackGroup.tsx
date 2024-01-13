@@ -78,21 +78,21 @@ const ImageAndDetailsWrapper = styled.div`
 
 const AboutWrapper = styled.div<{
   trackGroupCredits: string;
-  trackGroupAbout: string;
 }>`
   margin: 1.25rem 0 1.25rem;
-  ${(props) => (props.trackGroupAbout ? "" : "display: none;")}
   ${(props) =>
     props.trackGroupCredits
       ? "padding: 0.5rem 3rem 0.25rem 0rem;"
-      : "padding: 0.5rem 1rem 0.25rem 0rem;"}
+      : "padding: 0.5rem 2rem 0.25rem 0rem;"}
 
   p {
     line-height: 1.5rem;
   }
-  @media screen and (max-width: ${bp.small}px) {
+
+  @media screen and (max-width: ${bp.medium}px) {
     max-width: 100%;
     padding: 0.5rem 0rem 0.25rem 0rem;
+    margin-bottom: 0.5rem;
     border-right: 0;
   }
 `;
@@ -113,17 +113,20 @@ const CreditsWrapper = styled.div<{
     props.trackGroupAbout
       ? "margin: 1.25rem 0; padding: 0.5rem 0rem 0.5rem 2rem;"
       : "margin: .25rem 0 1.25rem 0; border-left: none; padding: 0.5rem 0.25rem 0.5rem 0;"}
-  @media screen and (max-width: ${bp.small}px) {
+  @media screen and (max-width: ${bp.medium}px) {
+    ${(props) => (props.trackGroupCredits ? "border-top: 1px solid;" : "")}
     max-width: 100%;
-    padding: 0rem 0.25rem 0.5rem 0rem;
+    padding: 1rem 0.25rem 0.5rem 0rem;
+    margin-top: 0;
     border-left: 0;
   }
 `;
 
 const TrackgroupInfosWrapper = styled.div`
   display: grid;
-  grid-template-columns: 65% 35%;
-  @media screen and (max-width: ${bp.small}px) {
+  grid-template-columns: 63% 37%;
+
+  @media screen and (max-width: ${bp.medium}px) {
     display: flex;
     flex-direction: column;
   }
@@ -273,11 +276,11 @@ function TrackGroup() {
             </div>
           </div>
           <TrackgroupInfosWrapper>
-            trackGroupAbout && <AboutWrapper
-              trackGroupAbout={trackGroupAbout}
-            >
-              <MarkdownContent content={trackGroup.about} />
-            </AboutWrapper>
+            {trackGroupAbout && (
+              <AboutWrapper trackGroupAbout={trackGroupAbout}>
+                <MarkdownContent content={trackGroup.about} />
+              </AboutWrapper>
+            )}
 
             <CreditsWrapper
               trackGroupCredits={trackGroupCredits}
