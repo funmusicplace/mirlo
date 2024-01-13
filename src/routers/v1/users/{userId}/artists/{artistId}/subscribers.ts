@@ -153,7 +153,6 @@ export default function () {
               },
               update: {},
             });
-            console.log("isUser", created);
           })
         );
         const users = await prisma.user.findMany({

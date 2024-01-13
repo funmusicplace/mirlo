@@ -1,10 +1,14 @@
 import { User } from "@prisma/client";
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 
-import { userAuthenticated } from "../../../../auth/passport";
+import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import prisma from "../../../../../prisma/prisma";
 
-import { subscribeUserToArtist } from "../../../../utils/artist";
+import {
+  confirmArtistIdExists,
+  createSubscriptionConfirmation,
+  subscribeUserToArtist,
+} from "../../../../utils/artist";
 
 type Params = {
   id: string;
@@ -12,19 +16,18 @@ type Params = {
 
 export default function () {
   const operations = {
-    POST: [userAuthenticated, POST],
+    POST: [confirmArtistIdExists, userLoggedInWithoutRedirect, POST],
   };
 
-  async function POST(req: Request, res: Response) {
+  async function POST(req: Request, res: Response, next: NextFunction) {
     const { id: artistId } = req.params as unknown as Params;
-    const { id: userId } = req.user as User;
+    const loggedInuser = req.user as User;
+
+    const { email } = req.body as unknown as {
+      email?: string;
+    };
 
     try {
-      const user = await prisma.user.findFirst({
-        where: {
-          id: userId,
-        },
-      });
       const artist = await prisma.artist.findFirst({
         where: {
           id: Number(artistId),
@@ -35,22 +38,28 @@ export default function () {
         },
       });
 
-      if (artist) {
-        const results = await subscribeUserToArtist(artist, user);
-
+      if (!loggedInuser?.id && email && artist) {
+        await createSubscriptionConfirmation(email, artist);
         res.status(200).json({
-          results,
+          message: "Success",
         });
       } else {
-        res.status(404).json({
-          error: "Artist not found",
+        const user = await prisma.user.findFirst({
+          where: {
+            id: loggedInuser.id,
+          },
         });
+
+        if (artist) {
+          const results = await subscribeUserToArtist(artist, user);
+
+          res.status(200).json({
+            results,
+          });
+        }
       }
     } catch (e) {
-      console.error(e);
-      res.status(500).json({
-        error: "Something went wrong while subscribing the user",
-      });
+      next(e);
     }
   }
 

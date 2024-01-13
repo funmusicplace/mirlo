@@ -10,11 +10,6 @@ import {
   createUser,
 } from "../../../utils";
 import prisma from "../../../../prisma/prisma";
-import {
-  minioClient,
-  createBucketIfNotExists,
-  finalArtistAvatarBucket,
-} from "../../../../src/utils/minio";
 
 import { requestApp } from "../../utils";
 

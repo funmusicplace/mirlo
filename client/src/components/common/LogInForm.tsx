@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form";
 import { useSnackbar } from "state/SnackbarContext";
 import React from "react";
 import api from "services/api";
+import { Link } from "react-router-dom";
 
 type SignupInputs = {
   email: string;
@@ -38,24 +39,53 @@ const LogInForm: React.FC<{ afterLogIn: () => void }> = ({ afterLogIn }) => {
     [afterLogIn, dispatch, snackbar]
   );
   return (
-    <form
-      className={css`
-        display: flex;
-        flex-direction: column;
-        text-align: left;
-      `}
-      onSubmit={handleSubmit(onSubmit)}
-    >
-      <FormComponent>
-        <label>{t("email")}</label>
-        <InputEl type="email" {...register("email")} />
-      </FormComponent>
-      <FormComponent>
-        <label>{t("password")}</label>
-        <InputEl {...register("password")} type="password" />
-      </FormComponent>
-      <Button type="submit">{t("logIn")}</Button>
-    </form>
+    <>
+      <form
+        className={css`
+          display: flex;
+          flex-direction: column;
+          text-align: left;
+        `}
+        onSubmit={handleSubmit(onSubmit)}
+      >
+        <FormComponent>
+          <label>{t("email")}</label>
+          <InputEl type="email" {...register("email")} />
+        </FormComponent>
+        <FormComponent>
+          <label>{t("password")}</label>
+          <InputEl {...register("password")} type="password" />
+        </FormComponent>
+        <Button type="submit">{t("logIn")}</Button>
+      </form>
+      <Link
+        to="/password-reset"
+        onClick={() => {
+          afterLogIn();
+        }}
+        className={css`
+          margin: 0 auto;
+          display: inline-block;
+          margin-top: 1rem;
+        `}
+      >
+        {t("passwordReset")}
+      </Link>
+      <br />
+      <Link
+        to="/signup"
+        onClick={() => {
+          afterLogIn();
+        }}
+        className={css`
+          margin: 0 auto;
+          display: inline-block;
+          margin-top: 1rem;
+        `}
+      >
+        {t("signUp")}
+      </Link>
+    </>
   );
 };
 

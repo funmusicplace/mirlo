@@ -1,0 +1,18 @@
+doctype html
+html
+  head
+    block head
+      meta(charset="utf-8")
+      meta(name="viewport", content="width=device-width")
+      meta(http-equiv="X-UA-Compatible", content="IE=edge")
+      meta(name="x-apple-disable-message-reformatting")
+      style 
+        include ../style.css
+  body.sans-serif
+    p Hi!
+    p Someone used this email address to subscribe to #{artist.name} on Mirlo 
+    p 
+      a(href!=`${host}/v1/artists/${artist.id}/confirmFollow?email=${email}&token=${token}`) Click here to confirm
+    p 
+      | If this was not you, please find contact information on 
+      a(href="https://mirlo.space") our website
