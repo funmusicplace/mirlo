@@ -77,6 +77,7 @@ const ArtistFormLinks: React.FC<{ isManage: boolean }> = ({ isManage }) => {
             } catch (e) {
               url = l.split("/")[0];
             }
+
             return (
               <a
                 href={l}

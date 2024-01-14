@@ -14,6 +14,7 @@ import useErrorHandler from "services/useErrorHandler";
 import { useTranslation } from "react-i18next";
 import { css } from "@emotion/css";
 import FormCheckbox from "components/common/FormCheckbox";
+import FormError from "components/common/FormError";
 
 const generateDefaultValues = (existing?: ArtistSubscriptionTier) => {
   const vals = {
@@ -48,7 +49,7 @@ const SubscriptionForm: React.FC<{
   }>({
     defaultValues: generateDefaultValues(existing),
   });
-  const { register, handleSubmit, reset } = methods;
+  const { register, handleSubmit, reset, formState } = methods;
 
   const existingId = existing?.id;
   const userId = user?.id;
@@ -94,6 +95,7 @@ const SubscriptionForm: React.FC<{
     [userId, existingId, snackbar, reset, reload, artistId, errorHandler]
   );
 
+  console.log("formState", formState.errors);
   return (
     <FormProvider {...methods}>
       <Box
@@ -108,8 +110,25 @@ const SubscriptionForm: React.FC<{
           </FormComponent>
           <FormComponent>
             {t("minimumAmount")}
-            <InputEl type="number" {...(register("minAmount"), { min: 0 })} />
-            <small>in {user?.currency}</small>
+            <div
+              className={css`
+                display: flex;
+                width: 100%;
+
+                span {
+                  margin-left: 1rem;
+                }
+              `}
+            >
+              <InputEl type="number" {...register("minAmount", { min: 1 })} />
+              <span>in {user?.currency ?? "usd"}</span>
+            </div>
+            {formState.errors.minAmount && (
+              <FormError>
+                {formState.errors.minAmount.type === "min" &&
+                  t("minAmountError")}
+              </FormError>
+            )}
           </FormComponent>
           <FormCheckbox
             idPrefix={`${existingId}`}

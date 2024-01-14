@@ -53,7 +53,6 @@ const ManageSubscriptionTierBox: React.FC<{
     >
       <SpaceBetweenDiv
         className={css`
-          display: flex;
           flex-direction: column;
         `}
       >
@@ -112,7 +111,7 @@ const ManageSubscriptionTierBox: React.FC<{
             existing={tier}
             reload={() => {
               reload();
-              setManageTier(false);
+              setManageTier(undefined);
             }}
             artist={artist}
           />
