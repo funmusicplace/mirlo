@@ -63,6 +63,7 @@ const SubscriptionForm: React.FC<{
             ...pick(data, ["name", "description", "allowVariable"]),
             minAmount: data.minAmount ? +data.minAmount * 100 : undefined,
           };
+          console.log("sending", data, sending);
           if (existingId) {
             await api.put<
               Partial<ArtistSubscriptionTier>,
@@ -108,7 +109,7 @@ const SubscriptionForm: React.FC<{
           </FormComponent>
           <FormComponent>
             {t("minimumAmount")}
-            <InputEl type="number" {...(register("minAmount"), { min: 0 })} />
+            <InputEl type="number" {...register("minAmount", { min: 1 })} />
             <small>in {user?.currency}</small>
           </FormComponent>
           <FormCheckbox

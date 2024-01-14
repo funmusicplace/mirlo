@@ -88,6 +88,14 @@ const router = createBrowserRouter([
         ),
       },
       {
+        path: "pages/en/faq",
+        element: (
+          <div className={pageMarkdownWrapper}>
+            <MarkdownContent source="/pages/en/FAQ.md" />
+          </div>
+        ),
+      },
+      {
         path: "pages/terms",
         element: (
           <div className={pageMarkdownWrapper}>

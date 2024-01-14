@@ -2,7 +2,7 @@ import { FaBandcamp, FaFacebook, FaGlobe, FaTwitter } from "react-icons/fa";
 
 const LinkIconDisplay: React.FC<{ url: string }> = ({ url }) => {
   let icon = <FaGlobe />;
-  if (url.includes("twitter.com") || url.includes("x.com")) {
+  if (url.includes("twitter.com")) {
     icon = <FaTwitter />;
   }
   if (url.includes("facebook.com")) {
