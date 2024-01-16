@@ -106,7 +106,6 @@ export default function () {
           slug = "blank";
         }
         const newSlug = await findNewSlug(slug, 0, artist.id);
-        console.log("found from ", slug, newSlug);
         await prisma.trackGroup.update({
           where: { id: trackGroup.id },
           data: {

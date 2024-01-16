@@ -95,7 +95,6 @@ const SubscriptionForm: React.FC<{
     [userId, existingId, snackbar, reset, reload, artistId, errorHandler]
   );
 
-  console.log("formState", formState.errors);
   return (
     <FormProvider {...methods}>
       <Box

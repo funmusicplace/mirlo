@@ -93,25 +93,6 @@ services:
     ports:
       - "${POSTGRES_LOCAL_MACHINE_PORT:-5432}:5432"
 
-  # nginx:
-  #   restart: always
-  #   container_name: resonate-nginx
-  #   networks:
-  #     - api-network
-  #   volumes:
-  #     - ./data/web-root:/var/www/html
-  #     - ./data/certbot-etc:/etc/letsencrypt
-  #     - ./data/certbot-var:/var/lib/letsencrypt
-  #     - ${MEDIA_LOCATION:-./data/media/}incoming:/data/media/incoming
-  #     - ${MEDIA_LOCATION:-./data/media/}audio:/data/media/audio
-  #     - ${MEDIA_LOCATION:-./data/media/}images:/data/media/images
-  #   build:
-  #     context: ./nginx
-  #     target: ${IMAGE:-local-image}
-  # ports:
-  #   - "${NGINX_PORT:-80}:80"
-  #   - 443:443
-
 networks:
   api-network:
     driver: bridge

@@ -6,7 +6,9 @@ dotenv.config();
 import yargs from "yargs";
 import { Job, Worker } from "bullmq";
 import winston from "winston";
-import convertAudioJob from "./convert-audio";
+import uploadAudioJob from "./upload-audio";
+import generateAlbumJob from "./generate-album";
+
 import optimizeImage from "./optimize-image";
 
 import { REDIS_CONFIG } from "../config/redis";
@@ -38,6 +40,7 @@ yargs // eslint-disable-line
     audioQueue();
     // audioDurationQueue();
     imageQueue();
+    generateAlbumQueueWorker();
   })
   .help().argv;
 
@@ -59,18 +62,35 @@ async function imageQueue() {
 }
 
 async function audioQueue() {
-  const worker = new Worker("convert-audio", convertAudioJob, workerOptions);
-  logger.info("Convert Audio worker started");
+  const worker = new Worker("upload-audio", uploadAudioJob, workerOptions);
+  logger.info("Upload Audio worker started");
 
   worker.on("completed", (job: any) => {
-    logger.info("completed:convert-audio");
+    logger.info("completed:upload-audio");
   });
 
   worker.on("failed", (job: any, err: any) => {
-    logger.error("failed:convert-audio", err);
+    logger.error("failed:upload-audio", err);
   });
 
   worker.on("error", (err: any) => {
-    logger.error("error:convert-audio", err);
+    logger.error("error:upload-audio", err);
+  });
+}
+
+export async function generateAlbumQueueWorker() {
+  const worker = new Worker("generate-album", generateAlbumJob, workerOptions);
+  logger.info("Generate Album worker started");
+
+  worker.on("completed", (job: any) => {
+    logger.info("completed:generate-album");
+  });
+
+  worker.on("failed", (job: any, err: any) => {
+    logger.error("failed:generate-album", err);
+  });
+
+  worker.on("error", (err: any) => {
+    logger.error("error:generate-album", err);
   });
 }

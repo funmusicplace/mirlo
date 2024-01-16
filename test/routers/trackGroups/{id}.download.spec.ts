@@ -12,6 +12,11 @@ import prisma from "../../../prisma/prisma";
 import { randomUUID } from "crypto";
 
 import { requestApp } from "../utils";
+import {
+  createBucketIfNotExists,
+  finalAudioBucket,
+  minioClient,
+} from "../../../src/utils/minio";
 
 describe("trackGroups/{id}/download", () => {
   beforeEach(async () => {
@@ -44,12 +49,13 @@ describe("trackGroups/{id}/download", () => {
       assert.equal(response.statusCode, 404);
     });
 
-    it("should GET / success without logged in user", async () => {
+    it("should GET / success without logged in user start generating", async () => {
       const { user } = await createUser({
         email: "artist@artist.com",
       });
       const artist = await createArtist(user.id);
       const trackGroup = await createTrackGroup(artist.id);
+      await createBucketIfNotExists(minioClient, finalAudioBucket);
 
       const { user: purchaser } = await createUser({
         email: "purchaser@artist.com",
@@ -70,12 +76,13 @@ describe("trackGroups/{id}/download", () => {
         )
         .set("Accept", "application/json");
 
-      assert.equal(response.header["content-type"], "application/zip");
       assert.equal(
-        response.header["content-disposition"],
-        `attachment; filename="Test trackGroup"`
+        response.header["content-type"],
+        "application/json; charset=utf-8"
       );
       assert.equal(response.statusCode, 200);
+
+      assert.notEqual(response.body.result.jobId, undefined);
 
       const updatedPurchase = await prisma.userTrackGroupPurchase.findFirst({
         where: {
@@ -111,12 +118,12 @@ describe("trackGroups/{id}/download", () => {
         .set("Accept", "application/json")
         .set("Cookie", [`jwt=${accessToken}`]);
 
-      assert.equal(response.header["content-type"], "application/zip");
       assert.equal(
-        response.header["content-disposition"],
-        `attachment; filename="Test trackGroup"`
+        response.header["content-type"],
+        "application/json; charset=utf-8"
       );
       assert.equal(response.statusCode, 200);
+      assert.notEqual(response.body.result.jobId, undefined);
 
       const updatedPurchase = await prisma.userTrackGroupPurchase.findFirst({
         where: {

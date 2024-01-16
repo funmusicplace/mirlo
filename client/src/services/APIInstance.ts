@@ -19,6 +19,7 @@ const APIInstance = (apiRoot: string) => {
     requestOptions?: RequestInit,
     options?: {
       text?: boolean;
+      noProcess?: boolean;
     }
   ): Promise<R> => {
     const root = authEndpoints.includes(endpoint) ? auth : api;
@@ -26,6 +27,9 @@ const APIInstance = (apiRoot: string) => {
 
     try {
       const resp = await fetch(req);
+      if (options?.noProcess) {
+        return resp as R;
+      }
       if (options?.text) {
         return resp.text() as R;
       }
@@ -148,9 +152,29 @@ const APIInstance = (apiRoot: string) => {
       }
     },
 
-    downloadFileDirectly: (fromEndpoint: string, filename: string) => {
-      fileSaver.saveAs(`${api}${fromEndpoint}`, filename);
-      return;
+    downloadFileDirectly: (
+      fromEndpoint: string,
+      filename: string
+    ): null | unknown => {
+      return apiRequest<Response>(
+        fromEndpoint,
+        {
+          method: "GET",
+          credentials: "include",
+        },
+        {
+          noProcess: true,
+        }
+      ).then((resp) => {
+        if (resp.headers.get("content-type")?.includes("application/json")) {
+          return resp.json();
+        } else if (
+          resp.headers.get("content-type")?.includes("application/zip")
+        ) {
+          fileSaver.saveAs(`${api}${fromEndpoint}`, filename);
+          return;
+        }
+      });
     },
 
     getFile: (filename: string, endpoint: string, type: string) => {
