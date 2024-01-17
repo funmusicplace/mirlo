@@ -64,6 +64,7 @@ const ArtistHeaderDescription: React.FC = () => {
 
     if ((el?.clientHeight ?? 0) > 100) {
       setCanCollapse(true);
+      setIsCollapsed(true);
     }
   }, [isEditing]);
 
