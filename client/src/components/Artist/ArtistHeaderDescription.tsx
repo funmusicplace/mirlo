@@ -8,7 +8,7 @@ import { useArtistContext } from "state/ArtistContext";
 import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
 import { useForm } from "react-hook-form";
-import { FaPen, FaSave, FaTimes } from "react-icons/fa";
+import { FaChevronDown, FaPen, FaSave, FaTimes } from "react-icons/fa";
 import TextArea from "components/common/TextArea";
 
 interface FormData {
@@ -27,6 +27,8 @@ const ArtistHeaderDescription: React.FC = () => {
 
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const [isEditing, setIsEditing] = React.useState(false);
+  const [isCollapsed, setIsCollapsed] = React.useState(false);
+  const [canCollapse, setCanCollapse] = React.useState(false);
   const userId = user?.id;
   const artistId = artist?.id;
   const artistUserId = artist?.userId;
@@ -56,6 +58,15 @@ const ArtistHeaderDescription: React.FC = () => {
     },
     [artistId, artistUserId, refresh, snackbar, userId, t]
   );
+
+  React.useEffect(() => {
+    const el = document.getElementById("markdown-content");
+
+    if ((el?.clientHeight ?? 0) > 100) {
+      setCanCollapse(true);
+    }
+  }, [isEditing]);
+
   if (!isEditing) {
     return (
       <div
@@ -64,12 +75,38 @@ const ArtistHeaderDescription: React.FC = () => {
           display: flex;
         `}
       >
-        <MarkdownContent
-          content={bio}
-          className={css`
-            width: auto;
-          `}
-        />
+        <div>
+          <MarkdownContent
+            content={bio}
+            className={css`
+              width: auto;
+              overflow: hidden;
+              text-overflow: ellipsis;
+
+              ${isCollapsed ? `max-height: 100px` : ""}
+            `}
+          />
+          {canCollapse && (
+            <Button
+              variant="link"
+              compact
+              startIcon={<FaChevronDown />}
+              className={css`
+                margin-top: 0.7rem;
+                margin-bottom: 1rem;
+
+                svg {
+                  transition: transform 0.2s;
+
+                  ${!isCollapsed ? `transform: rotate(-180deg);` : ""}
+                }
+              `}
+              onClick={() => setIsCollapsed((val) => !val)}
+            >
+              {isCollapsed ? "read more" : "read less"}
+            </Button>
+          )}
+        </div>
 
         {user && user.id === artist?.userId && (
           <div

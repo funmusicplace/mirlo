@@ -53,7 +53,7 @@ const MarkdownContent: React.FC<{
   }
 
   return (
-    <MarkdownWrapper className={className}>
+    <MarkdownWrapper className={className} id="markdown-content">
       <ReactMarkdown
         remarkPlugins={[
           remarkGfm,

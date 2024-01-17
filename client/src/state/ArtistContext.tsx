@@ -49,6 +49,21 @@ export const fetchArtist = async (
   return artist;
 };
 
+export const checkArtistStripeStatus = async (artistUserId?: number) => {
+  if (!artistUserId) {
+    return;
+  }
+  let checkAccountStatus;
+  try {
+    checkAccountStatus = await api.get<AccountStatus>(
+      `users/${artistUserId}/stripe/checkAccountStatus`
+    );
+  } catch (e) {
+    console.error("Stripe didn't work", e);
+  }
+  return checkAccountStatus;
+};
+
 export const stateReducer = produce((draft: ArtistState, action: Actions) => {
   switch (action.type) {
     case "setState":
@@ -112,15 +127,11 @@ export const ArtistProvider: React.FC<{
           userId
         );
 
+        const checkAccountStatus = await checkArtistStripeStatus(
+          artist?.userId
+        );
+
         if (artist) {
-          let checkAccountStatus;
-          try {
-            checkAccountStatus = await api.get<AccountStatus>(
-              `users/${artist.userId}/stripe/checkAccountStatus`
-            );
-          } catch (e) {
-            console.error("Stripe didn't work", e);
-          }
           dispatch({
             type: "setState",
             state: {

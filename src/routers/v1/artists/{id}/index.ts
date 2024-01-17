@@ -17,6 +17,7 @@ export default function () {
 
   async function GET(req: Request, res: Response, next: NextFunction) {
     let { id }: { id?: string } = req.params;
+    const { includeDefaultTier }: { includeDefaultTier?: boolean } = req.query;
     const user = req.user as User;
     if (!id || id === "undefined") {
       return res.status(400);
@@ -31,7 +32,7 @@ export default function () {
             id: parsedId,
             enabled: true,
           },
-          include: singleInclude(),
+          include: singleInclude({ includeDefaultTier }),
         });
 
         isUserSubscriber = await checkIsUserSubscriber(user, parsedId);

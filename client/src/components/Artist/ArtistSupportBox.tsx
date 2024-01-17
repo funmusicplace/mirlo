@@ -48,7 +48,6 @@ const ArtistSupportBox: React.FC<{
     state: { artist },
     refresh,
   } = useArtistContext();
-  React.useState<ArtistSubscriptionTier>();
   const [isCheckingForSubscription, setIsCheckingForSubscription] =
     React.useState(false);
 
