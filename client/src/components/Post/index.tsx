@@ -12,6 +12,8 @@ import { bp } from "../../constants";
 import Box from "components/common/Box";
 import FollowArtist from "components/common/FollowArtist";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
+import LoadingBlocks from "components/Artist/LoadingBlocks";
+import SupportArtistPopUp from "components/common/SupportArtistPopUp";
 
 export const pageMarkdownWrapper = css`
   width: 100%;
@@ -66,10 +68,16 @@ const Post: React.FC = () => {
     state: { user },
   } = useGlobalStateContext();
   const { postId } = useParams();
-  const { object: post } = usePublicObjectById<Post>("posts", postId);
+  const { object: post, isLoadingObject } = usePublicObjectById<Post>(
+    "posts",
+    postId
+  );
 
   if (!post) {
-    return <Box>No post found</Box>;
+    if (!isLoadingObject) {
+      return <Box>No post found</Box>;
+    }
+    return <LoadingBlocks rows={1} />;
   }
 
   const ownedByUser = post.artist?.userId === user?.id;
@@ -152,6 +160,16 @@ const Post: React.FC = () => {
           />
         </div>
       </div>
+      {post.artist && (
+        <div
+          className={css`
+            text-align: center;
+            margin: 2rem 0;
+          `}
+        >
+          <SupportArtistPopUp artist={post.artist} />
+        </div>
+      )}
     </div>
   );
 };

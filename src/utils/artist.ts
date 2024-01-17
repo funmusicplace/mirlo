@@ -327,7 +327,10 @@ export const deleteStripeSubscriptions = async (
   });
 };
 
-export const singleInclude = (): Prisma.ArtistInclude<DefaultArgs> => {
+export const singleInclude = (queryOptions?: {
+  includeDefaultTier?: boolean;
+}): Prisma.ArtistInclude<DefaultArgs> => {
+  const { includeDefaultTier } = queryOptions ?? {};
   return {
     trackGroups: {
       where: {
@@ -361,7 +364,7 @@ export const singleInclude = (): Prisma.ArtistInclude<DefaultArgs> => {
     subscriptionTiers: {
       where: {
         deletedAt: null,
-        isDefaultTier: false,
+        isDefaultTier: includeDefaultTier ? undefined : false,
       },
       orderBy: {
         minAmount: "asc",
