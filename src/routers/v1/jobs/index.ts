@@ -7,7 +7,22 @@ const queueOptions = {
   connection: REDIS_CONFIG,
 };
 
-export const audioQueue = new Queue("convert-audio", queueOptions);
+export const audioQueue = new Queue("upload-audio", queueOptions);
+export const generateAlbumQueue = new Queue("generate-album", queueOptions);
+
+const getJobStatus = async (queue: string, jobId: string) => {
+  let job;
+  if (queue === "generateAlbum") {
+    job = await generateAlbumQueue.getJob(jobId);
+  } else {
+    job = await audioQueue.getJob(jobId);
+  }
+  return {
+    jobId,
+    jobStatus: (await job?.getState()) ?? "unknown",
+    progress: job?.progress,
+  };
+};
 
 export default function () {
   const operations = {
@@ -15,7 +30,10 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response) {
-    const { ids } = req.query as { ids: string[] };
+    const { ids, queue = "convertAudio" } = req.query as {
+      ids: string[];
+      queue: string;
+    };
     let states: {
       jobId: string;
       jobStatus: string;
@@ -24,16 +42,10 @@ export default function () {
     try {
       if (Array.isArray(ids)) {
         for (const id of ids) {
-          let state = await audioQueue.getJobState(id);
-          let job = await audioQueue.getJob(id);
-          states.push({ jobId: id, jobStatus: state, progress: job?.progress });
+          states.push(await getJobStatus(queue, id));
         }
       } else {
-        states.push({
-          jobId: ids,
-          jobStatus: await audioQueue.getJobState(ids),
-          progress: (await audioQueue.getJob(ids))?.progress,
-        });
+        states.push(await getJobStatus(queue, ids));
       }
     } catch (e) {
       console.error("/jobs", e);

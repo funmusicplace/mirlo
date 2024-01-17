@@ -12,6 +12,7 @@ import TrackRowPlayControl from "components/common/TrackRowPlayControl";
 import { useTranslation } from "react-i18next";
 import EditTrackRow from "./EditTrackRow";
 import styled from "@emotion/styled";
+import LoadingSpinner from "components/common/LoadingSpinner";
 
 const TrackRow = styled("tr")`
   > td > .play-button {
@@ -48,15 +49,33 @@ const ManageTrackRow: React.FC<{
   const { t } = useTranslation("translation", {
     keyPrefix: "manageTrackTable",
   });
-
+  const [uploadState, setUploadState] = React.useState(
+    track.audio?.uploadState
+  );
   const snackbar = useSnackbar();
   const [isEditing, setIsEditing] = React.useState(false);
   const {
     state: { user },
   } = useGlobalStateContext();
   const { onDragStart, onDragEnd } = useDraggableTrack();
-
   const userId = user?.id;
+
+  React.useEffect(() => {
+    let interval: NodeJS.Timer;
+    if (uploadState === "STARTED") {
+      setInterval(async () => {
+        const result = await api.get<Track>(
+          `users/${userId}/tracks/${track.id}`
+        );
+        const newState = result.result.audio?.uploadState;
+        setUploadState(newState);
+        if (newState === "SUCCESS") {
+          interval && clearInterval(interval);
+        }
+      }, 4000);
+    }
+    return () => (interval ? clearInterval(interval) : undefined);
+  }, [track.id, uploadState, userId]);
 
   const onDeleteClick = React.useCallback(async () => {
     try {
@@ -68,7 +87,6 @@ const ManageTrackRow: React.FC<{
     }
   }, [track.id, userId, reload, snackbar]);
 
-  const uploadState = track.audio?.uploadState;
   const createdDate = track.audio
     ? new Date(track.audio.createdAt).getTime()
     : 0;
@@ -132,7 +150,12 @@ const ManageTrackRow: React.FC<{
           <div>{track.title}</div>
           <small>
             {uploadState === "SUCCESS" && t("doneUploadingTrack")}
-            {uploadState === "STARTED" && t("stillProcessing")}
+            {uploadState === "STARTED" && (
+              <>
+                <LoadingSpinner />
+                {t("stillProcessing")}
+              </>
+            )}
             {uploadState === "ERROR" && t("thereWasAnError")}
           </small>
         </div>

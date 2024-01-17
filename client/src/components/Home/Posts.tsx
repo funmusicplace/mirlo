@@ -12,7 +12,7 @@ import { PostGrid } from "components/Artist/ArtistPosts";
 const Posts = () => {
   const { t } = useTranslation("translation", { keyPrefix: "home" });
   const [posts, setPosts] = React.useState<Post[]>([]);
-  console.log("posts", posts);
+
   const fetchAllPosts = React.useCallback(async () => {
     const fetched = await api.getMany<Post>("posts?take=3");
     setPosts(

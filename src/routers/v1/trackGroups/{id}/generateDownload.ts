@@ -1,12 +1,14 @@
-import { User } from "@prisma/client";
+import { TrackAudio, Track, User } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
 import { logger } from "../../../../logger";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import prisma from "../../../../../prisma/prisma";
 
 import { doesTrackGroupBelongToUser } from "../../../../utils/ownership";
-import { FormatOptions } from "../../../../utils/trackGroup";
-import { minioClient, trackGroupFormatBucket } from "../../../../utils/minio";
+import {
+  FormatOptions,
+  buildZipFileForPath,
+} from "../../../../utils/trackGroup";
 import { startGeneratingAlbum } from "../../../../queues/album-queue";
 
 export default function () {
@@ -140,49 +142,20 @@ export default function () {
         }
       }
 
+      logger.info("Found a trackgroup");
+
       if (!trackGroup) {
         res.status(404).json({
           error: "No trackGroup found",
         });
         return next();
       }
-      logger.info("Found a trackgroup");
 
-      const zipName = `${trackGroup.id}/${format}.zip`;
+      await startGeneratingAlbum(trackGroup, format, trackGroup.tracks);
 
-      try {
-        logger.info("checking if trackgroup already zipped");
-        await minioClient.statObject(trackGroupFormatBucket, zipName);
-      } catch (e) {
-        const jobId = await startGeneratingAlbum(
-          trackGroup,
-          format,
-          trackGroup.tracks
-        );
-        return res.json({
-          message: "We've started generating the album",
-          result: { jobId },
-        });
-      }
-
-      try {
-        res.attachment(`${trackGroup.title}.zip`);
-        res.set(
-          "Content-Disposition",
-          `attachment; filename="${trackGroup.title}"`
-        );
-
-        const stream = await minioClient.getObject(
-          trackGroupFormatBucket,
-          zipName
-        );
-
-        stream.pipe(res);
-      } catch (e) {
-        next(e);
-      }
-
-      return;
+      return res.json({
+        message: "Success",
+      });
     } catch (e) {
       next(e);
     }

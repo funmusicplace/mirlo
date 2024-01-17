@@ -149,14 +149,13 @@ export async function buildZipFileForPath(
         const order = track.order ? track.order : i + 1;
         const trackTitle = `${order} - ${track.title}.${format}`;
 
-        const trackLocation = `${track.audio.id}/generated.${format}`;
+        const trackLocation = `${track.audio.id}/original.${track.audio.fileExtension}`;
         logger.info(`${track.audio.id}: Fetching ${trackLocation}`);
         try {
           const trackStream = await minioClient.getObject(
             finalAudioBucket,
             trackLocation
           );
-          logger.info(`${track.audio.id}: Fetched file for tracks`);
 
           archive.append(trackStream, { name: trackTitle });
           logger.info(

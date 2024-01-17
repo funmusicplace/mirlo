@@ -16,9 +16,15 @@ export const Select: React.FC<{
   style?: React.CSSProperties;
   onChange: React.ChangeEventHandler<HTMLSelectElement>;
   options: { label: string; value: string }[];
-}> = ({ value, onChange, options, style }) => {
+  disabled?: boolean;
+}> = ({ disabled, value, onChange, options, style }) => {
   return (
-    <SelectEl value={value} onChange={onChange} style={style}>
+    <SelectEl
+      value={value}
+      onChange={onChange}
+      style={style}
+      disabled={disabled}
+    >
       {options.map((o) => (
         <option key={o.value} value={o.value}>
           {o.label}

@@ -19,9 +19,9 @@ const queueOptions = {
   connection: REDIS_CONFIG,
 };
 
-export const audioQueue = new Queue("convert-audio", queueOptions);
+export const audioQueue = new Queue("upload-audio", queueOptions);
 
-const audioQueueEvents = new QueueEvents("convert-audio", queueOptions);
+const audioQueueEvents = new QueueEvents("upload-audio", queueOptions);
 
 audioQueueEvents.on(
   "completed",
@@ -135,8 +135,8 @@ export const processTrackAudio = (ctx: { req: Request; res: Response }) => {
         );
         await minioClient.putObject(incomingAudioBucket, audio.id, fileStream);
 
-        logger.info("Adding audio to convert-audio queue");
-        const job = await audioQueue.add("convert-audio", {
+        logger.info("Adding audio to upload-audio queue");
+        const job = await audioQueue.add("upload-audio", {
           audioId: audio.id,
           fileExtension: audio.fileExtension,
         });

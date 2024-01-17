@@ -15,6 +15,8 @@ export const finalCoversBucket = "trackgroup-covers";
 export const incomingAudioBucket = "incoming-track-audio";
 export const finalAudioBucket = "track-audio";
 
+export const trackGroupFormatBucket = "trackgroup-format";
+
 const {
   MINIO_HOST = "",
   MINIO_ROOT_USER = "",
@@ -37,14 +39,24 @@ export const createBucketIfNotExists = async (
   bucket: string,
   logger?: Logger
 ) => {
-  logger?.info("minio: Checking if a bucket exists");
-  const exists = await minioClient.bucketExists(bucket);
+  logger?.info(`minio: checking if a bucket exists: ${bucket}`);
+  let exists;
+  try {
+    exists = await minioClient.bucketExists(bucket);
+  } catch (e) {
+    logger?.info(`minio: creating bucket: ${bucket}`);
+
+    await minioClient.makeBucket(bucket);
+    logger?.info(`minio: created bucket: ${bucket}`);
+  }
 
   if (!exists) {
-    logger?.info("minio: Need to create bucket");
+    logger?.info(`minio: creating bucket: ${bucket}`);
     await minioClient.makeBucket(bucket);
+    logger?.info(`minio: created bucket: ${bucket}`);
   }
-  return exists;
+
+  return true;
 };
 
 export async function getBufferFromMinio(

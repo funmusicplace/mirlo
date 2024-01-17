@@ -8,6 +8,7 @@ import { useSnackbar } from "state/SnackbarContext";
 import { useArtistContext } from "state/ArtistContext";
 import Modal from "./Modal";
 import Select from "./Select";
+import LoadingSpinner from "./LoadingSpinner";
 
 const formats = ["flac", "wav", "opus", "320.mp3", "256.mp3", "128.mp3"];
 
@@ -17,17 +18,24 @@ const DownloadAlbumButton: React.FC<{
 }> = ({ trackGroup, onlyIcon }) => {
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
   const [chosenFormat, setChosenFormat] = React.useState(formats[0]);
+  const [isGeneratingAlbum, setIsGeneratingAlbum] = React.useState(0);
   const [isPopupOpen, setIsPopupOpen] = React.useState(false);
   const snackbar = useSnackbar();
   const [isDownloading, setIsDownloading] = React.useState(false);
   const { state } = useArtistContext();
+
   const downloadAlbum = React.useCallback(async () => {
     try {
       setIsDownloading(true);
-      await api.downloadFileDirectly(
+      const resp = await api.downloadFileDirectly(
         `trackGroups/${trackGroup.id}/download?format=${chosenFormat}`,
         `${trackGroup.title}.zip`
       );
+      if (resp) {
+        if ((resp as any).result.jobId) {
+          setIsGeneratingAlbum(+(resp as any).result.jobId);
+        }
+      }
     } catch (e) {
       snackbar(t("error"), { type: "warning" });
       console.error(e);
@@ -35,6 +43,27 @@ const DownloadAlbumButton: React.FC<{
       setIsDownloading(false);
     }
   }, [chosenFormat, snackbar, t, trackGroup.id, trackGroup.title]);
+
+  React.useEffect(() => {
+    let interval: NodeJS.Timer | null = null;
+    if (isGeneratingAlbum > 0) {
+      interval = setInterval(async () => {
+        const result = await api.getMany<{ jobStatus: string }>(
+          `jobs?queue=generateAlbum&ids=${isGeneratingAlbum}`
+        );
+        if (result.results[0]?.jobStatus === "completed") {
+          await api.downloadFileDirectly(
+            `trackGroups/${trackGroup.id}/download?format=${chosenFormat}`,
+            `${trackGroup.title}.zip`
+          );
+          setIsDownloading(false);
+          setIsGeneratingAlbum(0);
+          interval && clearInterval(interval);
+        }
+      }, 4000);
+    }
+    return () => (interval ? clearInterval(interval) : undefined);
+  }, [chosenFormat, isGeneratingAlbum, trackGroup.id, trackGroup.title]);
 
   if (!trackGroup || !state?.artist) {
     return null;
@@ -48,24 +77,50 @@ const DownloadAlbumButton: React.FC<{
         size="small"
         onClose={() => setIsPopupOpen(false)}
       >
-        <p>What file type do you want to download?</p>
-        <Select
-          value={chosenFormat}
-          onChange={(e) => setChosenFormat(e.target.value)}
-          options={formats.map((format) => ({ value: format, label: format }))}
-        />
-        <Button
-          compact
+        <div
           className={css`
-            margin-top: 0.5rem;
-            font-size: 1.2rem;
-            background: transparent;
+            display: flex;
+            flex-direction: column;
           `}
-          isLoading={isDownloading}
-          onClick={() => downloadAlbum()}
         >
-          Download
-        </Button>
+          <p>What file type do you want to download?</p>
+          <Select
+            value={chosenFormat}
+            onChange={(e) => setChosenFormat(e.target.value)}
+            options={formats.map((format) => ({
+              value: format,
+              label: format,
+            }))}
+            disabled={isGeneratingAlbum > 0}
+          />
+          <Button
+            compact
+            className={css`
+              margin-top: 0.5rem;
+              font-size: 1.2rem;
+              background: transparent;
+            `}
+            isLoading={isDownloading}
+            onClick={() => downloadAlbum()}
+            disabled={isGeneratingAlbum > 0}
+          >
+            Download
+          </Button>
+          {isGeneratingAlbum > 0 && (
+            <p
+              className={css`
+                margin-top: 1rem;
+
+                svg {
+                  margin-right: 0.5rem;
+                }
+              `}
+            >
+              <LoadingSpinner />
+              We're generating the album! Hold on for a minute...
+            </p>
+          )}
+        </div>
       </Modal>
       <Button
         onlyIcon={onlyIcon}

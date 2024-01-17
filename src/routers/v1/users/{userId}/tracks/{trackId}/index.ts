@@ -28,7 +28,7 @@ export default function () {
   const operations = {
     PUT: [userAuthenticated, userHasPermission("owner"), PUT],
     DELETE: [userAuthenticated, userHasPermission("owner"), DELETE],
-    GET,
+    GET: [userAuthenticated, userHasPermission("owner"), GET],
   };
 
   // FIXME: only allow updating of tracks owned by userId
@@ -200,12 +200,14 @@ export default function () {
     },
   };
 
-  // FIXME: only return tracks owned by user
   async function GET(req: Request, res: Response) {
-    const { trackId, userId } = req.params;
+    const { trackId } = req.params;
 
     const track = await prisma.track.findUnique({
       where: { id: Number(trackId) },
+      include: {
+        audio: true,
+      },
     });
     res.json({ result: track });
   }

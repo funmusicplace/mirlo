@@ -17,49 +17,6 @@ const {
   MINIO_API_PORT = 9000,
 } = process.env;
 
-const generateDestination = (
-  format: string,
-  destinationFolder: string,
-  audioBitrate?: string
-) => {
-  const fileName = `generated${
-    audioBitrate ? "." + audioBitrate : ""
-  }.${format}`;
-
-  return `${destinationFolder}/${fileName}`;
-};
-
-const formats = [
-  {
-    format: "wav",
-    // defaults to codec pcm_s16le
-  },
-  {
-    format: "flac",
-    audioCodec: "flac",
-  },
-  {
-    format: "opus",
-    audioCodec: "opus",
-    audioBitrate: undefined,
-  },
-  {
-    format: "mp3",
-    audioCodec: "libmp3lame",
-    audioBitrate: "128",
-  },
-  {
-    format: "mp3",
-    audioCodec: "libmp3lame",
-    audioBitrate: "256",
-  },
-  {
-    format: "mp3",
-    audioCodec: "libmp3lame",
-    audioBitrate: "320",
-  },
-];
-
 export default async (job: Job) => {
   const { audioId, fileExtension } = job.data;
   let progress = 10;
@@ -84,6 +41,7 @@ export default async (job: Job) => {
 
     const originalPath = `${destinationFolder}/original.${fileExtension}`;
 
+    // FIXME: can this be converted to a stream
     await minioClient.fGetObject(incomingAudioBucket, audioId, originalPath);
 
     let data: any;
@@ -91,59 +49,6 @@ export default async (job: Job) => {
     const profiler = logger.startTimer();
 
     await job.updateProgress(progress);
-
-    const formatProgressInterval = 70 / formats.length;
-
-    for (const formatDetails of formats) {
-      await new Promise((resolve, reject) => {
-        const { format, audioBitrate, audioCodec } = formatDetails;
-
-        logger.info(
-          `audioId ${audioId}: Processing stream for ${format}${
-            audioBitrate ? `@${audioBitrate}` : ""
-          }`
-        );
-
-        const destination = generateDestination(
-          format,
-          destinationFolder,
-          audioBitrate
-        );
-
-        const processor = ffmpeg(createReadStream(originalPath))
-          .noVideo()
-          .toFormat(format)
-          .on("stderr", function (stderrLine) {
-            // logger.info("Stderr output: " + stderrLine);
-          })
-          .on("error", (err: { message: unknown }) => {
-            logger.error(`Error converting to ${format}: ${err.message}`);
-            reject(err);
-          })
-          .on("end", () => {
-            logger.info(
-              `audioId ${audioId}: Done converting to ${format}${
-                audioBitrate ? `@${audioBitrate}` : ""
-              }`
-            );
-            resolve(null);
-          });
-
-        if (format === "mp3") {
-          processor.addOptions("-write_xing", "0");
-        }
-        if (audioCodec) {
-          processor.audioCodec(audioCodec);
-        }
-        if (audioBitrate) {
-          processor.audioBitrate(audioBitrate);
-        }
-
-        processor.save(destination);
-      });
-      progress += formatProgressInterval;
-      await job.updateProgress(progress);
-    }
 
     const hlsStream = await createReadStream(originalPath);
 
