@@ -34,6 +34,12 @@ const SupportArtistPopUp: React.FC<{ artist: Artist }> = ({ artist }) => {
   const snackbar = useSnackbar();
 
   React.useEffect(() => {
+    const checkStripe = async () => {
+      const status = await checkArtistStripeStatus(artist.userId);
+      if (status) {
+        setStripeAccountStatus(status.result);
+      }
+    };
     const callback = async () => {
       const artistDetails = await api.get<Artist>(
         `artists/${artist.id}/?includeDefaultTier=true`
@@ -41,10 +47,6 @@ const SupportArtistPopUp: React.FC<{ artist: Artist }> = ({ artist }) => {
 
       setOptions(artistDetails.result.subscriptionTiers);
 
-      const status = await checkArtistStripeStatus(artist.userId);
-      if (status) {
-        setStripeAccountStatus(status.result);
-      }
       const foundTier = user?.artistUserSubscriptions?.find(
         (sub) => sub.artistSubscriptionTier.artistId === artist.id
       )?.artistSubscriptionTier;
@@ -53,6 +55,7 @@ const SupportArtistPopUp: React.FC<{ artist: Artist }> = ({ artist }) => {
       }
     };
 
+    checkStripe();
     if (isOpen) {
       callback();
     }
