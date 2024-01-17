@@ -294,7 +294,7 @@
     "minAmountError": "The amount for a support tier must be more than or equal to 1"
   },
   "footer": {
-    "underConstruction": "Interested in joining Mirlo? <signup>Sign up</signup>! If you'd like to contribute check out <github>the code on GitHub</github>, <discord>join our Discord</discord>, or <email>email us</email>.",
+    "underConstruction": "Mirlo is under construction. If you'd like to contribute check out <github>the code on GitHub</github>, <discord>join our Discord</discord>, or <email>email us</email>.",
     "aboutUs": "<about>About us</about>, <faq>FAQ</faq>, <terms>Terms and Conditions</terms>, <privacy>Privacy</privacy>, <cookie>Our use of cookies</cookie>"
   },
   "admin": {
