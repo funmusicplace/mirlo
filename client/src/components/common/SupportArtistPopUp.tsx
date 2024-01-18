@@ -9,6 +9,9 @@ import SupportArtistPopUpTiers from "./SupportArtistPopUpTiers";
 import { useSnackbar } from "state/SnackbarContext";
 import { checkArtistStripeStatus } from "state/ArtistContext";
 import { useTranslation } from "react-i18next";
+import FollowArtist from "./FollowArtist";
+import FormComponent from "./FormComponent";
+import { InputEl } from "./Input";
 
 const SupportArtistPopUp: React.FC<{ artist: Artist }> = ({ artist }) => {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -22,6 +25,7 @@ const SupportArtistPopUp: React.FC<{ artist: Artist }> = ({ artist }) => {
       description: string;
       isDefaultTier: boolean;
     };
+    email: string;
   }>();
   const [options, setOptions] = React.useState<
     { name: string; id: number; description: string }[]
@@ -42,6 +46,7 @@ const SupportArtistPopUp: React.FC<{ artist: Artist }> = ({ artist }) => {
         setStripeAccountStatus(status.result);
       }
     };
+
     const callback = async () => {
       const artistDetails = await api.get<Artist>(
         `artists/${artist.id}/?includeDefaultTier=true`
@@ -73,17 +78,23 @@ const SupportArtistPopUp: React.FC<{ artist: Artist }> = ({ artist }) => {
     try {
       setIsCheckingForSubscription(true);
       const tier = methods.getValues("tier");
-
+      const email = methods.getValues("email");
       if (!tier.isDefaultTier) {
         const response = await api.post<
-          { tierId: number },
+          { tierId: number; email: string },
           { sessionUrl: string }
         >(`artists/${artist.id}/subscribe`, {
           tierId: tier.id,
+          email,
         });
         window.location.assign(response.sessionUrl);
       } else {
-        await api.post(`artists/${artist.id}/follow`, {});
+        await api.post(`artists/${artist.id}/follow`, {
+          email,
+        });
+      }
+      if (!user) {
+        snackbar("We've sent you a verification email!", { type: "success" });
       }
     } catch (e) {
       snackbar("Something went wrong", { type: "warning" });
@@ -97,8 +108,8 @@ const SupportArtistPopUp: React.FC<{ artist: Artist }> = ({ artist }) => {
 
   const value = methods.watch("tier");
 
-  if (!stripeAccountStatus?.chargesEnabled || !user) {
-    return null;
+  if (!stripeAccountStatus?.chargesEnabled) {
+    return <FollowArtist artistId={artist.id} />;
   }
 
   return (
@@ -123,10 +134,17 @@ const SupportArtistPopUp: React.FC<{ artist: Artist }> = ({ artist }) => {
               <SupportArtistPopUpTiers {...props} options={options} />
             )}
           />
+          {!user && (
+            <FormComponent>
+              {t("email")}
+              <InputEl {...methods.register("email")} type="email" required />
+            </FormComponent>
+          )}
         </FormProvider>
         <Button
           onClick={() => subscribeToTier()}
           isLoading={isCheckingForSubscription}
+          disabled={!methods.formState.isValid}
         >
           {t("continueWithName", { name: value?.name })}
         </Button>

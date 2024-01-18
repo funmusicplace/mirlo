@@ -45,7 +45,7 @@ export const Footer = () => {
           >
             <Trans
               t={t}
-              i18nKey="underConstruction"
+              i18nKey="getInTouch"
               components={{
                 github: (
                   // eslint-disable-next-line jsx-a11y/anchor-has-content
