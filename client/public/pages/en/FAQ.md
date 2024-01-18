@@ -24,6 +24,8 @@ We believe that the community is the platform and our goals, informed by our [Ob
 
 That said, we would like to make it easier for other groups (like music labels or other co-ops) to install the software. We’d also like to look into building plug-ins and other tools that are useful for artists (for example, plug-ins that help to make your music available on aggregators like Distrokids or other platforms).
 
+Eventually, we hope to [exit to our community](https://blog.fracturedatlas.org/exit-to-community).
+
 ### What are the short term goals of Mirlo?
 
 We’d like to release a minimum viable product that allows
