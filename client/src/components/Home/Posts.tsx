@@ -62,16 +62,16 @@ const Posts = () => {
                     background-color: var(--mi-darken-background-color);
                     filter: brightness(95%);
                     width: 100%;
+                    text-decoration: none;
 
-                    :hover {
+                    &:hover {
                       transition: 0.2s ease-in-out;
-                      text-decoration: none;
                       background-color: rgba(50, 0, 0, 0.07);
                       filter: brightness(90%);
                     }
 
                     @media (prefers-color-scheme: dark) {
-                      :hover {
+                      &:hover {
                         filter: brightness(120%);
                         background-color: rgba(100, 100, 100, 0.2);
                       }

@@ -67,14 +67,6 @@ const SupportMirlo = () => {
                   variant="big"
                   className={css`
                     display: block;
-                    height: 51px !important;
-                    border-radius: 9999px;
-                    font-weight: bold;
-                    font-size: 1rem;
-                    color: var(--mi-white) !important;
-                    align-items: center;
-                    display: inline-flex;
-                    line-height: 1rem;
                     padding: 1rem;
                     text-decoration: none;
                     text-align: center;
@@ -82,7 +74,6 @@ const SupportMirlo = () => {
                       text-decoration: underline;
                     }
 
-                    background-color: var(--mi-black) !important;
                     color: var(--mi-white);
                     @media (prefers-color-scheme: dark) {
                       background-color: var(--mi-white) !important;

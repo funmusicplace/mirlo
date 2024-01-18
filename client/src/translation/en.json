@@ -115,6 +115,7 @@
     "noUpdates": "There are no updates yet for this artist",
     "releases": "Releases",
     "posts": "Posts",
+    "justFollow": "Just follow",
     "noSubscriptionTiersYet": "This artist hasn't added any subscription tiers yet.",
     "unknown": "Unknown",
     "toFollowThisArtist": "To follow this artist please enter your email address.",
@@ -138,6 +139,10 @@
     "letsSupport": "Support this artist",
     "cancelSubscription": "Cancel subscription",
     "chooseThisSubscription": "Choose this subscription",
+    "chooseATier": "Choose a tier to support this artist:",
+    "subscribeToArtist": "Subscribe to {{ artist }}",
+
+    "continueWithName": "Continue with {{ name }}",
     "platformPercentDisclaimer": "Mirlo is evaluating the platform percentage and seeking input from musicians in the next few weeks.",
     "platformPercent": "{{ percent }}% ({{ money }}) of this purchase will go to maintain Mirlo. This does not include the cut taken by our payment processor"
   },
@@ -294,7 +299,7 @@
     "minAmountError": "The amount for a support tier must be more than or equal to 1"
   },
   "footer": {
-    "underConstruction": "Mirlo is under construction. If you'd like to contribute check out <github>the code on GitHub</github>, <discord>join our Discord</discord>, or <email>email us</email>.",
+    "getInTouch": "If you'd like to get in touch, join <discord>our discord</discord>, <email>email us</email>, or check out <github>our github</github>.",
     "aboutUs": "<about>About us</about>, <faq>FAQ</faq>, <terms>Terms and Conditions</terms>, <privacy>Privacy</privacy>, <cookie>Our use of cookies</cookie>"
   },
   "admin": {

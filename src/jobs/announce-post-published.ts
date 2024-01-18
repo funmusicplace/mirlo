@@ -14,11 +14,15 @@ const announcePublishPost = async () => {
       },
       deletedAt: null,
       artist: {
+        deletedAt: null,
         subscriptionTiers: {
           some: {
+            deletedAt: null,
             userSubscriptions: {
               some: {
+                deletedAt: null,
                 user: {
+                  deletedAt: null,
                   emailConfirmationToken: null,
                 },
               },

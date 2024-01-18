@@ -33,7 +33,7 @@ const ArtistPosts: React.FC = () => {
     state: { artist },
   } = useArtistContext();
 
-  if (!artist || artist.trackGroups.length === 0) {
+  if (!artist || artist.posts.length === 0) {
     return null;
   }
 

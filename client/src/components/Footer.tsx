@@ -1,18 +1,13 @@
 import { css } from "@emotion/css";
 import { Trans, useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { useGlobalStateContext } from "state/GlobalState";
 import WidthContainer from "./common/WidthContainer";
 import { bp } from "../constants";
+import { FaInstagram, FaMastodon, FaTwitter } from "react-icons/fa";
 
 export const Footer = () => {
   const { t } = useTranslation("translation", { keyPrefix: "footer" });
-  const {
-    state: { user },
-  } = useGlobalStateContext();
-  if (!user?.id) {
-    return null;
-  }
+
   return (
     <div
       className={css`
@@ -45,10 +40,8 @@ export const Footer = () => {
           >
             <Trans
               t={t}
-              i18nKey="underConstruction"
+              i18nKey="getInTouch"
               components={{
-                // eslint-disable-next-line jsx-a11y/anchor-has-content
-                signup: <a href="/signup"></a>,
                 github: (
                   // eslint-disable-next-line jsx-a11y/anchor-has-content
                   <a href="https://github.com/funmusicplace/mirlo/"></a>
@@ -60,18 +53,40 @@ export const Footer = () => {
               }}
             />
           </p>
-          <p>
+          <p
+            className={css`
+              margin-bottom: 1rem;
+            `}
+          >
             <Trans
               t={t}
               i18nKey="aboutUs"
               components={{
-                faq: <Link to="/pages/faq"></Link>,
+                faq: <Link to="/pages/en/faq"></Link>,
                 about: <Link to="/pages/about"></Link>,
                 terms: <Link to="/pages/terms"></Link>,
                 privacy: <Link to="/pages/privacy"></Link>,
                 cookie: <Link to="/pages/cookie-policy"></Link>,
               }}
             />
+          </p>
+          <p
+            className={css`
+              a {
+                margin: 0.5rem;
+                font-size: 1.5rem;
+              }
+            `}
+          >
+            <a href="https://instagram.com/mirlo.space" title="Mastodon">
+              <FaInstagram />
+            </a>
+            <a href="https://musician.social/@mirlo" title="Mastodon">
+              <FaMastodon />
+            </a>
+            <a href="https://x.com/mirlospace" title="Mastodon">
+              <FaTwitter />
+            </a>
           </p>
         </div>
       </WidthContainer>

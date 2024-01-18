@@ -165,9 +165,6 @@ h6 {
 a {
   transition: .25s color, .25s background-color;
   color: var(--mi-link-color);
-  text-decoration: none;
-}
-a:hover {
   text-decoration: underline;
 }
 

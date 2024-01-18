@@ -43,6 +43,10 @@ export const SplashTitle = styled.h2`
 export const SplashButtonWrapper = styled.div`
   display: flex;
   gap: 16px;
+
+  a {
+    background-color: transparent;
+  }
 `;
 
 const Splash = () => {
@@ -137,7 +141,7 @@ const Splash = () => {
                 // eslint-disable-next-line jsx-a11y/anchor-has-content
                 about: <a href="/pages/about"></a>,
                 // eslint-disable-next-line jsx-a11y/anchor-has-content
-                faq: <a href="/pages/faq"></a>,
+                faq: <a href="/pages/en/faq"></a>,
                 office: (
                   // eslint-disable-next-line jsx-a11y/anchor-has-content
                   <a href=" https://calendly.com/mirloofficehours/schedule"></a>
