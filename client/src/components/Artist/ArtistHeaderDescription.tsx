@@ -10,6 +10,7 @@ import { useSnackbar } from "state/SnackbarContext";
 import { useForm } from "react-hook-form";
 import { FaChevronDown, FaPen, FaSave, FaTimes } from "react-icons/fa";
 import TextArea from "components/common/TextArea";
+import { bp } from "../../constants";
 
 interface FormData {
   bio: string;
@@ -84,28 +85,51 @@ const ArtistHeaderDescription: React.FC = () => {
               overflow: hidden;
               text-overflow: ellipsis;
 
-              ${isCollapsed ? `max-height: 100px` : ""}
+              ${isCollapsed ? `max-height: 4rem;` : ""}
+
+              @media screen and (max-width: ${bp.medium}px) {
+                ${isCollapsed ? `max-height: 3rem;` : ""}
+              }
             `}
           />
           {canCollapse && (
-            <Button
-              variant="link"
-              compact
-              startIcon={<FaChevronDown />}
+            <div
               className={css`
-                margin-top: 0.7rem;
-                margin-bottom: 1rem;
+                width: 100%;
+                margin-top: -1.5rem;
+                padding-top: 0.75rem;
+                z-index: +1;
+                position: relative;
+                ${isCollapsed
+                  ? `background: linear-gradient(180deg, transparent 0%, var(--mi-normal-background-color) 42%);`
+                  : ""}
 
-                svg {
-                  transition: transform 0.2s;
-
-                  ${!isCollapsed ? `transform: rotate(-180deg);` : ""}
+                @media screen and (max-width: ${bp.medium}px) {
+                  ${isCollapsed
+                    ? `background: linear-gradient(180deg, transparent 0%, var(--mi-normal-background-color) 80%); padding-top: 1.2rem;`
+                    : ""}
                 }
               `}
-              onClick={() => setIsCollapsed((val) => !val)}
             >
-              {isCollapsed ? "read more" : "read less"}
-            </Button>
+              <Button
+                variant="link"
+                compact
+                startIcon={<FaChevronDown />}
+                className={css`
+                  margin-top: 0.7rem;
+                  margin-bottom: 0.5rem;
+
+                  svg {
+                    transition: transform 0.2s;
+
+                    ${!isCollapsed ? `transform: rotate(-180deg);` : ""}
+                  }
+                `}
+                onClick={() => setIsCollapsed((val) => !val)}
+              >
+                {isCollapsed ? "read more" : "read less"}
+              </Button>
+            </div>
           )}
         </div>
 

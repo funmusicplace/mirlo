@@ -14,7 +14,7 @@ const Container = styled.div<{ artistBanner: boolean; userId?: number }>`
   ${(props) =>
     !props.artistBanner ? "margin-top: 0px;" : "margin-top: calc(8vh);"}
   ${(props) =>
-    props.userId ? "margin-top: calc(8vh - 39px);" : "margin-top: calc(8vh);"}
+    props.userId ? "margin-top: calc(8vh - 39px);" : "margin-top: calc(1vh);"}
   max-width: var(--mi-container-big);
 
   @media screen and (max-width: ${bp.large}px) {
@@ -26,7 +26,7 @@ const Container = styled.div<{ artistBanner: boolean; userId?: number }>`
     padding: 0rem !important;
     width: 100%;
     ${(props) => (props.artistBanner ? "margin-top: 0px;" : "")}
-    ${(props) => (!props.userId ? "margin-top: 13vh;" : "")}
+    ${(props) => (!props.userId ? "margin-top: calc(7vh);" : "")}
     ${(props) => (!props.artistBanner ? "margin-top: 0px;" : "")}
   }
 `;

@@ -131,6 +131,8 @@ const Post: React.FC = () => {
               <span
                 className={css`
                   margin-right: 0.25rem;
+
+                  line-height: 2.2rem;
                 `}
               >
                 by{" "}
