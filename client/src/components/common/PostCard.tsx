@@ -1,4 +1,3 @@
-import { bp } from "../../constants";
 import { css } from "@emotion/css";
 import MarkdownContent from "./MarkdownContent";
 import Box from "./Box";
@@ -21,9 +20,6 @@ const PostCard: React.FC<{
         overflow: hidden;
         padding: 0 !important;
         justify-content: space-between;
-        @media screen and (max-width: ${bp.small}px) {
-          font-size: var(--mi-font-size-small) !important;
-        }
 
         @media (prefers-color-scheme: dark) {
           background-color: var(--mi-normal-background-color);
