@@ -37,7 +37,6 @@ import About from "components/pages/About";
 import { AuthWrapper } from "components/AuthWrapper";
 import Signup from "components/Signup";
 import { ArtistProvider } from "state/ArtistContext";
-import FAQ from "components/pages/FAQ";
 import ManageTrackGroup from "components/ManageArtist/ManageTrackGroup";
 import Releases from "components/Releases";
 import ManageContainer from "components/ManageArtist/ManageContainer";
@@ -70,7 +69,6 @@ const router = createBrowserRouter([
     children: [
       { path: "", element: <Home /> },
       { path: "pages/about", element: <About /> },
-      { path: "pages/faq", element: <FAQ /> },
       {
         path: "pages/cookie-policy",
         element: (

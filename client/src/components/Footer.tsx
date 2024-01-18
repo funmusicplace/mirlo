@@ -47,8 +47,6 @@ export const Footer = () => {
               t={t}
               i18nKey="underConstruction"
               components={{
-                // eslint-disable-next-line jsx-a11y/anchor-has-content
-                signup: <a href="/signup"></a>,
                 github: (
                   // eslint-disable-next-line jsx-a11y/anchor-has-content
                   <a href="https://github.com/funmusicplace/mirlo/"></a>
@@ -65,7 +63,7 @@ export const Footer = () => {
               t={t}
               i18nKey="aboutUs"
               components={{
-                faq: <Link to="/pages/faq"></Link>,
+                faq: <Link to="/pages/en/faq"></Link>,
                 about: <Link to="/pages/about"></Link>,
                 terms: <Link to="/pages/terms"></Link>,
                 privacy: <Link to="/pages/privacy"></Link>,

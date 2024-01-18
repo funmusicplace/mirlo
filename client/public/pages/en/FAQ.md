@@ -1,6 +1,6 @@
 # FAQ
 
-## What we’re building
+## About Mirlo
 
 ### What is Mirlo?
 
@@ -9,10 +9,6 @@ Mirlo provides a user-friendly space to help musicians sell music, manage subscr
 ### How does Mirlo work?
 
 We’re exploring a number of funding structures. We’re aiming for musicians to get as much of the price of their albums and subscriptions as possible while still supporting the workers and infrastructure of the co-op. We will likely add ways for purchasers to support the platform directly.
-
-### How much does Mirlo cost?
-
-Once incorporated, we’ll explore a number of funding structures. We’re aiming for musicians to get as much of the price of their albums and subscriptions as possible while still supporting the workers and infrastructure of the co-op. We will likely add ways for purchasers to support the platform directly.
 
 ### What makes Mirlo different from other products?
 
@@ -42,13 +38,19 @@ To cover costs, we would aim to initially take a fairly small cut (if at all) an
 
 Our main blocker is getting the word out! If you want to help out with marketing, [please reach out](mailto:mirlodotspace@protonmail.com)!
 
-### What’s on your product roadmap?
-
-We’re pretty close to being done with our minimum viable platform. Check out our[ GitHub issues tracker](https://github.com/funmusicplace/mirlo/issues) for what we're working on
-
 ### Have you heard of &lt;project x>?
 
 Probably! As individuals we’ve worked with and in Resonate and Ampled, and we’re in touch with a couple of other projects that are doing very similar things like jam.coop, faircamp, ampwall, patrontape, tone.audio, and some others. We’re hoping to continue talking to these folks and build towards standardization of resources and tech APIs so that our services can talk to each other and musicians can easily switch between them. If there’s a project you want to talk about, bring it up in our [Discord](https://discord.gg/XuV7F4YRqB)!
+
+## What we’re building {#what-we’re-building}
+
+### How much does Mirlo cost?
+
+Once incorporated, we’ll explore a number of funding structures. We’re aiming for musicians to get as much of the price of their albums and subscriptions as possible while still supporting the workers and infrastructure of the co-op. We will likely add ways for purchasers to support the platform directly.
+
+### What’s on your product roadmap?
+
+We’re pretty close to being done with our minimum viable platform. Check out our[ GitHub issues tracker](https://github.com/funmusicplace/mirlo/issues) for what we're working on
 
 ### How do payouts work?
 
@@ -66,7 +68,15 @@ Our front-end is a TypeScript react app and our back-end is a node TypeScript ex
 
 Yes! And we want your help 🙂.[ Check out our code](https://github.com/funmusicplace/mirlo).
 
-## The people doing it
+### Will you use my music for AI training purposes?
+
+No!
+
+### Can I help with testing?
+
+Yes please! Reach out to either LLK or Si on the[ Discord](https://discord.gg/XuV7F4YRqB) to get started.
+
+## The people doing it {#the-people-doing-it}
 
 ### How are you structured?
 
@@ -80,16 +90,20 @@ Mirlo is maintained by a worker co-operative heavily rooted in a community of mu
 
 Our community is primarily hanging out on the[ Discord](https://discord.gg/XuV7F4YRqB) of our parent project[ Fun Music Place](https://funmusic.place). Come say hi!
 
-### Can I help with testing?
-
-Yes please! Reach out to either LLK or Si on the[ Discord](https://discord.gg/XuV7F4YRqB) to get started.
-
-## Support questions
+## Support questions {#support-questions}
 
 ### How do I add support tiers?
 
-You can add support tiers by going to your artist's profile, clicking “edit page” (or navigating to it through the top right dropdown menu), and then switching to the “Support tiers” tab. There there’s an “+ add tier” button that will let you create a support tier.
+You can add support tiers by going to your artist's profile, clicking “edit page” (or navigating to it through the top right dropdown menu), and then switching to the “Support tiers” tab. There's an “+ add tier” button that will let you create a support tier.
 
 ### How can I sell individual tracks?
 
 We currently don’t support selling of individual tracks, but if you want to see this feature implemented, [upvote it on our ideas tracker](https://github.com/funmusicplace/mirlo/discussions/509).
+
+### Image support
+
+For our album, avatar, and background images we encourage people to upload higher resolution images. If you have issues with your specific image, please contact us at [mirlodotspace@proton.me](mailto:mirlodotspace@proton.me)
+
+### Can an artist make a listener account, will that be a problem in the future?
+
+There’s only one account type on Mirlo! Any user can make an artist to upload music to at any point. To do so, click on the top right menu and click on “Manage Artist”, this will let you add new artists.

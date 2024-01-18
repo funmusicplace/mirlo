@@ -138,6 +138,9 @@
     "letsSupport": "Support this artist",
     "cancelSubscription": "Cancel subscription",
     "chooseThisSubscription": "Choose this subscription",
+    "chooseATier": "Choose a tier to support this artist:",
+    "subscribeToArtist": "Subscribe to {{ artist }}",
+    "continueWithName": "Continue with {{ name }}",
     "platformPercentDisclaimer": "Mirlo is evaluating the platform percentage and seeking input from musicians in the next few weeks.",
     "platformPercent": "{{ percent }}% ({{ money }}) of this purchase will go to maintain Mirlo. This does not include the cut taken by our payment processor"
   },
