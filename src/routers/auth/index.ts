@@ -201,7 +201,6 @@ router.post(`/password-reset/initiate`, async (req, res, next) => {
     const user = await prisma.user.findFirst({
       where: {
         email,
-        emailConfirmationToken: null,
       },
     });
 
@@ -280,6 +279,8 @@ router.post(`/password-reset/set-password`, async (req, res, next) => {
         data: {
           passwordResetConfirmationToken: null,
           passwordResetConfirmationExpiration: null,
+          emailConfirmationExpiration: null, // At this point we've validated that the user has an e-mail address
+          emailConfirmationToken: null,
           password: await hashPassword(newPassword),
         },
         where: {
