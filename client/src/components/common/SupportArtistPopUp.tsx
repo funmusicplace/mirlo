@@ -8,11 +8,13 @@ import { Controller, FormProvider, useForm } from "react-hook-form";
 import SupportArtistPopUpTiers from "./SupportArtistPopUpTiers";
 import { useSnackbar } from "state/SnackbarContext";
 import { checkArtistStripeStatus } from "state/ArtistContext";
+import { useTranslation } from "react-i18next";
 
 const SupportArtistPopUp: React.FC<{ artist: Artist }> = ({ artist }) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const [stripeAccountStatus, setStripeAccountStatus] =
     React.useState<AccountStatus>();
+  const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const methods = useForm<{
     tier: {
       id: number;
@@ -102,16 +104,16 @@ const SupportArtistPopUp: React.FC<{ artist: Artist }> = ({ artist }) => {
   return (
     <>
       <Button variant="big" onClick={() => setIsOpen(true)}>
-        Subscribe to {artist.name}
+        {t("subscribeToArtist", { artist: artist.name })}
       </Button>
       <Modal
-        title={`Support ${artist.name}`}
+        title={t("supportArtist", { artist: artist.name }) ?? ""}
         open={isOpen}
         size="small"
         onClose={() => setIsOpen(false)}
       >
         <SpaceBetweenDiv>
-          <div>Choose a tier to suppor this artist:</div>
+          <div>{t("chooseATier")}</div>
         </SpaceBetweenDiv>
         <FormProvider {...methods}>
           <Controller
@@ -126,7 +128,7 @@ const SupportArtistPopUp: React.FC<{ artist: Artist }> = ({ artist }) => {
           onClick={() => subscribeToTier()}
           isLoading={isCheckingForSubscription}
         >
-          Continue with {value?.name}
+          {t("continueWithName", { name: value?.name })}
         </Button>
       </Modal>
     </>

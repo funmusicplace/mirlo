@@ -3,6 +3,7 @@ import { InputEl } from "./Input";
 import { useFormContext } from "react-hook-form";
 import { forwardRef } from "react";
 import Money from "./Money";
+import { useTranslation } from "react-i18next";
 
 const Label = styled.label`
   display: block;
@@ -49,6 +50,7 @@ const SupportArtistPopUpTiers = forwardRef<
     options: Partial<ArtistSubscriptionTier>[];
   }
 >(function ({ options, ...props }, ref) {
+  const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const methods = useFormContext();
   const currentValue: undefined | ArtistSubscriptionTier =
     methods.watch("tier");
@@ -76,7 +78,7 @@ const SupportArtistPopUpTiers = forwardRef<
             >
               <div>
                 <strong>
-                  {tier.name === "follow" ? "Just follow" : <>{tier.name}:</>}
+                  {tier.name === "follow" ? t("justFollow") : <>{tier.name}:</>}
                   {tier.minAmount ? (
                     <Money
                       amount={tier.minAmount ? tier.minAmount / 100 : 0}
