@@ -28,6 +28,10 @@ const MarkdownWrapper = styled.div`
     margin: 1rem 0;
   }
 
+  li {
+    margin-left: 1.2rem;
+  }
+
   ul {
     margin-left: 1rem;
     margin-bottom: 1rem;
