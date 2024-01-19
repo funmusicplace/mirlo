@@ -88,7 +88,7 @@ const ArtistHeaderDescription: React.FC = () => {
               ${isCollapsed ? `max-height: 4rem;` : ""}
 
               @media screen and (max-width: ${bp.medium}px) {
-                ${isCollapsed ? `max-height: 3rem;` : ""}
+                ${isCollapsed ? `max-height: 2rem;` : ""}
               }
             `}
           />
