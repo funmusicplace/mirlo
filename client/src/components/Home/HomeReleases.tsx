@@ -7,8 +7,8 @@ import { useTranslation } from "react-i18next";
 import { bp } from "../../constants";
 import WidthContainer from "../common/WidthContainer";
 import { SectionHeader } from "./Home";
-import { Link } from "react-router-dom";
 import { FaChevronRight } from "react-icons/fa";
+import LinkWithIcon from "components/common/LinkWithIcon";
 
 const bgcolor = css`
   width: 100%;
@@ -84,21 +84,9 @@ const Releases = () => {
                 align-self: flex-end;
               `}
             >
-              <Link
-                to="/releases"
-                className={css`
-                  display: flex;
-                  align-items: center;
-                  text-decoration: underline;
-                  margin-bottom: 0.25rem;
-
-                  svg {
-                    margin-left: 0.25rem;
-                  }
-                `}
-              >
+              <LinkWithIcon to="/releases">
                 More releases <FaChevronRight />
-              </Link>
+              </LinkWithIcon>
             </div>
           </div>
         </div>

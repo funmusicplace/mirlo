@@ -8,18 +8,25 @@ import { bp } from "../constants";
 import WidthContainer from "./common/WidthContainer";
 import { SectionHeader } from "./Home/Home";
 
+import usePagination from "utils/usePagination";
+
+const pageSize = 40;
+
 const Releases = () => {
   const { t } = useTranslation("translation", { keyPrefix: "releases" });
   const [trackGroups, setTrackGroups] = React.useState<TrackGroup[]>([]);
+  const { page, PaginationComponent } = usePagination({ pageSize });
 
   React.useEffect(() => {
     const callback = async () => {
-      const results = await api.getMany<TrackGroup>("trackGroups");
+      const results = await api.getMany<TrackGroup>(
+        `trackGroups?skip=${pageSize * page}&take=${pageSize}`
+      );
       setTrackGroups(results.results);
     };
 
     callback();
-  }, []);
+  }, [page]);
 
   return (
     <div
@@ -58,6 +65,8 @@ const Releases = () => {
               ))}
             </TrackgroupGrid>
           </div>
+
+          <PaginationComponent amount={trackGroups.length} />
         </WidthContainer>
       </div>
     </div>
