@@ -385,10 +385,10 @@ export const singleInclude = (queryOptions?: {
 };
 
 interface LocalArtist extends Artist {
-  posts: Post[];
+  posts?: Post[];
   banner: ArtistBanner | null;
   avatar: ArtistAvatar | null;
-  trackGroups: (TrackGroup & {
+  trackGroups?: (TrackGroup & {
     cover?: TrackGroupCover | null;
     tracks?: Track[];
   })[];
@@ -401,7 +401,7 @@ export const processSingleArtist = (
 ) => {
   return {
     ...artist,
-    posts: artist?.posts.map((p: Post) =>
+    posts: artist?.posts?.map((p: Post) =>
       postProcessor.single(p, isUserSubscriber || artist.userId === userId)
     ),
     banner: artist?.banner
@@ -426,6 +426,6 @@ export const processSingleArtist = (
             ),
         }
       : null,
-    trackGroups: artist?.trackGroups.map(processSingleTrackGroup),
+    trackGroups: artist?.trackGroups?.map(processSingleTrackGroup),
   };
 };

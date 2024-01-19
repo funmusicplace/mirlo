@@ -1,23 +1,38 @@
 import { Prisma } from "@prisma/client";
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import prisma from "../../../../prisma/prisma";
+import { processSingleArtist } from "../../../utils/artist";
 
 export default function () {
   const operations = {
     GET,
   };
 
-  async function GET(req: Request, res: Response) {
-    let where: Prisma.ArtistWhereInput = {};
+  async function GET(req: Request, res: Response, next: NextFunction) {
+    const { skip: skipQuery, take, name } = req.query;
 
-    if (req.query) {
-      if (req.query.name && typeof req.query.name === "string") {
-        where.name = { contains: req.query.name, mode: "insensitive" };
+    try {
+      let where: Prisma.ArtistWhereInput = {};
+
+      if (name && typeof name === "string") {
+        where.name = { contains: name, mode: "insensitive" };
       }
-    }
 
-    const artists = await prisma.artist.findMany({ where });
-    res.json({ results: artists });
+      const artists = await prisma.artist.findMany({
+        where,
+        skip: skipQuery ? Number(skipQuery) : undefined,
+        take: take ? Number(take) : undefined,
+        include: {
+          avatar: true,
+          banner: true,
+        },
+      });
+      res.json({
+        results: artists.map((artist) => processSingleArtist(artist)),
+      });
+    } catch (e) {
+      next(e);
+    }
   }
 
   GET.apiDoc = {
