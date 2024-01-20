@@ -56,6 +56,7 @@ import ManagePost from "components/ManageArtist/ManagePost";
 import NewReleaseRedirect from "components/ManageArtist/NewReleaseRedirect";
 import { css } from "@emotion/css";
 import Supporters from "components/ManageArtist/Supporters";
+import Artists from "components/Artists";
 
 const router = createBrowserRouter([
   {
@@ -227,6 +228,18 @@ const router = createBrowserRouter([
             `}
           >
             <Releases />
+          </div>
+        ),
+      },
+      {
+        path: "artists",
+        element: (
+          <div
+            className={css`
+              width: 100%;
+            `}
+          >
+            <Artists />
           </div>
         ),
       },

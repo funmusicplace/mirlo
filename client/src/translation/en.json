@@ -381,6 +381,9 @@
     "addAdditionalArtists": "Add additional artists",
     "addTrackButton": "Add track"
   },
+  "artists": {
+    "artists": "All artists"
+  },
   "postForm": {
     "newBlogPostFor": "New blog post for {{ artistName }}",
     "title": "Title:",

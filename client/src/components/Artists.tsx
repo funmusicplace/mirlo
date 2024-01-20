@@ -1,5 +1,4 @@
 import React from "react";
-import ArtistTrackGroup from "./Artist/ArtistTrackGroup";
 import TrackgroupGrid from "components/common/TrackgroupGrid";
 import api from "services/api";
 import { css } from "@emotion/css";
@@ -9,20 +8,21 @@ import WidthContainer from "./common/WidthContainer";
 import { SectionHeader } from "./Home/Home";
 
 import usePagination from "utils/usePagination";
+import ArtistSquare from "./Artist/ArtistSquare";
 
-const pageSize = 40;
+const pageSize = 20;
 
-const Releases = () => {
-  const { t } = useTranslation("translation", { keyPrefix: "releases" });
-  const [trackGroups, setTrackGroups] = React.useState<TrackGroup[]>([]);
+const Artists = () => {
+  const { t } = useTranslation("translation", { keyPrefix: "artists" });
+  const [artists, setArtists] = React.useState<Artist[]>([]);
   const { page, PaginationComponent } = usePagination({ pageSize });
 
   React.useEffect(() => {
     const callback = async () => {
-      const results = await api.getMany<TrackGroup>(
-        `trackGroups?skip=${pageSize * page}&take=${pageSize}`
+      const results = await api.getMany<Artist>(
+        `artists?skip=${pageSize * page}&take=${pageSize}`
       );
-      setTrackGroups(results.results);
+      setArtists(results.results);
     };
 
     callback();
@@ -41,7 +41,7 @@ const Releases = () => {
     >
       <SectionHeader>
         <WidthContainer variant="big" justify="center">
-          <h5>{t("recentReleases")}</h5>
+          <h5>{t("artists")}</h5>
         </WidthContainer>
       </SectionHeader>
       <div
@@ -60,17 +60,17 @@ const Releases = () => {
             `}
           >
             <TrackgroupGrid gridNumber="4">
-              {trackGroups?.map((trackGroup) => (
-                <ArtistTrackGroup key={trackGroup.id} trackGroup={trackGroup} />
+              {artists?.map((artist) => (
+                <ArtistSquare key={artist.id} artist={artist} />
               ))}
             </TrackgroupGrid>
           </div>
 
-          <PaginationComponent amount={trackGroups.length} />
+          <PaginationComponent amount={artists.length} />
         </WidthContainer>
       </div>
     </div>
   );
 };
 
-export default Releases;
+export default Artists;
