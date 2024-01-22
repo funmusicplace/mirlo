@@ -18,6 +18,7 @@ export default function () {
       if (name && typeof name === "string") {
         where.name = { contains: name, mode: "insensitive" };
       }
+      const itemCount = await prisma.artist.count({ where });
 
       const artists = await prisma.artist.findMany({
         where,
@@ -31,6 +32,7 @@ export default function () {
       });
       res.json({
         results: artists.map((artist) => processSingleArtist(artist)),
+        total: itemCount,
       });
     } catch (e) {
       next(e);
