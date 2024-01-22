@@ -17,10 +17,11 @@ export default function () {
         published: true,
         tracks: { some: { audio: { uploadState: "SUCCESS" } } },
       };
+      const itemCount = await prisma.trackGroup.count({ where });
+
       if (orderBy === "random") {
         // This isn't ideal, but it'll basically take a random slice
         // anywhere
-        const itemCount = await prisma.trackGroup.count({ where });
         skip = Math.max(
           0,
           Math.floor(Math.random() * itemCount) - Number(take)
@@ -45,7 +46,10 @@ export default function () {
           cover: true,
         },
       });
-      res.json({ results: trackGroups.map(processor.single) });
+      res.json({
+        results: trackGroups.map(processor.single),
+        total: itemCount,
+      });
     } catch (e) {
       next(e);
     }

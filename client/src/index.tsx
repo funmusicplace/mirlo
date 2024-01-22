@@ -57,6 +57,7 @@ import NewReleaseRedirect from "components/ManageArtist/NewReleaseRedirect";
 import { css } from "@emotion/css";
 import Supporters from "components/ManageArtist/Supporters";
 import Artists from "components/Artists";
+import AdminArtists from "components/Admin/AdminArtists";
 
 const router = createBrowserRouter([
   {
@@ -208,6 +209,10 @@ const router = createBrowserRouter([
           {
             path: "users",
             element: <AdminUsers />,
+          },
+          {
+            path: "artists",
+            element: <AdminArtists />,
           },
           {
             path: "trackGroups",

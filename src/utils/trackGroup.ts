@@ -1,4 +1,10 @@
-import { TrackGroup, TrackAudio, Track, TrackGroupCover } from "@prisma/client";
+import {
+  TrackGroup,
+  TrackAudio,
+  Track,
+  TrackGroupCover,
+  Prisma,
+} from "@prisma/client";
 import prisma from "../../prisma/prisma";
 import { convertURLArrayToSizes, generateFullStaticImageUrl } from "./images";
 import {
@@ -236,6 +242,24 @@ export const processSingleTrackGroup = (
       }
     : null,
 });
+
+export const processTrackGroupQueryOrder = (orderByString?: string) => {
+  let orderByObj: Prisma.TrackGroupOrderByWithRelationAndSearchRelevanceInput =
+    {
+      releaseDate: "desc",
+    };
+  if (orderByString === "random") {
+  } else if (orderByString === "id") {
+    orderByObj = {
+      id: "desc",
+    };
+  } else if (orderByString === "createdAt") {
+    orderByObj = {
+      createdAt: "desc",
+    };
+  }
+  return orderByObj;
+};
 
 export default {
   cover: generateFullStaticImageUrl,

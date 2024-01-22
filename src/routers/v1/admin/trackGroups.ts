@@ -1,0 +1,50 @@
+import { NextFunction, Request, Response } from "express";
+import { userAuthenticated, userHasPermission } from "../../../auth/passport";
+import prisma from "../../../../prisma/prisma";
+import processor, {
+  processTrackGroupQueryOrder,
+} from "../../../utils/trackGroup";
+
+export default function () {
+  const operations = {
+    GET: [userAuthenticated, userHasPermission("admin"), GET],
+  };
+
+  async function GET(req: Request, res: Response, next: NextFunction) {
+    const {
+      skip: skipQuery,
+      take,
+      orderBy,
+    } = req.query as { skip: string; take: string; orderBy: string };
+
+    try {
+      const itemCount = await prisma.trackGroup.count();
+
+      prisma.trackGroup.findMany();
+
+      const trackGroups = await prisma.trackGroup.findMany({
+        orderBy: processTrackGroupQueryOrder(orderBy),
+        skip: skipQuery ? Number(skipQuery) : undefined,
+        take: take ? Number(take) : undefined,
+        include: {
+          artist: {
+            select: {
+              name: true,
+              urlSlug: true,
+              id: true,
+            },
+          },
+          cover: true,
+        },
+      });
+      res.json({
+        results: trackGroups.map(processor.single),
+        total: itemCount,
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  return operations;
+}

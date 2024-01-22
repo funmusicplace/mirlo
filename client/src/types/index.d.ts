@@ -58,6 +58,7 @@ interface TrackGroup {
   artistId: number;
   tracks: Track[];
   updatedAt: string;
+  createdAt: string;
   cover?: {
     updatedAt: string;
     id: number;
@@ -97,6 +98,7 @@ interface Artist {
   id: number;
   location?: string;
   enabled: boolean;
+  createdAt: string;
   trackGroups: TrackGroup[];
   links?: string[];
   posts: Post[];
