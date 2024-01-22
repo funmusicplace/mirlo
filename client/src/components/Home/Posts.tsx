@@ -8,6 +8,7 @@ import api from "services/api";
 import PostCard from "components/common/PostCard";
 import Overlay from "components/common/Overlay";
 import { PostGrid } from "components/Artist/ArtistPosts";
+import { getArtistUrlReference, getPostURLReference } from "utils/artist";
 
 const Posts = () => {
   const { t } = useTranslation("translation", { keyPrefix: "home" });
@@ -55,7 +56,7 @@ const Posts = () => {
             <PostGrid>
               {posts.map((p) => (
                 <Link
-                  to={`/post/${p.id}/`}
+                  to={getPostURLReference(p)}
                   className={css`
                     display: flex;
                     border-radius: 5px;

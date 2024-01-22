@@ -274,6 +274,10 @@ const router = createBrowserRouter([
             path: "release/:trackGroupId",
             element: <TrackGroup />,
           },
+          {
+            path: "posts/:postId",
+            element: <Post />,
+          },
         ],
       },
     ],

@@ -10,6 +10,7 @@ import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import { FaRss } from "react-icons/fa";
 import Button from "components/common/Button";
 import styled from "@emotion/styled";
+import { getArtistUrlReference, getPostURLReference } from "utils/artist";
 
 export const PostGrid = styled.div<{}>`
   display: grid;
@@ -74,7 +75,7 @@ const ArtistPosts: React.FC = () => {
         <PostGrid>
           {artist.posts?.map((p) => (
             <Link
-              to={`/post/${p.id}/`}
+              to={getPostURLReference(p)}
               className={css`
                 display: flex;
                 border-radius: 10px;
@@ -96,7 +97,12 @@ const ArtistPosts: React.FC = () => {
               `}
             >
               <Overlay width="100%" height="100%"></Overlay>
-              <PostCard width="100%" height="350px" dateposition="auto" p={p} />
+              <PostCard
+                width="100%"
+                height="350px"
+                dateposition="auto"
+                p={{ ...p, artist: artist }}
+              />
             </Link>
           ))}
         </PostGrid>

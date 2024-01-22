@@ -9,7 +9,7 @@ import { useArtistContext } from "state/ArtistContext";
 const ArtistContainer: React.FC<{}> = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
 
-  const { trackGroupId } = useParams();
+  const { trackGroupId, postId } = useParams();
   const {
     state: { artist },
   } = useArtistContext();
@@ -20,31 +20,33 @@ const ArtistContainer: React.FC<{}> = () => {
     return null;
   }
 
+  const isPostOrRelease = trackGroupId || postId;
+
+  console.log("isPostOrRelease", isPostOrRelease);
+
   return (
     <>
-      {!trackGroupId && (
+      {!isPostOrRelease && (
         <>
           <ArtistPageWrapper artistBanner={!!artistBanner}>
-            <>
-              {!trackGroupId && <ArtistHeaderSection artist={artist} />}
+            <ArtistHeaderSection artist={artist} />
 
-              {!artist.enabled && (
-                <div
-                  className={css`
-                    background-color: var(--mi-warning-background-color);
-                    padding: 1rem;
-                    color: var(--mi-warning-text-color);
-                  `}
-                >
-                  {t("notEnabled")}
-                </div>
-              )}
-              <Outlet />
-            </>
+            {!artist.enabled && (
+              <div
+                className={css`
+                  background-color: var(--mi-warning-background-color);
+                  padding: 1rem;
+                  color: var(--mi-warning-text-color);
+                `}
+              >
+                {t("notEnabled")}
+              </div>
+            )}
+            <Outlet />
           </ArtistPageWrapper>
         </>
       )}
-      {trackGroupId && <Outlet />}
+      {isPostOrRelease && <Outlet />}
     </>
   );
 };

@@ -17,3 +17,9 @@ export const getReleaseUrl = (artist: Artist, trackGroup: TrackGroup) => {
     trackGroup
   )}`;
 };
+
+export const getPostURLReference = (post: Post) => {
+  return post.artist
+    ? `/${getArtistUrlReference(post.artist)}/posts/${post.id}/`
+    : `/post/${post.id}`;
+};

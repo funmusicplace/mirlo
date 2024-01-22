@@ -8,7 +8,7 @@ const PageHeader = () => {
   const { pathname } = useLocation();
 
   const isManage = pathname.includes("manage");
-  const { trackGroupId } = useParams();
+  const { trackGroupId, postId } = useParams();
   const {
     state: { user },
   } = useGlobalStateContext();
@@ -17,9 +17,11 @@ const PageHeader = () => {
   const artistBanner = artistContext?.state?.artist?.banner;
   const userId = user?.id;
 
+  const showBanner = !(trackGroupId || postId) || isManage;
+
   return (
     <>
-      {artistBanner && (!trackGroupId || isManage) && (
+      {artistBanner && showBanner && (
         <div
           className={css`
             position: fixed;
@@ -68,7 +70,7 @@ const PageHeader = () => {
           </div>
         </div>
       )}
-      {(!artistBanner || (trackGroupId && !isManage)) && (
+      {(!artistBanner || !showBanner) && (
         <div
           className={css`
             @media screen and (max-width: ${bp.medium}px) {
