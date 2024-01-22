@@ -22,8 +22,6 @@ const ArtistContainer: React.FC<{}> = () => {
 
   const isPostOrRelease = trackGroupId || postId;
 
-  console.log("isPostOrRelease", isPostOrRelease);
-
   return (
     <>
       {!isPostOrRelease && (

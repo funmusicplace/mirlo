@@ -10,7 +10,7 @@ import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import { FaRss } from "react-icons/fa";
 import Button from "components/common/Button";
 import styled from "@emotion/styled";
-import { getArtistUrlReference, getPostURLReference } from "utils/artist";
+import { getPostURLReference } from "utils/artist";
 
 export const PostGrid = styled.div<{}>`
   display: grid;

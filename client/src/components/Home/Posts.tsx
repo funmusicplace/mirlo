@@ -8,7 +8,7 @@ import api from "services/api";
 import PostCard from "components/common/PostCard";
 import Overlay from "components/common/Overlay";
 import { PostGrid } from "components/Artist/ArtistPosts";
-import { getArtistUrlReference, getPostURLReference } from "utils/artist";
+import { getPostURLReference } from "utils/artist";
 
 const Posts = () => {
   const { t } = useTranslation("translation", { keyPrefix: "home" });

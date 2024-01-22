@@ -11,6 +11,7 @@ import { useForm } from "react-hook-form";
 import { FaChevronDown, FaPen, FaSave, FaTimes } from "react-icons/fa";
 import TextArea from "components/common/TextArea";
 import { bp } from "../../constants";
+import { useSearchParams } from "react-router-dom";
 
 interface FormData {
   bio: string;
@@ -24,6 +25,9 @@ const ArtistHeaderDescription: React.FC = () => {
     state: { artist },
     refresh,
   } = useArtistContext();
+  const [searchParams] = useSearchParams();
+  const isHeaderExpanded = searchParams.get("expandHeader");
+
   const snackbar = useSnackbar();
 
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
@@ -65,9 +69,11 @@ const ArtistHeaderDescription: React.FC = () => {
 
     if ((el?.clientHeight ?? 0) > 100) {
       setCanCollapse(true);
-      setIsCollapsed(true);
+      if (!isHeaderExpanded) {
+        setIsCollapsed(true);
+      }
     }
-  }, [isEditing]);
+  }, [isEditing, isHeaderExpanded]);
 
   if (!isEditing) {
     return (
