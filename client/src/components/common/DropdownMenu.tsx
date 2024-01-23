@@ -6,7 +6,7 @@ import IconButton from "../common/IconButton";
 import Background from "components/common/Background";
 import { FaEllipsisV } from "react-icons/fa";
 
-const Header: React.FC<{
+const DropdownMenu: React.FC<{
   children: React.ReactElement;
   icon?: React.ReactElement;
   compact?: boolean;
@@ -51,6 +51,45 @@ const Header: React.FC<{
                   color: var(--mi-white);
                 }
               }
+
+              li > * {
+                background: transparent !important;
+                width: 200px;
+                text-decoration: none;
+                text-align: right;
+                display: block;
+                white-space: normal;
+                color: var(--mi-black);
+                word-break: break-word;
+                font-weight: normal;
+                border-radius: 0;
+                padding: 0.5rem;
+                margin: 0rem;
+
+                display: flex;
+                align-items: center;
+                justify-content: flex-end;
+                border: none;
+
+                &:hover {
+                  border-radius: 0;
+                  background: var(--mi-black) !important;
+                  color: var(--mi-white) !important;
+                  border: none !important;
+                }
+              }
+
+              @media (prefers-color-scheme: dark) {
+                li > * {
+                  background-color: var(--mi-black);
+                  color: var(--mi-white);
+
+                  &:hover {
+                    background-color: var(--mi-white) !important;
+                    color: var(--mi-black) !important;
+                  }
+                }
+              }
             `}
           >
             {React.Children.map(children, (child) =>
@@ -81,4 +120,4 @@ const Header: React.FC<{
   );
 };
 
-export default Header;
+export default DropdownMenu;

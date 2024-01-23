@@ -47,14 +47,16 @@ const ArtistSubscriberDataDownload: React.FC<{}> = () => {
   }
 
   return (
-    <Button
-      onClick={downloadSubscriberData}
-      compact
-      startIcon={<FaDownload />}
-      isLoading={isLoadingSubscriberData}
-    >
-      {t("downloadSubscriberData")}
-    </Button>
+    <li>
+      <Button
+        onClick={downloadSubscriberData}
+        compact
+        startIcon={<FaDownload />}
+        isLoading={isLoadingSubscriberData}
+      >
+        {t("downloadSubscriberData")}
+      </Button>
+    </li>
   );
 };
 

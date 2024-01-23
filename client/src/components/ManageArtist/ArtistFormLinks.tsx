@@ -5,7 +5,9 @@ import Button from "components/common/Button";
 import { css } from "@emotion/css";
 import { FaPlus, FaSave, FaTimes, FaTrash } from "react-icons/fa";
 import React from "react";
-import LinkIconDisplay from "components/common/LinkIconDisplay";
+import LinkIconDisplay, {
+  linkUrlDisplay,
+} from "components/common/LinkIconDisplay";
 import api from "services/api";
 import { useArtistContext } from "state/ArtistContext";
 import { useGlobalStateContext } from "state/GlobalState";
@@ -71,13 +73,6 @@ const ArtistFormLinks: React.FC<{ isManage: boolean }> = ({ isManage }) => {
       >
         <div>
           {artist?.links?.map((l) => {
-            let url;
-            try {
-              url = new URL(l).origin.replace(/https?:\/\//, "");
-            } catch (e) {
-              url = l.split("/")[0];
-            }
-
             return (
               <a
                 href={l}
@@ -92,7 +87,7 @@ const ArtistFormLinks: React.FC<{ isManage: boolean }> = ({ isManage }) => {
                   }
                 `}
               >
-                <LinkIconDisplay url={l} /> {url}
+                <LinkIconDisplay url={l} /> {linkUrlDisplay(l)}
               </a>
             );
           })}

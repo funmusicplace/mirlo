@@ -8,6 +8,8 @@ import { ArtistSection } from "components/Artist/Artist";
 import Money from "components/common/Money";
 import styled from "@emotion/styled";
 import { bp } from "../../constants";
+import ArtistSubscriberUploadData from "./ArtistSubscriberUploadData";
+import DropdownMenu from "components/common/DropdownMenu";
 
 export const SupporterTable = styled(Table)`
   @media screen and (max-width: ${bp.small}px) {
@@ -57,7 +59,12 @@ const Supporters = () => {
       <ArtistSection>
         <SpaceBetweenDiv>
           <h4>Supporters</h4>
-          <ArtistSubscriberDataDownload />
+          <DropdownMenu>
+            <>
+              <ArtistSubscriberDataDownload />
+              <ArtistSubscriberUploadData />
+            </>
+          </DropdownMenu>
         </SpaceBetweenDiv>
         <SupporterTable>
           <thead>

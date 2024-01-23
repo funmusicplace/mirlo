@@ -50,53 +50,7 @@ const Menu: React.FC = (props) => {
   }, [dispatch, navigate, setIsMenuOpen, snackbar, t]);
 
   return (
-    <menu
-      className={css`
-        list-style: none;
-        button {
-          font-size: var(--mi-font-size-normal);
-          height: auto;
-        }
-
-        & li > * {
-          background: transparent !important;
-          width: 200px;
-          text-decoration: none;
-          text-align: right;
-          display: block;
-          white-space: normal;
-          color: var(--mi-black);
-          word-break: break-word;
-          font-weight: normal;
-          border-radius: 0;
-          padding: 0.5rem;
-          margin: 0rem;
-
-          display: flex;
-          align-items: center;
-          justify-content: flex-end;
-          border: none;
-
-          &:hover {
-            border-radius: 0;
-            background: var(--mi-black) !important;
-            color: var(--mi-white) !important;
-            border: none !important;
-          }
-        }
-        @media (prefers-color-scheme: dark) {
-          & li > * {
-            background-color: var(--mi-black);
-            color: var(--mi-white);
-
-            &:hover {
-              background-color: var(--mi-white) !important;
-              color: var(--mi-black) !important;
-            }
-          }
-        }
-      `}
-    >
+    <menu className={css``}>
       {state.user && (
         <>
           <li>
