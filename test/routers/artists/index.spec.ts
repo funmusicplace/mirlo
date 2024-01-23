@@ -4,7 +4,12 @@ dotenv.config();
 import { describe, it } from "mocha";
 import request from "supertest";
 import prisma from "../../../prisma/prisma";
-import { clearTables } from "../../utils";
+import {
+  clearTables,
+  createArtist,
+  createTrack,
+  createTrackGroup,
+} from "../../utils";
 
 const baseURL = `${process.env.API_DOMAIN}/v1/`;
 
@@ -32,14 +37,12 @@ describe("artists", () => {
           email: "test@test.com",
         },
       });
-      await prisma.artist.create({
-        data: {
-          name: "Test artist",
-          urlSlug: "test-artist",
-          userId: user.id,
-          enabled: true,
-        },
-      });
+      const artist = await createArtist(user.id);
+
+      const trackGroup = await createTrackGroup(artist.id);
+
+      await createTrack(trackGroup.id);
+
       const response = await request(baseURL)
         .get("artists/")
         .set("Accept", "application/json");

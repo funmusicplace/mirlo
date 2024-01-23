@@ -1,5 +1,5 @@
 import prisma from "../prisma/prisma";
-import { Prisma } from "@prisma/client";
+import { Prisma, UploadState } from "@prisma/client";
 import { buildTokens } from "../src/routers/auth";
 
 export const clearTables = async () => {
@@ -87,7 +87,7 @@ export const createTrackGroup = async (
   artistId: number,
   data?: Partial<Prisma.TrackGroupCreateArgs["data"]>
 ) => {
-  const artist = await prisma.trackGroup.create({
+  const tg = await prisma.trackGroup.create({
     data: {
       minPrice: data?.minPrice,
       title: data?.title ?? "Test trackGroup",
@@ -109,5 +109,25 @@ export const createTrackGroup = async (
       },
     },
   });
-  return artist;
+  return tg;
+};
+
+export const createTrack = async (
+  trackGroupId: number,
+  data?: Partial<Prisma.TrackCreateArgs["data"]>
+) => {
+  const track = await prisma.track.create({
+    data: {
+      title: data?.title,
+      trackGroupId,
+    },
+  });
+
+  await prisma.trackAudio.create({
+    data: {
+      trackId: track.id,
+      uploadState: "SUCCESS",
+    },
+  });
+  return track;
 };

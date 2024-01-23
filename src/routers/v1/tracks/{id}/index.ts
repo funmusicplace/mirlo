@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import processor from "../../../../utils/trackGroup";
 import prisma from "../../../../../prisma/prisma";
 import { User } from "@prisma/client";
@@ -9,7 +9,7 @@ export default function () {
     GET: [userLoggedInWithoutRedirect, GET],
   };
 
-  async function GET(req: Request, res: Response) {
+  async function GET(req: Request, res: Response, next: NextFunction) {
     const { id }: { id?: string } = req.params;
     const loggedInUser = req.user as User;
     try {
@@ -44,11 +44,7 @@ export default function () {
         },
       });
     } catch (e) {
-      console.error("tracks/{id} GET", e);
-      res.status(500);
-      res.send({
-        error: "Error finding trackGroup",
-      });
+      next(e);
     }
   }
 
