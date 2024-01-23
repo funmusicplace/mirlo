@@ -162,7 +162,10 @@ const router = createBrowserRouter([
                 path: "",
                 element: <ManageArtist />,
                 children: [
-                  { path: "", element: <Navigate to="releases" /> },
+                  {
+                    path: "",
+                    element: <Navigate to="releases" replace={true} />,
+                  },
                   {
                     path: "releases",
                     element: <ManageArtistAlbums />,

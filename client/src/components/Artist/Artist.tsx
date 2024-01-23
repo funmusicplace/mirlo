@@ -34,6 +34,7 @@ function Artist() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const canReceivePayments = userStripeStatus?.chargesEnabled;
+
   React.useEffect(() => {
     const subPages = ["posts", "releases", "support"];
     const end = pathname.split("/")[2];
@@ -48,7 +49,7 @@ function Artist() {
           ? "support"
           : undefined;
       if (navigateTo) {
-        navigate(navigateTo);
+        navigate(navigateTo, { replace: true });
       }
     }
   }, [
