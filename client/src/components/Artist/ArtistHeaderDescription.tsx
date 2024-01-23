@@ -41,15 +41,14 @@ const ArtistHeaderDescription: React.FC = () => {
     defaultValues: { bio: artist?.bio },
   });
 
-  let bio =
-    user && user.id === artist?.userId && !artist.bio
-      ? t("noBioYet")
-      : artist?.bio;
+  const isArtistManager = userId === artistUserId;
+
+  let bio = isArtistManager && !artist?.bio ? t("noBioYet") : artist?.bio;
 
   const doSave = React.useCallback(
     async (data: FormData) => {
       try {
-        if (userId && artistId && artistUserId === userId) {
+        if (isArtistManager) {
           await api.put(`users/${userId}/artists/${artistId}`, {
             bio: data.bio,
           });
@@ -61,7 +60,7 @@ const ArtistHeaderDescription: React.FC = () => {
         setIsEditing(false);
       }
     },
-    [artistId, artistUserId, refresh, snackbar, userId, t]
+    [isArtistManager, refresh, snackbar, t, userId, artistId]
   );
 
   React.useEffect(() => {
@@ -74,6 +73,10 @@ const ArtistHeaderDescription: React.FC = () => {
       }
     }
   }, [isEditing, isHeaderExpanded]);
+
+  if (!isArtistManager && bio === "") {
+    return null;
+  }
 
   if (!isEditing) {
     return (
@@ -139,7 +142,7 @@ const ArtistHeaderDescription: React.FC = () => {
           )}
         </div>
 
-        {user && user.id === artist?.userId && (
+        {isArtistManager && (
           <div
             className={css`
               max-width: 5%;
