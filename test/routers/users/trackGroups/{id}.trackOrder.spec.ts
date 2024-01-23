@@ -26,7 +26,7 @@ describe("users/{id}/trackGroups/{id}/trackOrder", () => {
     assert.equal(response.statusCode, 401);
   });
 
-  it("should PUT / 401 trackGroup does not belong to user", async () => {
+  it("should PUT / 404 trackGroup does not belong to user", async () => {
     const { user, accessToken } = await createUser({
       email: "test@test.com",
     });
@@ -37,7 +37,7 @@ describe("users/{id}/trackGroups/{id}/trackOrder", () => {
       .set("Cookie", [`jwt=${accessToken}`])
       .set("Accept", "application/json");
 
-    assert.equal(response.statusCode, 401);
+    assert.equal(response.statusCode, 404);
   });
 
   it("should PUT successfully on a trackGroup belong to a user", async () => {

@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import prisma from "../../../../../../../prisma/prisma";
 import { userAuthenticated } from "../../../../../../auth/passport";
 import { doesTrackGroupBelongToUser } from "../../../../../../utils/ownership";
@@ -8,7 +8,7 @@ export default function () {
     PUT: [userAuthenticated, PUT],
   };
 
-  async function PUT(req: Request, res: Response) {
+  async function PUT(req: Request, res: Response, next: NextFunction) {
     const { trackGroupId, userId } = req.params;
     try {
       const trackGroup = await doesTrackGroupBelongToUser(
@@ -21,9 +21,7 @@ export default function () {
       });
       res.json(updatedTrackgroup);
     } catch (e) {
-      res.status(401).json({
-        error: "Content does not belong to user",
-      });
+      next(e);
     }
   }
 

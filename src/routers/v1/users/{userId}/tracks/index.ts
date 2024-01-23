@@ -52,16 +52,8 @@ export default function () {
     const { title, trackGroupId, trackArtists, order, metadata, isPreview } =
       req.body;
     try {
-      const trackGroup = await doesTrackGroupBelongToUser(
-        Number(trackGroupId),
-        Number(userId)
-      );
-      if (!trackGroup) {
-        res.status(400).json({
-          error: "Trackgroup must belong to user",
-        });
-        return next();
-      }
+      await doesTrackGroupBelongToUser(Number(trackGroupId), Number(userId));
+
       const createdTrack = await prisma.track.create({
         data: {
           title,

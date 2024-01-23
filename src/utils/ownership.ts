@@ -1,6 +1,7 @@
 import { ArtistSubscriptionTier } from "@prisma/client";
 
 import prisma from "../../prisma/prisma";
+import { AppError } from "./error";
 
 export const doesSubscriptionTierBelongToUser = async (
   subscriptionId: number,
@@ -49,6 +50,14 @@ export const doesTrackGroupBelongToUser = async (
       },
     },
   });
+
+  if (!trackgroup) {
+    throw new AppError({
+      description: "TrackGroup does not exist or does not belong to user",
+      httpCode: 404,
+      name: "TrackGroup does not exist or does not belong to user",
+    });
+  }
   return trackgroup;
 };
 
