@@ -1,7 +1,9 @@
 import { Prisma } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
 import prisma from "../../../../prisma/prisma";
-import processor from "../../../utils/trackGroup";
+import processor, {
+  whereForPublishedTrackGroups,
+} from "../../../utils/trackGroup";
 
 export default function () {
   const operations = {
@@ -13,10 +15,7 @@ export default function () {
 
     try {
       let skip = Number(skipQuery);
-      let where: Prisma.TrackGroupWhereInput = {
-        published: true,
-        tracks: { some: { audio: { uploadState: "SUCCESS" } } },
-      };
+      let where: Prisma.TrackGroupWhereInput = whereForPublishedTrackGroups();
       const itemCount = await prisma.trackGroup.count({ where });
 
       if (orderBy === "random") {

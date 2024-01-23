@@ -7,7 +7,7 @@ import { useArtistContext } from "state/ArtistContext";
 import { getArtistUrlReference, getTrackGroupUrlReference } from "utils/artist";
 import styled from "@emotion/styled";
 
-const TrackGroupWrapper = styled.div`
+export const TrackGroupWrapper = styled.div`
   margin-bottom: 0.5rem;
 
   button {
@@ -30,7 +30,7 @@ const TrackGroupWrapper = styled.div`
   }
 `;
 
-const TrackGroupLinks = styled.div`
+export const TrackGroupLinks = styled.div`
   font-size: var(--mi-font-size-small);
   margin-bottom: 0.5rem;
   padding-top: 0.5rem;
@@ -46,7 +46,7 @@ const TrackGroupLinks = styled.div`
   }
 `;
 
-const TrackGroupInfo = styled.div`
+export const TrackGroupInfo = styled.div`
   display: flex;
   flex-direction: column;
   width: 100%;

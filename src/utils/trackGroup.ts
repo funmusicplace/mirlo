@@ -20,7 +20,13 @@ import { deleteTrack } from "./tracks";
 import { randomUUID } from "crypto";
 import { Response } from "express";
 
-const { MEDIA_LOCATION_DOWNLOAD_CACHE = "" } = process.env;
+export const whereForPublishedTrackGroups = (): Prisma.TrackGroupWhereInput => {
+  return {
+    published: true,
+    tracks: { some: { audio: { uploadState: "SUCCESS" } } },
+    deletedAt: null,
+  };
+};
 
 export const deleteTrackGroupCover = async (trackGroupId: number) => {
   const cover = await prisma.trackGroupCover.findFirst({
