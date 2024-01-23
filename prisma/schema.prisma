@@ -211,6 +211,7 @@ model TrackGroup {
   credits                 String?
   userTrackGroupWishlist  UserTrackGroupWishlist[]
   platformPercent         Int?                     @default(0)
+  tags                    TrackGroupTag[]
 
   @@unique([artistId, urlSlug])
 }
@@ -284,4 +285,19 @@ model TrackPlay {
   ip        String?
   createdAt DateTime @default(now())
   owned     Boolean  @default(false)
+}
+
+model TrackGroupTag {
+  trackGroupId Int
+  trackGroup   TrackGroup @relation(fields: [trackGroupId], references: [id])
+  tagId        Int
+  tag          Tag        @relation(fields: [tagId], references: [id])
+
+  @@unique([trackGroupId, tagId])
+}
+
+model Tag {
+  id             Int             @id @default(autoincrement())
+  tag            String          @unique
+  trackGroupTags TrackGroupTag[]
 }

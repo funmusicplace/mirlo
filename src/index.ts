@@ -103,6 +103,7 @@ const routes = [
   "users/{userId}/trackGroups/{trackGroupId}",
   "users/{userId}/trackGroups/{trackGroupId}/trackOrder",
   "users/{userId}/trackGroups/{trackGroupId}/publish",
+  "users/{userId}/trackGroups/{trackGroupId}/tags",
   "users/{userId}/trackGroups/{trackGroupId}/cover",
   "users/{userId}/tracks",
   "users/{userId}/tracks/{trackId}/audio",

@@ -34,17 +34,7 @@ export default function () {
     const { trackGroupId } = req.params as unknown as Params;
     const loggedInUser = req.user as User;
     try {
-      const trackgroup = await doesTrackGroupBelongToUser(
-        Number(trackGroupId),
-        loggedInUser.id
-      );
-
-      if (!trackgroup) {
-        res.status(400).json({
-          error: "Trackgroup must belong to user",
-        });
-        return next();
-      }
+      await doesTrackGroupBelongToUser(Number(trackGroupId), loggedInUser.id);
 
       const jobId = await processTrackGroupCover({ req, res })(
         Number(trackGroupId)
@@ -103,13 +93,6 @@ export default function () {
         Number(trackGroupId),
         loggedInUser.id
       );
-
-      if (!trackgroup) {
-        res.status(400).json({
-          error: "Trackgroup must belong to user",
-        });
-        return next();
-      }
 
       await deleteTrackGroupCover(trackgroup.id);
 

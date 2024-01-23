@@ -46,10 +46,13 @@ export default function () {
         const { id: userId, isAdmin } = req.user as User;
 
         if (!isAdmin) {
-          const isCreator = await doesTrackGroupBelongToUser(
-            Number(trackGroupId),
-            userId
-          );
+          let isCreator;
+          try {
+            isCreator = await doesTrackGroupBelongToUser(
+              Number(trackGroupId),
+              userId
+            );
+          } catch (e) {}
           logger.info(`trackGroupId: ${trackGroupId} isCreator: ${isCreator}`);
 
           const purchase = await prisma.userTrackGroupPurchase.findFirst({

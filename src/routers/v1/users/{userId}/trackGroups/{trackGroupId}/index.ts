@@ -51,13 +51,6 @@ export default function () {
         Number(userId)
       );
 
-      if (!trackgroup) {
-        res.status(400).json({
-          error: "Trackgroup must belong to user",
-        });
-        return next();
-      }
-
       res.status(200).json({ result: processor.single(trackgroup) });
     } catch (e) {
       logger.error(e);
@@ -171,17 +164,7 @@ export default function () {
       userId: string;
     };
     try {
-      const trackgroup = await doesTrackGroupBelongToUser(
-        Number(trackGroupId),
-        Number(userId)
-      );
-
-      if (!trackgroup) {
-        res.status(400).json({
-          error: "Trackgroup must belong to user",
-        });
-        return next();
-      }
+      await doesTrackGroupBelongToUser(Number(trackGroupId), Number(userId));
 
       await deleteTrackGroup(Number(trackGroupId), true);
 

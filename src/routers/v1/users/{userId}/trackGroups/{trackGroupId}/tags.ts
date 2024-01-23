@@ -4,8 +4,10 @@ import {
   userAuthenticated,
   userHasPermission,
 } from "../../../../../../auth/passport";
-import prisma from "../../../../../../../prisma/prisma";
 import { doesTrackGroupBelongToUser } from "../../../../../../utils/ownership";
+import processTrackGroupCover from "../../../../../../utils/processTrackGroupCover";
+import { deleteTrackGroupCover } from "../../../../../../utils/trackGroup";
+import prisma from "../../../../../../../prisma/prisma";
 
 type Params = {
   trackGroupId: number;
@@ -19,48 +21,61 @@ export default function () {
 
   async function PUT(req: Request, res: Response, next: NextFunction) {
     const { trackGroupId } = req.params as unknown as Params;
-    const { trackIds } = req.body;
+    const tags = req.body as unknown as string[];
     const loggedInUser = req.user as User;
     try {
-      const trackGroup = await doesTrackGroupBelongToUser(
+      const trackgroup = await doesTrackGroupBelongToUser(
         Number(trackGroupId),
         loggedInUser.id
       );
 
-      await Promise.all(
-        trackIds.map(async (trackId: number, idx: number) => {
-          await prisma.track.update({
-            where: {
-              trackGroupId: trackGroup.id,
-              id: trackId,
-            },
-            data: {
-              order: idx + 1,
-            },
-          });
-        })
-      );
-
-      const updatedTrackGroup = await prisma.trackGroup.findFirst({
-        where: { id: trackGroup.id },
-        include: {
-          tracks: {
-            orderBy: { order: "asc" },
-            where: {
-              deletedAt: null,
-            },
-          },
+      await prisma.trackGroupTag.deleteMany({
+        where: {
+          trackGroupId: trackgroup.id,
         },
       });
 
-      res.json({ result: updatedTrackGroup });
+      const newTagIds = [];
+      for (const tag of tags) {
+        const tagObject = await prisma.tag.upsert({
+          create: {
+            tag,
+          },
+          update: {
+            tag,
+          },
+          where: {
+            tag,
+          },
+        });
+        newTagIds.push(tagObject.id);
+      }
+
+      await prisma.trackGroupTag.createMany({
+        data: newTagIds.map((id) => ({
+          trackGroupId: trackgroup.id,
+          tagId: id,
+        })),
+      });
+
+      const newTags = await prisma.trackGroupTag.findMany({
+        where: {
+          trackGroupId: trackgroup.id,
+        },
+        include: {
+          tag: true,
+        },
+      });
+      res.json({
+        results: newTags,
+      });
     } catch (error) {
       next(error);
     }
   }
 
   PUT.apiDoc = {
-    summary: "Updates a trackGroup cover belonging to a user",
+    summary: "Replaces the trackgroup's tags",
     parameters: [
       {
         in: "path",
@@ -76,18 +91,13 @@ export default function () {
       },
       {
         in: "body",
-        name: "trackIds",
-        required: true,
+        name: "tags",
         schema: {
-          type: "object",
-          required: ["trackIds"],
-          properties: {
-            trackIds: {
-              type: "array",
-              items: {
-                type: "number",
-              },
-            },
+          description: "The list of tags to add",
+          required: ["subscribers"],
+          type: "array",
+          items: {
+            type: "string",
           },
         },
       },

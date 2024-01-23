@@ -42,26 +42,17 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
   return (
     <ManageSectionWrapper>
       <SpaceBetweenDiv>
-        <div
-          className={css`
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            width: 100%;
-          `}
+        <Link to="supporters">{t("supporters")}</Link>
+        <Button
+          transparent
+          onClick={() => {
+            setAddingNewTier(true);
+          }}
+          startIcon={<FaPlus />}
+          compact
         >
-          <Link to="supporters">{t("supporters")}</Link>
-          <Button
-            transparent
-            onClick={() => {
-              setAddingNewTier(true);
-            }}
-            startIcon={<FaPlus />}
-            compact
-          >
-            {t("addNewTier")}
-          </Button>
-        </div>
+          {t("addNewTier")}
+        </Button>
       </SpaceBetweenDiv>
       <div
         className={css`
