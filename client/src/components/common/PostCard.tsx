@@ -2,6 +2,7 @@ import { css } from "@emotion/css";
 import MarkdownContent from "./MarkdownContent";
 import Box from "./Box";
 import { Link } from "react-router-dom";
+import { getArtistUrlReference, getPostURLReference } from "utils/artist";
 
 const PostCard: React.FC<{
   height: string;
@@ -53,7 +54,7 @@ const PostCard: React.FC<{
               `}
             >
               by{" "}
-              <Link to={`/${p.artist.urlSlug ?? p.artist.id}`}>
+              <Link to={`/${getArtistUrlReference(p.artist)}`}>
                 {p.artist?.name}
               </Link>
             </div>
@@ -79,15 +80,17 @@ const PostCard: React.FC<{
                 text-align: left;
               `}
             >
-              <Link
-                to={`/post/${p.id}/`}
-                className={css`
-                  font-weight: normal;
-                  text-align: center;
-                `}
-              >
-                {p.title}
-              </Link>
+              {p.artist && (
+                <Link
+                  to={getPostURLReference(p)}
+                  className={css`
+                    font-weight: normal;
+                    text-align: center;
+                  `}
+                >
+                  {p.title}
+                </Link>
+              )}
             </h4>
             <span
               className={css`

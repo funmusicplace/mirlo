@@ -2,52 +2,37 @@ import { Prisma } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
 import prisma from "../../../../prisma/prisma";
 import { processSingleArtist } from "../../../utils/artist";
-import { whereForPublishedTrackGroups } from "../../../utils/trackGroup";
+import { userAuthenticated, userHasPermission } from "../../../auth/passport";
 
 export default function () {
   const operations = {
-    GET,
+    GET: [userAuthenticated, userHasPermission("admin"), GET],
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { skip: skipQuery, take, name } = req.query;
 
     try {
-      let where: Prisma.ArtistWhereInput = {
-        trackGroups: {
-          some: whereForPublishedTrackGroups(),
-        },
-      };
+      let where: Prisma.ArtistWhereInput = {};
 
       if (name && typeof name === "string") {
         where.name = { contains: name, mode: "insensitive" };
       }
+      const itemCount = await prisma.artist.count({ where });
 
       const artists = await prisma.artist.findMany({
         where,
         skip: skipQuery ? Number(skipQuery) : undefined,
         take: take ? Number(take) : undefined,
         include: {
-          trackGroups: {
-            where: whereForPublishedTrackGroups(),
-            include: {
-              cover: true,
-            },
-          },
-          avatar: {
-            where: {
-              deletedAt: null,
-            },
-          },
-          banner: {
-            where: {
-              deletedAt: null,
-            },
-          },
+          avatar: true,
+          banner: true,
+          user: true,
         },
       });
       res.json({
         results: artists.map((artist) => processSingleArtist(artist)),
+        total: itemCount,
       });
     } catch (e) {
       next(e);

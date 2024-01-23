@@ -32,7 +32,7 @@ const Container = styled.div<{ artistBanner: boolean; userId?: number }>`
 `;
 
 export const ArtistPageWrapper: React.FC<{
-  children: React.ReactElement;
+  children: React.ReactNode;
   artistBanner?: boolean;
 }> = ({ children, artistBanner }) => {
   const {

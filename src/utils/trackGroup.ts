@@ -1,4 +1,10 @@
-import { TrackGroup, TrackAudio, Track, TrackGroupCover } from "@prisma/client";
+import {
+  TrackGroup,
+  TrackAudio,
+  Track,
+  TrackGroupCover,
+  Prisma,
+} from "@prisma/client";
 import prisma from "../../prisma/prisma";
 import { convertURLArrayToSizes, generateFullStaticImageUrl } from "./images";
 import {
@@ -14,7 +20,13 @@ import { deleteTrack } from "./tracks";
 import { randomUUID } from "crypto";
 import { Response } from "express";
 
-const { MEDIA_LOCATION_DOWNLOAD_CACHE = "" } = process.env;
+export const whereForPublishedTrackGroups = (): Prisma.TrackGroupWhereInput => {
+  return {
+    published: true,
+    tracks: { some: { audio: { uploadState: "SUCCESS" } } },
+    deletedAt: null,
+  };
+};
 
 export const deleteTrackGroupCover = async (trackGroupId: number) => {
   const cover = await prisma.trackGroupCover.findFirst({
@@ -236,6 +248,24 @@ export const processSingleTrackGroup = (
       }
     : null,
 });
+
+export const processTrackGroupQueryOrder = (orderByString?: string) => {
+  let orderByObj: Prisma.TrackGroupOrderByWithRelationAndSearchRelevanceInput =
+    {
+      releaseDate: "desc",
+    };
+  if (orderByString === "random") {
+  } else if (orderByString === "id") {
+    orderByObj = {
+      id: "desc",
+    };
+  } else if (orderByString === "createdAt") {
+    orderByObj = {
+      createdAt: "desc",
+    };
+  }
+  return orderByObj;
+};
 
 export default {
   cover: generateFullStaticImageUrl,

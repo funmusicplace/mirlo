@@ -22,7 +22,7 @@ export const AdminTrackGroups: React.FC = () => {
 
   React.useEffect(() => {
     const callback = async () => {
-      const { results } = await api.getMany<TrackGroup>("trackgroups");
+      const { results } = await api.getMany<TrackGroup>("admin/trackGroups");
       setResults(results);
     };
     callback();
@@ -36,7 +36,7 @@ export const AdminTrackGroups: React.FC = () => {
 
   const onClickQueue = React.useCallback(
     (id: number) => {
-      navigate(`/admin/trackgroups/${id}`);
+      navigate(`/admin/trackGroups/${id}`);
     },
     [navigate]
   );
@@ -47,32 +47,40 @@ export const AdminTrackGroups: React.FC = () => {
         flex-grow: 1;
       `}
     >
-      <h3>Trackgroups</h3>
+      <h3>TrackGroups</h3>
       {results.length > 0 && (
         <Table>
           <thead>
             <tr>
+              <th />
               <th>Title</th>
-              <th>Type</th>
+              {/* <th>Type</th> */}
               {/* <th>Private?</th> */}
-              <th>Enabled?</th>
+              {/* <th>Enabled?</th> */}
               {/* <th>Featured?</th> */}
               <th>Artist</th>
               <th>Release date</th>
+              <th>Created date</th>
+              <th>Published</th>
               <th />
             </tr>
           </thead>
           <tbody>
-            {results.map((trackgroup) => (
+            {results.map((trackgroup, index) => (
               <tr key={trackgroup.id}>
-                <td>{trackgroup.title}</td>
-                <td>{trackgroup.type}</td>
+                <td>{index + 1}</td>
+                <td>
+                  {trackgroup.title} (id: {trackgroup.id})
+                </td>
+                {/* <td>{trackgroup.type}</td> */}
                 {/* <td>{trackgroup.private ? <FaCheck /> : undefined}</td> */}
-                <td>{trackgroup.adminEnabled ? <FaCheck /> : undefined}</td>
+                {/* <td>{trackgroup.adminEnabled ? <FaCheck /> : undefined}</td> */}
                 {/* <td>{trackgroup.featured ? <FaCheck /> : undefined}</td> */}
 
                 <td>{trackgroup.artist?.name}</td>
                 <td>{trackgroup.releaseDate}</td>
+                <td>{trackgroup.createdAt}</td>
+                <td>{trackgroup.published ? <FaCheck /> : undefined}</td>
                 <td className="alignRight">
                   <IconButton
                     compact

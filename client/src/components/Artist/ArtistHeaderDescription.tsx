@@ -11,6 +11,7 @@ import { useForm } from "react-hook-form";
 import { FaChevronDown, FaPen, FaSave, FaTimes } from "react-icons/fa";
 import TextArea from "components/common/TextArea";
 import { bp } from "../../constants";
+import { useSearchParams } from "react-router-dom";
 
 interface FormData {
   bio: string;
@@ -24,6 +25,9 @@ const ArtistHeaderDescription: React.FC = () => {
     state: { artist },
     refresh,
   } = useArtistContext();
+  const [searchParams] = useSearchParams();
+  const isHeaderExpanded = searchParams.get("expandHeader");
+
   const snackbar = useSnackbar();
 
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
@@ -37,15 +41,14 @@ const ArtistHeaderDescription: React.FC = () => {
     defaultValues: { bio: artist?.bio },
   });
 
-  let bio =
-    user && user.id === artist?.userId && !artist.bio
-      ? t("noBioYet")
-      : artist?.bio;
+  const isArtistManager = userId === artistUserId;
+
+  let bio = isArtistManager && !artist?.bio ? t("noBioYet") : artist?.bio;
 
   const doSave = React.useCallback(
     async (data: FormData) => {
       try {
-        if (userId && artistId && artistUserId === userId) {
+        if (isArtistManager) {
           await api.put(`users/${userId}/artists/${artistId}`, {
             bio: data.bio,
           });
@@ -57,7 +60,7 @@ const ArtistHeaderDescription: React.FC = () => {
         setIsEditing(false);
       }
     },
-    [artistId, artistUserId, refresh, snackbar, userId, t]
+    [isArtistManager, refresh, snackbar, t, userId, artistId]
   );
 
   React.useEffect(() => {
@@ -65,9 +68,15 @@ const ArtistHeaderDescription: React.FC = () => {
 
     if ((el?.clientHeight ?? 0) > 100) {
       setCanCollapse(true);
-      setIsCollapsed(true);
+      if (!isHeaderExpanded) {
+        setIsCollapsed(true);
+      }
     }
-  }, [isEditing]);
+  }, [isEditing, isHeaderExpanded]);
+
+  if (!isArtistManager && bio === "") {
+    return null;
+  }
 
   if (!isEditing) {
     return (
@@ -133,7 +142,7 @@ const ArtistHeaderDescription: React.FC = () => {
           )}
         </div>
 
-        {user && user.id === artist?.userId && (
+        {isArtistManager && (
           <div
             className={css`
               max-width: 5%;

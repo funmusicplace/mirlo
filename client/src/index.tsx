@@ -57,6 +57,7 @@ import NewReleaseRedirect from "components/ManageArtist/NewReleaseRedirect";
 import { css } from "@emotion/css";
 import Supporters from "components/ManageArtist/Supporters";
 import Artists from "components/Artists";
+import AdminArtists from "components/Admin/AdminArtists";
 
 const router = createBrowserRouter([
   {
@@ -161,7 +162,10 @@ const router = createBrowserRouter([
                 path: "",
                 element: <ManageArtist />,
                 children: [
-                  { path: "", element: <Navigate to="releases" /> },
+                  {
+                    path: "",
+                    element: <Navigate to="releases" replace={true} />,
+                  },
                   {
                     path: "releases",
                     element: <ManageArtistAlbums />,
@@ -208,6 +212,10 @@ const router = createBrowserRouter([
           {
             path: "users",
             element: <AdminUsers />,
+          },
+          {
+            path: "artists",
+            element: <AdminArtists />,
           },
           {
             path: "trackGroups",
@@ -268,6 +276,10 @@ const router = createBrowserRouter([
           {
             path: "release/:trackGroupId",
             element: <TrackGroup />,
+          },
+          {
+            path: "posts/:postId",
+            element: <Post />,
           },
         ],
       },

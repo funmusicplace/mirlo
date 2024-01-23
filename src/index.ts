@@ -115,6 +115,8 @@ const routes = [
   "webhooks/stripe/connect",
   "jobs",
   "admin/tasks",
+  "admin/trackGroups",
+  "admin/artists",
 ];
 
 initialize({
