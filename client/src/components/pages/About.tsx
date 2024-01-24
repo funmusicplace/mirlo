@@ -1,5 +1,5 @@
 import { Trans, useTranslation } from "react-i18next";
-import { pageMarkdownWrapper } from "components/Post/index";
+import { PageMarkdownWrapper } from "components/Post/index";
 import { MetaCard } from "../common/MetaCard";
 import { Link } from "react-router-dom";
 import MarkdownWrapper from "../common/MarkdownWrapper";
@@ -8,7 +8,7 @@ const About: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "about" });
 
   return (
-    <div className={pageMarkdownWrapper}>
+    <PageMarkdownWrapper>
       <MarkdownWrapper>
         <MetaCard
           title="About"
@@ -40,7 +40,7 @@ const About: React.FC = () => {
         <h2>{t("behindThePlatform")}</h2>
         <p>{t("behindThePlatformText")}</p>
       </MarkdownWrapper>
-    </div>
+    </PageMarkdownWrapper>
   );
 };
 
