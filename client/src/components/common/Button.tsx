@@ -9,6 +9,7 @@ export interface Compactable {
   compact?: boolean;
   transparent?: boolean;
   thin?: boolean;
+  wrap?: boolean;
   role?: "primary" | "secondary" | "warning";
   variant?: "link" | "big" | "outlined" | "default";
   color?: string;
@@ -153,6 +154,11 @@ const CustomButton = styled.button<Compactable>`
         `;
       default:
         return `
+          ${
+            props.wrap
+              ? "white-space: wrap !important; height: auto; line-height:  1.2rem; width: 100%;"
+              : ""
+          };
           padding: ${props.compact ? ".3rem .5rem" : "1rem"};
           padding: ${props.onlyIcon ? ".5rem .5rem" : ".6rem .6rem"};
           background-color:  var(--mi-${props.role ?? "secondary"}-color);

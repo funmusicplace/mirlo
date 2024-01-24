@@ -47,44 +47,58 @@ const TrackGroupCard: React.FC<{
     <Box
       key={album.id}
       className={css`
-        display: flex;
+        display: grid;
+        grid-template-columns: minmax(25%, 25%) minmax(25%, 75%);
         width: 100%;
-        margin-bottom: 0.25rem;
         padding: 0 !important;
-        background-color: var(--mi-darken-background-color);
 
         &:not(:first-of-type) {
           margin-top: 1rem;
         }
         @media screen and (max-width: ${bp.medium}px) {
-          font-size: 0.8rem;
+          font-size: var(--mi-font-size-small);
+          grid-template-columns: max(40%) max(60%);
+        }
+
+        @media screen and (max-width: ${bp.small}px) {
+          grid-template-columns: max(35%) max(65%);
         }
       `}
     >
-      <Link
-        to={getReleaseUrl(artist, album)}
+      <div
         className={css`
-          @media screen and (max-width: ${bp.small}px) {
-            height: 100%;
-            margin: auto;
+          align-items: center;
+          display: flex;
+          a {
+            display: flex;
           }
         `}
       >
-        <ImageWithPlaceholder
-          src={album.cover?.sizes?.[600]}
-          alt={album.title}
-          size={250}
-        />
-      </Link>
+        <Link
+          to={getReleaseUrl(artist, album)}
+          className={css`
+            @media screen and (max-width: ${bp.small}px) {
+              width: 100%;
+            }
+          `}
+        >
+          <ImageWithPlaceholder
+            src={album.cover?.sizes?.[600]}
+            alt={album.title}
+            size={250}
+          />
+        </Link>
+      </div>
 
       <div
         className={css`
-          flex: 95%;
-          max-width: 95%;
           display: flex;
           flex-direction: column;
+          border-radius: var(--mi-border-radius-focus);
+          margin-left: 0.5rem;
           justify-content: space-between;
           padding: 1rem;
+          background-color: var(--mi-darken-background-color);
 
           > div {
             display: flex;
@@ -96,8 +110,6 @@ const TrackGroupCard: React.FC<{
           }
 
           @media screen and (max-width: ${bp.medium}px) {
-            flex: 85%;
-            max-width: 85%;
             font-size: 0.8rem;
             padding: 0.5rem;
             padding-right: 0.5rem;
@@ -155,11 +167,15 @@ const TrackGroupCard: React.FC<{
           `}
         >
           <Link to={`/manage/artists/${album.artistId}/release/${album.id}`}>
-            <Button compact>{t("manageAlbum")}</Button>
+            <Button compact variant="outlined">
+              {t("manageAlbum")}
+            </Button>
           </Link>
           {album.artist && album.published && (
             <Link to={getReleaseUrl(album.artist, album)}>
-              <Button compact>{t("viewLive")}</Button>
+              <Button compact variant="outlined">
+                {t("viewLive")}
+              </Button>
             </Link>
           )}
           {!album.published && (
