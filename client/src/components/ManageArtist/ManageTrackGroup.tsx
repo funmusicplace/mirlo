@@ -14,6 +14,7 @@ import ManageSectionWrapper from "./ManageSectionWrapper";
 import { css } from "@emotion/css";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import BackToArtistLink from "./BackToArtistLink";
+import ManageTags from "./AlbumFormComponents/ManageTags";
 
 const ManageTrackGroup: React.FC<{}> = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
@@ -98,13 +99,16 @@ const ManageTrackGroup: React.FC<{}> = () => {
         </SpaceBetweenDiv>
       </div>
       <AlbumForm existing={trackGroup} reload={reload} artist={artist} />
-      <h4
+
+      <ManageTags tags={trackGroup.tags} />
+
+      <h2
         className={css`
           margin-top: 1.5rem;
         `}
       >
         {t("uploadTracks")}
-      </h4>
+      </h2>
 
       {trackGroup && trackGroup?.tracks?.length > 0 && (
         <ManageTrackTable

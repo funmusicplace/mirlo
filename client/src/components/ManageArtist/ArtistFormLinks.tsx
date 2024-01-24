@@ -93,15 +93,17 @@ const ArtistFormLinks: React.FC<{ isManage: boolean }> = ({ isManage }) => {
           })}
         </div>
         {isManage && (
-          <Button
-            compact
-            thin
-            transparent
-            onClick={() => setIsEditing(true)}
-            startIcon={<FaPen />}
-          >
-            {t("editLinks")}
-          </Button>
+          <div>
+            <Button
+              compact
+              thin
+              variant="dashed"
+              onClick={() => setIsEditing(true)}
+              startIcon={<FaPen />}
+            >
+              {artist?.links?.length === 0 ? t("noLinksYet") : t("editLinks")}
+            </Button>
+          </div>
         )}
       </div>
     );

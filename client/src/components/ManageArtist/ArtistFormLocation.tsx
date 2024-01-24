@@ -71,14 +71,13 @@ const ArtistFormLocation: React.FC<{ isManage: boolean }> = ({ isManage }) => {
         )}
         {isManage && (
           <Button
-            transparent
+            variant="dashed"
             compact
             thin
             onClick={() => setIsEditing(true)}
             startIcon={<FaPen />}
             className={css`
               margin-left: 0.5rem;
-              height: 1rem !important;
             `}
           >
             {t("editLocation")}

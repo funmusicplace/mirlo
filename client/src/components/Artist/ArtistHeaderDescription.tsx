@@ -43,7 +43,7 @@ const ArtistHeaderDescription: React.FC = () => {
 
   const isArtistManager = userId === artistUserId;
 
-  let bio = isArtistManager && !artist?.bio ? t("noBioYet") : artist?.bio;
+  let bio = isArtistManager && artist?.bio;
 
   const doSave = React.useCallback(
     async (data: FormData) => {
@@ -84,63 +84,66 @@ const ArtistHeaderDescription: React.FC = () => {
         className={css`
           width: 100%;
           display: flex;
+          align-items: center;
         `}
       >
-        <div>
-          <MarkdownContent
-            content={bio}
-            className={css`
-              width: auto;
-              overflow: hidden;
-              text-overflow: ellipsis;
-
-              ${isCollapsed ? `max-height: 4rem;` : ""}
-
-              @media screen and (max-width: ${bp.medium}px) {
-                ${isCollapsed ? `max-height: 2rem;` : ""}
-              }
-            `}
-          />
-          {canCollapse && (
-            <div
+        {bio && (
+          <div>
+            <MarkdownContent
+              content={bio}
               className={css`
-                width: 100%;
-                margin-top: -1.5rem;
-                padding-top: 0.75rem;
-                z-index: +1;
-                position: relative;
-                ${isCollapsed
-                  ? `background: linear-gradient(180deg, transparent 0%, var(--mi-normal-background-color) 42%);`
-                  : ""}
+                width: auto;
+                overflow: hidden;
+                text-overflow: ellipsis;
+
+                ${isCollapsed ? `max-height: 4rem;` : ""}
 
                 @media screen and (max-width: ${bp.medium}px) {
-                  ${isCollapsed
-                    ? `background: linear-gradient(180deg, transparent 0%, var(--mi-normal-background-color) 80%); padding-top: 1.2rem;`
-                    : ""}
+                  ${isCollapsed ? `max-height: 2rem;` : ""}
                 }
               `}
-            >
-              <Button
-                variant="link"
-                compact
-                startIcon={<FaChevronDown />}
+            />
+            {canCollapse && (
+              <div
                 className={css`
-                  margin-top: 0.7rem;
-                  margin-bottom: 0.5rem;
+                  width: 100%;
+                  margin-top: -1.5rem;
+                  padding-top: 0.75rem;
+                  z-index: +1;
+                  position: relative;
+                  ${isCollapsed
+                    ? `background: linear-gradient(180deg, transparent 0%, var(--mi-normal-background-color) 42%);`
+                    : ""}
 
-                  svg {
-                    transition: transform 0.2s;
-
-                    ${!isCollapsed ? `transform: rotate(-180deg);` : ""}
+                  @media screen and (max-width: ${bp.medium}px) {
+                    ${isCollapsed
+                      ? `background: linear-gradient(180deg, transparent 0%, var(--mi-normal-background-color) 80%); padding-top: 1.2rem;`
+                      : ""}
                   }
                 `}
-                onClick={() => setIsCollapsed((val) => !val)}
               >
-                {isCollapsed ? "read more" : "read less"}
-              </Button>
-            </div>
-          )}
-        </div>
+                <Button
+                  variant="link"
+                  compact
+                  startIcon={<FaChevronDown />}
+                  className={css`
+                    margin-top: 0.7rem;
+                    margin-bottom: 0.5rem;
+
+                    svg {
+                      transition: transform 0.2s;
+
+                      ${!isCollapsed ? `transform: rotate(-180deg);` : ""}
+                    }
+                  `}
+                  onClick={() => setIsCollapsed((val) => !val)}
+                >
+                  {isCollapsed ? "read more" : "read less"}
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
 
         {isArtistManager && (
           <div
@@ -148,19 +151,18 @@ const ArtistHeaderDescription: React.FC = () => {
               max-width: 5%;
               flex: 5%;
               margin-right: 0.2rem;
+              margin-left: 0.2rem;
             `}
           >
             <Button
               compact
-              onlyIcon
-              transparent
+              onlyIcon={!!bio}
+              variant="dashed"
               onClick={() => setIsEditing(true)}
               startIcon={<FaPen />}
-              className={css`
-                margin-top: -0.5rem;
-                margin-left: -0.2rem;
-              `}
-            ></Button>
+            >
+              {!bio && t("noBioYet")}
+            </Button>
           </div>
         )}
       </div>

@@ -99,12 +99,13 @@ const ArtistVariableSupport: React.FC<{
               })}
             />
             {tier.currency}
+            {!!tier.minAmount && formState.errors?.amount && (
+              <small>
+                {t("mustBeAtLeast", { minAmount: tier.minAmount / 100 })}
+              </small>
+            )}
           </div>
-          {tier.minAmount && formState.errors?.amount && (
-            <small>
-              {t("mustBeAtLeast", { minAmount: tier.minAmount / 100 })}
-            </small>
-          )}
+
           <SupportBoxButton
             isLoading={isCheckingForSubscription}
             disabled={isCheckingForSubscription || !isEmpty(formState.errors)}

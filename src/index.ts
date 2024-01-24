@@ -63,6 +63,7 @@ if (!isDev) {
 }
 
 const routes = [
+  "tags",
   "trackGroups",
   "trackGroups/{id}",
   "trackGroups/{id}/download",

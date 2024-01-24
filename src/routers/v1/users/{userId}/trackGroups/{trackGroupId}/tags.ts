@@ -94,7 +94,6 @@ export default function () {
         name: "tags",
         schema: {
           description: "The list of tags to add",
-          required: ["subscribers"],
           type: "array",
           items: {
             type: "string",

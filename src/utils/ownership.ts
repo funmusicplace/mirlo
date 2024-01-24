@@ -1,7 +1,9 @@
-import { ArtistSubscriptionTier } from "@prisma/client";
+import { ArtistSubscriptionTier, Prisma } from "@prisma/client";
 
 import prisma from "../../prisma/prisma";
 import { AppError } from "./error";
+import { DefaultArgs } from "@prisma/client/runtime/library";
+import { trackGroupSingleInclude } from "./trackGroup";
 
 export const doesSubscriptionTierBelongToUser = async (
   subscriptionId: number,
@@ -38,17 +40,7 @@ export const doesTrackGroupBelongToUser = async (
       artistId: { in: artists.map((a) => a.id) },
       id: Number(trackGroupId),
     },
-    include: {
-      cover: { where: { deletedAt: null } },
-      artist: true,
-      tracks: {
-        where: {
-          deletedAt: null,
-        },
-        include: { trackArtists: true, audio: true },
-        orderBy: { order: "asc" },
-      },
-    },
+    include: trackGroupSingleInclude({ id: userId }),
   });
 
   if (!trackgroup) {
