@@ -45,16 +45,15 @@ const DropdownMenu: React.FC<{
                 color: var(--mi-black);
               }
 
-              @media (prefers-color-scheme: dark) {
-                background: var(--mi-black);
-                button {
-                  color: var(--mi-white);
-                }
+              li {
+                list-style-type: none;
+                padding-bottom: 0.5rem;
               }
 
               li > * {
                 background: transparent !important;
                 width: 200px;
+                list-style-type: none;
                 text-decoration: none;
                 text-align: right;
                 display: block;
@@ -80,6 +79,10 @@ const DropdownMenu: React.FC<{
               }
 
               @media (prefers-color-scheme: dark) {
+                background: var(--mi-black);
+                button {
+                  color: var(--mi-white);
+                }
                 li > * {
                   background-color: var(--mi-black);
                   color: var(--mi-white);
