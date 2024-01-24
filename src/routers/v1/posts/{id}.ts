@@ -2,8 +2,9 @@ import { NextFunction, Request, Response } from "express";
 import prisma from "../../../../prisma/prisma";
 import { userLoggedInWithoutRedirect } from "../../../auth/passport";
 import { User } from "@prisma/client";
-import postProcessor from "../../../utils/post";
+import postProcessor, { processSinglePost } from "../../../utils/post";
 import { checkIsUserSubscriber } from "../../../utils/artist";
+import { AppError } from "../../../utils/error";
 
 export default function () {
   const operations = {
@@ -23,16 +24,28 @@ export default function () {
           },
         },
         include: {
-          artist: true,
+          artist: {
+            include: {
+              avatar: {
+                where: {
+                  deletedAt: null,
+                },
+              },
+            },
+          },
         },
       });
 
       if (!post) {
-        return res.status(404).json({ error: "Post not found" });
+        throw new AppError({
+          httpCode: 404,
+          description: "Post not found",
+        });
       }
+
       const isUserSubscriber = await checkIsUserSubscriber(user, post.artistId);
       res.json({
-        result: postProcessor.single(
+        result: processSinglePost(
           post,
           isUserSubscriber || post.artist?.userId === user?.id
         ),

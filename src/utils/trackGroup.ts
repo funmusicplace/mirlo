@@ -4,6 +4,7 @@ import {
   Track,
   TrackGroupCover,
   Prisma,
+  TrackGroupTag,
 } from "@prisma/client";
 import prisma from "../../prisma/prisma";
 import { convertURLArrayToSizes, generateFullStaticImageUrl } from "./images";
@@ -13,12 +14,13 @@ import {
   minioClient,
   removeObjectsFromBucket,
 } from "./minio";
-import { findArtistIdForURLSlug } from "./artist";
+import { addSizesToImage, findArtistIdForURLSlug } from "./artist";
 import { logger } from "../logger";
 import archiver from "archiver";
 import { deleteTrack } from "./tracks";
 import { randomUUID } from "crypto";
 import { Response } from "express";
+import { DefaultArgs } from "@prisma/client/runtime/library";
 
 export const whereForPublishedTrackGroups = (): Prisma.TrackGroupWhereInput => {
   return {
@@ -109,6 +111,47 @@ export const findTrackGroupIdForSlug = async (
   }
 
   return id;
+};
+
+export const trackGroupSingleInclude = (loggedInUser?: {
+  id: number;
+}): Prisma.TrackGroupInclude<DefaultArgs> => {
+  return {
+    tracks: {
+      where: {
+        deletedAt: null,
+        audio: {
+          uploadState: "SUCCESS",
+        },
+      },
+      include: {
+        audio: true,
+        trackArtists: true,
+      },
+      orderBy: { order: "asc" },
+    },
+    artist: true,
+    tags: {
+      include: { tag: true },
+    },
+    cover: { where: { deletedAt: null } },
+    ...(loggedInUser
+      ? {
+          userTrackGroupPurchases: {
+            where: { userId: loggedInUser.id },
+            select: {
+              userId: true,
+            },
+          },
+          userTrackGroupWishlist: {
+            where: { userId: loggedInUser.id },
+            select: {
+              userId: true,
+            },
+          },
+        }
+      : {}),
+  };
 };
 
 export type FormatOptions =
@@ -236,17 +279,12 @@ export const processSingleTrackGroup = (
   tg: TrackGroup & {
     cover?: TrackGroupCover | null;
     tracks?: Track[];
+    tags?: (TrackGroupTag & { tag?: { tag?: string } })[];
   }
 ) => ({
   ...tg,
-  cover: tg.cover
-    ? {
-        ...tg.cover,
-        sizes: tg.cover
-          ? convertURLArrayToSizes(tg.cover?.url, finalCoversBucket)
-          : undefined,
-      }
-    : null,
+  tags: tg.tags?.map((t) => t.tag?.tag) ?? [],
+  cover: addSizesToImage(finalCoversBucket, tg.cover),
 });
 
 export const processTrackGroupQueryOrder = (orderByString?: string) => {

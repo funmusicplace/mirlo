@@ -11,7 +11,7 @@ export interface Compactable {
   thin?: boolean;
   wrap?: boolean;
   role?: "primary" | "secondary" | "warning";
-  variant?: "link" | "big" | "outlined" | "default";
+  variant?: "link" | "big" | "outlined" | "dashed" | "default";
   color?: string;
   uppercase?: boolean;
   onlyIcon?: boolean;
@@ -114,6 +114,7 @@ const CustomButton = styled.button<Compactable>`
           }
         `;
       case "outlined":
+      case "dashed":
         return `
           color: ${
             props.color
@@ -121,11 +122,11 @@ const CustomButton = styled.button<Compactable>`
               : `var(--mi-${props.role ?? "primary"}-color)`
           };
           background-color: transparent;
-          border: 1px solid ${
-            props.color
-              ? props.color
-              : `var(--mi-${props.role ?? "primary"}-color)`
-          };
+          border: 1px ${props.variant === "dashed" ? "dashed" : "solid"} ${
+          props.color
+            ? props.color
+            : `var(--mi-${props.role ?? "primary"}-color)`
+        };
           padding: ${props.compact ? ".3rem .5rem" : "1rem"};
           font-weight: bold;
 
@@ -140,11 +141,11 @@ const CustomButton = styled.button<Compactable>`
                 ? props.color
                 : `var(--mi-${props.role ?? "primary"}-color)`
             };            
-            border: 1px solid ${
-              props.color
-                ? props.color
-                : `var(--mi-${props.role ?? "primary"}-color)`
-            };
+            border: 1px ${props.variant === "dashed" ? "dashed" : "solid"} ${
+          props.color
+            ? props.color
+            : `var(--mi-${props.role ?? "primary"}-color)`
+        };
           }
 
           &[disabled] {

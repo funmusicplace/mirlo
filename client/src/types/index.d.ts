@@ -59,6 +59,7 @@ interface TrackGroup {
   tracks: Track[];
   updatedAt: string;
   createdAt: string;
+  tags?: string[];
   cover?: {
     updatedAt: string;
     id: number;

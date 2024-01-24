@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import prisma from "../../../../../prisma/prisma";
 import processor, {
   findTrackGroupIdForSlug,
+  trackGroupSingleInclude,
 } from "../../../../utils/trackGroup";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { User } from "@prisma/client";
@@ -31,38 +32,7 @@ export default function () {
             published: true,
             tracks: { some: { audio: { uploadState: "SUCCESS" } } },
           },
-          include: {
-            tracks: {
-              where: {
-                deletedAt: null,
-                audio: {
-                  uploadState: "SUCCESS",
-                },
-              },
-              include: {
-                audio: true,
-              },
-              orderBy: { order: "asc" },
-            },
-            artist: true,
-            cover: true,
-            ...(loggedInUser
-              ? {
-                  userTrackGroupPurchases: {
-                    where: { userId: loggedInUser.id },
-                    select: {
-                      userId: true,
-                    },
-                  },
-                  userTrackGroupWishlist: {
-                    where: { userId: loggedInUser.id },
-                    select: {
-                      userId: true,
-                    },
-                  },
-                }
-              : {}),
-          },
+          include: trackGroupSingleInclude(loggedInUser),
         });
       }
 

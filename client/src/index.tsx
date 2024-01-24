@@ -30,7 +30,7 @@ import Artist from "components/Artist/Artist";
 import TrackGroupWidget from "components/Widget/TrackGroupWidget";
 import TrackWidget from "components/Widget/TrackWidget";
 import Collection from "components/Profile/Collection";
-import Post, { pageMarkdownWrapper } from "components/Post";
+import Post, { PageMarkdownWrapper } from "components/Post";
 import PasswordReset from "components/PasswordReset";
 import TrackGroup from "components/TrackGroup/TrackGroup";
 import About from "components/pages/About";
@@ -74,33 +74,33 @@ const router = createBrowserRouter([
       {
         path: "pages/cookie-policy",
         element: (
-          <div className={pageMarkdownWrapper}>
+          <PageMarkdownWrapper>
             <MarkdownContent source="/pages/CookiePolicy.md" />
-          </div>
+          </PageMarkdownWrapper>
         ),
       },
       {
         path: "pages/privacy",
         element: (
-          <div className={pageMarkdownWrapper}>
+          <PageMarkdownWrapper>
             <MarkdownContent source="/pages/Privacy.md" />
-          </div>
+          </PageMarkdownWrapper>
         ),
       },
       {
         path: "pages/en/faq",
         element: (
-          <div className={pageMarkdownWrapper}>
+          <PageMarkdownWrapper>
             <MarkdownContent source="/pages/en/FAQ.md" />
-          </div>
+          </PageMarkdownWrapper>
         ),
       },
       {
         path: "pages/terms",
         element: (
-          <div className={pageMarkdownWrapper}>
+          <PageMarkdownWrapper>
             <MarkdownContent source="/pages/Terms.md" />
-          </div>
+          </PageMarkdownWrapper>
         ),
       },
       { path: "widget/track/:id", element: <TrackWidget /> },

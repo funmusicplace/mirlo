@@ -6,7 +6,6 @@ import { useGlobalStateContext } from "state/GlobalState";
 import Box from "../common/Box";
 import usePublicObjectById from "utils/usePublicObjectById";
 import { useTranslation } from "react-i18next";
-import ArtistSupport from "components/Artist/ArtistSupport";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
 import PublicTrackGroupListing from "components/common/PublicTrackGroupListing";
 import { MetaCard } from "components/common/MetaCard";
@@ -22,6 +21,8 @@ import ReleaseDate from "./ReleaseDate";
 import WidthContainer from "components/common/WidthContainer";
 import TrackGroupTitle from "./TrackGroupTitle";
 import styled from "@emotion/styled";
+import SupportArtistPopUp from "components/common/SupportArtistPopUp";
+import Pill from "components/common/Pill";
 
 const Container = styled.div<{ user?: LoggedInUser }>`
   ${(props) =>
@@ -290,7 +291,12 @@ function TrackGroup() {
             </CreditsWrapper>
           </TrackgroupInfosWrapper>
 
-          {userStripeStatus?.chargesEnabled && <ArtistSupport />}
+          {trackGroup.tags?.map((tag) => (
+            <Pill>{tag}</Pill>
+          ))}
+          {trackGroup.artist && userStripeStatus?.chargesEnabled && (
+            <SupportArtistPopUp artist={trackGroup.artist} />
+          )}
         </div>
       </Container>
     </WidthContainer>

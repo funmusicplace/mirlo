@@ -386,13 +386,25 @@ export const singleInclude = (queryOptions?: {
 
 interface LocalArtist extends Artist {
   posts?: Post[];
-  banner: ArtistBanner | null;
-  avatar: ArtistAvatar | null;
+  banner?: ArtistBanner | null;
+  avatar?: ArtistAvatar | null;
   trackGroups?: (TrackGroup & {
     cover?: TrackGroupCover | null;
     tracks?: Track[];
   })[];
 }
+
+export const addSizesToImage = (
+  bucket: string,
+  image?: { url: string[] } | null
+) => {
+  return image
+    ? {
+        ...image,
+        sizes: image && convertURLArrayToSizes(image?.url, bucket),
+      }
+    : null;
+};
 
 export const processSingleArtist = (
   artist: LocalArtist,
@@ -404,28 +416,8 @@ export const processSingleArtist = (
     posts: artist?.posts?.map((p: Post) =>
       postProcessor.single(p, isUserSubscriber || artist.userId === userId)
     ),
-    banner: artist?.banner
-      ? {
-          ...artist?.banner,
-          sizes:
-            artist?.banner &&
-            convertURLArrayToSizes(
-              artist?.banner?.url,
-              finalArtistBannerBucket
-            ),
-        }
-      : null,
-    avatar: artist?.avatar
-      ? {
-          ...artist?.avatar,
-          sizes:
-            artist?.avatar &&
-            convertURLArrayToSizes(
-              artist?.avatar?.url,
-              finalArtistAvatarBucket
-            ),
-        }
-      : null,
+    banner: addSizesToImage(finalArtistBannerBucket, artist?.banner),
+    avatar: addSizesToImage(finalArtistAvatarBucket, artist?.avatar),
     trackGroups: artist?.trackGroups?.map(processSingleTrackGroup),
   };
 };

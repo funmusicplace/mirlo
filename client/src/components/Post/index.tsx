@@ -14,8 +14,10 @@ import FollowArtist from "components/common/FollowArtist";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import SupportArtistPopUp from "components/common/SupportArtistPopUp";
+import Avatar from "components/Artist/Avatar";
+import styled from "@emotion/styled";
 
-export const pageMarkdownWrapper = css`
+export const PageMarkdownWrapper = styled.div`
   width: 100%;
   margin-top: 2rem;
   max-width: var(--mi-container-medium);
@@ -82,8 +84,10 @@ const Post: React.FC = () => {
 
   const ownedByUser = post.artist?.userId === user?.id;
 
+  console.log("margin", post.artist);
+
   return (
-    <div className={pageMarkdownWrapper}>
+    <PageMarkdownWrapper>
       <MetaCard
         title={`${post.title} by ${post.artist?.name}`}
         description={post.content.slice(0, 500)}
@@ -131,15 +135,27 @@ const Post: React.FC = () => {
               <span
                 className={css`
                   margin-right: 0.25rem;
-
+                  display: flex;
                   line-height: 2.2rem;
+
+                  a {
+                    display: inline-flex;
+                    align-items: center;
+                    margin-left: 0.35rem;
+                  }
+
+                  img {
+                    margin-right: 0.2rem;
+                    max-width: 25px;
+                  }
                 `}
               >
                 by{" "}
                 <Link
                   to={`/${post.artist.urlSlug?.toLowerCase() ?? post.artistId}`}
                 >
-                  {post.artist?.name}
+                  <Avatar avatar={post.artist.avatar?.sizes?.[60]} />
+                  <span>{post.artist?.name}</span>
                 </Link>
               </span>
               {post.artistId && <FollowArtist artistId={post.artistId} />}
@@ -172,7 +188,7 @@ const Post: React.FC = () => {
           <SupportArtistPopUp artist={post.artist} />
         </div>
       )}
-    </div>
+    </PageMarkdownWrapper>
   );
 };
 
