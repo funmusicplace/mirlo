@@ -291,12 +291,25 @@ function TrackGroup() {
             </CreditsWrapper>
           </TrackgroupInfosWrapper>
 
-          {trackGroup.tags?.map((tag) => (
-            <Pill>{tag}</Pill>
-          ))}
-          {trackGroup.artist && userStripeStatus?.chargesEnabled && (
-            <SupportArtistPopUp artist={trackGroup.artist} />
-          )}
+          <div
+            className={css`
+              margin-bottom: 1rem;
+            `}
+          >
+            {trackGroup.tags?.map((tag) => (
+              <Pill>{tag}</Pill>
+            ))}
+          </div>
+          <div
+            className={css`
+              margin-top: 2rem;
+              text-align: center;
+            `}
+          >
+            {trackGroup.artist && userStripeStatus?.chargesEnabled && (
+              <SupportArtistPopUp artist={trackGroup.artist} />
+            )}
+          </div>
         </div>
       </Container>
     </WidthContainer>
