@@ -4,7 +4,7 @@ const styles = `html {
   --mi-pink: #BE3455;
 
   --mi-normal-background-color: #f5f0f0;
-  --mi-lighten-background-color: rgba(255, 255, 255, 0.2);
+  --mi-lighten-background-color: rgba(255, 255, 255, 0.35);
   --mi-lighten-x-background-color: rgba(255, 255, 255, 0.5);
   --mi-darken-background-color: rgba(50, 0, 0, .03);
   --mi-darken-x-background-color: rgba(50, 0, 0, .2);
@@ -61,7 +61,7 @@ const styles = `html {
     --mi-normal-background-color: var(--mi-black);
     --mi-normal-foreground-color: var(--mi-white);
     --mi-darken-background-color: rgba(0, 0, 0, 0.03);
-    --mi-lighten-background-color: rgba(255, 255, 255, 0.2);
+    --mi-lighten-background-color: rgba(255, 255, 255, 0.35);
   
     --mi-light-background-color: #222;
     --mi-lighter-background-color: #282828;

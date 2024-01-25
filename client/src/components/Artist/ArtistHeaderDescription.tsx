@@ -84,7 +84,11 @@ const ArtistHeaderDescription: React.FC = () => {
         className={css`
           width: 100%;
           display: flex;
-          align-items: center;
+
+          ${isCollapsed
+            ? `
+          align-items: center;`
+            : "align-items: flex-start;"}
         `}
       >
         {bio && (
@@ -185,22 +189,24 @@ const ArtistHeaderDescription: React.FC = () => {
         <Button
           compact
           startIcon={<FaSave />}
+          collapsable
           onClick={handleSubmit(doSave)}
           className={css`
             margin-right: 0.5rem;
           `}
         >
-          {t("saveBio")}
+          <p>{t("saveBio")}</p>
         </Button>
         <Button
           compact
+          collapsable
           startIcon={<FaTimes />}
           onClick={() => {
             reset();
             setIsEditing(false);
           }}
         >
-          {t("cancel")}
+          <p>{t("cancel")}</p>
         </Button>
       </div>
     </>
