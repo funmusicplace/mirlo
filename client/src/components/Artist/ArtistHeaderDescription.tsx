@@ -189,7 +189,7 @@ const ArtistHeaderDescription: React.FC = () => {
         <Button
           compact
           startIcon={<FaSave />}
-          collapsable
+          collapsible
           onClick={handleSubmit(doSave)}
           className={css`
             margin-right: 0.5rem;
@@ -199,7 +199,7 @@ const ArtistHeaderDescription: React.FC = () => {
         </Button>
         <Button
           compact
-          collapsable
+          collapsible
           startIcon={<FaTimes />}
           onClick={() => {
             reset();

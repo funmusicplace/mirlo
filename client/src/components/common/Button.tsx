@@ -10,7 +10,7 @@ export interface Compactable {
   transparent?: boolean;
   thin?: boolean;
   wrap?: boolean;
-  collapsable?: boolean;
+  collapsible?: boolean;
   role?: "primary" | "secondary" | "warning";
   variant?: "link" | "big" | "outlined" | "dashed" | "default";
   color?: string;
@@ -181,9 +181,9 @@ const CustomButton = styled.button<Compactable>`
             color: var(--mi-${props.role ?? "secondary"}-color);
           }
           @media screen and (max-width: ${bp.medium}px) {
-              ${props.collapsable ? "border-radius: 100%;" : ""}
-              ${props.collapsable ? "> p {display: none;}" : ""}
-              ${props.collapsable ? "> span {margin: 0 !important;}" : ""}
+              ${props.collapsible ? "border-radius: 100%;" : ""}
+              ${props.collapsible ? "> p {display: none;}" : ""}
+              ${props.collapsible ? "> span {margin: 0 !important;}" : ""}
           }
           
           @media screen and (max-width: ${bp.small}px) {

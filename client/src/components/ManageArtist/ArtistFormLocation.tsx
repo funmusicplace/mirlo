@@ -132,7 +132,7 @@ const ArtistFormLocation: React.FC<{ isManage: boolean }> = ({ isManage }) => {
           `}
         >
           <Button
-            collapsable
+            collapsible
             compact
             startIcon={<FaSave />}
             onClick={handleSubmit(doSave)}
@@ -141,7 +141,7 @@ const ArtistFormLocation: React.FC<{ isManage: boolean }> = ({ isManage }) => {
           </Button>
           <Button
             compact
-            collapsable
+            collapsible
             startIcon={<FaTimes />}
             onClick={() => {
               reset();
