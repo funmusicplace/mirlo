@@ -74,9 +74,9 @@ const ManageTags: React.FC<{ tags?: string[] }> = ({ tags: existingTags }) => {
         <div
           className={css`
             list-style: none;
-            display: inline-block;
-            margin-right: 1rem;
-
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.25rem;
             margin-bottom: 1rem;
           `}
         >
