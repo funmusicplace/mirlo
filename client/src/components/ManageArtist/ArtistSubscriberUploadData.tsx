@@ -63,7 +63,6 @@ const ArtistSubscriberUploadData: React.FC<{}> = () => {
 
   const processData = async (results: { data: string[][] }) => {
     const data = results.data;
-    console.log("data", data);
 
     const headers = data.splice(0, 1)[0];
 
@@ -82,7 +81,6 @@ const ArtistSubscriberUploadData: React.FC<{}> = () => {
       return obj;
     });
 
-    console.log("newData", newData);
     setUploadedUsers(newData);
   };
 

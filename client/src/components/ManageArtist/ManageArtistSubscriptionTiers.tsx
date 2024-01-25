@@ -50,6 +50,7 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
           }}
           startIcon={<FaPlus />}
           compact
+          variant="dashed"
         >
           {t("addNewTier")}
         </Button>

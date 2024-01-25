@@ -26,6 +26,7 @@ const ArtistFormLocation: React.FC<{ isManage: boolean }> = ({ isManage }) => {
   } = useGlobalStateContext();
   const artistId = artist?.id;
   const artistUserId = artist?.userId;
+  const isArtistManager = artistUserId === user?.id;
   const userId = user?.id;
   const snackbar = useSnackbar();
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
@@ -69,7 +70,7 @@ const ArtistFormLocation: React.FC<{ isManage: boolean }> = ({ isManage }) => {
             {artist?.location}
           </div>
         )}
-        {isManage && (
+        {isArtistManager && (
           <Button
             variant="dashed"
             compact

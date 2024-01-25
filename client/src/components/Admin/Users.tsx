@@ -6,7 +6,7 @@ import Modal from "components/common/Modal";
 import Table from "components/common/Table";
 import React from "react";
 import { FaEdit } from "react-icons/fa";
-import { Outlet, useNavigate, useParams } from "react-router-dom";
+import { Link, Outlet, useNavigate, useParams } from "react-router-dom";
 import api from "services/api";
 // import { AdminUser, fetchUsers, fetchCSVAndDownload } from "services/api/Admin";
 // import usePagination from "utils/usePagination";
@@ -123,11 +123,13 @@ export const AdminUsers: React.FC = () => {
             <tr>
               <th>Name</th>
               <th>Email</th>
+              <th>Created at</th>
               {/* <th>Email confirmed?</th> */}
               {/* <th>Full name</th> */}
               {/* <th className="alignRight">Member</th> */}
               {/* <th>Role</th> */}
               <th>Updated at</th>
+              <th>Artists</th>
               <th />
             </tr>
           </thead>
@@ -140,7 +142,13 @@ export const AdminUsers: React.FC = () => {
                 {/* <td>{user.fullName}</td> */}
                 {/* <td className="alignRight">{user.member && <FaCheck />}</td> */}
                 {/* <td>{user.role.name}</td> */}
+                <td>{user.createdAt?.split("T")[0]}</td>
                 <td>{user.updatedAt?.split("T")[0]}</td>
+                <td>
+                  {user.artists.map((artist) => (
+                    <Link to={`/${artist.urlSlug}`}>{artist.name}</Link>
+                  ))}
+                </td>
                 <td className="alignRight">
                   <IconButton compact onClick={() => onClickQueue(user.id)}>
                     <FaEdit />

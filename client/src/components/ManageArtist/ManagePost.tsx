@@ -12,7 +12,7 @@ import BackToArtistLink from "./BackToArtistLink";
 import PostForm from "./PostForm";
 import Post from "components/Post";
 import Button from "components/common/Button";
-import { bp } from "constants";
+import { bp } from "../../constants";
 
 const ManagePost: React.FC<{}> = () => {
   const { t } = useTranslation("translation", { keyPrefix: "managePost" });

@@ -94,6 +94,8 @@ export const userHasPermission = (role: "admin" | "owner") => {
       res.status(401).json({ error: "Unauthorized" });
       return;
     } else {
+      // FIXME: this just checks that the user id in the url belongs to the user
+      //
       if (
         role === "owner" &&
         Number(userId) !== loggedInUser.id &&
@@ -102,6 +104,7 @@ export const userHasPermission = (role: "admin" | "owner") => {
         res.status(401).json({ error: "Unauthorized" });
         return;
       } else if (role === "admin" && !loggedInUser.isAdmin) {
+        console.log("error");
         res.status(401).json({ error: "Unauthorized" });
         return;
       }

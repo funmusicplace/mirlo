@@ -14,6 +14,7 @@ import ArtistFormLocation from "components/ManageArtist/ArtistFormLocation";
 import ArtistHeaderDescription from "components/Artist/ArtistHeaderDescription";
 import { useArtistContext } from "state/ArtistContext";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
+import { FaPen } from "react-icons/fa";
 
 const H1 = styled.h1<{ artistAvatar: boolean }>`
   font-size: 2.4rem;
@@ -74,7 +75,11 @@ const ArtistActions = styled.div`
   text-align: right;
   word-break: normal !important;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+
+  a {
+    margin-left: 0.75rem;
+  }
   padding-left: 1rem;
   @media screen and (max-width: ${bp.medium}px) {
     padding-left: 0.3rem;
@@ -192,7 +197,12 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
                       {!isManage && <FollowArtist artistId={artist.id} />}
                       {!isManage && user?.id === artist.userId && (
                         <Link to={`/manage/artists/${artist.id}`}>
-                          <Button compact variant="big" type="button">
+                          <Button
+                            startIcon={<FaPen />}
+                            compact
+                            type="button"
+                            variant="dashed"
+                          >
                             {t("edit")}
                           </Button>
                         </Link>

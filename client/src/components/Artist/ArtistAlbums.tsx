@@ -40,9 +40,10 @@ const ArtistAlbums: React.FC = () => {
       `}
     >
       <SpaceBetweenDiv>
+        <div />
         {artist.userId === user?.id && (
           <Link to={`/manage/artists/${artist.id}/new-release`}>
-            <Button compact transparent startIcon={<FaPlus />}>
+            <Button compact transparent startIcon={<FaPlus />} variant="dashed">
               {t("addNewAlbum")}
             </Button>
           </Link>

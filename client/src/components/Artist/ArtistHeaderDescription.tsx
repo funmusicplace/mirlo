@@ -43,7 +43,7 @@ const ArtistHeaderDescription: React.FC = () => {
 
   const isArtistManager = userId === artistUserId;
 
-  let bio = isArtistManager && artist?.bio;
+  let bio = artist?.bio;
 
   const doSave = React.useCallback(
     async (data: FormData) => {
@@ -73,10 +73,6 @@ const ArtistHeaderDescription: React.FC = () => {
       }
     }
   }, [isEditing, isHeaderExpanded]);
-
-  if (!isArtistManager && bio === "") {
-    return null;
-  }
 
   if (!isEditing) {
     return (
@@ -167,6 +163,10 @@ const ArtistHeaderDescription: React.FC = () => {
         )}
       </div>
     );
+  }
+
+  if (!isArtistManager && bio === "") {
+    return null;
   }
 
   return (

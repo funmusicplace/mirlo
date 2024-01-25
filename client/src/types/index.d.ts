@@ -125,6 +125,7 @@ interface User {
   name?: string;
   artists: Artist[];
   updatedAt: string;
+  createdAt: string;
 }
 
 interface ArtistSubscriptionTier {

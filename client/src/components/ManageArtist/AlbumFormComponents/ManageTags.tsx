@@ -36,7 +36,7 @@ const ManageTags: React.FC<{ tags?: string[] }> = ({ tags: existingTags }) => {
           newTags
         );
       } catch (e) {
-        console.log("e", e);
+        console.error("e", e);
       }
     },
     [trackGroupId, userId]
@@ -51,12 +51,10 @@ const ManageTags: React.FC<{ tags?: string[] }> = ({ tags: existingTags }) => {
 
   const saveTags = React.useCallback(
     async (newValue: string) => {
-      console.log("newValue", newValue);
       const newTags = uniq([
         ...tags,
         newValue.toLowerCase().split(" ").join("-"),
       ]);
-      console.log("updating", newTags);
       update(newTags);
       setTags(newTags);
     },

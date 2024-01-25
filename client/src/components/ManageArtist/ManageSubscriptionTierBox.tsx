@@ -85,7 +85,11 @@ const ManageSubscriptionTierBox: React.FC<{
             </strong>
           </div>
           <div>
-            <Button startIcon={<FaPen />} onClick={() => setManageTier(true)} />
+            <Button
+              variant="dashed"
+              startIcon={<FaPen />}
+              onClick={() => setManageTier(true)}
+            />
 
             <Button
               className={css`

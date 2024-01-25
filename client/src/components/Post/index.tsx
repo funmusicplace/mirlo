@@ -84,8 +84,6 @@ const Post: React.FC = () => {
 
   const ownedByUser = post.artist?.userId === user?.id;
 
-  console.log("margin", post.artist);
-
   return (
     <PageMarkdownWrapper>
       <MetaCard

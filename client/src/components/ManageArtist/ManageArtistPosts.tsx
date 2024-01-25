@@ -79,6 +79,7 @@ const ManageArtistPosts: React.FC<{}> = () => {
           }}
           startIcon={<FaPlus />}
           compact
+          variant="dashed"
         >
           {t("addNewPost", { artist: artist.name })}
         </Button>
@@ -128,7 +129,7 @@ const ManageArtistPosts: React.FC<{}> = () => {
                 `}
               >
                 <Link to={`/manage/artists/${p.artistId}/post/${p.id}`}>
-                  <Button onlyIcon startIcon={<FaPen />} />
+                  <Button onlyIcon variant="dashed" startIcon={<FaPen />} />
                 </Link>
                 <Button
                   className={css`

@@ -19,6 +19,9 @@ export default function () {
 
     const user = await prisma.user.findUnique({
       where: { id: Number(userId) },
+      include: {
+        artists: true,
+      },
     });
     res.json({ result: user });
   }
