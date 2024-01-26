@@ -76,7 +76,7 @@ const ArtistFormLocation: React.FC<{ isManage: boolean }> = ({ isManage }) => {
             {artist?.location}
           </div>
         )}
-        {!artist?.location && (
+        {!artist?.location && isArtistManager && (
           <div
             className={css`
               opacity: 0.5;
