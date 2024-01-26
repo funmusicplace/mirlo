@@ -1,11 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import prisma from "../../../prisma/prisma";
 
-export const profile = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const profile = async (req: Request, res: Response, next: NextFunction) => {
   const { email } = req.user as { email: string };
   try {
     const foundUser = await prisma.user.findFirst({

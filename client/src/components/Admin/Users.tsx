@@ -121,6 +121,7 @@ export const AdminUsers: React.FC = () => {
         <Table>
           <thead>
             <tr>
+              <th />
               <th>Name</th>
               <th>Email</th>
               <th>Created at</th>
@@ -134,8 +135,9 @@ export const AdminUsers: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {results.map((user) => (
+            {results.map((user, index) => (
               <tr key={user.id}>
+                <td>{index + 1}</td>
                 <td>{user.name}</td>
                 <td>{user.email}</td>
                 {/* <td>{user.emailConfirmed}</td> */}
@@ -145,8 +147,11 @@ export const AdminUsers: React.FC = () => {
                 <td>{user.createdAt?.split("T")[0]}</td>
                 <td>{user.updatedAt?.split("T")[0]}</td>
                 <td>
-                  {user.artists.map((artist) => (
-                    <Link to={`/${artist.urlSlug}`}>{artist.name}</Link>
+                  {user.artists.map((artist, i) => (
+                    <React.Fragment key={artist.id}>
+                      <Link to={`/${artist.urlSlug}`}>{artist.name}</Link>
+                      {i < user.artists.length - 1 ? ", " : ""}
+                    </React.Fragment>
                   ))}
                 </td>
                 <td className="alignRight">
