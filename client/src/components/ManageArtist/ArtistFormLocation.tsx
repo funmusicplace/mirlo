@@ -3,13 +3,15 @@ import { useForm } from "react-hook-form";
 import { InputEl } from "components/common/Input";
 import Button from "components/common/Button";
 import { css } from "@emotion/css";
-import { FaMapPin, FaSave, FaTimes } from "react-icons/fa";
+import { FaSave, FaTimes } from "react-icons/fa";
+import { IoLocationSharp } from "react-icons/io5";
 import React from "react";
 import api from "services/api";
 import { useArtistContext } from "state/ArtistContext";
 import { useGlobalStateContext } from "state/GlobalState";
 import { useSnackbar } from "state/SnackbarContext";
 import { FaPen } from "react-icons/fa";
+import { bp } from "../../constants";
 
 interface FormData {
   location: string;
@@ -58,6 +60,10 @@ const ArtistFormLocation: React.FC<{ isManage: boolean }> = ({ isManage }) => {
         className={css`
           display: flex;
           align-items: center;
+          button {
+            margin-left: 0.5rem;
+            margin-top: -0.75rem;
+          }
         `}
       >
         {artist?.location && (
@@ -70,19 +76,24 @@ const ArtistFormLocation: React.FC<{ isManage: boolean }> = ({ isManage }) => {
             {artist?.location}
           </div>
         )}
-        {isArtistManager && (
-          <Button
-            variant="dashed"
-            compact
-            thin
-            onClick={() => setIsEditing(true)}
-            startIcon={<FaPen />}
+        {!artist?.location && (
+          <div
             className={css`
-              margin-left: 0.5rem;
+              opacity: 0.5;
+              text-transform: capitalize;
             `}
           >
             {t("editLocation")}
-          </Button>
+          </div>
+        )}
+        {isArtistManager && (
+          <Button
+            compact
+            onlyIcon
+            variant="dashed"
+            onClick={() => setIsEditing(true)}
+            startIcon={<FaPen />}
+          ></Button>
         )}
       </div>
     );
@@ -94,34 +105,52 @@ const ArtistFormLocation: React.FC<{ isManage: boolean }> = ({ isManage }) => {
         className={css`
           display: flex;
           align-items: center;
-          justify-content: center;
-          max-width: 300px;
-          margin-bottom: 0.5rem;
+          flex-wrap: wrap;
+          gap: 0.5rem;
         `}
       >
-        <FaMapPin />
-        <InputEl {...register(`location`)} placeholder="eg. North Pole" />
-      </div>
-      <div
-        className={css`
-          button {
-            margin-right: 0.5rem;
-          }
-        `}
-      >
-        <Button compact startIcon={<FaSave />} onClick={handleSubmit(doSave)}>
-          {t("saveLocation")}
-        </Button>
-        <Button
-          compact
-          startIcon={<FaTimes />}
-          onClick={() => {
-            reset();
-            setIsEditing(false);
-          }}
+        <div
+          className={css`
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            max-width: 300px;
+            font-size: 1.4rem;
+
+            @media screen and (max-width: ${bp.medium}px) {
+              max-width: 200px;
+            }
+          `}
         >
-          {t("cancel")}
-        </Button>
+          <IoLocationSharp />
+          <InputEl {...register(`location`)} placeholder="eg. North Pole" />
+        </div>
+        <div
+          className={css`
+            display: flex;
+            gap: 0.5rem;
+          `}
+        >
+          <Button
+            collapsible
+            compact
+            startIcon={<FaSave />}
+            onClick={handleSubmit(doSave)}
+          >
+            <p>{t("saveLocation")}</p>
+          </Button>
+          <Button
+            compact
+            collapsible
+            startIcon={<FaTimes />}
+            onClick={() => {
+              reset();
+              setIsEditing(false);
+            }}
+          >
+            <p>{t("cancel")}</p>
+          </Button>
+        </div>
       </div>
     </>
   );
