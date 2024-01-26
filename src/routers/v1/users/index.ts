@@ -10,7 +10,11 @@ export default function () {
   async function GET(req: Request, res: Response) {
     const users = await prisma.user.findMany({
       include: {
-        artists: true,
+        artists: {
+          where: {
+            deletedAt: null,
+          },
+        },
       },
     });
     res.json({ results: users });

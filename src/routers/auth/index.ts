@@ -7,6 +7,7 @@ import sendMail from "../../jobs/send-mail";
 import { randomUUID } from "crypto";
 import logger from "../../logger";
 import profile from "./profile";
+import signup from "./signup";
 
 const jwt_secret = process.env.JWT_SECRET ?? "";
 const refresh_secret = process.env.REFRESH_TOKEN_SECRET ?? "";
@@ -17,78 +18,7 @@ export async function hashPassword(password: string) {
   return await bcrypt.hash(password, 3);
 }
 
-router.post(`/signup`, async (req, res, next) => {
-  let {
-    name,
-    email,
-    password,
-    client: clientURL,
-    receiveMailingList,
-    accountType,
-  } = req.body;
-
-  if (!email || !password) {
-    res.status(400).json({ error: "Email and password must be supplied" });
-    return next();
-  }
-  try {
-    email = email.toLowerCase();
-
-    const existing = await prisma.user.findFirst({
-      where: {
-        email,
-      },
-    });
-
-    const client = await prisma.client.findFirst({
-      where: {
-        applicationUrl: clientURL,
-      },
-    });
-
-    if (!client) {
-      res.status(400).json({ error: "This client does not exist " });
-    } else if (existing) {
-      res.status(400).json({ error: "This user exists" });
-    } else {
-      const result = await prisma.user.create({
-        data: {
-          name,
-          email,
-          receiveMailingList,
-          password: await hashPassword(password),
-        },
-        select: {
-          name: true,
-          email: true,
-          id: true,
-          receiveMailingList,
-          emailConfirmationToken: true,
-        },
-      });
-
-      await sendMail({
-        data: {
-          template: "new-user",
-          message: {
-            to: result.email,
-          },
-          locals: {
-            accountType,
-            user: result,
-            host: process.env.API_DOMAIN,
-            client: client.id,
-          },
-        },
-      });
-
-      res.json(result);
-    }
-  } catch (e) {
-    console.error("An error was encountered signing up", e);
-    res.status(500);
-  }
-});
+router.post(`/signup`, signup);
 
 router.get(`/confirmation/:emailConfirmationToken`, async (req, res, next) => {
   try {

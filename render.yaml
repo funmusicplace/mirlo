@@ -140,6 +140,23 @@ services:
           name: blackbrd
           property: connectionString
       - fromGroup: blackbrd
+      - key: MINIO_ROOT_PASSWORD
+        fromService:
+          type: web
+          name: minio
+          envVarKey: MINIO_ROOT_PASSWORD
+      - key: MINIO_PORT
+        fromService:
+          type: web
+          name: minio
+          envVarKey: PORT
+      - key: MINIO_API_PORT
+        value: 9000
+      - key: MINIO_HOST
+        fromService:
+          type: web
+          name: minio
+          property: host
     branch: main # optional (defaults to master)
 
   - type: cron
