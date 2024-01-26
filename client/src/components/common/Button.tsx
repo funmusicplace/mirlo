@@ -10,6 +10,7 @@ export interface Compactable {
   transparent?: boolean;
   thin?: boolean;
   wrap?: boolean;
+  collapsible?: boolean;
   role?: "primary" | "secondary" | "warning";
   variant?: "link" | "big" | "outlined" | "dashed" | "default";
   color?: string;
@@ -121,14 +122,14 @@ const CustomButton = styled.button<Compactable>`
               ? props.color
               : `var(--mi-${props.role ?? "primary"}-color)`
           };
-          background-color: transparent;
+          background-color: var(--mi-lighten-background-color);
           border: 1px ${props.variant === "dashed" ? "dashed" : "solid"} ${
           props.color
             ? props.color
             : `var(--mi-${props.role ?? "primary"}-color)`
         };
           padding: ${props.compact ? ".3rem .5rem" : "1rem"};
-          font-weight: bold;
+          font-weight: bold; 
 
           &:hover:not(:disabled) {
             color: ${
@@ -163,6 +164,7 @@ const CustomButton = styled.button<Compactable>`
           padding: ${props.compact ? ".3rem .5rem" : "1rem"};
           padding: ${props.onlyIcon ? ".5rem .5rem" : ".6rem .6rem"};
           background-color:  var(--mi-${props.role ?? "secondary"}-color);
+          
           ${
             props.transparent
               ? "background-color:  transparent; font-weight: bold;"
@@ -177,6 +179,11 @@ const CustomButton = styled.button<Compactable>`
           &:hover:not(:disabled) {
             background-color: var(--mi-${props.role ?? "primary"}-color);
             color: var(--mi-${props.role ?? "secondary"}-color);
+          }
+          @media screen and (max-width: ${bp.medium}px) {
+              ${props.collapsible ? "border-radius: 100%;" : ""}
+              ${props.collapsible ? "> p {display: none;}" : ""}
+              ${props.collapsible ? "> span {margin: auto !important;} " : ""}
           }
           
           @media screen and (max-width: ${bp.small}px) {

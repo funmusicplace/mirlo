@@ -9,10 +9,6 @@ const SpaceBetweenDiv = styled.div`
   padding-bottom: 0.2rem;
   margin-bottom: 0.5rem;
 
-  button {
-    height: 2rem;
-  }
-
   @media screen and (max-width: ${bp.medium}px) {
     align-items: flex-start !important;
     flex-wrap: wrap;
