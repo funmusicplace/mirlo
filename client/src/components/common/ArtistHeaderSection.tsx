@@ -1,12 +1,8 @@
 import { css } from "@emotion/css";
-import { Link } from "react-router-dom";
 import { bp } from "../../constants";
 import { MetaCard } from "components/common/MetaCard";
 import styled from "@emotion/styled";
 import FollowArtist from "./FollowArtist";
-import { useGlobalStateContext } from "state/GlobalState";
-import Button from "./Button";
-import { useTranslation } from "react-i18next";
 import SpaceBetweenDiv from "./SpaceBetweenDiv";
 import ArtistFormLinks from "components/ManageArtist/ArtistFormLinks";
 import Avatar from "components/Artist/Avatar";
@@ -14,7 +10,6 @@ import ArtistFormLocation from "components/ManageArtist/ArtistFormLocation";
 import ArtistHeaderDescription from "components/Artist/ArtistHeaderDescription";
 import { useArtistContext } from "state/ArtistContext";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
-import { FaPen } from "react-icons/fa";
 
 const H1 = styled.h1<{ artistAvatar: boolean }>`
   font-size: 2.4rem;
@@ -92,10 +87,6 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
   const {
     state: { artist, isLoading },
   } = useArtistContext();
-  const { t } = useTranslation("translation", { keyPrefix: "artist" });
-  const {
-    state: { user },
-  } = useGlobalStateContext();
 
   const artistAvatar = artist?.avatar;
 
@@ -195,18 +186,6 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
                     </div>
                     <ArtistActions>
                       {!isManage && <FollowArtist artistId={artist.id} />}
-                      {!isManage && user?.id === artist.userId && (
-                        <Link to={`/manage/artists/${artist.id}`}>
-                          <Button
-                            startIcon={<FaPen />}
-                            compact
-                            type="button"
-                            variant="dashed"
-                          >
-                            {t("edit")}
-                          </Button>
-                        </Link>
-                      )}
                     </ArtistActions>
                   </div>
                 </SpaceBetweenDiv>
