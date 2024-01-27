@@ -39,6 +39,6 @@ export const isTrackOwnedOrPreview = (
   return ownsTrack || boughtTrack;
 };
 
-export const widgetUrl = (trackId: number) => {
-  return process.env.REACT_APP_CLIENT_DOMAIN + `/widget/track/${trackId}`;
+export const widgetUrl = (trackId: number, type: "track" | "trackGroup") => {
+  return process.env.REACT_APP_CLIENT_DOMAIN + `/widget/${type}/${trackId}`;
 };

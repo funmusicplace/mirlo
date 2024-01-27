@@ -186,7 +186,7 @@ const TrackRow: React.FC<{
           transparent
           onClick={(e) => {
             e.stopPropagation();
-            navigator.clipboard.writeText(widgetUrl(track.id));
+            navigator.clipboard.writeText(widgetUrl(track.id, "track"));
             snackbar("Copied track url", { type: "success" });
           }}
           startIcon={<FiLink />}
