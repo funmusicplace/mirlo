@@ -167,7 +167,7 @@ const TrackGroupCard: React.FC<{
           `}
         >
           <Link to={`/manage/artists/${album.artistId}/release/${album.id}`}>
-            <Button compact variant="outlined">
+            <Button compact thin variant="outlined">
               {t("manageAlbum")}
             </Button>
           </Link>
