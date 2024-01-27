@@ -54,6 +54,7 @@ const TrackWidget = () => {
           className={css`
             border: var(--mi-border);
             ${embeddedInMirlo && "min-height: 154px;"}
+            ${!embeddedInMirlo && "min-height: 169px;"}
             display: flex;
             width: 100%;
             justify-content: center;
@@ -100,9 +101,14 @@ const TrackWidget = () => {
                 }
               />
             </div>
-
             {isTrackOwnedOrPreview(track, user) && (
-              <PlayButtonsWrapper ids={[track.id]} />
+              <div
+                className={css`
+                  padding-right: 2%;
+                `}
+              >
+                <PlayButtonsWrapper ids={[track.id]} />
+              </div>
             )}
           </FlexWrapper>
           {track && !embeddedInMirlo && (
