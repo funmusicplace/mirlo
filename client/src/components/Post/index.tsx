@@ -48,7 +48,7 @@ export const PageMarkdownWrapper = styled.div`
 
   ul {
     margin-left: 1rem;
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
     line-height: 1.7rem;
   }
 
