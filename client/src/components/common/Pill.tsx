@@ -7,7 +7,6 @@ const Pill = styled.span`
   border: var(--mi-border);
   padding: 0.25rem 0.5rem;
   font-size: 0.9rem;
-  margin: 0 0.3rem;
   align-items: center;
 
   button {
