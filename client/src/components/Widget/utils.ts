@@ -65,9 +65,28 @@ export const TrackListWrapper = styled.div<{}>`
   padding-right: 2%;
   overflow: auto;
   max-height: 200px;
+  ::-webkit-scrollbar {
+    -webkit-appearance: none;
+    }
+  ::-webkit-scrollbar:vertical {
+    width: 7px;
+    }
+  ::-webkit-scrollbar:horizontal {
+    height: 7px;
+    }
+  ::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, .5);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, .5);
+    }
+  ::-webkit-scrollbar-track {
+    border-radius: 0px;  
+    background-color: rgba(255, 255, 255, .2); 
+    }
 
   @media screen and (max-width: ${bp.small}px) {
    max-height: 70px;
+   overflow: auto;
   }
           
 `;
