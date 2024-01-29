@@ -15,6 +15,7 @@ import { isTrackOwnedOrPreview, widgetUrl } from "utils/tracks";
 import { FlexWrapper, WidgetWrapper, inIframe, inMirlo } from "./utils";
 import { PlayButtonsWrapper } from "./PlayButtonsWrapper";
 import DisplayAudioWrapper from "./DisplayAudio";
+import { bp } from "../../constants";
 
 const TrackWidget = () => {
   const params = useParams();
@@ -84,42 +85,86 @@ const TrackWidget = () => {
               src={track.trackGroup.cover?.sizes?.[300] ?? ""}
               alt={track.title}
               size={135}
+              className={css`
+                width: auto !important;
+              `}
             />
 
-            <div
+            <FlexWrapper
               className={css`
                 width: 100%;
                 min-width: 30%;
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: space-between;
+                align-items: center;
+
+                @media screen and (max-width: ${bp.small}px) {
+                  flex-direction: column;
+                  align-items: flex-start;
+                }
               `}
             >
-              <SmallTileDetails
-                title={track.title}
-                subtitle={track.trackGroup.title}
-                footer={
-                  track.trackGroup.artist?.name ??
-                  (artistTranslation("unknown") as string)
-                }
-              />
-            </div>
-            {isTrackOwnedOrPreview(track, user) && (
-              <div
+              <FlexWrapper
                 className={css`
-                  padding-right: 2%;
+                  flex: 30%;
+
+                  @media screen and (max-width: ${bp.small}px) {
+                    width: 100%;
+                  }
                 `}
               >
-                <PlayButtonsWrapper ids={[track.id]} />
-              </div>
-            )}
+                <SmallTileDetails
+                  title={track.title}
+                  subtitle={track.trackGroup.title}
+                  footer={
+                    track.trackGroup.artist?.name ??
+                    (artistTranslation("unknown") as string)
+                  }
+                />
+              </FlexWrapper>
+              {isTrackOwnedOrPreview(track, user) && (
+                <div
+                  className={css`
+                    padding-right: 2%;
+                    padding-left: 1rem;
+                  `}
+                >
+                  <PlayButtonsWrapper ids={[track.id]} />
+                </div>
+              )}
+
+              <FlexWrapper
+                className={css`
+                  position: relative;
+                  width: 100%;
+                `}
+              >
+                {track && !embeddedInMirlo && (
+                  <div
+                    className={css`
+                      flex: 100%;
+                      width: 100%;
+                      padding: 1rem 2% 0 1rem;
+                      margin: auto;
+
+                      @media screen and (max-width: ${bp.small}px) {
+                        padding: 0.5rem 2% 0 1rem;
+                      }
+                    `}
+                  >
+                    <DisplayAudioWrapper>
+                      <AudioWrapper
+                        currentTrack={track}
+                        hideControls
+                        position="relative"
+                      />
+                    </DisplayAudioWrapper>
+                  </div>
+                )}
+              </FlexWrapper>
+            </FlexWrapper>
           </FlexWrapper>
-          {track && !embeddedInMirlo && (
-            <DisplayAudioWrapper>
-              <AudioWrapper
-                currentTrack={track}
-                hideControls
-                position="relative"
-              />
-            </DisplayAudioWrapper>
-          )}
         </WidgetWrapper>
       )}
     </>
