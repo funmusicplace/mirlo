@@ -27,6 +27,7 @@ const usePagination = ({ pageSize }: { pageSize: number }) => {
             <FaChevronLeft /> Previous page
           </LinkWithIcon>
         )}
+        {page > 0 && amount === pageSize && <> - </>}
         {amount === pageSize && (
           <LinkWithIcon to={`?page=${page + 1}`}>
             Next page <FaChevronRight />
