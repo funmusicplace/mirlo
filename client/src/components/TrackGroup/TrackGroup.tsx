@@ -293,7 +293,7 @@ function TrackGroup() {
 
           <div
             className={css`
-              margin-bottom: 1rem;
+              margin: 1rem 0;
               display: flex;
               flex-wrap: wrap;
               gap: 0.5rem;

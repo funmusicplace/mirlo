@@ -75,7 +75,6 @@ const PurchaseOrDownloadAlbum: React.FC<{
           >
             <Button
               variant="outlined"
-              compact
               onClick={() => setIsPurchasingAlbum(true)}
             >
               {t(purchaseText)}

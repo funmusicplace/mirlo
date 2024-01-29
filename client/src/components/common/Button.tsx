@@ -129,7 +129,6 @@ const CustomButton = styled.button<Compactable>`
             : `var(--mi-${props.role ?? "primary"}-color)`
         };
           padding: ${props.compact ? ".3rem .5rem" : "1rem"};
-          ${props.compact ? "height: 1.5rem;" : ""}
           font-weight: bold; 
 
           &:hover:not(:disabled) {
@@ -153,6 +152,9 @@ const CustomButton = styled.button<Compactable>`
           &[disabled] {
             color: #ddd;
             border-color: #ddd;
+          }
+          @media screen and (max-width: ${bp.medium}px) {
+           ${props.compact ? "height: 1.5rem;" : ""}
           }
         `;
       default:
