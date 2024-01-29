@@ -135,6 +135,7 @@ const TrackGroupWidget = () => {
           <div
             className={css`
               padding-bottom: 0.5rem;
+              max-height: 350px;
               @media screen and (max-width: ${bp.small}px) {
                 width: 240px;
                 max-width: 100%;
