@@ -37,7 +37,6 @@ export const TgWidgetWrapper = styled.div<{ embeddedInMirlo?: boolean }>`
   display: flex;
   gap: 4% 2.5%;
   width: 100%;
-  padding: 0.5rem;
   ${(props) => props.embeddedInMirlo && "min-height: 154px;"}
   flex-wrap: wrap;
   align-items: center;
@@ -64,10 +63,29 @@ export const TrackListWrapper = styled.div<{}>`
   background-color: var(--mi-normal-background-color);
   padding-right: 2%;
   overflow: auto;
-  max-height: 200px;
+  max-height: 280px;
+  ::-webkit-scrollbar {
+    -webkit-appearance: none;
+    }
+  ::-webkit-scrollbar:vertical {
+    width: 7px;
+    }
+  ::-webkit-scrollbar:horizontal {
+    height: 7px;
+    }
+  ::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, .5);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, .5);
+    }
+  ::-webkit-scrollbar-track {
+    border-radius: 0px;  
+    background-color: rgba(255, 255, 255, .2); 
+    }
 
   @media screen and (max-width: ${bp.small}px) {
    max-height: 70px;
+   overflow: auto;
   }
           
 `;
@@ -76,6 +94,7 @@ export const WidgetTitleWrapper = styled.div<{}>`
   display: flex;
   flex: 50%;
   max-width: 50%;
+  height: 100%;
   flex-direction: column;
   justify-content: center;
             
@@ -83,6 +102,7 @@ export const WidgetTitleWrapper = styled.div<{}>`
               
     max-width: 100%;             
     flex: 100%;
+    height: auto;
               
     a {            
       font-size: var(--mi-font-size-small) !important;            

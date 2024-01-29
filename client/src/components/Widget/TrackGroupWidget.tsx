@@ -135,6 +135,7 @@ const TrackGroupWidget = () => {
           <div
             className={css`
               padding-bottom: 0.5rem;
+              max-height: 350px;
               @media screen and (max-width: ${bp.small}px) {
                 width: 240px;
                 max-width: 100%;
@@ -207,15 +208,21 @@ const TrackGroupWidget = () => {
           </TrackListWrapper>
         </WidgetTitleWrapper>
       </TgWidgetWrapper>
-      {currentTrack && !embeddedInMirlo && (
-        <DisplayAudioWrapper>
-          <AudioWrapper
-            currentTrack={currentTrack}
-            hideControls
-            position="relative"
-          />
-        </DisplayAudioWrapper>
-      )}
+      <div
+        className={css`
+          padding-top: 0.75rem;
+        `}
+      >
+        {currentTrack && !embeddedInMirlo && (
+          <DisplayAudioWrapper>
+            <AudioWrapper
+              currentTrack={currentTrack}
+              hideControls
+              position="relative"
+            />
+          </DisplayAudioWrapper>
+        )}
+      </div>
     </WidgetWrapper>
   );
 };
