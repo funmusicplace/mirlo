@@ -33,10 +33,19 @@ const announcePublishPost = async () => {
     },
     include: {
       artist: {
+        where: {
+          deletedAt: null,
+        },
         include: {
           subscriptionTiers: {
+            where: {
+              deletedAt: null,
+            },
             include: {
               userSubscriptions: {
+                where: {
+                  deletedAt: null,
+                },
                 include: {
                   user: true,
                 },
