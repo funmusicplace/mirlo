@@ -163,6 +163,7 @@ const TrackGroupWidget = () => {
               )}
               {!embeddedInMirlo && trackGroup.artist && (
                 <a
+                  target={`"_blank"`}
                   href={`${process.env.REACT_APP_CLIENT_DOMAIN}${getReleaseUrl(
                     trackGroup.artist,
                     trackGroup
