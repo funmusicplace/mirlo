@@ -8,12 +8,21 @@ import { Link, useParams } from "react-router-dom";
 import api from "services/api";
 import { useGlobalStateContext } from "state/GlobalState";
 import { isTrackOwnedOrPreview, widgetUrl } from "utils/tracks";
-import { FlexWrapper, WidgetWrapper, inIframe, inMirlo } from "./utils";
+import {
+  FlexWrapper,
+  TgWidgetWrapper,
+  TrackListWrapper,
+  WidgetTitleWrapper,
+  WidgetWrapper,
+  inIframe,
+  inMirlo,
+} from "./utils";
 import PublicTrackGroupListing from "components/common/PublicTrackGroupListing";
 import { PlayButtonsWrapper } from "./PlayButtonsWrapper";
 import DisplayAudioWrapper from "./DisplayAudio";
 import useCurrentTrackHook from "components/Player/useCurrentTrackHook";
 import { getArtistUrlReference, getReleaseUrl } from "utils/artist";
+import { bp } from "../../constants";
 
 const TrackGroupWidget = () => {
   const { t } = useTranslation("translation", {
@@ -52,7 +61,7 @@ const TrackGroupWidget = () => {
       <div
         className={css`
           border: var(--mi-border);
-          ${embeddedInMirlo && "min-height: 154px;"}
+          ${embeddedInMirlo && "min-height: 450px;"}
           display: flex;
           width: 100%;
           justify-content: center;
@@ -73,78 +82,131 @@ const TrackGroupWidget = () => {
   });
 
   return (
-    <WidgetWrapper>
-      <MetaCard
-        title={`${trackGroup.title} by ${trackGroup.artist?.name ?? "Unknown"}`}
-        description={`An album on Mirlo`}
-        image={trackGroup.cover?.sizes?.[300]}
-        player={widgetUrl(trackGroup.id, "trackGroup")}
-      />
-      <FlexWrapper
-        className={css`
-          align-items: flex-start;
-        `}
-      >
-        <ImageWithPlaceholder
-          src={trackGroup.cover?.sizes?.[300] ?? ""}
-          alt={trackGroup.title}
-          size={135}
+    <WidgetWrapper
+      className={css`
+        height: 410px;
+        overflow: hidden;
+        background-color: white !important;
+        @media (prefers-color-scheme: dark) {
+          background-color: black !important;
+        }
+      `}
+    >
+      <TgWidgetWrapper>
+        <MetaCard
+          title={`${trackGroup.title} by ${
+            trackGroup.artist?.name ?? "Unknown"
+          }`}
+          description={`An album on Mirlo`}
+          image={trackGroup.cover?.sizes?.[600]}
+          player={widgetUrl(trackGroup.id, "trackGroup")}
         />
-        <div
+        <FlexWrapper
           className={css`
-            width: 100%;
+            flex: 20%;
+            max-width: 350px;
+            position: relative;
+
+            @media screen and (max-width: ${bp.small}px) {
+              max-width: 240px;
+              width: 100%;
+              flex: 100%;
+              margin-bottom: 0.5rem;
+            }
           `}
         >
           <div
             className={css`
-              padding: 0.5rem 2rem;
+              position: absolute;
+              right: 2.5%;
+              bottom: 2.5%;
             `}
           >
-            {embeddedInMirlo && trackGroup.artist && (
-              <Link to={getReleaseUrl(trackGroup.artist, trackGroup)}>
-                {trackGroup.title}
-              </Link>
-            )}
-            {!embeddedInMirlo && trackGroup.artist && (
-              <a
-                href={`${process.env.REACT_APP_CLIENT_DOMAIN}${getReleaseUrl(
-                  trackGroup.artist,
-                  trackGroup
-                )}`}
-              >
-                {trackGroup.title}
-              </a>
-            )}{" "}
-            by{" "}
-            {embeddedInMirlo && trackGroup.artist && (
-              <Link to={getArtistUrlReference(trackGroup.artist)}>
-                {trackGroup.artist.name}
-              </Link>
-            )}
-            {!embeddedInMirlo && trackGroup.artist && (
-              <a
-                href={`${
-                  process.env.REACT_APP_CLIENT_DOMAIN
-                }/${getArtistUrlReference(trackGroup.artist)}`}
-              >
-                {trackGroup.artist.name}
-              </a>
-            )}
+            <PlayButtonsWrapper ids={playableTracks.map((t) => t.id)} />
           </div>
-          <PublicTrackGroupListing
-            tracks={trackGroup.tracks}
-            trackGroup={trackGroup}
+          <ImageWithPlaceholder
+            src={trackGroup.cover?.sizes?.[600] ?? ""}
+            alt={trackGroup.title}
+            size={400}
           />
-        </div>
-        <div
-          className={css`
-            align-self: center;
-            padding: 0 2rem;
-          `}
-        >
-          <PlayButtonsWrapper ids={playableTracks.map((t) => t.id)} />
-        </div>
-      </FlexWrapper>
+        </FlexWrapper>
+
+        <WidgetTitleWrapper>
+          <div
+            className={css`
+              padding-bottom: 0.5rem;
+              @media screen and (max-width: ${bp.small}px) {
+                width: 240px;
+                max-width: 100%;
+                flex: 100%;
+                align-self: center;
+              }
+            `}
+          >
+            <FlexWrapper
+              className={css`
+                align-items: center;
+                padding-bottom: 1rem;
+
+                a {
+                  font-size: 1.5rem;
+                }
+                @media screen and (max-width: ${bp.small}px) {
+                  padding-bottom: 0.25rem;
+                }
+              `}
+            >
+              {embeddedInMirlo && trackGroup.artist && (
+                <Link to={getReleaseUrl(trackGroup.artist, trackGroup)}>
+                  {trackGroup.title}
+                </Link>
+              )}
+              {!embeddedInMirlo && trackGroup.artist && (
+                <a
+                  target={`"_blank"`}
+                  href={`${process.env.REACT_APP_CLIENT_DOMAIN}${getReleaseUrl(
+                    trackGroup.artist,
+                    trackGroup
+                  )}`}
+                >
+                  {trackGroup.title}
+                </a>
+              )}
+            </FlexWrapper>{" "}
+            <FlexWrapper
+              className={css`
+                align-items: flex-end;
+                a {
+                  padding-left: 0.25rem;
+                }
+              `}
+            >
+              by{" "}
+              {embeddedInMirlo && trackGroup.artist && (
+                <Link to={getArtistUrlReference(trackGroup.artist)}>
+                  {trackGroup.artist.name}
+                </Link>
+              )}
+              {!embeddedInMirlo && trackGroup.artist && (
+                <a
+                  target={`"_blank"`}
+                  href={`${
+                    process.env.REACT_APP_CLIENT_DOMAIN
+                  }/${getArtistUrlReference(trackGroup.artist)}`}
+                >
+                  {trackGroup.artist.name}
+                </a>
+              )}
+            </FlexWrapper>
+          </div>
+          <TrackListWrapper>
+            <PublicTrackGroupListing
+              tracks={trackGroup.tracks}
+              trackGroup={trackGroup}
+            />
+          </TrackListWrapper>
+        </WidgetTitleWrapper>
+      </TgWidgetWrapper>
       {currentTrack && !embeddedInMirlo && (
         <DisplayAudioWrapper>
           <AudioWrapper
