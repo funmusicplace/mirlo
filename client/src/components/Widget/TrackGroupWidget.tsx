@@ -207,15 +207,21 @@ const TrackGroupWidget = () => {
           </TrackListWrapper>
         </WidgetTitleWrapper>
       </TgWidgetWrapper>
-      {currentTrack && !embeddedInMirlo && (
-        <DisplayAudioWrapper>
-          <AudioWrapper
-            currentTrack={currentTrack}
-            hideControls
-            position="relative"
-          />
-        </DisplayAudioWrapper>
-      )}
+      <div
+        className={css`
+          padding-top: 0.75rem;
+        `}
+      >
+        {currentTrack && !embeddedInMirlo && (
+          <DisplayAudioWrapper>
+            <AudioWrapper
+              currentTrack={currentTrack}
+              hideControls
+              position="relative"
+            />
+          </DisplayAudioWrapper>
+        )}
+      </div>
     </WidgetWrapper>
   );
 };
