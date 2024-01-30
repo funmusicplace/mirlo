@@ -153,8 +153,13 @@ const CustomButton = styled.button<Compactable>`
             color: #ddd;
             border-color: #ddd;
           }
-          @media screen and (max-width: ${bp.medium}px) {
-           ${props.compact ? "height: 1.5rem;" : ""}
+          @media screen and (max-width: ${bp.small}px) {
+           ${
+             props.compact && props.onlyIcon
+               ? "height: 1.5rem; width: 1.5rem;"
+               : ""
+           }
+           ${props.compact ? "height: 1.5rem;" : ""}           
           }
         `;
       default:
