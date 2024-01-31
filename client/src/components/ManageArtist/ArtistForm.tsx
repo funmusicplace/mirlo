@@ -189,7 +189,7 @@ export const ArtistForm: React.FC<{
 
               <FormComponent>
                 <label>{t("urlSlug")} </label>
-                <ArtistSlugInput isDisabled={!!existing} />
+                <ArtistSlugInput />
               </FormComponent>
 
               <FormComponent>
