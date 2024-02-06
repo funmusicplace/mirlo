@@ -202,10 +202,19 @@ export const subscribeUserToArtist = async (
 };
 
 export const deleteArtist = async (userId: number, artistId: number) => {
+  await prisma.artist.update({
+    where: {
+      id: artistId,
+      userId,
+    },
+    data: {
+      urlSlug: `deleted-${artistId}`,
+    },
+  });
   await prisma.artist.deleteMany({
     where: {
-      id: Number(artistId),
-      userId: Number(userId),
+      id: artistId,
+      userId,
     },
   });
 

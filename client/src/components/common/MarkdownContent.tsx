@@ -5,21 +5,13 @@ import remarkGfm from "remark-gfm";
 import remarkEmbedder from "utils/remarkEmbedder";
 import MarkdownWrapper from "./MarkdownWrapper";
 import LoadingSpinner from "./LoadingSpinner";
+import { isWidgetUrl } from "utils/tracks";
 
 const BlackbirdTransformer = {
   name: "BlackbirdTransformer",
   // shouldTransform can also be async
   shouldTransform(url: string) {
-    const { host, pathname } = new URL(url);
-
-    const hostArray = ["localhost:8080", "mirlo.space"];
-
-    if (process.env.REACT_APP_CLIENT_DOMAIN?.split("//")[1]) {
-      hostArray.push(process.env.REACT_APP_CLIENT_DOMAIN?.split("//")[1]);
-    }
-    const includesHost = hostArray.includes(host);
-    const isWidget = pathname.includes("/widget");
-    return includesHost && isWidget;
+    return isWidgetUrl(url);
   },
   // We want to probably differentiate these from widgets in an
   // iframe and widgets happening inside our own blog posts

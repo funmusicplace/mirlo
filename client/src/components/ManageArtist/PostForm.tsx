@@ -1,9 +1,8 @@
 import React from "react";
 
-import { useForm } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import Button from "../common/Button";
 import { InputEl } from "../common/Input";
-import TextArea from "../common/TextArea";
 import FormComponent from "components/common/FormComponent";
 import { useSnackbar } from "state/SnackbarContext";
 import { pick } from "lodash";
@@ -14,6 +13,7 @@ import { useTranslation } from "react-i18next";
 import { SelectEl } from "components/common/Select";
 import useGetUserObjectById from "utils/useGetUserObjectById";
 import useErrorHandler from "services/useErrorHandler";
+import TextEditor from "components/common/TextEditor";
 
 type FormData = {
   title: string;
@@ -54,13 +54,18 @@ const PostForm: React.FC<{
     publishedAt.getMinutes() - publishedAt.getTimezoneOffset()
   );
 
-  const { register, handleSubmit, watch } = useForm<FormData>({
+  const methods = useForm<FormData>({
     defaultValues: existing
-      ? { ...existing, publishedAt: publishedAt.toISOString().slice(0, 16) }
+      ? {
+          ...existing,
+          publishedAt: publishedAt.toISOString().slice(0, 16),
+        }
       : {
           publishedAt: publishedAt.toISOString().slice(0, 16),
         },
   });
+
+  const { register, handleSubmit, watch } = methods;
 
   const isPublic = watch("isPublic");
   const minimumTier = watch("minimumTier");
@@ -111,74 +116,77 @@ const PostForm: React.FC<{
   );
 
   return (
-    <form onSubmit={handleSubmit(doSave)}>
-      <FormComponent>
-        {t("title")} <InputEl {...register("title")} />
-      </FormComponent>
-      <FormComponent>
-        {t("publicationDate")}{" "}
-        <InputEl type="datetime-local" {...register("publishedAt")} />
-      </FormComponent>
-      <FormComponent>
-        {t("content")} <TextArea {...register("content")} rows={10} />
-      </FormComponent>
-      <FormComponent
-        className={css`
-          margin-top: 0.5rem;
-          display: flex;
-          flex-direction: row !important;
-          align-items: center !important;
-          input {
-            margin: 0 !important;
-            height: 1rem;
-            width: 1rem;
-          }
-          label {
-            margin-bottom: 0 !important;
-          }
-        `}
-      >
-        <input id="private" type="checkbox" {...register("isPublic")} />{" "}
-        <label htmlFor="private">
-          {t("isSubscriptionOnly")}
-          <small>{t("isSubscriptionPostOnly")}</small>
-        </label>
-      </FormComponent>
-      {!isPublic && (
+    <FormProvider {...methods}>
+      <form onSubmit={handleSubmit(doSave)}>
         <FormComponent>
-          <label
-            className={css`
-              display: block;
-              margin-bottom: 0.5rem;
-            `}
-          >
-            {t("ifNotPublic")}
-          </label>
-          <SelectEl {...register("minimumTier")}>
-            <option value="">None</option>
-            {tiers?.map((tier) => (
-              <option value={tier.id}>{tier.name}</option>
-            ))}
-          </SelectEl>
-          {minimumTier && (
-            <small>
-              The mimimum tier will be{" "}
-              <em>
-                {tiers?.find((tier) => `${tier.id}` === minimumTier)?.name}
-              </em>
-              .
-            </small>
-          )}
+          {t("title")} <InputEl {...register("title")} />
         </FormComponent>
-      )}
-      <Button
-        type="submit"
-        disabled={isSaving || (minimumTier === "" && !isPublic)}
-        isLoading={isSaving}
-      >
-        {existing ? t("save") : t("saveNew")} {t("post")}
-      </Button>
-    </form>
+        <FormComponent>
+          {t("publicationDate")}{" "}
+          <InputEl type="datetime-local" {...register("publishedAt")} />
+        </FormComponent>
+        <FormComponent>
+          <TextEditor name="content" />
+          {/* {t("content")} <TextArea {...register("content")} rows={10} /> */}
+        </FormComponent>
+        <FormComponent
+          className={css`
+            margin-top: 0.5rem;
+            display: flex;
+            flex-direction: row !important;
+            align-items: center !important;
+            input {
+              margin: 0 !important;
+              height: 1rem;
+              width: 1rem;
+            }
+            label {
+              margin-bottom: 0 !important;
+            }
+          `}
+        >
+          <input id="private" type="checkbox" {...register("isPublic")} />{" "}
+          <label htmlFor="private">
+            {t("isSubscriptionOnly")}
+            <small>{t("isSubscriptionPostOnly")}</small>
+          </label>
+        </FormComponent>
+        {!isPublic && (
+          <FormComponent>
+            <label
+              className={css`
+                display: block;
+                margin-bottom: 0.5rem;
+              `}
+            >
+              {t("ifNotPublic")}
+            </label>
+            <SelectEl {...register("minimumTier")}>
+              <option value="">None</option>
+              {tiers?.map((tier) => (
+                <option value={tier.id}>{tier.name}</option>
+              ))}
+            </SelectEl>
+            {minimumTier && (
+              <small>
+                The mimimum tier will be{" "}
+                <em>
+                  {tiers?.find((tier) => `${tier.id}` === minimumTier)?.name}
+                </em>
+                .
+              </small>
+            )}
+          </FormComponent>
+        )}
+        <Button
+          type="submit"
+          disabled={isSaving || (minimumTier === "" && !isPublic)}
+          isLoading={isSaving}
+        >
+          {existing ? t("save") : t("saveNew")} {t("post")}
+        </Button>
+      </form>
+    </FormProvider>
   );
 };
 

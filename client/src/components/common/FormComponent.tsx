@@ -29,10 +29,6 @@ const FormComponent = styled.div<{ direction?: "row" | "column" }>`
   .error {
     color: var(--mi-warning-color);
   }
-
-  > div > div {
-    margin-bottom: 1rem;
-  }
 `;
 
 export default FormComponent;

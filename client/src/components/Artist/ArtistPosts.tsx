@@ -75,7 +75,7 @@ const ArtistPosts: React.FC = () => {
         <PostGrid>
           {artist.posts?.map((p) => (
             <Link
-              to={getPostURLReference(p)}
+              to={getPostURLReference({ ...p, artist })}
               className={css`
                 display: flex;
                 border-radius: 10px;

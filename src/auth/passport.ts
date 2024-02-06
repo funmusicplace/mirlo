@@ -104,7 +104,6 @@ export const userHasPermission = (role: "admin" | "owner") => {
         res.status(401).json({ error: "Unauthorized" });
         return;
       } else if (role === "admin" && !loggedInUser.isAdmin) {
-        console.log("error");
         res.status(401).json({ error: "Unauthorized" });
         return;
       }
@@ -129,6 +128,9 @@ export const artistBelongsToLoggedInUser = async (
   if (!loggedInUser) {
     res.status(401).json({ error: "Unauthorized" });
   } else {
+    if (loggedInUser.isAdmin) {
+      return next();
+    }
     if (loggedInUser.id !== Number(userId)) {
       res.status(401).json({
         error: `Artist must belong to user`,

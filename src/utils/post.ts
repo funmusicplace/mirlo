@@ -1,9 +1,10 @@
-import { Artist, ArtistAvatar, Post } from "@prisma/client";
+import { Artist, ArtistAvatar, Post, User } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
 import prisma from "../../prisma/prisma";
 import showdown from "showdown";
 import { addSizesToImage } from "./artist";
 import { finalArtistAvatarBucket } from "./minio";
+import { AppError } from "./error";
 
 export const processSinglePost = (
   post: Post & { artist?: (Artist & { avatar?: ArtistAvatar | null }) | null },
@@ -37,28 +38,42 @@ export const doesPostBelongToUser = async (
   next: NextFunction
 ) => {
   const { userId, postId } = req.params;
-
-  if (userId && postId) {
-    const post = await prisma.post.findFirst({
-      where: {
-        artist: {
-          userId: Number(userId),
-        },
-        deletedAt: null,
-      },
-    });
-    if (post) {
-      return next();
+  const loggedInUser = req.user as User | undefined;
+  try {
+    if (userId && postId) {
+      if (loggedInUser?.id === Number(userId) || loggedInUser?.isAdmin) {
+        const post = await prisma.post.findFirst({
+          where: {
+            artist: {
+              userId: Number(userId),
+            },
+            deletedAt: null,
+          },
+        });
+        if (post) {
+          return next();
+        } else {
+          const e = new AppError({
+            httpCode: 401,
+            description: "Post must belong to user",
+          });
+          next(e);
+        }
+      } else {
+        const e = new AppError({
+          httpCode: 401,
+          description: "Post must belong to user",
+        });
+        next(e);
+      }
     } else {
-      res.status(400).json({
-        error: `Post must belong to user`,
+      const e = new AppError({
+        httpCode: 400,
+        description: "Invalid request",
       });
-      return next(`Post must belong to user`);
+      next(e);
     }
-  } else {
-    res.status(400).json({
-      error: `Bad request`,
-    });
-    return next(`userId and postId are required`);
+  } catch (e) {
+    next(e);
   }
 };

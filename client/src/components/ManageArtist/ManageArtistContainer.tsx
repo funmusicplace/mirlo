@@ -1,12 +1,13 @@
 import { css } from "@emotion/css";
 import React from "react";
 import { bp } from "../../constants";
-import { Outlet, useLocation } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import ArtistHeaderSection from "../common/ArtistHeaderSection";
 import { useGlobalStateContext } from "state/GlobalState";
 import { useTranslation } from "react-i18next";
 import styled from "@emotion/styled";
 import { useArtistContext } from "state/ArtistContext";
+import Box from "components/common/Box";
 
 const Container = styled.div<{ artistBanner: boolean; userId?: number }>`
   width: 100%;
@@ -65,12 +66,16 @@ export const ArtistPageWrapper: React.FC<{
   );
 };
 
-const ManageArtist: React.FC<{}> = () => {
+const ManageArtistContainer: React.FC<{}> = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
 
   const {
     state: { artist },
   } = useArtistContext();
+
+  const {
+    state: { user },
+  } = useGlobalStateContext();
 
   const location = useLocation();
 
@@ -78,6 +83,10 @@ const ManageArtist: React.FC<{}> = () => {
 
   if (!artist) {
     return null;
+  }
+
+  if (user?.id !== artist?.userId) {
+    <Navigate to="/manage" />;
   }
 
   const dontShowHeader =
@@ -88,6 +97,16 @@ const ManageArtist: React.FC<{}> = () => {
   return (
     <ArtistPageWrapper artistBanner={!!artistBanner}>
       <>
+        {user && artist.userId !== user.id && (
+          <Box
+            className={css`
+              background-color: var(--mi-warning-color);
+              color: white;
+            `}
+          >
+            You are viewing this artist as an admin
+          </Box>
+        )}
         {!dontShowHeader && <ArtistHeaderSection artist={artist} isManage />}
 
         {!artist.enabled && (
@@ -107,4 +126,4 @@ const ManageArtist: React.FC<{}> = () => {
   );
 };
 
-export default ManageArtist;
+export default ManageArtistContainer;

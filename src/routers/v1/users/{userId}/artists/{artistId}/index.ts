@@ -105,7 +105,6 @@ export default function () {
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { userId, artistId } = req.params as unknown as Params;
     const castArtistId = await findArtistIdForURLSlug(artistId);
-
     try {
       if (userId) {
         const artist = await prisma.artist.findFirst({

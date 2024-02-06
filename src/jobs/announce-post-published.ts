@@ -64,7 +64,7 @@ const announcePublishPost = async () => {
       const subscriptions = flatten(
         post.artist?.subscriptionTiers.map((st) => st.userSubscriptions)
       );
-      const postContent = markdownAsHtml(post.content);
+      const postContent = post.content;
       logger.info(
         `mailing post: ${post.title} to ${subscriptions.length} subscribers`
       );

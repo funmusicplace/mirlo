@@ -42,3 +42,17 @@ export const isTrackOwnedOrPreview = (
 export const widgetUrl = (trackId: number, type: "track" | "trackGroup") => {
   return process.env.REACT_APP_CLIENT_DOMAIN + `/widget/${type}/${trackId}`;
 };
+
+export const isWidgetUrl = (url: string) => {
+  const { host, pathname } = new URL(url);
+
+  const hostArray = ["localhost:8080", "mirlo.space"];
+
+  if (process.env.REACT_APP_CLIENT_DOMAIN?.split("//")[1]) {
+    hostArray.push(process.env.REACT_APP_CLIENT_DOMAIN?.split("//")[1]);
+  }
+  const includesHost = hostArray.includes(host);
+  const isWidget = pathname.includes("/widget");
+
+  return includesHost && isWidget;
+};

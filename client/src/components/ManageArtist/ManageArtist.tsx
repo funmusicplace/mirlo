@@ -22,17 +22,18 @@ import { ArtistSection } from "components/Artist/Artist";
 import styled from "@emotion/styled";
 
 export const MainButtons = styled.div`
-          display: flex;
-          width: 100%;
-          justify-content: flex-end;
-          flex-direction: column;
-          margin-bottom: 1rem;
+  display: flex;
+  width: 100%;
+  justify-content: flex-end;
+  flex-direction: column;
+  margin-bottom: 1rem;
 
-          @media screen and (max-width: ${bp.medium}px) {
-            padding: var(--mi-side-paddings-xsmall);
-            padding-top: 0.5rem;
-            margin-bottom: 0;
-      `;
+  @media screen and (max-width: ${bp.medium}px) {
+    padding: var(--mi-side-paddings-xsmall);
+    padding-top: 0.5rem;
+    margin-bottom: 0;
+  }
+`;
 
 const ManageArtist: React.FC<{}> = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });

@@ -5,7 +5,7 @@ import Modal from "components/common/Modal";
 // import Select from "components/common/Select";
 import Table from "components/common/Table";
 import React from "react";
-import { FaEdit } from "react-icons/fa";
+import { FaCheck, FaEdit } from "react-icons/fa";
 import { Link, Outlet, useNavigate, useParams } from "react-router-dom";
 import api from "services/api";
 // import { AdminUser, fetchUsers, fetchCSVAndDownload } from "services/api/Admin";
@@ -131,6 +131,7 @@ export const AdminUsers: React.FC = () => {
               {/* <th>Role</th> */}
               <th>Updated at</th>
               <th>Artists</th>
+              <th>Stripe set up</th>
               <th />
             </tr>
           </thead>
@@ -154,6 +155,7 @@ export const AdminUsers: React.FC = () => {
                     </React.Fragment>
                   ))}
                 </td>
+                <td>{user.stripeAccountId ? <FaCheck /> : ""}</td>
                 <td className="alignRight">
                   <IconButton compact onClick={() => onClickQueue(user.id)}>
                     <FaEdit />

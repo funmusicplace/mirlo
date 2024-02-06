@@ -8,6 +8,7 @@
     "signUpButton": "Sign up",
     "success": "Registration success!",
     "logIn": "Alrieady have an account? Log in",
+    "notArtistName": "You will be able to create multiple artist accounts, this can be anything",
     "termsAndPrivacy": "By signing up you agree to our <terms>terms</terms> and <privacy>privacy</privacy> policies",
     "receiveMailingList": "Stay up to date with Mirlo and our product by signing up to our mailing list"
   },
@@ -145,7 +146,7 @@
 
     "continueWithName": "Continue with {{ name }}",
     "platformPercentDisclaimer": "Mirlo is evaluating the platform percentage and seeking input from musicians in the next few weeks.",
-    "platformPercent": "{{ percent }}% ({{ money }}) of this purchase will go to maintain Mirlo. This does not include the cut taken by our payment processor"
+    "platformPercent": "{{ percent }}% ({{ money }}) will go to {{ artistName }}. This does not include the cut taken by our payment processor"
   },
   "clickToPlay": {
     "goToAlbum": "Go To Album"
@@ -413,7 +414,7 @@
     "sustainedBy": "Mirlo's work is sustained by our community, not by venture capital",
     "logIn": "Log in",
     "signUp": "Sign up",
-    "mirloConstruction": "Wanna talk more? <email>E-mail us</email>, <discord>join our Discord</discord>, or join us <office>for office hours</office>! Also check out our <about>About page</about>, <faq>FAQ</faq>, and <github>the code on GitHub</github>.",
+    "mirloConstruction": "Wanna talk more? <email>E-mail us</email>, <discord>join our Discord</discord>, or join us <office>for office hours</office>! Also check out our <about>About page</about>, <faq>FAQ</faq>, and <github>the code on GitHub</github>. <br /> <br/ >Want to just receive our monthly newsletter? <mailingList>Sign up</mailingList>",
     "latestCommunityPost": "Latest posts from the community"
   },
   "faq": {

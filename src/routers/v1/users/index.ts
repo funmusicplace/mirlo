@@ -16,6 +16,9 @@ export default function () {
           },
         },
       },
+      orderBy: {
+        createdAt: "desc",
+      },
     });
     res.json({ results: users });
   }

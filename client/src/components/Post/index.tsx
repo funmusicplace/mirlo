@@ -1,7 +1,7 @@
 import { css } from "@emotion/css";
 import Button from "components/common/Button";
 import { MetaCard } from "components/common/MetaCard";
-import MarkdownContent from "components/common/MarkdownContent";
+import parse from "html-react-parser";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { FaPen } from "react-icons/fa";
@@ -16,6 +16,7 @@ import LoadingBlocks from "components/Artist/LoadingBlocks";
 import SupportArtistPopUp from "components/common/SupportArtistPopUp";
 import Avatar from "components/Artist/Avatar";
 import styled from "@emotion/styled";
+import MarkdownWrapper from "components/common/MarkdownWrapper";
 
 export const PageMarkdownWrapper = styled.div`
   width: 100%;
@@ -38,7 +39,6 @@ export const PageMarkdownWrapper = styled.div`
   }
 
   p {
-    margin-bottom: 1.7rem !important;
     line-height: 1.7rem !important;
   }
 
@@ -120,9 +120,9 @@ const Post: React.FC = () => {
             `}
           >
             <h1>{post.title}</h1>
-            {ownedByUser && (
-              <Link to={`/manage/artists/${post.artist?.id}`}>
-                <Button compact startIcon={<FaPen />}>
+            {(ownedByUser || user?.isAdmin) && (
+              <Link to={`/manage/artists/${post.artistId}/post/${post.id}`}>
+                <Button variant="dashed" startIcon={<FaPen />}>
                   {t("edit")}
                 </Button>
               </Link>
@@ -168,12 +168,7 @@ const Post: React.FC = () => {
               {t("notAvailable")}
             </div>
           )}
-          <MarkdownContent
-            content={post.content}
-            className={css`
-              padding-top: 1rem;
-            `}
-          />
+          <MarkdownWrapper>{parse(post.content)}</MarkdownWrapper>
         </div>
       </div>
       {post.artist && (

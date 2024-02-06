@@ -75,6 +75,7 @@ const ArtistFormLinks: React.FC<{ isManage: boolean }> = ({ isManage }) => {
           {artist?.links?.map((l) => {
             return (
               <a
+                rel="me"
                 href={l}
                 key={l}
                 className={css`

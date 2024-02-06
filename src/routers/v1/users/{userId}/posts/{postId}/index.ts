@@ -94,13 +94,17 @@ export default function () {
     },
   };
 
-  async function GET(req: Request, res: Response) {
+  async function GET(req: Request, res: Response, next: NextFunction) {
     const { postId }: { postId?: string } = req.params;
 
-    const post = await prisma.post.findUnique({
-      where: { id: Number(postId) },
-    });
-    res.json({ result: post });
+    try {
+      const post = await prisma.post.findUnique({
+        where: { id: Number(postId) },
+      });
+      res.json({ result: post });
+    } catch (e) {
+      next(e);
+    }
   }
 
   GET.apiDoc = {

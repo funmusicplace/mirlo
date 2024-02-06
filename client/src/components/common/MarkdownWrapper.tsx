@@ -20,12 +20,18 @@ const MarkdownWrapper = styled.div`
     font-size: 1.2rem;
   }
 
-  p {
-    margin-bottom: 0.75rem;
-  }
-
   iframe {
     margin: 1rem 0;
+  }
+
+  iframe.ql-video {
+    width: 700px;
+    height: 394px;
+  }
+
+  iframe[src*="widget/track"].ql-video {
+    width: 700px;
+    height: 154px;
   }
 
   li {

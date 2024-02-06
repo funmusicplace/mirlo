@@ -126,6 +126,7 @@ interface User {
   artists: Artist[];
   updatedAt: string;
   createdAt: string;
+  stripeAccountId?: string;
 }
 
 interface ArtistSubscriptionTier {

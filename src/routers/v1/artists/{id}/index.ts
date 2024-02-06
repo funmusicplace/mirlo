@@ -50,8 +50,7 @@ export default function () {
         return next();
       }
     } catch (e) {
-      console.error(`artist/${id}`, e);
-      res.status(500);
+      next(e);
     }
   }
 

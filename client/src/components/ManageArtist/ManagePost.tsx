@@ -3,7 +3,6 @@ import { Link, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useArtistContext } from "state/ArtistContext";
 import useGetUserObjectById from "utils/useGetUserObjectById";
-import { useGlobalStateContext } from "state/GlobalState";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import ManageSectionWrapper from "./ManageSectionWrapper";
 import { css } from "@emotion/css";
@@ -18,14 +17,12 @@ const ManagePost: React.FC<{}> = () => {
   const { t } = useTranslation("translation", { keyPrefix: "managePost" });
 
   const { postId } = useParams();
-  const {
-    state: { user },
-  } = useGlobalStateContext();
+
   const {
     state: { artist },
   } = useArtistContext();
 
-  const userId = user?.id;
+  const userId = artist?.userId;
 
   const {
     object: post,
@@ -45,6 +42,8 @@ const ManagePost: React.FC<{}> = () => {
     <ManageSectionWrapper
       className={css`
         padding-top: 1rem !important;
+        max-width: var(--mi-container-medium);
+        margin: 0 auto;
       `}
     >
       <div
