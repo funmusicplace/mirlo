@@ -101,7 +101,6 @@ export default async (job: Job) => {
     try {
       await fsPromises.stat(tempFolder);
     } catch (e) {
-      console.log("statting failed");
       await fsPromises.mkdir(tempFolder, { recursive: true });
     }
 
@@ -153,7 +152,6 @@ export default async (job: Job) => {
 
       // good practice to catch warnings (ie stat failures and other non-blocking errors)
       archive.on("warning", function (err) {
-        console.log("warning");
         if (err.code === "ENOENT") {
           // log warning
         } else {
@@ -164,12 +162,11 @@ export default async (job: Job) => {
 
       // good practice to catch this error explicitly
       archive.on("error", function (err) {
-        console.log("erroring");
+        console.error("erroring", err);
         throw err;
       });
 
       archive.on("finish", () => {
-        console.log("finishing building archive");
         resolve();
       });
 

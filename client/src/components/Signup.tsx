@@ -120,8 +120,9 @@ function Signup() {
             <InputEl
               type="input"
               {...register("name")}
-              title="This name doesn't have to be your Artist Name."
+              title={t("notArtistName") ?? ""}
             />
+            <small>{t("notArtistName")}</small>
           </FormComponent>
           <FormComponent>
             <label>{t("email")}</label>

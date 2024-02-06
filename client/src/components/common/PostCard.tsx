@@ -1,5 +1,4 @@
 import { css } from "@emotion/css";
-import MarkdownContent from "./MarkdownContent";
 import Box from "./Box";
 import { Link } from "react-router-dom";
 import { getArtistUrlReference, getPostURLReference } from "utils/artist";
@@ -121,7 +120,8 @@ const PostCard: React.FC<{
               color: var(--mi-normal-foreground-color);
             `}
           >
-            <MarkdownContent content={p.content} />
+            <div dangerouslySetInnerHTML={{ __html: p.content }} />
+            {/* <MarkdownContent content={p.content} /> */}
           </span>
         </div>
       </div>

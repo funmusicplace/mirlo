@@ -29,6 +29,9 @@ export default function () {
           banner: true,
           user: true,
         },
+        orderBy: {
+          createdAt: "desc",
+        },
       });
       res.json({
         results: artists.map((artist) => processSingleArtist(artist)),

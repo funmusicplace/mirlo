@@ -239,7 +239,7 @@ router.post(
       const { email, password } = req.body;
       const foundUser = await prisma.user.findFirst({
         where: {
-          email,
+          email: email.toLowerCase(),
           emailConfirmationToken: null,
         },
       });

@@ -132,6 +132,10 @@ const Splash = () => {
             className={css`
               font-size: 0.875rem;
               line-height: 1.5;
+
+              br {
+                margin-bottom: 1rem;
+              }
             `}
           >
             <Trans
@@ -154,6 +158,10 @@ const Splash = () => {
                 discord: <a href="https://discord.gg/VjKq26raKX"></a>,
                 // eslint-disable-next-line jsx-a11y/anchor-has-content
                 email: <a href="mailto:mirlodotspace@proton.me"></a>,
+                mailingList: (
+                  // eslint-disable-next-line jsx-a11y/anchor-has-content
+                  <a href="https://dashboard.mailerlite.com/forms/396303/100612617721087214/share"></a>
+                ),
               }}
             />
           </p>

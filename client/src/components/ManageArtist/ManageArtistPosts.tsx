@@ -6,7 +6,6 @@ import { useGlobalStateContext } from "state/GlobalState";
 import NewPostForm from "./NewPostForm";
 import Box from "components/common/Box";
 import { FaPen, FaTrash } from "react-icons/fa";
-import MarkdownContent from "components/common/MarkdownContent";
 import { useSnackbar } from "state/SnackbarContext";
 import PostForm from "./PostForm";
 import Modal from "components/common/Modal";
@@ -17,6 +16,8 @@ import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import { ManageSectionWrapper } from "./ManageSectionWrapper";
 import { formatDate } from "components/TrackGroup/ReleaseDate";
 import { Link } from "react-router-dom";
+import parse from "html-react-parser";
+import MarkdownWrapper from "components/common/MarkdownWrapper";
 
 const ManageArtistPosts: React.FC<{}> = () => {
   const {
@@ -151,7 +152,7 @@ const ManageArtistPosts: React.FC<{}> = () => {
               published {formatDate({ date: p.publishedAt, i18n })}
             </p>
           </SpaceBetweenDiv>
-          <MarkdownContent content={p.content} />
+          <MarkdownWrapper>{parse(p.content)}</MarkdownWrapper>
         </Box>
       ))}
       {managePost && (

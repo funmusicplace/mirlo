@@ -1,6 +1,5 @@
 import produce from "immer";
 import React, { createContext } from "react";
-import { useGlobalStateContext } from "./GlobalState";
 import { useLocation, useParams } from "react-router-dom";
 import api from "services/api";
 
@@ -30,19 +29,20 @@ type Actions = SetArtist | SetLoading | SetState;
 
 export const fetchArtist = async (
   artistId?: string,
-  managedArtist?: boolean,
-  userId?: number
+  managedArtist?: boolean
 ) => {
   let artist;
   if (artistId) {
+    const { result } = await api.get<Artist>(`artists/${artistId}`);
+    const publicArtist = result;
+
     if (managedArtist) {
       const { result } = await api.get<Artist>(
-        `users/${userId}/artists/${artistId}`
+        `users/${publicArtist.userId}/artists/${artistId}`
       );
       artist = result;
     } else {
-      const { result } = await api.get<Artist>(`artists/${artistId}`);
-      artist = result;
+      artist = publicArtist;
     }
   }
 
@@ -96,10 +96,6 @@ export const ArtistProvider: React.FC<{
   children: React.ReactNode;
   managedArtist?: boolean;
 }> = ({ children, managedArtist }) => {
-  const {
-    state: { user },
-  } = useGlobalStateContext();
-  const userId = user?.id;
   const { pathname } = useLocation();
   const { artistId } = useParams();
   const [state, dispatch] = React.useReducer(stateReducer, {
@@ -108,14 +104,14 @@ export const ArtistProvider: React.FC<{
   });
 
   const refreshArtist = React.useCallback(async () => {
-    const artist = await fetchArtist(artistId, managedArtist, userId);
+    const artist = await fetchArtist(artistId, managedArtist);
     if (artist) {
       dispatch({
         type: "setArtist",
         artist,
       });
     }
-  }, [artistId, managedArtist, userId]);
+  }, [artistId, managedArtist]);
 
   const initialLoad = React.useCallback(
     async (newPathname: string) => {
@@ -123,8 +119,7 @@ export const ArtistProvider: React.FC<{
         dispatch({ type: "setIsLoading", isLoading: true });
         const artist = await fetchArtist(
           artistId,
-          newPathname.includes("manage"),
-          userId
+          newPathname.includes("manage")
         );
 
         const checkAccountStatus = await checkArtistStripeStatus(
@@ -157,7 +152,7 @@ export const ArtistProvider: React.FC<{
         });
       }
     },
-    [artistId, userId]
+    [artistId]
   );
 
   React.useEffect(() => {

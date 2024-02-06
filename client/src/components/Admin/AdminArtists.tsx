@@ -17,7 +17,9 @@ export const AdminArtists: React.FC = () => {
 
   React.useEffect(() => {
     const callback = async () => {
-      const { results } = await api.getMany<AdminArtist>("admin/artists");
+      const { results } = await api.getMany<AdminArtist>(
+        "admin/artists?orderBy=createdAt"
+      );
       setResults(results);
     };
     callback();

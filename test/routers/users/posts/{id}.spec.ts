@@ -25,6 +25,53 @@ describe("users/{userId}/posts/{postId}", () => {
   });
 
   describe("PUT", () => {
+    it("should not PUT for a non-admin user", async () => {
+      const { user: owner } = await createUser({
+        email: "owner@test.com",
+      });
+
+      const { accessToken: nonAdminToken } = await createUser({
+        email: "test@test.com",
+      });
+
+      const artist = await createArtist(owner.id);
+      const post = await createPost(artist.id);
+      const response = await requestApp
+        .put(`users/${owner.id}/posts/${post.id}`)
+        .send({
+          title: "new title",
+        })
+        .set("Cookie", [`jwt=${nonAdminToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.body.error, "Post must belong to user");
+      assert.equal(response.statusCode, 401);
+    });
+
+    it("should not PUT for a non-admin user", async () => {
+      const { user: owner } = await createUser({
+        email: "owner@test.com",
+      });
+
+      const { accessToken: adminToken } = await createUser({
+        email: "test@test.com",
+        isAdmin: true,
+      });
+
+      const artist = await createArtist(owner.id);
+      const post = await createPost(artist.id);
+      const response = await requestApp
+        .put(`users/${owner.id}/posts/${post.id}`)
+        .send({
+          title: "new title",
+        })
+        .set("Cookie", [`jwt=${adminToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.body.result.title, "new title");
+      assert.equal(response.statusCode, 200);
+    });
+
     it("should PUT / a new title", async () => {
       const { user, accessToken } = await createUser({
         email: "test@test.com",
