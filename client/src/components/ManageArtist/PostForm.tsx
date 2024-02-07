@@ -119,7 +119,7 @@ const PostForm: React.FC<{
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(doSave)}>
         <FormComponent>
-          {t("title")} <InputEl {...register("title")} />
+          {t("title")} <InputEl {...register("title")} required />
         </FormComponent>
         <FormComponent>
           {t("publicationDate")}{" "}
@@ -127,7 +127,6 @@ const PostForm: React.FC<{
         </FormComponent>
         <FormComponent>
           <TextEditor name="content" />
-          {/* {t("content")} <TextArea {...register("content")} rows={10} /> */}
         </FormComponent>
         <FormComponent
           className={css`
@@ -164,7 +163,9 @@ const PostForm: React.FC<{
             <SelectEl {...register("minimumTier")}>
               <option value="">None</option>
               {tiers?.map((tier) => (
-                <option value={tier.id}>{tier.name}</option>
+                <option value={tier.id} key={tier.id}>
+                  {tier.name}
+                </option>
               ))}
             </SelectEl>
             {minimumTier && (
@@ -180,7 +181,11 @@ const PostForm: React.FC<{
         )}
         <Button
           type="submit"
-          disabled={isSaving || (minimumTier === "" && !isPublic)}
+          disabled={
+            isSaving ||
+            (minimumTier === "" && !isPublic) ||
+            !methods.formState.isValid
+          }
           isLoading={isSaving}
         >
           {existing ? t("save") : t("saveNew")} {t("post")}
