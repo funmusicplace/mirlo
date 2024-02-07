@@ -24,6 +24,10 @@ const MarkdownWrapper = styled.div`
     margin: 1rem 0;
   }
 
+  img {
+    max-width: 100%;
+  }
+
   iframe.ql-video {
     width: 700px;
     height: 394px;
@@ -53,12 +57,6 @@ const MarkdownWrapper = styled.div`
 
   p {
     clear: both;
-  }
-
-  p img {
-    float: left;
-    margin: 0 1rem 1rem 0;
-    width: 150px;
   }
 `;
 

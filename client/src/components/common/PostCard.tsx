@@ -2,6 +2,8 @@ import { css } from "@emotion/css";
 import Box from "./Box";
 import { Link } from "react-router-dom";
 import { getArtistUrlReference, getPostURLReference } from "utils/artist";
+import parse from "html-react-parser";
+import MarkdownWrapper from "./MarkdownWrapper";
 
 const PostCard: React.FC<{
   height: string;
@@ -120,8 +122,7 @@ const PostCard: React.FC<{
               color: var(--mi-normal-foreground-color);
             `}
           >
-            <div dangerouslySetInnerHTML={{ __html: p.content }} />
-            {/* <MarkdownContent content={p.content} /> */}
+            <MarkdownWrapper>{parse(p.content)}</MarkdownWrapper>
           </span>
         </div>
       </div>
