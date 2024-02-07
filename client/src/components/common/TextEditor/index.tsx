@@ -84,7 +84,7 @@ const TextEditor: React.FC<{ name: string }> = ({ name }) => {
 
               button.ql-mirlo {
                 &:after {
-                  content: "\\25B6";
+                  content: "♫";
                   display: block;
                 }
               }
