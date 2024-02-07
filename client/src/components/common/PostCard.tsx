@@ -120,6 +120,10 @@ const PostCard: React.FC<{
               overflow: hidden;
               text-overflow: ellipsis;
               color: var(--mi-normal-foreground-color);
+
+              iframe {
+                width: auto !important;
+              }
             `}
           >
             <MarkdownWrapper>{parse(p.content)}</MarkdownWrapper>
