@@ -87,7 +87,7 @@ const TrackWidget = () => {
               size={135}
               className={css`
                 width: auto !important;
-                border-radius: 5px;
+                border-radius: 5px 0 0 5px;
               `}
             />
 
