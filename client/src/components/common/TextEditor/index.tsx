@@ -58,9 +58,15 @@ const TextEditor: React.FC<{ onChange: (val: any) => void; value: string }> = ({
             padding: 1rem;
             background-color: var(--mi-lighten-x-background-color);
 
-            ul {
+            ul,
+            ol {
               margin-left: 1rem;
               margin-bottom: 1.5rem;
+            }
+
+            li > ol,
+            li > ul {
+              list-style: lower-alpha;
             }
           }
         `

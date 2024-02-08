@@ -49,10 +49,16 @@ const MarkdownWrapper = styled.div`
     margin-left: 1.2rem;
   }
 
-  ul {
+  ul,
+  ol {
     margin-left: 1rem;
     margin-bottom: 1rem;
     margin-top: 0.75rem;
+  }
+
+  li > ol,
+  li > ul {
+    list-style: lower-alpha;
   }
 
   pre {
@@ -65,6 +71,7 @@ const MarkdownWrapper = styled.div`
 
   p {
     clear: both;
+    margin-bottom: 1rem;
   }
 
   strong {
