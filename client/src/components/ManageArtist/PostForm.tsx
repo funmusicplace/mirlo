@@ -1,6 +1,6 @@
 import React from "react";
 
-import { FormProvider, useForm } from "react-hook-form";
+import { Controller, FormProvider, useForm } from "react-hook-form";
 import Button from "../common/Button";
 import { InputEl } from "../common/Input";
 import FormComponent from "components/common/FormComponent";
@@ -119,15 +119,26 @@ const PostForm: React.FC<{
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(doSave)}>
         <FormComponent>
-          {t("title")} <InputEl {...register("title")} />
+          {t("title")} <InputEl {...register("title")} required />
         </FormComponent>
         <FormComponent>
           {t("publicationDate")}{" "}
           <InputEl type="datetime-local" {...register("publishedAt")} />
         </FormComponent>
         <FormComponent>
-          <TextEditor name="content" />
-          {/* {t("content")} <TextArea {...register("content")} rows={10} /> */}
+          <Controller
+            name="content"
+            render={({ field: { onChange, value, ref } }) => {
+              return (
+                <TextEditor
+                  onChange={(val: any) => {
+                    onChange(val);
+                  }}
+                  value={value}
+                />
+              );
+            }}
+          ></Controller>
         </FormComponent>
         <FormComponent
           className={css`
@@ -164,7 +175,9 @@ const PostForm: React.FC<{
             <SelectEl {...register("minimumTier")}>
               <option value="">None</option>
               {tiers?.map((tier) => (
-                <option value={tier.id}>{tier.name}</option>
+                <option value={tier.id} key={tier.id}>
+                  {tier.name}
+                </option>
               ))}
             </SelectEl>
             {minimumTier && (
@@ -180,7 +193,11 @@ const PostForm: React.FC<{
         )}
         <Button
           type="submit"
-          disabled={isSaving || (minimumTier === "" && !isPublic)}
+          disabled={
+            isSaving ||
+            (minimumTier === "" && !isPublic) ||
+            !methods.formState.isValid
+          }
           isLoading={isSaving}
         >
           {existing ? t("save") : t("saveNew")} {t("post")}

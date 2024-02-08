@@ -120,7 +120,17 @@ export const Modal: React.FC<{
   title?: string;
   onClose: () => void;
   size?: "small";
-}> = ({ children, open, onClose, size, title }) => {
+  className?: string;
+  contentClassName?: string;
+}> = ({
+  children,
+  open,
+  onClose,
+  size,
+  title,
+  className,
+  contentClassName,
+}) => {
   const [container] = React.useState(() => {
     // This will be executed only on the initial render
     // https://reactjs.org/docs/hooks-reference.html#lazy-initial-state
@@ -153,7 +163,7 @@ export const Modal: React.FC<{
     <>
       <Background onClick={onCloseWrapper} />
       <div className={wrapper} data-cy="modal">
-        <Content size={size}>
+        <Content size={size} className={className}>
           <SpaceBetweenDiv
             className={css`
               position: sticky;
@@ -197,7 +207,9 @@ export const Modal: React.FC<{
               <FaTimes />
             </IconButton>
           </SpaceBetweenDiv>
-          <ChildrenWrapper>{children}</ChildrenWrapper>
+          <ChildrenWrapper className={contentClassName}>
+            {children}
+          </ChildrenWrapper>
         </Content>
       </div>
     </>,

@@ -10,7 +10,7 @@ import { FaPen } from "react-icons/fa";
 import { useGlobalStateContext } from "state/GlobalState";
 import { bp } from "../../constants";
 
-const ArtistContainer: React.FC<{ isManage: boolean }> = (isManage) => {
+const ArtistContainer: React.FC<{ isManage?: boolean }> = (isManage) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
 
   const { trackGroupId, postId } = useParams();

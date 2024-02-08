@@ -60,6 +60,7 @@ const ArtistFormLocation: React.FC<{ isManage: boolean }> = ({ isManage }) => {
         className={css`
           display: flex;
           align-items: center;
+          margin-top: 1rem;
           button {
             margin-left: 0.5rem;
             margin-top: -0.75rem;

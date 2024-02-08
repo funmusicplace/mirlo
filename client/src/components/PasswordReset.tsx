@@ -68,7 +68,12 @@ function PasswordReset() {
   );
 
   return (
-    <div>
+    <div
+      className={css`
+        display: flex;
+        flex-direction: column;
+      `}
+    >
       {!token && (
         <form
           className={css`
@@ -76,6 +81,7 @@ function PasswordReset() {
             margin: 0 auto;
             display: flex;
             flex-direction: column;
+            margin-top: 2rem;
           `}
           onSubmit={initSubmit(onInitPasswordReset)}
         >
@@ -107,8 +113,9 @@ function PasswordReset() {
         alt="a blackbird"
         src="/images/blackbird.png"
         className={css`
-          width: 100%;
-          padding: 4rem 0;
+          width: 50%;
+          padding: 2rem 0;
+          margin: 3rem auto;
         `}
       />
     </div>

@@ -52,6 +52,7 @@ const MarkdownWrapper = styled.div`
   ul {
     margin-left: 1rem;
     margin-bottom: 1rem;
+    margin-top: 0.75rem;
   }
 
   pre {
@@ -64,6 +65,15 @@ const MarkdownWrapper = styled.div`
 
   p {
     clear: both;
+  }
+
+  strong {
+    font-weight: bold;
+  }
+
+  table {
+    width: 100%;
+    margin-bottom: 1rem;
   }
 `;
 

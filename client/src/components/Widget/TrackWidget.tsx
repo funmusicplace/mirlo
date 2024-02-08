@@ -16,6 +16,7 @@ import { FlexWrapper, WidgetWrapper, inIframe, inMirlo } from "./utils";
 import { PlayButtonsWrapper } from "./PlayButtonsWrapper";
 import DisplayAudioWrapper from "./DisplayAudio";
 import { bp } from "../../constants";
+import LoadingBlocks from "components/Artist/LoadingBlocks";
 
 const TrackWidget = () => {
   const params = useParams();
@@ -47,6 +48,10 @@ const TrackWidget = () => {
 
     callback();
   }, [params.id]);
+
+  if (isLoading) {
+    return <LoadingBlocks />;
+  }
 
   return (
     <>

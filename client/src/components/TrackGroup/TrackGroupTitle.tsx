@@ -14,6 +14,7 @@ import TrackGroupAdminMenu from "./TrackGroupAdminMenu";
 
 import React from "react";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
+import TrackGroupEmbed from "./TrackGroupEmbed";
 
 const TrackGroupTitle: React.FC<{ trackGroup: TrackGroup }> = ({
   trackGroup,
@@ -112,22 +113,25 @@ const TrackGroupTitle: React.FC<{ trackGroup: TrackGroup }> = ({
               to={`/manage/artists/${artist.id}/release/${trackGroup.id}`}
               style={{ marginRight: "0" }}
             >
-              <Button compact startIcon={<FaPen />}>
+              <Button compact startIcon={<FaPen />} variant="dashed">
                 {t("edit")}
               </Button>
             </Link>
           )}
-          {user?.isAdmin && (
-            <div
-              className={css`
-                padding-left: 1rem;
-              `}
-            >
-              <DropdownMenu compact>
-                <TrackGroupAdminMenu trackGroup={trackGroup} />
-              </DropdownMenu>
-            </div>
-          )}
+          <div
+            className={css`
+              padding-left: 1rem;
+            `}
+          >
+            <DropdownMenu compact>
+              <>
+                {user?.isAdmin && (
+                  <TrackGroupAdminMenu trackGroup={trackGroup} />
+                )}
+                <TrackGroupEmbed trackGroup={trackGroup} />
+              </>
+            </DropdownMenu>
+          </div>
         </div>
       </div>
     </>

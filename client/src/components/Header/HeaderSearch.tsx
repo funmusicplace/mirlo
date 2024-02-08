@@ -17,9 +17,10 @@ const HeaderSearch: React.FC = () => {
   return (
     <AutoComplete
       getOptions={getOptions}
+      showBackground
       placeholder="Search artists"
       resultsPrefix={t("searchSuggestions") ?? undefined}
-      optionDisplay={(r: { id: number; name: string }) => (
+      optionDisplay={(r: { id: number | string; name: string }) => (
         <li key={r.id}>
           <Link to={`/${r.id}`}>{r.name}</Link>
         </li>
