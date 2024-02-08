@@ -31,11 +31,18 @@ const MarkdownWrapper = styled.div`
   iframe.ql-video {
     width: 700px;
     height: 394px;
+    max-width: 100%;
   }
 
   iframe[src*="widget/track"].ql-video {
     width: 700px;
-    height: 154px;
+    height: 137px;
+    max-width: 100%;
+  }
+  iframe[src*="widget/trackgroup"].ql-video {
+    width: 700px;
+    height: 361px;
+    max-width: 100%;
   }
 
   li {

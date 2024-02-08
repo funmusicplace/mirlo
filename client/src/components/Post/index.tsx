@@ -129,7 +129,12 @@ const Post: React.FC = () => {
             )}
           </div>
           {post.artist && (
-            <SpaceBetweenDiv>
+            <SpaceBetweenDiv
+              className={css`
+                padding-bottom: 2rem !important;
+                padding-top: 0.5rem;
+              `}
+            >
               <span
                 className={css`
                   margin-right: 0.25rem;

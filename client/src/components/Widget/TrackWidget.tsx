@@ -87,6 +87,7 @@ const TrackWidget = () => {
               size={135}
               className={css`
                 width: auto !important;
+                border-radius: 5px;
               `}
             />
 
@@ -149,7 +150,8 @@ const TrackWidget = () => {
                       margin: auto;
 
                       @media screen and (max-width: ${bp.small}px) {
-                        padding: 0.5rem 2% 0 1rem;
+                        padding: 0.5rem 0 0 0;
+                        margin-top: 0.1rem;
                       }
                     `}
                   >

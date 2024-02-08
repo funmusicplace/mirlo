@@ -22,7 +22,6 @@ export const WidgetWrapper = styled.div<{ embeddedInMirlo?: boolean }>`
   border: var(--mi-border);
   flex-direction: column;
   width: 100%;
-  padding: 0.5rem;
   ${(props) => props.embeddedInMirlo && "min-height: 154px;"}
   display: flex;
   flex-direction: column;
@@ -31,15 +30,16 @@ export const WidgetWrapper = styled.div<{ embeddedInMirlo?: boolean }>`
   border-radius: 0.3rem;
   box-sizing: border-box;
   background: var(--mi-normal-background-color);
+  a {
+    color: var(--mi-normal-foreground-color)}
 `;
 
 export const TgWidgetWrapper = styled.div<{ embeddedInMirlo?: boolean }>`
   display: flex;
-  gap: 4% 2.5%;
   width: 100%;
   ${(props) => props.embeddedInMirlo && "min-height: 154px;"}
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   border-radius: 0.3rem;
   box-sizing: border-box;
@@ -50,8 +50,9 @@ export const TgWidgetWrapper = styled.div<{ embeddedInMirlo?: boolean }>`
 
   @media screen and (max-width: ${bp.small}px) {
     grid-template-columns: repeat(1, 1fr);
-    padding: .5rem .5rem 0 .5rem;
+    padding: .5rem 0 0 0rem;
     justify-content: center;
+    align-content: space-between;
     gap: 0;
   }
 `;
@@ -59,8 +60,6 @@ export const TgWidgetWrapper = styled.div<{ embeddedInMirlo?: boolean }>`
 export const TrackListWrapper = styled.div<{}>`
 
   border-top: var(--mi-border);
-  border-bottom: var(--mi-border);
-  background-color: var(--mi-normal-background-color);
   padding-right: 2%;
   overflow: auto;
   max-height: 280px;
@@ -92,11 +91,12 @@ export const TrackListWrapper = styled.div<{}>`
 export const WidgetTitleWrapper = styled.div<{}>`
 
   display: flex;
-  flex: 50%;
-  max-width: 50%;
+  flex: 45%;
+  border-left: var(--mi-border);
+  max-width: 100%;
   height: 100%;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
             
   @media screen and (max-width: ${bp.small}px) {
               

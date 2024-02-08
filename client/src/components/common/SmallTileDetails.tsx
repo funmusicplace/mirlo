@@ -32,6 +32,10 @@ export const SmallTileDetails: React.FC<{
           padding-left: 1rem;
           width: 100%;
           height: 100%;
+
+          @media screen and (max-width: ${bp.small}px) {
+            padding-top: 0.5rem;
+          }
         `}
       >
         <WidgetSection
@@ -44,7 +48,7 @@ export const SmallTileDetails: React.FC<{
             }
             @media screen and (max-width: ${bp.small}px) {
               font-size: var(--mi-font-size-normal);
-              margin-bottom: 0.5rem;
+              margin-bottom: 0.25rem;
             }
           `}
         >
@@ -67,7 +71,7 @@ export const SmallTileDetails: React.FC<{
 
             @media screen and (max-width: ${bp.small}px) {
               font-size: var(--mi-font-size-xsmall);
-              margin-bottom: 0.5rem;
+              margin-bottom: 0.25rem;
             }
           `}
         >

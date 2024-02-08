@@ -61,7 +61,7 @@ const TrackGroupWidget = () => {
       <div
         className={css`
           border: var(--mi-border);
-          ${embeddedInMirlo && "min-height: 450px;"}
+          ${embeddedInMirlo && "min-height: 364px;"}
           display: flex;
           width: 100%;
           justify-content: center;
@@ -84,7 +84,8 @@ const TrackGroupWidget = () => {
   return (
     <WidgetWrapper
       className={css`
-        height: 410px;
+        ${embeddedInMirlo && "min-height: 360px;"}
+        ${!embeddedInMirlo && "min-height: 366px;"}
         overflow: hidden;
         background-color: white !important;
         @media (prefers-color-scheme: dark) {
@@ -103,12 +104,12 @@ const TrackGroupWidget = () => {
         />
         <FlexWrapper
           className={css`
-            flex: 20%;
-            max-width: 350px;
+            flex: 55%;
+            max-width: 360px;
             position: relative;
 
             @media screen and (max-width: ${bp.small}px) {
-              max-width: 240px;
+              max-width: 227px;
               width: 100%;
               flex: 100%;
               margin-bottom: 0.5rem;
@@ -134,10 +135,11 @@ const TrackGroupWidget = () => {
         <WidgetTitleWrapper>
           <div
             className={css`
-              padding-bottom: 0.5rem;
-              max-height: 350px;
+              padding: 0.5rem 0.5rem 0.5rem 1rem;
+              max-height: 360px;
               @media screen and (max-width: ${bp.small}px) {
-                width: 240px;
+                width: 227px;
+                padding: 0 0 0.5rem 0;
                 max-width: 100%;
                 flex: 100%;
                 align-self: center;
@@ -208,11 +210,7 @@ const TrackGroupWidget = () => {
           </TrackListWrapper>
         </WidgetTitleWrapper>
       </TgWidgetWrapper>
-      <div
-        className={css`
-          padding-top: 0.75rem;
-        `}
-      >
+      <div>
         {currentTrack && !embeddedInMirlo && (
           <DisplayAudioWrapper>
             <AudioWrapper
