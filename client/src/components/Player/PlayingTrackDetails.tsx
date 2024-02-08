@@ -66,7 +66,6 @@ const PlayingTrackDetails: React.FC<{ currentTrack: Track }> = ({
             <div
               className={css`
                 opacity: 0.6;
-                text-transform: capitalize;
                 color: grey;
                 white-space: nowrap;
                 overflow: hidden;
@@ -86,7 +85,6 @@ const PlayingTrackDetails: React.FC<{ currentTrack: Track }> = ({
             </div>
             <div
               className={css`
-          text-transform: capitalize;
           font-weight: bold;
           overflow: hidden;
           white-space: nowrap;
