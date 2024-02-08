@@ -58,6 +58,10 @@ const TextEditor: React.FC<{ onChange: (val: any) => void; value: string }> = ({
             padding: 1rem;
             background-color: var(--mi-lighten-x-background-color);
 
+            img {
+              max-width: 100%;
+            }
+
             ul,
             ol {
               margin-left: 1rem;

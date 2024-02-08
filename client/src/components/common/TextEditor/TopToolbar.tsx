@@ -44,7 +44,11 @@ const TopToolbar: React.FC = () => {
         }
       `}
     >
-      <Toolbar>
+      <Toolbar
+        className={css`
+          flex-wrap: wrap;
+        `}
+      >
         <HeadingLevelButtonGroup />
         <BasicFormattingButtonGroup />
         <ToggleBlockquoteButton />
