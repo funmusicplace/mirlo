@@ -11,8 +11,6 @@ import {
   Toolbar,
 } from "@remirror/react";
 
-import { FaImage } from "react-icons/fa";
-import Button from "../Button";
 import InsertVideoButton from "./InsertVideoButton";
 import { css } from "@emotion/css";
 import InsertMirloWidgetButton from "./InsertMirloWidgetButton";
@@ -56,7 +54,7 @@ const TopToolbar: React.FC = () => {
           <CreateTableButton />
         </CommandButtonGroup>
         <CommandButtonGroup>
-          <Button startIcon={<FaImage />} />
+          {/* <Button startIcon={<FaImage />} /> */}
           <InsertVideoButton />
           <InsertMirloWidgetButton />
         </CommandButtonGroup>
