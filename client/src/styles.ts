@@ -91,9 +91,9 @@ body {
   font-smoothing: antialiased;
 }
 
-body,
-#root {
+body, root {
   min-height: 100%;
+  background-color: transparent;
 }
 
 h1 {
