@@ -1,6 +1,6 @@
 import React from "react";
 
-import { FormProvider, useForm } from "react-hook-form";
+import { Controller, FormProvider, useForm } from "react-hook-form";
 import Button from "../common/Button";
 import { InputEl } from "../common/Input";
 import FormComponent from "components/common/FormComponent";
@@ -126,7 +126,19 @@ const PostForm: React.FC<{
           <InputEl type="datetime-local" {...register("publishedAt")} />
         </FormComponent>
         <FormComponent>
-          <TextEditor name="content" />
+          <Controller
+            name="content"
+            render={({ field: { onChange, value, ref } }) => {
+              return (
+                <TextEditor
+                  onChange={(val: any) => {
+                    onChange(val);
+                  }}
+                  value={value}
+                />
+              );
+            }}
+          ></Controller>
         </FormComponent>
         <FormComponent
           className={css`

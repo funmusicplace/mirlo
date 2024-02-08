@@ -407,6 +407,12 @@
     "reactError": "React Error ",
     "unexpectedError": "Sorry, an unexpected error has occurred."
   },
+  "trackGroupEmbed": {
+    "share": "Share",
+    "copyAlbum": "Copy album link",
+    "copyIframe": "If you want to embed the track in an other website, copy the below code:",
+    "copiedToClipboard": "Copied to clipboard!"
+  },
   "home": {
     "support": "Directly support musicians. Buy their music. Collectively owned and managed.",
     "mailingList": "Get on the mailing list",

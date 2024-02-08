@@ -12,6 +12,10 @@ export const getTrackGroupUrlReference = (trackGroup: TrackGroup) => {
   return `${trackGroup.id}`;
 };
 
+export const getTrackGroupWidget = (trackGroupId: number) => {
+  return `${process.env.REACT_APP_CLIENT_DOMAIN}/widget/trackGroup/${trackGroupId}`;
+};
+
 export const getReleaseUrl = (artist: Artist, trackGroup: TrackGroup) => {
   return `/${getArtistUrlReference(artist)}/release/${getTrackGroupUrlReference(
     trackGroup

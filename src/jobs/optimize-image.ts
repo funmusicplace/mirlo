@@ -52,7 +52,7 @@ const optimizeImage = async (job: Job) => {
     logger.info(`Got object of size ${size}`);
     const promises = Object.entries(config)
       .map(([key, value]) => {
-        const outputType = key as "webp" | "jpeg"; // output type (jpeg, webp)
+        const outputType = key as "webp" | "jpeg" | "png"; // output type (jpeg, webp)
         const {
           // @ts-ignore
           options = {},

@@ -46,14 +46,14 @@ const ManageTags: React.FC<{ tags?: string[] }> = ({ tags: existingTags }) => {
     const tags = await api.getMany<{ tag: string; id: number }>(
       `tags?tag=${searchValue}`
     );
-    return tags.results.map((t) => ({ name: t.tag, id: t.id }));
+    return tags.results.map((t) => ({ name: t.tag, id: t.tag }));
   };
 
   const saveTags = React.useCallback(
-    async (newValue: string) => {
+    async (newValue: string | number) => {
       const newTags = uniq([
         ...tags,
-        newValue.toLowerCase().split(" ").join("-"),
+        `${newValue}`.toLowerCase().split(" ").join("-"),
       ]);
       update(newTags);
       setTags(newTags);

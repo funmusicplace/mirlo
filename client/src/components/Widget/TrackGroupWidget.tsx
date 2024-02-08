@@ -84,8 +84,11 @@ const TrackGroupWidget = () => {
   return (
     <WidgetWrapper
       className={css`
+<<<<<<< HEAD
         ${embeddedInMirlo && "min-height: 360px;"}
         ${!embeddedInMirlo && "min-height: 366px;"}
+=======
+>>>>>>> 9f7af27 (chore: switch to new blog editor)
         overflow: hidden;
         background-color: white !important;
         @media (prefers-color-scheme: dark) {
@@ -210,8 +213,8 @@ const TrackGroupWidget = () => {
           </TrackListWrapper>
         </WidgetTitleWrapper>
       </TgWidgetWrapper>
-      <div>
-        {currentTrack && !embeddedInMirlo && (
+      {currentTrack && !embeddedInMirlo && (
+        <div>
           <DisplayAudioWrapper>
             <AudioWrapper
               currentTrack={currentTrack}
@@ -219,8 +222,8 @@ const TrackGroupWidget = () => {
               position="relative"
             />
           </DisplayAudioWrapper>
-        )}
-      </div>
+        </div>
+      )}
     </WidgetWrapper>
   );
 };

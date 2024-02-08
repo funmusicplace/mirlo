@@ -10,12 +10,18 @@ import Button from "./Button";
 const AutoComplete: React.FC<{
   getOptions: (
     val: string
-  ) => Promise<{ id: number; name: string }[]> | { id: number; name: string }[];
+  ) =>
+    | Promise<{ id: number | string; name: string }[]>
+    | { id: number | string; name: string }[];
   resultsPrefix?: string;
-  onSelect?: (value: string) => void;
-  optionDisplay?: (result: { id: number; name: string }) => React.ReactNode;
+  onSelect?: (value: string | number) => void;
+  optionDisplay?: (result: {
+    id: number | string;
+    name: string;
+  }) => React.ReactNode;
   placeholder?: string;
   allowNew?: boolean;
+  showBackground?: boolean;
 }> = ({
   getOptions,
   resultsPrefix,
@@ -23,6 +29,7 @@ const AutoComplete: React.FC<{
   onSelect,
   placeholder,
   allowNew,
+  showBackground,
 }) => {
   const [searchValue, setSearchValue] = React.useState("");
   const { t } = useTranslation("translation", { keyPrefix: "headerSearch" });
@@ -30,7 +37,7 @@ const AutoComplete: React.FC<{
   const [showSuggestions, setShowSuggestions] = React.useState(false);
   const [isSearching, setIsSearching] = React.useState(false);
   const [searchResults, setSearchResults] = React.useState<
-    { id: number; name: string }[]
+    { id: number | string; name: string }[]
   >([]);
   const [navigationIndex, setNavigationIndex] = React.useState(0);
 
@@ -59,7 +66,7 @@ const AutoComplete: React.FC<{
   );
 
   const onSelectValue = React.useCallback(
-    (value: string, index?: number) => {
+    (value: string | number, index?: number) => {
       if (searchResults.length > 0 && index) {
         onSelect?.(searchResults[index].name);
       } else {
@@ -73,6 +80,8 @@ const AutoComplete: React.FC<{
   React.useEffect(() => {
     searchCallback(searchValue);
   }, [searchCallback, searchValue]);
+
+  console.log("searchResults", searchResults);
 
   return (
     <div
@@ -141,6 +150,7 @@ const AutoComplete: React.FC<{
               setShowSuggestions(false);
               setSearchValue("");
             }}
+            transparent={!showBackground}
           />
           <div
             className={css`
@@ -206,7 +216,7 @@ const AutoComplete: React.FC<{
                           : undefined
                       }
                     >
-                      <Button onClick={() => onSelectValue(r.name, index)}>
+                      <Button onClick={() => onSelectValue(r.id, index)}>
                         {r.name}
                       </Button>
                     </li>

@@ -5,7 +5,11 @@ import DownloadAlbumButton from "components/common/DownloadAlbumButton";
 const TrackGroupAdminMenu: React.FC<{
   trackGroup: TrackGroup;
 }> = (props) => {
-  return <DownloadAlbumButton trackGroup={props.trackGroup} />;
+  return (
+    <li>
+      <DownloadAlbumButton trackGroup={props.trackGroup} />
+    </li>
+  );
 };
 
 export default TrackGroupAdminMenu;

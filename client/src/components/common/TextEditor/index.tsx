@@ -1,117 +1,86 @@
-import { css } from "@emotion/css";
 import React from "react";
-import { Controller } from "react-hook-form";
-import ReactQuill, { Quill } from "react-quill";
-import "react-quill/dist/quill.snow.css";
+import {
+  PlaceholderExtension,
+  TableExtension,
+  ImageExtension,
+  wysiwygPreset,
+  DropCursorExtension,
+  IframeExtension,
+} from "remirror/extensions";
+import { EditorComponent, Remirror, useRemirror } from "@remirror/react";
+import "remirror/styles/all.css";
+import { css } from "@emotion/css";
 
-import { isWidgetUrl } from "utils/tracks";
+import { FloatingToolbar, TableComponents } from "@remirror/react";
+import { prosemirrorNodeToHtml } from "@remirror/core-utils";
 
-const formats = [
-  "header",
-  "bold",
-  "italic",
-  "underline",
-  "strike",
-  "blockquote",
-  "list",
-  "bullet",
-  "indent",
-  "link",
-  "image",
-  "video",
-  "mirlo",
+import TopToolbar from "./TopToolbar";
+
+/**
+ * Bubble menu for the pre-packaged editors
+ */
+export const BubbleMenu: React.FC = () => <FloatingToolbar />;
+
+const extensions = () => [
+  new PlaceholderExtension({ placeholder: "Type something" }),
+  new TableExtension(),
+  new DropCursorExtension(),
+  new ImageExtension(),
+  new IframeExtension(),
+  ...wysiwygPreset(),
 ];
 
-const TextEditor: React.FC<{ name: string }> = ({ name }) => {
-  const quillRef = React.useRef<ReactQuill>();
+const TextEditor: React.FC<{ onChange: (val: any) => void; value: string }> = ({
+  onChange,
+  value,
+}) => {
+  const { manager, state, setState } = useRemirror({
+    extensions,
+    content: value,
+    // content: "",
+    stringHandler: "html",
 
-  const modules = React.useMemo(
-    () => ({
-      toolbar: {
-        container: [
-          [{ header: [1, 2, false] }],
-          ["bold", "italic", "underline", "strike", "blockquote"],
-          [{ list: "ordered" }, { list: "bullet" }],
-          ["link", "image", "video", "mirlo"],
-        ],
-        handlers: {
-          mirlo: (value: unknown) => {
-            if (value) {
-              var url = prompt("Enter the link for the track");
-              const quill = quillRef.current?.getEditor();
-              if (quill && url && isWidgetUrl(url)) {
-                let range = quill.getSelection(true);
-                quill.insertText(range.index, "\n", Quill.sources.USER);
-
-                quill.insertEmbed(
-                  range.index + 1,
-                  "video",
-                  url,
-                  Quill.sources.USER
-                );
-
-                quill.formatText(
-                  { index: range.index + 1, length: range.length },
-                  "1",
-                  {
-                    height: "154",
-                    width: "400",
-                  }
-                );
-                quill.setSelection(range.index + 2, Quill.sources.SILENT);
-              }
-            }
-          },
-        },
-      },
-    }),
-    []
-  );
+    selection: "end",
+  });
 
   return (
-    <Controller
-      name={name}
-      render={({ field: { onChange, value, ref } }) => {
-        return (
-          <ReactQuill
-            ref={(el) => {
-              quillRef.current = el ?? undefined;
-            }}
-            value={value}
-            className={css`
-              width: 100%;
-              margin-bottom: 3.5rem;
+    <div
+      className={
+        // `remirror-theme ` +
+        css`
+          width: 100%;
 
-              button.ql-mirlo {
-                &:after {
-                  content: "♫";
-                  display: block;
-                }
-              }
-              .ql-container {
-                background: var(--mi-lighten-x-background-color);
-                font-size: 1.2rem;
-                min-height: 300px;
-              }
+          p {
+            margin-bottom: 1rem;
+          }
 
-              iframe.ql-video {
-                width: 700px;
-                height: 394px;
-              }
+          .remirror-editor {
+            padding: 1rem;
+            background-color: var(--mi-lighten-x-background-color);
 
-              iframe[src*="widget/track"].ql-video {
-                width: 700px;
-                height: 154px;
-              }
-            `}
-            theme="snow"
-            onChange={onChange}
-            modules={modules}
-            formats={formats}
-          />
-        );
-      }}
-    />
+            ul {
+              margin-left: 1rem;
+              margin-bottom: 1.5rem;
+            }
+          }
+        `
+      }
+    >
+      <Remirror
+        manager={manager}
+        state={state}
+        onChange={(parameter) => {
+          // Update the state to the latest value.
+          onChange(prosemirrorNodeToHtml(parameter.state.doc));
+          setState(parameter.state);
+        }}
+      >
+        <TopToolbar />
+        <EditorComponent />
+        <BubbleMenu />
+        <TableComponents />
+      </Remirror>
+    </div>
   );
 };
 
