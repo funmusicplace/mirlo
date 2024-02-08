@@ -20,6 +20,10 @@ const PlayingTrackDetails: React.FC<{ currentTrack: Track }> = ({
         margin-bottom: 0.3rem;
         padding-top: 0.5rem;
 
+        a {
+          text-decoration: none;
+        }
+
         @media (max-width: ${bp.small}px) {
           margin-right: 0.5rem;
           margin-left: 0.5rem;

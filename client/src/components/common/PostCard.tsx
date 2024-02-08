@@ -23,6 +23,10 @@ const PostCard: React.FC<{
         padding: 0 !important;
         justify-content: space-between;
 
+        a {
+          text-decoration: none;
+        }
+
         @media (prefers-color-scheme: dark) {
           background-color: var(--mi-normal-background-color);
         }
