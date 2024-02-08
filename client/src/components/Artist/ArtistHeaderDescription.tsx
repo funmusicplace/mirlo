@@ -80,6 +80,7 @@ const ArtistHeaderDescription: React.FC = () => {
         className={css`
           width: 100%;
           display: flex;
+          ${canCollapse ? `padding-bottom: 0;` : "padding-bottom: 0.5rem;"}
 
           ${isCollapsed
             ? `
