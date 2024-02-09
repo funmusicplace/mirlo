@@ -25,8 +25,9 @@ const TopToolbar: React.FC = () => {
         > div > div > span > button,
         > div > span > button,
         > div > button,
+        > div > div > button,
         > span > button {
-          background-color: none;
+          background-color: inherit !important;
           border: none;
           border-radius: 100%;
           height: 2rem;
