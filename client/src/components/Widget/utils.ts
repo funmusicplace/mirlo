@@ -26,8 +26,8 @@ export const WidgetWrapper = styled.div<{ embeddedInMirlo?: boolean }>`
   display: flex;
   flex-direction: column;
   align-items: space-between;
-  justify-content: stretch;
   border-radius: 0.3rem;
+  overflow: hidden;
   box-sizing: border-box;
   background: var(--mi-normal-background-color);
   a {

@@ -132,8 +132,11 @@ const TrackWidget = () => {
               {isTrackOwnedOrPreview(track, user) && (
                 <div
                   className={css`
-                    padding-right: 2%;
-                    padding-left: 1rem;
+                    padding: 0 2% 0 1rem;
+
+                    @media screen and (max-width: ${bp.small}px) {
+                      padding: ${embeddedInMirlo && "0 2% 0.5rem 1rem"};
+                    }
                   `}
                 >
                   <PlayButtonsWrapper ids={[track.id]} />
