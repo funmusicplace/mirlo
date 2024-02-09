@@ -55,6 +55,9 @@ const TextEditor: React.FC<{ onChange: (val: any) => void; value: string }> = ({
           }
 
           .remirror-editor {
+            iframe {
+              width: 100%;
+            }
             padding: 1rem;
             background-color: var(--mi-lighten-x-background-color);
 
