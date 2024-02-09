@@ -6,6 +6,7 @@ import {
   wysiwygPreset,
   DropCursorExtension,
   IframeExtension,
+  LinkExtension,
 } from "remirror/extensions";
 import { EditorComponent, Remirror, useRemirror } from "@remirror/react";
 import "remirror/styles/all.css";
@@ -15,11 +16,18 @@ import { FloatingToolbar, TableComponents } from "@remirror/react";
 import { prosemirrorNodeToHtml } from "@remirror/core-utils";
 
 import TopToolbar from "./TopToolbar";
+import FloatingLinkToolbar from "./FloatingLinkToolbar";
 
 /**
  * Bubble menu for the pre-packaged editors
  */
-export const BubbleMenu: React.FC = () => <FloatingToolbar />;
+export const BubbleMenu: React.FC = () => (
+  <FloatingToolbar
+    className={css`
+      z-index: 1;
+    `}
+  ></FloatingToolbar>
+);
 
 const extensions = () => [
   new PlaceholderExtension({ placeholder: "Type something" }),
@@ -27,6 +35,7 @@ const extensions = () => [
   new DropCursorExtension(),
   new ImageExtension(),
   new IframeExtension(),
+  new LinkExtension({ autoLink: true }),
   ...wysiwygPreset(),
 ];
 
@@ -46,7 +55,7 @@ const TextEditor: React.FC<{ onChange: (val: any) => void; value: string }> = ({
   return (
     <div
       className={
-        // `remirror-theme ` +
+        `remirror-theme ` +
         css`
           width: 100%;
 
@@ -90,8 +99,9 @@ const TextEditor: React.FC<{ onChange: (val: any) => void; value: string }> = ({
       >
         <TopToolbar />
         <EditorComponent />
-        <BubbleMenu />
+        {/* <BubbleMenu /> */}
         <TableComponents />
+        <FloatingLinkToolbar />
       </Remirror>
     </div>
   );
