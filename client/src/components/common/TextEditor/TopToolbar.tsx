@@ -39,7 +39,7 @@ const TopToolbar: React.FC = () => {
           }
           &:hover,
           &.Mui-selected {
-            background-color: var(--mi-primary-color);
+            background-color: var(--mi-primary-color) !important;
             color: var(--mi-secondary-color);
           }
         }

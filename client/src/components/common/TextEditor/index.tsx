@@ -58,6 +58,7 @@ const TextEditor: React.FC<{ onChange: (val: any) => void; value: string }> = ({
         `remirror-theme ` +
         css`
           width: 100%;
+          max-height: 500px;
 
           p {
             margin-bottom: 1rem;
