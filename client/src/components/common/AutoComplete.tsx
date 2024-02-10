@@ -81,8 +81,6 @@ const AutoComplete: React.FC<{
     searchCallback(searchValue);
   }, [searchCallback, searchValue]);
 
-  console.log("searchResults", searchResults);
-
   return (
     <div
       className={css`

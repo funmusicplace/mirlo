@@ -70,13 +70,11 @@ function useFloatingLinkState() {
   const updateReason = useUpdateReason();
 
   useLayoutEffect(() => {
-    console.log("layout effect", isEditing);
     if (!isEditing) {
       return;
     }
 
     if (updateReason.doc || updateReason.selection) {
-      console.log("updating to false");
       setIsEditing(false);
     }
   }, [isEditing, setIsEditing, updateReason.doc, updateReason.selection]);
@@ -151,7 +149,6 @@ const DelayAutoFocusInput = ({
     });
 
     return () => {
-      console.log("canceling animation frame");
       window.cancelAnimationFrame(frame);
     };
   }, [autoFocus]);
