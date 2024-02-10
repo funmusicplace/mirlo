@@ -14,11 +14,11 @@ import { getPostURLReference } from "utils/artist";
 
 export const PostGrid = styled.div<{}>`
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, 31.6%);
   gap: 4% 2.5%;
 
   @media screen and (max-width: ${bp.large}px) {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, 48.75%);
   }
 
   @media screen and (max-width: ${bp.medium}px) {
@@ -80,7 +80,8 @@ const ArtistPosts: React.FC = () => {
                 display: flex;
                 border-radius: 10px;
                 background-color: var(--mi-darken-background-color);
-                filter: brightness(95%);
+                position: relative;
+                filter: brightness(98%);
                 width: 100%;
 
                 &:hover {

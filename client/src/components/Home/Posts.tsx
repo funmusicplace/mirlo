@@ -61,7 +61,8 @@ const Posts = () => {
                     display: flex;
                     border-radius: 5px;
                     background-color: var(--mi-darken-background-color);
-                    filter: brightness(95%);
+                    position: relative;
+                    filter: brightness(98%);
                     width: 100%;
                     text-decoration: none;
 
