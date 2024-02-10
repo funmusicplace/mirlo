@@ -13,6 +13,7 @@ import styled from "@emotion/styled";
 import { getPostURLReference } from "utils/artist";
 
 export const PostGrid = styled.div<{}>`
+  position: relative;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 4% 2.5%;
@@ -77,6 +78,7 @@ const ArtistPosts: React.FC = () => {
             <Link
               to={getPostURLReference({ ...p, artist })}
               className={css`
+                position: relative;
                 display: flex;
                 border-radius: 10px;
                 background-color: var(--mi-darken-background-color);
