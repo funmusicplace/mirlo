@@ -35,7 +35,7 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
     if (!client) {
       res.status(400).json({ error: "This client does not exist " });
     } else if (existing) {
-      res.status(400).json({ error: "This user exists" });
+      res.status(400).json({ error: "A user with this email already exists" });
     } else {
       const result = await prisma.user.create({
         data: {

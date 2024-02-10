@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
-import { userAuthenticated } from "../../../../auth/passport";
-import prisma from "../../../../../prisma/prisma";
+import { userAuthenticated } from "../../../auth/passport";
+import prisma from "../../../../prisma/prisma";
 
 type Query = {
   urlSlug?: string;
@@ -15,14 +15,18 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
-    const { email } = req.query as unknown as Query;
+    const { artistId, urlSlug, email, forArtistId } =
+      req.query as unknown as Query;
     try {
       let exists = false;
-      const user = await prisma.user.findFirst({
-        where: { email },
-      });
-      exists = !!user;
 
+      const trackGroup = await prisma.trackGroup.findFirst({
+        where: {
+          urlSlug: { equals: urlSlug, mode: "insensitive" },
+          artistId: Number(artistId),
+        },
+      });
+      exists = !!trackGroup;
       res.status(200);
       res.json({ result: { exists } });
     } catch (e) {

@@ -73,6 +73,12 @@ export const ArtistForm: React.FC<{
 
   const existingId = existing?.id;
 
+  React.useEffect(() => {
+    if (existingId) {
+      methods.reset(generateDefaults(existing));
+    }
+  }, [existing, existingId, methods]);
+
   const userId = state.user?.id;
 
   const soSave = React.useCallback(
@@ -189,7 +195,7 @@ export const ArtistForm: React.FC<{
 
               <FormComponent>
                 <label>{t("urlSlug")} </label>
-                <ArtistSlugInput />
+                <ArtistSlugInput currentArtistId={existingId} />
               </FormComponent>
 
               <FormComponent>

@@ -65,6 +65,7 @@ if (!isDev) {
 const routes = [
   "tags",
   "trackGroups",
+  "trackGroups/testExistence",
   "trackGroups/{id}",
   "trackGroups/{id}/download",
   "trackGroups/{id}/purchase",
@@ -75,6 +76,7 @@ const routes = [
   "tracks/{id}",
   "tracks/{id}/stream/{segment}",
   "artists",
+  "artists/testExistence",
   "artists/{id}",
   "artists/{id}/subscribe",
   "artists/{id}/feed",

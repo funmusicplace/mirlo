@@ -3,7 +3,6 @@ import { InputEl } from "components/common/Input";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 import api from "services/api";
-import { useGlobalStateContext } from "state/GlobalState";
 
 const ArtistSlugInput: React.FC<{
   isDisabled?: boolean;
@@ -13,28 +12,22 @@ const ArtistSlugInput: React.FC<{
     register,
     formState: { errors },
   } = useFormContext();
-  const { state } = useGlobalStateContext();
 
   const validation = React.useCallback(
     async (value: string) => {
-      if (state.user) {
-        try {
-          let artistIdString = currentArtistId
-            ? `&forArtistId=${currentArtistId}`
-            : "";
-          const response = await api.get<{ exists: boolean }>(
-            `users/${
-              state.user.id
-            }/testExistence?urlSlug=${value.toLowerCase()}${artistIdString}`
-          );
-          return !response.result.exists;
-        } catch (e) {
-          return true;
-        }
+      try {
+        let artistIdString = currentArtistId
+          ? `&forArtistId=${currentArtistId}`
+          : "";
+        const response = await api.get<{ exists: boolean }>(
+          `artists/testExistence?urlSlug=${value.toLowerCase()}${artistIdString}`
+        );
+        return !response.result.exists;
+      } catch (e) {
+        return true;
       }
-      return true;
     },
-    [currentArtistId, state.user]
+    [currentArtistId]
   );
 
   return (
