@@ -11,6 +11,7 @@ import { css } from "@emotion/css";
 const InsertMirloWidgetButton = () => {
   const [isOpen, setIsOpen] = React.useState(false);
   const { addIframe } = useCommands();
+
   const onAdd = (trackId: string | number, variant: "track" | "trackGroup") => {
     addIframe({
       src: widgetUrl(+trackId, variant),

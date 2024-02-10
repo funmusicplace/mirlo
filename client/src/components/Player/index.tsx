@@ -73,13 +73,6 @@ const Player = () => {
         }
       `}
     >
-      <Helmet>
-        <title>
-          {currentTrack
-            ? `${currentTrack.trackGroup?.artist?.name} - ${currentTrack.title}`
-            : ""}
-        </title>
-      </Helmet>
       <div
         className={css`
           display: flex;

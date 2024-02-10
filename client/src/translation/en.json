@@ -185,6 +185,7 @@
     "tiers": "Support tiers",
     "yourAlbums": "Albums",
     "manageAlbum": "Manage",
+    "tools": "Tools",
     "publish": "Publish",
     "primaryColor": "Primary color",
     "secondaryColor": "Secondary color",
@@ -384,6 +385,15 @@
     "artist": "Artist",
     "addAdditionalArtists": "Add additional artists",
     "addTrackButton": "Add track"
+  },
+  "manageArtistTools": {
+    "downloadCodes": "Download codes",
+    "downloadCodesExplanation": "",
+    "addDownloadCodes": "Add download codes",
+    "generateDownloadCodes": "Generate download codes",
+    "selectedAlbum": "Selected album",
+    "groupName": "Group name",
+    "quantity": "Quantity"
   },
   "artists": {
     "artists": "All artists"

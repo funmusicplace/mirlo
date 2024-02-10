@@ -8,7 +8,7 @@ import TrackGroupCard from "./TrackGroupCard";
 import { useTranslation } from "react-i18next";
 import { useArtistContext } from "state/ArtistContext";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
-import { FaPlus } from "react-icons/fa";
+import { FaPlus, FaWrench } from "react-icons/fa";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import ManageSectionWrapper from "./ManageSectionWrapper";
 
@@ -45,11 +45,37 @@ const ManageArtistAlbums: React.FC<{}> = () => {
       <SpaceBetweenDiv>
         {trackGroups.length === 0 && <div>You don't have any albums yet</div>}
         {trackGroups.length !== 0 && <div />}
-        <Link to={`/manage/artists/${artistId}/new-release`}>
-          <Button compact transparent startIcon={<FaPlus />} variant="dashed">
-            {t("addNewAlbum")}
-          </Button>
-        </Link>
+        <div>
+          {user?.isAdmin && (
+            <Link
+              to={`/manage/artists/${artistId}/releases/tools`}
+              className={css`
+                margin-right: 0.25rem;
+              `}
+            >
+              <Button
+                compact
+                transparent
+                startIcon={<FaWrench />}
+                variant="dashed"
+                collapsible
+              >
+                {t("tools")}
+              </Button>
+            </Link>
+          )}
+          <Link to={`/manage/artists/${artistId}/new-release`}>
+            <Button
+              compact
+              transparent
+              startIcon={<FaPlus />}
+              variant="dashed"
+              collapsible
+            >
+              {t("addNewAlbum")}
+            </Button>
+          </Link>
+        </div>
       </SpaceBetweenDiv>
       {isLoading && <LoadingBlocks />}
       {trackGroups.length > 0 && (
