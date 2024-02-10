@@ -64,6 +64,7 @@ const Posts = () => {
                     position: relative;
                     filter: brightness(98%);
                     width: 100%;
+                    max-width: 100%;
                     text-decoration: none;
 
                     &:hover {
