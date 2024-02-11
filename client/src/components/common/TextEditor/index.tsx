@@ -57,14 +57,14 @@ const TextEditor: React.FC<{ onChange: (val: any) => void; value: string }> = ({
       className={
         `remirror-theme ` +
         css`
-          width: 100%;
-          max-height: 500px;
-
           p {
             margin-bottom: 1rem;
           }
 
           .remirror-editor {
+            width: 100%;
+            max-height: 500px;
+
             iframe {
               width: 100%;
             }
