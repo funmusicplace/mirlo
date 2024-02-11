@@ -5,14 +5,12 @@ import Button from "components/common/Button";
 import { css } from "@emotion/css";
 import { FaPlus, FaSave, FaTimes, FaTrash } from "react-icons/fa";
 import React from "react";
-import LinkIconDisplay, {
-  linkUrlDisplay,
-} from "components/common/LinkIconDisplay";
+import LinkIconDisplay from "components/common/LinkIconDisplay";
 import api from "services/api";
 import { useArtistContext } from "state/ArtistContext";
 import { useGlobalStateContext } from "state/GlobalState";
 import { useSnackbar } from "state/SnackbarContext";
-import { FaPen } from "react-icons/fa";
+import ArtistFormLinksView from "./ArtistFormLinksView";
 
 interface FormData {
   linkArray: { url: string }[];
@@ -48,8 +46,14 @@ const ArtistFormLinks: React.FC<{ isManage: boolean }> = ({ isManage }) => {
     async (data: FormData) => {
       try {
         if (userId && artistId && artistUserId === userId) {
+          const links = data.linkArray.map((link) => {
+            if (link.url.includes("@") && !link.url.startsWith("mailto:")) {
+              return `mailto:${link.url}`;
+            }
+            return link.url;
+          });
           await api.put(`users/${userId}/artists/${artistId}`, {
-            links: data.linkArray.map((link) => link.url),
+            links,
           });
         }
         refresh();
@@ -64,49 +68,7 @@ const ArtistFormLinks: React.FC<{ isManage: boolean }> = ({ isManage }) => {
 
   if (!isEditing) {
     return (
-      <div
-        className={css`
-          margin-bottom: 0.25rem;
-          display: flex;
-          align-items: center;
-        `}
-      >
-        <div>
-          {artist?.links?.map((l) => {
-            return (
-              <a
-                rel="me"
-                href={l}
-                key={l}
-                className={css`
-                  display: inline-flex;
-                  align-items: center;
-                  margin-right: 0.75rem;
-
-                  > svg {
-                    margin-right: 0.5rem;
-                  }
-                `}
-              >
-                <LinkIconDisplay url={l} /> {linkUrlDisplay(l)}
-              </a>
-            );
-          })}
-        </div>
-        {isManage && (
-          <div>
-            <Button
-              compact
-              thin
-              variant="dashed"
-              onClick={() => setIsEditing(true)}
-              startIcon={<FaPen />}
-            >
-              {artist?.links?.length === 0 ? t("noLinksYet") : t("editLinks")}
-            </Button>
-          </div>
-        )}
-      </div>
+      <ArtistFormLinksView isManage={isManage} setIsEditing={setIsEditing} />
     );
   }
 
