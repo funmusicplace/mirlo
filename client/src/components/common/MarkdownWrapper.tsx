@@ -1,4 +1,5 @@
 import styled from "@emotion/styled";
+import { bp } from "../../constants";
 
 const MarkdownWrapper = styled.div`
   margin-top: 0.5rem;
@@ -82,6 +83,18 @@ const MarkdownWrapper = styled.div`
   table {
     width: 100%;
     margin-bottom: 1rem;
+    padding: 0.5rem;
+    background-color: var(--mi-lighten-x-background-color);
+
+    @media screen and (max-width: ${bp.small}px) {
+      max-width: 340px;
+      overflow-x: scroll;
+      display: block;
+    }
+
+    td {
+      padding: 0.5rem;
+    }
   }
 `;
 

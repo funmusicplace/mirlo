@@ -5,9 +5,14 @@ import {
   FaInstagram,
   FaTwitter,
 } from "react-icons/fa";
+import { FiMail } from "react-icons/fi";
 
 export const linkUrlDisplay = (link: string) => {
   let url;
+  if (link.startsWith("mailto:")) {
+    console.log("link", link);
+    return "Email";
+  }
   try {
     url = new URL(link).origin.replace(/https?:\/\//, "");
   } catch (e) {
@@ -23,16 +28,17 @@ export const linkUrlDisplay = (link: string) => {
 
 const LinkIconDisplay: React.FC<{ url: string }> = ({ url }) => {
   let icon = <FaGlobe />;
-  if (url.includes("twitter.com")) {
+  if (url.includes("mailto")) {
+    icon = <FiMail />;
+  } else if (url.includes("twitter.com")) {
     icon = <FaTwitter />;
-  }
-  if (url.includes("facebook.com")) {
+  } else if (url.includes("x.com")) {
+    icon = <FaTwitter />;
+  } else if (url.includes("facebook.com")) {
     icon = <FaFacebook />;
-  }
-  if (url.includes("bandcamp.com")) {
+  } else if (url.includes("bandcamp.com")) {
     icon = <FaBandcamp />;
-  }
-  if (url.includes("instagram.com")) {
+  } else if (url.includes("instagram.com")) {
     icon = <FaInstagram />;
   }
   return <>{icon}</>;

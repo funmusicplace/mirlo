@@ -6,6 +6,60 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import Background from "components/common/Background";
 import Button from "./Button";
+import styled from "@emotion/styled";
+
+const SearchResultsDiv = styled.div`
+  position: absolute;
+  padding: 0.5rem;
+  background: var(--mi-white);
+  width: 100%;
+  z-index: 999;
+  word-break: break-word;
+  color: var(--mi-black) !important;
+
+  @media (max-width: ${bp.small}px) {
+    position: fixed;
+    left: 0;
+    margin-top: 1rem;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    color: var(--mi-black);
+    &::placeholder {
+      color: var(--mi-black) !important;
+      opacity: 0.3;
+    }
+  }
+`;
+
+const SearchResultList = styled.ol`
+  list-style: none;
+  margin-top: 1rem;
+`;
+
+const SearchResult = styled.li`
+  a,
+  button {
+    padding: 0.75rem 1rem;
+    color: var(--mi-black) !important;
+    display: block;
+    padding: 0.75rem 1rem;
+    background: transparent;
+    border: none;
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  &.selected {
+    background: var(--mi-black);
+    color: var(--mi-white) !important;
+
+    button,
+    a {
+      color: var(--mi-white) !important;
+    }
+  }
+`;
 
 const AutoComplete: React.FC<{
   getOptions: (
@@ -67,8 +121,8 @@ const AutoComplete: React.FC<{
 
   const onSelectValue = React.useCallback(
     (value: string | number, index?: number) => {
-      if (searchResults.length > 0 && index) {
-        onSelect?.(searchResults[index].name);
+      if (searchResults.length > 0 && index !== undefined) {
+        onSelect?.(searchResults[index].id);
       } else {
         onSelect?.(value);
       }
@@ -121,6 +175,7 @@ const AutoComplete: React.FC<{
         onKeyUp={(e) => {
           e.preventDefault();
           if (e.keyCode === 31 || e.key === "Enter") {
+            console.log("pressed enter", searchValue, navigationIndex);
             onSelectValue(searchValue, navigationIndex);
           }
           if (e.key === "ArrowDown") {
@@ -150,89 +205,40 @@ const AutoComplete: React.FC<{
             }}
             transparent={!showBackground}
           />
-          <div
-            className={css`
-              position: absolute;
-              padding: .5rem;
-              background: var(--mi-white);
-              width: 100%;
-              z-index: 999;
-              word-break: break-word;
-              color: var(--mi-black) !important;
-              
-              a {
-                color: var(--mi-black) !important;
-              }
-
-              button {
-                background: transparent;
-                border: none;
-                width: 100%;
-                justify-content: flex-start;
-              }
-
-              @media (max-width: ${bp.small}px) {
-                position: fixed;
-                left: 0;
-                margin-top: 1rem;
-              }
-
-              @media (prefers-color-scheme: dark) {
-                color: var(--mi-black) 
-                &::placeholder {
-                  color: var(--mi-black) !important;
-                  opacity: 0.3;
-                }
-              }
-            `}
-          >
+          <SearchResultsDiv>
             {resultsPrefix}
             {isSearching && <LoadingSpinner />}
             {!isSearching && searchResults.length > 0 && (
-              <ol
-                className={css`
-                  list-style: none;
-                  margin-top: 1rem;
-                `}
-              >
-                {searchResults.map((r, index) =>
-                  optionDisplay ? (
-                    optionDisplay(r)
-                  ) : (
-                    <li
-                      key={r.id}
-                      className={
-                        navigationIndex === index
-                          ? css`
-                              background: var(--mi-black);
-                              color: var(--mi-white);
-
-                              button {
-                                color: var(--mi-white);
-                              }
-                            `
-                          : undefined
-                      }
-                    >
+              <SearchResultList>
+                {searchResults.map((r, index) => (
+                  <SearchResult
+                    key={r.id}
+                    className={navigationIndex === index ? "selected" : ""}
+                  >
+                    {optionDisplay ? (
+                      optionDisplay(r)
+                    ) : (
                       <Button onClick={() => onSelectValue(r.id, index)}>
                         {r.name}
                       </Button>
-                    </li>
-                  )
-                )}
-              </ol>
+                    )}
+                  </SearchResult>
+                ))}
+              </SearchResultList>
             )}
             {!allowNew && !isSearching && searchResults.length === 0 && (
               <>{t("noResults")}</>
             )}
             {allowNew && !isSearching && searchResults.length === 0 && (
-              <li>
-                <Button onClick={() => onSelectValue(searchValue)}>
-                  use "{searchValue}"
-                </Button>
-              </li>
+              <SearchResultList>
+                <SearchResult>
+                  <Button onClick={() => onSelectValue(searchValue)}>
+                    use "{searchValue}"
+                  </Button>
+                </SearchResult>
+              </SearchResultList>
             )}
-          </div>
+          </SearchResultsDiv>
         </>
       )}
     </div>
