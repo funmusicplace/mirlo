@@ -388,10 +388,12 @@
   },
   "manageArtistTools": {
     "downloadCodes": "Download codes",
-    "downloadCodesExplanation": "",
+    "downloadCodesExplain": "You can share download codes with other people to give them free access to this album. Think press, friends, and family.",
     "addDownloadCodes": "Add download codes",
     "generateDownloadCodes": "Generate download codes",
+    "chooseAnAlbum": "Choose an album to generate the codes for",
     "selectedAlbum": "Selected album",
+    "generate": "Click to generate",
     "groupName": "Group name",
     "quantity": "Quantity"
   },

@@ -16,7 +16,6 @@ const ArtistFormLinksView: React.FC<{
     state: { artist },
   } = useArtistContext();
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
-  console.log("isManage", isManage);
   return (
     <div
       className={css`

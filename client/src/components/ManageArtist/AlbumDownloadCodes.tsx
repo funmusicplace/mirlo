@@ -3,23 +3,29 @@ import React from "react";
 import Modal from "components/common/Modal";
 import { useTranslation } from "react-i18next";
 import Button from "components/common/Button";
-import { FaPlus } from "react-icons/fa";
+import { FaPlus, FaTimes } from "react-icons/fa";
 import AutoComplete from "components/common/AutoComplete";
 import api from "services/api";
 import { useArtistContext } from "state/ArtistContext";
 import { css } from "@emotion/css";
-import TrackGroupCard from "./TrackGroupCard";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import SmallTileDetails from "components/common/SmallTileDetails";
 import { InputEl } from "components/common/Input";
 import FormComponent from "components/common/FormComponent";
 import { useForm } from "react-hook-form";
+import { useSnackbar } from "state/SnackbarContext";
+
+type FormData = {
+  group: string;
+  quantity: string;
+};
 
 const ManageArtistAlbumsTools: React.FC<{}> = () => {
-  const methods = useForm();
+  const methods = useForm<FormData>();
   const {
     state: { artist },
   } = useArtistContext();
+  const snackbar = useSnackbar();
   const [isOpen, setIsOpen] = React.useState(false);
   const [selectedTrackGroup, setSelectedTrackGroup] =
     React.useState<TrackGroup>();
@@ -29,7 +35,6 @@ const ManageArtistAlbumsTools: React.FC<{}> = () => {
   const userId = artist?.userId;
 
   const onChooseAlbum = async (trackGroupId: string | number) => {
-    console.log("choosing trackGroupId", trackGroupId);
     const trackGroup = await api.get<TrackGroup>(
       `users/${userId}/trackGroups/${trackGroupId}`
     );
@@ -51,6 +56,29 @@ const ManageArtistAlbumsTools: React.FC<{}> = () => {
       }));
     },
     [userId]
+  );
+
+  const trackGroupId = selectedTrackGroup?.id;
+
+  const generateDownloadCodes = React.useCallback(
+    async (data: FormData) => {
+      if (trackGroupId && userId) {
+        try {
+          await api.post(`users/${userId}/trackGroups/${trackGroupId}/codes`, [
+            {
+              group: data.group,
+              quantity: data.quantity,
+            },
+          ]);
+          methods.reset();
+          snackbar("Success", { type: "success" });
+          setIsOpen(false);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    },
+    [methods, snackbar, trackGroupId, userId]
   );
 
   return (
@@ -75,19 +103,19 @@ const ManageArtistAlbumsTools: React.FC<{}> = () => {
           min-height: 300px;
         `}
       >
-        <p>{t("chooseAnAlbum")}</p>
-        <AutoComplete
-          getOptions={getTrackGroupOptions}
-          onSelect={(val) => {
-            onChooseAlbum(val);
-          }}
-        />{" "}
+        {!trackGroupId && (
+          <>
+            <label>{t("chooseAnAlbum")}</label>
+            <AutoComplete
+              getOptions={getTrackGroupOptions}
+              onSelect={(val) => {
+                onChooseAlbum(val);
+              }}
+            />
+          </>
+        )}
         {selectedTrackGroup && artist && (
-          <div
-            className={css`
-              margin-top: 1rem;
-            `}
-          >
+          <div>
             <label>{t("selectedAlbum")}</label>
             <div
               className={css`
@@ -104,10 +132,15 @@ const ManageArtistAlbumsTools: React.FC<{}> = () => {
                 title={selectedTrackGroup.title}
                 subtitle={selectedTrackGroup.artist?.name ?? ""}
               />
+              <Button
+                startIcon={<FaTimes />}
+                variant="dashed"
+                onClick={() => setSelectedTrackGroup(undefined)}
+              />
             </div>
             <FormComponent>
               <label>{t("groupName")}</label>
-              <InputEl {...methods.register("group")} />
+              <InputEl {...methods.register("group")} required />
             </FormComponent>
             <FormComponent>
               <label>{t("quantity")}</label>
@@ -115,9 +148,12 @@ const ManageArtistAlbumsTools: React.FC<{}> = () => {
                 type="number"
                 {...methods.register("quantity")}
                 defaultValue={100}
+                required
               />
             </FormComponent>
-            <Button>{t("generate")}</Button>
+            <Button onClick={methods.handleSubmit(generateDownloadCodes)}>
+              {t("generate")}
+            </Button>
           </div>
         )}
       </Modal>

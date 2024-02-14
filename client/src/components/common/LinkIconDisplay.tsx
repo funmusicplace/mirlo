@@ -10,7 +10,6 @@ import { FiMail } from "react-icons/fi";
 export const linkUrlDisplay = (link: string) => {
   let url;
   if (link.startsWith("mailto:")) {
-    console.log("link", link);
     return "Email";
   }
   try {
