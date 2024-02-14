@@ -175,7 +175,6 @@ const AutoComplete: React.FC<{
         onKeyUp={(e) => {
           e.preventDefault();
           if (e.keyCode === 31 || e.key === "Enter") {
-            console.log("pressed enter", searchValue, navigationIndex);
             onSelectValue(searchValue, navigationIndex);
           }
           if (e.key === "ArrowDown") {

@@ -19,27 +19,28 @@ model Client {
 }
 
 model User {
-  id                                  Int                      @id @default(autoincrement())
-  email                               String                   @unique
+  id                                  Int                       @id @default(autoincrement())
+  email                               String                    @unique
   name                                String?
-  password                            String                   @default("")
+  password                            String                    @default("")
   refresh                             String?
   artists                             Artist[]
-  createdAt                           DateTime                 @default(now())
-  updatedAt                           DateTime                 @default(now()) @updatedAt
+  createdAt                           DateTime                  @default(now())
+  updatedAt                           DateTime                  @default(now()) @updatedAt
   deletedAt                           DateTime?
-  isAdmin                             Boolean                  @default(false)
+  isAdmin                             Boolean                   @default(false)
   artistUserSubscriptions             ArtistUserSubscription[]
   currency                            String?
   userTrackGroupPurchases             UserTrackGroupPurchase[]
-  emailConfirmationToken              String?                  @default(uuid()) @db.Uuid
-  emailConfirmationExpiration         DateTime?                @default(dbgenerated("(NOW() + '00:20:00'::interval)"))
+  emailConfirmationToken              String?                   @default(uuid()) @db.Uuid
+  emailConfirmationExpiration         DateTime?                 @default(dbgenerated("(NOW() + '00:20:00'::interval)"))
   passwordResetConfirmationToken      String?
   passwordResetConfirmationExpiration DateTime?
   stripeAccountId                     String?
-  receiveMailingList                  Boolean                  @default(false)
+  receiveMailingList                  Boolean                   @default(false)
   wishlist                            UserTrackGroupWishlist[]
   plays                               TrackPlay[]
+  downloadCodes                       TrackGroupDownloadCodes[]
 }
 
 model Post {
@@ -187,31 +188,42 @@ model UserTrackGroupWishlist {
   @@unique([userId, trackGroupId])
 }
 
+model TrackGroupDownloadCodes {
+  id               String     @id @default(uuid()) @db.Uuid
+  trackGroupId     Int
+  trackGroup       TrackGroup @relation(fields: [trackGroupId], references: [id])
+  downloadCode     String
+  group            String
+  redeemedByUserId Int?
+  redeemedByUser   User?      @relation(fields: [redeemedByUserId], references: [id])
+}
+
 model TrackGroup {
-  id                      Int                      @id @default(autoincrement())
+  id                      Int                       @id @default(autoincrement())
   about                   String?
-  artist                  Artist                   @relation(fields: [artistId], references: [id])
+  artist                  Artist                    @relation(fields: [artistId], references: [id])
   artistId                Int
   title                   String?
   tracks                  Track[]
   cover                   TrackGroupCover?
-  published               Boolean                  @default(false)
+  published               Boolean                   @default(false)
   type                    String?
-  releaseDate             DateTime                 @default(now())
-  adminEnabled            Boolean                  @default(true)
-  createdAt               DateTime                 @default(now())
-  updatedAt               DateTime                 @updatedAt
+  releaseDate             DateTime                  @default(now())
+  adminEnabled            Boolean                   @default(true)
+  createdAt               DateTime                  @default(now())
+  updatedAt               DateTime                  @updatedAt
   deletedAt               DateTime?
   minPrice                Int? // in cents
-  currency                String?                  @default("USD")
-  isPriceFixed            Boolean                  @default(false)
+  currency                String?                   @default("USD")
+  isPriceFixed            Boolean                   @default(false)
   userTrackGroupPurchases UserTrackGroupPurchase[]
   stripeProductKey        String?
   urlSlug                 String
   credits                 String?
   userTrackGroupWishlist  UserTrackGroupWishlist[]
-  platformPercent         Int?                     @default(0)
+  platformPercent         Int?                      @default(0)
   tags                    TrackGroupTag[]
+  downloadCodes           TrackGroupDownloadCodes[]
 
   @@unique([artistId, urlSlug])
 }

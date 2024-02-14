@@ -1,6 +1,5 @@
 import React from "react";
 import { css } from "@emotion/css";
-import { Helmet } from "react-helmet";
 
 import { bp } from "../../constants";
 import { AudioWrapper } from "../AudioWrapper";
@@ -73,13 +72,6 @@ const Player = () => {
         }
       `}
     >
-      <Helmet>
-        <title>
-          {currentTrack
-            ? `${currentTrack.trackGroup?.artist?.name} - ${currentTrack.title}`
-            : ""}
-        </title>
-      </Helmet>
       <div
         className={css`
           display: flex;

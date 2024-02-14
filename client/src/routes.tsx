@@ -44,6 +44,7 @@ import { css } from "@emotion/css";
 import Supporters from "components/ManageArtist/Supporters";
 import Artists from "components/Artists";
 import AdminArtists from "components/Admin/AdminArtists";
+import ManageArtistAlbumTools from "components/ManageArtist/ManageArtistAlbumTools";
 import Features from "components/Home/Features";
 
 const routes = [
@@ -172,6 +173,10 @@ const routes = [
                   {
                     path: "posts",
                     element: <ManageArtistPosts />,
+                  },
+                  {
+                    path: "releases/tools",
+                    element: <ManageArtistAlbumTools />,
                   },
                 ],
               },

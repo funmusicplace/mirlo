@@ -185,6 +185,7 @@
     "tiers": "Support tiers",
     "yourAlbums": "Albums",
     "manageAlbum": "Manage",
+    "tools": "Tools",
     "publish": "Publish",
     "primaryColor": "Primary color",
     "secondaryColor": "Secondary color",
@@ -384,6 +385,21 @@
     "artist": "Artist",
     "addAdditionalArtists": "Add additional artists",
     "addTrackButton": "Add track"
+  },
+  "manageArtistTools": {
+    "downloadCodes": "Download codes",
+    "downloadCodesExplain": "You can share download codes with other people to give them free access to this album. Think press, friends, and family.",
+    "addDownloadCodes": "Add download codes",
+    "generateDownloadCodes": "Generate download codes",
+    "chooseAnAlbum": "Choose an album to generate the codes for",
+    "selectedAlbum": "Selected album",
+    "generate": "Click to generate",
+    "groupName": "Group name",
+    "quantity": "Quantity",
+    "existingAlbumCodes": "Existing album codes",
+    "album": "Album",
+    "codeGroup": "Code group",
+    "quantityRedeemed": "Quantity redeemed"
   },
   "artists": {
     "artists": "All artists"

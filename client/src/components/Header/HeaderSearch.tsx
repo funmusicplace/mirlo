@@ -25,7 +25,6 @@ const HeaderSearch: React.FC = () => {
       placeholder="Search artists"
       resultsPrefix={t("searchSuggestions") ?? undefined}
       onSelect={(val) => {
-        console.log("val", val);
         navigate(`/${val}`);
       }}
       optionDisplay={(r: { id: number | string; name: string }) => (
