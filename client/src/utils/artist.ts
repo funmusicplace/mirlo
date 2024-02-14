@@ -5,7 +5,10 @@ export const getArtistUrlReference = (artist: Artist) => {
   return `${artist.id}`;
 };
 
-export const getTrackGroupUrlReference = (trackGroup: TrackGroup) => {
+export const getTrackGroupUrlReference = (trackGroup: {
+  urlSlug?: string;
+  id: number;
+}) => {
   if (!!trackGroup.urlSlug) {
     return trackGroup.urlSlug.toLowerCase();
   }
@@ -16,7 +19,10 @@ export const getTrackGroupWidget = (trackGroupId: number) => {
   return `${process.env.REACT_APP_CLIENT_DOMAIN}/widget/trackGroup/${trackGroupId}`;
 };
 
-export const getReleaseUrl = (artist: Artist, trackGroup: TrackGroup) => {
+export const getReleaseUrl = (
+  artist: Artist,
+  trackGroup: { urlSlug?: string; id: number }
+) => {
   return `/${getArtistUrlReference(artist)}/release/${getTrackGroupUrlReference(
     trackGroup
   )}`;

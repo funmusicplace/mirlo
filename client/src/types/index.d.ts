@@ -151,10 +151,12 @@ interface ArtistUserSubscription {
 
 interface UserTrackGroupPurchase {
   userId: number;
+  user?: User;
   trackGroupId: number;
   trackGroup?: TrackGroup;
   amountPaid: number;
   currency: number;
+  singleDownloadToken?: string;
 }
 
 type AccountStatus = {

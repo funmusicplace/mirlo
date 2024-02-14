@@ -236,7 +236,7 @@ export const registerPurchase = async ({
   userId: number;
   pricePaid: number;
   currencyPaid: string;
-  paymentProcessorKey: string;
+  paymentProcessorKey: string | null;
   trackGroupId: number;
 }) => {
   const token = randomUUID();
@@ -272,7 +272,22 @@ export const registerPurchase = async ({
       },
     });
   }
-  return purchase;
+
+  const refreshedPurchase = await prisma.userTrackGroupPurchase.findFirst({
+    where: {
+      userId: Number(userId),
+      trackGroupId: Number(trackGroupId),
+    },
+    include: {
+      user: {
+        select: {
+          email: true,
+          id: true,
+        },
+      },
+    },
+  });
+  return refreshedPurchase;
 };
 
 export const processSingleTrackGroup = (

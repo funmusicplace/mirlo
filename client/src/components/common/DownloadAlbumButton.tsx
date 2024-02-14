@@ -15,7 +15,9 @@ const formats = ["flac", "wav", "opus", "320.mp3", "256.mp3", "128.mp3"];
 const DownloadAlbumButton: React.FC<{
   trackGroup: TrackGroup;
   onlyIcon?: boolean;
-}> = ({ trackGroup, onlyIcon }) => {
+  token?: string;
+  email?: string;
+}> = ({ trackGroup, onlyIcon, email, token }) => {
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
   const [chosenFormat, setChosenFormat] = React.useState(formats[0]);
   const [isGeneratingAlbum, setIsGeneratingAlbum] = React.useState(0);
@@ -27,8 +29,16 @@ const DownloadAlbumButton: React.FC<{
   const downloadAlbum = React.useCallback(async () => {
     try {
       setIsDownloading(true);
+      const queryParams = new URLSearchParams();
+      queryParams.append("format", chosenFormat);
+      if (email) {
+        queryParams.append("email", email);
+      }
+      if (token) {
+        queryParams.append("token", token);
+      }
       const resp = await api.downloadFileDirectly(
-        `trackGroups/${trackGroup.id}/download?format=${chosenFormat}`,
+        `trackGroups/${trackGroup.id}/download?${queryParams.toString()}`,
         `${trackGroup.title}.zip`
       );
       if (resp) {
@@ -42,7 +52,15 @@ const DownloadAlbumButton: React.FC<{
     } finally {
       setIsDownloading(false);
     }
-  }, [chosenFormat, snackbar, t, trackGroup.id, trackGroup.title]);
+  }, [
+    chosenFormat,
+    email,
+    snackbar,
+    t,
+    token,
+    trackGroup.id,
+    trackGroup.title,
+  ]);
 
   React.useEffect(() => {
     let interval: NodeJS.Timer | null = null;

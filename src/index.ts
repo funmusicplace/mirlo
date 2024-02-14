@@ -68,6 +68,7 @@ const routes = [
   "trackGroups/testExistence",
   "trackGroups/{id}",
   "trackGroups/{id}/download",
+  "trackGroups/{id}/redeemCode",
   "trackGroups/{id}/purchase",
   "trackGroups/{id}/testOwns",
   "trackGroups/{id}/wishlist",

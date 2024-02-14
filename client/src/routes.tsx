@@ -46,6 +46,8 @@ import Artists from "components/Artists";
 import AdminArtists from "components/Admin/AdminArtists";
 import ManageArtistAlbumTools from "components/ManageArtist/ManageArtistAlbumTools";
 import Features from "components/Home/Features";
+import RedeemCode from "components/TrackGroup/RedeemCode";
+import DownloadAlbum from "components/TrackGroup/DownloadAlbum";
 
 const routes = [
   {
@@ -272,6 +274,14 @@ const routes = [
           {
             path: "release/:trackGroupId",
             element: <TrackGroup />,
+          },
+          {
+            path: "release/:trackGroupId/redeem",
+            element: <RedeemCode />,
+          },
+          {
+            path: "release/:trackGroupId/download",
+            element: <DownloadAlbum />,
           },
           {
             path: "posts/:postId",

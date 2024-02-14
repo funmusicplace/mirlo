@@ -129,15 +129,18 @@ export default function () {
             return next();
           }
 
-          await prisma.userTrackGroupPurchase.updateMany({
-            where: {
-              userId: user?.id,
-              trackGroupId: Number(trackGroupId),
-            },
-            data: {
-              singleDownloadToken: null,
-            },
-          });
+          // TODO: do we want a token to be reset after download?
+          // If so we probably want to do this once the download is
+          // complete on the client otherwise there might be errors
+          // await prisma.userTrackGroupPurchase.updateMany({
+          //   where: {
+          //     userId: user?.id,
+          //     trackGroupId: Number(trackGroupId),
+          //   },
+          //   data: {
+          //     singleDownloadToken: null,
+          //   },
+          // });
 
           trackGroup = purchase.trackGroup;
         }
