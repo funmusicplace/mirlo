@@ -8,6 +8,41 @@ import {
 import { findArtistIdForURLSlug } from "../../../../../../utils/artist";
 import { downloadCSVFile } from "../../../../../../utils/download";
 
+const csvColumns = [
+  {
+    label: "Email",
+    value: "user.email",
+  },
+  {
+    label: "User",
+    value: "user.name",
+  },
+  {
+    label: "Amount",
+    value: "amount",
+  },
+  {
+    label: "Currency",
+    value: "currency",
+  },
+  {
+    label: "Subscription Tier ID",
+    value: "artistSubscriptionTierId",
+  },
+  {
+    label: "Subscription Tier Name",
+    value: "artistSubscriptionTier.name",
+  },
+  {
+    label: "Created At",
+    value: "createdAt",
+  },
+  {
+    label: "Updated At",
+    value: "updatedAt",
+  },
+];
+
 export default function () {
   const operations = {
     GET: [userAuthenticated, artistBelongsToLoggedInUser, GET],
@@ -35,45 +70,7 @@ export default function () {
       });
 
       if (req.query?.format === "csv") {
-        return downloadCSVFile(
-          res,
-          "subscribers.csv",
-          [
-            {
-              label: "Email",
-              value: "user.email",
-            },
-            {
-              label: "User",
-              value: "user.name",
-            },
-            {
-              label: "Amount",
-              value: "amount",
-            },
-            {
-              label: "Currency",
-              value: "currency",
-            },
-            {
-              label: "Subscription Tier ID",
-              value: "artistSubscriptionTierId",
-            },
-            {
-              label: "Subscription Tier Name",
-              value: "artistSubscriptionTier.name",
-            },
-            {
-              label: "Created At",
-              value: "createdAt",
-            },
-            {
-              label: "Updated At",
-              value: "updatedAt",
-            },
-          ],
-          subscribers
-        );
+        return downloadCSVFile(res, "subscribers.csv", csvColumns, subscribers);
       } else {
         res.json({
           results: subscribers,

@@ -1,5 +1,4 @@
 import { css } from "@emotion/css";
-import IconButton from "components/common/IconButton";
 import Modal from "components/common/Modal";
 import React from "react";
 import { FaPen } from "react-icons/fa";
@@ -44,9 +43,8 @@ const ArtistManageSubscription: React.FC<{
         You are supporting this artist at the{" "}
         <strong>{userSubscriptionTier.name}</strong> tier!
       </p>
-      <IconButton onClick={() => setIsEditOpen(true)}>
-        <FaPen />
-      </IconButton>
+      <Button startIcon={<FaPen />} onClick={() => setIsEditOpen(true)} />
+
       <Modal
         open={isEditOpen}
         onClose={() => setIsEditOpen(false)}

@@ -2,18 +2,46 @@ import { User } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
 import {
   userAuthenticated,
-  userHasPermission,
+  artistBelongsToLoggedInUser,
 } from "../../../../../../auth/passport";
 
 import prisma from "../../../../../../../prisma/prisma";
+import { downloadCSVFile } from "../../../../../../utils/download";
 
 type Params = {
   artistId: string;
 };
 
+const csvColumns = [
+  {
+    label: "Album ID",
+    value: "trackGroupId",
+  },
+  {
+    label: "Album",
+    value: "trackgroup.title",
+  },
+  {
+    label: "Group",
+    value: "group",
+  },
+  {
+    label: "Code",
+    value: "downloadCode",
+  },
+  {
+    label: "Redeemed by user",
+    value: "redeemedByUser.name",
+  },
+  {
+    label: "User email",
+    value: "redeemedByUser.email",
+  },
+];
+
 export default function () {
   const operations = {
-    GET: [userAuthenticated, userHasPermission("owner"), GET],
+    GET: [userAuthenticated, artistBelongsToLoggedInUser, GET],
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
@@ -29,8 +57,12 @@ export default function () {
         },
         include: {
           trackGroup: true,
+          redeemedByUser: true,
         },
       });
+      if (req.query?.format === "csv") {
+        return downloadCSVFile(res, "codes.csv", csvColumns, artistCodes);
+      }
 
       res.json({
         results: artistCodes,
