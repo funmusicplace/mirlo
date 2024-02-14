@@ -45,6 +45,7 @@ import Supporters from "components/ManageArtist/Supporters";
 import Artists from "components/Artists";
 import AdminArtists from "components/Admin/AdminArtists";
 import ManageArtistAlbumTools from "components/ManageArtist/ManageArtistAlbumTools";
+import Features from "components/Home/Features";
 
 const routes = [
   {
@@ -89,6 +90,10 @@ const routes = [
             <MarkdownContent source="/pages/Terms.md" />
           </PageMarkdownWrapper>
         ),
+      },
+      {
+        path: "pages/features",
+        element: <Features />,
       },
       { path: "widget/track/:id", element: <TrackWidget /> },
       { path: "widget/trackgroup/:id", element: <TrackGroupWidget /> },

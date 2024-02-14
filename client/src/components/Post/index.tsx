@@ -173,14 +173,15 @@ const Post: React.FC = () => {
               {t("notAvailable")}
             </div>
           )}
-          <MarkdownWrapper>{parse(post.content)}</MarkdownWrapper>
+          {!post.isContentHidden && (
+            <MarkdownWrapper>{parse(post.content)}</MarkdownWrapper>
+          )}
         </div>
       </div>
       {post.artist && (
         <div
           className={css`
             text-align: center;
-            margin: 2rem 0;
           `}
         >
           <SupportArtistPopUp artist={post.artist} />
