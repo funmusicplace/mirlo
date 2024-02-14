@@ -1,6 +1,5 @@
 import React from "react";
 import { css } from "@emotion/css";
-import { Helmet } from "react-helmet";
 
 import { bp } from "../../constants";
 import { AudioWrapper } from "../AudioWrapper";

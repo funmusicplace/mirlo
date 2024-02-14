@@ -395,7 +395,11 @@
     "selectedAlbum": "Selected album",
     "generate": "Click to generate",
     "groupName": "Group name",
-    "quantity": "Quantity"
+    "quantity": "Quantity",
+    "existingAlbumCodes": "Existing album codes",
+    "album": "Album",
+    "codeGroup": "Code group",
+    "quantityRedeemed": "Quantity redeemed"
   },
   "artists": {
     "artists": "All artists"

@@ -114,7 +114,8 @@ h2 {
 }
 
 h3 {
-  font-size: 1.7rem;
+  font-size: 1.4rem;
+  font-weight: normal;
   padding-bottom: 1rem;
 }
 

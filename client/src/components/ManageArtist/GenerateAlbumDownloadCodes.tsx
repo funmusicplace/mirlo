@@ -20,7 +20,9 @@ type FormData = {
   quantity: string;
 };
 
-const ManageArtistAlbumsTools: React.FC<{}> = () => {
+const GenerateAlbumDownloadCodes: React.FC<{ onDone: () => void }> = ({
+  onDone,
+}) => {
   const methods = useForm<FormData>();
   const {
     state: { artist },
@@ -71,14 +73,16 @@ const ManageArtistAlbumsTools: React.FC<{}> = () => {
             },
           ]);
           methods.reset();
+          setSelectedTrackGroup(undefined);
           snackbar("Success", { type: "success" });
           setIsOpen(false);
+          onDone();
         } catch (e) {
           console.error(e);
         }
       }
     },
-    [methods, snackbar, trackGroupId, userId]
+    [methods, onDone, snackbar, trackGroupId, userId]
   );
 
   return (
@@ -161,4 +165,4 @@ const ManageArtistAlbumsTools: React.FC<{}> = () => {
   );
 };
 
-export default ManageArtistAlbumsTools;
+export default GenerateAlbumDownloadCodes;

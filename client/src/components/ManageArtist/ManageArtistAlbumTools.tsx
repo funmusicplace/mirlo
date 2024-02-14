@@ -1,15 +1,10 @@
 import React from "react";
 import { useArtistContext } from "state/ArtistContext";
 import { ManageSectionWrapper } from "./ManageSectionWrapper";
-import { useTranslation } from "react-i18next";
-import AlbumDownloadCodes from "./AlbumDownloadCodes";
 import { css } from "@emotion/css";
+import ShowAlbumCodes from "./ShowAlbumCodes";
 
 const ManageArtistAlbumsTools: React.FC<{}> = () => {
-  const { t } = useTranslation("translation", {
-    keyPrefix: "manageArtistTools",
-  });
-
   const {
     state: { artist },
   } = useArtistContext();
@@ -24,9 +19,7 @@ const ManageArtistAlbumsTools: React.FC<{}> = () => {
         margin-top: 2rem;
       `}
     >
-      <h2>{t("downloadCodes")}</h2>
-      <p>{t("downloadCodesExplain")}</p>
-      <AlbumDownloadCodes />
+      <ShowAlbumCodes />
     </ManageSectionWrapper>
   );
 };
