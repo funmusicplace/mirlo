@@ -33,7 +33,7 @@ const ArtistToggle = styled(FormComponent)`
 
   label {
     width: 50%;
-    margin: 0 0.5rem;
+    margin: 0 0.5rem 0 0;
     border: 1px solid var(--mi-darken-x-background-color);
     display: flex;
     align-items: center;
@@ -116,15 +116,6 @@ function Signup() {
         >
           <h2>{t("register")}</h2>
           <FormComponent>
-            <label>{t("name")}</label>
-            <InputEl
-              type="input"
-              {...register("name")}
-              title={t("notArtistName") ?? ""}
-            />
-            <small>{t("notArtistName")}</small>
-          </FormComponent>
-          <FormComponent>
             <label>{t("email")}</label>
             <InputEl type="email" {...register("email")} />
           </FormComponent>
@@ -132,12 +123,15 @@ function Signup() {
             <label>{t("password")}</label>
             <InputEl {...register("password")} type="password" />
           </FormComponent>
-          <FormComponent>
-            <Checkbox
-              keyName="receiveMailingList"
-              description={t("receiveMailingList")}
-            />
-          </FormComponent>
+
+          <div
+            className={css`
+              margin-bottom: 1rem;
+            `}
+          >
+            <strong>{t("howUse")}</strong>
+          </div>
+
           <ArtistToggle>
             <label>
               <input
@@ -145,13 +139,27 @@ function Signup() {
                 value="listener"
                 {...register("accountType")}
               />
-              <span>I'm just here to listen</span>
+              <span>{t("imJustHereToListen")}</span>
             </label>
             <label>
               <input type="radio" value="artist" {...register("accountType")} />
-              <span>I want to share my music</span>
+              <span>{t("shareMyMusic")}</span>
             </label>
           </ArtistToggle>
+          <small
+            className={css`
+              margin-bottom: 1rem;
+            `}
+          >
+            {t("alwaysCreateLater")}
+          </small>
+
+          <FormComponent>
+            <Checkbox
+              keyName="receiveMailingList"
+              description={t("receiveMailingList")}
+            />
+          </FormComponent>
           <div
             className={css`
               margin-bottom: 0.5rem;
@@ -167,7 +175,14 @@ function Signup() {
               }}
             />{" "}
           </div>
-          <Button type="submit">{t("signUpButton")}</Button>
+          <Button
+            className={css`
+              margin-top: 1rem;
+            `}
+            type="submit"
+          >
+            {t("signUpButton")}
+          </Button>
         </form>
         <Link
           to="/login"

@@ -278,6 +278,15 @@ export const registerPurchase = async ({
     });
   }
 
+  if (purchase) {
+    await prisma.userTrackGroupWishlist.deleteMany({
+      where: {
+        userId,
+        trackGroupId,
+      },
+    });
+  }
+
   const refreshedPurchase = await prisma.userTrackGroupPurchase.findFirst({
     where: {
       userId: Number(userId),

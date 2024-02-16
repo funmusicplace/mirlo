@@ -1,4 +1,4 @@
-import { User } from "@prisma/client";
+import { Prisma, User } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
 import {
   userAuthenticated,
@@ -50,15 +50,22 @@ export default function () {
 
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { artistId } = req.params as unknown as Params;
+    const { group } = req.query as unknown as { group: string };
 
     try {
-      const artistCodes = await prisma.trackGroupDownloadCodes.findMany({
-        where: {
-          trackGroup: {
-            artistId: Number(artistId),
-            deletedAt: null,
-          },
+      const where: Prisma.TrackGroupDownloadCodesWhereInput = {
+        trackGroup: {
+          artistId: Number(artistId),
+          deletedAt: null,
         },
+      };
+
+      if (typeof group === "string") {
+        where.group = group;
+      }
+
+      const artistCodes = await prisma.trackGroupDownloadCodes.findMany({
+        where,
         include: {
           trackGroup: {
             include: {

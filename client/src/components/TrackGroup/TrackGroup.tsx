@@ -22,7 +22,7 @@ import WidthContainer from "components/common/WidthContainer";
 import TrackGroupTitle from "./TrackGroupTitle";
 import styled from "@emotion/styled";
 import SupportArtistPopUp from "components/common/SupportArtistPopUp";
-import Pill from "components/common/Pill";
+import TrackGroupPills from "./TrackGroupPills";
 
 const Container = styled.div<{ user?: LoggedInUser }>`
   ${(props) =>
@@ -172,7 +172,10 @@ function TrackGroup() {
     <WidthContainer variant="big" justify="center">
       <MetaCard
         title={trackGroup.title}
-        description={trackGroup.about ?? "An album on Mirlo"}
+        description={
+          trackGroup.about ??
+          `An album by ${trackGroup.artist?.name ?? "an artist"} on Mirlo`
+        }
         image={trackGroup.cover?.sizes?.[600]}
       />
       <Container user={user}>
@@ -291,18 +294,7 @@ function TrackGroup() {
             </CreditsWrapper>
           </TrackgroupInfosWrapper>
 
-          <div
-            className={css`
-              margin: 1rem 0;
-              display: flex;
-              flex-wrap: wrap;
-              gap: 0.5rem;
-            `}
-          >
-            {trackGroup.tags?.map((tag) => (
-              <Pill>{tag}</Pill>
-            ))}
-          </div>
+          <TrackGroupPills tags={trackGroup.tags} />
           <div
             className={css`
               margin-top: 2rem;

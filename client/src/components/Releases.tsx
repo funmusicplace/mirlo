@@ -9,24 +9,36 @@ import WidthContainer from "./common/WidthContainer";
 import { SectionHeader } from "./Home/Home";
 
 import usePagination from "utils/usePagination";
+import { useSearchParams } from "react-router-dom";
 
 const pageSize = 40;
 
 const Releases = () => {
+  const [params] = useSearchParams();
+  console.log("tag", params.get("tag"));
   const { t } = useTranslation("translation", { keyPrefix: "releases" });
   const [trackGroups, setTrackGroups] = React.useState<TrackGroup[]>([]);
   const { page, PaginationComponent } = usePagination({ pageSize });
 
+  const tag = params.get("tag");
+
   React.useEffect(() => {
     const callback = async () => {
+      const newParams = new URLSearchParams({
+        skip: `${pageSize * page}`,
+        take: `${pageSize}`,
+      });
+      if (tag) {
+        newParams.append("tag", tag);
+      }
       const results = await api.getMany<TrackGroup>(
-        `trackGroups?skip=${pageSize * page}&take=${pageSize}`
+        `trackGroups?${newParams.toString()}`
       );
       setTrackGroups(results.results);
     };
 
     callback();
-  }, [page]);
+  }, [page, tag]);
 
   return (
     <div
@@ -41,7 +53,7 @@ const Releases = () => {
     >
       <SectionHeader>
         <WidthContainer variant="big" justify="center">
-          <h5>{t("recentReleases")}</h5>
+          <h5>{tag ? t("releasesForTag", { tag }) : t("recentReleases")}</h5>
         </WidthContainer>
       </SectionHeader>
       <div
