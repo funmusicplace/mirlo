@@ -1,5 +1,4 @@
 import React from "react";
-import IconButton from "components/common/IconButton";
 import { useForm, FormProvider } from "react-hook-form";
 import { InputEl } from "components/common/Input";
 import { FaEllipsisV, FaSave, FaTimes, FaUpload } from "react-icons/fa";
@@ -15,6 +14,7 @@ import { useGlobalStateContext } from "state/GlobalState";
 import { useSnackbar } from "state/SnackbarContext";
 import useJobStatusCheck from "utils/useJobStatusCheck";
 import LoadingSpinner from "components/common/LoadingSpinner";
+import Button from "components/common/Button";
 
 interface FormData {
   title: string;
@@ -41,6 +41,7 @@ const EditTrackRow: React.FC<{
       trackArtists: track.trackArtists,
     },
   });
+
   const {
     state: { user },
   } = useGlobalStateContext();
@@ -65,11 +66,13 @@ const EditTrackRow: React.FC<{
         const packet = {
           title: formData.title,
           isPreview: formData.status === "preview",
-          trackArtists: formData.trackArtists.map((a) => ({
-            ...a,
-            artistId:
-              a.artistId && isFinite(+a.artistId) ? +a.artistId : undefined,
-          })),
+          trackArtists: formData.trackArtists
+            .filter((a) => a.artistName || a.artistId)
+            .map((a) => ({
+              ...a,
+              artistId:
+                a.artistId && isFinite(+a.artistId) ? +a.artistId : undefined,
+            })),
         };
 
         await api.put<Partial<Track>, { track: Track }>(
@@ -99,6 +102,8 @@ const EditTrackRow: React.FC<{
 
   const uploadingState = uploadJobs?.[0]?.jobStatus;
   let isDisabled = !!(uploadingState || uploadJobs.length > 0);
+
+  console.log("formState", methods.formState);
 
   return (
     <FormProvider {...methods}>
@@ -164,33 +169,41 @@ const EditTrackRow: React.FC<{
           {track.audio?.duration && fmtMSS(+track.audio.duration)}
         </td>
         <td className="alignRight">
-          <IconButton
+          <Button
             compact
             onClick={onCancelEditing}
             type="button"
+            title="Close"
+            variant="dashed"
+            startIcon={<FaTimes />}
             disabled={isSaving || isDisabled}
             style={{ marginRight: ".25rem" }}
-          >
-            <FaTimes />
-          </IconButton>
-          <IconButton
+          />
+          <Button
             compact
+            variant="dashed"
+            startIcon={<FaSave />}
             disabled={isSaving || isDisabled}
             onClick={methods.handleSubmit(onSave)}
             type="button"
-            style={{ marginRight: ".25rem" }}
-          >
-            <FaSave />
-          </IconButton>
+            className={css`
+              margin-right: 0.25rem;
+              ${methods.formState.isDirty
+                ? `background-color: var(--mi-success-background-color) !important; 
+                   color: var(--mi-white) !important;
+                   border-color: var(--mi-white) !important;`
+                : ""}
+            `}
+          />
           <Tooltip hoverText={t("moreTrackDetails")} underline={false}>
-            <IconButton
+            <Button
               disabled={isSaving || isDisabled}
               compact
+              variant="dashed"
+              startIcon={<FaEllipsisV />}
               onClick={() => setShowMoreDetails((val) => !val)}
               type="button"
-            >
-              <FaEllipsisV />
-            </IconButton>
+            />
           </Tooltip>
         </td>
       </tr>

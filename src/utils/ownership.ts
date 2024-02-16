@@ -40,7 +40,7 @@ export const doesTrackGroupBelongToUser = async (
       artistId: { in: artists.map((a) => a.id) },
       id: Number(trackGroupId),
     },
-    include: trackGroupSingleInclude({ id: userId }),
+    include: trackGroupSingleInclude({ loggedInUserId: userId }),
   });
 
   if (!trackgroup) {

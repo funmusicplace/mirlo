@@ -9,7 +9,6 @@ import {
   createUser,
 } from "../../utils";
 import prisma from "../../../prisma/prisma";
-import { randomUUID } from "crypto";
 
 import { requestApp } from "../utils";
 
@@ -27,8 +26,7 @@ describe("trackGroups/{id}", () => {
       const response = await requestApp
         .get("trackGroups/1")
         .set("Accept", "application/json");
-
-      assert(response.statusCode === 404);
+      assert.equal(response.statusCode, 404);
     });
   });
 

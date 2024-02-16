@@ -14,7 +14,7 @@ export default function () {
 
   async function GET(req: Request, res: Response, next: NextFunction) {
     let { id }: { id?: string } = req.params;
-    const loggedInUser = req.user as User;
+    const loggedInUser = req.user as User | null;
 
     const { artistId }: { artistId: string } = req.query as {
       artistId: string;
@@ -32,7 +32,9 @@ export default function () {
             published: true,
             tracks: { some: { audio: { uploadState: "SUCCESS" } } },
           },
-          include: trackGroupSingleInclude(loggedInUser),
+          include: trackGroupSingleInclude({
+            loggedInUserId: loggedInUser?.id,
+          }),
         });
       }
 

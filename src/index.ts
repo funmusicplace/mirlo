@@ -124,6 +124,8 @@ const routes = [
   "admin/tasks",
   "admin/trackGroups",
   "admin/artists",
+  "admin/subscriptions",
+  "admin/purchases",
 ];
 
 initialize({

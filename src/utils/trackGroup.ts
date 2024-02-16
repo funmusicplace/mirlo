@@ -113,16 +113,21 @@ export const findTrackGroupIdForSlug = async (
   return id;
 };
 
-export const trackGroupSingleInclude = (loggedInUser?: {
-  id: number;
+export const trackGroupSingleInclude = (options: {
+  loggedInUserId?: number;
+  ownerId?: number;
 }): Prisma.TrackGroupInclude<DefaultArgs> => {
   return {
     tracks: {
       where: {
         deletedAt: null,
-        audio: {
-          uploadState: "SUCCESS",
-        },
+        ...(options.ownerId
+          ? {}
+          : {
+              audio: {
+                uploadState: "SUCCESS",
+              },
+            }),
       },
       include: {
         audio: true,
@@ -135,16 +140,16 @@ export const trackGroupSingleInclude = (loggedInUser?: {
       include: { tag: true },
     },
     cover: { where: { deletedAt: null } },
-    ...(loggedInUser
+    ...(options.loggedInUserId
       ? {
           userTrackGroupPurchases: {
-            where: { userId: loggedInUser.id },
+            where: { userId: options.loggedInUserId },
             select: {
               userId: true,
             },
           },
           userTrackGroupWishlist: {
-            where: { userId: loggedInUser.id },
+            where: { userId: options.loggedInUserId },
             select: {
               userId: true,
             },
