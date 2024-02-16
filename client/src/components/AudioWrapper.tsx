@@ -23,7 +23,8 @@ export const AudioWrapper: React.FC<{
   currentTrack: Track;
   hideControls?: boolean;
   position: string;
-}> = ({ currentTrack, hideControls = false, position }) => {
+  volume?: number;
+}> = ({ currentTrack, hideControls = false, position, volume = 1 }) => {
   const {
     state: { playerQueueIds, currentlyPlayingIndex, user, playing, looping },
     dispatch,
@@ -134,6 +135,12 @@ export const AudioWrapper: React.FC<{
   const onPlay = React.useCallback(() => {
     dispatch({ type: "setPlaying", playing: true });
   }, [dispatch]);
+
+  React.useEffect(() => {
+    if (playerRef.current) {
+      playerRef.current.volume = volume;
+    }
+  }, [volume]);
 
   if (!streamUrl) {
     return null;

@@ -103,8 +103,6 @@ const EditTrackRow: React.FC<{
   const uploadingState = uploadJobs?.[0]?.jobStatus;
   let isDisabled = !!(uploadingState || uploadJobs.length > 0);
 
-  console.log("formState", methods.formState);
-
   return (
     <FormProvider {...methods}>
       <tr

@@ -50,8 +50,6 @@ const ManageTrackGroup: React.FC<{}> = () => {
     return null;
   }
 
-  console.log("trackGroup", trackGroup.tracks);
-
   return (
     <ManageSectionWrapper
       className={css`

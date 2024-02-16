@@ -14,12 +14,50 @@ import { isEmpty } from "lodash";
 import { PlayControlButton } from "../common/PlayControlButton";
 import PlayingTrackDetails from "./PlayingTrackDetails";
 import useCurrentTrackHook from "./useCurrentTrackHook";
+import styled from "@emotion/styled";
+import { VolumeControl } from "./VolumeControl";
+
+const ControlWrapper = styled.span`
+  display: flex;
+  align-items: center;
+
+  button {
+    color: black;
+    background: transparent;
+    font-size: 1.2rem !important;
+  }
+
+  button:hover {
+    color: var(--mi-black) !important;
+    background-color: var(--mi-white);
+    font-size: 1.2rem;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    color: white;
+    button {
+      color: white;
+    }
+    button:hover {
+      color: var(--mi-white) !important;
+      background-color: var(--mi-white);
+      font-size: 1.2rem;
+    }
+  }
+
+  @media (max-width: ${bp.small}px) {
+    margin-right: 0.5rem;
+    max-width: 50%;
+  }
+`;
 
 const Player = () => {
   const {
     state: { user },
     dispatch,
   } = useGlobalStateContext();
+
+  const [volume, setVolume] = React.useState(1);
 
   const { currentTrack, isLoading } = useCurrentTrackHook();
 
@@ -88,7 +126,11 @@ const Player = () => {
         `}
       >
         {currentTrack && isTrackOwnedOrPreview(currentTrack, user) && (
-          <AudioWrapper currentTrack={currentTrack} position="absolute" />
+          <AudioWrapper
+            currentTrack={currentTrack}
+            position="absolute"
+            volume={volume}
+          />
         )}
       </div>
 
@@ -136,41 +178,8 @@ const Player = () => {
               }
             `}
           >
-            <span
-              className={css`
-                display: flex;
-                align-items: center;
-
-                button {
-                  color: black;
-                  background: transparent;
-                  font-size: 1.2rem !important;
-                }
-
-                button:hover {
-                  color: var(--mi-black) !important;
-                  background-color: var(--mi-white);
-                  font-size: 1.2rem;
-                }
-
-                @media (prefers-color-scheme: dark) {
-                  color: white;
-                  button {
-                    color: white;
-                  }
-                  button:hover {
-                    color: var(--mi-white) !important;
-                    background-color: var(--mi-white);
-                    font-size: 1.2rem;
-                  }
-                }
-
-                @media (max-width: ${bp.small}px) {
-                  margin-right: 0.5rem;
-                  max-width: 50%;
-                }
-              `}
-            >
+            <ControlWrapper>
+              <VolumeControl setVolume={setVolume} volume={volume} />
               <span
                 className={css`
                   display: flex;
@@ -209,7 +218,7 @@ const Player = () => {
               >
                 <NextButton />
               </div>
-            </span>
+            </ControlWrapper>
           </div>
         </div>
 

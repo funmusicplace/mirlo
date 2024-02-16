@@ -126,7 +126,6 @@ const TrackArtistFormFields: React.FC<{
       {fields.length > 1 && (
         <Button
           onClick={() => {
-            console.log("artistIndex", artistIndex);
             remove(artistIndex);
           }}
           type="button"

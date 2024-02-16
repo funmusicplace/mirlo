@@ -16,7 +16,6 @@ const useGetUserObjectById = <T>(
 
   const fetchObject = React.useCallback(async () => {
     setIsLoading(true);
-    console.log("fetching object");
     try {
       if (userId && id) {
         if (options?.multiple) {
@@ -25,11 +24,9 @@ const useGetUserObjectById = <T>(
           );
           setObjects(response.results);
         } else {
-          console.log("single object");
           const response = await api.get<T>(
             `users/${userId}/${endpoint}/${id}${queryParams ?? ""}`
           );
-          console.log("result", response.result);
           setObject(response.result);
         }
         setFinishedFirstLoad(true);

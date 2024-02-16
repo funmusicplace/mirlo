@@ -99,7 +99,6 @@ export const BulkTrackUpload: React.FC<{
           `users/${userId}/tracks/${response.result.id}/audio`,
           [firstTrack.t.file]
         );
-        console.log("uploaded track");
 
         if (remainingTracks.length !== 0) {
           setUploadQueue((queue) =>
@@ -110,7 +109,6 @@ export const BulkTrackUpload: React.FC<{
             setUploadQueue((queue) =>
               produceNewStatus(queue, firstTrack.t.title, 100)
             );
-            console.log("timed out");
             reload();
           }, timeInBetweenUploads / 2);
 
@@ -121,7 +119,6 @@ export const BulkTrackUpload: React.FC<{
           await uploadNextTrack(remainingTracks);
         }
       } else {
-        console.log("done uploading");
         setUploadQueue([]);
         reload();
         reset();
