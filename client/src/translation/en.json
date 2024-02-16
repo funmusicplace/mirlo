@@ -318,7 +318,10 @@
     "tracks": "Tracks",
     "callServerTasks": "Call server tasks",
     "whatTaskCall": "What task do you want to call on the server?",
-    "submitServerTask": "Submit server task"
+    "submitServerTask": "Submit server task",
+    "artist": "Artists",
+    "subscriptions": "Subscriptions",
+    "purchases": "Purchases"
   },
   "trackDetails": {
     "track": "Track:",

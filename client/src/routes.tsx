@@ -48,6 +48,8 @@ import ManageArtistAlbumTools from "components/ManageArtist/ManageArtistAlbumToo
 import Features from "components/Home/Features";
 import RedeemCode from "components/TrackGroup/RedeemCode";
 import DownloadAlbum from "components/TrackGroup/DownloadAlbum";
+import AdminPurchases from "components/Admin/AdminPurchases";
+import AdminSubscriptions from "components/Admin/AdminSubscriptions";
 
 const routes = [
   {
@@ -225,11 +227,11 @@ const routes = [
           },
           {
             path: "purchases",
-            element: <AdminTracks />,
+            element: <AdminPurchases />,
           },
           {
             path: "subscriptions",
-            element: <AdminTracks />,
+            element: <AdminSubscriptions />,
           },
         ],
       },

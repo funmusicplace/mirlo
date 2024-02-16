@@ -145,6 +145,8 @@ interface ArtistSubscriptionTier {
 interface ArtistUserSubscription {
   id: number;
   amount: number;
+  currency: string;
+  userId: number;
   artistSubscriptionTierId: number;
   artistSubscriptionTier: ArtistSubscriptionTier;
 }
@@ -155,7 +157,7 @@ interface UserTrackGroupPurchase {
   trackGroupId: number;
   trackGroup?: TrackGroup;
   amountPaid: number;
-  currency: number;
+  currencyPaid: string;
   singleDownloadToken?: string;
 }
 
