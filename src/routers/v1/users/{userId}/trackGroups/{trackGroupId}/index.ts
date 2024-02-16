@@ -6,12 +6,15 @@ import {
   trackGroupBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../../auth/passport";
-import processor from "../../../../../../utils/trackGroup";
+import processor, {
+  trackGroupSingleInclude,
+} from "../../../../../../utils/trackGroup";
 import { doesTrackGroupBelongToUser } from "../../../../../../utils/ownership";
 import prisma from "../../../../../../../prisma/prisma";
 import { deleteTrackGroup } from "../../../../../../utils/trackGroup";
 import logger from "../../../../../../logger";
 import slugify from "slugify";
+import { AppError } from "../../../../../../utils/error";
 
 type Params = {
   trackGroupId: string;
@@ -46,12 +49,31 @@ export default function () {
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { userId, trackGroupId } = req.params as unknown as Params;
     try {
-      const trackgroup = await doesTrackGroupBelongToUser(
+      const tg = await doesTrackGroupBelongToUser(
         Number(trackGroupId),
         Number(userId)
       );
 
-      res.status(200).json({ result: processor.single(trackgroup) });
+      const trackGroup = await prisma.trackGroup.findFirst({
+        where: {
+          id: Number(tg.id),
+        },
+        include: trackGroupSingleInclude({
+          loggedInUserId: Number(userId),
+          ownerId: Number(userId),
+        }),
+      });
+
+      if (!trackGroup) {
+        return next(
+          new AppError({
+            httpCode: 404,
+            description: "TrackGroup not found",
+          })
+        );
+      }
+
+      res.status(200).json({ result: processor.single(trackGroup) });
     } catch (e) {
       logger.error(e);
       res.status(500).json({

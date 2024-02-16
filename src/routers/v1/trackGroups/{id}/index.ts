@@ -32,7 +32,7 @@ export default function () {
             published: true,
             tracks: { some: { audio: { uploadState: "SUCCESS" } } },
           },
-          include: trackGroupSingleInclude(loggedInUser),
+          include: trackGroupSingleInclude({ loggedInUserId: loggedInUser.id }),
         });
       }
 
