@@ -78,29 +78,31 @@ export const SmallTileDetails: React.FC<{
           <span>from </span>
           <span>"{subtitle}"</span>
         </WidgetSection>
-        <WidgetSection
-          className={css`
-            color: var(--mi-normal-foreground-color);
-            font-size: 0.85rem;
-            margin-top: 0.25rem;
-            ul > li {
-              background-color: transparent;
-              margin-left: 0;
-              padding-left: 0;
-            }
+        {footer && (
+          <WidgetSection
+            className={css`
+              color: var(--mi-normal-foreground-color);
+              font-size: 0.85rem;
+              margin-top: 0.25rem;
+              ul > li {
+                background-color: transparent;
+                margin-left: 0;
+                padding-left: 0;
+              }
 
-            @media screen and (max-width: ${bp.medium}px) {
-              font-size: var(--mi-font-size-small);
-            }
+              @media screen and (max-width: ${bp.medium}px) {
+                font-size: var(--mi-font-size-small);
+              }
 
-            @media screen and (max-width: ${bp.small}px) {
-              font-size: var(--mi-font-size-xsmall);
-              margin-bottom: 0.5rem;
-            }
-          `}
-        >
-          {"by"} {footer}
-        </WidgetSection>
+              @media screen and (max-width: ${bp.small}px) {
+                font-size: var(--mi-font-size-xsmall);
+                margin-bottom: 0.5rem;
+              }
+            `}
+          >
+            {"by"} {footer}
+          </WidgetSection>
+        )}
       </div>
       <div
         className={css`
