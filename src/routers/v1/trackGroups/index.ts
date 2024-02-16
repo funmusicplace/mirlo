@@ -11,7 +11,7 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
-    const { skip: skipQuery, take, orderBy } = req.query;
+    const { skip: skipQuery, take, orderBy, tag } = req.query;
 
     try {
       let skip = Number(skipQuery);
@@ -25,6 +25,16 @@ export default function () {
           0,
           Math.floor(Math.random() * itemCount) - Number(take)
         );
+      }
+
+      if (tag && typeof tag === "string") {
+        where.tags = {
+          some: {
+            tag: {
+              tag: tag,
+            },
+          },
+        };
       }
 
       const trackGroups = await prisma.trackGroup.findMany({
