@@ -172,7 +172,10 @@ function TrackGroup() {
     <WidthContainer variant="big" justify="center">
       <MetaCard
         title={trackGroup.title}
-        description={trackGroup.about ?? "An album on Mirlo"}
+        description={
+          trackGroup.about ??
+          `An album by ${trackGroup.artist?.name ?? "an artist"} on Mirlo`
+        }
         image={trackGroup.cover?.sizes?.[600]}
       />
       <Container user={user}>
