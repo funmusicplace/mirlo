@@ -5,7 +5,10 @@ import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import prisma from "../../../../../prisma/prisma";
 
 import { doesTrackGroupBelongToUser } from "../../../../utils/ownership";
-import { FormatOptions } from "../../../../utils/trackGroup";
+import {
+  FormatOptions,
+  setDownloadTokenToNull,
+} from "../../../../utils/trackGroup";
 import { minioClient, trackGroupFormatBucket } from "../../../../utils/minio";
 import { startGeneratingAlbum } from "../../../../queues/album-queue";
 
@@ -77,15 +80,13 @@ export default function () {
             res.status(404);
             return next();
           }
-          await prisma.userTrackGroupPurchase.updateMany({
-            data: {
-              singleDownloadToken: null,
-            },
-            where: {
-              userId: purchase.userId,
-              trackGroupId: purchase.trackGroupId,
-            },
-          });
+          // TODO: do we want a token to be reset after download?
+          // If so we probably want to do this once the download is
+          // complete on the client otherwise there might be errors
+          // await setDownloadTokenToNull({
+          //   userId: purchase.userId,
+          //   trackGroupId: purchase.trackGroupId,
+          // });
           trackGroup = purchase.trackGroup;
         } else {
           logger.info(
@@ -109,7 +110,7 @@ export default function () {
         if (user) {
           const purchase = await prisma.userTrackGroupPurchase.findFirst({
             where: {
-              userId: user?.id,
+              userId: user.id,
               singleDownloadToken: token,
               trackGroupId: Number(trackGroupId),
               trackGroup: {
@@ -129,15 +130,13 @@ export default function () {
             return next();
           }
 
-          await prisma.userTrackGroupPurchase.updateMany({
-            where: {
-              userId: user?.id,
-              trackGroupId: Number(trackGroupId),
-            },
-            data: {
-              singleDownloadToken: null,
-            },
-          });
+          // TODO: do we want a token to be reset after download?
+          // If so we probably want to do this once the download is
+          // complete on the client otherwise there might be errors
+          // await setDownloadTokenToNull({
+          //   userId: user?.id,
+          //   trackGroupId: Number(trackGroupId),
+          // });
 
           trackGroup = purchase.trackGroup;
         }

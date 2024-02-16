@@ -1,5 +1,10 @@
 import { Helmet } from "react-helmet";
 
+function strip(html: string) {
+  let doc = new DOMParser().parseFromString(html, "text/html");
+  return doc.body.textContent || "";
+}
+
 export const MetaCard: React.FC<{
   title: string;
   description: string;
@@ -9,12 +14,12 @@ export const MetaCard: React.FC<{
   return (
     <Helmet>
       <title>Mirlo: {title}</title>
-      <meta name="description" content={title} />
+      <meta name="description" content={description} />
       <meta property="og:title" content={title} />
       <meta property="og:url" content={window.location.pathname} />
-      <meta property="og:description" content={description} />
+      <meta property="og:description" content={strip(description)} />
       <meta name="twitter:title" content={title} />
-      <meta name="twitter:description" content={description} />
+      <meta name="twitter:description" content={strip(description)} />
       <meta
         property="twitter:image"
         content={image ?? "/android-chrome-192x192.png"}

@@ -5,6 +5,9 @@ import api from "services/api";
 import { css } from "@emotion/css";
 import Table from "components/common/Table";
 import GenerateAlbumDownloadCodes from "./GenerateAlbumDownloadCodes";
+import { FaFileCsv } from "react-icons/fa";
+import Button from "components/common/Button";
+import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 
 type AlbumCode = {
   group: string;
@@ -18,24 +21,41 @@ const ShowAlbumCodes: React.FC<{}> = () => {
     keyPrefix: "manageArtistTools",
   });
   const [albumCodes, setAlbumCodes] = React.useState<AlbumCode[]>([]);
-
+  const [isDownloadingCodes, setIsdDownloadingCodes] = React.useState(false);
   const {
     state: { artist },
   } = useArtistContext();
   const userId = artist?.userId;
   const artistId = artist?.id;
+  const artistSlug = artist?.urlSlug ?? artist?.id;
 
   const callback = React.useCallback(async () => {
     const results = await api.getMany<AlbumCode>(
       `users/${userId}/artists/${artistId}/codes`
     );
-    console.log("results", results);
     setAlbumCodes(results.results);
   }, [artistId, userId]);
 
   React.useEffect(() => {
     callback();
   }, [callback]);
+
+  const downloadCodes = React.useCallback(async () => {
+    setIsdDownloadingCodes(true);
+    try {
+      if (userId && artistId) {
+        await api.getFile(
+          `all-codes-for-${artistSlug}`,
+          `users/${userId}/artists/${artistId}/codes?format=csv`,
+          "text/csv"
+        );
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsdDownloadingCodes(false);
+    }
+  }, [artistSlug, artistId, userId]);
 
   if (!artist) {
     return null;
@@ -79,7 +99,16 @@ const ShowAlbumCodes: React.FC<{}> = () => {
         </p>
         <GenerateAlbumDownloadCodes onDone={callback} />
       </div>
-      <h3>{t("existingAlbumCodes")}</h3>
+      <SpaceBetweenDiv>
+        <h3>{t("existingAlbumCodes")}</h3>
+        <Button
+          startIcon={<FaFileCsv />}
+          isLoading={isDownloadingCodes}
+          onClick={() => downloadCodes()}
+        >
+          Download all codes
+        </Button>
+      </SpaceBetweenDiv>
       <Table>
         <thead>
           <tr>
@@ -87,6 +116,7 @@ const ShowAlbumCodes: React.FC<{}> = () => {
             <th>{t("codeGroup")}</th>
             <th className="alignRight">{t("quantity")}</th>
             <th className="alignRight">{t("quantityRedeemed")}</th>
+            <th />
           </tr>
         </thead>
         <tbody>

@@ -8,6 +8,7 @@ import { randomUUID } from "crypto";
 import { Session } from "inspector";
 import { registerPurchase } from "./trackGroup";
 import { registerSubscription } from "./subscriptionTier";
+import { findOrCreateUserBasedOnEmail } from "./user";
 
 const { STRIPE_KEY } = process.env;
 
@@ -228,32 +229,18 @@ export const handleCheckoutSession = async (
     },
     { stripeAccount: stripeAccountId }
   );
-  let newUser = false;
 
   // If the user doesn't exist, we create one with an existing userEmail
-  if (!userId && userEmail) {
-    newUser = true; // If this is true the user wasn't logged in when making the purchase
-    let user = await prisma.user.findFirst({
-      where: {
-        email: userEmail,
-      },
-    });
-    if (!user) {
-      logger.info(`Creating a new user for ${userEmail}`);
-      user = await prisma.user.create({
-        data: {
-          email: userEmail,
-        },
-      });
-    }
-    userId = `${user?.id}`;
-  }
+  let { userId: actualUserId, newUser } = await findOrCreateUserBasedOnEmail(
+    userEmail,
+    userId
+  );
   logger.info(`Processing session`);
   if (tierId && userEmail) {
-    await handleSubscription(Number(userId), Number(tierId), session);
-  } else if (trackGroupId && userId) {
+    await handleSubscription(Number(actualUserId), Number(tierId), session);
+  } else if (trackGroupId && actualUserId) {
     await handleTrackGroupPurhcase(
-      Number(userId),
+      Number(actualUserId),
       Number(trackGroupId),
       session,
       newUser

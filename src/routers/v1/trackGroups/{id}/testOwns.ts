@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { userAuthenticated } from "../../../../auth/passport";
 import prisma from "../../../../../prisma/prisma";
+import { findTrackGroupIdForSlug } from "../../../../utils/trackGroup";
 
 type Query = {
   urlSlug?: string;

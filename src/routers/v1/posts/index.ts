@@ -20,7 +20,6 @@ export default function () {
         publishedAt: { lte: new Date() },
         isPublic: true,
       };
-
       if (user) {
         delete where.isPublic;
         where.OR = [
@@ -51,6 +50,7 @@ export default function () {
           },
         ];
       }
+
       const posts = await prisma.post.findMany({
         where,
         include: {
@@ -62,6 +62,7 @@ export default function () {
         take: take ? Number(take) : undefined,
         skip: skip ? Number(skip) : undefined,
       });
+
       const processedPosts = await Promise.all(
         posts.map(async (p) =>
           postProcessor.single(
@@ -72,7 +73,8 @@ export default function () {
           )
         )
       );
-      res.json({
+
+      return res.json({
         results: processedPosts,
       });
     } catch (e) {

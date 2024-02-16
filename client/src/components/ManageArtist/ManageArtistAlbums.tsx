@@ -22,17 +22,24 @@ const ManageArtistAlbums: React.FC<{}> = () => {
 
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
   const { artistId } = useParams();
-
+  const [isLoadingTrackGroups, setIsLoading] = React.useState(true);
   const [trackGroups, setTrackGroups] = React.useState<TrackGroup[]>([]);
 
   const userId = user?.id;
 
   const fetchTrackGroups = React.useCallback(async () => {
-    if (userId) {
-      const fetchedTrackGroups = await api.getMany<TrackGroup>(
-        `users/${userId}/trackGroups?artistId=${artistId}`
-      );
-      setTrackGroups(fetchedTrackGroups.results);
+    setIsLoading(true);
+    try {
+      if (userId) {
+        const fetchedTrackGroups = await api.getMany<TrackGroup>(
+          `users/${userId}/trackGroups?artistId=${artistId}`
+        );
+        setTrackGroups(fetchedTrackGroups.results);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsLoading(false);
     }
   }, [artistId, userId]);
 
@@ -43,7 +50,9 @@ const ManageArtistAlbums: React.FC<{}> = () => {
   return (
     <ManageSectionWrapper>
       <SpaceBetweenDiv>
-        {trackGroups.length === 0 && <div>You don't have any albums yet</div>}
+        {trackGroups.length === 0 && !isLoadingTrackGroups && (
+          <div>You don't have any albums yet</div>
+        )}
         {trackGroups.length !== 0 && <div />}
         <div>
           {user?.isAdmin && (

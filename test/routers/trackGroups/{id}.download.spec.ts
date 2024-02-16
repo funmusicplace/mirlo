@@ -103,13 +103,14 @@ describe("trackGroups/{id}/download", () => {
       const { user: purchaser, accessToken } = await createUser({
         email: "purchaser@artist.com",
       });
+      const downloadToken = randomUUID();
 
       const purchase = await prisma.userTrackGroupPurchase.create({
         data: {
           userId: purchaser.id,
           trackGroupId: trackGroup.id,
           pricePaid: 0,
-          singleDownloadToken: randomUUID(),
+          singleDownloadToken: downloadToken,
         },
       });
 
@@ -128,10 +129,10 @@ describe("trackGroups/{id}/download", () => {
       const updatedPurchase = await prisma.userTrackGroupPurchase.findFirst({
         where: {
           trackGroupId: purchase.trackGroupId,
-          userId: purchase.trackGroupId,
+          userId: purchaser.id,
         },
       });
-      assert.equal(updatedPurchase?.singleDownloadToken, null);
+      assert.equal(updatedPurchase?.singleDownloadToken, downloadToken);
     });
   });
 });

@@ -7,7 +7,7 @@ import { FaEdit } from "react-icons/fa";
 import { Outlet, useNavigate, useParams } from "react-router-dom";
 import api from "services/api";
 
-export const AdminTracks: React.FC = () => {
+export const AdminSubscriptions: React.FC = () => {
   const navigate = useNavigate();
   const { trackId } = useParams();
   const [openModal, setOpenModal] = React.useState(false);
@@ -85,4 +85,4 @@ export const AdminTracks: React.FC = () => {
   );
 };
 
-export default AdminTracks;
+export default AdminSubscriptions;

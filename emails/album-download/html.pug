@@ -19,7 +19,7 @@ html
       tr 
         td #{trackGroup.title}
         td 
-          a(href!=`${host}/v1/trackGroups/${trackGroup.id}/download?token=${token}&email=${email}`) #{trackGroup.artist.name}
+          a(href!=`${client}/${trackGroup.artist.urlSlug}/release/${trackGroup.urlSlug}/download?token=${token}&email=${email}`) download
 
     p 
     p 
