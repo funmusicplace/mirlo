@@ -40,22 +40,25 @@ const ShowAlbumCodes: React.FC<{}> = () => {
     callback();
   }, [callback]);
 
-  const downloadCodes = React.useCallback(async () => {
-    setIsdDownloadingCodes(true);
-    try {
-      if (userId && artistId) {
-        await api.getFile(
-          `all-codes-for-${artistSlug}`,
-          `users/${userId}/artists/${artistId}/codes?format=csv`,
-          "text/csv"
-        );
+  const downloadCodes = React.useCallback(
+    async (group?: string) => {
+      setIsdDownloadingCodes(true);
+      try {
+        if (userId && artistId) {
+          await api.getFile(
+            `${group ? group : "all"}-codes-for-${artistSlug}`,
+            `users/${userId}/artists/${artistId}/codes?format=csv&group=${group}`,
+            "text/csv"
+          );
+        }
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setIsdDownloadingCodes(false);
       }
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setIsdDownloadingCodes(false);
-    }
-  }, [artistSlug, artistId, userId]);
+    },
+    [artistSlug, artistId, userId]
+  );
 
   if (!artist) {
     return null;
@@ -126,6 +129,14 @@ const ShowAlbumCodes: React.FC<{}> = () => {
               <td>{r.group}</td>
               <td className="alignRight">{r.quantity}</td>
               <td className="alignRight">{r.quantityRedeemed}</td>
+              <td className="alignRight">
+                <Button
+                  compact
+                  startIcon={<FaFileCsv />}
+                  onClick={() => downloadCodes(r.group)}
+                  variant="dashed"
+                />
+              </td>
             </tr>
           ))}
         </tbody>
