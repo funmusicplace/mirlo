@@ -4,7 +4,6 @@ import { FaPen, FaTrash } from "react-icons/fa";
 import { useGlobalStateContext } from "state/GlobalState";
 import useDraggableTrack from "utils/useDraggableTrack";
 
-import IconButton from "../common/IconButton";
 import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
 import { fmtMSS } from "utils/tracks";
@@ -13,6 +12,7 @@ import { useTranslation } from "react-i18next";
 import EditTrackRow from "./EditTrackRow";
 import styled from "@emotion/styled";
 import LoadingSpinner from "components/common/LoadingSpinner";
+import Button from "components/common/Button";
 
 const TrackRow = styled("tr")`
   > td > .play-button {
@@ -192,17 +192,21 @@ const ManageTrackRow: React.FC<{
         {track.audio?.duration && fmtMSS(track.audio?.duration)}
       </td>
       <td align="right">
-        <IconButton
+        <Button
           compact
+          startIcon={<FaPen />}
+          variant="dashed"
           onClick={() => setIsEditing(true)}
           title={t("edit") ?? ""}
           style={{ marginRight: ".25rem" }}
-        >
-          <FaPen />
-        </IconButton>
-        <IconButton compact onClick={onDeleteClick} title={t("delete") ?? ""}>
-          <FaTrash />
-        </IconButton>
+        ></Button>
+        <Button
+          variant="dashed"
+          startIcon={<FaTrash />}
+          compact
+          onClick={onDeleteClick}
+          title={t("delete") ?? ""}
+        />
       </td>
     </TrackRow>
   );
