@@ -179,7 +179,6 @@ const Player = () => {
             `}
           >
             <ControlWrapper>
-              <VolumeControl setVolume={setVolume} volume={volume} />
               <span
                 className={css`
                   display: flex;
@@ -218,6 +217,7 @@ const Player = () => {
               >
                 <NextButton />
               </div>
+              <VolumeControl setVolume={setVolume} volume={volume} />
             </ControlWrapper>
           </div>
         </div>
