@@ -59,8 +59,7 @@ export const userLoggedInWithoutRedirect = (
     { session: false },
     (err?: unknown, user?: Express.User, info?: any) => {
       if (err instanceof TokenExpiredError) {
-        res.status(401).json({ error: info.message });
-        return;
+        return res.status(401).json({ error: info.message });
       } else if (err) {
         return next(err);
       }

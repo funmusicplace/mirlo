@@ -5,8 +5,6 @@ import {
   userHasPermission,
 } from "../../../../../../auth/passport";
 import { doesTrackGroupBelongToUser } from "../../../../../../utils/ownership";
-import processTrackGroupCover from "../../../../../../utils/processTrackGroupCover";
-import { deleteTrackGroupCover } from "../../../../../../utils/trackGroup";
 import prisma from "../../../../../../../prisma/prisma";
 import { randomBytes } from "crypto";
 import { range } from "lodash";

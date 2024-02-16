@@ -1,6 +1,6 @@
 import { css } from "@emotion/css";
 
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import Box from "../common/Box";
 import usePublicObjectById from "utils/usePublicObjectById";
 import { useTranslation } from "react-i18next";
@@ -29,8 +29,8 @@ function RedeemCode() {
     state: { user },
   } = useGlobalStateContext();
   const navigate = useNavigate();
-
-  const [code, setCode] = React.useState("");
+  const [params] = useSearchParams();
+  const [code, setCode] = React.useState(params.get("code") ?? "");
   const [email, setEmail] = React.useState("");
 
   const {

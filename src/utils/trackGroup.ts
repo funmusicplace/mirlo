@@ -290,6 +290,24 @@ export const registerPurchase = async ({
   return refreshedPurchase;
 };
 
+export const setDownloadTokenToNull = async ({
+  userId,
+  trackGroupId,
+}: {
+  userId: number;
+  trackGroupId: number;
+}) => {
+  await prisma.userTrackGroupPurchase.updateMany({
+    data: {
+      singleDownloadToken: null,
+    },
+    where: {
+      userId: userId,
+      trackGroupId: trackGroupId,
+    },
+  });
+};
+
 export const processSingleTrackGroup = (
   tg: TrackGroup & {
     cover?: TrackGroupCover | null;

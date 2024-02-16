@@ -43,7 +43,7 @@ export const findOrCreateUserBasedOnEmail = async (
       });
     }
     userId = `${user?.id}`;
-  } else {
+  } else if (userId) {
     user = await prisma.user.findFirst({
       where: { id: Number(userId) },
     });

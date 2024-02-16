@@ -11,7 +11,7 @@ import { ManageSectionWrapper } from "./ManageSectionWrapper";
 import Modal from "components/common/Modal";
 import { useTranslation } from "react-i18next";
 import Button from "components/common/Button";
-import { FaPlus } from "react-icons/fa";
+import { FaPlus, FaWrench } from "react-icons/fa";
 
 const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
   const {
@@ -42,18 +42,35 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
   return (
     <ManageSectionWrapper>
       <SpaceBetweenDiv>
-        <Link to="supporters">{t("supporters")}</Link>
-        <Button
-          transparent
-          onClick={() => {
-            setAddingNewTier(true);
-          }}
-          startIcon={<FaPlus />}
-          compact
-          variant="dashed"
-        >
-          {t("addNewTier")}
-        </Button>
+        <div />
+        <div>
+          <Link
+            to="supporters"
+            className={css`
+              margin-right: 0.25rem;
+            `}
+          >
+            <Button
+              variant="dashed"
+              compact
+              collapsible
+              startIcon={<FaWrench />}
+            >
+              {t("supporters")}
+            </Button>
+          </Link>
+          <Button
+            transparent
+            onClick={() => {
+              setAddingNewTier(true);
+            }}
+            startIcon={<FaPlus />}
+            compact
+            variant="dashed"
+          >
+            {t("addNewTier")}
+          </Button>
+        </div>
       </SpaceBetweenDiv>
       <div
         className={css`

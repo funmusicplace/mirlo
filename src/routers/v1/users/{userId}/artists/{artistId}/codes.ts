@@ -37,6 +37,10 @@ const csvColumns = [
     label: "User email",
     value: "redeemedByUser.email",
   },
+  {
+    label: "Code redeem URL",
+    value: "url",
+  },
 ];
 
 export default function () {
@@ -56,12 +60,24 @@ export default function () {
           },
         },
         include: {
-          trackGroup: true,
+          trackGroup: {
+            include: {
+              artist: true,
+            },
+          },
           redeemedByUser: true,
         },
       });
       if (req.query?.format === "csv") {
-        return downloadCSVFile(res, "codes.csv", csvColumns, artistCodes);
+        return downloadCSVFile(
+          res,
+          "codes.csv",
+          csvColumns,
+          artistCodes.map((c) => ({
+            ...c,
+            url: `${process.env.REACT_APP_CLIENT_DOMAIN}/${c.trackGroup.artist.urlSlug}/release/${c.trackGroup.urlSlug}/redeem?code=${c.downloadCode}`,
+          }))
+        );
       }
 
       res.json({

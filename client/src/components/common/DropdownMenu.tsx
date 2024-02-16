@@ -1,10 +1,10 @@
 import { css } from "@emotion/css";
 import React from "react";
 import { bp } from "../../constants";
-import IconButton from "../common/IconButton";
 
 import Background from "components/common/Background";
 import { FaEllipsisV } from "react-icons/fa";
+import Button from "./Button";
 
 const DropdownMenu: React.FC<{
   children: React.ReactElement;
@@ -101,7 +101,7 @@ const DropdownMenu: React.FC<{
         </>
       )}
 
-      <IconButton
+      <Button
         compact={compact}
         onClick={() => {
           setIsMenuOpen(true);
@@ -117,7 +117,7 @@ const DropdownMenu: React.FC<{
         `}
       >
         {icon}
-      </IconButton>
+      </Button>
     </div>
   );
 };

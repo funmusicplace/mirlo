@@ -30,6 +30,12 @@ export const Admin: React.FC = () => {
         <li>
           <NavLink to="tracks">{t("tracks")}</NavLink>
         </li>
+        <li>
+          <NavLink to="purchases">{t("purchases")}</NavLink>
+        </li>
+        <li>
+          <NavLink to="subscriptions">{t("subscriptions")}</NavLink>
+        </li>
       </Tabs>
       <div
         className={css`

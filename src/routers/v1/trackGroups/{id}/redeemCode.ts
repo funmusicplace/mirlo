@@ -3,8 +3,6 @@ import { NextFunction, Request, Response } from "express";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import prisma from "../../../../../prisma/prisma";
 
-import sendMail from "../../../../jobs/send-mail";
-import { randomUUID } from "crypto";
 import { registerPurchase } from "../../../../utils/trackGroup";
 import { findOrCreateUserBasedOnEmail } from "../../../../utils/user";
 import { AppError } from "../../../../utils/error";
@@ -83,7 +81,9 @@ export default function () {
         });
         return res.status(200).json(purchase);
       } else {
-        res.status(400).json({ message: "Something went wrong" });
+        res.status(400).json({
+          error: "Need to be either logged in or supply email address",
+        });
       }
     } catch (e) {
       next(e);

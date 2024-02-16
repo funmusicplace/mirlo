@@ -223,6 +223,14 @@ const routes = [
             path: "tracks",
             element: <AdminTracks />,
           },
+          {
+            path: "purchases",
+            element: <AdminTracks />,
+          },
+          {
+            path: "subscriptions",
+            element: <AdminTracks />,
+          },
         ],
       },
       {
