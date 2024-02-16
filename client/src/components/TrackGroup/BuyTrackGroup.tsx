@@ -122,6 +122,7 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup }> = ({
           percent={trackGroup.platformPercent}
           chosenPrice={chosenPrice}
           currency={trackGroup.currency}
+          artist={trackGroup.artist}
         />
         <EmailInput />
 

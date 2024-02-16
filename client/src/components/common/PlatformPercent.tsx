@@ -2,13 +2,13 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { moneyDisplay } from "./Money";
 import { css } from "@emotion/css";
-import { FiAlertCircle } from "react-icons/fi";
 
 const PlatformPercent: React.FC<{
   percent: number;
   chosenPrice?: string | number;
   currency?: string;
-}> = ({ percent, chosenPrice, currency = "USD" }) => {
+  artist?: Artist;
+}> = ({ percent, chosenPrice, currency = "USD", artist }) => {
   const chosenNumber =
     chosenPrice && isFinite(+chosenPrice) ? Number(chosenPrice) : null;
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
@@ -17,7 +17,7 @@ const PlatformPercent: React.FC<{
     return null;
   }
 
-  const amount = (chosenNumber * percent) / 100;
+  const amount = (chosenNumber * 100 - percent) / 100;
 
   return (
     <div
@@ -28,16 +28,10 @@ const PlatformPercent: React.FC<{
       `}
     >
       {t("platformPercent", {
-        percent,
+        percent: (100 - percent).toFixed(),
+        artistName: artist?.name ?? "the artist",
         money: moneyDisplay({ amount, currency }),
       })}
-      <span
-        className={css`
-          margin-left: 0.2rem;
-        `}
-      >
-        <FiAlertCircle /> {t("platformPercentDisclaimer")}
-      </span>
     </div>
   );
 };
