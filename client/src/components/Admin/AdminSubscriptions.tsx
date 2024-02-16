@@ -65,7 +65,7 @@ export const AdminSubscriptions: React.FC = () => {
           {Object.keys(total).map((currency) => (
             <tr key={currency}>
               <td>{currency}</td>
-              <Money amount={total[currency]} />
+              <Money amount={total[currency] / 100} />
             </tr>
           ))}
         </tbody>
@@ -99,7 +99,7 @@ export const AdminSubscriptions: React.FC = () => {
                   {sub.artistSubscriptionTier.artist.id})
                 </td>
                 <td>
-                  <Money amount={sub.amount} currency={sub.currency} />
+                  <Money amount={sub.amount / 100} currency={sub.currency} />
                 </td>
               </tr>
             ))}

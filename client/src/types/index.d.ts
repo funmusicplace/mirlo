@@ -156,8 +156,9 @@ interface UserTrackGroupPurchase {
   user?: User;
   trackGroupId: number;
   trackGroup?: TrackGroup;
-  amountPaid: number;
+  pricePaid: number;
   currencyPaid: string;
+  datePurchased: string;
   singleDownloadToken?: string;
 }
 

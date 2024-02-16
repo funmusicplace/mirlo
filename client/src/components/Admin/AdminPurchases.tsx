@@ -35,9 +35,9 @@ export const AdminPurchases: React.FC = () => {
 
   const total = results.reduce((aggr, r) => {
     if (aggr[r.currencyPaid]) {
-      aggr[r.currencyPaid] += r.amountPaid;
+      aggr[r.currencyPaid] += r.pricePaid;
     } else {
-      aggr[r.currencyPaid] = r.amountPaid;
+      aggr[r.currencyPaid] = r.pricePaid;
     }
     return aggr;
   }, {} as any);
@@ -66,7 +66,7 @@ export const AdminPurchases: React.FC = () => {
           {Object.keys(total).map((currency) => (
             <tr key={currency}>
               <td>{currency}</td>
-              <Money amount={total[currency]} />
+              <Money amount={total[currency] / 100} />
             </tr>
           ))}
         </tbody>
@@ -79,6 +79,7 @@ export const AdminPurchases: React.FC = () => {
               <th />
               <th>User</th>
               <th>TrackGroup</th>
+              <th>Date purchased</th>
               <th>Amount paid</th>
             </tr>
           </thead>
@@ -93,9 +94,10 @@ export const AdminPurchases: React.FC = () => {
                 <td>
                   {purchase.trackGroup.title} (id: {purchase.trackGroup.id})
                 </td>
+                <td>{purchase.datePurchased}</td>
                 <td>
                   <Money
-                    amount={purchase.amountPaid}
+                    amount={purchase.pricePaid / 100}
                     currency={purchase.currencyPaid}
                   />
                 </td>
