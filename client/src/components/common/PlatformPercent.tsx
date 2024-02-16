@@ -17,7 +17,7 @@ const PlatformPercent: React.FC<{
     return null;
   }
 
-  const amount = (chosenNumber * 100 - percent) / 100;
+  const amount = (chosenNumber * (100 - percent)) / 100;
 
   return (
     <div
