@@ -36,6 +36,10 @@ export const VolumeControl: React.FC<{
           margin: 0 0.25rem;
           top: 0;
           position: ${volume};
+
+          @media (prefers-color-scheme: light) {
+            background: var(--mi-darken-x-background-color);
+          }
         `}
         onClick={(event: React.MouseEvent<HTMLDivElement>) => {
           const divWidth = event.currentTarget.offsetWidth;
@@ -52,9 +56,13 @@ export const VolumeControl: React.FC<{
             overflow: none;
             transition: 0.1s width;
             width: ${volume * 100}%;
-            background: var(--mi-normal-foreground-color);
+            background: var(--mi-white);
             pointer-events: none;
             border-radius: 0.5rem;
+
+            @media (prefers-color-scheme: light) {
+              background: var(--mi-black);
+            }
           `}
         ></div>
       </div>
