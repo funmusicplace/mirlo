@@ -8,7 +8,7 @@ import { Navigate } from "react-router-dom";
 
 import Admin from "components/Admin/Admin";
 import AdminUsers from "components/Admin/Users";
-import AdminTrackGroups from "components/Admin/Trackgroups";
+import AdminTrackGroups from "components/Admin/AdminTrackgroups";
 import AdminTracks from "components/Admin/Tracks";
 import ManageArtist from "components/ManageArtist/ManageArtist";
 import Home from "components/Home/Home";
@@ -50,6 +50,8 @@ import RedeemCode from "components/TrackGroup/RedeemCode";
 import DownloadAlbum from "components/TrackGroup/DownloadAlbum";
 import AdminPurchases from "components/Admin/AdminPurchases";
 import AdminSubscriptions from "components/Admin/AdminSubscriptions";
+import CallServerTasks from "components/Admin/CallServerTasks";
+import AdminSettings from "components/Admin/AdminSettings";
 
 const routes = [
   {
@@ -232,6 +234,14 @@ const routes = [
           {
             path: "subscriptions",
             element: <AdminSubscriptions />,
+          },
+          {
+            path: "serverTasks",
+            element: <CallServerTasks />,
+          },
+          {
+            path: "settings",
+            element: <AdminSettings />,
           },
         ],
       },

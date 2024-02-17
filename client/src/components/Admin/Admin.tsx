@@ -4,7 +4,6 @@ import React from "react";
 import Tabs from "../common/Tabs";
 import { NavLink, Outlet } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import CallServerTasks from "./CallServerTasks";
 
 export const Admin: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "admin" });
@@ -16,8 +15,10 @@ export const Admin: React.FC = () => {
         width: 100%;
       `}
     >
-      <CallServerTasks />
       <Tabs>
+        <li>
+          <NavLink to="settings">{t("settings")}</NavLink>
+        </li>
         <li>
           <NavLink to="users">{t("users")}</NavLink>
         </li>
@@ -35,6 +36,9 @@ export const Admin: React.FC = () => {
         </li>
         <li>
           <NavLink to="subscriptions">{t("subscriptions")}</NavLink>
+        </li>
+        <li>
+          <NavLink to="serverTasks">{t("serverTasks")}</NavLink>
         </li>
       </Tabs>
       <div

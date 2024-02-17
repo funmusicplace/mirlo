@@ -124,10 +124,10 @@ const APIInstance = (apiRoot: string) => {
     getMany: async <R>(
       endpoint: string,
       query?: { [key: string]: string }
-    ): Promise<{ results: R[] }> => {
+    ): Promise<{ results: R[]; total?: number }> => {
       const fullEndpoint = convertQueryToSearchParams(endpoint, query);
 
-      return apiRequest<{ results: R[] }>(fullEndpoint, {
+      return apiRequest<{ results: R[]; total?: number }>(fullEndpoint, {
         method: "GET",
         credentials: "include",
       });

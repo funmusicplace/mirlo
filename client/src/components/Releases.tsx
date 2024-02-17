@@ -15,7 +15,6 @@ const pageSize = 40;
 
 const Releases = () => {
   const [params] = useSearchParams();
-  console.log("tag", params.get("tag"));
   const { t } = useTranslation("translation", { keyPrefix: "releases" });
   const [trackGroups, setTrackGroups] = React.useState<TrackGroup[]>([]);
   const { page, PaginationComponent } = usePagination({ pageSize });

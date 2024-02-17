@@ -6,6 +6,7 @@ import React from "react";
 import { FaCheck, FaEdit } from "react-icons/fa";
 import { Outlet, useNavigate, useParams } from "react-router-dom";
 import api from "services/api";
+import useAdminFilters from "./useAdminFilters";
 // import { AdminTrackGroup, fetchTrackGroups } from "services/api/Admin";
 // import usePagination from "utils/usePagination";
 
@@ -14,19 +15,27 @@ export const AdminTrackGroups: React.FC = () => {
   const { trackgroupId } = useParams();
   const [results, setResults] = React.useState<TrackGroup[]>([]);
   const [openModal, setOpenModal] = React.useState(false);
+  const [total, setTotal] = React.useState<number>();
 
-  // const { LoadingButton, results } = usePagination<TrackGroup>({
-  //   apiCall: React.useCallback(fetchTrackGroups, []),
-  //   options: React.useMemo(() => ({ limit: 50 }), []),
-  // });
+  const callback = React.useCallback(async (search?: URLSearchParams) => {
+    if (search) {
+      search.append("orderBy", "createdAt");
+    }
+    const { results, total: totalReuslts } = await api.getMany<TrackGroup>(
+      `admin/trackGroups?${search?.toString()}`
+    );
+    setResults(results);
+    setTotal(totalReuslts);
+  }, []);
+
+  const { Filters } = useAdminFilters({
+    onSubmitFilters: callback,
+    fields: ["title", "isPublished", "artistName"],
+  });
 
   React.useEffect(() => {
-    const callback = async () => {
-      const { results } = await api.getMany<TrackGroup>("admin/trackGroups");
-      setResults(results);
-    };
     callback();
-  }, []);
+  }, [callback]);
 
   React.useEffect(() => {
     if (trackgroupId) {
@@ -48,6 +57,9 @@ export const AdminTrackGroups: React.FC = () => {
       `}
     >
       <h3>TrackGroups</h3>
+      <Filters />
+      <h4>Total results: {total}</h4>
+
       {results.length > 0 && (
         <Table>
           <thead>

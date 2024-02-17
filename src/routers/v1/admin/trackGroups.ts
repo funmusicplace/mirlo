@@ -4,6 +4,7 @@ import prisma from "../../../../prisma/prisma";
 import processor, {
   processTrackGroupQueryOrder,
 } from "../../../utils/trackGroup";
+import { Prisma } from "@prisma/client";
 
 export default function () {
   const operations = {
@@ -15,14 +16,36 @@ export default function () {
       skip: skipQuery,
       take,
       orderBy,
-    } = req.query as { skip: string; take: string; orderBy: string };
+      isPublished,
+      title,
+      artistName,
+    } = req.query as {
+      skip: string;
+      take: string;
+      orderBy: string;
+      isPublished: string;
+      title: string;
+      artistName: string;
+    };
 
     try {
-      const itemCount = await prisma.trackGroup.count();
+      let where: Prisma.TrackGroupWhereInput = {
+        deletedAt: null,
+      };
 
-      prisma.trackGroup.findMany();
+      if (title && typeof title === "string") {
+        where.title = { contains: title, mode: "insensitive" };
+      }
+      if (artistName && typeof artistName === "string") {
+        where.artist = { name: { contains: artistName, mode: "insensitive" } };
+      }
+      if (isPublished) {
+        where.published = true;
+      }
+      const itemCount = await prisma.trackGroup.count({ where });
 
       const trackGroups = await prisma.trackGroup.findMany({
+        where,
         orderBy: processTrackGroupQueryOrder(orderBy),
         skip: skipQuery ? Number(skipQuery) : undefined,
         take: take ? Number(take) : undefined,
