@@ -1,5 +1,5 @@
 import { css } from "@emotion/css";
-import IconButton from "components/common/IconButton";
+import Button from "components/common/Button";
 import Modal from "components/common/Modal";
 import Table from "components/common/Table";
 import React from "react";
@@ -82,12 +82,11 @@ export const AdminTrackGroups: React.FC = () => {
                 <td>{trackgroup.createdAt}</td>
                 <td>{trackgroup.published ? <FaCheck /> : undefined}</td>
                 <td className="alignRight">
-                  <IconButton
+                  <Button
                     compact
+                    startIcon={<FaEdit />}
                     onClick={() => onClickQueue(trackgroup.id)}
-                  >
-                    <FaEdit />
-                  </IconButton>
+                  />
                 </td>
               </tr>
             ))}

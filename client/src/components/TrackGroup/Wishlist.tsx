@@ -1,5 +1,5 @@
 import { css } from "@emotion/css";
-import IconButton from "components/common/IconButton";
+import Button from "components/common/Button";
 import React from "react";
 import { IoIosHeart, IoIosHeartEmpty } from "react-icons/io";
 import api from "services/api";
@@ -26,16 +26,15 @@ const Wishlist: React.FC<{ trackGroup: TrackGroup }> = ({ trackGroup }) => {
   }
 
   return (
-    <IconButton
+    <Button
       onClick={onClick}
       compact
       variant="link"
       className={css`
         color: inherit !important;
       `}
-    >
-      {isInWishlist ? <IoIosHeart /> : <IoIosHeartEmpty />}
-    </IconButton>
+      startIcon={isInWishlist ? <IoIosHeart /> : <IoIosHeartEmpty />}
+    />
   );
 };
 

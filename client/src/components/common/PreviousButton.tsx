@@ -1,7 +1,7 @@
 import React from "react";
 
 import { MdSkipPrevious } from "react-icons/md";
-import IconButton from "./IconButton";
+import Button from "./Button";
 import { useGlobalStateContext } from "state/GlobalState";
 
 export const PreviousButton: React.FC = () => {
@@ -11,11 +11,7 @@ export const PreviousButton: React.FC = () => {
     dispatch({ type: "decrementCurrentlyPlayingIndex" });
   }, [dispatch]);
 
-  return (
-    <IconButton onClick={onClickPrevious}>
-      <MdSkipPrevious/>
-    </IconButton>
-  );
+  return <Button startIcon={<MdSkipPrevious />} onClick={onClickPrevious} />;
 };
 
 export default PreviousButton;
