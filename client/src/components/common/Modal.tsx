@@ -2,11 +2,11 @@ import React from "react";
 import { css } from "@emotion/css";
 import styled from "@emotion/styled";
 import { bp } from "../../constants";
-import IconButton from "./IconButton";
 import ReactDOM from "react-dom";
 import Background from "./Background";
 import { FaTimes } from "react-icons/fa";
 import SpaceBetweenDiv from "./SpaceBetweenDiv";
+import Button from "./Button";
 
 const wrapper = css`
   position: fixed;
@@ -198,14 +198,13 @@ export const Modal: React.FC<{
           >
             {title && <h2>{title}</h2>}
 
-            <IconButton
+            <Button
               className={close}
               compact
+              startIcon={<FaTimes />}
               onClick={onCloseWrapper}
               aria-label="close"
-            >
-              <FaTimes />
-            </IconButton>
+            ></Button>
           </SpaceBetweenDiv>
           <ChildrenWrapper className={contentClassName}>
             {children}

@@ -8,6 +8,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Settings {
+  id       Int  @id @default(autoincrement())
+  settings Json
+}
+
 model Client {
   id                 Int       @id @default(autoincrement())
   applicationName    String

@@ -1,8 +1,8 @@
 import React from "react";
 import { css } from "@emotion/css";
 import { VscPlay } from "react-icons/vsc";
-import IconButton from "./IconButton";
 import { useGlobalStateContext } from "state/GlobalState";
+import Button from "./Button";
 
 export const PlayButton: React.FC<{
   onPlay?: () => Promise<void> | void;
@@ -32,9 +32,7 @@ export const PlayButton: React.FC<{
         className
       }
     >
-      <IconButton onClick={onPlay ?? onPlayCallback}>
-        <VscPlay />
-      </IconButton>
+      <Button startIcon={<VscPlay />} onClick={onPlay ?? onPlayCallback} />
     </div>
   );
 };

@@ -2,9 +2,9 @@ import React from "react";
 import { css } from "@emotion/css";
 
 import { RxLoop } from "react-icons/rx";
-import IconButton from "./IconButton";
 import { GlobalState, useGlobalStateContext } from "state/GlobalState";
 import styled from "@emotion/styled";
+import Button from "./Button";
 
 const LoopingIndicator = styled.span`
   position: absolute;
@@ -35,18 +35,21 @@ export const LoopButton: React.FC = () => {
   }, [dispatch, looping]);
 
   return (
-    <IconButton
+    <Button
       role={looping ? "primary" : undefined}
       onClick={onLoop}
+      startIcon={
+        <>
+          <RxLoop />
+          {looping === "loopTrack" && <LoopingIndicator>1</LoopingIndicator>}
+        </>
+      }
       className={css`
         margin-left: 0.25rem;
         position: relative;
         ${looping ? "color: var(--mi-link-color) !important;" : ""}
       `}
-    >
-      <RxLoop />
-      {looping === "loopTrack" && <LoopingIndicator>1</LoopingIndicator>}
-    </IconButton>
+    />
   );
 };
 

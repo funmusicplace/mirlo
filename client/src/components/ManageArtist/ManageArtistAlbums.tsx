@@ -55,24 +55,22 @@ const ManageArtistAlbums: React.FC<{}> = () => {
         )}
         {trackGroups.length !== 0 && <div />}
         <div>
-          {user?.isAdmin && (
-            <Link
-              to={`/manage/artists/${artistId}/releases/tools`}
-              className={css`
-                margin-right: 0.25rem;
-              `}
+          <Link
+            to={`/manage/artists/${artistId}/releases/tools`}
+            className={css`
+              margin-right: 0.25rem;
+            `}
+          >
+            <Button
+              compact
+              transparent
+              startIcon={<FaWrench />}
+              variant="dashed"
+              collapsible
             >
-              <Button
-                compact
-                transparent
-                startIcon={<FaWrench />}
-                variant="dashed"
-                collapsible
-              >
-                {t("tools")}
-              </Button>
-            </Link>
-          )}
+              {t("tools")}
+            </Button>
+          </Link>
           <Link to={`/manage/artists/${artistId}/new-release`}>
             <Button
               compact

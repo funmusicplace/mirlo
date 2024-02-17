@@ -1,10 +1,10 @@
 import { css } from "@emotion/css";
-import IconButton from "components/common/IconButton";
 import React from "react";
 import { TfiControlPause } from "react-icons/tfi";
 import { VscPlay } from "react-icons/vsc";
 import { useGlobalStateContext } from "state/GlobalState";
 import { inIframe, inMirlo } from "./utils";
+import Button from "components/common/Button";
 
 export const PlayButtonsWrapper: React.FC<{ ids: number[] }> = ({ ids }) => {
   const {
@@ -59,27 +59,25 @@ export const PlayButtonsWrapper: React.FC<{ ids: number[] }> = ({ ids }) => {
       `}
     >
       {!playing && (
-        <IconButton
+        <Button
           onClick={playMusic}
+          startIcon={<VscPlay />}
           className={css`
           padding-left: 0.85rem !important;
         }
       `}
-        >
-          <VscPlay />
-        </IconButton>
+        />
       )}
       {(playing || embeddedInMirlo) && (
-        <IconButton
+        <Button
           onClick={onPause}
+          startIcon={<TfiControlPause />}
           className={css`
           padding: 0.75rem !important;
           ${embeddedInMirlo && "display: none;"}
         }
       `}
-        >
-          <TfiControlPause />
-        </IconButton>
+        />
       )}
     </div>
   );

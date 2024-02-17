@@ -1,9 +1,9 @@
 import React from "react";
 import { css } from "@emotion/css";
 import { TfiControlPause } from "react-icons/tfi";
-import IconButton from "./IconButton";
 import { useGlobalStateContext } from "state/GlobalState";
 import { isEqualDurations } from "utils/tracks";
+import Button from "./Button";
 
 export const PauseButton: React.FC<{ className?: string }> = ({
   className,
@@ -23,7 +23,8 @@ export const PauseButton: React.FC<{ className?: string }> = ({
 
   return (
     <div>
-      <IconButton
+      <Button
+        startIcon={<TfiControlPause />}
         onClick={onPause}
         className={
           css`
@@ -38,9 +39,7 @@ export const PauseButton: React.FC<{ className?: string }> = ({
           " " +
           className
         }
-      >
-        <TfiControlPause />
-      </IconButton>
+      />
     </div>
   );
 };

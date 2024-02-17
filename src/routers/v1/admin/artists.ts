@@ -10,13 +10,21 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
-    const { skip: skipQuery, take, name } = req.query;
-
+    const { skip: skipQuery, take, name, acceptPayments } = req.query;
     try {
-      let where: Prisma.ArtistWhereInput = {};
+      let where: Prisma.ArtistWhereInput = {
+        deletedAt: null,
+      };
 
       if (name && typeof name === "string") {
         where.name = { contains: name, mode: "insensitive" };
+      }
+      if (acceptPayments) {
+        where.user = {
+          stripeAccountId: {
+            not: null,
+          },
+        };
       }
       const itemCount = await prisma.artist.count({ where });
 

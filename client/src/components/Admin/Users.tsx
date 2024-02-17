@@ -1,15 +1,11 @@
 import { css } from "@emotion/css";
-// import Button from "components/common/Button";
-import IconButton from "components/common/IconButton";
+import Button from "components/common/Button";
 import Modal from "components/common/Modal";
-// import Select from "components/common/Select";
 import Table from "components/common/Table";
 import React from "react";
 import { FaCheck, FaEdit } from "react-icons/fa";
 import { Link, Outlet, useNavigate, useParams } from "react-router-dom";
 import api from "services/api";
-// import { AdminUser, fetchUsers, fetchCSVAndDownload } from "services/api/Admin";
-// import usePagination from "utils/usePagination";
 
 export const AdminUsers: React.FC = () => {
   // const [q, setQ] = React.useState("");
@@ -157,9 +153,11 @@ export const AdminUsers: React.FC = () => {
                 </td>
                 <td>{user.stripeAccountId ? <FaCheck /> : ""}</td>
                 <td className="alignRight">
-                  <IconButton compact onClick={() => onClickQueue(user.id)}>
-                    <FaEdit />
-                  </IconButton>
+                  <Button
+                    compact
+                    onClick={() => onClickQueue(user.id)}
+                    startIcon={<FaEdit />}
+                  />
                 </td>
               </tr>
             ))}

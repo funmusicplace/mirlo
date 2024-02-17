@@ -1,8 +1,8 @@
 import { VscPlay } from "react-icons/vsc";
 import { TfiControlPause } from "react-icons/tfi";
-import IconButton from "./IconButton";
 import { useGlobalStateContext } from "state/GlobalState";
 import React from "react";
+import Button from "./Button";
 
 const TrackRowPlayControl: React.FC<{
   trackNumber: number;
@@ -58,21 +58,23 @@ const TrackRowPlayControl: React.FC<{
             {trackNumber}
           </span>
           {canPlayTrack && !isDisabled && (
-            <IconButton compact className="play-button" onClick={onTrackPlay}>
-              <VscPlay />
-            </IconButton>
+            <Button
+              compact
+              startIcon={<VscPlay />}
+              className="play-button"
+              onClick={onTrackPlay}
+            ></Button>
           )}
         </>
       )}
       {playing && currentPlayingTrackId === trackId && (
-        <IconButton
+        <Button
           compact
+          startIcon={<TfiControlPause />}
           data-cy="track-row-pause-button"
           onClick={onTrackPause}
           style={{ width: "2rem", textAlign: "center" }}
-        >
-          <TfiControlPause />
-        </IconButton>
+        />
       )}
     </>
   );
