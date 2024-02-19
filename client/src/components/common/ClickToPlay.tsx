@@ -31,6 +31,8 @@ const TrackgroupButtons = styled.div`
       padding: 0;
       height: 3rem !important;
       color: white !important;
+
+      padding-right: 0.5rem !important;
       font-weight: normal;
       font-size: 1.3rem;
       text-transform: uppercase;
@@ -49,6 +51,8 @@ const TrackgroupButtons = styled.div`
     }
     button {
       width: 3rem;
+
+      background-color: rgba(0, 0, 0, 0.6) !important;
       height: 3rem;
     }
   }
@@ -131,13 +135,13 @@ const PlayWrapper = styled.div<WrapperProps>`
     }
 
     &:hover:not(:disabled) {
-      background-color: rgba(255, 255, 255, 0.5);
+      background-color: rgba(255, 255, 255, 0.5) !important;
       color: var(--mi-black);
     }
   }
 
   &:hover {
-    background-color: rgba(0, 0, 0, 0.6);
+    background-color: rgba(0, 0, 0, 0.6) !important;
     opacity: 1;
   }
 

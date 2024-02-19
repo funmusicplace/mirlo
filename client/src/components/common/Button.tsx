@@ -58,8 +58,6 @@ const CustomButton = styled.button<Compactable>`
           margin-left: .3rem;
           font-weight: bold;
           padding: 0 !important;
-          height: auto !important;
-          width: auto !important;
           background-color: transparent !important;
           font-size: inherit;
           line-height: inherit;

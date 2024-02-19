@@ -5,8 +5,9 @@ import { useGlobalStateContext } from "state/GlobalState";
 
 export const PlayControlButton: React.FC<{
   isPlaying?: boolean;
+  playerButton?: boolean;
   onPlay?: () => Promise<void>;
-}> = ({ onPlay, isPlaying }) => {
+}> = ({ onPlay, isPlaying, playerButton }) => {
   const {
     state: { playing },
   } = useGlobalStateContext();
@@ -17,6 +18,7 @@ export const PlayControlButton: React.FC<{
     <div
       className={css`
         button {
+          ${playerButton ? "height: 2.5rem; width: 2.5rem;" : ""}
           color: var(--mi-white);
           background-color: var(--mi-black);
           border-color: var(--mi-black);
@@ -24,11 +26,17 @@ export const PlayControlButton: React.FC<{
           align-content: center;
           align-items: center;
           justify-content: center;
+
+          span {
+            ${playerButton
+              ? "font-size: 1.1rem !important; padding: 20% 25% 25% 25%;"
+              : ""}
+          }
         }
 
         button:hover {
           border-color: var(--mi-black);
-          color: var(--mi-black) !important;
+          color: var(--mi-black);
           background-color: var(--mi-white);
         }
 
@@ -36,12 +44,12 @@ export const PlayControlButton: React.FC<{
           button {
             color: var(--mi-white);
             background: var(--mi-black);
-            border-color: grey;
+            border-color: grey !important;
           }
           button:hover {
             border-color: var(--mi-white);
-            color: var(--mi-black) !important;
-            background-color: var(--mi-white) !important;
+            color: var(--mi-black);
+            background-color: var(--mi-white);
           }
         }
       `}

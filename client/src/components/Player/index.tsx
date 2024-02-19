@@ -24,23 +24,21 @@ const ControlWrapper = styled.span`
   button {
     color: black;
     background: transparent;
-    font-size: 1.2rem !important;
   }
 
   button:hover {
-    color: var(--mi-black) !important;
+    color: var(--mi-white);
     background-color: var(--mi-white);
     font-size: 1.2rem;
   }
 
   @media (prefers-color-scheme: dark) {
-    color: white;
     button {
       color: white;
     }
     button:hover {
-      color: var(--mi-white) !important;
-      background-color: var(--mi-white);
+      background-color: var(--mi-white) !important;
+      color: var(--mi-black) !important;
       font-size: 1.2rem;
     }
   }
@@ -97,9 +95,6 @@ const Player = () => {
 
         @media (max-width: ${bp.small}px) {
           flex-direction: column;
-
-          button {
-          }
         }
 
         @media (prefers-color-scheme: dark) {
@@ -205,7 +200,7 @@ const Player = () => {
               >
                 <PreviousButton />
               </div>
-              <PlayControlButton />
+              <PlayControlButton playerButton />
               <div
                 className={css`
                 @media (max-width: ${bp.small}px) {
@@ -221,7 +216,6 @@ const Player = () => {
             </ControlWrapper>
           </div>
         </div>
-
         {!currentTrack && isLoading && <Spinner size="small" />}
       </div>
     </div>

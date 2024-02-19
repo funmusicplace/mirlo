@@ -23,7 +23,7 @@ export const PlayButton: React.FC<{
             margin-right: 0.25rem;
             padding: 0.7rem 0.6rem 0.7rem 0.8rem;
             border: solid 1.5px var(--mi-normal-foreground-color);
-            border-color: var(--mi-white);
+            border-color: var(--mi-black);
             background-color: var(--mi-black);
             color: var(--mi-white);
           }
