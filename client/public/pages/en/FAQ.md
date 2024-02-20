@@ -44,7 +44,7 @@ Our main blocker is getting the word out! If you want to help out with marketing
 
 Probably! As individuals we’ve worked with and in Resonate and Ampled, and we’re in touch with a couple of other projects that are doing very similar things like jam.coop, faircamp, ampwall, patrontape, tone.audio, and some others. We’re hoping to continue talking to these folks and build towards standardization of resources and tech APIs so that our services can talk to each other and musicians can easily switch between them. If there’s a project you want to talk about, bring it up in our [Discord](https://discord.gg/XuV7F4YRqB)!
 
-## What we’re building {#what-we’re-building}
+## What we’re building
 
 ### How much does Mirlo cost?
 
@@ -78,7 +78,7 @@ No!
 
 Yes please! Reach out to either LLK or Si on the[ Discord](https://discord.gg/XuV7F4YRqB) to get started.
 
-## The people doing it {#the-people-doing-it}
+## The people doing it
 
 ### How are you structured?
 
@@ -92,7 +92,7 @@ Mirlo is maintained by a worker co-operative heavily rooted in a community of mu
 
 Our community is primarily hanging out on the[ Discord](https://discord.gg/XuV7F4YRqB) of our parent project[ Fun Music Place](https://funmusic.place). Come say hi!
 
-## Support questions {#support-questions}
+## Support questions
 
 ### How do I add support tiers?
 
