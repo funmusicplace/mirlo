@@ -46,6 +46,22 @@ model User {
   wishlist                            UserTrackGroupWishlist[]
   plays                               TrackPlay[]
   downloadCodes                       TrackGroupDownloadCodes[]
+  UserNotification                    UserNotification[]
+}
+
+model UserNotification {
+  userId       Int
+  user         User             @relation(fields: [userId], references: [id])
+  notification NotificationType
+  isEnabled    Boolean          @default(true)
+
+  @@unique([userId, notification])
+}
+
+enum NotificationType {
+  DIGEST
+  MONTHLY_SUBSCRIPTION
+  ARTIST_POSTS
 }
 
 model Post {
