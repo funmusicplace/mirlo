@@ -126,6 +126,7 @@ const routes = [
   "admin/artists",
   "admin/subscriptions",
   "admin/purchases",
+  "admin/settings",
 ];
 
 initialize({
