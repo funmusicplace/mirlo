@@ -1,7 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import { userAuthenticated, userHasPermission } from "../../../auth/passport";
 import prisma from "../../../../prisma/prisma";
-import cleanUpFiles from "../../../jobs/clean-up-files";
+import cleanUpFiles from "../../../jobs/tasks/clean-up-files";
+import initiateUserNotifcations from "../../../jobs/tasks/initiate-user-notifications";
 
 export default function () {
   const operations = {
@@ -15,6 +16,10 @@ export default function () {
       if (jobName) {
         if (jobName === "cleanUpFiles" && typeof jobParam === "string") {
           await cleanUpFiles(jobParam);
+          result[jobName] = "Success";
+        }
+        if (jobName === "initiateUserNotifications") {
+          await initiateUserNotifcations();
           result[jobName] = "Success";
         }
       }

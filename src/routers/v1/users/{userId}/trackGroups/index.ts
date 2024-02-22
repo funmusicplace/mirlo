@@ -7,6 +7,7 @@ import {
 import processor from "../../../../../utils/trackGroup";
 import prisma from "../../../../../../prisma/prisma";
 import slugify from "slugify";
+import { getSiteSettings } from "../../../../../utils/settings";
 
 export default function () {
   const operations = {
@@ -139,6 +140,7 @@ export default function () {
           artist: { connect: { id: artistId } },
           published,
           minPrice,
+          platformPercent: (await getSiteSettings()).platformPercent,
           currency: userForCurrency?.currency ?? "USD",
           releaseDate: releaseDate ? new Date(releaseDate) : undefined,
           adminEnabled: true,

@@ -1,5 +1,5 @@
 import { promises as fsPromises } from "fs";
-import logger from "../logger";
+import logger from "../../logger";
 
 const cleanUpFiles = async (incomingFolder: string) => {
   try {

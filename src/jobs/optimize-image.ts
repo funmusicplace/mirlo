@@ -149,7 +149,7 @@ const optimizeImage = async (job: Job) => {
 
     return Promise.resolve();
   } catch (err) {
-    logger.error(err);
+    logger.error(`optimizeImage ${JSON.stringify(err)}`);
     return Promise.reject(err);
   }
 };

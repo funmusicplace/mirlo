@@ -46,6 +46,22 @@ model User {
   wishlist                            UserTrackGroupWishlist[]
   plays                               TrackPlay[]
   downloadCodes                       TrackGroupDownloadCodes[]
+  UserNotification                    UserNotification[]
+}
+
+model UserNotification {
+  userId       Int
+  user         User             @relation(fields: [userId], references: [id])
+  notification NotificationType
+  isEnabled    Boolean          @default(true)
+
+  @@unique([userId, notification])
+}
+
+enum NotificationType {
+  DIGEST
+  MONTHLY_SUBSCRIPTION
+  ARTIST_POSTS
 }
 
 model Post {
@@ -139,7 +155,7 @@ model ArtistSubscriptionTier {
   minimumTierForPost    Post[]
   postSubscriptionTiers PostSubscriptionTier[]
   isDefaultTier         Boolean                  @default(false)
-  platformPercent       Int?                     @default(0)
+  platformPercent       Int?                     @default(7)
 }
 
 model ArtistUserSubscription {
@@ -226,7 +242,7 @@ model TrackGroup {
   urlSlug                 String
   credits                 String?
   userTrackGroupWishlist  UserTrackGroupWishlist[]
-  platformPercent         Int?                      @default(0)
+  platformPercent         Int?                      @default(7)
   tags                    TrackGroupTag[]
   downloadCodes           TrackGroupDownloadCodes[]
 

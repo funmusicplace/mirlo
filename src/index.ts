@@ -217,7 +217,7 @@ app.use("/", (req, res) => {
   }
 });
 
-app.listen(process.env.PORT, () =>
+app.listen(process.env.NODE_ENV === "test" ? 5000 : process.env.PORT, () =>
   console.info(`
 🚀 Server ready at: ${process.env.API_DOMAIN}`)
 );

@@ -48,6 +48,9 @@ export const Admin: React.FC = () => {
         <label>{t("whatTaskCall")}</label>
         <SelectEl {...methods.register("jobName")}>
           <option value="cleanUpFiles">cleanUpFiles</option>
+          <option value="initiateUserNotifications">
+            initiateUserNotifications
+          </option>
         </SelectEl>
       </FormComponent>
       <FormComponent direction="row">

@@ -96,41 +96,6 @@ describe("trackGroups/{id}", () => {
     });
   });
 
-  describe("/purchase", () => {
-    it("should POST / 400 if artist not set up with stripe", async () => {
-      const { user } = await createUser({
-        email: "artist@artist.com",
-      });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id);
-
-      const response = await requestApp
-        .post(`trackGroups/${trackGroup.id}/purchase`)
-        .set("Accept", "application/json");
-      assert.equal(response.status, 400);
-      assert.equal(
-        response.body.error,
-        "Artist not set up with a payment processor yet"
-      );
-    });
-
-    // FIXME: https://github.com/funmusicplace/mirlo/issues/248
-    it.skip("should POST / 200", async () => {
-      const { user } = await createUser({
-        email: "artist@artist.com",
-        stripeAccountId: "aRandomWord",
-      });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id);
-
-      const response = await requestApp
-        .post(`trackGroups/${trackGroup.id}/purchase`)
-        .set("Accept", "application/json");
-
-      assert.equal(response.status, 400);
-    });
-  });
-
   describe("/emailDownload", () => {
     it("should POST / 404", async () => {
       const response = await requestApp

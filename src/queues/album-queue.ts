@@ -58,7 +58,9 @@ generateAlbumQueueEvents.on(
         logger.info("updated trackAudio");
       }
     } catch (err) {
-      logger.error(err);
+      logger.error(
+        `generateAlbumQueueEvents.completed error: ${JSON.stringify(err)}`
+      );
     }
   }
 );
@@ -81,7 +83,7 @@ generateAlbumQueueEvents.on("stalled", async (result: { jobId: string }) => {
       logger.info("Updated trackAudio");
     }
   } catch (err) {
-    logger.error(err);
+    logger.error(`generateAlbumQueueEvents.stalled: ${JSON.stringify(err)}`);
   }
 });
 

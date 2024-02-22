@@ -63,7 +63,7 @@ audioQueueEvents.on(
         logger.info("updated trackAudio");
       }
     } catch (err) {
-      logger.error(err);
+      logger.error(`audioQueueEvents.completed ${JSON.stringify(err)}`);
     }
   }
 );
@@ -86,7 +86,7 @@ audioQueueEvents.on("stalled", async (result: { jobId: string }) => {
       logger.info("Updated trackAudio");
     }
   } catch (err) {
-    logger.error(err);
+    logger.error(`audioQueueEvents.stalled ${JSON.stringify(err)}`);
   }
 });
 

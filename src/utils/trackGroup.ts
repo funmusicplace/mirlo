@@ -7,7 +7,7 @@ import {
   TrackGroupTag,
 } from "@prisma/client";
 import prisma from "../../prisma/prisma";
-import { convertURLArrayToSizes, generateFullStaticImageUrl } from "./images";
+import { generateFullStaticImageUrl } from "./images";
 import {
   finalCoversBucket,
   finalAudioBucket,
@@ -21,6 +21,8 @@ import { deleteTrack } from "./tracks";
 import { randomUUID } from "crypto";
 import { Response } from "express";
 import { DefaultArgs } from "@prisma/client/runtime/library";
+import { doesTrackGroupBelongToUser } from "./ownership";
+import { AppError } from "./error";
 
 export const whereForPublishedTrackGroups = (): Prisma.TrackGroupWhereInput => {
   return {
@@ -252,6 +254,7 @@ export const registerPurchase = async ({
       trackGroupId: Number(trackGroupId),
     },
   });
+
   if (purchase) {
     await prisma.userTrackGroupPurchase.update({
       where: {
@@ -265,6 +268,7 @@ export const registerPurchase = async ({
       },
     });
   }
+
   if (!purchase) {
     purchase = await prisma.userTrackGroupPurchase.create({
       data: {
@@ -302,6 +306,101 @@ export const registerPurchase = async ({
     },
   });
   return refreshedPurchase;
+};
+
+export const basicTrackGroupInclude = {
+  include: {
+    tracks: {
+      include: {
+        audio: true,
+      },
+      where: {
+        deletedAt: null,
+      },
+    },
+  },
+};
+
+export const findPurchaseAndVoidToken = async (
+  trackGroupId: number,
+  userId: number
+) => {
+  let isCreator;
+  try {
+    isCreator = await doesTrackGroupBelongToUser(Number(trackGroupId), userId);
+  } catch (e) {}
+  logger.info(`trackGroupId: ${trackGroupId} isCreator: ${isCreator}`);
+
+  const purchase = await prisma.userTrackGroupPurchase.findFirst({
+    where: {
+      trackGroupId: Number(trackGroupId),
+      ...(!isCreator
+        ? {
+            userId: Number(userId),
+            trackGroup: {
+              published: true,
+            },
+          }
+        : {}),
+    },
+    include: {
+      trackGroup: basicTrackGroupInclude,
+    },
+  });
+
+  if (!purchase) {
+    throw new AppError({
+      httpCode: 404,
+      description: `trackGroupId: ${trackGroupId} no purchase found`,
+    });
+  }
+
+  // TODO: do we want a token to be reset after download?
+  // If so we probably want to do this once the download is
+  // complete on the client otherwise there might be errors
+  // await setDownloadTokenToNull({
+  //   userId: purchase.userId,
+  //   trackGroupId: purchase.trackGroupId,
+  // });
+
+  return purchase;
+};
+
+export const findPurchaseBasedOnTokenAndUpdate = async (
+  trackGroupId: number,
+  token: string,
+  userId?: number
+) => {
+  const purchase = await prisma.userTrackGroupPurchase.findFirst({
+    where: {
+      userId: userId,
+      singleDownloadToken: token,
+      trackGroupId: Number(trackGroupId),
+      trackGroup: {
+        published: true,
+      },
+    },
+    include: {
+      trackGroup: basicTrackGroupInclude,
+    },
+  });
+
+  if (!purchase) {
+    throw new AppError({
+      httpCode: 404,
+      description: `Trackgroup Purchase doesn't exist for ${trackGroupId}`,
+    });
+  }
+
+  // TODO: do we want a token to be reset after download?
+  // If so we probably want to do this once the download is
+  // complete on the client otherwise there might be errors
+  // await setDownloadTokenToNull({
+  //   userId: user?.id,
+  //   trackGroupId: Number(trackGroupId),
+  // });
+
+  return purchase.trackGroup;
 };
 
 export const setDownloadTokenToNull = async ({

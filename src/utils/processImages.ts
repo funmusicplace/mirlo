@@ -66,7 +66,7 @@ imageQueueEvents.on("completed", async (result: { jobId: string }) => {
       // );
     }
   } catch (err) {
-    logger.error(err);
+    logger.error(`imageQueueEvents.completed ${JSON.stringify(err)}`);
   }
 });
 

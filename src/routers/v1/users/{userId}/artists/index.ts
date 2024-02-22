@@ -37,7 +37,7 @@ export default function () {
     POST: [userAuthenticated, userHasPermission("owner"), POST],
   };
 
-  async function GET(req: Request, res: Response) {
+  async function GET(req: Request, res: Response, next: NextFunction) {
     const { userId } = req.params as unknown as Params;
     const loggedInUser = req.user as User;
     try {
@@ -59,8 +59,7 @@ export default function () {
         });
       }
     } catch (e) {
-      res.status(500);
-      logger.error(`users/{userId}/artists GET ${e}`);
+      next(e);
     }
   }
 

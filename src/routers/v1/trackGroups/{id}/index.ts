@@ -22,9 +22,11 @@ export default function () {
     if (!id) {
       return res.status(400);
     }
+
     try {
       id = await findTrackGroupIdForSlug(id, artistId);
       let trackGroup;
+
       if (id) {
         trackGroup = await prisma.trackGroup.findFirst({
           where: {
@@ -44,11 +46,7 @@ export default function () {
       }
       res.json({ result: processor.single(trackGroup) });
     } catch (e) {
-      console.error("trackgroups/{id} GET", e);
-      res.status(500);
-      res.send({
-        error: "Error finding trackGroup",
-      });
+      next(e);
     }
   }
 

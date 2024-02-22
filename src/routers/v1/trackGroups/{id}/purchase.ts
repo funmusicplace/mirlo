@@ -1,14 +1,15 @@
 import { User } from "@prisma/client";
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
-import { generateFullStaticImageUrl } from "../../../../utils/images";
 import prisma from "../../../../../prisma/prisma";
-import { finalCoversBucket } from "../../../../utils/minio";
 
-const { API_DOMAIN } = process.env;
-
-import stripe from "../../../../utils/stripe";
+import {
+  createTrackGroupStripeProduct,
+  handleTrackGroupPurchase,
+  createStripeCheckoutSessionForPurchase,
+} from "../../../../utils/stripe";
 import { subscribeUserToArtist } from "../../../../utils/artist";
+import { AppError } from "../../../../utils/error";
 
 type Params = {
   id: string;
@@ -19,7 +20,7 @@ export default function () {
     POST: [userLoggedInWithoutRedirect, POST],
   };
 
-  async function POST(req: Request, res: Response) {
+  async function POST(req: Request, res: Response, next: NextFunction) {
     const { id: trackGroupId } = req.params as unknown as Params;
     let { price, email } = req.body as unknown as {
       price?: string; // In cents
@@ -28,8 +29,6 @@ export default function () {
     const loggedInUser = req.user as User | undefined;
 
     try {
-      const client = await prisma.client.findFirst({});
-
       if (loggedInUser) {
         const { id: userId } = loggedInUser;
         const user = await prisma.user.findFirst({
@@ -56,7 +55,10 @@ export default function () {
       });
 
       if (!trackGroup) {
-        return res.status(404);
+        throw new AppError({
+          httpCode: 404,
+          description: `TrackGroup with ID ${trackGroupId} not found`,
+        });
       }
 
       if (loggedInUser) {
@@ -65,100 +67,67 @@ export default function () {
 
       const stripeAccountId = trackGroup.artist.user.stripeAccountId;
 
-      if (!stripeAccountId) {
-        return res.status(400).json({
-          error: "Artist not set up with a payment processor yet",
-        });
-      }
-
-      let productKey = trackGroup.stripeProductKey;
-      const about =
-        trackGroup.about && trackGroup.about !== ""
-          ? trackGroup.about
-          : `The album ${trackGroup.title} by ${trackGroup.artist.name}.`;
-
-      if (!trackGroup.stripeProductKey) {
-        const product = await stripe.products.create(
-          {
-            name: `${trackGroup.title} by ${trackGroup.artist.name}`,
-            description: about,
-            tax_code: "txcd_10401100",
-            images: trackGroup.cover
-              ? [
-                  generateFullStaticImageUrl(
-                    trackGroup.cover?.url[4],
-                    finalCoversBucket
-                  ),
-                ]
-              : [],
-          },
-          {
-            stripeAccount: stripeAccountId,
-          }
-        );
-        await prisma.trackGroup.update({
-          where: {
-            id: Number(trackGroupId),
-          },
-          data: {
-            stripeProductKey: product.id,
-          },
-        });
-        productKey = product.id;
-      }
-
       const priceNumber =
         (price ? Number(price) : undefined) ?? trackGroup.minPrice ?? 0;
 
-      if (productKey && stripeAccountId) {
-        const session = await stripe.checkout.sessions.create(
-          {
-            billing_address_collection: "auto",
-            customer_email: loggedInUser?.email ?? email,
-            payment_intent_data: {
-              application_fee_amount:
-                (priceNumber * (trackGroup.platformPercent ?? 5)) / 100,
-            },
-            line_items: [
-              {
-                price_data: {
-                  tax_behavior: "exclusive",
-                  unit_amount: priceNumber,
-                  currency: trackGroup.currency?.toLowerCase() ?? "usd",
-                  product: productKey,
-                },
+      const priceZero = (trackGroup.minPrice ?? 0) === 0 && priceNumber === 0;
 
-                quantity: 1,
-              },
-            ],
-            metadata: {
-              clientId: client?.id ?? null,
-              trackGroupId,
-              artistId: trackGroup.artistId,
-              userId: loggedInUser?.id ?? null,
-              userEmail: email ?? null,
-              stripeAccountId,
-            },
-            mode: "payment",
-            success_url: `${API_DOMAIN}/v1/checkout?success=true&stripeAccountId=${stripeAccountId}&session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `${API_DOMAIN}/v1/checkout?canceled=true`,
-          },
-          { stripeAccount: stripeAccountId }
-        );
-        res.status(200).json({
-          sessionUrl: session.url,
+      if (priceNumber < (trackGroup.minPrice ?? 0)) {
+        throw new AppError({
+          httpCode: 400,
+          description: `Have to pay at least ${trackGroup.minPrice} for this trackGroup. ${priceNumber} is not enough`,
         });
+      }
+      console.log("priceZero", priceZero, priceNumber);
+
+      if (!stripeAccountId && !priceZero) {
+        throw new AppError({
+          httpCode: 400,
+          description: "Artist not set up with a payment processor yet",
+        });
+      }
+
+      if (priceZero && loggedInUser) {
+        await handleTrackGroupPurchase(loggedInUser.id, trackGroup.id);
+        return res.status(200).json({
+          redirectUrl: `/${trackGroup.artist.urlSlug}/release/${trackGroup.urlSlug}/download?email=${loggedInUser.email}`,
+        });
+      }
+
+      if (stripeAccountId) {
+        const productKey = await createTrackGroupStripeProduct(
+          trackGroup,
+          stripeAccountId
+        );
+
+        if (productKey) {
+          const session = await createStripeCheckoutSessionForPurchase({
+            loggedInUser,
+            email,
+            priceNumber,
+            trackGroup,
+            productKey,
+            stripeAccountId,
+          });
+          res.status(200).json({
+            redirectUrl: session.url,
+          });
+        } else {
+          new AppError({
+            httpCode: 500,
+            description:
+              "We didn't have enough information from the artist to start a Stripe session",
+          });
+        }
       } else {
-        res.status(500).json({
-          error: "Something went wrong while buying the track group",
+        throw new AppError({
+          httpCode: 500,
+          description:
+            "We didn't have enough information from the artist to start a Stripe session",
         });
       }
     } catch (e) {
-      console.error(e);
-
-      res.status(500).json({
-        error: "Something went wrong while buying the track group",
-      });
+      next(e);
     }
   }
 

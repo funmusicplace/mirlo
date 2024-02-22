@@ -94,7 +94,7 @@ export const createTrackGroup = async (
     data: {
       minPrice: data?.minPrice,
       title: data?.title ?? "Test trackGroup",
-      urlSlug: data?.urlSlug ?? "test-artist",
+      urlSlug: data?.urlSlug ?? "test-trackgroup",
       artistId: artistId,
       published: data?.published ?? true,
       releaseDate: data?.releaseDate,

@@ -15,22 +15,12 @@ import { css } from "@emotion/css";
 import { useGlobalStateContext } from "state/GlobalState";
 import { useArtistContext } from "state/ArtistContext";
 import Tooltip from "components/common/Tooltip";
+import { testOwnership } from "./utils";
 
 interface FormData {
   chosenPrice: string;
   userEmail: string;
 }
-
-const testOwnership = async (trackGroupId: number, email: string) => {
-  try {
-    const response = await api.get<{ exists: boolean }>(
-      `trackGroups/${trackGroupId}/testOwns?email=${email.toLowerCase()}`
-    );
-    return response.result.exists;
-  } catch (e) {
-    return false;
-  }
-};
 
 const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup }> = ({
   trackGroup,
@@ -66,7 +56,7 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup }> = ({
           : true;
 
         if (confirmed) {
-          const response = await api.post<{}, { sessionUrl: string }>(
+          const response = await api.post<{}, { redirectUrl: string }>(
             `trackGroups/${trackGroup.id}/purchase`,
             {
               price: data.chosenPrice
@@ -75,7 +65,7 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup }> = ({
               email: data.userEmail,
             }
           );
-          window.location.assign(response.sessionUrl);
+          window.location.assign(response.redirectUrl);
         }
       } catch (e) {
         snackbar(t("error"), { type: "warning" });

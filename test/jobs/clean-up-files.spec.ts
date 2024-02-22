@@ -4,7 +4,7 @@ import { describe, it } from "mocha";
 
 import { clearTables } from "../utils";
 
-import cleanUpFiles from "../../src/jobs/clean-up-files";
+import cleanUpFiles from "../../src/jobs/tasks/clean-up-files";
 
 describe("clean-up-trackgroups", () => {
   beforeEach(async () => {
