@@ -97,6 +97,9 @@
     "releaseDate": "Release date:",
     "usersCanPurchase": "Users can purchase this album",
     "price": "Price:",
+    "addToCollection": "Add to collection",
+    "addToCollectionDescription": "You'll add this free album to your collection.",
+    "addAlbumToCollection": "Add {{ title }} to your collection",
     "getDownloadLink": "Get download link email",
     "email": "Email",
     "nameYourPrice": "Name your price in USD:",
@@ -148,7 +151,6 @@
     "chooseThisSubscription": "Choose this subscription",
     "chooseATier": "Choose a tier to support this artist:",
     "subscribeToArtist": "Subscribe to {{ artist }}",
-
     "continueWithName": "Continue with {{ name }}",
     "platformPercentDisclaimer": "Mirlo is evaluating the platform percentage and seeking input from musicians in the next few weeks.",
     "platformPercent": "{{ percent }}% ({{ money }}) will go to {{ artistName }}. This does not include the cut taken by our payment processor"

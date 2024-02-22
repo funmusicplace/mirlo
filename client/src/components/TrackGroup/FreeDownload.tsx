@@ -21,10 +21,7 @@ const FreeDownload: React.FC<{
 
   const downloadAlbumAnyway = React.useCallback(async () => {
     try {
-      await api.post<{}, { sessionUrl: string }>(
-        `trackGroups/${trackGroup.id}/emailDownload`,
-        { email }
-      );
+      await api.post(`trackGroups/${trackGroup.id}/emailDownload`, { email });
     } catch (e) {
       snackbar(t("error"), { type: "warning" });
       console.error(e);

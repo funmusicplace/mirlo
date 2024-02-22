@@ -6,6 +6,8 @@ import {
 } from "../../../../../../../auth/passport";
 import prisma from "../../../../../../../../prisma/prisma";
 import { User } from "@prisma/client";
+import { getMaxListeners } from "process";
+import { getSiteSettings } from "../../../../../../../utils/settings";
 
 type Params = {
   artistId: string;
@@ -48,6 +50,8 @@ export default function () {
     const { artistId } = req.params as unknown as Params;
     const user = req.user as User;
 
+    const settings = await getSiteSettings();
+
     try {
       const userForCurrency = await prisma.user.findFirst({
         where: { id: user.id },
@@ -70,6 +74,7 @@ export default function () {
           description,
           minAmount,
           maxAmount,
+          platformPercent: settings.platformPercent,
           currency: userForCurrency?.currency ?? "USD",
           allowVariable,
           defaultAmount,

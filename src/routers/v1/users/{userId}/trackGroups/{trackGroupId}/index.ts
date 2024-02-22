@@ -75,10 +75,7 @@ export default function () {
 
       res.status(200).json({ result: processor.single(trackGroup) });
     } catch (e) {
-      logger.error(e);
-      res.status(500).json({
-        error: "Something went wrong",
-      });
+      next(e);
     }
   }
 
@@ -134,10 +131,7 @@ export default function () {
 
       res.json({ result: trackGroup });
     } catch (error) {
-      logger.error("error", error);
-      res.status(400).json({
-        error: `TrackGroup with ID ${trackGroupId} does not exist in the database`,
-      });
+      next(error);
     }
   }
 
@@ -192,8 +186,7 @@ export default function () {
 
       res.json({ message: "Success" });
     } catch (e) {
-      logger.error(`DELETE /users/{userId}/trackGroups/{trackgroupId} ${e}`);
-      res.status(500);
+      next(e);
     }
   }
 

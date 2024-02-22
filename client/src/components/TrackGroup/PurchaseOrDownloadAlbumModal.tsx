@@ -7,6 +7,7 @@ import BuyTrackGroup from "components/TrackGroup/BuyTrackGroup";
 import { useArtistContext } from "state/ArtistContext";
 import DownloadAlbumButton from "components/common/DownloadAlbumButton";
 import Button from "components/common/Button";
+import AddToCollection from "./AddToCollection";
 
 const PurchaseOrDownloadAlbum: React.FC<{
   trackGroup: TrackGroup;
@@ -59,6 +60,12 @@ const PurchaseOrDownloadAlbum: React.FC<{
 
   const showDownload = isOwned && !isBeforeReleaseDate;
 
+  const addToCollection =
+    !isOwned &&
+    userId &&
+    !artistState?.userStripeStatus?.chargesEnabled &&
+    trackGroup.minPrice === 0;
+
   return (
     <>
       <div
@@ -81,6 +88,7 @@ const PurchaseOrDownloadAlbum: React.FC<{
             </Button>
           </div>
         )}
+        {addToCollection && <AddToCollection trackGroup={trackGroup} />}
         {showDownload && (
           <DownloadAlbumButton trackGroup={trackGroup} onlyIcon />
         )}

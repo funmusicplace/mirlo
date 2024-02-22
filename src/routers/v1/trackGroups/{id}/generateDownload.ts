@@ -1,13 +1,14 @@
-import { TrackAudio, Track, User } from "@prisma/client";
+import { User } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
 import { logger } from "../../../../logger";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import prisma from "../../../../../prisma/prisma";
 
-import { doesTrackGroupBelongToUser } from "../../../../utils/ownership";
 import {
   FormatOptions,
-  buildZipFileForPath,
+  basicTrackGroupInclude,
+  findPurchaseAndVoidToken,
+  findPurchaseBasedOnTokenAndUpdate,
 } from "../../../../utils/trackGroup";
 import { startGeneratingAlbum } from "../../../../queues/album-queue";
 
@@ -29,65 +30,17 @@ export default function () {
     };
 
     try {
-      const trackGroupInclude = {
-        include: {
-          tracks: {
-            include: {
-              audio: true,
-            },
-            where: {
-              deletedAt: null,
-            },
-          },
-        },
-      };
-
       let trackGroup;
 
       if (req.user) {
         const { id: userId, isAdmin } = req.user as User;
 
         if (!isAdmin) {
-          let isCreator;
-          try {
-            isCreator = await doesTrackGroupBelongToUser(
-              Number(trackGroupId),
-              userId
-            );
-          } catch (e) {}
-          logger.info(`trackGroupId: ${trackGroupId} isCreator: ${isCreator}`);
+          const purchase = await findPurchaseAndVoidToken(
+            Number(trackGroupId),
+            userId
+          );
 
-          const purchase = await prisma.userTrackGroupPurchase.findFirst({
-            where: {
-              trackGroupId: Number(trackGroupId),
-              ...(!isCreator
-                ? {
-                    userId: Number(userId),
-                    trackGroup: {
-                      published: true,
-                    },
-                  }
-                : {}),
-            },
-            include: {
-              trackGroup: trackGroupInclude,
-            },
-          });
-
-          if (!purchase) {
-            logger.info(`trackGroupId: ${trackGroupId} no purchase found `);
-            res.status(404);
-            return next();
-          }
-          await prisma.userTrackGroupPurchase.updateMany({
-            data: {
-              singleDownloadToken: null,
-            },
-            where: {
-              userId: purchase.userId,
-              trackGroupId: purchase.trackGroupId,
-            },
-          });
           trackGroup = purchase.trackGroup;
         } else {
           logger.info(
@@ -97,7 +50,7 @@ export default function () {
             where: {
               id: Number(trackGroupId),
             },
-            ...trackGroupInclude,
+            ...basicTrackGroupInclude,
           });
         }
       } else {
@@ -109,39 +62,11 @@ export default function () {
         });
 
         if (user) {
-          const purchase = await prisma.userTrackGroupPurchase.findFirst({
-            where: {
-              userId: user?.id,
-              singleDownloadToken: token,
-              trackGroupId: Number(trackGroupId),
-              trackGroup: {
-                published: true,
-              },
-            },
-            include: {
-              trackGroup: trackGroupInclude,
-            },
-          });
-
-          if (!purchase) {
-            logger.info(
-              `trackGroupId: ${trackGroupId} no purchase record found `
-            );
-            res.status(404);
-            return next();
-          }
-
-          await prisma.userTrackGroupPurchase.updateMany({
-            where: {
-              userId: user?.id,
-              trackGroupId: Number(trackGroupId),
-            },
-            data: {
-              singleDownloadToken: null,
-            },
-          });
-
-          trackGroup = purchase.trackGroup;
+          trackGroup = await findPurchaseBasedOnTokenAndUpdate(
+            Number(trackGroupId),
+            token,
+            user?.id
+          );
         }
       }
 

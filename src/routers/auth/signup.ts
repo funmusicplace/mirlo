@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import prisma from "../../../prisma/prisma";
 import { hashPassword } from ".";
 import sendMail from "../../jobs/send-mail";
+import { NotificationType } from "@prisma/client";
 
 const signup = async (req: Request, res: Response, next: NextFunction) => {
   let {
@@ -51,6 +52,14 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
           receiveMailingList,
           emailConfirmationToken: true,
         },
+      });
+
+      await prisma.userNotification.createMany({
+        data: Object.values(NotificationType).map((obj) => ({
+          userId: result.id,
+          notification: obj,
+          isEnabled: true,
+        })),
       });
 
       await sendMail({

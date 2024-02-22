@@ -155,7 +155,7 @@ model ArtistSubscriptionTier {
   minimumTierForPost    Post[]
   postSubscriptionTiers PostSubscriptionTier[]
   isDefaultTier         Boolean                  @default(false)
-  platformPercent       Int?                     @default(0)
+  platformPercent       Int?                     @default(7)
 }
 
 model ArtistUserSubscription {
@@ -242,7 +242,7 @@ model TrackGroup {
   urlSlug                 String
   credits                 String?
   userTrackGroupWishlist  UserTrackGroupWishlist[]
-  platformPercent         Int?                      @default(0)
+  platformPercent         Int?                      @default(7)
   tags                    TrackGroupTag[]
   downloadCodes           TrackGroupDownloadCodes[]
 

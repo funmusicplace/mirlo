@@ -14,6 +14,7 @@ import stripe, {
 } from "../../../../utils/stripe";
 import { deleteStripeSubscriptions } from "../../../../utils/artist";
 import logger from "../../../../logger";
+import { getSiteSettings } from "../../../../utils/settings";
 
 type Params = {
   id: string;
@@ -120,9 +121,11 @@ export default function () {
         const session = await stripe.checkout.sessions.create(
           {
             billing_address_collection: "auto",
-            customer_email: loggedInUser?.email ?? email,
+            customer_email: loggedInUser?.email || email,
             subscription_data: {
-              application_fee_percent: newTier.platformPercent ?? 0 / 100,
+              application_fee_percent:
+                newTier.platformPercent ??
+                (await getSiteSettings()).platformPercent / 100,
             },
             line_items: [
               {

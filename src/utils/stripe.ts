@@ -1,20 +1,66 @@
 import Stripe from "stripe";
 import prisma from "../../prisma/prisma";
-import { Prisma } from "@prisma/client";
+import { Prisma, TrackGroup, User } from "@prisma/client";
 import { logger } from "../logger";
 import sendMail from "../jobs/send-mail";
 import { Request, Response } from "express";
-import { randomUUID } from "crypto";
-import { Session } from "inspector";
 import { registerPurchase } from "./trackGroup";
 import { registerSubscription } from "./subscriptionTier";
 import { findOrCreateUserBasedOnEmail } from "./user";
+import { getSiteSettings } from "./settings";
+import { generateFullStaticImageUrl } from "./images";
+import { finalCoversBucket } from "./minio";
 
-const { STRIPE_KEY } = process.env;
+const { STRIPE_KEY, API_DOMAIN } = process.env;
 
 const stripe = new Stripe(STRIPE_KEY ?? "", {
   apiVersion: "2022-11-15",
 });
+
+export const createTrackGroupStripeProduct = async (
+  trackGroup: Prisma.TrackGroupGetPayload<{
+    include: { artist: true; cover: true };
+  }>,
+  stripeAccountId: string
+) => {
+  let productKey = trackGroup.stripeProductKey;
+
+  const about =
+    trackGroup.about && trackGroup.about !== ""
+      ? trackGroup.about
+      : `The album ${trackGroup.title} by ${trackGroup.artist.name}.`;
+  if (!trackGroup.stripeProductKey) {
+    const product = await stripe.products.create(
+      {
+        name: `${trackGroup.title} by ${trackGroup.artist.name}`,
+        description: about,
+        tax_code: "txcd_10401100",
+        images: trackGroup.cover
+          ? [
+              generateFullStaticImageUrl(
+                trackGroup.cover?.url[4],
+                finalCoversBucket
+              ),
+            ]
+          : [],
+      },
+      {
+        stripeAccount: stripeAccountId,
+      }
+    );
+    await prisma.trackGroup.update({
+      where: {
+        id: trackGroup.id,
+      },
+      data: {
+        stripeProductKey: product.id,
+      },
+    });
+    productKey = product.id;
+  }
+
+  return productKey;
+};
 
 export const createSubscriptionStripeProduct = async (
   tier: Prisma.ArtistSubscriptionTierGetPayload<{ include: { artist: true } }>,
@@ -59,6 +105,64 @@ export const createSubscriptionStripeProduct = async (
   return productKey;
 };
 
+export const createStripeCheckoutSessionForPurchase = async ({
+  loggedInUser,
+  email,
+  priceNumber,
+  trackGroup,
+  productKey,
+  stripeAccountId,
+}: {
+  loggedInUser?: User;
+  email?: string;
+  priceNumber: number;
+  trackGroup: TrackGroup;
+  productKey: string;
+  stripeAccountId: string;
+}) => {
+  const settings = await getSiteSettings();
+  const client = await prisma.client.findFirst({});
+
+  const session = await stripe.checkout.sessions.create(
+    {
+      billing_address_collection: "auto",
+      customer_email: loggedInUser?.email || email,
+      payment_intent_data: {
+        application_fee_amount:
+          (priceNumber *
+            (trackGroup.platformPercent ?? settings.platformPercent)) /
+          100,
+      },
+      line_items: [
+        {
+          price_data: {
+            tax_behavior: "exclusive",
+            unit_amount: priceNumber,
+            currency: trackGroup.currency?.toLowerCase() ?? "usd",
+            product: productKey,
+          },
+
+          quantity: 1,
+        },
+      ],
+      metadata: {
+        clientId: client?.id ?? null,
+        trackGroupId: trackGroup.id,
+        artistId: trackGroup.artistId,
+        userId: loggedInUser?.id ?? null,
+        userEmail: email ?? null,
+        stripeAccountId,
+      },
+      mode: "payment",
+      success_url: `${API_DOMAIN}/v1/checkout?success=true&stripeAccountId=${stripeAccountId}&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${API_DOMAIN}/v1/checkout?canceled=true`,
+    },
+    { stripeAccount: stripeAccountId }
+  );
+
+  return session;
+};
+
 export const verifyStripeSignature = async (
   req: Request,
   res: Response,
@@ -87,20 +191,22 @@ export const verifyStripeSignature = async (
   return event;
 };
 
-const handleTrackGroupPurhcase = async (
+export const handleTrackGroupPurchase = async (
   userId: number,
   trackGroupId: number,
-  session: Stripe.Checkout.Session,
-  newUser: boolean
+  session?: Stripe.Checkout.Session,
+  newUser?: boolean
 ) => {
   try {
     const purchase = await registerPurchase({
       userId: Number(userId),
       trackGroupId: Number(trackGroupId),
-      pricePaid: session.amount_total ?? 0,
-      currencyPaid: session.currency ?? "USD",
-      paymentProcessorKey: session.id,
+      pricePaid: session?.amount_total ?? 0,
+      currencyPaid: session?.currency ?? "USD",
+      paymentProcessorKey: session?.id ?? null,
     });
+
+    const settings = await getSiteSettings();
 
     const user = await prisma.user.findFirst({
       where: {
@@ -155,12 +261,17 @@ const handleTrackGroupPurhcase = async (
             trackGroup,
             purchase,
             pricePaid,
-            platformCut: ((trackGroup.platformPercent ?? 5) * pricePaid) / 100,
+            platformCut:
+              ((trackGroup.platformPercent ?? settings.platformPercent) *
+                pricePaid) /
+              100,
             email: user.email,
           },
         },
       });
     }
+
+    return purchase;
   } catch (e) {
     logger.error(`Error creating album purchase: ${e}`);
   }
@@ -237,9 +348,11 @@ export const handleCheckoutSession = async (
   );
   logger.info(`Processing session`);
   if (tierId && userEmail) {
+    logger.info("handling subscription");
     await handleSubscription(Number(actualUserId), Number(tierId), session);
   } else if (trackGroupId && actualUserId) {
-    await handleTrackGroupPurhcase(
+    logger.info("handleTrackGroupPurchase");
+    await handleTrackGroupPurchase(
       Number(actualUserId),
       Number(trackGroupId),
       session,
