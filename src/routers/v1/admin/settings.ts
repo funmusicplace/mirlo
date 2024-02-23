@@ -41,7 +41,7 @@ export default function () {
         },
       });
       const refreshedSettings = await prisma.settings.findFirst();
-      return res.status(200).json({ result: settings });
+      return res.status(200).json({ result: refreshedSettings });
     } catch (e) {
       next(e);
     }
