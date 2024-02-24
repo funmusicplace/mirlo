@@ -6,20 +6,21 @@ import { i18n } from "i18next";
 
 export const formatDate = ({
   date,
-  options,
+  options: defaultOptions,
   i18n,
 }: {
   date: string;
   i18n: i18n;
   options?: Intl.DateTimeFormatOptions;
 }): string => {
+  const options: Intl.DateTimeFormatOptions = defaultOptions ?? {
+    month: "long",
+    year: "numeric",
+  };
+
   const releaseFormat = new Date(date).toLocaleDateString(
     i18n.resolvedLanguage,
-    {
-      month: "long",
-      year: "numeric",
-      ...options,
-    }
+    options
   );
 
   return releaseFormat;

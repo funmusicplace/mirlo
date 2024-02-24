@@ -88,6 +88,7 @@ const routes = [
   "posts/{id}",
   "users",
   "users/{userId}",
+  "users/{userId}/notifications",
   "users/{userId}/subscriptions",
   "users/{userId}/subscriptions/{subscriptionId}",
   "users/{userId}/purchases",

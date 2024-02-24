@@ -1,9 +1,13 @@
 import styled from "@emotion/styled";
 import { bp } from "../../constants";
 
-const Box = styled.div<{ variant?: "success" | "info" }>`
+const Box = styled.div<{
+  variant?: "success" | "info";
+  compact?: boolean;
+  small?: boolean;
+}>`
   width: 100%;
-  padding: 1.5rem;
+  padding: ${(props) => (props.compact ? ".25rem .5rem" : "1.25rem")};
   transition: 0.4s border-radius;
   margin-bottom: 0.5rem;
   border-radius: 5px;
@@ -26,6 +30,8 @@ const Box = styled.div<{ variant?: "success" | "info" }>`
         `;
     }
   }}
+
+  ${(props) => (props.small ? "font-size: .85rem" : "")}
 
   input {
     background: var(--mi-lighten-background-color);

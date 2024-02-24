@@ -52,6 +52,7 @@ import AdminPurchases from "components/Admin/AdminPurchases";
 import AdminSubscriptions from "components/Admin/AdminSubscriptions";
 import CallServerTasks from "components/Admin/CallServerTasks";
 import AdminSettings from "components/Admin/AdminSettings";
+import UserNotificationFeed from "components/Profile/UserNotificationFeed";
 
 const routes = [
   {
@@ -136,6 +137,10 @@ const routes = [
           {
             path: "wishlist",
             element: <WishlistCollection />,
+          },
+          {
+            path: "notifications",
+            element: <UserNotificationFeed />,
           },
         ],
       },

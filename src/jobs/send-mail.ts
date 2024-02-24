@@ -10,7 +10,8 @@ const viewsDir = path.join(__dirname, "../emails");
  * Cleanup incoming folder and more (later)
  */
 
-const sendMail = async (job: any) => {
+export const sendMail = async (job: any) => {
+  console.log("sending mail");
   try {
     const email = new Email({
       message: {

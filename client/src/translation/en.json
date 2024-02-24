@@ -319,6 +319,11 @@
     "getInTouch": "If you'd like to get in touch, join <discord>our discord</discord>, <email>email us</email>, or check out <github>our github</github>.",
     "aboutUs": "<about>About us</about>, <faq>FAQ</faq>, <terms>Terms and Conditions</terms>, <privacy>Privacy</privacy>, <cookie>Our use of cookies</cookie>"
   },
+  "notifications": {
+    "notifications": "Notifications",
+    "readPost": "Read post",
+    "viewAlbum": "View album"
+  },
   "admin": {
     "users": "Users",
     "trackgroups": "Trackgroups",
@@ -329,7 +334,8 @@
     "artists": "Artists",
     "serverTasks": "Server tasks",
     "subscriptions": "Subscriptions",
-    "purchases": "Purchases"
+    "purchases": "Purchases",
+    "settings": "Settings"
   },
   "trackDetails": {
     "track": "Track:",
@@ -429,6 +435,7 @@
     "isSubscriptionPostOnly": "Should anyone be able to read this post?",
     "post": "post",
     "save": "Save",
+    "inTheFuture": "In the future",
     "editPost": "Edit post",
     "postUpdated": "Post updated",
     "saveNew": "Save new",

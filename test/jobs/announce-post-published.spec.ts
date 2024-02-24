@@ -4,10 +4,11 @@ import { describe, it } from "mocha";
 
 import { clearTables, createPost, createUser } from "../utils";
 
-import announcePublishPost from "../../src/jobs/announce-post-published";
+import addPostToNotifications from "../../src/jobs/add-post-to-notifications";
 import prisma from "../../prisma/prisma";
+import assert from "assert";
 
-describe("announce-post-published", () => {
+describe("add-post-to-notifications", () => {
   beforeEach(async () => {
     try {
       await clearTables();
@@ -16,14 +17,16 @@ describe("announce-post-published", () => {
     }
   });
 
-  it("should send out an announcement email", async () => {
+  it("should add post to notifications", async () => {
     const { user: artistUser } = await createUser({
       email: "artist@artist.com",
     });
 
     const { user: followerUser } = await createUser({
       email: "follower@follower.com",
+      emailConfirmationToken: null,
     });
+
     const artist = await prisma.artist.create({
       data: {
         name: "Test artist",
@@ -54,20 +57,22 @@ describe("announce-post-published", () => {
       content: "# HI",
     });
 
-    await announcePublishPost();
+    await addPostToNotifications();
+
+    const note = await prisma.notification.findFirst({});
+    assert.notEqual(note, null);
+    assert.equal(note?.isRead, false);
+    assert.equal(note?.notificationType, "NEW_ARTIST_POST");
   });
 
-  // FIXME: to implement this we need to actually have a way to test
-  // what the job spits out (ie test the emails being sent). Can we
-  // mock sendMail?
-  it.skip("should not send out an announcement email to user without a confirmed email", async () => {
+  it("should not add a post twice to notifications", async () => {
     const { user: artistUser } = await createUser({
       email: "artist@artist.com",
     });
 
     const { user: followerUser } = await createUser({
       email: "follower@follower.com",
-      emailConfirmationToken: "asdfasdf",
+      emailConfirmationToken: null,
     });
 
     const artist = await prisma.artist.create({
@@ -100,6 +105,10 @@ describe("announce-post-published", () => {
       content: "# HI",
     });
 
-    await announcePublishPost();
+    await addPostToNotifications();
+    await addPostToNotifications();
+
+    const notes = await prisma.notification.findMany({});
+    assert.equal(notes.length, 1);
   });
 });
