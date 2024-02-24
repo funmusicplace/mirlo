@@ -30,7 +30,7 @@ export const PauseButton: React.FC<{ className?: string }> = ({
           css`
             font-size: 1.6rem;
             margin-right: 0.25rem;
-            padding: 0.75rem 0.7rem 0.65rem 0.7rem !important;
+            padding: 0.75rem 0.7rem 0.65rem 0.7rem;
             border: solid 1.5px !important;
             border-color: var(--mi-normal-foreground-color);
             background-color: var(--mi-normal-foreground-color);

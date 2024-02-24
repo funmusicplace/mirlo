@@ -28,16 +28,12 @@ const TrackgroupButtons = styled.div`
   div {
     width: 100%;
     button {
-      padding: 0;
-      height: 3rem !important;
+      height: 3rem;
       color: white !important;
-
-      padding-right: 0.5rem !important;
       font-weight: normal;
       font-size: 1.3rem;
       text-transform: uppercase;
       width: 100%;
-      height: 3rem;
     }
   }
   ul {
@@ -45,31 +41,30 @@ const TrackgroupButtons = styled.div`
     display: flex;
     justify-content: flex-end;
     list-style-type: none;
-
-    li:first-of-type > button {
-      padding-left: 0.8rem;
-    }
     button {
-      width: 3rem;
-
       background-color: rgba(0, 0, 0, 0.6) !important;
       height: 3rem;
+      width: 3rem;
     }
   }
   @media (max-width: ${bp.large}px) {
     div {
       button {
-        height: 2rem !important;
+        height: 2rem;
         font-size: 1rem;
       }
     }
     ul {
       button {
         font-size: 1.1rem;
-        width: 2rem !important;
-        height: 2rem !important;
-        margin: 0 !important;
-        padding: 0 0 0 0.4rem !important;
+        width: 2rem;
+        height: 2rem;
+      }
+
+      li:second-of-type {
+        button {
+          background: red !important;
+        }
       }
     }
   }
@@ -78,15 +73,11 @@ const TrackgroupButtons = styled.div`
       display: none;
     }
     div:last-child {
-      display: block !important;
+      display: block;
     }
     ul {
       button {
         font-size: 1.1rem;
-        width: 2rem !important;
-        height: 2rem !important;
-        margin: 0 !important;
-        padding: 0 0 0 0.4rem !important;
       }
       li:first-of-type {
         display: none;
@@ -111,28 +102,14 @@ const PlayWrapper = styled.div<WrapperProps>`
   border: 1px solid rgba(255, 255, 255, 0.05);
   transition: 0.5s;
 
-  .startIcon {
-    margin-right: 0rem !important;
-  }
-
   button {
     font-size: 1.4rem;
     right: 0;
     bottom: 0;
-    padding: 0rem;
-    padding-left: 0.8rem;
     margin: auto;
     border-radius: 0px;
     border: var(--mi-border);
     background-color: rgba(0, 0, 0, 0.7);
-
-    &:nth-of-type(1) {
-      margin: 0rem;
-    }
-
-    &:last-child {
-      padding-left: 0.9rem;
-    }
 
     &:hover:not(:disabled) {
       background-color: rgba(255, 255, 255, 0.5) !important;
@@ -146,7 +123,7 @@ const PlayWrapper = styled.div<WrapperProps>`
   }
 
   @media (max-width: ${bp.small}px) {
-    background-color: transparent !important;
+    background-color: transparent;
     opacity: 1;
     justify-content: flex-end;
     align-items: flex-end;
@@ -163,7 +140,8 @@ const Wrapper = styled.div<WrapperProps>`
   width: ${(props) => props.width}px;
 
   .startIcon {
-    font-size: 1.3rem !important;
+    font-size: 1.5rem !important;
+    line-height: 1.3rem !important;
   }
 
   a {
@@ -201,6 +179,10 @@ const Wrapper = styled.div<WrapperProps>`
   }
 
   @media (max-width: ${bp.large}px) {
+    .startIcon {
+      font-size: 1.2rem !important;
+      line-height: 1rem !important;
+    }
     position: relative;
     p {
       font-size: var(--mi-font-size-xsmall);

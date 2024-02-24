@@ -9,6 +9,7 @@ export interface Compactable {
   compact?: boolean;
   transparent?: boolean;
   thin?: boolean;
+  small?: boolean;
   wrap?: boolean;
   collapsible?: boolean;
   role?: "primary" | "secondary" | "warning";
@@ -38,7 +39,7 @@ const CustomButton = styled.button<Compactable>`
       props.onlyIcon && props.compact
         ? "height: 1.7rem; width: 1.7rem; font-size: var(--mi-font-size-xsmall);"
         : ""};
-  }
+      }
 
   &:hover:not(:disabled) {
     cursor: pointer;
@@ -167,6 +168,10 @@ const CustomButton = styled.button<Compactable>`
               ? "white-space: wrap !important; height: auto; line-height:  1.2rem; width: 100%;"
               : ""
           };
+          ${props.small ? "height: 1.5rem; width: 1.5rem; " : ""}
+          svg {
+            ${props.small ? "font-size: .8rem;" : ""}
+          }
           padding: ${props.compact ? ".3rem .5rem" : "1rem"};
           padding: ${props.onlyIcon ? ".5rem .5rem" : ".6rem .6rem"};
           background-color:  var(--mi-${props.role ?? "secondary"}-color);

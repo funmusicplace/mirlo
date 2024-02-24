@@ -34,7 +34,6 @@ const Header = styled.div`
   align-items: left;
   justify-content: space-between;
   flex-grow: 1;
-  border-bottom: solid 1px var(--mi-light-foreground-color);
   font-size: var(--mi-font-size-normal);
 
   @media screen and (max-width: ${bp.medium}px) {
@@ -42,8 +41,6 @@ const Header = styled.div`
     line-height: var(--mi-font-size-normal);
     border-radius: 0;
     padding: var(--mi-side-paddings-xsmall);
-    border: solid grey;
-    border-width: 0px 0px 1px 0px;
     margin-bottom: 0rem !important;
   }
 `;
@@ -53,6 +50,7 @@ const HeaderWrapper = styled.div`
   overflow: hidden;
   align-items: flex-end;
   justify-content: space-around;
+  border-bottom: solid 1px var(--mi-light-foreground-color);
 
   @media screen and (max-width: ${bp.medium}px) {
     background: var(--mi-normal-background-color);

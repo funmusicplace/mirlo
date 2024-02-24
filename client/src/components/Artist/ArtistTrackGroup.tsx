@@ -10,10 +10,6 @@ import styled from "@emotion/styled";
 export const TrackGroupWrapper = styled.div`
   margin-bottom: 0.5rem;
 
-  button {
-    padding: 0.35rem 0.35rem;
-  }
-
   @media screen and (max-width: ${bp.medium}px) {
     padding: 0;
     margin-bottom: 1rem;
