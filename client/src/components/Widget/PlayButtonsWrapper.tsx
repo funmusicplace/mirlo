@@ -39,42 +39,29 @@ export const PlayButtonsWrapper: React.FC<{ ids: number[] }> = ({ ids }) => {
     <div
       className={css`
         button {
-          font-size: 1.4rem !important;
           background-color: var(--mi-normal-foreground-color);
           color: var(--mi-normal-background-color);
           border: solid 1.5px var(--mi-normal-foreground-color) !important;
-          width: 3rem !important;
-          height: 3rem !important;
+          width: 3rem;
+          height: 3rem;
+          svg {
+            font-size: 1.5rem;
+            margin-left: 10%;
+          }
         }
-
-        @media (prefers-color-scheme: dark) {
-          button {
-            background-color: var(--mi-normal-foreground-color);
-            color: var(--mi-normal-background-color);
-          }
-          button:hover {
-            color: var(--mi-normal-foreground-color) !important;
-          }
+        button:hover {
+          color: var(--mi-normal-foreground-color) !important;
+          background-color: var(--mi-normal-background-color) !important;
         }
       `}
     >
-      {!playing && (
-        <Button
-          onClick={playMusic}
-          startIcon={<VscPlay />}
-          className={css`
-          padding-left: 0.85rem !important;
-        }
-      `}
-        />
-      )}
+      {!playing && <Button onClick={playMusic} startIcon={<VscPlay />} />}
       {(playing || embeddedInMirlo) && (
         <Button
           onClick={onPause}
           startIcon={<TfiControlPause />}
           className={css`
-          padding: 0.75rem !important;
-          ${embeddedInMirlo && "display: none;"}
+          ${embeddedInMirlo && "display: none !important;"}
         }
       `}
         />
