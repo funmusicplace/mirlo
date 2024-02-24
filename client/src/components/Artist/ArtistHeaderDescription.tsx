@@ -80,7 +80,7 @@ const ArtistHeaderDescription: React.FC = () => {
         className={css`
           width: 100%;
           display: flex;
-          ${canCollapse ? `padding-bottom: 0;` : "padding-bottom: 0.5rem;"}
+          ${canCollapse ? `padding-bottom: 0;` : "padding-bottom: 0.2rem;"}
 
           ${isCollapsed
             ? `
@@ -94,10 +94,10 @@ const ArtistHeaderDescription: React.FC = () => {
               content={bio}
               className={css`
                 width: auto;
-                overflow: hidden;
+                // overflow: hidden;
                 text-overflow: ellipsis;
 
-                ${isCollapsed ? `max-height: 4rem;` : ""}
+                ${isCollapsed ? `max-height: 2.5rem;` : ""}
 
                 @media screen and (max-width: ${bp.medium}px) {
                   ${isCollapsed ? `max-height: 2rem;` : ""}
@@ -124,7 +124,7 @@ const ArtistHeaderDescription: React.FC = () => {
 
                   @media screen and (max-width: ${bp.medium}px) {
                     ${isCollapsed
-                      ? `background: linear-gradient(180deg, transparent 0%, var(--mi-normal-background-color) 80%); padding-top: 1.2rem;`
+                      ? `background: linear-gradient(180deg, transparent 0%, var(--mi-normal-background-color) 42%); padding-top: 1rem;`
                       : ""}
                   }
                 `}
@@ -135,7 +135,7 @@ const ArtistHeaderDescription: React.FC = () => {
                   startIcon={<FaChevronDown />}
                   className={css`
                     margin-top: 0.7rem;
-                    margin-bottom: 0.5rem;
+                    margin-bottom: 0.25rem;
 
                     svg {
                       transition: transform 0.2s;

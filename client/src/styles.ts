@@ -90,7 +90,6 @@ body {
   font-family: var(--mi-font-family-stack);
   font-smoothing: antialiased;
 }
-
 body, root {
   min-height: 100%;
   background-color: transparent;

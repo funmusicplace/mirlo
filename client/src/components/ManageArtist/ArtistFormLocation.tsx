@@ -60,10 +60,14 @@ const ArtistFormLocation: React.FC<{ isManage: boolean }> = ({ isManage }) => {
         className={css`
           display: flex;
           align-items: center;
-          margin-top: 1rem;
+          margin-top: 0.2rem;
           button {
-            margin-left: 0.5rem;
-            margin-top: -0.75rem;
+            margin-left: 0.3rem;
+            margin-top: -0.5rem;
+          }
+
+          @media screen and (max-width: ${bp.medium}px) {
+            margin-top: 0rem;
           }
         `}
       >
@@ -89,9 +93,9 @@ const ArtistFormLocation: React.FC<{ isManage: boolean }> = ({ isManage }) => {
         )}
         {isArtistManager && (
           <Button
-            compact
+            transparent
+            small
             onlyIcon
-            variant="dashed"
             onClick={() => setIsEditing(true)}
             startIcon={<FaPen />}
           ></Button>
