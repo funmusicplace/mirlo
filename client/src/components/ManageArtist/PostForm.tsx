@@ -14,6 +14,7 @@ import { SelectEl } from "components/common/Select";
 import useGetUserObjectById from "utils/useGetUserObjectById";
 import useErrorHandler from "services/useErrorHandler";
 import TextEditor from "components/common/TextEditor";
+import Box from "components/common/Box";
 
 type FormData = {
   title: string;
@@ -73,6 +74,8 @@ const PostForm: React.FC<{
   const existingId = existing?.id;
   const userId = user?.id;
 
+  const publicationDate = watch("publishedAt");
+
   const doSave = React.useCallback(
     async (data: FormData) => {
       if (userId) {
@@ -124,6 +127,11 @@ const PostForm: React.FC<{
         <FormComponent>
           {t("publicationDate")}{" "}
           <InputEl type="datetime-local" {...register("publishedAt")} />
+          {new Date(publicationDate) > new Date() && (
+            <Box variant="info" compact small>
+              <>{t("inTheFuture")}</>
+            </Box>
+          )}
         </FormComponent>
         <FormComponent>
           <Controller

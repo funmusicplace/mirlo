@@ -24,44 +24,63 @@ model Client {
 }
 
 model User {
-  id                                  Int                       @id @default(autoincrement())
-  email                               String                    @unique
+  id                                  Int                             @id @default(autoincrement())
+  email                               String                          @unique
   name                                String?
-  password                            String                    @default("")
+  password                            String                          @default("")
   refresh                             String?
   artists                             Artist[]
-  createdAt                           DateTime                  @default(now())
-  updatedAt                           DateTime                  @default(now()) @updatedAt
+  createdAt                           DateTime                        @default(now())
+  updatedAt                           DateTime                        @default(now()) @updatedAt
   deletedAt                           DateTime?
-  isAdmin                             Boolean                   @default(false)
+  isAdmin                             Boolean                         @default(false)
   artistUserSubscriptions             ArtistUserSubscription[]
   currency                            String?
   userTrackGroupPurchases             UserTrackGroupPurchase[]
-  emailConfirmationToken              String?                   @default(uuid()) @db.Uuid
-  emailConfirmationExpiration         DateTime?                 @default(dbgenerated("(NOW() + '00:20:00'::interval)"))
+  emailConfirmationToken              String?                         @default(uuid()) @db.Uuid
+  emailConfirmationExpiration         DateTime?                       @default(dbgenerated("(NOW() + '00:20:00'::interval)"))
   passwordResetConfirmationToken      String?
   passwordResetConfirmationExpiration DateTime?
   stripeAccountId                     String?
-  receiveMailingList                  Boolean                   @default(false)
+  receiveMailingList                  Boolean                         @default(false)
   wishlist                            UserTrackGroupWishlist[]
   plays                               TrackPlay[]
   downloadCodes                       TrackGroupDownloadCodes[]
-  UserNotification                    UserNotification[]
+  userArtistNotificationSettings      UserArtistNotificationSetting[]
+  notifications                       Notification[]
 }
 
-model UserNotification {
+model UserArtistNotificationSetting {
   userId       Int
   user         User             @relation(fields: [userId], references: [id])
   notification NotificationType
   isEnabled    Boolean          @default(true)
+  artistId     Int
+  artist       Artist           @relation(fields: [artistId], references: [id])
 
   @@unique([userId, notification])
 }
 
+model Notification {
+  id               String                  @id @default(uuid())
+  isRead           Boolean                 @default(false)
+  userId           Int
+  user             User                    @relation(fields: [userId], references: [id])
+  notificationType NotificationType
+  createdAt        DateTime                @default(now())
+  content          String?
+  trackGroupId     Int?
+  trackGroup       TrackGroup?             @relation(fields: [trackGroupId], references: [id])
+  subscriptionId   Int?
+  subscription     ArtistUserSubscription? @relation(fields: [subscriptionId], references: [id])
+  postId           Int?
+  post             Post?                   @relation(fields: [postId], references: [id])
+}
+
 enum NotificationType {
-  DIGEST
-  MONTHLY_SUBSCRIPTION
-  ARTIST_POSTS
+  NEW_ARTIST_MONTHLY_SUBSCRIPTION
+  NEW_ARTIST_POST
+  NEW_ARTIST_ALBUM
 }
 
 model Post {
@@ -80,6 +99,7 @@ model Post {
   minimumSubscriptionTier   ArtistSubscriptionTier? @relation(fields: [minimumSubscriptionTierId], references: [id])
   hasAnnounceEmailBeenSent  Boolean                 @default(false)
   postSubscriptionTiers     PostSubscriptionTier[]
+  notifications             Notification[]
 }
 
 model PostSubscriptionTier {
@@ -112,6 +132,7 @@ model Artist {
   links                              String[]
   location                           String?
   artistUserSubscriptionConfirmation ArtistUserSubscriptionConfirmation[]
+  userArtistNotificationSettings     UserArtistNotificationSetting[]
 }
 
 model ArtistAvatar {
@@ -170,6 +191,7 @@ model ArtistUserSubscription {
   createdAt                DateTime               @default(now())
   updatedAt                DateTime               @default(now()) @updatedAt
   deletedAt                DateTime?
+  notifications            Notification[]
 
   @@unique([userId, artistSubscriptionTierId])
 }
@@ -245,6 +267,7 @@ model TrackGroup {
   platformPercent         Int?                      @default(7)
   tags                    TrackGroupTag[]
   downloadCodes           TrackGroupDownloadCodes[]
+  notifications           Notification[]
 
   @@unique([artistId, urlSlug])
 }

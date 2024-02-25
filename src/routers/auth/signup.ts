@@ -54,14 +54,6 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
         },
       });
 
-      await prisma.userNotification.createMany({
-        data: Object.values(NotificationType).map((obj) => ({
-          userId: result.id,
-          notification: obj,
-          isEnabled: true,
-        })),
-      });
-
       await sendMail({
         data: {
           template: "new-user",

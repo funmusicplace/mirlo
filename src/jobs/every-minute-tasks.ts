@@ -1,7 +1,9 @@
-import announcePublishPost from "./announce-post-published";
+import addPostToNotifications from "./add-post-to-notifications";
+import sendNotificationEmail from "./send-notification-email";
 
 const everyMinuteTasks = async () => {
-  await announcePublishPost();
+  await addPostToNotifications();
+  await sendNotificationEmail();
 };
 
 everyMinuteTasks();

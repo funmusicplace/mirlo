@@ -60,6 +60,7 @@ const TextEditor: React.FC<{ onChange: (val: any) => void; value: string }> = ({
           p {
             margin-bottom: 1rem;
           }
+          width: 100%;
 
           .remirror-editor {
             width: 100%;

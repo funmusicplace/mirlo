@@ -90,7 +90,11 @@ export default function () {
       if (priceZero && loggedInUser) {
         await handleTrackGroupPurchase(loggedInUser.id, trackGroup.id);
         return res.status(200).json({
-          redirectUrl: `/${trackGroup.artist.urlSlug}/release/${trackGroup.urlSlug}/download?email=${loggedInUser.email}`,
+          redirectUrl: `/${
+            trackGroup.artist.urlSlug ?? trackGroup.artist.id
+          }/release/${trackGroup.urlSlug ?? trackGroup.id}/download?email=${
+            loggedInUser.email
+          }`,
         });
       }
 

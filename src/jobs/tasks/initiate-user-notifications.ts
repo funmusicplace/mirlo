@@ -9,17 +9,18 @@ const initiateUserNotifcations = async () => {
   try {
     const users = await prisma.user.findMany({});
 
-    await prisma.userNotification.createMany({
-      data: flatten(
-        users.map((user) =>
-          Object.values(NotificationType).map((obj) => ({
-            userId: user.id,
-            notification: obj,
-            isEnabled: true,
-          }))
-        )
-      ),
-    });
+    // FIXME
+    // await prisma.userNotification.createMany({
+    //   data: flatten(
+    //     users.map((user) =>
+    //       Object.values(NotificationType).map((obj) => ({
+    //         userId: user.id,
+    //         notification: obj,
+    //         isEnabled: true,
+    //       }))
+    //     )
+    //   ),
+    // });
   } catch (e) {
     console.error(e);
     throw e;

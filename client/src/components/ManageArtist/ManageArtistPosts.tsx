@@ -149,7 +149,19 @@ const ManageArtistPosts: React.FC<{}> = () => {
                 width: 100%;
               `}
             >
-              published {formatDate({ date: p.publishedAt, i18n })}
+              {new Date(p.publishedAt) > new Date() && (
+                <>
+                  will publish{" "}
+                  {formatDate({
+                    date: p.publishedAt,
+                    i18n,
+                    options: { dateStyle: "short" },
+                  })}
+                </>
+              )}
+              {new Date(p.publishedAt) <= new Date() && (
+                <>published at {formatDate({ date: p.publishedAt, i18n })}</>
+              )}
             </p>
           </SpaceBetweenDiv>
           <MarkdownWrapper>{parse(p.content)}</MarkdownWrapper>

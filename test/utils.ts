@@ -3,6 +3,8 @@ import { Prisma, UploadState } from "@prisma/client";
 import { buildTokens } from "../src/routers/auth";
 
 export const clearTables = async () => {
+  await prisma.$executeRaw`DELETE FROM "Notification";`;
+  await prisma.$executeRaw`DELETE FROM "UserArtistNotificationSetting";`;
   await prisma.$executeRaw`DELETE FROM "ArtistUserSubscription";`;
   await prisma.$executeRaw`DELETE FROM "ArtistSubscriptionTier";`;
   await prisma.$executeRaw`DELETE FROM "Post";`;
