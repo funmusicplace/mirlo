@@ -27,6 +27,7 @@ import {
 import sendMail from "../jobs/send-mail";
 import { NextFunction, Request, Response } from "express";
 import { AppError } from "./error";
+import logger from "../logger";
 
 type Params = {
   id: string;
@@ -131,6 +132,7 @@ export const createSubscriptionConfirmation = async (
     if (e instanceof PrismaClientKnownRequestError) {
       // skip
       // FIXME: what should we do when a user already exists?
+      logger.info("Had an error", e);
     } else {
       throw e;
     }
