@@ -17,6 +17,8 @@ interface FormData {
   bio: string;
 }
 
+const collapsedHeight = 75;
+
 const ArtistHeaderDescription: React.FC = () => {
   const {
     state: { user },
@@ -65,8 +67,8 @@ const ArtistHeaderDescription: React.FC = () => {
 
   React.useEffect(() => {
     const el = document.getElementById("markdown-content");
-
-    if ((el?.clientHeight ?? 0) > 100) {
+    console.log("el", el?.clientHeight);
+    if ((el?.clientHeight ?? 0) > collapsedHeight) {
       setCanCollapse(true);
       if (!isHeaderExpanded) {
         setIsCollapsed(true);
@@ -82,10 +84,7 @@ const ArtistHeaderDescription: React.FC = () => {
           display: flex;
           ${canCollapse ? `padding-bottom: 0;` : "padding-bottom: 0.2rem;"}
 
-          ${isCollapsed
-            ? `
-          align-items: center;`
-            : "align-items: flex-start;"}
+          ${isCollapsed ? `align-items: center;` : "align-items: flex-start;"}
         `}
       >
         {bio && (
@@ -94,13 +93,13 @@ const ArtistHeaderDescription: React.FC = () => {
               content={bio}
               className={css`
                 width: auto;
-                // overflow: hidden;
+                overflow: hidden;
                 text-overflow: ellipsis;
 
-                ${isCollapsed ? `max-height: 2.5rem;` : ""}
+                ${isCollapsed ? `max-height: ${collapsedHeight}px;` : ""}
 
                 @media screen and (max-width: ${bp.medium}px) {
-                  ${isCollapsed ? `max-height: 2rem;` : ""}
+                  ${isCollapsed ? `max-height: ${collapsedHeight - 10}px;` : ""}
                 }
 
                 p img {
