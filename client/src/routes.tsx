@@ -53,6 +53,7 @@ import AdminSubscriptions from "components/Admin/AdminSubscriptions";
 import CallServerTasks from "components/Admin/CallServerTasks";
 import AdminSettings from "components/Admin/AdminSettings";
 import UserNotificationFeed from "components/Profile/UserNotificationFeed";
+import AdminManageUser from "components/Admin/AdminManageUser";
 
 const routes = [
   {
@@ -219,6 +220,10 @@ const routes = [
           {
             path: "users",
             element: <AdminUsers />,
+          },
+          {
+            path: "users/:id",
+            element: <AdminManageUser />,
           },
           {
             path: "artists",

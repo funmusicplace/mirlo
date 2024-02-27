@@ -129,6 +129,20 @@ interface User {
   stripeAccountId?: string;
 }
 
+interface UserFromAdmin {
+  id: number;
+  email: string;
+  name?: string;
+  artists: Artist[];
+  updatedAt: string;
+  createdAt: string;
+  stripeAccountId?: string;
+  currency: string;
+  emailConfirmationToken: string;
+  isAdmin: boolean;
+  receiveMailingList: boolean;
+}
+
 interface ArtistSubscriptionTier {
   id: number;
   artistId: number;
