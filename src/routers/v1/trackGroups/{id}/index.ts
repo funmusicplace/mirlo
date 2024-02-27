@@ -24,13 +24,13 @@ export default function () {
     }
 
     try {
-      id = await findTrackGroupIdForSlug(id, artistId);
+      const actualId = await findTrackGroupIdForSlug(id, artistId);
       let trackGroup;
 
-      if (id) {
+      if (actualId && typeof actualId === "number") {
         trackGroup = await prisma.trackGroup.findFirst({
           where: {
-            id: Number(id),
+            id: actualId,
             published: true,
             tracks: { some: { audio: { uploadState: "SUCCESS" } } },
           },
@@ -41,7 +41,9 @@ export default function () {
       }
 
       if (!trackGroup) {
-        res.status(404).json({ error: `TrackGroup with id ${id} not found` });
+        res
+          .status(404)
+          .json({ error: `TrackGroup with id ${actualId} not found` });
         return next();
       }
       res.json({ result: processor.single(trackGroup) });

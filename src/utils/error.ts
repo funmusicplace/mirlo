@@ -55,7 +55,10 @@ const errorHandler = (
   }
 
   // Errors we should probably know about
-  console.error(`ERROR: ${req.method}: ${req.path}`, err);
+  console.error(
+    `ERROR: ${req.method}: ${req.path} params: ${JSON.stringify(req.params)}`,
+    err
+  );
 
   if (err instanceof PrismaClientValidationError) {
     const messageStrings = err.message.split("\n");

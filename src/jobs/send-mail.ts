@@ -11,7 +11,7 @@ const viewsDir = path.join(__dirname, "../emails");
  */
 
 export const sendMail = async (job: any) => {
-  console.log("sending mail");
+  logger.info("sending mail");
   try {
     const email = new Email({
       message: {
