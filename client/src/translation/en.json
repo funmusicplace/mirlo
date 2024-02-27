@@ -18,7 +18,7 @@
   },
   "releases": {
     "recentReleases": "Recent releases",
-    "releasesForTag": "Releases for <strong>{{ tag }}</strong>"
+    "releasesForTag": "Releases for <0>{{ tag }}</0>"
   },
   "cookies": {
     "weUseCookies": "We use cookies to keep you logged in and to maintain your music queue.",

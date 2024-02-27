@@ -3,7 +3,7 @@ import ArtistTrackGroup from "./Artist/ArtistTrackGroup";
 import TrackgroupGrid from "components/common/TrackgroupGrid";
 import api from "services/api";
 import { css } from "@emotion/css";
-import { useTranslation } from "react-i18next";
+import { useTranslation, Trans } from "react-i18next";
 import { bp } from "../constants";
 import WidthContainer from "./common/WidthContainer";
 import { SectionHeader } from "./Home/Home";
@@ -52,7 +52,18 @@ const Releases = () => {
     >
       <SectionHeader>
         <WidthContainer variant="big" justify="center">
-          <h5>{tag ? t("releasesForTag", { tag }) : t("recentReleases")}</h5>
+          <h5>
+            {tag ? (
+              <Trans
+                t={t}
+                i18nKey={"releasesForTag"}
+                components={{ 0: <strong></strong> }}
+                values={{ tag }}
+              />
+            ) : (
+              t("recentReleases")
+            )}
+          </h5>
         </WidthContainer>
       </SectionHeader>
       <div

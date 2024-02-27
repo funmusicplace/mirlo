@@ -11,7 +11,7 @@ const viewsDir = path.join(__dirname, "../emails");
  */
 
 export const sendMail = async (job: any) => {
-  console.log("sending mail");
+  logger.info("sending mail");
   try {
     const email = new Email({
       message: {
@@ -52,9 +52,8 @@ export const sendMail = async (job: any) => {
 
     return Promise.resolve();
   } catch (err) {
-    // @ts-ignore
-    console.error("MirloSendmailError", err.response.body);
-    return Promise.reject(err);
+    console.error("MirloSendmailError", err);
+    throw err;
   }
 };
 

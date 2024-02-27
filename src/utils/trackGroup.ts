@@ -88,7 +88,8 @@ export const findTrackGroupIdForSlug = async (
   id: string,
   artistId?: string
 ) => {
-  if (Number.isNaN(Number(id))) {
+  let foundId: number | undefined = Number(id);
+  if (Number.isNaN(foundId)) {
     if (!artistId) {
       throw new Error(
         "Searching for a TrackGroup by slug requires an artistId"
@@ -103,16 +104,18 @@ export const findTrackGroupIdForSlug = async (
           artistId: parsedArtistId,
         },
       });
-      id = `${trackGroup?.id ?? id}`;
+      foundId = trackGroup ? trackGroup.id : undefined;
     } else {
-      logger.info(
+      logger.error(
         `findTrackGroupIdForSlug: returning undefined for id: ${id} artistId: ${artistId}`
       );
       return undefined;
     }
+  } else {
+    foundId = Number(id);
   }
 
-  return id;
+  return foundId;
 };
 
 export const trackGroupSingleInclude = (options: {
