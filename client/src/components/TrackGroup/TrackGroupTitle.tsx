@@ -14,7 +14,6 @@ import TrackGroupAdminMenu from "./TrackGroupAdminMenu";
 
 import React from "react";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
-import TrackGroupEmbed from "./TrackGroupEmbed";
 
 const TrackGroupTitle: React.FC<{ trackGroup: TrackGroup }> = ({
   trackGroup,
