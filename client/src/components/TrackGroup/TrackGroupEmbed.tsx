@@ -53,6 +53,7 @@ const TrackGroupEmbed: React.FC<{
               margin-bottom: 0.75rem;
               cursor: pointer;
               position: relative;
+              overflow: auto;
 
               svg {
                 position: absolute;
