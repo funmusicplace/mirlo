@@ -88,9 +88,10 @@ const TrackGroupEmbed: React.FC<{
           </code>
         </div>
       </Modal>
-      <div onClick={() => setIsPopupOpen(true)}>
+      <div>
         <Button
           onlyIcon
+          onClick={() => setIsPopupOpen(true)}
           className={css`
             margin-top: 0rem;
             font-size: 1.2rem;
