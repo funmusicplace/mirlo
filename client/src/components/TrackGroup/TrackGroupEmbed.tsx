@@ -6,6 +6,7 @@ import { useArtistContext } from "state/ArtistContext";
 import Modal from "components/common/Modal";
 import { getReleaseUrl, getTrackGroupWidget } from "utils/artist";
 import { FaCopy } from "react-icons/fa";
+import { BsShare } from "react-icons/bs";
 import { useSnackbar } from "state/SnackbarContext";
 
 const TrackGroupEmbed: React.FC<{
@@ -87,18 +88,21 @@ const TrackGroupEmbed: React.FC<{
           </code>
         </div>
       </Modal>
-      <li
-        className={css`
-          margin-top: 0rem;
-          font-size: 1.2rem;
-          background: transparent;
-          color: var(--mi-primary-color);
-          margin-left: 0.2rem;
-        `}
-        onClick={() => setIsPopupOpen(true)}
-      >
-        <Button>{t("share")}</Button>
-      </li>
+      <div>
+        <Button
+          onlyIcon
+          onClick={() => setIsPopupOpen(true)}
+          className={css`
+            margin-top: 0rem;
+            font-size: 1.2rem;
+            background: transparent;
+            color: var(--mi-primary-color);
+            margin-left: 0.2rem;
+          `}
+        >
+          <BsShare />
+        </Button>
+      </div>
     </div>
   );
 };

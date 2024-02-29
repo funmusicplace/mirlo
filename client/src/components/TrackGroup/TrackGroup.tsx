@@ -23,6 +23,7 @@ import TrackGroupTitle from "./TrackGroupTitle";
 import styled from "@emotion/styled";
 import SupportArtistPopUp from "components/common/SupportArtistPopUp";
 import TrackGroupPills from "./TrackGroupPills";
+import TrackGroupEmbed from "./TrackGroupEmbed";
 
 const Container = styled.div<{ user?: LoggedInUser }>`
   ${(props) =>
@@ -45,6 +46,7 @@ const Container = styled.div<{ user?: LoggedInUser }>`
 
 const ImageWrapper = styled.div`
   border: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
 `;
 
 const UnderneathImage = styled.div`
@@ -237,18 +239,25 @@ function TrackGroup() {
                   <div
                     className={css`
                       display: flex;
+                      justify-content: flex-end;
                       align-items: center;
+                      gap: 1rem;
                       button {
-                        margin-left: 0.5rem;
                         background: var(--mi-darken-background-color);
+                        margin-left: 0 !important;
                       }
                       a {
                         font-size: var(--mi-font-size-normal);
                       }
+
+                      @media screen and (max-width: ${bp.small}px) {
+                        gap: 0.75rem;
+                      }
                     `}
                   >
-                    <PurchaseOrDownloadAlbum trackGroup={trackGroup} />
+                    <TrackGroupEmbed trackGroup={trackGroup} />
                     <Wishlist trackGroup={trackGroup} />
+                    <PurchaseOrDownloadAlbum trackGroup={trackGroup} />
                   </div>
                 </UnderneathImage>
                 <SmallScreenPlayWrapper>

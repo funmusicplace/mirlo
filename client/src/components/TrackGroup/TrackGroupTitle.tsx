@@ -14,7 +14,6 @@ import TrackGroupAdminMenu from "./TrackGroupAdminMenu";
 
 import React from "react";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
-import TrackGroupEmbed from "./TrackGroupEmbed";
 
 const TrackGroupTitle: React.FC<{ trackGroup: TrackGroup }> = ({
   trackGroup,
@@ -118,20 +117,19 @@ const TrackGroupTitle: React.FC<{ trackGroup: TrackGroup }> = ({
               </Button>
             </Link>
           )}
-          <div
-            className={css`
-              padding-left: 1rem;
-            `}
-          >
-            <DropdownMenu compact>
-              <>
-                {user?.isAdmin && (
+          {user?.isAdmin && (
+            <div
+              className={css`
+                padding-left: 1rem;
+              `}
+            >
+              <DropdownMenu compact>
+                <>
                   <TrackGroupAdminMenu trackGroup={trackGroup} />
-                )}
-                <TrackGroupEmbed trackGroup={trackGroup} />
-              </>
-            </DropdownMenu>
-          </div>
+                </>
+              </DropdownMenu>
+            </div>
+          )}
         </div>
       </div>
     </>
