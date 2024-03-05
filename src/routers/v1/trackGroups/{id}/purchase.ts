@@ -78,7 +78,6 @@ export default function () {
           description: `Have to pay at least ${trackGroup.minPrice} for this trackGroup. ${priceNumber} is not enough`,
         });
       }
-      console.log("priceZero", priceZero, priceNumber);
 
       if (!stripeAccountId && !priceZero) {
         throw new AppError({

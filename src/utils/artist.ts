@@ -172,6 +172,13 @@ export const subscribeUserToArtist = async (
       },
     });
     if (!isSubscribed) {
+      await prisma.notification.create({
+        data: {
+          notificationType: "USER_FOLLOWED_YOU",
+          userId: user.id,
+          artistId: artist.id,
+        },
+      });
       await prisma.artistUserSubscription.upsert({
         create: {
           artistSubscriptionTierId: defaultTier.id,
