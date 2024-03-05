@@ -47,6 +47,15 @@ export const registerSubscription = async ({
     },
   });
 
+  await prisma.notification.create({
+    data: {
+      notificationType: "USER_SUBSCRIBED_TO_YOU",
+      artistId: artistUserSubscription.artistSubscriptionTier.artistId,
+      userId: artistUserSubscription.artistSubscriptionTier.artist.userId,
+      relatedUserId: Number(userId),
+    },
+  });
+
   logger.info(`Updated/created ${artistUserSubscription.id}`);
 
   return artistUserSubscription;

@@ -300,6 +300,11 @@ export const registerPurchase = async ({
       trackGroupId: Number(trackGroupId),
     },
     include: {
+      trackGroup: {
+        include: {
+          artist: true,
+        },
+      },
       user: {
         select: {
           email: true,
@@ -308,6 +313,17 @@ export const registerPurchase = async ({
       },
     },
   });
+  if (refreshedPurchase) {
+    await prisma.notification.create({
+      data: {
+        notificationType: "USER_BOUGHT_YOUR_ALBUM",
+        userId: refreshedPurchase?.trackGroup.artist.id,
+        relatedUserId: Number(userId),
+        trackGroupId: Number(trackGroupId),
+        artistId: refreshedPurchase?.trackGroup.artistId,
+      },
+    });
+  }
   return refreshedPurchase;
 };
 

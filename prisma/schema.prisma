@@ -47,7 +47,8 @@ model User {
   plays                               TrackPlay[]
   downloadCodes                       TrackGroupDownloadCodes[]
   userArtistNotificationSettings      UserArtistNotificationSetting[]
-  notifications                       Notification[]
+  receivingNotifications              Notification[]                  @relation("receivingUser")
+  relatedNotifications                Notification[]                  @relation("relatedUser")
 }
 
 model UserArtistNotificationSetting {
@@ -65,7 +66,7 @@ model Notification {
   id               String                  @id @default(uuid())
   isRead           Boolean                 @default(false)
   userId           Int
-  user             User                    @relation(fields: [userId], references: [id])
+  user             User                    @relation(fields: [userId], references: [id], name: "receivingUser")
   notificationType NotificationType
   createdAt        DateTime                @default(now())
   content          String?
@@ -77,6 +78,8 @@ model Notification {
   post             Post?                   @relation(fields: [postId], references: [id])
   artistId         Int?
   artist           Artist?                 @relation(fields: [artistId], references: [id])
+  relatedUserId    Int?
+  relatedUser      User?                   @relation(fields: [relatedUserId], references: [id], name: "relatedUser")
 }
 
 enum NotificationType {

@@ -67,7 +67,6 @@ const ArtistHeaderDescription: React.FC = () => {
 
   React.useEffect(() => {
     const el = document.getElementById("markdown-content");
-    console.log("el", el?.clientHeight);
     if ((el?.clientHeight ?? 0) > collapsedHeight) {
       setCanCollapse(true);
       if (!isHeaderExpanded) {
