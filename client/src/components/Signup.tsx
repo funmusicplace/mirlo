@@ -72,7 +72,11 @@ function Signup() {
       try {
         await api.post(
           "signup",
-          { ...data, client: process.env.REACT_APP_CLIENT_DOMAIN },
+          {
+            ...data,
+            receiveMailingList: !!data.receiveMailingList,
+            client: process.env.REACT_APP_CLIENT_DOMAIN,
+          },
           {
             credentials: undefined,
           }
