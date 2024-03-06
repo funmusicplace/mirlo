@@ -317,7 +317,7 @@ export const registerPurchase = async ({
     await prisma.notification.create({
       data: {
         notificationType: "USER_BOUGHT_YOUR_ALBUM",
-        userId: refreshedPurchase?.trackGroup.artist.id,
+        userId: refreshedPurchase?.trackGroup.artist.userId,
         relatedUserId: Number(userId),
         trackGroupId: Number(trackGroupId),
         artistId: refreshedPurchase?.trackGroup.artistId,
