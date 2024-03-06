@@ -1,7 +1,7 @@
 import { css } from "@emotion/css";
 import Box from "./Box";
 import { Link } from "react-router-dom";
-import { getArtistUrlReference, getPostURLReference } from "utils/artist";
+import { getArtistUrl, getPostURLReference } from "utils/artist";
 import parse from "html-react-parser";
 import MarkdownWrapper from "./MarkdownWrapper";
 
@@ -58,10 +58,7 @@ const PostCard: React.FC<{
                 z-index: +1;
               `}
             >
-              by{" "}
-              <Link to={`/${getArtistUrlReference(p.artist)}`}>
-                {p.artist?.name}
-              </Link>
+              by <Link to={getArtistUrl(p.artist)}>{p.artist?.name}</Link>
             </div>
           </div>
         )}

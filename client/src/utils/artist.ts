@@ -1,6 +1,6 @@
 export const getArtistUrlReference = (artist: Artist) => {
   if (artist.urlSlug) {
-    return artist.urlSlug.toLowerCase();
+    return `${artist.urlSlug.toLowerCase()}`;
   }
   return `${artist.id}`;
 };
@@ -13,6 +13,10 @@ export const getTrackGroupUrlReference = (trackGroup: {
     return trackGroup.urlSlug.toLowerCase();
   }
   return `${trackGroup.id}`;
+};
+
+export const getArtistUrl = (artist: Artist) => {
+  return `/${getArtistUrlReference(artist)}`;
 };
 
 export const getTrackGroupWidget = (trackGroupId: number) => {

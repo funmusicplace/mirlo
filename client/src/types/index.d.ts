@@ -93,6 +93,7 @@ type ArtistColors = {
 
 interface Notification {
   content: string;
+  isRead: boolean;
   id: string;
   notificationType:
     | "NEW_ARTIST_POST"

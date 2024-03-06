@@ -4,7 +4,7 @@ import ClickToPlay from "../common/ClickToPlay";
 import { Link } from "react-router-dom";
 import { bp } from "../../constants";
 import { useArtistContext } from "state/ArtistContext";
-import { getArtistUrlReference, getTrackGroupUrlReference } from "utils/artist";
+import { getArtistUrl, getReleaseUrl } from "utils/artist";
 import styled from "@emotion/styled";
 
 export const TrackGroupWrapper = styled.div`
@@ -90,18 +90,12 @@ const ArtistTrackGroup: React.FC<{
         <TrackGroupLinks>
           <TrackGroupInfo>
             {artist && (
-              <Link
-                to={`/${getArtistUrlReference(
-                  artist
-                )}/release/${getTrackGroupUrlReference(trackGroup)}`}
-              >
+              <Link to={getReleaseUrl(artist, trackGroup)}>
                 {trackGroup.title}
               </Link>
             )}
             {artist && (
-              <Link to={`/${getArtistUrlReference(artist)}/`}>
-                {trackGroup.artist?.name}
-              </Link>
+              <Link to={getArtistUrl(artist)}>{trackGroup.artist?.name}</Link>
             )}
           </TrackGroupInfo>
           <div

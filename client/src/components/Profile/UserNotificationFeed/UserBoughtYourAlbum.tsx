@@ -3,7 +3,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { FaChevronRight } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import { getArtistUrlReference, getTrackGroupUrlReference } from "utils/artist";
+import { getArtistUrl, getTrackGroupUrlReference } from "utils/artist";
 
 const UserBoughtYourAlbum: React.FC<{ notification: Notification }> = ({
   notification,
@@ -18,7 +18,7 @@ const UserBoughtYourAlbum: React.FC<{ notification: Notification }> = ({
       <div>
         {notification.relatedUser?.name} bought your album:{" "}
         {notification.trackGroup.artist && (
-          <Link to={getArtistUrlReference(notification.trackGroup.artist)}>
+          <Link to={getArtistUrl(notification.trackGroup.artist)}>
             {notification.trackGroup.artist?.name}
           </Link>
         )}

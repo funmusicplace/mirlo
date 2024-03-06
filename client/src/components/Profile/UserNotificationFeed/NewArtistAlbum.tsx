@@ -3,7 +3,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { FaChevronRight } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import { getArtistUrlReference, getReleaseUrl } from "utils/artist";
+import { getArtistUrl, getReleaseUrl } from "utils/artist";
 
 const NewArtistAlbum: React.FC<{ notification: Notification }> = ({
   notification,
@@ -18,7 +18,7 @@ const NewArtistAlbum: React.FC<{ notification: Notification }> = ({
       <div>
         New album by{" "}
         {notification.trackGroup.artist && (
-          <Link to={getArtistUrlReference(notification.trackGroup.artist)}>
+          <Link to={getArtistUrl(notification.trackGroup.artist)}>
             {notification.trackGroup.artist?.name}
           </Link>
         )}

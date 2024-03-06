@@ -3,7 +3,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { FaChevronRight } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import { getArtistUrlReference, getPostURLReference } from "utils/artist";
+import { getArtistUrl, getPostURLReference } from "utils/artist";
 
 const NewArtistPost: React.FC<{ notification: Notification }> = ({
   notification,
@@ -18,7 +18,7 @@ const NewArtistPost: React.FC<{ notification: Notification }> = ({
       <div>
         New post by{" "}
         {notification.post.artist && (
-          <Link to={getArtistUrlReference(notification.post.artist)}>
+          <Link to={getArtistUrl(notification.post.artist)}>
             {notification.post.artist?.name}
           </Link>
         )}
