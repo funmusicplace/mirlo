@@ -38,6 +38,7 @@ export default function () {
           subscription: {
             include: { artistSubscriptionTier: { include: { artist: true } } },
           },
+          relatedUser: true,
         },
         orderBy: {
           createdAt: "desc",

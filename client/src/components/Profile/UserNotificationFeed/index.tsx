@@ -3,23 +3,12 @@ import styled from "@emotion/styled";
 import { WidthWrapper } from "components/common/WidthContainer";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { FaChevronRight } from "react-icons/fa";
-import { Link } from "react-router-dom";
 import api from "services/api";
 import { useGlobalStateContext } from "state/GlobalState";
-import {
-  getArtistUrlReference,
-  getPostURLReference,
-  getReleaseUrl,
-} from "utils/artist";
 
-type Notification = {
-  content: string;
-  id: string;
-  notificationType: "NEW_ARTIST_POST" | "NEW_ARTIST_ALBUM";
-  post?: Post;
-  trackGroup: TrackGroup & { artist: Artist };
-};
+import UserBoughtYourAlbum from "./UserBoughtYourAlbum";
+import NewArtistPost from "./NewArtistPost";
+import NewArtistAlbum from "./NewArtistAlbum";
 
 const LI = styled.li`
   background-color: var(--mi-lighten-x-background-color);
@@ -61,71 +50,15 @@ const UserNotificationFeed = () => {
       >
         {notifications.map((notification) => (
           <LI key={notification.id}>
-            {notification.notificationType === "NEW_ARTIST_POST" &&
-              notification.post && (
-                <>
-                  <div>
-                    New post by{" "}
-                    {notification.post.artist && (
-                      <Link
-                        to={getArtistUrlReference(notification.post.artist)}
-                      >
-                        {notification.post.artist?.name}
-                      </Link>
-                    )}
-                    : <strong>{notification.post.title}</strong>
-                  </div>
-                  <Link
-                    to={getPostURLReference(notification.post)}
-                    className={css`
-                      display: flex;
-                      align-items: center;
-                      margin-top: 0.5rem;
-
-                      svg {
-                        margin-left: 0.25rem;
-                      }
-                    `}
-                  >
-                    {t("readPost")} <FaChevronRight />
-                  </Link>
-                </>
-              )}
-            {notification.notificationType === "NEW_ARTIST_ALBUM" &&
-              notification.trackGroup && (
-                <>
-                  <div>
-                    New album by{" "}
-                    {notification.trackGroup.artist && (
-                      <Link
-                        to={getArtistUrlReference(
-                          notification.trackGroup.artist
-                        )}
-                      >
-                        {notification.trackGroup.artist?.name}
-                      </Link>
-                    )}
-                    : <strong>{notification.trackGroup.title}</strong>
-                  </div>
-                  <Link
-                    to={getReleaseUrl(
-                      notification.trackGroup.artist,
-                      notification.trackGroup
-                    )}
-                    className={css`
-                      display: flex;
-                      align-items: center;
-                      margin-top: 0.5rem;
-
-                      svg {
-                        margin-left: 0.25rem;
-                      }
-                    `}
-                  >
-                    {t("viewAlbum")} <FaChevronRight />
-                  </Link>
-                </>
-              )}
+            {notification.notificationType === "USER_BOUGHT_YOUR_ALBUM" && (
+              <UserBoughtYourAlbum notification={notification} />
+            )}
+            {notification.notificationType === "NEW_ARTIST_POST" && (
+              <NewArtistPost notification={notification} />
+            )}
+            {notification.notificationType === "NEW_ARTIST_ALBUM" && (
+              <NewArtistAlbum notification={notification} />
+            )}
           </LI>
         ))}
       </ul>
