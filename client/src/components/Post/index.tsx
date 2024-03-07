@@ -27,6 +27,10 @@ export const PageMarkdownWrapper = styled.div`
   font-size: 18px;
   line-height: 1.7rem;
 
+  a {
+    word-break: break-word;
+  }
+
   h1 {
     font-weight: normal !important;
   }
