@@ -63,6 +63,7 @@
   },
   "profile": {
     "profile": "Profile",
+    "notifications": "Notifications",
     "profileUpdated": "Profile updated",
     "errorUpdatingProfile": "There was a problem with the API",
     "email": "Email:",
@@ -79,7 +80,8 @@
     "yourCollection": "Your collection",
     "yourWishlist": "Your wishlist",
     "collection": "Collection",
-    "wishlist": "Wishlist"
+    "wishlist": "Wishlist",
+    "wishlistEmpty": "There's nothing in your wishlist yet, browse the site!"
   },
   "trackGroupCard": {
     "notLoggedIn": "We'll need your email address to send you a one-time download link of the album. In the future you'll be able to create an account and access what you've bought.",

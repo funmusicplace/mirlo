@@ -6,9 +6,11 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 
 import { NavLink, Outlet } from "react-router-dom";
+import UnreadCountPill from "components/common/UnreadCountPill";
 
 const ProfileContainer: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "profile" });
+
   return (
     <>
       <div
@@ -61,6 +63,12 @@ const ProfileContainer: React.FC = () => {
               </li>
               <li>
                 <NavLink to="/profile/wishlist">{t("wishlist")}</NavLink>
+              </li>
+              <li>
+                <NavLink to="/profile/notifications">
+                  {t("notifications")}
+                  <UnreadCountPill />
+                </NavLink>
               </li>
             </Tabs>
           </WidthContainer>
