@@ -91,6 +91,19 @@ type ArtistColors = {
   foreground: string;
 };
 
+interface Notification {
+  content: string;
+  isRead: boolean;
+  id: string;
+  notificationType:
+    | "NEW_ARTIST_POST"
+    | "NEW_ARTIST_ALBUM"
+    | "USER_BOUGHT_YOUR_ALBUM";
+  post?: Post;
+  relatedUser?: User;
+  trackGroup?: TrackGroup & { artist: Artist };
+}
+
 interface Artist {
   name: string;
   bio: string;

@@ -42,7 +42,7 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
         data: {
           name,
           email,
-          receiveMailingList,
+          receiveMailingList: !!receiveMailingList,
           password: await hashPassword(password),
         },
         select: {

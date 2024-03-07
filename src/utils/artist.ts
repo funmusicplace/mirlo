@@ -142,6 +142,7 @@ export const createSubscriptionConfirmation = async (
 export const subscribeUserToArtist = async (
   artist: {
     user: User;
+    userId: number;
     subscriptionTiers: ArtistSubscriptionTier[];
     id: number;
   },
@@ -189,6 +190,14 @@ export const subscribeUserToArtist = async (
         },
       });
     }
+    await prisma.notification.create({
+      data: {
+        notificationType: "USER_FOLLOWED_YOU",
+        userId: artist.userId,
+        artistId: artist.id,
+        relatedUserId: user.id,
+      },
+    });
   }
 
   const subscriptions = await prisma.artistUserSubscription.findMany({

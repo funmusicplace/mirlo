@@ -14,7 +14,7 @@ import SmallTileDetails from "components/common/SmallTileDetails";
 import DownloadAlbumButton from "components/common/DownloadAlbumButton";
 import React from "react";
 import api from "services/api";
-import { getArtistUrlReference, getReleaseUrl } from "utils/artist";
+import { getArtistUrl, getReleaseUrl } from "utils/artist";
 
 function DownloadAlbum() {
   const [trackGroup, setTrackGroup] = React.useState<TrackGroup>();
@@ -73,7 +73,7 @@ function DownloadAlbum() {
       />
     );
   } else if (!trackGroup && !isLoadingTrackGroup) {
-    return <Navigate to={"/" + getArtistUrlReference(artist)} replace />;
+    return <Navigate to={getArtistUrl(artist)} replace />;
   } else if (!trackGroup) {
     return <FullPageLoadingSpinner />;
   }

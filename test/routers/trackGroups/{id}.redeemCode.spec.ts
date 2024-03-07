@@ -9,14 +9,8 @@ import {
   createUser,
 } from "../../utils";
 import prisma from "../../../prisma/prisma";
-import { randomUUID } from "crypto";
 
 import { requestApp } from "../utils";
-import {
-  createBucketIfNotExists,
-  finalAudioBucket,
-  minioClient,
-} from "../../../src/utils/minio";
 
 describe("trackGroups/{id}/redeemCode", () => {
   beforeEach(async () => {
@@ -100,7 +94,7 @@ describe("trackGroups/{id}/redeemCode", () => {
         email: "purchaser@artist.com",
       });
 
-      const code = await prisma.trackGroupDownloadCodes.create({
+      await prisma.trackGroupDownloadCodes.create({
         data: {
           trackGroupId: trackGroup.id,
           downloadCode: "asdf",
@@ -131,6 +125,18 @@ describe("trackGroups/{id}/redeemCode", () => {
       });
 
       assert.equal(purchase?.trackGroupId, trackGroup.id);
+
+      const artistNotification = await prisma.notification.findFirst({
+        where: {
+          userId: user.id,
+        },
+      });
+
+      assert.equal(
+        artistNotification?.notificationType,
+        "USER_BOUGHT_YOUR_ALBUM"
+      );
+      assert.equal(artistNotification?.relatedUserId, purchaser.id);
     });
 
     it("should GET / succeed with a logged in user", async () => {

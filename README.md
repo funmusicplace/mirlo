@@ -17,7 +17,7 @@ Main libraries:
 git clone <repository>
 cd mirlo
 cp .env.example .env
-docker-compose up
+docker-compose up # (or depending on your version of docker "docker compose up"--notice the space)
 ```
 
 Go to `localhost:3000/docs` and see the Swagger API docs.
@@ -128,6 +128,17 @@ If you get errors when running the backbird-api and blackbird-background service
 2. In Docker Desktop, go to Settings -> General and ensure `Use Rosetta for x86/amd64 emulation on Apple Silicon` is checked.
 3. Delete any previously created images
 4. Run `DOCKER_DEFAULT_PLATFORM=linux/amd64 docker compose up`
+
+## Docker connectivity issues. 
+
+It might be that your docker container can't reach yarn or github. As [described here](https://github.com/moby/moby/issues/32106#issuecomment-382228854): either in Docker Desktop, edit the Docker Engine file to show the DNS, or edit /etc/docker/daemon.json directly:
+
+```
+"dns": [
+    "10.0.0.2",
+    "8.8.8.8"
+  ],
+```
 
 # Credits
 

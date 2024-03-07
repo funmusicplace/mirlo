@@ -19,6 +19,25 @@ export default function () {
         where: { id: Number(trackGroupId) || undefined },
         data: { published: !trackGroup?.published },
       });
+      if (updatedTrackgroup.published) {
+        const artistFollowers = await prisma.artistUserSubscription.findMany({
+          where: {
+            artistSubscriptionTier: {
+              artistId: updatedTrackgroup.artistId,
+            },
+          },
+        });
+
+        await prisma.notification.createMany({
+          data: artistFollowers.map((follower) => {
+            return {
+              userId: follower.userId,
+              trackGroupId: updatedTrackgroup.id,
+              notificationType: "NEW_ARTIST_ALBUM",
+            };
+          }),
+        });
+      }
       res.json(updatedTrackgroup);
     } catch (e) {
       next(e);

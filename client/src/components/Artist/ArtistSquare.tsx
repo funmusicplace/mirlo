@@ -2,7 +2,7 @@ import { css } from "@emotion/css";
 import React from "react";
 import { Link } from "react-router-dom";
 import { bp } from "../../constants";
-import { getArtistUrlReference } from "utils/artist";
+import { getArtistUrl } from "utils/artist";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import {
   TrackGroupWrapper,
@@ -28,11 +28,7 @@ const ArtistSquare: React.FC<{
 
         <TrackGroupLinks>
           <TrackGroupInfo>
-            {artist && (
-              <Link to={`/${getArtistUrlReference(artist)}`}>
-                {artist.name}
-              </Link>
-            )}
+            {artist && <Link to={getArtistUrl(artist)}>{artist.name}</Link>}
           </TrackGroupInfo>
           <div
             className={css`

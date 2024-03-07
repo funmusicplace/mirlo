@@ -1,9 +1,8 @@
 import { User } from "@prisma/client";
 import { Request, Response } from "express";
-import { userAuthenticated } from "../../../../auth/passport";
-import prisma from "../../../../../prisma/prisma";
-import { AppError } from "../../../../utils/error";
-import artists from "./artists";
+import { userAuthenticated } from "../../../../../auth/passport";
+import prisma from "../../../../../../prisma/prisma";
+import { AppError } from "../../../../../utils/error";
 
 type Params = {
   userId: string;
@@ -38,6 +37,7 @@ export default function () {
           subscription: {
             include: { artistSubscriptionTier: { include: { artist: true } } },
           },
+          relatedUser: true,
         },
         orderBy: {
           createdAt: "desc",

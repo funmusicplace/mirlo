@@ -47,7 +47,8 @@ model User {
   plays                               TrackPlay[]
   downloadCodes                       TrackGroupDownloadCodes[]
   userArtistNotificationSettings      UserArtistNotificationSetting[]
-  notifications                       Notification[]
+  receivingNotifications              Notification[]                  @relation("receivingUser")
+  relatedNotifications                Notification[]                  @relation("relatedUser")
 }
 
 model UserArtistNotificationSetting {
@@ -65,7 +66,7 @@ model Notification {
   id               String                  @id @default(uuid())
   isRead           Boolean                 @default(false)
   userId           Int
-  user             User                    @relation(fields: [userId], references: [id])
+  user             User                    @relation(fields: [userId], references: [id], name: "receivingUser")
   notificationType NotificationType
   createdAt        DateTime                @default(now())
   content          String?
@@ -75,12 +76,19 @@ model Notification {
   subscription     ArtistUserSubscription? @relation(fields: [subscriptionId], references: [id])
   postId           Int?
   post             Post?                   @relation(fields: [postId], references: [id])
+  artistId         Int?
+  artist           Artist?                 @relation(fields: [artistId], references: [id])
+  relatedUserId    Int?
+  relatedUser      User?                   @relation(fields: [relatedUserId], references: [id], name: "relatedUser")
 }
 
 enum NotificationType {
   NEW_ARTIST_MONTHLY_SUBSCRIPTION
   NEW_ARTIST_POST
   NEW_ARTIST_ALBUM
+  USER_FOLLOWED_YOU
+  USER_BOUGHT_YOUR_ALBUM
+  USER_SUBSCRIBED_TO_YOU
 }
 
 model Post {
@@ -133,6 +141,7 @@ model Artist {
   location                           String?
   artistUserSubscriptionConfirmation ArtistUserSubscriptionConfirmation[]
   userArtistNotificationSettings     UserArtistNotificationSetting[]
+  notifications                      Notification[]
 }
 
 model ArtistAvatar {
