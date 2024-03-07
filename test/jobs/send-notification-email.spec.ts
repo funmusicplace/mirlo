@@ -47,7 +47,7 @@ describe("send-notification-email", () => {
       content: "# HI",
     });
 
-    const notification = await prisma.notification.create({
+    await prisma.notification.create({
       data: {
         userId: followerUser.id,
         postId: post.id,
