@@ -2,27 +2,25 @@ import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
 
-import {
-  clearTables,
-  createPost,
-  createTrackGroup,
-  createUser,
-} from "../utils";
+import { clearTables, createTrackGroup, createUser } from "../utils";
 
 import prisma from "../../prisma/prisma";
 import assert from "assert";
 import sinon from "sinon";
 import * as sendMail from "../../src/jobs/send-mail";
-import sendNotificationEmail from "../../src/jobs/send-notification-email";
 import { handleTrackGroupPurchase } from "../../src/utils/stripe";
 
-describe.only("handleTrackGroupPurchase", () => {
+describe("handleTrackGroupPurchase", () => {
   beforeEach(async () => {
     try {
       await clearTables();
     } catch (e) {
       console.error(e);
     }
+  });
+
+  afterEach(() => {
+    sinon.restore();
   });
 
   it("should send out emails for track group purchase", async () => {

@@ -19,7 +19,9 @@ describe("send-notification-email", () => {
     }
   });
 
-  afterEach(() => {});
+  afterEach(() => {
+    sinon.restore();
+  });
 
   it("should add post to notifications", async () => {
     const stub = sinon.stub(sendMail, "default");
