@@ -130,9 +130,13 @@ describe("users/{userId}/artists/{artistId}/subscribers", () => {
           userId: subscriber.id,
           artistSubscriptionTierId: tier.id,
         },
+        include: {
+          artistSubscriptionTier: true,
+        },
       });
 
       assert.notEqual(subscription, null);
+      assert.equal(subscription?.artistSubscriptionTier.isDefaultTier, true);
     });
 
     it("should handle an existing subscription", async () => {
