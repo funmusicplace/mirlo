@@ -132,7 +132,7 @@ const ArtistSubscriberUploadData: React.FC<{}> = () => {
             <Table>
               <thead>
                 <tr>
-                  <th>E-mail</th>
+                  <th>{t("email")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -143,12 +143,9 @@ const ArtistSubscriberUploadData: React.FC<{}> = () => {
                 ))}
               </tbody>
             </Table>
-            <p>
-              By uploading this list of e-mails, you solemnly swear that you
-              have permission from the email owners to upload the emails
-            </p>
+            <p>{t("rightToUpload")}</p>
             <Button variant="big" onClick={uploadSubscriberData}>
-              Alright, looks good, let's upload them!
+              {t("looksGood")}
             </Button>
           </div>
         )}
@@ -162,12 +159,14 @@ const ArtistSubscriberUploadData: React.FC<{}> = () => {
             <>
               <CSVReaderWrapper>
                 <CSVUploadButton type="button" {...getRootProps()}>
-                  Browse file
+                  {t("uploadACSV")}
                 </CSVUploadButton>
                 <AcceptedFiles>
                   {acceptedFile && acceptedFile.name}
                 </AcceptedFiles>
-                <RemoveButton {...getRemoveFileProps()}>Remove</RemoveButton>
+                <RemoveButton {...getRemoveFileProps()}>
+                  {t("remove")}
+                </RemoveButton>
               </CSVReaderWrapper>
               <ProgressBar style={{ background: "red" }} />
             </>
