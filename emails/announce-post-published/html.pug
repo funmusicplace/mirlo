@@ -16,4 +16,7 @@ html
       a(href!=`${client}/post/${post.id}`) Read it on Mirlo.
     div 
       | !{post.htmlContent}
-    
+    p
+    p Don't want to receive emails from #{artist.name} anymore?       
+      a(href!=`${client}/${artist.urlSlug ?? artist.id}}/unsubscribe?email=${email}`) Unsubscribe.
+

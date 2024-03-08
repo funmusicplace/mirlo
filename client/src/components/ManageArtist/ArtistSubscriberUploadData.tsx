@@ -1,7 +1,6 @@
 import Button from "components/common/Button";
 import React from "react";
 import api from "services/api";
-import { useGlobalStateContext } from "state/GlobalState";
 import { useCSVReader } from "react-papaparse";
 
 import { useTranslation } from "react-i18next";
@@ -39,9 +38,7 @@ const RemoveButton = styled(Button)`
 
 const ArtistSubscriberUploadData: React.FC<{}> = () => {
   const [isOpen, setIsOpen] = React.useState(false);
-  const {
-    state: { user },
-  } = useGlobalStateContext();
+
   const { t } = useTranslation("translation", {
     keyPrefix: "manageSubscriptions",
   });
@@ -59,7 +56,7 @@ const ArtistSubscriberUploadData: React.FC<{}> = () => {
   } = useArtistContext();
   const { artistId } = useParams();
 
-  const userId = user?.id;
+  const artistUserId = artist?.userId;
 
   const processData = async (results: { data: string[][] }) => {
     const data = results.data;
@@ -89,10 +86,13 @@ const ArtistSubscriberUploadData: React.FC<{}> = () => {
       setIsLoadingSubscriberData(true);
 
       try {
-        if (userId && artistId) {
-          await api.post(`users/${userId}/artists/${artistId}/subscribers`, {
-            subscribers: uploadedUsers,
-          });
+        if (artistUserId && artistId) {
+          await api.post(
+            `users/${artistUserId}/artists/${artistId}/subscribers`,
+            {
+              subscribers: uploadedUsers,
+            }
+          );
         }
         snackbar("Uploaded your followers!", { type: "success" });
       } catch (e) {
@@ -103,7 +103,7 @@ const ArtistSubscriberUploadData: React.FC<{}> = () => {
         setIsLoadingSubscriberData(false);
       }
     },
-    [artistId, snackbar, uploadedUsers, userId]
+    [artistId, snackbar, uploadedUsers, artistUserId]
   );
 
   if (!artist) {
@@ -149,29 +149,38 @@ const ArtistSubscriberUploadData: React.FC<{}> = () => {
             </Button>
           </div>
         )}
-        <CSVReader onUploadAccepted={processData}>
-          {({
-            getRootProps,
-            acceptedFile,
-            ProgressBar,
-            getRemoveFileProps,
-          }: any) => (
-            <>
-              <CSVReaderWrapper>
-                <CSVUploadButton type="button" {...getRootProps()}>
-                  {t("uploadACSV")}
-                </CSVUploadButton>
-                <AcceptedFiles>
-                  {acceptedFile && acceptedFile.name}
-                </AcceptedFiles>
-                <RemoveButton {...getRemoveFileProps()}>
-                  {t("remove")}
-                </RemoveButton>
-              </CSVReaderWrapper>
-              <ProgressBar style={{ background: "red" }} />
-            </>
-          )}
-        </CSVReader>
+        <div>
+          <p
+            className={css`
+              margin-bottom: 1rem;
+            `}
+          >
+            {t("fileUploadDescription")}
+          </p>
+          <CSVReader onUploadAccepted={processData}>
+            {({
+              getRootProps,
+              acceptedFile,
+              ProgressBar,
+              getRemoveFileProps,
+            }: any) => (
+              <>
+                <CSVReaderWrapper>
+                  <CSVUploadButton type="button" {...getRootProps()}>
+                    {t("uploadACSV")}
+                  </CSVUploadButton>
+                  <AcceptedFiles>
+                    {acceptedFile && acceptedFile.name}
+                  </AcceptedFiles>
+                  <RemoveButton {...getRemoveFileProps()}>
+                    {t("remove")}
+                  </RemoveButton>
+                </CSVReaderWrapper>
+                <ProgressBar style={{ background: "red" }} />
+              </>
+            )}
+          </CSVReader>
+        </div>
       </Modal>
       <li>
         <Button

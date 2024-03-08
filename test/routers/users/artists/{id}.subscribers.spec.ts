@@ -177,5 +177,72 @@ describe("users/{userId}/artists/{artistId}/subscribers", () => {
 
       assert.notEqual(created, null);
     });
+
+    it("should not let an non-owner upload for an artist", async () => {
+      const { accessToken: adminAccessToken } = await createUser({
+        email: "rando@rando.com",
+      });
+      const { user } = await createUser({ email: "test@testcom" });
+      const artist = await createArtist(user.id);
+      const tier = await createTier(artist.id, { isDefaultTier: true });
+      const subscriberEmail = "subscriber1@email.com";
+
+      const response = await requestApp
+        .post(`users/${user.id}/artists/${artist.id}/subscribers`)
+        .send({
+          subscribers: [
+            {
+              email: subscriberEmail,
+            },
+          ],
+        })
+        .set("Cookie", [`jwt=${adminAccessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 401);
+    });
+
+    it("should let an admin upload for an artist", async () => {
+      const { accessToken: adminAccessToken } = await createUser({
+        email: "admin@admin.com",
+        isAdmin: true,
+      });
+      const { user } = await createUser({ email: "test@testcom" });
+      const artist = await createArtist(user.id);
+      const tier = await createTier(artist.id, { isDefaultTier: true });
+      const subscriberEmail = "subscriber1@email.com";
+
+      const response = await requestApp
+        .post(`users/${user.id}/artists/${artist.id}/subscribers`)
+        .send({
+          subscribers: [
+            {
+              email: subscriberEmail,
+            },
+          ],
+        })
+        .set("Cookie", [`jwt=${adminAccessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+
+      const created = await prisma.user.findFirst({
+        where: {
+          email: subscriberEmail,
+        },
+      });
+
+      assert.notEqual(created, null);
+      assert(created);
+
+      const subscription = await prisma.artistUserSubscription.findFirst({
+        where: {
+          userId: created.id,
+          artistSubscriptionTierId: tier.id,
+        },
+      });
+
+      assert.notEqual(subscription, null);
+    });
   });
 });

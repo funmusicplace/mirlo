@@ -54,6 +54,7 @@ import CallServerTasks from "components/Admin/CallServerTasks";
 import AdminSettings from "components/Admin/AdminSettings";
 import UserNotificationFeed from "components/Profile/UserNotificationFeed";
 import AdminManageUser from "components/Admin/AdminManageUser";
+import ArtistUnsubscribe from "components/Artist/ArtistUnsubscribe";
 
 const routes = [
   {
@@ -300,6 +301,10 @@ const routes = [
                 element: <ArtistSupport />,
               },
             ],
+          },
+          {
+            path: "unsubscribe",
+            element: <ArtistUnsubscribe />,
           },
           {
             path: "release/:trackGroupId",

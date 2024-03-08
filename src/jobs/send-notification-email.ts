@@ -3,7 +3,6 @@ import logger from "../logger";
 import sendMail from "./send-mail";
 
 const sendNotificationEmail = async () => {
-  console.log("noting");
   const notifications = await prisma.notification.findMany({
     where: {
       isRead: false,
@@ -47,6 +46,7 @@ const sendNotificationEmail = async () => {
                 ...notification.post,
                 htmlContent: notification.post.content,
               },
+              email: notification.user.email,
               host: process.env.API_DOMAIN,
               client: process.env.REACT_APP_CLIENT_DOMAIN,
             },

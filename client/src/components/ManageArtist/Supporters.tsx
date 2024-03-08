@@ -59,7 +59,7 @@ const Supporters = () => {
       <ArtistSection>
         <SpaceBetweenDiv>
           <h4>Supporters</h4>
-          <DropdownMenu>
+          <DropdownMenu dashed>
             <>
               <ArtistSubscriberDataDownload />
               <ArtistSubscriberUploadData />
