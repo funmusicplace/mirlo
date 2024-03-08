@@ -452,7 +452,7 @@ export const processSingleTrackGroup = (
   cover: addSizesToImage(finalCoversBucket, tg.cover),
 });
 
-export const processTrackGroupQueryOrder = (orderByString?: string) => {
+export const processTrackGroupQueryOrder = (orderByString?: unknown) => {
   let orderByObj: Prisma.TrackGroupOrderByWithRelationAndSearchRelevanceInput =
     {
       releaseDate: "desc",
