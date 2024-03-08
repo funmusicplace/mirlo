@@ -39,7 +39,7 @@ const DownloadAlbumButton: React.FC<{
       }
       const resp = await api.downloadFileDirectly(
         `trackGroups/${trackGroup.id}/download?${queryParams.toString()}`,
-        `${trackGroup.title}.zip`
+        `${trackGroup.title.replaceAll(".", "-")}.zip`
       );
       if (resp) {
         if ((resp as any).result.jobId) {

@@ -100,11 +100,10 @@ export default function () {
       }
 
       try {
-        res.attachment(`${trackGroup.title}.zip`);
-        res.set(
-          "Content-Disposition",
-          `attachment; filename="${trackGroup.title}"`
-        );
+        const title = trackGroup.title?.replaceAll(".", "-");
+
+        res.attachment(`${title}.zip`);
+        res.set("Content-Disposition", `attachment; filename="${title}.zip"`);
 
         const stream = await minioClient.getObject(
           trackGroupFormatBucket,

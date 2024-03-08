@@ -13,7 +13,6 @@ import { convertAudioToFormat } from "../utils/tracks";
 import archiver from "archiver";
 import { PassThrough } from "stream";
 import { Track, TrackGroup } from "@prisma/client";
-import sendMail from "./send-mail";
 
 const {
   MINIO_HOST = "",

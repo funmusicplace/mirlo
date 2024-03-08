@@ -42,6 +42,9 @@ const AddToCollection: React.FC<{ trackGroup: TrackGroup }> = ({
         <Button
           variant="outlined"
           onClick={() => setIsAddingToCollection(true)}
+          className={css`
+            font-size: 1rem !important;
+          `}
         >
           {t("addToCollection")}
         </Button>

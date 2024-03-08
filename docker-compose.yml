@@ -1,8 +1,8 @@
 ---
 services:
   redis:
-    networks:
-      - redis-network
+    # networks:
+    #   - redis-network
     command:
       - redis-server
       - "--appendonly"
@@ -17,9 +17,9 @@ services:
       - "${REDIS_HOST_PORT:-6379}:${REDIS_PORT:-6379}"
 
   api:
-    networks:
-      - api-network
-      - redis-network
+    # networks:
+    #   - api-network
+    #   - redis-network
     env_file:
       - .env
     build: .
@@ -40,9 +40,9 @@ services:
       - ${MEDIA_LOCATION:-./data/media/}downloadCache:/data/media/downloadCache
 
   background:
-    networks:
-      - api-network
-      - redis-network
+    # networks:
+    #   - api-network
+    #   - redis-network
     env_file:
       - .env
     build: background
@@ -66,10 +66,10 @@ services:
   minio:
     image: minio/minio
     container_name: blackbird-minio
-    networks:
-      api-network:
-        aliases:
-          - minio
+    # networks:
+    #   api-network:
+    #     aliases:
+    #       - minio
     ports:
       - "9000:9000" # API Port
       - "9001:9001" # Web UI Port
@@ -86,18 +86,18 @@ services:
       - ./data/pgsql:/var/lib/postgresql/data
       - ./data/pgsql_backups:/backups
     container_name: blackbird-pgsql
-    networks:
-      api-network:
-        aliases:
-          - pgsql
+    # networks:
+    #   api-network:
+    #     aliases:
+    #       - pgsql
     ports:
       - "${POSTGRES_LOCAL_MACHINE_PORT:-5432}:5432"
 
-networks:
-  api-network:
-    driver: bridge
-  redis-network:
-    driver: bridge
+# networks:
+#   api-network:
+#     driver: bridge
+#   redis-network:
+#     driver: bridge
 
 volumes:
   minio_storage: {}

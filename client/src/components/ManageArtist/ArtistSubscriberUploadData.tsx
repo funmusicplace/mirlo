@@ -5,7 +5,6 @@ import { useCSVReader } from "react-papaparse";
 
 import { useTranslation } from "react-i18next";
 import { useArtistContext } from "state/ArtistContext";
-import { useParams } from "react-router-dom";
 import { FaUpload } from "react-icons/fa";
 import Modal from "components/common/Modal";
 import styled from "@emotion/styled";
@@ -58,8 +57,7 @@ const ArtistSubscriberUploadData: React.FC<{
   const {
     state: { artist },
   } = useArtistContext();
-  const { artistId } = useParams();
-
+  const artistId = artist?.id;
   const artistUserId = artist?.userId;
 
   const processData = async (results: { data: string[][] }) => {
