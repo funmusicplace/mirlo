@@ -7,6 +7,7 @@ import {
 } from "../../../../../../auth/passport";
 import { findArtistIdForURLSlug } from "../../../../../../utils/artist";
 import { downloadCSVFile } from "../../../../../../utils/download";
+import { uniqBy } from "lodash";
 
 const csvColumns = [
   {
@@ -123,7 +124,7 @@ export default function () {
 
       if (followTier) {
         await Promise.all(
-          subscribers.map(async (subscriber) => {
+          uniqBy(subscribers, "email").map(async (subscriber) => {
             const created = await prisma.user.upsert({
               where: {
                 email: subscriber.email,
@@ -136,23 +137,25 @@ export default function () {
               },
             });
 
-            await prisma.artistUserSubscription.upsert({
+            const found = await prisma.artistUserSubscription.findFirst({
               where: {
-                userId_artistSubscriptionTierId: {
-                  userId: created.id,
-                  artistSubscriptionTierId: followTier.id,
-                },
-              },
-              create: {
                 userId: created.id,
                 artistSubscriptionTierId: followTier.id,
-                amount: 0,
               },
-              update: {},
             });
+
+            if (!found) {
+              await prisma.artistUserSubscription.create({
+                data: {
+                  userId: created.id,
+                  artistSubscriptionTierId: followTier.id,
+                  amount: 0,
+                },
+              });
+            }
           })
         );
-        const users = await prisma.user.findMany({
+        await prisma.user.findMany({
           where: { email: { in: subscribers.map((s) => s.email) } },
         });
       }

@@ -15,40 +15,18 @@ export default function () {
 
   async function GET(req: Request, res: Response) {
     const { userId } = req.params as unknown as Params;
-    const { skip: skipQuery, take, unreadCount } = req.query;
-
     const loggedInUser = req.user as User;
 
     if (Number(userId) === Number(loggedInUser.id)) {
-      const notifications = await prisma.notification.findMany({
+      const notifications = await prisma.notification.count({
         where: {
           userId: Number(userId),
+          isRead: false,
         },
-        include: {
-          post: {
-            include: {
-              artist: true,
-            },
-          },
-          trackGroup: {
-            include: {
-              artist: true,
-            },
-          },
-          subscription: {
-            include: { artistSubscriptionTier: { include: { artist: true } } },
-          },
-          relatedUser: true,
-        },
-        orderBy: {
-          createdAt: "desc",
-        },
-        skip: skipQuery ? Number(skipQuery) : undefined,
-        take: take ? Number(take) : 10,
       });
 
       res.json({
-        results: notifications,
+        result: notifications,
       });
     } else {
       throw new AppError({

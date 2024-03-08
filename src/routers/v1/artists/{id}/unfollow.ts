@@ -1,8 +1,9 @@
 import { User } from "@prisma/client";
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 
-import { userAuthenticated } from "../../../../auth/passport";
+import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import prisma from "../../../../../prisma/prisma";
+import { AppError } from "../../../../utils/error";
 
 type Params = {
   id: string;
@@ -10,52 +11,73 @@ type Params = {
 
 export default function () {
   const operations = {
-    POST: [userAuthenticated, POST],
+    POST: [userLoggedInWithoutRedirect, POST],
   };
 
-  async function POST(req: Request, res: Response) {
+  async function POST(req: Request, res: Response, next: NextFunction) {
     const { id: artistId } = req.params as unknown as Params;
-    const { id: userId } = req.user as User;
+    const user = req.user as User;
+    const { email } = req.body;
 
     try {
-      const artist = await prisma.artist.findFirst({
-        where: {
-          id: Number(artistId),
-        },
-        include: {
-          subscriptionTiers: true,
-        },
-      });
-
-      if (artist) {
-        await prisma.artistUserSubscription.deleteMany({
+      let userIdToRemove: number | undefined = user?.id;
+      console.log("userIdToRemove", userIdToRemove, email);
+      if (!userIdToRemove && email && typeof email === "string") {
+        const relevantUser = await prisma.user.findFirst({
           where: {
-            artistSubscriptionTier: {
-              artistId: artist.id,
-              isDefaultTier: true,
-            },
-            userId: userId,
+            email,
+          },
+          select: {
+            id: true,
+          },
+        });
+        console.log("found user", relevantUser);
+        userIdToRemove = relevantUser?.id;
+      }
+
+      if (userIdToRemove) {
+        const artist = await prisma.artist.findFirst({
+          where: {
+            id: Number(artistId),
+          },
+          include: {
+            subscriptionTiers: true,
           },
         });
 
-        res.status(200).json({
-          message: "success",
-        });
+        if (artist) {
+          await prisma.artistUserSubscription.deleteMany({
+            where: {
+              artistSubscriptionTier: {
+                artistId: artist.id,
+                isDefaultTier: true,
+              },
+              userId: userIdToRemove,
+            },
+          });
+
+          res.status(200).json({
+            message: "success",
+          });
+        } else {
+          throw new AppError({
+            httpCode: 404,
+            description: "Artist not found",
+          });
+        }
       } else {
-        res.status(404).json({
-          error: "Artist not found",
+        throw new AppError({
+          httpCode: 404,
+          description: "User not found",
         });
       }
     } catch (e) {
-      console.error(e);
-      res.status(500).json({
-        error: "Something went wrong while subscribing the user",
-      });
+      next(e);
     }
   }
 
   POST.apiDoc = {
-    summary: "Follows a user to an artist",
+    summary: "Unfollows a user to an artist",
     parameters: [
       {
         in: "path",
@@ -66,7 +88,7 @@ export default function () {
     ],
     responses: {
       200: {
-        description: "Created artistSubscriptionTier",
+        description: "Removed artistSubscriptionTier",
       },
       default: {
         description: "An error occurred",

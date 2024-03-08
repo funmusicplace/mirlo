@@ -1,7 +1,6 @@
 import Button from "components/common/Button";
 import React from "react";
 import api from "services/api";
-import { useGlobalStateContext } from "state/GlobalState";
 import { useCSVReader } from "react-papaparse";
 
 import { useTranslation } from "react-i18next";
@@ -13,6 +12,7 @@ import styled from "@emotion/styled";
 import Table from "components/common/Table";
 import { css } from "@emotion/css";
 import { useSnackbar } from "state/SnackbarContext";
+import { uniqBy } from "lodash";
 
 const CSVReaderWrapper = styled.div`
   display: flex;
@@ -37,11 +37,12 @@ const RemoveButton = styled(Button)`
   padding: 0 20px;
 `;
 
-const ArtistSubscriberUploadData: React.FC<{}> = () => {
+const ArtistSubscriberUploadData: React.FC<{
+  onDone: () => void;
+  setIsMenuOpen?: (bool: boolean) => void;
+}> = ({ onDone, setIsMenuOpen }) => {
   const [isOpen, setIsOpen] = React.useState(false);
-  const {
-    state: { user },
-  } = useGlobalStateContext();
+
   const { t } = useTranslation("translation", {
     keyPrefix: "manageSubscriptions",
   });
@@ -59,7 +60,7 @@ const ArtistSubscriberUploadData: React.FC<{}> = () => {
   } = useArtistContext();
   const { artistId } = useParams();
 
-  const userId = user?.id;
+  const artistUserId = artist?.userId;
 
   const processData = async (results: { data: string[][] }) => {
     const data = results.data;
@@ -81,30 +82,33 @@ const ArtistSubscriberUploadData: React.FC<{}> = () => {
       return obj;
     });
 
-    setUploadedUsers(newData);
+    setUploadedUsers(uniqBy(newData, "email"));
   };
 
-  const uploadSubscriberData = React.useCallback(
-    async (data: any) => {
-      setIsLoadingSubscriberData(true);
+  const uploadSubscriberData = React.useCallback(async () => {
+    setIsLoadingSubscriberData(true);
 
-      try {
-        if (userId && artistId) {
-          await api.post(`users/${userId}/artists/${artistId}/subscribers`, {
+    try {
+      if (artistUserId && artistId) {
+        await api.post(
+          `users/${artistUserId}/artists/${artistId}/subscribers`,
+          {
             subscribers: uploadedUsers,
-          });
-        }
-        snackbar("Uploaded your followers!", { type: "success" });
-      } catch (e) {
-        snackbar("Something went wrong uploading followers", {
-          type: "warning",
-        });
-      } finally {
-        setIsLoadingSubscriberData(false);
+          }
+        );
       }
-    },
-    [artistId, snackbar, uploadedUsers, userId]
-  );
+      snackbar("Uploaded your followers!", { type: "success" });
+      setIsOpen(false);
+      onDone();
+      setIsMenuOpen?.(false);
+    } catch (e) {
+      snackbar("Something went wrong uploading followers", {
+        type: "warning",
+      });
+    } finally {
+      setIsLoadingSubscriberData(false);
+    }
+  }, [artistUserId, artistId, snackbar, onDone, setIsMenuOpen, uploadedUsers]);
 
   if (!artist) {
     return null;
@@ -132,7 +136,7 @@ const ArtistSubscriberUploadData: React.FC<{}> = () => {
             <Table>
               <thead>
                 <tr>
-                  <th>E-mail</th>
+                  <th>{t("email")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -143,36 +147,44 @@ const ArtistSubscriberUploadData: React.FC<{}> = () => {
                 ))}
               </tbody>
             </Table>
-            <p>
-              By uploading this list of e-mails, you solemnly swear that you
-              have permission from the email owners to upload the emails
-            </p>
+            <p>{t("rightToUpload")}</p>
             <Button variant="big" onClick={uploadSubscriberData}>
-              Alright, looks good, let's upload them!
+              {t("looksGood")}
             </Button>
           </div>
         )}
-        <CSVReader onUploadAccepted={processData}>
-          {({
-            getRootProps,
-            acceptedFile,
-            ProgressBar,
-            getRemoveFileProps,
-          }: any) => (
-            <>
-              <CSVReaderWrapper>
-                <CSVUploadButton type="button" {...getRootProps()}>
-                  Browse file
-                </CSVUploadButton>
-                <AcceptedFiles>
-                  {acceptedFile && acceptedFile.name}
-                </AcceptedFiles>
-                <RemoveButton {...getRemoveFileProps()}>Remove</RemoveButton>
-              </CSVReaderWrapper>
-              <ProgressBar style={{ background: "red" }} />
-            </>
-          )}
-        </CSVReader>
+        <div>
+          <p
+            className={css`
+              margin-bottom: 1rem;
+            `}
+          >
+            {t("fileUploadDescription")}
+          </p>
+          <CSVReader onUploadAccepted={processData}>
+            {({
+              getRootProps,
+              acceptedFile,
+              ProgressBar,
+              getRemoveFileProps,
+            }: any) => (
+              <>
+                <CSVReaderWrapper>
+                  <CSVUploadButton type="button" {...getRootProps()}>
+                    {t("uploadACSV")}
+                  </CSVUploadButton>
+                  <AcceptedFiles>
+                    {acceptedFile && acceptedFile.name}
+                  </AcceptedFiles>
+                  <RemoveButton {...getRemoveFileProps()}>
+                    {t("remove")}
+                  </RemoveButton>
+                </CSVReaderWrapper>
+                <ProgressBar style={{ background: "red" }} />
+              </>
+            )}
+          </CSVReader>
+        </div>
       </Modal>
       <li>
         <Button

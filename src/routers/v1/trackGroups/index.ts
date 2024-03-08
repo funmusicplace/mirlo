@@ -2,6 +2,7 @@ import { Prisma } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
 import prisma from "../../../../prisma/prisma";
 import processor, {
+  processTrackGroupQueryOrder,
   whereForPublishedTrackGroups,
 } from "../../../utils/trackGroup";
 
@@ -18,6 +19,7 @@ export default function () {
       let where: Prisma.TrackGroupWhereInput = whereForPublishedTrackGroups();
       const itemCount = await prisma.trackGroup.count({ where });
 
+      const orderByClause = processTrackGroupQueryOrder(orderBy);
       if (orderBy === "random") {
         // This isn't ideal, but it'll basically take a random slice
         // anywhere
@@ -39,9 +41,7 @@ export default function () {
 
       const trackGroups = await prisma.trackGroup.findMany({
         where,
-        orderBy: {
-          releaseDate: "desc",
-        },
+        orderBy: orderByClause,
         skip: skip ? Number(skip) : undefined,
         take: take ? Number(take) : undefined,
         include: {

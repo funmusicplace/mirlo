@@ -7,10 +7,11 @@ import { FaEllipsisV } from "react-icons/fa";
 import Button from "./Button";
 
 const DropdownMenu: React.FC<{
-  children: React.ReactElement;
+  children: React.ReactElement | React.ReactElement[];
+  dashed?: boolean;
   icon?: React.ReactElement;
   compact?: boolean;
-}> = ({ children, icon, compact }) => {
+}> = ({ children, icon, compact, dashed }) => {
   const [isMenuOpen, setIsMenuOpen] = React.useState<boolean>(false);
 
   if (!icon) {
@@ -51,7 +52,7 @@ const DropdownMenu: React.FC<{
 
               li > * {
                 background: transparent !important;
-                width: 200px;
+                min-width: 200px;
                 list-style-type: none;
                 text-decoration: none;
                 text-align: right;
@@ -103,6 +104,7 @@ const DropdownMenu: React.FC<{
 
       <Button
         compact={compact}
+        variant={dashed ? "dashed" : undefined}
         onClick={() => {
           setIsMenuOpen(true);
         }}

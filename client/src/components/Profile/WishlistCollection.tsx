@@ -50,7 +50,7 @@ function WishlistCollection() {
             `}
           >
             {!purchases ||
-              (purchases?.length === 0 && <Box>{t("collectionEmpty")}</Box>)}
+              (purchases?.length === 0 && <Box>{t("wishlistEmpty")}</Box>)}
             <TrackgroupGrid gridNumber={"4"}>
               {purchases?.map(
                 (purchase) =>

@@ -19,9 +19,11 @@ describe("send-notification-email", () => {
     }
   });
 
-  afterEach(() => {});
+  afterEach(() => {
+    sinon.restore();
+  });
 
-  it("should add post to notifications", async () => {
+  it("should send email based on NEW_ARTIST_POST notification", async () => {
     const stub = sinon.stub(sendMail, "default");
 
     const { user: artistUser } = await createUser({
@@ -47,7 +49,7 @@ describe("send-notification-email", () => {
       content: "# HI",
     });
 
-    const notification = await prisma.notification.create({
+    await prisma.notification.create({
       data: {
         userId: followerUser.id,
         postId: post.id,
@@ -59,15 +61,11 @@ describe("send-notification-email", () => {
     await sendNotificationEmail();
 
     assert.equal(stub.calledOnce, true);
-    assert.equal(
-      stub.getCall(0).args[0].data.template,
-      "announce-post-published"
-    );
-    assert.equal(
-      stub.getCall(0).args[0].data.message.to,
-      "follower@follower.com"
-    );
-    assert.equal(stub.getCall(0).args[0].data.locals.artist.id, artist.id);
-    assert.equal(stub.getCall(0).args[0].data.locals.post.id, post.id);
+    const data0 = stub.getCall(0).args[0].data;
+    assert.equal(data0.template, "announce-post-published");
+    assert.equal(data0.message.to, "follower@follower.com");
+    assert.equal(data0.locals.artist.id, artist.id);
+    assert.equal(data0.locals.post.id, post.id);
+    assert.equal(data0.locals.email, followerUser.email);
   });
 });

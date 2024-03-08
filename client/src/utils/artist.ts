@@ -1,4 +1,7 @@
-export const getArtistUrlReference = (artist: Artist) => {
+export const getArtistUrlReference = (artist: {
+  urlSlug?: string;
+  id?: number;
+}) => {
   if (artist.urlSlug) {
     return `${artist.urlSlug.toLowerCase()}`;
   }
@@ -15,7 +18,7 @@ export const getTrackGroupUrlReference = (trackGroup: {
   return `${trackGroup.id}`;
 };
 
-export const getArtistUrl = (artist: Artist) => {
+export const getArtistUrl = (artist: { urlSlug?: string; id?: number }) => {
   return `/${getArtistUrlReference(artist)}`;
 };
 

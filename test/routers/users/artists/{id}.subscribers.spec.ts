@@ -95,6 +95,48 @@ describe("users/{userId}/artists/{artistId}/subscribers", () => {
       assert.notEqual(subscription, null);
     });
 
+    it("should handle a double subscription", async () => {
+      const { user, accessToken } = await createUser({ email: "test@testcom" });
+      const artist = await createArtist(user.id);
+      const tier = await createTier(artist.id, { isDefaultTier: true });
+      const subscriberEmail = "subscriber1@email.com";
+
+      const response = await requestApp
+        .post(`users/${user.id}/artists/${artist.id}/subscribers`)
+        .send({
+          subscribers: [
+            {
+              email: subscriberEmail,
+            },
+            {
+              email: subscriberEmail,
+            },
+          ],
+        })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+
+      const created = await prisma.user.findFirst({
+        where: {
+          email: subscriberEmail,
+        },
+      });
+
+      assert.notEqual(created, null);
+      assert(created);
+
+      const subscriptions = await prisma.artistUserSubscription.findMany({
+        where: {
+          userId: created.id,
+          artistSubscriptionTierId: tier.id,
+        },
+      });
+
+      assert.equal(subscriptions.length, 1);
+    });
+
     it("should handle an existing user", async () => {
       const subscriberEmail = "subscriber1@email.com";
 
@@ -130,9 +172,13 @@ describe("users/{userId}/artists/{artistId}/subscribers", () => {
           userId: subscriber.id,
           artistSubscriptionTierId: tier.id,
         },
+        include: {
+          artistSubscriptionTier: true,
+        },
       });
 
       assert.notEqual(subscription, null);
+      assert.equal(subscription?.artistSubscriptionTier.isDefaultTier, true);
     });
 
     it("should handle an existing subscription", async () => {
@@ -172,6 +218,73 @@ describe("users/{userId}/artists/{artistId}/subscribers", () => {
       });
 
       assert.notEqual(created, null);
+    });
+
+    it("should not let an non-owner upload for an artist", async () => {
+      const { accessToken: adminAccessToken } = await createUser({
+        email: "rando@rando.com",
+      });
+      const { user } = await createUser({ email: "test@testcom" });
+      const artist = await createArtist(user.id);
+      const tier = await createTier(artist.id, { isDefaultTier: true });
+      const subscriberEmail = "subscriber1@email.com";
+
+      const response = await requestApp
+        .post(`users/${user.id}/artists/${artist.id}/subscribers`)
+        .send({
+          subscribers: [
+            {
+              email: subscriberEmail,
+            },
+          ],
+        })
+        .set("Cookie", [`jwt=${adminAccessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 401);
+    });
+
+    it("should let an admin upload for an artist", async () => {
+      const { accessToken: adminAccessToken } = await createUser({
+        email: "admin@admin.com",
+        isAdmin: true,
+      });
+      const { user } = await createUser({ email: "test@testcom" });
+      const artist = await createArtist(user.id);
+      const tier = await createTier(artist.id, { isDefaultTier: true });
+      const subscriberEmail = "subscriber1@email.com";
+
+      const response = await requestApp
+        .post(`users/${user.id}/artists/${artist.id}/subscribers`)
+        .send({
+          subscribers: [
+            {
+              email: subscriberEmail,
+            },
+          ],
+        })
+        .set("Cookie", [`jwt=${adminAccessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+
+      const created = await prisma.user.findFirst({
+        where: {
+          email: subscriberEmail,
+        },
+      });
+
+      assert.notEqual(created, null);
+      assert(created);
+
+      const subscription = await prisma.artistUserSubscription.findFirst({
+        where: {
+          userId: created.id,
+          artistSubscriptionTierId: tier.id,
+        },
+      });
+
+      assert.notEqual(subscription, null);
     });
   });
 });

@@ -63,6 +63,7 @@
   },
   "profile": {
     "profile": "Profile",
+    "notifications": "Notifications",
     "profileUpdated": "Profile updated",
     "errorUpdatingProfile": "There was a problem with the API",
     "email": "Email:",
@@ -79,7 +80,8 @@
     "yourCollection": "Your collection",
     "yourWishlist": "Your wishlist",
     "collection": "Collection",
-    "wishlist": "Wishlist"
+    "wishlist": "Wishlist",
+    "wishlistEmpty": "There's nothing in your wishlist yet, browse the site!"
   },
   "trackGroupCard": {
     "notLoggedIn": "We'll need your email address to send you a one-time download link of the album. In the future you'll be able to create an account and access what you've bought.",
@@ -112,6 +114,9 @@
   },
   "artist": {
     "follow": "Follow",
+    "enterEmail": "Enter your email:",
+    "unsubscribeFromArtist": "Stop receiving emails from this artist",
+    "stopReceivingUpdates": "Stop receiving updates",
     "ableToSupport": "Users will be able to subscribe here",
     "unfollow": "Stop following",
     "supportArtist": "Support {{artist}}",
@@ -299,10 +304,16 @@
   },
   "manageSubscriptions": {
     "downloadSubscriberData": "Download subscriber data",
-    "uploadSubscriberData": "Upload follower data"
+    "uploadSubscriberData": "Upload follower data",
+    "email": "E-mail",
+    "remove": "Remove",
+    "uploadACSV": "Upload a CSV file of email addresses",
+    "fileUploadDescription": "If you have a that contains a list of e-mail addresses in CSV format, you can upload it here: ",
+    "looksGood": "Alright, looks good, let's upload them!",
+    "rightToUpload": "By uploading this list of e-mails, you solemnly swear that you have permission from the email owners to upload the emails."
   },
   "subscriptionForm": {
-    "supporters": "View supporters",
+    "supporters": "Manage supporters",
     "subscriptionUpdated": "Subscription updated",
     "name": "Name: ",
     "addNewTier": "Add new tier",
