@@ -12,6 +12,7 @@ import styled from "@emotion/styled";
 import Table from "components/common/Table";
 import { css } from "@emotion/css";
 import { useSnackbar } from "state/SnackbarContext";
+import { uniqBy } from "lodash";
 
 const CSVReaderWrapper = styled.div`
   display: flex;
@@ -36,7 +37,10 @@ const RemoveButton = styled(Button)`
   padding: 0 20px;
 `;
 
-const ArtistSubscriberUploadData: React.FC<{}> = () => {
+const ArtistSubscriberUploadData: React.FC<{
+  onDone: () => void;
+  setIsMenuOpen?: (bool: boolean) => void;
+}> = ({ onDone, setIsMenuOpen }) => {
   const [isOpen, setIsOpen] = React.useState(false);
 
   const { t } = useTranslation("translation", {
@@ -78,33 +82,33 @@ const ArtistSubscriberUploadData: React.FC<{}> = () => {
       return obj;
     });
 
-    setUploadedUsers(newData);
+    setUploadedUsers(uniqBy(newData, "email"));
   };
 
-  const uploadSubscriberData = React.useCallback(
-    async (data: any) => {
-      setIsLoadingSubscriberData(true);
+  const uploadSubscriberData = React.useCallback(async () => {
+    setIsLoadingSubscriberData(true);
 
-      try {
-        if (artistUserId && artistId) {
-          await api.post(
-            `users/${artistUserId}/artists/${artistId}/subscribers`,
-            {
-              subscribers: uploadedUsers,
-            }
-          );
-        }
-        snackbar("Uploaded your followers!", { type: "success" });
-      } catch (e) {
-        snackbar("Something went wrong uploading followers", {
-          type: "warning",
-        });
-      } finally {
-        setIsLoadingSubscriberData(false);
+    try {
+      if (artistUserId && artistId) {
+        await api.post(
+          `users/${artistUserId}/artists/${artistId}/subscribers`,
+          {
+            subscribers: uploadedUsers,
+          }
+        );
       }
-    },
-    [artistId, snackbar, uploadedUsers, artistUserId]
-  );
+      snackbar("Uploaded your followers!", { type: "success" });
+      setIsOpen(false);
+      onDone();
+      setIsMenuOpen?.(false);
+    } catch (e) {
+      snackbar("Something went wrong uploading followers", {
+        type: "warning",
+      });
+    } finally {
+      setIsLoadingSubscriberData(false);
+    }
+  }, [artistUserId, artistId, snackbar, onDone, setIsMenuOpen, uploadedUsers]);
 
   if (!artist) {
     return null;

@@ -7,7 +7,7 @@ import { FaEllipsisV } from "react-icons/fa";
 import Button from "./Button";
 
 const DropdownMenu: React.FC<{
-  children: React.ReactElement;
+  children: React.ReactElement | React.ReactElement[];
   dashed?: boolean;
   icon?: React.ReactElement;
   compact?: boolean;

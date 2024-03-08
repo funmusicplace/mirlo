@@ -8,7 +8,7 @@ import { useArtistContext } from "state/ArtistContext";
 import { useParams } from "react-router-dom";
 import { FaDownload } from "react-icons/fa";
 
-const ArtistSubscriberDataDownload: React.FC<{}> = () => {
+const ArtistSubscriberDataDownload: React.FC = () => {
   const {
     state: { user },
   } = useGlobalStateContext();

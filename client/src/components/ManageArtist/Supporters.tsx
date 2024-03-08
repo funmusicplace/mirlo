@@ -10,6 +10,7 @@ import styled from "@emotion/styled";
 import { bp } from "../../constants";
 import ArtistSubscriberUploadData from "./ArtistSubscriberUploadData";
 import DropdownMenu from "components/common/DropdownMenu";
+import { css } from "@emotion/css";
 
 export const SupporterTable = styled(Table)`
   @media screen and (max-width: ${bp.small}px) {
@@ -37,22 +38,22 @@ const Supporters = () => {
   const [supporters, setSupporters] = React.useState<SupportTier[]>([]);
   const [followers, setFollowers] = React.useState<SupportTier[]>([]);
 
+  const loadSupporters = React.useCallback(async () => {
+    const response = await api.getMany<SupportTier>(
+      `users/${userId}/artists/${artistId}/subscribers`
+    );
+
+    setSupporters(
+      response.results.filter((r) => !r.artistSubscriptionTier.isDefaultTier)
+    );
+    setFollowers(
+      response.results.filter((r) => r.artistSubscriptionTier.isDefaultTier)
+    );
+  }, [artistId, userId]);
+
   React.useEffect(() => {
-    const callback = async () => {
-      const response = await api.getMany<SupportTier>(
-        `users/${userId}/artists/${artistId}/subscribers`
-      );
-
-      setSupporters(
-        response.results.filter((r) => !r.artistSubscriptionTier.isDefaultTier)
-      );
-      setFollowers(
-        response.results.filter((r) => r.artistSubscriptionTier.isDefaultTier)
-      );
-    };
-
-    callback();
-  }, [userId, artistId]);
+    loadSupporters();
+  }, [loadSupporters]);
 
   return (
     <>
@@ -60,10 +61,8 @@ const Supporters = () => {
         <SpaceBetweenDiv>
           <h4>Supporters</h4>
           <DropdownMenu dashed>
-            <>
-              <ArtistSubscriberDataDownload />
-              <ArtistSubscriberUploadData />
-            </>
+            <ArtistSubscriberDataDownload />
+            <ArtistSubscriberUploadData onDone={loadSupporters} />
           </DropdownMenu>
         </SpaceBetweenDiv>
         <SupporterTable>
@@ -78,7 +77,7 @@ const Supporters = () => {
           <tbody>
             {supporters.map((r) => (
               <tr key={r.user.id}>
-                <td>{r.user.name}</td>
+                <td>{r.user.name ?? "-"}</td>
                 <td>{r.user.email}</td>
                 <td>{r.artistSubscriptionTier.name}</td>
                 <td>
@@ -91,6 +90,19 @@ const Supporters = () => {
             ))}
           </tbody>
         </SupporterTable>
+        {supporters.length === 0 && (
+          <div
+            className={css`
+              padding: 2rem;
+              text-align: center;
+              width: 100%;
+              background: var(--mi-lighten-x-background-color);
+            `}
+          >
+            No supporters yet, share your profile with others to grow your
+            community
+          </div>
+        )}
       </ArtistSection>
       <ArtistSection>
         <SpaceBetweenDiv>

@@ -95,6 +95,48 @@ describe("users/{userId}/artists/{artistId}/subscribers", () => {
       assert.notEqual(subscription, null);
     });
 
+    it("should handle a double subscription", async () => {
+      const { user, accessToken } = await createUser({ email: "test@testcom" });
+      const artist = await createArtist(user.id);
+      const tier = await createTier(artist.id, { isDefaultTier: true });
+      const subscriberEmail = "subscriber1@email.com";
+
+      const response = await requestApp
+        .post(`users/${user.id}/artists/${artist.id}/subscribers`)
+        .send({
+          subscribers: [
+            {
+              email: subscriberEmail,
+            },
+            {
+              email: subscriberEmail,
+            },
+          ],
+        })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+
+      const created = await prisma.user.findFirst({
+        where: {
+          email: subscriberEmail,
+        },
+      });
+
+      assert.notEqual(created, null);
+      assert(created);
+
+      const subscriptions = await prisma.artistUserSubscription.findMany({
+        where: {
+          userId: created.id,
+          artistSubscriptionTierId: tier.id,
+        },
+      });
+
+      assert.equal(subscriptions.length, 1);
+    });
+
     it("should handle an existing user", async () => {
       const subscriberEmail = "subscriber1@email.com";
 
