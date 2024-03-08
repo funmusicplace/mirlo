@@ -1,9 +1,7 @@
-import { Request, Response } from "express";
-import { Queue, QueueEvents, Worker } from "bullmq";
+import { Queue, QueueEvents } from "bullmq";
 import { REDIS_CONFIG } from "../config/redis";
 import { logger } from "../logger";
 import prisma from "../../prisma/prisma";
-import generateAlbumJob from "../jobs/generate-album";
 import { Track, TrackGroup } from "@prisma/client";
 
 const queueOptions = {
@@ -29,33 +27,15 @@ generateAlbumQueueEvents.on(
 
     try {
       const job = await generateAlbumQueue.getJob(result.jobId);
-      if (result.returnvalue.error) {
-        console.error("There was an error processing the job");
+      console.log("result", result.returnvalue);
+      if (result.returnvalue?.error) {
+        logger.error(
+          `There was an error processing the job, ${JSON.stringify(
+            result.returnvalue?.error
+          )}`
+        );
       } else if (job) {
-        const audio = await prisma.trackAudio.update({
-          where: {
-            id: job.data.audioId,
-          },
-          data: {
-            uploadState: "SUCCESS",
-            duration:
-              typeof result.returnvalue?.duration === "number"
-                ? result.returnvalue.duration
-                : null,
-          },
-        });
-
-        if (audio && audio.trackId) {
-          await prisma.track.update({
-            where: {
-              id: audio.trackId,
-            },
-            data: {
-              metadata: result.returnvalue,
-            },
-          });
-        }
-        logger.info("updated trackAudio");
+        logger.info("Done generating album");
       }
     } catch (err) {
       logger.error(

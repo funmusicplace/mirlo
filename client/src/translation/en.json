@@ -104,6 +104,7 @@
     "addAlbumToCollection": "Add {{ title }} to your collection",
     "getDownloadLink": "Get download link email",
     "email": "Email",
+    "success": "Success",
     "nameYourPrice": "Name your price in USD:",
     "buyingTrackGroup": "Buying {{title}}",
     "preOrderingTrackGroup": "Pre-ordering {{title}}",
