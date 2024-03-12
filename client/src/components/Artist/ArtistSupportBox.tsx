@@ -140,7 +140,6 @@ const ArtistSupportBox: React.FC<{
           padding-top: 1rem;
           height: 100%;
           p {
-            display: flex;
             align-items: flex-start;
           }
         `}
