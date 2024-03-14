@@ -117,7 +117,7 @@ function Profile() {
           >
             <h1>{t("profile")}</h1>
             <FormComponent>
-              {t("email")}
+              <label>{t("email")}</label>
               <InputEl {...register("email")} disabled />
               <small
                 className={css`
@@ -128,7 +128,7 @@ function Profile() {
               </small>
             </FormComponent>
             <FormComponent>
-              {t("name")}
+              <label>{t("name")}</label>
               <InputEl {...register("name")} />
             </FormComponent>
             <Button type="submit" disabled={isSaving} isLoading={isSaving}>

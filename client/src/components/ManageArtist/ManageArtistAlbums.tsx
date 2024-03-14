@@ -65,7 +65,7 @@ const ManageArtistAlbums: React.FC<{}> = () => {
               compact
               transparent
               startIcon={<FaWrench />}
-              variant="dashed"
+              variant="outlined"
               collapsible
             >
               {t("tools")}

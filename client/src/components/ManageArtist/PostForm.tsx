@@ -122,10 +122,11 @@ const PostForm: React.FC<{
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(doSave)}>
         <FormComponent>
-          {t("title")} <InputEl {...register("title")} required />
+          <label>{t("title")}</label>{" "}
+          <InputEl {...register("title")} required />
         </FormComponent>
         <FormComponent>
-          {t("publicationDate")}{" "}
+          <label>{t("publicationDate")} </label>
           <InputEl type="datetime-local" {...register("publishedAt")} />
           {new Date(publicationDate) > new Date() && (
             <Box variant="info" compact small>

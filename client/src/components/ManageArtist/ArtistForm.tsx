@@ -129,16 +129,6 @@ export const ArtistForm: React.FC<{
       <div
         className={css`
           margin-top: 0.5rem;
-          label {
-            display: block;
-            font-size: 1.4rem;
-            margin-bottom: 0.7rem;
-          }
-          @media (max-width: ${bp.medium}px) {
-            label {
-              font-size: 1.3rem;
-            }
-          }
         `}
       >
         <FormProvider {...methods}>
@@ -146,6 +136,7 @@ export const ArtistForm: React.FC<{
             <div
               className={css`
                 display: flex;
+                margin-bottom: 1rem;
               `}
             >
               <div

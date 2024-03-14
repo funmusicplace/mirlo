@@ -124,13 +124,11 @@ const UploadArtistImage: React.FC<{
     <div
       className={css`
         height: 100%;
-        margin-bottom: 1rem;
       `}
     >
       <div
         className={css`
           position: relative;
-          margin-bottom: 0.5rem;
         `}
       >
         <div
@@ -188,7 +186,12 @@ const UploadArtistImage: React.FC<{
                 margin-top: 0.5rem;
               `}
             >
-              <Button onClick={deleteImage} variant="link" type="button">
+              <Button
+                onClick={deleteImage}
+                variant="link"
+                compact
+                type="button"
+              >
                 {t("deleteImage")}
               </Button>
             </small>

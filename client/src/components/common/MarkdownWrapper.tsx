@@ -73,7 +73,7 @@ const MarkdownWrapper = styled.div`
 
   p {
     clear: both;
-    margin-bottom: 1rem;
+    margin-bottom: 0.75rem;
   }
 
   strong {
