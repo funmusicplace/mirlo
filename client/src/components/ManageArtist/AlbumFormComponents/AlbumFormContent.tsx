@@ -20,7 +20,8 @@ const AlbumFormContent: React.FC<{
   return (
     <>
       <FormComponent>
-        {t("title")}: <InputEl {...register("title")} />
+        <label>{t("title")}</label>
+        <InputEl {...register("title")} />
       </FormComponent>
       <FormComponent
         style={{
@@ -29,7 +30,7 @@ const AlbumFormContent: React.FC<{
           alignItems: "flex-start",
         }}
       >
-        {t("cover")}:
+        <label>{t("cover")}</label>
         {!existingObject && (
           <UploadImage
             formName="coverFile"
@@ -60,17 +61,19 @@ const AlbumFormContent: React.FC<{
       </FormComponent> */}
 
       <FormComponent>
-        {t("releaseDate")}:{" "}
+        <label>{t("releaseDate")} </label>
         <InputEl type="date" {...register("releaseDate")} required />
       </FormComponent>
       <FormComponent>
-        {t("about")}: <TextArea {...register("about")} rows={7} />
+        <label>{t("about")} </label>
+        <TextArea {...register("about")} rows={7} />
       </FormComponent>
       <FormComponent>
-        {t("credits")}: <TextArea {...register("credits")} rows={5} />
+        <label>{t("credits")} </label>
+        <TextArea {...register("credits")} rows={5} />
       </FormComponent>
       <FormComponent>
-        {t("price")}:
+        <label>{t("price")}</label>
         <InputEl type="number" {...register("minPrice")} />
       </FormComponent>
     </>

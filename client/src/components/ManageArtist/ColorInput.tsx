@@ -17,7 +17,11 @@ export const ColorInput: React.FC<{ name: string; title: string }> = ({
   const { watch, register } = useFormContext();
   const color = watch(name);
   return (
-    <FormComponent>
+    <FormComponent
+      className={css`
+        margin-bottom: 0 !important;
+      `}
+    >
       {title}
       <div
         className={css`
