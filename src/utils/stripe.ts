@@ -308,6 +308,23 @@ const handleSubscription = async (
           },
         },
       });
+
+      await sendMail({
+        data: {
+          template: "artist-new-subscriber-announce",
+          message: {
+            to: artistUserSubscription.artistSubscriptionTier.artist.user.email,
+          },
+          locals: {
+            artist: artistUserSubscription.artistSubscriptionTier.artist,
+            artistUserSubscription,
+            user: artistUserSubscription.user,
+            email: artistUserSubscription.user.email,
+            client: process.env.REACT_APP_CLIENT_DOMAIN,
+            host: process.env.API_DOMAIN,
+          },
+        },
+      });
     }
   } catch (e) {
     logger.error(`Error creating subscription: ${e}`);
