@@ -12,6 +12,7 @@ import Table from "components/common/Table";
 import { css } from "@emotion/css";
 import { useSnackbar } from "state/SnackbarContext";
 import { uniqBy } from "lodash";
+import TextArea from "components/common/TextArea";
 
 const CSVReaderWrapper = styled.div`
   display: flex;
@@ -46,7 +47,7 @@ const ArtistSubscriberUploadData: React.FC<{
     keyPrefix: "manageSubscriptions",
   });
   const [uploadedUsers, setUploadedUsers] = React.useState<
-    { email: string; name: string }[]
+    { email: string; name?: string }[]
   >([]);
 
   const snackbar = useSnackbar();
@@ -59,6 +60,7 @@ const ArtistSubscriberUploadData: React.FC<{
   } = useArtistContext();
   const artistId = artist?.id;
   const artistUserId = artist?.userId;
+  const [emailText, setEmailText] = React.useState<string>();
 
   const processData = async (results: { data: string[][] }) => {
     const data = results.data;
@@ -83,30 +85,45 @@ const ArtistSubscriberUploadData: React.FC<{
     setUploadedUsers(uniqBy(newData, "email"));
   };
 
-  const uploadSubscriberData = React.useCallback(async () => {
-    setIsLoadingSubscriberData(true);
+  const uploadSubscriberData = React.useCallback(
+    async (users: { email: string; name?: string }[]) => {
+      setIsLoadingSubscriberData(true);
 
-    try {
-      if (artistUserId && artistId) {
-        await api.post(
-          `users/${artistUserId}/artists/${artistId}/subscribers`,
-          {
-            subscribers: uploadedUsers,
-          }
-        );
+      try {
+        if (artistUserId && artistId) {
+          await api.post(
+            `users/${artistUserId}/artists/${artistId}/subscribers`,
+            {
+              subscribers: users,
+            }
+          );
+        }
+        snackbar("Uploaded your followers!", { type: "success" });
+        setIsOpen(false);
+        onDone();
+        setIsMenuOpen?.(false);
+      } catch (e) {
+        snackbar("Something went wrong uploading followers", {
+          type: "warning",
+        });
+      } finally {
+        setIsLoadingSubscriberData(false);
       }
-      snackbar("Uploaded your followers!", { type: "success" });
-      setIsOpen(false);
-      onDone();
-      setIsMenuOpen?.(false);
-    } catch (e) {
-      snackbar("Something went wrong uploading followers", {
-        type: "warning",
-      });
-    } finally {
-      setIsLoadingSubscriberData(false);
-    }
-  }, [artistUserId, artistId, snackbar, onDone, setIsMenuOpen, uploadedUsers]);
+    },
+    [artistUserId, artistId, snackbar, onDone, setIsMenuOpen]
+  );
+
+  const processTextArea = React.useCallback(() => {
+    const emailsAsList =
+      emailText
+        ?.split(/,|\r?\n/)
+        .map((email) => email.replaceAll(" ", ""))
+        .filter((email) => !!email) ?? [];
+    console.log("emailsAsList", emailsAsList);
+    const users = emailsAsList?.map((email) => ({ email }));
+    setUploadedUsers(users);
+    uploadSubscriberData(users);
+  }, [emailText, uploadSubscriberData]);
 
   if (!artist) {
     return null;
@@ -146,15 +163,28 @@ const ArtistSubscriberUploadData: React.FC<{
               </tbody>
             </Table>
             <p>{t("rightToUpload")}</p>
-            <Button variant="big" onClick={uploadSubscriberData}>
+            <Button
+              variant="big"
+              onClick={() => uploadSubscriberData(uploadedUsers)}
+            >
               {t("looksGood")}
             </Button>
           </div>
         )}
+        <h3
+          className={css`
+            width: 100%;
+            font-weight: normal;
+          `}
+        >
+          Two ways to add emails:
+        </h3>
+
         <div>
           <p
             className={css`
-              margin-bottom: 1rem;
+              margin-top: 1rem;
+              margin-bottom: 0.5rem;
             `}
           >
             {t("fileUploadDescription")}
@@ -182,6 +212,21 @@ const ArtistSubscriberUploadData: React.FC<{
               </>
             )}
           </CSVReader>
+        </div>
+        <hr
+          className={css`
+            margin-bottom: 1rem;
+            margin-top: 1rem;
+          `}
+        />
+        <div>
+          <p>If you have a list of e-mails, paste them here:</p>
+          <TextArea
+            placeholder="email1@example.com, email2@example.com"
+            onChange={(e) => setEmailText(e.target.value)}
+            value={emailText}
+          />
+          <Button onClick={() => processTextArea()}>Next</Button>
         </div>
       </Modal>
       <li>

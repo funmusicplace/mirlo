@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 
 export const TextArea = styled.textarea`
-  border: 1px solid var(--mi-darken-background-color);
+  border: 1px solid var(--mi-darken-x-background-color);
   padding: 0.5rem;
   font-size: 1rem;
   margin-bottom: 0.5rem;

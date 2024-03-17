@@ -101,7 +101,7 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup }> = ({
       )}
       <form onSubmit={handleSubmit(purchaseAlbum)}>
         <FormComponent>
-          {t("nameYourPrice")}
+          {t("nameYourPrice", { currency: trackGroup.currency })}
           <InputEl
             {...register("chosenPrice")}
             type="number"
