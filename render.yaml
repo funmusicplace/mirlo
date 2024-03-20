@@ -7,7 +7,7 @@ services:
     buildCommand: yarn build
     staticPublishPath: ./build
     pullRequestPreviewsEnabled: true # optional
-    envVars: 
+    envVars:
       - fromGroup: blackbrd
     routes:
       - type: rewrite
@@ -22,12 +22,12 @@ services:
     repo: https://github.com/funmusicplace/mirlo.git # optional
     region: oregon # optional (defaults to oregon)
     branch: main # optional (defaults to master)
-    plan: standard # Supposedly this should be free but 
+    plan: standard # Supposedly this should be free but
     # dockerCommand: ./start.sh
     # dockerfilePath: ./prod.Dockerfile
     buildCommand: yarn install && yarn migrate:deploy
-    startCommand: yarn staging 
-    envVars: 
+    startCommand: yarn staging
+    envVars:
       - key: NODE_OPTIONS
         value: --max-old-space-size=1512
       - key: DATABASE_URL
@@ -62,19 +62,19 @@ services:
           type: web
           name: minio
           property: host
-  
+
   # A private minIO instance
   - type: web
     name: minio
     env: docker
     plan: starter
-    dockerfilePath: './minio/Dockerfile'
+    dockerfilePath: "./minio/Dockerfile"
     envVars:
-    - key: MINIO_ROOT_PASSWORD
-      generateValue: true # will generate a base64-encoded 256-bit secret
-    - fromGroup: blackbrd
-    - key: PORT
-      value: 9000
+      - key: MINIO_ROOT_PASSWORD
+        generateValue: true # will generate a base64-encoded 256-bit secret
+      - fromGroup: blackbrd
+      - key: PORT
+        value: 9000
     disk:
       name: data
       mountPath: /data
@@ -86,8 +86,8 @@ services:
     env: docker
     plan: standard # optional (defaults to starter)
     dockerfilePath: ./background/Dockerfile # optional
-    disk: # this disk gets used to process audio. They should get moved to the 
-          # minIO service and deleted after upload
+    disk: # this disk gets used to process audio. They should get moved to the
+      # minIO service and deleted after upload
       name: data
       mountPath: /data
       sizeGB: 20 # optional
@@ -125,7 +125,7 @@ services:
           property: host
 
   - type: cron
-    name: post-publish
+    name: every-minute-tasks
     env: node
     repo: https://github.com/funmusicplace/mirlo.git # optional
     plan: starter
@@ -160,11 +160,11 @@ services:
     branch: main # optional (defaults to master)
 
   - type: cron
-    name: daily-tasks
+    name: monthly-tasks
     env: node
     repo: https://github.com/funmusicplace/mirlo.git # optional
     plan: starter
-    startCommand: yarn ts-node src/jobs/daily-tasks.ts
+    startCommand: yarn ts-node src/jobs/monthly-tasks.ts
     buildCommand: yarn install && yarn migrate:deploy
     schedule: "0 0 1 * *"
     envVars:
@@ -198,10 +198,8 @@ databases:
   #       description: home
 
   # - name: private database
-  #   databaseName: private 
-    # ipAllowList: [] # only allow internal connections
-
-
+  #   databaseName: private
+  # ipAllowList: [] # only allow internal connections
 # envVarGroups:
 #   - name: conc-settings
 #     envVars:
