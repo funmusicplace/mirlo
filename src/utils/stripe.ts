@@ -347,9 +347,11 @@ export const handleCheckoutSession = async (
   let { userId, userEmail } = metadata;
   userEmail = userEmail || (session.customer_details?.email ?? "");
   logger.info(
-    `handle checkout session: sessionId: ${session.id}, stripeAccountId: ${stripeAccountId}, tierId: ${tierId}, trackGroupId: ${trackGroupId}`
+    `checkout.session: ${session.id}, stripeAccountId: ${stripeAccountId}, tierId: ${tierId}, trackGroupId: ${trackGroupId}`
   );
-  logger.info(`have user info: userId: ${userId} userEmail: ${userEmail}`);
+  logger.info(
+    `checkout.session: ${session.id}, have user info: userId: ${userId} userEmail: ${userEmail}`
+  );
   session = await stripe.checkout.sessions.retrieve(
     session.id,
     {
@@ -363,18 +365,58 @@ export const handleCheckoutSession = async (
     userEmail,
     userId
   );
-  logger.info(`Processing session`);
+  logger.info(`checkout.session: ${session.id} Processing session`);
   if (tierId && userEmail) {
-    logger.info("handling subscription");
+    logger.info(`checkout.session: ${session.id} handling subscription`);
     await handleSubscription(Number(actualUserId), Number(tierId), session);
   } else if (trackGroupId && actualUserId) {
-    logger.info("handleTrackGroupPurchase");
+    logger.info(`checkout.session: ${session.id} handleTrackGroupPurchase`);
     await handleTrackGroupPurchase(
       Number(actualUserId),
       Number(trackGroupId),
       session,
       newUser
     );
+  }
+};
+
+export const handleInvoicePaid = async (invoice: Stripe.Invoice) => {
+  const subscription = invoice.subscription;
+  logger.info(`invoice.paid: ${invoice.id} for ${subscription}`);
+  if (typeof subscription === "string") {
+    const artistUserSubscription =
+      await prisma.artistUserSubscription.findFirst({
+        where: {
+          stripeSubscriptionKey: subscription,
+        },
+        include: {
+          user: true,
+          artistSubscriptionTier: {
+            include: {
+              artist: true,
+            },
+          },
+        },
+      });
+    if (artistUserSubscription) {
+      logger.info(
+        `invoice.paid: ${invoice.id} found subscription, sending receipt`
+      );
+      await sendMail({
+        data: {
+          template: "artist-subscription-receipt",
+          message: {
+            to: artistUserSubscription.user.email,
+          },
+          locals: {
+            artist: artistUserSubscription.artistSubscriptionTier.artist,
+            artistUserSubscription,
+            host: process.env.API_DOMAIN,
+            client: process.env.REACT_APP_CLIENT_DOMAIN,
+          },
+        },
+      });
+    }
   }
 };
 
