@@ -186,6 +186,7 @@ model ArtistSubscriptionTier {
   postSubscriptionTiers PostSubscriptionTier[]
   isDefaultTier         Boolean                  @default(false)
   platformPercent       Int?                     @default(7)
+  autoPurchaseAlbums    Boolean                  @default(false)
 }
 
 model ArtistUserSubscription {
