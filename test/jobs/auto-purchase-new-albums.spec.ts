@@ -10,7 +10,7 @@ import * as sendMail from "../../src/jobs/send-mail";
 import sinon from "sinon";
 import autoPurchaseNewAlbums from "../../src/jobs/auto-purchase-new-albums";
 
-describe.only("auto-purchase-new-albums", () => {
+describe("auto-purchase-new-albums", () => {
   beforeEach(async () => {
     try {
       await clearTables();
