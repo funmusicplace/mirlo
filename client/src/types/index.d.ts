@@ -41,6 +41,7 @@ interface Track {
     artistId?: number;
     artistName?: string;
     isCoAuthor?: boolean;
+    trackId?: number;
   }[];
 }
 

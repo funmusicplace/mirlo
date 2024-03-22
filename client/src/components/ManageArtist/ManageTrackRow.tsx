@@ -107,7 +107,13 @@ const ManageTrackRow: React.FC<{
   }, [reload]);
 
   if (isEditing) {
-    return <EditTrackRow track={track} onCancelEditing={onCancelEditing} />;
+    return (
+      <EditTrackRow
+        track={track}
+        onCancelEditing={onCancelEditing}
+        reload={reload}
+      />
+    );
   }
 
   return (

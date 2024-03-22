@@ -30,6 +30,9 @@ const TrackRow: React.FC<{
     }
   }, [addTracksToQueue, canPlayTrack, dispatch, track.id]);
 
+  const coAuthors =
+    track.trackArtists?.filter((artist) => artist.isCoAuthor) ?? [];
+
   return (
     <tr
       key={track.id}
@@ -148,21 +151,33 @@ const TrackRow: React.FC<{
         >
           <div
             className={css`
-          overflow: hidden;
-          text-overflow: ellipsis;
+              overflow: hidden;
+              text-overflow: ellipsis;
 
-          @media screen and (max-width: ${bp.medium}px) {
-            font-size: .9rem;
-          }
-
-          @media screen and (max-width: ${bp.small}px) {
-              td {
-                padding: 0.15rem 0.3rem;
+              @media screen and (max-width: ${bp.medium}px) {
+                font-size: 0.9rem;
               }
-        `}
+
+              @media screen and (max-width: ${bp.small}px) {
+                td {
+                  padding: 0.15rem 0.3rem;
+                }
+              }
+            `}
           >
             {trackTitle}
+            {coAuthors.length > 1 && (
+              <span
+                className={css`
+                  color: var(--mi-light-foreground-color);
+                  margin-left: 0.5rem;
+                `}
+              >
+                {coAuthors.map((a) => a.artistName).join(", ")}
+              </span>
+            )}
           </div>
+
           <div
             className={css`
               font-size: 0.9rem;

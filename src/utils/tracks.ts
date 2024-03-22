@@ -88,3 +88,68 @@ export const convertAudioToFormat = (
 
   processor.save(destination);
 };
+
+export const updateTrackArtists = async (
+  trackId: number,
+  trackArtists: {
+    artistName: string;
+    id: string;
+    artistId: number;
+    role: string;
+    isCoAuthor: boolean;
+  }[]
+) => {
+  const currentTrackArtists = await prisma.trackArtist.findMany({
+    where: {
+      trackId: Number(trackId),
+    },
+  });
+
+  let trackArtistIds = trackArtists.map((ta) => ta.id);
+
+  const newTrackArtists = trackArtists.filter((ta) => !ta.id);
+  const existingTrackArtists = trackArtists.filter((ta) => ta.id);
+  const oldTrackArtists = currentTrackArtists.filter(
+    (ta) => !trackArtistIds.includes(ta.id)
+  );
+
+  await prisma.trackArtist.createMany({
+    data: newTrackArtists.map((nta) => ({
+      trackId: Number(trackId),
+      artistId: nta.artistId,
+      artistName: nta.artistName,
+      role: nta.role,
+      isCoAuthor: nta.isCoAuthor,
+    })),
+  });
+
+  await Promise.all(
+    existingTrackArtists.map((eta) =>
+      prisma.trackArtist.update({
+        where: {
+          id: eta.id,
+        },
+        data: {
+          artistId: eta.artistId,
+          artistName: eta.artistName,
+          role: eta.role,
+          isCoAuthor: eta.isCoAuthor,
+        },
+      })
+    )
+  );
+
+  await prisma.trackArtist.deleteMany({
+    where: {
+      id: {
+        in: oldTrackArtists.map((ota) => ota.id),
+      },
+    },
+  });
+
+  return prisma.trackArtist.findMany({
+    where: {
+      trackId: trackId,
+    },
+  });
+};

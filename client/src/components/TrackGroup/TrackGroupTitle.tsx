@@ -107,7 +107,7 @@ const TrackGroupTitle: React.FC<{ trackGroup: TrackGroup }> = ({
             align-items: center;
           `}
         >
-          {ownedByUser && (
+          {(ownedByUser || user?.isAdmin) && (
             <Link
               to={`/manage/artists/${artist.id}/release/${trackGroup.id}`}
               style={{ marginRight: "0" }}

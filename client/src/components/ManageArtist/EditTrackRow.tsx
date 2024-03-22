@@ -16,17 +16,24 @@ import useJobStatusCheck from "utils/useJobStatusCheck";
 import LoadingSpinner from "components/common/LoadingSpinner";
 import Button from "components/common/Button";
 
-interface FormData {
+export interface FormData {
   title: string;
   status: "preview" | "must-own";
   trackFile: FileList;
-  trackArtists: { artistName: string; artistRole: string; artistId: number }[];
+  trackArtists: {
+    artistName?: string;
+    artistRole?: string;
+    artistId?: number;
+    trackId?: number;
+  }[];
 }
 
 const EditTrackRow: React.FC<{
   track: Track;
   onCancelEditing: () => void;
-}> = ({ track, onCancelEditing: cancelEditing }) => {
+  reload: () => void;
+}> = ({ track, onCancelEditing: cancelEditing, reload }) => {
+  console.log("track", track.trackArtists);
   const [isSaving, setIsSaving] = React.useState(false);
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const [showMoreDetails, setShowMoreDetails] = React.useState(false);
@@ -95,9 +102,10 @@ const EditTrackRow: React.FC<{
         console.error(e);
       } finally {
         setIsSaving(false);
+        reload();
       }
     },
-    [onCancelEditing, setUploadJobs, snackbar, t, trackId, userId]
+    [onCancelEditing, reload, setUploadJobs, snackbar, t, trackId, userId]
   );
 
   const uploadingState = uploadJobs?.[0]?.jobStatus;
@@ -158,7 +166,10 @@ const EditTrackRow: React.FC<{
           <InputEl {...register(`title`)} disabled={isSaving || isDisabled} />
         </td>
         <td>
-          <ManageTrackArtists trackArtistsKey={`trackArtists`} />
+          <ManageTrackArtists
+            trackArtists={track.trackArtists ?? []}
+            onSave={reload}
+          />
         </td>
         <td>
           <SelectTrackPreview statusKey="status" />

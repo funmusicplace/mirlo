@@ -118,6 +118,7 @@ const routes = [
   "users/{userId}/tracks",
   "users/{userId}/tracks/{trackId}/audio",
   "users/{userId}/tracks/{trackId}",
+  "users/{userId}/tracks/{trackId}/trackArtists",
   "users/{userId}/posts/{postId}/publish",
   "users/{userId}/posts/{postId}",
   "users/{userId}/posts",

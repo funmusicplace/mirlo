@@ -11,16 +11,14 @@ import { FaTimes } from "react-icons/fa";
 import api from "services/api";
 
 const TrackArtistFormFields: React.FC<{
-  a: Record<"id", string>;
-  trackArtistsKey: string;
   artistIndex: number;
   disabled?: boolean;
-}> = ({ a, trackArtistsKey, artistIndex, disabled }) => {
+}> = ({ artistIndex, disabled }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const { register, control, setValue, watch } = useFormContext();
   const { fields, remove } = useFieldArray({
     control,
-    name: trackArtistsKey,
+    name: "trackArtists",
   });
 
   const getOptions = React.useCallback(async (searchString: string) => {
@@ -37,31 +35,29 @@ const TrackArtistFormFields: React.FC<{
     async (val: number | string) => {
       if (typeof val === "number") {
         const artist = await api.get<Artist>(`artists/${val}`);
-        setValue(
-          `${trackArtistsKey}.${artistIndex}.artistName`,
-          artist.result.name,
-          { shouldDirty: true }
-        );
-        setValue(`${trackArtistsKey}.${artistIndex}.artistId`, val, {
+        setValue(`trackArtists.${artistIndex}.artistName`, artist.result.name, {
+          shouldDirty: true,
+        });
+        setValue(`trackArtists.${artistIndex}.artistId`, val, {
           shouldDirty: true,
         });
       } else {
         // it's a new value
-        setValue(`${trackArtistsKey}.${artistIndex}.artistName`, val, {
+        setValue(`trackArtists.${artistIndex}.artistName`, val, {
           shouldDirty: true,
         });
       }
     },
-    [artistIndex, setValue, trackArtistsKey]
+    [artistIndex, setValue]
   );
 
   const clearExistingArtist = React.useCallback(() => {
-    setValue(`${trackArtistsKey}.${artistIndex}.artistId`, undefined);
-    setValue(`${trackArtistsKey}.${artistIndex}.artistName`, undefined);
-  }, [artistIndex, setValue, trackArtistsKey]);
+    setValue(`trackArtists.${artistIndex}.artistId`, undefined);
+    setValue(`trackArtists.${artistIndex}.artistName`, undefined);
+  }, [artistIndex, setValue]);
 
-  const watchId = watch(`${trackArtistsKey}.${artistIndex}.artistId`);
-  const watchName = watch(`${trackArtistsKey}.${artistIndex}.artistName`);
+  const watchId = watch(`trackArtists.${artistIndex}.artistId`);
+  const watchName = watch(`trackArtists.${artistIndex}.artistName`);
 
   return (
     <div
@@ -112,13 +108,13 @@ const TrackArtistFormFields: React.FC<{
         )}
 
         <InputEl
-          {...register(`${trackArtistsKey}.${artistIndex}.role`)}
+          {...register(`trackArtists.${artistIndex}.role`)}
           placeholder="Role"
           disabled={disabled}
         />
 
         <FormCheckbox
-          keyName={`${trackArtistsKey}.${artistIndex}.isCoAuthor`}
+          keyName={`trackArtists.${artistIndex}.isCoAuthor`}
           description={t("coAuthorCheck")}
           disabled={disabled}
         />
