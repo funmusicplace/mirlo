@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import {
   handleCheckoutSession,
+  handleInvoicePaid,
   verifyStripeSignature,
 } from "../../../../utils/stripe";
 import logger from "../../../../logger";
@@ -37,6 +38,10 @@ export default function () {
         logger.info(`Checkout status is ${session.status}.`);
 
         handleCheckoutSession(session);
+      case "invoice.paid":
+        const invoice = event.data.object;
+
+        handleInvoicePaid(invoice);
       default:
         // Unexpected event type
         logger.info(`Unhandled Stripe event type ${event.type}.`);

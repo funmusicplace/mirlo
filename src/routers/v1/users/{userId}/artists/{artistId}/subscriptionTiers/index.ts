@@ -66,6 +66,7 @@ export default function () {
         maxAmount,
         allowVariable,
         defaultAmount,
+        autoPurchaseAlbums,
       } = req.body;
       const subscription = await prisma.artistSubscriptionTier.create({
         data: {
@@ -74,6 +75,7 @@ export default function () {
           description,
           minAmount,
           maxAmount,
+          autoPurchaseAlbums,
           platformPercent: settings.platformPercent,
           currency: userForCurrency?.currency ?? "USD",
           allowVariable,

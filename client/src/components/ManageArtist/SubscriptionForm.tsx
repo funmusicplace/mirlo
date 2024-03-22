@@ -46,6 +46,7 @@ const SubscriptionForm: React.FC<{
     description: string;
     minAmount: string;
     allowVariable: boolean;
+    autoPurchaseAlbums: boolean;
   }>({
     defaultValues: generateDefaultValues(existing),
   });
@@ -61,7 +62,12 @@ const SubscriptionForm: React.FC<{
         try {
           setIsSaving(true);
           const sending = {
-            ...pick(data, ["name", "description", "allowVariable"]),
+            ...pick(data, [
+              "name",
+              "description",
+              "allowVariable",
+              "autoPurchaseAlbums",
+            ]),
             minAmount: data.minAmount ? +data.minAmount * 100 : undefined,
           };
           if (existingId) {
@@ -82,7 +88,7 @@ const SubscriptionForm: React.FC<{
             );
           }
 
-          snackbar("subscriptionUpdated", { type: "success" });
+          snackbar(t("subscriptionUpdated"), { type: "success" });
           reset();
           reload();
         } catch (e) {
@@ -92,7 +98,7 @@ const SubscriptionForm: React.FC<{
         }
       }
     },
-    [userId, existingId, snackbar, reset, reload, artistId, errorHandler]
+    [userId, existingId, t, snackbar, reset, reload, artistId, errorHandler]
   );
 
   return (
@@ -138,6 +144,11 @@ const SubscriptionForm: React.FC<{
             {t("description")}
             <TextArea {...register("description")} />
           </FormComponent>
+          <FormCheckbox
+            idPrefix={`${existingId}`}
+            keyName="autoPurchaseAlbums"
+            description={t("autoAlbumPurchase")}
+          />
           <Button
             type="submit"
             disabled={isSaving}
