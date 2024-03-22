@@ -46,7 +46,6 @@ export const PlayButtonsWrapper: React.FC<{ ids: number[] }> = ({ ids }) => {
           height: 3rem;
           svg {
             font-size: 1.5rem;
-            margin-left: 10%;
           }
         }
         button:hover {
@@ -55,7 +54,17 @@ export const PlayButtonsWrapper: React.FC<{ ids: number[] }> = ({ ids }) => {
         }
       `}
     >
-      {!playing && <Button onClick={playMusic} startIcon={<VscPlay />} />}
+      {!playing && (
+        <Button
+          onClick={playMusic}
+          startIcon={<VscPlay />}
+          className={css`
+            svg {
+              margin-left: 10%;
+            }
+          `}
+        />
+      )}
       {(playing || embeddedInMirlo) && (
         <Button
           onClick={onPause}
