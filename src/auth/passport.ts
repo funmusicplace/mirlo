@@ -170,7 +170,7 @@ export const trackGroupBelongsToLoggedInUser = async (
     if (!loggedInUser) {
       res.status(401).json({ error: "Unauthorized" });
     } else {
-      if (loggedInUser.id !== Number(userId)) {
+      if (loggedInUser.id !== Number(userId) && !loggedInUser.isAdmin) {
         res.status(400).json({
           error: `TrackGroup must belong to user`,
         });
