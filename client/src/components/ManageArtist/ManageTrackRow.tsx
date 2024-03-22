@@ -17,6 +17,9 @@ import Button from "components/common/Button";
 const TrackRow = styled("tr")`
   > td > .play-button {
     display: none;
+    svg {
+      margin-left: 15%;
+    }
   }
   > td > .track-number {
     display: block;
