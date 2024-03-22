@@ -5,12 +5,7 @@ import {
 } from "../../../../../../auth/passport";
 import { doesTrackBelongToUser } from "../../../../../../utils/ownership";
 import prisma from "../../../../../../../prisma/prisma";
-import {
-  finalAudioBucket,
-  getObjectList,
-  incomingAudioBucket,
-  minioClient,
-} from "../../../../../../utils/minio";
+
 import { deleteTrack } from "../../../../../../utils/tracks";
 
 interface TrackBody {

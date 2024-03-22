@@ -1,35 +1,85 @@
 import { css } from "@emotion/css";
 import React from "react";
-import { FaCheck, FaPlus } from "react-icons/fa";
+import { FaCheck, FaPen, FaPlus } from "react-icons/fa";
 import TrackArtistFormFields from "./TrackArtistFormFields";
 import Button from "components/common/Button";
 import { useTranslation } from "react-i18next";
-import { useFieldArray, useFormContext } from "react-hook-form";
+import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import Modal from "components/common/Modal";
+import { FormData } from "./EditTrackRow";
+import { useGlobalStateContext } from "state/GlobalState";
+import api from "services/api";
 
 const ManageTrackArtists: React.FC<{
-  trackArtistsKey: string;
   disabled?: boolean;
-}> = ({ trackArtistsKey, disabled }) => {
+  trackArtists: FormData["trackArtists"];
+  onSave: () => void;
+}> = ({ disabled, trackArtists, onSave }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const [isOpen, setIsOpen] = React.useState(false);
-  const { control } = useFormContext();
+  const methods = useForm<FormData>({
+    defaultValues: {
+      trackArtists,
+    },
+  });
+  const { control, handleSubmit, reset } = methods;
+  const {
+    state: { user },
+  } = useGlobalStateContext();
+  const userId = user?.id;
 
   const { fields, append } = useFieldArray({
     control,
-    name: trackArtistsKey,
+    name: `trackArtists`,
   });
 
+  React.useEffect(() => {
+    if (trackArtists) {
+      reset({ trackArtists });
+    }
+  }, [reset, trackArtists]);
+
+  const saveArtists = React.useCallback(
+    async (formData: FormData) => {
+      console.log("formData", formData);
+      try {
+        const packet = {
+          trackArtists: formData.trackArtists
+            .filter((a) => a.artistName || a.artistId)
+            .map((a) => ({
+              ...a,
+              artistId:
+                a.artistId && isFinite(+a.artistId) ? +a.artistId : undefined,
+            })),
+        };
+        const trackId = formData.trackArtists[0].trackId;
+        await api.put<Partial<Track>, { track: Track }>(
+          `users/${userId}/tracks/${trackId}/trackArtists`,
+          packet
+        );
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setIsOpen(false);
+        onSave();
+      }
+    },
+    [onSave, userId]
+  );
+
   return (
-    <>
+    <FormProvider {...methods}>
       {fields
         .map(
           (field) => (field as unknown as { artistName: string })["artistName"]
         )
         .join(", ")}
-      <Button variant="dashed" onClick={() => setIsOpen(true)}>
-        {t("editTrackArtists")}
-      </Button>
+      <Button
+        variant="dashed"
+        onClick={() => setIsOpen(true)}
+        startIcon={<FaPen />}
+        title={t("editTrackArtists") ?? ""}
+      />
       <Modal
         title={t("trackArtists") ?? ""}
         onClose={() => setIsOpen(false)}
@@ -44,9 +94,7 @@ const ManageTrackArtists: React.FC<{
           <div>
             {fields.map((a, artistIndex) => (
               <TrackArtistFormFields
-                a={a}
                 artistIndex={artistIndex}
-                trackArtistsKey={trackArtistsKey}
                 key={a.id}
                 disabled={disabled}
               />
@@ -69,9 +117,7 @@ const ManageTrackArtists: React.FC<{
               {t("addNewArtist")}
             </Button>
             <Button
-              onClick={() => {
-                setIsOpen(false);
-              }}
+              onClick={handleSubmit(saveArtists)}
               type="button"
               className={css`
                 margin-left: 1rem;
@@ -86,7 +132,7 @@ const ManageTrackArtists: React.FC<{
           </div>
         </div>
       </Modal>
-    </>
+    </FormProvider>
   );
 };
 

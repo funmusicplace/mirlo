@@ -2,13 +2,12 @@ import prisma from "../../prisma/prisma";
 import sendMail from "./send-mail";
 
 import logger from "../logger";
-import { groupBy } from "lodash";
 import { registerPurchase } from "../utils/trackGroup";
 
 const autoPurchaseNewAlbums = async () => {
   const currentDate = new Date();
   const tenMinutesAgo = new Date();
-  tenMinutesAgo.setDate(currentDate.getMinutes() - 10);
+  tenMinutesAgo.setMinutes(currentDate.getMinutes() - 10);
 
   const recentAlbums = await prisma.trackGroup.findMany({
     where: {
