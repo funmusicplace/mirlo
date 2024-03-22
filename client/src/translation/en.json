@@ -319,6 +319,7 @@
     "name": "Name: ",
     "addNewTier": "Add new tier",
     "allowVariableDescription": "Allow supporters to enter a larger number?",
+    "autoAlbumPurchase": "If a user subscribes at this tier, they'll automatically get every new album you release",
     "newSubscriptionTierFor": "New subscription tier for {{ artistName }}",
     "minimumAmount": "Minimum amount: ",
     "description": "Description",

@@ -313,6 +313,7 @@ export const registerPurchase = async ({
       },
     },
   });
+
   if (refreshedPurchase) {
     await prisma.notification.create({
       data: {

@@ -34,6 +34,7 @@ export default function () {
           allowVariable: req.body.allowVariable,
           // TODO: make sure minAmount is alphanumeric
           minAmount: +req.body.minAmount,
+          autoPurchaseAlbums: !!req.body.autoPurchaseAlbums,
         },
       });
 

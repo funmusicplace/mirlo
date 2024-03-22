@@ -2,15 +2,15 @@ import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
 
-import { clearTables, createPost, createUser } from "../utils";
+import { clearTables, createTrackGroup, createUser } from "../utils";
 
-import sendOutMonthlyReceipts from "../../src/jobs/send-out-monthly-receipts";
 import prisma from "../../prisma/prisma";
 import assert from "assert";
 import * as sendMail from "../../src/jobs/send-mail";
 import sinon from "sinon";
+import autoPurchaseNewAlbums from "../../src/jobs/auto-purchase-new-albums";
 
-describe("send-out-monthly-receipts", () => {
+describe.only("auto-purchase-new-albums", () => {
   beforeEach(async () => {
     try {
       await clearTables();
@@ -23,7 +23,7 @@ describe("send-out-monthly-receipts", () => {
     sinon.restore();
   });
 
-  it("should send out monthly receipt", async () => {
+  it("should auto purchase a new album", async () => {
     const stub = sinon.stub(sendMail, "default");
 
     const { user: artistUser } = await createUser({
@@ -44,6 +44,7 @@ describe("send-out-monthly-receipts", () => {
         subscriptionTiers: {
           create: {
             name: "a tier",
+            autoPurchaseAlbums: true,
           },
         },
       },
@@ -60,13 +61,18 @@ describe("send-out-monthly-receipts", () => {
       },
     });
 
-    await sendOutMonthlyReceipts();
+    const tg = await createTrackGroup(artist.id, {
+      releaseDate: new Date(),
+      published: true,
+    });
+
+    await autoPurchaseNewAlbums();
 
     assert.equal(stub.calledOnce, true);
     const data0 = stub.getCall(0).args[0].data;
-    assert.equal(data0.template, "announce-monthly-receipts");
+    assert.equal(data0.template, "automatically-received-album");
     assert.equal(data0.message.to, "follower@follower.com");
-    assert.equal(data0.locals.userSubscriptions.length, 1);
-    assert.equal(data0.locals.user.email, followerUser.email);
+    assert.equal(data0.locals.trackGroup.id, tg.id);
+    assert.equal(data0.locals.artist.id, artist.id);
   });
 });

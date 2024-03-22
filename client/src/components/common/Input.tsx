@@ -30,6 +30,10 @@ export const InputEl = styled.input`
   &:focus {
     border-radius: var(--mi-border-radius-focus);
   }
+
+  &[type="checkbox"] {
+    width: auto;
+  }
 `;
 
 export const Input: React.FC<Props> = ({ onChange, ...props }) => {
