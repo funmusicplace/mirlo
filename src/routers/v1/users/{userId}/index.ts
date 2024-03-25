@@ -6,6 +6,7 @@ import {
 import { Prisma, User } from "@prisma/client";
 import prisma from "../../../../../prisma/prisma";
 import { deleteUser } from "../../../../utils/user";
+import { AppError } from "../../../../utils/error";
 
 export default function () {
   const operations = {
@@ -14,21 +15,25 @@ export default function () {
     DELETE: [userAuthenticated, userHasPermission("owner"), DELETE],
   };
 
-  async function GET(req: Request, res: Response) {
+  async function GET(req: Request, res: Response, next: NextFunction) {
     const { userId }: { userId?: string } = req.params;
 
-    const user = await prisma.user.findUnique({
-      where: { id: Number(userId) },
-      select: {
-        artists: true,
-        email: true,
-        name: true,
-        stripeAccountId: true,
-        currency: true,
-        isAdmin: true,
-      },
-    });
-    res.json({ result: user });
+    try {
+      const user = await prisma.user.findUnique({
+        where: { id: Number(userId) },
+        select: {
+          artists: true,
+          email: true,
+          name: true,
+          stripeAccountId: true,
+          currency: true,
+          isAdmin: true,
+        },
+      });
+      res.json({ result: user });
+    } catch (e) {
+      next(e);
+    }
   }
 
   GET.apiDoc = {
