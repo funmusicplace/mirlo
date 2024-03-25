@@ -8,6 +8,8 @@ import {
 import { findArtistIdForURLSlug } from "../../../../../../utils/artist";
 import { downloadCSVFile } from "../../../../../../utils/download";
 import { uniqBy } from "lodash";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import logger from "../../../../../../logger";
 
 const csvColumns = [
   {
@@ -145,13 +147,26 @@ export default function () {
             });
 
             if (!found) {
-              await prisma.artistUserSubscription.create({
-                data: {
-                  userId: created.id,
-                  artistSubscriptionTierId: followTier.id,
-                  amount: 0,
-                },
-              });
+              try {
+                await prisma.artistUserSubscription.create({
+                  data: {
+                    userId: created.id,
+                    artistSubscriptionTierId: followTier.id,
+                    amount: 0,
+                  },
+                });
+              } catch (e) {
+                if (e instanceof PrismaClientKnownRequestError) {
+                  // do nothing
+                  if (e.code === "P2002") {
+                    logger.error("err", e.cause, e.name, e.code, e.meta);
+                  } else {
+                    throw e;
+                  }
+                } else {
+                  throw e;
+                }
+              }
             }
           })
         );
