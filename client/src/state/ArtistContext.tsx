@@ -15,30 +15,27 @@ type SetState = {
   state: ArtistState;
 };
 
-type SetArtist = {
-  type: "setArtist";
-  artist?: Artist;
-};
-
 type SetLoading = {
   type: "setIsLoading";
   isLoading: boolean;
 };
 
-type Actions = SetArtist | SetLoading | SetState;
+type Actions = SetLoading | SetState;
 
 export const fetchArtist = async (
-  artistId?: string,
-  managedArtist?: boolean
+  artistId: string,
+  managedArtist: boolean,
+  signal: AbortSignal,
 ) => {
   let artist;
   if (artistId) {
-    const { result } = await api.get<Artist>(`artists/${artistId}`);
+    const { result } = await api.get<Artist>(`artists/${artistId}`, signal);
     const publicArtist = result;
 
     if (managedArtist) {
       const { result } = await api.get<Artist>(
-        `users/${publicArtist.userId}/artists/${artistId}`
+        `users/${publicArtist.userId}/artists/${artistId}`,
+        signal,
       );
       artist = result;
     } else {
@@ -46,17 +43,15 @@ export const fetchArtist = async (
     }
   }
 
-  return artist;
+  return signal.aborted ? undefined : artist;
 };
 
-export const checkArtistStripeStatus = async (artistUserId?: number) => {
-  if (!artistUserId) {
-    return;
-  }
+export const checkArtistStripeStatus = async (artistUserId: number, signal: AbortSignal) => {
   let checkAccountStatus;
   try {
     checkAccountStatus = await api.get<AccountStatus>(
-      `users/${artistUserId}/stripe/checkAccountStatus`
+      `users/${artistUserId}/stripe/checkAccountStatus`,
+      signal,
     );
   } catch (e) {
     console.error("Stripe didn't work", e);
@@ -68,12 +63,6 @@ export const stateReducer = produce((draft: ArtistState, action: Actions) => {
   switch (action.type) {
     case "setState":
       draft = action.state;
-      break;
-    case "setArtist":
-      draft = {
-        ...draft,
-        artist: action.artist,
-      };
       break;
     case "setIsLoading":
       draft = {
@@ -94,40 +83,38 @@ const ArtistContext = createContext(
 
 export const ArtistProvider: React.FC<{
   children: React.ReactNode;
-  managedArtist?: boolean;
-}> = ({ children, managedArtist }) => {
+}> = ({ children }) => {
   const { pathname } = useLocation();
   const { artistId } = useParams();
   const [state, dispatch] = React.useReducer(stateReducer, {
     isArtistContext: artistId ? true : false,
     isLoading: true,
   });
+  const [refresh, setRefresh] = React.useState(0);
 
   const refreshArtist = React.useCallback(async () => {
-    const artist = await fetchArtist(artistId, managedArtist);
-    if (artist) {
-      dispatch({
-        type: "setArtist",
-        artist,
-      });
-    }
-  }, [artistId, managedArtist]);
+    setRefresh(refresh + 1);
+  }, [refresh, setRefresh]);
 
   const initialLoad = React.useCallback(
-    async (newPathname: string) => {
+    async (signal: AbortSignal) => {
+      let state: Actions|undefined = undefined;
+
       if (artistId) {
         dispatch({ type: "setIsLoading", isLoading: true });
         const artist = await fetchArtist(
           artistId,
-          newPathname.includes("manage")
-        );
-
-        const checkAccountStatus = await checkArtistStripeStatus(
-          artist?.userId
+          pathname.includes("manage"),
+          signal,
         );
 
         if (artist) {
-          dispatch({
+          const checkAccountStatus = await checkArtistStripeStatus(
+            artist.userId,
+            signal,
+          );
+
+          state = {
             type: "setState",
             state: {
               isLoading: false,
@@ -138,10 +125,10 @@ export const ArtistProvider: React.FC<{
               },
               isArtistContext: true,
             },
-          });
+          };
         }
       } else {
-        dispatch({
+        state = {
           type: "setState",
           state: {
             isLoading: false,
@@ -149,15 +136,22 @@ export const ArtistProvider: React.FC<{
             userStripeStatus: undefined,
             isArtistContext: false,
           },
-        });
+        };
+      }
+
+      if (state !== undefined && !signal.aborted) {
+        dispatch(state);
       }
     },
-    [artistId]
+    [artistId, pathname]
   );
 
   React.useEffect(() => {
-    initialLoad(pathname);
-  }, [initialLoad, pathname]);
+    const controller = new AbortController();
+    initialLoad(controller.signal);
+
+    return () => controller.abort();
+  }, [initialLoad, refresh]);
 
   return (
     <ArtistContext.Provider value={[state, dispatch, refreshArtist]}>
