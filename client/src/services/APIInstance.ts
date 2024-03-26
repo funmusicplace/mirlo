@@ -114,10 +114,11 @@ const APIInstance = (apiRoot: string) => {
       });
     },
 
-    get: async <R>(endpoint: string): Promise<{ result: R }> => {
+    get: async <R>(endpoint: string, signal?: AbortSignal): Promise<{ result: R }> => {
       return apiRequest<{ result: R }>(endpoint, {
         method: "GET",
         credentials: "include",
+        signal,
       });
     },
 

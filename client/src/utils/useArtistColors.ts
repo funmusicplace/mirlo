@@ -8,11 +8,16 @@ const useArtistColors = () => {
   const artistId = params?.artistId;
 
   React.useEffect(() => {
+    if (!artistId) return;
+    const controller = new AbortController();
+
     const callback = async () => {
-      const artist = await fetchArtist(artistId);
+      const artist = await fetchArtist(artistId, false, controller.signal);
       setArtistColors(artist?.properties?.colors);
     };
     callback();
+
+    return () => controller.abort();
   }, [artistId]);
 
   return artistColors;
