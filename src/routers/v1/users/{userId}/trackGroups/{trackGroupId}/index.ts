@@ -47,33 +47,22 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
-    const { userId, trackGroupId } = req.params as unknown as Params;
+    const { trackGroupId } = req.params as unknown as Params;
     try {
-      const tg = await doesTrackGroupBelongToUser(
-        Number(trackGroupId),
-        Number(userId)
-      );
-
       const trackGroup = await prisma.trackGroup.findFirst({
         where: {
-          id: Number(tg.id),
+          id: Number(trackGroupId),
         },
-        include: trackGroupSingleInclude({
-          loggedInUserId: Number(userId),
-          ownerId: Number(userId),
-        }),
       });
 
       if (!trackGroup) {
-        return next(
-          new AppError({
-            httpCode: 404,
-            description: "TrackGroup not found",
-          })
-        );
+        throw new AppError({
+          httpCode: 404,
+          description: "TrackGroup not found",
+        });
       }
 
-      res.status(200).json({ result: processor.single(trackGroup) });
+      return res.status(200).json({ result: processor.single(trackGroup) });
     } catch (e) {
       next(e);
     }
@@ -180,11 +169,9 @@ export default function () {
       userId: string;
     };
     try {
-      await doesTrackGroupBelongToUser(Number(trackGroupId), Number(userId));
-
       await deleteTrackGroup(Number(trackGroupId), true);
 
-      res.json({ message: "Success" });
+      return res.json({ message: "Success" });
     } catch (e) {
       next(e);
     }

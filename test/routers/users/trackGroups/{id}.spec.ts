@@ -29,7 +29,7 @@ describe("users/{userId}/trackGroups/{trackGroupId}", () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
       const artist = await createArtist(user.id);
 
-      const trackGroup = await createTrackGroup(artist.id, {
+      await createTrackGroup(artist.id, {
         urlSlug: "a-title",
       });
       const otherTrackGroup = await createTrackGroup(artist.id, {
@@ -48,6 +48,25 @@ describe("users/{userId}/trackGroups/{trackGroupId}", () => {
 
       assert.equal(response.status, 200);
       assert.equal(response.body.result.urlSlug, "a-title-1");
+    });
+  });
+
+  describe("DELETE", () => {
+    it("should delete a track group", async () => {
+      const { user, accessToken } = await createUser({ email: "test@testcom" });
+      const artist = await createArtist(user.id);
+
+      const trackGroup = await createTrackGroup(artist.id, {
+        urlSlug: "a-title",
+      });
+
+      const response = await requestApp
+        .delete(`users/${user.id}/trackGroups/${trackGroup.id}`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.status, 200);
+      console.log("response", response.body);
     });
   });
 });
