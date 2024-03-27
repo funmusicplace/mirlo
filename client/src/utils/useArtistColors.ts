@@ -8,7 +8,10 @@ const useArtistColors = () => {
   const artistId = params?.artistId;
 
   React.useEffect(() => {
-    if (!artistId) return;
+    if (!artistId) {
+      setArtistColors(undefined);
+      return;
+    }
     const controller = new AbortController();
 
     const callback = async () => {

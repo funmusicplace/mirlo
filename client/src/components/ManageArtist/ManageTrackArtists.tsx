@@ -6,9 +6,17 @@ import Button from "components/common/Button";
 import { useTranslation } from "react-i18next";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import Modal from "components/common/Modal";
-import { FormData } from "./EditTrackRow";
 import { useGlobalStateContext } from "state/GlobalState";
 import api from "services/api";
+
+export interface FormData {
+  trackArtists: {
+    artistName?: string;
+    artistRole?: string;
+    artistId?: number;
+    trackId?: number;
+  }[];
+}
 
 const ManageTrackArtists: React.FC<{
   disabled?: boolean;

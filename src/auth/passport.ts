@@ -7,6 +7,7 @@ import passportJWT from "passport-jwt";
 import prisma from "../../prisma/prisma";
 import { findArtistIdForURLSlug } from "../utils/artist";
 import logger from "../logger";
+import { AppError } from "../utils/error";
 
 const JWTStrategy = passportJWT.Strategy;
 
@@ -168,13 +169,16 @@ export const trackGroupBelongsToLoggedInUser = async (
 
   try {
     if (!loggedInUser) {
-      res.status(401).json({ error: "Unauthorized" });
+      throw new AppError({
+        description: "Not logged in user",
+        httpCode: 401,
+      });
     } else {
       if (loggedInUser.id !== Number(userId) && !loggedInUser.isAdmin) {
-        res.status(400).json({
-          error: `TrackGroup must belong to user`,
+        throw new AppError({
+          description: "TrackGroup does not exist or does not belong to user",
+          httpCode: 400,
         });
-        return next(`TrackGroup must belong to user`);
       }
 
       const trackGroup = await prisma.trackGroup.findFirst({
@@ -187,14 +191,14 @@ export const trackGroupBelongsToLoggedInUser = async (
       });
 
       if (!trackGroup) {
-        res.status(400).json({
-          error: "TrackGroup must belong to user",
+        throw new AppError({
+          description: "TrackGroup does not exist or does not belong to user",
+          httpCode: 400,
         });
-        return next("TrackGroup must belong to user");
       }
     }
   } catch (e) {
-    return res.status(500).json({ error: "Something went wrong on the API" });
+    return next(e);
   }
   return next();
 };

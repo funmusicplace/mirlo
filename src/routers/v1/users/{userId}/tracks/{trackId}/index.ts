@@ -6,16 +6,20 @@ import {
 import { doesTrackBelongToUser } from "../../../../../../utils/ownership";
 import prisma from "../../../../../../../prisma/prisma";
 
-import { deleteTrack } from "../../../../../../utils/tracks";
+import {
+  deleteTrack,
+  updateTrackArtists,
+} from "../../../../../../utils/tracks";
 
 interface TrackBody {
   title: string;
   isPreview: boolean;
-  trackArtists: {
+  trackArtists?: {
     artistName: string;
     id: string;
     artistId: number;
     role: string;
+    isCoAuthor: boolean;
   }[];
 }
 
@@ -43,57 +47,16 @@ export default function () {
         return next();
       }
 
+      await updateTrackArtists(Number(trackId), trackArtists);
+
       const newTrack = await prisma.track.update({
         where: { id: Number(trackId) },
         data: {
           title: title,
           isPreview: isPreview,
         },
-      });
-
-      const currentTrackArtists = await prisma.trackArtist.findMany({
-        where: {
-          trackId: Number(trackId),
-        },
-      });
-
-      let trackArtistIds = trackArtists.map((ta) => ta.id);
-
-      const newTrackArtists = trackArtists.filter((ta) => !ta.id);
-      const existingTrackArtists = trackArtists.filter((ta) => ta.id);
-      const oldTrackArtists = currentTrackArtists.filter(
-        (ta) => !trackArtistIds.includes(ta.id)
-      );
-
-      await prisma.trackArtist.createMany({
-        data: newTrackArtists.map((nta) => ({
-          trackId: Number(trackId),
-          artistId: nta.artistId,
-          artistName: nta.artistName,
-          role: nta.role,
-        })),
-      });
-
-      await Promise.all(
-        existingTrackArtists.map((eta) =>
-          prisma.trackArtist.update({
-            where: {
-              id: eta.id,
-            },
-            data: {
-              artistId: eta.artistId,
-              artistName: eta.artistName,
-              role: eta.role,
-            },
-          })
-        )
-      );
-
-      await prisma.trackArtist.deleteMany({
-        where: {
-          id: {
-            in: oldTrackArtists.map((ota) => ota.id),
-          },
+        include: {
+          trackArtists: true,
         },
       });
 
