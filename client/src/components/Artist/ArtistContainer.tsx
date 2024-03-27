@@ -17,6 +17,7 @@ const ArtistContainer: React.FC<{ isManage?: boolean }> = (isManage) => {
   const {
     state: { artist },
   } = useArtistContext();
+
   const {
     state: { user },
   } = useGlobalStateContext();
