@@ -47,12 +47,16 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
-    const { trackGroupId } = req.params as unknown as Params;
+    const { userId, trackGroupId } = req.params as unknown as Params;
     try {
       const trackGroup = await prisma.trackGroup.findFirst({
         where: {
           id: Number(trackGroupId),
         },
+        include: trackGroupSingleInclude({
+          loggedInUserId: Number(userId),
+          ownerId: Number(userId),
+        }),
       });
 
       if (!trackGroup) {
