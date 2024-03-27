@@ -20,12 +20,6 @@ export interface FormData {
   title: string;
   status: "preview" | "must-own";
   trackFile: FileList;
-  trackArtists: {
-    artistName?: string;
-    artistRole?: string;
-    artistId?: number;
-    trackId?: number;
-  }[];
 }
 
 const EditTrackRow: React.FC<{
@@ -45,7 +39,6 @@ const EditTrackRow: React.FC<{
     defaultValues: {
       title: track.title,
       status: track.isPreview ? "preview" : "must-own",
-      trackArtists: track.trackArtists,
     },
   });
 
@@ -61,7 +54,6 @@ const EditTrackRow: React.FC<{
     reset({
       title: track.title,
       status: track.isPreview ? "preview" : "must-own",
-      trackArtists: track.trackArtists,
     });
     cancelEditing();
   }, [reset, track, cancelEditing]);
@@ -73,13 +65,6 @@ const EditTrackRow: React.FC<{
         const packet = {
           title: formData.title,
           isPreview: formData.status === "preview",
-          trackArtists: formData.trackArtists
-            .filter((a) => a.artistName || a.artistId)
-            .map((a) => ({
-              ...a,
-              artistId:
-                a.artistId && isFinite(+a.artistId) ? +a.artistId : undefined,
-            })),
         };
 
         await api.put<Partial<Track>, { track: Track }>(

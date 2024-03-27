@@ -91,7 +91,7 @@ export const convertAudioToFormat = (
 
 export const updateTrackArtists = async (
   trackId: number,
-  trackArtists: {
+  trackArtists?: {
     artistName: string;
     id: string;
     artistId: number;
@@ -99,6 +99,9 @@ export const updateTrackArtists = async (
     isCoAuthor: boolean;
   }[]
 ) => {
+  if (!trackArtists) {
+    return;
+  }
   const currentTrackArtists = await prisma.trackArtist.findMany({
     where: {
       trackId: Number(trackId),
