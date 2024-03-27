@@ -1,5 +1,4 @@
 import { css } from "@emotion/css";
-import React from "react";
 import { Link } from "react-router-dom";
 import Logo from "../common/Logo";
 import { Trans, useTranslation } from "react-i18next";
