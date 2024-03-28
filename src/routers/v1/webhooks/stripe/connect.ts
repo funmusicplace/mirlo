@@ -21,13 +21,13 @@ export default function () {
   };
 
   async function POST(req: Request, res: Response) {
-    logger.info("Receiving user account webhook");
+    logger.info("stripe-connect: receiving user account webhook");
     const event = await verifyStripeSignature(
       req,
       res,
       STRIPE_WEBHOOK_CONNECT_SIGNING_SECRET
     );
-    logger.info(`Event for stripe account ${event.account}`);
+    logger.info(`stripe-connect: event for stripe account ${event.account}`);
 
     // Handle the event
     switch (event.type) {
@@ -35,16 +35,20 @@ export default function () {
         // To trigger this event type use
         // `stripe trigger checkout.session.completed --add checkout_session:metadata.userId=3 --add checkout_session:metadata.tierId=2`
         const session = event.data.object;
-        logger.info(`Checkout status is ${session.status}.`);
+        logger.info(`stripe-connect: checkout status is ${session.status}.`);
 
         handleCheckoutSession(session);
+        break;
       case "invoice.paid":
         const invoice = event.data.object;
 
         handleInvoicePaid(invoice);
+        break;
       default:
         // Unexpected event type
-        logger.info(`Unhandled Stripe event type ${event.type}.`);
+        logger.info(
+          `stripe-connect: unhandled Stripe event type ${event.type}.`
+        );
     }
     // Return a 200 response to acknowledge receipt of the event
     res.send();

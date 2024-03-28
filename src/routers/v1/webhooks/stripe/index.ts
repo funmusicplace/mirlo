@@ -17,7 +17,7 @@ export default function () {
   };
 
   async function POST(req: Request, res: Response) {
-    logger.info("Receiving global account webhook");
+    logger.info("stripe-index: receiving global account webhook");
     const event = await verifyStripeSignature(
       req,
       res,
@@ -30,12 +30,13 @@ export default function () {
         // To trigger this event type use
         // stripe trigger checkout.session.completed --add checkout_session:metadata.userId=3 --add checkout_session:metadata.tierId=2
         const session = event.data.object;
-        logger.info(`Checkout status is ${session.status}.`);
+        logger.info(`stripe-index: checkout status is ${session.status}.`);
 
         handleCheckoutSession(session);
+        break;
       default:
         // Unexpected event type
-        logger.info(`Unhandled Stripe event type ${event.type}.`);
+        logger.info(`stripe-index: unhandled Stripe event type ${event.type}.`);
     }
     // Return a 200 response to acknowledge receipt of the event
     res.send();
