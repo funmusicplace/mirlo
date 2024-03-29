@@ -1,8 +1,12 @@
 import { css } from "@emotion/css";
 import styled from "@emotion/styled";
+import { MetaCard } from "components/common/MetaCard";
 import { WidthWrapper } from "components/common/WidthContainer";
-import { bp } from "../../constants";
 import { FaArrowDown } from "react-icons/fa";
+import { bp } from "../../constants";
+import Button from "components/common/Button";
+import { Link } from "react-router-dom";
+import { Trans, useTranslation } from "react-i18next";
 
 const Container = styled(WidthWrapper)`
   h2 {
@@ -24,6 +28,8 @@ const Feature = styled.div`
   padding: 1rem 2rem 3.5rem 2rem;
   font-size: 1.2rem;
   display: grid;
+  align-items: center;
+
   &:nth-child(even) {
     grid-template-columns: max(30%) max(60%);
   }
@@ -72,9 +78,25 @@ const Feature = styled.div`
       margin: auto;
     }
   }
+
+  @media screen and (max-width: ${bp.small}px) {
+    padding: 0 0 1rem 0;
+    flex-direction: column-reverse;
+
+    &.reverse {
+      flex-direction: column-reverse;
+    }
+
+    & .description {
+      padding: 1rem;
+      max-width: 100%;
+    }
+  }
 `;
 
 const Features = () => {
+  const { t } = useTranslation("translation", { keyPrefix: "home" });
+
   return (
     <WidthWrapper
       variant="full"
@@ -85,6 +107,10 @@ const Features = () => {
         }
       `}
     >
+      <MetaCard
+        title="Features"
+        description="What's packaged with a Mirlo account? Here's some of our features"
+      />
       <Container
         variant="full"
         className={css`
@@ -95,6 +121,11 @@ const Features = () => {
 
           @media (prefers-color-scheme: dark) {
             background-color: #161616 !important;
+            height: auto;
+            padding: 1rem;
+            & > div {
+              flex-direction: column-reverse;
+            }
           }
         `}
       >
@@ -130,6 +161,11 @@ const Features = () => {
               @media screen and (max-width: ${bp.medium}px) {
                 padding: 0.5rem;
               }
+
+              @media screen and (max-width: ${bp.small}px) {
+                padding: 1rem 0;
+              }
+              }
             `}
           >
             <h2>Mirlo for Artists</h2>
@@ -144,17 +180,28 @@ const Features = () => {
               manage subscriptions, and share with their supporters.
             </p>
             <div>
-              <span
-                className={css`
-                  display: flex;
+              <Link to="#features">
+                <Button
+                  variant="big"
+                  className={css`
+                    display: flex;
 
-                  svg {
-                    margin-left: 0.5rem;
-                  }
-                `}
-              >
-                Learn more <FaArrowDown />
-              </span>
+                    svg {
+                      margin-left: 0.5rem;
+                    }
+                  `}
+                  onClick={() => {
+                    const features = document.getElementById("features");
+                    if (features) {
+                      features.scrollIntoView({
+                        behavior: "smooth",
+                      });
+                    }
+                  }}
+                >
+                  Learn more <FaArrowDown />
+                </Button>
+              </Link>
             </div>
           </div>
 
@@ -177,11 +224,17 @@ const Features = () => {
       </Container>
 
       <Container
+        id="features"
         variant="full"
         className={css`
           padding: 2rem;
           background: var(--mi-pink);
           color: var(--mi-white);
+
+          @media screen and (max-width: ${bp.small}px) {
+            padding: 0;
+            flex-direction: column;
+          }
         `}
       >
         <WidthWrapper
@@ -219,7 +272,6 @@ const Features = () => {
                 }
               `}
             />
-
             <div className="description">
               <strong>Have a lot of music to upload?</strong>
               <p>
@@ -238,7 +290,7 @@ const Features = () => {
                   Get in touch with us!
                 </a>
               </p>
-            </div>
+            </div>{" "}
           </Feature>
           <Feature>
             <div className="description">
@@ -250,11 +302,21 @@ const Features = () => {
                 else.
               </p>
             </div>
-            <img src="/images/embed-2.png" alt="page control" />
+            <img
+              src="/images/embed-2.png"
+              alt="page control"
+              className={css`
+                width: 60%;
+                margin: auto;
+
+                @media screen and (max-width: ${bp.medium}px) {
+                  width: 45%;
+                }
+              `}
+            />
           </Feature>
           <Feature>
             <img src="/images/embed-1.png" alt="embed" />
-
             <div className="description">
               <strong>Want control over what your page looks like?</strong>
               <p>
@@ -280,10 +342,15 @@ const Features = () => {
                 posts can be made public or sent to specific supporter tiers.
                 You can embed music hosted on Mirlo directly in your blog posts.
               </p>
+              <p>
+                Don't want to manage another mailing list? Us neither. You can
+                migrate your current supporters' emails to Mirlo and do
+                everything from one platform.
+              </p>
             </div>
             <img src="/images/community-share.png" alt="community share" />
           </Feature>
-          <Feature>
+          <Feature className="reverse">
             <img
               src="/images/monthly-donations.png"
               alt="monthly donations"
@@ -296,7 +363,6 @@ const Features = () => {
                 }
               `}
             />
-
             <div className="description">
               <strong>Want to have a predictable source of income?</strong>
               <p>
@@ -318,6 +384,33 @@ const Features = () => {
             </div>
             <img src="/images/international.png" alt="map" />
           </Feature>
+          <Feature className="reverse">
+            <img src="/images/downloads.png" alt="map" />
+
+            <div className="description">
+              <strong>
+                Want to share your music with press or close family and friends?
+              </strong>
+              <p>
+                Use download codes to share your music for free with press or
+                your proud family members and friends. You can generate an
+                unlimited set of codes for download of your music. Distribute it
+                with your merch or send it to your press contacts.
+              </p>
+            </div>
+          </Feature>
+          <Feature>
+            <div className="description">
+              <strong>Transparent and consistent pricing.</strong>
+              <p>
+                Mirlo uses a transparent and consistent pricing model. We charge
+                you 7% of your sale, and our payment processor (Stripe) takes a
+                roughly 3% cut.
+              </p>
+            </div>
+            <img src="/images/percentage.png" alt="map" />
+          </Feature>
+
           {/* <h2>Listener Features</h2>
         <p>
           Subscribe and support artists and access their content directly from
@@ -327,6 +420,62 @@ const Features = () => {
           Browse and listen to your collection of purchases or wishlested albums
           easily, on mobile or desktop with a simple and elegant interface.
         </p> */}
+        </WidthWrapper>
+      </Container>
+      <Container
+        className={css`
+          min-height: 34vh;
+          display: flex;
+          align-items: center;
+          background-color: #f5f0f0 !important;
+
+          @media (prefers-color-scheme: dark) {
+            background-color: #161616 !important;
+            height: auto;
+            padding: 1rem;
+            & > div {
+              flex-direction: column-reverse;
+            }
+          }
+        `}
+      >
+        <WidthWrapper
+          variant="big"
+          className={css`
+            display: flex;
+            overflow: hidden;
+            align-items: center;
+            gap: 5%;
+            justify-content: center;
+            font-size: 1.4rem;
+            flex-direction: column;
+          `}
+        >
+          <div>
+            Excited to get started?{" "}
+            <Link to="/signup">
+              <Button variant="big">Join Mirlo!</Button>
+            </Link>
+          </div>
+          <div
+            className={css`
+              margin-top: 1rem;
+            `}
+          >
+            <Trans
+              t={t}
+              i18nKey="officeHours"
+              components={{
+                // eslint-disable-next-line jsx-a11y/anchor-has-content
+                features: <a href="/pages/features"></a>,
+
+                office: (
+                  // eslint-disable-next-line jsx-a11y/anchor-has-content
+                  <a href=" https://calendly.com/mirloofficehours/schedule"></a>
+                ),
+              }}
+            />{" "}
+          </div>
         </WidthWrapper>
       </Container>
     </WidthWrapper>
