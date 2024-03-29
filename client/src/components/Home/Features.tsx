@@ -1,28 +1,42 @@
 import { css } from "@emotion/css";
 import styled from "@emotion/styled";
 import { WidthWrapper } from "components/common/WidthContainer";
+import { bp } from "../../constants";
 import { FaArrowDown } from "react-icons/fa";
 
 const Container = styled(WidthWrapper)`
-  padding-top: 2rem;
-  margin-bottom: 4rem;
-
   h2 {
     font-size: 3rem;
     line-height: 3rem;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    background-color: #be3455;
+  }
+
+  @media screen and (max-width: ${bp.medium}px) {
+    padding: var(--mi-side-paddings-xsmall);
   }
 `;
 
 const Feature = styled.div`
   max-width: 100%;
-  padding: 1rem 2rem 1rem 0;
+  padding: 1rem 2rem 3.5rem 2rem;
   font-size: 1.2rem;
-  display: flex;
-  align-items: center;
+  display: grid;
+  &:nth-child(even) {
+    grid-template-columns: max(30%) max(60%);
+  }
+  &:nth-child(odd) {
+    grid-template-columns: max(60%) max(30%);
+  }
+  gap: 5%;
+  justify-content: space-between;
 
   strong {
-    padding-bottom: 0.75rem;
+    padding-bottom: 1.6rem;
     display: block;
+    font-size: 1.6rem;
   }
 
   p {
@@ -32,38 +46,90 @@ const Feature = styled.div`
   }
 
   .description {
-    max-width: 60%;
     padding: 2rem;
+    margin: auto;
   }
 
   img {
-    max-width: 30%;
+    max-width: 100%;
+  }
+
+  @media screen and (max-width: ${bp.medium}px) {
+    padding: 1rem 1rem 3.5rem 1rem;
+    display: flex;
+    &:nth-child(even) {
+      flex-direction: column;
+    }
+    &:nth-child(odd) {
+      flex-direction: column-reverse;
+    }
+    .description {
+      padding: 2rem 0 0 0;
+      margin: auto;
+    }
+    img {
+      max-width: 80%;
+      margin: auto;
+    }
   }
 `;
 
 const Features = () => {
   return (
-    <WidthWrapper variant="full" className={css``}>
+    <WidthWrapper
+      variant="full"
+      className={css`
+        background-color: #f5f0f0 !important;
+        @media (prefers-color-scheme: dark) {
+          background-color: #161616 !important;
+        }
+      `}
+    >
       <Container
         variant="full"
         className={css`
-          height: 64vh;
+          min-height: 64vh;
           display: flex;
           align-items: center;
+          background-color: #f5f0f0 !important;
+
+          @media (prefers-color-scheme: dark) {
+            background-color: #161616 !important;
+          }
         `}
       >
         <WidthWrapper
-          variant="medium"
+          variant="big"
           className={css`
             display: flex;
             overflow: hidden;
+            padding: 2rem;
+            gap: 5%;
+            justify-content: center;
+
+            @media screen and (max-width: ${bp.medium}px) {
+              flex-direction: column;
+              padding: 1rem;
+            }
+            @media (orientation: landscape) {
+              min-height: calc(100vh - 125px);
+            }
+            @media screen and (max-width: ${bp.medium}px) and (orientation: portrait) {
+              min-height: calc(100vh - 125px);
+            }
           `}
         >
           <div
             className={css`
               padding-left: 2rem;
               padding-top: 2rem;
-              padding-right: 1rem;
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+
+              @media screen and (max-width: ${bp.medium}px) {
+                padding: 0.5rem;
+              }
             `}
           >
             <h2>Mirlo for Artists</h2>
@@ -77,17 +143,19 @@ const Features = () => {
               Mirlo provides a user-friendly space to help musicians sell music,
               manage subscriptions, and share with their supporters.
             </p>
-            <span
-              className={css`
-                display: flex;
+            <div>
+              <span
+                className={css`
+                  display: flex;
 
-                svg {
-                  margin-left: 0.5rem;
-                }
-              `}
-            >
-              Learn more <FaArrowDown />
-            </span>
+                  svg {
+                    margin-left: 0.5rem;
+                  }
+                `}
+              >
+                Learn more <FaArrowDown />
+              </span>
+            </div>
           </div>
 
           <img
@@ -96,8 +164,13 @@ const Features = () => {
             className={css`
               max-width: 100%;
               // margin-right: -25rem;
-              max-width: 300px;
+              max-width: 38%;
               margin-top: 2rem;
+
+              @media screen and (max-width: ${bp.medium}px) {
+                margin-top: 5%;
+                max-width: 70%;
+              }
             `}
           />
         </WidthWrapper>
@@ -112,7 +185,7 @@ const Features = () => {
         `}
       >
         <WidthWrapper
-          variant="medium"
+          variant="big"
           className={css`
             display: flex;
             flex-wrap: wrap;
@@ -134,7 +207,18 @@ const Features = () => {
             />
           </Feature>
           <Feature>
-            <img src="/images/bulk-upload.png" alt="upload tracks in bulk" />
+            <img
+              src="/images/bulk-upload.png"
+              alt="upload tracks in bulk"
+              className={css`
+                width: 80%;
+                margin: auto;
+
+                @media screen and (max-width: ${bp.medium}px) {
+                  width: 65%;
+                }
+              `}
+            />
 
             <div className="description">
               <strong>Have a lot of music to upload?</strong>
@@ -200,7 +284,18 @@ const Features = () => {
             <img src="/images/community-share.png" alt="community share" />
           </Feature>
           <Feature>
-            <img src="/images/monthly-donations.png" alt="monthly donations" />
+            <img
+              src="/images/monthly-donations.png"
+              alt="monthly donations"
+              className={css`
+                width: 80%;
+                margin: auto;
+
+                @media screen and (max-width: ${bp.medium}px) {
+                  width: 50%;
+                }
+              `}
+            />
 
             <div className="description">
               <strong>Want to have a predictable source of income?</strong>
