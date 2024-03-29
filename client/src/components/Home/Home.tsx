@@ -59,6 +59,7 @@ function Home() {
       <Splash />
       <Releases />
       <SupportMirlo />
+
       <Posts />
     </div>
   );

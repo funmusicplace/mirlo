@@ -132,7 +132,7 @@ const Splash = () => {
           )}
           <p
             className={css`
-              font-size: 0.875rem;
+              font-size: 1rem;
               line-height: 1.5;
 
               br {
@@ -142,28 +142,10 @@ const Splash = () => {
           >
             <Trans
               t={t}
-              i18nKey="mirloConstruction"
+              i18nKey="featuresLink"
               components={{
                 // eslint-disable-next-line jsx-a11y/anchor-has-content
-                about: <a href="/pages/about"></a>,
-                // eslint-disable-next-line jsx-a11y/anchor-has-content
-                faq: <a href="/pages/en/faq"></a>,
-                office: (
-                  // eslint-disable-next-line jsx-a11y/anchor-has-content
-                  <a href=" https://calendly.com/mirloofficehours/schedule"></a>
-                ),
-                github: (
-                  // eslint-disable-next-line jsx-a11y/anchor-has-content
-                  <a href="https://github.com/funmusicplace/mirlo/"></a>
-                ),
-                // eslint-disable-next-line jsx-a11y/anchor-has-content,
-                discord: <a href="https://discord.gg/VjKq26raKX"></a>,
-                // eslint-disable-next-line jsx-a11y/anchor-has-content
-                email: <a href="mailto:mirlodotspace@proton.me"></a>,
-                mailingList: (
-                  // eslint-disable-next-line jsx-a11y/anchor-has-content
-                  <a href="https://dashboard.mailerlite.com/forms/396303/100612617721087214/share"></a>
-                ),
+                features: <Link to="/pages/features"></Link>,
               }}
             />
           </p>
