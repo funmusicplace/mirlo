@@ -105,12 +105,17 @@ const Features = () => {
             overflow: hidden;
             padding: 2rem;
             gap: 5%;
-            min-height: calc(100vh - 125px);
             justify-content: center;
 
             @media screen and (max-width: ${bp.medium}px) {
               flex-direction: column;
               padding: 1rem;
+            }
+            @media (orientation: landscape) {
+              min-height: calc(100vh - 125px);
+            }
+            @media screen and (max-width: ${bp.medium}px) and (orientation: portrait) {
+              min-height: calc(100vh - 125px);
             }
           `}
         >
