@@ -350,7 +350,7 @@ const Features = () => {
             </div>
             <img src="/images/community-share.png" alt="community share" />
           </Feature>
-          <Feature className="reverse">
+          <Feature>
             <img
               src="/images/monthly-donations.png"
               alt="monthly donations"
@@ -384,7 +384,7 @@ const Features = () => {
             </div>
             <img src="/images/international.png" alt="map" />
           </Feature>
-          <Feature className="reverse">
+          <Feature>
             <img src="/images/downloads.png" alt="map" />
 
             <div className="description">
