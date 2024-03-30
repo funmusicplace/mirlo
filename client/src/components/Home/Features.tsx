@@ -74,13 +74,13 @@ const Feature = styled.div`
       margin: auto;
     }
     img {
-      max-width: 80%;
+      max-width: 50%;
       margin: auto;
     }
   }
 
   @media screen and (max-width: ${bp.small}px) {
-    padding: 0 0 1rem 0;
+    padding: 2rem 0rem 5rem 0rem;
     flex-direction: column-reverse;
 
     &.reverse {
@@ -445,13 +445,24 @@ const Features = () => {
             display: flex;
             overflow: hidden;
             align-items: center;
-            gap: 5%;
+            padding: 1rem;
+            gap: 1rem;
             justify-content: center;
             font-size: 1.4rem;
             flex-direction: column;
           `}
         >
-          <div>
+          <div
+            className={css`
+              display: flex;
+              overflow: hidden;
+              align-items: center;
+              gap: 1rem;
+              justify-content: center;
+              font-size: 1.4rem;
+              flex-direction: column;
+            `}
+          >
             Excited to get started?{" "}
             <Link to="/signup">
               <Button variant="big">Join Mirlo!</Button>
