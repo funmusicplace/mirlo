@@ -15,22 +15,20 @@ const useAdminFilters = ({
     | "title"
     | "isPublished"
     | "artistName"
+    | "datePurchased"
   )[];
 }) => {
   const { register, handleSubmit } = useForm();
 
   const submitToSearchParams = (
-    data?:
-      | string
-      | string[][]
-      | Record<string, string>
-      | URLSearchParams
-      | undefined
+    data?: string | string[][] | Record<string, string> | undefined
   ) => {
     let search = new URLSearchParams();
+
     if (data) {
       search = new URLSearchParams(data);
     }
+
     onSubmitFilters(search);
   };
 
@@ -69,6 +67,16 @@ const useAdminFilters = ({
           <FormComponent>
             <label>title</label>
             <InputEl {...register("title")} />
+          </FormComponent>
+        )}
+        {fields.includes("datePurchased") && (
+          <FormComponent>
+            <label>Date filter</label>
+            <SelectEl {...register("datePurchased")}>
+              <option value="">All</option>
+              <option value="thisMonth">Current month to date</option>
+              <option value="previousMonth">Previous month</option>
+            </SelectEl>
           </FormComponent>
         )}
         <Button>Filter</Button>

@@ -9,10 +9,35 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
-    const { skip: skipQuery, take, name } = req.query;
+    const {
+      skip: skipQuery,
+      take,
+      datePurchased,
+    } = req.query as { skip: string; take: string; datePurchased: string };
 
     try {
       let where: Prisma.UserTrackGroupPurchaseWhereInput = {};
+
+      if (datePurchased && datePurchased === "thisMonth") {
+        const startOfMonth = new Date();
+        startOfMonth.setDate(1);
+        startOfMonth.setHours(0, 0, 0, 0);
+        where.datePurchased = {
+          gte: startOfMonth.toISOString(),
+        };
+      } else if (datePurchased && datePurchased === "previousMonth") {
+        const startOfMonth = new Date();
+        startOfMonth.setDate(1);
+        startOfMonth.setMonth(startOfMonth.getMonth() - 1);
+        startOfMonth.setHours(0, 0, 0, 0);
+        const endOfMonth = new Date();
+        endOfMonth.setDate(1);
+        endOfMonth.setHours(0, 0, 0, 0);
+        where.datePurchased = {
+          gte: startOfMonth.toISOString(),
+          lt: endOfMonth.toISOString(),
+        };
+      }
 
       const itemCount = await prisma.userTrackGroupPurchase.count({ where });
 
@@ -22,7 +47,11 @@ export default function () {
         take: take ? Number(take) : undefined,
         include: {
           user: true,
-          trackGroup: true,
+          trackGroup: {
+            include: {
+              artist: true,
+            },
+          },
         },
         orderBy: {
           datePurchased: "desc",
