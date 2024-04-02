@@ -20,7 +20,7 @@ export const SplashWrapper = styled.div`
 
   @media screen and (max-width: ${bp.medium}px) and (orientation: portrait) {
     min-height: calc(100vh - 170px);
-    padding: 0 0.5rem 1rem 0.5rem;
+    padding: 0rem 0.5rem 1rem 0.5rem;
   }
 `;
 
@@ -31,9 +31,6 @@ export const TextWrapper = styled.div`
   max-width: 500px;
   justify-content: center;
   padding-bottom: 1rem;
-
-  @media screen and (max-width: ${bp.medium}px) {
-  }
 `;
 
 export const SplashTitle = styled.h2`

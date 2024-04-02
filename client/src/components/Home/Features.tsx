@@ -61,7 +61,7 @@ const Feature = styled.div`
   }
 
   @media screen and (max-width: ${bp.medium}px) {
-    padding: 1rem 1rem 3.5rem 1rem;
+    padding: 2rem 1rem 5rem 1rem;
     display: flex;
     &:nth-child(even) {
       flex-direction: column;
@@ -74,13 +74,13 @@ const Feature = styled.div`
       margin: auto;
     }
     img {
-      max-width: 80%;
+      max-width: 50%;
       margin: auto;
     }
   }
 
   @media screen and (max-width: ${bp.small}px) {
-    padding: 0 0 1rem 0;
+    padding: 2rem 0rem 5rem 0rem;
     flex-direction: column-reverse;
 
     &.reverse {
@@ -118,14 +118,13 @@ const Features = () => {
           display: flex;
           align-items: center;
           background-color: #f5f0f0 !important;
+          & > div {
+            flex-direction: column-reverse;
+          }
 
           @media (prefers-color-scheme: dark) {
             background-color: #161616 !important;
             height: auto;
-            padding: 1rem;
-            & > div {
-              flex-direction: column-reverse;
-            }
           }
         `}
       >
@@ -134,7 +133,7 @@ const Features = () => {
           className={css`
             display: flex;
             overflow: hidden;
-            padding: 2rem;
+            padding: 0 2rem 2rem 2rem;
             gap: 5%;
             justify-content: center;
 
@@ -179,12 +178,23 @@ const Features = () => {
               Mirlo provides a user-friendly space to help musicians sell music,
               manage subscriptions, and share with their supporters.
             </p>
-            <div>
+            <div
+              className={css`
+                padding-top: 1rem;
+              `}
+            >
               <Link to="#features">
                 <Button
                   variant="big"
                   className={css`
-                    display: flex;
+                    display: block;
+                    padding: 1.5rem 1rem !important;
+                    background-color: #be3455 !important;
+                    color: var(--mi-white) !important;
+
+                    &:hover {
+                      text-decoration: underline;
+                    }
 
                     svg {
                       margin-left: 0.5rem;
@@ -445,16 +455,41 @@ const Features = () => {
             display: flex;
             overflow: hidden;
             align-items: center;
-            gap: 5%;
+            padding: 1rem;
+            gap: 1rem;
             justify-content: center;
             font-size: 1.4rem;
             flex-direction: column;
           `}
         >
-          <div>
+          <div
+            className={css`
+              display: flex;
+              overflow: hidden;
+              align-items: center;
+              gap: 1rem;
+              justify-content: center;
+              font-size: 1.4rem;
+              flex-direction: column;
+            `}
+          >
             Excited to get started?{" "}
             <Link to="/signup">
-              <Button variant="big">Join Mirlo!</Button>
+              <Button
+                variant="big"
+                className={css`
+                  display: block;
+                  padding: 1.5rem 1rem !important;
+                  background-color: #be3455 !important;
+                  color: var(--mi-white) !important;
+
+                  &:hover {
+                    text-decoration: underline;
+                  }
+                `}
+              >
+                Join Mirlo!
+              </Button>
             </Link>
           </div>
           <div
