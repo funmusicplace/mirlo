@@ -27,7 +27,7 @@ export const getTrackGroupWidget = (trackGroupId: number) => {
 };
 
 export const getReleaseUrl = (
-  artist: Artist,
+  artist: { urlSlug?: string; id: number },
   trackGroup: { urlSlug?: string; id: number }
 ) => {
   return `/${getArtistUrlReference(artist)}/release/${getTrackGroupUrlReference(

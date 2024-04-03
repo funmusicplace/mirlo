@@ -29,7 +29,9 @@ const AcceptedFiles = styled.div`
   height: 45;
   line-height: 2.5;
   padding-left: 10;
-  width: 80%;
+  width: 50%;
+  max-width: 50%;
+  overflow: hidden;
 `;
 
 const RemoveButton = styled(Button)`
@@ -64,25 +66,36 @@ const ArtistSubscriberUploadData: React.FC<{
 
   const processData = async (results: { data: string[][] }) => {
     const data = results.data;
-
     const headers = data.splice(0, 1)[0];
 
+    const firstLineHasEmail = headers.findIndex((text) => text.includes("@"));
     const newData = data.map((line) => {
-      const obj = headers.reduce((aggr, header, idx) => {
-        if (
-          header.toLowerCase() === "email" ||
-          header.toLowerCase() === "e-mail"
-        ) {
-          aggr["email"] = line[idx];
-        }
-        // aggr[header] = line[idx];
+      if (firstLineHasEmail !== -1) {
+        return { email: line[firstLineHasEmail] };
+      } else {
+        const obj = headers.reduce((aggr, header, idx) => {
+          if (
+            (header.toLowerCase() === "email" ||
+              header.toLowerCase() === "e-mail" ||
+              header.toLowerCase() === "subscriber") &&
+            line[idx].includes("@")
+          ) {
+            aggr["email"] = line[idx];
+          }
 
-        return aggr;
-      }, {} as { email: string; name: string });
-      return obj;
+          return aggr;
+        }, {} as { email: string; name: string });
+        console.log("obj", obj);
+        return obj;
+      }
     });
 
-    setUploadedUsers(uniqBy(newData, "email"));
+    setUploadedUsers(
+      uniqBy(
+        newData.filter((data) => !!data.email),
+        "email"
+      )
+    );
   };
 
   const uploadSubscriberData = React.useCallback(
@@ -119,7 +132,6 @@ const ArtistSubscriberUploadData: React.FC<{
         ?.split(/,|\r?\n/)
         .map((email) => email.replaceAll(" ", ""))
         .filter((email) => !!email) ?? [];
-    console.log("emailsAsList", emailsAsList);
     const users = emailsAsList?.map((email) => ({ email }));
     setUploadedUsers(users);
     uploadSubscriberData(users);

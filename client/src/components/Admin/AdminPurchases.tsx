@@ -3,8 +3,10 @@ import Modal from "components/common/Modal";
 import Money from "components/common/Money";
 import Table from "components/common/Table";
 import React from "react";
-import { Outlet, useNavigate, useParams } from "react-router-dom";
+import { Link, Outlet, useNavigate, useParams } from "react-router-dom";
 import api from "services/api";
+import { getReleaseUrl } from "utils/artist";
+import useAdminFilters from "./useAdminFilters";
 
 interface AdminPurchase extends UserTrackGroupPurchase {
   user: User;
@@ -17,15 +19,24 @@ export const AdminPurchases: React.FC = () => {
   const [results, setResults] = React.useState<AdminPurchase[]>([]);
   const [openModal, setOpenModal] = React.useState(false);
 
-  React.useEffect(() => {
-    const callback = async () => {
-      const { results } = await api.getMany<AdminPurchase>(
-        "admin/purchases?orderBy=createdAt"
-      );
-      setResults(results);
-    };
-    callback();
+  const callback = React.useCallback(async (search?: URLSearchParams) => {
+    if (search) {
+      search.append("orderBy", "datePurchased");
+    }
+    const { results } = await api.getMany<AdminPurchase>(
+      `admin/purchases?${search?.toString() ?? ""}`
+    );
+    setResults(results);
   }, []);
+
+  const { Filters } = useAdminFilters({
+    onSubmitFilters: callback,
+    fields: ["datePurchased"],
+  });
+
+  React.useEffect(() => {
+    callback();
+  }, [callback]);
 
   React.useEffect(() => {
     if (trackgroupId) {
@@ -49,6 +60,7 @@ export const AdminPurchases: React.FC = () => {
       `}
     >
       <h3>Purchases</h3>
+      <Filters />
 
       <h4>Totals</h4>
       <Table
@@ -92,7 +104,17 @@ export const AdminPurchases: React.FC = () => {
                   {purchase.user.email} (userId: {purchase.userId})
                 </td>
                 <td>
-                  {purchase.trackGroup.title} (id: {purchase.trackGroup.id})
+                  <Link
+                    to={getReleaseUrl(
+                      purchase.trackGroup.artist ?? {
+                        id: purchase.trackGroup.artistId,
+                      },
+                      purchase.trackGroup
+                    )}
+                  >
+                    {purchase.trackGroup.title}
+                  </Link>{" "}
+                  (id: {purchase.trackGroup.id})
                 </td>
                 <td>{purchase.datePurchased}</td>
                 <td>

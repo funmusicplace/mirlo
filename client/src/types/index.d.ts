@@ -99,9 +99,14 @@ interface Notification {
   notificationType:
     | "NEW_ARTIST_POST"
     | "NEW_ARTIST_ALBUM"
-    | "USER_BOUGHT_YOUR_ALBUM";
+    | "USER_BOUGHT_YOUR_ALBUM"
+    | "USER_FOLLOWED_YOU"
+    | "USER_SUBSCRIBED_TO_YOU";
   post?: Post;
   relatedUser?: User;
+  artist?: Artist;
+  artistId?: number;
+  subscription?: ArtistUserSubscription;
   trackGroup?: TrackGroup & { artist: Artist };
 }
 

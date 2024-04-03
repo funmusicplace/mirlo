@@ -475,7 +475,8 @@
     "officeHours": "Have more questions? Join us for <office>office hours</office>.",
     "featuresLink": "What is Mirlo? Check out <features>our features</features>.",
     "mirloConstruction": "Wanna talk more? <email>E-mail us</email>, <discord>join our Discord</discord>, or join us <office>for office hours</office>! Also check out our <about>About page</about>, <faq>FAQ</faq>, and <github>the code on GitHub</github>. <br /> <br/ >Want to just receive our monthly newsletter? <mailingList>Sign up</mailingList>",
-    "latestCommunityPost": "Latest posts from the community"
+    "latestCommunityPost": "Latest posts from the community",
+    "supportUs": "Want to support us as we grow Mirlo? <support>Pitch in</support>"
   },
   "faq": {
     "title": "Frequently Asked Questions (FAQ)",

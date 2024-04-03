@@ -9,6 +9,7 @@ import { useGlobalStateContext } from "state/GlobalState";
 import UserBoughtYourAlbum from "./UserBoughtYourAlbum";
 import NewArtistPost from "./NewArtistPost";
 import NewArtistAlbum from "./NewArtistAlbum";
+import UserFollowedYou from "./UserFollowedYou";
 
 const LI = styled.li<{ isRead: boolean }>`
   background-color: ${(props) =>
@@ -84,6 +85,12 @@ const UserNotificationFeed = () => {
           >
             {notification.notificationType === "USER_BOUGHT_YOUR_ALBUM" && (
               <UserBoughtYourAlbum notification={notification} />
+            )}
+            {notification.notificationType === "USER_FOLLOWED_YOU" && (
+              <UserFollowedYou notification={notification} />
+            )}
+            {notification.notificationType === "USER_SUBSCRIBED_TO_YOU" && (
+              <UserFollowedYou notification={notification} />
             )}
             {notification.notificationType === "NEW_ARTIST_POST" && (
               <NewArtistPost notification={notification} />

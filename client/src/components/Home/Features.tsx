@@ -501,13 +501,24 @@ const Features = () => {
               t={t}
               i18nKey="officeHours"
               components={{
-                // eslint-disable-next-line jsx-a11y/anchor-has-content
-                features: <a href="/pages/features"></a>,
-
                 office: (
                   // eslint-disable-next-line jsx-a11y/anchor-has-content
                   <a href=" https://calendly.com/mirloofficehours/schedule"></a>
                 ),
+              }}
+            />{" "}
+          </div>
+          <div
+            className={css`
+              margin-top: 1rem;
+            `}
+          >
+            <Trans
+              t={t}
+              i18nKey="supportUs"
+              components={{
+                // eslint-disable-next-line jsx-a11y/anchor-has-content
+                support: <Link to="/team/support"></Link>,
               }}
             />{" "}
           </div>
