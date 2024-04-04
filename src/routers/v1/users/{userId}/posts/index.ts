@@ -6,6 +6,7 @@ import {
 } from "../../../../../auth/passport";
 
 import prisma from "../../../../../../prisma/prisma";
+import { AppError } from "../../../../../utils/error";
 
 export default function () {
   const operations = {
@@ -21,6 +22,7 @@ export default function () {
       isPublic,
       publishedAt,
       minimumSubscriptionTierId,
+      shouldSendEmail,
     } = req.body as unknown as {
       title: string;
       content: string;
@@ -28,15 +30,22 @@ export default function () {
       isPublic: boolean;
       minimumSubscriptionTierId: number;
       publishedAt: string;
+      shouldSendEmail: boolean;
     };
-    const user = req.user as User;
     try {
-      const validTier = await prisma.artistSubscriptionTier.findFirst({
-        where: {
-          artistId,
-          id: minimumSubscriptionTierId,
-        },
-      });
+      let validTier;
+      if (!minimumSubscriptionTierId) {
+        validTier = await prisma.artistSubscriptionTier.findFirst({
+          where: {
+            artistId,
+            id: minimumSubscriptionTierId,
+          },
+        });
+      } else {
+        validTier = await prisma.artistSubscriptionTier.findFirst({
+          where: { artistId, isDefaultTier: true },
+        });
+      }
 
       if (validTier) {
         const result = await prisma.post.create({
@@ -45,6 +54,7 @@ export default function () {
             content,
             isPublic,
             publishedAt,
+            shouldSendEmail,
             artist: { connect: { id: artistId } },
             minimumSubscriptionTier: {
               connect: { id: validTier?.id },
@@ -53,9 +63,10 @@ export default function () {
         });
         res.json({ result });
       } else {
-        res
-          .status(404)
-          .json({ error: "That tier doesn't belong to the current artist" });
+        throw new AppError({
+          description: "That tier doesn't belong to the current artist",
+          httpCode: 400,
+        });
       }
     } catch (e) {
       next(e);

@@ -11,7 +11,7 @@ const viewsDir = path.join(__dirname, "../emails");
  */
 
 export const sendMail = async (job: any) => {
-  logger.info("sending mail");
+  logger.info(`sendMail: sending: ${job.data.template}`);
   try {
     const email = new Email({
       message: {
@@ -48,7 +48,7 @@ export const sendMail = async (job: any) => {
         .then(logger.info);
     }
 
-    logger.info("Email sent");
+    logger.info(`sendMail: sent: ${job.data.template}`);
 
     return Promise.resolve();
   } catch (err) {

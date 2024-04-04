@@ -67,6 +67,7 @@ export const createPost = async (
       artistId: artistId,
       isPublic: data?.isPublic ?? true,
       content: data?.content ?? "The content",
+      shouldSendEmail: data?.shouldSendEmail,
     },
   });
   return post;
