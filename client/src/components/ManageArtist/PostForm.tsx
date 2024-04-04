@@ -22,6 +22,7 @@ type FormData = {
   content: string;
   isPublic: boolean;
   minimumTier: string;
+  shouldSendEmail: boolean;
 };
 
 const PostForm: React.FC<{
@@ -63,6 +64,7 @@ const PostForm: React.FC<{
         }
       : {
           publishedAt: publishedAt.toISOString().slice(0, 16),
+          shouldSendEmail: true,
         },
   });
 
@@ -200,6 +202,32 @@ const PostForm: React.FC<{
             )}
           </FormComponent>
         )}
+        <FormComponent
+          className={css`
+            margin-top: 0.5rem;
+            display: flex;
+            flex-direction: row !important;
+            align-items: center !important;
+            input {
+              margin: 0 !important;
+              height: 1rem;
+              width: 1rem;
+            }
+            label {
+              margin-bottom: 0 !important;
+            }
+          `}
+        >
+          <input
+            id="shouldSendEmail"
+            type="checkbox"
+            {...register("shouldSendEmail")}
+          />{" "}
+          <label htmlFor="shouldSendEmail">
+            {t("shouldSendEmail")}
+            <small>{t("shouldSendEmailContext")}</small>
+          </label>
+        </FormComponent>
         <Button
           type="submit"
           disabled={
