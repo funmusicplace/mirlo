@@ -193,17 +193,6 @@ const Header = () => {
 
   const show = useShow();
 
-  if (!isLoggedIn) {
-    return (
-      <HeaderWrapper transparent show={show}>
-        <Content>
-          <div />
-          <LogInPopup />
-        </Content>
-      </HeaderWrapper>
-    );
-  }
-
   return (
     <HeaderWrapper
       transparent={!!artistBanner && !!artistId}
@@ -248,9 +237,12 @@ const Header = () => {
         >
           <HeaderSearch />
 
-          <DropdownMenu icon={<ImMenu />}>
-            <Menu />
-          </DropdownMenu>
+          {isLoggedIn && (
+            <DropdownMenu icon={<ImMenu />}>
+              <Menu />
+            </DropdownMenu>
+          )}
+          {!isLoggedIn && <LogInPopup />}
         </div>
       </Content>
     </HeaderWrapper>

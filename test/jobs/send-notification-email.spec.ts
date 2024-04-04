@@ -68,4 +68,45 @@ describe("send-notification-email", () => {
     assert.equal(data0.locals.post.id, post.id);
     assert.equal(data0.locals.email, followerUser.email);
   });
+
+  it("should not send email if post is marked as not shouldSendEmail", async () => {
+    const stub = sinon.stub(sendMail, "default");
+
+    const { user: artistUser } = await createUser({
+      email: "artist@artist.com",
+    });
+
+    const { user: followerUser } = await createUser({
+      email: "follower@follower.com",
+      emailConfirmationToken: null,
+    });
+
+    const artist = await prisma.artist.create({
+      data: {
+        name: "Test artist",
+        urlSlug: "test-artist",
+        userId: artistUser.id,
+        enabled: true,
+      },
+    });
+
+    const post = await createPost(artist.id, {
+      title: "Our Custom Title",
+      content: "# HI",
+      shouldSendEmail: false,
+    });
+
+    await prisma.notification.create({
+      data: {
+        userId: followerUser.id,
+        postId: post.id,
+        isRead: false,
+        notificationType: "NEW_ARTIST_POST",
+      },
+    });
+
+    await sendNotificationEmail();
+
+    assert.equal(stub.called, false);
+  });
 });

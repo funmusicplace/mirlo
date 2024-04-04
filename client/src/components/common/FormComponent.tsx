@@ -32,7 +32,6 @@ const FormComponent = styled.div<{ direction?: "row" | "column" }>`
   label {
     font-size: 1.2rem;
     margin-bottom: 0.5rem;
-    text-transform: capitalize;
   }
 
   .error {

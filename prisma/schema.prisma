@@ -108,6 +108,7 @@ model Post {
   hasAnnounceEmailBeenSent  Boolean                 @default(false)
   postSubscriptionTiers     PostSubscriptionTier[]
   notifications             Notification[]
+  shouldSendEmail           Boolean                 @default(true)
 }
 
 model PostSubscriptionTier {

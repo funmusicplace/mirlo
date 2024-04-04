@@ -452,6 +452,8 @@
     "editPost": "Edit post",
     "postUpdated": "Post updated",
     "saveNew": "Save new",
+    "shouldSendEmail": "Should we send an email to your supporters when this post is published?",
+    "shouldSendEmailContext": "If yes, we'll send an e-mail, if not, they'll get notified on the website",
     "follow": "Everyone who pressed the follow button on your profile",
     "ifNotPublic": "If not public, which of your subscription tier should be the minimum tier to receive your update?"
   },
