@@ -7,20 +7,17 @@ import { useSnackbar } from "state/SnackbarContext";
 import { API_ROOT } from "../../constants";
 
 import api from "../../services/api";
-import { useGlobalStateContext } from "../../state/GlobalState";
 import Button from "../common/Button";
 import FormComponent from "../common/FormComponent";
 import { InputEl } from "../common/Input";
 import UserSupports from "./UserSupports";
 import useErrorHandler from "services/useErrorHandler";
 import WidthContainer from "components/common/WidthContainer";
+import { useAuthContext } from "state/AuthContext";
 
 function Profile() {
   const { t } = useTranslation("translation", { keyPrefix: "profile" });
-  const {
-    state: { user },
-    dispatch,
-  } = useGlobalStateContext();
+  const { user, refreshLoggedInUser } = useAuthContext();
   const [isSaving, setIsSaving] = React.useState(false);
   const errorHandler = useErrorHandler();
   const navigate = useNavigate();
@@ -34,14 +31,6 @@ function Profile() {
     },
   });
   const { register, handleSubmit } = methods;
-
-  const fetchProfile = React.useCallback(async () => {
-    const { result } = await api.get<LoggedInUser>("profile");
-    dispatch({
-      type: "setLoggedInUser",
-      user: result,
-    });
-  }, [dispatch]);
 
   const userId = user?.id;
   const snackbar = useSnackbar();
@@ -82,17 +71,10 @@ function Profile() {
         method: "GET",
         credentials: "include",
       });
-      dispatch({
-        type: "setLoggedInUser",
-        user: undefined,
-      });
+      refreshLoggedInUser();
       navigate("/");
     }
-  }, [t, userId, navigate, dispatch]);
-
-  React.useEffect(() => {
-    fetchProfile();
-  }, [fetchProfile]);
+  }, [t, userId, navigate, refreshLoggedInUser]);
 
   if (!user) {
     return null;

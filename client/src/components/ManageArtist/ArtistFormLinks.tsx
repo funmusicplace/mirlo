@@ -7,24 +7,19 @@ import { FaPlus, FaSave, FaTimes, FaTrash } from "react-icons/fa";
 import React from "react";
 import LinkIconDisplay from "components/common/LinkIconDisplay";
 import api from "services/api";
-import { useArtistContext } from "state/ArtistContext";
-import { useGlobalStateContext } from "state/GlobalState";
 import { useSnackbar } from "state/SnackbarContext";
 import ArtistFormLinksView from "./ArtistFormLinksView";
+import { useAuthContext } from "state/AuthContext";
+import { useQueryClient } from "@tanstack/react-query";
+import { isMatch } from "lodash";
 
 interface FormData {
   linkArray: { url: string }[];
 }
 
-const ArtistFormLinks: React.FC<{ isManage: boolean }> = ({ isManage }) => {
+const ArtistFormLinks: React.FC<{ artist: Artist, isManage: boolean }> = ({ artist, isManage }) => {
   const [isEditing, setIsEditing] = React.useState(false);
-  const {
-    state: { artist },
-    refresh,
-  } = useArtistContext();
-  const {
-    state: { user },
-  } = useGlobalStateContext();
+  const { user } = useAuthContext();
   const artistId = artist?.id;
   const artistUserId = artist?.userId;
   const userId = user?.id;
@@ -42,6 +37,8 @@ const ArtistFormLinks: React.FC<{ isManage: boolean }> = ({ isManage }) => {
 
   const addDisabled = links?.[links.length - 1]?.url === "";
 
+  const queryClient = useQueryClient();
+
   const doSave = React.useCallback(
     async (data: FormData) => {
       try {
@@ -56,19 +53,24 @@ const ArtistFormLinks: React.FC<{ isManage: boolean }> = ({ isManage }) => {
             links,
           });
         }
-        refresh();
+
+        // TODO: can be moved into a mutation
+        await queryClient.invalidateQueries({
+          predicate: (query) => isMatch(Object(query.queryKey[0]), { artistId }),
+        });
+
         snackbar("Updated links", { type: "success" });
       } catch (e) {
       } finally {
         setIsEditing(false);
       }
     },
-    [artistId, artistUserId, refresh, snackbar, userId]
+    [artistId, artistUserId, queryClient, snackbar, userId]
   );
 
   if (!isEditing) {
     return (
-      <ArtistFormLinksView isManage={isManage} setIsEditing={setIsEditing} />
+      <ArtistFormLinksView artist={artist} isManage={isManage} setIsEditing={setIsEditing} />
     );
   }
 

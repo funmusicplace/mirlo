@@ -10,19 +10,17 @@ import { useTranslation } from "react-i18next";
 
 import { useParams } from "react-router-dom";
 import api from "services/api";
-import { useGlobalStateContext } from "state/GlobalState";
 import { isTrackOwnedOrPreview, widgetUrl } from "utils/tracks";
 import { FlexWrapper, WidgetWrapper, inIframe, inMirlo } from "./utils";
 import { PlayButtonsWrapper } from "./PlayButtonsWrapper";
 import DisplayAudioWrapper from "./DisplayAudio";
 import { bp } from "../../constants";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
+import { useAuthContext } from "state/AuthContext";
 
 const TrackWidget = () => {
   const params = useParams();
-  const {
-    state: { user },
-  } = useGlobalStateContext();
+  const { user } = useAuthContext();
 
   const [track, setTrack] = React.useState<Track>();
   const [isLoading, setIsLoading] = React.useState(true);

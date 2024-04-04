@@ -7,16 +7,14 @@ import React from "react";
 import { FaTimes } from "react-icons/fa";
 import { useParams } from "react-router-dom";
 import api from "services/api";
-import { useGlobalStateContext } from "state/GlobalState";
+import { useAuthContext } from "state/AuthContext";
 
 export const Tag = <li></li>;
 
 const ManageTags: React.FC<{ tags?: string[] }> = ({ tags: existingTags }) => {
   const [tags, setTags] = React.useState<string[]>(existingTags ?? []);
   const { trackGroupId } = useParams();
-  const {
-    state: { user },
-  } = useGlobalStateContext();
+  const { user } = useAuthContext();
   const userId = user?.id;
 
   const removeTag = (index: number) => {

@@ -8,9 +8,9 @@ import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { ArtistTabs } from "components/common/Tabs";
 import React from "react";
 import api from "services/api";
-import { useGlobalStateContext } from "state/GlobalState";
 import { FaChevronRight } from "react-icons/fa";
 import { css } from "@emotion/css";
+import { useAuthContext } from "state/AuthContext";
 
 export const ArtistSection = styled.div`
   margin-bottom: 2rem;
@@ -25,9 +25,7 @@ export const ArtistSection = styled.div`
 
 function Artist() {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
-  const {
-    state: { user },
-  } = useGlobalStateContext();
+  const { user } = useAuthContext();
   const {
     state: { artist, isLoading, userStripeStatus },
   } = useArtistContext();

@@ -2,7 +2,6 @@ import { css } from "@emotion/css";
 
 import { useParams } from "react-router-dom";
 import ClickToPlayAlbum from "../common/ClickToPlayAlbum";
-import { useGlobalStateContext } from "state/GlobalState";
 import Box from "../common/Box";
 import usePublicObjectById from "utils/usePublicObjectById";
 import { useTranslation } from "react-i18next";
@@ -24,6 +23,7 @@ import styled from "@emotion/styled";
 import SupportArtistPopUp from "components/common/SupportArtistPopUp";
 import TrackGroupPills from "./TrackGroupPills";
 import TrackGroupEmbed from "./TrackGroupEmbed";
+import { useAuthContext } from "state/AuthContext";
 
 const Container = styled.div<{ user?: LoggedInUser }>`
   ${(props) =>
@@ -144,9 +144,7 @@ function TrackGroup() {
     state: { artist, isLoading: isLoadingArtist, userStripeStatus },
   } = useArtistContext();
   const { artistId, trackGroupId } = useParams();
-  const {
-    state: { user },
-  } = useGlobalStateContext();
+  const { user } = useAuthContext();
 
   const { object: trackGroup, isLoadingObject: isLoadingTrackGroup } =
     usePublicObjectById<TrackGroup>(

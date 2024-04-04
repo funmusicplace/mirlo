@@ -1,5 +1,7 @@
 import { css } from "@emotion/css";
-import useArtistColors from "utils/useArtistColors";
+import { useQuery } from "@tanstack/react-query";
+import { queryArtist } from "queries";
+import { useParams } from "react-router-dom";
 
 const colorDefined = (color?: string) => {
   return color && color !== "";
@@ -8,7 +10,10 @@ const colorDefined = (color?: string) => {
 const ArtistColorsWrapper: React.FC<{ children: React.ReactElement }> = ({
   children,
 }) => {
-  const artistColors = useArtistColors();
+  const params = useParams();
+  const artistId = params?.artistId ?? "";
+  const { data: artist } = useQuery(queryArtist(artistId));
+  const artistColors = artist?.properties?.colors;
 
   return (
     <div

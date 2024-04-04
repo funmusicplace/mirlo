@@ -1,17 +1,15 @@
 import Button from "components/common/Button";
 import React from "react";
 import api from "services/api";
-import { useGlobalStateContext } from "state/GlobalState";
 
 import { useTranslation } from "react-i18next";
 import { useArtistContext } from "state/ArtistContext";
 import { useParams } from "react-router-dom";
 import { FaDownload } from "react-icons/fa";
+import { useAuthContext } from "state/AuthContext";
 
 const ArtistSubscriberDataDownload: React.FC = () => {
-  const {
-    state: { user },
-  } = useGlobalStateContext();
+  const { user } = useAuthContext();
   const { t } = useTranslation("translation", {
     keyPrefix: "manageSubscriptions",
   });

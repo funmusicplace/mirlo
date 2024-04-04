@@ -3,20 +3,19 @@ import Button from "./Button";
 import Modal from "./Modal";
 import SpaceBetweenDiv from "./SpaceBetweenDiv";
 import api from "services/api";
-import { useGlobalStateContext } from "state/GlobalState";
 import { Controller, FormProvider, useForm } from "react-hook-form";
 import SupportArtistPopUpTiers from "./SupportArtistPopUpTiers";
 import { useSnackbar } from "state/SnackbarContext";
-import { checkArtistStripeStatus } from "state/ArtistContext";
 import { useTranslation } from "react-i18next";
 import FollowArtist from "./FollowArtist";
 import FormComponent from "./FormComponent";
 import { InputEl } from "./Input";
+import { useAuthContext } from "state/AuthContext";
+import { useQuery } from "@tanstack/react-query";
+import { queryArtist, queryUserStripeStatus } from "queries";
 
 const SupportArtistPopUp: React.FC<{ artist: Artist }> = ({ artist }) => {
   const [isOpen, setIsOpen] = React.useState(false);
-  const [stripeAccountStatus, setStripeAccountStatus] =
-    React.useState<AccountStatus>();
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const methods = useForm<{
     tier: {
@@ -27,48 +26,28 @@ const SupportArtistPopUp: React.FC<{ artist: Artist }> = ({ artist }) => {
     };
     email: string;
   }>();
-  const [options, setOptions] = React.useState<
-    { name: string; id: number; description: string }[]
-  >([]);
 
-  const {
-    state: { user },
-    refreshLoggedInUser,
-  } = useGlobalStateContext();
+  const { user, refreshLoggedInUser } = useAuthContext();
   const [isCheckingForSubscription, setIsCheckingForSubscription] =
     React.useState(false);
   const snackbar = useSnackbar();
 
+  const { data: artistDetails } = useQuery(queryArtist(artist.urlSlug ?? "", true));
+  const { data: stripeAccountStatus } = useQuery(queryUserStripeStatus(artist.userId));
+
+  const options = artistDetails?.subscriptionTiers ?? [];
+
   React.useEffect(() => {
-    const checkStripe = async () => {
-      const status = await checkArtistStripeStatus(artist.userId);
-      if (status) {
-        setStripeAccountStatus(status.result);
-      }
-    };
-
-    const callback = async () => {
-      const artistDetails = await api.get<Artist>(
-        `artists/${artist.id}/?includeDefaultTier=true`
-      );
-
-      setOptions(artistDetails.result.subscriptionTiers);
-
+    if (isOpen) {
       const foundTier = user?.artistUserSubscriptions?.find(
         (sub) => sub.artistSubscriptionTier.artistId === artist.id
       )?.artistSubscriptionTier;
       if (foundTier) {
         methods.setValue("tier", foundTier);
       }
-    };
-
-    checkStripe();
-    if (isOpen) {
-      callback();
     }
   }, [
     artist.id,
-    artist.userId,
     isOpen,
     methods,
     user?.artistUserSubscriptions,

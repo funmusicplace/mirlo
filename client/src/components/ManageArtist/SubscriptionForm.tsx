@@ -8,13 +8,13 @@ import FormComponent from "components/common/FormComponent";
 import { useSnackbar } from "state/SnackbarContext";
 import { pick } from "lodash";
 import api from "../../services/api";
-import { useGlobalStateContext } from "state/GlobalState";
 import Box from "components/common/Box";
 import useErrorHandler from "services/useErrorHandler";
 import { useTranslation } from "react-i18next";
 import { css } from "@emotion/css";
 import FormCheckbox from "components/common/FormCheckbox";
 import FormError from "components/common/FormError";
+import { useAuthContext } from "state/AuthContext";
 
 const generateDefaultValues = (existing?: ArtistSubscriptionTier) => {
   const vals = {
@@ -34,9 +34,7 @@ const SubscriptionForm: React.FC<{
     keyPrefix: "subscriptionForm",
   });
 
-  const {
-    state: { user },
-  } = useGlobalStateContext();
+  const { user } = useAuthContext();
   const snackbar = useSnackbar();
   const errorHandler = useErrorHandler();
   const [isSaving, setIsSaving] = React.useState(false);

@@ -12,6 +12,8 @@ import { SnackBarContextProvider } from "state/SnackbarContext";
 import { ThemeProvider } from "@emotion/react";
 import { theme } from "utils/theme";
 import routes from "routes";
+import { QueryClientWrapper } from "queries/QueryClientWrapper";
+import { AuthContextProvider } from "state/AuthContext";
 
 const router = createBrowserRouter(routes);
 
@@ -21,13 +23,17 @@ const root = ReactDOM.createRoot(
 
 root.render(
   <React.StrictMode>
-    <ThemeProvider theme={theme}>
-      <GlobalStateProvider>
-        <SnackBarContextProvider>
-          <RouterProvider router={router} />
-        </SnackBarContextProvider>
-      </GlobalStateProvider>
-    </ThemeProvider>
+    <QueryClientWrapper>
+      <AuthContextProvider>
+        <ThemeProvider theme={theme}>
+          <GlobalStateProvider>
+            <SnackBarContextProvider>
+              <RouterProvider router={router} />
+            </SnackBarContextProvider>
+          </GlobalStateProvider>
+        </ThemeProvider>
+      </AuthContextProvider>
+    </QueryClientWrapper>
   </React.StrictMode>
 );
 

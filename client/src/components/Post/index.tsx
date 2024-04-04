@@ -6,7 +6,6 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { FaPen } from "react-icons/fa";
 import { Link, useParams } from "react-router-dom";
-import { useGlobalStateContext } from "state/GlobalState";
 import usePublicObjectById from "utils/usePublicObjectById";
 import { bp } from "../../constants";
 import Box from "components/common/Box";
@@ -17,6 +16,7 @@ import SupportArtistPopUp from "components/common/SupportArtistPopUp";
 import Avatar from "components/Artist/Avatar";
 import styled from "@emotion/styled";
 import MarkdownWrapper from "components/common/MarkdownWrapper";
+import { useAuthContext } from "state/AuthContext";
 
 export const PageMarkdownWrapper = styled.div`
   width: 100%;
@@ -70,9 +70,7 @@ export const PageMarkdownWrapper = styled.div`
 const Post: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "post" });
 
-  const {
-    state: { user },
-  } = useGlobalStateContext();
+  const { user } = useAuthContext();
   const { postId } = useParams();
   const { object: post, isLoadingObject } = usePublicObjectById<Post>(
     "posts",

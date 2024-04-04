@@ -6,21 +6,21 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import api from "services/api";
-import { useGlobalStateContext } from "state/GlobalState";
+import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
 
 type Form = { currency: string };
 
 const CurrencySelect = () => {
-  const { state, refreshLoggedInUser } = useGlobalStateContext();
-  const userId = state.user?.id;
+  const { user, refreshLoggedInUser } = useAuthContext();
+  const userId = user?.id;
 
   const { t } = useTranslation("translation", { keyPrefix: "manage" });
   const snackbar = useSnackbar();
 
   const { register, handleSubmit } = useForm<Form>({
     defaultValues: {
-      currency: state.user?.currency,
+      currency: user?.currency,
     },
   });
 

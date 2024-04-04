@@ -8,10 +8,10 @@ import { IoLocationSharp } from "react-icons/io5";
 import React from "react";
 import api from "services/api";
 import { useArtistContext } from "state/ArtistContext";
-import { useGlobalStateContext } from "state/GlobalState";
 import { useSnackbar } from "state/SnackbarContext";
 import { FaPen } from "react-icons/fa";
 import { bp } from "../../constants";
+import { useAuthContext } from "state/AuthContext";
 
 interface FormData {
   location: string;
@@ -23,9 +23,7 @@ const ArtistFormLocation: React.FC<{ isManage: boolean }> = ({ isManage }) => {
     state: { artist },
     refresh,
   } = useArtistContext();
-  const {
-    state: { user },
-  } = useGlobalStateContext();
+  const { user } = useAuthContext();
   const artistId = artist?.id;
   const artistUserId = artist?.userId;
   const isArtistManager = artistUserId === user?.id;

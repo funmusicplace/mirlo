@@ -1,5 +1,4 @@
 import { useTranslation } from "react-i18next";
-import { useGlobalStateContext } from "state/GlobalState";
 import styled from "@emotion/styled";
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
@@ -13,6 +12,7 @@ import { FaArrowRight, FaPlus } from "react-icons/fa";
 import { css } from "@emotion/css";
 import { Link, useNavigate } from "react-router-dom";
 import useErrorHandler from "services/useErrorHandler";
+import { useAuthContext } from "state/AuthContext";
 
 const PageWrapper = styled.div`
   padding: 1rem;
@@ -44,9 +44,7 @@ const nextButtonText = (step: number, currentStepValue?: unknown) => {
 const steps: ("name" | "urlSlug" | "avatar")[] = ["name", "urlSlug", "avatar"];
 
 const Welcome = () => {
-  const {
-    state: { user },
-  } = useGlobalStateContext();
+  const { user } = useAuthContext();
   const errorHandler = useErrorHandler();
   const navigate = useNavigate();
   const userId = user?.id;

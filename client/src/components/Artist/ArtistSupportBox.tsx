@@ -1,7 +1,6 @@
 import { css } from "@emotion/css";
 import React from "react";
 import api from "services/api";
-import { useGlobalStateContext } from "state/GlobalState";
 import { useSnackbar } from "state/SnackbarContext";
 import Box from "../common/Box";
 import Money from "../common/Money";
@@ -15,6 +14,7 @@ import styled from "@emotion/styled";
 import ArtistVariableSupport, {
   SupportBoxButton,
 } from "./ArtistVariableSupport";
+import { useAuthContext } from "state/AuthContext";
 
 const StyledSupportBox = styled(Box)`
   background-color: var(--mi-darken-background-color);
@@ -40,10 +40,7 @@ const ArtistSupportBox: React.FC<{
   subscriptionTier: ArtistSubscriptionTier;
 }> = ({ subscriptionTier }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
-  const {
-    state: { user },
-    refreshLoggedInUser,
-  } = useGlobalStateContext();
+  const { user, refreshLoggedInUser } = useAuthContext();
   const {
     state: { artist },
     refresh,

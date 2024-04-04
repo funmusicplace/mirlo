@@ -4,12 +4,12 @@ import { WidthWrapper } from "components/common/WidthContainer";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import api from "services/api";
-import { useGlobalStateContext } from "state/GlobalState";
 
 import UserBoughtYourAlbum from "./UserBoughtYourAlbum";
 import NewArtistPost from "./NewArtistPost";
 import NewArtistAlbum from "./NewArtistAlbum";
 import UserFollowedYou from "./UserFollowedYou";
+import { useAuthContext } from "state/AuthContext";
 
 const LI = styled.li<{ isRead: boolean }>`
   background-color: ${(props) =>
@@ -27,9 +27,7 @@ const UserNotificationFeed = () => {
   const { t } = useTranslation("translation", { keyPrefix: "notifications" });
   const [notifications, setNotifications] = React.useState<Notification[]>([]);
   const hoverRef = React.useRef<NodeJS.Timeout>();
-  const {
-    state: { user },
-  } = useGlobalStateContext();
+  const { user } = useAuthContext();
   const userId = user?.id;
 
   const fetchNotifications = React.useCallback(

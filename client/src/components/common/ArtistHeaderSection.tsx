@@ -8,7 +8,6 @@ import ArtistFormLinks from "components/ManageArtist/ArtistFormLinks";
 import Avatar from "components/Artist/Avatar";
 import ArtistFormLocation from "components/ManageArtist/ArtistFormLocation";
 import ArtistHeaderDescription from "components/Artist/ArtistHeaderDescription";
-import { useArtistContext } from "state/ArtistContext";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 
 const H1 = styled.h1<{ artistAvatar: boolean }>`
@@ -79,13 +78,11 @@ const ArtistActions = styled.div`
   }
 `;
 
-const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
+const ArtistHeaderSection: React.FC<{ artist: Artist|undefined; isLoading: boolean; isManage: boolean }> = ({
+  artist,
+  isLoading,
   isManage,
 }) => {
-  const {
-    state: { artist, isLoading },
-  } = useArtistContext();
-
   const artistAvatar = artist?.avatar;
 
   if (!artist && isLoading) {
@@ -217,7 +214,7 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
           }
         `}
       >
-        <ArtistFormLinks isManage={!!isManage} />
+        <ArtistFormLinks artist={artist} isManage={!!isManage} />
       </div>
     </div>
   );

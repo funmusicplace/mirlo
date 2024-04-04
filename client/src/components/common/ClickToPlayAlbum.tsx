@@ -5,6 +5,7 @@ import { useGlobalStateContext } from "state/GlobalState";
 import api from "services/api";
 
 import PlayControlButton from "./PlayControlButton";
+import { useAuthContext } from "state/AuthContext";
 type WrapperProps = {
   width: number;
   height: number;
@@ -51,9 +52,10 @@ const ClickToPlayAlbum: React.FC<{
   className?: string;
 }> = ({ trackGroupId, image, className }) => {
   const {
-    state: { playing, user, playerQueueIds, currentlyPlayingIndex },
+    state: { playing, playerQueueIds, currentlyPlayingIndex },
     dispatch,
   } = useGlobalStateContext();
+  const { user } = useAuthContext();
   const [trackIds, setTrackIds] = React.useState<number[]>([]);
 
   const userId = user?.id;

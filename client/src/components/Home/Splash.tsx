@@ -5,7 +5,7 @@ import { Trans, useTranslation } from "react-i18next";
 import Button from "components/common/Button";
 import styled from "@emotion/styled";
 import { bp } from "../../constants";
-import { useGlobalStateContext } from "state/GlobalState";
+import { useAuthContext } from "state/AuthContext";
 
 export const SplashWrapper = styled.div`
   display: flex;
@@ -49,9 +49,7 @@ export const SplashButtonWrapper = styled.div`
 `;
 
 const Splash = () => {
-  const {
-    state: { user },
-  } = useGlobalStateContext();
+  const { user } = useAuthContext();
   const { t } = useTranslation("translation", { keyPrefix: "home" });
 
   return (

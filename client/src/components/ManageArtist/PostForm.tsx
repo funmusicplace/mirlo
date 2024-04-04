@@ -7,7 +7,6 @@ import FormComponent from "components/common/FormComponent";
 import { useSnackbar } from "state/SnackbarContext";
 import { pick } from "lodash";
 import api from "../../services/api";
-import { useGlobalStateContext } from "state/GlobalState";
 import { css } from "@emotion/css";
 import { useTranslation } from "react-i18next";
 import { SelectEl } from "components/common/Select";
@@ -15,6 +14,7 @@ import useGetUserObjectById from "utils/useGetUserObjectById";
 import useErrorHandler from "services/useErrorHandler";
 import TextEditor from "components/common/TextEditor";
 import Box from "components/common/Box";
+import { useAuthContext } from "state/AuthContext";
 
 type FormData = {
   title: string;
@@ -31,9 +31,7 @@ const PostForm: React.FC<{
   artist: Artist;
   onClose?: () => void;
 }> = ({ reload, artist, existing, onClose }) => {
-  const {
-    state: { user },
-  } = useGlobalStateContext();
+  const { user } = useAuthContext();
   const snackbar = useSnackbar();
   const errorHandler = useErrorHandler();
   const [isSaving, setIsSaving] = React.useState(false);

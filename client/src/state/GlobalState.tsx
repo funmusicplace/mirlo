@@ -1,10 +1,8 @@
 import React, { createContext } from "react";
 import produce from "immer";
 import { clone, pullAt, shuffle } from "lodash";
-import api from "services/api";
 
 export interface GlobalState {
-  user?: LoggedInUser;
   playerQueueIds: number[];
   token?: string;
   playing?: boolean;
@@ -16,11 +14,6 @@ export interface GlobalState {
   checkFavoriteStatusFlag?: number;
   cookieDisclaimerRead?: boolean;
 }
-
-type SetLoggedInUser = {
-  type: "setLoggedInUser";
-  user?: LoggedInUser;
-};
 
 type setCookieDisclaimerRead = {
   type: "setCookieDisclaimerRead";
@@ -102,7 +95,6 @@ type SetUserCredits = {
 };
 
 type Actions =
-  | SetLoggedInUser
   | SetState
   | AddToBackQueue
   | SetToken
@@ -142,9 +134,6 @@ export const stateReducer = produce((draft: GlobalState, action: Actions) => {
         draft.playerQueueIds = [...firstId, ...shuffle(draft.playerQueueIds)];
       }
       draft.currentlyPlayingIndex = 0;
-      break;
-    case "setLoggedInUser":
-      draft.user = action.user;
       break;
     case "setLooping":
       draft.looping = action.looping;
@@ -274,14 +263,5 @@ export const GlobalStateProvider: React.FC<GlobalStateProviderProps> = ({
 
 export const useGlobalStateContext = () => {
   const [state, dispatch] = React.useContext(GlobalContext);
-
-  const refreshLoggedInUser = React.useCallback(async () => {
-    const user = await api.get<LoggedInUser>("profile");
-    dispatch({
-      type: "setLoggedInUser",
-      user: user.result,
-    });
-  }, [dispatch]);
-
-  return { state, dispatch, refreshLoggedInUser };
+  return { state, dispatch };
 };

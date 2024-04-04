@@ -11,11 +11,11 @@ import FormComponent from "components/common/FormComponent";
 import { FormProvider, useForm } from "react-hook-form";
 import EmailInput from "./EmailInput";
 import PlatformPercent from "components/common/PlatformPercent";
-import { css } from "@emotion/css";
-import { useGlobalStateContext } from "state/GlobalState";
+import { css } from "@emotion/css"
 import { useArtistContext } from "state/ArtistContext";
 import Tooltip from "components/common/Tooltip";
 import { testOwnership } from "./utils";
+import { useAuthContext } from "state/AuthContext";
 
 interface FormData {
   chosenPrice: string;
@@ -28,9 +28,7 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup }> = ({
   const snackbar = useSnackbar();
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
 
-  const {
-    state: { user },
-  } = useGlobalStateContext();
+  const { user } = useAuthContext();
   const { state: artistState } = useArtistContext();
 
   const userId = user?.id;

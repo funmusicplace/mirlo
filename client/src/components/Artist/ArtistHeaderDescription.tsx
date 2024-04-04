@@ -1,17 +1,17 @@
 import { css } from "@emotion/css";
 import MarkdownContent from "components/common/MarkdownContent";
-import { useGlobalStateContext } from "state/GlobalState";
 import { useTranslation } from "react-i18next";
 import Button from "components/common/Button";
 import React from "react";
-import { useArtistContext } from "state/ArtistContext";
-import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
 import { useForm } from "react-hook-form";
 import { FaChevronDown, FaPen, FaSave, FaTimes } from "react-icons/fa";
 import TextArea from "components/common/TextArea";
 import { bp } from "../../constants";
-import { useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
+import { useAuthContext } from "state/AuthContext";
+import { useQuery } from "@tanstack/react-query";
+import { queryArtist, useUpdateArtistMutation } from "queries";
 
 interface FormData {
   bio: string;
@@ -20,13 +20,9 @@ interface FormData {
 const collapsedHeight = 65;
 
 const ArtistHeaderDescription: React.FC = () => {
-  const {
-    state: { user },
-  } = useGlobalStateContext();
-  const {
-    state: { artist },
-    refresh,
-  } = useArtistContext();
+  const { artistId } = useParams();
+  const { user } = useAuthContext();
+  const { data: artist } = useQuery(queryArtist(artistId ?? ""));
   const [searchParams] = useSearchParams();
   const isHeaderExpanded = searchParams.get("expandHeader");
 
@@ -37,32 +33,35 @@ const ArtistHeaderDescription: React.FC = () => {
   const [isCollapsed, setIsCollapsed] = React.useState(false);
   const [canCollapse, setCanCollapse] = React.useState(false);
   const userId = user?.id;
-  const artistId = artist?.id;
   const artistUserId = artist?.userId;
   const { register, handleSubmit, reset } = useForm<FormData>({
     defaultValues: { bio: artist?.bio },
   });
 
-  const isArtistManager = userId === artistUserId;
+  const { mutate: updateArtist } = useUpdateArtistMutation();
+
+  const isArtistManager = userId && Number(userId) === Number(artistUserId);
 
   let bio = artist?.bio;
 
   const doSave = React.useCallback(
     async (data: FormData) => {
-      try {
-        if (isArtistManager) {
-          await api.put(`users/${userId}/artists/${artistId}`, {
+      if (isArtistManager) {
+        updateArtist({
+          userId: Number(userId),
+          artistId: Number(artistId),
+          body: {
             bio: data.bio,
-          });
-        }
-        refresh();
-        snackbar(t("updatedBio"), { type: "success" });
-      } catch (e) {
-      } finally {
-        setIsEditing(false);
+          },
+        }, {
+          onSuccess() {
+            snackbar(t("updatedBio"), { type: "success" });
+            setIsEditing(false);
+          }
+        });
       }
     },
-    [isArtistManager, refresh, snackbar, t, userId, artistId]
+    [isArtistManager, updateArtist, snackbar, t, userId, artistId]
   );
 
   React.useEffect(() => {

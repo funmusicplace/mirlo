@@ -6,8 +6,8 @@ import Button from "components/common/Button";
 import { useTranslation } from "react-i18next";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import Modal from "components/common/Modal";
-import { useGlobalStateContext } from "state/GlobalState";
 import api from "services/api";
+import { useAuthContext } from "state/AuthContext";
 
 export interface FormData {
   trackArtists: {
@@ -31,9 +31,7 @@ const ManageTrackArtists: React.FC<{
     },
   });
   const { control, handleSubmit, reset } = methods;
-  const {
-    state: { user },
-  } = useGlobalStateContext();
+  const { user } = useAuthContext();
   const userId = user?.id;
 
   const { fields, append } = useFieldArray({

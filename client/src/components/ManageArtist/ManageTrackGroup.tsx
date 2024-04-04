@@ -6,7 +6,6 @@ import AlbumForm from "./AlbumForm";
 import BulkTrackUpload from "./BulkTrackUpload";
 import ManageTrackTable from "./ManageTrackTable";
 import useGetUserObjectById from "utils/useGetUserObjectById";
-import { useGlobalStateContext } from "state/GlobalState";
 import PublishButton from "./PublishButton";
 import { bp } from "../../constants";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
@@ -15,14 +14,13 @@ import { css } from "@emotion/css";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import BackToArtistLink from "./BackToArtistLink";
 import ManageTags from "./AlbumFormComponents/ManageTags";
+import { useAuthContext } from "state/AuthContext";
 
 const ManageTrackGroup: React.FC<{}> = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
 
   const { artistId, trackGroupId } = useParams();
-  const {
-    state: { user },
-  } = useGlobalStateContext();
+  const { user } = useAuthContext();
   const {
     state: { artist, isLoading },
   } = useArtistContext();

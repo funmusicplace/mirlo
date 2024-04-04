@@ -6,7 +6,6 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router-dom";
 import api from "services/api";
-import { useGlobalStateContext } from "state/GlobalState";
 import { isTrackOwnedOrPreview, widgetUrl } from "utils/tracks";
 import {
   FlexWrapper,
@@ -27,15 +26,14 @@ import {
   getReleaseUrl,
 } from "utils/artist";
 import { bp } from "../../constants";
+import { useAuthContext } from "state/AuthContext";
 
 const TrackGroupWidget = () => {
   const { t } = useTranslation("translation", {
     keyPrefix: "trackGroupDetails",
   });
   const params = useParams();
-  const {
-    state: { user },
-  } = useGlobalStateContext();
+  const { user } = useAuthContext();
 
   const { currentTrack } = useCurrentTrackHook();
 

@@ -22,7 +22,6 @@ import TrackGroup from "components/TrackGroup/TrackGroup";
 import About from "components/pages/About";
 import { AuthWrapper } from "components/AuthWrapper";
 import Signup from "components/Signup";
-import { ArtistProvider } from "state/ArtistContext";
 import ManageTrackGroup from "components/ManageArtist/ManageTrackGroup";
 import Releases from "components/Releases";
 import ManageContainer from "components/ManageArtist/ManageContainer";
@@ -59,11 +58,7 @@ import ArtistUnsubscribe from "components/Artist/ArtistUnsubscribe";
 const routes = [
   {
     path: "/",
-    element: (
-      <ArtistProvider>
-        <App />
-      </ArtistProvider>
-    ),
+    element: <App />,
     errorElement: <ErrorPage />,
     children: [
       { path: "", element: <Home /> },

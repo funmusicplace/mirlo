@@ -5,22 +5,22 @@ import api from "services/api";
 import Button from "../common/Button";
 import CreateNewArtistForm from "./ArtistForm";
 import { bp } from "../../constants";
-import { useGlobalStateContext } from "state/GlobalState";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import Box from "components/common/Box";
 import CountrySelect from "./CountrySelectForm";
 import WidthContainer from "components/common/WidthContainer";
+import { useAuthContext } from "state/AuthContext";
 
 export const Manage: React.FC = () => {
-  const { state } = useGlobalStateContext();
+  const { user } = useAuthContext();
   const [artists, setArtists] = React.useState<Artist[]>([]);
   const [stripeAccountStatus, setStripeAccountStatus] =
     React.useState<AccountStatus>();
   const [creatingNewArtist, setCreatingNewArtist] = React.useState(false);
   const { t } = useTranslation("translation", { keyPrefix: "manage" });
 
-  const userId = state.user?.id;
+  const userId = user?.id;
 
   const fetchArtists = React.useCallback(async () => {
     if (userId) {
@@ -113,7 +113,6 @@ export const Manage: React.FC = () => {
             <CreateNewArtistForm
               open={creatingNewArtist}
               onClose={() => setCreatingNewArtist(false)}
-              reload={fetchArtists}
             />
           </div>
           <div

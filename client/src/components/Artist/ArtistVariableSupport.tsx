@@ -9,7 +9,7 @@ import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import api from "services/api";
 import { useArtistContext } from "state/ArtistContext";
-import { useGlobalStateContext } from "state/GlobalState";
+import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
 
 export const SupportBoxButton = styled(Button)`
@@ -28,7 +28,7 @@ const ArtistVariableSupport: React.FC<{
       amount: tier.minAmount ? tier.minAmount / 100 : 0,
     },
   });
-  const { refreshLoggedInUser } = useGlobalStateContext();
+  const { refreshLoggedInUser } = useAuthContext();
   const [open, setOpen] = React.useState(false);
   const [isCheckingForSubscription, setIsCheckingForSubscription] =
     React.useState(false);

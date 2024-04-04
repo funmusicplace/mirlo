@@ -6,9 +6,9 @@ import { InputEl } from "../common/Input";
 import { SelectEl } from "../common/Select";
 import FormComponent from "components/common/FormComponent";
 import { useSnackbar } from "state/SnackbarContext";
-import { useGlobalStateContext } from "state/GlobalState";
 import Table from "components/common/Table";
 import { useTranslation } from "react-i18next";
+import { useAuthContext } from "state/AuthContext";
 
 export interface ShareableTrackgroup {
   creatorId: number;
@@ -32,9 +32,7 @@ export const NewTrack: React.FC<{
     name: "trackArtists",
   });
 
-  const {
-    state: { user },
-  } = useGlobalStateContext();
+  const { user } = useAuthContext();
 
   const [isSaving, setIsSaving] = React.useState(false);
   const { t } = useTranslation("translation", { keyPrefix: "newTrack" });

@@ -1,14 +1,12 @@
 import { css } from "@emotion/css";
 import React from "react";
 import api from "services/api";
-import { useGlobalStateContext } from "state/GlobalState";
 import Pill from "./Pill";
+import { useAuthContext } from "state/AuthContext";
 
 const UnreadCountPill = () => {
   const [unreadCount, setUnreadCount] = React.useState(0);
-  const {
-    state: { user },
-  } = useGlobalStateContext();
+  const { user } = useAuthContext();
   const userId = user?.id;
   React.useEffect(() => {
     const callback = async () => {

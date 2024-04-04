@@ -13,7 +13,7 @@ export const MetaCard: React.FC<{
 }> = ({ title, description, image, player }) => {
   return (
     <Helmet>
-      <title>Mirlo: {title}</title>
+      <title>{`Mirlo: ${title}`}</title>
       <meta name="description" content={description} />
       <meta property="og:title" content={title} />
       <meta property="og:url" content={window.location.pathname} />

@@ -8,6 +8,7 @@ import { useGlobalStateContext } from "state/GlobalState";
 // import { fmtMSS } from "utils/tracks";
 // import { bp } from "../constants";
 import SongTimeDisplay from "./common/SongTimeDisplay";
+import { useAuthContext } from "state/AuthContext";
 
 const hlsConfig = {
   xhrSetup: function (xhr: XMLHttpRequest, url: string) {
@@ -26,9 +27,10 @@ export const AudioWrapper: React.FC<{
   volume?: number;
 }> = ({ currentTrack, hideControls = false, position, volume = 1 }) => {
   const {
-    state: { playerQueueIds, currentlyPlayingIndex, user, playing, looping },
+    state: { playerQueueIds, currentlyPlayingIndex, playing, looping },
     dispatch,
   } = useGlobalStateContext();
+  const { user } = useAuthContext();
   // const [currentTime, setCurrentTime] = React.useState("0:00");
   const [mostlyListened, setMostlyListened] = React.useState(false);
   const [currentSeconds, setCurrentSeconds] = React.useState(0);

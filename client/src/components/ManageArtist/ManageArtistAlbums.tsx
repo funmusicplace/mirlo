@@ -3,7 +3,6 @@ import Button from "components/common/Button";
 import React from "react";
 import { Link, useParams } from "react-router-dom";
 import api from "services/api";
-import { useGlobalStateContext } from "state/GlobalState";
 import TrackGroupCard from "./TrackGroupCard";
 import { useTranslation } from "react-i18next";
 import { useArtistContext } from "state/ArtistContext";
@@ -11,11 +10,10 @@ import LoadingBlocks from "components/Artist/LoadingBlocks";
 import { FaPlus, FaWrench } from "react-icons/fa";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import ManageSectionWrapper from "./ManageSectionWrapper";
+import { useAuthContext } from "state/AuthContext";
 
 const ManageArtistAlbums: React.FC<{}> = () => {
-  const {
-    state: { user },
-  } = useGlobalStateContext();
+  const { user } = useAuthContext();
   const {
     state: { artist, isLoading },
   } = useArtistContext();

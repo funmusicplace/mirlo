@@ -2,20 +2,18 @@ import Modal from "components/common/Modal";
 import React from "react";
 import { css } from "@emotion/css";
 import { useTranslation } from "react-i18next";
-import { useGlobalStateContext } from "state/GlobalState";
 import BuyTrackGroup from "components/TrackGroup/BuyTrackGroup";
 import { useArtistContext } from "state/ArtistContext";
 import DownloadAlbumButton from "components/common/DownloadAlbumButton";
 import Button from "components/common/Button";
 import AddToCollection from "./AddToCollection";
+import { useAuthContext } from "state/AuthContext";
 
 const PurchaseOrDownloadAlbum: React.FC<{
   trackGroup: TrackGroup;
 }> = ({ trackGroup }) => {
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
-  const {
-    state: { user },
-  } = useGlobalStateContext();
+  const { user } = useAuthContext();
   const [isPurchasingAlbum, setIsPurchasingAlbum] = React.useState(false);
   const [isOwned, setIsOwned] = React.useState(false);
   const { state: artistState } = useArtistContext();

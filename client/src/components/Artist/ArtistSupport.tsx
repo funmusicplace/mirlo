@@ -2,7 +2,6 @@ import Box from "components/common/Box";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
-import { useGlobalStateContext } from "state/GlobalState";
 import ArtistManageSubscription from "./ArtistManageSubscription";
 import ArtistSupportBox from "./ArtistSupportBox";
 import { css } from "@emotion/css";
@@ -11,12 +10,12 @@ import FollowArtist from "components/common/FollowArtist";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import { useArtistContext } from "state/ArtistContext";
 import { PostGrid } from "./ArtistPosts";
+import { useAuthContext } from "state/AuthContext";
+import { useQueryClient } from "@tanstack/react-query";
+import { QUERY_KEY_AUTH } from "queries/keys";
 
 const ArtistSupport: React.FC = () => {
-  const {
-    state: { user },
-    refreshLoggedInUser,
-  } = useGlobalStateContext();
+  const { user } = useAuthContext();
 
   const {
     state: { artist, userStripeStatus },
@@ -60,16 +59,19 @@ const ArtistSupport: React.FC = () => {
     checkForSubscription();
   }, [checkForSubscription]);
 
+  const queryClient = useQueryClient();
   React.useEffect(() => {
     const query = new URLSearchParams(search);
     let interval: NodeJS.Timer | null = null;
     if (query.get("subscribe") === "success") {
       interval = setTimeout(async () => {
-        refreshLoggedInUser();
+        await queryClient.invalidateQueries({
+          predicate: query => query.queryKey.includes(QUERY_KEY_AUTH),
+        });
       }, 1000 * 3);
     }
     return () => (interval ? clearTimeout(interval) : undefined);
-  }, [refreshLoggedInUser, search]);
+  }, [queryClient, search]);
 
   if (!artist) {
     return null;

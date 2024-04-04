@@ -2,7 +2,6 @@ import { css } from "@emotion/css";
 import { FaPen } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import ClickToPlayAlbum from "../common/ClickToPlayAlbum";
-import { useGlobalStateContext } from "state/GlobalState";
 import Button from "../common/Button";
 import { useTranslation } from "react-i18next";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
@@ -14,6 +13,7 @@ import TrackGroupAdminMenu from "./TrackGroupAdminMenu";
 
 import React from "react";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
+import { useAuthContext } from "state/AuthContext";
 
 const TrackGroupTitle: React.FC<{ trackGroup: TrackGroup }> = ({
   trackGroup,
@@ -24,9 +24,7 @@ const TrackGroupTitle: React.FC<{ trackGroup: TrackGroup }> = ({
   const {
     state: { artist, isLoading: isLoadingArtist },
   } = useArtistContext();
-  const {
-    state: { user },
-  } = useGlobalStateContext();
+  const { user } = useAuthContext();
 
   if (!artist && !isLoadingArtist) {
     return <LoadingBlocks rows={1} />;
