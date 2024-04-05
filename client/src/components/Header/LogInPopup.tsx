@@ -1,3 +1,4 @@
+import { css } from "@emotion/css";
 import Button from "components/common/Button";
 import LogInForm from "components/common/LogInForm";
 import Modal from "components/common/Modal";
@@ -14,6 +15,9 @@ const LogInPopup = () => {
         onlyIcon
         startIcon={<FaUserAlt />}
         onClick={() => setIsOpen((val) => !val)}
+        className={css`
+          padding: 1rem;
+        `}
       />
       <Modal
         open={isOpen}
