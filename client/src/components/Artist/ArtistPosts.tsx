@@ -54,7 +54,6 @@ const ArtistPosts: React.FC = () => {
       <div
         className={css`
           display: flex;
-          flex-direction: column;
           align-items: center;
 
           a:hover {
