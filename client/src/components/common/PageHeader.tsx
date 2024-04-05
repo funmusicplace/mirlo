@@ -1,7 +1,6 @@
 import { css } from "@emotion/css";
 import { useLocation, useParams } from "react-router-dom";
 import { bp } from "../../constants";
-import { useGlobalStateContext } from "state/GlobalState";
 import { useArtistContext } from "state/ArtistContext";
 
 const PageHeader = () => {
@@ -9,9 +8,6 @@ const PageHeader = () => {
 
   const isManage = pathname.includes("manage");
   const { trackGroupId, postId } = useParams();
-  const {
-    state: { user },
-  } = useGlobalStateContext();
 
   const artistContext = useArtistContext();
   const artistBanner = artistContext?.state?.artist?.banner;
