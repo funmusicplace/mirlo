@@ -15,7 +15,6 @@ const PageHeader = () => {
 
   const artistContext = useArtistContext();
   const artistBanner = artistContext?.state?.artist?.banner;
-  const userId = user?.id;
 
   const showBanner = !(trackGroupId || postId) || isManage;
 
