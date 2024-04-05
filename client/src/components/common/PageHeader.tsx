@@ -34,8 +34,8 @@ const PageHeader = () => {
             box-shadow: inset 1em -2em 0.8em -1.3em rgba(0, 0, 0, 0.4);
             @media screen and (max-width: ${bp.medium}px) {
               position: absolute;
-              ${userId ? "margin-top: 0px;" : "height: calc(34vh);"}
-              ${!userId ? "position: fixed;" : ""}
+              margin-top: 0px;
+              height: calc(34vh);
             }
           `}
         >
