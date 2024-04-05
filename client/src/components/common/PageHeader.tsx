@@ -1,7 +1,6 @@
 import { css } from "@emotion/css";
 import { useLocation, useParams } from "react-router-dom";
 import { bp } from "../../constants";
-import { useGlobalStateContext } from "state/GlobalState";
 import { useArtistContext } from "state/ArtistContext";
 
 const PageHeader = () => {
@@ -9,13 +8,9 @@ const PageHeader = () => {
 
   const isManage = pathname.includes("manage");
   const { trackGroupId, postId } = useParams();
-  const {
-    state: { user },
-  } = useGlobalStateContext();
 
   const artistContext = useArtistContext();
   const artistBanner = artistContext?.state?.artist?.banner;
-  const userId = user?.id;
 
   const showBanner = !(trackGroupId || postId) || isManage;
 
@@ -34,8 +29,7 @@ const PageHeader = () => {
             box-shadow: inset 1em -2em 0.8em -1.3em rgba(0, 0, 0, 0.4);
             @media screen and (max-width: ${bp.medium}px) {
               position: absolute;
-              ${userId ? "margin-top: 0px;" : "height: calc(34vh);"}
-              ${!userId ? "position: fixed;" : ""}
+              margin-top: 0px;
             }
           `}
         >

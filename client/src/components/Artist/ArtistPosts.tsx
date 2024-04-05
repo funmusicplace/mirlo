@@ -62,7 +62,7 @@ const ArtistPosts: React.FC = () => {
           }
 
           @media screen and (max-width: ${bp.medium}px) {
-            padding: 0rem !important;
+            padding: 0 0 7.5rem 0 !important;
           }
         `}
       >

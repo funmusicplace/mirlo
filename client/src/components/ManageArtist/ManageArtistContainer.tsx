@@ -9,13 +9,12 @@ import styled from "@emotion/styled";
 import { useArtistContext } from "state/ArtistContext";
 import Box from "components/common/Box";
 
-const Container = styled.div<{ artistBanner: boolean; userId?: number }>`
+const Container = styled.div<{ artistBanner: boolean }>`
   width: 100%;
   padding: var(--mi-side-paddings-normal);
   ${(props) =>
     !props.artistBanner ? "margin-top: 0px;" : "margin-top: calc(8vh);"}
-  ${(props) =>
-    props.userId ? "margin-top: calc(8vh - 39px);" : "margin-top: calc(1vh);"}
+  margin-top: calc(8vh - 39px);
   max-width: var(--mi-container-big);
 
   @media screen and (max-width: ${bp.large}px) {
@@ -27,7 +26,6 @@ const Container = styled.div<{ artistBanner: boolean; userId?: number }>`
     padding: 0rem !important;
     width: 100%;
     ${(props) => (props.artistBanner ? "margin-top: 0px;" : "")}
-    ${(props) => (!props.userId ? "margin-top: calc(7vh);" : "")}
     ${(props) => (!props.artistBanner ? "margin-top: 0px;" : "")}
   }
 `;
@@ -36,12 +34,8 @@ export const ArtistPageWrapper: React.FC<{
   children: React.ReactNode;
   artistBanner?: boolean;
 }> = ({ children, artistBanner }) => {
-  const {
-    state: { user },
-  } = useGlobalStateContext();
-  const userId = user?.id;
   return (
-    <Container userId={userId} artistBanner={!!artistBanner}>
+    <Container artistBanner={!!artistBanner}>
       <div
         className={css`
           ${artistBanner

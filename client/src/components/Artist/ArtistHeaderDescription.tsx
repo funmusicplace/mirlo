@@ -17,7 +17,7 @@ interface FormData {
   bio: string;
 }
 
-const collapsedHeight = 75;
+const collapsedHeight = 65;
 
 const ArtistHeaderDescription: React.FC = () => {
   const {
