@@ -35,11 +35,11 @@ function DownloadAlbum() {
       try {
         setIsLoadingTrackGroup(true);
         const tgResponse = await api.get<TrackGroup>(
-          `trackGroups/${trackGroupId}?artistId=${artistId}`
+          `trackGroups/${trackGroupId}?artistId=${artistId}`,
         );
 
         const result = await api.get<{ exists: boolean }>(
-          `trackGroups/${tgResponse.result.id}/testOwns?email=${email}`
+          `trackGroups/${tgResponse.result.id}/testOwns?email=${email}`,
         );
 
         if (result.result.exists) {

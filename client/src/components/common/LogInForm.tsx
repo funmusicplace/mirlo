@@ -30,10 +30,10 @@ const LogInForm: React.FC<{ afterLogIn: () => void }> = ({ afterLogIn }) => {
         onError(e) {
           snackbar(e.message, { type: "warning" });
           console.error(e);
-        }
+        },
       });
     },
-    [login, afterLogIn, snackbar]
+    [login, afterLogIn, snackbar],
   );
 
   return (

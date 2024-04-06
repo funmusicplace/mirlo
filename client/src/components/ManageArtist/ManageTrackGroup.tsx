@@ -35,7 +35,7 @@ const ManageTrackGroup: React.FC<{}> = () => {
     "trackGroups",
     userId,
     trackGroupId,
-    `?artistId=${artistId}`
+    `?artistId=${artistId}`,
   );
 
   if (!artist && isLoading) {

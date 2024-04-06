@@ -25,14 +25,14 @@ export const Manage: React.FC = () => {
   const fetchArtists = React.useCallback(async () => {
     if (userId) {
       const fetchedArtists = await api.getMany<Artist>(
-        `users/${userId}/artists`
+        `users/${userId}/artists`,
       );
       if (fetchedArtists) {
         setArtists(fetchedArtists.results);
       }
 
       const checkAccountStatus = await api.get<AccountStatus>(
-        `users/${userId}/stripe/checkAccountStatus`
+        `users/${userId}/stripe/checkAccountStatus`,
       );
       setStripeAccountStatus(checkAccountStatus.result);
     }

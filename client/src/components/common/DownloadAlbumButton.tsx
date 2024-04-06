@@ -39,7 +39,7 @@ const DownloadAlbumButton: React.FC<{
       }
       const resp = await api.downloadFileDirectly(
         `trackGroups/${trackGroup.id}/download?${queryParams.toString()}`,
-        `${trackGroup.title.replaceAll(".", "-")}.zip`
+        `${trackGroup.title.replaceAll(".", "-")}.zip`,
       );
       if (resp) {
         if ((resp as any).result.jobId) {
@@ -68,14 +68,14 @@ const DownloadAlbumButton: React.FC<{
     if (isGeneratingAlbum > 0) {
       interval = setInterval(async () => {
         const result = await api.getMany<{ jobStatus: string }>(
-          `jobs?queue=generateAlbum&ids=${isGeneratingAlbum}`
+          `jobs?queue=generateAlbum&ids=${isGeneratingAlbum}`,
         );
         console.log("got result", result);
         if (result.results[0]?.jobStatus === "completed") {
           console.log("job status is completed");
           await api.downloadFileDirectly(
             `trackGroups/${trackGroup.id}/download?format=${chosenFormat}`,
-            `${trackGroup.title}.zip`
+            `${trackGroup.title}.zip`,
           );
           setIsDownloading(false);
           setIsGeneratingAlbum(0);

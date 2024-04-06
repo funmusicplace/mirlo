@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { queryAuthProfile, useAuthRefreshMutation } from "queries";
 import { QUERY_KEY_AUTH } from "queries/keys";
-import React, { useMemo } from "react"
+import React, { useMemo } from "react";
 
 const AuthContext = React.createContext<{
   /**
@@ -10,7 +10,7 @@ const AuthContext = React.createContext<{
    * - null: the query has resolved, and the user is not logged in
    * - [LoggedInUser]: the user is logged in
    */
-  user?: LoggedInUser|null;
+  user?: LoggedInUser | null;
 }>({
   user: undefined,
 });
@@ -25,20 +25,23 @@ export function AuthContextProvider({ children }: React.PropsWithChildren) {
     let interval: NodeJS.Timer | null = null;
 
     if (userId) {
-      interval = setInterval(async () => {
-        authRefresh();
-      }, 1000 * 60 * 5); // refresh every 5 minutes
+      interval = setInterval(
+        async () => {
+          authRefresh();
+        },
+        1000 * 60 * 5,
+      ); // refresh every 5 minutes
     }
     return () => (interval ? clearInterval(interval) : undefined);
   }, [userId, authRefresh]);
 
   const context = useMemo(() => ({ user }), [user]);
 
-  return <>
-    <AuthContext.Provider value={context}>
-      {children}
-    </AuthContext.Provider>
-  </>;
+  return (
+    <>
+      <AuthContext.Provider value={context}>{children}</AuthContext.Provider>
+    </>
+  );
 }
 
 export function useAuthContext() {

@@ -40,7 +40,7 @@ const ManageArtistPosts: React.FC<{}> = () => {
   const fetchPosts = React.useCallback(async () => {
     if (userId) {
       const fetchedPosts = await api.getMany<Post>(
-        `users/${userId}/posts?artistId=${artistId}`
+        `users/${userId}/posts?artistId=${artistId}`,
       );
       setPosts(fetchedPosts.results);
     }
@@ -60,7 +60,7 @@ const ManageArtistPosts: React.FC<{}> = () => {
         console.error(e);
       }
     },
-    [fetchPosts, snackbar, userId, t]
+    [fetchPosts, snackbar, userId, t],
   );
 
   if (!artist) {

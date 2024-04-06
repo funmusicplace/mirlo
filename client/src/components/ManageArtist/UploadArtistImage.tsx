@@ -22,13 +22,13 @@ export function isTrackgroup(entity: unknown): entity is TrackGroup {
 
 const getExistingImage = (
   existing: Artist | TrackGroup,
-  imageType: ImageType
+  imageType: ImageType,
 ) => {
   const image = isTrackgroup(existing)
     ? existing["cover"]
     : imageType === "avatar" || imageType === "banner"
-    ? existing[imageType]
-    : undefined;
+      ? existing[imageType]
+      : undefined;
 
   if (!image) {
     return undefined;
@@ -59,7 +59,7 @@ const UploadArtistImage: React.FC<{
   const snackbar = useSnackbar();
   const { refresh } = useArtistContext();
   const [existingImage, setExistingImage] = React.useState(
-    getExistingImage(existing, imageType)
+    getExistingImage(existing, imageType),
   );
   const [isSaving, setIsSaving] = React.useState(false);
 
@@ -98,7 +98,7 @@ const UploadArtistImage: React.FC<{
         if (file) {
           const jobInfo = await api.uploadFile(
             `${buildRootUrl(existing)}${imageType}`,
-            [file]
+            [file],
           );
           setUploadJobs([
             { jobId: jobInfo.result.jobId, jobStatus: "waiting" },
@@ -111,7 +111,7 @@ const UploadArtistImage: React.FC<{
         setIsSaving(false);
       }
     },
-    [existing, imageType, setUploadJobs, snackbar]
+    [existing, imageType, setUploadJobs, snackbar],
   );
 
   const isLoading =

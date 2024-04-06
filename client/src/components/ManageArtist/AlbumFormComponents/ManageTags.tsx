@@ -31,18 +31,18 @@ const ManageTags: React.FC<{ tags?: string[] }> = ({ tags: existingTags }) => {
       try {
         await api.put(
           `users/${userId}/trackGroups/${trackGroupId}/tags`,
-          newTags
+          newTags,
         );
       } catch (e) {
         console.error("e", e);
       }
     },
-    [trackGroupId, userId]
+    [trackGroupId, userId],
   );
 
   const findTags = async (searchValue: string) => {
     const tags = await api.getMany<{ tag: string; id: number }>(
-      `tags?tag=${searchValue}`
+      `tags?tag=${searchValue}`,
     );
     return tags.results.map((t) => ({ name: t.tag, id: t.tag }));
   };
@@ -56,7 +56,7 @@ const ManageTags: React.FC<{ tags?: string[] }> = ({ tags: existingTags }) => {
       update(newTags);
       setTags(newTags);
     },
-    [tags, update]
+    [tags, update],
   );
 
   return (

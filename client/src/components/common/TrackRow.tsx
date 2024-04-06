@@ -18,7 +18,7 @@ const TrackRow: React.FC<{
   const snackbar = useSnackbar();
   const { dispatch } = useGlobalStateContext();
   const [trackTitle] = React.useState(track.title);
-  const { user } = useAuthContext()
+  const { user } = useAuthContext();
 
   const canPlayTrack = isTrackOwnedOrPreview(track, user, trackGroup);
 

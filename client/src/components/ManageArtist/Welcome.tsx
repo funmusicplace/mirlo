@@ -68,7 +68,7 @@ const Welcome = () => {
             `users/${userId}/artists`,
             {
               name: data.name,
-            }
+            },
           );
           setLocalArtist(response.result);
           reset(response.result);
@@ -77,7 +77,7 @@ const Welcome = () => {
         } else if (localArtist && step > 1) {
           const response = await api.put<Partial<Artist>, { result: Artist }>(
             `users/${userId}/artists/${localArtist.id}`,
-            data
+            data,
           );
 
           setLocalArtist(response.result);
@@ -91,7 +91,7 @@ const Welcome = () => {
         setIsLoading(false);
       }
     },
-    [errorHandler, localArtist, localArtistLink, navigate, reset, step, userId]
+    [errorHandler, localArtist, localArtistLink, navigate, reset, step, userId],
   );
 
   const currentStepValue = getValues(steps[step] as keyof FormData);

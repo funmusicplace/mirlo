@@ -27,7 +27,7 @@ const PublishButton: React.FC<{
   const publishTrackGroup = React.useCallback(async () => {
     setIsPublishing(true);
     const anyIncomplete = trackGroup.tracks.find(
-      (t) => t.audio?.uploadState !== "SUCCESS"
+      (t) => t.audio?.uploadState !== "SUCCESS",
     );
     if (anyIncomplete && !window.confirm(t("areYouSurePublish") ?? "")) {
       setIsPublishing(false);
@@ -37,7 +37,7 @@ const PublishButton: React.FC<{
       if (artistUserId && trackGroupId) {
         await api.put(
           `users/${artistUserId}/trackGroups/${trackGroupId}/publish`,
-          {}
+          {},
         );
         snackbar(t("publishedSuccess"), { type: "success" });
       }

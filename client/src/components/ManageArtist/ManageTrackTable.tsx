@@ -98,7 +98,7 @@ export const ManageTrackTable: React.FC<{
         const newTracks = determineNewTrackOrder(
           displayTracks,
           droppedInId,
-          draggingTrackId
+          draggingTrackId,
         );
         if (trackGroupId) {
           setDisplayTracks(newTracks);
@@ -108,14 +108,14 @@ export const ManageTrackTable: React.FC<{
             `users/${userId}/trackGroups/${trackGroupId}/trackOrder`,
             {
               trackIds: newTracks.map((t) => t.id),
-            }
+            },
           );
 
           reload?.();
         }
       }
     },
-    [editable, draggingTrackId, displayTracks, trackGroupId, reload, userId]
+    [editable, draggingTrackId, displayTracks, trackGroupId, reload, userId],
   );
 
   const fetchTracks = React.useCallback(
@@ -130,7 +130,7 @@ export const ManageTrackTable: React.FC<{
       }
       setIsLoading(false);
     },
-    [userId]
+    [userId],
   );
 
   React.useEffect(() => {
@@ -148,7 +148,7 @@ export const ManageTrackTable: React.FC<{
           .map((track) => track.id),
       });
     },
-    [dispatch, tracks]
+    [dispatch, tracks],
   );
 
   const reloadWrapper = React.useCallback(async () => {

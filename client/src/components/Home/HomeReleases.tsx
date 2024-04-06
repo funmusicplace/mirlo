@@ -20,7 +20,9 @@ const bgcolor = css`
 
 const Releases = () => {
   const { t } = useTranslation("translation", { keyPrefix: "releases" });
-  const { data: trackGroups } = useQuery(queryTrackGroups({ take: 8, orderBy: "random" }));
+  const { data: trackGroups } = useQuery(
+    queryTrackGroups({ take: 8, orderBy: "random" }),
+  );
 
   return (
     <div className={bgcolor}>

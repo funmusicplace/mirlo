@@ -17,7 +17,10 @@ interface FormData {
   linkArray: { url: string }[];
 }
 
-const ArtistFormLinks: React.FC<{ artist: Artist, isManage: boolean }> = ({ artist, isManage }) => {
+const ArtistFormLinks: React.FC<{ artist: Artist; isManage: boolean }> = ({
+  artist,
+  isManage,
+}) => {
   const [isEditing, setIsEditing] = React.useState(false);
   const { user } = useAuthContext();
   const artistId = artist?.id;
@@ -56,7 +59,8 @@ const ArtistFormLinks: React.FC<{ artist: Artist, isManage: boolean }> = ({ arti
 
         // TODO: can be moved into a mutation
         await queryClient.invalidateQueries({
-          predicate: (query) => isMatch(Object(query.queryKey[0]), { artistId }),
+          predicate: (query) =>
+            isMatch(Object(query.queryKey[0]), { artistId }),
         });
 
         snackbar("Updated links", { type: "success" });
@@ -65,12 +69,16 @@ const ArtistFormLinks: React.FC<{ artist: Artist, isManage: boolean }> = ({ arti
         setIsEditing(false);
       }
     },
-    [artistId, artistUserId, queryClient, snackbar, userId]
+    [artistId, artistUserId, queryClient, snackbar, userId],
   );
 
   if (!isEditing) {
     return (
-      <ArtistFormLinksView artist={artist} isManage={isManage} setIsEditing={setIsEditing} />
+      <ArtistFormLinksView
+        artist={artist}
+        isManage={isManage}
+        setIsEditing={setIsEditing}
+      />
     );
   }
 

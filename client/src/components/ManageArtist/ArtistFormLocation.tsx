@@ -49,7 +49,7 @@ const ArtistFormLocation: React.FC<{ isManage: boolean }> = ({ isManage }) => {
         setIsEditing(false);
       }
     },
-    [artistId, artistUserId, refresh, snackbar, userId]
+    [artistId, artistUserId, refresh, snackbar, userId],
   );
 
   if (!isEditing) {

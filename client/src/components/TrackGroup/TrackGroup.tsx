@@ -25,7 +25,7 @@ import TrackGroupPills from "./TrackGroupPills";
 import TrackGroupEmbed from "./TrackGroupEmbed";
 import { useAuthContext } from "state/AuthContext";
 
-const Container = styled.div<{ user?: LoggedInUser|null }>`
+const Container = styled.div<{ user?: LoggedInUser | null }>`
   ${(props) =>
     props.user!
       ? `
@@ -150,7 +150,7 @@ function TrackGroup() {
     usePublicObjectById<TrackGroup>(
       "trackGroups",
       trackGroupId,
-      `?artistId=${artistId}`
+      `?artistId=${artistId}`,
     );
 
   if (!artist && !isLoadingArtist) {

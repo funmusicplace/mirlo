@@ -30,7 +30,7 @@ const useCurrentTrackHook = () => {
         setIsLoading(false);
       }
     },
-    [userId]
+    [userId],
   );
 
   const currentTrackId = currentTrack?.id;

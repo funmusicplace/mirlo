@@ -42,7 +42,7 @@ function Profile() {
           const emailChanged = data.email !== user?.email;
           const confirmed = emailChanged
             ? window.confirm(
-                "You will receive a confirmation email from Mirlo that you will have to act on before continuing to use Mirlo"
+                "You will receive a confirmation email from Mirlo that you will have to act on before continuing to use Mirlo",
               )
             : true;
           if (confirmed) {
@@ -60,7 +60,7 @@ function Profile() {
         }
       }
     },
-    [snackbar, userId, user?.email, errorHandler, t]
+    [snackbar, userId, user?.email, errorHandler, t],
   );
 
   const deleteAccount = React.useCallback(async () => {

@@ -89,14 +89,14 @@ const ArtistSupportBox: React.FC<{
   }
 
   const isSubscribedToTier = !!user?.artistUserSubscriptions?.find(
-    (sub) => sub.artistSubscriptionTier.id === subscriptionTier.id
+    (sub) => sub.artistSubscriptionTier.id === subscriptionTier.id,
   );
 
   const isSubscribedToArtist = !!user?.artistUserSubscriptions?.find(
     (sub) =>
       sub.artistSubscriptionTier.artistId === artist.id &&
       sub.artistSubscriptionTier.id !== subscriptionTier.id &&
-      !sub.artistSubscriptionTier.isDefaultTier
+      !sub.artistSubscriptionTier.isDefaultTier,
   );
 
   const ownedByUser = user && artist.userId === userId;

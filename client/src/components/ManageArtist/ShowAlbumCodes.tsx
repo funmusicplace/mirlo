@@ -31,7 +31,7 @@ const ShowAlbumCodes: React.FC<{}> = () => {
 
   const callback = React.useCallback(async () => {
     const results = await api.getMany<AlbumCode>(
-      `users/${userId}/artists/${artistId}/codes`
+      `users/${userId}/artists/${artistId}/codes`,
     );
     setAlbumCodes(results.results);
   }, [artistId, userId]);
@@ -48,7 +48,7 @@ const ShowAlbumCodes: React.FC<{}> = () => {
           await api.getFile(
             `${group ? group : "all"}-codes-for-${artistSlug}`,
             `users/${userId}/artists/${artistId}/codes?format=csv&group=${group}`,
-            "text/csv"
+            "text/csv",
           );
         }
       } catch (e) {
@@ -57,33 +57,42 @@ const ShowAlbumCodes: React.FC<{}> = () => {
         setIsdDownloadingCodes(false);
       }
     },
-    [artistSlug, artistId, userId]
+    [artistSlug, artistId, userId],
   );
 
   if (!artist) {
     return null;
   }
 
-  const reduced = albumCodes.reduce((aggr, item) => {
-    const existing = aggr.find(
-      (a) => a.trackGroupId === item.trackGroupId && a.group === item.group
-    );
-    if (existing) {
-      existing.quantity += 1;
-      if (item.redeemedByUserId) {
-        existing.quantityRedeemed += 1;
+  const reduced = albumCodes.reduce(
+    (aggr, item) => {
+      const existing = aggr.find(
+        (a) => a.trackGroupId === item.trackGroupId && a.group === item.group,
+      );
+      if (existing) {
+        existing.quantity += 1;
+        if (item.redeemedByUserId) {
+          existing.quantityRedeemed += 1;
+        }
+      } else {
+        aggr.push({
+          trackGroupId: item.trackGroupId,
+          trackGroup: item.trackGroup,
+          quantity: 1,
+          group: item.group,
+          quantityRedeemed: item.redeemedByUserId ? 1 : 0,
+        });
       }
-    } else {
-      aggr.push({
-        trackGroupId: item.trackGroupId,
-        trackGroup: item.trackGroup,
-        quantity: 1,
-        group: item.group,
-        quantityRedeemed: item.redeemedByUserId ? 1 : 0,
-      });
-    }
-    return aggr;
-  }, [] as { quantityRedeemed: number; trackGroupId: number; trackGroup: TrackGroup; quantity: number; group: string }[]);
+      return aggr;
+    },
+    [] as {
+      quantityRedeemed: number;
+      trackGroupId: number;
+      trackGroup: TrackGroup;
+      quantity: number;
+      group: string;
+    }[],
+  );
 
   return (
     <div>

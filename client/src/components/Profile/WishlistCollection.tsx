@@ -17,7 +17,7 @@ function WishlistCollection() {
 
   const fetchTrackGroups = React.useCallback(async () => {
     const { results } = await api.getMany<UserTrackGroupPurchase>(
-      `users/${userId}/wishlist`
+      `users/${userId}/wishlist`,
     );
     setPurchases(results);
   }, [userId]);
@@ -57,7 +57,7 @@ function WishlistCollection() {
                       trackGroup={purchase.trackGroup}
                       key={purchase.trackGroupId}
                     />
-                  )
+                  ),
               )}
             </TrackgroupGrid>
           </div>

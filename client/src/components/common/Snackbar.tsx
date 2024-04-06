@@ -23,8 +23,10 @@ const Container = styled.div<{ variant: Variant; position?: Position }>`
   border-radius: 4px;
   min-width: 344px;
   max-width: 672px;
-  box-shadow: 0px 3px 5px -1px rgba(0, 0, 0, 0.2),
-    0px 6px 10px 0px rgba(0, 0, 0, 0.14), 0px 1px 18px 0px rgba(0, 0, 0, 0.12);
+  box-shadow:
+    0px 3px 5px -1px rgba(0, 0, 0, 0.2),
+    0px 6px 10px 0px rgba(0, 0, 0, 0.14),
+    0px 1px 18px 0px rgba(0, 0, 0, 0.12);
   padding: 8px;
   animation: 300ms ease-out forwards slide-up;
   overflow: hidden;

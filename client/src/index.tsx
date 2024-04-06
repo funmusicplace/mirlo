@@ -18,7 +18,7 @@ import { AuthContextProvider } from "state/AuthContext";
 const router = createBrowserRouter(routes);
 
 const root = ReactDOM.createRoot(
-  document.getElementById("root") as HTMLElement
+  document.getElementById("root") as HTMLElement,
 );
 
 root.render(
@@ -34,7 +34,7 @@ root.render(
         </ThemeProvider>
       </AuthContextProvider>
     </QueryClientWrapper>
-  </React.StrictMode>
+  </React.StrictMode>,
 );
 
 // If you want to start measuring performance in your app, pass a function

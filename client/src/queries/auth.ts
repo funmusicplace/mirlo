@@ -1,4 +1,9 @@
-import { QueryFunction, queryOptions, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  QueryFunction,
+  queryOptions,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import * as api from "./fetch/fetchWrapper";
 import { QUERY_KEY_AUTH } from "./keys";
 import { MirloFetchError } from "./fetch/MirloFetchError";
@@ -91,15 +96,15 @@ export function useAuthRefreshMutation() {
 }
 
 const fetchProfile: QueryFunction<
-  LoggedInUser|null,
+  LoggedInUser | null,
   [{ query: "fetchProfile" }, ...unknown[]]
 > = ({ signal }) => {
-  return api.Get<{ result: LoggedInUser }>(`auth/profile`, { signal })
-    .then(r => r.result)
-    .catch(e => {
+  return api
+    .Get<{ result: LoggedInUser }>(`auth/profile`, { signal })
+    .then((r) => r.result)
+    .catch((e) => {
       // If the user is logged out, return null as a successful response
-      if (e instanceof MirloFetchError && e.status === 401)
-        return null;
+      if (e instanceof MirloFetchError && e.status === 401) return null;
       else throw e;
     });
 };

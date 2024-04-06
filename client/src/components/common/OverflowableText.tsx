@@ -7,7 +7,7 @@ export const OverflowableText: React.FC<{ text?: string }> = ({ text }) => {
   const [isExpandable, setIsExpandable] = React.useState(false);
   const [isExpanded, setIsExpanded] = React.useState(false);
   const [displayText, setDisplayText] = React.useState(
-    truncate(text, { length: truncateLength })
+    truncate(text, { length: truncateLength }),
   );
 
   React.useEffect(() => {
@@ -22,7 +22,9 @@ export const OverflowableText: React.FC<{ text?: string }> = ({ text }) => {
 
   React.useEffect(() => {
     setDisplayText(
-      isExpanded ? text ?? "" : truncate(text ?? "", { length: truncateLength })
+      isExpanded
+        ? text ?? ""
+        : truncate(text ?? "", { length: truncateLength }),
     );
   }, [text, isExpanded]);
 

@@ -61,7 +61,7 @@ const ManageTrackArtists: React.FC<{
         const trackId = formData.trackArtists[0].trackId;
         await api.put<Partial<Track>, { track: Track }>(
           `users/${userId}/tracks/${trackId}/trackArtists`,
-          packet
+          packet,
         );
       } catch (e) {
         console.error(e);
@@ -70,14 +70,14 @@ const ManageTrackArtists: React.FC<{
         onSave();
       }
     },
-    [onSave, userId]
+    [onSave, userId],
   );
 
   return (
     <FormProvider {...methods}>
       {fields
         .map(
-          (field) => (field as unknown as { artistName: string })["artistName"]
+          (field) => (field as unknown as { artistName: string })["artistName"],
         )
         .join(", ")}
       <Button

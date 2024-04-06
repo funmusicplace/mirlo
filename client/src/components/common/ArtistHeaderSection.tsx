@@ -78,11 +78,11 @@ const ArtistActions = styled.div`
   }
 `;
 
-const ArtistHeaderSection: React.FC<{ artist: Artist|undefined; isLoading: boolean; isManage: boolean }> = ({
-  artist,
-  isLoading,
-  isManage,
-}) => {
+const ArtistHeaderSection: React.FC<{
+  artist: Artist | undefined;
+  isLoading: boolean;
+  isManage: boolean;
+}> = ({ artist, isLoading, isManage }) => {
   const artistAvatar = artist?.avatar;
 
   if (!artist && isLoading) {

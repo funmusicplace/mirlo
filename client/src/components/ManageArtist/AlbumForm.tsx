@@ -65,7 +65,7 @@ const AlbumForm: React.FC<{
             {
               ...sending,
               artistId: artist.id,
-            }
+            },
           );
 
           if (
@@ -75,7 +75,7 @@ const AlbumForm: React.FC<{
           ) {
             const jobInfo = await api.uploadFile(
               `users/${userId}/trackGroups/${existingId}/cover`,
-              data.coverFile
+              data.coverFile,
             );
             setUploadJobs([
               { jobId: jobInfo.result.jobId, jobStatus: "waiting" },
@@ -101,7 +101,7 @@ const AlbumForm: React.FC<{
       setUploadJobs,
       errorHandler,
       reload,
-    ]
+    ],
   );
   const isDisabled = isSaving || (uploadJobs && uploadJobs.length > 0);
 

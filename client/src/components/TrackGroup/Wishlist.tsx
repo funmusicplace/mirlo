@@ -10,7 +10,7 @@ const Wishlist: React.FC<{ trackGroup: TrackGroup }> = ({ trackGroup }) => {
   const { user } = useAuthContext();
 
   const [isInWishlist, setIsInWishlist] = React.useState(
-    !!user?.wishlist?.find((w) => w.trackGroupId === trackGroup.id)
+    !!user?.wishlist?.find((w) => w.trackGroupId === trackGroup.id),
   );
 
   const onClick = React.useCallback(async () => {

@@ -73,18 +73,21 @@ const ArtistSubscriberUploadData: React.FC<{
       if (firstLineHasEmail !== -1) {
         return { email: line[firstLineHasEmail] };
       } else {
-        const obj = headers.reduce((aggr, header, idx) => {
-          if (
-            (header.toLowerCase() === "email" ||
-              header.toLowerCase() === "e-mail" ||
-              header.toLowerCase() === "subscriber") &&
-            line[idx].includes("@")
-          ) {
-            aggr["email"] = line[idx];
-          }
+        const obj = headers.reduce(
+          (aggr, header, idx) => {
+            if (
+              (header.toLowerCase() === "email" ||
+                header.toLowerCase() === "e-mail" ||
+                header.toLowerCase() === "subscriber") &&
+              line[idx].includes("@")
+            ) {
+              aggr["email"] = line[idx];
+            }
 
-          return aggr;
-        }, {} as { email: string; name: string });
+            return aggr;
+          },
+          {} as { email: string; name: string },
+        );
         console.log("obj", obj);
         return obj;
       }
@@ -93,8 +96,8 @@ const ArtistSubscriberUploadData: React.FC<{
     setUploadedUsers(
       uniqBy(
         newData.filter((data) => !!data.email),
-        "email"
-      )
+        "email",
+      ),
     );
   };
 
@@ -108,7 +111,7 @@ const ArtistSubscriberUploadData: React.FC<{
             `users/${artistUserId}/artists/${artistId}/subscribers`,
             {
               subscribers: users,
-            }
+            },
           );
         }
         snackbar("Uploaded your followers!", { type: "success" });
@@ -123,7 +126,7 @@ const ArtistSubscriberUploadData: React.FC<{
         setIsLoadingSubscriberData(false);
       }
     },
-    [artistUserId, artistId, snackbar, onDone, setIsMenuOpen]
+    [artistUserId, artistId, snackbar, onDone, setIsMenuOpen],
   );
 
   const processTextArea = React.useCallback(() => {

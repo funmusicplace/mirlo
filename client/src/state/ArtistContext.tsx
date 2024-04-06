@@ -10,16 +10,25 @@ import { useParams } from "react-router-dom";
  */
 export const useArtistContext = () => {
   const { artistId } = useParams();
-  const { data: artist, isLoading } = useQuery(queryArtist({ artistSlug: artistId ?? "", includeDefaultTier: false }));
-  const { data: userStripeStatus } = useQuery(queryUserStripeStatus(Number(artist?.userId)));
+  const { data: artist, isLoading } = useQuery(
+    queryArtist({ artistSlug: artistId ?? "", includeDefaultTier: false }),
+  );
+  const { data: userStripeStatus } = useQuery(
+    queryUserStripeStatus(Number(artist?.userId)),
+  );
 
   // TODO: eventually remove the manual refresh() once everything is a mutation
   const queryClient = useQueryClient();
   const refresh = React.useCallback(() => {
     queryClient.invalidateQueries({
-      predicate: (query) => isMatch(Object(query.queryKey[0]), { artistId: Number(artistId) }) || query.queryKey.includes(QUERY_KEY_ARTISTS),
+      predicate: (query) =>
+        isMatch(Object(query.queryKey[0]), { artistId: Number(artistId) }) ||
+        isMatch(Object(query.queryKey[0]), {
+          artistSlug: artist?.urlSlug ?? "",
+        }) ||
+        query.queryKey.includes(QUERY_KEY_ARTISTS),
     });
-  }, [queryClient, artistId]);
+  }, [queryClient, artistId, artist]);
 
   return {
     state: {

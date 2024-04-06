@@ -20,14 +20,14 @@ const ArtistSlugInput: React.FC<{
           ? `&forArtistId=${currentArtistId}`
           : "";
         const response = await api.get<{ exists: boolean }>(
-          `artists/testExistence?urlSlug=${value.toLowerCase()}${artistIdString}`
+          `artists/testExistence?urlSlug=${value.toLowerCase()}${artistIdString}`,
         );
         return !response.result.exists;
       } catch (e) {
         return true;
       }
     },
-    [currentArtistId]
+    [currentArtistId],
   );
 
   return (

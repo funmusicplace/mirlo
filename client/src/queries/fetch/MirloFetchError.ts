@@ -2,7 +2,7 @@ export class MirloFetchError extends Error {
   res: Response;
 
   constructor(res: Response, message?: string) {
-    super(message)
+    super(message);
     this.res = res;
   }
 

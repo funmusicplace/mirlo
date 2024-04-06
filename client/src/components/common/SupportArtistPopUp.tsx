@@ -32,26 +32,25 @@ const SupportArtistPopUp: React.FC<{ artist: Artist }> = ({ artist }) => {
     React.useState(false);
   const snackbar = useSnackbar();
 
-  const { data: artistDetails } = useQuery(queryArtist({ artistSlug: artist.urlSlug ?? "", includeDefaultTier: true }));
-  const { data: stripeAccountStatus } = useQuery(queryUserStripeStatus(artist.userId));
+  const { data: artistDetails } = useQuery(
+    queryArtist({ artistSlug: artist.urlSlug ?? "", includeDefaultTier: true }),
+  );
+  const { data: stripeAccountStatus } = useQuery(
+    queryUserStripeStatus(artist.userId),
+  );
 
   const options = artistDetails?.subscriptionTiers ?? [];
 
   React.useEffect(() => {
     if (isOpen) {
       const foundTier = user?.artistUserSubscriptions?.find(
-        (sub) => sub.artistSubscriptionTier.artistId === artist.id
+        (sub) => sub.artistSubscriptionTier.artistId === artist.id,
       )?.artistSubscriptionTier;
       if (foundTier) {
         methods.setValue("tier", foundTier);
       }
     }
-  }, [
-    artist.id,
-    isOpen,
-    methods,
-    user?.artistUserSubscriptions,
-  ]);
+  }, [artist.id, isOpen, methods, user?.artistUserSubscriptions]);
 
   const subscribeToTier = async () => {
     try {

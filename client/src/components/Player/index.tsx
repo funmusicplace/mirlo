@@ -52,9 +52,7 @@ const ControlWrapper = styled.span`
 
 const Player = () => {
   const { user } = useAuthContext();
-  const {
-    dispatch,
-  } = useGlobalStateContext();
+  const { dispatch } = useGlobalStateContext();
 
   const [volume, setVolume] = React.useState(1);
 

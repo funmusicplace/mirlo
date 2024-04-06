@@ -74,7 +74,7 @@ const CustomButton = styled.button<Compactable>`
 
       case "big":
         return `
-        
+
           color: ${
             props.color
               ? props.color
@@ -103,7 +103,7 @@ const CustomButton = styled.button<Compactable>`
                 : `var(--mi-${props.role ?? "primary"}-color)`
             };
           }
-          
+
           @media screen and (max-width: ${bp.small}px) {
             font-size: var(--mi-font-size-normal);
             ${
@@ -123,12 +123,12 @@ const CustomButton = styled.button<Compactable>`
           };
           background-color: var(--mi-lighten-background-color);
           border: 1px ${props.variant === "dashed" ? "dashed" : "solid"} ${
-          props.color
-            ? props.color
-            : `var(--mi-${props.role ?? "primary"}-color)`
-        };
+            props.color
+              ? props.color
+              : `var(--mi-${props.role ?? "primary"}-color)`
+          };
           padding: ${props.compact ? ".3rem .5rem" : "1rem"};
-          font-weight: bold; 
+          font-weight: bold;
 
           &:hover:not(:disabled) {
             color: ${
@@ -140,12 +140,12 @@ const CustomButton = styled.button<Compactable>`
               props.color
                 ? props.color
                 : `var(--mi-${props.role ?? "primary"}-color)`
-            };            
+            };
             border: 1px ${props.variant === "dashed" ? "dashed" : "solid"} ${
-          props.color
-            ? props.color
-            : `var(--mi-${props.role ?? "primary"}-color)`
-        };
+              props.color
+                ? props.color
+                : `var(--mi-${props.role ?? "primary"}-color)`
+            };
           }
 
           &[disabled] {
@@ -158,7 +158,7 @@ const CustomButton = styled.button<Compactable>`
                ? "height: 1.5rem; width: 1.5rem;"
                : ""
            }
-           ${props.compact ? "height: 1.5rem;" : ""}           
+           ${props.compact ? "height: 1.5rem;" : ""}
           }
         `;
       default:
@@ -175,13 +175,13 @@ const CustomButton = styled.button<Compactable>`
           padding: ${props.compact ? ".3rem .5rem" : "1rem"};
           padding: ${props.onlyIcon ? ".5rem .5rem" : ".6rem .6rem"};
           background-color:  var(--mi-${props.role ?? "secondary"}-color);
-          
+
           ${
             props.transparent
               ? "background-color:  transparent; font-weight: bold;"
               : ""
           };
-          ${props.thin ? "font-weight: normal !important;" : ""};          
+          ${props.thin ? "font-weight: normal !important;" : ""};
           color:  var(--mi-${props.role ?? "primary"}-color);
           color:  ${
             props.transparent ? "var(--mi-normal-foreground-color)" : ""
@@ -196,7 +196,7 @@ const CustomButton = styled.button<Compactable>`
               ${props.collapsible ? "> p {display: none;}" : ""}
               ${props.collapsible ? "> span {margin: auto !important;} " : ""}
           }
-          
+
           @media screen and (max-width: ${bp.small}px) {
             font-size: var(--mi-font-size-normal);
             padding: ${props.transparent ? ".5rem .25rem .5rem .25rem" : ""};

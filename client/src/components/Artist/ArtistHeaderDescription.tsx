@@ -22,7 +22,9 @@ const collapsedHeight = 65;
 const ArtistHeaderDescription: React.FC = () => {
   const { artistId } = useParams();
   const { user } = useAuthContext();
-  const { data: artist } = useQuery(queryArtist({ artistSlug: artistId ?? "" }));
+  const { data: artist } = useQuery(
+    queryArtist({ artistSlug: artistId ?? "" }),
+  );
   const [searchParams] = useSearchParams();
   const isHeaderExpanded = searchParams.get("expandHeader");
 
@@ -47,21 +49,24 @@ const ArtistHeaderDescription: React.FC = () => {
   const doSave = React.useCallback(
     async (data: FormData) => {
       if (isArtistManager) {
-        updateArtist({
-          userId: Number(userId),
-          artistId: Number(artistId),
-          body: {
-            bio: data.bio,
+        updateArtist(
+          {
+            userId: Number(userId),
+            artistId: Number(artistId),
+            body: {
+              bio: data.bio,
+            },
           },
-        }, {
-          onSuccess() {
-            snackbar(t("updatedBio"), { type: "success" });
-            setIsEditing(false);
-          }
-        });
+          {
+            onSuccess() {
+              snackbar(t("updatedBio"), { type: "success" });
+              setIsEditing(false);
+            },
+          },
+        );
       }
     },
-    [isArtistManager, updateArtist, snackbar, t, userId, artistId]
+    [isArtistManager, updateArtist, snackbar, t, userId, artistId],
   );
 
   React.useEffect(() => {

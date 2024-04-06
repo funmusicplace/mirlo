@@ -16,7 +16,9 @@ const ArtistContainer: React.FC = () => {
 
   const { artistId, trackGroupId, postId } = useParams();
 
-  const { data: artist, isLoading: isArtistLoading } = useQuery(queryArtist({ artistSlug: artistId ?? "" }));
+  const { data: artist, isLoading: isArtistLoading } = useQuery(
+    queryArtist({ artistSlug: artistId ?? "" }),
+  );
   const { user } = useAuthContext();
 
   const artistBanner = artist?.banner?.sizes;
@@ -69,7 +71,11 @@ const ArtistContainer: React.FC = () => {
       {!isPostOrRelease && (
         <>
           <ArtistPageWrapper artistBanner={!!artistBanner}>
-            <ArtistHeaderSection artist={artist} isLoading={isArtistLoading} isManage={false} />
+            <ArtistHeaderSection
+              artist={artist}
+              isLoading={isArtistLoading}
+              isManage={false}
+            />
 
             {artist && !artist.enabled && (
               <div

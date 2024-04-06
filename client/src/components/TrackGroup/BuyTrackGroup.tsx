@@ -11,7 +11,7 @@ import FormComponent from "components/common/FormComponent";
 import { FormProvider, useForm } from "react-hook-form";
 import EmailInput from "./EmailInput";
 import PlatformPercent from "components/common/PlatformPercent";
-import { css } from "@emotion/css"
+import { css } from "@emotion/css";
 import { useArtistContext } from "state/ArtistContext";
 import Tooltip from "components/common/Tooltip";
 import { testOwnership } from "./utils";
@@ -61,7 +61,7 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup }> = ({
                 ? Number(data.chosenPrice) * 100
                 : undefined,
               email: data.userEmail,
-            }
+            },
           );
           window.location.assign(response.redirectUrl);
         }
@@ -70,7 +70,7 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup }> = ({
         console.error(e);
       }
     },
-    [snackbar, t, trackGroup.id]
+    [snackbar, t, trackGroup.id],
   );
 
   const lessThan1 = !isFinite(+chosenPrice) ? true : Number(chosenPrice) < 1;

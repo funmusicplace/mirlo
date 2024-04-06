@@ -74,7 +74,7 @@ const Post: React.FC = () => {
   const { postId } = useParams();
   const { object: post, isLoadingObject } = usePublicObjectById<Post>(
     "posts",
-    postId
+    postId,
   );
 
   if (!post) {

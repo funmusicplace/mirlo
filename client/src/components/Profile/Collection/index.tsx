@@ -17,7 +17,7 @@ function Profile() {
 
   const fetchTrackGroups = React.useCallback(async () => {
     const { results } = await api.getMany<UserTrackGroupPurchase>(
-      `users/${userId}/purchases`
+      `users/${userId}/purchases`,
     );
     setPurchases(results);
   }, [userId]);
@@ -57,7 +57,7 @@ function Profile() {
                       trackGroup={purchase.trackGroup}
                       key={purchase.trackGroupId}
                     />
-                  )
+                  ),
               )}
             </TrackgroupGrid>
           </div>

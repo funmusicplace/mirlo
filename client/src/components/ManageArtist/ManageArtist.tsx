@@ -44,14 +44,20 @@ const ManageArtist: React.FC<{}> = () => {
   const { user } = useAuthContext();
   const userId = user?.id;
 
-  const { data: artist, isError } = useQuery(queryManagedArtist(Number(userId), Number(artistId)));
+  const { data: artist, isError } = useQuery(
+    queryManagedArtist(Number(userId), Number(artistId)),
+  );
 
   const { mutate: deleteArtist } = useDeleteArtistMutation();
 
   const [isEditing, setIsEditing] = React.useState(false);
 
   const onDelete = React.useCallback(() => {
-    if (!!userId && !!artist && window.confirm("Are you sure you want to delete this artist?")) {
+    if (
+      !!userId &&
+      !!artist &&
+      window.confirm("Are you sure you want to delete this artist?")
+    ) {
       deleteArtist(
         { userId, artistId: artist.id, artistSlug: artist.urlSlug ?? "" },
         {
@@ -61,7 +67,7 @@ const ManageArtist: React.FC<{}> = () => {
           onError() {
             snackbar("Problem deleting artist", { type: "warning" });
           },
-        }
+        },
       );
     }
   }, [userId, artist, deleteArtist, navigate, snackbar]);

@@ -41,7 +41,7 @@ const PostForm: React.FC<{
     user?.id,
     `${artist.id}`,
     `/subscriptionTiers?includeDefault=true`,
-    { multiple: true }
+    { multiple: true },
   );
 
   React.useEffect(() => {
@@ -51,7 +51,7 @@ const PostForm: React.FC<{
 
   const publishedAt = existing ? new Date(existing.publishedAt) : new Date();
   publishedAt.setMinutes(
-    publishedAt.getMinutes() - publishedAt.getTimezoneOffset()
+    publishedAt.getMinutes() - publishedAt.getTimezoneOffset(),
   );
 
   const methods = useForm<FormData>({
@@ -115,7 +115,7 @@ const PostForm: React.FC<{
         }
       }
     },
-    [reload, existingId, snackbar, artist.id, errorHandler, onClose, userId, t]
+    [reload, existingId, snackbar, artist.id, errorHandler, onClose, userId, t],
   );
 
   return (

@@ -66,7 +66,9 @@ const ManageArtistContainer: React.FC<{}> = () => {
   const { artistId } = useParams();
   const { user } = useAuthContext();
 
-  const { data: artist, isLoading: isArtistLoading } = useQuery(queryManagedArtist(Number(user?.id), Number(artistId)));
+  const { data: artist, isLoading: isArtistLoading } = useQuery(
+    queryManagedArtist(Number(user?.id), Number(artistId)),
+  );
 
   const location = useLocation();
 
@@ -99,7 +101,13 @@ const ManageArtistContainer: React.FC<{}> = () => {
           </Box>
         )}
 
-        {!dontShowHeader && <ArtistHeaderSection artist={artist} isLoading={isArtistLoading} isManage={true} />}
+        {!dontShowHeader && (
+          <ArtistHeaderSection
+            artist={artist}
+            isLoading={isArtistLoading}
+            isManage={true}
+          />
+        )}
 
         {!artist.enabled && (
           <div

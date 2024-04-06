@@ -171,7 +171,7 @@ const TrackGroupWidget = () => {
                   target={`"_blank"`}
                   href={`${process.env.REACT_APP_CLIENT_DOMAIN}${getReleaseUrl(
                     trackGroup.artist,
-                    trackGroup
+                    trackGroup,
                   )}`}
                 >
                   {trackGroup.title}

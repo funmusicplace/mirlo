@@ -76,8 +76,10 @@ export const ArtistForm: React.FC<{
   const { user } = useAuthContext();
   const userId = user?.id;
 
-  const { mutate: createArtist, isPending: isCreatePending } = useCreateArtistMutation();
-  const { mutate: updateArtist, isPending: isUpdatePending } = useUpdateArtistMutation();
+  const { mutate: createArtist, isPending: isCreatePending } =
+    useCreateArtistMutation();
+  const { mutate: updateArtist, isPending: isUpdatePending } =
+    useUpdateArtistMutation();
   const isPending = isCreatePending || isUpdatePending;
 
   const onSuccess = React.useCallback(() => {
@@ -91,28 +93,28 @@ export const ArtistForm: React.FC<{
     snackbar("Something went wrong with the API", { type: "warning" });
   }, [snackbar]);
 
-  const onValidSubmit = React.useCallback((data: FormData) => {
-    if (!userId) return;
+  const onValidSubmit = React.useCallback(
+    (data: FormData) => {
+      if (!userId) return;
 
-    const sending = {
-      bio: data.bio,
-      name: data.name,
-      urlSlug: data.urlSlug?.toLowerCase(),
-      properties: data.properties,
-    };
+      const sending = {
+        bio: data.bio,
+        name: data.name,
+        urlSlug: data.urlSlug?.toLowerCase(),
+        properties: data.properties,
+      };
 
-    if (existingId) {
-      updateArtist(
-        { userId, artistId: existingId, body: sending },
-        { onSuccess, onError }
-      );
-    } else {
-      createArtist(
-        { userId, body: sending },
-        { onSuccess, onError }
-      );
-    }
-  }, [userId, existingId, onSuccess, updateArtist, createArtist, onError]);
+      if (existingId) {
+        updateArtist(
+          { userId, artistId: existingId, body: sending },
+          { onSuccess, onError },
+        );
+      } else {
+        createArtist({ userId, body: sending }, { onSuccess, onError });
+      }
+    },
+    [userId, existingId, onSuccess, updateArtist, createArtist, onError],
+  );
 
   return (
     <Modal
