@@ -123,10 +123,10 @@ const CustomButton = styled.button<Compactable>`
           };
           background-color: var(--mi-lighten-background-color);
           border: 1px ${props.variant === "dashed" ? "dashed" : "solid"} ${
-          props.color
-            ? props.color
-            : `var(--mi-${props.role ?? "primary"}-color)`
-        };
+            props.color
+              ? props.color
+              : `var(--mi-${props.role ?? "primary"}-color)`
+          };
           padding: ${props.compact ? ".3rem .5rem" : "1rem"};
           font-weight: bold; 
 
@@ -142,10 +142,10 @@ const CustomButton = styled.button<Compactable>`
                 : `var(--mi-${props.role ?? "primary"}-color)`
             };            
             border: 1px ${props.variant === "dashed" ? "dashed" : "solid"} ${
-          props.color
-            ? props.color
-            : `var(--mi-${props.role ?? "primary"}-color)`
-        };
+              props.color
+                ? props.color
+                : `var(--mi-${props.role ?? "primary"}-color)`
+            };
           }
 
           &[disabled] {

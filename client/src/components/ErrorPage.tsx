@@ -5,7 +5,7 @@ export default function ErrorPage() {
   const error = useRouteError();
   console.error(error);
 
-  const {t} = useTranslation("translation", {keyPrefix : "errorPage"})
+  const { t } = useTranslation("translation", { keyPrefix: "errorPage" });
 
   return (
     <div>

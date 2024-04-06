@@ -64,26 +64,35 @@ const ShowAlbumCodes: React.FC<{}> = () => {
     return null;
   }
 
-  const reduced = albumCodes.reduce((aggr, item) => {
-    const existing = aggr.find(
-      (a) => a.trackGroupId === item.trackGroupId && a.group === item.group
-    );
-    if (existing) {
-      existing.quantity += 1;
-      if (item.redeemedByUserId) {
-        existing.quantityRedeemed += 1;
+  const reduced = albumCodes.reduce(
+    (aggr, item) => {
+      const existing = aggr.find(
+        (a) => a.trackGroupId === item.trackGroupId && a.group === item.group
+      );
+      if (existing) {
+        existing.quantity += 1;
+        if (item.redeemedByUserId) {
+          existing.quantityRedeemed += 1;
+        }
+      } else {
+        aggr.push({
+          trackGroupId: item.trackGroupId,
+          trackGroup: item.trackGroup,
+          quantity: 1,
+          group: item.group,
+          quantityRedeemed: item.redeemedByUserId ? 1 : 0,
+        });
       }
-    } else {
-      aggr.push({
-        trackGroupId: item.trackGroupId,
-        trackGroup: item.trackGroup,
-        quantity: 1,
-        group: item.group,
-        quantityRedeemed: item.redeemedByUserId ? 1 : 0,
-      });
-    }
-    return aggr;
-  }, [] as { quantityRedeemed: number; trackGroupId: number; trackGroup: TrackGroup; quantity: number; group: string }[]);
+      return aggr;
+    },
+    [] as {
+      quantityRedeemed: number;
+      trackGroupId: number;
+      trackGroup: TrackGroup;
+      quantity: number;
+      group: string;
+    }[]
+  );
 
   return (
     <div>

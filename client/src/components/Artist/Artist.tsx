@@ -44,10 +44,10 @@ function Artist() {
         (artist?.trackGroups.length ?? 0) > 0
           ? "releases"
           : (artist?.posts.length ?? 0) > 0
-          ? "posts"
-          : canReceivePayments
-          ? "support"
-          : undefined;
+            ? "posts"
+            : canReceivePayments
+              ? "support"
+              : undefined;
       if (navigateTo) {
         navigate(navigateTo, { replace: true });
       }

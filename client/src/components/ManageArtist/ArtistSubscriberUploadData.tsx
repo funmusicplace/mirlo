@@ -73,18 +73,21 @@ const ArtistSubscriberUploadData: React.FC<{
       if (firstLineHasEmail !== -1) {
         return { email: line[firstLineHasEmail] };
       } else {
-        const obj = headers.reduce((aggr, header, idx) => {
-          if (
-            (header.toLowerCase() === "email" ||
-              header.toLowerCase() === "e-mail" ||
-              header.toLowerCase() === "subscriber") &&
-            line[idx].includes("@")
-          ) {
-            aggr["email"] = line[idx];
-          }
+        const obj = headers.reduce(
+          (aggr, header, idx) => {
+            if (
+              (header.toLowerCase() === "email" ||
+                header.toLowerCase() === "e-mail" ||
+                header.toLowerCase() === "subscriber") &&
+              line[idx].includes("@")
+            ) {
+              aggr["email"] = line[idx];
+            }
 
-          return aggr;
-        }, {} as { email: string; name: string });
+            return aggr;
+          },
+          {} as { email: string; name: string }
+        );
         console.log("obj", obj);
         return obj;
       }

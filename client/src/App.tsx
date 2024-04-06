@@ -65,9 +65,12 @@ function App() {
     let interval: NodeJS.Timer | null = null;
 
     if (userId) {
-      interval = setInterval(async () => {
-        callback();
-      }, 1000 * 60 * 5); // refresh every 5 minutes
+      interval = setInterval(
+        async () => {
+          callback();
+        },
+        1000 * 60 * 5
+      ); // refresh every 5 minutes
     }
     return () => (interval ? clearInterval(interval) : undefined);
   }, [userId, dispatch, navigate, location.pathname]);
