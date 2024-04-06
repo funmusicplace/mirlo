@@ -19,7 +19,7 @@ const LogInForm: React.FC<{ afterLogIn: () => void }> = ({ afterLogIn }) => {
   const { register, handleSubmit } = useForm<SignupInputs>();
   const snackbar = useSnackbar();
 
-  const { login } = useLoginMutation();
+  const { mutate: login } = useLoginMutation();
 
   const onSubmit = React.useCallback(
     async (data: SignupInputs) => {

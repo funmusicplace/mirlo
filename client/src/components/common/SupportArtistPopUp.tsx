@@ -32,7 +32,7 @@ const SupportArtistPopUp: React.FC<{ artist: Artist }> = ({ artist }) => {
     React.useState(false);
   const snackbar = useSnackbar();
 
-  const { data: artistDetails } = useQuery(queryArtist(artist.urlSlug ?? "", true));
+  const { data: artistDetails } = useQuery(queryArtist({ artistSlug: artist.urlSlug ?? "", includeDefaultTier: true }));
   const { data: stripeAccountStatus } = useQuery(queryUserStripeStatus(artist.userId));
 
   const options = artistDetails?.subscriptionTiers ?? [];

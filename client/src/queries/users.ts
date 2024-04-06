@@ -38,7 +38,8 @@ export function queryManagedArtist(userId: number, artistId: number) {
 type ArtistBody = Partial<Pick<Artist, "bio" | "name" | "urlSlug" | "properties">>;
 
 async function createArtist({ userId, body }: { userId: number, body: ArtistBody }) {
-  return api.Post(`v1/users/${userId}/artists`, body);
+  return api.Post<ArtistBody, { result: Artist }>(`v1/users/${userId}/artists`, body)
+    .then(r => r.result);
 }
 
 export function useCreateArtistMutation() {
@@ -54,22 +55,25 @@ export function useCreateArtistMutation() {
 }
 
 async function updateArtist({ userId, artistId, body }: { userId: number, artistId: number, body: ArtistBody }) {
-  return api.Put(`v1/users/${userId}/artists/${artistId}`, body);
+  return api.Put<ArtistBody, { result: Artist }>(`v1/users/${userId}/artists/${artistId}`, body)
+    .then(r => r.result);
 }
 
 export function useUpdateArtistMutation() {
   const client = useQueryClient();
   return useMutation({
     mutationFn: updateArtist,
-    async onSuccess(_, { artistId }) {
+    async onSuccess(data, { artistId }) {
       await client.invalidateQueries({
-        predicate: (query) => isMatch(Object(query.queryKey[0]), { artistId }) || query.queryKey.includes(QUERY_KEY_ARTISTS),
+        predicate: (query) => isMatch(Object(query.queryKey[0]), { artistId }) ||
+          isMatch(Object(query.queryKey[0]), { artistSlug: String(data.urlSlug) }) ||
+          query.queryKey.includes(QUERY_KEY_ARTISTS),
       });
     },
   });
 }
 
-async function deleteArtist({ userId, artistId }: { userId: number, artistId: number }) {
+async function deleteArtist({ userId, artistId }: { userId: number, artistId: number, artistSlug: string }) {
   return api.Delete(`v1/users/${userId}/artists/${artistId}`);
 }
 
@@ -77,9 +81,11 @@ export function useDeleteArtistMutation() {
   const client = useQueryClient();
   return useMutation({
     mutationFn: deleteArtist,
-    async onSuccess(_, { artistId }) {
+    async onSuccess(_, { artistId, artistSlug }) {
       await client.invalidateQueries({
-        predicate: (query) => isMatch(Object(query.queryKey[0]), { artistId }) || query.queryKey.includes(QUERY_KEY_ARTISTS),
+        predicate: (query) => isMatch(Object(query.queryKey[0]), { artistId }) ||
+          isMatch(Object(query.queryKey[0]), { artistSlug }) ||
+          query.queryKey.includes(QUERY_KEY_ARTISTS),
       });
     },
   });

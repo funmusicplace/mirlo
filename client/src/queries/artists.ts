@@ -3,16 +3,16 @@ import * as api from "./fetch/fetchWrapper";
 
 const fetchArtist: QueryFunction<
   Artist,
-  [{ query: "fetchArtist", artistId: string, includeDefaultTier: boolean }, ...unknown[]]
-> = ({ queryKey: [{ artistId, includeDefaultTier }], signal }) => {
-  return api.Get<{ result: Artist }>(`v1/artists/${artistId}?includeDefaultTier=${includeDefaultTier}`, { signal })
+  [{ query: "fetchArtist", artistSlug: string, includeDefaultTier: boolean }, ...unknown[]]
+> = ({ queryKey: [{ artistSlug, includeDefaultTier }], signal }) => {
+  return api.Get<{ result: Artist }>(`v1/artists/${artistSlug}?includeDefaultTier=${includeDefaultTier}`, { signal })
     .then(r => r.result);
 };
 
-export function queryArtist(artistId: string, includeDefaultTier: boolean = false) {
+export function queryArtist(opts: { artistSlug: string, includeDefaultTier?: boolean }) {
   return queryOptions({
-    queryKey: [{ query: "fetchArtist", artistId, includeDefaultTier }],
+    queryKey: [{ query: "fetchArtist", artistSlug: opts.artistSlug, includeDefaultTier: opts.includeDefaultTier ?? false }],
     queryFn: fetchArtist,
-    enabled: !!artistId,
+    enabled: !!opts.artistSlug,
   });
 }

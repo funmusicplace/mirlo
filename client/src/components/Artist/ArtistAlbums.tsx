@@ -16,7 +16,7 @@ const ArtistAlbums: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const { user } = useAuthContext();
   const { artistId } = useParams();
-  const { data: artist } = useQuery(queryArtist(artistId ?? ""));
+  const { data: artist } = useQuery(queryArtist({ artistSlug: artistId ?? "" }));
 
   if (
     !artist ||

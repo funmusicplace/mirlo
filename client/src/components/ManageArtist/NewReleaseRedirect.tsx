@@ -1,15 +1,13 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { useGlobalStateContext } from "state/GlobalState";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import api from "services/api";
 import { useArtistContext } from "state/ArtistContext";
+import { useAuthContext } from "state/AuthContext";
 
 const NewReleaseRedirect: React.FC<{}> = () => {
   const navigate = useNavigate();
-  const {
-    state: { user },
-  } = useGlobalStateContext();
+  const { user } = useAuthContext();
 
   const {
     state: { artist },

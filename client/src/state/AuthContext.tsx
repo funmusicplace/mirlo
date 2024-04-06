@@ -4,7 +4,13 @@ import { QUERY_KEY_AUTH } from "queries/keys";
 import React, { useMemo } from "react"
 
 const AuthContext = React.createContext<{
-  user?: LoggedInUser;
+  /**
+   * [user] can have the following states:
+   * - undefined: the fetch is loading / we don't know if auth is successful yet
+   * - null: the query has resolved, and the user is not logged in
+   * - [LoggedInUser]: the user is logged in
+   */
+  user?: LoggedInUser|null;
 }>({
   user: undefined,
 });

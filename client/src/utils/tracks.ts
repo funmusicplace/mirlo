@@ -22,7 +22,7 @@ export const fmtMSS = (s: number) => {
 
 export const isTrackOwnedOrPreview = (
   track: Track,
-  user?: LoggedInUser,
+  user?: LoggedInUser|null,
   trackGroup?: TrackGroup
 ): boolean => {
   if (track.isPreview) {

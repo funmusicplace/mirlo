@@ -25,7 +25,7 @@ import TrackGroupPills from "./TrackGroupPills";
 import TrackGroupEmbed from "./TrackGroupEmbed";
 import { useAuthContext } from "state/AuthContext";
 
-const Container = styled.div<{ user?: LoggedInUser }>`
+const Container = styled.div<{ user?: LoggedInUser|null }>`
   ${(props) =>
     props.user!
       ? `

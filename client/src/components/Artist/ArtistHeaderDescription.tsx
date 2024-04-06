@@ -22,7 +22,7 @@ const collapsedHeight = 65;
 const ArtistHeaderDescription: React.FC = () => {
   const { artistId } = useParams();
   const { user } = useAuthContext();
-  const { data: artist } = useQuery(queryArtist(artistId ?? ""));
+  const { data: artist } = useQuery(queryArtist({ artistSlug: artistId ?? "" }));
   const [searchParams] = useSearchParams();
   const isHeaderExpanded = searchParams.get("expandHeader");
 

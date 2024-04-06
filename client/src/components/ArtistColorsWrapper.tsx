@@ -12,7 +12,7 @@ const ArtistColorsWrapper: React.FC<{ children: React.ReactElement }> = ({
 }) => {
   const params = useParams();
   const artistId = params?.artistId ?? "";
-  const { data: artist } = useQuery(queryArtist(artistId));
+  const { data: artist } = useQuery(queryArtist({ artistSlug: artistId }));
   const artistColors = artist?.properties?.colors;
 
   return (

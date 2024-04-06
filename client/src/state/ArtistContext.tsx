@@ -10,7 +10,7 @@ import { useParams } from "react-router-dom";
  */
 export const useArtistContext = () => {
   const { artistId } = useParams();
-  const { data: artist, isLoading } = useQuery(queryArtist(artistId ?? ""));
+  const { data: artist, isLoading } = useQuery(queryArtist({ artistSlug: artistId ?? "", includeDefaultTier: false }));
   const { data: userStripeStatus } = useQuery(queryUserStripeStatus(Number(artist?.userId)));
 
   // TODO: eventually remove the manual refresh() once everything is a mutation
