@@ -10,10 +10,10 @@ export const AuthWrapper: React.FC<{
   const { user } = useAuthContext();
 
   React.useEffect(() => {
-    if (!user) {
+    if (user === null) {
       navigate("/");
     }
-    if (adminOnly && !user?.isAdmin) {
+    if (adminOnly && user !== undefined && !user?.isAdmin) {
       navigate("/");
     }
   }, [adminOnly, navigate, user]);
