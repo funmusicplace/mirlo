@@ -8,7 +8,7 @@ import LinkIconDisplay, {
 import { FaPen } from "react-icons/fa";
 
 const ArtistFormLinksView: React.FC<{
-  artist: Artist;
+  artist: Pick<Artist, "links">;
   isManage: boolean;
   setIsEditing: (arg: boolean) => void;
 }> = ({ artist, isManage, setIsEditing }) => {

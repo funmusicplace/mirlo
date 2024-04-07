@@ -31,7 +31,7 @@ const fetchManagedArtist: QueryFunction<
   Artist,
   [
     { query: "fetchManagedArtist"; userId: number; artistId: number },
-    ...unknown[],
+    ...unknown[]
   ]
 > = ({ queryKey: [{ userId, artistId }], signal }) => {
   return api
@@ -49,7 +49,7 @@ export function queryManagedArtist(userId: number, artistId: number) {
   });
 }
 
-type ArtistBody = Partial<
+export type CreateArtistBody = Partial<
   Pick<Artist, "bio" | "name" | "urlSlug" | "properties">
 >;
 
@@ -58,10 +58,13 @@ async function createArtist({
   body,
 }: {
   userId: number;
-  body: ArtistBody;
+  body: CreateArtistBody;
 }) {
   return api
-    .Post<ArtistBody, { result: Artist }>(`v1/users/${userId}/artists`, body)
+    .Post<CreateArtistBody, { result: Artist }>(
+      `v1/users/${userId}/artists`,
+      body
+    )
     .then((r) => r.result);
 }
 
@@ -77,6 +80,10 @@ export function useCreateArtistMutation() {
   });
 }
 
+export type UpdateArtistBody = Partial<
+  Pick<Artist, "bio" | "name" | "location" | "links" | "urlSlug" | "properties">
+>;
+
 async function updateArtist({
   userId,
   artistId,
@@ -84,13 +91,13 @@ async function updateArtist({
 }: {
   userId: number;
   artistId: number;
-  body: ArtistBody;
+  body: UpdateArtistBody;
 }) {
   return api
-    .Put<
-      ArtistBody,
-      { result: Artist }
-    >(`v1/users/${userId}/artists/${artistId}`, body)
+    .Put<UpdateArtistBody, { result: Artist }>(
+      `v1/users/${userId}/artists/${artistId}`,
+      body
+    )
     .then((r) => r.result);
 }
 

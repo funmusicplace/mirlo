@@ -6,30 +6,44 @@ import { css } from "@emotion/css";
 import { FaPlus, FaSave, FaTimes, FaTrash } from "react-icons/fa";
 import React from "react";
 import LinkIconDisplay from "components/common/LinkIconDisplay";
-import api from "services/api";
-import { useSnackbar } from "state/SnackbarContext";
 import ArtistFormLinksView from "./ArtistFormLinksView";
-import { useAuthContext } from "state/AuthContext";
-import { useQueryClient } from "@tanstack/react-query";
-import { isMatch } from "lodash";
+import { useSnackbar } from "state/SnackbarContext";
 
 interface FormData {
   linkArray: { url: string }[];
 }
 
-const ArtistFormLinks: React.FC<{ artist: Artist; isManage: boolean }> = ({
+interface ArtistFormLinksProps {
+  isManage: boolean;
+  artist: Pick<Artist, "links">;
+  onSubmit: (data: Pick<Artist, "links">) => Promise<void>;
+}
+
+function transformFromLinks(artist: Pick<Artist, "links">): FormData {
+  return { linkArray: artist.links?.map((l) => ({ url: l })) ?? [] };
+}
+
+function transformToLinks(data: FormData): Pick<Artist, "links"> {
+  const links = data.linkArray.map((link) => {
+    if (link.url.includes("@") && !link.url.startsWith("mailto:")) {
+      return `mailto:${link.url}`;
+    }
+    return link.url;
+  });
+
+  return { links };
+}
+
+const ArtistFormLinks: React.FC<ArtistFormLinksProps> = ({
   artist,
   isManage,
+  onSubmit,
 }) => {
   const [isEditing, setIsEditing] = React.useState(false);
-  const { user } = useAuthContext();
-  const artistId = artist?.id;
-  const artistUserId = artist?.userId;
-  const userId = user?.id;
   const snackbar = useSnackbar();
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const { register, control, watch, handleSubmit, reset } = useForm<FormData>({
-    defaultValues: { linkArray: artist?.links?.map((l) => ({ url: l })) ?? [] },
+    values: transformFromLinks(artist),
   });
   const { fields, append, remove } = useFieldArray({
     control,
@@ -40,36 +54,13 @@ const ArtistFormLinks: React.FC<{ artist: Artist; isManage: boolean }> = ({
 
   const addDisabled = links?.[links.length - 1]?.url === "";
 
-  const queryClient = useQueryClient();
-
-  const doSave = React.useCallback(
+  const handleSave = React.useCallback(
     async (data: FormData) => {
-      try {
-        if (userId && artistId && artistUserId === userId) {
-          const links = data.linkArray.map((link) => {
-            if (link.url.includes("@") && !link.url.startsWith("mailto:")) {
-              return `mailto:${link.url}`;
-            }
-            return link.url;
-          });
-          await api.put(`users/${userId}/artists/${artistId}`, {
-            links,
-          });
-        }
-
-        // TODO: can be moved into a mutation
-        await queryClient.invalidateQueries({
-          predicate: (query) =>
-            isMatch(Object(query.queryKey[0]), { artistId }),
-        });
-
-        snackbar("Updated links", { type: "success" });
-      } catch (e) {
-      } finally {
-        setIsEditing(false);
-      }
+      await onSubmit(transformToLinks(data));
+      snackbar("Updated links", { type: "success" });
+      setIsEditing(false);
     },
-    [artistId, artistUserId, queryClient, snackbar, userId],
+    [onSubmit, snackbar],
   );
 
   if (!isEditing) {
@@ -135,7 +126,7 @@ const ArtistFormLinks: React.FC<{ artist: Artist; isManage: boolean }> = ({
         <Button
           compact
           startIcon={<FaSave />}
-          onClick={handleSubmit(doSave)}
+          onClick={handleSubmit(handleSave)}
           disabled={addDisabled}
         >
           {t("saveLinks")}

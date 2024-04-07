@@ -8,10 +8,7 @@ import { useForm } from "react-hook-form";
 import { FaChevronDown, FaPen, FaSave, FaTimes } from "react-icons/fa";
 import TextArea from "components/common/TextArea";
 import { bp } from "../../constants";
-import { useParams, useSearchParams } from "react-router-dom";
-import { useAuthContext } from "state/AuthContext";
-import { useQuery } from "@tanstack/react-query";
-import { queryArtist, useUpdateArtistMutation } from "queries";
+import { useSearchParams } from "react-router-dom";
 
 interface FormData {
   bio: string;
@@ -19,12 +16,17 @@ interface FormData {
 
 const collapsedHeight = 65;
 
-const ArtistHeaderDescription: React.FC = () => {
-  const { artistId } = useParams();
-  const { user } = useAuthContext();
-  const { data: artist } = useQuery(
-    queryArtist({ artistSlug: artistId ?? "" }),
-  );
+interface ArtistHeaderDescriptionProps {
+  isManage: boolean;
+  artist: Pick<Artist, "bio">;
+  onSubmit: (data: Pick<Artist, "bio">) => Promise<void>;
+}
+
+const ArtistHeaderDescription: React.FC<ArtistHeaderDescriptionProps> = ({
+  isManage,
+  artist,
+  onSubmit,
+}) => {
   const [searchParams] = useSearchParams();
   const isHeaderExpanded = searchParams.get("expandHeader");
 
@@ -34,39 +36,19 @@ const ArtistHeaderDescription: React.FC = () => {
   const [isEditing, setIsEditing] = React.useState(false);
   const [isCollapsed, setIsCollapsed] = React.useState(false);
   const [canCollapse, setCanCollapse] = React.useState(false);
-  const userId = user?.id;
-  const artistUserId = artist?.userId;
   const { register, handleSubmit, reset } = useForm<FormData>({
-    defaultValues: { bio: artist?.bio },
+    values: { bio: artist?.bio ?? "" },
   });
-
-  const { mutate: updateArtist } = useUpdateArtistMutation();
-
-  const isArtistManager = userId && Number(userId) === Number(artistUserId);
 
   let bio = artist?.bio;
 
-  const doSave = React.useCallback(
+  const handleSave = React.useCallback(
     async (data: FormData) => {
-      if (isArtistManager) {
-        updateArtist(
-          {
-            userId: Number(userId),
-            artistId: Number(artistId),
-            body: {
-              bio: data.bio,
-            },
-          },
-          {
-            onSuccess() {
-              snackbar(t("updatedBio"), { type: "success" });
-              setIsEditing(false);
-            },
-          },
-        );
-      }
+      await onSubmit(data);
+      snackbar(t("updatedBio"), { type: "success" });
+      setIsEditing(false);
     },
-    [isArtistManager, updateArtist, snackbar, t, userId, artistId],
+    [onSubmit, snackbar, t]
   );
 
   React.useEffect(() => {
@@ -154,7 +136,7 @@ const ArtistHeaderDescription: React.FC = () => {
           </div>
         )}
 
-        {isArtistManager && (
+        {isManage && (
           <div
             className={css`
               max-width: 5%;
@@ -178,7 +160,7 @@ const ArtistHeaderDescription: React.FC = () => {
     );
   }
 
-  if (!isArtistManager && bio === "") {
+  if (!isManage && bio === "") {
     return null;
   }
 
@@ -199,7 +181,7 @@ const ArtistHeaderDescription: React.FC = () => {
           compact
           startIcon={<FaSave />}
           collapsible
-          onClick={handleSubmit(doSave)}
+          onClick={handleSubmit(handleSave)}
           className={css`
             margin-right: 0.5rem;
           `}
