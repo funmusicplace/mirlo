@@ -8,7 +8,7 @@ const useWidgetListener = () => {
     window.addEventListener("message", (event) => {
       // identify correctness of message from iframe
       if (
-        event.origin === process.env.REACT_APP_CLIENT_DOMAIN &&
+        event.origin === import.meta.env.VITE_CLIENT_DOMAIN &&
         event.data.includes?.("mirlo")
       ) {
         const data = event.data.split(":");

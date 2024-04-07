@@ -40,7 +40,7 @@ export const isTrackOwnedOrPreview = (
 };
 
 export const widgetUrl = (trackId: number, type: "track" | "trackGroup") => {
-  return process.env.REACT_APP_CLIENT_DOMAIN + `/widget/${type}/${trackId}`;
+  return import.meta.env.VITE_CLIENT_DOMAIN + `/widget/${type}/${trackId}`;
 };
 
 export const isWidgetUrl = (url: string) => {
@@ -48,8 +48,8 @@ export const isWidgetUrl = (url: string) => {
 
   const hostArray = ["localhost:8080", "mirlo.space"];
 
-  if (process.env.REACT_APP_CLIENT_DOMAIN?.split("//")[1]) {
-    hostArray.push(process.env.REACT_APP_CLIENT_DOMAIN?.split("//")[1]);
+  if (import.meta.env.VITE_CLIENT_DOMAIN?.split("//")[1]) {
+    hostArray.push(import.meta.env.VITE_CLIENT_DOMAIN?.split("//")[1]);
   }
   const includesHost = hostArray.includes(host);
   const isWidget = pathname.includes("/widget");

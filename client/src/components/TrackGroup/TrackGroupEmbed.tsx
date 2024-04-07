@@ -67,7 +67,7 @@ const TrackGroupEmbed: React.FC<{
             onClick={() => {
               if (trackGroup.artist) {
                 navigator.clipboard.writeText(
-                  process.env.REACT_APP_CLIENT_DOMAIN +
+                  import.meta.env.VITE_CLIENT_DOMAIN +
                     getReleaseUrl(trackGroup.artist, trackGroup)
                 );
                 snackbar(t("copiedToClipboard"), { type: "success" });

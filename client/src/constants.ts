@@ -1,4 +1,4 @@
-export const API_ROOT = process.env.REACT_APP_API_DOMAIN;
+export const API_ROOT = import.meta.env.VITE_API_DOMAIN;
 
 export const bp = {
   small: "576",

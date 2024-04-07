@@ -49,7 +49,7 @@ function Profile() {
             setIsSaving(true);
             await api.put(`users/${userId}`, {
               ...data,
-              client: process.env.REACT_APP_CLIENT_DOMAIN,
+              client: import.meta.env.VITE_CLIENT_DOMAIN,
             });
             snackbar(t("profileUpdated"), { type: "success" });
           }

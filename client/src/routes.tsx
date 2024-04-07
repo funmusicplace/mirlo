@@ -1,166 +1,221 @@
+import { Navigate, type RouteObject } from "react-router-dom";
+
 import App from "./App";
 import ErrorPage from "./components/ErrorPage";
-
-import Login from "./components/Login";
-import Profile from "./components/Profile";
-import Manage from "./components/ManageArtist/Manage";
-import { Navigate } from "react-router-dom";
-
-import Admin from "components/Admin/Admin";
-import AdminUsers from "components/Admin/Users";
-import AdminTrackGroups from "components/Admin/AdminTrackgroups";
-import AdminTracks from "components/Admin/Tracks";
-import ManageArtist from "components/ManageArtist/ManageArtist";
-import Home from "components/Home/Home";
-import Artist from "components/Artist/Artist";
-import TrackGroupWidget from "components/Widget/TrackGroupWidget";
-import TrackWidget from "components/Widget/TrackWidget";
-import Collection from "components/Profile/Collection";
-import Post, { PageMarkdownWrapper } from "components/Post";
-import PasswordReset from "components/PasswordReset";
-import TrackGroup from "components/TrackGroup/TrackGroup";
-import About from "components/pages/About";
 import { AuthWrapper } from "components/AuthWrapper";
-import Signup from "components/Signup";
-import ManageTrackGroup from "components/ManageArtist/ManageTrackGroup";
-import Releases from "components/Releases";
-import ManageContainer from "components/ManageArtist/ManageContainer";
-import ManageArtistContainer from "components/ManageArtist/ManageArtistContainer";
-import ArtistContainer from "components/Artist/ArtistContainer";
-import ProfileContainer from "components/Profile/ProfileContainer";
-import WishlistCollection from "components/Profile/WishlistCollection";
-import MarkdownContent from "components/common/MarkdownContent";
-import Welcome from "components/ManageArtist/Welcome";
-import ArtistPosts from "components/Artist/ArtistPosts";
-import ArtistAlbums from "components/Artist/ArtistAlbums";
-import ArtistSupport from "components/Artist/ArtistSupport";
-import ManageArtistAlbums from "components/ManageArtist/ManageArtistAlbums";
-import ManageArtistSubscriptionTiers from "components/ManageArtist/ManageArtistSubscriptionTiers";
-import ManageArtistPosts from "components/ManageArtist/ManageArtistPosts";
-import ManagePost from "components/ManageArtist/ManagePost";
-import NewReleaseRedirect from "components/ManageArtist/NewReleaseRedirect";
 import { css } from "@emotion/css";
-import Supporters from "components/ManageArtist/Supporters";
-import Artists from "components/Artists";
-import AdminArtists from "components/Admin/AdminArtists";
-import ManageArtistAlbumTools from "components/ManageArtist/ManageArtistAlbumTools";
-import Features from "components/Home/Features";
-import RedeemCode from "components/TrackGroup/RedeemCode";
-import DownloadAlbum from "components/TrackGroup/DownloadAlbum";
-import AdminPurchases from "components/Admin/AdminPurchases";
-import AdminSubscriptions from "components/Admin/AdminSubscriptions";
-import CallServerTasks from "components/Admin/CallServerTasks";
-import AdminSettings from "components/Admin/AdminSettings";
-import UserNotificationFeed from "components/Profile/UserNotificationFeed";
-import AdminManageUser from "components/Admin/AdminManageUser";
-import ArtistUnsubscribe from "components/Artist/ArtistUnsubscribe";
 
-const routes = [
+async function markdownPage(source: string) {
+  const { PageMarkdownWrapper } = await import("components/Post");
+  const { default: MarkdownContent } = await import(
+    "components/common/MarkdownContent"
+  );
+  return {
+    Component: () => (
+      <PageMarkdownWrapper>
+        <MarkdownContent source={source} />
+      </PageMarkdownWrapper>
+    ),
+  };
+}
+
+const routes: RouteObject[] = [
   {
     path: "/",
     element: <App />,
     errorElement: <ErrorPage />,
     children: [
-      { path: "", element: <Home /> },
-      { path: "pages/about", element: <About /> },
+      {
+        path: "",
+        async lazy() {
+          const { default: Component } = await import("components/Home/Home");
+          return { Component };
+        },
+      },
+      {
+        path: "pages/about",
+        async lazy() {
+          const { default: Component } = await import("components/pages/About");
+          return { Component };
+        },
+      },
       {
         path: "pages/cookie-policy",
-        element: (
-          <PageMarkdownWrapper>
-            <MarkdownContent source="/pages/CookiePolicy.md" />
-          </PageMarkdownWrapper>
-        ),
+        lazy: () => markdownPage("/pages/CookiePolicy.md"),
       },
       {
         path: "pages/privacy",
-        element: (
-          <PageMarkdownWrapper>
-            <MarkdownContent source="/pages/Privacy.md" />
-          </PageMarkdownWrapper>
-        ),
+        lazy: () => markdownPage("/pages/Privacy.md"),
       },
       {
         path: "pages/en/faq",
-        element: (
-          <PageMarkdownWrapper>
-            <MarkdownContent source="/pages/en/FAQ.md" />
-          </PageMarkdownWrapper>
-        ),
+        lazy: () => markdownPage("/pages/en/FAQ.md"),
       },
       {
         path: "pages/terms",
-        element: (
-          <PageMarkdownWrapper>
-            <MarkdownContent source="/pages/Terms.md" />
-          </PageMarkdownWrapper>
-        ),
+        lazy: () => markdownPage("/pages/Terms.md"),
       },
       {
         path: "pages/features",
-        element: <Features />,
+        async lazy() {
+          const { default: Component } = await import(
+            "components/Home/Features"
+          );
+          return { Component };
+        },
       },
-      { path: "widget/track/:id", element: <TrackWidget /> },
-      { path: "widget/trackgroup/:id", element: <TrackGroupWidget /> },
-      { path: "post/:postId", element: <Post /> },
+      {
+        path: "widget/track/:id",
+        async lazy() {
+          const { default: Component } = await import(
+            "components/Widget/TrackWidget"
+          );
+          return { Component };
+        },
+      },
+      {
+        path: "widget/trackgroup/:id",
+        async lazy() {
+          const { default: Component } = await import(
+            "components/Widget/TrackGroupWidget"
+          );
+          return { Component };
+        },
+      },
+      {
+        path: "post/:postId",
+        async lazy() {
+          const { default: Component } = await import("components/Post");
+          return { Component };
+        },
+      },
       {
         path: "signup",
-        element: <Signup />,
+        async lazy() {
+          const { default: Component } = await import("components/Signup");
+          return { Component };
+        },
       },
       {
         path: "login",
-        element: <Login />,
+        async lazy() {
+          const { default: Component } = await import("./components/Login");
+          return { Component };
+        },
       },
 
       {
         path: "password-reset",
-        element: <PasswordReset />,
+        async lazy() {
+          const { default: Component } = await import(
+            "components/PasswordReset"
+          );
+          return { Component };
+        },
       },
       {
         path: "profile",
-        element: (
-          <AuthWrapper>
-            <ProfileContainer />
-          </AuthWrapper>
-        ),
+        async lazy() {
+          const { default: ProfileContainer } = await import(
+            "components/Profile/ProfileContainer"
+          );
+          return {
+            Component: () => (
+              <AuthWrapper>
+                <ProfileContainer />
+              </AuthWrapper>
+            ),
+          };
+        },
         children: [
           {
             path: "",
-            element: <Profile />,
+            async lazy() {
+              const { default: Component } = await import(
+                "./components/Profile"
+              );
+              return { Component };
+            },
           },
           {
             path: "collection",
-            element: <Collection />,
+            async lazy() {
+              const { default: Component } = await import(
+                "components/Profile/Collection"
+              );
+              return { Component };
+            },
           },
           {
             path: "wishlist",
-            element: <WishlistCollection />,
+            async lazy() {
+              const { default: Component } = await import(
+                "components/Profile/WishlistCollection"
+              );
+              return { Component };
+            },
           },
           {
             path: "notifications",
-            element: <UserNotificationFeed />,
+            async lazy() {
+              const { default: Component } = await import(
+                "components/Profile/UserNotificationFeed"
+              );
+              return { Component };
+            },
           },
         ],
       },
       {
         path: "manage",
-        element: (
-          <AuthWrapper>
-            <ManageContainer />
-          </AuthWrapper>
-        ),
+        async lazy() {
+          const { default: ManageContainer } = await import(
+            "components/ManageArtist/ManageContainer"
+          );
+          return {
+            Component: () => (
+              <AuthWrapper>
+                <ManageContainer />
+              </AuthWrapper>
+            ),
+          };
+        },
         children: [
           {
             path: "",
-            element: <Manage />,
+            async lazy() {
+              const { default: Component } = await import(
+                "./components/ManageArtist/Manage"
+              );
+              return { Component };
+            },
           },
-          { path: "welcome", element: <Welcome /> },
+          {
+            path: "welcome",
+            async lazy() {
+              const { default: Component } = await import(
+                "components/ManageArtist/Welcome"
+              );
+              return { Component };
+            },
+          },
           {
             path: "artists/:artistId",
-            element: <ManageArtistContainer />,
+            async lazy() {
+              const { default: Component } = await import(
+                "components/ManageArtist/ManageArtistContainer"
+              );
+              return { Component };
+            },
             children: [
               {
                 path: "",
-                element: <ManageArtist />,
+                async lazy() {
+                  const { default: Component } = await import(
+                    "components/ManageArtist/ManageArtist"
+                  );
+                  return { Component };
+                },
                 children: [
                   {
                     path: "",
@@ -168,37 +223,77 @@ const routes = [
                   },
                   {
                     path: "releases",
-                    element: <ManageArtistAlbums />,
+                    async lazy() {
+                      const { default: Component } = await import(
+                        "components/ManageArtist/ManageArtistAlbums"
+                      );
+                      return { Component };
+                    },
                   },
                   {
                     path: "tiers",
-                    element: <ManageArtistSubscriptionTiers />,
+                    async lazy() {
+                      const { default: Component } = await import(
+                        "components/ManageArtist/ManageArtistSubscriptionTiers"
+                      );
+                      return { Component };
+                    },
                   },
                   {
                     path: "tiers/supporters",
-                    element: <Supporters />,
+                    async lazy() {
+                      const { default: Component } = await import(
+                        "components/ManageArtist/Supporters"
+                      );
+                      return { Component };
+                    },
                   },
                   {
                     path: "posts",
-                    element: <ManageArtistPosts />,
+                    async lazy() {
+                      const { default: Component } = await import(
+                        "components/ManageArtist/ManageArtistPosts"
+                      );
+                      return { Component };
+                    },
                   },
                   {
                     path: "releases/tools",
-                    element: <ManageArtistAlbumTools />,
+                    async lazy() {
+                      const { default: Component } = await import(
+                        "components/ManageArtist/ManageArtistAlbumTools"
+                      );
+                      return { Component };
+                    },
                   },
                 ],
               },
               {
                 path: "release/:trackGroupId",
-                element: <ManageTrackGroup />,
+                async lazy() {
+                  const { default: Component } = await import(
+                    "components/ManageArtist/ManageTrackGroup"
+                  );
+                  return { Component };
+                },
               },
               {
                 path: "post/:postId",
-                element: <ManagePost />,
+                async lazy() {
+                  const { default: Component } = await import(
+                    "components/ManageArtist/ManagePost"
+                  );
+                  return { Component };
+                },
               },
               {
                 path: "new-release",
-                element: <NewReleaseRedirect />,
+                async lazy() {
+                  const { default: Component } = await import(
+                    "components/ManageArtist/NewReleaseRedirect"
+                  );
+                  return { Component };
+                },
               },
             ],
           },
@@ -207,115 +302,223 @@ const routes = [
 
       {
         path: "admin",
-        element: (
-          <AuthWrapper adminOnly>
-            <Admin />
-          </AuthWrapper>
-        ),
+        async lazy() {
+          const { default: Admin } = await import("components/Admin/Admin");
+          return {
+            Component: () => (
+              <AuthWrapper adminOnly>
+                <Admin />
+              </AuthWrapper>
+            ),
+          };
+        },
         children: [
           {
             path: "users",
-            element: <AdminUsers />,
+            async lazy() {
+              const { default: Component } = await import(
+                "components/Admin/Users"
+              );
+              return { Component };
+            },
           },
           {
             path: "users/:id",
-            element: <AdminManageUser />,
+            async lazy() {
+              const { default: Component } = await import(
+                "components/Admin/AdminManageUser"
+              );
+              return { Component };
+            },
           },
           {
             path: "artists",
-            element: <AdminArtists />,
+            async lazy() {
+              const { default: Component } = await import(
+                "components/Admin/AdminArtists"
+              );
+              return { Component };
+            },
           },
           {
             path: "trackGroups",
-            element: <AdminTrackGroups />,
+            async lazy() {
+              const { default: Component } = await import(
+                "components/Admin/AdminTrackgroups"
+              );
+              return { Component };
+            },
           },
           {
             path: "tracks",
-            element: <AdminTracks />,
+            async lazy() {
+              const { default: Component } = await import(
+                "components/Admin/Tracks"
+              );
+              return { Component };
+            },
           },
           {
             path: "purchases",
-            element: <AdminPurchases />,
+            async lazy() {
+              const { default: Component } = await import(
+                "components/Admin/AdminPurchases"
+              );
+              return { Component };
+            },
           },
           {
             path: "subscriptions",
-            element: <AdminSubscriptions />,
+            async lazy() {
+              const { default: Component } = await import(
+                "components/Admin/AdminSubscriptions"
+              );
+              return { Component };
+            },
           },
           {
             path: "serverTasks",
-            element: <CallServerTasks />,
+            async lazy() {
+              const { default: Component } = await import(
+                "components/Admin/CallServerTasks"
+              );
+              return { Component };
+            },
           },
           {
             path: "settings",
-            element: <AdminSettings />,
+            async lazy() {
+              const { default: Component } = await import(
+                "components/Admin/AdminSettings"
+              );
+              return { Component };
+            },
           },
         ],
       },
       {
         path: "releases",
-        element: (
-          <div
-            className={css`
-              width: 100%;
-            `}
-          >
-            <Releases />
-          </div>
-        ),
+        async lazy() {
+          const { default: Releases } = await import("components/Releases");
+          return {
+            Component: () => (
+              <div
+                className={css`
+                  width: 100%;
+                `}
+              >
+                <Releases />
+              </div>
+            ),
+          };
+        },
       },
       {
         path: "artists",
-        element: (
-          <div
-            className={css`
-              width: 100%;
-            `}
-          >
-            <Artists />
-          </div>
-        ),
+        async lazy() {
+          const { default: Artists } = await import("components/Artists");
+          return {
+            Component: () => (
+              <div
+                className={css`
+                  width: 100%;
+                `}
+              >
+                <Artists />
+              </div>
+            ),
+          };
+        },
       },
       {
         path: ":artistId",
-        element: <ArtistContainer />,
+        async lazy() {
+          const { default: Component } = await import(
+            "components/Artist/ArtistContainer"
+          );
+          return { Component };
+        },
         children: [
           {
             path: "",
-            element: <Artist />,
+            async lazy() {
+              const { default: Component } = await import(
+                "components/Artist/Artist"
+              );
+              return { Component };
+            },
             children: [
               {
                 path: "posts",
-                element: <ArtistPosts />,
+                async lazy() {
+                  const { default: Component } = await import(
+                    "components/Artist/ArtistPosts"
+                  );
+                  return { Component };
+                },
               },
               {
                 path: "releases",
-                element: <ArtistAlbums />,
+                async lazy() {
+                  const { default: Component } = await import(
+                    "components/Artist/ArtistAlbums"
+                  );
+                  return { Component };
+                },
               },
               {
                 path: "support",
-                element: <ArtistSupport />,
+                async lazy() {
+                  const { default: Component } = await import(
+                    "components/Artist/ArtistSupport"
+                  );
+                  return { Component };
+                },
               },
             ],
           },
           {
             path: "unsubscribe",
-            element: <ArtistUnsubscribe />,
+            async lazy() {
+              const { default: Component } = await import(
+                "components/Artist/ArtistUnsubscribe"
+              );
+              return { Component };
+            },
           },
           {
             path: "release/:trackGroupId",
-            element: <TrackGroup />,
+            async lazy() {
+              const { default: Component } = await import(
+                "components/TrackGroup/TrackGroup"
+              );
+              return { Component };
+            },
           },
           {
             path: "release/:trackGroupId/redeem",
-            element: <RedeemCode />,
+            async lazy() {
+              const { default: Component } = await import(
+                "components/TrackGroup/RedeemCode"
+              );
+              return { Component };
+            },
           },
           {
             path: "release/:trackGroupId/download",
-            element: <DownloadAlbum />,
+            async lazy() {
+              const { default: Component } = await import(
+                "components/TrackGroup/DownloadAlbum"
+              );
+              return { Component };
+            },
           },
           {
             path: "posts/:postId",
-            element: <Post />,
+            async lazy() {
+              const { default: Component } = await import("components/Post");
+              return { Component };
+            },
           },
         ],
       },

@@ -34,7 +34,7 @@ function PasswordReset() {
         await api.post("password-reset/initiate", {
           ...data,
           redirectClient:
-            process.env.REACT_APP_CLIENT_DOMAIN + "/password-reset",
+            import.meta.env.VITE_CLIENT_DOMAIN + "/password-reset",
         });
         snackbar("Check your email to continue resetting your password", {
           type: "success",
