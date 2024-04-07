@@ -1,5 +1,8 @@
-import { QueryCache, QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import {
+  QueryCache,
+  QueryClient,
+  QueryClientProvider,
+} from "@tanstack/react-query";
 import React from "react";
 import { MirloFetchError } from "./fetch/MirloFetchError";
 import { authRefresh } from "./auth";
@@ -12,8 +15,8 @@ const queryClient = new QueryClient({
       retry: (failureCount, error) => {
         // Don't retry for auth-related errors
         if (
-          error instanceof MirloFetchError
-          && (error.status === 400 || error.status === 401)
+          error instanceof MirloFetchError &&
+          (error.status === 400 || error.status === 401)
         ) {
           return false;
         }
@@ -26,8 +29,8 @@ const queryClient = new QueryClient({
   queryCache: new QueryCache({
     onError: async (error) => {
       if (
-        error instanceof MirloFetchError
-        && (error.status === 400 || error.status === 401)
+        error instanceof MirloFetchError &&
+        (error.status === 400 || error.status === 401)
       ) {
         console.log(`Received a ${error.status} response - refreshing auth...`);
         await authRefresh();
@@ -35,9 +38,15 @@ const queryClient = new QueryClient({
           predicate: (query) => query.queryKey.includes(QUERY_KEY_AUTH),
         });
       }
-    }
+    },
   }),
 });
+
+const ReactQueryDevtools = React.lazy(() =>
+  process.env.NODE_ENV === "development"
+    ? import("@tanstack/react-query-devtools").then(({ ReactQueryDevtools }) => ({ default: ReactQueryDevtools }))
+    : Promise.resolve({ default: () => undefined as never })
+);
 
 export function QueryClientWrapper(props: React.PropsWithChildren<{}>) {
   return (
@@ -45,5 +54,5 @@ export function QueryClientWrapper(props: React.PropsWithChildren<{}>) {
       {props.children}
       <ReactQueryDevtools />
     </QueryClientProvider>
-  )
+  );
 }
