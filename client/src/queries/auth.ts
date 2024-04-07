@@ -5,7 +5,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import * as api from "./fetch/fetchWrapper";
-import { QUERY_KEY_AUTH } from "./keys";
+import { QUERY_KEY_AUTH } from "./queryKeys";
 import { MirloFetchError } from "./fetch/MirloFetchError";
 
 type LoginBody = {
@@ -14,7 +14,7 @@ type LoginBody = {
 };
 
 async function login(body: LoginBody) {
-  await api.Post("auth/login", body);
+  await api.post("auth/login", body);
 }
 
 export function useLoginMutation() {
@@ -30,7 +30,7 @@ export function useLoginMutation() {
 }
 
 async function logout() {
-  await api.Get("auth/logout", {});
+  await api.get("auth/logout", {});
 }
 
 export function useLogoutMutation() {
@@ -60,7 +60,7 @@ async function signup(body: Omit<SignupBody, "client">) {
     client: String(process.env.REACT_APP_CLIENT_DOMAIN),
   };
 
-  await api.Post("auth/signup", signupBody, {
+  await api.post("auth/signup", signupBody, {
     credentials: undefined,
   });
 }
@@ -78,7 +78,7 @@ export function useSignupMutation() {
 }
 
 export async function authRefresh() {
-  await api.Post("auth/refresh", {});
+  await api.post("auth/refresh", {});
 }
 
 export function useAuthRefreshMutation() {
@@ -97,10 +97,10 @@ export function useAuthRefreshMutation() {
 
 const fetchProfile: QueryFunction<
   LoggedInUser | null,
-  [{ query: "fetchProfile" }, ...unknown[]]
+  ["fetchProfile", ...string[]]
 > = ({ signal }) => {
   return api
-    .Get<{ result: LoggedInUser }>(`auth/profile`, { signal })
+    .get<{ result: LoggedInUser }>(`auth/profile`, { signal })
     .then((r) => r.result)
     .catch((e) => {
       // If the user is logged out, return null as a successful response
@@ -116,7 +116,7 @@ const fetchProfile: QueryFunction<
  */
 export function queryAuthProfile() {
   return queryOptions({
-    queryKey: [{ query: "fetchProfile" }, QUERY_KEY_AUTH],
+    queryKey: ["fetchProfile", QUERY_KEY_AUTH],
     queryFn: fetchProfile,
   });
 }

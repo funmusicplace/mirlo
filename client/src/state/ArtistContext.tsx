@@ -1,7 +1,10 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { isMatch } from "lodash";
 import { queryArtist, queryUserStripeStatus } from "queries";
-import { QUERY_KEY_ARTISTS } from "queries/keys";
+import {
+  QUERY_KEY_ARTISTS,
+  queryKeyIncludes,
+  queryKeyMatches,
+} from "queries/queryKeys";
 import React from "react";
 import { useParams } from "react-router-dom";
 
@@ -11,10 +14,10 @@ import { useParams } from "react-router-dom";
 export const useArtistContext = () => {
   const { artistId } = useParams();
   const { data: artist, isLoading } = useQuery(
-    queryArtist({ artistSlug: artistId ?? "", includeDefaultTier: false }),
+    queryArtist({ artistSlug: artistId ?? "", includeDefaultTier: false })
   );
   const { data: userStripeStatus } = useQuery(
-    queryUserStripeStatus(Number(artist?.userId)),
+    queryUserStripeStatus(Number(artist?.userId))
   );
 
   // TODO: eventually remove the manual refresh() once everything is a mutation
@@ -22,11 +25,9 @@ export const useArtistContext = () => {
   const refresh = React.useCallback(() => {
     queryClient.invalidateQueries({
       predicate: (query) =>
-        isMatch(Object(query.queryKey[0]), { artistId: Number(artistId) }) ||
-        isMatch(Object(query.queryKey[0]), {
-          artistSlug: artist?.urlSlug ?? "",
-        }) ||
-        query.queryKey.includes(QUERY_KEY_ARTISTS),
+        queryKeyMatches(query, { artistId: Number(artistId) }) ||
+        queryKeyMatches(query, { artistSlug: artist?.urlSlug ?? "" }) ||
+        queryKeyIncludes(query, QUERY_KEY_ARTISTS),
     });
   }, [queryClient, artistId, artist]);
 

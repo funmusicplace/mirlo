@@ -6,7 +6,7 @@ import {
 import React from "react";
 import { MirloFetchError } from "./fetch/MirloFetchError";
 import { authRefresh } from "./auth";
-import { QUERY_KEY_AUTH } from "./keys";
+import { QUERY_KEY_AUTH } from "./queryKeys";
 
 const queryClient = new QueryClient({
   defaultOptions: {

@@ -5,15 +5,18 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import * as api from "./fetch/fetchWrapper";
-import { QUERY_KEY_ARTISTS } from "./keys";
-import { isMatch } from "lodash";
+import {
+  QUERY_KEY_ARTISTS,
+  queryKeyIncludes,
+  queryKeyMatches,
+} from "./queryKeys";
 
 const fetchUserStripeStatus: QueryFunction<
   AccountStatus,
-  [{ query: "fetchUserStripeStatus"; userId: number }]
-> = ({ queryKey: [{ userId }], signal }) => {
+  ["fetchUserStripeStatus", { userId: number }]
+> = ({ queryKey: [_, { userId }], signal }) => {
   return api
-    .Get<{
+    .get<{
       result: AccountStatus;
     }>(`v1/users/${userId}/stripe/checkAccountStatus`, { signal })
     .then((r) => r.result);
@@ -21,7 +24,7 @@ const fetchUserStripeStatus: QueryFunction<
 
 export function queryUserStripeStatus(userId: number) {
   return queryOptions({
-    queryKey: [{ query: "fetchUserStripeStatus", userId }],
+    queryKey: ["fetchUserStripeStatus", { userId }],
     queryFn: fetchUserStripeStatus,
     enabled: isFinite(userId),
   });
@@ -29,13 +32,10 @@ export function queryUserStripeStatus(userId: number) {
 
 const fetchManagedArtist: QueryFunction<
   Artist,
-  [
-    { query: "fetchManagedArtist"; userId: number; artistId: number },
-    ...unknown[]
-  ]
-> = ({ queryKey: [{ userId, artistId }], signal }) => {
+  ["fetchManagedArtist", { userId: number; artistId: number }]
+> = ({ queryKey: [_, { userId, artistId }], signal }) => {
   return api
-    .Get<{
+    .get<{
       result: Artist;
     }>(`v1/users/${userId}/artists/${artistId}`, { signal })
     .then((r) => r.result);
@@ -43,7 +43,7 @@ const fetchManagedArtist: QueryFunction<
 
 export function queryManagedArtist(userId: number, artistId: number) {
   return queryOptions({
-    queryKey: [{ query: "fetchManagedArtist", userId, artistId }],
+    queryKey: ["fetchManagedArtist", { userId, artistId }],
     queryFn: fetchManagedArtist,
     enabled: isFinite(userId) && isFinite(artistId),
   });
@@ -61,7 +61,7 @@ async function createArtist({
   body: CreateArtistBody;
 }) {
   return api
-    .Post<CreateArtistBody, { result: Artist }>(
+    .post<CreateArtistBody, { result: Artist }>(
       `v1/users/${userId}/artists`,
       body
     )
@@ -94,7 +94,7 @@ async function updateArtist({
   body: UpdateArtistBody;
 }) {
   return api
-    .Put<UpdateArtistBody, { result: Artist }>(
+    .put<UpdateArtistBody, { result: Artist }>(
       `v1/users/${userId}/artists/${artistId}`,
       body
     )
@@ -108,10 +108,8 @@ export function useUpdateArtistMutation() {
     async onSuccess(data, { artistId }) {
       await client.invalidateQueries({
         predicate: (query) =>
-          isMatch(Object(query.queryKey[0]), { artistId }) ||
-          isMatch(Object(query.queryKey[0]), {
-            artistSlug: String(data.urlSlug),
-          }) ||
+          queryKeyMatches(query, { artistId }) ||
+          queryKeyMatches(query, { artistSlug: String(data.urlSlug) }) ||
           query.queryKey.includes(QUERY_KEY_ARTISTS),
       });
     },
@@ -126,7 +124,7 @@ async function deleteArtist({
   artistId: number;
   artistSlug: string;
 }) {
-  return api.Delete(`v1/users/${userId}/artists/${artistId}`);
+  return api.del(`v1/users/${userId}/artists/${artistId}`);
 }
 
 export function useDeleteArtistMutation() {
@@ -136,9 +134,9 @@ export function useDeleteArtistMutation() {
     async onSuccess(_, { artistId, artistSlug }) {
       await client.invalidateQueries({
         predicate: (query) =>
-          isMatch(Object(query.queryKey[0]), { artistId }) ||
-          isMatch(Object(query.queryKey[0]), { artistSlug }) ||
-          query.queryKey.includes(QUERY_KEY_ARTISTS),
+          queryKeyMatches(query, { artistId }) ||
+          queryKeyMatches(query, { artistSlug }) ||
+          queryKeyIncludes(query, QUERY_KEY_ARTISTS),
       });
     },
   });

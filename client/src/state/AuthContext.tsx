@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { queryAuthProfile, useAuthRefreshMutation } from "queries";
-import { QUERY_KEY_AUTH } from "queries/keys";
+import { QUERY_KEY_AUTH, queryKeyIncludes } from "queries/queryKeys";
 import React, { useMemo } from "react";
 
 const AuthContext = React.createContext<{
@@ -25,12 +25,9 @@ export function AuthContextProvider({ children }: React.PropsWithChildren) {
     let interval: NodeJS.Timer | null = null;
 
     if (userId) {
-      interval = setInterval(
-        async () => {
-          authRefresh();
-        },
-        1000 * 60 * 5,
-      ); // refresh every 5 minutes
+      interval = setInterval(async () => {
+        authRefresh();
+      }, 1000 * 60 * 5); // refresh every 5 minutes
     }
     return () => (interval ? clearInterval(interval) : undefined);
   }, [userId, authRefresh]);
@@ -51,7 +48,7 @@ export function useAuthContext() {
   const queryClient = useQueryClient();
   const refreshLoggedInUser = React.useCallback(() => {
     queryClient.invalidateQueries({
-      predicate: (query) => query.queryKey.includes(QUERY_KEY_AUTH),
+      predicate: (query) => queryKeyIncludes(query, QUERY_KEY_AUTH),
     });
   }, [queryClient]);
 

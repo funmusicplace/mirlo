@@ -12,7 +12,7 @@ import { useArtistContext } from "state/ArtistContext";
 import { PostGrid } from "./ArtistPosts";
 import { useAuthContext } from "state/AuthContext";
 import { useQueryClient } from "@tanstack/react-query";
-import { QUERY_KEY_AUTH } from "queries/keys";
+import { QUERY_KEY_AUTH, queryKeyIncludes } from "queries/queryKeys";
 
 const ArtistSupport: React.FC = () => {
   const { user } = useAuthContext();
@@ -39,12 +39,12 @@ const ArtistSupport: React.FC = () => {
         const sub = userSubscriptions?.find(
           (aus) =>
             !aus.artistSubscriptionTier.isDefaultTier &&
-            aus.artistSubscriptionTier.artistId === artistId,
+            aus.artistSubscriptionTier.artistId === artistId
         );
         setUserSubscription(sub);
 
         const hasId = artistTiers?.find(
-          (tier) => sub?.artistSubscriptionTierId === tier.id,
+          (tier) => sub?.artistSubscriptionTierId === tier.id
         );
         setUserSubscriptionTier(hasId);
       }
@@ -66,7 +66,7 @@ const ArtistSupport: React.FC = () => {
     if (query.get("subscribe") === "success") {
       interval = setTimeout(async () => {
         await queryClient.invalidateQueries({
-          predicate: (query) => query.queryKey.includes(QUERY_KEY_AUTH),
+          predicate: (query) => queryKeyIncludes(query, QUERY_KEY_AUTH),
         });
       }, 1000 * 3);
     }

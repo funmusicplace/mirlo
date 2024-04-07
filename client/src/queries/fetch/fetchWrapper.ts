@@ -14,7 +14,7 @@ const baseUrl = API_ROOT?.replace(" ", "") ?? "";
  */
 async function fetchWrapper<R>(
   endpoint: string,
-  init: RequestInit,
+  init: RequestInit
 ): Promise<R> {
   const res = await fetch(`${baseUrl}/${endpoint}`, {
     credentials: "include",
@@ -33,7 +33,7 @@ async function fetchWrapper<R>(
  * @throws MirloFetchError if the response code is not OK
  * @throws SyntaxError if the response body is not JSON
  */
-export function Get<R>(endpoint: string, init: RequestInit): Promise<R> {
+export function get<R>(endpoint: string, init: RequestInit): Promise<R> {
   return fetchWrapper(endpoint, {
     method: "GET",
     ...init,
@@ -50,10 +50,10 @@ export function Get<R>(endpoint: string, init: RequestInit): Promise<R> {
  * @throws MirloFetchError if the response code is not OK
  * @throws SyntaxError if the response body is not JSON
  */
-export function Post<T, R>(
+export function post<T, R>(
   endpoint: string,
   body: T,
-  init: RequestInit = {},
+  init: RequestInit = {}
 ): Promise<R> {
   return fetchWrapper(endpoint, {
     method: "POST",
@@ -76,10 +76,10 @@ export function Post<T, R>(
  * @throws MirloFetchError if the response code is not OK
  * @throws SyntaxError if the response body is not JSON
  */
-export function Put<T, R>(
+export function put<T, R>(
   endpoint: string,
   body: T,
-  init: RequestInit = {},
+  init: RequestInit = {}
 ): Promise<R> {
   return fetchWrapper(endpoint, {
     method: "PUT",
@@ -101,10 +101,7 @@ export function Put<T, R>(
  * @throws MirloFetchError if the response code is not OK
  * @throws SyntaxError if the response body is not JSON
  */
-export function Delete<R>(
-  endpoint: string,
-  init: RequestInit = {},
-): Promise<R> {
+export function del<R>(endpoint: string, init: RequestInit = {}): Promise<R> {
   return fetchWrapper(endpoint, {
     method: "DELETE",
     ...init,
