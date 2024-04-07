@@ -27,6 +27,15 @@ export const PageMarkdownWrapper = styled.div`
   font-size: 18px;
   line-height: 1.7rem;
 
+  blockquote {
+    direction: ltr;
+    font-style: italic;
+    padding-left: 1rem;
+    border-left: solid 3px grey;
+    unicode-bidi: isolate;
+    margin-bottom: 1.5rem;
+  }
+
   a {
     word-break: break-word;
   }
@@ -40,6 +49,12 @@ export const PageMarkdownWrapper = styled.div`
     font-size: 1.7rem !important;
     margin-top: 1rem;
     margin-bottom: 1rem !important;
+  }
+
+  h3 {
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0;
   }
 
   p {
