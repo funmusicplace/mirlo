@@ -75,7 +75,7 @@ const ManagePost: React.FC<{}> = () => {
                 align-items: center;
               `}
             >
-              <Link to={`/post/${post.id}`}>
+              <Link to={`/${artist?.urlSlug}/posts/${post.id}`}>
                 <Button type="button">{t("viewLive")}</Button>
               </Link>
             </div>
