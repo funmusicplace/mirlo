@@ -25,7 +25,7 @@ type Actions = SetLoading | SetState;
 export const fetchArtist = async (
   artistId: string,
   managedArtist: boolean,
-  signal: AbortSignal,
+  signal: AbortSignal
 ) => {
   let artist;
   if (artistId) {
@@ -35,7 +35,7 @@ export const fetchArtist = async (
     if (managedArtist) {
       const { result } = await api.get<Artist>(
         `users/${publicArtist.userId}/artists/${artistId}`,
-        signal,
+        signal
       );
       artist = result;
     } else {
@@ -46,12 +46,15 @@ export const fetchArtist = async (
   return signal.aborted ? undefined : artist;
 };
 
-export const checkArtistStripeStatus = async (artistUserId: number, signal: AbortSignal) => {
+export const checkArtistStripeStatus = async (
+  artistUserId: number,
+  signal: AbortSignal
+) => {
   let checkAccountStatus;
   try {
     checkAccountStatus = await api.get<AccountStatus>(
       `users/${artistUserId}/stripe/checkAccountStatus`,
-      signal,
+      signal
     );
   } catch (e) {
     console.error("Stripe didn't work", e);
@@ -98,20 +101,20 @@ export const ArtistProvider: React.FC<{
 
   const initialLoad = React.useCallback(
     async (signal: AbortSignal) => {
-      let state: Actions|undefined = undefined;
+      let state: Actions | undefined = undefined;
 
       if (artistId) {
         dispatch({ type: "setIsLoading", isLoading: true });
         const artist = await fetchArtist(
           artistId,
           pathname.includes("manage"),
-          signal,
+          signal
         );
 
         if (artist) {
           const checkAccountStatus = await checkArtistStripeStatus(
             artist.userId,
-            signal,
+            signal
           );
 
           state = {

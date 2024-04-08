@@ -27,8 +27,8 @@ const getExistingImage = (
   const image = isTrackgroup(existing)
     ? existing["cover"]
     : imageType === "avatar" || imageType === "banner"
-    ? existing[imageType]
-    : undefined;
+      ? existing[imageType]
+      : undefined;
 
   if (!image) {
     return undefined;
