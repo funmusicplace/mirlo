@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useArtistContext } from "state/ArtistContext";
 import useGetUserObjectById from "utils/useGetUserObjectById";
+import { getPostURLReference } from "utils/artist";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import ManageSectionWrapper from "./ManageSectionWrapper";
 import { css } from "@emotion/css";
@@ -75,7 +76,7 @@ const ManagePost: React.FC<{}> = () => {
                 align-items: center;
               `}
             >
-              <Link to={`/${artist?.urlSlug}/posts/${post.id}`}>
+              <Link to={getPostURLReference({...post, artist})}>
                 <Button type="button">{t("viewLive")}</Button>
               </Link>
             </div>
