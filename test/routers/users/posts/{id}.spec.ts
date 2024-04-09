@@ -11,6 +11,7 @@ import {
   createPost,
   createUser,
 } from "../../../utils";
+import { findLastIndex } from "lodash";
 
 const baseURL = `${process.env.API_DOMAIN}/v1/`;
 const requestApp = request(baseURL);
@@ -140,6 +141,42 @@ describe("users/{userId}/posts/{postId}", () => {
       );
       assert.deepEqual(response.body.result.title, post.title);
       assert(response.statusCode === 200);
+    });
+
+    it("should PUT and store shouldSendEmail", async () => {
+      const { user, accessToken } = await createUser({
+        email: "test@test.com",
+      });
+
+      const artist = await createArtist(user.id, {
+        subscriptionTiers: {
+          create: {
+            name: "a tier",
+          },
+        },
+      });
+
+      const post = await createPost(artist.id, {
+        shouldSendEmail: true,
+      });
+      assert.equal(post.shouldSendEmail, true);
+
+      const response = await requestApp
+        .put(`users/${user.id}/posts/${post.id}`)
+        .send({
+          shouldSendEmail: false,
+        })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.body.result.shouldSendEmail, false);
+      assert.equal(response.statusCode, 200);
+      const refreshedPost = await prisma.post.findFirst({
+        where: {
+          id: post.id,
+        },
+      });
+      assert.equal(refreshedPost?.shouldSendEmail, false);
     });
   });
 

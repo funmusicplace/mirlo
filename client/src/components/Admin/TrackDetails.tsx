@@ -18,7 +18,7 @@ export const TrackDetails: React.FC = () => {
 
   const [track, setTrack] = React.useState<Track>();
 
-  const { t } = useTranslation("translation", { keyPrefix: "trackDetails"})
+  const { t } = useTranslation("translation", { keyPrefix: "trackDetails" });
 
   const fetchTrackWrapper = React.useCallback(
     async (id: string) => {
@@ -54,11 +54,11 @@ export const TrackDetails: React.FC = () => {
     [trackId, snackbar]
   );
 
-  
-
   return (
     <>
-      <h3>{t("track")} {track?.title}</h3>
+      <h3>
+        {t("track")} {track?.title}
+      </h3>
       <form onSubmit={handleSubmit(doSave)}>
         <div>
           {t("saveTrackForm.title")} <InputEl {...register("title")} />
@@ -66,7 +66,9 @@ export const TrackDetails: React.FC = () => {
         <div>
           {t("saveTrackForm.status")}
           <SelectEl defaultValue="paid" {...register("status")}>
-            <option value="free+paid">{t("saveTrackForm.option.freePaid")}</option>
+            <option value="free+paid">
+              {t("saveTrackForm.option.freePaid")}
+            </option>
             <option value="hidden">{t("saveTrackForm.option.hidden")}</option>
             <option value="free">{t("saveTrackForm.option.free")}</option>
             <option value="paid">{t("saveTrackForm.option.paid")}</option>

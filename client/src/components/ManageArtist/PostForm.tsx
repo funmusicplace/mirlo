@@ -41,7 +41,7 @@ const PostForm: React.FC<{
     user?.id,
     `${artist.id}`,
     `/subscriptionTiers?includeDefault=true`,
-    { multiple: true },
+    { multiple: true }
   );
 
   React.useEffect(() => {
@@ -51,8 +51,10 @@ const PostForm: React.FC<{
 
   const publishedAt = existing ? new Date(existing.publishedAt) : new Date();
   publishedAt.setMinutes(
-    publishedAt.getMinutes() - publishedAt.getTimezoneOffset(),
+    publishedAt.getMinutes() - publishedAt.getTimezoneOffset()
   );
+
+  console.log("exiting", existing);
 
   const methods = useForm<FormData>({
     defaultValues: existing
@@ -82,7 +84,7 @@ const PostForm: React.FC<{
         try {
           setIsSaving(true);
           const picked = {
-            ...pick(data, ["title", "content", "isPublic"]),
+            ...pick(data, ["title", "content", "isPublic", "shouldSendEmail"]),
             publishedAt: new Date(data.publishedAt + ":00").toISOString(),
             artistId: artist.id,
             minimumSubscriptionTierId:
@@ -115,7 +117,7 @@ const PostForm: React.FC<{
         }
       }
     },
-    [reload, existingId, snackbar, artist.id, errorHandler, onClose, userId, t],
+    [reload, existingId, snackbar, artist.id, errorHandler, onClose, userId, t]
   );
 
   return (

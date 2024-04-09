@@ -29,6 +29,11 @@ export const whereForPublishedTrackGroups = (): Prisma.TrackGroupWhereInput => {
     published: true,
     tracks: { some: { audio: { uploadState: "SUCCESS" } } },
     deletedAt: null,
+    cover: {
+      url: {
+        isEmpty: false,
+      },
+    },
   };
 };
 

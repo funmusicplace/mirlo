@@ -88,7 +88,7 @@ export const convertMetaData = (
         artistId:
           artist === trackGroup.artist?.name ? trackGroup.artistId : undefined,
       })) ?? [],
-  } as TrackData);
+  }) as TrackData;
 
 export const parse = async (files: File[]): Promise<ParsedItem[]> => {
   const parsed = await Promise.all(
@@ -136,7 +136,9 @@ export const UploadLabelWrapper = styled("label")`
   width: 100%;
   color: var(--mi-foreground-color);
   cursor: pointer;
-  transition: background 0.2s ease-in-out, border 0.2s ease-in-out;
+  transition:
+    background 0.2s ease-in-out,
+    border 0.2s ease-in-out;
 `;
 
 export const UploadField = styled(InputEl)`

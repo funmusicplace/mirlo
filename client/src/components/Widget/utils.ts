@@ -31,7 +31,8 @@ export const WidgetWrapper = styled.div<{ embeddedInMirlo?: boolean }>`
   box-sizing: border-box;
   background: var(--mi-normal-background-color);
   a {
-    color: var(--mi-normal-foreground-color)}
+    color: var(--mi-normal-foreground-color);
+  }
 `;
 
 export const TgWidgetWrapper = styled.div<{ embeddedInMirlo?: boolean }>`
@@ -50,7 +51,7 @@ export const TgWidgetWrapper = styled.div<{ embeddedInMirlo?: boolean }>`
 
   @media screen and (max-width: ${bp.small}px) {
     grid-template-columns: repeat(1, 1fr);
-    padding: .5rem 0 0 0rem;
+    padding: 0.5rem 0 0 0rem;
     justify-content: center;
     align-content: space-between;
     gap: 0;
@@ -58,38 +59,35 @@ export const TgWidgetWrapper = styled.div<{ embeddedInMirlo?: boolean }>`
 `;
 
 export const TrackListWrapper = styled.div<{}>`
-
   border-top: var(--mi-border);
   padding-right: 2%;
   overflow: auto;
   max-height: 280px;
   ::-webkit-scrollbar {
     -webkit-appearance: none;
-    }
+  }
   ::-webkit-scrollbar:vertical {
     width: 7px;
-    }
+  }
   ::-webkit-scrollbar:horizontal {
     height: 7px;
-    }
+  }
   ::-webkit-scrollbar-thumb {
-    background-color: rgba(0, 0, 0, .5);
+    background-color: rgba(0, 0, 0, 0.5);
     border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, .5);
-    }
+    border: 1px solid rgba(255, 255, 255, 0.5);
+  }
   ::-webkit-scrollbar-track {
-    border-radius: 0px;  
-    background-color: rgba(255, 255, 255, .2); 
-    }
+    border-radius: 0px;
+    background-color: rgba(255, 255, 255, 0.2);
+  }
 
   @media screen and (max-width: ${bp.small}px) {
-   max-height: 70px;
-   overflow: auto;
+    max-height: 70px;
+    overflow: auto;
   }
-          
 `;
 export const WidgetTitleWrapper = styled.div<{}>`
-
   display: flex;
   flex: 45%;
   border-left: var(--mi-border);
@@ -97,23 +95,21 @@ export const WidgetTitleWrapper = styled.div<{}>`
   height: 100%;
   flex-direction: column;
   justify-content: flex-start;
-            
+
   @media screen and (max-width: ${bp.small}px) {
-              
-    max-width: 100%;             
+    max-width: 100%;
     flex: 100%;
     height: auto;
-              
-    a {            
-      font-size: var(--mi-font-size-small) !important;            
-      overflow: hidden;             
-      white-space: nowrap;                
-      max-width: 100%;               
-      display: block;            
-      text-overflow: ellipsis;            
+
+    a {
+      font-size: var(--mi-font-size-small) !important;
+      overflow: hidden;
+      white-space: nowrap;
+      max-width: 100%;
+      display: block;
+      text-overflow: ellipsis;
     }
-}
-          
+  }
 `;
 
 export const FlexWrapper = styled.div`

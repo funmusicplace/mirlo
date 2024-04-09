@@ -1,4 +1,5 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-# yarn test
+# Runs prettier on the files specified in package.json / "lint-staged"
+npx --no-install lint-staged

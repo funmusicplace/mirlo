@@ -62,8 +62,8 @@ const parseFormat = (format: string) => {
     form === "mp3"
       ? "libmp3lame"
       : form === "wav"
-      ? undefined
-      : (form as "flac" | "libmp3lame" | "opus");
+        ? undefined
+        : (form as "flac" | "libmp3lame" | "opus");
   const bitrate =
     form === "mp3" ? (split[0] as "320" | "256" | "128") : undefined;
 

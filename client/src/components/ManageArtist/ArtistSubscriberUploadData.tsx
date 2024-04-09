@@ -86,7 +86,7 @@ const ArtistSubscriberUploadData: React.FC<{
 
             return aggr;
           },
-          {} as { email: string; name: string },
+          {} as { email: string; name: string }
         );
         console.log("obj", obj);
         return obj;
@@ -96,8 +96,8 @@ const ArtistSubscriberUploadData: React.FC<{
     setUploadedUsers(
       uniqBy(
         newData.filter((data) => !!data.email),
-        "email",
-      ),
+        "email"
+      )
     );
   };
 
@@ -111,7 +111,7 @@ const ArtistSubscriberUploadData: React.FC<{
             `users/${artistUserId}/artists/${artistId}/subscribers`,
             {
               subscribers: users,
-            },
+            }
           );
         }
         snackbar("Uploaded your followers!", { type: "success" });
@@ -126,7 +126,7 @@ const ArtistSubscriberUploadData: React.FC<{
         setIsLoadingSubscriberData(false);
       }
     },
-    [artistUserId, artistId, snackbar, onDone, setIsMenuOpen],
+    [artistUserId, artistId, snackbar, onDone, setIsMenuOpen]
   );
 
   const processTextArea = React.useCallback(() => {
