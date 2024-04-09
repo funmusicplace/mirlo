@@ -47,7 +47,29 @@ describe("artists", () => {
         .get("artists/")
         .set("Accept", "application/json");
 
-      assert(response.body.results.length === 1);
+      assert.equal(response.body.results.length, 1);
+      assert.equal(response.body.results[0].trackGroups[0].cover.url.length, 1);
+    });
+
+    it("should GET 0 artists with if artist trackgroup doesn't have a cover", async () => {
+      const user = await prisma.user.create({
+        data: {
+          email: "test@test.com",
+        },
+      });
+      const artist = await createArtist(user.id);
+
+      const trackGroup = await createTrackGroup(artist.id, {
+        cover: { create: undefined },
+      });
+
+      await createTrack(trackGroup.id);
+
+      const response = await request(baseURL)
+        .get("artists/")
+        .set("Accept", "application/json");
+
+      assert.equal(response.body.results.length, 0);
     });
   });
 });

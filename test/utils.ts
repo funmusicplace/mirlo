@@ -101,6 +101,14 @@ export const createTrackGroup = async (
       artistId: artistId,
       published: data?.published ?? true,
       releaseDate: data?.releaseDate,
+      cover:
+        data?.cover !== undefined
+          ? data.cover
+          : {
+              create: {
+                url: ["test-url"],
+              },
+            },
       tracks: {
         create: data?.tracks ?? [
           {
