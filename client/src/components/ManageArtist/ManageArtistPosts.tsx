@@ -10,6 +10,7 @@ import { useSnackbar } from "state/SnackbarContext";
 import PostForm from "./PostForm";
 import Modal from "components/common/Modal";
 import { useTranslation } from "react-i18next";
+import { getPostURLReference } from "utils/artist";
 import { FaPlus } from "react-icons/fa";
 import { useArtistContext } from "state/ArtistContext";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
@@ -111,7 +112,7 @@ const ManageArtistPosts: React.FC<{}> = () => {
               `}
             >
               <Link
-                to={`/post/${p.id}`}
+                to={getPostURLReference({...p, artist})}
                 className={css`
                   width: 80%;
                   display: flex;
