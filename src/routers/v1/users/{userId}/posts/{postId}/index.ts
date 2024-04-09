@@ -20,6 +20,7 @@ export default function () {
         isPublic,
         publishedAt,
         minimumSubscriptionTierId,
+        shouldSendEmail,
       } = req.body;
 
       if (minimumSubscriptionTierId !== undefined) {
@@ -45,6 +46,7 @@ export default function () {
           isPublic,
           publishedAt,
           minimumSubscriptionTierId,
+          shouldSendEmail,
         },
         where: {
           id: Number(postId),

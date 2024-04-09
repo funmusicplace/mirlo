@@ -56,6 +56,8 @@ const PostForm: React.FC<{
     publishedAt.getMinutes() - publishedAt.getTimezoneOffset()
   );
 
+  console.log("exiting", existing);
+
   const methods = useForm<FormData>({
     defaultValues: existing
       ? {
@@ -84,7 +86,7 @@ const PostForm: React.FC<{
         try {
           setIsSaving(true);
           const picked = {
-            ...pick(data, ["title", "content", "isPublic"]),
+            ...pick(data, ["title", "content", "isPublic", "shouldSendEmail"]),
             publishedAt: new Date(data.publishedAt + ":00").toISOString(),
             artistId: artist.id,
             minimumSubscriptionTierId:

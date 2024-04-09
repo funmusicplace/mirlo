@@ -36,12 +36,6 @@ describe("users/{userId}/trackGroups/{trackGroupId}/cover", () => {
       const trackGroup = await createTrackGroup(artist.id);
       await createBucketIfNotExists(minioClient, finalCoversBucket);
 
-      await prisma.trackGroupCover.create({
-        data: {
-          trackGroupId: trackGroup.id,
-        },
-      });
-
       const response = await requestApp
         .delete(`users/${user.id}/trackGroups/${trackGroup.id}/cover`)
         .set("Cookie", [`jwt=${accessToken}`])
