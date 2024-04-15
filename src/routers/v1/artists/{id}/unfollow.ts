@@ -21,7 +21,6 @@ export default function () {
 
     try {
       let userIdToRemove: number | undefined = user?.id;
-      console.log("userIdToRemove", userIdToRemove, email);
       if (!userIdToRemove && email && typeof email === "string") {
         const relevantUser = await prisma.user.findFirst({
           where: {
@@ -31,7 +30,6 @@ export default function () {
             id: true,
           },
         });
-        console.log("found user", relevantUser);
         userIdToRemove = relevantUser?.id;
       }
 

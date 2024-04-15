@@ -119,14 +119,16 @@ const ManageArtist: React.FC<{}> = () => {
       </MainButtons>
       <ArtistTabs>
         <li>
-          <NavLink to="releases">{t("yourAlbums")}</NavLink>
+          <NavLink to="releases">{t("releases")}</NavLink>
         </li>
         <li>
-          <NavLink to="posts">{t("posts")}</NavLink>
+          <NavLink to="posts">{t("updates")}</NavLink>
         </li>
         {artist && (
           <li>
-            <NavLink to="tiers">{t("tiers", { artist: artist.name })}</NavLink>
+            <NavLink to="tiers">
+              {t("support", { artist: artist.name })}
+            </NavLink>
           </li>
         )}
       </ArtistTabs>

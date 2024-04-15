@@ -95,5 +95,73 @@ describe("artists/{id}/confirmFollow", () => {
       });
       assert(follow);
     });
+
+    it("should create a user and if they didn't already exist in the database", async () => {
+      const { user: artistUser } = await createUser({
+        email: "test@test.com",
+      });
+
+      const followerEmail = "follower@follower.com";
+
+      const artist = await createArtist(artistUser.id, {
+        name: "Test artist",
+        userId: artistUser.id,
+        enabled: true,
+      });
+      const confirmation =
+        await prisma.artistUserSubscriptionConfirmation.create({
+          data: {
+            email: followerEmail,
+            artistId: artist.id,
+          },
+        });
+
+      const response = await requestApp
+        .get(`artists/${artist.id}/confirmFollow`)
+        .send({
+          token: confirmation.token,
+          email: followerEmail,
+        })
+        .set("Accept", "application/json");
+
+      assert.equal(response.status, 302);
+      const redirectTo =
+        process.env.REACT_APP_CLIENT_DOMAIN +
+        `/${artist.urlSlug}/?followSuccess=true`;
+
+      assert.equal(response.header["location"], redirectTo);
+      const subscription =
+        await prisma.artistUserSubscriptionConfirmation.findFirst({
+          where: {
+            email: "follower@follower.com",
+            artistId: artist.id,
+          },
+        });
+
+      assert(!subscription);
+
+      const follow = await prisma.artistUserSubscription.findFirst({
+        where: {
+          user: {
+            email: followerEmail,
+          },
+          artistSubscriptionTier: {
+            isDefaultTier: true,
+            artistId: artist.id,
+          },
+        },
+      });
+      assert(follow);
+
+      const user = await prisma.user.findFirst({
+        where: {
+          email: followerEmail,
+        },
+      });
+
+      assert(user);
+      assert.equal(user.emailConfirmationExpiration, null);
+      assert.equal(user.emailConfirmationToken, null);
+    });
   });
 });

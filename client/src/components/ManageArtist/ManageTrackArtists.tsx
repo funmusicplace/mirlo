@@ -106,15 +106,20 @@ const ManageTrackArtists: React.FC<{
               />
             ))}
           </div>
-          <div>
+          <div
+            className={css`
+              margin-top: 1rem;
+              display: flex;
+              justify-content: space-between;
+              width: 100%;
+              align-items: center;
+            `}
+          >
             <Button
               onClick={() => {
                 append({ artistName: "" });
               }}
               type="button"
-              className={css`
-                margin-top: 1rem;
-              `}
               compact
               disabled={disabled}
               startIcon={<FaPlus />}

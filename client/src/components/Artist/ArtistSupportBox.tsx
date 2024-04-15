@@ -153,7 +153,7 @@ const ArtistSupportBox: React.FC<{
           }
         `}
       >
-        {!ownedByUser && !isSubscribedToTier && !isSubscribedToArtist && (
+        {!isSubscribedToTier && !isSubscribedToArtist && (
           <>
             {" "}
             <div
@@ -173,6 +173,7 @@ const ArtistSupportBox: React.FC<{
                   ? subscriptionTier.minAmount / 100
                   : 0
               }
+              currency={subscriptionTier.currency}
             />
           </>
         )}
@@ -185,7 +186,6 @@ const ArtistSupportBox: React.FC<{
             `}
           >
             <p>
-              {ownedByUser && t("ableToSupport")}
               {isSubscribedToArtist &&
                 !isSubscribedToTier &&
                 t("areSupporting")}
