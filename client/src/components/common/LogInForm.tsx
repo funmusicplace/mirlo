@@ -33,7 +33,7 @@ const LogInForm: React.FC<{ afterLogIn: () => void }> = ({ afterLogIn }) => {
         },
       });
     },
-    [login, afterLogIn, snackbar],
+    [login, afterLogIn, snackbar]
   );
 
   return (

@@ -19,15 +19,15 @@ const FollowArtist: React.FC<{ artistId: number }> = ({ artistId }) => {
     !!user?.artistUserSubscriptions?.find(
       (aus) =>
         aus.artistSubscriptionTier.artistId &&
-        !aus.artistSubscriptionTier.isDefaultTier,
-    ),
+        !aus.artistSubscriptionTier.isDefaultTier
+    )
   );
   const [isFollowing, setIsFollowing] = React.useState(
     !!user?.artistUserSubscriptions?.find(
       (aus) =>
         aus.artistSubscriptionTier.artistId === localArtistId &&
-        aus.artistSubscriptionTier.isDefaultTier,
-    ),
+        aus.artistSubscriptionTier.isDefaultTier
+    )
   );
 
   const [isFollowPopupOpen, setIsFollowPopupOpen] = React.useState(false);
@@ -37,14 +37,14 @@ const FollowArtist: React.FC<{ artistId: number }> = ({ artistId }) => {
     const found = artistUserSubscriptions?.find(
       (aus) =>
         aus.artistSubscriptionTier.isDefaultTier &&
-        aus.artistSubscriptionTier.artistId === localArtistId,
+        aus.artistSubscriptionTier.artistId === localArtistId
     );
     setIsFollowing(!!found);
 
     const foundSubscribed = artistUserSubscriptions?.find(
       (aus) =>
         !aus.artistSubscriptionTier.isDefaultTier &&
-        aus.artistSubscriptionTier.artistId === localArtistId,
+        aus.artistSubscriptionTier.artistId === localArtistId
     );
     setIsSubscribed(!!foundSubscribed);
   }, [artistUserSubscriptions, localArtistId]);
@@ -55,7 +55,7 @@ const FollowArtist: React.FC<{ artistId: number }> = ({ artistId }) => {
         setIsLoading(true);
         await api.post(
           `artists/${localArtistId}/${isFollowing ? "unfollow" : "follow"}`,
-          {},
+          {}
         );
         await refreshLoggedInUser();
       } else {

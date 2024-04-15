@@ -63,7 +63,7 @@ const ClickToPlayAlbum: React.FC<{
   React.useEffect(() => {
     const callback = async () => {
       const { result } = await api.get<TrackGroup>(
-        `trackGroups/${trackGroupId}`,
+        `trackGroups/${trackGroupId}`
       );
       try {
         let isOwned = false;
@@ -73,7 +73,7 @@ const ClickToPlayAlbum: React.FC<{
           if (!userIsTrackGroupArtist) {
             const { results: purchases } =
               await api.getMany<UserTrackGroupPurchase>(
-                `users/${userId}/purchases?trackGroupId=${trackGroupId}`,
+                `users/${userId}/purchases?trackGroupId=${trackGroupId}`
               );
 
             isOwned = purchases.length > 0;

@@ -45,7 +45,7 @@ const ManageArtist: React.FC<{}> = () => {
   const userId = user?.id;
 
   const { data: artist, isError } = useQuery(
-    queryManagedArtist(Number(userId), Number(artistId)),
+    queryManagedArtist(Number(userId), Number(artistId))
   );
 
   const { mutate: deleteArtist } = useDeleteArtistMutation();
@@ -67,7 +67,7 @@ const ManageArtist: React.FC<{}> = () => {
           onError() {
             snackbar("Problem deleting artist", { type: "warning" });
           },
-        },
+        }
       );
     }
   }, [userId, artist, deleteArtist, navigate, snackbar]);

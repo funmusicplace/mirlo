@@ -61,7 +61,7 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup }> = ({
                 ? Number(data.chosenPrice) * 100
                 : undefined,
               email: data.userEmail,
-            },
+            }
           );
           window.location.assign(response.redirectUrl);
         }
@@ -70,7 +70,7 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup }> = ({
         console.error(e);
       }
     },
-    [snackbar, t, trackGroup.id],
+    [snackbar, t, trackGroup.id]
   );
 
   const lessThan1 = !isFinite(+chosenPrice) ? true : Number(chosenPrice) < 1;

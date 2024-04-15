@@ -150,7 +150,7 @@ function TrackGroup() {
     usePublicObjectById<TrackGroup>(
       "trackGroups",
       trackGroupId,
-      `?artistId=${artistId}`,
+      `?artistId=${artistId}`
     );
 
   if (!artist && !isLoadingArtist) {

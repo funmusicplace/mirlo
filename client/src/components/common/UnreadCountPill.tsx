@@ -11,7 +11,7 @@ const UnreadCountPill = () => {
   React.useEffect(() => {
     const callback = async () => {
       const response = await api.get<number>(
-        `users/${userId}/notifications/unreadCount`,
+        `users/${userId}/notifications/unreadCount`
       );
       setUnreadCount(response.result);
     };

@@ -38,7 +38,7 @@ const GenerateAlbumDownloadCodes: React.FC<{ onDone: () => void }> = ({
 
   const onChooseAlbum = async (trackGroupId: string | number) => {
     const trackGroup = await api.get<TrackGroup>(
-      `users/${userId}/trackGroups/${trackGroupId}`,
+      `users/${userId}/trackGroups/${trackGroupId}`
     );
     setSelectedTrackGroup(trackGroup.result);
   };
@@ -50,14 +50,14 @@ const GenerateAlbumDownloadCodes: React.FC<{ onDone: () => void }> = ({
         {
           title: searchString,
           take: "10",
-        },
+        }
       );
       return results.results.map((r) => ({
         name: `${r.artist?.name} - ${r.title}`,
         id: r.id,
       }));
     },
-    [userId],
+    [userId]
   );
 
   const trackGroupId = selectedTrackGroup?.id;
@@ -82,7 +82,7 @@ const GenerateAlbumDownloadCodes: React.FC<{ onDone: () => void }> = ({
         }
       }
     },
-    [methods, onDone, snackbar, trackGroupId, userId],
+    [methods, onDone, snackbar, trackGroupId, userId]
   );
 
   return (

@@ -43,7 +43,7 @@ export const PublicTrackGroupListing: React.FC<{
           .map((track) => track.id),
       });
     },
-    [dispatch, trackGroup, tracks, user],
+    [dispatch, trackGroup, tracks, user]
   );
 
   if (isLoading) {

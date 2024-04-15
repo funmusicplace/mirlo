@@ -20,7 +20,7 @@ export const formatDate = ({
 
   const releaseFormat = new Date(date).toLocaleDateString(
     i18n.resolvedLanguage,
-    options,
+    options
   );
 
   return releaseFormat;

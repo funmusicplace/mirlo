@@ -44,7 +44,9 @@ const queryClient = new QueryClient({
 
 const ReactQueryDevtools = React.lazy(() =>
   process.env.NODE_ENV === "development"
-    ? import("@tanstack/react-query-devtools").then(({ ReactQueryDevtools }) => ({ default: ReactQueryDevtools }))
+    ? import("@tanstack/react-query-devtools").then(
+        ({ ReactQueryDevtools }) => ({ default: ReactQueryDevtools })
+      )
     : Promise.resolve({ default: () => undefined as never })
 );
 

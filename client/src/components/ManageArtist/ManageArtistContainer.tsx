@@ -67,7 +67,7 @@ const ManageArtistContainer: React.FC<{}> = () => {
   const { user } = useAuthContext();
 
   const { data: artist, isLoading: isArtistLoading } = useQuery(
-    queryManagedArtist(Number(user?.id), Number(artistId)),
+    queryManagedArtist(Number(user?.id), Number(artistId))
   );
 
   const location = useLocation();

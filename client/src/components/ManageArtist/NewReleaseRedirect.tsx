@@ -36,7 +36,7 @@ const NewReleaseRedirect: React.FC<{}> = () => {
         navigate(`/manage/artists/${artistId}/release/${newAlbum.result.id}`);
       }
     },
-    [navigate],
+    [navigate]
   );
 
   React.useEffect(() => {

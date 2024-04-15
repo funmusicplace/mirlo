@@ -32,7 +32,7 @@ const TrackRowPlayControl: React.FC<{
       onTrackPlayCallback?.(trackId);
       dispatch({ type: "setPlaying", playing: true });
     },
-    [dispatch, onTrackPlayCallback, trackId],
+    [dispatch, onTrackPlayCallback, trackId]
   );
 
   const onTrackPause = React.useCallback(
@@ -40,7 +40,7 @@ const TrackRowPlayControl: React.FC<{
       e.stopPropagation();
       dispatch({ type: "setPlaying", playing: false });
     },
-    [dispatch],
+    [dispatch]
   );
 
   return (

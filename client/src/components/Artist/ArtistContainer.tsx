@@ -17,7 +17,7 @@ const ArtistContainer: React.FC = () => {
   const { artistId, trackGroupId, postId } = useParams();
 
   const { data: artist, isLoading: isArtistLoading } = useQuery(
-    queryArtist({ artistSlug: artistId ?? "" }),
+    queryArtist({ artistSlug: artistId ?? "" })
   );
   const { user } = useAuthContext();
 

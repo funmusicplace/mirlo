@@ -221,7 +221,7 @@ const ClickToPlay: React.FC<{
     let ids: number[] = [];
     if (trackGroupId) {
       const { result } = await api.get<TrackGroup>(
-        `trackGroups/${trackGroupId}`,
+        `trackGroups/${trackGroupId}`
       );
       ids = result.tracks
         .filter((item) => item.isPreview)

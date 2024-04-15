@@ -74,7 +74,7 @@ const SubscriptionForm: React.FC<{
               ArtistSubscriptionTier
             >(
               `users/${userId}/artists/${artistId}/subscriptionTiers/${existingId}`,
-              sending,
+              sending
             );
           } else {
             await api.post<
@@ -82,7 +82,7 @@ const SubscriptionForm: React.FC<{
               ArtistSubscriptionTier
             >(
               `users/${userId}/artists/${artistId}/subscriptionTiers/`,
-              sending,
+              sending
             );
           }
 
@@ -96,7 +96,7 @@ const SubscriptionForm: React.FC<{
         }
       }
     },
-    [userId, existingId, t, snackbar, reset, reload, artistId, errorHandler],
+    [userId, existingId, t, snackbar, reset, reload, artistId, errorHandler]
   );
 
   return (

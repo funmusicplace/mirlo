@@ -3,13 +3,13 @@ import produce from "immer";
 export const determineNewTrackOrder = produce(
   (oldTracks: Track[], droppedInId: number, draggingTrackId: number) => {
     const dragIdx = oldTracks.findIndex(
-      (track) => track.id === draggingTrackId,
+      (track) => track.id === draggingTrackId
     );
     const dropIdx = oldTracks.findIndex((track) => track.id === droppedInId);
     const draggedItem = oldTracks.splice(dragIdx, 1);
     oldTracks.splice(dropIdx, 0, draggedItem[0]);
     return oldTracks;
-  },
+  }
 );
 
 export const isEqualDurations = (n1: number, n2: number) => {
@@ -23,7 +23,7 @@ export const fmtMSS = (s: number) => {
 export const isTrackOwnedOrPreview = (
   track: Track,
   user?: LoggedInUser | null,
-  trackGroup?: TrackGroup,
+  trackGroup?: TrackGroup
 ): boolean => {
   if (track.isPreview) {
     return true;
@@ -34,7 +34,7 @@ export const isTrackOwnedOrPreview = (
   const lookInTrackGroup = trackGroup ?? track.trackGroup;
   const ownsTrack = lookInTrackGroup.artist?.userId === user.id;
   const boughtTrack = !!lookInTrackGroup.userTrackGroupPurchases?.find(
-    (utgp) => utgp.userId === user.id,
+    (utgp) => utgp.userId === user.id
   );
   return ownsTrack || boughtTrack;
 };

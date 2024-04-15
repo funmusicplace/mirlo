@@ -25,9 +25,12 @@ export function AuthContextProvider({ children }: React.PropsWithChildren) {
     let interval: NodeJS.Timer | null = null;
 
     if (userId) {
-      interval = setInterval(async () => {
-        authRefresh();
-      }, 1000 * 60 * 5); // refresh every 5 minutes
+      interval = setInterval(
+        async () => {
+          authRefresh();
+        },
+        1000 * 60 * 5
+      ); // refresh every 5 minutes
     }
     return () => (interval ? clearInterval(interval) : undefined);
   }, [userId, authRefresh]);

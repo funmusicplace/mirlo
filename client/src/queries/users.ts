@@ -61,10 +61,10 @@ async function createArtist({
   body: CreateArtistBody;
 }) {
   return api
-    .post<CreateArtistBody, { result: Artist }>(
-      `v1/users/${userId}/artists`,
-      body
-    )
+    .post<
+      CreateArtistBody,
+      { result: Artist }
+    >(`v1/users/${userId}/artists`, body)
     .then((r) => r.result);
 }
 
@@ -94,10 +94,10 @@ async function updateArtist({
   body: UpdateArtistBody;
 }) {
   return api
-    .put<UpdateArtistBody, { result: Artist }>(
-      `v1/users/${userId}/artists/${artistId}`,
-      body
-    )
+    .put<
+      UpdateArtistBody,
+      { result: Artist }
+    >(`v1/users/${userId}/artists/${artistId}`, body)
     .then((r) => r.result);
 }
 

@@ -20,7 +20,7 @@ const ArtistManageSubscription: React.FC<{
     try {
       if (userSubscription) {
         await api.delete(
-          `users/${userId}/subscriptions/${userSubscription.id}`,
+          `users/${userId}/subscriptions/${userSubscription.id}`
         );
         await reload();
       }

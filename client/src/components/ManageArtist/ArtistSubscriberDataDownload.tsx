@@ -30,7 +30,7 @@ const ArtistSubscriberDataDownload: React.FC = () => {
         await api.getFile(
           "artist-subscribers",
           `users/${userId}/artists/${artistId}/subscribers?format=csv`,
-          "text/csv",
+          "text/csv"
         );
       }
     } catch (e) {

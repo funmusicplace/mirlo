@@ -58,13 +58,13 @@ export const NewTrack: React.FC<{
               artistId: trackgroup.artistId,
               trackGroupId: trackgroup.id,
               trackArtists,
-            },
+            }
           );
 
           if (data.trackFile[0] && typeof data.trackFile[0] !== "string")
             await api.uploadFile(
               `users/${userId}/tracks/${result.track.id}/audio`,
-              data.trackFile,
+              data.trackFile
             );
           snackbar("Track uploaded", { type: "success" });
         }
@@ -76,7 +76,7 @@ export const NewTrack: React.FC<{
         await reload();
       }
     },
-    [userId, trackgroup.artistId, trackgroup.id, snackbar, reload],
+    [userId, trackgroup.artistId, trackgroup.id, snackbar, reload]
   );
 
   return (

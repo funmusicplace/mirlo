@@ -34,12 +34,12 @@ const UserNotificationFeed = () => {
     async (id: number | undefined) => {
       if (id) {
         const response = await api.getMany<Notification>(
-          `users/${id}/notifications`,
+          `users/${id}/notifications`
         );
         setNotifications(response.results);
       }
     },
-    [],
+    []
   );
 
   const markNotificationAsRead = React.useCallback(
@@ -50,7 +50,7 @@ const UserNotificationFeed = () => {
       }, 2000);
       hoverRef.current = timeout;
     },
-    [fetchNotifications, userId],
+    [fetchNotifications, userId]
   );
 
   React.useEffect(() => {

@@ -40,14 +40,14 @@ const Supporters = () => {
 
   const loadSupporters = React.useCallback(async () => {
     const response = await api.getMany<SupportTier>(
-      `users/${userId}/artists/${artistId}/subscribers`,
+      `users/${userId}/artists/${artistId}/subscribers`
     );
 
     setSupporters(
-      response.results.filter((r) => !r.artistSubscriptionTier.isDefaultTier),
+      response.results.filter((r) => !r.artistSubscriptionTier.isDefaultTier)
     );
     setFollowers(
-      response.results.filter((r) => r.artistSubscriptionTier.isDefaultTier),
+      response.results.filter((r) => r.artistSubscriptionTier.isDefaultTier)
     );
   }, [artistId, userId]);
 

@@ -17,7 +17,7 @@ const ArtistAlbums: React.FC = () => {
   const { user } = useAuthContext();
   const { artistId } = useParams();
   const { data: artist } = useQuery(
-    queryArtist({ artistSlug: artistId ?? "" }),
+    queryArtist({ artistSlug: artistId ?? "" })
   );
 
   if (

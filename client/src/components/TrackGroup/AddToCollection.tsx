@@ -21,7 +21,7 @@ const AddToCollection: React.FC<{ trackGroup: TrackGroup }> = ({
         `trackGroups/${trackGroup.id}/purchase`,
         {
           price: 0,
-        },
+        }
       );
       navigate(response.redirectUrl);
       snackbar(t("success"), { type: "success" });

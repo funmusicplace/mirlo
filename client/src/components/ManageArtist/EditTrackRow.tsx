@@ -67,13 +67,13 @@ const EditTrackRow: React.FC<{
 
         await api.put<Partial<Track>, { track: Track }>(
           `users/${userId}/tracks/${trackId}`,
-          packet,
+          packet
         );
 
         if (formData.trackFile.length > 0) {
           const jobInfo = await api.uploadFile(
             `users/${userId}/tracks/${trackId}/audio`,
-            [formData.trackFile[0]],
+            [formData.trackFile[0]]
           );
           const jobId = jobInfo.result.jobId;
           setUploadJobs([{ jobId, jobStatus: "waiting" }]);
@@ -88,7 +88,7 @@ const EditTrackRow: React.FC<{
         reload();
       }
     },
-    [onCancelEditing, reload, setUploadJobs, snackbar, t, trackId, userId],
+    [onCancelEditing, reload, setUploadJobs, snackbar, t, trackId, userId]
   );
 
   const uploadingState = uploadJobs?.[0]?.jobStatus;

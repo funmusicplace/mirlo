@@ -147,12 +147,12 @@ export const Modal: React.FC<{
     (
       e:
         | React.MouseEvent<HTMLButtonElement, MouseEvent>
-        | React.MouseEvent<HTMLDivElement, MouseEvent>,
+        | React.MouseEvent<HTMLDivElement, MouseEvent>
     ) => {
       e.stopPropagation();
       onClose();
     },
-    [onClose],
+    [onClose]
   );
 
   if (!open) {
@@ -212,7 +212,7 @@ export const Modal: React.FC<{
         </Content>
       </div>
     </>,
-    container,
+    container
   );
 };
 

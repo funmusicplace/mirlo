@@ -30,7 +30,7 @@ const ManageArtistAlbums: React.FC<{}> = () => {
     try {
       if (userId) {
         const fetchedTrackGroups = await api.getMany<TrackGroup>(
-          `users/${userId}/trackGroups?artistId=${artistId}`,
+          `users/${userId}/trackGroups?artistId=${artistId}`
         );
         setTrackGroups(fetchedTrackGroups.results);
       }

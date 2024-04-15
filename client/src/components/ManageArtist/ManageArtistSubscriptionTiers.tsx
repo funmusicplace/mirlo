@@ -30,7 +30,7 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
       user?.id,
       artistId,
       `/subscriptionTiers`,
-      { multiple: true },
+      { multiple: true }
     );
 
   if (!artist) {

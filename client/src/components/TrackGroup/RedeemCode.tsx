@@ -40,7 +40,7 @@ function RedeemCode() {
     usePublicObjectById<TrackGroup>(
       "trackGroups",
       trackGroupId,
-      `?artistId=${artistId}`,
+      `?artistId=${artistId}`
     );
 
   const tId = trackGroup?.id;
@@ -54,18 +54,18 @@ function RedeemCode() {
             {
               code,
               email,
-            },
+            }
           );
 
           navigate(
             `${getReleaseUrl(artist, trackGroup)}/download?token=${
               result.singleDownloadToken
-            }&email=${result.user?.email ?? user?.email ?? email}`,
+            }&email=${result.user?.email ?? user?.email ?? email}`
           );
         } catch (e) {}
       }
     },
-    [artist, navigate, tId, trackGroup, user?.email],
+    [artist, navigate, tId, trackGroup, user?.email]
   );
 
   if (!artist && !isLoadingArtist) {

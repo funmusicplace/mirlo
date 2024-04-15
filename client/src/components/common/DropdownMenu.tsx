@@ -96,7 +96,7 @@ const DropdownMenu: React.FC<{
             `}
           >
             {React.Children.map(children, (child) =>
-              React.cloneElement(child, { setIsMenuOpen }),
+              React.cloneElement(child, { setIsMenuOpen })
             )}
           </div>
         </>

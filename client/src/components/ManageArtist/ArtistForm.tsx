@@ -107,13 +107,13 @@ export const ArtistForm: React.FC<{
       if (existingId) {
         updateArtist(
           { userId, artistId: existingId, body: sending },
-          { onSuccess, onError },
+          { onSuccess, onError }
         );
       } else {
         createArtist({ userId, body: sending }, { onSuccess, onError });
       }
     },
-    [userId, existingId, onSuccess, updateArtist, createArtist, onError],
+    [userId, existingId, onSuccess, updateArtist, createArtist, onError]
   );
 
   return (

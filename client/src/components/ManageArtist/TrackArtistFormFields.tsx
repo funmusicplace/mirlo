@@ -48,7 +48,7 @@ const TrackArtistFormFields: React.FC<{
         });
       }
     },
-    [artistIndex, setValue],
+    [artistIndex, setValue]
   );
 
   const clearExistingArtist = React.useCallback(() => {

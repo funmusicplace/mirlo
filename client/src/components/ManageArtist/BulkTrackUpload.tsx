@@ -82,30 +82,30 @@ export const BulkTrackUpload: React.FC<{
         };
 
         setUploadQueue((queue) =>
-          produceNewStatus(queue, firstTrack.t.title, 15),
+          produceNewStatus(queue, firstTrack.t.title, 15)
         );
 
         const response = await api.post<Partial<Track>, { result: Track }>(
           `users/${userId}/tracks`,
-          packet,
+          packet
         );
 
         setUploadQueue((queue) =>
-          produceNewStatus(queue, firstTrack.t.title, 25),
+          produceNewStatus(queue, firstTrack.t.title, 25)
         );
         await api.uploadFile(
           `users/${userId}/tracks/${response.result.id}/audio`,
-          [firstTrack.t.file],
+          [firstTrack.t.file]
         );
 
         if (remainingTracks.length !== 0) {
           setUploadQueue((queue) =>
-            produceNewStatus(queue, firstTrack.t.title, 99),
+            produceNewStatus(queue, firstTrack.t.title, 99)
           );
 
           setTimeout(async () => {
             setUploadQueue((queue) =>
-              produceNewStatus(queue, firstTrack.t.title, 100),
+              produceNewStatus(queue, firstTrack.t.title, 100)
             );
             reload();
           }, timeInBetweenUploads / 2);
@@ -122,7 +122,7 @@ export const BulkTrackUpload: React.FC<{
         reset();
       }
     },
-    [reload, reset, trackgroup.artistId, trackgroup.id, userId],
+    [reload, reset, trackgroup.artistId, trackgroup.id, userId]
   );
 
   const processUploadedFiles = React.useCallback(
@@ -148,7 +148,7 @@ export const BulkTrackUpload: React.FC<{
 
       callback();
     },
-    [trackgroup, uploadNextTrack],
+    [trackgroup, uploadNextTrack]
   );
 
   React.useEffect(() => {

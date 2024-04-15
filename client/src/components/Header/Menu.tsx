@@ -23,7 +23,7 @@ const Menu: React.FC = (props) => {
   const fetchArtists = React.useCallback(async () => {
     if (userId) {
       const fetchedArtists = await api.getMany<Artist>(
-        `users/${userId}/artists`,
+        `users/${userId}/artists`
       );
       if (fetchedArtists) {
         setArtists(fetchedArtists.results);

@@ -60,7 +60,7 @@ const ArtistFormLinks: React.FC<ArtistFormLinksProps> = ({
       snackbar("Updated links", { type: "success" });
       setIsEditing(false);
     },
-    [onSubmit, snackbar],
+    [onSubmit, snackbar]
   );
 
   if (!isEditing) {

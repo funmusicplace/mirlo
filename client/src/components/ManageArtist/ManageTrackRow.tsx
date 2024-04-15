@@ -53,7 +53,7 @@ const ManageTrackRow: React.FC<{
     keyPrefix: "manageTrackTable",
   });
   const [uploadState, setUploadState] = React.useState(
-    track.audio?.uploadState,
+    track.audio?.uploadState
   );
   const snackbar = useSnackbar();
   const [isEditing, setIsEditing] = React.useState(false);
@@ -66,7 +66,7 @@ const ManageTrackRow: React.FC<{
     if (uploadState === "STARTED") {
       interval = setInterval(async () => {
         const result = await api.get<Track>(
-          `users/${userId}/tracks/${track.id}`,
+          `users/${userId}/tracks/${track.id}`
         );
         const newState = result.result.audio?.uploadState;
 

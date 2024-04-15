@@ -18,7 +18,7 @@ export const PauseButton: React.FC<{ className?: string }> = ({
         dispatch({ type: "setPlaying", playing: false });
       }
     },
-    [dispatch],
+    [dispatch]
   );
 
   return (

@@ -65,7 +65,7 @@ export const AudioWrapper: React.FC<{
       }
       setCurrentSeconds(e.target.currentTime);
     },
-    [currentTrack, mostlyListened, userId],
+    [currentTrack, mostlyListened, userId]
   );
 
   const determineIfShouldPlay = React.useCallback(() => {
@@ -117,10 +117,10 @@ export const AudioWrapper: React.FC<{
           ],
         });
         navigator.mediaSession.setActionHandler("previoustrack", () =>
-          dispatch({ type: "decrementCurrentlyPlayingIndex" }),
+          dispatch({ type: "decrementCurrentlyPlayingIndex" })
         );
         navigator.mediaSession.setActionHandler("nexttrack", () =>
-          dispatch({ type: "incrementCurrentlyPlayingIndex" }),
+          dispatch({ type: "incrementCurrentlyPlayingIndex" })
         );
 
         navigator.mediaSession.setActionHandler("seekto", (details) => {

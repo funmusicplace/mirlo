@@ -63,7 +63,7 @@ const SearchResult = styled.li`
 
 const AutoComplete: React.FC<{
   getOptions: (
-    val: string,
+    val: string
   ) =>
     | Promise<{ id: number | string; name: string }[]>
     | { id: number | string; name: string }[];
@@ -99,7 +99,7 @@ const AutoComplete: React.FC<{
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setSearchValue(e.target.value);
     },
-    [],
+    []
   );
 
   const searchCallback = React.useCallback(
@@ -116,7 +116,7 @@ const AutoComplete: React.FC<{
         setShowSuggestions(false);
       }
     },
-    [getOptions],
+    [getOptions]
   );
 
   const onSelectValue = React.useCallback(
@@ -128,7 +128,7 @@ const AutoComplete: React.FC<{
       }
       setSearchValue("");
     },
-    [onSelect, searchResults],
+    [onSelect, searchResults]
   );
 
   React.useEffect(() => {

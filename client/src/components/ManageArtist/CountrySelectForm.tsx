@@ -38,7 +38,7 @@ const CurrencySelect = () => {
         refreshLoggedInUser();
       }
     },
-    [refreshLoggedInUser, snackbar, t, userId],
+    [refreshLoggedInUser, snackbar, t, userId]
   );
 
   return (
