@@ -8,6 +8,7 @@ import { randomUUID } from "crypto";
 import logger from "../../logger";
 import profile from "./profile";
 import signup from "./signup";
+import refresh from "./refresh";
 
 const jwt_secret = process.env.JWT_SECRET ?? "";
 const refresh_secret = process.env.REFRESH_TOKEN_SECRET ?? "";
@@ -298,45 +299,7 @@ router.get("/logout", (req, res) => {
 
 router.get("/profile", userAuthenticated, profile);
 
-router.post("/refresh", (req, res) => {
-  if (req.cookies?.refresh) {
-    // Destructuring refreshToken from cookie
-    const refreshToken = req.cookies.refresh;
-    // Verifying refresh token
-    jwt.verify(
-      refreshToken,
-      refresh_secret,
-      {},
-      async (err: VerifyErrors | null, decoded?: JwtPayload | string) => {
-        if (err) {
-          // Wrong Refesh Token
-          clearJWT(res);
-          return res.status(406).json({ error: "Unauthorized" });
-        } else {
-          // Correct token we send a new access token
-
-          const foundUser = await prisma.user.findFirst({
-            where: {
-              email: (decoded as JwtPayload)?.email,
-            },
-          });
-
-          if (!foundUser) {
-            return res.status(401).json({ message: "Unauthorized" });
-          }
-
-          setTokens(res, foundUser);
-
-          res.status(200).json({
-            message: "Success",
-          });
-        }
-      }
-    );
-  } else {
-    return res.status(406).json({ message: "Unauthorized" });
-  }
-});
+router.post("/refresh", refresh);
 
 export const buildTokens = (user: { email: string; id: number }) => {
   const payload = {
@@ -354,7 +317,10 @@ export const buildTokens = (user: { email: string; id: number }) => {
   return { accessToken, refreshToken };
 };
 
-const setTokens = (res: Response, user: { email: string; id: number }) => {
+export const setTokens = (
+  res: Response,
+  user: { email: string; id: number }
+) => {
   const { accessToken, refreshToken } = buildTokens(user);
 
   res

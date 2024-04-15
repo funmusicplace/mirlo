@@ -5,7 +5,7 @@ import { getArtistUrl } from "utils/artist";
 const UserFollowedYou: React.FC<{ notification: Notification }> = ({
   notification,
 }) => {
-  if (!notification.trackGroup) {
+  if (!notification.relatedUser) {
     return null;
   }
   return (
