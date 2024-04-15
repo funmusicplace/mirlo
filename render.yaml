@@ -131,7 +131,7 @@ services:
     plan: starter
     startCommand: yarn ts-node src/jobs/every-minute-tasks.ts
     buildCommand: yarn install && yarn migrate:deploy
-    schedule: "*/5 * * * *"
+    schedule: "*/10 * * * *"
     envVars:
       - key: NODE_OPTIONS
         value: --max-old-space-size=512
