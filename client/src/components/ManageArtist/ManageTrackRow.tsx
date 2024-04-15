@@ -13,6 +13,7 @@ import EditTrackRow from "./EditTrackRow";
 import styled from "@emotion/styled";
 import LoadingSpinner from "components/common/LoadingSpinner";
 import Button from "components/common/Button";
+import ManageTrackArtists from "./ManageTrackArtists";
 
 const TrackRow = styled("tr")`
   > td > .play-button {
@@ -177,7 +178,10 @@ const ManageTrackRow: React.FC<{
           }
         `}
       >
-        {track.trackArtists?.map((artist) => artist.artistName).join(", ")}
+        <ManageTrackArtists
+          trackArtists={track.trackArtists ?? []}
+          onSave={reload}
+        />
       </td>
       <td
         className={css`
