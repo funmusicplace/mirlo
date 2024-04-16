@@ -4,35 +4,30 @@ import { Link, Outlet, useParams } from "react-router-dom";
 import ArtistHeaderSection from "../common/ArtistHeaderSection";
 import { useTranslation } from "react-i18next";
 import { ArtistPageWrapper } from "components/ManageArtist/ManageArtistContainer";
-import { useArtistContext } from "state/ArtistContext";
 import Button from "components/common/Button";
 import { FaPen } from "react-icons/fa";
-import { useGlobalStateContext } from "state/GlobalState";
 import { bp } from "../../constants";
+import { useQuery } from "@tanstack/react-query";
+import { queryArtist } from "queries";
+import { useAuthContext } from "state/AuthContext";
 
-const ArtistContainer: React.FC<{ isManage?: boolean }> = (isManage) => {
+const ArtistContainer: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
 
-  const { trackGroupId, postId } = useParams();
-  const {
-    state: { artist },
-  } = useArtistContext();
+  const { artistId, trackGroupId, postId } = useParams();
 
-  const {
-    state: { user },
-  } = useGlobalStateContext();
+  const { data: artist, isLoading: isArtistLoading } = useQuery(
+    queryArtist({ artistSlug: artistId ?? "" })
+  );
+  const { user } = useAuthContext();
 
   const artistBanner = artist?.banner?.sizes;
-
-  if (!artist) {
-    return null;
-  }
 
   const isPostOrRelease = trackGroupId || postId;
 
   return (
     <>
-      {isManage && user?.id === artist.userId && !trackGroupId && (
+      {artist && user?.id === artist?.userId && !trackGroupId && (
         <Link
           to={`/manage/artists/${artist.id}`}
           className={css`
@@ -76,9 +71,13 @@ const ArtistContainer: React.FC<{ isManage?: boolean }> = (isManage) => {
       {!isPostOrRelease && (
         <>
           <ArtistPageWrapper artistBanner={!!artistBanner}>
-            <ArtistHeaderSection artist={artist} />
+            <ArtistHeaderSection
+              artist={artist}
+              isLoading={isArtistLoading}
+              isManage={false}
+            />
 
-            {!artist.enabled && (
+            {artist && !artist.enabled && (
               <div
                 className={css`
                   background-color: var(--mi-warning-background-color);

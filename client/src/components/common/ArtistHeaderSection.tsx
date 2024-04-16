@@ -8,8 +8,11 @@ import ArtistFormLinks from "components/ManageArtist/ArtistFormLinks";
 import Avatar from "components/Artist/Avatar";
 import ArtistFormLocation from "components/ManageArtist/ArtistFormLocation";
 import ArtistHeaderDescription from "components/Artist/ArtistHeaderDescription";
-import { useArtistContext } from "state/ArtistContext";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
+import { UpdateArtistBody, useUpdateArtistMutation } from "queries";
+import React from "react";
+import { useSnackbar } from "state/SnackbarContext";
+import { useAuthContext } from "state/AuthContext";
 
 const H1 = styled.h1<{ artistAvatar: boolean }>`
   font-size: 2.4rem;
@@ -79,14 +82,31 @@ const ArtistActions = styled.div`
   }
 `;
 
-const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
-  isManage,
-}) => {
-  const {
-    state: { artist, isLoading },
-  } = useArtistContext();
-
+const ArtistHeaderSection: React.FC<{
+  artist: Artist | undefined;
+  isLoading: boolean;
+  isManage: boolean;
+}> = ({ artist, isLoading, isManage }) => {
   const artistAvatar = artist?.avatar;
+
+  const { user } = useAuthContext();
+  const { mutateAsync: updateArtist } = useUpdateArtistMutation();
+  const snackbar = useSnackbar();
+
+  const handleSubmit = React.useCallback(
+    async (data: UpdateArtistBody) => {
+      if (user && artist) {
+        await updateArtist({
+          userId: user.id,
+          artistId: artist.id,
+          body: data,
+        }).catch(() =>
+          snackbar("Error saving your changes", { type: "warning" })
+        );
+      }
+    },
+    [user, artist, updateArtist, snackbar]
+  );
 
   if (!artist && isLoading) {
     return <LoadingBlocks rows={1} />;
@@ -180,7 +200,11 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
                     >
                       <H1 artistAvatar={!!artistAvatar}>{artist.name}</H1>
 
-                      <ArtistFormLocation isManage={!!isManage} />
+                      <ArtistFormLocation
+                        isManage={!!isManage}
+                        artist={artist}
+                        onSubmit={handleSubmit}
+                      />
                     </div>
                     <ArtistActions>
                       {!isManage && <FollowArtist artistId={artist.id} />}
@@ -195,14 +219,22 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
                     ${!artistAvatar ? "padding-top: .75rem;" : ""}
                   `}
                 >
-                  <ArtistHeaderDescription />
+                  <ArtistHeaderDescription
+                    isManage={!!isManage}
+                    artist={artist}
+                    onSubmit={handleSubmit}
+                  />
                 </div>
               )}
             </div>
           </div>
           {artistAvatar && (
             <DescriptionWrapperHasAvatar>
-              <ArtistHeaderDescription />
+              <ArtistHeaderDescription
+                isManage={!!isManage}
+                artist={artist}
+                onSubmit={handleSubmit}
+              />
             </DescriptionWrapperHasAvatar>
           )}
         </Header>
@@ -217,7 +249,11 @@ const ArtistHeaderSection: React.FC<{ artist: Artist; isManage?: boolean }> = ({
           }
         `}
       >
-        <ArtistFormLinks isManage={!!isManage} />
+        <ArtistFormLinks
+          isManage={!!isManage}
+          artist={artist}
+          onSubmit={handleSubmit}
+        />
       </div>
     </div>
   );

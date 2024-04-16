@@ -4,12 +4,10 @@ import { bp } from "../../constants";
 import React from "react";
 import { IoIosHeart, IoIosHeartEmpty } from "react-icons/io";
 import api from "services/api";
-import { useGlobalStateContext } from "state/GlobalState";
+import { useAuthContext } from "state/AuthContext";
 
 const Wishlist: React.FC<{ trackGroup: TrackGroup }> = ({ trackGroup }) => {
-  const {
-    state: { user },
-  } = useGlobalStateContext();
+  const { user } = useAuthContext();
 
   const [isInWishlist, setIsInWishlist] = React.useState(
     !!user?.wishlist?.find((w) => w.trackGroupId === trackGroup.id)

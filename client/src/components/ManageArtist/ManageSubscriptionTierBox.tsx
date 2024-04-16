@@ -7,20 +7,18 @@ import React from "react";
 import { FaPen, FaTrash } from "react-icons/fa";
 import { useParams } from "react-router-dom";
 import api from "services/api";
-import { useGlobalStateContext } from "state/GlobalState";
 import { useSnackbar } from "state/SnackbarContext";
 import SubscriptionForm from "./SubscriptionForm";
 import MarkdownContent from "components/common/MarkdownContent";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
+import { useAuthContext } from "state/AuthContext";
 
 const ManageSubscriptionTierBox: React.FC<{
   tier: ArtistSubscriptionTier;
   artist: Artist;
   reload: () => Promise<void>;
 }> = ({ tier, reload, artist }) => {
-  const {
-    state: { user },
-  } = useGlobalStateContext();
+  const { user } = useAuthContext();
   const snackbar = useSnackbar();
 
   const { artistId } = useParams();

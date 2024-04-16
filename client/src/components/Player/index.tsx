@@ -16,6 +16,7 @@ import PlayingTrackDetails from "./PlayingTrackDetails";
 import useCurrentTrackHook from "./useCurrentTrackHook";
 import styled from "@emotion/styled";
 import { VolumeControl } from "./VolumeControl";
+import { useAuthContext } from "state/AuthContext";
 
 const ControlWrapper = styled.span`
   display: flex;
@@ -50,10 +51,8 @@ const ControlWrapper = styled.span`
 `;
 
 const Player = () => {
-  const {
-    state: { user },
-    dispatch,
-  } = useGlobalStateContext();
+  const { user } = useAuthContext();
+  const { dispatch } = useGlobalStateContext();
 
   const [volume, setVolume] = React.useState(1);
 

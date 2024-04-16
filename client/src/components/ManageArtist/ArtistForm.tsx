@@ -3,19 +3,17 @@ import Modal from "components/common/Modal";
 import Button from "../common/Button";
 import { FormProvider, useForm } from "react-hook-form";
 import { bp } from "../../constants";
-import api from "services/api";
 import { InputEl } from "../common/Input";
 import FormComponent from "components/common/FormComponent";
 import TextArea from "components/common/TextArea";
 import { css } from "@emotion/css";
 import { useSnackbar } from "state/SnackbarContext";
-import { pick } from "lodash";
-import { useGlobalStateContext } from "state/GlobalState";
 import UploadArtistImage from "./UploadArtistImage";
 import { useTranslation } from "react-i18next";
-import { useArtistContext } from "state/ArtistContext";
 import ArtistFormColors from "./ArtistFormColors";
 import ArtistSlugInput from "./ArtistSlugInput";
+import { useCreateArtistMutation, useUpdateArtistMutation } from "queries";
+import { useAuthContext } from "state/AuthContext";
 
 export interface ShareableTrackgroup {
   creatorId: number;
@@ -57,13 +55,9 @@ export const ArtistForm: React.FC<{
   existing?: Artist;
   open: boolean;
   onClose: () => void;
-  reload: () => Promise<void>;
-}> = ({ open, onClose, reload, existing }) => {
+}> = ({ open, onClose, existing }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artistForm" });
-  const { refresh } = useArtistContext();
   const snackbar = useSnackbar();
-  const { state } = useGlobalStateContext();
-  const [isSaving, setIsSaving] = React.useState(false);
 
   const methods = useForm<FormData>({
     defaultValues: generateDefaults(existing),
@@ -79,45 +73,47 @@ export const ArtistForm: React.FC<{
     }
   }, [existing, existingId, methods]);
 
-  const userId = state.user?.id;
+  const { user } = useAuthContext();
+  const userId = user?.id;
 
-  const soSave = React.useCallback(
-    async (data: FormData) => {
-      if (userId) {
-        try {
-          setIsSaving(true);
-          const sending = pick(data, [
-            "bio",
-            "name",
-            "urlSlug",
-            "properties.colors",
-          ]);
-          sending.urlSlug = sending.urlSlug?.toLowerCase();
-          if (existingId) {
-            await api.put(`users/${userId}/artists/${existingId}`, {
-              ...sending,
-            });
-          } else {
-            await api.post(`users/${userId}/artists`, {
-              ...sending,
-            });
-          }
+  const { mutate: createArtist, isPending: isCreatePending } =
+    useCreateArtistMutation();
+  const { mutate: updateArtist, isPending: isUpdatePending } =
+    useUpdateArtistMutation();
+  const isPending = isCreatePending || isUpdatePending;
 
-          await reload();
-          await refresh?.();
-          if (!existingId) {
-            onClose();
-          }
-          snackbar(t("updatedArtist"), { type: "success" });
-        } catch (e) {
-          console.error(e);
-          snackbar("Something went wrong with the API", { type: "warning" });
-        } finally {
-          setIsSaving(false);
-        }
+  const onSuccess = React.useCallback(() => {
+    if (!existingId) {
+      onClose();
+    }
+    snackbar(t("updatedArtist"), { type: "success" });
+  }, [existingId, onClose, t, snackbar]);
+
+  const onError = React.useCallback(() => {
+    snackbar("Something went wrong with the API", { type: "warning" });
+  }, [snackbar]);
+
+  const onValidSubmit = React.useCallback(
+    (data: FormData) => {
+      if (!userId) return;
+
+      const sending = {
+        bio: data.bio,
+        name: data.name,
+        urlSlug: data.urlSlug?.toLowerCase(),
+        properties: data.properties,
+      };
+
+      if (existingId) {
+        updateArtist(
+          { userId, artistId: existingId, body: sending },
+          { onSuccess, onError }
+        );
+      } else {
+        createArtist({ userId, body: sending }, { onSuccess, onError });
       }
     },
-    [userId, existingId, reload, refresh, snackbar, t, onClose]
+    [userId, existingId, onSuccess, updateArtist, createArtist, onError]
   );
 
   return (
@@ -132,7 +128,7 @@ export const ArtistForm: React.FC<{
         `}
       >
         <FormProvider {...methods}>
-          <form onSubmit={handleSubmit(soSave)}>
+          <form onSubmit={handleSubmit(onValidSubmit)}>
             <div
               className={css`
                 display: flex;
@@ -194,7 +190,7 @@ export const ArtistForm: React.FC<{
                 <TextArea {...register("bio")} rows={7} />
               </FormComponent>
 
-              <Button type="submit" disabled={isSaving} isLoading={isSaving}>
+              <Button type="submit" disabled={isPending} isLoading={isPending}>
                 {existing ? t("saveArtist") : t("createArtist")}
               </Button>
             </div>

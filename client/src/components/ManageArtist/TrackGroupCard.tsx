@@ -6,20 +6,18 @@ import { useTranslation } from "react-i18next";
 import { FaCheck, FaTimes, FaTrash } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import api from "services/api";
-import { useGlobalStateContext } from "state/GlobalState";
 import { useSnackbar } from "state/SnackbarContext";
 import { bp } from "../../constants";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import { getReleaseUrl } from "utils/artist";
+import { useAuthContext } from "state/AuthContext";
 
 const TrackGroupCard: React.FC<{
   album: TrackGroup;
   artist: Artist;
   reload: () => Promise<void>;
 }> = ({ album, artist, reload }) => {
-  const {
-    state: { user },
-  } = useGlobalStateContext();
+  const { user } = useAuthContext();
   const snackbar = useSnackbar();
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
   const { t: trackGroupCardTranslation } = useTranslation("translation", {

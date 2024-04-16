@@ -6,15 +6,13 @@ import { useSnackbar } from "state/SnackbarContext";
 
 import { Input } from "components/common/Input";
 import FormComponent from "components/common/FormComponent";
-import { useGlobalStateContext } from "state/GlobalState";
+import { useAuthContext } from "state/AuthContext";
 
 const FreeDownload: React.FC<{
   trackGroup: TrackGroup;
   chosenPrice: string;
 }> = ({ trackGroup, chosenPrice }) => {
-  const {
-    state: { user },
-  } = useGlobalStateContext();
+  const { user } = useAuthContext();
   const [email, setEmail] = React.useState(user?.email);
   const snackbar = useSnackbar();
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });

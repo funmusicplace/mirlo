@@ -2,7 +2,6 @@ import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import api from "services/api";
 import FormComponent from "components/common/FormComponent";
-import { useGlobalStateContext } from "state/GlobalState";
 import { useTranslation } from "react-i18next";
 import { css } from "@emotion/css";
 import { BulkTrackUploadRow } from "./BulkTrackUploadRow";
@@ -19,6 +18,7 @@ import {
   parse,
   produceNewStatus,
 } from "./utils";
+import { useAuthContext } from "state/AuthContext";
 
 if (typeof window !== "undefined" && typeof window.Buffer === "undefined") {
   window.Buffer = Buffer;
@@ -53,9 +53,7 @@ export const BulkTrackUpload: React.FC<{
     { title: string; status: number }[]
   >([]);
 
-  const {
-    state: { user },
-  } = useGlobalStateContext();
+  const { user } = useAuthContext();
 
   const trackFiles = watch("trackFiles");
 

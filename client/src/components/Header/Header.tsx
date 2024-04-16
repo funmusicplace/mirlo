@@ -4,7 +4,6 @@ import { useParams } from "react-router-dom";
 import usePublicArtist from "utils/usePublicObjectById";
 import PageHeader from "components/common/PageHeader";
 import { bp } from "../../constants";
-import { useGlobalStateContext } from "../../state/GlobalState";
 import HeaderSearch from "./HeaderSearch";
 import Menu from "./Menu";
 import Logo from "components/common/Logo";
@@ -13,6 +12,7 @@ import { ImMenu } from "react-icons/im";
 import styled from "@emotion/styled";
 import useShow from "utils/useShow";
 import LogInPopup from "./LogInPopup";
+import { useAuthContext } from "state/AuthContext";
 
 const HeaderWrapper = styled.div<{
   artistBanner?: boolean;
@@ -182,8 +182,8 @@ const Content = styled.div<{ artistId?: string }>`
 `;
 
 const Header = () => {
-  const { state } = useGlobalStateContext();
-  const isLoggedIn = !!state.user?.id;
+  const { user } = useAuthContext();
+  const isLoggedIn = !!user?.id;
 
   const { artistId, trackGroupId } = useParams();
 

@@ -10,11 +10,11 @@ import SelectTrackPreview from "./SelectTrackPreview";
 import TrackUploadingState from "./TrackUploadingState";
 import ManageTrackArtists from "./ManageTrackArtists";
 import api from "services/api";
-import { useGlobalStateContext } from "state/GlobalState";
 import { useSnackbar } from "state/SnackbarContext";
 import useJobStatusCheck from "utils/useJobStatusCheck";
 import LoadingSpinner from "components/common/LoadingSpinner";
 import Button from "components/common/Button";
+import { useAuthContext } from "state/AuthContext";
 
 export interface FormData {
   title: string;
@@ -42,9 +42,7 @@ const EditTrackRow: React.FC<{
     },
   });
 
-  const {
-    state: { user },
-  } = useGlobalStateContext();
+  const { user } = useAuthContext();
   const userId = user?.id;
   const snackbar = useSnackbar();
   const trackId = track.id;

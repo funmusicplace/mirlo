@@ -5,11 +5,11 @@ import Button from "../common/Button";
 import { useSnackbar } from "state/SnackbarContext";
 import { pick } from "lodash";
 import api from "../../services/api";
-import { useGlobalStateContext } from "state/GlobalState";
 import useErrorHandler from "services/useErrorHandler";
 import { useTranslation } from "react-i18next";
 import useJobStatusCheck from "utils/useJobStatusCheck";
 import AlbumFormContent from "./AlbumFormComponents/AlbumFormContent";
+import { useAuthContext } from "state/AuthContext";
 
 export interface FormData {
   published: boolean;
@@ -27,9 +27,7 @@ const AlbumForm: React.FC<{
   reload: () => Promise<void> | void;
   artist: Artist;
 }> = ({ reload, artist, existing }) => {
-  const {
-    state: { user },
-  } = useGlobalStateContext();
+  const { user } = useAuthContext();
   const snackbar = useSnackbar();
   const errorHandler = useErrorHandler();
   const [isSaving, setIsSaving] = React.useState(false);

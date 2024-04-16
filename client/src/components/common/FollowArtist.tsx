@@ -3,18 +3,15 @@ import Button from "./Button";
 import api from "services/api";
 import { FaMinus, FaPlus } from "react-icons/fa";
 import { useArtistContext } from "state/ArtistContext";
-import { useGlobalStateContext } from "state/GlobalState";
 import { useTranslation } from "react-i18next";
 import Modal from "./Modal";
 
 import FollowArtistNotLoggedInForm from "./FollowArtistNotLoggedInForm";
+import { useAuthContext } from "state/AuthContext";
 
 const FollowArtist: React.FC<{ artistId: number }> = ({ artistId }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
-  const {
-    state: { user },
-    refreshLoggedInUser,
-  } = useGlobalStateContext();
+  const { user, refreshLoggedInUser } = useAuthContext();
   const artistContext = useArtistContext();
   const localArtistId = artistId ?? artistContext?.state?.artist?.id;
   const artistUserSubscriptions = user?.artistUserSubscriptions;

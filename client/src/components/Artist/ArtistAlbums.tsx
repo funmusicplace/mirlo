@@ -4,22 +4,21 @@ import { useTranslation } from "react-i18next";
 import ArtistTrackGroup from "./ArtistTrackGroup";
 import { bp } from "../../constants";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
-import { useGlobalStateContext } from "state/GlobalState";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { FaPlus } from "react-icons/fa";
 import Button from "components/common/Button";
-import { useArtistContext } from "state/ArtistContext";
 import TrackgroupGrid from "components/common/TrackgroupGrid";
+import { useAuthContext } from "state/AuthContext";
+import { useQuery } from "@tanstack/react-query";
+import { queryArtist } from "queries";
 
 const ArtistAlbums: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
-  const {
-    state: { user },
-  } = useGlobalStateContext();
-
-  const {
-    state: { artist },
-  } = useArtistContext();
+  const { user } = useAuthContext();
+  const { artistId } = useParams();
+  const { data: artist } = useQuery(
+    queryArtist({ artistSlug: artistId ?? "" })
+  );
 
   if (
     !artist ||

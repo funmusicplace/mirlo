@@ -1,11 +1,13 @@
 import React from "react";
 import api from "services/api";
+import { useAuthContext } from "state/AuthContext";
 import { useGlobalStateContext } from "state/GlobalState";
 
 const useCurrentTrackHook = () => {
   const {
-    state: { playerQueueIds, currentlyPlayingIndex, user },
+    state: { playerQueueIds, currentlyPlayingIndex },
   } = useGlobalStateContext();
+  const { user } = useAuthContext();
 
   const [currentTrack, setCurrentTrack] = React.useState<Track>();
   const [isLoading, setIsLoading] = React.useState(false);

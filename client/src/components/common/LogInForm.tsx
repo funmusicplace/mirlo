@@ -3,12 +3,11 @@ import FormComponent from "./FormComponent";
 import { InputEl } from "./Input";
 import Button from "./Button";
 import { css } from "@emotion/css";
-import { useGlobalStateContext } from "state/GlobalState";
 import { useForm } from "react-hook-form";
 import { useSnackbar } from "state/SnackbarContext";
 import React from "react";
-import api from "services/api";
 import { Link } from "react-router-dom";
+import { useLoginMutation } from "queries/auth";
 
 type SignupInputs = {
   email: string;
@@ -17,27 +16,26 @@ type SignupInputs = {
 
 const LogInForm: React.FC<{ afterLogIn: () => void }> = ({ afterLogIn }) => {
   const { t } = useTranslation("translation", { keyPrefix: "logIn" });
-  const { dispatch } = useGlobalStateContext();
   const { register, handleSubmit } = useForm<SignupInputs>();
   const snackbar = useSnackbar();
 
+  const { mutate: login } = useLoginMutation();
+
   const onSubmit = React.useCallback(
     async (data: SignupInputs) => {
-      try {
-        await api.post("login", data);
-        const { result } = await api.get<LoggedInUser>("profile");
-        dispatch({
-          type: "setLoggedInUser",
-          user: result,
-        });
-        afterLogIn?.();
-      } catch (e: unknown) {
-        snackbar((e as Error).message, { type: "warning" });
-        console.error(e);
-      }
+      login(data, {
+        onSuccess() {
+          afterLogIn?.();
+        },
+        onError(e) {
+          snackbar(e.message, { type: "warning" });
+          console.error(e);
+        },
+      });
     },
-    [afterLogIn, dispatch, snackbar]
+    [login, afterLogIn, snackbar]
   );
+
   return (
     <>
       <form

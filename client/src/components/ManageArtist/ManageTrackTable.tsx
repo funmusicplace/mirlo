@@ -10,6 +10,7 @@ import Table from "../common/Table";
 import ManageTrackRow from "./ManageTrackRow";
 import { useTranslation } from "react-i18next";
 import styled from "@emotion/styled";
+import { useAuthContext } from "state/AuthContext";
 
 const TrackTableComponent = styled(Table)`
   margin-bottom: 1.5rem;
@@ -79,9 +80,10 @@ export const ManageTrackTable: React.FC<{
 }> = ({ tracks, trackGroupId, editable, reload }) => {
   const [isLoading, setIsLoading] = React.useState(false);
   const {
-    state: { user, draggingTrackId },
+    state: { draggingTrackId },
     dispatch,
   } = useGlobalStateContext();
+  const { user } = useAuthContext();
   const userId = user?.id;
   const [displayTracks, setDisplayTracks] = React.useState<Track[]>([]);
   const { t } = useTranslation("translation", {

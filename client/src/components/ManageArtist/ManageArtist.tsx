@@ -10,16 +10,16 @@ import {
   useNavigate,
   useParams,
 } from "react-router-dom";
-import api from "services/api";
-import { useGlobalStateContext } from "state/GlobalState";
 import ArtistForm from "./ArtistForm";
 import { useSnackbar } from "state/SnackbarContext";
 import { useTranslation } from "react-i18next";
-import { useArtistContext } from "state/ArtistContext";
 import Box from "components/common/Box";
 import { ArtistTabs } from "components/common/Tabs";
 import { ArtistSection } from "components/Artist/Artist";
 import styled from "@emotion/styled";
+import { useQuery } from "@tanstack/react-query";
+import { queryManagedArtist, useDeleteArtistMutation } from "queries";
+import { useAuthContext } from "state/AuthContext";
 
 export const MainButtons = styled.div`
   display: flex;
@@ -37,34 +37,42 @@ export const MainButtons = styled.div`
 
 const ManageArtist: React.FC<{}> = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
-  const {
-    state: { user },
-  } = useGlobalStateContext();
   const snackbar = useSnackbar();
   const navigate = useNavigate();
   const { artistId } = useParams();
 
-  const {
-    refresh,
-    state: { artist, isLoading },
-  } = useArtistContext();
+  const { user } = useAuthContext();
+  const userId = user?.id;
+
+  const { data: artist, isError } = useQuery(
+    queryManagedArtist(Number(userId), Number(artistId))
+  );
+
+  const { mutate: deleteArtist } = useDeleteArtistMutation();
 
   const [isEditing, setIsEditing] = React.useState(false);
 
-  const userId = user?.id;
-
-  const onDelete = async () => {
-    try {
-      if (window.confirm("Are you sure you want to delete this artist?")) {
-        await api.delete(`users/${userId}/artists/${artistId}`);
-        navigate("/manage");
-      }
-    } catch (e) {
-      snackbar("Problem deleting artist", { type: "warning" });
+  const onDelete = React.useCallback(() => {
+    if (
+      !!userId &&
+      !!artist &&
+      window.confirm("Are you sure you want to delete this artist?")
+    ) {
+      deleteArtist(
+        { userId, artistId: artist.id, artistSlug: artist.urlSlug ?? "" },
+        {
+          onSuccess() {
+            navigate("/manage");
+          },
+          onError() {
+            snackbar("Problem deleting artist", { type: "warning" });
+          },
+        }
+      );
     }
-  };
+  }, [userId, artist, deleteArtist, navigate, snackbar]);
 
-  if (!artist && !isLoading) {
+  if (isError) {
     return <Box>{t("doesNotExist")}</Box>;
   }
 
@@ -87,9 +95,6 @@ const ManageArtist: React.FC<{}> = () => {
           open={isEditing}
           onClose={() => setIsEditing(false)}
           existing={artist}
-          reload={() => {
-            return refresh();
-          }}
         />
       )}
       <MainButtons>

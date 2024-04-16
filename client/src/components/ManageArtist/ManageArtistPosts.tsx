@@ -2,7 +2,6 @@ import { css } from "@emotion/css";
 import Button from "components/common/Button";
 import React from "react";
 import api from "services/api";
-import { useGlobalStateContext } from "state/GlobalState";
 import NewPostForm from "./NewPostForm";
 import Box from "components/common/Box";
 import { FaPen, FaTrash } from "react-icons/fa";
@@ -19,11 +18,10 @@ import { formatDate } from "components/TrackGroup/ReleaseDate";
 import { Link } from "react-router-dom";
 import parse from "html-react-parser";
 import MarkdownWrapper from "components/common/MarkdownWrapper";
+import { useAuthContext } from "state/AuthContext";
 
 const ManageArtistPosts: React.FC<{}> = () => {
-  const {
-    state: { user },
-  } = useGlobalStateContext();
+  const { user } = useAuthContext();
   const { t, i18n } = useTranslation("translation", {
     keyPrefix: "manageArtist",
   });
@@ -112,7 +110,7 @@ const ManageArtistPosts: React.FC<{}> = () => {
               `}
             >
               <Link
-                to={getPostURLReference({...p, artist})}
+                to={getPostURLReference({ ...p, artist })}
                 className={css`
                   width: 80%;
                   display: flex;

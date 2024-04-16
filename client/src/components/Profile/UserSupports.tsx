@@ -2,32 +2,16 @@ import { css } from "@emotion/css";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import api from "../../services/api";
-import { useGlobalStateContext } from "../../state/GlobalState";
 import Box from "../common/Box";
 import Money from "../common/Money";
 import Pill from "../common/Pill";
+import { useAuthContext } from "state/AuthContext";
 
 const UserSupports: React.FC<{
   artistUserSubscriptions: ArtistUserSubscription[];
 }> = ({ artistUserSubscriptions }) => {
   const { t } = useTranslation("translation", { keyPrefix: "profile" });
-  const {
-    state: { user },
-    dispatch,
-  } = useGlobalStateContext();
-
-  const fetchProfile = React.useCallback(async () => {
-    const { result } = await api.get<LoggedInUser>("profile");
-    dispatch({
-      type: "setLoggedInUser",
-      user: result,
-    });
-  }, [dispatch]);
-
-  React.useEffect(() => {
-    fetchProfile();
-  }, [fetchProfile]);
+  const { user } = useAuthContext();
 
   if (!user) {
     return null;

@@ -5,16 +5,13 @@ import React from "react";
 import LinkIconDisplay, {
   linkUrlDisplay,
 } from "components/common/LinkIconDisplay";
-import { useArtistContext } from "state/ArtistContext";
 import { FaPen } from "react-icons/fa";
 
 const ArtistFormLinksView: React.FC<{
+  artist: Pick<Artist, "links">;
   isManage: boolean;
   setIsEditing: (arg: boolean) => void;
-}> = ({ isManage, setIsEditing }) => {
-  const {
-    state: { artist },
-  } = useArtistContext();
+}> = ({ artist, isManage, setIsEditing }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
   return (
     <div

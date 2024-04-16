@@ -2,14 +2,12 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 
 import { InputEl } from "components/common/Input";
-import { useGlobalStateContext } from "state/GlobalState";
 import FormComponent from "components/common/FormComponent";
 import { useFormContext } from "react-hook-form";
+import { useAuthContext } from "state/AuthContext";
 
 const EmailInput: React.FC = () => {
-  const {
-    state: { user },
-  } = useGlobalStateContext();
+  const { user } = useAuthContext();
   const { register } = useFormContext();
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
 

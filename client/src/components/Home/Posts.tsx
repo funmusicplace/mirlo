@@ -3,33 +3,18 @@ import { SectionHeader } from "./Home";
 import WidthContainer from "components/common/WidthContainer";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import React from "react";
-import api from "services/api";
 import PostCard from "components/common/PostCard";
 import Overlay from "components/common/Overlay";
 import { PostGrid } from "components/Artist/ArtistPosts";
 import { getPostURLReference } from "utils/artist";
+import { useQuery } from "@tanstack/react-query";
+import { queryPosts } from "queries";
 
 const Posts = () => {
   const { t } = useTranslation("translation", { keyPrefix: "home" });
-  const [posts, setPosts] = React.useState<Post[]>([]);
+  const { data: posts } = useQuery(queryPosts({ take: 3 }));
 
-  const fetchAllPosts = React.useCallback(async () => {
-    const fetched = await api.getMany<Post>("posts?take=3");
-    setPosts(
-      // FIXME: Maybe this should be managed by a filter on the API?
-      fetched.results
-    );
-  }, []);
-
-  const fetchPosts = React.useCallback(async () => {
-    await fetchAllPosts();
-  }, [fetchAllPosts]);
-
-  React.useEffect(() => {
-    fetchPosts();
-  }, [fetchPosts]);
-  if (posts.length === 0) {
+  if (posts?.results?.length === 0) {
     return null;
   }
 
@@ -54,7 +39,7 @@ const Posts = () => {
             `}
           >
             <PostGrid>
-              {posts.map((p) => (
+              {posts?.results?.map((p) => (
                 <Link
                   to={getPostURLReference(p)}
                   className={css`

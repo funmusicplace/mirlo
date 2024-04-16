@@ -1,6 +1,5 @@
 import { css } from "@emotion/css";
 import React from "react";
-import { useGlobalStateContext } from "state/GlobalState";
 import ManageSubscriptionTierBox from "./ManageSubscriptionTierBox";
 import SubscriptionForm from "./SubscriptionForm";
 import { useArtistContext } from "state/ArtistContext";
@@ -12,11 +11,10 @@ import Modal from "components/common/Modal";
 import { useTranslation } from "react-i18next";
 import Button from "components/common/Button";
 import { FaPlus, FaWrench } from "react-icons/fa";
+import { useAuthContext } from "state/AuthContext";
 
 const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
-  const {
-    state: { user },
-  } = useGlobalStateContext();
+  const { user } = useAuthContext();
   const [addingNewTier, setAddingNewTier] = React.useState(false);
   const { t } = useTranslation("translation", {
     keyPrefix: "subscriptionForm",

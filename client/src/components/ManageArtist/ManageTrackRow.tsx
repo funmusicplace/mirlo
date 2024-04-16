@@ -1,7 +1,6 @@
 import { css } from "@emotion/css";
 import React from "react";
 import { FaPen, FaTrash } from "react-icons/fa";
-import { useGlobalStateContext } from "state/GlobalState";
 import useDraggableTrack from "utils/useDraggableTrack";
 
 import api from "services/api";
@@ -13,6 +12,7 @@ import EditTrackRow from "./EditTrackRow";
 import styled from "@emotion/styled";
 import LoadingSpinner from "components/common/LoadingSpinner";
 import Button from "components/common/Button";
+import { useAuthContext } from "state/AuthContext";
 import ManageTrackArtists from "./ManageTrackArtists";
 
 const TrackRow = styled("tr")`
@@ -58,9 +58,7 @@ const ManageTrackRow: React.FC<{
   );
   const snackbar = useSnackbar();
   const [isEditing, setIsEditing] = React.useState(false);
-  const {
-    state: { user },
-  } = useGlobalStateContext();
+  const { user } = useAuthContext();
   const { onDragStart, onDragEnd } = useDraggableTrack();
   const userId = user?.id;
 

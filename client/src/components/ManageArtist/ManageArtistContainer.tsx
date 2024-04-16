@@ -1,13 +1,14 @@
 import { css } from "@emotion/css";
 import React from "react";
 import { bp } from "../../constants";
-import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { Navigate, Outlet, useLocation, useParams } from "react-router-dom";
 import ArtistHeaderSection from "../common/ArtistHeaderSection";
-import { useGlobalStateContext } from "state/GlobalState";
 import { useTranslation } from "react-i18next";
 import styled from "@emotion/styled";
-import { useArtistContext } from "state/ArtistContext";
 import Box from "components/common/Box";
+import { useQuery } from "@tanstack/react-query";
+import { queryManagedArtist } from "queries";
+import { useAuthContext } from "state/AuthContext";
 
 const Container = styled.div<{ artistBanner: boolean }>`
   width: 100%;
@@ -62,14 +63,12 @@ export const ArtistPageWrapper: React.FC<{
 
 const ManageArtistContainer: React.FC<{}> = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
+  const { artistId } = useParams();
+  const { user } = useAuthContext();
 
-  const {
-    state: { artist },
-  } = useArtistContext();
-
-  const {
-    state: { user },
-  } = useGlobalStateContext();
+  const { data: artist, isLoading: isArtistLoading } = useQuery(
+    queryManagedArtist(Number(user?.id), Number(artistId))
+  );
 
   const location = useLocation();
 
@@ -101,7 +100,14 @@ const ManageArtistContainer: React.FC<{}> = () => {
             You are viewing this artist as an admin
           </Box>
         )}
-        {!dontShowHeader && <ArtistHeaderSection artist={artist} isManage />}
+
+        {!dontShowHeader && (
+          <ArtistHeaderSection
+            artist={artist}
+            isLoading={isArtistLoading}
+            isManage={true}
+          />
+        )}
 
         {!artist.enabled && (
           <div

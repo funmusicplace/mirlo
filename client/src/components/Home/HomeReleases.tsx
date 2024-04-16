@@ -1,7 +1,5 @@
-import React from "react";
 import ArtistTrackGroup from "../Artist/ArtistTrackGroup";
 import TrackgroupGrid from "components/common/TrackgroupGrid";
-import api from "services/api";
 import { css } from "@emotion/css";
 import { useTranslation } from "react-i18next";
 import { bp } from "../../constants";
@@ -9,6 +7,8 @@ import WidthContainer from "../common/WidthContainer";
 import { SectionHeader } from "./Home";
 import { FaChevronRight } from "react-icons/fa";
 import LinkWithIcon from "components/common/LinkWithIcon";
+import { useQuery } from "@tanstack/react-query";
+import { queryTrackGroups } from "queries";
 
 const bgcolor = css`
   width: 100%;
@@ -20,18 +20,9 @@ const bgcolor = css`
 
 const Releases = () => {
   const { t } = useTranslation("translation", { keyPrefix: "releases" });
-  const [trackGroups, setTrackGroups] = React.useState<TrackGroup[]>([]);
-
-  React.useEffect(() => {
-    const callback = async () => {
-      const results = await api.getMany<TrackGroup>(
-        "trackGroups?take=8&orderBy=random"
-      );
-      setTrackGroups(results.results);
-    };
-
-    callback();
-  }, []);
+  const { data: trackGroups } = useQuery(
+    queryTrackGroups({ take: 8, orderBy: "random" })
+  );
 
   return (
     <div className={bgcolor}>
@@ -71,7 +62,7 @@ const Releases = () => {
               `}
             >
               <TrackgroupGrid gridNumber={"4"}>
-                {trackGroups?.map((trackGroup) => (
+                {trackGroups?.results?.map((trackGroup) => (
                   <ArtistTrackGroup
                     key={trackGroup.id}
                     trackGroup={trackGroup}

@@ -8,6 +8,7 @@ import { fmtMSS, isTrackOwnedOrPreview, widgetUrl } from "utils/tracks";
 import { useSnackbar } from "state/SnackbarContext";
 import { bp } from "../../constants";
 import TrackRowPlayControl from "./TrackRowPlayControl";
+import { useAuthContext } from "state/AuthContext";
 
 const TrackRow: React.FC<{
   track: Track;
@@ -17,9 +18,7 @@ const TrackRow: React.FC<{
   const snackbar = useSnackbar();
   const { dispatch } = useGlobalStateContext();
   const [trackTitle] = React.useState(track.title);
-  const {
-    state: { user },
-  } = useGlobalStateContext();
+  const { user } = useAuthContext();
 
   const canPlayTrack = isTrackOwnedOrPreview(track, user, trackGroup);
 

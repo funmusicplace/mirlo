@@ -8,14 +8,13 @@ import TrackRow from "./TrackRow";
 import { css } from "@emotion/css";
 import { bp } from "../../constants";
 import { isTrackOwnedOrPreview } from "utils/tracks";
+import { useAuthContext } from "state/AuthContext";
 
 export const PublicTrackGroupListing: React.FC<{
   tracks: Track[];
   trackGroup: TrackGroup;
 }> = ({ tracks, trackGroup }) => {
-  const {
-    state: { user },
-  } = useGlobalStateContext();
+  const { user } = useAuthContext();
   const [isLoading, setIsLoading] = React.useState(true);
   const { dispatch } = useGlobalStateContext();
   const [displayTracks, setDisplayTracks] = React.useState<Track[]>([]);

@@ -76,7 +76,7 @@ const ManagePost: React.FC<{}> = () => {
                 align-items: center;
               `}
             >
-              <Link to={getPostURLReference({...post, artist})}>
+              <Link to={getPostURLReference({ ...post, artist })}>
                 <Button type="button">{t("viewLive")}</Button>
               </Link>
             </div>

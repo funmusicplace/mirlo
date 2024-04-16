@@ -3,9 +3,9 @@ import Modal from "components/common/Modal";
 import React from "react";
 import { FaPen } from "react-icons/fa";
 import api from "services/api";
-import { useGlobalStateContext } from "state/GlobalState";
 import Box from "../common/Box";
 import Button from "../common/Button";
+import { useAuthContext } from "state/AuthContext";
 
 const ArtistManageSubscription: React.FC<{
   userSubscription?: ArtistUserSubscription;
@@ -13,9 +13,7 @@ const ArtistManageSubscription: React.FC<{
   reload: () => Promise<void>;
 }> = ({ userSubscriptionTier, reload, userSubscription }) => {
   const [isEditOpen, setIsEditOpen] = React.useState(false);
-  const {
-    state: { user },
-  } = useGlobalStateContext();
+  const { user } = useAuthContext();
   const userId = user?.id;
 
   const cancelSubscription = React.useCallback(async () => {

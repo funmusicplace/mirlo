@@ -3,22 +3,22 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useSnackbar } from "state/SnackbarContext";
-import { API_ROOT } from "../../constants";
-import { useGlobalStateContext } from "../../state/GlobalState";
 import Button from "../common/Button";
 import api from "services/api";
+import { useAuthContext } from "state/AuthContext";
+import { useLogoutMutation } from "queries";
 
 const Menu: React.FC = (props) => {
   const { setIsMenuOpen } = props as {
     setIsMenuOpen: (val: boolean) => void;
   };
   const { t } = useTranslation("translation", { keyPrefix: "headerMenu" });
-  const { state, dispatch } = useGlobalStateContext();
   const navigate = useNavigate();
   const snackbar = useSnackbar();
   const [artists, setArtists] = React.useState<Artist[]>([]);
 
-  const userId = state.user?.id;
+  const { user } = useAuthContext();
+  const userId = user?.id;
 
   const fetchArtists = React.useCallback(async () => {
     if (userId) {
@@ -35,23 +35,21 @@ const Menu: React.FC = (props) => {
     fetchArtists();
   }, [fetchArtists]);
 
-  const onLogOut = React.useCallback(async () => {
-    await fetch(API_ROOT + "/auth/logout", {
-      method: "GET",
-      credentials: "include",
+  const { mutate: logout } = useLogoutMutation();
+
+  const onLogOut = React.useCallback(() => {
+    logout(undefined, {
+      onSuccess() {
+        snackbar(t("logOutSuccess"), { type: "success" });
+        navigate("/");
+        setIsMenuOpen(false);
+      },
     });
-    dispatch({
-      type: "setLoggedInUser",
-      user: undefined,
-    });
-    snackbar(t("logOutSuccess"), { type: "success" });
-    navigate("/");
-    setIsMenuOpen(false);
-  }, [dispatch, navigate, setIsMenuOpen, snackbar, t]);
+  }, [logout, navigate, setIsMenuOpen, snackbar, t]);
 
   return (
     <menu className={css``}>
-      {state.user && (
+      {user && (
         <>
           <li>
             <Button
@@ -116,7 +114,7 @@ const Menu: React.FC = (props) => {
               );
             })}
           </div>
-          {state?.user?.isAdmin && (
+          {user?.isAdmin && (
             <li>
               <Button
                 onClick={() => {
@@ -140,7 +138,7 @@ const Menu: React.FC = (props) => {
           </li>
         </>
       )}
-      {!state.user && (
+      {!user && (
         <>
           <li>
             <Button

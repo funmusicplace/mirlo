@@ -2,17 +2,15 @@ import React from "react";
 import FormComponent from "./FormComponent";
 import Input from "./Input";
 import { useTranslation } from "react-i18next";
-import { useGlobalStateContext } from "state/GlobalState";
 import Button from "./Button";
 import { useSnackbar } from "state/SnackbarContext";
 import api from "services/api";
+import { useAuthContext } from "state/AuthContext";
 
 const FollowArtistNotLoggedInForm: React.FC<{ artistId: number }> = ({
   artistId,
 }) => {
-  const {
-    state: { user },
-  } = useGlobalStateContext();
+  const { user } = useAuthContext();
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const snackbar = useSnackbar();
 

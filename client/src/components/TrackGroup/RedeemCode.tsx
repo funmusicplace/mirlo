@@ -16,18 +16,16 @@ import { InputEl } from "components/common/Input";
 import Button from "components/common/Button";
 import React from "react";
 import FormComponent from "components/common/FormComponent";
-import { useGlobalStateContext } from "state/GlobalState";
 import api from "services/api";
 import { getReleaseUrl } from "utils/artist";
+import { useAuthContext } from "state/AuthContext";
 
 function RedeemCode() {
   const { t } = useTranslation("translation", {
     keyPrefix: "trackGroupDetails",
   });
 
-  const {
-    state: { user },
-  } = useGlobalStateContext();
+  const { user } = useAuthContext();
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const [code, setCode] = React.useState(params.get("code") ?? "");

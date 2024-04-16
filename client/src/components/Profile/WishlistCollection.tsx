@@ -4,14 +4,12 @@ import Box from "components/common/Box";
 import TrackgroupGrid from "components/common/TrackgroupGrid";
 import React from "react";
 import api from "../../services/api";
-import { useGlobalStateContext } from "../../state/GlobalState";
 import { useTranslation } from "react-i18next";
 import WidthContainer from "components/common/WidthContainer";
+import { useAuthContext } from "state/AuthContext";
 
 function WishlistCollection() {
-  const {
-    state: { user },
-  } = useGlobalStateContext();
+  const { user } = useAuthContext();
   const userId = user?.id;
 
   const [purchases, setPurchases] = React.useState<UserTrackGroupPurchase[]>();

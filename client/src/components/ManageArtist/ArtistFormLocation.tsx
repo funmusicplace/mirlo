@@ -6,9 +6,6 @@ import { css } from "@emotion/css";
 import { FaSave, FaTimes } from "react-icons/fa";
 import { IoLocationSharp } from "react-icons/io5";
 import React from "react";
-import api from "services/api";
-import { useArtistContext } from "state/ArtistContext";
-import { useGlobalStateContext } from "state/GlobalState";
 import { useSnackbar } from "state/SnackbarContext";
 import { FaPen } from "react-icons/fa";
 import { bp } from "../../constants";
@@ -17,41 +14,31 @@ interface FormData {
   location: string;
 }
 
-const ArtistFormLocation: React.FC<{ isManage: boolean }> = ({ isManage }) => {
+interface ArtistLocationProps {
+  isManage: boolean;
+  artist: Pick<Artist, "location">;
+  onSubmit: (data: FormData) => Promise<void>;
+}
+
+const ArtistFormLocation: React.FC<ArtistLocationProps> = ({
+  isManage,
+  artist,
+  onSubmit,
+}) => {
   const [isEditing, setIsEditing] = React.useState(false);
-  const {
-    state: { artist },
-    refresh,
-  } = useArtistContext();
-  const {
-    state: { user },
-  } = useGlobalStateContext();
-  const artistId = artist?.id;
-  const artistUserId = artist?.userId;
-  const isArtistManager = artistUserId === user?.id;
-  const userId = user?.id;
   const snackbar = useSnackbar();
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const { register, handleSubmit, reset } = useForm<FormData>({
-    defaultValues: { location: artist?.location },
+    values: { location: artist?.location ?? "" },
   });
 
-  const doSave = React.useCallback(
+  const handleSave = React.useCallback(
     async (data: FormData) => {
-      try {
-        if (userId && artistId && artistUserId === userId) {
-          await api.put(`users/${userId}/artists/${artistId}`, {
-            location: data.location,
-          });
-          refresh();
-          snackbar("Updated links", { type: "success" });
-        }
-      } catch (e) {
-      } finally {
-        setIsEditing(false);
-      }
+      await onSubmit(data);
+      snackbar("Updated location", { type: "success" });
+      setIsEditing(false);
     },
-    [artistId, artistUserId, refresh, snackbar, userId]
+    [onSubmit, snackbar]
   );
 
   if (!isEditing) {
@@ -81,7 +68,7 @@ const ArtistFormLocation: React.FC<{ isManage: boolean }> = ({ isManage }) => {
             {artist?.location}
           </div>
         )}
-        {!artist?.location && isArtistManager && (
+        {!artist?.location && isManage && (
           <div
             className={css`
               opacity: 0.5;
@@ -91,7 +78,7 @@ const ArtistFormLocation: React.FC<{ isManage: boolean }> = ({ isManage }) => {
             {t("editLocation")}
           </div>
         )}
-        {isArtistManager && (
+        {isManage && (
           <Button
             transparent
             small
@@ -140,7 +127,7 @@ const ArtistFormLocation: React.FC<{ isManage: boolean }> = ({ isManage }) => {
             collapsible
             compact
             startIcon={<FaSave />}
-            onClick={handleSubmit(doSave)}
+            onClick={handleSubmit(handleSave)}
           >
             <p>{t("saveLocation")}</p>
           </Button>
