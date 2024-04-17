@@ -58,7 +58,6 @@ export default function () {
     }
   }
 
-  // FIXME: only allow delete of posts belonging to user
   async function DELETE(req: Request, res: Response, next: NextFunction) {
     const { userId, postId } = req.params;
     try {

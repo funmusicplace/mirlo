@@ -41,6 +41,8 @@ const SupportArtistPopUp: React.FC<{ artist: Artist }> = ({ artist }) => {
 
   const options = artistDetails?.subscriptionTiers ?? [];
 
+  console.log("artist", artist);
+
   React.useEffect(() => {
     if (isOpen) {
       const foundTier = user?.artistUserSubscriptions?.find(

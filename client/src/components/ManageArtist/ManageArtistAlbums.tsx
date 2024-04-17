@@ -49,7 +49,7 @@ const ManageArtistAlbums: React.FC<{}> = () => {
     <ManageSectionWrapper>
       <SpaceBetweenDiv>
         {trackGroups.length === 0 && !isLoadingTrackGroups && (
-          <div>You don't have any albums yet</div>
+          <div>{t("noAlbumsYet")}</div>
         )}
         {trackGroups.length !== 0 && <div />}
         <div>

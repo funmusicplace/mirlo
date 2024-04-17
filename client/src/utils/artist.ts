@@ -22,6 +22,10 @@ export const getArtistUrl = (artist: { urlSlug?: string; id?: number }) => {
   return `/${getArtistUrlReference(artist)}`;
 };
 
+export const getArtistManageUrl = (artistId: number) => {
+  return `/manage/artists/${artistId}`;
+};
+
 export const getTrackGroupWidget = (trackGroupId: number) => {
   return `${process.env.REACT_APP_CLIENT_DOMAIN}/widget/trackGroup/${trackGroupId}`;
 };

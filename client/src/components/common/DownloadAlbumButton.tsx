@@ -43,7 +43,6 @@ const DownloadAlbumButton: React.FC<{
       );
       if (resp) {
         if ((resp as any).result.jobId) {
-          console.log("generating album");
           setIsGeneratingAlbum(+(resp as any).result.jobId);
         }
       }
@@ -70,9 +69,7 @@ const DownloadAlbumButton: React.FC<{
         const result = await api.getMany<{ jobStatus: string }>(
           `jobs?queue=generateAlbum&ids=${isGeneratingAlbum}`
         );
-        console.log("got result", result);
         if (result.results[0]?.jobStatus === "completed") {
-          console.log("job status is completed");
           await api.downloadFileDirectly(
             `trackGroups/${trackGroup.id}/download?format=${chosenFormat}`,
             `${trackGroup.title}.zip`

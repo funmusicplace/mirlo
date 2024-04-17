@@ -127,9 +127,9 @@ const ArtistSupport: React.FC = () => {
         </Box>
       )}
       <PostGrid>
-        {artist.subscriptionTiers?.map((p) => (
-          <ArtistSupportBox key={p.id} subscriptionTier={p} />
-        ))}
+        {artist.subscriptionTiers
+          ?.filter((p) => !p.isDefaultTier)
+          .map((p) => <ArtistSupportBox key={p.id} subscriptionTier={p} />)}
       </PostGrid>
     </>
   );

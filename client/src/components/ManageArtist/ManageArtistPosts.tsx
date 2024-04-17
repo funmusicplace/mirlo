@@ -54,9 +54,12 @@ const ManageArtistPosts: React.FC<{}> = () => {
   const deletePost = React.useCallback(
     async (postId: number) => {
       try {
-        await api.delete(`users/${userId}/posts/${postId}`);
-        snackbar(t("postDeleted"), { type: "success" });
-        fetchPosts();
+        const confirmed = window.confirm(t("areYouSureDelete") ?? "");
+        if (confirmed) {
+          await api.delete(`users/${userId}/posts/${postId}`);
+          snackbar(t("postDeleted"), { type: "success" });
+          fetchPosts();
+        }
       } catch (e) {
         console.error(e);
       }

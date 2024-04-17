@@ -22,7 +22,7 @@ const HeaderSearch: React.FC = () => {
     <AutoComplete
       getOptions={getOptions}
       showBackground
-      placeholder="Search artists"
+      placeholder={t("searchArtists") ?? ""}
       resultsPrefix={t("searchSuggestions") ?? undefined}
       onSelect={(val) => {
         navigate(`/${val}`);

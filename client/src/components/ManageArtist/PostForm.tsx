@@ -15,6 +15,8 @@ import useErrorHandler from "services/useErrorHandler";
 import TextEditor from "components/common/TextEditor";
 import Box from "components/common/Box";
 import { useAuthContext } from "state/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { getArtistManageUrl } from "utils/artist";
 
 type FormData = {
   title: string;
@@ -33,6 +35,7 @@ const PostForm: React.FC<{
 }> = ({ reload, artist, existing, onClose }) => {
   const { user } = useAuthContext();
   const snackbar = useSnackbar();
+  const navigate = useNavigate();
   const errorHandler = useErrorHandler();
   const [isSaving, setIsSaving] = React.useState(false);
   const { t } = useTranslation("translation", { keyPrefix: "postForm" });
@@ -53,8 +56,6 @@ const PostForm: React.FC<{
   publishedAt.setMinutes(
     publishedAt.getMinutes() - publishedAt.getTimezoneOffset()
   );
-
-  console.log("exiting", existing);
 
   const methods = useForm<FormData>({
     defaultValues: existing
@@ -119,6 +120,18 @@ const PostForm: React.FC<{
     },
     [reload, existingId, snackbar, artist.id, errorHandler, onClose, userId, t]
   );
+
+  const doDelete = React.useCallback(async () => {
+    try {
+      const confirmed = window.confirm(t("confirmDelete") ?? "");
+      if (confirmed) {
+        await api.delete(`users/${userId}/posts/${existingId}`);
+        navigate(getArtistManageUrl(artist.id));
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }, [artist.id, existingId, navigate, t, userId]);
 
   return (
     <FormProvider {...methods}>
@@ -228,17 +241,31 @@ const PostForm: React.FC<{
             <small>{t("shouldSendEmailContext")}</small>
           </label>
         </FormComponent>
-        <Button
-          type="submit"
-          disabled={
-            isSaving ||
-            (minimumTier === "" && !isPublic) ||
-            !methods.formState.isValid
-          }
-          isLoading={isSaving}
+        <div
+          className={css`
+            display: flex;
+            width: 100%;
+            justify-content: space-between;
+          `}
         >
-          {existing ? t("save") : t("saveNew")} {t("post")}
-        </Button>
+          <Button
+            type="submit"
+            variant="dashed"
+            disabled={
+              isSaving ||
+              (minimumTier === "" && !isPublic) ||
+              !methods.formState.isValid
+            }
+            isLoading={isSaving}
+          >
+            {existing ? t("save") : t("saveNew")} {t("post")}
+          </Button>
+          {existing && (
+            <Button type="button" isLoading={isSaving} onClick={doDelete}>
+              {t("delete")}
+            </Button>
+          )}
+        </div>
       </form>
     </FormProvider>
   );

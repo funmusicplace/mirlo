@@ -16,7 +16,7 @@ const About: React.FC = () => {
         daring to re-imagine the music industry: taking lessons learned in working in the
         solidarity economy and applying them to our process and product."
         />
-        <Link to="/">&#8612; Home</Link>
+        <Link to="/">&#8612; {t("home")}</Link>
         <h1>{t("about")}</h1>
         <p>{t("intro")}</p>
         <h2>{t("ourMission")}</h2>

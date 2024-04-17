@@ -7,6 +7,7 @@ import Button from "../common/Button";
 import api from "services/api";
 import { useAuthContext } from "state/AuthContext";
 import { useLogoutMutation } from "queries";
+import { getArtistManageUrl } from "utils/artist";
 
 const Menu: React.FC = (props) => {
   const { setIsMenuOpen } = props as {
@@ -97,7 +98,7 @@ const Menu: React.FC = (props) => {
                   <Button
                     onClick={() => {
                       setIsMenuOpen(false);
-                      navigate(`/manage/artists/${a.id}`);
+                      navigate(getArtistManageUrl(a.id));
                     }}
                   >
                     <div

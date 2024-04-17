@@ -3,7 +3,7 @@ import { FaPen } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import ClickToPlayAlbum from "../common/ClickToPlayAlbum";
 import Button from "../common/Button";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
 import { useArtistContext } from "state/ArtistContext";
 
@@ -91,10 +91,20 @@ const TrackGroupTitle: React.FC<{ trackGroup: TrackGroup }> = ({
                 font-style: normal;
               `}
             >
-              by{" "}
-              <Link to={`/${artist.urlSlug?.toLowerCase() ?? artist.id}`}>
-                {artist?.name}
-              </Link>
+              <Trans
+                t={t}
+                i18nKey="byArtist"
+                values={{
+                  artist: artist.name,
+                }}
+                components={{
+                  artistLink: (
+                    <Link
+                      to={`/${artist.urlSlug?.toLowerCase() ?? artist.id}`}
+                    ></Link>
+                  ),
+                }}
+              />
             </em>
           )}
         </div>

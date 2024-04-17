@@ -22,7 +22,8 @@ const ManageTrackArtists: React.FC<{
   disabled?: boolean;
   trackArtists: FormData["trackArtists"];
   onSave: () => void;
-}> = ({ disabled, trackArtists, onSave }) => {
+  trackId: number;
+}> = ({ disabled, trackArtists, onSave, trackId }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const [isOpen, setIsOpen] = React.useState(false);
   const methods = useForm<FormData>({
@@ -58,7 +59,6 @@ const ManageTrackArtists: React.FC<{
                 a.artistId && isFinite(+a.artistId) ? +a.artistId : undefined,
             })),
         };
-        const trackId = formData.trackArtists[0].trackId;
         await api.put<Partial<Track>, { track: Track }>(
           `users/${userId}/tracks/${trackId}/trackArtists`,
           packet
@@ -70,7 +70,7 @@ const ManageTrackArtists: React.FC<{
         onSave();
       }
     },
-    [onSave, userId]
+    [onSave, trackId, userId]
   );
 
   return (

@@ -99,7 +99,12 @@ export const sendToImageQueue = async (
       logger.info(
         `Going to put a file on MinIO Bucket ${incomingBucket}: ${image.id}, ${fileInfo.filename}`
       );
-      await minioClient.putObject(incomingBucket, image.id, fileStream);
+      try {
+        await minioClient.putObject(incomingBucket, image.id, fileStream);
+      } catch (e) {
+        logger.error("There was an error uploading to minio");
+        throw e;
+      }
 
       logger.info("Adding image to queue");
 
@@ -113,6 +118,7 @@ export const sendToImageQueue = async (
       resolve(job.id);
     });
   }).catch((e) => {
+    logger.error("There was an error optimizing the image");
     throw e;
   });
 
