@@ -152,6 +152,7 @@ const EditTrackRow: React.FC<{
           <ManageTrackArtists
             trackArtists={track.trackArtists ?? []}
             onSave={reload}
+            trackId={track.id}
           />
         </td>
         <td>
