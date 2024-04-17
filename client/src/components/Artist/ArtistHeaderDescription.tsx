@@ -129,7 +129,7 @@ const ArtistHeaderDescription: React.FC<ArtistHeaderDescriptionProps> = ({
                   `}
                   onClick={() => setIsCollapsed((val) => !val)}
                 >
-                  {isCollapsed ? "read more" : "read less"}
+                  {isCollapsed ? t("readMore") : t("readLess")}
                 </Button>
               </div>
             )}

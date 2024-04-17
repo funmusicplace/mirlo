@@ -99,7 +99,7 @@ function Artist() {
                 }
               `}
             >
-              Configure payment processor <FaChevronRight />
+              {t("configurePayment")} <FaChevronRight />
             </a>
           </li>
         )}

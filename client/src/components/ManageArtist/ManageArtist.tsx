@@ -53,11 +53,7 @@ const ManageArtist: React.FC<{}> = () => {
   const [isEditing, setIsEditing] = React.useState(false);
 
   const onDelete = React.useCallback(() => {
-    if (
-      !!userId &&
-      !!artist &&
-      window.confirm("Are you sure you want to delete this artist?")
-    ) {
+    if (!!userId && !!artist && window.confirm(t("areYouSureDelete") ?? "")) {
       deleteArtist(
         { userId, artistId: artist.id, artistSlug: artist.urlSlug ?? "" },
         {
@@ -65,12 +61,12 @@ const ManageArtist: React.FC<{}> = () => {
             navigate("/manage");
           },
           onError() {
-            snackbar("Problem deleting artist", { type: "warning" });
+            snackbar(t("problemDeletingArtist"), { type: "warning" });
           },
         }
       );
     }
-  }, [userId, artist, deleteArtist, navigate, snackbar]);
+  }, [userId, artist, t, deleteArtist, navigate, snackbar]);
 
   if (isError) {
     return <Box>{t("doesNotExist")}</Box>;

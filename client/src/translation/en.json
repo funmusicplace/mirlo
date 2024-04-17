@@ -59,7 +59,8 @@
   },
   "headerSearch": {
     "searchSuggestions": "Search suggestions:",
-    "noResults": "Hmm, couldn't find anything for that search"
+    "noResults": "Hmm, couldn't find anything for that search",
+    "searchArtists": "Search artists"
   },
   "profile": {
     "profile": "Profile",
@@ -150,6 +151,9 @@
     "editLocation": "Edit location",
     "saveLocation": "Save location",
     "cancel": "Cancel",
+    "readMore": "Read more",
+    "readLess": "Read less",
+    "configurePayment": "Configure payment processor",
     "howMuch": "Your subscription amount",
     "mustBeAtLeast": "Must be at least {{minAmount}}",
     "letsSupport": "Support this artist",
@@ -185,6 +189,10 @@
   "manageArtist": {
     "notEnabled": "This artist has not been enabled by site admin yet! Contact an admin to do so.",
     "manage": "Manage {{artist}}",
+    "areYouSureDelete": "Are you sure you want to delete this artist?",
+    "problemDeletingArtist": "Problem deleting artist",
+    "postDeleted": "Post deleted",
+    "noAlbumsYet": "You don't have any albums yet",
     "editPost": "Edit post",
     "editDetails": "Edit artist details",
     "viewLive": "View live",
@@ -368,6 +376,8 @@
     "title": "Title:",
     "type": "Type:",
     "edit": "Edit",
+    "byArtist": "by <artistLink>{{artist}}</artistLink}}",
+    "copiedTrackUrl": "Copied track url",
     "releaseDate": "Release date:",
     "pastRelease": "Released on {{date}}",
     "futureRelease": "Will be released on {{date}}",
@@ -424,6 +434,7 @@
   },
   "manageArtistTools": {
     "downloadCodes": "Download codes",
+    "downloadAllCodes": "Download all codes",
     "downloadCodesExplain": "You can share download codes with other people to give them free access to this album. Think press, friends, and family.",
     "addDownloadCodes": "Add download codes",
     "generateDownloadCodes": "Generate download codes",
@@ -441,6 +452,7 @@
     "artists": "All artists"
   },
   "postForm": {
+    "confirmDelete": "Are you sure you want to delete this post?",
     "newBlogPostFor": "New blog post for {{ artistName }}",
     "title": "Title:",
     "publicationDate": "Publication date:",
@@ -452,6 +464,7 @@
     "inTheFuture": "In the future",
     "editPost": "Edit post",
     "postUpdated": "Post updated",
+    "delete": "Delete",
     "saveNew": "Save new",
     "shouldSendEmail": "Should we send an email to your supporters when this post is published?",
     "shouldSendEmailContext": "If yes, we'll send an e-mail, if not, they'll get notified on the website",

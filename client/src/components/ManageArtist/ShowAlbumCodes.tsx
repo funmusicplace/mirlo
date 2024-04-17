@@ -118,7 +118,7 @@ const ShowAlbumCodes: React.FC<{}> = () => {
           isLoading={isDownloadingCodes}
           onClick={() => downloadCodes()}
         >
-          Download all codes
+          {t("downloadAllCodes")}
         </Button>
       </SpaceBetweenDiv>
       <Table>

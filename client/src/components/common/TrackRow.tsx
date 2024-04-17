@@ -9,12 +9,14 @@ import { useSnackbar } from "state/SnackbarContext";
 import { bp } from "../../constants";
 import TrackRowPlayControl from "./TrackRowPlayControl";
 import { useAuthContext } from "state/AuthContext";
+import { useTranslation } from "react-i18next";
 
 const TrackRow: React.FC<{
   track: Track;
   trackGroup: TrackGroup;
   addTracksToQueue: (id: number) => void;
 }> = ({ track, addTracksToQueue, trackGroup }) => {
+  const { t } = useTranslation("translation", { keyPrefix: "track" });
   const snackbar = useSnackbar();
   const { dispatch } = useGlobalStateContext();
   const [trackTitle] = React.useState(track.title);
@@ -201,7 +203,7 @@ const TrackRow: React.FC<{
           onClick={(e) => {
             e.stopPropagation();
             navigator.clipboard.writeText(widgetUrl(track.id, "track"));
-            snackbar("Copied track url", { type: "success" });
+            snackbar(t("copiedTrackUrl"), { type: "success" });
           }}
           startIcon={<FiLink />}
           className={css`
