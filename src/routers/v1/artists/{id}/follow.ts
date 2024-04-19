@@ -1,8 +1,8 @@
-import { User } from "@prisma/client";
+import { User } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
-import prisma from "../../../../../prisma/prisma";
+import prisma from "@mirlo/prisma";
 
 import {
   confirmArtistIdExists,

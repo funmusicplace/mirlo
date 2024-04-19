@@ -1,10 +1,10 @@
-import { User } from "@prisma/client";
+import { User } from "@mirlo/prisma/client";
 
 import { NextFunction, Request, Response } from "express";
 import { TokenExpiredError } from "jsonwebtoken";
 import passport from "passport";
 import passportJWT from "passport-jwt";
-import prisma from "../../prisma/prisma";
+import prisma from "@mirlo/prisma";
 import { findArtistIdForURLSlug } from "../utils/artist";
 import logger from "../logger";
 import { AppError } from "../utils/error";

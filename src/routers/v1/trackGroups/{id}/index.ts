@@ -1,11 +1,11 @@
 import { NextFunction, Request, Response } from "express";
-import prisma from "../../../../../prisma/prisma";
+import prisma from "@mirlo/prisma";
 import processor, {
   findTrackGroupIdForSlug,
   trackGroupSingleInclude,
 } from "../../../../utils/trackGroup";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
-import { User } from "@prisma/client";
+import { User } from "@mirlo/prisma/client";
 
 export default function () {
   const operations = {

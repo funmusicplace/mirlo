@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import prisma from "../../../prisma/prisma";
+import prisma from "@mirlo/prisma";
 
 const profile = async (req: Request, res: Response, next: NextFunction) => {
   const { email } = req.user as { email: string };

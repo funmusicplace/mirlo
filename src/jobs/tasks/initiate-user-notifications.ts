@@ -1,5 +1,5 @@
-import prisma from "../../../prisma/prisma";
-import { NotificationType } from "@prisma/client";
+import prisma from "@mirlo/prisma";
+import { NotificationType } from "@mirlo/prisma/client";
 import { flatten } from "lodash";
 
 // This will only be run-able once. We'll maybe want to

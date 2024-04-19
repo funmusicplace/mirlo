@@ -4,7 +4,7 @@ import {
   userHasPermission,
 } from "../../../../../../auth/passport";
 import { doesTrackBelongToUser } from "../../../../../../utils/ownership";
-import prisma from "../../../../../../../prisma/prisma";
+import prisma from "@mirlo/prisma";
 import { updateTrackArtists } from "../../../../../../utils/tracks";
 
 interface TrackBody {

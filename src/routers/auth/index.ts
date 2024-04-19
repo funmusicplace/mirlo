@@ -2,7 +2,7 @@ import express, { Response } from "express";
 import jwt, { JwtPayload, VerifyErrors } from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { userAuthenticated } from "../../auth/passport";
-import prisma from "../../../prisma/prisma";
+import prisma from "@mirlo/prisma";
 import sendMail from "../../jobs/send-mail";
 import { randomUUID } from "crypto";
 import logger from "../../logger";

@@ -3,7 +3,7 @@ import { Queue, QueueEvents } from "bullmq";
 
 import { REDIS_CONFIG } from "../config/redis";
 
-import prisma from "../../prisma/prisma";
+import prisma from "@mirlo/prisma";
 import { logger } from "../logger";
 import { createBucketIfNotExists, incomingAudioBucket } from "./minio";
 import { minioClient } from "./minio";

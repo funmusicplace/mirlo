@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { userAuthenticated } from "../../../../../../../auth/passport";
 import { doesSubscriptionTierBelongToUser } from "../../../../../../../utils/ownership";
-import prisma from "../../../../../../../../prisma/prisma";
+import prisma from "@mirlo/prisma";
 import logger from "../../../../../../../logger";
 
 export default function () {

@@ -3,12 +3,13 @@ services:
   - type: web
     name: client
     env: static
-    rootDir: client
-    buildCommand: yarn build
-    staticPublishPath: ./build
+    buildCommand: corepack enable && yarn install --immutable && yarn client:build && mv client/dist/index.html client/dist/app.html
+    staticPublishPath: ./client/dist
     pullRequestPreviewsEnabled: true # optional
     envVars:
       - fromGroup: blackbrd
+      - key: SKIP_INSTALL_DEPS
+        value: true
     routes:
       - type: rewrite
         source: /*
@@ -25,9 +26,13 @@ services:
     plan: standard # Supposedly this should be free but
     # dockerCommand: ./start.sh
     # dockerfilePath: ./prod.Dockerfile
-    buildCommand: yarn install && yarn migrate:deploy
-    startCommand: yarn staging
+    buildCommand: corepack enable && yarn install --immutable && yarn prisma:migrate:deploy
+    startCommand: yarn ts-node src/index.ts
     envVars:
+      - key: SKIP_INSTALL_DEPS
+        value: true
+      - key: NODE_ENV
+        value: production
       - key: NODE_OPTIONS
         value: --max-old-space-size=1512
       - key: DATABASE_URL
@@ -85,7 +90,8 @@ services:
     name: background
     env: docker
     plan: standard # optional (defaults to starter)
-    dockerfilePath: ./background/Dockerfile # optional
+    dockerfilePath: ./Dockerfile # optional
+    dockerCommand: yarn ts-node src/jobs/queue-worker.ts run
     disk: # this disk gets used to process audio. They should get moved to the
       # minIO service and deleted after upload
       name: data

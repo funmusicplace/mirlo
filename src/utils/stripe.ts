@@ -1,6 +1,6 @@
 import Stripe from "stripe";
-import prisma from "../../prisma/prisma";
-import { Prisma, TrackGroup, User } from "@prisma/client";
+import prisma from "@mirlo/prisma";
+import { Prisma, TrackGroup, User } from "@mirlo/prisma/client";
 import { logger } from "../logger";
 import sendMail from "../jobs/send-mail";
 import { Request, Response } from "express";

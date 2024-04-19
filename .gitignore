@@ -8,3 +8,6 @@ package-lock.json
 yarn-error.log
 .DS_Store
 .vscode
+.pnp.*
+.yarn/*
+__generated__/

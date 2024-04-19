@@ -9,8 +9,8 @@ import {
   TrackGroupCover,
   Track,
   Prisma,
-} from "@prisma/client";
-import prisma from "../../prisma/prisma";
+} from "@mirlo/prisma/client";
+import prisma from "@mirlo/prisma";
 import stripe from "./stripe";
 import { deleteTrackGroup, processSingleTrackGroup } from "./trackGroup";
 import postProcessor from "./post";

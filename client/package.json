@@ -1,5 +1,5 @@
 {
-  "name": "client",
+  "name": "@mirlo/client",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -41,10 +41,10 @@
     "unist-util-visit": "^4.1.2"
   },
   "scripts": {
-    "start": "vite",
-    "build": "tsc --noEmit && vite build",
-    "preview": "vite preview",
-    "test": "tsc --noEmit && vitest"
+    "client:start": "vite",
+    "client:build": "tsc --noEmit && vite build",
+    "client:preview": "vite preview",
+    "client:test": "tsc --noEmit && vitest"
   },
   "browserslist": {
     "production": [
@@ -67,13 +67,15 @@
     "@transifex/cli": "^5.4.0",
     "@types/file-saver": "^2.0.5",
     "@types/lodash": "^4.14.192",
-    "@types/node": "^16.18.9",
+    "@types/prop-types": "^15",
     "@types/react": "^18.0.26",
     "@types/react-dom": "^18.0.9",
     "@types/react-helmet": "^6.1.6",
     "@vitejs/plugin-legacy": "^5.3.2",
     "@vitejs/plugin-react": "^4.2.1",
     "jsdom": "^24.0.0",
+    "prop-types": "^15.8.1",
+    "rollup": "^4.16.4",
     "terser": "^5.30.3",
     "typescript": "5.1.6",
     "vite": "^5.2.9",

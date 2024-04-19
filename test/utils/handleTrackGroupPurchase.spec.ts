@@ -4,7 +4,7 @@ import { describe, it } from "mocha";
 
 import { clearTables, createTrackGroup, createUser } from "../utils";
 
-import prisma from "../../prisma/prisma";
+import prisma from "@mirlo/prisma";
 import assert from "assert";
 import sinon from "sinon";
 import * as sendMail from "../../src/jobs/send-mail";

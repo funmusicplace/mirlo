@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import prisma from "../../../../../../../prisma/prisma";
+import prisma from "@mirlo/prisma";
 import { userAuthenticated } from "../../../../../../auth/passport";
 import { doesPostBelongToUser } from "../../../../../../utils/post";
 

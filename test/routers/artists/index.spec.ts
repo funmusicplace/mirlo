@@ -3,7 +3,7 @@ import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
 import request from "supertest";
-import prisma from "../../../prisma/prisma";
+import prisma from "@mirlo/prisma";
 import {
   clearTables,
   createArtist,

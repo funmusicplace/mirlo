@@ -1,11 +1,11 @@
-import { Prisma, User } from "@prisma/client";
+import { Prisma, User } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 import {
   contentBelongsToLoggedInUserArtist,
   userAuthenticated,
 } from "../../../../../auth/passport";
 
-import prisma from "../../../../../../prisma/prisma";
+import prisma from "@mirlo/prisma";
 import { AppError } from "../../../../../utils/error";
 
 export default function () {

@@ -8,7 +8,7 @@ import {
   createTrackGroup,
   createUser,
 } from "../../utils";
-import prisma from "../../../prisma/prisma";
+import prisma from "@mirlo/prisma";
 import { randomUUID } from "crypto";
 
 import { requestApp } from "../utils";

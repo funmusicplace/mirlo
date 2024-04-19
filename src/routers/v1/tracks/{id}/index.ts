@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import processor from "../../../../utils/trackGroup";
-import prisma from "../../../../../prisma/prisma";
-import { User } from "@prisma/client";
+import prisma from "@mirlo/prisma";
+import { User } from "@mirlo/prisma/client";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 
 export default function () {

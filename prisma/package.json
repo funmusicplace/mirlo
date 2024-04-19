@@ -1,0 +1,33 @@
+{
+  "name": "@mirlo/prisma",
+  "exports": {
+    ".": {
+      "require": {
+        "types": "./prisma.ts",
+        "default": "./prisma.ts"
+      }
+    },
+    "./client": {
+      "require": {
+        "types": "./__generated__/index.d.ts",
+        "default": "./__generated__/index.js"
+      }
+    }
+  },
+  "scripts": {
+    "prisma:build": "pnpify prisma generate",
+    "prisma:migrate": "DEBUG=prisma:client pnpify prisma migrate dev",
+    "prisma:migrate:deploy": "DEBUG=prisma:client pnpify prisma migrate deploy",
+    "prisma:seed": "pnpify prisma db seed"
+  },
+  "prisma": {
+    "seed": "ts-node seed.ts"
+  },
+  "devDependencies": {
+    "@types/node": "18.11.12",
+    "@yarnpkg/pnpify": "^4.0.1",
+    "prisma": "5",
+    "ts-node": "^10.9.2",
+    "typescript": "5.1.6"
+  }
+}

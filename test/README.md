@@ -1,13 +1,13 @@
 # Tests
 
-Run the test docker compose:
+To run these tests in docker compose:
 
 ```
-docker-compose -f docker-compose.yml -f test.docker-compose.yml up
+docker compose run test
 ```
 
-And then run the tests:
+To clean up these containers afterwards, the `--profile=test` argument needs to be passed to docker:
 
 ```
-docker exec -it blackbird-api yarn test
+docker compose --profile=test down
 ```

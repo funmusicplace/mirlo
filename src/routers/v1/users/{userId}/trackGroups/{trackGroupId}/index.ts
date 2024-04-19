@@ -1,4 +1,4 @@
-import { Artist, User } from "@prisma/client";
+import { Artist, User } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 import { pick } from "lodash";
 import {
@@ -10,7 +10,7 @@ import processor, {
   trackGroupSingleInclude,
 } from "../../../../../../utils/trackGroup";
 import { doesTrackGroupBelongToUser } from "../../../../../../utils/ownership";
-import prisma from "../../../../../../../prisma/prisma";
+import prisma from "@mirlo/prisma";
 import { deleteTrackGroup } from "../../../../../../utils/trackGroup";
 import logger from "../../../../../../logger";
 import slugify from "slugify";

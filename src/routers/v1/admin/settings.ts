@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { userAuthenticated, userHasPermission } from "../../../auth/passport";
 import { getSiteSettings } from "../../../utils/settings";
-import prisma from "../../../../prisma/prisma";
+import prisma from "@mirlo/prisma";
 import { AppError } from "../../../utils/error";
 
 export default function () {

@@ -16,7 +16,7 @@ import "./auth/passport";
 import { imageQueue } from "./utils/processImages";
 import { audioQueue } from "./utils/processTrackAudio";
 import { serveStatic } from "./static";
-import prisma from "../prisma/prisma";
+import prisma from "@mirlo/prisma";
 import { rateLimit } from "express-rate-limit";
 import { corsCheck } from "./auth/cors";
 import errorHandler from "./utils/error";
@@ -223,7 +223,7 @@ app.use("/", (req, res) => {
   }
 });
 
-app.listen(process.env.NODE_ENV === "test" ? 5000 : process.env.PORT, () =>
+app.listen(process.env.PORT, () =>
   console.info(`
 🚀 Server ready at: ${process.env.API_DOMAIN}`)
 );

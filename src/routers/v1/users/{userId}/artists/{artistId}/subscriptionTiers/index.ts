@@ -4,8 +4,8 @@ import {
   userAuthenticated,
   userHasPermission,
 } from "../../../../../../../auth/passport";
-import prisma from "../../../../../../../../prisma/prisma";
-import { User } from "@prisma/client";
+import prisma from "@mirlo/prisma";
+import { User } from "@mirlo/prisma/client";
 import { getMaxListeners } from "process";
 import { getSiteSettings } from "../../../../../../../utils/settings";
 

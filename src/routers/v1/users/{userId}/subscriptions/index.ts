@@ -1,7 +1,7 @@
-import { Prisma, User } from "@prisma/client";
+import { Prisma, User } from "@mirlo/prisma/client";
 import { Request, Response } from "express";
 import { userAuthenticated } from "../../../../../auth/passport";
-import prisma from "../../../../../../prisma/prisma";
+import prisma from "@mirlo/prisma";
 
 type Params = {
   userId: string;

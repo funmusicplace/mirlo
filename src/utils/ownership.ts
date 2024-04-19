@@ -1,6 +1,6 @@
-import { ArtistSubscriptionTier, Prisma } from "@prisma/client";
+import { ArtistSubscriptionTier, Prisma } from "@mirlo/prisma/client";
 
-import prisma from "../../prisma/prisma";
+import prisma from "@mirlo/prisma";
 import { AppError } from "./error";
 import { DefaultArgs } from "@prisma/client/runtime/library";
 import { trackGroupSingleInclude } from "./trackGroup";

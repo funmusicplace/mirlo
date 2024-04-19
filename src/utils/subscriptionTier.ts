@@ -1,4 +1,4 @@
-import prisma from "../../prisma/prisma";
+import prisma from "@mirlo/prisma";
 import logger from "../logger";
 
 export const registerSubscription = async ({
