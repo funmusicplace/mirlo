@@ -67,7 +67,7 @@ services:
   - type: web
     name: minio
     env: docker
-    plan: starter
+    plan: standard
     dockerfilePath: "./minio/Dockerfile"
     envVars:
       - key: MINIO_ROOT_PASSWORD

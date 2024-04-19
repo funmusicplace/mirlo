@@ -73,10 +73,17 @@ const Releases = () => {
             <div
               className={css`
                 align-self: flex-end;
+                display: flex;
+                justify-content: flex-end;
+
+                a {
+                  margin-left: 1rem;
+                }
               `}
             >
+              <LinkWithIcon to="/releases">{t("viewAllArtists")}</LinkWithIcon>
               <LinkWithIcon to="/releases">
-                More releases <FaChevronRight />
+                {t("moreReleases")} <FaChevronRight />
               </LinkWithIcon>
             </div>
           </div>

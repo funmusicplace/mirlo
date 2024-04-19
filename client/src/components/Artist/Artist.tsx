@@ -79,13 +79,15 @@ function Artist() {
             <NavLink to="posts">{t("updates")}</NavLink>
           </li>
         )}
-        {canReceivePayments && (artist?.subscriptionTiers.length ?? 0) > 0 && (
-          <li>
-            <NavLink to="support">
-              {t("support", { artist: artist.name })}
-            </NavLink>
-          </li>
-        )}
+        {canReceivePayments &&
+          (artist?.subscriptionTiers.filter((tier) => !tier.isDefaultTier)
+            .length ?? 0) > 0 && (
+            <li>
+              <NavLink to="support">
+                {t("support", { artist: artist.name })}
+              </NavLink>
+            </li>
+          )}
         {user && isArtistUser && !canReceivePayments && (
           <li>
             <a
