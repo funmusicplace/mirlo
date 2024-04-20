@@ -117,13 +117,7 @@ const ArtistSupportBox: React.FC<{
           }
         `}
       >
-        <h3
-          className={css`
-            text-transform: Capitalize;
-          `}
-        >
-          {subscriptionTier.name}
-        </h3>
+        <h3>{subscriptionTier.name}</h3>
         <Money
           amount={
             subscriptionTier.minAmount ? subscriptionTier.minAmount / 100 : 0

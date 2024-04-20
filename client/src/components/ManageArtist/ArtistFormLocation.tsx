@@ -62,7 +62,6 @@ const ArtistFormLocation: React.FC<ArtistLocationProps> = ({
           <div
             className={css`
               opacity: 0.7;
-              text-transform: capitalize;
             `}
           >
             {artist?.location}
@@ -72,7 +71,6 @@ const ArtistFormLocation: React.FC<ArtistLocationProps> = ({
           <div
             className={css`
               opacity: 0.5;
-              text-transform: capitalize;
             `}
           >
             {t("editLocation")}
