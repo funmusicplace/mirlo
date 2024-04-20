@@ -33,7 +33,7 @@ const TrackGroupEmbed: React.FC<{
   return (
     <div>
       <Modal
-        title={t("embed") ?? ""}
+        title={t("embed", { name: trackGroup.title }) ?? ""}
         open={isPopupOpen}
         onClose={() => setIsPopupOpen(false)}
       >
