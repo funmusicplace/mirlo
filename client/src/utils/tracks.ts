@@ -28,6 +28,12 @@ export const isTrackOwnedOrPreview = (
   if (track.isPreview) {
     return true;
   }
+  if (
+    trackGroup?.releaseDate &&
+    new Date(trackGroup.releaseDate) > new Date()
+  ) {
+    return false;
+  }
   if (!user) {
     return false;
   }

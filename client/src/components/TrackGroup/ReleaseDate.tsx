@@ -33,12 +33,14 @@ const ReleaseDate: React.FC<{ releaseDate: string }> = ({
     keyPrefix: "trackGroupDetails",
   });
 
-  const releaseDate = new Date(releaseDateString);
+  const date = new Date(releaseDateString.split("T")[0]);
+  const userTimezoneOffset = date.getTimezoneOffset() * 60000;
+  const releaseDate = new Date(date.getTime() + userTimezoneOffset);
   const beforeReleaseDate = releaseDate > new Date();
 
   const releaseFormat = formatDate({
-    date: releaseDateString,
-    options: beforeReleaseDate ? { day: "numeric" } : {},
+    date: releaseDate.toString(),
+    options: beforeReleaseDate ? { day: "numeric", month: "long" } : {},
     i18n,
   });
 

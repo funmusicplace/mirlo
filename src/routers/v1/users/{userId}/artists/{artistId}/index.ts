@@ -11,6 +11,7 @@ import {
   processSingleArtist,
   singleInclude,
 } from "../../../../../../utils/artist";
+import slugify from "slugify";
 
 type Params = {
   artistId: string;
@@ -40,7 +41,9 @@ export default function () {
           name,
           links,
           location,
-          ...(urlSlug ? { urlSlug: urlSlug?.toLowerCase() } : {}),
+          ...(urlSlug
+            ? { urlSlug: slugify(urlSlug?.toLowerCase(), { strict: true }) }
+            : {}),
           properties,
         },
       });

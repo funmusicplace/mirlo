@@ -27,6 +27,7 @@ const PurchaseOrDownloadAlbum: React.FC<{
         const purchased = purchases?.find(
           (p) => p.trackGroupId === trackGroup.id
         );
+
         setIsOwned(!!purchased);
       }
     } catch (e) {

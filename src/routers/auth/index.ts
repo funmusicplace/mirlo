@@ -1,5 +1,5 @@
 import express, { Response } from "express";
-import jwt, { JwtPayload, VerifyErrors } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { userAuthenticated } from "../../auth/passport";
 import prisma from "../../../prisma/prisma";
@@ -311,7 +311,7 @@ export const buildTokens = (user: { email: string; id: number }) => {
     expiresIn: "10m",
   });
   const refreshToken = jwt.sign(payload, refresh_secret, {
-    expiresIn: "1d",
+    expiresIn: "4w",
   });
 
   return { accessToken, refreshToken };
