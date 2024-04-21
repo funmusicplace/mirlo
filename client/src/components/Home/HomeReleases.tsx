@@ -81,7 +81,7 @@ const Releases = () => {
                 }
               `}
             >
-              <LinkWithIcon to="/releases">{t("viewAllArtists")}</LinkWithIcon>
+              <LinkWithIcon to="/artists">{t("viewAllArtists")}</LinkWithIcon>
               <LinkWithIcon to="/releases">
                 {t("moreReleases")} <FaChevronRight />
               </LinkWithIcon>
