@@ -105,11 +105,18 @@ export default function () {
         return next();
       }
 
+      const slug = slugify(
+        urlSlug?.toLowerCase() ?? slugify(name.toLowerCase()),
+        {
+          strict: true,
+        }
+      );
+
       const result = await prisma.artist.create({
         data: {
           name,
           bio,
-          urlSlug: urlSlug?.toLowerCase() ?? slugify(name.toLowerCase()),
+          urlSlug: slug,
           user: {
             connect: {
               id: Number(userId),
