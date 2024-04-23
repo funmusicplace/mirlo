@@ -140,6 +140,7 @@
     "followArtist": "Follow {{artistName}}",
     "error": "Something went wrong",
     "subscribedSuccessfully": "Subscription confirmation e-mail sent!",
+    "successfullyUnsubscribed": "Successfully unsubscribed",
     "subscribe": "Subscribe to artist",
     "month": "month",
     "noBioYet": "You haven't added a biography for your artist yet",
@@ -268,6 +269,8 @@
     "createAlbum": "Create album",
     "update": "Update",
     "makePrivate": "Make private",
+    "priceZeroOrMore": "Price must be zero or more",
+    "madePrivate": "Your album has been made private. People will no longer be able to see it",
     "makePreorderPrivate": "Make pre-order private",
     "trackGroupUpdated": "Album updated",
     "trackGroupCreated": "Album created",
@@ -371,7 +374,8 @@
     "saveTrackForm.options.hidden": "Hidden",
     "saveTrackForm.options.free": "Free",
     "saveTrackForm.options.paid": "Paid",
-    "saveTrackForm.options.deleted": "Deleted"
+    "saveTrackForm.options.deleted": "Deleted",
+    "successfullyUpdated": "Successfully updated track"
   },
   "trackGroupDetails": {
     "trackgroup": "Track Group:",
@@ -385,7 +389,7 @@
     "futureRelease": "Will be released on {{date}}",
     "about": "About:",
     "isPrivate": "Is private?",
-    "privateAlbumDescription": "Private albums can not be listened to by Resonate users",
+    "privateAlbumDescription": "Private albums can not be listened to by Mirlo users",
     "isEnabled": "Is enabled?",
     "enabledAlbumDescription": "Enabled albums can be made public by the artist",
     "saveTrackGroupButton": "Save track group",
