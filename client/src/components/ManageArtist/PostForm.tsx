@@ -152,7 +152,7 @@ const PostForm: React.FC<{
         <FormComponent>
           <Controller
             name="content"
-            render={({ field: { onChange, value, ref } }) => {
+            render={({ field: { onChange, value } }) => {
               return (
                 <TextEditor
                   onChange={(val: any) => {
@@ -249,7 +249,6 @@ const PostForm: React.FC<{
           `}
         >
           <Button
-            type="submit"
             variant="dashed"
             disabled={
               isSaving ||
@@ -257,6 +256,7 @@ const PostForm: React.FC<{
               !methods.formState.isValid
             }
             isLoading={isSaving}
+            onClick={handleSubmit(doSave)}
           >
             {existing ? t("save") : t("saveNew")} {t("post")}
           </Button>

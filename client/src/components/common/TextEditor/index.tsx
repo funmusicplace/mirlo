@@ -35,7 +35,7 @@ const extensions = () => [
   new DropCursorExtension(),
   new ImageExtension(),
   new IframeExtension(),
-  new LinkExtension({ autoLink: true }),
+  new LinkExtension({ autoLink: true, selectTextOnClick: true }),
   ...wysiwygPreset(),
 ];
 
