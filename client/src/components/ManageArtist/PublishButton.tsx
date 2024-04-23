@@ -39,7 +39,9 @@ const PublishButton: React.FC<{
           `users/${artistUserId}/trackGroups/${trackGroupId}/publish`,
           {}
         );
-        snackbar(t("publishedSuccess"), { type: "success" });
+        snackbar(t(trackGroup.published ? "madePrivate" : "publishedSuccess"), {
+          type: "success",
+        });
       }
     } catch (e) {
       console.error(e);
@@ -47,7 +49,15 @@ const PublishButton: React.FC<{
       await reload();
       setIsPublishing(false);
     }
-  }, [trackGroup.tracks, artistUserId, trackGroupId, snackbar, t, reload]);
+  }, [
+    trackGroup.tracks,
+    trackGroup.published,
+    t,
+    artistUserId,
+    trackGroupId,
+    snackbar,
+    reload,
+  ]);
 
   const beforeReleaseDate = new Date(trackGroup.releaseDate) > new Date();
 

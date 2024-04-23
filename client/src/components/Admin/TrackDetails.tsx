@@ -43,7 +43,7 @@ export const TrackDetails: React.FC = () => {
         try {
           setIsLoading(true);
           await api.put<Track, Track>(`tracks/${trackId}`, data as Track);
-          snackbar("Successfully updated track", { type: "success" });
+          snackbar("sucessfullyUpdated", { type: "success" });
         } catch (e) {
           console.error(e);
         } finally {

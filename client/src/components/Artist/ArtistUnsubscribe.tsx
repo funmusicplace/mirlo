@@ -39,10 +39,10 @@ function ArtistUnsubscribe() {
           await api.post(`artists/${artistId}/unfollow`, {
             email: email?.replaceAll(" ", ""),
           });
-          snackbar("Successfully unsubscribed", { type: "success" });
+          snackbar("successfullyUnsubscribed", { type: "success" });
           navigate(getArtistUrl(artist));
         } catch (e) {
-          snackbar("Something went wrong", { type: "warning" });
+          snackbar("error", { type: "warning" });
         }
       }
     },
