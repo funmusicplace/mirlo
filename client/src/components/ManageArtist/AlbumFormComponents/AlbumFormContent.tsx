@@ -8,6 +8,7 @@ import { InputEl } from "components/common/Input";
 import TextArea from "components/common/TextArea";
 import UploadImage from "../UploadImage";
 import UploadArtistImage from "../UploadArtistImage";
+import FormError from "components/common/FormError";
 
 const AlbumFormContent: React.FC<{
   isLoadingImage: boolean;
@@ -15,7 +16,12 @@ const AlbumFormContent: React.FC<{
   existingObject?: TrackGroup;
 }> = ({ isLoadingImage, existingFileCover, existingObject }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
-  const { register } = useFormContext();
+  const {
+    register,
+    formState: { errors },
+  } = useFormContext();
+
+  console.log("errors", errors);
 
   return (
     <>
@@ -74,7 +80,8 @@ const AlbumFormContent: React.FC<{
       </FormComponent>
       <FormComponent>
         <label>{t("price")}</label>
-        <InputEl type="number" {...register("minPrice")} />
+        <InputEl type="number" {...register("minPrice", { min: 0 })} />
+        {errors.minPrice && <FormError>{t("priceZeroOrMore")}</FormError>}
       </FormComponent>
     </>
   );
