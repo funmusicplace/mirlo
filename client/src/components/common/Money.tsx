@@ -8,7 +8,7 @@ export const moneyDisplay = ({
   if (!amount) {
     return "-";
   }
-  return new Intl.NumberFormat("us", {
+  return new Intl.NumberFormat(undefined, {
     style: "currency",
     currency,
   }).format(+amount);

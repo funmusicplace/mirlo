@@ -11,6 +11,7 @@ import { bp } from "../../constants";
 import ArtistSubscriberUploadData from "./ArtistSubscriberUploadData";
 import DropdownMenu from "components/common/DropdownMenu";
 import { css } from "@emotion/css";
+import { sumBy } from "lodash";
 
 export const SupporterTable = styled(Table)`
   @media screen and (max-width: ${bp.small}px) {
@@ -55,11 +56,21 @@ const Supporters = () => {
     loadSupporters();
   }, [loadSupporters]);
 
+  const amount = sumBy(supporters, "amount");
+  console.log("amount", amount, supporters[0]?.artistSubscriptionTier.currency);
+
   return (
     <>
       <ArtistSection>
         <SpaceBetweenDiv>
-          <h4>Supporters</h4>
+          <div>
+            <h4>Supporters</h4>
+            Total:{" "}
+            <Money
+              amount={amount}
+              currency={supporters[0]?.artistSubscriptionTier.currency}
+            />
+          </div>
           <DropdownMenu dashed>
             <ArtistSubscriberDataDownload />
             <ArtistSubscriberUploadData onDone={loadSupporters} />
