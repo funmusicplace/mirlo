@@ -72,6 +72,7 @@ services:
   - type: web
     name: minio
     env: docker
+    autoDeploy: false
     plan: standard
     dockerfilePath: "./minio/Dockerfile"
     envVars:
