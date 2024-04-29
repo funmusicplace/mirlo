@@ -6,7 +6,7 @@ import legacy from "@vitejs/plugin-legacy";
 import { optimizeLodashImports } from "@optimize-lodash/rollup-plugin";
 
 export default defineConfig({
-  base: "",
+  base: process.env.VITE_CLIENT_DOMAIN ?? "",
   plugins: [react(), viteTsconfigPaths(), legacy()],
   server: {
     open: true,
