@@ -67,7 +67,7 @@ const Supporters = () => {
             <h4>Supporters</h4>
             Total:{" "}
             <Money
-              amount={amount}
+              amount={amount / 100}
               currency={supporters[0]?.artistSubscriptionTier.currency}
             />
           </div>

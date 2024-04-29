@@ -17,7 +17,9 @@ const UserFollowedYou: React.FC<{ notification: Notification }> = ({
             {notification.artist?.name}
           </Link>
         )}{" "}
-        at {notification.subscription?.artistSubscriptionTier.name}
+        {notification.subscription && (
+          <>at {notification.subscription?.artistSubscriptionTier.name}</>
+        )}
       </div>
     </>
   );

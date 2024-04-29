@@ -136,7 +136,7 @@ services:
     repo: https://github.com/funmusicplace/mirlo.git # optional
     plan: starter
     startCommand: yarn ts-node src/jobs/every-minute-tasks.ts
-    buildCommand: yarn install && yarn migrate:deploy
+    buildCommand: corepack enable && yarn install --immutable && yarn prisma:migrate:deploy
     schedule: "*/10 * * * *"
     envVars:
       - key: NODE_OPTIONS
@@ -171,7 +171,7 @@ services:
     repo: https://github.com/funmusicplace/mirlo.git # optional
     plan: starter
     startCommand: yarn ts-node src/jobs/monthly-tasks.ts
-    buildCommand: yarn install && yarn migrate:deploy
+    buildCommand: corepack enable && yarn install --immutable && yarn prisma:migrate:deploy
     schedule: "0 0 1 * *"
     envVars:
       - key: NODE_OPTIONS
