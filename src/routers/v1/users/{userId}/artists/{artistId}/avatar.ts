@@ -5,8 +5,8 @@ import {
 } from "../../../../../../auth/passport";
 import { processArtistAvatar } from "../../../../../../utils/processImages";
 import busboy from "connect-busboy";
-import { User } from "@prisma/client";
-import prisma from "../../../../../../../prisma/prisma";
+import { User } from "@mirlo/prisma/client";
+import prisma from "@mirlo/prisma";
 import { deleteArtistAvatar } from "../../../../../../utils/artist";
 
 type Params = {

@@ -9,7 +9,7 @@ import {
   incomingCoversBucket,
   minioClient,
 } from "../utils/minio";
-import prisma from "../../prisma/prisma";
+import prisma from "@mirlo/prisma";
 import { logger } from "./queue-worker";
 
 const { defaultOptions, config: sharpConfig } = tempSharpConfig;

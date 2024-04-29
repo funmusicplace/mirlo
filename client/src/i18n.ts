@@ -4,10 +4,10 @@ import { TransifexI18next } from "@transifex/i18next";
 
 import * as en from "translation/en.json";
 
-const hasTransifex = !!process.env.REACT_APP_TRANSIFEX_TOKEN;
+const hasTransifex = !!import.meta.env.VITE_TRANSIFEX_TOKEN;
 
 const txBackend = new TransifexI18next({
-  token: process.env.REACT_APP_TRANSIFEX_TOKEN,
+  token: import.meta.env.VITE_TRANSIFEX_TOKEN,
   // other options from @transifex/native init function
 });
 // the translations

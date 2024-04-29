@@ -27,7 +27,7 @@ export const getArtistManageUrl = (artistId: number) => {
 };
 
 export const getTrackGroupWidget = (trackGroupId: number) => {
-  return `${process.env.REACT_APP_CLIENT_DOMAIN}/widget/trackGroup/${trackGroupId}`;
+  return `${import.meta.env.VITE_CLIENT_DOMAIN}/widget/trackGroup/${trackGroupId}`;
 };
 
 export const getReleaseUrl = (

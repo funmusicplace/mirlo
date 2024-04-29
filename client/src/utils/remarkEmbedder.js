@@ -8,9 +8,9 @@ import * as parse5 from "parse5";
  * See ticket https://github.com/remark-embedder/core/issues/123#issue-1676994245
  */
 
-Object.defineProperty(exports, "__esModule", {
-  value: true,
-});
+// Object.defineProperty(exports, "__esModule", {
+//   value: true,
+// });
 // exports.default = void 0;
 
 // results in an AST node of type "root" with a single "children" node of type "element"

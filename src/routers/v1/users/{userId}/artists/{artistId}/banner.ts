@@ -5,8 +5,8 @@ import {
   userAuthenticated,
 } from "../../../../../../auth/passport";
 import { processArtistBanner } from "../../../../../../utils/processImages";
-import prisma from "../../../../../../../prisma/prisma";
-import { User } from "@prisma/client";
+import prisma from "@mirlo/prisma";
+import { User } from "@mirlo/prisma/client";
 import { deleteArtistBanner } from "../../../../../../utils/artist";
 
 type Params = {

@@ -1,7 +1,6 @@
 // import { css } from "@emotion/css";
 
 import React from "react";
-import ReactHlsPlayer from "@gumlet/react-hls-player";
 import api from "services/api";
 
 import { useGlobalStateContext } from "state/GlobalState";
@@ -9,6 +8,9 @@ import { useGlobalStateContext } from "state/GlobalState";
 // import { bp } from "../constants";
 import SongTimeDisplay from "./common/SongTimeDisplay";
 import { useAuthContext } from "state/AuthContext";
+
+// Load react-hls-player asynchronously (the hls bundle is quite big)
+const ReactHlsPlayer = React.lazy(() => import("@gumlet/react-hls-player"));
 
 const hlsConfig = {
   xhrSetup: function (xhr: XMLHttpRequest, url: string) {

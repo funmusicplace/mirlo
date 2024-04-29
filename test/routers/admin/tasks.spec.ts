@@ -9,7 +9,7 @@ import {
   createTrackGroup,
   createUser,
 } from "../../utils";
-import prisma from "../../../prisma/prisma";
+import prisma from "@mirlo/prisma";
 import { randomUUID } from "crypto";
 
 const baseURL = `${process.env.API_DOMAIN}/v1/`;

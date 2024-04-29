@@ -3,7 +3,7 @@ import {
   userAuthenticated,
   userHasPermission,
 } from "../../../../auth/passport";
-import prisma from "../../../../../prisma/prisma";
+import prisma from "@mirlo/prisma";
 
 export default function () {
   const operations = {

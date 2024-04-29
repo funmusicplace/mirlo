@@ -75,7 +75,7 @@ function Signup() {
           {
             ...data,
             receiveMailingList: !!data.receiveMailingList,
-            client: process.env.REACT_APP_CLIENT_DOMAIN,
+            client: import.meta.env.VITE_CLIENT_DOMAIN,
           },
           {
             credentials: undefined,

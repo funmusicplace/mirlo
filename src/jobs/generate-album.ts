@@ -12,7 +12,7 @@ import {
 import { convertAudioToFormat } from "../utils/tracks";
 import archiver from "archiver";
 import { PassThrough } from "stream";
-import { Track, TrackGroup } from "@prisma/client";
+import { Track, TrackGroup } from "@mirlo/prisma/client";
 
 const {
   MINIO_HOST = "",

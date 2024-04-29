@@ -1,8 +1,8 @@
 import { Queue, QueueEvents } from "bullmq";
 import { REDIS_CONFIG } from "../config/redis";
 import { logger } from "../logger";
-import prisma from "../../prisma/prisma";
-import { Track, TrackGroup } from "@prisma/client";
+import prisma from "@mirlo/prisma";
+import { Track, TrackGroup } from "@mirlo/prisma/client";
 
 const queueOptions = {
   prefix: "mirlo",

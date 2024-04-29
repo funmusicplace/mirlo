@@ -1,11 +1,11 @@
-import { User } from "@prisma/client";
+import { User } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 import {
   userAuthenticated,
   userHasPermission,
 } from "../../../../../../auth/passport";
 import { doesTrackGroupBelongToUser } from "../../../../../../utils/ownership";
-import prisma from "../../../../../../../prisma/prisma";
+import prisma from "@mirlo/prisma";
 
 type Params = {
   trackGroupId: number;

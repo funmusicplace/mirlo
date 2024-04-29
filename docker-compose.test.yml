@@ -1,0 +1,81 @@
+services:
+  redis-test:
+    extends:
+      file: docker-compose.api.yml
+      service: redis
+    container_name: blackbird-redis-test
+    networks: !reset [test-network]
+    ports: !reset []
+    profiles: [test]
+
+  api-test:
+    extends:
+      file: docker-compose.api.yml
+      service: api
+    container_name: blackbird-api-test
+    networks: !reset [test-network]
+    links:
+      - redis-test:redis
+      - minio-test:minio
+      - pgsql-test:pgsql
+    ports: !reset []
+    depends_on: !reset
+      - redis-test
+      - pgsql-test
+      - minio-test
+    environment:
+      API_DOMAIN: http://api:3000
+    profiles: [test]
+
+  minio-test:
+    extends:
+      file: docker-compose.api.yml
+      service: minio
+    container_name: blackbird-minio-test
+    networks: !reset [test-network]
+    ports: !reset []
+    volumes: !reset
+      - minio_storage-test:/data
+    profiles: [test]
+
+  pgsql-test:
+    extends:
+      file: docker-compose.api.yml
+      service: pgsql
+    container_name: blackbird-pgsql-test
+    networks: !reset [test-network]
+    ports: !reset []
+    volumes: !reset
+      - ./data/pgsql-test:/var/lib/postgresql/data
+      - ./data/pgsql_backups-test:/backups
+    profiles: [test]
+
+  test:
+    extends:
+      file: docker-compose.api.yml
+      service: api
+    container_name: blackbird-test
+    networks: !reset [test-network]
+    links:
+      - redis-test:redis
+      - api-test:api
+      - minio-test:minio
+      - pgsql-test:pgsql
+    ports: !reset []
+    depends_on: !reset
+      api-test:
+        condition: service_healthy
+    environment:
+      NODE_ENV: test
+      CI: true
+      API_DOMAIN: http://api:3000
+    command: yarn api:test
+    restart: no
+    profiles: [test]
+
+networks:
+  test-network:
+    driver: bridge
+
+volumes:
+  minio_storage-test: {}

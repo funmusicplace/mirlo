@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import prisma from "../../../../../../../prisma/prisma";
+import prisma from "@mirlo/prisma";
 import { userAuthenticated } from "../../../../../../auth/passport";
 import { doesTrackGroupBelongToUser } from "../../../../../../utils/ownership";
 

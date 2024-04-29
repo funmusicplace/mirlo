@@ -11,44 +11,58 @@ on:
       - main
 
 jobs:
+  client-unit:
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: 'yarn'
+
+      - name: Copy env file
+        run: |
+          cp .env.example .env
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Run tests
+        run: yarn client:test
+
   api-unit:
     timeout-minutes: 10
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v1
-
-      - run: echo ::set-output name=NODE_VERSION::$(cat .nvmrc)
-        id: nvm
-
-      - name: Install node
-        uses: actions/setup-node@v1
-        with:
-          node-version: ${{ steps.nvm.outputs.NODE_VERSION }}
+        uses: actions/checkout@v4
 
       - name: Copy env file
         run: |
           cp .env.example .env
 
-      # - name: Echo CI
-      #   run: echo ${CI}
-
-      - name: Install
-        run: yarn install --force
-
-      - name: Start containers
-        run: docker-compose -f docker-compose.yml -f test.docker-compose.yml up -d
-
-      - name: Sleep to give things time to start
-        run: sleep 60s
-
-      - name: Print logs just to see
-        run: docker logs blackbird-api
+      - name: Build docker image
+        run: docker compose build test
 
       - name: Run tests
-        run: docker exec -e API_DOMAIN=http://api:3000 blackbird-api yarn test --exit
+        run: docker compose run test
+
+      - name: Print logs
+        if: always()
+        run: |
+          echo "::group::Log output: blackbird-api-test"
+          docker compose logs api-test
+          echo "::endgroup::"
 
       - name: Stop containers
         if: always()
-        run: docker-compose down
+        run: docker compose --profile=test down

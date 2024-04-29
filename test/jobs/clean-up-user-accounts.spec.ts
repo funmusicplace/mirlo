@@ -5,7 +5,7 @@ import { describe, it } from "mocha";
 import { clearTables, createUser } from "../utils";
 import assert from "node:assert";
 import cleanUpUserAccounts from "../../src/jobs/clean-up-user-accounts";
-import prisma from "../../prisma/prisma";
+import prisma from "@mirlo/prisma";
 
 describe("clean-up-user-accounts", () => {
   beforeEach(async () => {

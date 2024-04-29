@@ -5,7 +5,7 @@ import { describe, it } from "mocha";
 import { clearTables, createPost, createUser } from "../utils";
 
 import addPostToNotifications from "../../src/jobs/add-post-to-notifications";
-import prisma from "../../prisma/prisma";
+import prisma from "@mirlo/prisma";
 import assert from "assert";
 
 describe("add-post-to-notifications", () => {

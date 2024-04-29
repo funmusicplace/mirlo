@@ -1,5 +1,5 @@
 import prisma from "../prisma/prisma";
-import { Prisma, UploadState } from "@prisma/client";
+import { Prisma, UploadState } from "@mirlo/prisma/client";
 import { buildTokens } from "../src/routers/auth";
 
 export const clearTables = async () => {

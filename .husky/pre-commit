@@ -2,4 +2,4 @@
 . "$(dirname -- "$0")/_/husky.sh"
 
 # Runs prettier on the files specified in package.json / "lint-staged"
-npx --no-install lint-staged
+yarn lint-staged

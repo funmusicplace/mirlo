@@ -3,8 +3,8 @@ import {
   userAuthenticated,
   userHasPermission,
 } from "../../../../auth/passport";
-import { Prisma, User } from "@prisma/client";
-import prisma from "../../../../../prisma/prisma";
+import { Prisma, User } from "@mirlo/prisma/client";
+import prisma from "@mirlo/prisma";
 import { deleteUser } from "../../../../utils/user";
 import { AppError } from "../../../../utils/error";
 

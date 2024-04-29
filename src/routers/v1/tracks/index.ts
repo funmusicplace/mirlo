@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
-import prisma from "../../../../prisma/prisma";
-import { Prisma } from "@prisma/client";
+import prisma from "@mirlo/prisma";
+import { Prisma } from "@mirlo/prisma/client";
 
 export default function () {
   const operations = {

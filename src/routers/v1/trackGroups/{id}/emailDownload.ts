@@ -1,10 +1,10 @@
-import { User } from "@prisma/client";
+import { User } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 import {
   userAuthenticated,
   userLoggedInWithoutRedirect,
 } from "../../../../auth/passport";
-import prisma from "../../../../../prisma/prisma";
+import prisma from "@mirlo/prisma";
 
 import sendMail from "../../../../jobs/send-mail";
 import { randomUUID } from "crypto";

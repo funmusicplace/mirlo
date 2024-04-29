@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
-import { User, Prisma } from "@prisma/client";
+import { User, Prisma } from "@mirlo/prisma/client";
 
 import RSS from "rss";
 
-import prisma from "../../../../../prisma/prisma";
+import prisma from "@mirlo/prisma";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { findArtistIdForURLSlug } from "../../../../utils/artist";
 import { markdownAsHtml } from "../../../../utils/post";

@@ -11,7 +11,7 @@ export function inIframe() {
 
 export function inMirlo() {
   try {
-    return window.top?.location.origin === process.env.REACT_APP_CLIENT_DOMAIN;
+    return window.top?.location.origin === import.meta.env.VITE_CLIENT_DOMAIN;
   } catch (e) {
     return false;
   }

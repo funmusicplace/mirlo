@@ -1,11 +1,11 @@
-import { Prisma, User } from "@prisma/client";
+import { Prisma, User } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 import {
   userAuthenticated,
   artistBelongsToLoggedInUser,
 } from "../../../../../../auth/passport";
 
-import prisma from "../../../../../../../prisma/prisma";
+import prisma from "@mirlo/prisma";
 import { downloadCSVFile } from "../../../../../../utils/download";
 
 type Params = {
