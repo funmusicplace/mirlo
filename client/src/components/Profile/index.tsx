@@ -2,12 +2,12 @@ import { css } from "@emotion/css";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useSnackbar } from "state/SnackbarContext";
 import { API_ROOT } from "../../constants";
 
 import api from "../../services/api";
-import Button from "../common/Button";
+import Button, { ButtonLink } from "../common/Button";
 import FormComponent from "../common/FormComponent";
 import { InputEl } from "../common/Input";
 import UserSupports from "./UserSupports";
@@ -129,12 +129,12 @@ function Profile() {
                 artistUserSubscriptions={user.artistUserSubscriptions}
               />
             )}
-            <Link to="/profile/collection" style={{ marginTop: "1rem" }}>
-              <Button style={{ width: "100%" }}>{t("viewCollection")}</Button>
-            </Link>
-            <Link to="/manage" style={{ marginTop: "1rem" }}>
-              <Button style={{ width: "100%" }}>{t("manageArtists")}</Button>
-            </Link>
+            <ButtonLink to="/profile/collection" style={{ marginTop: "1rem" }}>
+              {t("viewCollection")}
+            </ButtonLink>
+            <ButtonLink to="/manage" style={{ marginTop: "1rem" }}>
+              {t("manageArtists")}
+            </ButtonLink>
             <Button
               style={{
                 width: "100%",

@@ -5,8 +5,7 @@ import {
   SplashWrapper,
   TextWrapper,
 } from "./Splash";
-import Button from "components/common/Button";
-import { Link } from "react-router-dom";
+import { ButtonLink } from "components/common/Button";
 import { useTranslation } from "react-i18next";
 import { bp } from "../../constants";
 
@@ -62,28 +61,27 @@ const SupportMirlo = () => {
           >
             <SplashTitle>{t("sustainedBy")}</SplashTitle>
             <SplashButtonWrapper>
-              <Link to="/team/support">
-                <Button
-                  variant="big"
-                  className={css`
-                    display: block;
-                    padding: 1rem;
-                    text-decoration: none;
-                    text-align: center;
-                    &:hover {
-                      text-decoration: underline;
-                    }
+              <ButtonLink
+                to="/team/support"
+                variant="big"
+                className={css`
+                  display: block;
+                  padding: 1rem;
+                  text-decoration: none;
+                  text-align: center;
+                  &:hover {
+                    text-decoration: underline;
+                  }
 
-                    color: var(--mi-white);
-                    @media (prefers-color-scheme: dark) {
-                      background-color: var(--mi-white) !important;
-                      color: var(--mi-black) !important;
-                    }
-                  `}
-                >
-                  {t("supportTeam")}
-                </Button>
-              </Link>
+                  color: var(--mi-white);
+                  @media (prefers-color-scheme: dark) {
+                    background-color: var(--mi-white) !important;
+                    color: var(--mi-black) !important;
+                  }
+                `}
+              >
+                {t("supportTeam")}
+              </ButtonLink>
             </SplashButtonWrapper>
           </div>
         </TextWrapper>

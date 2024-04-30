@@ -1,15 +1,9 @@
 import { css } from "@emotion/css";
-import Button from "components/common/Button";
+import Button, { ButtonLink } from "components/common/Button";
 import React from "react";
 import { bp } from "../../constants";
 import { FaEye, FaPen, FaTrash } from "react-icons/fa";
-import {
-  Link,
-  NavLink,
-  Outlet,
-  useNavigate,
-  useParams,
-} from "react-router-dom";
+import { NavLink, Outlet, useNavigate, useParams } from "react-router-dom";
 import ArtistForm from "./ArtistForm";
 import { useSnackbar } from "state/SnackbarContext";
 import { useTranslation } from "react-i18next";
@@ -106,11 +100,14 @@ const ManageArtist: React.FC<{}> = () => {
           >
             {t("editDetails")}
           </Button>
-          <Link to={`/${artist?.urlSlug?.toLowerCase() ?? artist?.id}`}>
-            <Button variant="big" startIcon={<FaEye />} disabled={!artist}>
-              {t("viewLive")}
-            </Button>
-          </Link>
+          <ButtonLink
+            to={`/${artist?.urlSlug?.toLowerCase() ?? artist?.id}`}
+            variant="big"
+            startIcon={<FaEye />}
+            disabled={!artist}
+          >
+            {t("viewLive")}
+          </ButtonLink>
         </div>
       </MainButtons>
       <ArtistTabs>

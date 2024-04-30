@@ -1,5 +1,5 @@
 import { css } from "@emotion/css";
-import Button from "components/common/Button";
+import Button, { ButtonLink } from "components/common/Button";
 import React from "react";
 import api from "services/api";
 import NewPostForm from "./NewPostForm";
@@ -131,9 +131,12 @@ const ManageArtistPosts: React.FC<{}> = () => {
                   display: flex;
                 `}
               >
-                <Link to={`/manage/artists/${p.artistId}/post/${p.id}`}>
-                  <Button onlyIcon variant="dashed" startIcon={<FaPen />} />
-                </Link>
+                <ButtonLink
+                  to={`/manage/artists/${p.artistId}/post/${p.id}`}
+                  onlyIcon
+                  variant="dashed"
+                  startIcon={<FaPen />}
+                />
                 <Button
                   className={css`
                     margin-left: 0.5rem;

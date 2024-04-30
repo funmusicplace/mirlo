@@ -4,6 +4,7 @@ import styled from "@emotion/styled";
 import LoadingSpinner from "./LoadingSpinner";
 import { css } from "@emotion/css";
 import { bp } from "../../constants";
+import { Link } from "react-router-dom";
 
 export interface Compactable {
   compact?: boolean;
@@ -254,6 +255,7 @@ export interface ButtonProps extends Compactable {
   isLoading?: boolean;
   collapse?: boolean;
   title?: string;
+  as?: React.ElementType<any, keyof React.JSX.IntrinsicElements>;
 }
 
 export const Button: React.FC<ButtonProps> = ({
@@ -292,6 +294,19 @@ export const Button: React.FC<ButtonProps> = ({
       {!collapse && children}
       {endIcon ? <span className="endIcon">{endIcon}</span> : ""}
     </CustomButton>
+  );
+};
+
+export const ButtonLink: React.FC<ButtonProps & { to: string }> = ({
+  to,
+  ...props
+}) => {
+  return (
+    <Button
+      // Use the "Link" element from react-router as the base element for the button
+      as={(props) => <Link to={to} {...props} />}
+      {...props}
+    />
   );
 };
 

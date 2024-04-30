@@ -2,10 +2,9 @@ import { css } from "@emotion/css";
 import React from "react";
 
 import api from "services/api";
-import Button from "../common/Button";
+import Button, { ButtonLink } from "../common/Button";
 import CreateNewArtistForm from "./ArtistForm";
 import { bp } from "../../constants";
-import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import Box from "components/common/Box";
 import CountrySelect from "./CountrySelectForm";
@@ -79,35 +78,35 @@ export const Manage: React.FC = () => {
               `}
             >
               {artists.map((a) => (
-                <Link
+                <ButtonLink
                   key={a.id}
                   to={`artists/${a.id}`}
+                  variant="outlined"
                   className={css`
                     margin-right: 1rem;
                     margin-bottom: 1rem;
                   `}
                 >
-                  <Button variant="outlined">{a.name}</Button>
-                </Link>
+                  {a.name}
+                </ButtonLink>
               ))}
               <div
                 className={css`
                   width: 100%;
                 `}
               >
-                <Link to="/manage/welcome">
-                  <Button
-                    variant="big"
-                    className={css`
-                      flex-grow: 1;
-                      text-align: center;
-                      border-radius: 6px;
-                      justify-self: none;
-                    `}
-                  >
-                    {t("createNewArtist")}
-                  </Button>
-                </Link>
+                <ButtonLink
+                  to="/manage/welcome"
+                  variant="big"
+                  className={css`
+                    flex-grow: 1;
+                    text-align: center;
+                    border-radius: 6px;
+                    justify-self: none;
+                  `}
+                >
+                  {t("createNewArtist")}
+                </ButtonLink>
               </div>
             </div>
             <CreateNewArtistForm

@@ -3,14 +3,14 @@ import styled from "@emotion/styled";
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
 import { FormProvider, useForm } from "react-hook-form";
-import Button from "components/common/Button";
+import Button, { ButtonLink } from "components/common/Button";
 import React from "react";
 import ArtistSlugInput from "./ArtistSlugInput";
 import api from "services/api";
 import UploadArtistImage from "./UploadArtistImage";
 import { FaArrowRight, FaPlus } from "react-icons/fa";
 import { css } from "@emotion/css";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import useErrorHandler from "services/useErrorHandler";
 import { useAuthContext } from "state/AuthContext";
 
@@ -141,16 +141,15 @@ const Welcome = () => {
             `}
           >
             {steps[step] === "avatar" && localArtist && (
-              <Link to={`/manage/artists/${localArtist.id}/new-release`}>
-                <Button
-                  isLoading={isLoading}
-                  compact
-                  disabled={isButtonDisabled}
-                  startIcon={<FaPlus />}
-                >
-                  {t("addAlbum")}
-                </Button>
-              </Link>
+              <ButtonLink
+                to={`/manage/artists/${localArtist.id}/new-release`}
+                isLoading={isLoading}
+                compact
+                disabled={isButtonDisabled}
+                startIcon={<FaPlus />}
+              >
+                {t("addAlbum")}
+              </ButtonLink>
             )}
             <Button
               isLoading={isLoading}
@@ -165,17 +164,16 @@ const Welcome = () => {
             </Button>
 
             {step > 0 && steps[step] !== "avatar" && (
-              <Link to={localArtistLink}>
-                <Button
-                  isLoading={isLoading}
-                  compact
-                  variant="outlined"
-                  disabled={isButtonDisabled}
-                  endIcon={<FaArrowRight />}
-                >
-                  {t("takeMeToTheArtistPage")}
-                </Button>
-              </Link>
+              <ButtonLink
+                to={localArtistLink}
+                isLoading={isLoading}
+                compact
+                variant="outlined"
+                disabled={isButtonDisabled}
+                endIcon={<FaArrowRight />}
+              >
+                {t("takeMeToTheArtistPage")}
+              </ButtonLink>
             )}
           </div>
         </PageWrapper>
