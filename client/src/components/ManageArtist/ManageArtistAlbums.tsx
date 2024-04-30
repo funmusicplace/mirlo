@@ -1,7 +1,7 @@
 import { css } from "@emotion/css";
-import Button from "components/common/Button";
+import { ButtonLink } from "components/common/Button";
 import React from "react";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import api from "services/api";
 import TrackGroupCard from "./TrackGroupCard";
 import { useTranslation } from "react-i18next";
@@ -53,33 +53,29 @@ const ManageArtistAlbums: React.FC<{}> = () => {
         )}
         {trackGroups.length !== 0 && <div />}
         <div>
-          <Link
+          <ButtonLink
             to={`/manage/artists/${artistId}/releases/tools`}
+            compact
+            transparent
+            startIcon={<FaWrench />}
+            variant="outlined"
+            collapsible
             className={css`
               margin-right: 0.25rem;
             `}
           >
-            <Button
-              compact
-              transparent
-              startIcon={<FaWrench />}
-              variant="outlined"
-              collapsible
-            >
-              {t("tools")}
-            </Button>
-          </Link>
-          <Link to={`/manage/artists/${artistId}/new-release`}>
-            <Button
-              compact
-              transparent
-              startIcon={<FaPlus />}
-              variant="dashed"
-              collapsible
-            >
-              {t("addNewAlbum")}
-            </Button>
-          </Link>
+            {t("tools")}
+          </ButtonLink>
+          <ButtonLink
+            to={`/manage/artists/${artistId}/new-release`}
+            compact
+            transparent
+            startIcon={<FaPlus />}
+            variant="dashed"
+            collapsible
+          >
+            {t("addNewAlbum")}
+          </ButtonLink>
         </div>
       </SpaceBetweenDiv>
       {isLoading && <LoadingBlocks />}

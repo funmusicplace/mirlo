@@ -4,9 +4,9 @@ import { useTranslation } from "react-i18next";
 import ArtistTrackGroup from "./ArtistTrackGroup";
 import { bp } from "../../constants";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { FaPlus } from "react-icons/fa";
-import Button from "components/common/Button";
+import { ButtonLink } from "components/common/Button";
 import TrackgroupGrid from "components/common/TrackgroupGrid";
 import { useAuthContext } from "state/AuthContext";
 import { useQuery } from "@tanstack/react-query";
@@ -41,11 +41,15 @@ const ArtistAlbums: React.FC = () => {
       <SpaceBetweenDiv>
         <div />
         {artist.userId === user?.id && (
-          <Link to={`/manage/artists/${artist.id}/new-release`}>
-            <Button compact transparent startIcon={<FaPlus />} variant="dashed">
-              {t("addNewAlbum")}
-            </Button>
-          </Link>
+          <ButtonLink
+            compact
+            transparent
+            startIcon={<FaPlus />}
+            variant="dashed"
+            to={`/manage/artists/${artist.id}/new-release`}
+          >
+            {t("addNewAlbum")}
+          </ButtonLink>
         )}
       </SpaceBetweenDiv>
       <TrackgroupGrid gridNumber={"3"} wrap>

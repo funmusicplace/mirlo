@@ -1,10 +1,10 @@
 import React from "react";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useArtistContext } from "state/ArtistContext";
 import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
-import Button from "components/common/Button";
+import Button, { ButtonLink } from "components/common/Button";
 import { css } from "@emotion/css";
 import { getReleaseUrl } from "utils/artist";
 
@@ -80,11 +80,9 @@ const PublishButton: React.FC<{
         {t(trackGroup.published ? privateButton : publishButton)}
       </Button>
       {artist && trackGroup.published && (
-        <Link to={getReleaseUrl(artist, trackGroup)}>
-          <Button variant="big">
-            {t(beforeReleaseDate ? "viewPreorder" : "view")}
-          </Button>
-        </Link>
+        <ButtonLink to={getReleaseUrl(artist, trackGroup)} variant="big">
+          {t(beforeReleaseDate ? "viewPreorder" : "view")}
+        </ButtonLink>
       )}
     </div>
   );

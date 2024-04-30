@@ -1,5 +1,5 @@
 import { css } from "@emotion/css";
-import Button from "components/common/Button";
+import { ButtonLink } from "components/common/Button";
 import { MetaCard } from "components/common/MetaCard";
 import parse from "html-react-parser";
 import React from "react";
@@ -138,11 +138,13 @@ const Post: React.FC = () => {
           >
             <h1>{post.title}</h1>
             {(ownedByUser || user?.isAdmin) && (
-              <Link to={`/manage/artists/${post.artistId}/post/${post.id}`}>
-                <Button variant="dashed" startIcon={<FaPen />}>
-                  {t("edit")}
-                </Button>
-              </Link>
+              <ButtonLink
+                to={`/manage/artists/${post.artistId}/post/${post.id}`}
+                variant="dashed"
+                startIcon={<FaPen />}
+              >
+                {t("edit")}
+              </ButtonLink>
             )}
           </div>
           {post.artist && (
