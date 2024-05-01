@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useId } from "react";
 import ArtistTrackGroup from "./Artist/ArtistTrackGroup";
 import TrackgroupGrid from "components/common/TrackgroupGrid";
 import api from "services/api";
@@ -39,6 +39,9 @@ const Releases = () => {
     callback();
   }, [page, tag]);
 
+  const id = useId();
+  const headingId = `${id}-recent-releases`;
+
   return (
     <div
       className={css`
@@ -52,7 +55,7 @@ const Releases = () => {
     >
       <SectionHeader>
         <WidthContainer variant="big" justify="center">
-          <h5>
+          <h5 id={headingId}>
             {tag ? (
               <Trans
                 t={t}
@@ -81,9 +84,18 @@ const Releases = () => {
               padding: var(--mi-side-paddings-xsmall);
             `}
           >
-            <TrackgroupGrid gridNumber="4">
+            <TrackgroupGrid
+              gridNumber="4"
+              as="ul"
+              aria-labelledby={headingId}
+              role="list"
+            >
               {trackGroups?.map((trackGroup) => (
-                <ArtistTrackGroup key={trackGroup.id} trackGroup={trackGroup} />
+                <ArtistTrackGroup
+                  key={trackGroup.id}
+                  trackGroup={trackGroup}
+                  as="li"
+                />
               ))}
             </TrackgroupGrid>
           </div>

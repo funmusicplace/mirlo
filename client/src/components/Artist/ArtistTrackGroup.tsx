@@ -6,6 +6,7 @@ import { bp } from "../../constants";
 import { useArtistContext } from "state/ArtistContext";
 import { getArtistUrl, getReleaseUrl } from "utils/artist";
 import styled from "@emotion/styled";
+import { useTranslation } from "react-i18next";
 
 export const TrackGroupWrapper = styled.div`
   margin-bottom: 0.5rem;
@@ -63,8 +64,10 @@ export const TrackGroupInfo = styled.div`
 
 const ArtistTrackGroup: React.FC<{
   trackGroup: TrackGroup;
-}> = ({ trackGroup }) => {
+  as?: React.ElementType<any, keyof React.JSX.IntrinsicElements>;
+}> = ({ trackGroup, as }) => {
   const { state } = useArtistContext();
+  const { t } = useTranslation("translation", { keyPrefix: "clickToPlay" });
 
   if (!trackGroup || (!state?.artist && !trackGroup.artist)) {
     return null;
@@ -73,7 +76,7 @@ const ArtistTrackGroup: React.FC<{
   const artist = state?.artist ?? trackGroup?.artist;
 
   return (
-    <TrackGroupWrapper>
+    <TrackGroupWrapper as={as}>
       <div>
         <ClickToPlay
           image={{
@@ -85,37 +88,40 @@ const ArtistTrackGroup: React.FC<{
           title={trackGroup.title}
           trackGroup={trackGroup}
           artist={artist}
-        />
-
-        <TrackGroupLinks>
-          <TrackGroupInfo>
-            {artist && (
-              <Link to={getReleaseUrl(artist, trackGroup)}>
-                {trackGroup.title}
-              </Link>
-            )}
-            {artist && (
-              <Link to={getArtistUrl(artist)}>{trackGroup.artist?.name}</Link>
-            )}
-          </TrackGroupInfo>
-          <div
-            className={css`
-              button {
-                margin-top: -0.25rem;
-              }
-              @media screen and (max-width: ${bp.small}px) {
+        >
+          <TrackGroupLinks>
+            <TrackGroupInfo>
+              {artist && (
+                <Link
+                  to={getReleaseUrl(artist, trackGroup)}
+                  aria-label={`${t("goToAlbum")}: ${trackGroup.title || "Untitled"}`}
+                >
+                  {trackGroup.title}
+                </Link>
+              )}
+              {artist && (
+                <Link to={getArtistUrl(artist)}>{trackGroup.artist?.name}</Link>
+              )}
+            </TrackGroupInfo>
+            <div
+              className={css`
                 button {
-                  margin-top: -0.1rem;
-                  opacity: 0.5;
+                  margin-top: -0.25rem;
                 }
-              }
+                @media screen and (max-width: ${bp.small}px) {
+                  button {
+                    margin-top: -0.1rem;
+                    opacity: 0.5;
+                  }
+                }
 
-              @media screen and (min-width: ${bp.small}px) {
-                display: none!;
-              }
-            `}
-          ></div>
-        </TrackGroupLinks>
+                @media screen and (min-width: ${bp.small}px) {
+                  display: none!;
+                }
+              `}
+            ></div>
+          </TrackGroupLinks>
+        </ClickToPlay>
       </div>
     </TrackGroupWrapper>
   );

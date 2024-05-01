@@ -52,9 +52,19 @@ const ArtistAlbums: React.FC = () => {
           </ButtonLink>
         )}
       </SpaceBetweenDiv>
-      <TrackgroupGrid gridNumber={"3"} wrap>
+      <TrackgroupGrid
+        gridNumber={"3"}
+        wrap
+        as="ul"
+        role="list"
+        aria-labelledby="artist-navlink-releases"
+      >
         {artist.trackGroups?.map((trackGroup) => (
-          <ArtistTrackGroup key={trackGroup.id} trackGroup={trackGroup} />
+          <ArtistTrackGroup
+            key={trackGroup.id}
+            trackGroup={trackGroup}
+            as="li"
+          />
         ))}
       </TrackgroupGrid>
     </div>

@@ -9,6 +9,7 @@ import { FaChevronRight } from "react-icons/fa";
 import LinkWithIcon from "components/common/LinkWithIcon";
 import { useQuery } from "@tanstack/react-query";
 import { queryTrackGroups } from "queries";
+import { useId } from "react";
 
 const bgcolor = css`
   width: 100%;
@@ -23,6 +24,9 @@ const Releases = () => {
   const { data: trackGroups } = useQuery(
     queryTrackGroups({ take: 8, orderBy: "random" })
   );
+
+  const id = useId();
+  const headingId = `${id}-recent-releases`;
 
   return (
     <div className={bgcolor}>
@@ -43,7 +47,7 @@ const Releases = () => {
           `}
         >
           <SectionHeader className={bgcolor}>
-            <h5>{t("recentReleases")}</h5>
+            <h5 id={headingId}>{t("recentReleases")}</h5>
           </SectionHeader>
           <div
             className={css`
@@ -61,11 +65,17 @@ const Releases = () => {
                 padding: var(--mi-side-paddings-xsmall);
               `}
             >
-              <TrackgroupGrid gridNumber={"4"}>
+              <TrackgroupGrid
+                gridNumber={"4"}
+                as="ul"
+                aria-labelledby={headingId}
+                role="list"
+              >
                 {trackGroups?.results?.map((trackGroup) => (
                   <ArtistTrackGroup
                     key={trackGroup.id}
                     trackGroup={trackGroup}
+                    as="li"
                   />
                 ))}
               </TrackgroupGrid>

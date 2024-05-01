@@ -71,7 +71,9 @@ function Artist() {
       <ArtistTabs>
         {(artist?.trackGroups.length ?? 0) > 0 && (
           <li>
-            <NavLink to="releases">{t("releases")}</NavLink>
+            <NavLink to="releases" id="artist-navlink-releases">
+              {t("releases")}
+            </NavLink>
           </li>
         )}
         {(artist?.posts.length ?? 0) > 0 && (

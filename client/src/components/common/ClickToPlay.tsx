@@ -6,12 +6,14 @@ import api from "services/api";
 import ImageWithPlaceholder from "./ImageWithPlaceholder";
 import { PlayingMusicBars } from "./PlayingMusicBars";
 import PlayButton from "./PlayButton";
-import { Link } from "react-router-dom";
+import { Link, useLinkClickHandler } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import Wishlist from "components/TrackGroup/Wishlist";
 import PurchaseOrDownloadAlbum from "components/TrackGroup/PurchaseOrDownloadAlbumModal";
 import PauseButton from "./PauseButton";
 import { getReleaseUrl } from "utils/artist";
+import { useLinkContainer } from "utils/useLinkContainer";
+import { useAuthContext } from "state/AuthContext";
 
 type WrapperProps = {
   width: number;
@@ -117,11 +119,6 @@ const PlayWrapper = styled.div<WrapperProps>`
     }
   }
 
-  &:hover {
-    background-color: rgba(0, 0, 0, 0.6) !important;
-    opacity: 1;
-  }
-
   @media (max-width: ${bp.small}px) {
     background-color: transparent;
     opacity: 1;
@@ -200,18 +197,50 @@ const Wrapper = styled.div<WrapperProps>`
   }
 `;
 
-const ClickToPlay: React.FC<{
-  trackGroup: TrackGroup;
-  artist?: Artist;
-  trackGroupId?: number;
-  title: string;
-  image?: { width: number; height: number; url: string };
-  className?: string;
-}> = ({ trackGroup, artist, trackGroupId, title, image, className }) => {
+// This wrapper component contains both the "click to play" box *and*
+// related content (title, artist link) so that focusing/hovering on
+// any of them will also make the play button visible
+const ClickToPlayWrapper = styled.div`
+  cursor: pointer;
+
+  &:hover,
+  &:focus-within {
+    .play-wrapper {
+      background-color: rgba(0, 0, 0, 0.6) !important;
+      opacity: 1;
+    }
+  }
+
+  &:focus-within {
+    outline: 1px solid currentColor;
+    outline-offset: 0.5rem;
+  }
+`;
+
+const ClickToPlay: React.FC<
+  React.PropsWithChildren<{
+    trackGroup: TrackGroup;
+    artist?: Artist;
+    trackGroupId?: number;
+    title: string;
+    image?: { width: number; height: number; url: string };
+    className?: string;
+  }>
+> = ({
+  trackGroup,
+  artist,
+  trackGroupId,
+  title,
+  image,
+  className,
+  children,
+}) => {
   const {
     state: { playing, playerQueueIds, currentlyPlayingIndex },
     dispatch,
   } = useGlobalStateContext();
+
+  const { user } = useAuthContext();
 
   const [trackIds, setTrackIds] = React.useState<number[]>([]);
 
@@ -239,40 +268,68 @@ const ClickToPlay: React.FC<{
     currentlyPlayingIndex !== undefined &&
     trackIds.includes(playerQueueIds[currentlyPlayingIndex]);
 
+  const href = artist && getReleaseUrl(artist, trackGroup);
+  const { containerProps } = useLinkContainer(href);
+
   return (
-    <Wrapper
-      width={image?.width ?? 0}
-      height={image?.height ?? 0}
-      className={className}
-    >
-      <PlayWrapper width={image?.width ?? 0} height={image?.height ?? 0}>
-        {artist && <Link to={getReleaseUrl(artist, trackGroup)}></Link>}
-        <TrackgroupButtons>
-          <PurchaseOrDownloadAlbum trackGroup={trackGroup} />
-          <ul>
-            <li>
-              <Wishlist trackGroup={trackGroup} />
-            </li>
-
-            <li>{!currentlyPlaying && <PlayButton onPlay={onClickPlay} />}</li>
-
-            <li>{currentlyPlaying && <PauseButton />}</li>
-          </ul>
-        </TrackgroupButtons>
-
-        <p>{t("goToAlbum")}</p>
-      </PlayWrapper>
-
-      {currentlyPlaying && (
-        <PlayingMusicBars
+    <ClickToPlayWrapper {...containerProps}>
+      <Wrapper
+        width={image?.width ?? 0}
+        height={image?.height ?? 0}
+        className={className}
+      >
+        <PlayWrapper
           width={image?.width ?? 0}
           height={image?.height ?? 0}
-        />
-      )}
-      {image && (
-        <ImageWithPlaceholder src={image.url} alt={title} size={image.width} />
-      )}
-    </Wrapper>
+          className="play-wrapper"
+        >
+          <TrackgroupButtons>
+            <PurchaseOrDownloadAlbum trackGroup={trackGroup} />
+            <ul>
+              {user && (
+                <li>
+                  <Wishlist trackGroup={trackGroup} />
+                </li>
+              )}
+
+              {!currentlyPlaying && (
+                <li>
+                  <PlayButton onPlay={onClickPlay} />
+                </li>
+              )}
+
+              {currentlyPlaying && (
+                <li>
+                  <PauseButton />
+                </li>
+              )}
+            </ul>
+          </TrackgroupButtons>
+
+          {/*
+           * This "Go to album" text SHOULD be used to describe the album link (through aria-label), provided in {children}.
+           * As such, it is safe to exclude this from the accessibility tree.
+           * https://www.w3.org/TR/wai-aria/states_and_properties#aria-hidden
+           */}
+          <p aria-hidden>{t("goToAlbum")}</p>
+        </PlayWrapper>
+
+        {currentlyPlaying && (
+          <PlayingMusicBars
+            width={image?.width ?? 0}
+            height={image?.height ?? 0}
+          />
+        )}
+        {image && (
+          <ImageWithPlaceholder
+            src={image.url}
+            alt={title}
+            size={image.width}
+          />
+        )}
+      </Wrapper>
+      {children}
+    </ClickToPlayWrapper>
   );
 };
 

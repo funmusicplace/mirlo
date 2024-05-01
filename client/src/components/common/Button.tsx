@@ -285,14 +285,23 @@ export const Button: React.FC<ButtonProps> = ({
         />
       )}
       {!isLoading && startIcon ? (
-        <span className={`startIcon ${collapse ? "collapsed" : ""}`}>
+        <span
+          className={`startIcon ${collapse ? "collapsed" : ""}`}
+          aria-hidden
+        >
           {startIcon}
         </span>
       ) : (
         ""
       )}
       {!collapse && children}
-      {endIcon ? <span className="endIcon">{endIcon}</span> : ""}
+      {endIcon ? (
+        <span className="endIcon" aria-hidden>
+          {endIcon}
+        </span>
+      ) : (
+        ""
+      )}
     </CustomButton>
   );
 };

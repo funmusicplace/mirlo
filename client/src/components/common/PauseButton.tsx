@@ -4,11 +4,14 @@ import { TfiControlPause } from "react-icons/tfi";
 import { useGlobalStateContext } from "state/GlobalState";
 import { isEqualDurations } from "utils/tracks";
 import Button from "./Button";
+import { useTranslation } from "react-i18next";
 
 export const PauseButton: React.FC<{ className?: string }> = ({
   className,
 }) => {
   const { dispatch } = useGlobalStateContext();
+
+  const { t } = useTranslation("translation", { keyPrefix: "clickToPlay" });
 
   const onPause = React.useCallback(
     (e: any) => {
@@ -25,6 +28,7 @@ export const PauseButton: React.FC<{ className?: string }> = ({
     <div>
       <Button
         startIcon={<TfiControlPause />}
+        aria-label={t("pause")}
         onClick={onPause}
         className={
           css`

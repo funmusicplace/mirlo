@@ -169,7 +169,9 @@
     "platformPercent": "{{ percent }}% ({{ money }}) will go to {{ artistName }}. This does not include the cut taken by our payment processor"
   },
   "clickToPlay": {
-    "goToAlbum": "Go To Album"
+    "goToAlbum": "Go To Album",
+    "play": "Play",
+    "pause": "Pause"
   },
   "post": {
     "edit": "Edit",
