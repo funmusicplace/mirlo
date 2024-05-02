@@ -86,6 +86,13 @@
       To begin the development, run `npm start` or `yarn start`.
       To create a production bundle, use `npm run build` or `yarn build`.
     -->
+    <script>
+      // This is a hacky polyfill for node libs (specifically "readable-stream", a dependency of "music-metadata-browser") referencing .global
+      // which does not exist in the browser environment in dev mode.
+      if (global === undefined) {
+        var global = window;
+      }
+    </script>
     <script type="module" src="/src/index.tsx"></script>
   </body>
 </html>
