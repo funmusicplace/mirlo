@@ -6,14 +6,13 @@ import api from "services/api";
 import ImageWithPlaceholder from "./ImageWithPlaceholder";
 import { PlayingMusicBars } from "./PlayingMusicBars";
 import PlayButton from "./PlayButton";
-import { Link, useLinkClickHandler } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import Wishlist from "components/TrackGroup/Wishlist";
 import PurchaseOrDownloadAlbum from "components/TrackGroup/PurchaseOrDownloadAlbumModal";
 import PauseButton from "./PauseButton";
 import { getReleaseUrl } from "utils/artist";
-import { useLinkContainer } from "utils/useLinkContainer";
 import { useAuthContext } from "state/AuthContext";
+import { Link } from "react-router-dom";
 
 type WrapperProps = {
   width: number;
@@ -27,8 +26,10 @@ const TrackgroupButtons = styled.div`
   display: flex;
   justify-content: flex-end;
 
-  div {
+  & > :first-of-type {
     width: 100%;
+    flex-grow: 1;
+
     button {
       height: 3rem;
       color: white !important;
@@ -38,52 +39,33 @@ const TrackgroupButtons = styled.div`
       width: 100%;
     }
   }
-  ul {
-    z-index: 2;
-    display: flex;
-    justify-content: flex-end;
-    list-style-type: none;
-    button {
-      background-color: rgba(0, 0, 0, 0.6) !important;
-      height: 3rem;
-      width: 3rem;
-    }
+
+  button {
+    background-color: rgba(0, 0, 0, 0.6) !important;
+    min-height: 3rem;
+    min-width: 3rem;
   }
+
   @media (max-width: ${bp.large}px) {
-    div {
+    & > :first-of-type {
       button {
         height: 2rem;
         font-size: 1rem;
       }
     }
-    ul {
-      button {
-        font-size: 1.1rem;
-        width: 2rem;
-        height: 2rem;
-      }
-
-      li:second-of-type {
-        button {
-          background: red !important;
-        }
-      }
+    button {
+      font-size: 1.1rem;
+      min-width: 2rem;
+      min-height: 2rem;
     }
   }
+
   @media (max-width: ${bp.small}px) {
-    div:first-of-type {
+    & > :first-of-type {
       display: none;
     }
-    div:last-child {
-      display: block;
-    }
-    ul {
-      button {
-        font-size: 1.1rem;
-      }
-      li:first-of-type {
-        display: none;
-      }
+    button {
+      font-size: 1.1rem;
     }
   }
 `;
@@ -119,7 +101,10 @@ const PlayWrapper = styled.div<WrapperProps>`
     }
   }
 
-  @media (max-width: ${bp.small}px) {
+  // When using a touchscreen device, always show the album buttons
+  // instead of only on hover
+  // - combines with a similar query on <Wrapper> to hide the "Go to album" text
+  @media (pointer: coarse) {
     background-color: transparent;
     opacity: 1;
     justify-content: flex-end;
@@ -190,7 +175,9 @@ const Wrapper = styled.div<WrapperProps>`
       height: ${(props) => (props.height < 420 ? `${props.height}px` : "auto")};
     }
   }
-  @media (max-width: ${bp.small}px) {
+
+  // Together with @media (pointer: coarse) in <PlayWrapper> - this hides the "Go to album" text on hover
+  @media (pointer: coarse) {
     p {
       display: none;
     }
@@ -209,11 +196,6 @@ const ClickToPlayWrapper = styled.div`
       background-color: rgba(0, 0, 0, 0.6) !important;
       opacity: 1;
     }
-  }
-
-  &:focus-within {
-    outline: 1px solid currentColor;
-    outline-offset: 0.5rem;
   }
 `;
 
@@ -268,11 +250,8 @@ const ClickToPlay: React.FC<
     currentlyPlayingIndex !== undefined &&
     trackIds.includes(playerQueueIds[currentlyPlayingIndex]);
 
-  const href = artist && getReleaseUrl(artist, trackGroup);
-  const { containerProps } = useLinkContainer(href);
-
   return (
-    <ClickToPlayWrapper {...containerProps}>
+    <ClickToPlayWrapper>
       <Wrapper
         width={image?.width ?? 0}
         height={image?.height ?? 0}
@@ -283,33 +262,31 @@ const ClickToPlay: React.FC<
           height={image?.height ?? 0}
           className="play-wrapper"
         >
+          {/*
+           * This link is not visible to the user, and should be duplicated by an album link provided in {children}.
+           * As such, it is safe to exclude this from the accessibility tree.
+           * https://www.w3.org/TR/wai-aria/states_and_properties#aria-hidden
+           */}
+          {artist && (
+            <Link
+              to={getReleaseUrl(artist, trackGroup)}
+              aria-hidden
+              tabIndex={-1}
+            ></Link>
+          )}
           <TrackgroupButtons>
-            <PurchaseOrDownloadAlbum trackGroup={trackGroup} />
-            <ul>
-              {user && (
-                <li>
-                  <Wishlist trackGroup={trackGroup} />
-                </li>
-              )}
+            <div>
+              <PurchaseOrDownloadAlbum trackGroup={trackGroup} />
+            </div>
+            {user && <Wishlist trackGroup={trackGroup} />}
 
-              {!currentlyPlaying && (
-                <li>
-                  <PlayButton onPlay={onClickPlay} />
-                </li>
-              )}
+            {!currentlyPlaying && <PlayButton onPlay={onClickPlay} />}
 
-              {currentlyPlaying && (
-                <li>
-                  <PauseButton />
-                </li>
-              )}
-            </ul>
+            {currentlyPlaying && <PauseButton />}
           </TrackgroupButtons>
 
           {/*
-           * This "Go to album" text SHOULD be used to describe the album link (through aria-label), provided in {children}.
-           * As such, it is safe to exclude this from the accessibility tree.
-           * https://www.w3.org/TR/wai-aria/states_and_properties#aria-hidden
+           * Likewise, this "Go to album" text SHOULD also be used to describe the album link (through aria-label).
            */}
           <p aria-hidden>{t("goToAlbum")}</p>
         </PlayWrapper>

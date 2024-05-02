@@ -94,9 +94,20 @@ const ArtistTrackGroup: React.FC<{
               {artist && (
                 <Link
                   to={getReleaseUrl(artist, trackGroup)}
-                  aria-label={`${t("goToAlbum")}: ${trackGroup.title || "Untitled"}`}
+                  aria-label={`${t("goToAlbum")}: ${trackGroup.title || t("untitled")}`}
                 >
-                  {trackGroup.title}
+                  {trackGroup.title.length ? (
+                    trackGroup.title
+                  ) : (
+                    <span
+                      className={css`
+                        color: var(--mi-light-foreground-color);
+                        font-style: italic;
+                      `}
+                    >
+                      {t("untitled")}
+                    </span>
+                  )}
                 </Link>
               )}
               {artist && (

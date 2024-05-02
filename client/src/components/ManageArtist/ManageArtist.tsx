@@ -144,7 +144,7 @@ const ManageArtist: React.FC<{}> = () => {
         >
           <Button
             compact
-            role="warning"
+            buttonRole="warning"
             startIcon={<FaTrash />}
             onClick={onDelete}
           >

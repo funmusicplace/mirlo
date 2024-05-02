@@ -28,7 +28,8 @@ export const PauseButton: React.FC<{ className?: string }> = ({
     <div>
       <Button
         startIcon={<TfiControlPause />}
-        aria-label={t("pause")}
+        aria-label={`${t("pause")}`}
+        title={`${t("pause")}`}
         onClick={onPause}
         className={
           css`

@@ -86,6 +86,10 @@
     "wishlist": "Wishlist",
     "wishlistEmpty": "There's nothing in your wishlist yet, browse the site!"
   },
+  "wishlist": {
+    "addToWishlist": "Add to wishlist",
+    "removeFromWishlist": "Remove from wishlist"
+  },
   "trackGroupCard": {
     "notLoggedIn": "We'll need your email address to send you a one-time download link of the album. In the future you'll be able to create an account and access what you've bought.",
     "albumExists": "An album has already been bought using this email address, you can finish creating an account to see it in your collection. Do you want to proceed anyway?",
@@ -169,6 +173,7 @@
     "platformPercent": "{{ percent }}% ({{ money }}) will go to {{ artistName }}. This does not include the cut taken by our payment processor"
   },
   "clickToPlay": {
+    "untitled": "Untitled",
     "goToAlbum": "Go To Album",
     "play": "Play",
     "pause": "Pause"

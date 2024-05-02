@@ -38,7 +38,8 @@ export const PlayButton: React.FC<{
       <Button
         startIcon={<VscPlay />}
         onClick={onPlay ?? onPlayCallback}
-        aria-label={t("play")}
+        aria-label={`${t("play")}`}
+        title={`${t("play")}`}
       />
     </div>
   );
