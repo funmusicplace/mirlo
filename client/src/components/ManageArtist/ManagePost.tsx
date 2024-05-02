@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useArtistContext } from "state/ArtistContext";
 import useGetUserObjectById from "utils/useGetUserObjectById";
@@ -11,7 +11,7 @@ import LoadingBlocks from "components/Artist/LoadingBlocks";
 import BackToArtistLink from "./BackToArtistLink";
 import PostForm from "./PostForm";
 import Post from "components/Post";
-import Button from "components/common/Button";
+import { ButtonLink } from "components/common/Button";
 import { bp } from "../../constants";
 
 const ManagePost: React.FC<{}> = () => {
@@ -76,9 +76,12 @@ const ManagePost: React.FC<{}> = () => {
                 align-items: center;
               `}
             >
-              <Link to={getPostURLReference({ ...post, artist })}>
-                <Button type="button">{t("viewLive")}</Button>
-              </Link>
+              <ButtonLink
+                to={getPostURLReference({ ...post, artist })}
+                type="button"
+              >
+                {t("viewLive")}
+              </ButtonLink>
             </div>
           )}
         </SpaceBetweenDiv>

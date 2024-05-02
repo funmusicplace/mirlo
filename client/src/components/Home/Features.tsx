@@ -4,7 +4,7 @@ import { MetaCard } from "components/common/MetaCard";
 import { WidthWrapper } from "components/common/WidthContainer";
 import { FaArrowDown } from "react-icons/fa";
 import { bp } from "../../constants";
-import Button from "components/common/Button";
+import Button, { ButtonLink } from "components/common/Button";
 import { Link } from "react-router-dom";
 import { Trans, useTranslation } from "react-i18next";
 
@@ -183,35 +183,34 @@ const Features = () => {
                 padding-top: 1rem;
               `}
             >
-              <Link to="#features">
-                <Button
-                  variant="big"
-                  className={css`
-                    display: block;
-                    padding: 1.5rem 1rem !important;
-                    background-color: #be3455 !important;
-                    color: var(--mi-white) !important;
+              <ButtonLink
+                to="#features"
+                variant="big"
+                className={css`
+                  display: block;
+                  padding: 1.5rem 1rem !important;
+                  background-color: #be3455 !important;
+                  color: var(--mi-white) !important;
 
-                    &:hover {
-                      text-decoration: underline;
-                    }
+                  &:hover {
+                    text-decoration: underline;
+                  }
 
-                    svg {
-                      margin-left: 0.5rem;
-                    }
-                  `}
-                  onClick={() => {
-                    const features = document.getElementById("features");
-                    if (features) {
-                      features.scrollIntoView({
-                        behavior: "smooth",
-                      });
-                    }
-                  }}
-                >
-                  Learn more <FaArrowDown />
-                </Button>
-              </Link>
+                  svg {
+                    margin-left: 0.5rem;
+                  }
+                `}
+                onClick={() => {
+                  const features = document.getElementById("features");
+                  if (features) {
+                    features.scrollIntoView({
+                      behavior: "smooth",
+                    });
+                  }
+                }}
+              >
+                Learn more <FaArrowDown />
+              </ButtonLink>
             </div>
           </div>
 
@@ -474,23 +473,22 @@ const Features = () => {
             `}
           >
             Excited to get started?{" "}
-            <Link to="/signup">
-              <Button
-                variant="big"
-                className={css`
-                  display: block;
-                  padding: 1.5rem 1rem !important;
-                  background-color: #be3455 !important;
-                  color: var(--mi-white) !important;
+            <ButtonLink
+              to="/signup"
+              variant="big"
+              className={css`
+                display: block;
+                padding: 1.5rem 1rem !important;
+                background-color: #be3455 !important;
+                color: var(--mi-white) !important;
 
-                  &:hover {
-                    text-decoration: underline;
-                  }
-                `}
-              >
-                Join Mirlo!
-              </Button>
-            </Link>
+                &:hover {
+                  text-decoration: underline;
+                }
+              `}
+            >
+              Join Mirlo!
+            </ButtonLink>
           </div>
           <div
             className={css`

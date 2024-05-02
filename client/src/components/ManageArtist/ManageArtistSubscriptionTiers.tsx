@@ -4,12 +4,12 @@ import ManageSubscriptionTierBox from "./ManageSubscriptionTierBox";
 import SubscriptionForm from "./SubscriptionForm";
 import { useArtistContext } from "state/ArtistContext";
 import useGetUserObjectById from "utils/useGetUserObjectById";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import { ManageSectionWrapper } from "./ManageSectionWrapper";
 import Modal from "components/common/Modal";
 import { useTranslation } from "react-i18next";
-import Button from "components/common/Button";
+import Button, { ButtonLink } from "components/common/Button";
 import { FaPlus, FaWrench } from "react-icons/fa";
 import { useAuthContext } from "state/AuthContext";
 
@@ -42,21 +42,18 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
       <SpaceBetweenDiv>
         <div />
         <div>
-          <Link
+          <ButtonLink
             to="supporters"
             className={css`
               margin-right: 0.25rem;
             `}
+            variant="dashed"
+            compact
+            collapsible
+            startIcon={<FaWrench />}
           >
-            <Button
-              variant="dashed"
-              compact
-              collapsible
-              startIcon={<FaWrench />}
-            >
-              {t("supporters")}
-            </Button>
-          </Link>
+            {t("supporters")}
+          </ButtonLink>
           <Button
             transparent
             onClick={() => {

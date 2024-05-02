@@ -2,7 +2,7 @@ import { css } from "@emotion/css";
 import { Link } from "react-router-dom";
 import Logo from "../common/Logo";
 import { Trans, useTranslation } from "react-i18next";
-import Button from "components/common/Button";
+import { ButtonLink } from "components/common/Button";
 import styled from "@emotion/styled";
 import { bp } from "../../constants";
 import { useAuthContext } from "state/AuthContext";
@@ -85,44 +85,42 @@ const Splash = () => {
           <SplashTitle>{t("support")}</SplashTitle>
           {!user && (
             <SplashButtonWrapper>
-              <Link to="/signup">
-                <Button
-                  variant="big"
-                  className={css`
-                    display: block;
-                    padding: 1.5rem 1rem !important;
-                    background-color: #be3455 !important;
+              <ButtonLink
+                to="/signup"
+                variant="big"
+                className={css`
+                  display: block;
+                  padding: 1.5rem 1rem !important;
+                  background-color: #be3455 !important;
 
-                    &:hover {
-                      text-decoration: underline;
-                    }
-                    color: var(--mi-white) !important;
-                  `}
-                >
-                  {t("signUp")}
-                </Button>
-              </Link>
-              <Link to="/login">
-                <Button
-                  variant="big"
-                  className={css`
-                    color: var(--mi-white) !important;
-                    &:hover {
-                      text-decoration: underline;
-                    }
-                    padding: 1.5rem 1rem !important;
+                  &:hover {
+                    text-decoration: underline;
+                  }
+                  color: var(--mi-white) !important;
+                `}
+              >
+                {t("signUp")}
+              </ButtonLink>
+              <ButtonLink
+                to="/login"
+                variant="big"
+                className={css`
+                  color: var(--mi-white) !important;
+                  &:hover {
+                    text-decoration: underline;
+                  }
+                  padding: 1.5rem 1rem !important;
 
-                    background-color: var(--mi-black) !important;
-                    color: var(--mi-white);
-                    @media (prefers-color-scheme: dark) {
-                      background-color: var(--mi-white) !important;
-                      color: var(--mi-black) !important;
-                    }
-                  `}
-                >
-                  {t("logIn")}
-                </Button>
-              </Link>
+                  background-color: var(--mi-black) !important;
+                  color: var(--mi-white);
+                  @media (prefers-color-scheme: dark) {
+                    background-color: var(--mi-white) !important;
+                    color: var(--mi-black) !important;
+                  }
+                `}
+              >
+                {t("logIn")}
+              </ButtonLink>
             </SplashButtonWrapper>
           )}
           <p

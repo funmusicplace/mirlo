@@ -1,5 +1,5 @@
 import { css } from "@emotion/css";
-import Button from "components/common/Button";
+import { ButtonLink } from "components/common/Button";
 import Table from "components/common/Table";
 import React from "react";
 import { FaCheck, FaEdit } from "react-icons/fa";
@@ -58,9 +58,11 @@ export const AdminUsers: React.FC = () => {
                 </td>
                 <td>{user.stripeAccountId ? <FaCheck /> : ""}</td>
                 <td className="alignRight">
-                  <Link to={`/admin/users/${user.id}`}>
-                    <Button compact startIcon={<FaEdit />} />
-                  </Link>
+                  <ButtonLink
+                    compact
+                    startIcon={<FaEdit />}
+                    to={`/admin/users/${user.id}`}
+                  />
                 </td>
               </tr>
             ))}

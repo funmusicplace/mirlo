@@ -1,6 +1,6 @@
 import { css } from "@emotion/css";
 import Box from "components/common/Box";
-import Button from "components/common/Button";
+import Button, { ButtonLink } from "components/common/Button";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { FaCheck, FaTimes, FaTrash } from "react-icons/fa";
@@ -164,17 +164,22 @@ const TrackGroupCard: React.FC<{
               justify-content: space-between !important;
           `}
         >
-          <Link to={`/manage/artists/${album.artistId}/release/${album.id}`}>
-            <Button compact thin variant="outlined">
-              {t("manageAlbum")}
-            </Button>
-          </Link>
+          <ButtonLink
+            to={`/manage/artists/${album.artistId}/release/${album.id}`}
+            compact
+            thin
+            variant="outlined"
+          >
+            {t("manageAlbum")}
+          </ButtonLink>
           {album.artist && album.published && (
-            <Link to={getReleaseUrl(album.artist, album)}>
-              <Button compact variant="outlined">
-                {t("viewLive")}
-              </Button>
-            </Link>
+            <ButtonLink
+              to={getReleaseUrl(album.artist, album)}
+              compact
+              variant="outlined"
+            >
+              {t("viewLive")}
+            </ButtonLink>
           )}
           {!album.published && (
             <Button compact startIcon={<FaTrash />} onClick={deleteTrackGroup}>
