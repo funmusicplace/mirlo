@@ -7,9 +7,27 @@ import {
 } from "react-icons/fa";
 import { FiMail } from "react-icons/fi";
 
+// See: https://html.spec.whatwg.org/multipage/input.html#e-mail-state-(type%3Demail)
+// This is modified to exclude the "/" symbol if it occurs before an @ sign - which avoids mastodon links being parsed as emails
+const EMAIL_REGEX =
+  /^[a-zA-Z0-9.!#$%&'*+=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+
+export function isEmailLink(link: string): boolean {
+  return link.startsWith("mailto:") || EMAIL_REGEX.test(link);
+}
+
+export function linkUrlHref(link: string): string {
+  if (isEmailLink(link)) {
+    return link.startsWith("mailto:") ? link : `mailto:${link}`;
+  } else {
+    // If the link doesn't start with "http://" or "https://", prefix it
+    return /https?:\/\//.test(link) ? link : `https://${link}`;
+  }
+}
+
 export const linkUrlDisplay = (link: string) => {
   let url;
-  if (link.startsWith("mailto:")) {
+  if (isEmailLink(link)) {
     return "Email";
   }
   try {
@@ -27,7 +45,7 @@ export const linkUrlDisplay = (link: string) => {
 
 const LinkIconDisplay: React.FC<{ url: string }> = ({ url }) => {
   let icon = <FaGlobe />;
-  if (url.includes("mailto")) {
+  if (isEmailLink(url)) {
     icon = <FiMail />;
   } else if (url.includes("twitter.com")) {
     icon = <FaTwitter />;

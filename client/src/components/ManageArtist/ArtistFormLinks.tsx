@@ -5,7 +5,9 @@ import Button from "components/common/Button";
 import { css } from "@emotion/css";
 import { FaPlus, FaSave, FaTimes, FaTrash } from "react-icons/fa";
 import React from "react";
-import LinkIconDisplay from "components/common/LinkIconDisplay";
+import LinkIconDisplay, {
+  linkUrlHref,
+} from "components/common/LinkIconDisplay";
 import ArtistFormLinksView from "./ArtistFormLinksView";
 import { useSnackbar } from "state/SnackbarContext";
 
@@ -25,9 +27,6 @@ function transformFromLinks(artist: Pick<Artist, "links">): FormData {
 
 function transformToLinks(data: FormData): Pick<Artist, "links"> {
   const links = data.linkArray.map((link) => {
-    if (link.url.includes("@") && !link.url.startsWith("mailto:")) {
-      return `mailto:${link.url}`;
-    }
     return link.url;
   });
 
@@ -77,6 +76,7 @@ const ArtistFormLinks: React.FC<ArtistFormLinksProps> = ({
     <>
       {fields.map((field, index) => (
         <div
+          key={index}
           className={css`
             max-width: 50%;
             display: flex;
@@ -95,7 +95,7 @@ const ArtistFormLinks: React.FC<ArtistFormLinksProps> = ({
         >
           <LinkIconDisplay url={links[index].url} />
           <InputEl
-            {...register(`linkArray.${index}.url`)}
+            {...register(`linkArray.${index}.url`, { setValueAs: linkUrlHref })}
             placeholder="eg. http://some.url"
             key={field.id}
             type="url"

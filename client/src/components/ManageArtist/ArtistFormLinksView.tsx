@@ -4,6 +4,7 @@ import { css } from "@emotion/css";
 import React from "react";
 import LinkIconDisplay, {
   linkUrlDisplay,
+  linkUrlHref,
 } from "components/common/LinkIconDisplay";
 import { FaPen } from "react-icons/fa";
 
@@ -26,7 +27,7 @@ const ArtistFormLinksView: React.FC<{
           return (
             <a
               rel="me"
-              href={l}
+              href={linkUrlHref(l)}
               key={l}
               className={css`
                 display: inline-flex;
