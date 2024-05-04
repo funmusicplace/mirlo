@@ -21,8 +21,6 @@ const AlbumFormContent: React.FC<{
     formState: { errors },
   } = useFormContext();
 
-  console.log("errors", errors);
-
   return (
     <>
       <FormComponent>

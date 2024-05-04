@@ -8,8 +8,7 @@ import "./i18n";
 import { GlobalStateProvider } from "./state/GlobalState";
 
 import { SnackBarContextProvider } from "state/SnackbarContext";
-import { ThemeProvider } from "@emotion/react";
-import { theme } from "utils/theme";
+
 import routes from "routes";
 import { QueryClientWrapper } from "queries/QueryClientWrapper";
 import { AuthContextProvider } from "state/AuthContext";
@@ -24,13 +23,11 @@ root.render(
   <React.StrictMode>
     <QueryClientWrapper>
       <AuthContextProvider>
-        <ThemeProvider theme={theme}>
-          <GlobalStateProvider>
-            <SnackBarContextProvider>
-              <RouterProvider router={router} />
-            </SnackBarContextProvider>
-          </GlobalStateProvider>
-        </ThemeProvider>
+        <GlobalStateProvider>
+          <SnackBarContextProvider>
+            <RouterProvider router={router} />
+          </SnackBarContextProvider>
+        </GlobalStateProvider>
       </AuthContextProvider>
     </QueryClientWrapper>
   </React.StrictMode>

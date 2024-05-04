@@ -48,7 +48,6 @@ const ManageTrackArtists: React.FC<{
 
   const saveArtists = React.useCallback(
     async (formData: FormData) => {
-      console.log("formData", formData);
       try {
         const packet = {
           trackArtists: formData.trackArtists
