@@ -26,6 +26,7 @@ const CustomButton = styled.button<Compactable>`
   transition: 0.25s background-color, 0.25s color, 0.25s border-radius,
     0.25s filter;
   font-size: 1rem;
+  text-decoration: none;
   line-height: 1rem;
   height: 2rem;
   ${(props) => (props.onlyIcon ? "height: 2rem;" : "")};
@@ -62,6 +63,7 @@ const CustomButton = styled.button<Compactable>`
           padding: 0 !important;
           background-color: transparent !important;
           font-size: inherit;
+          text-decoration: underline;
           line-height: inherit;
 
           &:hover:not(:disabled) {
@@ -89,7 +91,6 @@ const CustomButton = styled.button<Compactable>`
           display: inline-flex;
           line-height: 1rem;
           padding: 1rem;
-          text-decoration: none;
           text-align: center;
 
           &:hover:not(:disabled) {
@@ -306,13 +307,18 @@ export const Button: React.FC<ButtonProps> = ({
   );
 };
 
+const CustomButtonLink = CustomButton.withComponent(
+  // excluding "onlyIcon" here prevents a react warning about an "unknown event handler"
+  ({ onlyIcon, ...props }: Compactable & { to: string }) => <Link {...props} />
+);
+
 export const ButtonLink: React.FC<ButtonProps & { to: string }> = ({
   ...props
 }) => {
   return (
     <Button
       // Use the "Link" element from react-router as the base element for the button
-      as={Link}
+      as={CustomButtonLink}
       {...props}
     />
   );
