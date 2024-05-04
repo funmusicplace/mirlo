@@ -17,7 +17,7 @@ export const ShuffleButton: React.FC = () => {
   return (
     <Button
       startIcon={<RxShuffle />}
-      role={shuffle ? "secondary" : undefined}
+      buttonRole={shuffle ? "secondary" : undefined}
       onClick={onShuffle}
       className={css`
         ${shuffle ? "color: var(--mi-link-color) !important;" : ""}

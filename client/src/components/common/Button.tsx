@@ -4,7 +4,6 @@ import styled from "@emotion/styled";
 import LoadingSpinner from "./LoadingSpinner";
 import { css } from "@emotion/css";
 import { bp } from "../../constants";
-import { Link } from "react-router-dom";
 
 export interface Compactable {
   compact?: boolean;
@@ -13,7 +12,7 @@ export interface Compactable {
   small?: boolean;
   wrap?: boolean;
   collapsible?: boolean;
-  role?: "primary" | "secondary" | "warning";
+  buttonRole?: "primary" | "secondary" | "warning";
   variant?: "link" | "big" | "outlined" | "dashed" | "default";
   color?: string;
   uppercase?: boolean;
@@ -243,8 +242,9 @@ const CustomButton = styled.button<Compactable>`
   }
 `;
 
-export interface ButtonProps extends Compactable {
-  onClick?: React.MouseEventHandler<HTMLButtonElement>;
+export interface ButtonProps
+  extends Compactable,
+    React.HTMLAttributes<HTMLButtonElement> {
   children?: React.ReactNode;
   startIcon?: React.ReactElement;
   endIcon?: React.ReactElement;
@@ -254,7 +254,6 @@ export interface ButtonProps extends Compactable {
   type?: React.ButtonHTMLAttributes<HTMLButtonElement>["type"];
   isLoading?: boolean;
   collapse?: boolean;
-  title?: string;
   as?: React.ElementType<any, keyof React.JSX.IntrinsicElements>;
 }
 
@@ -285,17 +284,28 @@ export const Button: React.FC<ButtonProps> = ({
         />
       )}
       {!isLoading && startIcon ? (
-        <span className={`startIcon ${collapse ? "collapsed" : ""}`}>
+        <span
+          className={`startIcon ${collapse ? "collapsed" : ""}`}
+          aria-hidden
+        >
           {startIcon}
         </span>
       ) : (
         ""
       )}
       {!collapse && children}
-      {endIcon ? <span className="endIcon">{endIcon}</span> : ""}
+      {endIcon ? (
+        <span className="endIcon" aria-hidden>
+          {endIcon}
+        </span>
+      ) : (
+        ""
+      )}
     </CustomButton>
   );
 };
+
+const CustomButtonLink = CustomButton.withComponent("a");
 
 export const ButtonLink: React.FC<ButtonProps & { to: string }> = ({
   to,
@@ -304,7 +314,7 @@ export const ButtonLink: React.FC<ButtonProps & { to: string }> = ({
   return (
     <Button
       // Use the "Link" element from react-router as the base element for the button
-      as={(props) => <Link to={to} {...props} />}
+      as={CustomButtonLink}
       {...props}
     />
   );

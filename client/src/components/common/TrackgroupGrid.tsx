@@ -17,6 +17,7 @@ const TrackgroupGrid = styled.div<{
   gap: 0 2%;
   width: 100%;
   white-space: nowrap;
+  list-style: none;
 
   a {
     text-decoration: none;

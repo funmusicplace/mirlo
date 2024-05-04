@@ -36,7 +36,7 @@ export const LoopButton: React.FC = () => {
 
   return (
     <Button
-      role={looping ? "primary" : undefined}
+      buttonRole={looping ? "primary" : undefined}
       onClick={onLoop}
       startIcon={
         <>
