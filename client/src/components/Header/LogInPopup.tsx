@@ -12,6 +12,7 @@ const LogInPopup = () => {
   return (
     <>
       <Button
+        aria-label={`${t("logIn")}`}
         onlyIcon
         startIcon={<FaUserAlt />}
         onClick={() => setIsOpen((val) => !val)}

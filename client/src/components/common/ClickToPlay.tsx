@@ -25,6 +25,7 @@ const TrackgroupButtons = styled.div`
   bottom: 0;
   display: flex;
   justify-content: flex-end;
+  z-index: 2;
 
   & > :first-of-type {
     width: 100%;

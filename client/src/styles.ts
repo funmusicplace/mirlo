@@ -169,7 +169,6 @@ a {
 
 @media (prefers-color-scheme: dark) {
   a {
-    text-decoration: none;
     color: var(--mi-pink);
   }
 }

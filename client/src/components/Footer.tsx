@@ -78,14 +78,26 @@ export const Footer = () => {
               }
             `}
           >
-            <a href="https://instagram.com/mirlo.space" title="Mastodon">
-              <FaInstagram />
+            <a
+              href="https://instagram.com/mirlo.space"
+              title="Instagram"
+              aria-label={`${t("socialInstagram", { username: "@mirlo.space" })}`}
+            >
+              <FaInstagram aria-hidden />
             </a>
-            <a href="https://musician.social/@mirlo" title="Mastodon">
-              <FaMastodon />
+            <a
+              href="https://musician.social/@mirlo"
+              title="Mastodon"
+              aria-label={`${t("socialMastodon", { username: "@mirlo@musician.social" })}`}
+            >
+              <FaMastodon aria-hidden />
             </a>
-            <a href="https://x.com/mirlospace" title="Mastodon">
-              <FaTwitter />
+            <a
+              href="https://x.com/mirlospace"
+              title="X"
+              aria-label={`${t("socialX", { username: "@mirlospace" })}`}
+            >
+              <FaTwitter aria-hidden />
             </a>
           </p>
         </div>
