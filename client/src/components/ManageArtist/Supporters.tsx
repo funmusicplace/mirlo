@@ -57,7 +57,6 @@ const Supporters = () => {
   }, [loadSupporters]);
 
   const amount = sumBy(supporters, "amount");
-  console.log("amount", amount, supporters[0]?.artistSubscriptionTier.currency);
 
   return (
     <>

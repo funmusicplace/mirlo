@@ -27,7 +27,6 @@ const EditTrackRow: React.FC<{
   onCancelEditing: () => void;
   reload: () => void;
 }> = ({ track, onCancelEditing: cancelEditing, reload }) => {
-  console.log("track", track.trackArtists);
   const [isSaving, setIsSaving] = React.useState(false);
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const [showMoreDetails, setShowMoreDetails] = React.useState(false);

@@ -15,7 +15,7 @@ export const ListButton = styled.button<Compactable>`
   display: flex;
   align-items: center;
   text-decoration: none;
-  color: ${(props) => props.theme.colors.text};
+  color: var(--mi-normal-foreground-color);
   transition: 0.5s background-color;
 
   &:hover {
@@ -23,11 +23,11 @@ export const ListButton = styled.button<Compactable>`
   }
 
   &:active {
-    background-color: ${(props) => props.theme.colors.primary};
+    background-color: #0096a8;
   }
 
   &.active {
-    background-color: ${(props) => props.theme.colors.primary};
+    background-color: #0096a8;
     color: white;
   }
 

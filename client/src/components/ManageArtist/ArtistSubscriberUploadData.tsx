@@ -88,7 +88,6 @@ const ArtistSubscriberUploadData: React.FC<{
           },
           {} as { email: string; name: string }
         );
-        console.log("obj", obj);
         return obj;
       }
     });

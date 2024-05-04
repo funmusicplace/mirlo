@@ -136,6 +136,7 @@ export const Modal: React.FC<{
     // https://reactjs.org/docs/hooks-reference.html#lazy-initial-state
     return document.createElement("div");
   });
+
   React.useEffect(() => {
     document.body.appendChild(container);
     return () => {
