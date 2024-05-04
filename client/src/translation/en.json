@@ -351,7 +351,10 @@
   },
   "footer": {
     "getInTouch": "If you'd like to get in touch, join <discord>our discord</discord>, <email>email us</email>, or check out <github>our github</github>.",
-    "aboutUs": "<about>About us</about>, <faq>FAQ</faq>, <terms>Terms and Conditions</terms>, <privacy>Privacy</privacy>, <cookie>Our use of cookies</cookie>"
+    "aboutUs": "<about>About us</about>, <faq>FAQ</faq>, <terms>Terms and Conditions</terms>, <privacy>Privacy</privacy>, <cookie>Our use of cookies</cookie>",
+    "socialInstagram": "{{username}} on Instagram",
+    "socialMastodon": "{{username}} on Mastodon",
+    "socialX": "{{username}} on X"
   },
   "notifications": {
     "notifications": "Notifications",

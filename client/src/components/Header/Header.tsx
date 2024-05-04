@@ -123,6 +123,7 @@ const LogoWrapper = () => {
     >
       <Link
         to="/"
+        aria-label="Mirlo"
         className={css`
           display: flex;
           justify-content: flex-start;
@@ -130,6 +131,7 @@ const LogoWrapper = () => {
         `}
       >
         <span
+          aria-hidden
           className={css`
             @media (max-width: ${bp.medium}px) {
               display: none;
@@ -139,6 +141,7 @@ const LogoWrapper = () => {
           <Logo />
         </span>
         <span
+          aria-hidden
           className={css`
             @media (min-width: ${bp.medium}px) {
               display: none;
