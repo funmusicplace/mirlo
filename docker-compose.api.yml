@@ -100,7 +100,7 @@ services:
       - ./data/pgsql:/var/lib/postgresql/data
       - ./data/pgsql_backups:/backups
     healthcheck:
-      test: ["CMD", "pg_isready"]
+      test: ["CMD", "pg_isready", "-U", "$POSTGRES_USER"]
       interval: 10s
       timeout: 5s
       retries: 5
