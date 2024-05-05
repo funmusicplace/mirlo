@@ -47,7 +47,9 @@ const Releases = () => {
           `}
         >
           <SectionHeader className={bgcolor}>
-            <h5 id={headingId}>{t("recentReleases")}</h5>
+            <h2 className="h5 section-header__heading" id={headingId}>
+              {t("recentReleases")}
+            </h2>
           </SectionHeader>
           <div
             className={css`

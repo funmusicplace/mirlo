@@ -18,7 +18,7 @@ export const SectionHeader = styled.div<{ userId?: number }>`
   ${(props) =>
     !props.userId ? "top: -0.1rem; padding: .85rem 0 .65rem 0;" : ""}
 
-  h5 {
+  .section-header__heading {
     text-transform: uppercase;
     margin: var(--mi-side-paddings-xsmall);
     font-weight: normal;
@@ -28,14 +28,14 @@ export const SectionHeader = styled.div<{ userId?: number }>`
 
   @media (prefers-color-scheme: dark) {
     background-color: var(--mi-normal-background-color);
-    h5 {
+    .section-header__heading {
       color: pink;
     }
   }
 
   @media screen and (max-width: ${bp.medium}px) {
     top: -0.1rem;
-    h5 {
+    .section-header__heading {
       margin: var(--mi-side-paddings-xsmall);
     }
   }
