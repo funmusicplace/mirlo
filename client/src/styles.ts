@@ -13,8 +13,8 @@ const styles = `html {
   --mi-lighter-background-color: #fcfcfc;
 
   --mi-normal-foreground-color: var(--mi-black);
-  --mi-light-foreground-color: #555;
-  --mi-lighter-foreground-color: #888;
+  --mi-light-foreground-color: #454545;
+  --mi-lighter-foreground-color: #515151;
 
   --mi-primary-color: var(--mi-black);
   --mi-secondary-color: pink;
@@ -63,8 +63,8 @@ const styles = `html {
     --mi-lighten-background-color: rgba(255, 255, 255, 0.2);
 
     --mi-normal-foreground-color: var(--mi-white);
-    --mi-light-foreground-color: #a0a0a0;
-    --mi-lighter-foreground-color: #707070;
+    --mi-light-foreground-color: #A0A0A0;
+    --mi-lighter-foreground-color: #9E9E9E;
 
     --mi-light-background-color: #222;
     --mi-lighter-background-color: #282828;
