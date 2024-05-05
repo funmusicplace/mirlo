@@ -1,11 +1,12 @@
+import React from "react";
 import styled from "@emotion/styled";
 import { css } from "@emotion/css";
 import Box from "./Box";
 import { Link } from "react-router-dom";
 import { getArtistUrl, getPostURLReference } from "utils/artist";
-import parse from "html-react-parser";
 import MarkdownWrapper from "./MarkdownWrapper";
 import Overlay from "components/common/Overlay";
+import { getHtmlExcerpt } from "utils/getHtmlExcerpt";
 
 const PostContainer = styled.div`
   display: flex;
@@ -48,6 +49,7 @@ const PostCard: React.FC<{
   p: Post;
 }> = ({ p }) => {
   const postUrl = getPostURLReference(p);
+  const excerpt = React.useMemo(() => getHtmlExcerpt(p.content), [p.content]);
 
   return (
     <PostContainer>
@@ -152,13 +154,13 @@ const PostCard: React.FC<{
                 overflow: hidden;
                 text-overflow: ellipsis;
                 color: var(--mi-normal-foreground-color);
-
-                iframe {
-                  width: auto !important;
-                }
               `}
             >
-              <MarkdownWrapper>{parse(p.content)}</MarkdownWrapper>
+              <MarkdownWrapper>
+                {excerpt.map((text, i) => (
+                  <p key={i}>{text}</p>
+                ))}
+              </MarkdownWrapper>
             </span>
           </div>
         </div>
