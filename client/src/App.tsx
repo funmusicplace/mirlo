@@ -14,6 +14,7 @@ import { MetaCard } from "components/common/MetaCard";
 import ArtistColorsWrapper from "components/ArtistColorsWrapper";
 import CookieDisclaimer from "components/CookieDisclaimer";
 import { useAuthContext } from "state/AuthContext";
+import Kickstarter from "components/Home/Kickstarter";
 
 injectGlobal(globalCSS);
 
@@ -67,6 +68,8 @@ function App() {
                 width: 100%;
               `}
             >
+              <Kickstarter />
+
               <div
                 className={css`
                   margin: 0 auto;

@@ -361,6 +361,10 @@
     "readPost": "Read post",
     "viewAlbum": "View album"
   },
+  "kickstarter": {
+    "launchedAKickstarter": "Mirlo has launched a Kickstarter!",
+    "helpUsReachOurGoal": "Help us reach our goal!"
+  },
   "admin": {
     "users": "Users",
     "trackgroups": "Trackgroups",
