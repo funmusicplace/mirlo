@@ -1,40 +1,15 @@
-import styled from "@emotion/styled";
 import { css } from "@emotion/css";
 import React from "react";
-import { Link, Outlet, useParams } from "react-router-dom";
+import { Outlet, useParams } from "react-router-dom";
 import ArtistHeaderSection from "../common/ArtistHeaderSection";
 import { useTranslation } from "react-i18next";
 import { ArtistPageWrapper } from "components/ManageArtist/ManageArtistContainer";
-import Button from "components/common/Button";
+import { ButtonLink } from "components/common/Button";
 import { FaPen } from "react-icons/fa";
 import { bp } from "../../constants";
 import { useQuery } from "@tanstack/react-query";
 import { queryArtist } from "queries";
 import { useAuthContext } from "state/AuthContext";
-
-const EditLink = styled(Link)`
-  z-index: 999999;
-  top: 75px;
-  right: 1rem;
-  position: fixed;
-  box-shadow: 0.2rem 0.2rem 0.3rem rgba(0, 0, 0, 0.5);
-
-  background-color: rgba(255, 255, 255, 0.9) !important;
-  color: black !important;
-  padding: 1.2rem !important;
-  :hover {
-    background-color: rgba(0, 0, 0, 0.7) !important;
-    color: white !important;
-  }
-
-  @media screen and (max-width: ${bp.medium}px) {
-    left: 1rem;
-    bottom: 75px;
-    top: auto;
-    right: auto;
-    padding: 1rem !important;
-  }
-`;
 
 const ArtistContainer: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
@@ -53,17 +28,37 @@ const ArtistContainer: React.FC = () => {
   return (
     <>
       {artist && user?.id === artist?.userId && !trackGroupId && (
-        <Button
+        <ButtonLink
+          to={`/manage/artists/${artist.id}`}
           startIcon={<FaPen />}
           compact
-          type="button"
           variant="dashed"
-          as={(props) => (
-            <EditLink to={`/manage/artists/${artist.id}`} {...props} />
-          )}
+          className={css`
+            z-index: 999999;
+            top: 75px;
+            right: 1rem;
+            position: fixed;
+            box-shadow: 0.2rem 0.2rem 0.3rem rgba(0, 0, 0, 0.5);
+
+            background-color: rgba(255, 255, 255, 0.9) !important;
+            color: black !important;
+            padding: 1.2rem !important;
+            :hover {
+              background-color: rgba(0, 0, 0, 0.7) !important;
+              color: white !important;
+            }
+
+            @media screen and (max-width: ${bp.medium}px) {
+              left: 1rem;
+              bottom: 75px;
+              top: auto;
+              right: auto;
+              padding: 1rem !important;
+            }
+          `}
         >
           {t("editPage")}
-        </Button>
+        </ButtonLink>
       )}
       {!isPostOrRelease && (
         <>
