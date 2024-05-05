@@ -180,22 +180,20 @@ const CustomButton = styled.button<Compactable>`
           }
           padding: ${props.compact ? ".3rem .5rem" : "1rem"};
           padding: ${props.onlyIcon ? ".5rem .5rem" : ".6rem .6rem"};
-          background-color:  var(--mi-${props.buttonRole ?? "secondary"}-color);
+
+          background-color: var(--mi-${props.buttonRole ?? "secondary"}-color);
+          color: var(--mi-primary-color);
 
           ${
             props.transparent
-              ? "background-color:  transparent; font-weight: bold;"
+              ? "background-color:  transparent; font-weight: bold; color: var(--mi-normal-foreground-color);"
               : ""
           };
           ${props.thin ? "font-weight: normal !important;" : ""};
-          color:  var(--mi-${props.buttonRole ?? "primary"}-color);
-          color:  ${
-            props.transparent ? "var(--mi-normal-foreground-color)" : ""
-          };
 
           &:hover:not(:disabled) {
-            background-color: var(--mi-${props.buttonRole ?? "primary"}-color);
-            color: var(--mi-${props.buttonRole ?? "secondary"}-color);
+            background-color: var(--mi-primary-color);
+            color: var(--mi-secondary-color);
           }
           @media screen and (max-width: ${bp.medium}px) {
               ${props.collapsible ? "border-radius: 100%;" : ""}
