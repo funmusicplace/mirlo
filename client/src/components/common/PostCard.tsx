@@ -48,8 +48,13 @@ const PostCard: React.FC<{
   p: Post;
 }> = ({ p }) => {
   const postUrl = getPostURLReference(p);
-  const excerpt = React.useMemo(() => getHtmlExcerpt(p.content), [p.content]);
   const postContainerProps = useLinkContainer({ to: postUrl });
+
+  // Use the first 8 paragraphs of the post as an unformatted excerpt
+  const excerpt = React.useMemo(
+    () => getHtmlExcerpt(p.content).slice(0, 8),
+    [p.content]
+  );
 
   return (
     <PostContainer {...postContainerProps}>
