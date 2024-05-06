@@ -7,7 +7,15 @@ import { optimizeLodashImports } from "@optimize-lodash/rollup-plugin";
 
 export default defineConfig({
   base: "/",
-  plugins: [react(), viteTsconfigPaths(), legacy()],
+  plugins: [
+    react({
+      babel: {
+        plugins: ["@emotion/babel-plugin"],
+      },
+    }),
+    viteTsconfigPaths(),
+    legacy(),
+  ],
   server: {
     open: true,
     port: Number(process.env.PORT) || 8080,
