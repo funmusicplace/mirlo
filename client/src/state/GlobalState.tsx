@@ -211,6 +211,7 @@ export const stateReducer = produce((draft: GlobalState, action: Actions) => {
     case "setCookieDisclaimerRead":
       draft.cookieDisclaimerRead = true;
       break;
+
     default:
       break;
   }

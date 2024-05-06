@@ -136,9 +136,11 @@ const Features = () => {
             padding: 0 2rem 2rem 2rem;
             gap: 5%;
             justify-content: center;
+            flex-direction: row-reverse !important;
+            align-items: center;
 
             @media screen and (max-width: ${bp.medium}px) {
-              flex-direction: column;
+              flex-direction: column-reverse !important;
               padding: 1rem;
             }
             @media (orientation: landscape) {
@@ -154,8 +156,8 @@ const Features = () => {
               padding-left: 2rem;
               padding-top: 2rem;
               display: flex;
-              flex-direction: column;
               justify-content: center;
+              flex-direction: column;
 
               @media screen and (max-width: ${bp.medium}px) {
                 padding: 0.5rem;
@@ -215,7 +217,7 @@ const Features = () => {
           </div>
 
           <img
-            alt="Mowukis Cover Page"
+            alt="Mirlo painted bird"
             src="/images/MirloPaintBird.svg"
             className={css`
               max-width: 100%;
