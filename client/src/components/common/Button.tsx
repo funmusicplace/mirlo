@@ -308,24 +308,25 @@ export const Button: React.FC<
   );
 };
 
+export const ButtonAnchor: React.FC<
+  ButtonProps & React.AnchorHTMLAttributes<HTMLAnchorElement>
+> = ({ ...props }) => {
+  return (
+    /*
+    // @ts-ignore Because of as="a", we can pass anchor attributes here - the types just don't like it. */
+    <Button as="a" {...props} />
+  );
+};
+
 export const ButtonLink: React.FC<
   ButtonProps & {
     to: string;
     relative?: RelativeRoutingType;
-  } & React.HTMLAttributes<HTMLAnchorElement>
+  } & React.AnchorHTMLAttributes<HTMLAnchorElement>
 > = ({ to, relative, ...props }) => {
   const handleClick = useLinkClickHandler(to, { relative });
   const href = useHref(to, { relative });
-  return (
-    <Button
-      as="a"
-      onClick={handleClick as any}
-      /*
-      // @ts-ignore Because of as="a", we can pass anchor attributes here - the types just don't like it. */
-      href={href}
-      {...props}
-    />
-  );
+  return <ButtonAnchor onClick={handleClick} href={href} {...props} />;
 };
 
 export default Button;
