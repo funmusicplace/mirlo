@@ -7,6 +7,7 @@ import { getArtistUrl, getPostURLReference } from "utils/artist";
 import MarkdownWrapper from "./MarkdownWrapper";
 import Overlay from "components/common/Overlay";
 import { getHtmlExcerpt } from "utils/getHtmlExcerpt";
+import { useLinkContainer } from "utils/useLinkContainer";
 
 const PostContainer = styled.div`
   display: flex;
@@ -15,12 +16,24 @@ const PostContainer = styled.div`
   position: relative;
   filter: brightness(98%);
   width: 100%;
-  text-decoration: none;
+  cursor: pointer;
+
+  .post-container__link {
+    text-decoration: none;
+  }
 
   &:hover {
     transition: 0.2s ease-in-out;
     background-color: rgba(50, 0, 0, 0.07);
     filter: brightness(90%);
+
+    .post-container__link {
+      text-decoration: underline;
+    }
+  }
+
+  &:focus-within {
+    outline: 1px solid var(--mi-normal-foreground-color);
   }
 
   @media (prefers-color-scheme: dark) {
@@ -31,29 +44,15 @@ const PostContainer = styled.div`
   }
 `;
 
-const LinkOverlay = styled(Link)`
-  display: flex;
-  justify-content: center;
-  position: absolute;
-  z-index: 2;
-  text-align: center;
-  align-items: center;
-  width: 100%;
-  height: 100%;
-  text-decoration: none;
-  text-transform: uppercase;
-  font-size: var(--mi-font-size-small);
-`;
-
 const PostCard: React.FC<{
   p: Post;
 }> = ({ p }) => {
   const postUrl = getPostURLReference(p);
   const excerpt = React.useMemo(() => getHtmlExcerpt(p.content), [p.content]);
+  const postContainerProps = useLinkContainer({ to: postUrl });
 
   return (
-    <PostContainer>
-      <LinkOverlay to={postUrl} aria-hidden tabIndex={-1} />
+    <PostContainer {...postContainerProps}>
       <Overlay width="100%" height="100%"></Overlay>
       <Box
         key={p.id}
@@ -93,7 +92,6 @@ const PostCard: React.FC<{
                   text-overflow: ellipsis;
                   padding-right: 3rem;
                   position: absolute;
-                  z-index: 3;
                 `}
               >
                 by <Link to={getArtistUrl(p.artist)}>{p.artist?.name}</Link>
@@ -118,12 +116,13 @@ const PostCard: React.FC<{
               {p.artist && (
                 <Link
                   to={postUrl}
-                  className={css`
-                    font-weight: normal;
-                    text-align: center;
-                    z-index: 3;
-                    text-decoration: none;
-                  `}
+                  className={
+                    "post-container__link " +
+                    css`
+                      font-weight: normal;
+                      text-align: center;
+                    `
+                  }
                 >
                   {p.title}
                 </Link>
