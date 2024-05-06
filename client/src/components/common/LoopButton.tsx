@@ -9,13 +9,19 @@ import Button from "./Button";
 const LoopingIndicator = styled.span`
   position: absolute;
   font-size: 0.5rem;
+  line-height: 0.5rem;
   font-weight: bold;
   padding: 0.15rem 0.25rem;
-  background-color: var(--mi-primary-color);
+  background-color: var(--mi-secondary-color);
   border-radius: 100%;
-  color: white;
+  color: var(--mi-primary-color);
   top: 0.2rem;
   right: 0.2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 0.8rem;
+  height: 0.8rem;
 `;
 
 export const LoopButton: React.FC = () => {
