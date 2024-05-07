@@ -74,18 +74,14 @@ const addPostToNotifications = async () => {
       );
       const postContent = post.content;
 
-      await Promise.all(
-        subscriptions.map(async (subscription) => {
-          await prisma.notification.create({
-            data: {
-              postId: post.id,
-              content: postContent,
-              userId: subscription.userId,
-              notificationType: "NEW_ARTIST_POST",
-            },
-          });
-        }) ?? []
-      );
+      await prisma.notification.createMany({
+        data: subscriptions.map((s) => ({
+          postId: post.id,
+          content: postContent,
+          userId: s.userId,
+          notificationType: "NEW_ARTIST_POST",
+        })),
+      });
 
       await prisma.post.update({
         where: {
