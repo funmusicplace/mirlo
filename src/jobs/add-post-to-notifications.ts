@@ -65,7 +65,7 @@ const addPostToNotifications = async () => {
     },
   });
 
-  logger.info(`found #${posts.length} posts`);
+  logger.info(`found ${posts.length} posts`);
 
   try {
     await Promise.all(
@@ -82,7 +82,10 @@ const addPostToNotifications = async () => {
             userId: s.userId,
             notificationType: "NEW_ARTIST_POST",
           })),
+          skipDuplicates: true,
         });
+
+        logger.info(`created ${subscriptions.length} notifications`);
 
         await prisma.post.update({
           where: {
@@ -95,6 +98,7 @@ const addPostToNotifications = async () => {
       })
     );
   } catch (e) {
+    console.error(e);
     logger.error(`Failed to create all notifications`);
     logger.error(e);
   }
