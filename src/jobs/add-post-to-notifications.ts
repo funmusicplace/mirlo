@@ -74,6 +74,9 @@ const addPostToNotifications = async () => {
           post.artist?.subscriptionTiers.map((st) => st.userSubscriptions)
         );
         const postContent = post.content;
+        logger.info(
+          `attempting to create ${subscriptions.length} notifications`
+        );
 
         await prisma.notification.createMany({
           data: subscriptions.map((s) => ({
