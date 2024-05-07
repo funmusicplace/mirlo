@@ -1,6 +1,6 @@
 import { css } from "@emotion/css";
 import { SplashButtonWrapper, SplashTitle, SplashWrapper } from "./Splash";
-import { ButtonLink } from "components/common/Button";
+import { ButtonAnchor, ButtonLink } from "components/common/Button";
 import { useTranslation } from "react-i18next";
 import { bp } from "../../constants";
 import { useGlobalStateContext } from "state/GlobalState";
@@ -49,8 +49,8 @@ const Kickstarter = () => {
           {t("launchedAKickstarter")}
         </h2>
         <SplashButtonWrapper>
-          <ButtonLink
-            to="https://www.kickstarter.com/projects/mirlo/mirlo"
+          <ButtonAnchor
+            href="https://www.kickstarter.com/projects/mirlo/mirlo"
             variant="big"
             className={css`
               display: block;
@@ -70,7 +70,7 @@ const Kickstarter = () => {
             `}
           >
             {t("helpUsReachOurGoal")}
-          </ButtonLink>
+          </ButtonAnchor>
         </SplashButtonWrapper>
       </SplashWrapper>
     </div>
