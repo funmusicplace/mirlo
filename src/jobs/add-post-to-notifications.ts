@@ -67,32 +67,37 @@ const addPostToNotifications = async () => {
 
   logger.info(`found #${posts.length} posts`);
 
-  await Promise.all(
-    posts.map(async (post) => {
-      const subscriptions = flatten(
-        post.artist?.subscriptionTiers.map((st) => st.userSubscriptions)
-      );
-      const postContent = post.content;
+  try {
+    await Promise.all(
+      posts.map(async (post) => {
+        const subscriptions = flatten(
+          post.artist?.subscriptionTiers.map((st) => st.userSubscriptions)
+        );
+        const postContent = post.content;
 
-      await prisma.notification.createMany({
-        data: subscriptions.map((s) => ({
-          postId: post.id,
-          content: postContent,
-          userId: s.userId,
-          notificationType: "NEW_ARTIST_POST",
-        })),
-      });
+        await prisma.notification.createMany({
+          data: subscriptions.map((s) => ({
+            postId: post.id,
+            content: postContent,
+            userId: s.userId,
+            notificationType: "NEW_ARTIST_POST",
+          })),
+        });
 
-      await prisma.post.update({
-        where: {
-          id: post.id,
-        },
-        data: {
-          hasAnnounceEmailBeenSent: true,
-        },
-      });
-    })
-  );
+        await prisma.post.update({
+          where: {
+            id: post.id,
+          },
+          data: {
+            hasAnnounceEmailBeenSent: true,
+          },
+        });
+      })
+    );
+  } catch (e) {
+    logger.error(`Failed to create all notifications`);
+    logger.error(e);
+  }
 };
 
 export default addPostToNotifications;
