@@ -25,7 +25,7 @@ const sendNotificationEmail = async () => {
     },
   });
 
-  for (const notification of notifications) {
+  for await (const notification of notifications) {
     if (
       notification.notificationType === "NEW_ARTIST_POST" &&
       notification.post?.artist
