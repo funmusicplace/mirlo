@@ -156,7 +156,9 @@ export default function () {
                   },
                 });
               } catch (e) {
+                logger.error(`subscribers error code: ${(e as any).code} ${e}`);
                 if (e instanceof PrismaClientKnownRequestError) {
+                  logger.error("instance of prismaclient");
                   // do nothing, unique constraint failed
                   // https://www.prisma.io/docs/orm/reference/error-reference#p2002
                   if (e.code === "P2002") {
