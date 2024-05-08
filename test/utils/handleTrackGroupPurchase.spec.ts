@@ -7,7 +7,7 @@ import { clearTables, createTrackGroup, createUser } from "../utils";
 import prisma from "@mirlo/prisma";
 import assert from "assert";
 import sinon from "sinon";
-import * as sendMail from "../../src/queues/send-mail";
+import * as sendMail from "../../src/jobs/send-mail";
 import { handleTrackGroupPurchase } from "../../src/utils/stripe";
 
 describe("handleTrackGroupPurchase", () => {

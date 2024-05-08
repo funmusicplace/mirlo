@@ -10,9 +10,10 @@ import uploadAudioJob from "./upload-audio";
 import generateAlbumJob from "./generate-album";
 
 import optimizeImage from "./optimize-image";
+import sendMail from "./send-mail";
+import "../queues/send-mail-queue";
 
 import { REDIS_CONFIG } from "../config/redis";
-import sendMail from "../queues/send-mail";
 
 export const logger = winston.createLogger({
   level: "info",

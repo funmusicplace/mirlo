@@ -6,7 +6,7 @@ import {
 } from "../../../../auth/passport";
 import prisma from "@mirlo/prisma";
 
-import sendMail from "../../../../queues/send-mail";
+import sendMail from "../../../../jobs/send-mail";
 import { randomUUID } from "crypto";
 import { Job } from "bullmq";
 

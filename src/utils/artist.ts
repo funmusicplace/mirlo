@@ -24,7 +24,7 @@ import {
   DefaultArgs,
   PrismaClientKnownRequestError,
 } from "@prisma/client/runtime/library";
-import sendMail from "../queues/send-mail";
+import sendMail from "../jobs/send-mail";
 import { NextFunction, Request, Response } from "express";
 import { AppError } from "./error";
 import logger from "../logger";

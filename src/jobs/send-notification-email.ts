@@ -1,14 +1,6 @@
 import prisma from "@mirlo/prisma";
 import logger from "../logger";
-import { Queue } from "bullmq";
-import { REDIS_CONFIG } from "../config/redis";
-
-const queueOptions = {
-  prefix: "mirlo",
-  connection: REDIS_CONFIG,
-};
-
-export const sendMailQueue = new Queue("send-mail", queueOptions);
+import { sendMailQueue } from "../queues/send-mail-queue";
 
 const sendNotificationEmail = async () => {
   const notifications = await prisma.notification.findMany({

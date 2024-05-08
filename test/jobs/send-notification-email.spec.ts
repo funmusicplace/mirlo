@@ -7,8 +7,12 @@ import { clearTables, createPost, createUser } from "../utils";
 import prisma from "@mirlo/prisma";
 import assert from "assert";
 import sinon from "sinon";
-import * as sendMail from "../../src/queues/send-mail";
+import * as sendMail from "../../src/jobs/send-mail";
 import sendNotificationEmail from "../../src/jobs/send-notification-email";
+import {
+  sendMailQueue,
+  sendMailQueueEvents,
+} from "../../src/queues/send-mail-queue";
 
 describe("send-notification-email", () => {
   beforeEach(async () => {
@@ -23,8 +27,15 @@ describe("send-notification-email", () => {
     sinon.restore();
   });
 
-  it.skip("should send email based on NEW_ARTIST_POST notification", async () => {
-    const stub = sinon.stub(sendMail, "default");
+  after(async () => {
+    // Gotta make sure to close the queues and queue events
+    await sendMailQueue.close();
+    await sendMailQueueEvents.close();
+  });
+
+  it("should send email based on NEW_ARTIST_POST notification", async () => {
+    // const stub = sinon.stub(sendMail, "default");
+    const stub = sinon.stub(sendMailQueue, "add");
 
     const { user: artistUser } = await createUser({
       email: "artist@artist.com",
@@ -60,19 +71,19 @@ describe("send-notification-email", () => {
 
     await sendNotificationEmail();
 
-    // FIXME: this now uses queues, can we check that something
-    // was added to a queue in the tests?
-    // assert.equal(stub.calledOnce, true);
-    // const data0 = stub.getCall(0).args[0].data;
-    // assert.equal(data0.template, "announce-post-published");
-    // assert.equal(data0.message.to, "follower@follower.com");
-    // assert.equal(data0.locals.artist.id, artist.id);
-    // assert.equal(data0.locals.post.id, post.id);
-    // assert.equal(data0.locals.email, followerUser.email);
+    assert.equal(stub.calledOnce, true);
+    const args = stub.getCall(0).args;
+    assert.equal(args[0], "send-mail");
+    const data = args[1];
+    assert.equal(data.template, "announce-post-published");
+    assert.equal(data.message.to, "follower@follower.com");
+    assert.equal(data.locals.artist.id, artist.id);
+    assert.equal(data.locals.post.id, post.id);
+    assert.equal(data.locals.email, followerUser.email);
   });
 
-  it.skip("should not send email if post is marked as not shouldSendEmail", async () => {
-    const stub = sinon.stub(sendMail, "default");
+  it("should not send email if post is marked as not shouldSendEmail", async () => {
+    const stub = sinon.stub(sendMailQueue, "add");
 
     const { user: artistUser } = await createUser({
       email: "artist@artist.com",
@@ -109,8 +120,6 @@ describe("send-notification-email", () => {
 
     await sendNotificationEmail();
 
-    // FIXME: this now uses queues, can we check that something
-    // was added to a queue in the tests?
     assert.equal(stub.called, false);
   });
 });

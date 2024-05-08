@@ -20,7 +20,7 @@ import prisma from "@mirlo/prisma";
 import { rateLimit } from "express-rate-limit";
 import { corsCheck } from "./auth/cors";
 import errorHandler from "./utils/error";
-import { sendMailQueue } from "./queues/send-mail";
+import { sendMailQueue } from "./queues/send-mail-queue";
 
 dotenv.config();
 

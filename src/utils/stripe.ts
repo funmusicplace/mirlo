@@ -2,7 +2,7 @@ import Stripe from "stripe";
 import prisma from "@mirlo/prisma";
 import { Prisma, TrackGroup, User } from "@mirlo/prisma/client";
 import { logger } from "../logger";
-import sendMail from "../queues/send-mail";
+import sendMail from "../jobs/send-mail";
 import { Request, Response } from "express";
 import { registerPurchase } from "./trackGroup";
 import { registerSubscription } from "./subscriptionTier";

@@ -1,5 +1,5 @@
 import prisma from "@mirlo/prisma";
-import sendMail from "../queues/send-mail";
+import sendMail from "./send-mail";
 
 import logger from "../logger";
 import { registerPurchase } from "../utils/trackGroup";

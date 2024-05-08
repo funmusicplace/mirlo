@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { userAuthenticated } from "../../auth/passport";
 import prisma from "@mirlo/prisma";
-import sendMail from "../../queues/send-mail";
+import sendMail from "../../jobs/send-mail";
 import { randomUUID } from "crypto";
 import logger from "../../logger";
 import profile from "./profile";
