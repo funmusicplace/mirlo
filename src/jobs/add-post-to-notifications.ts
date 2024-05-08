@@ -84,7 +84,6 @@ const addPostToNotifications = async () => {
           await tx.notification.createMany({
             data: subscriptions.map((s) => ({
               postId: post.id,
-              content: postContent,
               userId: s.userId,
               notificationType: "NEW_ARTIST_POST",
             })),
