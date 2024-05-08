@@ -6,8 +6,9 @@ import {
 } from "../../../../auth/passport";
 import prisma from "@mirlo/prisma";
 
-import sendMail from "../../../../jobs/send-mail";
+import sendMail from "../../../../queues/send-mail";
 import { randomUUID } from "crypto";
+import { Job } from "bullmq";
 
 export default function () {
   const operations = {
@@ -88,7 +89,7 @@ export default function () {
               token: purchase.singleDownloadToken,
             },
           },
-        });
+        } as Job);
         res.status(200).json({ message: "success" });
       } else {
         res.status(500).json({

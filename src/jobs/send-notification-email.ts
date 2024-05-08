@@ -1,6 +1,14 @@
 import prisma from "@mirlo/prisma";
 import logger from "../logger";
-import sendMail from "./send-mail";
+import { Queue } from "bullmq";
+import { REDIS_CONFIG } from "../config/redis";
+
+const queueOptions = {
+  prefix: "mirlo",
+  connection: REDIS_CONFIG,
+};
+
+export const sendMailQueue = new Queue("send-mail", queueOptions);
 
 const sendNotificationEmail = async () => {
   const notifications = await prisma.notification.findMany({
@@ -41,22 +49,20 @@ const sendNotificationEmail = async () => {
             `sendNotificationEmail: mailing notification for: ${notification.post.title} to ${notification.user.email}`
           );
           try {
-            await sendMail({
-              data: {
-                template: "announce-post-published",
-                message: {
-                  to: notification.user.email,
+            sendMailQueue.add("send-mail", {
+              template: "announce-post-published",
+              message: {
+                to: notification.user.email,
+              },
+              locals: {
+                artist: notification.post.artist,
+                post: {
+                  ...notification.post,
+                  htmlContent: notification.post.content,
                 },
-                locals: {
-                  artist: notification.post.artist,
-                  post: {
-                    ...notification.post,
-                    htmlContent: notification.post.content,
-                  },
-                  email: notification.user.email,
-                  host: process.env.API_DOMAIN,
-                  client: process.env.REACT_APP_CLIENT_DOMAIN,
-                },
+                email: notification.user.email,
+                host: process.env.API_DOMAIN,
+                client: process.env.REACT_APP_CLIENT_DOMAIN,
               },
             });
           } catch (e) {
@@ -74,6 +80,7 @@ const sendNotificationEmail = async () => {
             isRead: true,
           },
         });
+        logger.info(`sendNotificationEmail: updated notification`);
       }
     }
   } catch (e) {

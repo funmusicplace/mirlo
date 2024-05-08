@@ -7,7 +7,7 @@ import { clearTables, createPost, createUser } from "../utils";
 import sendOutMonthlyReceipts from "../../src/jobs/send-out-monthly-receipts";
 import prisma from "@mirlo/prisma";
 import assert from "assert";
-import * as sendMail from "../../src/jobs/send-mail";
+import * as sendMail from "../../src/queues/send-mail";
 import sinon from "sinon";
 
 describe("send-out-monthly-receipts", () => {

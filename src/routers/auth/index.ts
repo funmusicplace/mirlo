@@ -3,12 +3,13 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { userAuthenticated } from "../../auth/passport";
 import prisma from "@mirlo/prisma";
-import sendMail from "../../jobs/send-mail";
+import sendMail from "../../queues/send-mail";
 import { randomUUID } from "crypto";
 import logger from "../../logger";
 import profile from "./profile";
 import signup from "./signup";
 import refresh from "./refresh";
+import { Job } from "bullmq";
 
 const jwt_secret = process.env.JWT_SECRET ?? "";
 const refresh_secret = process.env.REFRESH_TOKEN_SECRET ?? "";
@@ -167,7 +168,7 @@ router.post(`/password-reset/initiate`, async (req, res, next) => {
             token,
           },
         },
-      });
+      } as Job);
 
       return res.status(200).send({ message: "Success" });
     }

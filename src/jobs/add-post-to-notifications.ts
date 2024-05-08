@@ -1,7 +1,7 @@
 import prisma from "@mirlo/prisma";
 
 import logger from "../logger";
-import { flatten } from "lodash";
+import { flatten, uniqBy } from "lodash";
 
 const addPostToNotifications = async () => {
   const date = new Date();
@@ -65,44 +65,50 @@ const addPostToNotifications = async () => {
     },
   });
 
-  logger.info(`found ${posts.length} posts`);
+  logger.info(`addPostToNotifications: found ${posts.length} posts`);
 
   try {
     await Promise.all(
       posts.map(async (post) => {
-        const subscriptions = flatten(
+        const flatSubscriptions = flatten(
           post.artist?.subscriptionTiers.map((st) => st.userSubscriptions)
         );
+        const subscriptions = uniqBy(flatSubscriptions, "userId");
         const postContent = post.content;
-        logger.info(
-          `attempting to create ${subscriptions.length} notifications`
-        );
 
-        await prisma.notification.createMany({
-          data: subscriptions.map((s) => ({
-            postId: post.id,
-            content: postContent,
-            userId: s.userId,
-            notificationType: "NEW_ARTIST_POST",
-          })),
-          skipDuplicates: true,
-        });
+        await prisma.$transaction(async (tx) => {
+          logger.info(
+            `addPostToNotifications: attempting to create ${subscriptions.length} notifications`
+          );
 
-        logger.info(`created ${subscriptions.length} notifications`);
+          await tx.notification.createMany({
+            data: subscriptions.map((s) => ({
+              postId: post.id,
+              content: postContent,
+              userId: s.userId,
+              notificationType: "NEW_ARTIST_POST",
+            })),
+            skipDuplicates: true,
+          });
 
-        await prisma.post.update({
-          where: {
-            id: post.id,
-          },
-          data: {
-            hasAnnounceEmailBeenSent: true,
-          },
+          logger.info(
+            `addPostToNotifications: created ${subscriptions.length} notifications`
+          );
+
+          await tx.post.update({
+            where: {
+              id: post.id,
+            },
+            data: {
+              hasAnnounceEmailBeenSent: true,
+            },
+          });
         });
       })
     );
   } catch (e) {
     console.error(e);
-    logger.error(`Failed to create all notifications`);
+    logger.error(`addPostToNotifications: Failed to create all notifications`);
     logger.error(e);
   }
 };

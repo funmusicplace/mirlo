@@ -2,7 +2,7 @@ import Stripe from "stripe";
 import prisma from "@mirlo/prisma";
 import { Prisma, TrackGroup, User } from "@mirlo/prisma/client";
 import { logger } from "../logger";
-import sendMail from "../jobs/send-mail";
+import sendMail from "../queues/send-mail";
 import { Request, Response } from "express";
 import { registerPurchase } from "./trackGroup";
 import { registerSubscription } from "./subscriptionTier";
@@ -10,6 +10,7 @@ import { findOrCreateUserBasedOnEmail } from "./user";
 import { getSiteSettings } from "./settings";
 import { generateFullStaticImageUrl } from "./images";
 import { finalCoversBucket } from "./minio";
+import { Job } from "bullmq";
 
 const { STRIPE_KEY, API_DOMAIN } = process.env;
 
@@ -247,7 +248,7 @@ export const handleTrackGroupPurchase = async (
             host: process.env.API_DOMAIN,
           },
         },
-      });
+      } as Job);
 
       const pricePaid = purchase.pricePaid / 100;
 
@@ -268,7 +269,7 @@ export const handleTrackGroupPurchase = async (
             email: user.email,
           },
         },
-      });
+      } as Job);
     }
 
     return purchase;
@@ -307,7 +308,7 @@ const handleSubscription = async (
             host: process.env.API_DOMAIN,
           },
         },
-      });
+      } as Job);
 
       await sendMail({
         data: {
@@ -324,7 +325,7 @@ const handleSubscription = async (
             host: process.env.API_DOMAIN,
           },
         },
-      });
+      } as Job);
     }
   } catch (e) {
     logger.error(`Error creating subscription: ${e}`);
@@ -415,7 +416,7 @@ export const handleInvoicePaid = async (invoice: Stripe.Invoice) => {
             client: process.env.REACT_APP_CLIENT_DOMAIN,
           },
         },
-      });
+      } as Job);
     }
   }
 };

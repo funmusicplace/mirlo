@@ -24,10 +24,11 @@ import {
   DefaultArgs,
   PrismaClientKnownRequestError,
 } from "@prisma/client/runtime/library";
-import sendMail from "../jobs/send-mail";
+import sendMail from "../queues/send-mail";
 import { NextFunction, Request, Response } from "express";
 import { AppError } from "./error";
 import logger from "../logger";
+import { Job } from "bullmq";
 
 type Params = {
   id: string;
@@ -127,7 +128,7 @@ export const createSubscriptionConfirmation = async (
           client: process.env.REACT_APP_CLIENT_DOMAIN,
         },
       },
-    });
+    } as Job);
   } catch (e) {
     if (e instanceof PrismaClientKnownRequestError) {
       // skip

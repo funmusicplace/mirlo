@@ -7,7 +7,7 @@ import { clearTables, createPost, createUser } from "../utils";
 import prisma from "@mirlo/prisma";
 import assert from "assert";
 import sinon from "sinon";
-import * as sendMail from "../../src/jobs/send-mail";
+import * as sendMail from "../../src/queues/send-mail";
 import sendNotificationEmail from "../../src/jobs/send-notification-email";
 
 describe("send-notification-email", () => {

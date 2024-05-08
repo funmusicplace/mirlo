@@ -1,8 +1,9 @@
 import prisma from "@mirlo/prisma";
-import sendMail from "./send-mail";
+import sendMail from "../queues/send-mail";
 
 import logger from "../logger";
 import { groupBy } from "lodash";
+import { Job } from "bullmq";
 
 const sendOutMonthlyReceipts = async () => {
   const allSubscriptions = await prisma.artistUserSubscription.findMany({
@@ -49,7 +50,7 @@ const sendOutMonthlyReceipts = async () => {
             client: process.env.REACT_APP_CLIENT_DOMAIN,
           },
         },
-      });
+      } as Job);
     })
   );
 };

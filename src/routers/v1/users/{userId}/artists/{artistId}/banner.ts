@@ -4,7 +4,7 @@ import {
   artistBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../../auth/passport";
-import { processArtistBanner } from "../../../../../../utils/processImages";
+import { processArtistBanner } from "../../../../../../queues/processImages";
 import prisma from "@mirlo/prisma";
 import { User } from "@mirlo/prisma/client";
 import { deleteArtistBanner } from "../../../../../../utils/artist";

@@ -6,7 +6,7 @@ import { clearTables, createTrackGroup, createUser } from "../utils";
 
 import prisma from "@mirlo/prisma";
 import assert from "assert";
-import * as sendMail from "../../src/jobs/send-mail";
+import * as sendMail from "../../src/queues/send-mail";
 import sinon from "sinon";
 import autoPurchaseNewAlbums from "../../src/jobs/auto-purchase-new-albums";
 
