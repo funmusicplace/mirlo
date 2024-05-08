@@ -157,9 +157,11 @@ export default function () {
                 });
               } catch (e) {
                 if (e instanceof PrismaClientKnownRequestError) {
-                  // do nothing
+                  // do nothing, unique constraint failed
+                  // https://www.prisma.io/docs/orm/reference/error-reference#p2002
                   if (e.code === "P2002") {
                     logger.error("err", e.cause, e.name, e.code, e.meta);
+                    return;
                   } else {
                     throw e;
                   }

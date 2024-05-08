@@ -334,6 +334,17 @@
     "looksGood": "Alright, looks good, let's upload them!",
     "rightToUpload": "By uploading this list of e-mails, you solemnly swear that you have permission from the email owners to upload the emails."
   },
+  "artistSupporters": {
+    "supporters": "Supporters",
+    "totalComingIn": "Total coming in",
+    "totalSupporters": "{{ count }} supporters",
+    "followers": "Followers ({{count}})",
+    "name": "Name",
+    "email": "Email",
+    "tier": "Tier",
+    "amount": "Amount",
+    "noSupportersYet": "No supporters yet, share your profile with others to grow your community"
+  },
   "subscriptionForm": {
     "supporters": "Manage supporters",
     "subscriptionUpdated": "Subscription updated",
