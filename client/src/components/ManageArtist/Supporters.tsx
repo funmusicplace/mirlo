@@ -12,6 +12,7 @@ import ArtistSubscriberUploadData from "./ArtistSubscriberUploadData";
 import DropdownMenu from "components/common/DropdownMenu";
 import { css } from "@emotion/css";
 import { sumBy } from "lodash";
+import { useTranslation } from "react-i18next";
 
 export const SupporterTable = styled(Table)`
   @media screen and (max-width: ${bp.small}px) {
@@ -35,6 +36,9 @@ const Supporters = () => {
     state: { artist },
   } = useArtistContext();
   const artistId = artist?.id;
+  const { t } = useTranslation("translation", {
+    keyPrefix: "artistSupporters",
+  });
   const userId = artist?.userId;
   const [supporters, setSupporters] = React.useState<SupportTier[]>([]);
   const [followers, setFollowers] = React.useState<SupportTier[]>([]);
@@ -63,12 +67,14 @@ const Supporters = () => {
       <ArtistSection>
         <SpaceBetweenDiv>
           <div>
-            <h4>Supporters</h4>
-            Total:{" "}
+            <h4>{t("supporters")}</h4>
+            {t("totalComingIn")}:{" "}
             <Money
               amount={amount / 100}
               currency={supporters[0]?.artistSubscriptionTier.currency}
             />
+            <br />
+            {t("totalSupporters", { count: supporters.length })}
           </div>
           <DropdownMenu dashed>
             <ArtistSubscriberDataDownload />
@@ -78,10 +84,10 @@ const Supporters = () => {
         <SupporterTable>
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Tier</th>
-              <th>Amount</th>
+              <th>{t("name")}</th>
+              <th>{t("email")}</th>
+              <th>{t("tier")}</th>
+              <th>{t("amount")}</th>
             </tr>
           </thead>
           <tbody>
@@ -109,20 +115,19 @@ const Supporters = () => {
               background: var(--mi-lighten-x-background-color);
             `}
           >
-            No supporters yet, share your profile with others to grow your
-            community
+            {t("noSupportersYet")}
           </div>
         )}
       </ArtistSection>
       <ArtistSection>
         <SpaceBetweenDiv>
-          <h4>Followers</h4>
+          <h4>{t("followers", { count: followers.length })}</h4>
         </SpaceBetweenDiv>
         <SupporterTable>
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Email</th>
+              <th>{t("name")}</th>
+              <th>{t("email")}</th>
             </tr>
           </thead>
           <tbody>
