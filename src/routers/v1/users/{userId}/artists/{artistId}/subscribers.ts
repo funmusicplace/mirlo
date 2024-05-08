@@ -157,16 +157,18 @@ export default function () {
                 });
               } catch (e) {
                 logger.error(`subscribers error code: ${(e as any).code} ${e}`);
-                if (e instanceof PrismaClientKnownRequestError) {
+                if ((e as any).code === "P2002") {
                   logger.error("instance of prismaclient");
                   // do nothing, unique constraint failed
                   // https://www.prisma.io/docs/orm/reference/error-reference#p2002
-                  if (e.code === "P2002") {
-                    logger.error("err", e.cause, e.name, e.code, e.meta);
-                    return;
-                  } else {
-                    throw e;
-                  }
+                  logger.error(
+                    "err",
+                    (e as PrismaClientKnownRequestError).cause,
+                    (e as PrismaClientKnownRequestError).name,
+                    (e as PrismaClientKnownRequestError).code,
+                    (e as PrismaClientKnownRequestError).meta
+                  );
+                  return;
                 } else {
                   throw e;
                 }
