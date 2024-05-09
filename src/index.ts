@@ -13,13 +13,14 @@ import {
 import apiDoc from "./routers/v1/api-doc";
 import auth from "./routers/auth";
 import "./auth/passport";
-import { imageQueue } from "./utils/processImages";
-import { audioQueue } from "./utils/processTrackAudio";
+import { imageQueue } from "./queues/processImages";
+import { audioQueue } from "./queues/processTrackAudio";
 import { serveStatic } from "./static";
 import prisma from "@mirlo/prisma";
 import { rateLimit } from "express-rate-limit";
 import { corsCheck } from "./auth/cors";
 import errorHandler from "./utils/error";
+import { sendMailQueue } from "./queues/send-mail-queue";
 
 dotenv.config();
 
@@ -188,7 +189,11 @@ app.use("/audio", express.static("data/media/audio"));
 if (isDev) {
   const serverAdapter = new ExpressAdapter();
   createBullBoard({
-    queues: [new BullMQAdapter(imageQueue), new BullMQAdapter(audioQueue)],
+    queues: [
+      new BullMQAdapter(imageQueue),
+      new BullMQAdapter(audioQueue),
+      new BullMQAdapter(sendMailQueue),
+    ],
     serverAdapter: serverAdapter,
   });
   serverAdapter.setBasePath("/admin/queues");

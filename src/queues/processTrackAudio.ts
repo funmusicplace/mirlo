@@ -5,8 +5,8 @@ import { REDIS_CONFIG } from "../config/redis";
 
 import prisma from "@mirlo/prisma";
 import { logger } from "../logger";
-import { createBucketIfNotExists, incomingAudioBucket } from "./minio";
-import { minioClient } from "./minio";
+import { createBucketIfNotExists, incomingAudioBucket } from "../utils/minio";
+import { minioClient } from "../utils/minio";
 
 const { MINIO_HOST = "", MINIO_API_PORT = 9000 } = process.env;
 

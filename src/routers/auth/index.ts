@@ -9,6 +9,7 @@ import logger from "../../logger";
 import profile from "./profile";
 import signup from "./signup";
 import refresh from "./refresh";
+import { Job } from "bullmq";
 
 const jwt_secret = process.env.JWT_SECRET ?? "";
 const refresh_secret = process.env.REFRESH_TOKEN_SECRET ?? "";
@@ -167,7 +168,7 @@ router.post(`/password-reset/initiate`, async (req, res, next) => {
             token,
           },
         },
-      });
+      } as Job);
 
       return res.status(200).send({ message: "Success" });
     }

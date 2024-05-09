@@ -1,16 +1,25 @@
 import path from "path";
-import nodemailer from "nodemailer";
+import nodemailer, { Transporter } from "nodemailer";
 import sendgrid from "nodemailer-sendgrid";
 import Email from "email-templates";
 import { logger } from "../logger";
+import { Job } from "bullmq";
 
 const viewsDir = path.join(__dirname, "../emails");
+
+const transport: Transporter = !!process.env.SENDGRID_API_KEY
+  ? nodemailer.createTransport(
+      sendgrid({
+        apiKey: process.env.SENDGRID_API_KEY!,
+      })
+    )
+  : ({ jsonTransport: true } as unknown as Transporter);
 
 /**
  * Cleanup incoming folder and more (later)
  */
 
-export const sendMail = async (job: any) => {
+export const sendMail = async (job: Job) => {
   logger.info(`sendMail: sending: ${job.data.template}`);
   try {
     const email = new Email({
@@ -27,13 +36,7 @@ export const sendMail = async (job: any) => {
           relativeTo: path.resolve(viewsDir),
         },
       },
-      transport: !!process.env.SENDGRID_API_KEY
-        ? nodemailer.createTransport(
-            sendgrid({
-              apiKey: process.env.SENDGRID_API_KEY!,
-            })
-          )
-        : { jsonTransport: true },
+      transport,
     });
 
     if (process.env.NODE_ENV === "production") {
@@ -43,7 +46,7 @@ export const sendMail = async (job: any) => {
         locals: job.data.locals,
       });
     } else {
-      email
+      await email
         .render(job.data.template + "/html", job.data.locals)
         .then(logger.info);
     }

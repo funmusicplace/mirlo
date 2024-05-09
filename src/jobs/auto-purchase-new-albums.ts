@@ -3,6 +3,7 @@ import sendMail from "./send-mail";
 
 import logger from "../logger";
 import { registerPurchase } from "../utils/trackGroup";
+import { Job } from "bullmq";
 
 const autoPurchaseNewAlbums = async () => {
   const currentDate = new Date();
@@ -78,7 +79,7 @@ const autoPurchaseNewAlbums = async () => {
                 client: process.env.REACT_APP_CLIENT_DOMAIN,
               },
             },
-          });
+          } as Job);
         })
       );
     })
