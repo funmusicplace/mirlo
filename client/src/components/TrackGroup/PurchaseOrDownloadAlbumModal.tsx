@@ -45,7 +45,14 @@ const PurchaseOrDownloadAlbum: React.FC<{
 
   const isBeforeReleaseDate = new Date(trackGroup.releaseDate) > new Date();
 
-  const purchaseText = isBeforeReleaseDate ? "preOrder" : "buy";
+  const payOrNameYourPrice =
+    trackGroup.minPrice === 0 && !trackGroup.isPriceFixed
+      ? "nameYourPriceLabel"
+      : "buy";
+
+  const preOrderOrBuyText = isBeforeReleaseDate
+    ? "preOrder"
+    : payOrNameYourPrice;
   const purchaseTitle = isBeforeReleaseDate
     ? "preOrderingTrackGroup"
     : "buyingTrackGroup";
@@ -83,7 +90,7 @@ const PurchaseOrDownloadAlbum: React.FC<{
               variant="outlined"
               onClick={() => setIsPurchasingAlbum(true)}
             >
-              {t(purchaseText)}
+              {t(preOrderOrBuyText)}
             </Button>
           </div>
         )}
