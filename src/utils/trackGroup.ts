@@ -94,7 +94,8 @@ export const findTrackGroupIdForSlug = async (
   artistId?: string
 ) => {
   let foundId: number | undefined = Number(id);
-  if (Number.isNaN(foundId)) {
+
+  if (Number.isNaN(foundId) || (Number.isFinite(+foundId) && artistId)) {
     if (!artistId) {
       throw new Error(
         "Searching for a TrackGroup by slug requires an artistId"

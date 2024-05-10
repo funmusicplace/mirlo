@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import prisma from "@mirlo/prisma";
-import { findTrackGroupIdForSlug } from "../../../../utils/trackGroup";
 
 type Query = {
   urlSlug?: string;
