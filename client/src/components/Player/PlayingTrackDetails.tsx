@@ -14,6 +14,7 @@ const PlayingTrackDetails: React.FC<{ currentTrack: Track }> = ({
         flex: 40%;
         display: flex;
         align-items: center;
+        gap: 0.5rem;
 
         margin-right: 1rem;
         margin-left: 1rem;
@@ -30,19 +31,17 @@ const PlayingTrackDetails: React.FC<{ currentTrack: Track }> = ({
         }
       `}
     >
-      <div>
-        <ImageWithPlaceholder
-          src={currentTrack?.trackGroup.cover?.sizes?.[120]}
-          size={48}
-          alt={currentTrack?.title ?? "Loading album"}
-          className={css`
-            background-color: #efefef;
-            margin-right: 0.5rem;
-            min-height: 100%;
-            min-width: 48px;
-          `}
-        />
-      </div>
+      <ImageWithPlaceholder
+        src={currentTrack?.trackGroup.cover?.sizes?.[120]}
+        size={48}
+        square
+        alt={currentTrack?.title ?? "Loading album"}
+        className={css`
+          width: 48px;
+          height: 48px;
+          flex-basis: 48px;
+        `}
+      />
       <div
         className={css`
           max-width: 80%;
