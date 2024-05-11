@@ -9,7 +9,7 @@ import Overlay from "components/common/Overlay";
 import { getHtmlExcerpt } from "utils/getHtmlExcerpt";
 import { useLinkContainer } from "utils/useLinkContainer";
 
-const PostContainer = styled.div`
+const PostContainer = styled.li`
   display: flex;
   border-radius: 5px;
   background-color: var(--mi-darken-background-color);
