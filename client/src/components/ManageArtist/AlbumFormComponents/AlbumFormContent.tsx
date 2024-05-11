@@ -44,6 +44,7 @@ const AlbumFormContent: React.FC<{
         )}
         {existingObject && (
           <UploadArtistImage
+            imagetypedescription="an album cover"
             existing={existingObject}
             imageType="cover"
             height="400"

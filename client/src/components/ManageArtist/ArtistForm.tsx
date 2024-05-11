@@ -146,6 +146,7 @@ export const ArtistForm: React.FC<{
                 {existing && (
                   <UploadArtistImage
                     existing={existing}
+                    imagetypedescription="a background image"
                     imageType="banner"
                     height="auto"
                     width="100%"
@@ -163,6 +164,7 @@ export const ArtistForm: React.FC<{
                 {existing && (
                   <UploadArtistImage
                     existing={existing}
+                    imagetypedescription="your avatar"
                     imageType="avatar"
                     height="auto"
                     width="100%"

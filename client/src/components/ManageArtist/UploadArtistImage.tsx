@@ -54,7 +54,15 @@ const UploadArtistImage: React.FC<{
   height: string;
   width: string;
   maxDimensions: string;
-}> = ({ existing, imageType, height, width, maxDimensions }) => {
+  imagetypedescription: string;
+}> = ({
+  existing,
+  imageType,
+  height,
+  width,
+  maxDimensions,
+  imagetypedescription,
+}) => {
   const { t } = useTranslation("translation", { keyPrefix: "artistForm" });
   const snackbar = useSnackbar();
   const { refresh } = useArtistContext();
@@ -158,7 +166,12 @@ const UploadArtistImage: React.FC<{
             )}
 
             {!existingImage && (
-              <UploadPrompt width={width} height={height} rounded={rounded} />
+              <UploadPrompt
+                width={width}
+                height={height}
+                rounded={rounded}
+                imagetypedescription={imagetypedescription}
+              />
             )}
             {(isLoading || isSaving) && <Spinner rounded={rounded} />}
           </label>
