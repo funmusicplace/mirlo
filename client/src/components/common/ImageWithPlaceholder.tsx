@@ -7,7 +7,7 @@ const ImageContainer = styled.div`
   background-color: var(--mi-darken-background-color);
 
   img {
-    transition: opacity 1s;
+    transition: opacity 0.25s;
     max-width: 100%;
     height: 100%;
   }
@@ -30,6 +30,8 @@ export const ImageWithPlaceholder: React.FC<{
         alt={alt}
         width={size}
         height={size}
+        loading="lazy"
+        decoding="async"
         onLoad={() => setLoading(false)}
         onError={() => setError(true)}
         style={{

@@ -19,6 +19,24 @@ export const serveStatic = async (
     return;
   }
 
+  // Cache minio assets for 1 week
+  res.setHeader(
+    "Cache-Control",
+    "public, max-age=604800, stale-while-revalidate=604800"
+  );
+  res.setHeader("ETag", `"${stat.etag}"`);
+
+  // when If-None-Match is provided, only return the object if the etag has changed
+  // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/If-None-Match
+  const ifNoneMatch = req.header("If-None-Match");
+  if (ifNoneMatch && ifNoneMatch.includes(`"${stat.etag}"`)) {
+    // if the object is unchanged, return 304 (not modified) with no body
+    res.status(304);
+    res.send(null);
+    next();
+    return;
+  }
+
   try {
     const { buffer } = await getBufferFromMinio(
       minioClient,
@@ -30,7 +48,6 @@ export const serveStatic = async (
   } catch (e) {
     console.error("error", e);
     res.status(400);
-    return;
   }
   next();
 };
