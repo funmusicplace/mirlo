@@ -27,7 +27,10 @@ export interface Compactable {
 const CustomButton = styled.button<Compactable>`
   background: none;
   border: none;
-  transition: 0.25s background-color, 0.25s color, 0.25s border-radius,
+  transition:
+    0.25s background-color,
+    0.25s color,
+    0.25s border-radius,
     0.25s filter;
   font-size: 1rem;
   text-decoration: none;
@@ -45,7 +48,7 @@ const CustomButton = styled.button<Compactable>`
       props.onlyIcon && props.compact
         ? "height: 1.7rem; width: 1.7rem; font-size: var(--mi-font-size-xsmall);"
         : ""};
-      }
+  }
 
   &:hover:not(:disabled) {
     cursor: pointer;
@@ -224,7 +227,7 @@ const CustomButton = styled.button<Compactable>`
     opacity: 0.6;
   }
 
-  & .startIcon:not(.collapsed) {
+  & .startIcon {
     margin-top: 0.1rem;
     margin-right: ${(props) => (props.onlyIcon ? "0px" : "0.5rem")};
     line-height: 0.785rem;
@@ -232,7 +235,7 @@ const CustomButton = styled.button<Compactable>`
     font-size: ${(props) => (props.onlyIcon ? ".9rem" : "")};
   }
 
-  & .endIcon:not(.collapsed) {
+  & .endIcon {
     margin-top: 0.1rem;
     margin-left: 0.5rem;
     line-height: 0.785rem;
@@ -240,9 +243,10 @@ const CustomButton = styled.button<Compactable>`
   }
 
   @media screen and (max-width: ${bp.small}px) {
-  & .startIcon:not(.collapsed) {
-    font-size: ${(props) =>
-      props.onlyIcon ? "var(--mi-font-size-xsmall)" : ""};
+    & .startIcon {
+      font-size: ${(props) =>
+        props.onlyIcon ? "var(--mi-font-size-xsmall)" : ""};
+    }
   }
 `;
 
@@ -254,7 +258,6 @@ export interface ButtonProps extends Compactable {
   style?: React.CSSProperties;
   className?: string;
   isLoading?: boolean;
-  collapse?: boolean;
   as?: React.ElementType<any, keyof React.JSX.IntrinsicElements>;
 }
 
@@ -267,7 +270,6 @@ export const Button: React.FC<
   endIcon,
   disabled,
   isLoading,
-  collapse,
   role,
   ...props
 }) => {
@@ -279,24 +281,22 @@ export const Button: React.FC<
       {...props}
     >
       {isLoading && (
-        <LoadingSpinner
-          className={css`
-            margin-right: 0.5rem;
-            fill: var(--mi-normal-background-color);
-          `}
-        />
+        <span className="startIcon" aria-hidden>
+          <LoadingSpinner
+            className={css`
+              fill: var(--mi-normal-background-color);
+            `}
+          />
+        </span>
       )}
       {!isLoading && startIcon ? (
-        <span
-          className={`startIcon ${collapse ? "collapsed" : ""}`}
-          aria-hidden
-        >
+        <span className="startIcon" aria-hidden>
           {startIcon}
         </span>
       ) : (
         ""
       )}
-      {!collapse && children}
+      {children}
       {endIcon ? (
         <span className="endIcon" aria-hidden>
           {endIcon}

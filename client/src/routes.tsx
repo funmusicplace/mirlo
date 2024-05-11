@@ -286,15 +286,6 @@ const routes: RouteObject[] = [
                   return { Component };
                 },
               },
-              {
-                path: "new-release",
-                async lazy() {
-                  const { default: Component } = await import(
-                    "components/ManageArtist/NewReleaseRedirect"
-                  );
-                  return { Component };
-                },
-              },
             ],
           },
         ],

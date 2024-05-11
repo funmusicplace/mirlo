@@ -15,7 +15,12 @@ export const QUERY_KEY_AUTH = "auth";
  */
 export const QUERY_KEY_ARTISTS = "artists";
 
-export type QueryTag = typeof QUERY_KEY_AUTH | typeof QUERY_KEY_ARTISTS;
+export const QUERY_KEY_TRACK_GROUPS = "trackGroups";
+
+export type QueryTag =
+  | typeof QUERY_KEY_AUTH
+  | typeof QUERY_KEY_ARTISTS
+  | typeof QUERY_KEY_TRACK_GROUPS;
 
 export type QueryArgs = {
   artistId: number;

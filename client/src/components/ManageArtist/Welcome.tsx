@@ -13,6 +13,7 @@ import { css } from "@emotion/css";
 import { useNavigate } from "react-router-dom";
 import useErrorHandler from "services/useErrorHandler";
 import { useAuthContext } from "state/AuthContext";
+import { NewAlbumButton } from "./NewAlbumButton";
 
 const PageWrapper = styled.div`
   padding: 1rem;
@@ -141,15 +142,9 @@ const Welcome = () => {
             `}
           >
             {steps[step] === "avatar" && localArtist && (
-              <ButtonLink
-                to={`/manage/artists/${localArtist.id}/new-release`}
-                isLoading={isLoading}
-                compact
-                disabled={isButtonDisabled}
-                startIcon={<FaPlus />}
-              >
+              <NewAlbumButton artist={localArtist}>
                 {t("addAlbum")}
-              </ButtonLink>
+              </NewAlbumButton>
             )}
             <Button
               isLoading={isLoading}
