@@ -45,9 +45,6 @@ const Releases = () => {
   return (
     <div
       className={css`
-        a {
-          color: var(--mi-normal-foreground-color);
-        }
         @media screen and (max-width: ${bp.medium}px) {
           margin-bottom: 0rem;
         }

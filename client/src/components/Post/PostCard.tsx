@@ -1,10 +1,10 @@
 import React from "react";
 import styled from "@emotion/styled";
 import { css } from "@emotion/css";
-import Box from "./Box";
+import Box from "components/common/Box";
 import { Link } from "react-router-dom";
 import { getArtistUrl, getPostURLReference } from "utils/artist";
-import MarkdownWrapper from "./MarkdownWrapper";
+import MarkdownWrapper from "components/common/MarkdownWrapper";
 import Overlay from "components/common/Overlay";
 import { getHtmlExcerpt } from "utils/getHtmlExcerpt";
 import { useLinkContainer } from "utils/useLinkContainer";
@@ -126,6 +126,7 @@ const PostCard: React.FC<{
                     css`
                       font-weight: normal;
                       text-align: center;
+                      color: var(--mi-normal-foreground-color);
                     `
                   }
                 >

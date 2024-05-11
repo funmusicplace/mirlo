@@ -33,6 +33,7 @@ const ArtistFormLinksView: React.FC<{
                 display: inline-flex;
                 align-items: center;
                 margin-right: 0.75rem;
+                color: var(--mi-normal-foreground-color);
 
                 > svg {
                   margin-right: 0.5rem;

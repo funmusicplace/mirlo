@@ -3,10 +3,10 @@ import { css } from "@emotion/css";
 import { SectionHeader } from "./Home";
 import WidthContainer from "components/common/WidthContainer";
 import { useTranslation } from "react-i18next";
-import PostCard from "components/common/PostCard";
-import { PostGrid } from "components/Artist/ArtistPosts";
+import PostCard from "components/Post/PostCard";
 import { useQuery } from "@tanstack/react-query";
 import { queryPosts } from "queries";
+import PostGrid from "components/Post/PostGrid";
 
 const Posts = () => {
   const { t } = useTranslation("translation", { keyPrefix: "home" });
@@ -36,18 +36,9 @@ const Posts = () => {
           <div
             className={css`
               margin: var(--mi-side-paddings-xsmall);
-              a {
-                color: var(--mi-normal-foreground-color);
-              }
             `}
           >
-            <PostGrid as="ul" role="list" aria-labelledby={headingId}>
-              {posts?.results?.map((p) => (
-                <li key={p.id}>
-                  <PostCard p={p} />
-                </li>
-              ))}
-            </PostGrid>
+            <PostGrid posts={posts?.results} ariaLabelledBy={headingId} />
           </div>
         </div>
       </WidthContainer>

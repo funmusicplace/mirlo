@@ -18,6 +18,7 @@ const Tabs = styled.ul`
       font-size: 1.2rem;
       transition: 0.1s border-bottom;
       border-bottom: 4px solid transparent;
+      color: var(--mi-normal-foreground-color);
 
       @media screen and (max-width: ${bp.medium}px) {
         padding: 0rem 0.25rem calc(0.9rem - 4px) 0.25rem;
