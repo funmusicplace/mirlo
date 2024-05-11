@@ -69,11 +69,14 @@ const SupportMirlo = () => {
                   padding: 1rem;
                   text-decoration: none;
                   text-align: center;
+
+                  background-color: var(--mi-black) !important;
+                  color: var(--mi-white) !important;
+
                   &:hover {
                     text-decoration: underline;
                   }
 
-                  color: var(--mi-white);
                   @media (prefers-color-scheme: dark) {
                     background-color: var(--mi-white) !important;
                     color: var(--mi-black) !important;

@@ -1,27 +1,18 @@
 import { Queue, QueueEvents } from "bullmq";
-import * as Minio from "minio";
 
 import sharpConfig from "../config/sharp";
 
-import { SUPPORTED_IMAGE_MIME_TYPES } from "../config/supported-media-types";
 import { REDIS_CONFIG } from "../config/redis";
 import {
   createBucketIfNotExists,
   finalArtistAvatarBucket,
   finalArtistBannerBucket,
-  finalCoversBucket,
   incomingArtistAvatarBucket,
   incomingArtistBannerBucket,
-  incomingCoversBucket,
   minioClient,
-} from "./minio";
+} from "../utils/minio";
 import prisma from "@mirlo/prisma";
-import {
-  APIContext,
-  APIFile,
-  checkFileType,
-  checkFileTypeFromStream,
-} from "./file";
+import { APIContext } from "../utils/file";
 import { logger } from "../jobs/queue-worker";
 
 const { MINIO_HOST = "", MINIO_API_PORT = 9000 } = process.env;

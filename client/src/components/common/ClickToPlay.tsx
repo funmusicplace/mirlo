@@ -27,7 +27,7 @@ const TrackgroupButtons = styled.div`
   justify-content: flex-end;
   z-index: 2;
 
-  & > :first-of-type {
+  & > div:first-of-type {
     width: 100%;
     flex-grow: 1;
 
@@ -48,7 +48,7 @@ const TrackgroupButtons = styled.div`
   }
 
   @media (max-width: ${bp.large}px) {
-    & > :first-of-type {
+    & > div:first-of-type {
       button {
         height: 2rem;
         font-size: 1rem;
@@ -62,7 +62,7 @@ const TrackgroupButtons = styled.div`
   }
 
   @media (max-width: ${bp.small}px) {
-    & > :first-of-type {
+    & > div:first-of-type {
       display: none;
     }
     button {

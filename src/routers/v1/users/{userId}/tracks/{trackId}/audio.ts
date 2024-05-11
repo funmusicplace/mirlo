@@ -5,7 +5,7 @@ import {
   userHasPermission,
 } from "../../../../../../auth/passport";
 import { doesTrackBelongToUser } from "../../../../../../utils/ownership";
-import { processTrackAudio } from "../../../../../../utils/processTrackAudio";
+import { processTrackAudio } from "../../../../../../queues/processTrackAudio";
 import busboy from "connect-busboy";
 
 type Params = {

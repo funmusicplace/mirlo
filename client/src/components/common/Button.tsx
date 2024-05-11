@@ -4,7 +4,11 @@ import styled from "@emotion/styled";
 import LoadingSpinner from "./LoadingSpinner";
 import { css } from "@emotion/css";
 import { bp } from "../../constants";
-import { Link } from "react-router-dom";
+import {
+  RelativeRoutingType,
+  useHref,
+  useLinkClickHandler,
+} from "react-router-dom";
 
 export interface Compactable {
   compact?: boolean;
@@ -26,6 +30,7 @@ const CustomButton = styled.button<Compactable>`
   transition: 0.25s background-color, 0.25s color, 0.25s border-radius,
     0.25s filter;
   font-size: 1rem;
+  text-decoration: none;
   line-height: 1rem;
   height: 2rem;
   ${(props) => (props.onlyIcon ? "height: 2rem;" : "")};
@@ -54,7 +59,7 @@ const CustomButton = styled.button<Compactable>`
           color: ${
             props.color
               ? props.color
-              : `var(--mi-${props.role ?? "primary"}-color)`
+              : `var(--mi-${props.buttonRole ?? "primary"}-color)`
           };
           margin-right: 0;
           margin-left: .3rem;
@@ -62,13 +67,14 @@ const CustomButton = styled.button<Compactable>`
           padding: 0 !important;
           background-color: transparent !important;
           font-size: inherit;
+          text-decoration: underline;
           line-height: inherit;
 
           &:hover:not(:disabled) {
             color: ${
               props.color
                 ? props.color
-                : `var(--mi-${props.role ?? "primary"}-color)`
+                : `var(--mi-${props.buttonRole ?? "primary"}-color)`
             };
           }
         `;
@@ -79,7 +85,7 @@ const CustomButton = styled.button<Compactable>`
           color: ${
             props.color
               ? props.color
-              : `var(--mi-${props.role ?? "primary"}-color)`
+              : `var(--mi-${props.buttonRole ?? "primary"}-color)`
           };
           ${props.compact ? "" : "height: 2.5rem; min-width: 5rem;"}
           border-radius: 9999px !important;
@@ -89,19 +95,18 @@ const CustomButton = styled.button<Compactable>`
           display: inline-flex;
           line-height: 1rem;
           padding: 1rem;
-          text-decoration: none;
           text-align: center;
 
           &:hover:not(:disabled) {
             color: ${
               props.color
                 ? props.color
-                : `var(--mi-${props.role ?? "secondary"}-color)`
+                : `var(--mi-${props.buttonRole ?? "secondary"}-color)`
             };
             background-color:  ${
               props.color
                 ? props.color
-                : `var(--mi-${props.role ?? "primary"}-color)`
+                : `var(--mi-${props.buttonRole ?? "primary"}-color)`
             };
           }
 
@@ -120,13 +125,13 @@ const CustomButton = styled.button<Compactable>`
           color: ${
             props.color
               ? props.color
-              : `var(--mi-${props.role ?? "primary"}-color)`
+              : `var(--mi-${props.buttonRole ?? "primary"}-color)`
           };
           background-color: var(--mi-lighten-background-color);
           border: 1px ${props.variant === "dashed" ? "dashed" : "solid"} ${
             props.color
               ? props.color
-              : `var(--mi-${props.role ?? "primary"}-color)`
+              : `var(--mi-${props.buttonRole ?? "primary"}-color)`
           };
           padding: ${props.compact ? ".3rem .5rem" : "1rem"};
           font-weight: bold;
@@ -135,17 +140,17 @@ const CustomButton = styled.button<Compactable>`
             color: ${
               props.color
                 ? props.color
-                : `var(--mi-${props.role ?? "secondary"}-color)`
+                : `var(--mi-${props.buttonRole ?? "secondary"}-color)`
             };
             background-color: ${
               props.color
                 ? props.color
-                : `var(--mi-${props.role ?? "primary"}-color)`
+                : `var(--mi-${props.buttonRole ?? "primary"}-color)`
             };
             border: 1px ${props.variant === "dashed" ? "dashed" : "solid"} ${
               props.color
                 ? props.color
-                : `var(--mi-${props.role ?? "primary"}-color)`
+                : `var(--mi-${props.buttonRole ?? "primary"}-color)`
             };
           }
 
@@ -175,22 +180,20 @@ const CustomButton = styled.button<Compactable>`
           }
           padding: ${props.compact ? ".3rem .5rem" : "1rem"};
           padding: ${props.onlyIcon ? ".5rem .5rem" : ".6rem .6rem"};
-          background-color:  var(--mi-${props.role ?? "secondary"}-color);
+
+          background-color: var(--mi-${props.buttonRole ?? "secondary"}-color);
+          color: var(--mi-primary-color);
 
           ${
             props.transparent
-              ? "background-color:  transparent; font-weight: bold;"
+              ? "background-color:  transparent; font-weight: bold; color: var(--mi-normal-foreground-color);"
               : ""
           };
           ${props.thin ? "font-weight: normal !important;" : ""};
-          color:  var(--mi-${props.role ?? "primary"}-color);
-          color:  ${
-            props.transparent ? "var(--mi-normal-foreground-color)" : ""
-          };
 
           &:hover:not(:disabled) {
-            background-color: var(--mi-${props.role ?? "primary"}-color);
-            color: var(--mi-${props.role ?? "secondary"}-color);
+            background-color: var(--mi-primary-color);
+            color: var(--mi-secondary-color);
           }
           @media screen and (max-width: ${bp.medium}px) {
               ${props.collapsible ? "border-radius: 100%;" : ""}
@@ -243,22 +246,21 @@ const CustomButton = styled.button<Compactable>`
   }
 `;
 
-export interface ButtonProps
-  extends Compactable,
-    React.HTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps extends Compactable {
   children?: React.ReactNode;
   startIcon?: React.ReactElement;
   endIcon?: React.ReactElement;
   disabled?: boolean;
   style?: React.CSSProperties;
   className?: string;
-  type?: React.ButtonHTMLAttributes<HTMLButtonElement>["type"];
   isLoading?: boolean;
   collapse?: boolean;
   as?: React.ElementType<any, keyof React.JSX.IntrinsicElements>;
 }
 
-export const Button: React.FC<ButtonProps> = ({
+export const Button: React.FC<
+  ButtonProps & React.ButtonHTMLAttributes<HTMLButtonElement>
+> = ({
   children,
   onClick,
   startIcon,
@@ -306,16 +308,25 @@ export const Button: React.FC<ButtonProps> = ({
   );
 };
 
-export const ButtonLink: React.FC<ButtonProps & { to: string }> = ({
-  ...props
-}) => {
+export const ButtonAnchor: React.FC<
+  ButtonProps & React.AnchorHTMLAttributes<HTMLAnchorElement>
+> = ({ ...props }) => {
   return (
-    <Button
-      // Use the "Link" element from react-router as the base element for the button
-      as={Link}
-      {...props}
-    />
+    /*
+    // @ts-ignore Because of as="a", we can pass anchor attributes here - the types just don't like it. */
+    <Button as="a" {...props} />
   );
+};
+
+export const ButtonLink: React.FC<
+  ButtonProps & {
+    to: string;
+    relative?: RelativeRoutingType;
+  } & React.AnchorHTMLAttributes<HTMLAnchorElement>
+> = ({ to, relative, ...props }) => {
+  const handleClick = useLinkClickHandler(to, { relative });
+  const href = useHref(to, { relative });
+  return <ButtonAnchor onClick={handleClick} href={href} {...props} />;
 };
 
 export default Button;

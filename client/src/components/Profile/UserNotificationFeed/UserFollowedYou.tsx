@@ -11,7 +11,8 @@ const UserFollowedYou: React.FC<{ notification: Notification }> = ({
   return (
     <>
       <div>
-        {notification.relatedUser?.name} followed your artist:{" "}
+        {notification.relatedUser?.name ?? notification.relatedUser?.email}{" "}
+        followed your artist:{" "}
         {notification.artist && (
           <Link to={getArtistUrl(notification.artist)}>
             {notification.artist?.name}

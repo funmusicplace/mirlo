@@ -6,7 +6,7 @@ import PostCard from "components/common/PostCard";
 import { useArtistContext } from "state/ArtistContext";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import { FaRss } from "react-icons/fa";
-import Button from "components/common/Button";
+import { ButtonAnchor } from "components/common/Button";
 import styled from "@emotion/styled";
 
 export const PostGrid = styled.div<{}>`
@@ -41,13 +41,13 @@ const ArtistPosts: React.FC = () => {
     <div>
       <SpaceBetweenDiv>
         <div></div>
-        <a
+        <ButtonAnchor
           target="_blank"
           href={`${import.meta.env.VITE_API_DOMAIN}/v1/artists/${artist.id}/feed?format=rss`}
           rel="noreferrer"
-        >
-          <Button onlyIcon startIcon={<FaRss />} />
-        </a>
+          onlyIcon
+          startIcon={<FaRss />}
+        />
       </SpaceBetweenDiv>
       <div
         className={css`

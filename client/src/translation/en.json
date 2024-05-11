@@ -97,6 +97,7 @@
     "downloadDisclaimer": "we strongly encourage you to download purchases, we're not always in control of what might be required of us legally to keep the platform and releases up. We think people should try, as much as possible, to keep a local archive of the art that they buy online.",
     "error": "Something went wrong",
     "buy": "Buy",
+    "nameYourPriceLabel": "Name your price",
     "preOrder": "Pre-order",
     "released": "Released: {{date}}",
     "notImplemented": "Buying an album for variable price hasn't been implemented yet",
@@ -334,6 +335,17 @@
     "looksGood": "Alright, looks good, let's upload them!",
     "rightToUpload": "By uploading this list of e-mails, you solemnly swear that you have permission from the email owners to upload the emails."
   },
+  "artistSupporters": {
+    "supporters": "Supporters",
+    "totalComingIn": "Total coming in",
+    "totalSupporters": "{{ count }} supporters",
+    "followers": "Followers ({{count}})",
+    "name": "Name",
+    "email": "Email",
+    "tier": "Tier",
+    "amount": "Amount",
+    "noSupportersYet": "No supporters yet, share your profile with others to grow your community"
+  },
   "subscriptionForm": {
     "supporters": "Manage supporters",
     "subscriptionUpdated": "Subscription updated",
@@ -360,6 +372,10 @@
     "notifications": "Notifications",
     "readPost": "Read post",
     "viewAlbum": "View album"
+  },
+  "kickstarter": {
+    "launchedAKickstarter": "Mirlo has launched a Kickstarter!",
+    "helpUsReachOurGoal": "Help us reach our goal!"
   },
   "admin": {
     "users": "Users",

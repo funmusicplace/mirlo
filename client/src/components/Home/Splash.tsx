@@ -42,10 +42,6 @@ export const SplashTitle = styled.h2`
 export const SplashButtonWrapper = styled.div`
   display: flex;
   gap: 16px;
-
-  a {
-    background-color: transparent;
-  }
 `;
 
 const Splash = () => {

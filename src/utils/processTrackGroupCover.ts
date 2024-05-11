@@ -1,7 +1,7 @@
 import { finalCoversBucket, incomingCoversBucket } from "./minio";
 import prisma from "@mirlo/prisma";
 import { APIContext } from "./file";
-import { sendToImageQueue } from "./processImages";
+import { sendToImageQueue } from "../queues/processImages";
 
 const processTrackGroupCover = (ctx: APIContext) => {
   return async (trackGroupId: number) => {

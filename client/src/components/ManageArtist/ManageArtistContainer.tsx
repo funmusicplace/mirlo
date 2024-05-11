@@ -48,7 +48,6 @@ export const ArtistPageWrapper: React.FC<{
 
           a {
             color: var(--mi-normal-foreground-color);
-            font-weight: normal;
           }
           @media screen and (max-width: ${bp.medium}px) {
             padding: 0rem !important;

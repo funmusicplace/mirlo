@@ -72,6 +72,7 @@ interface TrackGroup {
   userTrackGroupPurchases?: { userId: number }[];
   userTrackGroupWishlist?: { userId: number }[];
   platformPercent: number;
+  isPriceFixed: boolean;
 }
 
 interface Post {

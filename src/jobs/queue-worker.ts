@@ -10,6 +10,8 @@ import uploadAudioJob from "./upload-audio";
 import generateAlbumJob from "./generate-album";
 
 import optimizeImage from "./optimize-image";
+import sendMail from "./send-mail";
+import "../queues/send-mail-queue";
 
 import { REDIS_CONFIG } from "../config/redis";
 
@@ -41,6 +43,7 @@ yargs // eslint-disable-line
     // audioDurationQueue();
     imageQueue();
     generateAlbumQueueWorker();
+    sendMailQueue();
   })
   .help().argv;
 
@@ -58,6 +61,29 @@ async function imageQueue() {
 
   worker.on("error", (err: any) => {
     logger.error("error:optimize-image", err);
+  });
+}
+
+async function sendMailQueue() {
+  const worker = new Worker("send-mail", sendMail, {
+    ...workerOptions,
+    limiter: {
+      max: parseInt(process.env.MAX_LIMIT || "1"),
+      duration: parseInt(process.env.DURATION_LIMIT || "1000"),
+    },
+  });
+  logger.info("Send mail worker started");
+
+  worker.on("completed", (job: Job) => {
+    logger.info("completed:send-mail");
+  });
+
+  worker.on("failed", (job?: Job, err?: any) => {
+    logger.error("failed:send-mail", err);
+  });
+
+  worker.on("error", (err: any) => {
+    logger.error("error:send-mail", err);
   });
 }
 

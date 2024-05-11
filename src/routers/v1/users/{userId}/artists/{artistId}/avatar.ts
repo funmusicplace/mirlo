@@ -3,7 +3,7 @@ import {
   artistBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../../auth/passport";
-import { processArtistAvatar } from "../../../../../../utils/processImages";
+import { processArtistAvatar } from "../../../../../../queues/processImages";
 import busboy from "connect-busboy";
 import { User } from "@mirlo/prisma/client";
 import prisma from "@mirlo/prisma";
