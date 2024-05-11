@@ -31,19 +31,26 @@ const Kickstarter = () => {
           margin: 0;
           display: flex;
           min-height: auto !important;
+          padding: 1rem !important;
           flex-direction: row;
           align-items: center;
           gap: 2rem;
 
           @media screen and (max-width: ${bp.medium}px) {
             margin: 0;
-            flex-direction: column;
+            gap: 1rem;
+            padding: 0.5rem !important;
           }
         `}
       >
         <h2
           className={css`
             margin-bottom: 0;
+
+            @media screen and (max-width: ${bp.medium}px) {
+              font-size: var(--mi-font-size-small) !important;
+              line-height: 1.2rem !important;
+            }
           `}
         >
           {t("launchedAKickstarter")}
@@ -66,6 +73,10 @@ const Kickstarter = () => {
               @media (prefers-color-scheme: dark) {
                 background-color: var(--mi-white) !important;
                 color: var(--mi-black) !important;
+              }
+
+              @media screen and (max-width: ${bp.medium}px) {
+                font-size: var(--mi-font-size-xsmall) !important;
               }
             `}
           >
