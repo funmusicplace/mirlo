@@ -72,6 +72,11 @@ services:
     command: yarn api:test
     restart: no
     profiles: [test]
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./test
+          target: /var/www/api/test
 
 networks:
   test-network:
