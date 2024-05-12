@@ -9,6 +9,7 @@ import { FaFileUpload } from "react-icons/fa";
 
 export const Img = styled.img<{ rounded?: boolean }>`
   transition: .25s background-color, .25s filter;
+  aspect-ratio: 1/1;
 
   &:hover {
     filter: brightness(80%);
@@ -38,6 +39,8 @@ export const ReplaceSpan = styled.span<{ rounded?: boolean }>`
   z-index: 999;
   display: block;
   ${({ rounded }) => (rounded ? "border-radius: 100% !important" : "")}}
+
+
 `;
 
 export const Spinner: React.FC<{ rounded?: boolean }> = ({ rounded }) => {
@@ -128,7 +131,6 @@ const UploadImage: React.FC<{
   width?: string;
   height?: string;
   imageTypeDescription?: string;
-  replace?: string;
 }> = ({
   formName,
   existingCover,
@@ -138,7 +140,6 @@ const UploadImage: React.FC<{
   width,
   height,
   imageTypeDescription,
-  replace,
 }) => {
   const [existingImage, setExistingImage] = React.useState(existingCover);
   const formContext = useFormContext();

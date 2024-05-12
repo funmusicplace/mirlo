@@ -181,7 +181,17 @@ const UploadArtistImage: React.FC<{
                   }
                 `}
               >
-                <ReplaceSpan rounded={rounded}>Replace Image</ReplaceSpan>
+                <ReplaceSpan
+                  rounded={rounded}
+                  className={css`
+                    @media (max-width: ${bp.medium}px) {
+                      font-size: var(--mi-font-size-xsmall) !important;
+                      height: 96% !important;
+                    }
+                  `}
+                >
+                  Replace Image
+                </ReplaceSpan>
                 <Img src={existingImage} alt={imageType} rounded={rounded} />
               </div>
             )}
