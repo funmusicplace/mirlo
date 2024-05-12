@@ -256,6 +256,7 @@ export const ArtistForm: React.FC<{
                       flex: 55%;
                       @media (max-width: ${bp.medium}px) {
                         flex-direction: column;
+                        padding-bottom: 2rem !important;
                       }
                     `}
                   >
