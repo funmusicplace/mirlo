@@ -165,9 +165,9 @@ const AutoComplete: React.FC<{
             opacity: 0.7;
           }
           @media (prefers-color-scheme: dark) {
-            color: var(--mi-black) !important;
+            color: var(--mi-white) !important;
             &::placeholder {
-              color: var(--mi-black) !important;
+              color: var(--mi-white) !important;
               opacity: 0.3;
             }
           }

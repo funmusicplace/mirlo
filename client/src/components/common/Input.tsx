@@ -37,6 +37,7 @@ export const InputEl = styled.input`
 
   @media (prefers-color-scheme: dark) {
     background-color: rgba(125, 125, 125, 0.2) !important;
+    color: white !important;
   }
 `;
 
