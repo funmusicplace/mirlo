@@ -21,9 +21,9 @@ const wrapper = css`
   align-items: center;
 `;
 
-const ChildrenWrapper = styled.div<{ title?: boolean }>`
+const ChildrenWrapper = styled.div<{ title?: boolean; noPadding?: boolean }>`
   overflow-y: auto;
-  padding: 20px;
+  ${(props) => (props.noPadding ? "padding: 0;" : "padding: 20px;")}
   margin-bottom: 1rem;
   margin-left: 0rem;
   ::-webkit-scrollbar {
@@ -122,6 +122,7 @@ export const Modal: React.FC<{
   size?: "small";
   className?: string;
   contentClassName?: string;
+  noPadding?: boolean;
 }> = ({
   children,
   open,
@@ -130,6 +131,7 @@ export const Modal: React.FC<{
   title,
   className,
   contentClassName,
+  noPadding,
 }) => {
   const [container] = React.useState(() => {
     // This will be executed only on the initial render
@@ -207,7 +209,7 @@ export const Modal: React.FC<{
               aria-label="close"
             ></Button>
           </SpaceBetweenDiv>
-          <ChildrenWrapper className={contentClassName}>
+          <ChildrenWrapper className={contentClassName} noPadding={noPadding}>
             {children}
           </ChildrenWrapper>
         </Content>

@@ -14,11 +14,26 @@ import ArtistFormColors from "./ArtistFormColors";
 import ArtistSlugInput from "./ArtistSlugInput";
 import { useCreateArtistMutation, useUpdateArtistMutation } from "queries";
 import { useAuthContext } from "state/AuthContext";
+import styled from "@emotion/styled";
 
 export interface ShareableTrackgroup {
   creatorId: number;
   slug: string;
 }
+
+export const ArtistFormSection = styled.div<{ isOdd?: boolean }>`
+  display: flex;
+  padding: 2rem !important;
+  margin-bottom: 1rem;
+  ${(props) =>
+    !props.isOdd ? "background: var(--mi-lighten-background-color);" : ""}
+  gap: 0;
+
+  @media (max-width: ${bp.medium}px) {
+    flex-direction: column;
+    padding: 1rem !important;
+  }
+`;
 
 type FormData = {
   name: string;
@@ -118,83 +133,172 @@ export const ArtistForm: React.FC<{
 
   return (
     <Modal
+      noPadding
       open={open}
       onClose={onClose}
       title={existing ? "Edit artist" : "Create an artist"}
+      className={css`
+        div:nth-child(1) {
+          margin-bottom: 0;
+        }
+      `}
     >
-      <div
-        className={css`
-          margin-top: 0.5rem;
-        `}
-      >
+      <div>
         <FormProvider {...methods}>
           <form onSubmit={handleSubmit(onValidSubmit)}>
-            <div
-              className={css`
-                display: flex;
-                margin-bottom: 1rem;
-              `}
-            >
-              <div
+            <div>
+              <ArtistFormSection
                 className={css`
-                  flex: 50%;
+                  display: grid !important;
+                  grid-template-columns: repeat(5, 1fr);
+                  grid-template-rows: repeat(3, 1fr);
+                  grid-gap: 5% !important;
                   @media (max-width: ${bp.medium}px) {
-                    flex-direction: column;
+                    grid-template-rows: repeat(10, 0.25fr);
+                    row-gap: 0 !important;
                   }
                 `}
               >
-                {existing && (
-                  <UploadArtistImage
-                    existing={existing}
-                    imageTypeDescription="a background image"
-                    imageType="banner"
-                    height="auto"
-                    width="100%"
-                    maxDimensions="2500x2500"
-                  />
-                )}
-              </div>
+                <div
+                  className={css`
+                    grid-column: 1 / 3;
+                    grid-row: 1 / 5;
+                    @media (max-width: ${bp.medium}px) {
+                      grid-column: 1 / 3;
+                      grid-row: 1 / 5;
+                      input {
+                        display: none;
+                      }
+                    }
+                  `}
+                >
+                  <FormComponent>
+                    {existing && (
+                      <UploadArtistImage
+                        existing={existing}
+                        imageTypeDescription="your avatar"
+                        imageType="avatar"
+                        height="auto"
+                        width="100%"
+                        maxDimensions="1500x1500"
+                      />
+                    )}
+                  </FormComponent>
+                </div>
 
-              <div
+                <div
+                  className={css`
+                    padding-bottom: 1rem;
+                    grid-column: 3 / 6;
+                    grid-row: 1;
+                    @media (max-width: ${bp.medium}px) {
+                      grid-row: 2;
+                    }
+                  `}
+                >
+                  <FormComponent>
+                    <label>{t("displayName")} </label>
+                    <InputEl
+                      {...register("name", { required: true })}
+                      className={css`
+                        font-size: 1.5rem !important;
+                        @media (max-width: ${bp.medium}px) {
+                          font-size: 1rem !important;
+                        }
+                      `}
+                    />
+                  </FormComponent>
+                </div>
+
+                <div
+                  className={css`
+                    grid-column: 3 / 6;
+                    grid-row: 2 / 5;
+                    @media (max-width: ${bp.medium}px) {
+                      grid-column: 1 / 6;
+                      grid-row: 6 / 11;
+                    }
+                  `}
+                >
+                  <FormComponent>
+                    <label>{t("bio")}</label>
+                    <TextArea {...register("bio")} rows={7} />
+                  </FormComponent>
+                </div>
+              </ArtistFormSection>
+              <ArtistFormSection isOdd>
+                <div
+                  className={css`
+                    display: flex;
+                    width: 100%;
+                    margin-bottom: 1rem;
+                    gap: 5%;
+                    @media (max-width: ${bp.medium}px) {
+                      flex-direction: column;
+                    }
+                  `}
+                >
+                  <div
+                    className={css`
+                      flex: 35%;
+                      flex-direction: column;
+                    `}
+                  >
+                    <FormComponent>
+                      {existing && <ArtistFormColors />}
+                    </FormComponent>
+                  </div>
+                  <div
+                    className={css`
+                      flex: 55%;
+                      @media (max-width: ${bp.medium}px) {
+                        flex-direction: column;
+                      }
+                    `}
+                  >
+                    <FormComponent>
+                      <label>Background Image</label>
+                      {existing && (
+                        <UploadArtistImage
+                          existing={existing}
+                          imageTypeDescription="a background image"
+                          imageType="banner"
+                          height="auto"
+                          width="100%"
+                          maxDimensions="2500x2500"
+                        />
+                      )}
+                    </FormComponent>
+                  </div>
+                </div>
+              </ArtistFormSection>
+
+              <ArtistFormSection>
+                <FormComponent
+                  className={css`
+                    width: 100%;
+                  `}
+                >
+                  <label>{t("urlSlug")} </label>
+                  <ArtistSlugInput currentArtistId={existingId} />
+                </FormComponent>
+              </ArtistFormSection>
+
+              <ArtistFormSection
+                isOdd
                 className={css`
-                  flex: 50%;
-                  margin-left: 1rem;
+                  margin-bottom: 0 !important;
                 `}
               >
-                {existing && (
-                  <UploadArtistImage
-                    existing={existing}
-                    imageTypeDescription="your avatar"
-                    imageType="avatar"
-                    height="auto"
-                    width="100%"
-                    maxDimensions="1500x1500"
-                  />
-                )}
-              </div>
-            </div>
-
-            <div>
-              <FormComponent>
-                <label>{t("displayName")} </label>
-                <InputEl {...register("name", { required: true })} />
-              </FormComponent>
-
-              <FormComponent>{existing && <ArtistFormColors />}</FormComponent>
-
-              <FormComponent>
-                <label>{t("urlSlug")} </label>
-                <ArtistSlugInput currentArtistId={existingId} />
-              </FormComponent>
-
-              <FormComponent>
-                <label>{t("bio")}</label>
-                <TextArea {...register("bio")} rows={7} />
-              </FormComponent>
-
-              <Button type="submit" disabled={isPending} isLoading={isPending}>
-                {existing ? t("saveArtist") : t("createArtist")}
-              </Button>
+                <Button
+                  type="submit"
+                  variant="big"
+                  disabled={isPending}
+                  isLoading={isPending}
+                >
+                  {existing ? t("saveArtist") : t("createArtist")}
+                </Button>
+              </ArtistFormSection>
             </div>
           </form>
         </FormProvider>

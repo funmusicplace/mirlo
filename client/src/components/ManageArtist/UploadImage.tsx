@@ -8,18 +8,36 @@ import styled from "@emotion/styled";
 import { FaFileUpload } from "react-icons/fa";
 
 export const Img = styled.img<{ rounded?: boolean }>`
-  max-width: 150px;
   transition: .25s background-color, .25s filter;
-  @media (max-width: ${bp.medium}px) {
-    max-width: 100%;
-  }
 
   &:hover {
     filter: brightness(80%);
     cursor: pointer;
   }
+  @media (max-width: ${bp.medium}px) {
+    max-width: 100%;
+  }
 
   ${({ rounded }) => (rounded ? "border-radius: 100%" : "")}}
+`;
+
+export const ReplaceSpan = styled.span<{ rounded?: boolean }>`
+  position: absolute;
+  text-align: center;
+  vertical-align: middle;
+  line-height: 100%;
+  width: 100%;
+  height: 98.5%;
+  cursor: pointer;
+  padding-top: 47%;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  justify-content: center;
+  z-index: 999;
+  display: block;
+  ${({ rounded }) => (rounded ? "border-radius: 100% !important" : "")}}
 `;
 
 export const Spinner: React.FC<{ rounded?: boolean }> = ({ rounded }) => {
@@ -60,8 +78,14 @@ export const UploadPrompt: React.FC<{
         flex-direction: column;
         padding: 2rem;
         text-align: center;
-        width: ${width}px;
-        height: ${height}px;
+        aspect-ratio: 1 / 1;
+        background: radial-gradient(
+          circle,
+          rgba(96, 96, 96, 0.1) 3%,
+          rgba(125, 125, 125, 0.25) 90%
+        );
+        width: ${width};
+        height: ${height};
         display: flex;
         align-items: center;
         justify-content: center;
@@ -77,6 +101,10 @@ export const UploadPrompt: React.FC<{
 
         &:hover {
           background-color: var(--mi-darken-background-color);
+        }
+        @media (max-width: ${bp.medium}px) {
+          padding: 0.2rem;
+          font-size: var(--mi-font-size-small);
         }
       `}
     >
@@ -100,6 +128,7 @@ const UploadImage: React.FC<{
   width?: string;
   height?: string;
   imageTypeDescription?: string;
+  replace?: string;
 }> = ({
   formName,
   existingCover,
@@ -109,6 +138,7 @@ const UploadImage: React.FC<{
   width,
   height,
   imageTypeDescription,
+  replace,
 }) => {
   const [existingImage, setExistingImage] = React.useState(existingCover);
   const formContext = useFormContext();

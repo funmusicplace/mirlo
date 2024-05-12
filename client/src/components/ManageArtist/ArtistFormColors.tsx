@@ -12,11 +12,14 @@ const ArtistFormColors = () => {
       <div
         className={css`
           display: flex;
+          width: 100%;
+          height: 100%;
+          flex-direction: column;
           margin-bottom: 0.75rem;
 
           > div {
             margin-right: 1rem;
-            margin-top: 0rem;
+            margin-top: 1rem;
           }
 
           > div > div {
@@ -26,6 +29,7 @@ const ArtistFormColors = () => {
 
           div:last-child {
             margin-right: 0rem;
+            width: 100%;
           }
 
           span {
@@ -40,12 +44,8 @@ const ArtistFormColors = () => {
             margin-top: 0rem !important;
           }
 
-          @media (max-width: ${bp.medium}px) {
-            flex-direction: column;
-
-            div {
-              margin-right: 0;
-            }
+          div {
+            margin-right: 0;
           }
         `}
       >
