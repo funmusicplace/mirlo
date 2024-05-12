@@ -13,6 +13,7 @@ import { ArtistSection } from "components/Artist/Artist";
 import styled from "@emotion/styled";
 import { useQuery } from "@tanstack/react-query";
 import { queryManagedArtist, useDeleteArtistMutation } from "queries";
+import { AiOutlineWarning } from "react-icons/ai";
 import { useAuthContext } from "state/AuthContext";
 
 export const MainButtons = styled.div`
@@ -129,7 +130,21 @@ const ManageArtist: React.FC<{}> = () => {
 
       <ArtistSection>
         <div>
-          <h2>Danger</h2>
+          <label
+            className={css`
+              svg {
+                margin-bottom: -0.15rem;
+                height: 1.2rem;
+              }
+            `}
+          >
+            <AiOutlineWarning
+              className={css`
+                font-size: 1.5rem;
+              `}
+            />
+            {t("terminationDanger")}
+          </label>
         </div>
 
         <div
