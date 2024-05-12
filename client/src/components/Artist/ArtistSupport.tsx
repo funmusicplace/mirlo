@@ -14,7 +14,7 @@ import { useAuthContext } from "state/AuthContext";
 import { useQueryClient } from "@tanstack/react-query";
 import { QUERY_KEY_AUTH, queryKeyIncludes } from "queries/queryKeys";
 
-export const PostGrid = styled.div<{}>`
+const ArtistSupportGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(3, 31.6%);
   gap: 4% 2.5%;
@@ -143,11 +143,11 @@ const ArtistSupport: React.FC = () => {
           {t("noSubscriptionTiersYet")}
         </Box>
       )}
-      <PostGrid>
+      <ArtistSupportGrid>
         {artist.subscriptionTiers
           ?.filter((p) => !p.isDefaultTier)
           .map((p) => <ArtistSupportBox key={p.id} subscriptionTier={p} />)}
-      </PostGrid>
+      </ArtistSupportGrid>
     </>
   );
 };
