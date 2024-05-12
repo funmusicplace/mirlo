@@ -1,31 +1,17 @@
 import styled from "@emotion/styled";
 import React from "react";
-import { bp } from "../../constants";
 import { useGlobalStateContext } from "state/GlobalState";
 import api from "services/api";
 
 import PlayControlButton from "./PlayControlButton";
 import { useAuthContext } from "state/AuthContext";
-type WrapperProps = {
-  width: number;
-  height: number;
-};
 
-const Wrapper = styled.div<WrapperProps>`
+const Wrapper = styled.div`
   position: relative;
   max-width: 100%;
-  width: ${(props) => props.width}px;
 
   .startIcon {
     font-size: 1.3rem !important;
-  }
-
-  img {
-    width: 100%;
-    height: 100%;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    text-align: center;
-    display: block;
   }
 
   button {
@@ -40,17 +26,12 @@ const Wrapper = styled.div<WrapperProps>`
       color: var(--mi-secondary-color);
     }
   }
-
-  @media (max-width: ${bp.medium}px) {
-    position: relative;
-  }
 `;
 
 const ClickToPlayAlbum: React.FC<{
   trackGroupId: number;
-  image?: { width: number; height: number; url: string };
   className?: string;
-}> = ({ trackGroupId, image, className }) => {
+}> = ({ trackGroupId, className }) => {
   const {
     state: { playing, playerQueueIds, currentlyPlayingIndex },
     dispatch,
@@ -105,11 +86,7 @@ const ClickToPlayAlbum: React.FC<{
     trackIds.includes(playerQueueIds[currentlyPlayingIndex]);
 
   return (
-    <Wrapper
-      width={image?.width ?? 0}
-      height={image?.height ?? 0}
-      className={className}
-    >
+    <Wrapper className={className}>
       <PlayControlButton onPlay={onClickPlay} isPlaying={currentlyPlaying} />
     </Wrapper>
   );

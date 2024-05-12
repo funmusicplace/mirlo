@@ -14,11 +14,6 @@ import { getReleaseUrl } from "utils/artist";
 import { useAuthContext } from "state/AuthContext";
 import { Link } from "react-router-dom";
 
-type WrapperProps = {
-  width: number;
-  height: number;
-};
-
 const TrackgroupButtons = styled.div`
   width: 100%;
   position: absolute;
@@ -71,7 +66,7 @@ const TrackgroupButtons = styled.div`
   }
 `;
 
-const PlayWrapper = styled.div<WrapperProps>`
+const PlayWrapper = styled.div`
   display: flex;
   flex-direction: column;
   position: absolute;
@@ -117,10 +112,9 @@ const PlayWrapper = styled.div<WrapperProps>`
   }
 `;
 
-const Wrapper = styled.div<WrapperProps>`
+const Wrapper = styled.div`
   position: relative;
   max-width: 100%;
-  width: ${(props) => props.width}px;
 
   .startIcon {
     font-size: 1.5rem !important;
@@ -153,12 +147,9 @@ const Wrapper = styled.div<WrapperProps>`
     font-size: var(--mi-font-size-small);
   }
   img {
-    width: 100%;
-    height: 100%;
     border: 1px solid rgba(255, 255, 255, 0.05);
     text-align: center;
     display: block;
-    // padding-top: ${(props) => props.height / 2 - 12}px;
   }
 
   @media (max-width: ${bp.large}px) {
@@ -169,11 +160,6 @@ const Wrapper = styled.div<WrapperProps>`
     position: relative;
     p {
       font-size: var(--mi-font-size-xsmall);
-    }
-
-    img {
-      width: ${(props) => (props.width < 420 ? `${props.width}px` : "100%")};
-      height: ${(props) => (props.height < 420 ? `${props.height}px` : "auto")};
     }
   }
 
@@ -253,16 +239,8 @@ const ClickToPlay: React.FC<
 
   return (
     <ClickToPlayWrapper>
-      <Wrapper
-        width={image?.width ?? 0}
-        height={image?.height ?? 0}
-        className={className}
-      >
-        <PlayWrapper
-          width={image?.width ?? 0}
-          height={image?.height ?? 0}
-          className="play-wrapper"
-        >
+      <Wrapper className={className}>
+        <PlayWrapper className="play-wrapper">
           {/*
            * This link is not visible to the user, and should be duplicated by an album link provided in {children}.
            * As such, it is safe to exclude this from the accessibility tree.
@@ -303,6 +281,7 @@ const ClickToPlay: React.FC<
             src={image.url}
             alt={title}
             size={image.width}
+            square
           />
         )}
       </Wrapper>
