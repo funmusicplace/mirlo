@@ -34,11 +34,6 @@ export const InputEl = styled.input`
   &[type="checkbox"] {
     width: auto;
   }
-
-  @media (prefers-color-scheme: dark) {
-    background-color: rgba(125, 125, 125, 0.2) !important;
-    color: white !important;
-  }
 `;
 
 export const Input: React.FC<Props> = ({ onChange, ...props }) => {
