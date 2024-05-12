@@ -52,8 +52,8 @@ export const UploadPrompt: React.FC<{
   width?: string;
   height?: string;
   rounded?: boolean;
-  imagetypedescription?: string;
-}> = ({ width, height, rounded, imagetypedescription }) => {
+  imageTypeDescription?: string;
+}> = ({ width, height, rounded, imageTypeDescription }) => {
   return (
     <div
       className={css`
@@ -81,7 +81,7 @@ export const UploadPrompt: React.FC<{
       `}
     >
       <FaFileUpload />
-      Click to upload {imagetypedescription}
+      Click to upload {imageTypeDescription}
     </div>
   );
 };
@@ -99,7 +99,7 @@ const UploadImage: React.FC<{
   rounded?: boolean;
   width?: string;
   height?: string;
-  imagetypedescription?: string;
+  imageTypeDescription?: string;
 }> = ({
   formName,
   existingCover,
@@ -108,7 +108,7 @@ const UploadImage: React.FC<{
   rounded,
   width,
   height,
-  imagetypedescription,
+  imageTypeDescription,
 }) => {
   const [existingImage, setExistingImage] = React.useState(existingCover);
   const formContext = useFormContext();
@@ -142,7 +142,7 @@ const UploadImage: React.FC<{
               width={width}
               height={height}
               rounded={rounded}
-              imagetypedescription={imagetypedescription}
+              imageTypeDescription={imageTypeDescription}
             />
           </label>
         )}
