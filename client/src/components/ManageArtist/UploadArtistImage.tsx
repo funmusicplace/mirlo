@@ -148,6 +148,7 @@ const UploadArtistImage: React.FC<{
             align-items: flex-start;
             flex-wrap: wrap;
             flex-direction: column;
+            max-width: 400px;
 
             img {
               flex: 45%;
