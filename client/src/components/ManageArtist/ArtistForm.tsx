@@ -33,6 +33,9 @@ export const ArtistFormSection = styled.div<{ isOdd?: boolean }>`
     flex-direction: column;
     padding: 1rem !important;
   }
+  @media (prefers-color-scheme: dark) {
+    ${(props) => (!props.isOdd ? "background: rgba(125, 125, 125, 0.1);" : "")}
+  }
 `;
 
 type FormData = {
