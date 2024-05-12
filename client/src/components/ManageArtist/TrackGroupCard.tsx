@@ -5,41 +5,37 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { FaCheck, FaTimes, FaTrash } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
 import { bp } from "../../constants";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import { getReleaseUrl } from "utils/artist";
-import { useAuthContext } from "state/AuthContext";
+import { useDeleteTrackGroupMutation } from "queries";
 
 const TrackGroupCard: React.FC<{
   album: TrackGroup;
   artist: Artist;
-  reload: () => Promise<void>;
-}> = ({ album, artist, reload }) => {
-  const { user } = useAuthContext();
+}> = ({ album, artist }) => {
   const snackbar = useSnackbar();
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
   const { t: trackGroupCardTranslation } = useTranslation("translation", {
     keyPrefix: "trackGroupCard",
   });
 
-  const userId = user?.id;
+  const { mutateAsync: deleteTrackGroup, isPending: isDeletePending } =
+    useDeleteTrackGroupMutation();
 
-  const deleteTrackGroup = React.useCallback(async () => {
+  const handleDelete = React.useCallback(async () => {
+    const confirmed = window.confirm(t("deleteTrackGroupConfirm") ?? "");
+    if (!confirmed) return;
+
     try {
-      const confirmed = window.confirm(t("deleteTrackGroupConfirm") ?? "");
-      if (confirmed) {
-        await api.delete(`users/${userId}/trackGroups/${album.id}`);
-        snackbar(t("albumDeleted"), { type: "success" });
-      }
+      await deleteTrackGroup({ userId: artist.userId, trackGroupId: album.id });
+      snackbar(t("albumDeleted"), { type: "success" });
     } catch (e) {
       console.error(e);
       snackbar(t("somethingWentWrong"), { type: "warning" });
-    } finally {
-      reload?.();
     }
-  }, [t, userId, album.id, snackbar, reload]);
+  }, [artist, album, t]);
 
   return (
     <Box
@@ -182,7 +178,12 @@ const TrackGroupCard: React.FC<{
             </ButtonLink>
           )}
           {!album.published && (
-            <Button compact startIcon={<FaTrash />} onClick={deleteTrackGroup}>
+            <Button
+              compact
+              startIcon={<FaTrash />}
+              onClick={handleDelete}
+              isLoading={isDeletePending}
+            >
               {t("delete")}
             </Button>
           )}
