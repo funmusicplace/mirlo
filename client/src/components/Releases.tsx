@@ -45,9 +45,6 @@ const Releases = () => {
   return (
     <div
       className={css`
-        a {
-          color: var(--mi-normal-foreground-color);
-        }
         @media screen and (max-width: ${bp.medium}px) {
           margin-bottom: 0rem;
         }
@@ -55,7 +52,7 @@ const Releases = () => {
     >
       <SectionHeader>
         <WidthContainer variant="big" justify="center">
-          <h5 id={headingId}>
+          <h1 className="h5 section-header__heading" id={headingId}>
             {tag ? (
               <Trans
                 t={t}
@@ -66,7 +63,7 @@ const Releases = () => {
             ) : (
               t("recentReleases")
             )}
-          </h5>
+          </h1>
         </WidthContainer>
       </SectionHeader>
       <div

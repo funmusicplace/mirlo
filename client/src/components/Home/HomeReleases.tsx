@@ -37,9 +37,6 @@ const Releases = () => {
             padding-bottom: 1rem;
             width: 100%;
 
-            a {
-              color: var(--mi-normal-foreground-color);
-            }
             @media screen and (max-width: ${bp.medium}px) {
               margin-bottom: 0rem;
               padding-top: 0rem;
@@ -47,7 +44,9 @@ const Releases = () => {
           `}
         >
           <SectionHeader className={bgcolor}>
-            <h5 id={headingId}>{t("recentReleases")}</h5>
+            <h2 className="h5 section-header__heading" id={headingId}>
+              {t("recentReleases")}
+            </h2>
           </SectionHeader>
           <div
             className={css`

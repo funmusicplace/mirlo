@@ -46,9 +46,6 @@ export const ArtistPageWrapper: React.FC<{
           padding: 0 2rem 2rem;
           height: 100%;
 
-          a {
-            color: var(--mi-normal-foreground-color);
-          }
           @media screen and (max-width: ${bp.medium}px) {
             padding: 0rem !important;
           }

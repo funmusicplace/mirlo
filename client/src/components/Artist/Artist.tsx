@@ -78,7 +78,9 @@ function Artist() {
         )}
         {(artist?.posts.length ?? 0) > 0 && (
           <li>
-            <NavLink to="posts">{t("updates")}</NavLink>
+            <NavLink to="posts" id="artist-navlink-updates">
+              {t("updates")}
+            </NavLink>
           </li>
         )}
         {canReceivePayments &&

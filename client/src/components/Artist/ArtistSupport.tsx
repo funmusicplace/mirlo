@@ -1,5 +1,6 @@
 import Box from "components/common/Box";
 import React from "react";
+import styled from "@emotion/styled";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
 import ArtistManageSubscription from "./ArtistManageSubscription";
@@ -9,10 +10,26 @@ import { bp } from "../../constants";
 import FollowArtist from "components/common/FollowArtist";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import { useArtistContext } from "state/ArtistContext";
-import { PostGrid } from "./ArtistPosts";
 import { useAuthContext } from "state/AuthContext";
 import { useQueryClient } from "@tanstack/react-query";
 import { QUERY_KEY_AUTH, queryKeyIncludes } from "queries/queryKeys";
+
+const ArtistSupportGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 31.6%);
+  gap: 4% 2.5%;
+  max-width: 100%;
+  list-style-type: none;
+
+  @media screen and (max-width: ${bp.large}px) {
+    grid-template-columns: repeat(2, 48.75%);
+  }
+
+  @media screen and (max-width: ${bp.medium}px) {
+    grid-template-columns: repeat(1, 100%);
+    gap: 2%;
+  }
+`;
 
 const ArtistSupport: React.FC = () => {
   const { user } = useAuthContext();
@@ -126,11 +143,11 @@ const ArtistSupport: React.FC = () => {
           {t("noSubscriptionTiersYet")}
         </Box>
       )}
-      <PostGrid>
+      <ArtistSupportGrid>
         {artist.subscriptionTiers
           ?.filter((p) => !p.isDefaultTier)
           .map((p) => <ArtistSupportBox key={p.id} subscriptionTier={p} />)}
-      </PostGrid>
+      </ArtistSupportGrid>
     </>
   );
 };

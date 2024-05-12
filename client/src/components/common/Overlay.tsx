@@ -22,6 +22,7 @@ const Overlay: React.FC<{
       rgba(0, 0, 0, 0) 30%,
       rgba(0, 0, 0, 0) 100%
     );
+    pointer-events: none;
 
     :hover {
       transition: 0.2s ease-in-out;

@@ -95,19 +95,18 @@ const ArtistTrackGroup: React.FC<{
                 <Link
                   to={getReleaseUrl(artist, trackGroup)}
                   aria-label={`${t("goToAlbum")}: ${trackGroup.title || t("untitled")}`}
+                  className={
+                    trackGroup.title.length
+                      ? css`
+                          color: var(--mi-normal-foreground-color);
+                        `
+                      : css`
+                          color: var(--mi-light-foreground-color);
+                          font-style: italic;
+                        `
+                  }
                 >
-                  {trackGroup.title.length ? (
-                    trackGroup.title
-                  ) : (
-                    <span
-                      className={css`
-                        color: var(--mi-light-foreground-color);
-                        font-style: italic;
-                      `}
-                    >
-                      {t("untitled")}
-                    </span>
-                  )}
+                  {trackGroup.title.length ? trackGroup.title : t("untitled")}
                 </Link>
               )}
               {artist && (
