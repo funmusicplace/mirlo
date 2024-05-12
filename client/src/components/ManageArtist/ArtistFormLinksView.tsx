@@ -29,6 +29,7 @@ const ArtistFormLinksView: React.FC<{
               rel="me"
               href={linkUrlHref(l)}
               key={l}
+              target="_blank"
               className={css`
                 display: inline-flex;
                 align-items: center;
