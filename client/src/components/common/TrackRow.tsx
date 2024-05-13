@@ -170,8 +170,12 @@ const TrackRow: React.FC<{
             {coAuthors.length > 1 && (
               <span
                 className={css`
-                  color: var(--mi-light-foreground-color);
+                  color: var(--mi-lighter-foreground-color);
                   margin-left: 0.5rem;
+
+                  @media (prefers-color-scheme: dark) {
+                    color: var(--mi-light-foreground-color);
+                  }
                 `}
               >
                 {coAuthors.map((a) => a.artistName).join(", ")}

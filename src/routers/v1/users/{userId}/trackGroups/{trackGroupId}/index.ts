@@ -9,10 +9,8 @@ import {
 import processor, {
   trackGroupSingleInclude,
 } from "../../../../../../utils/trackGroup";
-import { doesTrackGroupBelongToUser } from "../../../../../../utils/ownership";
 import prisma from "@mirlo/prisma";
 import { deleteTrackGroup } from "../../../../../../utils/trackGroup";
-import logger from "../../../../../../logger";
 import slugify from "slugify";
 import { AppError } from "../../../../../../utils/error";
 
@@ -105,7 +103,7 @@ export default function () {
       });
 
       if (trackGroup?.title && trackGroup.urlSlug.includes("mi-temp-slug")) {
-        let slug = slugify(newValues.title).toLowerCase();
+        let slug = slugify(newValues.title, { strict: true }).toLowerCase();
 
         if (slug === "") {
           slug = "blank";

@@ -119,13 +119,16 @@ const SupportArtistPopUp: React.FC<{ artist: Artist }> = ({ artist }) => {
             </FormComponent>
           )}
         </FormProvider>
+
         <Button
           onClick={() => subscribeToTier()}
           isLoading={isCheckingForSubscription}
-          disabled={!methods.formState.isValid}
+          disabled={!methods.formState.isValid || !value}
           wrap
         >
-          {t("continueWithName", { name: value?.name })}
+          {t(!value ? "chooseToContinue" : "continueWithName", {
+            name: value?.name,
+          })}
         </Button>
       </Modal>
     </>
