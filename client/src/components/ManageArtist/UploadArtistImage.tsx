@@ -6,10 +6,12 @@ import api from "services/api";
 import useJobStatusCheck from "utils/useJobStatusCheck";
 import { useSnackbar } from "state/SnackbarContext";
 import { InputEl } from "components/common/Input";
+import { AiFillDelete } from "react-icons/ai";
 
-import { Img, Spinner, UploadPrompt } from "./UploadImage";
+import { Img, ReplaceSpan, Spinner, UploadPrompt } from "./UploadImage";
 import Button from "components/common/Button";
 import { useArtistContext } from "state/ArtistContext";
+import { bp } from "../../constants";
 
 type ImageType = "banner" | "avatar" | "cover";
 
@@ -54,7 +56,15 @@ const UploadArtistImage: React.FC<{
   height: string;
   width: string;
   maxDimensions: string;
-}> = ({ existing, imageType, height, width, maxDimensions }) => {
+  imageTypeDescription: string;
+}> = ({
+  existing,
+  imageType,
+  height,
+  width,
+  maxDimensions,
+  imageTypeDescription,
+}) => {
   const { t } = useTranslation("translation", { keyPrefix: "artistForm" });
   const snackbar = useSnackbar();
   const { refresh } = useArtistContext();
@@ -124,6 +134,7 @@ const UploadArtistImage: React.FC<{
     <div
       className={css`
         height: 100%;
+        width: 100%;
       `}
     >
       <div
@@ -137,6 +148,7 @@ const UploadArtistImage: React.FC<{
             align-items: flex-start;
             flex-wrap: wrap;
             flex-direction: column;
+            max-width: 400px;
 
             img {
               flex: 45%;
@@ -149,16 +161,99 @@ const UploadArtistImage: React.FC<{
 
             label {
               position: relative;
+              width: 100%;
+              margin-bottom: 1rem;
             }
           `}
         >
           <label htmlFor={`${imageType}image`}>
             {existingImage && (
-              <Img src={existingImage} alt={imageType} rounded={rounded} />
+              <div
+                className={css`
+                  span {
+                    opacity: 0;
+                    color: rgba(0, 0, 0, 0);
+                  }
+                  &:hover {
+                    span {
+                      opacity: 1;
+                      color: white;
+                    }
+                  }
+                `}
+              >
+                <ReplaceSpan
+                  rounded={rounded}
+                  className={css`
+                    @media (max-width: ${bp.medium}px) {
+                      font-size: var(--mi-font-size-xsmall) !important;
+                      height: 96% !important;
+                    }
+                  `}
+                >
+                  Replace Image
+                </ReplaceSpan>
+                <Img src={existingImage} alt={imageType} rounded={rounded} />
+              </div>
             )}
-
+            {existingImage && (
+              <small
+                className={css`
+                  flex: 100%;
+                  height: 2.5rem;
+                  width: 2.5rem;
+                  bottom: 1rem;
+                  right: 1rem;
+                  border-radius: 100%;
+                  background: rgba(0, 0, 0, 0.5);
+                  display: flex;
+                  justify-content: center;
+                  align-items: center;
+                  position: absolute;
+                  z-index: 999;
+                  text-align: right;
+                  span {
+                    svg {
+                      margin-right: 0.3rem !important;
+                      height: 1.5rem;
+                      width: 1.5rem;
+                    }
+                  }
+                  @media (max-width: ${bp.medium}px) {
+                    bottom: 0.3rem;
+                    right: 0.3rem;
+                    span {
+                      svg {
+                        margin-right: 0.3rem !important;
+                        height: 1rem;
+                        width: 1rem;
+                      }
+                    }
+                  }
+                `}
+              >
+                <div>
+                  <Button
+                    onClick={deleteImage}
+                    variant="link"
+                    compact
+                    onlyIcon
+                    type="button"
+                    startIcon={<AiFillDelete />}
+                    className={css`
+                      color: white !important;
+                    `}
+                  ></Button>
+                </div>
+              </small>
+            )}
             {!existingImage && (
-              <UploadPrompt width={width} height={height} rounded={rounded} />
+              <UploadPrompt
+                width={width}
+                height={height}
+                rounded={rounded}
+                imageTypeDescription={imageTypeDescription}
+              />
             )}
             {(isLoading || isSaving) && <Spinner rounded={rounded} />}
           </label>
@@ -174,28 +269,13 @@ const UploadArtistImage: React.FC<{
               width: 100%;
               flex: 100%;
               margin-top: 0.5rem;
+              @media (max-width: ${bp.medium}px) {
+                font-size: var(--mi-font-size-xsmall);
+              }
             `}
           >
             {t("dimensionsTip", { maxDimensions })}
           </small>
-          {existingImage && (
-            <small
-              className={css`
-                width: 100%;
-                flex: 100%;
-                margin-top: 0.5rem;
-              `}
-            >
-              <Button
-                onClick={deleteImage}
-                variant="link"
-                compact
-                type="button"
-              >
-                {t("deleteImage")}
-              </Button>
-            </small>
-          )}
         </div>
       </div>
     </div>

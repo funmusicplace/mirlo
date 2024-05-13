@@ -301,7 +301,7 @@
   },
   "artistForm": {
     "displayName": "Display name",
-    "bio": "Bio",
+    "bio": "Artist Biography",
     "urlSlug": "Text that will appear in the URL",
     "saveArtist": "Save artist",
     "createArtist": "Create artist",

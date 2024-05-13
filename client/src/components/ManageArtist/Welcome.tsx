@@ -124,6 +124,7 @@ const Welcome = () => {
             <FormComponent>
               <label>Want to upload an avatar?</label>
               <UploadArtistImage
+                imageTypeDescription="your avatar"
                 existing={localArtist}
                 imageType="avatar"
                 height="150"
