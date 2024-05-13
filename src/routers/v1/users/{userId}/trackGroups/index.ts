@@ -6,7 +6,6 @@ import {
 } from "../../../../../auth/passport";
 import processor from "../../../../../utils/trackGroup";
 import prisma from "@mirlo/prisma";
-import slugify from "slugify";
 import { getSiteSettings } from "../../../../../utils/settings";
 
 export default function () {
