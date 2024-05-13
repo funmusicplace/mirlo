@@ -170,6 +170,7 @@
     "chooseATier": "Choose a tier to support this artist:",
     "subscribeToArtist": "Subscribe to {{ artist }}",
     "continueWithName": "Continue with {{ name }}",
+    "chooseToContinue": "Choose a support tier to continue",
     "platformPercentDisclaimer": "Mirlo is evaluating the platform percentage and seeking input from musicians in the next few weeks.",
     "platformPercent": "{{ percent }}% ({{ money }}) will go to {{ artistName }}. This does not include the cut taken by our payment processor"
   },
