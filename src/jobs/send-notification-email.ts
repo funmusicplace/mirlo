@@ -85,7 +85,7 @@ const sendNotificationEmail = async () => {
             logger.info(`sendNotificationEmail: updated notification`);
           } catch (e) {
             logger.error(
-              `failed to send to queue notification ${notification.id} to ${notification.user.email}`
+              `sendNotificationEmail: failed to send to queue notification ${notification.id} to ${notification.user.email}`
             );
             logger.error(e);
           }
@@ -93,10 +93,12 @@ const sendNotificationEmail = async () => {
       }
     }
   } catch (e) {
-    logger.error(`failed to send out all notifications`);
+    logger.error(`sendNotificationEmail: failed to send out all notifications`);
     logger.error(e);
   } finally {
-    sendMailQueue.close();
+    logger.error(`sendNotificationEmail: closing queue`);
+
+    await sendMailQueue.close();
   }
 };
 
