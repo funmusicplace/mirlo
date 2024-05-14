@@ -74,7 +74,6 @@ const addPostToNotifications = async () => {
           post.artist?.subscriptionTiers.map((st) => st.userSubscriptions)
         );
         const subscriptions = uniqBy(flatSubscriptions, "userId");
-        const postContent = post.content;
 
         await prisma.$transaction(async (tx) => {
           logger.info(

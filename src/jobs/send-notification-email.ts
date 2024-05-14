@@ -78,6 +78,8 @@ const sendNotificationEmail = async () => {
   } catch (e) {
     logger.error(`failed to send out all notifications`);
     logger.error(e);
+  } finally {
+    sendMailQueue.close();
   }
 };
 
