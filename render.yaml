@@ -157,6 +157,16 @@ services:
           type: web
           name: minio
           envVarKey: PORT
+      - key: REDIS_HOST
+        fromService:
+          type: redis
+          name: redis
+          property: host
+      - key: REDIS_PORT
+        fromService:
+          type: redis
+          name: redis
+          property: port
       - key: MINIO_API_PORT
         value: 9000
       - key: MINIO_HOST
