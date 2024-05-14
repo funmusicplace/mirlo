@@ -25,6 +25,10 @@ const sendNotificationEmail = async () => {
     },
   });
 
+  logger.info(
+    `sendNotificationEmail: found ${notifications.length} notifications to send out`
+  );
+
   try {
     for await (const notification of notifications) {
       if (
