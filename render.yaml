@@ -200,7 +200,7 @@ services:
     ipAllowList: # required
       - source: 0.0.0.0/0
         description: everywhere
-    plan: free # optional (defaults to starter)
+    plan: starter # optional (defaults to starter)
     maxmemoryPolicy: noeviction # optional (defaults to allkeys-lru)
 
 databases:
