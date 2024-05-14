@@ -9,6 +9,7 @@ const sendNotificationEmail = async () => {
       createdAt: {
         lte: new Date(),
       },
+      notificationType: "NEW_ARTIST_POST",
     },
     include: {
       post: {
@@ -45,7 +46,7 @@ const sendNotificationEmail = async () => {
             `sendNotificationEmail: mailing notification for: ${notification.post.title} to ${notification.user.email}`
           );
           try {
-            sendMailQueue.add("send-mail", {
+            await sendMailQueue.add("send-mail", {
               template: "announce-post-published",
               message: {
                 to: notification.user.email,
