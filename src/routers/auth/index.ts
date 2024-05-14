@@ -309,7 +309,7 @@ export const buildTokens = (user: { email: string; id: number }) => {
   };
 
   const accessToken = jwt.sign(payload, jwt_secret, {
-    expiresIn: "10m",
+    expiresIn: "1w",
   });
   const refreshToken = jwt.sign(payload, refresh_secret, {
     expiresIn: "4w",

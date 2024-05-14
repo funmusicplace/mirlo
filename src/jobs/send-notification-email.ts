@@ -43,7 +43,6 @@ const sendNotificationEmail = async () => {
           logger.info(
             `sendNotificationEmail: post asked not to be emailed: ${notification.post.title} to ${notification.user.email}`
           );
-          return;
         } else {
           logger.info(
             `sendNotificationEmail: sending to queue notification for: ${notification.post.title} to ${notification.user.email}`
