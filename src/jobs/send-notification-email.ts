@@ -43,6 +43,15 @@ const sendNotificationEmail = async () => {
           logger.info(
             `sendNotificationEmail: post asked not to be emailed: ${notification.post.title} to ${notification.user.email}`
           );
+          await prisma.notification.update({
+            where: {
+              id: notification.id,
+            },
+            data: {
+              isRead: true,
+            },
+          });
+          logger.info(`sendNotificationEmail: updated notification`);
         } else {
           logger.info(
             `sendNotificationEmail: sending to queue notification for: ${notification.post.title} to ${notification.user.email}`
@@ -64,6 +73,16 @@ const sendNotificationEmail = async () => {
                 client: process.env.REACT_APP_CLIENT_DOMAIN,
               },
             });
+
+            await prisma.notification.update({
+              where: {
+                id: notification.id,
+              },
+              data: {
+                isRead: true,
+              },
+            });
+            logger.info(`sendNotificationEmail: updated notification`);
           } catch (e) {
             logger.error(
               `failed to send to queue notification ${notification.id} to ${notification.user.email}`
@@ -71,15 +90,6 @@ const sendNotificationEmail = async () => {
             logger.error(e);
           }
         }
-        await prisma.notification.update({
-          where: {
-            id: notification.id,
-          },
-          data: {
-            isRead: true,
-          },
-        });
-        logger.info(`sendNotificationEmail: updated notification`);
       }
     }
   } catch (e) {
