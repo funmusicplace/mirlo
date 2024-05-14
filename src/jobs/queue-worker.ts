@@ -67,10 +67,6 @@ async function imageQueue() {
 async function sendMailQueue() {
   const worker = new Worker("send-mail", sendMail, {
     ...workerOptions,
-    limiter: {
-      max: parseInt(process.env.MAX_LIMIT || "1"),
-      duration: parseInt(process.env.DURATION_LIMIT || "1000"),
-    },
   });
   logger.info("Send mail worker started");
 

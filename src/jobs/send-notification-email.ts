@@ -32,6 +32,9 @@ const sendNotificationEmail = async () => {
 
   try {
     for await (const notification of notifications) {
+      console.log(
+        `sendNotificationEmail: checking for notification ${notification.id}`
+      );
       if (
         notification.notificationType === "NEW_ARTIST_POST" &&
         notification.post?.artist
@@ -43,7 +46,7 @@ const sendNotificationEmail = async () => {
           return;
         } else {
           logger.info(
-            `sendNotificationEmail: mailing notification for: ${notification.post.title} to ${notification.user.email}`
+            `sendNotificationEmail: sending to queue notification for: ${notification.post.title} to ${notification.user.email}`
           );
           try {
             await sendMailQueue.add("send-mail", {
@@ -64,7 +67,7 @@ const sendNotificationEmail = async () => {
             });
           } catch (e) {
             logger.error(
-              `failed to send e-mail of notification ${notification.id} to ${notification.user.email}`
+              `failed to send to queue notification ${notification.id} to ${notification.user.email}`
             );
             logger.error(e);
           }
