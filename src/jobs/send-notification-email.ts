@@ -1,8 +1,10 @@
 import prisma from "@mirlo/prisma";
 import logger from "../logger";
-import { sendMailQueue } from "../queues/send-mail-queue";
+import { sendMailQueue, sendMailQueueEvents } from "../queues/send-mail-queue";
 
 const sendNotificationEmail = async () => {
+  logger.info(`sendNotificationEmail: sending notifications`);
+
   const notifications = await prisma.notification.findMany({
     where: {
       isRead: false,
@@ -96,9 +98,10 @@ const sendNotificationEmail = async () => {
     logger.error(`sendNotificationEmail: failed to send out all notifications`);
     logger.error(e);
   } finally {
-    logger.error(`sendNotificationEmail: closing queue`);
+    logger.info(`sendNotificationEmail: closing queue`);
 
     await sendMailQueue.close();
+    await sendMailQueueEvents.close();
   }
 };
 
