@@ -1,15 +1,16 @@
 .sans-serif {
-  font-family: -apple-system, BlinkMacSystemFont,
-    'avenir next', avenir,
-    'helvetica neue', helvetica,
-    ubuntu,
-    roboto, noto,
-    'segoe ui', arial,
+  font-family: -apple-system, BlinkMacSystemFont, "avenir next", avenir,
+    "helvetica neue", helvetica, ubuntu, roboto, noto, "segoe ui", arial,
     sans-serif;
 }
 
+body {
+  font-size: 14.5px;
+  line-height: 1.5;
+}
+
 p {
-  margin-bottom: .75rem;
+  margin-bottom: 0.75rem;
 }
 
 .b {
@@ -24,8 +25,8 @@ p {
   line-height: 1.5;
 }
 
-.mw8 {
-  max-width: 64rem;
+.mw600 {
+  max-width: 600px;
 }
 
 .w-100 {
@@ -49,7 +50,7 @@ p {
 }
 
 .stripe-dark:nth-child(odd) {
-  background-color: rgba(0, 0, 0, .1);
+  background-color: rgba(0, 0, 0, 0.1);
 }
 
 .tl {
@@ -57,7 +58,7 @@ p {
 }
 
 .f6 {
-  font-size: .875rem;
+  font-size: 0.875rem;
 }
 
 .center {

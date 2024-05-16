@@ -9,14 +9,25 @@ html
       style 
         include ../style.css
   body.sans-serif
-    p Yay! 
-    p Someone (#{email}) bought a digital copy of #{trackGroup.title}.
-    table 
-      tr 
-        td #{trackGroup.title}
-        td #{pricePaid} #{purchase.currencyPaid}
-        td Mirlo percentage: #{trackGroup.platformPercent}% (#{purchase.currencyPaid} #{platformCut})
-        td Final: #{pricePaid - platformCut} #{purchase.currencyPaid}
+    div
+      div.mw600
+        p 
+          | Hello #{trackGroup.artist.user.name}!
+        p 
+          | Someone (#{email}) bought a digital copy of 
+          strong #{trackGroup.title}.
+      div.mw600
+        p 
+          | Album: 
+          strong #{trackGroup.title}
+        p 
+          | #{purchase.currencyPaid.toUpperCase()} 
+          | #{pricePaid.toFixed(2)} 
+          | (Mirlo percentage: #{trackGroup.platformPercent}% (#{purchase.currencyPaid.toUpperCase()} #{platformCut.toFixed(2)}))
+        p 
+          | Final: 
+          strong #{purchase.currencyPaid.toUpperCase()} #{(pricePaid - platformCut).toFixed(2)} 
 
-    p The final money will be available via your Stripe dashboard
+      p The final money will be available via your Stripe dashboard
+      p If you have any questions please reach out to hi@mirlo.space
 
