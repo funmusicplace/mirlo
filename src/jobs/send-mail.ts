@@ -27,6 +27,7 @@ export const sendMail = async (job: Job) => {
         from: `"Mirlo" <${
           process.env.SENDGRID_SENDER ?? "no-reply@mirlo.space"
         }>`,
+        attachDataUrls: true,
       },
       juice: true,
       send: true,
