@@ -1,12 +1,13 @@
-const shouldWatch = process.env.CI === "true" ? false : true;
+const inCI = process.env.CI === "true" ? true : false;
 
-console.log("Watching... ", shouldWatch);
+console.log("in CI: ", inCI);
 
 module.exports = {
   extension: ["ts"],
   spec: "test/**/*.spec.ts",
   require: "ts-node/register",
-  watch: shouldWatch,
+  forbidOnly: inCI,
+  // watch: !inCI,
   "watch-files": ["test/**/*.ts", "src/**/*.ts"],
   "watch-ignore": ["node_modules"],
 };

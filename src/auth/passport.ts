@@ -138,7 +138,7 @@ export const artistBelongsToLoggedInUser = async (
       return;
     }
 
-    const artist = await prisma.artist.findFirstOrThrow({
+    const artist = await prisma.artist.findFirst({
       where: {
         userId: loggedInUser.id,
         id: Number(castArtistId),

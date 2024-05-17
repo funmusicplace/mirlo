@@ -26,13 +26,6 @@ describe("users/{userId}/artists/{artistId}", () => {
     it("should fail gracefully with undefined user", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
       const artist = await createArtist(user.id);
-      await createBucketIfNotExists(minioClient, finalArtistAvatarBucket);
-
-      await prisma.artistAvatar.create({
-        data: {
-          artistId: artist.id,
-        },
-      });
 
       const response = await requestApp
         .get(`users/undefined/artists/${artist.id}`)
@@ -40,6 +33,49 @@ describe("users/{userId}/artists/{artistId}", () => {
         .set("Accept", "application/json");
 
       assert.equal(response.statusCode, 401);
+    });
+
+    it("should return artist for logged in user if owned", async () => {
+      const { user, accessToken } = await createUser({ email: "test@testcom" });
+      const artist = await createArtist(user.id);
+
+      const response = await requestApp
+        .get(`users/${user.id}/artists/${artist.id}`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+    });
+
+    it("should not return artist for logged in user if not owned", async () => {
+      const { user } = await createUser({ email: "test@testcom" });
+      const { user: otherUser, accessToken: otherAccessToken } =
+        await createUser({
+          email: "otherUser@test.com",
+        });
+      const artist = await createArtist(user.id);
+      const response = await requestApp
+        .get(`users/${otherUser.id}/artists/${artist.id}`)
+        .set("Cookie", [`jwt=${otherAccessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 404);
+    });
+
+    it("should return artist for logged in admin even if not owned", async () => {
+      const { user } = await createUser({ email: "test@testcom" });
+      const { accessToken: adminAccessToken } = await createUser({
+        email: "admin@admin.com",
+        isAdmin: true,
+      });
+      const artist = await createArtist(user.id);
+
+      const response = await requestApp
+        .get(`users/${user.id}/artists/${artist.id}`)
+        .set("Cookie", [`jwt=${adminAccessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
     });
   });
 

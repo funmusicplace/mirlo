@@ -76,6 +76,10 @@ const errorHandler = (
     if (err.meta && err.code === "P2002") {
       message = `Value is not unique: ${err.meta?.target}`;
     }
+
+    if (err.code === "P2025") {
+      message = `Not found: ${err.message}`;
+    }
     res.status(400).json({
       error: message,
     });
