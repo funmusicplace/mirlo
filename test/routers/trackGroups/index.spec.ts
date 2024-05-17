@@ -95,6 +95,32 @@ describe("trackGroups", () => {
       assert.equal(response.body.results[0].id, mostRecent.id);
       assert.equal(response.body.results[1].id, middle.id);
       assert.equal(response.body.results[2].id, oldest.id);
+      assert.equal(response.body.total, 3);
+
+      assert(response.statusCode === 200);
+    });
+
+    it("should limit to one by artist on distinctArtists", async () => {
+      const { user } = await createUser({ email: "test@testcom" });
+      const artist = await createArtist(user.id);
+      const mostRecent = await createTrackGroup(artist.id, {
+        title: "most recent",
+      });
+      const middle = await createTrackGroup(artist.id, {
+        title: "middle",
+        urlSlug: "a-second-album",
+      });
+      const oldest = await createTrackGroup(artist.id, {
+        title: "oldest",
+        urlSlug: "a-oldest-album",
+      });
+      const response = await requestApp
+        .get("trackGroups")
+        .query("distinctArtists=true")
+        .set("Accept", "application/json");
+
+      assert.equal(response.body.results.length, 1);
+      assert.equal(response.body.total, undefined);
 
       assert(response.statusCode === 200);
     });

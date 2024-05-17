@@ -9,7 +9,7 @@ services:
     image: redis
     restart: unless-stopped
     healthcheck:
-      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -42,6 +42,9 @@ services:
         - action: sync+restart
           path: ./src
           target: /var/www/api/src
+        - action: sync+restart
+          path: ./emails
+          target: /var/www/api/emails
         - action: rebuild
           path: ./prisma
           target: /var/www/api/prisma
@@ -73,6 +76,9 @@ services:
         - action: sync+restart
           path: ./src
           target: /var/www/api/src
+        - action: sync+restart
+          path: ./emails
+          target: /var/www/api/emails
         - action: rebuild
           path: ./prisma
           target: /var/www/api/prisma

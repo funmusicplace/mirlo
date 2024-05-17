@@ -9,12 +9,20 @@ import { QUERY_KEY_TRACK_GROUPS, queryKeyIncludes } from "./queryKeys";
 
 const fetchTrackGroups: QueryFunction<
   { results: TrackGroup[]; total?: number },
-  ["fetchTrackGroups", { take: number; orderBy: "random" }, ...any]
-> = ({ queryKey: [_, { take, orderBy }], signal }) => {
+  [
+    "fetchTrackGroups",
+    { take: number; orderBy: "random"; distinctArtists?: boolean },
+    ...any,
+  ]
+> = ({ queryKey: [_, { take, orderBy, distinctArtists }], signal }) => {
   return api.get(`v1/trackGroups?take=${take}&orderBy=${orderBy}`, { signal });
 };
 
-export function queryTrackGroups(opts: { take: number; orderBy: "random" }) {
+export function queryTrackGroups(opts: {
+  take: number;
+  orderBy: "random";
+  distinctArtists?: boolean;
+}) {
   return queryOptions({
     queryKey: ["fetchTrackGroups", opts, QUERY_KEY_TRACK_GROUPS],
     queryFn: fetchTrackGroups,

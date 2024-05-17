@@ -12,20 +12,29 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
-    const { skip: skipQuery, take, orderBy, tag } = req.query;
+    const { skip: skipQuery, take, orderBy, tag, distinctArtists } = req.query;
 
     try {
       let skip = Number(skipQuery);
       let where: Prisma.TrackGroupWhereInput = whereForPublishedTrackGroups();
-      const itemCount = await prisma.trackGroup.count({ where });
+      let itemCount = undefined;
+
+      // Note that the distinct query does not support a count
+      // https://github.com/prisma/prisma/issues/4228. Though we
+      // could probably write a custom query (ditto to random)
+      if (!distinctArtists) {
+        itemCount = await prisma.trackGroup.count({
+          where,
+        });
+      }
 
       const orderByClause = processTrackGroupQueryOrder(orderBy);
       if (orderBy === "random") {
         // This isn't ideal, but it'll basically take a random slice
-        // anywhere
+        // anywhere. Prisma does not support random slices.
         skip = Math.max(
           0,
-          Math.floor(Math.random() * itemCount) - Number(take)
+          Math.floor(Math.random() * (itemCount ?? 0)) - Number(take)
         );
       }
 
@@ -41,6 +50,8 @@ export default function () {
 
       const trackGroups = await prisma.trackGroup.findMany({
         where,
+
+        ...(distinctArtists ? { distinct: "artistId" } : {}),
         orderBy: orderByClause,
         skip: skip ? Number(skip) : undefined,
         take: take ? Number(take) : undefined,

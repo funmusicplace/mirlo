@@ -22,7 +22,7 @@ const bgcolor = css`
 const Releases = () => {
   const { t } = useTranslation("translation", { keyPrefix: "releases" });
   const { data: trackGroups } = useQuery(
-    queryTrackGroups({ take: 8, orderBy: "random" })
+    queryTrackGroups({ take: 8, orderBy: "random", distinctArtists: true })
   );
 
   const id = useId();
