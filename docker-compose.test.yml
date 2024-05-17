@@ -67,7 +67,7 @@ services:
         condition: service_healthy
     environment:
       NODE_ENV: test
-      CI: true
+      CI: "${CI:-false}"
       API_DOMAIN: http://api:3000
     command: yarn api:test
     restart: no

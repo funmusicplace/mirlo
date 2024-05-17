@@ -109,27 +109,20 @@ export default function () {
     const { userId, artistId } = req.params as unknown as Params;
     const castArtistId = await findArtistIdForURLSlug(artistId);
     try {
-      if (userId) {
-        const artist = await prisma.artist.findFirst({
-          where: {
-            id: Number(castArtistId),
-            userId: Number(userId),
-          },
-          include: singleInclude(),
-        });
+      const artist = await prisma.artist.findFirst({
+        where: {
+          id: Number(castArtistId),
+        },
+        include: singleInclude(),
+      });
 
-        if (!artist) {
-          res.status(404).json({
-            error: "Artist not found",
-          });
-        } else {
-          res.json({
-            result: processSingleArtist(artist, Number(userId)),
-          });
-        }
+      if (!artist) {
+        return res.status(404).json({
+          error: "Artist not found",
+        });
       } else {
-        res.status(400).json({
-          error: "Invalid route",
+        return res.json({
+          result: processSingleArtist(artist, Number(userId)),
         });
       }
     } catch (e) {
