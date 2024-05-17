@@ -80,7 +80,7 @@ const ImageAndDetailsWrapper = styled.div`
 `;
 
 const AboutWrapper = styled.div<{
-  trackGroupCredits: string;
+  trackGroupCredits: boolean;
 }>`
   margin: 1.25rem 0 1.25rem;
   ${(props) =>
@@ -101,8 +101,8 @@ const AboutWrapper = styled.div<{
 `;
 
 const CreditsWrapper = styled.div<{
-  trackGroupCredits: string;
-  trackGroupAbout: string;
+  trackGroupCredits: boolean;
+  trackGroupAbout: boolean;
 }>`
   font-size: var(--mi-font-size-small);
   opacity: 0.5;
@@ -288,14 +288,14 @@ function TrackGroup() {
           </div>
           <TrackgroupInfosWrapper>
             {trackGroupAbout && (
-              <AboutWrapper trackGroupCredits={trackGroupCredits}>
+              <AboutWrapper trackGroupCredits={Boolean(trackGroupCredits)}>
                 <MarkdownContent content={trackGroup.about} />
               </AboutWrapper>
             )}
 
             <CreditsWrapper
-              trackGroupCredits={trackGroupCredits}
-              trackGroupAbout={trackGroupAbout}
+              trackGroupCredits={Boolean(trackGroupCredits)}
+              trackGroupAbout={Boolean(trackGroupAbout)}
             >
               <MarkdownContent content={trackGroup.credits} />
             </CreditsWrapper>

@@ -1,32 +1,20 @@
-const styles = `html {
-  --mi-black: #111;
-  --mi-white: #ffffff;
-  --mi-pink: #BE3455;
+@import "./theme";
 
-  --mi-normal-background-color: #f5f0f0;
-  --mi-lighten-background-color: rgba(255, 255, 255, 0.35);
-  --mi-lighten-x-background-color: rgba(255, 255, 255, 0.5);
-  --mi-darken-background-color: rgba(50, 0, 0, .03);
-  --mi-darken-x-background-color: rgba(50, 0, 0, .2);
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  -webkit-font-smoothing: auto;
+  -moz-osx-font-smoothing: auto;
+}
 
-  --mi-light-background-color: #f7f7f7;
-  --mi-lighter-background-color: #fcfcfc;
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+    monospace;
+}
 
-  --mi-normal-foreground-color: var(--mi-black);
-  --mi-light-foreground-color: #454545;
-  --mi-lighter-foreground-color: #515151;
-
-  --mi-primary-color: var(--mi-black);
-  --mi-secondary-color: pink;
-
-  --mi-info-background-color: #5C899C;
-  --mi-success-background-color: #4cdb5f;
-
-  --mi-warning-color: #f04e37;
-  --mi-warning-background-color: var(--mi-warning-color);
-  --mi-darken-warning-background-color: #df250b;
-  --mi-link-color: var(--mi-pink);
-
+html {
   --mi-border-radius: 3px;
   --mi-border-radius-x: 15px;
   --mi-border-radius-focus: 8px;
@@ -34,8 +22,6 @@ const styles = `html {
   --mi-border: solid 1px rgba(125, 125, 125, 0.5);
 
   --header-cover-sticky-height: 55px;
-
-  --mi-icon-button-background-color: var(--mi-darken-x-background-color);
 
   --mi-font-family-stack: 'Arial', -apple-system, BlinkMacSystemFont,
     'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans',
@@ -53,27 +39,6 @@ const styles = `html {
   --mi-container-big: 1106px;
   --mi-container-medium: 768px;
   --mi-container-small: 300px;
-
-}
-
-@media (prefers-color-scheme: dark) {
-  html {
-    --mi-normal-background-color: var(--mi-black);
-    --mi-darken-background-color: rgba(0, 0, 0, 0.03);
-    --mi-lighten-background-color: rgba(255, 255, 255, 0.2);
-
-    --mi-normal-foreground-color: var(--mi-white);
-    --mi-light-foreground-color: #A0A0A0;
-    --mi-lighter-foreground-color: #9E9E9E;
-
-    --mi-light-background-color: #222;
-    --mi-lighter-background-color: #282828;
-
-    --mi-primary-color: var(--mi-white);
-    --mi-secondary-color: #BE3455;
-
-    --mi-pink: #EA8B99;
-  }
 }
 
 * {
@@ -219,6 +184,3 @@ button {
     transform: rotate(360deg);
   }
 }
-`;
-
-export default styles;

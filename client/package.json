@@ -45,7 +45,9 @@
     "client:start": "vite",
     "client:build": "tsc --noEmit && vite build",
     "client:preview": "vite preview",
-    "client:test": "tsc --noEmit && vitest"
+    "client:test": "tsc --noEmit && vitest",
+    "client:storybook": "storybook dev -p 6006",
+    "client:storybook:build": "storybook build"
   },
   "browserslist": {
     "production": [
@@ -62,6 +64,13 @@
   "devDependencies": {
     "@emotion/babel-plugin": "^11.10.5",
     "@optimize-lodash/rollup-plugin": "^4.0.4",
+    "@storybook/addon-essentials": "^8.1.1",
+    "@storybook/addon-interactions": "^8.1.1",
+    "@storybook/addon-links": "^8.1.1",
+    "@storybook/addon-themes": "^8.1.1",
+    "@storybook/blocks": "^8.1.1",
+    "@storybook/react": "^8.1.1",
+    "@storybook/react-vite": "^8.1.1",
     "@testing-library/dom": "^10.0.0",
     "@testing-library/jest-dom": "^6.4.2",
     "@testing-library/react": "^15.0.2",
@@ -79,6 +88,8 @@
     "jsdom": "^24.0.0",
     "prop-types": "^15.8.1",
     "rollup": "^4.16.4",
+    "storybook": "^8.1.1",
+    "storybook-addon-remix-react-router": "^3.0.0",
     "terser": "^5.30.3",
     "typescript": "5.1.6",
     "vite": "^5.2.9",

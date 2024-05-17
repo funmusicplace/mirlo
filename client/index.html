@@ -61,6 +61,22 @@
         color: #be3455;
       }
     </style>
+
+    <!--
+    The below script is used to synchronously apply the [data-mi-theme] attribute when a user has selected light/dark mode.
+    As such, it needs to be placed directly in the HTML and cannot be bundled.
+    Used in src/styles/theme.css
+    -->
+    <script>
+      {
+        const prefersDark = window.matchMedia("(prefers-color-scheme: dark)");
+        function updateTheme() {
+          document.documentElement.setAttribute("data-mi-theme", prefersDark.matches ? "dark" : "light");
+        }
+        prefersDark.addEventListener("change", updateTheme);
+        updateTheme();
+      }
+    </script>
   </head>
   <body>
     <noscript>
@@ -72,8 +88,8 @@
           href="https://www.browserstack.com/guide/how-to-enable-javascript-in-browser"
           >Here's how &#x1f517;</a
         >
-      </p></noscript
-    >
+      </p>
+    </noscript>
 
     <div id="root"></div>
     <!--

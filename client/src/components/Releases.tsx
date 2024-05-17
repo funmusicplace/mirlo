@@ -1,7 +1,6 @@
-import React, { useId } from "react";
+import { useId } from "react";
 import ArtistTrackGroup from "./Artist/ArtistTrackGroup";
 import TrackgroupGrid from "components/common/TrackgroupGrid";
-import api from "services/api";
 import { css } from "@emotion/css";
 import { useTranslation, Trans } from "react-i18next";
 import { bp } from "../constants";
@@ -10,34 +9,25 @@ import { SectionHeader } from "./Home/Home";
 
 import usePagination from "utils/usePagination";
 import { useSearchParams } from "react-router-dom";
+import { queryTrackGroups } from "queries";
+import { useQuery } from "@tanstack/react-query";
 
 const pageSize = 40;
 
 const Releases = () => {
   const [params] = useSearchParams();
   const { t } = useTranslation("translation", { keyPrefix: "releases" });
-  const [trackGroups, setTrackGroups] = React.useState<TrackGroup[]>([]);
   const { page, PaginationComponent } = usePagination({ pageSize });
 
   const tag = params.get("tag");
 
-  React.useEffect(() => {
-    const callback = async () => {
-      const newParams = new URLSearchParams({
-        skip: `${pageSize * page}`,
-        take: `${pageSize}`,
-      });
-      if (tag) {
-        newParams.append("tag", tag);
-      }
-      const results = await api.getMany<TrackGroup>(
-        `trackGroups?${newParams.toString()}`
-      );
-      setTrackGroups(results.results);
-    };
-
-    callback();
-  }, [page, tag]);
+  const { data: trackGroups } = useQuery(
+    queryTrackGroups({
+      skip: pageSize * page,
+      take: pageSize,
+      tag: tag || undefined,
+    })
+  );
 
   const id = useId();
   const headingId = `${id}-recent-releases`;
@@ -87,7 +77,7 @@ const Releases = () => {
               aria-labelledby={headingId}
               role="list"
             >
-              {trackGroups?.map((trackGroup) => (
+              {trackGroups?.results?.map((trackGroup) => (
                 <ArtistTrackGroup
                   key={trackGroup.id}
                   trackGroup={trackGroup}
@@ -97,7 +87,9 @@ const Releases = () => {
             </TrackgroupGrid>
           </div>
 
-          <PaginationComponent amount={trackGroups.length} />
+          {trackGroups && (
+            <PaginationComponent amount={trackGroups.results.length} />
+          )}
         </WidthContainer>
       </div>
     </div>

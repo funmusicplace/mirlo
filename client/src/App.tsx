@@ -1,4 +1,4 @@
-import { css, injectGlobal } from "@emotion/css";
+import { css } from "@emotion/css";
 import PageHeader from "components/common/PageHeader";
 import Snackbar from "components/common/Snackbar";
 import Player from "components/Player";
@@ -7,7 +7,6 @@ import { Outlet, useLocation } from "react-router-dom";
 import SnackbarContext from "state/SnackbarContext";
 import useWidgetListener from "utils/useWidgetListener";
 import Header from "./components/Header/Header";
-import globalCSS from "./styles";
 import { Footer } from "components/Footer";
 import { bp } from "./constants";
 import { MetaCard } from "components/common/MetaCard";
@@ -15,8 +14,6 @@ import ArtistColorsWrapper from "components/ArtistColorsWrapper";
 import CookieDisclaimer from "components/CookieDisclaimer";
 import { useAuthContext } from "state/AuthContext";
 import Kickstarter from "components/Home/Kickstarter";
-
-injectGlobal(globalCSS);
 
 function App() {
   const { isDisplayed } = useContext(SnackbarContext);
