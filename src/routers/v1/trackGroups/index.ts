@@ -50,7 +50,6 @@ export default function () {
 
       const trackGroups = await prisma.trackGroup.findMany({
         where,
-
         ...(distinctArtists ? { distinct: "artistId" } : {}),
         orderBy: orderByClause,
         skip: skip ? Number(skip) : undefined,
