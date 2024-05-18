@@ -15,7 +15,10 @@ const fetchTrackGroups: QueryFunction<
     ...any,
   ]
 > = ({ queryKey: [_, { take, orderBy, distinctArtists }], signal }) => {
-  return api.get(`v1/trackGroups?take=${take}&orderBy=${orderBy}`, { signal });
+  return api.get(
+    `v1/trackGroups?take=${take}&orderBy=${orderBy}&=distinctArtists=${distinctArtists ?? false}`,
+    { signal }
+  );
 };
 
 export function queryTrackGroups(opts: {
