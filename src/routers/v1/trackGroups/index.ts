@@ -34,7 +34,7 @@ export default function () {
         // anywhere. Prisma does not support random slices.
         skip = Math.max(
           0,
-          Math.floor(Math.random() * (itemCount ?? 0)) - Number(take)
+          Math.floor(Math.random() * (itemCount ?? 100)) - Number(take)
         );
       }
 
