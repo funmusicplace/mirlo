@@ -1,4 +1,8 @@
 [[redirects]]
+  from = "/kickstarter"
+  to = "https://www.kickstarter.com/projects/mirlo/mirlo"
+
+[[redirects]]
   from = "/*"   
   to = "/index.html"   
   status = 200
