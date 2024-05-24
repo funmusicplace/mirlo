@@ -215,6 +215,7 @@ const PostForm: React.FC<{
             )}
           </FormComponent>
         )}
+
         <FormComponent
           className={css`
             margin-top: 0.5rem;
