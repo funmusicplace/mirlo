@@ -17,7 +17,7 @@ html
      
     div 
       p #{trackGroup.title}
-      p #{purchase.currencyPaid.toUpperCase()} #{(purchase.pricePaid / 100, 2).toFixed(2)}
+      p #{purchase.currencyPaid.toUpperCase()} #{(purchase.pricePaid / 100).toFixed(2)}
     if isBeforeReleaseDate
       p The album will become available in your collection for unlimited listening and downloading once it is released.
     else 
