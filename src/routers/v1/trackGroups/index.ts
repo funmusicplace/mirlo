@@ -12,7 +12,8 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
-    const { skip: skipQuery, take, orderBy, tag, distinctArtists } = req.query;
+    const { skip: skipQuery, take, orderBy, tag } = req.query;
+    const distinctArtists = req.query.distinctArtists === "true";
 
     try {
       let skip = Number(skipQuery);
