@@ -27,7 +27,7 @@ interface TrackGroupFormData {
   releaseDate: string;
   about: string;
   artistId: number;
-  cover: { id: number; url: string };
+  cover: { id: string; url: string[] };
 }
 
 export const TrackGroupDetails: React.FC = () => {

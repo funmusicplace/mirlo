@@ -19,6 +19,11 @@ const ArtistAlbums: React.FC = () => {
     queryArtist({ artistSlug: artistId ?? "" })
   );
 
+  const trackGroups = React.useMemo(
+    () => artist?.trackGroups?.map((trackGroup) => ({ ...trackGroup, artist })),
+    [artist]
+  );
+
   if (
     !artist ||
     (artist.trackGroups.length === 0 && artist.userId !== user?.id)
@@ -48,7 +53,7 @@ const ArtistAlbums: React.FC = () => {
         role="list"
         aria-labelledby="artist-navlink-releases"
       >
-        {artist.trackGroups?.map((trackGroup) => (
+        {trackGroups?.map((trackGroup) => (
           <ArtistTrackGroup
             key={trackGroup.id}
             trackGroup={trackGroup}

@@ -7,7 +7,7 @@ const PlatformPercent: React.FC<{
   percent: number;
   chosenPrice?: string | number;
   currency?: string;
-  artist?: Artist;
+  artist?: Pick<Artist, "name">;
 }> = ({ percent, chosenPrice, currency = "USD", artist }) => {
   const chosenNumber =
     chosenPrice && isFinite(+chosenPrice) ? Number(chosenPrice) : null;

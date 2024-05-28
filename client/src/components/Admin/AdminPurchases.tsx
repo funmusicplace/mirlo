@@ -107,7 +107,7 @@ export const AdminPurchases: React.FC = () => {
                   <Link
                     to={getReleaseUrl(
                       purchase.trackGroup.artist ?? {
-                        id: purchase.trackGroup.artistId,
+                        id: purchase.trackGroup.artistId!,
                       },
                       purchase.trackGroup
                     )}

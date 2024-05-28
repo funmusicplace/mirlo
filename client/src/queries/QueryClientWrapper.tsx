@@ -50,11 +50,13 @@ const ReactQueryDevtools = React.lazy(() =>
     : Promise.resolve({ default: () => undefined as never })
 );
 
-export function QueryClientWrapper(props: React.PropsWithChildren<{}>) {
+export function QueryClientWrapper(
+  props: React.PropsWithChildren<{ devTools?: boolean }>
+) {
   return (
     <QueryClientProvider client={queryClient}>
       {props.children}
-      <ReactQueryDevtools />
+      {props.devTools !== false && <ReactQueryDevtools />}
     </QueryClientProvider>
   );
 }

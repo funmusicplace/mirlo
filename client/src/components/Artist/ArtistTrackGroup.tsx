@@ -3,7 +3,6 @@ import React from "react";
 import ClickToPlay from "../common/ClickToPlay";
 import { Link } from "react-router-dom";
 import { bp } from "../../constants";
-import { useArtistContext } from "state/ArtistContext";
 import { getArtistUrl, getReleaseUrl } from "utils/artist";
 import styled from "@emotion/styled";
 import { useTranslation } from "react-i18next";
@@ -48,6 +47,9 @@ export const TrackGroupInfo = styled.div`
   flex-direction: column;
   width: 100%;
 
+  a {
+    text-decoration: none;
+  }
   a:first-of-type {
     font-weight: normal;
     margin-bottom: 0.2rem;
@@ -66,14 +68,7 @@ const ArtistTrackGroup: React.FC<{
   trackGroup: TrackGroup;
   as?: React.ElementType<any, keyof React.JSX.IntrinsicElements>;
 }> = ({ trackGroup, as }) => {
-  const { state } = useArtistContext();
   const { t } = useTranslation("translation", { keyPrefix: "clickToPlay" });
-
-  if (!trackGroup || (!state?.artist && !trackGroup.artist)) {
-    return null;
-  }
-
-  const artist = state?.artist ?? trackGroup?.artist;
 
   return (
     <TrackGroupWrapper as={as}>
@@ -87,13 +82,12 @@ const ArtistTrackGroup: React.FC<{
           trackGroupId={trackGroup.id}
           title={trackGroup.title}
           trackGroup={trackGroup}
-          artist={artist}
         >
           <TrackGroupLinks>
             <TrackGroupInfo>
-              {artist && (
+              {trackGroup.artist && (
                 <Link
-                  to={getReleaseUrl(artist, trackGroup)}
+                  to={getReleaseUrl(trackGroup.artist, trackGroup)}
                   aria-label={`${t("goToAlbum")}: ${trackGroup.title || t("untitled")}`}
                   className={
                     trackGroup.title.length
@@ -109,8 +103,10 @@ const ArtistTrackGroup: React.FC<{
                   {trackGroup.title.length ? trackGroup.title : t("untitled")}
                 </Link>
               )}
-              {artist && (
-                <Link to={getArtistUrl(artist)}>{trackGroup.artist?.name}</Link>
+              {trackGroup.artist && (
+                <Link to={getArtistUrl(trackGroup.artist)}>
+                  {trackGroup.artist?.name}
+                </Link>
               )}
             </TrackGroupInfo>
             <div

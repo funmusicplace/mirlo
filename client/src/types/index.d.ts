@@ -50,21 +50,21 @@ interface TrackGroup {
   published: boolean;
   adminEnabled: boolean;
   id: number;
-  type: "lp" | "ep" | "album" | "single";
+  type?: "lp" | "ep" | "album" | "single";
   releaseDate: string;
-  about: string;
+  about?: string;
   currency: string;
-  credits: string;
-  artist?: Artist;
-  artistId: number;
+  credits?: string;
+  artist?: Pick<Artist, "name" | "urlSlug" | "id" | "userId">;
+  artistId?: number;
   tracks: Track[];
   updatedAt: string;
   createdAt: string;
   tags?: string[];
   cover?: {
     updatedAt: string;
-    id: number;
-    url: string;
+    id: string;
+    url: string[];
     sizes?: { [key: number]: string };
   };
   minPrice?: number; // in cents

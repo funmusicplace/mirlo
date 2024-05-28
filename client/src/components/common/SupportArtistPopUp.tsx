@@ -14,7 +14,9 @@ import { useAuthContext } from "state/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { queryArtist, queryUserStripeStatus } from "queries";
 
-const SupportArtistPopUp: React.FC<{ artist: Artist }> = ({ artist }) => {
+const SupportArtistPopUp: React.FC<{
+  artist: Pick<Artist, "id" | "name" | "userId" | "urlSlug">;
+}> = ({ artist }) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const methods = useForm<{

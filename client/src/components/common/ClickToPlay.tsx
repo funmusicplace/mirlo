@@ -189,21 +189,12 @@ const ClickToPlayWrapper = styled.div`
 const ClickToPlay: React.FC<
   React.PropsWithChildren<{
     trackGroup: TrackGroup;
-    artist?: Artist;
     trackGroupId?: number;
     title: string;
     image?: { width: number; height: number; url: string };
     className?: string;
   }>
-> = ({
-  trackGroup,
-  artist,
-  trackGroupId,
-  title,
-  image,
-  className,
-  children,
-}) => {
+> = ({ trackGroup, trackGroupId, title, image, className, children }) => {
   const {
     state: { playing, playerQueueIds, currentlyPlayingIndex },
     dispatch,
@@ -246,9 +237,9 @@ const ClickToPlay: React.FC<
            * As such, it is safe to exclude this from the accessibility tree.
            * https://www.w3.org/TR/wai-aria/states_and_properties#aria-hidden
            */}
-          {artist && (
+          {trackGroup.artist && (
             <Link
-              to={getReleaseUrl(artist, trackGroup)}
+              to={getReleaseUrl(trackGroup.artist, trackGroup)}
               aria-hidden
               tabIndex={-1}
             ></Link>
