@@ -127,6 +127,9 @@ interface Artist {
   properties?: {
     colors: ArtistColors;
   };
+  user?: {
+    currency: string;
+  };
   banner?: {
     url: string;
     sizes?: { [key: number]: string };
