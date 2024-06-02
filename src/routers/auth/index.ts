@@ -251,12 +251,12 @@ router.post(
           res.locals.user = foundUser;
           next();
         } else {
-          res.status(400).json({
+          res.status(401).json({
             error: "Incorrect username or password",
           });
         }
       } else {
-        res.status(400).json({
+        res.status(401).json({
           error: "Incorrect username or password",
         });
       }
