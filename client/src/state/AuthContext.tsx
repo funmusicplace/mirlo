@@ -38,9 +38,7 @@ export function AuthContextProvider({ children }: React.PropsWithChildren) {
   const context = useMemo(() => ({ user }), [user]);
 
   return (
-    <>
-      <AuthContext.Provider value={context}>{children}</AuthContext.Provider>
-    </>
+    <AuthContext.Provider value={context}>{children}</AuthContext.Provider>
   );
 }
 

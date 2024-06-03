@@ -1,19 +1,25 @@
 import React from "react";
 import Button from "./Button";
 import api from "services/api";
-import { FaMinus, FaPlus } from "react-icons/fa";
-import { useArtistContext } from "state/ArtistContext";
+import { FaCheck, FaMinus, FaPlus } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 import Modal from "./Modal";
 
-import FollowArtistNotLoggedInForm from "./FollowArtistNotLoggedInForm";
 import { useAuthContext } from "state/AuthContext";
+import SupportArtistTiersForm from "./SupportArtistTiersForm";
+import { useQuery } from "@tanstack/react-query";
+import { queryArtist } from "queries";
+import { css } from "@emotion/css";
+import Box from "./Box";
 
 const FollowArtist: React.FC<{ artistId: number }> = ({ artistId }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const { user, refreshLoggedInUser } = useAuthContext();
-  const artistContext = useArtistContext();
-  const localArtistId = artistId ?? artistContext?.state?.artist?.id;
+  const { data: artist } = useQuery(
+    queryArtist({ artistSlug: `${artistId}`, includeDefaultTier: true })
+  );
+
+  const localArtistId = artistId ?? artist?.id;
   const artistUserSubscriptions = user?.artistUserSubscriptions;
   const [isSubscribed, setIsSubscribed] = React.useState(
     !!user?.artistUserSubscriptions?.find(
@@ -58,6 +64,9 @@ const FollowArtist: React.FC<{ artistId: number }> = ({ artistId }) => {
           {}
         );
         await refreshLoggedInUser();
+        if (!isFollowing) {
+          setIsFollowPopupOpen(true);
+        }
       } else {
         setIsFollowPopupOpen(true);
       }
@@ -65,6 +74,10 @@ const FollowArtist: React.FC<{ artistId: number }> = ({ artistId }) => {
       setIsLoading(false);
     }
   }, [isFollowing, localArtistId, refreshLoggedInUser, user]);
+
+  if (!artist) {
+    return null;
+  }
 
   if (isSubscribed) {
     return <>Subscribed</>;
@@ -77,12 +90,53 @@ const FollowArtist: React.FC<{ artistId: number }> = ({ artistId }) => {
         open={isFollowPopupOpen}
         onClose={() => setIsFollowPopupOpen(false)}
         title={
-          t("followArtist", {
-            artistName: artistContext.state?.artist?.name,
+          t(user ? "followingArtist" : "followArtist", {
+            artistName: artist?.name,
           }) ?? ""
         }
       >
-        <FollowArtistNotLoggedInForm artistId={localArtistId} />
+        {user && (
+          <>
+            <Box
+              variant="success"
+              className={css`
+                margin-bottom: 1rem;
+                display: flex;
+                align-items: center;
+                svg {
+                  margin-right: 1rem;
+                }
+              `}
+            >
+              <FaCheck />
+              {t("youveSubscribed", {
+                artistName: artist?.name,
+              })}
+            </Box>
+            <h3
+              className={css`
+                margin-bottom: 1rem;
+                margin-top: 1rem;
+              `}
+            >
+              {t("supportArtistFinancially", {
+                artistName: artist?.name,
+              })}
+            </h3>
+          </>
+        )}
+        {!user && (
+          <p
+            className={css`
+              margin-bottom: 1rem;
+            `}
+          >
+            {t("chooseSupportLevel", {
+              artistName: artist?.name,
+            })}
+          </p>
+        )}
+        <SupportArtistTiersForm artist={artist} excludeDefault={!!user} />
       </Modal>
       <Button
         compact

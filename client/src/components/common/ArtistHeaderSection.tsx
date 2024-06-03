@@ -13,7 +13,6 @@ import { UpdateArtistBody, useUpdateArtistMutation } from "queries";
 import React from "react";
 import { useSnackbar } from "state/SnackbarContext";
 import { useAuthContext } from "state/AuthContext";
-import OneTimeSupport from "./OneTimeSupport";
 
 const H1 = styled.h1<{ artistAvatar: boolean }>`
   font-size: 2.4rem;
@@ -209,7 +208,6 @@ const ArtistHeaderSection: React.FC<{
                     </div>
                     <ArtistActions>
                       {!isManage && <FollowArtist artistId={artist.id} />}
-                      {!isManage && <OneTimeSupport artistId={artist.id} />}
                     </ArtistActions>
                   </div>
                 </SpaceBetweenDiv>

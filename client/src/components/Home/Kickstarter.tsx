@@ -53,11 +53,11 @@ const Kickstarter = () => {
             }
           `}
         >
-          {t("launchedAKickstarter")}
+          {t("helpKeepMirloRunning")}
         </h2>
         <SplashButtonWrapper>
-          <ButtonAnchor
-            href="https://www.kickstarter.com/projects/mirlo/mirlo"
+          <ButtonLink
+            to="/team/support"
             variant="big"
             className={css`
               display: block;
@@ -80,8 +80,8 @@ const Kickstarter = () => {
               }
             `}
           >
-            {t("helpUsReachOurGoal")}
-          </ButtonAnchor>
+            {t("donateNow")}
+          </ButtonLink>
         </SplashButtonWrapper>
       </SplashWrapper>
     </div>

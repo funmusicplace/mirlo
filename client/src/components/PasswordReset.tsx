@@ -20,7 +20,7 @@ function PasswordReset() {
   const search = new URLSearchParams(location.search);
 
   const token = search.get("token");
-  const email = search.get("email");
+  const id = search.get("id");
   const { register: initRegister, handleSubmit: initSubmit } =
     useForm<SignupInputs>();
   const { register: newRegister, handleSubmit: newSubmit } =
@@ -53,7 +53,7 @@ function PasswordReset() {
         await api.post("password-reset/set-password", {
           ...data,
           token,
-          email,
+          id,
         });
         snackbar("Password reset! Continue to log in", {
           type: "success",
@@ -64,7 +64,7 @@ function PasswordReset() {
         console.error(e);
       }
     },
-    [email, navigate, snackbar, token]
+    [id, navigate, snackbar, token]
   );
 
   return (
@@ -92,11 +92,11 @@ function PasswordReset() {
           <Button type="submit">{t("reset")}</Button>
         </form>
       )}
-      {token && email && (
+      {token && id && (
         <form
           className={css`
             max-width: 400px;
-            margin: 0 auto;
+            margin: 2rem auto;
             display: flex;
             flex-direction: column;
           `}
@@ -106,7 +106,14 @@ function PasswordReset() {
 
           <label>{t("password")}</label>
           <InputEl type="password" {...newRegister("password")} />
-          <Button type="submit">{t("confirmNewPassword")}</Button>
+          <Button
+            className={css`
+              margin-top: 1rem;
+            `}
+            type="submit"
+          >
+            {t("confirmNewPassword")}
+          </Button>
         </form>
       )}
       <img

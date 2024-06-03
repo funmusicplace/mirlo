@@ -144,6 +144,9 @@
     "unknown": "Unknown",
     "toFollowThisArtist": "To follow this artist please enter your email address.",
     "followArtist": "Follow {{artistName}}",
+    "followingArtist": "You're now following {{artistName}}",
+    "supportArtistFinancially": "Support {{artistName}} financially",
+    "youveSubscribed": "You've subscribed to receive e-mails from {{ artistName }}.",
     "error": "Something went wrong",
     "subscribedSuccessfully": "Subscription confirmation e-mail sent!",
     "successfullyUnsubscribed": "Successfully unsubscribed",
@@ -169,9 +172,12 @@
     "cancelSubscription": "Cancel subscription",
     "chooseThisSubscription": "Choose this subscription",
     "chooseATier": "Choose a tier to support this artist:",
+    "contributionIsMonthly": "Make contribution monthly",
     "subscribeToArtist": "Subscribe to {{ artist }}",
-    "continueWithName": "Continue with {{ name }}",
-    "chooseToContinue": "Choose a support tier to continue",
+    "chooseSupportLevel": "You can follow the artist or choose to support them financially",
+    "continueWithName": "Support  at {{ name }}",
+    "continueWithPrice": "Continue with {{ amount }}/month",
+    "chooseToContinue": "Choose a support tier to support",
     "platformPercentDisclaimer": "Mirlo is evaluating the platform percentage and seeking input from musicians in the next few weeks.",
     "platformPercent": "{{ percent }}% ({{ money }}) will go to {{ artistName }}. This does not include the cut taken by our payment processor"
   },
@@ -378,7 +384,9 @@
   },
   "kickstarter": {
     "launchedAKickstarter": "Mirlo has launched a Kickstarter!",
-    "helpUsReachOurGoal": "Help us reach our goal!"
+    "helpKeepMirloRunning": "Help keep Mirlo running",
+    "helpUsReachOurGoal": "Help us reach our goal!",
+    "donateNow": "Donate now"
   },
   "admin": {
     "users": "Users",
