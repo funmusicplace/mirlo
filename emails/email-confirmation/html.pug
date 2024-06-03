@@ -13,5 +13,5 @@ html
     p You asked to reset your email address.
     p #{user.email}
     p 
-      a(href=`${host}/register/emailConfirmation/${user.emailConfirmationToken}?email=${user.email}`) Click here to confirm
+      a(href=`${host}/register/emailConfirmation/${user.emailConfirmationToken}?email=${encodeURIComponent(user.email)}`) Click here to confirm
     p If this was not you, please get in touch with us at funmusic.place@gmail.com

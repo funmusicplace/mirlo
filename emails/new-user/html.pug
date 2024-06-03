@@ -13,5 +13,5 @@ html
     p Someone signed up to mirlo using this email address
     p #{user.email}
     p 
-      a(href!=`${host}/auth/confirmation/${user.emailConfirmationToken}?user=${user.id}&email=${user.email}&client=${client}&accountType=${accountType}`) Click here to confirm
+      a(href!=`${host}/auth/confirmation/${user.emailConfirmationToken}?user=${user.id}&email=${encodeURIComponent(user.email)}&client=${client}&accountType=${accountType}`) Click here to confirm
     p If this was not you, you can safely ignore this email.
