@@ -79,7 +79,7 @@ router.get(`/confirmation/:emailConfirmationToken`, async (req, res, next) => {
       if (accountType === "artist") {
         return res.redirect(`${client.applicationUrl}/manage/welcome`);
       }
-      return res.redirect(`${client.applicationUrl}`);
+      return res.redirect(`${client.applicationUrl}/profile/collection`);
     }
   } catch (e) {
     console.error(e);
@@ -92,15 +92,14 @@ router.get("/password-reset/confirmation/:token", async (req, res, next) => {
     let { token } = req.params as {
       token: string;
     };
-    let { email, redirectClient } = req.query as {
+    let { id, redirectClient } = req.query as {
       redirectClient: string;
-      email: string;
+      id: string;
     };
-    email = email.toLowerCase();
 
     const user = await prisma.user.findFirst({
       where: {
-        email,
+        id: Number(id),
         passwordResetConfirmationToken: token,
       },
     });
@@ -113,7 +112,7 @@ router.get("/password-reset/confirmation/:token", async (req, res, next) => {
     ) {
       return res.status(404).json({ error: "Token expired" });
     } else {
-      return res.redirect(redirectClient + `?token=${token}&email=${email}`);
+      return res.redirect(redirectClient + `?token=${token}&id=${id}`);
     }
   } catch (e) {
     logger.info(`Error with password reset ${e}`);
@@ -153,6 +152,7 @@ router.post(`/password-reset/initiate`, async (req, res, next) => {
         select: {
           email: true,
           passwordResetConfirmationToken: true,
+          id: true,
         },
       });
       await sendMail({
@@ -185,16 +185,16 @@ router.post(`/password-reset/set-password`, async (req, res, next) => {
     let {
       password: newPassword,
       token,
-      email,
+      id,
     } = req.body as {
       password: string;
-      email: string;
+      id: string;
       token: string;
     };
 
     const user = await prisma.user.findFirst({
       where: {
-        email,
+        id: Number(id),
         passwordResetConfirmationToken: token,
       },
     });
