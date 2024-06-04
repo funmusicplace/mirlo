@@ -2,17 +2,14 @@ import React from "react";
 import Button from "./Button";
 import Modal from "./Modal";
 import SpaceBetweenDiv from "./SpaceBetweenDiv";
-import api from "services/api";
-import { Controller, FormProvider, useForm } from "react-hook-form";
-import SupportArtistPopUpTiers from "./SupportArtistPopUpTiers";
-import { useSnackbar } from "state/SnackbarContext";
+import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import FollowArtist from "./FollowArtist";
-import FormComponent from "./FormComponent";
-import { InputEl } from "./Input";
+
 import { useAuthContext } from "state/AuthContext";
 import { useQuery } from "@tanstack/react-query";
-import { queryArtist, queryUserStripeStatus } from "queries";
+import { queryUserStripeStatus } from "queries";
+import SupportArtistTiersForm from "./SupportArtistTiersForm";
 
 const SupportArtistPopUp: React.FC<{
   artist: Pick<Artist, "id" | "name" | "userId" | "urlSlug">;
@@ -29,19 +26,11 @@ const SupportArtistPopUp: React.FC<{
     email: string;
   }>();
 
-  const { user, refreshLoggedInUser } = useAuthContext();
-  const [isCheckingForSubscription, setIsCheckingForSubscription] =
-    React.useState(false);
-  const snackbar = useSnackbar();
+  const { user } = useAuthContext();
 
-  const { data: artistDetails } = useQuery(
-    queryArtist({ artistSlug: artist.urlSlug ?? "", includeDefaultTier: true })
-  );
   const { data: stripeAccountStatus } = useQuery(
     queryUserStripeStatus(artist.userId)
   );
-
-  const options = artistDetails?.subscriptionTiers ?? [];
 
   React.useEffect(() => {
     if (isOpen) {
@@ -53,40 +42,6 @@ const SupportArtistPopUp: React.FC<{
       }
     }
   }, [artist.id, isOpen, methods, user?.artistUserSubscriptions]);
-
-  const subscribeToTier = async () => {
-    try {
-      setIsCheckingForSubscription(true);
-      const tier = methods.getValues("tier");
-      const email = methods.getValues("email");
-      if (!tier.isDefaultTier) {
-        const response = await api.post<
-          { tierId: number; email: string },
-          { sessionUrl: string }
-        >(`artists/${artist.id}/subscribe`, {
-          tierId: tier.id,
-          email,
-        });
-        window.location.assign(response.sessionUrl);
-      } else {
-        await api.post(`artists/${artist.id}/follow`, {
-          email,
-        });
-      }
-      if (!user) {
-        snackbar("We've sent you a verification email!", { type: "success" });
-      }
-    } catch (e) {
-      snackbar("Something went wrong", { type: "warning" });
-      console.error(e);
-    } finally {
-      setIsCheckingForSubscription(false);
-      refreshLoggedInUser();
-      setIsOpen(false);
-    }
-  };
-
-  const value = methods.watch("tier");
 
   if (!stripeAccountStatus?.chargesEnabled) {
     return <FollowArtist artistId={artist.id} />;
@@ -106,32 +61,10 @@ const SupportArtistPopUp: React.FC<{
         <SpaceBetweenDiv>
           <div>{t("chooseATier")}</div>
         </SpaceBetweenDiv>
-        <FormProvider {...methods}>
-          <Controller
-            name="tier"
-            control={methods.control}
-            render={({ ...props }) => (
-              <SupportArtistPopUpTiers {...props} options={options} />
-            )}
-          />
-          {!user && (
-            <FormComponent>
-              {t("email")}
-              <InputEl {...methods.register("email")} type="email" required />
-            </FormComponent>
-          )}
-        </FormProvider>
-
-        <Button
-          onClick={() => subscribeToTier()}
-          isLoading={isCheckingForSubscription}
-          disabled={!methods.formState.isValid || !value}
-          wrap
-        >
-          {t(!value ? "chooseToContinue" : "continueWithName", {
-            name: value?.name,
-          })}
-        </Button>
+        <SupportArtistTiersForm
+          artist={artist}
+          onFinishedSubscribing={() => setIsOpen(false)}
+        />
       </Modal>
     </>
   );

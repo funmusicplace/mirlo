@@ -12,7 +12,6 @@ import { queryArtist } from "queries";
 import { NewAlbumButton } from "components/ManageArtist/NewAlbumButton";
 
 const ArtistAlbums: React.FC = () => {
-  const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const { user } = useAuthContext();
   const { artistId } = useParams();
   const { data: artist } = useQuery(

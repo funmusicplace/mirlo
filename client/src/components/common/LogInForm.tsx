@@ -28,6 +28,7 @@ const LogInForm: React.FC<{ afterLogIn: () => void }> = ({ afterLogIn }) => {
           afterLogIn?.();
         },
         onError(e) {
+          console.log("e", e.message);
           snackbar(e.message, { type: "warning" });
           console.error(e);
         },

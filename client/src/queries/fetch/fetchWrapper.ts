@@ -20,7 +20,15 @@ async function fetchWrapper<R>(
     credentials: "include",
     ...init,
   });
-  if (!res.ok) throw new MirloFetchError(res);
+  if (!res.ok) {
+    let message;
+    try {
+      message = (await res.json()).error;
+    } catch (e) {
+      message = res.text;
+    }
+    throw new MirloFetchError(res, message);
+  }
   return await res.json();
 }
 

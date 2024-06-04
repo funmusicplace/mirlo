@@ -44,6 +44,11 @@ export default function () {
               deletedAt: null,
             },
           },
+          user: {
+            select: {
+              currency: true,
+            },
+          },
         },
       });
       res.json({
