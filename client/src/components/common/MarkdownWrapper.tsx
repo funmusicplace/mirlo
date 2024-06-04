@@ -31,19 +31,18 @@ const MarkdownWrapper = styled.div`
 
   iframe {
     width: 700px;
-    height: 394px;
     max-width: 100%;
   }
 
   iframe[src*="widget/track"] {
     width: 700px;
-    height: 137px;
+    height: 130px;
     max-width: 100%;
   }
 
-  iframe[src*="widget/trackgroup"] {
+  iframe[src*="widget/trackGroup"] {
     width: 700px;
-    height: 361px;
+    height: 371px;
     max-width: 100%;
   }
 

@@ -63,7 +63,7 @@ const TrackGroupWidget = () => {
       <div
         className={css`
           border: var(--mi-border);
-          ${embeddedInMirlo && "min-height: 364px;"}
+          ${embeddedInMirlo && "min-height: 359px;"}
           display: flex;
           width: 100%;
           justify-content: center;
@@ -86,10 +86,14 @@ const TrackGroupWidget = () => {
   return (
     <WidgetWrapper
       className={css`
-        ${embeddedInMirlo && "min-height: 360px;"}
-        ${!embeddedInMirlo && "min-height: 366px;"}
         overflow: hidden;
         background-color: white !important;
+        a {
+          text-decoration: none;
+        }
+        a:hover {
+          text-decoration: underline;
+        }
         @media (prefers-color-scheme: dark) {
           background-color: black !important;
         }
@@ -162,7 +166,10 @@ const TrackGroupWidget = () => {
               `}
             >
               {embeddedInMirlo && trackGroup.artist && (
-                <Link to={getReleaseUrl(trackGroup.artist, trackGroup)}>
+                <Link
+                  target={`"_blank"`}
+                  to={getReleaseUrl(trackGroup.artist, trackGroup)}
+                >
                   {trackGroup.title}
                 </Link>
               )}
@@ -188,7 +195,7 @@ const TrackGroupWidget = () => {
             >
               by{" "}
               {embeddedInMirlo && trackGroup.artist && (
-                <Link to={getArtistUrl(trackGroup.artist)}>
+                <Link target={`"_blank"`} to={getArtistUrl(trackGroup.artist)}>
                   {trackGroup.artist.name}
                 </Link>
               )}

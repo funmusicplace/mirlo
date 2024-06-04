@@ -35,7 +35,7 @@ export const InputEl = styled.input`
     width: auto;
   }
   @media (prefers-color-scheme: dark) {
-    background-color: var(--mi-darken-background-color) !important;
+    background-color: var(--mi-darken-background-color);
     border: var(--mi-border);
   }
 `;

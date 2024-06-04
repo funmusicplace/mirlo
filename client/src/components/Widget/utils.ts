@@ -38,7 +38,7 @@ export const WidgetWrapper = styled.div<{ embeddedInMirlo?: boolean }>`
 export const TgWidgetWrapper = styled.div<{ embeddedInMirlo?: boolean }>`
   display: flex;
   width: 100%;
-  ${(props) => props.embeddedInMirlo && "min-height: 154px;"}
+  ${(props) => props.embeddedInMirlo && "min-height: 371px;"}
   flex-wrap: wrap;
   align-items: flex-start;
   justify-content: center;

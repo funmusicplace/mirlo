@@ -4,6 +4,7 @@ import Modal from "../Modal";
 import { FaFilm } from "react-icons/fa";
 import { InputEl } from "../Input";
 import { useCommands } from "@remirror/react";
+import { css } from "@emotion/css";
 
 const InsertVideoButton = () => {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -37,7 +38,13 @@ const InsertVideoButton = () => {
           value={videoUrl}
           onChange={(e) => setVideoUrl(e.target.value)}
         />
-        <Button type="button" onClick={onAdd}>
+        <Button
+          type="button"
+          onClick={onAdd}
+          className={css`
+            margin-top: 1rem;
+          `}
+        >
           Add video
         </Button>
       </Modal>
