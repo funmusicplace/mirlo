@@ -81,13 +81,12 @@ const TrackWidget = () => {
           <FlexWrapper
             className={css`
               align-items: center;
-              height: 135px;
             `}
           >
             <ImageWithPlaceholder
               src={track.trackGroup.cover?.sizes?.[300] ?? ""}
               alt={track.title}
-              size={135}
+              size={150}
               className={css`
                 width: auto !important;
                 border-radius: 0.3rem 0 0 0.3rem;
