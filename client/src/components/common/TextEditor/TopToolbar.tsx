@@ -43,6 +43,18 @@ const TopToolbar: React.FC = () => {
             color: var(--mi-secondary-color);
           }
         }
+
+        @media (prefers-color-scheme: dark) {
+          > button,
+          > div > div > span > button,
+          > div > span > button,
+          > div > button,
+          > div > div > button,
+          > span > button {
+            background-color: inherit !important;
+            color: var(--mi-black) !important;
+          }
+        }
       `}
     >
       <Toolbar

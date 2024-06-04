@@ -16,6 +16,8 @@ const SearchResultsDiv = styled.div`
   z-index: 999;
   word-break: break-word;
   color: var(--mi-black) !important;
+  margin-top: 0.5rem;
+  border-radius: 5px;
 
   @media (max-width: ${bp.small}px) {
     position: fixed;
@@ -43,11 +45,12 @@ const SearchResult = styled.li`
     padding: 0.75rem 1rem;
     color: var(--mi-black) !important;
     display: block;
-    padding: 0.75rem 1rem;
     background: transparent;
     border: none;
     width: 100%;
     justify-content: flex-start;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   &.selected {
@@ -57,6 +60,16 @@ const SearchResult = styled.li`
     button,
     a {
       color: var(--mi-white) !important;
+    }
+  }
+  button:hover,
+  a:hover {
+    color: var(--mi-white) !important;
+  }
+  @media (prefers-color-scheme: dark) {
+    button:hover,
+    a:hover {
+      background-color: var(--mi-black) !important;
     }
   }
 `;
@@ -153,22 +166,22 @@ const AutoComplete: React.FC<{
         autoComplete="off"
         className={css`
           z-index: 1000;
+          opacity: 0.95;
           position: relative;
           margin-bottom: 0 !important;
           border: 1px solid var(--mi-lighten-foreground-color);
           background: var(--mi-white) !important;
+          overflow: hidden;
+          text-overflow: ellipsis;
           &::placeholder {
             color: var(--mi-normal-foreground-color) !important;
-            opacity: 0.3;
-          }
-          @media screen and (max-width: ${bp.medium}px) {
-            opacity: 0.7;
+            opacity: 0.5;
           }
           @media (prefers-color-scheme: dark) {
             color: var(--mi-white) !important;
+            background: var(--mi-black) !important;
             &::placeholder {
               color: var(--mi-white) !important;
-              opacity: 0.3;
             }
           }
         `}
