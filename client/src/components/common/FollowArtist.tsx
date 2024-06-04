@@ -114,10 +114,12 @@ const FollowArtist: React.FC<{ artistId: number }> = ({ artistId }) => {
               })}
             </Box>
             <h3
-              className={css`
-                margin-bottom: 1rem;
-                margin-top: 1rem;
-              `}
+              className={
+                css`
+                  margin-bottom: 0.5rem;
+                  margin-top: 1rem;
+                ` + " h4"
+              }
             >
               {t("supportArtistFinancially", {
                 artistName: artist?.name,

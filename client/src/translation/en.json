@@ -145,7 +145,7 @@
     "toFollowThisArtist": "To follow this artist please enter your email address.",
     "followArtist": "Follow {{artistName}}",
     "followingArtist": "You're now following {{artistName}}",
-    "supportArtistFinancially": "Support {{artistName}} financially",
+    "supportArtistFinancially": "Want to also support {{ artistName }} with a monthly contribution?",
     "youveSubscribed": "You've subscribed to receive e-mails from {{ artistName }}.",
     "error": "Something went wrong",
     "subscribedSuccessfully": "Subscription confirmation e-mail sent!",
