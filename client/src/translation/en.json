@@ -562,7 +562,7 @@
     "questions.mainBlockers.question": "What are the main blockers facing Mirlo?",
     "questions.mainBlockers.answer": "Our main blocker is getting the word out! If you want to help out with marketing, <1>please reach out</1>!",
     "questions.productRoadmap.question": "What’s on your product roadmap?",
-    "questions.productRoadmap.answer": "We’re pretty close to being done with our minimum viable platform. Check out our <1>GitHub issues tracker</1> for what we're working on",
+    "questions.productRoadmap.answer": "We’re pretty close to being done with our minimum viable platform. Check out our <1>GitHub issues tracker</1> for what we're working on.",
     "questions.heardOfProjectX.question": "Have you heard of \"project x\"?",
     "questions.heardOfProjectX.answer": "Probably! As individuals we’ve worked with and in Resonate and Ampled, and we’re in touch with a couple of other projects that are doing very similar things like jam.coop, faircamp, ampwall, patrontape, tone.audio, and some others. We’re hoping to continue talking to these folks and build towards standardization of resources and tech APIs so that our services can talk to each other and musicians can easily switch between them. If there’s a project you want to talk about, bring it up in our <1>Discord</1>!",
     "questions.howDoPayoutsWork.question": "How do payouts work?",
