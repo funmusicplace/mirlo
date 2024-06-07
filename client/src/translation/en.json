@@ -304,8 +304,8 @@
     "artist": "Artist",
     "editTrackArtists": "Edit track artists",
     "thereWasAnError": "There was an error uploading this track.",
-    "doneUploading": "Uploaded all tracks, we still need to process them on our servers, but you can now safely close the browser.",
-    "uploadingTracks": "Uploading tracks, this could take several minutes, please don't close the browser."
+    "doneUploading": "Uploaded all tracks. We still need to process them on our servers, but you can now safely close the browser.",
+    "uploadingTracks": "Uploading tracks. This could take several minutes, please don't close the browser."
   },
   "artistForm": {
     "displayName": "Display name",
