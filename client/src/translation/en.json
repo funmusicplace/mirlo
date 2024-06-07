@@ -420,7 +420,7 @@
     "type": "Type:",
     "edit": "Edit",
     "byArtist": "by <artistLink>{{artist}}</artistLink}}",
-    "copiedTrackUrl": "Copied track url",
+    "copiedTrackUrl": "Copied track URL",
     "releaseDate": "Release date:",
     "pastRelease": "Released on {{date}}",
     "futureRelease": "Will be released on {{date}}",
