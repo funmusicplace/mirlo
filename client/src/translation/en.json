@@ -12,9 +12,9 @@
     "alwaysCreateLater": "You can always add an artist account later",
     "imJustHereToListen": "I'm just here to listen",
     "logIn": "Alrieady have an account? Log in",
-    "notArtistName": "You will be able to create multiple artist accounts, this can be anything",
-    "termsAndPrivacy": "By signing up you agree to our <terms>terms</terms> and <privacy>privacy</privacy> policies",
-    "receiveMailingList": "Stay up to date with Mirlo and our product by signing up to our mailing list"
+    "notArtistName": "You will be able to create multiple artist accounts, this can be anything.",
+    "termsAndPrivacy": "By signing up you agree to our <terms>terms</terms> and <privacy>privacy</privacy> policies.",
+    "receiveMailingList": "Stay up to date with Mirlo and our product by signing up to our mailing list."
   },
   "releases": {
     "recentReleases": "Recent releases",
@@ -78,7 +78,7 @@
     "noSubscriptionsYet": "You don't support any musicians yet",
     "areYouSureDeleteAccount": "Are you sure you want to delete your account?",
     "deleteAccount": "Delete account",
-    "changingEmailDisabled": "Changing your email has been disabled for now. Please contact an admin if you want to do so",
+    "changingEmailDisabled": "Changing your email has been disabled for now. Please contact an admin if you want to do so.",
     "collectionEmpty": "There's nothing in your collection yet, support some artists and buy their music!",
     "yourCollection": "Your collection",
     "yourWishlist": "Your wishlist",
@@ -94,18 +94,18 @@
     "notLoggedIn": "We'll need your email address to send you a one-time download link of the album. In the future you'll be able to create an account and access what you've bought.",
     "albumExists": "An album has already been bought using this email address, you can finish creating an account to see it in your collection. Do you want to proceed anyway?",
     "download": "Download",
-    "downloadDisclaimer": "we strongly encourage you to download purchases, we're not always in control of what might be required of us legally to keep the platform and releases up. We think people should try, as much as possible, to keep a local archive of the art that they buy online.",
+    "downloadDisclaimer": "We strongly encourage you to download purchases; we're not always in control of what might be required of us legally to keep the platform and releases up. We think people should try, as much as possible, to keep a local archive of the art that they buy online.",
     "error": "Something went wrong",
     "buy": "Buy",
     "nameYourPriceLabel": "Name your price",
     "preOrder": "Pre-order",
     "released": "Released: {{date}}",
-    "notImplemented": "Buying an album for variable price hasn't been implemented yet",
+    "notImplemented": "Buying an album for variable price hasn't been implemented yet.",
     "title": "Title:",
     "published": "Published:",
     "tracks": "Tracks:",
     "releaseDate": "Release date:",
-    "usersCanPurchase": "Users can purchase this album",
+    "usersCanPurchase": "Users can purchase this album.",
     "price": "Price:",
     "addToCollection": "Add to collection",
     "addToCollectionDescription": "You'll add this free album to your collection.",
@@ -116,10 +116,10 @@
     "nameYourPrice": "Name your price in {{ currency }}:",
     "buyingTrackGroup": "Buying {{title}}",
     "preOrderingTrackGroup": "Pre-ordering {{title}}",
-    "lessThanMin": "{{artistName}} has set a mimimum price of {{minPrice}} for this purchase",
-    "moreThan1": "Pay 1 {{currency}} or more to add this release to your Mirlo collection and directly support {{artistName}}",
-    "justDownloadLoggedIn": "Want to just download the album? We'll email you a download link. You'll get added to the artist's mailing list",
-    "justDownloadNoUser": "Want to just download the album? Enter your email and we'll email you a download link. You'll get added to the artist's mailing list"
+    "lessThanMin": "{{artistName}} has set a mimimum price of {{minPrice}} for this purchase.",
+    "moreThan1": "Pay 1 {{currency}} or more to add this release to your Mirlo collection and directly support {{artistName}}.",
+    "justDownloadLoggedIn": "Want to just download the album? We'll email you a download link. You'll get added to the artist's mailing list.",
+    "justDownloadNoUser": "Want to just download the album? Enter your email and we'll email you a download link. You'll get added to the artist's mailing list."
   },
   "artist": {
     "follow": "Follow",
@@ -133,10 +133,10 @@
     "supportAtThisTier": "You're supporting at this tier",
     "areSupporting": "You're supporting this artist!",
     "support": "Support",
-    "doesNotExist": "This artist does not exist or it does not have a public presence",
+    "doesNotExist": "This artist does not exist or it does not have a public presence.",
     "edit": "Edit page",
     "updates": "Updates",
-    "noUpdates": "There are no updates yet for this artist",
+    "noUpdates": "There are no updates yet for this artist.",
     "releases": "Releases",
     "posts": "Posts",
     "justFollow": "Just follow",
@@ -152,7 +152,7 @@
     "successfullyUnsubscribed": "Successfully unsubscribed",
     "subscribe": "Subscribe to artist",
     "month": "month",
-    "noBioYet": "You haven't added a biography for your artist yet",
+    "noBioYet": "You haven't added a biography for your artist yet.",
     "addNewAlbum": "Add new album",
     "saveBio": "Save bio",
     "editBioButton": "Edit bio",
@@ -179,7 +179,7 @@
     "continueWithPrice": "Continue with {{ amount }}/month",
     "chooseToContinue": "Choose a support tier to support",
     "platformPercentDisclaimer": "Mirlo is evaluating the platform percentage and seeking input from musicians in the next few weeks.",
-    "platformPercent": "{{ percent }}% ({{ money }}) will go to {{ artistName }}. This does not include the cut taken by our payment processor"
+    "platformPercent": "{{ percent }}% ({{ money }}) will go to {{ artistName }}. This does not include the cut taken by our payment processor."
   },
   "clickToPlay": {
     "untitled": "Untitled",
@@ -189,18 +189,18 @@
   },
   "post": {
     "edit": "Edit",
-    "notAvailable": "The artist has not made this post's content publicly available"
+    "notAvailable": "The artist has not made this post's content publicly available."
   },
   "manage": {
     "manageArtists": "Manage artists",
     "error": "Something went wrong",
     "setUpBankAccount": "Set up bank account",
     "stripeAccountVerified": "Stripe account verified! This means you'll be able to receive payments for purchases.",
-    "waitingStripeAccountVerification": "We're waiting on stripe to verify your account",
-    "downloadSubscriberData": "Download Subscriber Data",
+    "waitingStripeAccountVerification": "We're waiting on Stripe to verify your account.",
+    "downloadSubscriberData": "Download subscriber data",
     "subscriptionTiers": "Your subscription tiers",
     "createNewArtist": "Create new artist",
-    "waitingOnStripe": "We're waiting on stripe to verify your account",
+    "waitingOnStripe": "We're waiting on Stripe to verify your account",
     "updateBankAccount": "Change bank account information",
     "countryCurrencyCode": "Country currency code:",
     "saveCountryCode": "Save"
@@ -211,7 +211,7 @@
     "areYouSureDelete": "Are you sure you want to delete this artist?",
     "problemDeletingArtist": "Problem deleting artist",
     "postDeleted": "Post deleted",
-    "noAlbumsYet": "You don't have any albums yet",
+    "noAlbumsYet": "You don't have any albums yet.",
     "editPost": "Edit post",
     "editDetails": "Edit artist details",
     "viewLive": "View live",
@@ -264,10 +264,10 @@
     "saveAlbum": "Save album",
     "submitAlbum": "Submit album to add tracks",
     "publish": "Publish release",
-    "publishedSuccess": "Successfully published album, it's now publicly available",
+    "publishedSuccess": "Successfully published album, it's now publicly available.",
     "publishPreorder": "Publish pre-order",
     "uploadTracks": "Manage tracks",
-    "uploadTracksDescription": "Attach files from your computer to get started uploading tracks",
+    "uploadTracksDescription": "Attach files from your computer to get started uploading tracks.",
     "addTheFollowingTracks": "We'll add the following tracks",
     "addNewArtist": "Add new artist",
     "credits": "Credits",
@@ -276,7 +276,7 @@
     "trackTitle": "Track title",
     "trackTitleHelp": "The title of the track",
     "artists": "Artists",
-    "trackArtistsHelp": "Who are the artists involved in making the track? List as many as you like, alongside their role",
+    "trackArtistsHelp": "Who are the artists involved in making the track? List as many as you like, alongside their role.",
     "status": "Free listen?",
     "statusHelp": "Can the user listen to the track without owning it?",
     "metadata": "Metadata",
@@ -286,8 +286,8 @@
     "createAlbum": "Create album",
     "update": "Update",
     "makePrivate": "Make private",
-    "priceZeroOrMore": "Price must be zero or more",
-    "madePrivate": "Your album has been made private. People will no longer be able to see it",
+    "priceZeroOrMore": "Price must be zero or more.",
+    "madePrivate": "Your album has been made private. People will no longer be able to see it.",
     "makePreorderPrivate": "Make pre-order private",
     "trackGroupUpdated": "Album updated",
     "trackGroupCreated": "Album created",
@@ -303,13 +303,13 @@
     "artistOnMirlo": "Artist with a presence on Mirlo",
     "artist": "Artist",
     "editTrackArtists": "Edit track artists",
-    "thereWasAnError": "There was an error uploading this track",
-    "doneUploading": "Uploaded all tracks, we still need to process them on our servers, but you can now safely close the browser",
-    "uploadingTracks": "Uploading tracks, this could take several minutes, please don't close the browser"
+    "thereWasAnError": "There was an error uploading this track.",
+    "doneUploading": "Uploaded all tracks, we still need to process them on our servers, but you can now safely close the browser.",
+    "uploadingTracks": "Uploading tracks, this could take several minutes, please don't close the browser."
   },
   "artistForm": {
     "displayName": "Display name",
-    "bio": "Artist Biography",
+    "bio": "Artist biography",
     "urlSlug": "Text that will appear in the URL",
     "saveArtist": "Save artist",
     "createArtist": "Create artist",
@@ -317,7 +317,7 @@
     "uploading": "Uploading...",
     "replace": "Replace",
     "updatedArtist": "Updated artist",
-    "dimensionsTip": "For the best effect, upload a {{maxDimensions}} size image",
+    "dimensionsTip": "For the best effect, upload a {{maxDimensions}} size image.",
     "yourAlbums": "Your albums",
     "addNewAlbum": "Add new album to {{artistName}}",
     "posts": "Posts",
@@ -353,7 +353,7 @@
     "email": "Email",
     "tier": "Tier",
     "amount": "Amount",
-    "noSupportersYet": "No supporters yet, share your profile with others to grow your community"
+    "noSupportersYet": "No supporters yet, share your profile with others to grow your community."
   },
   "subscriptionForm": {
     "supporters": "Manage supporters",
@@ -361,18 +361,18 @@
     "name": "Name: ",
     "addNewTier": "Add new tier",
     "allowVariableDescription": "Allow supporters to enter a larger number?",
-    "autoAlbumPurchase": "If a user subscribes at this tier, they'll automatically get every new album you release",
+    "autoAlbumPurchase": "If a user subscribes at this tier, they'll automatically get every new album you release.",
     "newSubscriptionTierFor": "New subscription tier for {{ artistName }}",
     "minimumAmount": "Minimum amount: ",
     "description": "Description",
     "saveSubscription": "Save subscription",
     "createSubscription": "Create subscription",
     "editSubscriptionTierFor": "Edit subscription tier for {{artistName}}",
-    "minAmountError": "The amount for a support tier must be more than or equal to 1"
+    "minAmountError": "The amount for a support tier must be more than or equal to 1."
   },
   "footer": {
-    "getInTouch": "If you'd like to get in touch, join <discord>our discord</discord>, <email>email us</email>, or check out <github>our github</github>.",
-    "aboutUs": "<about>About us</about>, <faq>FAQ</faq>, <terms>Terms and Conditions</terms>, <privacy>Privacy</privacy>, <cookie>Our use of cookies</cookie>",
+    "getInTouch": "If you'd like to get in touch, join <discord>our Discord</discord>, <email>email us</email>, or check out <github>our Github</github>.",
+    "aboutUs": "<about>About us</about>, <faq>FAQ</faq>, <terms>Terms and conditions</terms>, <privacy>Privacy</privacy>, <cookie>Our use of cookies</cookie>",
     "socialInstagram": "{{username}} on Instagram",
     "socialMastodon": "{{username}} on Mastodon",
     "socialX": "{{username}} on X"
@@ -426,11 +426,11 @@
     "futureRelease": "Will be released on {{date}}",
     "about": "About:",
     "isPrivate": "Is private?",
-    "privateAlbumDescription": "Private albums can not be listened to by Mirlo users",
+    "privateAlbumDescription": "Private albums can not be listened to by Mirlo users.",
     "isEnabled": "Is enabled?",
-    "enabledAlbumDescription": "Enabled albums can be made public by the artist",
+    "enabledAlbumDescription": "Enabled albums can be made public by the artist.",
     "saveTrackGroupButton": "Save track group",
-    "doesNotExist": "This album does not exist or it does not have a public presence"
+    "doesNotExist": "This album does not exist or it does not have a public presence."
   },
   "manageSubscriptionTierBox": {
     "edit": "Edit",
@@ -510,12 +510,12 @@
     "delete": "Delete",
     "saveNew": "Save new",
     "shouldSendEmail": "Should we send an email to your supporters when this post is published?",
-    "shouldSendEmailContext": "If yes, we'll send an e-mail, if not, they'll get notified on the website",
+    "shouldSendEmailContext": "If yes, we'll send an e-mail, if not, they'll get notified on the website.",
     "follow": "Everyone who pressed the follow button on your profile",
     "ifNotPublic": "If not public, which of your subscription tier should be the minimum tier to receive your update?"
   },
   "errorPage": {
-    "reactError": "React Error ",
+    "reactError": "React error ",
     "unexpectedError": "Sorry, an unexpected error has occurred."
   },
   "trackGroupEmbed": {
