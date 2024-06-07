@@ -419,7 +419,7 @@
     "title": "Title:",
     "type": "Type:",
     "edit": "Edit",
-    "byArtist": "by <artistLink>{{artist}}</artistLink}}",
+    "byArtist": "by <artistLink>{{artist}}</artistLink>",
     "copiedTrackUrl": "Copied track URL",
     "releaseDate": "Release date:",
     "pastRelease": "Released on {{date}}",
