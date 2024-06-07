@@ -339,9 +339,12 @@
     "deleteImage": "Delete image"
   },
   "manageSubscriptions": {
+    "pasteEmailsHere": "If you have a list of e-mails, paste them here:",
     "downloadSubscriberData": "Download subscriber data",
-    "uploadSubscriberData": "Upload follower data",
+    "uploadSubscriberData": "Upload emails to the {{ artistName }} mailing list",
+    "somethingWentWrongUploadingEmails": "Something went wrong uploading e-mails",
     "email": "E-mail",
+    "uploadedNewEmails": "Uploaded new emails!",
     "remove": "Remove",
     "uploadACSV": "Upload a CSV file of email addresses",
     "fileUploadDescription": "If you have a CSV file that contains a list of e-mail addresses in CSV format, you can upload it here: ",
