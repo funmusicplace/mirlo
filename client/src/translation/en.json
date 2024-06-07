@@ -189,7 +189,9 @@
   },
   "post": {
     "edit": "Edit",
-    "notAvailable": "The artist has not made this post's content publicly available"
+    "notAvailable": "The artist has not made this post's content publicly available",
+    "publishedAt": "Published {{ date }}",
+    "willPublishAt": "Will publish at {{ date }}"
   },
   "manage": {
     "manageArtists": "Manage artists",
@@ -236,6 +238,8 @@
     "deleteTrackGroupConfirm": "Are you sure you want to delete this album?",
     "albumDeleted": "Album deleted",
     "somethingWentWrong": "Something went wrong",
+    "publishedAt": "Published {{ date }}",
+    "willPublishAt": "Will publish at {{ date }}",
     "publishedSuccess": "Your album has been published. People will be able to buy it after the release date!"
   },
   "managePost": {
