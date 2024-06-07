@@ -30,7 +30,7 @@
     "about": "About",
     "intro": "Mirlo provides a user-friendly space to help musicians sell music, manage subscriptions, and share with their supporters.",
     "ourMission": "Our mission",
-    "missionStatement": "<1>The music industry does not work for musicians or listeners and needs a radical re-imagination. </1><1>Mirlo is a community of musicians, listeners, and coders who are daring to do just that: taking lessons learned in working in the solidarity economy and applying them to our process and product.</1><1>We are building an online audio distribution (think Bandcamp) and patronage (think Patreon) platform that aims to be radical, accessible, open source (free & libre), modular, and standards based.</1>",
+    "missionStatement": "<1>The music industry does not work for musicians or listeners and needs a radical re-imagination. </1><1>Mirlo is a community of musicians, listeners, and coders who are daring to do just that, taking lessons learned in working in the solidarity economy and applying them to our process and product.</1><1>We are building an online audio distribution (think Bandcamp) and patronage (think Patreon) platform that aims to be radical, accessible, open source (free & libre), modular, and standards based.</1>",
     "behindThePlatform": "Behind the platform",
     "behindThePlatformText": "Our members have experience working both within Resonate and Ampled, other co-ops across several industries, and complex high-traffic web platforms. We envision this platform as a tool to support musicians in cultivating direct and reciprocal relationships and resources to sustain one another’s creative practice."
   },
@@ -415,7 +415,7 @@
     "successfullyUpdated": "Successfully updated track"
   },
   "trackGroupDetails": {
-    "trackgroup": "Track Group:",
+    "trackgroup": "Track group:",
     "title": "Title:",
     "type": "Type:",
     "edit": "Edit",
@@ -461,12 +461,12 @@
     "stillProcessing": "Still processing audio"
   },
   "mewTrack": {
-    "newTrack": "New Track",
+    "newTrack": "New track",
     "title:": "Title",
     "status:": "Status",
     "statusPreview": "Preview",
     "statusMustOwn": "Must own",
-    "trackFile": "Upload Track File",
+    "trackFile": "Upload track file",
     "creditArtistQuestion": "Want to credit an artist on this track?",
     "artistNameFormatQuestionColumn": "How the artist's name should appear publicly",
     "existingArtistQuestionColumn": "Is this an existing artist in Mirlo? Add their ID if so.",
