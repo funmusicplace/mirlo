@@ -175,7 +175,7 @@
     "contributionIsMonthly": "Make contribution monthly",
     "subscribeToArtist": "Subscribe to {{ artist }}",
     "chooseSupportLevel": "You can follow the artist or choose to support them financially",
-    "continueWithName": "Support  at {{ name }}",
+    "continueWithName": "Support at {{ name }}",
     "continueWithPrice": "Continue with {{ amount }}/month",
     "chooseToContinue": "Choose a support tier to support",
     "platformPercentDisclaimer": "Mirlo is evaluating the platform percentage and seeking input from musicians in the next few weeks.",
@@ -183,7 +183,7 @@
   },
   "clickToPlay": {
     "untitled": "Untitled",
-    "goToAlbum": "Go To Album",
+    "goToAlbum": "Go to album",
     "play": "Play",
     "pause": "Pause"
   },
@@ -219,7 +219,7 @@
     "terminationDanger": " Artist account termination ",
     "addNewAlbum": "Add new album",
     "edit": "Edit",
-    "editPage": "Edit Artist Page",
+    "editPage": "Edit artist page",
     "delete": "Delete",
     "addNewPost": "Add new post",
     "releases": "Releases",
@@ -522,14 +522,14 @@
     "embed": "Embed {{ name }} in another website",
     "share": "Share",
     "copyAlbum": "Copy album link",
-    "copyIframe": "If you want to embed the track in an other website, copy the below code:",
+    "copyIframe": "If you want to embed the track in another website, copy the code below:",
     "copiedToClipboard": "Copied to clipboard!"
   },
   "home": {
     "support": "Directly support musicians. Buy their music. Collectively owned and managed.",
     "mailingList": "Get on the mailing list",
     "supportTeam": "Support Mirlo",
-    "sustainedBy": "Mirlo's work is sustained by our community, not by venture capital",
+    "sustainedBy": "Mirlo's work is sustained by our community, not by venture capital.",
     "logIn": "Log in",
     "signUp": "Sign up",
     "officeHours": "Have more questions? Join us for <office>office hours</office>.",
