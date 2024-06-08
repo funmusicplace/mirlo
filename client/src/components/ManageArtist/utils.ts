@@ -68,8 +68,15 @@ export const convertMetaData = (
   p: ParsedItem,
   i: number,
   trackGroup: TrackGroup
-) =>
-  ({
+) => {
+  let title = p.metadata.common.title;
+
+  if (!title) {
+    title = p.file.name ?? "";
+    title = title.replace(/\.wav$/, "");
+  }
+
+  return {
     metadata: p.metadata,
     order: `${
       p.metadata.common.track.no && Number.isFinite(+p.metadata.common.track.no)
@@ -78,7 +85,7 @@ export const convertMetaData = (
     }`,
     duration: p.metadata.format.duration,
     file: p.file,
-    title: p.metadata.common.title ?? p.file.name ?? "",
+    title,
     status: "preview",
     trackArtists:
       p.metadata.common.artists?.map((artist) => ({
@@ -88,7 +95,8 @@ export const convertMetaData = (
         artistId:
           artist === trackGroup.artist?.name ? trackGroup.artistId : undefined,
       })) ?? [],
-  }) as TrackData;
+  } as TrackData;
+};
 
 export const parse = async (files: File[]): Promise<ParsedItem[]> => {
   const parsed = await Promise.all(
