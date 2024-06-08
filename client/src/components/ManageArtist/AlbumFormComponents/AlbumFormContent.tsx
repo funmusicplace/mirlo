@@ -13,6 +13,9 @@ import { useAuthContext } from "state/AuthContext";
 import { useParams } from "react-router-dom";
 import LoadingSpinner from "components/common/LoadingSpinner";
 import { css } from "@emotion/css";
+import { useSnackbar } from "state/SnackbarContext";
+import useErrorHandler from "services/useErrorHandler";
+import { FaCheck } from "react-icons/fa";
 
 const SavingInput: React.FC<{
   formKey: string;
@@ -23,9 +26,14 @@ const SavingInput: React.FC<{
   type?: string;
 }> = ({ formKey, url, extraData, type, required, rows }) => {
   const { register, getValues } = useFormContext();
+  const errorHandler = useErrorHandler();
+
   const [isSaving, setIsSaving] = React.useState(false);
+  const [saveSuccess, setSaveSuccess] = React.useState(false);
+
   const saveOnBlur = React.useCallback(async () => {
     try {
+      setSaveSuccess(false);
       setIsSaving(true);
       let value = getValues(formKey);
 
@@ -39,8 +47,20 @@ const SavingInput: React.FC<{
         [formKey]: value,
         ...extraData,
       });
+      let timeout2: NodeJS.Timeout;
+      const timeout = setTimeout(() => {
+        setIsSaving(false);
+        setSaveSuccess(true);
+        timeout2 = setTimeout(() => {
+          setSaveSuccess(false);
+        }, 1000);
+      }, 1000);
+      return () => {
+        clearTimeout(timeout2);
+        clearTimeout(timeout);
+      };
     } catch (e) {
-    } finally {
+      errorHandler(e);
       setIsSaving(false);
     }
   }, [formKey, getValues, url, extraData]);
@@ -68,6 +88,7 @@ const SavingInput: React.FC<{
       )}
       {rows && <TextArea {...register(formKey)} rows={7} onBlur={saveOnBlur} />}
       {isSaving && <LoadingSpinner />}
+      {saveSuccess && <FaCheck />}
     </div>
   );
 };
