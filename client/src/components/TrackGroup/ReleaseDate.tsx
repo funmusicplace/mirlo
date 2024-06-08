@@ -14,11 +14,11 @@ export const formatDate = ({
   options?: Intl.DateTimeFormatOptions;
 }): string => {
   const options: Intl.DateTimeFormatOptions = defaultOptions ?? {
-    month: "long",
-    year: "numeric",
+    dateStyle: "short",
+    timeStyle: "short",
   };
 
-  const releaseFormat = new Date(date).toLocaleDateString(
+  const releaseFormat = new Date(date).toLocaleString(
     i18n.resolvedLanguage,
     options
   );

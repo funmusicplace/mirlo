@@ -6,26 +6,113 @@ import FormComponent from "components/common/FormComponent";
 import { useTranslation } from "react-i18next";
 import { InputEl } from "components/common/Input";
 import TextArea from "components/common/TextArea";
-import UploadImage from "../UploadImage";
 import UploadArtistImage from "../UploadArtistImage";
 import FormError from "components/common/FormError";
+import api from "services/api";
+import { useAuthContext } from "state/AuthContext";
+import { useParams } from "react-router-dom";
+import LoadingSpinner from "components/common/LoadingSpinner";
+import { css } from "@emotion/css";
+import { useSnackbar } from "state/SnackbarContext";
+import useErrorHandler from "services/useErrorHandler";
+import { FaCheck } from "react-icons/fa";
+
+const SavingInput: React.FC<{
+  formKey: string;
+  url: string;
+  extraData: Object;
+  rows?: number;
+  required?: boolean;
+  type?: string;
+}> = ({ formKey, url, extraData, type, required, rows }) => {
+  const { register, getValues } = useFormContext();
+  const errorHandler = useErrorHandler();
+
+  const [isSaving, setIsSaving] = React.useState(false);
+  const [saveSuccess, setSaveSuccess] = React.useState(false);
+
+  const saveOnBlur = React.useCallback(async () => {
+    try {
+      setSaveSuccess(false);
+      setIsSaving(true);
+      let value = getValues(formKey);
+
+      if (formKey === "releaseDate") {
+        value = new Date(value).toISOString();
+      } else if (formKey === "minPrice") {
+        value = value ? value * 100 : undefined;
+      }
+
+      await api.put<unknown, TrackGroup>(url, {
+        [formKey]: value,
+        ...extraData,
+      });
+      let timeout2: NodeJS.Timeout;
+      const timeout = setTimeout(() => {
+        setIsSaving(false);
+        setSaveSuccess(true);
+        timeout2 = setTimeout(() => {
+          setSaveSuccess(false);
+        }, 1000);
+      }, 1000);
+      return () => {
+        clearTimeout(timeout2);
+        clearTimeout(timeout);
+      };
+    } catch (e) {
+      errorHandler(e);
+      setIsSaving(false);
+    }
+  }, [formKey, getValues, url, extraData]);
+
+  return (
+    <div
+      className={css`
+        display: flex;
+        width: 100%;
+        align-items: center;
+
+        input,
+        textarea {
+          margin-right: 1rem;
+        }
+      `}
+    >
+      {!rows && (
+        <InputEl
+          {...register(formKey)}
+          onBlur={saveOnBlur}
+          type={type}
+          required={required}
+        />
+      )}
+      {rows && <TextArea {...register(formKey)} rows={7} onBlur={saveOnBlur} />}
+      {isSaving && <LoadingSpinner />}
+      {saveSuccess && <FaCheck />}
+    </div>
+  );
+};
 
 const AlbumFormContent: React.FC<{
-  isLoadingImage: boolean;
-  existingFileCover?: string;
-  existingObject?: TrackGroup;
-}> = ({ isLoadingImage, existingFileCover, existingObject }) => {
+  existingObject: TrackGroup;
+}> = ({ existingObject }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const {
-    register,
     formState: { errors },
   } = useFormContext();
+  const { user } = useAuthContext();
+  const userId = user?.id;
+  const { artistId, trackGroupId } = useParams();
 
   return (
     <>
       <FormComponent>
         <label>{t("title")}</label>
-        <InputEl {...register("title")} />
+        <SavingInput
+          formKey="title"
+          url={`users/${userId}/trackGroups/${trackGroupId}`}
+          extraData={{ artistId: Number(artistId) }}
+        />
       </FormComponent>
       <FormComponent
         style={{
@@ -35,23 +122,15 @@ const AlbumFormContent: React.FC<{
         }}
       >
         <label>{t("cover")}</label>
-        {!existingObject && (
-          <UploadImage
-            formName="coverFile"
-            isLoading={isLoadingImage}
-            existingCover={existingFileCover}
-          />
-        )}
-        {existingObject && (
-          <UploadArtistImage
-            imageTypeDescription="an album cover"
-            existing={existingObject}
-            imageType="cover"
-            height="400"
-            width="400"
-            maxDimensions="1500x1500"
-          />
-        )}
+
+        <UploadArtistImage
+          imageTypeDescription="an album cover"
+          existing={existingObject}
+          imageType="cover"
+          height="400"
+          width="400"
+          maxDimensions="1500x1500"
+        />
       </FormComponent>
 
       {/* <FormComponent>
@@ -67,19 +146,40 @@ const AlbumFormContent: React.FC<{
 
       <FormComponent>
         <label>{t("releaseDate")} </label>
-        <InputEl type="date" {...register("releaseDate")} required />
+        <SavingInput
+          formKey="date"
+          type="date"
+          required
+          url={`users/${userId}/trackGroups/${trackGroupId}`}
+          extraData={{ artistId: Number(artistId) }}
+        />
       </FormComponent>
       <FormComponent>
         <label>{t("about")} </label>
-        <TextArea {...register("about")} rows={7} />
+        <SavingInput
+          formKey="about"
+          rows={8}
+          url={`users/${userId}/trackGroups/${trackGroupId}`}
+          extraData={{ artistId: Number(artistId) }}
+        />
       </FormComponent>
       <FormComponent>
         <label>{t("credits")} </label>
-        <TextArea {...register("credits")} rows={5} />
+        <SavingInput
+          formKey="credits"
+          rows={8}
+          url={`users/${userId}/trackGroups/${trackGroupId}`}
+          extraData={{ artistId: Number(artistId) }}
+        />
       </FormComponent>
       <FormComponent>
         <label>{t("price")}</label>
-        <InputEl type="number" {...register("minPrice", { min: 0 })} />
+        <SavingInput
+          formKey="price"
+          type="number"
+          url={`users/${userId}/trackGroups/${trackGroupId}`}
+          extraData={{ artistId: Number(artistId) }}
+        />
         {errors.minPrice && <FormError>{t("priceZeroOrMore")}</FormError>}
       </FormComponent>
     </>

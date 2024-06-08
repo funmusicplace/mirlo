@@ -113,19 +113,19 @@ const ArtistSubscriberUploadData: React.FC<{
             }
           );
         }
-        snackbar("Uploaded your followers!", { type: "success" });
+        snackbar(t("uploadedNewEmails"), { type: "success" });
         setIsOpen(false);
         onDone();
         setIsMenuOpen?.(false);
       } catch (e) {
-        snackbar("Something went wrong uploading followers", {
+        snackbar(t("somethingWentWrongUploadingEmails"), {
           type: "warning",
         });
       } finally {
         setIsLoadingSubscriberData(false);
       }
     },
-    [artistUserId, artistId, snackbar, onDone, setIsMenuOpen]
+    [artistUserId, artistId, snackbar, onDone, setIsMenuOpen, t]
   );
 
   const processTextArea = React.useCallback(() => {
@@ -234,7 +234,7 @@ const ArtistSubscriberUploadData: React.FC<{
           `}
         />
         <div>
-          <p>If you have a list of e-mails, paste them here:</p>
+          <p>{t("pasteEmailsHere")}</p>
           <TextArea
             placeholder="email1@example.com, email2@example.com"
             onChange={(e) => setEmailText(e.target.value)}
