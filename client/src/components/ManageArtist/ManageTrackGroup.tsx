@@ -15,15 +15,35 @@ import LoadingBlocks from "components/Artist/LoadingBlocks";
 import BackToArtistLink from "./BackToArtistLink";
 import ManageTags from "./AlbumFormComponents/ManageTags";
 import { useAuthContext } from "state/AuthContext";
+import { FormProvider, useForm } from "react-hook-form";
+import { useQuery } from "@tanstack/react-query";
+import { queryArtist } from "queries";
+import { useSnackbar } from "state/SnackbarContext";
+import useErrorHandler from "services/useErrorHandler";
+import api from "services/api";
+import { pick } from "lodash";
+
+export interface TrackGroupFormData {
+  published: boolean;
+  title: string;
+  type: TrackGroup["type"];
+  minPrice: string;
+  releaseDate: string;
+  credits: string;
+  about: string;
+  coverFile: File[];
+}
 
 const ManageTrackGroup: React.FC<{}> = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
 
-  const { artistId, trackGroupId } = useParams();
+  const { artistId: artistParamId, trackGroupId: trackGroupParamId } =
+    useParams();
   const { user } = useAuthContext();
-  const {
-    state: { artist, isLoading },
-  } = useArtistContext();
+
+  const { data: artist, isLoading: isLoading } = useQuery(
+    queryArtist({ artistSlug: artistParamId ?? "" })
+  );
 
   const userId = user?.id;
 
@@ -34,8 +54,8 @@ const ManageTrackGroup: React.FC<{}> = () => {
   } = useGetUserObjectById<TrackGroup>(
     "trackGroups",
     userId,
-    trackGroupId,
-    `?artistId=${artistId}`
+    trackGroupParamId,
+    `?artistId=${artistParamId}`
   );
 
   if (!artist && isLoading) {
@@ -96,7 +116,7 @@ const ManageTrackGroup: React.FC<{}> = () => {
           </div>
         </SpaceBetweenDiv>
       </div>
-      <AlbumForm existing={trackGroup} reload={reload} artist={artist} />
+      <AlbumForm trackGroup={trackGroup} artist={artist} reload={reload} />
 
       <ManageTags tags={trackGroup.tags} />
 

@@ -1,122 +1,66 @@
 import React from "react";
-import { FormProvider, useForm } from "react-hook-form";
+import { FormProvider, useForm, useFormContext } from "react-hook-form";
 import Button from "../common/Button";
 
-import { useSnackbar } from "state/SnackbarContext";
-import { pick } from "lodash";
-import api from "../../services/api";
-import useErrorHandler from "services/useErrorHandler";
 import { useTranslation } from "react-i18next";
-import useJobStatusCheck from "utils/useJobStatusCheck";
 import AlbumFormContent from "./AlbumFormComponents/AlbumFormContent";
+import { TrackGroupFormData } from "./ManageTrackGroup";
 import { useAuthContext } from "state/AuthContext";
-
-export interface FormData {
-  published: boolean;
-  title: string;
-  type: TrackGroup["type"];
-  minPrice: string;
-  releaseDate: string;
-  credits: string;
-  about: string;
-  coverFile: File[];
-}
+import { useSnackbar } from "state/SnackbarContext";
+import useErrorHandler from "services/useErrorHandler";
 
 const AlbumForm: React.FC<{
-  existing: TrackGroup;
-  reload: () => Promise<void> | void;
+  trackGroup: TrackGroup;
   artist: Artist;
-}> = ({ reload, artist, existing }) => {
-  const { user } = useAuthContext();
+  reload: () => void;
+}> = ({ trackGroup, artist, reload }) => {
+  const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const snackbar = useSnackbar();
   const errorHandler = useErrorHandler();
   const [isSaving, setIsSaving] = React.useState(false);
-  const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
 
-  const defaultValues = {
-    ...existing,
-    releaseDate: existing?.releaseDate.split("T")[0],
-    minPrice: `${
-      existing?.minPrice !== undefined ? existing.minPrice / 100 : ""
-    }`,
-  };
-
-  const methods = useForm<FormData>({
-    defaultValues,
-  });
-  const { handleSubmit, reset } = methods;
-  const { uploadJobs, setUploadJobs } = useJobStatusCheck({ reload, reset });
-  const existingId = existing?.id;
+  const methods = useForm<TrackGroupFormData>();
+  const { handleSubmit } = methods;
+  const { user } = useAuthContext();
   const userId = user?.id;
 
-  const doSave = React.useCallback(
-    async (data: FormData) => {
-      if (userId) {
-        try {
-          setIsSaving(true);
-          const sending = {
-            ...pick(data, ["title", "private", "type", "about", "credits"]),
-            minPrice: data.minPrice ? +data.minPrice * 100 : undefined,
-            releaseDate: new Date(data.releaseDate).toISOString(),
-          };
+  React.useEffect(() => {
+    const defaultValues = {
+      ...trackGroup,
+      releaseDate: trackGroup?.releaseDate.split("T")[0],
+      minPrice: `${
+        trackGroup?.minPrice !== undefined ? trackGroup.minPrice / 100 : ""
+      }`,
+    };
+    methods.reset(defaultValues);
+  }, [trackGroup]);
 
-          await api.put<Partial<TrackGroup>, TrackGroup>(
-            `users/${userId}/trackGroups/${existingId}`,
-            {
-              ...sending,
-              artistId: artist.id,
-            }
-          );
+  const artistId = artist?.id;
+  const trackGroupId = trackGroup?.id;
 
-          if (
-            existingId &&
-            data.coverFile?.[0] &&
-            typeof data.coverFile?.[0] !== "string"
-          ) {
-            const jobInfo = await api.uploadFile(
-              `users/${userId}/trackGroups/${existingId}/cover`,
-              data.coverFile
-            );
-            setUploadJobs([
-              { jobId: jobInfo.result.jobId, jobStatus: "waiting" },
-            ]);
-          }
-          snackbar(t("trackGroupUpdated"), {
-            type: "success",
-          });
-        } catch (e) {
-          errorHandler(e);
-        } finally {
-          setIsSaving(false);
-          await reload();
-        }
+  const doSave = React.useCallback(async () => {
+    if (userId) {
+      try {
+        setIsSaving(true);
+
+        snackbar(t("trackGroupUpdated"), {
+          type: "success",
+        });
+      } catch (e) {
+        errorHandler(e);
+      } finally {
+        setIsSaving(false);
+        await reload();
       }
-    },
-    [
-      t,
-      userId,
-      existingId,
-      snackbar,
-      artist.id,
-      setUploadJobs,
-      errorHandler,
-      reload,
-    ]
-  );
-  const isDisabled = isSaving || (uploadJobs && uploadJobs.length > 0);
+    }
+  }, [t, userId, trackGroupId, snackbar, artistId, errorHandler, reload]);
+  const isDisabled = isSaving;
 
   return (
     <div>
       <FormProvider {...methods}>
         <form onSubmit={handleSubmit(doSave)}>
-          <AlbumFormContent
-            isLoadingImage={
-              uploadJobs?.[0]?.jobStatus !== undefined &&
-              uploadJobs?.[0]?.jobStatus !== "completed"
-            }
-            existingObject={existing}
-            existingFileCover={existing.cover?.sizes?.[120]}
-          />
+          <AlbumFormContent existingObject={trackGroup} />
 
           <Button
             variant="big"
@@ -124,7 +68,7 @@ const AlbumForm: React.FC<{
             disabled={isDisabled}
             isLoading={isDisabled}
           >
-            {existing.published ? t("update") : t("saveDraft")}
+            {trackGroup.published ? t("update") : t("saveDraft")}
           </Button>
         </form>
       </FormProvider>

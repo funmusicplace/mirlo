@@ -175,7 +175,6 @@
     "contributionIsMonthly": "Make contribution monthly",
     "subscribeToArtist": "Subscribe to {{ artist }}",
     "chooseSupportLevel": "You can follow the artist or choose to support them financially",
-    "continueWithName": "Support at {{ name }}",
     "continueWithPrice": "Continue with {{ amount }}/month",
     "chooseToContinue": "Choose a support tier to support",
     "platformPercentDisclaimer": "Mirlo is evaluating the platform percentage and seeking input from musicians in the next few weeks.",
@@ -189,7 +188,9 @@
   },
   "post": {
     "edit": "Edit",
-    "notAvailable": "The artist has not made this post's content publicly available."
+    "notAvailable": "The artist has not made this post's content publicly available.",
+    "publishedAt": "Published {{ date }}",
+    "willPublishAt": "Will publish at {{ date }}"
   },
   "manage": {
     "manageArtists": "Manage artists",
@@ -236,6 +237,8 @@
     "deleteTrackGroupConfirm": "Are you sure you want to delete this album?",
     "albumDeleted": "Album deleted",
     "somethingWentWrong": "Something went wrong",
+    "publishedAt": "Published {{ date }}",
+    "willPublishAt": "Will publish at {{ date }}",
     "publishedSuccess": "Your album has been published. People will be able to buy it after the release date!"
   },
   "managePost": {
@@ -262,7 +265,6 @@
     "about": "About",
     "price": "Price",
     "saveAlbum": "Save album",
-    "submitAlbum": "Submit album to add tracks",
     "publish": "Publish release",
     "publishedSuccess": "Successfully published album, it's now publicly available.",
     "publishPreorder": "Publish pre-order",
@@ -335,9 +337,12 @@
     "deleteImage": "Delete image"
   },
   "manageSubscriptions": {
+    "pasteEmailsHere": "If you have a list of e-mails, paste them here:",
     "downloadSubscriberData": "Download subscriber data",
-    "uploadSubscriberData": "Upload follower data",
+    "uploadSubscriberData": "Upload emails to the {{ artistName }} mailing list",
+    "somethingWentWrongUploadingEmails": "Something went wrong uploading e-mails",
     "email": "E-mail",
+    "uploadedNewEmails": "Uploaded new emails!",
     "remove": "Remove",
     "uploadACSV": "Upload a CSV file of email addresses",
     "fileUploadDescription": "If you have a CSV file that contains a list of e-mail addresses in CSV format, you can upload it here: ",
@@ -460,21 +465,6 @@
     "doneUploadingTrack": "Processed track",
     "stillProcessing": "Still processing audio"
   },
-  "mewTrack": {
-    "newTrack": "New track",
-    "title:": "Title",
-    "status:": "Status",
-    "statusPreview": "Preview",
-    "statusMustOwn": "Must own",
-    "trackFile": "Upload track file",
-    "creditArtistQuestion": "Want to credit an artist on this track?",
-    "artistNameFormatQuestionColumn": "How the artist's name should appear publicly",
-    "existingArtistQuestionColumn": "Is this an existing artist in Mirlo? Add their ID if so.",
-    "artistRoleColumn": "What role did the artist have?",
-    "artist": "Artist",
-    "addAdditionalArtists": "Add additional artists",
-    "addTrackButton": "Add track"
-  },
   "manageArtistTools": {
     "downloadCodes": "Download codes",
     "downloadAllCodes": "Download all codes",
@@ -541,7 +531,7 @@
   "faq": {
     "title": "Frequently Asked Questions (FAQ)",
     "home": "Home",
-    "faqDescription": "Some frequently asked questions about MirloThe people doing it",
+    "faqDescription": "Some frequently asked questions about Mirlo",
     "whatWeBuilding": "What we're building",
     "people": "The people doing it ",
     "questions.whatIsMirlo.question": "What is Mirlo?",

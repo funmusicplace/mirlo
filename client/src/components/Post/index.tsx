@@ -17,6 +17,7 @@ import Avatar from "components/Artist/Avatar";
 import styled from "@emotion/styled";
 import MarkdownWrapper from "components/common/MarkdownWrapper";
 import { useAuthContext } from "state/AuthContext";
+import { formatDate } from "components/TrackGroup/ReleaseDate";
 
 export const PageMarkdownWrapper = styled.div`
   width: 100%;
@@ -83,7 +84,7 @@ export const PageMarkdownWrapper = styled.div`
 `;
 
 const Post: React.FC = () => {
-  const { t } = useTranslation("translation", { keyPrefix: "post" });
+  const { t, i18n } = useTranslation("translation", { keyPrefix: "post" });
 
   const { user } = useAuthContext();
   const { postId } = useParams();
@@ -154,32 +155,46 @@ const Post: React.FC = () => {
                 padding-top: 0.5rem;
               `}
             >
-              <span
-                className={css`
-                  margin-right: 0.25rem;
-                  display: flex;
-                  line-height: 2.2rem;
+              <div>
+                <div
+                  className={css`
+                    margin-right: 0.25rem;
+                    display: flex;
+                    line-height: 2.2rem;
 
-                  a {
-                    display: inline-flex;
-                    align-items: center;
-                    margin-left: 0.35rem;
-                  }
+                    a {
+                      display: inline-flex;
+                      align-items: center;
+                      margin-left: 0.35rem;
+                    }
 
-                  img {
-                    margin-right: 0.2rem;
-                    max-width: 25px;
-                  }
-                `}
-              >
-                by{" "}
-                <Link
-                  to={`/${post.artist.urlSlug?.toLowerCase() ?? post.artistId}`}
+                    img {
+                      margin-right: 0.2rem;
+                      max-width: 25px;
+                    }
+                  `}
                 >
-                  <Avatar avatar={post.artist.avatar?.sizes?.[60]} />
-                  <span>{post.artist?.name}</span>
-                </Link>
-              </span>
+                  by{" "}
+                  <Link
+                    to={`/${post.artist.urlSlug?.toLowerCase() ?? post.artistId}`}
+                  >
+                    <Avatar avatar={post.artist.avatar?.sizes?.[60]} />
+                    <span>{post.artist?.name}</span>
+                  </Link>
+                </div>
+                <em>
+                  {t("publishedAt", {
+                    date: formatDate({
+                      date: post.publishedAt,
+                      i18n,
+                      options: {
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                      },
+                    }),
+                  })}
+                </em>
+              </div>
               {post.artistId && <FollowArtist artistId={post.artistId} />}
             </SpaceBetweenDiv>
           )}

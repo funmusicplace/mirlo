@@ -8,6 +8,8 @@ import MarkdownWrapper from "components/common/MarkdownWrapper";
 import Overlay from "components/common/Overlay";
 import { getHtmlExcerpt } from "utils/getHtmlExcerpt";
 import { useLinkContainer } from "utils/useLinkContainer";
+import { formatDate } from "components/TrackGroup/ReleaseDate";
+import { useTranslation } from "react-i18next";
 
 const PostContainer = styled.li`
   display: flex;
@@ -49,6 +51,10 @@ const PostCard: React.FC<{
 }> = ({ p }) => {
   const postUrl = getPostURLReference(p);
   const postContainerProps = useLinkContainer({ to: postUrl });
+
+  const { i18n } = useTranslation("translation", {
+    keyPrefix: "post",
+  });
 
   // Use the first 8 paragraphs of the post as an unformatted excerpt
   const excerpt = React.useMemo(
@@ -141,10 +147,9 @@ const PostCard: React.FC<{
                 font-size: var(--mi-font-size-small);
               `}
             >
-              {new Date(p.publishedAt).toLocaleDateString("en-US", {
-                weekday: "short",
-                month: "short",
-                day: "numeric",
+              {formatDate({
+                date: p.publishedAt,
+                i18n,
               })}
             </p>
           </div>
