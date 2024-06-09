@@ -20,7 +20,7 @@ const About: React.FC = () => {
         <h1>{t("about")}</h1>
         <p>{t("intro")}</p>
         <h2>{t("ourMission")}</h2>
-        <Trans t={t}>
+        <Trans i18nKey="missionStatement" t={t}>
           <p>
             The music industry does not work for musicians or listeners and
             needs a radical re-imagination.
