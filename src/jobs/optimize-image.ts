@@ -46,7 +46,6 @@ const optimizeImage = async (job: Job) => {
       destination,
       logger
     );
-
     await createBucketIfNotExists(minioClient, finalMinioBucket, logger);
 
     logger.info(`Got object of size ${size}`);
@@ -94,28 +93,35 @@ const optimizeImage = async (job: Job) => {
               variant.outputOptions || {}
             );
 
-            let newBuffer = await sharp(buffer)
-              .rotate()
-              .resize(resizeOptions)
-              [outputType](outputOptions)
-              .toBuffer();
-            logger.info("created size of object");
+            let newBuffer;
+            try {
+              newBuffer = await sharp(buffer)
+                .rotate()
+                .resize(resizeOptions)
+                [outputType](outputOptions)
+                .toBuffer();
+              logger.info(
+                `created size ${resizeOptions.width}x${resizeOptions.height} for ${outputType}`
+              );
 
-            logger.info("Uploading image to bucket");
-            await minioClient.putObject(
-              finalMinioBucket,
-              finalFileName,
-              newBuffer
-            );
+              logger.info("Uploading image to bucket");
+              await minioClient.putObject(
+                finalMinioBucket,
+                finalFileName,
+                newBuffer
+              );
 
-            logger.info(`Converted and optimized image to ${outputType}`, {
-              ratio: `${width}x${height})`,
-            });
-            return {
-              width: width,
-              height: height,
-              format: outputType,
-            };
+              logger.info(`Converted and optimized image to ${outputType}`, {
+                ratio: `${width}x${height})`,
+              });
+              return {
+                width: width,
+                height: height,
+                format: outputType,
+              };
+            } catch (e) {
+              console.error(e);
+            }
           }
         );
       })

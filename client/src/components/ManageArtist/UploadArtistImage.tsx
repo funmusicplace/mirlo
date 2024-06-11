@@ -56,6 +56,7 @@ const UploadArtistImage: React.FC<{
   height: string;
   width: string;
   maxDimensions: string;
+  maxSize: string;
   imageTypeDescription: string;
 }> = ({
   existing,
@@ -63,6 +64,7 @@ const UploadArtistImage: React.FC<{
   height,
   width,
   maxDimensions,
+  maxSize,
   imageTypeDescription,
 }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artistForm" });
@@ -274,7 +276,7 @@ const UploadArtistImage: React.FC<{
               }
             `}
           >
-            {t("dimensionsTip", { maxDimensions })}
+            {t("dimensionsTip", { maxDimensions, maxSize })}
           </small>
         </div>
       </div>
