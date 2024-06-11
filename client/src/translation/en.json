@@ -320,7 +320,7 @@
     "uploading": "Uploading...",
     "replace": "Replace",
     "updatedArtist": "Updated artist",
-    "dimensionsTip": "For the best effect, upload a {{maxDimensions}} size image.",
+    "dimensionsTip": "For the best effect, upload a {{maxDimensions}} size image. File size is limited to {{ maxSize }}.",
     "yourAlbums": "Your albums",
     "addNewAlbum": "Add new album to {{artistName}}",
     "posts": "Posts",

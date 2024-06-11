@@ -130,6 +130,7 @@ const AlbumFormContent: React.FC<{
           height="400"
           width="400"
           maxDimensions="1500x1500"
+          maxSize="15mb"
         />
       </FormComponent>
 
