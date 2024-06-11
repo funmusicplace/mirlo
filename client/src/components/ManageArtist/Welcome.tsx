@@ -130,6 +130,7 @@ const Welcome = () => {
                 height="150"
                 width="150"
                 maxDimensions="512x512"
+                maxSize="15mb"
               />
             </FormComponent>
           )}

@@ -184,6 +184,7 @@ export const ArtistForm: React.FC<{
                         height="auto"
                         width="100%"
                         maxDimensions="1500x1500"
+                        maxSize="15mb"
                       />
                     )}
                   </FormComponent>
@@ -270,6 +271,7 @@ export const ArtistForm: React.FC<{
                           height="auto"
                           width="100%"
                           maxDimensions="2500x2500"
+                          maxSize="15mb"
                         />
                       )}
                     </FormComponent>
