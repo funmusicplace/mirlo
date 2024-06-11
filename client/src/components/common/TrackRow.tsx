@@ -16,7 +16,9 @@ const TrackRow: React.FC<{
   trackGroup: TrackGroup;
   addTracksToQueue: (id: number) => void;
 }> = ({ track, addTracksToQueue, trackGroup }) => {
-  const { t } = useTranslation("translation", { keyPrefix: "track" });
+  const { t } = useTranslation("translation", {
+    keyPrefix: "trackGroupDetails",
+  });
   const snackbar = useSnackbar();
   const { dispatch } = useGlobalStateContext();
   const [trackTitle] = React.useState(track.title);
