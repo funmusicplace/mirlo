@@ -167,6 +167,7 @@ const ArtistSupportBox: React.FC<{
                   ? subscriptionTier.minAmount / 100
                   : 0
               }
+              artist={artist}
               currency={subscriptionTier.currency}
             />
           </>
