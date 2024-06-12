@@ -1,4 +1,4 @@
-import { isMatch } from "lodash";
+import { identity, isMatch, pickBy } from "lodash";
 
 /**
  * Categorizes any query that should be invalidated when the user auth
@@ -38,7 +38,7 @@ export function queryKeyMatches(
   if (query.queryKey instanceof Array) {
     const queryArgs = query.queryKey[1];
     if (queryArgs && typeof queryArgs === "object") {
-      return isMatch(queryArgs, args);
+      return isMatch(pickBy(queryArgs, identity), pickBy(args, identity));
     }
   }
 

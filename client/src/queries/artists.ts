@@ -3,7 +3,7 @@ import * as api from "./fetch/fetchWrapper";
 
 const fetchArtist: QueryFunction<
   Artist,
-  ["fetchArtist", { artistSlug: string; includeDefaultTier: boolean }]
+  ["fetchArtist", { artistSlug: string; includeDefaultTier?: boolean }]
 > = ({ queryKey: [_, { artistSlug, includeDefaultTier }], signal }) => {
   return api
     .get<{
@@ -23,7 +23,7 @@ export function queryArtist(opts: {
       "fetchArtist",
       {
         artistSlug: opts.artistSlug,
-        includeDefaultTier: opts.includeDefaultTier ?? false,
+        includeDefaultTier: opts.includeDefaultTier,
       },
     ],
     queryFn: fetchArtist,

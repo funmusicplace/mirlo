@@ -443,13 +443,23 @@
     "delete": "Delete"
   },
   "welcome": {
+    "welcome": "Welcome! Let's get you set up.",
+    "whatPublicName": "First, what's the public name of your artist?",
+    "showInTheURL": "What should the artist page's URL be?",
+    "thisWillLookLikeURL": "This will look like {{ url }}",
     "enterANameToGetStarted": "Enter a name to get started",
+    "wantToUploadAnAvatar": "Want to upload an avatar?",
     "letsGetStarted": "Let's get started!",
     "looksGood": "Looks good!",
     "addAnAvatar": "Add an avatar",
+    "customizeYourPage": "Customize what the artist's page will look like.",
     "next": "Next",
-    "takeMeToTheArtistPage": "Take me to the artist page",
-    "addAlbum": "Add album"
+    "takeMeToTheArtistPage": "Skip this! Take me to the new artist page.",
+    "addAlbum": "Add album",
+    "chooseYourStarterTheme": "Choose your starter theme.",
+    "youCanCustomizeThisLater": "You can customize this later.",
+    "lightTheme": "Light",
+    "darkTheme": "Dark"
   },
   "manageTrackTable": {
     "titleColumn": "Title",

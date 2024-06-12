@@ -17,7 +17,7 @@ html {
   --mi-lighter-foreground-color: #515151;
 
   --mi-primary-color: var(--mi-black);
-  --mi-secondary-color: pink;
+  --mi-secondary-color: #ffc0cb;
 
   --mi-info-background-color: #5c899c;
   --mi-success-background-color: #048c16;
