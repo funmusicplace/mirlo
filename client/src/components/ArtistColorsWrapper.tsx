@@ -1,7 +1,7 @@
 import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
 import { queryArtist, queryManagedArtist } from "queries";
-import { useLocation, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useAuthContext } from "state/AuthContext";
 
 const colorDefined = (color?: string) => {
@@ -24,7 +24,6 @@ const ArtistColorsWrapper: React.FC<{ children: React.ReactElement }> = ({
 
   const artistColors =
     managedArtist?.properties?.colors ?? artist?.properties?.colors;
-
   return (
     <div
       id="artist-colors-wrapper"

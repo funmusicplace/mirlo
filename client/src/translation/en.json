@@ -444,6 +444,7 @@
   },
   "welcome": {
     "welcome": "Welcome! Let's get you set up.",
+    "youCanChangeThis": "You can always change this later",
     "whatPublicName": "First, what's the public name of your artist?",
     "showInTheURL": "What should the artist page's URL be?",
     "thisWillLookLikeURL": "This will look like {{ url }}",

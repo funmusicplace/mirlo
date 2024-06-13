@@ -30,6 +30,15 @@ const forbiddenNames = [
   "password-reset",
   "artists",
   "releases",
+  "user",
+  "username",
+  "you",
+  "guest",
+  "account",
+  "administrator",
+  "system",
+  "help",
+  "error",
 ];
 
 export default function () {
