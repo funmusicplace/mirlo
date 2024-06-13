@@ -4,7 +4,6 @@ import React from "react";
 import { bp } from "../../constants";
 import { FaEye, FaPen, FaTrash } from "react-icons/fa";
 import { NavLink, Outlet, useNavigate, useParams } from "react-router-dom";
-import ArtistForm from "./ArtistForm";
 import { useSnackbar } from "state/SnackbarContext";
 import { useTranslation } from "react-i18next";
 import Box from "components/common/Box";
@@ -67,6 +66,10 @@ const ManageArtist: React.FC<{}> = () => {
     return <Box>{t("doesNotExist")}</Box>;
   }
 
+  if (!artist) {
+    return null;
+  }
+
   return (
     <>
       {artist && !artist.enabled && (
@@ -81,26 +84,19 @@ const ManageArtist: React.FC<{}> = () => {
         </div>
       )}
 
-      {artist && (
-        <ArtistForm
-          open={isEditing}
-          onClose={() => setIsEditing(false)}
-          existing={artist}
-        />
-      )}
       <MainButtons>
         <div>
-          <Button
+          <ButtonLink
             variant="big"
             startIcon={<FaPen />}
-            onClick={() => setIsEditing(true)}
+            to={`/manage/artists/${artist.id}/customize`}
             className={css`
               margin-right: 0.5rem;
               margin-bottom: 0.25rem;
             `}
           >
             {t("editDetails")}
-          </Button>
+          </ButtonLink>
           <ButtonLink
             to={`/${artist?.urlSlug?.toLowerCase() ?? artist?.id}`}
             variant="big"

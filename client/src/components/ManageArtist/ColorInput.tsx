@@ -1,7 +1,11 @@
 import { css } from "@emotion/css";
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
+import { useUpdateArtistMutation } from "queries";
+import React from "react";
 import { useFormContext } from "react-hook-form";
+import { useParams } from "react-router-dom";
+import { useAuthContext } from "state/AuthContext";
 
 const generateColor = (name: string) => {
   if (["background", "foreground"].includes(name)) {
@@ -16,6 +20,27 @@ export const ColorInput: React.FC<{ name: string; title: string }> = ({
 }) => {
   const { watch, register } = useFormContext();
   const color = watch(name);
+  const colors = watch("properties.colors");
+  const { user } = useAuthContext();
+  const { mutateAsync: updateArtist } = useUpdateArtistMutation();
+  const { artistId } = useParams();
+
+  const updateColorOnChange = React.useCallback(async () => {
+    try {
+      if (user && artistId) {
+        await updateArtist({
+          userId: user.id,
+          artistId: Number(artistId),
+          body: {
+            properties: {
+              colors,
+            },
+          },
+        });
+      }
+    } catch (e) {}
+  }, [colors]);
+
   return (
     <FormComponent
       className={css`
@@ -39,7 +64,7 @@ export const ColorInput: React.FC<{ name: string; title: string }> = ({
               : generateColor(name.split(".")[2])};
           `}
         ></span>
-        <InputEl {...register(name)} />
+        <InputEl {...register(name)} onBlur={updateColorOnChange} />
       </div>
     </FormComponent>
   );

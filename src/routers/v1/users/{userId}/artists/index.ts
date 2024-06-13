@@ -9,6 +9,7 @@ import {
 import prisma from "@mirlo/prisma";
 import logger from "../../../../../logger";
 import slugify from "slugify";
+import { AppError } from "../../../../../utils/error";
 
 type Params = {
   artistId: number;
@@ -29,6 +30,15 @@ const forbiddenNames = [
   "password-reset",
   "artists",
   "releases",
+  "user",
+  "username",
+  "you",
+  "guest",
+  "account",
+  "administrator",
+  "system",
+  "help",
+  "error",
 ];
 
 export default function () {
@@ -98,11 +108,10 @@ export default function () {
     const { userId } = req.params as unknown as Params;
     try {
       if (forbiddenNames.includes(urlSlug)) {
-        res.status(400);
-        res.send({
-          error: `"urlSlug" can't be one of: ${forbiddenNames.join(", ")}`,
+        throw new AppError({
+          description: `"urlSlug" can't be one of: ${forbiddenNames.join(", ")}`,
+          httpCode: 400,
         });
-        return next();
       }
 
       const slug = slugify(

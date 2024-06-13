@@ -222,6 +222,15 @@ const routes: RouteObject[] = [
                     element: <Navigate to="releases" replace={true} />,
                   },
                   {
+                    path: "customize",
+                    async lazy() {
+                      const { default: Component } = await import(
+                        "components/ManageArtist/CustomizeLook"
+                      );
+                      return { Component };
+                    },
+                  },
+                  {
                     path: "releases",
                     async lazy() {
                       const { default: Component } = await import(

@@ -107,10 +107,13 @@ export function useUpdateArtistMutation() {
     mutationFn: updateArtist,
     async onSuccess(data, { artistId }) {
       await client.invalidateQueries({
-        predicate: (query) =>
-          queryKeyMatches(query, { artistId }) ||
-          queryKeyMatches(query, { artistSlug: String(data.urlSlug) }) ||
-          query.queryKey.includes(QUERY_KEY_ARTISTS),
+        predicate: (query) => {
+          const invalidate =
+            queryKeyMatches(query, { artistId }) ||
+            queryKeyMatches(query, { artistSlug: String(data.urlSlug) }) ||
+            query.queryKey.includes(QUERY_KEY_ARTISTS);
+          return invalidate;
+        },
       });
     },
   });

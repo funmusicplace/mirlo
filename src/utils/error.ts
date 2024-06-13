@@ -63,13 +63,19 @@ const errorHandler = (
     err
   );
 
-  if (err instanceof PrismaClientValidationError) {
+  if (
+    err instanceof PrismaClientValidationError ||
+    err.name === "PrismaClientValidationError"
+  ) {
     const messageStrings = err.message.split("\n");
 
     res.status(400).json({
       error: messageStrings[messageStrings.length - 1],
     });
-  } else if (err instanceof PrismaClientKnownRequestError) {
+  } else if (
+    err instanceof PrismaClientKnownRequestError ||
+    err.name === "PrismaClientKnownRequestError"
+  ) {
     console.error("err", err.cause, err.name, err.code, err.meta);
     let message = `Something went wrong with the data supplied. Admin should check the logs`;
 

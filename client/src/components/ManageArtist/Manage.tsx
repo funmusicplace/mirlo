@@ -3,7 +3,7 @@ import React from "react";
 
 import api from "services/api";
 import Button, { ButtonLink } from "../common/Button";
-import CreateNewArtistForm from "./ArtistForm";
+import CreateNewArtistForm from "./CustomizeLook";
 import { bp } from "../../constants";
 import { useTranslation } from "react-i18next";
 import Box from "components/common/Box";
@@ -109,10 +109,6 @@ export const Manage: React.FC = () => {
                 </ButtonLink>
               </div>
             </div>
-            <CreateNewArtistForm
-              open={creatingNewArtist}
-              onClose={() => setCreatingNewArtist(false)}
-            />
           </div>
           <div
             className={css`

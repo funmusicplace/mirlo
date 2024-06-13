@@ -8,12 +8,13 @@ import React from "react";
 import ArtistSlugInput from "./ArtistSlugInput";
 import api from "services/api";
 import UploadArtistImage from "./UploadArtistImage";
-import { FaArrowRight, FaPlus } from "react-icons/fa";
+import { FaArrowRight } from "react-icons/fa";
 import { css } from "@emotion/css";
 import { useNavigate } from "react-router-dom";
 import useErrorHandler from "services/useErrorHandler";
 import { useAuthContext } from "state/AuthContext";
 import { NewAlbumButton } from "./NewAlbumButton";
+import ChooseYourTheme from "./ChooseYourTheme";
 
 const PageWrapper = styled.div`
   padding: 1rem;
@@ -24,6 +25,7 @@ const PageWrapper = styled.div`
 interface FormData {
   name: string;
   urlSlug: string;
+  theme: string;
 }
 
 const nextButtonText = (step: number, currentStepValue?: unknown) => {
@@ -34,15 +36,14 @@ const nextButtonText = (step: number, currentStepValue?: unknown) => {
       }
       return "enterANameToGetStarted";
     case "urlSlug":
-      return "addAnAvatar";
-    case "avatar":
-      return "takeMeToTheArtistPage";
+      return "customizeYourPage";
+
     default:
       return "next";
   }
 };
 
-const steps: ("name" | "urlSlug" | "avatar")[] = ["name", "urlSlug", "avatar"];
+const steps: ("name" | "urlSlug")[] = ["name", "urlSlug"];
 
 const Welcome = () => {
   const { user } = useAuthContext();
@@ -57,7 +58,11 @@ const Welcome = () => {
   const { register, handleSubmit, reset, formState, watch, getValues } =
     methods;
 
-  const vals = { urlSlug: watch("urlSlug"), name: watch("name") };
+  const vals = {
+    urlSlug: watch("urlSlug"),
+    name: watch("name"),
+    theme: watch("theme"),
+  };
   const localArtistLink = `/${localArtist?.urlSlug}`;
 
   const onClickNext = React.useCallback(
@@ -73,8 +78,6 @@ const Welcome = () => {
           );
           setLocalArtist(response.result);
           reset(response.result);
-        } else if (steps[step] === "avatar") {
-          navigate(localArtistLink);
         } else if (localArtist && step > 1) {
           const response = await api.put<Partial<Artist>, { result: Artist }>(
             `users/${userId}/artists/${localArtist.id}`,
@@ -84,7 +87,11 @@ const Welcome = () => {
           setLocalArtist(response.result);
           reset(response.result);
         }
-        setStep((s) => s + 1);
+        if (localArtist && steps[step] === "urlSlug") {
+          navigate(`/manage/artists/${localArtist.id}/customize`);
+        } else {
+          setStep((s) => s + 1);
+        }
       } catch (e) {
         errorHandler(e);
         console.error(e);
@@ -104,36 +111,26 @@ const Welcome = () => {
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onClickNext)}>
         <PageWrapper>
-          <h2>Welcome! Let's get you set up.</h2>
+          <h2>{t("welcome")}</h2>
 
           <FormComponent>
-            <label>First, what's the public name of your artist?</label>
+            <label>{t("whatPublicName")}</label>
             <InputEl {...register("name")} placeholder="name" />
+            <small>{t("youCanChangeThis")}</small>
           </FormComponent>
 
           {step > 0 && (
             <FormComponent>
-              <label>What should we show in the URL?</label>
+              <label>{t("showInTheURL")}</label>
               <small>
-                This will look like {window.location.host}/{vals.urlSlug}
+                {t("thisWillLookLikeURL", {
+                  url: `${window.location.host}/${vals.urlSlug}`,
+                })}
               </small>
               <ArtistSlugInput currentArtistId={localArtist?.id} />
             </FormComponent>
           )}
-          {step > 1 && localArtist && (
-            <FormComponent>
-              <label>Want to upload an avatar?</label>
-              <UploadArtistImage
-                imageTypeDescription="your avatar"
-                existing={localArtist}
-                imageType="avatar"
-                height="150"
-                width="150"
-                maxDimensions="512x512"
-                maxSize="15mb"
-              />
-            </FormComponent>
-          )}
+
           <div
             className={css`
               display: flex;
@@ -143,15 +140,9 @@ const Welcome = () => {
               }
             `}
           >
-            {steps[step] === "avatar" && localArtist && (
-              <NewAlbumButton artist={localArtist}>
-                {t("addAlbum")}
-              </NewAlbumButton>
-            )}
             <Button
               isLoading={isLoading}
               compact
-              variant={steps[step] === "avatar" ? "outlined" : undefined}
               disabled={isButtonDisabled}
               type="submit"
               onClick={handleSubmit(onClickNext)}
@@ -159,20 +150,21 @@ const Welcome = () => {
             >
               {t(nextButtonText(step, currentStepValue))}
             </Button>
-
-            {step > 0 && steps[step] !== "avatar" && (
-              <ButtonLink
-                to={localArtistLink}
-                isLoading={isLoading}
-                compact
-                variant="outlined"
-                disabled={isButtonDisabled}
-                endIcon={<FaArrowRight />}
-              >
-                {t("takeMeToTheArtistPage")}
-              </ButtonLink>
-            )}
           </div>
+          {step > 0 && (
+            <ButtonLink
+              to={localArtistLink}
+              isLoading={isLoading}
+              variant="outlined"
+              disabled={isButtonDisabled}
+              endIcon={<FaArrowRight />}
+              className={css`
+                margin-top: 1rem;
+              `}
+            >
+              {t("takeMeToTheArtistPage")}
+            </ButtonLink>
+          )}
         </PageWrapper>
       </form>
     </FormProvider>
