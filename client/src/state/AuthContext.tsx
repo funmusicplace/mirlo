@@ -2,6 +2,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { queryAuthProfile, useAuthRefreshMutation } from "queries";
 import { QUERY_KEY_AUTH, queryKeyIncludes } from "queries/queryKeys";
 import React, { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 
 const AuthContext = React.createContext<{
   /**
@@ -17,9 +18,15 @@ const AuthContext = React.createContext<{
 
 export function AuthContextProvider({ children }: React.PropsWithChildren) {
   const { data: user } = useQuery(queryAuthProfile());
+  const { i18n } = useTranslation();
   const userId = user?.id;
 
   const { authRefresh } = useAuthRefreshMutation();
+
+  const userLanguage = user?.language;
+  React.useEffect(() => {
+    i18n.changeLanguage(userLanguage);
+  }, [userLanguage]);
 
   React.useEffect(() => {
     let interval: NodeJS.Timer | null = null;

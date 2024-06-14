@@ -15,6 +15,7 @@ const profile = async (req: Request, res: Response, next: NextFunction) => {
         artists: true,
         isAdmin: true,
         currency: true,
+        language: true,
         wishlist: true,
         userTrackGroupPurchases: {
           select: {

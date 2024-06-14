@@ -51,6 +51,7 @@ model User {
   userArtistNotificationSettings      UserArtistNotificationSetting[]
   receivingNotifications              Notification[]                  @relation("receivingUser")
   relatedNotifications                Notification[]                  @relation("relatedUser")
+  language                            String?
 }
 
 model UserArtistNotificationSetting {
