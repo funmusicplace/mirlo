@@ -17,6 +17,7 @@ interface LoggedInUser {
     userId: number;
     trackGroupId: number;
   }[];
+  language?: string;
 }
 
 interface Track {

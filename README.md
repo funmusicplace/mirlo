@@ -12,6 +12,7 @@ Main libraries:
 ### Download and install
 
 Prerequisites:
+
 - [Docker](https://www.docker.com/get-started/)
 - [Node.js 18](https://nodejs.org/en)
 - [Yarn 4](https://yarnpkg.com)
@@ -77,8 +78,10 @@ docker exec -it blackbird-api yarn ts-node src/jobs/queue-worker.ts run
 Migrations will run automatically on `docker-compose up`. To make changes to the database, change the schema.prisma file and then run:
 
 ```sh
-docker exec -it blackbird-api yarn prisma:migrate
+yarn prisma:migrate
 ```
+
+> **Note:** if this is your first time doing this you'll need to add a `.env` file to your `/prisma` folder. You can copy the `.env.example` and set the values correctly.
 
 If your typescript for prisma is ever out of date, you can re-generate it with:
 
@@ -138,7 +141,7 @@ If you get errors when running the backbird-api and blackbird-background service
 3. Delete any previously created images
 4. Run `DOCKER_DEFAULT_PLATFORM=linux/amd64 docker compose up`
 
-## Docker connectivity issues. 
+## Docker connectivity issues.
 
 It might be that your docker container can't reach yarn or github. As [described here](https://github.com/moby/moby/issues/32106#issuecomment-382228854): either in Docker Desktop, edit the Docker Engine file to show the DNS, or edit /etc/docker/daemon.json directly:
 
