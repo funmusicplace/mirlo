@@ -3,6 +3,10 @@
   to = "https://www.kickstarter.com/projects/mirlo/mirlo"
 
 [[redirects]]
+  from = "/community-call"
+  to= "https://us02web.zoom.us/meeting/register/tZYtc-ugqzgiHdWcVjG1bnIpfzCPr41JqFV5#/registration"
+
+[[redirects]]
   from = "/*"   
   to = "/index.html"   
   status = 200

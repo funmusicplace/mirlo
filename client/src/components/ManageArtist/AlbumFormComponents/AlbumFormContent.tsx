@@ -4,94 +4,13 @@ import { useFormContext } from "react-hook-form";
 import FormComponent from "components/common/FormComponent";
 
 import { useTranslation } from "react-i18next";
-import { InputEl } from "components/common/Input";
-import TextArea from "components/common/TextArea";
+
 import UploadArtistImage from "../UploadArtistImage";
 import FormError from "components/common/FormError";
-import api from "services/api";
 import { useAuthContext } from "state/AuthContext";
 import { useParams } from "react-router-dom";
-import LoadingSpinner from "components/common/LoadingSpinner";
-import { css } from "@emotion/css";
-import { useSnackbar } from "state/SnackbarContext";
-import useErrorHandler from "services/useErrorHandler";
-import { FaCheck } from "react-icons/fa";
 
-const SavingInput: React.FC<{
-  formKey: string;
-  url: string;
-  extraData: Object;
-  rows?: number;
-  required?: boolean;
-  type?: string;
-}> = ({ formKey, url, extraData, type, required, rows }) => {
-  const { register, getValues } = useFormContext();
-  const errorHandler = useErrorHandler();
-
-  const [isSaving, setIsSaving] = React.useState(false);
-  const [saveSuccess, setSaveSuccess] = React.useState(false);
-
-  const saveOnBlur = React.useCallback(async () => {
-    try {
-      setSaveSuccess(false);
-      setIsSaving(true);
-      let value = getValues(formKey);
-
-      if (formKey === "releaseDate") {
-        value = new Date(value).toISOString();
-      } else if (formKey === "minPrice") {
-        value = value ? value * 100 : undefined;
-      }
-
-      await api.put<unknown, TrackGroup>(url, {
-        [formKey]: value,
-        ...extraData,
-      });
-      let timeout2: NodeJS.Timeout;
-      const timeout = setTimeout(() => {
-        setIsSaving(false);
-        setSaveSuccess(true);
-        timeout2 = setTimeout(() => {
-          setSaveSuccess(false);
-        }, 1000);
-      }, 1000);
-      return () => {
-        clearTimeout(timeout2);
-        clearTimeout(timeout);
-      };
-    } catch (e) {
-      errorHandler(e);
-      setIsSaving(false);
-    }
-  }, [formKey, getValues, url, extraData]);
-
-  return (
-    <div
-      className={css`
-        display: flex;
-        width: 100%;
-        align-items: center;
-
-        input,
-        textarea {
-          margin-right: 1rem;
-        }
-      `}
-    >
-      {!rows && (
-        <InputEl
-          {...register(formKey)}
-          onBlur={saveOnBlur}
-          type={type}
-          required={required}
-        />
-      )}
-      {rows && <TextArea {...register(formKey)} rows={7} onBlur={saveOnBlur} />}
-      {isSaving && <LoadingSpinner />}
-      {saveSuccess && <FaCheck />}
-    </div>
-  );
-};
+import SavingInput from "./SavingInput";
 
 const AlbumFormContent: React.FC<{
   existingObject: TrackGroup;
@@ -148,7 +67,7 @@ const AlbumFormContent: React.FC<{
       <FormComponent>
         <label>{t("releaseDate")} </label>
         <SavingInput
-          formKey="date"
+          formKey="releaseDate"
           type="date"
           required
           url={`users/${userId}/trackGroups/${trackGroupId}`}
