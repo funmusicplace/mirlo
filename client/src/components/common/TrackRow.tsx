@@ -10,6 +10,93 @@ import { bp } from "../../constants";
 import TrackRowPlayControl from "./TrackRowPlayControl";
 import { useAuthContext } from "state/AuthContext";
 import { useTranslation } from "react-i18next";
+import styled from "@emotion/styled";
+
+const TR = styled.tr<{ canPlayTrack: boolean }>`
+  ${(props) =>
+    !props.canPlayTrack
+      ? `color: var(--mi-normal-foreground-color); opacity: .3;`
+      : ""}
+
+  &:hover {
+    color: var(--mi-normal-background-color) !important;
+    ${(props) =>
+      !props.canPlayTrack
+        ? `background-color: var(--mi-normal-foreground-color);`
+        : `background-color: var(--mi-normal-foreground-color) !important;`}
+
+    button {
+      color: var(--mi-normal-background-color);
+      background: transparent;
+    }
+  }
+
+  button {
+    color: var(--mi-normal-foreground-color);
+    background: transparent;
+    font-size: 0.8rem;
+
+    &:hover {
+      color: var(--mi-normal-background-color) !important;
+      background: transparent;
+    }
+  }
+
+  > td > .play-button {
+    display: none;
+  }
+  > td > .track-number {
+    display: block;
+  }
+  &:hover > td > .play-button {
+    display: block;
+    width: 2rem;
+  }
+  ${(props) =>
+    props.canPlayTrack
+      ? `&:hover > td > .track-number {
+          display: none;
+        }`
+      : ""}
+  @media screen and (max-width: ${bp.small}px) {
+    td {
+      padding: 0.15rem 0.3rem;
+    }
+    span {
+      width: 1rem !important;
+      margin-right: 1rem !important;
+    }
+  }
+`;
+
+const FirstTD = styled.td`
+  height: 30px;
+
+  button {
+    padding: 0.5rem 0.65rem 0.5rem 0.4rem !important;
+    background: none;
+  }
+  button:hover {
+    padding: 0.5rem 0.65rem 0.5rem 0.4rem !important;
+    background: none !important;
+  }
+  @media screen and (max-width: ${bp.small}px) {
+    button {
+      padding: 0.5rem 0.65rem 0.5rem 0.1rem !important;
+      background: none;
+    }
+    button:hover {
+      padding: 0.5rem 0.65rem 0.5rem 0.1rem !important;
+      background: none !important;
+    }
+  }
+`;
+
+const TrackTitleTD = styled.td`
+  width: 100%;
+  padding: 0rem;
+  margin: 0rem;
+`;
 
 const TrackRow: React.FC<{
   track: Track;
@@ -37,102 +124,21 @@ const TrackRow: React.FC<{
     track.trackArtists?.filter((artist) => artist.isCoAuthor) ?? [];
 
   return (
-    <tr
+    <TR
       key={track.id}
       id={`${track.id}`}
       onClick={onTrackPlay}
-      className={css`
-        ${!canPlayTrack
-          ? `color: var(--mi-normal-foreground-color); opacity: .3;`
-          : ""}
-
-        &:hover {
-          color: var(--mi-normal-background-color) !important;
-          ${!canPlayTrack
-            ? `background-color: var(--mi-normal-foreground-color);`
-            : `background-color: var(--mi-normal-foreground-color) !important;`}
-
-          button {
-            color: var(--mi-normal-background-color);
-            background: transparent;
-          }
-        }
-
-        button {
-          color: var(--mi-normal-foreground-color);
-          background: transparent;
-          font-size: 0.8rem;
-
-          &:hover {
-            color: var(--mi-normal-background-color) !important;
-            background: transparent;
-          }
-        }
-
-        > td > .play-button {
-          display: none;
-        }
-        > td > .track-number {
-          display: block;
-        }
-        &:hover > td > .play-button {
-          display: block;
-          width: 2rem;
-        }
-        ${canPlayTrack
-          ? `&:hover > td > .track-number {
-          display: none;
-        }`
-          : ""}
-        @media screen and (max-width: ${bp.small}px) {
-          td {
-            padding: 0.15rem 0.3rem;
-          }
-          span {
-            width: 1rem !important;
-            margin-right: 1rem !important;
-          }
-        }
-      `}
+      canPlayTrack={canPlayTrack}
     >
-      <td
-        className={css`
-          height: 30px;
-
-          button {
-            padding: 0.5rem 0.65rem 0.5rem 0.4rem !important;
-            background: none;
-          }
-          button:hover {
-            padding: 0.5rem 0.65rem 0.5rem 0.4rem !important;
-            background: none !important;
-          }
-          @media screen and (max-width: ${bp.small}px) {
-            button {
-              padding: 0.5rem 0.65rem 0.5rem 0.1rem !important;
-              background: none;
-            }
-            button:hover {
-              padding: 0.5rem 0.65rem 0.5rem 0.1rem !important;
-              background: none !important;
-            }
-          }
-        `}
-      >
+      <FirstTD>
         <TrackRowPlayControl
           trackId={track.id}
           canPlayTrack={canPlayTrack}
           trackNumber={track.order}
           onTrackPlayCallback={addTracksToQueue}
         />
-      </td>
-      <td
-        className={css`
-          width: 100%;
-          padding: 0rem;
-          margin: 0rem;
-        `}
-      >
+      </FirstTD>
+      <TrackTitleTD>
         <div
           className={css`
             display: flex;
@@ -169,7 +175,9 @@ const TrackRow: React.FC<{
             `}
           >
             {trackTitle}
-            {coAuthors.length > 1 && (
+            {coAuthors.find(
+              (author) => author.artistId !== trackGroup.artistId
+            ) && (
               <span
                 className={css`
                   color: var(--mi-lighter-foreground-color);
@@ -201,7 +209,7 @@ const TrackRow: React.FC<{
             {track.audio?.duration && fmtMSS(track.audio.duration)}
           </div>
         </div>
-      </td>
+      </TrackTitleTD>
       <td align="right">
         <Button
           compact
@@ -223,7 +231,7 @@ const TrackRow: React.FC<{
           `}
         ></Button>
       </td>
-    </tr>
+    </TR>
   );
 };
 export default TrackRow;
