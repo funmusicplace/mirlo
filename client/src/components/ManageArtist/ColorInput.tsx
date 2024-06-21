@@ -1,6 +1,7 @@
 import { css } from "@emotion/css";
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
+import { get, keyBy } from "lodash";
 import { useUpdateArtistMutation } from "queries";
 import React from "react";
 import { useFormContext } from "react-hook-form";
@@ -14,11 +15,17 @@ const generateColor = (name: string) => {
   return `var(--mi-${name}-color)`;
 };
 
+const isValidColor = (val: string) => {
+  const matcher = val.match(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/);
+  return matcher;
+};
+
 export const ColorInput: React.FC<{ name: string; title: string }> = ({
   name,
   title,
 }) => {
-  const { watch, register } = useFormContext();
+  const { watch, register, clearErrors, setError, setValue, getFieldState } =
+    useFormContext();
   const color = watch(name);
   const colors = watch("properties.colors");
   const { user } = useAuthContext();
@@ -41,10 +48,21 @@ export const ColorInput: React.FC<{ name: string; title: string }> = ({
     } catch (e) {}
   }, [colors]);
 
+  React.useEffect(() => {
+    clearErrors(name);
+    if (!isValidColor(color)) {
+      setError(name, { message: "Not a valid color" });
+    }
+    setValue(name, color, { shouldDirty: true });
+  }, [color]);
+
+  const errorMessage = getFieldState(name).error?.message ?? "";
   return (
     <FormComponent
       className={css`
         margin-bottom: 0 !important;
+        background-color: var(--mi-darken-background-color);
+        padding: 0.5rem 0.75rem;
       `}
     >
       {title}
@@ -66,6 +84,15 @@ export const ColorInput: React.FC<{ name: string; title: string }> = ({
         ></span>
         <InputEl {...register(name)} onBlur={updateColorOnChange} />
       </div>
+      {errorMessage && (
+        <small
+          className={css`
+            color: var(--mi-warning-color);
+          `}
+        >
+          {errorMessage}
+        </small>
+      )}
     </FormComponent>
   );
 };

@@ -70,7 +70,7 @@ const PurchaseOrDownloadAlbum: React.FC<{
     !isOwned &&
     userId &&
     !artistState?.userStripeStatus?.chargesEnabled &&
-    trackGroup.minPrice === 0;
+    (trackGroup.minPrice === 0 || trackGroup.minPrice === null);
 
   return (
     <>
