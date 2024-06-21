@@ -36,7 +36,6 @@ const SavingInput: React.FC<{
       } else if (formKey === "minPrice") {
         value = value ? value * 100 : undefined;
       }
-      console.log("value", value);
 
       await api.put<unknown, TrackGroup>(url, {
         [formKey]: value,
