@@ -17,8 +17,9 @@ const SavingInput: React.FC<{
   extraData: Object;
   rows?: number;
   required?: boolean;
+  step?: string;
   type?: string;
-}> = ({ formKey, url, extraData, type, required, rows }) => {
+}> = ({ formKey, url, extraData, type, required, rows, step }) => {
   const { register, getValues } = useFormContext();
   const errorHandler = useErrorHandler();
 
@@ -78,6 +79,7 @@ const SavingInput: React.FC<{
           onBlur={saveOnBlur}
           type={type}
           required={required}
+          step={step}
         />
       )}
       {rows && <TextArea {...register(formKey)} rows={7} onBlur={saveOnBlur} />}
