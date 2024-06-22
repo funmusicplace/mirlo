@@ -95,8 +95,9 @@ const AlbumFormContent: React.FC<{
       <FormComponent>
         <label>{t("price")}</label>
         <SavingInput
-          formKey="price"
+          formKey="minPrice"
           type="number"
+          step="0.01"
           url={`users/${userId}/trackGroups/${trackGroupId}`}
           extraData={{ artistId: Number(artistId) }}
         />
