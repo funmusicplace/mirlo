@@ -212,7 +212,7 @@ const FloatingLinkToolbar: React.FC = () => {
       {!isEditing && (
         <FloatingToolbar
           className={css`
-            z-index: 1;
+            z-index: 10000;
           `}
         >
           {linkEditButtons}
@@ -222,7 +222,7 @@ const FloatingLinkToolbar: React.FC = () => {
         <FloatingToolbar
           positioner={linkPositioner}
           className={css`
-            z-index: 1;
+            z-index: 10000;
           `}
         >
           {linkEditButtons}
@@ -231,17 +231,17 @@ const FloatingLinkToolbar: React.FC = () => {
 
       <FloatingWrapper
         containerClass={css`
-          z-index: 1;
+          z-index: 100000;
         `}
         positioner="always"
-        placement="bottom"
+        // placement="bottom"
         enabled={isEditing}
         // See ticket https://github.com/remirror/remirror/issues/2013 for this
         // to be fixed
         // renderOutsideEditor
       >
         <DelayAutoFocusInput
-          style={{ zIndex: 20 }}
+          style={{ zIndex: 10000 }}
           autoFocus
           placeholder="Enter link..."
           onChange={(event: ChangeEvent<HTMLInputElement>) =>

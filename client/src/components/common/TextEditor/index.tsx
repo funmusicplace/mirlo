@@ -12,22 +12,11 @@ import { EditorComponent, Remirror, useRemirror } from "@remirror/react";
 import "remirror/styles/all.css";
 import { css } from "@emotion/css";
 
-import { FloatingToolbar, TableComponents } from "@remirror/react";
+import { TableComponents } from "@remirror/react";
 import { prosemirrorNodeToHtml } from "@remirror/core-utils";
 
 import TopToolbar from "./TopToolbar";
 import FloatingLinkToolbar from "./FloatingLinkToolbar";
-
-/**
- * Bubble menu for the pre-packaged editors
- */
-export const BubbleMenu: React.FC = () => (
-  <FloatingToolbar
-    className={css`
-      z-index: 1;
-    `}
-  ></FloatingToolbar>
-);
 
 const extensions = () => [
   new PlaceholderExtension({ placeholder: "Type something" }),
