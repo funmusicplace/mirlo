@@ -6,20 +6,30 @@ import React from "react";
 import { FaEdit } from "react-icons/fa";
 import { Outlet, useNavigate, useParams } from "react-router-dom";
 import api from "services/api";
+import usePagination from "utils/usePagination";
+
+const pageSize = 100;
 
 export const AdminTracks: React.FC = () => {
   const navigate = useNavigate();
   const { trackId } = useParams();
   const [openModal, setOpenModal] = React.useState(false);
   const [results, setResults] = React.useState<Track[]>([]);
+  const { page, PaginationComponent } = usePagination({ pageSize });
 
   React.useEffect(() => {
     const callback = async () => {
-      const { results } = await api.getMany<Track>("tracks");
+      const params = new URLSearchParams();
+      params.append("skip", `${pageSize * page}`);
+      params.append("take", `${pageSize}`);
+
+      const { results } = await api.getMany<Track>(
+        `tracks?${params.toString()}`
+      );
       setResults(results);
     };
     callback();
-  }, []);
+  }, [page]);
 
   React.useEffect(() => {
     if (trackId) {
@@ -72,7 +82,7 @@ export const AdminTracks: React.FC = () => {
           </tbody>
         </Table>
       )}
-      {/* <LoadingButton /> */}
+      <PaginationComponent amount={results.length} />
       <Modal
         open={openModal}
         onClose={() => {

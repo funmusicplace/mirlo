@@ -7,8 +7,9 @@ import { FaCheck, FaEdit } from "react-icons/fa";
 import { Outlet, useNavigate, useParams } from "react-router-dom";
 import api from "services/api";
 import useAdminFilters from "./useAdminFilters";
-// import { AdminTrackGroup, fetchTrackGroups } from "services/api/Admin";
-// import usePagination from "utils/usePagination";
+import usePagination from "utils/usePagination";
+
+const pageSize = 100;
 
 export const AdminTrackGroups: React.FC = () => {
   const navigate = useNavigate();
@@ -16,17 +17,24 @@ export const AdminTrackGroups: React.FC = () => {
   const [results, setResults] = React.useState<TrackGroup[]>([]);
   const [openModal, setOpenModal] = React.useState(false);
   const [total, setTotal] = React.useState<number>();
+  const { page, PaginationComponent } = usePagination({ pageSize });
 
-  const callback = React.useCallback(async (search?: URLSearchParams) => {
-    if (search) {
-      search.append("orderBy", "createdAt");
-    }
-    const { results, total: totalReuslts } = await api.getMany<TrackGroup>(
-      `admin/trackGroups?${search?.toString()}`
-    );
-    setResults(results);
-    setTotal(totalReuslts);
-  }, []);
+  const callback = React.useCallback(
+    async (search?: URLSearchParams) => {
+      const params = search ? search : new URLSearchParams();
+
+      params.append("orderBy", "createdAt");
+      params.append("skip", `${pageSize * page}`);
+      params.append("take", `${pageSize}`);
+
+      const { results, total: totalReuslts } = await api.getMany<TrackGroup>(
+        `admin/trackGroups?${params?.toString()}`
+      );
+      setResults(results);
+      setTotal(totalReuslts);
+    },
+    [page]
+  );
 
   const { Filters } = useAdminFilters({
     onSubmitFilters: callback,
@@ -66,10 +74,7 @@ export const AdminTrackGroups: React.FC = () => {
             <tr>
               <th />
               <th>Title</th>
-              {/* <th>Type</th> */}
-              {/* <th>Private?</th> */}
-              {/* <th>Enabled?</th> */}
-              {/* <th>Featured?</th> */}
+
               <th>Artist</th>
               <th>Release date</th>
               <th>Created date</th>
@@ -84,10 +89,6 @@ export const AdminTrackGroups: React.FC = () => {
                 <td>
                   {trackgroup.title} (id: {trackgroup.id})
                 </td>
-                {/* <td>{trackgroup.type}</td> */}
-                {/* <td>{trackgroup.private ? <FaCheck /> : undefined}</td> */}
-                {/* <td>{trackgroup.adminEnabled ? <FaCheck /> : undefined}</td> */}
-                {/* <td>{trackgroup.featured ? <FaCheck /> : undefined}</td> */}
 
                 <td>{trackgroup.artist?.name}</td>
                 <td>{trackgroup.releaseDate}</td>
@@ -105,7 +106,8 @@ export const AdminTrackGroups: React.FC = () => {
           </tbody>
         </Table>
       )}
-      {/* <LoadingButton /> */}
+      <PaginationComponent amount={results.length} />
+
       <Modal
         open={openModal}
         onClose={() => {

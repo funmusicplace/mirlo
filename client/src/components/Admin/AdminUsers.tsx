@@ -5,17 +5,27 @@ import React from "react";
 import { FaCheck, FaEdit } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import api from "services/api";
+import usePagination from "utils/usePagination";
+
+const pageSize = 100;
 
 export const AdminUsers: React.FC = () => {
   const [results, setResults] = React.useState<User[]>([]);
+  const { page, PaginationComponent } = usePagination({ pageSize });
 
   React.useEffect(() => {
     const callback = async () => {
-      const { results } = await api.getMany<User>("users");
+      const params = new URLSearchParams();
+
+      params.append("skip", `${pageSize * page}`);
+      params.append("take", `${pageSize}`);
+      const { results } = await api.getMany<User>(
+        `users?${params?.toString()}`
+      );
       setResults(results);
     };
     callback();
-  }, []);
+  }, [page]);
 
   return (
     <div
@@ -69,6 +79,7 @@ export const AdminUsers: React.FC = () => {
           </tbody>
         </Table>
       )}
+      <PaginationComponent amount={results.length} />
     </div>
   );
 };

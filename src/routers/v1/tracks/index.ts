@@ -1,10 +1,11 @@
 import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
 import { Prisma } from "@mirlo/prisma/client";
+import { userHasPermission } from "../../../auth/passport";
 
 export default function () {
   const operations = {
-    GET,
+    GET: [GET, userHasPermission("admin")],
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {

@@ -8,6 +8,12 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response) {
+    const { skip: skipQuery, take } = req.query as {
+      skip: string;
+      take: string;
+    };
+    const itemCount = await prisma.trackGroup.count();
+
     const users = await prisma.user.findMany({
       include: {
         artists: {
@@ -16,11 +22,13 @@ export default function () {
           },
         },
       },
+      skip: skipQuery ? Number(skipQuery) : undefined,
+      take: take ? Number(take) : undefined,
       orderBy: {
         createdAt: "desc",
       },
     });
-    res.json({ results: users });
+    res.json({ results: users, total: itemCount });
   }
   return operations;
 }
