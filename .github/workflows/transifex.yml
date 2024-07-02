@@ -14,10 +14,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: install node
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "npm"
+
       - name: Change directory
         run: cd client
 
-      - name: Run tests
+      - name: Push transifex
         run: |
           TRANSIFEX_TOKEN=${{ secrets.TRANSIFEX_TOKEN }} 
           TRANSIFEX_SECRET=${{ secrets.TRANSIFEX_SECRET }} 

@@ -284,7 +284,7 @@
     "status": "Free listen?",
     "statusHelp": "Can the user listen to the track without owning it?",
     "metadata": "Metadata",
-    "coAuthorCheck": "Should they be listed in the track listing?",
+    "coAuthorCheck": "Should they be listed in the track listing? Like a featured artist or as a secondary main artist?",
     "moreTrackDetails": "More track details",
     "saveDraft": "Save draft",
     "createAlbum": "Create album",
