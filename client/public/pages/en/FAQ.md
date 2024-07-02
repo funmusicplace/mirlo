@@ -60,7 +60,7 @@ We use [Stripe](https://stripe.com/nl-us) to process payments. Artists will have
 
 ### What file formats do you support?
 
-For upload we support lossless file formats (opus, flac, wav). We convert files across formats to be available to purchasers, as well as converting them to HLS and a couple of mp3 bitrates.
+For upload we support lossless file formats (flac, wav). We convert files across formats to be available to purchasers, as well as converting them to HLS and a couple of mp3 bitrates.
 
 ### Tell me about your tech stack
 

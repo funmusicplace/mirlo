@@ -1,48 +1,48 @@
 import { css } from "@emotion/css";
-import Modal from "components/common/Modal";
 import Money from "components/common/Money";
 import Table from "components/common/Table";
 import React from "react";
-import { Link, Outlet, useNavigate, useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import api from "services/api";
 import { getReleaseUrl } from "utils/artist";
 import useAdminFilters from "./useAdminFilters";
+import usePagination from "utils/usePagination";
 
 interface AdminPurchase extends UserTrackGroupPurchase {
   user: User;
   trackGroup: TrackGroup;
 }
 
-export const AdminPurchases: React.FC = () => {
-  const navigate = useNavigate();
-  const { trackgroupId } = useParams();
-  const [results, setResults] = React.useState<AdminPurchase[]>([]);
-  const [openModal, setOpenModal] = React.useState(false);
+const pageSize = 500;
 
-  const callback = React.useCallback(async (search?: URLSearchParams) => {
-    if (search) {
-      search.append("orderBy", "datePurchased");
-    }
-    const { results } = await api.getMany<AdminPurchase>(
-      `admin/purchases?${search?.toString() ?? ""}`
-    );
-    setResults(results);
-  }, []);
+export const AdminPurchases: React.FC = () => {
+  const [results, setResults] = React.useState<AdminPurchase[]>([]);
+  const { page, PaginationComponent } = usePagination({ pageSize });
+
+  const callback = React.useCallback(
+    async (search?: URLSearchParams) => {
+      const params = search ? search : new URLSearchParams();
+
+      params.append("orderBy", "datePurchased");
+      params.append("skip", `${pageSize * page}`);
+      params.append("take", `${pageSize}`);
+
+      const { results } = await api.getMany<AdminPurchase>(
+        `admin/purchases?${params.toString() ?? ""}`
+      );
+      setResults(results);
+    },
+    [page]
+  );
 
   const { Filters } = useAdminFilters({
     onSubmitFilters: callback,
-    fields: ["datePurchased"],
+    fields: ["datePurchased", "pricePaid"],
   });
 
   React.useEffect(() => {
     callback();
   }, [callback]);
-
-  React.useEffect(() => {
-    if (trackgroupId) {
-      setOpenModal(true);
-    }
-  }, [trackgroupId]);
 
   const total = results.reduce((aggr, r) => {
     if (aggr[r.currencyPaid]) {
@@ -128,16 +128,7 @@ export const AdminPurchases: React.FC = () => {
           </tbody>
         </Table>
       )}
-      {/* <LoadingButton /> */}
-      <Modal
-        open={openModal}
-        onClose={() => {
-          setOpenModal(false);
-          navigate("/admin/trackgroups");
-        }}
-      >
-        <Outlet />
-      </Modal>
+      <PaginationComponent amount={results.length} />
     </div>
   );
 };

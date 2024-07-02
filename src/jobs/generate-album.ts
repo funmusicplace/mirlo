@@ -20,41 +20,6 @@ const {
   MINIO_API_PORT = 9000,
 } = process.env;
 
-const formats: {
-  format: "wav" | "flac" | "opus" | "mp3";
-  audioCodec?: "flac" | "opus" | "libmp3lame";
-  audioBitrate?: "320" | "256" | "128";
-}[] = [
-  {
-    format: "wav",
-    // defaults to codec pcm_s16le
-  },
-  {
-    format: "flac",
-    audioCodec: "flac",
-  },
-  {
-    format: "opus",
-    audioCodec: "opus",
-    audioBitrate: undefined,
-  },
-  {
-    format: "mp3",
-    audioCodec: "libmp3lame",
-    audioBitrate: "128",
-  },
-  {
-    format: "mp3",
-    audioCodec: "libmp3lame",
-    audioBitrate: "256",
-  },
-  {
-    format: "mp3",
-    audioCodec: "libmp3lame",
-    audioBitrate: "320",
-  },
-];
-
 const parseFormat = (format: string) => {
   const split = format.split(".");
   const form = split[split.length - 1] as "wav" | "mp3" | "flac" | "opus";

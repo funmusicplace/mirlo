@@ -13,7 +13,13 @@ export default function () {
       skip: skipQuery,
       take,
       datePurchased,
-    } = req.query as { skip: string; take: string; datePurchased: string };
+      pricePaid,
+    } = req.query as {
+      skip: string;
+      take: string;
+      datePurchased: string;
+      pricePaid: string;
+    };
 
     try {
       let where: Prisma.UserTrackGroupPurchaseWhereInput = {};
@@ -37,6 +43,14 @@ export default function () {
           gte: startOfMonth.toISOString(),
           lt: endOfMonth.toISOString(),
         };
+      }
+
+      if (pricePaid && pricePaid === "paid") {
+        where.pricePaid = {
+          gt: 0,
+        };
+      } else if (pricePaid && pricePaid === "free") {
+        where.pricePaid = 0;
       }
 
       const itemCount = await prisma.userTrackGroupPurchase.count({ where });

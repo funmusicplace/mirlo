@@ -317,7 +317,7 @@ const routes: RouteObject[] = [
             path: "users",
             async lazy() {
               const { default: Component } = await import(
-                "components/Admin/Users"
+                "components/Admin/AdminUsers"
               );
               return { Component };
             },
