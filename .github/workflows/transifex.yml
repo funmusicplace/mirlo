@@ -12,11 +12,20 @@ jobs:
   push-transifex:
     timeout-minutes: 10
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Push source file using transifex client
-        uses: transifex/cli-action@v2
+      - name: install node
+        uses: actions/setup-node@v4
         with:
-          token: ${{ secrets.TRANSIFEX_API_TOKEN }}
+          node-version-file: ".nvmrc"
+          cache: "npm"
+
+      - name: Push transifex
+        working-directory: client
+        run: |
+          TRANSIFEX_TOKEN=${{ secrets.TRANSIFEX_TOKEN }} 
+          TRANSIFEX_SECRET=${{ secrets.TRANSIFEX_SECRET }} 
+          npx txjs-cli push src/translation/en.json --parser=i18next
