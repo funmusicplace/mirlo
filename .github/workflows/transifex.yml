@@ -26,10 +26,13 @@ jobs:
       - name: install transifex
         run: npm install -g @transifex/cli
 
+      - name:
+        run: echo ${{secrets.TRANSIFEX_TOKEN}}
+
       - name: Push transifex
         working-directory: client
         env:
-          TRANSIFEX_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TRANSIFEX_TOKEN: ${{ secrets.TRANSIFEX_TOKEN }}
           TRANSIFEX_SECRET: ${{ secrets.TRANSIFEX_SECRET }}
         run: |
           TRANSIFEX_TOKEN=$TRANSIFEX_TOKEN
