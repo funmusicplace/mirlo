@@ -8,7 +8,7 @@ import { clearTables, createArtist, createUser } from "../../../utils";
 
 const baseURL = `${process.env.API_DOMAIN}/v1/`;
 
-describe("users/{id}/trackGroups/{id}/trackOrder", () => {
+describe("manage/trackGroups/{id}/trackOrder", () => {
   beforeEach(async () => {
     try {
       await clearTables();
@@ -19,7 +19,7 @@ describe("users/{id}/trackGroups/{id}/trackOrder", () => {
 
   it("should PUT / 401 no user", async () => {
     const response = await request(baseURL)
-      .put("users/1/trackGroups/1/trackOrder")
+      .put("manage/trackGroups/1/trackOrder")
       .set("Accept", "application/json")
       .send({ trackIds: [] });
 
@@ -32,7 +32,7 @@ describe("users/{id}/trackGroups/{id}/trackOrder", () => {
     });
 
     const response = await request(baseURL)
-      .put(`users/${user.id}/trackGroups/1/trackOrder`)
+      .put(`manage/trackGroups/1/trackOrder`)
       .send({ trackIds: [] })
       .set("Cookie", [`jwt=${accessToken}`])
       .set("Accept", "application/json");
@@ -71,7 +71,7 @@ describe("users/{id}/trackGroups/{id}/trackOrder", () => {
     });
 
     const response = await request(baseURL)
-      .put(`users/${user.id}/trackGroups/${trackGroup.id}/trackOrder`)
+      .put(`manage/trackGroups/${trackGroup.id}/trackOrder`)
       .send({ trackIds: [track2.id, track1.id] })
       .set("Cookie", [`jwt=${accessToken}`])
       .set("Accept", "application/json");

@@ -94,7 +94,7 @@ const PostForm: React.FC<{
                 : undefined,
           };
           if (existingId) {
-            await api.put(`users/${userId}/posts/${existingId}`, picked);
+            await api.put(`manage/posts/${existingId}`, picked);
           } else {
             await api.post<
               {
@@ -104,7 +104,7 @@ const PostForm: React.FC<{
                 publishedAt: string;
               },
               { id: number }
-            >(`users/${userId}/posts`, picked);
+            >(`manage/posts`, picked);
           }
 
           snackbar(t("postUpdated"), { type: "success" });
@@ -125,7 +125,7 @@ const PostForm: React.FC<{
     try {
       const confirmed = window.confirm(t("confirmDelete") ?? "");
       if (confirmed) {
-        await api.delete(`users/${userId}/posts/${existingId}`);
+        await api.delete(`manage/posts/${existingId}`);
         navigate(getArtistManageUrl(artist.id));
       }
     } catch (e) {

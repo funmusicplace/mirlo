@@ -37,7 +37,7 @@ const fetchManagedArtist: QueryFunction<
   return api
     .get<{
       result: Artist;
-    }>(`v1/users/${userId}/artists/${artistId}`, { signal })
+    }>(`v1/manage/artists/${artistId}`, { signal })
     .then((r) => r.result);
 };
 
@@ -61,10 +61,7 @@ async function createArtist({
   body: CreateArtistBody;
 }) {
   return api
-    .post<
-      CreateArtistBody,
-      { result: Artist }
-    >(`v1/users/${userId}/artists`, body)
+    .post<CreateArtistBody, { result: Artist }>(`v1/manage/artists`, body)
     .then((r) => r.result);
 }
 
@@ -97,7 +94,7 @@ async function updateArtist({
     .put<
       UpdateArtistBody,
       { result: Artist }
-    >(`v1/users/${userId}/artists/${artistId}`, body)
+    >(`v1/manage/artists/${artistId}`, body)
     .then((r) => r.result);
 }
 
@@ -120,14 +117,12 @@ export function useUpdateArtistMutation() {
 }
 
 async function deleteArtist({
-  userId,
   artistId,
 }: {
-  userId: number;
   artistId: number;
   artistSlug: string;
 }) {
-  return api.del(`v1/users/${userId}/artists/${artistId}`);
+  return api.del(`v1/manage/artists/${artistId}`);
 }
 
 export function useDeleteArtistMutation() {

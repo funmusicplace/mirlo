@@ -38,20 +38,17 @@ const GenerateAlbumDownloadCodes: React.FC<{ onDone: () => void }> = ({
 
   const onChooseAlbum = async (trackGroupId: string | number) => {
     const trackGroup = await api.get<TrackGroup>(
-      `users/${userId}/trackGroups/${trackGroupId}`
+      `manage/trackGroups/${trackGroupId}`
     );
     setSelectedTrackGroup(trackGroup.result);
   };
 
   const getTrackGroupOptions = React.useCallback(
     async (searchString: string) => {
-      const results = await api.getMany<TrackGroup>(
-        `users/${userId}/trackGroups`,
-        {
-          title: searchString,
-          take: "10",
-        }
-      );
+      const results = await api.getMany<TrackGroup>(`manage/trackGroups`, {
+        title: searchString,
+        take: "10",
+      });
       return results.results.map((r) => ({
         name: `${r.artist?.name} - ${r.title}`,
         id: r.id,
@@ -66,7 +63,7 @@ const GenerateAlbumDownloadCodes: React.FC<{ onDone: () => void }> = ({
     async (data: FormData) => {
       if (trackGroupId && userId) {
         try {
-          await api.post(`users/${userId}/trackGroups/${trackGroupId}/codes`, [
+          await api.post(`manage/trackGroups/${trackGroupId}/codes`, [
             {
               group: data.group,
               quantity: data.quantity,

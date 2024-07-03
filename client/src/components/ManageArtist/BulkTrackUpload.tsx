@@ -86,17 +86,16 @@ export const BulkTrackUpload: React.FC<{
         );
 
         const response = await api.post<Partial<Track>, { result: Track }>(
-          `users/${userId}/tracks`,
+          `manage/tracks`,
           packet
         );
 
         setUploadQueue((queue) =>
           produceNewStatus(queue, firstTrack.t.title, 25)
         );
-        await api.uploadFile(
-          `users/${userId}/tracks/${response.result.id}/audio`,
-          [firstTrack.t.file]
-        );
+        await api.uploadFile(`manage/tracks/${response.result.id}/audio`, [
+          firstTrack.t.file,
+        ]);
 
         if (remainingTracks.length !== 0) {
           setUploadQueue((queue) =>

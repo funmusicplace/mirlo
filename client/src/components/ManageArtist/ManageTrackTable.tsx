@@ -103,13 +103,9 @@ export const ManageTrackTable: React.FC<{
         if (trackGroupId) {
           setDisplayTracks(newTracks);
 
-          // FIXME: this endpoint isn't implemented
-          await api.put(
-            `users/${userId}/trackGroups/${trackGroupId}/trackOrder`,
-            {
-              trackIds: newTracks.map((t) => t.id),
-            }
-          );
+          await api.put(`manage/trackGroups/${trackGroupId}/trackOrder`, {
+            trackIds: newTracks.map((t) => t.id),
+          });
 
           reload?.();
         }

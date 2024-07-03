@@ -29,7 +29,7 @@ const AlbumFormContent: React.FC<{
         <label>{t("title")}</label>
         <SavingInput
           formKey="title"
-          url={`users/${userId}/trackGroups/${trackGroupId}`}
+          url={`manage/trackGroups/${trackGroupId}`}
           extraData={{ artistId: Number(artistId) }}
         />
       </FormComponent>
@@ -70,7 +70,7 @@ const AlbumFormContent: React.FC<{
           formKey="releaseDate"
           type="date"
           required
-          url={`users/${userId}/trackGroups/${trackGroupId}`}
+          url={`manage/trackGroups/${trackGroupId}`}
           extraData={{ artistId: Number(artistId) }}
         />
       </FormComponent>
@@ -79,7 +79,7 @@ const AlbumFormContent: React.FC<{
         <SavingInput
           formKey="about"
           rows={8}
-          url={`users/${userId}/trackGroups/${trackGroupId}`}
+          url={`manage/trackGroups/${trackGroupId}`}
           extraData={{ artistId: Number(artistId) }}
         />
       </FormComponent>
@@ -88,7 +88,7 @@ const AlbumFormContent: React.FC<{
         <SavingInput
           formKey="credits"
           rows={8}
-          url={`users/${userId}/trackGroups/${trackGroupId}`}
+          url={`manage/trackGroups/${trackGroupId}`}
           extraData={{ artistId: Number(artistId) }}
         />
       </FormComponent>
@@ -98,7 +98,7 @@ const AlbumFormContent: React.FC<{
           formKey="minPrice"
           type="number"
           step="0.01"
-          url={`users/${userId}/trackGroups/${trackGroupId}`}
+          url={`manage/trackGroups/${trackGroupId}`}
           extraData={{ artistId: Number(artistId) }}
         />
         {errors.minPrice && <FormError>{t("priceZeroOrMore")}</FormError>}

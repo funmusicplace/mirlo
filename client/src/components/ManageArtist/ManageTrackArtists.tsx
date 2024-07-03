@@ -59,7 +59,7 @@ const ManageTrackArtists: React.FC<{
             })),
         };
         await api.put<Partial<Track>, { track: Track }>(
-          `users/${userId}/tracks/${trackId}/trackArtists`,
+          `manage/tracks/${trackId}/trackArtists`,
           packet
         );
       } catch (e) {

@@ -30,7 +30,7 @@ const ManageSubscriptionTierBox: React.FC<{
     async (tierId: number) => {
       try {
         await api.delete(
-          `users/${userId}/artists/${artistId}/subscriptionTiers/${tierId}`
+          `manage/artists/${artistId}/subscriptionTiers/${tierId}`
         );
         snackbar("Tier deleted", { type: "success" });
         reload();

@@ -8,7 +8,7 @@ import { clearTables } from "../../../utils";
 
 const baseURL = `${process.env.API_DOMAIN}/v1/`;
 
-describe("users/{id}/tracks/{id}/audio", () => {
+describe("manage/tracks/{id}/audio", () => {
   beforeEach(async () => {
     try {
       await clearTables();
@@ -19,7 +19,7 @@ describe("users/{id}/tracks/{id}/audio", () => {
 
   it("should GET / 404 no user", async () => {
     const response = await request(baseURL)
-      .get("users/1/tracks/1/audio")
+      .get("manage/tracks/1/audio")
       .set("Accept", "application/json");
 
     assert(response.statusCode === 404);

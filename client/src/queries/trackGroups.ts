@@ -11,20 +11,26 @@ const fetchTrackGroups: QueryFunction<
   { results: TrackGroup[]; total?: number },
   [
     "fetchTrackGroups",
-    { skip?: number; take?: number; orderBy?: "random"; tag?: string; distinctArtists?: boolean },
+    {
+      skip?: number;
+      take?: number;
+      orderBy?: "random";
+      tag?: string;
+      distinctArtists?: boolean;
+    },
     ...any,
   ]
-> = ({ queryKey: [_, { skip, take, orderBy, tag, distinctArtists }], signal }) => {
+> = ({
+  queryKey: [_, { skip, take, orderBy, tag, distinctArtists }],
+  signal,
+}) => {
   const params = new URLSearchParams();
   if (skip) params.append("skip", String(skip));
   if (take) params.append("take", String(take));
   if (orderBy) params.append("orderBy", orderBy);
   if (tag) params.append("tag", tag);
   params.append("distinctArtists", String(distinctArtists ?? false));
-  return api.get(
-    `v1/trackGroups?${params}`,
-    { signal }
-  );
+  return api.get(`v1/trackGroups?${params}`, { signal });
 };
 
 export function queryTrackGroups(opts: {
@@ -42,11 +48,10 @@ export function queryTrackGroups(opts: {
 
 const fetchUserTrackGroups: QueryFunction<
   { results: TrackGroup[] },
-  ["fetchUserTrackGroups", { userId: number; artistId?: number }, ...any]
-> = ({ queryKey: [_, { userId, artistId }], signal }) => {
+  ["fetchUserTrackGroups", { artistId?: number }, ...any]
+> = ({ queryKey: [_, { artistId }], signal }) => {
   return api.get(
-    `v1/users/${userId}/trackGroups` +
-      (artistId ? `?artistId=${artistId}` : ""),
+    `manage/trackGroups` + (artistId ? `?artistId=${artistId}` : ""),
     { signal }
   );
 };
@@ -66,7 +71,7 @@ async function createTrackGroup(opts: {
   userId: number;
   trackGroup: Partial<TrackGroup>;
 }): Promise<{ result: TrackGroup }> {
-  return await api.post(`v1/users/${opts.userId}/trackGroups`, opts.trackGroup);
+  return await api.post(`v1/manage/trackGroups`, opts.trackGroup);
 }
 
 export function useCreateTrackGroupMutation() {
@@ -86,10 +91,7 @@ async function updateTrackGroup(opts: {
   trackGroupId: number;
   trackGroup: Partial<TrackGroup>;
 }) {
-  await api.put(
-    `v1/users/${opts.userId}/trackGroups/${opts.trackGroupId}`,
-    opts.trackGroup
-  );
+  await api.put(`v1/manage/trackGroups/${opts.trackGroupId}`, opts.trackGroup);
 }
 
 export function useUpdateTrackGroupMutation() {
@@ -108,7 +110,7 @@ async function deleteTrackGroup(opts: {
   userId: number;
   trackGroupId: number;
 }) {
-  await api.del(`v1/users/${opts.userId}/trackGroups/${opts.trackGroupId}`);
+  await api.del(`v1/manage/trackGroups/${opts.trackGroupId}`);
 }
 
 export function useDeleteTrackGroupMutation() {

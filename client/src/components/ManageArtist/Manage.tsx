@@ -23,9 +23,7 @@ export const Manage: React.FC = () => {
 
   const fetchArtists = React.useCallback(async () => {
     if (userId) {
-      const fetchedArtists = await api.getMany<Artist>(
-        `users/${userId}/artists`
-      );
+      const fetchedArtists = await api.getMany<Artist>(`manage/artists`);
       if (fetchedArtists) {
         setArtists(fetchedArtists.results);
       }

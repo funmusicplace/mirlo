@@ -41,7 +41,7 @@ const ManageArtistPosts: React.FC<{}> = () => {
   const fetchPosts = React.useCallback(async () => {
     if (userId) {
       const fetchedPosts = await api.getMany<Post>(
-        `users/${userId}/posts?artistId=${artistId}`
+        `manage/posts?artistId=${artistId}`
       );
       setPosts(fetchedPosts.results);
     }
@@ -56,7 +56,7 @@ const ManageArtistPosts: React.FC<{}> = () => {
       try {
         const confirmed = window.confirm(t("areYouSureDelete") ?? "");
         if (confirmed) {
-          await api.delete(`users/${userId}/posts/${postId}`);
+          await api.delete(`manage/posts/${postId}`);
           snackbar(t("postDeleted"), { type: "success" });
           fetchPosts();
         }

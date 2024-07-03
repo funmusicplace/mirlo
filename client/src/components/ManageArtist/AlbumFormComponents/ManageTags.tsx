@@ -29,10 +29,7 @@ const ManageTags: React.FC<{ tags?: string[] }> = ({ tags: existingTags }) => {
   const update = React.useCallback(
     async (newTags: string[]) => {
       try {
-        await api.put(
-          `users/${userId}/trackGroups/${trackGroupId}/tags`,
-          newTags
-        );
+        await api.put(`manage/trackGroups/${trackGroupId}/tags`, newTags);
       } catch (e) {
         console.error("e", e);
       }
