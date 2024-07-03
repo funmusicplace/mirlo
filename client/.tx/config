@@ -1,0 +1,12 @@
+[main]
+host = https://app.transifex.com
+
+[o:mirlo:p:mirlo:r:mirlo]
+file_filter            = src/translation/<lang>.json
+source_file            = src/translation/en.json
+type                   = FILELESS
+minimum_perc           = 0
+resource_name          = Mirlo
+replace_edited_strings = false
+keep_translations      = false
+
