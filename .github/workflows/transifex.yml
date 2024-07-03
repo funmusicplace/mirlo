@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
 
 jobs:
   push-transifex:
@@ -25,9 +22,6 @@ jobs:
 
       - name: install transifex
         run: npm install -g @transifex/cli
-
-      - name:
-        run: echo ${{secrets.TRANSIFEX_TOKEN}}
 
       - name: Push transifex
         working-directory: client
