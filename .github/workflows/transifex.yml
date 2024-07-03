@@ -28,7 +28,10 @@ jobs:
 
       - name: Push transifex
         working-directory: client
+        env:
+          TRANSIFEX_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TRANSIFEX_SECRET: ${{ secrets.TRANSIFEX_SECRET }}
         run: |
-          TRANSIFEX_TOKEN=${{ secrets.TRANSIFEX_TOKEN }} 
-          TRANSIFEX_SECRET=${{ secrets.TRANSIFEX_SECRET }} 
+          TRANSIFEX_TOKEN=$TRANSIFEX_TOKEN
+          TRANSIFEX_SECRET=$TRANSIFEX_SECRET 
           npx txjs-cli push src/translation/en.json --parser=i18next
