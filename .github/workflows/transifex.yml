@@ -23,6 +23,9 @@ jobs:
           node-version-file: ".nvmrc"
           cache: "npm"
 
+      - name: install transifex
+        run: npm install -g @transifex/cli
+
       - name: Push transifex
         working-directory: client
         run: |
