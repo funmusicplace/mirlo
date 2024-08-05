@@ -2,8 +2,6 @@ import { css } from "@emotion/css";
 import React from "react";
 import ManageSubscriptionTierBox from "./ManageSubscriptionTierBox";
 import SubscriptionForm from "./SubscriptionForm";
-import { useArtistContext } from "state/ArtistContext";
-import useGetUserObjectById from "utils/useGetUserObjectById";
 import { useParams } from "react-router-dom";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import { ManageSectionWrapper } from "./ManageSectionWrapper";
@@ -11,31 +9,31 @@ import Modal from "components/common/Modal";
 import { useTranslation } from "react-i18next";
 import Button, { ButtonLink } from "components/common/Button";
 import { FaPlus, FaWrench } from "react-icons/fa";
-import { useAuthContext } from "state/AuthContext";
+import {
+  queryManagedArtist,
+  queryManagedArtistSubscriptionTiers,
+} from "queries";
+import { useQuery } from "@tanstack/react-query";
 
 const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
-  const { user } = useAuthContext();
   const [addingNewTier, setAddingNewTier] = React.useState(false);
   const { t } = useTranslation("translation", {
     keyPrefix: "subscriptionForm",
   });
 
-  const {
-    state: { artist },
-  } = useArtistContext();
   const { artistId } = useParams();
-  const { objects: tiers, reload } =
-    useGetUserObjectById<ArtistSubscriptionTier>(
-      "artists",
-      user?.id,
-      artistId,
-      `/subscriptionTiers`,
-      { multiple: true }
-    );
+  const { data: artist } = useQuery(queryManagedArtist(Number(artistId)));
+  const { data: tiers, refetch } = useQuery(
+    queryManagedArtistSubscriptionTiers({
+      artistId: Number(artistId),
+    })
+  );
 
   if (!artist) {
     return null;
   }
+
+  console.log("tiers", tiers?.results);
 
   return (
     <ManageSectionWrapper>
@@ -72,11 +70,11 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
           margin-bottom: 1rem;
         `}
       >
-        {tiers?.map((tier) => (
+        {tiers?.results.map((tier) => (
           <ManageSubscriptionTierBox
             tier={tier}
             key={tier.id}
-            reload={reload}
+            reload={refetch}
             artist={artist}
           />
         ))}
@@ -86,7 +84,7 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
         onClose={() => setAddingNewTier(false)}
         title={t("newSubscriptionTierFor", { artistName: artist.name }) ?? ""}
       >
-        <SubscriptionForm artist={artist} reload={reload} />
+        <SubscriptionForm artist={artist} reload={refetch} />
       </Modal>
     </ManageSectionWrapper>
   );

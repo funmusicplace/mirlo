@@ -1,13 +1,13 @@
 import { NextFunction, Request, Response } from "express";
 import {
+  trackBelongsToLoggedInUser,
   userAuthenticated,
-  userHasPermission,
 } from "../../../../../auth/passport";
 import { doesTrackBelongToUser } from "../../../../../utils/ownership";
 import prisma from "@mirlo/prisma";
 
 import { deleteTrack, updateTrackArtists } from "../../../../../utils/tracks";
-import { AppError } from "../../../../../utils/error";
+import { User } from "@mirlo/prisma/client";
 
 interface TrackBody {
   title: string;
@@ -23,19 +23,21 @@ interface TrackBody {
 
 export default function () {
   const operations = {
-    PUT: [userAuthenticated, userHasPermission("owner"), PUT],
-    DELETE: [userAuthenticated, userHasPermission("owner"), DELETE],
-    GET: [userAuthenticated, userHasPermission("owner"), GET],
+    PUT: [userAuthenticated, trackBelongsToLoggedInUser, PUT],
+    DELETE: [userAuthenticated, trackBelongsToLoggedInUser, DELETE],
+    GET: [userAuthenticated, trackBelongsToLoggedInUser, GET],
   };
 
   // FIXME: only allow updating of tracks owned by userId
   async function PUT(req: Request, res: Response, next: NextFunction) {
-    const { trackId, userId } = req.params;
+    const { trackId } = req.params;
     const { title, isPreview, trackArtists } = req.body as TrackBody;
+    const loggedInUser = req.user as User;
+
     try {
       const track = await doesTrackBelongToUser(
         Number(trackId),
-        Number(userId)
+        Number(loggedInUser.id)
       );
 
       if (!track) {
@@ -76,12 +78,6 @@ export default function () {
         type: "string",
       },
       {
-        in: "path",
-        name: "userId",
-        required: true,
-        type: "string",
-      },
-      {
         in: "body",
         name: "track",
         schema: {
@@ -106,10 +102,11 @@ export default function () {
   };
 
   async function DELETE(req: Request, res: Response, next: NextFunction) {
-    const { userId, trackId: trackIdString } = req.params;
+    const { trackId: trackIdString } = req.params;
+    const loggedInUser = req.user as User;
 
     const trackId = Number(trackIdString);
-    const track = await doesTrackBelongToUser(trackId, Number(userId));
+    const track = await doesTrackBelongToUser(trackId, Number(loggedInUser.id));
     if (!track) {
       res.status(400).json({
         error: "Track must belong to user",
@@ -122,10 +119,7 @@ export default function () {
 
       res.json({ message: "Success" });
     } catch (e) {
-      throw new AppError({
-        httpCode: 500,
-        description: e,
-      });
+      next(e);
     }
   }
 
@@ -135,12 +129,6 @@ export default function () {
       {
         in: "path",
         name: "trackId",
-        required: true,
-        type: "string",
-      },
-      {
-        in: "path",
-        name: "userId",
         required: true,
         type: "string",
       },
@@ -173,12 +161,6 @@ export default function () {
   GET.apiDoc = {
     summary: "Returns track information",
     parameters: [
-      {
-        in: "path",
-        name: "userId",
-        required: true,
-        type: "string",
-      },
       {
         in: "path",
         name: "trackId",

@@ -10,7 +10,7 @@ import { getReleaseUrl } from "utils/artist";
 
 const PublishButton: React.FC<{
   trackGroup: TrackGroup;
-  reload: () => Promise<void>;
+  reload: () => Promise<unknown>;
 }> = ({ trackGroup, reload }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const snackbar = useSnackbar();
@@ -35,10 +35,7 @@ const PublishButton: React.FC<{
     }
     try {
       if (artistUserId && trackGroupId) {
-        await api.put(
-          `users/${artistUserId}/trackGroups/${trackGroupId}/publish`,
-          {}
-        );
+        await api.put(`manage/trackGroups/${trackGroupId}/publish`, {});
         snackbar(t(trackGroup.published ? "madePrivate" : "publishedSuccess"), {
           type: "success",
         });

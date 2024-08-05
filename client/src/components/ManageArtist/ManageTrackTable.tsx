@@ -76,7 +76,7 @@ export const ManageTrackTable: React.FC<{
   trackGroupId?: number;
   editable?: boolean;
   owned?: boolean;
-  reload?: () => Promise<void>;
+  reload?: () => Promise<unknown>;
 }> = ({ tracks, trackGroupId, editable, reload }) => {
   const [isLoading, setIsLoading] = React.useState(false);
   const {

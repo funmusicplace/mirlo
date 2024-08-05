@@ -1,5 +1,5 @@
 import { Prisma, User } from "@mirlo/prisma/client";
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { userAuthenticated } from "../../../../auth/passport";
 import prisma from "@mirlo/prisma";
 import { AppError } from "../../../../utils/error";
@@ -13,7 +13,7 @@ export default function () {
     GET: [userAuthenticated, GET],
   };
 
-  async function GET(req: Request, res: Response) {
+  async function GET(req: Request, res: Response, next: NextFunction) {
     const { userId } = req.params as unknown as Params;
     const { artistId } = req.query as unknown as { artistId: string };
     const loggedInUser = req.user as User;
@@ -44,23 +44,12 @@ export default function () {
         });
       }
     } catch (e) {
-      throw new AppError({
-        httpCode: 500,
-        description: "Something went wrong",
-      });
+      next(e);
     }
   }
 
   GET.apiDoc = {
     summary: "Returns user artists",
-    parameters: [
-      {
-        in: "path",
-        name: "userId",
-        required: true,
-        type: "string",
-      },
-    ],
     responses: {
       200: {
         description: "Subscriptions that belong to the user",

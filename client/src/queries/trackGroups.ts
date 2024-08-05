@@ -46,32 +46,13 @@ export function queryTrackGroups(opts: {
   });
 }
 
-const fetchUserTrackGroups: QueryFunction<
-  { results: TrackGroup[] },
-  ["fetchUserTrackGroups", { artistId?: number }, ...any]
-> = ({ queryKey: [_, { artistId }], signal }) => {
-  return api.get(
-    `manage/trackGroups` + (artistId ? `?artistId=${artistId}` : ""),
-    { signal }
-  );
-};
-
-export function queryUserTrackGroups(opts: {
-  userId: number;
-  artistId?: number;
-}) {
-  return queryOptions({
-    queryKey: ["fetchUserTrackGroups", opts, QUERY_KEY_TRACK_GROUPS],
-    queryFn: fetchUserTrackGroups,
-    enabled: !!opts.userId && (opts.artistId === undefined || !!opts.artistId),
-  });
-}
-
 async function createTrackGroup(opts: {
-  userId: number;
   trackGroup: Partial<TrackGroup>;
 }): Promise<{ result: TrackGroup }> {
-  return await api.post(`v1/manage/trackGroups`, opts.trackGroup);
+  return await api.post(
+    `v1/manage/artists/${opts.trackGroup.artistId}/trackGroups`,
+    opts.trackGroup
+  );
 }
 
 export function useCreateTrackGroupMutation() {
@@ -87,7 +68,6 @@ export function useCreateTrackGroupMutation() {
 }
 
 async function updateTrackGroup(opts: {
-  userId: number;
   trackGroupId: number;
   trackGroup: Partial<TrackGroup>;
 }) {

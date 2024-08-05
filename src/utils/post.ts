@@ -37,28 +37,39 @@ export const doesPostBelongToUser = async (
   res: Response,
   next: NextFunction
 ) => {
-  const { userId, postId } = req.params;
+  const { postId } = req.params;
   const loggedInUser = req.user as User | undefined;
   try {
-    if (userId && postId) {
-      if (loggedInUser?.id === Number(userId) || loggedInUser?.isAdmin) {
+    if (postId && loggedInUser) {
+      if (loggedInUser.isAdmin) {
         const post = await prisma.post.findFirst({
           where: {
-            artist: {
-              userId: Number(userId),
-            },
+            id: Number(postId),
             deletedAt: null,
+          },
+          select: {
+            id: true,
           },
         });
         if (post) {
           return next();
-        } else {
-          const e = new AppError({
-            httpCode: 401,
-            description: "Post must belong to user",
-          });
-          next(e);
         }
+      }
+
+      const post = await prisma.post.findFirst({
+        where: {
+          id: Number(postId),
+          artist: {
+            userId: Number(loggedInUser.id),
+          },
+          deletedAt: null,
+        },
+        select: {
+          id: true,
+        },
+      });
+      if (post) {
+        return next();
       } else {
         const e = new AppError({
           httpCode: 401,

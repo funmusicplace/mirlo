@@ -16,7 +16,7 @@ import { useAuthContext } from "state/AuthContext";
 const ManageSubscriptionTierBox: React.FC<{
   tier: ArtistSubscriptionTier;
   artist: Artist;
-  reload: () => Promise<void>;
+  reload: () => Promise<unknown>;
 }> = ({ tier, reload, artist }) => {
   const { user } = useAuthContext();
   const snackbar = useSnackbar();

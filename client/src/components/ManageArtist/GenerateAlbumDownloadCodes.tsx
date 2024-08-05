@@ -6,7 +6,6 @@ import Button from "components/common/Button";
 import { FaPlus, FaTimes } from "react-icons/fa";
 import AutoComplete from "components/common/AutoComplete";
 import api from "services/api";
-import { useArtistContext } from "state/ArtistContext";
 import { css } from "@emotion/css";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import SmallTileDetails from "components/common/SmallTileDetails";
@@ -14,6 +13,9 @@ import { InputEl } from "components/common/Input";
 import FormComponent from "components/common/FormComponent";
 import { useForm } from "react-hook-form";
 import { useSnackbar } from "state/SnackbarContext";
+import { queryManagedArtist } from "queries";
+import { useQuery } from "@tanstack/react-query";
+import { useParams } from "react-router-dom";
 
 type FormData = {
   group: string;
@@ -24,9 +26,8 @@ const GenerateAlbumDownloadCodes: React.FC<{ onDone: () => void }> = ({
   onDone,
 }) => {
   const methods = useForm<FormData>();
-  const {
-    state: { artist },
-  } = useArtistContext();
+  const { artistId } = useParams();
+  const { data: artist } = useQuery(queryManagedArtist(Number(artistId)));
   const snackbar = useSnackbar();
   const [isOpen, setIsOpen] = React.useState(false);
   const [selectedTrackGroup, setSelectedTrackGroup] =
@@ -34,7 +35,6 @@ const GenerateAlbumDownloadCodes: React.FC<{ onDone: () => void }> = ({
   const { t } = useTranslation("translation", {
     keyPrefix: "manageArtistTools",
   });
-  const userId = artist?.userId;
 
   const onChooseAlbum = async (trackGroupId: string | number) => {
     const trackGroup = await api.get<TrackGroup>(
@@ -45,23 +45,29 @@ const GenerateAlbumDownloadCodes: React.FC<{ onDone: () => void }> = ({
 
   const getTrackGroupOptions = React.useCallback(
     async (searchString: string) => {
-      const results = await api.getMany<TrackGroup>(`manage/trackGroups`, {
-        title: searchString,
-        take: "10",
-      });
-      return results.results.map((r) => ({
-        name: `${r.artist?.name} - ${r.title}`,
-        id: r.id,
-      }));
+      if (artist) {
+        const results = await api.getMany<TrackGroup>(
+          `manage/artists/${artist.id}/trackGroups`,
+          {
+            title: searchString,
+            take: "10",
+          }
+        );
+        return results.results.map((r) => ({
+          name: `${r.artist?.name} - ${r.title}`,
+          id: r.id,
+        }));
+      }
+      return [];
     },
-    [userId]
+    [artist]
   );
 
   const trackGroupId = selectedTrackGroup?.id;
 
   const generateDownloadCodes = React.useCallback(
     async (data: FormData) => {
-      if (trackGroupId && userId) {
+      if (trackGroupId) {
         try {
           await api.post(`manage/trackGroups/${trackGroupId}/codes`, [
             {
@@ -79,7 +85,7 @@ const GenerateAlbumDownloadCodes: React.FC<{ onDone: () => void }> = ({
         }
       }
     },
-    [methods, onDone, snackbar, trackGroupId, userId]
+    [methods, onDone, snackbar, trackGroupId]
   );
 
   return (

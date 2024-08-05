@@ -21,7 +21,6 @@ export function NewAlbumButton(props: NewAlbumButtonProps) {
   const handleClick = React.useCallback(
     once(async () => {
       const newAlbum = await createTrackGroup({
-        userId: props.artist.userId,
         trackGroup: {
           title: "",
           urlSlug: `mi-temp-slug-new-album-${uuid()}`,

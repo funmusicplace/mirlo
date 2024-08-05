@@ -1,8 +1,8 @@
 import { User } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 import {
+  trackGroupBelongsToLoggedInUser,
   userAuthenticated,
-  userHasPermission,
 } from "../../../../../auth/passport";
 import prisma from "@mirlo/prisma";
 import { doesTrackGroupBelongToUser } from "../../../../../utils/ownership";
@@ -14,7 +14,7 @@ type Params = {
 
 export default function () {
   const operations = {
-    PUT: [userAuthenticated, userHasPermission("owner"), PUT],
+    PUT: [userAuthenticated, trackGroupBelongsToLoggedInUser, PUT],
   };
 
   async function PUT(req: Request, res: Response, next: NextFunction) {
@@ -62,12 +62,6 @@ export default function () {
   PUT.apiDoc = {
     summary: "Updates a trackGroup cover belonging to a user",
     parameters: [
-      {
-        in: "path",
-        name: "userId",
-        required: true,
-        type: "string",
-      },
       {
         in: "path",
         name: "trackGroupId",

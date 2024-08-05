@@ -45,15 +45,17 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
-    const { userId, trackGroupId } = req.params as unknown as Params;
+    const { trackGroupId } = req.params as unknown as Params;
+    const loggedInUser = req.user as User;
+
     try {
       const trackGroup = await prisma.trackGroup.findFirst({
         where: {
           id: Number(trackGroupId),
         },
         include: trackGroupSingleInclude({
-          loggedInUserId: Number(userId),
-          ownerId: Number(userId),
+          loggedInUserId: Number(loggedInUser.id),
+          ownerId: Number(loggedInUser.id),
         }),
       });
 
@@ -131,12 +133,6 @@ export default function () {
     parameters: [
       {
         in: "path",
-        name: "userId",
-        required: true,
-        type: "string",
-      },
-      {
-        in: "path",
         name: "trackGroupId",
         required: true,
         type: "string",
@@ -166,7 +162,7 @@ export default function () {
   };
 
   async function DELETE(req: Request, res: Response, next: NextFunction) {
-    const { trackGroupId, userId } = req.params as {
+    const { trackGroupId } = req.params as {
       trackGroupId: string;
       userId: string;
     };
@@ -182,12 +178,6 @@ export default function () {
   DELETE.apiDoc = {
     summary: "Deletes a trackGroup belonging to a user",
     parameters: [
-      {
-        in: "path",
-        name: "userId",
-        required: true,
-        type: "string",
-      },
       {
         in: "path",
         name: "trackGroupId",

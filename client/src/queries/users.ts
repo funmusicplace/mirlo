@@ -32,8 +32,8 @@ export function queryUserStripeStatus(userId: number) {
 
 const fetchManagedArtist: QueryFunction<
   Artist,
-  ["fetchManagedArtist", { userId: number; artistId: number }]
-> = ({ queryKey: [_, { userId, artistId }], signal }) => {
+  ["fetchManagedArtist", { artistId: number }]
+> = ({ queryKey: [_, { artistId }], signal }) => {
   return api
     .get<{
       result: Artist;
@@ -41,11 +41,30 @@ const fetchManagedArtist: QueryFunction<
     .then((r) => r.result);
 };
 
-export function queryManagedArtist(userId: number, artistId: number) {
+export function queryManagedArtist(artistId: number) {
   return queryOptions({
-    queryKey: ["fetchManagedArtist", { userId, artistId }],
+    queryKey: ["fetchManagedArtist", { artistId }],
     queryFn: fetchManagedArtist,
-    enabled: isFinite(userId) && isFinite(artistId),
+    enabled: isFinite(artistId),
+  });
+}
+
+const fetchManagedTrackGroup: QueryFunction<
+  TrackGroup,
+  ["fetchManagedTrackGroup", { trackGroupId: number }]
+> = ({ queryKey: [_, { trackGroupId }], signal }) => {
+  return api
+    .get<{
+      result: TrackGroup;
+    }>(`v1/manage/trackGroups/${trackGroupId}`, { signal })
+    .then((r) => r.result);
+};
+
+export function queryManagedTrackGroup(trackGroupId: number) {
+  return queryOptions({
+    queryKey: ["fetchManagedTrackGroup", { trackGroupId }],
+    queryFn: fetchManagedTrackGroup,
+    enabled: isFinite(trackGroupId),
   });
 }
 
@@ -54,7 +73,6 @@ export type CreateArtistBody = Partial<
 >;
 
 async function createArtist({
-  userId,
   body,
 }: {
   userId: number;
@@ -82,7 +100,6 @@ export type UpdateArtistBody = Partial<
 >;
 
 async function updateArtist({
-  userId,
   artistId,
   body,
 }: {

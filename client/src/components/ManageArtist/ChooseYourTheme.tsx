@@ -1,10 +1,9 @@
 import { useTranslation } from "react-i18next";
 import styled from "@emotion/styled";
 import { useFormContext } from "react-hook-form";
-import { UpdateArtistBody, useUpdateArtistMutation } from "queries";
+import { useUpdateArtistMutation } from "queries";
 import React from "react";
 import { useAuthContext } from "state/AuthContext";
-import { css } from "@emotion/css";
 
 const ColorSquare = styled.span<{ color: string }>`
   display: inline-block;

@@ -1,8 +1,6 @@
 import React from "react";
 import { useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { useArtistContext } from "state/ArtistContext";
-import useGetUserObjectById from "utils/useGetUserObjectById";
 import { getPostURLReference } from "utils/artist";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import ManageSectionWrapper from "./ManageSectionWrapper";
@@ -13,25 +11,23 @@ import PostForm from "./PostForm";
 import Post from "components/Post";
 import { ButtonLink } from "components/common/Button";
 import { bp } from "../../constants";
+import { useQuery } from "@tanstack/react-query";
+import { queryManagedArtist, queryManagedPost } from "queries";
 
 const ManagePost: React.FC<{}> = () => {
   const { t } = useTranslation("translation", { keyPrefix: "managePost" });
 
-  const { postId } = useParams();
+  const { postId, artistId } = useParams();
+
+  const { data: artist } = useQuery(queryManagedArtist(Number(artistId)));
 
   const {
-    state: { artist },
-  } = useArtistContext();
+    data: post,
+    isLoading,
+    refetch,
+  } = useQuery(queryManagedPost(Number(postId)));
 
-  const userId = artist?.userId;
-
-  const {
-    object: post,
-    reload,
-    isLoadingObject,
-  } = useGetUserObjectById<Post>("posts", userId, postId);
-
-  if (!post && isLoadingObject) {
+  if (!post && isLoading) {
     return <LoadingBlocks />;
   } else if (!Post) {
     return null;
@@ -83,7 +79,7 @@ const ManagePost: React.FC<{}> = () => {
           )}
         </SpaceBetweenDiv>
       </div>
-      {artist && <PostForm existing={post} reload={reload} artist={artist} />}
+      {artist && <PostForm existing={post} reload={refetch} artist={artist} />}
     </ManageSectionWrapper>
   );
 };

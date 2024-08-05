@@ -44,7 +44,7 @@ const alertUser = (event: any) => {
 
 export const BulkTrackUpload: React.FC<{
   trackgroup: TrackGroup;
-  reload: () => Promise<void>;
+  reload: () => Promise<unknown>;
 }> = ({ trackgroup, reload }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const methods = useForm<FormData>();

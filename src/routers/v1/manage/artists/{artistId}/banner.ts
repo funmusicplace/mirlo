@@ -8,6 +8,7 @@ import { processArtistBanner } from "../../../../../queues/processImages";
 import prisma from "@mirlo/prisma";
 import { User } from "@mirlo/prisma/client";
 import { deleteArtistBanner } from "../../../../../utils/artist";
+import { AppError } from "../../../../../utils/error";
 
 type Params = {
   artistId: string;
@@ -46,12 +47,6 @@ export default function () {
   PUT.apiDoc = {
     summary: "Updates an artist banner belonging to a user",
     parameters: [
-      {
-        in: "path",
-        name: "userId",
-        required: true,
-        type: "string",
-      },
       {
         in: "path",
         name: "artistId",
@@ -94,10 +89,7 @@ export default function () {
       });
 
       if (!artist) {
-        res.status(400).json({
-          error: "artist must belong to user",
-        });
-        return next();
+        throw new AppError({ description: "Artist not found", httpCode: 404 });
       }
 
       await deleteArtistBanner(artist.id);
@@ -107,6 +99,32 @@ export default function () {
       next(error);
     }
   }
+
+  DELETE.apiDoc = {
+    summary: "Deletes an artist banner belonging to a user",
+    parameters: [
+      {
+        in: "path",
+        name: "artistId",
+        required: true,
+        type: "string",
+      },
+    ],
+    responses: {
+      200: {
+        description: "Updated Artist",
+        schema: {
+          type: "object",
+        },
+      },
+      default: {
+        description: "An error occurred",
+        schema: {
+          additionalProperties: true,
+        },
+      },
+    },
+  };
 
   return operations;
 }

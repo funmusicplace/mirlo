@@ -16,18 +16,14 @@ export default function () {
   };
 
   async function DELETE(req: Request, res: Response, next: NextFunction) {
-    const { userId, subscriptionId } = req.params as unknown as Params;
+    const { subscriptionId } = req.params as unknown as Params;
     const loggedInUser = req.user as User;
 
-    if (loggedInUser.id !== Number(userId)) {
-      res.status(401);
-      return next();
-    }
     try {
       const subscription = await prisma.artistUserSubscription.findFirst({
         where: {
           id: Number(subscriptionId),
-          userId: Number(userId),
+          userId: Number(loggedInUser.id),
         },
         include: {
           artistSubscriptionTier: true,
@@ -60,7 +56,7 @@ export default function () {
       await prisma.artistUserSubscription.deleteMany({
         where: {
           id: Number(subscriptionId),
-          userId: Number(userId),
+          userId: Number(loggedInUser.id),
         },
       });
       res.json({ message: "Success" });
@@ -75,12 +71,6 @@ export default function () {
   DELETE.apiDoc = {
     summary: "Deletes a subscription belonging to a user",
     parameters: [
-      {
-        in: "path",
-        name: "userId",
-        required: true,
-        type: "string",
-      },
       {
         in: "path",
         name: "subscriptionId",

@@ -13,7 +13,6 @@ import styled from "@emotion/styled";
 import { useQuery } from "@tanstack/react-query";
 import { queryManagedArtist, useDeleteArtistMutation } from "queries";
 import { AiOutlineWarning } from "react-icons/ai";
-import { useAuthContext } from "state/AuthContext";
 
 export const MainButtons = styled.div`
   display: flex;
@@ -35,21 +34,16 @@ const ManageArtist: React.FC<{}> = () => {
   const navigate = useNavigate();
   const { artistId } = useParams();
 
-  const { user } = useAuthContext();
-  const userId = user?.id;
-
   const { data: artist, isError } = useQuery(
-    queryManagedArtist(Number(userId), Number(artistId))
+    queryManagedArtist(Number(artistId))
   );
 
   const { mutate: deleteArtist } = useDeleteArtistMutation();
 
-  const [isEditing, setIsEditing] = React.useState(false);
-
   const onDelete = React.useCallback(() => {
-    if (!!userId && !!artist && window.confirm(t("areYouSureDelete") ?? "")) {
+    if (!!artist && window.confirm(t("areYouSureDelete") ?? "")) {
       deleteArtist(
-        { userId, artistId: artist.id, artistSlug: artist.urlSlug ?? "" },
+        { artistId: artist.id, artistSlug: artist.urlSlug ?? "" },
         {
           onSuccess() {
             navigate("/manage");
@@ -60,7 +54,7 @@ const ManageArtist: React.FC<{}> = () => {
         }
       );
     }
-  }, [userId, artist, t, deleteArtist, navigate, snackbar]);
+  }, [artist, t, deleteArtist, navigate, snackbar]);
 
   if (isError) {
     return <Box>{t("doesNotExist")}</Box>;

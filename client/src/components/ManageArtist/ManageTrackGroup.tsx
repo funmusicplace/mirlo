@@ -1,11 +1,9 @@
 import React from "react";
 import { useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { useArtistContext } from "state/ArtistContext";
 import AlbumForm from "./AlbumForm";
 import BulkTrackUpload from "./BulkTrackUpload";
 import ManageTrackTable from "./ManageTrackTable";
-import useGetUserObjectById from "utils/useGetUserObjectById";
 import PublishButton from "./PublishButton";
 import { bp } from "../../constants";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
@@ -14,14 +12,8 @@ import { css } from "@emotion/css";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import BackToArtistLink from "./BackToArtistLink";
 import ManageTags from "./AlbumFormComponents/ManageTags";
-import { useAuthContext } from "state/AuthContext";
-import { FormProvider, useForm } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
-import { queryArtist } from "queries";
-import { useSnackbar } from "state/SnackbarContext";
-import useErrorHandler from "services/useErrorHandler";
-import api from "services/api";
-import { pick } from "lodash";
+import { queryArtist, queryManagedTrackGroup } from "queries";
 
 export interface TrackGroupFormData {
   published: boolean;
@@ -39,24 +31,16 @@ const ManageTrackGroup: React.FC<{}> = () => {
 
   const { artistId: artistParamId, trackGroupId: trackGroupParamId } =
     useParams();
-  const { user } = useAuthContext();
 
   const { data: artist, isLoading: isLoading } = useQuery(
     queryArtist({ artistSlug: artistParamId ?? "" })
   );
 
-  const userId = user?.id;
-
   const {
-    object: trackGroup,
-    reload,
-    isLoadingObject: isLoadingTrackGroup,
-  } = useGetUserObjectById<TrackGroup>(
-    "trackGroups",
-    userId,
-    trackGroupParamId,
-    `?artistId=${artistParamId}`
-  );
+    data: trackGroup,
+    isLoading: isLoadingTrackGroup,
+    refetch,
+  } = useQuery(queryManagedTrackGroup(Number(trackGroupParamId)));
 
   if (!artist && isLoading) {
     return <LoadingBlocks />;
@@ -111,12 +95,12 @@ const ManageTrackGroup: React.FC<{}> = () => {
             `}
           >
             {trackGroup && trackGroup.tracks?.length > 0 && (
-              <PublishButton trackGroup={trackGroup} reload={reload} />
+              <PublishButton trackGroup={trackGroup} reload={refetch} />
             )}
           </div>
         </SpaceBetweenDiv>
       </div>
-      <AlbumForm trackGroup={trackGroup} artist={artist} reload={reload} />
+      <AlbumForm trackGroup={trackGroup} artist={artist} reload={refetch} />
 
       <ManageTags tags={trackGroup.tags} />
 
@@ -134,16 +118,16 @@ const ManageTrackGroup: React.FC<{}> = () => {
           editable
           trackGroupId={trackGroup.id}
           owned
-          reload={reload}
+          reload={refetch}
         />
       )}
 
       {trackGroup && (
-        <BulkTrackUpload trackgroup={trackGroup} reload={reload} />
+        <BulkTrackUpload trackgroup={trackGroup} reload={refetch} />
       )}
       <hr style={{ marginTop: "1rem", marginBottom: "1rem" }} />
       {trackGroup && trackGroup.tracks?.length > 0 && (
-        <PublishButton trackGroup={trackGroup} reload={reload} />
+        <PublishButton trackGroup={trackGroup} reload={refetch} />
       )}
     </ManageSectionWrapper>
   );

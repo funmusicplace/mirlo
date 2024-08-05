@@ -1,8 +1,8 @@
 import { User } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 import {
+  trackGroupBelongsToLoggedInUser,
   userAuthenticated,
-  userHasPermission,
 } from "../../../../../auth/passport";
 import { doesTrackGroupBelongToUser } from "../../../../../utils/ownership";
 import busboy from "connect-busboy";
@@ -18,7 +18,7 @@ export default function () {
   const operations = {
     PUT: [
       userAuthenticated,
-      userHasPermission("owner"),
+      trackGroupBelongsToLoggedInUser,
       busboy({
         highWaterMark: 2 * 1024 * 1024,
         limits: {
@@ -27,7 +27,7 @@ export default function () {
       }),
       PUT,
     ],
-    DELETE: [userAuthenticated, userHasPermission("owner"), DELETE],
+    DELETE: [userAuthenticated, trackGroupBelongsToLoggedInUser, DELETE],
   };
 
   async function PUT(req: Request, res: Response, next: NextFunction) {
@@ -49,12 +49,6 @@ export default function () {
   PUT.apiDoc = {
     summary: "Updates a trackGroup cover belonging to a user",
     parameters: [
-      {
-        in: "path",
-        name: "userId",
-        required: true,
-        type: "string",
-      },
       {
         in: "path",
         name: "trackGroupId",

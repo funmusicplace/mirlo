@@ -15,7 +15,17 @@ export const QUERY_KEY_AUTH = "auth";
  */
 export const QUERY_KEY_ARTISTS = "artists";
 
+/**
+ * Categorizes any query that should be invalidated when any trackgroup is changed,
+ * regardless of the trackGroupId.
+ */
 export const QUERY_KEY_TRACK_GROUPS = "trackGroups";
+
+/**
+ * Categorizes any query that should be invalidated when any trackgroup is changed,
+ * regardless of the trackGroupId.
+ */
+export const QUERY_KEY_POSTS = "trackGroups";
 
 export type QueryTag =
   | typeof QUERY_KEY_AUTH

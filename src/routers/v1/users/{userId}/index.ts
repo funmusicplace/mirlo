@@ -6,7 +6,6 @@ import {
 import { Prisma, User } from "@mirlo/prisma/client";
 import prisma from "@mirlo/prisma";
 import { deleteUser } from "../../../../utils/user";
-import { AppError } from "../../../../utils/error";
 
 export default function () {
   const operations = {

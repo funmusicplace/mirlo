@@ -2,7 +2,6 @@ import { NextFunction, Request, Response } from "express";
 import {
   contentBelongsToLoggedInUserArtist,
   userAuthenticated,
-  userHasPermission,
 } from "../../../../../../auth/passport";
 import prisma from "@mirlo/prisma";
 import { User } from "@mirlo/prisma/client";
@@ -15,7 +14,7 @@ type Params = {
 
 export default function () {
   const operations = {
-    GET: [userAuthenticated, userHasPermission("owner"), GET],
+    GET: [userAuthenticated, contentBelongsToLoggedInUserArtist, GET],
     POST: [userAuthenticated, contentBelongsToLoggedInUserArtist, POST],
   };
 
@@ -36,14 +35,9 @@ export default function () {
 
       res.status(200).json({ results: subscriptions });
     } catch (e) {
-      console.error(e);
-      res.status(500).json({
-        error: "Something went wrong",
-      });
+      next(e);
     }
   }
-
-  // TODO: GET documentation
 
   async function POST(req: Request, res: Response) {
     const { artistId } = req.params as unknown as Params;
@@ -93,12 +87,6 @@ export default function () {
   POST.apiDoc = {
     summary: "Creates a artistSubscriptionTier belonging to a user",
     parameters: [
-      {
-        in: "path",
-        name: "userId",
-        required: true,
-        type: "number",
-      },
       {
         in: "body",
         name: "subscription",

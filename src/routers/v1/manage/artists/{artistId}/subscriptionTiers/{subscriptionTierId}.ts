@@ -1,3 +1,5 @@
+import { User } from "@mirlo/prisma/client";
+
 import { NextFunction, Request, Response } from "express";
 import { userAuthenticated } from "../../../../../../auth/passport";
 import { doesSubscriptionTierBelongToUser } from "../../../../../../utils/ownership";
@@ -11,12 +13,13 @@ export default function () {
   };
 
   async function PUT(req: Request, res: Response, next: NextFunction) {
-    const { subscriptionTierId, userId } = req.params;
+    const { subscriptionTierId } = req.params;
+    const user = req.user as User;
 
     try {
       const subscriptionTier = await doesSubscriptionTierBelongToUser(
         Number(subscriptionTierId),
-        Number(userId)
+        Number(user.id)
       );
 
       if (!subscriptionTier) {
@@ -54,12 +57,6 @@ export default function () {
         type: "string",
       },
       {
-        in: "path",
-        name: "userId",
-        required: true,
-        type: "string",
-      },
-      {
         in: "body",
         name: "subscription",
         schema: {
@@ -85,10 +82,12 @@ export default function () {
 
   async function DELETE(req: Request, res: Response, next: NextFunction) {
     try {
-      const { userId, subscriptionTierId } = req.params;
+      const { subscriptionTierId } = req.params;
+      const user = req.user as User;
+
       const tier = await doesSubscriptionTierBelongToUser(
         Number(subscriptionTierId),
-        Number(userId)
+        Number(user.id)
       );
 
       if (!tier) {
@@ -111,11 +110,7 @@ export default function () {
       });
       res.json({ message: "Success" });
     } catch (e) {
-      console.error(
-        "delete artist/{artistId}/subscriptionTiers/{subscriptionTierId}",
-        e
-      );
-      res.status(500);
+      next(e);
     }
   }
 
@@ -131,12 +126,6 @@ export default function () {
       {
         in: "path",
         name: "artistId",
-        required: true,
-        type: "string",
-      },
-      {
-        in: "path",
-        name: "userId",
         required: true,
         type: "string",
       },

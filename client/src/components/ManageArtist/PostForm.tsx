@@ -17,6 +17,8 @@ import Box from "components/common/Box";
 import { useAuthContext } from "state/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { getArtistManageUrl } from "utils/artist";
+import { useQuery } from "@tanstack/react-query";
+import { queryManagedArtistSubscriptionTiers } from "queries";
 
 type FormData = {
   title: string;
@@ -29,7 +31,7 @@ type FormData = {
 
 const PostForm: React.FC<{
   existing?: Post;
-  reload: () => Promise<void>;
+  reload: () => Promise<unknown>;
   artist: Artist;
   onClose?: () => void;
 }> = ({ reload, artist, existing, onClose }) => {
@@ -39,18 +41,15 @@ const PostForm: React.FC<{
   const errorHandler = useErrorHandler();
   const [isSaving, setIsSaving] = React.useState(false);
   const { t } = useTranslation("translation", { keyPrefix: "postForm" });
-  const { objects: tiers } = useGetUserObjectById<ArtistSubscriptionTier>(
-    "artists",
-    user?.id,
-    `${artist.id}`,
-    `/subscriptionTiers?includeDefault=true`,
-    { multiple: true }
+
+  const { data: tiers } = useQuery(
+    queryManagedArtistSubscriptionTiers({
+      artistId: artist.id,
+      includeDefault: true,
+    })
   );
 
-  React.useEffect(() => {
-    const callback = async () => {};
-    callback();
-  }, [artist]);
+  console.log("existing", tiers?.results);
 
   const publishedAt = existing ? new Date(existing.publishedAt) : new Date();
   publishedAt.setMinutes(
@@ -68,6 +67,22 @@ const PostForm: React.FC<{
           shouldSendEmail: true,
         },
   });
+
+  React.useEffect(() => {
+    if ((tiers?.results.length ?? 0) > 0) {
+      if (
+        existing?.minimumSubscriptionTierId &&
+        tiers?.results.find(
+          (tier) => tier.id === existing.minimumSubscriptionTierId
+        )
+      ) {
+        methods.setValue(
+          "minimumTier",
+          `${existing.minimumSubscriptionTierId}`
+        );
+      }
+    }
+  }, [tiers]);
 
   const { register, handleSubmit, watch } = methods;
 
@@ -198,7 +213,7 @@ const PostForm: React.FC<{
             </label>
             <SelectEl {...register("minimumTier")}>
               <option value="">None</option>
-              {tiers?.map((tier) => (
+              {tiers?.results.map((tier) => (
                 <option value={tier.id} key={tier.id}>
                   {tier.name}
                 </option>
@@ -208,7 +223,10 @@ const PostForm: React.FC<{
               <small>
                 The mimimum tier will be{" "}
                 <em>
-                  {tiers?.find((tier) => `${tier.id}` === minimumTier)?.name}
+                  {
+                    tiers?.results.find((tier) => `${tier.id}` === minimumTier)
+                      ?.name
+                  }
                 </em>
                 .
               </small>

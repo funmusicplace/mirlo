@@ -1,10 +1,11 @@
 import { NextFunction, Request, Response } from "express";
 import {
+  trackBelongsToLoggedInUser,
   userAuthenticated,
-  userHasPermission,
 } from "../../../../../auth/passport";
 import { doesTrackBelongToUser } from "../../../../../utils/ownership";
 import { updateTrackArtists } from "../../../../../utils/tracks";
+import { User } from "@mirlo/prisma/client";
 
 interface TrackBody {
   title: string;
@@ -20,19 +21,20 @@ interface TrackBody {
 
 export default function () {
   const operations = {
-    PUT: [userAuthenticated, userHasPermission("owner"), PUT],
+    PUT: [userAuthenticated, trackBelongsToLoggedInUser, PUT],
   };
 
   async function PUT(req: Request, res: Response, next: NextFunction) {
-    const { trackId, userId } = req.params as {
+    const { trackId } = req.params as {
       trackId: string;
-      userId: string;
     };
+    const loggedInUser = req.user as User;
+
     const { trackArtists } = req.body as TrackBody;
     try {
       const track = await doesTrackBelongToUser(
         Number(trackId),
-        Number(userId)
+        Number(loggedInUser.id)
       );
 
       if (!track) {
@@ -61,12 +63,6 @@ export default function () {
       {
         in: "path",
         name: "trackId",
-        required: true,
-        type: "string",
-      },
-      {
-        in: "path",
-        name: "userId",
         required: true,
         type: "string",
       },

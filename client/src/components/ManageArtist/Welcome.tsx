@@ -74,6 +74,7 @@ const Welcome = () => {
             `manage/artists`,
             {
               name: data.name,
+              userId,
             }
           );
           setLocalArtist(response.result);

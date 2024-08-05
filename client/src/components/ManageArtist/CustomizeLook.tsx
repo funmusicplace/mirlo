@@ -84,15 +84,14 @@ const generateDefaults = (existing?: Artist) => ({
   },
 });
 
-export const ArtistForm: React.FC = () => {
+export const CustomizeLook: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "artistForm" });
   const snackbar = useSnackbar();
   const { user } = useAuthContext();
   const userId = user?.id;
   const { artistId } = useParams();
-  const { data: artist } = useQuery(
-    queryManagedArtist(Number(userId), Number(artistId))
-  );
+  console.log("artistId", artistId);
+  const { data: artist } = useQuery(queryManagedArtist(Number(artistId)));
   const methods = useForm<FormData>({
     defaultValues: generateDefaults(artist),
   });
@@ -315,4 +314,4 @@ export const ArtistForm: React.FC = () => {
   );
 };
 
-export default ArtistForm;
+export default CustomizeLook;

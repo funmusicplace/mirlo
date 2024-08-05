@@ -70,7 +70,6 @@ const Splash = () => {
         `}
       />
       <TextWrapper>
-        <Logo />
         <div
           className={css`
             display: flex;

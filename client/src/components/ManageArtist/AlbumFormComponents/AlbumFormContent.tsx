@@ -7,7 +7,6 @@ import { useTranslation } from "react-i18next";
 
 import UploadArtistImage from "../UploadArtistImage";
 import FormError from "components/common/FormError";
-import { useAuthContext } from "state/AuthContext";
 import { useParams } from "react-router-dom";
 
 import SavingInput from "./SavingInput";
@@ -19,8 +18,6 @@ const AlbumFormContent: React.FC<{
   const {
     formState: { errors },
   } = useFormContext();
-  const { user } = useAuthContext();
-  const userId = user?.id;
   const { artistId, trackGroupId } = useParams();
 
   return (

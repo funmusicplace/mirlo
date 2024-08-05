@@ -247,7 +247,7 @@ const ArtistSubscriberUploadData: React.FC<{
           startIcon={<FaUpload />}
           isLoading={isLoadingSubscriberData}
         >
-          {t("uploadSubscriberData")}
+          {t("uploadSubscriberData", { artistName: artist.name })}
         </Button>
       </li>
     </>

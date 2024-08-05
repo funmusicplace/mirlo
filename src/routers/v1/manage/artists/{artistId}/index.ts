@@ -4,6 +4,7 @@ import {
   userAuthenticated,
 } from "../../../../../auth/passport";
 import prisma from "@mirlo/prisma";
+import { User } from "@mirlo/prisma/client";
 
 import {
   deleteArtist,
@@ -12,10 +13,10 @@ import {
   singleInclude,
 } from "../../../../../utils/artist";
 import slugify from "slugify";
+import { AppError } from "../../../../../utils/error";
 
 type Params = {
   artistId: string;
-  userId: string;
 };
 
 export default function () {
@@ -25,16 +26,16 @@ export default function () {
     DELETE: [userAuthenticated, artistBelongsToLoggedInUser, DELETE],
   };
 
-  async function PUT(req: Request, res: Response) {
-    const { userId, artistId } = req.params as unknown as Params;
+  async function PUT(req: Request, res: Response, next: NextFunction) {
+    const { artistId } = req.params as unknown as Params;
     const { bio, name, urlSlug, properties, links, location } = req.body;
-
+    const user = req.user as User;
     try {
       // FIXME: check type of properties object.
       const updatedCount = await prisma.artist.updateMany({
         where: {
           id: Number(artistId),
-          userId: Number(userId),
+          userId: Number(user.id),
         },
         data: {
           bio,
@@ -59,22 +60,13 @@ export default function () {
         });
       }
     } catch (error) {
-      console.error(`manage/artists/${artistId}`, error);
-      res.status(500).json({
-        error: `Artist with ID ${artistId} does not exist for user ${userId}`,
-      });
+      next(error);
     }
   }
 
   PUT.apiDoc = {
     summary: "Updates an artist belonging to a user",
     parameters: [
-      {
-        in: "path",
-        name: "userId",
-        required: true,
-        type: "string",
-      },
       {
         in: "path",
         name: "artistId",
@@ -106,7 +98,9 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
-    const { userId, artistId } = req.params as unknown as Params;
+    const { artistId } = req.params as unknown as Params;
+    const user = req.user as User;
+
     const castArtistId = await findArtistIdForURLSlug(artistId);
     try {
       const artist = await prisma.artist.findFirst({
@@ -122,7 +116,7 @@ export default function () {
         });
       } else {
         return res.json({
-          result: processSingleArtist(artist, Number(userId)),
+          result: processSingleArtist(artist, Number(user.id)),
         });
       }
     } catch (e) {
@@ -133,12 +127,6 @@ export default function () {
   GET.apiDoc = {
     summary: "Returns artist information that belongs to a user",
     parameters: [
-      {
-        in: "path",
-        name: "userId",
-        required: true,
-        type: "string",
-      },
       {
         in: "path",
         name: "artistId",
@@ -163,10 +151,11 @@ export default function () {
   };
 
   async function DELETE(req: Request, res: Response, next: NextFunction) {
-    const { userId, artistId } = req.params as unknown as Params;
+    const { artistId } = req.params as unknown as Params;
+    const user = req.user as User;
 
     try {
-      await deleteArtist(Number(userId), Number(artistId));
+      await deleteArtist(Number(user.id), Number(artistId));
     } catch (e) {
       return next(e);
     }
@@ -176,12 +165,6 @@ export default function () {
   DELETE.apiDoc = {
     summary: "Deletes an Artist belonging to a user",
     parameters: [
-      {
-        in: "path",
-        name: "userId",
-        required: true,
-        type: "string",
-      },
       {
         in: "path",
         name: "artistId",

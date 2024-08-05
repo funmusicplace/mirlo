@@ -1,77 +1,58 @@
-import { Prisma, User } from "@mirlo/prisma/client";
+import { User } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 import {
   contentBelongsToLoggedInUserArtist,
   userAuthenticated,
-} from "../../../../auth/passport";
-import processor from "../../../../utils/trackGroup";
+} from "../../../../../auth/passport";
+import processor from "../../../../../utils/trackGroup";
 import prisma from "@mirlo/prisma";
-import { getSiteSettings } from "../../../../utils/settings";
+import { getSiteSettings } from "../../../../../utils/settings";
 
 export default function () {
   const operations = {
-    GET: [userAuthenticated, GET],
+    GET: [userAuthenticated, contentBelongsToLoggedInUserArtist, GET],
     POST: [userAuthenticated, contentBelongsToLoggedInUserArtist, POST],
   };
 
-  // FIXME: only get trackgroups belonging to artists belonging to a user
-  async function GET(req: Request, res: Response) {
-    const { artistId } = req.query;
-    const user = req.user as User;
-    let where: Prisma.TrackGroupWhereInput = {};
-    if (artistId) {
-      where.artistId = Number(artistId);
-    } else {
-      const artists = await prisma.artist.findMany({
+  async function GET(req: Request, res: Response, next: NextFunction) {
+    const { artistId } = req.params;
+    try {
+      const results = await prisma.trackGroup.findMany({
         where: {
-          userId: user.id,
+          id: Number(artistId),
         },
-        select: {
-          id: true,
+        orderBy: {
+          releaseDate: "desc",
+        },
+        include: {
+          tracks: {
+            where: {
+              deletedAt: null,
+            },
+            include: {
+              audio: true,
+            },
+          },
+          artist: true,
+          cover: {
+            where: {
+              deletedAt: null,
+            },
+          },
         },
       });
-      where.artistId = {
-        in: artists.map((a) => a.id),
-      };
+
+      res.json({
+        results: results.map(processor.single),
+      });
+    } catch (e) {
+      next(e);
     }
-
-    const results = await prisma.trackGroup.findMany({
-      where,
-      orderBy: {
-        releaseDate: "desc",
-      },
-      include: {
-        tracks: {
-          where: {
-            deletedAt: null,
-          },
-          include: {
-            audio: true,
-          },
-        },
-        artist: true,
-        cover: {
-          where: {
-            deletedAt: null,
-          },
-        },
-      },
-    });
-
-    res.json({
-      results: results.map(processor.single),
-    });
   }
 
   GET.apiDoc = {
     summary: "Get all trackgroups belonging to a user",
     parameters: [
-      {
-        in: "path",
-        name: "userId",
-        required: true,
-        type: "number",
-      },
       {
         in: "query",
         name: "artistId",
@@ -163,7 +144,7 @@ export default function () {
     parameters: [
       {
         in: "path",
-        name: "userId",
+        name: "artistId",
         required: true,
         type: "number",
       },

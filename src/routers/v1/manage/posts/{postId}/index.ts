@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { userAuthenticated } from "../../../../../auth/passport";
 import prisma from "@mirlo/prisma";
 import { doesPostBelongToUser } from "../../../../../utils/post";
+import { AppError } from "../../../../../utils/error";
 
 export default function () {
   const operations = {
@@ -32,8 +33,10 @@ export default function () {
         });
 
         if (!validTier) {
-          return res.status(400).json({
-            error: "That subscription tier isn't associated with the artist",
+          throw new AppError({
+            httpCode: 400,
+            description:
+              "That subscription tier isn't associated with the artistS",
           });
         }
       }
@@ -59,7 +62,7 @@ export default function () {
   }
 
   async function DELETE(req: Request, res: Response, next: NextFunction) {
-    const { userId, postId } = req.params;
+    const { postId } = req.params;
     try {
       await prisma.post.delete({
         where: {
@@ -111,12 +114,6 @@ export default function () {
   GET.apiDoc = {
     summary: "Returns Post information",
     parameters: [
-      {
-        in: "path",
-        name: "userId",
-        required: true,
-        type: "string",
-      },
       {
         in: "path",
         name: "postId",

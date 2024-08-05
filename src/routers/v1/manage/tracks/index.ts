@@ -1,33 +1,34 @@
 import { NextFunction, Request, Response } from "express";
-import {
-  userAuthenticated,
-  userHasPermission,
-} from "../../../../auth/passport";
+import { User } from "@mirlo/prisma/client";
+
+import { userAuthenticated } from "../../../../auth/passport";
 import prisma from "@mirlo/prisma";
 import { doesTrackGroupBelongToUser } from "../../../../utils/ownership";
 
 export default function () {
   const operations = {
-    GET,
-    POST: [userAuthenticated, userHasPermission("owner"), POST],
+    GET: [userAuthenticated, GET],
+    POST: [userAuthenticated, POST],
   };
 
-  // FIXME: filter tracks to those owned by a user
   async function GET(req: Request, res: Response) {
-    const tracks = await prisma.track.findMany();
+    const loggedInUser = req.user as User;
+
+    const tracks = await prisma.track.findMany({
+      where: {
+        trackGroup: {
+          artist: {
+            userId: loggedInUser.id,
+          },
+        },
+      },
+    });
     res.json(tracks);
   }
 
   GET.apiDoc = {
     summary: "Returns all tracks belonging to a user",
-    parameters: [
-      {
-        in: "path",
-        name: "userId",
-        required: true,
-        type: "number",
-      },
-    ],
+    parameters: [],
     responses: {
       200: {
         description: "A list of tracks",
@@ -48,11 +49,15 @@ export default function () {
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {
-    const { userId } = req.params;
+    const loggedInUser = req.user as User;
+
     const { title, trackGroupId, trackArtists, order, metadata, isPreview } =
       req.body;
     try {
-      await doesTrackGroupBelongToUser(Number(trackGroupId), Number(userId));
+      await doesTrackGroupBelongToUser(
+        Number(trackGroupId),
+        Number(loggedInUser.id)
+      );
 
       const createdTrack = await prisma.track.create({
         data: {
@@ -81,10 +86,7 @@ export default function () {
       });
       res.json({ result: track });
     } catch (e) {
-      console.error(e);
-      res
-        .status(500)
-        .json({ error: "Something went wrong creating the trackgroup" });
+      next(e);
     }
   }
 

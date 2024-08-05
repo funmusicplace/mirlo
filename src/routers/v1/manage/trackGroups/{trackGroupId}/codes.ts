@@ -1,8 +1,8 @@
 import { User } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 import {
+  trackGroupBelongsToLoggedInUser,
   userAuthenticated,
-  userHasPermission,
 } from "../../../../../auth/passport";
 import { doesTrackGroupBelongToUser } from "../../../../../utils/ownership";
 import prisma from "@mirlo/prisma";
@@ -16,7 +16,7 @@ type Params = {
 
 export default function () {
   const operations = {
-    POST: [userAuthenticated, userHasPermission("owner"), POST],
+    POST: [userAuthenticated, trackGroupBelongsToLoggedInUser, POST],
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {
@@ -53,12 +53,6 @@ export default function () {
   POST.apiDoc = {
     summary: "Create codes for a trackGroup",
     parameters: [
-      {
-        in: "path",
-        name: "userId",
-        required: true,
-        type: "string",
-      },
       {
         in: "path",
         name: "trackGroupId",

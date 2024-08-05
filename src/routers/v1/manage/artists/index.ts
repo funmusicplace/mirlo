@@ -1,10 +1,6 @@
 import { User } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
-import {
-  userAuthenticated,
-  userHasPermission,
-  userLoggedInWithoutRedirect,
-} from "../../../../auth/passport";
+import { userAuthenticated } from "../../../../auth/passport";
 
 import prisma from "@mirlo/prisma";
 import slugify from "slugify";
@@ -42,31 +38,20 @@ const forbiddenNames = [
 
 export default function () {
   const operations = {
-    GET: [userLoggedInWithoutRedirect, GET],
-    POST: [userAuthenticated, userHasPermission("owner"), POST],
+    GET: [userAuthenticated, GET],
+    POST: [userAuthenticated, POST],
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
-    const { userId } = req.params as unknown as Params;
     const loggedInUser = req.user as User;
     try {
-      if (userId) {
-        const where = {
-          userId: Number(userId),
-          ...(loggedInUser && loggedInUser.id === Number(userId)
-            ? {}
-            : { enabled: true }),
-        };
-        const artists = await prisma.artist.findMany({
-          where,
-        });
-        res.json({ results: artists });
-      } else {
-        res.status(400);
-        res.json({
-          error: "Invalid route",
-        });
-      }
+      const where = {
+        userId: Number(loggedInUser.id),
+      };
+      const artists = await prisma.artist.findMany({
+        where,
+      });
+      res.json({ results: artists });
     } catch (e) {
       next(e);
     }
@@ -74,14 +59,6 @@ export default function () {
 
   GET.apiDoc = {
     summary: "Returns user artists",
-    parameters: [
-      {
-        in: "path",
-        name: "userId",
-        required: true,
-        type: "string",
-      },
-    ],
     responses: {
       200: {
         description: "A track that matches the id",
@@ -103,8 +80,7 @@ export default function () {
 
   // FIXME: only allow creation for logged in user.
   async function POST(req: Request, res: Response, next: NextFunction) {
-    const { name, bio, urlSlug } = req.body;
-    const { userId } = req.params as unknown as Params;
+    const { name, bio, urlSlug, userId } = req.body;
     try {
       if (forbiddenNames.includes(urlSlug)) {
         throw new AppError({
@@ -149,12 +125,6 @@ export default function () {
   POST.apiDoc = {
     summary: "Creates an artist belonging to a user",
     parameters: [
-      {
-        in: "path",
-        name: "userId",
-        required: true,
-        type: "string",
-      },
       {
         in: "body",
         name: "artist",

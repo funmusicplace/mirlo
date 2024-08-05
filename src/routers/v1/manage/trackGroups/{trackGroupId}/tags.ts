@@ -2,7 +2,7 @@ import { User } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 import {
   userAuthenticated,
-  userHasPermission,
+  contentBelongsToLoggedInUserArtist,
 } from "../../../../../auth/passport";
 import { doesTrackGroupBelongToUser } from "../../../../../utils/ownership";
 import prisma from "@mirlo/prisma";
@@ -14,7 +14,7 @@ type Params = {
 
 export default function () {
   const operations = {
-    PUT: [userAuthenticated, userHasPermission("owner"), PUT],
+    PUT: [userAuthenticated, contentBelongsToLoggedInUserArtist, PUT],
   };
 
   async function PUT(req: Request, res: Response, next: NextFunction) {
@@ -75,12 +75,6 @@ export default function () {
   PUT.apiDoc = {
     summary: "Replaces the trackgroup's tags",
     parameters: [
-      {
-        in: "path",
-        name: "userId",
-        required: true,
-        type: "string",
-      },
       {
         in: "path",
         name: "trackGroupId",

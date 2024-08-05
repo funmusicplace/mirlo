@@ -16,7 +16,6 @@ export const Manage: React.FC = () => {
   const [artists, setArtists] = React.useState<Artist[]>([]);
   const [stripeAccountStatus, setStripeAccountStatus] =
     React.useState<AccountStatus>();
-  const [creatingNewArtist, setCreatingNewArtist] = React.useState(false);
   const { t } = useTranslation("translation", { keyPrefix: "manage" });
 
   const userId = user?.id;

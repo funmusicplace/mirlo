@@ -1,7 +1,6 @@
 import { css } from "@emotion/css";
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
-import { get, keyBy } from "lodash";
 import { useUpdateArtistMutation } from "queries";
 import React from "react";
 import { useFormContext } from "react-hook-form";

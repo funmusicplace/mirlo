@@ -8,9 +8,8 @@ export default function () {
     PUT: [userAuthenticated, doesPostBelongToUser, PUT],
   };
 
-  // FIXME: only allow to publish posts by userId
   async function PUT(req: Request, res: Response) {
-    const { postId, userId } = req.params;
+    const { postId } = req.params;
 
     try {
       const updatedPost = await prisma.post.update({

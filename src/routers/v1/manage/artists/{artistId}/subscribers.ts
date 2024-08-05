@@ -193,12 +193,6 @@ export default function () {
     parameters: [
       {
         in: "path",
-        name: "userId",
-        required: true,
-        type: "string",
-      },
-      {
-        in: "path",
         name: "artistId",
         required: true,
         type: "string",

@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
 import { userAuthenticated } from "../../../../../auth/passport";
 import { doesTrackGroupBelongToUser } from "../../../../../utils/ownership";
+import { User } from "@mirlo/prisma/client";
 
 export default function () {
   const operations = {
@@ -9,11 +10,13 @@ export default function () {
   };
 
   async function PUT(req: Request, res: Response, next: NextFunction) {
-    const { trackGroupId, userId } = req.params;
+    const { trackGroupId } = req.params;
+    const loggedInUser = req.user as User;
+
     try {
       const trackGroup = await doesTrackGroupBelongToUser(
         Number(trackGroupId),
-        Number(userId)
+        Number(loggedInUser.id)
       );
       const updatedTrackgroup = await prisma.trackGroup.update({
         where: { id: Number(trackGroupId) || undefined },
@@ -46,14 +49,6 @@ export default function () {
 
   PUT.apiDoc = {
     summary: "Toggles the publish state of a TrackGroup",
-    parameters: [
-      {
-        in: "path",
-        name: "userId",
-        required: true,
-        type: "string",
-      },
-    ],
     responses: {
       200: {
         description: "Updated trackGroup",
