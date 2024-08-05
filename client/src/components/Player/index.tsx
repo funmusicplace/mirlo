@@ -103,6 +103,7 @@ const Player = () => {
           }
         }
       `}
+      id="player"
     >
       <div
         className={css`

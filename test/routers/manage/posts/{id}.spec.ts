@@ -11,12 +11,11 @@ import {
   createPost,
   createUser,
 } from "../../../utils";
-import { findLastIndex } from "lodash";
 
 const baseURL = `${process.env.API_DOMAIN}/v1/`;
 const requestApp = request(baseURL);
 
-describe("users/{userId}/posts/{postId}", () => {
+describe("manage/posts/{postId}", () => {
   beforeEach(async () => {
     try {
       await clearTables();
@@ -38,7 +37,7 @@ describe("users/{userId}/posts/{postId}", () => {
       const artist = await createArtist(owner.id);
       const post = await createPost(artist.id);
       const response = await requestApp
-        .put(`users/${owner.id}/posts/${post.id}`)
+        .put(`manage/posts/${post.id}`)
         .send({
           title: "new title",
         })
@@ -62,7 +61,7 @@ describe("users/{userId}/posts/{postId}", () => {
       const artist = await createArtist(owner.id);
       const post = await createPost(artist.id);
       const response = await requestApp
-        .put(`users/${owner.id}/posts/${post.id}`)
+        .put(`manage/posts/${post.id}`)
         .send({
           title: "new title",
         })
@@ -81,7 +80,7 @@ describe("users/{userId}/posts/{postId}", () => {
       const artist = await createArtist(user.id);
       const post = await createPost(artist.id);
       const response = await requestApp
-        .put(`users/${user.id}/posts/${post.id}`)
+        .put(`manage/posts/${post.id}`)
         .send({
           title: "new title",
         })
@@ -100,7 +99,7 @@ describe("users/{userId}/posts/{postId}", () => {
       const artist = await createArtist(user.id);
       const post = await createPost(artist.id);
       const response = await requestApp
-        .put(`users/${user.id}/posts/${post.id}`)
+        .put(`manage/posts/${post.id}`)
         .send({
           minimumSubscriptionTierId: 0,
         })
@@ -129,7 +128,7 @@ describe("users/{userId}/posts/{postId}", () => {
 
       const post = await createPost(artist.id);
       const response = await requestApp
-        .put(`users/${user.id}/posts/${post.id}`)
+        .put(`manage/posts/${post.id}`)
         .send({
           minimumSubscriptionTierId: artist.subscriptionTiers[0].id,
         })
@@ -162,7 +161,7 @@ describe("users/{userId}/posts/{postId}", () => {
       assert.equal(post.shouldSendEmail, true);
 
       const response = await requestApp
-        .put(`users/${user.id}/posts/${post.id}`)
+        .put(`manage/posts/${post.id}`)
         .send({
           shouldSendEmail: false,
         })
@@ -189,7 +188,7 @@ describe("users/{userId}/posts/{postId}", () => {
       const artist = await createArtist(user.id);
       const post = await createPost(artist.id);
       const response = await requestApp
-        .delete(`users/${user.id}/posts/${post.id}`)
+        .delete(`manage/posts/${post.id}`)
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
 

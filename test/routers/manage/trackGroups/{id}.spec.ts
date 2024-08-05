@@ -15,7 +15,7 @@ import {
 const baseURL = `${process.env.API_DOMAIN}/v1/`;
 const requestApp = request(baseURL);
 
-describe("users/{userId}/trackGroups/{trackGroupId}", () => {
+describe("manage/trackGroups/{trackGroupId}", () => {
   beforeEach(async () => {
     try {
       await clearTables();
@@ -37,7 +37,7 @@ describe("users/{userId}/trackGroups/{trackGroupId}", () => {
       });
 
       const response = await requestApp
-        .put(`users/${user.id}/trackGroups/${otherTrackGroup.id}`)
+        .put(`manage/trackGroups/${otherTrackGroup.id}`)
         .send({
           artistId: artist.id,
           minPrice: 500,
@@ -61,12 +61,12 @@ describe("users/{userId}/trackGroups/{trackGroupId}", () => {
       });
 
       const response = await requestApp
-        .delete(`users/${user.id}/trackGroups/${trackGroup.id}`)
+        .delete(`manage/trackGroups/${trackGroup.id}`)
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
+      console.log("response", response);
 
       assert.equal(response.status, 200);
-      console.log("response", response.body);
     });
   });
 });

@@ -6,7 +6,6 @@ import { describe, it } from "mocha";
 import {
   clearTables,
   createArtist,
-  createTier,
   createTrackGroup,
   createUser,
 } from "../../../utils";
@@ -15,7 +14,7 @@ import prisma from "@mirlo/prisma";
 import { requestApp } from "../../utils";
 import { range } from "lodash";
 
-describe("users/{userId}/trackGroups/{trackGroupId}/codes", () => {
+describe("manage/trackGroups/{trackGroupId}/codes", () => {
   beforeEach(async () => {
     try {
       await clearTables();
@@ -31,7 +30,7 @@ describe("users/{userId}/trackGroups/{trackGroupId}/codes", () => {
       const trackGroup = await createTrackGroup(artist.id);
 
       const response = await requestApp
-        .post(`users/${user.id}/trackGroups/${trackGroup.id}/codes`)
+        .post(`manage/trackGroups/${trackGroup.id}/codes`)
         .send([
           {
             group: "Test group",

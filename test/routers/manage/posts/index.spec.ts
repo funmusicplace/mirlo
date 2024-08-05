@@ -10,7 +10,7 @@ import { clearTables, createArtist, createUser } from "../../../utils";
 const baseURL = `${process.env.API_DOMAIN}/v1/`;
 const requestApp = request(baseURL);
 
-describe("users/{userId}/posts", () => {
+describe("manage/posts", () => {
   beforeEach(async () => {
     try {
       await clearTables();
@@ -21,12 +21,12 @@ describe("users/{userId}/posts", () => {
 
   describe("GET", () => {
     it("should GET /", async () => {
-      const { user, accessToken } = await createUser({
+      const { accessToken } = await createUser({
         email: "test@test.com",
       });
 
       const response = await requestApp
-        .get(`users/${user.id}/posts`)
+        .get(`manage/posts`)
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
 
@@ -49,7 +49,7 @@ describe("users/{userId}/posts", () => {
       });
 
       const response = await requestApp
-        .post(`users/${user.id}/posts`)
+        .post(`manage/posts`)
         .send({
           title: "My title",
           artistId: artist.id,
@@ -75,7 +75,7 @@ describe("users/{userId}/posts", () => {
       });
 
       const response = await requestApp
-        .post(`users/${user.id}/posts`)
+        .post(`manage/posts`)
         .send({
           title: "My title",
           artistId: artist.id,
@@ -101,7 +101,7 @@ describe("users/{userId}/posts", () => {
       });
 
       const response = await requestApp
-        .post(`users/${user.id}/posts`)
+        .post(`manage/posts`)
         .send({
           artistId: artist.id,
           title: "",
@@ -114,14 +114,14 @@ describe("users/{userId}/posts", () => {
     });
 
     it("should not POST a post when artistId doesn't belong to user", async () => {
-      const { user, accessToken } = await createUser({ email: "test@testcom" });
+      const { accessToken } = await createUser({ email: "test@testcom" });
       const { user: artistUser } = await createUser({
         email: "artist@artist.com",
       });
 
       const artist = await createArtist(artistUser.id);
       const response = await requestApp
-        .post(`users/${user.id}/posts`)
+        .post(`manage/posts`)
         .send({
           artistId: artist.id,
           minPrice: 500,
@@ -138,7 +138,7 @@ describe("users/{userId}/posts", () => {
 
       const artist = await createArtist(user.id);
       const response = await requestApp
-        .post(`users/${user.id}/posts`)
+        .post(`manage/posts`)
         .send({
           artistId: artist.id,
           minPrice: 500,

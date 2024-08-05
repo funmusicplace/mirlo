@@ -9,12 +9,11 @@ import {
   createTier,
   createUser,
 } from "../../../utils";
-import prisma from "@mirlo/prisma";
 
 import { requestApp } from "../../utils";
 import { faker } from "@faker-js/faker";
 
-describe("users/{userId}/artists/{artistId}/subscriptionTiers", () => {
+describe("manage/artists/{artistId}/subscriptionTiers", () => {
   beforeEach(async () => {
     try {
       await clearTables();
@@ -33,7 +32,7 @@ describe("users/{userId}/artists/{artistId}/subscriptionTiers", () => {
 
       const artist = await createArtist(user.id);
       const response = await requestApp
-        .post(`users/${user.id}/artists/${artist.id}/subscriptionTiers`)
+        .post(`manage/artists/${artist.id}/subscriptionTiers`)
         .send({
           name: title,
           description: "description",
@@ -51,7 +50,7 @@ describe("users/{userId}/artists/{artistId}/subscriptionTiers", () => {
   });
 });
 
-describe("users/{userId}/artists/{artistId}/subscriptionTiers/{tierId}", () => {
+describe("manage/artists/{artistId}/subscriptionTiers/{tierId}", () => {
   beforeEach(async () => {
     try {
       await clearTables();
@@ -71,9 +70,7 @@ describe("users/{userId}/artists/{artistId}/subscriptionTiers/{tierId}", () => {
       const artist = await createArtist(user.id);
       const tier = await createTier(artist.id);
       const response = await requestApp
-        .put(
-          `users/${user.id}/artists/${artist.id}/subscriptionTiers/${tier.id}`
-        )
+        .put(`manage/artists/${artist.id}/subscriptionTiers/${tier.id}`)
         .send({
           allowVariable: true,
         })

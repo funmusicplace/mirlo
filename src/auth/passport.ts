@@ -177,7 +177,7 @@ export const trackGroupBelongsToLoggedInUser = async (
       if (!trackGroup) {
         throw new AppError({
           description: "TrackGroup does not exist or does not belong to user",
-          httpCode: 400,
+          httpCode: 404,
         });
       }
     }

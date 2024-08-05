@@ -3,6 +3,7 @@ import { NextFunction, Request, Response } from "express";
 import {
   userAuthenticated,
   contentBelongsToLoggedInUserArtist,
+  trackGroupBelongsToLoggedInUser,
 } from "../../../../../auth/passport";
 import { doesTrackGroupBelongToUser } from "../../../../../utils/ownership";
 import prisma from "@mirlo/prisma";
@@ -14,7 +15,7 @@ type Params = {
 
 export default function () {
   const operations = {
-    PUT: [userAuthenticated, contentBelongsToLoggedInUserArtist, PUT],
+    PUT: [userAuthenticated, trackGroupBelongsToLoggedInUser, PUT],
   };
 
   async function PUT(req: Request, res: Response, next: NextFunction) {

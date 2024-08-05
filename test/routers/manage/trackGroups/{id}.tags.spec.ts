@@ -16,7 +16,7 @@ import prisma from "@mirlo/prisma";
 const baseURL = `${process.env.API_DOMAIN}/v1/`;
 const requestApp = request(baseURL);
 
-describe("users/{userId}/trackGroups/{trackGroupId}/tags", () => {
+describe("manage/trackGroups/{trackGroupId}/tags", () => {
   beforeEach(async () => {
     try {
       await clearTables();
@@ -35,7 +35,7 @@ describe("users/{userId}/trackGroups/{trackGroupId}/tags", () => {
       });
 
       const response = await requestApp
-        .put(`users/${user.id}/trackGroups/${trackGroup.id}/tags`)
+        .put(`manage/trackGroups/${trackGroup.id}/tags`)
         .send(tagArray)
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
@@ -84,7 +84,7 @@ describe("users/{userId}/trackGroups/{trackGroupId}/tags", () => {
       });
 
       const response = await requestApp
-        .put(`users/${user.id}/trackGroups/${trackGroup.id}/tags`)
+        .put(`manage/trackGroups/${trackGroup.id}/tags`)
         .send(tagArray)
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");

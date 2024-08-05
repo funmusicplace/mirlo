@@ -164,7 +164,6 @@ export default function () {
   async function DELETE(req: Request, res: Response, next: NextFunction) {
     const { trackGroupId } = req.params as {
       trackGroupId: string;
-      userId: string;
     };
     try {
       await deleteTrackGroup(Number(trackGroupId), true);

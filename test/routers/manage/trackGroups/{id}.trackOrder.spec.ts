@@ -27,7 +27,7 @@ describe("manage/trackGroups/{id}/trackOrder", () => {
   });
 
   it("should PUT / 404 trackGroup does not belong to user", async () => {
-    const { user, accessToken } = await createUser({
+    const { accessToken } = await createUser({
       email: "test@test.com",
     });
 

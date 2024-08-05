@@ -13,7 +13,7 @@ import prisma from "@mirlo/prisma";
 
 import { requestApp } from "../../utils";
 
-describe("users/{userId}/artists/{artistId}/subscribers", () => {
+describe("manage/artists/{artistId}/subscribers", () => {
   beforeEach(async () => {
     try {
       await clearTables();
@@ -28,7 +28,7 @@ describe("users/{userId}/artists/{artistId}/subscribers", () => {
       const artist = await createArtist(user.id);
 
       const response = await requestApp
-        .get(`users/${user.id}/artists/${artist.id}/subscribers`)
+        .get(`manage/artists/${artist.id}/subscribers`)
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
       assert.equal(response.statusCode, 200);
@@ -46,7 +46,7 @@ describe("users/{userId}/artists/{artistId}/subscribers", () => {
       });
 
       const response = await requestApp
-        .get(`users/${user.id}/artists/${artist.id}/subscribers?format=csv`)
+        .get(`manage/artists/${artist.id}/subscribers?format=csv`)
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
       assert.equal(response.statusCode, 200);
@@ -63,7 +63,7 @@ describe("users/{userId}/artists/{artistId}/subscribers", () => {
       const subscriberEmail = "subscriber1@email.com";
 
       const response = await requestApp
-        .post(`users/${user.id}/artists/${artist.id}/subscribers`)
+        .post(`manage/artists/${artist.id}/subscribers`)
         .send({
           subscribers: [
             {
@@ -102,7 +102,7 @@ describe("users/{userId}/artists/{artistId}/subscribers", () => {
       const subscriberEmail = "subscriber1@email.com";
 
       const response = await requestApp
-        .post(`users/${user.id}/artists/${artist.id}/subscribers`)
+        .post(`manage/artists/${artist.id}/subscribers`)
         .send({
           subscribers: [
             {
@@ -146,7 +146,7 @@ describe("users/{userId}/artists/{artistId}/subscribers", () => {
       const tier = await createTier(artist.id, { isDefaultTier: true });
 
       const response = await requestApp
-        .post(`users/${user.id}/artists/${artist.id}/subscribers`)
+        .post(`manage/artists/${artist.id}/subscribers`)
         .send({
           subscribers: [
             {
@@ -198,7 +198,7 @@ describe("users/{userId}/artists/{artistId}/subscribers", () => {
       });
 
       const response = await requestApp
-        .post(`users/${user.id}/artists/${artist.id}/subscribers`)
+        .post(`manage/artists/${artist.id}/subscribers`)
         .send({
           subscribers: [
             {
@@ -226,11 +226,10 @@ describe("users/{userId}/artists/{artistId}/subscribers", () => {
       });
       const { user } = await createUser({ email: "test@testcom" });
       const artist = await createArtist(user.id);
-      const tier = await createTier(artist.id, { isDefaultTier: true });
       const subscriberEmail = "subscriber1@email.com";
 
       const response = await requestApp
-        .post(`users/${user.id}/artists/${artist.id}/subscribers`)
+        .post(`manage/artists/${artist.id}/subscribers`)
         .send({
           subscribers: [
             {
@@ -241,7 +240,7 @@ describe("users/{userId}/artists/{artistId}/subscribers", () => {
         .set("Cookie", [`jwt=${adminAccessToken}`])
         .set("Accept", "application/json");
 
-      assert.equal(response.statusCode, 401);
+      assert.equal(response.statusCode, 404);
     });
 
     it("should let an admin upload for an artist", async () => {
@@ -255,7 +254,7 @@ describe("users/{userId}/artists/{artistId}/subscribers", () => {
       const subscriberEmail = "subscriber1@email.com";
 
       const response = await requestApp
-        .post(`users/${user.id}/artists/${artist.id}/subscribers`)
+        .post(`manage/artists/${artist.id}/subscribers`)
         .send({
           subscribers: [
             {

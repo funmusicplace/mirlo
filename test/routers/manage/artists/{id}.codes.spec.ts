@@ -13,7 +13,7 @@ import prisma from "@mirlo/prisma";
 
 import { requestApp } from "../../utils";
 
-describe("users/{userId}/artists/{artistId}/codes", () => {
+describe("manage/artists/{artistId}/codes", () => {
   beforeEach(async () => {
     try {
       await clearTables();
@@ -44,7 +44,7 @@ describe("users/{userId}/artists/{artistId}/codes", () => {
       });
 
       const response = await requestApp
-        .get(`users/${user.id}/artists/${artist.id}/codes`)
+        .get(`manage/artists/${artist.id}/codes`)
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
       assert.equal(response.statusCode, 200);
@@ -82,7 +82,7 @@ describe("users/{userId}/artists/{artistId}/codes", () => {
       });
 
       const response = await requestApp
-        .get(`users/${user.id}/artists/${artist.id}/codes?format=csv`)
+        .get(`manage/artists/${artist.id}/codes?format=csv`)
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
 

@@ -15,7 +15,7 @@ import {
 const baseURL = `${process.env.API_DOMAIN}/v1/`;
 const requestApp = request(baseURL);
 
-describe("manage/trackGroups", () => {
+describe("manage/artists/{artistId}/trackGroups", () => {
   beforeEach(async () => {
     try {
       await clearTables();
@@ -25,26 +25,12 @@ describe("manage/trackGroups", () => {
   });
 
   describe("GET", () => {
-    it("should GET /", async () => {
-      const { accessToken } = await createUser({
-        email: "test@test.com",
-      });
-
-      const response = await requestApp
-        .get(`manage/trackGroups`)
-        .set("Cookie", [`jwt=${accessToken}`])
-        .set("Accept", "application/json");
-
-      assert.deepEqual(response.body.results, []);
-      assert(response.statusCode === 200);
-    });
-
     it("should GET / with one trackGroup", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
       const artist = await createArtist(user.id);
       const trackGroup = await createTrackGroup(artist.id);
       const response = await requestApp
-        .get(`manage/trackGroups`)
+        .get(`manage/artists/${artist.id}/trackGroups`)
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
 
@@ -60,7 +46,7 @@ describe("manage/trackGroups", () => {
         tracks: [] as Prisma.TrackCreateNestedManyWithoutTrackGroupInput,
       });
       const response = await requestApp
-        .get(`manage/trackGroups`)
+        .get(`manage/artists/${artist.id}/trackGroups`)
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
 
@@ -73,7 +59,7 @@ describe("manage/trackGroups", () => {
       const artist = await createArtist(user.id);
       await createTrackGroup(artist.id, { published: false });
       const response = await requestApp
-        .get(`manage/trackGroups`)
+        .get(`manage/artists/${artist.id}/trackGroups`)
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
 
@@ -99,7 +85,7 @@ describe("manage/trackGroups", () => {
         releaseDate: "2022-11-28T12:52:08.206Z",
       });
       const response = await requestApp
-        .get(`manage/trackGroups`)
+        .get(`manage/artists/${artist.id}/trackGroups`)
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
 
@@ -116,7 +102,7 @@ describe("manage/trackGroups", () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
       const artist = await createArtist(user.id);
       const response = await requestApp
-        .post(`manage/trackGroups`)
+        .post(`manage/artists/${artist.id}/trackGroups`)
         .send({
           artistId: artist.id,
           minPrice: 500,
@@ -134,7 +120,7 @@ describe("manage/trackGroups", () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
       const artist = await createArtist(user.id);
       const response = await requestApp
-        .post(`manage/trackGroups`)
+        .post(`manage/artists/${artist.id}/trackGroups`)
         .send({
           artistId: artist.id,
           minPrice: 500,
@@ -153,7 +139,7 @@ describe("manage/trackGroups", () => {
       const trackGroup = await createTrackGroup(artist.id);
 
       const response = await requestApp
-        .post(`manage/trackGroups`)
+        .post(`manage/artists/${artist.id}/trackGroups`)
         .send({
           artistId: artist.id,
           minPrice: 500,
@@ -175,7 +161,7 @@ describe("manage/trackGroups", () => {
       const artist = await createArtist(user.id);
 
       const response = await requestApp
-        .post(`manage/trackGroups`)
+        .post(`manage/artists/${artist.id}/trackGroups`)
         .send({
           artistId: artist.id,
           minPrice: 500,
@@ -190,14 +176,14 @@ describe("manage/trackGroups", () => {
     });
 
     it("should not POST an album when artistId doesn't belong to user", async () => {
-      const { user, accessToken } = await createUser({ email: "test@testcom" });
+      const { accessToken } = await createUser({ email: "test@testcom" });
       const { user: artistUser } = await createUser({
         email: "artist@artist.com",
       });
 
       const artist = await createArtist(artistUser.id);
       const response = await requestApp
-        .post(`manage/trackGroups`)
+        .post(`manage/artists/${artist.id}/trackGroups`)
         .send({
           artistId: artist.id,
           minPrice: 500,

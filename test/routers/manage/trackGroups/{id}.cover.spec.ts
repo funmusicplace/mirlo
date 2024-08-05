@@ -20,7 +20,7 @@ import {
 const baseURL = `${process.env.API_DOMAIN}/v1/`;
 const requestApp = request(baseURL);
 
-describe("users/{userId}/trackGroups/{trackGroupId}/cover", () => {
+describe("manage/trackGroups/{trackGroupId}/cover", () => {
   beforeEach(async () => {
     try {
       await clearTables();
@@ -37,7 +37,7 @@ describe("users/{userId}/trackGroups/{trackGroupId}/cover", () => {
       await createBucketIfNotExists(minioClient, finalCoversBucket);
 
       const response = await requestApp
-        .delete(`users/${user.id}/trackGroups/${trackGroup.id}/cover`)
+        .delete(`manage/trackGroups/${trackGroup.id}/cover`)
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
 

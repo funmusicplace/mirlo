@@ -36,7 +36,7 @@ export default function () {
           throw new AppError({
             httpCode: 400,
             description:
-              "That subscription tier isn't associated with the artistS",
+              "That subscription tier isn't associated with the artist",
           });
         }
       }
