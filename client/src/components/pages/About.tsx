@@ -53,7 +53,10 @@ const About: React.FC = () => {
           <Trans
             i18nKey="featuresText"
             t={t}
-            components={{ 1: <p></p>, a: <Link to="/pages/features"></Link> }}
+            components={{
+              p: <p></p>,
+              featuresLink: <Link to="/pages/features"></Link>,
+            }}
           ></Trans>
           <Trans
             t={t}
@@ -62,6 +65,7 @@ const About: React.FC = () => {
               takeRate: <Link to="/team/posts/16"></Link>,
               p: <p></p>,
               giveDirectly: <Link to="/team/support"></Link>,
+              i: <em></em>,
             }}
           ></Trans>
           <p>{t("morePricing")}</p>
@@ -131,6 +135,36 @@ const About: React.FC = () => {
                       sustainable ecosystem.
                     </li>
                   </ul>
+                </>
+              }
+            />
+            <CollapsibleLI
+              title="What are the long term goals of Mirlo?"
+              answer={
+                <>
+                  <p>
+                    We believe that the community is the platform and our goals,
+                    informed by our{" "}
+                    <a href="https://funmusic.place/observations-and-intent/">
+                      Observations and Intent
+                    </a>
+                    , will grow and change along with the community.
+                  </p>
+                  <p>
+                    That said, we would like to make it easier for other groups
+                    (like music labels or other co-ops) to install the software.
+                    We’d also like to look into building plug-ins and other
+                    tools that are useful for artists (for example, plug-ins
+                    that help to make your music available on aggregators like
+                    Distrokids or other platforms).
+                  </p>
+                  <p>
+                    Eventually, we hope to{" "}
+                    <a href="https://blog.fracturedatlas.org/exit-to-community">
+                      exit to our community
+                    </a>
+                    .
+                  </p>
                 </>
               }
             />
@@ -289,6 +323,77 @@ const About: React.FC = () => {
             and put on an event in the area.
           </p>
         </div>
+        <div>
+          <H2>Support, etc</H2>
+          <p>Here's some common questions asked!</p>
+          <CollapsibleList>
+            <CollapsibleLI
+              title="Can an artist make a listener account, will that be a problem in the future?"
+              answer={
+                <>
+                  <p>
+                    There’s only one account type on Mirlo! Any user can make an
+                    artist to upload music to at any point. To do so, click on
+                    the top right menu and click on “Manage Artist”, this will
+                    let you add new artists.
+                  </p>
+                  <p>
+                    Whether or not you want to maintain a separation between
+                    your artist account and your listening, is your call
+                  </p>
+                </>
+              }
+            />
+            <CollapsibleLI
+              title="How do I add support tiers?"
+              answer={
+                <>
+                  <p>
+                    You can add support tiers by going to your artist's profile,
+                    clicking “edit page” (or navigating to it through the top
+                    right dropdown menu), and then switching to the “Support
+                    tiers” tab. There's an “+ add tier” button that will let you
+                    create a support tier.
+                  </p>
+                  <p>
+                    To enable this you'll need to sign up with our payment
+                    processor Stripe first.
+                  </p>
+                </>
+              }
+            />
+            <CollapsibleLI
+              title="How can I sell individual tracks?"
+              answer={
+                <>
+                  <p>
+                    We currently don’t support selling of individual tracks, but
+                    if you want to see this feature implemented,{" "}
+                    <a href="https://github.com/funmusicplace/mirlo/discussions/509">
+                      upvote it on our ideas tracker
+                    </a>
+                    .
+                  </p>
+                </>
+              }
+            />
+            <CollapsibleLI
+              title="Image support"
+              answer={
+                <>
+                  <p>
+                    For our album, avatar, and background images we encourage
+                    people to upload higher resolution images. If you have
+                    issues with your specific image, please contact us at{" "}
+                    <a href="mailto:mirlodotspace@proton.me">
+                      mirlodotspace@proton.me
+                    </a>
+                  </p>
+                </>
+              }
+            />
+          </CollapsibleList>
+        </div>
       </MarkdownWrapper>
     </PageMarkdownWrapper>
   );
@@ -324,6 +429,8 @@ const CollapsibleLI: React.FC<{
           background: none;
           font-size: inherit;
           cursor: pointer;
+          color: var(--mi-normal-foreground-color);
+          font-weight: normal;
           width: 100%;
           text-align: left;
 
@@ -337,7 +444,7 @@ const CollapsibleLI: React.FC<{
         onClick={() => setIsOpen((val) => !val)}
       >
         <FaChevronRight />
-        <strong>{title}</strong>
+        {title}
       </button>
       {isOpen && <div>{answer}</div>}
     </li>

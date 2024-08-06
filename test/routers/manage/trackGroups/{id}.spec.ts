@@ -64,7 +64,6 @@ describe("manage/trackGroups/{trackGroupId}", () => {
         .delete(`manage/trackGroups/${trackGroup.id}`)
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
-      console.log("response", response);
 
       assert.equal(response.status, 200);
     });

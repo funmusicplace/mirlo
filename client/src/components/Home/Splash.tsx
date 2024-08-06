@@ -134,6 +134,7 @@ const Splash = () => {
               components={{
                 // eslint-disable-next-line jsx-a11y/anchor-has-content
                 features: <Link to="/pages/features"></Link>,
+                about: <Link to="/pages/about"></Link>,
               }}
             />
           </p>
