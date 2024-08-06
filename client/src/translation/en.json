@@ -11,7 +11,7 @@
     "success": "Registration success!",
     "alwaysCreateLater": "You can always add an artist account later",
     "imJustHereToListen": "I'm just here to listen",
-    "logIn": "Alrieady have an account? Log in",
+    "logIn": "Already have an account? Log in",
     "notArtistName": "You will be able to create multiple artist accounts, this can be anything.",
     "termsAndPrivacy": "By signing up you agree to our <terms>terms</terms> and <privacy>privacy</privacy> policies.",
     "receiveMailingList": "Stay up to date with Mirlo and our product by signing up to our mailing list."
@@ -35,8 +35,8 @@
     "behindThePlatform": "Behind the platform",
     "behindThePlatformText": "Our members have experience working both within Resonate and Ampled, other co-ops across several industries, and complex high-traffic web platforms. We envision this platform as a tool to support artists in cultivating direct and reciprocal relationships and resources to sustain one another’s creative practice.",
     "pricingAndFeatures": "Pricing & Features",
-    "featuresText": "<1>Mirlo provides a space for artists to upload their music, establish their online presence, sell their music, and gain monthly financial supporters.</1><1>For a thorough look at our features for artists, <a>check out our features page</a></1>",
-    "pricingText": "<p>Mirlo takes a 7% cut of all transactions. So if a musician sells an album on for $10, Mirlo will earn 70 cents.</p><p>Then, our payment processor Stripe, will take a cut, which is 2.9% + 30c (so much larger on small transactions)</p>. <p>Check out <takeRate>our blog post explaining how we got there</takeRate></p>. <p>However, we are dependent on direct monthly financial contributions. <giveDirectly>Consider giving</giveDirectly>.</p>",
+    "featuresText": "<p>Mirlo provides a space for artists to upload their music, establish their online presence, sell their music, and gain monthly financial supporters.</p><p>For a thorough look at our features for artists, <featuresLink>check out our features page</featuresLink>.</p>",
+    "pricingText": "<p>Mirlo takes a 7% cut of all transactions. So if a musician sells an album on for $10, Mirlo will earn 70 cents. <i>Then</i>, our payment processor Stripe, will take a cut, which is 2.9% + 30c (so much larger on small transactions).</p><p>Want to know more about how we calculated our take rate? Check out <takeRate>our blog post explaining how we got there</takeRate>.</p> <p>While we hope to be fully funded by transactions on Mirlo, in the mean time we're dependent on direct monthly financial contributions. <giveDirectly>Support Mirlo with a monthly contribution</giveDirectly>.</p>",
     "morePricing": "As we develop our product and come to terms with costs of running it, we will tweak these numbers and explore new ways of paying for the service and our work"
   },
   "logIn": {
@@ -384,7 +384,7 @@
   },
   "footer": {
     "getInTouch": "If you'd like to get in touch, join <discord>our Discord</discord>, <email>email us</email>, or check out <github>our Github</github>.",
-    "aboutUs": "<about>About us</about>, <faq>FAQ</faq>, <terms>Terms and conditions</terms>, <privacy>Privacy</privacy>, <cookie>Our use of cookies</cookie>",
+    "aboutUs": "<about>About us</about>, <terms>Terms and conditions</terms>, <privacy>Privacy</privacy>, <cookie>Our use of cookies</cookie>",
     "socialInstagram": "{{username}} on Instagram",
     "socialMastodon": "{{username}} on Mastodon",
     "socialX": "{{username}} on X"
@@ -541,8 +541,8 @@
     "logIn": "Log in",
     "signUp": "Sign up",
     "officeHours": "Have more questions? Join us for <office>office hours</office>.",
-    "featuresLink": "What is Mirlo? Check out <features>our features</features>.",
-    "mirloConstruction": "Wanna talk more? <email>E-mail us</email>, <discord>join our Discord</discord>, or join us <office>for office hours</office>! Also check out our <about>About page</about>, <faq>FAQ</faq>, and <github>the code on GitHub</github>. <br /> <br/ >Want to just receive our monthly newsletter? <mailingList>Sign up</mailingList>",
+    "featuresLink": "What is Mirlo? Check out <features>our features</features> and <about>about section</about>.",
+    "mirloConstruction": "Wanna talk more? <email>E-mail us</email>, <discord>join our Discord</discord>, or join us <office>for office hours</office>! Also check out our <about>About page</about>, and <github>the code on GitHub</github>. <br /> <br/ >Want to just receive our monthly newsletter? <mailingList>Sign up</mailingList>",
     "latestCommunityPost": "Latest posts from the community",
     "supportUs": "Want to support us as we grow Mirlo? <support>Pitch in</support>"
   },

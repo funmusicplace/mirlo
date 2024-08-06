@@ -70,7 +70,6 @@ export const deleteTrackGroup = async (
   trackGroupId: number,
   deleteAll?: boolean
 ) => {
-  console.log("trying tod elete trackgroup cover", trackGroupId);
   await deleteTrackGroupCover(Number(trackGroupId));
 
   await prisma.trackGroup.delete({
@@ -78,7 +77,6 @@ export const deleteTrackGroup = async (
       id: Number(trackGroupId),
     },
   });
-  console.log("deleteall?", deleteAll);
 
   if (deleteAll) {
     const tracks = await prisma.track.findMany({
@@ -86,7 +84,6 @@ export const deleteTrackGroup = async (
         trackGroupId,
       },
     });
-    console.log("found tracks?", tracks.length);
 
     await Promise.all(tracks.map(async (track) => await deleteTrack(track.id)));
   }

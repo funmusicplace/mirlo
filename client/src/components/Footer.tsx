@@ -62,7 +62,6 @@ export const Footer = () => {
               t={t}
               i18nKey="aboutUs"
               components={{
-                faq: <Link to="/pages/en/faq"></Link>,
                 about: <Link to="/pages/about"></Link>,
                 terms: <Link to="/pages/terms"></Link>,
                 privacy: <Link to="/pages/privacy"></Link>,

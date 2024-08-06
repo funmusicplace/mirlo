@@ -48,10 +48,6 @@ const routes: RouteObject[] = [
         lazy: () => markdownPage("/pages/Privacy.md"),
       },
       {
-        path: "pages/en/faq",
-        lazy: () => markdownPage("/pages/en/FAQ.md"),
-      },
-      {
         path: "pages/terms",
         lazy: () => markdownPage("/pages/Terms.md"),
       },
