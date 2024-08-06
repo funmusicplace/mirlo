@@ -78,8 +78,8 @@ const AutoComplete: React.FC<{
   getOptions: (
     val: string
   ) =>
-    | Promise<{ id: number | string; name: string }[]>
-    | { id: number | string; name: string }[];
+    | Promise<{ id: number | string; name: string; isNew?: boolean }[]>
+    | { id: number | string; name: string; isNew?: boolean }[];
   resultsPrefix?: string;
   onSelect?: (value: string | number) => void;
   optionDisplay?: (result: {
@@ -104,7 +104,7 @@ const AutoComplete: React.FC<{
   const [showSuggestions, setShowSuggestions] = React.useState(false);
   const [isSearching, setIsSearching] = React.useState(false);
   const [searchResults, setSearchResults] = React.useState<
-    { id: number | string; name: string }[]
+    { id: number | string; name: string; isNew?: boolean }[]
   >([]);
   const [navigationIndex, setNavigationIndex] = React.useState(0);
 
@@ -121,6 +121,18 @@ const AutoComplete: React.FC<{
         setShowSuggestions(true);
         setIsSearching(true);
         const results = await getOptions(searchString);
+
+        const searchResultsMatchSearch = searchResults.find(
+          (result) =>
+            result.name.toLowerCase().replaceAll(/\-| /g, "") === searchString
+        );
+        if (allowNew && !searchResultsMatchSearch) {
+          results.push({
+            id: searchString,
+            name: searchString,
+            isNew: true,
+          });
+        }
         setSearchResults(results);
         setIsSearching(false);
         setNavigationIndex(0);
@@ -129,7 +141,7 @@ const AutoComplete: React.FC<{
         setShowSuggestions(false);
       }
     },
-    [getOptions]
+    [getOptions, allowNew]
   );
 
   const onSelectValue = React.useCallback(
@@ -231,7 +243,7 @@ const AutoComplete: React.FC<{
                       optionDisplay(r)
                     ) : (
                       <Button onClick={() => onSelectValue(r.id, index)}>
-                        {r.name}
+                        {r.isNew ? `use "${r.name}"` : r.name}
                       </Button>
                     )}
                   </SearchResult>
@@ -240,15 +252,6 @@ const AutoComplete: React.FC<{
             )}
             {!allowNew && !isSearching && searchResults.length === 0 && (
               <>{t("noResults")}</>
-            )}
-            {allowNew && !isSearching && searchResults.length === 0 && (
-              <SearchResultList>
-                <SearchResult>
-                  <Button onClick={() => onSelectValue(searchValue)}>
-                    use "{searchValue}"
-                  </Button>
-                </SearchResult>
-              </SearchResultList>
             )}
           </SearchResultsDiv>
         </>
