@@ -7,7 +7,6 @@ import { useTranslation } from "react-i18next";
 
 import UploadArtistImage from "../UploadArtistImage";
 import FormError from "components/common/FormError";
-import { useAuthContext } from "state/AuthContext";
 import { useParams } from "react-router-dom";
 
 import SavingInput from "./SavingInput";
@@ -19,8 +18,6 @@ const AlbumFormContent: React.FC<{
   const {
     formState: { errors },
   } = useFormContext();
-  const { user } = useAuthContext();
-  const userId = user?.id;
   const { artistId, trackGroupId } = useParams();
 
   return (
@@ -29,7 +26,7 @@ const AlbumFormContent: React.FC<{
         <label>{t("title")}</label>
         <SavingInput
           formKey="title"
-          url={`users/${userId}/trackGroups/${trackGroupId}`}
+          url={`manage/trackGroups/${trackGroupId}`}
           extraData={{ artistId: Number(artistId) }}
         />
       </FormComponent>
@@ -70,7 +67,7 @@ const AlbumFormContent: React.FC<{
           formKey="releaseDate"
           type="date"
           required
-          url={`users/${userId}/trackGroups/${trackGroupId}`}
+          url={`manage/trackGroups/${trackGroupId}`}
           extraData={{ artistId: Number(artistId) }}
         />
       </FormComponent>
@@ -79,7 +76,7 @@ const AlbumFormContent: React.FC<{
         <SavingInput
           formKey="about"
           rows={8}
-          url={`users/${userId}/trackGroups/${trackGroupId}`}
+          url={`manage/trackGroups/${trackGroupId}`}
           extraData={{ artistId: Number(artistId) }}
         />
       </FormComponent>
@@ -88,7 +85,7 @@ const AlbumFormContent: React.FC<{
         <SavingInput
           formKey="credits"
           rows={8}
-          url={`users/${userId}/trackGroups/${trackGroupId}`}
+          url={`manage/trackGroups/${trackGroupId}`}
           extraData={{ artistId: Number(artistId) }}
         />
       </FormComponent>
@@ -98,7 +95,7 @@ const AlbumFormContent: React.FC<{
           formKey="minPrice"
           type="number"
           step="0.01"
-          url={`users/${userId}/trackGroups/${trackGroupId}`}
+          url={`manage/trackGroups/${trackGroupId}`}
           extraData={{ artistId: Number(artistId) }}
         />
         {errors.minPrice && <FormError>{t("priceZeroOrMore")}</FormError>}

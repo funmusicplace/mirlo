@@ -165,7 +165,7 @@ export const removeObjectsFromBucket = async (
   prefix: string
 ) => {
   const objects = await getObjectList(bucketName, prefix);
-
+  console.log("objects", objects);
   await minioClient.removeObjects(
     bucketName,
     objects.map((o) => o.name)

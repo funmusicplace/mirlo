@@ -31,7 +31,7 @@ const ShowAlbumCodes: React.FC<{}> = () => {
 
   const callback = React.useCallback(async () => {
     const results = await api.getMany<AlbumCode>(
-      `users/${userId}/artists/${artistId}/codes`
+      `manage/artists/${artistId}/codes`
     );
     setAlbumCodes(results.results);
   }, [artistId, userId]);
@@ -47,7 +47,7 @@ const ShowAlbumCodes: React.FC<{}> = () => {
         if (userId && artistId) {
           await api.getFile(
             `${group ? group : "all"}-codes-for-${artistSlug}`,
-            `users/${userId}/artists/${artistId}/codes?format=csv&group=${group}`,
+            `manage/artists/${artistId}/codes?format=csv&group=${group}`,
             "text/csv"
           );
         }

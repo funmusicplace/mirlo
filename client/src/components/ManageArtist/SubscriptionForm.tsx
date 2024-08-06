@@ -73,17 +73,14 @@ const SubscriptionForm: React.FC<{
               Partial<ArtistSubscriptionTier>,
               ArtistSubscriptionTier
             >(
-              `users/${userId}/artists/${artistId}/subscriptionTiers/${existingId}`,
+              `manage/artists/${artistId}/subscriptionTiers/${existingId}`,
               sending
             );
           } else {
             await api.post<
               Partial<ArtistSubscriptionTier>,
               ArtistSubscriptionTier
-            >(
-              `users/${userId}/artists/${artistId}/subscriptionTiers/`,
-              sending
-            );
+            >(`manage/artists/${artistId}/subscriptionTiers/`, sending);
           }
 
           snackbar(t("subscriptionUpdated"), { type: "success" });

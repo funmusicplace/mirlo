@@ -1,14 +1,11 @@
 import { css } from "@emotion/css";
-import { SplashButtonWrapper, SplashTitle, SplashWrapper } from "./Splash";
-import { ButtonAnchor, ButtonLink } from "components/common/Button";
+import { SplashButtonWrapper, SplashWrapper } from "./Splash";
+import { ButtonLink } from "components/common/Button";
 import { useTranslation } from "react-i18next";
 import { bp } from "../../constants";
-import { useGlobalStateContext } from "state/GlobalState";
 
 const Kickstarter = () => {
   const { t } = useTranslation("translation", { keyPrefix: "kickstarter" });
-
-  const { state, dispatch } = useGlobalStateContext();
 
   return (
     <div

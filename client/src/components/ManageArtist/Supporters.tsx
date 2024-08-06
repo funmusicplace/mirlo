@@ -45,7 +45,7 @@ const Supporters = () => {
 
   const loadSupporters = React.useCallback(async () => {
     const response = await api.getMany<SupportTier>(
-      `users/${userId}/artists/${artistId}/subscribers`
+      `manage/artists/${artistId}/subscribers`
     );
 
     setSupporters(

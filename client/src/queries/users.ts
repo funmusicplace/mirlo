@@ -32,20 +32,39 @@ export function queryUserStripeStatus(userId: number) {
 
 const fetchManagedArtist: QueryFunction<
   Artist,
-  ["fetchManagedArtist", { userId: number; artistId: number }]
-> = ({ queryKey: [_, { userId, artistId }], signal }) => {
+  ["fetchManagedArtist", { artistId: number }]
+> = ({ queryKey: [_, { artistId }], signal }) => {
   return api
     .get<{
       result: Artist;
-    }>(`v1/users/${userId}/artists/${artistId}`, { signal })
+    }>(`v1/manage/artists/${artistId}`, { signal })
     .then((r) => r.result);
 };
 
-export function queryManagedArtist(userId: number, artistId: number) {
+export function queryManagedArtist(artistId: number) {
   return queryOptions({
-    queryKey: ["fetchManagedArtist", { userId, artistId }],
+    queryKey: ["fetchManagedArtist", { artistId }],
     queryFn: fetchManagedArtist,
-    enabled: isFinite(userId) && isFinite(artistId),
+    enabled: isFinite(artistId),
+  });
+}
+
+const fetchManagedTrackGroup: QueryFunction<
+  TrackGroup,
+  ["fetchManagedTrackGroup", { trackGroupId: number }]
+> = ({ queryKey: [_, { trackGroupId }], signal }) => {
+  return api
+    .get<{
+      result: TrackGroup;
+    }>(`v1/manage/trackGroups/${trackGroupId}`, { signal })
+    .then((r) => r.result);
+};
+
+export function queryManagedTrackGroup(trackGroupId: number) {
+  return queryOptions({
+    queryKey: ["fetchManagedTrackGroup", { trackGroupId }],
+    queryFn: fetchManagedTrackGroup,
+    enabled: isFinite(trackGroupId),
   });
 }
 
@@ -54,17 +73,13 @@ export type CreateArtistBody = Partial<
 >;
 
 async function createArtist({
-  userId,
   body,
 }: {
   userId: number;
   body: CreateArtistBody;
 }) {
   return api
-    .post<
-      CreateArtistBody,
-      { result: Artist }
-    >(`v1/users/${userId}/artists`, body)
+    .post<CreateArtistBody, { result: Artist }>(`v1/manage/artists`, body)
     .then((r) => r.result);
 }
 
@@ -85,7 +100,6 @@ export type UpdateArtistBody = Partial<
 >;
 
 async function updateArtist({
-  userId,
   artistId,
   body,
 }: {
@@ -97,7 +111,7 @@ async function updateArtist({
     .put<
       UpdateArtistBody,
       { result: Artist }
-    >(`v1/users/${userId}/artists/${artistId}`, body)
+    >(`v1/manage/artists/${artistId}`, body)
     .then((r) => r.result);
 }
 
@@ -120,14 +134,12 @@ export function useUpdateArtistMutation() {
 }
 
 async function deleteArtist({
-  userId,
   artistId,
 }: {
-  userId: number;
   artistId: number;
   artistSlug: string;
 }) {
-  return api.del(`v1/users/${userId}/artists/${artistId}`);
+  return api.del(`v1/manage/artists/${artistId}`);
 }
 
 export function useDeleteArtistMutation() {

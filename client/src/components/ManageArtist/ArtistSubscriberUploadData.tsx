@@ -106,12 +106,9 @@ const ArtistSubscriberUploadData: React.FC<{
 
       try {
         if (artistUserId && artistId) {
-          await api.post(
-            `users/${artistUserId}/artists/${artistId}/subscribers`,
-            {
-              subscribers: users,
-            }
-          );
+          await api.post(`manage/artists/${artistId}/subscribers`, {
+            subscribers: users,
+          });
         }
         snackbar(t("uploadedNewEmails"), { type: "success" });
         setIsOpen(false);
@@ -250,7 +247,7 @@ const ArtistSubscriberUploadData: React.FC<{
           startIcon={<FaUpload />}
           isLoading={isLoadingSubscriberData}
         >
-          {t("uploadSubscriberData")}
+          {t("uploadSubscriberData", { artistName: artist.name })}
         </Button>
       </li>
     </>

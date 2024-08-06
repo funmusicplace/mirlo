@@ -85,6 +85,7 @@ interface Post {
   isPublic: boolean;
   artistId?: number;
   isContentHidden: boolean;
+  minimumSubscriptionTierId?: number;
 }
 
 type ArtistColors = {

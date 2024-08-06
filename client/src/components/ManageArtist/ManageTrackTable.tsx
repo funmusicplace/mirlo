@@ -76,7 +76,7 @@ export const ManageTrackTable: React.FC<{
   trackGroupId?: number;
   editable?: boolean;
   owned?: boolean;
-  reload?: () => Promise<void>;
+  reload?: () => Promise<unknown>;
 }> = ({ tracks, trackGroupId, editable, reload }) => {
   const [isLoading, setIsLoading] = React.useState(false);
   const {
@@ -103,13 +103,9 @@ export const ManageTrackTable: React.FC<{
         if (trackGroupId) {
           setDisplayTracks(newTracks);
 
-          // FIXME: this endpoint isn't implemented
-          await api.put(
-            `users/${userId}/trackGroups/${trackGroupId}/trackOrder`,
-            {
-              trackIds: newTracks.map((t) => t.id),
-            }
-          );
+          await api.put(`manage/trackGroups/${trackGroupId}/trackOrder`, {
+            trackIds: newTracks.map((t) => t.id),
+          });
 
           reload?.();
         }

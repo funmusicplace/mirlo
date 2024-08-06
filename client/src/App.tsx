@@ -13,7 +13,6 @@ import { MetaCard } from "components/common/MetaCard";
 import ArtistColorsWrapper from "components/ArtistColorsWrapper";
 import CookieDisclaimer from "components/CookieDisclaimer";
 import { useAuthContext } from "state/AuthContext";
-import Kickstarter from "components/Home/Kickstarter";
 
 function App() {
   const { isDisplayed } = useContext(SnackbarContext);
@@ -65,8 +64,6 @@ function App() {
                 width: 100%;
               `}
             >
-              <Kickstarter />
-
               <div
                 className={css`
                   margin: 0 auto;

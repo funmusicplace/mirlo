@@ -117,12 +117,10 @@ export const artistBelongsToLoggedInUser = async (
   res: Response,
   next: NextFunction
 ) => {
-  const { userId, artistId } = req.params as unknown as {
-    userId: string;
+  const { artistId } = req.params as unknown as {
     artistId: string;
   };
   const castArtistId = await findArtistIdForURLSlug(artistId);
-
   const loggedInUser = req.user as User | undefined;
 
   if (!loggedInUser) {
@@ -130,12 +128,6 @@ export const artistBelongsToLoggedInUser = async (
   } else {
     if (loggedInUser.isAdmin) {
       return next();
-    }
-    if (loggedInUser.id !== Number(userId)) {
-      res.status(401).json({
-        error: `Artist must belong to user`,
-      });
-      return;
     }
 
     const artist = await prisma.artist.findFirst({
@@ -157,11 +149,10 @@ export const artistBelongsToLoggedInUser = async (
 
 export const trackGroupBelongsToLoggedInUser = async (
   req: Request,
-  res: Response,
+  _res: Response,
   next: NextFunction
 ) => {
-  const { userId, trackGroupId } = req.params as unknown as {
-    userId: string;
+  const { trackGroupId } = req.params as unknown as {
     trackGroupId: string;
   };
 
@@ -174,13 +165,6 @@ export const trackGroupBelongsToLoggedInUser = async (
         httpCode: 401,
       });
     } else {
-      if (loggedInUser.id !== Number(userId) && !loggedInUser.isAdmin) {
-        throw new AppError({
-          description: "TrackGroup does not exist or does not belong to user",
-          httpCode: 400,
-        });
-      }
-
       const trackGroup = await prisma.trackGroup.findFirst({
         where: {
           artist: {
@@ -193,6 +177,48 @@ export const trackGroupBelongsToLoggedInUser = async (
       if (!trackGroup) {
         throw new AppError({
           description: "TrackGroup does not exist or does not belong to user",
+          httpCode: 404,
+        });
+      }
+    }
+  } catch (e) {
+    return next(e);
+  }
+  return next();
+};
+
+export const trackBelongsToLoggedInUser = async (
+  req: Request,
+  _res: Response,
+  next: NextFunction
+) => {
+  const { trackId } = req.params as unknown as {
+    trackId: string;
+  };
+
+  const loggedInUser = req.user as User | undefined;
+
+  try {
+    if (!loggedInUser) {
+      throw new AppError({
+        description: "Not logged in user",
+        httpCode: 401,
+      });
+    } else {
+      const track = await prisma.track.findFirst({
+        where: {
+          trackGroup: {
+            artist: {
+              userId: loggedInUser.id,
+            },
+          },
+          id: Number(trackId),
+        },
+      });
+
+      if (!track) {
+        throw new AppError({
+          description: "Track does not exist or does not belong to user",
           httpCode: 400,
         });
       }
@@ -208,7 +234,6 @@ export const contentBelongsToLoggedInUserArtist = async (
   res: Response,
   next: NextFunction
 ) => {
-  const { userId } = req.params as unknown as { userId: string };
   const data = req.body;
 
   const artistId = data.artistId ?? req.params.artistId;
@@ -218,13 +243,6 @@ export const contentBelongsToLoggedInUserArtist = async (
   if (!loggedInUser) {
     res.status(401).json({ error: "Unauthorized" });
   } else {
-    if (loggedInUser.id !== Number(userId)) {
-      res.status(400).json({
-        error: `Artist must belong to user`,
-      });
-      return;
-    }
-
     const artist = await prisma.artist.findFirst({
       where: {
         userId: loggedInUser.id,

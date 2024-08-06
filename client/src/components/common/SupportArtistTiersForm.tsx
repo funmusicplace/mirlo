@@ -10,7 +10,6 @@ import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { queryArtist } from "queries";
 import api from "services/api";
-import FormCheckbox from "./FormCheckbox";
 import { moneyDisplay } from "./Money";
 
 const SupportArtistTiersForm: React.FC<{

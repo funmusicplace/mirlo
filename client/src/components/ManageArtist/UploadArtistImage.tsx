@@ -43,9 +43,9 @@ const getExistingImage = (
 const buildRootUrl = (existing: TrackGroup | Artist) => {
   let url = "";
   if (isTrackgroup(existing)) {
-    url = `users/${existing.artist?.userId}/trackGroups/${existing.id}/`;
+    url = `manage/trackGroups/${existing.id}/`;
   } else {
-    url = `users/${existing?.userId}/artists/${existing.id}/`;
+    url = `manage/artists/${existing.id}/`;
   }
   return url;
 };

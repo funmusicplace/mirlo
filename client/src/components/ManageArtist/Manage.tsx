@@ -16,16 +16,13 @@ export const Manage: React.FC = () => {
   const [artists, setArtists] = React.useState<Artist[]>([]);
   const [stripeAccountStatus, setStripeAccountStatus] =
     React.useState<AccountStatus>();
-  const [creatingNewArtist, setCreatingNewArtist] = React.useState(false);
   const { t } = useTranslation("translation", { keyPrefix: "manage" });
 
   const userId = user?.id;
 
   const fetchArtists = React.useCallback(async () => {
     if (userId) {
-      const fetchedArtists = await api.getMany<Artist>(
-        `users/${userId}/artists`
-      );
+      const fetchedArtists = await api.getMany<Artist>(`manage/artists`);
       if (fetchedArtists) {
         setArtists(fetchedArtists.results);
       }

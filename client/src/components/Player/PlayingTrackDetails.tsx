@@ -61,6 +61,7 @@ const PlayingTrackDetails: React.FC<{ currentTrack: Track }> = ({
             text-overflow: ellipsis;
             font-size: var(--mi-font-size-normal);
           `}
+          id="player-track-title"
         >
           {currentTrack?.title}
         </div>
@@ -81,6 +82,7 @@ const PlayingTrackDetails: React.FC<{ currentTrack: Track }> = ({
                     currentTrack.trackGroup.artist,
                     currentTrack.trackGroup
                   )}
+                  id="player-trackGroup-title"
                 >
                   {currentTrack.trackGroup.title}
                 </Link>
@@ -88,14 +90,16 @@ const PlayingTrackDetails: React.FC<{ currentTrack: Track }> = ({
             </div>
             <div
               className={css`
-          font-weight: bold;
-          overflow: hidden;
-          white-space: nowrap;
-          text-overflow: ellipsis;
-          }
-        `}
+                font-weight: bold;
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+              `}
             >
-              <Link to={`/${currentTrack.trackGroup.artistId}`}>
+              <Link
+                to={`/${currentTrack.trackGroup.artistId}`}
+                id="player-artist-name"
+              >
                 {currentTrack.trackGroup.artist?.name}
               </Link>
             </div>

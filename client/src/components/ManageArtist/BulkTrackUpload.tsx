@@ -44,7 +44,7 @@ const alertUser = (event: any) => {
 
 export const BulkTrackUpload: React.FC<{
   trackgroup: TrackGroup;
-  reload: () => Promise<void>;
+  reload: () => Promise<unknown>;
 }> = ({ trackgroup, reload }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const methods = useForm<FormData>();
@@ -86,17 +86,16 @@ export const BulkTrackUpload: React.FC<{
         );
 
         const response = await api.post<Partial<Track>, { result: Track }>(
-          `users/${userId}/tracks`,
+          `manage/tracks`,
           packet
         );
 
         setUploadQueue((queue) =>
           produceNewStatus(queue, firstTrack.t.title, 25)
         );
-        await api.uploadFile(
-          `users/${userId}/tracks/${response.result.id}/audio`,
-          [firstTrack.t.file]
-        );
+        await api.uploadFile(`manage/tracks/${response.result.id}/audio`, [
+          firstTrack.t.file,
+        ]);
 
         if (remainingTracks.length !== 0) {
           setUploadQueue((queue) =>

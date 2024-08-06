@@ -71,16 +71,17 @@ const Welcome = () => {
       try {
         if (steps[step] === "name") {
           const response = await api.post<Partial<Artist>, { result: Artist }>(
-            `users/${userId}/artists`,
+            `manage/artists`,
             {
               name: data.name,
+              userId,
             }
           );
           setLocalArtist(response.result);
           reset(response.result);
         } else if (localArtist && step > 1) {
           const response = await api.put<Partial<Artist>, { result: Artist }>(
-            `users/${userId}/artists/${localArtist.id}`,
+            `manage/artists/${localArtist.id}`,
             data
           );
 

@@ -66,9 +66,7 @@ const ManageTrackRow: React.FC<{
     let interval: NodeJS.Timer;
     if (uploadState === "STARTED") {
       interval = setInterval(async () => {
-        const result = await api.get<Track>(
-          `users/${userId}/tracks/${track.id}`
-        );
+        const result = await api.get<Track>(`manage/tracks/${track.id}`);
         const newState = result.result.audio?.uploadState;
 
         setUploadState(newState);
@@ -82,7 +80,7 @@ const ManageTrackRow: React.FC<{
 
   const onDeleteClick = React.useCallback(async () => {
     try {
-      await api.delete(`users/${userId}/tracks/${track.id}`);
+      await api.delete(`manage/tracks/${track.id}`);
       await reload?.();
       snackbar("Deleted track", { type: "success" });
     } catch (e) {

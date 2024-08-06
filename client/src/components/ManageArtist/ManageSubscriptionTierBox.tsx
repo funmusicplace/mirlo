@@ -16,7 +16,7 @@ import { useAuthContext } from "state/AuthContext";
 const ManageSubscriptionTierBox: React.FC<{
   tier: ArtistSubscriptionTier;
   artist: Artist;
-  reload: () => Promise<void>;
+  reload: () => Promise<unknown>;
 }> = ({ tier, reload, artist }) => {
   const { user } = useAuthContext();
   const snackbar = useSnackbar();
@@ -30,7 +30,7 @@ const ManageSubscriptionTierBox: React.FC<{
     async (tierId: number) => {
       try {
         await api.delete(
-          `users/${userId}/artists/${artistId}/subscriptionTiers/${tierId}`
+          `manage/artists/${artistId}/subscriptionTiers/${tierId}`
         );
         snackbar("Tier deleted", { type: "success" });
         reload();

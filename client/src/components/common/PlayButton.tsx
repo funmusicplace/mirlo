@@ -40,6 +40,7 @@ export const PlayButton: React.FC<{
         onClick={onPlay ?? onPlayCallback}
         aria-label={`${t("play")}`}
         title={`${t("play")}`}
+        className="play-button"
       />
     </div>
   );

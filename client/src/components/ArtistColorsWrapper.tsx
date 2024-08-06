@@ -18,7 +18,7 @@ const ArtistColorsWrapper: React.FC<{ children: React.ReactElement }> = ({
 
   // Because of type mismatch we couldn't choose which of these to query
   const { data: managedArtist } = useQuery(
-    queryManagedArtist(Number(userId), Number(artistId))
+    queryManagedArtist(Number(artistId))
   );
   const { data: artist } = useQuery(queryArtist({ artistSlug: artistId }));
 

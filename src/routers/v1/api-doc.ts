@@ -45,6 +45,10 @@ const apiDoc = {
           description: "The string that will appear in the URL",
           type: "string",
         },
+        userId: {
+          description: "The ID of the user",
+          type: "number",
+        },
       },
     },
     User: {

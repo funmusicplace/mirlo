@@ -11,20 +11,26 @@ const fetchTrackGroups: QueryFunction<
   { results: TrackGroup[]; total?: number },
   [
     "fetchTrackGroups",
-    { skip?: number; take?: number; orderBy?: "random"; tag?: string; distinctArtists?: boolean },
+    {
+      skip?: number;
+      take?: number;
+      orderBy?: "random";
+      tag?: string;
+      distinctArtists?: boolean;
+    },
     ...any,
   ]
-> = ({ queryKey: [_, { skip, take, orderBy, tag, distinctArtists }], signal }) => {
+> = ({
+  queryKey: [_, { skip, take, orderBy, tag, distinctArtists }],
+  signal,
+}) => {
   const params = new URLSearchParams();
   if (skip) params.append("skip", String(skip));
   if (take) params.append("take", String(take));
   if (orderBy) params.append("orderBy", orderBy);
   if (tag) params.append("tag", tag);
   params.append("distinctArtists", String(distinctArtists ?? false));
-  return api.get(
-    `v1/trackGroups?${params}`,
-    { signal }
-  );
+  return api.get(`v1/trackGroups?${params}`, { signal });
 };
 
 export function queryTrackGroups(opts: {
@@ -40,33 +46,13 @@ export function queryTrackGroups(opts: {
   });
 }
 
-const fetchUserTrackGroups: QueryFunction<
-  { results: TrackGroup[] },
-  ["fetchUserTrackGroups", { userId: number; artistId?: number }, ...any]
-> = ({ queryKey: [_, { userId, artistId }], signal }) => {
-  return api.get(
-    `v1/users/${userId}/trackGroups` +
-      (artistId ? `?artistId=${artistId}` : ""),
-    { signal }
-  );
-};
-
-export function queryUserTrackGroups(opts: {
-  userId: number;
-  artistId?: number;
-}) {
-  return queryOptions({
-    queryKey: ["fetchUserTrackGroups", opts, QUERY_KEY_TRACK_GROUPS],
-    queryFn: fetchUserTrackGroups,
-    enabled: !!opts.userId && (opts.artistId === undefined || !!opts.artistId),
-  });
-}
-
 async function createTrackGroup(opts: {
-  userId: number;
   trackGroup: Partial<TrackGroup>;
 }): Promise<{ result: TrackGroup }> {
-  return await api.post(`v1/users/${opts.userId}/trackGroups`, opts.trackGroup);
+  return await api.post(
+    `v1/manage/artists/${opts.trackGroup.artistId}/trackGroups`,
+    opts.trackGroup
+  );
 }
 
 export function useCreateTrackGroupMutation() {
@@ -82,14 +68,10 @@ export function useCreateTrackGroupMutation() {
 }
 
 async function updateTrackGroup(opts: {
-  userId: number;
   trackGroupId: number;
   trackGroup: Partial<TrackGroup>;
 }) {
-  await api.put(
-    `v1/users/${opts.userId}/trackGroups/${opts.trackGroupId}`,
-    opts.trackGroup
-  );
+  await api.put(`v1/manage/trackGroups/${opts.trackGroupId}`, opts.trackGroup);
 }
 
 export function useUpdateTrackGroupMutation() {
@@ -108,7 +90,7 @@ async function deleteTrackGroup(opts: {
   userId: number;
   trackGroupId: number;
 }) {
-  await api.del(`v1/users/${opts.userId}/trackGroups/${opts.trackGroupId}`);
+  await api.del(`v1/manage/trackGroups/${opts.trackGroupId}`);
 }
 
 export function useDeleteTrackGroupMutation() {

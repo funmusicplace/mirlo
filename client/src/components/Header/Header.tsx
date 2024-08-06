@@ -13,6 +13,8 @@ import styled from "@emotion/styled";
 import useShow from "utils/useShow";
 import LogInPopup from "./LogInPopup";
 import { useAuthContext } from "state/AuthContext";
+import { ButtonLink } from "components/common/Button";
+import { useTranslation } from "react-i18next";
 
 const HeaderWrapper = styled.div<{
   artistBanner?: boolean;
@@ -185,6 +187,8 @@ const Content = styled.div<{ artistId?: string }>`
 `;
 
 const Header = () => {
+  const { t } = useTranslation("translation", { keyPrefix: "kickstarter" });
+
   const { user } = useAuthContext();
   const isLoggedIn = !!user?.id;
 
@@ -246,6 +250,32 @@ const Header = () => {
             </DropdownMenu>
           )}
           {!isLoggedIn && <LogInPopup />}
+          <ButtonLink
+            to="/team/support"
+            className={css`
+              display: block;
+              padding: 1rem;
+              margin-left: 1rem;
+              text-decoration: none;
+              text-align: center;
+              &:hover {
+                text-decoration: underline;
+              }
+
+              color: var(--mi-white) !important;
+              background-color: var(--mi-black) !important;
+              @media (prefers-color-scheme: dark) {
+                background-color: var(--mi-white) !important;
+                color: var(--mi-black) !important;
+              }
+
+              @media screen and (max-width: ${bp.medium}px) {
+                font-size: var(--mi-font-size-xsmall) !important;
+              }
+            `}
+          >
+            {t("donateNow")}
+          </ButtonLink>
         </div>
       </Content>
     </HeaderWrapper>

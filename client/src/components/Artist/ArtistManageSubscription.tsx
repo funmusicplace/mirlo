@@ -19,9 +19,7 @@ const ArtistManageSubscription: React.FC<{
   const cancelSubscription = React.useCallback(async () => {
     try {
       if (userSubscription) {
-        await api.delete(
-          `users/${userId}/subscriptions/${userSubscription.id}`
-        );
+        await api.delete(`manage/subscriptions/${userSubscription.id}`);
         await reload();
       }
     } catch (e) {

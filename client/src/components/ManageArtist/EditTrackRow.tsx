@@ -65,13 +65,13 @@ const EditTrackRow: React.FC<{
         };
 
         await api.put<Partial<Track>, { track: Track }>(
-          `users/${userId}/tracks/${trackId}`,
+          `manage/tracks/${trackId}`,
           packet
         );
 
         if (formData.trackFile.length > 0) {
           const jobInfo = await api.uploadFile(
-            `users/${userId}/tracks/${trackId}/audio`,
+            `manage/tracks/${trackId}/audio`,
             [formData.trackFile[0]]
           );
           const jobId = jobInfo.result.jobId;
