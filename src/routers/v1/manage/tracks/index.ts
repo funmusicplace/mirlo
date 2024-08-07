@@ -54,10 +54,7 @@ export default function () {
     const { title, trackGroupId, trackArtists, order, metadata, isPreview } =
       req.body;
     try {
-      await doesTrackGroupBelongToUser(
-        Number(trackGroupId),
-        Number(loggedInUser.id)
-      );
+      await doesTrackGroupBelongToUser(Number(trackGroupId), loggedInUser);
 
       const createdTrack = await prisma.track.create({
         data: {

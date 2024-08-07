@@ -28,25 +28,11 @@ export default function () {
     GET: [userAuthenticated, trackBelongsToLoggedInUser, GET],
   };
 
-  // FIXME: only allow updating of tracks owned by userId
   async function PUT(req: Request, res: Response, next: NextFunction) {
     const { trackId } = req.params;
     const { title, isPreview, trackArtists } = req.body as TrackBody;
-    const loggedInUser = req.user as User;
 
     try {
-      const track = await doesTrackBelongToUser(
-        Number(trackId),
-        Number(loggedInUser.id)
-      );
-
-      if (!track) {
-        res.status(400).json({
-          error: "Track must belong to user",
-        });
-        return next();
-      }
-
       await updateTrackArtists(Number(trackId), trackArtists);
 
       const newTrack = await prisma.track.update({
@@ -106,7 +92,7 @@ export default function () {
     const loggedInUser = req.user as User;
 
     const trackId = Number(trackIdString);
-    const track = await doesTrackBelongToUser(trackId, Number(loggedInUser.id));
+    const track = await doesTrackBelongToUser(trackId, loggedInUser);
     if (!track) {
       res.status(400).json({
         error: "Track must belong to user",

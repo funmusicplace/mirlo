@@ -5,6 +5,7 @@ import {
   TrackGroupCover,
   Prisma,
   TrackGroupTag,
+  User,
 } from "@mirlo/prisma/client";
 import prisma from "@mirlo/prisma";
 import { generateFullStaticImageUrl } from "./images";
@@ -349,11 +350,11 @@ export const basicTrackGroupInclude = {
 
 export const findPurchaseAndVoidToken = async (
   trackGroupId: number,
-  userId: number
+  user: User
 ) => {
   let isCreator;
   try {
-    isCreator = await doesTrackGroupBelongToUser(Number(trackGroupId), userId);
+    isCreator = await doesTrackGroupBelongToUser(Number(trackGroupId), user);
   } catch (e) {}
   logger.info(`trackGroupId: ${trackGroupId} isCreator: ${isCreator}`);
 
@@ -362,7 +363,7 @@ export const findPurchaseAndVoidToken = async (
       trackGroupId: Number(trackGroupId),
       ...(!isCreator
         ? {
-            userId: Number(userId),
+            userId: Number(user.id),
             trackGroup: {
               published: true,
             },

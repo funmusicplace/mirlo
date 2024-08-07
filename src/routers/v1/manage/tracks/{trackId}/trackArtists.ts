@@ -3,9 +3,7 @@ import {
   trackBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";
-import { doesTrackBelongToUser } from "../../../../../utils/ownership";
 import { updateTrackArtists } from "../../../../../utils/tracks";
-import { User } from "@mirlo/prisma/client";
 
 interface TrackBody {
   title: string;
@@ -28,22 +26,9 @@ export default function () {
     const { trackId } = req.params as {
       trackId: string;
     };
-    const loggedInUser = req.user as User;
 
     const { trackArtists } = req.body as TrackBody;
     try {
-      const track = await doesTrackBelongToUser(
-        Number(trackId),
-        Number(loggedInUser.id)
-      );
-
-      if (!track) {
-        res.status(400).json({
-          error: "Track must belong to user",
-        });
-        return next();
-      }
-
       const newTrackArtists = await updateTrackArtists(
         Number(trackId),
         trackArtists

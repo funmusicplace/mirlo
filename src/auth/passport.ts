@@ -8,6 +8,7 @@ import prisma from "@mirlo/prisma";
 import { findArtistIdForURLSlug } from "../utils/artist";
 import logger from "../logger";
 import { AppError } from "../utils/error";
+import { doesTrackGroupBelongToUser } from "../utils/ownership";
 
 const JWTStrategy = passportJWT.Strategy;
 
@@ -165,21 +166,7 @@ export const trackGroupBelongsToLoggedInUser = async (
         httpCode: 401,
       });
     } else {
-      const trackGroup = await prisma.trackGroup.findFirst({
-        where: {
-          artist: {
-            userId: loggedInUser.id,
-          },
-          id: Number(trackGroupId),
-        },
-      });
-
-      if (!trackGroup) {
-        throw new AppError({
-          description: "TrackGroup does not exist or does not belong to user",
-          httpCode: 404,
-        });
-      }
+      await doesTrackGroupBelongToUser(Number(trackGroupId), loggedInUser);
     }
   } catch (e) {
     return next(e);
@@ -205,6 +192,9 @@ export const trackBelongsToLoggedInUser = async (
         httpCode: 401,
       });
     } else {
+      if (loggedInUser.isAdmin) {
+        return next();
+      }
       const track = await prisma.track.findFirst({
         where: {
           trackGroup: {

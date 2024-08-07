@@ -33,7 +33,7 @@ export default function () {
     const { trackId } = req.params as unknown as Params;
     const loggedInUser = req.user as User;
     try {
-      const track = doesTrackBelongToUser(Number(trackId), loggedInUser.id);
+      const track = doesTrackBelongToUser(Number(trackId), loggedInUser);
 
       if (!track) {
         res.status(400).json({

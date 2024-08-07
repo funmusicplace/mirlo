@@ -34,7 +34,7 @@ export default function () {
     const { trackGroupId } = req.params as unknown as Params;
     const loggedInUser = req.user as User;
     try {
-      await doesTrackGroupBelongToUser(Number(trackGroupId), loggedInUser.id);
+      await doesTrackGroupBelongToUser(Number(trackGroupId), loggedInUser);
 
       const jobId = await processTrackGroupCover({ req, res })(
         Number(trackGroupId)
@@ -85,7 +85,7 @@ export default function () {
     try {
       const trackgroup = await doesTrackGroupBelongToUser(
         Number(trackGroupId),
-        loggedInUser.id
+        loggedInUser
       );
 
       await deleteTrackGroupCover(trackgroup.id);
