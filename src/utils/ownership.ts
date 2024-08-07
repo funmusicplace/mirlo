@@ -1,4 +1,9 @@
-import { ArtistSubscriptionTier, Prisma } from "@mirlo/prisma/client";
+import {
+  ArtistSubscriptionTier,
+  Prisma,
+  TrackGroup,
+  User,
+} from "@mirlo/prisma/client";
 
 import prisma from "@mirlo/prisma";
 import { AppError } from "./error";
@@ -27,36 +32,39 @@ export const doesSubscriptionTierBelongToUser = async (
 
 export const doesTrackGroupBelongToUser = async (
   trackGroupId: number,
-  userId: number
+  user: User
 ) => {
-  const artists = await prisma.artist.findMany({
-    where: {
-      userId: Number(userId),
-    },
-  });
+  let trackGroup;
+  if (user.isAdmin) {
+    trackGroup = await prisma.trackGroup.findFirst({
+      where: {
+        id: Number(trackGroupId),
+      },
+      include: trackGroupSingleInclude({ loggedInUserId: user.id }),
+    });
+  } else {
+    trackGroup = await prisma.trackGroup.findFirst({
+      where: {
+        artist: {
+          userId: user.id,
+        },
+        id: Number(trackGroupId),
+      },
+      include: trackGroupSingleInclude({ loggedInUserId: user.id }),
+    });
+  }
 
-  const trackgroup = await prisma.trackGroup.findFirst({
-    where: {
-      artistId: { in: artists.map((a) => a.id) },
-      id: Number(trackGroupId),
-    },
-    include: trackGroupSingleInclude({ loggedInUserId: userId }),
-  });
-
-  if (!trackgroup) {
+  if (!trackGroup) {
     throw new AppError({
       description: "TrackGroup does not exist or does not belong to user",
       httpCode: 404,
       name: "TrackGroup does not exist or does not belong to user",
     });
   }
-  return trackgroup;
+  return trackGroup;
 };
 
-export const doesTrackBelongToUser = async (
-  trackId: number,
-  userId: number
-) => {
+export const doesTrackBelongToUser = async (trackId: number, user: User) => {
   try {
     const track = await prisma.track.findUnique({
       where: {
@@ -67,7 +75,7 @@ export const doesTrackBelongToUser = async (
     if (track) {
       const trackGroup = await doesTrackGroupBelongToUser(
         track?.trackGroupId,
-        userId
+        user
       );
       if (trackGroup) {
         return track;
@@ -80,10 +88,7 @@ export const doesTrackBelongToUser = async (
   }
 };
 
-export const canUserListenToTrack = async (
-  trackId?: number,
-  userId?: number
-) => {
+export const canUserListenToTrack = async (trackId?: number, user?: User) => {
   if (!trackId) {
     return false;
   }
@@ -98,8 +103,8 @@ export const canUserListenToTrack = async (
     return true;
   }
 
-  if (track && userId) {
-    const trackGroup = await doesTrackBelongToUser(track.trackGroupId, userId);
+  if (track && user) {
+    const trackGroup = await doesTrackBelongToUser(track.trackGroupId, user);
     if (trackGroup) {
       return true;
     }
@@ -107,7 +112,7 @@ export const canUserListenToTrack = async (
     const purchase = await prisma.userTrackGroupPurchase.findFirst({
       where: {
         trackGroupId: track.trackGroupId,
-        userId: userId,
+        userId: user.id,
       },
     });
 

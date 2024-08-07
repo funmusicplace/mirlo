@@ -66,7 +66,7 @@ export default function () {
 
       const isUserAbleToListenToTrack = await canUserListenToTrack(
         track?.id,
-        user?.id
+        user
       );
 
       if (!track || !isUserAbleToListenToTrack) {

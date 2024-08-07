@@ -24,7 +24,7 @@ export default function () {
     try {
       const trackGroup = await doesTrackGroupBelongToUser(
         Number(trackGroupId),
-        loggedInUser.id
+        loggedInUser
       );
 
       await Promise.all(

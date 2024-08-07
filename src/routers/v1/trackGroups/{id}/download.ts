@@ -34,12 +34,12 @@ export default function () {
       let trackGroup;
 
       if (req.user) {
-        const { id: userId, isAdmin } = req.user as User;
+        const user = req.user as User;
 
-        if (!isAdmin) {
+        if (!user.isAdmin) {
           const purchase = await findPurchaseAndVoidToken(
             Number(trackGroupId),
-            userId
+            user
           );
 
           trackGroup = purchase.trackGroup;

@@ -16,7 +16,7 @@ export default function () {
     try {
       const trackGroup = await doesTrackGroupBelongToUser(
         Number(trackGroupId),
-        Number(loggedInUser.id)
+        loggedInUser
       );
       const updatedTrackgroup = await prisma.trackGroup.update({
         where: { id: Number(trackGroupId) || undefined },

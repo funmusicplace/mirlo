@@ -39,7 +39,7 @@ const findNewSlug = async (
 
 export default function () {
   const operations = {
-    PUT: [userAuthenticated, contentBelongsToLoggedInUserArtist, PUT],
+    PUT: [userAuthenticated, trackGroupBelongsToLoggedInUser, PUT],
     DELETE: [userAuthenticated, trackGroupBelongsToLoggedInUser, DELETE],
     GET: [userAuthenticated, trackGroupBelongsToLoggedInUser, GET],
   };
@@ -75,15 +75,14 @@ export default function () {
   async function PUT(req: Request, res: Response, next: NextFunction) {
     const { trackGroupId } = req.params as unknown as Params;
     const data = req.body;
-    const loggedInUser = req.user as User;
 
     try {
       const artist = (await prisma.artist.findFirst({
         where: {
-          userId: loggedInUser.id,
           id: Number(data.artistId),
         },
       })) as Artist; // By now we know that the artist exists
+      // and the user can edit it
 
       const newValues = pick(data, [
         "title",
@@ -94,6 +93,8 @@ export default function () {
         "minPrice",
         "credits",
       ]);
+
+      console.log(newValues);
 
       await prisma.trackGroup.updateMany({
         where: { id: Number(trackGroupId), artistId: artist.id },
