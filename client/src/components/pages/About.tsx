@@ -35,9 +35,10 @@ const About: React.FC = () => {
             needs a radical re-imagination.
           </p>
           <p>
-            Mirlo is a community of musicians, listeners, and coders who are
-            daring to do just that: taking lessons learned in working in the
-            solidarity economy and applying them to our process and product.
+            Mirlo is a community of musicians, listeners, cultural workers, and
+            coders who are daring to do just that: taking lessons learned in
+            working in the solidarity economy and applying them to our process
+            and product.
           </p>
           <p>
             We are building an online audio distribution (think Bandcamp) and
@@ -91,20 +92,21 @@ const About: React.FC = () => {
 
           <p>
             Our members have experience working both within Resonate and Ampled,
-            other co-ops across several industries, and complex high-traffic web
-            platforms. We envision this platform as a tool to support musicians
-            in cultivating direct and reciprocal relationships and resources to
-            sustain one another’s creative practice.
+            other co-ops across several industries, mutual aid and community
+            organizing efforts, and complex high-traffic web platforms. We
+            envision this platform as a tool to support musicians in cultivating
+            direct and reciprocal relationships and resources to sustain one
+            another’s creative practice.
           </p>
           <p>
             While Mirlo is legally incorporated as an LLC recognized by the
             United States of America, our work is hugely dependent on a network
-            of people who have helped us with get to where we are. We're
-            immensely grateful to everyone who is supporting us through labor or
-            financial contributions to get us here.
+            of people who have helped us get to where we are. We're immensely
+            grateful to everyone who is supporting us through labor or financial
+            contributions to get us here.
           </p>
           <p>
-            Mirlo is structured as a worked owned co-operative. Our three
+            Mirlo is structured as a worker owned co-operative. Our three
             worker-owners are featured on <a href="/team">our team page</a>.
           </p>
           <p>
