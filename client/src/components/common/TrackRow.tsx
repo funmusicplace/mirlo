@@ -82,11 +82,9 @@ const FirstTD = styled.td`
   }
   @media screen and (max-width: ${bp.small}px) {
     button {
-      padding: 0.5rem 0.65rem 0.5rem 0.1rem !important;
       background: none;
     }
     button:hover {
-      padding: 0.5rem 0.65rem 0.5rem 0.1rem !important;
       background: none !important;
     }
   }
