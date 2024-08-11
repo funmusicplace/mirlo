@@ -177,7 +177,7 @@ const CustomButton = styled.button<Compactable>`
               ? `white-space: normal !important;
                  height: auto;
                  line-height: 1.2rem;
-                 width: 100%;
+                 width: 94%;
                  word-break: break-word;
                  hyphens: auto;`
               : "white-space: nowrap;"
