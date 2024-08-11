@@ -174,8 +174,13 @@ const CustomButton = styled.button<Compactable>`
         return `
           ${
             props.wrap
-              ? "white-space: wrap !important; height: auto; line-height:  1.2rem; width: 100%;"
-              : ""
+              ? `white-space: normal !important;
+                 height: auto;
+                 line-height: 1.2rem;
+                 width: 100%;
+                 word-break: break-word;
+                 hyphens: auto;`
+              : "white-space: nowrap;"
           };
           ${props.small ? "height: 1.5rem; width: 1.5rem; " : ""}
           svg {
