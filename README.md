@@ -47,6 +47,15 @@ yarn install
 yarn client:start
 ```
 
+
+You can log in with these credentials:
+
+```
+admin@admin.com
+test1234
+```
+
+
 ## Email
 
 On production email gets sent by sendgrid. During local development emails appear in the docker logs for the api.
