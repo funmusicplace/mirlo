@@ -226,7 +226,6 @@ const CustomButton = styled.button<Compactable>`
   border-radius: var(--mi-border-radius);
   border-radius: ${(props) => (props.onlyIcon ? "100%" : "")};
   justify-content: center;
-  white-space: nowrap;
 
   &[disabled] {
     opacity: 0.6;
