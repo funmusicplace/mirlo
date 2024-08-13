@@ -112,7 +112,13 @@ const About: React.FC = () => {
           <p>
             We are still finalizing our Operating Agreement, but once it's
             finished we will share it here. We're pursuing a structure inspired
-            by Sociocracy.
+            by{" "}
+            <a href="https://www.sociocracyforall.org/sociocracy/">
+              Sociocracy
+            </a>
+            . Sociocracy is a governance system, just like democracy or
+            corporate governance methods. It values self-governance based on the
+            values of equality.
           </p>
           <h3>Structure FAQ</h3>
           <CollapsibleList>
@@ -124,12 +130,9 @@ const About: React.FC = () => {
                   different from other crowdfunding platforms because it:
                   <ul>
                     <li>
-                      is rooted in mutual aid and an explicitly anti-capitalist
-                      and anti-oppressive practice;
-                    </li>
-                    <li>
-                      is stewared by a worker co-op, which intends to
-                      exit-to-community as a multi-stakeholder cooperative;
+                      is rooted in mutual aid and is stewared by a worker co-op,
+                      which intends to exit-to-community as a multi-stakeholder
+                      cooperative;
                     </li>
                     <li>
                       It’s open source and is working together with other
@@ -145,8 +148,7 @@ const About: React.FC = () => {
               answer={
                 <>
                   <p>
-                    We believe that the community is the platform and our goals,
-                    informed by our{" "}
+                    Our goals, informed by our{" "}
                     <a href="https://funmusic.place/observations-and-intent/">
                       Observations and Intent
                     </a>
@@ -165,7 +167,8 @@ const About: React.FC = () => {
                     <a href="https://blog.fracturedatlas.org/exit-to-community">
                       exit to our community
                     </a>
-                    .
+                    , by bringing in musicians and other key stakeholders into
+                    the decision making process.
                   </p>
                 </>
               }
@@ -208,6 +211,26 @@ const About: React.FC = () => {
                 </>
               }
             />
+            <CollapsibleLI
+              title="What are the main blockers facing Mirlo?"
+              answer={
+                <>
+                  <p>
+                    Our main blocker is paying our worker-owners to make space
+                    to work on Mirlo. Since we don't take venture capital money
+                    to fund our project we are almost entirely dependent on the
+                    support of our community. Want to talk about this?{" "}
+                    <a href="mailto:mirlodotspace@protonmail.com">via e-mail</a>{" "}
+                    or on{" "}
+                    <a href="https://discord.gg/XuV7F4YRqB">our Discord</a>.
+                  </p>
+                  <p>
+                    Want to support us with a monthly gift? Do so on{" "}
+                    <a href="/team/support">our team's</a> Mirlo profile.
+                  </p>
+                </>
+              }
+            />
           </CollapsibleList>
         </div>
         <H2>What we're building</H2>
@@ -225,7 +248,7 @@ const About: React.FC = () => {
             }
           />
           <CollapsibleLI
-            title={"Tell me about your tech stack"}
+            title="Tell me about your tech stack"
             answer={
               <>
                 Our front-end is a TypeScript react app and our back-end is a
@@ -238,7 +261,7 @@ const About: React.FC = () => {
             }
           />
           <CollapsibleLI
-            title={"Are you open source?"}
+            title="Are you open source?"
             answer={
               <>
                 Yes! And we want your help 🙂.{" "}
@@ -263,19 +286,7 @@ const About: React.FC = () => {
               </>
             }
           />
-          <CollapsibleLI
-            title="What are the main blockers facing Mirlo?"
-            answer={
-              <>
-                Our main blocker is getting the word out! If you want to help
-                out with marketing,{" "}
-                <a href="mailto:mirlodotspace@protonmail.com">
-                  please reach out
-                </a>
-                !
-              </>
-            }
-          />
+
           <CollapsibleLI
             title="What file formats do you support?"
             answer={
