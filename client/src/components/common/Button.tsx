@@ -174,8 +174,13 @@ const CustomButton = styled.button<Compactable>`
         return `
           ${
             props.wrap
-              ? "white-space: wrap !important; height: auto; line-height:  1.2rem; width: 100%;"
-              : ""
+              ? `white-space: normal !important;
+                 height: auto;
+                 line-height: 1.2rem;
+                 width: 94%;
+                 word-break: break-word;
+                 hyphens: auto;`
+              : "white-space: nowrap;"
           };
           ${props.small ? "height: 1.5rem; width: 1.5rem; " : ""}
           svg {
@@ -221,7 +226,6 @@ const CustomButton = styled.button<Compactable>`
   border-radius: var(--mi-border-radius);
   border-radius: ${(props) => (props.onlyIcon ? "100%" : "")};
   justify-content: center;
-  white-space: nowrap;
 
   &[disabled] {
     opacity: 0.6;
