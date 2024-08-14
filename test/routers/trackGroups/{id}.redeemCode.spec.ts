@@ -52,11 +52,11 @@ describe("trackGroups/{id}/redeemCode", () => {
       const artist = await createArtist(user.id);
       const trackGroup = await createTrackGroup(artist.id);
 
-      const { user: purchaser } = await createUser({
+      await createUser({
         email: "purchaser@artist.com",
       });
 
-      const code = await prisma.trackGroupDownloadCodes.create({
+      await prisma.trackGroupDownloadCodes.create({
         data: {
           trackGroupId: trackGroup.id,
           downloadCode: "asdf",

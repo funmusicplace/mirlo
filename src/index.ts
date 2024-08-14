@@ -87,6 +87,7 @@ const routes = [
   "artists/{id}/unfollow",
   "posts",
   "posts/{id}",
+  "licenses",
   "users",
   "users/{userId}",
   "users/{userId}/confirmEmail",

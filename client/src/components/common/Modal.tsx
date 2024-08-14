@@ -117,7 +117,7 @@ const close = css`
 export const Modal: React.FC<{
   open: boolean;
   children: React.ReactNode;
-  title?: string;
+  title?: string | null;
   onClose: () => void;
   size?: "small";
   className?: string;

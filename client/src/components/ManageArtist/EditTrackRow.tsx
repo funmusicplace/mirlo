@@ -1,7 +1,7 @@
 import React from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { InputEl } from "components/common/Input";
-import { FaEllipsisV, FaSave, FaTimes, FaUpload } from "react-icons/fa";
+import { FaSave, FaTimes, FaUpload } from "react-icons/fa";
 import { css } from "@emotion/css";
 import { useTranslation } from "react-i18next";
 import Tooltip from "components/common/Tooltip";
@@ -15,11 +15,13 @@ import useJobStatusCheck from "utils/useJobStatusCheck";
 import LoadingSpinner from "components/common/LoadingSpinner";
 import Button from "components/common/Button";
 import { useAuthContext } from "state/AuthContext";
+import ManageTrackLicense from "./ManageTrackLicense";
 
 export interface FormData {
   title: string;
   status: "preview" | "must-own";
   trackFile: FileList;
+  licenseId: number;
 }
 
 const EditTrackRow: React.FC<{
@@ -29,7 +31,6 @@ const EditTrackRow: React.FC<{
 }> = ({ track, onCancelEditing: cancelEditing, reload }) => {
   const [isSaving, setIsSaving] = React.useState(false);
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
-  const [showMoreDetails, setShowMoreDetails] = React.useState(false);
   const { uploadJobs, setUploadJobs } = useJobStatusCheck({
     reload: cancelEditing,
   });
@@ -38,6 +39,7 @@ const EditTrackRow: React.FC<{
     defaultValues: {
       title: track.title,
       status: track.isPreview ? "preview" : "must-own",
+      licenseId: track.licenseId,
     },
   });
 
@@ -51,17 +53,22 @@ const EditTrackRow: React.FC<{
     reset({
       title: track.title,
       status: track.isPreview ? "preview" : "must-own",
+      licenseId: track.licenseId,
     });
     cancelEditing();
   }, [reset, track, cancelEditing]);
 
   const onSave = React.useCallback(
     async (formData: FormData) => {
+      console.log("formData", formData);
       try {
         setIsSaving(true);
         const packet = {
           title: formData.title,
           isPreview: formData.status === "preview",
+          licenseId: formData.licenseId
+            ? Number(formData.licenseId)
+            : undefined,
         };
 
         await api.put<Partial<Track>, { track: Track }>(
@@ -187,34 +194,26 @@ const EditTrackRow: React.FC<{
                 : ""}
             `}
           />
-          <Tooltip hoverText={t("moreTrackDetails")} underline={false}>
-            <Button
-              disabled={isSaving || isDisabled}
-              compact
-              variant="dashed"
-              startIcon={<FaEllipsisV />}
-              onClick={() => setShowMoreDetails((val) => !val)}
-              type="button"
-            />
-          </Tooltip>
         </td>
       </tr>
-      {showMoreDetails && (
-        <tr>
-          <td colSpan={99}>
-            <div
-              className={css`
-                max-width: 600px;
-                max-height: 200px;
-                overflow: scroll;
-              `}
-            >
-              <strong>raw id3 tag: </strong>
-              {JSON.stringify(track.metadata, null, 2)}
-            </div>
-          </td>
-        </tr>
-      )}
+      <tr>
+        <td colSpan={2}>
+          <ManageTrackLicense />
+        </td>
+        <td />
+        <td colSpan={99}>
+          <div
+            className={css`
+              max-width: 600px;
+              max-height: 200px;
+              overflow: scroll;
+            `}
+          >
+            <strong>raw id3 tag: </strong>
+            {JSON.stringify(track.metadata, null, 2)}
+          </div>
+        </td>
+      </tr>
     </FormProvider>
   );
 };

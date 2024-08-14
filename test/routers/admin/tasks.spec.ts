@@ -3,14 +3,7 @@ import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
 import request from "supertest";
-import {
-  clearTables,
-  createArtist,
-  createTrackGroup,
-  createUser,
-} from "../../utils";
-import prisma from "@mirlo/prisma";
-import { randomUUID } from "crypto";
+import { clearTables, createUser } from "../../utils";
 
 const baseURL = `${process.env.API_DOMAIN}/v1/`;
 

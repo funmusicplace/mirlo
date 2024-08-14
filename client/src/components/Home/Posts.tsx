@@ -3,16 +3,15 @@ import { css } from "@emotion/css";
 import { SectionHeader } from "./Home";
 import WidthContainer from "components/common/WidthContainer";
 import { useTranslation } from "react-i18next";
-import PostCard from "components/Post/PostCard";
 import { useQuery } from "@tanstack/react-query";
 import { queryPosts } from "queries";
 import PostGrid from "components/Post/PostGrid";
 
 const Posts = () => {
   const { t } = useTranslation("translation", { keyPrefix: "home" });
-  const { data: posts } = useQuery(queryPosts({ take: 3 }));
-
-  if (posts?.results?.length === 0) {
+  const response = useQuery(queryPosts({ take: 3 }));
+  const { data: posts } = response;
+  if (posts?.results?.length === 0 || posts === undefined) {
     return null;
   }
 
