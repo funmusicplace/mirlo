@@ -50,18 +50,20 @@ const Releases = () => {
       `}
     >
       {" "}
-      <SectionHeader>
-        <WidthContainer variant="big">
-          <h2 className="h5 section-header__heading">Popular Tags</h2>
-          <div
-            className={css`
-              margin: 0 0.5rem;
-            `}
-          >
-            <TrackGroupPills tags={tags?.results.map((tag) => tag.tag)} />
-          </div>
-        </WidthContainer>
-      </SectionHeader>
+      {!tag && (
+        <SectionHeader>
+          <WidthContainer variant="big">
+            <h2 className="h5 section-header__heading">Popular Tags</h2>
+            <div
+              className={css`
+                margin: 0 0.5rem;
+              `}
+            >
+              <TrackGroupPills tags={tags?.results.map((tag) => tag.tag)} />
+            </div>
+          </WidthContainer>
+        </SectionHeader>
+      )}
       <SectionHeader>
         <WidthContainer variant="big" justify="center">
           <h1 className="h5 section-header__heading" id={headingId}>
