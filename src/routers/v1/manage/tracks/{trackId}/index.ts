@@ -12,6 +12,7 @@ import { User } from "@mirlo/prisma/client";
 interface TrackBody {
   title: string;
   isPreview: boolean;
+  licenseId: number;
   trackArtists?: {
     artistName: string;
     id: string;
@@ -30,7 +31,7 @@ export default function () {
 
   async function PUT(req: Request, res: Response, next: NextFunction) {
     const { trackId } = req.params;
-    const { title, isPreview, trackArtists } = req.body as TrackBody;
+    const { title, isPreview, trackArtists, licenseId } = req.body as TrackBody;
 
     try {
       await updateTrackArtists(Number(trackId), trackArtists);
@@ -40,6 +41,7 @@ export default function () {
         data: {
           title: title,
           isPreview: isPreview,
+          licenseId: Number(licenseId),
         },
         include: {
           trackArtists: true,

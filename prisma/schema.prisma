@@ -311,6 +311,16 @@ model Track {
   trackArtists TrackArtist[]
   metadata     Json?
   plays        TrackPlay[]
+  license      License?      @relation(fields: [licenseId], references: [id])
+  licenseId    Int?
+}
+
+model License {
+  id    Int     @id @default(autoincrement())
+  short String  @unique
+  name  String
+  link  String?
+  track Track[]
 }
 
 model TrackArtist {

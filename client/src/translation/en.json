@@ -254,7 +254,21 @@
     "managePost": "Manage post",
     "viewLive": "View live"
   },
+  "manageLicense": {
+    "shortLabelForLicense": "What's a unique short label for this license?",
+    "egShort": "eg. cc0",
+    "longLabel": "What's the full name of this license?",
+    "egLong": "No Rights Reserved",
+    "urlForLabel": "Where can others read more about this label?",
+    "egLink": "eg. https://creativecommons.org/public-domain/cc0/",
+    "add": "Add"
+  },
   "manageAlbum": {
+    "dontSeeTheLicenseYouWant": "Don't see the license you want for this track?",
+    "license": "Track license",
+    "addALicense": "Add a license",
+    "addIt": "Add it",
+    "whatMeanLicense": "Don't know what this means? Just leave it blank! By default all works are copyrighted",
     "editAlbum": "Edit album",
     "viewArtist": "Back to artist",
     "title": "Title",

@@ -144,6 +144,7 @@ export const trackGroupSingleInclude = (options: {
       include: {
         audio: true,
         trackArtists: true,
+        license: true,
       },
       orderBy: { order: "asc" },
     },

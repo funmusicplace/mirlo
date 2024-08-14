@@ -44,6 +44,12 @@ interface Track {
     isCoAuthor?: boolean;
     trackId?: number;
   }[];
+  licenseId?: number;
+  license?: {
+    short: string;
+    name: string;
+    link?: string;
+  };
 }
 
 interface Tag {
@@ -207,3 +213,9 @@ type AccountStatus = {
   chargesEnabled: boolean;
   detailsSubmitted: boolean;
 };
+
+interface License {
+  id: number;
+  short: string;
+  link?: string;
+}

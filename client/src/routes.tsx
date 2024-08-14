@@ -381,6 +381,15 @@ const routes: RouteObject[] = [
             },
           },
           {
+            path: "licenses",
+            async lazy() {
+              const { default: Component } = await import(
+                "components/Admin/AdminLicenses"
+              );
+              return { Component };
+            },
+          },
+          {
             path: "settings",
             async lazy() {
               const { default: Component } = await import(

@@ -11,6 +11,7 @@ import TrackRowPlayControl from "./TrackRowPlayControl";
 import { useAuthContext } from "state/AuthContext";
 import { useTranslation } from "react-i18next";
 import styled from "@emotion/styled";
+import Tooltip from "./Tooltip";
 
 const TR = styled.tr<{ canPlayTrack: boolean }>`
   ${(props) =>
@@ -210,6 +211,7 @@ const TrackRow: React.FC<{
           </div>
         </div>
       </TrackTitleTD>
+
       <td align="right">
         <Button
           compact
@@ -231,6 +233,24 @@ const TrackRow: React.FC<{
           `}
         ></Button>
       </td>
+      {track.license && track.license?.short !== "copyright" && (
+        <td>
+          <Tooltip hoverText={track.license.name}>
+            {track.license.link && (
+              <a
+                target="_blank"
+                href={track.license.link}
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+              >
+                {track.license.short}
+              </a>
+            )}
+            {!track.license.link && track.license.short}
+          </Tooltip>
+        </td>
+      )}
     </TR>
   );
 };
