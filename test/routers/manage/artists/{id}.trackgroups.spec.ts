@@ -43,7 +43,7 @@ describe("manage/artists/{artistId}/trackGroups", () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
       const artist = await createArtist(user.id);
       await createTrackGroup(artist.id, {
-        tracks: [] as Prisma.TrackCreateNestedManyWithoutTrackGroupInput,
+        tracks: [],
       });
       const response = await requestApp
         .get(`manage/artists/${artist.id}/trackGroups`)

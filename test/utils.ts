@@ -91,7 +91,9 @@ export const createTier = async (
 
 export const createTrackGroup = async (
   artistId: number,
-  data?: Partial<Prisma.TrackGroupCreateArgs["data"]>
+  data?: Partial<Prisma.TrackGroupCreateArgs["data"]> & {
+    tracks?: { title: string }[];
+  }
 ) => {
   const tg = await prisma.trackGroup.create({
     data: {

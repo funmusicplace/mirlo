@@ -49,7 +49,7 @@ describe("trackGroups", () => {
       const { user } = await createUser({ email: "test@testcom" });
       const artist = await createArtist(user.id);
       await createTrackGroup(artist.id, {
-        tracks: [] as Prisma.TrackCreateNestedManyWithoutTrackGroupInput,
+        tracks: [],
       });
       const response = await requestApp
         .get("trackGroups")
@@ -103,14 +103,14 @@ describe("trackGroups", () => {
     it("should limit to one by artist on distinctArtists", async () => {
       const { user } = await createUser({ email: "test@testcom" });
       const artist = await createArtist(user.id);
-      const mostRecent = await createTrackGroup(artist.id, {
+      await createTrackGroup(artist.id, {
         title: "most recent",
       });
-      const middle = await createTrackGroup(artist.id, {
+      await createTrackGroup(artist.id, {
         title: "middle",
         urlSlug: "a-second-album",
       });
-      const oldest = await createTrackGroup(artist.id, {
+      await createTrackGroup(artist.id, {
         title: "oldest",
         urlSlug: "a-oldest-album",
       });
