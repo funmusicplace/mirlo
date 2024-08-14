@@ -34,6 +34,7 @@ const Releases = () => {
   const { data: tags } = useQuery(
     queryTags({
       orderBy: "count",
+      take: 20,
     })
   );
 
