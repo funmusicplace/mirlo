@@ -20,7 +20,8 @@
     "recentReleases": "Recent releases",
     "releasesForTag": "Releases for <0>{{ tag }}</0>",
     "moreReleases": "More releases",
-    "viewAllArtists": "View all artists"
+    "viewAllArtists": "View all artists",
+    "popularTags": "Popular Tags"
   },
   "cookies": {
     "weUseCookies": "We use cookies to keep you logged in and to maintain your music queue.",

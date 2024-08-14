@@ -295,7 +295,6 @@ const routes: RouteObject[] = [
           },
         ],
       },
-
       {
         path: "admin",
         async lazy() {
@@ -404,6 +403,23 @@ const routes: RouteObject[] = [
                 `}
               >
                 <Releases />
+              </div>
+            ),
+          };
+        },
+      },
+      {
+        path: "tags",
+        async lazy() {
+          const { default: Tags } = await import("components/Tags");
+          return {
+            Component: () => (
+              <div
+                className={css`
+                  width: 100%;
+                `}
+              >
+                <Tags />
               </div>
             ),
           };
