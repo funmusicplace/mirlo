@@ -73,11 +73,9 @@ const FirstTD = styled.td`
   height: 30px;
 
   button {
-    padding: 0.5rem 0.65rem 0.5rem 0.4rem !important;
     background: none;
   }
   button:hover {
-    padding: 0.5rem 0.65rem 0.5rem 0.4rem !important;
     background: none !important;
   }
   @media screen and (max-width: ${bp.small}px) {
