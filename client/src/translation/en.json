@@ -37,8 +37,8 @@
     "behindThePlatformText": "Our members have experience working both within Resonate and Ampled, other co-ops across several industries, and complex high-traffic web platforms. We envision this platform as a tool to support artists in cultivating direct and reciprocal relationships and resources to sustain one another’s creative practice.",
     "pricingAndFeatures": "Pricing & Features",
     "featuresText": "<p>Mirlo provides a space for artists to upload their music, establish their online presence, sell their music, and gain monthly financial supporters.</p><p>For a thorough look at our features for artists, <featuresLink>check out our features page</featuresLink>.</p>",
-    "pricingText": "<p>Mirlo takes a 7% cut of all transactions. So if a musician sells an album on for $10, Mirlo will earn 70 cents. <i>Then</i>, our payment processor Stripe, will take a cut, which is 2.9% + 30c (so much larger on small transactions).</p><p>Want to know more about how we calculated our take rate? Check out <takeRate>our blog post explaining how we got there</takeRate>.</p> <p>While we hope to be fully funded by transactions on Mirlo, in the mean time we're dependent on direct monthly financial contributions. <giveDirectly>Support Mirlo with a monthly contribution</giveDirectly>.</p>",
-    "morePricing": "As we develop our product and come to terms with costs of running it, we will tweak these numbers and explore new ways of paying for the service and our work"
+    "pricingText": "<p>Mirlo takes a 7% cut of all transactions. So if an artist sells an album on for $10, Mirlo will earn 70 cents. <i>Then</i>, our payment processor Stripe, will take a cut, which is 2.9% + 30c (so much larger on small transactions).</p><p>Want to know more about how we calculated our take rate? Check out <takeRate>our blog post explaining how we got there</takeRate>.</p> <p>While we hope to be fully funded by transactions on Mirlo, in the mean time we're dependent on direct monthly financial contributions. <giveDirectly>Support Mirlo with a monthly contribution</giveDirectly>.</p>",
+    "morePricing": "As we develop our product and come to terms with costs of running it, we will tweak these numbers and explore new ways of paying for the service and our work."
   },
   "logIn": {
     "logIn": "Log in",
@@ -133,7 +133,7 @@
     "follow": "Follow",
     "enterEmail": "Enter your email:",
     "unsubscribeFromArtist": "Stop receiving emails from this artist",
-    "stopReceivingUpdates": "Stop receiving updates",
+    "stopReceivingUpdates": "Stop receiving posts",
     "ableToSupport": "Users will be able to subscribe here",
     "unfollow": "Stop following",
     "oneTimeSupport": "Buy a drink",
@@ -144,8 +144,8 @@
     "support": "Support",
     "doesNotExist": "This artist does not exist or it does not have a public presence.",
     "edit": "Edit page",
-    "updates": "Updates",
-    "noUpdates": "There are no updates yet for this artist.",
+    "updates": "Posts",
+    "noUpdates": "There are no posts yet for this artist.",
     "releases": "Releases",
     "posts": "Posts",
     "justFollow": "Just follow",
@@ -233,7 +233,7 @@
     "delete": "Delete",
     "addNewPost": "Add new post",
     "releases": "Releases",
-    "updates": "Updates",
+    "updates": "Posts",
     "support": "Support",
     "yourAlbums": "Albums",
     "manageAlbum": "Manage",
@@ -295,7 +295,7 @@
     "moreTrackDetails": "More track details",
     "saveDraft": "Save draft",
     "createAlbum": "Create album",
-    "update": "Update",
+    "update": "Posts",
     "makePrivate": "Make private",
     "priceZeroOrMore": "Price must be zero or more.",
     "madePrivate": "Your album has been made private. People will no longer be able to see it.",
@@ -452,7 +452,7 @@
   },
   "welcome": {
     "welcome": "Welcome! Let's get you set up.",
-    "youCanChangeThis": "You can always change this later",
+    "youCanChangeThis": "You can always change this later.",
     "whatPublicName": "First, what's the public name of your artist?",
     "showInTheURL": "What should the artist page's URL be?",
     "thisWillLookLikeURL": "This will look like {{ url }}",
@@ -522,7 +522,7 @@
     "shouldSendEmail": "Should we send an email to your supporters when this post is published?",
     "shouldSendEmailContext": "If yes, we'll send an e-mail, if not, they'll get notified on the website.",
     "follow": "Everyone who pressed the follow button on your profile",
-    "ifNotPublic": "If not public, which of your subscription tier should be the minimum tier to receive your update?"
+    "ifNotPublic": "If not public, which of your subscription tier should be the minimum tier to receive your posts?"
   },
   "errorPage": {
     "reactError": "React error ",
