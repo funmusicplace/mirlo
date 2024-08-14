@@ -25,6 +25,12 @@ export const QUERY_KEY_TRACK_GROUPS = "trackGroups";
  * Categorizes any query that should be invalidated when any trackgroup is changed,
  * regardless of the trackGroupId.
  */
+export const QUERY_KEY_TAGS = "tags";
+
+/**
+ * Categorizes any query that should be invalidated when any trackgroup is changed,
+ * regardless of the trackGroupId.
+ */
 export const QUERY_KEY_POSTS = "trackGroups";
 
 export type QueryTag =

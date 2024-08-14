@@ -35,9 +35,10 @@ const About: React.FC = () => {
             needs a radical re-imagination.
           </p>
           <p>
-            Mirlo is a community of musicians, listeners, and coders who are
-            daring to do just that: taking lessons learned in working in the
-            solidarity economy and applying them to our process and product.
+            Mirlo is a community of musicians, listeners, cultural workers, and
+            coders who are daring to do just that: taking lessons learned in
+            working in the solidarity economy and applying them to our process
+            and product.
           </p>
           <p>
             We are building an online audio distribution (think Bandcamp) and
@@ -91,26 +92,33 @@ const About: React.FC = () => {
 
           <p>
             Our members have experience working both within Resonate and Ampled,
-            other co-ops across several industries, and complex high-traffic web
-            platforms. We envision this platform as a tool to support musicians
-            in cultivating direct and reciprocal relationships and resources to
-            sustain one another’s creative practice.
+            other co-ops across several industries, mutual aid and community
+            organizing efforts, and complex high-traffic web platforms. We
+            envision this platform as a tool to support musicians in cultivating
+            direct and reciprocal relationships and resources to sustain one
+            another’s creative practice.
           </p>
           <p>
             While Mirlo is legally incorporated as an LLC recognized by the
             United States of America, our work is hugely dependent on a network
-            of people who have helped us with get to where we are. We're
-            immensely grateful to everyone who is supporting us through labor or
-            financial contributions to get us here.
+            of people who have helped us get to where we are. We're immensely
+            grateful to everyone who is supporting us through labor or financial
+            contributions to get us here.
           </p>
           <p>
-            Mirlo is structured as a worked owned co-operative. Our three
+            Mirlo is structured as a worker owned co-operative. Our three
             worker-owners are featured on <a href="/team">our team page</a>.
           </p>
           <p>
             We are still finalizing our Operating Agreement, but once it's
             finished we will share it here. We're pursuing a structure inspired
-            by Sociocracy.
+            by{" "}
+            <a href="https://www.sociocracyforall.org/sociocracy/">
+              Sociocracy
+            </a>
+            . Sociocracy is a governance system, just like democracy or
+            corporate governance methods. It values self-governance based on the
+            values of equality.
           </p>
           <h3>Structure FAQ</h3>
           <CollapsibleList>
@@ -122,12 +130,9 @@ const About: React.FC = () => {
                   different from other crowdfunding platforms because it:
                   <ul>
                     <li>
-                      is rooted in mutual aid and an explicitly anti-capitalist
-                      and anti-oppressive practice;
-                    </li>
-                    <li>
-                      is stewared by a worker co-op, which intends to
-                      exit-to-community as a multi-stakeholder cooperative;
+                      is rooted in mutual aid and is stewared by a worker co-op,
+                      which intends to exit-to-community as a multi-stakeholder
+                      cooperative;
                     </li>
                     <li>
                       It’s open source and is working together with other
@@ -143,8 +148,7 @@ const About: React.FC = () => {
               answer={
                 <>
                   <p>
-                    We believe that the community is the platform and our goals,
-                    informed by our{" "}
+                    Our goals, informed by our{" "}
                     <a href="https://funmusic.place/observations-and-intent/">
                       Observations and Intent
                     </a>
@@ -163,7 +167,8 @@ const About: React.FC = () => {
                     <a href="https://blog.fracturedatlas.org/exit-to-community">
                       exit to our community
                     </a>
-                    .
+                    , by bringing in musicians and other key stakeholders into
+                    the decision making process.
                   </p>
                 </>
               }
@@ -206,6 +211,26 @@ const About: React.FC = () => {
                 </>
               }
             />
+            <CollapsibleLI
+              title="What are the main blockers facing Mirlo?"
+              answer={
+                <>
+                  <p>
+                    Our main blocker is paying our worker-owners to make space
+                    to work on Mirlo. Since we don't take venture capital money
+                    to fund our project we are almost entirely dependent on the
+                    support of our community. Want to talk about this?{" "}
+                    <a href="mailto:mirlodotspace@protonmail.com">via e-mail</a>{" "}
+                    or on{" "}
+                    <a href="https://discord.gg/XuV7F4YRqB">our Discord</a>.
+                  </p>
+                  <p>
+                    Want to support us with a monthly gift? Do so on{" "}
+                    <a href="/team/support">our team's</a> Mirlo profile.
+                  </p>
+                </>
+              }
+            />
           </CollapsibleList>
         </div>
         <H2>What we're building</H2>
@@ -223,7 +248,7 @@ const About: React.FC = () => {
             }
           />
           <CollapsibleLI
-            title={"Tell me about your tech stack"}
+            title="Tell me about your tech stack"
             answer={
               <>
                 Our front-end is a TypeScript react app and our back-end is a
@@ -236,7 +261,7 @@ const About: React.FC = () => {
             }
           />
           <CollapsibleLI
-            title={"Are you open source?"}
+            title="Are you open source?"
             answer={
               <>
                 Yes! And we want your help 🙂.{" "}
@@ -261,19 +286,7 @@ const About: React.FC = () => {
               </>
             }
           />
-          <CollapsibleLI
-            title="What are the main blockers facing Mirlo?"
-            answer={
-              <>
-                Our main blocker is getting the word out! If you want to help
-                out with marketing,{" "}
-                <a href="mailto:mirlodotspace@protonmail.com">
-                  please reach out
-                </a>
-                !
-              </>
-            }
-          />
+
           <CollapsibleLI
             title="What file formats do you support?"
             answer={

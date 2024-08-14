@@ -2,7 +2,7 @@ import { css } from "@emotion/css";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useSnackbar } from "state/SnackbarContext";
 
 import api from "../../services/api";
@@ -106,6 +106,15 @@ function ProfileForm() {
           {t("updateProfileButton")}
         </Button>
       </form>
+      <Link
+        className={css`
+          margin-top: 1rem;
+          display: block;
+        `}
+        to="/password-reset"
+      >
+        {t("resetPasswordLink")}
+      </Link>
     </FormProvider>
   );
 }

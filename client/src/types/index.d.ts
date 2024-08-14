@@ -46,6 +46,10 @@ interface Track {
   }[];
 }
 
+interface Tag {
+  tag: string;
+}
+
 interface TrackGroup {
   title: string;
   published: boolean;

@@ -11,6 +11,8 @@ import usePagination from "utils/usePagination";
 import { useSearchParams } from "react-router-dom";
 import { queryTrackGroups } from "queries";
 import { useQuery } from "@tanstack/react-query";
+import { queryTags } from "queries/tags";
+import TrackGroupPills from "./TrackGroup/TrackGroupPills";
 
 const pageSize = 40;
 
@@ -29,6 +31,12 @@ const Releases = () => {
     })
   );
 
+  const { data: tags } = useQuery(
+    queryTags({
+      orderBy: "count",
+    })
+  );
+
   const id = useId();
   const headingId = `${id}-recent-releases`;
 
@@ -40,6 +48,19 @@ const Releases = () => {
         }
       `}
     >
+      {" "}
+      <SectionHeader>
+        <WidthContainer variant="big">
+          <h2 className="h5 section-header__heading">Popular Tags</h2>
+          <div
+            className={css`
+              margin: 0 0.5rem;
+            `}
+          >
+            <TrackGroupPills tags={tags?.results.map((tag) => tag.tag)} />
+          </div>
+        </WidthContainer>
+      </SectionHeader>
       <SectionHeader>
         <WidthContainer variant="big" justify="center">
           <h1 className="h5 section-header__heading" id={headingId}>
