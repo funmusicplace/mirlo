@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "module": "node16",
     "sourceMap": true,
     "outDir": "dist",
     "strict": true,

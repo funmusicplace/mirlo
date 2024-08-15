@@ -88,6 +88,7 @@ export default function () {
         logger.info("checking if trackgroup already zipped");
         await minioClient.statObject(trackGroupFormatBucket, zipName);
       } catch (e) {
+        logger.info("trackGroup doesn't exist yet, start generating it");
         const jobId = await startGeneratingAlbum(
           trackGroup,
           format,

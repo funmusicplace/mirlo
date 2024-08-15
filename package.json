@@ -31,6 +31,7 @@
     "express-openapi": "^12.1.0",
     "express-rate-limit": "^7.1.4",
     "file-type": "16",
+    "filenamify": "^4.3.0",
     "fluent-ffmpeg": "^2.1.2",
     "husky": "^8.0.3",
     "image-size": "^1.0.2",

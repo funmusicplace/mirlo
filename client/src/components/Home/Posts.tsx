@@ -11,12 +11,13 @@ const Posts = () => {
   const { t } = useTranslation("translation", { keyPrefix: "home" });
   const response = useQuery(queryPosts({ take: 3 }));
   const { data: posts } = response;
-  if (posts?.results?.length === 0 || posts === undefined) {
-    return null;
-  }
 
   const id = React.useId();
   const headingId = `${id}-community-posts`;
+
+  if (posts?.results?.length === 0 || posts === undefined) {
+    return null;
+  }
 
   return (
     <>
