@@ -13,6 +13,7 @@ import { convertAudioToFormat } from "../utils/tracks";
 import archiver from "archiver";
 import { PassThrough } from "stream";
 import { Track, TrackGroup } from "@mirlo/prisma/client";
+import filenamify from "filenamify";
 
 const {
   MINIO_HOST = "",
@@ -73,7 +74,7 @@ export default async (job: Job) => {
     let i = 0;
     for await (const track of tracks) {
       const minioTrackLocation = `${track.audio.id}/original.${track.audio.fileExtension}`;
-      logger.info(`${track.audio.id}: Fetching ${minioTrackLocation}`);
+      logger.info(`audioId ${track.audio.id}: Fetching ${minioTrackLocation}`);
       const originalTrackPath = `${tempFolder}/original.${track.audio.fileExtension}`;
 
       await minioClient.fGetObject(
@@ -96,7 +97,7 @@ export default async (job: Job) => {
           track.audio.id,
           createReadStream(originalTrackPath),
           format,
-          `${tempFolder}/${track.order ?? i}-${track.title}`,
+          `${tempFolder}/${track.order ?? i}-${filenamify(track.title ?? "")}`,
           reject,
           resolve
         );

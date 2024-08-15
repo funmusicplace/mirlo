@@ -2,7 +2,7 @@ import prisma from "@mirlo/prisma";
 import { finalAudioBucket, removeObjectsFromBucket } from "../utils/minio";
 import ffmpeg from "fluent-ffmpeg";
 import logger from "../logger";
-import { Readable, PassThrough } from "stream";
+import { Readable } from "stream";
 
 export const deleteTrack = async (trackId: number) => {
   await prisma.track.delete({
@@ -59,6 +59,10 @@ export const convertAudioToFormat = (
   onSuccess?: (dunno: null) => void
 ) => {
   const { format, audioBitrate, audioCodec } = formatDetails;
+  logger.info(
+    `audioId ${audioId}: converting ${format} going to ${goingTo} @${audioBitrate}`
+  );
+
   let destination = generateDestination(format, goingTo, audioBitrate);
   const processor = ffmpeg(stream)
     .noVideo()
