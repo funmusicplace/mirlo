@@ -67,27 +67,30 @@ const TR = styled.tr<{ canPlayTrack: boolean }>`
       width: 1rem !important;
       margin-right: 1rem !important;
     }
+    > td > .play-button {
+      margin-left: 0.5rem;
+    }
+    > td > .track-number {
+      margin-left: 0.5rem;
+    }
   }
 `;
+
 
 const FirstTD = styled.td`
   height: 30px;
 
   button {
-    padding: 0.5rem 0.65rem 0.5rem 0.4rem !important;
     background: none;
   }
   button:hover {
-    padding: 0.5rem 0.65rem 0.5rem 0.4rem !important;
     background: none !important;
   }
   @media screen and (max-width: ${bp.small}px) {
     button {
-      padding: 0.5rem 0.65rem 0.5rem 0.1rem !important;
       background: none;
     }
     button:hover {
-      padding: 0.5rem 0.65rem 0.5rem 0.1rem !important;
       background: none !important;
     }
   }
