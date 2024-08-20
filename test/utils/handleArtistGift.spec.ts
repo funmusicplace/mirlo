@@ -2,15 +2,15 @@ import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
 
-import { clearTables, createTrackGroup, createUser } from "../utils";
+import { clearTables, createUser } from "../utils";
 
 import prisma from "@mirlo/prisma";
 import assert from "assert";
 import sinon from "sinon";
 import * as sendMail from "../../src/jobs/send-mail";
-import { handleTrackGroupPurchase } from "../../src/utils/handleFinishedTransactions";
+import { handleArtistGift } from "../../src/utils/handleFinishedTransactions";
 
-describe("handleTrackGroupPurchase", () => {
+describe.only("handleArtistGift", () => {
   beforeEach(async () => {
     try {
       await clearTables();
@@ -44,22 +44,24 @@ describe("handleTrackGroupPurchase", () => {
       },
     });
 
-    const trackGroup = await createTrackGroup(artist.id, {
-      title: "Our Custom Title",
-    });
+    await handleArtistGift(purchaser.id, artist.id);
 
-    await handleTrackGroupPurchase(purchaser.id, trackGroup.id);
+    const tip = await prisma.userArtistTip.findFirst({
+      where: { userId: purchaser.id, artistId: artist.id },
+    });
 
     assert.equal(stub.calledTwice, true);
     const data0 = stub.getCall(0).args[0].data;
-    assert.equal(data0.template, "album-purchase-receipt");
+    assert.equal(data0.template, "artist-tip-receipt");
     assert.equal(data0.message.to, "follower@follower.com");
-    assert.equal(data0.locals.trackGroup.id, trackGroup.id);
-    assert.equal(data0.locals.purchase.pricePaid, 0);
+    assert.equal(data0.locals.tip.userId, tip?.userId);
+    assert.equal(data0.locals.tip.artistId, tip?.artistId);
+    assert.equal(data0.locals.tip.pricePaid, 0);
     const data1 = stub.getCall(1).args[0].data;
-    assert.equal(data1.template, "album-purchase-artist-notification");
+    assert.equal(data1.template, "tip-artist-notification");
     assert.equal(data1.message.to, artistUser.email);
-    assert.equal(data1.locals.trackGroup.id, trackGroup.id);
-    assert.equal(data1.locals.purchase.pricePaid, 0);
+    assert.equal(data1.locals.tip.userId, tip?.userId);
+    assert.equal(data1.locals.tip.artistId, tip?.artistId);
+    assert.equal(data1.locals.tip.pricePaid, 0);
   });
 });

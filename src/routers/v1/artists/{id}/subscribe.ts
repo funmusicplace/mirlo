@@ -10,6 +10,7 @@ import prisma from "@mirlo/prisma";
 const { API_DOMAIN } = process.env;
 
 import stripe, {
+  createCheckoutSessionForSubscription,
   createSubscriptionStripeProduct,
 } from "../../../../utils/stripe";
 import { deleteStripeSubscriptions } from "../../../../utils/artist";
@@ -48,8 +49,6 @@ export default function () {
     const loggedInUser = req.user as User | undefined;
 
     try {
-      const client = await prisma.client.findFirst({});
-
       if (loggedInUser) {
         const { id: userId } = loggedInUser;
         const user = await prisma.user.findFirst({
@@ -108,65 +107,19 @@ export default function () {
         });
       }
 
-      const productKey = await createSubscriptionStripeProduct(
-        newTier,
-        stripeAccountId
-      );
+      const session = await createCheckoutSessionForSubscription({
+        loggedInUser,
+        email,
+        stripeAccountId,
+        artistId: newTier.artistId,
+        tier: newTier,
+        amount,
+      });
+      logger.info(`Generated a Stripe checkout session ${session.id}`);
 
-      logger.info(
-        `Created a new product for artist ${artistId}, ${productKey}`
-      );
-
-      if (productKey) {
-        const session = await stripe.checkout.sessions.create(
-          {
-            billing_address_collection: "auto",
-            customer_email: loggedInUser?.email || email,
-            subscription_data: {
-              application_fee_percent:
-                newTier.platformPercent ??
-                (await getSiteSettings()).platformPercent / 100,
-            },
-            line_items: [
-              {
-                price_data: {
-                  tax_behavior: "exclusive",
-                  unit_amount: newTier.allowVariable
-                    ? amount || newTier.minAmount
-                    : newTier.minAmount ?? 0,
-                  currency: newTier.currency ?? "USD",
-                  product: productKey,
-                  recurring: { interval: "month" },
-                },
-                quantity: 1,
-              },
-            ],
-            metadata: {
-              clientId: client?.id ?? null,
-              artistId,
-              tierId,
-              userId: loggedInUser?.id ?? null,
-              userEmail: email ?? null,
-              stripeAccountId,
-            },
-            mode: "subscription",
-            success_url: `${API_DOMAIN}/v1/checkout?success=true&stripeAccountId=${stripeAccountId}&session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `${API_DOMAIN}/v1/checkout?canceled=true`,
-          },
-          {
-            stripeAccount: stripeAccountId,
-          }
-        );
-        logger.info(`Generated a Stripe checkout session ${session.id}`);
-
-        res.status(200).json({
-          sessionUrl: session.url,
-        });
-      } else {
-        res.status(500).json({
-          error: "Something went wrong while subscribing the user",
-        });
-      }
+      res.status(200).json({
+        sessionUrl: session.url,
+      });
     } catch (e) {
       next(e);
     }

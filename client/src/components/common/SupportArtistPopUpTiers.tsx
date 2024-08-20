@@ -78,7 +78,11 @@ const SupportArtistPopUpTiers = forwardRef<
             >
               <div>
                 <strong>
-                  {tier.name === "follow" ? t("justFollow") : <>{tier.name}:</>}
+                  {tier.name === "follow" ? (
+                    t("justFollow")
+                  ) : (
+                    <>{tier.name}: </>
+                  )}
                   {tier.minAmount ? (
                     <Money
                       amount={tier.minAmount ? tier.minAmount / 100 : 0}

@@ -159,6 +159,7 @@ interface User {
   artists: Artist[];
   updatedAt: string;
   createdAt: string;
+  currency: string;
   stripeAccountId?: string;
 }
 

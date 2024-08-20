@@ -52,6 +52,7 @@ model User {
   receivingNotifications              Notification[]                  @relation("receivingUser")
   relatedNotifications                Notification[]                  @relation("relatedUser")
   language                            String?
+  userArtistTip                       UserArtistTip[]
 }
 
 model UserArtistNotificationSetting {
@@ -146,6 +147,7 @@ model Artist {
   artistUserSubscriptionConfirmation ArtistUserSubscriptionConfirmation[]
   userArtistNotificationSettings     UserArtistNotificationSetting[]
   notifications                      Notification[]
+  userArtistTip                      UserArtistTip[]
 }
 
 model ArtistAvatar {
@@ -219,6 +221,19 @@ model ArtistUserSubscriptionConfirmation {
   tokenExpiration DateTime? @default(dbgenerated("(NOW() + '06:00:00'::interval)"))
 
   @@unique([email, artistId])
+}
+
+model UserArtistTip {
+  userId           Int
+  user             User     @relation(fields: [userId], references: [id])
+  artistId         Int
+  artist           Artist   @relation(fields: [artistId], references: [id])
+  pricePaid        Int // in cents
+  currencyPaid     String   @default("USD")
+  datePurchased    DateTime @default(now())
+  stripeSessionKey String?
+
+  @@unique([userId, artistId])
 }
 
 model UserTrackGroupPurchase {
