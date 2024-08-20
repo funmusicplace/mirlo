@@ -10,7 +10,7 @@ import sinon from "sinon";
 import * as sendMail from "../../src/jobs/send-mail";
 import { handleArtistGift } from "../../src/utils/handleFinishedTransactions";
 
-describe.only("handleArtistGift", () => {
+describe("handleArtistGift", () => {
   beforeEach(async () => {
     try {
       await clearTables();

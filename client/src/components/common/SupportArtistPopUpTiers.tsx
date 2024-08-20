@@ -2,7 +2,7 @@ import styled from "@emotion/styled";
 import { InputEl } from "./Input";
 import { useFormContext } from "react-hook-form";
 import { forwardRef } from "react";
-import Money from "./Money";
+import { moneyDisplay } from "./Money";
 import { useTranslation } from "react-i18next";
 
 const Label = styled.label`
@@ -83,14 +83,14 @@ const SupportArtistPopUpTiers = forwardRef<
                   ) : (
                     <>{tier.name}: </>
                   )}
-                  {tier.minAmount ? (
-                    <Money
-                      amount={tier.minAmount ? tier.minAmount / 100 : 0}
-                      currency={tier.currency}
-                    />
-                  ) : (
-                    ""
-                  )}
+                  {tier.minAmount
+                    ? t("tierMonthly", {
+                        amount: moneyDisplay({
+                          amount: tier.minAmount ? tier.minAmount / 100 : 0,
+                          currency: tier.currency,
+                        }),
+                      })
+                    : ""}
                 </strong>
                 <p>{tier.description}</p>
               </div>

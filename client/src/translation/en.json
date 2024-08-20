@@ -141,6 +141,7 @@
     "enterGiftAmount": "Choose tip amount",
     "orGiveOnce": "Or, you can give just this once",
     "otherGift": "Other",
+    "tierMonthly": "{{ amount }} per month",
     "ableToSupport": "Users will be able to subscribe here",
     "unfollow": "Stop following",
     "oneTimeSupport": "Buy a drink",

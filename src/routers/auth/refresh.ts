@@ -32,7 +32,7 @@ const refresh = (req: Request, res: Response, next: NextFunction) => {
             });
 
             if (!foundUser) {
-              return res.status(401).json({ message: "Unauthorized" });
+              return res.status(401).json({ error: "Unauthorized" });
             }
 
             setTokens(res, foundUser);
