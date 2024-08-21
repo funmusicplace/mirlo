@@ -126,7 +126,7 @@ const TipArtistForm: React.FC<{
                 id={`priceButton-${gift.value}`}
               />
               <label htmlFor={`priceButton-${gift.value}`}>
-                {gift.value !== "other"
+                {currency && gift.value !== "other"
                   ? moneyDisplay({
                       amount: gift.value,
                       currency,
@@ -165,12 +165,13 @@ const TipArtistForm: React.FC<{
           width: 100% !important;
         `}
       >
-        {t(!actualValue ? "enterGiftAmount" : "giveOnce", {
-          amount: moneyDisplay({
-            amount: actualValue,
-            currency,
-          }),
-        })}
+        {currency &&
+          t(!actualValue ? "enterGiftAmount" : "giveOnce", {
+            amount: moneyDisplay({
+              amount: actualValue,
+              currency,
+            }),
+          })}
       </Button>
     </div>
   );

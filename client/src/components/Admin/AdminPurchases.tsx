@@ -78,7 +78,7 @@ export const AdminPurchases: React.FC = () => {
           {Object.keys(total).map((currency) => (
             <tr key={currency}>
               <td>{currency}</td>
-              <Money amount={total[currency] / 100} />
+              <Money amount={total[currency] / 100} currency={currency} />
             </tr>
           ))}
         </tbody>
