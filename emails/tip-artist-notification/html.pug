@@ -1,0 +1,26 @@
+doctype html
+html
+  head
+    block head
+      meta(charset="utf-8")
+      meta(name="viewport", content="width=device-width")
+      meta(http-equiv="X-UA-Compatible", content="IE=edge")
+      meta(name="x-apple-disable-message-reformatting")
+      style 
+        include ../style.css
+  body.sans-serif
+    div
+      div.mw600
+        p 
+          | Hello #{tip.artist.user.name}!
+        p 
+          | Someone (#{email}) supported you with a one-time tip.
+
+        p 
+          | #{tip.currencyPaid.toUpperCase()} 
+          | #{pricePaid.toFixed(2)};
+          | (Mirlo percentage: #{platformCut.toFixed(2)}))
+
+      p The final money will be available via your Stripe dashboard
+      p If you have any questions please reach out to hi@mirlo.space
+

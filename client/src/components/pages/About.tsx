@@ -1,12 +1,13 @@
 import { Trans, useTranslation } from "react-i18next";
 import { PageMarkdownWrapper } from "components/Post/index";
 import { MetaCard } from "../common/MetaCard";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import MarkdownWrapper from "../common/MarkdownWrapper";
 import React from "react";
 import { css } from "@emotion/css";
 import styled from "@emotion/styled";
-import { FaChevronRight } from "react-icons/fa";
+import { FaChevronRight, FaLink } from "react-icons/fa";
+import { ButtonAnchor } from "components/common/Button";
 
 const H2 = styled.h2`
   margin-top: 2rem !important;
@@ -49,7 +50,9 @@ const About: React.FC = () => {
         </Trans>
 
         <div>
-          <H2>{t("pricingAndFeatures")}</H2>
+          <H2HashLink id="pricing-and-features">
+            {t("pricingAndFeatures")}
+          </H2HashLink>
 
           <Trans
             i18nKey="featuresText"
@@ -88,7 +91,7 @@ const About: React.FC = () => {
           </CollapsibleList>
         </div>
         <div>
-          <H2>Who's doing this work</H2>
+          <H2HashLink id="who">Who's doing this work</H2HashLink>
 
           <p>
             Our members have experience working both within Resonate and Ampled,
@@ -120,10 +123,11 @@ const About: React.FC = () => {
             corporate governance methods. It values self-governance based on the
             values of equality.
           </p>
-          <h3>Structure FAQ</h3>
+          <h3 id="structure-faq">Structure FAQ</h3>
           <CollapsibleList>
             <CollapsibleLI
               title="What makes Mirlo different from other products?"
+              id="different-from-other-products"
               answer={
                 <>
                   Mirlo allows for direct and ongoing support of artists. It’s
@@ -145,6 +149,7 @@ const About: React.FC = () => {
             />
             <CollapsibleLI
               title="What are the long term goals of Mirlo?"
+              id="long-term-goals"
               answer={
                 <>
                   <p>
@@ -233,73 +238,10 @@ const About: React.FC = () => {
             />
           </CollapsibleList>
         </div>
-        <H2>What we're building</H2>
-        <CollapsibleList>
-          <CollapsibleLI
-            title="Whats on your product roadmap?"
-            answer={
-              <>
-                Check out our{" "}
-                <a href="https://github.com/funmusicplace/mirlo/issues">
-                  GitHub issues tracker
-                </a>{" "}
-                for what we're working on
-              </>
-            }
-          />
-          <CollapsibleLI
-            title="Tell me about your tech stack"
-            answer={
-              <>
-                Our front-end is a TypeScript react app and our back-end is a
-                node TypeScript express app. We’re hosted on
-                <a href="https://render.com/">Render</a>. You can see all of{" "}
-                <a href="https://github.com/funmusicplace/mirlo/">
-                  our code on GitHub
-                </a>
-              </>
-            }
-          />
-          <CollapsibleLI
-            title="Are you open source?"
-            answer={
-              <>
-                Yes! And we want your help 🙂.{" "}
-                <a href="https://github.com/funmusicplace/mirlo">
-                  Check out our code
-                </a>
-                .
-              </>
-            }
-          />
-          <CollapsibleLI
-            title="Will you use my music for AI training purposes?"
-            answer={<>No!</>}
-          />
-          <CollapsibleLI
-            title="Can I help with testing?"
-            answer={
-              <>
-                Yes please! Reach out to either LLK or Si on the{" "}
-                <a href="https://discord.gg/XuV7F4YRqB">Discord</a> to get
-                started.
-              </>
-            }
-          />
-
-          <CollapsibleLI
-            title="What file formats do you support?"
-            answer={
-              <>
-                For upload we support lossless file formats (flac, wav). We
-                convert files across formats to be available to purchasers, as
-                well as converting them to HLS and a couple of mp3 bitrates.
-              </>
-            }
-          />
-        </CollapsibleList>
         <div>
-          <H2>Road to self-sustainability</H2>
+          <H2HashLink id="road-to-sustainability">
+            Road to self-sustainability
+          </H2HashLink>
           <p>
             Mirlo is an ambitious project, and to pull it off we will need money
             to pay ourselves for our time as well as for all the material costs
@@ -337,9 +279,123 @@ const About: React.FC = () => {
           </p>
         </div>
         <div>
-          <H2>Support, etc</H2>
-          <p>Here's some common questions asked!</p>
+          <H2HashLink id="what-we-build">What we're building</H2HashLink>
+          <p>
+            Some frequently asked questions about what and how we're building it
+          </p>
           <CollapsibleList>
+            <CollapsibleLI
+              title="Whats on your product roadmap?"
+              id="product-roadmap"
+              answer={
+                <>
+                  Check out our{" "}
+                  <a href="https://github.com/funmusicplace/mirlo/issues">
+                    GitHub issues tracker
+                  </a>{" "}
+                  for what we're working on, and what's on{" "}
+                  <a href="https://github.com/funmusicplace/mirlo/discussions/categories/ideas">
+                    our ideas list
+                  </a>{" "}
+                  to vote on what you'd like to see.
+                </>
+              }
+            />
+            <CollapsibleLI
+              title="Tell me about your tech stack"
+              id="tech-stack"
+              answer={
+                <>
+                  Our front-end is a TypeScript react app and our back-end is a
+                  node TypeScript express app. We’re hosted on
+                  <a href="https://render.com/">Render</a>. You can see all of{" "}
+                  <a href="https://github.com/funmusicplace/mirlo/">
+                    our code on GitHub
+                  </a>
+                </>
+              }
+            />
+            <CollapsibleLI
+              title="Are you open source?"
+              id="open-source"
+              answer={
+                <>
+                  Yes! And we want your help 🙂.{" "}
+                  <a href="https://github.com/funmusicplace/mirlo">
+                    Check out our code
+                  </a>
+                  .
+                </>
+              }
+            />
+            <CollapsibleLI
+              title="Will you use my music for AI training purposes?"
+              id="use-music-ai"
+              answer={<>No!</>}
+            />
+            <CollapsibleLI
+              title="Can I help with testing?"
+              id="can-help-testing"
+              answer={
+                <>
+                  Yes please! Reach out to either LLK or Si on the{" "}
+                  <a href="https://discord.gg/XuV7F4YRqB">Discord</a> to get
+                  started.
+                </>
+              }
+            />
+
+            <CollapsibleLI
+              title="What file formats do you support?"
+              id="file-formats-supported"
+              answer={
+                <>
+                  For upload we support lossless file formats (flac, wav). We
+                  convert files across formats to be available to purchasers, as
+                  well as converting them to HLS and a couple of mp3 bitrates.
+                </>
+              }
+            />
+          </CollapsibleList>
+        </div>
+        <div>
+          <H2HashLink id="support">Support, etc</H2HashLink>
+          <p>Here's some common questions asked!</p>
+
+          <CollapsibleList>
+            <CollapsibleLI
+              title="Do you have brand / logo guidelines?"
+              id="brand-logo-guide"
+              answer={
+                <>
+                  <p>
+                    Yes! Check out our{" "}
+                    <a href="/public/logo-guidelines-jun-30.pdf">
+                      logo guidelines as of June 30, 2024
+                    </a>
+                    .{" "}
+                  </p>
+                  <p>
+                    Logo downloads:{" "}
+                    <a href="/public/Logo-With-Wordmark.svg">
+                      SVG with wordmark
+                    </a>
+                    ,{" "}
+                    <a href="/public/Logo_Mirlo_Transparent_RedCircle.svg">
+                      SVG logo, red
+                    </a>
+                    ,{" "}
+                    <a href="/public/android-chrome-512x512.png">
+                      png logo, red (512x512)
+                    </a>
+                    ,{" "}
+                    <a href="/public/Logo_Mirlo_Transparent_BlackCircle.png">
+                      png logo, black and white (285x285)
+                    </a>
+                  </p>
+                </>
+              }
+            />
             <CollapsibleLI
               title="Can an artist make a listener account, will that be a problem in the future?"
               answer={
@@ -421,8 +477,18 @@ const CollapsibleList = styled.ul`
 const CollapsibleLI: React.FC<{
   title: string;
   answer: React.ReactElement;
-}> = ({ title, answer }) => {
+  id?: string;
+}> = ({ title, answer, id }) => {
+  const { hash } = useLocation();
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = React.useState(false);
+
+  React.useEffect(() => {
+    if (id && hash === `#${id}`) {
+      setIsOpen(true);
+    }
+  }, [hash, id]);
+
   return (
     <li
       className={css`
@@ -435,6 +501,7 @@ const CollapsibleLI: React.FC<{
           margin-top: 0.5rem;
         }
       `}
+      id={id}
     >
       <button
         className={css`
@@ -449,18 +516,62 @@ const CollapsibleLI: React.FC<{
 
           display: flex;
           align-items: center;
+          ${isOpen && `font-weight: bold;`}
 
           svg {
             margin-right: 0.5rem;
+
+            ${isOpen && `transform: rotate(90deg)`}
           }
         `}
-        onClick={() => setIsOpen((val) => !val)}
+        onClick={() => {
+          setIsOpen((val) => !val);
+          if (id) {
+            navigate(`#${id}`);
+          }
+        }}
       >
         <FaChevronRight />
-        {title}
+        <span
+          className={css`
+            display: flex;
+            width: 100%;
+            justify-content: space-between;
+          `}
+        >
+          {title}
+          {id && <FaLink />}
+        </span>
       </button>
       {isOpen && <div>{answer}</div>}
     </li>
+  );
+};
+
+const H2HashLink: React.FC<{
+  id: string;
+  children: React.ReactElement | null | string;
+}> = ({ id, children }) => {
+  return (
+    <Link
+      to={`#${id}`}
+      id={id}
+      className={css`
+        color: inherit;
+        text-decoration: none;
+
+        svg {
+          margin-left: 1rem;
+          font-size: 1rem;
+        }
+      `}
+    >
+      {" "}
+      <H2>
+        {children}
+        <FaLink />{" "}
+      </H2>
+    </Link>
   );
 };
 

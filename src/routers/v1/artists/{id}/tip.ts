@@ -3,8 +3,7 @@ import { NextFunction, Request, Response } from "express";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import prisma from "@mirlo/prisma";
 
-import { createStripeCheckoutSessionForPurchase } from "../../../../utils/stripe";
-import { handleTrackGroupPurchase } from "../../../../utils/handleFinishedTransactions";
+import { createStripeCheckoutSessionForTip } from "../../../../utils/stripe";
 import { subscribeUserToArtist } from "../../../../utils/artist";
 import { AppError } from "../../../../utils/error";
 
@@ -18,7 +17,7 @@ export default function () {
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {
-    const { id: trackGroupId } = req.params as unknown as Params;
+    const { id: artistId } = req.params as unknown as Params;
     let { price, email } = req.body as unknown as {
       price?: string; // In cents
       email?: string;
@@ -36,71 +35,53 @@ export default function () {
         email = user?.email;
       }
 
-      const trackGroup = await prisma.trackGroup.findFirst({
+      const artist = await prisma.artist.findFirst({
         where: {
-          id: Number(trackGroupId),
+          id: Number(artistId),
         },
         include: {
-          artist: {
-            include: {
-              user: true,
-              subscriptionTiers: true,
-            },
-          },
-          cover: true,
+          user: true,
+          subscriptionTiers: true,
         },
       });
 
-      if (!trackGroup) {
+      if (!artist) {
         throw new AppError({
           httpCode: 404,
-          description: `TrackGroup with ID ${trackGroupId} not found`,
+          description: `Artist not found`,
         });
       }
 
       if (loggedInUser) {
-        await subscribeUserToArtist(trackGroup?.artist, loggedInUser);
+        await subscribeUserToArtist(artist, loggedInUser);
       }
 
-      const stripeAccountId = trackGroup.artist.user.stripeAccountId;
+      const stripeAccountId = artist.user.stripeAccountId;
 
-      const priceNumber =
-        (price ? Number(price) : undefined) ?? trackGroup.minPrice ?? 0;
+      const priceNumber = price ? Number(price) : undefined;
 
-      const priceZero = (trackGroup.minPrice ?? 0) === 0 && priceNumber === 0;
-
-      if (priceNumber < (trackGroup.minPrice ?? 0)) {
-        throw new AppError({
-          httpCode: 400,
-          description: `Have to pay at least ${trackGroup.minPrice} for this trackGroup. ${priceNumber} is not enough`,
-        });
-      }
-
-      if (!stripeAccountId && !priceZero) {
+      if (!stripeAccountId) {
         throw new AppError({
           httpCode: 400,
           description: "Artist not set up with a payment processor yet",
         });
       }
 
-      if (priceZero && loggedInUser) {
-        await handleTrackGroupPurchase(loggedInUser.id, trackGroup.id);
-        return res.status(200).json({
-          redirectUrl: `/${
-            trackGroup.artist.urlSlug ?? trackGroup.artist.id
-          }/release/${trackGroup.urlSlug ?? trackGroup.id}/download?email=${
-            loggedInUser.email
-          }`,
+      if (!priceNumber) {
+        throw new AppError({
+          httpCode: 400,
+          description: "Can't tip someone zero",
         });
       }
 
       if (stripeAccountId) {
-        const session = await createStripeCheckoutSessionForPurchase({
+        const session = await createStripeCheckoutSessionForTip({
           loggedInUser,
           email,
           priceNumber,
-          trackGroup,
           stripeAccountId,
+          artistId: Number(artistId),
+          currency: artist.user.currency ?? "usd",
         });
         res.status(200).json({
           redirectUrl: session.url,

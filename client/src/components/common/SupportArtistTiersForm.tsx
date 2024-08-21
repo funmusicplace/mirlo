@@ -11,6 +11,7 @@ import { useQuery } from "@tanstack/react-query";
 import { queryArtist } from "queries";
 import api from "services/api";
 import { moneyDisplay } from "./Money";
+import { css } from "@emotion/css";
 
 const SupportArtistTiersForm: React.FC<{
   artist: Pick<Artist, "id" | "name" | "userId" | "urlSlug">;
@@ -107,6 +108,9 @@ const SupportArtistTiersForm: React.FC<{
         isLoading={isCheckingForSubscription}
         disabled={!methods.formState.isValid || !value}
         wrap
+        className={css`
+          width: 100% !important;
+        `}
       >
         {t(!value ? "chooseToContinue" : "continueWithPrice", {
           amount: moneyDisplay({

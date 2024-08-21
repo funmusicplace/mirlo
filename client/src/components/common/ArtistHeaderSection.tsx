@@ -13,6 +13,7 @@ import { UpdateArtistBody, useUpdateArtistMutation } from "queries";
 import React from "react";
 import { useSnackbar } from "state/SnackbarContext";
 import { useAuthContext } from "state/AuthContext";
+import TipArtist from "./TipArtist";
 
 const H1 = styled.h1<{ artistAvatar: boolean }>`
   font-size: 2.4rem;
@@ -77,8 +78,10 @@ const ArtistActions = styled.div`
     margin-left: 0.75rem;
   }
   padding-left: 1rem;
+
   @media screen and (max-width: ${bp.medium}px) {
     padding-left: 0.3rem;
+    flex-direction: column;
   }
 `;
 
@@ -207,6 +210,7 @@ const ArtistHeaderSection: React.FC<{
                       />
                     </div>
                     <ArtistActions>
+                      {!isManage && <TipArtist artistId={artist.id} />}
                       {!isManage && <FollowArtist artistId={artist.id} />}
                     </ArtistActions>
                   </div>

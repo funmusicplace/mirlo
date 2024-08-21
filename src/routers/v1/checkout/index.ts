@@ -18,28 +18,42 @@ export default function () {
         const session = await stripe.checkout.sessions.retrieve(session_id, {
           stripeAccount: stripeAccountId,
         });
-        const { clientId, artistId, trackGroupId, tierId } =
+        const { clientId, artistId, trackGroupId, tierId, gaveGift } =
           session.metadata as unknown as {
             clientId: number | null;
             artistId: number | null;
+            gaveGift: 1 | null;
             tierId: number | null;
             trackGroupId: number | null;
           };
-        if (clientId) {
+        if (clientId && artistId) {
           const client = await prisma.client.findFirst({
             where: {
               id: +clientId,
             },
           });
 
-          if (client && tierId && artistId) {
+          const artist = await prisma.artist.findFirst({
+            where: { id: +artistId },
+          });
+
+          if (gaveGift && artist && client) {
             // FIXME: We'll probably want clients to be able to define the
             // checkout callbackURL separately from the applicationURL
             // and that callbackURL should probably contain a pattern that
             // they can define
             res.redirect(
               client?.applicationUrl +
-                `/${artistId}?subscribe=${
+                `/${artist?.urlSlug}?tip=${success ? "success" : "canceled"}`
+            );
+          } else if (client && tierId && artist) {
+            // FIXME: We'll probably want clients to be able to define the
+            // checkout callbackURL separately from the applicationURL
+            // and that callbackURL should probably contain a pattern that
+            // they can define
+            res.redirect(
+              client?.applicationUrl +
+                `/${artist.urlSlug}?subscribe=${
                   success ? "success" : "canceled"
                 }&tierId=${tierId}`
             );
@@ -50,7 +64,7 @@ export default function () {
             // they can define
             res.redirect(
               client?.applicationUrl +
-                `/${artistId}?trackGroupPurchase=${
+                `/${artist?.urlSlug}?trackGroupPurchase=${
                   success ? "success" : "canceled"
                 }&trackGroupId=${trackGroupId}`
             );

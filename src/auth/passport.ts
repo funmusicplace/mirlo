@@ -35,6 +35,7 @@ passport.use(
       const { expiration, email } = jwtPayload;
 
       if (Date.now() > expiration) {
+        console.log("token expired");
         done("Unauthorized", false);
       }
       const foundUser = await prisma.user.findFirst({
