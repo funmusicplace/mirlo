@@ -146,7 +146,11 @@ export const createStripeCheckoutSessionForPurchase = async ({
   }>;
   stripeAccountId: string;
 }) => {
-  const client = await prisma.client.findFirst({});
+  const client = await prisma.client.findFirst({
+    where: {
+      applicationName: "frontend",
+    },
+  });
 
   const productKey = await createTrackGroupStripeProduct(
     trackGroup,
@@ -217,7 +221,11 @@ export const createStripeCheckoutSessionForTip = async ({
   stripeAccountId: string;
   artistId: number;
 }) => {
-  const client = await prisma.client.findFirst({});
+  const client = await prisma.client.findFirst({
+    where: {
+      applicationName: "frontend",
+    },
+  });
 
   const session = await stripe.checkout.sessions.create(
     {
@@ -270,7 +278,11 @@ export const createCheckoutSessionForSubscription = async ({
   tier: Prisma.ArtistSubscriptionTierGetPayload<{ include: { artist: true } }>;
   amount: number;
 }) => {
-  const client = await prisma.client.findFirst({});
+  const client = await prisma.client.findFirst({
+    where: {
+      applicationName: "frontend",
+    },
+  });
   const productKey = await createSubscriptionStripeProduct(
     tier,
     stripeAccountId
