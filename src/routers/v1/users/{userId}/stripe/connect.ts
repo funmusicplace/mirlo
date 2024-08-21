@@ -28,7 +28,11 @@ export default function () {
         if (user) {
           let accountId = user.stripeAccountId;
           const alreadyExisted = !!accountId;
-          const client = await prisma.client.findFirst({});
+          const client = await prisma.client.findFirst({
+            where: {
+              applicationName: "frontend",
+            },
+          });
           logger.info(
             `Connecting ${user.id} to Stripe. Have existing account: ${alreadyExisted} ${accountId}`
           );
