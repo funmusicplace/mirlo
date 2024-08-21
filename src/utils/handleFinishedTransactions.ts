@@ -126,6 +126,8 @@ export const handleArtistGift = async (
     });
 
     if (user && tip) {
+      const pricePaid = tip.pricePaid / 100;
+
       await sendMail({
         data: {
           template: "artist-tip-receipt",
@@ -135,13 +137,12 @@ export const handleArtistGift = async (
           locals: {
             tip,
             email: user.email,
+            pricePaid,
             client: process.env.REACT_APP_CLIENT_DOMAIN,
             host: process.env.API_DOMAIN,
           },
         },
       } as Job);
-
-      const pricePaid = tip.pricePaid / 100;
 
       await sendMail({
         data: {
