@@ -3,12 +3,16 @@ import { SelectEl } from "components/common/Select";
 import { queryLicenses } from "queries/licenses";
 import { useQuery } from "@tanstack/react-query";
 import FormComponent from "components/common/FormComponent";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import Button from "components/common/Button";
 import { css } from "@emotion/css";
 import Modal from "components/common/Modal";
 import React from "react";
 import LicenseForm from "components/common/LicenseForm";
+import Tooltip from "components/common/Tooltip";
+import { FaInfoCircle } from "react-icons/fa";
+import { IconOnly } from "components/common/Button.stories";
+import InfoModal from "components/common/InfoModal";
 
 const ManageTrackLicense = () => {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
@@ -27,7 +31,28 @@ const ManageTrackLicense = () => {
         <LicenseForm callback={refetch} />
       </Modal>
       <FormComponent>
-        <label>{t("license")}</label>
+        <label
+          className={css`
+            display: flex;
+            align-items: center;
+
+            button {
+              margin-left: 0.5rem;
+            }
+          `}
+        >
+          {t("license")}
+
+          <InfoModal
+            info={
+              <Trans
+                t={t}
+                i18nKey={"whatMeanLicense"}
+                components={{ a: <a></a> }}
+              />
+            }
+          />
+        </label>
         <SelectEl {...methods.register("licenseId")}>
           {licenses?.results.map((license) => (
             <option value={license.id}>{license.short}</option>
@@ -52,7 +77,6 @@ const ManageTrackLicense = () => {
             {t("addIt")}
           </Button>
         </small>
-        <small>{t("whatMeanLicense")}</small>
       </FormComponent>
     </>
   );
