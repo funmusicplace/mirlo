@@ -402,6 +402,11 @@ export const singleInclude = (queryOptions?: {
         publishedAt: "desc",
       },
     },
+    user: {
+      select: {
+        currency: true,
+      },
+    },
   };
 };
 
