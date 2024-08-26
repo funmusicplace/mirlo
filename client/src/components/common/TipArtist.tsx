@@ -7,7 +7,7 @@ import Modal from "./Modal";
 import { useAuthContext } from "state/AuthContext";
 import SupportArtistTiersForm from "./SupportArtistTiersForm";
 import { useQuery } from "@tanstack/react-query";
-import { queryArtist } from "queries";
+import { queryArtist, queryUserStripeStatus } from "queries";
 import { css } from "@emotion/css";
 import TipArtistForm from "./TipArtistForm";
 
@@ -18,13 +18,17 @@ const TipArtist: React.FC<{ artistId: number }> = ({ artistId }) => {
     queryArtist({ artistSlug: `${artistId}`, includeDefaultTier: true })
   );
 
+  const { data: stripeAccountStatus } = useQuery(
+    queryUserStripeStatus(artist?.userId ?? 0)
+  );
+
   const [isTipPopUpOpen, setIsTipPopUpOpen] = React.useState(false);
 
   const onTipClick = React.useCallback(async () => {
     setIsTipPopUpOpen(true);
   }, []);
 
-  if (!artist) {
+  if (!artist || !stripeAccountStatus?.chargesEnabled) {
     return null;
   }
 
@@ -44,7 +48,7 @@ const TipArtist: React.FC<{ artistId: number }> = ({ artistId }) => {
           {t("likeWhatTheyAreDoing")}
         </p>
         <SupportArtistTiersForm artist={artist} excludeDefault={!!user} />
-        {user?.isAdmin && <TipArtistForm artist={artist} />}
+        <TipArtistForm artist={artist} />
       </Modal>
       <Button
         compact

@@ -1,9 +1,9 @@
 export const moneyDisplay = ({
   amount,
-  currency = "USD",
+  currency,
 }: {
   amount?: number | string;
-  currency?: string;
+  currency: string;
 }) => {
   if (!amount) {
     return "-";
@@ -16,8 +16,8 @@ export const moneyDisplay = ({
 
 export const Money: React.FC<{
   amount?: number | string;
-  currency?: string;
-}> = ({ amount, currency = "USD" }) => {
+  currency: string;
+}> = ({ amount, currency }) => {
   return <>{moneyDisplay({ amount, currency })}</>;
 };
 

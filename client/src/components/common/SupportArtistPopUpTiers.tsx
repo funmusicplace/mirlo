@@ -47,7 +47,7 @@ const ListItem = styled.li`
 const SupportArtistPopUpTiers = forwardRef<
   HTMLInputElement,
   {
-    options: Partial<ArtistSubscriptionTier>[];
+    options: ArtistSubscriptionTier[];
   }
 >(function ({ options, ...props }, ref) {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });

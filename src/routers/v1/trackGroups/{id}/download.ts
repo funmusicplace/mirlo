@@ -12,6 +12,7 @@ import {
 } from "../../../../utils/trackGroup";
 import { minioClient, trackGroupFormatBucket } from "../../../../utils/minio";
 import { startGeneratingAlbum } from "../../../../queues/album-queue";
+import filenamify from "filenamify";
 
 export default function () {
   const operations = {
@@ -101,7 +102,7 @@ export default function () {
       }
 
       try {
-        const title = trackGroup.title?.replaceAll(".", "-");
+        const title = filenamify(trackGroup.title ?? "album");
 
         res.attachment(`${title}.zip`);
         res.set("Content-Disposition", `attachment; filename="${title}.zip"`);

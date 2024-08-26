@@ -6,7 +6,7 @@ import { css } from "@emotion/css";
 const PlatformPercent: React.FC<{
   percent: number;
   chosenPrice?: string | number;
-  currency?: string;
+  currency: string;
   artist?: Pick<Artist, "name">;
 }> = ({ percent, chosenPrice, currency = "USD", artist }) => {
   const chosenNumber =
