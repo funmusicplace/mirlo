@@ -266,8 +266,8 @@
     "shortLabelForLicense": "What's a unique short label for this license?",
     "egShort": "eg. cc0",
     "longLabel": "What's the full name of this license?",
-    "egLong": "No Rights Reserved",
-    "urlForLabel": "Where can others read more about this label?",
+    "egLong": "eg. No Rights Reserved",
+    "urlForLabel": "Where can you read more about this license?",
     "egLink": "eg. https://creativecommons.org/public-domain/cc0/",
     "add": "Add"
   },
