@@ -11,6 +11,7 @@ import { queryArtist } from "queries";
 import api from "services/api";
 import { moneyDisplay } from "./Money";
 import { css } from "@emotion/css";
+import LoadingBlocks from "components/Artist/LoadingBlocks";
 
 const defaultGifts = [
   { value: 5 },
@@ -89,90 +90,96 @@ const TipArtistForm: React.FC<{
       >
         {t("orGiveOnce")}
       </p>
-      <FormProvider {...methods}>
-        <ul
-          className={css`
-            margin-bottom: 0.5rem;
-          `}
-        >
-          {defaultGifts.map((gift) => (
-            <li
-              key={gift.value}
+      {!artistDetails && <LoadingBlocks rows={1} />}
+
+      {artistDetails && (
+        <>
+          <FormProvider {...methods}>
+            <ul
               className={css`
-                display: inline-block;
-
-                input {
-                  display: none;
-                }
-
-                label {
-                  padding: 0.75rem 1rem;
-                  display: block;
-                  border: 1px solid var(--mi-darken-background-color);
-                  margin-right: 0.2rem;
-                  background-color: var(--mi-lighten-background-color);
-                  cursor: pointer;
-                }
-
-                input:checked + label {
-                  background-color: var(--mi-info-background-color);
-                }
+                margin-bottom: 0.5rem;
               `}
             >
-              <input
-                type="radio"
-                value={gift.value}
-                {...methods.register("priceButton")}
-                id={`priceButton-${gift.value}`}
-              />
-              <label htmlFor={`priceButton-${gift.value}`}>
-                {currency && gift.value !== "other"
-                  ? moneyDisplay({
-                      amount: gift.value,
-                      currency,
-                    })
-                  : t("otherGift")}
-              </label>
-            </li>
-          ))}
-        </ul>
-        {valueButton === "other" && (
-          <FormComponent
+              {defaultGifts.map((gift) => (
+                <li
+                  key={gift.value}
+                  className={css`
+                    display: inline-block;
+
+                    input {
+                      display: none;
+                    }
+
+                    label {
+                      padding: 0.75rem 1rem;
+                      display: block;
+                      border: 1px solid var(--mi-darken-background-color);
+                      margin-right: 0.2rem;
+                      background-color: var(--mi-lighten-background-color);
+                      cursor: pointer;
+                    }
+
+                    input:checked + label {
+                      background-color: var(--mi-info-background-color);
+                    }
+                  `}
+                >
+                  <input
+                    type="radio"
+                    value={gift.value}
+                    {...methods.register("priceButton")}
+                    id={`priceButton-${gift.value}`}
+                  />
+                  <label htmlFor={`priceButton-${gift.value}`}>
+                    {currency && gift.value !== "other"
+                      ? moneyDisplay({
+                          amount: gift.value,
+                          currency,
+                        })
+                      : t("otherGift")}
+                  </label>
+                </li>
+              ))}
+            </ul>
+            {valueButton === "other" && (
+              <FormComponent
+                className={css`
+                  margin-bottom: 0.5rem !important;
+                `}
+              >
+                <InputEl type="number" {...methods.register("price")} />
+              </FormComponent>
+            )}
+            {!user && (
+              <FormComponent
+                className={css`
+                  margin-bottom: 0.5rem !important;
+                `}
+              >
+                {t("email")}
+                <InputEl {...methods.register("email")} type="email" required />
+              </FormComponent>
+            )}
+          </FormProvider>
+          <Button
+            onClick={() => subscribeToTier()}
+            isLoading={isCheckingForSubscription}
+            disabled={!methods.formState.isValid || !actualValue}
+            wrap
             className={css`
-              margin-bottom: 0.5rem !important;
+              width: 100% !important;
             `}
           >
-            <InputEl type="number" {...methods.register("price")} />
-          </FormComponent>
-        )}
-        {!user && (
-          <FormComponent
-            className={css`
-              margin-bottom: 0.5rem !important;
-            `}
-          >
-            {t("email")}
-            <InputEl {...methods.register("email")} type="email" required />
-          </FormComponent>
-        )}
-      </FormProvider>
-      <Button
-        onClick={() => subscribeToTier()}
-        isLoading={isCheckingForSubscription}
-        disabled={!methods.formState.isValid || !actualValue}
-        wrap
-        className={css`
-          width: 100% !important;
-        `}
-      >
-        {currency &&
-          t(!actualValue ? "enterGiftAmount" : "giveOnce", {
-            amount: moneyDisplay({
-              amount: actualValue,
-              currency,
-            }),
-          })}
-      </Button>
+            {currency &&
+              t(!actualValue ? "enterGiftAmount" : "giveOnce", {
+                amount: moneyDisplay({
+                  amount: actualValue,
+                  currency,
+                }),
+              })}
+          </Button>
+        </>
+      )}
     </div>
   );
 };
