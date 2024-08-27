@@ -1,9 +1,9 @@
 import { css } from "@emotion/css";
 import React from "react";
 import ClickToPlay from "../common/ClickToPlay";
-import { Link } from "react-router-dom";
+import { Link, matchPath } from "react-router-dom";
 import { bp } from "../../constants";
-import { getArtistUrl, getReleaseUrl } from "utils/artist";
+import { getArtistUrl, getReleasesUrl, getReleaseUrl } from "utils/artist";
 import styled from "@emotion/styled";
 import { useTranslation } from "react-i18next";
 
@@ -50,17 +50,19 @@ export const TrackGroupInfo = styled.div`
   a {
     text-decoration: none;
   }
-  a:first-of-type {
-    font-weight: normal;
-    margin-bottom: 0.2rem;
-  }
-  a:last-of-type {
-    font-size: var(--mi-font-size-xsmall);
-    color: var(--mi-light-foreground-color);
-  }
 
   a:hover {
     text-decoration: underline;
+  }
+
+  .track-group-name {
+    font-weight: normal;
+    margin-bottom: 0.2rem;
+  }
+
+  .track-group-artist {
+    font-size: var(--mi-font-size-xsmall);
+    color: var(--mi-light-foreground-color);
   }
 `;
 
@@ -98,16 +100,13 @@ const ArtistTrackGroup: React.FC<{
                           color: var(--mi-light-foreground-color);
                           font-style: italic;
                         `
+                      + " track-group-name"
                   }
                 >
                   {trackGroup.title.length ? trackGroup.title : t("untitled")}
                 </Link>
               )}
-              {trackGroup.artist && (
-                <Link to={getArtistUrl(trackGroup.artist)}>
-                  {trackGroup.artist?.name}
-                </Link>
-              )}
+              {<ArtistName artist={trackGroup.artist} />}
             </TrackGroupInfo>
             <div
               className={css`
@@ -132,5 +131,16 @@ const ArtistTrackGroup: React.FC<{
     </TrackGroupWrapper>
   );
 };
+
+const ArtistName: React.FC<{ artist: TrackGroup['artist'] }> = ({ artist }) => {
+  if (!artist) { return null; }
+
+  const artistUrl = getReleasesUrl(artist);
+  return (
+    !!matchPath({ path: artistUrl }, window.location.pathname)
+      ? <span className="track-group-artist">{artist.name}</span>
+      : <Link className="track-group-artist" to={artistUrl}>{artist.name}</Link>
+  )
+}
 
 export default ArtistTrackGroup;
