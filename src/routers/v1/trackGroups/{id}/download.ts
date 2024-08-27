@@ -13,6 +13,7 @@ import {
 import { minioClient, trackGroupFormatBucket } from "../../../../utils/minio";
 import { startGeneratingAlbum } from "../../../../queues/album-queue";
 import filenamify from "filenamify";
+import { cleanHeaderValue } from "../../../../utils/validate-http-headers";
 
 export default function () {
   const operations = {
@@ -102,8 +103,8 @@ export default function () {
       }
 
       try {
-        const title = filenamify(trackGroup.title ?? "album");
-
+        const title = cleanHeaderValue(filenamify(trackGroup.title ?? "album"));
+        logger.info(`downloading ${title}.zip`);
         res.attachment(`${title}.zip`);
         res.set("Content-Disposition", `attachment; filename="${title}.zip"`);
 

@@ -15,6 +15,7 @@ import LogInPopup from "./LogInPopup";
 import { useAuthContext } from "state/AuthContext";
 import { ButtonLink } from "components/common/Button";
 import { useTranslation } from "react-i18next";
+import { FaHandHoldingHeart } from "react-icons/fa";
 
 const HeaderWrapper = styled.div<{
   artistBanner?: boolean;
@@ -252,6 +253,8 @@ const Header = () => {
           {!isLoggedIn && <LogInPopup />}
           <ButtonLink
             to="/team/support"
+            collapsible
+            startIcon={<FaHandHoldingHeart />}
             className={css`
               display: block;
               padding: 1rem;
@@ -274,7 +277,7 @@ const Header = () => {
               }
             `}
           >
-            {t("donateNow")}
+            <p>{t("donateNow")}</p>
           </ButtonLink>
         </div>
       </Content>

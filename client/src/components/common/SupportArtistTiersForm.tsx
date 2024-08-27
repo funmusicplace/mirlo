@@ -12,6 +12,7 @@ import { queryArtist } from "queries";
 import api from "services/api";
 import { moneyDisplay } from "./Money";
 import { css } from "@emotion/css";
+import LoadingBlocks from "components/Artist/LoadingBlocks";
 
 const SupportArtistTiersForm: React.FC<{
   artist: Pick<Artist, "id" | "name" | "userId" | "urlSlug">;
@@ -80,6 +81,7 @@ const SupportArtistTiersForm: React.FC<{
 
   return (
     <>
+      {!artistDetails && <LoadingBlocks rows={1} />}
       <FormProvider {...methods}>
         <Controller
           name="tier"

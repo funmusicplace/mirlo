@@ -19,7 +19,6 @@ export interface Compactable {
   collapsible?: boolean;
   buttonRole?: "primary" | "secondary" | "warning";
   variant?: "link" | "big" | "outlined" | "dashed" | "default";
-  color?: string;
   uppercase?: boolean;
   onlyIcon?: boolean;
 }
@@ -59,11 +58,7 @@ const CustomButton = styled.button<Compactable>`
     switch (props.variant) {
       case "link":
         return `
-          color: ${
-            props.color
-              ? props.color
-              : `var(--mi-${props.buttonRole ?? "primary"}-color)`
-          };
+          color: var(--mi-${props.buttonRole ?? "primary"}-color);
           margin-right: 0;
           margin-left: .3rem;
           font-weight: bold;
@@ -74,22 +69,14 @@ const CustomButton = styled.button<Compactable>`
           line-height: inherit;
 
           &:hover:not(:disabled) {
-            color: ${
-              props.color
-                ? props.color
-                : `var(--mi-${props.buttonRole ?? "primary"}-color)`
-            };
+            color: var(--mi-${props.buttonRole ?? "primary"}-color);
           }
         `;
 
       case "big":
         return `
 
-          color: ${
-            props.color
-              ? props.color
-              : `var(--mi-${props.buttonRole ?? "primary"}-color)`
-          };
+          color: var(--mi-${props.buttonRole ?? "primary"}-color);
           ${props.compact ? "" : "height: 2.5rem; min-width: 5rem;"}
           border-radius: 9999px !important;
           background-color: var(--mi-secondary-color);
@@ -101,16 +88,8 @@ const CustomButton = styled.button<Compactable>`
           text-align: center;
 
           &:hover:not(:disabled) {
-            color: ${
-              props.color
-                ? props.color
-                : `var(--mi-${props.buttonRole ?? "secondary"}-color)`
-            };
-            background-color:  ${
-              props.color
-                ? props.color
-                : `var(--mi-${props.buttonRole ?? "primary"}-color)`
-            };
+            color: var(--mi-${props.buttonRole ?? "secondary"}-color);
+            background-color: var(--mi-${props.buttonRole ?? "primary"}-color);
           }
 
           @media screen and (max-width: ${bp.small}px) {
@@ -125,36 +104,16 @@ const CustomButton = styled.button<Compactable>`
       case "outlined":
       case "dashed":
         return `
-          color: ${
-            props.color
-              ? props.color
-              : `var(--mi-${props.buttonRole ?? "primary"}-color)`
-          };
+          color: var(--mi-${props.buttonRole ?? "primary"}-color);
           background-color: var(--mi-lighten-background-color);
-          border: 1px ${props.variant === "dashed" ? "dashed" : "solid"} ${
-            props.color
-              ? props.color
-              : `var(--mi-${props.buttonRole ?? "primary"}-color)`
-          };
+          border: 1px ${props.variant === "dashed" ? "dashed" : "solid"} var(--mi-${props.buttonRole ?? "primary"}-color);
           padding: ${props.compact ? ".3rem .5rem" : "1rem"};
           font-weight: bold;
 
           &:hover:not(:disabled) {
-            color: ${
-              props.color
-                ? props.color
-                : `var(--mi-${props.buttonRole ?? "secondary"}-color)`
-            };
-            background-color: ${
-              props.color
-                ? props.color
-                : `var(--mi-${props.buttonRole ?? "primary"}-color)`
-            };
-            border: 1px ${props.variant === "dashed" ? "dashed" : "solid"} ${
-              props.color
-                ? props.color
-                : `var(--mi-${props.buttonRole ?? "primary"}-color)`
-            };
+            color: var(--mi-${props.buttonRole ?? "secondary"}-color);
+            background-color: var(--mi-${props.buttonRole ?? "primary"}-color);
+            border: 1px ${props.variant === "dashed" ? "dashed" : "solid"} var(--mi-${props.buttonRole ?? "primary"}-color);
           }
 
           &[disabled] {

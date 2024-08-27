@@ -250,12 +250,13 @@ const FloatingLinkToolbar: React.FC = () => {
           value={href}
           onKeyPress={(event: KeyboardEvent<HTMLInputElement>) => {
             const { code } = event;
-
             if (code === "Enter") {
+              event.preventDefault();
               submitHref();
             }
 
             if (code === "Escape") {
+              event.preventDefault();
               cancelHref();
             }
           }}

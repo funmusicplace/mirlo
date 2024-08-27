@@ -177,7 +177,7 @@ const PostForm: React.FC<{
                 />
               );
             }}
-          ></Controller>
+          />
         </FormComponent>
         <FormComponent
           className={css`
