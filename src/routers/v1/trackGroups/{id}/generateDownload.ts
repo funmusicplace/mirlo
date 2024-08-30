@@ -79,7 +79,7 @@ export default function () {
         return next();
       }
 
-      await startGeneratingAlbum(trackGroup, format, trackGroup.tracks);
+      await startGeneratingAlbum(trackGroup, format);
 
       return res.json({
         message: "Success",

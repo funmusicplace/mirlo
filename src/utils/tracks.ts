@@ -3,6 +3,13 @@ import { finalAudioBucket, removeObjectsFromBucket } from "../utils/minio";
 import ffmpeg from "fluent-ffmpeg";
 import logger from "../logger";
 import { Readable } from "stream";
+import {
+  Artist,
+  Track,
+  TrackArtist,
+  TrackAudio,
+  TrackGroup,
+} from "@mirlo/prisma/client";
 
 export const deleteTrack = async (trackId: number) => {
   await prisma.track.delete({
@@ -47,7 +54,11 @@ const generateDestination = (
 };
 
 export const convertAudioToFormat = (
-  audioId: string,
+  content: {
+    track: Track & { audio: TrackAudio; trackArtists: TrackArtist[] };
+    artist: Artist;
+    trackGroup: TrackGroup;
+  },
   stream: Readable,
   formatDetails: {
     format: "wav" | "flac" | "opus" | "mp3";
@@ -58,15 +69,25 @@ export const convertAudioToFormat = (
   onError?: (err: unknown) => void,
   onSuccess?: (dunno: null) => void
 ) => {
+  const audioId = content.track.audio.id;
   const { format, audioBitrate, audioCodec } = formatDetails;
   logger.info(
     `audioId ${audioId}: converting ${format} going to ${goingTo} @${audioBitrate}`
   );
 
+  console.log(content.track.metadata);
+
   let destination = generateDestination(format, goingTo, audioBitrate);
   const processor = ffmpeg(stream)
     .noVideo()
     .toFormat(format)
+    // FIXME why don't these work?
+    // .outputOptions("-map_metadata:s:a", "0:s:a")
+    // .outputOption("-map_metadata:s:a 0:s:a")
+    // .outputOptions("-map_metadata 0:s")
+    .outputOptions("-metadata", `title=${content.track.title}`)
+    .outputOptions("-metadata", `album=${content.trackGroup.title}`)
+    .outputOptions("-metadata", `artist=${content.artist.name}`)
     .on("stderr", function (stderrLine) {
       // logger.info("Stderr output: " +resolve stderrLine);
     })

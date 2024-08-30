@@ -24,6 +24,7 @@ import { Response } from "express";
 import { DefaultArgs } from "@prisma/client/runtime/library";
 import { doesTrackGroupBelongToUser } from "./ownership";
 import { AppError } from "./error";
+import trackArtists from "../routers/v1/manage/tracks/{trackId}/trackArtists";
 
 export const whereForPublishedTrackGroups = (): Prisma.TrackGroupWhereInput => {
   return {
@@ -341,6 +342,7 @@ export const basicTrackGroupInclude = {
     tracks: {
       include: {
         audio: true,
+        trackArtists: true,
       },
       where: {
         deletedAt: null,

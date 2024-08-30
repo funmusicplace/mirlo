@@ -91,11 +91,7 @@ export default function () {
         await minioClient.statObject(trackGroupFormatBucket, zipName);
       } catch (e) {
         logger.info("trackGroup doesn't exist yet, start generating it");
-        const jobId = await startGeneratingAlbum(
-          trackGroup,
-          format,
-          trackGroup.tracks
-        );
+        const jobId = await startGeneratingAlbum(trackGroup, format);
         return res.json({
           message: "We've started generating the album",
           result: { jobId },
