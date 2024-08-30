@@ -2,7 +2,6 @@ import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
 import { queryArtist, queryManagedArtist } from "queries";
 import { useParams } from "react-router-dom";
-import { useAuthContext } from "state/AuthContext";
 
 const colorDefined = (color?: string) => {
   return color && color !== "";
@@ -13,9 +12,6 @@ const ArtistColorsWrapper: React.FC<{ children: React.ReactElement }> = ({
 }) => {
   const params = useParams();
   const artistId = params?.artistId ?? "";
-  const { user } = useAuthContext();
-  const userId = user?.id;
-
   // Because of type mismatch we couldn't choose which of these to query
   const { data: managedArtist } = useQuery(
     queryManagedArtist(Number(artistId))

@@ -150,7 +150,7 @@ model Artist {
   urlSlug                            String                               @unique
   properties                         Json?
   trackArtists                       TrackArtist[]
-  links                              String[]
+  links                              String[] // Legacy, use linksJson instead
   /// [ArtistLink]
   linksJson                          Json[]
   location                           String?

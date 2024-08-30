@@ -134,7 +134,7 @@ interface Artist {
   createdAt: string;
   trackGroups: TrackGroup[];
   links?: string[];
-  linksJson?: { url: string; linkType: string }[];
+  linksJson?: { url: string; linkType: string; inHeader?: boolean }[];
   posts: Post[];
   subscriptionTiers: ArtistSubscriptionTier[];
   properties?: {
