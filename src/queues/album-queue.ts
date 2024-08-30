@@ -72,14 +72,12 @@ generateAlbumQueueEvents.on("error", async (error) => {
 });
 
 export const startGeneratingAlbum = async (
-  trackGroup: TrackGroup,
-  format: string,
-  tracks: Track[]
+  trackGroup: TrackGroup & { tracks: Track[] },
+  format: string
 ) => {
   const job = await generateAlbumQueue.add("generate-album", {
     trackGroup,
     format,
-    tracks,
   });
 
   return job.id;

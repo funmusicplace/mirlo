@@ -12,8 +12,14 @@ import {
 import { convertAudioToFormat } from "../utils/tracks";
 import archiver from "archiver";
 import { PassThrough } from "stream";
-import { Track, TrackGroup } from "@mirlo/prisma/client";
+import {
+  Track,
+  TrackArtist,
+  TrackAudio,
+  TrackGroup,
+} from "@mirlo/prisma/client";
 import filenamify from "filenamify";
+import prisma from "@mirlo/prisma";
 
 const {
   MINIO_HOST = "",
@@ -41,13 +47,10 @@ const parseFormat = (format: string) => {
 };
 
 export default async (job: Job) => {
-  const {
-    trackGroup,
-    tracks,
-    format: formatString,
-  } = job.data as {
-    trackGroup: TrackGroup;
-    tracks: (Track & { audio: { id: string; fileExtension: string } })[];
+  const { trackGroup, format: formatString } = job.data as {
+    trackGroup: TrackGroup & {
+      tracks: (Track & { audio: TrackAudio; trackArtists: TrackArtist[] })[];
+    };
     format: string;
   };
   const format = parseFormat(formatString);
@@ -72,7 +75,7 @@ export default async (job: Job) => {
     const profiler = logger.startTimer();
 
     let i = 0;
-    for await (const track of tracks) {
+    for await (const track of trackGroup.tracks) {
       const minioTrackLocation = `${track.audio.id}/original.${track.audio.fileExtension}`;
       logger.info(`audioId ${track.audio.id}: Fetching ${minioTrackLocation}`);
       const originalTrackPath = `${tempFolder}/original.${track.audio.fileExtension}`;
@@ -82,9 +85,17 @@ export default async (job: Job) => {
         minioTrackLocation,
         originalTrackPath
       );
-      progress += (i * 70) / tracks.length;
+      progress += (i * 70) / trackGroup.tracks.length;
       i += 1;
       await job.updateProgress(progress);
+
+      const artist = await prisma.artist.findFirst({
+        where: { id: trackGroup.artistId },
+      });
+
+      if (!artist) {
+        throw "Couldn't find artist, weird";
+      }
 
       await new Promise((resolve, reject) => {
         logger.info(
@@ -94,7 +105,7 @@ export default async (job: Job) => {
         );
 
         convertAudioToFormat(
-          track.audio.id,
+          { track, artist, trackGroup },
           createReadStream(originalTrackPath),
           format,
           `${tempFolder}/${track.order ?? i}-${filenamify(track.title ?? "")}`,
