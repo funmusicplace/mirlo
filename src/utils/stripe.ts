@@ -38,10 +38,10 @@ export const calculateAppFee = async (
   currency: string,
   platformPercent?: number | null
 ) => {
-  const appFee = Math.floor(
+  const appFee = (
     price * (await calculatePlatformPercent(currency, platformPercent))
-  );
-  return appFee || undefined;
+  ).toFixed();
+  return +appFee || undefined;
 };
 
 export const createTrackGroupStripeProduct = async (

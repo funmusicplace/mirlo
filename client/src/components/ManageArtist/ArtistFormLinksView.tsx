@@ -3,17 +3,20 @@ import Button from "components/common/Button";
 import { css } from "@emotion/css";
 import React from "react";
 import LinkIconDisplay, {
+  findOutsideSite,
   linkUrlDisplay,
   linkUrlHref,
 } from "components/common/LinkIconDisplay";
 import { FaPen } from "react-icons/fa";
+import { transformFromLinks } from "./ArtistFormLinks";
 
 const ArtistFormLinksView: React.FC<{
-  artist: Pick<Artist, "links">;
+  artist: Pick<Artist, "linksJson" | "links">;
   isManage: boolean;
   setIsEditing: (arg: boolean) => void;
 }> = ({ artist, isManage, setIsEditing }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
+  const links = transformFromLinks(artist).linkArray;
   return (
     <div
       className={css`
@@ -23,12 +26,13 @@ const ArtistFormLinksView: React.FC<{
       `}
     >
       <div>
-        {artist?.links?.map((l) => {
+        {links.map((l) => {
+          const site = findOutsideSite(l.url);
           return (
             <a
               rel="me"
-              href={linkUrlHref(l)}
-              key={l}
+              href={linkUrlHref(l.url, true)}
+              key={l.url}
               target="_blank"
               className={css`
                 display: inline-flex;
@@ -41,7 +45,7 @@ const ArtistFormLinksView: React.FC<{
                 }
               `}
             >
-              <LinkIconDisplay url={l} /> {linkUrlDisplay(l)}
+              {site.icon} {linkUrlDisplay(l.url)}
             </a>
           );
         })}
@@ -55,7 +59,7 @@ const ArtistFormLinksView: React.FC<{
             onClick={() => setIsEditing(true)}
             startIcon={<FaPen />}
           >
-            {artist?.links?.length === 0 ? t("noLinksYet") : t("editLinks")}
+            {links?.length === 0 ? t("noLinksYet") : t("editLinks")}
           </Button>
         </div>
       )}

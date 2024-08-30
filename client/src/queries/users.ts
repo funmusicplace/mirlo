@@ -96,7 +96,16 @@ export function useCreateArtistMutation() {
 }
 
 export type UpdateArtistBody = Partial<
-  Pick<Artist, "bio" | "name" | "location" | "links" | "urlSlug" | "properties">
+  Pick<
+    Artist,
+    | "bio"
+    | "name"
+    | "location"
+    | "links"
+    | "linksJson"
+    | "urlSlug"
+    | "properties"
+  >
 >;
 
 async function updateArtist({
