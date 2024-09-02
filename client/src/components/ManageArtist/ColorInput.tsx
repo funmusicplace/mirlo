@@ -50,7 +50,7 @@ export const ColorInput: React.FC<{ name: string; title: string }> = ({
   React.useEffect(() => {
     clearErrors(name);
     if (!isValidColor(color)) {
-      setError(name, { message: "Not a valid color code. Please use #RRGGBB, #RGB, #RRGGBBAA, or #RGBA format." });
+      setError(name, { message: "Not a valid color code. Please use #RRGGBB or #RGB format." });
     }
     setValue(name, color, { shouldDirty: true });
   }, [color]);
