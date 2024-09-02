@@ -15,7 +15,7 @@ const generateColor = (name: string) => {
 };
 
 const isValidColor = (val: string) => {
-  const matcher = val.match(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3}|[A-Fa-f0-9]{8}|[A-Fa-f0-9]{4})$/);
+  const matcher = val.match(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/);
   return matcher;
 };
 
