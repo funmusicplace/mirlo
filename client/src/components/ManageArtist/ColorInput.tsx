@@ -15,7 +15,7 @@ const generateColor = (name: string) => {
 };
 
 const isValidColor = (val: string) => {
-  const matcher = val.match(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/);
+  const matcher = val.match(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3}|[A-Fa-f0-9]{8}|[A-Fa-f0-9]{4})$/);
   return matcher;
 };
 
@@ -50,7 +50,7 @@ export const ColorInput: React.FC<{ name: string; title: string }> = ({
   React.useEffect(() => {
     clearErrors(name);
     if (!isValidColor(color)) {
-      setError(name, { message: "Not a valid color" });
+      setError(name, { message: "Not a valid color code. Please use #RRGGBB, #RGB, #RRGGBBAA, or #RGBA format." });
     }
     setValue(name, color, { shouldDirty: true });
   }, [color]);
