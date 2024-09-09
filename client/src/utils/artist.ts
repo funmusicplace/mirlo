@@ -22,6 +22,10 @@ export const getArtistUrl = (artist: { urlSlug?: string; id?: number }) => {
   return `/${getArtistUrlReference(artist)}`;
 };
 
+export const getReleasesUrl = (artist: { urlSlug?: string; id?: number }) => {
+  return `${getArtistUrl(artist)}/releases`;
+}
+
 export const getArtistManageUrl = (artistId: number) => {
   return `/manage/artists/${artistId}`;
 };
