@@ -30,7 +30,7 @@ const calculatePlatformPercent = async (
   if (currency.toLowerCase() === "brl") {
     return 0;
   }
-  return (percent ?? settings.platformPercent) / 100;
+  return (percent ?? settings.platformPercent ?? 7) / 100;
 };
 
 export const calculateAppFee = async (
@@ -38,10 +38,12 @@ export const calculateAppFee = async (
   currency: string,
   platformPercent?: number | null
 ) => {
-  const appFee = (
-    price * (await calculatePlatformPercent(currency, platformPercent))
-  ).toFixed();
-  return +appFee || undefined;
+  const calculatedPlatformPercent = await calculatePlatformPercent(
+    currency,
+    platformPercent
+  );
+  const appFee = (price * calculatedPlatformPercent).toFixed();
+  return +appFee || 0;
 };
 
 export const createTrackGroupStripeProduct = async (

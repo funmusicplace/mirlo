@@ -23,7 +23,7 @@ describe("handleArtistGift", () => {
     sinon.restore();
   });
 
-  it("should send out emails for track group purchase", async () => {
+  it("should send out emails for artist gift", async () => {
     const stub = sinon.spy(sendMail, "default");
 
     const { user: artistUser } = await createUser({
