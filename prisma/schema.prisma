@@ -155,14 +155,14 @@ model Artist {
   /// [ArtistLink]
   linksJson                          Json[]
   location                           String?
-  allowPurchaseEntireCatalog         Boolean
-  purchaseEntireCatalogMinPrice      Int // in cents
+  allowPurchaseEntireCatalog         Boolean                              @default(false)
+  purchaseEntireCatalogMinPrice      Int                                  @default(0) // in cents  
   artistUserSubscriptionConfirmation ArtistUserSubscriptionConfirmation[]
   userArtistNotificationSettings     UserArtistNotificationSetting[]
   notifications                      Notification[]
   userArtistTip                      UserArtistTip[]
   ArtistTipTier                      ArtistTipTier[]
-  merchStoreURL                      String
+  merchStoreURL                      String?
 }
 
 model ArtistAvatar {
