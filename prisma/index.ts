@@ -1,9 +1,12 @@
 declare global {
   namespace PrismaJson {
     // you can use classes, interfaces, types, etc.
-    type ArtistJson = {
+    type ArtistLink = {
       url: string;
       name: string;
+    };
+    type Settings = {
+      platformPercent: number;
     };
   }
 }

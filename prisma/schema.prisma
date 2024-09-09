@@ -20,6 +20,7 @@ datasource db {
 
 model Settings {
   id       Int  @id @default(autoincrement())
+  /// [Settings]
   settings Json
 }
 
