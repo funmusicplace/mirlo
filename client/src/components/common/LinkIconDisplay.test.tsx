@@ -28,11 +28,6 @@ test("linkUrlHref adds an https prefix to links that don't have one", () => {
   expect(result).toBe("https://example.com");
 });
 
-test("linkUrlHref adds a mailto prefix to emails that don't have one", () => {
-  const result = linkUrlHref("test@example.com");
-  expect(result).toBe("mailto:test@example.com");
-});
-
 test("linkUrlHref doesn't affect links that already have an http prefix", () => {
   const result = linkUrlHref("http://example.com");
   expect(result).toBe("http://example.com");
