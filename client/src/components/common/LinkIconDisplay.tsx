@@ -16,9 +16,13 @@ export function isEmailLink(link: string): boolean {
   return link.startsWith("mailto:") || EMAIL_REGEX.test(link);
 }
 
-export function linkUrlHref(link: string): string {
+export function linkUrlHref(link: string, forDisplay?: boolean): string {
   if (isEmailLink(link)) {
-    return link.startsWith("mailto:") ? link : `mailto:${link}`;
+    return forDisplay
+      ? link.startsWith("mailto:")
+        ? link
+        : `mailto:${link}`
+      : link;
   } else {
     // If the link doesn't start with "http://" or "https://", prefix it
     return /https?:\/\//.test(link) ? link : `https://${link}`;
@@ -30,33 +34,41 @@ export const linkUrlDisplay = (link: string) => {
   if (isEmailLink(link)) {
     return "Email";
   }
+  url = findOutsideSite(link);
+
   try {
     url = new URL(link).origin.replace(/https?:\/\//, "");
   } catch (e) {
     url = link.split("/")[0];
   }
 
-  if (url.includes("instagram.com")) {
-    return "Instagram";
-  }
-
   return url;
 };
 
+export const findOutsideSite = (link: string) => {
+  return (
+    outsideLinks.find((site) => link.includes(site.matches)) ??
+    outsideLinks[outsideLinks.length - 1]
+  );
+};
+
+export const outsideLinks = [
+  { matches: "twitter.com", icon: <FaTwitter />, name: "Twitter" },
+  { matches: "x.com", icon: <FaTwitter />, name: "X" },
+  { matches: "facebook.com", icon: <FaFacebook />, name: "Facebook" },
+  { matches: "bandcamp.com", icon: <FaBandcamp />, name: "Bandcamp" },
+  { matches: "instagram.com", icon: <FaInstagram />, name: "Instagram" },
+  { matches: "@", icon: <FiMail />, name: "Email" },
+  { matches: "", icon: <FaGlobe />, name: "Website" },
+];
+
 const LinkIconDisplay: React.FC<{ url: string }> = ({ url }) => {
   let icon = <FaGlobe />;
+  const site = outsideLinks.find((site) => url.includes(site.matches));
   if (isEmailLink(url)) {
     icon = <FiMail />;
-  } else if (url.includes("twitter.com")) {
-    icon = <FaTwitter />;
-  } else if (url.includes("x.com")) {
-    icon = <FaTwitter />;
-  } else if (url.includes("facebook.com")) {
-    icon = <FaFacebook />;
-  } else if (url.includes("bandcamp.com")) {
-    icon = <FaBandcamp />;
-  } else if (url.includes("instagram.com")) {
-    icon = <FaInstagram />;
+  } else if (site) {
+    return site.icon;
   }
   return <>{icon}</>;
 };

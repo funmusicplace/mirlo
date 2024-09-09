@@ -2955,6 +2955,7 @@ __metadata:
     "@types/node": "npm:18.11.12"
     "@yarnpkg/pnpify": "npm:^4.0.1"
     prisma: "npm:5"
+    prisma-json-types-generator: "npm:^3.0.4"
     ts-node: "npm:^10.9.2"
     typescript: "npm:5.1.6"
   languageName: unknown
@@ -3365,6 +3366,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@prisma/debug@npm:5.9.1":
+  version: 5.9.1
+  resolution: "@prisma/debug@npm:5.9.1"
+  checksum: 10/ef9daf19c083e6a7c7470417aee4d4a3a12446c18285cc76f65ce2d133650c28d7a2f0fa5efe9ed7b2d0968ea91d1884e16d377908cc853f20a458270612aa44
+  languageName: node
+  linkType: hard
+
 "@prisma/engines-version@npm:5.13.0-23.b9a39a7ee606c28e3455d0fd60e78c3ba82b1a2b":
   version: 5.13.0-23.b9a39a7ee606c28e3455d0fd60e78c3ba82b1a2b
   resolution: "@prisma/engines-version@npm:5.13.0-23.b9a39a7ee606c28e3455d0fd60e78c3ba82b1a2b"
@@ -3392,6 +3400,15 @@ __metadata:
     "@prisma/engines-version": "npm:5.13.0-23.b9a39a7ee606c28e3455d0fd60e78c3ba82b1a2b"
     "@prisma/get-platform": "npm:5.13.0"
   checksum: 10/fcce109375ee9fd232d68dea9559ec4d8e6a25de408671f7bee7a21c60046207a981d035c04fe770da74d1b0ec5c20baf5882ff738c106a81da79e9e387e4e71
+  languageName: node
+  linkType: hard
+
+"@prisma/generator-helper@npm:5.9.1":
+  version: 5.9.1
+  resolution: "@prisma/generator-helper@npm:5.9.1"
+  dependencies:
+    "@prisma/debug": "npm:5.9.1"
+  checksum: 10/e8e7dda67d041523d2db74e166b8b757dc632a0b8c069b664d8a64b6d3e1b87a0bc7c2dd02dc00bb8a0e7500d54b382e4ca9dc3ddad032a0b684615a2666182e
   languageName: node
   linkType: hard
 
@@ -17107,6 +17124,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"prisma-json-types-generator@npm:^3.0.4":
+  version: 3.0.4
+  resolution: "prisma-json-types-generator@npm:3.0.4"
+  dependencies:
+    "@prisma/generator-helper": "npm:5.9.1"
+    tslib: "npm:2.6.2"
+  peerDependencies:
+    prisma: ^5.1
+    typescript: ^5.1
+  bin:
+    prisma-json-types-generator: index.js
+  checksum: 10/540a85ff4e6c734e43b4577eb72db5bd11ffad16d1775bf8eaccd75617509e3b29487b25aa8694924ae0409f1854448819aad834ed100f1f9efed571896895b8
+  languageName: node
+  linkType: hard
+
 "prisma@npm:5":
   version: 5.13.0
   resolution: "prisma@npm:5.13.0"
@@ -20552,6 +20584,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"tslib@npm:2.6.2, tslib@npm:^2.0.1, tslib@npm:^2.4.0, tslib@npm:^2.4.1":
+  version: 2.6.2
+  resolution: "tslib@npm:2.6.2"
+  checksum: 10/bd26c22d36736513980091a1e356378e8b662ded04204453d353a7f34a4c21ed0afc59b5f90719d4ba756e581a162ecbf93118dc9c6be5acf70aa309188166ca
+  languageName: node
+  linkType: hard
+
 "tslib@npm:^1.13.0, tslib@npm:^1.9.3":
   version: 1.14.1
   resolution: "tslib@npm:1.14.1"
@@ -20563,13 +20602,6 @@ __metadata:
   version: 2.4.1
   resolution: "tslib@npm:2.4.1"
   checksum: 10/e14311d5392ec0e3519feb9afdb54483d7f3aa2d3def6f1a1a30bd3deca5dfeadd106e80bee9ba880bce86a2e50854c9fe5958572cd188d7ac6f8625101a6a8f
-  languageName: node
-  linkType: hard
-
-"tslib@npm:^2.0.1, tslib@npm:^2.4.0, tslib@npm:^2.4.1":
-  version: 2.6.2
-  resolution: "tslib@npm:2.6.2"
-  checksum: 10/bd26c22d36736513980091a1e356378e8b662ded04204453d353a7f34a4c21ed0afc59b5f90719d4ba756e581a162ecbf93118dc9c6be5acf70aa309188166ca
   languageName: node
   linkType: hard
 

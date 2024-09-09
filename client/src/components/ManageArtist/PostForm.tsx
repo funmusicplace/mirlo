@@ -10,7 +10,6 @@ import api from "../../services/api";
 import { css } from "@emotion/css";
 import { useTranslation } from "react-i18next";
 import { SelectEl } from "components/common/Select";
-import useGetUserObjectById from "utils/useGetUserObjectById";
 import useErrorHandler from "services/useErrorHandler";
 import TextEditor from "components/common/TextEditor";
 import Box from "components/common/Box";

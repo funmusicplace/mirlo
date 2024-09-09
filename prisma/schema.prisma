@@ -5,6 +5,14 @@ generator client {
   binaryTargets   = ["native", "debian-openssl-3.0.x"]
 }
 
+/// Always after the prisma-client-js generator
+generator json {
+  provider = "prisma-json-types-generator"
+  // namespace = "PrismaJson"
+  // clientOutput = "<finds it automatically>"
+  // (./ -> relative to schema, or an importable path to require() it)
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -12,6 +20,7 @@ datasource db {
 
 model Settings {
   id       Int  @id @default(autoincrement())
+  /// [Settings]
   settings Json
 }
 
@@ -142,12 +151,18 @@ model Artist {
   urlSlug                            String                               @unique
   properties                         Json?
   trackArtists                       TrackArtist[]
-  links                              String[]
+  links                              String[] // Legacy, use linksJson instead
+  /// [ArtistLink]
+  linksJson                          Json[]
   location                           String?
+  allowPurchaseEntireCatalog         Boolean                              @default(false)
+  purchaseEntireCatalogMinPrice      Int                                  @default(0) // in cents  
   artistUserSubscriptionConfirmation ArtistUserSubscriptionConfirmation[]
   userArtistNotificationSettings     UserArtistNotificationSetting[]
   notifications                      Notification[]
   userArtistTip                      UserArtistTip[]
+  ArtistTipTier                      ArtistTipTier[]
+  merchStoreURL                      String?
 }
 
 model ArtistAvatar {
@@ -195,6 +210,25 @@ model ArtistSubscriptionTier {
   autoPurchaseAlbums    Boolean                  @default(false)
 }
 
+model ArtistTipTier {
+  id                Int             @id @default(autoincrement())
+  name              String
+  description       String          @default("")
+  artistId          Int
+  artist            Artist          @relation(fields: [artistId], references: [id])
+  minAmount         Int? // in cents
+  allowVariable     Boolean?
+  maxAmount         Int? // in cents
+  defaultAmount     Int? // in cents
+  currency          String          @default("USD")
+  userSubscriptions UserArtistTip[]
+  stripeProductKey  String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @default(now()) @updatedAt
+  deletedAt         DateTime?
+  platformPercent   Int?            @default(7)
+}
+
 model ArtistUserSubscription {
   id                       Int                    @id @default(autoincrement())
   artistSubscriptionTierId Int
@@ -225,13 +259,15 @@ model ArtistUserSubscriptionConfirmation {
 
 model UserArtistTip {
   userId           Int
-  user             User     @relation(fields: [userId], references: [id])
+  user             User           @relation(fields: [userId], references: [id])
   artistId         Int
-  artist           Artist   @relation(fields: [artistId], references: [id])
+  artist           Artist         @relation(fields: [artistId], references: [id])
   pricePaid        Int // in cents
-  currencyPaid     String   @default("USD")
-  datePurchased    DateTime @default(now())
+  currencyPaid     String         @default("USD")
+  datePurchased    DateTime       @default(now())
   stripeSessionKey String?
+  ArtistTipTier    ArtistTipTier? @relation(fields: [artistTipTierId], references: [id])
+  artistTipTierId  Int?
 
   @@unique([userId, artistId])
 }

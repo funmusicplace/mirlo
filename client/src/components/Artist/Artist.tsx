@@ -4,13 +4,21 @@ import { useTranslation } from "react-i18next";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
 import { useArtistContext } from "state/ArtistContext";
 import styled from "@emotion/styled";
-import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import {
+  NavLink,
+  Outlet,
+  useLocation,
+  useNavigate,
+  useParams,
+} from "react-router-dom";
 import { ArtistTabs } from "components/common/Tabs";
 import React from "react";
 import api from "services/api";
 import { FaChevronRight } from "react-icons/fa";
 import { css } from "@emotion/css";
 import { useAuthContext } from "state/AuthContext";
+import { useQuery } from "@tanstack/react-query";
+import { queryArtist, queryUserStripeStatus } from "queries";
 
 export const ArtistSection = styled.div`
   margin-bottom: 2rem;
@@ -26,26 +34,37 @@ export const ArtistSection = styled.div`
 function Artist() {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const { user } = useAuthContext();
-  const {
-    state: { artist, isLoading, userStripeStatus },
-  } = useArtistContext();
+  const params = useParams();
+
+  const artistId = params?.artistId ?? "";
+
+  const { data: artist, isLoading } = useQuery(
+    queryArtist({ artistSlug: artistId })
+  );
+
+  const { data: stripeAccountStatus } = useQuery(
+    queryUserStripeStatus(artist?.userId ?? 0)
+  );
+
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const canReceivePayments = userStripeStatus?.chargesEnabled;
+  const canReceivePayments = stripeAccountStatus?.chargesEnabled;
 
   React.useEffect(() => {
-    const subPages = ["posts", "releases", "support"];
+    const subPages = ["posts", "releases", "support", "links"];
     const end = pathname.split("/")[2];
 
     if (!subPages.includes(end)) {
       const navigateTo =
-        (artist?.trackGroups.length ?? 0) > 0
-          ? "releases"
-          : (artist?.posts.length ?? 0) > 0
-            ? "posts"
-            : canReceivePayments
-              ? "support"
-              : undefined;
+        (artist?.linksJson?.length ?? 0) > 0
+          ? "links"
+          : (artist?.trackGroups.length ?? 0) > 0
+            ? "releases"
+            : (artist?.posts.length ?? 0) > 0
+              ? "posts"
+              : canReceivePayments
+                ? "support"
+                : undefined;
       if (navigateTo) {
         navigate(navigateTo, { replace: true });
       }

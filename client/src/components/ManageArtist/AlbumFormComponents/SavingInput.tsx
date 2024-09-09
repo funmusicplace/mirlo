@@ -38,10 +38,12 @@ const SavingInput: React.FC<{
         value = value ? value * 100 : undefined;
       }
 
-      await api.put<unknown, TrackGroup>(url, {
+      const data = {
         [formKey]: value,
         ...extraData,
-      });
+      };
+
+      await api.put<unknown, TrackGroup>(url, data);
       let timeout2: NodeJS.Timeout;
       const timeout = setTimeout(() => {
         setIsSaving(false);

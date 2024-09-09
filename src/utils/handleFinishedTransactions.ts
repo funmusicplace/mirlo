@@ -144,6 +144,8 @@ export const handleArtistGift = async (
         },
       } as Job);
 
+      const platformCut = await calculateAppFee(pricePaid, tip.currencyPaid);
+
       await sendMail({
         data: {
           template: "tip-artist-notification",
@@ -153,7 +155,7 @@ export const handleArtistGift = async (
           locals: {
             tip,
             pricePaid,
-            platformCut: await calculateAppFee(pricePaid, tip.currencyPaid),
+            platformCut,
             email: user.email,
           },
         },
@@ -163,6 +165,7 @@ export const handleArtistGift = async (
     return tip;
   } catch (e) {
     logger.error(`Error creating tip: ${e}`);
+    throw e;
   }
 };
 

@@ -21,6 +21,7 @@ import styled from "@emotion/styled";
 import ChooseYourTheme from "./ChooseYourTheme";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
+import SavingInput from "./AlbumFormComponents/SavingInput";
 
 export interface ShareableTrackgroup {
   creatorId: number;
@@ -96,7 +97,7 @@ export const CustomizeLook: React.FC = () => {
     defaultValues: generateDefaults(artist),
   });
 
-  const { register, handleSubmit } = methods;
+  const { handleSubmit } = methods;
 
   const existingId = artist?.id;
 
@@ -125,8 +126,6 @@ export const CustomizeLook: React.FC = () => {
       if (!userId) return;
 
       const sending = {
-        bio: data.bio,
-        name: data.name,
         urlSlug: data.urlSlug?.toLowerCase(),
         properties: data.properties,
       };
@@ -202,14 +201,10 @@ export const CustomizeLook: React.FC = () => {
               >
                 <FormComponent>
                   <label>{t("displayName")} </label>
-                  <InputEl
-                    {...register("name", { required: true })}
-                    className={css`
-                      font-size: 1.5rem !important;
-                      @media (max-width: ${bp.medium}px) {
-                        font-size: 1rem !important;
-                      }
-                    `}
+                  <SavingInput
+                    formKey="name"
+                    url={`manage/artists/${artistId}`}
+                    extraData={{}}
                   />
                 </FormComponent>
               </div>
@@ -226,7 +221,12 @@ export const CustomizeLook: React.FC = () => {
               >
                 <FormComponent>
                   <label>{t("bio")}</label>
-                  <TextArea {...register("bio")} rows={7} />
+                  <SavingInput
+                    formKey="bio"
+                    rows={7}
+                    url={`manage/artists/${artistId}`}
+                    extraData={{}}
+                  />
                 </FormComponent>
               </div>
             </ArtistFormSection>

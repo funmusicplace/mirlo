@@ -54,6 +54,7 @@ const AlbumForm: React.FC<{
       }
     }
   }, [t, userId, trackGroupId, snackbar, artistId, errorHandler, reload]);
+
   const isDisabled = isSaving;
 
   return (
