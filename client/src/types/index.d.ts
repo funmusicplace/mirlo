@@ -211,6 +211,14 @@ interface UserTrackGroupPurchase {
   singleDownloadToken?: string;
 }
 
+interface UserArtistTip {
+  userId: number;
+  artistId: number;
+  pricePaid: number;
+  currencyPaid: string;
+  datePurchased: string;
+}
+
 type AccountStatus = {
   chargesEnabled: boolean;
   detailsSubmitted: boolean;
