@@ -229,3 +229,38 @@ interface License {
   short: string;
   link?: string;
 }
+interface ShippingDestination {
+  id: string;
+  homeCountry: string;
+  destinationCountry: string | null;
+  merchId: string;
+  costUnit: number;
+  currency: string;
+  costExtraUnit: number;
+}
+
+interface MerchOption {
+  name: string;
+  quantityRemaining: number;
+  sku: string;
+}
+
+interface MerchOptionType {
+  optionName: string;
+  options: MerchOption[];
+}
+
+interface Merch {
+  artistId: number;
+  title: string;
+  minPrice: number;
+  quantityRemaining: number;
+  id: string;
+  images: {
+    url: string[];
+    updatedAt: string;
+    sizes?: { [key: number]: string };
+  }[];
+  shippingDestinations: ShippingDestination[];
+  optionTypes: MerchOptionType[];
+}

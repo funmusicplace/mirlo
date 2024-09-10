@@ -13,6 +13,7 @@ import styled from "@emotion/styled";
 import { useQuery } from "@tanstack/react-query";
 import { queryManagedArtist, useDeleteArtistMutation } from "queries";
 import { AiOutlineWarning } from "react-icons/ai";
+import { useAuthContext } from "state/AuthContext";
 
 export const MainButtons = styled.div`
   display: flex;
@@ -33,6 +34,8 @@ const ManageArtist: React.FC<{}> = () => {
   const snackbar = useSnackbar();
   const navigate = useNavigate();
   const { artistId } = useParams();
+
+  const { user } = useAuthContext();
 
   const { data: artist, isError } = useQuery(
     queryManagedArtist(Number(artistId))
@@ -115,10 +118,21 @@ const ManageArtist: React.FC<{}> = () => {
             </NavLink>
           </li>
         )}
+        {artist && user?.isAdmin && (
+          <li>
+            <NavLink to="merch">{t("merch")}</NavLink>
+          </li>
+        )}
       </ArtistTabs>
       <Outlet />
 
-      <ArtistSection>
+      <ArtistSection
+        className={css`
+          margin-top: 4rem !important;
+          border-top: 1px solid var(--mi-darken-x-background-color);
+          padding-top: 1rem !important;
+        `}
+      >
         <div>
           <label
             className={css`

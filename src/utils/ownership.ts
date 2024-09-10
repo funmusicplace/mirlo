@@ -64,6 +64,35 @@ export const doesTrackGroupBelongToUser = async (
   return trackGroup;
 };
 
+export const doesMerchBelongToUser = async (merchId: string, user: User) => {
+  let merch;
+  if (user.isAdmin) {
+    merch = await prisma.merch.findFirst({
+      where: {
+        id: merchId,
+      },
+    });
+  } else {
+    merch = await prisma.merch.findFirst({
+      where: {
+        artist: {
+          userId: user.id,
+        },
+        id: merchId,
+      },
+    });
+  }
+
+  if (!merch) {
+    throw new AppError({
+      description: "Merch does not exist or does not belong to user",
+      httpCode: 404,
+      name: "Merch does not exist or does not belong to user",
+    });
+  }
+  return merch;
+};
+
 export const doesTrackBelongToUser = async (trackId: number, user: User) => {
   try {
     const track = await prisma.track.findUnique({

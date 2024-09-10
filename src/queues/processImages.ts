@@ -7,8 +7,10 @@ import {
   createBucketIfNotExists,
   finalArtistAvatarBucket,
   finalArtistBannerBucket,
+  finalMerchImageBucket,
   incomingArtistAvatarBucket,
   incomingArtistBannerBucket,
+  incomingMerchImageBucket,
   minioClient,
 } from "../utils/minio";
 import prisma from "@mirlo/prisma";
@@ -100,7 +102,7 @@ export const sendToImageQueue = async (
       logger.info("Adding image to queue");
 
       const job = await imageQueue.add("optimize-image", {
-        destination: image.id,
+        destinationId: image.id,
         model,
         incomingMinioBucket: incomingBucket,
         finalMinioBucket: finalBucket,
@@ -163,6 +165,33 @@ export const processArtistBanner = (ctx: APIContext) => {
           },
           where: {
             artistId,
+          },
+        });
+      }
+    );
+  };
+};
+
+export const processMerchImage = (ctx: APIContext) => {
+  return async (merchId: string) => {
+    return sendToImageQueue(
+      ctx,
+      incomingMerchImageBucket,
+      "merchImage",
+      finalMerchImageBucket,
+      "artwork",
+      async (_fileInfo: { filename: string }) => {
+        const exists = await prisma.merchImage.findFirst({
+          where: {
+            merchId,
+          },
+        });
+        if (exists) {
+          return exists;
+        }
+        return prisma.merchImage.create({
+          data: {
+            merchId,
           },
         });
       }

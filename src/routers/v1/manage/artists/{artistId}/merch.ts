@@ -4,9 +4,12 @@ import {
   contentBelongsToLoggedInUserArtist,
   userAuthenticated,
 } from "../../../../../auth/passport";
-import processor from "../../../../../utils/trackGroup";
 import prisma from "@mirlo/prisma";
-import { getSiteSettings } from "../../../../../utils/settings";
+import countries from "../../../../../utils/country-codes-currencies";
+import {
+  getUserCountry,
+  getUserCurrencyString,
+} from "../../../../../utils/user";
 
 export default function () {
   const operations = {
@@ -17,33 +20,20 @@ export default function () {
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { artistId } = req.params;
     try {
-      const results = await prisma.trackGroup.findMany({
+      const results = await prisma.merch.findMany({
         where: {
           artistId: Number(artistId),
-        },
-        orderBy: {
-          releaseDate: "desc",
+          deletedAt: null,
         },
         include: {
-          tracks: {
-            where: {
-              deletedAt: null,
-            },
-            include: {
-              audio: true,
-            },
-          },
           artist: true,
-          cover: {
-            where: {
-              deletedAt: null,
-            },
-          },
+          images: true,
+          optionTypes: { include: { options: true } },
         },
       });
 
       res.json({
-        results: results.map(processor.single),
+        results: results,
       });
     } catch (e) {
       next(e);
@@ -51,7 +41,7 @@ export default function () {
   }
 
   GET.apiDoc = {
-    summary: "Get all trackgroups belonging to a user",
+    summary: "Get all merch belonging to a user",
     parameters: [
       {
         in: "query",
@@ -61,11 +51,11 @@ export default function () {
     ],
     responses: {
       200: {
-        description: "Created trackgroup",
+        description: "Got all merch merch",
         schema: {
           type: "array",
           items: {
-            $ref: "#/definitions/TrackGroup",
+            $ref: "#/definitions/Merch",
           },
         },
       },
@@ -79,61 +69,40 @@ export default function () {
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {
-    const {
-      title,
-      about,
-      artistId,
-      published,
-      releaseDate,
-      credits,
-      type,
-      minPrice,
-      urlSlug,
-    } = req.body;
+    const { title, description, artistId } = req.body;
     const user = req.user as User;
 
-    if (!urlSlug) {
-      return res.status(400).json({
-        error: "Argument `urlSlug` is missing.",
-      });
-    }
-
     try {
-      const userForCurrency = await prisma.user.findFirst({
-        where: { id: user.id },
-        select: {
-          currency: true,
-        },
-      });
-      const existingSlug = await prisma.trackGroup.findFirst({
-        where: {
-          artistId: Number(artistId),
-          urlSlug,
-        },
-      });
+      const currencyString = await getUserCurrencyString(user.id);
 
-      if (existingSlug) {
-        return res.status(400).json({
-          error: "Can't create a trackGroup with an existing urlSlug",
-        });
-      }
-      const result = await prisma.trackGroup.create({
+      const result = await prisma.merch.create({
         data: {
           title,
-          about,
-          credits,
-          type,
+          description: description ?? "",
           artist: { connect: { id: artistId } },
-          published,
-          minPrice,
-          platformPercent: (await getSiteSettings()).platformPercent,
-          currency: userForCurrency?.currency ?? "usd",
-          releaseDate: releaseDate ? new Date(releaseDate) : undefined,
-          adminEnabled: true,
-          urlSlug,
+          minPrice: 0,
+          currency: currencyString,
+          quantityRemaining: 0,
+          isPublic: false,
         },
       });
-      return res.json({ result });
+
+      const country = await getUserCountry(user.id);
+
+      await prisma.merchShippingDestination.create({
+        data: {
+          merchId: result.id,
+          costUnit: 0,
+          costExtraUnit: 0,
+          currency: currencyString,
+          homeCountry: country?.countryCode ?? "us",
+        },
+      });
+
+      const created = await prisma.merch.findFirst({
+        where: { id: result.id },
+      });
+      return res.json({ result: created });
     } catch (e) {
       next(e);
     }

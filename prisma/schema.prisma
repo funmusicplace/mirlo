@@ -62,7 +62,7 @@ model User {
   relatedNotifications                Notification[]                  @relation("relatedUser")
   language                            String?
   userArtistTip                       UserArtistTip[]
-  MerchPurchase                       MerchPurchase[]
+  merchPurchase                       MerchPurchase[]
 }
 
 model UserArtistNotificationSetting {
@@ -164,6 +164,7 @@ model Artist {
   userArtistTip                      UserArtistTip[]
   ArtistTipTier                      ArtistTipTier[]
   merchStoreURL                      String?
+  merch                              Merch[]
 }
 
 model ArtistAvatar {
@@ -263,20 +264,24 @@ model Merch {
   title                       String
   description                 String
   minPrice                    Int // In cents
+  currency                    String?                    @default("usd")
   quantityRemaining           Int
   startShippingDate           DateTime?
-  sku                         String
-  includePurchaseTrackGroupId Boolean
+  sku                         String?
+  includePurchaseTrackGroupId Int?
+  includePurchaseTrackGroup   TrackGroup?                @relation(fields: [includePurchaseTrackGroupId], references: [id])
   isPublic                    Boolean
-  itemTypeId                  Int
-  itemType                    MerchItemType              @relation(fields: [itemTypeId], references: [id])
+  itemTypeId                  Int?
+  itemType                    MerchItemType?             @relation(fields: [itemTypeId], references: [id])
   createdAt                   DateTime                   @default(now())
   updatedAt                   DateTime                   @default(now()) @updatedAt
   deletedAt                   DateTime?
-  merchImages                 MerchImage[]
-  merchShippingDestinations   MerchShippingDestination[]
-  merchOptionTypes            MerchOptionType[]
-  merchPurchases              MerchPurchase[]
+  artistId                    Int
+  artist                      Artist                     @relation(fields: [artistId], references: [id])
+  images                      MerchImage[]
+  shippingDestinations        MerchShippingDestination[]
+  optionTypes                 MerchOptionType[]
+  purchases                   MerchPurchase[]
 }
 
 model MerchItemType {
@@ -286,38 +291,40 @@ model MerchItemType {
 }
 
 model MerchImage {
-  id      String   @id @default(uuid()) @db.Uuid
-  merch   Merch    @relation(fields: [merchId], references: [id])
-  merchId String   @db.Uuid
-  url     String[]
+  id        String   @id @default(uuid()) @db.Uuid
+  merch     Merch    @relation(fields: [merchId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  merchId   String   @db.Uuid
+  url       String[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 }
 
 model MerchShippingDestination {
-  id                 String @id @default(uuid()) @db.Uuid
+  id                 String  @id @default(uuid()) @db.Uuid
   homeCountry        String
-  destinationCountry String
-  merch              Merch  @relation(fields: [merchId], references: [id])
-  merchId            String @db.Uuid
+  destinationCountry String?
+  merch              Merch   @relation(fields: [merchId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  merchId            String  @db.Uuid
   costUnit           Int // in cents
   currency           String
   costExtraUnit      Int // in cents
 }
 
 model MerchOptionType {
-  id           String        @id @default(uuid()) @db.Uuid
-  optionName   String // eg. "shirt size"
-  merch        Merch         @relation(fields: [merchId], references: [id])
-  merchId      String        @db.Uuid
-  merchOptions MerchOption[]
+  id         String        @id @default(uuid()) @db.Uuid
+  optionName String // eg. "shirt size"
+  merch      Merch         @relation(fields: [merchId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  merchId    String        @db.Uuid
+  options    MerchOption[]
 }
 
 model MerchOption {
   id                String          @id @default(uuid()) @db.Uuid
   merchOptionTypeId String          @db.Uuid
-  merchOptionType   MerchOptionType @relation(fields: [merchOptionTypeId], references: [id])
+  merchOptionType   MerchOptionType @relation(fields: [merchOptionTypeId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   name              String // eg. "small"
-  quantityRemaining Int
-  sku               String
+  quantityRemaining Int?
+  sku               String?
 }
 
 model MerchPurchase {
@@ -406,7 +413,7 @@ model TrackGroup {
   updatedAt               DateTime                  @updatedAt
   deletedAt               DateTime?
   minPrice                Int? // in cents
-  currency                String?                   @default("USD")
+  currency                String?                   @default("usd")
   isPriceFixed            Boolean                   @default(false)
   userTrackGroupPurchases UserTrackGroupPurchase[]
   stripeProductKey        String?
@@ -417,6 +424,7 @@ model TrackGroup {
   tags                    TrackGroupTag[]
   downloadCodes           TrackGroupDownloadCodes[]
   notifications           Notification[]
+  Merch                   Merch[]
 
   @@unique([artistId, urlSlug])
 }

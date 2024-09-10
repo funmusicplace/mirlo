@@ -68,6 +68,25 @@ export function queryManagedTrackGroup(trackGroupId: number) {
   });
 }
 
+const fetchManagedMerch: QueryFunction<
+  Merch,
+  ["fetchManagedMerch", { merchId: string }]
+> = ({ queryKey: [_, { merchId }], signal }) => {
+  return api
+    .get<{
+      result: Merch;
+    }>(`v1/manage/merch/${merchId}`, { signal })
+    .then((r) => r.result);
+};
+
+export function queryManagedMerch(merchId: string) {
+  console.log("querying merch id", merchId);
+  return queryOptions({
+    queryKey: ["fetchManagedMerch", { merchId }],
+    queryFn: fetchManagedMerch,
+  });
+}
+
 export type CreateArtistBody = Partial<
   Pick<Artist, "bio" | "name" | "urlSlug" | "properties">
 >;

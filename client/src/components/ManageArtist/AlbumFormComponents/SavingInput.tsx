@@ -38,6 +38,10 @@ const SavingInput: React.FC<{
         value = value ? value * 100 : undefined;
       }
 
+      if (type === "number") {
+        value = Number(value);
+      }
+
       const data = {
         [formKey]: value,
         ...extraData,
@@ -84,7 +88,9 @@ const SavingInput: React.FC<{
           step={step}
         />
       )}
-      {rows && <TextArea {...register(formKey)} rows={7} onBlur={saveOnBlur} />}
+      {rows && (
+        <TextArea {...register(formKey)} rows={rows} onBlur={saveOnBlur} />
+      )}
       {isSaving && <LoadingSpinner />}
       {saveSuccess && <FaCheck />}
     </div>

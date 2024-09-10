@@ -24,8 +24,6 @@ const ManageArtistAlbums: React.FC<{}> = () => {
     queryManagedArtistTrackGroups({ artistId: Number(artistId) })
   );
 
-  console.log("trackGroups", trackGroups?.results);
-
   return (
     <ManageSectionWrapper>
       <SpaceBetweenDiv>

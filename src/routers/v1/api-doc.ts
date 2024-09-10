@@ -16,6 +16,16 @@ const apiDoc = {
         },
       },
     },
+    Merch: {
+      type: "object",
+      required: [],
+      properties: {
+        string: {
+          description: "Title of the merch",
+          type: "string",
+        },
+      },
+    },
     TrackGroupPurchase: {
       type: "object",
       required: ["userId", "trackGroupId"],

@@ -27,7 +27,7 @@ const {
 const optimizeImage = async (job: Job) => {
   const {
     config = sharpConfig.artwork,
-    destination,
+    destinationId,
     model,
     incomingMinioBucket,
     finalMinioBucket,
@@ -39,11 +39,11 @@ const optimizeImage = async (job: Job) => {
       `MinIO is at ${MINIO_HOST}:${MINIO_API_PORT} ${MINIO_ROOT_USER}`
     );
 
-    logger.info(`Starting to optimize images ${destination}`);
+    logger.info(`Starting to optimize images ${model}/${destinationId}`);
     const { buffer, size } = await getBufferFromMinio(
       minioClient,
       incomingMinioBucket,
-      destination,
+      destinationId,
       logger
     );
     await createBucketIfNotExists(minioClient, finalMinioBucket, logger);
@@ -67,13 +67,13 @@ const optimizeImage = async (job: Job) => {
             resize?: any;
             outputOptions?: any;
             blur?: any;
-            width?: any;
-            height?: any;
+            width?: number;
+            height?: number;
             suffix?: any;
           }) => {
             const { width, height, suffix = `-x${width}` } = variant;
 
-            const finalFileName = `${destination}${suffix}${ext}`;
+            const finalFileName = `${destinationId}${suffix}${ext}`;
 
             logger.info(`Destination: ${finalFileName}`);
 
@@ -128,22 +128,29 @@ const optimizeImage = async (job: Job) => {
       .flat(1);
 
     const results = await Promise.all(promises);
-    const urls = uniq(results.map((r) => `${destination}-x${r.width}`));
+    const urls = uniq(
+      results.map((r: { width: number }) => `${destinationId}-x${r.width}`)
+    ) as string[];
     logger.info(`Saving URLs [${urls.join(", ")}]`);
 
     if (model === "trackGroupCover") {
       await prisma.trackGroupCover.update({
-        where: { id: destination },
+        where: { id: destinationId },
         data: { url: urls },
       });
     } else if (model === "artistBanner") {
       await prisma.artistBanner.update({
-        where: { id: destination },
+        where: { id: destinationId },
         data: { url: urls },
       });
     } else if (model === "artistAvatar") {
       await prisma.artistAvatar.update({
-        where: { id: destination },
+        where: { id: destinationId },
+        data: { url: urls },
+      });
+    } else if (model === "merchImage") {
+      await prisma.merchImage.update({
+        where: { id: destinationId },
         data: { url: urls },
       });
     }
@@ -151,7 +158,7 @@ const optimizeImage = async (job: Job) => {
     profiler.done({ message: "Done optimizing image" });
     logger.info(`Removing from Bucket ${incomingCoversBucket}`);
 
-    await minioClient.removeObject(incomingCoversBucket, destination);
+    await minioClient.removeObject(incomingCoversBucket, destinationId);
 
     return Promise.resolve();
   } catch (err) {

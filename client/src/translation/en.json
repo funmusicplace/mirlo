@@ -255,6 +255,7 @@
     "albumDeleted": "Album deleted",
     "somethingWentWrong": "Something went wrong",
     "publishedAt": "Published {{ date }}",
+    "merch": "Merch",
     "willPublishAt": "Will publish at {{ date }}",
     "publishedSuccess": "Your album has been published. People will be able to buy it after the release date!"
   },
@@ -270,6 +271,24 @@
     "urlForLabel": "Where can you read more about this license?",
     "egLink": "eg. https://creativecommons.org/public-domain/cc0/",
     "add": "Add"
+  },
+  "manageMerch": {
+    "destinationCountry": "Destination country",
+    "costUnit": "Cost per unit",
+    "costExtraUnit": "Cost per additional unit",
+    "anywhere": "Anywhere",
+    "edit": "Edit",
+    "addNewShippingDestination": "Add new shipping destination",
+    "save": "Save",
+    "options": "Options",
+    "optionName": "Option name",
+    "addNewOption": "Add new option",
+    "addNewMerchOption": "Add new merch option",
+    "costPerUnitDisplay": "{{ costUnit}} ({{costExtraUnit}})",
+    "merchOptionsExplainer": "Does your merch come in different categories? For example t-shirt size?",
+    "shippingDestinationPrices": "Shipping destination prices",
+    "merchOptionsTitle": "Merch options",
+    "setDifferentCostPerDestination": "You'll want to set a different shipping cost per destination. It's likely much more expensive to ship to another country"
   },
   "manageAlbum": {
     "dontSeeTheLicenseYouWant": "Don't see the license you want for this track?",

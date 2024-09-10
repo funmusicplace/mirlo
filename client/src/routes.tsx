@@ -263,6 +263,31 @@ const routes: RouteObject[] = [
                     },
                   },
                   {
+                    path: "merch",
+                    children: [
+                      {
+                        path: "",
+
+                        async lazy() {
+                          const { default: Component } = await import(
+                            "components/ManageArtist/Merch/ManageMerch"
+                          );
+                          return { Component };
+                        },
+                      },
+                      {
+                        path: ":merchId",
+                        async lazy() {
+                          const { default: Component } = await import(
+                            "components/ManageArtist/Merch/EditMerch"
+                          );
+                          return { Component };
+                        },
+                      },
+                    ],
+                  },
+
+                  {
                     path: "releases/tools",
                     async lazy() {
                       const { default: Component } = await import(
