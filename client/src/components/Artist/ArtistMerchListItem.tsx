@@ -1,9 +1,10 @@
 import React from "react";
-import ClickToPlay from "../common/ClickToPlay";
 import { bp } from "../../constants";
 import styled from "@emotion/styled";
+import { useTranslation } from "react-i18next";
 import ArtistLink from "./ArtistLink";
 import ArtistItemLink from "./ArtistItemLink";
+import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 
 export const TrackGroupWrapper = styled.div`
   margin-bottom: 0.5rem;
@@ -62,33 +63,31 @@ export const TrackGroupInfo = styled.div`
   }
 `;
 
-const ArtistTrackGroup: React.FC<{
-  trackGroup: TrackGroup & { artist?: Artist };
+const ArtistMerchListItem: React.FC<{
+  merch: Merch & { artist?: Artist };
   as?: React.ElementType<any, keyof React.JSX.IntrinsicElements>;
-}> = ({ trackGroup, as }) => {
+}> = ({ merch, as }) => {
+  const { t } = useTranslation("translation", { keyPrefix: "clickToPlay" });
+  const merchImageUrl = merch.images?.[0]?.sizes?.[600];
+  console.log(merchImageUrl);
   return (
     <TrackGroupWrapper as={as}>
       <div>
-        <ClickToPlay
-          image={{
-            width: 400,
-            height: 400,
-            url: trackGroup.cover?.sizes?.[600] ?? "",
-          }}
-          trackGroupId={trackGroup.id}
-          title={trackGroup.title}
-          trackGroup={trackGroup}
-        >
-          <TrackGroupLinks>
-            <TrackGroupInfo>
-              <ArtistItemLink item={trackGroup} />
-              <ArtistLink artist={trackGroup.artist} />
-            </TrackGroupInfo>
-          </TrackGroupLinks>
-        </ClickToPlay>
+        <ImageWithPlaceholder
+          src={merchImageUrl}
+          alt={merch.title}
+          size={400}
+          square
+        />
+        <TrackGroupLinks>
+          <TrackGroupInfo>
+            <ArtistItemLink item={merch} />
+            <ArtistLink artist={merch.artist} />
+          </TrackGroupInfo>
+        </TrackGroupLinks>
       </div>
     </TrackGroupWrapper>
   );
 };
 
-export default ArtistTrackGroup;
+export default ArtistMerchListItem;

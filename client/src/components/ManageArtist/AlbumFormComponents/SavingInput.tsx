@@ -10,6 +10,7 @@ import LoadingSpinner from "components/common/LoadingSpinner";
 import { css } from "@emotion/css";
 import useErrorHandler from "services/useErrorHandler";
 import { FaCheck } from "react-icons/fa";
+import { useQueryClient } from "@tanstack/react-query";
 
 const SavingInput: React.FC<{
   formKey: string;
@@ -19,9 +20,20 @@ const SavingInput: React.FC<{
   required?: boolean;
   step?: string;
   type?: string;
-}> = ({ formKey, url, extraData, type, required, rows, step }) => {
+  clearQueryKey?: string;
+}> = ({
+  formKey,
+  url,
+  extraData,
+  type,
+  required,
+  rows,
+  step,
+  clearQueryKey,
+}) => {
   const { register, getValues } = useFormContext();
   const errorHandler = useErrorHandler();
+  const client = useQueryClient();
 
   const [isSaving, setIsSaving] = React.useState(false);
   const [saveSuccess, setSaveSuccess] = React.useState(false);
@@ -47,7 +59,22 @@ const SavingInput: React.FC<{
         ...extraData,
       };
 
-      await api.put<unknown, TrackGroup>(url, data);
+      await api.put<unknown, unknown>(url, data);
+
+      if (clearQueryKey) {
+        client.invalidateQueries({
+          predicate: (query) => {
+            const shouldInvalidate = query.queryKey.find((obj) => {
+              if (typeof obj === "string") {
+                return obj.toLowerCase().includes(clearQueryKey.toLowerCase());
+              }
+              return false;
+            });
+
+            return !!shouldInvalidate;
+          },
+        });
+      }
       let timeout2: NodeJS.Timeout;
       const timeout = setTimeout(() => {
         setIsSaving(false);

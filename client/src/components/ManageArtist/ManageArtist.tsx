@@ -1,33 +1,18 @@
 import { css } from "@emotion/css";
-import Button, { ButtonLink } from "components/common/Button";
+import Button from "components/common/Button";
 import React from "react";
 import { bp } from "../../constants";
-import { FaEye, FaPen, FaTrash } from "react-icons/fa";
+import { FaTrash } from "react-icons/fa";
 import { NavLink, Outlet, useNavigate, useParams } from "react-router-dom";
 import { useSnackbar } from "state/SnackbarContext";
 import { useTranslation } from "react-i18next";
 import Box from "components/common/Box";
 import { ArtistTabs } from "components/common/Tabs";
 import { ArtistSection } from "components/Artist/Artist";
-import styled from "@emotion/styled";
 import { useQuery } from "@tanstack/react-query";
 import { queryManagedArtist, useDeleteArtistMutation } from "queries";
 import { AiOutlineWarning } from "react-icons/ai";
 import { useAuthContext } from "state/AuthContext";
-
-export const MainButtons = styled.div`
-  display: flex;
-  width: 100%;
-  justify-content: flex-end;
-  flex-direction: column;
-  margin-bottom: 1rem;
-
-  @media screen and (max-width: ${bp.medium}px) {
-    padding: var(--mi-side-paddings-xsmall);
-    padding-top: 0.5rem;
-    margin-bottom: 0;
-  }
-`;
 
 const ManageArtist: React.FC<{}> = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
@@ -81,29 +66,6 @@ const ManageArtist: React.FC<{}> = () => {
         </div>
       )}
 
-      <MainButtons>
-        <div>
-          <ButtonLink
-            variant="big"
-            startIcon={<FaPen />}
-            to={`/manage/artists/${artist.id}/customize`}
-            className={css`
-              margin-right: 0.5rem;
-              margin-bottom: 0.25rem;
-            `}
-          >
-            {t("editDetails")}
-          </ButtonLink>
-          <ButtonLink
-            to={`/${artist?.urlSlug?.toLowerCase() ?? artist?.id}`}
-            variant="big"
-            startIcon={<FaEye />}
-            disabled={!artist}
-          >
-            {t("viewLive")}
-          </ButtonLink>
-        </div>
-      </MainButtons>
       <ArtistTabs>
         <li>
           <NavLink to="releases">{t("releases")}</NavLink>

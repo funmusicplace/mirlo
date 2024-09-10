@@ -513,6 +513,15 @@ const routes: RouteObject[] = [
                 },
               },
               {
+                path: "merch",
+                async lazy() {
+                  const { default: Component } = await import(
+                    "components/Artist/ArtistMerch"
+                  );
+                  return { Component };
+                },
+              },
+              {
                 path: "releases",
                 async lazy() {
                   const { default: Component } = await import(

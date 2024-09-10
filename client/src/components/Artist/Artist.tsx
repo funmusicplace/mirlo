@@ -14,11 +14,13 @@ import {
 import { ArtistTabs } from "components/common/Tabs";
 import React from "react";
 import api from "services/api";
-import { FaChevronRight } from "react-icons/fa";
+import { FaChevronRight, FaEdit } from "react-icons/fa";
 import { css } from "@emotion/css";
 import { useAuthContext } from "state/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { queryArtist, queryUserStripeStatus } from "queries";
+import { ButtonLink } from "components/common/Button";
+import { getArtistManageUrl } from "utils/artist";
 
 export const ArtistSection = styled.div`
   margin-bottom: 2rem;
@@ -51,27 +53,29 @@ function Artist() {
   const canReceivePayments = stripeAccountStatus?.chargesEnabled;
 
   React.useEffect(() => {
-    const subPages = ["posts", "releases", "support", "links"];
+    const subPages = ["posts", "releases", "support", "links", "merch"];
     const end = pathname.split("/")[2];
 
     if (!subPages.includes(end)) {
-      const navigateTo =
-        (artist?.linksJson?.length ?? 0) > 0
-          ? "links"
-          : (artist?.trackGroups.length ?? 0) > 0
-            ? "releases"
-            : (artist?.posts.length ?? 0) > 0
-              ? "posts"
-              : canReceivePayments
-                ? "support"
-                : undefined;
-      if (navigateTo) {
-        navigate(navigateTo, { replace: true });
+      if (artist?.trackGroups.length) {
+        // has track groups
+        navigate("releases", { replace: true });
+      } else if (artist?.posts.length) {
+        // has track groups
+        navigate("posts", { replace: true });
+      } else if (canReceivePayments) {
+        // has track groups
+        navigate("support", { replace: true });
+      } else if (artist?.linksJson?.length) {
+        // has links
+        navigate("links", { replace: true });
       }
     }
   }, [
     pathname,
     navigate,
+    user?.id,
+    artist?.id,
     artist?.trackGroups.length,
     artist?.posts.length,
     canReceivePayments,
@@ -102,15 +106,41 @@ function Artist() {
             </NavLink>
           </li>
         )}
-        {canReceivePayments &&
-          (artist?.subscriptionTiers.filter((tier) => !tier.isDefaultTier)
-            .length ?? 0) > 0 && (
-            <li>
-              <NavLink to="support">
-                {t("support", { artist: artist.name })}
-              </NavLink>
+        {canReceivePayments && (
+          <>
+            {(artist?.subscriptionTiers.filter((tier) => !tier.isDefaultTier)
+              .length ?? 0) > 0 && (
+              <li>
+                <NavLink to="support">
+                  {t("support", { artist: artist.name })}
+                </NavLink>
+              </li>
+            )}
+          </>
+        )}
+        {user?.isAdmin && (
+          <>
+            <li
+              className={css`
+                display: flex;
+              `}
+            >
+              <NavLink to="merch">{t("merch")}</NavLink>
+              <ButtonLink
+                startIcon={<FaEdit />}
+                to={getArtistManageUrl(artist.id) + "/merch"}
+                variant="dashed"
+                className={
+                  "edit " +
+                  css`
+                    margin-left: 0.5rem;
+                    margin-top: -0.5rem;
+                  `
+                }
+              />
             </li>
-          )}
+          </>
+        )}
         {user && isArtistUser && !canReceivePayments && (
           <li>
             <a

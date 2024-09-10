@@ -66,7 +66,6 @@ interface TrackGroup {
   about?: string;
   currency: string;
   credits?: string;
-  artist?: Pick<Artist, "name" | "urlSlug" | "id" | "userId">;
   artistId?: number;
   tracks: Track[];
   updatedAt: string;
@@ -151,6 +150,7 @@ interface Artist {
     sizes?: { [key: string]: string };
     updatedAt: string;
   };
+  merch: Merch[];
 }
 
 interface User {
@@ -256,6 +256,7 @@ interface Merch {
   minPrice: number;
   quantityRemaining: number;
   id: string;
+  isPublic: boolean;
   images: {
     url: string[];
     updatedAt: string;

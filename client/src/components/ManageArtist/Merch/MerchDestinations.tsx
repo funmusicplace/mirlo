@@ -105,7 +105,9 @@ const MerchDestinations: React.FC<{}> = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageMerch" });
   const [isEditing, setIsEditing] = React.useState(false);
 
-  const { data: merch } = useQuery(queryManagedMerch(merchParamId ?? ""));
+  const { data: merch, refetch } = useQuery(
+    queryManagedMerch(merchParamId ?? "")
+  );
 
   const methods = useForm<DestinationForm>({
     defaultValues: {
@@ -123,8 +125,6 @@ const MerchDestinations: React.FC<{}> = () => {
 
   const update = React.useCallback(
     async (newDestinations: DestinationForm) => {
-      console.log(newDestinations);
-
       const packet = newDestinations.destinations.map((dest) => ({
         ...dest,
         costUnit: Number(dest.costUnit) * 100,
@@ -132,11 +132,12 @@ const MerchDestinations: React.FC<{}> = () => {
       }));
       try {
         await api.put(`manage/merch/${merchParamId}/destinations`, packet);
+        refetch();
       } catch (e) {
         console.error("e", e);
       }
     },
-    [merchParamId]
+    [merchParamId, refetch]
   );
 
   return (

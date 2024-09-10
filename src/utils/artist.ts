@@ -9,6 +9,8 @@ import {
   TrackGroupCover,
   Track,
   Prisma,
+  Merch,
+  MerchImage,
 } from "@mirlo/prisma/client";
 import prisma from "@mirlo/prisma";
 import stripe from "./stripe";
@@ -18,6 +20,7 @@ import { convertURLArrayToSizes } from "./images";
 import {
   finalArtistAvatarBucket,
   finalArtistBannerBucket,
+  finalMerchImageBucket,
   removeObjectsFromBucket,
 } from "./minio";
 import {
@@ -382,6 +385,14 @@ export const singleInclude = (queryOptions?: {
         deletedAt: null,
       },
     },
+    merch: {
+      where: {
+        isPublic: true,
+      },
+      include: {
+        images: true,
+      },
+    },
     subscriptionTiers: {
       where: {
         deletedAt: null,
@@ -418,6 +429,7 @@ interface LocalArtist extends Artist {
     cover?: TrackGroupCover | null;
     tracks?: Track[];
   })[];
+  merch?: (Merch & { images: MerchImage[] })[];
 }
 
 export const addSizesToImage = (
@@ -442,6 +454,10 @@ export const processSingleArtist = (
     posts: artist?.posts?.map((p: Post) =>
       postProcessor.single(p, isUserSubscriber || artist.userId === userId)
     ),
+    merch: artist?.merch?.map((m) => ({
+      ...m,
+      images: m.images.map((i) => addSizesToImage(finalMerchImageBucket, i)),
+    })),
     banner: addSizesToImage(finalArtistBannerBucket, artist?.banner),
     avatar: addSizesToImage(finalArtistAvatarBucket, artist?.avatar),
     trackGroups: artist?.trackGroups?.map(processSingleTrackGroup),

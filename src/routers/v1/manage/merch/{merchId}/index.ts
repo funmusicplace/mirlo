@@ -67,9 +67,8 @@ export default function () {
         "description",
         "minPrice",
         "quantityRemaining",
+        "isPublic",
       ]);
-
-      console.log(newValues);
 
       await prisma.merch.updateMany({
         where: { id: merchId },

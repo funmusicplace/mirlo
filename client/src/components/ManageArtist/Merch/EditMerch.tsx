@@ -11,6 +11,10 @@ import MerchForm from "./MerchForm";
 import MerchDestinations from "./MerchDestinations";
 import UploadArtistImage from "../UploadArtistImage";
 import MerchOptions from "./MerchOptions";
+import Box from "components/common/Box";
+import FormCheckbox from "components/common/FormCheckbox";
+import { Toggle } from "components/common/Toggle";
+import api from "services/api";
 
 export interface TrackGroupFormData {
   published: boolean;
@@ -38,6 +42,19 @@ const EditMerch: React.FC<{}> = () => {
     refetch,
   } = useQuery(queryManagedMerch(merchParamId ?? ""));
 
+  const updatePublic = React.useCallback(
+    async (val: boolean) => {
+      const packet = { isPublic: val };
+      try {
+        await api.put(`manage/merch/${merchParamId}`, packet);
+        refetch();
+      } catch (e) {
+        console.error("e", e);
+      }
+    },
+    [merchParamId, refetch]
+  );
+
   if (!artist && isLoading) {
     return <LoadingBlocks />;
   } else if (!artist) {
@@ -48,6 +65,7 @@ const EditMerch: React.FC<{}> = () => {
     return null;
   }
 
+  console.log(merch.isPublic);
   return (
     <ManageSectionWrapper
       className={css`
@@ -58,6 +76,13 @@ const EditMerch: React.FC<{}> = () => {
         }
       `}
     >
+      <Box variant="info">
+        <Toggle
+          label={t("isPublic")}
+          toggled={merch.isPublic}
+          onClick={updatePublic}
+        />
+      </Box>
       <div
         className={css`
           display: flex;

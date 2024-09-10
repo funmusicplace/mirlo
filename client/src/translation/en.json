@@ -130,6 +130,8 @@
     "justDownloadNoUser": "Want to just download the album? Enter your email and we'll email you a download link. You'll get added to the artist's mailing list."
   },
   "artist": {
+    "merch": "Merch",
+    "addNewMerch": "Add new merch",
     "follow": "Follow",
     "enterEmail": "Enter your email:",
     "tipThisArtist": "Tip this artist",
@@ -274,6 +276,12 @@
   },
   "manageMerch": {
     "destinationCountry": "Destination country",
+    "merchTitle": "What are you selling?",
+    "merchDescription": "How would you describe it?",
+    "price": "Price",
+    "quanity": "How many do you have?",
+    "saveMerch": "Save merch details",
+    "isPublic": "Should this merch item be publicly listed?",
     "costUnit": "Cost per unit",
     "costExtraUnit": "Cost per additional unit",
     "anywhere": "Anywhere",

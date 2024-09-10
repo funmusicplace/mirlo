@@ -10,6 +10,7 @@ import SavingInput from "../AlbumFormComponents/SavingInput";
 import FormComponent from "components/common/FormComponent";
 import { css } from "@emotion/css";
 import FormError from "components/common/FormError";
+import { QUERY_KEY_MERCH } from "queries/queryKeys";
 
 const MerchForm: React.FC<{
   merch: Merch;
@@ -78,6 +79,7 @@ const MerchForm: React.FC<{
             formKey="title"
             url={`manage/merch/${merch.id}`}
             extraData={{}}
+            clearQueryKey={QUERY_KEY_MERCH}
           />
         </FormComponent>
         <FormComponent>
@@ -87,6 +89,7 @@ const MerchForm: React.FC<{
             rows={3}
             url={`manage/merch/${merch.id}`}
             extraData={{}}
+            clearQueryKey={QUERY_KEY_MERCH}
           />
         </FormComponent>
         <FormComponent>
@@ -97,6 +100,7 @@ const MerchForm: React.FC<{
             step="0.01"
             url={`manage/merch/${merch.id}`}
             extraData={{}}
+            clearQueryKey={QUERY_KEY_MERCH}
           />
           {errors.minPrice && <FormError>{t("priceZeroOrMore")}</FormError>}
         </FormComponent>
@@ -109,6 +113,7 @@ const MerchForm: React.FC<{
             step="1"
             url={`manage/merch/${merch.id}`}
             extraData={{}}
+            clearQueryKey={QUERY_KEY_MERCH}
           />
         </FormComponent>
         <Button
