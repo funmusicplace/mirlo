@@ -360,8 +360,7 @@ model UserArtistTip {
   stripeSessionKey String?
   ArtistTipTier    ArtistTipTier? @relation(fields: [artistTipTierId], references: [id])
   artistTipTierId  Int?
-
-  @@unique([userId, artistId])
+  id               String         @id @default(uuid()) @db.Uuid
 }
 
 model UserTrackGroupPurchase {

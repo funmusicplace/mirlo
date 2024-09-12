@@ -49,9 +49,11 @@ const Destination: React.FC<{
           <FormComponent>
             <label>{t("destinationCountry")}</label>
             <SelectEl
-              {...methods.register(`destinations.${index}.destinationCountry`)}
+              {...methods.register(`destinations.${index}.destinationCountry`, {
+                required: true,
+              })}
+              required
             >
-              <option>Anywhere</option>
               {countryCodesCurrencies.map((country) => (
                 <option key={country.countryCode} value={country.countryCode}>
                   {country.countryName} {country.countryCode}

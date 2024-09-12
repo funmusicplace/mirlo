@@ -29,7 +29,6 @@ function TrackGroup() {
   });
 
   const { artistId, merchId } = useParams();
-  const { user } = useAuthContext();
   const { data: artist, isLoading: isLoadingArtist } = useQuery(
     queryArtist({ artistSlug: artistId ?? "" })
   );
@@ -108,7 +107,11 @@ function TrackGroup() {
             <ImageAndDetailsWrapper>
               <ImageWrapper>
                 <ImageWithPlaceholder
-                  src={merch.images?.[0]?.sizes?.[960]}
+                  src={
+                    merch.images?.[0]?.sizes?.[960] +
+                    "?" +
+                    merch.images?.[0].updatedAt
+                  }
                   alt={merch.title}
                   size={960}
                 />

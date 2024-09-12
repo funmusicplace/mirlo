@@ -10,6 +10,7 @@ import {
   getUserCountry,
   getUserCurrencyString,
 } from "../../../../../utils/user";
+import { processSingleMerch } from "../../../../../utils/merch";
 
 export default function () {
   const operations = {
@@ -33,7 +34,7 @@ export default function () {
       });
 
       res.json({
-        results: results,
+        results: results.map(processSingleMerch),
       });
     } catch (e) {
       next(e);

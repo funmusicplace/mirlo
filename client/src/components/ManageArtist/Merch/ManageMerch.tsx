@@ -11,6 +11,7 @@ import { NewMerchButton } from "./NewMerchButton";
 import { ButtonLink } from "components/common/Button";
 import { FaPen } from "react-icons/fa";
 import DashedList from "./DashedList";
+import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 
 const ManageMerch: React.FC<{}> = () => {
   const { artistId } = useParams();
@@ -52,7 +53,24 @@ const ManageMerch: React.FC<{}> = () => {
         {artist &&
           merch?.results.map((item) => (
             <li key={item.id}>
-              {item.title}
+              <div
+                className={css`
+                  display: flex;
+                  align-items: center;
+
+                  > span {
+                    margin-left: 1rem;
+                  }
+                `}
+              >
+                <ImageWithPlaceholder
+                  src={item.images?.[0]?.sizes?.[60]}
+                  alt={item.title}
+                  size={60}
+                  square
+                />
+                <span>{item.title}</span>
+              </div>
               <ButtonLink to={item.id} startIcon={<FaPen />} />
             </li>
           ))}

@@ -52,6 +52,7 @@ export default function () {
               subscriptionTiers: true,
             },
           },
+          shippingDestinations: true,
           images: true,
         },
       });

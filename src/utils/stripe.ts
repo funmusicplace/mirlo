@@ -12,6 +12,7 @@ import { Job } from "bullmq";
 import { AppError } from "./error";
 import {
   handleArtistGift,
+  handleArtistMerchPurchase,
   handleSubscription,
   handleTrackGroupPurchase,
 } from "./handleFinishedTransactions";
@@ -284,7 +285,7 @@ export const createStripeCheckoutSessionForMerchPurchase = async ({
   priceNumber: number;
   quantity: number;
   merch: Prisma.MerchGetPayload<{
-    include: { artist: true; images: true };
+    include: { artist: true; images: true; shippingDestinations: true };
   }>;
   stripeAccountId: string;
 }) => {
@@ -305,11 +306,17 @@ export const createStripeCheckoutSessionForMerchPurchase = async ({
 
   const currency = merch.currency?.toLowerCase() ?? "usd";
 
+  const destinations = merch.shippingDestinations
+    .map((d) => d.destinationCountry?.toUpperCase())
+    .filter(
+      (v) => !!v
+    ) as Stripe.Checkout.SessionCreateParams.ShippingAddressCollection.AllowedCountry[];
+
   const session = await stripe.checkout.sessions.create(
     {
       billing_address_collection: "required",
       shipping_address_collection: {
-        allowed_countries: ["US"], // FIXME feed in shippingDesinations
+        allowed_countries: destinations, // FIXME feed in shippingDesinations
       },
       customer_email: loggedInUser?.email || email,
       payment_intent_data: {
@@ -512,6 +519,7 @@ type SessionMetaData = {
   trackGroupId: string;
   stripeAccountId: string;
   gaveGift: string;
+  merchId: string;
   artistId: string;
 };
 
@@ -520,8 +528,14 @@ export const handleCheckoutSession = async (
 ) => {
   try {
     const metadata = session.metadata as unknown as SessionMetaData;
-    const { tierId, trackGroupId, stripeAccountId, gaveGift, artistId } =
-      metadata;
+    const {
+      tierId,
+      merchId,
+      trackGroupId,
+      stripeAccountId,
+      gaveGift,
+      artistId,
+    } = metadata;
     let { userId, userEmail } = metadata;
     userEmail = userEmail || (session.customer_details?.email ?? "");
     logger.info(
@@ -547,6 +561,9 @@ export const handleCheckoutSession = async (
     if (gaveGift && `${gaveGift}` === "1" && artistId) {
       logger.info(`checkout.session: ${session.id} handling tip`);
       await handleArtistGift(Number(actualUserId), Number(artistId), session);
+    } else if (merchId && userEmail) {
+      logger.info(`checkout.session: ${session.id} handling merch`);
+      await handleArtistMerchPurchase(Number(actualUserId), merchId, session);
     } else if (tierId && userEmail) {
       logger.info(`checkout.session: ${session.id} handling subscription`);
       await handleSubscription(Number(actualUserId), Number(tierId), session);

@@ -528,7 +528,7 @@ const routes: RouteObject[] = [
                     path: ":merchId/checkout-complete",
                     async lazy() {
                       const { default: Component } = await import(
-                        "components/Merch/MerchView"
+                        "components/Merch/CheckoutComplete"
                       );
                       return { Component };
                     },
