@@ -8,8 +8,7 @@ import {
 import prisma from "@mirlo/prisma";
 import { deleteTrackGroup } from "../../../../../utils/trackGroup";
 import { AppError } from "../../../../../utils/error";
-import { addSizesToImage } from "../../../../../utils/artist";
-import { finalMerchImageBucket } from "../../../../../utils/minio";
+import { processSingleMerch } from "../../../../../utils/merch";
 
 type Params = {
   merchId: string;
@@ -45,12 +44,7 @@ export default function () {
       }
 
       return res.status(200).json({
-        result: {
-          ...merch,
-          images: merch.images.map((img) =>
-            addSizesToImage(finalMerchImageBucket, img)
-          ),
-        },
+        result: processSingleMerch(merch),
       });
     } catch (e) {
       next(e);

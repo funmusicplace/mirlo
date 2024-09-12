@@ -32,6 +32,7 @@ import { NextFunction, Request, Response } from "express";
 import { AppError } from "./error";
 import logger from "../logger";
 import { Job } from "bullmq";
+import { processSingleMerch } from "./merch";
 
 type Params = {
   id: string;
@@ -454,10 +455,7 @@ export const processSingleArtist = (
     posts: artist?.posts?.map((p: Post) =>
       postProcessor.single(p, isUserSubscriber || artist.userId === userId)
     ),
-    merch: artist?.merch?.map((m) => ({
-      ...m,
-      images: m.images.map((i) => addSizesToImage(finalMerchImageBucket, i)),
-    })),
+    merch: artist?.merch?.map(processSingleMerch),
     banner: addSizesToImage(finalArtistBannerBucket, artist?.banner),
     avatar: addSizesToImage(finalArtistAvatarBucket, artist?.avatar),
     trackGroups: artist?.trackGroups?.map(processSingleTrackGroup),

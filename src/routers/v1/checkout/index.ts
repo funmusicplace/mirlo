@@ -18,13 +18,14 @@ export default function () {
         const session = await stripe.checkout.sessions.retrieve(session_id, {
           stripeAccount: stripeAccountId,
         });
-        const { clientId, artistId, trackGroupId, tierId, gaveGift } =
+        const { clientId, artistId, trackGroupId, tierId, gaveGift, merchId } =
           session.metadata as unknown as {
             clientId: number | null;
             artistId: number | null;
             gaveGift: 1 | null;
             tierId: number | null;
             trackGroupId: number | null;
+            merchId: string | null;
           };
         if (clientId && artistId) {
           const client = await prisma.client.findFirst({
@@ -37,7 +38,16 @@ export default function () {
             where: { id: +artistId },
           });
 
-          if (gaveGift && artist && client) {
+          if (merchId && artist) {
+            // FIXME: We'll probably want clients to be able to define the
+            // checkout callbackURL separately from the applicationURL
+            // and that callbackURL should probably contain a pattern that
+            // they can define
+            res.redirect(
+              client?.applicationUrl +
+                `/${artist?.urlSlug}/merch/${merchId}/checkout-complete`
+            );
+          } else if (gaveGift && artist && client) {
             // FIXME: We'll probably want clients to be able to define the
             // checkout callbackURL separately from the applicationURL
             // and that callbackURL should probably contain a pattern that

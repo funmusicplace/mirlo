@@ -1,6 +1,5 @@
 import { css } from "@emotion/css";
 import React from "react";
-import ArtistTrackGroup from "./ArtistTrackGroup";
 import { bp } from "../../constants";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import { useParams } from "react-router-dom";

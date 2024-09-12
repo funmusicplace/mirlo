@@ -282,6 +282,7 @@ model Merch {
   shippingDestinations        MerchShippingDestination[]
   optionTypes                 MerchOptionType[]
   purchases                   MerchPurchase[]
+  stripeProductKey            String?
 }
 
 model MerchItemType {

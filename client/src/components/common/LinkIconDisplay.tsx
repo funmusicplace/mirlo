@@ -3,6 +3,7 @@ import {
   FaFacebook,
   FaGlobe,
   FaInstagram,
+  FaMastodon,
   FaTwitter,
 } from "react-icons/fa";
 import { FiMail } from "react-icons/fi";
@@ -53,6 +54,7 @@ export const findOutsideSite = (link: string) => {
 };
 
 export const outsideLinks = [
+  { matches: "mastodon", icon: <FaMastodon />, name: "Mastodon" },
   { matches: "twitter.com", icon: <FaTwitter />, name: "Twitter" },
   { matches: "x.com", icon: <FaTwitter />, name: "X" },
   { matches: "facebook.com", icon: <FaFacebook />, name: "Facebook" },

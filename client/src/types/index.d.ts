@@ -67,6 +67,7 @@ interface TrackGroup {
   currency: string;
   credits?: string;
   artistId?: number;
+  artist: Artist;
   tracks: Track[];
   updatedAt: string;
   createdAt: string;
@@ -252,6 +253,8 @@ interface MerchOptionType {
 
 interface Merch {
   artistId: number;
+  description: string;
+  artist: Artist;
   title: string;
   minPrice: number;
   quantityRemaining: number;

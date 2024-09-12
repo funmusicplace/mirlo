@@ -15,9 +15,57 @@ import React from "react";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import { useAuthContext } from "state/AuthContext";
 
-const TrackGroupTitle: React.FC<{ trackGroup: TrackGroup }> = ({
-  trackGroup,
-}) => {
+export const ItemViewTitle: React.FC<{
+  title: string;
+  trackGroupId?: number;
+}> = ({ title, trackGroupId }) => {
+  return (
+    <div>
+      <div
+        className={css`
+          display: flex;
+          margin-top: 1rem;
+          margin-bottom: 0.5rem;
+          align-items: center;
+          justify-content: flex-start;
+          align-items: center;
+        `}
+      >
+        {trackGroupId && (
+          <div
+            className={css`
+              @media screen and (max-width: ${bp.small}px) {
+                display: none;
+              }
+            `}
+          >
+            <ClickToPlayAlbum
+              trackGroupId={trackGroupId}
+              className={css`
+                width: 50px !important;
+                margin-right: 10px;
+              `}
+            />
+          </div>
+        )}
+        <div>
+          <h1
+            className={css`
+              font-size: 2rem;
+              line-height: 2.2rem;
+            `}
+          >
+            {title}
+          </h1>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const TrackGroupTitle: React.FC<{
+  trackGroup: TrackGroup;
+}> = ({ trackGroup }) => {
   const { t } = useTranslation("translation", {
     keyPrefix: "trackGroupDetails",
   });
@@ -36,45 +84,7 @@ const TrackGroupTitle: React.FC<{ trackGroup: TrackGroup }> = ({
 
   return (
     <>
-      <div>
-        <div
-          className={css`
-            display: flex;
-            margin-top: 1rem;
-            margin-bottom: 0.5rem;
-            align-items: center;
-            justify-content: flex-start;
-            align-items: center;
-          `}
-        >
-          <div
-            className={css`
-              @media screen and (max-width: ${bp.small}px) {
-                display: none;
-              }
-            `}
-          >
-            <ClickToPlayAlbum
-              trackGroupId={trackGroup.id}
-              className={css`
-                width: 50px !important;
-                margin-right: 10px;
-              `}
-            />
-          </div>
-          <div>
-            <h1
-              className={css`
-                font-size: 2rem;
-                line-height: 2.2rem;
-              `}
-            >
-              {trackGroup.title}
-            </h1>
-          </div>
-        </div>
-      </div>
-
+      <ItemViewTitle trackGroupId={trackGroup.id} title={trackGroup.title} />
       <div
         className={css`
           display: flex;
@@ -132,9 +142,7 @@ const TrackGroupTitle: React.FC<{ trackGroup: TrackGroup }> = ({
               `}
             >
               <DropdownMenu compact>
-                <>
-                  <TrackGroupAdminMenu trackGroup={trackGroup} />
-                </>
+                <TrackGroupAdminMenu trackGroup={trackGroup} />
               </DropdownMenu>
             </div>
           )}

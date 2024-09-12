@@ -18,7 +18,7 @@ import { ButtonLink } from "./Button";
 import { FaEye, FaPen } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 
-const H1 = styled.h1<{ artistAvatar: boolean }>`
+export const ArtistTitle = styled.h1<{ artistAvatar: boolean }>`
   font-size: 2.4rem;
   line-height: 2.5rem;
 
@@ -205,7 +205,9 @@ const ArtistHeaderSection: React.FC<{
                         width: 100%;
                       `}
                     >
-                      <H1 artistAvatar={!!artistAvatar}>{artist.name}</H1>
+                      <ArtistTitle artistAvatar={!!artistAvatar}>
+                        {artist.name}
+                      </ArtistTitle>
 
                       <ArtistFormLocation
                         isManage={!!isManage}

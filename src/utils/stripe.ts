@@ -46,6 +46,66 @@ export const calculateAppFee = async (
   return +appFee || 0;
 };
 
+const buildProductDescription = (
+  title: string | null,
+  artistName: string,
+  itemDescription?: string | null
+) => {
+  const about =
+    itemDescription && itemDescription !== ""
+      ? itemDescription
+      : `The item ${title} by ${artistName}.`;
+
+  return about;
+};
+
+export const createMerchStripeProduct = async (
+  merch: Prisma.MerchGetPayload<{
+    include: { artist: true; images: true };
+  }>,
+  stripeAccountId: string
+) => {
+  let productKey = merch.stripeProductKey;
+
+  const about = buildProductDescription(
+    merch.title,
+    merch.artist.name,
+    merch.description
+  );
+  if (!merch.stripeProductKey) {
+    const product = await stripe.products.create(
+      {
+        name: `${merch.title} by ${merch.artist.name}`,
+        description: about,
+        tax_code: "txcd_99999999",
+        images:
+          merch.images?.length > 0
+            ? [
+                generateFullStaticImageUrl(
+                  merch.images?.[0]?.url[4],
+                  finalCoversBucket
+                ),
+              ]
+            : [],
+      },
+      {
+        stripeAccount: stripeAccountId,
+      }
+    );
+    await prisma.merch.update({
+      where: {
+        id: merch.id,
+      },
+      data: {
+        stripeProductKey: product.id,
+      },
+    });
+    productKey = product.id;
+  }
+
+  return productKey;
+};
+
 export const createTrackGroupStripeProduct = async (
   trackGroup: Prisma.TrackGroupGetPayload<{
     include: { artist: true; cover: true };
@@ -54,10 +114,12 @@ export const createTrackGroupStripeProduct = async (
 ) => {
   let productKey = trackGroup.stripeProductKey;
 
-  const about =
-    trackGroup.about && trackGroup.about !== ""
-      ? trackGroup.about
-      : `The album ${trackGroup.title} by ${trackGroup.artist.name}.`;
+  const about = buildProductDescription(
+    trackGroup.title,
+    trackGroup.artist.name,
+    trackGroup.about
+  );
+
   if (!trackGroup.stripeProductKey) {
     const product = await stripe.products.create(
       {
@@ -195,6 +257,79 @@ export const createStripeCheckoutSessionForPurchase = async ({
         clientId: client?.id ?? null,
         trackGroupId: trackGroup.id,
         artistId: trackGroup.artistId,
+        userId: loggedInUser?.id ?? null,
+        userEmail: email ?? null,
+        stripeAccountId,
+      },
+      mode: "payment",
+      success_url: `${API_DOMAIN}/v1/checkout?success=true&stripeAccountId=${stripeAccountId}&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${API_DOMAIN}/v1/checkout?canceled=true`,
+    },
+    { stripeAccount: stripeAccountId }
+  );
+
+  return session;
+};
+
+export const createStripeCheckoutSessionForMerchPurchase = async ({
+  loggedInUser,
+  email,
+  priceNumber,
+  merch,
+  quantity,
+  stripeAccountId,
+}: {
+  loggedInUser?: User;
+  email?: string;
+  priceNumber: number;
+  quantity: number;
+  merch: Prisma.MerchGetPayload<{
+    include: { artist: true; images: true };
+  }>;
+  stripeAccountId: string;
+}) => {
+  const client = await prisma.client.findFirst({
+    where: {
+      applicationName: "frontend",
+    },
+  });
+
+  const productKey = await createMerchStripeProduct(merch, stripeAccountId);
+
+  if (!productKey) {
+    throw new AppError({
+      description: "Was not able to create a product for user",
+      httpCode: 500,
+    });
+  }
+
+  const currency = merch.currency?.toLowerCase() ?? "usd";
+
+  const session = await stripe.checkout.sessions.create(
+    {
+      billing_address_collection: "required",
+      shipping_address_collection: {
+        allowed_countries: ["US"], // FIXME feed in shippingDesinations
+      },
+      customer_email: loggedInUser?.email || email,
+      payment_intent_data: {
+        application_fee_amount: await calculateAppFee(priceNumber, currency),
+      },
+      line_items: [
+        {
+          price_data: {
+            tax_behavior: "exclusive",
+            unit_amount: priceNumber,
+            currency,
+            product: productKey,
+          },
+          quantity,
+        },
+      ],
+      metadata: {
+        clientId: client?.id ?? null,
+        merchId: merch.id,
+        artistId: merch.artistId,
         userId: loggedInUser?.id ?? null,
         userEmail: email ?? null,
         stripeAccountId,

@@ -486,6 +486,15 @@ const routes: RouteObject[] = [
         },
       },
       {
+        path: ":artistId/links",
+        async lazy() {
+          const { default: Component } = await import(
+            "components/Artist/ArtistLinks"
+          );
+          return { Component };
+        },
+      },
+      {
         path: ":artistId",
         async lazy() {
           const { default: Component } = await import(
@@ -514,12 +523,35 @@ const routes: RouteObject[] = [
               },
               {
                 path: "merch",
-                async lazy() {
-                  const { default: Component } = await import(
-                    "components/Artist/ArtistMerch"
-                  );
-                  return { Component };
-                },
+                children: [
+                  {
+                    path: ":merchId/checkout-complete",
+                    async lazy() {
+                      const { default: Component } = await import(
+                        "components/Merch/MerchView"
+                      );
+                      return { Component };
+                    },
+                  },
+                  {
+                    path: ":merchId",
+                    async lazy() {
+                      const { default: Component } = await import(
+                        "components/Merch/MerchView"
+                      );
+                      return { Component };
+                    },
+                  },
+                  {
+                    path: "",
+                    async lazy() {
+                      const { default: Component } = await import(
+                        "components/Merch/ArtistMerch"
+                      );
+                      return { Component };
+                    },
+                  },
+                ],
               },
               {
                 path: "releases",
@@ -535,15 +567,6 @@ const routes: RouteObject[] = [
                 async lazy() {
                   const { default: Component } = await import(
                     "components/Artist/ArtistSupport"
-                  );
-                  return { Component };
-                },
-              },
-              {
-                path: "links",
-                async lazy() {
-                  const { default: Component } = await import(
-                    "components/Artist/ArtistLinks"
                   );
                   return { Component };
                 },
