@@ -109,7 +109,7 @@ export default function () {
         where: {
           id: Number(castArtistId),
         },
-        include: singleInclude(),
+        include: { ...singleInclude(), merch: { include: { images: true } } },
       });
 
       if (!artist) {

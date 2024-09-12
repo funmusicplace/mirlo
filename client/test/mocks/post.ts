@@ -18,5 +18,6 @@ export const POST_EXAMPLE: Post = {
     trackGroups: [],
     posts: [],
     subscriptionTiers: [],
+    merch: [],
   },
 };
