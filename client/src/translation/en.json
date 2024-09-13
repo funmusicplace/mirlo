@@ -379,6 +379,8 @@
     "uploadingTracks": "Uploading tracks. This could take several minutes, please don't close the browser."
   },
   "artistForm": {
+    "backgroundImageLabel": "Background image",
+    "backgroundImageDescription": "The image that appears in the background of your page",
     "displayName": "Display name",
     "bio": "Artist biography",
     "urlSlug": "Text that will appear in the URL",
