@@ -74,7 +74,7 @@
   },
   "profile": {
     "emailConfirmationRequired": "You will receive a confirmation email from Mirlo that you will have to act on before continuing to use Mirlo.",
-    "resetPasswordLink": "Want to change your password? Use the reset form",
+    "resetPasswordLink": "Want to change your password? Use the reset form.",
     "profile": "Profile",
     "notifications": "Notifications",
     "profileUpdated": "Profile updated",
