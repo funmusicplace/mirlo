@@ -71,7 +71,11 @@ const Supporters = () => {
             {t("totalComingIn")}:{" "}
             <Money
               amount={amount / 100}
-              currency={supporters[0]?.artistSubscriptionTier.currency}
+              currency={
+                supporters[0]?.artistSubscriptionTier.currency ??
+                artist?.user?.currency ??
+                "usd"
+              }
             />
             <br />
             {t("totalSupporters", { count: supporters.length })}
@@ -99,7 +103,11 @@ const Supporters = () => {
                 <td>
                   <Money
                     amount={r.amount / 100}
-                    currency={r.artistSubscriptionTier.currency}
+                    currency={
+                      r.artistSubscriptionTier.currency ??
+                      artist?.user?.currency ??
+                      "usd"
+                    }
                   />
                 </td>
               </tr>

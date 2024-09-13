@@ -2,12 +2,14 @@ import { css } from "@emotion/css";
 import { InputEl } from "components/common/Input";
 import React from "react";
 import { useFormContext } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import api from "services/api";
 
 const ArtistSlugInput: React.FC<{
   isDisabled?: boolean;
   currentArtistId?: number;
 }> = ({ currentArtistId, isDisabled }) => {
+  const { t } = useTranslation("translation", { keyPrefix: "mustBeUnique" });
   const {
     register,
     formState: { errors },

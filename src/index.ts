@@ -142,6 +142,7 @@ const routes = [
   "admin/subscriptions",
   "admin/purchases",
   "admin/settings",
+  "admin/tips",
 ];
 
 initialize({

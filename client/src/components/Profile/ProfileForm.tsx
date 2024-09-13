@@ -2,7 +2,7 @@ import { css } from "@emotion/css";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useSnackbar } from "state/SnackbarContext";
 
 import api from "../../services/api";
@@ -42,9 +42,7 @@ function ProfileForm() {
         try {
           const emailChanged = data.email !== user?.email;
           const confirmed = emailChanged
-            ? window.confirm(
-                "You will receive a confirmation email from Mirlo that you will have to act on before continuing to use Mirlo"
-              )
+            ? window.confirm(t("emailConfirmationRequired") ?? "")
             : true;
           if (confirmed) {
             setIsSaving(true);

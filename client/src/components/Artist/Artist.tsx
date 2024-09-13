@@ -2,7 +2,6 @@ import { bp } from "../../constants";
 import Box from "../common/Box";
 import { useTranslation } from "react-i18next";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
-import { useArtistContext } from "state/ArtistContext";
 import styled from "@emotion/styled";
 import {
   NavLink,
