@@ -28,9 +28,7 @@ export const PlayControlButton: React.FC<{
           justify-content: center;
 
           span {
-            ${playerButton
-              ? "font-size: 1.1rem !important; padding: 20% 25% 25% 25%;"
-              : ""}
+            ${playerButton ? "font-size: 1.1rem !important; " : ""}
           }
         }
 

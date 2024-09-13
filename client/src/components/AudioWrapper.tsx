@@ -24,18 +24,23 @@ const hlsConfig = {
 
 export const AudioWrapper: React.FC<{
   currentTrack: Track;
-  hideControls?: boolean;
   position: string;
   volume?: number;
-}> = ({ currentTrack, hideControls = false, position, volume = 1 }) => {
+  setCurrentSeconds: (time: number) => void;
+  currentSeconds: number;
+}> = ({
+  currentTrack,
+  position,
+  volume = 1,
+  setCurrentSeconds,
+  currentSeconds,
+}) => {
   const {
     state: { playerQueueIds, currentlyPlayingIndex, playing, looping },
     dispatch,
   } = useGlobalStateContext();
   const { user } = useAuthContext();
-  // const [currentTime, setCurrentTime] = React.useState("0:00");
   const [mostlyListened, setMostlyListened] = React.useState(false);
-  const [currentSeconds, setCurrentSeconds] = React.useState(0);
   const userId = user?.id;
   const playerRef = React.useRef<HTMLVideoElement>(null);
 
