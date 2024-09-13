@@ -109,6 +109,7 @@
     "resetPasswordLink": "Want to change your password? Use the reset form.",
     "password": "Updating your email requires entering your password",
     "deleteYourAccount": "No longer want to use Mirlo? Delete your account",
+    "emailConfirmationRequired": "You will receive a confirmation email from Mirlo that you will have to act on before continuing to use Mirlo.",
     "profile": "Profile",
     "viewLabelPage": "View label page",
     "manageArtistsDescription": "Here you can manage your artist pages. You can create new pages and manage existing ones.",
