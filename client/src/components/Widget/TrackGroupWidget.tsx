@@ -36,7 +36,7 @@ const TrackGroupWidget = () => {
   const { user } = useAuthContext();
 
   const { currentTrack } = useCurrentTrackHook();
-
+  const [currentSeconds, setCurrentSeconds] = React.useState(0);
   const [trackGroup, setTrackGroup] = React.useState<TrackGroup>();
   const [isLoading, setIsLoading] = React.useState(true);
 
@@ -224,8 +224,9 @@ const TrackGroupWidget = () => {
           <DisplayAudioWrapper>
             <AudioWrapper
               currentTrack={currentTrack}
-              hideControls
               position="relative"
+              setCurrentSeconds={setCurrentSeconds}
+              currentSeconds={currentSeconds}
             />
           </DisplayAudioWrapper>
         </div>

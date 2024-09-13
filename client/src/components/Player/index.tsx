@@ -17,6 +17,7 @@ import useCurrentTrackHook from "./useCurrentTrackHook";
 import styled from "@emotion/styled";
 import { VolumeControl } from "./VolumeControl";
 import { useAuthContext } from "state/AuthContext";
+import Wishlist from "components/TrackGroup/Wishlist";
 
 const ControlWrapper = styled.span`
   display: flex;
@@ -178,6 +179,9 @@ const Player = () => {
               }
             `}
           >
+            <span>
+              <Wishlist trackGroup={{ id: currentTrack.trackGroupId }} />
+            </span>
             <span>{fmtMSS(currentSeconds)}</span>
 
             <ControlWrapper>
