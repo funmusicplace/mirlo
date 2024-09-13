@@ -7,7 +7,6 @@ import React from "react";
 import { css } from "@emotion/css";
 import styled from "@emotion/styled";
 import { FaChevronRight, FaLink } from "react-icons/fa";
-import { ButtonAnchor } from "components/common/Button";
 
 const H2 = styled.h2`
   margin-top: 2rem !important;
@@ -22,9 +21,7 @@ const About: React.FC = () => {
       <MarkdownWrapper>
         <MetaCard
           title="About"
-          description="Mirlo is a community of musicians, listeners, and coders who are
-        daring to re-imagine the music industry: taking lessons learned in working in the
-        solidarity economy and applying them to our process and product."
+          description="Mirlo provides a user-friendly space to help artists sell digital music, receive financial support, manage mailing lists, and share with their supporters."
         />
         <Link to="/">&#8612; {t("home")}</Link>
         <h1>{t("about")}</h1>
