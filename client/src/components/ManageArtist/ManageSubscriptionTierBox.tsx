@@ -12,12 +12,16 @@ import SubscriptionForm from "./SubscriptionForm";
 import MarkdownContent from "components/common/MarkdownContent";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import { useAuthContext } from "state/AuthContext";
+import { useTranslation } from "react-i18next";
 
 const ManageSubscriptionTierBox: React.FC<{
   tier: ArtistSubscriptionTier;
   artist: Artist;
   reload: () => Promise<unknown>;
 }> = ({ tier, reload, artist }) => {
+  const { t } = useTranslation("translation", {
+    keyPrefix: "subscriptionForm",
+  });
   const { user } = useAuthContext();
   const snackbar = useSnackbar();
 
@@ -104,7 +108,7 @@ const ManageSubscriptionTierBox: React.FC<{
       {manageTier && (
         <Modal
           open={!!manageTier}
-          title="Edit tier"
+          title={t("editTier")}
           onClose={() => setManageTier(undefined)}
           size="small"
         >
