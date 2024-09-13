@@ -6,7 +6,7 @@ import FormComponent from "components/common/FormComponent";
 import { useFormContext } from "react-hook-form";
 import { useAuthContext } from "state/AuthContext";
 
-const EmailInput: React.FC = () => {
+const EmailInput: React.FC<{ required?: boolean }> = ({ required }) => {
   const { user } = useAuthContext();
   const { register } = useFormContext();
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
@@ -18,7 +18,17 @@ const EmailInput: React.FC = () => {
   return (
     <FormComponent>
       {t("email")}
-      <InputEl {...register("userEmail")} type="email" />
+      <InputEl
+        {...register("userEmail", {
+          required,
+          pattern: {
+            value: /\S+@\S+\.\S+/,
+            message: "Entered value does not match email format",
+          },
+        })}
+        type="email"
+        required
+      />
       <small>{t("notLoggedIn")}</small>
     </FormComponent>
   );

@@ -112,7 +112,7 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup }> = ({
           currency={trackGroup.currency}
           artist={trackGroup.artist}
         />
-        <EmailInput />
+        <EmailInput required />
 
         {userIsTrackGroupArtist && (
           <Tooltip hoverText={t("usersCanPurchase")}>
