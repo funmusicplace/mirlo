@@ -17,6 +17,13 @@ export const TRACK_GROUP_EXAMPLE: TrackGroup = {
     urlSlug: "example-artist",
     id: 1,
     userId: 1,
+    merch: [],
+    bio: "",
+    enabled: true,
+    createdAt: "1999-09-09T09:09:09Z",
+    trackGroups: [],
+    posts: [],
+    subscriptionTiers: [],
   },
   cover: {
     id: "00000000-0000-0000-0000-000000000000",

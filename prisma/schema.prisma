@@ -62,6 +62,7 @@ model User {
   relatedNotifications                Notification[]                  @relation("relatedUser")
   language                            String?
   userArtistTip                       UserArtistTip[]
+  merchPurchase                       MerchPurchase[]
 }
 
 model UserArtistNotificationSetting {
@@ -163,6 +164,7 @@ model Artist {
   userArtistTip                      UserArtistTip[]
   ArtistTipTier                      ArtistTipTier[]
   merchStoreURL                      String?
+  merch                              Merch[]
 }
 
 model ArtistAvatar {
@@ -257,6 +259,96 @@ model ArtistUserSubscriptionConfirmation {
   @@unique([email, artistId])
 }
 
+model Merch {
+  id                          String                     @id @default(uuid()) @db.Uuid
+  title                       String
+  description                 String
+  minPrice                    Int // In cents
+  currency                    String?                    @default("usd")
+  quantityRemaining           Int
+  startShippingDate           DateTime?
+  sku                         String?
+  includePurchaseTrackGroupId Int?
+  includePurchaseTrackGroup   TrackGroup?                @relation(fields: [includePurchaseTrackGroupId], references: [id])
+  isPublic                    Boolean
+  itemTypeId                  Int?
+  itemType                    MerchItemType?             @relation(fields: [itemTypeId], references: [id])
+  createdAt                   DateTime                   @default(now())
+  updatedAt                   DateTime                   @default(now()) @updatedAt
+  deletedAt                   DateTime?
+  artistId                    Int
+  artist                      Artist                     @relation(fields: [artistId], references: [id])
+  images                      MerchImage[]
+  shippingDestinations        MerchShippingDestination[]
+  optionTypes                 MerchOptionType[]
+  purchases                   MerchPurchase[]
+  stripeProductKey            String?
+}
+
+model MerchItemType {
+  name  String
+  id    Int     @id @default(autoincrement())
+  merch Merch[]
+}
+
+model MerchImage {
+  id        String   @id @default(uuid()) @db.Uuid
+  merch     Merch    @relation(fields: [merchId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  merchId   String   @db.Uuid
+  url       String[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model MerchShippingDestination {
+  id                 String  @id @default(uuid()) @db.Uuid
+  homeCountry        String
+  destinationCountry String?
+  merch              Merch   @relation(fields: [merchId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  merchId            String  @db.Uuid
+  costUnit           Int // in cents
+  currency           String
+  costExtraUnit      Int // in cents
+}
+
+model MerchOptionType {
+  id         String        @id @default(uuid()) @db.Uuid
+  optionName String // eg. "shirt size"
+  merch      Merch         @relation(fields: [merchId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  merchId    String        @db.Uuid
+  options    MerchOption[]
+}
+
+model MerchOption {
+  id                String          @id @default(uuid()) @db.Uuid
+  merchOptionTypeId String          @db.Uuid
+  merchOptionType   MerchOptionType @relation(fields: [merchOptionTypeId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  name              String // eg. "small"
+  quantityRemaining Int?
+  sku               String?
+}
+
+model MerchPurchase {
+  id                   String            @id @default(uuid()) @db.Uuid
+  merch                Merch             @relation(fields: [merchId], references: [id])
+  merchId              String            @db.Uuid
+  currencyPaid         String
+  amountPaid           Int // in cents
+  stripeTransactionKey String?
+  userId               Int
+  user                 User              @relation(fields: [userId], references: [id])
+  shippingAddress      Json?
+  billingAddress       Json?
+  fulfillmentStatus    FulfillmentStatus
+}
+
+enum FulfillmentStatus {
+  NO_PROGRESS
+  STARTED
+  SHIPPED
+  COMPLETED
+}
+
 model UserArtistTip {
   userId           Int
   user             User           @relation(fields: [userId], references: [id])
@@ -268,8 +360,7 @@ model UserArtistTip {
   stripeSessionKey String?
   ArtistTipTier    ArtistTipTier? @relation(fields: [artistTipTierId], references: [id])
   artistTipTierId  Int?
-
-  @@unique([userId, artistId])
+  id               String         @id @default(uuid()) @db.Uuid
 }
 
 model UserTrackGroupPurchase {
@@ -322,7 +413,7 @@ model TrackGroup {
   updatedAt               DateTime                  @updatedAt
   deletedAt               DateTime?
   minPrice                Int? // in cents
-  currency                String?                   @default("USD")
+  currency                String?                   @default("usd")
   isPriceFixed            Boolean                   @default(false)
   userTrackGroupPurchases UserTrackGroupPurchase[]
   stripeProductKey        String?
@@ -333,6 +424,7 @@ model TrackGroup {
   tags                    TrackGroupTag[]
   downloadCodes           TrackGroupDownloadCodes[]
   notifications           Notification[]
+  Merch                   Merch[]
 
   @@unique([artistId, urlSlug])
 }

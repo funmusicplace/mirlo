@@ -12,8 +12,11 @@ import { Img, ReplaceSpan, Spinner, UploadPrompt } from "./UploadImage";
 import Button from "components/common/Button";
 import { useArtistContext } from "state/ArtistContext";
 import { bp } from "../../constants";
+import { useParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { queryArtist } from "queries";
 
-type ImageType = "banner" | "avatar" | "cover";
+type ImageType = "banner" | "avatar" | "cover" | "image";
 
 export function isTrackgroup(entity: unknown): entity is TrackGroup {
   if (!entity) {
@@ -22,15 +25,25 @@ export function isTrackgroup(entity: unknown): entity is TrackGroup {
   return (entity as TrackGroup).cover !== undefined;
 }
 
+export function isMerch(entity: unknown): entity is Merch {
+  if (!entity) {
+    return false;
+  }
+  return (entity as Merch).quantityRemaining !== undefined;
+}
+
 const getExistingImage = (
-  existing: Artist | TrackGroup,
+  existing: Artist | TrackGroup | Merch,
   imageType: ImageType
 ) => {
-  const image = isTrackgroup(existing)
-    ? existing["cover"]
-    : imageType === "avatar" || imageType === "banner"
-      ? existing[imageType]
-      : undefined;
+  let image = undefined;
+  if (isTrackgroup(existing)) {
+    image = existing["cover"];
+  } else if (isMerch(existing)) {
+    image = existing.images?.[0];
+  } else if (imageType === "avatar" || imageType === "banner") {
+    image = existing[imageType];
+  }
 
   if (!image) {
     return undefined;
@@ -40,10 +53,12 @@ const getExistingImage = (
   return `${actualImageLocation}/?updatedAt=${image?.updatedAt}`;
 };
 
-const buildRootUrl = (existing: TrackGroup | Artist) => {
+const buildRootUrl = (existing: TrackGroup | Artist | Merch) => {
   let url = "";
   if (isTrackgroup(existing)) {
     url = `manage/trackGroups/${existing.id}/`;
+  } else if (isMerch(existing)) {
+    url = `manage/merch/${existing.id}/`;
   } else {
     url = `manage/artists/${existing.id}/`;
   }
@@ -51,7 +66,7 @@ const buildRootUrl = (existing: TrackGroup | Artist) => {
 };
 
 const UploadArtistImage: React.FC<{
-  existing: Artist | TrackGroup;
+  existing: Artist | TrackGroup | Merch;
   imageType: ImageType;
   height: string;
   width: string;
@@ -69,7 +84,11 @@ const UploadArtistImage: React.FC<{
 }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artistForm" });
   const snackbar = useSnackbar();
-  const { refresh } = useArtistContext();
+  const { artistId: artistParamId } = useParams();
+
+  const { refetch: refresh } = useQuery(
+    queryArtist({ artistSlug: artistParamId ?? "" })
+  );
   const [existingImage, setExistingImage] = React.useState(
     getExistingImage(existing, imageType)
   );

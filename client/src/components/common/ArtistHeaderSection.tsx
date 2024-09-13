@@ -14,8 +14,11 @@ import React from "react";
 import { useSnackbar } from "state/SnackbarContext";
 import { useAuthContext } from "state/AuthContext";
 import TipArtist from "./TipArtist";
+import { ButtonLink } from "./Button";
+import { FaEye, FaPen } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
 
-const H1 = styled.h1<{ artistAvatar: boolean }>`
+export const ArtistTitle = styled.h1<{ artistAvatar: boolean }>`
   font-size: 2.4rem;
   line-height: 2.5rem;
 
@@ -91,6 +94,7 @@ const ArtistHeaderSection: React.FC<{
   isManage: boolean;
 }> = ({ artist, isLoading, isManage }) => {
   const artistAvatar = artist?.avatar;
+  const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
 
   const { user } = useAuthContext();
   const { mutateAsync: updateArtist } = useUpdateArtistMutation();
@@ -201,7 +205,9 @@ const ArtistHeaderSection: React.FC<{
                         width: 100%;
                       `}
                     >
-                      <H1 artistAvatar={!!artistAvatar}>{artist.name}</H1>
+                      <ArtistTitle artistAvatar={!!artistAvatar}>
+                        {artist.name}
+                      </ArtistTitle>
 
                       <ArtistFormLocation
                         isManage={!!isManage}
@@ -212,6 +218,34 @@ const ArtistHeaderSection: React.FC<{
                     <ArtistActions>
                       {!isManage && <TipArtist artistId={artist.id} />}
                       {!isManage && <FollowArtist artistId={artist.id} />}
+                      {isManage && (
+                        <div>
+                          <ButtonLink
+                            variant="big"
+                            collapsible
+                            startIcon={<FaPen />}
+                            to={`/manage/artists/${artist.id}/customize`}
+                            className={css`
+                              margin-bottom: 0.25rem;
+                            `}
+                          >
+                            {t("editDetails")}
+                          </ButtonLink>
+                          <ButtonLink
+                            to={`/${artist?.urlSlug?.toLowerCase() ?? artist?.id}`}
+                            variant="big"
+                            collapsible
+                            startIcon={<FaEye />}
+                            disabled={!artist}
+                            className={css`
+                              margin-left: 0.5rem;
+                              margin-bottom: 0.25rem;
+                            `}
+                          >
+                            {t("viewLive")}
+                          </ButtonLink>
+                        </div>
+                      )}
                     </ArtistActions>
                   </div>
                 </SpaceBetweenDiv>

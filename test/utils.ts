@@ -4,6 +4,7 @@ import { buildTokens } from "../src/routers/auth";
 
 export const clearTables = async () => {
   await prisma.$executeRaw`DELETE FROM "Notification";`;
+  await prisma.$executeRaw`DELETE FROM "Merch";`;
   await prisma.$executeRaw`DELETE FROM "UserArtistNotificationSetting";`;
   await prisma.$executeRaw`DELETE FROM "ArtistUserSubscription";`;
   await prisma.$executeRaw`DELETE FROM "ArtistSubscriptionTier";`;
@@ -124,6 +125,23 @@ export const createTrackGroup = async (
           },
         ],
       },
+    },
+  });
+  return tg;
+};
+
+export const createMerch = async (
+  artistId: number,
+  data?: Partial<Prisma.MerchCreateArgs["data"]>
+) => {
+  const tg = await prisma.merch.create({
+    data: {
+      minPrice: data?.minPrice ?? 0,
+      description: data?.description ?? "Test description",
+      quantityRemaining: data?.quantityRemaining ?? 0,
+      isPublic: false,
+      title: data?.title ?? "Test trackGroup",
+      artistId: artistId,
     },
   });
   return tg;

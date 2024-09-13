@@ -8,4 +8,5 @@ export const ARTIST_EXAMPLE: Artist = {
   trackGroups: [],
   posts: [],
   subscriptionTiers: [],
+  merch: [],
 };

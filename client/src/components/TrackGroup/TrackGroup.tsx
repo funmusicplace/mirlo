@@ -25,7 +25,7 @@ import TrackGroupPills from "./TrackGroupPills";
 import TrackGroupEmbed from "./TrackGroupEmbed";
 import { useAuthContext } from "state/AuthContext";
 
-const Container = styled.div<{ user?: LoggedInUser | null }>`
+export const Container = styled.div<{ user?: LoggedInUser | null }>`
   ${(props) =>
     props.user!
       ? `
@@ -44,12 +44,12 @@ const Container = styled.div<{ user?: LoggedInUser | null }>`
   }
 `;
 
-const ImageWrapper = styled.div`
+export const ImageWrapper = styled.div`
   border: 1px solid rgba(255, 255, 255, 0.05);
   display: flex;
 `;
 
-const UnderneathImage = styled.div`
+export const UnderneathImage = styled.div`
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
   display: flex;
@@ -64,7 +64,7 @@ const SmallScreenPlayWrapper = styled.div`
   }
 `;
 
-const ImageAndDetailsWrapper = styled.div`
+export const ImageAndDetailsWrapper = styled.div`
   display: flex;
   flex: 45%;
   max-width: 45%;
@@ -79,7 +79,7 @@ const ImageAndDetailsWrapper = styled.div`
   }
 `;
 
-const AboutWrapper = styled.div<{
+export const AboutWrapper = styled.div<{
   trackGroupCredits: boolean;
 }>`
   margin: 1.25rem 0 1.25rem;
@@ -125,7 +125,7 @@ const CreditsWrapper = styled.div<{
   }
 `;
 
-const TrackgroupInfosWrapper = styled.div`
+export const TrackgroupInfosWrapper = styled.div`
   display: grid;
   grid-template-columns: 63% 37%;
 
@@ -147,7 +147,7 @@ function TrackGroup() {
   const { user } = useAuthContext();
 
   const { object: trackGroup, isLoadingObject: isLoadingTrackGroup } =
-    usePublicObjectById<TrackGroup>(
+    usePublicObjectById<TrackGroup & { artist: Artist }>(
       "trackGroups",
       trackGroupId,
       `?artistId=${artistId}`

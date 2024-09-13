@@ -9,6 +9,8 @@ import {
   TrackGroupCover,
   Track,
   Prisma,
+  Merch,
+  MerchImage,
 } from "@mirlo/prisma/client";
 import prisma from "@mirlo/prisma";
 import stripe from "./stripe";
@@ -18,6 +20,7 @@ import { convertURLArrayToSizes } from "./images";
 import {
   finalArtistAvatarBucket,
   finalArtistBannerBucket,
+  finalMerchImageBucket,
   removeObjectsFromBucket,
 } from "./minio";
 import {
@@ -29,6 +32,7 @@ import { NextFunction, Request, Response } from "express";
 import { AppError } from "./error";
 import logger from "../logger";
 import { Job } from "bullmq";
+import { processSingleMerch } from "./merch";
 
 type Params = {
   id: string;
@@ -350,7 +354,9 @@ export const deleteStripeSubscriptions = async (
 
 export const singleInclude = (queryOptions?: {
   includeDefaultTier?: boolean;
-}): Prisma.ArtistInclude<DefaultArgs> => {
+}): Prisma.ArtistInclude<DefaultArgs> & {
+  merch: { include: { images: boolean } };
+} => {
   const { includeDefaultTier } = queryOptions ?? {};
   return {
     trackGroups: {
@@ -380,6 +386,14 @@ export const singleInclude = (queryOptions?: {
     avatar: {
       where: {
         deletedAt: null,
+      },
+    },
+    merch: {
+      where: {
+        isPublic: true,
+      },
+      include: {
+        images: true,
       },
     },
     subscriptionTiers: {
@@ -418,6 +432,7 @@ interface LocalArtist extends Artist {
     cover?: TrackGroupCover | null;
     tracks?: Track[];
   })[];
+  merch?: (Merch & { images: MerchImage[] })[];
 }
 
 export const addSizesToImage = (
@@ -442,6 +457,7 @@ export const processSingleArtist = (
     posts: artist?.posts?.map((p: Post) =>
       postProcessor.single(p, isUserSubscriber || artist.userId === userId)
     ),
+    merch: artist?.merch?.map(processSingleMerch),
     banner: addSizesToImage(finalArtistBannerBucket, artist?.banner),
     avatar: addSizesToImage(finalArtistAvatarBucket, artist?.avatar),
     trackGroups: artist?.trackGroups?.map(processSingleTrackGroup),

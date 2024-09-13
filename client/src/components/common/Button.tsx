@@ -53,6 +53,21 @@ const CustomButton = styled.button<Compactable>`
     cursor: pointer;
   }
 
+  ${(props) =>
+    props.collapsible &&
+    `
+      @media screen and (max-width: ${bp.medium}px) {
+        border-radius: 100%;
+        height: auto;
+        min-width: auto;
+        > p,
+        .children {
+          display: none;
+        }
+        .startIcon, .endIcon {margin: auto !important;}
+      }
+    `}
+
   ${(props) => (props.uppercase ? "text-transform: uppercase;" : "")}
   ${(props) => {
     switch (props.variant) {
@@ -97,7 +112,9 @@ const CustomButton = styled.button<Compactable>`
             ${
               props.compact
                 ? "padding: .5rem; height: 1.5rem !important;"
-                : "height: 2rem;"
+                : props.collapsible
+                  ? "height: auto;"
+                  : "height: 2rem;"
             };
           }
         `;
@@ -162,12 +179,7 @@ const CustomButton = styled.button<Compactable>`
             background-color: var(--mi-primary-color);
             color: var(--mi-secondary-color);
           }
-          @media screen and (max-width: ${bp.medium}px) {
-              ${props.collapsible ? "border-radius: 100%;" : ""}
-              ${props.collapsible ? "> p {display: none;}" : ""}
-              ${props.collapsible ? "> span {margin: auto !important;} " : ""}
-          }
-
+          
           @media screen and (max-width: ${bp.small}px) {
             font-size: var(--mi-font-size-normal);
             padding: ${props.transparent ? ".5rem .25rem .5rem .25rem" : ""};
@@ -259,7 +271,7 @@ export const Button: React.FC<
       ) : (
         ""
       )}
-      {children}
+      <span className="children">{children}</span>
       {endIcon ? (
         <span className="endIcon" aria-hidden>
           {endIcon}

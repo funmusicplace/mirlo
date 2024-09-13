@@ -22,6 +22,12 @@ export const QUERY_KEY_ARTISTS = "artists";
 export const QUERY_KEY_TRACK_GROUPS = "trackGroups";
 
 /**
+ * Categorizes any query that should be invalidated when any merch is changed,
+ * regardless of the merchId.
+ */
+export const QUERY_KEY_MERCH = "merch";
+
+/**
  * Categorizes any query that should be invalidated when any trackgroup is changed,
  * regardless of the trackGroupId.
  */
@@ -36,7 +42,8 @@ export const QUERY_KEY_POSTS = "trackGroups";
 export type QueryTag =
   | typeof QUERY_KEY_AUTH
   | typeof QUERY_KEY_ARTISTS
-  | typeof QUERY_KEY_TRACK_GROUPS;
+  | typeof QUERY_KEY_TRACK_GROUPS
+  | typeof QUERY_KEY_MERCH;
 
 export type QueryArgs = {
   artistId: number;

@@ -8,7 +8,10 @@ import prisma from "@mirlo/prisma";
 import { findArtistIdForURLSlug } from "../utils/artist";
 import logger from "../logger";
 import { AppError } from "../utils/error";
-import { doesTrackGroupBelongToUser } from "../utils/ownership";
+import {
+  doesMerchBelongToUser,
+  doesTrackGroupBelongToUser,
+} from "../utils/ownership";
 
 const JWTStrategy = passportJWT.Strategy;
 
@@ -168,6 +171,32 @@ export const trackGroupBelongsToLoggedInUser = async (
       });
     } else {
       await doesTrackGroupBelongToUser(Number(trackGroupId), loggedInUser);
+    }
+  } catch (e) {
+    return next(e);
+  }
+  return next();
+};
+
+export const merchBelongsToLoggedInUser = async (
+  req: Request,
+  _res: Response,
+  next: NextFunction
+) => {
+  const { merchId } = req.params as unknown as {
+    merchId: string;
+  };
+
+  const loggedInUser = req.user as User | undefined;
+
+  try {
+    if (!loggedInUser) {
+      throw new AppError({
+        description: "Not logged in user",
+        httpCode: 401,
+      });
+    } else {
+      await doesMerchBelongToUser(merchId, loggedInUser);
     }
   } catch (e) {
     return next(e);

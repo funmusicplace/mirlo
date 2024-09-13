@@ -6,11 +6,11 @@ const Tabs = styled.ul`
   margin: 1.1rem 0.5rem 0 0;
 
   > li {
-    display: inline-block;
+    display: inline-flex;
     margin-right: 1rem;
     margin-top: 0.5rem;
 
-    a {
+    > a:not(.edit) {
       text-decoration: none;
       padding: 0rem 0.25rem calc(0.9rem - 4px) 0.25rem;
       line-height: 1rem;

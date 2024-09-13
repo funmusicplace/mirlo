@@ -1,6 +1,7 @@
 import prisma from "@mirlo/prisma";
 import logger from "../logger";
 import { deleteArtist, deleteStripeSubscriptions } from "./artist";
+import countries from "./country-codes-currencies";
 
 export const deleteUser = async (userId: number) => {
   const userArtists = await prisma.artist.findMany({
@@ -18,6 +19,27 @@ export const deleteUser = async (userId: number) => {
     },
   });
   await prisma.user.delete({ where: { id: userId } });
+};
+
+export const getUserCurrencyString = async (userId: number) => {
+  const userForCurrency = await prisma.user.findFirst({
+    where: { id: userId },
+    select: {
+      currency: true,
+    },
+  });
+
+  const currencyString = userForCurrency?.currency ?? "usd";
+
+  return currencyString;
+};
+
+export const getUserCountry = async (userId: number) => {
+  const currencyString = await getUserCurrencyString(userId);
+  const country = countries.find(
+    (country) => country.currencyCode.toLowerCase() === currencyString
+  );
+  return country;
 };
 
 export const findOrCreateUserBasedOnEmail = async (

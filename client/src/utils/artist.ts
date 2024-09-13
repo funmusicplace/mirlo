@@ -39,6 +39,13 @@ export const getReleaseUrl = (
   )}`;
 };
 
+export const getMerchUrl = (
+  artist: { urlSlug?: string; id: number },
+  merch: { id: string }
+) => {
+  return `/${getArtistUrlReference(artist)}/merch/${merch.id}`;
+};
+
 export const getPostURLReference = (post: Post) => {
   return post.artist
     ? `/${getArtistUrlReference(post.artist)}/posts/${post.id}/`

@@ -5,12 +5,16 @@ import { bp } from "../../constants";
 
 import { useQuery } from "@tanstack/react-query";
 import { queryArtist } from "queries";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import {
   findOutsideSite,
   linkUrlDisplay,
   linkUrlHref,
 } from "components/common/LinkIconDisplay";
+import { ArtistPageWrapper } from "components/ManageArtist/ManageArtistContainer";
+import Avatar from "./Avatar";
+import { ArtistTitle } from "components/common/ArtistHeaderSection";
+import { FaChevronLeft } from "react-icons/fa";
 
 const ArtistLinks: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
@@ -24,18 +28,58 @@ const ArtistLinks: React.FC = () => {
     return null;
   }
 
+  const artistBanner = artist?.banner?.sizes;
+  const artistAvatar = artist?.avatar;
+
   return (
+    // <ArtistPageWrapper artistBanner={!!artistBanner}>
     <div>
       <div
         className={css`
           max-width: 500px;
-          margin: 0 auto;
-          margin-top: 2rem;
+          background: var(--mi-normal-background-color);
+          margin: 3rem auto;
+          padding: 4rem 3rem;
+
           @media screen and (max-width: ${bp.medium}px) {
             padding: 0 0 7.5rem 0 !important;
           }
         `}
       >
+        <div
+          className={css`
+            display: flex;
+            margin-bottom: 2rem;
+
+            div {
+              margin-right: 1rem;
+            }
+          `}
+        >
+          {artistAvatar && (
+            <Avatar
+              avatar={
+                artistAvatar?.sizes?.[300] + `?${artistAvatar?.updatedAt}`
+              }
+            />
+          )}
+          <div>
+            <ArtistTitle artistAvatar={!!artistAvatar}>
+              {artist.name}
+            </ArtistTitle>
+            <Link
+              to={`/${artist.id}`}
+              className={css`
+                display: inline-flex;
+                margin-top: 1rem;
+                align-items: center;
+              `}
+            >
+              <FaChevronLeft />
+              Back to artist
+            </Link>
+          </div>
+        </div>
         <ul
           className={css`
             padding-bottom: 0.7rem;
@@ -53,6 +97,7 @@ const ArtistLinks: React.FC = () => {
                 display: block;
                 font-size: 1rem;
                 text-decoration: none;
+                margin-right: 0;
               }
 
               a:hover {
@@ -89,6 +134,7 @@ const ArtistLinks: React.FC = () => {
         </ul>
       </div>
     </div>
+    // </ArtistPageWrapper>
   );
 };
 

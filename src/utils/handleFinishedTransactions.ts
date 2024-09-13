@@ -101,7 +101,7 @@ export const handleArtistGift = async (
   session?: Stripe.Checkout.Session
 ) => {
   try {
-    await prisma.userArtistTip.create({
+    const createdTip = await prisma.userArtistTip.create({
       data: {
         userId,
         artistId,
@@ -113,8 +113,7 @@ export const handleArtistGift = async (
 
     const tip = await prisma.userArtistTip.findFirst({
       where: {
-        artistId,
-        userId,
+        id: createdTip.id,
       },
       include: { artist: { include: { user: true } } },
     });
@@ -163,6 +162,89 @@ export const handleArtistGift = async (
     }
 
     return tip;
+  } catch (e) {
+    logger.error(`Error creating tip: ${e}`);
+    throw e;
+  }
+};
+
+export const handleArtistMerchPurchase = async (
+  userId: number,
+  merchId: string,
+  session?: Stripe.Checkout.Session
+) => {
+  try {
+    const createdMerchPurchase = await prisma.merchPurchase.create({
+      data: {
+        userId,
+        merchId,
+        amountPaid: session?.amount_total ?? 0,
+        currencyPaid: session?.currency ?? "USD",
+        stripeTransactionKey: session?.id ?? null,
+        fulfillmentStatus: "NO_PROGRESS",
+        shippingAddress: session?.shipping_details,
+        billingAddress: session?.customer_details?.address,
+      },
+    });
+
+    const merchPurchase = await prisma.merchPurchase.findFirst({
+      where: {
+        id: createdMerchPurchase.id,
+      },
+      include: {
+        merch: {
+          include: { artist: { include: { user: true } } },
+        },
+      },
+    });
+
+    const user = await prisma.user.findFirst({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (user && merchPurchase) {
+      const pricePaid = merchPurchase.amountPaid / 100;
+
+      await sendMail({
+        data: {
+          template: "artist-merch-purchase-receipt",
+          message: {
+            to: user.email,
+          },
+          locals: {
+            merchPurchase,
+            email: user.email,
+            pricePaid,
+            client: process.env.REACT_APP_CLIENT_DOMAIN,
+            host: process.env.API_DOMAIN,
+          },
+        },
+      } as Job);
+
+      const platformCut = await calculateAppFee(
+        pricePaid,
+        merchPurchase.currencyPaid
+      );
+
+      await sendMail({
+        data: {
+          template: "tell-artist-about-merch-purchase",
+          message: {
+            to: merchPurchase.merch.artist.user.email,
+          },
+          locals: {
+            merchPurchase,
+            pricePaid,
+            platformCut,
+            email: user.email,
+          },
+        },
+      } as Job);
+    }
+
+    return merchPurchase;
   } catch (e) {
     logger.error(`Error creating tip: ${e}`);
     throw e;

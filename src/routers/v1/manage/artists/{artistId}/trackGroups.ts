@@ -127,7 +127,7 @@ export default function () {
           published,
           minPrice,
           platformPercent: (await getSiteSettings()).platformPercent,
-          currency: userForCurrency?.currency ?? "USD",
+          currency: userForCurrency?.currency ?? "usd",
           releaseDate: releaseDate ? new Date(releaseDate) : undefined,
           adminEnabled: true,
           urlSlug,

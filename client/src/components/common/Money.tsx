@@ -5,7 +5,7 @@ export const moneyDisplay = ({
   amount?: number | string;
   currency: string;
 }) => {
-  if (!amount) {
+  if (amount === undefined || amount === null) {
     return "-";
   }
   return new Intl.NumberFormat(undefined, {

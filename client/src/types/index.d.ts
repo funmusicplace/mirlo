@@ -66,8 +66,8 @@ interface TrackGroup {
   about?: string;
   currency: string;
   credits?: string;
-  artist?: Pick<Artist, "name" | "urlSlug" | "id" | "userId">;
   artistId?: number;
+  artist: Artist;
   tracks: Track[];
   updatedAt: string;
   createdAt: string;
@@ -151,6 +151,7 @@ interface Artist {
     sizes?: { [key: string]: string };
     updatedAt: string;
   };
+  merch: Merch[];
 }
 
 interface User {
@@ -211,6 +212,14 @@ interface UserTrackGroupPurchase {
   singleDownloadToken?: string;
 }
 
+interface UserArtistTip {
+  userId: number;
+  artistId: number;
+  pricePaid: number;
+  currencyPaid: string;
+  datePurchased: string;
+}
+
 type AccountStatus = {
   chargesEnabled: boolean;
   detailsSubmitted: boolean;
@@ -220,4 +229,42 @@ interface License {
   id: number;
   short: string;
   link?: string;
+}
+interface ShippingDestination {
+  id: string;
+  homeCountry: string;
+  destinationCountry: string | null;
+  merchId: string;
+  costUnit: number;
+  currency: string;
+  costExtraUnit: number;
+}
+
+interface MerchOption {
+  name: string;
+  quantityRemaining: number;
+  sku: string;
+}
+
+interface MerchOptionType {
+  optionName: string;
+  options: MerchOption[];
+}
+
+interface Merch {
+  artistId: number;
+  description: string;
+  artist: Artist;
+  title: string;
+  minPrice: number;
+  quantityRemaining: number;
+  id: string;
+  isPublic: boolean;
+  images: {
+    url: string[];
+    updatedAt: string;
+    sizes?: { [key: number]: string };
+  }[];
+  shippingDestinations: ShippingDestination[];
+  optionTypes: MerchOptionType[];
 }

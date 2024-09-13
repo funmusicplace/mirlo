@@ -22,6 +22,7 @@ import ChooseYourTheme from "./ChooseYourTheme";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import SavingInput from "./AlbumFormComponents/SavingInput";
+import { QUERY_KEY_ARTISTS } from "queries/queryKeys";
 
 export interface ShareableTrackgroup {
   creatorId: number;
@@ -205,6 +206,7 @@ export const CustomizeLook: React.FC = () => {
                     formKey="name"
                     url={`manage/artists/${artistId}`}
                     extraData={{}}
+                    clearQueryKey={QUERY_KEY_ARTISTS}
                   />
                 </FormComponent>
               </div>
@@ -225,6 +227,7 @@ export const CustomizeLook: React.FC = () => {
                     formKey="bio"
                     rows={7}
                     url={`manage/artists/${artistId}`}
+                    clearQueryKey={QUERY_KEY_ARTISTS}
                     extraData={{}}
                   />
                 </FormComponent>

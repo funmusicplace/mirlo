@@ -263,6 +263,31 @@ const routes: RouteObject[] = [
                     },
                   },
                   {
+                    path: "merch",
+                    children: [
+                      {
+                        path: "",
+
+                        async lazy() {
+                          const { default: Component } = await import(
+                            "components/ManageArtist/Merch/ManageMerch"
+                          );
+                          return { Component };
+                        },
+                      },
+                      {
+                        path: ":merchId",
+                        async lazy() {
+                          const { default: Component } = await import(
+                            "components/ManageArtist/Merch/EditMerch"
+                          );
+                          return { Component };
+                        },
+                      },
+                    ],
+                  },
+
+                  {
                     path: "releases/tools",
                     async lazy() {
                       const { default: Component } = await import(
@@ -363,6 +388,15 @@ const routes: RouteObject[] = [
             },
           },
           {
+            path: "tips",
+            async lazy() {
+              const { default: Component } = await import(
+                "components/Admin/AdminTips"
+              );
+              return { Component };
+            },
+          },
+          {
             path: "subscriptions",
             async lazy() {
               const { default: Component } = await import(
@@ -452,6 +486,15 @@ const routes: RouteObject[] = [
         },
       },
       {
+        path: ":artistId/links",
+        async lazy() {
+          const { default: Component } = await import(
+            "components/Artist/ArtistLinks"
+          );
+          return { Component };
+        },
+      },
+      {
         path: ":artistId",
         async lazy() {
           const { default: Component } = await import(
@@ -479,6 +522,38 @@ const routes: RouteObject[] = [
                 },
               },
               {
+                path: "merch",
+                children: [
+                  {
+                    path: ":merchId/checkout-complete",
+                    async lazy() {
+                      const { default: Component } = await import(
+                        "components/Merch/CheckoutComplete"
+                      );
+                      return { Component };
+                    },
+                  },
+                  {
+                    path: ":merchId",
+                    async lazy() {
+                      const { default: Component } = await import(
+                        "components/Merch/MerchView"
+                      );
+                      return { Component };
+                    },
+                  },
+                  {
+                    path: "",
+                    async lazy() {
+                      const { default: Component } = await import(
+                        "components/Merch/ArtistMerch"
+                      );
+                      return { Component };
+                    },
+                  },
+                ],
+              },
+              {
                 path: "releases",
                 async lazy() {
                   const { default: Component } = await import(
@@ -492,15 +567,6 @@ const routes: RouteObject[] = [
                 async lazy() {
                   const { default: Component } = await import(
                     "components/Artist/ArtistSupport"
-                  );
-                  return { Component };
-                },
-              },
-              {
-                path: "links",
-                async lazy() {
-                  const { default: Component } = await import(
-                    "components/Artist/ArtistLinks"
                   );
                   return { Component };
                 },
