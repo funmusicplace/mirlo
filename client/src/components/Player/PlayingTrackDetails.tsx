@@ -7,6 +7,16 @@ import { getReleaseUrl } from "utils/artist";
 const PlayingTrackDetails: React.FC<{ currentTrack: Track }> = ({
   currentTrack,
 }) => {
+  const artists =
+    currentTrack.trackArtists?.filter((artist) => artist.isCoAuthor) ?? [];
+
+  if (artists.length === 0) {
+    artists.push({
+      artistId: currentTrack.trackGroup.artistId,
+      artistName: currentTrack.trackGroup.artist.name,
+    });
+  }
+
   return (
     <div
       className={css`
@@ -96,12 +106,17 @@ const PlayingTrackDetails: React.FC<{ currentTrack: Track }> = ({
                 text-overflow: ellipsis;
               `}
             >
-              <Link
-                to={`/${currentTrack.trackGroup.artistId}`}
-                id="player-artist-name"
-              >
-                {currentTrack.trackGroup.artist?.name}
-              </Link>
+              {artists.map((artist) => (
+                <>
+                  {artist.artistId ? (
+                    <Link to={`/${artist.artistId}`} id="player-artist-name">
+                      {artist.artistName}
+                    </Link>
+                  ) : (
+                    artist.artistName
+                  )}
+                </>
+              ))}
             </div>
           </>
         )}
