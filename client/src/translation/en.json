@@ -135,6 +135,7 @@
     "merch": "Merch",
     "Email": "Email",
     "Website": "Website",
+    "bioPlaceholder": "Let listeners know a bit about yourself",
     "linkPlaceholder": "eg. https://some.url",
     "verificationEmailSent": "We've sent you a verification email!",
     "somethingWentWrong": "Something went wrong",
@@ -430,6 +431,7 @@
   },
   "subscriptionForm": {
     "supporters": "Manage supporters",
+    "inCurrency": "In {{ currency }}",
     "subscriptionUpdated": "Subscription updated",
     "name": "Name: ",
     "addNewTier": "Add new tier",

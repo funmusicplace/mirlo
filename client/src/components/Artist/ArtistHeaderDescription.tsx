@@ -174,7 +174,7 @@ const ArtistHeaderDescription: React.FC<ArtistHeaderDescriptionProps> = ({
       >
         <TextArea
           {...register(`bio`)}
-          placeholder="Let listeners know a bit about yourself"
+          placeholder={t("bioPlaceholder") ?? ""}
           rows={8}
         />
         <Button
