@@ -133,6 +133,9 @@
   },
   "artist": {
     "merch": "Merch",
+    "Email": "Email",
+    "Website": "Website",
+    "linkPlaceholder": "eg. https://some.url",
     "verificationEmailSent": "We've sent you a verification email!",
     "somethingWentWrong": "Something went wrong",
     "addNewMerch": "Add new merch",

@@ -70,7 +70,7 @@ const ArtistFormLinks: React.FC<ArtistFormLinksProps> = ({
   const handleSave = React.useCallback(
     async (data: FormData) => {
       await onSubmit(transformToLinks(data));
-      snackbar("Updated links", { type: "success" });
+      snackbar(t("updatedLinks"), { type: "success" });
       setIsEditing(false);
     },
     [onSubmit, snackbar]
@@ -131,7 +131,7 @@ const ArtistFormLinks: React.FC<ArtistFormLinksProps> = ({
               {site?.icon ?? <FaGlobe />}
               <SelectEl {...register(`linkArray.${index}.linkType`)}>
                 {outsideLinks.map((site) => (
-                  <option>{site.name}</option>
+                  <option>{t(site.name, site.name)}</option>
                 ))}
               </SelectEl>
               <div className="header-wrapper">
@@ -140,7 +140,7 @@ const ArtistFormLinks: React.FC<ArtistFormLinksProps> = ({
                     setValueAs: linkUrlHref,
                     onBlur: (e) => handleInputElBlur(e.target.value, index),
                   })}
-                  placeholder="eg. http://some.url"
+                  placeholder={t("linkPlaceholder") ?? ""}
                   key={field.id}
                   type="url"
                 />
@@ -160,6 +160,7 @@ const ArtistFormLinks: React.FC<ArtistFormLinksProps> = ({
             display: flex;
             align-items: center;
             margin-bottom: 1rem;
+            flex-wrap: wrap;
             button {
               margin-left: 0.2rem;
               margin-right: 0.5rem;
