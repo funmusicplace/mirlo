@@ -105,22 +105,24 @@ const SupportArtistTiersForm: React.FC<{
           </FormComponent>
         )}
       </FormProvider>
-      <Button
-        onClick={() => subscribeToTier()}
-        isLoading={isCheckingForSubscription}
-        disabled={!methods.formState.isValid || !value}
-        wrap
-        className={css`
-          width: 100% !important;
-        `}
-      >
-        {t(!value ? "chooseToContinue" : "continueWithPrice", {
-          amount: moneyDisplay({
-            amount: value?.minAmount / 100,
-            currency: value?.currency,
-          }),
-        })}
-      </Button>
+      {value && (
+        <Button
+          onClick={() => subscribeToTier()}
+          isLoading={isCheckingForSubscription}
+          disabled={!methods.formState.isValid || !value}
+          wrap
+          className={css`
+            width: 100% !important;
+          `}
+        >
+          {t(!value ? "chooseToContinue" : "continueWithPrice", {
+            amount: moneyDisplay({
+              amount: value?.minAmount / 100,
+              currency: value?.currency,
+            }),
+          })}
+        </Button>
+      )}
     </>
   );
 };

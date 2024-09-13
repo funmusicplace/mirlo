@@ -46,9 +46,7 @@ const CurrencySelect = () => {
       <FormComponent
         className={css`
           display: flex;
-          * {
-            margin-top: 0.5rem;
-          }
+
           button {
             height: 100%;
             margin: 0 0 0 0.5rem;
@@ -62,7 +60,7 @@ const CurrencySelect = () => {
         <div
           className={css`
             display: flex;
-            align-items: flex-end;
+            align-items: center;
             button {
               margin: 0 0 0 0.5rem;
             }

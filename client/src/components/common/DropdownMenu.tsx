@@ -108,6 +108,7 @@ const DropdownMenu: React.FC<{
         onClick={() => {
           setIsMenuOpen(true);
         }}
+        startIcon={icon}
         className={css`
           button:hover {
             color: var(--mi-white);
@@ -117,9 +118,7 @@ const DropdownMenu: React.FC<{
             background-color: var(--mi-normal-background-color) !important;
           }
         `}
-      >
-        {icon}
-      </Button>
+      />
     </div>
   );
 };
