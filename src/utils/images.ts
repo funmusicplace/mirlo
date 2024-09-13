@@ -1,5 +1,5 @@
 export const generateFullStaticImageUrl = (url: string, bucket: string) => {
-  return `${process.env.STATIC_MEDIA_HOST}/images/${bucket}/${url}.jpg`;
+  return `${process.env.STATIC_MEDIA_HOST}/images/${bucket}/${url}.webp`;
 };
 
 export const convertURLArrayToSizes = (urls: string[], bucket: string) => {

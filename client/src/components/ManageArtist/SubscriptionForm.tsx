@@ -121,7 +121,10 @@ const SubscriptionForm: React.FC<{
               `}
             >
               <InputEl type="number" {...register("minAmount", { min: 1 })} />
-              <span>in {user?.currency ?? "usd"}</span>
+              <span>
+                {t("inCurrency", { currency: user?.currency ?? "usd" })}in{" "}
+                {user?.currency ?? "usd"}
+              </span>
             </div>
             {formState.errors.minAmount && (
               <FormError>

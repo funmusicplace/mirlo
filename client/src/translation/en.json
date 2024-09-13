@@ -30,14 +30,16 @@
   "about": {
     "about": "About",
     "home": "Home",
-    "intro": "Mirlo provides a user-friendly space to help artists sell digital music, get financial support, manage mailing lists, and share with their supporters.",
+    "intro": "Mirlo provides a user-friendly space to help artists sell digital music, receive financial support, manage mailing lists, and share with their supporters.",
     "ourMission": "Our mission",
-    "missionStatement": "<1>The music industry does not work for artists or listeners and needs a radical re-imagination. </1><1>Mirlo is a community of artists, listeners, and coders who are daring to do just that: taking lessons learned in working in the solidarity economy and applying them to our process and product.</1><1>We are building an online audio distribution (think Bandcamp) and patronage (think Patreon) platform that aims to be radical, accessible, open source (free & libre), modular, and standards based.</1>",
+    "missionStatement": "<1>The music industry does not work for artists or listeners and needs a radical re-imagining.</1><1Mirlo hosts a community of artists, listeners, organizers, and coders who are daring to do just that: taking lessons learned from working in the solidarity economy and applying them to our platform.</1><1>We are building an online audio distribution and patronage platform that aims to be radical, accessible, open source (free & libre), modular, and standards based.</1>",
     "behindThePlatform": "Behind the platform",
     "behindThePlatformText": "Our members have experience working both within Resonate and Ampled, other co-ops across several industries, and complex high-traffic web platforms. We envision this platform as a tool to support artists in cultivating direct and reciprocal relationships and resources to sustain one another’s creative practice.",
     "pricingAndFeatures": "Pricing & Features",
-    "featuresText": "<p>Mirlo provides a space for artists to upload their music, establish their online presence, sell their music, and gain monthly financial supporters.</p><p>For a thorough look at our features for artists, <featuresLink>check out our features page</featuresLink>.</p>",
-    "pricingText": "<p>Mirlo takes a 7% cut of all transactions. So if an artist sells an album on for $10, Mirlo will earn 70 cents. <i>Then</i>, our payment processor Stripe, will take a cut, which is 2.9% + 30c (so much larger on small transactions).</p><p>Want to know more about how we calculated our take rate? Check out <takeRate>our blog post explaining how we got there</takeRate>.</p> <p>While we hope to be fully funded by transactions on Mirlo, in the mean time we're dependent on direct monthly financial contributions. <giveDirectly>Support Mirlo with a monthly contribution</giveDirectly>.</p>",
+    "features": "Features",
+    "pricing": "Pricing",
+    "featuresText": "<p>Mirlo provides a space for artists to upload their music, establish their online presence, sell their music, and receive ongoing monthly contributions from their audience.</p><p>For a thorough look at our features for artists, <featuresLink>check out our features page</featuresLink>.</p>",
+    "pricingText": "<p>Mirlo takes a 7% cut of all transactions. So if an artist sells an album on for $10, Mirlo will earn 70 cents. <i>Then</i>, our payment processor Stripe, will take a cut of 2.9% + 30c (proportionally this is larger on small transactions).</p><p>Want to know more about how we calculated our take rate? Check out <takeRate>our blog post explaining how we got there</takeRate>.</p> <p>As we develop our product and come to terms with the costs of running it, we will adjust these numbers and explore new ways of financing Mirlo.</p>",
     "morePricing": "As we develop our product and come to terms with costs of running it, we will tweak these numbers and explore new ways of paying for the service and our work."
   },
   "logIn": {
@@ -135,6 +137,7 @@
     "merch": "Merch",
     "Email": "Email",
     "Website": "Website",
+    "bioPlaceholder": "Let listeners know a bit about yourself",
     "linkPlaceholder": "eg. https://some.url",
     "verificationEmailSent": "We've sent you a verification email!",
     "somethingWentWrong": "Something went wrong",
@@ -378,6 +381,8 @@
     "uploadingTracks": "Uploading tracks. This could take several minutes, please don't close the browser."
   },
   "artistForm": {
+    "backgroundImageLabel": "Background image",
+    "backgroundImageDescription": "The image that appears in the background of your page",
     "displayName": "Display name",
     "bio": "Artist biography",
     "urlSlug": "Text that will appear in the URL",
@@ -430,6 +435,7 @@
   },
   "subscriptionForm": {
     "supporters": "Manage supporters",
+    "inCurrency": "In {{ currency }}",
     "subscriptionUpdated": "Subscription updated",
     "name": "Name: ",
     "addNewTier": "Add new tier",

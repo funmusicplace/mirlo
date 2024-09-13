@@ -7,7 +7,6 @@ import React from "react";
 import { css } from "@emotion/css";
 import styled from "@emotion/styled";
 import { FaChevronRight, FaLink } from "react-icons/fa";
-import { ButtonAnchor } from "components/common/Button";
 
 const H2 = styled.h2`
   margin-top: 2rem !important;
@@ -22,9 +21,7 @@ const About: React.FC = () => {
       <MarkdownWrapper>
         <MetaCard
           title="About"
-          description="Mirlo is a community of musicians, listeners, and coders who are
-        daring to re-imagine the music industry: taking lessons learned in working in the
-        solidarity economy and applying them to our process and product."
+          description="Mirlo provides a user-friendly space to help artists sell digital music, receive financial support, manage mailing lists, and share with their supporters."
         />
         <Link to="/">&#8612; {t("home")}</Link>
         <h1>{t("about")}</h1>
@@ -32,28 +29,23 @@ const About: React.FC = () => {
         <H2>{t("ourMission")}</H2>
         <Trans i18nKey="missionStatement" t={t}>
           <p>
-            The music industry does not work for musicians or listeners and
-            needs a radical re-imagination.
+            The music industry does not work for artists or listeners and needs
+            a radical re-imagining.
           </p>
           <p>
-            Mirlo is a community of musicians, listeners, cultural workers, and
-            coders who are daring to do just that: taking lessons learned in
-            working in the solidarity economy and applying them to our process
-            and product.
+            Mirlo hosts a community of artists, listeners, organizers, and
+            coders who are daring to do just that: taking lessons learned from
+            working in the solidarity economy and applying them to our platform.
           </p>
           <p>
-            We are building an online audio distribution (think Bandcamp) and
-            patronage (think Patreon) platform that aims to be radical,
-            accessible, open source (free & libre), modular, and standards
-            based.
+            We are building an online audio distribution and patronage platform
+            that aims to be radical, accessible, open source (free & libre),
+            modular, and standards based.
           </p>
         </Trans>
 
         <div>
-          <H2HashLink id="pricing-and-features">
-            {t("pricingAndFeatures")}
-          </H2HashLink>
-
+          <H2HashLink id="features">{t("features")}</H2HashLink>
           <Trans
             i18nKey="featuresText"
             t={t}
@@ -61,7 +53,9 @@ const About: React.FC = () => {
               p: <p></p>,
               featuresLink: <Link to="/pages/features"></Link>,
             }}
-          ></Trans>
+          />
+
+          <H2HashLink id="pricing">{t("pricing")}</H2HashLink>
           <Trans
             t={t}
             i18nKey="pricingText"
@@ -71,9 +65,124 @@ const About: React.FC = () => {
               giveDirectly: <Link to="/team/support"></Link>,
               i: <em></em>,
             }}
-          ></Trans>
-          <p>{t("morePricing")}</p>
-          <h3>Pricing FAQ</h3>
+          />
+        </div>
+        <div>
+          <H2HashLink id="story">Our story</H2HashLink>
+
+          <p>
+            The idea of Mirlo grew out of conversations that began in late 2022
+            as a handful of musicians, technologists, and mutual aid organizers
+            began to find each other and reflect on their experiences working
+            with two ongoing music cooperative initiatives at the time,{" "}
+            <a href="https://ampled.com/">Ampled</a> and{" "}
+            <a href="https://resonate.coop/">Resonate</a>. Through those
+            conversations, we began to develop a shared analysis of today’s
+            precarious music industry and invited others to join us in the
+            conversations we published online at{" "}
+            <a href="https://funmusic.place">Fun Music Place</a>. We also
+            started to{" "}
+            <a href="https://funmusic.place/blog/the-spotify-ai-blues/">
+              dream together
+            </a>{" "}
+            about what alternatives that foregrounded mutual aid and the value
+            of musical creativity might actually look like. Two of the group
+            members, LLK and Si, wrote code for an initial software product.
+          </p>
+          <p>
+            As these conversations unfolded, Bandcamp was sold again, firing
+            half of their employees in the process. We realized the heightened
+            need for viable alternatives to the corporate giants. Ultimately,
+            three of us who were based in the United States{" "}
+            <a href="https://mirlo.space/team/posts/10/"> formed an LLC</a> and
+            became the{" "}
+            <a href="https://mirlo.space/team">
+              official co-founders and worker-owners
+            </a>{" "}
+            , with other contributors continuing to offer support
+            internationally. We joined the{" "}
+            <a href="https://www.usworker.coop/en/">
+              US Federation of Worker Cooperatives
+            </a>{" "}
+            as a startup member and are currently finalizing our operating
+            agreement to incorporate consent-based cooperative governance into
+            our foundational protocols, inspired by the principles of{" "}
+            <a href="https://www.sociocracyforall.org/sociocracy/">
+              Sociocracy
+            </a>
+            .
+          </p>
+        </div>
+        <div>
+          <H2HashLink id="need-support">We need your support</H2HashLink>
+          <p>
+            Since our soft launch earlier this year, we have been amazed by the
+            influx of support from open source developers, musicians, listeners,
+            cultural workers, and cooperative proponents. Still, Mirlo is an
+            ambitious project.
+          </p>
+
+          <p>
+            We need your help to make it a reality. To pull it off we need money
+            to pay ourselves for our time as well as for all the material costs
+            of running a business at this scale. In May, we{" "}
+            <a href="https://www.kickstarter.com/projects/mirlo/mirlo">
+              ran a successful kickstarter
+            </a>{" "}
+            which gave us some runway for the rest of this year. It would cover
+            our basic costs including legal fees, server fees, travel fees, etc.
+            Our estimated budget can be viewed{" "}
+            <a href="link to spreadsheet">here</a>.
+          </p>
+          <p>
+            In the meantime, we are seeking ongoing financial support on Mirlo
+            itself. Please pitch in on{" "}
+            <a href="https://mirlo.space/team/support">our team's</a> support
+            page!
+          </p>
+          <p>
+            We've also received a grant from the Greater Washington Center for
+            Employee Ownership to{" "}
+            <a href="https://mirlo.space/team/posts/72/">
+              further cooperative education in DC
+            </a>{" "}
+            and put on an event in the area next year. If you're in the DMV
+            region and would like to participate, please get in touch.
+          </p>
+        </div>
+        <div>
+          <H2HashLink id="vision">Our Vision</H2HashLink>
+          <p>
+            Mirlo aims to bring about a vibrant ecosystem that values creative
+            work and ensures that artists don't have to sacrifice basic needs in
+            order to follow their inspiration. We believe that in order to bring
+            that world about, we need tools to help connect one another through
+            music, grounded in the material challenges of musicians struggling
+            through the drudgery of isolation and
+            hyperindividualism---especially those who come from working-class
+            backgrounds and people of the global majority, who are
+            disproportionately impacted by today’s dominant systems.
+          </p>
+          <p>
+            Given how much music is mediated through the internet, musicians
+            need to have a say in how those tools are built and maintained. We
+            believe that an approach that prioritizes long-term sustainability,
+            emphasizes transparency, practices informed consent, and welcomes
+            serendipity through open standards will offer a path towards these
+            goals.
+          </p>
+          <p>
+            We also recognize that some of these ideals will have to be
+            negotiated through intense contradictions as they come into conflict
+            with the ruins of the market-driven music industry we're living in
+            today. To work through those contradictions, we prioritize building
+            trust, sharing joy, and fostering resilient relationships to find
+            creative pathways towards this vision together.
+          </p>
+        </div>
+        <div>
+          <H2HashLink id="faq">FAQ</H2HashLink>
+          <h3 id="pricing-faq">Pricing</h3>
           <CollapsibleList>
             <CollapsibleLI
               title="How do payouts work?"
@@ -89,41 +198,7 @@ const About: React.FC = () => {
               }
             />
           </CollapsibleList>
-        </div>
-        <div>
-          <H2HashLink id="who">Who's doing this work</H2HashLink>
-
-          <p>
-            Our members have experience working both within Resonate and Ampled,
-            other co-ops across several industries, mutual aid and community
-            organizing efforts, and complex high-traffic web platforms. We
-            envision this platform as a tool to support musicians in cultivating
-            direct and reciprocal relationships and resources to sustain one
-            another’s creative practice.
-          </p>
-          <p>
-            While Mirlo is legally incorporated as an LLC recognized by the
-            United States of America, our work is hugely dependent on a network
-            of people who have helped us get to where we are. We're immensely
-            grateful to everyone who is supporting us through labor or financial
-            contributions to get us here.
-          </p>
-          <p>
-            Mirlo is structured as a worker owned co-operative. Our three
-            worker-owners are featured on <a href="/team">our team page</a>.
-          </p>
-          <p>
-            We are still finalizing our Operating Agreement, but once it's
-            finished we will share it here. We're pursuing a structure inspired
-            by{" "}
-            <a href="https://www.sociocracyforall.org/sociocracy/">
-              Sociocracy
-            </a>
-            . Sociocracy is a governance system, just like democracy or
-            corporate governance methods. It values self-governance based on the
-            values of equality.
-          </p>
-          <h3 id="structure-faq">Structure FAQ</h3>
+          <h3 id="structure-faq">Structure</h3>
           <CollapsibleList>
             <CollapsibleLI
               title="What makes Mirlo different from other products?"
@@ -237,52 +312,7 @@ const About: React.FC = () => {
               }
             />
           </CollapsibleList>
-        </div>
-        <div>
-          <H2HashLink id="road-to-sustainability">
-            Road to self-sustainability
-          </H2HashLink>
-          <p>
-            Mirlo is an ambitious project, and to pull it off we will need money
-            to pay ourselves for our time as well as for all the material costs
-            of running a business at this scale.
-          </p>
-          <p>
-            As outlined above, Mirlo takes a small percentage from each
-            transaction on the platform. However, for that to make us
-            sustainable, we will need over 100s of thousands of dollars moving
-            through the platform on any given month (see our{" "}
-            <a href="/team/posts/16/">take rate discussion</a>). So we need to
-            get creative. But before we dive into how we do that, consider
-            supporting some artists on Mirlo!
-          </p>
-          <p>
-            In May / June of 2024 we{" "}
-            <a href="https://www.kickstarter.com/projects/mirlo/mirlo">
-              ran a successful kickstarter
-            </a>{" "}
-            which gave us some runway for the rest of 2024. It would cover our
-            basic costs including legal fees, server fees, travel fees, and
-            more. We will link to our budget for the second half of 2024 once
-            it's available.
-          </p>
-          <p>
-            We are also running an ongoing crowdfunding campaign on Mirlo
-            itself. You can pitch in to that campaign on{" "}
-            <a href="/team/support">our team's</a> support page.
-          </p>
-          <p>
-            We've received a grant from the Greater Washington Center for
-            Employee Ownership to{" "}
-            <a href="/team/posts/72/">further cooperative education in DC</a>{" "}
-            and put on an event in the area.
-          </p>
-        </div>
-        <div>
-          <H2HashLink id="what-we-build">What we're building</H2HashLink>
-          <p>
-            Some frequently asked questions about what and how we're building it
-          </p>
+          <h3 id="product">Product</h3>
           <CollapsibleList>
             <CollapsibleLI
               title="Whats on your product roadmap?"
@@ -357,11 +387,7 @@ const About: React.FC = () => {
               }
             />
           </CollapsibleList>
-        </div>
-        <div>
-          <H2HashLink id="support">Support, etc</H2HashLink>
-          <p>Here's some common questions asked!</p>
-
+          <h3 id="support">Support, etc</h3>
           <CollapsibleList>
             <CollapsibleLI
               title="Do you have brand / logo guidelines?"

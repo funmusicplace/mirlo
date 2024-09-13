@@ -269,10 +269,10 @@ export const CustomizeLook: React.FC = () => {
                   `}
                 >
                   <FormComponent>
-                    <label>Background Image</label>
+                    <label>{t("backgroundImageLabel")}</label>
                     <UploadArtistImage
                       existing={artist}
-                      imageTypeDescription="a background image"
+                      imageTypeDescription={t("backgroundImageDescription")}
                       imageType="banner"
                       height="auto"
                       width="100%"
