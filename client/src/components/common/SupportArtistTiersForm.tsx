@@ -65,10 +65,10 @@ const SupportArtistTiersForm: React.FC<{
         });
       }
       if (!user) {
-        snackbar("We've sent you a verification email!", { type: "success" });
+        snackbar(t("verificationEmailSent"), { type: "success" });
       }
     } catch (e) {
-      snackbar("Something went wrong", { type: "warning" });
+      snackbar(t("somethingWentWrong"), { type: "warning" });
       console.error(e);
     } finally {
       setIsCheckingForSubscription(false);
