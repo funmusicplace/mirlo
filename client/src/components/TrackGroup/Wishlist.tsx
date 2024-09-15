@@ -7,7 +7,7 @@ import api from "services/api";
 import { useAuthContext } from "state/AuthContext";
 import { useTranslation } from "react-i18next";
 
-const Wishlist: React.FC<{ trackGroup: TrackGroup }> = ({ trackGroup }) => {
+const Wishlist: React.FC<{ trackGroup: { id: number } }> = ({ trackGroup }) => {
   const { user } = useAuthContext();
   const { t } = useTranslation("translation", { keyPrefix: "wishlist" });
 

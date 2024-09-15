@@ -5,7 +5,7 @@ import { bp } from "../../constants";
 import { AudioWrapper } from "../AudioWrapper";
 import Spinner from "../common/Spinner";
 import { useGlobalStateContext } from "state/GlobalState";
-import { isTrackOwnedOrPreview } from "utils/tracks";
+import { fmtMSS, isTrackOwnedOrPreview } from "utils/tracks";
 import LoopButton from "../common/LoopButton";
 import ShuffleButton from "../common/ShuffleButton";
 import NextButton from "../common/NextButton";
@@ -17,6 +17,7 @@ import useCurrentTrackHook from "./useCurrentTrackHook";
 import styled from "@emotion/styled";
 import { VolumeControl } from "./VolumeControl";
 import { useAuthContext } from "state/AuthContext";
+import Wishlist from "components/TrackGroup/Wishlist";
 
 const ControlWrapper = styled.span`
   display: flex;
@@ -55,8 +56,8 @@ const Player = () => {
   const { dispatch } = useGlobalStateContext();
 
   const [volume, setVolume] = React.useState(1);
-
   const { currentTrack, isLoading } = useCurrentTrackHook();
+  const [currentSeconds, setCurrentSeconds] = React.useState(0);
 
   React.useEffect(() => {
     if ("mediaSession" in navigator) {
@@ -125,6 +126,8 @@ const Player = () => {
             currentTrack={currentTrack}
             position="absolute"
             volume={volume}
+            setCurrentSeconds={setCurrentSeconds}
+            currentSeconds={currentSeconds}
           />
         )}
       </div>
@@ -166,13 +169,21 @@ const Player = () => {
 
           <div
             className={css`
-              display: inline-block;
-
+              display: inline-flex;
+              align-items: center;
               button {
                 margin-right: 0.25rem;
               }
+              span {
+                margin-left: 0.25rem;
+              }
             `}
           >
+            <span>
+              <Wishlist trackGroup={{ id: currentTrack.trackGroupId }} />
+            </span>
+            <span>{fmtMSS(currentSeconds)}</span>
+
             <ControlWrapper>
               <span
                 className={css`

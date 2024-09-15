@@ -21,6 +21,7 @@ import { useAuthContext } from "state/AuthContext";
 const TrackWidget = () => {
   const params = useParams();
   const { user } = useAuthContext();
+  const [currentSeconds, setCurrentSeconds] = React.useState(0);
 
   const [track, setTrack] = React.useState<Track>();
   const [isLoading, setIsLoading] = React.useState(true);
@@ -163,8 +164,9 @@ const TrackWidget = () => {
                     <DisplayAudioWrapper>
                       <AudioWrapper
                         currentTrack={track}
-                        hideControls
                         position="relative"
+                        setCurrentSeconds={setCurrentSeconds}
+                        currentSeconds={currentSeconds}
                       />
                     </DisplayAudioWrapper>
                   </div>
