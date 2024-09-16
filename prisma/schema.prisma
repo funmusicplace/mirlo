@@ -330,12 +330,15 @@ model MerchOption {
 
 model MerchPurchase {
   id                   String            @id @default(uuid()) @db.Uuid
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @default(now()) @updatedAt
   merch                Merch             @relation(fields: [merchId], references: [id])
   merchId              String            @db.Uuid
   currencyPaid         String
   amountPaid           Int // in cents
   stripeTransactionKey String?
   userId               Int
+  quantity             Int
   user                 User              @relation(fields: [userId], references: [id])
   shippingAddress      Json?
   billingAddress       Json?

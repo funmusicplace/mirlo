@@ -13,7 +13,6 @@ import {
   singleInclude,
 } from "../../../../../utils/artist";
 import slugify from "slugify";
-import { AppError } from "../../../../../utils/error";
 
 type Params = {
   artistId: string;

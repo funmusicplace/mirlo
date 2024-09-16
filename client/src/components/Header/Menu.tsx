@@ -125,6 +125,18 @@ const Menu: React.FC = (props) => {
               </Button>
             </li>
           )}
+          {user?.isAdmin && (
+            <li>
+              <Button
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  navigate("/fulfillment");
+                }}
+              >
+                {t("fulfillment")}
+              </Button>
+            </li>
+          )}
           <li>
             <Button
               onClick={onLogOut}

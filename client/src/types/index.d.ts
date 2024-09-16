@@ -268,3 +268,23 @@ interface Merch {
   shippingDestinations: ShippingDestination[];
   optionTypes: MerchOptionType[];
 }
+
+interface MerchPurchase {
+  merchId: string;
+  id: string;
+  merch: Merch;
+  user: User;
+  userId: number;
+  createdAt: string;
+  updatedAt: string;
+  quantity: number;
+  fulfillmentStatus: "NO_PROGRESS" | "STARTED" | "SHIPPED" | "COMPLETED";
+  shippingAddress: {
+    line1: string;
+    line2: string;
+    postal_code: string;
+    city?: string;
+    state?: string;
+    country?: string;
+  };
+}

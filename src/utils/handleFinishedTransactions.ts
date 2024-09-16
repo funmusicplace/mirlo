@@ -1,5 +1,6 @@
 import Stripe from "stripe";
 import prisma from "@mirlo/prisma";
+import { Prisma, MerchPurchase } from "@mirlo/prisma/client";
 
 import { logger } from "../logger";
 import sendMail from "../jobs/send-mail";
@@ -168,35 +169,65 @@ export const handleArtistGift = async (
   }
 };
 
+// FIXME: is it possible to refactor all checkout sessions to use line_items
+// so that we can use the same email etc for everything?
 export const handleArtistMerchPurchase = async (
   userId: number,
   merchId: string,
   session?: Stripe.Checkout.Session
 ) => {
   try {
-    const createdMerchPurchase = await prisma.merchPurchase.create({
-      data: {
-        userId,
-        merchId,
-        amountPaid: session?.amount_total ?? 0,
-        currencyPaid: session?.currency ?? "USD",
-        stripeTransactionKey: session?.id ?? null,
-        fulfillmentStatus: "NO_PROGRESS",
-        shippingAddress: session?.shipping_details,
-        billingAddress: session?.customer_details?.address,
-      },
-    });
+    const purchases = await Promise.all(
+      session?.line_items?.data.map(async (item) => {
+        const createdMerchPurchase = await prisma.merchPurchase.create({
+          data: {
+            userId,
+            merchId,
+            amountPaid: item.amount_total ?? 0,
+            currencyPaid: item.currency ?? "USD",
+            stripeTransactionKey: session?.id ?? null,
+            fulfillmentStatus: "NO_PROGRESS",
+            shippingAddress: session?.shipping_details?.address,
+            billingAddress: session?.customer_details?.address,
+            quantity: item.quantity ?? 1,
+          },
+        });
+        const merch = await prisma.merch.findFirst({
+          where: { id: merchId },
+        });
+        if (merch?.quantityRemaining) {
+          await prisma.merch.update({
+            where: {
+              id: createdMerchPurchase.merchId,
+            },
+            data: {
+              quantityRemaining:
+                merch.quantityRemaining - createdMerchPurchase.quantity,
+            },
+          });
+        }
+        const merchPurchase = await prisma.merchPurchase.findFirst({
+          where: {
+            id: createdMerchPurchase.id,
+          },
+          include: {
+            merch: {
+              include: { artist: { include: { user: true } } },
+            },
+          },
+        });
+        const platformCut = await calculateAppFee(
+          createdMerchPurchase.amountPaid,
+          createdMerchPurchase.currencyPaid
+        );
 
-    const merchPurchase = await prisma.merchPurchase.findFirst({
-      where: {
-        id: createdMerchPurchase.id,
-      },
-      include: {
-        merch: {
-          include: { artist: { include: { user: true } } },
-        },
-      },
-    });
+        return {
+          ...merchPurchase,
+          artistCut: (merchPurchase?.amountPaid ?? 0) - platformCut,
+          platformCut,
+        };
+      }) ?? []
+    );
 
     const user = await prisma.user.findFirst({
       where: {
@@ -204,9 +235,7 @@ export const handleArtistMerchPurchase = async (
       },
     });
 
-    if (user && merchPurchase) {
-      const pricePaid = merchPurchase.amountPaid / 100;
-
+    if (user && purchases.length > 0) {
       await sendMail({
         data: {
           template: "artist-merch-purchase-receipt",
@@ -214,37 +243,32 @@ export const handleArtistMerchPurchase = async (
             to: user.email,
           },
           locals: {
-            merchPurchase,
+            purchases,
             email: user.email,
-            pricePaid,
+            artist: purchases?.[0]?.merch?.artist,
             client: process.env.REACT_APP_CLIENT_DOMAIN,
             host: process.env.API_DOMAIN,
           },
         },
       } as Job);
 
-      const platformCut = await calculateAppFee(
-        pricePaid,
-        merchPurchase.currencyPaid
-      );
-
       await sendMail({
         data: {
           template: "tell-artist-about-merch-purchase",
           message: {
-            to: merchPurchase.merch.artist.user.email,
+            to: purchases?.[0]?.merch?.artist.user.email,
           },
           locals: {
-            merchPurchase,
-            pricePaid,
-            platformCut,
+            purchases,
+            artist: purchases?.[0]?.merch?.artist,
+            calculateAppFee,
             email: user.email,
           },
         },
       } as Job);
     }
 
-    return merchPurchase;
+    return purchases;
   } catch (e) {
     logger.error(`Error creating tip: ${e}`);
     throw e;

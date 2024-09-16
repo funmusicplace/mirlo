@@ -10,6 +10,7 @@ import logger from "../logger";
 import { AppError } from "../utils/error";
 import {
   doesMerchBelongToUser,
+  doesMerchPurchaseBelongToUser,
   doesTrackGroupBelongToUser,
 } from "../utils/ownership";
 
@@ -197,6 +198,32 @@ export const merchBelongsToLoggedInUser = async (
       });
     } else {
       await doesMerchBelongToUser(merchId, loggedInUser);
+    }
+  } catch (e) {
+    return next(e);
+  }
+  return next();
+};
+
+export const merchPurchaseBelongsToLoggedInUser = async (
+  req: Request,
+  _res: Response,
+  next: NextFunction
+) => {
+  const { purchaseId } = req.params as unknown as {
+    purchaseId: string;
+  };
+
+  const loggedInUser = req.user as User | undefined;
+
+  try {
+    if (!loggedInUser) {
+      throw new AppError({
+        description: "Not logged in user",
+        httpCode: 401,
+      });
+    } else {
+      await doesMerchPurchaseBelongToUser(purchaseId, loggedInUser);
     }
   } catch (e) {
     return next(e);

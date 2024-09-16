@@ -99,7 +99,6 @@ const routes: RouteObject[] = [
           return { Component };
         },
       },
-
       {
         path: "password-reset",
         async lazy() {
@@ -433,6 +432,17 @@ const routes: RouteObject[] = [
             },
           },
         ],
+      },
+      {
+        path: "fulfillment",
+        async lazy() {
+          const { default: Fulfillment } = await import(
+            "components/FulFillment/Fulfillment"
+          );
+          return {
+            Component: () => <Fulfillment />,
+          };
+        },
       },
       {
         path: "releases",
