@@ -13,10 +13,14 @@ import FormComponent from "components/common/FormComponent";
 import React from "react";
 import { css } from "@emotion/css";
 import api from "services/api";
+import { SelectEl } from "components/common/Select";
+import { moneyDisplay } from "components/common/Money";
 
 type FormData = {
   quantity: number;
   price: number;
+  merchOptionIds: string[];
+  shippingDestinationId: string;
 };
 
 function BuyMerchItem() {
@@ -40,12 +44,15 @@ function BuyMerchItem() {
   const minPrice = (merch?.minPrice ?? 0) / 100;
 
   const methods = useForm<FormData>({
-    defaultValues: { price: minPrice, quantity: 1 },
+    defaultValues: {
+      price: minPrice,
+      quantity: 1,
+      merchOptionIds: [],
+    },
   });
 
   const onSubmit = React.useCallback(
     async (data: FormData) => {
-      console.log(data);
       try {
         if (merch) {
           setIsLoadingStripe(true);
@@ -54,6 +61,8 @@ function BuyMerchItem() {
             {
               price: data.price ? Number(data.price) * 100 : undefined,
               quantity: data.quantity,
+              merchOptionIds: data.merchOptionIds,
+              shippingDestinationId: data.shippingDestinationId,
             }
           );
           window.location.assign(response.redirectUrl);
@@ -83,10 +92,19 @@ function BuyMerchItem() {
     return null;
   }
 
-  console.log("errors", methods.formState.errors);
+  const onlyOneDestination = merch.shippingDestinations.length === 1;
+  const defaultOption = onlyOneDestination
+    ? t("everywhere")
+    : t("everywhereElse");
 
   return (
-    <form onSubmit={methods.handleSubmit(onSubmit)}>
+    <form
+      onSubmit={methods.handleSubmit(onSubmit)}
+      className={css`
+        background-color: var(--mi-lighten-background-color);
+        padding: 1rem;
+      `}
+    >
       <h3>{t("buy")}</h3>
       <p>{t("supportThisArtistByPurchasing")}</p>
       <FormComponent>
@@ -105,7 +123,7 @@ function BuyMerchItem() {
         />
       </FormComponent>
       <FormComponent>
-        <label>{t("howMuch")}</label>
+        <label>{t("howMuch", { currency: merch.artist.user?.currency })}</label>
         <InputEl
           {...methods.register("price", { min: minPrice })}
           type="number"
@@ -115,7 +133,43 @@ function BuyMerchItem() {
           `}
         />
       </FormComponent>
-      <Button disabled={!methods.formState.isValid} variant="big">
+      {merch.optionTypes?.map((optionType, idx) => (
+        <FormComponent>
+          <label>{optionType.optionName}</label>
+          <SelectEl {...methods.register(`merchOptionIds.${idx}`)}>
+            {optionType.options.map((o) => (
+              <option key={o.name} value={o.id}>
+                {o.name}
+              </option>
+            ))}
+          </SelectEl>
+        </FormComponent>
+      ))}
+      <FormComponent>
+        <label>{t("supportedShippingDestinations")}</label>
+        <SelectEl {...methods.register(`shippingDestinationId`)}>
+          {merch.shippingDestinations.map((o) => (
+            <option key={o.id} value={o.id}>
+              {o.destinationCountry && o.destinationCountry !== ""
+                ? o.destinationCountry
+                : defaultOption}{" "}
+              (
+              {t("destinationCost", {
+                costUnit: moneyDisplay({
+                  amount: o.costUnit / 100,
+                  currency: o.currency,
+                }),
+              })}
+              )
+            </option>
+          ))}
+        </SelectEl>
+      </FormComponent>
+      <Button
+        disabled={!methods.formState.isValid}
+        isLoading={isLoadingStripe}
+        variant="big"
+      >
         {t("buy")}
       </Button>
     </form>

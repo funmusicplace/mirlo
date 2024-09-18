@@ -78,7 +78,7 @@ const OptionType: React.FC<{
       {!isEditing && (
         <>
           <em>{optionType.optionName}</em>
-          {optionType.options?.map((o) => o.name)}
+          {optionType.options?.map((o) => o.name).join(", ")}
         </>
       )}
     </li>

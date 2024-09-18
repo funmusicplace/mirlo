@@ -1,0 +1,28 @@
+doctype html
+html
+  head
+    block head
+      meta(charset="utf-8")
+      meta(name="viewport", content="width=device-width")
+      meta(http-equiv="X-UA-Compatible", content="IE=edge")
+      meta(name="x-apple-disable-message-reformatting")
+      style 
+        include ../style.css
+  body.sans-serif
+    div
+      div.mw600
+        p 
+          | Hello #{artist.user.name}!
+        p 
+          | Someone (#{email}) bought something from you!.
+      ul.mw600
+        each purchase in purchases 
+          li #{purchase.merch.title} x#{purchase.quantity}
+            | #{purchase.currencyPaid.toUpperCase()} #{(purchase.amountPaid / 100).toFixed(2)}
+            | Mirlo's cut: (#{purchase.currencyPaid.toUpperCase()} #{purchase.platformCut.toFixed(2)})
+            strong Total: #{purchase.currencyPaid.toUpperCase()} #{(purchase.artistCut).toFixed(2)} 
+
+      p To learn more about this order, please see your fulfillment dashboard.
+      p The final money will be available via your Stripe dashboard
+      p If you have any questions please reach out to hi@mirlo.space
+

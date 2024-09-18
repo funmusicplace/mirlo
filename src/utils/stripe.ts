@@ -1,6 +1,12 @@
 import Stripe from "stripe";
 import prisma from "@mirlo/prisma";
-import { Prisma, User } from "@mirlo/prisma/client";
+import {
+  MerchOptionType,
+  Prisma,
+  User,
+  MerchOption,
+  MerchShippingDestination,
+} from "@mirlo/prisma/client";
 import { logger } from "../logger";
 import sendMail from "../jobs/send-mail";
 import { Request, Response } from "express";
@@ -16,8 +22,11 @@ import {
   handleSubscription,
   handleTrackGroupPurchase,
 } from "./handleFinishedTransactions";
+import countryCodesCurrencies from "./country-codes-currencies";
 
 const { STRIPE_KEY, API_DOMAIN } = process.env;
+
+export const OPTION_JOINER = ";;";
 
 const stripe = new Stripe(STRIPE_KEY ?? "", {
   apiVersion: "2022-11-15",
@@ -47,38 +56,104 @@ export const calculateAppFee = async (
   return +appFee || 0;
 };
 
-const buildProductDescription = (
+const buildProductDescription = async (
   title: string | null,
   artistName: string,
-  itemDescription?: string | null
+  itemDescription?: string | null,
+  options?: { merchOptionIds?: string[] }
 ) => {
-  const about =
+  let about =
     itemDescription && itemDescription !== ""
       ? itemDescription
-      : `The item ${title} by ${artistName}.`;
+      : `${title} by ${artistName}.`;
+
+  if (options?.merchOptionIds) {
+    const foundOptions = await prisma.merchOption.findMany({
+      where: {
+        id: { in: options.merchOptionIds },
+      },
+      include: {
+        merchOptionType: true,
+      },
+    });
+
+    if (foundOptions.length > 0) {
+      about += `\n
+    ${foundOptions.map((o) => `${o.merchOptionType.optionName}: ${o.name}\n`)}
+      `;
+    }
+  }
 
   return about;
 };
 
+const checkForProductKey = async (
+  stripeProductKey: string | null,
+  stripeAccountId: string,
+  options?: { merchOptionIds?: string[] }
+) => {
+  if (options?.merchOptionIds && options?.merchOptionIds?.length > 0) {
+    const products = await stripe.products.search({
+      query: `metadata["merchOptionIds"]:"${options.merchOptionIds.join(OPTION_JOINER)}"`,
+    });
+    return products.data[0]?.id;
+  }
+  let productKey = stripeProductKey;
+
+  if (productKey) {
+    try {
+      await stripe.products.retrieve(productKey, {
+        stripeAccount: stripeAccountId,
+      });
+    } catch (e) {
+      if (e instanceof Error) {
+        if (e.message.includes("No such product")) {
+          logger.error("Weird, product doesn't exist", e.message);
+          productKey = null;
+        }
+      }
+    }
+  } else {
+  }
+  return productKey;
+};
+
+/**
+ * For Merch we don't store the stripeProductKey on the merch unless there are no options
+ * @param merch
+ * @param stripeAccountId
+ * @param options
+ * @returns
+ */
 export const createMerchStripeProduct = async (
   merch: Prisma.MerchGetPayload<{
     include: { artist: true; images: true };
   }>,
-  stripeAccountId: string
+  stripeAccountId: string,
+  options?: { merchOptionIds?: string[] }
 ) => {
-  let productKey = merch.stripeProductKey;
-
-  const about = buildProductDescription(
+  let productKey = await checkForProductKey(
+    merch.stripeProductKey,
+    stripeAccountId,
+    options
+  );
+  const about = await buildProductDescription(
     merch.title,
     merch.artist.name,
-    merch.description
+    merch.description,
+    options
   );
-  if (!merch.stripeProductKey) {
+  if (!productKey) {
     const product = await stripe.products.create(
       {
         name: `${merch.title} by ${merch.artist.name}`,
         description: about,
         tax_code: "txcd_99999999",
+        metadata: {
+          merchOptionIds: options?.merchOptionIds
+            ? options?.merchOptionIds.join(OPTION_JOINER)
+            : null,
+        },
         images:
           merch.images?.length > 0
             ? [
@@ -93,14 +168,21 @@ export const createMerchStripeProduct = async (
         stripeAccount: stripeAccountId,
       }
     );
-    await prisma.merch.update({
-      where: {
-        id: merch.id,
-      },
-      data: {
-        stripeProductKey: product.id,
-      },
-    });
+    // do not set a product key if there are options
+    if (
+      !options ||
+      !options.merchOptionIds ||
+      options.merchOptionIds.length === 0
+    ) {
+      await prisma.merch.update({
+        where: {
+          id: merch.id,
+        },
+        data: {
+          stripeProductKey: product.id,
+        },
+      });
+    }
     productKey = product.id;
   }
 
@@ -113,15 +195,18 @@ export const createTrackGroupStripeProduct = async (
   }>,
   stripeAccountId: string
 ) => {
-  let productKey = trackGroup.stripeProductKey;
+  let productKey = await checkForProductKey(
+    trackGroup.stripeProductKey,
+    stripeAccountId
+  );
 
-  const about = buildProductDescription(
+  const about = await buildProductDescription(
     trackGroup.title,
     trackGroup.artist.name,
     trackGroup.about
   );
 
-  if (!trackGroup.stripeProductKey) {
+  if (!productKey) {
     const product = await stripe.products.create(
       {
         name: `${trackGroup.title} by ${trackGroup.artist.name}`,
@@ -158,21 +243,10 @@ export const createSubscriptionStripeProduct = async (
   tier: Prisma.ArtistSubscriptionTierGetPayload<{ include: { artist: true } }>,
   stripeAccountId: string
 ) => {
-  let productKey = tier.stripeProductKey;
-  if (productKey) {
-    try {
-      await stripe.products.retrieve(productKey, {
-        stripeAccount: stripeAccountId,
-      });
-    } catch (e) {
-      if (e instanceof Error) {
-        if (e.message.includes("No such product")) {
-          console.error("Weird, product doesn't exist", e.message);
-          productKey = null;
-        }
-      }
-    }
-  }
+  let productKey = await checkForProductKey(
+    tier.stripeProductKey,
+    stripeAccountId
+  );
 
   if (!productKey) {
     const product = await stripe.products.create(
@@ -272,13 +346,73 @@ export const createStripeCheckoutSessionForPurchase = async ({
   return session;
 };
 
+const stripeBannedDestinations =
+  "AS, CX, CC, CU, HM, IR, KP, MH, FM, NF, MP, PW, SD, SY, UM, VI".split(", ");
+
+const countryToCurrencyMap = countryCodesCurrencies.reduce((aggr, country) => ({
+  ...aggr,
+  [country.countryCode]: country.currencyCode,
+}));
+
+const determineShipping = (
+  shippingDestinations: MerchShippingDestination[],
+  shippingDestinationId: string,
+  quantity: number = 0
+) => {
+  const destination = shippingDestinations.find(
+    (s) => s.id === shippingDestinationId
+  );
+
+  if (!destination) {
+    throw new AppError({
+      httpCode: 400,
+      description:
+        "Supplied destination isn't a valid destination for the seller",
+    });
+  }
+
+  let possibleDestinations = [destination.destinationCountry];
+
+  if (destination?.destinationCountry === "") {
+    const specificShippingCosts = shippingDestinations.filter(
+      (d) => d.destinationCountry !== ""
+    );
+    possibleDestinations = countryCodesCurrencies
+      .map((country) => {
+        const inSpecific = specificShippingCosts.find(
+          (d) => d.destinationCountry === country.countryCode
+        );
+        const banned = stripeBannedDestinations.includes(country.countryCode);
+        if (banned || inSpecific) return null;
+        return country.countryCode;
+      })
+      .filter((country) => !!country);
+  }
+
+  return {
+    shipping_rate_data: {
+      display_name: `Shipping to ${!!destination.destinationCountry ? destination.destinationCountry : "Everywhere"}`,
+      fixed_amount: {
+        currency: destination?.currency,
+        amount:
+          destination?.costUnit +
+          (quantity > 1 ? quantity * destination?.costExtraUnit : 0),
+      },
+      type: "fixed_amount" as "fixed_amount",
+    },
+    destinationCodes: possibleDestinations,
+  };
+};
+
 export const createStripeCheckoutSessionForMerchPurchase = async ({
   loggedInUser,
   email,
   priceNumber,
   merch,
   quantity,
+  options,
   stripeAccountId,
+  shippingDestinationId,
 }: {
   loggedInUser?: User;
   email?: string;
@@ -287,6 +421,10 @@ export const createStripeCheckoutSessionForMerchPurchase = async ({
   merch: Prisma.MerchGetPayload<{
     include: { artist: true; images: true; shippingDestinations: true };
   }>;
+  options: {
+    merchOptionIds: string[];
+  };
+  shippingDestinationId: string;
   stripeAccountId: string;
 }) => {
   const client = await prisma.client.findFirst({
@@ -295,7 +433,11 @@ export const createStripeCheckoutSessionForMerchPurchase = async ({
     },
   });
 
-  const productKey = await createMerchStripeProduct(merch, stripeAccountId);
+  const productKey = await createMerchStripeProduct(
+    merch,
+    stripeAccountId,
+    options
+  );
 
   if (!productKey) {
     throw new AppError({
@@ -306,18 +448,22 @@ export const createStripeCheckoutSessionForMerchPurchase = async ({
 
   const currency = merch.currency?.toLowerCase() ?? "usd";
 
-  const destinations = merch.shippingDestinations
-    .map((d) => d.destinationCountry?.toUpperCase())
-    .filter(
-      (v) => !!v
-    ) as Stripe.Checkout.SessionCreateParams.ShippingAddressCollection.AllowedCountry[];
+  const destinations = determineShipping(
+    merch.shippingDestinations,
+    shippingDestinationId,
+    quantity
+  );
 
   const session = await stripe.checkout.sessions.create(
     {
       billing_address_collection: "required",
       shipping_address_collection: {
-        allowed_countries: destinations, // FIXME feed in shippingDesinations
+        allowed_countries:
+          destinations.destinationCodes as Stripe.Checkout.SessionCreateParams.ShippingAddressCollection.AllowedCountry[],
       },
+      shipping_options: [
+        { shipping_rate_data: destinations.shipping_rate_data },
+      ],
       customer_email: loggedInUser?.email || email,
       payment_intent_data: {
         application_fee_amount: await calculateAppFee(priceNumber, currency),
@@ -563,7 +709,7 @@ export const handleCheckoutSession = async (
       await handleArtistGift(Number(actualUserId), Number(artistId), session);
     } else if (merchId && userEmail) {
       logger.info(`checkout.session: ${session.id} handling merch`);
-      await handleArtistMerchPurchase(Number(actualUserId), merchId, session);
+      await handleArtistMerchPurchase(Number(actualUserId), session);
     } else if (tierId && userEmail) {
       logger.info(`checkout.session: ${session.id} handling subscription`);
       await handleSubscription(Number(actualUserId), Number(tierId), session);

@@ -1,5 +1,6 @@
 import Stripe from "stripe";
 import prisma from "@mirlo/prisma";
+import { Prisma, MerchPurchase, MerchOption } from "@mirlo/prisma/client";
 
 import { logger } from "../logger";
 import sendMail from "../jobs/send-mail";
@@ -7,8 +8,12 @@ import { registerPurchase } from "./trackGroup";
 import { registerSubscription } from "./subscriptionTier";
 import { getSiteSettings } from "./settings";
 import { Job } from "bullmq";
-import { calculateAppFee } from "./stripe";
+import { calculateAppFee, OPTION_JOINER } from "./stripe";
+const { STRIPE_KEY } = process.env;
 
+const stripe = new Stripe(STRIPE_KEY ?? "", {
+  apiVersion: "2022-11-15",
+});
 export const handleTrackGroupPurchase = async (
   userId: number,
   trackGroupId: number,
@@ -168,35 +173,128 @@ export const handleArtistGift = async (
   }
 };
 
+// FIXME: is it possible to refactor all checkout sessions to use line_items
+// so that we can use the same email etc for everything?
 export const handleArtistMerchPurchase = async (
   userId: number,
-  merchId: string,
   session?: Stripe.Checkout.Session
 ) => {
   try {
-    const createdMerchPurchase = await prisma.merchPurchase.create({
-      data: {
-        userId,
-        merchId,
-        amountPaid: session?.amount_total ?? 0,
-        currencyPaid: session?.currency ?? "USD",
-        stripeTransactionKey: session?.id ?? null,
-        fulfillmentStatus: "NO_PROGRESS",
-        shippingAddress: session?.shipping_details,
-        billingAddress: session?.customer_details?.address,
-      },
-    });
+    const purchases = (
+      await Promise.all(
+        session?.line_items?.data.map(async (item) => {
+          const stripeProduct = item.price?.product;
+          let merchProduct;
+          let stripeProductId =
+            typeof stripeProduct === "string"
+              ? stripeProduct
+              : stripeProduct?.id;
 
-    const merchPurchase = await prisma.merchPurchase.findFirst({
-      where: {
-        id: createdMerchPurchase.id,
-      },
-      include: {
-        merch: {
-          include: { artist: { include: { user: true } } },
-        },
-      },
-    });
+          // Use the product of this line item to find the
+          // relevant item in our database. For merch this
+          // can be either product directly, or something defined
+          // by the merch options
+          if (stripeProductId) {
+            const product = await stripe.products.retrieve(stripeProductId);
+
+            if (product.metadata.merchOptionIds) {
+              const optionIds =
+                product.metadata.merchOptionIds.split(OPTION_JOINER);
+              merchProduct = await prisma.merch.findFirst({
+                where: {
+                  optionTypes: {
+                    some: { options: { some: { id: { in: optionIds } } } },
+                  },
+                },
+                include: {
+                  optionTypes: {
+                    include: { options: true },
+                  },
+                },
+              });
+            } else {
+              merchProduct = await prisma.merch.findFirst({
+                where: {
+                  stripeProductKey: product.id,
+                },
+                include: {
+                  optionTypes: {
+                    include: { options: true },
+                  },
+                },
+              });
+            }
+
+            if (merchProduct) {
+              const optionIds =
+                product.metadata?.merchOptionIds?.split(OPTION_JOINER);
+              const options: MerchOption[] = [];
+              merchProduct.optionTypes.forEach((ot) =>
+                ot.options.forEach((o) => {
+                  if (optionIds?.includes(o.id)) {
+                    options.push(o);
+                  }
+                })
+              );
+
+              const createdMerchPurchase = await prisma.merchPurchase.create({
+                data: {
+                  userId,
+                  merchId: merchProduct.id,
+                  amountPaid: item.amount_total ?? 0,
+                  currencyPaid: item.currency ?? "USD",
+                  stripeTransactionKey: session?.id ?? null,
+                  fulfillmentStatus: "NO_PROGRESS",
+                  shippingAddress: session?.shipping_details?.address,
+                  billingAddress: session?.customer_details?.address,
+                  quantity: item.quantity ?? 1,
+                  options: {
+                    connect: options.map((o) => ({
+                      id: o.id,
+                    })),
+                  },
+                },
+              });
+              const merch = await prisma.merch.findFirst({
+                where: { id: createdMerchPurchase.merchId },
+              });
+
+              if (merch?.quantityRemaining) {
+                await prisma.merch.update({
+                  where: {
+                    id: createdMerchPurchase.merchId,
+                  },
+                  data: {
+                    quantityRemaining:
+                      merch.quantityRemaining - createdMerchPurchase.quantity,
+                  },
+                });
+              }
+              const merchPurchase = await prisma.merchPurchase.findFirst({
+                where: {
+                  id: createdMerchPurchase.id,
+                },
+                include: {
+                  merch: {
+                    include: { artist: { include: { user: true } } },
+                  },
+                },
+              });
+              const platformCut = await calculateAppFee(
+                createdMerchPurchase.amountPaid,
+                createdMerchPurchase.currencyPaid
+              );
+
+              return {
+                ...merchPurchase,
+                artistCut: (merchPurchase?.amountPaid ?? 0) - platformCut,
+                platformCut,
+              };
+            }
+          }
+        }) ?? []
+      )
+    ).filter((o) => !!o);
 
     const user = await prisma.user.findFirst({
       where: {
@@ -204,9 +302,7 @@ export const handleArtistMerchPurchase = async (
       },
     });
 
-    if (user && merchPurchase) {
-      const pricePaid = merchPurchase.amountPaid / 100;
-
+    if (user && purchases.length > 0) {
       await sendMail({
         data: {
           template: "artist-merch-purchase-receipt",
@@ -214,37 +310,32 @@ export const handleArtistMerchPurchase = async (
             to: user.email,
           },
           locals: {
-            merchPurchase,
+            purchases,
             email: user.email,
-            pricePaid,
+            artist: purchases?.[0]?.merch?.artist,
             client: process.env.REACT_APP_CLIENT_DOMAIN,
             host: process.env.API_DOMAIN,
           },
         },
       } as Job);
 
-      const platformCut = await calculateAppFee(
-        pricePaid,
-        merchPurchase.currencyPaid
-      );
-
       await sendMail({
         data: {
           template: "tell-artist-about-merch-purchase",
           message: {
-            to: merchPurchase.merch.artist.user.email,
+            to: purchases?.[0]?.merch?.artist.user.email,
           },
           locals: {
-            merchPurchase,
-            pricePaid,
-            platformCut,
+            purchases,
+            artist: purchases?.[0]?.merch?.artist,
+            calculateAppFee,
             email: user.email,
           },
         },
       } as Job);
     }
 
-    return merchPurchase;
+    return purchases;
   } catch (e) {
     logger.error(`Error creating tip: ${e}`);
     throw e;

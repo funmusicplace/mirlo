@@ -23,11 +23,14 @@ export default function () {
 
   async function POST(req: Request, res: Response, next: NextFunction) {
     const { id: merchId } = req.params as unknown as Params;
-    let { price, email, quantity } = req.body as unknown as {
-      price?: string; // In cents
-      email?: string;
-      quantity?: number;
-    };
+    let { price, email, quantity, merchOptionIds, shippingDestinationId } =
+      req.body as unknown as {
+        price?: string; // In cents
+        email?: string;
+        quantity?: number;
+        merchOptionIds: string[];
+        shippingDestinationId: string;
+      };
     const loggedInUser = req.user as User | undefined;
 
     try {
@@ -54,6 +57,11 @@ export default function () {
           },
           shippingDestinations: true,
           images: true,
+          optionTypes: {
+            include: {
+              options: true,
+            },
+          },
         },
       });
 
@@ -63,6 +71,16 @@ export default function () {
           description: `Merch with ID ${merch} not found`,
         });
       }
+
+      // Check if the options passed are possible
+      const finalOptionIds: string[] = [];
+      merch.optionTypes.forEach((ot) => {
+        ot.options.forEach((o) => {
+          if (merchOptionIds.includes(o.id)) {
+            finalOptionIds.push(o.id);
+          }
+        });
+      });
 
       if (loggedInUser) {
         await subscribeUserToArtist(merch?.artist, loggedInUser);
@@ -90,6 +108,8 @@ export default function () {
           merch,
           quantity: quantity ?? 0,
           stripeAccountId,
+          shippingDestinationId,
+          options: { merchOptionIds: finalOptionIds },
         });
         res.status(200).json({
           redirectUrl: session.url,

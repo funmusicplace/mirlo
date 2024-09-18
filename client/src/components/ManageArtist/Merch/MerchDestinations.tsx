@@ -1,111 +1,35 @@
 import { useQuery } from "@tanstack/react-query";
 import Button from "components/common/Button";
-import Money, { moneyDisplay } from "components/common/Money";
 import { queryManagedMerch } from "queries";
 import { FaPen, FaPlus } from "react-icons/fa";
 import { useParams } from "react-router-dom";
 import DashedList from "./DashedList";
 import { css } from "@emotion/css";
 import React from "react";
-import {
-  FormProvider,
-  useFieldArray,
-  useForm,
-  useFormContext,
-} from "react-hook-form";
-import FormComponent from "components/common/FormComponent";
+import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { SelectEl } from "components/common/Select";
-import countryCodesCurrencies from "./country-codes-currencies";
-import { InputEl } from "components/common/Input";
 import api from "services/api";
+import { useAuthContext } from "state/AuthContext";
+import DestinationListItem from "./DestinationListItem";
+import countryCodesCurrencies from "./country-codes-currencies";
 
 type DestinationForm = {
   destinations: Partial<ShippingDestination>[];
 };
 
-const Destination: React.FC<{
-  dest: Partial<ShippingDestination>;
-  index: number;
-  isEditing: boolean;
-}> = ({ dest, isEditing, index }) => {
-  const { t } = useTranslation("translation", { keyPrefix: "manageMerch" });
-
-  const methods = useFormContext();
-  return (
-    <li>
-      {isEditing && (
-        <div
-          className={css`
-            width: 100%;
-
-            > div {
-              max-width: 45%;
-              display: inline-block;
-              margin-right: 1rem;
-            }
-          `}
-        >
-          <FormComponent>
-            <label>{t("destinationCountry")}</label>
-            <SelectEl
-              {...methods.register(`destinations.${index}.destinationCountry`, {
-                required: true,
-              })}
-              required
-            >
-              {countryCodesCurrencies.map((country) => (
-                <option key={country.countryCode} value={country.countryCode}>
-                  {country.countryName} {country.countryCode}
-                </option>
-              ))}
-            </SelectEl>
-          </FormComponent>
-          <FormComponent>
-            <label>{t("costUnit")}</label>
-            <InputEl
-              type="number"
-              {...methods.register(`destinations.${index}.costUnit`)}
-            />
-          </FormComponent>
-          <FormComponent>
-            <label>{t("costExtraUnit")}</label>
-            <InputEl
-              type="number"
-              {...methods.register(`destinations.${index}.costExtraUnit`)}
-            />
-          </FormComponent>
-        </div>
-      )}
-      {!isEditing && (
-        <>
-          <em>
-            {dest.homeCountry} -&gt; {dest.destinationCountry || t("anywhere")}
-          </em>
-          {dest.currency && (
-            <>
-              {t("costPerUnitDisplay", {
-                costUnit: moneyDisplay({
-                  amount: dest.costUnit,
-                  currency: dest.currency,
-                }),
-                costExtraUnit: moneyDisplay({
-                  amount: dest.costExtraUnit,
-                  currency: dest.currency,
-                }),
-              })}
-            </>
-          )}
-        </>
-      )}
-    </li>
-  );
-};
+const currencyToCountryMap = countryCodesCurrencies.reduce(
+  (aggr, country) => {
+    aggr[country.currencyCode] = country;
+    return aggr;
+  },
+  {} as { [key: string]: any }
+);
 
 const MerchDestinations: React.FC<{}> = () => {
   const { merchId: merchParamId } = useParams();
   const { t } = useTranslation("translation", { keyPrefix: "manageMerch" });
   const [isEditing, setIsEditing] = React.useState(false);
+  const { user } = useAuthContext();
 
   const { data: merch, refetch } = useQuery(
     queryManagedMerch(merchParamId ?? "")
@@ -120,6 +44,7 @@ const MerchDestinations: React.FC<{}> = () => {
       })),
     },
   });
+
   const { fields, append } = useFieldArray({
     control: methods.control,
     name: `destinations`,
@@ -152,6 +77,13 @@ const MerchDestinations: React.FC<{}> = () => {
         {t("shippingDestinationPrices")}
       </h2>
       <p>{t("setDifferentCostPerDestination")}</p>
+      {user?.currency && (
+        <p>
+          {t("currentCountry", {
+            country: currencyToCountryMap[user?.currency],
+          })}
+        </p>
+      )}
       <form
         onSubmit={methods.handleSubmit(update)}
         className={css`
@@ -161,7 +93,7 @@ const MerchDestinations: React.FC<{}> = () => {
         <FormProvider {...methods}>
           <DashedList>
             {fields?.map((dest, index) => (
-              <Destination
+              <DestinationListItem
                 dest={dest}
                 key={dest.id}
                 isEditing={isEditing}

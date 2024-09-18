@@ -172,7 +172,7 @@ const ArtistSupportBox: React.FC<{
             />
           </>
         )}
-        {(isSubscribedToTier || ownedByUser || isSubscribedToArtist) && (
+        {(isSubscribedToTier || isSubscribedToArtist) && (
           <Box
             className={css`
               text-align: center;
