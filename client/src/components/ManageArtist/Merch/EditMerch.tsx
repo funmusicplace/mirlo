@@ -78,12 +78,14 @@ const EditMerch: React.FC<{}> = () => {
         }
       `}
     >
-      <SpaceBetweenDiv>
-        <div />
-        <ButtonLink to={getMerchUrl(artist, merch)}>
-          {t("viewMerchLive")}
-        </ButtonLink>
-      </SpaceBetweenDiv>
+      {merch.isPublic && (
+        <SpaceBetweenDiv>
+          <div />
+          <ButtonLink to={getMerchUrl(artist, merch)}>
+            {t("viewMerchLive")}
+          </ButtonLink>
+        </SpaceBetweenDiv>
+      )}
       <Box variant="info">
         <Toggle
           label={t("isPublic")}

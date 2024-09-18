@@ -17,7 +17,7 @@ import { QUERY_KEY_AUTH, queryKeyIncludes } from "queries/queryKeys";
 const ArtistSupportGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(3, 31.6%);
-  gap: 4% 2.5%;
+  gap: 1rem 2.5%;
   max-width: 100%;
   list-style-type: none;
 
@@ -27,7 +27,7 @@ const ArtistSupportGrid = styled.div`
 
   @media screen and (max-width: ${bp.medium}px) {
     grid-template-columns: repeat(1, 100%);
-    gap: 2%;
+    gap: 1rem 2%;
   }
 `;
 

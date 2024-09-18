@@ -162,7 +162,7 @@
     "everywhere": "Everywhere",
     "everywhereElse": "Everywhere else",
     "destinationCost": "Cost to ship here: {{costUnit}}",
-    "supportedShippingDestinations": "This artist ships to, choose the one that best matches you  "
+    "supportedShippingDestinations": "Choose the shipping destination that best matches you"
   },
   "artist": {
     "merch": "Merch",
@@ -335,6 +335,7 @@
     "edit": "Edit",
     "addNewShippingDestination": "Add new shipping destination",
     "save": "Save",
+    "viewMerchLive": "View merch live",
     "options": "Options",
     "optionName": "Option name",
     "addNewOption": "Add new option",
