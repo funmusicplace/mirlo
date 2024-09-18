@@ -103,6 +103,8 @@ function BuyMerchItem() {
       className={css`
         background-color: var(--mi-lighten-background-color);
         padding: 1rem;
+        margin-top: -1rem;
+        max-width: calc(100vh / 12 * 3);
       `}
     >
       <h3>{t("buy")}</h3>
