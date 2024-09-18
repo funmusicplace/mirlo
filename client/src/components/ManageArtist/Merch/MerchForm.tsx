@@ -51,7 +51,7 @@ const MerchForm: React.FC<{
       try {
         setIsSaving(true);
 
-        snackbar(t("trackGroupUpdated"), {
+        snackbar(t("merchUpdated"), {
           type: "success",
         });
       } catch (e) {

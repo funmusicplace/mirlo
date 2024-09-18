@@ -244,10 +244,12 @@ interface MerchOption {
   name: string;
   quantityRemaining: number;
   sku: string;
+  id: string;
 }
 
 interface MerchOptionType {
   optionName: string;
+  id: string;
   options: MerchOption[];
 }
 

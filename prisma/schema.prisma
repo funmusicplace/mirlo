@@ -326,6 +326,7 @@ model MerchOption {
   name              String // eg. "small"
   quantityRemaining Int?
   sku               String?
+  purchases         MerchPurchase[]
 }
 
 model MerchPurchase {
@@ -343,6 +344,7 @@ model MerchPurchase {
   shippingAddress      Json?
   billingAddress       Json?
   fulfillmentStatus    FulfillmentStatus
+  options              MerchOption[]
 }
 
 enum FulfillmentStatus {

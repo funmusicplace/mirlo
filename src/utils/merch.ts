@@ -26,9 +26,11 @@ export const deleteMerchCover = async (merchId: string) => {
   }
 };
 
-export const processSingleMerch = (tg: Merch & { images: MerchImage[] }) => ({
-  ...tg,
-  images: tg.images?.map((t) => addSizesToImage(finalMerchImageBucket, t)),
+export const processSingleMerch = (
+  merch: Merch & { images: MerchImage[] }
+) => ({
+  ...merch,
+  images: merch.images?.map((t) => addSizesToImage(finalMerchImageBucket, t)),
 });
 
 export default {

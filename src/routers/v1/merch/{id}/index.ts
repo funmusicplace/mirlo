@@ -22,10 +22,15 @@ export default function () {
         where: {
           isPublic: true,
           id,
+          shippingDestinations: {
+            some: {},
+          },
         },
         include: {
           artist: true,
           images: true,
+          shippingDestinations: true,
+          optionTypes: { include: { options: true } },
         },
       });
 

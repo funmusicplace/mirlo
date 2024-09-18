@@ -151,6 +151,19 @@
     "shippingAddress": "Shipping address:",
     "itemPurchased": "Purchased"
   },
+  "merchDetails": {
+    "buy": "Buy",
+    "supportThisArtistByPurchasing": "Support this artist!",
+    "howMany": "How many do you want?",
+    "howMuch": "Pay {{ currency }}",
+    "editMerch": "Edit merch",
+    "shipsTo": "Ships to {{ destinations }}",
+    "doesNotExist": "The page you are looking for does not exist",
+    "everywhere": "Everywhere",
+    "everywhereElse": "Everywhere else",
+    "destinationCost": "Cost to ship here: {{costUnit}}",
+    "supportedShippingDestinations": "This artist ships to, choose the one that best matches you  "
+  },
   "artist": {
     "merch": "Merch",
     "Email": "Email",
@@ -310,8 +323,11 @@
     "merchTitle": "What are you selling?",
     "merchDescription": "How would you describe it?",
     "price": "Price",
-    "quanity": "How many do you have?",
+    "quantity": "How many do you have?",
+    "everywhere": "Everywhere",
+    "everywhereElse": "Everywhere else",
     "saveMerch": "Save merch details",
+    "merchUpdated": "Merch updated",
     "isPublic": "Should this merch item be publicly listed?",
     "costUnit": "Cost per unit",
     "costExtraUnit": "Cost per additional unit",

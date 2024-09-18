@@ -26,6 +26,10 @@ export const getArtistManageUrl = (artistId: number) => {
   return `/manage/artists/${artistId}`;
 };
 
+export const getArtistManageMerchUrl = (artistId: number, merchId: string) => {
+  return `/manage/artists/${artistId}/merch/${merchId}`;
+};
+
 export const getTrackGroupWidget = (trackGroupId: number) => {
   return `${import.meta.env.VITE_CLIENT_DOMAIN}/widget/trackGroup/${trackGroupId}`;
 };

@@ -14,7 +14,6 @@ import WidthContainer from "components/common/WidthContainer";
 import { ItemViewTitle } from "../TrackGroup/TrackGroupTitle";
 import SupportArtistPopUp from "components/common/SupportArtistPopUp";
 
-import { useAuthContext } from "state/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { queryArtist, queryMerch, queryUserStripeStatus } from "queries";
 import {
@@ -22,6 +21,10 @@ import {
   ImageWrapper,
 } from "components/TrackGroup/TrackGroup";
 import BuyMerchItem from "./BuyMerchItem";
+import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
+import { ButtonLink } from "components/common/Button";
+import { getArtistManageMerchUrl } from "utils/artist";
+import { FaPen } from "react-icons/fa";
 
 function TrackGroup() {
   const { t } = useTranslation("translation", {
@@ -91,8 +94,17 @@ function TrackGroup() {
             }
           `}
         >
-          <ItemViewTitle title={merch.title} />
-
+          <SpaceBetweenDiv>
+            <ItemViewTitle title={merch.title} />
+            <ButtonLink
+              compact
+              startIcon={<FaPen />}
+              variant="dashed"
+              to={getArtistManageMerchUrl(artist.id, merch.id)}
+            >
+              {t("editMerch")}
+            </ButtonLink>
+          </SpaceBetweenDiv>
           <div
             className={css`
               display: flex;

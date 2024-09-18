@@ -15,6 +15,9 @@ import Box from "components/common/Box";
 import FormCheckbox from "components/common/FormCheckbox";
 import { Toggle } from "components/common/Toggle";
 import api from "services/api";
+import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
+import { ButtonLink } from "components/common/Button";
+import { getMerchUrl } from "utils/artist";
 
 export interface TrackGroupFormData {
   published: boolean;
@@ -65,7 +68,6 @@ const EditMerch: React.FC<{}> = () => {
     return null;
   }
 
-  console.log(merch.isPublic);
   return (
     <ManageSectionWrapper
       className={css`
@@ -76,6 +78,12 @@ const EditMerch: React.FC<{}> = () => {
         }
       `}
     >
+      <SpaceBetweenDiv>
+        <div />
+        <ButtonLink to={getMerchUrl(artist, merch)}>
+          {t("viewMerchLive")}
+        </ButtonLink>
+      </SpaceBetweenDiv>
       <Box variant="info">
         <Toggle
           label={t("isPublic")}

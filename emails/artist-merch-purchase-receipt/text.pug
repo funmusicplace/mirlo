@@ -1,0 +1,10 @@
+| Wow!
+|
+| Thank you for supporting #{merchPurchase.merch.artist.name} with your purchase.
+|
+each purchase in purchases 
+  | #{purchase.merch.title} x#{purchase.quantity}
+  | #{purchase.currencyPaid.toUpperCase()} #{(purchase.amountPaid / 100).toFixed(2)}
+        
+| The artist will start fulfilling your order and be in touch.
+| Enjoy!
