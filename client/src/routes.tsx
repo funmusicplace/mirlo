@@ -440,7 +440,11 @@ const routes: RouteObject[] = [
             "components/FulFillment/Fulfillment"
           );
           return {
-            Component: () => <Fulfillment />,
+            Component: () => (
+              <AuthWrapper>
+                <Fulfillment />
+              </AuthWrapper>
+            ),
           };
         },
       },
