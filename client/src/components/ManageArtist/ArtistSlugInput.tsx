@@ -9,7 +9,7 @@ const ArtistSlugInput: React.FC<{
   isDisabled?: boolean;
   currentArtistId?: number;
 }> = ({ currentArtistId, isDisabled }) => {
-  const { t } = useTranslation("translation", { keyPrefix: "mustBeUnique" });
+  const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
   const {
     register,
     formState: { errors },
@@ -43,11 +43,10 @@ const ArtistSlugInput: React.FC<{
           margin-bottom: 0.5rem;
         `}
       />
-      <small>Must be unique</small>
+      <small>{t("mustBeUnique")}</small>
       {errors.urlSlug && (
         <small className="error">
-          {errors.urlSlug.type === "unique" &&
-            "This needs to be unique, try something else"}
+          {errors.urlSlug.type === "unique" && t("needsToBeUnique")}
         </small>
       )}
     </>
