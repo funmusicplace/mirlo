@@ -420,8 +420,9 @@
   },
   "artistForm": {
     "backgroundImageLabel": "Background image",
+    "clickToUploadType": "Click to upload {{ imageType }}",
     "needsToBeUnique": "This needs to be unique, try something else",
-    "backgroundImageDescription": "The image that appears in the background of your page",
+    "backgroundImageDescription": "the image that appears in the background of your page",
     "displayName": "Display name",
     "bio": "Artist biography",
     "urlSlug": "Text that will appear in the URL",

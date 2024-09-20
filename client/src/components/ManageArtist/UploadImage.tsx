@@ -6,6 +6,7 @@ import React from "react";
 import { useFormContext } from "react-hook-form";
 import styled from "@emotion/styled";
 import { FaFileUpload } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
 
 export const Img = styled.img<{ rounded?: boolean }>`
   transition: .25s background-color, .25s filter;
@@ -39,8 +40,6 @@ export const ReplaceSpan = styled.span<{ rounded?: boolean }>`
   z-index: 999;
   display: block;
   ${({ rounded }) => (rounded ? "border-radius: 100% !important" : "")}}
-
-
 `;
 
 export const Spinner: React.FC<{ rounded?: boolean }> = ({ rounded }) => {
@@ -75,6 +74,8 @@ export const UploadPrompt: React.FC<{
   rounded?: boolean;
   imageTypeDescription?: string;
 }> = ({ width, height, rounded, imageTypeDescription }) => {
+  const { t } = useTranslation("translation", { keyPrefix: "artistForm" });
+
   return (
     <div
       className={css`
@@ -112,7 +113,7 @@ export const UploadPrompt: React.FC<{
       `}
     >
       <FaFileUpload />
-      Click to upload {imageTypeDescription}
+      {t("clickToUploadType", { imageType: imageTypeDescription })}
     </div>
   );
 };

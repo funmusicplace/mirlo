@@ -18,7 +18,9 @@ export const deleteMerchCover = async (merchId: string) => {
           id: merchId,
         },
       });
-    } catch (e) {}
+    } catch (e) {
+      console.log(e);
+    }
 
     try {
       removeObjectsFromBucket(finalMerchImageBucket, image.id);
