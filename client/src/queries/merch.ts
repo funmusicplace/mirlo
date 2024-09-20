@@ -5,7 +5,11 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import * as api from "./fetch/fetchWrapper";
-import { QUERY_KEY_MERCH, queryKeyIncludes } from "./queryKeys";
+import {
+  QUERY_KEY_MERCH,
+  queryKeyIncludes,
+  queryKeyMatches,
+} from "./queryKeys";
 
 const fetchMerch: QueryFunction<Merch, ["fetchMerch", { merchId: string }]> = ({
   queryKey: [_, { merchId }],
@@ -48,6 +52,23 @@ export function useCreateMerchMutation() {
     async onSuccess() {
       await client.invalidateQueries({
         predicate: (query) => queryKeyIncludes(query, QUERY_KEY_MERCH),
+      });
+    },
+  });
+}
+async function deleteMerch({ merchId }: { merchId: string }) {
+  return api.del(`v1/manage/merch/${merchId}`);
+}
+
+export function useDeleteMerchMutation() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: deleteMerch,
+    async onSuccess(_, { merchId }) {
+      await client.invalidateQueries({
+        predicate: (query) =>
+          queryKeyMatches(query, { merchId }) ||
+          queryKeyIncludes(query, QUERY_KEY_MERCH),
       });
     },
   });

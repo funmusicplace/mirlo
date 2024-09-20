@@ -1,4 +1,4 @@
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import styled from "@emotion/styled";
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
@@ -116,7 +116,10 @@ const Welcome = () => {
 
           <FormComponent>
             <label>{t("whatPublicName")}</label>
-            <InputEl {...register("name")} placeholder="name" />
+            <InputEl
+              {...register("name")}
+              placeholder={t("placeholderName") ?? ""}
+            />
             <small>{t("youCanChangeThis")}</small>
           </FormComponent>
 
@@ -124,9 +127,16 @@ const Welcome = () => {
             <FormComponent>
               <label>{t("showInTheURL")}</label>
               <small>
-                {t("thisWillLookLikeURL", {
-                  url: `${window.location.host}/${vals.urlSlug}`,
-                })}
+                <Trans
+                  i18nKey="thisWillLookLikeURL"
+                  t={t}
+                  components={{
+                    strong: <strong></strong>,
+                  }}
+                  values={{
+                    url: `${window.location.host}/${vals.urlSlug}`,
+                  }}
+                />
               </small>
               <ArtistSlugInput currentArtistId={localArtist?.id} />
             </FormComponent>

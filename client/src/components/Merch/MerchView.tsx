@@ -25,6 +25,7 @@ import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import { ButtonLink } from "components/common/Button";
 import { getArtistManageMerchUrl } from "utils/artist";
 import { FaPen } from "react-icons/fa";
+import { useAuthContext } from "state/AuthContext";
 
 function TrackGroup() {
   const { t } = useTranslation("translation", {
@@ -32,6 +33,7 @@ function TrackGroup() {
   });
 
   const { artistId, merchId } = useParams();
+  const { user } = useAuthContext();
   const { data: artist, isLoading: isLoadingArtist } = useQuery(
     queryArtist({ artistSlug: artistId ?? "" })
   );
@@ -54,6 +56,8 @@ function TrackGroup() {
   } else if (!merch) {
     return <FullPageLoadingSpinner />;
   }
+
+  const userIsOwner = user?.id === artist.userId || user?.isAdmin;
 
   return (
     <WidthContainer variant="big" justify="center">
@@ -96,14 +100,16 @@ function TrackGroup() {
         >
           <SpaceBetweenDiv>
             <ItemViewTitle title={merch.title} />
-            <ButtonLink
-              compact
-              startIcon={<FaPen />}
-              variant="dashed"
-              to={getArtistManageMerchUrl(artist.id, merch.id)}
-            >
-              {t("editMerch")}
-            </ButtonLink>
+            {userIsOwner && (
+              <ButtonLink
+                compact
+                startIcon={<FaPen />}
+                variant="dashed"
+                to={getArtistManageMerchUrl(artist.id, merch.id)}
+              >
+                {t("editMerch")}
+              </ButtonLink>
+            )}
           </SpaceBetweenDiv>
           <div
             className={css`

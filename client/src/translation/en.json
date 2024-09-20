@@ -167,6 +167,7 @@
   "artist": {
     "merch": "Merch",
     "Email": "Email",
+    "postByArtist": "by <link>{{artistName}}</link>",
     "Website": "Website",
     "bioPlaceholder": "Let listeners know a bit about yourself",
     "linkPlaceholder": "eg. https://some.url",
@@ -256,6 +257,7 @@
   },
   "manage": {
     "manageArtists": "Manage artists",
+    "managePayment": "Manage payment processor",
     "error": "Something went wrong",
     "setUpBankAccount": "Set up bank account",
     "stripeAccountVerified": "Stripe account verified! This means you'll be able to receive payments for purchases.",
@@ -320,6 +322,10 @@
   },
   "manageMerch": {
     "destinationCountry": "Destination country",
+    "deleteMerch": "Delete merch item",
+    "relatedToTrackGroup": "Should this merch appear under a specific album?",
+    "areYouSureDelete": "Are you sure you want to delete this artist?",
+    "problemDeletingMerch": "Problem deleting merch",
     "merchTitle": "What are you selling?",
     "merchDescription": "How would you describe it?",
     "price": "Price",
@@ -337,6 +343,7 @@
     "save": "Save",
     "viewMerchLive": "View merch live",
     "options": "Options",
+    "currentCountry": "Your current country is: {{ country }}",
     "optionName": "Option name",
     "addNewOption": "Add new option",
     "addNewMerchOption": "Add new merch option",
@@ -417,7 +424,9 @@
   },
   "artistForm": {
     "backgroundImageLabel": "Background image",
-    "backgroundImageDescription": "The image that appears in the background of your page",
+    "clickToUploadType": "Click to upload {{ imageType }}",
+    "needsToBeUnique": "This needs to be unique, try something else",
+    "backgroundImageDescription": "the image that appears in the background of your page",
     "displayName": "Display name",
     "bio": "Artist biography",
     "urlSlug": "Text that will appear in the URL",
@@ -495,7 +504,8 @@
   "notifications": {
     "notifications": "Notifications",
     "readPost": "Read post",
-    "viewAlbum": "View album"
+    "viewAlbum": "View album",
+    "newPostByArtist": "New post by <link>{{artistName}}</link>"
   },
   "kickstarter": {
     "launchedAKickstarter": "Mirlo has launched a Kickstarter!",
@@ -553,10 +563,11 @@
   },
   "welcome": {
     "welcome": "Welcome! Let's get you set up.",
+    "placeholderName": "Your Artist Name",
     "youCanChangeThis": "You can always change this later.",
     "whatPublicName": "First, what's the public name of your artist?",
     "showInTheURL": "What should the artist page's URL be?",
-    "thisWillLookLikeURL": "This will look like {{ url }}",
+    "thisWillLookLikeURL": "This will look like: <strong>{{ url }}</strong>",
     "enterANameToGetStarted": "Enter a name to get started",
     "wantToUploadAnAvatar": "Want to upload an avatar?",
     "letsGetStarted": "Let's get started!",

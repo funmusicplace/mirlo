@@ -6,9 +6,8 @@ import {
 } from "../../../../../auth/passport";
 
 import prisma from "@mirlo/prisma";
-import { deleteTrackGroup } from "../../../../../utils/trackGroup";
 import { AppError } from "../../../../../utils/error";
-import { processSingleMerch } from "../../../../../utils/merch";
+import { deleteMerch, processSingleMerch } from "../../../../../utils/merch";
 
 type Params = {
   merchId: string;
@@ -32,6 +31,7 @@ export default function () {
         include: {
           shippingDestinations: true,
           images: true,
+          includePurchaseTrackGroup: true,
           optionTypes: { include: { options: true } },
         },
       });
@@ -62,7 +62,32 @@ export default function () {
         "minPrice",
         "quantityRemaining",
         "isPublic",
+        "includePurchaseTrackGroupId",
       ]);
+
+      if (newValues.includePurchaseTrackGroupId) {
+        // check that the artist who owns this merch also
+        // owns this trackgroup
+        const merch = await prisma.merch.findFirst({
+          where: {
+            id: merchId,
+          },
+        });
+        const trackGroup = await prisma.trackGroup.findFirst({
+          where: {
+            artistId: merch?.artistId,
+            id: Number(newValues.includePurchaseTrackGroupId),
+          },
+        });
+
+        if (!trackGroup) {
+          throw new AppError({
+            httpCode: 400,
+            description:
+              "The includePurchaseTrackGroupId must belong to the merch's artist",
+          });
+        }
+      }
 
       await prisma.merch.updateMany({
         where: { id: merchId },
@@ -71,6 +96,9 @@ export default function () {
 
       let merch = await prisma.merch.findFirst({
         where: { id: merchId },
+        include: {
+          includePurchaseTrackGroup: true,
+        },
       });
 
       res.json({ result: merch });
@@ -113,11 +141,11 @@ export default function () {
   };
 
   async function DELETE(req: Request, res: Response, next: NextFunction) {
-    const { trackGroupId } = req.params as {
-      trackGroupId: string;
+    const { merchId } = req.params as {
+      merchId: string;
     };
     try {
-      await deleteTrackGroup(Number(trackGroupId), true);
+      await deleteMerch(merchId);
 
       return res.json({ message: "Success" });
     } catch (e) {
@@ -126,11 +154,11 @@ export default function () {
   }
 
   DELETE.apiDoc = {
-    summary: "Deletes a trackGroup belonging to a user",
+    summary: "Deletes a merch belonging to a user",
     parameters: [
       {
         in: "path",
-        name: "trackGroupId",
+        name: "merchId",
         required: true,
         type: "string",
       },

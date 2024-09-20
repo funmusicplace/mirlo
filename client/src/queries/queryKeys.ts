@@ -48,6 +48,7 @@ export type QueryTag =
 export type QueryArgs = {
   artistId: number;
   artistSlug: string;
+  merchId: string;
 };
 
 /**

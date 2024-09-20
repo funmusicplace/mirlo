@@ -43,6 +43,10 @@ const calculatePlatformPercent = async (
   return (percent ?? settings.platformPercent ?? 7) / 100;
 };
 
+const castToFixed = (val: number) => {
+  return Number(val.toFixed());
+};
+
 export const calculateAppFee = async (
   price: number,
   currency: string,
@@ -52,8 +56,8 @@ export const calculateAppFee = async (
     currency,
     platformPercent
   );
-  const appFee = (price * calculatedPlatformPercent).toFixed();
-  return +appFee || 0;
+  const appFee = castToFixed(price * calculatedPlatformPercent);
+  return appFee || 0;
 };
 
 const buildProductDescription = async (
@@ -321,7 +325,7 @@ export const createStripeCheckoutSessionForPurchase = async ({
         {
           price_data: {
             tax_behavior: "exclusive",
-            unit_amount: priceNumber,
+            unit_amount: castToFixed(priceNumber),
             currency,
             product: productKey,
           },
@@ -348,11 +352,6 @@ export const createStripeCheckoutSessionForPurchase = async ({
 
 const stripeBannedDestinations =
   "AS, CX, CC, CU, HM, IR, KP, MH, FM, NF, MP, PW, SD, SY, UM, VI".split(", ");
-
-const countryToCurrencyMap = countryCodesCurrencies.reduce((aggr, country) => ({
-  ...aggr,
-  [country.countryCode]: country.currencyCode,
-}));
 
 const determineShipping = (
   shippingDestinations: MerchShippingDestination[],
@@ -394,9 +393,10 @@ const determineShipping = (
       display_name: `Shipping to ${!!destination.destinationCountry ? destination.destinationCountry : "Everywhere"}`,
       fixed_amount: {
         currency: destination?.currency,
-        amount:
+        amount: castToFixed(
           destination?.costUnit +
-          (quantity > 1 ? quantity * destination?.costExtraUnit : 0),
+            (quantity > 1 ? quantity * destination?.costExtraUnit : 0)
+        ),
       },
       type: "fixed_amount" as "fixed_amount",
     },
@@ -472,7 +472,7 @@ export const createStripeCheckoutSessionForMerchPurchase = async ({
         {
           price_data: {
             tax_behavior: "exclusive",
-            unit_amount: priceNumber,
+            unit_amount: castToFixed(priceNumber),
             currency,
             product: productKey,
           },
@@ -529,7 +529,7 @@ export const createStripeCheckoutSessionForTip = async ({
         {
           price_data: {
             tax_behavior: "exclusive",
-            unit_amount: priceNumber,
+            unit_amount: castToFixed(priceNumber),
             currency: currency?.toLowerCase() ?? "usd",
             product_data: { name: "Mirlo One Time Tip" },
           },

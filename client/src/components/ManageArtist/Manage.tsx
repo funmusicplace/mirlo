@@ -112,7 +112,7 @@ export const Manage: React.FC = () => {
               margin-top: 3rem;
             `}
           >
-            <h2>Payment management</h2>
+            <h2>{t("managePayment")}</h2>
             <CountrySelect />
             {stripeAccountStatus?.detailsSubmitted && (
               <Box variant="info">

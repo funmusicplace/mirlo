@@ -1,23 +1,31 @@
 import React from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { bp } from "../../../constants";
 import ManageSectionWrapper from "../ManageSectionWrapper";
 import { css } from "@emotion/css";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import { useQuery } from "@tanstack/react-query";
-import { queryArtist, queryManagedMerch } from "queries";
+import {
+  queryArtist,
+  queryManagedMerch,
+  useDeleteMerchMutation,
+} from "queries";
 import MerchForm from "./MerchForm";
 import MerchDestinations from "./MerchDestinations";
 import UploadArtistImage from "../UploadArtistImage";
 import MerchOptions from "./MerchOptions";
 import Box from "components/common/Box";
-import FormCheckbox from "components/common/FormCheckbox";
 import { Toggle } from "components/common/Toggle";
 import api from "services/api";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
-import { ButtonLink } from "components/common/Button";
+import Button, { ButtonLink } from "components/common/Button";
 import { getMerchUrl } from "utils/artist";
+import { FaTrash } from "react-icons/fa";
+import { useSnackbar } from "state/SnackbarContext";
+import DeleteMerchButton from "./DeleteMerchButton";
+import AutoCompleteTrackGroup from "components/common/AutoCompleteTrackGroup";
+import FormComponent from "components/common/FormComponent";
 
 export interface TrackGroupFormData {
   published: boolean;
@@ -32,7 +40,8 @@ export interface TrackGroupFormData {
 
 const EditMerch: React.FC<{}> = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageMerch" });
-
+  const snackbar = useSnackbar();
+  const navigate = useNavigate();
   const { artistId: artistParamId, merchId: merchParamId } = useParams();
 
   const { data: artist, isLoading: isLoading } = useQuery(
@@ -57,6 +66,24 @@ const EditMerch: React.FC<{}> = () => {
     },
     [merchParamId, refetch]
   );
+
+  const { mutate: deleteMerch, isPending } = useDeleteMerchMutation();
+
+  const onDelete = React.useCallback(() => {
+    if (!!merch && window.confirm(t("areYouSureDelete") ?? "")) {
+      deleteMerch(
+        { merchId: merch.id },
+        {
+          onSuccess() {
+            navigate(`/manage/artists/${merch.artistId}/merch`);
+          },
+          onError() {
+            snackbar(t("problemDeletingMerch"), { type: "warning" });
+          },
+        }
+      );
+    }
+  }, [merch, t, deleteMerch, navigate, snackbar]);
 
   if (!artist && isLoading) {
     return <LoadingBlocks />;
@@ -132,8 +159,10 @@ const EditMerch: React.FC<{}> = () => {
           />
           <MerchForm merch={merch} artist={artist} reload={refetch} />
         </div>
+
         <MerchDestinations />
         <MerchOptions />
+        <DeleteMerchButton />
       </div>
     </ManageSectionWrapper>
   );

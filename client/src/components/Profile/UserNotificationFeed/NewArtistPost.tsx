@@ -1,6 +1,6 @@
 import { css } from "@emotion/css";
 import React from "react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { FaChevronRight } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { getArtistUrl, getPostURLReference } from "utils/artist";
@@ -13,17 +13,23 @@ const NewArtistPost: React.FC<{ notification: Notification }> = ({
   if (!notification.post) {
     return null;
   }
+
+  const artist = notification.post.artist;
   return (
     <>
-      <div>
-        New post by{" "}
-        {notification.post.artist && (
-          <Link to={getArtistUrl(notification.post.artist)}>
-            {notification.post.artist?.name}
-          </Link>
-        )}
-        : <strong>{notification.post.title}</strong>
-      </div>
+      {artist && (
+        <div>
+          <Trans
+            t={t}
+            i18nKey="newPostByArtist"
+            values={{ artistName: artist?.name }}
+            components={{
+              link: <Link to={getArtistUrl(artist)}></Link>,
+            }}
+          />
+          : <strong>{notification.post.title}</strong>
+        </div>
+      )}
       <Link
         to={getPostURLReference(notification.post)}
         className={css`

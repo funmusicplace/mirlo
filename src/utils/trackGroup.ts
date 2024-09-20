@@ -149,6 +149,7 @@ export const trackGroupSingleInclude = (options: {
       orderBy: { order: "asc" },
     },
     artist: true,
+    merch: true,
     tags: {
       include: { tag: true },
     },
