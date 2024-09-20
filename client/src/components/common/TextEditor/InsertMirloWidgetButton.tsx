@@ -8,6 +8,7 @@ import api from "services/api";
 import { widgetUrl } from "utils/tracks";
 import { css } from "@emotion/css";
 import { bp } from "../../../constants";
+import AutoCompleteTrackGroup from "../AutoCompleteTrackGroup";
 
 const InsertMirloWidgetButton = () => {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -95,12 +96,7 @@ const InsertMirloWidgetButton = () => {
         />
         <br />
         Insert a trackgroup:
-        <AutoComplete
-          getOptions={getTrackGroupOptions}
-          onSelect={(val) => {
-            onAdd(val, "trackGroup");
-          }}
-        />
+        <AutoCompleteTrackGroup onSelect={(val) => onAdd(val, "trackGroup")} />
       </Modal>
     </>
   );

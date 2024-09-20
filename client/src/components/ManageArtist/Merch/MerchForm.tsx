@@ -11,6 +11,8 @@ import FormComponent from "components/common/FormComponent";
 import { css } from "@emotion/css";
 import FormError from "components/common/FormError";
 import { QUERY_KEY_MERCH } from "queries/queryKeys";
+import AutoCompleteTrackGroup from "components/common/AutoCompleteTrackGroup";
+import SelectTrackGroup from "./SelectTrackGroup";
 
 const MerchForm: React.FC<{
   merch: Merch;
@@ -116,6 +118,8 @@ const MerchForm: React.FC<{
             clearQueryKey={QUERY_KEY_MERCH}
           />
         </FormComponent>
+
+        <SelectTrackGroup merch={merch} reload={reload} />
         <Button
           variant="big"
           type="submit"

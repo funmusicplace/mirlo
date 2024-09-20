@@ -167,6 +167,7 @@
   "artist": {
     "merch": "Merch",
     "Email": "Email",
+    "postByArtist": "by <link>{{artistName}}</link>",
     "Website": "Website",
     "bioPlaceholder": "Let listeners know a bit about yourself",
     "linkPlaceholder": "eg. https://some.url",
@@ -256,6 +257,7 @@
   },
   "manage": {
     "manageArtists": "Manage artists",
+    "managePayment": "Manage payment processor",
     "error": "Something went wrong",
     "setUpBankAccount": "Set up bank account",
     "stripeAccountVerified": "Stripe account verified! This means you'll be able to receive payments for purchases.",
@@ -321,6 +323,7 @@
   "manageMerch": {
     "destinationCountry": "Destination country",
     "deleteMerch": "Delete merch item",
+    "relatedToTrackGroup": "Should this merch appear under a specific album?",
     "areYouSureDelete": "Are you sure you want to delete this artist?",
     "problemDeletingMerch": "Problem deleting merch",
     "merchTitle": "What are you selling?",
@@ -340,6 +343,7 @@
     "save": "Save",
     "viewMerchLive": "View merch live",
     "options": "Options",
+    "currentCountry": "Your current country is: {{ country }}",
     "optionName": "Option name",
     "addNewOption": "Add new option",
     "addNewMerchOption": "Add new merch option",
@@ -500,7 +504,8 @@
   "notifications": {
     "notifications": "Notifications",
     "readPost": "Read post",
-    "viewAlbum": "View album"
+    "viewAlbum": "View album",
+    "newPostByArtist": "New post by <link>{{artistName}}</link>"
   },
   "kickstarter": {
     "launchedAKickstarter": "Mirlo has launched a Kickstarter!",
@@ -558,6 +563,7 @@
   },
   "welcome": {
     "welcome": "Welcome! Let's get you set up.",
+    "placeholderName": "Your Artist Name",
     "youCanChangeThis": "You can always change this later.",
     "whatPublicName": "First, what's the public name of your artist?",
     "showInTheURL": "What should the artist page's URL be?",

@@ -21,6 +21,7 @@ export default function () {
       const merch = await prisma.merch.findFirst({
         where: {
           isPublic: true,
+          deletedAt: null,
           id,
           shippingDestinations: {
             some: {},
@@ -30,6 +31,7 @@ export default function () {
           artist: true,
           images: true,
           shippingDestinations: true,
+          includePurchaseTrackGroup: true,
           optionTypes: { include: { options: true } },
         },
       });

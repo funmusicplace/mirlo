@@ -242,7 +242,10 @@ const AutoComplete: React.FC<{
                     {optionDisplay ? (
                       optionDisplay(r)
                     ) : (
-                      <Button onClick={() => onSelectValue(r.id, index)}>
+                      <Button
+                        type="button"
+                        onClick={() => onSelectValue(r.id, index)}
+                      >
                         {r.isNew ? `use "${r.name}"` : r.name}
                       </Button>
                     )}

@@ -6,13 +6,8 @@ import {
 } from "../../../../../auth/passport";
 
 import prisma from "@mirlo/prisma";
-import { deleteTrackGroup } from "../../../../../utils/trackGroup";
 import { AppError } from "../../../../../utils/error";
-import {
-  deleteMerch,
-  deleteMerchCover,
-  processSingleMerch,
-} from "../../../../../utils/merch";
+import { deleteMerch, processSingleMerch } from "../../../../../utils/merch";
 
 type Params = {
   merchId: string;
@@ -36,6 +31,7 @@ export default function () {
         include: {
           shippingDestinations: true,
           images: true,
+          includePurchaseTrackGroup: true,
           optionTypes: { include: { options: true } },
         },
       });
@@ -66,7 +62,32 @@ export default function () {
         "minPrice",
         "quantityRemaining",
         "isPublic",
+        "includePurchaseTrackGroupId",
       ]);
+
+      if (newValues.includePurchaseTrackGroupId) {
+        // check that the artist who owns this merch also
+        // owns this trackgroup
+        const merch = await prisma.merch.findFirst({
+          where: {
+            id: merchId,
+          },
+        });
+        const trackGroup = await prisma.trackGroup.findFirst({
+          where: {
+            artistId: merch?.artistId,
+            id: Number(newValues.includePurchaseTrackGroupId),
+          },
+        });
+
+        if (!trackGroup) {
+          throw new AppError({
+            httpCode: 400,
+            description:
+              "The includePurchaseTrackGroupId must belong to the merch's artist",
+          });
+        }
+      }
 
       await prisma.merch.updateMany({
         where: { id: merchId },
@@ -75,6 +96,9 @@ export default function () {
 
       let merch = await prisma.merch.findFirst({
         where: { id: merchId },
+        include: {
+          includePurchaseTrackGroup: true,
+        },
       });
 
       res.json({ result: merch });

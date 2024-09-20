@@ -23,6 +23,9 @@ import Button, { ButtonLink } from "components/common/Button";
 import { getMerchUrl } from "utils/artist";
 import { FaTrash } from "react-icons/fa";
 import { useSnackbar } from "state/SnackbarContext";
+import DeleteMerchButton from "./DeleteMerchButton";
+import AutoCompleteTrackGroup from "components/common/AutoCompleteTrackGroup";
+import FormComponent from "components/common/FormComponent";
 
 export interface TrackGroupFormData {
   published: boolean;
@@ -156,21 +159,10 @@ const EditMerch: React.FC<{}> = () => {
           />
           <MerchForm merch={merch} artist={artist} reload={refetch} />
         </div>
+
         <MerchDestinations />
         <MerchOptions />
-        <Button
-          compact
-          className={css`
-            background-color: var(--mi-alert);
-            margin-top: 1rem;
-          `}
-          buttonRole="warning"
-          isLoading={isPending}
-          startIcon={<FaTrash />}
-          onClick={onDelete}
-        >
-          {t("deleteMerch")}
-        </Button>
+        <DeleteMerchButton />
       </div>
     </ManageSectionWrapper>
   );

@@ -108,7 +108,15 @@ export default function () {
         where: {
           id: Number(castArtistId),
         },
-        include: { ...singleInclude(), merch: { include: { images: true } } },
+        include: {
+          ...singleInclude(),
+          merch: {
+            where: {
+              deletedAt: null,
+            },
+            include: { images: true, includePurchaseTrackGroup: true },
+          },
+        },
       });
 
       if (!artist) {

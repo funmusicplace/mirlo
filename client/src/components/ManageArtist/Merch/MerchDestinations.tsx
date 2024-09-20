@@ -12,6 +12,11 @@ import api from "services/api";
 import { useAuthContext } from "state/AuthContext";
 import DestinationListItem from "./DestinationListItem";
 import countryCodesCurrencies from "./country-codes-currencies";
+import styled from "@emotion/styled";
+
+const P = styled.p`
+  margin: 0.25rem 0 0.5rem;
+`;
 
 type DestinationForm = {
   destinations: Partial<ShippingDestination>[];
@@ -76,18 +81,19 @@ const MerchDestinations: React.FC<{}> = () => {
       >
         {t("shippingDestinationPrices")}
       </h2>
-      <p>{t("setDifferentCostPerDestination")}</p>
+      <P>{t("setDifferentCostPerDestination")}</P>
       {user?.currency && (
-        <p>
+        <P>
           {t("currentCountry", {
             country: currencyToCountryMap[user?.currency],
           })}
-        </p>
+        </P>
       )}
       <form
         onSubmit={methods.handleSubmit(update)}
         className={css`
           width: 100%;
+          margin-top: 0.75rem;
         `}
       >
         <FormProvider {...methods}>

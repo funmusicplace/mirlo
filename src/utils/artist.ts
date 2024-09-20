@@ -394,6 +394,7 @@ export const singleInclude = (queryOptions?: {
       },
       include: {
         images: true,
+        includePurchaseTrackGroup: true,
       },
     },
     subscriptionTiers: {

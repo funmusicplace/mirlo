@@ -429,7 +429,7 @@ model TrackGroup {
   tags                    TrackGroupTag[]
   downloadCodes           TrackGroupDownloadCodes[]
   notifications           Notification[]
-  Merch                   Merch[]
+  merch                   Merch[]
 
   @@unique([artistId, urlSlug])
 }

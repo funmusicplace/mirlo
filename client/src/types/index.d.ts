@@ -261,6 +261,8 @@ interface Merch {
   minPrice: number;
   quantityRemaining: number;
   id: string;
+  includePurchaseTrackGroupId?: number;
+  includePurchaseTrackGroup: TrackGroup;
   isPublic: boolean;
   images: {
     url: string[];

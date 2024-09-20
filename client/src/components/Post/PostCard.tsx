@@ -9,7 +9,7 @@ import Overlay from "components/common/Overlay";
 import { getHtmlExcerpt } from "utils/getHtmlExcerpt";
 import { useLinkContainer } from "utils/useLinkContainer";
 import { formatDate } from "components/TrackGroup/ReleaseDate";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 
 const PostContainer = styled.li`
   display: flex;
@@ -51,6 +51,7 @@ const PostCard: React.FC<{
 }> = ({ p }) => {
   const postUrl = getPostURLReference(p);
   const postContainerProps = useLinkContainer({ to: postUrl });
+  const { t } = useTranslation("translation", { keyPrefix: "artist" });
 
   const { i18n } = useTranslation("translation", {
     keyPrefix: "post",
@@ -105,7 +106,14 @@ const PostCard: React.FC<{
                   position: absolute;
                 `}
               >
-                by <Link to={getArtistUrl(p.artist)}>{p.artist?.name}</Link>
+                <Trans
+                  t={t}
+                  i18nKey="postByArtist"
+                  values={{ artistName: p.artist?.name }}
+                  components={{
+                    link: <Link to={getArtistUrl(p.artist)}></Link>,
+                  }}
+                />
               </p>
             </div>
           )}

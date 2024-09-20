@@ -7,13 +7,17 @@ import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import { FaRss } from "react-icons/fa";
 import { ButtonAnchor } from "components/common/Button";
 import PostGrid from "components/Post/PostGrid";
+import { queryArtist } from "queries";
+import { useQuery } from "@tanstack/react-query";
+import { useParams } from "react-router-dom";
 
 const ArtistPosts: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
+  const { artistId } = useParams();
 
-  const {
-    state: { artist },
-  } = useArtistContext();
+  const { data: artist } = useQuery(
+    queryArtist({ artistSlug: artistId ?? "" })
+  );
 
   const posts = React.useMemo(() => {
     return artist?.posts?.map((p) => ({ ...p, artist }));

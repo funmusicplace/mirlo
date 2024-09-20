@@ -441,7 +441,7 @@ const routes: RouteObject[] = [
           );
           return {
             Component: () => (
-              <AuthWrapper>
+              <AuthWrapper adminOnly>
                 <Fulfillment />
               </AuthWrapper>
             ),
@@ -544,7 +544,13 @@ const routes: RouteObject[] = [
                       const { default: Component } = await import(
                         "components/Merch/CheckoutComplete"
                       );
-                      return { Component };
+                      return {
+                        Component: () => (
+                          <AuthWrapper adminOnly>
+                            <Component />
+                          </AuthWrapper>
+                        ),
+                      };
                     },
                   },
                   {
@@ -553,7 +559,13 @@ const routes: RouteObject[] = [
                       const { default: Component } = await import(
                         "components/Merch/MerchView"
                       );
-                      return { Component };
+                      return {
+                        Component: () => (
+                          <AuthWrapper adminOnly>
+                            <Component />
+                          </AuthWrapper>
+                        ),
+                      };
                     },
                   },
                   {
@@ -562,7 +574,13 @@ const routes: RouteObject[] = [
                       const { default: Component } = await import(
                         "components/Merch/ArtistMerch"
                       );
-                      return { Component };
+                      return {
+                        Component: () => (
+                          <AuthWrapper adminOnly>
+                            <Component />
+                          </AuthWrapper>
+                        ),
+                      };
                     },
                   },
                 ],

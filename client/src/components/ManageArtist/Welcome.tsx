@@ -116,7 +116,10 @@ const Welcome = () => {
 
           <FormComponent>
             <label>{t("whatPublicName")}</label>
-            <InputEl {...register("name")} placeholder="name" />
+            <InputEl
+              {...register("name")}
+              placeholder={t("placeholderName") ?? ""}
+            />
             <small>{t("youCanChangeThis")}</small>
           </FormComponent>
 
