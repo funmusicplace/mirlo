@@ -12,11 +12,13 @@ export const deleteMerchCover = async (merchId: string) => {
   });
 
   if (image) {
-    await prisma.merchImage.delete({
-      where: {
-        id: merchId,
-      },
-    });
+    try {
+      await prisma.merchImage.delete({
+        where: {
+          id: merchId,
+        },
+      });
+    } catch (e) {}
 
     try {
       removeObjectsFromBucket(finalMerchImageBucket, image.id);
@@ -24,6 +26,23 @@ export const deleteMerchCover = async (merchId: string) => {
       console.error("Found no files, that's okay");
     }
   }
+};
+
+/**
+ * We use our own custom function to handle this until we
+ * can figure out a way to soft delete cascade. Maybe
+ * we can't?
+ *
+ * @param trackGroupId
+ */
+export const deleteMerch = async (merchId: string) => {
+  await deleteMerchCover(merchId);
+
+  await prisma.merch.delete({
+    where: {
+      id: merchId,
+    },
+  });
 };
 
 export const processSingleMerch = (

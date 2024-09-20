@@ -320,6 +320,9 @@
   },
   "manageMerch": {
     "destinationCountry": "Destination country",
+    "deleteMerch": "Delete merch item",
+    "areYouSureDelete": "Are you sure you want to delete this artist?",
+    "problemDeletingMerch": "Problem deleting merch",
     "merchTitle": "What are you selling?",
     "merchDescription": "How would you describe it?",
     "price": "Price",
@@ -417,6 +420,7 @@
   },
   "artistForm": {
     "backgroundImageLabel": "Background image",
+    "needsToBeUnique": "This needs to be unique, try something else",
     "backgroundImageDescription": "The image that appears in the background of your page",
     "displayName": "Display name",
     "bio": "Artist biography",
@@ -556,7 +560,7 @@
     "youCanChangeThis": "You can always change this later.",
     "whatPublicName": "First, what's the public name of your artist?",
     "showInTheURL": "What should the artist page's URL be?",
-    "thisWillLookLikeURL": "This will look like {{ url }}",
+    "thisWillLookLikeURL": "This will look like: <strong>{{ url }}</strong>",
     "enterANameToGetStarted": "Enter a name to get started",
     "wantToUploadAnAvatar": "Want to upload an avatar?",
     "letsGetStarted": "Let's get started!",

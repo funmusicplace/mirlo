@@ -8,7 +8,11 @@ import {
 import prisma from "@mirlo/prisma";
 import { deleteTrackGroup } from "../../../../../utils/trackGroup";
 import { AppError } from "../../../../../utils/error";
-import { processSingleMerch } from "../../../../../utils/merch";
+import {
+  deleteMerch,
+  deleteMerchCover,
+  processSingleMerch,
+} from "../../../../../utils/merch";
 
 type Params = {
   merchId: string;
@@ -113,11 +117,11 @@ export default function () {
   };
 
   async function DELETE(req: Request, res: Response, next: NextFunction) {
-    const { trackGroupId } = req.params as {
-      trackGroupId: string;
+    const { merchId } = req.params as {
+      merchId: string;
     };
     try {
-      await deleteTrackGroup(Number(trackGroupId), true);
+      await deleteMerch(merchId);
 
       return res.json({ message: "Success" });
     } catch (e) {
@@ -126,11 +130,11 @@ export default function () {
   }
 
   DELETE.apiDoc = {
-    summary: "Deletes a trackGroup belonging to a user",
+    summary: "Deletes a merch belonging to a user",
     parameters: [
       {
         in: "path",
-        name: "trackGroupId",
+        name: "merchId",
         required: true,
         type: "string",
       },

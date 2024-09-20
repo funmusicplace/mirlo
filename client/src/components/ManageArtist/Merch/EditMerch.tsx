@@ -16,7 +16,6 @@ import MerchDestinations from "./MerchDestinations";
 import UploadArtistImage from "../UploadArtistImage";
 import MerchOptions from "./MerchOptions";
 import Box from "components/common/Box";
-import FormCheckbox from "components/common/FormCheckbox";
 import { Toggle } from "components/common/Toggle";
 import api from "services/api";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
@@ -40,7 +39,6 @@ const EditMerch: React.FC<{}> = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageMerch" });
   const snackbar = useSnackbar();
   const navigate = useNavigate();
-
   const { artistId: artistParamId, merchId: merchParamId } = useParams();
 
   const { data: artist, isLoading: isLoading } = useQuery(
@@ -66,7 +64,7 @@ const EditMerch: React.FC<{}> = () => {
     [merchParamId, refetch]
   );
 
-  const { mutate: deleteMerch } = useDeleteMerchMutation();
+  const { mutate: deleteMerch, isPending } = useDeleteMerchMutation();
 
   const onDelete = React.useCallback(() => {
     if (!!merch && window.confirm(t("areYouSureDelete") ?? "")) {
@@ -74,7 +72,7 @@ const EditMerch: React.FC<{}> = () => {
         { merchId: merch.id },
         {
           onSuccess() {
-            navigate("/manage");
+            navigate(`/manage/artists/${merch.artistId}/merch`);
           },
           onError() {
             snackbar(t("problemDeletingMerch"), { type: "warning" });
@@ -82,7 +80,7 @@ const EditMerch: React.FC<{}> = () => {
         }
       );
     }
-  }, [artist, t, deleteMerch, navigate, snackbar]);
+  }, [merch, t, deleteMerch, navigate, snackbar]);
 
   if (!artist && isLoading) {
     return <LoadingBlocks />;
@@ -164,13 +162,15 @@ const EditMerch: React.FC<{}> = () => {
           compact
           className={css`
             background-color: var(--mi-alert);
+            margin-top: 1rem;
           `}
           buttonRole="warning"
+          isLoading={isPending}
           startIcon={<FaTrash />}
           onClick={onDelete}
         >
           {t("deleteMerch")}
-        </Button>{" "}
+        </Button>
       </div>
     </ManageSectionWrapper>
   );
