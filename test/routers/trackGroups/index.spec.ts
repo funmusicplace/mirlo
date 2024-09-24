@@ -124,5 +124,29 @@ describe("trackGroups", () => {
 
       assert(response.statusCode === 200);
     });
+
+    it("should only return albums filtered by artistId", async () => {
+      const { user } = await createUser({ email: "test@testcom" });
+      const artist = await createArtist(user.id);
+      const tg = await createTrackGroup(artist.id, {
+        title: "most recent",
+      });
+
+      const artist2 = await createArtist(user.id, { urlSlug: "asdfasdf" });
+      await createTrackGroup(artist2.id, {
+        title: "most recent",
+      });
+
+      const response = await requestApp
+        .get("trackGroups")
+        .query(`artistId=${artist.id}`)
+        .set("Accept", "application/json");
+
+      assert.equal(response.body.results.length, 1);
+      assert.equal(response.body.total, 1);
+      assert.equal(response.body.results[0].id, tg.id);
+
+      assert(response.statusCode === 200);
+    });
   });
 });
