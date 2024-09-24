@@ -24,6 +24,7 @@ import SupportArtistPopUp from "components/common/SupportArtistPopUp";
 import TrackGroupPills from "./TrackGroupPills";
 import TrackGroupEmbed from "./TrackGroupEmbed";
 import { useAuthContext } from "state/AuthContext";
+import TrackGroupMerch from "./TrackGroupMerch";
 
 export const Container = styled.div<{ user?: LoggedInUser | null }>`
   ${(props) =>
@@ -255,6 +256,9 @@ function TrackGroup() {
                     <PurchaseOrDownloadAlbum trackGroup={trackGroup} />
                   </div>
                 </UnderneathImage>
+                {trackGroup.merch && (
+                  <TrackGroupMerch merch={trackGroup.merch} />
+                )}
                 <SmallScreenPlayWrapper>
                   <ClickToPlayAlbum
                     trackGroupId={trackGroup.id}

@@ -34,9 +34,14 @@ export default function () {
             published: true,
             tracks: { some: { audio: { uploadState: "SUCCESS" } } },
           },
-          include: trackGroupSingleInclude({
-            loggedInUserId: loggedInUser?.id,
-          }),
+          include: {
+            ...trackGroupSingleInclude({
+              loggedInUserId: loggedInUser?.id,
+            }),
+            merch: {
+              include: { images: true },
+            },
+          },
         });
       }
 

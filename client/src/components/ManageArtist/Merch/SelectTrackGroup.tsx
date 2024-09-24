@@ -49,13 +49,15 @@ const SelectTrackGroup: React.FC<{
   return (
     <FormComponent>
       <label>{t("relatedToTrackGroup")}</label>
-      <Pill
-        className={css`
-          margin: 0.5rem 0 1rem;
-        `}
-      >
-        {currentTrackGroup?.title}
-      </Pill>
+      {currentTrackGroup && (
+        <Pill
+          className={css`
+            margin: 0.5rem 0 1rem;
+          `}
+        >
+          {currentTrackGroup.title}
+        </Pill>
+      )}
       <AutoCompleteTrackGroup
         onSelect={(val) => doSave(val)}
         filterByArtistId={merch.artistId}

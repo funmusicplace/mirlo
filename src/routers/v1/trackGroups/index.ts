@@ -73,6 +73,7 @@ export default function () {
               id: true,
             },
           },
+
           cover: true,
         },
       });
