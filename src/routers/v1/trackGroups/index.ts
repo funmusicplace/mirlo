@@ -12,7 +12,7 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
-    const { skip: skipQuery, take, orderBy, tag, artistId } = req.query;
+    const { skip: skipQuery, take, orderBy, tag, artistId, title } = req.query;
     const distinctArtists = req.query.distinctArtists === "true";
 
     try {
@@ -33,6 +33,13 @@ export default function () {
         where.artistId = Number(artistId);
       }
 
+      if (title && typeof title === "string") {
+        where.title = {
+          contains: title,
+          mode: "insensitive",
+        };
+      }
+
       // Note that the distinct query does not support a count
       // https://github.com/prisma/prisma/issues/4228. Though we
       // could probably write a custom query (ditto to random)
@@ -51,8 +58,6 @@ export default function () {
           Math.floor(Math.random() * (itemCount ?? 100)) - Number(take)
         );
       }
-
-      console.log("where", where);
 
       const trackGroups = await prisma.trackGroup.findMany({
         where,
