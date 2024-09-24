@@ -391,6 +391,7 @@ export const singleInclude = (queryOptions?: {
     merch: {
       where: {
         isPublic: true,
+        deletedAt: null,
       },
       include: {
         images: true,

@@ -53,10 +53,17 @@ export default function () {
         where: {
           id: Number(trackGroupId),
         },
-        include: trackGroupSingleInclude({
-          loggedInUserId: Number(loggedInUser.id),
-          ownerId: Number(loggedInUser.id),
-        }),
+        include: {
+          ...trackGroupSingleInclude({
+            loggedInUserId: Number(loggedInUser.id),
+            ownerId: Number(loggedInUser.id),
+          }),
+          merch: {
+            include: {
+              images: true,
+            },
+          },
+        },
       });
 
       if (!trackGroup) {

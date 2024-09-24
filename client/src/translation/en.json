@@ -541,6 +541,8 @@
   },
   "trackGroupDetails": {
     "trackgroup": "Track group:",
+    "buy": "Buy",
+    "relatedMerch": "Related merch",
     "title": "Title:",
     "type": "Type:",
     "edit": "Edit",

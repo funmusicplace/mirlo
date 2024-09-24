@@ -12,13 +12,33 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
-    const { skip: skipQuery, take, orderBy, tag } = req.query;
+    const { skip: skipQuery, take, orderBy, tag, artistId, title } = req.query;
     const distinctArtists = req.query.distinctArtists === "true";
 
     try {
       let skip = Number(skipQuery);
       let where: Prisma.TrackGroupWhereInput = whereForPublishedTrackGroups();
       let itemCount = undefined;
+
+      if (tag && typeof tag === "string") {
+        where.tags = {
+          some: {
+            tag: {
+              tag: tag,
+            },
+          },
+        };
+      }
+      if (artistId) {
+        where.artistId = Number(artistId);
+      }
+
+      if (title && typeof title === "string") {
+        where.title = {
+          contains: title,
+          mode: "insensitive",
+        };
+      }
 
       // Note that the distinct query does not support a count
       // https://github.com/prisma/prisma/issues/4228. Though we
@@ -39,16 +59,6 @@ export default function () {
         );
       }
 
-      if (tag && typeof tag === "string") {
-        where.tags = {
-          some: {
-            tag: {
-              tag: tag,
-            },
-          },
-        };
-      }
-
       const trackGroups = await prisma.trackGroup.findMany({
         where,
         ...(distinctArtists ? { distinct: "artistId" } : {}),
@@ -63,6 +73,7 @@ export default function () {
               id: true,
             },
           },
+
           cover: true,
         },
       });

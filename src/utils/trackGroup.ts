@@ -6,6 +6,8 @@ import {
   Prisma,
   TrackGroupTag,
   User,
+  Merch,
+  MerchImage,
 } from "@mirlo/prisma/client";
 import prisma from "@mirlo/prisma";
 import { generateFullStaticImageUrl } from "./images";
@@ -24,6 +26,7 @@ import { Response } from "express";
 import { DefaultArgs } from "@prisma/client/runtime/library";
 import { doesTrackGroupBelongToUser } from "./ownership";
 import { AppError } from "./error";
+import { processSingleMerch } from "./merch";
 
 export const whereForPublishedTrackGroups = (): Prisma.TrackGroupWhereInput => {
   return {
@@ -149,7 +152,11 @@ export const trackGroupSingleInclude = (options: {
       orderBy: { order: "asc" },
     },
     artist: true,
-    merch: true,
+    merch: {
+      include: {
+        images: true,
+      },
+    },
     tags: {
       include: { tag: true },
     },
@@ -454,11 +461,13 @@ export const setDownloadTokenToNull = async ({
 export const processSingleTrackGroup = (
   tg: TrackGroup & {
     cover?: TrackGroupCover | null;
+    merch?: (Merch & { images: MerchImage[] })[];
     tracks?: Track[];
     tags?: (TrackGroupTag & { tag?: { tag?: string } })[];
   }
 ) => ({
   ...tg,
+  merch: tg.merch?.map(processSingleMerch),
   tags: tg.tags?.map((t) => t.tag?.tag) ?? [],
   cover: addSizesToImage(finalCoversBucket, tg.cover),
 });

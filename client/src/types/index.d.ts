@@ -72,6 +72,7 @@ interface TrackGroup {
   updatedAt: string;
   createdAt: string;
   tags?: string[];
+  merch?: Merch[];
   cover?: {
     updatedAt: string;
     id: string;
