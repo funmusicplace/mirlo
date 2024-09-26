@@ -161,6 +161,7 @@
     "doesNotExist": "The page you are looking for does not exist",
     "everywhere": "Everywhere",
     "everywhereElse": "Everywhere else",
+    "includesDownloadOf": "Includes a download of <link>{{albumTitle}}</link>",
     "destinationCost": "Cost to ship here: {{costUnit}}",
     "supportedShippingDestinations": "Choose the shipping destination that best matches you"
   },

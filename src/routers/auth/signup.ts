@@ -1,8 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
 import { hashPassword } from ".";
-import sendMail from "../../jobs/send-mail";
-import { NotificationType } from "@mirlo/prisma/client";
+import { sendMail } from "../../jobs/send-mail";
 import { Job } from "bullmq";
 
 const signup = async (req: Request, res: Response, next: NextFunction) => {
