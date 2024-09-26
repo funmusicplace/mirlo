@@ -15,7 +15,7 @@ import sinon from "sinon";
 import * as sendMail from "../../src/jobs/send-mail";
 import { handleArtistMerchPurchase } from "../../src/utils/handleFinishedTransactions";
 import Stripe from "stripe";
-import stripe, { OPTION_JOINER } from "../../src/utils/stripe";
+import stripe from "../../src/utils/stripe";
 
 describe("handleArtistMerchPurchase", () => {
   beforeEach(async () => {

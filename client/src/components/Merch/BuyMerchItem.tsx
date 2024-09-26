@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import Box from "../common/Box";
 import { useTranslation } from "react-i18next";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
@@ -15,6 +15,8 @@ import { css } from "@emotion/css";
 import api from "services/api";
 import { SelectEl } from "components/common/Select";
 import { moneyDisplay } from "components/common/Money";
+import { getReleaseUrl } from "utils/artist";
+import IncludesDigitalDownload from "./IncludesDigitalDownload";
 
 type FormData = {
   quantity: number;
@@ -167,6 +169,7 @@ function BuyMerchItem() {
           ))}
         </SelectEl>
       </FormComponent>
+      <IncludesDigitalDownload merch={merch} artist={artist} />
       <Button
         disabled={!methods.formState.isValid}
         isLoading={isLoadingStripe}

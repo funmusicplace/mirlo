@@ -57,6 +57,8 @@ function TrackGroup() {
     return <FullPageLoadingSpinner />;
   }
 
+  console.log(merch);
+
   const userIsOwner = user?.id === artist.userId || user?.isAdmin;
 
   return (
