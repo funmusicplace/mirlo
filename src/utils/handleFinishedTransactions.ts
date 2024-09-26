@@ -1,6 +1,6 @@
 import Stripe from "stripe";
 import prisma from "@mirlo/prisma";
-import { Prisma, MerchPurchase, MerchOption } from "@mirlo/prisma/client";
+import { MerchOption } from "@mirlo/prisma/client";
 
 import { logger } from "../logger";
 import sendMail from "../jobs/send-mail";
@@ -8,12 +8,9 @@ import { registerPurchase } from "./trackGroup";
 import { registerSubscription } from "./subscriptionTier";
 import { getSiteSettings } from "./settings";
 import { Job } from "bullmq";
-import { calculateAppFee, OPTION_JOINER } from "./stripe";
-const { STRIPE_KEY } = process.env;
+import stripe, { calculateAppFee, OPTION_JOINER } from "./stripe";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 
-const stripe = new Stripe(STRIPE_KEY ?? "", {
-  apiVersion: "2022-11-15",
-});
 export const handleTrackGroupPurchase = async (
   userId: number,
   trackGroupId: number,
@@ -193,7 +190,8 @@ export const handleArtistMerchPurchase = async (
           // Use the product of this line item to find the
           // relevant item in our database. For merch this
           // can be either product directly, or something defined
-          // by the merch options
+          // by the merch options. We create a product for each possible
+          // combiunation of merch option
           if (stripeProductId) {
             const product = await stripe.products.retrieve(stripeProductId);
 
@@ -255,6 +253,28 @@ export const handleArtistMerchPurchase = async (
                   },
                 },
               });
+
+              if (merchProduct.includePurchaseTrackGroupId) {
+                try {
+                  await prisma.userTrackGroupPurchase.create({
+                    data: {
+                      trackGroupId: merchProduct.includePurchaseTrackGroupId,
+                      pricePaid: 0,
+                      userId: createdMerchPurchase.userId,
+                    },
+                  });
+                } catch (e: any) {
+                  if (
+                    e instanceof PrismaClientKnownRequestError ||
+                    e.name === "PrismaClientKnownRequestError"
+                  ) {
+                    if (e.code !== "P2002") {
+                      throw e;
+                    }
+                  }
+                }
+              }
+
               const merch = await prisma.merch.findFirst({
                 where: { id: createdMerchPurchase.merchId },
               });
@@ -270,6 +290,7 @@ export const handleArtistMerchPurchase = async (
                   },
                 });
               }
+
               const merchPurchase = await prisma.merchPurchase.findFirst({
                 where: {
                   id: createdMerchPurchase.id,
@@ -278,6 +299,7 @@ export const handleArtistMerchPurchase = async (
                   merch: {
                     include: { artist: { include: { user: true } } },
                   },
+                  options: true,
                 },
               });
               const platformCut = await calculateAppFee(
@@ -321,7 +343,7 @@ export const handleArtistMerchPurchase = async (
 
       await sendMail({
         data: {
-          template: "tell-artist-about-merch-purchase",
+          template: "artist-merch-purchase-receipt",
           message: {
             to: purchases?.[0]?.merch?.artist.user.email,
           },
