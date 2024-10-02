@@ -762,4 +762,8 @@ export const handleInvoicePaid = async (invoice: Stripe.Invoice) => {
   }
 };
 
+export const handleAccountUpdate = async (account: Stripe.Account) => {
+  logger.info(`account.update: received update for ${account.id}`);
+};
+
 export default stripe;
