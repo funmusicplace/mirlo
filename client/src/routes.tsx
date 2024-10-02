@@ -545,11 +545,7 @@ const routes: RouteObject[] = [
                         "components/Merch/CheckoutComplete"
                       );
                       return {
-                        Component: () => (
-                          <AuthWrapper adminOnly>
-                            <Component />
-                          </AuthWrapper>
-                        ),
+                        Component: () => <Component />,
                       };
                     },
                   },
@@ -560,11 +556,7 @@ const routes: RouteObject[] = [
                         "components/Merch/MerchView"
                       );
                       return {
-                        Component: () => (
-                          <AuthWrapper adminOnly>
-                            <Component />
-                          </AuthWrapper>
-                        ),
+                        Component: () => <Component />,
                       };
                     },
                   },
@@ -575,11 +567,7 @@ const routes: RouteObject[] = [
                         "components/Merch/ArtistMerch"
                       );
                       return {
-                        Component: () => (
-                          <AuthWrapper adminOnly>
-                            <Component />
-                          </AuthWrapper>
-                        ),
+                        Component: () => <Component />,
                       };
                     },
                   },

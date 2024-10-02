@@ -1,12 +1,6 @@
 import Stripe from "stripe";
 import prisma from "@mirlo/prisma";
-import {
-  MerchOptionType,
-  Prisma,
-  User,
-  MerchOption,
-  MerchShippingDestination,
-} from "@mirlo/prisma/client";
+import { Prisma, User, MerchShippingDestination } from "@mirlo/prisma/client";
 import { logger } from "../logger";
 import sendMail from "../jobs/send-mail";
 import { Request, Response } from "express";
@@ -735,6 +729,7 @@ export const handleInvoicePaid = async (invoice: Stripe.Invoice) => {
       await prisma.artistUserSubscription.findFirst({
         where: {
           stripeSubscriptionKey: subscription,
+          deletedAt: null,
         },
         include: {
           user: true,

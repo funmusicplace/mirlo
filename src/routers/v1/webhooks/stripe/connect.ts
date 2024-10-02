@@ -44,6 +44,11 @@ export default function () {
 
         handleInvoicePaid(invoice);
         break;
+      case "account.updated":
+        const invoice = event.data.object;
+
+        handleInvoicePaid(invoice);
+        break;
       default:
         // Unexpected event type
         logger.info(
