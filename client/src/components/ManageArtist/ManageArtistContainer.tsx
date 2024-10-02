@@ -98,30 +98,30 @@ const ManageArtistContainer: React.FC<{}> = () => {
         {user && artist.userId !== user.id && (
           <Box
             className={css`
-              background-color: var(--mi-warning-color);
-              color: white;
+              background-color: var(--mi-warning-background-color);
             `}
           >
             You are viewing this artist as an admin
           </Box>
         )}
-        {/* {user && !stripeAccountStatus?.chargesEnabled && ( */}
-        <Box
-          className={css`
-            background-color: var(--mi-warning-color);
-            color: white;
-          `}
-        >
-          <Trans
-            t={t}
-            i18nKey={"paymentProcessorNotSetUp"}
-            components={{
-              // eslint-disable-next-line jsx-a11y/anchor-has-content
-              manage: <Link to="/manage"></Link>,
-            }}
-          />
-        </Box>
-        {/* )} */}
+        {user &&
+          stripeAccountStatus &&
+          !stripeAccountStatus?.chargesEnabled && (
+            <Box
+              className={css`
+                background-color: var(--mi-warning-background- color);
+              `}
+            >
+              <Trans
+                t={t}
+                i18nKey={"paymentProcessorNotSetUp"}
+                components={{
+                  // eslint-disable-next-line jsx-a11y/anchor-has-content
+                  manage: <Link to="/manage"></Link>,
+                }}
+              />
+            </Box>
+          )}
 
         {!dontShowHeader && (
           <ArtistHeaderSection
