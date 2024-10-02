@@ -174,7 +174,8 @@ export const handleArtistGift = async (
 // so that we can use the same email etc for everything?
 export const handleArtistMerchPurchase = async (
   userId: number,
-  session?: Stripe.Checkout.Session
+  session: Stripe.Checkout.Session,
+  stripeAccount: string
 ) => {
   try {
     const purchases = (
@@ -193,7 +194,11 @@ export const handleArtistMerchPurchase = async (
           // by the merch options. We create a product for each possible
           // combiunation of merch option
           if (stripeProductId) {
-            const product = await stripe.products.retrieve(stripeProductId);
+            const product = await stripe.products.retrieve(
+              stripeProductId,
+              undefined,
+              { stripeAccount }
+            );
 
             if (product.metadata.merchOptionIds) {
               const optionIds =
@@ -359,7 +364,7 @@ export const handleArtistMerchPurchase = async (
 
     return purchases;
   } catch (e) {
-    logger.error(`Error creating tip: ${e}`);
+    logger.error(`Error creating merch purchase: ${e}`);
     throw e;
   }
 };

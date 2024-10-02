@@ -703,7 +703,11 @@ export const handleCheckoutSession = async (
       await handleArtistGift(Number(actualUserId), Number(artistId), session);
     } else if (merchId && userEmail) {
       logger.info(`checkout.session: ${session.id} handling merch`);
-      await handleArtistMerchPurchase(Number(actualUserId), session);
+      await handleArtistMerchPurchase(
+        Number(actualUserId),
+        session,
+        stripeAccountId
+      );
     } else if (tierId && userEmail) {
       logger.info(`checkout.session: ${session.id} handling subscription`);
       await handleSubscription(Number(actualUserId), Number(tierId), session);
