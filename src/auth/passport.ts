@@ -290,6 +290,9 @@ export const contentBelongsToLoggedInUserArtist = async (
   if (!loggedInUser) {
     res.status(401).json({ error: "Unauthorized" });
   } else {
+    if (loggedInUser.isAdmin) {
+      return next();
+    }
     const artist = await prisma.artist.findFirst({
       where: {
         userId: loggedInUser.id,

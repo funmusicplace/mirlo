@@ -256,7 +256,7 @@ function TrackGroup() {
                     <PurchaseOrDownloadAlbum trackGroup={trackGroup} />
                   </div>
                 </UnderneathImage>
-                {trackGroup.merch && (
+                {trackGroup.merch && trackGroup.merch.length > 0 && (
                   <TrackGroupMerch merch={trackGroup.merch} />
                 )}
                 <SmallScreenPlayWrapper>
