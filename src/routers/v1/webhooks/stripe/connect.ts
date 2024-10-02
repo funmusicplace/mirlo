@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import {
+  handleAccountUpdate,
   handleCheckoutSession,
   handleInvoicePaid,
   verifyStripeSignature,
@@ -43,6 +44,11 @@ export default function () {
         const invoice = event.data.object;
 
         handleInvoicePaid(invoice);
+        break;
+      case "account.updated":
+        const accountUpdate = event.data.object;
+
+        handleAccountUpdate(accountUpdate);
         break;
       default:
         // Unexpected event type

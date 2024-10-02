@@ -45,10 +45,11 @@ export const AdminPurchases: React.FC = () => {
   }, [callback]);
 
   const total = results.reduce((aggr, r) => {
-    if (aggr[r.currencyPaid]) {
-      aggr[r.currencyPaid] += r.pricePaid;
+    const currencyPaid = r.currencyPaid.toLowerCase();
+    if (aggr[currencyPaid]) {
+      aggr[currencyPaid] += r.pricePaid;
     } else {
-      aggr[r.currencyPaid] = r.pricePaid;
+      aggr[currencyPaid] = r.pricePaid;
     }
     return aggr;
   }, {} as any);

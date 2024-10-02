@@ -17,6 +17,8 @@ import { handleArtistMerchPurchase } from "../../src/utils/handleFinishedTransac
 import Stripe from "stripe";
 import stripe from "../../src/utils/stripe";
 
+const stripeAccountId = "hke";
+
 describe("handleArtistMerchPurchase", () => {
   beforeEach(async () => {
     try {
@@ -62,11 +64,15 @@ describe("handleArtistMerchPurchase", () => {
       stripeProductKey: productKey,
     });
 
-    await handleArtistMerchPurchase(purchaser.id, {
-      line_items: {
-        data: [{ price: { product: productKey } } as Stripe.LineItem],
-      } as Stripe.ApiList<Stripe.LineItem>,
-    } as Stripe.Checkout.Session);
+    await handleArtistMerchPurchase(
+      purchaser.id,
+      {
+        line_items: {
+          data: [{ price: { product: productKey } } as Stripe.LineItem],
+        } as Stripe.ApiList<Stripe.LineItem>,
+      } as Stripe.Checkout.Session,
+      stripeAccountId
+    );
 
     assert.equal(stub.calledTwice, true);
     const data0 = stub.getCall(0).args[0].data;
@@ -114,16 +120,20 @@ describe("handleArtistMerchPurchase", () => {
       stripeProductKey: productKey,
     });
 
-    await handleArtistMerchPurchase(purchaser.id, {
-      line_items: {
-        data: [
-          {
-            price: { product: productKey },
-            amount_total: 2000,
-          } as Stripe.LineItem,
-        ],
-      } as Stripe.ApiList<Stripe.LineItem>,
-    } as Stripe.Checkout.Session);
+    await handleArtistMerchPurchase(
+      purchaser.id,
+      {
+        line_items: {
+          data: [
+            {
+              price: { product: productKey },
+              amount_total: 2000,
+            } as Stripe.LineItem,
+          ],
+        } as Stripe.ApiList<Stripe.LineItem>,
+      } as Stripe.Checkout.Session,
+      stripeAccountId
+    );
 
     assert.equal(stub.calledTwice, true);
     const data0 = stub.getCall(0).args[0].data;
@@ -177,16 +187,20 @@ describe("handleArtistMerchPurchase", () => {
       includePurchaseTrackGroupId: trackGroup.id,
     });
 
-    await handleArtistMerchPurchase(purchaser.id, {
-      line_items: {
-        data: [
-          {
-            price: { product: productKey },
-            amount_total: 2000,
-          } as Stripe.LineItem,
-        ],
-      } as Stripe.ApiList<Stripe.LineItem>,
-    } as Stripe.Checkout.Session);
+    await handleArtistMerchPurchase(
+      purchaser.id,
+      {
+        line_items: {
+          data: [
+            {
+              price: { product: productKey },
+              amount_total: 2000,
+            } as Stripe.LineItem,
+          ],
+        } as Stripe.ApiList<Stripe.LineItem>,
+      } as Stripe.Checkout.Session,
+      stripeAccountId
+    );
 
     const ownedTG = await prisma.userTrackGroupPurchase.findFirst({
       where: { userId: purchaser.id },
@@ -235,16 +249,20 @@ describe("handleArtistMerchPurchase", () => {
       includePurchaseTrackGroupId: trackGroup.id,
     });
 
-    await handleArtistMerchPurchase(purchaser.id, {
-      line_items: {
-        data: [
-          {
-            price: { product: productKey },
-            amount_total: 2000,
-          } as Stripe.LineItem,
-        ],
-      } as Stripe.ApiList<Stripe.LineItem>,
-    } as Stripe.Checkout.Session);
+    await handleArtistMerchPurchase(
+      purchaser.id,
+      {
+        line_items: {
+          data: [
+            {
+              price: { product: productKey },
+              amount_total: 2000,
+            } as Stripe.LineItem,
+          ],
+        } as Stripe.ApiList<Stripe.LineItem>,
+      } as Stripe.Checkout.Session,
+      stripeAccountId
+    );
 
     const ownedTG = await prisma.userTrackGroupPurchase.findMany({
       where: { userId: purchaser.id },
@@ -309,16 +327,20 @@ describe("handleArtistMerchPurchase", () => {
       },
     });
 
-    await handleArtistMerchPurchase(purchaser.id, {
-      line_items: {
-        data: [
-          {
-            price: { product: productKey },
-            amount_total: 2000,
-          } as Stripe.LineItem,
-        ],
-      } as Stripe.ApiList<Stripe.LineItem>,
-    } as Stripe.Checkout.Session);
+    await handleArtistMerchPurchase(
+      purchaser.id,
+      {
+        line_items: {
+          data: [
+            {
+              price: { product: productKey },
+              amount_total: 2000,
+            } as Stripe.LineItem,
+          ],
+        } as Stripe.ApiList<Stripe.LineItem>,
+      } as Stripe.Checkout.Session,
+      stripeAccountId
+    );
 
     assert.equal(stub.calledTwice, true);
     const data0 = stub.getCall(0).args[0].data;

@@ -1,13 +1,19 @@
 import { css } from "@emotion/css";
 import React from "react";
 import { bp } from "../../constants";
-import { Navigate, Outlet, useLocation, useParams } from "react-router-dom";
+import {
+  Link,
+  Navigate,
+  Outlet,
+  useLocation,
+  useParams,
+} from "react-router-dom";
 import ArtistHeaderSection from "../common/ArtistHeaderSection";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import styled from "@emotion/styled";
 import Box from "components/common/Box";
 import { useQuery } from "@tanstack/react-query";
-import { queryManagedArtist } from "queries";
+import { queryManagedArtist, queryUserStripeStatus } from "queries";
 import { useAuthContext } from "state/AuthContext";
 
 const Container = styled.div<{ artistBanner: boolean }>`
@@ -65,6 +71,9 @@ const ManageArtistContainer: React.FC<{}> = () => {
   const { data: artist, isLoading: isArtistLoading } = useQuery(
     queryManagedArtist(Number(artistId))
   );
+  const { data: stripeAccountStatus } = useQuery(
+    queryUserStripeStatus(artist?.userId ?? 0)
+  );
 
   const location = useLocation();
 
@@ -96,6 +105,23 @@ const ManageArtistContainer: React.FC<{}> = () => {
             You are viewing this artist as an admin
           </Box>
         )}
+        {/* {user && !stripeAccountStatus?.chargesEnabled && ( */}
+        <Box
+          className={css`
+            background-color: var(--mi-warning-color);
+            color: white;
+          `}
+        >
+          <Trans
+            t={t}
+            i18nKey={"paymentProcessorNotSetUp"}
+            components={{
+              // eslint-disable-next-line jsx-a11y/anchor-has-content
+              manage: <Link to="/manage"></Link>,
+            }}
+          />
+        </Box>
+        {/* )} */}
 
         {!dontShowHeader && (
           <ArtistHeaderSection

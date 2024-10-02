@@ -1,12 +1,6 @@
 import Stripe from "stripe";
 import prisma from "@mirlo/prisma";
-import {
-  MerchOptionType,
-  Prisma,
-  User,
-  MerchOption,
-  MerchShippingDestination,
-} from "@mirlo/prisma/client";
+import { Prisma, User, MerchShippingDestination } from "@mirlo/prisma/client";
 import { logger } from "../logger";
 import sendMail from "../jobs/send-mail";
 import { Request, Response } from "express";
@@ -709,7 +703,11 @@ export const handleCheckoutSession = async (
       await handleArtistGift(Number(actualUserId), Number(artistId), session);
     } else if (merchId && userEmail) {
       logger.info(`checkout.session: ${session.id} handling merch`);
-      await handleArtistMerchPurchase(Number(actualUserId), session);
+      await handleArtistMerchPurchase(
+        Number(actualUserId),
+        session,
+        stripeAccountId
+      );
     } else if (tierId && userEmail) {
       logger.info(`checkout.session: ${session.id} handling subscription`);
       await handleSubscription(Number(actualUserId), Number(tierId), session);
@@ -735,6 +733,7 @@ export const handleInvoicePaid = async (invoice: Stripe.Invoice) => {
       await prisma.artistUserSubscription.findFirst({
         where: {
           stripeSubscriptionKey: subscription,
+          deletedAt: null,
         },
         include: {
           user: true,
@@ -765,6 +764,10 @@ export const handleInvoicePaid = async (invoice: Stripe.Invoice) => {
       } as Job);
     }
   }
+};
+
+export const handleAccountUpdate = async (account: Stripe.Account) => {
+  logger.info(`account.update: received update for ${account.id}`);
 };
 
 export default stripe;
