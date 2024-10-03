@@ -22,7 +22,10 @@ html
             | Mirlo's cut: (#{purchase.currencyPaid.toUpperCase()} #{purchase.platformCut.toFixed(2)})
             strong Total: #{purchase.currencyPaid.toUpperCase()} #{(purchase.artistCut).toFixed(2)} 
 
-      p To learn more about this order, please see your fulfillment dashboard.
+      p  
+        | To learn more about this order, please see your 
+        a(href="https://mirlo.space/fulfillment") fulfillment dashboard 
+        | .
       p The final money will be available via your Stripe dashboard
       p If you have any questions please reach out to hi@mirlo.space
 

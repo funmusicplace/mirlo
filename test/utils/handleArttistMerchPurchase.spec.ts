@@ -82,7 +82,7 @@ describe("handleArtistMerchPurchase", () => {
     assert.equal(data0.locals.purchases[0].amountPaid, 0);
 
     const data1 = stub.getCall(1).args[0].data;
-    assert.equal(data1.template, "artist-merch-purchase-receipt");
+    assert.equal(data1.template, "tell-artist-about-merch-purchase");
     assert.equal(data1.message.to, artistUser.email);
     assert.equal(data0.locals.purchases[0].merchId, merch.id);
     assert.equal(data0.locals.purchases[0].amountPaid, 0);
@@ -90,7 +90,7 @@ describe("handleArtistMerchPurchase", () => {
 
   it("should send correct price in emails", async () => {
     const stub = sinon.spy(sendMail, "default");
-    const stubStripe = sinon
+    sinon
       .stub(stripe.products, "retrieve")
       // @ts-ignore
       .returns({ metadata: {} });
@@ -145,7 +145,7 @@ describe("handleArtistMerchPurchase", () => {
     assert.equal(data0.locals.purchases[0].platformCut, 140);
 
     const data1 = stub.getCall(1).args[0].data;
-    assert.equal(data1.template, "artist-merch-purchase-receipt");
+    assert.equal(data1.template, "tell-artist-about-merch-purchase");
     assert.equal(data1.message.to, artistUser.email);
     assert.equal(data0.locals.purchases[0].merchId, merch.id);
     assert.equal(data0.locals.purchases[0].amountPaid, 2000);
@@ -354,7 +354,7 @@ describe("handleArtistMerchPurchase", () => {
     assert.equal(data0.locals.purchases[0].options.length, 1);
 
     const data1 = stub.getCall(1).args[0].data;
-    assert.equal(data1.template, "artist-merch-purchase-receipt");
+    assert.equal(data1.template, "tell-artist-about-merch-purchase");
     assert.equal(data1.message.to, artistUser.email);
     assert.equal(data0.locals.purchases[0].merchId, merch.id);
     assert.equal(data0.locals.purchases[0].amountPaid, 2000);
