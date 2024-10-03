@@ -240,6 +240,10 @@ export const handleArtistMerchPurchase = async (
                 })
               );
 
+              logger.info(
+                `handleArtistMerchPurchase: userId: ${userId}, merchId: ${merchProduct.id}, amountPaid: ${item.amount_total}${item.currency}`
+              );
+
               const createdMerchPurchase = await prisma.merchPurchase.create({
                 data: {
                   userId,
@@ -323,23 +327,23 @@ export const handleArtistMerchPurchase = async (
       )
     ).filter((o) => !!o);
 
-    const user = await prisma.user.findFirst({
+    const purchaser = await prisma.user.findFirst({
       where: {
         id: userId,
       },
     });
 
-    if (user && purchases.length > 0) {
+    if (purchaser && purchases.length > 0 && purchases?.[0]?.merch?.artist) {
       await sendMail({
         data: {
           template: "artist-merch-purchase-receipt",
           message: {
-            to: user.email,
+            to: purchaser.email,
           },
           locals: {
             purchases,
-            email: user.email,
-            artist: purchases?.[0]?.merch?.artist,
+            email: purchaser.email,
+            artist: purchases?.[0].merch.artist,
             client: process.env.REACT_APP_CLIENT_DOMAIN,
             host: process.env.API_DOMAIN,
           },
@@ -348,15 +352,15 @@ export const handleArtistMerchPurchase = async (
 
       await sendMail({
         data: {
-          template: "artist-merch-purchase-receipt",
+          template: "tell-artist-about-merch-purchase",
           message: {
             to: purchases?.[0]?.merch?.artist.user.email,
           },
           locals: {
             purchases,
-            artist: purchases?.[0]?.merch?.artist,
+            artist: purchases[0].merch.artist,
             calculateAppFee,
-            email: user.email,
+            email: purchaser.email,
           },
         },
       } as Job);

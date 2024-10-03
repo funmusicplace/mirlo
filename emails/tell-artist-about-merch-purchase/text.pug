@@ -1,11 +1,12 @@
 | Yay!
 |
-| Someone (#{email}) bought a digital copy of #{trackGroup.title}.
-|
-| #{trackGroup.title}
-| #{pricePaid} #{purchase.currencyPaid}
-| Mirlo percentage: #{trackGroup.platformPercent}
-| Final: #{pricePaid - platformCut} #{purchase.currencyPaid}
-| 
+| Someone (#{email}) bought something from you!
+each purchase in purchases 
+  | #{purchase.merch.title} x#{purchase.quantity}
+  | Mirlo's cut: (#{purchase.currencyPaid.toUpperCase()} #{purchase.platformCut.toFixed(2)})
+  | strong Total: #{purchase.currencyPaid.toUpperCase()} #{(purchase.artistCut).toFixed(2)} 
+| To learn more about this order, please see your fulfillment dashboard.
 | The final money will be available via your Stripe dashboard
+| 
+| If you have any questions please reach out to hi@mirlo.space
 | Enjoy!

@@ -65,7 +65,8 @@
     "logIn": "Log in",
     "signUp": "Sign up",
     "about": "About",
-    "admin": "Admin"
+    "admin": "Admin",
+    "fulfillment": "Order fulfillment"
   },
   "headerSearch": {
     "searchSuggestions": "Search suggestions:",
