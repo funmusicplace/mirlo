@@ -351,7 +351,6 @@
     "optionName": "Option name",
     "addNewOption": "Add new option",
     "addNewMerchOption": "Add new merch option",
-    "costPerUnitDisplay": "{{ costUnit}} ({{costExtraUnit}})",
     "merchOptionsExplainer": "Does your merch come in different categories? For example t-shirt size?",
     "shippingDestinationPrices": "Shipping destination prices",
     "merchOptionsTitle": "Merch options",
