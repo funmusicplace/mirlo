@@ -112,7 +112,7 @@ const Player = () => {
           align-items: center;
           justify-content: flex-end;
           flex-grow: 1;
-          padding-bottom: 0.25rem;
+          padding-bottom: 0.5rem;
           background-color: var(--mi-normal-background-color);
 
           @media (max-width: ${bp.small}px) {

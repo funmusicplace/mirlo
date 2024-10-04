@@ -12,7 +12,7 @@ export const SongTimeDisplay: React.FC<{
   return (
     <div
       className={css`
-        height: 0.25rem;
+        height: 1rem;
         filter: brightness(1);
         cursor: pointer;
         width: 100%;
@@ -30,7 +30,7 @@ export const SongTimeDisplay: React.FC<{
     >
       <div
         className={css`
-          height: 100%;
+          height: 0.25rem;
           overflow: none;
           transition: 0.1s width;
           width: ${percent * 100}%;
