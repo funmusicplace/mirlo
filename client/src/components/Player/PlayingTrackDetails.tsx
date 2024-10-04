@@ -3,6 +3,7 @@ import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import { Link } from "react-router-dom";
 import { bp } from "../../constants";
 import { getReleaseUrl } from "utils/artist";
+import React from "react";
 
 const PlayingTrackDetails: React.FC<{ currentTrack: Track }> = ({
   currentTrack,
@@ -107,7 +108,7 @@ const PlayingTrackDetails: React.FC<{ currentTrack: Track }> = ({
               `}
             >
               {artists.map((artist) => (
-                <>
+                <React.Fragment key={artist.artistName}>
                   {artist.artistId ? (
                     <Link to={`/${artist.artistId}`} id="player-artist-name">
                       {artist.artistName}
@@ -115,7 +116,7 @@ const PlayingTrackDetails: React.FC<{ currentTrack: Track }> = ({
                   ) : (
                     artist.artistName
                   )}
-                </>
+                </React.Fragment>
               ))}
             </div>
           </>

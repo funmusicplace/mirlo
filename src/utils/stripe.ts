@@ -366,10 +366,14 @@ const determineShipping = (
 
   let possibleDestinations = [destination.destinationCountry];
 
-  if (destination?.destinationCountry === "") {
+  if (
+    destination?.destinationCountry === "" ||
+    destination?.destinationCountry === null
+  ) {
     const specificShippingCosts = shippingDestinations.filter(
       (d) => d.destinationCountry !== ""
     );
+
     possibleDestinations = countryCodesCurrencies
       .map((country) => {
         const inSpecific = specificShippingCosts.find(

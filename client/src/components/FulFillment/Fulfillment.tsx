@@ -27,8 +27,6 @@ export const Fulfillment: React.FC = () => {
     callback();
   }, [callback]);
 
-  console.log("results", results);
-
   return (
     <div
       className={css`
@@ -37,13 +35,19 @@ export const Fulfillment: React.FC = () => {
         max-width: 100%;
       `}
     >
-      <h3>Orders & Fulfillment</h3>
+      <h3
+        className={css`
+          margin: 0.5rem 0;
+        `}
+      >
+        Orders & Fulfillment
+      </h3>
       <h4>Total results: {total}</h4>
       {results.length > 0 && (
         <div
           className={css`
             max-width: 100%;
-            overflow: scroll;
+            overflow-x: auto;
             background-color: var(--mi-lighten-background-color);
           `}
         >

@@ -59,6 +59,11 @@ function TrackGroup() {
 
   console.log(merch);
 
+  const merchDescription =
+    merch.description === "" && merch.includePurchaseTrackGroup.about
+      ? merch.includePurchaseTrackGroup.about
+      : merch.description;
+
   const userIsOwner = user?.id === artist.userId || user?.isAdmin;
 
   return (
@@ -149,9 +154,9 @@ function TrackGroup() {
                 }
               `}
             >
-              <MarkdownContent content={merch.description} />
+              <MarkdownContent content={merchDescription} />
             </div>
-            <BuyMerchItem />
+            <BuyMerchItem artist={artist} merch={merch} />
           </div>
         </div>
 

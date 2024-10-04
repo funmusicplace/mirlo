@@ -6,7 +6,10 @@ import { SelectEl } from "components/common/Select";
 import { formatDate } from "components/TrackGroup/ReleaseDate";
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { FaExternalLinkAlt } from "react-icons/fa";
+import { Link } from "react-router-dom";
 import api from "services/api";
+import { getArtistUrl, getMerchUrl } from "utils/artist";
 
 const Underline = styled.div`
   border-bottom: 1px solid var(--mi-darken-x-background-color);
@@ -21,6 +24,10 @@ const Section = styled.div`
   label {
     width: calc(3 / 12 * 100%) !important;
     font-weight: bold;
+  }
+
+  a {
+    padding-left: 0.5rem;
   }
 `;
 
@@ -44,13 +51,31 @@ const CustomerPopUp: React.FC<{ purchase: MerchPurchase }> = ({ purchase }) => {
     },
     [purchase.id]
   );
+
   return (
     <div>
       <Underline>
         <h2>{purchase.user.name}</h2>
         <Section>
+          <label>{t("itemArtist")}</label>{" "}
+          <span>
+            {purchase.merch.artist.name}
+            <Link to={getArtistUrl(purchase.merch.artist)} target="_blank">
+              <FaExternalLinkAlt />
+            </Link>
+          </span>
+        </Section>
+        <Section>
           <label>{t("itemPurchased")}</label>{" "}
-          <span>{purchase.merch.title}</span>
+          <span>
+            {purchase.merch.title}
+            <Link
+              to={getMerchUrl(purchase.merch.artist, purchase.merch)}
+              target="_blank"
+            >
+              <FaExternalLinkAlt />
+            </Link>
+          </span>
         </Section>
         <Section>
           <label>{t("quantity")}</label> <span>{purchase.quantity}</span>

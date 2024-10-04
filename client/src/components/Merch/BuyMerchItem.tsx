@@ -1,10 +1,7 @@
-import { Link, useParams } from "react-router-dom";
-import Box from "../common/Box";
 import { useTranslation } from "react-i18next";
-import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
 
 import { useQuery } from "@tanstack/react-query";
-import { queryArtist, queryMerch, queryUserStripeStatus } from "queries";
+import { queryUserStripeStatus } from "queries";
 
 import Button from "components/common/Button";
 import { InputEl } from "components/common/Input";
@@ -15,7 +12,6 @@ import { css } from "@emotion/css";
 import api from "services/api";
 import { SelectEl } from "components/common/Select";
 import { moneyDisplay } from "components/common/Money";
-import { getReleaseUrl } from "utils/artist";
 import IncludesDigitalDownload from "./IncludesDigitalDownload";
 
 type FormData = {
@@ -25,19 +21,15 @@ type FormData = {
   shippingDestinationId: string;
 };
 
-function BuyMerchItem() {
+const BuyMerchItem: React.FC<{
+  merch: Merch;
+  artist: Artist;
+  showTitle?: boolean;
+}> = ({ merch, artist, showTitle }) => {
   const { t } = useTranslation("translation", {
     keyPrefix: "merchDetails",
   });
   const [isLoadingStripe, setIsLoadingStripe] = React.useState(false);
-
-  const { artistId, merchId } = useParams();
-  const { data: artist, isLoading: isLoadingArtist } = useQuery(
-    queryArtist({ artistSlug: artistId ?? "" })
-  );
-  const { data: merch, isLoading: isLoadingMerch } = useQuery(
-    queryMerch({ merchId: merchId ?? "" })
-  );
 
   const { data: stripeAccountStatus } = useQuery(
     queryUserStripeStatus(artist?.userId ?? 0)
@@ -77,20 +69,7 @@ function BuyMerchItem() {
     [setIsLoadingStripe, merch?.id]
   );
 
-  if (!artist && !isLoadingArtist) {
-    return <Box>{t("doesNotExist")}</Box>;
-  } else if (!artist) {
-    return <FullPageLoadingSpinner />;
-  }
-
-  if (!merch && !isLoadingMerch) {
-    return <Box>{t("doesNotExist")}</Box>;
-  } else if (!merch) {
-    return <FullPageLoadingSpinner />;
-  } else if (
-    !stripeAccountStatus?.chargesEnabled ||
-    merch.quantityRemaining === 0
-  ) {
+  if (!stripeAccountStatus?.chargesEnabled || merch.quantityRemaining === 0) {
     return null;
   }
 
@@ -109,7 +88,7 @@ function BuyMerchItem() {
         max-width: calc(100vh / 12 * 3);
       `}
     >
-      <h3>{t("buy")}</h3>
+      <h3>{t("buy", { title: showTitle ? merch.title : undefined })}</h3>
       <p>{t("supportThisArtistByPurchasing")}</p>
       <FormComponent>
         <label>{t("howMany")}</label>
@@ -127,7 +106,7 @@ function BuyMerchItem() {
         />
       </FormComponent>
       <FormComponent>
-        <label>{t("howMuch", { currency: merch.artist.user?.currency })}</label>
+        <label>{t("howMuch", { currency: merch.currency })}</label>
         <InputEl
           {...methods.register("price", { min: minPrice })}
           type="number"
@@ -179,6 +158,6 @@ function BuyMerchItem() {
       </Button>
     </form>
   );
-}
+};
 
 export default BuyMerchItem;

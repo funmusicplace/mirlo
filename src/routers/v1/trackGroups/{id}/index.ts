@@ -39,7 +39,11 @@ export default function () {
               loggedInUserId: loggedInUser?.id,
             }),
             merch: {
-              include: { images: true },
+              include: {
+                images: true,
+                shippingDestinations: true,
+                optionTypes: { include: { options: true } },
+              },
             },
           },
         });
