@@ -1,3 +1,16 @@
+export const getCurrencySymbol = (currency: string, locale?: string) => {
+  return (0)
+    .toLocaleString(locale, {
+      style: "currency",
+      currency: currency,
+      currencyDisplay: "symbol",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    })
+    .replace(/\d/g, "")
+    .trim();
+};
+
 export const moneyDisplay = ({
   amount,
   currency,
