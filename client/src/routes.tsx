@@ -1,4 +1,4 @@
-import { Navigate, type RouteObject } from "react-router-dom";
+import { Navigate, type RouteObject, Link } from "react-router-dom";
 
 import App from "./App";
 import ErrorPage from "./components/ErrorPage";

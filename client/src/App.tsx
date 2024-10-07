@@ -29,64 +29,79 @@ function App() {
 
   return (
     <>
-      <MetaCard
-        title="Mirlo"
-        description="A music distribution and patronage site"
-        image="/android-chrome-512x512.png"
-      />
-      <ArtistColorsWrapper>
-        <>
-          {/* <Snackbar /> */}
-          {isDisplayed && <Snackbar />}
+      <a href="#main-content" className={css`
+        position: absolute;
+        top: -40px;
+        left: 0;
+        background: #000;
+        color: #fff;
+        padding: 8px;
+        z-index: 100;
+        text-decoration: none;
+        transition: top 0.3s;
 
-          <Header />
-          <CookieDisclaimer />
-          <div
-            className={css`
-              @media screen and (max-width: ${bp.medium}px) {
-                ${user ? "display: none !important;" : ""}
-              }
-            `}
-          >
-            <PageHeader />
-          </div>
-          <div
-            className={css`
-              flex-grow: 1;
-              display: flex;
-              flex-direction: column;
-              padding-bottom: 65px;
-            `}
-          >
+        &:focus {
+          top: 0;
+        }
+      `}>
+        Skip to main content
+      </a>
+      
+      <main id="main-content">
+        <ArtistColorsWrapper>
+          <>
+            {/* <Snackbar /> */}
+            {isDisplayed && <Snackbar />}
+
+            <Header />
+            <CookieDisclaimer />
+            <div
+              className={css`
+                @media screen and (max-width: ${bp.medium}px) {
+                  ${user ? "display: none !important;" : ""}
+                }
+              `}
+            >
+              <PageHeader />
+            </div>
             <div
               className={css`
                 flex-grow: 1;
                 display: flex;
                 flex-direction: column;
-                width: 100%;
+                padding-bottom: 65px;
               `}
             >
               <div
                 className={css`
-                  margin: 0 auto;
-                  width: 100%;
-                  border-radius: var(--mi-border-radius);
-                  display: flex;
-                  justify-content: center;
-                  z-index: 1;
-                  ${user ? "display: flex;" : ""}
                   flex-grow: 1;
+                  display: flex;
+                  flex-direction: column;
+                  width: 100%;
                 `}
               >
-                <Outlet />
+                <div
+                  className={css`
+                    margin: 0 auto;
+                    width: 100%;
+                    border-radius: var(--mi-border-radius);
+                    display: flex;
+                    justify-content: center;
+                    z-index: 1;
+                    ${user ? "display: flex;" : ""}
+                    flex-grow: 1;
+                  `}
+                >
+                  <Outlet />
+                </div>
+                <Footer />
               </div>
-              <Footer />
-            </div>
 
-            <Player />
-          </div>
-        </>
-      </ArtistColorsWrapper>
+              <Player />
+            </div>
+          </>
+        </ArtistColorsWrapper>
+      </main>
     </>
   );
 }
