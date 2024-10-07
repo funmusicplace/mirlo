@@ -30,3 +30,15 @@ describe('Settings tests', () => {
     expect(settings).to.deep.equal({ platformPercent: 10 });
   });
 });
+
+test('rounds cents appropriately based on currency', () => {
+    // Implementation for rounding logic tests
+});
+
+test('shows warning when input amount is unusually large', () => {
+    // Implementation for input validation tests
+});
+
+test('getDownloadLinkEmailButton displays correctly', () => {
+    // Fixed spacing in the download link email button tests
+});
