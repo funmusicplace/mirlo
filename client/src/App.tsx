@@ -13,6 +13,8 @@ import { MetaCard } from "components/common/MetaCard";
 import ArtistColorsWrapper from "components/ArtistColorsWrapper";
 import CookieDisclaimer from "components/CookieDisclaimer";
 import { useAuthContext } from "state/AuthContext";
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import PurchaseConfirmation from './pages/PurchaseConfirmation';
 
 function App() {
   const { isDisplayed } = useContext(SnackbarContext);
@@ -88,5 +90,16 @@ function App() {
     </>
   );
 }
+
+const App: React.FC = () => {
+  return (
+    <Router>
+      <Switch>
+        <Route path="/confirmation" component={PurchaseConfirmation} />
+        {/* ... other routes */}
+      </Switch>
+    </Router>
+  );
+};
 
 export default App;
