@@ -590,6 +590,7 @@
   },
   "manageTrackTable": {
     "titleColumn": "Title",
+    "areYouSureDelete": "Are you sure you want to delete this track?",
     "durationColumn": "Duration",
     "manageColumn": "Manage",
     "noTracksMessage": "There's no tracks yet in this playlist!",

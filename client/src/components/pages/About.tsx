@@ -13,6 +13,22 @@ const H2 = styled.h2`
   margin-bottom: 1rem;
 `;
 
+const Person = styled.div`
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+
+  img {
+    max-width: 10rem;
+    margin-right: 2rem;
+    border-radius: var(--mi-border-radius);
+  }
+
+  p {
+    margin-top: -0.25rem;
+  }
+`;
+
 const About: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "about" });
 
@@ -96,11 +112,9 @@ const About: React.FC = () => {
             three of us who were based in the United States{" "}
             <a href="https://mirlo.space/team/posts/10/"> formed an LLC</a> and
             became the{" "}
-            <a href="https://mirlo.space/team">
-              official co-founders and worker-owners
-            </a>{" "}
-            , with other contributors continuing to offer support
-            internationally. We joined the{" "}
+            <a href="#team">official co-founders and worker-owners</a> , with
+            other contributors continuing to offer support internationally. We
+            joined the{" "}
             <a href="https://www.usworker.coop/en/">
               US Federation of Worker Cooperatives
             </a>{" "}
@@ -111,6 +125,129 @@ const About: React.FC = () => {
               Sociocracy
             </a>
             .
+          </p>
+        </div>
+        <div>
+          <H2HashLink id="team">Our team</H2HashLink>
+          <p>
+            Behind the platform Our members have experience working both within
+            Resonate and Ampled, other co-ops across several industries, and
+            complex high-traffic web platforms. We envision this platform as a
+            tool to support musicians in cultivating direct and reciprocal
+            relationships and resources to sustain one another’s creative
+            practice.
+          </p>
+          <p>
+            While Mirlo is legally incorporated as an entity recognized by the
+            United States of America, our work is hugely dependent on a network
+            of people who have helped us with get to where we are.
+          </p>
+          <p>
+            {" "}
+            We're immensely grateful to everyone who is supporting us through
+            labor or financial contributions to get us here.
+          </p>
+          <h3>The worker owners</h3>
+          <Person>
+            <img
+              src="https://mirlo.space/images/owner-pictures/alex-photo.png"
+              alt="alex photo"
+            />
+            <p>
+              Alex (he / him) is a writer, organizer, and trombonist working at
+              the confluences of music and social transformation. He holds a PhD
+              in Ethnomusicology from UCLA, where his research focused on jazz
+              clubs and the communities that sustain them in Los Angeles, USA;
+              Santiago, Chile; and Novosibirsk, Siberia. His writing on the
+              contemporary jazz world has appeared in The Newark Star-Ledger,
+              NPR Music, LA Weekly, and DownBeat, among other outlets. He has
+              also trained in Deep Listening through the Center for Deep
+              Listening and is currently preparing his debut album project,
+              Somewhere Else!!!!, with three Chilean collaborators. Alex has
+              worked in the solidarity economy movement as co-founder of the
+              mental health worker cooperative, Catalyst Cooperative Healing, as
+              a working member of Sociocracy for All, and as an Artist-Owner of
+              Ampled.{" "}
+            </p>
+          </Person>
+          <Person>
+            <img
+              src="https://mirlo.space/images/owner-pictures/jodi-photo.jpg"
+              alt="jodi photo"
+            />
+            <p>
+              Hailing from Jamaica, jodi (they / them) is a neurodivergent
+              queer, non-binary femme photographer, cultural organizer, and
+              migrant rights advocate living on unceded Lenape land in so-called
+              New York. Over the span of several years, they have engaged in
+              racial justice organizing including post-disaster relief work,
+              supporting police violence survivors, and devising harm reduction
+              strategies. Cultivating liberatory frameworks where Black
+              LGBTQIAP+ people are honored and meaningfully included is
+              immensely important to them. jodi's forthcoming media projects
+              center communities they belong to. They are passionate about
+              visual storytelling and especially concerned with exalting the
+              narratives of global majority people who have historically been
+              subjugated.{" "}
+            </p>
+          </Person>
+          <Person>
+            <img
+              src="https://mirlo.space/images/owner-pictures/simon-photo.jpg"
+              alt="si photo"
+            />
+            <p>
+              Simon (he / him) is a mutual aid, solidarity economy, and dual
+              power organizer in DC. In his free time he plays soccer and
+              doodles. He used to have a weekly radio slot on public radio, and
+              has done music journalism in a past life. As a wage laborer he has
+              worked as a software developer for UN organizations, fortune 500
+              companies, user experience agencies, fast growing start-ups, and
+              not-for-profit organizations.
+            </p>
+          </Person>
+
+          <h3>Everyone else</h3>
+
+          <p>
+            It's impossible to list everyone who—through their unpaid labor—has
+            made this project a success, but we want to give a special shout out
+            to:
+            <ul>
+              <li>
+                <strong>
+                  <a href="https://mowukis.com">Louis-Louise Kay</a>
+                </strong>
+                , who has tirelessly advocated, worked on, and given feedback on
+                the platform
+              </li>
+              <li>
+                <strong>Han</strong>, who has been a stalwart of our community,
+                our insights, and collective education
+              </li>
+              <li>
+                <strong>Diane</strong>, who has helped with facilitation,
+                brainstorming, and general support and insights
+              </li>
+              <li>
+                <strong>
+                  <a href="https://medium.com/@daspitzberg">Danny</a>
+                </strong>
+                , who has connected us with people across the co-operative
+                movement, and provided valuable insights and history
+              </li>
+              <li>
+                <strong>
+                  Obigre, <a href="https://viiii.neocities.org/">viiii</a>, and
+                  many others
+                </strong>
+                , who have been instrumental in translation efforts of the Mirlo
+                website
+              </li>
+              <li>
+                James, who has helped significantly push forward the Mirlo code.
+              </li>
+            </ul>
           </p>
         </div>
         <div>
@@ -151,7 +288,7 @@ const About: React.FC = () => {
           </p>
         </div>
         <div>
-          <H2HashLink id="vision">Our Vision</H2HashLink>
+          <H2HashLink id="vision">Our vision</H2HashLink>
           <p>
             Mirlo aims to bring about a vibrant ecosystem that values creative
             work and ensures that artists don't have to sacrifice basic needs in

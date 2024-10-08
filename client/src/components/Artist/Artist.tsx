@@ -117,7 +117,7 @@ function Artist() {
             )}
           </>
         )}
-        {user?.isAdmin && (
+        {(artist.merch.length ?? 0) > 0 && (
           <>
             <li
               className={css`
@@ -125,18 +125,20 @@ function Artist() {
               `}
             >
               <NavLink to="merch">{t("merch")}</NavLink>
-              <ButtonLink
-                startIcon={<FaEdit />}
-                to={getArtistManageUrl(artist.id) + "/merch"}
-                variant="dashed"
-                className={
-                  "edit " +
-                  css`
-                    margin-left: 0.5rem;
-                    margin-top: -0.5rem;
-                  `
-                }
-              />
+              {(isArtistUser || user?.isAdmin) && (
+                <ButtonLink
+                  startIcon={<FaEdit />}
+                  to={getArtistManageUrl(artist.id) + "/merch"}
+                  variant="dashed"
+                  className={
+                    "edit " +
+                    css`
+                      margin-left: 0.5rem;
+                      margin-top: -0.5rem;
+                    `
+                  }
+                />
+              )}
             </li>
           </>
         )}
