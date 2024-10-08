@@ -145,6 +145,7 @@ const routes = [
   "admin/purchases",
   "admin/settings",
   "admin/tips",
+  "oembed",
 ];
 
 initialize({

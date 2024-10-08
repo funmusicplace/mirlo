@@ -27,6 +27,9 @@ export default function () {
         where,
         skip: skipQuery ? Number(skipQuery) : undefined,
         take: take ? Number(take) : undefined,
+        orderBy: {
+          name: "desc",
+        },
         include: {
           trackGroups: {
             where: whereForPublishedTrackGroups(),

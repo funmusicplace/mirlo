@@ -76,6 +76,7 @@ const ArtistActions = styled.div`
   word-break: normal !important;
   display: flex;
   flex-direction: row;
+  align-items: center;
 
   a {
     margin-left: 0.75rem;

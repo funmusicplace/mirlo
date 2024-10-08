@@ -80,9 +80,12 @@ const ManageTrackRow: React.FC<{
 
   const onDeleteClick = React.useCallback(async () => {
     try {
-      await api.delete(`manage/tracks/${track.id}`);
-      await reload?.();
-      snackbar("Deleted track", { type: "success" });
+      const confirm = window.confirm(t("areYouSureDelete") ?? "");
+      if (confirm) {
+        await api.delete(`manage/tracks/${track.id}`);
+        await reload?.();
+        snackbar("Deleted track", { type: "success" });
+      }
     } catch (e) {
       console.error(e);
     }
