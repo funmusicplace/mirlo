@@ -260,6 +260,7 @@ interface Merch {
   artist: Artist;
   title: string;
   minPrice: number;
+  currency: string;
   quantityRemaining: number;
   id: string;
   includePurchaseTrackGroupId?: number;

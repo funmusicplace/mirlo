@@ -1,11 +1,10 @@
 import Button from "components/common/Button";
 import Modal from "components/common/Modal";
-import { SelectEl } from "components/common/Select";
 import { formatDate } from "components/TrackGroup/ReleaseDate";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { FaEye } from "react-icons/fa";
-import api from "services/api";
+
 import CustomerPopUp from "./CustomerPopUp";
 import { css } from "@emotion/css";
 
@@ -38,11 +37,13 @@ const FulfillmentRow: React.FC<{ purchase: MerchPurchase; index: number }> = ({
           <Button onClick={() => setIsEditing(true)} startIcon={<FaEye />} />
         </td>
         <td>{purchase.merch.artist.name}</td>
-        <td>{purchase.merch.title}</td>
+        <td>{purchase.merch.title} </td>
         <td>{purchase.user.name}</td>
         <td>{purchase.user.email}</td>
         <td>{purchase.quantity}</td>
-        <td>{t(statusMap[purchase.fulfillmentStatus])}</td>
+        <td>
+          <Button>{t(statusMap[purchase.fulfillmentStatus])}</Button>
+        </td>
         <td>
           {formatDate({
             date: purchase.createdAt,

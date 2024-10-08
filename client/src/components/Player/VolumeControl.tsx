@@ -28,18 +28,13 @@ export const VolumeControl: React.FC<{
 
       <div
         className={css`
-          height: 0.25rem;
+          height: 1rem;
           filter: brightness(1);
-          background: var(--mi-lighten-x-background-color);
           cursor: pointer;
           width: 100%;
           margin: 0 0.25rem;
           top: 0;
-          position: ${volume};
-
-          @media (prefers-color-scheme: light) {
-            background: var(--mi-darken-x-background-color);
-          }
+          position: inherit;
         `}
         onClick={(event: React.MouseEvent<HTMLDivElement>) => {
           const divWidth = event.currentTarget.offsetWidth;
@@ -52,19 +47,38 @@ export const VolumeControl: React.FC<{
       >
         <div
           className={css`
-            height: 100%;
+            height: 0.25rem;
             overflow: none;
             transition: 0.1s width;
             width: ${volume * 100}%;
             background: var(--mi-white);
             pointer-events: none;
             border-radius: 0.5rem;
+            position: absolute;
+            top: 0.4rem;
 
             @media (prefers-color-scheme: light) {
               background: var(--mi-black);
             }
           `}
-        ></div>
+        />
+        <div
+          className={css`
+            height: 0.25rem;
+            overflow: none;
+            width: 100%;
+            background: var(--mi-white);
+            pointer-events: none;
+            position: absolute;
+            top: 0.4rem;
+            border-radius: 0.5rem;
+            background: var(--mi-lighten-x-background-color);
+
+            @media (prefers-color-scheme: light) {
+              background: var(--mi-darken-x-background-color);
+            }
+          `}
+        />
       </div>
 
       <Button

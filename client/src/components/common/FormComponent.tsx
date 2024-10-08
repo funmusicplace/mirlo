@@ -2,7 +2,7 @@ import styled from "@emotion/styled";
 import { bp } from "../../constants";
 
 const FormComponent = styled.div<{ direction?: "row" | "column" }>`
-  margin-bottom: 1.75rem;
+  margin-bottom: 1.5rem;
   margin-top: 0.25rem;
 
   display: flex;
@@ -24,6 +24,7 @@ const FormComponent = styled.div<{ direction?: "row" | "column" }>`
   }
   input {
     border: var(--mi-border);
+    margin-bottom: 0.25rem;
   }
   textarea {
     border: var(--mi-border);

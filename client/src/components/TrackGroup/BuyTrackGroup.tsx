@@ -1,5 +1,8 @@
 import Button from "components/common/Button";
-import Money, { moneyDisplay } from "components/common/Money";
+import Money, {
+  getCurrencySymbol,
+  moneyDisplay,
+} from "components/common/Money";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import api from "services/api";
@@ -99,19 +102,22 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup }> = ({
       )}
       <form onSubmit={handleSubmit(purchaseAlbum)}>
         <FormComponent>
-          {t("nameYourPrice", { currency: trackGroup.currency })}
+          {t("nameYourPrice", {
+            currency: getCurrencySymbol(trackGroup.currency, undefined),
+          })}
           <InputEl
             {...register("chosenPrice")}
             type="number"
             min={trackGroup.minPrice ? trackGroup.minPrice / 100 : 0}
           />
+          <PlatformPercent
+            percent={trackGroup.platformPercent}
+            chosenPrice={chosenPrice}
+            currency={trackGroup.currency}
+            artist={trackGroup.artist}
+          />
         </FormComponent>
-        <PlatformPercent
-          percent={trackGroup.platformPercent}
-          chosenPrice={chosenPrice}
-          currency={trackGroup.currency}
-          artist={trackGroup.artist}
-        />
+
         <EmailInput required />
 
         {userIsTrackGroupArtist && (
@@ -130,13 +136,15 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup }> = ({
             {t(purchaseText)}
           </Button>
         )}
-        <p
+
+        <div
           className={css`
             margin-top: 1rem;
+            font-size: 0.8rem;
           `}
         >
-          <small>{t("downloadDisclaimer")}</small>
-        </p>
+          {t("downloadDisclaimer")}
+        </div>
       </form>
       {!isBeforeReleaseDate && (
         <>

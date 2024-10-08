@@ -23,8 +23,7 @@ const PlatformPercent: React.FC<{
     <div
       className={css`
         margin-bottom: 0.5rem;
-        font-size: 0.7rem;
-        margin-top: 0.5rem;
+        font-size: 0.8rem;
       `}
     >
       {t("platformPercent", {

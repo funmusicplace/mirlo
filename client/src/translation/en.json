@@ -139,6 +139,7 @@
     "merchItem": "Merch item",
     "customer": "Customer",
     "email": "E-mail",
+    "itemArtist": "Artist merch belongs",
     "fulfillmentStatus": "Fulfillment status",
     "orderDate": "Ordered on",
     "quantity": "Quantity",
@@ -153,7 +154,7 @@
     "itemPurchased": "Purchased"
   },
   "merchDetails": {
-    "buy": "Buy",
+    "buy": "Buy {{title}}",
     "supportThisArtistByPurchasing": "Support this artist!",
     "howMany": "How many do you want?",
     "howMuch": "Pay {{ currency }}",
@@ -162,7 +163,7 @@
     "doesNotExist": "The page you are looking for does not exist",
     "everywhere": "Everywhere",
     "everywhereElse": "Everywhere else",
-    "includesDownloadOf": "Includes a download of <link>{{albumTitle}}</link>",
+    "includesDownloadOf": "Includes a download of <link> {{albumTitle}} </link>",
     "destinationCost": "Cost to ship here: {{costUnit}}",
     "supportedShippingDestinations": "Choose the shipping destination that best matches you"
   },
@@ -350,7 +351,6 @@
     "optionName": "Option name",
     "addNewOption": "Add new option",
     "addNewMerchOption": "Add new merch option",
-    "costPerUnitDisplay": "{{ costUnit}} ({{costExtraUnit}})",
     "merchOptionsExplainer": "Does your merch come in different categories? For example t-shirt size?",
     "shippingDestinationPrices": "Shipping destination prices",
     "merchOptionsTitle": "Merch options",
@@ -545,6 +545,7 @@
   "trackGroupDetails": {
     "trackgroup": "Track group:",
     "buy": "Buy",
+    "buyFor": "Buy for {{amount}}",
     "relatedMerch": "Related merch",
     "title": "Title:",
     "type": "Type:",

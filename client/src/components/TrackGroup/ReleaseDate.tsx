@@ -40,9 +40,12 @@ const ReleaseDate: React.FC<{ releaseDate: string }> = ({
 
   const releaseFormat = formatDate({
     date: releaseDate.toString(),
-    options: beforeReleaseDate ? { day: "numeric", month: "long" } : {},
+    options: beforeReleaseDate
+      ? { day: "numeric", month: "long" }
+      : { day: "numeric", month: "long", year: "numeric" },
     i18n,
   });
+  console.log("releaseFormat", releaseFormat);
 
   return (
     <div
