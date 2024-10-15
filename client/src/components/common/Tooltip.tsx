@@ -3,7 +3,7 @@ import React from "react";
 
 const TooltipWrapper = styled.div<{ underline: boolean }>`
   position: relative;
-  z-index: 9999;
+  z-index: 998;
   display: inline-block;
 
   ${(props) => (props.underline ? "border-bottom: 1px dotted black" : "")};
@@ -26,7 +26,7 @@ const TooltipText = styled.span`
   margin-top: 0.75rem;
 
   position: absolute;
-  z-index: 9999;
+  z-index: 999;
 
   top: 100%;
   left: 160%;
