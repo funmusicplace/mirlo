@@ -156,6 +156,7 @@ const ArtistSupportBox: React.FC<{
                 align-items: center;
                 align-items: stretch;
                 justify-content: center;
+                margin-bottom: 0.5rem;
               `}
             >
               <ArtistVariableSupport tier={subscriptionTier} />

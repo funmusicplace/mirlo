@@ -13,6 +13,15 @@ import { useTranslation } from "react-i18next";
 import styled from "@emotion/styled";
 import Tooltip from "./Tooltip";
 
+const LicenseSpan = styled.a`
+  text-wrap: nowrap;
+  max-width: 4rem;
+  display: block;
+  overflow: ellipsis;
+  text-overflow: ellipsis;
+  overflow: hidden;
+`;
+
 const TR = styled.tr<{ canPlayTrack: boolean }>`
   ${(props) =>
     !props.canPlayTrack
@@ -75,7 +84,6 @@ const TR = styled.tr<{ canPlayTrack: boolean }>`
     }
   }
 `;
-
 
 const FirstTD = styled.td`
   height: 30px;
@@ -240,17 +248,23 @@ const TrackRow: React.FC<{
         <td>
           <Tooltip hoverText={track.license.name}>
             {track.license.link && (
-              <a
+              <LicenseSpan
+                as="a"
                 target="_blank"
                 href={track.license.link}
                 onClick={(e) => {
                   e.stopPropagation();
                 }}
+                className={css`
+                  overflow: ellipsis;
+                `}
               >
                 {track.license.short}
-              </a>
+              </LicenseSpan>
             )}
-            {!track.license.link && track.license.short}
+            {!track.license.link && (
+              <LicenseSpan as="span">{track.license.short}</LicenseSpan>
+            )}
           </Tooltip>
         </td>
       )}

@@ -109,6 +109,7 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup }> = ({
             {...register("chosenPrice")}
             type="number"
             min={trackGroup.minPrice ? trackGroup.minPrice / 100 : 0}
+            step="0.01"
           />
           <PlatformPercent
             percent={trackGroup.platformPercent}
