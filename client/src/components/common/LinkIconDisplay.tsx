@@ -14,6 +14,9 @@ const EMAIL_REGEX =
   /^[a-zA-Z0-9.!#$%&'*+=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
 
 export function isEmailLink(link: string): boolean {
+  if (link.startsWith("http")) {
+    return false;
+  }
   return link.startsWith("mailto:") || EMAIL_REGEX.test(link);
 }
 
@@ -39,6 +42,8 @@ export const linkUrlDisplay = (link: string) => {
 
   try {
     url = new URL(link).origin.replace(/https?:\/\//, "");
+    url = url.replace("www.", "");
+    url = url.replace(/\.[com|org|net]/, "");
   } catch (e) {
     url = link.split("/")[0];
   }
