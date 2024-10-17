@@ -5,12 +5,11 @@ import Box from "../common/Box";
 import { useTranslation } from "react-i18next";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
-
 import { WidthWrapper } from "components/common/WidthContainer";
 
-import { useAuthContext } from "state/AuthContext";
 import { useQuery } from "@tanstack/react-query";
-import { queryArtist, queryMerch, queryUserStripeStatus } from "queries";
+import { queryArtist, queryMerch } from "queries";
+import Confetti from "./Confetti";
 
 function TrackGroup() {
   const { t } = useTranslation("translation", {
@@ -18,7 +17,6 @@ function TrackGroup() {
   });
 
   const { artistId, merchId } = useParams();
-  const { user } = useAuthContext();
   const { data: artist, isLoading: isLoadingArtist } = useQuery(
     queryArtist({ artistSlug: artistId ?? "" })
   );
@@ -40,16 +38,30 @@ function TrackGroup() {
 
   return (
     <WidthWrapper
-      variant="small"
+      variant="medium"
       className={css`
         margin-top: 4rem !important;
+        align-items: center;
+
+        h1 {
+          margin-bottom: 1rem;
+        }
+
+        svg {
+          max-width: 200px;
+          margin: 0 auto;
+          display: block;
+        }
       `}
     >
       <h1>Purchase complete!</h1>
       <div
         className={css`
           display: flex;
-          margin-top: 1rem;
+
+          div:first-child {
+            flex-grow: 1;
+          }
         `}
       >
         <ImageWithPlaceholder
@@ -66,6 +78,7 @@ function TrackGroup() {
           You've bought {merch.title}! The artist has been notified.
         </div>
       </div>
+      <Confetti />
     </WidthWrapper>
   );
 }

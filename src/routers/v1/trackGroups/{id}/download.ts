@@ -58,7 +58,7 @@ export default function () {
         }
       } else {
         logger.info(
-          `trackGroupId: ${trackGroupId} being downloaded by a non-logged in user`
+          `trackGroupId: ${trackGroupId} being downloaded by a non-logged in user, ${email}, ${token}`
         );
         const user = await prisma.user.findFirst({
           where: { email },

@@ -101,8 +101,6 @@ export default function () {
         "credits",
       ]);
 
-      console.log(newValues);
-
       await prisma.trackGroup.updateMany({
         where: { id: Number(trackGroupId), artistId: artist.id },
         data: newValues,

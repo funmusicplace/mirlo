@@ -34,7 +34,7 @@ describe("handleArtistMerchPurchase", () => {
 
   it("should send out emails for merch purchase", async () => {
     const stub = sinon.spy(sendMail, "default");
-    const stubStripe = sinon
+    sinon
       .stub(stripe.products, "retrieve")
       // @ts-ignore
       .returns({ metadata: {} });
