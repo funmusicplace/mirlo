@@ -45,7 +45,6 @@ const ReleaseDate: React.FC<{ releaseDate: string }> = ({
       : { day: "numeric", month: "long", year: "numeric" },
     i18n,
   });
-  console.log("releaseFormat", releaseFormat);
 
   return (
     <div

@@ -425,7 +425,7 @@ export const findPurchaseBasedOnTokenAndUpdate = async (
   if (!purchase) {
     throw new AppError({
       httpCode: 404,
-      description: `Trackgroup Purchase doesn't exist for ${trackGroupId}`,
+      description: `Trackgroup Purchase doesn't exist for ${trackGroupId}, ${userId}`,
     });
   }
 

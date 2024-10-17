@@ -10,7 +10,8 @@ import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import { WidthWrapper } from "components/common/WidthContainer";
 
 import SmallTileDetails from "components/common/SmallTileDetails";
-
+import { useQuery } from "@tanstack/react-query";
+import { queryArtist } from "queries";
 import DownloadAlbumButton from "components/common/DownloadAlbumButton";
 import React from "react";
 import api from "services/api";
@@ -23,17 +24,17 @@ function DownloadAlbum() {
   const [params] = useSearchParams();
   const token = params.get("token");
   const email = params.get("email");
+  const { trackGroupId, artistId } = useParams();
 
-  const {
-    state: { artist, isLoading: isLoadingArtist },
-  } = useArtistContext();
-  const { trackGroupId } = useParams();
+  const { data: artist, isLoading: isLoadingArtist } = useQuery(
+    queryArtist({ artistSlug: artistId ?? "" })
+  );
 
-  const artistId = artist?.id;
   React.useEffect(() => {
     const callback = async () => {
       try {
         setIsLoadingTrackGroup(true);
+        // We need to find the trackgroup id, not the slug
         const tgResponse = await api.get<TrackGroup>(
           `trackGroups/${trackGroupId}?artistId=${artistId}`
         );
@@ -55,7 +56,9 @@ function DownloadAlbum() {
         setIsLoadingTrackGroup(false);
       }
     };
-    callback();
+    if (artistId) {
+      callback();
+    }
   }, [artistId, email, trackGroupId]);
 
   if (!artist && !isLoadingArtist) {
