@@ -154,7 +154,7 @@
     "itemPurchased": "Purchased"
   },
   "merchDetails": {
-    "buy": "Buy {{title}}",
+    "buy": "Buy",
     "supportThisArtistByPurchasing": "Support this artist!",
     "howMany": "How many do you want?",
     "howMuch": "Pay {{ currency }}",
