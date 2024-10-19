@@ -148,7 +148,8 @@ export const stateReducer = produce((draft: GlobalState, action: Actions) => {
       if (atEndOfQueue && draft.looping === "loopQueue") {
         newIndex = 0;
       } else if (atEndOfQueue) {
-        newIndex = undefined;
+        newIndex = draft.currentlyPlayingIndex;
+        draft.playing = false;
       } else {
         newIndex = (draft.currentlyPlayingIndex ?? 0) + 1;
       }
