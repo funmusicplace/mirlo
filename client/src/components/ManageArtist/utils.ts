@@ -81,7 +81,7 @@ export const convertMetaData = (
     order: `${
       p.metadata.common.track.no && Number.isFinite(+p.metadata.common.track.no)
         ? Number(p.metadata.common.track.no)
-        : i + 1
+        : trackGroup.tracks.length + i + 1
     }`,
     duration: p.metadata.format.duration,
     file: p.file,
