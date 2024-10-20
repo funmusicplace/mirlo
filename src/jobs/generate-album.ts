@@ -6,6 +6,7 @@ import { logger } from "./queue-worker";
 import {
   createBucketIfNotExists,
   finalAudioBucket,
+  finalCoversBucket,
   minioClient,
   trackGroupFormatBucket,
 } from "../utils/minio";
@@ -17,6 +18,7 @@ import {
   TrackArtist,
   TrackAudio,
   TrackGroup,
+  TrackGroupCover,
 } from "@mirlo/prisma/client";
 import filenamify from "filenamify";
 import prisma from "@mirlo/prisma";
@@ -50,6 +52,7 @@ export default async (job: Job) => {
   const { trackGroup, format: formatString } = job.data as {
     trackGroup: TrackGroup & {
       tracks: (Track & { audio: TrackAudio; trackArtists: TrackArtist[] })[];
+      cover: TrackGroupCover;
     };
     format: string;
   };
@@ -118,6 +121,11 @@ export default async (job: Job) => {
     }
 
     await job.updateProgress(90);
+
+    if (trackGroup.cover?.id) {
+      logger.info("Adding cover");
+      await minioClient.fGetObject(finalCoversBucket, `${trackGroup.cover.id}-x1500.jpg`, `${tempFolder}/cover.jpg`);
+    }
 
     await new Promise(async (resolve: (value?: unknown) => void, reject) => {
       const finalFilesInFolder = await fsPromises.readdir(tempFolder);
