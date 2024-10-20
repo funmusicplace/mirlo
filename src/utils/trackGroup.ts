@@ -355,6 +355,11 @@ export const basicTrackGroupInclude = {
         deletedAt: null,
       },
     },
+    cover: {
+      include: {
+        trackGroup: false
+      }
+    }
   },
 };
 
