@@ -1,7 +1,14 @@
 import { promises as fsPromises } from "fs";
 import logger from "../../logger";
+import { removeObjectsFromBucket, trackGroupFormatBucket } from "../../utils/minio";
 
 const cleanUpFiles = async (incomingFolder: string) => {
+  if (incomingFolder === trackGroupFormatBucket) {
+    removeBucket(incomingFolder);
+    return {
+      deleted: incomingFolder
+    }
+  }
   try {
     await fsPromises.stat(incomingFolder);
   } catch (e) {
@@ -29,5 +36,10 @@ const cleanUpFiles = async (incomingFolder: string) => {
     deleted: counter,
   };
 };
+
+const removeBucket = async (bucketName: string) => {
+  logger.info(`Removing all objects from ${bucketName}`);
+  await removeObjectsFromBucket(bucketName, '');
+}
 
 export default cleanUpFiles;
