@@ -10,7 +10,6 @@ import { AiFillDelete } from "react-icons/ai";
 
 import { Img, ReplaceSpan, Spinner, UploadPrompt } from "./UploadImage";
 import Button from "components/common/Button";
-import { useArtistContext } from "state/ArtistContext";
 import { bp } from "../../constants";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -212,7 +211,7 @@ const UploadArtistImage: React.FC<{
                     }
                   `}
                 >
-                  Replace Image
+                  {t("replaceImage")}
                 </ReplaceSpan>
                 <Img src={existingImage} alt={imageType} rounded={rounded} />
               </div>

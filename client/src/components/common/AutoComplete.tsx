@@ -86,7 +86,7 @@ const AutoComplete: React.FC<{
     id: number | string;
     name: string;
   }) => React.ReactNode;
-  placeholder?: string;
+  placeholder?: string | null;
   allowNew?: boolean;
   showBackground?: boolean;
 }> = ({
@@ -170,7 +170,7 @@ const AutoComplete: React.FC<{
       <InputEl
         name="search"
         value={searchValue}
-        placeholder={placeholder}
+        placeholder={placeholder ?? ""}
         data-lpignore="true"
         id="search"
         type="search"

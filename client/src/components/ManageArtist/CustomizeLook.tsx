@@ -180,7 +180,7 @@ export const CustomizeLook: React.FC = () => {
                 <FormComponent>
                   <UploadArtistImage
                     existing={artist}
-                    imageTypeDescription="your avatar"
+                    imageTypeDescription={t("yourAvatar")}
                     imageType="avatar"
                     height="auto"
                     width="100%"

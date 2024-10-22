@@ -26,6 +26,7 @@ import { ButtonLink } from "components/common/Button";
 import { getArtistManageMerchUrl } from "utils/artist";
 import { FaPen } from "react-icons/fa";
 import { useAuthContext } from "state/AuthContext";
+import PublicTrackGroupListing from "components/common/PublicTrackGroupListing";
 
 function TrackGroup() {
   const { t } = useTranslation("translation", {
@@ -56,8 +57,6 @@ function TrackGroup() {
   } else if (!merch) {
     return <FullPageLoadingSpinner />;
   }
-
-  console.log(merch);
 
   const merchDescription =
     merch.description === "" && merch.includePurchaseTrackGroup.about
@@ -144,17 +143,30 @@ function TrackGroup() {
             </ImageAndDetailsWrapper>
             <div
               className={css`
-                margin-left: 1rem;
-                max-width: 59%;
-                flex: 59%;
-                @media screen and (max-width: ${bp.small}px) {
-                  max-width: 100%;
-                  flex: 100%;
-                  margin-left: 0;
-                }
+                flex-direction: column;
+                display: flex;
               `}
             >
-              <MarkdownContent content={merchDescription} />
+              {
+                <PublicTrackGroupListing
+                  tracks={merch.includePurchaseTrackGroup.tracks}
+                  trackGroup={merch.includePurchaseTrackGroup}
+                />
+              }
+              <div
+                className={css`
+                  margin-left: 1rem;
+                  max-width: 59%;
+                  flex: 59%;
+                  @media screen and (max-width: ${bp.small}px) {
+                    max-width: 100%;
+                    flex: 100%;
+                    margin-left: 0;
+                  }
+                `}
+              >
+                <MarkdownContent content={merchDescription} />
+              </div>
             </div>
             <BuyMerchItem artist={artist} merch={merch} />
           </div>

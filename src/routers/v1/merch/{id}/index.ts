@@ -31,7 +31,11 @@ export default function () {
           artist: true,
           images: true,
           shippingDestinations: true,
-          includePurchaseTrackGroup: true,
+          includePurchaseTrackGroup: {
+            include: {
+              tracks: true,
+            },
+          },
           optionTypes: { include: { options: true } },
         },
       });

@@ -7,6 +7,7 @@ import Button from "./common/Button";
 import { InputEl } from "./common/Input";
 import { useSnackbar } from "state/SnackbarContext";
 import { useTranslation } from "react-i18next";
+import Box from "./common/Box";
 
 type SignupInputs = {
   email: string;
@@ -21,6 +22,7 @@ function PasswordReset() {
 
   const token = search.get("token");
   const id = search.get("id");
+  const accountIncomplete = search.get("accountIncomplete") === "true";
   const { register: initRegister, handleSubmit: initSubmit } =
     useForm<SignupInputs>();
   const { register: newRegister, handleSubmit: newSubmit } =
@@ -74,6 +76,16 @@ function PasswordReset() {
         flex-direction: column;
       `}
     >
+      {accountIncomplete && (
+        <Box
+          variant="info"
+          className={css`
+            margin-top: 1rem;
+          `}
+        >
+          {t("setAPasswordToFinishAccountSetUp")}
+        </Box>
+      )}
       {!token && (
         <form
           className={css`
@@ -89,7 +101,14 @@ function PasswordReset() {
 
           <label>{t("email")}</label>
           <InputEl type="email" {...initRegister("email")} />
-          <Button type="submit">{t("reset")}</Button>
+          <Button
+            type="submit"
+            className={css`
+              margin-top: 1rem;
+            `}
+          >
+            {t("reset")}
+          </Button>
         </form>
       )}
       {token && id && (
@@ -102,7 +121,10 @@ function PasswordReset() {
           `}
           onSubmit={newSubmit(onNewPassword)}
         >
-          <h2>{t("title")}</h2>
+          <h2>
+            {" "}
+            {accountIncomplete ? t("accountIncompleteTitle") : t("title")}
+          </h2>
 
           <label>{t("password")}</label>
           <InputEl type="password" {...newRegister("password")} />

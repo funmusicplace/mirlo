@@ -92,9 +92,10 @@ router.get("/password-reset/confirmation/:token", async (req, res, next) => {
     let { token } = req.params as {
       token: string;
     };
-    let { id, redirectClient } = req.query as {
+    let { id, redirectClient, accountIncomplete } = req.query as {
       redirectClient: string;
       id: string;
+      accountIncomplete?: string;
     };
 
     const user = await prisma.user.findFirst({
@@ -112,7 +113,10 @@ router.get("/password-reset/confirmation/:token", async (req, res, next) => {
     ) {
       return res.status(404).json({ error: "Token expired" });
     } else {
-      return res.redirect(redirectClient + `?token=${token}&id=${id}`);
+      return res.redirect(
+        redirectClient +
+          `?token=${token}&id=${id}&accountIncomplete=${accountIncomplete}`
+      );
     }
   } catch (e) {
     logger.info(`Error with password reset ${e}`);
@@ -123,9 +127,10 @@ router.post(`/password-reset/initiate`, async (req, res, next) => {
   try {
     // FIXME: should the client be changed from a URL to an id. Probably
     // And then check that the client exists in the DB.
-    let { redirectClient, email } = req.body as {
+    let { redirectClient, email, accountIncomplete } = req.body as {
       redirectClient: string;
       email: string;
+      accountIncomplete: boolean;
     };
     email = email.toLowerCase();
 
@@ -165,6 +170,7 @@ router.post(`/password-reset/initiate`, async (req, res, next) => {
             user: result,
             host: process.env.API_DOMAIN,
             redirectClient,
+            accountIncomplete,
             token,
           },
         },

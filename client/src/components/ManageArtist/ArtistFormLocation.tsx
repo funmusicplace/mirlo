@@ -113,7 +113,10 @@ const ArtistFormLocation: React.FC<ArtistLocationProps> = ({
           `}
         >
           <IoLocationSharp />
-          <InputEl {...register(`location`)} placeholder="eg. North Pole" />
+          <InputEl
+            {...register(`location`)}
+            placeholder={t("exampleLocation") ?? ""}
+          />
         </div>
         <div
           className={css`

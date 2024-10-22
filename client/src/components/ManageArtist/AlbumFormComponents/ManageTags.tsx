@@ -4,6 +4,7 @@ import Button from "components/common/Button";
 import Pill from "components/common/Pill";
 import { cloneDeep, uniq } from "lodash";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { FaTimes } from "react-icons/fa";
 import { useParams } from "react-router-dom";
 import api from "services/api";
@@ -12,6 +13,8 @@ import { useAuthContext } from "state/AuthContext";
 export const Tag = <li></li>;
 
 const ManageTags: React.FC<{ tags?: string[] }> = ({ tags: existingTags }) => {
+  const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
+
   const [tags, setTags] = React.useState<string[]>(existingTags ?? []);
   const { trackGroupId } = useParams();
   const { user } = useAuthContext();
@@ -62,7 +65,7 @@ const ManageTags: React.FC<{ tags?: string[] }> = ({ tags: existingTags }) => {
         margin-top: 1.5rem;
       `}
     >
-      <h2>Album tags</h2>
+      <h2>{t("albumTags")}</h2>
       {tags.length > 0 && (
         <div
           className={css`
@@ -100,7 +103,7 @@ const ManageTags: React.FC<{ tags?: string[] }> = ({ tags: existingTags }) => {
         <AutoComplete
           getOptions={findTags}
           onSelect={saveTags}
-          placeholder="Start typing"
+          placeholder={t("typeForTags")}
           allowNew
         />
       </div>
