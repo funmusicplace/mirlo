@@ -10,8 +10,12 @@ html
         include ../style.css
   body.sans-serif
     p Hi!
-    p Someone wants to reset the password for this email
+    if accountIncomplete
+      p Someone wants to set a password for this email
+    else 
+      p Someone wants to reset the password for this email
+
     p #{user.email}
     p 
-      a(href!=`${host}/auth/password-reset/confirmation/${token}?id=${user.id}&redirectClient=${redirectClient}`) Click here to confirm
+      a(href!=`${host}/auth/password-reset/confirmation/${token}?id=${user.id}&redirectClient=${redirectClient}&accountIncomplete=${accountIncomplete}`) Click here to confirm
     p If this was not you, you can safely ignore this email.

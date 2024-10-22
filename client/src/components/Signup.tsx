@@ -7,7 +7,7 @@ import Button from "./common/Button";
 import { InputEl } from "./common/Input";
 import { useSnackbar } from "state/SnackbarContext";
 import Box from "./common/Box";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import FormComponent from "./common/FormComponent";
 import Checkbox from "./common/FormCheckbox";
 import styled from "@emotion/styled";
@@ -60,6 +60,7 @@ function Signup() {
   const { t } = useTranslation("translation", { keyPrefix: "signUp" });
   const snackbar = useSnackbar();
   const [hasRegistered, setHasRegistered] = React.useState(false);
+  const [accountIncomplete, setAccountIncomplete] = React.useState(false);
   const methods = useForm<SignupInputs>({
     defaultValues: {
       accountType: "listener",
@@ -84,12 +85,40 @@ function Signup() {
         setHasRegistered(true);
         snackbar(t("success"), { type: "success" });
       } catch (e) {
-        snackbar((e as Error).message, { type: "warning" });
-        console.error(e);
+        if ((e as Error).message.includes("incomplete")) {
+          await api.post("password-reset/initiate", {
+            ...data,
+            accountIncomplete: true,
+            redirectClient:
+              import.meta.env.VITE_CLIENT_DOMAIN + "/password-reset",
+          });
+          snackbar(t("checkEmailContinueSignup"), {
+            type: "success",
+          });
+          setAccountIncomplete(true);
+          setHasRegistered(true);
+        } else {
+          snackbar((e as Error).message, { type: "warning" });
+          console.error(e);
+        }
       }
     },
     [snackbar, t]
   );
+
+  if (accountIncomplete) {
+    return (
+      <Box
+        className={css`
+          margin: 0 auto;
+          max-width: 320px;
+          text-align: center;
+        `}
+      >
+        {t("accountIncomplete")}
+      </Box>
+    );
+  }
 
   if (hasRegistered) {
     return (
@@ -111,7 +140,7 @@ function Signup() {
         <form
           className={css`
             max-width: 320px;
-            margin: 0 auto;
+            margin: 2rem auto;
             display: flex;
             text-align: left;
             flex-direction: column;
