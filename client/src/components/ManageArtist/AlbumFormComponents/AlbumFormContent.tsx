@@ -42,7 +42,7 @@ const AlbumFormContent: React.FC<{
         <label>{t("cover")}</label>
 
         <UploadArtistImage
-          imageTypeDescription="an album cover"
+          imageTypeDescription={t("anAlbumCover")}
           existing={existingObject}
           imageType="cover"
           height="400"

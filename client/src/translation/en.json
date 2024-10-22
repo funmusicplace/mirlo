@@ -170,6 +170,8 @@
   "artist": {
     "merch": "Merch",
     "Email": "Email",
+    "exampleLocation": "Eg. North Pole",
+    "backToArtist": "Back to artist",
     "postByArtist": "by <link>{{artistName}}</link>",
     "Website": "Website",
     "bioPlaceholder": "Let listeners know a bit about yourself",
@@ -274,6 +276,8 @@
     "saveCountryCode": "Save"
   },
   "manageArtist": {
+    "albumTags": "Album tags",
+    "typeForTags": "Start typing to add tags",
     "notEnabled": "This artist has not been enabled by site admin yet! Contact an admin to do so.",
     "manage": "Manage {{artist}}",
     "paymentProcessorNotSetUp": "You haven't set up a payment processor yet. Go to your <manage>artists management page</manage> to do so.",
@@ -327,6 +331,7 @@
   "manageMerch": {
     "destinationCountry": "Destination country",
     "deleteMerch": "Delete merch item",
+    "merchImage": "merch image",
     "relatedToTrackGroup": "Should this merch appear under a specific album?",
     "areYouSureDelete": "Are you sure you want to delete this artist?",
     "problemDeletingMerch": "Problem deleting merch",
@@ -359,6 +364,7 @@
   "manageAlbum": {
     "dontSeeTheLicenseYouWant": "Don't see the license you want for this track?",
     "license": "Track license",
+    "anAlbumCover": "an album cover",
     "addALicense": "Add a license",
     "addIt": "Add it",
     "whatMeanLicense": "Don't know what this means? It's safe to leave it blank. Depending on your country, your work is most likely already copyrighted under the Berne Convention and/or the TRIPS agreement <a href='https://en.m.wikipedia.org/wiki/TRIPS_Agreement'>(more about it here)</a>.",
@@ -428,11 +434,13 @@
   "artistForm": {
     "backgroundImageLabel": "Background image",
     "clickToUploadType": "Click to upload {{ imageType }}",
+    "yourAvatar": "your avatar",
     "needsToBeUnique": "This needs to be unique, try something else",
     "backgroundImageDescription": "the image that appears in the background of your page",
     "displayName": "Display name",
     "bio": "Artist biography",
     "urlSlug": "Text that will appear in the URL",
+    "replaceImage": "Replace image",
     "saveArtist": "Save artist",
     "createArtist": "Create artist",
     "newArtist": "New artist",

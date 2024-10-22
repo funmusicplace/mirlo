@@ -19,13 +19,10 @@ import Box from "components/common/Box";
 import { Toggle } from "components/common/Toggle";
 import api from "services/api";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
-import Button, { ButtonLink } from "components/common/Button";
+import { ButtonLink } from "components/common/Button";
 import { getMerchUrl } from "utils/artist";
-import { FaTrash } from "react-icons/fa";
 import { useSnackbar } from "state/SnackbarContext";
 import DeleteMerchButton from "./DeleteMerchButton";
-import AutoCompleteTrackGroup from "components/common/AutoCompleteTrackGroup";
-import FormComponent from "components/common/FormComponent";
 
 export interface TrackGroupFormData {
   published: boolean;
@@ -149,7 +146,7 @@ const EditMerch: React.FC<{}> = () => {
           `}
         >
           <UploadArtistImage
-            imageTypeDescription="merch image"
+            imageTypeDescription={t("merchImage")}
             existing={merch}
             imageType="image"
             height="400"

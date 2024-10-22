@@ -266,7 +266,6 @@ const routes: RouteObject[] = [
                     children: [
                       {
                         path: "",
-
                         async lazy() {
                           const { default: Component } = await import(
                             "components/ManageArtist/Merch/ManageMerch"
@@ -440,11 +439,7 @@ const routes: RouteObject[] = [
             "components/FulFillment/Fulfillment"
           );
           return {
-            Component: () => (
-              <AuthWrapper adminOnly>
-                <Fulfillment />
-              </AuthWrapper>
-            ),
+            Component: () => <Fulfillment />,
           };
         },
       },

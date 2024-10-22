@@ -1,5 +1,6 @@
 import { css } from "@emotion/css";
 import Tooltip from "components/common/Tooltip";
+import { useTranslation } from "react-i18next";
 import { FaChevronLeft } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { useArtistContext } from "state/ArtistContext";
@@ -8,13 +9,14 @@ const BackToArtistLink = () => {
   const {
     state: { artist },
   } = useArtistContext();
+  const { t } = useTranslation("translation", { keyPrefix: "artist" });
 
   if (!artist) {
     return null;
   }
 
   return (
-    <Tooltip hoverText="Back to artist" underline={false}>
+    <Tooltip hoverText={t("backToArtist")} underline={false}>
       <Link
         className={css`
           display: flex;
