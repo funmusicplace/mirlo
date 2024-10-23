@@ -51,7 +51,7 @@ const ArtistLinksInHeader: React.FC<{
               key={l.url}
               target="_blank"
             >
-              {site.icon} {linkUrlDisplay(l.url)}
+              {site.icon} {linkUrlDisplay(l)}
             </a>
           );
         })}

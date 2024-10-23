@@ -33,22 +33,16 @@ export function linkUrlHref(link: string, forDisplay?: boolean): string {
   }
 }
 
-export const linkUrlDisplay = (link: string) => {
-  let url;
-  if (isEmailLink(link)) {
+export const linkUrlDisplay = (link: {url: string, linkType?: string}): string => {
+  if (isEmailLink(link.url)) {
     return "Email";
   }
-  url = findOutsideSite(link);
 
-  try {
-    url = new URL(link).origin.replace(/https?:\/\//, "");
-    url = url.replace("www.", "");
-    url = url.replace(/\.[com|org|net]/, "");
-  } catch (e) {
-    url = link.split("/")[0];
+  if (!link.linkType || link.linkType === "Email") {
+    return findOutsideSite(link.url).name;
   }
 
-  return url;
+  return link.linkType;
 };
 
 export const findOutsideSite = (link: string) => {

@@ -125,7 +125,7 @@ const ArtistLinks: React.FC = () => {
                     }
                   `}
                 >
-                  {site.icon} {linkUrlDisplay(l.url)}
+                  {site.icon} {linkUrlDisplay(l)}
                 </a>
               </li>
             );
