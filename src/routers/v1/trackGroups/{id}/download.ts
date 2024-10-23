@@ -99,7 +99,7 @@ export default function () {
       }
 
       try {
-        const title = cleanHeaderValue(filenamify(trackGroup.title ?? "album"));
+        const title = cleanHeaderValue(filenamify(`${trackGroup.artist.name} - ${trackGroup.title ?? "album"}`));
         logger.info(`downloading ${title}.zip`);
         res.attachment(`${title}.zip`);
         res.set("Content-Disposition", `attachment; filename="${title}.zip"`);

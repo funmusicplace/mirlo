@@ -359,6 +359,11 @@ export const basicTrackGroupInclude = {
       include: {
         trackGroup: false
       }
+    },
+    artist: {
+      include: {
+        user: false
+      }
     }
   },
 };
