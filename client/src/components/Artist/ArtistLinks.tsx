@@ -107,7 +107,7 @@ const ArtistLinks: React.FC = () => {
           `}
         >
           {artist.linksJson?.map((l) => {
-            const site = findOutsideSite(l.url);
+            const site = findOutsideSite(l);
             return (
               <li key={l.url}>
                 <a

@@ -124,6 +124,12 @@ interface Notification {
   trackGroup?: TrackGroup & { artist: Artist };
 }
 
+interface Link {
+  url: string;
+  linkType?: string;
+  inHeader?: boolean;
+}
+
 interface Artist {
   name: string;
   bio: string;
@@ -135,7 +141,7 @@ interface Artist {
   createdAt: string;
   trackGroups: TrackGroup[];
   links?: string[];
-  linksJson?: { url: string; linkType: string; inHeader?: boolean }[];
+  linksJson?: Link[];
   posts: Post[];
   subscriptionTiers: ArtistSubscriptionTier[];
   properties?: {

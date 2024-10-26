@@ -2929,7 +2929,7 @@ __metadata:
     react-hook-form: "npm:^7.40.0"
     react-i18n: "npm:^1.0.1"
     react-i18next: "npm:^12.2.2"
-    react-icons: "npm:^5.0.1"
+    react-icons: "npm:^5.3.0"
     react-markdown: "npm:^8.0.6"
     react-papaparse: "npm:^4.4.0"
     react-router-dom: "npm:^6.22.3"
@@ -17975,12 +17975,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-icons@npm:^5.0.1":
-  version: 5.1.0
-  resolution: "react-icons@npm:5.1.0"
+"react-icons@npm:^5.3.0":
+  version: 5.3.0
+  resolution: "react-icons@npm:5.3.0"
   peerDependencies:
     react: "*"
-  checksum: 10/00f75809b1846a6cfb48e3d64ddc5e931a1fa74aa429cd594dc4a70223a5702deff62638b02c727c0aeb83120a8875d8034b380601c61a4d803a9227387bac22
+  checksum: 10/7f315d2a5e0eee7fefe01eac5cbe818b9592d88964f6c99ba454539a78cd2efd4430152e88113585c5a54bca6a5e1e7e7978df9cf69a03d8479a8d3d106a027c
   languageName: node
   linkType: hard
 

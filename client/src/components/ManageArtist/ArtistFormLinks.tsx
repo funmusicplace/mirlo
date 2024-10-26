@@ -18,7 +18,7 @@ import FormCheckbox from "components/common/FormCheckbox";
 import FormComponent from "components/common/FormComponent";
 
 interface FormData {
-  linkArray: { url: string; linkType: string; inHeader?: boolean }[];
+  linkArray: Link[];
 }
 
 interface ArtistFormLinksProps {
@@ -34,7 +34,7 @@ export function transformFromLinks(
     linkArray: [
       ...(artist.links?.map((l) => ({
         url: l.replace("mailto:", ""),
-        linkType: findOutsideSite(l)?.name,
+        linkType: findOutsideSite({url: l, linkType: ""})?.name,
         inHeader: true,
       })) ?? []),
       ...(artist.linksJson ?? []),
@@ -78,7 +78,7 @@ const ArtistFormLinks: React.FC<ArtistFormLinksProps> = ({
 
   const handleInputElBlur = React.useCallback(
     (val: string, index: number) => {
-      const newVal = findOutsideSite(val).name;
+      const newVal = findOutsideSite({url: val, linkType: ""}).name;
       setValue(`linkArray.${index}.linkType`, newVal);
     },
     [setValue]
@@ -130,8 +130,18 @@ const ArtistFormLinks: React.FC<ArtistFormLinksProps> = ({
             >
               {site?.icon ?? <FaGlobe />}
               <SelectEl {...register(`linkArray.${index}.linkType`)}>
-                {outsideLinks.map((site) => (
-                  <option>{t(site.name, site.name)}</option>
+                {outsideLinks
+                  .sort((a, b) => {
+                    if (a.name > b.name) {
+                      return 1;
+                    }
+                    if (a.name < b.name) {
+                      return -1;
+                    }
+                    return 0;
+                  })
+                  .map((site) => (
+                    <option key={site.name}>{t(site.name, site.name)}</option>
                 ))}
               </SelectEl>
               <div className="header-wrapper">

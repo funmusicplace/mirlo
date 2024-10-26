@@ -43,7 +43,7 @@ const ArtistLinksInHeader: React.FC<{
         `}
       >
         {links.map((l) => {
-          const site = findOutsideSite(l.url);
+          const site = findOutsideSite(l);
           return (
             <a
               rel="me"
