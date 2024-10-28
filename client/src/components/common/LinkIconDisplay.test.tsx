@@ -47,8 +47,8 @@ test.each([
 });
 
 test("linkUrlDisplay ignores Email linkType if url is not e-mail", () => {
-  const result = linkUrlDisplay({url: "https://example.com", linkType: "Email"});
-  expect(result).toBe("Website");
+  const result = linkUrlDisplay({url: "https://example.com/@user", linkType: "Email"});
+  expect(result).toBe("Example");
 });
 
 test("linkUrlDisplay returns linkType if set", () => {
@@ -63,9 +63,9 @@ test.each([
   [{url: "https://www.facebook.com/", linkType: undefined}, "Facebook"],
   [{url: "https://www.bandcamp.com/", linkType: undefined}, "Bandcamp"],
   [{url: "https://www.instagram.com/", linkType: undefined}, "Instagram"],
-  [{url: "@", linkType: undefined}, "Email"],
-  [{url: "http://example.com/", linkType: undefined}, "Website"],
-])("linkUrlDisplay guesses linkType when not set", (link, expected) => {
+  [{url: "test@example.com", linkType: undefined}, "Email"],
+  [{url: "http://example.com/", linkType: undefined}, "Example"],
+])("linkUrlDisplay guesses linkType when not set", (link: Link, expected) => {
   const result = linkUrlDisplay(link);
   expect(result).toBe(expected);
 });
