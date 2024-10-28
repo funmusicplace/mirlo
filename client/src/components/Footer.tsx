@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import WidthContainer from "./common/WidthContainer";
 import { bp } from "../constants";
 import { FaInstagram, FaMastodon, FaTwitter } from "react-icons/fa";
+import { FaBluesky } from "react-icons/fa6";
 
 export const Footer = () => {
   const { t } = useTranslation("translation", { keyPrefix: "footer" });
@@ -97,6 +98,13 @@ export const Footer = () => {
               aria-label={`${t("socialX", { username: "@mirlospace" })}`}
             >
               <FaTwitter aria-hidden />
+            </a>
+            <a
+              href="https://bsky.app/profile/mirlo.bsky.social"
+              title="BlueSky"
+              aria-label={`${t("socialBlueSky", { username: "mirlo.bsky.social" })}`}
+            >
+              <FaBluesky />
             </a>
           </p>
         </div>

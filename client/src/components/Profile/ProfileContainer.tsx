@@ -33,6 +33,7 @@ const ProfileContainer: React.FC = () => {
           className={css`
             border-bottom: var(--mi-border);
             background-color: var(--mi-light-background-color);
+            margin-bottom: 1rem;
           `}
         >
           <WidthContainer variant="big" justify="center">
@@ -63,6 +64,9 @@ const ProfileContainer: React.FC = () => {
               </li>
               <li>
                 <NavLink to="/profile/wishlist">{t("wishlist")}</NavLink>
+              </li>
+              <li>
+                <NavLink to="/profile/purchases">{t("purchases")}</NavLink>
               </li>
               <li>
                 <NavLink to="/profile/notifications">

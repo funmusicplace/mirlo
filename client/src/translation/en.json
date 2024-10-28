@@ -98,8 +98,13 @@
     "collectionEmpty": "There's nothing in your collection yet, support some artists and buy their music!",
     "yourCollection": "Your collection",
     "yourWishlist": "Your wishlist",
+    "yourPurchases": "Your purchases",
     "collection": "Collection",
     "wishlist": "Wishlist",
+    "purchases": "Purchases",
+    "paid": "Paid: {{ amount }}",
+    "purchasedOn": "Purchased on {{ date }}",
+    "albumLink": "<albumLink>{{albumTitle}}</albumLink> by <artistLink>{{artistName}}</artistLink>",
     "wishlistEmpty": "There's nothing in your wishlist yet, browse the site!",
     "resetPassword": "Want to reset your password?"
   },
@@ -514,7 +519,8 @@
     "aboutUs": "<about>About us</about>, <terms>Terms and conditions</terms>, <privacy>Privacy</privacy>, <cookie>Our use of cookies</cookie>",
     "socialInstagram": "{{username}} on Instagram",
     "socialMastodon": "{{username}} on Mastodon",
-    "socialX": "{{username}} on X"
+    "socialX": "{{username}} on X",
+    "socialBlueSky": "{{username}} on BlueSky"
   },
   "notifications": {
     "notifications": "Notifications",

@@ -33,7 +33,19 @@ export default function () {
           shippingDestinations: true,
           includePurchaseTrackGroup: {
             include: {
-              tracks: true,
+              tracks: {
+                where: {
+                  deletedAt: null,
+                  audio: {
+                    uploadState: "SUCCESS",
+                  },
+                },
+                include: {
+                  audio: true,
+                  trackArtists: true,
+                  license: true,
+                },
+              },
             },
           },
           optionTypes: { include: { options: true } },

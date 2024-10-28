@@ -54,7 +54,7 @@ const ClickToPlayAlbum: React.FC<{
           if (!userIsTrackGroupArtist) {
             const { results: purchases } =
               await api.getMany<UserTrackGroupPurchase>(
-                `users/${userId}/purchases?trackGroupId=${trackGroupId}`
+                `users/${userId}/trackGroupPurchases?trackGroupId=${trackGroupId}`
               );
 
             isOwned = purchases.length > 0;

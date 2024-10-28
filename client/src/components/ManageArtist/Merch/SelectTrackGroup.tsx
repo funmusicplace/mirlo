@@ -18,9 +18,9 @@ const SelectTrackGroup: React.FC<{
   const snackbar = useSnackbar();
   const errorHandler = useErrorHandler();
   const [isSaving, setIsSaving] = React.useState(false);
-  const [currentTrackGroup, setCurrentTrackGroup] = React.useState<TrackGroup>(
-    merch.includePurchaseTrackGroup
-  );
+  const [currentTrackGroup, setCurrentTrackGroup] = React.useState<
+    TrackGroup | undefined
+  >(merch.includePurchaseTrackGroup);
 
   const doSave = React.useCallback(
     async (val: number) => {

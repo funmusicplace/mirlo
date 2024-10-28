@@ -59,7 +59,7 @@ function TrackGroup() {
   }
 
   const merchDescription =
-    merch.description === "" && merch.includePurchaseTrackGroup.about
+    merch.description === "" && merch.includePurchaseTrackGroup?.about
       ? merch.includePurchaseTrackGroup.about
       : merch.description;
 
@@ -147,12 +147,12 @@ function TrackGroup() {
                 display: flex;
               `}
             >
-              {
+              {merch.includePurchaseTrackGroup && (
                 <PublicTrackGroupListing
-                  tracks={merch.includePurchaseTrackGroup.tracks}
+                  tracks={merch.includePurchaseTrackGroup?.tracks}
                   trackGroup={merch.includePurchaseTrackGroup}
                 />
-              }
+              )}
               <div
                 className={css`
                   margin-left: 1rem;

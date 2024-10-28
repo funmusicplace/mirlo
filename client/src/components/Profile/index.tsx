@@ -57,23 +57,29 @@ function Profile() {
               artistUserSubscriptions={user.artistUserSubscriptions}
             />
           )}
-          <ButtonLink to="/profile/collection" style={{ marginTop: "1rem" }}>
-            {t("viewCollection")}
-          </ButtonLink>
+
           <ButtonLink to="/manage" style={{ marginTop: "1rem" }}>
             {t("manageArtists")}
           </ButtonLink>
-          <Button
-            style={{
-              width: "100%",
-              backgroundColor: "var(--mi-warning-background-color)",
-              borderColor: "var(--mi-darken-warning-background-color)",
-              marginTop: "1rem",
-            }}
-            onClick={deleteAccount}
+          <div
+            className={css`
+              border-top: 1px solid var(--mi-darken-x-background-color);
+              margin-top: 2rem;
+              padding-top: 1rem;
+            `}
           >
-            {t("deleteAccount")}
-          </Button>
+            <Button
+              style={{
+                width: "100%",
+                backgroundColor: "var(--mi-warning-background-color)",
+                borderColor: "var(--mi-darken-warning-background-color)",
+                marginTop: "1rem",
+              }}
+              onClick={deleteAccount}
+            >
+              {t("deleteAccount")}
+            </Button>
+          </div>
         </div>
       </WidthContainer>
     </div>
