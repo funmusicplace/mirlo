@@ -5,7 +5,6 @@ import {
   userAuthenticated,
 } from "../../../../../auth/passport";
 import prisma from "@mirlo/prisma";
-import countries from "../../../../../utils/country-codes-currencies";
 import {
   getUserCountry,
   getUserCurrencyString,

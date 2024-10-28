@@ -22,6 +22,7 @@ const UnreadCountPill = () => {
     <Pill
       className={css`
         margin-left: 0.5rem;
+        margin-bottom: -10px;
       `}
     >
       {unreadCount}

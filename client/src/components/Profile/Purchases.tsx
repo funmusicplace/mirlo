@@ -8,23 +8,23 @@ import { useTranslation } from "react-i18next";
 import WidthContainer from "components/common/WidthContainer";
 import { useAuthContext } from "state/AuthContext";
 
-function WishlistCollection() {
+function Purchases() {
   const { user } = useAuthContext();
   const userId = user?.id;
 
-  const [purchases, setPurchases] = React.useState<UserTrackGroupWishlist[]>();
+  const [purchases, setPurchases] = React.useState<UserTrackGroupPurchase[]>();
   const { t } = useTranslation("translation", { keyPrefix: "profile" });
 
-  const fetchWishlist = React.useCallback(async () => {
-    const { results } = await api.getMany<UserTrackGroupWishlist>(
-      `users/${userId}/wishlist`
+  const fetchTrackGroups = React.useCallback(async () => {
+    const { results } = await api.getMany<UserTrackGroupPurchase>(
+      `users/${userId}/trackGroupPurchases`
     );
     setPurchases(results);
   }, [userId]);
 
   React.useEffect(() => {
-    fetchWishlist();
-  }, [fetchWishlist]);
+    fetchTrackGroups();
+  }, [fetchTrackGroups]);
 
   if (!user) {
     return null;
@@ -38,7 +38,7 @@ function WishlistCollection() {
         `}
       >
         <WidthContainer variant="big" justify="center">
-          <h1>{t("yourWishlist")}</h1>
+          <h1>{t("yourPurchases")}</h1>
           <div
             className={css`
               display: flex;
@@ -48,7 +48,7 @@ function WishlistCollection() {
             `}
           >
             {!purchases ||
-              (purchases?.length === 0 && <Box>{t("wishlistEmpty")}</Box>)}
+              (purchases?.length === 0 && <Box>{t("noPurchases")}</Box>)}
             <TrackgroupGrid gridNumber={"4"}>
               {purchases?.map(
                 (purchase) =>
@@ -67,4 +67,4 @@ function WishlistCollection() {
   );
 }
 
-export default WishlistCollection;
+export default Purchases;

@@ -208,6 +208,14 @@ interface ArtistUserSubscription {
   artistSubscriptionTier: ArtistSubscriptionTier;
 }
 
+interface UserTrackGroupWishlist {
+  userId: number;
+  user: User;
+  trackGroupId: number;
+  trackGroup: TrackGroup;
+  createdAt: string;
+}
+
 interface UserTrackGroupPurchase {
   userId: number;
   user?: User;
@@ -270,7 +278,7 @@ interface Merch {
   quantityRemaining: number;
   id: string;
   includePurchaseTrackGroupId?: number;
-  includePurchaseTrackGroup: TrackGroup;
+  includePurchaseTrackGroup?: TrackGroup;
   isPublic: boolean;
   images: {
     url: string[];
@@ -290,6 +298,8 @@ interface MerchPurchase {
   createdAt: string;
   updatedAt: string;
   quantity: number;
+  currencyPaid: string;
+  amountPaid: number;
   fulfillmentStatus: "NO_PROGRESS" | "STARTED" | "SHIPPED" | "COMPLETED";
   shippingAddress: {
     line1: string;
