@@ -85,7 +85,7 @@ const MerchDestinations: React.FC<{}> = () => {
       {user?.currency && (
         <P>
           {t("currentCountry", {
-            country: currencyToCountryMap[user?.currency],
+            country: currencyToCountryMap[user.currency].countryName,
           })}
         </P>
       )}
@@ -111,10 +111,18 @@ const MerchDestinations: React.FC<{}> = () => {
         <div
           className={css`
             margin-top: 1rem;
+            display: flex;
+            justify-content: space-between;
           `}
         >
           {!isEditing && (
-            <Button startIcon={<FaPen />} onClick={() => setIsEditing(true)}>
+            <Button
+              startIcon={<FaPen />}
+              onClick={() => setIsEditing(true)}
+              className={css`
+                justify-self: flex-start;
+              `}
+            >
               {t("edit")}
             </Button>
           )}

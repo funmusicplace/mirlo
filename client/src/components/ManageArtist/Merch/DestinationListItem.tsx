@@ -31,9 +31,11 @@ const DestinationListItem: React.FC<{
         <div
           className={css`
             width: 100%;
+            display: flex;
+            justify-content: space-between;
 
             > div {
-              max-width: 45%;
+              max-width: 30%;
               display: inline-block;
               margin-right: 1rem;
             }

@@ -33,8 +33,11 @@ const IncludesDigitalDownload: React.FC<{ merch: Merch; artist: Artist }> = ({
         i18nKey="includesDownloadOf"
         values={{ albumTitle: merch.includePurchaseTrackGroup.title }}
         components={{
-          link: (
+          albumLink: (
             <Link
+              className={css`
+                font-weight: bold;
+              `}
               to={getReleaseUrl(merch.artist, merch.includePurchaseTrackGroup)}
             ></Link>
           ),

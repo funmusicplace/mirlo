@@ -9,6 +9,7 @@ import AutoCompleteTrackGroup from "components/common/AutoCompleteTrackGroup";
 import api from "services/api";
 import Pill from "components/common/Pill";
 import { css } from "@emotion/css";
+import { FaTimes } from "react-icons/fa";
 
 const SelectTrackGroup: React.FC<{
   merch: Merch;
@@ -23,7 +24,7 @@ const SelectTrackGroup: React.FC<{
   >(merch.includePurchaseTrackGroup);
 
   const doSave = React.useCallback(
-    async (val: number) => {
+    async (val: number | null) => {
       try {
         setIsSaving(true);
         const response = await api.put<Partial<Merch>, { result: Merch }>(
@@ -56,6 +57,12 @@ const SelectTrackGroup: React.FC<{
           `}
         >
           {currentTrackGroup.title}
+          <FaTimes
+            onClick={() => doSave(null)}
+            className={css`
+              cursor: pointer;
+            `}
+          />
         </Pill>
       )}
       <AutoCompleteTrackGroup
