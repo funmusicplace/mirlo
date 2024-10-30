@@ -168,7 +168,7 @@ const BuyMerchItem: React.FC<{
         isLoading={isLoadingStripe}
         variant="big"
       >
-        {t("buy")}
+        {t("buyMerch")}
       </Button>
     </form>
   );
