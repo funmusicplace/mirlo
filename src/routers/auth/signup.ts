@@ -3,6 +3,8 @@ import prisma from "@mirlo/prisma";
 import { hashPassword } from ".";
 import { sendMail } from "../../jobs/send-mail";
 import { Job } from "bullmq";
+import logger from "../../logger";
+import { AppError } from "../../utils/error";
 
 const signup = async (req: Request, res: Response, next: NextFunction) => {
   let {
@@ -15,8 +17,12 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
   } = req.body;
 
   if (!email || !password) {
-    res.status(400).json({ error: "Email and password must be supplied" });
-    return next();
+    next(
+      new AppError({
+        httpCode: 400,
+        description: "Email and password must be supplied",
+      })
+    );
   }
   try {
     email = email.toLowerCase();
@@ -26,7 +32,6 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
         email,
       },
     });
-
     const client = await prisma.client.findFirst({
       where: {
         applicationUrl: clientURL,
@@ -37,11 +42,21 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
       res.status(400).json({ error: "This client does not exist " });
     } else if (existing) {
       if (existing.password) {
-        res
-          .status(400)
-          .json({ error: "A user with this email already exists" });
+        logger.info(`auth/signup: attempt to signup with completed account`);
+        return next(
+          new AppError({
+            httpCode: 400,
+            description: "A user with this email already exists",
+          })
+        );
       } else {
-        res.status(400).json({ error: "User account incomplete" });
+        logger.info(`auth/signup: attempt to signup with incomplete account`);
+        return next(
+          new AppError({
+            httpCode: 400,
+            description: "User account incomplete",
+          })
+        );
       }
     } else {
       const result = await prisma.user.create({
@@ -75,7 +90,7 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
         },
       } as Job);
 
-      res.json(result);
+      return res.json(result);
     }
   } catch (e) {
     next(e);

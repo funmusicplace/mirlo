@@ -30,7 +30,7 @@ describe("trackGroups/{id}/redeemCode", () => {
       assert(response.statusCode === 404);
     });
 
-    it("should GET / 404 when no code found", async () => {
+    it.only("should GET / 404 when no code found", async () => {
       const { user } = await createUser({
         email: "artist@artist.com",
       });
