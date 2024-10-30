@@ -277,7 +277,7 @@ interface Merch {
   currency: string;
   quantityRemaining: number;
   id: string;
-  includePurchaseTrackGroupId?: number;
+  includePurchaseTrackGroupId?: number | null;
   includePurchaseTrackGroup?: TrackGroup;
   isPublic: boolean;
   images: {

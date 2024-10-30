@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 
 import { useQuery } from "@tanstack/react-query";
 import { queryUserStripeStatus } from "queries";
+import { bp } from "../../constants";
 
 import Button from "components/common/Button";
 import { InputEl } from "components/common/Input";
@@ -82,40 +83,53 @@ const BuyMerchItem: React.FC<{
     <form
       onSubmit={methods.handleSubmit(onSubmit)}
       className={css`
-        background-color: var(--mi-lighten-background-color);
         padding: 1rem;
         margin-top: -1rem;
-        max-width: calc(100vh / 12 * 3);
       `}
     >
       <h3>{t("buy", { title: showTitle ? merch.title : undefined })}</h3>
-      <p>{t("supportThisArtistByPurchasing")}</p>
-      <FormComponent>
-        <label>{t("howMany")}</label>
-        <InputEl
-          {...methods.register("quantity", {
-            min: 1,
-            max: merch.quantityRemaining,
-          })}
-          className={css`
-            max-width: 8rem;
-          `}
-          type="number"
-          min={1}
-          max={merch.quantityRemaining}
-        />
-      </FormComponent>
-      <FormComponent>
-        <label>{t("howMuch", { currency: merch.currency })}</label>
-        <InputEl
-          {...methods.register("price", { min: minPrice })}
-          type="number"
-          min={minPrice}
-          className={css`
-            max-width: 8rem;
-          `}
-        />
-      </FormComponent>
+      <div
+        className={css`
+          @media screen and (min-width: ${bp.medium}px) {
+            display: flex;
+            backround: blue;
+            flex-direction: row;
+
+            > div {
+              max-width: 49%;
+              margin-right: 1rem;
+            }
+          }
+        `}
+      >
+        <FormComponent>
+          <label>{t("howMany")}</label>
+          <InputEl
+            {...methods.register("quantity", {
+              min: 1,
+              max: merch.quantityRemaining,
+            })}
+            className={css`
+              max-width: 8rem;
+            `}
+            type="number"
+            min={1}
+            max={merch.quantityRemaining}
+          />
+        </FormComponent>
+        <FormComponent>
+          <label>{t("howMuch", { currency: merch.currency })}</label>
+          <InputEl
+            {...methods.register("price", { min: minPrice })}
+            type="number"
+            min={minPrice}
+            className={css`
+              max-width: 8rem;
+            `}
+          />
+        </FormComponent>
+      </div>
+
       {merch.optionTypes?.map((optionType, idx) => (
         <FormComponent>
           <label>{optionType.optionName}</label>

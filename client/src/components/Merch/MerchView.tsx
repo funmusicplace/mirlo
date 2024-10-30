@@ -147,17 +147,9 @@ function TrackGroup() {
                 display: flex;
               `}
             >
-              {merch.includePurchaseTrackGroup && (
-                <PublicTrackGroupListing
-                  tracks={merch.includePurchaseTrackGroup?.tracks}
-                  trackGroup={merch.includePurchaseTrackGroup}
-                />
-              )}
               <div
                 className={css`
                   margin-left: 1rem;
-                  max-width: 59%;
-                  flex: 59%;
                   @media screen and (max-width: ${bp.small}px) {
                     max-width: 100%;
                     flex: 100%;
@@ -167,8 +159,16 @@ function TrackGroup() {
               >
                 <MarkdownContent content={merchDescription} />
               </div>
+              <BuyMerchItem artist={artist} merch={merch} />
+
+              {merch.includePurchaseTrackGroup && (
+                <PublicTrackGroupListing
+                  tracks={merch.includePurchaseTrackGroup?.tracks}
+                  trackGroup={merch.includePurchaseTrackGroup}
+                  size="small"
+                />
+              )}
             </div>
-            <BuyMerchItem artist={artist} merch={merch} />
           </div>
         </div>
 

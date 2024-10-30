@@ -13,13 +13,14 @@ import { useAuthContext } from "state/AuthContext";
 export const PublicTrackGroupListing: React.FC<{
   tracks: Track[];
   trackGroup: TrackGroup;
-}> = ({ tracks, trackGroup }) => {
+  size?: "small";
+}> = ({ tracks, trackGroup, size }) => {
   const { user } = useAuthContext();
   const [isLoading, setIsLoading] = React.useState(true);
   const { dispatch } = useGlobalStateContext();
   const [displayTracks, setDisplayTracks] = React.useState<Track[]>([]);
 
-  const fetchTracks = React.useCallback(async (checkTracks: Track[]) => {
+  const fetchTracks = React.useCallback(async () => {
     setIsLoading(false);
   }, []);
 
@@ -66,6 +67,7 @@ export const PublicTrackGroupListing: React.FC<{
             track={track}
             addTracksToQueue={addTracksToQueue}
             trackGroup={trackGroup}
+            size={size}
           />
         ))}
         {!isLoading && displayTracks.length === 0 && (

@@ -122,12 +122,12 @@ const EditMerch: React.FC<{}> = () => {
           display: flex;
           flex-direction: column;
           align-items: flex-start;
+          margin-top: 2rem;
         `}
       >
         <div
           className={css`
             display: flex;
-            align-items: center;
             width: 100%;
 
             @media (max-width: ${bp.small}px) {

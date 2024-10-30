@@ -40,9 +40,10 @@ const OptionType: React.FC<{
         <div
           className={css`
             width: 100%;
+            display: flex;
+            justify-content: space-between;
 
             > div {
-              max-width: 45%;
               display: inline-block;
               margin-right: 1rem;
             }
@@ -52,7 +53,15 @@ const OptionType: React.FC<{
             <label>{t("optionName")}</label>
             <InputEl {...methods.register(`optionTypes.${index}.optionName`)} />
           </FormComponent>
-          <FormComponent>
+          <FormComponent
+            className={css`
+              width: 100%;
+
+              label {
+                display: block;
+              }
+            `}
+          >
             <label>{t("options")}</label>
             {options.map((o, optionIndex) => (
               <InputEl
@@ -147,6 +156,8 @@ const MerchOptions: React.FC<{}> = () => {
         <div
           className={css`
             margin-top: 1rem;
+            display: flex;
+            justify-content: space-between;
           `}
         >
           {!isEditing && (

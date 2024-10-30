@@ -114,7 +114,8 @@ const TrackRow: React.FC<{
   track: Track;
   trackGroup: TrackGroup;
   addTracksToQueue: (id: number) => void;
-}> = ({ track, addTracksToQueue, trackGroup }) => {
+  size?: "small";
+}> = ({ track, addTracksToQueue, trackGroup, size }) => {
   const { t } = useTranslation("translation", {
     keyPrefix: "trackGroupDetails",
   });
@@ -223,51 +224,55 @@ const TrackRow: React.FC<{
         </div>
       </TrackTitleTD>
 
-      <td align="right">
-        <Button
-          compact
-          transparent
-          onClick={(e) => {
-            e.stopPropagation();
-            navigator.clipboard.writeText(widgetUrl(track.id, "track"));
-            snackbar(t("copiedTrackUrl"), { type: "success" });
-          }}
-          startIcon={<FiLink />}
-          className={css`
-            .startIcon {
-              padding-left: 1rem;
-            }
-            :hover {
-              background: transparent !important;
-              opacity: 0.6;
-            }
-          `}
-        ></Button>
-      </td>
-      {track.license && track.license?.short !== "copyright" && (
-        <td>
-          <Tooltip hoverText={track.license.name}>
-            {track.license.link && (
-              <LicenseSpan
-                as="a"
-                target="_blank"
-                href={track.license.link}
-                onClick={(e) => {
-                  e.stopPropagation();
-                }}
-                className={css`
-                  overflow: ellipsis;
-                `}
-              >
-                {track.license.short}
-              </LicenseSpan>
-            )}
-            {!track.license.link && (
-              <LicenseSpan as="span">{track.license.short}</LicenseSpan>
-            )}
-          </Tooltip>
+      {size !== "small" && (
+        <td align="right">
+          <Button
+            compact
+            transparent
+            onClick={(e) => {
+              e.stopPropagation();
+              navigator.clipboard.writeText(widgetUrl(track.id, "track"));
+              snackbar(t("copiedTrackUrl"), { type: "success" });
+            }}
+            startIcon={<FiLink />}
+            className={css`
+              .startIcon {
+                padding-left: 1rem;
+              }
+              :hover {
+                background: transparent !important;
+                opacity: 0.6;
+              }
+            `}
+          />
         </td>
       )}
+      {size !== "small" &&
+        track.license &&
+        track.license?.short !== "copyright" && (
+          <td>
+            <Tooltip hoverText={track.license.name}>
+              {track.license.link && (
+                <LicenseSpan
+                  as="a"
+                  target="_blank"
+                  href={track.license.link}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                  className={css`
+                    overflow: ellipsis;
+                  `}
+                >
+                  {track.license.short}
+                </LicenseSpan>
+              )}
+              {!track.license.link && (
+                <LicenseSpan as="span">{track.license.short}</LicenseSpan>
+              )}
+            </Tooltip>
+          </td>
+        )}
     </TR>
   );
 };
