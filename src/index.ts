@@ -1,4 +1,4 @@
-import express from "express";
+import express, { NextFunction, Request, Response } from "express";
 import cookieParser from "cookie-parser";
 import passport from "passport";
 import { initialize } from "express-openapi";
@@ -241,6 +241,8 @@ app.use("/", (req, res) => {
     }
   }
 });
+
+app.use(errorHandler);
 
 app.listen(process.env.PORT, () =>
   console.info(`

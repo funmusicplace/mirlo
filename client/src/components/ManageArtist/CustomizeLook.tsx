@@ -92,7 +92,6 @@ export const CustomizeLook: React.FC = () => {
   const { user } = useAuthContext();
   const userId = user?.id;
   const { artistId } = useParams();
-  console.log("artistId", artistId);
   const { data: artist } = useQuery(queryManagedArtist(Number(artistId)));
   const methods = useForm<FormData>({
     defaultValues: generateDefaults(artist),

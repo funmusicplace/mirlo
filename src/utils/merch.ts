@@ -3,6 +3,7 @@ import { Merch, MerchImage } from "@mirlo/prisma/client";
 import prisma from "@mirlo/prisma";
 import { finalMerchImageBucket, removeObjectsFromBucket } from "./minio";
 import { addSizesToImage } from "./artist";
+import logger from "../logger";
 
 export const deleteMerchCover = async (merchId: string) => {
   const image = await prisma.merchImage.findFirst({
@@ -19,7 +20,8 @@ export const deleteMerchCover = async (merchId: string) => {
         },
       });
     } catch (e) {
-      console.log(e);
+      logger.error(`Error deleting merch cover`);
+      console.error(e);
     }
 
     try {

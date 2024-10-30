@@ -27,7 +27,7 @@ generateAlbumQueueEvents.on(
 
     try {
       const job = await generateAlbumQueue.getJob(result.jobId);
-      console.log("result", result.returnvalue);
+      logger.info("generate album job result:", result.returnvalue);
       if (result.returnvalue?.error) {
         logger.error(
           `There was an error processing the job, ${JSON.stringify(

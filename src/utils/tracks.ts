@@ -75,7 +75,9 @@ export const convertAudioToFormat = (
     `audioId ${audioId}: converting ${format} going to ${goingTo} @${audioBitrate}`
   );
 
-  console.log(content.track.metadata);
+  logger.info(
+    `audioId ${audioId}: metadata: ${JSON.stringify(content.track.metadata)}`
+  );
 
   let destination = generateDestination(format, goingTo, audioBitrate);
   const processor = ffmpeg(stream)

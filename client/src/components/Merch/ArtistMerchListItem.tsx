@@ -16,7 +16,6 @@ const ArtistMerchListItem: React.FC<{
 }> = ({ merch, as }) => {
   const merchImageUrl =
     merch.images?.[0]?.sizes?.[600] + "?" + merch.images?.[0]?.updatedAt;
-  console.log(merchImageUrl);
   return (
     <TrackGroupWrapper as={as}>
       <div>

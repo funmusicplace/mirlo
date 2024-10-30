@@ -59,7 +59,7 @@ const TrackGroupMerchItem: React.FC<{ item: Merch }> = ({ item }) => {
       >
         {t("buyFor", {
           amount: moneyDisplay({
-            amount: item.minPrice,
+            amount: item.minPrice / 100,
             currency: item.currency,
           }),
         })}

@@ -50,12 +50,10 @@ export default function () {
       });
 
       if (!downloadCode) {
-        return next(
-          new AppError({
-            httpCode: 404,
-            description: "Code not found",
-          })
-        );
+        throw new AppError({
+          httpCode: 404,
+          description: "Code not found",
+        });
       }
 
       const { user: purchaser } = await findOrCreateUserBasedOnEmail(

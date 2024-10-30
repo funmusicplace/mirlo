@@ -164,6 +164,7 @@
   },
   "merchDetails": {
     "buy": "Buy",
+    "buyMerch": "Buy",
     "supportThisArtistByPurchasing": "Support this artist!",
     "howMany": "How many do you want?",
     "howMuch": "Pay {{ currency }}",

@@ -48,8 +48,6 @@ const PostForm: React.FC<{
     })
   );
 
-  console.log("existing", tiers?.results);
-
   const publishedAt = existing ? new Date(existing.publishedAt) : new Date();
   publishedAt.setMinutes(
     publishedAt.getMinutes() - publishedAt.getTimezoneOffset()

@@ -80,7 +80,6 @@ const fetchManagedMerch: QueryFunction<
 };
 
 export function queryManagedMerch(merchId: string) {
-  console.log("querying merch id", merchId);
   return queryOptions({
     queryKey: ["fetchManagedMerch", { merchId }],
     queryFn: fetchManagedMerch,
