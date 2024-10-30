@@ -242,6 +242,8 @@ app.use("/", (req, res) => {
   }
 });
 
+app.use(errorHandler);
+
 app.listen(process.env.PORT, () =>
   console.info(`
 🚀 Server ready at: ${process.env.API_DOMAIN}`)
