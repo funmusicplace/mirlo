@@ -93,7 +93,7 @@ const PurchaseComponent: React.FC<{
       <span>
         {t("paid", {
           amount: moneyDisplay({
-            amount: pricePaid,
+            amount: pricePaid / 100,
             currency: currencyPaid,
           }),
         })}
@@ -114,7 +114,6 @@ function YourPurchases() {
     const { results } = await api.getMany<
       UserTrackGroupPurchase | MerchPurchase
     >(`users/${userId}/purchases`);
-    console.log("results", results);
     setPurchases(results);
   }, [userId]);
 
