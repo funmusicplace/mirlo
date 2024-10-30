@@ -40,6 +40,9 @@ export default function () {
                     uploadState: "SUCCESS",
                   },
                 },
+                orderBy: {
+                  order: "asc",
+                },
                 include: {
                   audio: true,
                   trackArtists: true,
