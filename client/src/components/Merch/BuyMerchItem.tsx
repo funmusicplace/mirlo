@@ -87,7 +87,7 @@ const BuyMerchItem: React.FC<{
         margin-top: -1rem;
       `}
     >
-      <h3>{t("buy", { title: showTitle ? merch.title : undefined })}</h3>
+      <h3>{t("buyMerch")}</h3>
       <div
         className={css`
           @media screen and (min-width: ${bp.medium}px) {
