@@ -34,7 +34,7 @@ const sendNotificationEmail = async () => {
 
   try {
     for await (const notification of notifications) {
-      console.log(
+      logger.info(
         `sendNotificationEmail: checking for notification ${notification.id}`
       );
       if (

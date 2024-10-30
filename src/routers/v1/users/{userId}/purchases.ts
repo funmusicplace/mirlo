@@ -49,7 +49,6 @@ export default function () {
     const { userId } = req.params as unknown as Params;
 
     const loggedInUser = req.user as User;
-    console.log("user", userId);
     if (Number(userId) === Number(loggedInUser.id)) {
       const trackGroupPurchases = await prisma.userTrackGroupPurchase.findMany({
         where: {
@@ -84,11 +83,9 @@ export default function () {
         (a, b) => {
           const timeA = isTrackGroupPurchase(a) ? a.datePurchased : a.createdAt;
           const timeB = isTrackGroupPurchase(b) ? b.datePurchased : b.createdAt;
-          console.log("time", timeA, timeB);
           return timeA > timeB ? -1 : 1;
         }
       );
-      console.log("zipped", mergedPurchases);
 
       res.json({
         results: mergedPurchases.map((p) => ({

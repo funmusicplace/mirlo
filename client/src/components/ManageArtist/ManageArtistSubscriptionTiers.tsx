@@ -33,8 +33,6 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
     return null;
   }
 
-  console.log("tiers", tiers?.results);
-
   return (
     <ManageSectionWrapper>
       <SpaceBetweenDiv>

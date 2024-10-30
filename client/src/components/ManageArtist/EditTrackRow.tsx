@@ -60,7 +60,6 @@ const EditTrackRow: React.FC<{
 
   const onSave = React.useCallback(
     async (formData: FormData) => {
-      console.log("formData", formData);
       try {
         setIsSaving(true);
         const packet = {

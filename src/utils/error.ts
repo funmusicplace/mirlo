@@ -43,13 +43,7 @@ export class AppError extends Error {
   }
 }
 
-const errorHandler = (
-  err: any,
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  console.log("error handler");
+const errorHandler = (err: any, req: Request, res: Response) => {
   if (err instanceof AppError) {
     console.error("Found instance of AppError", err);
     return res.status(err.httpCode).json({
