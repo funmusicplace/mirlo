@@ -128,7 +128,11 @@ function TrackGroup() {
               }
             `}
           >
-            <ImageAndDetailsWrapper>
+            <ImageAndDetailsWrapper
+              className={css`
+                min-width: 45%;
+              `}
+            >
               <ImageWrapper>
                 <ImageWithPlaceholder
                   src={
@@ -147,6 +151,7 @@ function TrackGroup() {
                 display: flex;
               `}
             >
+              <BuyMerchItem artist={artist} merch={merch} />
               <div
                 className={css`
                   margin-left: 1rem;
@@ -159,8 +164,6 @@ function TrackGroup() {
               >
                 <MarkdownContent content={merchDescription} />
               </div>
-              <BuyMerchItem artist={artist} merch={merch} />
-
               {merch.includePurchaseTrackGroup && (
                 <PublicTrackGroupListing
                   tracks={merch.includePurchaseTrackGroup?.tracks}
