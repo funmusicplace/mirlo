@@ -14,6 +14,7 @@ import api from "services/api";
 import { SelectEl } from "components/common/Select";
 import { moneyDisplay } from "components/common/Money";
 import IncludesDigitalDownload from "./IncludesDigitalDownload";
+import { FaChevronRight } from "react-icons/fa";
 
 type FormData = {
   quantity: number;
@@ -87,7 +88,6 @@ const BuyMerchItem: React.FC<{
         margin-top: -1rem;
       `}
     >
-      <h3>{t("buyMerch")}</h3>
       <div
         className={css`
           @media screen and (min-width: ${bp.medium}px) {
@@ -98,6 +98,7 @@ const BuyMerchItem: React.FC<{
             > div {
               max-width: 49%;
               margin-right: 1rem;
+              margin-bottom: 0.5rem;
             }
           }
         `}
@@ -167,8 +168,9 @@ const BuyMerchItem: React.FC<{
         disabled={!methods.formState.isValid}
         isLoading={isLoadingStripe}
         variant="big"
+        endIcon={<FaChevronRight />}
       >
-        {t("buyMerch")}
+        {t("goToCheckOut")}
       </Button>
     </form>
   );

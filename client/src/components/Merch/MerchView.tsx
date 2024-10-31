@@ -1,6 +1,6 @@
 import { css } from "@emotion/css";
 
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import Box from "../common/Box";
 import { useTranslation } from "react-i18next";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
@@ -22,11 +22,15 @@ import {
 } from "components/TrackGroup/TrackGroup";
 import BuyMerchItem from "./BuyMerchItem";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
-import { ButtonLink } from "components/common/Button";
-import { getArtistManageMerchUrl } from "utils/artist";
-import { FaPen } from "react-icons/fa";
+import Button, { ButtonLink } from "components/common/Button";
+import { getArtistManageMerchUrl, getReleaseUrl } from "utils/artist";
+import { FaChevronRight, FaPen } from "react-icons/fa";
 import { useAuthContext } from "state/AuthContext";
 import PublicTrackGroupListing from "components/common/PublicTrackGroupListing";
+import { moneyDisplay } from "components/common/Money";
+import Modal from "components/common/Modal";
+import React from "react";
+import MerchButtonPopUp from "./MerchButtonPopUp";
 
 function TrackGroup() {
   const { t } = useTranslation("translation", {
@@ -149,9 +153,26 @@ function TrackGroup() {
               className={css`
                 flex-direction: column;
                 display: flex;
+                flex-grow: 1;
+                padding: 1rem;
               `}
             >
-              <BuyMerchItem artist={artist} merch={merch} />
+              <MerchButtonPopUp merch={merch} artist={artist} />
+              {merch.includePurchaseTrackGroup && (
+                <Link
+                  to={getReleaseUrl(
+                    merch.artist,
+                    merch.includePurchaseTrackGroup
+                  )}
+                  className={css`
+                    margin: 1rem 0;
+                  `}
+                >
+                  {t("merchFor", {
+                    album: merch.includePurchaseTrackGroup?.title,
+                  })}
+                </Link>
+              )}
               <div
                 className={css`
                   margin-left: 1rem;
