@@ -6,11 +6,13 @@ import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import Modal from "components/common/Modal";
 import { moneyDisplay } from "components/common/Money";
 import BuyMerchItem from "components/Merch/BuyMerchItem";
+import MerchButtonPopUp from "components/Merch/MerchButtonPopUp";
 import { queryArtist } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { FaChevronRight } from "react-icons/fa";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
+import { getMerchUrl } from "utils/artist";
 
 const TrackGroupMerchItem: React.FC<{ item: Merch }> = ({ item }) => {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -34,8 +36,9 @@ const TrackGroupMerchItem: React.FC<{ item: Merch }> = ({ item }) => {
           display: flex;
           align-items: center;
 
-          > span {
+          > a {
             margin-left: 1rem;
+            font-size: 0.9rem;
           }
 
           img {
@@ -49,34 +52,9 @@ const TrackGroupMerchItem: React.FC<{ item: Merch }> = ({ item }) => {
           size={60}
           square
         />
-        <span>{item.title}</span>
+        <Link to={getMerchUrl(artist, item)}>{item.title}</Link>
       </div>
-
-      <Button
-        endIcon={<FaChevronRight />}
-        // to={`/${item.artistId}/merch/${item.id}`}
-        onClick={() => setIsOpen(true)}
-      >
-        {t("buyFor", {
-          amount: moneyDisplay({
-            amount: item.minPrice / 100,
-            currency: item.currency,
-          }),
-        })}
-      </Button>
-      <Modal
-        open={isOpen}
-        size="small"
-        onClose={() => setIsOpen(false)}
-        className={css`
-          form {
-            max-width: 100%;
-            background-color: transparent;
-          }
-        `}
-      >
-        <BuyMerchItem artist={artist} merch={item} />
-      </Modal>
+      <MerchButtonPopUp artist={artist} merch={item} />
     </li>
   );
 };
