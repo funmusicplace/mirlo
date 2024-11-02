@@ -7,22 +7,17 @@ import {
 } from "../../../../auth/passport";
 import prisma from "@mirlo/prisma";
 
-const { API_DOMAIN } = process.env;
-
-import stripe, {
-  createCheckoutSessionForSubscription,
-  createSubscriptionStripeProduct,
-} from "../../../../utils/stripe";
+import { createCheckoutSessionForSubscription } from "../../../../utils/stripe";
 import { deleteStripeSubscriptions } from "../../../../utils/artist";
 import logger from "../../../../logger";
-import { getSiteSettings } from "../../../../utils/settings";
+import { AppError } from "../../../../utils/error";
 
 type Params = {
   id: string;
 };
 
 const findTierById = async (tierId: number) => {
-  return await prisma.artistSubscriptionTier.findFirst({
+  return prisma.artistSubscriptionTier.findFirst({
     where: {
       id: tierId,
     },
@@ -97,13 +92,17 @@ export default function () {
       const newTier = await findTierById(tierId);
 
       if (!newTier) {
-        return res.status(404);
+        throw new AppError({
+          httpCode: 404,
+          description: "Tier not found"
+        });
       }
       const stripeAccountId = newTier.artist.user.stripeAccountId;
 
       if (!stripeAccountId) {
-        return res.status(400).json({
-          error: "Artist has not set up with a payment processor yet",
+        throw new AppError({
+          httpCode: 400,
+          description: "Artist has not set up with a payment processor yet"
         });
       }
 
