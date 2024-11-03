@@ -1,4 +1,10 @@
 services:
+  stripe-test:
+    container_name: blackbird-stripe-mock-test
+    image: stripe/stripe-mock
+    networks: !reset [test-network]
+    ports: !reset []
+    profiles: [test]
   redis-test:
     extends:
       file: docker-compose.api.yml
@@ -23,8 +29,14 @@ services:
       - redis-test
       - pgsql-test
       - minio-test
+      - stripe-test
     environment:
+      NODE_ENV: test
       API_DOMAIN: http://api:3000
+      STRIPE_HOST: stripe-test
+      STRIPE_PORT: 12111
+      STRIPE_PROTOCOL: http
+      STRIPE_KEY: sk_test_123
     profiles: [test]
 
   minio-test:
@@ -61,6 +73,7 @@ services:
       - api-test:api
       - minio-test:minio
       - pgsql-test:pgsql
+      - stripe-test:stripe
     ports: !reset []
     depends_on: !reset
       api-test:

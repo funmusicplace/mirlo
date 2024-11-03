@@ -22,9 +22,19 @@ const { STRIPE_KEY, API_DOMAIN } = process.env;
 
 export const OPTION_JOINER = ";;";
 
-const stripe = new Stripe(STRIPE_KEY ?? "", {
-  apiVersion: "2022-11-15",
-});
+let stripeConfig: Stripe.StripeConfig = { apiVersion: "2022-11-15" };
+
+if (process.env.NODE_ENV === "test") {
+  const { STRIPE_HOST, STRIPE_PORT, STRIPE_PROTOCOL } = process.env;
+  stripeConfig = {
+    ...stripeConfig,
+    host: STRIPE_HOST,
+    port: STRIPE_PORT,
+    protocol: STRIPE_PROTOCOL === "http" ? "http" : "https"
+  };
+}
+
+const stripe = new Stripe(STRIPE_KEY ?? "", stripeConfig);
 
 const calculatePlatformPercent = async (
   currency: string,

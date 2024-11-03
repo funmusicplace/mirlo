@@ -13,3 +13,4 @@ yarn-error.log
 __generated__/
 
 *storybook.log
+.idea/
