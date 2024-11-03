@@ -18,17 +18,23 @@ import {
 } from "./handleFinishedTransactions";
 import countryCodesCurrencies from "./country-codes-currencies";
 
-// STRIPE_HOST, STRIPE_PORT, and STRIPE_PROTOCOL should not be set when not running tests against stripe-mock
-const { STRIPE_KEY, API_DOMAIN, STRIPE_HOST, STRIPE_PORT, STRIPE_PROTOCOL } = process.env;
+const { STRIPE_KEY, API_DOMAIN } = process.env;
 
 export const OPTION_JOINER = ";;";
 
-const stripe = new Stripe(STRIPE_KEY ?? "", {
-  apiVersion: "2022-11-15",
-  host: STRIPE_HOST,
-  port: STRIPE_PORT,
-  protocol: STRIPE_PROTOCOL === "http" ? "http" : "https"
-});
+let stripeConfig: Stripe.StripeConfig = { apiVersion: "2022-11-15" };
+
+if (process.env.NODE_ENV === "test") {
+  const { STRIPE_HOST, STRIPE_PORT, STRIPE_PROTOCOL } = process.env;
+  stripeConfig = {
+    ...stripeConfig,
+    host: STRIPE_HOST,
+    port: STRIPE_PORT,
+    protocol: STRIPE_PROTOCOL === "http" ? "http" : "https"
+  };
+}
+
+const stripe = new Stripe(STRIPE_KEY ?? "", stripeConfig);
 
 const calculatePlatformPercent = async (
   currency: string,

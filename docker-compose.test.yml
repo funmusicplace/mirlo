@@ -31,6 +31,7 @@ services:
       - minio-test
       - stripe-test
     environment:
+      NODE_ENV: test
       API_DOMAIN: http://api:3000
       STRIPE_HOST: stripe-test
       STRIPE_PORT: 12111
