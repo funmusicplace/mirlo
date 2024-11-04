@@ -7,6 +7,8 @@ import yargs from "yargs";
 import { Job, Worker } from "bullmq";
 import winston from "winston";
 import uploadAudioJob from "./upload-audio";
+import verifyAudioJob from "./verify-audio";
+
 import generateAlbumJob from "./generate-album";
 
 import optimizeImage from "./optimize-image";
@@ -41,6 +43,7 @@ yargs // eslint-disable-line
     logger.info("STARTING WORKER QUEUE");
     audioQueue();
     // audioDurationQueue();
+    verifyAudioQueue();
     imageQueue();
     generateAlbumQueueWorker();
     sendMailQueue();
@@ -97,6 +100,23 @@ async function audioQueue() {
 
   worker.on("error", (err: any) => {
     logger.error("error:upload-audio", err);
+  });
+}
+
+async function verifyAudioQueue() {
+  const worker = new Worker("verify-audio", verifyAudioJob, workerOptions);
+  logger.info("Verify Audio worker started");
+
+  worker.on("completed", (job: any) => {
+    logger.info("completed:verify-audio");
+  });
+
+  worker.on("failed", (job: any, err: any) => {
+    logger.error("failed:verify-audio", err);
+  });
+
+  worker.on("error", (err: any) => {
+    logger.error("error:verify-audio", err);
   });
 }
 

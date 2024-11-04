@@ -147,6 +147,7 @@ const routes = [
   "admin/settings",
   "admin/tips",
   "oembed",
+  "flag",
 ];
 
 initialize({

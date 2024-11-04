@@ -217,7 +217,6 @@ const ArtistHeaderSection: React.FC<{
                       />
                     </div>
                     <ArtistActions>
-                      {!isManage && <TipArtist artistId={artist.id} />}
                       {!isManage && <FollowArtist artistId={artist.id} />}
                       {isManage && (
                         <div>

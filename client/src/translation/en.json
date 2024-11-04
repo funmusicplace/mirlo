@@ -182,6 +182,11 @@
   },
   "artist": {
     "merch": "Merch",
+    "flagContent": "Flag content",
+    "whyAreYouFlaggingIt": "Why are you flagging it?",
+    "howContact": "How can we contact you?",
+    "submit": "Report",
+    "reportContentDescription": "Is there a problem with this content? Please let us know",
     "Email": "Email",
     "exampleLocation": "Eg. North Pole",
     "backToArtist": "Back to artist",

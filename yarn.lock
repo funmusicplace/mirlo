@@ -2814,6 +2814,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@marsidev/react-turnstile@npm:^1.0.2":
+  version: 1.0.2
+  resolution: "@marsidev/react-turnstile@npm:1.0.2"
+  peerDependencies:
+    react: ^17.0.2 || ^18.0.0
+    react-dom: ^17.0.2 || ^18.0.0
+  checksum: 10/09733062c451b5faf9b61f411833e891856cfc29182726a9f227c02ce7ddc01165605d9b6592adf8d68a07014a88f6eaa004ebaef3ba3eca10d290392e8c25bd
+  languageName: node
+  linkType: hard
+
 "@mdx-js/react@npm:^3.0.0":
   version: 3.0.1
   resolution: "@mdx-js/react@npm:3.0.1"
@@ -2881,6 +2891,7 @@ __metadata:
     "@emotion/react": "npm:^11.10.5"
     "@emotion/styled": "npm:^11.10.5"
     "@gumlet/react-hls-player": "npm:^1.0.1"
+    "@marsidev/react-turnstile": "npm:^1.0.2"
     "@optimize-lodash/rollup-plugin": "npm:^4.0.4"
     "@paypal/react-paypal-js": "npm:^7.8.2"
     "@remirror/pm": "npm:^2.0.8"
@@ -6842,6 +6853,16 @@ __metadata:
   dependencies:
     "@types/express": "npm:*"
   checksum: 10/99988c8643dcfcd44a4a297d79a06126a86e90421daf6aa4bb947ebf3fd33e70b1b8c5277688bdd0025b0cbecceffe259c0933a749896592236261a9f0323cf4
+  languageName: node
+  linkType: hard
+
+"@types/node-fetch@npm:^2.6.11":
+  version: 2.6.11
+  resolution: "@types/node-fetch@npm:2.6.11"
+  dependencies:
+    "@types/node": "npm:*"
+    form-data: "npm:^4.0.0"
+  checksum: 10/c416df8f182ec3826278ea42557fda08f169a48a05e60722d9c8edd4e5b2076ae281c6b6601ad406035b7201f885b0257983b61c26b3f9eb0f41192a807b5de5
   languageName: node
   linkType: hard
 
@@ -15571,6 +15592,7 @@ __metadata:
     "@types/mocha": "npm:^10.0.1"
     "@types/multer": "npm:^1.4.7"
     "@types/node": "npm:18.11.12"
+    "@types/node-fetch": "npm:^2.6.11"
     "@types/nodemailer": "npm:^6.4.14"
     "@types/nodemailer-sendgrid": "npm:^1.0.0"
     "@types/passport": "npm:^1.0.11"
@@ -15613,6 +15635,7 @@ __metadata:
     mocha: "npm:^10.2.0"
     multer: "npm:^1.4.5-lts.1"
     music-metadata: "npm:7.13.3"
+    node-fetch: "npm:2"
     nodemailer: "npm:^6.9.1"
     nodemailer-sendgrid: "npm:^1.0.3"
     nodemon: "npm:^2.0.20"
@@ -15987,17 +16010,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-fetch@npm:^1.0.1":
-  version: 1.7.3
-  resolution: "node-fetch@npm:1.7.3"
-  dependencies:
-    encoding: "npm:^0.1.11"
-    is-stream: "npm:^1.0.1"
-  checksum: 10/17be1a182eec37ba43c1b02673329ab1fa1c2e3ddbdf9b5f62d5157aa118c253dcd42f338eb1b6fe84fb0689c4dd8eb5aaebf46a9b5a066fae88c74e36522688
-  languageName: node
-  linkType: hard
-
-"node-fetch@npm:^2.0.0":
+"node-fetch@npm:2, node-fetch@npm:^2.0.0":
   version: 2.7.0
   resolution: "node-fetch@npm:2.7.0"
   dependencies:
@@ -16008,6 +16021,16 @@ __metadata:
     encoding:
       optional: true
   checksum: 10/b24f8a3dc937f388192e59bcf9d0857d7b6940a2496f328381641cb616efccc9866e89ec43f2ec956bbd6c3d3ee05524ce77fe7b29ccd34692b3a16f237d6676
+  languageName: node
+  linkType: hard
+
+"node-fetch@npm:^1.0.1":
+  version: 1.7.3
+  resolution: "node-fetch@npm:1.7.3"
+  dependencies:
+    encoding: "npm:^0.1.11"
+    is-stream: "npm:^1.0.1"
+  checksum: 10/17be1a182eec37ba43c1b02673329ab1fa1c2e3ddbdf9b5f62d5157aa118c253dcd42f338eb1b6fe84fb0689c4dd8eb5aaebf46a9b5a066fae88c74e36522688
   languageName: node
   linkType: hard
 
