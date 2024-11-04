@@ -7,6 +7,7 @@ import prisma from "@mirlo/prisma";
 import { logger } from "../logger";
 import { createBucketIfNotExists, incomingAudioBucket } from "../utils/minio";
 import { minioClient } from "../utils/minio";
+import { verifyAudioQueue } from "./verify-audio-queue";
 
 const { MINIO_HOST = "", MINIO_API_PORT = 9000 } = process.env;
 
@@ -60,7 +61,13 @@ audioQueueEvents.on(
             },
           });
         }
-        logger.info("updated trackAudio");
+        logger.info(`audioId: ${audio.id} updated trackAudio`);
+
+        await verifyAudioQueue.add("verify-audio", {
+          audioId: audio.id,
+          fileExtension: audio.fileExtension,
+        });
+        logger.info(`audioId: ${audio.id} sent to verifyAudioQueue`);
       }
     } catch (err) {
       logger.error(`audioQueueEvents.completed ${JSON.stringify(err)}`);

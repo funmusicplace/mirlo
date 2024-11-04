@@ -24,7 +24,7 @@ You agree to the following by supporting an Artist: You are doing so because you
 
 Artists owe their supporters a high standard of effort, honest communication, and a dedication to setting good faith expectations for supporters. However, Mirlo does not guarantee that Artists deliver content or work.
 
-When you support an artist, you will be charged on the monthly anniversary of the date of your initial support. (i.e. If you make a supporting payment on March 1 st then you will be billed again on April 1st.) If you support multiple artists, you will be charged monthly on the date that each artist was initially supported.
+When you support an artist, you will be charged on the monthly anniversary of the date of your initial support. (i.e. If you make a supporting payment on March 3rd then you will be billed again on April 3rd.) If you support multiple artists, you will be charged monthly on the date that each artist was initially supported.
 
 **Payment Processing Fees** To process payments, we use Stripe Connect, which charges $0.30 + 2.9% per successful card charge. We take processing payments to Artists seriously - and using Stripe allows us to do this in a secure, safe, and compliant way.
 
@@ -109,6 +109,7 @@ You can terminate your account at any time through your account settings. We may
 - Don’t harm anyone’s computer. Don’t distribute software viruses, or anything else (code, films, programs) designed to interfere with the proper function of any software, hardware, or equipment on the Site (whether it belongs to Mirlo or another party).
 - Don’t try to interfere with the proper workings of the Services. Don’t bypass any measures we’ve put in place to secure the Services. Don’t try to damage or get unauthorized access to any system, data, password, or other information, whether it belongs to Mirlo or another party. Don’t take any action that imposes an unreasonable load on our infrastructure, or on our third- party providers. We reserve the right to determine what is reasonable.
 - Don’t use any kind of software or device, whether it is manual or automated, to “crawl” or “spider” any part of the Site. Don’t take apart or reverse engineer any aspect of Mirlo in an effort to access things like source code, underlying ideas, or algorithms.
+- Due to our use of Stripe as a payment processor, Mirlo can not handle transactions used for pornography or other sexually explicit material. See a full list of [types of content that Stripe prohibits here](https://stripe.com/en-ca/legal/restricted-businesses#prohibited-businesses).
 
 ## Section 7. The Legal Stuff
 

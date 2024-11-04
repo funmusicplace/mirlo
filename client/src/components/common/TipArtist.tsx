@@ -11,7 +11,10 @@ import { queryArtist, queryUserStripeStatus } from "queries";
 import { css } from "@emotion/css";
 import TipArtistForm from "./TipArtistForm";
 
-const TipArtist: React.FC<{ artistId: number }> = ({ artistId }) => {
+const TipArtist: React.FC<{ artistId: number; transparent?: boolean }> = ({
+  artistId,
+  transparent = true,
+}) => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const { user } = useAuthContext();
   const { data: artist } = useQuery(
@@ -52,7 +55,7 @@ const TipArtist: React.FC<{ artistId: number }> = ({ artistId }) => {
       </Modal>
       <Button
         compact
-        transparent
+        transparent={transparent}
         type="button"
         onClick={onTipClick}
         startIcon={<FaDonate />}

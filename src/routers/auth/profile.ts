@@ -1,5 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
+import { addSizesToImage } from "../../utils/artist";
+import { finalArtistAvatarBucket } from "../../utils/minio";
 
 const profile = async (req: Request, res: Response, next: NextFunction) => {
   const { email } = req.user as { email: string };
@@ -29,7 +31,11 @@ const profile = async (req: Request, res: Response, next: NextFunction) => {
           select: {
             artistSubscriptionTier: {
               include: {
-                artist: true,
+                artist: {
+                  include: {
+                    avatar: true,
+                  },
+                },
               },
             },
             id: true,
@@ -40,7 +46,26 @@ const profile = async (req: Request, res: Response, next: NextFunction) => {
       },
     });
 
-    res.status(200).json({ result: foundUser });
+    res.status(200).json({
+      result: {
+        ...foundUser,
+        artistUserSubscriptions: foundUser?.artistUserSubscriptions.map(
+          (aus) => ({
+            ...aus,
+            artistSubscriptionTier: {
+              ...aus.artistSubscriptionTier,
+              artist: {
+                ...aus.artistSubscriptionTier.artist,
+                avatar: addSizesToImage(
+                  finalArtistAvatarBucket,
+                  aus.artistSubscriptionTier.artist.avatar
+                ),
+              },
+            },
+          })
+        ),
+      },
+    });
   } catch (e) {
     next(e);
   }

@@ -18,6 +18,7 @@ import styled from "@emotion/styled";
 import MarkdownWrapper from "components/common/MarkdownWrapper";
 import { useAuthContext } from "state/AuthContext";
 import { formatDate } from "components/TrackGroup/ReleaseDate";
+import TipArtist from "components/common/TipArtist";
 
 export const PageMarkdownWrapper = styled.div`
   width: 100%;
@@ -114,6 +115,8 @@ const Post: React.FC = () => {
           display: flex;
           justify-content: center;
           width: 100%;
+          position: relative;
+
           h1 {
             margin-bottom: 0.5rem;
           }
@@ -125,6 +128,23 @@ const Post: React.FC = () => {
           }
         `}
       >
+        {post.artistId && (
+          <div
+            className={css`
+              position: absolute;
+            `}
+          >
+            <div
+              className={css`
+                position: fixed;
+                right: 1rem;
+                top: 10rem;
+              `}
+            >
+              <TipArtist artistId={post.artistId} transparent={false} />
+            </div>
+          </div>
+        )}
         <div
           className={css`
             flex: 100%;

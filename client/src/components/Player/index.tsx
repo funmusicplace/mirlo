@@ -18,6 +18,7 @@ import styled from "@emotion/styled";
 import { VolumeControl } from "./VolumeControl";
 import { useAuthContext } from "state/AuthContext";
 import Wishlist from "components/TrackGroup/Wishlist";
+import TipArtist from "components/common/TipArtist";
 
 const ControlWrapper = styled.span`
   display: flex;
@@ -53,7 +54,7 @@ const ControlWrapper = styled.span`
 
 const Player = () => {
   const { user } = useAuthContext();
-  const { dispatch } = useGlobalStateContext();
+  const { dispatch, state } = useGlobalStateContext();
 
   const [volume, setVolume] = React.useState(1);
   const { currentTrack, isLoading } = useCurrentTrackHook();
@@ -181,6 +182,9 @@ const Player = () => {
           >
             <span>
               <Wishlist trackGroup={{ id: currentTrack.trackGroupId }} />
+              {state.playing && currentTrack.trackGroup.artistId && (
+                <TipArtist artistId={currentTrack.trackGroup.artistId} />
+              )}
             </span>
             <span>{fmtMSS(currentSeconds)}</span>
 

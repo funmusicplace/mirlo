@@ -1,5 +1,5 @@
 import { css } from "@emotion/css";
-import { FaPen } from "react-icons/fa";
+import { FaFlag, FaPen } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import ClickToPlayAlbum from "../common/ClickToPlayAlbum";
 import Button from "../common/Button";
@@ -14,6 +14,7 @@ import TrackGroupAdminMenu from "./TrackGroupAdminMenu";
 import React from "react";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import { useAuthContext } from "state/AuthContext";
+import FlagContent from "./FlagContent";
 
 export const ItemViewTitle: React.FC<{
   title: string;
@@ -133,6 +134,7 @@ const TrackGroupTitle: React.FC<{
               </Button>
             </Link>
           )}
+          <FlagContent trackGroupId={trackGroup.id} />
           {user?.isAdmin && (
             <div
               className={css`
