@@ -43,6 +43,7 @@ docker exec -it blackbird-api yarn prisma:seed
 #### For the client:
 
 ```sh
+cp client/.env.example client/.env
 yarn install
 yarn client:start
 ```
