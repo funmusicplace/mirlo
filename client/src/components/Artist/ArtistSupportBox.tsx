@@ -99,8 +99,6 @@ const ArtistSupportBox: React.FC<{
       !sub.artistSubscriptionTier.isDefaultTier
   );
 
-  const ownedByUser = user && artist.userId === userId;
-
   return (
     <StyledSupportBox>
       <div
@@ -195,12 +193,14 @@ const ArtistSupportBox: React.FC<{
               `}
             >
               {user && isSubscribedToArtist && !isSubscribedToTier && (
-                <SupportBoxButton
-                  onClick={() => subscribeToTier(subscriptionTier)}
-                  isLoading={isCheckingForSubscription}
-                >
-                  {t("chooseThisSubscription")}
-                </SupportBoxButton>
+                <>
+                  <SupportBoxButton
+                    onClick={() => subscribeToTier(subscriptionTier)}
+                    isLoading={isCheckingForSubscription}
+                  >
+                    {t("chooseThisSubscription")}
+                  </SupportBoxButton>
+                </>
               )}
               {user && isSubscribedToTier && (
                 <SupportBoxButton onClick={() => cancelSubscription()}>
