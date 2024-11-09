@@ -41,6 +41,8 @@ Mirlo shall be entitled to a share of the revenue received from Transactions (th
 
 Mirlo is not responsible for mistakes in your content. Mirlo will not be liable for any errors or omissions in any content.
 
+Mirlo is not responsible for refunds made to purchasers of your content, merch, or monthly support tiers.
+
 Mirlo can use the content you’ve submitted. For the purposes of marketing, you grant to us, and others acting on our behalf, the worldwide, non-exclusive, perpetual, irrevocable, royalty-free, sublicensable, transferable right to use, exercise, and commercialize the copyright, publicity, trademark, and database rights with respect to your Content.
 
 When we use the content, we can make changes, like editing or translating it. You grant us the right to edit, modify, reformat, excerpt, delete, or translate any of your Content.
