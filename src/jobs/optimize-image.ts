@@ -12,6 +12,7 @@ import prisma from "@mirlo/prisma";
 import { logger } from "./queue-worker";
 import { generateFullStaticImageUrl } from "../utils/images";
 import fetch from "node-fetch";
+import sendMail from "./send-mail";
 
 const { defaultOptions, config: sharpConfig } = tempSharpConfig;
 
@@ -175,17 +176,30 @@ const optimizeImage = async (job: Job) => {
       searchParams.append("api_user", process.env.SIGHTENGINE_USER);
       searchParams.append("api_secret", process.env.SIGHTENGINE_SECRET);
 
-      console.log(searchParams.toString());
-
       const response = await fetch(
         `https://api.sightengine.com/1.0/check.json?${searchParams.toString()}`,
         {
           method: "GET",
         }
       );
-      console.log("status", response.status);
       if (response.status === 200) {
-        console.log("response json", await response.json());
+        const result = await response.json();
+        if (result.nudity.sexual_display > 0.9) {
+          logger.info("Sending an email report about SightEngine");
+          await sendMail({
+            data: {
+              template: "sight-engine-report",
+              message: {
+                to: "hi@mirlo.space",
+              },
+              locals: {
+                model,
+                destinationId,
+                sightEngineId: result.request.id,
+              },
+            },
+          } as Job);
+        }
       }
     }
 
