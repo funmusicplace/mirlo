@@ -160,6 +160,23 @@ const optimizeImage = async (job: Job) => {
 
     await minioClient.removeObject(incomingCoversBucket, destinationId);
 
+    if (process.env.SIGHTENGINE_USER && process.env.SIGHTENGINE_SECRET) {
+      const searchParams = new URLSearchParams();
+      searchParams.append("url", urls[urls.length - 1]);
+      searchParams.append("models", "nudity-2.1");
+      searchParams.append("api_user", process.env.SIGHTENGINE_USER);
+      searchParams.append("api_secret", process.env.SIGHTENGINE_SECRET);
+
+      console.log(searchParams.toString());
+
+      await fetch(
+        `https://api.sightengine.com/1.0/check.json?${searchParams.toString()}`,
+        {
+          method: "GET",
+        }
+      );
+    }
+
     return Promise.resolve();
   } catch (err) {
     logger.error(`optimizeImage ${JSON.stringify(err)}`);

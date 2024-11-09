@@ -18,6 +18,10 @@ export default async (job: Job) => {
   try {
     logger.info(`audioId: ${audioId} \t verifying audio`);
 
+    if (!process.env.AUDD_IO_TOKEN) {
+      return;
+    }
+
     let progress = 10;
     const tempFolder = `/data/media/verifying/${audioId}`;
     logger.info(
@@ -73,15 +77,6 @@ export default async (job: Job) => {
     });
     console.log("status", response.status);
     console.log("response", await response.json());
-    // ffmpeg(stream)
-    //   .outputOptions("-chromaprint")
-    //   .on("error", function (err, stdout, stderr) {
-    //     console.log("Error: " + err.message);
-    //     console.log("ffmpeg output:\n" + stdout);
-    //     console.log("ffmpeg stderr:\n" + stderr);
-    //   })
-    //   .on("end", function () {})
-    //   .save(destinationFolder);
 
     logger.info(`audioId: ${audioId} \t verifying chromaprint exists`);
   } catch (e) {
