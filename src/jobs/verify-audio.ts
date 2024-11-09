@@ -73,14 +73,10 @@ export default async (job: Job) => {
       return: "musicbrainz",
     });
 
-    console.log("url", url);
+    console.log("url", jsonBody);
     const response = await fetch(`https://enterprise.audd.io/recognize`, {
       method: "POST",
       body: jsonBody,
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "multipart/form-data",
-      },
     });
     console.log("status", response.status);
     console.log("response", await response.json());
