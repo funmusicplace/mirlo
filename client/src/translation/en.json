@@ -86,6 +86,8 @@
     "errorUpdatingProfile": "There was a problem with the API",
     "email": "Email:",
     "name": "Name:",
+    "noPurchases": "You haven't bought anything on Mirlo yet",
+    "reimbursals": "Please reach out to the artist from who you purchased the content if you have concerns or want a reimbursal",
     "language": "Language:",
     "updateProfileButton": "Update profile",
     "viewCollection": "View collection",

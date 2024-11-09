@@ -50,18 +50,18 @@ export default async (job: Job) => {
 
     logger.info(`audioId: ${audioId} \t checking audio for existing tags`);
 
-    const stats = statSync(localTrackPath);
+    // const stats = statSync(localTrackPath);
     // const fileSizeInBytes = stats.size;
 
     // You can pass any of the 3 objects below as body
     // const stream = await createReadStream(localTrackPath);
-    const file = await readFileSync(localTrackPath);
-    const blob = new Blob([file], { type: `audio/${fileExtension}` });
-    console.log("file", file);
+    // const file = await readFileSync(localTrackPath);
+    // const blob = new Blob([file], { type: `audio/${fileExtension}` });
+    // console.log("file", file);
 
-    const formData = new FormData();
+    // const formData = new FormData();
     // formData.append("file", blob);
-    formData.append("api_token", process.env.AUDD_IO_TOKEN);
+    // formData.append("api_token", process.env.AUDD_IO_TOKEN);
 
     const url = `${process.env.API_DOMAIN}/v1/tracks/${audioId}/audio`;
     const jsonBody = JSON.stringify({

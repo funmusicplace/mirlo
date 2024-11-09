@@ -147,8 +147,7 @@ function YourPurchases() {
               }
             `}
           >
-            {!purchases ||
-              (purchases?.length === 0 && <Box>{t("noPurchases")}</Box>)}
+            {!purchases || (purchases?.length === 0 && <>{t("noPurchases")}</>)}
             {purchases && (
               <ol
                 className={css`
@@ -206,6 +205,9 @@ function YourPurchases() {
                 ))}
               </ol>
             )}
+          </div>
+          <div>
+            <p>{t("reimbursals")}</p>
           </div>
         </WidthContainer>
       </div>
