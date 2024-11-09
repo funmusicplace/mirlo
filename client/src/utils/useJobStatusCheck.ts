@@ -13,7 +13,7 @@ const useJobStatusCheck = ({
   >([]);
 
   React.useEffect(() => {
-    let timer: NodeJS.Timer | undefined;
+    let timer: NodeJS.Timeout | undefined;
     if (uploadJobs.length > 0) {
       timer = setInterval(async () => {
         const result = await api.getMany<{ jobStatus: string; jobId: string }>(

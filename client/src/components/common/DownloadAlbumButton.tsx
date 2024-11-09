@@ -63,7 +63,7 @@ const DownloadAlbumButton: React.FC<{
   ]);
 
   React.useEffect(() => {
-    let interval: NodeJS.Timer | null = null;
+    let interval: NodeJS.Timeout | null = null;
     if (isGeneratingAlbum > 0) {
       interval = setInterval(async () => {
         const result = await api.getMany<{ jobStatus: string }>(

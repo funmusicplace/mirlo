@@ -29,7 +29,7 @@ export function AuthContextProvider({ children }: React.PropsWithChildren) {
   }, [userLanguage]);
 
   React.useEffect(() => {
-    let interval: NodeJS.Timer | null = null;
+    let interval: NodeJS.Timeout | null = null;
 
     if (userId) {
       interval = setInterval(
