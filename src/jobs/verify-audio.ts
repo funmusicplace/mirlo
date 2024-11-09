@@ -60,7 +60,7 @@ export default async (job: Job) => {
     console.log("file", file);
 
     const formData = new FormData();
-    formData.append("file", blob);
+    // formData.append("file", blob);
     formData.append("api_token", process.env.AUDD_IO_TOKEN);
 
     const url = `${process.env.API_DOMAIN}/v1/tracks/${audioId}/audio`;
