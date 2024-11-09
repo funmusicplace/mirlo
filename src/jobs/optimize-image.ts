@@ -6,13 +6,12 @@ import { uniq } from "lodash";
 import {
   createBucketIfNotExists,
   getBufferFromMinio,
-  incomingArtistBannerBucket,
-  incomingCoversBucket,
   minioClient,
 } from "../utils/minio";
 import prisma from "@mirlo/prisma";
 import { logger } from "./queue-worker";
 import { generateFullStaticImageUrl } from "../utils/images";
+import fetch from "node-fetch";
 
 const { defaultOptions, config: sharpConfig } = tempSharpConfig;
 
@@ -170,7 +169,7 @@ const optimizeImage = async (job: Job) => {
       const searchParams = new URLSearchParams();
       searchParams.append(
         "url",
-        generateFullStaticImageUrl(urls[urls.length - 1], finalMinioBucket)
+        generateFullStaticImageUrl(urls[0], finalMinioBucket)
       );
       searchParams.append("models", "nudity-2.1");
       searchParams.append("api_user", process.env.SIGHTENGINE_USER);
@@ -185,7 +184,9 @@ const optimizeImage = async (job: Job) => {
         }
       );
       console.log("status", response.status);
-      console.log("response", response.body);
+      if (response.status === 200) {
+        console.log("response json", await response.json());
+      }
     }
 
     return Promise.resolve();
