@@ -6,11 +6,13 @@ import { uniq } from "lodash";
 import {
   createBucketIfNotExists,
   getBufferFromMinio,
+  incomingArtistBannerBucket,
   incomingCoversBucket,
   minioClient,
 } from "../utils/minio";
 import prisma from "@mirlo/prisma";
 import { logger } from "./queue-worker";
+import { generateFullStaticImageUrl } from "../utils/images";
 
 const { defaultOptions, config: sharpConfig } = tempSharpConfig;
 
@@ -156,25 +158,34 @@ const optimizeImage = async (job: Job) => {
     }
 
     profiler.done({ message: "Done optimizing image" });
-    logger.info(`Removing from Bucket ${incomingCoversBucket}`);
+    logger.info(`Removing from Bucket ${incomingMinioBucket}`);
 
-    await minioClient.removeObject(incomingCoversBucket, destinationId);
+    await minioClient.removeObject(incomingMinioBucket, destinationId);
+    logger.info(
+      `${process.env.SIGHTENGINE_USER} + ${process.env.SIGHTENGINE_SECRET}`
+    );
 
     if (process.env.SIGHTENGINE_USER && process.env.SIGHTENGINE_SECRET) {
+      logger.info("Checking SightEngine");
       const searchParams = new URLSearchParams();
-      searchParams.append("url", urls[urls.length - 1]);
+      searchParams.append(
+        "url",
+        generateFullStaticImageUrl(urls[urls.length - 1], finalMinioBucket)
+      );
       searchParams.append("models", "nudity-2.1");
       searchParams.append("api_user", process.env.SIGHTENGINE_USER);
       searchParams.append("api_secret", process.env.SIGHTENGINE_SECRET);
 
       console.log(searchParams.toString());
 
-      await fetch(
+      const response = await fetch(
         `https://api.sightengine.com/1.0/check.json?${searchParams.toString()}`,
         {
           method: "GET",
         }
       );
+      console.log("status", response.status);
+      console.log("response", response.body);
     }
 
     return Promise.resolve();
