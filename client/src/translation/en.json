@@ -167,7 +167,8 @@
   },
   "merchDetails": {
     "buy": "Buy",
-    "goToCheckout": "proceed to checkout",
+    "goToCheckOut": "Proceed to checkout",
+    "artistCheckoutPage": "You will be taken to the artist's payment processor page to complete this subscription.",
     "buyMerch": "Buy",
     "buyFor": "Buy for {{amount}}",
     "merchFor": "This merch is for {{ album }}",
@@ -185,7 +186,7 @@
   },
   "artist": {
     "merch": "Merch",
-    "artistCheckoutPage": "You will be taken to the artist's payment processor page to complete this subscription",
+    "artistCheckoutPage": "You will be taken to the artist's payment processor page to complete this subscription.",
     "flagContent": "Flag content",
     "whyAreYouFlaggingIt": "Why are you flagging it?",
     "howContact": "How can we contact you?",
