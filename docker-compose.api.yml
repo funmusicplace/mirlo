@@ -69,8 +69,6 @@ services:
     networks: [api-network]
     volumes:
       - ${MEDIA_LOCATION:-./data/media/}processing:/data/media/processing
-      # - ${MEDIA_LOCATION:-./data/media/}audio:/data/media/audio
-      # - ${MEDIA_LOCATION:-./data/media/}images:/data/media/images
     develop:
       watch:
         - action: sync+restart

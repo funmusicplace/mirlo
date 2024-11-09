@@ -123,6 +123,18 @@ const SupportArtistTiersForm: React.FC<{
           })}
         </Button>
       )}
+      <div
+        className={css`
+          margin-top: 1rem;
+
+          small {
+            display: block;
+            margin-bottom: 0.5rem;
+          }
+        `}
+      >
+        <small>{t("artistCheckoutPage")}</small>
+      </div>
     </>
   );
 };

@@ -115,6 +115,18 @@ const ArtistVariableSupport: React.FC<{
           >
             {t("letsSupport")}
           </SupportBoxButton>
+          <div
+            className={css`
+              margin-top: 1rem;
+
+              small {
+                display: block;
+                margin-bottom: 0.5rem;
+              }
+            `}
+          >
+            <small>{t("artistCheckoutPage")}</small>
+          </div>
         </form>
       </Modal>
     </>

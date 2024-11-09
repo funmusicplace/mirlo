@@ -141,10 +141,16 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup }> = ({
         <div
           className={css`
             margin-top: 1rem;
-            font-size: 0.8rem;
+
+            small {
+              display: block;
+              margin-bottom: 0.5rem;
+            }
           `}
         >
-          {t("downloadDisclaimer")}
+          <small>{t("artistCheckoutPage")}</small>
+
+          <small>{t("downloadDisclaimer")}</small>
         </div>
       </form>
       {!isBeforeReleaseDate && (

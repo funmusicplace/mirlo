@@ -79,7 +79,7 @@ const ArtistSupport: React.FC = () => {
   const queryClient = useQueryClient();
   React.useEffect(() => {
     const query = new URLSearchParams(search);
-    let interval: NodeJS.Timer | null = null;
+    let interval: NodeJS.Timeout | null = null;
     if (query.get("subscribe") === "success") {
       interval = setTimeout(async () => {
         await queryClient.invalidateQueries({

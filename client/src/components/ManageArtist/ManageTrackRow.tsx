@@ -63,15 +63,15 @@ const ManageTrackRow: React.FC<{
   const userId = user?.id;
 
   React.useEffect(() => {
-    let interval: NodeJS.Timer;
+    let interval: NodeJS.Timeout | null = null;
     if (uploadState === "STARTED") {
       interval = setInterval(async () => {
         const result = await api.get<Track>(`manage/tracks/${track.id}`);
         const newState = result.result.audio?.uploadState;
 
         setUploadState(newState);
-        if (newState === "SUCCESS") {
-          interval && clearInterval(interval);
+        if (newState === "SUCCESS" && interval) {
+          clearInterval(interval);
         }
       }, 4000);
     }
