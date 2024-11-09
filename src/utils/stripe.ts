@@ -30,7 +30,7 @@ if (process.env.NODE_ENV === "test") {
     ...stripeConfig,
     host: STRIPE_HOST,
     port: STRIPE_PORT,
-    protocol: STRIPE_PROTOCOL === "http" ? "http" : "https"
+    protocol: STRIPE_PROTOCOL === "http" ? "http" : "https",
   };
 }
 
@@ -41,7 +41,7 @@ const calculatePlatformPercent = async (
   percent?: number | null
 ) => {
   const settings = await getSiteSettings();
-  if (currency.toLowerCase() === "brl") {
+  if (currency.toLowerCase() === "brl" || currency.toLowerCase() === "mxn") {
     return 0;
   }
   return (percent ?? settings.platformPercent ?? 7) / 100;

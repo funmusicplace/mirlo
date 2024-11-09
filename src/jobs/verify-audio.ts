@@ -1,17 +1,10 @@
 import { Job } from "bullmq";
 
-import ffmpeg from "fluent-ffmpeg";
-import {
-  createReadStream,
-  promises as fsPromises,
-  readFileSync,
-  statSync,
-} from "fs";
+import { promises as fsPromises } from "fs";
 
 import { logger } from "./queue-worker";
 import { finalAudioBucket, minioClient } from "../utils/minio";
 import fetch from "node-fetch";
-import FormData from "form-data";
 
 const {
   MINIO_HOST = "",
