@@ -67,6 +67,10 @@ export default async (job: Job) => {
     const jsonBody = JSON.stringify({
       url,
       api_token: process.env.AUDD_IO_TOKEN,
+      skip: 4,
+      every: 1,
+      skip_first_second: 30,
+      return: "musicbrainz",
     });
 
     console.log("url", url);
