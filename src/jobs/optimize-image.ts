@@ -20,6 +20,8 @@ const {
   MINIO_HOST = "",
   MINIO_ROOT_USER = "",
   MINIO_API_PORT = 9000,
+  SIGHTENGINE_USER,
+  SIGHTENGINE_SECRET,
 } = process.env;
 
 /**
@@ -161,11 +163,8 @@ const optimizeImage = async (job: Job) => {
     logger.info(`Removing from Bucket ${incomingMinioBucket}`);
 
     await minioClient.removeObject(incomingMinioBucket, destinationId);
-    logger.info(
-      `${process.env.SIGHTENGINE_USER} + ${process.env.SIGHTENGINE_SECRET}`
-    );
 
-    if (process.env.SIGHTENGINE_USER && process.env.SIGHTENGINE_SECRET) {
+    if (SIGHTENGINE_USER && SIGHTENGINE_SECRET) {
       logger.info("Checking SightEngine");
       const searchParams = new URLSearchParams();
       searchParams.append(
@@ -173,8 +172,8 @@ const optimizeImage = async (job: Job) => {
         generateFullStaticImageUrl(urls[0], finalMinioBucket)
       );
       searchParams.append("models", "nudity-2.1");
-      searchParams.append("api_user", process.env.SIGHTENGINE_USER);
-      searchParams.append("api_secret", process.env.SIGHTENGINE_SECRET);
+      searchParams.append("api_user", SIGHTENGINE_USER);
+      searchParams.append("api_secret", SIGHTENGINE_SECRET);
 
       const response = await fetch(
         `https://api.sightengine.com/1.0/check.json?${searchParams.toString()}`,
