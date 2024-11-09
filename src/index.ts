@@ -76,6 +76,7 @@ const routes = [
   "trackGroups/{id}/emailDownload",
   "tracks",
   "tracks/{id}",
+  "tracks/{id}/audio",
   "tracks/{id}/stream/{segment}",
   "artists",
   "artists/testExistence",
@@ -198,7 +199,7 @@ app.use(express.static("public"));
 //   res.sendFile(path.join(__dirname, "../", "public", "app.html"));
 // });
 app.use("/images/:bucket/:filename", serveStatic);
-app.use("/audio", express.static("data/media/audio"));
+// app.use("/audio", express.static("data/media/audio"));
 
 // Setting up a bull worker dashboard
 if (isDev) {

@@ -6873,6 +6873,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/node@npm:18":
+  version: 18.19.64
+  resolution: "@types/node@npm:18.19.64"
+  dependencies:
+    undici-types: "npm:~5.26.4"
+  checksum: 10/c6383d4f6f3b3f1d48234b2e71e20d1ead4ac4ee31bbca7ef8719eedd1e79a425b35952d4b1ba3eff0a4e3eebd37b8a6e85e9af3bb88aa7b3fdae9cb66630820
+  languageName: node
+  linkType: hard
+
 "@types/node@npm:>=8.1.0":
   version: 18.15.11
   resolution: "@types/node@npm:18.15.11"
@@ -11810,6 +11819,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"form-data@npm:^4.0.1":
+  version: 4.0.1
+  resolution: "form-data@npm:4.0.1"
+  dependencies:
+    asynckit: "npm:^0.4.0"
+    combined-stream: "npm:^1.0.8"
+    mime-types: "npm:^2.1.12"
+  checksum: 10/6adb1cff557328bc6eb8a68da205f9ae44ab0e88d4d9237aaf91eed591ffc64f77411efb9016af7d87f23d0a038c45a788aa1c6634e51175c4efa36c2bc53774
+  languageName: node
+  linkType: hard
+
 "form-data@npm:~2.3.2":
   version: 2.3.3
   resolution: "form-data@npm:2.3.3"
@@ -15591,7 +15611,7 @@ __metadata:
     "@types/minio": "npm:^7.0.18"
     "@types/mocha": "npm:^10.0.1"
     "@types/multer": "npm:^1.4.7"
-    "@types/node": "npm:18.11.12"
+    "@types/node": "npm:18"
     "@types/node-fetch": "npm:^2.6.11"
     "@types/nodemailer": "npm:^6.4.14"
     "@types/nodemailer-sendgrid": "npm:^1.0.0"
@@ -15625,6 +15645,7 @@ __metadata:
     file-type: "npm:16"
     filenamify: "npm:^4.3.0"
     fluent-ffmpeg: "npm:^2.1.2"
+    form-data: "npm:^4.0.1"
     husky: "npm:^8.0.3"
     image-size: "npm:^1.0.2"
     json2csv: "npm:^6.0.0-alpha.2"
