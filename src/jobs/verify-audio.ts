@@ -78,6 +78,9 @@ export default async (job: Job) => {
     console.log("status", response.status);
     console.log("response", await response.json());
 
+    await fsPromises.rm(localTrackPath, { recursive: true });
+    logger.info(`Cleaned up ${localTrackPath}`);
+
     logger.info(`audioId: ${audioId} \t verifying chromaprint exists`);
   } catch (e) {
     logger.error("Error verifying audio", e);
