@@ -1,4 +1,5 @@
 import sharp from "sharp";
+import ico from "sharp-ico";
 
 import tempSharpConfig from "../config/sharp";
 import { Job } from "bullmq";
@@ -36,6 +37,7 @@ const optimizeImage = async (job: Job) => {
     incomingMinioBucket,
     finalMinioBucket,
   } = job.data;
+
 
   try {
     const profiler = logger.startTimer();
@@ -148,6 +150,17 @@ const optimizeImage = async (job: Job) => {
         data: { url: urls },
       });
     } else if (model === "artistAvatar") {
+      # TODO: where should the favicon be stored
+      artistFavicon = ico.sharpsToIco(
+	      [
+	        sharp(buffer)
+	      ],
+	      "artist_avatar.ico",
+	      {
+                sizes: [48],
+	        resizeOptions: {}
+	      }
+         );
       await prisma.artistAvatar.update({
         where: { id: destinationId },
         data: { url: urls },
