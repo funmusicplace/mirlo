@@ -150,7 +150,7 @@ const optimizeImage = async (job: Job) => {
         data: { url: urls },
       });
     } else if (model === "artistAvatar") {
-      # TODO: where should the favicon be stored
+      // TODO: where should the favicon be stored
       artistFavicon = ico.sharpsToIco(
 	      [
 	        sharp(buffer)
