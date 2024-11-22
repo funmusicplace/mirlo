@@ -32,7 +32,9 @@ const queryClient = new QueryClient({
         error instanceof MirloFetchError &&
         (error.status === 400 || error.status === 401)
       ) {
-        console.log(`Received a ${error.status} response - refreshing auth...`);
+        console.error(
+          `Received a ${error.status} response - refreshing auth...`
+        );
         await authRefresh();
         queryClient.invalidateQueries({
           predicate: (query) => query.queryKey.includes(QUERY_KEY_AUTH),

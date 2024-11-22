@@ -2,13 +2,11 @@ import Stripe from "stripe";
 import prisma from "@mirlo/prisma";
 import { Prisma, User, MerchShippingDestination } from "@mirlo/prisma/client";
 import { logger } from "../logger";
-import sendMail from "../jobs/send-mail";
 import { Request, Response } from "express";
 import { findOrCreateUserBasedOnEmail } from "./user";
 import { getSiteSettings } from "./settings";
 import { generateFullStaticImageUrl } from "./images";
 import { finalCoversBucket } from "./minio";
-import { Job } from "bullmq";
 import { AppError } from "./error";
 import {
   handleArtistGift,
@@ -17,6 +15,7 @@ import {
   handleTrackGroupPurchase,
 } from "./handleFinishedTransactions";
 import countryCodesCurrencies from "./country-codes-currencies";
+import { manageSubscriptionReceipt } from "./subscription";
 
 const { STRIPE_KEY, API_DOMAIN } = process.env;
 
@@ -743,40 +742,13 @@ export const handleInvoicePaid = async (invoice: Stripe.Invoice) => {
   const subscription = invoice.subscription;
   logger.info(`invoice.paid: ${invoice.id} for ${subscription}`);
   if (typeof subscription === "string") {
-    const artistUserSubscription =
-      await prisma.artistUserSubscription.findFirst({
-        where: {
-          stripeSubscriptionKey: subscription,
-          deletedAt: null,
-        },
-        include: {
-          user: true,
-          artistSubscriptionTier: {
-            include: {
-              artist: true,
-            },
-          },
-        },
-      });
-    if (artistUserSubscription) {
-      logger.info(
-        `invoice.paid: ${invoice.id} found subscription, sending receipt`
-      );
-      await sendMail({
-        data: {
-          template: "artist-subscription-receipt",
-          message: {
-            to: artistUserSubscription.user.email,
-          },
-          locals: {
-            artist: artistUserSubscription.artistSubscriptionTier.artist,
-            artistUserSubscription,
-            host: process.env.API_DOMAIN,
-            client: process.env.REACT_APP_CLIENT_DOMAIN,
-          },
-        },
-      } as Job);
-    }
+    await manageSubscriptionReceipt({
+      paymentProcessor: "stripe",
+      processorPaymentReferenceId: invoice.id,
+      processorSubscriptionReferenceId: subscription,
+      amountPaid: invoice.amount_paid,
+      currency: invoice.currency,
+    });
   }
 };
 

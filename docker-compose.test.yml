@@ -5,6 +5,7 @@ services:
     networks: !reset [test-network]
     ports: !reset []
     profiles: [test]
+
   redis-test:
     extends:
       file: docker-compose.api.yml

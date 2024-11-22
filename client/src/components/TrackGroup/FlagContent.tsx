@@ -28,7 +28,6 @@ const FlagContent: React.FC<{ trackGroupId: number }> = ({ trackGroupId }) => {
   });
 
   const submitFlag = async (data: { reason: string; email: string }) => {
-    console.log("data", data);
     setIsLoading(true);
 
     try {
@@ -48,7 +47,7 @@ const FlagContent: React.FC<{ trackGroupId: number }> = ({ trackGroupId }) => {
       snackbar("An error happened while reporting this content", {
         type: "warning",
       });
-      console.log(e);
+      console.error(e);
     }
   };
 
