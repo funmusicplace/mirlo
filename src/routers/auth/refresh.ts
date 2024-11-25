@@ -55,7 +55,6 @@ const refresh = (req: Request, res: Response, next: NextFunction) => {
       }
     }
   } catch (e) {
-    console.log("has an error, passing it along", e);
     next(e);
   }
 };

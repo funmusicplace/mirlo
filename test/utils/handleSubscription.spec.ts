@@ -8,13 +8,10 @@ import prisma from "@mirlo/prisma";
 import assert from "assert";
 import sinon from "sinon";
 import * as sendMail from "../../src/jobs/send-mail";
-import {
-  handleSubscription,
-  handleTrackGroupPurchase,
-} from "../../src/utils/handleFinishedTransactions";
+import { handleSubscription } from "../../src/utils/handleFinishedTransactions";
 import Stripe from "stripe";
 
-describe("handleTrackGroupPurchase", () => {
+describe("handleSubscription", () => {
   beforeEach(async () => {
     try {
       await clearTables();

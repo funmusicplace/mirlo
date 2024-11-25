@@ -9,7 +9,6 @@ const AutoCompleteTrackGroup: React.FC<{
 }> = ({ onSelect, filterByArtistId }) => {
   const getTrackGroupOptions = React.useCallback(
     async (searchString: string) => {
-      console.log("filter", filterByArtistId);
       const results = await api.getMany<TrackGroup>("trackGroups", {
         title: searchString,
         take: "10",

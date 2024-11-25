@@ -94,7 +94,7 @@ export default function () {
       if (!newTier) {
         throw new AppError({
           httpCode: 404,
-          description: "Tier not found"
+          description: "Tier not found",
         });
       }
       const stripeAccountId = newTier.artist.user.stripeAccountId;
@@ -102,7 +102,7 @@ export default function () {
       if (!stripeAccountId) {
         throw new AppError({
           httpCode: 400,
-          description: "Artist has not set up with a payment processor yet"
+          description: "Artist has not set up with a payment processor yet",
         });
       }
 

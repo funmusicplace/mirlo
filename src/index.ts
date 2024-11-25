@@ -1,4 +1,4 @@
-import express, { NextFunction, Request, Response } from "express";
+import express from "express";
 import cookieParser from "cookie-parser";
 import passport from "passport";
 import { initialize } from "express-openapi";
@@ -103,6 +103,7 @@ const routes = [
   "users/{userId}/trackGroupPurchases",
   "users/{userId}/purchases",
   "users/{userId}/wishlist",
+  "users/{userId}/charges",
   "users/{userId}/stripe/connect",
   "users/{userId}/stripe/checkAccountStatus",
   "users/{userId}/feed",

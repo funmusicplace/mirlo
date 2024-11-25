@@ -208,6 +208,15 @@ interface ArtistUserSubscription {
   artistSubscriptionTier: ArtistSubscriptionTier;
 }
 
+interface ArtistUserSubscriptionCharge {
+  id: string;
+  currency: string;
+  amountPaid: number;
+  artistUserSubscriptionId: number;
+  artistUserSubscription: ArtistUserSubscription;
+  createdAt: string;
+}
+
 interface UserTrackGroupWishlist {
   userId: number;
   user: User;

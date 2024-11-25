@@ -172,27 +172,6 @@ const About: React.FC = () => {
           </Person>
           <Person>
             <img
-              src="https://mirlo.space/images/owner-pictures/jodi-photo.jpg"
-              alt="jodi photo"
-            />
-            <p>
-              Hailing from Jamaica, jodi (they / them) is a neurodivergent
-              queer, non-binary femme photographer, cultural organizer, and
-              migrant rights advocate living on unceded Lenape land in so-called
-              New York. Over the span of several years, they have engaged in
-              racial justice organizing including post-disaster relief work,
-              supporting police violence survivors, and devising harm reduction
-              strategies. Cultivating liberatory frameworks where Black
-              LGBTQIAP+ people are honored and meaningfully included is
-              immensely important to them. jodi's forthcoming media projects
-              center communities they belong to. They are passionate about
-              visual storytelling and especially concerned with exalting the
-              narratives of global majority people who have historically been
-              subjugated.{" "}
-            </p>
-          </Person>
-          <Person>
-            <img
               src="https://mirlo.space/images/owner-pictures/simon-photo.jpg"
               alt="si photo"
             />
@@ -214,6 +193,10 @@ const About: React.FC = () => {
             made this project a success, but we want to give a special shout out
             to:
             <ul>
+              <li>
+                <strong>jodi</strong>, one of our original co-owners, who helped
+                guide the direction and culture of mirlo during its first year
+              </li>
               <li>
                 <strong>
                   <a href="https://mowukis.com">Louis-Louise Kay</a>

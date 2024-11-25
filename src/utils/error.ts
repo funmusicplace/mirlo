@@ -49,7 +49,7 @@ const errorHandler = (
   res: Response,
   next: NextFunction
 ) => {
-  console.log("error handler", err);
+  console.error("error handler", err);
   if (err instanceof AppError) {
     console.error("Found instance of AppError", err);
     return res.status(err.httpCode).json({

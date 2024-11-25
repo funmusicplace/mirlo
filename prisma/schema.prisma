@@ -232,18 +232,19 @@ model ArtistTipTier {
 }
 
 model ArtistUserSubscription {
-  id                       Int                    @id @default(autoincrement())
-  artistSubscriptionTierId Int
-  artistSubscriptionTier   ArtistSubscriptionTier @relation(fields: [artistSubscriptionTierId], references: [id])
-  userId                   Int
-  user                     User                   @relation(fields: [userId], references: [id])
-  amount                   Int // In cents
-  currency                 String                 @default("USD")
-  stripeSubscriptionKey    String?
-  createdAt                DateTime               @default(now())
-  updatedAt                DateTime               @default(now()) @updatedAt
-  deletedAt                DateTime?
-  notifications            Notification[]
+  id                           Int                            @id @default(autoincrement())
+  artistSubscriptionTierId     Int
+  artistSubscriptionTier       ArtistSubscriptionTier         @relation(fields: [artistSubscriptionTierId], references: [id])
+  userId                       Int
+  user                         User                           @relation(fields: [userId], references: [id])
+  amount                       Int // In cents
+  currency                     String                         @default("USD")
+  stripeSubscriptionKey        String?
+  createdAt                    DateTime                       @default(now())
+  updatedAt                    DateTime                       @default(now()) @updatedAt
+  deletedAt                    DateTime?
+  notifications                Notification[]
+  artistUserSubscriptionCharge ArtistUserSubscriptionCharge[]
 
   @@unique([userId, artistSubscriptionTierId])
 }
@@ -257,6 +258,17 @@ model ArtistUserSubscriptionConfirmation {
   tokenExpiration DateTime? @default(dbgenerated("(NOW() + '06:00:00'::interval)"))
 
   @@unique([email, artistId])
+}
+
+model ArtistUserSubscriptionCharge {
+  id                       String                 @id @default(uuid()) @db.Uuid
+  artistUserSubscriptionId Int
+  artistUserSubscription   ArtistUserSubscription @relation(fields: [artistUserSubscriptionId], references: [id])
+  stripeInvoiceId          String? // Stripe Invoice Id
+  paymentProcessor         String
+  amountPaid               Int // in cents
+  currency                 String
+  createdAt                DateTime               @default(now())
 }
 
 model Merch {

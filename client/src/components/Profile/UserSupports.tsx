@@ -38,8 +38,6 @@ const UserSupports: React.FC<{
     return null;
   }
 
-  console.log("notFollows", notFollows);
-
   return (
     <Box
       className={css`
