@@ -26,7 +26,7 @@ describe("users/{userId}/charges", () => {
   });
 
   describe("GET", () => {
-    it.only("should return all charges for logged in user", async () => {
+    it("should return all charges for logged in user", async () => {
       const { user: purchaser, accessToken } = await createUser({
         email: "purchaser@testcom",
       });
