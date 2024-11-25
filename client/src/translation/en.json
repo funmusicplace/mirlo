@@ -108,7 +108,9 @@
     "purchasedOn": "Purchased on {{ date }}",
     "albumLink": "<albumLink>{{albumTitle}}</albumLink> by <artistLink>{{artistName}}</artistLink>",
     "wishlistEmpty": "There's nothing in your wishlist yet, browse the site!",
-    "resetPassword": "Want to reset your password?"
+    "resetPassword": "Want to reset your password?",
+    "subscriptionCharges": "Subscription payments you've made",
+    "noCharges": "You haven't made any payments yet"
   },
   "wishlist": {
     "addToWishlist": "Add to wishlist",
