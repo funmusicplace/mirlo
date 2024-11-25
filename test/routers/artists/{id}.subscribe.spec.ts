@@ -110,7 +110,7 @@ describe("artists/{id}/subscribe", () => {
         },
       });
       const newTierId = artist.subscriptionTiers![1].id;
-      const response = await requestApp
+      await requestApp
         .post(`artists/${artistUser.id}/subscribe`)
         .send({
           tierId: newTierId,
@@ -119,9 +119,6 @@ describe("artists/{id}/subscribe", () => {
         })
         .set("Accept", "application/json")
         .set("Cookie", [`jwt=${followerAccessToken}`]);
-      // FIXME: should this succeed?
-      const sessionUrl = response.body.sessionUrl;
-      await request(sessionUrl).get("");
 
       const subscriptions = await prisma.artistUserSubscription.findMany({
         where: {
