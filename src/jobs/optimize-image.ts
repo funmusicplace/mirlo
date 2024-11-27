@@ -38,7 +38,6 @@ const optimizeImage = async (job: Job) => {
     finalMinioBucket,
   } = job.data;
 
-
   try {
     const profiler = logger.startTimer();
     logger.info(
@@ -150,17 +149,17 @@ const optimizeImage = async (job: Job) => {
         data: { url: urls },
       });
     } else if (model === "artistAvatar") {
-      // TODO: where should the favicon be stored
-      artistFavicon = ico.sharpsToIco(
-	      [
-	        sharp(buffer)
-	      ],
-	      "artist_avatar.ico",
-	      {
-                sizes: [48],
-	        resizeOptions: {}
-	      }
-         );
+      artistFavicon = ico.sharpsToIco([sharp(buffer)], "artist_avatar.ico", {
+        sizes: [48],
+        resizeOptions: {},
+      });
+      logger.info("Uploading artist avatar favicon to bucket");
+      const faviconFinalName = `${destinationId}_favicon.ico`;
+      await minioClient.putObject(
+        finalMinioBucket,
+        faviconFinalName,
+        artistFavicon
+      );
       await prisma.artistAvatar.update({
         where: { id: destinationId },
         data: { url: urls },
