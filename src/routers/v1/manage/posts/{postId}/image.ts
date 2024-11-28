@@ -1,20 +1,21 @@
 import { NextFunction, Request, Response } from "express";
-import {
-  merchBelongsToLoggedInUser,
-  userAuthenticated,
-} from "../../../../../auth/passport";
+import { userAuthenticated } from "../../../../../auth/passport";
 import busboy from "connect-busboy";
 import { processPostImage } from "../../../../../queues/processImages";
+import { doesPostBelongToUser } from "../../../../../utils/post";
+import { finalPostImageBucket } from "../../../../../utils/minio";
+import { generateFullStaticImageUrl } from "../../../../../utils/images";
+import prisma from "@mirlo/prisma";
 
 type Params = {
-  postId: number;
+  postId: string;
 };
 
 export default function () {
   const operations = {
     PUT: [
       userAuthenticated,
-      merchBelongsToLoggedInUser,
+      doesPostBelongToUser,
       busboy({
         highWaterMark: 2 * 1024 * 1024,
         limits: {
@@ -28,8 +29,23 @@ export default function () {
   async function PUT(req: Request, res: Response, next: NextFunction) {
     const { postId } = req.params as unknown as Params;
     try {
-      const imageId = await processPostImage({ req, res })(postId);
-      console.log(imageId);
+      const imageId = await processPostImage({ req, res })(Number(postId));
+      const image = await prisma.postImage.findFirst({
+        where: {
+          id: imageId as string,
+        },
+      });
+      if (image) {
+        res.json({
+          result: {
+            jobId: generateFullStaticImageUrl(
+              image.id,
+              finalPostImageBucket,
+              image.extension
+            ),
+          },
+        });
+      }
     } catch (error) {
       next(error);
     }
@@ -40,7 +56,7 @@ export default function () {
     parameters: [
       {
         in: "path",
-        name: "merchId",
+        name: "postId",
         required: true,
         type: "string",
       },
@@ -53,12 +69,6 @@ export default function () {
       },
     ],
     responses: {
-      200: {
-        description: "Updated merch",
-        schema: {
-          $ref: "#/definitions/Merch",
-        },
-      },
       default: {
         description: "An error occurred",
         schema: {

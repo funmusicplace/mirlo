@@ -73,10 +73,13 @@ export const uploadAndSendToImageQueue = async (
   sharpConfigKey: "artwork" | "avatar" | "banner",
   createDatabaseEntry: ({
     filename,
+    mimeType,
   }: {
     filename: string;
+    mimeType: string;
   }) => Promise<{ id: string }>,
-  finalBucket?: string // If this is not supplied, we this basically just uploads to the first bucket
+  finalBucket?: string, // If this is not supplied, we this basically just uploads to the first bucket,0
+  storeWithExtension?: boolean
 ) => {
   logger.info(`MinIO is at ${MINIO_HOST}:${MINIO_API_PORT}`);
   logger.info("Uploading image to object storage");
@@ -94,15 +97,19 @@ export const uploadAndSendToImageQueue = async (
         `Going to put a file on MinIO Bucket ${incomingBucket}: ${image.id}, ${fileInfo.filename}`
       );
       try {
-        await minioClient.putObject(incomingBucket, image.id, fileStream);
+        const filenameArray = fileInfo.filename.split(".");
+        const fileName = storeWithExtension
+          ? `${image.id}.${[filenameArray[filenameArray.length - 1]]}`
+          : image.id;
+        await minioClient.putObject(incomingBucket, fileName, fileStream);
       } catch (e) {
         logger.error("There was an error uploading to minio");
         throw e;
       }
 
-      logger.info("Adding image to queue");
-
       if (finalBucket) {
+        logger.info("Adding image to queue");
+
         const job = await imageQueue.add("optimize-image", {
           destinationId: image.id,
           model,
@@ -211,14 +218,19 @@ export const processPostImage = (ctx: APIContext) => {
       finalPostImageBucket,
       "postImage",
       "artwork",
-      async (_fileInfo: { filename: string }) => {
+      async (fileInfo: { filename: string; mimeType: string }) => {
+        const filenameArray = fileInfo.filename.split(".");
+
         return prisma.postImage.create({
           data: {
             postId,
+            mimeType: fileInfo.mimeType,
+            extension: filenameArray[filenameArray.length - 1],
           },
         });
       },
-      undefined
+      undefined,
+      true
     );
   };
 };

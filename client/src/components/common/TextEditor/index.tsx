@@ -7,7 +7,10 @@ import {
   DropCursorExtension,
   IframeExtension,
   LinkExtension,
+  ImageAttributes,
 } from "remirror/extensions";
+import { CommandFunctionProps, DelayedPromiseCreator } from "@remirror/core";
+
 import { EditorComponent, Remirror, useRemirror } from "@remirror/react";
 import "remirror/styles/all.css";
 import { css } from "@emotion/css";
@@ -17,23 +20,36 @@ import { prosemirrorNodeToHtml } from "@remirror/core-utils";
 
 import TopToolbar from "./TopToolbar";
 import FloatingLinkToolbar from "./FloatingLinkToolbar";
+import api from "services/api";
 
-const extensions = () => [
+const extensions = (postId: number) => () => [
   new PlaceholderExtension({ placeholder: "Type something" }),
-  new TableExtension(),
-  new DropCursorExtension(),
-  new ImageExtension(),
+  new TableExtension({}),
+  new DropCursorExtension({}),
+  new ImageExtension({
+    uploadHandler: (
+      files: { file: File; progress: (progress: number) => void }[]
+    ): DelayedPromiseCreator<ImageAttributes>[] => {
+      return files.map((f) => async (props: CommandFunctionProps) => {
+        const response = await api.uploadFile(`manage/posts/${postId}/image`, [
+          f.file,
+        ]);
+        return { src: response.result.jobId };
+      });
+    },
+  }),
   new IframeExtension(),
   new LinkExtension({ autoLink: true, selectTextOnClick: true }),
   ...wysiwygPreset(),
 ];
 
-const TextEditor: React.FC<{ onChange: (val: any) => void; value: string }> = ({
-  onChange,
-  value,
-}) => {
+const TextEditor: React.FC<{
+  onChange: (val: any) => void;
+  value: string;
+  postId: number;
+}> = ({ onChange, value, postId }) => {
   const { manager, state, setState } = useRemirror({
-    extensions,
+    extensions: extensions(postId),
     content: value,
     // content: "",
     stringHandler: "html",

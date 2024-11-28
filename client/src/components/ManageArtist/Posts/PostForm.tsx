@@ -163,19 +163,22 @@ const PostForm: React.FC<{
           )}
         </FormComponent>
         <FormComponent>
-          <Controller
-            name="content"
-            render={({ field: { onChange, value } }) => {
-              return (
-                <TextEditor
-                  onChange={(val: any) => {
-                    onChange(val);
-                  }}
-                  value={value}
-                />
-              );
-            }}
-          />
+          {existing && (
+            <Controller
+              name="content"
+              render={({ field: { onChange, value } }) => {
+                return (
+                  <TextEditor
+                    onChange={(val: any) => {
+                      onChange(val);
+                    }}
+                    value={value}
+                    postId={existing.id}
+                  />
+                );
+              }}
+            />
+          )}
         </FormComponent>
         <FormComponent
           className={css`
