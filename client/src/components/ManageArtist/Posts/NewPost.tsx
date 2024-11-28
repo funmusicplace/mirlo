@@ -1,39 +1,28 @@
 import React from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { getPostURLReference } from "utils/artist";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
-import ManageSectionWrapper from "./ManageSectionWrapper";
+import ManageSectionWrapper from "../ManageSectionWrapper";
 import { css } from "@emotion/css";
-import LoadingBlocks from "components/Artist/LoadingBlocks";
-import BackToArtistLink from "./BackToArtistLink";
+import BackToArtistLink from "../BackToArtistLink";
 import PostForm from "./PostForm";
-import Post from "components/Post";
-import { ButtonLink } from "components/common/Button";
-import { bp } from "../../constants";
+import { bp } from "../../../constants";
 import { useQuery } from "@tanstack/react-query";
 import { queryManagedArtist, queryManagedPost } from "queries";
 
 const ManagePost: React.FC<{}> = () => {
   const { t } = useTranslation("translation", { keyPrefix: "managePost" });
+  const navigate = useNavigate();
 
-  const { postId, artistId } = useParams();
+  const { artistId } = useParams();
 
   const { data: artist } = useQuery(queryManagedArtist(Number(artistId)));
 
-  const {
-    data: post,
-    isLoading,
-    refetch,
-  } = useQuery(queryManagedPost(Number(postId)));
-
-  if (!post && isLoading) {
-    return <LoadingBlocks />;
-  } else if (!Post) {
-    return null;
-  }
-
-  const isPublished = post && new Date(post.publishedAt) < new Date();
+  const reload = React.useCallback(async (postId?: number) => {
+    if (postId) {
+      navigate(`/manage/artists/${artistId}/post/${postId}`);
+    }
+  }, []);
 
   return (
     <ManageSectionWrapper
@@ -65,21 +54,9 @@ const ManagePost: React.FC<{}> = () => {
           >
             {t("managePost")}
           </h1>
-          {post && isPublished && (
-            <div
-              className={css`
-                display: flex;
-                align-items: center;
-              `}
-            >
-              <ButtonLink to={getPostURLReference({ ...post, artist })}>
-                {t("viewLive")}
-              </ButtonLink>
-            </div>
-          )}
         </SpaceBetweenDiv>
       </div>
-      {artist && <PostForm existing={post} reload={refetch} artist={artist} />}
+      {artist && <PostForm {...{ reload, artist }} />}
     </ManageSectionWrapper>
   );
 };

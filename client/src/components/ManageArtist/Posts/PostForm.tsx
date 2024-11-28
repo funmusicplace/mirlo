@@ -1,12 +1,12 @@
 import React from "react";
 
 import { Controller, FormProvider, useForm } from "react-hook-form";
-import Button from "../common/Button";
-import { InputEl } from "../common/Input";
+import Button from "../../common/Button";
+import { InputEl } from "../../common/Input";
 import FormComponent from "components/common/FormComponent";
 import { useSnackbar } from "state/SnackbarContext";
 import { pick } from "lodash";
-import api from "../../services/api";
+import api from "../../../services/api";
 import { css } from "@emotion/css";
 import { useTranslation } from "react-i18next";
 import { SelectEl } from "components/common/Select";
@@ -30,7 +30,7 @@ type FormData = {
 
 const PostForm: React.FC<{
   existing?: Post;
-  reload: () => Promise<unknown>;
+  reload: (postId?: number) => Promise<unknown>;
   artist: Artist;
   onClose?: () => void;
 }> = ({ reload, artist, existing, onClose }) => {
@@ -96,6 +96,7 @@ const PostForm: React.FC<{
       if (userId) {
         try {
           setIsSaving(true);
+          let postId;
           const picked = {
             ...pick(data, ["title", "content", "isPublic", "shouldSendEmail"]),
             publishedAt: new Date(data.publishedAt + ":00").toISOString(),
@@ -106,21 +107,21 @@ const PostForm: React.FC<{
                 : undefined,
           };
           if (existingId) {
-            await api.put(`manage/posts/${existingId}`, picked);
+            const response = await api.put<
+              Partial<Post>,
+              { result: { id: number } }
+            >(`manage/posts/${existingId}`, picked);
+            postId = response.result.id;
           } else {
-            await api.post<
-              {
-                title?: string;
-                artistId: number;
-                cover?: File[];
-                publishedAt: string;
-              },
-              { id: number }
+            const response = await api.post<
+              Partial<Post>,
+              { result: { id: number } }
             >(`manage/posts`, picked);
+            postId = response.result.id;
           }
 
           snackbar(t("postUpdated"), { type: "success" });
-          reload?.();
+          reload(postId);
           onClose?.();
         } catch (e) {
           errorHandler(e);

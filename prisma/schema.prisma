@@ -123,6 +123,17 @@ model Post {
   postSubscriptionTiers     PostSubscriptionTier[]
   notifications             Notification[]
   shouldSendEmail           Boolean                 @default(true)
+  postImage                 PostImage[]
+}
+
+model PostImage {
+  id        String    @id @default(uuid()) @db.Uuid
+  url       String[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  postId    Int
+  post      Post      @relation(fields: [postId], references: [id])
 }
 
 model PostSubscriptionTier {

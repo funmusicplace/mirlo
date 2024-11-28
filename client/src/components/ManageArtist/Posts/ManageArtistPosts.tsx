@@ -2,7 +2,6 @@ import { css } from "@emotion/css";
 import Button, { ButtonLink } from "components/common/Button";
 import React from "react";
 import api from "services/api";
-import NewPostForm from "./NewPostForm";
 import Box from "components/common/Box";
 import { FaPen, FaTrash } from "react-icons/fa";
 import { useSnackbar } from "state/SnackbarContext";
@@ -13,7 +12,7 @@ import { getPostURLReference } from "utils/artist";
 import { FaPlus } from "react-icons/fa";
 import { useArtistContext } from "state/ArtistContext";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
-import { ManageSectionWrapper } from "./ManageSectionWrapper";
+import { ManageSectionWrapper } from "../ManageSectionWrapper";
 import { formatDate } from "components/TrackGroup/ReleaseDate";
 import { Link } from "react-router-dom";
 import parse from "html-react-parser";
@@ -38,6 +37,7 @@ const ManageArtistPosts: React.FC<{}> = () => {
 
   const userId = user?.id;
   const artistId = artist?.id;
+
   const fetchPosts = React.useCallback(async () => {
     if (userId) {
       const fetchedPosts = await api.getMany<Post>(
@@ -75,17 +75,15 @@ const ManageArtistPosts: React.FC<{}> = () => {
     <ManageSectionWrapper>
       <SpaceBetweenDiv>
         <div />
-        <Button
+        <ButtonLink
           transparent
-          onClick={() => {
-            setAddingNewPost(true);
-          }}
+          to={`/manage/artists/${artist.id}/post/new`}
           startIcon={<FaPlus />}
           compact
           variant="dashed"
         >
           {t("addNewPost", { artist: artist.name })}
-        </Button>
+        </ButtonLink>
       </SpaceBetweenDiv>
       {posts?.map((p) => (
         <Box
@@ -180,13 +178,6 @@ const ManageArtistPosts: React.FC<{}> = () => {
           <PostForm existing={managePost} reload={fetchPosts} artist={artist} />
         </Modal>
       )}
-
-      <NewPostForm
-        open={addingNewPost}
-        onClose={() => setAddingNewPost(false)}
-        reload={fetchPosts}
-        artist={artist}
-      />
     </ManageSectionWrapper>
   );
 };

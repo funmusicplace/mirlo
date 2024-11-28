@@ -15,6 +15,8 @@ export const finalCoversBucket = "trackgroup-covers";
 export const incomingMerchImageBucket = "incoming-merch-images";
 export const finalMerchImageBucket = "merch-images";
 
+export const finalPostImageBucket = "post-images";
+
 export const incomingAudioBucket = "incoming-track-audio";
 export const finalAudioBucket = "track-audio";
 
