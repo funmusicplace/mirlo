@@ -10,11 +10,12 @@ export default function () {
 
   async function PUT(req: Request, res: Response) {
     const { postId } = req.params;
+    const { thumbnailImageId } = req.body;
 
     try {
       const updatedPost = await prisma.post.update({
-        where: { id: Number(postId) || undefined },
-        data: { isDraft: false },
+        where: { id: Number(postId) },
+        data: { thumbnailImageId },
       });
       res.json(updatedPost);
     } catch (error) {
@@ -25,7 +26,7 @@ export default function () {
   }
 
   PUT.apiDoc = {
-    summary: "Publishes a Post",
+    summary: "Sets a thumnbail on a post",
     parameters: [
       {
         in: "path",

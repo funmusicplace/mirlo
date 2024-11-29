@@ -13,6 +13,7 @@ type Params = {
 
 export default function () {
   const operations = {
+    GET: [userAuthenticated, doesPostBelongToUser, GET],
     PUT: [
       userAuthenticated,
       doesPostBelongToUser,
@@ -25,6 +26,35 @@ export default function () {
       PUT,
     ],
   };
+
+  async function GET(req: Request, res: Response, next: NextFunction) {
+    let { postId }: { postId?: string } = req.params;
+
+    try {
+      const images = await prisma.postImage.findMany({
+        where: {
+          postId: Number(postId),
+          deletedAt: null,
+        },
+        include: {
+          thumbnailForPost: true,
+        },
+      });
+
+      res.json({
+        results: images.map((image) => ({
+          ...image,
+          src: generateFullStaticImageUrl(
+            image.id,
+            finalPostImageBucket,
+            image.extension
+          ),
+        })),
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
 
   async function PUT(req: Request, res: Response, next: NextFunction) {
     const { postId } = req.params as unknown as Params;

@@ -116,25 +116,29 @@ model Post {
   viewCount                 Int                     @default(0)
   artist                    Artist?                 @relation(fields: [artistId], references: [id])
   artistId                  Int?
-  isPublic                  Boolean                 @default(false)
+  isDraft                   Boolean                 @default(true)
+  isPublic                  Boolean                 @default(false) // is PUblic is different from is Draft. isPublic defined is the post is visible by non-followers
   minimumSubscriptionTierId Int?
   minimumSubscriptionTier   ArtistSubscriptionTier? @relation(fields: [minimumSubscriptionTierId], references: [id])
   hasAnnounceEmailBeenSent  Boolean                 @default(false)
   postSubscriptionTiers     PostSubscriptionTier[]
   notifications             Notification[]
   shouldSendEmail           Boolean                 @default(true)
-  postImage                 PostImage[]
+  images                    PostImage[]             @relation("images")
+  thumbnailImage            PostImage?              @relation(fields: [thumbnailImageId], references: [id])
+  thumbnailImageId          String?                 @db.Uuid
 }
 
 model PostImage {
-  id        String    @id @default(uuid()) @db.Uuid
-  mimeType  String
-  extension String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
-  postId    Int
-  post      Post      @relation(fields: [postId], references: [id])
+  id               String    @id @default(uuid()) @db.Uuid
+  mimeType         String
+  extension        String
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  deletedAt        DateTime?
+  postId           Int
+  post             Post      @relation(name: "images", fields: [postId], references: [id])
+  thumbnailForPost Post[]
 }
 
 model PostSubscriptionTier {

@@ -14,7 +14,7 @@ import { useArtistContext } from "state/ArtistContext";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import { ManageSectionWrapper } from "../ManageSectionWrapper";
 import { formatDate } from "components/TrackGroup/ReleaseDate";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import parse from "html-react-parser";
 import MarkdownWrapper from "components/common/MarkdownWrapper";
 import { useAuthContext } from "state/AuthContext";
@@ -24,13 +24,13 @@ const ManageArtistPosts: React.FC<{}> = () => {
   const { t, i18n } = useTranslation("translation", {
     keyPrefix: "manageArtist",
   });
+  const navigate = useNavigate();
 
   const snackbar = useSnackbar();
   const {
     state: { artist },
   } = useArtistContext();
 
-  const [addingNewPost, setAddingNewPost] = React.useState(false);
   const [managePost, setManagePost] = React.useState<Post>();
 
   const [posts, setPosts] = React.useState<Post[]>([]);
@@ -50,6 +50,20 @@ const ManageArtistPosts: React.FC<{}> = () => {
   React.useEffect(() => {
     fetchPosts();
   }, [fetchPosts]);
+
+  const createPost = React.useCallback(async () => {
+    if (artistId) {
+      const response = await api.post<
+        Partial<Post>,
+        { result: { id: number } }
+      >(`manage/posts`, {
+        title: "",
+        content: "",
+        artistId: artistId,
+      });
+      navigate(`/manage/artists/${artistId}/post/${response.result.id}/`);
+    }
+  }, [artistId]);
 
   const deletePost = React.useCallback(
     async (postId: number) => {
@@ -75,15 +89,15 @@ const ManageArtistPosts: React.FC<{}> = () => {
     <ManageSectionWrapper>
       <SpaceBetweenDiv>
         <div />
-        <ButtonLink
+        <Button
           transparent
-          to={`/manage/artists/${artist.id}/post/new`}
+          onClick={createPost}
           startIcon={<FaPlus />}
           compact
           variant="dashed"
         >
           {t("addNewPost", { artist: artist.name })}
-        </ButtonLink>
+        </Button>
       </SpaceBetweenDiv>
       {posts?.map((p) => (
         <Box
@@ -166,18 +180,9 @@ const ManageArtistPosts: React.FC<{}> = () => {
                 })}
             </p>
           </SpaceBetweenDiv>
-          <MarkdownWrapper>{parse(p.content)}</MarkdownWrapper>
+          <MarkdownWrapper>{parse(p.content ?? "")}</MarkdownWrapper>
         </Box>
       ))}
-      {managePost && (
-        <Modal
-          open={!!managePost}
-          onClose={() => setManagePost(undefined)}
-          title={t("editPost") ?? ""}
-        >
-          <PostForm existing={managePost} reload={fetchPosts} artist={artist} />
-        </Modal>
-      )}
     </ManageSectionWrapper>
   );
 };

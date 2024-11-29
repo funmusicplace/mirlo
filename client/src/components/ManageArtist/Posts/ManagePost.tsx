@@ -33,7 +33,8 @@ const ManagePost: React.FC<{}> = () => {
     return null;
   }
 
-  const isPublished = post && new Date(post.publishedAt) < new Date();
+  const isPublished =
+    post && !post.isDraft && new Date(post.publishedAt) < new Date();
 
   return (
     <ManageSectionWrapper
@@ -79,8 +80,8 @@ const ManagePost: React.FC<{}> = () => {
           )}
         </SpaceBetweenDiv>
       </div>
-      {artist && (
-        <PostForm existing={post} reload={() => refetch()} artist={artist} />
+      {artist && post && (
+        <PostForm post={post} reload={() => refetch()} artist={artist} />
       )}
     </ManageSectionWrapper>
   );

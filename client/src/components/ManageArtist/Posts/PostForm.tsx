@@ -18,6 +18,8 @@ import { useNavigate } from "react-router-dom";
 import { getArtistManageUrl } from "utils/artist";
 import { useQuery } from "@tanstack/react-query";
 import { queryManagedArtistSubscriptionTiers } from "queries";
+import ImagesInPostManager from "components/common/TextEditor/ImagesInPostManager";
+import useGetUserObjectById from "utils/useGetUserObjectById";
 
 type FormData = {
   title: string;
@@ -29,11 +31,11 @@ type FormData = {
 };
 
 const PostForm: React.FC<{
-  existing?: Post;
+  post: Post;
   reload: (postId?: number) => Promise<unknown>;
   artist: Artist;
   onClose?: () => void;
-}> = ({ reload, artist, existing, onClose }) => {
+}> = ({ reload, artist, post, onClose }) => {
   const { user } = useAuthContext();
   const snackbar = useSnackbar();
   const navigate = useNavigate();
@@ -48,15 +50,20 @@ const PostForm: React.FC<{
     })
   );
 
-  const publishedAt = existing ? new Date(existing.publishedAt) : new Date();
+  const publishedAt = post ? new Date(post.publishedAt) : new Date();
   publishedAt.setMinutes(
     publishedAt.getMinutes() - publishedAt.getTimezoneOffset()
   );
 
+  const { objects: images, reload: reloadImages } =
+    useGetUserObjectById<PostImage>(`manage/posts/${post?.id}/images`, {
+      multiple: true,
+    });
+
   const methods = useForm<FormData>({
-    defaultValues: existing
+    defaultValues: post
       ? {
-          ...existing,
+          ...post,
           publishedAt: publishedAt.toISOString().slice(0, 16),
         }
       : {
@@ -68,15 +75,12 @@ const PostForm: React.FC<{
   React.useEffect(() => {
     if ((tiers?.results.length ?? 0) > 0) {
       if (
-        existing?.minimumSubscriptionTierId &&
+        post.minimumSubscriptionTierId &&
         tiers?.results.find(
-          (tier) => tier.id === existing.minimumSubscriptionTierId
+          (tier) => tier.id === post.minimumSubscriptionTierId
         )
       ) {
-        methods.setValue(
-          "minimumTier",
-          `${existing.minimumSubscriptionTierId}`
-        );
+        methods.setValue("minimumTier", `${post.minimumSubscriptionTierId}`);
       }
     }
   }, [tiers]);
@@ -86,7 +90,7 @@ const PostForm: React.FC<{
   const isPublic = watch("isPublic");
   const minimumTier = watch("minimumTier");
 
-  const existingId = existing?.id;
+  const existingId = post.id;
   const userId = user?.id;
 
   const publicationDate = watch("publishedAt");
@@ -106,19 +110,11 @@ const PostForm: React.FC<{
                 ? Number(data.minimumTier)
                 : undefined,
           };
-          if (existingId) {
-            const response = await api.put<
-              Partial<Post>,
-              { result: { id: number } }
-            >(`manage/posts/${existingId}`, picked);
-            postId = response.result.id;
-          } else {
-            const response = await api.post<
-              Partial<Post>,
-              { result: { id: number } }
-            >(`manage/posts`, picked);
-            postId = response.result.id;
-          }
+          const response = await api.put<
+            Partial<Post>,
+            { result: { id: number } }
+          >(`manage/posts/${existingId}`, picked);
+          postId = response.result.id;
 
           snackbar(t("postUpdated"), { type: "success" });
           reload(postId);
@@ -134,6 +130,15 @@ const PostForm: React.FC<{
     [reload, existingId, snackbar, artist.id, errorHandler, onClose, userId, t]
   );
 
+  const doPublish = React.useCallback(async () => {
+    try {
+      await api.put(`manage/posts/${existingId}/publish`, {});
+      reload(existingId);
+    } catch (e) {
+      console.error(e);
+    }
+  }, [existingId]);
+
   const doDelete = React.useCallback(async () => {
     try {
       const confirmed = window.confirm(t("confirmDelete") ?? "");
@@ -145,6 +150,9 @@ const PostForm: React.FC<{
       console.error(e);
     }
   }, [artist.id, existingId, navigate, t, userId]);
+
+  const isFuture = new Date() < new Date(publicationDate);
+  console.log(isFuture);
 
   return (
     <FormProvider {...methods}>
@@ -163,20 +171,26 @@ const PostForm: React.FC<{
           )}
         </FormComponent>
         <FormComponent>
-          {existing && (
-            <Controller
-              name="content"
-              render={({ field: { onChange, value } }) => {
-                return (
-                  <TextEditor
-                    onChange={(val: any) => {
-                      onChange(val);
-                    }}
-                    value={value}
-                    postId={existing.id}
-                  />
-                );
-              }}
+          <Controller
+            name="content"
+            render={({ field: { onChange, value } }) => {
+              return (
+                <TextEditor
+                  onChange={(val: any) => {
+                    onChange(val);
+                  }}
+                  value={value}
+                  postId={post.id}
+                  reloadImages={reloadImages}
+                />
+              );
+            }}
+          />
+          {images && images.length > 0 && (
+            <ImagesInPostManager
+              postId={post.id}
+              images={images}
+              reload={reloadImages}
             />
           )}
         </FormComponent>
@@ -278,13 +292,25 @@ const PostForm: React.FC<{
             isLoading={isSaving}
             onClick={handleSubmit(doSave)}
           >
-            {existing ? t("save") : t("saveNew")} {t("post")}
+            {post.isDraft ? t("saveDraft") : t("updatePost")}
           </Button>
-          {existing && (
-            <Button type="button" isLoading={isSaving} onClick={doDelete}>
-              {t("delete")}
+          {post.isDraft && (
+            <Button
+              disabled={
+                isSaving ||
+                (minimumTier === "" && !isPublic) ||
+                !methods.formState.isValid
+              }
+              isLoading={isSaving}
+              onClick={doPublish}
+              type="button"
+            >
+              {isFuture ? t("scheduleToPublish") : t("publishPost")}
             </Button>
           )}
+          <Button type="button" isLoading={isSaving} onClick={doDelete}>
+            {t("delete")}
+          </Button>
         </div>
       </form>
     </FormProvider>

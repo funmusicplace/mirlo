@@ -55,6 +55,24 @@ export default function () {
           id: Number(postId),
         },
       });
+
+      const postImages = await prisma.postImage.findMany({
+        where: {
+          postId: post.id,
+        },
+      });
+      const imagesToDelete = postImages
+        .filter((image) => {
+          const inContent = content.includes(image.id);
+          const isThumbnail = post.thumbnailImageId === image.id;
+          return !(inContent || isThumbnail);
+        })
+        .map((image) => image.id);
+      await prisma.postImage.deleteMany({
+        where: {
+          id: { in: imagesToDelete },
+        },
+      });
       res.json({ result: post });
     } catch (e) {
       next(e);

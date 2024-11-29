@@ -21,8 +21,10 @@ import { prosemirrorNodeToHtml } from "@remirror/core-utils";
 import TopToolbar from "./TopToolbar";
 import FloatingLinkToolbar from "./FloatingLinkToolbar";
 import api from "services/api";
+import useGetUserObjectById from "utils/useGetUserObjectById";
+import ImagesInPostManager from "./ImagesInPostManager";
 
-const extensions = (postId: number) => () => [
+const extensions = (postId: number, reload: () => void) => () => [
   new PlaceholderExtension({ placeholder: "Type something" }),
   new TableExtension({}),
   new DropCursorExtension({}),
@@ -31,9 +33,10 @@ const extensions = (postId: number) => () => [
       files: { file: File; progress: (progress: number) => void }[]
     ): DelayedPromiseCreator<ImageAttributes>[] => {
       return files.map((f) => async (props: CommandFunctionProps) => {
-        const response = await api.uploadFile(`manage/posts/${postId}/image`, [
+        const response = await api.uploadFile(`manage/posts/${postId}/images`, [
           f.file,
         ]);
+        reload();
         return { src: response.result.jobId };
       });
     },
@@ -47,9 +50,10 @@ const TextEditor: React.FC<{
   onChange: (val: any) => void;
   value: string;
   postId: number;
-}> = ({ onChange, value, postId }) => {
+  reloadImages: () => void;
+}> = ({ onChange, value, postId, reloadImages }) => {
   const { manager, state, setState } = useRemirror({
-    extensions: extensions(postId),
+    extensions: extensions(postId, reloadImages),
     content: value,
     // content: "",
     stringHandler: "html",
@@ -69,7 +73,9 @@ const TextEditor: React.FC<{
 
           .remirror-editor {
             width: 100%;
-            max-height: 500px;
+            .ProseMirror {
+              border: 1px solid var(--mi-darken-x-background-color);
+            }
 
             iframe {
               width: 100%;
@@ -99,6 +105,7 @@ const TextEditor: React.FC<{
         manager={manager}
         state={state}
         onChange={(parameter) => {
+          console.log("changing");
           // Update the state to the latest value.
           onChange(prosemirrorNodeToHtml(parameter.state.doc));
           setState(parameter.state);
