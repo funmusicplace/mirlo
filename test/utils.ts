@@ -1,9 +1,10 @@
 import prisma from "../prisma/prisma";
-import { Prisma, UploadState } from "@mirlo/prisma/client";
+import { Prisma } from "@mirlo/prisma/client";
 import { buildTokens } from "../src/routers/auth";
 
 export const clearTables = async () => {
   await prisma.$executeRaw`DELETE FROM "Notification";`;
+  await prisma.$executeRaw`DELETE FROM "PostImage";`;
   await prisma.$executeRaw`DELETE FROM "MerchPurchase";`;
   await prisma.$executeRaw`DELETE FROM "Merch";`;
   await prisma.$executeRaw`DELETE FROM "ArtistUserSubscriptionCharge";`;
@@ -73,6 +74,7 @@ export const createPost = async (
       isPublic: data?.isPublic ?? true,
       content: data?.content ?? "The content",
       shouldSendEmail: data?.shouldSendEmail,
+      isDraft: data?.isDraft ?? true,
     },
   });
   return post;

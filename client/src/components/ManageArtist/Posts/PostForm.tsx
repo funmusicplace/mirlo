@@ -152,7 +152,6 @@ const PostForm: React.FC<{
   }, [artist.id, existingId, navigate, t, userId]);
 
   const isFuture = new Date() < new Date(publicationDate);
-  console.log(isFuture);
 
   return (
     <FormProvider {...methods}>

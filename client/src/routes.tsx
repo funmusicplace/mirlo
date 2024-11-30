@@ -315,15 +315,6 @@ const routes: RouteObject[] = [
                 },
               },
               {
-                path: "post/new",
-                async lazy() {
-                  const { default: Component } = await import(
-                    "components/ManageArtist/Posts/NewPost"
-                  );
-                  return { Component };
-                },
-              },
-              {
                 path: "post/:postId",
                 async lazy() {
                   const { default: Component } = await import(

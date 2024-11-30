@@ -16,7 +16,7 @@ export default function () {
         where: { id: Number(postId) || undefined },
         data: { isDraft: false },
       });
-      res.json(updatedPost);
+      res.json({ result: updatedPost });
     } catch (error) {
       res.json({
         error: `Post with ID ${postId} does not exist in the database`,

@@ -7,6 +7,7 @@ export const POST_EXAMPLE: Post = {
 	`,
   publishedAt: "1999-09-09T09:09:09Z",
   isPublic: true,
+  isDraft: false,
   isContentHidden: false,
   artist: {
     id: 1,

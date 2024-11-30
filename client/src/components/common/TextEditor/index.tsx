@@ -105,7 +105,6 @@ const TextEditor: React.FC<{
         manager={manager}
         state={state}
         onChange={(parameter) => {
-          console.log("changing");
           // Update the state to the latest value.
           onChange(prosemirrorNodeToHtml(parameter.state.doc));
           setState(parameter.state);

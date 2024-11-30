@@ -14,7 +14,6 @@ const ImagesInPostManager: React.FC<{
 
   const markImageAsThumbnail = React.useCallback(
     async (imageId: string) => {
-      console.log("marking as thumbnail", imageId);
       await api.put(`manage/posts/${postId}/thumbnail`, {
         thumbnailImageId: imageId,
       });

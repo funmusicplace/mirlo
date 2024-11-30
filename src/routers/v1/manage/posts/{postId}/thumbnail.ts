@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import prisma from "@mirlo/prisma";
 import { userAuthenticated } from "../../../../../auth/passport";
 import { doesPostBelongToUser } from "../../../../../utils/post";
+import { AppError } from "../../../../../utils/error";
 
 export default function () {
   const operations = {
@@ -17,11 +18,9 @@ export default function () {
         where: { id: Number(postId) },
         data: { thumbnailImageId },
       });
-      res.json(updatedPost);
+      res.json({ result: updatedPost });
     } catch (error) {
-      res.json({
-        error: `Post with ID ${postId} does not exist in the database`,
-      });
+      throw error;
     }
   }
 
