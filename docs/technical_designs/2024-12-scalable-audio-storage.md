@@ -1,15 +1,15 @@
 # Scalable Audio Storage
 
-Date: 2024-12
-Author: @bbstilson
-Owners: @simonv3, @LouisLouiseKay
+* Date: 2024-12
+* Author: @bbstilson
+* Owners: @simonv3, @LouisLouiseKay
 
 ## Terminology
 
-- [Render](https://render.com/)
-- [Minio](https://min.io/)
-- [Backblaze](https://www.backblaze.com/)
-- [AWS S3](https://aws.amazon.com/s3/)
+* [Render](https://render.com/)
+* [Minio](https://min.io/)
+* [Backblaze](https://www.backblaze.com/)
+* [AWS S3](https://aws.amazon.com/s3/)
 
 ## Problem
 
@@ -17,15 +17,15 @@ Mirlo uses Render as an infrastructure one-stop shop. This works well as it make
 
 ## Storage Requirements
 
-- Durable
-  - Audio files should not be lost.
-- Secure
-  - Audio files should not be exposed to the open internet.
-- Performant
-  - Streaming audio segments requires real-time throughput (<300ms / request).
-- Affordable
-  - The closer to free, the better.
-- Locally compatible.
+* Durable
+  * Audio files should not be lost.
+* Secure
+  * Audio files should not be exposed to the open internet.
+* Performant
+  * Streaming audio segments requires real-time throughput (<300ms / request).
+* Affordable
+  * The closer to free, the better.
+* Locally compatible.
 
 ## Backblaze (recommended)
 
