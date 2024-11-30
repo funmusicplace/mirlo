@@ -74,6 +74,7 @@ const routes = [
   "trackGroups/{id}/testOwns",
   "trackGroups/{id}/wishlist",
   "trackGroups/{id}/emailDownload",
+  "trackGroups/{id}/generate",
   "tracks",
   "tracks/{id}",
   "tracks/{id}/audio",

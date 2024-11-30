@@ -177,6 +177,20 @@ const APIInstance = (apiRoot: string) => {
       });
     },
 
+    generateDownload: (endpoint: string) => {
+      return apiRequest<Response>(
+        endpoint,
+        {
+          method: "GET"
+        },
+        {
+          noProcess: true
+        }
+      ).then(resp => {
+        return resp.json();
+      });
+    },
+
     getFile: (filename: string, endpoint: string, type: string) => {
       return apiRequest<string>(
         endpoint,
