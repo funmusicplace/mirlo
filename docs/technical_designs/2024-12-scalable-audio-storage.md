@@ -81,7 +81,7 @@ So why not use S3? AWS is an abstraction over a data center. Any thing is possib
 2) Data migration.
    1) Switch from a Minio client to an S3-compatible client. For JS, this is `@aws-sdk/client-s3`.
    2) Add dual writes.
-      a) Write to both Render Minio instance and Backblaze.
+      1) Write to both Render Minio instance and Backblaze.
    3) Migrate data to Backblaze.
    4) Change reads to Backblaze.
    5) Clean up old paths. (writing to Render Minio instance).
