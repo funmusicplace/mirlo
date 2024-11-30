@@ -7,10 +7,18 @@ import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
 import { useArtistContext } from "state/ArtistContext";
 import Modal from "./Modal";
-import Select from "./Select";
 import LoadingSpinner from "./LoadingSpinner";
 
 const formats = ["flac", "wav", "opus", "320.mp3", "256.mp3", "128.mp3"];
+const formatsDisplay: { [format: string]: string; } = {
+  "": "",
+  "flac": "FLAC",
+  "wav": "WAV",
+  "opus": "OPUS",
+  "320.mp3": "MP3 320kbps",
+  "256.mp3": "MP3 256kbps",
+  "128.mp3": "MP3 128kbps",
+}
 
 const DownloadAlbumButton: React.FC<{
   trackGroup: TrackGroup;
@@ -19,7 +27,7 @@ const DownloadAlbumButton: React.FC<{
   email?: string;
 }> = ({ trackGroup, onlyIcon, email, token }) => {
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
-  const [chosenFormat, setChosenFormat] = React.useState(formats[0]);
+  const [chosenFormat, setChosenFormat] = React.useState("");
   const [isGeneratingAlbum, setIsGeneratingAlbum] = React.useState(0);
   const [isPopupOpen, setIsPopupOpen] = React.useState(false);
   const snackbar = useSnackbar();
@@ -62,6 +70,26 @@ const DownloadAlbumButton: React.FC<{
     trackGroup.title,
   ]);
 
+  const generateAlbum = React.useCallback(async (format: string) => {
+    try {
+      const queryParams = new URLSearchParams();
+      queryParams.append("format", format);
+      const resp = await api.generateDownload(`trackGroups/${trackGroup.id}/generate?${queryParams.toString()}`);
+      if ((resp as any).result.jobId) {
+        setIsGeneratingAlbum(+(resp as any).result.jobId);
+      } else if ((resp as any).result === true) {
+        setIsGeneratingAlbum(0);
+      }
+    } catch (e) {
+      snackbar(t("error"), { type: "warning" });
+      console.error(e);
+    }
+  }, [
+    chosenFormat,
+    trackGroup.id,
+    t,
+  ])
+
   React.useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
     if (isGeneratingAlbum > 0) {
@@ -70,10 +98,6 @@ const DownloadAlbumButton: React.FC<{
           `jobs?queue=generateAlbum&ids=${isGeneratingAlbum}`
         );
         if (result.results[0]?.jobStatus === "completed") {
-          await api.downloadFileDirectly(
-            `trackGroups/${trackGroup.id}/download?format=${chosenFormat}`,
-            `${trackGroup.title}.zip`
-          );
           setIsDownloading(false);
           setIsGeneratingAlbum(0);
           interval && clearInterval(interval);
@@ -90,7 +114,7 @@ const DownloadAlbumButton: React.FC<{
   return (
     <div>
       <Modal
-        title={t("download") ?? ""}
+        title={`${t("download")} ${formatsDisplay[chosenFormat]}` ?? ""}
         open={isPopupOpen}
         size="small"
         onClose={() => setIsPopupOpen(false)}
@@ -99,44 +123,71 @@ const DownloadAlbumButton: React.FC<{
           className={css`
             display: flex;
             flex-direction: column;
+              text-align: center;
           `}
         >
-          <p>What file type do you want to download?</p>
-          <Select
-            value={chosenFormat}
-            onChange={(e) => setChosenFormat(e.target.value)}
-            options={formats.map((format) => ({
-              value: format,
-              label: format,
-            }))}
-            disabled={isGeneratingAlbum > 0}
-          />
-          <Button
-            compact
-            className={css`
-              margin-top: 0.5rem;
-              font-size: 1.2rem;
-              background: transparent;
-            `}
-            isLoading={isDownloading}
-            onClick={() => downloadAlbum()}
-            disabled={isGeneratingAlbum > 0}
-          >
-            Download
-          </Button>
-          {isGeneratingAlbum > 0 && (
-            <p
-              className={css`
-                margin-top: 1rem;
-
-                svg {
-                  margin-right: 0.5rem;
-                }
-              `}
-            >
-              <LoadingSpinner />
-              We're generating the album! Hold on for a minute...
-            </p>
+          {!chosenFormat && !isDownloading ? (
+            <>
+              <p>{t("downloadFiletypeQuery")}</p>
+              <ul className={css`list-style-type: none;`}>
+                {formats.map((format) => (
+                  <li key={format}>
+                    <Button
+                      compact
+                      className={css`
+                        margin-top: 0.5rem;
+                        font-size: 1.2rem;
+                        width: 50%;
+                        background: transparent;
+                      `}
+                      onClick={async () => {
+                        setChosenFormat(format);
+                        await generateAlbum(format);
+                      }}
+                    >
+                      {formatsDisplay[format]}
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : (
+            <>
+              <Button
+                compact
+                className={css`
+                  margin-top: 0.5rem;
+                  font-size: 1.2rem;
+                  background: transparent;
+                `}
+                isLoading={isDownloading}
+                onClick={async () => {
+                  await downloadAlbum();
+                  setIsPopupOpen(false);
+                }}
+                disabled={isGeneratingAlbum > 0}
+              >
+                {isGeneratingAlbum > 0 ? (
+                  <p
+                    className={css`
+                      svg {
+                        margin-right: 0.5rem;
+                      }
+                    `}
+                  >
+                    <LoadingSpinner />
+                    {t("downloadButtonGenerating")}
+                  </p>
+                ) : (
+                  t("download")
+                )}
+              </Button>
+              <p>
+                <Button className={css`margin-top: 1rem`} onClick={() => setChosenFormat("")}>
+                  {t("chooseAnotherFormat")}
+                </Button>
+              </p>
+            </>
           )}
         </div>
       </Modal>
@@ -150,7 +201,10 @@ const DownloadAlbumButton: React.FC<{
           margin-left: 0.2rem;
         `}
         startIcon={<RiDownloadLine />}
-        onClick={() => setIsPopupOpen(true)}
+        onClick={() => {
+          setChosenFormat("");
+          setIsPopupOpen(true);
+        }}
       >
         {onlyIcon ? "" : "Download"}
       </Button>
