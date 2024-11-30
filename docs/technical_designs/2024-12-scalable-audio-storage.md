@@ -27,12 +27,6 @@ Mirlo uses Render as an infrastructure one-stop shop. This works well as it make
   - The closer to free, the better.
 - Locally compatible.
 
-## Current Data Flow
-
-In order to upload audio, an artist must first create a track. This creates a record in the database, and the row id (among other things) is returned to the frontend.
-
-TODO
-
 ## Backblaze (recommended)
 
 Backblaze is a cloud storage and data backup platform tauting "always-how storage" at "1/5 the cost" of other providers. Accessing the platform is possible with a native API and S3-compatible SDKs (e.g., boto3). Backblaze charges $6 / TB / month ($0.006 / GB / month) for storage and egress is free for the first bytes equivalent to 3x average monthly data stored, then $0.01/GB for additional egress.
