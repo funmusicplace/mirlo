@@ -2,7 +2,7 @@
 
 Date: 2024-12
 Author: @bbstilson
-Owner(s): @simonv3, @LouisLouiseKay
+Owners: @simonv3, @LouisLouiseKay
 
 ## Terminology
 
