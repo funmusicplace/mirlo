@@ -148,7 +148,8 @@
     "justDownloadLoggedIn": "Want to just download the album? We'll email you a download link. You'll get added to the artist's mailing list.",
     "justDownloadNoUser": "Want to just download the album? Enter your email and we'll email you a download link. You'll get added to the artist's mailing list.",
     "downloadButtonGenerating": "We're generating the album! Hold on for a minute...",
-    "chooseAnotherFormat": "Choose another format"
+    "chooseAnotherFormat": "Choose another format",
+    "downloadFiletypeQuery": "What file type do you want to download?"
   },
   "fulfillment": {
     "artist": "Artist",

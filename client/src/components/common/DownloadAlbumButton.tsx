@@ -128,7 +128,7 @@ const DownloadAlbumButton: React.FC<{
         >
           {!chosenFormat && !isDownloading ? (
             <>
-              <p>What file type do you want to download?</p>
+              <p>{t("downloadFiletypeQuery")}</p>
               <ul className={css`list-style-type: none;`}>
                 {formats.map((format) => (
                   <li key={format}>
