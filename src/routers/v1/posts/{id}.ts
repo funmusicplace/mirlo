@@ -22,6 +22,7 @@ export default function () {
           publishedAt: {
             lte: new Date(),
           },
+          isDraft: false,
         },
         include: {
           artist: {

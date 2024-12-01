@@ -1,15 +1,14 @@
 import { finalCoversBucket, incomingCoversBucket } from "./minio";
 import prisma from "@mirlo/prisma";
 import { APIContext } from "./file";
-import { sendToImageQueue } from "../queues/processImages";
+import { uploadAndSendToImageQueue } from "../queues/processImages";
 
 const processTrackGroupCover = (ctx: APIContext) => {
   return async (trackGroupId: number) => {
-    return sendToImageQueue(
+    return uploadAndSendToImageQueue(
       ctx,
       incomingCoversBucket,
       "trackGroupCover",
-      finalCoversBucket,
       "artwork",
       async (fileInfo: { filename: string }) => {
         return prisma.trackGroupCover.upsert({
@@ -25,7 +24,8 @@ const processTrackGroupCover = (ctx: APIContext) => {
             trackGroupId,
           },
         });
-      }
+      },
+      finalCoversBucket
     );
   };
 };

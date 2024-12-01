@@ -58,12 +58,6 @@ export default function () {
       },
     ],
     responses: {
-      200: {
-        description: "Updated merch",
-        schema: {
-          $ref: "#/definitions/Merch",
-        },
-      },
       default: {
         description: "An error occurred",
         schema: {

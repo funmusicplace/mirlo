@@ -3,9 +3,6 @@ import api from "services/api";
 
 const useGetUserObjectById = <T>(
   endpoint: string,
-  userId?: number,
-  id?: string,
-  queryParams?: string,
   options?: { multiple?: boolean }
 ) => {
   const [object, setObject] = React.useState<T>();
@@ -17,26 +14,18 @@ const useGetUserObjectById = <T>(
   const fetchObject = React.useCallback(async () => {
     setIsLoading(true);
     try {
-      if (userId && id) {
-        if (options?.multiple) {
-          const response = await api.getMany<T>(
-            `users/${userId}/${endpoint}/${id}${queryParams ?? ""}`
-          );
-          setObjects(response.results);
-        } else {
-          const response = await api.get<T>(
-            `users/${userId}/${endpoint}/${id}${queryParams ?? ""}`
-          );
-          setObject(response.result);
-        }
-        setFinishedFirstLoad(true);
+      if (options?.multiple) {
+        const response = await api.getMany<T>(`${endpoint}`);
+        setObjects(response.results);
       } else {
-        setObject(undefined);
+        const response = await api.get<T>(`${endpoint}`);
+        setObject(response.result);
       }
+      setFinishedFirstLoad(true);
     } finally {
       setIsLoading(false);
     }
-  }, [endpoint, id, options?.multiple, queryParams, userId]);
+  }, [endpoint, options?.multiple]);
 
   React.useEffect(() => {
     fetchObject();

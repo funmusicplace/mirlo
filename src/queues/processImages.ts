@@ -8,6 +8,7 @@ import {
   finalArtistAvatarBucket,
   finalArtistBannerBucket,
   finalMerchImageBucket,
+  finalPostImageBucket,
   incomingArtistAvatarBucket,
   incomingArtistBannerBucket,
   incomingMerchImageBucket,
@@ -65,17 +66,20 @@ imageQueueEvents.on("completed", async (result: { jobId: string }) => {
 
 export default imageQueue;
 
-export const sendToImageQueue = async (
+export const uploadAndSendToImageQueue = async (
   ctx: APIContext,
   incomingBucket: string,
   model: string,
-  finalBucket: string,
   sharpConfigKey: "artwork" | "avatar" | "banner",
   createDatabaseEntry: ({
     filename,
+    mimeType,
   }: {
     filename: string;
-  }) => Promise<{ id: string }>
+    mimeType: string;
+  }) => Promise<{ id: string }>,
+  finalBucket?: string, // If this is not supplied, we this basically just uploads to the first bucket,0
+  storeWithExtension?: boolean
 ) => {
   logger.info(`MinIO is at ${MINIO_HOST}:${MINIO_API_PORT}`);
   logger.info("Uploading image to object storage");
@@ -93,22 +97,30 @@ export const sendToImageQueue = async (
         `Going to put a file on MinIO Bucket ${incomingBucket}: ${image.id}, ${fileInfo.filename}`
       );
       try {
-        await minioClient.putObject(incomingBucket, image.id, fileStream);
+        const filenameArray = fileInfo.filename.split(".");
+        const fileName = storeWithExtension
+          ? `${image.id}.${[filenameArray[filenameArray.length - 1]]}`
+          : image.id;
+        await minioClient.putObject(incomingBucket, fileName, fileStream);
       } catch (e) {
         logger.error("There was an error uploading to minio");
         throw e;
       }
 
-      logger.info("Adding image to queue");
+      if (finalBucket) {
+        logger.info("Adding image to queue");
 
-      const job = await imageQueue.add("optimize-image", {
-        destinationId: image.id,
-        model,
-        incomingMinioBucket: incomingBucket,
-        finalMinioBucket: finalBucket,
-        config: sharpConfig.config[sharpConfigKey],
-      });
-      resolve(job.id);
+        const job = await imageQueue.add("optimize-image", {
+          destinationId: image.id,
+          model,
+          incomingMinioBucket: incomingBucket,
+          finalMinioBucket: finalBucket,
+          config: sharpConfig.config[sharpConfigKey],
+        });
+        resolve(job.id);
+      } else {
+        resolve(image.id);
+      }
     });
   }).catch((e) => {
     logger.error("There was an error optimizing the image");
@@ -120,11 +132,10 @@ export const sendToImageQueue = async (
 
 export const processArtistAvatar = (ctx: APIContext) => {
   return async (artistId: number) => {
-    return sendToImageQueue(
+    return uploadAndSendToImageQueue(
       ctx,
       incomingArtistAvatarBucket,
       "artistAvatar",
-      finalArtistAvatarBucket,
       "avatar",
       async (fileInfo: { filename: string }) => {
         return prisma.artistAvatar.upsert({
@@ -140,18 +151,18 @@ export const processArtistAvatar = (ctx: APIContext) => {
             artistId,
           },
         });
-      }
+      },
+      finalArtistAvatarBucket
     );
   };
 };
 
 export const processArtistBanner = (ctx: APIContext) => {
   return async (artistId: number) => {
-    return sendToImageQueue(
+    return uploadAndSendToImageQueue(
       ctx,
       incomingArtistBannerBucket,
       "artistBanner",
-      finalArtistBannerBucket,
       "banner",
       async (fileInfo: { filename: string }) => {
         return prisma.artistBanner.upsert({
@@ -167,18 +178,18 @@ export const processArtistBanner = (ctx: APIContext) => {
             artistId,
           },
         });
-      }
+      },
+      finalArtistBannerBucket
     );
   };
 };
 
 export const processMerchImage = (ctx: APIContext) => {
   return async (merchId: string) => {
-    return sendToImageQueue(
+    return uploadAndSendToImageQueue(
       ctx,
       incomingMerchImageBucket,
       "merchImage",
-      finalMerchImageBucket,
       "artwork",
       async (_fileInfo: { filename: string }) => {
         const exists = await prisma.merchImage.findFirst({
@@ -194,7 +205,32 @@ export const processMerchImage = (ctx: APIContext) => {
             merchId,
           },
         });
-      }
+      },
+      finalMerchImageBucket
+    );
+  };
+};
+
+export const processPostImage = (ctx: APIContext) => {
+  return async (postId: number) => {
+    return uploadAndSendToImageQueue(
+      ctx,
+      finalPostImageBucket,
+      "postImage",
+      "artwork",
+      async (fileInfo: { filename: string; mimeType: string }) => {
+        const filenameArray = fileInfo.filename.split(".");
+
+        return prisma.postImage.create({
+          data: {
+            postId,
+            mimeType: fileInfo.mimeType,
+            extension: filenameArray[filenameArray.length - 1],
+          },
+        });
+      },
+      undefined,
+      true
     );
   };
 };

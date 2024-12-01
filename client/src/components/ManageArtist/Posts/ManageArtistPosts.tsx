@@ -2,7 +2,6 @@ import { css } from "@emotion/css";
 import Button, { ButtonLink } from "components/common/Button";
 import React from "react";
 import api from "services/api";
-import NewPostForm from "./NewPostForm";
 import Box from "components/common/Box";
 import { FaPen, FaTrash } from "react-icons/fa";
 import { useSnackbar } from "state/SnackbarContext";
@@ -13,9 +12,9 @@ import { getPostURLReference } from "utils/artist";
 import { FaPlus } from "react-icons/fa";
 import { useArtistContext } from "state/ArtistContext";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
-import { ManageSectionWrapper } from "./ManageSectionWrapper";
+import { ManageSectionWrapper } from "../ManageSectionWrapper";
 import { formatDate } from "components/TrackGroup/ReleaseDate";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import parse from "html-react-parser";
 import MarkdownWrapper from "components/common/MarkdownWrapper";
 import { useAuthContext } from "state/AuthContext";
@@ -25,19 +24,20 @@ const ManageArtistPosts: React.FC<{}> = () => {
   const { t, i18n } = useTranslation("translation", {
     keyPrefix: "manageArtist",
   });
+  const navigate = useNavigate();
 
   const snackbar = useSnackbar();
   const {
     state: { artist },
   } = useArtistContext();
 
-  const [addingNewPost, setAddingNewPost] = React.useState(false);
   const [managePost, setManagePost] = React.useState<Post>();
 
   const [posts, setPosts] = React.useState<Post[]>([]);
 
   const userId = user?.id;
   const artistId = artist?.id;
+
   const fetchPosts = React.useCallback(async () => {
     if (userId) {
       const fetchedPosts = await api.getMany<Post>(
@@ -50,6 +50,20 @@ const ManageArtistPosts: React.FC<{}> = () => {
   React.useEffect(() => {
     fetchPosts();
   }, [fetchPosts]);
+
+  const createPost = React.useCallback(async () => {
+    if (artistId) {
+      const response = await api.post<
+        Partial<Post>,
+        { result: { id: number } }
+      >(`manage/posts`, {
+        title: "",
+        content: "",
+        artistId: artistId,
+      });
+      navigate(`/manage/artists/${artistId}/post/${response.result.id}/`);
+    }
+  }, [artistId]);
 
   const deletePost = React.useCallback(
     async (postId: number) => {
@@ -77,9 +91,7 @@ const ManageArtistPosts: React.FC<{}> = () => {
         <div />
         <Button
           transparent
-          onClick={() => {
-            setAddingNewPost(true);
-          }}
+          onClick={createPost}
           startIcon={<FaPlus />}
           compact
           variant="dashed"
@@ -168,25 +180,9 @@ const ManageArtistPosts: React.FC<{}> = () => {
                 })}
             </p>
           </SpaceBetweenDiv>
-          <MarkdownWrapper>{parse(p.content)}</MarkdownWrapper>
+          <MarkdownWrapper>{parse(p.content ?? "")}</MarkdownWrapper>
         </Box>
       ))}
-      {managePost && (
-        <Modal
-          open={!!managePost}
-          onClose={() => setManagePost(undefined)}
-          title={t("editPost") ?? ""}
-        >
-          <PostForm existing={managePost} reload={fetchPosts} artist={artist} />
-        </Modal>
-      )}
-
-      <NewPostForm
-        open={addingNewPost}
-        onClose={() => setAddingNewPost(false)}
-        reload={fetchPosts}
-        artist={artist}
-      />
     </ManageSectionWrapper>
   );
 };

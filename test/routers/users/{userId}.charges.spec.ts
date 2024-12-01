@@ -5,16 +5,9 @@ dotenv.config();
 import prisma from "@mirlo/prisma";
 
 import { describe, it } from "mocha";
-import {
-  clearTables,
-  createArtist,
-  createMerch,
-  createTrackGroup,
-  createUser,
-} from "../../utils";
+import { clearTables, createArtist, createUser } from "../../utils";
 
 import { requestApp } from "../utils";
-import { faker } from "@faker-js/faker";
 
 describe("users/{userId}/charges", () => {
   beforeEach(async () => {

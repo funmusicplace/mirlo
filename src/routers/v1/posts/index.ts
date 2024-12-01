@@ -19,6 +19,7 @@ export default function () {
       let where: Prisma.PostWhereInput = {
         publishedAt: { lte: new Date() },
         isPublic: true,
+        isDraft: false,
       };
       if (user) {
         delete where.isPublic;

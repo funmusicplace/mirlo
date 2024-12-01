@@ -30,13 +30,27 @@ describe("posts/{id}", () => {
         email: "artist@artist.com",
       });
       const artist = await createArtist(user.id);
+      const post = await createPost(artist.id, { isDraft: false });
+
+      const response = await requestApp
+        .get(`posts/${post.id}`)
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+    });
+
+    it("should GET / 404 if draft", async () => {
+      const { user } = await createUser({
+        email: "artist@artist.com",
+      });
+      const artist = await createArtist(user.id);
       const post = await createPost(artist.id);
 
       const response = await requestApp
         .get(`posts/${post.id}`)
         .set("Accept", "application/json");
 
-      assert(response.statusCode === 200);
+      assert.equal(response.statusCode, 404);
     });
 
     it("should GET / and show content if public", async () => {
@@ -45,7 +59,10 @@ describe("posts/{id}", () => {
         email: "artist@artist.com",
       });
       const artist = await createArtist(user.id);
-      const post = await createPost(artist.id, { content: testContent });
+      const post = await createPost(artist.id, {
+        content: testContent,
+        isDraft: false,
+      });
 
       const response = await requestApp
         .get(`posts/${post.id}`)
@@ -61,6 +78,7 @@ describe("posts/{id}", () => {
       });
       const artist = await createArtist(user.id);
       const post = await createPost(artist.id, {
+        isDraft: false,
         isPublic: false,
         content: testContent,
       });

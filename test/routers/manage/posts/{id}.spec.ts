@@ -142,7 +142,7 @@ describe("manage/posts/{postId}", () => {
       assert(response.statusCode === 200);
     });
 
-    it("should PUT and store shouldSendEmail", async () => {
+    it("should PUT and update shouldSendEmail", async () => {
       const { user, accessToken } = await createUser({
         email: "test@test.com",
       });
@@ -177,6 +177,78 @@ describe("manage/posts/{postId}", () => {
       });
       assert.equal(refreshedPost?.shouldSendEmail, false);
     });
+
+    it("should PUT and remove unused images", async () => {
+      const { user, accessToken } = await createUser({
+        email: "test@test.com",
+      });
+
+      const artist = await createArtist(user.id, {
+        subscriptionTiers: {
+          create: {
+            name: "a tier",
+          },
+        },
+      });
+
+      const post = await createPost(artist.id, {
+        shouldSendEmail: true,
+      });
+
+      const image1 = await prisma.postImage.create({
+        data: {
+          postId: post.id,
+          mimeType: "image/jpeg",
+          extension: "jpg",
+        },
+      });
+
+      const image2 = await prisma.postImage.create({
+        data: {
+          postId: post.id,
+          mimeType: "image/jpeg",
+          extension: "jpg",
+        },
+      });
+      await prisma.post.update({
+        where: {
+          id: post.id,
+        },
+        data: {
+          thumbnailImageId: image2.id,
+        },
+      });
+
+      await prisma.postImage.create({
+        data: {
+          postId: post.id,
+          mimeType: "image/jpeg",
+          extension: "jpg",
+        },
+      });
+
+      const firstConfirmation = await prisma.postImage.findMany({
+        where: {
+          postId: post.id,
+        },
+      });
+      assert.equal(firstConfirmation.length, 3);
+
+      await requestApp
+        .put(`manage/posts/${post.id}`)
+        .send({
+          content: `<html><img src="${image1.id}.${image1.extension}"/></html>`,
+        })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      const refetchedImages = await prisma.postImage.findMany({
+        where: {
+          postId: post.id,
+        },
+      });
+      assert.equal(refetchedImages.length, 2);
+    });
   });
 
   describe("DELETE", () => {
@@ -200,6 +272,37 @@ describe("manage/posts/{postId}", () => {
       });
 
       assert.equal(refetchedPost, null);
+    });
+
+    it("should DELETE a posts images", async () => {
+      const { user, accessToken } = await createUser({
+        email: "test@test.com",
+      });
+
+      const artist = await createArtist(user.id);
+      const post = await createPost(artist.id);
+
+      const image = await prisma.postImage.create({
+        data: {
+          postId: post.id,
+          mimeType: "image/jpeg",
+          extension: "jpg",
+        },
+      });
+
+      const response = await requestApp
+        .delete(`manage/posts/${post.id}`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert(response.statusCode === 200);
+      const fetchedImage = await prisma.postImage.findFirst({
+        where: {
+          id: image.id,
+        },
+      });
+
+      assert.equal(fetchedImage, null);
     });
   });
 });

@@ -265,7 +265,7 @@ const routes: RouteObject[] = [
                     path: "posts",
                     async lazy() {
                       const { default: Component } = await import(
-                        "components/ManageArtist/ManageArtistPosts"
+                        "components/ManageArtist/Posts/ManageArtistPosts"
                       );
                       return { Component };
                     },
@@ -318,7 +318,7 @@ const routes: RouteObject[] = [
                 path: "post/:postId",
                 async lazy() {
                   const { default: Component } = await import(
-                    "components/ManageArtist/ManagePost"
+                    "components/ManageArtist/Posts/ManagePost"
                   );
                   return { Component };
                 },

@@ -3,14 +3,14 @@ import { useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { getPostURLReference } from "utils/artist";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
-import ManageSectionWrapper from "./ManageSectionWrapper";
+import ManageSectionWrapper from "../ManageSectionWrapper";
 import { css } from "@emotion/css";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
-import BackToArtistLink from "./BackToArtistLink";
+import BackToArtistLink from "../BackToArtistLink";
 import PostForm from "./PostForm";
 import Post from "components/Post";
 import { ButtonLink } from "components/common/Button";
-import { bp } from "../../constants";
+import { bp } from "../../../constants";
 import { useQuery } from "@tanstack/react-query";
 import { queryManagedArtist, queryManagedPost } from "queries";
 
@@ -33,7 +33,8 @@ const ManagePost: React.FC<{}> = () => {
     return null;
   }
 
-  const isPublished = post && new Date(post.publishedAt) < new Date();
+  const isPublished =
+    post && !post.isDraft && new Date(post.publishedAt) < new Date();
 
   return (
     <ManageSectionWrapper
@@ -79,7 +80,9 @@ const ManagePost: React.FC<{}> = () => {
           )}
         </SpaceBetweenDiv>
       </div>
-      {artist && <PostForm existing={post} reload={refetch} artist={artist} />}
+      {artist && post && (
+        <PostForm post={post} reload={() => refetch()} artist={artist} />
+      )}
     </ManageSectionWrapper>
   );
 };

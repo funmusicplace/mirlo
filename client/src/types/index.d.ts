@@ -97,6 +97,15 @@ interface Post {
   artistId?: number;
   isContentHidden: boolean;
   minimumSubscriptionTierId?: number;
+  thumbnailImageId?: string;
+  isDraft: boolean;
+}
+
+interface PostImage {
+  src: string;
+  id: string;
+  postId: number;
+  thumbnailForPost?: Post[];
 }
 
 type ArtistColors = {

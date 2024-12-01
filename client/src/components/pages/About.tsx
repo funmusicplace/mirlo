@@ -149,10 +149,25 @@ const About: React.FC = () => {
           </p>
           <h3>The worker owners</h3>
           <Person>
-            <img
-              src="https://mirlo.space/images/owner-pictures/alex-photo.png"
-              alt="alex photo"
-            />
+            <span
+              className={css`
+                display: inline-block;
+                width: 10rem;
+                height: 10rem;
+                overflow: clip;
+                border-radius: 100%;
+                margin-right: 2rem;
+              `}
+            >
+              <img
+                src="https://mirlo.space/images/owner-pictures/alex-photo.png"
+                alt="alex photo"
+                className={css`
+                  margin-top: -2rem;
+                `}
+              />
+            </span>
+
             <p>
               Alex (he / him) is a writer, organizer, and trombonist working at
               the confluences of music and social transformation. He holds a PhD
@@ -171,10 +186,25 @@ const About: React.FC = () => {
             </p>
           </Person>
           <Person>
-            <img
-              src="https://mirlo.space/images/owner-pictures/simon-photo.jpg"
-              alt="si photo"
-            />
+            <span
+              className={css`
+                display: inline-block;
+                width: 10rem;
+                height: 10rem;
+                overflow: clip;
+                border-radius: 100%;
+                margin-right: 2rem;
+              `}
+            >
+              <img
+                src="https://mirlo.space/images/owner-pictures/simon-photo.jpg"
+                alt="si photo"
+                className={css`
+                  margin-top: -2rem;
+                `}
+              />{" "}
+            </span>
+
             <p>
               Simon (he / him) is a mutual aid, solidarity economy, and dual
               power organizer in DC. In his free time he plays soccer and
@@ -186,6 +216,14 @@ const About: React.FC = () => {
             </p>
           </Person>
 
+          <h3>Previous member owners</h3>
+          <ul>
+            <li>
+              <strong>jodi</strong>, one of our original co-owners, who helped
+              guide the direction and culture of mirlo during its first year
+            </li>
+          </ul>
+
           <h3>Everyone else</h3>
 
           <p>
@@ -193,10 +231,6 @@ const About: React.FC = () => {
             made this project a success, but we want to give a special shout out
             to:
             <ul>
-              <li>
-                <strong>jodi</strong>, one of our original co-owners, who helped
-                guide the direction and culture of mirlo during its first year
-              </li>
               <li>
                 <strong>
                   <a href="https://mowukis.com">Louis-Louise Kay</a>
