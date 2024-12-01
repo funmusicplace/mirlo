@@ -147,6 +147,9 @@ const ArtistHeaderDescription: React.FC<ArtistHeaderDescriptionProps> = ({
           >
             <Button
               compact
+              className={css`
+                white-space: nowrap;
+              `}
               onlyIcon={!!bio}
               variant="dashed"
               onClick={() => setIsEditing(true)}

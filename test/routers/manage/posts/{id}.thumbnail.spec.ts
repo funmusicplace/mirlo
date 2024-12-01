@@ -12,7 +12,7 @@ import {
 import { requestApp } from "../../utils";
 import prisma from "@mirlo/prisma";
 
-describe("manage/posts/{postId}/thumbnail", () => {
+describe("manage/posts/{postId}/featuredImage", () => {
   beforeEach(async () => {
     try {
       await clearTables();
@@ -22,7 +22,7 @@ describe("manage/posts/{postId}/thumbnail", () => {
   });
 
   describe("/", () => {
-    it("should PUT to update the thumbnail of a post", async () => {
+    it("should PUT to update the featuredImage image of a post", async () => {
       const { user, accessToken } = await createUser({
         email: "artist@artist.com",
       });
@@ -37,9 +37,9 @@ describe("manage/posts/{postId}/thumbnail", () => {
       });
 
       await requestApp
-        .put(`manage/posts/${post.id}/thumbnail`)
+        .put(`manage/posts/${post.id}/featuredImage`)
         .send({
-          thumbnailImageId: image.id,
+          featuredImageId: image.id,
         })
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
@@ -47,7 +47,7 @@ describe("manage/posts/{postId}/thumbnail", () => {
       const updatedPost = await prisma.post.findFirst({
         where: { id: post.id },
       });
-      assert.equal(updatedPost?.thumbnailImageId, image.id);
+      assert.equal(updatedPost?.featuredImageId, image.id);
     });
   });
 });

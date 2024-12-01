@@ -215,7 +215,7 @@ describe("manage/posts/{postId}", () => {
           id: post.id,
         },
         data: {
-          thumbnailImageId: image2.id,
+          featuredImageId: image2.id,
         },
       });
 

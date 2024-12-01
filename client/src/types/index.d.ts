@@ -97,7 +97,7 @@ interface Post {
   artistId?: number;
   isContentHidden: boolean;
   minimumSubscriptionTierId?: number;
-  thumbnailImageId?: string;
+  featuredImageId?: string;
   isDraft: boolean;
 }
 
@@ -105,7 +105,7 @@ interface PostImage {
   src: string;
   id: string;
   postId: number;
-  thumbnailForPost?: Post[];
+  featuredForPost?: Post[];
 }
 
 type ArtistColors = {

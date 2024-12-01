@@ -413,9 +413,13 @@ export const singleInclude = (queryOptions?: {
           lte: new Date(),
         },
         deletedAt: null,
+        isDraft: false,
       },
       orderBy: {
         publishedAt: "desc",
+      },
+      include: {
+        featuredImage: true,
       },
     },
     user: {

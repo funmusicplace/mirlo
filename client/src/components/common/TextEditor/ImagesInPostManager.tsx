@@ -3,7 +3,6 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { FaCheckCircle } from "react-icons/fa";
 import api from "services/api";
-import useGetUserObjectById from "utils/useGetUserObjectById";
 
 const ImagesInPostManager: React.FC<{
   images: PostImage[];
@@ -12,10 +11,10 @@ const ImagesInPostManager: React.FC<{
 }> = ({ postId, reload, images }) => {
   const { t } = useTranslation("translation", { keyPrefix: "postForm" });
 
-  const markImageAsThumbnail = React.useCallback(
+  const markImageAsFeatured = React.useCallback(
     async (imageId: string) => {
-      await api.put(`manage/posts/${postId}/thumbnail`, {
-        thumbnailImageId: imageId,
+      await api.put(`manage/posts/${postId}/featuredImage`, {
+        featuredImageId: imageId,
       });
       reload();
     },
@@ -33,7 +32,7 @@ const ImagesInPostManager: React.FC<{
       `}
     >
       <h3>{t("imagesInPost")}</h3>
-      <p>{t("imageIsThumbnail")}</p>
+      <p>{t("imageIsFeatured")}</p>
       {images?.map((image) => (
         <div
           className={css`
@@ -42,7 +41,7 @@ const ImagesInPostManager: React.FC<{
             margin: 0.2rem;
             cursor: pointer;
           `}
-          onClick={() => markImageAsThumbnail(image.id)}
+          onClick={() => markImageAsFeatured(image.id)}
         >
           <img
             className={css`
@@ -50,7 +49,7 @@ const ImagesInPostManager: React.FC<{
             `}
             src={image.src}
           />
-          {(image.thumbnailForPost?.length ?? 0) > 0 && (
+          {(image.featuredForPost?.length ?? 0) > 0 && (
             <span
               className={css`
                 position: absolute;

@@ -64,8 +64,8 @@ export default function () {
       const imagesToDelete = postImages
         .filter((image) => {
           const inContent = content.includes(image.id);
-          const isThumbnail = post.thumbnailImageId === image.id;
-          return !(inContent || isThumbnail);
+          const isFeatured = post.featuredImageId === image.id;
+          return !(inContent || isFeatured);
         })
         .map((image) => image.id);
       await prisma.postImage.deleteMany({

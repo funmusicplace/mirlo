@@ -11,12 +11,12 @@ export default function () {
 
   async function PUT(req: Request, res: Response) {
     const { postId } = req.params;
-    const { thumbnailImageId } = req.body;
+    const { featuredImageId } = req.body;
 
     try {
       const updatedPost = await prisma.post.update({
         where: { id: Number(postId) },
-        data: { thumbnailImageId },
+        data: { featuredImageId },
       });
       res.json({ result: updatedPost });
     } catch (error) {

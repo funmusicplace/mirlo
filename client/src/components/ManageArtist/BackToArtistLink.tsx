@@ -5,7 +5,7 @@ import { FaChevronLeft } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { useArtistContext } from "state/ArtistContext";
 
-const BackToArtistLink = () => {
+const BackToArtistLink: React.FC<{ subPage?: "posts" }> = ({ subPage }) => {
   const {
     state: { artist },
   } = useArtistContext();
@@ -24,7 +24,7 @@ const BackToArtistLink = () => {
           font-size: 1.2rem;
           padding-bottom: 1rem;
         `}
-        to={`/manage/artists/${artist.id}/`}
+        to={`/manage/artists/${artist.id}/${subPage}`}
       >
         <FaChevronLeft
           className={css`

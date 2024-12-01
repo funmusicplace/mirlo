@@ -657,8 +657,8 @@
     "artists": "All artists"
   },
   "postForm": {
-    "imagesInPosts": "Manage images in post",
-    "imageIsThumbnail": "Which image should be the post thumbnail?",
+    "imagesInPost": "Manage images in post",
+    "imageIsFeatured": "Which image should be featured?",
     "confirmDelete": "Are you sure you want to delete this post?",
     "newBlogPostFor": "New blog post for {{ artistName }}",
     "title": "Title:",
@@ -668,6 +668,8 @@
     "isSubscriptionPostOnly": "Should anyone be able to read this post? Uncheck this if only your subscribers should see it",
     "post": "post",
     "save": "Save",
+    "publishPost": "Publish post",
+    "scheduleToPublish": "Schedule to publish",
     "saveDraft": "Save draft",
     "updatePost": "Update post",
     "inTheFuture": "In the future",

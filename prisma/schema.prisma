@@ -125,20 +125,20 @@ model Post {
   notifications             Notification[]
   shouldSendEmail           Boolean                 @default(true)
   images                    PostImage[]             @relation("images")
-  thumbnailImage            PostImage?              @relation(fields: [thumbnailImageId], references: [id])
-  thumbnailImageId          String?                 @db.Uuid
+  featuredImage             PostImage?              @relation(fields: [featuredImageId], references: [id])
+  featuredImageId           String?                 @db.Uuid
 }
 
 model PostImage {
-  id               String    @id @default(uuid()) @db.Uuid
-  mimeType         String
-  extension        String
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
-  deletedAt        DateTime?
-  postId           Int
-  post             Post      @relation(name: "images", fields: [postId], references: [id])
-  thumbnailForPost Post[]
+  id              String    @id @default(uuid()) @db.Uuid
+  mimeType        String
+  extension       String
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime?
+  postId          Int
+  post            Post      @relation(name: "images", fields: [postId], references: [id])
+  featuredForPost Post[]
 }
 
 model PostSubscriptionTier {

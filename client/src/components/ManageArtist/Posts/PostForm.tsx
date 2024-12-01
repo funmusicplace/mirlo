@@ -216,7 +216,11 @@ const PostForm: React.FC<{
           </label>
         </FormComponent>
         {!isPublic && (
-          <FormComponent>
+          <FormComponent
+            className={css`
+              margin-left: 1.75rem;
+            `}
+          >
             <label
               className={css`
                 display: block;

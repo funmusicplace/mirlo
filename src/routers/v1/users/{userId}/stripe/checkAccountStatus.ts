@@ -49,6 +49,7 @@ export default function () {
           });
         }
       }
+      res.status(404);
     } catch (e) {
       next(e);
     }
