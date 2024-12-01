@@ -87,6 +87,11 @@ export default function () {
           id: Number(postId),
         },
       });
+      await prisma.postImage.deleteMany({
+        where: {
+          postId: Number(postId),
+        },
+      });
       res.json({ message: "Success" });
     } catch (e) {
       next(e);

@@ -10,6 +10,7 @@ const InsertVideoButton = () => {
   const [isOpen, setIsOpen] = React.useState(false);
   const [videoUrl, setVideoUrl] = React.useState("");
   const { addIframe, addYouTubeVideo } = useCommands();
+
   const onAdd = () => {
     if (videoUrl.includes("youtube")) {
       addYouTubeVideo({ video: videoUrl });

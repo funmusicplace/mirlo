@@ -21,8 +21,6 @@ import { prosemirrorNodeToHtml } from "@remirror/core-utils";
 import TopToolbar from "./TopToolbar";
 import FloatingLinkToolbar from "./FloatingLinkToolbar";
 import api from "services/api";
-import useGetUserObjectById from "utils/useGetUserObjectById";
-import ImagesInPostManager from "./ImagesInPostManager";
 
 const extensions = (postId: number, reload: () => void) => () => [
   new PlaceholderExtension({ placeholder: "Type something" }),
@@ -110,7 +108,7 @@ const TextEditor: React.FC<{
           setState(parameter.state);
         }}
       >
-        <TopToolbar />
+        <TopToolbar postId={postId} />
         <EditorComponent />
         {/* <BubbleMenu /> */}
         <TableComponents />
