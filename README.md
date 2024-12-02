@@ -48,14 +48,12 @@ yarn install
 yarn client:start
 ```
 
-
 You can log in with these credentials:
 
 ```
 admin@admin.com
 test1234
 ```
-
 
 ## Email
 
