@@ -33,6 +33,7 @@ const addPostToNotifications = async () => {
       },
       hasAnnounceEmailBeenSent: false,
       deletedAt: null,
+      isDraft: false,
       artist: {
         id: {
           in: nonDeletedArtistsWithSubscriptions.map((a) => a.id),

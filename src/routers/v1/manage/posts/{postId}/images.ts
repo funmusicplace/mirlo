@@ -37,7 +37,7 @@ export default function () {
           deletedAt: null,
         },
         include: {
-          thumbnailForPost: true,
+          featuredForPost: true,
         },
       });
 

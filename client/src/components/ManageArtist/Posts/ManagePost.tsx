@@ -56,7 +56,7 @@ const ManagePost: React.FC<{}> = () => {
           }
         `}
       >
-        <BackToArtistLink />
+        <BackToArtistLink subPage="posts" />
         <SpaceBetweenDiv>
           <h1
             className={css`
