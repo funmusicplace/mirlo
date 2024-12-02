@@ -62,15 +62,6 @@ const AlbumForm: React.FC<{
       <FormProvider {...methods}>
         <form onSubmit={handleSubmit(doSave)}>
           <AlbumFormContent existingObject={trackGroup} />
-
-          <Button
-            variant="big"
-            type="submit"
-            disabled={isDisabled}
-            isLoading={isDisabled}
-          >
-            {trackGroup.published ? t("update") : t("saveDraft")}
-          </Button>
         </form>
       </FormProvider>
     </div>
