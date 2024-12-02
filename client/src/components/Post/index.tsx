@@ -138,7 +138,7 @@ const Post: React.FC = () => {
               className={css`
                 position: fixed;
                 right: 1rem;
-                top: 10rem;
+                top: 4rem;
               `}
             >
               <TipArtist artistId={post.artistId} transparent={false} />

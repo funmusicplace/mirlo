@@ -103,6 +103,7 @@ export default function () {
         where: { id: user.id },
         select: {
           currency: true,
+          promoCodes: true,
         },
       });
       const existingSlug = await prisma.trackGroup.findFirst({
@@ -117,6 +118,9 @@ export default function () {
           error: "Can't create a trackGroup with an existing urlSlug",
         });
       }
+
+      const userHasPromo = !!userForCurrency?.promoCodes.length;
+
       const result = await prisma.trackGroup.create({
         data: {
           title,
@@ -126,7 +130,9 @@ export default function () {
           artist: { connect: { id: artistId } },
           published,
           minPrice,
-          platformPercent: (await getSiteSettings()).platformPercent,
+          platformPercent: userHasPromo
+            ? 0
+            : (await getSiteSettings()).platformPercent,
           currency: userForCurrency?.currency ?? "usd",
           releaseDate: releaseDate ? new Date(releaseDate) : undefined,
           adminEnabled: true,

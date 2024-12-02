@@ -11,6 +11,7 @@ import { css } from "@emotion/css";
 import useErrorHandler from "services/useErrorHandler";
 import { FaCheck } from "react-icons/fa";
 import { useQueryClient } from "@tanstack/react-query";
+import { debounce } from "lodash";
 
 const SavingInput: React.FC<{
   formKey: string;
@@ -38,60 +39,65 @@ const SavingInput: React.FC<{
   const [isSaving, setIsSaving] = React.useState(false);
   const [saveSuccess, setSaveSuccess] = React.useState(false);
 
-  const saveOnBlur = React.useCallback(async () => {
-    try {
-      setSaveSuccess(false);
-      setIsSaving(true);
-      let value = getValues(formKey);
+  const saveOnBlur = React.useCallback(
+    debounce(async () => {
+      try {
+        setSaveSuccess(false);
+        setIsSaving(true);
+        let value = getValues(formKey);
 
-      if (formKey === "releaseDate") {
-        value = new Date(value).toISOString();
-      } else if (formKey === "minPrice") {
-        value = value ? value * 100 : undefined;
-      }
+        if (formKey === "releaseDate") {
+          value = new Date(value).toISOString();
+        } else if (formKey === "minPrice") {
+          value = value ? value * 100 : undefined;
+        }
 
-      if (type === "number") {
-        value = Number(value);
-      }
+        if (type === "number") {
+          value = Number(value);
+        }
 
-      const data = {
-        [formKey]: value,
-        ...extraData,
-      };
+        const data = {
+          [formKey]: value,
+          ...extraData,
+        };
 
-      await api.put<unknown, unknown>(url, data);
+        await api.put<unknown, unknown>(url, data);
 
-      if (clearQueryKey) {
-        client.invalidateQueries({
-          predicate: (query) => {
-            const shouldInvalidate = query.queryKey.find((obj) => {
-              if (typeof obj === "string") {
-                return obj.toLowerCase().includes(clearQueryKey.toLowerCase());
-              }
-              return false;
-            });
+        if (clearQueryKey) {
+          client.invalidateQueries({
+            predicate: (query) => {
+              const shouldInvalidate = query.queryKey.find((obj) => {
+                if (typeof obj === "string") {
+                  return obj
+                    .toLowerCase()
+                    .includes(clearQueryKey.toLowerCase());
+                }
+                return false;
+              });
 
-            return !!shouldInvalidate;
-          },
-        });
-      }
-      let timeout2: NodeJS.Timeout;
-      const timeout = setTimeout(() => {
-        setIsSaving(false);
-        setSaveSuccess(true);
-        timeout2 = setTimeout(() => {
-          setSaveSuccess(false);
+              return !!shouldInvalidate;
+            },
+          });
+        }
+        let timeout2: NodeJS.Timeout;
+        const timeout = setTimeout(() => {
+          setIsSaving(false);
+          setSaveSuccess(true);
+          timeout2 = setTimeout(() => {
+            setSaveSuccess(false);
+          }, 1000);
         }, 1000);
-      }, 1000);
-      return () => {
-        clearTimeout(timeout2);
-        clearTimeout(timeout);
-      };
-    } catch (e) {
-      errorHandler(e);
-      setIsSaving(false);
-    }
-  }, [formKey, getValues, url, extraData]);
+        return () => {
+          clearTimeout(timeout2);
+          clearTimeout(timeout);
+        };
+      } catch (e) {
+        errorHandler(e);
+        setIsSaving(false);
+      }
+    }, 500),
+    [formKey, getValues, url, extraData]
+  );
 
   return (
     <div
@@ -109,14 +115,14 @@ const SavingInput: React.FC<{
       {!rows && (
         <InputEl
           {...register(formKey)}
-          onBlur={saveOnBlur}
+          onInput={saveOnBlur}
           type={type}
           required={required}
           step={step}
         />
       )}
       {rows && (
-        <TextArea {...register(formKey)} rows={rows} onBlur={saveOnBlur} />
+        <TextArea {...register(formKey)} rows={rows} onInput={saveOnBlur} />
       )}
       {isSaving && <LoadingSpinner />}
       {saveSuccess && <FaCheck />}

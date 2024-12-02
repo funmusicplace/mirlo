@@ -24,7 +24,7 @@ const BackToArtistLink: React.FC<{ subPage?: "posts" }> = ({ subPage }) => {
           font-size: 1.2rem;
           padding-bottom: 1rem;
         `}
-        to={`/manage/artists/${artist.id}/${subPage}`}
+        to={`/manage/artists/${artist.id}/${subPage ?? ""}`}
       >
         <FaChevronLeft
           className={css`

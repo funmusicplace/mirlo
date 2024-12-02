@@ -7,7 +7,7 @@ import Button from "./common/Button";
 import { InputEl } from "./common/Input";
 import { useSnackbar } from "state/SnackbarContext";
 import Box from "./common/Box";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import FormComponent from "./common/FormComponent";
 import Checkbox from "./common/FormCheckbox";
 import styled from "@emotion/styled";
@@ -19,6 +19,7 @@ type SignupInputs = {
   password: string;
   receiveMailingList: boolean;
   accountType: "listener";
+  promoCode: string;
 };
 
 const ArtistToggle = styled(FormComponent)`
@@ -58,18 +59,22 @@ const ArtistToggle = styled(FormComponent)`
 
 function Signup() {
   const { t } = useTranslation("translation", { keyPrefix: "signUp" });
+  const [search] = useSearchParams();
+  console.log(search);
   const snackbar = useSnackbar();
   const [hasRegistered, setHasRegistered] = React.useState(false);
   const [accountIncomplete, setAccountIncomplete] = React.useState(false);
   const methods = useForm<SignupInputs>({
     defaultValues: {
       accountType: "listener",
+      promoCode: search.get("promo") ?? "",
     },
   });
   const { register, handleSubmit } = methods;
 
   const onSubmit = React.useCallback(
     async (data: SignupInputs) => {
+      console.log("data", data);
       try {
         await api.post(
           "signup",
@@ -193,6 +198,8 @@ function Signup() {
               description={t("receiveMailingList")}
             />
           </FormComponent>
+          <InputEl type="hidden" {...register("promoCode")} />
+
           <div
             className={css`
               margin-bottom: 0.5rem;
