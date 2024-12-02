@@ -14,6 +14,7 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
     client: clientURL,
     receiveMailingList,
     accountType,
+    promoCode,
   } = req.body;
 
   if (!email || !password) {
@@ -65,6 +66,7 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
           email,
           receiveMailingList: !!receiveMailingList,
           password: await hashPassword(password),
+          promoCodes: promoCode ? [promoCode] : [],
         },
         select: {
           name: true,

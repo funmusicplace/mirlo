@@ -63,6 +63,7 @@ model User {
   language                            String?
   userArtistTip                       UserArtistTip[]
   merchPurchase                       MerchPurchase[]
+  promoCodes                          String[]
 }
 
 model UserArtistNotificationSetting {
@@ -295,6 +296,7 @@ model Merch {
   currency                    String?                    @default("usd")
   quantityRemaining           Int
   startShippingDate           DateTime?
+  platformPercent             Int?                       @default(7)
   sku                         String?
   includePurchaseTrackGroupId Int?
   includePurchaseTrackGroup   TrackGroup?                @relation(fields: [includePurchaseTrackGroupId], references: [id])

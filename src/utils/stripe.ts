@@ -473,7 +473,11 @@ export const createStripeCheckoutSessionForMerchPurchase = async ({
       ],
       customer_email: loggedInUser?.email || email,
       payment_intent_data: {
-        application_fee_amount: await calculateAppFee(priceNumber, currency),
+        application_fee_amount: await calculateAppFee(
+          priceNumber,
+          currency,
+          merch.platformPercent
+        ),
       },
       line_items: [
         {

@@ -50,8 +50,11 @@ export default function () {
         where: { id: user.id },
         select: {
           currency: true,
+          promoCodes: true,
         },
       });
+      const userHasPromo = !!userForCurrency?.promoCodes.length;
+
       const {
         name,
         description,
@@ -69,8 +72,8 @@ export default function () {
           minAmount,
           maxAmount,
           autoPurchaseAlbums,
-          platformPercent: settings.platformPercent,
-          currency: userForCurrency?.currency ?? "USD",
+          platformPercent: userHasPromo ? 0 : settings.platformPercent,
+          currency: userForCurrency?.currency ?? "usd",
           allowVariable,
           defaultAmount,
         },

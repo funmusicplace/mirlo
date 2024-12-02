@@ -79,9 +79,9 @@ export default function () {
     },
   };
 
-  // FIXME: only allow creation for logged in user.
   async function POST(req: Request, res: Response, next: NextFunction) {
-    const { name, bio, urlSlug, userId } = req.body;
+    const { name, bio, urlSlug } = req.body;
+    const user = req.user as User;
     try {
       if (forbiddenNames.includes(urlSlug)) {
         throw new AppError({
@@ -104,7 +104,7 @@ export default function () {
           urlSlug: slug,
           user: {
             connect: {
-              id: Number(userId),
+              id: Number(user.id),
             },
           },
           subscriptionTiers: {
