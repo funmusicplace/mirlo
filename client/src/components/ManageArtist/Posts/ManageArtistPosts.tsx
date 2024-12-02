@@ -8,7 +8,7 @@ import { useSnackbar } from "state/SnackbarContext";
 import PostForm from "./PostForm";
 import Modal from "components/common/Modal";
 import { useTranslation } from "react-i18next";
-import { getPostURLReference } from "utils/artist";
+import { getManagePostURLReference, getPostURLReference } from "utils/artist";
 import { FaPlus } from "react-icons/fa";
 import { useArtistContext } from "state/ArtistContext";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
@@ -18,6 +18,7 @@ import { Link, useNavigate } from "react-router-dom";
 import parse from "html-react-parser";
 import MarkdownWrapper from "components/common/MarkdownWrapper";
 import { useAuthContext } from "state/AuthContext";
+import Pill from "components/common/Pill";
 
 const ManageArtistPosts: React.FC<{}> = () => {
   const { user } = useAuthContext();
@@ -125,18 +126,44 @@ const ManageArtistPosts: React.FC<{}> = () => {
               `}
             >
               <Link
-                to={getPostURLReference({ ...p, artist })}
+                to={
+                  p.isDraft
+                    ? getManagePostURLReference(p)
+                    : getPostURLReference({ ...p, artist })
+                }
                 className={css`
                   width: 80%;
                   display: flex;
-                  flex-direction: column;
                   justify-content: flex-start;
+                  align-items: flex-start;
                   h2 {
                     margin-right: 1rem;
                   }
                 `}
               >
-                <h2>{p.title}</h2>
+                {p.isDraft && (
+                  <Pill
+                    className={css`
+                      margin-right: 0.5rem;
+                    `}
+                  >
+                    Draft
+                  </Pill>
+                )}
+
+                <h2>
+                  {p.title === "" || !p.title ? (
+                    <span
+                      className={css`
+                        font-style: italic;
+                      `}
+                    >
+                      No title
+                    </span>
+                  ) : (
+                    p.title
+                  )}
+                </h2>
               </Link>
               <div
                 className={css`
@@ -144,7 +171,7 @@ const ManageArtistPosts: React.FC<{}> = () => {
                 `}
               >
                 <ButtonLink
-                  to={`/manage/artists/${p.artistId}/post/${p.id}`}
+                  to={getManagePostURLReference(p)}
                   onlyIcon
                   variant="dashed"
                   startIcon={<FaPen />}
@@ -174,7 +201,8 @@ const ManageArtistPosts: React.FC<{}> = () => {
                     options: { dateStyle: "short" },
                   }),
                 })}
-              {new Date(p.publishedAt) <= new Date() &&
+              {!p.isDraft &&
+                new Date(p.publishedAt) <= new Date() &&
                 t("publishedAt", {
                   date: formatDate({ date: p.publishedAt, i18n }),
                 })}

@@ -55,3 +55,10 @@ export const getPostURLReference = (post: Post) => {
     ? `/${getArtistUrlReference(post.artist)}/posts/${post.id}/`
     : `/post/${post.id}`;
 };
+
+export const getManagePostURLReference = (post: Post) => {
+  if (post.artistId) {
+    return `${getArtistManageUrl(post.artistId)}/post/${post.id}/`;
+  }
+  return "";
+};
