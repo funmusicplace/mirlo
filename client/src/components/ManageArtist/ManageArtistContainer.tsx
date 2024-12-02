@@ -109,7 +109,11 @@ const ManageArtistContainer: React.FC<{}> = () => {
           !stripeAccountStatus?.chargesEnabled && (
             <Box
               className={css`
-                background-color: var(--mi-warning-background- color);
+                background-color: var(--mi-warning-background-color);
+
+                a {
+                  color: var(--mi-white);
+                }
               `}
             >
               <Trans
