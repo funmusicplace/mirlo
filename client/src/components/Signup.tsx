@@ -60,7 +60,6 @@ const ArtistToggle = styled(FormComponent)`
 function Signup() {
   const { t } = useTranslation("translation", { keyPrefix: "signUp" });
   const [search] = useSearchParams();
-  console.log(search);
   const snackbar = useSnackbar();
   const [hasRegistered, setHasRegistered] = React.useState(false);
   const [accountIncomplete, setAccountIncomplete] = React.useState(false);
@@ -74,7 +73,6 @@ function Signup() {
 
   const onSubmit = React.useCallback(
     async (data: SignupInputs) => {
-      console.log("data", data);
       try {
         await api.post(
           "signup",

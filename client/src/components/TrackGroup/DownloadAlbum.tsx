@@ -18,7 +18,6 @@ import api from "services/api";
 import { getArtistUrl, getReleaseUrl } from "utils/artist";
 
 function DownloadAlbum() {
-  console.log("download album");
   const [trackGroup, setTrackGroup] = React.useState<TrackGroup>();
   const [isOwned, setIsOwned] = React.useState(false);
   const [isLoadingTrackGroup, setIsLoadingTrackGroup] = React.useState(true);

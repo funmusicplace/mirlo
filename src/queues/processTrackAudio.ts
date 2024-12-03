@@ -51,16 +51,6 @@ audioQueueEvents.on(
           },
         });
 
-        if (audio && audio.trackId) {
-          await prisma.track.update({
-            where: {
-              id: audio.trackId,
-            },
-            data: {
-              metadata: result.returnvalue,
-            },
-          });
-        }
         logger.info(`audioId: ${audio.id} updated trackAudio`);
 
         await verifyAudioQueue.add("verify-audio", {

@@ -78,8 +78,8 @@ function TrackView() {
   return (
     <WidthContainer variant="big" justify="center">
       <MetaCard
-        title={trackGroup.title}
-        description={`An album by ${trackGroup.artist?.name ?? "an artist"} on Mirlo`}
+        title={filteredTrack.title}
+        description={`A track by ${trackGroup.artist?.name ?? "an artist"} on Mirlo`}
         image={trackGroup.cover?.sizes?.[600]}
       />
       <Container user={user}>
