@@ -2,11 +2,11 @@ import { cloneDeep } from "lodash";
 import React from "react";
 import { useGlobalStateContext } from "state/GlobalState";
 
-import { CenteredSpinner } from "./Spinner";
-import Table from "./Table";
+import { CenteredSpinner } from "../Spinner";
+import Table from "../Table";
 import TrackRow from "./TrackRow";
 import { css } from "@emotion/css";
-import { bp } from "../../constants";
+import { bp } from "../../../constants";
 import { isTrackOwnedOrPreview } from "utils/tracks";
 import { useAuthContext } from "state/AuthContext";
 

@@ -46,6 +46,36 @@ export function queryTrackGroups(opts: {
   });
 }
 
+const fetchTrackGroup: QueryFunction<
+  TrackGroup,
+  ["fetchTrackGroup", { albumSlug: string; artistId?: string }]
+> = ({ queryKey: [_, { albumSlug, artistId }], signal }) => {
+  return api
+    .get<{
+      result: TrackGroup;
+    }>(`v1/trackGroups/${albumSlug}/?artistId=${artistId}`, {
+      signal,
+    })
+    .then((r) => r.result);
+};
+
+export function queryTrackGroup(opts: {
+  albumSlug: string;
+  artistId?: string;
+}) {
+  return queryOptions({
+    queryKey: [
+      "fetchTrackGroup",
+      {
+        albumSlug: opts.albumSlug,
+        artistId: opts.artistId,
+      },
+    ],
+    queryFn: fetchTrackGroup,
+    enabled: !!opts.albumSlug,
+  });
+}
+
 async function createTrackGroup(opts: {
   trackGroup: Partial<TrackGroup>;
 }): Promise<{ result: TrackGroup }> {

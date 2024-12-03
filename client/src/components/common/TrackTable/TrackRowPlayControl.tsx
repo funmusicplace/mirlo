@@ -2,7 +2,7 @@ import { VscPlay } from "react-icons/vsc";
 import { TfiControlPause } from "react-icons/tfi";
 import { useGlobalStateContext } from "state/GlobalState";
 import React from "react";
-import Button from "./Button";
+import Button from "../Button";
 
 const TrackRowPlayControl: React.FC<{
   trackNumber: number;

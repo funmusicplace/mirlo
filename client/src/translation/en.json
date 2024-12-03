@@ -584,6 +584,7 @@
     "title": "Title:",
     "type": "Type:",
     "edit": "Edit",
+    "fromAlbum": "from <albumLink>{{album}}</albumLink>",
     "byArtist": "by <artistLink>{{artist}}</artistLink>",
     "copiedTrackUrl": "Copied track URL",
     "releaseDate": "Release date:",

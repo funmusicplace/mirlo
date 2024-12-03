@@ -1,17 +1,16 @@
 import { css } from "@emotion/css";
 import React from "react";
-import { FiLink } from "react-icons/fi";
 import { useGlobalStateContext } from "state/GlobalState";
 
-import Button from "./Button";
-import { fmtMSS, isTrackOwnedOrPreview, widgetUrl } from "utils/tracks";
-import { useSnackbar } from "state/SnackbarContext";
-import { bp } from "../../constants";
+import { fmtMSS, isTrackOwnedOrPreview } from "utils/tracks";
+import { bp } from "../../../constants";
 import TrackRowPlayControl from "./TrackRowPlayControl";
 import { useAuthContext } from "state/AuthContext";
-import { useTranslation } from "react-i18next";
 import styled from "@emotion/styled";
-import Tooltip from "./Tooltip";
+import Tooltip from "../Tooltip";
+import TrackAuthors from "./TrackAuthors";
+import EmbedLink from "./EmbedLink";
+import TrackLink from "./TrackLink";
 
 const LicenseSpan = styled.a`
   text-wrap: nowrap;
@@ -116,10 +115,6 @@ const TrackRow: React.FC<{
   addTracksToQueue: (id: number) => void;
   size?: "small";
 }> = ({ track, addTracksToQueue, trackGroup, size }) => {
-  const { t } = useTranslation("translation", {
-    keyPrefix: "trackGroupDetails",
-  });
-  const snackbar = useSnackbar();
   const { dispatch } = useGlobalStateContext();
   const [trackTitle] = React.useState(track.title);
   const { user } = useAuthContext();
@@ -132,9 +127,6 @@ const TrackRow: React.FC<{
       dispatch({ type: "setPlaying", playing: true });
     }
   }, [addTracksToQueue, canPlayTrack, dispatch, track.id]);
-
-  const coAuthors =
-    track.trackArtists?.filter((artist) => artist.isCoAuthor) ?? [];
 
   return (
     <TR
@@ -188,22 +180,10 @@ const TrackRow: React.FC<{
             `}
           >
             {trackTitle}
-            {coAuthors.find(
-              (author) => author.artistId !== trackGroup.artistId
-            ) && (
-              <span
-                className={css`
-                  color: var(--mi-lighter-foreground-color);
-                  margin-left: 0.5rem;
-
-                  @media (prefers-color-scheme: dark) {
-                    color: var(--mi-light-foreground-color);
-                  }
-                `}
-              >
-                {coAuthors.map((a) => a.artistName).join(", ")}
-              </span>
-            )}
+            <TrackAuthors
+              track={track}
+              trackGroupArtistId={trackGroup.artistId}
+            />
           </div>
 
           <div
@@ -223,28 +203,16 @@ const TrackRow: React.FC<{
           </div>
         </div>
       </TrackTitleTD>
-
+      {/* <td align="right">
+        <TrackLink
+          track={track}
+          trackGroup={trackGroup}
+          artist={trackGroup.artist}
+        />
+      </td> */}
       {size !== "small" && (
         <td align="right">
-          <Button
-            compact
-            transparent
-            onClick={(e) => {
-              e.stopPropagation();
-              navigator.clipboard.writeText(widgetUrl(track.id, "track"));
-              snackbar(t("copiedTrackUrl"), { type: "success" });
-            }}
-            startIcon={<FiLink />}
-            className={css`
-              .startIcon {
-                padding-left: 1rem;
-              }
-              :hover {
-                background: transparent !important;
-                opacity: 0.6;
-              }
-            `}
-          />
+          <EmbedLink track={track} />
         </td>
       )}
       {size !== "small" &&

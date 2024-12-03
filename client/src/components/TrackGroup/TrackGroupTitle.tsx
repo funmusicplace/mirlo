@@ -1,11 +1,10 @@
 import { css } from "@emotion/css";
-import { FaFlag, FaPen } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { FaPen } from "react-icons/fa";
+import { Link, useParams } from "react-router-dom";
 import ClickToPlayAlbum from "../common/ClickToPlayAlbum";
 import Button from "../common/Button";
-import { Trans, useTranslation } from "react-i18next";
+import { useTranslation } from "react-i18next";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
-import { useArtistContext } from "state/ArtistContext";
 
 import { bp } from "../../constants";
 import DropdownMenu from "components/common/DropdownMenu";
@@ -15,6 +14,9 @@ import React from "react";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import { useAuthContext } from "state/AuthContext";
 import FlagContent from "./FlagContent";
+import ArtistByLine from "./ArtistByLine";
+import { useQuery } from "@tanstack/react-query";
+import { queryArtist } from "queries";
 
 export const ItemViewTitle: React.FC<{
   title: string;
@@ -64,13 +66,17 @@ export const ItemViewTitle: React.FC<{
 
 const TrackGroupTitle: React.FC<{
   trackGroup: TrackGroup;
-}> = ({ trackGroup }) => {
+  title: string;
+}> = ({ trackGroup, title }) => {
   const { t } = useTranslation("translation", {
     keyPrefix: "trackGroupDetails",
   });
-  const {
-    state: { artist, isLoading: isLoadingArtist },
-  } = useArtistContext();
+
+  const params = useParams();
+  const { data: artist, isLoading: isLoadingArtist } = useQuery(
+    queryArtist({ artistSlug: params.artistId ?? "" })
+  );
+
   const { user } = useAuthContext();
 
   if (!artist && !isLoadingArtist) {
@@ -83,7 +89,7 @@ const TrackGroupTitle: React.FC<{
 
   return (
     <>
-      <ItemViewTitle trackGroupId={trackGroup.id} title={trackGroup.title} />
+      <ItemViewTitle trackGroupId={trackGroup.id} title={title} />
       <div
         className={css`
           display: flex;
@@ -92,31 +98,10 @@ const TrackGroupTitle: React.FC<{
           margin-bottom: 0.6rem;
         `}
       >
-        <div>
-          {artist && (
-            <em
-              className={css`
-                font-size: 18px;
-                font-style: normal;
-              `}
-            >
-              <Trans
-                t={t}
-                i18nKey="byArtist"
-                values={{
-                  artist: artist.name,
-                }}
-                components={{
-                  artistLink: (
-                    <Link
-                      to={`/${artist.urlSlug?.toLowerCase() ?? artist.id}`}
-                    ></Link>
-                  ),
-                }}
-              />
-            </em>
-          )}
-        </div>
+        <ArtistByLine
+          artist={artist}
+          fromAlbum={title !== trackGroup.title ? trackGroup : undefined}
+        />
         <div
           className={css`
             text-align: right;
@@ -142,7 +127,7 @@ const TrackGroupTitle: React.FC<{
               `}
             >
               <DropdownMenu compact>
-                <TrackGroupAdminMenu trackGroup={trackGroup} />
+                <TrackGroupAdminMenu trackGroupId={trackGroup.id} />
               </DropdownMenu>
             </div>
           )}

@@ -1,6 +1,6 @@
 import { css } from "@emotion/css";
 
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import ClickToPlayAlbum from "../common/ClickToPlayAlbum";
 import Box from "../common/Box";
 import usePublicObjectById from "utils/usePublicObjectById";
@@ -8,7 +8,6 @@ import { useTranslation } from "react-i18next";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
 import PublicTrackGroupListing from "components/common/TrackTable/PublicTrackGroupListing";
 import { MetaCard } from "components/common/MetaCard";
-import { useArtistContext } from "state/ArtistContext";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 
 import PurchaseOrDownloadAlbum from "./PurchaseOrDownloadAlbumModal";
@@ -19,145 +18,35 @@ import Wishlist from "./Wishlist";
 import ReleaseDate from "./ReleaseDate";
 import WidthContainer from "components/common/WidthContainer";
 import TrackGroupTitle from "./TrackGroupTitle";
-import styled from "@emotion/styled";
 import SupportArtistPopUp from "components/common/SupportArtistPopUp";
 import TrackGroupPills from "./TrackGroupPills";
 import TrackGroupEmbed from "./TrackGroupEmbed";
 import { useAuthContext } from "state/AuthContext";
 import TrackGroupMerch from "./TrackGroupMerch";
 import { useQuery } from "@tanstack/react-query";
-import { queryArtist, queryTrackGroup, queryUserStripeStatus } from "queries";
+import { queryArtist, queryTrackGroup } from "queries";
+import {
+  AboutWrapper,
+  Container,
+  CreditsWrapper,
+  ImageAndDetailsWrapper,
+  ImageWrapper,
+  SmallScreenPlayWrapper,
+  TrackgroupInfosWrapper,
+  TrackListingWrapper,
+  UnderneathImage,
+} from "./TrackGroup";
+import { getReleaseUrl } from "utils/artist";
 
-export const Container = styled.div<{ user?: LoggedInUser | null }>`
-  ${(props) =>
-    props.user!
-      ? `
-    min-height: calc(100vh - 70px);
-    margin-top: 0vh;`
-      : `
-    min-height: calc(100vh - 130px);
-    margin-top: 1rem;`}
-  display: flex;
-  align-items: center;
-  width: 100%;
-  padding: var(--mi-side-paddings-xsmall);
-
-  @media screen and (max-width: ${bp.small}px) {
-    margin-top: 0rem;
-  }
-`;
-
-export const ImageWrapper = styled.div`
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  display: flex;
-`;
-
-export const UnderneathImage = styled.div`
-  margin-top: 0.5rem;
-  margin-bottom: 0.5rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-`;
-
-export const SmallScreenPlayWrapper = styled.div`
-  margin-bottom: 0.5rem;
-  @media screen and (min-width: ${bp.small}px) {
-    display: none;
-  }
-`;
-
-export const ImageAndDetailsWrapper = styled.div`
-  display: flex;
-  flex: 45%;
-  max-width: 45%;
-  flex-direction: column;
-
-  @media screen and (max-width: ${bp.small}px) {
-    flex: 100%;
-    max-width: 100%;
-    width: 100%;
-    min-width: 100%;
-    flex-direction: column;
-  }
-`;
-
-export const AboutWrapper = styled.div<{
-  trackGroupCredits: boolean;
-}>`
-  margin: 1.25rem 0 1.25rem;
-  ${(props) =>
-    props.trackGroupCredits
-      ? "padding: 0.5rem 3rem 0.25rem 0rem;"
-      : "padding: 0.5rem 2rem 0.25rem 0rem;"}
-
-  p {
-    line-height: 1.5rem;
-  }
-
-  @media screen and (max-width: ${bp.medium}px) {
-    max-width: 100%;
-    padding: 0.5rem 0rem 0.25rem 0rem;
-    margin-bottom: 0.5rem;
-    border-right: 0;
-  }
-`;
-
-export const CreditsWrapper = styled.div<{
-  trackGroupCredits: boolean;
-  trackGroupAbout: boolean;
-}>`
-  font-size: var(--mi-font-size-small);
-  opacity: 0.5;
-  height: auto;
-  p {
-    line-height: 1.3rem;
-  }
-  ${(props) =>
-    props.trackGroupCredits ? "border-left: 1px solid;" : "display: none;"}
-  ${(props) =>
-    props.trackGroupAbout
-      ? "margin: 1.25rem 0; padding: 0.5rem 0rem 0.5rem 2rem;"
-      : "margin: .25rem 0 1.25rem 0; border-left: none; padding: 0.5rem 0.25rem 0.5rem 0;"}
-  @media screen and (max-width: ${bp.medium}px) {
-    ${(props) => (props.trackGroupCredits ? "border-top: 1px solid;" : "")}
-    max-width: 100%;
-    padding: 1rem 0.25rem 0.5rem 0rem;
-    margin-top: 0;
-    border-left: 0;
-  }
-`;
-
-export const TrackgroupInfosWrapper = styled.div`
-  display: grid;
-  grid-template-columns: 63% 37%;
-
-  @media screen and (max-width: ${bp.medium}px) {
-    display: flex;
-    flex-direction: column;
-  }
-`;
-
-export const TrackListingWrapper = styled.div`
-  max-width: 59%;
-  flex: 59%;
-  @media screen and (max-width: ${bp.small}px) {
-    max-width: 100%;
-    flex: 100%;
-    margin-left: 0;
-  }
-`;
-
-function TrackGroup() {
+function TrackView() {
   const { t } = useTranslation("translation", {
     keyPrefix: "trackGroupDetails",
   });
-
-  const { artistId, trackGroupId } = useParams();
+  const navigate = useNavigate();
+  const { artistId, trackGroupId, trackId } = useParams();
   const { data: artist, isLoading: isLoadingArtist } = useQuery(
     queryArtist({ artistSlug: artistId ?? "" })
   );
-
   const { user } = useAuthContext();
 
   const { data: trackGroup, isLoading: isLoadingTrackGroup } = useQuery(
@@ -178,6 +67,13 @@ function TrackGroup() {
 
   const trackGroupCredits = trackGroup.credits;
   const trackGroupAbout = trackGroup.about;
+
+  const filteredTrack = trackGroup.tracks.find((t) => t.id === Number(trackId));
+
+  if (!filteredTrack) {
+    navigate(getReleaseUrl(artist, trackGroup));
+    return null;
+  }
 
   return (
     <WidthContainer variant="big" justify="center">
@@ -219,7 +115,10 @@ function TrackGroup() {
               }
             `}
           >
-            <TrackGroupTitle trackGroup={trackGroup} title={trackGroup.title} />
+            <TrackGroupTitle
+              trackGroup={trackGroup}
+              title={filteredTrack.title}
+            />
 
             <div
               className={css`
@@ -242,29 +141,6 @@ function TrackGroup() {
                 </ImageWrapper>
                 <UnderneathImage>
                   <ReleaseDate releaseDate={trackGroup.releaseDate} />
-                  <div
-                    className={css`
-                      display: flex;
-                      justify-content: flex-end;
-                      align-items: center;
-                      gap: 1rem;
-                      button {
-                        background: var(--mi-darken-background-color);
-                        margin-left: 0 !important;
-                      }
-                      a {
-                        font-size: var(--mi-font-size-normal);
-                      }
-
-                      @media screen and (max-width: ${bp.small}px) {
-                        gap: 0.75rem;
-                      }
-                    `}
-                  >
-                    <TrackGroupEmbed trackGroup={trackGroup} />
-                    <Wishlist trackGroup={trackGroup} />
-                    <PurchaseOrDownloadAlbum trackGroup={trackGroup} />
-                  </div>
                 </UnderneathImage>
                 {trackGroup.merch && trackGroup.merch.length > 0 && (
                   <TrackGroupMerch merch={trackGroup.merch} />
@@ -281,28 +157,14 @@ function TrackGroup() {
               </ImageAndDetailsWrapper>
               <TrackListingWrapper>
                 <PublicTrackGroupListing
-                  tracks={trackGroup.tracks}
+                  tracks={[filteredTrack]}
                   trackGroup={trackGroup}
                 />
+                <div></div>
               </TrackListingWrapper>
             </div>
           </div>
-          <TrackgroupInfosWrapper>
-            {trackGroupAbout && (
-              <AboutWrapper trackGroupCredits={Boolean(trackGroupCredits)}>
-                <MarkdownContent content={trackGroup.about} />
-              </AboutWrapper>
-            )}
 
-            <CreditsWrapper
-              trackGroupCredits={Boolean(trackGroupCredits)}
-              trackGroupAbout={Boolean(trackGroupAbout)}
-            >
-              <MarkdownContent content={trackGroup.credits} />
-            </CreditsWrapper>
-          </TrackgroupInfosWrapper>
-
-          <TrackGroupPills tags={trackGroup.tags} />
           <div
             className={css`
               margin-top: 2rem;
@@ -319,4 +181,4 @@ function TrackGroup() {
   );
 }
 
-export default TrackGroup;
+export default TrackView;
