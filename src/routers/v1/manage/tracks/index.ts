@@ -61,7 +61,7 @@ export default function () {
           title,
           order,
           isPreview,
-          metadata: metadata,
+          metadata,
           trackGroup: {
             connect: {
               id: Number(trackGroupId),

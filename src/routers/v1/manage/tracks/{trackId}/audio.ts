@@ -8,6 +8,7 @@ import {
 import { doesTrackBelongToUser } from "../../../../../utils/ownership";
 import { processTrackAudio } from "../../../../../queues/processTrackAudio";
 import busboy from "connect-busboy";
+import prisma from "@mirlo/prisma";
 
 type Params = {
   trackId: string;
@@ -33,7 +34,7 @@ export default function () {
     const { trackId } = req.params as unknown as Params;
     const loggedInUser = req.user as User;
     try {
-      const track = doesTrackBelongToUser(Number(trackId), loggedInUser);
+      const track = await doesTrackBelongToUser(Number(trackId), loggedInUser);
 
       if (!track) {
         res.status(400).json({

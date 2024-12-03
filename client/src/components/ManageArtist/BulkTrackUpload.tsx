@@ -8,7 +8,7 @@ import { BulkTrackUploadRow } from "./BulkTrackUploadRow";
 
 import { Buffer } from "buffer";
 import process from "process";
-import { pickBy } from "lodash";
+import { pick, pickBy } from "lodash";
 import {
   TrackData,
   UploadField,
@@ -65,11 +65,7 @@ export const BulkTrackUpload: React.FC<{
       if (firstTrack) {
         const packet = {
           title: firstTrack.t.title,
-          metadata: pickBy(firstTrack.t.metadata, [
-            "format",
-            "common",
-            "native",
-          ]),
+          metadata: pick(firstTrack.t.metadata, ["format", "common", "native"]),
           artistId: trackgroup.artistId,
           isPreview: firstTrack.t.status === "preview",
           order: firstTrack.order,

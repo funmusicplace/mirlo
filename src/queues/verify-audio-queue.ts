@@ -14,7 +14,6 @@ const verifyAudioQueueEvents = new QueueEvents("verify-audio", queueOptions);
 verifyAudioQueueEvents.on(
   "completed",
   async (result: { jobId: string; returnvalue?: any }) => {
-    console.log("done verifying track");
     logger.info(
       `Job with id ${JSON.stringify(
         result.jobId
