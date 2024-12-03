@@ -20,16 +20,13 @@ import {
   ImageAndDetailsWrapper,
   ImageWrapper,
 } from "components/TrackGroup/TrackGroup";
-import BuyMerchItem from "./BuyMerchItem";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
-import Button, { ButtonLink } from "components/common/Button";
+import { ButtonLink } from "components/common/Button";
 import { getArtistManageMerchUrl, getReleaseUrl } from "utils/artist";
-import { FaChevronRight, FaPen } from "react-icons/fa";
+import { FaPen } from "react-icons/fa";
 import { useAuthContext } from "state/AuthContext";
-import PublicTrackGroupListing from "components/common/PublicTrackGroupListing";
-import { moneyDisplay } from "components/common/Money";
-import Modal from "components/common/Modal";
-import React from "react";
+import PublicTrackGroupListing from "components/common/TrackTable/PublicTrackGroupListing";
+
 import MerchButtonPopUp from "./MerchButtonPopUp";
 
 function TrackGroup() {

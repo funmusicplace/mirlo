@@ -16,7 +16,7 @@ import {
   inIframe,
   inMirlo,
 } from "./utils";
-import PublicTrackGroupListing from "components/common/PublicTrackGroupListing";
+import PublicTrackGroupListing from "components/common/TrackTable/PublicTrackGroupListing";
 import { PlayButtonsWrapper } from "./PlayButtonsWrapper";
 import DisplayAudioWrapper from "./DisplayAudio";
 import useCurrentTrackHook from "components/Player/useCurrentTrackHook";

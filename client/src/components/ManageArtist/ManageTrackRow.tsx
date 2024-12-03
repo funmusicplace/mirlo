@@ -6,7 +6,7 @@ import useDraggableTrack from "utils/useDraggableTrack";
 import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
 import { fmtMSS } from "utils/tracks";
-import TrackRowPlayControl from "components/common/TrackRowPlayControl";
+import TrackRowPlayControl from "components/common/TrackTable/TrackRowPlayControl";
 import { useTranslation } from "react-i18next";
 import EditTrackRow from "./EditTrackRow";
 import styled from "@emotion/styled";
