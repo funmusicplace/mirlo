@@ -149,16 +149,16 @@ const optimizeImage = async (job: Job) => {
         data: { url: urls },
       });
     } else if (model === "artistAvatar") {
-      artistFavicon = ico.sharpsToIco([sharp(buffer)], "artist_avatar.ico", {
+      const faviconFinalName = "artist_avatar_favicon.ico";
+      ico.sharpsToIco([sharp(buffer)], faviconFinalName, {
         sizes: [48],
         resizeOptions: {},
       });
       logger.info("Uploading artist avatar favicon to bucket");
-      const faviconFinalName = `${destinationId}_favicon.ico`;
       await minioClient.putObject(
         finalMinioBucket,
         faviconFinalName,
-        artistFavicon
+        sharp(buffer)
       );
       await prisma.artistAvatar.update({
         where: { id: destinationId },
