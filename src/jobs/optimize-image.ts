@@ -149,7 +149,7 @@ const optimizeImage = async (job: Job) => {
         data: { url: urls },
       });
     } else if (model === "artistAvatar") {
-      const faviconFinalName = "artist_avatar_favicon.ico";
+      const faviconFinalName = `${destinationId}_artist_avatar_favicon.ico`;
       ico.sharpsToIco([sharp(buffer)], faviconFinalName, {
         sizes: [48],
         resizeOptions: {},
