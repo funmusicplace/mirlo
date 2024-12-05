@@ -1,21 +1,21 @@
 import React from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { InputEl } from "components/common/Input";
-import { FaSave, FaTimes, FaUpload } from "react-icons/fa";
+import { FaSave, FaTimes } from "react-icons/fa";
 import { css } from "@emotion/css";
 import { useTranslation } from "react-i18next";
-import Tooltip from "components/common/Tooltip";
 import { fmtMSS } from "utils/tracks";
-import SelectTrackPreview from "./SelectTrackPreview";
-import TrackUploadingState from "./TrackUploadingState";
-import ManageTrackArtists from "./ManageTrackArtists";
+import SelectTrackPreview from "../SelectTrackPreview";
+import TrackUploadingState from "../TrackUploadingState";
+import ManageTrackArtists from "../ManageTrackArtists";
 import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
 import useJobStatusCheck from "utils/useJobStatusCheck";
 import LoadingSpinner from "components/common/LoadingSpinner";
 import Button from "components/common/Button";
 import { useAuthContext } from "state/AuthContext";
-import ManageTrackLicense from "./ManageTrackLicense";
+import ManageTrackLicense from "../ManageTrackLicense";
+import ReplaceTrackAudioInput from "./ReplaceTrackAudioInput";
 
 export interface FormData {
   title: string;
@@ -115,38 +115,11 @@ const EditTrackRow: React.FC<{
           {isSaving && <LoadingSpinner />}
 
           {!uploadingState && !isSaving && (
-            <Tooltip hoverText={t("replaceTrackAudio")}>
-              <label
-                htmlFor={`track.${trackId}`}
-                className={css`
-                  width: 2rem;
-                  cursor: pointer;
-                  height: 2rem;
-                  display: flex;
-                  justify-content: center;
-                  align-items: center;
-                  background-color: var(--mi-darken-background-color);
-                  border-radius: var(--mi-border-radius);
-                `}
-              >
-                <FaUpload />
-                <input
-                  disabled={isSaving || isDisabled}
-                  type="file"
-                  className={css`
-                    display: none;
-
-                    &::file-selector-button {
-                      display: none;
-                    }
-                  `}
-                  placeholder="Replace"
-                  id={`track.${trackId}`}
-                  {...register("trackFile")}
-                  accept="audio/mpeg,audio/flac,audio/wav,audio/x-flac,audio/aac,audio/aiff,audio/x-m4a"
-                />
-              </label>
-            </Tooltip>
+            <ReplaceTrackAudioInput
+              trackId={trackId}
+              isSaving={isSaving}
+              isDisabled={isDisabled}
+            />
           )}
           {!isSaving && <TrackUploadingState uploadingState={uploadingState} />}
         </td>
