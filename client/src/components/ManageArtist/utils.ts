@@ -85,7 +85,7 @@ export const convertMetaData = (
     }`,
     duration: p.metadata.format.duration,
     file: p.file,
-    title,
+    title: p.metadata.common.title,
     status: "preview",
     trackArtists:
       p.metadata.common.artists?.map((artist) => ({
@@ -103,16 +103,9 @@ export const parse = async (files: File[]): Promise<ParsedItem[]> => {
     files.map(async (file) => {
       try {
         const parsedFile = await parseBlob(file);
-        const metadata = parsedFile.common;
         return {
           file,
-          metadata: {
-            ...parsedFile,
-            common: {
-              title: metadata.title ?? file.name,
-              ...parsedFile.common,
-            },
-          },
+          metadata: parsedFile,
         };
       } catch (e) {
         console.error("Error parsing metadata", e);

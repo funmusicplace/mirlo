@@ -8,12 +8,14 @@ import { useSnackbar } from "state/SnackbarContext";
 import { fmtMSS } from "utils/tracks";
 import TrackRowPlayControl from "components/common/TrackTable/TrackRowPlayControl";
 import { useTranslation } from "react-i18next";
-import EditTrackRow from "./EditTrackRow";
+import EditTrackRow from "./AlbumFormComponents/EditTrackRow";
 import styled from "@emotion/styled";
 import LoadingSpinner from "components/common/LoadingSpinner";
 import Button from "components/common/Button";
 import { useAuthContext } from "state/AuthContext";
 import ManageTrackArtists from "./ManageTrackArtists";
+import SavingInput from "./AlbumFormComponents/SavingInput";
+import ClickToEditInput from "./AlbumFormComponents/ClickToEditInput";
 
 const TrackRow = styled("tr")`
   > td > .play-button {
@@ -157,7 +159,11 @@ const ManageTrackRow: React.FC<{
         `}
       >
         <div>
-          <div>{track.title}</div>
+          <ClickToEditInput
+            defaultValue={track.title}
+            url={`manage/tracks/${track.id}`}
+            formKey="title"
+          />
           <small>
             {uploadState === "SUCCESS" && t("doneUploadingTrack")}
             {uploadState === "STARTED" && (
