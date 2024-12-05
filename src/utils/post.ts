@@ -3,11 +3,14 @@ import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
 import showdown from "showdown";
 import { addSizesToImage } from "./artist";
-import { finalArtistAvatarBucket } from "./minio";
+import { finalArtistAvatarBucket, finalPostImageBucket } from "./minio";
 import { AppError } from "./error";
+import { generateFullStaticImageUrl } from "./images";
 
 export const processSinglePost = (
-  post: Post & { artist?: (Artist & { avatar?: ArtistAvatar | null }) | null },
+  post: Post & {
+    artist?: (Artist & { avatar?: ArtistAvatar | null }) | null;
+  } & { featuredImage?: { extension: string; id: string } | null },
   isUserSubscriber?: boolean
 ) => ({
   ...post,
@@ -16,6 +19,14 @@ export const processSinglePost = (
     avatar: post.artist
       ? addSizesToImage(finalArtistAvatarBucket, post.artist?.avatar)
       : null,
+  },
+  featuredImage: post.featuredImage && {
+    ...post.featuredImage,
+    src: generateFullStaticImageUrl(
+      post.featuredImage.id,
+      finalPostImageBucket,
+      post.featuredImage.extension
+    ),
   },
   isContentHidden: !(isUserSubscriber || post.isPublic),
 });

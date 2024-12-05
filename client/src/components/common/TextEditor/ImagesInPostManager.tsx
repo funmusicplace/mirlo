@@ -41,6 +41,7 @@ const ImagesInPostManager: React.FC<{
             margin: 0.2rem;
             cursor: pointer;
           `}
+          key={image.id}
           onClick={() => markImageAsFeatured(image.id)}
         >
           <img

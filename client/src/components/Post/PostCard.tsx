@@ -10,6 +10,7 @@ import { getHtmlExcerpt } from "utils/getHtmlExcerpt";
 import { useLinkContainer } from "utils/useLinkContainer";
 import { formatDate } from "components/TrackGroup/ReleaseDate";
 import { Trans, useTranslation } from "react-i18next";
+import { bp } from "../../constants";
 
 const PostContainer = styled.li`
   display: flex;
@@ -47,9 +48,9 @@ const PostContainer = styled.li`
 `;
 
 const PostCard: React.FC<{
-  p: Post;
-}> = ({ p }) => {
-  const postUrl = getPostURLReference(p);
+  post: Post;
+}> = ({ post }) => {
+  const postUrl = getPostURLReference(post);
   const postContainerProps = useLinkContainer({ to: postUrl });
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
 
@@ -59,15 +60,15 @@ const PostCard: React.FC<{
 
   // Use the first 8 paragraphs of the post as an unformatted excerpt
   const excerpt = React.useMemo(
-    () => getHtmlExcerpt(p.content).slice(0, 8),
-    [p.content]
+    () => getHtmlExcerpt(post.content).slice(0, 8),
+    [post.content]
   );
+  console.log("p", post);
 
   return (
     <PostContainer {...postContainerProps}>
-      <Overlay width="100%" height="100%"></Overlay>
+      <Overlay width="100%" height="100%" />
       <Box
-        key={p.id}
         className={css`
           height: 350px;
           width: 100% !important;
@@ -76,6 +77,7 @@ const PostCard: React.FC<{
           overflow: hidden;
           padding: 0 !important;
           justify-content: space-between;
+          position: relative;
 
           @media (prefers-color-scheme: dark) {
             background-color: var(--mi-normal-background-color);
@@ -84,14 +86,35 @@ const PostCard: React.FC<{
       >
         <div
           className={css`
+            max-height: 65%;
+            z-index: 0;
+            position: relative;
+          `}
+        >
+          <img
+            src={post.featuredImage?.src}
+            className={css`
+              width: 100%;
+            `}
+          />
+        </div>
+        <div
+          className={css`
             padding: 1.5rem;
             margin: 0;
+            z-index: 1;
+            position: relative;
             width: 100%;
             overflow: hidden;
             transition: 0.2s ease-in-out;
+
+            background-color: var(--mi-normal-background-color);
+
+            @media screen and (max-width: ${bp.medium}px) {
+            }
           `}
         >
-          {p.artist && (
+          {post.artist && (
             <div
               className={css`
                 padding-bottom: 2rem;
@@ -109,9 +132,9 @@ const PostCard: React.FC<{
                 <Trans
                   t={t}
                   i18nKey="postByArtist"
-                  values={{ artistName: p.artist?.name }}
+                  values={{ artistName: post.artist?.name }}
                   components={{
-                    link: <Link to={getArtistUrl(p.artist)}></Link>,
+                    link: <Link to={getArtistUrl(post.artist)}></Link>,
                   }}
                 />
               </p>
@@ -132,7 +155,7 @@ const PostCard: React.FC<{
                 `
               }
             >
-              {p.artist && (
+              {post.artist && (
                 <Link
                   to={postUrl}
                   className={
@@ -144,7 +167,7 @@ const PostCard: React.FC<{
                     `
                   }
                 >
-                  {p.title}
+                  {post.title}
                 </Link>
               )}
             </h3>
@@ -156,7 +179,7 @@ const PostCard: React.FC<{
               `}
             >
               {formatDate({
-                date: p.publishedAt,
+                date: post.publishedAt,
                 i18n,
               })}
             </p>

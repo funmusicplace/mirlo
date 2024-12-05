@@ -1,4 +1,3 @@
-import React from "react";
 import styled from "@emotion/styled";
 import { bp } from "../../constants";
 import PostCard from "./PostCard";
@@ -28,7 +27,7 @@ interface PostGridProps {
 export default function PostGrid(props: PostGridProps) {
   return (
     <PostGridWrapper role="list" aria-labelledby={props.ariaLabelledBy}>
-      {props.posts?.map((post) => <PostCard key={post.id} p={post} />)}
+      {props.posts?.map((post) => <PostCard key={post.id} post={post} />)}
     </PostGridWrapper>
   );
 }
