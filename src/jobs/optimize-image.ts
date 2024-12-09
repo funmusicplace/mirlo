@@ -1,4 +1,5 @@
 import sharp from "sharp";
+import ico from "sharp-ico";
 
 import tempSharpConfig from "../config/sharp";
 import { Job } from "bullmq";
@@ -148,6 +149,17 @@ const optimizeImage = async (job: Job) => {
         data: { url: urls },
       });
     } else if (model === "artistAvatar") {
+      const faviconFinalName = `${destinationId}_artist_avatar_favicon.ico`;
+      ico.sharpsToIco([sharp(buffer)], faviconFinalName, {
+        sizes: [48],
+        resizeOptions: {},
+      });
+      logger.info("Uploading artist avatar favicon to bucket");
+      await minioClient.putObject(
+        finalMinioBucket,
+        faviconFinalName,
+        sharp(buffer)
+      );
       await prisma.artistAvatar.update({
         where: { id: destinationId },
         data: { url: urls },
