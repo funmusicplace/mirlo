@@ -128,6 +128,9 @@ const About: React.FC = () => {
           </p>
         </div>
         <div>
+          <H2HashLink id="media">In the media</H2HashLink>
+        </div>
+        <div>
           <H2HashLink id="team">Our team</H2HashLink>
           <p>
             Behind the platform Our members have experience working both within
