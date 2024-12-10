@@ -49,6 +49,7 @@
     "passport-jwt": "^4.0.0",
     "rss": "^1.2.2",
     "sharp": "^0.33.3",
+    "sharp-ico": "^0.1.5",
     "shasum": "^1.0.2",
     "showdown": "^2.1.0",
     "slugify": "^1.6.6",
