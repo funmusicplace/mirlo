@@ -151,6 +151,7 @@ const routes = [
   "admin/purchases",
   "admin/settings",
   "admin/tips",
+  "admin/users",
   "oembed",
   "flag",
 ];

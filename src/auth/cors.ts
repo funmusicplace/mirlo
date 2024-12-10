@@ -23,8 +23,6 @@ export const corsCheck = async (...args: [Request, Response, NextFunction]) => {
     origin.push("http://localhost:8080"); // Just... for ease of coding
   }
 
-  console.log("allowed cors origins", origin);
-
   return cors({
     origin,
     credentials: true,

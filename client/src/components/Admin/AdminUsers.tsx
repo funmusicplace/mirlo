@@ -1,6 +1,7 @@
 import { css } from "@emotion/css";
-import { ButtonLink } from "components/common/Button";
+import Button, { ButtonLink } from "components/common/Button";
 import Table from "components/common/Table";
+import TextArea from "components/common/TextArea";
 import React from "react";
 import { FaCheck, FaEdit } from "react-icons/fa";
 import { Link } from "react-router-dom";
@@ -11,6 +12,7 @@ const pageSize = 100;
 
 export const AdminUsers: React.FC = () => {
   const [results, setResults] = React.useState<User[]>([]);
+  const [newUsers, setNewUsers] = React.useState("");
   const { page, PaginationComponent } = usePagination({ pageSize });
 
   React.useEffect(() => {
@@ -27,6 +29,20 @@ export const AdminUsers: React.FC = () => {
     callback();
   }, [page]);
 
+  const uploadUsers = async (users: { email: string }[]) => {
+    await api.post(`admin/users`, { users });
+  };
+
+  const processTextArea = React.useCallback(() => {
+    const emailsAsList =
+      newUsers
+        ?.split(/,|\r?\n/)
+        .map((email) => email.replaceAll(" ", ""))
+        .filter((email) => !!email) ?? [];
+    const users = emailsAsList?.map((email) => ({ email }));
+    uploadUsers(users);
+  }, [newUsers, uploadUsers]);
+
   return (
     <div
       className={css`
@@ -34,6 +50,14 @@ export const AdminUsers: React.FC = () => {
       `}
     >
       <h2>Users</h2>
+
+      <TextArea
+        onChange={(e) => setNewUsers(e.target.value)}
+        value={newUsers}
+      />
+      <Button type="button" onClick={processTextArea}>
+        Bulk Add Emails as Users
+      </Button>
 
       {results.length > 0 && (
         <Table>
