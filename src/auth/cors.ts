@@ -18,9 +18,12 @@ export const corsCheck = async (...args: [Request, Response, NextFunction]) => {
     ),
     process.env.API_DOMAIN ?? "http://localhost:3000",
   ];
+
   if (process.env.NODE_ENV === "development") {
     origin.push("http://localhost:8080"); // Just... for ease of coding
   }
+
+  console.log("allowed cors origins", origin);
 
   return cors({
     origin,
