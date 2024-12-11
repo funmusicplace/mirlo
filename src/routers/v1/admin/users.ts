@@ -2,7 +2,6 @@ import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
 import { userAuthenticated, userHasPermission } from "../../../auth/passport";
 import { uniqBy } from "lodash";
-import logger from "../../../logger";
 
 export default function () {
   const operations = {
@@ -31,18 +30,6 @@ export default function () {
       next(e);
     }
   }
-
-  POST.apiDoc = {
-    summary: "Creates users based on emails supplied",
-    responses: {
-      default: {
-        description: "An error occurred",
-        schema: {
-          additionalProperties: true,
-        },
-      },
-    },
-  };
 
   return operations;
 }

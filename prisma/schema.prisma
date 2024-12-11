@@ -404,7 +404,7 @@ model UserTrackGroupPurchase {
   trackGroupId        Int
   trackGroup          TrackGroup @relation(fields: [trackGroupId], references: [id])
   pricePaid           Int // in cents
-  currencyPaid        String     @default("USD")
+  currencyPaid        String     @default("usd")
   datePurchased       DateTime   @default(now())
   stripeSessionKey    String?
   singleDownloadToken String?

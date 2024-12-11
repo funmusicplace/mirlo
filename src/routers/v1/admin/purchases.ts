@@ -6,6 +6,7 @@ import { userAuthenticated, userHasPermission } from "../../../auth/passport";
 export default function () {
   const operations = {
     GET: [userAuthenticated, userHasPermission("admin"), GET],
+    POST: [userAuthenticated, userHasPermission("admin"), POST],
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
@@ -80,20 +81,40 @@ export default function () {
     }
   }
 
-  GET.apiDoc = {
-    summary: "Returns all purchases",
-    responses: {
-      200: {
-        description: "A list of purchases",
-      },
-      default: {
-        description: "An error occurred",
-        schema: {
-          additionalProperties: true,
+  async function POST(req: Request, res: Response, next: NextFunction) {
+    const { users, trackGroupId, pricePaid } = req.body as {
+      users: { email: string }[];
+      trackGroupId: number;
+      pricePaid: number;
+    };
+
+    try {
+      const existingUsers = await prisma.user.findMany({
+        where: { email: { in: users.map((s) => s.email) } },
+        select: { email: true, id: true },
+      });
+
+      await prisma.trackGroup.findFirstOrThrow({
+        where: {
+          id: trackGroupId,
         },
-      },
-    },
-  };
+      });
+
+      await prisma.userTrackGroupPurchase.createMany({
+        data: existingUsers.map((user) => ({
+          trackGroupId,
+          userId: user.id,
+          pricePaid,
+        })),
+      });
+
+      res.json({
+        message: "success",
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
 
   return operations;
 }

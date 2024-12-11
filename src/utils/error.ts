@@ -1,4 +1,5 @@
 import {
+  NotFoundError,
   PrismaClientKnownRequestError,
   PrismaClientValidationError,
 } from "@prisma/client/runtime/library";
@@ -74,6 +75,7 @@ const errorHandler = (
     });
   } else if (
     err instanceof PrismaClientKnownRequestError ||
+    err.name === "NotFoundError" ||
     err.name === "PrismaClientKnownRequestError"
   ) {
     console.error("err", err.cause, err.name, err.code, err.meta);
