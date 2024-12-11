@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import Background from "components/common/Background";
 import Button from "./Button";
 import styled from "@emotion/styled";
+import { useLocation } from "react-router-dom";
 
 const SearchResultsDiv = styled.div`
   position: absolute;
@@ -65,6 +66,7 @@ const SearchResult = styled.li`
   button:hover,
   a:hover {
     color: var(--mi-white) !important;
+    background-color: var(--mi-black) !important;
   }
   @media (prefers-color-scheme: dark) {
     button:hover,
@@ -85,13 +87,17 @@ const AutoComplete: React.FC<{
   optionDisplay?: (result: {
     id: number | string;
     name: string;
+    artistId?: string | number;
+    trackGroupId?: string | number;
   }) => React.ReactNode;
   placeholder?: string | null;
   allowNew?: boolean;
   showBackground?: boolean;
+  usesNavigation?: boolean;
 }> = ({
   getOptions,
   resultsPrefix,
+  usesNavigation,
   optionDisplay,
   onSelect,
   placeholder,
@@ -107,6 +113,7 @@ const AutoComplete: React.FC<{
     { id: number | string; name: string; isNew?: boolean }[]
   >([]);
   const [navigationIndex, setNavigationIndex] = React.useState(0);
+  let location = useLocation();
 
   const onChangeValue = React.useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -152,6 +159,7 @@ const AutoComplete: React.FC<{
         onSelect?.(value);
       }
       setSearchValue("");
+      setShowSuggestions(false);
     },
     [onSelect, searchResults]
   );
@@ -159,6 +167,12 @@ const AutoComplete: React.FC<{
   React.useEffect(() => {
     searchCallback(searchValue);
   }, [searchCallback, searchValue]);
+
+  React.useEffect(() => {
+    if (usesNavigation) {
+      setShowSuggestions(false);
+    }
+  }, [usesNavigation, location]);
 
   return (
     <div

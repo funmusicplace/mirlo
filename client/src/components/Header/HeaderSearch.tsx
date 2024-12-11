@@ -1,21 +1,41 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import api from "services/api";
 import AutoComplete from "components/common/AutoComplete";
 
 const HeaderSearch: React.FC = () => {
-  const navigate = useNavigate();
   const { t } = useTranslation("translation", { keyPrefix: "headerSearch" });
 
   const getOptions = React.useCallback(async (searchString: string) => {
-    const results = await api.getMany<Artist>(`artists`, {
+    const artists = await api.getMany<Artist>(`artists`, {
       name: searchString,
     });
-    return results.results.map((r) => ({
-      id: r.urlSlug ?? r.id,
-      name: r.name,
-    }));
+    const trackGroups = await api.getMany<TrackGroup>(`trackGroups`, {
+      title: searchString,
+    });
+    const tracks = await api.getMany<Track>(`tracks`, {
+      title: searchString,
+    });
+    return [
+      ...artists.results.map((r) => ({
+        artistId: r.urlSlug ?? r.id,
+        id: r.id,
+        name: r.name,
+      })),
+      ...trackGroups.results.map((t) => ({
+        id: t.urlSlug ?? t.id,
+        artistId: t.artist?.urlSlug ?? t.artistId,
+        trackGroupId: t.urlSlug ?? t.id,
+        name: t.title,
+      })),
+      ...tracks.results.map((t) => ({
+        id: t.id,
+        trackGroupId: t.trackGroup.urlSlug ?? t.trackGroupId,
+        artistId: t.trackGroup.artist.urlSlug ?? t.trackGroup.artistId,
+        name: t.title,
+      })),
+    ];
   }, []);
 
   return (
@@ -23,13 +43,30 @@ const HeaderSearch: React.FC = () => {
       getOptions={getOptions}
       showBackground
       placeholder={t("searchArtists") ?? ""}
+      usesNavigation
       resultsPrefix={t("searchSuggestions") ?? undefined}
-      onSelect={(val) => {
-        navigate(`/${val}`);
+      optionDisplay={(r: {
+        id: number | string;
+        name: string;
+        artistId?: number | string;
+        trackGroupId?: number | string;
+      }) => {
+        let url = "";
+
+        if (r.artistId) {
+          url += r.artistId;
+
+          if (r.trackGroupId) {
+            url += `/release/${r.trackGroupId}`;
+
+            if (r.id !== r.trackGroupId) {
+              url += `/tracks/${r.id}`;
+            }
+          }
+        }
+
+        return <Link to={url}>{r.name}</Link>;
       }}
-      optionDisplay={(r: { id: number | string; name: string }) => (
-        <Link to={`/${r.id}`}>{r.name}</Link>
-      )}
     />
   );
 };
