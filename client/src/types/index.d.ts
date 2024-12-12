@@ -98,6 +98,7 @@ interface Post {
   isContentHidden: boolean;
   minimumSubscriptionTierId?: number;
   featuredImageId?: string;
+  featuredImage?: { src: string };
   isDraft: boolean;
 }
 

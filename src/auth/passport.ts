@@ -13,7 +13,6 @@ import {
   doesMerchPurchaseBelongToUser,
   doesTrackGroupBelongToUser,
 } from "../utils/ownership";
-import { doesPostBelongToUser } from "../utils/post";
 
 const JWTStrategy = passportJWT.Strategy;
 

@@ -16,7 +16,7 @@ import { debounce } from "lodash";
 const SavingInput: React.FC<{
   formKey: string;
   url: string;
-  extraData: Object;
+  extraData?: Object;
   rows?: number;
   required?: boolean;
   step?: string;
@@ -25,7 +25,7 @@ const SavingInput: React.FC<{
 }> = ({
   formKey,
   url,
-  extraData,
+  extraData = {},
   type,
   required,
   rows,

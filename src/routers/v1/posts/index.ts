@@ -56,6 +56,7 @@ export default function () {
         where,
         include: {
           artist: true,
+          featuredImage: true,
         },
         orderBy: {
           publishedAt: "desc",
