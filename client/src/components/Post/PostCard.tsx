@@ -63,7 +63,6 @@ const PostCard: React.FC<{
     () => getHtmlExcerpt(post.content).slice(0, 8),
     [post.content]
   );
-  console.log("p", post);
 
   return (
     <PostContainer {...postContainerProps}>

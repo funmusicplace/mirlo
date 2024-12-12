@@ -5,14 +5,16 @@ import { useTranslation } from "react-i18next";
 import { FaCheckCircle } from "react-icons/fa";
 import api from "services/api";
 import { InputEl } from "../Input";
+import { useSnackbar } from "state/SnackbarContext";
 
 const ImagesInPostManager: React.FC<{
-  images: PostImage[];
+  images?: PostImage[];
   reload: () => void;
   postId: number;
 }> = ({ postId, reload, images }) => {
   const { t } = useTranslation("translation", { keyPrefix: "postForm" });
   const [isSaving, setIsSaving] = React.useState(false);
+  const snackbar = useSnackbar();
 
   const markImageAsFeatured = React.useCallback(
     async (imageId: string) => {
@@ -31,12 +33,14 @@ const ImagesInPostManager: React.FC<{
         const file = e.target.files?.[0];
         if (file) {
           const jobInfo = await api.uploadFile(
-            `${buildRootUrl(existing)}${imageType}`,
+            `manage/posts/${postId}/images`,
             [file]
           );
-          setUploadJobs([
-            { jobId: jobInfo.result.jobId, jobStatus: "waiting" },
-          ]);
+          const splitUrl = jobInfo.result.jobId.split("/");
+          const imgName = splitUrl[splitUrl.length - 1].split(".");
+          const imageId = imgName[0];
+
+          markImageAsFeatured(imageId);
         }
       } catch (e) {
         snackbar("Something went wrong", { type: "warning" });
@@ -70,8 +74,9 @@ const ImagesInPostManager: React.FC<{
             className={css`
               display: inline-block;
               position: relative;
-              margin: 0.2rem;
+              margin: 0 0.2rem;
               cursor: pointer;
+              height: 100%;
             `}
             key={image.id}
             onClick={() => markImageAsFeatured(image.id)}
@@ -108,6 +113,7 @@ const ImagesInPostManager: React.FC<{
         <div
           className={css`
             display: inline-block;
+            height: 100px;
           `}
         >
           <label htmlFor={`featuredImage`}>
@@ -122,6 +128,7 @@ const ImagesInPostManager: React.FC<{
             id={`featuredImage`}
             accept="image/*"
             onChange={callback}
+            style={{ display: "none" }}
           />
         </div>
       </div>

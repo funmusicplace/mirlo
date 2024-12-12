@@ -118,6 +118,7 @@ const PostForm: React.FC<{
 
           snackbar(t("postUpdated"), { type: "success" });
           reload(postId);
+          reloadImages();
           onClose?.();
         } catch (e) {
           errorHandler(e);
@@ -134,6 +135,7 @@ const PostForm: React.FC<{
     try {
       await api.put(`manage/posts/${existingId}/publish`, {});
       reload(existingId);
+      reloadImages();
     } catch (e) {
       console.error(e);
     }
@@ -185,13 +187,11 @@ const PostForm: React.FC<{
               );
             }}
           />
-          {images && images.length > 0 && (
-            <ImagesInPostManager
-              postId={post.id}
-              images={images}
-              reload={reloadImages}
-            />
-          )}
+          <ImagesInPostManager
+            postId={post.id}
+            images={images}
+            reload={reloadImages}
+          />
         </FormComponent>
         <FormComponent
           className={css`
