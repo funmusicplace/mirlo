@@ -44,6 +44,8 @@ const EditTrackRow: React.FC<{
       title: track.title,
       status: track.isPreview ? "preview" : "must-own",
       licenseId: track.licenseId,
+      lyrics: track.lyrics,
+      isrc: track.isrc,
     },
   });
 
@@ -177,16 +179,20 @@ const EditTrackRow: React.FC<{
         </td>
       </tr>
       <tr>
-        <td colSpan={2}>
+        <td colSpan={3}>
           <FormComponent>
             <label>{t("isrcCode")}</label>
             <InputEl {...register(`isrc`)} disabled={isSaving || isDisabled} />
           </FormComponent>
         </td>
-        <td />
-        <td>
+        <td colSpan={3}>
           <label>{t("lyrics")}</label>
-          <TextArea {...register("lyrics")} />
+          <TextArea
+            {...register("lyrics")}
+            className={css`
+              width: 100%;
+            `}
+          />
         </td>
       </tr>
       <tr>
