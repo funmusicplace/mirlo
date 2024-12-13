@@ -12,7 +12,7 @@ export const cleanUpOldFilesQueue = new Queue(
   queueOptions
 );
 
-const cleanUpOldFilesEvents = new QueueEvents(
+export const cleanUpOldFilesEvents = new QueueEvents(
   "clean-up-old-files",
   queueOptions
 );
