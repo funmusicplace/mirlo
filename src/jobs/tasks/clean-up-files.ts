@@ -1,13 +1,25 @@
 import { promises as fsPromises } from "fs";
 import logger from "../../logger";
-import { removeObjectsFromBucket, trackGroupFormatBucket } from "../../utils/minio";
+import {
+  removeObjectsFromBucket,
+  trackGroupFormatBucket,
+} from "../../utils/minio";
+import { startCleaningUpOldFiles } from "../../queues/clean-up-old-files-queue";
 
 const cleanUpFiles = async (incomingFolder: string) => {
   if (incomingFolder === trackGroupFormatBucket) {
+    logger.info("cleaning up files in the trackgroup minio container");
     removeBucket(incomingFolder);
     return {
-      deleted: incomingFolder
-    }
+      deleted: incomingFolder,
+    };
+  }
+  if (incomingFolder === "background-worker") {
+    logger.info("starting a job to clean up files in the background worker");
+    startCleaningUpOldFiles();
+    return {
+      deleted: incomingFolder,
+    };
   }
   try {
     await fsPromises.stat(incomingFolder);
@@ -39,7 +51,7 @@ const cleanUpFiles = async (incomingFolder: string) => {
 
 const removeBucket = async (bucketName: string) => {
   logger.info(`Removing all objects from ${bucketName}`);
-  await removeObjectsFromBucket(bucketName, '');
-}
+  await removeObjectsFromBucket(bucketName, "");
+};
 
 export default cleanUpFiles;

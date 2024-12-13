@@ -8,11 +8,12 @@ import { Job, Worker } from "bullmq";
 import winston from "winston";
 import uploadAudioJob from "./upload-audio";
 import verifyAudioJob from "./verify-audio";
-
 import generateAlbumJob from "./generate-album";
-
 import optimizeImage from "./optimize-image";
+import cleanUpOldFilesJob from "./clean-up-old-files";
+
 import sendMail from "./send-mail";
+
 import "../queues/send-mail-queue";
 
 import { REDIS_CONFIG } from "../config/redis";
@@ -47,6 +48,7 @@ yargs // eslint-disable-line
     imageQueue();
     generateAlbumQueueWorker();
     sendMailQueue();
+    cleanUpFilesQueue();
   })
   .help().argv;
 
@@ -134,5 +136,26 @@ export async function generateAlbumQueueWorker() {
 
   worker.on("error", (err: any) => {
     logger.error("error:generate-album", err);
+  });
+}
+
+export async function cleanUpFilesQueue() {
+  const worker = new Worker(
+    "clean-up-old-files",
+    cleanUpOldFilesJob,
+    workerOptions
+  );
+  logger.info("Clean Up Files worker started");
+
+  worker.on("completed", (job: any) => {
+    logger.info("completed:clean-up-old-files");
+  });
+
+  worker.on("failed", (job: any, err: any) => {
+    logger.error("failed:clean-up-old-files", err);
+  });
+
+  worker.on("error", (err: any) => {
+    logger.error("error:clean-up-old-files", err);
   });
 }
