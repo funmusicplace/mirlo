@@ -50,6 +50,8 @@ interface Track {
     name: string;
     link?: string;
   };
+  isrc?: string;
+  lyrics?: string;
 }
 
 interface Tag {

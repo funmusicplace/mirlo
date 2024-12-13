@@ -31,7 +31,9 @@ const EmbedLink: React.FC<{ track: Track; trackGroupArtistId?: number }> = ({
           opacity: 0.6;
         }
       `}
-    />
+    >
+      {t("embedCode")}
+    </Button>
   );
 };
 

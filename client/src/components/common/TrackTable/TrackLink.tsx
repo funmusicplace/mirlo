@@ -3,12 +3,16 @@ import { ButtonLink } from "../Button";
 
 import { FaLink } from "react-icons/fa";
 import { getReleaseUrl } from "utils/artist";
+import { useTranslation } from "react-i18next";
 
 const TrackLink: React.FC<{
   track: Track;
   artist: Artist;
   trackGroup: TrackGroup;
 }> = ({ artist, trackGroup, track }) => {
+  const { t } = useTranslation("translation", {
+    keyPrefix: "trackGroupDetails",
+  });
   return (
     <ButtonLink
       compact
@@ -24,7 +28,9 @@ const TrackLink: React.FC<{
           opacity: 0.6;
         }
       `}
-    />
+    >
+      {t("viewTrack")}
+    </ButtonLink>
   );
 };
 

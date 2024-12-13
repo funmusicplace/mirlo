@@ -394,6 +394,8 @@
     "license": "Track license",
     "anAlbumCover": "an album cover",
     "addALicense": "Add a license",
+    "isrcCode": "ISRC Code",
+    "lyrics": "Lyrics",
     "addIt": "Add it",
     "whatMeanLicense": "Don't know what this means? It's safe to leave it blank. Depending on your country, your work is most likely already copyrighted under the Berne Convention and/or the TRIPS agreement <a href='https://en.m.wikipedia.org/wiki/TRIPS_Agreement'>(more about it here)</a>.",
     "editAlbum": "Edit album",
@@ -581,6 +583,9 @@
   },
   "trackGroupDetails": {
     "trackgroup": "Album:",
+    "embedCode": "Embed code",
+    "viewLyrics": "View lyrics",
+    "lyrics": "Lyrics",
     "buy": "Buy",
     "buyFor": "Buy for {{amount}}",
     "relatedMerch": "Related merch",

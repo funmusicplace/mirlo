@@ -51,8 +51,16 @@ export default function () {
   async function POST(req: Request, res: Response, next: NextFunction) {
     const loggedInUser = req.user as User;
 
-    const { title, trackGroupId, trackArtists, order, metadata, isPreview } =
-      req.body;
+    const {
+      title,
+      trackGroupId,
+      trackArtists,
+      order,
+      metadata,
+      isPreview,
+      lyrics,
+      isrc,
+    } = req.body;
     try {
       await doesTrackGroupBelongToUser(Number(trackGroupId), loggedInUser);
 
@@ -62,6 +70,8 @@ export default function () {
           order,
           isPreview,
           metadata,
+          lyrics,
+          isrc,
           trackGroup: {
             connect: {
               id: Number(trackGroupId),

@@ -11,6 +11,8 @@ import Tooltip from "../Tooltip";
 import TrackAuthors from "./TrackAuthors";
 import EmbedLink from "./EmbedLink";
 import TrackLink from "./TrackLink";
+import DropdownMenu from "../DropdownMenu";
+import LyricsModal from "./LyricsModal";
 
 const LicenseSpan = styled.a`
   text-wrap: nowrap;
@@ -34,13 +36,18 @@ const TR = styled.tr<{ canPlayTrack: boolean }>`
         ? `background-color: var(--mi-normal-foreground-color);`
         : `background-color: var(--mi-normal-foreground-color) !important;`}
 
-    button {
+    button.play-button {
       color: var(--mi-normal-background-color);
       background: transparent;
     }
+
+    .mi-dropdown-button {
+      background-color: var(--mi-primary-color);
+      color: var(--mi-secondary-color);
+    }
   }
 
-  button {
+  button.play-button {
     color: var(--mi-normal-foreground-color);
     background: transparent;
     font-size: 0.8rem;
@@ -67,6 +74,7 @@ const TR = styled.tr<{ canPlayTrack: boolean }>`
           display: none;
         }`
       : ""}
+
   @media screen and (max-width: ${bp.small}px) {
     td {
       padding: 0.15rem 0.3rem;
@@ -203,6 +211,7 @@ const TrackRow: React.FC<{
           </div>
         </div>
       </TrackTitleTD>
+
       {/* <td align="right">
         <TrackLink
           track={track}
@@ -212,7 +221,15 @@ const TrackRow: React.FC<{
       </td> */}
       {size !== "small" && (
         <td align="right">
-          <EmbedLink track={track} />
+          <DropdownMenu compact transparent>
+            <EmbedLink track={track} />
+            <TrackLink
+              track={track}
+              trackGroup={trackGroup}
+              artist={trackGroup.artist}
+            />
+            <LyricsModal track={track} />
+          </DropdownMenu>
         </td>
       )}
       {size !== "small" &&

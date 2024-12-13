@@ -13,6 +13,8 @@ interface TrackBody {
   title: string;
   isPreview: boolean;
   licenseId: number;
+  lyrics: string;
+  isrc: string;
   trackArtists?: {
     artistName: string;
     id: string;
@@ -31,7 +33,8 @@ export default function () {
 
   async function PUT(req: Request, res: Response, next: NextFunction) {
     const { trackId } = req.params;
-    const { title, isPreview, trackArtists, licenseId } = req.body as TrackBody;
+    const { title, isPreview, trackArtists, licenseId, lyrics, isrc } =
+      req.body as TrackBody;
 
     try {
       await updateTrackArtists(Number(trackId), trackArtists);
@@ -40,6 +43,8 @@ export default function () {
         where: { id: Number(trackId) },
         data: {
           title: title,
+          lyrics,
+          isrc,
           isPreview: isPreview,
           licenseId: Number(licenseId),
         },
