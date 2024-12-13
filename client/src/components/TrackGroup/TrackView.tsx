@@ -3,36 +3,27 @@ import { css } from "@emotion/css";
 import { useNavigate, useParams } from "react-router-dom";
 import ClickToPlayAlbum from "../common/ClickToPlayAlbum";
 import Box from "../common/Box";
-import usePublicObjectById from "utils/usePublicObjectById";
 import { useTranslation } from "react-i18next";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
 import PublicTrackGroupListing from "components/common/TrackTable/PublicTrackGroupListing";
 import { MetaCard } from "components/common/MetaCard";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 
-import PurchaseOrDownloadAlbum from "./PurchaseOrDownloadAlbumModal";
 import { bp } from "../../constants";
 
-import MarkdownContent from "components/common/MarkdownContent";
-import Wishlist from "./Wishlist";
 import ReleaseDate from "./ReleaseDate";
 import WidthContainer from "components/common/WidthContainer";
 import TrackGroupTitle from "./TrackGroupTitle";
 import SupportArtistPopUp from "components/common/SupportArtistPopUp";
-import TrackGroupPills from "./TrackGroupPills";
-import TrackGroupEmbed from "./TrackGroupEmbed";
 import { useAuthContext } from "state/AuthContext";
 import TrackGroupMerch from "./TrackGroupMerch";
 import { useQuery } from "@tanstack/react-query";
 import { queryArtist, queryTrackGroup } from "queries";
 import {
-  AboutWrapper,
   Container,
-  CreditsWrapper,
   ImageAndDetailsWrapper,
   ImageWrapper,
   SmallScreenPlayWrapper,
-  TrackgroupInfosWrapper,
   TrackListingWrapper,
   UnderneathImage,
 } from "./TrackGroup";
@@ -64,9 +55,6 @@ function TrackView() {
   } else if (!trackGroup) {
     return <FullPageLoadingSpinner />;
   }
-
-  const trackGroupCredits = trackGroup.credits;
-  const trackGroupAbout = trackGroup.about;
 
   const filteredTrack = trackGroup.tracks.find((t) => t.id === Number(trackId));
 
@@ -155,13 +143,39 @@ function TrackView() {
                   />
                 </SmallScreenPlayWrapper>
               </ImageAndDetailsWrapper>
-              <TrackListingWrapper>
-                <PublicTrackGroupListing
-                  tracks={[filteredTrack]}
-                  trackGroup={trackGroup}
-                />
-                <div></div>
-              </TrackListingWrapper>
+              <div
+                className={css`
+                  flex-grow: 1;
+
+                  > div {
+                    max-width: 100%;
+                  }
+                `}
+              >
+                <TrackListingWrapper>
+                  <PublicTrackGroupListing
+                    tracks={[filteredTrack]}
+                    trackGroup={trackGroup}
+                  />
+                </TrackListingWrapper>
+                {filteredTrack.lyrics && (
+                  <div
+                    className={css`
+                      padding: 1rem;
+                      white-space: pre-line;
+                    `}
+                  >
+                    <h3
+                      className={css`
+                        margin-bottom: 1rem;
+                      `}
+                    >
+                      Lyrics
+                    </h3>
+                    {filteredTrack.lyrics}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 

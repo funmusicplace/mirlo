@@ -11,7 +11,8 @@ const DropdownMenu: React.FC<{
   dashed?: boolean;
   icon?: React.ReactElement;
   compact?: boolean;
-}> = ({ children, icon, compact, dashed }) => {
+  transparent?: boolean;
+}> = ({ children, icon, compact, dashed, transparent }) => {
   const [isMenuOpen, setIsMenuOpen] = React.useState<boolean>(false);
 
   if (!icon) {
@@ -27,7 +28,8 @@ const DropdownMenu: React.FC<{
       {isMenuOpen && (
         <>
           <Background
-            onClick={() => {
+            onClick={(e) => {
+              e.stopPropagation();
               setIsMenuOpen(false);
             }}
           />
@@ -105,19 +107,24 @@ const DropdownMenu: React.FC<{
       <Button
         compact={compact}
         variant={dashed ? "dashed" : undefined}
-        onClick={() => {
+        onClick={(e) => {
+          e.stopPropagation();
           setIsMenuOpen(true);
         }}
         startIcon={icon}
-        className={css`
-          button:hover {
-            color: var(--mi-white);
-            background-color: var(--mi-black);
-          }
-          @media (max-width: ${bp.small}px) {
-            background-color: var(--mi-normal-background-color) !important;
-          }
-        `}
+        transparent={transparent}
+        className={
+          "mi-dropdown-button " +
+          css`
+            button:hover {
+              color: var(--mi-white);
+              background-color: var(--mi-black);
+            }
+            @media (max-width: ${bp.small}px) {
+              background-color: var(--mi-normal-background-color) !important;
+            }
+          `
+        }
       />
     </div>
   );

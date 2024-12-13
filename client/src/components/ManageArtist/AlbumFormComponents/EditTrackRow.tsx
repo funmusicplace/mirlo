@@ -16,12 +16,16 @@ import Button from "components/common/Button";
 import { useAuthContext } from "state/AuthContext";
 import ManageTrackLicense from "../ManageTrackLicense";
 import ReplaceTrackAudioInput from "./ReplaceTrackAudioInput";
+import TextArea from "components/common/TextArea";
+import FormComponent from "components/common/FormComponent";
 
 export interface FormData {
   title: string;
   status: "preview" | "must-own";
   trackFile: FileList;
   licenseId: number;
+  isrc: string;
+  lyrics: string;
 }
 
 const EditTrackRow: React.FC<{
@@ -40,6 +44,8 @@ const EditTrackRow: React.FC<{
       title: track.title,
       status: track.isPreview ? "preview" : "must-own",
       licenseId: track.licenseId,
+      lyrics: track.lyrics,
+      isrc: track.isrc,
     },
   });
 
@@ -54,6 +60,8 @@ const EditTrackRow: React.FC<{
       title: track.title,
       status: track.isPreview ? "preview" : "must-own",
       licenseId: track.licenseId,
+      isrc: track.isrc,
+      lyrics: track.lyrics,
     });
     cancelEditing();
   }, [reset, track, cancelEditing]);
@@ -64,6 +72,8 @@ const EditTrackRow: React.FC<{
         setIsSaving(true);
         const packet = {
           title: formData.title,
+          isrc: formData.isrc,
+          lyrics: formData.lyrics,
           isPreview: formData.status === "preview",
           licenseId: formData.licenseId
             ? Number(formData.licenseId)
@@ -164,6 +174,23 @@ const EditTrackRow: React.FC<{
                    color: var(--mi-white) !important;
                    border-color: var(--mi-white) !important;`
                 : ""}
+            `}
+          />
+        </td>
+      </tr>
+      <tr>
+        <td colSpan={3}>
+          <FormComponent>
+            <label>{t("isrcCode")}</label>
+            <InputEl {...register(`isrc`)} disabled={isSaving || isDisabled} />
+          </FormComponent>
+        </td>
+        <td colSpan={3}>
+          <label>{t("lyrics")}</label>
+          <TextArea
+            {...register("lyrics")}
+            className={css`
+              width: 100%;
             `}
           />
         </td>

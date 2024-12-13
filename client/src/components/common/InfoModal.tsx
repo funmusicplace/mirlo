@@ -1,4 +1,4 @@
-import { FaInfoCircle, FaQuestionCircle } from "react-icons/fa";
+import { FaQuestionCircle } from "react-icons/fa";
 import Button from "./Button";
 import React from "react";
 import Modal from "./Modal";

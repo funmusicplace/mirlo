@@ -38,10 +38,6 @@ export const PageMarkdownWrapper = styled.div`
     margin-bottom: 1.5rem;
   }
 
-  a {
-    word-break: break-word;
-  }
-
   h1 {
     font-weight: normal !important;
   }
@@ -155,6 +151,7 @@ const Post: React.FC = () => {
             className={css`
               display: flex;
               justify-content: space-between;
+              align-items: center;
             `}
           >
             <h1>{post.title}</h1>
@@ -163,6 +160,7 @@ const Post: React.FC = () => {
                 to={`/manage/artists/${post.artistId}/post/${post.id}`}
                 variant="dashed"
                 startIcon={<FaPen />}
+                compact
               >
                 {t("edit")}
               </ButtonLink>

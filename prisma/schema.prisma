@@ -491,6 +491,8 @@ model Track {
   plays        TrackPlay[]
   license      License?      @relation(fields: [licenseId], references: [id])
   licenseId    Int?
+  lyrics       String?
+  isrc         String?
 }
 
 model License {

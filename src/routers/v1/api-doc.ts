@@ -2,7 +2,7 @@ const apiDoc = {
   swagger: "2.0",
   basePath: "/",
   info: {
-    title: "Nomad API",
+    title: "Mirlo API",
     version: "1.0.0",
   },
   definitions: {

@@ -3,12 +3,10 @@ import { css } from "@emotion/css";
 import { useParams } from "react-router-dom";
 import ClickToPlayAlbum from "../common/ClickToPlayAlbum";
 import Box from "../common/Box";
-import usePublicObjectById from "utils/usePublicObjectById";
 import { useTranslation } from "react-i18next";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
 import PublicTrackGroupListing from "components/common/TrackTable/PublicTrackGroupListing";
 import { MetaCard } from "components/common/MetaCard";
-import { useArtistContext } from "state/ArtistContext";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 
 import PurchaseOrDownloadAlbum from "./PurchaseOrDownloadAlbumModal";

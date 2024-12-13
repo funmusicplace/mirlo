@@ -83,20 +83,22 @@ const PostCard: React.FC<{
           }
         `}
       >
-        <div
-          className={css`
-            max-height: 65%;
-            z-index: 0;
-            position: relative;
-          `}
-        >
-          <img
-            src={post.featuredImage?.src}
+        {post.featuredImage && (
+          <div
             className={css`
-              width: 100%;
+              max-height: 65%;
+              z-index: 0;
+              position: relative;
             `}
-          />
-        </div>
+          >
+            <img
+              src={post.featuredImage?.src}
+              className={css`
+                width: 100%;
+              `}
+            />
+          </div>
+        )}
         <div
           className={css`
             padding: 1.5rem;
@@ -106,11 +108,8 @@ const PostCard: React.FC<{
             width: 100%;
             overflow: hidden;
             transition: 0.2s ease-in-out;
-
+            ${!post.featuredImage ? "height: 100%;" : ""}
             background-color: var(--mi-normal-background-color);
-
-            @media screen and (max-width: ${bp.medium}px) {
-            }
           `}
         >
           {post.artist && (
