@@ -2,7 +2,7 @@ import { css } from "@emotion/css";
 import { FaPen } from "react-icons/fa";
 import { Link, useParams } from "react-router-dom";
 import ClickToPlayAlbum from "../common/ClickToPlayAlbum";
-import Button from "../common/Button";
+import Button, { ButtonLink } from "../common/Button";
 import { useTranslation } from "react-i18next";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
 
@@ -110,14 +110,15 @@ const TrackGroupTitle: React.FC<{
           `}
         >
           {(ownedByUser || user?.isAdmin) && (
-            <Link
+            <ButtonLink
+              compact
+              startIcon={<FaPen />}
+              variant="dashed"
               to={`/manage/artists/${artist.id}/release/${trackGroup.id}`}
-              style={{ marginRight: "0" }}
+              style={{ marginRight: "1rem" }}
             >
-              <Button compact startIcon={<FaPen />} variant="dashed">
-                {t("edit")}
-              </Button>
-            </Link>
+              {t("edit")}
+            </ButtonLink>
           )}
           <FlagContent trackGroupId={trackGroup.id} />
           {user?.isAdmin && (
