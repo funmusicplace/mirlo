@@ -71,6 +71,8 @@ export const BulkTrackUpload: React.FC<{
           artistId: trackgroup.artistId,
           isPreview: firstTrack.t.status === "preview",
           order: firstTrack.order,
+          lyrics: firstTrack.t.lyrics,
+          isrc: firstTrack.t.isrc,
           trackGroupId: trackgroup.id,
           trackArtists: firstTrack.t.trackArtists.map((a) => ({
             ...a,

@@ -50,6 +50,8 @@ export interface TrackData {
   title: string;
   status: Track["status"];
   order: string;
+  lyrics?: string;
+  isrc?: string;
   metadata: { [key: string]: any };
   trackArtists: {
     artistName?: string;
@@ -88,6 +90,8 @@ export const convertMetaData = (
     file: p.file,
     title: p.metadata.common.title,
     status: "preview",
+    lyrics: p.metadata.common.lyricist,
+    isrc: p.metadata.common.isrc,
     trackArtists:
       p.metadata.common.artists?.map((artist) => ({
         artistName: artist ?? "",
