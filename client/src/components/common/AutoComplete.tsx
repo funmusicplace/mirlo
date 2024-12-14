@@ -81,7 +81,8 @@ const AutoComplete: React.FC<{
     val: string
   ) =>
     | Promise<{ id: number | string; name: string; isNew?: boolean }[]>
-    | { id: number | string; name: string; isNew?: boolean }[];
+    | { id: number | string; name: string; isNew?: boolean }[]
+    | undefined;
   resultsPrefix?: string;
   onSelect?: (value: string | number) => void;
   optionDisplay?: (result: {
@@ -133,14 +134,14 @@ const AutoComplete: React.FC<{
           (result) =>
             result.name.toLowerCase().replaceAll(/\-| /g, "") === searchString
         );
-        if (allowNew && !searchResultsMatchSearch) {
+        if (allowNew && !searchResultsMatchSearch && results) {
           results.push({
             id: searchString,
             name: searchString,
             isNew: true,
           });
         }
-        setSearchResults(results);
+        setSearchResults(results ?? []);
         setIsSearching(false);
         setNavigationIndex(0);
       } else {

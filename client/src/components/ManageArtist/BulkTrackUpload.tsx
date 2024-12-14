@@ -8,7 +8,7 @@ import { BulkTrackUploadRow } from "./BulkTrackUploadRow";
 
 import { Buffer } from "buffer";
 import process from "process";
-import { pick, pickBy } from "lodash";
+import { pick } from "lodash";
 import {
   TrackData,
   UploadField,
@@ -19,6 +19,7 @@ import {
   produceNewStatus,
 } from "./utils";
 import { useAuthContext } from "state/AuthContext";
+import { useSnackbar } from "state/SnackbarContext";
 
 if (typeof window !== "undefined" && typeof window.Buffer === "undefined") {
   window.Buffer = Buffer;
@@ -46,6 +47,7 @@ export const BulkTrackUpload: React.FC<{
   trackgroup: TrackGroup;
   reload: () => Promise<unknown>;
 }> = ({ trackgroup, reload }) => {
+  const snackbar = useSnackbar();
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const methods = useForm<FormData>();
   const { register, watch, reset } = methods;
@@ -65,10 +67,12 @@ export const BulkTrackUpload: React.FC<{
       if (firstTrack) {
         const packet = {
           title: firstTrack.t.title,
-          metadata: pick(firstTrack.t.metadata, ["format", "common", "native"]),
+          metadata: pick(firstTrack.t.metadata, ["format", "common"]),
           artistId: trackgroup.artistId,
           isPreview: firstTrack.t.status === "preview",
           order: firstTrack.order,
+          lyrics: firstTrack.t.lyrics,
+          isrc: firstTrack.t.isrc,
           trackGroupId: trackgroup.id,
           trackArtists: firstTrack.t.trackArtists.map((a) => ({
             ...a,
@@ -81,17 +85,25 @@ export const BulkTrackUpload: React.FC<{
           produceNewStatus(queue, firstTrack.t.title, 15)
         );
 
-        const response = await api.post<Partial<Track>, { result: Track }>(
-          `manage/tracks`,
-          packet
-        );
-
-        setUploadQueue((queue) =>
-          produceNewStatus(queue, firstTrack.t.title, 25)
-        );
-        await api.uploadFile(`manage/tracks/${response.result.id}/audio`, [
-          firstTrack.t.file,
-        ]);
+        try {
+          const response = await api.post<Partial<Track>, { result: Track }>(
+            `manage/tracks`,
+            packet
+          );
+          setUploadQueue((queue) =>
+            produceNewStatus(queue, firstTrack.t.title, 25)
+          );
+          await api.uploadFile(`manage/tracks/${response.result.id}/audio`, [
+            firstTrack.t.file,
+          ]);
+        } catch (e) {
+          snackbar(
+            `Something went wrong uploading track ${packet.title}. Please report this incident to hi@mirlo.space`,
+            {
+              type: "warning",
+            }
+          );
+        }
 
         if (remainingTracks.length !== 0) {
           setUploadQueue((queue) =>
@@ -194,7 +206,7 @@ export const BulkTrackUpload: React.FC<{
               disabled={disableUploadButton}
               multiple
               {...register("trackFiles")}
-              accept="audio/flac,audio/wav,audio/x-flac,audio/aac,audio/aiff,audio/x-m4a"
+              accept="audio/flac,audio/wav,audio/x-wav,audio/x-flac,audio/aac,audio/aiff,audio/x-m4a"
             />
           </UploadLabelWrapper>
         </FormComponent>

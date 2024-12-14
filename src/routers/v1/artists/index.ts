@@ -10,7 +10,7 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
-    const { skip: skipQuery, take, name } = req.query;
+    const { skip: skipQuery, take = 10, name } = req.query;
 
     try {
       let where: Prisma.ArtistWhereInput = {

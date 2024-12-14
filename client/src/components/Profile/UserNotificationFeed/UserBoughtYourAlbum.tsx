@@ -3,7 +3,11 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { FaChevronRight } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import { getArtistUrl, getTrackGroupUrlReference } from "utils/artist";
+import {
+  getArtistUrl,
+  getReleaseUrl,
+  getTrackGroupUrlReference,
+} from "utils/artist";
 
 const UserBoughtYourAlbum: React.FC<{ notification: Notification }> = ({
   notification,
@@ -25,7 +29,10 @@ const UserBoughtYourAlbum: React.FC<{ notification: Notification }> = ({
         : <strong>{notification.trackGroup.title}</strong>
       </div>
       <Link
-        to={getTrackGroupUrlReference(notification.trackGroup)}
+        to={getReleaseUrl(
+          notification.trackGroup.artist,
+          notification.trackGroup
+        )}
         className={css`
           display: flex;
           align-items: center;
