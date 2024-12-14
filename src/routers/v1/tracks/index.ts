@@ -9,7 +9,7 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
-    const { skip: skipQuery, take, title } = req.query;
+    const { skip: skipQuery, take = 10, title } = req.query;
 
     try {
       let where: Prisma.TrackWhereInput = {

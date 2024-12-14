@@ -24,18 +24,21 @@ const HeaderSearch: React.FC = () => {
           artistId: r.urlSlug ?? r.id,
           id: r.id,
           name: r.name,
+          isArtist: true,
         })),
         ...trackGroups.results.map((t) => ({
           id: t.urlSlug ?? t.id,
           artistId: t.artist?.urlSlug ?? t.artistId,
           trackGroupId: t.urlSlug ?? t.id,
           name: t.title,
+          isTrackGroup: true,
         })),
         ...tracks.results.map((t) => ({
           id: t.id,
           trackGroupId: t.trackGroup.urlSlug ?? t.trackGroupId,
           artistId: t.trackGroup.artist.urlSlug ?? t.trackGroup.artistId,
           name: t.title,
+          isTrack: true,
         })),
       ];
     }, 500),
