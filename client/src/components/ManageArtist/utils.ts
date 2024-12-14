@@ -75,6 +75,7 @@ export const convertMetaData = (
     title = p.file.name ?? "";
     title = title.replace(/\.wav$/, "");
   }
+  console.log("title", title);
 
   return {
     metadata: p.metadata,
