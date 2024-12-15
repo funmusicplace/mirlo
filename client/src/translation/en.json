@@ -585,6 +585,7 @@
     "trackgroup": "Album:",
     "embedCode": "Embed code",
     "viewLyrics": "View lyrics",
+    "viewTrack": "View track",
     "lyrics": "Lyrics",
     "buy": "Buy",
     "buyFor": "Buy for {{amount}}",
