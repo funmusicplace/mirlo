@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { ImEmbed } from "react-icons/im";
 import Modal from "../Modal";
 import React from "react";
+import { MdLyrics } from "react-icons/md";
 
 const LyricsModal: React.FC<{ track: Track; trackGroupArtistId?: number }> = ({
   track,
@@ -22,7 +23,7 @@ const LyricsModal: React.FC<{ track: Track; trackGroupArtistId?: number }> = ({
           e.stopPropagation();
           setIsOpen(true);
         }}
-        startIcon={<ImEmbed />}
+        startIcon={<MdLyrics />}
         className={css`
           .startIcon {
             padding-left: 1rem;
