@@ -35,6 +35,7 @@ interface Track {
     createdAt: string;
     duration: number; // in seconds
     uploadState: "STARTED" | "SUCCESS" | "ERROR";
+    originalFilename: string;
   };
   isPreview: boolean;
   trackArtists?: {
