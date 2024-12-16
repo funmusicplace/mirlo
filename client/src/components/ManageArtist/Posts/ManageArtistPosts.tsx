@@ -32,8 +32,6 @@ const ManageArtistPosts: React.FC<{}> = () => {
     state: { artist },
   } = useArtistContext();
 
-  const [managePost, setManagePost] = React.useState<Post>();
-
   const [posts, setPosts] = React.useState<Post[]>([]);
 
   const userId = user?.id;
@@ -69,7 +67,7 @@ const ManageArtistPosts: React.FC<{}> = () => {
   const deletePost = React.useCallback(
     async (postId: number) => {
       try {
-        const confirmed = window.confirm(t("areYouSureDelete") ?? "");
+        const confirmed = window.confirm(t("areYouSureDeletePost") ?? "");
         if (confirmed) {
           await api.delete(`manage/posts/${postId}`);
           snackbar(t("postDeleted"), { type: "success" });

@@ -6,11 +6,7 @@ import ManageSectionWrapper from "../ManageSectionWrapper";
 import { css } from "@emotion/css";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import { useQuery } from "@tanstack/react-query";
-import {
-  queryArtist,
-  queryManagedMerch,
-  useDeleteMerchMutation,
-} from "queries";
+import { queryArtist, queryManagedMerch } from "queries";
 import MerchForm from "./MerchForm";
 import MerchDestinations from "./MerchDestinations";
 import UploadArtistImage from "../UploadArtistImage";
@@ -63,24 +59,6 @@ const EditMerch: React.FC<{}> = () => {
     },
     [merchParamId, refetch]
   );
-
-  const { mutate: deleteMerch, isPending } = useDeleteMerchMutation();
-
-  const onDelete = React.useCallback(() => {
-    if (!!merch && window.confirm(t("areYouSureDelete") ?? "")) {
-      deleteMerch(
-        { merchId: merch.id },
-        {
-          onSuccess() {
-            navigate(`/manage/artists/${merch.artistId}/merch`);
-          },
-          onError() {
-            snackbar(t("problemDeletingMerch"), { type: "warning" });
-          },
-        }
-      );
-    }
-  }, [merch, t, deleteMerch, navigate, snackbar]);
 
   if (!artist && isLoading) {
     return <LoadingBlocks />;
