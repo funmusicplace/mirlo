@@ -1,6 +1,6 @@
 import { css } from "@emotion/css";
 import React from "react";
-import { FaPen, FaTrash } from "react-icons/fa";
+import { FaExclamationTriangle, FaPen, FaTrash } from "react-icons/fa";
 import useDraggableTrack from "utils/useDraggableTrack";
 
 import api from "services/api";
@@ -108,6 +108,8 @@ const ManageTrackRow: React.FC<{
     reload();
   }, [reload]);
 
+  console.log("track.audio", track.title, !track.title);
+
   if (isEditing) {
     return (
       <EditTrackRow
@@ -149,8 +151,13 @@ const ManageTrackRow: React.FC<{
           overflow: hidden;
           whitespace: nowrap;
           text-overflow: ellipsis;
+          background-color: ${!track.title
+            ? "var(--mi-warning-background-color)"
+            : "transparent"};
           &:hover {
-            background-color: transparent !important;
+            background-color: ${!track.title
+              ? "var(--mi-warning-background-color)"
+              : "transparent"};
           }
 
           &:before {
@@ -158,22 +165,40 @@ const ManageTrackRow: React.FC<{
           }
         `}
       >
-        <div>
-          <ClickToEditInput
-            defaultValue={track.title}
-            url={`manage/tracks/${track.id}`}
-            formKey="title"
-          />
-          <small>
-            {uploadState === "SUCCESS" && t("doneUploadingTrack")}
-            {uploadState === "STARTED" && (
-              <>
-                <LoadingSpinner />
-                {t("stillProcessing")}
-              </>
-            )}
-            {uploadState === "ERROR" && t("thereWasAnError")}
-          </small>
+        <div
+          className={css`
+            display: flex;
+            align-items: center;
+
+            > svg {
+              margin-right: 1rem;
+            }
+          `}
+        >
+          {!track.title && <FaExclamationTriangle />}
+          <div>
+            <ClickToEditInput
+              defaultValue={track.title}
+              url={`manage/tracks/${track.id}`}
+              formKey="title"
+              reload={reload}
+            />
+            <small>
+              {t("originalFilename", {
+                filename: track.audio?.originalFilename,
+              })}
+              <div>
+                {uploadState === "SUCCESS" && t("doneUploadingTrack")}
+                {uploadState === "STARTED" && (
+                  <>
+                    <LoadingSpinner />
+                    {t("stillProcessing")}
+                  </>
+                )}
+                {uploadState === "ERROR" && t("thereWasAnError")}
+              </div>
+            </small>
+          </div>
         </div>
       </td>
       <td

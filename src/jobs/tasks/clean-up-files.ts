@@ -7,9 +7,15 @@ import {
 import { startCleaningUpOldFiles } from "../../queues/clean-up-old-files-queue";
 
 const cleanUpFiles = async (incomingFolder: string) => {
-  if (incomingFolder === trackGroupFormatBucket) {
-    logger.info("cleaning up files in the trackgroup minio container");
-    removeBucket(incomingFolder);
+  if (incomingFolder.startsWith(trackGroupFormatBucket)) {
+    const split = incomingFolder.split(/\/(.*)/);
+    const bucket = split[0];
+    const albumId = split[1];
+    logger.info(
+      `cleaning up ${albumId ?? "all files"} in the trackgroup minio container`
+    );
+
+    removeBucket(bucket, albumId);
     return {
       deleted: incomingFolder,
     };
@@ -49,9 +55,9 @@ const cleanUpFiles = async (incomingFolder: string) => {
   };
 };
 
-const removeBucket = async (bucketName: string) => {
+const removeBucket = async (bucketName: string, prefix: string) => {
   logger.info(`Removing all objects from ${bucketName}`);
-  await removeObjectsFromBucket(bucketName, "");
+  await removeObjectsFromBucket(bucketName, prefix ?? "");
 };
 
 export default cleanUpFiles;

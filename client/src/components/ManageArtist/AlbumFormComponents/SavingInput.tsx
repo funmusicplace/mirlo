@@ -22,6 +22,7 @@ const SavingInput: React.FC<{
   step?: string;
   type?: string;
   clearQueryKey?: string;
+  reload?: () => void;
 }> = ({
   formKey,
   url,
@@ -31,6 +32,7 @@ const SavingInput: React.FC<{
   rows,
   step,
   clearQueryKey,
+  reload,
 }) => {
   const { register, getValues } = useFormContext();
   const errorHandler = useErrorHandler();
@@ -83,6 +85,7 @@ const SavingInput: React.FC<{
         const timeout = setTimeout(() => {
           setIsSaving(false);
           setSaveSuccess(true);
+          reload?.();
           timeout2 = setTimeout(() => {
             setSaveSuccess(false);
           }, 1000);
