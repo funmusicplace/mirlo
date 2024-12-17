@@ -56,7 +56,7 @@ const cleanUpFiles = async (incomingFolder: string) => {
 };
 
 const removeBucket = async (bucketName: string, prefix: string) => {
-  logger.info(`Removing all objects from ${bucketName}`);
+  logger.info(`Removing ${prefix ?? "all objects"} from ${bucketName}`);
   await removeObjectsFromBucket(bucketName, prefix ?? "");
 };
 
