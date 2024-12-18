@@ -77,7 +77,6 @@ export const convertMetaData = (
     title = p.file.name ?? "";
     title = title.replace(/\.wav$/, "");
   }
-  console.log("title", title);
 
   return {
     metadata: p.metadata,
@@ -90,7 +89,7 @@ export const convertMetaData = (
     file: p.file,
     title: p.metadata.common.title,
     status: "preview",
-    lyrics: p.metadata.common.lyricist,
+    lyrics: p.metadata.common.lyrics,
     isrc: p.metadata.common.isrc,
     trackArtists:
       p.metadata.common.artists?.map((artist) => ({

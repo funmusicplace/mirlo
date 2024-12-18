@@ -100,6 +100,17 @@ export default async (job: Job) => {
         throw "Couldn't find artist, weird";
       }
 
+      const coverDestination = `${tempFolder}/cover.jpg`;
+
+      if (trackGroup.cover?.id) {
+        logger.info("Adding cover");
+        await minioClient.fGetObject(
+          finalCoversBucket,
+          `${trackGroup.cover.id}-x1500.jpg`,
+          coverDestination
+        );
+      }
+
       await new Promise((resolve, reject) => {
         logger.info(
           `audioId ${track.audio.id}: Processing stream for ${format.format}${
@@ -108,7 +119,12 @@ export default async (job: Job) => {
         );
 
         convertAudioToFormat(
-          { track, artist, trackGroup },
+          {
+            track,
+            artist,
+            trackGroup,
+            coverLocation: coverDestination,
+          },
           createReadStream(originalTrackPath),
           format,
           `${tempFolder}/${track.order ?? i}-${filenamify(track.title ?? "")}`,
@@ -122,12 +138,7 @@ export default async (job: Job) => {
 
     await job.updateProgress(90);
 
-    if (trackGroup.cover?.id) {
-      logger.info("Adding cover");
-      await minioClient.fGetObject(finalCoversBucket, `${trackGroup.cover.id}-x1500.jpg`, `${tempFolder}/cover.jpg`);
-    }
-
-    await new Promise(async (resolve: (value?: unknown) => void, reject) => {
+    await new Promise(async (resolve: (value?: unknown) => void) => {
       const finalFilesInFolder = await fsPromises.readdir(tempFolder);
 
       const archive = archiver("zip", {
