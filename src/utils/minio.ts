@@ -6,6 +6,7 @@ import {
   CreateBucketCommand,
   HeadBucketCommand,
   GetObjectCommand,
+  DeleteObjectCommand,
 } from "@aws-sdk/client-s3";
 import fs from "fs";
 import logger from "../logger";
@@ -35,7 +36,6 @@ const {
   MINIO_HOST = "",
   MINIO_ROOT_USER = "",
   MINIO_ROOT_PASSWORD = "",
-  BACKBLAZE_KEY_NAME = "",
   BACKBLAZE_KEY_ID = "",
   BACKBLAZE_APP_KEY = "",
   MINIO_API_PORT = 9000,
@@ -61,6 +61,11 @@ export const backblazeClient = new S3Client({
     secretAccessKey: BACKBLAZE_APP_KEY,
   },
 });
+
+// Toggle this to true if you want to test backblaze locally
+// Note: you'll need both the backblaze key id and app key
+// set for this to work.
+const testBackBlazeLocally = true;
 
 const createB2BucketIfNotExists = async (bucket: string) => {
   logger.info(`backblaze: checking if a bucket exists: ${bucket}`);
@@ -109,7 +114,7 @@ export const createBucketIfNotExists = async (
     logger?.info(`minio: created bucket: ${bucket}`);
   }
 
-  if (NODE_ENV === "production") {
+  if (testBackBlazeLocally || NODE_ENV === "production") {
     await createB2BucketIfNotExists(bucket);
   }
 
@@ -121,7 +126,9 @@ export const uploadWrapper = async (
   fileName: string,
   fileStream: Readable
 ) => {
-  if (NODE_ENV === "production") {
+  if (testBackBlazeLocally || NODE_ENV === "production") {
+    logger.info(`backblaze: uploading fileStream: ${bucket}/${fileName}`);
+
     const upload = new Upload({
       client: backblazeClient,
       params: {
@@ -132,7 +139,41 @@ export const uploadWrapper = async (
     });
     await upload.done();
   } else {
+    logger.info(`minio: uploading fileStream: ${bucket}/${fileName}`);
     await minioClient.putObject(bucket, fileName, fileStream);
+  }
+};
+
+export const removeObjectFromStorage = async (
+  bucket: string,
+  fileName: string
+) => {
+  if (testBackBlazeLocally || NODE_ENV === "production") {
+    logger.info(`backblaze: removing fileStream: ${bucket}/${fileName}`);
+
+    await backblazeClient.send(
+      new DeleteObjectCommand({ Bucket: bucket, Key: fileName })
+    );
+  } else {
+    logger.info(`minio: removing fileStream: ${bucket}/${fileName}`);
+
+    await minioClient.removeObject(bucket, fileName);
+  }
+};
+
+export const getBufferFromStorage = async (
+  minioClient: Client,
+  bucket: string,
+  filename: string
+) => {
+  if (testBackBlazeLocally || NODE_ENV === "production") {
+    logger.info(`backblaze: getting buffer: ${bucket}/${filename}`);
+
+    return getBufferFromBackblaze(bucket, filename);
+  } else {
+    logger.info(`minio: getting buffer: ${bucket}/${filename}`);
+
+    return getBufferFromMinio(minioClient, bucket, filename);
   }
 };
 
@@ -144,18 +185,6 @@ export const getBufferFromBackblaze = async (
     new GetObjectCommand({ Bucket: bucket, Key: filename })
   );
   return { buffer: await result.Body?.transformToByteArray() };
-};
-
-export const getBufferFromStorage = async (
-  minioClient: Client,
-  bucket: string,
-  filename: string
-) => {
-  if (NODE_ENV === "production") {
-    return getBufferFromBackblaze(bucket, filename);
-  } else {
-    return getBufferFromMinio(minioClient, bucket, filename);
-  }
 };
 
 export async function getBufferFromMinio(

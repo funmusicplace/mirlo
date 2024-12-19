@@ -8,6 +8,7 @@ import {
   createBucketIfNotExists,
   getBufferFromStorage,
   minioClient,
+  removeObjectFromStorage,
 } from "../utils/minio";
 import prisma from "@mirlo/prisma";
 import { logger } from "./queue-worker";
@@ -174,7 +175,7 @@ const optimizeImage = async (job: Job) => {
     profiler.done({ message: "Done optimizing image" });
     logger.info(`Removing from Bucket ${incomingMinioBucket}`);
 
-    await minioClient.removeObject(incomingMinioBucket, destinationId);
+    await removeObjectFromStorage(incomingMinioBucket, destinationId);
 
     if (SIGHTENGINE_USER && SIGHTENGINE_SECRET) {
       logger.info("Checking SightEngine");
