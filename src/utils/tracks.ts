@@ -58,6 +58,7 @@ export const convertAudioToFormat = (
     track: Track & { audio: TrackAudio; trackArtists: TrackArtist[] };
     artist: Artist;
     trackGroup: TrackGroup;
+    coverLocation: string;
   },
   stream: Readable,
   formatDetails: {
@@ -79,6 +80,10 @@ export const convertAudioToFormat = (
     `audioId ${audioId}: metadata: ${JSON.stringify(content.track.metadata)}`
   );
 
+  const artists = (
+    content.track.trackArtists?.filter((artist) => artist.isCoAuthor) ?? []
+  ).map((artist) => artist.artistName);
+
   let destination = generateDestination(format, goingTo, audioBitrate);
   const processor = ffmpeg(stream)
     .noVideo()
@@ -87,9 +92,11 @@ export const convertAudioToFormat = (
     // .outputOptions("-map_metadata:s:a", "0:s:a")
     // .outputOption("-map_metadata:s:a 0:s:a")
     // .outputOptions("-map_metadata 0:s")
+    .outputOptions("-id3v2_version 3")
     .outputOptions("-metadata", `title=${content.track.title}`)
     .outputOptions("-metadata", `album=${content.trackGroup.title}`)
-    .outputOptions("-metadata", `artist=${content.artist.name}`)
+    .outputOptions("-metadata", `album_artist=${content.artist.name}`)
+    .outputOptions("-metadata", `track=${content.track.order}`)
     .on("stderr", function (stderrLine) {
       // logger.info("Stderr output: " +resolve stderrLine);
     })
@@ -106,8 +113,24 @@ export const convertAudioToFormat = (
       onSuccess?.(null);
     });
 
+  if (artists.length) {
+    processor.outputOptions("-metadata", `artist=${artists.join(", ")}`);
+  }
+
+  if (content.track.metadata) {
+    processor.outputOptions(
+      "-metadata",
+      // @ts-ignore
+      `genre=${content.track.metadata?.common?.genre ?? "Unknown"}`
+    );
+  }
+
   if (format === "mp3") {
     processor.addOptions("-write_xing", "0");
+    processor.addInput(content.coverLocation);
+    processor.outputOptions("-metadata:s:v", `title="Album cover"`);
+    processor.videoCodec("copy");
+    processor.outputOptions("-metadata:s:v", `commment="Cover (front)`);
   }
   if (audioCodec) {
     processor.audioCodec(audioCodec);
