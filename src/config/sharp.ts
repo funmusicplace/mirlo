@@ -69,6 +69,7 @@ export default {
     avatar: {
       webp: {
         variants: [
+          { width: 3000, height: 3000 },
           { width: 1500, height: 1500 },
           { width: 1200, height: 1200 },
           { width: 960, height: 960 },

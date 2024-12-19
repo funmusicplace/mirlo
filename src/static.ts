@@ -24,28 +24,33 @@ export const serveStatic = async (
       new HeadObjectCommand({
         Bucket: req.params.bucket,
         Key: req.params.filename,
-      })
+      }),
+      {}
     );
     // If the object doesn't exist on backblaze we check in minio
-    if (!backblazeStat) {
-      minioStat = await minioClient.statObject(
-        req.params.bucket,
-        req.params.filename
-      );
-    }
   } catch (error) {
-    console.error("error stat", error);
+    console.error("failed fetching from backblaze");
+  }
+
+  if (!backblazeStat) {
+    minioStat = await minioClient.statObject(
+      req.params.bucket,
+      req.params.filename
+    );
+  }
+
+  if (!backblazeStat && !minioStat) {
     res.status(404);
     next();
     return;
   }
 
-  // Cache minio assets for 1 week
+  // Cache assets for 1 week
   res.setHeader(
     "Cache-Control",
     "public, max-age=604800, stale-while-revalidate=604800"
   );
-  const etag = `"${backblazeStat.ETag ?? minioStat?.etag}"`;
+  const etag = `"${backblazeStat?.ETag ?? minioStat?.etag}"`;
   res.setHeader("ETag", etag);
 
   // when If-None-Match is provided, only return the object if the etag has changed
@@ -65,6 +70,7 @@ export const serveStatic = async (
         req.params.bucket,
         req.params.filename
       );
+
       res.end(buffer, "binary");
     } else {
       const { buffer } = await getBufferFromMinio(
@@ -72,6 +78,7 @@ export const serveStatic = async (
         req.params.bucket,
         req.params.filename
       );
+
       res.end(buffer, "binary");
     }
 

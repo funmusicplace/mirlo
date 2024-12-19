@@ -10,15 +10,15 @@ import Modal from "./Modal";
 import LoadingSpinner from "./LoadingSpinner";
 
 const formats = ["flac", "wav", "opus", "320.mp3", "256.mp3", "128.mp3"];
-const formatsDisplay: { [format: string]: string; } = {
+const formatsDisplay: { [format: string]: string } = {
   "": "",
-  "flac": "FLAC",
-  "wav": "WAV",
-  "opus": "OPUS",
+  flac: "FLAC",
+  wav: "WAV",
+  opus: "OPUS",
   "320.mp3": "MP3 320kbps",
   "256.mp3": "MP3 256kbps",
   "128.mp3": "MP3 128kbps",
-}
+};
 
 const DownloadAlbumButton: React.FC<{
   trackGroup: TrackGroup;
@@ -70,25 +70,26 @@ const DownloadAlbumButton: React.FC<{
     trackGroup.title,
   ]);
 
-  const generateAlbum = React.useCallback(async (format: string) => {
-    try {
-      const queryParams = new URLSearchParams();
-      queryParams.append("format", format);
-      const resp = await api.generateDownload(`trackGroups/${trackGroup.id}/generate?${queryParams.toString()}`);
-      if ((resp as any).result.jobId) {
-        setIsGeneratingAlbum(+(resp as any).result.jobId);
-      } else if ((resp as any).result === true) {
-        setIsGeneratingAlbum(0);
+  const generateAlbum = React.useCallback(
+    async (format: string) => {
+      try {
+        const queryParams = new URLSearchParams();
+        queryParams.append("format", format);
+        const resp = await api.generateDownload(
+          `trackGroups/${trackGroup.id}/generate?${queryParams.toString()}`
+        );
+        if ((resp as any).result.jobId) {
+          setIsGeneratingAlbum(+(resp as any).result.jobId);
+        } else if ((resp as any).result === true) {
+          setIsGeneratingAlbum(0);
+        }
+      } catch (e) {
+        snackbar(t("error"), { type: "warning" });
+        console.error(e);
       }
-    } catch (e) {
-      snackbar(t("error"), { type: "warning" });
-      console.error(e);
-    }
-  }, [
-    chosenFormat,
-    trackGroup.id,
-    t,
-  ])
+    },
+    [chosenFormat, trackGroup.id, t]
+  );
 
   React.useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
@@ -114,7 +115,7 @@ const DownloadAlbumButton: React.FC<{
   return (
     <div>
       <Modal
-        title={`${t("download")} ${formatsDisplay[chosenFormat]}` ?? ""}
+        title={`${t("download")} ${formatsDisplay[chosenFormat]}`}
         open={isPopupOpen}
         size="small"
         onClose={() => setIsPopupOpen(false)}
@@ -123,13 +124,17 @@ const DownloadAlbumButton: React.FC<{
           className={css`
             display: flex;
             flex-direction: column;
-              text-align: center;
+            text-align: center;
           `}
         >
           {!chosenFormat && !isDownloading ? (
             <>
               <p>{t("downloadFiletypeQuery")}</p>
-              <ul className={css`list-style-type: none;`}>
+              <ul
+                className={css`
+                  list-style-type: none;
+                `}
+              >
                 {formats.map((format) => (
                   <li key={format}>
                     <Button
@@ -183,7 +188,12 @@ const DownloadAlbumButton: React.FC<{
                 )}
               </Button>
               <p>
-                <Button className={css`margin-top: 1rem`} onClick={() => setChosenFormat("")}>
+                <Button
+                  className={css`
+                    margin-top: 1rem;
+                  `}
+                  onClick={() => setChosenFormat("")}
+                >
                   {t("chooseAnotherFormat")}
                 </Button>
               </p>

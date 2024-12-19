@@ -13,16 +13,11 @@ import {
   incomingArtistBannerBucket,
   incomingMerchImageBucket,
   minioClient,
-  backblazeClient,
   uploadWrapper,
 } from "../utils/minio";
 import prisma from "@mirlo/prisma";
 import { APIContext } from "../utils/file";
 import { logger } from "../jobs/queue-worker";
-import { PutObjectCommand } from "@aws-sdk/client-s3";
-import { Upload } from "@aws-sdk/lib-storage";
-
-const { MINIO_HOST = "", MINIO_API_PORT = 9000 } = process.env;
 
 const queueOptions = {
   prefix: "mirlo",

@@ -61,12 +61,13 @@ export const backblazeClient = new S3Client({
     accessKeyId: BACKBLAZE_KEY_ID,
     secretAccessKey: BACKBLAZE_APP_KEY,
   },
+  maxAttempts: 1,
 });
 
 // Toggle this to true if you want to test backblaze locally
 // Note: you'll need both the backblaze key id and app key
 // set for this to work.
-const testBackBlazeLocally = true;
+const testBackBlazeLocally = false;
 
 const createB2BucketIfNotExists = async (bucket: string) => {
   logger.info(`backblaze: checking if a bucket exists: ${bucket}`);
@@ -81,14 +82,6 @@ const createB2BucketIfNotExists = async (bucket: string) => {
     logger.info(`backblaze: created bucket: ${bucket}`);
   }
 
-  if (!exists) {
-    logger.info(`backblaze: does not exist, creating bucket: ${bucket}`);
-    await backblazeClient.send(new CreateBucketCommand({ Bucket: bucket }));
-    logger.info(`backblaze: created bucket: ${bucket}`);
-  } else {
-    logger.info(`backblaze: bucket exists: ${bucket}`);
-  }
-
   return true;
 };
 
@@ -97,26 +90,27 @@ export const createBucketIfNotExists = async (
   bucket: string,
   logger?: Logger
 ) => {
-  logger?.info(`minio: checking if a bucket exists: ${bucket}`);
+  logger?.info(`checking if a bucket exists: ${bucket}`);
   let exists;
-  try {
-    exists = await minioClient.bucketExists(bucket);
-  } catch (e) {
-    logger?.error(e);
-    logger?.info(`minio: failed to check, creating bucket: ${bucket}`);
-
-    await minioClient.makeBucket(bucket);
-    logger?.info(`minio: created bucket: ${bucket}`);
-  }
-
-  if (!exists) {
-    logger?.info(`minio: does not exist, creating bucket: ${bucket}`);
-    await minioClient.makeBucket(bucket);
-    logger?.info(`minio: created bucket: ${bucket}`);
-  }
 
   if (testBackBlazeLocally || NODE_ENV === "production") {
     await createB2BucketIfNotExists(bucket);
+  } else {
+    try {
+      exists = await minioClient.bucketExists(bucket);
+    } catch (e) {
+      logger?.error(e);
+      logger?.info(`minio: failed to check, creating bucket: ${bucket}`);
+
+      await minioClient.makeBucket(bucket);
+      logger?.info(`minio: created bucket: ${bucket}`);
+    }
+
+    if (!exists) {
+      logger?.info(`minio: does not exist, creating bucket: ${bucket}`);
+      await minioClient.makeBucket(bucket);
+      logger?.info(`minio: created bucket: ${bucket}`);
+    }
   }
 
   return true;
@@ -201,7 +195,10 @@ export const getBufferFromBackblaze = async (
   const result = await backblazeClient.send(
     new GetObjectCommand({ Bucket: bucket, Key: filename })
   );
-  return { buffer: await result.Body?.transformToByteArray() };
+  return {
+    buffer: await result.Body?.transformToByteArray(),
+    etag: result.ETag,
+  };
 };
 
 export async function getBufferFromMinio(
@@ -212,16 +209,13 @@ export async function getBufferFromMinio(
   return new Promise((resolve: (result: { buffer: Buffer }) => any, reject) => {
     logger.info(`Getting object from MinIO Bucket ${bucket}: ${filename}`);
     const buff: Buffer[] = [];
-    var size = 0;
     minioClient
       .getObject(bucket, filename)
       .then(function (dataStream) {
         dataStream.on("data", async function (chunk) {
           buff.push(chunk);
-          size += chunk.length;
         });
         dataStream.on("end", function () {
-          logger.info("End. Total size = " + size);
           resolve({ buffer: Buffer.concat(buff) });
         });
         dataStream.on("error", function (err) {
