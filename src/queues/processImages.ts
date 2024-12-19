@@ -13,10 +13,14 @@ import {
   incomingArtistBannerBucket,
   incomingMerchImageBucket,
   minioClient,
+  backblazeClient,
+  uploadWrapper,
 } from "../utils/minio";
 import prisma from "@mirlo/prisma";
 import { APIContext } from "../utils/file";
 import { logger } from "../jobs/queue-worker";
+import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { Upload } from "@aws-sdk/lib-storage";
 
 const { MINIO_HOST = "", MINIO_API_PORT = 9000 } = process.env;
 
@@ -101,7 +105,7 @@ export const uploadAndSendToImageQueue = async (
         const fileName = storeWithExtension
           ? `${image.id}.${[filenameArray[filenameArray.length - 1]]}`
           : image.id;
-        await minioClient.putObject(incomingBucket, fileName, fileStream);
+        await uploadWrapper(incomingBucket, fileName, fileStream);
       } catch (e) {
         logger.error("There was an error uploading to minio");
         throw e;
