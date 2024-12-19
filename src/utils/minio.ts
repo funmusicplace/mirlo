@@ -7,6 +7,7 @@ import {
   HeadBucketCommand,
   GetObjectCommand,
   DeleteObjectCommand,
+  PutObjectCommand,
 } from "@aws-sdk/client-s3";
 import fs from "fs";
 import logger from "../logger";
@@ -124,20 +125,36 @@ export const createBucketIfNotExists = async (
 export const uploadWrapper = async (
   bucket: string,
   fileName: string,
-  fileStream: Readable
+  fileStream: Readable | Buffer,
+  options?: { contentType?: string }
 ) => {
   if (testBackBlazeLocally || NODE_ENV === "production") {
-    logger.info(`backblaze: uploading fileStream: ${bucket}/${fileName}`);
+    if (fileStream instanceof Buffer) {
+      logger.info(`backblaze: uploading buffer: ${bucket}/${fileName}`);
 
-    const upload = new Upload({
-      client: backblazeClient,
-      params: {
-        Bucket: bucket,
-        Key: fileName,
-        Body: fileStream,
-      },
-    });
-    await upload.done();
+      await backblazeClient.send(
+        new PutObjectCommand({
+          Bucket: bucket,
+          Key: fileName,
+          Body: fileStream,
+          ContentType: options?.contentType,
+        })
+      );
+    } else {
+      logger.info(`backblaze: uploading fileStream: ${bucket}/${fileName}`);
+
+      const upload = new Upload({
+        client: backblazeClient,
+        params: {
+          Bucket: bucket,
+          Key: fileName,
+          Body: fileStream,
+          ContentType: options?.contentType,
+        },
+      });
+
+      await upload.done();
+    }
   } else {
     logger.info(`minio: uploading fileStream: ${bucket}/${fileName}`);
     await minioClient.putObject(bucket, fileName, fileStream);
@@ -199,7 +216,6 @@ export async function getBufferFromMinio(
     minioClient
       .getObject(bucket, filename)
       .then(function (dataStream) {
-        logger.info("Got stream");
         dataStream.on("data", async function (chunk) {
           buff.push(chunk);
           size += chunk.length;
@@ -241,7 +257,6 @@ export async function getFileFromMinio(
       minioClient
         .getObject(bucket, filename)
         .then(function (dataStream) {
-          logger?.info("Got stream");
           dataStream.on("data", async function (chunk) {
             writableStream.write(chunk);
           });
