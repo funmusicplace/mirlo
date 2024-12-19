@@ -8,12 +8,15 @@ const queueOptions = {
 };
 
 export const audioQueue = new Queue("upload-audio", queueOptions);
+export const optimizeImage = new Queue("optimize-image", queueOptions);
 export const generateAlbumQueue = new Queue("generate-album", queueOptions);
 
 const getJobStatus = async (queue: string, jobId: string) => {
   let job;
   if (queue === "generateAlbum") {
     job = await generateAlbumQueue.getJob(jobId);
+  } else if (queue === "optimizeImage") {
+    job = await optimizeImage.getJob(jobId);
   } else {
     job = await audioQueue.getJob(jobId);
   }

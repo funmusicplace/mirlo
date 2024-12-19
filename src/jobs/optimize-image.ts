@@ -6,8 +6,10 @@ import { Job } from "bullmq";
 import { uniq } from "lodash";
 import {
   createBucketIfNotExists,
-  getBufferFromMinio,
+  getBufferFromStorage,
   minioClient,
+  removeObjectFromStorage,
+  uploadWrapper,
 } from "../utils/minio";
 import prisma from "@mirlo/prisma";
 import { logger } from "./queue-worker";
@@ -17,13 +19,13 @@ import sendMail from "./send-mail";
 
 const { defaultOptions, config: sharpConfig } = tempSharpConfig;
 
-const {
-  MINIO_HOST = "",
-  MINIO_ROOT_USER = "",
-  MINIO_API_PORT = 9000,
-  SIGHTENGINE_USER,
-  SIGHTENGINE_SECRET,
-} = process.env;
+const { SIGHTENGINE_USER, SIGHTENGINE_SECRET } = process.env;
+
+const sleep = (ms: number) =>
+  new Promise((resolve) => {
+    console.log("sleeping", ms);
+    return setTimeout(resolve, ms);
+  });
 
 /**
  * Convert and optimize track artworks to mozjpeg and webp
@@ -40,42 +42,53 @@ const optimizeImage = async (job: Job) => {
 
   try {
     const profiler = logger.startTimer();
-    logger.info(
-      `MinIO is at ${MINIO_HOST}:${MINIO_API_PORT} ${MINIO_ROOT_USER}`
-    );
 
     logger.info(`Starting to optimize images ${model}/${destinationId}`);
-    const { buffer, size } = await getBufferFromMinio(
+    const { buffer } = await getBufferFromStorage(
       minioClient,
       incomingMinioBucket,
-      destinationId,
-      logger
+      destinationId
     );
+
     await createBucketIfNotExists(minioClient, finalMinioBucket, logger);
 
-    logger.info(`Got object of size ${size}`);
+    // logger.info(`Got object of size ${size}`);
     const promises = Object.entries(config)
-      .map(([key, value]) => {
-        const outputType = key as "webp" | "jpeg" | "png"; // output type (jpeg, webp)
+      .map(([key, value], i) => {
+        const outputType = key as "webp"; // output type (jpeg, webp)
         const {
           // @ts-ignore
           options = {},
-          // @ts-ignore
           variants = [],
           // @ts-ignore
           ext = defaultOptions[outputType].ext,
-        } = value;
+        } = value as {
+          options: {
+            [key: string]: unknown;
+          };
+          variants: { width: number; height: number }[];
+        };
 
         return variants.map(
-          async (variant: {
-            extract?: any;
-            resize?: any;
-            outputOptions?: any;
-            blur?: any;
-            width?: number;
-            height?: number;
-            suffix?: any;
-          }) => {
+          async (
+            variant: {
+              extract?: any;
+              resize?: any;
+              outputOptions?: any;
+              blur?: any;
+              width?: number;
+              height?: number;
+              suffix?: any;
+            },
+            j
+          ) => {
+            // This is a pretty hacky way of sleeping and probably something we shoudl
+            // not do?
+            // But basically the reason we have to do this is because backblaze
+            // seems to not like it when we bombard it with files all in one go,
+            // so when we do Promise.all at the end of this we're sending all the
+            // files and it just doesn't process anything but the first one.
+            await sleep((i + 1) * (j + 1) * 1500);
             const { width, height, suffix = `-x${width}` } = variant;
 
             const finalFileName = `${destinationId}${suffix}${ext}`;
@@ -110,11 +123,14 @@ const optimizeImage = async (job: Job) => {
               );
 
               logger.info("Uploading image to bucket");
-              await minioClient.putObject(
-                finalMinioBucket,
-                finalFileName,
-                newBuffer
-              );
+              await uploadWrapper(finalMinioBucket, finalFileName, newBuffer, {
+                contentType: `image/${outputType}`,
+              });
+              // await minioClient.putObject(
+              //   finalMinioBucket,
+              //   finalFileName,
+              //   newBuffer
+              // );
 
               logger.info(`Converted and optimized image to ${outputType}`, {
                 ratio: `${width}x${height})`,
@@ -134,7 +150,7 @@ const optimizeImage = async (job: Job) => {
 
     const results = await Promise.all(promises);
     const urls = uniq(
-      results.map((r: { width: number }) => `${destinationId}-x${r.width}`)
+      results.map((r?: { width?: number }) => `${destinationId}-x${r?.width}`)
     ) as string[];
     logger.info(`Saving URLs [${urls.join(", ")}]`);
 
@@ -160,6 +176,8 @@ const optimizeImage = async (job: Job) => {
         faviconFinalName,
         sharp(buffer)
       );
+      await uploadWrapper(finalMinioBucket, faviconFinalName, sharp(buffer));
+
       await prisma.artistAvatar.update({
         where: { id: destinationId },
         data: { url: urls },
@@ -174,7 +192,7 @@ const optimizeImage = async (job: Job) => {
     profiler.done({ message: "Done optimizing image" });
     logger.info(`Removing from Bucket ${incomingMinioBucket}`);
 
-    await minioClient.removeObject(incomingMinioBucket, destinationId);
+    await removeObjectFromStorage(incomingMinioBucket, destinationId);
 
     if (SIGHTENGINE_USER && SIGHTENGINE_SECRET) {
       logger.info("Checking SightEngine");

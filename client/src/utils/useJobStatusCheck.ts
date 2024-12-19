@@ -4,9 +4,11 @@ import api from "services/api";
 const useJobStatusCheck = ({
   reload,
   reset,
+  queue,
 }: {
   reload: () => void;
   reset?: () => void;
+  queue?: "optimizeImage";
 }) => {
   const [uploadJobs, setUploadJobs] = React.useState<
     { jobId: string; jobStatus: string }[]
@@ -16,9 +18,11 @@ const useJobStatusCheck = ({
     let timer: NodeJS.Timeout | undefined;
     if (uploadJobs.length > 0) {
       timer = setInterval(async () => {
+        console.log("setting an interval");
         const result = await api.getMany<{ jobStatus: string; jobId: string }>(
-          `jobs?${uploadJobs.map((job) => `ids=${job.jobId}&`).join("")}`
+          `jobs?queue=${queue ?? ""}&${uploadJobs.map((job) => `ids=${job.jobId}&`).join("")}`
         );
+        console.log("result", result);
 
         if (
           result.results.some(
