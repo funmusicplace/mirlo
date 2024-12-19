@@ -6,7 +6,7 @@ import { Job } from "bullmq";
 import { uniq } from "lodash";
 import {
   createBucketIfNotExists,
-  getBufferFromMinio,
+  getBufferFromStorage,
   minioClient,
 } from "../utils/minio";
 import prisma from "@mirlo/prisma";
@@ -45,15 +45,15 @@ const optimizeImage = async (job: Job) => {
     );
 
     logger.info(`Starting to optimize images ${model}/${destinationId}`);
-    const { buffer, size } = await getBufferFromMinio(
+    const { buffer } = await getBufferFromStorage(
       minioClient,
       incomingMinioBucket,
-      destinationId,
-      logger
+      destinationId
     );
+
     await createBucketIfNotExists(minioClient, finalMinioBucket, logger);
 
-    logger.info(`Got object of size ${size}`);
+    // logger.info(`Got object of size ${size}`);
     const promises = Object.entries(config)
       .map(([key, value]) => {
         const outputType = key as "webp" | "jpeg" | "png"; // output type (jpeg, webp)
