@@ -105,6 +105,7 @@ const UploadArtistImage: React.FC<{
   const { uploadJobs, setUploadJobs } = useJobStatusCheck({
     reload: () => {},
     reset: resetWrapper,
+    queue: "optimizeImage",
   });
 
   const deleteImage = React.useCallback(async () => {
@@ -130,6 +131,7 @@ const UploadArtistImage: React.FC<{
             `${buildRootUrl(existing)}${imageType}`,
             [file]
           );
+          console.log("jobInfo", jobInfo);
           setUploadJobs([
             { jobId: jobInfo.result.jobId, jobStatus: "waiting" },
           ]);

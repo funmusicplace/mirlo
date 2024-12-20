@@ -13,12 +13,11 @@ import {
   incomingArtistBannerBucket,
   incomingMerchImageBucket,
   minioClient,
+  uploadWrapper,
 } from "../utils/minio";
 import prisma from "@mirlo/prisma";
 import { APIContext } from "../utils/file";
 import { logger } from "../jobs/queue-worker";
-
-const { MINIO_HOST = "", MINIO_API_PORT = 9000 } = process.env;
 
 const queueOptions = {
   prefix: "mirlo",
@@ -81,8 +80,7 @@ export const uploadAndSendToImageQueue = async (
   finalBucket?: string, // If this is not supplied, we this basically just uploads to the first bucket,0
   storeWithExtension?: boolean
 ) => {
-  logger.info(`MinIO is at ${MINIO_HOST}:${MINIO_API_PORT}`);
-  logger.info("Uploading image to object storage");
+  logger.info(`Uploading ${sharpConfigKey} to object storage`);
 
   await createBucketIfNotExists(minioClient, incomingBucket, logger);
   logger.info("Made bucket");
@@ -93,17 +91,14 @@ export const uploadAndSendToImageQueue = async (
     ctx.req.busboy.on("file", async (_fieldname, fileStream, fileInfo) => {
       const image = await createDatabaseEntry(fileInfo);
 
-      logger.info(
-        `Going to put a file on MinIO Bucket ${incomingBucket}: ${image.id}, ${fileInfo.filename}`
-      );
       try {
         const filenameArray = fileInfo.filename.split(".");
         const fileName = storeWithExtension
           ? `${image.id}.${[filenameArray[filenameArray.length - 1]]}`
           : image.id;
-        await minioClient.putObject(incomingBucket, fileName, fileStream);
+        await uploadWrapper(incomingBucket, fileName, fileStream);
       } catch (e) {
-        logger.error("There was an error uploading to minio");
+        logger.error("There was an error uploading to storage");
         throw e;
       }
 
@@ -138,6 +133,7 @@ export const processArtistAvatar = (ctx: APIContext) => {
       "artistAvatar",
       "avatar",
       async (fileInfo: { filename: string }) => {
+        logger.info(`Upserting artist avatar`);
         return prisma.artistAvatar.upsert({
           create: {
             originalFilename: fileInfo.filename,
