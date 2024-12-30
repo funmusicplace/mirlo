@@ -207,7 +207,6 @@ export async function getBufferFromMinio(
   filename: string
 ): Promise<{ buffer: Buffer }> {
   return new Promise((resolve: (result: { buffer: Buffer }) => any, reject) => {
-    logger.info(`Getting object from MinIO Bucket ${bucket}: ${filename}`);
     const buff: Buffer[] = [];
     minioClient
       .getObject(bucket, filename)

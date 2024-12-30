@@ -15,7 +15,6 @@ export const serveStatic = async (
 ) => {
   let backblazeStat;
   let minioStat;
-  logger.info(`static: ${req.params.bucket}/${req.params.filename}`);
 
   // FIXME: someone who's better at devops than me will have to figure out
   // how we can serve these directly from minio
@@ -29,7 +28,7 @@ export const serveStatic = async (
     );
     // If the object doesn't exist on backblaze we check in minio
   } catch (error) {
-    console.error("failed fetching from backblaze");
+    // console.error("failed fetching from backblaze");
   }
 
   if (!backblazeStat) {

@@ -23,7 +23,6 @@ const { SIGHTENGINE_USER, SIGHTENGINE_SECRET } = process.env;
 
 const sleep = (ms: number) =>
   new Promise((resolve) => {
-    console.log("sleeping", ms);
     return setTimeout(resolve, ms);
   });
 

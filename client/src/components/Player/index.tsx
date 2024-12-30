@@ -186,7 +186,15 @@ const Player = () => {
                 <TipArtist artistId={currentTrack.trackGroup.artistId} />
               )}
             </span>
-            <span>{fmtMSS(currentSeconds)}</span>
+            <span
+              className={css`
+                display: inline-block;
+                min-width: 3rem;
+                text-align: right;
+              `}
+            >
+              {fmtMSS(currentSeconds)}
+            </span>
 
             <ControlWrapper>
               <span
