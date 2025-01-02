@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { userAuthenticated, userHasPermission } from "../../../auth/passport";
 import cleanUpFiles from "../../../jobs/tasks/clean-up-files";
 import initiateUserNotifcations from "../../../jobs/tasks/initiate-user-notifications";
+import { startMovingFiles } from "../../../queues/moving-files-to-backblaze";
 
 export default function () {
   const operations = {
@@ -15,6 +16,14 @@ export default function () {
       if (jobName) {
         if (jobName === "cleanUpFiles" && typeof jobParam === "string") {
           await cleanUpFiles(jobParam);
+          result[jobName] = "Success";
+        }
+        if (
+          jobName === "moveBucketToBackblaze" &&
+          typeof jobParam === "string" &&
+          ["artist-avatars"].includes(jobParam)
+        ) {
+          await startMovingFiles(jobParam);
           result[jobName] = "Success";
         }
         if (jobName === "initiateUserNotifications") {

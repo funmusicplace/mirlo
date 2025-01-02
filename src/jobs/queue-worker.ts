@@ -17,6 +17,10 @@ import sendMail from "./send-mail";
 import "../queues/send-mail-queue";
 
 import { REDIS_CONFIG } from "../config/redis";
+import {
+  moveFilesToBackblazeJob,
+  moveFilesToBackBlazeQueue,
+} from "../queues/moving-files-to-backblaze";
 
 export const logger = winston.createLogger({
   level: "info",
@@ -49,6 +53,7 @@ yargs // eslint-disable-line
     generateAlbumQueueWorker();
     sendMailQueue();
     cleanUpFilesQueue();
+    moveFilesToBackBlazeWorker();
   })
   .help().argv;
 
@@ -143,6 +148,26 @@ export async function cleanUpFilesQueue() {
   const worker = new Worker(
     "clean-up-old-files",
     cleanUpOldFilesJob,
+    workerOptions
+  );
+  logger.info("Move Files From Minio to BackBlaze worker started");
+
+  worker.on("completed", (job: any) => {
+    logger.info("completed:clean-up-old-files");
+  });
+
+  worker.on("failed", (job: any, err: any) => {
+    logger.error("failed:clean-up-old-files", err);
+  });
+
+  worker.on("error", (err: any) => {
+    logger.error("error:clean-up-old-files", err);
+  });
+}
+export async function moveFilesToBackBlazeWorker() {
+  const worker = new Worker(
+    "move-file-to-backblaze",
+    moveFilesToBackblazeJob,
     workerOptions
   );
   logger.info("Clean Up Files worker started");
