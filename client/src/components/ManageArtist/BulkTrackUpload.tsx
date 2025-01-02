@@ -65,9 +65,13 @@ export const BulkTrackUpload: React.FC<{
     async (remainingTracks: OrderedTrackData[]) => {
       const firstTrack = remainingTracks.pop();
       if (firstTrack) {
+        const metadata = pick(firstTrack.t.metadata, ["format", "common"]);
+        delete metadata.common.picture;
+        console.log("firstTrack", metadata);
+
         const packet = {
           title: firstTrack.t.title,
-          metadata: pick(firstTrack.t.metadata, ["format", "common"]),
+          metadata: metadata,
           artistId: trackgroup.artistId,
           isPreview: firstTrack.t.status === "preview",
           order: firstTrack.order,
