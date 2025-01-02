@@ -21,7 +21,12 @@ export default function () {
         if (
           jobName === "moveBucketToBackblaze" &&
           typeof jobParam === "string" &&
-          ["artist-avatars"].includes(jobParam)
+          [
+            "artist-avatars",
+            "artist-banners",
+            "trackgroup-covers",
+            "post-images",
+          ].includes(jobParam)
         ) {
           await startMovingFiles(jobParam);
           result[jobName] = "Success";

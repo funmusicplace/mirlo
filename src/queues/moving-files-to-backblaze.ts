@@ -1,15 +1,7 @@
 import { Job, Queue, QueueEvents } from "bullmq";
 import { REDIS_CONFIG } from "../config/redis";
-import { promises as fsPromises } from "fs";
 import logger from "../logger";
-import {
-  getBufferFromMinio,
-  getObjectList,
-  minioClient,
-  removeObjectsFromBucket,
-  trackGroupFormatBucket,
-  uploadWrapper,
-} from "../utils/minio";
+import { getObjectList, minioClient, uploadWrapper } from "../utils/minio";
 import { sleep } from "../jobs/optimize-image";
 
 const queueOptions = {

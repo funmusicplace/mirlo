@@ -51,16 +51,7 @@ generateAlbumQueueEvents.on("stalled", async (result: { jobId: string }) => {
   try {
     const job = await generateAlbumQueue.getJob(result.jobId);
     if (job) {
-      await prisma.trackAudio.update({
-        where: {
-          id: job.data.audioId,
-        },
-        data: {
-          uploadState: "ERROR",
-        },
-      });
-
-      logger.info("Updated trackAudio");
+      console.log("job details", job);
     }
   } catch (err) {
     logger.error(`generateAlbumQueueEvents.stalled: ${JSON.stringify(err)}`);
