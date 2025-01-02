@@ -21,7 +21,7 @@ const { defaultOptions, config: sharpConfig } = tempSharpConfig;
 
 const { SIGHTENGINE_USER, SIGHTENGINE_SECRET } = process.env;
 
-const sleep = (ms: number) =>
+export const sleep = (ms: number) =>
   new Promise((resolve) => {
     return setTimeout(resolve, ms);
   });
