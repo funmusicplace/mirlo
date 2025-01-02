@@ -78,6 +78,8 @@ export const convertMetaData = (
     title = title.replace(/\.wav$/, "");
   }
 
+  let isrc = p.metadata.common.isrc?.[0];
+
   return {
     metadata: p.metadata,
     order: `${
@@ -90,7 +92,7 @@ export const convertMetaData = (
     title: p.metadata.common.title,
     status: "preview",
     lyrics: p.metadata.common.lyrics,
-    isrc: p.metadata.common.isrc,
+    isrc: isrc,
     trackArtists:
       p.metadata.common.artists?.map((artist) => ({
         artistName: artist ?? "",

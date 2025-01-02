@@ -45,24 +45,35 @@ export const confirmArtistIdExists = async (
 ) => {
   const { id: artistId } = req.params as unknown as Params;
 
-  const artist = await prisma.artist.findFirst({
-    where: {
-      id: Number(artistId),
-    },
-    select: {
-      id: true,
-    },
-  });
-
-  if (!artist) {
+  if (!artistId || Number.isNaN(artistId)) {
     const error = new AppError({
-      name: "Artist not found",
-      httpCode: 404,
-      description: "Artist not found",
+      name: "Artist ID must be valid number",
+      httpCode: 400,
+      description: "Artist ID must be valid number",
     });
     return next(error);
   }
-  next();
+  try {
+    const artist = await prisma.artist.findFirst({
+      where: {
+        id: Number(artistId),
+      },
+      select: {
+        id: true,
+      },
+    });
+    if (!artist) {
+      const error = new AppError({
+        name: "Artist not found",
+        httpCode: 404,
+        description: "Artist not found",
+      });
+      return next(error);
+    }
+    next();
+  } catch (e) {
+    next(e);
+  }
 };
 
 export const checkIsUserSubscriber = async (

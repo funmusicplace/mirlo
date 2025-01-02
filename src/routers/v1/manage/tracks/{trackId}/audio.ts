@@ -2,13 +2,11 @@ import { User } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 import {
   trackBelongsToLoggedInUser,
-  trackGroupBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";
 import { doesTrackBelongToUser } from "../../../../../utils/ownership";
 import { processTrackAudio } from "../../../../../queues/processTrackAudio";
 import busboy from "connect-busboy";
-import prisma from "@mirlo/prisma";
 
 type Params = {
   trackId: string;
