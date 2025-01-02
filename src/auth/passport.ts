@@ -126,31 +126,36 @@ export const artistBelongsToLoggedInUser = async (
   const { artistId } = req.params as unknown as {
     artistId: string;
   };
-  const castArtistId = await findArtistIdForURLSlug(artistId);
-  const loggedInUser = req.user as User | undefined;
+  try {
+    const castArtistId = await findArtistIdForURLSlug(artistId);
+    const loggedInUser = req.user as User | undefined;
 
-  if (!loggedInUser) {
-    res.status(401).json({ error: "Unauthorized" });
-  } else {
-    if (loggedInUser.isAdmin) {
-      return next();
-    }
+    if (!loggedInUser) {
+      res.status(401).json({ error: "Unauthorized" });
+    } else {
+      if (loggedInUser.isAdmin) {
+        return next();
+      }
 
-    const artist = await prisma.artist.findFirst({
-      where: {
-        userId: loggedInUser.id,
-        id: Number(castArtistId),
-      },
-    });
-
-    if (!artist) {
-      res.status(404).json({
-        error: "Artist not found",
+      const artist = await prisma.artist.findFirst({
+        where: {
+          userId: loggedInUser.id,
+          id: Number(castArtistId),
+        },
       });
-      return;
+
+      if (!artist) {
+        res.status(404).json({
+          error: "Artist not found",
+        });
+        return;
+      }
     }
+    return next();
+  } catch (e) {
+    next(e);
   }
-  return next();
+  return;
 };
 
 export const trackGroupBelongsToLoggedInUser = async (
@@ -287,27 +292,32 @@ export const contentBelongsToLoggedInUserArtist = async (
 
   const loggedInUser = req.user as User | undefined;
 
-  if (!loggedInUser) {
-    res.status(401).json({ error: "Unauthorized" });
-  } else {
-    if (loggedInUser.isAdmin) {
-      return next();
-    }
-    const artist = await prisma.artist.findFirst({
-      where: {
-        userId: loggedInUser.id,
-        id: Number(artistId),
-      },
-    });
-
-    if (!artist) {
-      res.status(400).json({
-        error: "Artist must belong to user",
+  try {
+    if (!loggedInUser) {
+      res.status(401).json({ error: "Unauthorized" });
+    } else {
+      if (loggedInUser.isAdmin) {
+        return next();
+      }
+      const artist = await prisma.artist.findFirst({
+        where: {
+          userId: loggedInUser.id,
+          id: Number(artistId),
+        },
       });
-      return;
+
+      if (!artist) {
+        res.status(400).json({
+          error: "Artist must belong to user",
+        });
+        return;
+      }
     }
+    return next();
+  } catch (e) {
+    next(e);
   }
-  return next();
+  return;
 };
 
 export default {
