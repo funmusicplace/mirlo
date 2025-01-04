@@ -32,7 +32,7 @@ export const sendMail = async (job: {
   data: {
     template: string;
     message: Mail.Options;
-    locals: { [key: string]: unknown };
+    locals: { [key: string]: any };
   };
 }) => {
   logger.info(`sendMail: sending: ${job.data.template}`);
