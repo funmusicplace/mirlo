@@ -3,6 +3,7 @@ import { REDIS_CONFIG } from "../config/redis";
 import logger from "../logger";
 import { getObjectList, minioClient, uploadWrapper } from "../utils/minio";
 import { sleep } from "../jobs/optimize-image";
+import { sendErrorEmail } from "../jobs/send-mail";
 
 const queueOptions = {
   prefix: "mirlo",
@@ -53,7 +54,7 @@ export const startMovingFiles = async (bucketName: string) => {
           fileName: file.name,
         },
         {
-          delay: i * 1500,
+          delay: i * 2000,
         }
       );
     } catch (e) {
@@ -73,7 +74,8 @@ export const moveFilesToBackblazeJob = async (job: Job) => {
     await uploadWrapper(bucketName, fileName, stream);
   } catch (e) {
     console.error(e);
-    logger.error("Error moving file");
+    sendErrorEmail(e);
+    logger.error(`Error moving file ${bucketName}/${fileName}`);
   }
   logger.info(`done transfering ${bucketName}/${fileName}`);
 };
