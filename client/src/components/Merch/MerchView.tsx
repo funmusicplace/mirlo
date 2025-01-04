@@ -29,7 +29,7 @@ import PublicTrackGroupListing from "components/common/TrackTable/PublicTrackGro
 
 import MerchButtonPopUp from "./MerchButtonPopUp";
 
-function TrackGroup() {
+function MerchView() {
   const { t } = useTranslation("translation", {
     keyPrefix: "merchDetails",
   });
@@ -208,4 +208,4 @@ function TrackGroup() {
   );
 }
 
-export default TrackGroup;
+export default MerchView;
