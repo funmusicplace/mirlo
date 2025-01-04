@@ -1,0 +1,15 @@
+doctype html
+html
+  head
+    block head
+      meta(charset="utf-8")
+      meta(name="viewport", content="width=device-width")
+      meta(http-equiv="X-UA-Compatible", content="IE=edge")
+      meta(name="x-apple-disable-message-reformatting")
+      link(rel="stylesheet", href="style.css", data-inline)
+  body.sans-serif
+    .pa4
+      | There was an error in the application: 
+      | #{error}
+      | Happened at #{time}
+

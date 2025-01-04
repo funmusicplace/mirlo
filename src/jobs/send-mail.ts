@@ -4,6 +4,7 @@ import sendgrid from "nodemailer-sendgrid";
 import Email from "email-templates";
 import { logger } from "../logger";
 import { Job } from "bullmq";
+import Mail from "nodemailer/lib/mailer";
 
 const viewsDir = path.join(__dirname, "../emails");
 
@@ -15,11 +16,25 @@ const transport: Transporter = !!process.env.SENDGRID_API_KEY
     )
   : ({ jsonTransport: true } as unknown as Transporter);
 
-/**
- * Cleanup incoming folder and more (later)
- */
+export const sendErrorEmail = async (error: unknown) => {
+  sendMail({
+    data: {
+      template: "error-email",
+      message: {
+        to: "hi@mirlo.space",
+      },
+      locals: { error: JSON.stringify(error), time: new Date().toDateString() },
+    },
+  });
+};
 
-export const sendMail = async (job: Job) => {
+export const sendMail = async (job: {
+  data: {
+    template: string;
+    message: Mail.Options;
+    locals: { [key: string]: any };
+  };
+}) => {
   logger.info(`sendMail: sending: ${job.data.template}`);
   try {
     const email = new Email({

@@ -80,7 +80,7 @@ const ManageArtist: React.FC<{}> = () => {
             </NavLink>
           </li>
         )}
-        {artist && user?.isAdmin && (
+        {artist && (
           <li>
             <NavLink to="merch">{t("merch")}</NavLink>
           </li>
