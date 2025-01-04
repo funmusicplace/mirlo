@@ -150,7 +150,7 @@ export async function cleanUpFilesQueue() {
     cleanUpOldFilesJob,
     workerOptions
   );
-  logger.info("Move Files From Minio to BackBlaze worker started");
+  logger.info("clean up old files worker started");
 
   worker.on("completed", (job: any) => {
     logger.info("completed:clean-up-old-files");
@@ -170,17 +170,17 @@ export async function moveFilesToBackBlazeWorker() {
     moveFilesToBackblazeJob,
     workerOptions
   );
-  logger.info("Clean Up Files worker started");
+  logger.info("Move Files to Backblaze worker started");
 
   worker.on("completed", (job: any) => {
-    logger.info("completed:clean-up-old-files");
+    logger.info("completed:move-file-to-backblaze");
   });
 
   worker.on("failed", (job: any, err: any) => {
-    logger.error("failed:clean-up-old-files", err);
+    logger.error("failed:move-file-to-backblaze", err);
   });
 
   worker.on("error", (err: any) => {
-    logger.error("error:clean-up-old-files", err);
+    logger.error("error:move-file-to-backblaze", err);
   });
 }

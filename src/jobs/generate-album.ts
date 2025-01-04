@@ -7,6 +7,7 @@ import {
   createBucketIfNotExists,
   finalAudioBucket,
   finalCoversBucket,
+  getBufferFromStorage,
   minioClient,
   trackGroupFormatBucket,
 } from "../utils/minio";
@@ -22,6 +23,7 @@ import {
 } from "@mirlo/prisma/client";
 import filenamify from "filenamify";
 import prisma from "@mirlo/prisma";
+import cover from "../routers/v1/manage/trackGroups/{trackGroupId}/cover";
 
 const {
   MINIO_HOST = "",
@@ -104,11 +106,20 @@ export default async (job: Job) => {
 
       if (trackGroup.cover?.id) {
         logger.info("Adding cover");
-        await minioClient.fGetObject(
+        // await minioClient.fGetObject(
+        //   finalCoversBucket,
+        //   `${trackGroup.cover.id}-x1500.jpg`,
+        //   coverDestination
+        // );
+
+        const { buffer } = await getBufferFromStorage(
+          minioClient,
           finalCoversBucket,
-          `${trackGroup.cover.id}-x1500.jpg`,
-          coverDestination
+          `${trackGroup.cover.id}-x1500.jpg`
         );
+        if (buffer) {
+          await fsPromises.writeFile(coverDestination, buffer);
+        }
       }
 
       await new Promise((resolve, reject) => {
