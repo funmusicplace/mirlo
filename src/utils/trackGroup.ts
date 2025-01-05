@@ -357,14 +357,14 @@ export const basicTrackGroupInclude = {
     },
     cover: {
       include: {
-        trackGroup: false
-      }
+        trackGroup: false,
+      },
     },
     artist: {
       include: {
-        user: false
-      }
-    }
+        user: false,
+      },
+    },
   },
 };
 
@@ -435,7 +435,7 @@ export const findPurchaseBasedOnTokenAndUpdate = async (
   if (!purchase) {
     throw new AppError({
       httpCode: 404,
-      description: `Trackgroup Purchase doesn't exist for ${trackGroupId}, ${userId}`,
+      description: `Trackgroup Purchase doesn't exist for trackgroupId: ${trackGroupId}, userId: ${userId}`,
     });
   }
 

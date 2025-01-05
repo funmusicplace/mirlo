@@ -245,6 +245,12 @@ router.post(
   async (req, res, next) => {
     try {
       const { email, password } = req.body;
+      if (!email || !password) {
+        res.status(401).json({
+          error: "Incorrect username or password",
+        });
+        return next();
+      }
       const foundUser = await prisma.user.findFirst({
         where: {
           email: email.toLowerCase(),

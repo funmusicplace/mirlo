@@ -41,7 +41,6 @@ const HeaderSearch: React.FC = () => {
         isTrack: true,
       })),
     ];
-    console.log("results", results);
     return results;
   }, []);
 
