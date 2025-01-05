@@ -74,7 +74,9 @@ export const moveFilesToBackblazeJob = async (job: Job) => {
     await uploadWrapper(bucketName, fileName, stream);
   } catch (e) {
     console.error(e);
-    sendErrorEmail(e);
+    if (e instanceof Error) {
+      sendErrorEmail(e);
+    }
     logger.error(`Error moving file ${bucketName}/${fileName}`);
   }
   logger.info(`done transfering ${bucketName}/${fileName}`);

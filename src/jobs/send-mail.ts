@@ -16,14 +16,17 @@ const transport: Transporter = !!process.env.SENDGRID_API_KEY
     )
   : ({ jsonTransport: true } as unknown as Transporter);
 
-export const sendErrorEmail = async (error: unknown) => {
+export const sendErrorEmail = async (error: Error) => {
   sendMail({
     data: {
       template: "error-email",
       message: {
         to: "hi@mirlo.space",
       },
-      locals: { error: JSON.stringify(error), time: new Date().toDateString() },
+      locals: {
+        error: JSON.stringify(error.stack),
+        time: new Date().toDateString(),
+      },
     },
   });
 };
