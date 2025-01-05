@@ -8,6 +8,7 @@ import Background from "components/common/Background";
 import Button from "./Button";
 import styled from "@emotion/styled";
 import { useLocation } from "react-router-dom";
+import { debounce } from "lodash";
 
 const SearchResultsDiv = styled.div`
   position: absolute;
@@ -124,12 +125,11 @@ const AutoComplete: React.FC<{
   );
 
   const searchCallback = React.useCallback(
-    async (searchString: string) => {
+    debounce(async (searchString: string) => {
       if (searchString && searchString.length > 1) {
         setShowSuggestions(true);
         setIsSearching(true);
         const results = await getOptions(searchString);
-
         const searchResultsMatchSearch = searchResults.find(
           (result) =>
             result.name.toLowerCase().replaceAll(/\-| /g, "") === searchString
@@ -148,7 +148,7 @@ const AutoComplete: React.FC<{
         setSearchResults([]);
         setShowSuggestions(false);
       }
-    },
+    }, 500),
     [getOptions, allowNew]
   );
 
