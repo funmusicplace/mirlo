@@ -29,6 +29,8 @@ model Client {
   applicationName    String
   applicationUrl     String
   allowedCorsOrigins String[]
+  secret             String?
+  key                String?
   updatedAt          DateTime
   createdAt          DateTime
   deletedAt          DateTime?

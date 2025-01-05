@@ -8,42 +8,41 @@ import { debounce } from "lodash";
 const HeaderSearch: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "headerSearch" });
 
-  const getOptions = React.useCallback(
-    debounce(async (searchString: string) => {
-      const artists = await api.getMany<Artist>(`artists`, {
-        name: searchString,
-      });
-      const trackGroups = await api.getMany<TrackGroup>(`trackGroups`, {
-        title: searchString,
-      });
-      const tracks = await api.getMany<Track>(`tracks`, {
-        title: searchString,
-      });
-      return [
-        ...artists.results.map((r) => ({
-          artistId: r.urlSlug ?? r.id,
-          id: r.id,
-          name: r.name,
-          isArtist: true,
-        })),
-        ...trackGroups.results.map((t) => ({
-          id: t.urlSlug ?? t.id,
-          artistId: t.artist?.urlSlug ?? t.artistId,
-          trackGroupId: t.urlSlug ?? t.id,
-          name: t.title,
-          isTrackGroup: true,
-        })),
-        ...tracks.results.map((t) => ({
-          id: t.id,
-          trackGroupId: t.trackGroup.urlSlug ?? t.trackGroupId,
-          artistId: t.trackGroup.artist.urlSlug ?? t.trackGroup.artistId,
-          name: t.title,
-          isTrack: true,
-        })),
-      ];
-    }, 500),
-    []
-  );
+  const getOptions = React.useCallback(async (searchString: string) => {
+    console.log("searching", searchString);
+    const artists = await api.getMany<Artist>(`artists`, {
+      name: searchString,
+    });
+    const trackGroups = await api.getMany<TrackGroup>(`trackGroups`, {
+      title: searchString,
+    });
+    const tracks = await api.getMany<Track>(`tracks`, {
+      title: searchString,
+    });
+    const results = [
+      ...artists.results.map((r) => ({
+        artistId: r.urlSlug ?? r.id,
+        id: r.id,
+        name: r.name,
+        isArtist: true,
+      })),
+      ...trackGroups.results.map((t) => ({
+        id: t.urlSlug ?? t.id,
+        artistId: t.artist?.urlSlug ?? t.artistId,
+        trackGroupId: t.urlSlug ?? t.id,
+        name: t.title,
+        isTrackGroup: true,
+      })),
+      ...tracks.results.map((t) => ({
+        id: t.id,
+        trackGroupId: t.trackGroup.urlSlug ?? t.trackGroupId,
+        artistId: t.trackGroup.artist.urlSlug ?? t.trackGroup.artistId,
+        name: t.title,
+        isTrack: true,
+      })),
+    ];
+    return results;
+  }, []);
 
   return (
     <AutoComplete

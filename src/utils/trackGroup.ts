@@ -94,12 +94,15 @@ export const deleteTrackGroup = async (
 };
 
 export const findTrackGroupIdForSlug = async (
-  id: string,
+  trackGroupIdOrSlug: string,
   artistId?: string
 ) => {
-  let foundId: number | undefined = Number(id);
+  let foundtrackGroupId: number | undefined = Number(trackGroupIdOrSlug);
 
-  if (Number.isNaN(foundId) || (Number.isFinite(+foundId) && artistId)) {
+  if (
+    Number.isNaN(foundtrackGroupId) ||
+    (Number.isFinite(+foundtrackGroupId) && artistId)
+  ) {
     if (!artistId) {
       throw new Error(
         "Searching for a TrackGroup by slug requires an artistId"
@@ -110,22 +113,22 @@ export const findTrackGroupIdForSlug = async (
     if (parsedArtistId) {
       const trackGroup = await prisma.trackGroup.findFirst({
         where: {
-          urlSlug: { equals: id, mode: "insensitive" },
+          urlSlug: { equals: trackGroupIdOrSlug, mode: "insensitive" },
           artistId: parsedArtistId,
         },
       });
-      foundId = trackGroup ? trackGroup.id : undefined;
+      foundtrackGroupId = trackGroup ? trackGroup.id : undefined;
     } else {
-      logger.error(
-        `findTrackGroupIdForSlug: returning undefined for id: ${id} artistId: ${artistId}`
+      logger.info(
+        `findTrackGroupIdForSlug: returning undefined for trackGroupId: ${trackGroupIdOrSlug}, artistId: ${artistId}`
       );
       return undefined;
     }
   } else {
-    foundId = Number(id);
+    foundtrackGroupId = Number(trackGroupIdOrSlug);
   }
 
-  return foundId;
+  return foundtrackGroupId;
 };
 
 export const trackGroupSingleInclude = (options: {
@@ -357,14 +360,14 @@ export const basicTrackGroupInclude = {
     },
     cover: {
       include: {
-        trackGroup: false
-      }
+        trackGroup: false,
+      },
     },
     artist: {
       include: {
-        user: false
-      }
-    }
+        user: false,
+      },
+    },
   },
 };
 
@@ -435,7 +438,7 @@ export const findPurchaseBasedOnTokenAndUpdate = async (
   if (!purchase) {
     throw new AppError({
       httpCode: 404,
-      description: `Trackgroup Purchase doesn't exist for ${trackGroupId}, ${userId}`,
+      description: `Trackgroup Purchase doesn't exist for trackgroupId: ${trackGroupId}, userId: ${userId}`,
     });
   }
 
