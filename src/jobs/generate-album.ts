@@ -102,7 +102,7 @@ export default async (job: Job) => {
         throw "Couldn't find artist, weird";
       }
 
-      const coverDestination = `${tempFolder}/cover.jpg`;
+      const coverDestination = `${tempFolder}/cover.webp`;
 
       if (trackGroup.cover?.id) {
         logger.info("Adding cover");
@@ -115,7 +115,7 @@ export default async (job: Job) => {
         const { buffer } = await getBufferFromStorage(
           minioClient,
           finalCoversBucket,
-          `${trackGroup.cover.id}-x1500.jpg`
+          `${trackGroup.cover.id}-x1500.webp`
         );
         if (buffer) {
           await fsPromises.writeFile(coverDestination, buffer);
