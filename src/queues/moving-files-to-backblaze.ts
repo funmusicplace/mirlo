@@ -1,8 +1,12 @@
 import { Job, Queue, QueueEvents } from "bullmq";
 import { REDIS_CONFIG } from "../config/redis";
 import logger from "../logger";
-import { getObjectList, minioClient, uploadWrapper } from "../utils/minio";
-import { sleep } from "../jobs/optimize-image";
+import {
+  fileExistCheckBackblaze,
+  getObjectList,
+  minioClient,
+  uploadWrapper,
+} from "../utils/minio";
 import { sendErrorEmail } from "../jobs/send-mail";
 
 const queueOptions = {
@@ -68,10 +72,17 @@ export const moveFilesToBackblazeJob = async (job: Job) => {
   const bucketName = job.data.bucketName;
   const fileName = job.data.fileName;
 
-  logger.info(`moving file: bucket: ${bucketName}, ${fileName}`);
+  logger.info(`checking file exists: ${bucketName}/${fileName}`);
   try {
-    const stream = await minioClient.getObject(bucketName, fileName);
-    await uploadWrapper(bucketName, fileName, stream);
+    const stat = await fileExistCheckBackblaze(bucketName, fileName);
+
+    if (!stat) {
+      logger.info(`file does not exist, moving it: ${bucketName}/${fileName}`);
+      const stream = await minioClient.getObject(bucketName, fileName);
+      await uploadWrapper(bucketName, fileName, stream);
+    } else {
+      logger.info(`file already exists: ${bucketName}/${fileName}`);
+    }
   } catch (e) {
     console.error(e);
     if (e instanceof Error) {

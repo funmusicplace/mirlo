@@ -8,6 +8,8 @@ import {
   GetObjectCommand,
   DeleteObjectCommand,
   PutObjectCommand,
+  HeadObjectCommand,
+  HeadObjectCommandOutput,
 } from "@aws-sdk/client-s3";
 import fs from "fs";
 import logger from "../logger";
@@ -83,6 +85,25 @@ const createB2BucketIfNotExists = async (bucket: string) => {
   }
 
   return true;
+};
+
+export const fileExistCheckBackblaze = async (
+  bucket: string,
+  filename: string
+): Promise<HeadObjectCommandOutput | undefined> => {
+  let backblazeStat: HeadObjectCommandOutput | undefined = undefined;
+  try {
+    backblazeStat = await backblazeClient.send(
+      new HeadObjectCommand({
+        Bucket: bucket,
+        Key: filename,
+      }),
+      {}
+    );
+  } catch (e) {
+    return undefined;
+  }
+  return backblazeStat;
 };
 
 export const createBucketIfNotExists = async (
