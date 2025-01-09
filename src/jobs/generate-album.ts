@@ -206,7 +206,10 @@ export default async (job: Job) => {
     });
   } catch (e) {
     await fsPromises.rm(tempFolder, { recursive: true, force: true });
-    logger.error("Error creating audio folder", e);
+    logger.error(`Error creating audio folder for ${trackGroup.id}`);
+    if (e instanceof Error) {
+      logger.error(`${e.message}: ${e.stack}`);
+    }
     return { error: e };
   }
 };

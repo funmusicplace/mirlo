@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import {
   backblazeClient,
+  fileExistCheckBackblaze,
   getBufferFromBackblaze,
   getBufferFromMinio,
 } from "./utils/minio";
@@ -13,25 +14,18 @@ export const serveStatic = async (
   res: Response,
   next: NextFunction
 ) => {
-  let backblazeStat;
   let minioStat;
 
-  // FIXME: someone who's better at devops than me will have to figure out
-  // how we can serve these directly from minio
-  try {
-    backblazeStat = await backblazeClient.send(
-      new HeadObjectCommand({
-        Bucket: req.params.bucket,
-        Key: req.params.filename,
-      }),
-      {}
-    );
-    // If the object doesn't exist on backblaze we check in minio
-  } catch (error) {
-    // console.error("failed fetching from backblaze");
-  }
+  const backblazeStat = await fileExistCheckBackblaze(
+    req.params.bucket,
+    req.params.filename
+  );
 
+  // If the object doesn't exist on backblaze we check in minio
   if (!backblazeStat) {
+    logger.error(
+      `Error fetching static file from backblaze, checking minio: ${req.params.bucket}/${req.params.filename}`
+    );
     minioStat = await minioClient.statObject(
       req.params.bucket,
       req.params.filename
