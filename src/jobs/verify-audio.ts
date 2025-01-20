@@ -3,14 +3,8 @@ import { Job } from "bullmq";
 import { promises as fsPromises } from "fs";
 
 import { logger } from "./queue-worker";
-import { finalAudioBucket, minioClient } from "../utils/minio";
+import { finalAudioBucket, getFile } from "../utils/minio";
 import fetch from "node-fetch";
-
-const {
-  MINIO_HOST = "",
-  MINIO_ROOT_USER = "",
-  MINIO_API_PORT = 9000,
-} = process.env;
 
 export default async (job: Job) => {
   const { audioId, fileExtension } = job.data;
@@ -24,22 +18,17 @@ export default async (job: Job) => {
 
     let progress = 10;
     const tempFolder = `/data/media/verifying/${audioId}`;
-    logger.info(
-      `MinIO is at ${MINIO_HOST}:${MINIO_API_PORT} ${MINIO_ROOT_USER}`
-    );
+
     try {
       await fsPromises.stat(tempFolder);
     } catch (e) {
       await fsPromises.mkdir(tempFolder, { recursive: true });
     }
 
-    const minioTrackLocation = `${audioId}/original.${fileExtension}`;
+    const remoteTrackLocation = `${audioId}/original.${fileExtension}`;
     const localTrackPath = `${tempFolder}/original.${fileExtension}`;
-    await minioClient.fGetObject(
-      finalAudioBucket,
-      minioTrackLocation,
-      localTrackPath
-    );
+
+    await getFile(finalAudioBucket, remoteTrackLocation, localTrackPath);
 
     logger.info(`audioId: ${audioId} \t got the track audio`);
 
@@ -70,7 +59,6 @@ export default async (job: Job) => {
       return: "musicbrainz",
     });
 
-    console.log("url", jsonBody);
     const response = await fetch(`https://enterprise.audd.io/recognize`, {
       method: "POST",
       body: jsonBody,

@@ -12,7 +12,6 @@ import {
   incomingArtistAvatarBucket,
   incomingArtistBannerBucket,
   incomingMerchImageBucket,
-  minioClient,
   uploadWrapper,
 } from "../utils/minio";
 import prisma from "@mirlo/prisma";
@@ -82,7 +81,7 @@ export const uploadAndSendToImageQueue = async (
 ) => {
   logger.info(`Uploading ${sharpConfigKey} to object storage`);
 
-  await createBucketIfNotExists(minioClient, incomingBucket, logger);
+  await createBucketIfNotExists(incomingBucket, logger);
   logger.info("Made bucket");
 
   ctx.req.pipe(ctx.req.busboy);

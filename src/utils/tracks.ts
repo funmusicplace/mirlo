@@ -126,11 +126,12 @@ export const convertAudioToFormat = (
   }
 
   if (format === "mp3") {
-    processor.addOptions("-write_xing", "0");
-    processor.addInput(content.coverLocation);
-    processor.outputOptions("-metadata:s:v", `title="Album cover"`);
-    processor.videoCodec("copy");
-    processor.outputOptions("-metadata:s:v", `commment="Cover (front)`);
+    // FIXME: this seems to fail for some things. Maybe to do with webp vs jpeg?
+    // processor.addOptions("-write_xing", "0");
+    // processor.addInput(content.coverLocation);
+    // processor.outputOptions("-metadata:s:v", `title="Album cover"`);
+    // processor.videoCodec("copy");
+    // processor.outputOptions("-metadata:s:v", `commment="Cover (front)`);
   }
   if (audioCodec) {
     processor.audioCodec(audioCodec);

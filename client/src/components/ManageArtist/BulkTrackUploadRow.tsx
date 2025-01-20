@@ -5,7 +5,8 @@ import styled from "@emotion/styled";
 
 export const PercentUpload = styled("div")<{ percentUpload: number }>`
   position: absolute;
-  height: 100%;
+  height: 5px;
+  bottom: 0;
   opacity: 0.5;
   transition: 0.2s width;
   width: ${(props) => props.percentUpload ?? 0}%;
@@ -43,6 +44,7 @@ export const BulkTrackUploadRow: React.FC<{
       className={css`
         position: relative;
         margin-bottom: 0.2rem;
+        background: var(--mi-darken-background-color);
       `}
     >
       <PercentUpload percentUpload={track.status} />

@@ -4,8 +4,8 @@ import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
 import {
   finalAudioBucket,
-  getBufferFromMinio,
-  minioClient,
+  getBufferBasedOnStat,
+  statFile,
 } from "../../../../../utils/minio";
 import { userLoggedInWithoutRedirect } from "../../../../../auth/passport";
 import { canUserListenToTrack } from "../../../../../utils/ownership";
@@ -17,20 +17,15 @@ export const fetchFile = async (
 ) => {
   const alias = `${filename}/${segment}`;
 
-  try {
-    await minioClient.statObject(finalAudioBucket, alias);
-    // await fsPromises.stat(path.join(ROOT, alias));
-  } catch (e) {
-    res.status(404);
+  const { backblazeStat, minioStat } = await statFile(finalAudioBucket, alias);
+  if (!backblazeStat && !minioStat) {
     res.send();
-    return;
   }
-
   try {
-    const { buffer } = await getBufferFromMinio(
-      minioClient,
+    const buffer = await getBufferBasedOnStat(
       finalAudioBucket,
-      alias
+      alias,
+      backblazeStat
     );
 
     res.end(buffer, "binary");

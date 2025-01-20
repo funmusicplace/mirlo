@@ -6,7 +6,6 @@ import { describe, it } from "mocha";
 import { clearTables, createArtist, createUser } from "../../../utils";
 import prisma from "@mirlo/prisma";
 import {
-  minioClient,
   createBucketIfNotExists,
   finalArtistAvatarBucket,
 } from "../../../../src/utils/minio";
@@ -26,7 +25,7 @@ describe("manage/artists/{artistId}/avatar", () => {
     it("should DELETE with one artist", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
       const artist = await createArtist(user.id);
-      await createBucketIfNotExists(minioClient, finalArtistAvatarBucket);
+      await createBucketIfNotExists(finalArtistAvatarBucket);
 
       await prisma.artistAvatar.create({
         data: {

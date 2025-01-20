@@ -7,7 +7,6 @@ import { uniq } from "lodash";
 import {
   createBucketIfNotExists,
   getBufferFromStorage,
-  minioClient,
   removeObjectFromStorage,
   uploadWrapper,
 } from "../utils/minio";
@@ -44,12 +43,11 @@ const optimizeImage = async (job: Job) => {
 
     logger.info(`Starting to optimize images ${model}/${destinationId}`);
     const { buffer } = await getBufferFromStorage(
-      minioClient,
       incomingMinioBucket,
       destinationId
     );
 
-    await createBucketIfNotExists(minioClient, finalMinioBucket, logger);
+    await createBucketIfNotExists(finalMinioBucket, logger);
 
     // logger.info(`Got object of size ${size}`);
     const promises = Object.entries(config)
@@ -125,11 +123,6 @@ const optimizeImage = async (job: Job) => {
               await uploadWrapper(finalMinioBucket, finalFileName, newBuffer, {
                 contentType: `image/${outputType}`,
               });
-              // await minioClient.putObject(
-              //   finalMinioBucket,
-              //   finalFileName,
-              //   newBuffer
-              // );
 
               logger.info(`Converted and optimized image to ${outputType}`, {
                 ratio: `${width}x${height})`,
@@ -170,11 +163,6 @@ const optimizeImage = async (job: Job) => {
         resizeOptions: {},
       });
       logger.info("Uploading artist avatar favicon to bucket");
-      await minioClient.putObject(
-        finalMinioBucket,
-        faviconFinalName,
-        sharp(buffer)
-      );
       await uploadWrapper(finalMinioBucket, faviconFinalName, sharp(buffer));
 
       await prisma.artistAvatar.update({

@@ -4,9 +4,7 @@ import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
 import { clearTables, createArtist, createUser } from "../../../utils";
-import prisma from "@mirlo/prisma";
 import {
-  minioClient,
   createBucketIfNotExists,
   finalArtistAvatarBucket,
 } from "../../../../src/utils/minio";
@@ -72,7 +70,7 @@ describe("manage/artists/{artistId}", () => {
         email: "test@testcom",
       });
       const artist = await createArtist(user.id);
-      await createBucketIfNotExists(minioClient, finalArtistAvatarBucket);
+      await createBucketIfNotExists(finalArtistAvatarBucket);
 
       const response = await requestApp
         .delete(`manage/artists/${artist.id}`)
