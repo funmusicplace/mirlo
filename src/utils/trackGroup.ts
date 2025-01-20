@@ -14,8 +14,8 @@ import { generateFullStaticImageUrl } from "./images";
 import {
   finalCoversBucket,
   finalAudioBucket,
-  minioClient,
   removeObjectsFromBucket,
+  getReadStream,
 } from "./minio";
 import { addSizesToImage, findArtistIdForURLSlug } from "./artist";
 import { logger } from "../logger";
@@ -236,17 +236,25 @@ export async function buildZipFileForPath(
         const trackLocation = `${track.audio.id}/original.${track.audio.fileExtension}`;
         logger.info(`${track.audio.id}: Fetching ${trackLocation}`);
         try {
-          const trackStream = await minioClient.getObject(
+          const trackStream = await getReadStream(
             finalAudioBucket,
             trackLocation
           );
 
-          archive.append(trackStream, { name: trackTitle });
-          logger.info(
-            `${track.audio.id}: Added track to zip file ${track.title}`
-          );
+          if (trackStream) {
+            archive.append(trackStream, { name: trackTitle });
+            logger.info(
+              `${track.audio.id}: Added track to zip file ${track.title}`
+            );
+          } else {
+            logger.error(
+              `${track.audio.id}: File not found on backend storage skipping`
+            );
+          }
         } catch (e) {
-          logger.error(`${track.audio.id}: File not found on MinIO skipping`);
+          logger.error(
+            `${track.audio.id}: File not found on backend storage skipping`
+          );
         }
       }
     }

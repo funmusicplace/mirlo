@@ -15,7 +15,6 @@ import { requestApp } from "../utils";
 import {
   createBucketIfNotExists,
   finalAudioBucket,
-  minioClient,
 } from "../../../src/utils/minio";
 
 describe("trackGroups/{id}/download", () => {
@@ -55,7 +54,7 @@ describe("trackGroups/{id}/download", () => {
       });
       const artist = await createArtist(user.id);
       const trackGroup = await createTrackGroup(artist.id);
-      await createBucketIfNotExists(minioClient, finalAudioBucket);
+      await createBucketIfNotExists(finalAudioBucket);
 
       const { user: purchaser } = await createUser({
         email: "purchaser@artist.com",

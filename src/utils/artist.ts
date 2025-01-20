@@ -20,7 +20,6 @@ import { convertURLArrayToSizes } from "./images";
 import {
   finalArtistAvatarBucket,
   finalArtistBannerBucket,
-  finalMerchImageBucket,
   removeObjectsFromBucket,
 } from "./minio";
 import {

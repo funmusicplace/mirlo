@@ -14,7 +14,6 @@ import LoadingSpinner from "components/common/LoadingSpinner";
 import Button from "components/common/Button";
 import { useAuthContext } from "state/AuthContext";
 import ManageTrackArtists from "./ManageTrackArtists";
-import SavingInput from "./AlbumFormComponents/SavingInput";
 import ClickToEditInput from "./AlbumFormComponents/ClickToEditInput";
 
 const TrackRow = styled("tr")`
@@ -107,8 +106,6 @@ const ManageTrackRow: React.FC<{
 
     reload();
   }, [reload]);
-
-  console.log("track.audio", track.title, !track.title);
 
   if (isEditing) {
     return (

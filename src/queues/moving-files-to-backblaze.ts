@@ -5,6 +5,7 @@ import {
   fileExistCheckBackblaze,
   getObjectList,
   minioClient,
+  uploadFilesToBackblaze,
   uploadWrapper,
 } from "../utils/minio";
 import { sendErrorEmail } from "../jobs/send-mail";
@@ -77,9 +78,11 @@ export const moveFilesToBackblazeJob = async (job: Job) => {
     const stat = await fileExistCheckBackblaze(bucketName, fileName);
 
     if (!stat) {
-      logger.info(`file does not exist, moving it: ${bucketName}/${fileName}`);
+      logger.info(
+        `file does not exist on backblaze yet, moving it: ${bucketName}/${fileName}`
+      );
       const stream = await minioClient.getObject(bucketName, fileName);
-      await uploadWrapper(bucketName, fileName, stream);
+      await uploadFilesToBackblaze(bucketName, fileName, stream);
     } else {
       logger.info(`file already exists: ${bucketName}/${fileName}`);
     }

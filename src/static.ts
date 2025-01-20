@@ -1,37 +1,21 @@
 import { NextFunction, Request, Response } from "express";
 import {
-  backblazeClient,
-  fileExistCheckBackblaze,
+  getBufferBasedOnStat,
   getBufferFromBackblaze,
   getBufferFromMinio,
+  statFile,
 } from "./utils/minio";
 import { minioClient } from "./utils/minio";
-import { HeadObjectCommand } from "@aws-sdk/client-s3";
-import logger from "./logger";
 
 export const serveStatic = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  let minioStat;
-
-  const backblazeStat = await fileExistCheckBackblaze(
+  const { backblazeStat, minioStat } = await statFile(
     req.params.bucket,
     req.params.filename
   );
-
-  // If the object doesn't exist on backblaze we check in minio
-  if (!backblazeStat) {
-    logger.error(
-      `Error fetching static file from backblaze, checking minio: ${req.params.bucket}/${req.params.filename}`
-    );
-    minioStat = await minioClient.statObject(
-      req.params.bucket,
-      req.params.filename
-    );
-  }
-
   if (!backblazeStat && !minioStat) {
     res.status(404);
     next();
@@ -58,22 +42,13 @@ export const serveStatic = async (
   }
 
   try {
-    if (backblazeStat) {
-      const { buffer } = await getBufferFromBackblaze(
-        req.params.bucket,
-        req.params.filename
-      );
+    const buffer = await getBufferBasedOnStat(
+      req.params.bucket,
+      req.params.filename,
+      backblazeStat
+    );
 
-      res.end(buffer, "binary");
-    } else {
-      const { buffer } = await getBufferFromMinio(
-        minioClient,
-        req.params.bucket,
-        req.params.filename
-      );
-
-      res.end(buffer, "binary");
-    }
+    res.end(buffer, "binary");
 
     return;
   } catch (e) {

@@ -6,6 +6,7 @@ FROM node:18-bookworm-slim AS base
 COPY --from=ffmpeg / /
 
 RUN apt-get update -qq
+RUN apt-get update && apt-get install -y apt-transport-https
 RUN apt-get install -qq libavdevice59 >/dev/null
 
 # Create app directory

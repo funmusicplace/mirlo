@@ -67,7 +67,6 @@ export const BulkTrackUpload: React.FC<{
       if (firstTrack) {
         const metadata = pick(firstTrack.t.metadata, ["format", "common"]);
         delete metadata.common.picture;
-        console.log("firstTrack", metadata);
 
         const packet = {
           title: firstTrack.t.title,
@@ -194,11 +193,11 @@ export const BulkTrackUpload: React.FC<{
               margin-bottom: 1rem;
             `}
           >
-            {uploadQueue.map((t, idx) => (
+            {uploadQueue.map((t) => (
               <BulkTrackUploadRow track={t} key={t.title} />
             ))}
           </div>
-        )}
+        )}{" "}
         <p>{t("uploadTracksDescription")}</p>
         <FormComponent>
           <UploadLabelWrapper htmlFor="audio">

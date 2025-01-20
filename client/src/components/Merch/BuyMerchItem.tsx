@@ -172,7 +172,9 @@ const BuyMerchItem: React.FC<{
       >
         {t("goToCheckOut")}
       </Button>
-      <small>{t("artistCheckoutPage")}</small>
+      <div>
+        <small>{t("artistCheckoutPage")}</small>
+      </div>
     </form>
   );
 };

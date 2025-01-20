@@ -5,11 +5,12 @@ import { REDIS_CONFIG } from "../config/redis";
 
 import prisma from "@mirlo/prisma";
 import { logger } from "../logger";
-import { createBucketIfNotExists, incomingAudioBucket } from "../utils/minio";
-import { minioClient } from "../utils/minio";
+import {
+  createBucketIfNotExists,
+  incomingAudioBucket,
+  uploadWrapper,
+} from "../utils/minio";
 import { verifyAudioQueue } from "./verify-audio-queue";
-
-const { MINIO_HOST = "", MINIO_API_PORT = 9000 } = process.env;
 
 const buildTrackStreamURL = (trackId: number) => {
   return `/v1/tracks/${trackId}/stream/playlist.m3u8`;
@@ -97,10 +98,9 @@ audioQueueEvents.on("error", async (error) => {
  */
 export const processTrackAudio = (ctx: { req: Request; res: Response }) => {
   return async (trackId: number) => {
-    logger.info(`MinIO is at ${MINIO_HOST}:${MINIO_API_PORT}`);
     logger.info("Uploading trackAudio to temporary storage");
 
-    await createBucketIfNotExists(minioClient, incomingAudioBucket, logger);
+    await createBucketIfNotExists(incomingAudioBucket, logger);
 
     ctx.req.pipe(ctx.req.busboy);
 
@@ -128,9 +128,9 @@ export const processTrackAudio = (ctx: { req: Request; res: Response }) => {
         });
 
         logger.info(
-          `Going to put a file on MinIO Bucket ${incomingAudioBucket}: ${audio.id}, ${fileInfo.filename}`
+          `Going to put a file on ${incomingAudioBucket}/${audio.id}: ${fileInfo.filename}`
         );
-        await minioClient.putObject(incomingAudioBucket, audio.id, fileStream);
+        await uploadWrapper(incomingAudioBucket, audio.id, fileStream);
 
         logger.info("Adding audio to upload-audio queue");
         const job = await audioQueue.add("upload-audio", {
