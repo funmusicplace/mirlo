@@ -169,8 +169,6 @@ export const uploadFilesToBackblaze = async (
   options?: { contentType?: string }
 ) => {
   if (fileStream instanceof Buffer) {
-    logger.info(`${backendStorage}: uploading buffer: ${bucket}/${fileName}`);
-
     await backblazeClient.send(
       new PutObjectCommand({
         Bucket: bucket,
@@ -180,10 +178,6 @@ export const uploadFilesToBackblaze = async (
       })
     );
   } else {
-    logger.info(
-      `${backendStorage}: uploading fileStream: ${bucket}/${fileName}`
-    );
-
     const upload = new Upload({
       client: backblazeClient,
       params: {
@@ -196,6 +190,9 @@ export const uploadFilesToBackblaze = async (
 
     await upload.done();
   }
+  logger.info(
+    `${backendStorage}: done uploading filestream|buffer: ${bucket}/${fileName}`
+  );
 };
 
 export const uploadWrapper = async (
@@ -204,12 +201,12 @@ export const uploadWrapper = async (
   fileStream: Readable | Buffer,
   options?: { contentType?: string }
 ) => {
+  logger.info(
+    `${backendStorage}: uploading fileStream|buffer: ${bucket}/${fileName}`
+  );
   if (backendStorage === "backblaze") {
-    uploadFilesToBackblaze(bucket, fileName, fileStream, options);
+    await uploadFilesToBackblaze(bucket, fileName, fileStream, options);
   } else {
-    logger.info(
-      `${backendStorage}: uploading fileStream: ${bucket}/${fileName}`
-    );
     await minioClient.putObject(bucket, fileName, fileStream);
   }
 };
