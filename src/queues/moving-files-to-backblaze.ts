@@ -4,6 +4,7 @@ import logger from "../logger";
 import {
   fileExistCheckBackblaze,
   getObjectList,
+  getObjectListFromMinio,
   minioClient,
   uploadFilesToBackblaze,
   uploadWrapper,
@@ -48,7 +49,7 @@ moveFilesToBackBlazeQueueEvents.on("error", async (error) => {
 });
 
 export const startMovingFiles = async (bucketName: string) => {
-  const files = await getObjectList(bucketName, "");
+  const files = await getObjectListFromMinio(bucketName, "");
   logger.info(`moving-files: going to move ${files.length} files`);
   files.map(async (file, i) => {
     try {
