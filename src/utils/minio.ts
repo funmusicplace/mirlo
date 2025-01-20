@@ -421,7 +421,7 @@ export const getObjectListFromMinio = async (
 ): Promise<{ name: string }[]> => {
   return await new Promise((resolve, reject) => {
     const data: { name: string }[] = [];
-    const stream = minioClient.listObjects(bucket, prefix, true);
+    const stream = minioClient.listObjectsV2(bucket, prefix, true);
     stream.on("data", function (obj) {
       data.push(obj);
     });

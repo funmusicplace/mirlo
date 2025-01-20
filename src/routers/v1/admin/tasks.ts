@@ -33,7 +33,7 @@ export default function () {
             "trackgroup-format",
           ].includes(jobParam)
         ) {
-          await startMovingFiles(jobParam);
+          startMovingFiles(jobParam);
           result[jobName] = "Success";
         }
         if (jobName === "initiateUserNotifications") {
