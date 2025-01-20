@@ -13,7 +13,7 @@ export default function () {
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { jobName, jobParam } = req.query;
     const result: { [key: string]: "Success" } = {};
-    logger.info(`starting job ${jobName}`);
+    logger.info(`triggering job ${jobName} with ${jobParam}`);
 
     try {
       if (jobName) {
@@ -30,6 +30,7 @@ export default function () {
             "trackgroup-covers",
             "post-images",
             "track-audio",
+            "trackgroup-format",
           ].includes(jobParam)
         ) {
           await startMovingFiles(jobParam);
