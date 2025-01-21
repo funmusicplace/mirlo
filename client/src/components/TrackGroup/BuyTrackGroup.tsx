@@ -40,7 +40,7 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup }> = ({
   const minPrice = trackGroup.minPrice;
   const methods = useForm<FormData>({
     defaultValues: {
-      chosenPrice: `${minPrice ? minPrice / 100 : 5}`,
+      chosenPrice: `${minPrice ? minPrice / 100 : ""}`,
       userEmail: "",
     },
     reValidateMode: "onBlur",

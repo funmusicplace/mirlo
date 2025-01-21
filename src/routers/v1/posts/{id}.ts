@@ -25,6 +25,7 @@ export default function () {
           isDraft: false,
         },
         include: {
+          featuredImage: true,
           artist: {
             include: {
               avatar: {
