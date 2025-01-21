@@ -100,7 +100,7 @@ export const Footer = () => {
               <FaTwitter aria-hidden />
             </a>
             <a
-              href="https://bsky.app/profile/mirlo.bsky.social"
+              href="https://bsky.app/profile/mirlo.space"
               title="BlueSky"
               aria-label={`${t("socialBlueSky", { username: "mirlo.bsky.social" })}`}
             >

@@ -49,6 +49,8 @@ moveFilesToBackBlazeQueueEvents.on("error", async (error) => {
 });
 
 export const startMovingFiles = async (bucketName: string) => {
+  logger.info(`moving-files: getting file list`);
+
   const files = await getObjectListFromMinio(bucketName, "");
   logger.info(`moving-files: going to move ${files.length} files`);
   files.map(async (file, i) => {
