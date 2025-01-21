@@ -171,7 +171,6 @@ const About: React.FC = () => {
               />
             </a>
           </li>
-
           <li>
             <a
               title="An Interview with Alex Rodríguez of Mirlo"
@@ -189,6 +188,22 @@ const About: React.FC = () => {
               href="https://podcast.sustainoss.org/234"
             >
               <img alt="Sustain" src="/images/media/sustain.jpg" />
+            </a>
+          </li>
+          <li>
+            <a
+              title="Simon Vansintjan on Mirlo"
+              href="https://podcast.sustainoss.org/234"
+            >
+              <img alt="Sustain" src="/images/media/sustain.jpg" />
+            </a>
+          </li>
+          <li>
+            <a
+              title="The music industry is dependent on underpaid workers"
+              href="https://podcasts.apple.com/us/podcast/the-music-industry-is-dependent-on-underpaid-workers/id1375082413?i=1000678928151"
+            >
+              <img alt="Power Station" src="/images/media/power-station.webp" />
             </a>
           </li>
         </ul>
