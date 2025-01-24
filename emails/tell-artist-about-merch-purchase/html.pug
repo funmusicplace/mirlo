@@ -17,10 +17,11 @@ html
           | Someone (#{email}) bought something from you!.
       ul.mw600
         each purchase in purchases 
-          li #{purchase.merch.title} x#{purchase.quantity}
+          li #{purchase.merch.title} amount #{purchase.quantity}:
             | #{purchase.currencyPaid.toUpperCase()} #{(purchase.amountPaid / 100).toFixed(2)}
-            | Mirlo's cut: (#{purchase.currencyPaid.toUpperCase()} #{purchase.platformCut.toFixed(2)})
-            strong Total: #{purchase.currencyPaid.toUpperCase()} #{(purchase.artistCut).toFixed(2)} 
+            | Mirlo's cut: (#{purchase.currencyPaid.toUpperCase()} #{(purchase.platformCut / 100).toFixed(2)})
+            strong 
+              | Total: #{purchase.currencyPaid.toUpperCase()} #{(purchase.artistCut / 100).toFixed(2)} 
 
       p  
         | To learn more about this order, please see your 

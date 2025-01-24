@@ -2,7 +2,7 @@ import styled from "@emotion/styled";
 import { bp } from "../../constants";
 
 const Box = styled.div<{
-  variant?: "success" | "info";
+  variant?: "success" | "info" | "warning";
   compact?: boolean;
   small?: boolean;
 }>`
@@ -16,14 +16,31 @@ const Box = styled.div<{
     switch (props.variant) {
       case "success":
         return `
-          background-color: var(--mi-success-background-color);
-          color: var(--mi-white);
+            background: repeating-linear-gradient(
+              45deg, 
+              var(--mi-success-background-color), 
+              var(--mi-success-background-color) 10px, 
+              var(--mi-normal-background-color) 10px, 
+              var(--mi-normal-background-color) 20px
+            );
+            border: var(--mi-success-background-color) 1px solid;
+            color: var(--mi-normal-foreground-color); 
         `;
       case "info":
         return `
           background-color: var(--mi-info-background-color);
           color: var(--mi-white);
         `;
+      case "warning":
+        return `
+            background: repeating-linear-gradient(45deg, 
+              var(--mi-warning-background-color), 
+              var(--mi-warning-background-color) 10px, 
+              var(--mi-normal-background-color) 10px, 
+              var(--mi-normal-background-color) 20px);
+            border: var(--mi-warning-background-color) 1px solid;
+            color: var(--mi-normal-foreground-color);
+          `;
       default:
         return `
           // background-color: var(--mi-lighten-background-color);

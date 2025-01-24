@@ -98,7 +98,7 @@ const SavingInput: React.FC<{
         errorHandler(e);
         setIsSaving(false);
       }
-    }, 1000),
+    }, 1500),
     [formKey, getValues, url, extraData]
   );
 

@@ -192,14 +192,6 @@ const About: React.FC = () => {
           </li>
           <li>
             <a
-              title="Simon Vansintjan on Mirlo"
-              href="https://podcast.sustainoss.org/234"
-            >
-              <img alt="Sustain" src="/images/media/sustain.jpg" />
-            </a>
-          </li>
-          <li>
-            <a
               title="The music industry is dependent on underpaid workers"
               href="https://podcasts.apple.com/us/podcast/the-music-industry-is-dependent-on-underpaid-workers/id1375082413?i=1000678928151"
             >

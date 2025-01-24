@@ -14,7 +14,7 @@ html
      
     ul 
       each purchase in purchases 
-        li #{purchase.merch.title} x#{purchase.quantity}
+        li #{purchase.merch.title} amount #{purchase.quantity}: 
            | #{purchase.currencyPaid.toUpperCase()} #{(purchase.amountPaid / 100).toFixed(2)}
         
     p The artist will start fulfilling your order and be in touch.
