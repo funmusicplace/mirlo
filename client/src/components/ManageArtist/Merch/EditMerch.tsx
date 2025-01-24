@@ -47,6 +47,10 @@ const IsPublicToggle: React.FC<{ merch: Merch }> = ({ merch }) => {
       className={css`
         margin-top: 1rem;
         margin-bottom: 1rem;
+
+        label {
+          font-weight: bold;
+        }
       `}
     >
       <Toggle

@@ -39,6 +39,7 @@ export default function () {
               loggedInUserId: loggedInUser?.id,
             }),
             merch: {
+              where: { isPublic: true },
               include: {
                 images: true,
                 shippingDestinations: true,
