@@ -94,7 +94,7 @@ const TrackGroupCard: React.FC<{
           padding: 1rem;
           background-color: var(--mi-darken-background-color);
 
-          > div {
+          > div > div {
             display: flex;
             justify-content: flex-start;
           }
@@ -124,22 +124,23 @@ const TrackGroupCard: React.FC<{
         `}
       >
         <div>
-          <strong>{trackGroupCardTranslation("title")}</strong>
-          {album.title}
+          <div>
+            <strong>{trackGroupCardTranslation("title")}</strong>
+            {album.title}
+          </div>
+          <div>
+            <strong>{trackGroupCardTranslation("published")}</strong>{" "}
+            {album.published ? <FaCheck /> : <FaTimes />}
+          </div>
+          <div>
+            <strong>{trackGroupCardTranslation("tracks")}</strong>{" "}
+            {album.tracks.length}
+          </div>
+          <div>
+            <strong>{trackGroupCardTranslation("releaseDate")} </strong>
+            {album.releaseDate?.split("T")[0]}
+          </div>
         </div>
-        <div>
-          <strong>{trackGroupCardTranslation("published")}</strong>{" "}
-          {album.published ? <FaCheck /> : <FaTimes />}
-        </div>
-        <div>
-          <strong>{trackGroupCardTranslation("tracks")}</strong>{" "}
-          {album.tracks.length}
-        </div>
-        <div>
-          <strong>{trackGroupCardTranslation("releaseDate")} </strong>
-          {album.releaseDate?.split("T")[0]}
-        </div>
-
         <div
           className={css`
             display: block;

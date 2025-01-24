@@ -76,6 +76,10 @@ const addPostToNotifications = async () => {
         );
         const subscriptions = uniqBy(flatSubscriptions, "userId");
 
+        logger.info(
+          `addPostToNotifciations: creating notifications for ${post.id}, ${post.artistId} with content: ${post.content}`
+        );
+
         await prisma.$transaction(async (tx) => {
           logger.info(
             `addPostToNotifications: attempting to create ${subscriptions.length} notifications`

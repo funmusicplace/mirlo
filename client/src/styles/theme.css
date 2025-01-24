@@ -24,6 +24,7 @@ html {
 
   --mi-warning-color: #f2897a;
   --mi-warning-background-color: #e6c7c3;
+  --mi-lighten-warning-background-color: #f3dad7;
 
   --mi-darken-warning-background-color: #e4aca4;
   --mi-link-color: var(--mi-pink);

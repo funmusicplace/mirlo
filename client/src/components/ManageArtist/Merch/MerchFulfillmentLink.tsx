@@ -8,7 +8,6 @@ import { useTranslation } from "react-i18next";
 import { FaArrowRight } from "react-icons/fa";
 
 const MerchFulfillmentLink: React.FC<{}> = () => {
-  const { merchId: merchParamId } = useParams();
   const { t } = useTranslation("translation", { keyPrefix: "manageMerch" });
 
   return (

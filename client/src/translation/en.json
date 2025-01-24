@@ -380,6 +380,7 @@
     "edit": "Edit",
     "addNewShippingDestination": "Add new shipping destination",
     "save": "Save",
+    "notPublic": "Not published yet",
     "viewMerchLive": "View merch live",
     "options": "Options (eg. 'large')",
     "currentCountry": "Your current country is: {{ country }}",
@@ -390,7 +391,7 @@
     "shippingDestinationPrices": "Shipping destination prices",
     "merchOptionsTitle": "Merch options",
     "merchFulfillment": "Merch fulfillment",
-    "merchFulfillmentParagraph": "To manage orders for this merch item, check your fulfillment",
+    "merchFulfillmentParagraph": "To manage orders for merch, check your fulfillment page",
     "setDifferentCostPerDestination": "You'll want to set a different shipping cost per destination. It's likely much more expensive to ship to another country"
   },
   "manageAlbum": {
