@@ -19,6 +19,7 @@ import { ButtonLink } from "components/common/Button";
 import { getMerchUrl } from "utils/artist";
 import { useSnackbar } from "state/SnackbarContext";
 import DeleteMerchButton from "./DeleteMerchButton";
+import MerchFulfillmentLink from "./MerchFulfillmentLink";
 
 const IsPublicToggle: React.FC<{ merch: Merch }> = ({ merch }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageMerch" });
@@ -159,6 +160,7 @@ const EditMerch: React.FC<{}> = () => {
         <MerchDestinations />
         <MerchOptions />
         <IsPublicToggle merch={merch} />
+        <MerchFulfillmentLink />
         <DeleteMerchButton />
       </div>
     </ManageSectionWrapper>

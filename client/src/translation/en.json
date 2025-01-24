@@ -389,6 +389,8 @@
     "merchOptionsExplainer": "Does your merch come in different categories? For example t-shirt size?",
     "shippingDestinationPrices": "Shipping destination prices",
     "merchOptionsTitle": "Merch options",
+    "merchFulfillment": "Merch fulfillment",
+    "merchFulfillmentParagraph": "To manage orders for this merch item, check your fulfillment",
     "setDifferentCostPerDestination": "You'll want to set a different shipping cost per destination. It's likely much more expensive to ship to another country"
   },
   "manageAlbum": {
