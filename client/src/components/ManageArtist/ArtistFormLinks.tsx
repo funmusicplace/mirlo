@@ -179,7 +179,7 @@ const ArtistFormLinks: React.FC<ArtistFormLinksProps> = ({
         >
           <Button
             size="compact"
-            transparent
+            variant="transparent"
             onClick={() =>
               append({
                 url: "",

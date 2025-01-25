@@ -1,6 +1,5 @@
 import { css } from "@emotion/css";
 import React from "react";
-import { bp } from "../../constants";
 
 import Background from "components/common/Background";
 import { FaEllipsisV } from "react-icons/fa";
@@ -11,8 +10,7 @@ const DropdownMenu: React.FC<{
   dashed?: boolean;
   icon?: React.ReactElement;
   compact?: boolean;
-  transparent?: boolean;
-}> = ({ children, icon, compact, dashed, transparent }) => {
+}> = ({ children, icon, compact, dashed }) => {
   const [isMenuOpen, setIsMenuOpen] = React.useState<boolean>(false);
 
   if (!icon) {

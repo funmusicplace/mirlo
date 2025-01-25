@@ -143,11 +143,12 @@ const TrackGroupCard: React.FC<{
         </div>
         <div
           className={css`
-            display: block;
+            display: flex;
             width: 100%;
             justify-content: flex-end !important;
             text-align: right;
             margin-top: 0.5rem;
+            align-items: center;
 
             & > * {
               margin-right: 1rem;

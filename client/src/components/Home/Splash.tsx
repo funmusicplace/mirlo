@@ -6,6 +6,7 @@ import { ButtonLink } from "components/common/Button";
 import styled from "@emotion/styled";
 import { bp } from "../../constants";
 import { useAuthContext } from "state/AuthContext";
+import { FaArrowRight } from "react-icons/fa";
 
 export const SplashWrapper = styled.div`
   display: flex;
@@ -80,37 +81,15 @@ const Splash = () => {
           <SplashTitle>{t("support")}</SplashTitle>
           {!user && (
             <SplashButtonWrapper>
-              <ButtonLink
-                to="/signup"
-                className={css`
-                  display: block;
-                  padding: 1.5rem 1rem !important;
-                  background-color: #be3455 !important;
-
-                  &:hover {
-                    text-decoration: underline;
-                  }
-                  color: var(--mi-white) !important;
-                `}
-              >
+              <ButtonLink size="big" to="/signup" rounded>
                 {t("signUp")}
               </ButtonLink>
               <ButtonLink
+                size="big"
                 to="/login"
-                className={css`
-                  color: var(--mi-white) !important;
-                  &:hover {
-                    text-decoration: underline;
-                  }
-                  padding: 1.5rem 1rem !important;
-
-                  background-color: var(--mi-black) !important;
-                  color: var(--mi-white);
-                  @media (prefers-color-scheme: dark) {
-                    background-color: var(--mi-white) !important;
-                    color: var(--mi-black) !important;
-                  }
-                `}
+                buttonRole="secondary"
+                rounded
+                endIcon={<FaArrowRight />}
               >
                 {t("logIn")}
               </ButtonLink>

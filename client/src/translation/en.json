@@ -402,6 +402,7 @@
     "shippingDestinationPrices": "Shipping destination prices",
     "merchOptionsTitle": "Merch options",
     "merchFulfillment": "Merch fulfillment",
+    "viewFulfillment": "View fulfillment",
     "merchFulfillmentParagraph": "To manage orders for merch, check your fulfillment page",
     "setDifferentCostPerDestination": "You'll want to set a different shipping cost per destination. It's likely much more expensive to ship to another country"
   },
