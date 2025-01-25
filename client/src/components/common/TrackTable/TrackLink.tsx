@@ -16,7 +16,7 @@ const TrackLink: React.FC<{
   return (
     <ButtonLink
       size="compact"
-      transparent
+      variant="transparent"
       to={`${getReleaseUrl(artist, trackGroup)}/tracks/${track.id}`}
       startIcon={<FaLink />}
       className={css`

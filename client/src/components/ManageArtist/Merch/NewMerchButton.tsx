@@ -35,7 +35,6 @@ export function NewMerchButton(props: NewAlbumButtonProps) {
   return (
     <Button
       size="compact"
-      transparent
       startIcon={<FaPlus />}
       variant="dashed"
       collapsible

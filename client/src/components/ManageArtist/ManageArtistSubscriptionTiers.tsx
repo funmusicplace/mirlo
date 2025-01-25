@@ -51,7 +51,6 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
             {t("supporters")}
           </ButtonLink>
           <Button
-            transparent
             onClick={() => {
               setAddingNewTier(true);
             }}

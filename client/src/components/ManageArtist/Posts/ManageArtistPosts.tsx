@@ -89,7 +89,6 @@ const ManageArtistPosts: React.FC<{}> = () => {
       <SpaceBetweenDiv>
         <div />
         <Button
-          transparent
           onClick={createPost}
           startIcon={<FaPlus />}
           size="compact"

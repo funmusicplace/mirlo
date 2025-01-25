@@ -10,13 +10,12 @@ import {
 } from "react-router-dom";
 
 export interface Sizable {
-  transparent?: boolean;
   size?: "big" | "compact";
   wrap?: boolean;
   rounded?: boolean;
   collapsible?: boolean;
   buttonRole?: "primary" | "secondary" | "warning";
-  variant?: "link" | "outlined" | "dashed" | "transparent";
+  variant?: "link" | "outlined" | "dashed" | "transparent" | "default";
   uppercase?: boolean;
   onlyIcon?: boolean;
 }
@@ -63,21 +62,35 @@ function lightOrDark(color: string) {
   }
 }
 
+const isDarkMode = () => {
+  return (
+    window.matchMedia &&
+    window.matchMedia("(prefers-color-scheme: dark)").matches
+  );
+};
+
 const CustomButton = styled.button<Sizable>(
   {},
   ({ buttonRole, size, ...props }) => {
     const bodyStyles = window.getComputedStyle(document.body);
     let cssColorVariable = `--mi-${buttonRole ?? "primary"}-color`;
-    var backgroundColor = bodyStyles.getPropertyValue(cssColorVariable); //get
+    var backgroundColor = bodyStyles.getPropertyValue(cssColorVariable);
     let foregroundColor = bodyStyles.getPropertyValue(
       `--mi-light-background-color`
     );
 
     const backgroundIsLight = lightOrDark(backgroundColor) === "light";
     if (backgroundIsLight) {
+      console.log("backgroundIsLight", backgroundIsLight, backgroundColor);
       foregroundColor = bodyStyles.getPropertyValue(
         "--mi-normal-foreground-color"
       );
+
+      if (isDarkMode()) {
+        foregroundColor = bodyStyles.getPropertyValue(
+          "--mi-normal-background-color"
+        );
+      }
     }
 
     const isOnlyIcon = props.onlyIcon
@@ -135,6 +148,8 @@ const CustomButton = styled.button<Sizable>(
         }
       `
       : "";
+    console.log("background", backgroundColor);
+    console.log("foreground", foregroundColor);
 
     let variantStyles = () => {
       switch (props.variant) {
@@ -208,26 +223,18 @@ const CustomButton = styled.button<Sizable>(
           return `
           background-color: ${backgroundColor};
           color: ${foregroundColor};
-
-          ${
-            props.transparent
-              ? `background-color:  transparent; 
-                 font-weight: bold;
-                 color: var(--mi-normal-foreground-color);`
-              : ""
-          };
+          border: 1px solid ${backgroundColor};
 
           svg {
             fill: ${foregroundColor};
+             
+            @media (prefers-color-scheme: dark) {
+              fill: ${foregroundColor};
+            }
           }
 
           &:hover:not(:disabled) {
             filter: brightness(150%);
-          }
-          
-          @media screen and (max-width: ${bp.small}px) {
-            font-size: var(--mi-font-size-normal);
-            padding: ${props.transparent ? ".5rem .25rem .5rem .25rem" : ""};
           }
         `;
       }
@@ -247,7 +254,6 @@ const CustomButton = styled.button<Sizable>(
          : "white-space: nowrap;"
      }
     
-    background: none;
     border: none;
     transition:
       0.25s background-color,
@@ -289,7 +295,7 @@ const CustomButton = styled.button<Sizable>(
   
     & .endIcon {
       margin-top: ${props.onlyIcon ? "0px" : "0.1rem"};
-      margin-right: ${props.onlyIcon ? "0px" : "0.5rem"};
+      margin-left: ${props.onlyIcon ? "0px" : "0.5rem"};
       line-height: 0.785rem;
       font-size: ${props.onlyIcon ? ".9rem" : "0.785rem"};
     }

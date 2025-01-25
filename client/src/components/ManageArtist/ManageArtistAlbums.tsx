@@ -35,7 +35,6 @@ const ManageArtistAlbums: React.FC<{}> = () => {
           <ButtonLink
             to={`/manage/artists/${artistId}/releases/tools`}
             size="compact"
-            transparent
             startIcon={<FaWrench />}
             variant="outlined"
             collapsible
