@@ -1,5 +1,5 @@
 import { css } from "@emotion/css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export const Toggle: React.FC<{
   label: string;
@@ -13,6 +13,10 @@ export const Toggle: React.FC<{
     onClick(!isToggled);
   };
 
+  useEffect(() => {
+    toggle(toggled);
+  }, [toggled]);
+
   return (
     <label
       className={css`
@@ -24,6 +28,7 @@ export const Toggle: React.FC<{
       <input
         type="checkbox"
         defaultChecked={isToggled}
+        checked={isToggled}
         onClick={callback}
         className={css`
           opacity: 0;

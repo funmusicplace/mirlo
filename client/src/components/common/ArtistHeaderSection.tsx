@@ -221,7 +221,8 @@ const ArtistHeaderSection: React.FC<{
                       {isManage && (
                         <div>
                           <ButtonLink
-                            variant="big"
+                            size="big"
+                            rounded
                             collapsible
                             startIcon={<FaPen />}
                             to={`/manage/artists/${artist.id}/customize`}
@@ -233,7 +234,8 @@ const ArtistHeaderSection: React.FC<{
                           </ButtonLink>
                           <ButtonLink
                             to={`/${artist?.urlSlug?.toLowerCase() ?? artist?.id}`}
-                            variant="big"
+                            size="big"
+                            rounded
                             collapsible
                             startIcon={<FaEye />}
                             disabled={!artist}

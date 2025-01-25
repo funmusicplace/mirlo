@@ -19,6 +19,49 @@ import { ButtonLink } from "components/common/Button";
 import { getMerchUrl } from "utils/artist";
 import { useSnackbar } from "state/SnackbarContext";
 import DeleteMerchButton from "./DeleteMerchButton";
+import MerchFulfillmentLink from "./MerchFulfillmentLink";
+
+const IsPublicToggle: React.FC<{ merch: Merch }> = ({ merch }) => {
+  const { t } = useTranslation("translation", { keyPrefix: "manageMerch" });
+  const snackbar = useSnackbar();
+  const { merchId: merchParamId } = useParams();
+
+  const { refetch } = useQuery(queryManagedMerch(merchParamId ?? ""));
+
+  const updatePublic = React.useCallback(
+    async (val: boolean) => {
+      const packet = { isPublic: val };
+      try {
+        await api.put(`manage/merch/${merchParamId}`, packet);
+        refetch();
+        snackbar(t("merchUpdated"));
+      } catch (e) {
+        console.error("e", e);
+      }
+    },
+    [merchParamId, refetch]
+  );
+
+  return (
+    <Box
+      variant={merch.isPublic ? "success" : "warning"}
+      className={css`
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+
+        label {
+          font-weight: bold;
+        }
+      `}
+    >
+      <Toggle
+        label={t(merch.isPublic ? "isPublicSet" : "isPublicNotSet")}
+        toggled={merch.isPublic}
+        onClick={updatePublic}
+      />
+    </Box>
+  );
+};
 
 export interface TrackGroupFormData {
   published: boolean;
@@ -33,8 +76,6 @@ export interface TrackGroupFormData {
 
 const EditMerch: React.FC<{}> = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageMerch" });
-  const snackbar = useSnackbar();
-  const navigate = useNavigate();
   const { artistId: artistParamId, merchId: merchParamId } = useParams();
 
   const { data: artist, isLoading: isLoading } = useQuery(
@@ -43,28 +84,15 @@ const EditMerch: React.FC<{}> = () => {
 
   const {
     data: merch,
-    isLoading: isLoadingTrackGroup,
+    isLoading: isLoadingMerch,
     refetch,
   } = useQuery(queryManagedMerch(merchParamId ?? ""));
-
-  const updatePublic = React.useCallback(
-    async (val: boolean) => {
-      const packet = { isPublic: val };
-      try {
-        await api.put(`manage/merch/${merchParamId}`, packet);
-        refetch();
-      } catch (e) {
-        console.error("e", e);
-      }
-    },
-    [merchParamId, refetch]
-  );
 
   if (!artist && isLoading) {
     return <LoadingBlocks />;
   } else if (!artist) {
     return null;
-  } else if (!merch && isLoadingTrackGroup) {
+  } else if (!merch && isLoadingMerch) {
     return <LoadingBlocks />;
   } else if (!merch) {
     return null;
@@ -88,13 +116,7 @@ const EditMerch: React.FC<{}> = () => {
           </ButtonLink>
         </SpaceBetweenDiv>
       )}
-      <Box variant="info">
-        <Toggle
-          label={t("isPublic")}
-          toggled={merch.isPublic}
-          onClick={updatePublic}
-        />
-      </Box>
+      <IsPublicToggle merch={merch} />
       <div
         className={css`
           display: flex;
@@ -137,6 +159,8 @@ const EditMerch: React.FC<{}> = () => {
 
         <MerchDestinations />
         <MerchOptions />
+        <IsPublicToggle merch={merch} />
+        <MerchFulfillmentLink />
         <DeleteMerchButton />
       </div>
     </ManageSectionWrapper>

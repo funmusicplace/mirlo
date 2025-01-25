@@ -105,26 +105,13 @@ const DropdownMenu: React.FC<{
       )}
 
       <Button
-        compact={compact}
-        variant={dashed ? "dashed" : undefined}
+        size={compact ? "compact" : undefined}
+        variant={dashed ? "dashed" : "transparent"}
         onClick={(e) => {
           e.stopPropagation();
           setIsMenuOpen(true);
         }}
         startIcon={icon}
-        transparent={transparent}
-        className={
-          "mi-dropdown-button " +
-          css`
-            button:hover {
-              color: var(--mi-white);
-              background-color: var(--mi-black);
-            }
-            @media (max-width: ${bp.small}px) {
-              background-color: var(--mi-normal-background-color) !important;
-            }
-          `
-        }
       />
     </div>
   );

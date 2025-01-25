@@ -151,7 +151,7 @@ const EditTrackRow: React.FC<{
         </td>
         <td className="alignRight">
           <Button
-            compact
+            size="compact"
             onClick={onCancelEditing}
             type="button"
             title="Close"
@@ -161,7 +161,7 @@ const EditTrackRow: React.FC<{
             style={{ marginRight: ".25rem" }}
           />
           <Button
-            compact
+            size="compact"
             variant="dashed"
             startIcon={<FaSave />}
             disabled={isSaving || isDisabled}

@@ -37,7 +37,7 @@ export function NewAlbumButton(props: NewAlbumButtonProps) {
 
   return (
     <Button
-      compact
+      size="compact"
       transparent
       startIcon={<FaPlus />}
       variant="dashed"

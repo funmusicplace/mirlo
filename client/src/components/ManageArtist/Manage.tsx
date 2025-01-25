@@ -94,7 +94,6 @@ export const Manage: React.FC = () => {
               >
                 <ButtonLink
                   to="/manage/welcome"
-                  variant="big"
                   className={css`
                     flex-grow: 1;
                     text-align: center;
@@ -125,7 +124,7 @@ export const Manage: React.FC = () => {
             )}
             {userId && (
               <a href={api.paymentProcessor.stripeConnect(userId)}>
-                <Button variant="big">
+                <Button>
                   {stripeAccountStatus?.detailsSubmitted
                     ? t("updateBankAccount")
                     : t("setUpBankAccount")}

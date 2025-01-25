@@ -3,7 +3,7 @@ import Box from "components/common/Box";
 import Button, { ButtonLink } from "components/common/Button";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { FaCheck, FaTimes, FaTrash } from "react-icons/fa";
+import { FaCheck, FaEye, FaTimes, FaTrash } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { useSnackbar } from "state/SnackbarContext";
 import { bp } from "../../constants";
@@ -94,7 +94,7 @@ const TrackGroupCard: React.FC<{
           padding: 1rem;
           background-color: var(--mi-darken-background-color);
 
-          > div {
+          > div > div {
             display: flex;
             justify-content: flex-start;
           }
@@ -124,22 +124,23 @@ const TrackGroupCard: React.FC<{
         `}
       >
         <div>
-          <strong>{trackGroupCardTranslation("title")}</strong>
-          {album.title}
+          <div>
+            <strong>{trackGroupCardTranslation("title")}</strong>
+            {album.title}
+          </div>
+          <div>
+            <strong>{trackGroupCardTranslation("published")}</strong>{" "}
+            {album.published ? <FaCheck /> : <FaTimes />}
+          </div>
+          <div>
+            <strong>{trackGroupCardTranslation("tracks")}</strong>{" "}
+            {album.tracks.length}
+          </div>
+          <div>
+            <strong>{trackGroupCardTranslation("releaseDate")} </strong>
+            {album.releaseDate?.split("T")[0]}
+          </div>
         </div>
-        <div>
-          <strong>{trackGroupCardTranslation("published")}</strong>{" "}
-          {album.published ? <FaCheck /> : <FaTimes />}
-        </div>
-        <div>
-          <strong>{trackGroupCardTranslation("tracks")}</strong>{" "}
-          {album.tracks.length}
-        </div>
-        <div>
-          <strong>{trackGroupCardTranslation("releaseDate")} </strong>
-          {album.releaseDate?.split("T")[0]}
-        </div>
-
         <div
           className={css`
             display: block;
@@ -162,8 +163,7 @@ const TrackGroupCard: React.FC<{
         >
           <ButtonLink
             to={`/manage/artists/${album.artistId}/release/${album.id}`}
-            compact
-            thin
+            size="compact"
             variant="outlined"
           >
             {t("manageAlbum")}
@@ -171,15 +171,16 @@ const TrackGroupCard: React.FC<{
           {album.artist && album.published && (
             <ButtonLink
               to={getReleaseUrl(album.artist, album)}
-              compact
+              size="compact"
               variant="outlined"
+              startIcon={<FaEye />}
             >
               {t("viewLive")}
             </ButtonLink>
           )}
           {!album.published && (
             <Button
-              compact
+              size="compact"
               startIcon={<FaTrash />}
               onClick={handleDelete}
               isLoading={isDeletePending}

@@ -76,7 +76,7 @@ const CurrencySelect = () => {
               </option>
             ))}
           </SelectEl>
-          <Button compact>{t("saveCountryCode")}</Button>
+          <Button size="compact">{t("saveCountryCode")}</Button>
         </div>
       </FormComponent>
     </form>

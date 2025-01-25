@@ -203,7 +203,7 @@ export const Modal: React.FC<{
 
             <Button
               className={close}
-              compact
+              size="compact"
               startIcon={<FaTimes />}
               onClick={onCloseWrapper}
               aria-label="close"

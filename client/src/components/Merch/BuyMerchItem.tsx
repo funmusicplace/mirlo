@@ -167,7 +167,8 @@ const BuyMerchItem: React.FC<{
       <Button
         disabled={!methods.formState.isValid}
         isLoading={isLoadingStripe}
-        variant="big"
+        size="big"
+        rounded
         endIcon={<FaChevronRight />}
       >
         {t("goToCheckOut")}

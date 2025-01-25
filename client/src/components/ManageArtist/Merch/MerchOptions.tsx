@@ -75,7 +75,7 @@ const OptionType: React.FC<{
                 append("");
               }}
               type="button"
-              compact
+              size="compact"
               startIcon={<FaPlus />}
               variant="dashed"
             >
@@ -173,7 +173,7 @@ const MerchOptions: React.FC<{}> = () => {
                   append({ optionName: "" });
                 }}
                 type="button"
-                compact
+                size="compact"
                 startIcon={<FaPlus />}
                 variant="dashed"
               >

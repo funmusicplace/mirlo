@@ -59,7 +59,7 @@ const TrackRowPlayControl: React.FC<{
           </span>
           {canPlayTrack && !isDisabled && (
             <Button
-              compact
+              size="compact"
               startIcon={<VscPlay />}
               className="play-button"
               onClick={onTrackPlay}
@@ -69,7 +69,7 @@ const TrackRowPlayControl: React.FC<{
       )}
       {playing && currentPlayingTrackId === trackId && (
         <Button
-          compact
+          size="compact"
           startIcon={<TfiControlPause />}
           data-cy="track-row-pause-button"
           onClick={onTrackPause}

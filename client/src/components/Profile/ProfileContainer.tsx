@@ -24,9 +24,6 @@ const ProfileContainer: React.FC = () => {
           h1 {
             margin: 0.7rem 0;
           }
-          a {
-            color: var(--mi-normal-foreground-color);
-          }
         `}
       >
         <div

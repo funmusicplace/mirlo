@@ -124,10 +124,6 @@ const ManageArtist: React.FC<{}> = () => {
           `}
         >
           <Button
-            compact
-            className={css`
-              background-color: var(--mi-alert);
-            `}
             buttonRole="warning"
             startIcon={<FaTrash />}
             onClick={onDelete}

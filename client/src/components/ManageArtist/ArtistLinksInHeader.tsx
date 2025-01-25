@@ -66,8 +66,7 @@ const ArtistLinksInHeader: React.FC<{
       {isManage && (
         <div>
           <Button
-            compact
-            thin
+            size="compact"
             variant="dashed"
             onClick={() => setIsEditing(true)}
             startIcon={<FaPen />}

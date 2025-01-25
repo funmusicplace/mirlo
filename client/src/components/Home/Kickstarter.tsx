@@ -55,7 +55,8 @@ const Kickstarter = () => {
         <SplashButtonWrapper>
           <ButtonLink
             to="/team/support"
-            variant="big"
+            size="big"
+            rounded
             className={css`
               display: block;
               padding: 1rem;

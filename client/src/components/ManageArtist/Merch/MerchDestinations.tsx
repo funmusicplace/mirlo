@@ -133,7 +133,7 @@ const MerchDestinations: React.FC<{}> = () => {
                   append({ destinationCountry: null });
                 }}
                 type="button"
-                compact
+                size="compact"
                 startIcon={<FaPlus />}
                 variant="dashed"
               >

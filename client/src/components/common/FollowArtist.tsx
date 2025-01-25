@@ -141,8 +141,8 @@ const FollowArtist: React.FC<{ artistId: number }> = ({ artistId }) => {
         <SupportArtistTiersForm artist={artist} excludeDefault={!!user} />
       </Modal>
       <Button
-        compact
-        transparent
+        size="compact"
+        variant="outlined"
         type="button"
         onClick={onFollowClick}
         isLoading={isLoading}

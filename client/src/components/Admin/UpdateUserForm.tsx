@@ -48,10 +48,6 @@ export const UpdateUserForm: React.FC = () => {
           <option value="superadmin">Superadmin</option>
         </SelectEl>
       </div>
-
-      {/* <Button type="submit" style={{ marginTop: "1rem" }}>
-        Save user
-      </Button> */}
     </form>
   );
 };

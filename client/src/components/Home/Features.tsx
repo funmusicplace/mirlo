@@ -187,10 +187,11 @@ const Features = () => {
             >
               <ButtonLink
                 to="#features"
-                variant="big"
+                size="big"
+                rounded
+                endIcon={<FaArrowDown />}
                 className={css`
                   display: block;
-                  padding: 1.5rem 1rem !important;
                   background-color: #be3455 !important;
                   color: var(--mi-white) !important;
 
@@ -211,7 +212,7 @@ const Features = () => {
                   }
                 }}
               >
-                Learn more <FaArrowDown />
+                Learn more
               </ButtonLink>
             </div>
           </div>
@@ -477,10 +478,10 @@ const Features = () => {
             Excited to get started?{" "}
             <ButtonLink
               to="/signup"
-              variant="big"
+              size="big"
+              rounded
               className={css`
                 display: block;
-                padding: 1.5rem 1rem !important;
                 background-color: #be3455 !important;
                 color: var(--mi-white) !important;
 

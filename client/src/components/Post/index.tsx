@@ -170,7 +170,7 @@ const Post: React.FC = () => {
                   to={`/manage/artists/${post.artistId}/post/${post.id}`}
                   variant="dashed"
                   startIcon={<FaPen />}
-                  compact
+                  size="compact"
                 >
                   {t("edit")}
                 </ButtonLink>

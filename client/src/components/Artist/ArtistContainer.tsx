@@ -31,7 +31,7 @@ const ArtistContainer: React.FC = () => {
         <ButtonLink
           to={`/manage/artists/${artist.id}`}
           startIcon={<FaPen />}
-          compact
+          size="compact"
           variant="dashed"
           className={css`
             z-index: 999999;

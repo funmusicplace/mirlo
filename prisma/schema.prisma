@@ -48,6 +48,7 @@ model User {
   deletedAt                           DateTime?
   isAdmin                             Boolean                         @default(false)
   artistUserSubscriptions             ArtistUserSubscription[]
+  countryCode                         String?
   currency                            String?
   userTrackGroupPurchases             UserTrackGroupPurchase[]
   emailConfirmationToken              String?                         @default(uuid()) @db.Uuid
@@ -358,6 +359,7 @@ model MerchOption {
   name              String // eg. "small"
   quantityRemaining Int?
   sku               String?
+  additionalPrice   Int?
   purchases         MerchPurchase[]
 }
 

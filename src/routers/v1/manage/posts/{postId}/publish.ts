@@ -12,9 +12,12 @@ export default function () {
     const { postId } = req.params;
 
     try {
+      const existingPost = await prisma.post.findFirst({
+        where: { id: Number(postId) || undefined },
+      });
       const updatedPost = await prisma.post.update({
         where: { id: Number(postId) || undefined },
-        data: { isDraft: false },
+        data: { isDraft: !existingPost?.isDraft },
       });
       res.json({ result: updatedPost });
     } catch (error) {

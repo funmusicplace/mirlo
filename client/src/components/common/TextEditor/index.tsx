@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import {
   PlaceholderExtension,
   TableExtension,
@@ -21,6 +21,7 @@ import { prosemirrorNodeToHtml } from "@remirror/core-utils";
 import TopToolbar from "./TopToolbar";
 import FloatingLinkToolbar from "./FloatingLinkToolbar";
 import api from "services/api";
+import { useTranslation } from "react-i18next";
 
 const extensions = (postId: number, reload: () => void) => () => [
   new PlaceholderExtension({ placeholder: "Type something" }),

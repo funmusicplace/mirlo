@@ -109,7 +109,7 @@ function MerchView() {
             <ItemViewTitle title={merch.title} />
             {userIsOwner && (
               <ButtonLink
-                compact
+                size="compact"
                 startIcon={<FaPen />}
                 variant="dashed"
                 to={getArtistManageMerchUrl(artist.id, merch.id)}

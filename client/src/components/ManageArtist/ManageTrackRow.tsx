@@ -234,7 +234,7 @@ const ManageTrackRow: React.FC<{
       </td>
       <td align="right">
         <Button
-          compact
+          size="compact"
           startIcon={<FaPen />}
           variant="dashed"
           onClick={() => setIsEditing(true)}
@@ -244,7 +244,7 @@ const ManageTrackRow: React.FC<{
         <Button
           variant="dashed"
           startIcon={<FaTrash />}
-          compact
+          size="compact"
           onClick={onDeleteClick}
           title={t("delete") ?? ""}
         />

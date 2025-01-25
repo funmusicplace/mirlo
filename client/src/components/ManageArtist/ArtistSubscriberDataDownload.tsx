@@ -48,7 +48,7 @@ const ArtistSubscriberDataDownload: React.FC = () => {
     <li>
       <Button
         onClick={downloadSubscriberData}
-        compact
+        size="compact"
         startIcon={<FaDownload />}
         isLoading={isLoadingSubscriberData}
       >

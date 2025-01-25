@@ -73,7 +73,7 @@ export const AdminTracks: React.FC = () => {
                 <td className="alignRight">
                   <Button
                     startIcon={<FaEdit />}
-                    compact
+                    size="compact"
                     onClick={() => onClickQueue(track.id)}
                   />
                 </td>

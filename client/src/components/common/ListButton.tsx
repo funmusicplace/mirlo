@@ -1,13 +1,12 @@
 import styled from "@emotion/styled";
 import { NavLink } from "react-router-dom";
-import { Compactable } from "./Button";
+import { Sizable } from "./Button";
 
-export const ListButton = styled.button<Compactable>`
+export const ListButton = styled.button<Sizable>`
   width: 100%;
   height: 100%;
   border: 0;
   margin: 0;
-  padding: ${(props) => (props.compact ? "0" : "0.4rem 0.5rem")};
   text-align: inherit;
   font-size: inherit;
   background-color: inherit;

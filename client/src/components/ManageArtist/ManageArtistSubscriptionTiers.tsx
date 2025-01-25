@@ -44,7 +44,7 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
               margin-right: 0.25rem;
             `}
             variant="dashed"
-            compact
+            size="compact"
             collapsible
             startIcon={<FaWrench />}
           >
@@ -56,7 +56,7 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
               setAddingNewTier(true);
             }}
             startIcon={<FaPlus />}
-            compact
+            size="compact"
             variant="dashed"
           >
             {t("addNewTier")}

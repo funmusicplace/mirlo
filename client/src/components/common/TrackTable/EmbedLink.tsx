@@ -14,7 +14,7 @@ const EmbedLink: React.FC<{ track: Track; trackGroupArtistId?: number }> = ({
   });
   return (
     <Button
-      compact
+      size="compact"
       transparent
       onClick={(e) => {
         e.stopPropagation();
