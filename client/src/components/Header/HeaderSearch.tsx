@@ -3,13 +3,11 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import api from "services/api";
 import AutoComplete from "components/common/AutoComplete";
-import { debounce } from "lodash";
 
 const HeaderSearch: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "headerSearch" });
 
   const getOptions = React.useCallback(async (searchString: string) => {
-    console.log("searching", searchString);
     const artists = await api.getMany<Artist>(`artists`, {
       name: searchString,
     });
@@ -20,24 +18,30 @@ const HeaderSearch: React.FC = () => {
       title: searchString,
     });
     const results = [
-      ...artists.results.map((r) => ({
+      ...artists.results.map((r, rid) => ({
+        firstInCategory: rid === 0,
+        category: t("artists"),
         artistId: r.urlSlug ?? r.id,
         id: r.id,
         name: r.name,
         isArtist: true,
       })),
-      ...trackGroups.results.map((t) => ({
-        id: t.urlSlug ?? t.id,
-        artistId: t.artist?.urlSlug ?? t.artistId,
-        trackGroupId: t.urlSlug ?? t.id,
-        name: t.title,
+      ...trackGroups.results.map((tr, tid) => ({
+        firstInCategory: tid === 0,
+        category: t("albums"),
+        id: tr.urlSlug ?? tr.id,
+        artistId: tr.artist?.urlSlug ?? tr.artistId,
+        trackGroupId: tr.urlSlug ?? tr.id,
+        name: tr.title,
         isTrackGroup: true,
       })),
-      ...tracks.results.map((t) => ({
-        id: t.id,
-        trackGroupId: t.trackGroup.urlSlug ?? t.trackGroupId,
-        artistId: t.trackGroup.artist.urlSlug ?? t.trackGroup.artistId,
-        name: t.title,
+      ...tracks.results.map((tr, tid) => ({
+        firstInCategory: tid === 0,
+        id: tr.id,
+        category: t("tracks"),
+        trackGroupId: tr.trackGroup.urlSlug ?? tr.trackGroupId,
+        artistId: tr.trackGroup.artist.urlSlug ?? tr.trackGroup.artistId,
+        name: tr.title,
         isTrack: true,
       })),
     ];
@@ -48,7 +52,7 @@ const HeaderSearch: React.FC = () => {
     <AutoComplete
       getOptions={getOptions}
       showBackground
-      placeholder={t("searchArtists") ?? ""}
+      placeholder={t("search") ?? ""}
       usesNavigation
       resultsPrefix={t("searchSuggestions") ?? undefined}
       optionDisplay={(r: {

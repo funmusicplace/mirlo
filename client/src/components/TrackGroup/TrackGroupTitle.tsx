@@ -124,7 +124,7 @@ const TrackGroupTitle: React.FC<{
           {user?.isAdmin && (
             <div
               className={css`
-                padding-left: 1rem;
+                padding-left: 0.5rem;
               `}
             >
               <DropdownMenu compact>

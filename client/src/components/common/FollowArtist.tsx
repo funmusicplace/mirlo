@@ -19,6 +19,8 @@ const FollowArtist: React.FC<{ artistId: number }> = ({ artistId }) => {
     queryArtist({ artistSlug: `${artistId}`, includeDefaultTier: true })
   );
 
+  console.log("data", artist);
+
   const localArtistId = artistId ?? artist?.id;
   const artistUserSubscriptions = user?.artistUserSubscriptions;
   const [isSubscribed, setIsSubscribed] = React.useState(
@@ -83,6 +85,10 @@ const FollowArtist: React.FC<{ artistId: number }> = ({ artistId }) => {
     return <>Subscribed</>;
   }
 
+  const hasNoneDefaultSubscriptionTiers = artist.subscriptionTiers.find(
+    (t) => !t.isDefaultTier
+  );
+
   return (
     <>
       <Modal
@@ -113,18 +119,20 @@ const FollowArtist: React.FC<{ artistId: number }> = ({ artistId }) => {
                 artistName: artist?.name,
               })}
             </Box>
-            <h3
-              className={
-                css`
-                  margin-bottom: 0.5rem;
-                  margin-top: 1rem;
-                ` + " h4"
-              }
-            >
-              {t("supportArtistFinancially", {
-                artistName: artist?.name,
-              })}
-            </h3>
+            {hasNoneDefaultSubscriptionTiers && (
+              <h3
+                className={
+                  css`
+                    margin-bottom: 0.5rem;
+                    margin-top: 1rem;
+                  ` + " h4"
+                }
+              >
+                {t("supportArtistFinancially", {
+                  artistName: artist?.name,
+                })}
+              </h3>
+            )}
           </>
         )}
         {!user && (
@@ -138,7 +146,9 @@ const FollowArtist: React.FC<{ artistId: number }> = ({ artistId }) => {
             })}
           </p>
         )}
-        <SupportArtistTiersForm artist={artist} excludeDefault={!!user} />
+        {hasNoneDefaultSubscriptionTiers && (
+          <SupportArtistTiersForm artist={artist} excludeDefault={!!user} />
+        )}
       </Modal>
       <Button
         size="compact"

@@ -53,7 +53,11 @@ const FlagContent: React.FC<{ trackGroupId: number }> = ({ trackGroupId }) => {
 
   return (
     <>
-      <Button startIcon={<FaFlag />} onClick={() => setIsFlagOpen(true)} />
+      <Button
+        startIcon={<FaFlag />}
+        variant="transparent"
+        onClick={() => setIsFlagOpen(true)}
+      />
       <Modal
         size="small"
         open={isFlagOpen}
