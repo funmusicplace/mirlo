@@ -79,7 +79,7 @@ const ArtistFormLocation: React.FC<ArtistLocationProps> = ({
         {isManage && (
           <Button
             transparent
-            small
+            size="compact"
             onlyIcon
             onClick={() => setIsEditing(true)}
             startIcon={<FaPen />}
@@ -126,14 +126,14 @@ const ArtistFormLocation: React.FC<ArtistLocationProps> = ({
         >
           <Button
             collapsible
-            compact
+            size="compact"
             startIcon={<FaSave />}
             onClick={handleSubmit(handleSave)}
           >
             <p>{t("saveLocation")}</p>
           </Button>
           <Button
-            compact
+            size="compact"
             collapsible
             startIcon={<FaTimes />}
             onClick={() => {

@@ -300,12 +300,7 @@ export const CustomizeLook: React.FC = () => {
                 margin-bottom: 0 !important;
               `}
             >
-              <Button
-                type="submit"
-                variant="big"
-                disabled={isPending}
-                isLoading={isPending}
-              >
+              <Button type="submit" disabled={isPending} isLoading={isPending}>
                 {t("saveArtist")}
               </Button>
             </ArtistFormSection>

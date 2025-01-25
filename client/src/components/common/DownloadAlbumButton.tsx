@@ -138,7 +138,7 @@ const DownloadAlbumButton: React.FC<{
                 {formats.map((format) => (
                   <li key={format}>
                     <Button
-                      compact
+                      size="compact"
                       className={css`
                         margin-top: 0.5rem;
                         font-size: 1.2rem;
@@ -159,7 +159,7 @@ const DownloadAlbumButton: React.FC<{
           ) : (
             <>
               <Button
-                compact
+                size="compact"
                 className={css`
                   margin-top: 0.5rem;
                   font-size: 1.2rem;

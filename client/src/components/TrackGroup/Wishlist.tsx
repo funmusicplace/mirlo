@@ -31,21 +31,6 @@ const Wishlist: React.FC<{ trackGroup: { id: number } }> = ({ trackGroup }) => {
   return (
     <Button
       onClick={onClick}
-      className={css`
-        color: inherit !important;
-        :hover {
-          border: solid 1px black !important;
-          background-color: transparent !important;
-        }
-        span {
-          font-size: 1.1rem !important;
-        }
-        @media screen and (max-width: ${bp.small}px) {
-          span {
-            font-size: 1rem !important;
-          }
-        }
-      `}
       aria-label={buttonLabel}
       title={buttonLabel}
       startIcon={isInWishlist ? <IoIosHeart /> : <IoIosHeartEmpty />}

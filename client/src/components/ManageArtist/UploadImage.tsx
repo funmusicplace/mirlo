@@ -80,8 +80,9 @@ export const UploadPrompt: React.FC<{
     <div
       className={css`
         flex-direction: column;
-        padding: 2rem;
+        padding: 1rem;
         text-align: center;
+        font-size: 1rem;
         aspect-ratio: 1 / 1;
         background: radial-gradient(
           circle,

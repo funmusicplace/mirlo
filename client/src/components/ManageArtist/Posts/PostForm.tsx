@@ -136,6 +136,7 @@ const PostForm: React.FC<{
       await api.put(`manage/posts/${existingId}/publish`, {});
       reload(existingId);
       reloadImages();
+      snackbar(t("publishedPost"));
     } catch (e) {
       console.error(e);
     }
@@ -154,6 +155,12 @@ const PostForm: React.FC<{
   }, [artist.id, existingId, navigate, t, userId]);
 
   const isFuture = new Date() < new Date(publicationDate);
+
+  const publishText = post.isDraft
+    ? isFuture
+      ? t("scheduleToPublish")
+      : t("publishPost")
+    : t("returnToDraft");
 
   return (
     <FormProvider {...methods}>
@@ -283,21 +290,29 @@ const PostForm: React.FC<{
             display: flex;
             width: 100%;
             justify-content: space-between;
+            align-items: center;
           `}
         >
-          <Button
-            variant="dashed"
-            disabled={
-              isSaving ||
-              (minimumTier === "" && !isPublic) ||
-              !methods.formState.isValid
-            }
-            isLoading={isSaving}
-            onClick={handleSubmit(doSave)}
-          >
-            {post.isDraft ? t("saveDraft") : t("updatePost")}
+          <Button type="button" isLoading={isSaving} onClick={doDelete}>
+            {t("delete")}
           </Button>
-          {post.isDraft && (
+          <div>
+            <Button
+              variant="dashed"
+              className={css`
+                margin-right: 1rem;
+              `}
+              type="button"
+              disabled={
+                isSaving ||
+                (minimumTier === "" && !isPublic) ||
+                !methods.formState.isValid
+              }
+              isLoading={isSaving}
+              onClick={handleSubmit(doSave)}
+            >
+              {post.isDraft ? t("saveDraft") : t("updatePost")}
+            </Button>
             <Button
               disabled={
                 isSaving ||
@@ -308,12 +323,9 @@ const PostForm: React.FC<{
               onClick={doPublish}
               type="button"
             >
-              {isFuture ? t("scheduleToPublish") : t("publishPost")}
+              {publishText}
             </Button>
-          )}
-          <Button type="button" isLoading={isSaving} onClick={doDelete}>
-            {t("delete")}
-          </Button>
+          </div>
         </div>
       </form>
     </FormProvider>

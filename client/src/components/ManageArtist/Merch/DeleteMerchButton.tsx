@@ -59,7 +59,7 @@ const DeleteMerch: React.FC<{}> = () => {
       `}
     >
       <Button
-        compact
+        size="compact"
         className={css`
           background-color: var(--mi-alert);
         `}

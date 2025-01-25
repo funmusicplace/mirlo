@@ -9,10 +9,12 @@ import { widgetUrl } from "utils/tracks";
 import { css } from "@emotion/css";
 import { bp } from "../../../constants";
 import AutoCompleteTrackGroup from "../AutoCompleteTrackGroup";
+import { useTranslation } from "react-i18next";
 
 const InsertMirloWidgetButton = () => {
   const [isOpen, setIsOpen] = React.useState(false);
   const { addIframe } = useCommands();
+  const { t } = useTranslation("translation", { keyPrefix: "textEditor" });
 
   const onAdd = (trackId: string | number, variant: "track" | "trackGroup") => {
     addIframe({
@@ -33,20 +35,6 @@ const InsertMirloWidgetButton = () => {
       id: r.id,
     }));
   }, []);
-
-  const getTrackGroupOptions = React.useCallback(
-    async (searchString: string) => {
-      const results = await api.getMany<TrackGroup>(`trackGroups`, {
-        title: searchString,
-        take: "10",
-      });
-      return results.results.map((r) => ({
-        name: `${r.artist?.name} - ${r.title}`,
-        id: r.id,
-      }));
-    },
-    []
-  );
 
   return (
     <>
@@ -87,7 +75,7 @@ const InsertMirloWidgetButton = () => {
           }
         `}
       >
-        Insert a track:
+        {t("insertATrack")}
         <AutoComplete
           getOptions={getTrackOptions}
           onSelect={(val) => {
@@ -95,7 +83,7 @@ const InsertMirloWidgetButton = () => {
           }}
         />
         <br />
-        Insert a trackgroup:
+        {t("insertATrackGroup")}
         <AutoCompleteTrackGroup onSelect={(val) => onAdd(val, "trackGroup")} />
       </Modal>
     </>

@@ -123,14 +123,15 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup }> = ({
 
         {userIsTrackGroupArtist && (
           <Tooltip hoverText={t("usersCanPurchase")}>
-            <Button variant="big" type="submit" disabled>
+            <Button size="big" rounded type="submit" disabled>
               {t(purchaseText)}
             </Button>
           </Tooltip>
         )}
         {!userIsTrackGroupArtist && (
           <Button
-            variant="big"
+            size="big"
+            rounded
             type="submit"
             disabled={!!lessThan1 || lessThanMin || !formState.isValid}
           >

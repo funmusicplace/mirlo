@@ -111,7 +111,7 @@ const TrackGroupTitle: React.FC<{
         >
           {(ownedByUser || user?.isAdmin) && (
             <ButtonLink
-              compact
+              size="compact"
               startIcon={<FaPen />}
               variant="dashed"
               to={`/manage/artists/${artist.id}/release/${trackGroup.id}`}

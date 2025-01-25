@@ -93,16 +93,13 @@ const TrackGroupEmbed: React.FC<{
         <Button
           onlyIcon
           onClick={() => setIsPopupOpen(true)}
+          startIcon={<BsShare />}
           className={css`
             margin-top: 0rem;
             font-size: 1.2rem;
-            background: transparent;
-            color: var(--mi-primary-color);
             margin-left: 0.2rem;
           `}
-        >
-          <BsShare />
-        </Button>
+        ></Button>
       </div>
     </div>
   );

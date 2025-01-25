@@ -92,7 +92,7 @@ const ManageArtistPosts: React.FC<{}> = () => {
           transparent
           onClick={createPost}
           startIcon={<FaPlus />}
-          compact
+          size="compact"
           variant="dashed"
         >
           {t("addNewPost", { artist: artist.name })}

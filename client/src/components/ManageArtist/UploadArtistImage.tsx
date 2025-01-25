@@ -257,7 +257,7 @@ const UploadArtistImage: React.FC<{
                   <Button
                     onClick={deleteImage}
                     variant="link"
-                    compact
+                    size="compact"
                     onlyIcon
                     type="button"
                     startIcon={<AiFillDelete />}

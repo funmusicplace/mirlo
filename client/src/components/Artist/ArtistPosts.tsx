@@ -2,7 +2,6 @@ import { css } from "@emotion/css";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { bp } from "../../constants";
-import { useArtistContext } from "state/ArtistContext";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import { FaRss } from "react-icons/fa";
 import { ButtonAnchor } from "components/common/Button";

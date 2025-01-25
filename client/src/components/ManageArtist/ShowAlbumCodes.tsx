@@ -140,7 +140,7 @@ const ShowAlbumCodes: React.FC<{}> = () => {
               <td className="alignRight">{r.quantityRedeemed}</td>
               <td className="alignRight">
                 <Button
-                  compact
+                  size="compact"
                   startIcon={<FaFileCsv />}
                   onClick={() => downloadCodes(r.group)}
                   variant="dashed"

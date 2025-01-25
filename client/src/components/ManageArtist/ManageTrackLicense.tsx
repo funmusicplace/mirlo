@@ -69,7 +69,7 @@ const ManageTrackLicense = () => {
             variant="dashed"
             onClick={() => setIsModalOpen(true)}
             type="button"
-            compact
+            size="compact"
             className={css`
               margin-left: 0.25rem;
             `}

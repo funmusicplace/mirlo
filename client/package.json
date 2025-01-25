@@ -44,6 +44,7 @@
   },
   "scripts": {
     "client:start": "vite",
+    "client:tsc": "tsc",
     "client:build": "tsc --noEmit && vite build",
     "client:preview": "vite preview",
     "client:test": "tsc --noEmit && vitest",

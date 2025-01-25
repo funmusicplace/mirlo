@@ -119,7 +119,7 @@ const ManageTrackArtists: React.FC<{
                 append({ artistName: "" });
               }}
               type="button"
-              compact
+              size="compact"
               disabled={disabled}
               startIcon={<FaPlus />}
               variant="dashed"
@@ -132,7 +132,7 @@ const ManageTrackArtists: React.FC<{
               className={css`
                 margin-left: 1rem;
               `}
-              compact
+              size="compact"
               disabled={disabled}
               startIcon={<FaCheck />}
               variant="dashed"

@@ -71,10 +71,9 @@ function Profile() {
             <Button
               style={{
                 width: "100%",
-                backgroundColor: "var(--mi-warning-background-color)",
-                borderColor: "var(--mi-darken-warning-background-color)",
                 marginTop: "1rem",
               }}
+              buttonRole="warning"
               onClick={deleteAccount}
             >
               {t("deleteAccount")}

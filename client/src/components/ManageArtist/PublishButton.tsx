@@ -7,6 +7,7 @@ import { useSnackbar } from "state/SnackbarContext";
 import Button, { ButtonLink } from "components/common/Button";
 import { css } from "@emotion/css";
 import { getReleaseUrl } from "utils/artist";
+import { FaEye } from "react-icons/fa";
 
 const PublishButton: React.FC<{
   trackGroup: TrackGroup;
@@ -66,7 +67,8 @@ const PublishButton: React.FC<{
   return (
     <div>
       <Button
-        variant="big"
+        size="big"
+        rounded
         isLoading={isPublishing}
         onClick={publishTrackGroup}
         disabled={isPublishing}
@@ -77,7 +79,12 @@ const PublishButton: React.FC<{
         {t(trackGroup.published ? privateButton : publishButton)}
       </Button>
       {artist && trackGroup.published && (
-        <ButtonLink to={getReleaseUrl(artist, trackGroup)} variant="big">
+        <ButtonLink
+          to={getReleaseUrl(artist, trackGroup)}
+          size="big"
+          startIcon={<FaEye />}
+          variant="dashed"
+        >
           {t(beforeReleaseDate ? "viewPreorder" : "view")}
         </ButtonLink>
       )}

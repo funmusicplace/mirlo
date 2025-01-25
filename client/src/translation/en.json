@@ -348,6 +348,16 @@
     "managePost": "Manage post",
     "viewLive": "View live"
   },
+  "textEditor": {
+    "uploadImage": "Upload an image",
+    "uploadImageDescription": "Choose an image to upload",
+    "addImage": "Add image",
+    "insertATrack": "Insert a track:",
+    "insertATrackGroup": "Insert an album",
+    "uploadAVideo": "Add a video",
+    "addUrl": "Insert a video url",
+    "addVideo": "Add video"
+  },
   "manageLicense": {
     "shortLabelForLicense": "What's a unique short label for this license?",
     "egShort": "eg. cc0",
@@ -365,6 +375,7 @@
     "areYouSureDelete": "Are you sure you want to delete this merch itemf?",
     "problemDeletingMerch": "Problem deleting merch",
     "merchTitle": "What are you selling?",
+    "publishedPost": "Published post!",
     "merchDescription": "How would you describe it?",
     "price": "Price",
     "quantity": "How many do you have?",
@@ -674,6 +685,7 @@
   },
   "postForm": {
     "imagesInPost": "Manage images in post",
+    "returnToDraft": "Return to draft",
     "imageIsFeatured": "Which image should be featured?",
     "confirmDelete": "Are you sure you want to delete this post?",
     "title": "Title:",

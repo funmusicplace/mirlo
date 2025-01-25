@@ -47,7 +47,11 @@ const ArtistManageSubscription: React.FC<{
         title="Manage subscription"
         size="small"
       >
-        <Button compact buttonRole="warning" onClick={cancelSubscription}>
+        <Button
+          size="compact"
+          buttonRole="warning"
+          onClick={cancelSubscription}
+        >
           Cancel subscription
         </Button>
       </Modal>

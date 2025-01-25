@@ -63,12 +63,14 @@ const SupportMirlo = () => {
             <SplashButtonWrapper>
               <ButtonLink
                 to="/team/support"
-                variant="big"
+                size="big"
+                rounded
                 className={css`
                   display: block;
                   padding: 1rem;
                   text-decoration: none;
                   text-align: center;
+
                   &:hover {
                     text-decoration: underline;
                   }

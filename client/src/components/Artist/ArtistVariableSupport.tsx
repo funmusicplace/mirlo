@@ -59,7 +59,8 @@ const ArtistVariableSupport: React.FC<{
   return (
     <>
       <SupportBoxButton
-        variant="big"
+        size="big"
+        rounded
         uppercase
         onClick={() =>
           tier.allowVariable ? setOpen(true) : subscribeToTier(tier)
@@ -109,7 +110,7 @@ const ArtistVariableSupport: React.FC<{
           <SupportBoxButton
             isLoading={isCheckingForSubscription}
             disabled={isCheckingForSubscription || !isEmpty(formState.errors)}
-            compact
+            size="compact"
             uppercase
             type="submit"
           >

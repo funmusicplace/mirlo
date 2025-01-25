@@ -115,7 +115,7 @@ const ArtistHeaderDescription: React.FC<ArtistHeaderDescriptionProps> = ({
               >
                 <Button
                   variant="link"
-                  compact
+                  size="compact"
                   startIcon={<FaChevronDown />}
                   className={css`
                     margin-top: 0.7rem;
@@ -146,7 +146,7 @@ const ArtistHeaderDescription: React.FC<ArtistHeaderDescriptionProps> = ({
             `}
           >
             <Button
-              compact
+              size="compact"
               className={css`
                 white-space: nowrap;
               `}
@@ -181,7 +181,7 @@ const ArtistHeaderDescription: React.FC<ArtistHeaderDescriptionProps> = ({
           rows={8}
         />
         <Button
-          compact
+          size="compact"
           startIcon={<FaSave />}
           collapsible
           onClick={handleSubmit(handleSave)}
@@ -192,7 +192,7 @@ const ArtistHeaderDescription: React.FC<ArtistHeaderDescriptionProps> = ({
           <p>{t("saveBio")}</p>
         </Button>
         <Button
-          compact
+          size="compact"
           collapsible
           startIcon={<FaTimes />}
           onClick={() => {

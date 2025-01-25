@@ -174,10 +174,6 @@ const Content = styled.div<{ artistId?: string }>`
   margin: 0 auto;
   height: var(--header-cover-sticky-height);
 
-  Button {
-    background-color: var(--mi-normal-background-color);
-  }
-
   @media screen and (max-width: ${bp.medium}px) {
     padding-top: 0.5rem;
     padding-bottom: 0.5rem;
@@ -234,13 +230,6 @@ const Header = () => {
           className={css`
             display: flex;
             align-items: center;
-            button {
-              color: var(--mi-normal-foreground-color);
-            }
-            button:hover {
-              color: var(--mi-normal-background-color);
-              background-color: var(--mi-normal-foreground-color);
-            }
           `}
         >
           <HeaderSearch />
@@ -257,7 +246,6 @@ const Header = () => {
             startIcon={<FaHandHoldingHeart />}
             className={css`
               display: block;
-              padding: 1rem;
               margin-left: 1rem;
               text-decoration: none;
               text-align: center;

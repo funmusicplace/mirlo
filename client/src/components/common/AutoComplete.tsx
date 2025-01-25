@@ -44,7 +44,7 @@ const SearchResultList = styled.ol`
 const SearchResult = styled.li`
   a,
   button {
-    padding: 0.75rem 1rem;
+    padding: 0.75rem 1rem !important;
     color: var(--mi-black) !important;
     display: block;
     background: transparent;
@@ -64,6 +64,7 @@ const SearchResult = styled.li`
       color: var(--mi-white) !important;
     }
   }
+
   button:hover,
   a:hover {
     color: var(--mi-white) !important;

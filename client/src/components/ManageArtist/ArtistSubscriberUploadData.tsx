@@ -174,10 +174,7 @@ const ArtistSubscriberUploadData: React.FC<{
               </tbody>
             </Table>
             <p>{t("rightToUpload")}</p>
-            <Button
-              variant="big"
-              onClick={() => uploadSubscriberData(uploadedUsers)}
-            >
+            <Button onClick={() => uploadSubscriberData(uploadedUsers)}>
               {t("looksGood")}
             </Button>
           </div>
@@ -243,7 +240,7 @@ const ArtistSubscriberUploadData: React.FC<{
       <li>
         <Button
           onClick={() => setIsOpen(true)}
-          compact
+          size="compact"
           startIcon={<FaUpload />}
           isLoading={isLoadingSubscriberData}
         >

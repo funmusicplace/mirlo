@@ -82,7 +82,6 @@ const Splash = () => {
             <SplashButtonWrapper>
               <ButtonLink
                 to="/signup"
-                variant="big"
                 className={css`
                   display: block;
                   padding: 1.5rem 1rem !important;
@@ -98,7 +97,6 @@ const Splash = () => {
               </ButtonLink>
               <ButtonLink
                 to="/login"
-                variant="big"
                 className={css`
                   color: var(--mi-white) !important;
                   &:hover {

@@ -121,7 +121,8 @@ const MerchForm: React.FC<{
 
         <SelectTrackGroup merch={merch} reload={reload} />
         <Button
-          variant="big"
+          size="big"
+          rounded
           type="submit"
           disabled={isDisabled}
           isLoading={isDisabled}

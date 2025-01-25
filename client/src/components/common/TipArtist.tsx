@@ -54,7 +54,7 @@ const TipArtist: React.FC<{ artistId: number; transparent?: boolean }> = ({
         <TipArtistForm artist={artist} />
       </Modal>
       <Button
-        compact
+        size="compact"
         transparent={transparent}
         type="button"
         onClick={onTipClick}

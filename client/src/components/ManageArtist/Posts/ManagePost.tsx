@@ -13,6 +13,7 @@ import { ButtonLink } from "components/common/Button";
 import { bp } from "../../../constants";
 import { useQuery } from "@tanstack/react-query";
 import { queryManagedArtist, queryManagedPost } from "queries";
+import { FaEye } from "react-icons/fa";
 
 const ManagePost: React.FC<{}> = () => {
   const { t } = useTranslation("translation", { keyPrefix: "managePost" });
@@ -73,7 +74,10 @@ const ManagePost: React.FC<{}> = () => {
                 align-items: center;
               `}
             >
-              <ButtonLink to={getPostURLReference({ ...post, artist })}>
+              <ButtonLink
+                to={getPostURLReference({ ...post, artist })}
+                startIcon={<FaEye />}
+              >
                 {t("viewLive")}
               </ButtonLink>
             </div>

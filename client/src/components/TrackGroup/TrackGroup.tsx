@@ -246,10 +246,7 @@ function TrackGroup() {
                       justify-content: flex-end;
                       align-items: center;
                       gap: 1rem;
-                      button {
-                        background: var(--mi-darken-background-color);
-                        margin-left: 0 !important;
-                      }
+
                       a {
                         font-size: var(--mi-font-size-normal);
                       }

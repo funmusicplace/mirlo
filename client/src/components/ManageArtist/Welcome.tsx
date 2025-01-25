@@ -153,7 +153,7 @@ const Welcome = () => {
           >
             <Button
               isLoading={isLoading}
-              compact
+              size="compact"
               disabled={isButtonDisabled}
               type="submit"
               onClick={handleSubmit(onClickNext)}
