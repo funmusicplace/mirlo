@@ -82,7 +82,7 @@ const UserSupports: React.FC<{
                     <span>{s.artistSubscriptionTier.artist.name}</span>
                     <span>
                       {moneyDisplay({
-                        amount: s.amount,
+                        amount: s.amount / 100,
                         currency: s.artistSubscriptionTier.currency,
                       })}
                       /mo
