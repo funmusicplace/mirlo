@@ -12,7 +12,7 @@ import React from "react";
 import { css } from "@emotion/css";
 import api from "services/api";
 import { SelectEl } from "components/common/Select";
-import { moneyDisplay } from "components/common/Money";
+import { getCurrencySymbol, moneyDisplay } from "components/common/Money";
 import IncludesDigitalDownload from "./IncludesDigitalDownload";
 import { FaChevronRight } from "react-icons/fa";
 
@@ -27,7 +27,7 @@ const BuyMerchItem: React.FC<{
   merch: Merch;
   artist: Artist;
   showTitle?: boolean;
-}> = ({ merch, artist, showTitle }) => {
+}> = ({ merch, artist }) => {
   const { t } = useTranslation("translation", {
     keyPrefix: "merchDetails",
   });
@@ -119,7 +119,9 @@ const BuyMerchItem: React.FC<{
           />
         </FormComponent>
         <FormComponent>
-          <label>{t("howMuch", { currency: merch.currency })}</label>
+          <label>
+            {t("howMuch", { currency: getCurrencySymbol(merch.currency) })}
+          </label>
           <InputEl
             {...methods.register("price", { min: minPrice })}
             type="number"
@@ -137,7 +139,13 @@ const BuyMerchItem: React.FC<{
           <SelectEl {...methods.register(`merchOptionIds.${idx}`)}>
             {optionType.options.map((o) => (
               <option key={o.name} value={o.id}>
-                {o.name}
+                {t("option", {
+                  name: o.name,
+                  costUnit: moneyDisplay({
+                    amount: o.additionalPrice / 100,
+                    currency: merch.currency,
+                  }),
+                })}
               </option>
             ))}
           </SelectEl>

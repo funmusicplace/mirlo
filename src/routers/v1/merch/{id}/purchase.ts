@@ -74,13 +74,22 @@ export default function () {
 
       // Check if the options passed are possible
       const finalOptionIds: string[] = [];
+      const additionalPrices: number[] = [];
       merch.optionTypes.forEach((ot) => {
         ot.options.forEach((o) => {
           if (merchOptionIds.includes(o.id)) {
             finalOptionIds.push(o.id);
+            if (o.additionalPrice) {
+              additionalPrices.push(o.additionalPrice);
+            }
           }
         });
       });
+
+      const additionalPrice = additionalPrices.reduce(
+        (aggr, price) => price + aggr,
+        0
+      );
 
       if (loggedInUser) {
         await subscribeUserToArtist(merch?.artist, loggedInUser);
@@ -104,7 +113,7 @@ export default function () {
         const session = await createStripeCheckoutSessionForMerchPurchase({
           loggedInUser,
           email,
-          priceNumber,
+          priceNumber: priceNumber + additionalPrice,
           merch,
           quantity: quantity ?? 0,
           stripeAccountId,

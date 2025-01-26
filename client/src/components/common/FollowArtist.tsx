@@ -19,8 +19,6 @@ const FollowArtist: React.FC<{ artistId: number }> = ({ artistId }) => {
     queryArtist({ artistSlug: `${artistId}`, includeDefaultTier: true })
   );
 
-  console.log("data", artist);
-
   const localArtistId = artistId ?? artist?.id;
   const artistUserSubscriptions = user?.artistUserSubscriptions;
   const [isSubscribed, setIsSubscribed] = React.useState(
