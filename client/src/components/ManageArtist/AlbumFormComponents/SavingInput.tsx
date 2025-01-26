@@ -41,7 +41,7 @@ const SavingInput: React.FC<{
   const [isSaving, setIsSaving] = React.useState(false);
   const [saveSuccess, setSaveSuccess] = React.useState(false);
 
-  const saveOnBlur = React.useCallback(
+  const saveOnInput = React.useCallback(
     debounce(async () => {
       try {
         setSaveSuccess(false);
@@ -65,22 +65,6 @@ const SavingInput: React.FC<{
 
         await api.put<unknown, unknown>(url, data);
 
-        if (clearQueryKey) {
-          client.invalidateQueries({
-            predicate: (query) => {
-              const shouldInvalidate = query.queryKey.find((obj) => {
-                if (typeof obj === "string") {
-                  return obj
-                    .toLowerCase()
-                    .includes(clearQueryKey.toLowerCase());
-                }
-                return false;
-              });
-
-              return !!shouldInvalidate;
-            },
-          });
-        }
         let timeout2: NodeJS.Timeout;
         const timeout = setTimeout(() => {
           setIsSaving(false);
@@ -102,6 +86,30 @@ const SavingInput: React.FC<{
     [formKey, getValues, url, extraData]
   );
 
+  const onBlur = React.useCallback(() => {
+    // After the timeout clear the query key so that other spaces are updated
+
+    const timeout = setTimeout(() => {
+      if (clearQueryKey) {
+        client.invalidateQueries({
+          predicate: (query) => {
+            const shouldInvalidate = query.queryKey.find((obj) => {
+              if (typeof obj === "string") {
+                return obj.toLowerCase().includes(clearQueryKey.toLowerCase());
+              }
+              return false;
+            });
+
+            return !!shouldInvalidate;
+          },
+        });
+      }
+    }, 2000);
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [clearQueryKey]);
+
   return (
     <div
       className={css`
@@ -118,14 +126,20 @@ const SavingInput: React.FC<{
       {!rows && (
         <InputEl
           {...register(formKey)}
-          onInput={saveOnBlur}
+          onInput={saveOnInput}
+          onBlur={onBlur}
           type={type}
           required={required}
           step={step}
         />
       )}
       {rows && (
-        <TextArea {...register(formKey)} rows={rows} onInput={saveOnBlur} />
+        <TextArea
+          {...register(formKey)}
+          rows={rows}
+          onInput={saveOnInput}
+          onBlur={onBlur}
+        />
       )}
       {isSaving && <LoadingSpinner />}
       {saveSuccess && <FaCheck />}

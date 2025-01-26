@@ -282,6 +282,7 @@ interface MerchOption {
   quantityRemaining: number;
   sku: string;
   id: string;
+  additionalPrice: number;
 }
 
 interface MerchOptionType {
