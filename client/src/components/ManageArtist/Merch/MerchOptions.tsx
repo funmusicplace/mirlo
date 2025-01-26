@@ -117,7 +117,11 @@ const OptionType: React.FC<{
       {!isEditing && (
         <>
           <em>{optionType.optionName}</em>
-          {optionType.options?.map((o) => o.name).join(", ")}
+          {optionType.options
+            ?.map((o) =>
+              o.additionalPrice ? `${o.name} (${o.additionalPrice})` : o.name
+            )
+            .join(", ")}
         </>
       )}
     </li>
@@ -133,7 +137,13 @@ const MerchOptions: React.FC<{}> = () => {
 
   const methods = useForm<OptionTypesForm>({
     defaultValues: {
-      optionTypes: merch?.optionTypes,
+      optionTypes: merch?.optionTypes.map((ot) => ({
+        ...ot,
+        options: ot.options?.map((o) => ({
+          ...o,
+          additionalPrice: o.additionalPrice / 100,
+        })),
+      })),
     },
   });
 
@@ -144,7 +154,13 @@ const MerchOptions: React.FC<{}> = () => {
 
   const update = React.useCallback(
     async (newOptionTypes: OptionTypesForm) => {
-      const packet = newOptionTypes.optionTypes;
+      const packet = newOptionTypes.optionTypes.map((ot) => ({
+        ...ot,
+        options: ot.options?.map((o) => ({
+          ...o,
+          additionalPrice: o.additionalPrice * 100,
+        })),
+      }));
       try {
         await api.put(`manage/merch/${merchParamId}/optionTypes`, packet);
       } catch (e) {
