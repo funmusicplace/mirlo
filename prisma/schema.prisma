@@ -131,6 +131,7 @@ model Post {
   images                    PostImage[]             @relation("images")
   featuredImage             PostImage?              @relation(fields: [featuredImageId], references: [id])
   featuredImageId           String?                 @db.Uuid
+  postTracks                PostTrack[]
 }
 
 model PostImage {
@@ -497,6 +498,7 @@ model Track {
   licenseId    Int?
   lyrics       String?
   isrc         String?
+  postTracks   PostTrack[]
 }
 
 model License {
@@ -549,6 +551,16 @@ model TrackPlay {
   ip        String?
   createdAt DateTime @default(now())
   owned     Boolean  @default(false)
+}
+
+model PostTrack {
+  trackId Int
+  track   Track @relation(fields: [trackId], references: [id])
+  postId  Int
+  post    Post  @relation(fields: [postId], references: [id])
+  order   Int
+
+  @@unique([trackId, postId])
 }
 
 model TrackGroupTag {

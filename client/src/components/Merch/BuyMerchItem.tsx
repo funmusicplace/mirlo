@@ -137,17 +137,23 @@ const BuyMerchItem: React.FC<{
         <FormComponent>
           <label>{optionType.optionName}</label>
           <SelectEl {...methods.register(`merchOptionIds.${idx}`)}>
-            {optionType.options.map((o) => (
-              <option key={o.name} value={o.id}>
-                {t("option", {
-                  name: o.name,
-                  costUnit: moneyDisplay({
-                    amount: o.additionalPrice / 100,
-                    currency: merch.currency,
-                  }),
-                })}
-              </option>
-            ))}
+            {optionType.options
+              .sort((a, b) => {
+                return a.additionalPrice > b.additionalPrice ? -1 : 1;
+              })
+              .map((o) => (
+                <option key={o.name} value={o.id}>
+                  {o.additionalPrice
+                    ? t("option", {
+                        name: o.name,
+                        costUnit: moneyDisplay({
+                          amount: o.additionalPrice / 100,
+                          currency: merch.currency,
+                        }),
+                      })
+                    : o.name}
+                </option>
+              ))}
           </SelectEl>
         </FormComponent>
       ))}

@@ -11,17 +11,25 @@ import { bp } from "../../../constants";
 import AutoCompleteTrackGroup from "../AutoCompleteTrackGroup";
 import { useTranslation } from "react-i18next";
 
-const InsertMirloWidgetButton = () => {
+const InsertMirloWidgetButton: React.FC<{ postId: number }> = ({ postId }) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const { addIframe } = useCommands();
   const { t } = useTranslation("translation", { keyPrefix: "textEditor" });
 
-  const onAdd = (trackId: string | number, variant: "track" | "trackGroup") => {
+  const onAdd = async (
+    trackId: string | number,
+    variant: "track" | "trackGroup"
+  ) => {
     addIframe({
       src: widgetUrl(+trackId, variant),
       height: variant === "track" ? 137 : 371,
       width: 700,
     });
+    if (variant) {
+      const results = await api.put(`manage/posts/${postId}/tracks`, {
+        trackId: trackId,
+      });
+    }
     setIsOpen(false);
   };
 
