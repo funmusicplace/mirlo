@@ -8,7 +8,8 @@ import { useTranslation } from "react-i18next";
 export const PlayButton: React.FC<{
   onPlay?: () => Promise<void> | void;
   className?: string;
-}> = ({ onPlay, className }) => {
+  variant?: "outlined";
+}> = ({ onPlay, className, variant }) => {
   const { dispatch } = useGlobalStateContext();
 
   const onPlayCallback = React.useCallback(() => {
@@ -26,9 +27,6 @@ export const PlayButton: React.FC<{
             margin-right: 0.25rem;
             padding: 0.7rem 0.6rem 0.7rem 0.8rem;
             border: solid 1.5px var(--mi-normal-foreground-color);
-            border-color: var(--mi-black);
-            background-color: var(--mi-black);
-            color: var(--mi-white);
           }
         ` +
         " " +
@@ -41,6 +39,8 @@ export const PlayButton: React.FC<{
         aria-label={`${t("play")}`}
         title={`${t("play")}`}
         className="play-button"
+        variant={variant}
+        buttonRole="black"
       />
     </div>
   );

@@ -14,7 +14,7 @@ export interface Sizable {
   wrap?: boolean;
   rounded?: boolean;
   collapsible?: boolean;
-  buttonRole?: "primary" | "secondary" | "warning";
+  buttonRole?: "primary" | "secondary" | "warning" | "black";
   variant?: "link" | "outlined" | "dashed" | "transparent" | "default";
   uppercase?: boolean;
   onlyIcon?: boolean;
@@ -81,7 +81,6 @@ const CustomButton = styled.button<Sizable>(
 
     const backgroundIsLight = lightOrDark(backgroundColor) === "light";
     if (backgroundIsLight) {
-      console.log("backgroundIsLight", backgroundIsLight, backgroundColor);
       foregroundColor = bodyStyles.getPropertyValue(
         "--mi-normal-foreground-color"
       );
@@ -148,8 +147,6 @@ const CustomButton = styled.button<Sizable>(
         }
       `
       : "";
-    console.log("background", backgroundColor);
-    console.log("foreground", foregroundColor);
 
     let variantStyles = () => {
       switch (props.variant) {
@@ -223,7 +220,6 @@ const CustomButton = styled.button<Sizable>(
           return `
           background-color: ${backgroundColor};
           color: ${foregroundColor};
-          border: 1px solid ${backgroundColor};
 
           svg {
             fill: ${foregroundColor};

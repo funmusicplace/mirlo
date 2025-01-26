@@ -233,9 +233,9 @@ function TrackGroup() {
               <ImageAndDetailsWrapper>
                 <ImageWrapper>
                   <ImageWithPlaceholder
-                    src={trackGroup.cover?.sizes?.[960]}
+                    src={trackGroup.cover?.sizes?.[600]}
                     alt={trackGroup.title}
-                    size={960}
+                    size={600}
                   />
                 </ImageWrapper>
                 <UnderneathImage>
@@ -245,7 +245,7 @@ function TrackGroup() {
                       display: flex;
                       justify-content: flex-end;
                       align-items: center;
-                      gap: 1rem;
+                      gap: 0.5rem;
 
                       a {
                         font-size: var(--mi-font-size-normal);

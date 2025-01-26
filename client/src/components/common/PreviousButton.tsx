@@ -11,7 +11,14 @@ export const PreviousButton: React.FC = () => {
     dispatch({ type: "decrementCurrentlyPlayingIndex" });
   }, [dispatch]);
 
-  return <Button startIcon={<MdSkipPrevious />} onClick={onClickPrevious} />;
+  return (
+    <Button
+      startIcon={<MdSkipPrevious />}
+      variant="outlined"
+      buttonRole="black"
+      onClick={onClickPrevious}
+    />
+  );
 };
 
 export default PreviousButton;

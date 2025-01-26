@@ -13,6 +13,7 @@ html {
   --mi-lighter-background-color: #fcfcfc;
 
   --mi-normal-foreground-color: var(--mi-black);
+  --mi-black-color: var(--mi-black);
   --mi-light-foreground-color: #454545;
   --mi-lighter-foreground-color: #515151;
 
@@ -53,4 +54,5 @@ html {
   --mi-secondary-color: #be3455;
 
   --mi-pink: #ea8b99;
+  --mi-black-color: var(--mi-white);
 }

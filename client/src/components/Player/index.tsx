@@ -25,25 +25,7 @@ const ControlWrapper = styled.span`
   align-items: center;
 
   button {
-    color: black;
-    background: transparent;
-  }
-
-  button:hover {
-    color: var(--mi-white);
-    background-color: var(--mi-white);
-    font-size: 1.2rem;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    button {
-      color: white;
-    }
-    button:hover {
-      background-color: var(--mi-white) !important;
-      color: var(--mi-black) !important;
-      font-size: 1.2rem;
-    }
+    margin-right: 0.6rem;
   }
 
   @media (max-width: ${bp.small}px) {

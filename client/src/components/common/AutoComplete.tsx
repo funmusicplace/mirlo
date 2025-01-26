@@ -78,21 +78,29 @@ const SearchResult = styled.li`
   }
 `;
 
+type Result = {
+  id: number | string;
+  name: string;
+  isNew?: boolean;
+  firstInCategory?: boolean;
+  category?: string;
+};
+
 const AutoComplete: React.FC<{
-  getOptions: (
-    val: string
-  ) =>
-    | Promise<{ id: number | string; name: string; isNew?: boolean }[]>
-    | { id: number | string; name: string; isNew?: boolean }[]
-    | undefined;
+  getOptions: (val: string) => Promise<Result[]> | Result[] | undefined;
   resultsPrefix?: string;
   onSelect?: (value: string | number) => void;
-  optionDisplay?: (result: {
-    id: number | string;
-    name: string;
-    artistId?: string | number;
-    trackGroupId?: string | number;
-  }) => React.ReactNode;
+  optionDisplay?: (
+    result: {
+      id: number | string;
+      name: string;
+      artistId?: string | number;
+      trackGroupId?: string | number;
+      firstInCategory?: boolean;
+      category?: string;
+    },
+    index: number
+  ) => React.ReactNode;
   placeholder?: string | null;
   allowNew?: boolean;
   showBackground?: boolean;
@@ -112,9 +120,7 @@ const AutoComplete: React.FC<{
 
   const [showSuggestions, setShowSuggestions] = React.useState(false);
   const [isSearching, setIsSearching] = React.useState(false);
-  const [searchResults, setSearchResults] = React.useState<
-    { id: number | string; name: string; isNew?: boolean }[]
-  >([]);
+  const [searchResults, setSearchResults] = React.useState<Result[]>([]);
   const [navigationIndex, setNavigationIndex] = React.useState(0);
   let location = useLocation();
 
@@ -250,23 +256,28 @@ const AutoComplete: React.FC<{
             {isSearching && <LoadingSpinner />}
             {!isSearching && searchResults.length > 0 && (
               <SearchResultList>
-                {searchResults.map((r, index) => (
-                  <SearchResult
-                    key={r.id}
-                    className={navigationIndex === index ? "selected" : ""}
-                  >
-                    {optionDisplay ? (
-                      optionDisplay(r)
-                    ) : (
-                      <Button
-                        type="button"
-                        onClick={() => onSelectValue(r.id, index)}
+                {searchResults.map((r, index) => {
+                  return (
+                    <>
+                      {r.firstInCategory && <>{r.category}</>}
+                      <SearchResult
+                        key={r.id}
+                        className={navigationIndex === index ? "selected" : ""}
                       >
-                        {r.isNew ? `use "${r.name}"` : r.name}
-                      </Button>
-                    )}
-                  </SearchResult>
-                ))}
+                        {optionDisplay ? (
+                          optionDisplay(r, index)
+                        ) : (
+                          <Button
+                            type="button"
+                            onClick={() => onSelectValue(r.id, index)}
+                          >
+                            {r.isNew ? `use "${r.name}"` : r.name}
+                          </Button>
+                        )}
+                      </SearchResult>
+                    </>
+                  );
+                })}
               </SearchResultList>
             )}
             {!allowNew && !isSearching && searchResults.length === 0 && (
