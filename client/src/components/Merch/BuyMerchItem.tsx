@@ -143,13 +143,15 @@ const BuyMerchItem: React.FC<{
               })
               .map((o) => (
                 <option key={o.name} value={o.id}>
-                  {t("option", {
-                    name: o.name,
-                    costUnit: moneyDisplay({
-                      amount: o.additionalPrice / 100,
-                      currency: merch.currency,
-                    }),
-                  })}
+                  {o.additionalPrice
+                    ? t("option", {
+                        name: o.name,
+                        costUnit: moneyDisplay({
+                          amount: o.additionalPrice / 100,
+                          currency: merch.currency,
+                        }),
+                      })
+                    : o.name}
                 </option>
               ))}
           </SelectEl>
