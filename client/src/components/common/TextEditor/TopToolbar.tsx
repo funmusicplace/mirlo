@@ -29,11 +29,16 @@ const TopToolbar: React.FC<{ postId: number }> = ({ postId }) => {
         > div > div > button,
         > span > button {
           background-color: inherit !important;
+          color: inherit !important;
           border: none;
           border-radius: 100%;
           height: 2rem;
           width: 2rem;
           padding: 0;
+
+          svg {
+            fill: inherit !important;
+          }
 
           &.Mui-disabled {
             border: 0;
@@ -74,7 +79,7 @@ const TopToolbar: React.FC<{ postId: number }> = ({ postId }) => {
         <CommandButtonGroup>
           {/* <Button startIcon={<FaImage />} /> */}
           <InsertVideoButton />
-          <InsertMirloWidgetButton />
+          <InsertMirloWidgetButton postId={postId} />
           <InsertImageButton postId={postId} />
         </CommandButtonGroup>
       </Toolbar>
