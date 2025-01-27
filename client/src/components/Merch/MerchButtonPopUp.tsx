@@ -8,6 +8,8 @@ import Button from "components/common/Button";
 import { moneyDisplay } from "components/common/Money";
 import Modal from "components/common/Modal";
 import React from "react";
+import { useQuery } from "@tanstack/react-query";
+import { queryUserStripeStatus } from "queries";
 
 const MerchButtonPopUp: React.FC<{ merch: Merch; artist: Artist }> = ({
   merch,
@@ -17,7 +19,15 @@ const MerchButtonPopUp: React.FC<{ merch: Merch; artist: Artist }> = ({
     keyPrefix: "merchDetails",
   });
 
+  const { data: stripeAccountStatus } = useQuery(
+    queryUserStripeStatus(artist?.userId ?? 0)
+  );
+
   const [isOpen, setIsOpen] = React.useState(false);
+
+  if (!stripeAccountStatus?.chargesEnabled || merch.quantityRemaining === 0) {
+    return null;
+  }
 
   return (
     <>
