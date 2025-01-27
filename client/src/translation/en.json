@@ -374,6 +374,9 @@
     "add": "Add"
   },
   "manageMerch": {
+    "saveDestinations": "Save destinations",
+    "saveOptions": "Save options",
+    "backToMerchList": "Back to merch list",
     "destinationCountry": "Destination country",
     "deleteMerch": "Delete merch item",
     "merchImage": "merch image",

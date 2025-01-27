@@ -4,6 +4,7 @@ export default styled.ul`
   border: 1px dashed var(--mi-darken-x-background-color);
   list-style: none;
   width: 100%;
+  background-color: var(--mi-lighten-background-color);
 
   li {
     padding: 1rem;

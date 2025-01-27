@@ -139,7 +139,7 @@ const MerchDestinations: React.FC<{}> = () => {
               >
                 {t("addNewShippingDestination")}
               </Button>
-              <Button>{t("save")}</Button>
+              <Button>{t("saveDestinations")}</Button>
             </>
           )}
         </div>

@@ -120,7 +120,7 @@ const EditMerch: React.FC<{}> = () => {
             variant="link"
             to={getArtistManageUrl(artist.id) + "/merch"}
           >
-            {t("viewMerchLive")}
+            {t("backToMerchList")}
           </ButtonLink>{" "}
           <ButtonLink to={getMerchUrl(artist, merch)}>
             {t("viewMerchLive")}
