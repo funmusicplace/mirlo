@@ -139,7 +139,7 @@ function MerchView() {
                   src={
                     merch.images?.[0]?.sizes?.[960] +
                     "?" +
-                    merch.images?.[0].updatedAt
+                    merch.images?.[0]?.updatedAt
                   }
                   alt={merch.title}
                   size={960}
