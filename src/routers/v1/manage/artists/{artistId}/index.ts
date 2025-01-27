@@ -29,13 +29,12 @@ export default function () {
     const { artistId } = req.params as unknown as Params;
     const { bio, name, urlSlug, properties, links, linksJson, location } =
       req.body;
-    const user = req.user as User;
+
     try {
       // FIXME: check type of properties object.
       const updatedCount = await prisma.artist.updateMany({
         where: {
           id: Number(artistId),
-          userId: Number(user.id),
         },
         data: {
           bio,
