@@ -78,7 +78,7 @@ const ArtistFormLocation: React.FC<ArtistLocationProps> = ({
         )}
         {isManage && (
           <Button
-            variant="transparent"
+            variant="dashed"
             size="compact"
             onlyIcon
             onClick={() => setIsEditing(true)}

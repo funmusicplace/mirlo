@@ -13,11 +13,11 @@ import { debounce } from "lodash";
 const SearchResultsDiv = styled.div`
   position: absolute;
   padding: 0.5rem;
-  background: var(--mi-white);
+  background: var(--mi-normal-background-color);
   width: 100%;
   z-index: 999;
   word-break: break-word;
-  color: var(--mi-black) !important;
+  color: var(--mi-normal-foreground-color);
   margin-top: 0.5rem;
   border-radius: 5px;
 
@@ -28,9 +28,9 @@ const SearchResultsDiv = styled.div`
   }
 
   @media (prefers-color-scheme: dark) {
-    color: var(--mi-black);
+    color: var(--mi-normal-foreground-color);
     &::placeholder {
-      color: var(--mi-black) !important;
+      color: var(--mi-normal-foreground-color) !important;
       opacity: 0.3;
     }
   }
@@ -45,7 +45,7 @@ const SearchResult = styled.li`
   a,
   button {
     padding: 0.75rem 1rem !important;
-    color: var(--mi-black) !important;
+    color: var(--mi-normal-foreground-color) !important;
     display: block;
     background: transparent;
     border: none;
@@ -56,24 +56,24 @@ const SearchResult = styled.li`
   }
 
   &.selected {
-    background: var(--mi-black);
-    color: var(--mi-white) !important;
+    background: var(--mi-normal-foreground-color);
+    color: var(--mi-normal-background-color) !important;
 
     button,
     a {
-      color: var(--mi-white) !important;
+      color: var(--mi-normal-background-color) !important;
     }
   }
 
   button:hover,
   a:hover {
-    color: var(--mi-white) !important;
-    background-color: var(--mi-black) !important;
+    color: var(--mi-normal-background-color) !important;
+    background-color: var(--mi-normal-foreground-color) !important;
   }
   @media (prefers-color-scheme: dark) {
     button:hover,
     a:hover {
-      background-color: var(--mi-black) !important;
+      background-color: var(--mi-normal-foreground-color) !important;
     }
   }
 `;
@@ -203,8 +203,8 @@ const AutoComplete: React.FC<{
           opacity: 0.95;
           position: relative;
           margin-bottom: 0 !important;
-          border: 1px solid var(--mi-lighten-foreground-color);
-          background: var(--mi-white) !important;
+          border: 1px solid var(--mi-normal-foreground-color);
+          background: var(--mi-normal-background-color) !important;
           overflow: hidden;
           text-overflow: ellipsis;
           &::placeholder {
@@ -212,10 +212,10 @@ const AutoComplete: React.FC<{
             opacity: 0.5;
           }
           @media (prefers-color-scheme: dark) {
-            color: var(--mi-white) !important;
-            background: var(--mi-black) !important;
+            color: var(--mi-normal-foreground-color) !important;
+            background: var(--mi-normal-background-color) !important;
             &::placeholder {
-              color: var(--mi-white) !important;
+              color: var(--mi-normal-foreground-color) !important;
             }
           }
         `}

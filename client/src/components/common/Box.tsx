@@ -29,7 +29,7 @@ const Box = styled.div<{
       case "info":
         return `
           background-color: var(--mi-info-background-color);
-          color: var(--mi-white);
+          color: var(--mi-normal-foreground-color);
         `;
       case "warning":
         return `

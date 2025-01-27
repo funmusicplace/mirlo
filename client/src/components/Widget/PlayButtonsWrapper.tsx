@@ -41,7 +41,7 @@ export const PlayButtonsWrapper: React.FC<{ ids: number[] }> = ({ ids }) => {
         button {
           background-color: var(--mi-normal-foreground-color);
           color: var(--mi-normal-background-color);
-          border: solid 1.5px var(--mi-normal-foreground-color) !important;
+          border: solid 1.5px var(--mi-normal-foreground-color);
           width: 3rem;
           height: 3rem;
           svg {

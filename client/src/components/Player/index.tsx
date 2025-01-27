@@ -67,24 +67,11 @@ const Player = () => {
         width: 100%;
         z-index: 10;
         bottom: 0;
-        color: var(--mi-black);
         filter: drop-shadow(0 0 0.1rem rgba(0, 0, 0, 0.3));
         background-color: var(--mi-darken-x-background-color);
-        // height: 73px;
-
-        a {
-          color: var(--mi-black);
-        }
 
         @media (max-width: ${bp.small}px) {
           flex-direction: column;
-        }
-
-        @media (prefers-color-scheme: dark) {
-          color: white;
-          a {
-            color: white;
-          }
         }
       `}
       id="player"
@@ -95,7 +82,6 @@ const Player = () => {
           align-items: center;
           justify-content: flex-end;
           flex-grow: 1;
-          padding-bottom: 0.5rem;
           background-color: var(--mi-normal-background-color);
 
           @media (max-width: ${bp.small}px) {
@@ -120,10 +106,6 @@ const Player = () => {
           width: 100%;
           margin: auto;
           background-color: var(--mi-normal-background-color);
-
-          @media (prefers-color-scheme: dark) {
-            background-color: #0e0e0e;
-          }
         `}
       >
         <div
@@ -135,11 +117,6 @@ const Player = () => {
             paddin-right: 0.5rem;
             font-size: var(--mi-font-size-small);
             justify-content: space-between;
-            background-color: #f5f0f0;
-
-            @media (prefers-color-scheme: dark) {
-              background-color: #0e0e0e;
-            }
 
             @media (max-width: ${bp.small}px) {
               font-size: var(--mi-font-size-xsmall);
