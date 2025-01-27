@@ -222,15 +222,23 @@ const TrackRow: React.FC<{
       {size !== "small" && (
         <td align="right">
           <DropdownMenu compact>
-            <>
-              <EmbedLink track={track} />
-              <TrackLink
-                track={track}
-                trackGroup={trackGroup}
-                artist={trackGroup.artist}
-              />
-              {track.lyrics && <LyricsModal track={track} />}
-            </>
+            <ul>
+              <li>
+                <EmbedLink track={track} />
+              </li>
+              <li>
+                <TrackLink
+                  track={track}
+                  trackGroup={trackGroup}
+                  artist={trackGroup.artist}
+                />
+              </li>
+              {track.lyrics && (
+                <li>
+                  s <LyricsModal track={track} />
+                </li>
+              )}
+            </ul>
           </DropdownMenu>
         </td>
       )}

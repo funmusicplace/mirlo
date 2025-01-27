@@ -76,7 +76,7 @@ const CustomButton = styled.button<Sizable>(
     let cssColorVariable = `--mi-${buttonRole ?? "primary"}-color`;
     var backgroundColor = bodyStyles.getPropertyValue(cssColorVariable);
     let foregroundColor = bodyStyles.getPropertyValue(
-      `--mi-light-background-color`
+      `--mi-normal-background-color`
     );
 
     const backgroundIsLight = lightOrDark(backgroundColor) === "light";

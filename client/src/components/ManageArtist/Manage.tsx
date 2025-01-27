@@ -94,6 +94,7 @@ export const Manage: React.FC = () => {
               >
                 <ButtonLink
                   to="/manage/welcome"
+                  buttonRole="primary"
                   className={css`
                     flex-grow: 1;
                     text-align: center;

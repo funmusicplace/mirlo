@@ -81,38 +81,45 @@ const Menu: React.FC = (props) => {
             </Button>
           </li>
 
-          <div
+          <li
             className={css`
-              border-bottom: var(--mi-border);
-              border-top: var(--mi-border);
-              margin: 0.5rem 0;
-              max-height: 190px;
-              overflow: auto;
+              padding: 0;
             `}
           >
-            {artists.map((a) => {
-              return (
-                <li key={a.id}>
-                  <Button
-                    onClick={() => {
-                      setIsMenuOpen(false);
-                      navigate(getArtistManageUrl(a.id));
-                    }}
-                  >
-                    <div
-                      className={css`
-                        font-weight: bold;
-                        opacity: 0.7;
-                        font-size: 0.9rem;
-                      `}
+            <ul
+              className={css`
+                border-bottom: 1px solid var(--mi-normal-foreground-color) !important;
+                border-top: 1px solid var(--mi-normal-foreground-color) !important;
+                margin: 0;
+                padding: 0 !important ;
+                max-height: 190px;
+                overflow: auto;
+              `}
+            >
+              {artists.map((a) => {
+                return (
+                  <li key={a.id}>
+                    <Button
+                      onClick={() => {
+                        setIsMenuOpen(false);
+                        navigate(getArtistManageUrl(a.id));
+                      }}
                     >
-                      {a.name}
-                    </div>
-                  </Button>
-                </li>
-              );
-            })}
-          </div>
+                      <div
+                        className={css`
+                          font-weight: bold;
+                          opacity: 0.7;
+                          font-size: 0.9rem;
+                        `}
+                      >
+                        {a.name}
+                      </div>
+                    </Button>
+                  </li>
+                );
+              })}
+            </ul>
+          </li>
           {user?.isAdmin && (
             <li>
               <Button

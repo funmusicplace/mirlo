@@ -41,9 +41,10 @@ const DropdownMenu: React.FC<{
               z-index: 999;
               overflow: hidden;
               text-overflow: ellipsis;
-              background: var(--mi-white);
+              background: var(--mi-normal-background-color) !important;
+
               button {
-                color: var(--mi-black);
+                color: var(--mi-normal-foreground-color) !important;
               }
 
               li {
@@ -51,14 +52,14 @@ const DropdownMenu: React.FC<{
               }
 
               li > * {
-                background: transparent !important;
                 min-width: 200px;
                 list-style-type: none;
                 text-decoration: none;
                 text-align: right;
                 display: block;
                 white-space: normal;
-                color: var(--mi-black);
+                color: var(--mi-normal-foreground-color) !important;
+                background-color: var(--mi-normal-background-color) !important;
                 word-break: break-word;
                 font-weight: normal;
                 border-radius: 0;
@@ -72,25 +73,9 @@ const DropdownMenu: React.FC<{
 
                 &:hover {
                   border-radius: 0;
-                  background: var(--mi-black) !important;
-                  color: var(--mi-white) !important;
-                  border: none !important;
-                }
-              }
-
-              @media (prefers-color-scheme: dark) {
-                background: var(--mi-black);
-                button {
-                  color: var(--mi-white);
-                }
-                li > * {
-                  background-color: var(--mi-black);
-                  color: var(--mi-white);
-
-                  &:hover {
-                    background-color: var(--mi-white) !important;
-                    color: var(--mi-black) !important;
-                  }
+                  background: var(--mi-normal-foreground-color) !important;
+                  color: var(--mi-normal-background-color) !important;
+                  border: none;
                 }
               }
             `}

@@ -44,7 +44,7 @@ const HeaderWrapper = styled.div<{
     props.transparent
       ? `background: transparent; 
          box-shadow: 0px 1px 10px rgba(0, 0, 0, 0);`
-      : `background: var(--mi-light-background-color); 
+      : `background: var(--mi-darken-background-color); 
          box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1);`}
 
   ${(props) =>
