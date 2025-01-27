@@ -324,7 +324,6 @@
     "editPost": "Edit post",
     "editDetails": "Edit artist details",
     "viewLive": "View live",
-    "deleteArtist": "Permanently delete artist account",
     "terminationDanger": " Artist account termination ",
     "addNewAlbum": "Add new album",
     "edit": "Edit",
@@ -489,6 +488,7 @@
     "uploadingTracks": "Uploading tracks. This could take several minutes, please don't close the browser."
   },
   "artistForm": {
+    "deleteArtist": "Permanently delete artist account",
     "backgroundImageLabel": "Background image",
     "clickToUploadType": "Click to upload {{ imageType }}",
     "yourAvatar": "your avatar",
