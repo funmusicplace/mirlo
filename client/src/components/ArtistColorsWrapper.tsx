@@ -10,7 +10,7 @@ const colorDefined = (color?: string) => {
 
 const colors = {
   dark: {
-    primary: "#fff",
+    primary: "#ffc0cb",
     secondary: "#be3455",
     foreground: "#fff",
     background: "#111",
