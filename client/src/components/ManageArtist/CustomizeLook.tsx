@@ -21,7 +21,6 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import SavingInput from "./AlbumFormComponents/SavingInput";
 import { QUERY_KEY_ARTISTS } from "queries/queryKeys";
-import { FaTrash } from "react-icons/fa";
 import DeleteArtist from "./DeleteArtist";
 
 export interface ShareableTrackgroup {
