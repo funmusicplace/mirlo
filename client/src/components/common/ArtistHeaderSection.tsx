@@ -13,7 +13,6 @@ import { UpdateArtistBody, useUpdateArtistMutation } from "queries";
 import React from "react";
 import { useSnackbar } from "state/SnackbarContext";
 import { useAuthContext } from "state/AuthContext";
-import TipArtist from "./TipArtist";
 import { ButtonLink } from "./Button";
 import { FaEye, FaPen } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
