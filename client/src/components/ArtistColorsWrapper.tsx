@@ -30,26 +30,31 @@ const ArtistColorsWrapper: React.FC<{ children: React.ReactElement }> = ({
 
         ${artistColors &&
         `
-    ${
-      colorDefined(artistColors.background) &&
-      `--mi-normal-background-color: ${artistColors.background};`
-    }
-    ${
-      colorDefined(artistColors.primary) &&
-      `--mi-primary-color: ${artistColors.primary};`
-    }
-    ${
-      colorDefined(artistColors.secondary) &&
-      `--mi-secondary-color: ${artistColors.secondary};`
-    }
-    ${
-      colorDefined(artistColors.foreground) &&
-      `--mi-normal-foreground-color: ${artistColors.foreground} !important;`
-    }
-    `}
+        ${
+          colorDefined(artistColors.background) &&
+          `--mi-normal-background-color: ${artistColors.background};`
+        }
+        ${
+          colorDefined(artistColors.primary) &&
+          `--mi-primary-color: ${artistColors.primary};`
+        }
+        ${
+          colorDefined(artistColors.secondary) &&
+          `--mi-secondary-color: ${artistColors.secondary};`
+        }
+        ${
+          colorDefined(artistColors.foreground) &&
+          `--mi-normal-foreground-color: ${artistColors.foreground} !important;`
+        }
+        `}
 
         background-color: var(--mi-normal-background-color);
         color: var(--mi-normal-foreground-color);
+
+        [data-mi-theme="dark"] {
+          background-color: var(--mi-normal-background-color);
+          color: var(--mi-normal-foreground-color);
+        }
       `}
     >
       {children}

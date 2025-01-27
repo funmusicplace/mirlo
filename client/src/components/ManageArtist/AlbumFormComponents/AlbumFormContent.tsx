@@ -29,7 +29,6 @@ const AlbumFormContent: React.FC<{
           formKey="title"
           url={`manage/trackGroups/${trackGroupId}`}
           extraData={{ artistId: Number(artistId) }}
-          clearQueryKey={QUERY_KEY_TRACK_GROUPS}
         />
       </FormComponent>
       <FormComponent
@@ -71,7 +70,6 @@ const AlbumFormContent: React.FC<{
           required
           url={`manage/trackGroups/${trackGroupId}`}
           extraData={{ artistId: Number(artistId) }}
-          clearQueryKey={QUERY_KEY_TRACK_GROUPS}
         />
       </FormComponent>
       <FormComponent>
@@ -81,7 +79,6 @@ const AlbumFormContent: React.FC<{
           rows={8}
           url={`manage/trackGroups/${trackGroupId}`}
           extraData={{ artistId: Number(artistId) }}
-          clearQueryKey={QUERY_KEY_TRACK_GROUPS}
         />
       </FormComponent>
       <FormComponent>
@@ -91,7 +88,6 @@ const AlbumFormContent: React.FC<{
           rows={8}
           url={`manage/trackGroups/${trackGroupId}`}
           extraData={{ artistId: Number(artistId) }}
-          clearQueryKey={QUERY_KEY_TRACK_GROUPS}
         />
       </FormComponent>
       <FormComponent>
@@ -102,7 +98,6 @@ const AlbumFormContent: React.FC<{
           step="0.01"
           url={`manage/trackGroups/${trackGroupId}`}
           extraData={{ artistId: Number(artistId) }}
-          clearQueryKey={QUERY_KEY_TRACK_GROUPS}
         />
         {errors.minPrice && <FormError>{t("priceZeroOrMore")}</FormError>}
       </FormComponent>

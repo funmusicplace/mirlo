@@ -2,9 +2,7 @@ import React from "react";
 import Button from "../common/Button";
 import { FormProvider, useForm } from "react-hook-form";
 import { bp } from "../../constants";
-import { InputEl } from "../common/Input";
 import FormComponent from "components/common/FormComponent";
-import TextArea from "components/common/TextArea";
 import { css } from "@emotion/css";
 import { useSnackbar } from "state/SnackbarContext";
 import UploadArtistImage from "./UploadArtistImage";
@@ -19,7 +17,7 @@ import {
 import { useAuthContext } from "state/AuthContext";
 import styled from "@emotion/styled";
 import ChooseYourTheme from "./ChooseYourTheme";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import SavingInput from "./AlbumFormComponents/SavingInput";
 import { QUERY_KEY_ARTISTS } from "queries/queryKeys";
@@ -112,6 +110,7 @@ export const CustomizeLook: React.FC = () => {
   const { mutate: updateArtist, isPending: isUpdatePending } =
     useUpdateArtistMutation();
   const isPending = isCreatePending || isUpdatePending;
+  const client = useQueryClient();
 
   const onSuccess = React.useCallback(() => {
     snackbar(t("updatedArtist"), { type: "success" });
@@ -138,6 +137,30 @@ export const CustomizeLook: React.FC = () => {
       } else {
         createArtist({ userId, body: sending }, { onSuccess, onError });
       }
+
+      const timeout = setTimeout(() => {
+        client.invalidateQueries({
+          predicate: (query) => {
+            const shouldInvalidate = query.queryKey.find((obj) => {
+              if (typeof obj === "string") {
+                return obj
+                  .toLowerCase()
+                  .includes(QUERY_KEY_ARTISTS.toLowerCase());
+              }
+              return false;
+            });
+
+            return !!shouldInvalidate;
+          },
+        });
+
+        snackbar(t("merchUpdated"), {
+          type: "success",
+        });
+      }, 2000);
+      return () => {
+        clearTimeout(timeout);
+      };
     },
     [userId, existingId, onSuccess, updateArtist, createArtist, onError]
   );
@@ -205,7 +228,6 @@ export const CustomizeLook: React.FC = () => {
                     formKey="name"
                     url={`manage/artists/${artistId}`}
                     extraData={{}}
-                    clearQueryKey={QUERY_KEY_ARTISTS}
                   />
                 </FormComponent>
               </div>
@@ -226,7 +248,6 @@ export const CustomizeLook: React.FC = () => {
                     formKey="bio"
                     rows={7}
                     url={`manage/artists/${artistId}`}
-                    clearQueryKey={QUERY_KEY_ARTISTS}
                     extraData={{}}
                   />
                 </FormComponent>

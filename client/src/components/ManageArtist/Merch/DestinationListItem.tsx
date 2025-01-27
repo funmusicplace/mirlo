@@ -47,11 +47,13 @@ const DestinationListItem: React.FC<{
               {...methods.register(`destinations.${index}.destinationCountry`)}
             >
               <option value="">{defaultOption}</option>
-              {countryCodesCurrencies.map((country) => (
-                <option key={country.countryCode} value={country.countryCode}>
-                  {country.countryName} {country.countryCode}
-                </option>
-              ))}
+              {countryCodesCurrencies
+                .sort((a, b) => (a.countryName > b.countryName ? 1 : -1))
+                .map((country) => (
+                  <option key={country.countryCode} value={country.countryCode}>
+                    {country.countryName} ({country.countryCode})
+                  </option>
+                ))}
             </SelectEl>
           </FormComponent>
           <FormComponent>
