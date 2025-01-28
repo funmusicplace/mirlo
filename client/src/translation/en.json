@@ -182,7 +182,7 @@
     "buyMerch": "Buy",
     "buyFor": "Buy for {{amount}}",
     "buyFrom": "Buy from {{amount}}",
-    "merchFor": "This merch is for {{ album }}",
+    "merchFor": "This merch is for '{{ album }}' and you'll receive a download of it when you buy it.",
     "supportThisArtistByPurchasing": "Support this artist!",
     "howMany": "How many do you want?",
     "howMuch": "Pay {{ currency }}",

@@ -155,6 +155,18 @@ function MerchView() {
               `}
             >
               <MerchButtonPopUp merch={merch} artist={artist} />
+              <div
+                className={css`
+                  margin-left: 1rem;
+                  @media screen and (max-width: ${bp.small}px) {
+                    max-width: 100%;
+                    flex: 100%;
+                    margin-left: 0;
+                  }
+                `}
+              >
+                <MarkdownContent content={merchDescription} />
+              </div>
               {merch.includePurchaseTrackGroup && (
                 <Link
                   to={getReleaseUrl(
@@ -170,18 +182,6 @@ function MerchView() {
                   })}
                 </Link>
               )}
-              <div
-                className={css`
-                  margin-left: 1rem;
-                  @media screen and (max-width: ${bp.small}px) {
-                    max-width: 100%;
-                    flex: 100%;
-                    margin-left: 0;
-                  }
-                `}
-              >
-                <MarkdownContent content={merchDescription} />
-              </div>
               {merch.includePurchaseTrackGroup && (
                 <PublicTrackGroupListing
                   tracks={merch.includePurchaseTrackGroup?.tracks}
