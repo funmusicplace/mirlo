@@ -14,6 +14,7 @@ const SearchResultsDiv = styled.div`
   position: absolute;
   padding: 0.5rem;
   background: var(--mi-normal-background-color);
+  border: 1px solid var(--mi-darken-xx-background-color);
   width: 100%;
   z-index: 999;
   word-break: break-word;

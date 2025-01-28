@@ -184,6 +184,7 @@ const MerchOptions: React.FC<{}> = () => {
         onSubmit={methods.handleSubmit(update)}
         className={css`
           width: 100%;
+          margin-top: 0.75rem;
         `}
       >
         <FormProvider {...methods}>
@@ -224,7 +225,7 @@ const MerchOptions: React.FC<{}> = () => {
               >
                 {t("addNewMerchOption")}
               </Button>
-              <Button>{t("save")}</Button>
+              <Button>{t("saveOptions")}</Button>
             </>
           )}
         </div>

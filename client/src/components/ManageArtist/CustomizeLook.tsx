@@ -21,6 +21,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import SavingInput from "./AlbumFormComponents/SavingInput";
 import { QUERY_KEY_ARTISTS } from "queries/queryKeys";
+import DeleteArtist from "./DeleteArtist";
 
 export interface ShareableTrackgroup {
   creatorId: number;
@@ -328,6 +329,7 @@ export const CustomizeLook: React.FC = () => {
           </div>
         </form>
       </FormProvider>
+      <DeleteArtist />
     </div>
   );
 };
