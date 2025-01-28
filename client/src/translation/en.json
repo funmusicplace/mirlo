@@ -177,6 +177,7 @@
   },
   "merchDetails": {
     "buy": "Buy",
+    "orderTotal": "Order total: {{ amount }}",
     "goToCheckOut": "Proceed to checkout",
     "artistCheckoutPage": "You will be taken to the artist's payment processor page to complete this purchase.",
     "buyMerch": "Buy",
@@ -376,7 +377,6 @@
   },
   "manageMerch": {
     "saveDestinations": "Save destinations",
-    "orderTotal": "Order total: {{ amount }}",
     "updatedShippingDestinations": "Updated shipping destinations",
     "saveOptions": "Save options",
     "backToMerchList": "Back to merch list",
