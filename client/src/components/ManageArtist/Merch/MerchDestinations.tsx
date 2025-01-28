@@ -13,6 +13,7 @@ import { useAuthContext } from "state/AuthContext";
 import DestinationListItem from "./DestinationListItem";
 import countryCodesCurrencies from "./country-codes-currencies";
 import styled from "@emotion/styled";
+import { useSnackbar } from "state/SnackbarContext";
 
 const P = styled.p`
   margin: 0.25rem 0 0.5rem;
@@ -32,6 +33,7 @@ const currencyToCountryMap = countryCodesCurrencies.reduce(
 
 const MerchDestinations: React.FC<{}> = () => {
   const { merchId: merchParamId } = useParams();
+  const snackbar = useSnackbar();
   const { t } = useTranslation("translation", { keyPrefix: "manageMerch" });
   const [isEditing, setIsEditing] = React.useState(false);
   const { user } = useAuthContext();
@@ -65,6 +67,7 @@ const MerchDestinations: React.FC<{}> = () => {
       try {
         await api.put(`manage/merch/${merchParamId}/destinations`, packet);
         refetch();
+        snackbar("updatedShippingDestinations", { type: "success" });
       } catch (e) {
         console.error("e", e);
       }

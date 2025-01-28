@@ -2,11 +2,12 @@ import { css } from "@emotion/css";
 import styled from "@emotion/styled";
 import { MetaCard } from "components/common/MetaCard";
 import { WidthWrapper } from "components/common/WidthContainer";
-import { FaArrowDown } from "react-icons/fa";
+import { FaArrowDown, FaInfo } from "react-icons/fa";
 import { bp } from "../../constants";
 import Button, { ButtonLink } from "components/common/Button";
 import { Link } from "react-router-dom";
 import { Trans, useTranslation } from "react-i18next";
+import Tooltip from "components/common/Tooltip";
 
 const Container = styled(WidthWrapper)`
   h2 {
@@ -290,17 +291,14 @@ const Features = () => {
                 You're prolific! We get it. Or you're a label! Batch upload an
                 album in one click just drag and drop the content of your album
                 folder and you're good to go! The upload process is quick and
-                painless to make it easy for you to upload your catalogue. Want
-                to upload more than 10 albums?{" "}
-                <a
-                  className={css`
-                    color: white;
-                    text-decoration: underline;
-                  `}
-                  href="mailto:mirlodotspace@proton.me"
+                painless to make it easy for you to upload your catalogue.
+                <Tooltip
+                  hoverText={
+                    "While there's no cap on how many albums you can upload, please be kind to our servers, and consider pitching in :)"
+                  }
                 >
-                  Get in touch with us!
-                </a>
+                  <FaInfo />
+                </Tooltip>
               </p>
             </div>{" "}
           </Feature>

@@ -65,10 +65,19 @@ const SelectTrackGroup: React.FC<{
           />
         </Pill>
       )}
+
       <AutoCompleteTrackGroup
         onSelect={(val) => doSave(val)}
         filterByArtistId={merch.artistId}
+        placeholder={t("typeAlbumName") ?? ""}
       />
+      <small
+        className={css`
+          margin-top: 1rem;
+        `}
+      >
+        {t("relatedTrackGroupSmall")}
+      </small>
     </FormComponent>
   );
 };

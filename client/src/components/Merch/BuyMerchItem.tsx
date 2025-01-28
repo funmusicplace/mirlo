@@ -47,6 +47,11 @@ const BuyMerchItem: React.FC<{
     },
   });
 
+  const currentPrice = methods.watch("price");
+  const quantity = methods.watch("quantity");
+  const currentOptions = methods.watch("merchOptionIds");
+  const shippingDestination = methods.watch("shippingDestinationId");
+
   const onSubmit = React.useCallback(
     async (data: FormData) => {
       try {
@@ -74,6 +79,27 @@ const BuyMerchItem: React.FC<{
   if (!stripeAccountStatus?.chargesEnabled || merch.quantityRemaining === 0) {
     return null;
   }
+
+  console.log(currentOptions, currentPrice, shippingDestination);
+
+  let price = currentPrice;
+
+  merch.optionTypes.forEach((ot) =>
+    ot.options.forEach((o) =>
+      currentOptions.includes(o.id)
+        ? (price += o.additionalPrice / 100)
+        : undefined
+    )
+  );
+
+  console.log("merch", merch.shippingDestinations);
+  merch.shippingDestinations.forEach((sd) => {
+    if (sd.id === shippingDestination) {
+      price += sd.costUnit / 100 + (sd.costExtraUnit * (quantity - 1)) / 100;
+    }
+  });
+
+  console.log("tota", price);
 
   const onlyOneDestination = merch.shippingDestinations.length === 1;
   const defaultOption = onlyOneDestination
@@ -178,6 +204,16 @@ const BuyMerchItem: React.FC<{
         </SelectEl>
       </FormComponent>
       <IncludesDigitalDownload merch={merch} artist={artist} />
+      <p
+        className={css`
+          margin: 1rem auto;
+          font-weight: bold;
+        `}
+      >
+        {t("orderTotal", {
+          amount: moneyDisplay({ amount: price, currency: merch.currency }),
+        })}
+      </p>
       <Button
         disabled={!methods.formState.isValid}
         isLoading={isLoadingStripe}
@@ -187,7 +223,11 @@ const BuyMerchItem: React.FC<{
       >
         {t("goToCheckOut")}
       </Button>
-      <div>
+      <div
+        className={css`
+          margin-top: 1rem;
+        `}
+      >
         <small>{t("artistCheckoutPage")}</small>
       </div>
     </form>

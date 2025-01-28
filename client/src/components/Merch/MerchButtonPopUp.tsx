@@ -29,15 +29,23 @@ const MerchButtonPopUp: React.FC<{ merch: Merch; artist: Artist }> = ({
     return null;
   }
 
+  const hasPricedOptions = merch.optionTypes.find((ot) =>
+    ot.options.find((o) => o.additionalPrice)
+  );
+
+  const amount = moneyDisplay({
+    amount: merch.minPrice / 100,
+    currency: merch.currency,
+  });
+
   return (
     <>
       <Button onClick={() => setIsOpen(true)}>
-        {t("buyFor", {
-          amount: moneyDisplay({
-            amount: merch.minPrice / 100,
-            currency: merch.currency,
-          }),
-        })}
+        {hasPricedOptions
+          ? t("buyFrom", { amount })
+          : t("buyFor", {
+              amount,
+            })}
       </Button>
       <Modal
         open={isOpen}

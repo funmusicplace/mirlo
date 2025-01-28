@@ -31,7 +31,7 @@ const FormComponent = styled.div<{ direction?: "row" | "column" }>`
   }
 
   label {
-    font-size: 1.2rem;
+    font-size: 1rem;
     margin-bottom: 0.5rem;
   }
 
