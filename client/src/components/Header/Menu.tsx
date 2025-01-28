@@ -94,6 +94,7 @@ const Menu: React.FC = (props) => {
                 padding: 0 !important ;
                 max-height: 190px;
                 overflow: auto;
+                flex-direction: column;
               `}
             >
               {artists.map((a) => {
