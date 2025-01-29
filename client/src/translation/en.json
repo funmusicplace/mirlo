@@ -623,6 +623,7 @@
   },
   "trackGroupDetails": {
     "trackgroup": "Album:",
+    "downloadCodecsInfo": "Includes downloads in FLAC, WAV, mp3 and more. Paying supporters also get unlimited streaming on the Mirlo website",
     "embedCode": "Embed code",
     "viewLyrics": "View lyrics",
     "viewTrack": "View track",

@@ -485,7 +485,7 @@ export const setDownloadTokenToNull = async ({
 export const processSingleTrackGroup = (
   tg: TrackGroup & {
     cover?: TrackGroupCover | null;
-    artist?: Artist & { avatar?: ArtistAvatar | null };
+    artist?: Partial<Artist> & { avatar?: ArtistAvatar | null };
     merch?: (Merch & { images: MerchImage[] })[];
     tracks?: Track[];
     tags?: (TrackGroupTag & { tag?: { tag?: string } })[];

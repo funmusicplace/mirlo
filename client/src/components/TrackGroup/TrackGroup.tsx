@@ -139,6 +139,8 @@ export const TrackgroupInfosWrapper = styled.div`
 export const TrackListingWrapper = styled.div`
   max-width: 59%;
   flex: 59%;
+  margin: 0 0.5rem;
+
   @media screen and (max-width: ${bp.small}px) {
     max-width: 100%;
     flex: 100%;
@@ -264,6 +266,7 @@ function TrackGroup() {
                 {trackGroup.merch && trackGroup.merch.length > 0 && (
                   <TrackGroupMerch merch={trackGroup.merch} />
                 )}
+
                 <SmallScreenPlayWrapper>
                   <ClickToPlayAlbum
                     trackGroupId={trackGroup.id}
@@ -279,6 +282,14 @@ function TrackGroup() {
                   tracks={trackGroup.tracks}
                   trackGroup={trackGroup}
                 />
+                <small
+                  className={css`
+                    margin-left: 2.5rem;
+                    margin-top: 1rem;
+                  `}
+                >
+                  {t("downloadCodecsInfo")}
+                </small>
               </TrackListingWrapper>
             </div>
           </div>
