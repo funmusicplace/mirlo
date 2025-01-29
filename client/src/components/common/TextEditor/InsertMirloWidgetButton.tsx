@@ -10,7 +10,6 @@ import { css } from "@emotion/css";
 import { bp } from "../../../constants";
 import AutoCompleteTrackGroup from "../AutoCompleteTrackGroup";
 import { useTranslation } from "react-i18next";
-import Tabs from "../Tabs";
 import BulkTrackUpload from "components/ManageArtist/BulkTrackUpload";
 
 const InsertMirloWidgetButton: React.FC<{
@@ -136,8 +135,12 @@ const InsertMirloWidgetButton: React.FC<{
                   flex-direction: column;
                   display: flex;
 
-                  span {
-                    margin: 0.5rem 0;
+                  > span {
+                    padding: 1rem;
+                    font-weight: bold;
+                    border: 1px dashed var(--mi-darken-xx-background-color);
+                    display: blox;
+                    margin-top: 1rem;
                   }
 
                   button {

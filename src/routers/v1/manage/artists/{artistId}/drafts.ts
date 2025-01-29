@@ -31,6 +31,9 @@ export default function () {
         where: {
           isDrafts: true,
         },
+        include: {
+          tracks: true,
+        },
       });
 
       if (!draftAlbum) {
