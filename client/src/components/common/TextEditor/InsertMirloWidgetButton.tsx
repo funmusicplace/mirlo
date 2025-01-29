@@ -134,19 +134,24 @@ const InsertMirloWidgetButton: React.FC<{
               <div
                 className={css`
                   flex-direction: column;
+                  display: flex;
+
+                  span {
+                    margin: 0.5rem 0;
+                  }
 
                   button {
                     margin-top: 1rem;
                   }
                 `}
               >
-                {newSong.title}
+                <span>{newSong.title}</span>
                 <Button
                   onClick={() => {
                     onAdd(newSong.id, "track");
                   }}
                 >
-                  {t("")}
+                  {t("addThisSong")}
                 </Button>
               </div>
             )}
