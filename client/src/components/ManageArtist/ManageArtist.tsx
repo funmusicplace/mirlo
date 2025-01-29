@@ -64,32 +64,6 @@ const ManageArtist: React.FC<{}> = () => {
         )}
       </ArtistTabs>
       <Outlet />
-
-      <ArtistSection
-        className={css`
-          margin-top: 4rem !important;
-          border-top: 1px solid var(--mi-darken-x-background-color);
-          padding-top: 1rem !important;
-        `}
-      >
-        <div>
-          <label
-            className={css`
-              svg {
-                margin-bottom: -0.15rem;
-                height: 1.2rem;
-              }
-            `}
-          >
-            <AiOutlineWarning
-              className={css`
-                font-size: 1.5rem;
-              `}
-            />
-            {t("terminationDanger")}
-          </label>
-        </div>
-      </ArtistSection>
     </>
   );
 };

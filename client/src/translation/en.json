@@ -326,7 +326,6 @@
     "editPost": "Edit post",
     "editDetails": "Edit artist details",
     "viewLive": "View live",
-    "terminationDanger": " Artist account termination ",
     "addNewAlbum": "Add new album",
     "edit": "Edit",
     "editPage": "Manage artist page",
@@ -502,6 +501,7 @@
   },
   "artistForm": {
     "deleteArtist": "Permanently delete artist account",
+    "terminationDanger": " Artist account termination ",
     "backgroundImageLabel": "Background image",
     "clickToUploadType": "Click to upload {{ imageType }}",
     "yourAvatar": "your avatar",
@@ -679,6 +679,7 @@
     "noTracksMessage": "There's no tracks yet in this playlist!",
     "emptyTracklist": "There's no tracks yet in this playlist!",
     "delete": "Delete",
+    "deleteTrackSuccess": "Delete track success",
     "edit": "Edit",
     "listedArtists": "Listed artists",
     "originalFilename": "Original file name: {{ filename }}",
