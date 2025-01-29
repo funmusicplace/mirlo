@@ -6,13 +6,7 @@ import {
 import prisma from "@mirlo/prisma";
 import { User } from "@mirlo/prisma/client";
 
-import {
-  deleteArtist,
-  findArtistIdForURLSlug,
-  processSingleArtist,
-  singleInclude,
-} from "../../../../../utils/artist";
-import slugify from "slugify";
+import { deleteArtist } from "../../../../../utils/artist";
 
 type Params = {
   artistId: string;
@@ -30,6 +24,7 @@ export default function () {
       let draftAlbum = await prisma.trackGroup.findFirst({
         where: {
           isDrafts: true,
+          artistId: Number(artistId),
         },
         include: {
           tracks: true,

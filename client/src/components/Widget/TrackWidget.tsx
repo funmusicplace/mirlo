@@ -52,8 +52,6 @@ const TrackWidget = () => {
     return <LoadingBlocks />;
   }
 
-  console.log("track", track);
-
   return (
     <>
       {(!track || !track.id) && !isLoading && (
