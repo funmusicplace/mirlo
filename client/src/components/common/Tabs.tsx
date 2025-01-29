@@ -10,7 +10,9 @@ const Tabs = styled.ul`
     margin-right: 1rem;
     margin-top: 0.5rem;
 
-    > a:not(.edit) {
+    > a:not(.edit),
+    button {
+      border-radius: none;
       text-decoration: none;
       padding: 0rem 0.25rem calc(0.9rem - 4px) 0.25rem;
       line-height: 1rem;

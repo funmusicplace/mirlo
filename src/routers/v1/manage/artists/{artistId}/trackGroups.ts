@@ -20,6 +20,7 @@ export default function () {
       const results = await prisma.trackGroup.findMany({
         where: {
           artistId: Number(artistId),
+          isDrafts: false,
         },
         orderBy: {
           releaseDate: "desc",

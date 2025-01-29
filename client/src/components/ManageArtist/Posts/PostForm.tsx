@@ -189,6 +189,7 @@ const PostForm: React.FC<{
                   }}
                   value={value}
                   postId={post.id}
+                  artistId={artist.id}
                   reloadImages={reloadImages}
                 />
               );

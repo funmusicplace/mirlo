@@ -92,14 +92,11 @@ const BuyMerchItem: React.FC<{
     )
   );
 
-  console.log("merch", merch.shippingDestinations);
   merch.shippingDestinations.forEach((sd) => {
     if (sd.id === shippingDestination) {
       price += sd.costUnit / 100 + (sd.costExtraUnit * (quantity - 1)) / 100;
     }
   });
-
-  console.log("tota", price);
 
   const onlyOneDestination = merch.shippingDestinations.length === 1;
   const defaultOption = onlyOneDestination

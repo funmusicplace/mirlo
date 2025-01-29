@@ -44,8 +44,8 @@ const alertUser = (event: any) => {
 };
 
 export const BulkTrackUpload: React.FC<{
-  trackgroup: TrackGroup;
-  reload: () => Promise<unknown>;
+  trackgroup: { artistId?: number; id: number; tracks: Track[] };
+  reload: (newTrack?: Track) => Promise<unknown>;
 }> = ({ trackgroup, reload }) => {
   const snackbar = useSnackbar();
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
@@ -88,15 +88,18 @@ export const BulkTrackUpload: React.FC<{
           produceNewStatus(queue, firstTrack.t.title, 15)
         );
 
+        let newTrack: Track | undefined = undefined;
+
         try {
           const response = await api.post<Partial<Track>, { result: Track }>(
             `manage/tracks`,
             packet
           );
+          newTrack = response.result;
           setUploadQueue((queue) =>
             produceNewStatus(queue, firstTrack.t.title, 25)
           );
-          await api.uploadFile(`manage/tracks/${response.result.id}/audio`, [
+          await api.uploadFile(`manage/tracks/${newTrack.id}/audio`, [
             firstTrack.t.file,
           ]);
         } catch (e) {
@@ -117,7 +120,7 @@ export const BulkTrackUpload: React.FC<{
             setUploadQueue((queue) =>
               produceNewStatus(queue, firstTrack.t.title, 100)
             );
-            reload();
+            reload(newTrack);
           }, timeInBetweenUploads / 2);
 
           setTimeout(async () => {
@@ -125,6 +128,7 @@ export const BulkTrackUpload: React.FC<{
           }, timeInBetweenUploads);
         } else {
           await uploadNextTrack(remainingTracks);
+          reload(newTrack);
         }
       } else {
         setUploadQueue([]);

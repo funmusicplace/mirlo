@@ -48,8 +48,9 @@ const TextEditor: React.FC<{
   onChange: (val: any) => void;
   value: string;
   postId: number;
+  artistId: number;
   reloadImages: () => void;
-}> = ({ onChange, value, postId, reloadImages }) => {
+}> = ({ onChange, value, postId, reloadImages, artistId }) => {
   const { manager, state, setState } = useRemirror({
     extensions: extensions(postId, reloadImages),
     content: value,
@@ -106,7 +107,7 @@ const TextEditor: React.FC<{
           setState(parameter.state);
         }}
       >
-        <TopToolbar postId={postId} />
+        <TopToolbar postId={postId} artistId={artistId} />
         <EditorComponent />
         {/* <BubbleMenu /> */}
         <TableComponents />

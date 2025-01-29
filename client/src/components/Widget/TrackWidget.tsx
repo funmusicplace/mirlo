@@ -52,6 +52,8 @@ const TrackWidget = () => {
     return <LoadingBlocks />;
   }
 
+  console.log("track", track);
+
   return (
     <>
       {(!track || !track.id) && !isLoading && (
@@ -85,7 +87,11 @@ const TrackWidget = () => {
             `}
           >
             <ImageWithPlaceholder
-              src={track.trackGroup.cover?.sizes?.[300] ?? ""}
+              src={
+                track.trackGroup.cover?.sizes?.[300] ??
+                track.trackGroup.artist?.avatar?.sizes?.[300] ??
+                ""
+              }
               alt={track.title}
               size={150}
               className={css`
@@ -120,7 +126,9 @@ const TrackWidget = () => {
               >
                 <SmallTileDetails
                   title={track.title}
-                  subtitle={track.trackGroup.title}
+                  subtitle={
+                    track.trackGroup.isDraft ? "Drafts" : track.trackGroup.title
+                  }
                   footer={
                     track.trackGroup.artist?.name ??
                     (artistTranslation("unknown") as string)

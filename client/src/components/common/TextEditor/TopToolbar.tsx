@@ -16,7 +16,10 @@ import { css } from "@emotion/css";
 import InsertMirloWidgetButton from "./InsertMirloWidgetButton";
 import InsertImageButton from "./InsertImageButton";
 
-const TopToolbar: React.FC<{ postId: number }> = ({ postId }) => {
+const TopToolbar: React.FC<{ postId: number; artistId: number }> = ({
+  postId,
+  artistId,
+}) => {
   return (
     <div
       className={css`
@@ -79,7 +82,7 @@ const TopToolbar: React.FC<{ postId: number }> = ({ postId }) => {
         <CommandButtonGroup>
           {/* <Button startIcon={<FaImage />} /> */}
           <InsertVideoButton />
-          <InsertMirloWidgetButton postId={postId} />
+          <InsertMirloWidgetButton postId={postId} artistId={artistId} />
           <InsertImageButton postId={postId} />
         </CommandButtonGroup>
       </Toolbar>

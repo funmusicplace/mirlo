@@ -76,6 +76,7 @@ interface TrackGroup {
   createdAt: string;
   tags?: string[];
   merch?: Merch[];
+  isDraft?: boolean;
   cover?: {
     updatedAt: string;
     id: string;
