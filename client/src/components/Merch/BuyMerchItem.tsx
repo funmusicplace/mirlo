@@ -80,8 +80,6 @@ const BuyMerchItem: React.FC<{
     return null;
   }
 
-  console.log(currentOptions, currentPrice, shippingDestination);
-
   let price = currentPrice;
 
   merch.optionTypes.forEach((ot) =>

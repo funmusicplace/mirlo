@@ -11,6 +11,9 @@ import { bp } from "../../../constants";
 import AutoCompleteTrackGroup from "../AutoCompleteTrackGroup";
 import { useTranslation } from "react-i18next";
 import BulkTrackUpload from "components/ManageArtist/BulkTrackUpload";
+import { InputEl } from "../Input";
+import FormComponent from "../FormComponent";
+import Box from "../Box";
 
 const InsertMirloWidgetButton: React.FC<{
   postId: number;
@@ -19,6 +22,7 @@ const InsertMirloWidgetButton: React.FC<{
   const [isOpen, setIsOpen] = React.useState(false);
   const [draftAlbum, setDraftAlbum] = React.useState<TrackGroup>();
   const [newSong, setNewSong] = React.useState<Track>();
+  const [newSongTitle, setNewSongTitle] = React.useState("");
   const { addIframe } = useCommands();
   const { t } = useTranslation("translation", { keyPrefix: "textEditor" });
 
@@ -50,11 +54,34 @@ const InsertMirloWidgetButton: React.FC<{
     }));
   }, []);
 
+  const addNewSong = React.useCallback(async () => {
+    if (newSong) {
+      try {
+        await api.put(`manage/tracks/${newSong.id}`, { title: newSongTitle });
+        onAdd(newSong.id, "track");
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }, [newSong, newSongTitle]);
+
+  const setNewSongDetails = React.useCallback(async (newTrack?: Track) => {
+    if (newTrack) {
+      try {
+        const { result } = await api.get<Track>(`manage/tracks/${newTrack.id}`);
+        setNewSong(result);
+        setNewSongTitle(result?.title ?? "");
+        loadDraft();
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }, []);
+
   const loadDraft = React.useCallback(async () => {
     const response = await api.get<TrackGroup>(
       `manage/artists/${artistId}/drafts`
     );
-    console.log("response", response);
     setDraftAlbum(response.result);
   }, []);
 
@@ -135,7 +162,7 @@ const InsertMirloWidgetButton: React.FC<{
                   flex-direction: column;
                   display: flex;
 
-                  > span {
+                  > div {
                     padding: 1rem;
                     font-weight: bold;
                     border: 1px dashed var(--mi-darken-xx-background-color);
@@ -148,12 +175,18 @@ const InsertMirloWidgetButton: React.FC<{
                   }
                 `}
               >
-                <span>{newSong.title}</span>
-                <Button
-                  onClick={() => {
-                    onAdd(newSong.id, "track");
-                  }}
-                >
+                <FormComponent>
+                  <label>{t("songTitle")}</label>
+                  <InputEl
+                    value={newSongTitle}
+                    onChange={(e) => setNewSongTitle(e.currentTarget.value)}
+                  />
+                  <small>{newSong.audio?.originalFilename}</small>
+                </FormComponent>
+                {newSongTitle === "" && (
+                  <Box variant="warning">{t("addTitleToUpload")}</Box>
+                )}
+                <Button disabled={newSongTitle === ""} onClick={addNewSong}>
                   {t("addThisSong")}
                 </Button>
               </div>
@@ -161,10 +194,7 @@ const InsertMirloWidgetButton: React.FC<{
             {!newSong && (
               <BulkTrackUpload
                 trackgroup={draftAlbum}
-                reload={async (newTrack) => {
-                  setNewSong(newTrack);
-                  loadDraft();
-                }}
+                reload={setNewSongDetails}
               />
             )}
           </>

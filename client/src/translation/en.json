@@ -364,11 +364,13 @@
     "uploadAVideo": "Add a video",
     "addUrl": "Insert a video url",
     "addVideo": "Add video",
-    "addThisSong": "Add this song",
-    "uploadNewSong": "Upload new song",
-    "useExistingSong": "Use existing song",
-    "existingSongDescription": "Sharing a song from an existing album or pre-order? Find it here",
-    "uploadNewSongDescription": "Are you sharing a song that's not on one of your albums? A draft or WIP? Upload it here to share."
+    "addThisSong": "Add this track",
+    "songTitle": "Track title",
+    "uploadNewSong": "Upload new track",
+    "addTitleToUpload": "Add track title to upload",
+    "useExistingSong": "Use existing track",
+    "existingSongDescription": "Sharing a track from an existing album or pre-order? Find it here",
+    "uploadNewSongDescription": "Are you sharing a track that's not on one of your albums? A draft or WIP? Upload it here to share."
   },
   "manageLicense": {
     "shortLabelForLicense": "What's a unique short label for this license?",
