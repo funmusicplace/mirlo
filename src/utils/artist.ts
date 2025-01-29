@@ -372,6 +372,7 @@ export const singleInclude = (queryOptions?: {
     trackGroups: {
       where: {
         published: true,
+        isDrafts: false,
         tracks: { some: { audio: { uploadState: "SUCCESS" } } },
       },
       orderBy: {

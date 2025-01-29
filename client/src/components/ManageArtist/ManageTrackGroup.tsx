@@ -100,7 +100,11 @@ const ManageTrackGroup: React.FC<{}> = () => {
           </div>
         </SpaceBetweenDiv>
       </div>
-      <AlbumForm trackGroup={trackGroup} artist={artist} reload={refetch} />
+      <AlbumForm
+        trackGroup={trackGroup}
+        artist={artist}
+        reload={() => refetch()}
+      />
 
       <ManageTags tags={trackGroup.tags} />
 
@@ -123,7 +127,7 @@ const ManageTrackGroup: React.FC<{}> = () => {
       )}
 
       {trackGroup && (
-        <BulkTrackUpload trackgroup={trackGroup} reload={refetch} />
+        <BulkTrackUpload trackgroup={trackGroup} reload={() => refetch()} />
       )}
       <hr style={{ marginTop: "1rem", marginBottom: "1rem" }} />
       {trackGroup && trackGroup.tracks?.length > 0 && (

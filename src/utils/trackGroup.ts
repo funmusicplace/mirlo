@@ -8,6 +8,8 @@ import {
   User,
   Merch,
   MerchImage,
+  Artist,
+  ArtistAvatar,
 } from "@mirlo/prisma/client";
 import prisma from "@mirlo/prisma";
 import { generateFullStaticImageUrl } from "./images";
@@ -16,6 +18,7 @@ import {
   finalAudioBucket,
   removeObjectsFromBucket,
   getReadStream,
+  finalArtistAvatarBucket,
 } from "./minio";
 import { addSizesToImage, findArtistIdForURLSlug } from "./artist";
 import { logger } from "../logger";
@@ -482,12 +485,21 @@ export const setDownloadTokenToNull = async ({
 export const processSingleTrackGroup = (
   tg: TrackGroup & {
     cover?: TrackGroupCover | null;
+    artist?: Partial<Artist> & { avatar?: ArtistAvatar | null };
     merch?: (Merch & { images: MerchImage[] })[];
     tracks?: Track[];
     tags?: (TrackGroupTag & { tag?: { tag?: string } })[];
   }
 ) => ({
   ...tg,
+  artist: tg.artist
+    ? {
+        ...tg.artist,
+        avatar: tg.artist.avatar
+          ? addSizesToImage(finalArtistAvatarBucket, tg.artist.avatar)
+          : undefined,
+      }
+    : undefined,
   merch: tg.merch?.map(processSingleMerch),
   tags: tg.tags?.map((t) => t.tag?.tag) ?? [],
   cover: addSizesToImage(finalCoversBucket, tg.cover),

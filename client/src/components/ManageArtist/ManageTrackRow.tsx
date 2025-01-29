@@ -85,7 +85,7 @@ const ManageTrackRow: React.FC<{
       if (confirm) {
         await api.delete(`manage/tracks/${track.id}`);
         await reload?.();
-        snackbar("Deleted track", { type: "success" });
+        snackbar(t("deleteTrackSuccess"), { type: "success" });
       }
     } catch (e) {
       console.error(e);

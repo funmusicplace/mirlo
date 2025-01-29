@@ -55,7 +55,7 @@ const ArtistContainer: React.FC = () => {
               variant="dashed"
               className={css`
                 box-shadow: 0.2rem 0.2rem 0.3rem rgba(0, 0, 0, 0.5);
-
+                margin-bottom: 1rem;
                 background-color: rgba(255, 255, 255, 0.9) !important;
                 color: black !important;
                 padding: 1.2rem !important;

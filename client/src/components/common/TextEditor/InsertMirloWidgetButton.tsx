@@ -10,9 +10,16 @@ import { css } from "@emotion/css";
 import { bp } from "../../../constants";
 import AutoCompleteTrackGroup from "../AutoCompleteTrackGroup";
 import { useTranslation } from "react-i18next";
+import Tabs from "../Tabs";
+import BulkTrackUpload from "components/ManageArtist/BulkTrackUpload";
 
-const InsertMirloWidgetButton: React.FC<{ postId: number }> = ({ postId }) => {
+const InsertMirloWidgetButton: React.FC<{
+  postId: number;
+  artistId: number;
+}> = ({ postId, artistId }) => {
   const [isOpen, setIsOpen] = React.useState(false);
+  const [draftAlbum, setDraftAlbum] = React.useState<TrackGroup>();
+  const [newSong, setNewSong] = React.useState<Track>();
   const { addIframe } = useCommands();
   const { t } = useTranslation("translation", { keyPrefix: "textEditor" });
 
@@ -26,7 +33,7 @@ const InsertMirloWidgetButton: React.FC<{ postId: number }> = ({ postId }) => {
       width: 700,
     });
     if (variant) {
-      const results = await api.put(`manage/posts/${postId}/tracks`, {
+      await api.put(`manage/posts/${postId}/tracks`, {
         trackId: trackId,
       });
     }
@@ -42,6 +49,20 @@ const InsertMirloWidgetButton: React.FC<{ postId: number }> = ({ postId }) => {
       name: `${r.trackGroup.artist?.name} - ${r.title}`,
       id: r.id,
     }));
+  }, []);
+
+  const loadDraft = React.useCallback(async () => {
+    const response = await api.get<TrackGroup>(
+      `manage/artists/${artistId}/drafts`
+    );
+    console.log("response", response);
+    setDraftAlbum(response.result);
+  }, []);
+
+  React.useEffect(() => {
+    try {
+      loadDraft();
+    } catch (e) {}
   }, []);
 
   return (
@@ -65,9 +86,6 @@ const InsertMirloWidgetButton: React.FC<{ postId: number }> = ({ postId }) => {
             position: fixed;
             width: calc(92% - 1rem);
           }
-          button {
-            padding: 0 0.75rem !important;
-          }
 
           input {
             position: relative;
@@ -81,18 +99,68 @@ const InsertMirloWidgetButton: React.FC<{ postId: number }> = ({ postId }) => {
               margin-left: 1rem;
             }
           }
+
+          ul {
+            margin-bottom: 1rem;
+          }
         `}
       >
-        {t("insertATrack")}
-        <AutoComplete
-          getOptions={getTrackOptions}
-          onSelect={(val) => {
-            onAdd(val, "track");
-          }}
-        />
-        <br />
-        {t("insertATrackGroup")}
-        <AutoCompleteTrackGroup onSelect={(val) => onAdd(val, "trackGroup")} />
+        {draftAlbum && (
+          <>
+            <div
+              className={css`
+                margin-bottom: 2rem;
+              `}
+            >
+              <h2>{t("useExistingSong")}</h2>
+              <p>{t("existingSongDescription")}</p>
+
+              {t("insertATrack")}
+              <AutoComplete
+                getOptions={getTrackOptions}
+                onSelect={(val) => {
+                  onAdd(val, "track");
+                }}
+              />
+              <br />
+              {t("insertATrackGroup")}
+              <AutoCompleteTrackGroup
+                onSelect={(val) => onAdd(val, "trackGroup")}
+              />
+            </div>
+            <h2>{t("uploadNewSong")}</h2>
+            <p>{t("uploadNewSongDescription")}</p>
+            {newSong && (
+              <div
+                className={css`
+                  flex-direction: column;
+
+                  button {
+                    margin-top: 1rem;
+                  }
+                `}
+              >
+                {newSong.title}
+                <Button
+                  onClick={() => {
+                    onAdd(newSong.id, "track");
+                  }}
+                >
+                  {t("")}
+                </Button>
+              </div>
+            )}
+            {!newSong && (
+              <BulkTrackUpload
+                trackgroup={draftAlbum}
+                reload={async (newTrack) => {
+                  setNewSong(newTrack);
+                  loadDraft();
+                }}
+              />
+            )}
+          </>
+        )}
       </Modal>
     </>
   );

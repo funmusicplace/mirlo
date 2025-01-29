@@ -10,6 +10,8 @@ import { queryManagedArtist, useDeleteArtistMutation } from "queries";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import { FaTrash } from "react-icons/fa";
+import { AiOutlineWarning } from "react-icons/ai";
+import { ArtistSection } from "components/Artist/Artist";
 
 export const DeleteArtist: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "artistForm" });
@@ -38,20 +40,45 @@ export const DeleteArtist: React.FC = () => {
   }, [artist, t, deleteArtist, navigate, snackbar]);
 
   return (
-    <div
+    <ArtistSection
       className={css`
-        padding: 0.5rem 0 2rem 0;
-
-        @media screen and (max-width: ${bp.medium}px) {
-          border-radius: 0;
-          padding-bottom: 2rem;
-        }
+        margin-top: 4rem !important;
+        border-top: 1px solid var(--mi-darken-x-background-color);
+        padding-top: 1rem !important;
       `}
     >
-      <Button buttonRole="warning" startIcon={<FaTrash />} onClick={onDelete}>
-        {t("deleteArtist")}
-      </Button>
-    </div>
+      <div>
+        <label
+          className={css`
+            svg {
+              margin-bottom: -0.15rem;
+              height: 1.2rem;
+            }
+          `}
+        >
+          <AiOutlineWarning
+            className={css`
+              font-size: 1.5rem;
+            `}
+          />
+          {t("terminationDanger")}
+        </label>
+      </div>
+      <div
+        className={css`
+          padding: 0.5rem 0 2rem 0;
+
+          @media screen and (max-width: ${bp.medium}px) {
+            border-radius: 0;
+            padding-bottom: 2rem;
+          }
+        `}
+      >
+        <Button buttonRole="warning" startIcon={<FaTrash />} onClick={onDelete}>
+          {t("deleteArtist")}
+        </Button>
+      </div>
+    </ArtistSection>
   );
 };
 

@@ -112,14 +112,19 @@ export const fileExistCheckBackblaze = async (
 
 export const statFile = async (bucket: string, filename: string) => {
   let minioStat;
+  let backblazeStat;
 
-  const backblazeStat = await fileExistCheckBackblaze(bucket, filename);
-
+  if (backendStorage === "backblaze") {
+    backblazeStat = await fileExistCheckBackblaze(bucket, filename);
+  }
   // If the object doesn't exist on backblaze we check in minio
   if (!backblazeStat) {
-    logger.error(
-      `Error fetching static file from backblaze, checking minio: ${bucket}/${filename}`
-    );
+    if (backendStorage === "backblaze") {
+      // don't need to log this if our backend storage isn't backblaze
+      logger.error(
+        `Error fetching static file from backblaze, checking minio: ${bucket}/${filename}`
+      );
+    }
     try {
       minioStat = await minioClient.statObject(bucket, filename);
     } catch {

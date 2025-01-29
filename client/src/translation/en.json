@@ -326,7 +326,6 @@
     "editPost": "Edit post",
     "editDetails": "Edit artist details",
     "viewLive": "View live",
-    "terminationDanger": " Artist account termination ",
     "addNewAlbum": "Add new album",
     "edit": "Edit",
     "editPage": "Manage artist page",
@@ -364,7 +363,12 @@
     "insertATrackGroup": "Insert an album",
     "uploadAVideo": "Add a video",
     "addUrl": "Insert a video url",
-    "addVideo": "Add video"
+    "addVideo": "Add video",
+    "addThisSong": "Add this song",
+    "uploadNewSong": "Upload new song",
+    "useExistingSong": "Use existing song",
+    "existingSongDescription": "Sharing a song from an existing album or pre-order? Find it here",
+    "uploadNewSongDescription": "Are you sharing a song that's not on one of your albums? A draft or WIP? Upload it here to share."
   },
   "manageLicense": {
     "shortLabelForLicense": "What's a unique short label for this license?",
@@ -497,6 +501,7 @@
   },
   "artistForm": {
     "deleteArtist": "Permanently delete artist account",
+    "terminationDanger": " Artist account termination ",
     "backgroundImageLabel": "Background image",
     "clickToUploadType": "Click to upload {{ imageType }}",
     "yourAvatar": "your avatar",
@@ -618,6 +623,7 @@
   },
   "trackGroupDetails": {
     "trackgroup": "Album:",
+    "downloadCodecsInfo": "Includes downloads in FLAC, WAV, mp3 and more. Paying supporters also get unlimited streaming on the Mirlo website",
     "embedCode": "Embed code",
     "viewLyrics": "View lyrics",
     "viewTrack": "View track",
@@ -674,6 +680,7 @@
     "noTracksMessage": "There's no tracks yet in this playlist!",
     "emptyTracklist": "There's no tracks yet in this playlist!",
     "delete": "Delete",
+    "deleteTrackSuccess": "Delete track success",
     "edit": "Edit",
     "listedArtists": "Listed artists",
     "originalFilename": "Original file name: {{ filename }}",

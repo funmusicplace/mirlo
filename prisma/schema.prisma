@@ -443,6 +443,7 @@ model TrackGroup {
   artist                  Artist                    @relation(fields: [artistId], references: [id])
   artistId                Int
   title                   String?
+  isDrafts                Boolean                   @default(false)
   tracks                  Track[]
   cover                   TrackGroupCover?
   published               Boolean                   @default(false)
