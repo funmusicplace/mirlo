@@ -30,6 +30,7 @@ export default function () {
             "trackgroup-covers",
             "post-images",
             "track-audio",
+            "merch-images",
             "trackgroup-format",
           ].includes(jobParam)
         ) {
