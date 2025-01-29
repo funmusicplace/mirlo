@@ -160,7 +160,7 @@ const BuyMerchItem: React.FC<{
           <SelectEl {...methods.register(`merchOptionIds.${idx}`)}>
             {optionType.options
               .sort((a, b) => {
-                return a.additionalPrice > b.additionalPrice ? -1 : 1;
+                return a.additionalPrice < b.additionalPrice ? -1 : 1;
               })
               .map((o) => (
                 <option key={o.name} value={o.id}>
