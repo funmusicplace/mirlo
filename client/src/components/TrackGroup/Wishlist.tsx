@@ -1,6 +1,4 @@
-import { css } from "@emotion/css";
 import Button from "components/common/Button";
-import { bp } from "../../constants";
 import React from "react";
 import { IoIosHeart, IoIosHeartEmpty } from "react-icons/io";
 import api from "services/api";
@@ -32,6 +30,7 @@ const Wishlist: React.FC<{ trackGroup: { id: number } }> = ({ trackGroup }) => {
     <Button
       onClick={onClick}
       aria-label={buttonLabel}
+      className="wishlist"
       title={buttonLabel}
       startIcon={isInWishlist ? <IoIosHeart /> : <IoIosHeartEmpty />}
     />

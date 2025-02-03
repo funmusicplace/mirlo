@@ -56,6 +56,7 @@ const TipArtist: React.FC<{ artistId: number; transparent?: boolean }> = ({
       <Button
         size="compact"
         variant={transparent ? "transparent" : undefined}
+        className="tip-artist"
         type="button"
         onClick={onTipClick}
         startIcon={<FaDonate />}

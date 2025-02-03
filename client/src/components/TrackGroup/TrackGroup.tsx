@@ -282,14 +282,14 @@ function TrackGroup() {
                   tracks={trackGroup.tracks}
                   trackGroup={trackGroup}
                 />
-                <small
+                <p
                   className={css`
                     margin-left: 2.5rem;
                     margin-top: 1rem;
                   `}
                 >
-                  {t("downloadCodecsInfo")}
-                </small>
+                  <small>{t("downloadCodecsInfo")}</small>
+                </p>
               </TrackListingWrapper>
             </div>
           </div>

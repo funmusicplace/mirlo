@@ -10,6 +10,7 @@ import { bp } from "../../constants";
 import { useQuery } from "@tanstack/react-query";
 import { queryArtist } from "queries";
 import { useAuthContext } from "state/AuthContext";
+import FixedButtonLink from "components/common/FixedButton";
 
 const ArtistContainer: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
@@ -39,6 +40,10 @@ const ArtistContainer: React.FC = () => {
               display: flex;
               flex-direction: column;
 
+              a:first-of-type {
+                margin-bottom: 1rem;
+              }
+
               @media screen and (max-width: ${bp.medium}px) {
                 left: 1rem;
                 bottom: 75px;
@@ -48,60 +53,22 @@ const ArtistContainer: React.FC = () => {
               }
             `}
           >
-            <ButtonLink
+            <FixedButtonLink
               to={`/manage/artists/${artist.id}/customize`}
               startIcon={<FaEye />}
               size="compact"
               variant="dashed"
-              className={css`
-                box-shadow: 0.2rem 0.2rem 0.3rem rgba(0, 0, 0, 0.5);
-                margin-bottom: 1rem;
-                background-color: rgba(255, 255, 255, 0.9) !important;
-                color: black !important;
-                padding: 1.2rem !important;
-                :hover {
-                  background-color: rgba(0, 0, 0, 0.7) !important;
-                  color: white !important;
-                }
-
-                @media screen and (max-width: ${bp.medium}px) {
-                  left: 1rem;
-                  bottom: 75px;
-                  top: auto;
-                  right: auto;
-                  padding: 1rem !important;
-                }
-              `}
             >
               {t("customizeLook")}
-            </ButtonLink>
-            <ButtonLink
+            </FixedButtonLink>
+            <FixedButtonLink
               to={`/manage/artists/${artist.id}`}
               startIcon={<FaPen />}
               size="compact"
               variant="dashed"
-              className={css`
-                box-shadow: 0.2rem 0.2rem 0.3rem rgba(0, 0, 0, 0.5);
-
-                background-color: rgba(255, 255, 255, 0.9) !important;
-                color: black !important;
-                padding: 1.2rem !important;
-                :hover {
-                  background-color: rgba(0, 0, 0, 0.7) !important;
-                  color: white !important;
-                }
-
-                @media screen and (max-width: ${bp.medium}px) {
-                  left: 1rem;
-                  bottom: 75px;
-                  top: auto;
-                  right: auto;
-                  padding: 1rem !important;
-                }
-              `}
             >
               {t("editPage")}
-            </ButtonLink>
+            </FixedButtonLink>
           </div>
         )}
       {!isPostOrRelease && (

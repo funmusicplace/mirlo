@@ -246,7 +246,7 @@ const Header = () => {
             startIcon={<FaHandHoldingHeart />}
             className={css`
               display: block;
-              margin-left: 1rem;
+              margin-left: 0.75rem;
               text-decoration: none;
               text-align: center;
               &:hover {
@@ -254,7 +254,13 @@ const Header = () => {
               }
 
               color: var(--mi-white) !important;
+
+              svg {
+                fill: white !important;
+              }
+
               background-color: var(--mi-black) !important;
+
               @media (prefers-color-scheme: dark) {
                 background-color: var(--mi-white) !important;
                 color: var(--mi-black) !important;

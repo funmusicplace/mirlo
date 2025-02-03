@@ -17,7 +17,7 @@ export const NextButton: React.FC = () => {
   return (
     <Button
       startIcon={<MdSkipNext />}
-      variant="outlined"
+      variant="transparent"
       buttonRole="black"
       onClick={onClickNext}
     />

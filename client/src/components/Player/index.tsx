@@ -76,6 +76,58 @@ const Player = () => {
       `}
       id="player"
     >
+      {currentTrack?.trackGroup.artistId && (
+        <div
+          className={css`
+            z-index: 999999;
+            top: 75px;
+            right: 1rem;
+            position: fixed;
+            display: flex;
+            flex-direction: column;
+
+            right: 1rem;
+            bottom: 75px;
+            top: auto;
+            left: auto;
+            padding: 1rem !important;
+
+            flex-direction: row;
+
+            button {
+              box-shadow: 0.2rem 0.2rem 0.3rem rgba(0, 0, 0, 0.5);
+              background-color: rgba(255, 255, 255, 0.9) !important;
+              margin-left: 1rem;
+              color: black !important;
+
+              svg {
+                fill: black !important;
+              }
+
+              &:hover {
+                background-color: rgba(0, 0, 0, 0.7) !important;
+                color: white !important;
+
+                svg {
+                  fill: white !important;
+                }
+              }
+            }
+
+            @media (min-width: ${bp.small}px) {
+              .tip-artist,
+              .wishlist {
+                display: none;
+              }
+            }
+          `}
+        >
+          <Wishlist trackGroup={{ id: currentTrack.trackGroupId }} />
+          {state.playing && (
+            <TipArtist artistId={currentTrack.trackGroup.artistId} />
+          )}
+        </div>
+      )}
       <div
         className={css`
           display: flex;
@@ -134,22 +186,31 @@ const Player = () => {
               button {
                 margin-right: 0.25rem;
               }
-              span {
-                margin-left: 0.25rem;
+
+              @media (max-width: ${bp.small}px) {
+                .tip-artist,
+                .wishlist {
+                  display: none;
+                }
               }
             `}
           >
-            <span>
+            <div
+              className={css`
+                display: flex;
+              `}
+            >
               <Wishlist trackGroup={{ id: currentTrack.trackGroupId }} />
               {state.playing && currentTrack.trackGroup.artistId && (
                 <TipArtist artistId={currentTrack.trackGroup.artistId} />
               )}
-            </span>
+            </div>
             <span
               className={css`
                 display: inline-block;
                 min-width: 3rem;
                 text-align: right;
+                margin-right: 1rem;
               `}
             >
               {fmtMSS(currentSeconds)}
@@ -170,28 +231,11 @@ const Player = () => {
 
                 <ShuffleButton />
               </span>
-              <div
-                className={css`
-                  @media (max-width: ${bp.small}px) {
-                    button {
-                      padding: 0em 0.5em 0em 0em;
-                      background: transparent;
-                    }
-                  }
-                `}
-              >
+              <div>
                 <PreviousButton />
               </div>
               <PlayControlButton playerButton />
-              <div
-                className={css`
-                @media (max-width: ${bp.small}px) {
-                    button {
-                      padding: 0em 0em 0em .5em;
-                      background: transparent;
-                    }
-              `}
-              >
+              <div>
                 <NextButton />
               </div>
               <VolumeControl setVolume={setVolume} volume={volume} />

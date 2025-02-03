@@ -76,6 +76,7 @@ const TipArtistForm: React.FC<{
   const valueButton = methods.watch("priceButton");
 
   const actualValue = valueButton === "other" ? value : valueButton;
+
   return (
     <div
       className={css`
@@ -91,7 +92,7 @@ const TipArtistForm: React.FC<{
       </p>
       {!artistDetails && <LoadingBlocks rows={1} />}
 
-      {artistDetails && (
+      {currency && artistDetails && (
         <>
           <FormProvider {...methods}>
             <ul
@@ -130,7 +131,7 @@ const TipArtistForm: React.FC<{
                     id={`priceButton-${gift.value}`}
                   />
                   <label htmlFor={`priceButton-${gift.value}`}>
-                    {currency && gift.value !== "other"
+                    {gift.value !== "other"
                       ? moneyDisplay({
                           amount: gift.value,
                           currency,

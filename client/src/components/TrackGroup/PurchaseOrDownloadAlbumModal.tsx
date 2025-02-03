@@ -8,6 +8,7 @@ import DownloadAlbumButton from "components/common/DownloadAlbumButton";
 import Button from "components/common/Button";
 import AddToCollection from "./AddToCollection";
 import { useAuthContext } from "state/AuthContext";
+import { ArtistButton } from "components/Artist/ArtistRouterLink";
 
 const PurchaseOrDownloadAlbum: React.FC<{
   trackGroup: TrackGroup;
@@ -86,12 +87,12 @@ const PurchaseOrDownloadAlbum: React.FC<{
               z-index: 2;
             `}
           >
-            <Button
+            <ArtistButton
               variant="outlined"
               onClick={() => setIsPurchasingAlbum(true)}
             >
               {t(preOrderOrBuyText)}
-            </Button>
+            </ArtistButton>
           </div>
         )}
         {addToCollection && <AddToCollection trackGroup={trackGroup} />}

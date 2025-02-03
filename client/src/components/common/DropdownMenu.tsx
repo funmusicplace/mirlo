@@ -21,6 +21,10 @@ const DropdownMenu: React.FC<{
     <div
       className={css`
         position: relative;
+
+        > button {
+          flex-grow: 1;
+        }
       `}
     >
       {isMenuOpen && (
