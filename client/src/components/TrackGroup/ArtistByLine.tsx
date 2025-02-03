@@ -1,4 +1,5 @@
 import { css } from "@emotion/css";
+import ArtistRouterLink from "components/Artist/ArtistRouterLink";
 
 import { Trans, useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
@@ -28,7 +29,11 @@ const ArtistByLine: React.FC<{ artist: Artist; fromAlbum?: TrackGroup }> = ({
               album: fromAlbum.title,
             }}
             components={{
-              albumLink: <Link to={getReleaseUrl(artist, fromAlbum)}></Link>,
+              albumLink: (
+                <ArtistRouterLink
+                  to={getReleaseUrl(artist, fromAlbum)}
+                ></ArtistRouterLink>
+              ),
             }}
           />{" "}
         </>
@@ -40,7 +45,9 @@ const ArtistByLine: React.FC<{ artist: Artist; fromAlbum?: TrackGroup }> = ({
           artist: artist.name,
         }}
         components={{
-          artistLink: <Link to={getArtistUrl(artist)}></Link>,
+          artistLink: (
+            <ArtistRouterLink to={getArtistUrl(artist)}></ArtistRouterLink>
+          ),
         }}
       />
     </div>

@@ -34,6 +34,10 @@ const TrackgroupButtons = styled.div`
       text-transform: uppercase;
       width: 100%;
     }
+
+    svg {
+      fill: white !important;
+    }
   }
 
   button {
@@ -49,6 +53,7 @@ const TrackgroupButtons = styled.div`
         font-size: 1rem;
       }
     }
+
     button {
       font-size: 1.1rem;
       min-width: 2rem;
@@ -119,6 +124,10 @@ const Wrapper = styled.div`
   .startIcon {
     font-size: 1.5rem !important;
     line-height: 1.3rem !important;
+
+    svg {
+      fill: white !important;
+    }
   }
 
   a {
@@ -248,7 +257,11 @@ const ClickToPlay: React.FC<
             <div>
               <PurchaseOrDownloadAlbum trackGroup={trackGroup} />
             </div>
-            {user && <Wishlist trackGroup={trackGroup} />}
+            {user && (
+              <div>
+                <Wishlist trackGroup={trackGroup} />
+              </div>
+            )}
 
             {!currentlyPlaying && <PlayButton onPlay={onClickPlay} />}
 

@@ -104,7 +104,6 @@ const CustomButton = styled.button<Sizable>(
             ? `
             height: 1.7rem; 
             width: 1.7rem; 
-            font-size: var(--mi-font-size-xsmall);
             `
             : ""
         };
@@ -139,11 +138,15 @@ const CustomButton = styled.button<Sizable>(
           border-radius: 100%;
           height: auto;
           min-width: auto;
+          padding: .7rem !important;
+
           > p,
           .children {
             display: none;
           }
-          .startIcon, .endIcon {margin: auto !important;}
+          .startIcon, .endIcon {
+            margin: auto !important;
+          }
         }
       `
       : "";
@@ -165,7 +168,7 @@ const CustomButton = styled.button<Sizable>(
           }
 
           &:hover:not(:disabled) {
-            filter: brightness(150%);
+            filter: brightness(95%) saturate(30%);
           }
         `;
         case "outlined":
@@ -230,7 +233,7 @@ const CustomButton = styled.button<Sizable>(
           }
 
           &:hover:not(:disabled) {
-            filter: brightness(150%);
+            filter: brightness(95%) saturate(30%);
           }
         `;
       }
@@ -269,32 +272,29 @@ const CustomButton = styled.button<Sizable>(
     ${variantStyles()}
   
     align-items: center;
-    display: inline-flex;
+    display: flex;
     border-radius: ${props.onlyIcon ? "100%" : "var(--mi-border-radius)"};
     justify-content: center;
   
     &[disabled] {
       opacity: 0.6;
     }
-  
-    & .startIcon {
+
+    .startIcon,
+    .endIcon {
+      display: flex;
+      align-content: center;
+      justify-content: center;
       margin-top: ${props.onlyIcon ? "0px" : "0.1rem"};
       margin-right: ${props.onlyIcon ? "0px" : "0.5rem"};
-      line-height: 0.785rem;
-      font-size: ${props.onlyIcon ? ".9rem" : "0.785rem"};
-      
-  
-      @media screen and (max-width: ${bp.small}px) {
-        font-size: ${props.onlyIcon ? "var(--mi-font-size-xsmall)" : ""};
-      }
     }
-  
-    & .endIcon {
+
+    .endIcon {
       margin-top: ${props.onlyIcon ? "0px" : "0.1rem"};
+      margin-right: 0;
       margin-left: ${props.onlyIcon ? "0px" : "0.5rem"};
-      line-height: 0.785rem;
-      font-size: ${props.onlyIcon ? ".9rem" : "0.785rem"};
     }
+
   `;
 
     return style;
