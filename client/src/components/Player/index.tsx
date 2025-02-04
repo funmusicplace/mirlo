@@ -68,6 +68,7 @@ const Player = () => {
         z-index: 10;
         bottom: 0;
         filter: drop-shadow(0 0 0.1rem rgba(0, 0, 0, 0.3));
+
         background-color: var(--mi-darken-x-background-color);
 
         @media (max-width: ${bp.small}px) {
@@ -96,22 +97,7 @@ const Player = () => {
 
             button {
               box-shadow: 0.2rem 0.2rem 0.3rem rgba(0, 0, 0, 0.5);
-              background-color: rgba(255, 255, 255, 0.9) !important;
               margin-left: 1rem;
-              color: black !important;
-
-              svg {
-                fill: black !important;
-              }
-
-              &:hover {
-                background-color: rgba(0, 0, 0, 0.7) !important;
-                color: white !important;
-
-                svg {
-                  fill: white !important;
-                }
-              }
             }
 
             @media (min-width: ${bp.small}px) {
@@ -134,7 +120,6 @@ const Player = () => {
           align-items: center;
           justify-content: flex-end;
           flex-grow: 1;
-          background-color: var(--mi-normal-background-color);
 
           @media (max-width: ${bp.small}px) {
             width: 100%;
@@ -157,7 +142,13 @@ const Player = () => {
         className={css`
           width: 100%;
           margin: auto;
-          background-color: var(--mi-normal-background-color);
+          background-color: var(--mi-off-white);
+          color: var(--mi-black);
+
+          @media (prefers-color-scheme: dark) {
+            background-color: var(--mi-black);
+            color: var(--mi-off-white);
+          }
         `}
       >
         <div

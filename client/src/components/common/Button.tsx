@@ -14,7 +14,7 @@ export interface Sizable {
   wrap?: boolean;
   rounded?: boolean;
   collapsible?: boolean;
-  buttonRole?: "primary" | "secondary" | "warning" | "black";
+  buttonRole?: "primary" | "warning" | "black";
   variant?: "link" | "outlined" | "dashed" | "transparent" | "default";
   uppercase?: boolean;
   onlyIcon?: boolean;
@@ -74,24 +74,8 @@ const CustomButton = styled.button<Sizable>(
   ({ buttonRole, size, ...props }) => {
     const bodyStyles = window.getComputedStyle(document.body);
     let cssColorVariable = `--mi-${buttonRole ?? "primary"}-color`;
-    var backgroundColor = bodyStyles.getPropertyValue(cssColorVariable);
-    let foregroundColor = bodyStyles.getPropertyValue(
-      `--mi-normal-background-color`
-    );
-
-    const backgroundIsLight = lightOrDark(backgroundColor) === "light";
-    if (backgroundIsLight) {
-      foregroundColor = bodyStyles.getPropertyValue(
-        "--mi-normal-foreground-color"
-      );
-
-      if (isDarkMode()) {
-        foregroundColor = bodyStyles.getPropertyValue(
-          "--mi-normal-background-color"
-        );
-      }
-    }
-
+    var primaryColor = bodyStyles.getPropertyValue(cssColorVariable);
+    let secondaryColor = bodyStyles.getPropertyValue(`--mi-secondary-color`);
     const isOnlyIcon = props.onlyIcon
       ? `
       padding: .5rem;
@@ -155,7 +139,7 @@ const CustomButton = styled.button<Sizable>(
       switch (props.variant) {
         case "link":
           return `
-          color: ${backgroundColor};
+          color: ${primaryColor};
           margin-left: .3rem;
           font-weight: bold;
           padding: 0 !important;
@@ -164,7 +148,7 @@ const CustomButton = styled.button<Sizable>(
           line-height: inherit;
 
           svg {
-            fill: ${backgroundColor};
+            fill: ${primaryColor};
           }
 
           &:hover:not(:disabled) {
@@ -174,21 +158,21 @@ const CustomButton = styled.button<Sizable>(
         case "outlined":
         case "dashed":
           return `
-          color: ${backgroundColor};
+          color: ${primaryColor};
           background-color: transparent;
-          border: 1px ${props.variant === "outlined" ? "solid" : props.variant} ${backgroundColor};
+          border: 1px ${props.variant === "outlined" ? "solid" : props.variant} ${primaryColor};
           font-weight: bold;
 
           svg {
-            fill: ${backgroundColor};
+            fill: ${primaryColor};
           }
 
           &:hover:not(:disabled) {
-            color: ${foregroundColor};
-            background-color: ${backgroundColor};
+            color: ${primaryColor};
+            background-color: ${secondaryColor};
 
             svg {
-              fill: ${foregroundColor};
+              fill: ${primaryColor};
             }
           }
 
@@ -198,20 +182,21 @@ const CustomButton = styled.button<Sizable>(
           }
         `;
         case "transparent":
-          return `color: ${backgroundColor};
+          return `
+          color: ${primaryColor};
           background-color: transparent;
           font-weight: bold;
 
           svg {
-            fill: ${backgroundColor};
+            fill: ${primaryColor};
           }
 
           &:hover:not(:disabled) {
-            color: ${foregroundColor};
-            background-color: ${backgroundColor};
+            color: ${primaryColor};
+            background-color: ${secondaryColor};
 
             svg {
-              fill: ${foregroundColor};
+              fill: ${primaryColor};
             }
           }
 
@@ -221,14 +206,14 @@ const CustomButton = styled.button<Sizable>(
           }`;
         default:
           return `
-          background-color: ${backgroundColor};
-          color: ${foregroundColor};
+          background-color: ${primaryColor};
+          color: ${secondaryColor};
 
           svg {
-            fill: ${foregroundColor};
+            fill: ${secondaryColor};
              
             @media (prefers-color-scheme: dark) {
-              fill: ${foregroundColor};
+              fill: ${secondaryColor};
             }
           }
 

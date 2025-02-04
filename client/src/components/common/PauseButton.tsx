@@ -32,7 +32,6 @@ export const PauseButton: React.FC<{ className?: string }> = ({
         title={`${t("pause")}`}
         onClick={onPause}
         variant="outlined"
-        buttonRole="black"
         className={
           css`
             font-size: 1.6rem;

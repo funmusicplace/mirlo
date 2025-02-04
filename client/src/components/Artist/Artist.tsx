@@ -89,8 +89,6 @@ function Artist() {
 
   const isArtistUser = artist.userId === user?.id;
 
-  console.log("artist", artist.properties?.colors);
-
   return (
     <>
       <ArtistTabs color={artist.properties?.colors.primary}>

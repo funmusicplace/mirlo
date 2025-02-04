@@ -87,7 +87,7 @@ const Splash = () => {
               <ButtonLink
                 size="big"
                 to="/login"
-                buttonRole="secondary"
+                variant="outlined"
                 rounded
                 endIcon={<FaArrowRight />}
               >
