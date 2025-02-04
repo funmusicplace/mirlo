@@ -313,6 +313,8 @@ function TrackGroup() {
             className={css`
               margin-top: 2rem;
               text-align: center;
+              display: flex;
+              justify-content: center;
             `}
           >
             {trackGroup.artist && (
