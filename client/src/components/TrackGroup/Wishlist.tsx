@@ -4,8 +4,12 @@ import { IoIosHeart, IoIosHeartEmpty } from "react-icons/io";
 import api from "services/api";
 import { useAuthContext } from "state/AuthContext";
 import { useTranslation } from "react-i18next";
+import { ArtistButton } from "components/Artist/ArtistButtons";
 
-const Wishlist: React.FC<{ trackGroup: { id: number } }> = ({ trackGroup }) => {
+const Wishlist: React.FC<{
+  trackGroup: { id: number };
+  inArtistPage?: boolean;
+}> = ({ trackGroup, inArtistPage }) => {
   const { user } = useAuthContext();
   const { t } = useTranslation("translation", { keyPrefix: "wishlist" });
 
@@ -25,6 +29,18 @@ const Wishlist: React.FC<{ trackGroup: { id: number } }> = ({ trackGroup }) => {
   }
 
   const buttonLabel = `${isInWishlist ? t("removeFromWishlist") : t("addToWishlist")}`;
+
+  if (inArtistPage) {
+    return (
+      <ArtistButton
+        onClick={onClick}
+        aria-label={buttonLabel}
+        className="wishlist"
+        title={buttonLabel}
+        startIcon={isInWishlist ? <IoIosHeart /> : <IoIosHeartEmpty />}
+      />
+    );
+  }
 
   return (
     <Button

@@ -5,9 +5,9 @@ import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
 import { queryManagedMerch, useDeleteMerchMutation } from "queries";
 
-import Button from "components/common/Button";
 import { FaTrash } from "react-icons/fa";
 import { useSnackbar } from "state/SnackbarContext";
+import { ArtistButton } from "components/Artist/ArtistButtons";
 
 export interface TrackGroupFormData {
   published: boolean;
@@ -58,7 +58,7 @@ const DeleteMerch: React.FC<{}> = () => {
         border-top: 1px solid var(--mi-darken-x-background-color);
       `}
     >
-      <Button
+      <ArtistButton
         size="compact"
         className={css`
           background-color: var(--mi-alert);
@@ -69,7 +69,7 @@ const DeleteMerch: React.FC<{}> = () => {
         onClick={onDelete}
       >
         {t("deleteMerch")}
-      </Button>
+      </ArtistButton>
     </div>
   );
 };

@@ -16,6 +16,7 @@ import MerchFulfillmentLink from "./MerchFulfillmentLink";
 import Pill from "components/common/Pill";
 import { useTranslation } from "react-i18next";
 import { ImWarning } from "react-icons/im";
+import { ArtistButtonLink } from "components/Artist/ArtistButtons";
 
 const ManageMerch: React.FC<{}> = () => {
   const { artistId } = useParams();
@@ -83,7 +84,7 @@ const ManageMerch: React.FC<{}> = () => {
                   </Pill>
                 )}
               </div>
-              <ButtonLink to={item.id} startIcon={<FaPen />} />
+              <ArtistButtonLink to={item.id} startIcon={<FaPen />} />
             </li>
           ))}
       </DashedList>

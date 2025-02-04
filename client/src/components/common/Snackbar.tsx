@@ -20,7 +20,7 @@ const Container = styled.div<{ variant: Variant; position?: Position }>`
         color: var(--mi-normal-foreground-color); 
         font-weight: bold;`;
       default:
-        return `color: var(--mi-light-foreground-color)`;
+        return `color: var(--mi-normal-foreground-color)`;
     }
   }};
   z-index: 1000;

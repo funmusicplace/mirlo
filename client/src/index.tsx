@@ -12,6 +12,8 @@ import { SnackBarContextProvider } from "state/SnackbarContext";
 import routes from "routes";
 import { QueryClientWrapper } from "queries/QueryClientWrapper";
 import { AuthContextProvider } from "state/AuthContext";
+import { ConfirmContextProvider } from "utils/useConfirm";
+import { ConfirmDialog } from "components/common/ConfirmDialog";
 
 const router = createBrowserRouter(routes);
 
@@ -24,9 +26,12 @@ root.render(
     <QueryClientWrapper>
       <AuthContextProvider>
         <GlobalStateProvider>
-          <SnackBarContextProvider>
-            <RouterProvider router={router} />
-          </SnackBarContextProvider>
+          <ConfirmContextProvider>
+            <ConfirmDialog />
+            <SnackBarContextProvider>
+              <RouterProvider router={router} />
+            </SnackBarContextProvider>
+          </ConfirmContextProvider>
         </GlobalStateProvider>
       </AuthContextProvider>
     </QueryClientWrapper>

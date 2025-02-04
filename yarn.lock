@@ -17232,6 +17232,7 @@ __metadata:
     swagger-ui-express: "npm:^4.6.0"
     ts-node: "npm:^10.9.2"
     typescript: "npm:5.1.6"
+    use-confirm: "npm:^1.0.1"
     winston: "npm:^3.8.2"
     yargs: "npm:^17.6.2"
   languageName: unknown
@@ -22838,6 +22839,15 @@ __metadata:
     "@types/react":
       optional: true
   checksum: 10/3be76eae71b52ab233b4fde974eddeff72e67e6723100a0c0297df4b0d60daabedfa706ffb314d0a52645f2c1235e50fdbd53d99f374eb5df68c74d412e98a9b
+  languageName: node
+  linkType: hard
+
+"use-confirm@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "use-confirm@npm:1.0.1"
+  peerDependencies:
+    react: ^16.8.0 || ^17 || ^18
+  checksum: 10/bcd1242d1212c2dcf07f9eb8a7311bd0c17a45f472c382c29c95226cfa7fff1b9f89bd65e6117b9c0665317979083e56d9a8b0f809a656dbaa578636482d7f20
   languageName: node
   linkType: hard
 

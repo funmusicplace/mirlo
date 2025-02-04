@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { bp } from "../../../constants";
 import ManageSectionWrapper from "../ManageSectionWrapper";
@@ -16,15 +16,12 @@ import { Toggle } from "components/common/Toggle";
 import api from "services/api";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import { ButtonLink } from "components/common/Button";
-import {
-  getArtistManageMerchUrl,
-  getArtistManageUrl,
-  getMerchUrl,
-} from "utils/artist";
+import { getArtistManageUrl, getMerchUrl } from "utils/artist";
 import { useSnackbar } from "state/SnackbarContext";
 import DeleteMerchButton from "./DeleteMerchButton";
 import MerchFulfillmentLink from "./MerchFulfillmentLink";
 import { FaArrowLeft } from "react-icons/fa";
+import { ArtistButtonLink } from "components/Artist/ArtistButtons";
 
 const IsPublicToggle: React.FC<{ merch: Merch }> = ({ merch }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageMerch" });
@@ -115,16 +112,16 @@ const EditMerch: React.FC<{}> = () => {
     >
       {merch.isPublic && (
         <SpaceBetweenDiv>
-          <ButtonLink
+          <ArtistButtonLink
             startIcon={<FaArrowLeft />}
             variant="link"
             to={getArtistManageUrl(artist.id) + "/merch"}
           >
             {t("backToMerchList")}
-          </ButtonLink>{" "}
-          <ButtonLink to={getMerchUrl(artist, merch)}>
+          </ArtistButtonLink>{" "}
+          <ArtistButtonLink to={getMerchUrl(artist, merch)}>
             {t("viewMerchLive")}
-          </ButtonLink>
+          </ArtistButtonLink>
         </SpaceBetweenDiv>
       )}
       <IsPublicToggle merch={merch} />

@@ -10,6 +10,10 @@ import { bp } from "../../constants";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import { getReleaseUrl } from "utils/artist";
 import { useDeleteTrackGroupMutation } from "queries";
+import ArtistRouterLink, {
+  ArtistButton,
+  ArtistButtonLink,
+} from "components/Artist/ArtistButtons";
 
 const TrackGroupCard: React.FC<{
   album: TrackGroup;
@@ -68,7 +72,7 @@ const TrackGroupCard: React.FC<{
           }
         `}
       >
-        <Link
+        <ArtistRouterLink
           to={getReleaseUrl(artist, album)}
           className={css`
             @media screen and (max-width: ${bp.small}px) {
@@ -81,7 +85,7 @@ const TrackGroupCard: React.FC<{
             alt={album.title}
             size={250}
           />
-        </Link>
+        </ArtistRouterLink>
       </div>
 
       <div
@@ -162,32 +166,32 @@ const TrackGroupCard: React.FC<{
               justify-content: space-between !important;
           `}
         >
-          <ButtonLink
+          <ArtistButtonLink
             to={`/manage/artists/${album.artistId}/release/${album.id}`}
             size="compact"
             variant="outlined"
           >
             {t("manageAlbum")}
-          </ButtonLink>
+          </ArtistButtonLink>
           {album.artist && album.published && (
-            <ButtonLink
+            <ArtistButtonLink
               to={getReleaseUrl(album.artist, album)}
               size="compact"
               variant="outlined"
               startIcon={<FaEye />}
             >
               {t("viewLive")}
-            </ButtonLink>
+            </ArtistButtonLink>
           )}
           {!album.published && (
-            <Button
+            <ArtistButton
               size="compact"
               startIcon={<FaTrash />}
               onClick={handleDelete}
               isLoading={isDeletePending}
             >
               {t("delete")}
-            </Button>
+            </ArtistButton>
           )}
         </div>
       </div>

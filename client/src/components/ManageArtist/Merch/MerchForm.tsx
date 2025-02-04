@@ -13,6 +13,7 @@ import FormError from "components/common/FormError";
 import { QUERY_KEY_MERCH } from "queries/queryKeys";
 import SelectTrackGroup from "./SelectTrackGroup";
 import { useQueryClient } from "@tanstack/react-query";
+import { ArtistButton } from "components/Artist/ArtistButtons";
 
 const MerchForm: React.FC<{
   merch: Merch;
@@ -138,7 +139,7 @@ const MerchForm: React.FC<{
         </FormComponent>
 
         <SelectTrackGroup merch={merch} reload={reload} />
-        <Button
+        <ArtistButton
           size="big"
           rounded
           type="submit"
@@ -146,7 +147,7 @@ const MerchForm: React.FC<{
           isLoading={isDisabled}
         >
           {t("saveMerch")}
-        </Button>
+        </ArtistButton>
       </form>
     </FormProvider>
   );

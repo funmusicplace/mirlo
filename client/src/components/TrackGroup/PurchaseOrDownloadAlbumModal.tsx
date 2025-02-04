@@ -5,10 +5,9 @@ import { useTranslation } from "react-i18next";
 import BuyTrackGroup from "components/TrackGroup/BuyTrackGroup";
 import { useArtistContext } from "state/ArtistContext";
 import DownloadAlbumButton from "components/common/DownloadAlbumButton";
-import Button from "components/common/Button";
 import AddToCollection from "./AddToCollection";
 import { useAuthContext } from "state/AuthContext";
-import { ArtistButton } from "components/Artist/ArtistRouterLink";
+import { ArtistButton } from "components/Artist/ArtistButtons";
 
 const PurchaseOrDownloadAlbum: React.FC<{
   trackGroup: TrackGroup;

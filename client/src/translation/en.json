@@ -18,6 +18,10 @@
     "termsAndPrivacy": "By signing up you agree to our <terms>terms</terms> and <privacy>privacy</privacy> policies.",
     "receiveMailingList": "Stay up to date with Mirlo and our product by signing up to our mailing list."
   },
+  "confirmationDialog": {
+    "cancel": "Cancel",
+    "yes": "Yes"
+  },
   "releases": {
     "recentReleases": "Recent releases",
     "releasesForTag": "Releases for <0>{{ tag }}</0>",
@@ -394,7 +398,7 @@
     "areYouSureDelete": "Are you sure you want to delete this merch itemf?",
     "problemDeletingMerch": "Problem deleting merch",
     "merchTitle": "Name",
-    "publishedPost": "Published post!",
+    "publishedPost": "Published merch!",
     "merchDescription": "Description",
     "price": "Price",
     "quantity": "Quantity in stock",
@@ -605,6 +609,7 @@
     "whatTaskCall": "What task do you want to call on the server?",
     "submitServerTask": "Submit server task",
     "artists": "Artists",
+    "tips": "Tips",
     "serverTasks": "Server tasks",
     "subscriptions": "Subscriptions",
     "purchases": "Purchases",
@@ -713,6 +718,9 @@
   },
   "postForm": {
     "imagesInPost": "Manage images in post",
+    "publishedPost": "Published post!",
+    "contentIsEmpty": "Content is empty, are you sure you want to post?",
+    "titleIsEmpty": "Title is empty, are you sure you want to post?",
     "returnToDraft": "Return to draft",
     "imageIsFeatured": "Which image should be featured?",
     "confirmDelete": "Are you sure you want to delete this post?",
@@ -726,7 +734,7 @@
     "publishPost": "Publish post",
     "scheduleToPublish": "Schedule to publish",
     "saveDraft": "Save draft",
-    "updatePost": "Update post",
+    "updatePost": "Save post",
     "inTheFuture": "In the future",
     "editPost": "Edit post",
     "postUpdated": "Post updated",

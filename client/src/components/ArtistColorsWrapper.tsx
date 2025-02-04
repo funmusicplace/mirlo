@@ -27,14 +27,14 @@ const updateTheme = (artistColors?: any, theme?: "dark" | "light") => {
   console.log("updatinmg theme", artistColors, theme);
   document.documentElement.setAttribute("data-mi-theme", theme ?? "light");
   if (artistColors) {
-    document.documentElement.style.setProperty(
-      "--mi-primary-color",
-      artistColors.primary
-    );
-    document.documentElement.style.setProperty(
-      "--mi-secondary-color",
-      artistColors.secondary
-    );
+    // document.documentElement.style.setProperty(
+    //   "--mi-primary-color",
+    //   artistColors.primary
+    // );
+    // document.documentElement.style.setProperty(
+    //   "--mi-secondary-color",
+    //   artistColors.secondary
+    // );
     document.documentElement.style.setProperty(
       "--mi-normal-background-color",
       artistColors.background
@@ -44,14 +44,14 @@ const updateTheme = (artistColors?: any, theme?: "dark" | "light") => {
       artistColors.foreground
     );
   } else {
-    document.documentElement.style.setProperty(
-      "--mi-primary-color",
-      colors[theme ?? "light"]["primary"]
-    );
-    document.documentElement.style.setProperty(
-      "--mi-secondary-color",
-      colors[theme ?? "light"]["secondary"]
-    );
+    // document.documentElement.style.setProperty(
+    //   "--mi-primary-color",
+    //   colors[theme ?? "light"]["primary"]
+    // );
+    // document.documentElement.style.setProperty(
+    //   "--mi-secondary-color",
+    //   colors[theme ?? "light"]["secondary"]
+    // );
     document.documentElement.style.setProperty(
       "--mi-normal-background-color",
       colors[theme ?? "light"]["background"]

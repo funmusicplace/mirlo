@@ -18,7 +18,6 @@ export const NextButton: React.FC = () => {
     <Button
       startIcon={<MdSkipNext />}
       variant="transparent"
-      buttonRole="black"
       onClick={onClickNext}
     />
   );

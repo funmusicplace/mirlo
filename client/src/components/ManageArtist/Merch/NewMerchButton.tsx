@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { FaPlus } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { once } from "lodash";
+import { ArtistButton } from "components/Artist/ArtistButtons";
 
 interface NewAlbumButtonProps extends React.PropsWithChildren {
   artist: Pick<Artist, "id" | "userId">;
@@ -33,7 +34,7 @@ export function NewMerchButton(props: NewAlbumButtonProps) {
   );
 
   return (
-    <Button
+    <ArtistButton
       size="compact"
       startIcon={<FaPlus />}
       variant="dashed"
@@ -42,6 +43,6 @@ export function NewMerchButton(props: NewAlbumButtonProps) {
       onClick={handleClick}
     >
       {props.children ?? t("artist.addNewMerch")}
-    </Button>
+    </ArtistButton>
   );
 }

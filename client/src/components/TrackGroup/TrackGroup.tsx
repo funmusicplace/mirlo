@@ -259,7 +259,7 @@ function TrackGroup() {
                     `}
                   >
                     <TrackGroupEmbed trackGroup={trackGroup} />
-                    <Wishlist trackGroup={trackGroup} />
+                    <Wishlist trackGroup={trackGroup} inArtistPage />
                     <PurchaseOrDownloadAlbum trackGroup={trackGroup} />
                   </div>
                 </UnderneathImage>
@@ -313,6 +313,8 @@ function TrackGroup() {
             className={css`
               margin-top: 2rem;
               text-align: center;
+              display: flex;
+              justify-content: center;
             `}
           >
             {trackGroup.artist && (

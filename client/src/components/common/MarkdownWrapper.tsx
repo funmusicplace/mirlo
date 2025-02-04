@@ -46,6 +46,10 @@ const MarkdownWrapper = styled.div`
     max-width: 100%;
   }
 
+  iframe.remirror-iframe-youtube {
+    min-height: 390px;
+  }
+
   li {
     margin-left: 1.2rem;
   }

@@ -14,6 +14,7 @@ import DestinationListItem from "./DestinationListItem";
 import countryCodesCurrencies from "./country-codes-currencies";
 import styled from "@emotion/styled";
 import { useSnackbar } from "state/SnackbarContext";
+import { ArtistButton } from "components/Artist/ArtistButtons";
 
 const P = styled.p`
   margin: 0.25rem 0 0.5rem;
@@ -119,7 +120,7 @@ const MerchDestinations: React.FC<{}> = () => {
           `}
         >
           {!isEditing && (
-            <Button
+            <ArtistButton
               startIcon={<FaPen />}
               onClick={() => setIsEditing(true)}
               className={css`
@@ -127,11 +128,11 @@ const MerchDestinations: React.FC<{}> = () => {
               `}
             >
               {t("edit")}
-            </Button>
+            </ArtistButton>
           )}
           {isEditing && (
             <>
-              <Button
+              <ArtistButton
                 onClick={() => {
                   append({ destinationCountry: null });
                 }}
@@ -141,8 +142,8 @@ const MerchDestinations: React.FC<{}> = () => {
                 variant="dashed"
               >
                 {t("addNewShippingDestination")}
-              </Button>
-              <Button>{t("saveDestinations")}</Button>
+              </ArtistButton>
+              <ArtistButton>{t("saveDestinations")}</ArtistButton>
             </>
           )}
         </div>

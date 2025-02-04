@@ -40,7 +40,6 @@ export const PlayButton: React.FC<{
         title={`${t("play")}`}
         className="play-button"
         variant={variant}
-        buttonRole="black"
       />
     </div>
   );

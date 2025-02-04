@@ -24,6 +24,10 @@ const DropdownMenu: React.FC<{
 
         > button {
           flex-grow: 1;
+
+          svg {
+            fill: black;
+          }
         }
       `}
     >

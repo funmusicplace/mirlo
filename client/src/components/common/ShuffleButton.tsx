@@ -18,11 +18,11 @@ export const ShuffleButton: React.FC = () => {
   return (
     <Button
       startIcon={<RxShuffle />}
-      buttonRole={shuffle ? "secondary" : undefined}
+      buttonRole={shuffle ? "primary" : undefined}
       onClick={onShuffle}
       variant={shuffle ? "default" : "outlined"}
       className={css`
-        ${shuffle ? "color: var(--mi-link-color) !important;" : ""}
+        ${shuffle ? "color: white !important;" : ""}
       `}
     />
   );
