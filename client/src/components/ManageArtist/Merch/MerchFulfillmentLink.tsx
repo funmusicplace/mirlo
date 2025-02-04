@@ -1,11 +1,9 @@
-import Button, { ButtonLink } from "components/common/Button";
-
-import { useParams } from "react-router-dom";
 import { css } from "@emotion/css";
 import React from "react";
 
 import { useTranslation } from "react-i18next";
 import { FaArrowRight } from "react-icons/fa";
+import { ArtistButtonLink } from "components/Artist/ArtistButtons";
 
 const MerchFulfillmentLink: React.FC<{}> = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageMerch" });
@@ -26,9 +24,9 @@ const MerchFulfillmentLink: React.FC<{}> = () => {
       >
         {t("merchFulfillmentParagraph")}
       </p>
-      <ButtonLink startIcon={<FaArrowRight />} to="/fulfillment">
+      <ArtistButtonLink startIcon={<FaArrowRight />} to="/fulfillment">
         {t("viewFulfillment")}
-      </ButtonLink>
+      </ArtistButtonLink>
     </>
   );
 };

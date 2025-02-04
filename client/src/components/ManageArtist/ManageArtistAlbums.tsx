@@ -1,5 +1,4 @@
 import { css } from "@emotion/css";
-import { ButtonLink } from "components/common/Button";
 import React from "react";
 import { useParams } from "react-router-dom";
 import TrackGroupCard from "./TrackGroupCard";
@@ -11,6 +10,7 @@ import ManageSectionWrapper from "./ManageSectionWrapper";
 import { NewAlbumButton } from "./NewAlbumButton";
 import { useQuery } from "@tanstack/react-query";
 import { queryArtist, queryManagedArtistTrackGroups } from "queries";
+import { ArtistButtonLink } from "components/Artist/ArtistButtons";
 
 const ManageArtistAlbums: React.FC<{}> = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
@@ -32,7 +32,7 @@ const ManageArtistAlbums: React.FC<{}> = () => {
         )}
         {trackGroups?.results.length !== 0 && <div />}
         <div>
-          <ButtonLink
+          <ArtistButtonLink
             to={`/manage/artists/${artistId}/releases/tools`}
             size="compact"
             startIcon={<FaWrench />}
@@ -43,7 +43,7 @@ const ManageArtistAlbums: React.FC<{}> = () => {
             `}
           >
             {t("tools")}
-          </ButtonLink>
+          </ArtistButtonLink>
           {artist ? <NewAlbumButton artist={artist} /> : undefined}
         </div>
       </SpaceBetweenDiv>

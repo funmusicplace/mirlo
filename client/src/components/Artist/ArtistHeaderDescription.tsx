@@ -9,6 +9,7 @@ import { FaChevronDown, FaPen, FaSave, FaTimes } from "react-icons/fa";
 import TextArea from "components/common/TextArea";
 import { bp } from "../../constants";
 import { useSearchParams } from "react-router-dom";
+import { ArtistButton } from "./ArtistButtons";
 
 interface FormData {
   bio: string;
@@ -113,7 +114,7 @@ const ArtistHeaderDescription: React.FC<ArtistHeaderDescriptionProps> = ({
                   }
                 `}
               >
-                <Button
+                <ArtistButton
                   variant="link"
                   size="compact"
                   startIcon={<FaChevronDown />}
@@ -130,7 +131,7 @@ const ArtistHeaderDescription: React.FC<ArtistHeaderDescriptionProps> = ({
                   onClick={() => setIsCollapsed((val) => !val)}
                 >
                   {isCollapsed ? t("readMore") : t("readLess")}
-                </Button>
+                </ArtistButton>
               </div>
             )}
           </div>
@@ -145,7 +146,7 @@ const ArtistHeaderDescription: React.FC<ArtistHeaderDescriptionProps> = ({
               margin-left: 0.2rem;
             `}
           >
-            <Button
+            <ArtistButton
               size="compact"
               className={css`
                 white-space: nowrap;
@@ -156,7 +157,7 @@ const ArtistHeaderDescription: React.FC<ArtistHeaderDescriptionProps> = ({
               startIcon={<FaPen />}
             >
               {!bio && t("noBioYet")}
-            </Button>
+            </ArtistButton>
           </div>
         )}
       </div>
@@ -180,7 +181,7 @@ const ArtistHeaderDescription: React.FC<ArtistHeaderDescriptionProps> = ({
           placeholder={t("bioPlaceholder") ?? ""}
           rows={8}
         />
-        <Button
+        <ArtistButton
           size="compact"
           startIcon={<FaSave />}
           collapsible
@@ -190,8 +191,8 @@ const ArtistHeaderDescription: React.FC<ArtistHeaderDescriptionProps> = ({
           `}
         >
           <p>{t("saveBio")}</p>
-        </Button>
-        <Button
+        </ArtistButton>
+        <ArtistButton
           size="compact"
           collapsible
           startIcon={<FaTimes />}
@@ -201,7 +202,7 @@ const ArtistHeaderDescription: React.FC<ArtistHeaderDescriptionProps> = ({
           }}
         >
           <p>{t("cancel")}</p>
-        </Button>
+        </ArtistButton>
       </div>
     </>
   );

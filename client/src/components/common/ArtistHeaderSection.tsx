@@ -16,6 +16,10 @@ import { useAuthContext } from "state/AuthContext";
 import { ButtonLink } from "./Button";
 import { FaEye, FaPen } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
+import {
+  ArtistButton,
+  ArtistButtonLink,
+} from "components/Artist/ArtistButtons";
 
 export const ArtistTitle = styled.h1<{ artistAvatar: boolean }>`
   font-size: 2.4rem;
@@ -219,7 +223,7 @@ const ArtistHeaderSection: React.FC<{
                       {!isManage && <FollowArtist artistId={artist.id} />}
                       {isManage && (
                         <div>
-                          <ButtonLink
+                          <ArtistButtonLink
                             size="big"
                             rounded
                             collapsible
@@ -230,8 +234,8 @@ const ArtistHeaderSection: React.FC<{
                             `}
                           >
                             {t("editDetails")}
-                          </ButtonLink>
-                          <ButtonLink
+                          </ArtistButtonLink>
+                          <ArtistButtonLink
                             to={`/${artist?.urlSlug?.toLowerCase() ?? artist?.id}`}
                             size="big"
                             rounded
@@ -244,7 +248,7 @@ const ArtistHeaderSection: React.FC<{
                             `}
                           >
                             {t("viewLive")}
-                          </ButtonLink>
+                          </ArtistButtonLink>
                         </div>
                       )}
                     </ArtistActions>

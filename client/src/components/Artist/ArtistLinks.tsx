@@ -11,7 +11,6 @@ import {
   linkUrlDisplay,
   linkUrlHref,
 } from "components/common/LinkIconDisplay";
-import { ArtistPageWrapper } from "components/ManageArtist/ManageArtistContainer";
 import Avatar from "./Avatar";
 import { ArtistTitle } from "components/common/ArtistHeaderSection";
 import { FaChevronLeft } from "react-icons/fa";
@@ -28,7 +27,6 @@ const ArtistLinks: React.FC = () => {
     return null;
   }
 
-  const artistBanner = artist?.banner?.sizes;
   const artistAvatar = artist?.avatar;
 
   return (

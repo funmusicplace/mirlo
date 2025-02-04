@@ -35,7 +35,7 @@ const SavingInput: React.FC<{
         setIsSaving(true);
         let value = getValues(formKey);
 
-        if (formKey === "releaseDate") {
+        if (formKey === "releaseDate" || formKey === "publishedAt") {
           value = new Date(value).toISOString();
         } else if (formKey === "minPrice") {
           value = value ? value * 100 : undefined;

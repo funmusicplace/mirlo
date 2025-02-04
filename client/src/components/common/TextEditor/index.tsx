@@ -77,6 +77,11 @@ const TextEditor: React.FC<{
             iframe {
               width: 100%;
             }
+
+            iframe.remirror-iframe-youtube {
+              min-height: 390px;
+            }
+
             padding: 1rem;
             background-color: var(--mi-lighten-x-background-color);
 

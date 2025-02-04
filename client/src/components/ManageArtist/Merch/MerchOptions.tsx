@@ -16,6 +16,7 @@ import FormComponent from "components/common/FormComponent";
 import { useTranslation } from "react-i18next";
 import { InputEl } from "components/common/Input";
 import api from "services/api";
+import { ArtistButton } from "components/Artist/ArtistButtons";
 
 type OptionTypesForm = {
   optionTypes: Partial<MerchOptionType>[];
@@ -93,14 +94,14 @@ const OptionType: React.FC<{
                     type="number"
                   />
                 </FormComponent>
-                <Button
+                <ArtistButton
                   type="button"
                   startIcon={<FaTrash />}
                   onClick={() => remove(optionIndex)}
                 />
               </div>
             ))}
-            <Button
+            <ArtistButton
               onClick={() => {
                 append("");
               }}
@@ -110,7 +111,7 @@ const OptionType: React.FC<{
               variant="dashed"
             >
               {t("addNewOptionSubType")}
-            </Button>
+            </ArtistButton>
           </FormComponent>
         </div>
       )}
@@ -207,14 +208,16 @@ const MerchOptions: React.FC<{}> = () => {
           `}
         >
           {!isEditing && (
-            <Button startIcon={<FaPen />} onClick={() => setIsEditing(true)}>
+            <ArtistButton
+              startIcon={<FaPen />}
+              onClick={() => setIsEditing(true)}
+            >
               {t("edit")}
-            </Button>
+            </ArtistButton>
           )}
           {isEditing && (
             <>
-              {" "}
-              <Button
+              <ArtistButton
                 onClick={() => {
                   append({ optionName: "" });
                 }}
@@ -224,8 +227,8 @@ const MerchOptions: React.FC<{}> = () => {
                 variant="dashed"
               >
                 {t("addNewMerchOption")}
-              </Button>
-              <Button>{t("saveOptions")}</Button>
+              </ArtistButton>
+              <ArtistButton>{t("saveOptions")}</ArtistButton>
             </>
           )}
         </div>

@@ -11,6 +11,7 @@ import { useQuery } from "@tanstack/react-query";
 import { queryArtist } from "queries";
 import { css } from "@emotion/css";
 import Box from "./Box";
+import { ArtistButton } from "components/Artist/ArtistButtons";
 
 const FollowArtist: React.FC<{ artistId: number }> = ({ artistId }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
@@ -148,7 +149,7 @@ const FollowArtist: React.FC<{ artistId: number }> = ({ artistId }) => {
           <SupportArtistTiersForm artist={artist} excludeDefault={!!user} />
         )}
       </Modal>
-      <Button
+      <ArtistButton
         size="compact"
         variant="outlined"
         type="button"
@@ -157,7 +158,7 @@ const FollowArtist: React.FC<{ artistId: number }> = ({ artistId }) => {
         startIcon={isFollowing ? <FaMinus /> : <FaPlus />}
       >
         {t(isFollowing ? "unfollow" : "follow")}
-      </Button>
+      </ArtistButton>
     </>
   );
 };

@@ -1,5 +1,5 @@
 import { css } from "@emotion/css";
-import ArtistRouterLink from "components/Artist/ArtistRouterLink";
+import ArtistRouterLink from "components/Artist/ArtistButtons";
 
 import { Trans, useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";

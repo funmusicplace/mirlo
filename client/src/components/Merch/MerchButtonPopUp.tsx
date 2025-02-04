@@ -10,6 +10,7 @@ import Modal from "components/common/Modal";
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { queryUserStripeStatus } from "queries";
+import { ArtistButton } from "components/Artist/ArtistButtons";
 
 const MerchButtonPopUp: React.FC<{ merch: Merch; artist: Artist }> = ({
   merch,
@@ -40,13 +41,13 @@ const MerchButtonPopUp: React.FC<{ merch: Merch; artist: Artist }> = ({
 
   return (
     <>
-      <Button onClick={() => setIsOpen(true)}>
+      <ArtistButton onClick={() => setIsOpen(true)}>
         {hasPricedOptions
           ? t("buyFrom", { amount })
           : t("buyFor", {
               amount,
             })}
-      </Button>
+      </ArtistButton>
       <Modal
         open={isOpen}
         size="small"

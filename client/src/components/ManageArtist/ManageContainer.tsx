@@ -12,7 +12,6 @@ const ManageContainer: React.FC = () => {
           z-index: 1;
           top: calc(48px + 3rem);
           left: 0;
-          overflow-x: hidden;
           padding: 0 !important;
           width: 100%;
         `}

@@ -20,6 +20,7 @@ import { useQuery } from "@tanstack/react-query";
 import { queryArtist, queryUserStripeStatus } from "queries";
 import { ButtonLink } from "components/common/Button";
 import { getArtistManageUrl } from "utils/artist";
+import { ArtistButtonLink } from "./ArtistButtons";
 
 export const ArtistSection = styled.div`
   margin-bottom: 2rem;
@@ -88,9 +89,11 @@ function Artist() {
 
   const isArtistUser = artist.userId === user?.id;
 
+  console.log("artist", artist.properties?.colors);
+
   return (
     <>
-      <ArtistTabs>
+      <ArtistTabs color={artist.properties?.colors.primary}>
         {(artist?.trackGroups.length ?? 0) > 0 && (
           <li>
             <NavLink to="releases" id="artist-navlink-releases">
@@ -126,7 +129,7 @@ function Artist() {
             >
               <NavLink to="merch">{t("merch")}</NavLink>
               {(isArtistUser || user?.isAdmin) && (
-                <ButtonLink
+                <ArtistButtonLink
                   startIcon={<FaEdit />}
                   to={getArtistManageUrl(artist.id) + "/merch"}
                   variant="dashed"

@@ -28,6 +28,7 @@ import { useAuthContext } from "state/AuthContext";
 import PublicTrackGroupListing from "components/common/TrackTable/PublicTrackGroupListing";
 
 import MerchButtonPopUp from "./MerchButtonPopUp";
+import { ArtistButtonLink } from "components/Artist/ArtistButtons";
 
 function MerchView() {
   const { t } = useTranslation("translation", {
@@ -108,14 +109,14 @@ function MerchView() {
           <SpaceBetweenDiv>
             <ItemViewTitle title={merch.title} />
             {userIsOwner && (
-              <ButtonLink
+              <ArtistButtonLink
                 size="compact"
                 startIcon={<FaPen />}
                 variant="dashed"
                 to={getArtistManageMerchUrl(artist.id, merch.id)}
               >
                 {t("editMerch")}
-              </ButtonLink>
+              </ArtistButtonLink>
             )}
           </SpaceBetweenDiv>
           <div
@@ -197,6 +198,9 @@ function MerchView() {
           className={css`
             margin-top: 4rem;
             text-align: center;
+            display: flex;
+            margin: 4rem auto;
+            justify-content: center;
           `}
         >
           {merch.artist && stripeAccountStatus?.chargesEnabled && (

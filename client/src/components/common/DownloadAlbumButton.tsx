@@ -8,7 +8,7 @@ import { useSnackbar } from "state/SnackbarContext";
 import { useArtistContext } from "state/ArtistContext";
 import Modal from "./Modal";
 import LoadingSpinner from "./LoadingSpinner";
-import { ArtistButton } from "components/Artist/ArtistRouterLink";
+import { ArtistButton } from "components/Artist/ArtistButtons";
 
 const formats = ["flac", "wav", "opus", "320.mp3", "256.mp3", "128.mp3"];
 const formatsDisplay: { [format: string]: string } = {
@@ -190,20 +190,20 @@ const DownloadAlbumButton: React.FC<{
                 )}
               </ArtistButton>
               <p>
-                <Button
+                <ArtistButton
                   className={css`
                     margin-top: 1rem;
                   `}
                   onClick={() => setChosenFormat("")}
                 >
                   {t("chooseAnotherFormat")}
-                </Button>
+                </ArtistButton>
               </p>
             </>
           )}
         </div>
       </Modal>
-      <Button
+      <ArtistButton
         onlyIcon={onlyIcon}
         className={css`
           margin-top: 0rem;
@@ -218,7 +218,7 @@ const DownloadAlbumButton: React.FC<{
         }}
       >
         {onlyIcon ? "" : "Download"}
-      </Button>
+      </ArtistButton>
     </div>
   );
 };
