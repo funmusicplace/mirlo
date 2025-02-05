@@ -15,6 +15,7 @@ export const ConfirmDialog = () => {
       <div>{message}</div>
       <div
         className={css`
+          margin-top: 1.5rem;
           display: flex;
 
           justify-content: flex-end;

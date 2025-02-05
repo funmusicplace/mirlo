@@ -26,7 +26,13 @@ const DropdownMenu: React.FC<{
           flex-grow: 1;
 
           svg {
-            fill: black;
+            fill: var(--mi-black);
+          }
+
+          @media (prefers-color-scheme: dark) {
+            svg {
+              fill: var(--mi-white) !important;
+            }
           }
         }
       `}

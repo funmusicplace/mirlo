@@ -264,6 +264,10 @@ const Header = () => {
               @media (prefers-color-scheme: dark) {
                 background-color: var(--mi-white) !important;
                 color: var(--mi-black) !important;
+
+                svg {
+                  fill: var(--mi-black) !important;
+                }
               }
 
               @media screen and (max-width: ${bp.medium}px) {
