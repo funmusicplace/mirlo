@@ -33,6 +33,7 @@ const TrackgroupGrid = styled.div<{
         : "minmax(0,50%) minmax(0,50%)"};
     gap: 0 3%;
     font-size: var(--mi-font-size-xsmall);
+
     a:last-of-type {
       font-size: var(--mi-font-size-xsmall);
     }
