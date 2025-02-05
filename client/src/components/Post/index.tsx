@@ -243,6 +243,9 @@ const Post: React.FC = () => {
           <div
             className={css`
               text-align: center;
+              display: flex;
+              justify-content: center;
+              margin: 1rem;
             `}
           >
             <SupportArtistPopUp artist={post.artist} />

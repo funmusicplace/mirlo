@@ -16,8 +16,8 @@ import FormComponent from "../FormComponent";
 import Box from "../Box";
 
 const InsertMirloWidgetButton: React.FC<{
-  postId: number;
-  artistId: number;
+  postId?: number;
+  artistId?: number;
 }> = ({ postId, artistId }) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const [draftAlbum, setDraftAlbum] = React.useState<TrackGroup>();
@@ -35,7 +35,7 @@ const InsertMirloWidgetButton: React.FC<{
       height: variant === "track" ? 137 : 371,
       width: 700,
     });
-    if (variant) {
+    if (variant && postId) {
       await api.put(`manage/posts/${postId}/tracks`, {
         trackId: trackId,
       });
@@ -79,11 +79,13 @@ const InsertMirloWidgetButton: React.FC<{
   }, []);
 
   const loadDraft = React.useCallback(async () => {
-    const response = await api.get<TrackGroup>(
-      `manage/artists/${artistId}/drafts`
-    );
-    setDraftAlbum(response.result);
-  }, []);
+    if (artistId) {
+      const response = await api.get<TrackGroup>(
+        `manage/artists/${artistId}/drafts`
+      );
+      setDraftAlbum(response.result);
+    }
+  }, [artistId]);
 
   React.useEffect(() => {
     try {

@@ -16,7 +16,7 @@ import { css } from "@emotion/css";
 import InsertMirloWidgetButton from "./InsertMirloWidgetButton";
 import InsertImageButton from "./InsertImageButton";
 
-const TopToolbar: React.FC<{ postId: number; artistId: number }> = ({
+const TopToolbar: React.FC<{ postId?: number; artistId?: number }> = ({
   postId,
   artistId,
 }) => {

@@ -67,6 +67,7 @@ model User {
   userArtistTip                       UserArtistTip[]
   merchPurchase                       MerchPurchase[]
   promoCodes                          String[]
+  receivePlatformEmails               Boolean                         @default(true)
 }
 
 model UserArtistNotificationSetting {

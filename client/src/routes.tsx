@@ -439,6 +439,15 @@ const routes: RouteObject[] = [
               return { Component };
             },
           },
+          {
+            path: "sendEmails",
+            async lazy() {
+              const { default: Component } = await import(
+                "components/Admin/AdminSendEmail"
+              );
+              return { Component };
+            },
+          },
         ],
       },
       {

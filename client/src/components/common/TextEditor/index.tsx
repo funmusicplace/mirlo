@@ -22,7 +22,7 @@ import TopToolbar from "./TopToolbar";
 import FloatingLinkToolbar from "./FloatingLinkToolbar";
 import api from "services/api";
 
-const extensions = (postId: number, reload: () => void) => () => [
+const extensions = (postId?: number, reload?: () => void) => () => [
   new PlaceholderExtension({ placeholder: "Type something" }),
   new TableExtension({}),
   new DropCursorExtension({}),
@@ -30,13 +30,17 @@ const extensions = (postId: number, reload: () => void) => () => [
     uploadHandler: (
       files: { file: File; progress: (progress: number) => void }[]
     ): DelayedPromiseCreator<ImageAttributes>[] => {
-      return files.map((f) => async (props: CommandFunctionProps) => {
-        const response = await api.uploadFile(`manage/posts/${postId}/images`, [
-          f.file,
-        ]);
-        reload();
-        return { src: response.result.jobId };
-      });
+      if (postId) {
+        return files.map((f) => async (props: CommandFunctionProps) => {
+          const response = await api.uploadFile(
+            `manage/posts/${postId}/images`,
+            [f.file]
+          );
+          reload?.();
+          return { src: response.result.jobId };
+        });
+      }
+      return [];
     },
   }),
   new IframeExtension(),
@@ -47,9 +51,9 @@ const extensions = (postId: number, reload: () => void) => () => [
 const TextEditor: React.FC<{
   onChange: (val: any) => void;
   value: string;
-  postId: number;
-  artistId: number;
-  reloadImages: () => void;
+  postId?: number;
+  artistId?: number;
+  reloadImages?: () => void;
 }> = ({ onChange, value, postId, reloadImages, artistId }) => {
   const { manager, state, setState } = useRemirror({
     extensions: extensions(postId, reloadImages),
