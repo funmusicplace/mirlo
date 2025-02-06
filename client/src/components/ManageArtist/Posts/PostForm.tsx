@@ -22,7 +22,7 @@ import { ArtistButton } from "components/Artist/ArtistButtons";
 import SavingInput from "../AlbumFormComponents/SavingInput";
 import EditPostHeader from "./EditPostHeader";
 
-type FormData = {
+export type PostFormData = {
   title: string;
   publishedAt: string;
   content: string;
@@ -61,7 +61,7 @@ const PostForm: React.FC<{
       multiple: true,
     });
 
-  const methods = useForm<FormData>({
+  const methods = useForm<PostFormData>({
     defaultValues: post
       ? {
           ...post,
@@ -97,7 +97,8 @@ const PostForm: React.FC<{
   const publicationDate = watch("publishedAt");
 
   const doSave = React.useCallback(
-    async (data: FormData) => {
+    async (data: PostFormData) => {
+      console.log("saving");
       if (userId) {
         try {
           setIsSaving(true);
