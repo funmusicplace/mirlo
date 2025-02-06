@@ -24,7 +24,6 @@ const colors = {
 };
 
 const updateTheme = (artistColors?: any, theme?: "dark" | "light") => {
-  console.log("updatinmg theme", artistColors, theme);
   document.documentElement.setAttribute("data-mi-theme", theme ?? "light");
   if (artistColors) {
     // document.documentElement.style.setProperty(
@@ -83,8 +82,6 @@ const ArtistColorsWrapper: React.FC<{ children: React.ReactElement }> = ({
     managedArtist?.properties?.colors ?? artist?.properties?.colors;
 
   React.useEffect(() => {
-    console.log("prefersDark", prefersDark.matches);
-
     updateTheme(artistColors, prefersDark.matches ? "dark" : "light");
   }, [artistColors]);
 

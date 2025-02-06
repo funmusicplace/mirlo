@@ -1,4 +1,5 @@
 import { ArtistButton } from "components/Artist/ArtistButtons";
+import { pick } from "lodash";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -6,6 +7,7 @@ import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
 import { useConfirm } from "utils/useConfirm";
 import useGetUserObjectById from "utils/useGetUserObjectById";
+import { PostFormData } from "./PostForm";
 
 const PublishPostButton: React.FC<{
   post: Post;
@@ -15,7 +17,7 @@ const PublishPostButton: React.FC<{
   const snackbar = useSnackbar();
   const [isPublishing, setIsPublishing] = React.useState(false);
   const { ask } = useConfirm();
-  const { watch } = useFormContext();
+  const { watch, handleSubmit } = useFormContext<PostFormData>();
 
   const { reload: reloadImages } = useGetUserObjectById<PostImage>(
     `manage/posts/${post?.id}/images`,
@@ -29,33 +31,50 @@ const PublishPostButton: React.FC<{
 
   const existingId = post.id;
 
-  const doPublish = React.useCallback(async () => {
-    try {
-      setIsPublishing(true);
+  const doPublish = React.useCallback(
+    async (data: PostFormData) => {
+      console.log("publishing");
+      try {
+        setIsPublishing(true);
 
-      if (post.isDraft && (content === "" || content === "<p></p>")) {
-        const ok = await ask(t("contentIsEmpty"));
-        if (!ok) {
-          return;
+        if (post.isDraft && (content === "" || content === "<p></p>")) {
+          const ok = await ask(t("contentIsEmpty"));
+          if (!ok) {
+            return;
+          }
         }
-      }
 
-      if (post.isDraft && title === "") {
-        const ok = await ask(t("titleIsEmpty"));
-        if (!ok) {
-          return;
+        if (post.isDraft && title === "") {
+          const ok = await ask(t("titleIsEmpty"));
+          if (!ok) {
+            return;
+          }
         }
+        const picked = {
+          ...pick(data, ["title", "content", "isPublic", "shouldSendEmail"]),
+          publishedAt: new Date(data.publishedAt + ":00").toISOString(),
+          artistId: post.artistId,
+          minimumSubscriptionTierId:
+            isFinite(+data.minimumTier) && +data.minimumTier !== 0
+              ? Number(data.minimumTier)
+              : undefined,
+        };
+        await api.put<Partial<Post>, { result: { id: number } }>(
+          `manage/posts/${existingId}`,
+          picked
+        );
+        await api.put(`manage/posts/${existingId}/publish`, {});
+        reload(existingId);
+        reloadImages();
+        snackbar(t("publishedPost"), { type: "success" });
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setIsPublishing(false);
       }
-      await api.put(`manage/posts/${existingId}/publish`, {});
-      reload(existingId);
-      reloadImages();
-      snackbar(t("publishedPost"), { type: "success" });
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setIsPublishing(false);
-    }
-  }, [existingId, title, content, isDraft]);
+    },
+    [existingId, title, content, isDraft]
+  );
 
   const minimumTier = watch("minimumTier");
   const publicationDate = watch("publishedAt");
@@ -72,8 +91,8 @@ const PublishPostButton: React.FC<{
     <ArtistButton
       disabled={!minimumTier || !publicationDate}
       isLoading={isPublishing}
-      onClick={doPublish}
-      type="button"
+      onClick={handleSubmit(doPublish)}
+      type="submit"
     >
       {publishText}
     </ArtistButton>
