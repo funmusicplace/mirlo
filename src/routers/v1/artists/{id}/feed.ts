@@ -163,7 +163,7 @@ export default function () {
         res.send(feed.xml());
       } else {
         res.json({
-          results: posts,
+          results: zipped,
         });
       }
     } catch (e) {

@@ -127,7 +127,11 @@ const ManageTrackGroup: React.FC<{}> = () => {
       )}
 
       {trackGroup && (
-        <BulkTrackUpload trackgroup={trackGroup} reload={() => refetch()} />
+        <BulkTrackUpload
+          trackgroup={trackGroup}
+          reload={() => refetch()}
+          multiple
+        />
       )}
       <hr style={{ marginTop: "1rem", marginBottom: "1rem" }} />
       {trackGroup && trackGroup.tracks?.length > 0 && (

@@ -13,7 +13,7 @@ import {
 
 import { requestApp } from "../utils";
 
-describe.only("artists/{id}/feed", () => {
+describe("artists/{id}/feed", () => {
   beforeEach(async () => {
     try {
       await clearTables();

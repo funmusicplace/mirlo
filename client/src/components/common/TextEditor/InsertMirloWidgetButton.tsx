@@ -14,6 +14,7 @@ import BulkTrackUpload from "components/ManageArtist/BulkTrackUpload";
 import { InputEl } from "../Input";
 import FormComponent from "../FormComponent";
 import Box from "../Box";
+import { useForm } from "react-hook-form";
 
 const InsertMirloWidgetButton: React.FC<{
   postId?: number;
@@ -21,10 +22,19 @@ const InsertMirloWidgetButton: React.FC<{
 }> = ({ postId, artistId }) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const [draftAlbum, setDraftAlbum] = React.useState<TrackGroup>();
-  const [newSong, setNewSong] = React.useState<Track>();
-  const [newSongTitle, setNewSongTitle] = React.useState("");
+  const [newSongs, setNewSongs] = React.useState<Track[]>([]);
+  const methods = useForm<{ titles: string[] }>();
   const { addIframe } = useCommands();
   const { t } = useTranslation("translation", { keyPrefix: "textEditor" });
+
+  const titles = methods.watch("titles");
+
+  React.useEffect(() => {
+    if (!isOpen) {
+      methods.reset({ titles: [] });
+      setNewSongs([]);
+    }
+  }, [methods, isOpen]);
 
   const onAdd = async (
     trackId: string | number,
@@ -35,7 +45,7 @@ const InsertMirloWidgetButton: React.FC<{
       height: variant === "track" ? 137 : 371,
       width: 700,
     });
-    if (variant && postId) {
+    if (variant === "track" && postId) {
       await api.put(`manage/posts/${postId}/tracks`, {
         trackId: trackId,
       });
@@ -54,23 +64,28 @@ const InsertMirloWidgetButton: React.FC<{
     }));
   }, []);
 
-  const addNewSong = React.useCallback(async () => {
-    if (newSong) {
+  const addNewSongs = React.useCallback(async () => {
+    const titles = methods.getValues("titles");
+    if (newSongs) {
       try {
-        await api.put(`manage/tracks/${newSong.id}`, { title: newSongTitle });
-        onAdd(newSong.id, "track");
+        await Promise.all(
+          newSongs.map(async (song, idx) => {
+            await api.put(`manage/tracks/${song.id}`, { title: titles[idx] });
+          })
+        );
+        newSongs.forEach((song) => onAdd(song.id, "track"));
       } catch (e) {
         console.error(e);
       }
     }
-  }, [newSong, newSongTitle]);
+  }, [newSongs, methods]);
 
   const setNewSongDetails = React.useCallback(async (newTrack?: Track) => {
     if (newTrack) {
       try {
         const { result } = await api.get<Track>(`manage/tracks/${newTrack.id}`);
-        setNewSong(result);
-        setNewSongTitle(result?.title ?? "");
+        // setNewSong(result);
+        setNewSongs((existing) => [...(existing ?? []), result]);
         loadDraft();
       } catch (e) {
         console.error(e);
@@ -92,6 +107,8 @@ const InsertMirloWidgetButton: React.FC<{
       loadDraft();
     } catch (e) {}
   }, []);
+
+  const hasEmptyStrings = titles?.filter((title) => title === "").length > 0;
 
   return (
     <>
@@ -158,7 +175,7 @@ const InsertMirloWidgetButton: React.FC<{
             </div>
             <h2>{t("uploadNewSong")}</h2>
             <p>{t("uploadNewSongDescription")}</p>
-            {newSong && (
+            {newSongs.length > 0 && (
               <div
                 className={css`
                   flex-direction: column;
@@ -177,28 +194,25 @@ const InsertMirloWidgetButton: React.FC<{
                   }
                 `}
               >
-                <FormComponent>
-                  <label>{t("songTitle")}</label>
-                  <InputEl
-                    value={newSongTitle}
-                    onChange={(e) => setNewSongTitle(e.currentTarget.value)}
-                  />
-                  <small>{newSong.audio?.originalFilename}</small>
-                </FormComponent>
-                {newSongTitle === "" && (
+                {newSongs?.map((song, idx) => (
+                  <FormComponent key={song.id}>
+                    <label>{t("songTitle")}</label>
+                    <InputEl {...methods.register(`titles.${idx}`)} required />
+                    <small>{song.audio?.originalFilename}</small>
+                  </FormComponent>
+                ))}
+                {hasEmptyStrings && (
                   <Box variant="warning">{t("addTitleToUpload")}</Box>
                 )}
-                <Button disabled={newSongTitle === ""} onClick={addNewSong}>
+                <Button disabled={!!hasEmptyStrings} onClick={addNewSongs}>
                   {t("addThisSong")}
                 </Button>
               </div>
             )}
-            {!newSong && (
-              <BulkTrackUpload
-                trackgroup={draftAlbum}
-                reload={setNewSongDetails}
-              />
-            )}
+            <BulkTrackUpload
+              trackgroup={draftAlbum}
+              reload={setNewSongDetails}
+            />
           </>
         )}
       </Modal>
