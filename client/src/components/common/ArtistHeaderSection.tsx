@@ -14,10 +14,11 @@ import React from "react";
 import { useSnackbar } from "state/SnackbarContext";
 import { useAuthContext } from "state/AuthContext";
 import { ButtonLink } from "./Button";
-import { FaEye, FaPen } from "react-icons/fa";
+import { FaEye, FaPen, FaRss } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 import {
   ArtistButton,
+  ArtistButtonAnchor,
   ArtistButtonLink,
 } from "components/Artist/ArtistButtons";
 
@@ -220,7 +221,18 @@ const ArtistHeaderSection: React.FC<{
                       />
                     </div>
                     <ArtistActions>
-                      {!isManage && <FollowArtist artistId={artist.id} />}
+                      {!isManage && (
+                        <>
+                          <FollowArtist artistId={artist.id} />
+                          <ArtistButtonAnchor
+                            target="_blank"
+                            href={`${import.meta.env.VITE_API_DOMAIN}/v1/artists/${artist.id}/feed?format=rss`}
+                            rel="noreferrer"
+                            onlyIcon
+                            startIcon={<FaRss />}
+                          />
+                        </>
+                      )}
                       {isManage && (
                         <div>
                           <ArtistButtonLink
