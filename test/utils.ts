@@ -109,6 +109,8 @@ export const createTrackGroup = async (
       urlSlug: data?.urlSlug ?? "test-trackgroup",
       artistId: artistId,
       published: data?.published ?? true,
+      stripeProductKey: data?.stripeProductKey ?? null,
+      paymentToUserId: data?.paymentToUserId,
       releaseDate: data?.releaseDate,
       cover:
         data?.cover !== undefined

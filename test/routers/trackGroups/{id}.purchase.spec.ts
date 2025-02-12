@@ -1,5 +1,7 @@
 import assert from "node:assert";
 import * as dotenv from "dotenv";
+import { Request, Response } from "express";
+
 dotenv.config();
 import { describe, it } from "mocha";
 import {
@@ -8,9 +10,13 @@ import {
   createTrackGroup,
   createUser,
 } from "../../utils";
+import sinon from "sinon";
 
 import { requestApp } from "../utils";
 import prisma from "@mirlo/prisma";
+import purchaseAlbumEndpoint from "../../../src/routers/v1/trackGroups/{id}/purchase";
+import * as stripeUtils from "../../../src/utils/stripe";
+import Stripe from "stripe";
 
 describe("trackGroups/{id}/purchase", () => {
   beforeEach(async () => {
@@ -19,6 +25,10 @@ describe("trackGroups/{id}/purchase", () => {
     } catch (e) {
       console.error(e);
     }
+  });
+
+  afterEach(() => {
+    sinon.restore();
   });
 
   describe("POST", () => {
@@ -135,20 +145,98 @@ describe("trackGroups/{id}/purchase", () => {
       assert.equal(response.statusCode, 500);
     });
 
-    // FIXME: https://github.com/funmusicplace/mirlo/issues/248
-    it.skip("should POST / 200", async () => {
-      const { user } = await createUser({
-        email: "artist@artist.com",
-        stripeAccountId: "aRandomWord",
+    describe("endpoint as function", () => {
+      it("should correctly send data to stripe for a checkout session", async () => {
+        const stubCreate = sinon.stub(
+          stripeUtils.stripe.checkout.sessions,
+          "create"
+        );
+        sinon
+          .stub(stripeUtils.stripe.products, "retrieve")
+          // @ts-ignore
+          .callsFake(async (_params) => {
+            // return whatever
+          });
+
+        const { user } = await createUser({
+          email: "artist@artist.com",
+          stripeAccountId: "aRandomWord",
+        });
+        const artist = await createArtist(user.id);
+        const trackGroup = await createTrackGroup(artist.id, {
+          stripeProductKey: "testProductKey",
+        });
+
+        await purchaseAlbumEndpoint().POST[1](
+          {
+            body: { price: 15 },
+            params: { id: trackGroup.id },
+          } as unknown as Request,
+          {} as Response,
+          () => {}
+        );
+
+        assert.equal(stubCreate.calledOnce, true);
+        const args = stubCreate.getCall(0).args;
+        assert.equal(args[0].metadata?.artistId, artist.id);
+        assert.equal(args[0].metadata?.trackGroupId, trackGroup.id);
+        assert.equal(args[0].metadata?.stripeAccountId, user.stripeAccountId);
+        assert.equal(args[0].line_items?.[0].quantity, 1);
+        assert.equal(
+          args[0].line_items?.[0].price_data?.product,
+          trackGroup.stripeProductKey
+        );
       });
-      const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id);
 
-      const response = await requestApp
-        .post(`trackGroups/${trackGroup.id}/purchase`)
-        .set("Accept", "application/json");
+      it("should use the stripe account of the paymentUser", async () => {
+        const stubCreate = sinon.stub(
+          stripeUtils.stripe.checkout.sessions,
+          "create"
+        );
+        sinon
+          .stub(stripeUtils.stripe.products, "retrieve")
+          // @ts-ignore
+          .callsFake(async (_params) => {
+            // return whatever
+          });
 
-      assert.equal(response.status, 400);
+        const { user: artistUser } = await createUser({
+          email: "artist@artist.com",
+          stripeAccountId: "aRandomWord",
+        });
+        const { user: labelUser } = await createUser({
+          email: "label@label.com",
+          stripeAccountId: "labelAccountId",
+        });
+        const artist = await createArtist(artistUser.id);
+        const trackGroup = await createTrackGroup(artist.id, {
+          stripeProductKey: "testProductKey",
+          paymentToUserId: labelUser.id,
+        });
+
+        await purchaseAlbumEndpoint().POST[1](
+          {
+            body: { price: 15 },
+            params: { id: trackGroup.id },
+          } as unknown as Request,
+          {} as Response,
+          () => {}
+        );
+
+        assert.equal(stubCreate.calledOnce, true);
+        const args = stubCreate.getCall(0).args;
+        assert.equal(args[0].metadata?.artistId, artist.id);
+        assert.equal(args[0].metadata?.trackGroupId, trackGroup.id);
+        assert.equal(
+          args[0].metadata?.stripeAccountId,
+          labelUser.stripeAccountId
+        );
+        assert.equal(args[0].line_items?.[0].quantity, 1);
+        assert.equal(
+          args[0].line_items?.[0].price_data?.product,
+          trackGroup.stripeProductKey
+        );
+      });
     });
   });
 });

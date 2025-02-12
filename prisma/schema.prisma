@@ -68,6 +68,7 @@ model User {
   merchPurchase                       MerchPurchase[]
   promoCodes                          String[]
   receivePlatformEmails               Boolean                         @default(true)
+  paymentTrackGroups                  TrackGroup[]
 }
 
 model UserArtistNotificationSetting {
@@ -467,6 +468,8 @@ model TrackGroup {
   downloadCodes           TrackGroupDownloadCodes[]
   notifications           Notification[]
   merch                   Merch[]
+  paymentToUserId         Int?
+  paymentToUser           User?                     @relation(fields: [paymentToUserId], references: [id])
 
   @@unique([artistId, urlSlug])
 }
