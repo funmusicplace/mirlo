@@ -21,6 +21,7 @@ import { rateLimit } from "express-rate-limit";
 import { corsCheck } from "./auth/cors";
 import errorHandler from "./utils/error";
 import { sendMailQueue } from "./queues/send-mail-queue";
+import path from "node:path";
 
 dotenv.config();
 
@@ -240,14 +241,11 @@ app.use("/health", async (req, res) => {
 // This has to be the last thing used so that other things don't get over-written
 app.use("/", (req, res) => {
   if (!res.headersSent) {
-    if (req.url !== "/") {
-      res.status(404).json({
-        error: "Page not found",
-      });
+    console.log("req", req.path);
+    if (req.path.includes("index.html")) {
+      res.sendFile(path.join(__dirname, "..", "client", "dist", req.path));
     } else {
-      res.status(200).json({
-        mirlo: "chirp",
-      });
+      res.sendFile(path.join(__dirname, "..", "client", "dist", req.path));
     }
   }
 });
