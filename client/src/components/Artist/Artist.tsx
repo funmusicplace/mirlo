@@ -18,7 +18,6 @@ import { css } from "@emotion/css";
 import { useAuthContext } from "state/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { queryArtist, queryUserStripeStatus } from "queries";
-import { ButtonLink } from "components/common/Button";
 import { getArtistManageUrl } from "utils/artist";
 import { ArtistButtonLink } from "./ArtistButtons";
 

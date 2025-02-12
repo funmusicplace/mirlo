@@ -28,16 +28,6 @@ const ArtistPosts: React.FC = () => {
 
   return (
     <div>
-      <SpaceBetweenDiv>
-        <div></div>
-        <ButtonAnchor
-          target="_blank"
-          href={`${import.meta.env.VITE_API_DOMAIN}/v1/artists/${artist.id}/feed?format=rss`}
-          rel="noreferrer"
-          onlyIcon
-          startIcon={<FaRss />}
-        />
-      </SpaceBetweenDiv>
       <div
         className={css`
           @media screen and (max-width: ${bp.medium}px) {

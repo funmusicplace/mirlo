@@ -34,6 +34,7 @@ import { processSingleMerch } from "./merch";
 export const whereForPublishedTrackGroups = (): Prisma.TrackGroupWhereInput => {
   return {
     published: true,
+    isDrafts: false,
     tracks: { some: { audio: { uploadState: "SUCCESS" } } },
     deletedAt: null,
     cover: {

@@ -8,8 +8,12 @@ import { getPostURLReference } from "utils/artist";
 import { useTranslation } from "react-i18next";
 import { bp } from "../../../constants";
 import PublishPostButton from "./PublishPostButton";
+import SaveDraftButton from "./SaveDraftButton";
 
-const EditPostHeader = () => {
+const EditPostHeader: React.FC<{
+  reload: (postId?: number) => Promise<unknown>;
+  onClose?: () => void;
+}> = ({ reload, onClose }) => {
   const { postId, artistId } = useParams();
   const { data: artist } = useQuery(queryManagedArtist(Number(artistId)));
   const { t } = useTranslation("translation", { keyPrefix: "managePost" });
@@ -48,7 +52,7 @@ const EditPostHeader = () => {
           display: flex;
         `}
       >
-        {isPublished && (
+        {artist && isPublished && (
           <div
             className={css`
               display: flex;
@@ -63,6 +67,14 @@ const EditPostHeader = () => {
               {t("viewLive")}
             </ArtistButtonLink>
           </div>
+        )}
+        {artist && (
+          <SaveDraftButton
+            post={post}
+            artistId={artist.id}
+            reload={reload}
+            onClose={onClose}
+          />
         )}
         <PublishPostButton post={post} reload={() => refetch()} />
       </div>

@@ -147,7 +147,7 @@ const PostForm: React.FC<{
 
   return (
     <FormProvider {...methods}>
-      <EditPostHeader />
+      <EditPostHeader reload={reload} onClose={onClose} />
 
       <form onSubmit={handleSubmit(doSave)}>
         <FormComponent>
@@ -292,28 +292,6 @@ const PostForm: React.FC<{
           <ArtistButton type="button" isLoading={isSaving} onClick={doDelete}>
             {t("delete")}
           </ArtistButton>
-          <div
-            className={css`
-              display: flex;
-            `}
-          >
-            <ArtistButton
-              variant="dashed"
-              className={css`
-                margin-right: 1rem;
-              `}
-              type="button"
-              disabled={
-                isSaving ||
-                (minimumTier === "" && !isPublic) ||
-                !methods.formState.isValid
-              }
-              isLoading={isSaving}
-              onClick={handleSubmit(doSave)}
-            >
-              {post.isDraft ? t("saveDraft") : t("updatePost")}
-            </ArtistButton>
-          </div>
         </div>
       </form>
     </FormProvider>

@@ -4,7 +4,12 @@ dotenv.config();
 import { describe, it } from "mocha";
 import prisma from "@mirlo/prisma";
 import Parser from "rss-parser";
-import { clearTables, createArtist, createUser } from "../../utils";
+import {
+  clearTables,
+  createArtist,
+  createTrackGroup,
+  createUser,
+} from "../../utils";
 
 import { requestApp } from "../utils";
 
@@ -120,7 +125,7 @@ describe("artists/{id}/feed", () => {
       obj.feedUrl,
       `${process.env.API_DOMAIN}/v1/${artist.urlSlug}/feed?format=rss`
     );
-    assert.equal(obj.title, `${artist.name} Posts`);
+    assert.equal(obj.title, `${artist.name} Feed`);
     assert.equal(obj.items.length, 1);
     assert(obj.items[0].content?.includes("<h2"));
     assert.equal(obj.items[0].title, postTitle);
@@ -265,5 +270,88 @@ describe("artists/{id}/feed", () => {
     assert.equal(response.statusCode, 200);
     assert.equal(response.body.results.length, 1);
     assert.equal(response.body.results[0].title, postTitle);
+  });
+
+  it("should GET / an album and display it in RSS", async () => {
+    const user = await prisma.user.create({
+      data: {
+        email: "test@test.com",
+      },
+    });
+    const artist = await prisma.artist.create({
+      data: {
+        name: "Test artist",
+        urlSlug: "test-artist",
+        userId: user.id,
+        enabled: true,
+      },
+    });
+
+    const trackGroup = await createTrackGroup(artist.id);
+
+    const response = await requestApp
+      .get(`artists/${artist.id}/feed?format=rss`)
+      .set("Accept", "application/json");
+
+    assert(response.statusCode === 200);
+    let parser = new Parser();
+    const obj = await parser.parseString(response.text);
+    assert(response.text);
+    assert.equal(
+      obj.feedUrl,
+      `${process.env.API_DOMAIN}/v1/${artist.urlSlug}/feed?format=rss`
+    );
+    assert.equal(obj.title, `${artist.name} Feed`);
+    assert.equal(obj.items.length, 1);
+    assert(obj.items[0].content?.includes(""));
+    assert.equal(obj.items[0].title, trackGroup.title);
+  });
+
+  it("should GET / an both an album and a post and display it in RSS", async () => {
+    const user = await prisma.user.create({
+      data: {
+        email: "test@test.com",
+      },
+    });
+    const artist = await prisma.artist.create({
+      data: {
+        name: "Test artist",
+        urlSlug: "test-artist",
+        userId: user.id,
+        enabled: true,
+      },
+    });
+
+    const postTitle = "Test post title";
+
+    await prisma.post.create({
+      data: {
+        title: postTitle,
+        artistId: artist.id,
+        isPublic: true,
+        content: "# HI",
+      },
+    });
+
+    const trackGroup = await createTrackGroup(artist.id);
+
+    const response = await requestApp
+      .get(`artists/${artist.id}/feed?format=rss`)
+      .set("Accept", "application/json");
+
+    assert(response.statusCode === 200);
+    let parser = new Parser();
+    const obj = await parser.parseString(response.text);
+    assert(response.text);
+    assert.equal(
+      obj.feedUrl,
+      `${process.env.API_DOMAIN}/v1/${artist.urlSlug}/feed?format=rss`
+    );
+
+    assert.equal(obj.title, `${artist.name} Feed`);
+    assert.equal(obj.items.length, 2);
+    assert(obj.items[0].content?.includes(""));
+    assert.equal(obj.items[0].title, trackGroup.title);
+    assert.equal(obj.items[1].title, postTitle);
   });
 });

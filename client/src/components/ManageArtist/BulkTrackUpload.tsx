@@ -46,7 +46,8 @@ const alertUser = (event: any) => {
 export const BulkTrackUpload: React.FC<{
   trackgroup: { artistId?: number; id: number; tracks: Track[] };
   reload: (newTrack?: Track) => Promise<unknown>;
-}> = ({ trackgroup, reload }) => {
+  multiple?: boolean;
+}> = ({ trackgroup, reload, multiple }) => {
   const snackbar = useSnackbar();
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const methods = useForm<FormData>();
@@ -211,7 +212,7 @@ export const BulkTrackUpload: React.FC<{
               type="file"
               id="audio"
               disabled={disableUploadButton}
-              multiple
+              multiple={multiple}
               {...register("trackFiles")}
               accept="audio/flac,audio/wav,audio/x-wav,audio/x-flac,audio/aac,audio/aiff,audio/x-m4a"
             />
