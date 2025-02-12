@@ -97,7 +97,7 @@ services:
       # minIO service and deleted after upload
       name: data
       mountPath: /data
-      sizeGB: 20 # optional
+      sizeGB: 40 # optional
     # dockerContext: ./background/src # optional
     envVars:
       - key: DATABASE_URL
@@ -200,7 +200,7 @@ services:
     ipAllowList: # required
       - source: 0.0.0.0/0
         description: everywhere
-    plan: starter # optional (defaults to starter)
+    plan: standard # optional (defaults to starter)
     maxmemoryPolicy: noeviction # optional (defaults to allkeys-lru)
 
 databases:
