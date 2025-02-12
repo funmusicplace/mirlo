@@ -218,11 +218,9 @@ const optimizeImage = async (job: Job) => {
         }
       }
     }
-
-    return Promise.resolve();
   } catch (err) {
     logger.error(`optimizeImage ${JSON.stringify(err)}`);
-    return Promise.reject(err);
+    return { error: err };
   }
 };
 
