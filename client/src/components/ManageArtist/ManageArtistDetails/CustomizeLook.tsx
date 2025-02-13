@@ -1,11 +1,11 @@
 import React from "react";
-import Button from "../common/Button";
+import Button from "../../common/Button";
 import { FormProvider, useForm } from "react-hook-form";
-import { bp } from "../../constants";
+import { bp } from "../../../constants";
 import FormComponent from "components/common/FormComponent";
 import { css } from "@emotion/css";
 import { useSnackbar } from "state/SnackbarContext";
-import UploadArtistImage from "./UploadArtistImage";
+import UploadArtistImage from "../UploadArtistImage";
 import { useTranslation } from "react-i18next";
 import ArtistFormColors from "./ArtistFormColors";
 import ArtistSlugInput from "./ArtistSlugInput";
@@ -16,12 +16,13 @@ import {
 } from "queries";
 import { useAuthContext } from "state/AuthContext";
 import styled from "@emotion/styled";
-import ChooseYourTheme from "./ChooseYourTheme";
+import ChooseYourTheme from "../ChooseYourTheme";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
-import SavingInput from "./AlbumFormComponents/SavingInput";
+import SavingInput from "../AlbumFormComponents/SavingInput";
 import { QUERY_KEY_ARTISTS } from "queries/queryKeys";
-import DeleteArtist from "./DeleteArtist";
+import DeleteArtist from "../DeleteArtist";
+import ArtistLabels from "./ArtistLabels";
 
 export interface ShareableTrackgroup {
   creatorId: number;
@@ -172,6 +173,7 @@ export const CustomizeLook: React.FC = () => {
 
   return (
     <div>
+      <ArtistLabels />
       <FormProvider {...methods}>
         <form onSubmit={handleSubmit(onValidSubmit)}>
           <div>

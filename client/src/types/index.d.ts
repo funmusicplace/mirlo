@@ -13,6 +13,7 @@ interface LoggedInUser {
   userTrackGroupPurchases?: { trackGroupId: number }[];
   isAdmin: boolean;
   currency?: string;
+  isLabelAccount?: boolean;
   wishlist?: {
     userId: number;
     trackGroupId: number;
@@ -144,6 +145,12 @@ interface Link {
   inHeader?: boolean;
 }
 
+interface ArtistLabel {
+  artistId: number;
+  labelUserId: number;
+  labelUser: { name: string; email: string };
+}
+
 interface Artist {
   name: string;
   bio: string;
@@ -153,6 +160,7 @@ interface Artist {
   location?: string;
   enabled: boolean;
   createdAt: string;
+  artistLabels?: ArtistLabel[];
   trackGroups: TrackGroup[];
   links?: string[];
   linksJson?: Link[];

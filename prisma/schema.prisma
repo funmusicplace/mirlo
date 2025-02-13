@@ -69,6 +69,8 @@ model User {
   promoCodes                          String[]
   receivePlatformEmails               Boolean                         @default(true)
   paymentTrackGroups                  TrackGroup[]
+  isLabelAccount                      Boolean                         @default(false)
+  artistLabels                        ArtistLabel[]
 }
 
 model UserArtistNotificationSetting {
@@ -188,6 +190,7 @@ model Artist {
   ArtistTipTier                      ArtistTipTier[]
   merchStoreURL                      String?
   merch                              Merch[]
+  artistLabels                       ArtistLabel[]
 }
 
 model ArtistAvatar {
@@ -210,6 +213,15 @@ model ArtistBanner {
   updatedAt        DateTime  @updatedAt
   deletedAt        DateTime?
   originalFilename String?
+}
+
+model ArtistLabel {
+  artist      Artist @relation(fields: [artistId], references: [id])
+  artistId    Int
+  labelUser   User   @relation(fields: [labelUserId], references: [id])
+  labelUserId Int
+
+  @@unique([labelUserId, artistId])
 }
 
 model ArtistSubscriptionTier {
