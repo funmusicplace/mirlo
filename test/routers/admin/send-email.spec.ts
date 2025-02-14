@@ -71,17 +71,19 @@ describe("admin/send-email", () => {
     });
 
     describe("endpoint as function", () => {
-      it("should POST and send to an admin", async () => {
+      it("should POST and send to an artist", async () => {
         const stub = sinon.stub(sendMailQueue, "add");
-
+        await createUser({
+          email: "admin@isAdmin.com",
+          isAdmin: true,
+        });
         const { user: artistUser } = await createUser({
           email: "artist@artist.com",
-          isAdmin: true,
         });
         await createArtist(artistUser.id);
 
         await sendMailAdminEndpoint().POST[2](
-          { body: {} } as Request,
+          { body: { sendToOption: "allArtists" } } as Request,
           {} as Response,
           () => {}
         );
@@ -110,7 +112,31 @@ describe("admin/send-email", () => {
         await createArtist(artistUser.id);
 
         await sendMailAdminEndpoint().POST[2](
-          { body: {} } as Request,
+          { body: { sendToOption: "allArtists" } } as Request,
+          {} as Response,
+          () => {}
+        );
+
+        assert.equal(stub.calledOnce, true);
+        const args = stub.getCall(0).args;
+        assert.equal(args[0], "send-mail");
+        const data = args[1];
+        assert.equal(data.template, "admin-announcement");
+        assert.equal(data.message.to, artistUser.email);
+        assert.equal(data.locals.user.id, artistUser.id);
+      });
+
+      it("should POST and send to an email address", async () => {
+        const stub = sinon.stub(sendMailQueue, "add");
+
+        const { user: artistUser } = await createUser({
+          email: "user@user.com",
+        });
+
+        await sendMailAdminEndpoint().POST[2](
+          {
+            body: { sendToOption: "emails", sendTo: "user@user.com" },
+          } as Request,
           {} as Response,
           () => {}
         );
