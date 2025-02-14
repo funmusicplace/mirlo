@@ -47,6 +47,7 @@ export default function () {
               subscriptionTiers: true,
             },
           },
+          paymentToUser: true,
           cover: true,
         },
       });
@@ -62,7 +63,9 @@ export default function () {
         await subscribeUserToArtist(trackGroup?.artist, loggedInUser);
       }
 
-      const stripeAccountId = trackGroup.artist.user.stripeAccountId;
+      const stripeAccountId =
+        trackGroup.paymentToUser?.stripeAccountId ??
+        trackGroup.artist.user.stripeAccountId;
 
       const priceNumber =
         (price ? Number(price) : undefined) ?? trackGroup.minPrice ?? 0;

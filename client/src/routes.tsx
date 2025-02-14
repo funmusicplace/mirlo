@@ -229,7 +229,7 @@ const routes: RouteObject[] = [
                     path: "customize",
                     async lazy() {
                       const { default: Component } = await import(
-                        "components/ManageArtist/CustomizeLook"
+                        "components/ManageArtist/ManageArtistDetails/CustomizeLook"
                       );
                       return { Component };
                     },

@@ -94,14 +94,13 @@ const routes = [
   "posts",
   "posts/{id}",
   "licenses",
+  "labels",
   "users",
   "users/{userId}",
   "users/{userId}/confirmEmail",
   "users/{userId}/notifications",
   "users/{userId}/notifications/unreadCount",
   "users/{userId}/notifications/{notificationId}",
-  "manage/subscriptions",
-  "manage/subscriptions/{subscriptionId}",
   "users/{userId}/trackGroupPurchases",
   "users/{userId}/purchases",
   "users/{userId}/wishlist",
@@ -110,10 +109,14 @@ const routes = [
   "users/{userId}/stripe/checkAccountStatus",
   "users/{userId}/feed",
   "users/{userId}/testExistence",
+  "manage/subscriptions",
+  "manage/subscriptions/{subscriptionId}",
   "manage/artists",
   "manage/artists/{artistId}",
   "manage/artists/{artistId}/trackGroups",
   "manage/artists/{artistId}/merch",
+  "manage/artists/{artistId}/labels",
+  "manage/artists/{artistId}/labels/{labelUserId}",
   "manage/artists/{artistId}/codes",
   "manage/artists/{artistId}/subscribers",
   "manage/artists/{artistId}/banner",
@@ -241,11 +244,15 @@ app.use("/health", async (req, res) => {
 // This has to be the last thing used so that other things don't get over-written
 app.use("/", (req, res) => {
   if (!res.headersSent) {
-    console.log("req", req.path);
     if (req.path.includes("index.html")) {
+      console.log("req path");
       res.sendFile(path.join(__dirname, "..", "client", "dist", req.path));
     } else {
-      res.sendFile(path.join(__dirname, "..", "client", "dist", req.path));
+      try {
+        res.sendFile(path.join(__dirname, "..", "client", "dist", req.path));
+      } catch (e) {
+        console.log(`didn't find that file`, req.path);
+      }
     }
   }
 });

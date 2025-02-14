@@ -13,6 +13,7 @@ import useErrorHandler from "services/useErrorHandler";
 import { useAuthContext } from "state/AuthContext";
 import { SelectEl } from "components/common/Select";
 import { finishedLanguages } from "i18n";
+import { Toggle } from "components/common/Toggle";
 
 function ProfileForm() {
   const { t, i18n } = useTranslation("translation", { keyPrefix: "profile" });
@@ -24,20 +25,29 @@ function ProfileForm() {
     email: string;
     name: string;
     language: string;
+    isLabelAccount: boolean;
   }>({
     defaultValues: {
       email: user?.email,
       name: user?.name,
       language: language.split("-")[0],
+      isLabelAccount: user?.isLabelAccount,
     },
   });
-  const { register, handleSubmit } = methods;
+  const { register, handleSubmit, watch, setValue } = methods;
 
   const userId = user?.id;
   const snackbar = useSnackbar();
 
+  const isLabelAccount = watch("isLabelAccount");
+
   const doSave = React.useCallback(
-    async (data: { email?: string; name: string; language: string }) => {
+    async (data: {
+      email?: string;
+      name: string;
+      language: string;
+      isLabelAccount: boolean;
+    }) => {
       if (userId) {
         try {
           const emailChanged = data.email !== user?.email;
@@ -99,6 +109,16 @@ function ProfileForm() {
               <option value={lang.short}>{lang.name}</option>
             ))}
           </SelectEl>
+        </FormComponent>
+        <FormComponent>
+          <Toggle
+            label={t("isLabelAccount")}
+            toggled={isLabelAccount}
+            onClick={() => {
+              setValue("isLabelAccount", !isLabelAccount);
+            }}
+          />
+          <small>{t("makeSearchable")}</small>
         </FormComponent>
         <Button type="submit" disabled={isSaving} isLoading={isSaving}>
           {t("updateProfileButton")}

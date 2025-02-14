@@ -1,4 +1,6 @@
 import { Request, Response } from "express";
+import { Prisma, User } from "@mirlo/prisma/client";
+
 import { userAuthenticated, userHasPermission } from "../../../auth/passport";
 import prisma from "@mirlo/prisma";
 
@@ -8,19 +10,37 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response) {
-    const { skip: skipQuery, take } = req.query as {
+    const {
+      skip: skipQuery,
+      take,
+      email,
+    } = req.query as {
       skip: string;
       take: string;
+      email: string;
     };
-    const itemCount = await prisma.trackGroup.count();
+    let where: Prisma.UserWhereInput = {};
+
+    if (email) {
+      where = {
+        email: {
+          contains: email,
+          mode: "insensitive",
+        },
+      };
+    }
+
+    const itemCount = await prisma.user.count({ where });
 
     const users = await prisma.user.findMany({
-      include: {
+      where,
+      select: {
         artists: {
           where: {
             deletedAt: null,
           },
         },
+        email: true,
       },
       skip: skipQuery ? Number(skipQuery) : undefined,
       take: take ? Number(take) : undefined,

@@ -88,6 +88,8 @@
     "emailConfirmationRequired": "You will receive a confirmation email from Mirlo that you will have to act on before continuing to use Mirlo.",
     "resetPasswordLink": "Want to change your password? Use the reset form",
     "profile": "Profile",
+    "isSearchable": "Enabling this will let artists find your label and request to be added to your roster. Artists will then be able to say for which albums payments will be sent to the payment processor linked to this Stripe account.",
+    "isLabelAccount": "Is this an account for a record label or artist collective?",
     "notifications": "Notifications",
     "profileUpdated": "Profile updated",
     "errorUpdatingProfile": "There was a problem with the API.",
@@ -507,6 +509,7 @@
   },
   "artistForm": {
     "deleteArtist": "Permanently delete artist account",
+    "whatLabelsisThisArtistPartOf": "What label is this artist a part of?",
     "terminationDanger": " Artist account termination ",
     "backgroundImageLabel": "Background image",
     "clickToUploadType": "Click to upload {{ imageType }}",

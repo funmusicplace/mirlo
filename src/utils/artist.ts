@@ -418,6 +418,17 @@ export const singleInclude = (queryOptions?: {
         minAmount: "asc",
       },
     },
+    artistLabels: {
+      include: {
+        labelUser: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+    },
     posts: {
       where: {
         publishedAt: {
