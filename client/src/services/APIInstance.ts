@@ -137,7 +137,7 @@ const APIInstance = (apiRoot: string) => {
       });
     },
 
-    delete: async <R>(endpoint: string): Promise<R> => {
+    delete: async <R, T>(endpoint: string): Promise<R> => {
       return apiRequest<R>(endpoint, {
         method: "DELETE",
         credentials: "include",
@@ -181,12 +181,12 @@ const APIInstance = (apiRoot: string) => {
       return apiRequest<Response>(
         endpoint,
         {
-          method: "GET"
+          method: "GET",
         },
         {
-          noProcess: true
+          noProcess: true,
         }
-      ).then(resp => {
+      ).then((resp) => {
         return resp.json();
       });
     },

@@ -1,4 +1,5 @@
 import { css } from "@emotion/css";
+import { ArtistButton } from "components/Artist/ArtistButtons";
 import AutoComplete from "components/common/AutoComplete";
 import Button from "components/common/Button";
 import Pill from "components/common/Pill";
@@ -79,7 +80,7 @@ const ManageTags: React.FC<{ tags?: string[] }> = ({ tags: existingTags }) => {
           {tags.map((tag, index) => (
             <Pill>
               {tag}{" "}
-              <Button
+              <ArtistButton
                 startIcon={<FaTimes />}
                 onClick={() => removeTag(index)}
                 onlyIcon

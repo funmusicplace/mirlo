@@ -7,6 +7,7 @@ import Pill from "components/common/Pill";
 import { queryManagedArtist, useUpdateArtistMutation } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { FaTimes } from "react-icons/fa";
 import { useParams } from "react-router-dom";
 import api from "services/api";
 
@@ -16,6 +17,15 @@ const ArtistLabels = () => {
 
   const { data: artist, refetch } = useQuery(
     queryManagedArtist(Number(artistId))
+  );
+
+  const removeLabel = React.useCallback(
+    async (id: number | string) => {
+      console.log("id", id);
+      await api.delete(`manage/artists/${artistId}/labels/${id}`);
+      await refetch();
+    },
+    [artistId]
   );
 
   const setLabel = React.useCallback(
@@ -59,7 +69,18 @@ const ArtistLabels = () => {
             margin-top: 0.5rem;
           `}
         >
-          {artist?.artistLabels?.map((l) => <Pill>{l.labelUser.name}</Pill>)}
+          {artist?.artistLabels?.map((l) => (
+            <Pill>
+              {l.labelUser.name}{" "}
+              <ArtistButton
+                startIcon={<FaTimes />}
+                onClick={() => removeLabel(l.labelUserId)}
+                onlyIcon
+                type="button"
+                variant="dashed"
+              />
+            </Pill>
+          ))}
         </div>
       </FormComponent>
     </form>

@@ -116,6 +116,7 @@ const routes = [
   "manage/artists/{artistId}/trackGroups",
   "manage/artists/{artistId}/merch",
   "manage/artists/{artistId}/labels",
+  "manage/artists/{artistId}/labels/{labelUserId}",
   "manage/artists/{artistId}/codes",
   "manage/artists/{artistId}/subscribers",
   "manage/artists/{artistId}/banner",
