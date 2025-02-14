@@ -9,24 +9,38 @@ export default function () {
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {
-    const { content } = req.body;
+    const { content, sendToOption, sendTo, title } = req.body;
     try {
-      const users = await prisma.user.findMany({
-        where: {
-          receivePlatformEmails: true,
-        },
-        include: {
-          artists: true,
-        },
-      });
-      const usersWithArtists = users.filter((u) => u.artists.length > 0);
+      let sendToUsers: { email: string }[] = [];
+
+      if (sendToOption === "allArtists") {
+        const users = await prisma.user.findMany({
+          where: {
+            receivePlatformEmails: true,
+          },
+          include: {
+            artists: true,
+          },
+        });
+        sendToUsers = users.filter((u) => u.artists.length > 0);
+      } else if (sendToOption === "emails") {
+        const emails = sendTo.replace(/\s+/, "").split(",");
+        sendToUsers = await prisma.user.findMany({
+          where: {
+            email: {
+              in: emails,
+            },
+          },
+        });
+      }
 
       await Promise.all(
-        usersWithArtists.map(async (user) => {
+        sendToUsers.map(async (user) => {
           await sendMailQueue.add("send-mail", {
             template: "admin-announcement",
             message: {
               to: user.email,
+              subject: title ?? "Mirlo: Platform Notice",
             },
             locals: {
               email: user.email,
@@ -38,7 +52,7 @@ export default function () {
       );
       return res.status(200).json({
         result: {
-          sentTo: usersWithArtists.length,
+          sentTo: sendToUsers.length,
         },
       });
     } catch (e) {

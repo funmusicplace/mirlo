@@ -509,6 +509,7 @@
   },
   "artistForm": {
     "deleteArtist": "Permanently delete artist account",
+    "whatLabelsisThisArtistPartOf": "What label is this artist a part of?",
     "terminationDanger": " Artist account termination ",
     "backgroundImageLabel": "Background image",
     "clickToUploadType": "Click to upload {{ imageType }}",

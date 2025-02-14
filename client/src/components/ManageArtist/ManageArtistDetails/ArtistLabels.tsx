@@ -11,7 +11,7 @@ import { useParams } from "react-router-dom";
 import api from "services/api";
 
 const ArtistLabels = () => {
-  const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
+  const { t } = useTranslation("translation", { keyPrefix: "artistForm" });
   const { artistId } = useParams();
 
   const { data: artist, refetch } = useQuery(

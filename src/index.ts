@@ -243,11 +243,15 @@ app.use("/health", async (req, res) => {
 // This has to be the last thing used so that other things don't get over-written
 app.use("/", (req, res) => {
   if (!res.headersSent) {
-    console.log("req", req.path);
     if (req.path.includes("index.html")) {
+      console.log("req path");
       res.sendFile(path.join(__dirname, "..", "client", "dist", req.path));
     } else {
-      res.sendFile(path.join(__dirname, "..", "client", "dist", req.path));
+      try {
+        res.sendFile(path.join(__dirname, "..", "client", "dist", req.path));
+      } catch (e) {
+        console.log(`didn't find that file`, req.path);
+      }
     }
   }
 });

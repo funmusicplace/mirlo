@@ -1,4 +1,7 @@
 import Button from "components/common/Button";
+import FormComponent from "components/common/FormComponent";
+import { InputEl } from "components/common/Input";
+import { SelectEl } from "components/common/Select";
 import TextEditor from "components/common/TextEditor";
 import WidthContainer from "components/common/WidthContainer";
 import React from "react";
@@ -9,6 +12,9 @@ import { useConfirm } from "utils/useConfirm";
 
 interface FormData {
   content: string;
+  title: string;
+  sendToOption: "emails" | "allArtists";
+  sendTo: string;
 }
 
 const AdminSendEmail = () => {
@@ -16,6 +22,9 @@ const AdminSendEmail = () => {
 
   const snackbar = useSnackbar();
   const methods = useForm<FormData>();
+  const { register, watch } = methods;
+
+  const sendToOption = watch("sendToOption");
 
   const updateSettings = React.useCallback(
     async (data: FormData) => {
@@ -27,7 +36,7 @@ const AdminSendEmail = () => {
           return;
         }
         const { result } = await api.post<
-          { content: string },
+          FormData,
           { result: { sentTo: number } }
         >("admin/send-email", data);
         snackbar(`Sent email to ${result.sentTo} users!`, { type: "success" });
@@ -43,6 +52,23 @@ const AdminSendEmail = () => {
     <WidthContainer variant="medium">
       <h3>Send Email</h3>
       <FormProvider {...methods}>
+        <FormComponent>
+          <label>Send to</label>
+          <SelectEl {...register("sendToOption")}>
+            <option value="emails">Individual Emails</option>
+            <option value="allArtists">All artists</option>
+          </SelectEl>
+        </FormComponent>
+        {sendToOption === "emails" && (
+          <FormComponent>
+            <label>Emails:</label>
+            <InputEl {...register("sendTo")} />
+          </FormComponent>
+        )}
+        <FormComponent>
+          <label>Title</label>
+          <InputEl {...register("title")} />
+        </FormComponent>
         <form onSubmit={methods.handleSubmit(updateSettings)}>
           <Controller
             name="content"
