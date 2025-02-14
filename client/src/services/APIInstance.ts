@@ -137,7 +137,7 @@ const APIInstance = (apiRoot: string) => {
       });
     },
 
-    delete: async <R, T>(endpoint: string): Promise<R> => {
+    delete: async <R>(endpoint: string): Promise<R> => {
       return apiRequest<R>(endpoint, {
         method: "DELETE",
         credentials: "include",
