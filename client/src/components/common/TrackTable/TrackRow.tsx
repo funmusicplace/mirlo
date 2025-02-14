@@ -79,10 +79,6 @@ const TR = styled.tr<{ canPlayTrack: boolean }>`
     td {
       padding: 0.15rem 0.3rem;
     }
-    span {
-      width: 1rem !important;
-      margin-right: 1rem !important;
-    }
     > td > .play-button {
       margin-left: 0.5rem;
     }

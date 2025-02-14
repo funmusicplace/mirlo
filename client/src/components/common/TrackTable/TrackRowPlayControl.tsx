@@ -3,6 +3,7 @@ import { TfiControlPause } from "react-icons/tfi";
 import { useGlobalStateContext } from "state/GlobalState";
 import React from "react";
 import Button from "../Button";
+import { css } from "@emotion/css";
 
 const TrackRowPlayControl: React.FC<{
   trackNumber: number;
@@ -48,12 +49,13 @@ const TrackRowPlayControl: React.FC<{
       {(!playing || currentPlayingTrackId !== trackId) && (
         <>
           <span
-            className="track-number"
-            style={{
-              width: "1.5rem",
-              textAlign: "center",
-              margin: "0rem .5rem 0rem 0rem",
-            }}
+            className={
+              "track-number " +
+              css`
+                text-align: center;
+                margin: 0 0.5rem 0 0;
+              `
+            }
           >
             {trackNumber}
           </span>
