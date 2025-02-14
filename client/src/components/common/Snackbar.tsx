@@ -39,7 +39,8 @@ const Container = styled.div<{ variant: Variant; position?: Position }>`
   @media (max-width: ${bp.small}px) {
     bottom: auto;
     top: 3rem;
-    left: 1rem;
+    left: auto;
+    right: auto;
   }
 
   ${(props) => {
