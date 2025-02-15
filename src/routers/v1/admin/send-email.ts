@@ -27,6 +27,7 @@ export default function () {
         const emails = sendTo.replace(/\s+/, "").split(",");
         sendToUsers = await prisma.user.findMany({
           where: {
+            receivePlatformEmails: true,
             email: {
               in: emails,
             },
