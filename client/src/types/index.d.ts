@@ -154,6 +154,7 @@ interface ArtistLabel {
 interface Artist {
   name: string;
   bio: string;
+  activityPub: boolean;
   urlSlug?: string;
   userId: number;
   id: number;

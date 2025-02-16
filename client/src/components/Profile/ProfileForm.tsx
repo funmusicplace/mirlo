@@ -15,18 +15,20 @@ import { SelectEl } from "components/common/Select";
 import { finishedLanguages } from "i18n";
 import { Toggle } from "components/common/Toggle";
 
+type FormData = {
+  email?: string;
+  name: string;
+  language: string;
+  isLabelAccount: boolean;
+};
+
 function ProfileForm() {
   const { t, i18n } = useTranslation("translation", { keyPrefix: "profile" });
   const { user } = useAuthContext();
   const [isSaving, setIsSaving] = React.useState(false);
   const errorHandler = useErrorHandler();
   const language = user?.language ?? navigator.language;
-  const methods = useForm<{
-    email: string;
-    name: string;
-    language: string;
-    isLabelAccount: boolean;
-  }>({
+  const methods = useForm<FormData>({
     defaultValues: {
       email: user?.email,
       name: user?.name,
@@ -42,12 +44,7 @@ function ProfileForm() {
   const isLabelAccount = watch("isLabelAccount");
 
   const doSave = React.useCallback(
-    async (data: {
-      email?: string;
-      name: string;
-      language: string;
-      isLabelAccount: boolean;
-    }) => {
+    async (data: FormData) => {
       if (userId) {
         try {
           const emailChanged = data.email !== user?.email;

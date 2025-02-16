@@ -14,9 +14,9 @@ import prisma from "@mirlo/prisma";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { findArtistIdForURLSlug } from "../../../../utils/artist";
 import { markdownAsHtml } from "../../../../utils/post";
-import { zip, zipObject } from "lodash";
 import { whereForPublishedTrackGroups } from "../../../../utils/trackGroup";
 import { isTrackGroup } from "../../../../utils/typeguards";
+import { turnFeedIntoOutbox } from "../../../../activityPub/utils";
 
 const getPostsVisibleToUser = async (
   user: User,
@@ -87,6 +87,39 @@ const getAlbumsVisibleToUser = async (artist: Artist) => {
   return albums;
 };
 
+const turnItemsIntoRSS = async (
+  artist: Artist,
+  zipped: ((TrackGroup & { artist: Artist }) | Post)[]
+) => {
+  // TODO: probably want to convert this to some sort of module
+  const client = await prisma.client.findFirst({
+    where: {
+      applicationName: "frontend",
+    },
+  });
+
+  const feed = new RSS({
+    title: `${artist.name} Feed`,
+    description: artist.bio ?? undefined,
+    feed_url: `${process.env.API_DOMAIN}/v1/${artist.urlSlug}/feed?format=rss`,
+    site_url: `${client?.applicationUrl}/${artist.urlSlug}`,
+  });
+
+  for (const p of zipped) {
+    feed.item({
+      title: p.title ?? "",
+      description: isTrackGroup(p)
+        ? `<h2>An album release by artist ${p.artist.name}.</h2>`
+        : markdownAsHtml(p.content),
+      url: isTrackGroup(p)
+        ? `${client?.applicationUrl}/${p.artist.urlSlug}/release/${p.urlSlug}`
+        : `${client?.applicationUrl}/post/${p.id}`,
+      date: isTrackGroup(p) ? p.releaseDate : p.publishedAt,
+    });
+  }
+  return feed;
+};
+
 export default function () {
   const operations = {
     GET: [userLoggedInWithoutRedirect, GET],
@@ -131,34 +164,12 @@ export default function () {
         }
       });
 
-      if (format === "rss") {
-        // TODO: probably want to convert this to some sort of module
-        const client = await prisma.client.findFirst({
-          where: {
-            applicationName: "frontend",
-          },
-        });
-
-        const feed = new RSS({
-          title: `${artist.name} Feed`,
-          description: artist.bio ?? undefined,
-          feed_url: `${process.env.API_DOMAIN}/v1/${artist.urlSlug}/feed?format=rss`,
-          site_url: `${client?.applicationUrl}/${artist.urlSlug}`,
-        });
-
-        for (const p of zipped) {
-          feed.item({
-            title: p.title ?? "",
-            description: isTrackGroup(p)
-              ? `<h2>An album release by artist ${p.artist.name}.</h2>`
-              : markdownAsHtml(p.content),
-            url: isTrackGroup(p)
-              ? `${client?.applicationUrl}/${p.artist.urlSlug}/release/${p.urlSlug}`
-              : `${client?.applicationUrl}/post/${p.id}`,
-            date: isTrackGroup(p) ? p.releaseDate : p.publishedAt,
-          });
-        }
-
+      if (req.headers["content-type"] === "application/activity+json") {
+        const feed = await turnFeedIntoOutbox(artist, zipped);
+        res.set("Content-Type", "application/activity+json");
+        res.send(feed);
+      } else if (format === "rss") {
+        const feed = await turnItemsIntoRSS(artist, zipped);
         res.set("Content-Type", "application/rss+xml");
         res.send(feed.xml());
       } else {
