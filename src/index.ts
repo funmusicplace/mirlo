@@ -247,11 +247,19 @@ app.use("/health", async (req, res) => {
 });
 
 // This has to be the last thing used so that other things don't get over-written
-app.use("/", (req, res) => {
+app.use("/", async (req, res) => {
   if (!res.headersSent) {
-    if (req.path.includes("index.html") || req.path === "/") {
-      console.log("root path");
-      const html = parseIndex("index.html");
+    if (
+      (req.path.includes("index.html") || req.path.startsWith("/")) &&
+      !(
+        req.path.includes(".css") ||
+        req.path.includes(".js") ||
+        req.path.includes(".svg") ||
+        req.path.includes(".png") ||
+        req.path.includes(".jpg")
+      )
+    ) {
+      const html = await parseIndex(req.path);
       res.send(html);
     } else {
       try {
@@ -262,7 +270,6 @@ app.use("/", (req, res) => {
           "dist",
           req.path
         );
-        console.log("fileLocation", fileLocation);
         res.sendFile(fileLocation);
       } catch (e) {
         console.log(`didn't find that file`, req.path);
