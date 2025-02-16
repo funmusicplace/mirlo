@@ -42,7 +42,7 @@ export default function () {
           return next();
         }
 
-        if (req.headers["content-type"] === "application/activity+json") {
+        if (req.headers["Accept"] === "application/activity+json") {
           res.json(turnArtistIntoActor(artist));
         } else {
           res.json({
