@@ -4,6 +4,7 @@ import prisma from "@mirlo/prisma";
 
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { fetchFile } from "./stream/{segment}";
+import { AppError } from "../../../../utils/error";
 
 export default function () {
   const operations = {
@@ -22,17 +23,17 @@ export default function () {
       });
 
       if (!track) {
-        res.status(404);
-        return next();
+        throw new AppError({
+          httpCode: 404,
+          description: "Track not found",
+        });
       }
 
       if (track) {
         await fetchFile(res, track.id, "original.flac");
       }
     } catch (e) {
-      console.error(e);
-      res.status(500);
-      return next();
+      return next(e);
     }
   }
 

@@ -27,8 +27,16 @@ export default function () {
 
   async function PUT(req: Request, res: Response, next: NextFunction) {
     const { artistId } = req.params as unknown as Params;
-    const { bio, name, urlSlug, properties, links, linksJson, location } =
-      req.body;
+    const {
+      bio,
+      name,
+      urlSlug,
+      properties,
+      links,
+      linksJson,
+      location,
+      activityPub,
+    } = req.body;
 
     try {
       // FIXME: check type of properties object.
@@ -42,6 +50,7 @@ export default function () {
           links,
           linksJson,
           location,
+          activityPub,
           ...(urlSlug
             ? { urlSlug: slugify(urlSlug?.toLowerCase(), { strict: true }) }
             : {}),

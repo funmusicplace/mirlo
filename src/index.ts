@@ -22,6 +22,9 @@ import { corsCheck } from "./auth/cors";
 import errorHandler from "./utils/error";
 import { sendMailQueue } from "./queues/send-mail-queue";
 import path from "node:path";
+import activityPub from "./activityPub";
+import * as cheerio from "cheerio";
+import parseIndex from "./parseIndex";
 
 dotenv.config();
 
@@ -228,6 +231,8 @@ if (isDev) {
   app.use("/admin/queues", serverAdapter.getRouter());
 }
 
+app.use(activityPub);
+
 // This has to be the last thing used so that other things don't get over-written
 app.use("/health", async (req, res) => {
   try {
@@ -242,14 +247,32 @@ app.use("/health", async (req, res) => {
 });
 
 // This has to be the last thing used so that other things don't get over-written
-app.use("/", (req, res) => {
+app.use("/", async (req, res) => {
   if (!res.headersSent) {
-    if (req.path.includes("index.html")) {
-      console.log("req path");
-      res.sendFile(path.join(__dirname, "..", "client", "dist", req.path));
+    if (req.path.startsWith("/v1")) {
+      res.sendStatus(404);
+    } else if (
+      (req.path.includes("index.html") || req.path.startsWith("/")) &&
+      !(
+        req.path.includes(".css") ||
+        req.path.includes(".js") ||
+        req.path.includes(".svg") ||
+        req.path.includes(".png") ||
+        req.path.includes(".jpg")
+      )
+    ) {
+      const html = await parseIndex(req.path);
+      res.send(html);
     } else {
       try {
-        res.sendFile(path.join(__dirname, "..", "client", "dist", req.path));
+        const fileLocation = path.join(
+          __dirname,
+          "..",
+          "client",
+          "dist",
+          req.path
+        );
+        res.sendFile(fileLocation);
       } catch (e) {
         console.log(`didn't find that file`, req.path);
       }

@@ -23,6 +23,7 @@ import SavingInput from "../AlbumFormComponents/SavingInput";
 import { QUERY_KEY_ARTISTS } from "queries/queryKeys";
 import DeleteArtist from "../DeleteArtist";
 import ArtistLabels from "./ArtistLabels";
+import { Toggle } from "components/common/Toggle";
 
 export interface ShareableTrackgroup {
   creatorId: number;
@@ -61,6 +62,7 @@ type FormData = {
   urlSlug: string;
   banner: File[];
   avatar: File[];
+  activityPub: boolean;
   properties: {
     colors: {
       primary: string;
@@ -75,6 +77,7 @@ const generateDefaults = (existing?: Artist) => ({
   name: existing?.name ?? "",
   bio: existing?.bio ?? "",
   urlSlug: existing?.urlSlug ?? "",
+  activityPub: existing?.activityPub ?? false,
   properties: {
     colors: {
       primary: "",
@@ -93,6 +96,7 @@ export const CustomizeLook: React.FC = () => {
   const userId = user?.id;
   const { artistId } = useParams();
   const { data: artist } = useQuery(queryManagedArtist(Number(artistId)));
+
   const methods = useForm<FormData>({
     defaultValues: generateDefaults(artist),
   });
@@ -128,6 +132,7 @@ export const CustomizeLook: React.FC = () => {
 
       const sending = {
         urlSlug: data.urlSlug?.toLowerCase(),
+        activityPub: data.activityPub,
         properties: data.properties,
       };
 
@@ -166,6 +171,8 @@ export const CustomizeLook: React.FC = () => {
     },
     [userId, existingId, onSuccess, updateArtist, createArtist, onError]
   );
+
+  const activityPub = methods.watch("activityPub");
 
   if (!artist) {
     return null;
@@ -317,6 +324,16 @@ export const CustomizeLook: React.FC = () => {
                 <ArtistSlugInput currentArtistId={existingId} />
               </FormComponent>
             </ArtistFormSection>
+            <FormComponent>
+              <Toggle
+                label={t("enableActivityPub")}
+                toggled={activityPub}
+                onClick={() => {
+                  methods.setValue("activityPub", !activityPub);
+                }}
+              />
+              <small>{t("makeSearchable")}</small>
+            </FormComponent>
 
             <ArtistFormSection
               isOdd

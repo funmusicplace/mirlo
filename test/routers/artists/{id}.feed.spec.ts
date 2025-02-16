@@ -12,6 +12,7 @@ import {
 } from "../../utils";
 
 import { requestApp } from "../utils";
+import { faker } from "@faker-js/faker";
 
 describe("artists/{id}/feed", () => {
   beforeEach(async () => {
@@ -330,6 +331,7 @@ describe("artists/{id}/feed", () => {
         artistId: artist.id,
         isPublic: true,
         content: "# HI",
+        publishedAt: faker.date.past().toISOString(),
       },
     });
 

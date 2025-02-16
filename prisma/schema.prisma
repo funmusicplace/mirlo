@@ -19,9 +19,11 @@ datasource db {
 }
 
 model Settings {
-  id       Int  @id @default(autoincrement())
+  id         Int     @id @default(autoincrement())
   /// [Settings]
-  settings Json
+  settings   Json
+  publicKey  String? // Used for ActivityPub
+  privateKey String? // Used for ActivityPub
 }
 
 model Client {
@@ -187,10 +189,11 @@ model Artist {
   userArtistNotificationSettings     UserArtistNotificationSetting[]
   notifications                      Notification[]
   userArtistTip                      UserArtistTip[]
-  ArtistTipTier                      ArtistTipTier[]
+  artistTipTier                      ArtistTipTier[]
   merchStoreURL                      String?
   merch                              Merch[]
   artistLabels                       ArtistLabel[]
+  activityPub                        Boolean                              @default(false)
 }
 
 model ArtistAvatar {

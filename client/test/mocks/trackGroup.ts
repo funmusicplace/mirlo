@@ -24,6 +24,7 @@ export const TRACK_GROUP_EXAMPLE: TrackGroup = {
     trackGroups: [],
     posts: [],
     subscriptionTiers: [],
+    activityPub: false,
   },
   cover: {
     id: "00000000-0000-0000-0000-000000000000",
