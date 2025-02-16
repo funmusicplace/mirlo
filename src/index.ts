@@ -249,7 +249,9 @@ app.use("/health", async (req, res) => {
 // This has to be the last thing used so that other things don't get over-written
 app.use("/", async (req, res) => {
   if (!res.headersSent) {
-    if (
+    if (req.path.startsWith("/v1")) {
+      res.sendStatus(404);
+    } else if (
       (req.path.includes("index.html") || req.path.startsWith("/")) &&
       !(
         req.path.includes(".css") ||

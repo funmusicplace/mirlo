@@ -20,5 +20,6 @@ export const POST_EXAMPLE: Post = {
     posts: [],
     subscriptionTiers: [],
     merch: [],
+    activityPub: false,
   },
 };

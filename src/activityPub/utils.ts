@@ -16,6 +16,7 @@ import {
 import { generateFullStaticImageUrl } from "../utils/images";
 import { isTrackGroup } from "../utils/typeguards";
 import { markdownAsHtml } from "../utils/post";
+import { getSiteSettings } from "../utils/settings";
 const { API_DOMAIN } = process.env;
 
 export const artistsEndpoint = `${API_DOMAIN}/v1/artists/`;
@@ -39,9 +40,9 @@ export const getClient = async () => {
 export const turnArtistIntoActor = async (
   artist: Artist & { avatar: ArtistAvatar | null; banner: ArtistBanner | null }
 ) => {
-  const client = await getClient();
+  const settings = await getSiteSettings();
   let pubKey;
-  if (!client.privateKey) {
+  if (!settings.privateKey) {
     try {
       // instead of storing a private key for each user, we do this for the client
       // people seem to think this is fine https://socialhub.activitypub.rocks/t/how-i-saved-gigabytes-by-deleting-all-rsa-keys/3983
@@ -61,9 +62,9 @@ export const turnArtistIntoActor = async (
           },
         }
       );
-      await prisma.client.update({
+      await prisma.settings.update({
         where: {
-          id: client.id,
+          id: settings.id,
         },
         data: {
           publicKey,
@@ -75,10 +76,11 @@ export const turnArtistIntoActor = async (
       console.error(e);
       throw new AppError({
         httpCode: 500,
-        description: "Something went wrong generating the keys for the client",
+        description: "Something went wrong generating the keys for the app",
       });
     }
   }
+  const client = await getClient();
 
   const domain = client.applicationUrl;
 

@@ -22,6 +22,6 @@ describe("manage/tracks/{id}/audio", () => {
       .get("manage/tracks/1/audio")
       .set("Accept", "application/json");
 
-    assert(response.statusCode === 404);
+    assert.equal(response.statusCode, 404);
   });
 });

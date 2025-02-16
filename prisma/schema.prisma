@@ -19,9 +19,11 @@ datasource db {
 }
 
 model Settings {
-  id       Int  @id @default(autoincrement())
+  id         Int     @id @default(autoincrement())
   /// [Settings]
-  settings Json
+  settings   Json
+  publicKey  String? // Used for ActivityPub
+  privateKey String? // Used for ActivityPub
 }
 
 model Client {
@@ -34,8 +36,6 @@ model Client {
   updatedAt          DateTime
   createdAt          DateTime
   deletedAt          DateTime?
-  publicKey          String? // Used for ActivityPub
-  privateKey         String? // Used for ActivityPub
 }
 
 model User {

@@ -1,8 +1,9 @@
 import prisma from "@mirlo/prisma";
+import { Settings } from "@mirlo/prisma/client";
 
-type SettingsType = {
+interface SettingsType extends Partial<Settings> {
   platformPercent: number;
-};
+}
 
 const defaultSettings = {
   platformPercent: 7,
