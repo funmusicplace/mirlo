@@ -16,7 +16,10 @@ import { findArtistIdForURLSlug } from "../../../../utils/artist";
 import { markdownAsHtml } from "../../../../utils/post";
 import { whereForPublishedTrackGroups } from "../../../../utils/trackGroup";
 import { isTrackGroup } from "../../../../utils/typeguards";
-import { turnFeedIntoOutbox } from "../../../../activityPub/utils";
+import {
+  headersAreForActivityPub,
+  turnFeedIntoOutbox,
+} from "../../../../activityPub/utils";
 
 const getPostsVisibleToUser = async (
   user: User,
@@ -164,7 +167,7 @@ export default function () {
         }
       });
 
-      if (req.headers["content-type"] === "application/activity+json") {
+      if (headersAreForActivityPub(req.headers)) {
         const feed = await turnFeedIntoOutbox(artist, zipped);
         res.set("Content-Type", "application/activity+json");
         res.send(feed);

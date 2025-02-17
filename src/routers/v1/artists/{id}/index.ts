@@ -9,7 +9,10 @@ import {
   processSingleArtist,
   singleInclude,
 } from "../../../../utils/artist";
-import { turnArtistIntoActor } from "../../../../activityPub/utils";
+import {
+  headersAreForActivityPub,
+  turnArtistIntoActor,
+} from "../../../../activityPub/utils";
 
 export default function () {
   const operations = {
@@ -42,12 +45,7 @@ export default function () {
           return next();
         }
 
-        if (
-          req.headers["accept"] === "application/activity+json" ||
-          req.headers["accept"]?.includes(
-            'application/ld+json; profile="https://www.w3.org/ns/activitystreams"'
-          )
-        ) {
+        if (headersAreForActivityPub(req.headers)) {
           res.json(await turnArtistIntoActor(artist));
           return next();
         } else {

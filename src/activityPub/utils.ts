@@ -16,9 +16,19 @@ import {
 import { generateFullStaticImageUrl } from "../utils/images";
 import { isTrackGroup } from "../utils/typeguards";
 import { getSiteSettings } from "../utils/settings";
+import { IncomingHttpHeaders } from "http";
 const { API_DOMAIN } = process.env;
 
 export const artistsEndpoint = `${API_DOMAIN}/v1/artists/`;
+
+export const headersAreForActivityPub = (headers: IncomingHttpHeaders) => {
+  return (
+    headers["accept"] === "application/activity+json" ||
+    headers["accept"]?.includes(
+      'application/ld+json; profile="https://www.w3.org/ns/activitystreams"'
+    )
+  );
+};
 
 export const getClient = async () => {
   let client = await prisma.client.findFirst({
