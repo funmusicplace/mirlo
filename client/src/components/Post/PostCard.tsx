@@ -14,7 +14,6 @@ const HalfTone: React.FC<{ color1?: string; color2?: string }> = ({
   color1,
   color2,
 }) => {
-  console.log("color", color1 || "var(--mirlo-black)", color2);
   return (
     <div
       className={css`

@@ -42,8 +42,9 @@ export default function () {
           return next();
         }
 
-        if (req.headers["Accept"] === "application/activity+json") {
-          res.json(turnArtistIntoActor(artist));
+        if (req.headers["accept"] === "application/activity+json") {
+          res.json(await turnArtistIntoActor(artist));
+          return next();
         } else {
           res.json({
             result: processSingleArtist(

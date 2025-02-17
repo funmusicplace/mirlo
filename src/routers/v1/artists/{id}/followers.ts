@@ -13,8 +13,6 @@ export default function () {
 
   async function GET(req: Request, res: Response) {
     let { id }: { id?: string } = req.params;
-    const { format } = req.query;
-    const user = req.user as User;
 
     try {
       const parsedId = await findArtistIdForURLSlug(id);
