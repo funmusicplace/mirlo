@@ -10,8 +10,8 @@ const defaultSettings = {
 };
 
 export const getSiteSettings = async (): Promise<SettingsType> => {
-  const result = await prisma.settings.findFirst();
-  const { settings } = result ?? { settings: {} };
+  const result = await prisma.settings.findMany();
+  const { settings } = result[0] ?? { settings: {} };
   return {
     ...defaultSettings,
     ...settings,

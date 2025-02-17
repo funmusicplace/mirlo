@@ -20,7 +20,7 @@ const parseIndex = async (pathname: string) => {
   const $ = cheerio.load(buffer);
 
   try {
-    console.log(pathname);
+    console.error("UNHANDLED FILE", pathname);
     const client = await getClient();
     if (route[2] === "posts") {
       const post = await prisma.post.findFirst({
