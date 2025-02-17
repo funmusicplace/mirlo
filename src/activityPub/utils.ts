@@ -15,23 +15,24 @@ import {
 } from "../utils/minio";
 import { generateFullStaticImageUrl } from "../utils/images";
 import { isTrackGroup } from "../utils/typeguards";
-import { markdownAsHtml } from "../utils/post";
 import { getSiteSettings } from "../utils/settings";
 const { API_DOMAIN } = process.env;
 
 export const artistsEndpoint = `${API_DOMAIN}/v1/artists/`;
 
 export const getClient = async () => {
-  const client = await prisma.client.findFirst({
+  let client = await prisma.client.findFirst({
     where: {
       applicationName: "frontend",
     },
   });
 
   if (!client) {
-    throw new AppError({
-      httpCode: 500,
-      description: "Server doesn't have a client",
+    client = await prisma.client.create({
+      data: {
+        applicationName: "frontend",
+        applicationUrl: "http://localhost:8080",
+      },
     });
   }
   return client;
@@ -41,8 +42,8 @@ export const turnArtistIntoActor = async (
   artist: Artist & { avatar: ArtistAvatar | null; banner: ArtistBanner | null }
 ) => {
   const settings = await getSiteSettings();
-  let pubKey;
-  if (!settings.privateKey) {
+  let pubKey = settings.publicKey;
+  if (!pubKey) {
     try {
       // instead of storing a private key for each user, we do this for the client
       // people seem to think this is fine https://socialhub.activitypub.rocks/t/how-i-saved-gigabytes-by-deleting-all-rsa-keys/3983
