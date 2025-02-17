@@ -44,6 +44,7 @@ const parseIndex = async (pathname: string) => {
       }
     } else if (route[2] === "releases") {
       // it is about releases
+      console.log("release-route", route);
       const tg = await prisma.trackGroup.findFirst({
         where: { urlSlug: route[3] },
         include: {
