@@ -85,22 +85,24 @@ export const turnArtistIntoActor = async (
 
   const domain = client.applicationUrl;
 
+  const root = artistsEndpoint.replace("api.", "");
+
   return {
     "@context": [
       "https://www.w3.org/ns/activitystreams",
       "https://w3id.org/security/v1",
     ],
 
-    id: `${artistsEndpoint}${artist.urlSlug}`, // This is where someone can find this actor
+    id: `${root}${artist.urlSlug}`, // This is where someone can find this actor
     url: `${domain}/${artist.urlSlug}`, // This is the visible profile
     type: "Person",
     preferredUsername: `${artist.urlSlug}`,
     name: artist.name,
     summary: artist.bio,
     discoverable: artist.activityPub,
-    inbox: `${artistsEndpoint}${artist.urlSlug}/inbox`,
-    outbox: `${artistsEndpoint}${artist.urlSlug}/feed`,
-    followers: `${artistsEndpoint}${artist.urlSlug}/followers`,
+    inbox: `${root}${artist.urlSlug}/inbox`,
+    outbox: `${root}${artist.urlSlug}/feed`,
+    followers: `${root}${artist.urlSlug}/followers`,
     ...(artist.avatar
       ? {
           icon: {
@@ -126,8 +128,8 @@ export const turnArtistIntoActor = async (
         }
       : {}),
     publicKey: {
-      id: `${artistsEndpoint}${artist.urlSlug}`,
-      owner: `${artistsEndpoint}${artist.urlSlug}`,
+      id: `${root}${artist.urlSlug}#main-key`,
+      owner: `${root}${artist.urlSlug}`,
       publicKeyPem: pubKey,
     },
   };

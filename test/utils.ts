@@ -29,6 +29,7 @@ export const clearTables = async () => {
   await prisma.$executeRaw`DELETE FROM "Artist";`;
   await prisma.$executeRaw`DELETE FROM "User";`;
   await prisma.$executeRaw`DELETE FROM "Client";`;
+  await prisma.$executeRaw`DELETE FROM "Settings";`;
 };
 
 export const createUser = async (data: Prisma.UserCreateArgs["data"]) => {
