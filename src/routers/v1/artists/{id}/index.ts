@@ -42,7 +42,12 @@ export default function () {
           return next();
         }
 
-        if (req.headers["accept"] === "application/activity+json") {
+        if (
+          req.headers["accept"] === "application/activity+json" ||
+          req.headers["accept"]?.includes(
+            'application/ld+json; profile="https://www.w3.org/ns/activitystreams"'
+          )
+        ) {
           res.json(await turnArtistIntoActor(artist));
           return next();
         } else {
