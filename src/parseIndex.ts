@@ -45,7 +45,7 @@ const parseIndex = async (pathname: string) => {
     } else if (route[2] === "releases") {
       // it is about releases
       const tg = await prisma.trackGroup.findFirst({
-        where: { id: Number(route[3]) },
+        where: { urlSlug: route[3] },
         include: {
           artist: true,
           cover: true,
@@ -76,7 +76,7 @@ const parseIndex = async (pathname: string) => {
         "manage",
       ].includes(route[1])
     ) {
-      // we should just render as normal
+      // we write our own little custom texts to render these pages
     }
   } catch (e) {
     console.error("e", e);
