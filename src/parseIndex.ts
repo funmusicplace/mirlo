@@ -54,15 +54,18 @@ const parseIndex = async (pathname: string) => {
         },
       });
       if (tg) {
-        console.log("rfound release");
+        const coverString = tg.cover?.url.find((u) => u.includes("x600"));
         $("head").append(`
         <meta property="og:type" content="article">
         <meta property="og:title" content="${tg.title}">
         <meta property="og:description" content="An album by ${tg.artist.name} on Mirlo">
         <meta property="og:url" content="${client.applicationUrl}/${tg.artist?.urlSlug}/releases/${tg.urlSlug}">
         ${
-          tg.cover
-            ? `<meta property="og:image" content="${generateFullStaticImageUrl(tg.cover.url[600], finalCoversBucket)}" />`
+          coverString
+            ? `<meta property="og:image" content="${generateFullStaticImageUrl(
+                coverString,
+                finalCoversBucket
+              )}" />`
             : ""
         }
       `);
