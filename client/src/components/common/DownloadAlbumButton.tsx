@@ -138,7 +138,7 @@ const DownloadAlbumButton: React.FC<{
               >
                 {formats.map((format) => (
                   <li key={format}>
-                    <Button
+                    <ArtistButton
                       size="compact"
                       className={css`
                         margin-top: 0.5rem;
@@ -153,7 +153,7 @@ const DownloadAlbumButton: React.FC<{
                       }}
                     >
                       {formatsDisplay[format]}
-                    </Button>
+                    </ArtistButton>
                   </li>
                 ))}
               </ul>
