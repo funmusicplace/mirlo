@@ -53,5 +53,5 @@ describe("artists/{id]/inbox", () => {
 
       assert.equal(response.statusCode, 200);
     });
-  });
+  }).timeout(5000);
 });

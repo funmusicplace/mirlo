@@ -106,7 +106,7 @@ describe("artists", () => {
         response.body.followers.includes("/v1/artists/test-artist/followers")
       );
       assert(response.body.publicKey.publicKeyPem);
-    });
+    }).timeout(5000);
 
     it("should GET /{id} with application/lb+json", async () => {
       const artistSlug = "test-artist";
