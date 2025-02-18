@@ -1,6 +1,6 @@
 import prisma from "@mirlo/prisma";
 import { Request, Response } from "express";
-import { getClient, artistsEndpoint } from "./utils";
+import { getClient, root } from "./utils";
 const { REACT_APP_CLIENT_DOMAIN } = process.env;
 
 const mirloDomain = REACT_APP_CLIENT_DOMAIN?.split("//")[1];
@@ -31,8 +31,6 @@ const webfinger = async (req: Request, res: Response) => {
   if (!artist) {
     return res.status(404).send("Resource not found");
   }
-
-  const root = artistsEndpoint.replace("api.", "");
 
   res
     .json({

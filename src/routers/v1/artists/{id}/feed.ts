@@ -168,8 +168,11 @@ export default function () {
       });
 
       if (headersAreForActivityPub(req.headers)) {
+        if (req.headers.accept) {
+          res.set("content-type", req.headers.accept);
+        }
         const feed = await turnFeedIntoOutbox(artist, zipped);
-        res.set("Content-Type", "application/activity+json");
+
         res.send(feed);
       } else if (format === "rss") {
         const feed = await turnItemsIntoRSS(artist, zipped);

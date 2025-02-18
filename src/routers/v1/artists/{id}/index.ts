@@ -46,7 +46,11 @@ export default function () {
         }
 
         if (headersAreForActivityPub(req.headers)) {
+          if (req.headers.accept) {
+            res.set("content-type", req.headers.accept);
+          }
           res.json(await turnArtistIntoActor(artist));
+
           return next();
         } else {
           res.json({

@@ -308,7 +308,7 @@ describe("artists/{id}/feed", () => {
     assert.equal(obj.items[0].title, trackGroup.title);
   });
 
-  it("should GET / an both an album and a post and display it in RSS", async () => {
+  it("should GET / both an album and a post and display it in RSS", async () => {
     const user = await prisma.user.create({
       data: {
         email: "test@test.com",
@@ -355,5 +355,82 @@ describe("artists/{id}/feed", () => {
     assert(obj.items[0].content?.includes(""));
     assert.equal(obj.items[0].title, trackGroup.title);
     assert.equal(obj.items[1].title, postTitle);
+  });
+
+  describe("ActivityPub", () => {
+    it("should GET / both an album and a post and display it in outbox", async () => {
+      const user = await prisma.user.create({
+        data: {
+          email: "test@test.com",
+        },
+      });
+      const artist = await prisma.artist.create({
+        data: {
+          name: "Test artist",
+          urlSlug: "test-artist",
+          userId: user.id,
+          enabled: true,
+        },
+      });
+
+      const postTitle = "Test post title";
+
+      const post = await prisma.post.create({
+        data: {
+          title: postTitle,
+          artistId: artist.id,
+          isPublic: true,
+          content: "# HI",
+          publishedAt: faker.date.past().toISOString(),
+        },
+      });
+
+      const trackGroup = await createTrackGroup(artist.id);
+
+      const response = await requestApp
+        .get(`artists/${artist.id}/feed`)
+        .set("Accept", "application/activity+json");
+
+      assert(response.statusCode === 200);
+      const first = response.body.first;
+      assert.equal(response.body.type, "OrderedCollection");
+      assert.equal(response.body.totalItems, 2);
+      assert(response.body.id.includes(`v1/artists/${artist.urlSlug}/feed`));
+      assert.equal(first.type, "OrderedCollectionPage");
+      assert(first.partOf.includes(`v1/artists/${artist.urlSlug}/feed`));
+      assert(first.id.includes(`v1/artists/${artist.urlSlug}/feed?page=1`));
+      assert.equal(first.orderedItems.length, 2);
+      assert.equal(
+        response.body["@context"][0],
+        "https://www.w3.org/ns/activitystreams"
+      );
+      const firstItem = first.orderedItems[0];
+      assert(
+        firstItem.id.endsWith(
+          `v1/artists/${artist.urlSlug}/trackGroups/${trackGroup.urlSlug}`
+        )
+      );
+      assert(
+        firstItem.url.endsWith(
+          `${artist.urlSlug}/releases/${trackGroup.urlSlug}`
+        )
+      );
+      assert(firstItem.attributedTo.endsWith(`/${artist.urlSlug}`));
+      assert.equal(firstItem.type, "Note");
+      assert.equal(
+        firstItem.content,
+        `<h2>An album release by artist ${artist.name}.</h2>`
+      );
+      assert.equal(firstItem.published, trackGroup.releaseDate.toISOString());
+      const secondItem = first.orderedItems[1];
+      assert(
+        secondItem.id.endsWith(`v1/artists/${artist.urlSlug}/posts/${post.id}`)
+      );
+      assert(secondItem.url.endsWith(`${artist.urlSlug}/posts/${post.id}`));
+      assert(secondItem.attributedTo.endsWith(`/${artist.urlSlug}`));
+      assert.equal(secondItem.type, "Note");
+      assert.equal(secondItem.content, post.content);
+      assert.equal(secondItem.published, post.publishedAt.toISOString());
+    });
   });
 });
