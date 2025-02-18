@@ -89,6 +89,7 @@ const routes = [
   "artists/{id}/subscribe",
   "artists/{id}/feed",
   "artists/{id}/follow",
+  "artists/{id}/followers",
   "artists/{id}/confirmFollow",
   "artists/{id}/unfollow",
   "artists/{id}/tip",

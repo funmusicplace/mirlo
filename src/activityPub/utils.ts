@@ -16,9 +16,19 @@ import {
 import { generateFullStaticImageUrl } from "../utils/images";
 import { isTrackGroup } from "../utils/typeguards";
 import { getSiteSettings } from "../utils/settings";
+import { IncomingHttpHeaders } from "http";
 const { API_DOMAIN } = process.env;
 
-export const artistsEndpoint = `${API_DOMAIN}/v1/artists/`;
+export const root = `${API_DOMAIN}/v1/artists/`.replace("api.", "");
+
+export const headersAreForActivityPub = (headers: IncomingHttpHeaders) => {
+  return (
+    headers["accept"] === "application/activity+json" ||
+    headers["accept"]?.includes(
+      'application/ld+json; profile="https://www.w3.org/ns/activitystreams"'
+    )
+  );
+};
 
 export const getClient = async () => {
   let client = await prisma.client.findFirst({
@@ -85,8 +95,6 @@ export const turnArtistIntoActor = async (
 
   const domain = client.applicationUrl;
 
-  const root = artistsEndpoint.replace("api.", "");
-
   return {
     "@context": [
       "https://www.w3.org/ns/activitystreams",
@@ -146,19 +154,23 @@ export const turnFeedIntoOutbox = async (
   return {
     type: "OrderedCollection",
     totalItems: feed.length,
-    id: `${artistsEndpoint}${artist.urlSlug}/outbox`,
+    id: `${root}${artist.urlSlug}/feed`,
     first: {
       type: "OrderedCollectionPage",
       totalItems: feed.length,
-      partOf: `${artistsEndpoint}${artist.urlSlug}/outbox`,
+      partOf: `${root}${artist.urlSlug}/feed`,
       orderedItems: feed.map((f) => ({
         "@context": "https://www.w3.org/ns/activitystreams",
-        id: f.id,
+        id: isTrackGroup(f)
+          ? `${root}${f.artist?.urlSlug}/trackGroups/${f.urlSlug}`
+          : `${root}${f.artist?.urlSlug}/posts/${f.id}`,
         type: "Note",
         content: isTrackGroup(f)
           ? `<h2>An album release by artist ${f.artist.name}.</h2>`
           : f.content,
-        url: `${client.applicationUrl}/${f.artist?.urlSlug}/posts/${f.id}`,
+        url: isTrackGroup(f)
+          ? `${client.applicationUrl}/${f.artist?.urlSlug}/releases/${f.urlSlug}`
+          : `${client.applicationUrl}/${f.artist?.urlSlug}/posts/${f.id}`,
         attributedTo: `${client.applicationUrl}/${f.artist?.urlSlug}`,
         to: ["https://www.w3.org/ns/activitystreams#Public"],
         cc: [],
@@ -176,7 +188,7 @@ export const turnFeedIntoOutbox = async (
         //   },
         // },
       })),
-      id: `${artistsEndpoint}${artist.urlSlug}/outbox?page=1`,
+      id: `${root}${artist.urlSlug}/feed?page=1`,
     },
     "@context": ["https://www.w3.org/ns/activitystreams"],
   };
@@ -189,13 +201,13 @@ export const turnSubscribersIntoFollowers = (
   return {
     type: "OrderedCollection",
     totalItems: followers.length,
-    id: `${artistsEndpoint}${artist.urlSlug}/followers`,
+    id: `${root}${artist.urlSlug}/followers`,
     first: {
       type: "OrderedCollectionPage",
       totalItems: followers.length,
-      partOf: `${artistsEndpoint}${artist.urlSlug}/followers`,
+      partOf: `${root}${artist.urlSlug}/followers`,
       orderedItems: [],
-      id: `${artistsEndpoint}${artist.urlSlug}/followers?page=1`,
+      id: `${root}${artist.urlSlug}/followers?page=1`,
     },
     "@context": ["https://www.w3.org/ns/activitystreams"],
   };

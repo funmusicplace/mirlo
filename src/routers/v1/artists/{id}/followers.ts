@@ -4,7 +4,10 @@ import { User } from "@mirlo/prisma/client";
 import prisma from "@mirlo/prisma";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { findArtistIdForURLSlug } from "../../../../utils/artist";
-import { turnSubscribersIntoFollowers } from "../../../../activityPub/utils";
+import {
+  headersAreForActivityPub,
+  turnSubscribersIntoFollowers,
+} from "../../../../activityPub/utils";
 
 export default function () {
   const operations = {
@@ -41,9 +44,18 @@ export default function () {
           },
         },
       });
-      res.json(turnSubscribersIntoFollowers(artist, followers));
+      if (headersAreForActivityPub(req.headers)) {
+        if (req.headers.accept) {
+          res.set("content-type", req.headers.accept);
+        }
+        res.json(turnSubscribersIntoFollowers(artist, followers));
+      } else {
+        res.json({
+          result: followers.length,
+        });
+      }
     } catch (e) {
-      console.error(`/v1/artists/{id}/feed ${e}`);
+      console.error(`/v1/artists/{id}/followers ${e}`);
       res.status(400);
     }
   }
