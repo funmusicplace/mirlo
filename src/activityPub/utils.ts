@@ -69,7 +69,7 @@ export const generateKeysForSiteIfNeeded = async () => {
 
 export const headersAreForActivityPub = (headers: IncomingHttpHeaders) => {
   return (
-    headers["accept"] === "application/activity+json" ||
+    headers["accept"]?.includes("application/activity+json") ||
     headers["accept"]?.includes(
       'application/ld+json; profile="https://www.w3.org/ns/activitystreams"'
     )
