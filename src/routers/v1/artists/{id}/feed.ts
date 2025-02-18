@@ -73,7 +73,8 @@ const getPostsVisibleToUser = async (
             (t) =>
               userSubscription.artistSubscriptionTierId ===
               t.artistSubscriptionTierId
-          )
+          ) ||
+          p.isPublic
       );
     } else {
       posts = posts.filter((p) => p.isPublic);

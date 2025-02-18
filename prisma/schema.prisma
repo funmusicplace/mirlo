@@ -86,6 +86,14 @@ model UserArtistNotificationSetting {
   @@unique([userId, notification])
 }
 
+model ActivityPubArtistFollowers {
+  artistId Int
+  artist   Artist @relation(fields: [artistId], references: [id])
+  actor    String
+
+  @@unique([actor, artistId])
+}
+
 model Notification {
   id               String                  @id @default(uuid())
   isRead           Boolean                 @default(false)
@@ -194,6 +202,7 @@ model Artist {
   merch                              Merch[]
   artistLabels                       ArtistLabel[]
   activityPub                        Boolean                              @default(false)
+  ActivityPubArtistFollowers         ActivityPubArtistFollowers[]
 }
 
 model ArtistAvatar {
