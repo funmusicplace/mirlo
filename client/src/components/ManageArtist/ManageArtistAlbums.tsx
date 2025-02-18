@@ -31,7 +31,11 @@ const ManageArtistAlbums: React.FC<{}> = () => {
           <div>{t("noAlbumsYet")}</div>
         )}
         {trackGroups?.results.length !== 0 && <div />}
-        <div>
+        <div
+          className={css`
+            display: flex;
+          `}
+        >
           <ArtistButtonLink
             to={`/manage/artists/${artistId}/releases/tools`}
             size="compact"

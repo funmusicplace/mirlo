@@ -21,6 +21,52 @@ const { API_DOMAIN } = process.env;
 
 export const root = `${API_DOMAIN}/v1/artists/`.replace("api.", "");
 
+export const generateKeysForSiteIfNeeded = async () => {
+  const settings = await getSiteSettings();
+  console.log("got site settings", settings);
+  const { publicKey } = settings;
+  if (!publicKey) {
+    try {
+      // instead of storing a private key for each user, we do this for the client
+      // people seem to think this is fine https://socialhub.activitypub.rocks/t/how-i-saved-gigabytes-by-deleting-all-rsa-keys/3983
+      // If this client doesn't have a privateKey yet,
+      // we'll generate one and store it. This should only happen once.
+      const { publicKey, privateKey } = await crypto.generateKeyPairSync(
+        "rsa",
+        {
+          modulusLength: 4096,
+          publicKeyEncoding: {
+            type: "spki",
+            format: "pem",
+          },
+          privateKeyEncoding: {
+            type: "pkcs8",
+            format: "pem",
+          },
+        }
+      );
+      console.log("id", settings.id);
+      await prisma.settings.update({
+        where: {
+          id: settings.id,
+        },
+        data: {
+          publicKey,
+          privateKey,
+        },
+      });
+    } catch (e) {
+      console.error(e);
+      throw new AppError({
+        httpCode: 500,
+        description: "Something went wrong generating the keys for the app",
+      });
+    }
+  }
+
+  return await getSiteSettings();
+};
+
 export const headersAreForActivityPub = (headers: IncomingHttpHeaders) => {
   return (
     headers["accept"] === "application/activity+json" ||
@@ -51,48 +97,8 @@ export const getClient = async () => {
 export const turnArtistIntoActor = async (
   artist: Artist & { avatar: ArtistAvatar | null; banner: ArtistBanner | null }
 ) => {
-  const settings = await getSiteSettings();
-  let pubKey = settings.publicKey;
-  if (!pubKey) {
-    try {
-      // instead of storing a private key for each user, we do this for the client
-      // people seem to think this is fine https://socialhub.activitypub.rocks/t/how-i-saved-gigabytes-by-deleting-all-rsa-keys/3983
-      // If this client doesn't have a privateKey yet,
-      // we'll generate one and store it. This should only happen once.
-      const { publicKey, privateKey } = await crypto.generateKeyPairSync(
-        "rsa",
-        {
-          modulusLength: 4096,
-          publicKeyEncoding: {
-            type: "spki",
-            format: "pem",
-          },
-          privateKeyEncoding: {
-            type: "pkcs8",
-            format: "pem",
-          },
-        }
-      );
-      await prisma.settings.update({
-        where: {
-          id: settings.id,
-        },
-        data: {
-          publicKey,
-          privateKey,
-        },
-      });
-      pubKey = publicKey;
-    } catch (e) {
-      console.error(e);
-      throw new AppError({
-        httpCode: 500,
-        description: "Something went wrong generating the keys for the app",
-      });
-    }
-  }
   const client = await getClient();
-
+  const { publicKey } = await generateKeysForSiteIfNeeded();
   const domain = client.applicationUrl;
 
   return {
@@ -138,7 +144,7 @@ export const turnArtistIntoActor = async (
     publicKey: {
       id: `${root}${artist.urlSlug}#main-key`,
       owner: `${root}${artist.urlSlug}`,
-      publicKeyPem: pubKey,
+      publicKeyPem: publicKey,
     },
   };
 };

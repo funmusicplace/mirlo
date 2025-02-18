@@ -12,6 +12,7 @@ const defaultSettings = {
 export const getSiteSettings = async (): Promise<SettingsType> => {
   let [result] = await prisma.settings.findMany();
   if (!result) {
+    console.log("creating settings");
     result = await prisma.settings.create({
       data: {
         settings: {
@@ -19,8 +20,9 @@ export const getSiteSettings = async (): Promise<SettingsType> => {
         },
       },
     });
+    console.log("created settings", result);
   }
-  const { settings } = result ?? { settings: {} };
+  const { settings } = result;
   return {
     ...defaultSettings,
     ...settings,
