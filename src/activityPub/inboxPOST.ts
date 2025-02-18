@@ -6,8 +6,8 @@ import {
 } from "./utils";
 import prisma from "@mirlo/prisma";
 import crypto from "crypto";
-import request from "request";
 import { AppError } from "../utils/error";
+import { findArtistIdForURLSlug } from "../utils/artist";
 
 async function signAndSend(
   message: any,
@@ -77,25 +77,29 @@ async function sendAcceptMessage(
 }
 
 const inboxPOST = async (req: Request, res: Response, next: NextFunction) => {
+  let { id }: { id?: string } = req.params;
+  if (!id || id === "undefined") {
+    return res.status(400);
+  }
+  const parsedId = await findArtistIdForURLSlug(id);
+
   if (!headersAreForActivityPub(req.headers)) {
     res
       .status(400)
       .json({ error: "Endpoint only accepts ActivityPub requests" });
   }
 
-  const { id: artistId } = req.params as unknown as { id: string };
   try {
     const artist = await prisma.artist.findFirst({
       where: {
-        id: Number(artistId),
-      },
-      include: {
-        user: true,
-        subscriptionTiers: true,
+        id: parsedId,
       },
     });
     if (!artist) {
-      return;
+      throw new AppError({
+        httpCode: 404,
+        description: "Artist not found, must use urlSlug",
+      });
     }
     if (!req.body.actor || !req.body.type) {
       throw new AppError({

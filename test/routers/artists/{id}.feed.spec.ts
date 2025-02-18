@@ -388,7 +388,7 @@ describe("artists/{id}/feed", () => {
       const trackGroup = await createTrackGroup(artist.id);
 
       const response = await requestApp
-        .get(`artists/${artist.id}/feed`)
+        .get(`artists/${artist.urlSlug}/feed`)
         .set("Accept", "application/activity+json");
 
       assert(response.statusCode === 200);
