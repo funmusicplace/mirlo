@@ -43,8 +43,8 @@ const parseIndex = async (pathname: string) => {
       }
     `);
       }
-    } else if (route[2] === "releases") {
-      // it is about releases
+    } else if (route[2] === "release") {
+      // it is about n individual release
       console.log("release-route", route);
       const tg = await prisma.trackGroup.findFirst({
         where: { urlSlug: route[3] },
@@ -54,6 +54,7 @@ const parseIndex = async (pathname: string) => {
         },
       });
       if (tg) {
+        console.log("rfound release");
         $("head").append(`
         <meta property="og:type" content="article">
         <meta property="og:title" content="${tg.title}">
