@@ -30,7 +30,7 @@ describe("artists/{id]/inbox", () => {
         .set("Accept", "application/activity+json");
 
       assert.equal(response.status, 404);
-      assert.equal(response.body.error, "Artist not found");
+      assert.equal(response.body.error, "Artist not found, must use urlSlug");
     });
 
     it("should follow an artist", async () => {
@@ -44,7 +44,7 @@ describe("artists/{id]/inbox", () => {
         enabled: true,
       });
       const response = await requestApp
-        .post(`artists/${artist.id}/inbox`)
+        .post(`artists/${artist.urlSlug}/inbox`)
         .send({
           actor: "https://test-actor.com/remote-actor",
           type: "Follow",
