@@ -6,7 +6,6 @@ import {
 } from "./utils";
 import prisma from "@mirlo/prisma";
 import crypto from "crypto";
-import request from "request";
 import { AppError } from "../utils/error";
 
 async function signAndSend(
@@ -87,15 +86,14 @@ const inboxPOST = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const artist = await prisma.artist.findFirst({
       where: {
-        id: Number(artistId),
-      },
-      include: {
-        user: true,
-        subscriptionTiers: true,
+        urlSlug: artistId,
       },
     });
     if (!artist) {
-      return;
+      throw new AppError({
+        httpCode: 404,
+        description: "Artist not found, must use urlSlug",
+      });
     }
     if (!req.body.actor || !req.body.type) {
       throw new AppError({
