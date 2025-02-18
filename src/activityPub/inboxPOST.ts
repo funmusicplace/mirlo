@@ -81,15 +81,18 @@ const inboxPOST = async (req: Request, res: Response, next: NextFunction) => {
   if (!id || id === "undefined") {
     return res.status(400);
   }
-  const parsedId = await findArtistIdForURLSlug(id);
-
-  if (!headersAreForActivityPub(req.headers)) {
-    res
-      .status(400)
-      .json({ error: "Endpoint only accepts ActivityPub requests" });
-  }
 
   try {
+    const parsedId = await findArtistIdForURLSlug(id);
+
+    if (!headersAreForActivityPub(req.headers)) {
+      console.log("whats wrong");
+      throw new AppError({
+        httpCode: 400,
+        description: "Only accepts ActivityPub headers",
+      });
+    }
+
     const artist = await prisma.artist.findFirst({
       where: {
         id: parsedId,
