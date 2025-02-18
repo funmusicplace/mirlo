@@ -123,7 +123,6 @@ export default function () {
 
   async function DELETE(req: Request, res: Response, next: NextFunction) {
     let { artistId }: { artistId?: string } = req.params;
-    console.log("label", req.body);
     const { labelUserId } = req.body as { labelUserId?: number };
 
     try {

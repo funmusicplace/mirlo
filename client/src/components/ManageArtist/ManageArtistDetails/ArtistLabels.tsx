@@ -21,7 +21,6 @@ const ArtistLabels = () => {
 
   const removeLabel = React.useCallback(
     async (id: number | string) => {
-      console.log("id", id);
       await api.delete(`manage/artists/${artistId}/labels/${id}`);
       await refetch();
     },
@@ -30,7 +29,6 @@ const ArtistLabels = () => {
 
   const setLabel = React.useCallback(
     async (id: number | string) => {
-      console.log("id", id);
       await api.post(`manage/artists/${artistId}/labels`, {
         labelUserId: id,
       });

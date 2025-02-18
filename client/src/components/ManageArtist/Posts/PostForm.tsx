@@ -98,7 +98,6 @@ const PostForm: React.FC<{
 
   const doSave = React.useCallback(
     async (data: PostFormData) => {
-      console.log("saving");
       if (userId) {
         try {
           setIsSaving(true);

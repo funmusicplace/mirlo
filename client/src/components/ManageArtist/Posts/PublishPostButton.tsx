@@ -33,7 +33,6 @@ const PublishPostButton: React.FC<{
 
   const doPublish = React.useCallback(
     async (data: PostFormData) => {
-      console.log("publishing");
       try {
         setIsPublishing(true);
 
