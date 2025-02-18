@@ -45,6 +45,7 @@ export const generateKeysForSiteIfNeeded = async () => {
           },
         }
       );
+      console.log("id", settings.id);
       await prisma.settings.update({
         where: {
           id: settings.id,
