@@ -20,7 +20,7 @@ export const getSiteSettings = async (): Promise<SettingsType> => {
       },
     });
   }
-  const { settings } = result ?? { settings: {} };
+  const { settings } = result;
   return {
     ...defaultSettings,
     ...settings,

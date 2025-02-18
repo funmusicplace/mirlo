@@ -23,7 +23,7 @@ export const root = `${API_DOMAIN}/v1/artists/`.replace("api.", "");
 
 export const generateKeysForSiteIfNeeded = async () => {
   const settings = await getSiteSettings();
-
+  console.log("got site settings", settings);
   const { publicKey } = settings;
   if (!publicKey) {
     try {
