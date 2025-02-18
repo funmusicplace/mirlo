@@ -34,6 +34,7 @@ const parseIndex = async (pathname: string) => {
         $("head").append(`
       <meta property="og:type" content="article">
       <meta property="og:title" content="${post.title}">
+      <meta property="og:description" content="An post by ${post.artist?.name ?? "A Mirlo artist"} on Mirlo">
       <meta property="og:url" content="${client.applicationUrl}/${post.artist?.urlSlug}/posts/${post.id}}">
       ${
         post.featuredImage
@@ -55,10 +56,11 @@ const parseIndex = async (pathname: string) => {
         $("head").append(`
         <meta property="og:type" content="article">
         <meta property="og:title" content="${tg.title}">
-        <meta property="og:url" content="${client.applicationUrl}/${tg.artist?.urlSlug}/posts/${tg.id}}">
+        <meta property="og:description" content="An album by ${tg.artist.name} on Mirlo">
+        <meta property="og:url" content="${client.applicationUrl}/${tg.artist?.urlSlug}/releases/${tg.urlSlug}">
         ${
           tg.cover
-            ? `<meta property="og:image" content="${generateFullStaticImageUrl(tg.cover.url[150], finalCoversBucket)}" />`
+            ? `<meta property="og:image" content="${generateFullStaticImageUrl(tg.cover.url[600], finalCoversBucket)}" />`
             : ""
         }
       `);
