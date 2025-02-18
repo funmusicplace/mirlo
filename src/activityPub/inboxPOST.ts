@@ -139,7 +139,7 @@ const inboxPOST = async (req: Request, res: Response, next: NextFunction) => {
     }
     console.log("sent message etc");
     if (req.headers.accept) {
-      res.set("content-type", req.headers.accept);
+      res.set("content-type", "application/activity+json");
     }
     console.log("statusing");
     res.status(200);

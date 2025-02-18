@@ -47,7 +47,7 @@ export default function () {
 
         if (headersAreForActivityPub(req.headers)) {
           if (req.headers.accept) {
-            res.set("content-type", req.headers.accept);
+            res.set("content-type", "application/activity+json");
           }
           res.json(await turnArtistIntoActor(artist));
 

@@ -6,7 +6,7 @@ import { clearTables, createArtist, createUser } from "../../utils";
 
 import { requestApp } from "../utils";
 
-describe("artists/{id]/inbox", () => {
+describe("artists/{id}/inbox", () => {
   beforeEach(async () => {
     try {
       await clearTables();
@@ -117,6 +117,6 @@ describe("artists/{id]/inbox", () => {
         .set("Accept", "application/activity+json");
 
       assert.equal(response.statusCode, 200);
-    });
-  }).timeout(5000);
+    }).timeout(5000);
+  });
 });

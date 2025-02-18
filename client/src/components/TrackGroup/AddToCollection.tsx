@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { useSnackbar } from "state/SnackbarContext";
 import api from "services/api";
 import { useNavigate } from "react-router-dom";
+import { ArtistButton } from "components/Artist/ArtistButtons";
 
 const AddToCollection: React.FC<{ trackGroup: TrackGroup }> = ({
   trackGroup,
@@ -39,7 +40,7 @@ const AddToCollection: React.FC<{ trackGroup: TrackGroup }> = ({
           z-index: 2;
         `}
       >
-        <Button
+        <ArtistButton
           variant="outlined"
           onClick={() => setIsAddingToCollection(true)}
           className={css`
@@ -47,7 +48,7 @@ const AddToCollection: React.FC<{ trackGroup: TrackGroup }> = ({
           `}
         >
           {t("addToCollection")}
-        </Button>
+        </ArtistButton>
       </div>
       <Modal
         size="small"
@@ -63,9 +64,9 @@ const AddToCollection: React.FC<{ trackGroup: TrackGroup }> = ({
           `}
         >
           <p>{t("addToCollectionDescription")}</p>
-          <Button onClick={() => purchaseAlbum()}>
+          <ArtistButton onClick={() => purchaseAlbum()}>
             {t("addToCollection")}
-          </Button>
+          </ArtistButton>
         </div>
       </Modal>
     </>
