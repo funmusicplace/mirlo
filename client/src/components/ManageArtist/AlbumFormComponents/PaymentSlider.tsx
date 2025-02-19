@@ -17,7 +17,7 @@ const PaymentSlider: React.FC<{
   extraData: { artistId: number };
 }> = ({ url, extraData }) => {
   const { artistId } = useParams();
-  const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
+  const { t } = useTranslation("translation", { keyPrefix: "platformSlider" });
   const [isOpen, setIsInfoOpen] = React.useState(false);
 
   const { data: artist } = useQuery(
@@ -170,6 +170,14 @@ const PaymentSlider: React.FC<{
                 </td>
               </tr>
             </table>
+            <p>
+              Curious about how Mirlo uses money? We post quarterly financial
+              statements{" "}
+              <a href="https://mirlo.space/manage/artists/21/posts?tag=finances">
+                on our blog
+              </a>
+              .
+            </p>
           </Modal>
         </div>
       </div>
