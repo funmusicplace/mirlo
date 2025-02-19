@@ -101,14 +101,12 @@ const ManageTrackGroup: React.FC<{}> = () => {
           </div>
         </SpaceBetweenDiv>
       </div>
-      <AlbumPaymentReceiver />
+      {/* <AlbumPaymentReceiver /> */}
       <AlbumForm
         trackGroup={trackGroup}
         artist={artist}
         reload={() => refetch()}
       />
-
-      <ManageTags tags={trackGroup.tags} />
 
       <h2
         className={css`

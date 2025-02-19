@@ -11,6 +11,7 @@ const AlbumPaymentReceiver = () => {
     const options = await api.getMany<User>(`users?email=${search}`);
     return options.results.map((r) => ({ id: r.id, name: r.email }));
   }, []);
+
   return (
     <div>
       <FormComponent>

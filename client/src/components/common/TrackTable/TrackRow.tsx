@@ -63,10 +63,14 @@ const TR = styled.tr<{ canPlayTrack: boolean }>`
   }
   > td > .track-number {
     display: block;
+    width: 2rem;
   }
   &:hover > td > .play-button {
     display: block;
-    width: 2rem;
+
+    svg {
+      fill: var(--mi-white);
+    }
   }
   ${(props) =>
     props.canPlayTrack
