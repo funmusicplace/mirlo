@@ -435,7 +435,17 @@
     "merchFulfillmentParagraph": "To manage orders for merch, check your fulfillment page",
     "setDifferentCostPerDestination": "You'll want to set a different shipping cost per destination. It's likely much more expensive to ship to another country"
   },
+  "platformSlider": {
+    "howMuchGoesToMirlo": "How much goes to Mirlo?",
+    "solidarity": "Solidarity",
+    "sustain": "Sustain",
+    "fullCost": "Full cost",
+    "platformCut": "Platform cut: {{percent}}%",
+    "redistribution": "Redistribution",
+    "howMuchModalText": "Mirlo thrives on artist contributions—whether through monthly support or a slice of album sales. But we get it: every cent counts, and only you know what you can afford. That’s why we let you decide how much of your sales goes to Mirlo. Your art, your call."
+  },
   "manageAlbum": {
+    "platformPercent": "How much goes to Mirlo?",
     "dontSeeTheLicenseYouWant": "Don't see the license you want for this track?",
     "license": "Track license",
     "anAlbumCover": "an album cover",

@@ -99,6 +99,7 @@ export default function () {
         "about",
         "minPrice",
         "credits",
+        "platformPercent",
       ]);
 
       await prisma.trackGroup.updateMany({

@@ -10,7 +10,10 @@ import FormError from "components/common/FormError";
 import { useParams } from "react-router-dom";
 
 import SavingInput from "./SavingInput";
-import { QUERY_KEY_TRACK_GROUPS } from "queries/queryKeys";
+import { css } from "@emotion/css";
+import { bp } from "../../../constants";
+import ManageTags from "./ManageTags";
+import PaymentSlider from "./PaymentSlider";
 
 const AlbumFormContent: React.FC<{
   existingObject: TrackGroup;
@@ -31,27 +34,36 @@ const AlbumFormContent: React.FC<{
           extraData={{ artistId: Number(artistId) }}
         />
       </FormComponent>
-      <FormComponent
-        style={{
-          flexDirection: "column",
-          display: "flex",
-          alignItems: "flex-start",
-        }}
+      <div
+        className={css`
+          @media screen and (min-width: ${bp.medium}px) {
+            display: flex;
+            flex-direction: row;
+          }
+        `}
       >
-        <label>{t("cover")}</label>
+        <FormComponent
+          style={{
+            flexDirection: "column",
+            marginRight: "1rem",
+            display: "flex",
+            alignItems: "flex-start",
+          }}
+        >
+          <label>{t("cover")}</label>
 
-        <UploadArtistImage
-          imageTypeDescription={t("anAlbumCover")}
-          existing={existingObject}
-          imageType="cover"
-          height="400"
-          width="400"
-          maxDimensions="1500x1500"
-          maxSize="15mb"
-        />
-      </FormComponent>
+          <UploadArtistImage
+            imageTypeDescription={t("anAlbumCover")}
+            existing={existingObject}
+            imageType="cover"
+            height="400"
+            width="400"
+            maxDimensions="1500x1500"
+            maxSize="15mb"
+          />
+        </FormComponent>
 
-      {/* <FormComponent>
+        {/* <FormComponent>
         {t("type")}:{" "}
         <SelectEl defaultValue="lp" {...register("type")}>
           <option value="lp">{t("lp")}</option>
@@ -62,16 +74,58 @@ const AlbumFormContent: React.FC<{
         <small>The type is optional</small>
       </FormComponent> */}
 
-      <FormComponent>
-        <label>{t("releaseDate")} </label>
-        <SavingInput
-          formKey="releaseDate"
-          type="date"
-          required
-          url={`manage/trackGroups/${trackGroupId}`}
-          extraData={{ artistId: Number(artistId) }}
-        />
-      </FormComponent>
+        <div
+          className={css`
+            flex-grow: 1;
+          `}
+        >
+          <FormComponent>
+            <label>{t("releaseDate")} </label>
+            <SavingInput
+              formKey="releaseDate"
+              type="date"
+              required
+              url={`manage/trackGroups/${trackGroupId}`}
+              extraData={{ artistId: Number(artistId) }}
+            />
+          </FormComponent>
+
+          <div
+            className={css`
+              width: 100%;
+              @media screen and (min-width: ${bp.medium}px) {
+                display: flex;
+                flex-direction: row;
+              }
+            `}
+          >
+            <FormComponent>
+              <label>{t("price")}</label>
+              <SavingInput
+                formKey="minPrice"
+                type="number"
+                step="0.01"
+                url={`manage/trackGroups/${trackGroupId}`}
+                extraData={{ artistId: Number(artistId) }}
+              />
+              {errors.minPrice && <FormError>{t("priceZeroOrMore")}</FormError>}
+            </FormComponent>
+            <FormComponent
+              className={css`
+                flex-grow: 1;
+              `}
+            >
+              <label>{t("platformPercent")}</label>
+              <PaymentSlider
+                url={`manage/trackGroups/${trackGroupId}`}
+                extraData={{ artistId: Number(artistId) }}
+              />
+              {errors.minPrice && <FormError>{t("platformPercent")}</FormError>}
+            </FormComponent>
+          </div>
+          <ManageTags tags={existingObject.tags} />
+        </div>
+      </div>
       <FormComponent>
         <label>{t("about")} </label>
         <SavingInput
@@ -89,17 +143,6 @@ const AlbumFormContent: React.FC<{
           url={`manage/trackGroups/${trackGroupId}`}
           extraData={{ artistId: Number(artistId) }}
         />
-      </FormComponent>
-      <FormComponent>
-        <label>{t("price")}</label>
-        <SavingInput
-          formKey="minPrice"
-          type="number"
-          step="0.01"
-          url={`manage/trackGroups/${trackGroupId}`}
-          extraData={{ artistId: Number(artistId) }}
-        />
-        {errors.minPrice && <FormError>{t("priceZeroOrMore")}</FormError>}
       </FormComponent>
     </>
   );

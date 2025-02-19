@@ -158,7 +158,6 @@ const EditTrackRow: React.FC<{
             variant="dashed"
             startIcon={<FaTimes />}
             disabled={isSaving || isDisabled}
-            style={{ marginRight: ".25rem" }}
           />
           <Button
             size="compact"
@@ -168,7 +167,6 @@ const EditTrackRow: React.FC<{
             onClick={methods.handleSubmit(onSave)}
             type="button"
             className={css`
-              margin-right: 0.25rem;
               ${methods.formState.isDirty
                 ? `background-color: var(--mi-success-background-color) !important; 
                    color: var(--mi-white) !important;
