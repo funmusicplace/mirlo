@@ -70,6 +70,13 @@ const PostContainer = styled.li`
 
   .post-container__link {
     text-decoration: none;
+    overflow: hidden;
+    display: inline-block;
+    text-align: left;
+    height: 1.5rem;
+    width: 100%;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   &:hover {
