@@ -14,10 +14,13 @@ import { css } from "@emotion/css";
 import { bp } from "../../../constants";
 import ManageTags from "./ManageTags";
 import PaymentSlider from "./PaymentSlider";
+import { getCurrencySymbol, moneyDisplay } from "components/common/Money";
+import { useAuthContext } from "state/AuthContext";
 
 const AlbumFormContent: React.FC<{
   existingObject: TrackGroup;
 }> = ({ existingObject }) => {
+  const { user } = useAuthContext();
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const {
     formState: { errors },
@@ -101,14 +104,35 @@ const AlbumFormContent: React.FC<{
           >
             <FormComponent>
               <label>{t("price")}</label>
-              <SavingInput
-                formKey="minPrice"
-                type="number"
-                step="0.01"
-                url={`manage/trackGroups/${trackGroupId}`}
-                extraData={{ artistId: Number(artistId) }}
-              />
+              <div
+                className={css`
+                  display: flex;
+                  align-items: center;
+                `}
+              >
+                <div
+                  className={css`
+                    width: 2rem;
+                    height: 89%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin-bottom: 0.25rem;
+                    background-color: var(--mi-darken-x-background-color);
+                  `}
+                >
+                  {user?.currency && getCurrencySymbol(user?.currency)}
+                </div>
+                <SavingInput
+                  formKey="minPrice"
+                  type="number"
+                  step="0.01"
+                  url={`manage/trackGroups/${trackGroupId}`}
+                  extraData={{ artistId: Number(artistId) }}
+                />
+              </div>
               {errors.minPrice && <FormError>{t("priceZeroOrMore")}</FormError>}
+              <small>{t("currencyIsSetOnManageArtist")}</small>
             </FormComponent>
             <FormComponent
               className={css`

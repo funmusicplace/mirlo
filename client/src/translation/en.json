@@ -447,6 +447,7 @@
   },
   "manageAlbum": {
     "platformPercent": "How much goes to Mirlo?",
+    "currencyIsSetOnManageArtist": "The currency is set by the payment processor you've linked on the manage artist page",
     "dontSeeTheLicenseYouWant": "Don't see the license you want for this track?",
     "license": "Track license",
     "anAlbumCover": "an album cover",
