@@ -19,6 +19,8 @@ import MarkdownWrapper from "components/common/MarkdownWrapper";
 import { useAuthContext } from "state/AuthContext";
 import { formatDate } from "components/TrackGroup/ReleaseDate";
 import TipArtist from "components/common/TipArtist";
+import { useQuery } from "@tanstack/react-query";
+import { queryPost, queryPosts } from "queries";
 
 export const PageMarkdownWrapper = styled.div`
   width: 100%;
@@ -84,15 +86,29 @@ const Post: React.FC = () => {
   const { t, i18n } = useTranslation("translation", { keyPrefix: "post" });
 
   const { user } = useAuthContext();
-  const { postId } = useParams();
-  const { object: post, isLoadingObject } = usePublicObjectById<Post>(
-    "posts",
-    postId
+  const { artistId, postId } = useParams();
+  const { data: post, isLoading } = useQuery(
+    queryPost({ postId: Number(postId) })
   );
 
   if (!post) {
-    if (!isLoadingObject) {
-      return <Box>No post found</Box>;
+    if (!isLoading) {
+      return (
+        <Box
+          className={css`
+            width: 100;
+            text-align: center;
+          `}
+        >
+          No post found
+          {artistId && (
+            <>
+              , return to <Link to={`/${artistId}`}>artist page</Link>
+            </>
+          )}
+          .
+        </Box>
+      );
     }
     return <LoadingBlocks rows={1} />;
   }
