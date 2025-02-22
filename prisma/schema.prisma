@@ -406,6 +406,8 @@ model MerchPurchase {
   billingAddress       Json?
   fulfillmentStatus    FulfillmentStatus
   options              MerchOption[]
+  trackingNumber       String?
+  trackingWebsite      String?
 }
 
 enum FulfillmentStatus {
