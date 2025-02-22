@@ -2,9 +2,7 @@ import { css } from "@emotion/css";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { bp } from "../../constants";
-import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
-import { FaRss } from "react-icons/fa";
-import { ButtonAnchor } from "components/common/Button";
+
 import PostGrid from "components/Post/PostGrid";
 import { queryArtist } from "queries";
 import { useQuery } from "@tanstack/react-query";
