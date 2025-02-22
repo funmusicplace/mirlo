@@ -139,7 +139,7 @@ function PasswordReset() {
       )}
       <img
         alt="a blackbird"
-        src="/images/blackbird.png"
+        src="/assets/images/blackbird.png"
         className={css`
           width: 50%;
           padding: 2rem 0;

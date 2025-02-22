@@ -234,7 +234,7 @@ function Signup() {
         </Link>
         <img
           alt="a blackbird"
-          src="/images/blackbird.png"
+          src="/assets/images/blackbird.png"
           className={css`
             width: 100%;
             padding: 4rem 0;

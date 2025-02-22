@@ -220,7 +220,7 @@ const Features = () => {
 
           <img
             alt="Mirlo painted bird"
-            src="/images/MirloPaintBird.svg"
+            src="/assets/images/MirloPaintBird.svg"
             className={css`
               max-width: 100%;
               // margin-right: -25rem;
@@ -268,13 +268,13 @@ const Features = () => {
               </p>
             </div>
             <img
-              src="/images/multiple-artist-accounts.png"
+              src="/assets/images/multiple-artist-accounts.png"
               alt="multiple artist accounts"
             />
           </Feature>
           <Feature>
             <img
-              src="/images/bulk-upload.png"
+              src="/assets/images/bulk-upload.png"
               alt="upload tracks in bulk"
               className={css`
                 width: 80%;
@@ -313,7 +313,7 @@ const Features = () => {
               </p>
             </div>
             <img
-              src="/images/embed-2.png"
+              src="/assets/images/embed-2.png"
               alt="page control"
               className={css`
                 width: 60%;
@@ -326,7 +326,7 @@ const Features = () => {
             />
           </Feature>
           <Feature>
-            <img src="/images/embed-1.png" alt="embed" />
+            <img src="/assets/images/embed-1.png" alt="embed" />
             <div className="description">
               <strong>Want control over what your page looks like?</strong>
               <p>
@@ -358,11 +358,14 @@ const Features = () => {
                 everything from one platform.
               </p>
             </div>
-            <img src="/images/community-share.png" alt="community share" />
+            <img
+              src="/assets/images/community-share.png"
+              alt="community share"
+            />
           </Feature>
           <Feature>
             <img
-              src="/images/monthly-donations.png"
+              src="/assets/images/monthly-donations.png"
               alt="monthly donations"
               className={css`
                 width: 80%;
@@ -392,10 +395,10 @@ const Features = () => {
                 the world
               </p>
             </div>
-            <img src="/images/international.png" alt="map" />
+            <img src="/assets/images/international.png" alt="map" />
           </Feature>
           <Feature>
-            <img src="/images/downloads.png" alt="map" />
+            <img src="/assets/images/downloads.png" alt="map" />
 
             <div className="description">
               <strong>
@@ -418,7 +421,7 @@ const Features = () => {
                 roughly 3% cut.
               </p>
             </div>
-            <img src="/images/percentage.png" alt="map" />
+            <img src="/assets/images/percentage.png" alt="map" />
           </Feature>
 
           {/* <h2>Listener Features</h2>

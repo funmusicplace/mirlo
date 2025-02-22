@@ -57,7 +57,7 @@ const Splash = () => {
 
           @media (min-width: 768px) {
             display: block;
-            background-image: url("/images/blackbird-light.webp");
+            background-image: url("/assets/images/blackbird-light.webp");
             background-size: contain;
             background-repeat: no-repeat;
             width: 370px;
@@ -66,7 +66,7 @@ const Splash = () => {
           }
 
           @media (min-width: 768px) and (prefers-color-scheme: dark) {
-            background-image: url("/images/blackbird-dark.webp");
+            background-image: url("/assets/images/blackbird-dark.webp");
           }
         `}
       />

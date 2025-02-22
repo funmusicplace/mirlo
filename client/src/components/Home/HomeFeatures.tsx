@@ -90,7 +90,7 @@ const SupportMirlo = () => {
         <div
           className={css`
             display: block;
-            background-image: url("/images/flock.svg");
+            background-image: url("/assets/images/flock.svg");
             background-size: contain;
             background-repeat: no-repeat;
             width: 90%;
@@ -98,7 +98,7 @@ const SupportMirlo = () => {
 
             @media (min-width: 768px) {
               display: block;
-              background-image: url("/images/flock.svg");
+              background-image: url("/assets/images/flock.svg");
               background-size: contain;
               background-repeat: no-repeat;
               width: 370px;
@@ -107,7 +107,7 @@ const SupportMirlo = () => {
             }
 
             @media (min-width: 768px) and (prefers-color-scheme: dark) {
-              background-image: url("/images/flock.svg");
+              background-image: url("/assets/images/flock.svg");
             }
           `}
         />
