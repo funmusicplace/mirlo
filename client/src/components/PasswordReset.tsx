@@ -122,7 +122,6 @@ function PasswordReset() {
           onSubmit={newSubmit(onNewPassword)}
         >
           <h2>
-            {" "}
             {accountIncomplete ? t("accountIncompleteTitle") : t("title")}
           </h2>
 

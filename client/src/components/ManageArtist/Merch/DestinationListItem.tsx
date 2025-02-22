@@ -25,6 +25,7 @@ const DestinationListItem: React.FC<{
     ? dest.destinationCountry
     : defaultOption;
 
+  const homeCountry = methods.watch(`destinations.${index}.homeCountry`);
   return (
     <li>
       {isEditing && (
@@ -41,6 +42,20 @@ const DestinationListItem: React.FC<{
             }
           `}
         >
+          <FormComponent>
+            <label>{t("homeCountry")}</label>
+            <SelectEl
+              {...methods.register(`destinations.${index}.homeCountry`)}
+            >
+              {countryCodesCurrencies
+                .sort((a, b) => (a.countryName > b.countryName ? 1 : -1))
+                .map((country) => (
+                  <option key={country.countryCode} value={country.countryCode}>
+                    {country.countryName} ({country.countryCode})
+                  </option>
+                ))}
+            </SelectEl>
+          </FormComponent>
           <FormComponent>
             <label>{t("destinationCountry")}</label>
             <SelectEl

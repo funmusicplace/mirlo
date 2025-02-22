@@ -30,7 +30,6 @@ export const Footer = () => {
       <WidthContainer variant="big" justify="center">
         <div
           className={css`
-            background-color: var(--mi-normal-background-color);
             padding: 2rem;
           `}
         >
