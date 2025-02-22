@@ -15,6 +15,7 @@ import { SelectEl } from "components/common/Select";
 import { getCurrencySymbol, moneyDisplay } from "components/common/Money";
 import IncludesDigitalDownload from "./IncludesDigitalDownload";
 import { FaChevronRight } from "react-icons/fa";
+import countryCodesCurrencies from "components/ManageArtist/Merch/country-codes-currencies";
 
 type FormData = {
   quantity: number;
@@ -22,6 +23,14 @@ type FormData = {
   merchOptionIds: string[];
   shippingDestinationId: string;
 };
+
+const codeToCountryMap = countryCodesCurrencies.reduce(
+  (aggr, country) => {
+    aggr[country.countryCode] = country;
+    return aggr;
+  },
+  {} as { [key: string]: any }
+);
 
 const BuyMerchItem: React.FC<{
   merch: Merch;
@@ -184,7 +193,7 @@ const BuyMerchItem: React.FC<{
           {merch.shippingDestinations.map((o) => (
             <option key={o.id} value={o.id}>
               {o.destinationCountry && o.destinationCountry !== ""
-                ? o.destinationCountry
+                ? `${codeToCountryMap[o.destinationCountry].countryName} (${o.destinationCountry})`
                 : defaultOption}{" "}
               (
               {t("destinationCost", {

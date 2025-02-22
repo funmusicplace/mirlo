@@ -23,7 +23,6 @@ import errorHandler from "./utils/error";
 import { sendMailQueue } from "./queues/send-mail-queue";
 import path from "node:path";
 import activityPub from "./activityPub";
-import * as cheerio from "cheerio";
 import parseIndex from "./parseIndex";
 
 dotenv.config();

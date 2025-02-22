@@ -122,7 +122,6 @@ function PasswordReset() {
           onSubmit={newSubmit(onNewPassword)}
         >
           <h2>
-            {" "}
             {accountIncomplete ? t("accountIncompleteTitle") : t("title")}
           </h2>
 
@@ -140,7 +139,7 @@ function PasswordReset() {
       )}
       <img
         alt="a blackbird"
-        src="/images/blackbird.png"
+        src="/assets/images/blackbird.png"
         className={css`
           width: 50%;
           padding: 2rem 0;

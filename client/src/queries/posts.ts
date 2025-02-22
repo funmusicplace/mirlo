@@ -2,6 +2,32 @@ import { QueryFunction, queryOptions } from "@tanstack/react-query";
 import * as api from "./fetch/fetchWrapper";
 import { QUERY_KEY_POSTS } from "./queryKeys";
 
+const fetchPost: QueryFunction<Post, ["fetchPost", { postId: number }]> = ({
+  queryKey: [_, { postId }],
+  signal,
+}) => {
+  return api
+    .get<{
+      result: Post;
+    }>(`v1/posts/${postId}`, {
+      signal,
+    })
+    .then((r) => r.result);
+};
+
+export function queryPost(opts: { postId: number }) {
+  return queryOptions({
+    queryKey: [
+      "fetchPost",
+      {
+        postId: opts.postId,
+      },
+    ],
+    queryFn: fetchPost,
+    enabled: !!opts.postId,
+  });
+}
+
 const fetchPosts: QueryFunction<
   { results: Post[]; total?: number },
   ["fetchPosts", { take: number }]

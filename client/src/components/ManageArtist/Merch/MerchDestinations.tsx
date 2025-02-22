@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import Button from "components/common/Button";
 import { queryManagedMerch } from "queries";
 import { FaPen, FaPlus } from "react-icons/fa";
 import { useParams } from "react-router-dom";
@@ -43,10 +42,16 @@ const MerchDestinations: React.FC<{}> = () => {
     queryManagedMerch(merchParamId ?? "")
   );
 
+  console.log("merch", merch);
+
   const methods = useForm<DestinationForm>({
     defaultValues: {
       destinations: merch?.shippingDestinations.map((dest) => ({
         ...dest,
+        homeCountry: (user?.currency && !dest.homeCountry
+          ? currencyToCountryMap[user?.currency].countryCode
+          : dest.homeCountry
+        ).toUpperCase(),
         costUnit: dest.costUnit / 100,
         costExtraUnit: dest.costExtraUnit / 100,
       })),
@@ -86,13 +91,7 @@ const MerchDestinations: React.FC<{}> = () => {
         {t("shippingDestinationPrices")}
       </h2>
       <P>{t("setDifferentCostPerDestination")}</P>
-      {user?.currency && (
-        <P>
-          {t("currentCountry", {
-            country: currencyToCountryMap[user.currency].countryName,
-          })}
-        </P>
-      )}
+
       <form
         onSubmit={methods.handleSubmit(update)}
         className={css`
