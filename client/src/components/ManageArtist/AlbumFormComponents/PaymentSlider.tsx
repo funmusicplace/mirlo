@@ -3,7 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import { ArtistButton } from "components/Artist/ArtistButtons";
 import Modal from "components/common/Modal";
 import Pill from "components/common/Pill";
-import Tooltip from "components/common/Tooltip";
 import { queryArtist } from "queries";
 import React from "react";
 import { useFormContext } from "react-hook-form";

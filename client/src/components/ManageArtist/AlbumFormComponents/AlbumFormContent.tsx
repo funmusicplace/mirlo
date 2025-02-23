@@ -14,7 +14,7 @@ import { css } from "@emotion/css";
 import { bp } from "../../../constants";
 import ManageTags from "./ManageTags";
 import PaymentSlider from "./PaymentSlider";
-import { getCurrencySymbol, moneyDisplay } from "components/common/Money";
+import { getCurrencySymbol } from "components/common/Money";
 import { useAuthContext } from "state/AuthContext";
 
 const AlbumFormContent: React.FC<{
@@ -102,7 +102,11 @@ const AlbumFormContent: React.FC<{
               }
             `}
           >
-            <FormComponent>
+            <FormComponent
+              className={css`
+                max-width: 200px;
+              `}
+            >
               <label>{t("price")}</label>
               <div
                 className={css`
@@ -136,7 +140,7 @@ const AlbumFormContent: React.FC<{
             </FormComponent>
             <FormComponent
               className={css`
-                flex-grow: 1;
+                width: 340px;
               `}
             >
               <label>{t("platformPercent")}</label>
