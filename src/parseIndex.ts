@@ -4,11 +4,7 @@ import * as cheerio from "cheerio";
 import prisma from "@mirlo/prisma";
 import { getClient } from "./activityPub/utils";
 import { generateFullStaticImageUrl } from "./utils/images";
-import {
-  finalArtistAvatarBucket,
-  finalCoversBucket,
-  finalPostImageBucket,
-} from "./utils/minio";
+import { finalCoversBucket, finalPostImageBucket } from "./utils/minio";
 
 const buildOpenGraphTags = (
   $: cheerio.CheerioAPI,
@@ -24,9 +20,14 @@ const buildOpenGraphTags = (
     <meta property="og:title" content="${title}">
     <meta property="og:description" content="${description}">
     <meta property="og:url" content="${url}">
+    <meta name="twitter:title" content=${title} />
+    <meta name="twitter:description" content=${description} />
+
     ${imageUrl ? `<meta property="og:image" content="${imageUrl}" />` : ""}
   `);
 };
+
+const mirloDefaultDescription = "Buy and sell music directly from musicians.";
 
 const parseIndex = async (pathname: string) => {
   const fileLocation = path.join(
@@ -44,28 +45,6 @@ const parseIndex = async (pathname: string) => {
   try {
     const client = await getClient();
     if (route[2] === "posts") {
-      const post = await prisma.post.findFirst({
-        where: { id: Number(route[3]) },
-        include: {
-          artist: true,
-          featuredImage: true,
-        },
-      });
-      if (post) {
-        // it's a post
-        buildOpenGraphTags($, {
-          title: post.title,
-          description: `A post by ${post.artist?.name ?? "a Mirlo artist"}`,
-          url: `${client.applicationUrl}/${post.artist?.urlSlug}/posts/${post.id}`,
-          imageUrl: post.featuredImage
-            ? generateFullStaticImageUrl(
-                post.featuredImage.id,
-                finalPostImageBucket,
-                post.featuredImage.extension
-              )
-            : undefined,
-        });
-      }
     } else if (route[2] === "release") {
       // it is about n individual release
       const tg = await prisma.trackGroup.findFirst({
@@ -91,7 +70,7 @@ const parseIndex = async (pathname: string) => {
             : undefined,
         });
       }
-    } else if (route[2] === "releases") {
+    } else if (route[2] === "releases" || route[2] === "posts") {
       // it is about n individual release
       const artist = await prisma.artist.findFirst({
         where: { urlSlug: route[1] },
@@ -100,32 +79,61 @@ const parseIndex = async (pathname: string) => {
         },
       });
       if (artist) {
-        const coverString = artist.avatar?.url.find((u) => u.includes("x600"));
-        buildOpenGraphTags($, {
-          title: artist.name ?? "A Mirlo Artist",
-          description: `An artist on Mirlo`,
-          url: `${client.applicationUrl}/${artist?.urlSlug}/releases`,
-          imageUrl: coverString
-            ? generateFullStaticImageUrl(coverString, finalCoversBucket)
-            : undefined,
+        const post = await prisma.post.findFirst({
+          where: { id: Number(route[3]) },
+          include: {
+            artist: true,
+            featuredImage: true,
+          },
         });
+        if (post) {
+          // it's a post
+          buildOpenGraphTags($, {
+            title: post.title,
+            description: `A post by ${post.artist?.name ?? "a Mirlo artist"}`,
+            url: `${client.applicationUrl}/${post.artist?.urlSlug}/posts/${post.id}`,
+            imageUrl: post.featuredImage
+              ? generateFullStaticImageUrl(
+                  post.featuredImage.id,
+                  finalPostImageBucket,
+                  post.featuredImage.extension
+                )
+              : undefined,
+          });
+        } else {
+          const coverString = artist.avatar?.url.find((u) =>
+            u.includes("x600")
+          );
+          buildOpenGraphTags($, {
+            title: artist.name ?? "A Mirlo Artist",
+            description: `An artist on Mirlo`,
+            url: `${client.applicationUrl}/${artist?.urlSlug}/releases`,
+            imageUrl: coverString
+              ? generateFullStaticImageUrl(coverString, finalCoversBucket)
+              : undefined,
+          });
+        }
       }
     } else if (route[1] === "widget") {
+    } else if (route[1] === "login") {
+      buildOpenGraphTags($, {
+        title: "Log in to Mirlo",
+        description: mirloDefaultDescription,
+        url: `${client.applicationUrl}/${route.join("/")}`,
+      });
       // it's about a widget
-    } else if (
-      [
-        "admin",
-        "pages",
-        "profile",
-        "password-reset",
-        "login",
-        "signup",
-        "manage",
-      ].includes(route[1])
-    ) {
-      // we write our own little custom texts to render these pages
+    } else if (["signup"].includes(route[1])) {
+      buildOpenGraphTags($, {
+        title: "Sign up to Mirlo",
+        description: mirloDefaultDescription,
+        url: `${client.applicationUrl}/${route.join("/")}`,
+      });
     } else {
-      console.log("unahndled", route);
+      buildOpenGraphTags($, {
+        title: "Mirlo",
+        description: mirloDefaultDescription,
+        url: `${client.applicationUrl}/${route.join("/")}`,
+      });
     }
   } catch (e) {
     console.error("e", e);
