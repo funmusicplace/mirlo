@@ -229,6 +229,9 @@ const ArtistHeaderSection: React.FC<{
                             href={`${import.meta.env.VITE_API_DOMAIN}/v1/artists/${artist.id}/feed?format=rss`}
                             rel="noreferrer"
                             onlyIcon
+                            className={css`
+                              margin-top: 0.25rem;
+                            `}
                             startIcon={<FaRss />}
                           />
                         </>
