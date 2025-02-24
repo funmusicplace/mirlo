@@ -45,7 +45,7 @@
     "features": "Features",
     "pricing": "Pricing",
     "featuresText": "<p>Mirlo provides a space for artists to upload their music, establish their online presence, sell their music, and receive ongoing monthly contributions from their audience.</p><p>For a thorough look at our features for artists, <featuresLink>check out our features page</featuresLink>.</p>",
-    "pricingText": "<p>Mirlo takes a 7% cut of all transactions. So if an artist sells an album on for $10, Mirlo will earn 70 cents. <i>Then</i>, our payment processor Stripe, will take a cut of 2.9% + 30c (proportionally this is larger on small transactions).</p><p>Want to know more about how we calculated our take rate? Check out <takeRate>our blog post explaining how we got there</takeRate>.</p> <p>As we develop our product and come to terms with the costs of running it, we will adjust these numbers and explore new ways of financing Mirlo.</p>",
+    "pricingText": "<p>Artists get to set the take rate at Mirlo. So if an artist sells an album on for $10, they will decide whether Mirlo gets 70 cents, $1, or nothing. <i>Then</i>, our payment processor Stripe, will take a cut of 2.9% + 30c (proportionally this is larger on small transactions).</p><p>Want to know more about our thought process? Check out <takeRate>our blog post explaining how we got there</takeRate>.</p> <p>As we develop our product and come to terms with the costs of running it, we will adjust these numbers and explore new ways of financing Mirlo.</p>",
     "morePricing": "As we develop our product and come to terms with costs of running it, we will tweak these numbers and explore new ways of paying for the service and our work."
   },
   "logIn": {

@@ -4,7 +4,11 @@ import * as cheerio from "cheerio";
 import prisma from "@mirlo/prisma";
 import { getClient } from "./activityPub/utils";
 import { generateFullStaticImageUrl } from "./utils/images";
-import { finalCoversBucket, finalPostImageBucket } from "./utils/minio";
+import {
+  finalArtistAvatarBucket,
+  finalCoversBucket,
+  finalPostImageBucket,
+} from "./utils/minio";
 
 const buildOpenGraphTags = (
   $: cheerio.CheerioAPI,
@@ -29,6 +33,11 @@ const buildOpenGraphTags = (
 
 const mirloDefaultDescription = "Buy and sell music directly from musicians.";
 
+/**
+ * FIXME: make this function a little more sane. Also write tests for it.
+ * @param pathname
+ * @returns
+ */
 const parseIndex = async (pathname: string) => {
   const fileLocation = path.join(
     __dirname,
@@ -44,8 +53,30 @@ const parseIndex = async (pathname: string) => {
 
   try {
     const client = await getClient();
-    if (route[2] === "posts") {
-    } else if (route[2] === "release") {
+
+    const artist = await prisma.artist.findFirst({
+      where: { urlSlug: route[1] },
+      include: {
+        avatar: true,
+      },
+    });
+
+    const avatarString = artist?.avatar?.url.find((u) => u.includes("x600"));
+    if (
+      artist &&
+      (route[2] === "posts" ||
+        route[2] === "support" ||
+        route[2] === "releases")
+    ) {
+      buildOpenGraphTags($, {
+        title: artist.name ?? "A Mirlo Artist",
+        description: `An artist on Mirlo`,
+        url: `${client.applicationUrl}/${artist?.urlSlug}/releases`,
+        imageUrl: avatarString
+          ? generateFullStaticImageUrl(avatarString, finalArtistAvatarBucket)
+          : undefined,
+      });
+    } else if (artist && route[2] === "release") {
       // it is about n individual release
       const tg = await prisma.trackGroup.findFirst({
         where: {
@@ -72,12 +103,7 @@ const parseIndex = async (pathname: string) => {
       }
     } else if (route[2] === "releases" || route[2] === "posts") {
       // it is about n individual release
-      const artist = await prisma.artist.findFirst({
-        where: { urlSlug: route[1] },
-        include: {
-          avatar: true,
-        },
-      });
+
       if (artist) {
         const post = await prisma.post.findFirst({
           where: { id: Number(route[3]) },
@@ -101,15 +127,15 @@ const parseIndex = async (pathname: string) => {
               : undefined,
           });
         } else {
-          const coverString = artist.avatar?.url.find((u) =>
-            u.includes("x600")
-          );
           buildOpenGraphTags($, {
             title: artist.name ?? "A Mirlo Artist",
             description: `An artist on Mirlo`,
             url: `${client.applicationUrl}/${artist?.urlSlug}/releases`,
-            imageUrl: coverString
-              ? generateFullStaticImageUrl(coverString, finalCoversBucket)
+            imageUrl: avatarString
+              ? generateFullStaticImageUrl(
+                  avatarString,
+                  finalArtistAvatarBucket
+                )
               : undefined,
           });
         }
