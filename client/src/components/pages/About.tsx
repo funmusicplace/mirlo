@@ -83,7 +83,7 @@ const About: React.FC = () => {
           t={t}
           i18nKey="pricingText"
           components={{
-            takeRate: <Link to="/team/posts/16"></Link>,
+            takeRate: <Link to="/team/posts/204"></Link>,
             p: <p></p>,
             giveDirectly: <Link to="/team/support"></Link>,
             i: <em></em>,
