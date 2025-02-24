@@ -49,7 +49,6 @@ const ArtistContainer: React.FC = () => {
                 bottom: 75px;
                 top: auto;
                 right: auto;
-                padding: 1rem !important;
               }
             `}
           >
