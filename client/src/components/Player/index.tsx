@@ -91,7 +91,6 @@ const Player = () => {
             bottom: 75px;
             top: auto;
             left: auto;
-            padding: 1rem !important;
 
             flex-direction: row;
 
