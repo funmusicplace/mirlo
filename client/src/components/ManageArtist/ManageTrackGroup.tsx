@@ -14,6 +14,7 @@ import BackToArtistLink from "./BackToArtistLink";
 import ManageTags from "./AlbumFormComponents/ManageTags";
 import { useQuery } from "@tanstack/react-query";
 import { queryArtist, queryManagedTrackGroup } from "queries";
+import AlbumPaymentReceiver from "./AlbumFormComponents/AlbumPaymentReceiver";
 
 export interface TrackGroupFormData {
   published: boolean;
@@ -100,9 +101,12 @@ const ManageTrackGroup: React.FC<{}> = () => {
           </div>
         </SpaceBetweenDiv>
       </div>
-      <AlbumForm trackGroup={trackGroup} artist={artist} reload={refetch} />
-
-      <ManageTags tags={trackGroup.tags} />
+      {/* <AlbumPaymentReceiver /> */}
+      <AlbumForm
+        trackGroup={trackGroup}
+        artist={artist}
+        reload={() => refetch()}
+      />
 
       <h2
         className={css`
@@ -123,7 +127,11 @@ const ManageTrackGroup: React.FC<{}> = () => {
       )}
 
       {trackGroup && (
-        <BulkTrackUpload trackgroup={trackGroup} reload={refetch} />
+        <BulkTrackUpload
+          trackgroup={trackGroup}
+          reload={() => refetch()}
+          multiple
+        />
       )}
       <hr style={{ marginTop: "1rem", marginBottom: "1rem" }} />
       {trackGroup && trackGroup.tracks?.length > 0 && (

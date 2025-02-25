@@ -229,7 +229,7 @@ const routes: RouteObject[] = [
                     path: "customize",
                     async lazy() {
                       const { default: Component } = await import(
-                        "components/ManageArtist/CustomizeLook"
+                        "components/ManageArtist/ManageArtistDetails/CustomizeLook"
                       );
                       return { Component };
                     },
@@ -435,6 +435,15 @@ const routes: RouteObject[] = [
             async lazy() {
               const { default: Component } = await import(
                 "components/Admin/AdminSettings"
+              );
+              return { Component };
+            },
+          },
+          {
+            path: "sendEmails",
+            async lazy() {
+              const { default: Component } = await import(
+                "components/Admin/AdminSendEmail"
               );
               return { Component };
             },

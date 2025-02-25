@@ -8,6 +8,9 @@ import Button from "components/common/Button";
 import { moneyDisplay } from "components/common/Money";
 import Modal from "components/common/Modal";
 import React from "react";
+import { useQuery } from "@tanstack/react-query";
+import { queryUserStripeStatus } from "queries";
+import { ArtistButton } from "components/Artist/ArtistButtons";
 
 const MerchButtonPopUp: React.FC<{ merch: Merch; artist: Artist }> = ({
   merch,
@@ -17,18 +20,34 @@ const MerchButtonPopUp: React.FC<{ merch: Merch; artist: Artist }> = ({
     keyPrefix: "merchDetails",
   });
 
+  const { data: stripeAccountStatus } = useQuery(
+    queryUserStripeStatus(artist?.userId ?? 0)
+  );
+
   const [isOpen, setIsOpen] = React.useState(false);
+
+  if (!stripeAccountStatus?.chargesEnabled || merch.quantityRemaining === 0) {
+    return null;
+  }
+
+  const hasPricedOptions = merch.optionTypes.find((ot) =>
+    ot.options.find((o) => o.additionalPrice)
+  );
+
+  const amount = moneyDisplay({
+    amount: merch.minPrice / 100,
+    currency: merch.currency,
+  });
 
   return (
     <>
-      <Button onClick={() => setIsOpen(true)}>
-        {t("buyFor", {
-          amount: moneyDisplay({
-            amount: merch.minPrice / 100,
-            currency: merch.currency,
-          }),
-        })}
-      </Button>
+      <ArtistButton onClick={() => setIsOpen(true)}>
+        {hasPricedOptions
+          ? t("buyFrom", { amount })
+          : t("buyFor", {
+              amount,
+            })}
+      </ArtistButton>
       <Modal
         open={isOpen}
         size="small"

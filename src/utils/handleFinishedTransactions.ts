@@ -45,6 +45,7 @@ export const handleTrackGroupPurchase = async (
             user: true,
           },
         },
+        paymentToUser: true,
       },
     });
 
@@ -75,7 +76,7 @@ export const handleTrackGroupPurchase = async (
         data: {
           template: "album-purchase-artist-notification",
           message: {
-            to: trackGroup.artist.user.email,
+            to: trackGroup.paymentToUser?.email ?? trackGroup.artist.user.email,
           },
           locals: {
             trackGroup,

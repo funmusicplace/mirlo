@@ -97,7 +97,7 @@ const TrackArtistFormFields: React.FC<{
             <Pill>
               {watchName}{" "}
               <Button
-                compact
+                size="compact"
                 startIcon={<FaTimes />}
                 variant="dashed"
                 title="Clear"
@@ -126,7 +126,7 @@ const TrackArtistFormFields: React.FC<{
           }}
           type="button"
           variant="dashed"
-          compact
+          size="compact"
           disabled={disabled}
         >
           Remove this artist

@@ -1,6 +1,13 @@
 import React from "react";
 import api from "services/api";
 
+/**
+ * @deprecated
+ * @param endpoint
+ * @param id
+ * @param queryParams
+ * @returns
+ */
 const usePublicObjectById = <T>(
   endpoint: string,
   id?: string,

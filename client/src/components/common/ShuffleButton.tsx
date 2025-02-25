@@ -14,13 +14,15 @@ export const ShuffleButton: React.FC = () => {
   const onShuffle = React.useCallback(() => {
     dispatch({ type: "setShuffle", shuffle: !shuffle });
   }, [dispatch, shuffle]);
+
   return (
     <Button
       startIcon={<RxShuffle />}
-      buttonRole={shuffle ? "secondary" : undefined}
+      buttonRole={shuffle ? "primary" : undefined}
       onClick={onShuffle}
+      variant={shuffle ? "default" : "outlined"}
       className={css`
-        ${shuffle ? "color: var(--mi-link-color) !important;" : ""}
+        ${shuffle ? "color: white !important;" : ""}
       `}
     />
   );

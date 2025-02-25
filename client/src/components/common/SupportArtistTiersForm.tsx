@@ -78,7 +78,6 @@ const SupportArtistTiersForm: React.FC<{
   };
 
   const value = methods.watch("tier");
-
   return (
     <>
       {!artistDetails && <LoadingBlocks rows={1} />}

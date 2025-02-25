@@ -10,6 +10,7 @@ import {
   PutObjectCommand,
   HeadObjectCommand,
   HeadObjectCommandOutput,
+  ListObjectsCommand,
 } from "@aws-sdk/client-s3";
 import fs from "fs";
 import logger from "../logger";
@@ -69,7 +70,10 @@ export const backblazeClient = new S3Client({
 // Toggle this to true if you want to test backblaze locally
 // Note: you'll need both the backblaze key id and app key
 // set for this to work.
-const testBackBlazeLocally = false;
+// FIXME: this should / could be set in the database as part
+// of the site settings.
+const backendStorage: "minio" | "backblaze" =
+  NODE_ENV === "production" ? "backblaze" : "minio";
 
 const createB2BucketIfNotExists = async (bucket: string) => {
   logger.info(`backblaze: checking if a bucket exists: ${bucket}`);
@@ -106,15 +110,41 @@ export const fileExistCheckBackblaze = async (
   return backblazeStat;
 };
 
+export const statFile = async (bucket: string, filename: string) => {
+  let minioStat;
+  let backblazeStat;
+
+  if (backendStorage === "backblaze") {
+    backblazeStat = await fileExistCheckBackblaze(bucket, filename);
+    if (!backblazeStat) {
+      // don't need to log this if our backend storage isn't backblaze
+      logger.error(
+        `Error fetching static file from backblaze: ${bucket}/${filename}`
+      );
+    }
+  }
+  // If the object doesn't exist on backblaze we check in minio
+  if (backendStorage === "minio") {
+    try {
+      minioStat = await minioClient.statObject(bucket, filename);
+    } catch {
+      logger.error(`minio doesn't have the file. weird`);
+    }
+  }
+  return {
+    minioStat,
+    backblazeStat,
+  };
+};
+
 export const createBucketIfNotExists = async (
-  minioClient: Client,
   bucket: string,
   logger?: Logger
 ) => {
-  logger?.info(`checking if a bucket exists: ${bucket}`);
   let exists;
+  logger?.info(`${backendStorage}: checking if a bucket exists in: ${bucket}`);
 
-  if (testBackBlazeLocally || NODE_ENV === "production") {
+  if (backendStorage === "backblaze") {
     await createB2BucketIfNotExists(bucket);
   } else {
     try {
@@ -137,41 +167,51 @@ export const createBucketIfNotExists = async (
   return true;
 };
 
+export const uploadFilesToBackblaze = async (
+  bucket: string,
+  fileName: string,
+  fileStream: Readable | Buffer,
+  options?: { contentType?: string }
+) => {
+  if (fileStream instanceof Buffer) {
+    await backblazeClient.send(
+      new PutObjectCommand({
+        Bucket: bucket,
+        Key: fileName,
+        Body: fileStream,
+        ContentType: options?.contentType,
+      })
+    );
+  } else {
+    const upload = new Upload({
+      client: backblazeClient,
+      params: {
+        Bucket: bucket,
+        Key: fileName,
+        Body: fileStream,
+        ContentType: options?.contentType,
+      },
+    });
+
+    await upload.done();
+  }
+  logger.info(
+    `${backendStorage}: done uploading filestream|buffer: ${bucket}/${fileName}`
+  );
+};
+
 export const uploadWrapper = async (
   bucket: string,
   fileName: string,
   fileStream: Readable | Buffer,
   options?: { contentType?: string }
 ) => {
-  if (testBackBlazeLocally || NODE_ENV === "production") {
-    if (fileStream instanceof Buffer) {
-      logger.info(`backblaze: uploading buffer: ${bucket}/${fileName}`);
-
-      await backblazeClient.send(
-        new PutObjectCommand({
-          Bucket: bucket,
-          Key: fileName,
-          Body: fileStream,
-          ContentType: options?.contentType,
-        })
-      );
-    } else {
-      logger.info(`backblaze: uploading fileStream: ${bucket}/${fileName}`);
-
-      const upload = new Upload({
-        client: backblazeClient,
-        params: {
-          Bucket: bucket,
-          Key: fileName,
-          Body: fileStream,
-          ContentType: options?.contentType,
-        },
-      });
-
-      await upload.done();
-    }
+  logger.info(
+    `${backendStorage}: uploading fileStream|buffer: ${bucket}/${fileName}`
+  );
+  if (backendStorage === "backblaze") {
+    await uploadFilesToBackblaze(bucket, fileName, fileStream, options);
   } else {
-    logger.info(`minio: uploading fileStream: ${bucket}/${fileName}`);
     await minioClient.putObject(bucket, fileName, fileStream);
   }
 };
@@ -180,7 +220,7 @@ export const removeObjectFromStorage = async (
   bucket: string,
   fileName: string
 ) => {
-  if (testBackBlazeLocally || NODE_ENV === "production") {
+  if (backendStorage === "backblaze") {
     logger.info(`backblaze: removing fileStream: ${bucket}/${fileName}`);
 
     await backblazeClient.send(
@@ -194,11 +234,10 @@ export const removeObjectFromStorage = async (
 };
 
 export const getBufferFromStorage = async (
-  minioClient: Client,
   bucket: string,
   filename: string
 ) => {
-  if (testBackBlazeLocally || NODE_ENV === "production") {
+  if (backendStorage === "backblaze") {
     logger.info(`backblaze: getting buffer: ${bucket}/${filename}`);
 
     return getBufferFromBackblaze(bucket, filename);
@@ -220,6 +259,79 @@ export const getBufferFromBackblaze = async (
     buffer: await result.Body?.transformToByteArray(),
     etag: result.ETag,
   };
+};
+
+export const downloadFileFromBackblaze = async (
+  bucket: string,
+  remoteFileName: string,
+  localFilePath: string
+) => {
+  const result = await backblazeClient.send(
+    new GetObjectCommand({ Bucket: bucket, Key: remoteFileName })
+  );
+  if (result.Body instanceof Readable) {
+    await fs.promises.writeFile(localFilePath, result.Body);
+  }
+};
+
+export const getFile = async (
+  bucket: string,
+  remoteFileName: string,
+  localFilePath: string
+) => {
+  if (backendStorage === "backblaze") {
+    logger.info(
+      `${backendStorage}: getting buffer: ${bucket}/${remoteFileName} storing at ${localFilePath}`
+    );
+
+    return downloadFileFromBackblaze(bucket, remoteFileName, localFilePath);
+  } else {
+    logger.info(
+      `${backendStorage}: getting buffer: ${bucket}/${remoteFileName} storing at ${localFilePath}`
+    );
+
+    await getFileFromMinio(bucket, remoteFileName, localFilePath);
+  }
+};
+
+export const getReadStream = async (bucket: string, remoteFileName: string) => {
+  if (backendStorage === "backblaze") {
+    logger.info(`backblaze: getting buffer: ${bucket}/${remoteFileName}`);
+
+    return getReadStreamFromBackblaze(bucket, remoteFileName);
+  } else {
+    logger.info(`minio: getting buffer: ${bucket}/${remoteFileName}`);
+
+    return minioClient.getObject(trackGroupFormatBucket, remoteFileName);
+  }
+};
+
+export const getReadStreamFromBackblaze = async (
+  bucket: string,
+  remoteFileName: string
+) => {
+  const result = await backblazeClient.send(
+    new GetObjectCommand({ Bucket: bucket, Key: remoteFileName })
+  );
+  if (result.Body instanceof Readable) {
+    return result.Body;
+  }
+};
+
+export const getBufferBasedOnStat = async (
+  bucket: string,
+  filename: string,
+  backblazeStat?: HeadObjectCommandOutput
+) => {
+  if (backblazeStat) {
+    const { buffer } = await getBufferFromBackblaze(bucket, filename);
+
+    return buffer;
+  } else {
+    const { buffer } = await getBufferFromMinio(minioClient, bucket, filename);
+
+    return buffer;
+  }
 };
 
 export async function getBufferFromMinio(
@@ -248,25 +360,22 @@ export async function getBufferFromMinio(
 }
 
 export async function getFileFromMinio(
-  minioClient: Client,
   bucket: string,
   filename: string,
-  destinationFolderName?: string,
-  destinationFilePath?: string,
-  logger?: Logger
+  destinationFilePath: string
 ): Promise<{ filePath: string }> {
   return new Promise(
     async (resolve: (result: { filePath: string }) => any, reject) => {
       logger?.info(
-        `Getting object from MinIO Bucket ${bucket}: ${filename} in ${destinationFolderName}`
+        `Getting object from MinIO Bucket ${bucket}: ${filename} in ${destinationFilePath}`
       );
-      await fs.mkdirSync(`${destinationFolderName}`, { recursive: true });
+      // await fs.mkdirSync(`${destinationFolderName}`, { recursive: true });
 
-      const filePath = `${destinationFolderName}/${
-        destinationFilePath ?? `${bucket}_${filename}`
-      }`;
+      // const filePath = `${destinationFolderName}/${
+      //   destinationFilePath ?? `${bucket}_${filename}`
+      // }`;
 
-      const writableStream = fs.createWriteStream(`${filePath}`);
+      const writableStream = fs.createWriteStream(`${destinationFilePath}`);
       // var size = 0;
       minioClient
         .getObject(bucket, filename)
@@ -278,8 +387,8 @@ export async function getFileFromMinio(
             // logger?.info("End. Total size = " + size);
             writableStream.end();
             writableStream.on("finish", () => {
-              logger?.info(`Everything exists at filePath  ${filePath}`);
-              resolve({ filePath });
+              logger?.info(`getFileFromMinio ${destinationFilePath}`);
+              resolve({ filePath: destinationFilePath });
             });
             // resolve({ buffer: Buffer.concat(buff), size });
             resolve;
@@ -298,9 +407,26 @@ export const getObjectList = async (
   bucket: string,
   prefix: string
 ): Promise<{ name: string }[]> => {
+  if (backendStorage === "backblaze") {
+    const result = await backblazeClient.send(
+      new ListObjectsCommand({ Bucket: bucket, Prefix: prefix })
+    );
+    return (
+      result.Contents?.map((c) => (c?.Key ? { name: c.Key } : undefined)) ?? []
+    ).filter((c) => !!c) as { name: string }[];
+  } else {
+    const result = await getObjectListFromMinio(bucket, prefix);
+    return result;
+  }
+};
+
+export const getObjectListFromMinio = async (
+  bucket: string,
+  prefix: string
+): Promise<{ name: string }[]> => {
   return await new Promise((resolve, reject) => {
     const data: { name: string }[] = [];
-    const stream = minioClient.listObjects(bucket, prefix, true);
+    const stream = minioClient.listObjectsV2(bucket, prefix, true);
     stream.on("data", function (obj) {
       data.push(obj);
     });
@@ -319,8 +445,15 @@ export const removeObjectsFromBucket = async (
   prefix: string
 ) => {
   const objects = await getObjectList(bucketName, prefix);
+  if (backendStorage === "backblaze") {
+    await Promise.all(
+      objects.map((o) => removeObjectFromStorage(bucketName, o.name))
+    );
+  }
+  const minioObojects = await getObjectListFromMinio(bucketName, prefix);
+
   await minioClient.removeObjects(
     bucketName,
-    objects.map((o) => o.name)
+    minioObojects.map((o) => o.name)
   );
 };

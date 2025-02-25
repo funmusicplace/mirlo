@@ -150,7 +150,7 @@ const SubscriptionForm: React.FC<{
           <Button
             type="submit"
             disabled={isSaving}
-            compact
+            size="compact"
             isLoading={isSaving}
           >
             {existing ? t("saveSubscription") : t("createSubscription")}

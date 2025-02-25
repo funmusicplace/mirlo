@@ -1,30 +1,36 @@
 html {
   --mi-black: #111;
   --mi-white: #ffffff;
+  --mi-off-white: #f5f0f0;
   --mi-pink: #be3455;
 
   --mi-normal-background-color: #f5f0f0;
   --mi-lighten-background-color: rgba(255, 255, 255, 0.35);
   --mi-lighten-x-background-color: rgba(255, 255, 255, 0.5);
+  --mi-lighten-xx-background-color: rgba(255, 255, 255, 0.8);
   --mi-darken-background-color: rgba(50, 0, 0, 0.03);
   --mi-darken-x-background-color: rgba(50, 0, 0, 0.2);
+  --mi-darken-xx-background-color: rgba(50, 0, 0, 0.2);
 
   --mi-light-background-color: #f7f7f7;
   --mi-lighter-background-color: #fcfcfc;
 
   --mi-normal-foreground-color: var(--mi-black);
+  --mi-black-color: var(--mi-black);
   --mi-light-foreground-color: #454545;
   --mi-lighter-foreground-color: #515151;
 
-  --mi-primary-color: var(--mi-black);
-  --mi-secondary-color: #ffc0cb;
+  --mi-primary-color: var(--mi-pink);
+  --mi-secondary-color: var(--mi-black);
 
   --mi-info-background-color: #5c899c;
-  --mi-success-background-color: #048c16;
+  --mi-success-background-color: #d7f0da;
 
   --mi-warning-color: #f2897a;
-  --mi-warning-background-color: var(--mi-warning-color);
-  --mi-darken-warning-background-color: #df250b;
+  --mi-warning-background-color: #e6c7c3;
+  --mi-lighten-warning-background-color: #f3dad7;
+
+  --mi-darken-warning-background-color: #e4aca4;
   --mi-link-color: var(--mi-pink);
 
   --mi-icon-button-background-color: var(--mi-darken-x-background-color);
@@ -40,15 +46,16 @@ html {
   --mi-darken-background-color: rgba(0, 0, 0, 0.03);
   --mi-lighten-background-color: rgba(255, 255, 255, 0.2);
 
-  --mi-normal-foreground-color: var(--mi-white);
+  --mi-normal-foreground-color: var(--mi-off-white);
   --mi-light-foreground-color: #a0a0a0;
   --mi-lighter-foreground-color: #9e9e9e;
 
   --mi-light-background-color: #222;
   --mi-lighter-background-color: #282828;
 
-  --mi-primary-color: var(--mi-white);
+  --mi-primary-color: #ffc0cb;
   --mi-secondary-color: #be3455;
 
   --mi-pink: #ea8b99;
+  --mi-black-color: #fff;
 }

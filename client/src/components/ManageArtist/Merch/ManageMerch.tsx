@@ -12,9 +12,16 @@ import { ButtonLink } from "components/common/Button";
 import { FaPen } from "react-icons/fa";
 import DashedList from "./DashedList";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
+import MerchFulfillmentLink from "./MerchFulfillmentLink";
+import Pill from "components/common/Pill";
+import { useTranslation } from "react-i18next";
+import { ImWarning } from "react-icons/im";
+import { ArtistButtonLink } from "components/Artist/ArtistButtons";
 
 const ManageMerch: React.FC<{}> = () => {
   const { artistId } = useParams();
+  const { t } = useTranslation("translation", { keyPrefix: "manageMerch" });
+
   const { data: artist, isLoading: isLoadingArtist } = useQuery(
     queryManagedArtist(Number(artistId))
   );
@@ -70,11 +77,19 @@ const ManageMerch: React.FC<{}> = () => {
                   square
                 />
                 <span>{item.title}</span>
+                {!item.isPublic && (
+                  <Pill variant="warning">
+                    <ImWarning />
+                    {t("notPublic")}
+                  </Pill>
+                )}
               </div>
-              <ButtonLink to={item.id} startIcon={<FaPen />} />
+              <ArtistButtonLink to={item.id} startIcon={<FaPen />} />
             </li>
           ))}
       </DashedList>
+
+      <MerchFulfillmentLink />
     </ManageSectionWrapper>
   );
 };

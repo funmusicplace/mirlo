@@ -1,44 +1,17 @@
-import {
-  Merch,
-  MerchPurchase,
-  Prisma,
-  TrackGroup,
-  User,
-  UserTrackGroupPurchase,
-} from "@mirlo/prisma/client";
+import { User } from "@mirlo/prisma/client";
 import { Request, Response } from "express";
 import { userAuthenticated } from "../../../../auth/passport";
 import prisma from "@mirlo/prisma";
 import trackGroupProcessor from "../../../../utils/trackGroup";
 import { processSingleMerch } from "../../../../utils/merch";
+import {
+  isMerchPurchase,
+  isTrackGroupPurchase,
+} from "../../../../utils/typeguards";
 
 type Params = {
   userId: string;
 };
-
-type TrackGroupPurchaseWithTrackGroup = UserTrackGroupPurchase & {
-  trackGroup: TrackGroup;
-};
-
-function isTrackGroupPurchase(
-  entity: unknown
-): entity is TrackGroupPurchaseWithTrackGroup {
-  if (!entity) {
-    return false;
-  }
-  return (entity as TrackGroupPurchaseWithTrackGroup).trackGroup !== undefined;
-}
-
-type MerchPurchaseWithMerch = MerchPurchase & {
-  merch: Merch;
-};
-
-function isMerchPurchase(entity: unknown): entity is MerchPurchaseWithMerch {
-  if (!entity) {
-    return false;
-  }
-  return (entity as MerchPurchaseWithMerch).merch !== undefined;
-}
 
 export default function () {
   const operations = {
@@ -82,6 +55,7 @@ export default function () {
       const mergedPurchases = [...merchPurchases, ...trackGroupPurchases].sort(
         (a, b) => {
           const timeA = isTrackGroupPurchase(a) ? a.datePurchased : a.createdAt;
+
           const timeB = isTrackGroupPurchase(b) ? b.datePurchased : b.createdAt;
           return timeA > timeB ? -1 : 1;
         }

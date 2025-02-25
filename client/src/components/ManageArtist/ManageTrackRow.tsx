@@ -14,7 +14,6 @@ import LoadingSpinner from "components/common/LoadingSpinner";
 import Button from "components/common/Button";
 import { useAuthContext } from "state/AuthContext";
 import ManageTrackArtists from "./ManageTrackArtists";
-import SavingInput from "./AlbumFormComponents/SavingInput";
 import ClickToEditInput from "./AlbumFormComponents/ClickToEditInput";
 
 const TrackRow = styled("tr")`
@@ -86,7 +85,7 @@ const ManageTrackRow: React.FC<{
       if (confirm) {
         await api.delete(`manage/tracks/${track.id}`);
         await reload?.();
-        snackbar("Deleted track", { type: "success" });
+        snackbar(t("deleteTrackSuccess"), { type: "success" });
       }
     } catch (e) {
       console.error(e);
@@ -107,8 +106,6 @@ const ManageTrackRow: React.FC<{
 
     reload();
   }, [reload]);
-
-  console.log("track.audio", track.title, !track.title);
 
   if (isEditing) {
     return (
@@ -237,7 +234,7 @@ const ManageTrackRow: React.FC<{
       </td>
       <td align="right">
         <Button
-          compact
+          size="compact"
           startIcon={<FaPen />}
           variant="dashed"
           onClick={() => setIsEditing(true)}
@@ -247,7 +244,7 @@ const ManageTrackRow: React.FC<{
         <Button
           variant="dashed"
           startIcon={<FaTrash />}
-          compact
+          size="compact"
           onClick={onDeleteClick}
           title={t("delete") ?? ""}
         />

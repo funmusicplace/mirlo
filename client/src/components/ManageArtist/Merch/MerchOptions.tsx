@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import Button from "components/common/Button";
 import { queryManagedMerch } from "queries";
-import { FaPen, FaPlus } from "react-icons/fa";
+import { FaPen, FaPlus, FaTrash } from "react-icons/fa";
 import { useParams } from "react-router-dom";
 import DashedList from "./DashedList";
 import { css } from "@emotion/css";
@@ -16,6 +16,7 @@ import FormComponent from "components/common/FormComponent";
 import { useTranslation } from "react-i18next";
 import { InputEl } from "components/common/Input";
 import api from "services/api";
+import { ArtistButton } from "components/Artist/ArtistButtons";
 
 type OptionTypesForm = {
   optionTypes: Partial<MerchOptionType>[];
@@ -30,10 +31,15 @@ const OptionType: React.FC<{
 
   const methods = useFormContext();
 
-  const { fields: options, append } = useFieldArray({
+  const {
+    fields: options,
+    append,
+    remove,
+  } = useFieldArray({
     control: methods.control,
     name: `optionTypes.${index}.options`,
   });
+
   return (
     <li>
       {isEditing && (
@@ -50,7 +56,7 @@ const OptionType: React.FC<{
           `}
         >
           <FormComponent>
-            <label>{t("optionName")}</label>
+            <label>{t("optionType")}</label>
             <InputEl {...methods.register(`optionTypes.${index}.optionName`)} />
           </FormComponent>
           <FormComponent
@@ -62,32 +68,61 @@ const OptionType: React.FC<{
               }
             `}
           >
-            <label>{t("options")}</label>
+            <label>{t("optionSubTypes")}</label>
             {options.map((o, optionIndex) => (
-              <InputEl
-                {...methods.register(
-                  `optionTypes.${index}.options.${optionIndex}.name`
-                )}
-              />
+              <div
+                className={css`
+                  display: flex;
+                  gap: 1rem;
+                `}
+              >
+                <FormComponent>
+                  <label>{t("subtypeName")}</label>
+                  <InputEl
+                    {...methods.register(
+                      `optionTypes.${index}.options.${optionIndex}.name`
+                    )}
+                    required
+                  />
+                </FormComponent>
+                <FormComponent>
+                  <label>{t("additionalPrice")}</label>
+                  <InputEl
+                    {...methods.register(
+                      `optionTypes.${index}.options.${optionIndex}.additionalPrice`
+                    )}
+                    type="number"
+                  />
+                </FormComponent>
+                <ArtistButton
+                  type="button"
+                  startIcon={<FaTrash />}
+                  onClick={() => remove(optionIndex)}
+                />
+              </div>
             ))}
-            <Button
+            <ArtistButton
               onClick={() => {
                 append("");
               }}
               type="button"
-              compact
+              size="compact"
               startIcon={<FaPlus />}
               variant="dashed"
             >
-              {t("addNewOption")}
-            </Button>
+              {t("addNewOptionSubType")}
+            </ArtistButton>
           </FormComponent>
         </div>
       )}
       {!isEditing && (
         <>
           <em>{optionType.optionName}</em>
-          {optionType.options?.map((o) => o.name).join(", ")}
+          {optionType.options
+            ?.map((o) =>
+              o.additionalPrice ? `${o.name} (${o.additionalPrice})` : o.name
+            )
+            .join(", ")}
         </>
       )}
     </li>
@@ -99,15 +134,20 @@ const MerchOptions: React.FC<{}> = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageMerch" });
   const [isEditing, setIsEditing] = React.useState(false);
 
-  const { data: merch, refetch } = useQuery(
-    queryManagedMerch(merchParamId ?? "")
-  );
+  const { data: merch } = useQuery(queryManagedMerch(merchParamId ?? ""));
 
   const methods = useForm<OptionTypesForm>({
     defaultValues: {
-      optionTypes: merch?.optionTypes,
+      optionTypes: merch?.optionTypes.map((ot) => ({
+        ...ot,
+        options: ot.options?.map((o) => ({
+          ...o,
+          additionalPrice: o.additionalPrice / 100,
+        })),
+      })),
     },
   });
+
   const { fields, append } = useFieldArray({
     control: methods.control,
     name: `optionTypes`,
@@ -115,7 +155,13 @@ const MerchOptions: React.FC<{}> = () => {
 
   const update = React.useCallback(
     async (newOptionTypes: OptionTypesForm) => {
-      const packet = newOptionTypes.optionTypes;
+      const packet = newOptionTypes.optionTypes.map((ot) => ({
+        ...ot,
+        options: ot.options?.map((o) => ({
+          ...o,
+          additionalPrice: o.additionalPrice * 100,
+        })),
+      }));
       try {
         await api.put(`manage/merch/${merchParamId}/optionTypes`, packet);
       } catch (e) {
@@ -139,6 +185,7 @@ const MerchOptions: React.FC<{}> = () => {
         onSubmit={methods.handleSubmit(update)}
         className={css`
           width: 100%;
+          margin-top: 0.75rem;
         `}
       >
         <FormProvider {...methods}>
@@ -161,25 +208,27 @@ const MerchOptions: React.FC<{}> = () => {
           `}
         >
           {!isEditing && (
-            <Button startIcon={<FaPen />} onClick={() => setIsEditing(true)}>
+            <ArtistButton
+              startIcon={<FaPen />}
+              onClick={() => setIsEditing(true)}
+            >
               {t("edit")}
-            </Button>
+            </ArtistButton>
           )}
           {isEditing && (
             <>
-              {" "}
-              <Button
+              <ArtistButton
                 onClick={() => {
                   append({ optionName: "" });
                 }}
                 type="button"
-                compact
+                size="compact"
                 startIcon={<FaPlus />}
                 variant="dashed"
               >
                 {t("addNewMerchOption")}
-              </Button>
-              <Button>{t("save")}</Button>
+              </ArtistButton>
+              <ArtistButton>{t("saveOptions")}</ArtistButton>
             </>
           )}
         </div>

@@ -8,6 +8,7 @@ import { getReleaseUrl, getTrackGroupWidget } from "utils/artist";
 import { FaCopy } from "react-icons/fa";
 import { BsShare } from "react-icons/bs";
 import { useSnackbar } from "state/SnackbarContext";
+import { ArtistButton } from "components/Artist/ArtistButtons";
 
 const TrackGroupEmbed: React.FC<{
   trackGroup: TrackGroup;
@@ -90,19 +91,16 @@ const TrackGroupEmbed: React.FC<{
         </div>
       </Modal>
       <div>
-        <Button
+        <ArtistButton
           onlyIcon
           onClick={() => setIsPopupOpen(true)}
+          startIcon={<BsShare />}
           className={css`
             margin-top: 0rem;
             font-size: 1.2rem;
-            background: transparent;
-            color: var(--mi-primary-color);
             margin-left: 0.2rem;
           `}
-        >
-          <BsShare />
-        </Button>
+        ></ArtistButton>
       </div>
     </div>
   );

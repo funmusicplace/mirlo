@@ -10,10 +10,15 @@ import {
   findPurchaseAndVoidToken,
   findPurchaseBasedOnTokenAndUpdate,
 } from "../../../../utils/trackGroup";
-import { minioClient, trackGroupFormatBucket } from "../../../../utils/minio";
+import {
+  getReadStream,
+  statFile,
+  trackGroupFormatBucket,
+} from "../../../../utils/minio";
 import { startGeneratingAlbum } from "../../../../queues/album-queue";
 import filenamify from "filenamify";
 import { cleanHeaderValue } from "../../../../utils/validate-http-headers";
+import { AppError } from "../../../../utils/error";
 
 export default function () {
   const operations = {
@@ -88,7 +93,18 @@ export default function () {
 
       try {
         logger.info("checking if trackgroup already zipped");
-        await minioClient.statObject(trackGroupFormatBucket, zipName);
+        const { backblazeStat, minioStat } = await statFile(
+          trackGroupFormatBucket,
+          zipName
+        );
+        if (!backblazeStat && !minioStat) {
+          logger.info("trackGroup doesn't exist yet, start generating it");
+          const jobId = await startGeneratingAlbum(trackGroup, format);
+          return res.json({
+            message: "We've started generating the album",
+            result: { jobId },
+          });
+        }
       } catch (e) {
         logger.info("trackGroup doesn't exist yet, start generating it");
         const jobId = await startGeneratingAlbum(trackGroup, format);
@@ -99,17 +115,25 @@ export default function () {
       }
 
       try {
-        const title = cleanHeaderValue(filenamify(`${trackGroup.artist.name} - ${trackGroup.title ?? "album"}`));
+        const title = cleanHeaderValue(
+          filenamify(
+            `${trackGroup.artist.name} - ${trackGroup.title ?? "album"}`
+          )
+        );
         logger.info(`downloading ${title}.zip`);
         res.attachment(`${title}.zip`);
         res.set("Content-Disposition", `attachment; filename="${title}.zip"`);
 
-        const stream = await minioClient.getObject(
-          trackGroupFormatBucket,
-          zipName
-        );
+        const stream = await getReadStream(trackGroupFormatBucket, zipName);
 
-        stream.pipe(res);
+        if (stream) {
+          stream.pipe(res);
+        } else {
+          throw new AppError({
+            httpCode: 500,
+            description: `Remote file not found for ${trackGroupFormatBucket}/${zipName}`,
+          });
+        }
       } catch (e) {
         next(e);
       }

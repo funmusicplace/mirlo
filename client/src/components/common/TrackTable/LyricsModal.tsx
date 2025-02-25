@@ -17,8 +17,8 @@ const LyricsModal: React.FC<{ track: Track; trackGroupArtistId?: number }> = ({
   return (
     <>
       <Button
-        compact
-        transparent
+        size="compact"
+        variant="transparent"
         onClick={(e) => {
           e.stopPropagation();
           setIsOpen(true);

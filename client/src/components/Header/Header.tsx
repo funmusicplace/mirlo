@@ -44,7 +44,7 @@ const HeaderWrapper = styled.div<{
     props.transparent
       ? `background: transparent; 
          box-shadow: 0px 1px 10px rgba(0, 0, 0, 0);`
-      : `background: var(--mi-light-background-color); 
+      : `background: var(--mi-darken-background-color); 
          box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1);`}
 
   ${(props) =>
@@ -174,10 +174,6 @@ const Content = styled.div<{ artistId?: string }>`
   margin: 0 auto;
   height: var(--header-cover-sticky-height);
 
-  Button {
-    background-color: var(--mi-normal-background-color);
-  }
-
   @media screen and (max-width: ${bp.medium}px) {
     padding-top: 0.5rem;
     padding-bottom: 0.5rem;
@@ -234,13 +230,6 @@ const Header = () => {
           className={css`
             display: flex;
             align-items: center;
-            button {
-              color: var(--mi-normal-foreground-color);
-            }
-            button:hover {
-              color: var(--mi-normal-background-color);
-              background-color: var(--mi-normal-foreground-color);
-            }
           `}
         >
           <HeaderSearch />
@@ -257,8 +246,7 @@ const Header = () => {
             startIcon={<FaHandHoldingHeart />}
             className={css`
               display: block;
-              padding: 1rem;
-              margin-left: 1rem;
+              margin-left: 0.75rem;
               text-decoration: none;
               text-align: center;
               &:hover {
@@ -266,10 +254,20 @@ const Header = () => {
               }
 
               color: var(--mi-white) !important;
+
+              svg {
+                fill: white !important;
+              }
+
               background-color: var(--mi-black) !important;
+
               @media (prefers-color-scheme: dark) {
                 background-color: var(--mi-white) !important;
                 color: var(--mi-black) !important;
+
+                svg {
+                  fill: var(--mi-black) !important;
+                }
               }
 
               @media screen and (max-width: ${bp.medium}px) {

@@ -20,7 +20,6 @@ import { convertURLArrayToSizes } from "./images";
 import {
   finalArtistAvatarBucket,
   finalArtistBannerBucket,
-  finalMerchImageBucket,
   removeObjectsFromBucket,
 } from "./minio";
 import {
@@ -373,6 +372,7 @@ export const singleInclude = (queryOptions?: {
     trackGroups: {
       where: {
         published: true,
+        isDrafts: false,
         tracks: { some: { audio: { uploadState: "SUCCESS" } } },
       },
       orderBy: {
@@ -416,6 +416,17 @@ export const singleInclude = (queryOptions?: {
       },
       orderBy: {
         minAmount: "asc",
+      },
+    },
+    artistLabels: {
+      include: {
+        labelUser: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
       },
     },
     posts: {

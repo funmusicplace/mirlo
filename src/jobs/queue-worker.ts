@@ -17,10 +17,7 @@ import sendMail from "./send-mail";
 import "../queues/send-mail-queue";
 
 import { REDIS_CONFIG } from "../config/redis";
-import {
-  moveFilesToBackblazeJob,
-  moveFilesToBackBlazeQueue,
-} from "../queues/moving-files-to-backblaze";
+import { moveFilesToBackblazeJob } from "../queues/moving-files-to-backblaze";
 
 export const logger = winston.createLogger({
   level: "info",

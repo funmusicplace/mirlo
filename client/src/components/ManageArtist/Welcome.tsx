@@ -5,7 +5,7 @@ import { InputEl } from "components/common/Input";
 import { FormProvider, useForm } from "react-hook-form";
 import Button, { ButtonLink } from "components/common/Button";
 import React from "react";
-import ArtistSlugInput from "./ArtistSlugInput";
+import ArtistSlugInput from "./ManageArtistDetails/ArtistSlugInput";
 import api from "services/api";
 import UploadArtistImage from "./UploadArtistImage";
 import { FaArrowRight } from "react-icons/fa";
@@ -153,7 +153,7 @@ const Welcome = () => {
           >
             <Button
               isLoading={isLoading}
-              compact
+              size="compact"
               disabled={isButtonDisabled}
               type="submit"
               onClick={handleSubmit(onClickNext)}

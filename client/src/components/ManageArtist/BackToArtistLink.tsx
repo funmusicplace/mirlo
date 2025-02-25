@@ -1,4 +1,5 @@
 import { css } from "@emotion/css";
+import ArtistRouterLink from "components/Artist/ArtistButtons";
 import Tooltip from "components/common/Tooltip";
 import { useTranslation } from "react-i18next";
 import { FaChevronLeft } from "react-icons/fa";
@@ -17,12 +18,11 @@ const BackToArtistLink: React.FC<{ subPage?: "posts" }> = ({ subPage }) => {
 
   return (
     <Tooltip hoverText={t("backToArtist")} underline={false}>
-      <Link
+      <ArtistRouterLink
         className={css`
           display: flex;
           align-items: center;
           font-size: 1.2rem;
-          padding-bottom: 1rem;
         `}
         to={`/manage/artists/${artist.id}/${subPage ?? ""}`}
       >
@@ -33,7 +33,7 @@ const BackToArtistLink: React.FC<{ subPage?: "posts" }> = ({ subPage }) => {
           `}
         />
         {artist.name}
-      </Link>
+      </ArtistRouterLink>
     </Tooltip>
   );
 };

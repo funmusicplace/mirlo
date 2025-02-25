@@ -13,11 +13,12 @@ import { debounce } from "lodash";
 const SearchResultsDiv = styled.div`
   position: absolute;
   padding: 0.5rem;
-  background: var(--mi-white);
+  background: var(--mi-normal-background-color);
+  border: 1px solid var(--mi-darken-xx-background-color);
   width: 100%;
   z-index: 999;
   word-break: break-word;
-  color: var(--mi-black) !important;
+  color: var(--mi-normal-foreground-color);
   margin-top: 0.5rem;
   border-radius: 5px;
 
@@ -28,9 +29,9 @@ const SearchResultsDiv = styled.div`
   }
 
   @media (prefers-color-scheme: dark) {
-    color: var(--mi-black);
+    color: var(--mi-normal-foreground-color);
     &::placeholder {
-      color: var(--mi-black) !important;
+      color: var(--mi-normal-foreground-color) !important;
       opacity: 0.3;
     }
   }
@@ -44,8 +45,8 @@ const SearchResultList = styled.ol`
 const SearchResult = styled.li`
   a,
   button {
-    padding: 0.75rem 1rem;
-    color: var(--mi-black) !important;
+    padding: 0.75rem 1rem !important;
+    color: var(--mi-normal-foreground-color) !important;
     display: block;
     background: transparent;
     border: none;
@@ -56,42 +57,51 @@ const SearchResult = styled.li`
   }
 
   &.selected {
-    background: var(--mi-black);
-    color: var(--mi-white) !important;
+    background: var(--mi-normal-foreground-color);
+    color: var(--mi-normal-background-color) !important;
 
     button,
     a {
-      color: var(--mi-white) !important;
+      color: var(--mi-normal-background-color) !important;
     }
   }
+
   button:hover,
   a:hover {
-    color: var(--mi-white) !important;
-    background-color: var(--mi-black) !important;
+    color: var(--mi-normal-background-color) !important;
+    background-color: var(--mi-normal-foreground-color) !important;
   }
   @media (prefers-color-scheme: dark) {
     button:hover,
     a:hover {
-      background-color: var(--mi-black) !important;
+      background-color: var(--mi-normal-foreground-color) !important;
     }
   }
 `;
 
+type Result = {
+  id: number | string;
+  name: string;
+  isNew?: boolean;
+  firstInCategory?: boolean;
+  category?: string;
+};
+
 const AutoComplete: React.FC<{
-  getOptions: (
-    val: string
-  ) =>
-    | Promise<{ id: number | string; name: string; isNew?: boolean }[]>
-    | { id: number | string; name: string; isNew?: boolean }[]
-    | undefined;
+  getOptions: (val: string) => Promise<Result[]> | Result[] | undefined;
   resultsPrefix?: string;
   onSelect?: (value: string | number) => void;
-  optionDisplay?: (result: {
-    id: number | string;
-    name: string;
-    artistId?: string | number;
-    trackGroupId?: string | number;
-  }) => React.ReactNode;
+  optionDisplay?: (
+    result: {
+      id: number | string;
+      name: string;
+      artistId?: string | number;
+      trackGroupId?: string | number;
+      firstInCategory?: boolean;
+      category?: string;
+    },
+    index: number
+  ) => React.ReactNode;
   placeholder?: string | null;
   allowNew?: boolean;
   showBackground?: boolean;
@@ -111,9 +121,7 @@ const AutoComplete: React.FC<{
 
   const [showSuggestions, setShowSuggestions] = React.useState(false);
   const [isSearching, setIsSearching] = React.useState(false);
-  const [searchResults, setSearchResults] = React.useState<
-    { id: number | string; name: string; isNew?: boolean }[]
-  >([]);
+  const [searchResults, setSearchResults] = React.useState<Result[]>([]);
   const [navigationIndex, setNavigationIndex] = React.useState(0);
   let location = useLocation();
 
@@ -196,8 +204,8 @@ const AutoComplete: React.FC<{
           opacity: 0.95;
           position: relative;
           margin-bottom: 0 !important;
-          border: 1px solid var(--mi-lighten-foreground-color);
-          background: var(--mi-white) !important;
+          border: 1px solid var(--mi-normal-foreground-color);
+          background: var(--mi-normal-background-color) !important;
           overflow: hidden;
           text-overflow: ellipsis;
           &::placeholder {
@@ -205,10 +213,10 @@ const AutoComplete: React.FC<{
             opacity: 0.5;
           }
           @media (prefers-color-scheme: dark) {
-            color: var(--mi-white) !important;
-            background: var(--mi-black) !important;
+            color: var(--mi-normal-foreground-color) !important;
+            background: var(--mi-normal-background-color) !important;
             &::placeholder {
-              color: var(--mi-white) !important;
+              color: var(--mi-normal-foreground-color) !important;
             }
           }
         `}
@@ -249,23 +257,28 @@ const AutoComplete: React.FC<{
             {isSearching && <LoadingSpinner />}
             {!isSearching && searchResults.length > 0 && (
               <SearchResultList>
-                {searchResults.map((r, index) => (
-                  <SearchResult
-                    key={r.id}
-                    className={navigationIndex === index ? "selected" : ""}
-                  >
-                    {optionDisplay ? (
-                      optionDisplay(r)
-                    ) : (
-                      <Button
-                        type="button"
-                        onClick={() => onSelectValue(r.id, index)}
+                {searchResults.map((r, index) => {
+                  return (
+                    <>
+                      {r.firstInCategory && <>{r.category}</>}
+                      <SearchResult
+                        key={r.id}
+                        className={navigationIndex === index ? "selected" : ""}
                       >
-                        {r.isNew ? `use "${r.name}"` : r.name}
-                      </Button>
-                    )}
-                  </SearchResult>
-                ))}
+                        {optionDisplay ? (
+                          optionDisplay(r, index)
+                        ) : (
+                          <Button
+                            type="button"
+                            onClick={() => onSelectValue(r.id, index)}
+                          >
+                            {r.isNew ? `use "${r.name}"` : r.name}
+                          </Button>
+                        )}
+                      </SearchResult>
+                    </>
+                  );
+                })}
               </SearchResultList>
             )}
             {!allowNew && !isSearching && searchResults.length === 0 && (

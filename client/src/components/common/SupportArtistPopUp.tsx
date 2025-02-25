@@ -10,6 +10,7 @@ import { useAuthContext } from "state/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { queryUserStripeStatus } from "queries";
 import SupportArtistTiersForm from "./SupportArtistTiersForm";
+import { ArtistButton } from "components/Artist/ArtistButtons";
 
 const SupportArtistPopUp: React.FC<{
   artist: Pick<Artist, "id" | "name" | "userId" | "urlSlug">;
@@ -49,9 +50,9 @@ const SupportArtistPopUp: React.FC<{
 
   return (
     <>
-      <Button variant="big" onClick={() => setIsOpen(true)}>
+      <ArtistButton size="big" rounded wrap onClick={() => setIsOpen(true)}>
         {t("subscribeToArtist", { artist: artist.name })}
-      </Button>
+      </ArtistButton>
       <Modal
         title={t("supportArtist", { artist: artist.name }) ?? ""}
         open={isOpen}

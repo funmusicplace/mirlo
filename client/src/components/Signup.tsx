@@ -35,10 +35,14 @@ const ArtistToggle = styled(FormComponent)`
   label {
     width: 50%;
     margin: 0 0.5rem 0 0;
-    border: 1px solid var(--mi-darken-x-background-color);
+    border: 1px solid var(--mi-lighten-x-background-color);
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+
+  input:checked + span {
+    background: var(--mi-info-background-color);
   }
 
   span {
@@ -49,11 +53,7 @@ const ArtistToggle = styled(FormComponent)`
     display: flex;
     align-items: center;
     height: 100%;
-  }
-
-  input:checked + span {
-    background-color: var(--mi-info-background-color);
-    color: var(--mi-white);
+    cursor: pointer;
   }
 `;
 
@@ -234,7 +234,7 @@ function Signup() {
         </Link>
         <img
           alt="a blackbird"
-          src="/images/blackbird.png"
+          src="/assets/images/blackbird.png"
           className={css`
             width: 100%;
             padding: 4rem 0;

@@ -90,8 +90,8 @@ export default function () {
         }
       } else {
         res
-          .status(500)
-          .json({ error: "Something went wrong while subscribing the user" });
+          .status(400)
+          .json({ error: "need session_id and stripeAccountId in query" });
       }
     } catch (e) {
       console.error(e);

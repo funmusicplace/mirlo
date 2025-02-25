@@ -5,11 +5,13 @@ import { FaFilm } from "react-icons/fa";
 import { InputEl } from "../Input";
 import { useCommands } from "@remirror/react";
 import { css } from "@emotion/css";
+import { useTranslation } from "react-i18next";
 
 const InsertVideoButton = () => {
   const [isOpen, setIsOpen] = React.useState(false);
   const [videoUrl, setVideoUrl] = React.useState("");
   const { addIframe, addYouTubeVideo } = useCommands();
+  const { t } = useTranslation("translation", { keyPrefix: "textEditor" });
 
   const onAdd = () => {
     if (videoUrl.includes("youtube")) {
@@ -32,9 +34,9 @@ const InsertVideoButton = () => {
         open={isOpen}
         onClose={() => setIsOpen(false)}
         size="small"
-        title="Add a video"
+        title={t("uploadAVideo")}
       >
-        What's the video URL?
+        {t("addUrl")}
         <InputEl
           value={videoUrl}
           onChange={(e) => setVideoUrl(e.target.value)}
@@ -46,7 +48,7 @@ const InsertVideoButton = () => {
             margin-top: 1rem;
           `}
         >
-          Add video
+          {t("addVideo")}
         </Button>
       </Modal>
     </>

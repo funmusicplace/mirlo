@@ -13,7 +13,6 @@ import {
 import prisma from "@mirlo/prisma";
 import {
   finalCoversBucket,
-  minioClient,
   createBucketIfNotExists,
 } from "../../../../src/utils/minio";
 
@@ -34,7 +33,7 @@ describe("manage/trackGroups/{trackGroupId}/cover", () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
       const artist = await createArtist(user.id);
       const trackGroup = await createTrackGroup(artist.id);
-      await createBucketIfNotExists(minioClient, finalCoversBucket);
+      await createBucketIfNotExists(finalCoversBucket);
 
       const response = await requestApp
         .delete(`manage/trackGroups/${trackGroup.id}/cover`)

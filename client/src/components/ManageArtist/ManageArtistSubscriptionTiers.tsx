@@ -44,19 +44,18 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
               margin-right: 0.25rem;
             `}
             variant="dashed"
-            compact
+            size="compact"
             collapsible
             startIcon={<FaWrench />}
           >
             {t("supporters")}
           </ButtonLink>
           <Button
-            transparent
             onClick={() => {
               setAddingNewTier(true);
             }}
             startIcon={<FaPlus />}
-            compact
+            size="compact"
             variant="dashed"
           >
             {t("addNewTier")}

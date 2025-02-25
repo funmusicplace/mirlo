@@ -139,6 +139,8 @@ export const TrackgroupInfosWrapper = styled.div`
 export const TrackListingWrapper = styled.div`
   max-width: 59%;
   flex: 59%;
+  margin: 0 0.5rem;
+
   @media screen and (max-width: ${bp.small}px) {
     max-width: 100%;
     flex: 100%;
@@ -233,9 +235,9 @@ function TrackGroup() {
               <ImageAndDetailsWrapper>
                 <ImageWrapper>
                   <ImageWithPlaceholder
-                    src={trackGroup.cover?.sizes?.[960]}
+                    src={trackGroup.cover?.sizes?.[600]}
                     alt={trackGroup.title}
-                    size={960}
+                    size={600}
                   />
                 </ImageWrapper>
                 <UnderneathImage>
@@ -245,11 +247,8 @@ function TrackGroup() {
                       display: flex;
                       justify-content: flex-end;
                       align-items: center;
-                      gap: 1rem;
-                      button {
-                        background: var(--mi-darken-background-color);
-                        margin-left: 0 !important;
-                      }
+                      gap: 0.5rem;
+
                       a {
                         font-size: var(--mi-font-size-normal);
                       }
@@ -260,13 +259,14 @@ function TrackGroup() {
                     `}
                   >
                     <TrackGroupEmbed trackGroup={trackGroup} />
-                    <Wishlist trackGroup={trackGroup} />
+                    <Wishlist trackGroup={trackGroup} inArtistPage />
                     <PurchaseOrDownloadAlbum trackGroup={trackGroup} />
                   </div>
                 </UnderneathImage>
                 {trackGroup.merch && trackGroup.merch.length > 0 && (
                   <TrackGroupMerch merch={trackGroup.merch} />
                 )}
+
                 <SmallScreenPlayWrapper>
                   <ClickToPlayAlbum
                     trackGroupId={trackGroup.id}
@@ -282,6 +282,14 @@ function TrackGroup() {
                   tracks={trackGroup.tracks}
                   trackGroup={trackGroup}
                 />
+                <p
+                  className={css`
+                    margin-left: 2.5rem;
+                    margin-top: 1rem;
+                  `}
+                >
+                  <small>{t("downloadCodecsInfo")}</small>
+                </p>
               </TrackListingWrapper>
             </div>
           </div>
@@ -305,6 +313,8 @@ function TrackGroup() {
             className={css`
               margin-top: 2rem;
               text-align: center;
+              display: flex;
+              justify-content: center;
             `}
           >
             {trackGroup.artist && (

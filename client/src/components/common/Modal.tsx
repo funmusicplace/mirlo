@@ -174,7 +174,7 @@ export const Modal: React.FC<{
               padding-top: 1rem;
               align-items: center;
               margin-bottom: 0.5rem;
-              background-color: var(--mi-lighter-background-color) !important;
+              background-color: var(--mi-lighten-background-color) !important;
               padding: 1rem;
               border-radius: var(--mi-border-radius-x) var(--mi-border-radius-x)
                 0 0;
@@ -193,17 +193,13 @@ export const Modal: React.FC<{
                 max-width: 85%;
                 margin-bottom: 0 !important;
               }
-
-              @media (prefers-color-scheme: dark) {
-                background-color: #080808 !important;
-              }
             `}
           >
             {title && <h2>{title}</h2>}
 
             <Button
               className={close}
-              compact
+              size="compact"
               startIcon={<FaTimes />}
               onClick={onCloseWrapper}
               aria-label="close"

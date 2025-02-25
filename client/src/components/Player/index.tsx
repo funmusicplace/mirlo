@@ -25,25 +25,7 @@ const ControlWrapper = styled.span`
   align-items: center;
 
   button {
-    color: black;
-    background: transparent;
-  }
-
-  button:hover {
-    color: var(--mi-white);
-    background-color: var(--mi-white);
-    font-size: 1.2rem;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    button {
-      color: white;
-    }
-    button:hover {
-      background-color: var(--mi-white) !important;
-      color: var(--mi-black) !important;
-      font-size: 1.2rem;
-    }
+    margin-right: 0.6rem;
   }
 
   @media (max-width: ${bp.small}px) {
@@ -85,36 +67,58 @@ const Player = () => {
         width: 100%;
         z-index: 10;
         bottom: 0;
-        color: var(--mi-black);
         filter: drop-shadow(0 0 0.1rem rgba(0, 0, 0, 0.3));
-        background-color: var(--mi-darken-x-background-color);
-        // height: 73px;
 
-        a {
-          color: var(--mi-black);
-        }
+        background-color: var(--mi-darken-x-background-color);
 
         @media (max-width: ${bp.small}px) {
           flex-direction: column;
         }
-
-        @media (prefers-color-scheme: dark) {
-          color: white;
-          a {
-            color: white;
-          }
-        }
       `}
       id="player"
     >
+      {currentTrack?.trackGroup.artistId && (
+        <div
+          className={css`
+            z-index: 999999;
+            top: 75px;
+            right: 1rem;
+            position: fixed;
+            display: flex;
+            flex-direction: column;
+
+            right: 1rem;
+            bottom: 75px;
+            top: auto;
+            left: auto;
+
+            flex-direction: row;
+
+            button {
+              box-shadow: 0.2rem 0.2rem 0.3rem rgba(0, 0, 0, 0.5);
+              margin-left: 1rem;
+            }
+
+            @media (min-width: ${bp.small}px) {
+              .tip-artist,
+              .wishlist {
+                display: none;
+              }
+            }
+          `}
+        >
+          <Wishlist trackGroup={{ id: currentTrack.trackGroupId }} />
+          {state.playing && (
+            <TipArtist artistId={currentTrack.trackGroup.artistId} />
+          )}
+        </div>
+      )}
       <div
         className={css`
           display: flex;
           align-items: center;
           justify-content: flex-end;
           flex-grow: 1;
-          padding-bottom: 0.5rem;
-          background-color: var(--mi-normal-background-color);
 
           @media (max-width: ${bp.small}px) {
             width: 100%;
@@ -137,10 +141,12 @@ const Player = () => {
         className={css`
           width: 100%;
           margin: auto;
-          background-color: var(--mi-normal-background-color);
+          background-color: var(--mi-off-white);
+          color: var(--mi-black);
 
           @media (prefers-color-scheme: dark) {
-            background-color: #0e0e0e;
+            background-color: var(--mi-black);
+            color: var(--mi-off-white);
           }
         `}
       >
@@ -153,11 +159,6 @@ const Player = () => {
             paddin-right: 0.5rem;
             font-size: var(--mi-font-size-small);
             justify-content: space-between;
-            background-color: #f5f0f0;
-
-            @media (prefers-color-scheme: dark) {
-              background-color: #0e0e0e;
-            }
 
             @media (max-width: ${bp.small}px) {
               font-size: var(--mi-font-size-xsmall);
@@ -175,22 +176,31 @@ const Player = () => {
               button {
                 margin-right: 0.25rem;
               }
-              span {
-                margin-left: 0.25rem;
+
+              @media (max-width: ${bp.small}px) {
+                .tip-artist,
+                .wishlist {
+                  display: none;
+                }
               }
             `}
           >
-            <span>
+            <div
+              className={css`
+                display: flex;
+              `}
+            >
               <Wishlist trackGroup={{ id: currentTrack.trackGroupId }} />
               {state.playing && currentTrack.trackGroup.artistId && (
                 <TipArtist artistId={currentTrack.trackGroup.artistId} />
               )}
-            </span>
+            </div>
             <span
               className={css`
                 display: inline-block;
                 min-width: 3rem;
                 text-align: right;
+                margin-right: 1rem;
               `}
             >
               {fmtMSS(currentSeconds)}
@@ -211,28 +221,11 @@ const Player = () => {
 
                 <ShuffleButton />
               </span>
-              <div
-                className={css`
-                  @media (max-width: ${bp.small}px) {
-                    button {
-                      padding: 0em 0.5em 0em 0em;
-                      background: transparent;
-                    }
-                  }
-                `}
-              >
+              <div>
                 <PreviousButton />
               </div>
               <PlayControlButton playerButton />
-              <div
-                className={css`
-                @media (max-width: ${bp.small}px) {
-                    button {
-                      padding: 0em 0em 0em .5em;
-                      background: transparent;
-                    }
-              `}
-              >
+              <div>
                 <NextButton />
               </div>
               <VolumeControl setVolume={setVolume} volume={volume} />

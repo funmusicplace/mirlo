@@ -18,7 +18,11 @@ export default function () {
         include: {
           trackGroup: {
             include: {
-              artist: true,
+              artist: {
+                include: {
+                  avatar: true,
+                },
+              },
               cover: true,
               ...(loggedInUser
                 ? {

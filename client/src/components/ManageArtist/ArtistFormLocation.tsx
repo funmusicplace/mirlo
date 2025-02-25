@@ -9,6 +9,7 @@ import React from "react";
 import { useSnackbar } from "state/SnackbarContext";
 import { FaPen } from "react-icons/fa";
 import { bp } from "../../constants";
+import { ArtistButton } from "components/Artist/ArtistButtons";
 
 interface FormData {
   location: string;
@@ -77,13 +78,13 @@ const ArtistFormLocation: React.FC<ArtistLocationProps> = ({
           </div>
         )}
         {isManage && (
-          <Button
-            transparent
-            small
+          <ArtistButton
+            variant="dashed"
+            size="compact"
             onlyIcon
             onClick={() => setIsEditing(true)}
             startIcon={<FaPen />}
-          ></Button>
+          ></ArtistButton>
         )}
       </div>
     );
@@ -124,16 +125,16 @@ const ArtistFormLocation: React.FC<ArtistLocationProps> = ({
             gap: 0.5rem;
           `}
         >
-          <Button
+          <ArtistButton
             collapsible
-            compact
+            size="compact"
             startIcon={<FaSave />}
             onClick={handleSubmit(handleSave)}
           >
             <p>{t("saveLocation")}</p>
-          </Button>
-          <Button
-            compact
+          </ArtistButton>
+          <ArtistButton
+            size="compact"
             collapsible
             startIcon={<FaTimes />}
             onClick={() => {
@@ -142,7 +143,7 @@ const ArtistFormLocation: React.FC<ArtistLocationProps> = ({
             }}
           >
             <p>{t("cancel")}</p>
-          </Button>
+          </ArtistButton>
         </div>
       </div>
     </>

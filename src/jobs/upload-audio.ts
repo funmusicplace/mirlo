@@ -7,15 +7,12 @@ import { logger } from "./queue-worker";
 import {
   createBucketIfNotExists,
   finalAudioBucket,
+  getFile,
   incomingAudioBucket,
-  minioClient,
+  removeObjectFromStorage,
+  statFile,
+  uploadWrapper,
 } from "../utils/minio";
-
-const {
-  MINIO_HOST = "",
-  MINIO_ROOT_USER = "",
-  MINIO_API_PORT = 9000,
-} = process.env;
 
 export default async (job: Job) => {
   const { audioId, fileExtension } = job.data;
@@ -25,14 +22,10 @@ export default async (job: Job) => {
     const destinationFolder = `/data/media/processing/${audioId}`;
 
     logger.info(
-      `MinIO is at ${MINIO_HOST}:${MINIO_API_PORT} ${MINIO_ROOT_USER}`
+      `upload-audio: checking if folder exists, if not creating it ${destinationFolder}`
     );
 
-    logger.info(
-      `checking if folder exists, if not creating it ${destinationFolder}`
-    );
-
-    await createBucketIfNotExists(minioClient, finalAudioBucket, logger);
+    await createBucketIfNotExists(finalAudioBucket, logger);
     try {
       await fsPromises.stat(destinationFolder);
     } catch (e) {
@@ -40,10 +33,13 @@ export default async (job: Job) => {
     }
 
     const originalPath = `${destinationFolder}/original.${fileExtension}`;
-
-    // FIXME: can this be converted to a stream
-    await minioClient.fGetObject(incomingAudioBucket, audioId, originalPath);
-
+    logger.info(`upload-audio: getting file and storing it at ${originalPath}`);
+    // FIXME: can this be converted to a stream.
+    // It looks like ffmpeg has issues with streams
+    const { minioStat } = await statFile(incomingAudioBucket, audioId);
+    console.log("minioStat", minioStat);
+    await getFile(incomingAudioBucket, audioId, originalPath);
+    logger.info(`upload-audio: got file and put it at ${originalPath}`);
     let data: any;
 
     const profiler = logger.startTimer();
@@ -51,7 +47,6 @@ export default async (job: Job) => {
     await job.updateProgress(progress);
 
     const hlsStream = await createReadStream(originalPath);
-
     const duration = await new Promise(async (resolve, reject) => {
       let duration = 0;
       ffmpeg(hlsStream)
@@ -94,25 +89,20 @@ export default async (job: Job) => {
     await job.updateProgress(90);
 
     const finalFilesInFolder = await fsPromises.readdir(destinationFolder);
-
+    logger.info(`upload-audio: starting upload to ${destinationFolder}`);
     for await (const file of finalFilesInFolder) {
       const uploadStream = await createReadStream(
         `${destinationFolder}/${file}`
       );
-      await minioClient.putObject(
-        finalAudioBucket,
-        `${audioId}/${file}`,
-        uploadStream
-      );
-      logger.info(`audioId ${audioId}: Uploading file ${file}`);
+      await uploadWrapper(finalAudioBucket, `${audioId}/${file}`, uploadStream);
     }
 
     profiler.done({ message: "Done converting to audio" });
 
     logger.info(`audioId ${audioId}: Done processing streams`);
 
-    await minioClient.removeObject(incomingAudioBucket, audioId);
-    logger.info(`audioId ${audioId}: Cleaned up incoming minio folder`);
+    await removeObjectFromStorage(incomingAudioBucket, audioId);
+    logger.info(`audioId ${audioId}: Cleaned up incoming bucket`);
     await fsPromises.rm(destinationFolder, { recursive: true });
     logger.info(`Cleaned up ${destinationFolder}`);
     const response = { ...(data ?? {}), duration };

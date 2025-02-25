@@ -13,6 +13,7 @@ export enum HttpCode {
   UNAUTHORIZED = 401,
   NOT_FOUND = 404,
   INTERNAL_SERVER_ERROR = 500,
+  NOT_IMPLEMENTED = 501,
   NOT_ACCEPTABLE = 406,
 }
 
@@ -50,7 +51,6 @@ const errorHandler = (
   res: Response,
   next: NextFunction
 ) => {
-  console.error("error handler", err.path, err);
   if (err instanceof AppError) {
     console.error("Found instance of AppError", err);
     return res.status(err.httpCode).json({

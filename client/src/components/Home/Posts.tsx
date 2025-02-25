@@ -9,7 +9,7 @@ import PostGrid from "components/Post/PostGrid";
 
 const Posts = () => {
   const { t } = useTranslation("translation", { keyPrefix: "home" });
-  const response = useQuery(queryPosts({ take: 3 }));
+  const response = useQuery(queryPosts({ take: 6 }));
   const { data: posts } = response;
 
   const id = React.useId();

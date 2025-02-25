@@ -34,7 +34,7 @@ export function transformFromLinks(
     linkArray: [
       ...(artist.links?.map((l) => ({
         url: l.replace("mailto:", ""),
-        linkType: findOutsideSite({url: l, linkType: ""})?.name,
+        linkType: findOutsideSite({ url: l, linkType: "" })?.name,
         inHeader: true,
       })) ?? []),
       ...(artist.linksJson ?? []),
@@ -78,7 +78,7 @@ const ArtistFormLinks: React.FC<ArtistFormLinksProps> = ({
 
   const handleInputElBlur = React.useCallback(
     (val: string, index: number) => {
-      const newVal = findOutsideSite({url: val, linkType: ""}).name;
+      const newVal = findOutsideSite({ url: val, linkType: "" }).name;
       setValue(`linkArray.${index}.linkType`, newVal);
     },
     [setValue]
@@ -142,7 +142,7 @@ const ArtistFormLinks: React.FC<ArtistFormLinksProps> = ({
                   })
                   .map((site) => (
                     <option key={site.name}>{t(site.name, site.name)}</option>
-                ))}
+                  ))}
               </SelectEl>
               <div className="header-wrapper">
                 <InputEl
@@ -178,8 +178,8 @@ const ArtistFormLinks: React.FC<ArtistFormLinksProps> = ({
           `}
         >
           <Button
-            compact
-            transparent
+            size="compact"
+            variant="transparent"
             onClick={() =>
               append({
                 url: "",
@@ -192,7 +192,7 @@ const ArtistFormLinks: React.FC<ArtistFormLinksProps> = ({
             {t("addNewLink")}
           </Button>
           <Button
-            compact
+            size="compact"
             startIcon={<FaSave />}
             onClick={handleSubmit(handleSave)}
             disabled={addDisabled}
@@ -200,7 +200,7 @@ const ArtistFormLinks: React.FC<ArtistFormLinksProps> = ({
             {t("saveLinks")}
           </Button>
           <Button
-            compact
+            size="compact"
             startIcon={<FaTimes />}
             onClick={() => {
               reset();

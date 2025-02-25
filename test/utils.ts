@@ -3,6 +3,7 @@ import { Prisma } from "@mirlo/prisma/client";
 import { buildTokens } from "../src/routers/auth";
 
 export const clearTables = async () => {
+  await prisma.$executeRaw`DELETE FROM "ActivityPubArtistFollowers";`;
   await prisma.$executeRaw`DELETE FROM "Notification";`;
   await prisma.$executeRaw`DELETE FROM "PostImage";`;
   await prisma.$executeRaw`DELETE FROM "MerchPurchase";`;
@@ -29,6 +30,7 @@ export const clearTables = async () => {
   await prisma.$executeRaw`DELETE FROM "Artist";`;
   await prisma.$executeRaw`DELETE FROM "User";`;
   await prisma.$executeRaw`DELETE FROM "Client";`;
+  await prisma.$executeRaw`DELETE FROM "Settings";`;
 };
 
 export const createUser = async (data: Prisma.UserCreateArgs["data"]) => {
@@ -109,6 +111,8 @@ export const createTrackGroup = async (
       urlSlug: data?.urlSlug ?? "test-trackgroup",
       artistId: artistId,
       published: data?.published ?? true,
+      stripeProductKey: data?.stripeProductKey ?? null,
+      paymentToUserId: data?.paymentToUserId,
       releaseDate: data?.releaseDate,
       cover:
         data?.cover !== undefined

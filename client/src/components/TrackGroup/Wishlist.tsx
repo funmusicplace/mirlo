@@ -1,13 +1,15 @@
-import { css } from "@emotion/css";
 import Button from "components/common/Button";
-import { bp } from "../../constants";
 import React from "react";
 import { IoIosHeart, IoIosHeartEmpty } from "react-icons/io";
 import api from "services/api";
 import { useAuthContext } from "state/AuthContext";
 import { useTranslation } from "react-i18next";
+import { ArtistButton } from "components/Artist/ArtistButtons";
 
-const Wishlist: React.FC<{ trackGroup: { id: number } }> = ({ trackGroup }) => {
+const Wishlist: React.FC<{
+  trackGroup: { id: number };
+  inArtistPage?: boolean;
+}> = ({ trackGroup, inArtistPage }) => {
   const { user } = useAuthContext();
   const { t } = useTranslation("translation", { keyPrefix: "wishlist" });
 
@@ -28,25 +30,23 @@ const Wishlist: React.FC<{ trackGroup: { id: number } }> = ({ trackGroup }) => {
 
   const buttonLabel = `${isInWishlist ? t("removeFromWishlist") : t("addToWishlist")}`;
 
+  if (inArtistPage) {
+    return (
+      <ArtistButton
+        onClick={onClick}
+        aria-label={buttonLabel}
+        className="wishlist"
+        title={buttonLabel}
+        startIcon={isInWishlist ? <IoIosHeart /> : <IoIosHeartEmpty />}
+      />
+    );
+  }
+
   return (
     <Button
       onClick={onClick}
-      className={css`
-        color: inherit !important;
-        :hover {
-          border: solid 1px black !important;
-          background-color: transparent !important;
-        }
-        span {
-          font-size: 1.1rem !important;
-        }
-        @media screen and (max-width: ${bp.small}px) {
-          span {
-            font-size: 1rem !important;
-          }
-        }
-      `}
       aria-label={buttonLabel}
+      className="wishlist"
       title={buttonLabel}
       startIcon={isInWishlist ? <IoIosHeart /> : <IoIosHeartEmpty />}
     />

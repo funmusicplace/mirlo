@@ -6,7 +6,8 @@ import api from "services/api";
 const AutoCompleteTrackGroup: React.FC<{
   onSelect: (val: number) => void;
   filterByArtistId?: number;
-}> = ({ onSelect, filterByArtistId }) => {
+  placeholder?: string;
+}> = ({ onSelect, filterByArtistId, placeholder }) => {
   const getTrackGroupOptions = React.useCallback(
     async (searchString: string) => {
       const results = await api.getMany<TrackGroup>("trackGroups", {
@@ -25,6 +26,7 @@ const AutoCompleteTrackGroup: React.FC<{
   return (
     <AutoComplete
       getOptions={getTrackGroupOptions}
+      placeholder={placeholder}
       onSelect={(val) => onSelect(val as number)}
     />
   );

@@ -33,7 +33,7 @@ if (process.env.NODE_ENV === "test") {
   };
 }
 
-const stripe = new Stripe(STRIPE_KEY ?? "", stripeConfig);
+export const stripe = new Stripe(STRIPE_KEY ?? "", stripeConfig);
 
 const calculatePlatformPercent = async (
   currency: string,
@@ -59,6 +59,7 @@ export const calculateAppFee = async (
     currency,
     platformPercent
   );
+
   const appFee = castToFixed(price * calculatedPlatformPercent);
   return appFee || 0;
 };
@@ -106,7 +107,6 @@ const checkForProductKey = async (
     return products.data[0]?.id;
   }
   let productKey = stripeProductKey;
-
   if (productKey) {
     try {
       await stripe.products.retrieve(productKey, {
@@ -120,7 +120,6 @@ const checkForProductKey = async (
         }
       }
     }
-  } else {
   }
   return productKey;
 };
@@ -207,13 +206,12 @@ export const createTrackGroupStripeProduct = async (
     stripeAccountId
   );
 
-  const about = await buildProductDescription(
-    trackGroup.title,
-    trackGroup.artist.name,
-    trackGroup.about
-  );
-
   if (!productKey) {
+    const about = await buildProductDescription(
+      trackGroup.title,
+      trackGroup.artist.name,
+      trackGroup.about
+    );
     const product = await stripe.products.create(
       {
         name: `${trackGroup.title} by ${trackGroup.artist.name}`,

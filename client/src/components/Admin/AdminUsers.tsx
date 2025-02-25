@@ -93,7 +93,7 @@ export const AdminUsers: React.FC = () => {
                 <td>{user.stripeAccountId ? <FaCheck /> : ""}</td>
                 <td className="alignRight">
                   <ButtonLink
-                    compact
+                    size="compact"
                     startIcon={<FaEdit />}
                     to={`/admin/users/${user.id}`}
                   />

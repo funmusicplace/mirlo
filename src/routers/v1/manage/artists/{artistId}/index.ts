@@ -27,15 +27,22 @@ export default function () {
 
   async function PUT(req: Request, res: Response, next: NextFunction) {
     const { artistId } = req.params as unknown as Params;
-    const { bio, name, urlSlug, properties, links, linksJson, location } =
-      req.body;
-    const user = req.user as User;
+    const {
+      bio,
+      name,
+      urlSlug,
+      properties,
+      links,
+      linksJson,
+      location,
+      activityPub,
+    } = req.body;
+
     try {
       // FIXME: check type of properties object.
       const updatedCount = await prisma.artist.updateMany({
         where: {
           id: Number(artistId),
-          userId: Number(user.id),
         },
         data: {
           bio,
@@ -43,6 +50,7 @@ export default function () {
           links,
           linksJson,
           location,
+          activityPub,
           ...(urlSlug
             ? { urlSlug: slugify(urlSlug?.toLowerCase(), { strict: true }) }
             : {}),

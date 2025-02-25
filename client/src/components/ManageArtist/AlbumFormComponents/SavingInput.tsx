@@ -10,7 +10,6 @@ import LoadingSpinner from "components/common/LoadingSpinner";
 import { css } from "@emotion/css";
 import useErrorHandler from "services/useErrorHandler";
 import { FaCheck } from "react-icons/fa";
-import { useQueryClient } from "@tanstack/react-query";
 import { debounce } from "lodash";
 
 const SavingInput: React.FC<{
@@ -21,34 +20,22 @@ const SavingInput: React.FC<{
   required?: boolean;
   step?: string;
   type?: string;
-  clearQueryKey?: string;
   reload?: () => void;
-}> = ({
-  formKey,
-  url,
-  extraData = {},
-  type,
-  required,
-  rows,
-  step,
-  clearQueryKey,
-  reload,
-}) => {
+}> = ({ formKey, url, extraData = {}, type, required, rows, step, reload }) => {
   const { register, getValues } = useFormContext();
   const errorHandler = useErrorHandler();
-  const client = useQueryClient();
 
   const [isSaving, setIsSaving] = React.useState(false);
   const [saveSuccess, setSaveSuccess] = React.useState(false);
 
-  const saveOnBlur = React.useCallback(
+  const saveOnInput = React.useCallback(
     debounce(async () => {
       try {
         setSaveSuccess(false);
         setIsSaving(true);
         let value = getValues(formKey);
 
-        if (formKey === "releaseDate") {
+        if (formKey === "releaseDate" || formKey === "publishedAt") {
           value = new Date(value).toISOString();
         } else if (formKey === "minPrice") {
           value = value ? value * 100 : undefined;
@@ -65,22 +52,6 @@ const SavingInput: React.FC<{
 
         await api.put<unknown, unknown>(url, data);
 
-        if (clearQueryKey) {
-          client.invalidateQueries({
-            predicate: (query) => {
-              const shouldInvalidate = query.queryKey.find((obj) => {
-                if (typeof obj === "string") {
-                  return obj
-                    .toLowerCase()
-                    .includes(clearQueryKey.toLowerCase());
-                }
-                return false;
-              });
-
-              return !!shouldInvalidate;
-            },
-          });
-        }
         let timeout2: NodeJS.Timeout;
         const timeout = setTimeout(() => {
           setIsSaving(false);
@@ -98,7 +69,7 @@ const SavingInput: React.FC<{
         errorHandler(e);
         setIsSaving(false);
       }
-    }, 500),
+    }, 1500),
     [formKey, getValues, url, extraData]
   );
 
@@ -118,14 +89,14 @@ const SavingInput: React.FC<{
       {!rows && (
         <InputEl
           {...register(formKey)}
-          onInput={saveOnBlur}
+          onInput={saveOnInput}
           type={type}
           required={required}
           step={step}
         />
       )}
       {rows && (
-        <TextArea {...register(formKey)} rows={rows} onInput={saveOnBlur} />
+        <TextArea {...register(formKey)} rows={rows} onInput={saveOnInput} />
       )}
       {isSaving && <LoadingSpinner />}
       {saveSuccess && <FaCheck />}

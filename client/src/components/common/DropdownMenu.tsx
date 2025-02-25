@@ -1,6 +1,5 @@
 import { css } from "@emotion/css";
 import React from "react";
-import { bp } from "../../constants";
 
 import Background from "components/common/Background";
 import { FaEllipsisV } from "react-icons/fa";
@@ -11,8 +10,7 @@ const DropdownMenu: React.FC<{
   dashed?: boolean;
   icon?: React.ReactElement;
   compact?: boolean;
-  transparent?: boolean;
-}> = ({ children, icon, compact, dashed, transparent }) => {
+}> = ({ children, icon, compact, dashed }) => {
   const [isMenuOpen, setIsMenuOpen] = React.useState<boolean>(false);
 
   if (!icon) {
@@ -23,6 +21,20 @@ const DropdownMenu: React.FC<{
     <div
       className={css`
         position: relative;
+
+        > button {
+          flex-grow: 1;
+
+          svg {
+            fill: var(--mi-black);
+          }
+
+          @media (prefers-color-scheme: dark) {
+            svg {
+              fill: var(--mi-white) !important;
+            }
+          }
+        }
       `}
     >
       {isMenuOpen && (
@@ -43,9 +55,10 @@ const DropdownMenu: React.FC<{
               z-index: 999;
               overflow: hidden;
               text-overflow: ellipsis;
-              background: var(--mi-white);
+              background: var(--mi-normal-background-color) !important;
+
               button {
-                color: var(--mi-black);
+                color: var(--mi-normal-foreground-color) !important;
               }
 
               li {
@@ -53,14 +66,14 @@ const DropdownMenu: React.FC<{
               }
 
               li > * {
-                background: transparent !important;
                 min-width: 200px;
                 list-style-type: none;
                 text-decoration: none;
                 text-align: right;
                 display: block;
                 white-space: normal;
-                color: var(--mi-black);
+                color: var(--mi-normal-foreground-color) !important;
+                background-color: var(--mi-normal-background-color) !important;
                 word-break: break-word;
                 font-weight: normal;
                 border-radius: 0;
@@ -74,25 +87,9 @@ const DropdownMenu: React.FC<{
 
                 &:hover {
                   border-radius: 0;
-                  background: var(--mi-black) !important;
-                  color: var(--mi-white) !important;
-                  border: none !important;
-                }
-              }
-
-              @media (prefers-color-scheme: dark) {
-                background: var(--mi-black);
-                button {
-                  color: var(--mi-white);
-                }
-                li > * {
-                  background-color: var(--mi-black);
-                  color: var(--mi-white);
-
-                  &:hover {
-                    background-color: var(--mi-white) !important;
-                    color: var(--mi-black) !important;
-                  }
+                  background: var(--mi-normal-foreground-color) !important;
+                  color: var(--mi-normal-background-color) !important;
+                  border: none;
                 }
               }
             `}
@@ -105,26 +102,13 @@ const DropdownMenu: React.FC<{
       )}
 
       <Button
-        compact={compact}
-        variant={dashed ? "dashed" : undefined}
+        size={compact ? "compact" : undefined}
+        variant={dashed ? "dashed" : "transparent"}
         onClick={(e) => {
           e.stopPropagation();
           setIsMenuOpen(true);
         }}
         startIcon={icon}
-        transparent={transparent}
-        className={
-          "mi-dropdown-button " +
-          css`
-            button:hover {
-              color: var(--mi-white);
-              background-color: var(--mi-black);
-            }
-            @media (max-width: ${bp.small}px) {
-              background-color: var(--mi-normal-background-color) !important;
-            }
-          `
-        }
       />
     </div>
   );

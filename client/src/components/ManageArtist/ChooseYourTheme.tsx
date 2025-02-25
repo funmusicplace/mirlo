@@ -59,14 +59,14 @@ const ThemeRadio: React.FC<{
 };
 
 const lightTheme = [
-  { color: "#111", title: "main button color", key: "primary" },
+  { color: "#be3455", title: "main button color", key: "primary" },
   { color: "#ffc0cb", title: "secondary button color", key: "secondary" },
   { color: "#f5f0f0", title: "background color", key: "background" },
   { color: "#111", title: "text color", key: "foreground" },
 ];
 
 const darkTheme = [
-  { color: "#fff", title: "main button color", key: "primary" },
+  { color: "#ffc0cb", title: "main button color", key: "primary" },
   { color: "#be3455", title: "secondary button color", key: "secondary" },
   { color: "#111", title: "background color", key: "background" },
   { color: "#fff", title: "text color", key: "foreground" },

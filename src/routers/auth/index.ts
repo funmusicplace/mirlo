@@ -10,6 +10,7 @@ import profile from "./profile";
 import signup from "./signup";
 import refresh from "./refresh";
 import { Job } from "bullmq";
+import login from "./login";
 
 const jwt_secret = process.env.JWT_SECRET ?? "";
 const refresh_secret = process.env.REFRESH_TOKEN_SECRET ?? "";
@@ -240,59 +241,22 @@ router.post(`/password-reset/set-password`, async (req, res, next) => {
   }
 });
 
-router.post(
-  "/login",
-  async (req, res, next) => {
-    try {
-      const { email, password } = req.body;
-      if (!email || !password) {
-        res.status(401).json({
-          error: "Incorrect username or password",
-        });
-        return next();
-      }
-      const foundUser = await prisma.user.findFirst({
-        where: {
-          email: email.toLowerCase(),
-          emailConfirmationToken: null,
-        },
-      });
-      if (foundUser) {
-        const match = await bcrypt.compare(password, foundUser.password);
-        if (match) {
-          res.locals.user = foundUser;
-          next();
-        } else {
-          res.status(401).json({
-            error: "Incorrect username or password",
-          });
-        }
-      } else {
-        res.status(401).json({
-          error: "Incorrect username or password",
-        });
-      }
-    } catch (error) {
-      next(error);
-    }
-  },
-  async (req, res) => {
-    let user;
-    if (res.locals.user) {
-      user = res.locals.user;
-    } else {
-      res.status(400).json({
-        error: "user not found",
-      });
-    }
-
-    setTokens(res, user);
-
-    res.status(200).json({
-      message: "Success",
+router.post("/login", login, async (req, res) => {
+  let user;
+  if (res.locals.user) {
+    user = res.locals.user;
+  } else {
+    res.status(400).json({
+      error: "user not found",
     });
   }
-);
+
+  setTokens(res, user);
+
+  res.status(200).json({
+    message: "Success",
+  });
+});
 
 export const clearJWT = (res: Response) => {
   return res.clearCookie("jwt").clearCookie("refresh");

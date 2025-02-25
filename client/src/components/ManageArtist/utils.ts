@@ -69,7 +69,7 @@ type ParsedItem = {
 export const convertMetaData = (
   p: ParsedItem,
   i: number,
-  trackGroup: TrackGroup
+  trackGroup: { tracks: Track[]; artist?: Artist; artistId?: number }
 ) => {
   let title = p.metadata.common.title;
 

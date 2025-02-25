@@ -9,6 +9,10 @@ import {
   processSingleArtist,
   singleInclude,
 } from "../../../../utils/artist";
+import {
+  headersAreForActivityPub,
+  turnArtistIntoActor,
+} from "../../../../activityPub/utils";
 
 export default function () {
   const operations = {
@@ -25,9 +29,8 @@ export default function () {
     try {
       const parsedId = await findArtistIdForURLSlug(id);
       let isUserSubscriber = false;
-      let artist: any;
       if (parsedId) {
-        artist = await prisma.artist.findFirst({
+        const artist = await prisma.artist.findFirst({
           where: {
             id: parsedId,
             enabled: true,
@@ -42,9 +45,22 @@ export default function () {
           return next();
         }
 
-        res.json({
-          result: processSingleArtist(artist, user?.id, isUserSubscriber),
-        });
+        if (headersAreForActivityPub(req.headers)) {
+          if (req.headers.accept) {
+            res.set("content-type", "application/activity+json");
+          }
+          res.json(await turnArtistIntoActor(artist));
+
+          return next();
+        } else {
+          res.json({
+            result: processSingleArtist(
+              artist as any,
+              user?.id,
+              isUserSubscriber
+            ),
+          });
+        }
       } else {
         res.status(404);
         return next();

@@ -30,7 +30,6 @@ export const Footer = () => {
       <WidthContainer variant="big" justify="center">
         <div
           className={css`
-            background-color: var(--mi-normal-background-color);
             padding: 2rem;
           `}
         >
@@ -100,7 +99,7 @@ export const Footer = () => {
               <FaTwitter aria-hidden />
             </a>
             <a
-              href="https://bsky.app/profile/mirlo.bsky.social"
+              href="https://bsky.app/profile/mirlo.space"
               title="BlueSky"
               aria-label={`${t("socialBlueSky", { username: "mirlo.bsky.social" })}`}
             >

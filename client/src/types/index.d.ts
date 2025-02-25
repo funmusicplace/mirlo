@@ -13,6 +13,7 @@ interface LoggedInUser {
   userTrackGroupPurchases?: { trackGroupId: number }[];
   isAdmin: boolean;
   currency?: string;
+  isLabelAccount?: boolean;
   wishlist?: {
     userId: number;
     trackGroupId: number;
@@ -76,6 +77,7 @@ interface TrackGroup {
   createdAt: string;
   tags?: string[];
   merch?: Merch[];
+  isDraft?: boolean;
   cover?: {
     updatedAt: string;
     id: string;
@@ -143,15 +145,23 @@ interface Link {
   inHeader?: boolean;
 }
 
+interface ArtistLabel {
+  artistId: number;
+  labelUserId: number;
+  labelUser: { name: string; email: string };
+}
+
 interface Artist {
   name: string;
   bio: string;
+  activityPub: boolean;
   urlSlug?: string;
   userId: number;
   id: number;
   location?: string;
   enabled: boolean;
   createdAt: string;
+  artistLabels?: ArtistLabel[];
   trackGroups: TrackGroup[];
   links?: string[];
   linksJson?: Link[];
@@ -282,6 +292,7 @@ interface MerchOption {
   quantityRemaining: number;
   sku: string;
   id: string;
+  additionalPrice: number;
 }
 
 interface MerchOptionType {

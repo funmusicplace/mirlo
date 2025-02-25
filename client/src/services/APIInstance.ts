@@ -181,12 +181,12 @@ const APIInstance = (apiRoot: string) => {
       return apiRequest<Response>(
         endpoint,
         {
-          method: "GET"
+          method: "GET",
         },
         {
-          noProcess: true
+          noProcess: true,
         }
-      ).then(resp => {
+      ).then((resp) => {
         return resp.json();
       });
     },

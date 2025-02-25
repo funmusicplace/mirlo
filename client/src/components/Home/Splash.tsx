@@ -6,6 +6,7 @@ import { ButtonLink } from "components/common/Button";
 import styled from "@emotion/styled";
 import { bp } from "../../constants";
 import { useAuthContext } from "state/AuthContext";
+import { FaArrowRight } from "react-icons/fa";
 
 export const SplashWrapper = styled.div`
   display: flex;
@@ -56,7 +57,7 @@ const Splash = () => {
 
           @media (min-width: 768px) {
             display: block;
-            background-image: url("/images/blackbird-light.webp");
+            background-image: url("/assets/images/blackbird-light.webp");
             background-size: contain;
             background-repeat: no-repeat;
             width: 370px;
@@ -65,7 +66,7 @@ const Splash = () => {
           }
 
           @media (min-width: 768px) and (prefers-color-scheme: dark) {
-            background-image: url("/images/blackbird-dark.webp");
+            background-image: url("/assets/images/blackbird-dark.webp");
           }
         `}
       />
@@ -80,39 +81,15 @@ const Splash = () => {
           <SplashTitle>{t("support")}</SplashTitle>
           {!user && (
             <SplashButtonWrapper>
-              <ButtonLink
-                to="/signup"
-                variant="big"
-                className={css`
-                  display: block;
-                  padding: 1.5rem 1rem !important;
-                  background-color: #be3455 !important;
-
-                  &:hover {
-                    text-decoration: underline;
-                  }
-                  color: var(--mi-white) !important;
-                `}
-              >
+              <ButtonLink size="big" to="/signup" rounded>
                 {t("signUp")}
               </ButtonLink>
               <ButtonLink
+                size="big"
                 to="/login"
-                variant="big"
-                className={css`
-                  color: var(--mi-white) !important;
-                  &:hover {
-                    text-decoration: underline;
-                  }
-                  padding: 1.5rem 1rem !important;
-
-                  background-color: var(--mi-black) !important;
-                  color: var(--mi-white);
-                  @media (prefers-color-scheme: dark) {
-                    background-color: var(--mi-white) !important;
-                    color: var(--mi-black) !important;
-                  }
-                `}
+                variant="outlined"
+                rounded
+                endIcon={<FaArrowRight />}
               >
                 {t("logIn")}
               </ButtonLink>

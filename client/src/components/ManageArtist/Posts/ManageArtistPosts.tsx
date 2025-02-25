@@ -19,6 +19,11 @@ import parse from "html-react-parser";
 import MarkdownWrapper from "components/common/MarkdownWrapper";
 import { useAuthContext } from "state/AuthContext";
 import Pill from "components/common/Pill";
+import ArtistRouterLink, {
+  ArtistButton,
+  ArtistButtonLink,
+} from "components/Artist/ArtistButtons";
+import ArtistLink from "components/Artist/ArtistLink";
 
 const ManageArtistPosts: React.FC<{}> = () => {
   const { user } = useAuthContext();
@@ -59,6 +64,7 @@ const ManageArtistPosts: React.FC<{}> = () => {
         title: "",
         content: "",
         artistId: artistId,
+        isPublic: false,
       });
       navigate(`/manage/artists/${artistId}/post/${response.result.id}/`);
     }
@@ -88,15 +94,14 @@ const ManageArtistPosts: React.FC<{}> = () => {
     <ManageSectionWrapper>
       <SpaceBetweenDiv>
         <div />
-        <Button
-          transparent
+        <ArtistButton
           onClick={createPost}
           startIcon={<FaPlus />}
-          compact
+          size="compact"
           variant="dashed"
         >
           {t("addNewPost", { artist: artist.name })}
-        </Button>
+        </ArtistButton>
       </SpaceBetweenDiv>
       {posts?.map((p) => (
         <Box
@@ -123,7 +128,7 @@ const ManageArtistPosts: React.FC<{}> = () => {
                 border-bottom: var(--mi-border);
               `}
             >
-              <Link
+              <ArtistRouterLink
                 to={
                   p.isDraft
                     ? getManagePostURLReference(p)
@@ -162,25 +167,25 @@ const ManageArtistPosts: React.FC<{}> = () => {
                     p.title
                   )}
                 </h2>
-              </Link>
+              </ArtistRouterLink>
               <div
                 className={css`
                   display: flex;
                 `}
               >
-                <ButtonLink
+                <ArtistButtonLink
                   to={getManagePostURLReference(p)}
                   onlyIcon
                   variant="dashed"
                   startIcon={<FaPen />}
                 />
-                <Button
+                <ArtistButton
                   className={css`
                     margin-left: 0.5rem;
                   `}
                   startIcon={<FaTrash />}
                   onClick={() => deletePost(p.id)}
-                ></Button>
+                ></ArtistButton>
               </div>
             </div>
             <p

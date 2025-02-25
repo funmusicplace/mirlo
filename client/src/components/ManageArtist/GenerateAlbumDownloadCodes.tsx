@@ -91,13 +91,12 @@ const GenerateAlbumDownloadCodes: React.FC<{ onDone: () => void }> = ({
   return (
     <>
       <Button
-        transparent
+        variant="dashed"
         onClick={() => {
           setIsOpen(true);
         }}
         startIcon={<FaPlus />}
-        compact
-        variant="dashed"
+        size="compact"
       >
         {t("addDownloadCodes")}
       </Button>

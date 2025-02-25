@@ -111,7 +111,7 @@ const TrackGroupTitle: React.FC<{
         >
           {(ownedByUser || user?.isAdmin) && (
             <ButtonLink
-              compact
+              size="compact"
               startIcon={<FaPen />}
               variant="dashed"
               to={`/manage/artists/${artist.id}/release/${trackGroup.id}`}
@@ -124,7 +124,7 @@ const TrackGroupTitle: React.FC<{
           {user?.isAdmin && (
             <div
               className={css`
-                padding-left: 1rem;
+                padding-left: 0.5rem;
               `}
             >
               <DropdownMenu compact>

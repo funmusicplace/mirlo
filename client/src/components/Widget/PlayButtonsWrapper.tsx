@@ -41,16 +41,22 @@ export const PlayButtonsWrapper: React.FC<{ ids: number[] }> = ({ ids }) => {
         button {
           background-color: var(--mi-normal-foreground-color);
           color: var(--mi-normal-background-color);
-          border: solid 1.5px var(--mi-normal-foreground-color) !important;
+          border: solid 1.5px var(--mi-normal-foreground-color);
           width: 3rem;
           height: 3rem;
           svg {
             font-size: 1.5rem;
+            fill: var(--mi-normal-background-color);
           }
         }
+
         button:hover {
           color: var(--mi-normal-foreground-color) !important;
           background-color: var(--mi-normal-background-color) !important;
+
+          svg {
+            fill: var(--mi-normal-foreground-color) !important;
+          }
         }
       `}
     >

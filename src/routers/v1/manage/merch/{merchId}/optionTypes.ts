@@ -25,9 +25,8 @@ export default function () {
     const { merchId } = req.params as unknown as Params;
     const optionTypes = req.body as unknown as {
       optionName: string;
-      options: { name: string }[];
+      options: { name: string; additionalPrice: string }[];
     }[];
-    const user = req.user as User;
 
     try {
       await prisma.merchOptionType.deleteMany({
@@ -44,7 +43,10 @@ export default function () {
               optionName: oType.optionName,
               options: {
                 createMany: {
-                  data: oType.options.map((o) => ({ name: o.name })),
+                  data: oType.options.map((o) => ({
+                    name: o.name,
+                    additionalPrice: Number(o.additionalPrice),
+                  })),
                 },
               },
             },
@@ -57,7 +59,11 @@ export default function () {
           id: merchId,
         },
         include: {
-          optionTypes: true,
+          optionTypes: {
+            include: {
+              options: true,
+            },
+          },
         },
       });
       res.json({

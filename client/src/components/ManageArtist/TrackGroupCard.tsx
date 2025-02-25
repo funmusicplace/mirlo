@@ -3,13 +3,17 @@ import Box from "components/common/Box";
 import Button, { ButtonLink } from "components/common/Button";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { FaCheck, FaTimes, FaTrash } from "react-icons/fa";
+import { FaCheck, FaEye, FaTimes, FaTrash } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { useSnackbar } from "state/SnackbarContext";
 import { bp } from "../../constants";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import { getReleaseUrl } from "utils/artist";
 import { useDeleteTrackGroupMutation } from "queries";
+import ArtistRouterLink, {
+  ArtistButton,
+  ArtistButtonLink,
+} from "components/Artist/ArtistButtons";
 
 const TrackGroupCard: React.FC<{
   album: TrackGroup;
@@ -68,7 +72,7 @@ const TrackGroupCard: React.FC<{
           }
         `}
       >
-        <Link
+        <ArtistRouterLink
           to={getReleaseUrl(artist, album)}
           className={css`
             @media screen and (max-width: ${bp.small}px) {
@@ -81,7 +85,7 @@ const TrackGroupCard: React.FC<{
             alt={album.title}
             size={250}
           />
-        </Link>
+        </ArtistRouterLink>
       </div>
 
       <div
@@ -94,7 +98,7 @@ const TrackGroupCard: React.FC<{
           padding: 1rem;
           background-color: var(--mi-darken-background-color);
 
-          > div {
+          > div > div {
             display: flex;
             justify-content: flex-start;
           }
@@ -124,29 +128,31 @@ const TrackGroupCard: React.FC<{
         `}
       >
         <div>
-          <strong>{trackGroupCardTranslation("title")}</strong>
-          {album.title}
+          <div>
+            <strong>{trackGroupCardTranslation("title")}</strong>
+            {album.title}
+          </div>
+          <div>
+            <strong>{trackGroupCardTranslation("published")}</strong>{" "}
+            {album.published ? <FaCheck /> : <FaTimes />}
+          </div>
+          <div>
+            <strong>{trackGroupCardTranslation("tracks")}</strong>{" "}
+            {album.tracks.length}
+          </div>
+          <div>
+            <strong>{trackGroupCardTranslation("releaseDate")} </strong>
+            {album.releaseDate?.split("T")[0]}
+          </div>
         </div>
-        <div>
-          <strong>{trackGroupCardTranslation("published")}</strong>{" "}
-          {album.published ? <FaCheck /> : <FaTimes />}
-        </div>
-        <div>
-          <strong>{trackGroupCardTranslation("tracks")}</strong>{" "}
-          {album.tracks.length}
-        </div>
-        <div>
-          <strong>{trackGroupCardTranslation("releaseDate")} </strong>
-          {album.releaseDate?.split("T")[0]}
-        </div>
-
         <div
           className={css`
-            display: block;
+            display: flex;
             width: 100%;
             justify-content: flex-end !important;
             text-align: right;
             margin-top: 0.5rem;
+            align-items: center;
 
             & > * {
               margin-right: 1rem;
@@ -160,32 +166,32 @@ const TrackGroupCard: React.FC<{
               justify-content: space-between !important;
           `}
         >
-          <ButtonLink
+          <ArtistButtonLink
             to={`/manage/artists/${album.artistId}/release/${album.id}`}
-            compact
-            thin
+            size="compact"
             variant="outlined"
           >
             {t("manageAlbum")}
-          </ButtonLink>
+          </ArtistButtonLink>
           {album.artist && album.published && (
-            <ButtonLink
+            <ArtistButtonLink
               to={getReleaseUrl(album.artist, album)}
-              compact
+              size="compact"
               variant="outlined"
+              startIcon={<FaEye />}
             >
               {t("viewLive")}
-            </ButtonLink>
+            </ArtistButtonLink>
           )}
           {!album.published && (
-            <Button
-              compact
+            <ArtistButton
+              size="compact"
               startIcon={<FaTrash />}
               onClick={handleDelete}
               isLoading={isDeletePending}
             >
               {t("delete")}
-            </Button>
+            </ArtistButton>
           )}
         </div>
       </div>

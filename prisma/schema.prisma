@@ -19,9 +19,11 @@ datasource db {
 }
 
 model Settings {
-  id       Int  @id @default(autoincrement())
+  id         Int     @id @default(autoincrement())
   /// [Settings]
-  settings Json
+  settings   Json
+  publicKey  String? // Used for ActivityPub
+  privateKey String? // Used for ActivityPub
 }
 
 model Client {
@@ -31,8 +33,8 @@ model Client {
   allowedCorsOrigins String[]
   secret             String?
   key                String?
-  updatedAt          DateTime
-  createdAt          DateTime
+  updatedAt          DateTime  @default(now()) @updatedAt
+  createdAt          DateTime  @default(now())
   deletedAt          DateTime?
 }
 
@@ -48,6 +50,7 @@ model User {
   deletedAt                           DateTime?
   isAdmin                             Boolean                         @default(false)
   artistUserSubscriptions             ArtistUserSubscription[]
+  countryCode                         String?
   currency                            String?
   userTrackGroupPurchases             UserTrackGroupPurchase[]
   emailConfirmationToken              String?                         @default(uuid()) @db.Uuid
@@ -66,6 +69,10 @@ model User {
   userArtistTip                       UserArtistTip[]
   merchPurchase                       MerchPurchase[]
   promoCodes                          String[]
+  receivePlatformEmails               Boolean                         @default(true)
+  paymentTrackGroups                  TrackGroup[]
+  isLabelAccount                      Boolean                         @default(false)
+  artistLabels                        ArtistLabel[]
 }
 
 model UserArtistNotificationSetting {
@@ -77,6 +84,14 @@ model UserArtistNotificationSetting {
   artist       Artist           @relation(fields: [artistId], references: [id])
 
   @@unique([userId, notification])
+}
+
+model ActivityPubArtistFollowers {
+  artistId Int
+  artist   Artist @relation(fields: [artistId], references: [id])
+  actor    String
+
+  @@unique([actor, artistId])
 }
 
 model Notification {
@@ -130,6 +145,7 @@ model Post {
   images                    PostImage[]             @relation("images")
   featuredImage             PostImage?              @relation(fields: [featuredImageId], references: [id])
   featuredImageId           String?                 @db.Uuid
+  postTracks                PostTrack[]
 }
 
 model PostImage {
@@ -181,9 +197,12 @@ model Artist {
   userArtistNotificationSettings     UserArtistNotificationSetting[]
   notifications                      Notification[]
   userArtistTip                      UserArtistTip[]
-  ArtistTipTier                      ArtistTipTier[]
+  artistTipTier                      ArtistTipTier[]
   merchStoreURL                      String?
   merch                              Merch[]
+  artistLabels                       ArtistLabel[]
+  activityPub                        Boolean                              @default(false)
+  ActivityPubArtistFollowers         ActivityPubArtistFollowers[]
 }
 
 model ArtistAvatar {
@@ -206,6 +225,15 @@ model ArtistBanner {
   updatedAt        DateTime  @updatedAt
   deletedAt        DateTime?
   originalFilename String?
+}
+
+model ArtistLabel {
+  artist      Artist @relation(fields: [artistId], references: [id])
+  artistId    Int
+  labelUser   User   @relation(fields: [labelUserId], references: [id])
+  labelUserId Int
+
+  @@unique([labelUserId, artistId])
 }
 
 model ArtistSubscriptionTier {
@@ -358,6 +386,7 @@ model MerchOption {
   name              String // eg. "small"
   quantityRemaining Int?
   sku               String?
+  additionalPrice   Int?
   purchases         MerchPurchase[]
 }
 
@@ -377,6 +406,8 @@ model MerchPurchase {
   billingAddress       Json?
   fulfillmentStatus    FulfillmentStatus
   options              MerchOption[]
+  trackingNumber       String?
+  trackingWebsite      String?
 }
 
 enum FulfillmentStatus {
@@ -440,6 +471,7 @@ model TrackGroup {
   artist                  Artist                    @relation(fields: [artistId], references: [id])
   artistId                Int
   title                   String?
+  isDrafts                Boolean                   @default(false)
   tracks                  Track[]
   cover                   TrackGroupCover?
   published               Boolean                   @default(false)
@@ -462,6 +494,8 @@ model TrackGroup {
   downloadCodes           TrackGroupDownloadCodes[]
   notifications           Notification[]
   merch                   Merch[]
+  paymentToUserId         Int?
+  paymentToUser           User?                     @relation(fields: [paymentToUserId], references: [id])
 
   @@unique([artistId, urlSlug])
 }
@@ -495,6 +529,7 @@ model Track {
   licenseId    Int?
   lyrics       String?
   isrc         String?
+  postTracks   PostTrack[]
 }
 
 model License {
@@ -547,6 +582,16 @@ model TrackPlay {
   ip        String?
   createdAt DateTime @default(now())
   owned     Boolean  @default(false)
+}
+
+model PostTrack {
+  trackId Int
+  track   Track @relation(fields: [trackId], references: [id])
+  postId  Int
+  post    Post  @relation(fields: [postId], references: [id])
+  order   Int
+
+  @@unique([trackId, postId])
 }
 
 model TrackGroupTag {

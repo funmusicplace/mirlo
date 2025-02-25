@@ -21,6 +21,9 @@ import { rateLimit } from "express-rate-limit";
 import { corsCheck } from "./auth/cors";
 import errorHandler from "./utils/error";
 import { sendMailQueue } from "./queues/send-mail-queue";
+import path from "node:path";
+import activityPub from "./activityPub";
+import parseIndex from "./parseIndex";
 
 dotenv.config();
 
@@ -85,6 +88,8 @@ const routes = [
   "artists/{id}/subscribe",
   "artists/{id}/feed",
   "artists/{id}/follow",
+  "artists/{id}/followers",
+  "artists/{id}/inbox",
   "artists/{id}/confirmFollow",
   "artists/{id}/unfollow",
   "artists/{id}/tip",
@@ -93,14 +98,13 @@ const routes = [
   "posts",
   "posts/{id}",
   "licenses",
+  "labels",
   "users",
   "users/{userId}",
   "users/{userId}/confirmEmail",
   "users/{userId}/notifications",
   "users/{userId}/notifications/unreadCount",
   "users/{userId}/notifications/{notificationId}",
-  "manage/subscriptions",
-  "manage/subscriptions/{subscriptionId}",
   "users/{userId}/trackGroupPurchases",
   "users/{userId}/purchases",
   "users/{userId}/wishlist",
@@ -109,14 +113,19 @@ const routes = [
   "users/{userId}/stripe/checkAccountStatus",
   "users/{userId}/feed",
   "users/{userId}/testExistence",
+  "manage/subscriptions",
+  "manage/subscriptions/{subscriptionId}",
   "manage/artists",
   "manage/artists/{artistId}",
   "manage/artists/{artistId}/trackGroups",
   "manage/artists/{artistId}/merch",
+  "manage/artists/{artistId}/labels",
+  "manage/artists/{artistId}/labels/{labelUserId}",
   "manage/artists/{artistId}/codes",
   "manage/artists/{artistId}/subscribers",
   "manage/artists/{artistId}/banner",
   "manage/artists/{artistId}/avatar",
+  "manage/artists/{artistId}/drafts",
   "manage/artists/{artistId}/subscriptionTiers",
   "manage/artists/{artistId}/subscriptionTiers/{subscriptionTierId}",
   "manage/trackGroups/{trackGroupId}",
@@ -136,6 +145,7 @@ const routes = [
   "manage/tracks/{trackId}",
   "manage/tracks/{trackId}/trackArtists",
   "manage/posts/{postId}/images",
+  "manage/posts/{postId}/tracks",
   "manage/posts/{postId}/featuredImage",
   "manage/posts/{postId}/publish",
   "manage/posts/{postId}",
@@ -152,6 +162,7 @@ const routes = [
   "admin/settings",
   "admin/tips",
   "admin/users",
+  "admin/send-email",
   "oembed",
   "flag",
 ];
@@ -221,6 +232,8 @@ if (isDev) {
   app.use("/admin/queues", serverAdapter.getRouter());
 }
 
+app.use(activityPub);
+
 // This has to be the last thing used so that other things don't get over-written
 app.use("/health", async (req, res) => {
   try {
@@ -235,16 +248,37 @@ app.use("/health", async (req, res) => {
 });
 
 // This has to be the last thing used so that other things don't get over-written
-app.use("/", (req, res) => {
+app.use("/", async (req, res) => {
   if (!res.headersSent) {
-    if (req.url !== "/") {
-      res.status(404).json({
-        error: "Page not found",
-      });
+    if (req.path.startsWith("/v1")) {
+      res.sendStatus(404);
+    } else if (
+      (req.path.includes("index.html") || req.path.startsWith("/")) &&
+      !(
+        req.path.includes(".css") ||
+        req.path.includes(".js") ||
+        req.path.includes(".svg") ||
+        req.path.includes(".png") ||
+        req.path.includes(".jpg") ||
+        req.path.includes(".ico") ||
+        req.path.includes(".webp")
+      )
+    ) {
+      const html = await parseIndex(req.path);
+      res.send(html);
     } else {
-      res.status(200).json({
-        mirlo: "chirp",
-      });
+      try {
+        const fileLocation = path.join(
+          __dirname,
+          "..",
+          "client",
+          "dist",
+          req.path
+        );
+        res.sendFile(fileLocation);
+      } catch (e) {
+        console.log(`didn't find that file`, req.path);
+      }
     }
   }
 });

@@ -31,7 +31,9 @@ const TrackGroupMerch: React.FC<{ merch: Merch[] }> = ({ merch }) => {
           }
         `}
       >
-        {merch?.map((item) => <TrackGroupMerchItem item={item} />)}
+        {merch?.map((item) => (
+          <TrackGroupMerchItem key={item.id} item={item} />
+        ))}
       </DashedList>
     </div>
   );

@@ -1,8 +1,6 @@
 import React from "react";
 
 import { Controller, FormProvider, useForm } from "react-hook-form";
-import Button from "../../common/Button";
-import { InputEl } from "../../common/Input";
 import FormComponent from "components/common/FormComponent";
 import { useSnackbar } from "state/SnackbarContext";
 import { pick } from "lodash";
@@ -20,8 +18,11 @@ import { useQuery } from "@tanstack/react-query";
 import { queryManagedArtistSubscriptionTiers } from "queries";
 import ImagesInPostManager from "components/common/TextEditor/ImagesInPostManager";
 import useGetUserObjectById from "utils/useGetUserObjectById";
+import { ArtistButton } from "components/Artist/ArtistButtons";
+import SavingInput from "../AlbumFormComponents/SavingInput";
+import EditPostHeader from "./EditPostHeader";
 
-type FormData = {
+export type PostFormData = {
   title: string;
   publishedAt: string;
   content: string;
@@ -60,7 +61,7 @@ const PostForm: React.FC<{
       multiple: true,
     });
 
-  const methods = useForm<FormData>({
+  const methods = useForm<PostFormData>({
     defaultValues: post
       ? {
           ...post,
@@ -96,7 +97,7 @@ const PostForm: React.FC<{
   const publicationDate = watch("publishedAt");
 
   const doSave = React.useCallback(
-    async (data: FormData) => {
+    async (data: PostFormData) => {
       if (userId) {
         try {
           setIsSaving(true);
@@ -131,16 +132,6 @@ const PostForm: React.FC<{
     [reload, existingId, snackbar, artist.id, errorHandler, onClose, userId, t]
   );
 
-  const doPublish = React.useCallback(async () => {
-    try {
-      await api.put(`manage/posts/${existingId}/publish`, {});
-      reload(existingId);
-      reloadImages();
-    } catch (e) {
-      console.error(e);
-    }
-  }, [existingId]);
-
   const doDelete = React.useCallback(async () => {
     try {
       const confirmed = window.confirm(t("confirmDelete") ?? "");
@@ -153,18 +144,28 @@ const PostForm: React.FC<{
     }
   }, [artist.id, existingId, navigate, t, userId]);
 
-  const isFuture = new Date() < new Date(publicationDate);
-
   return (
     <FormProvider {...methods}>
+      <EditPostHeader reload={reload} onClose={onClose} />
+
       <form onSubmit={handleSubmit(doSave)}>
         <FormComponent>
-          <label>{t("title")}</label>{" "}
-          <InputEl {...register("title")} required />
+          <label>{t("title")}</label>
+          <SavingInput
+            formKey="title"
+            required
+            url={`manage/posts/${post.id}`}
+          />
         </FormComponent>
         <FormComponent>
           <label>{t("publicationDate")} </label>
-          <InputEl type="datetime-local" {...register("publishedAt")} />
+          <SavingInput
+            formKey="publishedAt"
+            type="datetime-local"
+            required
+            url={`manage/posts/${post.id}`}
+          />
+          {/* <InputEl type="datetime-local" {...register("publishedAt")} /> */}
           {new Date(publicationDate) > new Date() && (
             <Box variant="info" compact small>
               <>{t("inTheFuture")}</>
@@ -182,6 +183,7 @@ const PostForm: React.FC<{
                   }}
                   value={value}
                   postId={post.id}
+                  artistId={artist.id}
                   reloadImages={reloadImages}
                 />
               );
@@ -283,37 +285,12 @@ const PostForm: React.FC<{
             display: flex;
             width: 100%;
             justify-content: space-between;
+            align-items: center;
           `}
         >
-          <Button
-            variant="dashed"
-            disabled={
-              isSaving ||
-              (minimumTier === "" && !isPublic) ||
-              !methods.formState.isValid
-            }
-            isLoading={isSaving}
-            onClick={handleSubmit(doSave)}
-          >
-            {post.isDraft ? t("saveDraft") : t("updatePost")}
-          </Button>
-          {post.isDraft && (
-            <Button
-              disabled={
-                isSaving ||
-                (minimumTier === "" && !isPublic) ||
-                !methods.formState.isValid
-              }
-              isLoading={isSaving}
-              onClick={doPublish}
-              type="button"
-            >
-              {isFuture ? t("scheduleToPublish") : t("publishPost")}
-            </Button>
-          )}
-          <Button type="button" isLoading={isSaving} onClick={doDelete}>
+          <ArtistButton type="button" isLoading={isSaving} onClick={doDelete}>
             {t("delete")}
-          </Button>
+          </ArtistButton>
         </div>
       </form>
     </FormProvider>

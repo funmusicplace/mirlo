@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "@emotion/styled";
+import { css } from "@emotion/css";
 
 const ImageContainer = styled.div`
   display: block;
@@ -25,21 +26,33 @@ export const ImageWithPlaceholder: React.FC<{
 
   return (
     <ImageContainer className={className}>
-      <img
-        src={src}
-        alt={alt}
-        width={size}
-        height={size}
-        loading="lazy"
-        decoding="async"
-        onLoad={() => setLoading(false)}
-        onError={() => setError(true)}
-        style={{
-          aspectRatio: square ? "1" : "unset",
-          objectFit: square ? "contain" : "unset",
-          opacity: isLoading || isError ? 0 : 1,
-        }}
-      />
+      {src && (
+        <img
+          src={src}
+          alt={alt}
+          width={size}
+          height={size}
+          loading="lazy"
+          decoding="async"
+          onLoad={() => setLoading(false)}
+          onError={() => setError(true)}
+          style={{
+            aspectRatio: square ? "1" : "unset",
+            objectFit: square ? "contain" : "unset",
+            opacity: isLoading || isError ? 0 : 1,
+          }}
+        />
+      )}
+      {!src && (
+        <div
+          className={css`
+            width: 99vh;
+            height: 99vh;
+            max-height: ${size}px;
+            display: block;
+          `}
+        />
+      )}
     </ImageContainer>
   );
 };

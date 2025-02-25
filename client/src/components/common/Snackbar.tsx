@@ -14,9 +14,14 @@ const Container = styled.div<{ variant: Variant; position?: Position }>`
     return `var(--mi-${props.variant ?? "light"}-background-color)`;
   }};
   ${(props) => {
-    return props.variant
-      ? `color: var(--mi-white); font-weight: bold;`
-      : `color: var(--mi-light-foreground-color)`;
+    switch (props.variant) {
+      case "success":
+        return `
+        color: var(--mi-normal-foreground-color); 
+        font-weight: bold;`;
+      default:
+        return `color: var(--mi-normal-foreground-color)`;
+    }
   }};
   z-index: 1000;
   margin: 16px;
@@ -34,7 +39,8 @@ const Container = styled.div<{ variant: Variant; position?: Position }>`
   @media (max-width: ${bp.small}px) {
     bottom: auto;
     top: 3rem;
-    left: 1rem;
+    left: auto;
+    right: auto;
   }
 
   ${(props) => {

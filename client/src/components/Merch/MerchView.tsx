@@ -28,6 +28,7 @@ import { useAuthContext } from "state/AuthContext";
 import PublicTrackGroupListing from "components/common/TrackTable/PublicTrackGroupListing";
 
 import MerchButtonPopUp from "./MerchButtonPopUp";
+import { ArtistButtonLink } from "components/Artist/ArtistButtons";
 
 function MerchView() {
   const { t } = useTranslation("translation", {
@@ -108,14 +109,14 @@ function MerchView() {
           <SpaceBetweenDiv>
             <ItemViewTitle title={merch.title} />
             {userIsOwner && (
-              <ButtonLink
-                compact
+              <ArtistButtonLink
+                size="compact"
                 startIcon={<FaPen />}
                 variant="dashed"
                 to={getArtistManageMerchUrl(artist.id, merch.id)}
               >
                 {t("editMerch")}
-              </ButtonLink>
+              </ArtistButtonLink>
             )}
           </SpaceBetweenDiv>
           <div
@@ -139,7 +140,7 @@ function MerchView() {
                   src={
                     merch.images?.[0]?.sizes?.[960] +
                     "?" +
-                    merch.images?.[0].updatedAt
+                    merch.images?.[0]?.updatedAt
                   }
                   alt={merch.title}
                   size={960}
@@ -155,6 +156,18 @@ function MerchView() {
               `}
             >
               <MerchButtonPopUp merch={merch} artist={artist} />
+              <div
+                className={css`
+                  margin-left: 1rem;
+                  @media screen and (max-width: ${bp.small}px) {
+                    max-width: 100%;
+                    flex: 100%;
+                    margin-left: 0;
+                  }
+                `}
+              >
+                <MarkdownContent content={merchDescription} />
+              </div>
               {merch.includePurchaseTrackGroup && (
                 <Link
                   to={getReleaseUrl(
@@ -170,18 +183,6 @@ function MerchView() {
                   })}
                 </Link>
               )}
-              <div
-                className={css`
-                  margin-left: 1rem;
-                  @media screen and (max-width: ${bp.small}px) {
-                    max-width: 100%;
-                    flex: 100%;
-                    margin-left: 0;
-                  }
-                `}
-              >
-                <MarkdownContent content={merchDescription} />
-              </div>
               {merch.includePurchaseTrackGroup && (
                 <PublicTrackGroupListing
                   tracks={merch.includePurchaseTrackGroup?.tracks}
@@ -197,6 +198,9 @@ function MerchView() {
           className={css`
             margin-top: 4rem;
             text-align: center;
+            display: flex;
+            margin: 4rem auto;
+            justify-content: center;
           `}
         >
           {merch.artist && stripeAccountStatus?.chargesEnabled && (

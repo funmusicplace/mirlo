@@ -12,9 +12,10 @@ import React from "react";
 import { css } from "@emotion/css";
 import api from "services/api";
 import { SelectEl } from "components/common/Select";
-import { moneyDisplay } from "components/common/Money";
+import { getCurrencySymbol, moneyDisplay } from "components/common/Money";
 import IncludesDigitalDownload from "./IncludesDigitalDownload";
 import { FaChevronRight } from "react-icons/fa";
+import countryCodesCurrencies from "components/ManageArtist/Merch/country-codes-currencies";
 
 type FormData = {
   quantity: number;
@@ -23,11 +24,19 @@ type FormData = {
   shippingDestinationId: string;
 };
 
+const codeToCountryMap = countryCodesCurrencies.reduce(
+  (aggr, country) => {
+    aggr[country.countryCode] = country;
+    return aggr;
+  },
+  {} as { [key: string]: any }
+);
+
 const BuyMerchItem: React.FC<{
   merch: Merch;
   artist: Artist;
   showTitle?: boolean;
-}> = ({ merch, artist, showTitle }) => {
+}> = ({ merch, artist }) => {
   const { t } = useTranslation("translation", {
     keyPrefix: "merchDetails",
   });
@@ -46,6 +55,11 @@ const BuyMerchItem: React.FC<{
       merchOptionIds: [],
     },
   });
+
+  const currentPrice = methods.watch("price");
+  const quantity = methods.watch("quantity");
+  const currentOptions = methods.watch("merchOptionIds");
+  const shippingDestination = methods.watch("shippingDestinationId");
 
   const onSubmit = React.useCallback(
     async (data: FormData) => {
@@ -74,6 +88,22 @@ const BuyMerchItem: React.FC<{
   if (!stripeAccountStatus?.chargesEnabled || merch.quantityRemaining === 0) {
     return null;
   }
+
+  let price = currentPrice;
+
+  merch.optionTypes.forEach((ot) =>
+    ot.options.forEach((o) =>
+      currentOptions.includes(o.id)
+        ? (price += o.additionalPrice / 100)
+        : undefined
+    )
+  );
+
+  merch.shippingDestinations.forEach((sd) => {
+    if (sd.id === shippingDestination) {
+      price += sd.costUnit / 100 + (sd.costExtraUnit * (quantity - 1)) / 100;
+    }
+  });
 
   const onlyOneDestination = merch.shippingDestinations.length === 1;
   const defaultOption = onlyOneDestination
@@ -119,7 +149,9 @@ const BuyMerchItem: React.FC<{
           />
         </FormComponent>
         <FormComponent>
-          <label>{t("howMuch", { currency: merch.currency })}</label>
+          <label>
+            {t("howMuch", { currency: getCurrencySymbol(merch.currency) })}
+          </label>
           <InputEl
             {...methods.register("price", { min: minPrice })}
             type="number"
@@ -135,11 +167,23 @@ const BuyMerchItem: React.FC<{
         <FormComponent>
           <label>{optionType.optionName}</label>
           <SelectEl {...methods.register(`merchOptionIds.${idx}`)}>
-            {optionType.options.map((o) => (
-              <option key={o.name} value={o.id}>
-                {o.name}
-              </option>
-            ))}
+            {optionType.options
+              .sort((a, b) => {
+                return a.additionalPrice < b.additionalPrice ? -1 : 1;
+              })
+              .map((o) => (
+                <option key={o.name} value={o.id}>
+                  {o.additionalPrice
+                    ? t("option", {
+                        name: o.name,
+                        costUnit: moneyDisplay({
+                          amount: o.additionalPrice / 100,
+                          currency: merch.currency,
+                        }),
+                      })
+                    : o.name}
+                </option>
+              ))}
           </SelectEl>
         </FormComponent>
       ))}
@@ -149,7 +193,7 @@ const BuyMerchItem: React.FC<{
           {merch.shippingDestinations.map((o) => (
             <option key={o.id} value={o.id}>
               {o.destinationCountry && o.destinationCountry !== ""
-                ? o.destinationCountry
+                ? `${codeToCountryMap[o.destinationCountry].countryName} (${o.destinationCountry})`
                 : defaultOption}{" "}
               (
               {t("destinationCost", {
@@ -164,15 +208,32 @@ const BuyMerchItem: React.FC<{
         </SelectEl>
       </FormComponent>
       <IncludesDigitalDownload merch={merch} artist={artist} />
+      <p
+        className={css`
+          margin: 1rem auto;
+          font-weight: bold;
+        `}
+      >
+        {t("orderTotal", {
+          amount: moneyDisplay({ amount: price, currency: merch.currency }),
+        })}
+      </p>
       <Button
         disabled={!methods.formState.isValid}
         isLoading={isLoadingStripe}
-        variant="big"
+        size="big"
+        rounded
         endIcon={<FaChevronRight />}
       >
         {t("goToCheckOut")}
       </Button>
-      <small>{t("artistCheckoutPage")}</small>
+      <div
+        className={css`
+          margin-top: 1rem;
+        `}
+      >
+        <small>{t("artistCheckoutPage")}</small>
+      </div>
     </form>
   );
 };

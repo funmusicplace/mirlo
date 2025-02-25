@@ -4,7 +4,9 @@ import logger from "../logger";
 import {
   fileExistCheckBackblaze,
   getObjectList,
+  getObjectListFromMinio,
   minioClient,
+  uploadFilesToBackblaze,
   uploadWrapper,
 } from "../utils/minio";
 import { sendErrorEmail } from "../jobs/send-mail";
@@ -47,10 +49,13 @@ moveFilesToBackBlazeQueueEvents.on("error", async (error) => {
 });
 
 export const startMovingFiles = async (bucketName: string) => {
-  const files = await getObjectList(bucketName, "");
+  logger.info(`moving-files: getting file list`);
+
+  const files = await getObjectListFromMinio(bucketName, "");
+  logger.info(`moving-files: going to move ${files.length} files`);
   files.map(async (file, i) => {
     try {
-      console.log("adding to queue", file.name);
+      logger.info(`moving-files: adding to queue ${bucketName}/${file.name}`);
       moveFilesToBackBlazeQueue.add(
         "move-file-to-backblaze",
         {
@@ -77,9 +82,11 @@ export const moveFilesToBackblazeJob = async (job: Job) => {
     const stat = await fileExistCheckBackblaze(bucketName, fileName);
 
     if (!stat) {
-      logger.info(`file does not exist, moving it: ${bucketName}/${fileName}`);
+      logger.info(
+        `file does not exist on backblaze yet, moving it: ${bucketName}/${fileName}`
+      );
       const stream = await minioClient.getObject(bucketName, fileName);
-      await uploadWrapper(bucketName, fileName, stream);
+      await uploadFilesToBackblaze(bucketName, fileName, stream);
     } else {
       logger.info(`file already exists: ${bucketName}/${fileName}`);
     }

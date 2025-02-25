@@ -2,11 +2,12 @@ import { css } from "@emotion/css";
 import styled from "@emotion/styled";
 import { MetaCard } from "components/common/MetaCard";
 import { WidthWrapper } from "components/common/WidthContainer";
-import { FaArrowDown } from "react-icons/fa";
+import { FaArrowDown, FaInfo } from "react-icons/fa";
 import { bp } from "../../constants";
 import Button, { ButtonLink } from "components/common/Button";
 import { Link } from "react-router-dom";
 import { Trans, useTranslation } from "react-i18next";
+import Tooltip from "components/common/Tooltip";
 
 const Container = styled(WidthWrapper)`
   h2 {
@@ -187,10 +188,11 @@ const Features = () => {
             >
               <ButtonLink
                 to="#features"
-                variant="big"
+                size="big"
+                rounded
+                endIcon={<FaArrowDown />}
                 className={css`
                   display: block;
-                  padding: 1.5rem 1rem !important;
                   background-color: #be3455 !important;
                   color: var(--mi-white) !important;
 
@@ -211,14 +213,14 @@ const Features = () => {
                   }
                 }}
               >
-                Learn more <FaArrowDown />
+                Learn more
               </ButtonLink>
             </div>
           </div>
 
           <img
             alt="Mirlo painted bird"
-            src="/images/MirloPaintBird.svg"
+            src="/assets/images/MirloPaintBird.svg"
             className={css`
               max-width: 100%;
               // margin-right: -25rem;
@@ -266,13 +268,13 @@ const Features = () => {
               </p>
             </div>
             <img
-              src="/images/multiple-artist-accounts.png"
+              src="/assets/images/multiple-artist-accounts.png"
               alt="multiple artist accounts"
             />
           </Feature>
           <Feature>
             <img
-              src="/images/bulk-upload.png"
+              src="/assets/images/bulk-upload.png"
               alt="upload tracks in bulk"
               className={css`
                 width: 80%;
@@ -289,17 +291,14 @@ const Features = () => {
                 You're prolific! We get it. Or you're a label! Batch upload an
                 album in one click just drag and drop the content of your album
                 folder and you're good to go! The upload process is quick and
-                painless to make it easy for you to upload your catalogue. Want
-                to upload more than 10 albums?{" "}
-                <a
-                  className={css`
-                    color: white;
-                    text-decoration: underline;
-                  `}
-                  href="mailto:mirlodotspace@proton.me"
+                painless to make it easy for you to upload your catalogue.
+                <Tooltip
+                  hoverText={
+                    "While there's no cap on how many albums you can upload, please be kind to our servers, and consider pitching in :)"
+                  }
                 >
-                  Get in touch with us!
-                </a>
+                  <FaInfo />
+                </Tooltip>
               </p>
             </div>{" "}
           </Feature>
@@ -314,7 +313,7 @@ const Features = () => {
               </p>
             </div>
             <img
-              src="/images/embed-2.png"
+              src="/assets/images/embed-2.png"
               alt="page control"
               className={css`
                 width: 60%;
@@ -327,7 +326,7 @@ const Features = () => {
             />
           </Feature>
           <Feature>
-            <img src="/images/embed-1.png" alt="embed" />
+            <img src="/assets/images/embed-1.png" alt="embed" />
             <div className="description">
               <strong>Want control over what your page looks like?</strong>
               <p>
@@ -359,11 +358,14 @@ const Features = () => {
                 everything from one platform.
               </p>
             </div>
-            <img src="/images/community-share.png" alt="community share" />
+            <img
+              src="/assets/images/community-share.png"
+              alt="community share"
+            />
           </Feature>
           <Feature>
             <img
-              src="/images/monthly-donations.png"
+              src="/assets/images/monthly-donations.png"
               alt="monthly donations"
               className={css`
                 width: 80%;
@@ -393,10 +395,10 @@ const Features = () => {
                 the world
               </p>
             </div>
-            <img src="/images/international.png" alt="map" />
+            <img src="/assets/images/international.png" alt="map" />
           </Feature>
           <Feature>
-            <img src="/images/downloads.png" alt="map" />
+            <img src="/assets/images/downloads.png" alt="map" />
 
             <div className="description">
               <strong>
@@ -419,7 +421,7 @@ const Features = () => {
                 roughly 3% cut.
               </p>
             </div>
-            <img src="/images/percentage.png" alt="map" />
+            <img src="/assets/images/percentage.png" alt="map" />
           </Feature>
 
           {/* <h2>Listener Features</h2>
@@ -477,10 +479,10 @@ const Features = () => {
             Excited to get started?{" "}
             <ButtonLink
               to="/signup"
-              variant="big"
+              size="big"
+              rounded
               className={css`
                 display: block;
-                padding: 1.5rem 1rem !important;
                 background-color: #be3455 !important;
                 color: var(--mi-white) !important;
 

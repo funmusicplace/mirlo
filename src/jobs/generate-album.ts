@@ -8,8 +8,9 @@ import {
   finalAudioBucket,
   finalCoversBucket,
   getBufferFromStorage,
-  minioClient,
+  getFile,
   trackGroupFormatBucket,
+  uploadWrapper,
 } from "../utils/minio";
 import { convertAudioToFormat } from "../utils/tracks";
 import archiver from "archiver";
@@ -23,13 +24,6 @@ import {
 } from "@mirlo/prisma/client";
 import filenamify from "filenamify";
 import prisma from "@mirlo/prisma";
-import cover from "../routers/v1/manage/trackGroups/{trackGroupId}/cover";
-
-const {
-  MINIO_HOST = "",
-  MINIO_ROOT_USER = "",
-  MINIO_API_PORT = 9000,
-} = process.env;
 
 const parseFormat = (format: string) => {
   const split = format.split(".");
@@ -65,10 +59,9 @@ export default async (job: Job) => {
 
   let progress = 10;
   const tempFolder = `/data/media/trackGroup/${trackGroup.id}`;
-  logger.info(`MinIO is at ${MINIO_HOST}:${MINIO_API_PORT} ${MINIO_ROOT_USER}`);
 
   try {
-    await createBucketIfNotExists(minioClient, trackGroupFormatBucket, logger);
+    await createBucketIfNotExists(trackGroupFormatBucket, logger);
 
     logger.info(`Checking if folder exists, if not creating it ${tempFolder}`);
     try {
@@ -81,19 +74,19 @@ export default async (job: Job) => {
 
     let i = 0;
     for await (const track of trackGroup.tracks) {
-      const minioTrackLocation = `${track.audio.id}/original.${track.audio.fileExtension}`;
-      logger.info(`audioId ${track.audio.id}: Fetching ${minioTrackLocation}`);
+      const originalTrackLocation = `${track.audio.id}/original.${track.audio.fileExtension}`;
+      logger.info(
+        `audioId ${track.audio.id}: Fetching ${originalTrackLocation}`
+      );
       const originalTrackPath = `${tempFolder}/original.${track.audio.fileExtension}`;
 
-      await minioClient.fGetObject(
-        finalAudioBucket,
-        minioTrackLocation,
-        originalTrackPath
-      );
+      await getFile(finalAudioBucket, originalTrackLocation, originalTrackPath);
       progress += (i * 70) / trackGroup.tracks.length;
       i += 1;
       await job.updateProgress(progress);
-
+      logger.info(
+        `audioId ${track.audio.id}: Getting artist for trackGroup ${originalTrackLocation}`
+      );
       const artist = await prisma.artist.findFirst({
         where: { id: trackGroup.artistId },
       });
@@ -102,30 +95,14 @@ export default async (job: Job) => {
         throw "Couldn't find artist, weird";
       }
 
-      const coverDestination = `${tempFolder}/cover.webp`;
-
-      if (trackGroup.cover?.id) {
-        logger.info("Adding cover");
-        // await minioClient.fGetObject(
-        //   finalCoversBucket,
-        //   `${trackGroup.cover.id}-x1500.jpg`,
-        //   coverDestination
-        // );
-
-        const { buffer } = await getBufferFromStorage(
-          minioClient,
-          finalCoversBucket,
-          `${trackGroup.cover.id}-x1500.webp`
-        );
-        if (buffer) {
-          await fsPromises.writeFile(coverDestination, buffer);
-        }
-      }
-
       await new Promise((resolve, reject) => {
+        const trackFileName = `${tempFolder}/${track.order ?? i}-${filenamify(track.title ?? "")}`;
+
         logger.info(
           `audioId ${track.audio.id}: Processing stream for ${format.format}${
-            format.audioBitrate ? `@${format.audioBitrate}` : ""
+            format.audioBitrate
+              ? `@${format.audioBitrate} to ${trackFileName}`
+              : ""
           }`
         );
 
@@ -138,7 +115,7 @@ export default async (job: Job) => {
           },
           createReadStream(originalTrackPath),
           format,
-          `${tempFolder}/${track.order ?? i}-${filenamify(track.title ?? "")}`,
+          trackFileName,
           reject,
           resolve
         );
@@ -147,7 +124,22 @@ export default async (job: Job) => {
       await fsPromises.rm(originalTrackPath, { force: true });
     }
 
+    const coverDestination = `${tempFolder}/cover.webp`;
+    if (trackGroup.cover?.id) {
+      logger.info(`trackGroupId ${trackGroup.id}: Adding cover`);
+
+      const { buffer } = await getBufferFromStorage(
+        finalCoversBucket,
+        `${trackGroup.cover.id}-x1500.webp`
+      );
+      if (buffer) {
+        await fsPromises.writeFile(coverDestination, buffer);
+      }
+    }
+
     await job.updateProgress(90);
+
+    logger.info(`trackGroupId ${trackGroup.id}: Building zip`);
 
     await new Promise(async (resolve: (value?: unknown) => void) => {
       const finalFilesInFolder = await fsPromises.readdir(tempFolder);
@@ -192,23 +184,23 @@ export default async (job: Job) => {
       archive.pipe(pass);
       archive.finalize();
 
-      await minioClient.putObject(
+      await uploadWrapper(
         trackGroupFormatBucket,
         `${trackGroup.id}/${formatString}.zip`,
         pass
       );
 
-      logger.info(
-        `trackGroupId ${trackGroup.id}: Cleaned up incoming minio folder`
-      );
+      logger.info(`trackGroupId ${trackGroup.id}: Cleaned up incoming bucket`);
       await fsPromises.rm(tempFolder, { recursive: true, force: true });
       logger.info(`Cleaned up ${tempFolder}`);
     });
   } catch (e) {
     await fsPromises.rm(tempFolder, { recursive: true, force: true });
-    logger.error(`Error creating audio folder for ${trackGroup.id}`);
+    logger.error(
+      `Error creating audio folder for trackGroupId: ${trackGroup.id}`
+    );
     if (e instanceof Error) {
-      logger.error(`${e.message}: ${e.stack}`);
+      logger.error(`${e.message}: ${e.stack?.toString()}`);
     }
     return { error: e };
   }

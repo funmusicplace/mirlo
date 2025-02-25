@@ -54,7 +54,9 @@ const sendNotificationEmail = async () => {
             },
           });
           logger.info(`sendNotificationEmail: updated notification`);
-        } else {
+        } else if (!!notification.post.content) {
+          // If the post doesn't have content we shouldn't send it.
+          // It's likely an error
           logger.info(
             `sendNotificationEmail: sending to queue notification for: ${notification.post.title} to ${notification.user.email}`
           );

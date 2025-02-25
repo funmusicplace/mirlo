@@ -151,24 +151,22 @@ const EditTrackRow: React.FC<{
         </td>
         <td className="alignRight">
           <Button
-            compact
+            size="compact"
             onClick={onCancelEditing}
             type="button"
             title="Close"
             variant="dashed"
             startIcon={<FaTimes />}
             disabled={isSaving || isDisabled}
-            style={{ marginRight: ".25rem" }}
           />
           <Button
-            compact
+            size="compact"
             variant="dashed"
             startIcon={<FaSave />}
             disabled={isSaving || isDisabled}
             onClick={methods.handleSubmit(onSave)}
             type="button"
             className={css`
-              margin-right: 0.25rem;
               ${methods.formState.isDirty
                 ? `background-color: var(--mi-success-background-color) !important; 
                    color: var(--mi-white) !important;

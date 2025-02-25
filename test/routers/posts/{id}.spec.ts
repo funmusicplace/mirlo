@@ -36,6 +36,7 @@ describe("posts/{id}", () => {
         .get(`posts/${post.id}`)
         .set("Accept", "application/json");
 
+      assert.equal(response.body.result.id, post.id);
       assert.equal(response.statusCode, 200);
     });
 

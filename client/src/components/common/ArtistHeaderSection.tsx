@@ -13,10 +13,14 @@ import { UpdateArtistBody, useUpdateArtistMutation } from "queries";
 import React from "react";
 import { useSnackbar } from "state/SnackbarContext";
 import { useAuthContext } from "state/AuthContext";
-import TipArtist from "./TipArtist";
 import { ButtonLink } from "./Button";
-import { FaEye, FaPen } from "react-icons/fa";
+import { FaEye, FaPen, FaRss } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
+import {
+  ArtistButton,
+  ArtistButtonAnchor,
+  ArtistButtonLink,
+} from "components/Artist/ArtistButtons";
 
 export const ArtistTitle = styled.h1<{ artistAvatar: boolean }>`
   font-size: 2.4rem;
@@ -217,11 +221,26 @@ const ArtistHeaderSection: React.FC<{
                       />
                     </div>
                     <ArtistActions>
-                      {!isManage && <FollowArtist artistId={artist.id} />}
+                      {!isManage && (
+                        <>
+                          <FollowArtist artistId={artist.id} />
+                          <ArtistButtonAnchor
+                            target="_blank"
+                            href={`${import.meta.env.VITE_API_DOMAIN}/v1/artists/${artist.id}/feed?format=rss`}
+                            rel="noreferrer"
+                            onlyIcon
+                            className={css`
+                              margin-top: 0.25rem;
+                            `}
+                            startIcon={<FaRss />}
+                          />
+                        </>
+                      )}
                       {isManage && (
                         <div>
-                          <ButtonLink
-                            variant="big"
+                          <ArtistButtonLink
+                            size="big"
+                            rounded
                             collapsible
                             startIcon={<FaPen />}
                             to={`/manage/artists/${artist.id}/customize`}
@@ -230,10 +249,11 @@ const ArtistHeaderSection: React.FC<{
                             `}
                           >
                             {t("editDetails")}
-                          </ButtonLink>
-                          <ButtonLink
+                          </ArtistButtonLink>
+                          <ArtistButtonLink
                             to={`/${artist?.urlSlug?.toLowerCase() ?? artist?.id}`}
-                            variant="big"
+                            size="big"
+                            rounded
                             collapsible
                             startIcon={<FaEye />}
                             disabled={!artist}
@@ -243,7 +263,7 @@ const ArtistHeaderSection: React.FC<{
                             `}
                           >
                             {t("viewLive")}
-                          </ButtonLink>
+                          </ArtistButtonLink>
                         </div>
                       )}
                     </ArtistActions>

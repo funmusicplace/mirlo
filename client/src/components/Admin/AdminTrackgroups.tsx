@@ -96,7 +96,7 @@ export const AdminTrackGroups: React.FC = () => {
                 <td>{trackgroup.published ? <FaCheck /> : undefined}</td>
                 <td className="alignRight">
                   <Button
-                    compact
+                    size="compact"
                     startIcon={<FaEdit />}
                     onClick={() => onClickQueue(trackgroup.id)}
                   />

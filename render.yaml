@@ -26,7 +26,7 @@ services:
     plan: standard # Supposedly this should be free but
     # dockerCommand: ./start.sh
     # dockerfilePath: ./prod.Dockerfile
-    buildCommand: corepack enable && yarn install --immutable && yarn prisma:migrate:deploy
+    buildCommand: corepack enable && yarn install --immutable && yarn prisma:migrate:deploy && yarn client:build
     startCommand: yarn ts-node src/index.ts
     envVars:
       - key: SKIP_INSTALL_DEPS
@@ -97,7 +97,7 @@ services:
       # minIO service and deleted after upload
       name: data
       mountPath: /data
-      sizeGB: 20 # optional
+      sizeGB: 40 # optional
     # dockerContext: ./background/src # optional
     envVars:
       - key: DATABASE_URL
@@ -200,7 +200,7 @@ services:
     ipAllowList: # required
       - source: 0.0.0.0/0
         description: everywhere
-    plan: starter # optional (defaults to starter)
+    plan: standard # optional (defaults to starter)
     maxmemoryPolicy: noeviction # optional (defaults to allkeys-lru)
 
 databases:

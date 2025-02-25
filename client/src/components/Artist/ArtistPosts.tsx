@@ -2,10 +2,7 @@ import { css } from "@emotion/css";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { bp } from "../../constants";
-import { useArtistContext } from "state/ArtistContext";
-import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
-import { FaRss } from "react-icons/fa";
-import { ButtonAnchor } from "components/common/Button";
+
 import PostGrid from "components/Post/PostGrid";
 import { queryArtist } from "queries";
 import { useQuery } from "@tanstack/react-query";
@@ -29,16 +26,6 @@ const ArtistPosts: React.FC = () => {
 
   return (
     <div>
-      <SpaceBetweenDiv>
-        <div></div>
-        <ButtonAnchor
-          target="_blank"
-          href={`${import.meta.env.VITE_API_DOMAIN}/v1/artists/${artist.id}/feed?format=rss`}
-          rel="noreferrer"
-          onlyIcon
-          startIcon={<FaRss />}
-        />
-      </SpaceBetweenDiv>
       <div
         className={css`
           @media screen and (max-width: ${bp.medium}px) {

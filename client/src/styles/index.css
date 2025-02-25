@@ -142,6 +142,7 @@ a {
   transition: .25s color, .25s background-color;
   color: var(--mi-link-color);
   text-decoration: underline;
+  word-break: break-word;
 }
 
 @media (prefers-color-scheme: dark) {

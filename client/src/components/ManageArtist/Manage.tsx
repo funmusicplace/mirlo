@@ -3,7 +3,7 @@ import React from "react";
 
 import api from "services/api";
 import Button, { ButtonLink } from "../common/Button";
-import CreateNewArtistForm from "./CustomizeLook";
+import CreateNewArtistForm from "./ManageArtistDetails/CustomizeLook";
 import { bp } from "../../constants";
 import { useTranslation } from "react-i18next";
 import Box from "components/common/Box";
@@ -94,7 +94,7 @@ export const Manage: React.FC = () => {
               >
                 <ButtonLink
                   to="/manage/welcome"
-                  variant="big"
+                  buttonRole="primary"
                   className={css`
                     flex-grow: 1;
                     text-align: center;
@@ -125,7 +125,7 @@ export const Manage: React.FC = () => {
             )}
             {userId && (
               <a href={api.paymentProcessor.stripeConnect(userId)}>
-                <Button variant="big">
+                <Button>
                   {stripeAccountStatus?.detailsSubmitted
                     ? t("updateBankAccount")
                     : t("setUpBankAccount")}

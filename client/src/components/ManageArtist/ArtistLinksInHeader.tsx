@@ -10,6 +10,7 @@ import {
 import { FaPen, FaPlus } from "react-icons/fa";
 import { transformFromLinks } from "./ArtistFormLinks";
 import { Link } from "react-router-dom";
+import { ArtistButton } from "components/Artist/ArtistButtons";
 
 const ArtistLinksInHeader: React.FC<{
   artist: Pick<Artist, "linksJson" | "links">;
@@ -65,15 +66,14 @@ const ArtistLinksInHeader: React.FC<{
 
       {isManage && (
         <div>
-          <Button
-            compact
-            thin
+          <ArtistButton
+            size="compact"
             variant="dashed"
             onClick={() => setIsEditing(true)}
             startIcon={<FaPen />}
           >
             {links?.length === 0 ? t("noLinksYet") : t("editLinks")}
-          </Button>
+          </ArtistButton>
         </div>
       )}
     </div>

@@ -7,6 +7,11 @@ import { useSnackbar } from "state/SnackbarContext";
 import Button, { ButtonLink } from "components/common/Button";
 import { css } from "@emotion/css";
 import { getReleaseUrl } from "utils/artist";
+import { FaEye, FaLock } from "react-icons/fa";
+import {
+  ArtistButton,
+  ArtistButtonLink,
+} from "components/Artist/ArtistButtons";
 
 const PublishButton: React.FC<{
   trackGroup: TrackGroup;
@@ -64,23 +69,35 @@ const PublishButton: React.FC<{
     : "makePrivate";
 
   return (
-    <div>
-      <Button
-        variant="big"
+    <div
+      className={css`
+        display: flex;
+      `}
+    >
+      {artist && trackGroup.published && (
+        <ArtistButtonLink
+          to={getReleaseUrl(artist, trackGroup)}
+          size="big"
+          rounded
+          startIcon={<FaEye />}
+          variant="dashed"
+        >
+          {t(beforeReleaseDate ? "viewPreorder" : "view")}
+        </ArtistButtonLink>
+      )}
+      <ArtistButton
+        size="big"
+        rounded
+        startIcon={<FaLock />}
         isLoading={isPublishing}
         onClick={publishTrackGroup}
         disabled={isPublishing}
         className={css`
-          margin-right: 0.75rem;
+          margin-left: 0.75rem;
         `}
       >
         {t(trackGroup.published ? privateButton : publishButton)}
-      </Button>
-      {artist && trackGroup.published && (
-        <ButtonLink to={getReleaseUrl(artist, trackGroup)} variant="big">
-          {t(beforeReleaseDate ? "viewPreorder" : "view")}
-        </ButtonLink>
-      )}
+      </ArtistButton>
     </div>
   );
 };

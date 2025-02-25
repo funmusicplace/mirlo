@@ -4,13 +4,60 @@ import { css } from "@emotion/css";
 import Box from "components/common/Box";
 import { Link } from "react-router-dom";
 import { getArtistUrl, getPostURLReference } from "utils/artist";
-import MarkdownWrapper from "components/common/MarkdownWrapper";
 import Overlay from "components/common/Overlay";
-import { getHtmlExcerpt } from "utils/getHtmlExcerpt";
 import { useLinkContainer } from "utils/useLinkContainer";
 import { formatDate } from "components/TrackGroup/ReleaseDate";
 import { Trans, useTranslation } from "react-i18next";
-import { bp } from "../../constants";
+import { sample } from "lodash";
+
+const HalfTone: React.FC<{ color1?: string; color2?: string }> = ({
+  color1,
+  color2,
+}) => {
+  return (
+    <div
+      className={css`
+        --mask: linear-gradient(rgb(0 0 0), rgb(0 0 0 / 0.5));
+        --stop1: 3%;
+        --stop2: 90%;
+
+        aspect-ratio: 1;
+        position: relative;
+        background: ${color1 || "var(--mi-white)"};
+        filter: contrast(50);
+
+        &:after {
+          content: "";
+          position: absolute;
+          inset: 0;
+
+          background-repeat: round;
+          mask-image: var(--mask);
+
+          --bgSize: ${sample([".7rem", ".5rem"])};
+          --bgPosition: calc(var(--bgSize) / 2);
+          --stop1: 3%;
+          --stop2: 65%;
+
+          background-image: radial-gradient(
+              circle at center,
+              ${color2 || "var(--mi-pink)"} var(--stop1),
+              transparent var(--stop2)
+            ),
+            radial-gradient(
+              circle at center,
+              ${color2 || "var(--mi-pink)"} var(--stop1),
+              transparent var(--stop2)
+            );
+          background-size: var(--bgSize) var(--bgSize);
+          background-position:
+            0 0,
+            var(--bgPosition) var(--bgPosition);
+        }
+      `}
+    ></div>
+  );
+};
 
 const PostContainer = styled.li`
   display: flex;
@@ -23,6 +70,13 @@ const PostContainer = styled.li`
 
   .post-container__link {
     text-decoration: none;
+    overflow: hidden;
+    display: inline-block;
+    text-align: left;
+    height: 1.5rem;
+    width: 100%;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   &:hover {
@@ -58,12 +112,6 @@ const PostCard: React.FC<{
     keyPrefix: "post",
   });
 
-  // Use the first 8 paragraphs of the post as an unformatted excerpt
-  const excerpt = React.useMemo(
-    () => getHtmlExcerpt(post.content).slice(0, 8),
-    [post.content]
-  );
-
   return (
     <PostContainer {...postContainerProps}>
       <Overlay width="100%" height="100%" />
@@ -83,22 +131,30 @@ const PostCard: React.FC<{
           }
         `}
       >
-        {post.featuredImage && (
-          <div
-            className={css`
-              max-height: 65%;
-              z-index: 0;
-              position: relative;
-            `}
-          >
+        <div
+          className={css`
+            height: 65%;
+            z-index: 0;
+            position: relative;
+            overflow: hidden;
+          `}
+        >
+          {post.featuredImage ? (
             <img
               src={post.featuredImage?.src}
               className={css`
+                object-fit: cover;
+                height: 100%;
                 width: 100%;
               `}
             />
-          </div>
-        )}
+          ) : (
+            <HalfTone
+              color1={post.artist?.properties?.colors?.primary}
+              color2={post.artist?.properties?.colors?.secondary}
+            />
+          )}
+        </div>
         <div
           className={css`
             padding: 1.5rem;
@@ -181,26 +237,6 @@ const PostCard: React.FC<{
                 i18n,
               })}
             </p>
-          </div>
-          <div
-            className={css`
-              width: 100%;
-            `}
-          >
-            <span
-              className={css`
-                display: block;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                color: var(--mi-normal-foreground-color);
-              `}
-            >
-              <MarkdownWrapper>
-                {excerpt.map((text, i) => (
-                  <p key={i}>{text}</p>
-                ))}
-              </MarkdownWrapper>
-            </span>
           </div>
         </div>
       </Box>

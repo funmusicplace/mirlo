@@ -107,7 +107,7 @@ const PlayingTrackDetails: React.FC<{ currentTrack: Track }> = ({
                 text-overflow: ellipsis;
               `}
             >
-              {artists.map((artist) => (
+              {artists.map((artist, index) => (
                 <React.Fragment key={artist.artistName}>
                   {artist.artistId ? (
                     <Link to={`/${artist.artistId}`} id="player-artist-name">
@@ -116,6 +116,7 @@ const PlayingTrackDetails: React.FC<{ currentTrack: Track }> = ({
                   ) : (
                     artist.artistName
                   )}
+                  {index < artists.length - 1 && ", "}
                 </React.Fragment>
               ))}
             </div>

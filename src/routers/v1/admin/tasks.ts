@@ -3,6 +3,7 @@ import { userAuthenticated, userHasPermission } from "../../../auth/passport";
 import cleanUpFiles from "../../../jobs/tasks/clean-up-files";
 import initiateUserNotifcations from "../../../jobs/tasks/initiate-user-notifications";
 import { startMovingFiles } from "../../../queues/moving-files-to-backblaze";
+import logger from "../../../logger";
 
 export default function () {
   const operations = {
@@ -12,6 +13,8 @@ export default function () {
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { jobName, jobParam } = req.query;
     const result: { [key: string]: "Success" } = {};
+    logger.info(`triggering job ${jobName} with ${jobParam}`);
+
     try {
       if (jobName) {
         if (jobName === "cleanUpFiles" && typeof jobParam === "string") {
@@ -26,9 +29,12 @@ export default function () {
             "artist-banners",
             "trackgroup-covers",
             "post-images",
+            "track-audio",
+            "merch-images",
+            "trackgroup-format",
           ].includes(jobParam)
         ) {
-          await startMovingFiles(jobParam);
+          startMovingFiles(jobParam);
           result[jobName] = "Success";
         }
         if (jobName === "initiateUserNotifications") {

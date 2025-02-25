@@ -40,9 +40,9 @@ export const Fulfillment: React.FC = () => {
           margin: 0.5rem 0;
         `}
       >
-        Orders & Fulfillment
+        {t("ordersAndFulfillment")}
       </h3>
-      <h4>Total results: {total}</h4>
+      <h4>{t("totalResults", { count: total })}</h4>
       {results.length > 0 && (
         <div
           className={css`

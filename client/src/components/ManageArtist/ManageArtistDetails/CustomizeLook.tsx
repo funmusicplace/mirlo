@@ -1,13 +1,11 @@
 import React from "react";
-import Button from "../common/Button";
+import Button from "../../common/Button";
 import { FormProvider, useForm } from "react-hook-form";
-import { bp } from "../../constants";
-import { InputEl } from "../common/Input";
+import { bp } from "../../../constants";
 import FormComponent from "components/common/FormComponent";
-import TextArea from "components/common/TextArea";
 import { css } from "@emotion/css";
 import { useSnackbar } from "state/SnackbarContext";
-import UploadArtistImage from "./UploadArtistImage";
+import UploadArtistImage from "../UploadArtistImage";
 import { useTranslation } from "react-i18next";
 import ArtistFormColors from "./ArtistFormColors";
 import ArtistSlugInput from "./ArtistSlugInput";
@@ -18,11 +16,14 @@ import {
 } from "queries";
 import { useAuthContext } from "state/AuthContext";
 import styled from "@emotion/styled";
-import ChooseYourTheme from "./ChooseYourTheme";
-import { useQuery } from "@tanstack/react-query";
+import ChooseYourTheme from "../ChooseYourTheme";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
-import SavingInput from "./AlbumFormComponents/SavingInput";
+import SavingInput from "../AlbumFormComponents/SavingInput";
 import { QUERY_KEY_ARTISTS } from "queries/queryKeys";
+import DeleteArtist from "../DeleteArtist";
+import ArtistLabels from "./ArtistLabels";
+import { Toggle } from "components/common/Toggle";
 
 export interface ShareableTrackgroup {
   creatorId: number;
@@ -61,6 +62,7 @@ type FormData = {
   urlSlug: string;
   banner: File[];
   avatar: File[];
+  activityPub: boolean;
   properties: {
     colors: {
       primary: string;
@@ -75,6 +77,7 @@ const generateDefaults = (existing?: Artist) => ({
   name: existing?.name ?? "",
   bio: existing?.bio ?? "",
   urlSlug: existing?.urlSlug ?? "",
+  activityPub: existing?.activityPub ?? false,
   properties: {
     colors: {
       primary: "",
@@ -93,6 +96,7 @@ export const CustomizeLook: React.FC = () => {
   const userId = user?.id;
   const { artistId } = useParams();
   const { data: artist } = useQuery(queryManagedArtist(Number(artistId)));
+
   const methods = useForm<FormData>({
     defaultValues: generateDefaults(artist),
   });
@@ -112,6 +116,7 @@ export const CustomizeLook: React.FC = () => {
   const { mutate: updateArtist, isPending: isUpdatePending } =
     useUpdateArtistMutation();
   const isPending = isCreatePending || isUpdatePending;
+  const client = useQueryClient();
 
   const onSuccess = React.useCallback(() => {
     snackbar(t("updatedArtist"), { type: "success" });
@@ -127,6 +132,7 @@ export const CustomizeLook: React.FC = () => {
 
       const sending = {
         urlSlug: data.urlSlug?.toLowerCase(),
+        activityPub: data.activityPub,
         properties: data.properties,
       };
 
@@ -138,9 +144,35 @@ export const CustomizeLook: React.FC = () => {
       } else {
         createArtist({ userId, body: sending }, { onSuccess, onError });
       }
+
+      const timeout = setTimeout(() => {
+        client.invalidateQueries({
+          predicate: (query) => {
+            const shouldInvalidate = query.queryKey.find((obj) => {
+              if (typeof obj === "string") {
+                return obj
+                  .toLowerCase()
+                  .includes(QUERY_KEY_ARTISTS.toLowerCase());
+              }
+              return false;
+            });
+
+            return !!shouldInvalidate;
+          },
+        });
+
+        snackbar(t("merchUpdated"), {
+          type: "success",
+        });
+      }, 2000);
+      return () => {
+        clearTimeout(timeout);
+      };
     },
     [userId, existingId, onSuccess, updateArtist, createArtist, onError]
   );
+
+  const activityPub = methods.watch("activityPub");
 
   if (!artist) {
     return null;
@@ -148,6 +180,7 @@ export const CustomizeLook: React.FC = () => {
 
   return (
     <div>
+      <ArtistLabels />
       <FormProvider {...methods}>
         <form onSubmit={handleSubmit(onValidSubmit)}>
           <div>
@@ -205,7 +238,6 @@ export const CustomizeLook: React.FC = () => {
                     formKey="name"
                     url={`manage/artists/${artistId}`}
                     extraData={{}}
-                    clearQueryKey={QUERY_KEY_ARTISTS}
                   />
                 </FormComponent>
               </div>
@@ -226,7 +258,6 @@ export const CustomizeLook: React.FC = () => {
                     formKey="bio"
                     rows={7}
                     url={`manage/artists/${artistId}`}
-                    clearQueryKey={QUERY_KEY_ARTISTS}
                     extraData={{}}
                   />
                 </FormComponent>
@@ -293,6 +324,16 @@ export const CustomizeLook: React.FC = () => {
                 <ArtistSlugInput currentArtistId={existingId} />
               </FormComponent>
             </ArtistFormSection>
+            <FormComponent>
+              <Toggle
+                label={t("enableActivityPub")}
+                toggled={activityPub}
+                onClick={() => {
+                  methods.setValue("activityPub", !activityPub);
+                }}
+              />
+              <small>{t("makeSearchable")}</small>
+            </FormComponent>
 
             <ArtistFormSection
               isOdd
@@ -300,18 +341,14 @@ export const CustomizeLook: React.FC = () => {
                 margin-bottom: 0 !important;
               `}
             >
-              <Button
-                type="submit"
-                variant="big"
-                disabled={isPending}
-                isLoading={isPending}
-              >
+              <Button type="submit" disabled={isPending} isLoading={isPending}>
                 {t("saveArtist")}
               </Button>
             </ArtistFormSection>
           </div>
         </form>
       </FormProvider>
+      <DeleteArtist />
     </div>
   );
 };

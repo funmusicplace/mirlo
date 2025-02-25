@@ -44,9 +44,10 @@ const alertUser = (event: any) => {
 };
 
 export const BulkTrackUpload: React.FC<{
-  trackgroup: TrackGroup;
-  reload: () => Promise<unknown>;
-}> = ({ trackgroup, reload }) => {
+  trackgroup: { artistId?: number; id: number; tracks: Track[] };
+  reload: (newTrack?: Track) => Promise<unknown>;
+  multiple?: boolean;
+}> = ({ trackgroup, reload, multiple }) => {
   const snackbar = useSnackbar();
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const methods = useForm<FormData>();
@@ -67,7 +68,6 @@ export const BulkTrackUpload: React.FC<{
       if (firstTrack) {
         const metadata = pick(firstTrack.t.metadata, ["format", "common"]);
         delete metadata.common.picture;
-        console.log("firstTrack", metadata);
 
         const packet = {
           title: firstTrack.t.title,
@@ -89,15 +89,18 @@ export const BulkTrackUpload: React.FC<{
           produceNewStatus(queue, firstTrack.t.title, 15)
         );
 
+        let newTrack: Track | undefined = undefined;
+
         try {
           const response = await api.post<Partial<Track>, { result: Track }>(
             `manage/tracks`,
             packet
           );
+          newTrack = response.result;
           setUploadQueue((queue) =>
             produceNewStatus(queue, firstTrack.t.title, 25)
           );
-          await api.uploadFile(`manage/tracks/${response.result.id}/audio`, [
+          await api.uploadFile(`manage/tracks/${newTrack.id}/audio`, [
             firstTrack.t.file,
           ]);
         } catch (e) {
@@ -118,7 +121,7 @@ export const BulkTrackUpload: React.FC<{
             setUploadQueue((queue) =>
               produceNewStatus(queue, firstTrack.t.title, 100)
             );
-            reload();
+            reload(newTrack);
           }, timeInBetweenUploads / 2);
 
           setTimeout(async () => {
@@ -126,6 +129,7 @@ export const BulkTrackUpload: React.FC<{
           }, timeInBetweenUploads);
         } else {
           await uploadNextTrack(remainingTracks);
+          reload(newTrack);
         }
       } else {
         setUploadQueue([]);
@@ -194,11 +198,11 @@ export const BulkTrackUpload: React.FC<{
               margin-bottom: 1rem;
             `}
           >
-            {uploadQueue.map((t, idx) => (
+            {uploadQueue.map((t) => (
               <BulkTrackUploadRow track={t} key={t.title} />
             ))}
           </div>
-        )}
+        )}{" "}
         <p>{t("uploadTracksDescription")}</p>
         <FormComponent>
           <UploadLabelWrapper htmlFor="audio">
@@ -208,7 +212,7 @@ export const BulkTrackUpload: React.FC<{
               type="file"
               id="audio"
               disabled={disableUploadButton}
-              multiple
+              multiple={multiple}
               {...register("trackFiles")}
               accept="audio/flac,audio/wav,audio/x-wav,audio/x-flac,audio/aac,audio/aiff,audio/x-m4a"
             />

@@ -9,4 +9,5 @@ export const ARTIST_EXAMPLE: Artist = {
   posts: [],
   subscriptionTiers: [],
   merch: [],
+  activityPub: false,
 };

@@ -63,10 +63,14 @@ const TR = styled.tr<{ canPlayTrack: boolean }>`
   }
   > td > .track-number {
     display: block;
+    width: 2rem;
   }
   &:hover > td > .play-button {
     display: block;
-    width: 2rem;
+
+    svg {
+      fill: var(--mi-white);
+    }
   }
   ${(props) =>
     props.canPlayTrack
@@ -78,10 +82,6 @@ const TR = styled.tr<{ canPlayTrack: boolean }>`
   @media screen and (max-width: ${bp.small}px) {
     td {
       padding: 0.15rem 0.3rem;
-    }
-    span {
-      width: 1rem !important;
-      margin-right: 1rem !important;
     }
     > td > .play-button {
       margin-left: 0.5rem;
@@ -221,16 +221,24 @@ const TrackRow: React.FC<{
       </td> */}
       {size !== "small" && (
         <td align="right">
-          <DropdownMenu compact transparent>
-            <>
-              <EmbedLink track={track} />
-              <TrackLink
-                track={track}
-                trackGroup={trackGroup}
-                artist={trackGroup.artist}
-              />
-              {track.lyrics && <LyricsModal track={track} />}
-            </>
+          <DropdownMenu compact>
+            <ul>
+              <li>
+                <EmbedLink track={track} />
+              </li>
+              <li>
+                <TrackLink
+                  track={track}
+                  trackGroup={trackGroup}
+                  artist={trackGroup.artist}
+                />
+              </li>
+              {track.lyrics && (
+                <li>
+                  s <LyricsModal track={track} />
+                </li>
+              )}
+            </ul>
           </DropdownMenu>
         </td>
       )}

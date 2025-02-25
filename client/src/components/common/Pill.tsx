@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 
-const Pill = styled.span<{ isHoverable?: boolean }>`
+const Pill = styled.span<{ isHoverable?: boolean; variant?: "warning" }>`
   display: inline-flex;
   background-color: var(--mi-darken-x-background-color);
   border-radius: var(--mi-border-radius-x);
@@ -18,6 +18,25 @@ const Pill = styled.span<{ isHoverable?: boolean }>`
     background-color: var(--mi-lighten-background-color);
   }
 
+  ${(props) => {
+    switch (props.variant) {
+      case "warning":
+        return `
+            background: repeating-linear-gradient(45deg, 
+              var(--mi-lighten-warning-background-color), 
+              var(--mi-lighten-warning-background-color) 10px, 
+              var(--mi-normal-background-color) 10px, 
+              var(--mi-normal-background-color) 20px);
+            border: var(--mi-warning-background-color) 1px solid;
+            color: var(--mi-normal-foreground-color);
+            font-weight: bold;
+          `;
+      default:
+        return `
+          // background-color: var(--mi-lighten-background-color);
+        `;
+    }
+  }}
   ${(props) =>
     props.isHoverable
       ? `

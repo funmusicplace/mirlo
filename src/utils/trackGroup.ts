@@ -8,14 +8,17 @@ import {
   User,
   Merch,
   MerchImage,
+  Artist,
+  ArtistAvatar,
 } from "@mirlo/prisma/client";
 import prisma from "@mirlo/prisma";
 import { generateFullStaticImageUrl } from "./images";
 import {
   finalCoversBucket,
   finalAudioBucket,
-  minioClient,
   removeObjectsFromBucket,
+  getReadStream,
+  finalArtistAvatarBucket,
 } from "./minio";
 import { addSizesToImage, findArtistIdForURLSlug } from "./artist";
 import { logger } from "../logger";
@@ -31,6 +34,7 @@ import { processSingleMerch } from "./merch";
 export const whereForPublishedTrackGroups = (): Prisma.TrackGroupWhereInput => {
   return {
     published: true,
+    isDrafts: false,
     tracks: { some: { audio: { uploadState: "SUCCESS" } } },
     deletedAt: null,
     cover: {
@@ -236,17 +240,25 @@ export async function buildZipFileForPath(
         const trackLocation = `${track.audio.id}/original.${track.audio.fileExtension}`;
         logger.info(`${track.audio.id}: Fetching ${trackLocation}`);
         try {
-          const trackStream = await minioClient.getObject(
+          const trackStream = await getReadStream(
             finalAudioBucket,
             trackLocation
           );
 
-          archive.append(trackStream, { name: trackTitle });
-          logger.info(
-            `${track.audio.id}: Added track to zip file ${track.title}`
-          );
+          if (trackStream) {
+            archive.append(trackStream, { name: trackTitle });
+            logger.info(
+              `${track.audio.id}: Added track to zip file ${track.title}`
+            );
+          } else {
+            logger.error(
+              `${track.audio.id}: File not found on backend storage skipping`
+            );
+          }
         } catch (e) {
-          logger.error(`${track.audio.id}: File not found on MinIO skipping`);
+          logger.error(
+            `${track.audio.id}: File not found on backend storage skipping`
+          );
         }
       }
     }
@@ -474,12 +486,21 @@ export const setDownloadTokenToNull = async ({
 export const processSingleTrackGroup = (
   tg: TrackGroup & {
     cover?: TrackGroupCover | null;
+    artist?: Partial<Artist> & { avatar?: ArtistAvatar | null };
     merch?: (Merch & { images: MerchImage[] })[];
     tracks?: Track[];
     tags?: (TrackGroupTag & { tag?: { tag?: string } })[];
   }
 ) => ({
   ...tg,
+  artist: tg.artist
+    ? {
+        ...tg.artist,
+        avatar: tg.artist.avatar
+          ? addSizesToImage(finalArtistAvatarBucket, tg.artist.avatar)
+          : undefined,
+      }
+    : undefined,
   merch: tg.merch?.map(processSingleMerch),
   tags: tg.tags?.map((t) => t.tag?.tag) ?? [],
   cover: addSizesToImage(finalCoversBucket, tg.cover),

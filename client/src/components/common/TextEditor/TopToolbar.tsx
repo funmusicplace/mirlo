@@ -16,7 +16,10 @@ import { css } from "@emotion/css";
 import InsertMirloWidgetButton from "./InsertMirloWidgetButton";
 import InsertImageButton from "./InsertImageButton";
 
-const TopToolbar: React.FC<{ postId: number }> = ({ postId }) => {
+const TopToolbar: React.FC<{ postId?: number; artistId?: number }> = ({
+  postId,
+  artistId,
+}) => {
   return (
     <div
       className={css`
@@ -29,11 +32,16 @@ const TopToolbar: React.FC<{ postId: number }> = ({ postId }) => {
         > div > div > button,
         > span > button {
           background-color: inherit !important;
+          color: inherit !important;
           border: none;
           border-radius: 100%;
           height: 2rem;
           width: 2rem;
           padding: 0;
+
+          svg {
+            fill: inherit !important;
+          }
 
           &.Mui-disabled {
             border: 0;
@@ -74,7 +82,7 @@ const TopToolbar: React.FC<{ postId: number }> = ({ postId }) => {
         <CommandButtonGroup>
           {/* <Button startIcon={<FaImage />} /> */}
           <InsertVideoButton />
-          <InsertMirloWidgetButton />
+          <InsertMirloWidgetButton postId={postId} artistId={artistId} />
           <InsertImageButton postId={postId} />
         </CommandButtonGroup>
       </Toolbar>

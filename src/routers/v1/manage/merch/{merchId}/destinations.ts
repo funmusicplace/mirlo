@@ -25,6 +25,7 @@ export default function () {
     const { merchId } = req.params as unknown as Params;
     const destinations = req.body as unknown as {
       destinationCountry: string;
+      homeCountry: string;
       costUnit: number;
       costExtraUnit: number;
     }[];
@@ -44,7 +45,7 @@ export default function () {
       await prisma.merchShippingDestination.createMany({
         data: destinations.map((dest) => ({
           merchId,
-          homeCountry: country?.countryCode ?? "us",
+          homeCountry: dest.homeCountry ?? country?.countryCode ?? "us",
           destinationCountry: dest.destinationCountry,
           costUnit: dest.costUnit,
           currency: currencyString,

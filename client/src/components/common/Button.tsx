@@ -2,7 +2,6 @@ import React from "react";
 
 import styled from "@emotion/styled";
 import LoadingSpinner from "./LoadingSpinner";
-import { css } from "@emotion/css";
 import { bp } from "../../constants";
 import {
   RelativeRoutingType,
@@ -10,222 +9,284 @@ import {
   useLinkClickHandler,
 } from "react-router-dom";
 
-export interface Compactable {
-  compact?: boolean;
-  transparent?: boolean;
-  thin?: boolean;
-  small?: boolean;
+export interface Sizable {
+  size?: "big" | "compact";
   wrap?: boolean;
+  rounded?: boolean;
   collapsible?: boolean;
-  buttonRole?: "primary" | "secondary" | "warning";
-  variant?: "link" | "big" | "outlined" | "dashed" | "default";
+  buttonRole?: "primary" | "warning" | "black";
+  variant?: "link" | "outlined" | "dashed" | "transparent" | "default";
   uppercase?: boolean;
   onlyIcon?: boolean;
 }
 
-const CustomButton = styled.button<Compactable>`
-  background: none;
-  border: none;
-  transition:
-    0.25s background-color,
-    0.25s color,
-    0.25s border-radius,
-    0.25s filter;
-  font-size: 1rem;
-  text-decoration: none;
-  line-height: 1rem;
-  // height: 2rem;
-  ${(props) => (props.onlyIcon ? "height: 2rem;" : "")};
-  ${(props) => (props.onlyIcon ? "width: 2rem;" : "")};
+function lightOrDark(color: string) {
+  let matchedColor: string | RegExpMatchArray | null | number = color;
 
-  @media screen and (max-width: ${bp.medium}px) {
-    font-size: 0.8rem;
-  }
-  @media screen and (max-width: ${bp.small}px) {
-    font-size: 0.8rem;
-    ${(props) =>
-      props.onlyIcon && props.compact
-        ? "height: 1.7rem; width: 1.7rem; font-size: var(--mi-font-size-xsmall);"
-        : ""};
+  // Variables for red, green, blue values
+  var r, g, b, hsp;
+
+  // Check the format of the color, HEX or RGB?
+  if (color.match(/^rgb/)) {
+    // If RGB --> store the red, green, blue values in separate variables
+    matchedColor = color.match(
+      /^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*(\d+(?:\.\d+)?))?\)$/
+    );
+
+    if (matchedColor) {
+      r = matchedColor[1];
+      g = matchedColor[2];
+      b = matchedColor[3];
+    }
+  } else if (typeof color === "string") {
+    // If hex --> Convert it to RGB: http://gist.github.com/983661
+    matchedColor = +(
+      "0x" + color.slice(1).replace(color.length < 5 ? /./g : "", "$&$&")
+    );
+
+    r = matchedColor >> 16;
+    g = (matchedColor >> 8) & 255;
+    b = matchedColor & 255;
   }
 
-  &:hover:not(:disabled) {
-    cursor: pointer;
+  if (typeof r === "number" && typeof g === "number" && typeof b === "number") {
+    const rSquared = r * r;
+    // HSP (Highly Sensitive Poo) equation from http://alienryderflex.com/hsp.html
+    hsp = Math.sqrt(0.299 * rSquared + 0.587 * (g * g) + 0.114 * (b * b));
   }
+  // Using the HSP value, determine whether the color is light or dark
+  if (hsp && hsp > 127.5) {
+    return "light";
+  } else {
+    return "dark";
+  }
+}
 
-  ${(props) =>
-    props.collapsible &&
-    `
-      @media screen and (max-width: ${bp.medium}px) {
-        border-radius: 100%;
-        height: auto;
-        min-width: auto;
-        > p,
-        .children {
-          display: none;
-        }
-        .startIcon, .endIcon {margin: auto !important;}
+const isDarkMode = () => {
+  return (
+    window.matchMedia &&
+    window.matchMedia("(prefers-color-scheme: dark)").matches
+  );
+};
+
+const CustomButton = styled.button<Sizable>(
+  {},
+  ({ buttonRole, size, ...props }) => {
+    const bodyStyles = window.getComputedStyle(document.body);
+    let cssColorVariable = `--mi-${buttonRole ?? "primary"}-color`;
+    var primaryColor = bodyStyles.getPropertyValue(cssColorVariable);
+    let secondaryColor = bodyStyles.getPropertyValue(`--mi-secondary-color`);
+    const isOnlyIcon = props.onlyIcon
+      ? `
+      padding: .5rem;
+      height: 2rem;
+      width: 2rem;
+
+      @media screen and (max-width: ${bp.small}px) {
+        ${
+          size === "compact"
+            ? `
+            height: 1.7rem; 
+            width: 1.7rem; 
+            `
+            : ""
+        };
       }
-    `}
+    `
+      : "";
 
-  ${(props) => (props.uppercase ? "text-transform: uppercase;" : "")}
-  ${(props) => {
-    switch (props.variant) {
-      case "link":
+    const sizeVariables = () => {
+      if (size === "compact") {
         return `
-          color: var(--mi-${props.buttonRole ?? "primary"}-color);
-          margin-right: 0;
+          line-height: 1.2rem;
+          padding: .3rem .5rem;
+          font-size: .8rem;
+        `;
+      } else if (size === "big") {
+        return `
+          line-height: 1.2rem;
+          padding: 1rem 1.3rem;
+          font-size: 1.2rem;
+        `;
+      } else {
+        return `
+          padding: .5rem .7rem;
+          font-size: 1rem;
+        `;
+      }
+    };
+
+    const collapsible = props.collapsible
+      ? `
+        @media screen and (max-width: ${bp.medium}px) {
+          border-radius: 100%;
+          height: auto;
+          min-width: auto;
+          padding: .7rem !important;
+
+          > p,
+          .children {
+            display: none;
+          }
+          .startIcon, .endIcon {
+            margin: auto !important;
+          }
+        }
+      `
+      : "";
+
+    let variantStyles = () => {
+      switch (props.variant) {
+        case "link":
+          return `
+          color: ${primaryColor};
           margin-left: .3rem;
           font-weight: bold;
           padding: 0 !important;
           background-color: transparent !important;
-          font-size: inherit;
           text-decoration: underline;
           line-height: inherit;
 
+          svg {
+            fill: ${primaryColor};
+          }
+
           &:hover:not(:disabled) {
-            color: var(--mi-${props.buttonRole ?? "primary"}-color);
+            filter: brightness(95%) saturate(30%);
           }
         `;
-
-      case "big":
-        return `
-
-          color: var(--mi-${props.buttonRole ?? "primary"}-color);
-          ${props.compact ? "" : "height: 2.5rem; min-width: 5rem;"}
-          border-radius: 9999px !important;
-          background-color: var(--mi-secondary-color);
-          font-weight: bold;
-          align-items: center;
-          display: inline-flex;
-          line-height: 1rem;
-          padding: 1rem;
-          text-align: center;
-
-          &:hover:not(:disabled) {
-            color: var(--mi-${props.buttonRole ?? "secondary"}-color);
-            background-color: var(--mi-${props.buttonRole ?? "primary"}-color);
-          }
-
-          @media screen and (max-width: ${bp.small}px) {
-            font-size: var(--mi-font-size-normal);
-            ${
-              props.compact
-                ? "padding: .5rem; height: 1.5rem !important;"
-                : props.collapsible
-                  ? "height: auto;"
-                  : "height: 2rem;"
-            };
-          }
-        `;
-      case "outlined":
-      case "dashed":
-        return `
-          color: var(--mi-${props.buttonRole ?? "primary"}-color);
-          background-color: var(--mi-lighten-background-color);
-          border: 1px ${props.variant === "dashed" ? "dashed" : "solid"} var(--mi-${props.buttonRole ?? "primary"}-color);
-          padding: ${props.compact ? ".3rem .5rem" : "1rem"};
+        case "outlined":
+        case "dashed":
+          return `
+          color: ${primaryColor};
+          background-color: transparent;
+          border: 1px ${props.variant === "outlined" ? "solid" : props.variant} ${primaryColor};
           font-weight: bold;
 
+          svg {
+            fill: ${primaryColor};
+          }
+
           &:hover:not(:disabled) {
-            color: var(--mi-${props.buttonRole ?? "secondary"}-color);
-            background-color: var(--mi-${props.buttonRole ?? "primary"}-color);
-            border: 1px ${props.variant === "dashed" ? "dashed" : "solid"} var(--mi-${props.buttonRole ?? "primary"}-color);
+            color: ${primaryColor};
+            background-color: ${secondaryColor};
+
+            svg {
+              fill: ${primaryColor};
+            }
           }
 
           &[disabled] {
             color: #ddd;
             border-color: #ddd;
           }
-          @media screen and (max-width: ${bp.small}px) {
-           ${
-             props.compact && props.onlyIcon
-               ? "height: 1.5rem; width: 1.5rem;"
-               : ""
-           }
-           ${props.compact ? "height: 1.5rem;" : ""}
-          }
         `;
-      default:
-        return `
-          ${
-            props.wrap
-              ? `white-space: normal !important;
-                 height: auto;
-                 line-height: 1.2rem;
-                 width: 94%;
-                 word-break: break-word;
-                 hyphens: auto;`
-              : "white-space: nowrap;"
-          };
-          ${props.small ? "height: 1.5rem; width: 1.5rem; " : ""}
+        case "transparent":
+          return `
+          color: ${primaryColor};
+          background-color: transparent;
+          font-weight: bold;
+
           svg {
-            ${props.small ? "font-size: .8rem;" : ""}
+            fill: ${primaryColor};
           }
-          padding: ${props.compact ? ".3rem .5rem" : "1rem"};
-          padding: ${props.onlyIcon ? ".5rem .5rem" : ".6rem .6rem"};
-
-          background-color: var(--mi-${props.buttonRole ?? "secondary"}-color);
-          color: var(--mi-primary-color);
-
-          ${
-            props.transparent
-              ? "background-color:  transparent; font-weight: bold; color: var(--mi-normal-foreground-color);"
-              : ""
-          };
-          ${props.thin ? "font-weight: normal !important;" : ""};
 
           &:hover:not(:disabled) {
-            background-color: var(--mi-primary-color);
-            color: var(--mi-secondary-color);
+            color: ${primaryColor};
+            background-color: ${secondaryColor};
+
+            svg {
+              fill: ${primaryColor};
+            }
           }
-          
-          @media screen and (max-width: ${bp.small}px) {
-            font-size: var(--mi-font-size-normal);
-            padding: ${props.transparent ? ".5rem .25rem .5rem .25rem" : ""};
+
+          &[disabled] {
+            color: #ddd;
+            border-color: #ddd;
+          }`;
+        default:
+          return `
+          background-color: ${primaryColor};
+          color: ${secondaryColor};
+
+          svg {
+            fill: ${secondaryColor};
+             
+            @media (prefers-color-scheme: dark) {
+              fill: ${secondaryColor};
+            }
+          }
+
+          &:hover:not(:disabled) {
+            filter: brightness(95%) saturate(30%);
           }
         `;
+      }
+    };
+
+    const style = `
+    ${sizeVariables()}
+    ${isOnlyIcon}
+    ${props.rounded ? `border-radius: 99999px !important;` : ""}
+     ${
+       props.wrap
+         ? `white-space: normal !important;
+                   height: auto;
+                   width: 94%;
+                   word-break: break-word;
+                   hyphens: auto;`
+         : "white-space: nowrap;"
+     }
+    
+    border: none;
+    transition:
+      0.25s background-color,
+      0.25s color,
+      0.25s border-radius,
+      0.25s opacity,
+      0.25s filter;
+    text-decoration: none;
+  
+    &:hover:not(:disabled) {
+      cursor: pointer;
     }
-  }}
-
-  &:hover:not(:disabled) {
-    filter: saturate(50%);
-  }
-
-  align-items: center;
-  display: inline-flex;
-  border-radius: var(--mi-border-radius);
-  border-radius: ${(props) => (props.onlyIcon ? "100%" : "")};
-  justify-content: center;
-
-  &[disabled] {
-    opacity: 0.6;
-  }
-
-  & .startIcon {
-    margin-top: 0.1rem;
-    margin-right: ${(props) => (props.onlyIcon ? "0px" : "0.5rem")};
-    line-height: 0.785rem;
-    font-size: 0.785rem;
-    font-size: ${(props) => (props.onlyIcon ? ".9rem" : "")};
-  }
-
-  & .endIcon {
-    margin-top: 0.1rem;
-    margin-left: 0.5rem;
-    line-height: 0.785rem;
-    font-size: 0.785rem;
-  }
-
-  @media screen and (max-width: ${bp.small}px) {
-    & .startIcon {
-      font-size: ${(props) =>
-        props.onlyIcon ? "var(--mi-font-size-xsmall)" : ""};
+  
+    ${collapsible}
+  
+    ${props.uppercase ? "text-transform: uppercase;" : ""}
+    ${variantStyles()}
+  
+    align-items: center;
+    display: flex;
+    border-radius: ${props.onlyIcon ? "100%" : "var(--mi-border-radius)"};
+    justify-content: center;
+  
+    &[disabled] {
+      opacity: 0.6;
     }
-  }
-`;
 
-export interface ButtonProps extends Compactable {
+    .startIcon,
+    .endIcon {
+      display: flex;
+      align-content: center;
+      justify-content: center;
+      margin-top: ${props.onlyIcon ? "0px" : "0.1rem"};
+      margin-right: ${props.onlyIcon ? "0px" : "0.5rem"};
+    }
+
+    .endIcon {
+      margin-top: ${props.onlyIcon ? "0px" : "0.1rem"};
+      margin-right: 0;
+      margin-left: ${props.onlyIcon ? "0px" : "0.5rem"};
+    }
+
+  `;
+
+    return style;
+  }
+);
+
+export interface ButtonProps extends Sizable {
   children?: React.ReactNode;
   startIcon?: React.ReactElement;
   endIcon?: React.ReactElement;
@@ -245,6 +306,7 @@ export const Button: React.FC<
   endIcon,
   disabled,
   isLoading,
+  onlyIcon,
   role,
   ...props
 }) => {
@@ -252,16 +314,12 @@ export const Button: React.FC<
     <CustomButton
       onClick={onClick}
       disabled={disabled}
-      onlyIcon={!children}
+      onlyIcon={!children || onlyIcon}
       {...props}
     >
       {isLoading && (
         <span className="startIcon" aria-hidden>
-          <LoadingSpinner
-            className={css`
-              fill: var(--mi-normal-background-color);
-            `}
-          />
+          <LoadingSpinner />
         </span>
       )}
       {!isLoading && startIcon ? (
@@ -271,7 +329,7 @@ export const Button: React.FC<
       ) : (
         ""
       )}
-      <span className="children">{children}</span>
+      {!onlyIcon && <span className="children">{children}</span>}
       {endIcon ? (
         <span className="endIcon" aria-hidden>
           {endIcon}

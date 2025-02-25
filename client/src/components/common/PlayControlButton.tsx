@@ -19,9 +19,6 @@ export const PlayControlButton: React.FC<{
       className={css`
         button {
           ${playerButton ? "height: 2.5rem; width: 2.5rem;" : ""}
-          color: var(--mi-white);
-          background-color: var(--mi-black);
-          border-color: var(--mi-black);
           display: flex;
           align-content: center;
           align-items: center;
@@ -31,28 +28,9 @@ export const PlayControlButton: React.FC<{
             ${playerButton ? "font-size: 1.1rem !important; " : ""}
           }
         }
-
-        button:hover {
-          border-color: var(--mi-black);
-          color: var(--mi-black);
-          background-color: var(--mi-white);
-        }
-
-        @media (prefers-color-scheme: dark) {
-          button {
-            color: var(--mi-white);
-            background: var(--mi-black);
-            border-color: grey !important;
-          }
-          button:hover {
-            border-color: var(--mi-white);
-            color: var(--mi-black);
-            background-color: var(--mi-white);
-          }
-        }
       `}
     >
-      {!localIsPlaying && <PlayButton onPlay={onPlay} />}
+      {!localIsPlaying && <PlayButton onPlay={onPlay} variant="outlined" />}
       {localIsPlaying && <PauseButton />}
     </div>
   );

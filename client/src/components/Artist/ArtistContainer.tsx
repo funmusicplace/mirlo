@@ -5,11 +5,12 @@ import ArtistHeaderSection from "../common/ArtistHeaderSection";
 import { useTranslation } from "react-i18next";
 import { ArtistPageWrapper } from "components/ManageArtist/ManageArtistContainer";
 import { ButtonLink } from "components/common/Button";
-import { FaPen } from "react-icons/fa";
+import { FaEye, FaPen } from "react-icons/fa";
 import { bp } from "../../constants";
 import { useQuery } from "@tanstack/react-query";
 import { queryArtist } from "queries";
 import { useAuthContext } from "state/AuthContext";
+import FixedButtonLink from "components/common/FixedButton";
 
 const ArtistContainer: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
@@ -27,39 +28,48 @@ const ArtistContainer: React.FC = () => {
 
   return (
     <>
-      {artist && user?.id === artist?.userId && !trackGroupId && (
-        <ButtonLink
-          to={`/manage/artists/${artist.id}`}
-          startIcon={<FaPen />}
-          compact
-          variant="dashed"
-          className={css`
-            z-index: 999999;
-            top: 75px;
-            right: 1rem;
-            position: fixed;
-            box-shadow: 0.2rem 0.2rem 0.3rem rgba(0, 0, 0, 0.5);
+      {artist &&
+        (user?.isAdmin ||
+          (artist && user?.id === artist?.userId && !trackGroupId)) && (
+          <div
+            className={css`
+              z-index: 999999;
+              top: 75px;
+              right: 1rem;
+              position: fixed;
+              display: flex;
+              flex-direction: column;
 
-            background-color: rgba(255, 255, 255, 0.9) !important;
-            color: black !important;
-            padding: 1.2rem !important;
-            :hover {
-              background-color: rgba(0, 0, 0, 0.7) !important;
-              color: white !important;
-            }
+              a:first-of-type {
+                margin-bottom: 1rem;
+              }
 
-            @media screen and (max-width: ${bp.medium}px) {
-              left: 1rem;
-              bottom: 75px;
-              top: auto;
-              right: auto;
-              padding: 1rem !important;
-            }
-          `}
-        >
-          {t("editPage")}
-        </ButtonLink>
-      )}
+              @media screen and (max-width: ${bp.medium}px) {
+                left: 1rem;
+                bottom: 75px;
+                top: auto;
+                right: auto;
+              }
+            `}
+          >
+            <FixedButtonLink
+              to={`/manage/artists/${artist.id}/customize`}
+              startIcon={<FaEye />}
+              size="compact"
+              variant="dashed"
+            >
+              {t("customizeLook")}
+            </FixedButtonLink>
+            <FixedButtonLink
+              to={`/manage/artists/${artist.id}`}
+              startIcon={<FaPen />}
+              size="compact"
+              variant="dashed"
+            >
+              {t("editPage")}
+            </FixedButtonLink>
+          </div>
+        )}
       {!isPostOrRelease && (
         <>
           <ArtistPageWrapper artistBanner={!!artistBanner}>

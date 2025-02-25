@@ -14,6 +14,7 @@ import { bp } from "../../constants";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { queryArtist } from "queries";
+import { ArtistButton } from "components/Artist/ArtistButtons";
 
 type ImageType = "banner" | "avatar" | "cover" | "image";
 
@@ -254,17 +255,17 @@ const UploadArtistImage: React.FC<{
                 `}
               >
                 <div>
-                  <Button
+                  <ArtistButton
                     onClick={deleteImage}
                     variant="link"
-                    compact
+                    size="compact"
                     onlyIcon
                     type="button"
                     startIcon={<AiFillDelete />}
                     className={css`
                       color: white !important;
                     `}
-                  ></Button>
+                  />
                 </div>
               </small>
             )}

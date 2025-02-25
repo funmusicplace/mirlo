@@ -1,6 +1,5 @@
 import React from "react";
-import { FormProvider, useForm, useFormContext } from "react-hook-form";
-import Button from "../common/Button";
+import { FormProvider, useForm } from "react-hook-form";
 
 import { useTranslation } from "react-i18next";
 import AlbumFormContent from "./AlbumFormComponents/AlbumFormContent";
@@ -8,6 +7,8 @@ import { TrackGroupFormData } from "./ManageTrackGroup";
 import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
 import useErrorHandler from "services/useErrorHandler";
+import { QUERY_KEY_TRACK_GROUPS } from "queries/queryKeys";
+import { useQueryClient } from "@tanstack/react-query";
 
 const AlbumForm: React.FC<{
   trackGroup: TrackGroup;
@@ -23,11 +24,13 @@ const AlbumForm: React.FC<{
   const { handleSubmit } = methods;
   const { user } = useAuthContext();
   const userId = user?.id;
+  const client = useQueryClient();
 
   React.useEffect(() => {
     const defaultValues = {
       ...trackGroup,
       releaseDate: trackGroup?.releaseDate.split("T")[0],
+      platformPercent: trackGroup?.platformPercent ?? 7,
       minPrice: `${
         trackGroup?.minPrice !== undefined ? trackGroup.minPrice / 100 : ""
       }`,
@@ -53,9 +56,31 @@ const AlbumForm: React.FC<{
         await reload();
       }
     }
-  }, [t, userId, trackGroupId, snackbar, artistId, errorHandler, reload]);
 
-  const isDisabled = isSaving;
+    const timeout = setTimeout(() => {
+      client.invalidateQueries({
+        predicate: (query) => {
+          const shouldInvalidate = query.queryKey.find((obj) => {
+            if (typeof obj === "string") {
+              return obj
+                .toLowerCase()
+                .includes(QUERY_KEY_TRACK_GROUPS.toLowerCase());
+            }
+            return false;
+          });
+
+          return !!shouldInvalidate;
+        },
+      });
+
+      snackbar(t("merchUpdated"), {
+        type: "success",
+      });
+    }, 2000);
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [t, userId, trackGroupId, snackbar, artistId, errorHandler, reload]);
 
   return (
     <div>

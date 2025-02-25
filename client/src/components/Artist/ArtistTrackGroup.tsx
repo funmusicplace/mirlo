@@ -54,7 +54,6 @@ export const TrackGroupInfo = styled.div`
   }
   a:last-of-type {
     font-size: var(--mi-font-size-xsmall);
-    color: var(--mi-light-foreground-color);
   }
 
   a:hover {

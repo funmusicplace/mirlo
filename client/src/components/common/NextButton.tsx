@@ -14,7 +14,13 @@ export const NextButton: React.FC = () => {
     dispatch({ type: "incrementCurrentlyPlayingIndex" });
   }, [dispatch]);
 
-  return <Button startIcon={<MdSkipNext />} onClick={onClickNext} />;
+  return (
+    <Button
+      startIcon={<MdSkipNext />}
+      variant="transparent"
+      onClick={onClickNext}
+    />
+  );
 };
 
 export default NextButton;

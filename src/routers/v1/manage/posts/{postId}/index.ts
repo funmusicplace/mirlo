@@ -68,12 +68,42 @@ export default function () {
           return !(inContent || isFeatured);
         })
         .map((image) => image.id);
+
       await prisma.postImage.deleteMany({
         where: {
           id: { in: imagesToDelete },
         },
       });
-      res.json({ result: post });
+
+      const postTracks = await prisma.postTrack.findMany({
+        where: {
+          postId: post.id,
+        },
+      });
+      const tracksToDelete = postTracks
+        .filter((pt) => {
+          const inContent = content.includes(`track/${pt.trackId}`);
+          return !inContent;
+        })
+        .map((image) => image.trackId);
+
+      await prisma.postTrack.deleteMany({
+        where: {
+          postId: post.id,
+          trackId: { in: tracksToDelete },
+        },
+      });
+
+      const refreshedPost = await prisma.post.findFirst({
+        where: {
+          id: post.id,
+        },
+        include: {
+          postTracks: true,
+          images: true,
+        },
+      });
+      res.json({ result: refreshedPost });
     } catch (e) {
       next(e);
     }
