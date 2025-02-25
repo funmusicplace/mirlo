@@ -440,13 +440,13 @@
     "howMuchGoesToMirlo": "How much goes to Mirlo?",
     "solidarity": "Solidarity",
     "sustain": "Sustain",
-    "currencyIsSetOnManageArtist": "The currency is set by the payment processor you've linked on the manage artist page",
     "fullCost": "Full cost",
     "platformCut": "Platform cut: {{percent}}%",
     "redistribution": "Redistribution",
     "howMuchModalText": "Mirlo thrives on artist contributions—whether through monthly support or a slice of album sales. But we get it: every cent counts, and only you know what you can afford. That’s why we let you decide how much of your sales goes to Mirlo. Your art, your call."
   },
   "manageAlbum": {
+    "currencyIsSetOnManageArtist": "The currency is set by the payment processor you've linked on the manage artist page",
     "platformPercent": "How much goes to Mirlo?",
     "dontSeeTheLicenseYouWant": "Don't see the license you want for this track?",
     "license": "Track license",
