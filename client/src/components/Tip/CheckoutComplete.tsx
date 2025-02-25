@@ -9,30 +9,24 @@ import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import { WidthWrapper } from "components/common/WidthContainer";
 
 import { useQuery } from "@tanstack/react-query";
-import { queryArtist, queryMerch } from "queries";
+import { queryArtist, queryTip } from "queries";
 
 function TrackGroup() {
   const { t } = useTranslation("translation", {
     keyPrefix: "merchDetails",
   });
 
-  const { artistId, merchId } = useParams();
+  const { artistId, artistSlug, tipId } = useParams();
   const { data: artist, isLoading: isLoadingArtist } = useQuery(
     queryArtist({ artistSlug: artistId ?? "" })
   );
-  const { data: merch, isLoading: isLoadingMerch } = useQuery(
-    queryMerch({ merchId: merchId ?? "" })
+  const { data: tip, isLoading: isLoadingTip } = useQuery(
+    queryTip({ artistId: artist.id, artistSlug: artistSlug, tipId: tipId })
   );
 
   if (!artist && !isLoadingArtist) {
     return <Box>{t("doesNotExist")}</Box>;
   } else if (!artist) {
-    return <FullPageLoadingSpinner />;
-  }
-
-  if (!merch && !isLoadingMerch) {
-    return <Box>{t("doesNotExist")}</Box>;
-  } else if (!merch) {
     return <FullPageLoadingSpinner />;
   }
 
@@ -54,7 +48,7 @@ function TrackGroup() {
         }
       `}
     >
-      <h1>Purchase complete!</h1>
+      <h1>You have successfully tipped this artist!</h1>
       <div
         className={css`
           display: flex;
@@ -65,8 +59,8 @@ function TrackGroup() {
         `}
       >
         <ImageWithPlaceholder
-          src={merch.images?.[0]?.sizes?.[120]}
-          alt={merch.title}
+          src={artist.avatar?.[0]?.sizes?.[120]}
+          alt={artist.name}
           size={120}
         />
         <div
@@ -75,7 +69,7 @@ function TrackGroup() {
           `}
         >
           {" "}
-          You've bought {merch.title}! The artist has been notified.
+          You've tipped {artist.name}! The artist has been notified.
         </div>
       </div>
       <Confetti />
