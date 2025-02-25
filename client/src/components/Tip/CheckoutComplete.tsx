@@ -21,7 +21,7 @@ function TipArtist() {
     queryArtist({ artistSlug: artistId ?? "" })
   );
   const { data: tip, isLoading: isLoadingTip } = useQuery(
-    queryTip({ artistId: artist.id, artistSlug: artistSlug, tipId: tipId })
+    queryTip({ artistId: artistId, artistSlug: artistSlug, tipId: tipId })
   );
 
   if (!artist && !isLoadingArtist) {
