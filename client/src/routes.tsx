@@ -588,6 +588,27 @@ const routes: RouteObject[] = [
             },
             children: [
               {
+                path: "artistSlug",
+                children: [
+                  {
+                    path: "tip",
+                    children: [
+                      {
+                        path: ":tipId/checkout-complete",
+                        async lazy() {
+                          const { default: Component } = await import(
+                            "components/Tip/CheckoutComplete"
+                          );
+                          return {
+                            Component: () => <Component />,
+                          };
+                        },
+                      },
+                    ],
+                  },
+                ],
+              },
+              {
                 path: "posts",
                 async lazy() {
                   const { default: Component } = await import(
@@ -725,27 +746,6 @@ const routes: RouteObject[] = [
               const { default: Component } = await import("components/Post");
               return { Component };
             },
-          },
-        ],
-      },
-      {
-        path: "artistSlug",
-        children: [
-          {
-            path: "tip",
-            children: [
-              {
-                path: ":tipId/checkout-complete",
-                async lazy() {
-                  const { default: Component } = await import(
-                    "components/Tip/CheckoutComplete"
-                  );
-                  return {
-                    Component: () => <Component />,
-                  };
-                },
-              },
-            ],
           },
         ],
       },
