@@ -11,9 +11,9 @@ import { WidthWrapper } from "components/common/WidthContainer";
 import { useQuery } from "@tanstack/react-query";
 import { queryArtist, queryTip } from "queries";
 
-function TrackGroup() {
+function TipArtist() {
   const { t } = useTranslation("translation", {
-    keyPrefix: "merchDetails",
+    keyPrefix: "tipArtist",
   });
 
   const { artistId, artistSlug, tipId } = useParams();
@@ -77,4 +77,4 @@ function TrackGroup() {
   );
 }
 
-export default TrackGroup;
+export default TipArtist;
