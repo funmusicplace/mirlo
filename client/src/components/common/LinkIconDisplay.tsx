@@ -13,7 +13,7 @@ import {
   FaPatreon,
   FaXTwitter,
   FaTwitch,
-  FaVideo
+  FaVideo,
 } from "react-icons/fa6";
 import { FiMail } from "react-icons/fi";
 
@@ -60,11 +60,12 @@ export const linkUrlDisplay = (link: Link): string => {
 };
 
 export const findOutsideSite = (link: Link) => {
-  var result = (
-    outsideLinks.find((site) => link.linkType !== "Email" && link.linkType === site.name) ??
+  var result =
+    outsideLinks.find(
+      (site) => link.linkType !== "Email" && link.linkType === site.name
+    ) ??
     outsideLinks.find((site) => link.url.includes(site.matches)) ??
-    outsideLinks[outsideLinks.length - 1]
-  );
+    outsideLinks[outsideLinks.length - 1];
   if (result.name === "Email" && !isEmailLink(link.url)) {
     result = outsideLinks[outsideLinks.length - 1];
   }
@@ -76,11 +77,14 @@ const parseUnknownSiteNameFromUrl = (urlString: string) => {
     const url = new URL(urlString);
     const hostNameParts = url.hostname.split(".");
     const siteName = hostNameParts[hostNameParts.length - 2];
-    return siteName[0].toLocaleUpperCase() + siteName.substring(1).toLocaleLowerCase();
+    return (
+      siteName[0].toLocaleUpperCase() +
+      siteName.substring(1).toLocaleLowerCase()
+    );
   } catch {
     return undefined;
   }
-}
+};
 
 export const outsideLinks = [
   { matches: "mastodon", icon: <FaMastodon />, name: "Mastodon" },

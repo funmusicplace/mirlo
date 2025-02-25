@@ -3,13 +3,13 @@ import { css } from "@emotion/css";
 import { useParams } from "react-router-dom";
 import Box from "../common/Box";
 import { useTranslation } from "react-i18next";
+import Confetti from "components/common/Confetti";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import { WidthWrapper } from "components/common/WidthContainer";
 
 import { useQuery } from "@tanstack/react-query";
 import { queryArtist, queryMerch } from "queries";
-import Confetti from "./Confetti";
 
 function TrackGroup() {
   const { t } = useTranslation("translation", {
