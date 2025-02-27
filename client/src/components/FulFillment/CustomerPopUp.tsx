@@ -102,7 +102,7 @@ const CustomerPopUp: React.FC<{ purchase: MerchPurchase }> = ({ purchase }) => {
             )}
             {purchase.shippingAddress.line1 && (
               <>
-                {purchase.shippingAddress.line1}
+                {purchase.shippingAddress.line2}
                 <br />
               </>
             )}
