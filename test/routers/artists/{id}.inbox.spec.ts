@@ -3,6 +3,7 @@ import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
 import { clearTables, createArtist, createUser } from "../../utils";
+import prisma from "@mirlo/prisma";
 
 import { requestApp } from "../utils";
 
@@ -115,6 +116,15 @@ describe("artists/{id}/inbox", () => {
           type: "Follow",
         })
         .set("Accept", "application/activity+json");
+      console.log("response", response.body);
+
+      const result = await prisma.activityPubArtistFollowers.findFirst({
+        where: {
+          artistId: artist.id,
+        },
+      });
+
+      console.log("result", result);
 
       assert.equal(response.statusCode, 200);
     }).timeout(5000);

@@ -86,7 +86,7 @@ const inboxPOST = async (req: Request, res: Response, next: NextFunction) => {
     const parsedId = await findArtistIdForURLSlug(id);
 
     if (!headersAreForActivityPub(req.headers)) {
-      console.log("whats wrong");
+      console.log("whats wrong", req.headers);
       throw new AppError({
         httpCode: 400,
         description: "Only accepts ActivityPub headers",
