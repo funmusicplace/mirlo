@@ -104,7 +104,7 @@ const inboxPOST = async (req: Request, res: Response, next: NextFunction) => {
       });
     }
     if (!req.body.actor || !req.body.type) {
-      console.log("whats wrong", req.body);
+      console.log("whats wrong", req);
       throw new AppError({
         httpCode: 400,
         description: "Not a valid Activity",
