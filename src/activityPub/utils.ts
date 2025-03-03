@@ -67,10 +67,13 @@ export const generateKeysForSiteIfNeeded = async () => {
   return await getSiteSettings();
 };
 
-export const headersAreForActivityPub = (headers: IncomingHttpHeaders) => {
+export const headersAreForActivityPub = (
+  headers: IncomingHttpHeaders,
+  type: "accept" | "content-type"
+) => {
   return (
-    headers["accept"]?.includes("application/activity+json") ||
-    headers["accept"]?.includes(
+    headers[type]?.includes("application/activity+json") ||
+    headers[type]?.includes(
       'application/ld+json; profile="https://www.w3.org/ns/activitystreams"'
     )
   );

@@ -85,7 +85,7 @@ const inboxPOST = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const parsedId = await findArtistIdForURLSlug(id);
 
-    if (!headersAreForActivityPub(req.headers)) {
+    if (!headersAreForActivityPub(req.headers, "content-type")) {
       console.log("whats wrong", req.headers);
       throw new AppError({
         httpCode: 400,
