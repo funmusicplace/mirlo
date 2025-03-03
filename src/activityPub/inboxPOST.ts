@@ -86,7 +86,6 @@ const inboxPOST = async (req: Request, res: Response, next: NextFunction) => {
     const parsedId = await findArtistIdForURLSlug(id);
 
     if (!headersAreForActivityPub(req.headers, "content-type")) {
-      console.log("whats wrong", req.headers);
       throw new AppError({
         httpCode: 400,
         description: "Only accepts ActivityPub headers",
@@ -105,6 +104,7 @@ const inboxPOST = async (req: Request, res: Response, next: NextFunction) => {
       });
     }
     if (!req.body.actor || !req.body.type) {
+      console.log("whats wrong", req.body);
       throw new AppError({
         httpCode: 400,
         description: "Not a valid Activity",
