@@ -91,24 +91,16 @@ const SupportMirlo = () => {
         <div
           className={css`
             display: block;
-            background-image: url("/assets/images/flock.svg");
+            background-image: url("/static/images/flock.svg");
             background-size: contain;
             background-repeat: no-repeat;
             width: 90%;
             height: 30vh;
 
             @media (min-width: 768px) {
-              display: block;
-              background-image: url("/assets/images/flock.svg");
-              background-size: contain;
-              background-repeat: no-repeat;
               width: 370px;
               height: 285px;
               margin-right: 60px;
-            }
-
-            @media (min-width: 768px) and (prefers-color-scheme: dark) {
-              background-image: url("/assets/images/flock.svg");
             }
           `}
         />
