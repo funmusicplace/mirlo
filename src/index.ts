@@ -43,6 +43,7 @@ app.use(corsCheck);
 app.use(
   express.json({
     limit: "5mb",
+    type: "*json",
     verify: (req, res, buf) => {
       // See https://stackoverflow.com/a/70951912/154392
       // @ts-ignore

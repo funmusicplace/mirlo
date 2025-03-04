@@ -220,7 +220,7 @@ const Features = () => {
 
           <img
             alt="Mirlo painted bird"
-            src="/assets/images/MirloPaintBird.svg"
+            src="/static/images/MirloPaintBird.svg"
             className={css`
               max-width: 100%;
               // margin-right: -25rem;
@@ -268,13 +268,13 @@ const Features = () => {
               </p>
             </div>
             <img
-              src="/assets/images/multiple-artist-accounts.png"
+              src="/static/images/multiple-artist-accounts.png"
               alt="multiple artist accounts"
             />
           </Feature>
           <Feature>
             <img
-              src="/assets/images/bulk-upload.png"
+              src="/static/images/bulk-upload.png"
               alt="upload tracks in bulk"
               className={css`
                 width: 80%;
@@ -313,7 +313,7 @@ const Features = () => {
               </p>
             </div>
             <img
-              src="/assets/images/embed-2.png"
+              src="/static/images/embed-2.png"
               alt="page control"
               className={css`
                 width: 60%;
@@ -326,7 +326,7 @@ const Features = () => {
             />
           </Feature>
           <Feature>
-            <img src="/assets/images/embed-1.png" alt="embed" />
+            <img src="/static/images/embed-1.png" alt="embed" />
             <div className="description">
               <strong>Want control over what your page looks like?</strong>
               <p>
@@ -359,13 +359,13 @@ const Features = () => {
               </p>
             </div>
             <img
-              src="/assets/images/community-share.png"
+              src="/static/images/community-share.png"
               alt="community share"
             />
           </Feature>
           <Feature>
             <img
-              src="/assets/images/monthly-donations.png"
+              src="/static/images/monthly-donations.png"
               alt="monthly donations"
               className={css`
                 width: 80%;
@@ -395,10 +395,10 @@ const Features = () => {
                 the world
               </p>
             </div>
-            <img src="/assets/images/international.png" alt="map" />
+            <img src="/static/images/international.png" alt="map" />
           </Feature>
           <Feature>
-            <img src="/assets/images/downloads.png" alt="map" />
+            <img src="/static/images/downloads.png" alt="map" />
 
             <div className="description">
               <strong>
