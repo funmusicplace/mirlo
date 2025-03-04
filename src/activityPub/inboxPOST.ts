@@ -104,7 +104,6 @@ const inboxPOST = async (req: Request, res: Response, next: NextFunction) => {
       });
     }
     if (!req.body.actor || !req.body.type) {
-      console.log("whats wrong", req);
       throw new AppError({
         httpCode: 400,
         description: "Not a valid Activity",
@@ -137,11 +136,9 @@ const inboxPOST = async (req: Request, res: Response, next: NextFunction) => {
         },
       });
     }
-    console.log("sent message etc");
     if (req.headers.accept) {
       res.set("content-type", "application/activity+json");
     }
-    console.log("statusing");
     res.status(200);
     res.json({
       message: "success",
