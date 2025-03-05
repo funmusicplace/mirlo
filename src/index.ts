@@ -263,7 +263,8 @@ app.use("/", async (req, res) => {
         req.path.includes(".jpg") ||
         req.path.includes(".ico") ||
         req.path.includes(".webp") ||
-        req.path.includes(".md")
+        req.path.includes(".md") ||
+        req.path.includes(".pdf")
       )
     ) {
       const html = await parseIndex(req.path);
