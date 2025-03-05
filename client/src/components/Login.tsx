@@ -34,7 +34,7 @@ function Login() {
 
       <img
         alt="blackbird"
-        src="/assets/images/blackbird.png"
+        src="/static/images/blackbird.png"
         className={css`
           width: 100%;
           padding: 4rem 0;
