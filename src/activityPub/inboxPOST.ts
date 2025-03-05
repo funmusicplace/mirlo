@@ -83,14 +83,13 @@ const inboxPOST = async (req: Request, res: Response, next: NextFunction) => {
   }
 
   try {
-    const parsedId = await findArtistIdForURLSlug(id);
-
     if (!headersAreForActivityPub(req.headers, "content-type")) {
       throw new AppError({
         httpCode: 400,
         description: "Only accepts ActivityPub headers",
       });
     }
+    const parsedId = await findArtistIdForURLSlug(id);
 
     const artist = await prisma.artist.findFirst({
       where: {
@@ -116,7 +115,6 @@ const inboxPOST = async (req: Request, res: Response, next: NextFunction) => {
         description: `${req.body.type} not implemented`,
       });
     }
-    console.log("req.body", req.body);
     const remoteActorId = new URL(req.body.actor);
     const remoteActorDomain = remoteActorId.hostname;
     if (req.body.type === "Follow") {
