@@ -41,15 +41,15 @@ const routes: RouteObject[] = [
       },
       {
         path: "pages/cookie-policy",
-        lazy: () => markdownPage("/pages/CookiePolicy.md"),
+        lazy: () => markdownPage("/static/pages/CookiePolicy.md"),
       },
       {
         path: "pages/privacy",
-        lazy: () => markdownPage("/pages/Privacy.md"),
+        lazy: () => markdownPage("/static/pages/Privacy.md"),
       },
       {
         path: "pages/terms",
-        lazy: () => markdownPage("/pages/Terms.md"),
+        lazy: () => markdownPage("/static/pages/Terms.md"),
       },
       {
         path: "pages/features",
