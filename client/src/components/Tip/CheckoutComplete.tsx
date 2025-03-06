@@ -16,7 +16,7 @@ function TipArtist() {
     keyPrefix: "tipArtist",
   });
 
-  const { artistId, artistSlug, tipId } = useParams();
+  const { artistId, tipId } = useParams();
   const { data: artist, isLoading: isLoadingArtist } = useQuery(
     queryArtist({ artistSlug: artistId ?? "" })
   );
