@@ -59,7 +59,7 @@ function TipArtist() {
         `}
       >
         <ImageWithPlaceholder
-          src={artist.avatar?.[0]?.sizes?.[120]}
+          src={artist.avatar?.sizes?.[120]}
           alt={artist.name}
           size={120}
         />
