@@ -449,11 +449,12 @@ export const removeObjectsFromBucket = async (
     await Promise.all(
       objects.map((o) => removeObjectFromStorage(bucketName, o.name))
     );
-  }
-  const minioObojects = await getObjectListFromMinio(bucketName, prefix);
+  } else {
+    const minioObojects = await getObjectListFromMinio(bucketName, prefix);
 
-  await minioClient.removeObjects(
-    bucketName,
-    minioObojects.map((o) => o.name)
-  );
+    await minioClient.removeObjects(
+      bucketName,
+      minioObojects.map((o) => o.name)
+    );
+  }
 };

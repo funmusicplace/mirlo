@@ -3,6 +3,7 @@ import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
 import { clearTables, createArtist, createUser } from "../../utils";
+import prisma from "@mirlo/prisma";
 
 import { requestApp } from "../utils";
 
@@ -27,7 +28,7 @@ describe("artists/{id}/inbox", () => {
     it("should 404 if an artist doesn't exist", async () => {
       const response = await requestApp
         .post(`artists/1/inbox`)
-        .set("Accept", "application/activity+json");
+        .set("content-type", "application/activity+json");
 
       assert.equal(response.status, 404);
       assert.equal(response.body.error, "Artist not found, must use urlSlug");
@@ -50,7 +51,7 @@ describe("artists/{id}/inbox", () => {
           actor: "https://test-actor.com/remote-actor",
           type: "Follow",
         })
-        .set("Accept", "application/json");
+        .set("content-type", "application/json");
 
       assert.equal(response.statusCode, 400);
     });
@@ -71,7 +72,7 @@ describe("artists/{id}/inbox", () => {
         .send({
           actor: "https://test-actor.com/remote-actor",
         })
-        .set("Accept", "application/json");
+        .set("content-type", "application/json");
 
       assert.equal(response.statusCode, 400);
     });
@@ -93,9 +94,9 @@ describe("artists/{id}/inbox", () => {
           actor: "https://test-actor.com/remote-actor",
           type: "Create",
         })
-        .set("Accept", "application/json");
+        .set("content-type", "application/activity+json");
 
-      assert.equal(response.statusCode, 400);
+      assert.equal(response.statusCode, 501);
     });
 
     it("should follow an artist", async () => {
@@ -114,7 +115,16 @@ describe("artists/{id}/inbox", () => {
           actor: "https://test-actor.com/remote-actor",
           type: "Follow",
         })
-        .set("Accept", "application/activity+json");
+        .set("content-type", "application/activity+json");
+      console.log("response", response.body);
+
+      const result = await prisma.activityPubArtistFollowers.findFirst({
+        where: {
+          artistId: artist.id,
+        },
+      });
+
+      console.log("result", result);
 
       assert.equal(response.statusCode, 200);
     }).timeout(5000);

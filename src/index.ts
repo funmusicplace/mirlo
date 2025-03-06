@@ -43,6 +43,7 @@ app.use(corsCheck);
 app.use(
   express.json({
     limit: "5mb",
+    type: ["application/*+json", "application/json"],
     verify: (req, res, buf) => {
       // See https://stackoverflow.com/a/70951912/154392
       // @ts-ignore
@@ -261,7 +262,9 @@ app.use("/", async (req, res) => {
         req.path.includes(".png") ||
         req.path.includes(".jpg") ||
         req.path.includes(".ico") ||
-        req.path.includes(".webp")
+        req.path.includes(".webp") ||
+        req.path.includes(".md") ||
+        req.path.includes(".pdf")
       )
     ) {
       const html = await parseIndex(req.path);

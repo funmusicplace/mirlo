@@ -45,7 +45,7 @@ export default function () {
           return next();
         }
 
-        if (headersAreForActivityPub(req.headers)) {
+        if (headersAreForActivityPub(req.headers, "accept")) {
           if (req.headers.accept) {
             res.set("content-type", "application/activity+json");
           }

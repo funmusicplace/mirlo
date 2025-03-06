@@ -28,7 +28,7 @@ When you support an artist, you will be charged on the monthly anniversary of th
 
 **Payment Processing Fees** To process payments, we use Stripe Connect, which charges $0.30 + 2.9% per successful card charge. We take processing payments to Artists seriously - and using Stripe allows us to do this in a secure, safe, and compliant way.
 
-Mirlo shall be entitled to a share of the revenue received from Transactions (the “Revenue Share”), which shall be calculated on your gross revenue from Transactions, not including any Transactions for which you or we provide a refund, in accordance with the rate schedule set forth at[ ](https://bandcamp.com/pricing)TKTK. You shall be solely responsible and liable for, and Mirlo shall have no responsibility or liability for, any Stripe fees (except for fees charged on Mirlo’s Stripe account), credit card transaction fees (together, “Fees”), bad debts (such as credit card returns or fraud), disputed payments, and refunds, except as provided in this Agreement.
+Mirlo shall be entitled to a share of the revenue received from Transactions (the “Revenue Share”), which shall be calculated on your gross revenue from Transactions, not including any Transactions for which you or we provide a refund, in accordance with the rate schedule agreed on by the artist and Mirlo. You shall be solely responsible and liable for, and Mirlo shall have no responsibility or liability for, any Stripe fees (except for fees charged on Mirlo’s Stripe account), credit card transaction fees (together, “Fees”), bad debts (such as credit card returns or fraud), disputed payments, and refunds, except as provided in this Agreement.
 
 ### Section 4b. An Artist’s Intellectual Property
 
@@ -43,9 +43,13 @@ Mirlo is not responsible for mistakes in your content. Mirlo will not be liable 
 
 Mirlo is not responsible for refunds made to purchasers of your content, merch, or monthly support tiers.
 
-Mirlo can use the content you’ve submitted. For the purposes of marketing, you grant to us, and others acting on our behalf, the worldwide, non-exclusive, perpetual, irrevocable, royalty-free, sublicensable, transferable right to use, exercise, and commercialize the copyright, publicity, trademark, and database rights with respect to your Content.
+Mirlo can use the content you’ve submitted for the purposes of marketing Mirlo and your content. This may, but is not limited to, posts on social media and screenshots of our platform in advertisements.
 
-When we use the content, we can make changes, like editing or translating it. You grant us the right to edit, modify, reformat, excerpt, delete, or translate any of your Content.
+You grant us, and others acting on our behalf, the right to store your content in our databases and datastores, translate your content, and modify the original files for delivering different file formats to other users.
+
+When we use the content, we can make changes, like editing or translating it. You grant us the right to edit, modify, reformat, excerpt, delete, or translate any of your Content as needed for providing the services that we provide. This may be but is not limmited to changing encoding or file format for music uploaded to the platform.
+
+When content from Mirlo is sent to other services we will ask for your permission before doing so. This may look like, but is not limited to, uploading music to streaming platforms or music sharing platforms.
 
 If any agreement you have entered into with any third party, including, but not limited to a PRO, music publisher, union or guild, whether by law or contract, prohibits you from granting company the right and license set forth in this Agreement and making the representations and warranties set forth in the paragraphs above, then you are prohibited from uploading your music to the Service and shall be responsible for indemnifying and holding company harmless from and against any and all claims arising from the exploitation of your music on the Service, including all court costs and legal fees.
 
