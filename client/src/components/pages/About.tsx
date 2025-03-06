@@ -170,7 +170,7 @@ const About: React.FC = () => {
             >
               <img
                 alt="Everything Co-op"
-                src="/assets/images/media/everything-co-op.png"
+                src="/static/images/media/everything-co-op.png"
               />
             </a>
           </li>
@@ -181,7 +181,7 @@ const About: React.FC = () => {
             >
               <img
                 alt="Grassroots Economic Organizing"
-                src="/assets/images/media/geo-logo-sun-road.png"
+                src="/static/images/media/geo-logo-sun-road.png"
               />
             </a>
           </li>
@@ -190,7 +190,7 @@ const About: React.FC = () => {
               title="Simon Vansintjan on Mirlo"
               href="https://podcast.sustainoss.org/234"
             >
-              <img alt="Sustain" src="/assets/images/media/sustain.jpg" />
+              <img alt="Sustain" src="/static/images/media/sustain.jpg" />
             </a>
           </li>
           <li>
@@ -200,7 +200,7 @@ const About: React.FC = () => {
             >
               <img
                 alt="Power Station"
-                src="/assets/images/media/power-station.webp"
+                src="/static/images/media/power-station.webp"
               />
             </a>
           </li>
@@ -243,7 +243,7 @@ const About: React.FC = () => {
             `}
           >
             <img
-              src="https://mirlo.space/assets/images/owner-pictures/alex-photo.png"
+              src="https://mirlo.space/static/images/owner-pictures/alex-photo.png"
               alt="alex photo"
               className={css`
                 margin-top: -2rem;
@@ -279,7 +279,7 @@ const About: React.FC = () => {
             `}
           >
             <img
-              src="https://mirlo.space/assets/images/owner-pictures/simon-photo.jpg"
+              src="https://mirlo.space/static/images/owner-pictures/simon-photo.jpg"
               alt="si photo"
               className={css`
                 margin-top: -2rem;
