@@ -3,28 +3,22 @@ import * as api from "./fetch/fetchWrapper";
 
 const fetchTip: QueryFunction<
   UserArtistTip,
-  ["fetchTip", { artistId: string; artistSlug: string; tipId: string }]
-> = ({ queryKey: [_, { artistId, artistSlug, tipId }], signal }) => {
+  ["fetchTip", { tipId: string }]
+> = ({ queryKey: [_, { tipId }], signal }) => {
   return api
     .get<{
       result: UserArtistTip;
-    }>(`/v1/artists/${artistId}/${artistSlug}/${tipId}`, {
+    }>(`/v1/manage/tips/${tipId}`, {
       signal,
     })
     .then((r) => r.result);
 };
 
-export function queryTip(opts: {
-  artistId: string;
-  artistSlug: string;
-  tipId: string;
-}) {
+export function queryTip(opts: { tipId: string }) {
   return queryOptions({
     queryKey: [
       "fetchTip",
       {
-        artistId: opts.artistId,
-        artistSlug: opts.artistSlug,
         tipId: opts.tipId,
       },
     ],
