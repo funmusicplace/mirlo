@@ -90,7 +90,7 @@ type Result = {
 const AutoComplete: React.FC<{
   getOptions: (val: string) => Promise<Result[]> | Result[] | undefined;
   resultsPrefix?: string;
-  onSelect?: (value: string | number) => void;
+  onSelect?: (value: unknown) => void;
   optionDisplay?: (
     result: {
       id: number | string;
@@ -105,6 +105,7 @@ const AutoComplete: React.FC<{
   placeholder?: string | null;
   allowNew?: boolean;
   showBackground?: boolean;
+  onEnter?: (val: string) => void;
   usesNavigation?: boolean;
 }> = ({
   getOptions,
@@ -112,6 +113,7 @@ const AutoComplete: React.FC<{
   usesNavigation,
   optionDisplay,
   onSelect,
+  onEnter,
   placeholder,
   allowNew,
   showBackground,
@@ -163,7 +165,8 @@ const AutoComplete: React.FC<{
   const onSelectValue = React.useCallback(
     (value: string | number, index?: number) => {
       if (searchResults.length > 0 && index !== undefined) {
-        onSelect?.(searchResults[index].id);
+        console.log("selecting index", index);
+        onSelect?.(searchResults[index]);
       } else {
         onSelect?.(value);
       }
@@ -223,7 +226,18 @@ const AutoComplete: React.FC<{
         onKeyUp={(e) => {
           e.preventDefault();
           if (e.keyCode === 31 || e.key === "Enter") {
-            onSelectValue(searchValue, navigationIndex);
+            console.log("pressed enter", searchResults);
+            if (searchResults.length > 0) {
+              console.log(
+                "searchValue, navigationIndex",
+                searchValue,
+                navigationIndex
+              );
+              onSelectValue(searchValue, navigationIndex);
+            } else {
+              onEnter?.(searchValue);
+              setSearchValue("");
+            }
           }
           if (e.key === "ArrowDown") {
             setNavigationIndex((val) => {

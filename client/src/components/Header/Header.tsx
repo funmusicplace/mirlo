@@ -44,7 +44,7 @@ const HeaderWrapper = styled.div<{
     props.transparent
       ? `background: transparent; 
          box-shadow: 0px 1px 10px rgba(0, 0, 0, 0);`
-      : `background: var(--mi-darken-background-color); 
+      : `background: var(--mi-normal-background-color); 
          box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1);`}
 
   ${(props) =>
@@ -192,14 +192,14 @@ const Header = () => {
   const { artistId, trackGroupId } = useParams();
 
   const { object: artist } = usePublicArtist<Artist>("artists", artistId);
-
   const artistBanner = artist?.banner?.sizes;
 
   const show = useShow();
+  const transparent = !!artistBanner && !!artistId;
 
   return (
     <HeaderWrapper
-      transparent={!!artistBanner && !!artistId}
+      transparent={transparent}
       artistBanner={!!artistBanner}
       show={show}
       trackGroupId={!!trackGroupId}

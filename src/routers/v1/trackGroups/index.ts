@@ -17,6 +17,7 @@ export default function () {
       take = 10,
       orderBy,
       tag,
+      search,
       artistId,
       title,
     } = req.query;
@@ -36,6 +37,7 @@ export default function () {
           },
         };
       }
+
       if (artistId) {
         where.artistId = Number(artistId);
       }

@@ -10,6 +10,7 @@ import LinkWithIcon from "components/common/LinkWithIcon";
 import { useQuery } from "@tanstack/react-query";
 import { queryTrackGroups } from "queries";
 import { useId } from "react";
+import { ButtonLink } from "components/common/Button";
 
 const bgcolor = css`
   width: 100%;
@@ -87,13 +88,14 @@ const Releases = () => {
 
                 a {
                   margin-left: 1rem;
+                  margin-bottom: 0;
                 }
               `}
             >
               <LinkWithIcon to="/artists">{t("viewAllArtists")}</LinkWithIcon>
-              <LinkWithIcon to="/releases">
-                {t("moreReleases")} <FaChevronRight />
-              </LinkWithIcon>
+              <ButtonLink to="/releases" endIcon={<FaChevronRight />}>
+                {t("moreReleases")}
+              </ButtonLink>
             </div>
           </div>
         </div>

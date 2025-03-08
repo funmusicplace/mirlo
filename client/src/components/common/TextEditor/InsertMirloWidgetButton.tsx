@@ -164,7 +164,9 @@ const InsertMirloWidgetButton: React.FC<{
               <AutoComplete
                 getOptions={getTrackOptions}
                 onSelect={(val) => {
-                  onAdd(val, "track");
+                  if (typeof val === "string" || typeof val === "number") {
+                    onAdd(val, "track");
+                  }
                 }}
               />
               <br />

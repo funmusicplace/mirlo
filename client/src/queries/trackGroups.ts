@@ -16,12 +16,13 @@ const fetchTrackGroups: QueryFunction<
       take?: number;
       orderBy?: "random";
       tag?: string;
+      title?: string;
       distinctArtists?: boolean;
     },
     ...any,
   ]
 > = ({
-  queryKey: [_, { skip, take, orderBy, tag, distinctArtists }],
+  queryKey: [_, { skip, take, orderBy, title, tag, distinctArtists }],
   signal,
 }) => {
   const params = new URLSearchParams();
@@ -29,6 +30,8 @@ const fetchTrackGroups: QueryFunction<
   if (take) params.append("take", String(take));
   if (orderBy) params.append("orderBy", orderBy);
   if (tag) params.append("tag", tag);
+  if (title) params.append("title", title);
+
   params.append("distinctArtists", String(distinctArtists ?? false));
   return api.get(`v1/trackGroups?${params}`, { signal });
 };
@@ -38,6 +41,7 @@ export function queryTrackGroups(opts: {
   take?: number;
   orderBy?: "random";
   tag?: string;
+  title?: string;
   distinctArtists?: boolean;
 }) {
   return queryOptions({

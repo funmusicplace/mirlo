@@ -24,6 +24,7 @@
   },
   "releases": {
     "recentReleases": "Recent releases",
+    "recentReleasesFor": "Recent releases for {{ search }}",
     "releasesForTag": "Releases for <0>{{ tag }}</0>",
     "moreReleases": "More releases",
     "viewAllArtists": "View all artists",

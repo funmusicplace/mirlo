@@ -27,7 +27,11 @@ const AutoCompleteTrackGroup: React.FC<{
     <AutoComplete
       getOptions={getTrackGroupOptions}
       placeholder={placeholder}
-      onSelect={(val) => onSelect(val as number)}
+      onSelect={(val) => {
+        if (typeof val === "number") {
+          onSelect(val);
+        }
+      }}
     />
   );
 };
