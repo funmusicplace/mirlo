@@ -426,7 +426,7 @@ model UserArtistTip {
   currencyPaid     String         @default("USD")
   datePurchased    DateTime       @default(now())
   stripeSessionKey String?
-  ArtistTipTier    ArtistTipTier? @relation(fields: [artistTipTierId], references: [id])
+  artistTipTier    ArtistTipTier? @relation(fields: [artistTipTierId], references: [id])
   artistTipTierId  Int?
   id               String         @id @default(uuid()) @db.Uuid
 }
