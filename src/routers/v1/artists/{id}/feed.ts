@@ -29,6 +29,7 @@ const getPostsVisibleToUser = async (
     publishedAt: { lte: new Date() },
     artistId: Number(artist.id),
     isPublic: true,
+    isDraft: false,
   };
 
   if (user) {
@@ -49,6 +50,7 @@ const getPostsVisibleToUser = async (
     },
     take: 20,
   });
+
   if (user) {
     const userSubscription = await prisma.artistUserSubscription.findFirst({
       where: {
