@@ -1,11 +1,29 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import api from "services/api";
 import AutoComplete from "components/common/AutoComplete";
 
+const constructUrl = (r: any) => {
+  let url = "";
+
+  if (r.artistId) {
+    url += r.artistId;
+
+    if (r.trackGroupId) {
+      url += `/release/${r.trackGroupId}`;
+
+      if (r.id !== r.trackGroupId) {
+        url += `/tracks/${r.id}`;
+      }
+    }
+  }
+  return url;
+};
+
 const HeaderSearch: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "headerSearch" });
+  const navigate = useNavigate();
 
   const getOptions = React.useCallback(async (searchString: string) => {
     const artists = await api.getMany<Artist>(`artists`, {
@@ -48,12 +66,21 @@ const HeaderSearch: React.FC = () => {
     return results;
   }, []);
 
+  const onEnter = React.useCallback((value: string) => {
+    navigate(`/releases?search=${value}`);
+  }, []);
+
   return (
     <AutoComplete
       getOptions={getOptions}
       showBackground
       placeholder={t("search") ?? ""}
       usesNavigation
+      onSelect={(value) => {
+        console.log("value", constructUrl(value));
+        navigate(constructUrl(value));
+      }}
+      onEnter={onEnter}
       resultsPrefix={t("searchSuggestions") ?? undefined}
       optionDisplay={(r: {
         id: number | string;
@@ -61,21 +88,7 @@ const HeaderSearch: React.FC = () => {
         artistId?: number | string;
         trackGroupId?: number | string;
       }) => {
-        let url = "";
-
-        if (r.artistId) {
-          url += r.artistId;
-
-          if (r.trackGroupId) {
-            url += `/release/${r.trackGroupId}`;
-
-            if (r.id !== r.trackGroupId) {
-              url += `/tracks/${r.id}`;
-            }
-          }
-        }
-
-        return <Link to={url}>{r.name}</Link>;
+        return <Link to={constructUrl(r)}>{r.name}</Link>;
       }}
     />
   );

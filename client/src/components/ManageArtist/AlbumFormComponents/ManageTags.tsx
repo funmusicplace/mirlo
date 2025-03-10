@@ -49,13 +49,15 @@ const ManageTags: React.FC<{ tags?: string[] }> = ({ tags: existingTags }) => {
   };
 
   const saveTags = React.useCallback(
-    async (newValue: string | number) => {
-      const newTags = uniq([
-        ...tags,
-        `${newValue}`.toLowerCase().split(" ").join("-"),
-      ]);
-      update(newTags);
-      setTags(newTags);
+    async (newValue: unknown) => {
+      if (typeof newValue === "string" || typeof newValue === "number") {
+        const newTags = uniq([
+          ...tags,
+          `${newValue}`.toLowerCase().split(" ").join("-"),
+        ]);
+        update(newTags);
+        setTags(newTags);
+      }
     },
     [tags, update]
   );

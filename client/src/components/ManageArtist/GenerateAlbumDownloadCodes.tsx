@@ -115,7 +115,9 @@ const GenerateAlbumDownloadCodes: React.FC<{ onDone: () => void }> = ({
             <AutoComplete
               getOptions={getTrackGroupOptions}
               onSelect={(val) => {
-                onChooseAlbum(val);
+                if (typeof val === "string" || typeof val === "number") {
+                  onChooseAlbum(val);
+                }
               }}
             />
           </>

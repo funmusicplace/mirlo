@@ -28,11 +28,13 @@ const ArtistLabels = () => {
   );
 
   const setLabel = React.useCallback(
-    async (id: number | string) => {
-      await api.post(`manage/artists/${artistId}/labels`, {
-        labelUserId: id,
-      });
-      await refetch();
+    async (id: unknown) => {
+      if (typeof id === "string" || typeof id === "number") {
+        await api.post(`manage/artists/${artistId}/labels`, {
+          labelUserId: id,
+        });
+        await refetch();
+      }
     },
     [artistId]
   );

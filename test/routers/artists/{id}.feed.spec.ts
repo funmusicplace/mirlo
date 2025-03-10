@@ -76,6 +76,7 @@ describe("artists/{id}/feed", () => {
         title: postTitle,
         artistId: artist.id,
         isPublic: true,
+        isDraft: false,
       },
     });
 
@@ -111,6 +112,7 @@ describe("artists/{id}/feed", () => {
         artistId: artist.id,
         isPublic: true,
         content: "# HI",
+        isDraft: false,
       },
     });
 
@@ -147,6 +149,7 @@ describe("artists/{id}/feed", () => {
         title: postTitle,
         artistId: artist.id,
         isPublic: false,
+        isDraft: false,
       },
     });
 
@@ -192,6 +195,7 @@ describe("artists/{id}/feed", () => {
         title: postTitle,
         artistId: artist.id,
         isPublic: false,
+        isDraft: false,
         minimumSubscriptionTierId: artist.subscriptionTiers[0].id,
       },
     });
@@ -252,6 +256,7 @@ describe("artists/{id}/feed", () => {
         title: postTitle,
         artistId: artist.id,
         isPublic: false,
+        isDraft: false,
         minimumSubscriptionTierId: minTier.id,
       },
     });
@@ -330,6 +335,7 @@ describe("artists/{id}/feed", () => {
         title: postTitle,
         artistId: artist.id,
         isPublic: true,
+        isDraft: false,
         content: "# HI",
         publishedAt: faker.date.past().toISOString(),
       },
@@ -381,6 +387,7 @@ describe("artists/{id}/feed", () => {
           artistId: artist.id,
           isPublic: true,
           content: "# HI",
+          isDraft: false,
           publishedAt: faker.date.past().toISOString(),
         },
       });

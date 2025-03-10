@@ -159,7 +159,7 @@ const About: React.FC = () => {
             >
               <img
                 alt="It could happen here"
-                src="/assets/images/media/ichh.jpg"
+                src="/static/images/media/ichh.jpg"
               />
             </a>
           </li>

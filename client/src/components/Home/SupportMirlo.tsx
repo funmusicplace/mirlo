@@ -31,6 +31,8 @@ const SupportMirlo = () => {
       <SplashWrapper
         className={css`
           margin: 4rem 0;
+          background-image: none !important;
+
           display: flex;
           min-height: auto !important;
 

@@ -22,12 +22,14 @@ const Releases = () => {
   const { page, PaginationComponent } = usePagination({ pageSize });
 
   const tag = params.get("tag");
+  const search = params.get("search");
 
   const { data: trackGroups } = useQuery(
     queryTrackGroups({
       skip: pageSize * page,
       take: pageSize,
       tag: tag || undefined,
+      title: search ?? undefined,
     })
   );
 
@@ -49,7 +51,6 @@ const Releases = () => {
         }
       `}
     >
-      {" "}
       {!tag && (
         <SectionHeader>
           <WidthContainer variant="big">
@@ -74,6 +75,8 @@ const Releases = () => {
                 components={{ 0: <strong></strong> }}
                 values={{ tag }}
               />
+            ) : search ? (
+              t("recentReleasesFor", { search })
             ) : (
               t("recentReleases")
             )}

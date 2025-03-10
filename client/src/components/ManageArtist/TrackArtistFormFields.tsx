@@ -32,7 +32,7 @@ const TrackArtistFormFields: React.FC<{
   }, []);
 
   const onSelect = React.useCallback(
-    async (val: number | string) => {
+    async (val: unknown) => {
       if (typeof val === "number") {
         const artist = await api.get<Artist>(`artists/${val}`);
         setValue(`trackArtists.${artistIndex}.artistName`, artist.result.name, {
@@ -41,7 +41,7 @@ const TrackArtistFormFields: React.FC<{
         setValue(`trackArtists.${artistIndex}.artistId`, val, {
           shouldDirty: true,
         });
-      } else {
+      } else if (typeof val === "string") {
         // it's a new value
         setValue(`trackArtists.${artistIndex}.artistName`, val, {
           shouldDirty: true,
