@@ -6,6 +6,8 @@ import styled from "@emotion/styled";
 import { bp } from "../../constants";
 import { useAuthContext } from "state/AuthContext";
 import { FaArrowRight } from "react-icons/fa";
+import React from "react";
+import Parallax from "parallax-js";
 
 export const SplashWrapper = styled.div`
   display: flex;
@@ -13,7 +15,6 @@ export const SplashWrapper = styled.div`
   display: relative;
   justify-content: center;
   width: 100%;
-  padding: 2rem;
   overflow: hidden;
   position: relative;
   background-image: url("/static/images/grain-small.png");
@@ -49,17 +50,26 @@ export const SplashButtonWrapper = styled.div`
 `;
 
 const ParallexObjectWrapper = styled.div`
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-
   background-size: contain;
   background-repeat: no-repeat;
 `;
 
 const Splash = () => {
+  const sceneEl = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (sceneEl.current) {
+      const parallaxInstance = new Parallax(sceneEl.current, {
+        relativeInput: true,
+        hoverOnly: true,
+      });
+
+      parallaxInstance.enable();
+
+      return () => parallaxInstance.disable();
+    }
+  }, []);
+
   const { user } = useAuthContext();
   const { t } = useTranslation("translation", { keyPrefix: "home" });
 
@@ -68,122 +78,114 @@ const Splash = () => {
       <SplashWrapper>
         <div
           className={css`
-            height: 100vh;
             width: 100%;
-            overflow-x: hidden;
-
-            perspective: 1px;
+            position: absolute !important;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
           `}
+          ref={sceneEl}
         >
           <ParallexObjectWrapper
+            data-depth="1"
             className={css`
-              display: flex;
-              justify-content: center;
-              align-items: center;
-            `}
-          >
-            <div
-              className={css`
-                background-image: url("/static/images/frog-mirlo-no-grain.svg");
-                width: 370px;
-                height: 285px;
-
-                background-size: contain;
-                background-repeat: no-repeat;
-                z-index: 1;
-              `}
-            />
-
-            <TextWrapper>
-              <div
-                className={css`
-                  display: flex;
-                  flex-direction: column;
-                  gap: 24px;
-                `}
-              >
-                <SplashTitle>{t("support")}</SplashTitle>
-                {!user && (
-                  <SplashButtonWrapper>
-                    <ButtonLink size="big" to="/signup" rounded>
-                      {t("signUp")}
-                    </ButtonLink>
-                    <ButtonLink
-                      size="big"
-                      to="/login"
-                      variant="outlined"
-                      rounded
-                      endIcon={<FaArrowRight />}
-                    >
-                      {t("logIn")}
-                    </ButtonLink>
-                  </SplashButtonWrapper>
-                )}
-                <p
-                  className={css`
-                    font-size: 1rem;
-                    line-height: 1.5;
-
-                    br {
-                      margin-bottom: 1rem;
-                    }
-                  `}
-                >
-                  <Trans
-                    t={t}
-                    i18nKey="featuresLink"
-                    components={{
-                      // eslint-disable-next-line jsx-a11y/anchor-has-content
-                      features: <Link to="/pages/features"></Link>,
-                      about: <Link to="/pages/about"></Link>,
-                    }}
-                  />
-                </p>
-              </div>
-            </TextWrapper>
-          </ParallexObjectWrapper>
-          <ParallexObjectWrapper
-            className={css`
-              transform: translateZ(0);
-
-              width: 100%;
-              height: 100rem;
-            `}
-          />
-          <ParallexObjectWrapper
-            className={css`
-              transform: translateZ(-1px);
-
-              top: 10rem;
-
-              width: 100%;
-              height: 200px;
-
-              background-image: url("/static/images/cloud-no-grain-2.svg");
-            `}
-          />
-          <ParallexObjectWrapper
-            className={css`
-              transform: translateZ(-2px);
-
-              top: 20rem;
-
-              height: 200px;
-
+              width: 70%;
+              height: 140px;
               background-image: url("/static/images/cloud-no-grain-1.svg");
             `}
           />
           <ParallexObjectWrapper
+            data-depth="2"
             className={css`
-              transform: translateZ(-3px);
-
-              top: 20rem;
-
-              height: 200px;
-
+              height: 140px;
+              width: 70%;
+              top: 10rem !important;
+              left: 50% !important;
+              z-index: -1;
+              background-image: url("/static/images/cloud-no-grain-2.svg");
+            `}
+          />
+          <ParallexObjectWrapper
+            data-depth="3"
+            className={css`
+              height: 140px;
+              width: 70%;
+              top: 60% !important;
+              left: 50% !important;
+              z-index: -1;
               background-image: url("/static/images/cloud-no-grain-3.svg");
             `}
           ></ParallexObjectWrapper>
+        </div>
+        <div
+          data-depth="0.2"
+          className={css`
+            display: flex !important;
+            width: 100%;
+            height: 100%;
+            justify-content: center;
+            align-items: center;
+          `}
+        >
+          <div
+            className={css`
+              background-image: url("/static/images/frog-mirlo-no-grain.svg");
+              background-size: contain;
+              background-repeat: no-repeat;
+              z-index: 1;
+              width: 400px;
+              height: 280px;
+            `}
+          />
+
+          <TextWrapper>
+            <div
+              className={css`
+                display: flex;
+                flex-direction: column;
+                gap: 24px;
+              `}
+            >
+              <SplashTitle>{t("support")}</SplashTitle>
+              {!user && (
+                <SplashButtonWrapper>
+                  <ButtonLink size="big" to="/signup" rounded>
+                    {t("signUp")}
+                  </ButtonLink>
+                  <ButtonLink
+                    size="big"
+                    to="/login"
+                    variant="outlined"
+                    rounded
+                    endIcon={<FaArrowRight />}
+                  >
+                    {t("logIn")}
+                  </ButtonLink>
+                </SplashButtonWrapper>
+              )}
+              <p
+                className={css`
+                  font-size: 1rem;
+                  line-height: 1.5;
+
+                  br {
+                    margin-bottom: 1rem;
+                  }
+                `}
+              >
+                <Trans
+                  t={t}
+                  i18nKey="featuresLink"
+                  components={{
+                    // eslint-disable-next-line jsx-a11y/anchor-has-content
+                    features: <Link to="/pages/features"></Link>,
+                    about: <Link to="/pages/about"></Link>,
+                  }}
+                />
+              </p>
+            </div>
+          </TextWrapper>
         </div>
       </SplashWrapper>
     </>
