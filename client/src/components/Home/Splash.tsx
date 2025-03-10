@@ -84,6 +84,7 @@ const Splash = () => {
             display: flex;
             align-items: center;
             justify-content: center;
+            z-index: 0;
           `}
           ref={sceneEl}
         >
@@ -91,19 +92,27 @@ const Splash = () => {
             data-depth="1"
             className={css`
               width: 70%;
-              height: 140px;
-              background-image: url("/static/images/cloud-no-grain-1.svg");
+              height: 100px;
+              background-image: url("/static/images/cloud-no-grain-3.svg");
+
+              @media screen and (max-width: ${bp.medium}px) {
+                top 2rem !important;
+              }
             `}
           />
           <ParallexObjectWrapper
             data-depth="2"
             className={css`
-              height: 140px;
+              height: 100px;
               width: 70%;
-              top: 10rem !important;
-              left: 50% !important;
+              top: 2rem !important;
+              left: 30% !important;
               z-index: -1;
               background-image: url("/static/images/cloud-no-grain-2.svg");
+
+              @media screen and (max-width: ${bp.medium}px) {
+                margin-bottom: 0rem;
+              }
             `}
           />
           <ParallexObjectWrapper
@@ -111,21 +120,28 @@ const Splash = () => {
             className={css`
               height: 140px;
               width: 70%;
-              top: 60% !important;
+              top: 80% !important;
               left: 50% !important;
               z-index: -1;
-              background-image: url("/static/images/cloud-no-grain-3.svg");
+              background-image: url("/static/images/cloud-no-grain-1.svg");
+
+              @media screen and (max-width: ${bp.medium}px) {
+                margin-bottom: 0rem;
+              }
             `}
           ></ParallexObjectWrapper>
         </div>
         <div
-          data-depth="0.2"
           className={css`
             display: flex !important;
             width: 100%;
             height: 100%;
             justify-content: center;
             align-items: center;
+            z-index: 1;
+            @media screen and (max-width: ${bp.medium}px) {
+              flex-direction: column;
+            }
           `}
         >
           <div
@@ -136,6 +152,10 @@ const Splash = () => {
               z-index: 1;
               width: 400px;
               height: 280px;
+
+              @media screen and (max-width: ${bp.medium}px) {
+                width: 300px;
+              }
             `}
           />
 
