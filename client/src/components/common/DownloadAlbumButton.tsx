@@ -1,4 +1,3 @@
-import Button from "components/common/Button";
 import React from "react";
 import { css } from "@emotion/css";
 import { useTranslation } from "react-i18next";
@@ -8,7 +7,7 @@ import { useSnackbar } from "state/SnackbarContext";
 import { useArtistContext } from "state/ArtistContext";
 import Modal from "./Modal";
 import LoadingSpinner from "./LoadingSpinner";
-import { ArtistButton } from "components/Artist/ArtistButtons";
+import { ArtistButton, ArtistButtonAnchor } from "components/Artist/ArtistButtons";
 
 const formats = ["flac", "wav", "opus", "320.mp3", "256.mp3", "128.mp3"];
 const formatsDisplay: { [format: string]: string } = {
@@ -35,41 +34,17 @@ const DownloadAlbumButton: React.FC<{
   const [isDownloading, setIsDownloading] = React.useState(false);
   const { state } = useArtistContext();
 
-  const downloadAlbum = React.useCallback(async () => {
-    try {
-      setIsDownloading(true);
-      const queryParams = new URLSearchParams();
-      queryParams.append("format", chosenFormat);
-      if (email) {
-        queryParams.append("email", email);
-      }
-      if (token) {
-        queryParams.append("token", token);
-      }
-      const resp = await api.downloadFileDirectly(
-        `trackGroups/${trackGroup.id}/download?${queryParams.toString()}`,
-        `${trackGroup.title.replaceAll(".", "-")}.zip`
-      );
-      if (resp) {
-        if ((resp as any).result.jobId) {
-          setIsGeneratingAlbum(+(resp as any).result.jobId);
-        }
-      }
-    } catch (e) {
-      snackbar(t("error"), { type: "warning" });
-      console.error(e);
-    } finally {
-      setIsDownloading(false);
+  const getDownloadUrl = () => {
+    const queryParams = new URLSearchParams();
+    queryParams.append("format", chosenFormat);
+    if (email) {
+      queryParams.append("email", email);
     }
-  }, [
-    chosenFormat,
-    email,
-    snackbar,
-    t,
-    token,
-    trackGroup.id,
-    trackGroup.title,
-  ]);
+    if (token) {
+      queryParams.append("token", token);
+    }
+    return api.getFileDownloadUrl(`trackGroups/${trackGroup.id}/download?${queryParams.toString()}`);
+  };
 
   const generateAlbum = React.useCallback(
     async (format: string) => {
@@ -141,7 +116,6 @@ const DownloadAlbumButton: React.FC<{
                     <ArtistButton
                       size="compact"
                       className={css`
-                        margin-top: 0.5rem;
                         font-size: 1.2rem;
                         width: 50%;
                         background: transparent;
@@ -160,39 +134,36 @@ const DownloadAlbumButton: React.FC<{
             </>
           ) : (
             <>
-              <ArtistButton
-                size="compact"
-                className={css`
-                  margin-top: 0.5rem;
-                  font-size: 1.2rem;
-                  background: transparent;
-                `}
-                isLoading={isDownloading}
-                onClick={async () => {
-                  await downloadAlbum();
-                  setIsPopupOpen(false);
-                }}
-                disabled={isGeneratingAlbum > 0}
-              >
-                {isGeneratingAlbum > 0 ? (
-                  <p
-                    className={css`
+              {isGeneratingAlbum > 0 ? (
+                <p
+                  className={css`
                       svg {
                         margin-right: 0.5rem;
                       }
                     `}
-                  >
-                    <LoadingSpinner />
-                    {t("downloadButtonGenerating")}
-                  </p>
-                ) : (
-                  t("download")
-                )}
-              </ArtistButton>
+                >
+                  <LoadingSpinner />
+                  {t("downloadButtonGenerating")}
+                </p>
+              ) : (<ArtistButtonAnchor
+                  size="compact"
+                  className={css`
+                  margin-top: 0.5rem;
+                  font-size: 1.2rem;
+                  background: transparent;
+                `}
+                  isLoading={isDownloading}
+                  href={getDownloadUrl()}
+                  onClick={async () => {
+                    setChosenFormat("")
+                    setIsPopupOpen(false);
+                  }}
+                >{t("download")}</ArtistButtonAnchor>
+              )}
               <p>
                 <ArtistButton
                   className={css`
-                    margin-top: 1rem;
+                    margin: 1rem auto;
                   `}
                   onClick={() => setChosenFormat("")}
                 >
@@ -206,7 +177,7 @@ const DownloadAlbumButton: React.FC<{
       <ArtistButton
         onlyIcon={onlyIcon}
         className={css`
-          margin-top: 0rem;
+          margin-top: 0;
           font-size: 1.2rem;
           background: transparent;
           color: var(--mi-primary-color);

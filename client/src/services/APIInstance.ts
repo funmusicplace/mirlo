@@ -152,29 +152,8 @@ const APIInstance = (apiRoot: string) => {
       }
     },
 
-    downloadFileDirectly: (
-      fromEndpoint: string,
-      filename: string
-    ): null | unknown => {
-      return apiRequest<Response>(
-        fromEndpoint,
-        {
-          method: "GET",
-          credentials: "include",
-        },
-        {
-          noProcess: true,
-        }
-      ).then((resp) => {
-        if (resp.headers.get("content-type")?.includes("application/json")) {
-          return resp.json();
-        } else if (
-          resp.headers.get("content-type")?.includes("application/zip")
-        ) {
-          fileSaver.saveAs(`${api}${fromEndpoint}`, filename);
-          return;
-        }
-      });
+    getFileDownloadUrl: (fromEndpoint: string): string => {
+      return `${apiRoot}/v1/${fromEndpoint}`;
     },
 
     generateDownload: (endpoint: string) => {
