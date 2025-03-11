@@ -25,7 +25,7 @@ const SelectTrackGroup: React.FC<{
   >(merch.includePurchaseTrackGroup);
 
   const doSave = React.useCallback(
-    async (val: number | null) => {
+    async (val: unknown) => {
       try {
         if (hasId(val) && typeof val.id === "number") {
           setIsSaving(true);
