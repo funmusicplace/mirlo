@@ -94,7 +94,7 @@ export default function () {
           .json({ error: "need session_id and stripeAccountId in query" });
       }
     } catch (e) {
-      console.error(e);
+      console.error(`Error in checkout process`, e);
       res.status(500).json({
         error: "Something went wrong while subscribing the user",
       });
