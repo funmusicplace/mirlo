@@ -554,7 +554,10 @@
     "secondaryColor": "Secondary color",
     "backgroundColor": "Background color",
     "foregroundColor": "Normal text color",
-    "deleteImage": "Delete image"
+    "deleteImage": "Delete image",
+    "warningFeature": "Warning: this is an experimental feature. You shouldn't rely on it.",
+    "enableActivityPub": "Enable ActivityPub",
+    "makeSearchable": "Do you want to make this artist searchable on the fediverse? This will enable ActivityPub for this artist."
   },
   "manageSubscriptions": {
     "pasteEmailsHere": "If you have a list of e-mail addresses, paste them here:",

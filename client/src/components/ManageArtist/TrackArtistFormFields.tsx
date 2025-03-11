@@ -9,6 +9,7 @@ import { useFieldArray, useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { FaTimes } from "react-icons/fa";
 import api from "services/api";
+import { hasId } from "./AlbumFormComponents/ManageTags";
 
 const TrackArtistFormFields: React.FC<{
   artistIndex: number;
@@ -33,17 +34,17 @@ const TrackArtistFormFields: React.FC<{
 
   const onSelect = React.useCallback(
     async (val: unknown) => {
-      if (typeof val === "number") {
-        const artist = await api.get<Artist>(`artists/${val}`);
+      if (hasId(val) && typeof val.id === "number") {
+        const artist = await api.get<Artist>(`artists/${val.id}`);
         setValue(`trackArtists.${artistIndex}.artistName`, artist.result.name, {
           shouldDirty: true,
         });
         setValue(`trackArtists.${artistIndex}.artistId`, val, {
           shouldDirty: true,
         });
-      } else if (typeof val === "string") {
+      } else if (hasId(val) && typeof val.id === "string") {
         // it's a new value
-        setValue(`trackArtists.${artistIndex}.artistName`, val, {
+        setValue(`trackArtists.${artistIndex}.artistName`, val.id, {
           shouldDirty: true,
         });
       }

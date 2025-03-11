@@ -53,11 +53,9 @@ const ManageTags: React.FC<{ tags?: string[] }> = ({ tags: existingTags }) => {
   const userId = user?.id;
 
   const removeTag = (index: number) => {
-    console.log("going to set parent tags");
     setTags((allTags) => {
       const clones = cloneDeep(allTags);
       clones.splice(index, 1);
-      console.log("removing a tag");
       update(clones);
       return clones;
     });
@@ -65,7 +63,6 @@ const ManageTags: React.FC<{ tags?: string[] }> = ({ tags: existingTags }) => {
 
   const update = React.useCallback(
     async (newTags: string[]) => {
-      console.log("updateTags", newTags);
       try {
         await api.put(`manage/trackGroups/${trackGroupId}/tags`, newTags);
       } catch (e) {
@@ -84,9 +81,7 @@ const ManageTags: React.FC<{ tags?: string[] }> = ({ tags: existingTags }) => {
 
   const saveTags = React.useCallback(
     async (newValue: unknown) => {
-      console.log("saveTags newValue", newValue);
       if (hasId(newValue)) {
-        console.log("saveTags existing", tags);
         const newTags = uniq([
           ...tags,
           `${newValue.id}`.toLowerCase().split(" ").join("-"),

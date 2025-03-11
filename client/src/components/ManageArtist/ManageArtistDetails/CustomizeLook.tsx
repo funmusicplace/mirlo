@@ -24,6 +24,7 @@ import { QUERY_KEY_ARTISTS } from "queries/queryKeys";
 import DeleteArtist from "../DeleteArtist";
 import ArtistLabels from "./ArtistLabels";
 import { Toggle } from "components/common/Toggle";
+import Box from "components/common/Box";
 
 export interface ShareableTrackgroup {
   creatorId: number;
@@ -324,6 +325,7 @@ export const CustomizeLook: React.FC = () => {
                 <ArtistSlugInput currentArtistId={existingId} />
               </FormComponent>
             </ArtistFormSection>
+            <Box variant="warning">{t("warning")}</Box>
             <FormComponent>
               <Toggle
                 label={t("enableActivityPub")}
