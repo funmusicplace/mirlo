@@ -77,7 +77,6 @@ const HeaderSearch: React.FC = () => {
       placeholder={t("search") ?? ""}
       usesNavigation
       onSelect={(value) => {
-        console.log("value", constructUrl(value));
         navigate(constructUrl(value));
       }}
       onEnter={onEnter}

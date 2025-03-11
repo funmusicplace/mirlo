@@ -2,6 +2,7 @@ import React from "react";
 
 import AutoComplete from "./AutoComplete";
 import api from "services/api";
+import { hasId } from "components/ManageArtist/AlbumFormComponents/ManageTags";
 
 const AutoCompleteTrackGroup: React.FC<{
   onSelect: (val: number) => void;
@@ -28,8 +29,11 @@ const AutoCompleteTrackGroup: React.FC<{
       getOptions={getTrackGroupOptions}
       placeholder={placeholder}
       onSelect={(val) => {
+        console.log("autocompleting track group", val);
         if (typeof val === "number") {
           onSelect(val);
+        } else if (hasId(val) && typeof val.id === "number") {
+          onSelect(val.id);
         }
       }}
     />

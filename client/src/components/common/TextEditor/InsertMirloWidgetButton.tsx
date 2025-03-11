@@ -15,6 +15,7 @@ import { InputEl } from "../Input";
 import FormComponent from "../FormComponent";
 import Box from "../Box";
 import { useForm } from "react-hook-form";
+import { hasId } from "components/ManageArtist/AlbumFormComponents/ManageTags";
 
 const InsertMirloWidgetButton: React.FC<{
   postId?: number;
@@ -164,8 +165,11 @@ const InsertMirloWidgetButton: React.FC<{
               <AutoComplete
                 getOptions={getTrackOptions}
                 onSelect={(val) => {
-                  if (typeof val === "string" || typeof val === "number") {
-                    onAdd(val, "track");
+                  if (
+                    hasId(val) &&
+                    (typeof val.id === "string" || typeof val.id === "number")
+                  ) {
+                    onAdd(val.id, "track");
                   }
                 }}
               />

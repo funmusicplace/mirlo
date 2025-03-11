@@ -133,7 +133,12 @@ const ManageTrackRow: React.FC<{
         }
       `}
     >
-      <td>
+      <td
+        className={css`
+          width: 50px;
+          text-align: center;
+        `}
+      >
         <TrackRowPlayControl
           trackId={track.id}
           canPlayTrack={true}
@@ -232,7 +237,16 @@ const ManageTrackRow: React.FC<{
       >
         {track.audio?.duration && fmtMSS(track.audio?.duration)}
       </td>
-      <td align="right">
+      <td
+        align="right"
+        className={css`
+          width: 120px;
+
+          button {
+            display: inline-block;
+          }
+        `}
+      >
         <Button
           size="compact"
           startIcon={<FaPen />}

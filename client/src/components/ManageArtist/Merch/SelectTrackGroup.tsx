@@ -10,6 +10,7 @@ import api from "services/api";
 import Pill from "components/common/Pill";
 import { css } from "@emotion/css";
 import { FaTimes } from "react-icons/fa";
+import { hasId } from "../AlbumFormComponents/ManageTags";
 
 const SelectTrackGroup: React.FC<{
   merch: Merch;
@@ -26,17 +27,19 @@ const SelectTrackGroup: React.FC<{
   const doSave = React.useCallback(
     async (val: number | null) => {
       try {
-        setIsSaving(true);
-        const response = await api.put<Partial<Merch>, { result: Merch }>(
-          `manage/merch/${merch.id}`,
-          {
-            includePurchaseTrackGroupId: val,
-          }
-        );
-        setCurrentTrackGroup(response.result.includePurchaseTrackGroup);
-        snackbar(t("merchUpdated"), {
-          type: "success",
-        });
+        if (hasId(val) && typeof val.id === "number") {
+          setIsSaving(true);
+          const response = await api.put<Partial<Merch>, { result: Merch }>(
+            `manage/merch/${merch.id}`,
+            {
+              includePurchaseTrackGroupId: val.id,
+            }
+          );
+          setCurrentTrackGroup(response.result.includePurchaseTrackGroup);
+          snackbar(t("merchUpdated"), {
+            type: "success",
+          });
+        }
       } catch (e) {
         errorHandler(e);
       } finally {

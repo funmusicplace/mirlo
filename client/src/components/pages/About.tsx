@@ -39,6 +39,7 @@ const About: React.FC = () => {
 
         h1 {
           margin-top: 1rem;
+          font-family: "Cubano", var(--mi-font-family-stack);
         }
 
         h2 {

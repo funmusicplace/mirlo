@@ -36,7 +36,7 @@ const ArtistRouterLink: React.FC<LinkProps> = (props) => {
 
 export const ArtistButton: React.FC<
   ButtonProps & React.ButtonHTMLAttributes<HTMLButtonElement>
-> = (props) => {
+> = ({ onClick, ...props }) => {
   const { artistId } = useParams();
 
   const { data: artist, isLoading: isLoadingArtist } = useQuery(
@@ -107,6 +107,7 @@ export const ArtistButton: React.FC<
 
   return (
     <Button
+      onClick={onClick}
       {...props}
       className={
         css`

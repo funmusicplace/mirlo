@@ -146,10 +146,18 @@ const EditTrackRow: React.FC<{
         <td>
           <SelectTrackPreview statusKey="status" />
         </td>
-        <td className="alignRight">
+        <td align="right">
           {track.audio?.duration && fmtMSS(+track.audio.duration)}
         </td>
-        <td className="alignRight">
+        <td
+          align="right"
+          className={css`
+            button {
+              display: inline-block;
+              margin-left: 0.25rem;
+            }
+          `}
+        >
           <Button
             size="compact"
             onClick={onCancelEditing}

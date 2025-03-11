@@ -17,6 +17,7 @@ const SupportMirlo = () => {
       className={css`
         width: 100%;
         background-color: #be3455;
+        background-image: url("/static/images/grainy_bg_mirlo_red.webp");
         color: var(--mi-white);
 
         @media screen and (max-width: ${bp.medium}px) {

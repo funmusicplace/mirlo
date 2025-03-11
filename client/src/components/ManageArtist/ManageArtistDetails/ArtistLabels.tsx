@@ -10,6 +10,7 @@ import { useTranslation } from "react-i18next";
 import { FaTimes } from "react-icons/fa";
 import { useParams } from "react-router-dom";
 import api from "services/api";
+import { hasId } from "../AlbumFormComponents/ManageTags";
 
 const ArtistLabels = () => {
   const { t } = useTranslation("translation", { keyPrefix: "artistForm" });
@@ -28,10 +29,13 @@ const ArtistLabels = () => {
   );
 
   const setLabel = React.useCallback(
-    async (id: unknown) => {
-      if (typeof id === "string" || typeof id === "number") {
+    async (val: unknown) => {
+      if (
+        hasId(val) &&
+        (typeof val.id === "string" || typeof val.id === "number")
+      ) {
         await api.post(`manage/artists/${artistId}/labels`, {
-          labelUserId: id,
+          labelUserId: val.id,
         });
         await refetch();
       }
