@@ -40,6 +40,14 @@ const About: React.FC = () => {
         h1 {
           margin-top: 1rem;
         }
+
+        h2 {
+          font-family: "Cubano", var(--mi-font-family-stack);
+        }
+
+        p {
+          margin-bottom: 1.25rem;
+        }
       `}
     >
       <MetaCard

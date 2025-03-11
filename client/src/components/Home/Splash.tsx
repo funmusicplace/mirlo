@@ -38,7 +38,7 @@ export const TextWrapper = styled.div`
   padding-bottom: 1rem;
 `;
 
-export const SplashTitle = styled.h2`
+export const SplashTitle = styled.h1`
   font-size: 1.75rem;
   font-weight: 400;
   line-height: 1.25;
@@ -151,7 +151,7 @@ const Splash = () => {
         >
           <div
             className={css`
-              background-image: url("/static/images/frog-mirlo-no-grain.svg");
+              background-image: url("/static/images/frog-mirlo-toneddowngrain.webp");
               background-size: contain;
               background-repeat: no-repeat;
               z-index: 1;

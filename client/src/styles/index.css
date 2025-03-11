@@ -75,6 +75,7 @@ h1,
   line-height: 3rem;
   font-weight: normal;
   margin-bottom: unset;
+  font-family: "cubano", var(--mi-font-family-stack);
 
   a {
     text-decoration: none;
@@ -87,8 +88,6 @@ h2,
   line-height: 1.8rem;
   font-weight: normal;
   margin-bottom: 0.7rem;
-
-  font-family: "cubano";
 }
 
 h3,
