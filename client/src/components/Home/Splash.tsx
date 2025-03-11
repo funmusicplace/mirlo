@@ -89,44 +89,49 @@ const Splash = () => {
           ref={sceneEl}
         >
           <ParallexObjectWrapper
-            data-depth="1"
+            data-depth=".2"
             className={css`
-              width: 70%;
+              width: 60%;
               height: 50px;
+              top: -30% !important;
+              left: 0rem !important;
               background-image: url("/static/images/cloud-no-grain-3.svg");
+              z-index: 1;
 
               @media screen and (max-width: ${bp.medium}px) {
-                top 2rem !important;
+                top: -40% !important;
               }
             `}
           />
           <ParallexObjectWrapper
-            data-depth="2"
+            data-depth=".4"
             className={css`
               height: 80px;
               width: 70%;
-              top: 2rem !important;
-              left: 30% !important;
+              top: 75% !important;
+              left: 10% !important;
               z-index: -1;
               background-image: url("/static/images/cloud-no-grain-2.svg");
 
               @media screen and (max-width: ${bp.medium}px) {
                 margin-bottom: 0rem;
+                top: 38% !important;
               }
             `}
           />
           <ParallexObjectWrapper
-            data-depth="3"
+            data-depth=".6"
             className={css`
               height: 140px;
-              width: 70%;
-              top: 80% !important;
-              left: 50% !important;
+              width: 60%;
+              top: 55% !important;
+              left: 35% !important;
               z-index: -1;
               background-image: url("/static/images/cloud-no-grain-1.svg");
 
               @media screen and (max-width: ${bp.medium}px) {
                 margin-bottom: 0rem;
+                top: 42% !important;
               }
             `}
           ></ParallexObjectWrapper>
@@ -150,8 +155,8 @@ const Splash = () => {
               background-size: contain;
               background-repeat: no-repeat;
               z-index: 1;
-              width: 400px;
-              height: 280px;
+              width: 540px;
+              height: 370px;
               margin-right: 4rem;
 
               @media screen and (max-width: ${bp.medium}px) {

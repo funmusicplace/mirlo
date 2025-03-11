@@ -2,8 +2,8 @@
 @font-face {
   font-family: "Cubano";
   src:
-    url("fonts/cubano-sharp.woff2") format("woff2"),
-    url("fonts/cubano-sharp.woff") format("woff");
+    url("/fonts/cubano-sharp.woff2") format("woff2"),
+    url("/fonts/cubano-sharp.woff") format("woff");
 }
 body {
   margin: 0;
