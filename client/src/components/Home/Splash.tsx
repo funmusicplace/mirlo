@@ -127,7 +127,7 @@ const Splash = () => {
               top: 55% !important;
               left: 35% !important;
               z-index: -1;
-              background-image: url("/static/images/cloud-no-grain-1.svg");
+              background-image: url("/static/images/cloud-toneddowngrain-1.webp");
 
               @media screen and (max-width: ${bp.medium}px) {
                 margin-bottom: 0rem;
