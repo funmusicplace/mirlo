@@ -1,5 +1,10 @@
 @import "./theme";
-
+@font-face {
+  font-family: "Cubano";
+  src:
+    url("fonts/cubano-sharp.woff2") format("woff2"),
+    url("fonts/cubano-sharp.woff") format("woff");
+}
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
@@ -23,17 +28,17 @@ html {
 
   --header-cover-sticky-height: 55px;
 
-  --mi-font-family-stack: 'Arial', -apple-system, BlinkMacSystemFont,
-    'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans',
-    'Droid Sans', 'Helvetica Neue', sans-serif;
+  --mi-font-family-stack: "Arial", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+    "Helvetica Neue", sans-serif;
 
   --mi-font-size-normal: 1rem;
-  --mi-font-size-small: .875rem;
-  --mi-font-size-xsmall: .75rem;
+  --mi-font-size-small: 0.875rem;
+  --mi-font-size-xsmall: 0.75rem;
 
   --mi-side-paddings-normal: 0rem 2rem;
   --mi-side-paddings-small: 0rem 1rem;
-  --mi-side-paddings-xsmall: 0rem .5rem;
+  --mi-side-paddings-xsmall: 0rem 0.5rem;
 
   --mi-container-full: 100%;
   --mi-container-big: 1106px;
@@ -58,12 +63,14 @@ body {
   font-family: var(--mi-font-family-stack);
   font-smoothing: antialiased;
 }
-body, root {
+body,
+root {
   min-height: 100%;
   background-color: transparent;
 }
 
-h1, .h1 {
+h1,
+.h1 {
   font-size: 2.5rem;
   line-height: 3rem;
   font-weight: normal;
@@ -74,72 +81,86 @@ h1, .h1 {
   }
 }
 
-h2, .h2 {
+h2,
+.h2 {
   font-size: 1.5rem;
   line-height: 1.8rem;
   font-weight: normal;
-  margin-bottom: .7rem;
+  margin-bottom: 0.7rem;
+
+  font-family: "cubano";
 }
 
-h3, .h3 {
+h3,
+.h3 {
   font-size: 1.4rem;
   line-height: unset;
   font-weight: bold;
   margin-bottom: unset;
 }
 
-h4, .h4 {
+h4,
+.h4 {
   font-size: 1.3rem;
   line-height: unset;
-  padding-bottom: .75rem;
+  padding-bottom: 0.75rem;
   margin-bottom: unset;
 }
 
-h5, .h5 {
+h5,
+.h5 {
   font-size: 1.2rem;
   line-height: unset;
-  padding-bottom: .75rem;
+  padding-bottom: 0.75rem;
   margin-bottom: unset;
 }
 
-h6, .h6 {
+h6,
+.h6 {
   font-size: 1.1rem;
   line-height: unset;
-  padding-bottom: .75rem;
+  padding-bottom: 0.75rem;
   margin-bottom: unset;
 }
 
 @media (max-width: 768px) {
-  h1, .h1 {
+  h1,
+  .h1 {
     font-size: 2rem;
     line-height: 2.5rem;
   }
 
-  h2, .h2 {
+  h2,
+  .h2 {
     font-size: 1.3rem;
-    margin-bottom: .5rem;
+    margin-bottom: 0.5rem;
   }
-  h3, .h3 {
+  h3,
+  .h3 {
     font-size: 1.2rem;
     padding-bottom: 1rem;
   }
-  h4, .h4 {
+  h4,
+  .h4 {
     font-size: 1.3rem;
-    padding-bottom: .75rem;
+    padding-bottom: 0.75rem;
   }
 }
 @media (max-width: 430px) {
   html {
     font-size: 16px;
   }
-  h5, .h5 {
+  h5,
+  .h5 {
     font-size: 1rem;
     margin-bottom: 0rem;
   }
 }
 
 a {
-  transition: .25s color, .25s background-color;
+  transition:
+    0.25s color,
+    0.25s background-color;
   color: var(--mi-link-color);
   text-decoration: underline;
   word-break: break-word;
