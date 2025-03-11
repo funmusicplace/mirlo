@@ -90,7 +90,16 @@ type Result = {
 const AutoComplete: React.FC<{
   getOptions: (val: string) => Promise<Result[]> | Result[] | undefined;
   resultsPrefix?: string;
-  onSelect?: (value: unknown) => void;
+  onSelect?: (
+    value:
+      | string
+      | number
+      | {
+          id: string | number;
+          name: string;
+          isNew?: boolean;
+        }
+  ) => void;
   optionDisplay?: (
     result: {
       id: number | string;
