@@ -63,19 +63,54 @@ const parseIndex = async (pathname: string) => {
 
     const avatarString = artist?.avatar?.url.find((u) => u.includes("x600"));
     if (
-      artist &&
-      (route[2] === "posts" ||
-        route[2] === "support" ||
-        route[2] === "releases")
+      route[2] === "releases" ||
+      route[2] === "posts" ||
+      route[2] === "support"
     ) {
-      buildOpenGraphTags($, {
-        title: artist.name ?? "A Mirlo Artist",
-        description: `An artist on Mirlo`,
-        url: `${client.applicationUrl}/${artist?.urlSlug}/releases`,
-        imageUrl: avatarString
+      if (artist) {
+        const artistName = artist.name ?? "A Mirlo Artist";
+        const avatarUrl = avatarString
           ? generateFullStaticImageUrl(avatarString, finalArtistAvatarBucket)
-          : undefined,
-      });
+          : undefined;
+        if (route[2] === "posts") {
+          const post = await prisma.post.findFirst({
+            where: { id: Number(route[3]) },
+            include: {
+              artist: true,
+              featuredImage: true,
+            },
+          });
+          if (post) {
+            // it's a post
+            buildOpenGraphTags($, {
+              title: post.title,
+              description: `A post by ${artistName}`,
+              url: `${client.applicationUrl}/${post.artist?.urlSlug}/posts/${post.id}`,
+              imageUrl: post.featuredImage
+                ? generateFullStaticImageUrl(
+                    post.featuredImage.id,
+                    finalPostImageBucket,
+                    post.featuredImage.extension
+                  )
+                : avatarUrl,
+            });
+          } else {
+            buildOpenGraphTags($, {
+              title: artistName,
+              description: `All posts by ${artistName} on Mirlo`,
+              url: `${client.applicationUrl}/${artist?.urlSlug}/releases`,
+              imageUrl: avatarUrl,
+            });
+          }
+        } else if (route[2] === "support") {
+          buildOpenGraphTags($, {
+            title: artistName,
+            description: `Support ${artistName} on Mirlo`,
+            url: `${client.applicationUrl}/${artist?.urlSlug}/releases`,
+            imageUrl: avatarUrl,
+          });
+        }
+      }
     } else if (artist && route[2] === "release") {
       // it is about n individual release
       const tg = await prisma.trackGroup.findFirst({
@@ -100,45 +135,6 @@ const parseIndex = async (pathname: string) => {
             ? generateFullStaticImageUrl(coverString, finalCoversBucket)
             : undefined,
         });
-      }
-    } else if (route[2] === "releases" || route[2] === "posts") {
-      // it is about n individual release
-
-      if (artist) {
-        const post = await prisma.post.findFirst({
-          where: { id: Number(route[3]) },
-          include: {
-            artist: true,
-            featuredImage: true,
-          },
-        });
-        if (post) {
-          // it's a post
-          buildOpenGraphTags($, {
-            title: post.title,
-            description: `A post by ${post.artist?.name ?? "a Mirlo artist"}`,
-            url: `${client.applicationUrl}/${post.artist?.urlSlug}/posts/${post.id}`,
-            imageUrl: post.featuredImage
-              ? generateFullStaticImageUrl(
-                  post.featuredImage.id,
-                  finalPostImageBucket,
-                  post.featuredImage.extension
-                )
-              : undefined,
-          });
-        } else {
-          buildOpenGraphTags($, {
-            title: artist.name ?? "A Mirlo Artist",
-            description: `An artist on Mirlo`,
-            url: `${client.applicationUrl}/${artist?.urlSlug}/releases`,
-            imageUrl: avatarString
-              ? generateFullStaticImageUrl(
-                  avatarString,
-                  finalArtistAvatarBucket
-                )
-              : undefined,
-          });
-        }
       }
     } else if (route[1] === "widget") {
     } else if (route[1] === "login") {
