@@ -773,7 +773,7 @@
     "copiedToClipboard": "Copied to clipboard!"
   },
   "home": {
-    "support": "Directly support artists. Buy their music. Collectively owned and managed.",
+    "support": "<red>Directly support artists.</red> Buy their music. Collectively owned and managed.",
     "mailingList": "Get on the mailing list",
     "supportTeam": "Support Mirlo",
     "sustainedBy": "Mirlo's work is sustained by our community, not by venture capital.",

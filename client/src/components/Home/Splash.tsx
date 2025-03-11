@@ -92,7 +92,7 @@ const Splash = () => {
             data-depth="1"
             className={css`
               width: 70%;
-              height: 100px;
+              height: 50px;
               background-image: url("/static/images/cloud-no-grain-3.svg");
 
               @media screen and (max-width: ${bp.medium}px) {
@@ -103,7 +103,7 @@ const Splash = () => {
           <ParallexObjectWrapper
             data-depth="2"
             className={css`
-              height: 100px;
+              height: 80px;
               width: 70%;
               top: 2rem !important;
               left: 30% !important;
@@ -152,8 +152,11 @@ const Splash = () => {
               z-index: 1;
               width: 400px;
               height: 280px;
+              margin-right: 4rem;
 
               @media screen and (max-width: ${bp.medium}px) {
+                margin-right: 0;
+                margin-top: 4rem;
                 width: 300px;
               }
             `}
@@ -165,9 +168,25 @@ const Splash = () => {
                 display: flex;
                 flex-direction: column;
                 gap: 24px;
+
+                color: var(--mi-black);
               `}
             >
-              <SplashTitle>{t("support")}</SplashTitle>
+              <SplashTitle>
+                <Trans
+                  t={t}
+                  i18nKey="support"
+                  components={{
+                    red: (
+                      <span
+                        className={css`
+                          color: var(--mi-pink);
+                        `}
+                      ></span>
+                    ),
+                  }}
+                ></Trans>
+              </SplashTitle>
               {!user && (
                 <SplashButtonWrapper>
                   <ButtonLink size="big" to="/signup" rounded>
