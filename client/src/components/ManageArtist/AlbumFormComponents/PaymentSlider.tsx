@@ -172,7 +172,7 @@ const PaymentSlider: React.FC<{
             <p>
               Curious about how Mirlo uses money? We post quarterly financial
               statements{" "}
-              <a href="https://mirlo.space/manage/artists/21/posts?tag=finances">
+              <a href="https://mirlo.space/team/posts?tag=finances">
                 on our blog
               </a>
               .
