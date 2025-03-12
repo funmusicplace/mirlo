@@ -199,7 +199,7 @@ if (!isDev) {
   // Set a rate limiter on all auth endpoints to be only 5 requests a minute
   const authLimiter = rateLimit({
     windowMs: 60 * 1000, // 1 minute
-    limit: 100, // Limit each IP to 100 requests per `window`
+    limit: 50, // Limit each IP to 100 requests per `window`
     standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers,
   });
 

@@ -1,5 +1,4 @@
 import {
-  NotFoundError,
   PrismaClientKnownRequestError,
   PrismaClientValidationError,
 } from "@prisma/client/runtime/library";
@@ -26,6 +25,7 @@ interface AppErrorArgs {
 
 export class AppError extends Error {
   public readonly name: string;
+  public readonly description: string;
   public readonly httpCode: HttpCode;
   public readonly isOperational: boolean = true;
 
@@ -36,6 +36,7 @@ export class AppError extends Error {
 
     this.name = args.name || "Error";
     this.httpCode = args.httpCode;
+    this.description = args.description;
 
     if (args.isOperational !== undefined) {
       this.isOperational = args.isOperational;
@@ -52,7 +53,14 @@ const errorHandler = (
   next: NextFunction
 ) => {
   if (err instanceof AppError) {
-    console.error("Found instance of AppError", err);
+    console.error(
+      "Found instance of AppError",
+      req.path,
+      req.method,
+      err.httpCode,
+      err.name,
+      err.description
+    );
     return res.status(err.httpCode).json({
       error: err.message,
     });

@@ -2,6 +2,7 @@ import * as http from "http";
 
 const options: http.RequestOptions = {
   host: "localhost",
+  headers: { "health-check": 1 },
   port: process.env.PORT,
   path: "/health",
   timeout: 2000,

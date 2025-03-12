@@ -1,15 +1,16 @@
 import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
 import bcrypt from "bcryptjs";
+import { AppError } from "../../utils/error";
 
 const login = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
-      res.status(401).json({
-        error: "Incorrect username or password",
+      throw new AppError({
+        httpCode: 401,
+        description: "Missing log in information",
       });
-      return next();
     }
     const foundUser = await prisma.user.findFirst({
       where: {
@@ -23,13 +24,15 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
         res.locals.user = foundUser;
         next();
       } else {
-        res.status(401).json({
-          error: "Incorrect username or password",
+        throw new AppError({
+          httpCode: 401,
+          description: "Incorrect username or password",
         });
       }
     } else {
-      res.status(401).json({
-        error: "Incorrect username or password",
+      throw new AppError({
+        httpCode: 401,
+        description: "Incorrect username or password",
       });
     }
   } catch (error) {
