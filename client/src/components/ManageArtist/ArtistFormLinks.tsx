@@ -3,7 +3,7 @@ import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { InputEl } from "components/common/Input";
 import Button from "components/common/Button";
 import { css } from "@emotion/css";
-import { FaGlobe, FaPlus, FaSave, FaTimes, FaTrash } from "react-icons/fa";
+import { FaPlus, FaSave, FaTimes, FaTrash } from "react-icons/fa";
 import React from "react";
 import {
   findOutsideSite,
@@ -34,7 +34,8 @@ export function transformFromLinks(
     linkArray: [
       ...(artist.links?.map((l) => ({
         url: l.replace("mailto:", ""),
-        linkType: findOutsideSite({ url: l, linkType: "" })?.name,
+        linkType: "",
+        linkLabel: "",
         inHeader: true,
       })) ?? []),
       ...(artist.linksJson ?? []),
@@ -98,9 +99,7 @@ const ArtistFormLinks: React.FC<ArtistFormLinksProps> = ({
     <Modal open={true} size="small" onClose={() => setIsEditing(false)}>
       <FormProvider {...methods}>
         {fields.map((field, index) => {
-          const site = outsideLinks.find((site) =>
-            field.url.includes(site.matches)
-          );
+          const linkType = watch(`linkArray.${index}.linkType`);
           return (
             <div
               key={index}
@@ -126,26 +125,55 @@ const ArtistFormLinks: React.FC<ArtistFormLinksProps> = ({
                     margin-bottom: 0;
                   }
                 }
+                
+                .link-wrapper {
+                    display: grid;
+                    align-items: center;
+                    grid-template-columns: 1fr 2fr;
+                    grid-gap: 1rem;
+                    grid-template-areas:
+                        "iconLabel iconSelect"
+                        "nameLabel nameInput"
+                        "urlLabel urlInput"
+                        "checkbox checkbox"
+                }
+
+                .link-wrapper label {
+                    text-align: right;
+                }
               `}
             >
-              {site?.icon ?? <FaGlobe />}
-              <SelectEl {...register(`linkArray.${index}.linkType`)}>
-                {outsideLinks
-                  .sort((a, b) => {
-                    if (a.name > b.name) {
-                      return 1;
-                    }
-                    if (a.name < b.name) {
-                      return -1;
-                    }
-                    return 0;
-                  })
-                  .map((site) => (
-                    <option key={site.name}>{t(site.name, site.name)}</option>
-                  ))}
-              </SelectEl>
-              <div className="header-wrapper">
+              <div className="link-wrapper">
+                <label className={css`grid-area: iconLabel`} htmlFor={`linkIcon${index}`}>Link icon</label>
+                <div id={`linkIcon${index}`}>
+                  <SelectEl
+                    {...register(`linkArray.${index}.linkType`)}>
+                    {outsideLinks
+                      .sort((a, b) => {
+                        if (a.name > b.name) {
+                          return 1;
+                        }
+                        if (a.name < b.name) {
+                          return -1;
+                        }
+                        return 0;
+                      })
+                      .map((site) => (
+                        <option key={site.name}>{t(site.name, site.name)}</option>
+                      ))}
+                  </SelectEl>
+                  &nbsp;{outsideLinks.find(l => l.name === linkType)?.icon}
+                </div>
+                <label className={css`grid-area: nameLabel`} htmlFor={`linkLabel${index}`}>Link text</label>
+                <InputEl className={css`grid-area: nameInput`} id={`linkLabel${index}`} {...register(`linkArray.${index}.linkLabel`, {
+                  onBlur: (e) => setValue(`linkArray.${index}.linkType`, e.target.value)
+                })}
+                  placeholder={t("linkLabel") ?? ""}
+                />
+                <label className={css`grid-area: urlLabel`} htmlFor={`linkUrl${index}`}>URL</label>
                 <InputEl
+                  className={css`grid-area: urlInput`}
+                  id={`linkUrl${index}`}
                   {...register(`linkArray.${index}.url`, {
                     setValueAs: linkUrlHref,
                     onBlur: (e) => handleInputElBlur(e.target.value, index),
@@ -154,7 +182,7 @@ const ArtistFormLinks: React.FC<ArtistFormLinksProps> = ({
                   key={field.id}
                   type="url"
                 />
-                <FormComponent style={{ display: "flex" }}>
+                <FormComponent className={css`grid-area: checkbox`} style={{ display: "flex" }}>
                   <FormCheckbox
                     keyName={`linkArray.${index}.inHeader`}
                     description={t("linkInHeader")}
@@ -183,7 +211,7 @@ const ArtistFormLinks: React.FC<ArtistFormLinksProps> = ({
             onClick={() =>
               append({
                 url: "",
-                linkType: outsideLinks[outsideLinks.length - 1]?.name,
+                linkType: "",
               })
             }
             disabled={addDisabled}

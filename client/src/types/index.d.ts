@@ -142,6 +142,7 @@ interface Notification {
 interface Link {
   url: string;
   linkType?: string;
+  linkLabel?: string;
   inHeader?: boolean;
 }
 
