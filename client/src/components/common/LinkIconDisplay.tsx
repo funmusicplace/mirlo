@@ -43,6 +43,8 @@ export function linkUrlHref(link: string, forDisplay?: boolean): string {
 }
 
 export const linkUrlDisplay = (link: Link): string => {
+  if (link.linkLabel) return link.linkLabel;
+
   if (isEmailLink(link.url)) {
     return "Email";
   }
