@@ -20,24 +20,25 @@ export const corsCheck = async (...args: [Request, Response, NextFunction]) => {
       req.headers["sec-fetch-site"] === "same-site" ||
       req.headers["sec-fetch-site"] === "same-origin";
     let clients: Client[] = [];
-    console.log("req", req.headers, isSameSite);
     if ((req.path === "/health" && req.headers["health-check"]) || isDev) {
       // do nothing
     } else {
-      // if (isSameSite) {
-      clients = await prisma.client.findMany();
-      // } else if (!apiHeader || typeof apiHeader !== "string") {
-      //   throw new AppError({
-      //     httpCode: 401,
-      //     description: "Missing API Code",
-      //   });
-      // } else if (typeof apiHeader === "string" && !isSameSite) {
-      //   clients = await prisma.client.findMany({
-      //     where: {
-      //       key: apiHeader,
-      //     },
-      //   });
-      // }
+      if (isSameSite) {
+        clients = await prisma.client.findMany();
+      } else if (!apiHeader || typeof apiHeader !== "string") {
+        console.log("is not SameSite", req.headers);
+
+        throw new AppError({
+          httpCode: 401,
+          description: "Missing API Code",
+        });
+      } else if (typeof apiHeader === "string" && !isSameSite) {
+        clients = await prisma.client.findMany({
+          where: {
+            key: apiHeader,
+          },
+        });
+      }
     }
     const origin = [
       ...flatten(
