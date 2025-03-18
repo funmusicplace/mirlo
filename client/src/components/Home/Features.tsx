@@ -421,7 +421,7 @@ const Features = () => {
                 roughly 3% cut.
               </p>
             </div>
-            <img src="/assets/images/percentage.png" alt="map" />
+            <img src="/static/images/percentage.png" alt="map" />
           </Feature>
 
           {/* <h2>Listener Features</h2>

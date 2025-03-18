@@ -23,7 +23,16 @@ const APIInstance = (apiRoot: string) => {
     }
   ): Promise<R> => {
     const root = authEndpoints.includes(endpoint) ? auth : api;
-    const req = new Request(`${root}${endpoint}`, requestOptions);
+    const req = new Request(`${root}${endpoint}`, {
+      headers: {
+        ...requestOptions?.headers,
+      },
+      ...requestOptions,
+    });
+
+    req.headers.append("mirlo-api-key", import.meta.env.VITE_MIRLO_API_KEY);
+
+    console.log("req", req);
 
     try {
       const resp = await fetch(req);

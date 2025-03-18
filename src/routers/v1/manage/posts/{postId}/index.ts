@@ -56,43 +56,44 @@ export default function () {
         },
       });
 
-      const postImages = await prisma.postImage.findMany({
-        where: {
-          postId: post.id,
-        },
-      });
-      const imagesToDelete = postImages
-        .filter((image) => {
-          const inContent = content.includes(image.id);
-          const isFeatured = post.featuredImageId === image.id;
-          return !(inContent || isFeatured);
-        })
-        .map((image) => image.id);
+      if (content) {
+        const postImages = await prisma.postImage.findMany({
+          where: {
+            postId: post.id,
+          },
+        });
+        const imagesToDelete = postImages
+          .filter((image) => {
+            const inContent = content.includes(image.id);
+            const isFeatured = post.featuredImageId === image.id;
+            return !(inContent || isFeatured);
+          })
+          .map((image) => image.id);
 
-      await prisma.postImage.deleteMany({
-        where: {
-          id: { in: imagesToDelete },
-        },
-      });
+        await prisma.postImage.deleteMany({
+          where: {
+            id: { in: imagesToDelete },
+          },
+        });
 
-      const postTracks = await prisma.postTrack.findMany({
-        where: {
-          postId: post.id,
-        },
-      });
-      const tracksToDelete = postTracks
-        .filter((pt) => {
-          const inContent = content.includes(`track/${pt.trackId}`);
-          return !inContent;
-        })
-        .map((image) => image.trackId);
-
-      await prisma.postTrack.deleteMany({
-        where: {
-          postId: post.id,
-          trackId: { in: tracksToDelete },
-        },
-      });
+        const postTracks = await prisma.postTrack.findMany({
+          where: {
+            postId: post.id,
+          },
+        });
+        const tracksToDelete = postTracks
+          .filter((pt) => {
+            const inContent = content.includes(`track/${pt.trackId}`);
+            return !inContent;
+          })
+          .map((image) => image.trackId);
+        await prisma.postTrack.deleteMany({
+          where: {
+            postId: post.id,
+            trackId: { in: tracksToDelete },
+          },
+        });
+      }
 
       const refreshedPost = await prisma.post.findFirst({
         where: {

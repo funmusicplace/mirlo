@@ -59,7 +59,7 @@ export default function () {
           try {
             stripeAccount = await stripe.accounts.retrieve(accountId);
           } catch (e) {
-            console.error(e);
+            console.error(`Error retrieving account information about user`, e);
           }
 
           const accountLink = await stripe.accountLinks.create({

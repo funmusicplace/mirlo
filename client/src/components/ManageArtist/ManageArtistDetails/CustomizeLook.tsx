@@ -325,7 +325,7 @@ export const CustomizeLook: React.FC = () => {
                 <ArtistSlugInput currentArtistId={existingId} />
               </FormComponent>
             </ArtistFormSection>
-            <Box variant="warning">{t("warning")}</Box>
+            <Box variant="warning">{t("warningFeature")}</Box>
             <FormComponent>
               <Toggle
                 label={t("enableActivityPub")}

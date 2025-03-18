@@ -232,7 +232,6 @@ const CustomButton = styled.button<Sizable>(
        props.wrap
          ? `white-space: normal !important;
                    height: auto;
-                   width: 94%;
                    word-break: break-word;
                    hyphens: auto;`
          : "white-space: nowrap;"
