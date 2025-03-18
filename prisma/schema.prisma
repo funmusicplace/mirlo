@@ -155,6 +155,7 @@ model PostImage {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   deletedAt       DateTime?
+  isHero          Boolean   @default(false)
   postId          Int
   post            Post      @relation(name: "images", fields: [postId], references: [id])
   featuredForPost Post[]

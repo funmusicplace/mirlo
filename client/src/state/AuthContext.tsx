@@ -24,6 +24,7 @@ export function AuthContextProvider({ children }: React.PropsWithChildren) {
   const { authRefresh } = useAuthRefreshMutation();
 
   const userLanguage = user?.language;
+
   React.useEffect(() => {
     i18n.changeLanguage(userLanguage);
   }, [userLanguage]);
