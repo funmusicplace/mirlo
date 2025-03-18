@@ -6,6 +6,11 @@ import cors from "cors";
 import { NextFunction, Request, Response } from "express";
 import { AppError } from "../utils/error";
 
+const isDev =
+  process.env.NODE_ENV === "development" ||
+  process.env.NODE_ENV === "test" ||
+  process.env.CI;
+
 export const corsCheck = async (...args: [Request, Response, NextFunction]) => {
   const [req, _res, next] = args;
 
@@ -16,7 +21,7 @@ export const corsCheck = async (...args: [Request, Response, NextFunction]) => {
       req.headers["sec-fetch-site"] === "same-origin";
     let clients: Client[] = [];
 
-    if (req.path === "/health" && req.headers["health-check"]) {
+    if ((req.path === "/health" && req.headers["health-check"]) || isDev) {
       // do nothing
     } else {
       if (isSameSite) {
