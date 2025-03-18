@@ -162,18 +162,19 @@ const PostHeader: React.FC<{ post: Post }> = ({ post }) => {
                       <span>{post.artist?.name}</span>
                     </Link>
                   </div>
-                  <em>
-                    {t("publishedAt", {
-                      date: formatDate({
-                        date: post.publishedAt,
-                        i18n,
-                        options: {
-                          dateStyle: "medium",
-                          timeStyle: "short",
-                        },
-                      }),
-                    })}
-                  </em>
+                  <small>
+                    <em>
+                      {t("publishedAt", {
+                        date: formatDate({
+                          date: post.publishedAt,
+                          i18n,
+                          options: {
+                            dateStyle: "medium",
+                          },
+                        }),
+                      })}
+                    </em>
+                  </small>
                 </div>
                 {post.artistId && <FollowArtist artistId={post.artistId} />}
               </SpaceBetweenDiv>

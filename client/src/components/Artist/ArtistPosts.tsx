@@ -36,6 +36,7 @@ const ArtistPosts: React.FC = () => {
     <div>
       <div
         className={css`
+          margin-bottom: 2rem;
           @media screen and (max-width: ${bp.medium}px) {
             padding: 0 0 7.5rem 0 !important;
           }
