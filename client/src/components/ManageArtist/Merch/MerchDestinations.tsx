@@ -42,8 +42,6 @@ const MerchDestinations: React.FC<{}> = () => {
     queryManagedMerch(merchParamId ?? "")
   );
 
-  console.log("merch", merch);
-
   const methods = useForm<DestinationForm>({
     defaultValues: {
       destinations: merch?.shippingDestinations.map((dest) => ({

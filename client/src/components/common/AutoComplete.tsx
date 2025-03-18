@@ -174,7 +174,6 @@ const AutoComplete: React.FC<{
   const onSelectValue = React.useCallback(
     (value: string | number, index?: number) => {
       if (searchResults.length > 0 && index !== undefined) {
-        console.log("selecting index", index);
         onSelect?.(searchResults[index]);
       } else {
         onSelect?.(value);
@@ -235,13 +234,7 @@ const AutoComplete: React.FC<{
         onKeyUp={(e) => {
           e.preventDefault();
           if (e.keyCode === 31 || e.key === "Enter") {
-            console.log("pressed enter", searchResults);
             if (searchResults.length > 0) {
-              console.log(
-                "searchValue, navigationIndex",
-                searchValue,
-                navigationIndex
-              );
               onSelectValue(searchValue, navigationIndex);
             } else {
               onEnter?.(searchValue);

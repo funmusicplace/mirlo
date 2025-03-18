@@ -11,7 +11,13 @@ const usePagination = ({ pageSize }: { pageSize: number }) => {
 
   return {
     page,
-    PaginationComponent: ({ amount }: { amount: number }) => (
+    PaginationComponent: ({
+      amount,
+      total,
+    }: {
+      amount?: number;
+      total?: number;
+    }) => (
       <div
         className={css`
           display: flex;
@@ -37,7 +43,7 @@ const usePagination = ({ pageSize }: { pageSize: number }) => {
             -{" "}
           </span>
         )}
-        {amount === pageSize && (
+        {(amount === pageSize || (total && total > pageSize * (page + 1))) && (
           <LinkWithIcon to={`?page=${page + 1}`}>
             Next page <FaChevronRight />
           </LinkWithIcon>

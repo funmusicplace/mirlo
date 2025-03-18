@@ -32,8 +32,6 @@ const APIInstance = (apiRoot: string) => {
 
     req.headers.append("mirlo-api-key", import.meta.env.VITE_MIRLO_API_KEY);
 
-    console.log("req", req);
-
     try {
       const resp = await fetch(req);
       if (options?.noProcess) {

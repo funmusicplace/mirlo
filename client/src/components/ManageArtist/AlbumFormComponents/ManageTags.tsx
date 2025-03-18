@@ -26,7 +26,6 @@ const ArtistTag: React.FC<{
   removeTag: (idx: number) => void;
 }> = ({ tag, index, removeTag }) => {
   const onClick = React.useCallback(() => {
-    console.log("clicking");
     removeTag(index);
   }, [removeTag, index]);
 
