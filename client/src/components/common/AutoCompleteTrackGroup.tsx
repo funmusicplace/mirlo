@@ -29,7 +29,6 @@ const AutoCompleteTrackGroup: React.FC<{
       getOptions={getTrackGroupOptions}
       placeholder={placeholder}
       onSelect={(val) => {
-        console.log("autocompleting track group", val);
         if (typeof val === "number") {
           onSelect(val);
         } else if (hasId(val) && typeof val.id === "number") {

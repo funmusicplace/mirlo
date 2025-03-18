@@ -28,6 +28,29 @@ export function queryPost(opts: { postId: number }) {
   });
 }
 
+const fetchArtistPosts: QueryFunction<
+  { results: Post[]; total?: number },
+  [
+    "fetchArtistPosts",
+    { take: number; skip: number; artistId: number | string },
+  ]
+> = ({ queryKey: [_, { take, skip = 0, artistId }], signal }) => {
+  return api.get(`v1/artists/${artistId}/posts?take=${take}&skip=${skip}`, {
+    signal,
+  });
+};
+
+export function queryArtistPosts(opts: {
+  take: number;
+  artistId: number | string;
+  skip: number;
+}) {
+  return queryOptions({
+    queryKey: ["fetchArtistPosts", opts],
+    queryFn: fetchArtistPosts,
+  });
+}
+
 const fetchPosts: QueryFunction<
   { results: Post[]; total?: number },
   ["fetchPosts", { take: number }]

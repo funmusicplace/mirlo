@@ -7,9 +7,13 @@ import { useQuery } from "@tanstack/react-query";
 import { queryPosts } from "queries";
 import PostGrid from "components/Post/PostGrid";
 
+const pageSize = 6;
+
 const Posts = () => {
   const { t } = useTranslation("translation", { keyPrefix: "home" });
-  const response = useQuery(queryPosts({ take: 6 }));
+
+  const response = useQuery(queryPosts({ take: pageSize }));
+
   const { data: posts } = response;
 
   const id = React.useId();

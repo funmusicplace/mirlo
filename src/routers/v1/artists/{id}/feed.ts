@@ -13,17 +13,21 @@ import RSS from "rss";
 import prisma from "@mirlo/prisma";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { findArtistIdForURLSlug } from "../../../../utils/artist";
-import { markdownAsHtml } from "../../../../utils/post";
+import { markdownAsHtml, processSinglePost } from "../../../../utils/post";
 import { whereForPublishedTrackGroups } from "../../../../utils/trackGroup";
 import { isTrackGroup } from "../../../../utils/typeguards";
 import {
   headersAreForActivityPub,
   turnFeedIntoOutbox,
 } from "../../../../activityPub/utils";
+import { generateFullStaticImageUrl } from "../../../../utils/images";
+import { finalPostImageBucket } from "../../../../utils/minio";
 
-const getPostsVisibleToUser = async (
+export const getPostsVisibleToUser = async (
   user: User,
-  artist: Artist & { subscriptionTiers: ArtistSubscriptionTier[] }
+  artist: Artist & { subscriptionTiers: ArtistSubscriptionTier[] },
+  take: number = 20,
+  skip: number = 0
 ) => {
   let where: Prisma.PostWhereInput = {
     publishedAt: { lte: new Date() },
@@ -38,17 +42,21 @@ const getPostsVisibleToUser = async (
     // we don't have to post process this?
   }
 
+  const itemCount = await prisma.post.count({
+    where,
+  });
+
   let posts = await prisma.post.findMany({
     where,
     include: {
       artist: true,
       minimumSubscriptionTier: true,
       postSubscriptionTiers: true,
+      featuredImage: true,
     },
     orderBy: {
       publishedAt: "desc",
     },
-    take: 20,
   });
 
   if (user) {
@@ -82,7 +90,24 @@ const getPostsVisibleToUser = async (
       posts = posts.filter((p) => p.isPublic);
     }
   }
-  return posts;
+
+  // This isn't very efficient for large number of posts
+  const takePosts = posts.slice(skip, take + skip);
+
+  return {
+    posts: takePosts.map((post) => ({
+      ...post,
+      featuredImage: post.featuredImage && {
+        ...post.featuredImage,
+        src: generateFullStaticImageUrl(
+          post.featuredImage.id,
+          finalPostImageBucket,
+          post.featuredImage.extension
+        ),
+      },
+    })),
+    total: posts.length,
+  };
 };
 
 const getAlbumsVisibleToUser = async (artist: Artist) => {
@@ -160,7 +185,7 @@ export default function () {
 
       const albums = await getAlbumsVisibleToUser(artist);
 
-      const zipped = [...posts, ...albums].sort((a, b) => {
+      const zipped = [...posts.posts, ...albums].sort((a, b) => {
         const publishedDateA = isTrackGroup(a) ? a.releaseDate : a.publishedAt;
         const publishedDateB = isTrackGroup(b) ? b.releaseDate : b.publishedAt;
         if (publishedDateA > publishedDateB) {

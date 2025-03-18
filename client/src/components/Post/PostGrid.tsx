@@ -15,7 +15,6 @@ const PostGridWrapper = styled.ul<{}>`
 
   @media screen and (max-width: ${bp.medium}px) {
     grid-template-columns: repeat(1, 100%);
-    gap: 2%;
   }
 `;
 
