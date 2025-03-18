@@ -23,10 +23,11 @@ export const corsCheck = async (...args: [Request, Response, NextFunction]) => {
     if ((req.path === "/health" && req.headers["health-check"]) || isDev) {
       // do nothing
     } else {
-      if (isSameSite) {
+      // We only care about the API key for API requests
+      if (isSameSite || !req.path.startsWith("/v1")) {
         clients = await prisma.client.findMany();
       } else if (!apiHeader || typeof apiHeader !== "string") {
-        console.log("is not SameSite", req.headers);
+        console.log("is not SameSite", req.path, req.headers);
 
         throw new AppError({
           httpCode: 401,
