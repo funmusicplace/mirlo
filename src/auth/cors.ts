@@ -20,8 +20,10 @@ export const corsCheck = async (...args: [Request, Response, NextFunction]) => {
     if ((req.path === "/health" && req.headers["health-check"]) || isTest) {
       // do nothing
     } else {
+      const isAPINonStripeEndpoint =
+        req.path.startsWith("/v1") && !req.path.startsWith("/v1/checkout");
       // We only care about the API key for API requests
-      if (isSameSite || !req.path.startsWith("/v1")) {
+      if (isSameSite || !isAPINonStripeEndpoint) {
         clients = await prisma.client.findMany();
       } else if (!apiHeader || typeof apiHeader !== "string") {
         console.log("is not SameSite", req.path, req.headers);
