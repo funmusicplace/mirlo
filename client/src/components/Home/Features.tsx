@@ -414,11 +414,14 @@ const Features = () => {
           </Feature>
           <Feature>
             <div className="description">
-              <strong>Transparent and consistent pricing.</strong>
+              <strong>You decide how much it costs.</strong>
               <p>
-                Mirlo uses a transparent and consistent pricing model. We charge
-                you 7% of your sale, and our payment processor (Stripe) takes a
-                roughly 3% cut.
+                Artists get to choose how much of each sale goes to us. So if
+                you want 10% of your album sale to go Mirlo, and you sell it for
+                $10, we will get $1. If, instead, you need 100% of the sale, you
+                get to keep it! Our payment processor (Stripe) takes a 2.9% +
+                30c cut. We trust artists to know how much of their sales they
+                can afford to give to us.
               </p>
             </div>
             <img src="/static/images/percentage.png" alt="map" />
@@ -493,22 +496,6 @@ const Features = () => {
             >
               Join Mirlo!
             </ButtonLink>
-          </div>
-          <div
-            className={css`
-              margin-top: 1rem;
-            `}
-          >
-            <Trans
-              t={t}
-              i18nKey="officeHours"
-              components={{
-                office: (
-                  // eslint-disable-next-line jsx-a11y/anchor-has-content
-                  <a href=" https://calendly.com/mirloofficehours/schedule"></a>
-                ),
-              }}
-            />{" "}
           </div>
           <div
             className={css`

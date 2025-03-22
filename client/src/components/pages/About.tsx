@@ -96,6 +96,9 @@ const About: React.FC = () => {
             p: <p></p>,
             giveDirectly: <Link to="/team/support"></Link>,
             i: <em></em>,
+            proportionally: (
+              <a href="https://nham.co.uk/2025/03/musicians-how-to-receive-more-money-for-each-track-sold/"></a>
+            ),
           }}
         />
       </div>
@@ -449,8 +452,10 @@ const About: React.FC = () => {
             id="different-from-other-products"
             answer={
               <>
-                Mirlo allows for direct and ongoing support of artists. It’s
-                different from other crowdfunding platforms because it:
+                <p>
+                  Mirlo allows for direct and ongoing support of artists. It’s
+                  different from other crowdfunding platforms because it:
+                </p>
                 <ul>
                   <li>
                     is rooted in mutual aid and is stewared by a worker co-op,
@@ -463,6 +468,141 @@ const About: React.FC = () => {
                     ecosystem.
                   </li>
                 </ul>
+                <table
+                  cellSpacing={0}
+                  className={css`
+                    min-width: 1080px;
+                    margin-left: -200px;
+                    padding: 2rem 0;
+                    font-size: 0.9rem;
+
+                    th,
+                    td {
+                      text-align: center;
+                      padding: 0.5rem;
+                      line-height: 1.3;
+                    }
+
+                    .comparison td,
+                    .comparison th {
+                      border-right: 1px solid black;
+                      text-align: center;
+                      max-width: 6rem;
+
+                      &:last-child {
+                        border-right: none;
+                      }
+                    }
+
+                    th:first-child {
+                      text-align: right;
+                      padding-right: 1rem;
+                    }
+                  `}
+                >
+                  <tr>
+                    <td></td>
+                    <th>Mirlo</th>
+                    <th>Bandcamp</th>
+                    <th>Patreon</th>
+                    {/* <th>Ampwall</th> */}
+                    {/* <th>Bandwagon</th> */}
+                    {/* <th>Subvert</th> */}
+                  </tr>
+                  <tr className="comparison">
+                    <th>Pricing</th>
+                    <td>You decide</td> {/* Mirlo */}
+                    <td>%15 of sales</td> {/* Bandcamp */}
+                    <td>%8 of support</td> {/* Patreon */}
+                    {/* <td>$10/year, 5% of sales</td> Ampwall */}
+                    {/* <td>Free</td> Bandwagon */}
+                    {/* <td>?</td> Subvert */}
+                  </tr>
+                  <tr className="comparison">
+                    <th>Upload music and sell music</th>
+                    <td>✅</td> {/* Mirlo */}
+                    <td>✅</td> {/* Bandcamp */}
+                    <td>❌</td> {/* Patreon */}
+                    {/* <td>✅</td> Ampwall */}
+                    {/* <td>✅ sales is being worked on</td> Bandwagon */}
+                    {/* <td>Presumably</td> Subvert */}
+                  </tr>
+                  <tr className="comparison">
+                    <th>Merch sales</th>
+                    <td>✅</td>
+                    <td>✅</td>
+                    <td>
+                      ❌ <br />
+                      but you can link merch sales to your audience
+                    </td>{" "}
+                    {/* Patreon */}
+                    {/* <td>✅</td> */}
+                    {/* <td>❌</td> */}
+                    {/* <td>❌</td> */}
+                  </tr>
+                  <tr className="comparison">
+                    <th>Monthly support</th>
+                    <td>✅</td>
+                    <td>✅</td>
+                    <td>✅</td> {/* Patreon */}
+                    {/* <td>✅</td> */}
+                    {/* <td>❌</td> */}
+                    {/* <td>❌</td> */}
+                  </tr>
+                  <tr className="comparison">
+                    <th>Blog posts to audience segments</th>
+                    <td>✅</td> {/* Mirlo */}
+                    <td>✅</td> {/* Bandcamp */}
+                    <td>✅</td> {/* Patreon */}
+                    {/* <td>❌</td> Ampwall */}
+                    {/* <td>❌</td> Bandwagon */}
+                    {/* <td>❌</td> Subvert */}
+                  </tr>
+                  <tr className="comparison">
+                    <th>Download codes and press kits</th>
+                    <td>✅</td> {/* Mirlo */}
+                    <td>✅</td> {/* Bandcamp */}
+                    <td>❌</td> {/* Patreon */}
+                    {/* <td>❌</td> Ampwall */}
+                    {/* <td>❌</td> Bandwagon */}
+                    {/* <td>❌</td> Subvert */}
+                  </tr>
+                  <tr className="comparison">
+                    <th>Tip jar</th>
+                    <td>✅</td> {/* Mirlo */}
+                    <td>❌</td> {/* Bandcamp */}
+                    <td>❌</td> {/* Patreon */}
+                    {/* <td>❌</td> Ampwall */}
+                    {/* <td>❌</td> Bandwagon */}
+                    {/* <td>❌</td> Subvert */}
+                  </tr>
+                  <tr className="comparison">
+                    <th>Embed music</th>
+                    <td>✅</td> {/* Mirlo */}
+                    <td>✅</td> {/* Bandcamp */}
+                    <td>✅</td> {/* Patreon */}
+                    {/* <td>✅</td> Ampwall */}
+                    {/* <td>❌</td> Bandwagon */}
+                    {/* <td>❌</td> Subvert */}
+                  </tr>
+                  <tr className="comparison">
+                    <th>Open Source</th>
+                    <td>✅</td>
+                    <td>❌</td> <td>❌</td>
+                    {/* <td>❌</td> */}
+                    {/* <td>✅</td> */}
+                    {/* <td>❌</td> */}
+                  </tr>
+                  <tr className="comparison">
+                    <th>Worker owned</th>
+                    <td>✅</td> {/* Mirlo */}
+                    <td>❌</td> {/* Bandcamp */}
+                    <td>❌</td>
+                    {/* <td>❌</td> Ampwall */}
+                    {/* <td>❌</td> Bandwagon */}
+                    {/* <td>❌</td> Subvert */}
+                  </tr>
+                </table>
               </>
             }
           />

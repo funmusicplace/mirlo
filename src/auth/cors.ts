@@ -21,7 +21,11 @@ export const corsCheck = async (...args: [Request, Response, NextFunction]) => {
       // do nothing
     } else {
       const isAPINonStripeEndpoint =
-        req.path.startsWith("/v1") && !req.path.startsWith("/v1/checkout");
+        req.path.startsWith("/v1") &&
+        !(
+          req.path.startsWith("/v1/checkout") ||
+          req.path.startsWith("/v1/webhooks")
+        );
       // We only care about the API key for API requests
       if (isSameSite || !isAPINonStripeEndpoint) {
         clients = await prisma.client.findMany();
