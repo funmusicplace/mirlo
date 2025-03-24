@@ -18,6 +18,9 @@ import ManageTrackLicense from "../ManageTrackLicense";
 import ReplaceTrackAudioInput from "./ReplaceTrackAudioInput";
 import TextArea from "components/common/TextArea";
 import FormComponent from "components/common/FormComponent";
+import { useParams } from "react-router-dom";
+import { queryArtist } from "queries";
+import { useQuery } from "@tanstack/react-query";
 
 export interface FormData {
   title: string;
@@ -38,6 +41,14 @@ const EditTrackRow: React.FC<{
   const { uploadJobs, setUploadJobs } = useJobStatusCheck({
     reload: cancelEditing,
   });
+
+  const { artistId } = useParams();
+
+  const { data: artist } = useQuery(
+    queryArtist({ artistSlug: artistId ?? "" })
+  );
+
+  const colors = artist?.properties?.colors;
 
   const methods = useForm<FormData>({
     defaultValues: {
@@ -80,6 +91,8 @@ const EditTrackRow: React.FC<{
             : undefined,
         };
 
+        console.log("title", packet);
+
         await api.put<Partial<Track>, { track: Track }>(
           `manage/tracks/${trackId}`,
           packet
@@ -100,6 +113,7 @@ const EditTrackRow: React.FC<{
         console.error(e);
       } finally {
         setIsSaving(false);
+        console.log("reloading");
         reload();
       }
     },
@@ -176,9 +190,9 @@ const EditTrackRow: React.FC<{
             type="button"
             className={css`
               ${methods.formState.isDirty
-                ? `background-color: var(--mi-success-background-color) !important; 
-                   color: var(--mi-white) !important;
-                   border-color: var(--mi-white) !important;`
+                ? `background-color: ${colors?.primary} !important; 
+                   color: ${colors?.background} !important;
+                   border-color: ${colors?.primary} !important;`
                 : ""}
             `}
           />

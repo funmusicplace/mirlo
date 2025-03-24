@@ -11,7 +11,7 @@ import {
 import ArtistHeaderSection from "../common/ArtistHeaderSection";
 import { Trans, useTranslation } from "react-i18next";
 import styled from "@emotion/styled";
-import Box from "components/common/Box";
+import Box, { ArtistBox } from "components/common/Box";
 import { useQuery } from "@tanstack/react-query";
 import { queryManagedArtist, queryUserStripeStatus } from "queries";
 import { useAuthContext } from "state/AuthContext";
@@ -96,26 +96,14 @@ const ManageArtistContainer: React.FC<{}> = () => {
     <ArtistPageWrapper artistBanner={!!artistBanner}>
       <>
         {user && artist.userId !== user.id && (
-          <Box
-            className={css`
-              background-color: var(--mi-warning-background-color);
-            `}
-          >
+          <ArtistBox variant="warning">
             You are viewing this artist as an admin
-          </Box>
+          </ArtistBox>
         )}
         {user &&
           stripeAccountStatus &&
           !stripeAccountStatus?.chargesEnabled && (
-            <Box
-              className={css`
-                background-color: var(--mi-warning-background-color);
-
-                a {
-                  color: var(--mi-white);
-                }
-              `}
-            >
+            <ArtistBox variant="warning">
               <Trans
                 t={t}
                 i18nKey={"paymentProcessorNotSetUp"}
@@ -124,7 +112,7 @@ const ManageArtistContainer: React.FC<{}> = () => {
                   manage: <Link to="/manage"></Link>,
                 }}
               />
-            </Box>
+            </ArtistBox>
           )}
 
         {!dontShowHeader && (
@@ -136,15 +124,7 @@ const ManageArtistContainer: React.FC<{}> = () => {
         )}
 
         {!artist.enabled && (
-          <div
-            className={css`
-              background-color: var(--mi-warning-background-color);
-              padding: 1rem;
-              color: var(--mi-warning-text-color);
-            `}
-          >
-            {t("notEnabled")}
-          </div>
+          <ArtistBox variant="warning">{t("notEnabled")}</ArtistBox>
         )}
         <Outlet />
       </>
