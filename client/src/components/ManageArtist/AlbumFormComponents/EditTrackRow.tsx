@@ -91,8 +91,6 @@ const EditTrackRow: React.FC<{
             : undefined,
         };
 
-        console.log("title", packet);
-
         await api.put<Partial<Track>, { track: Track }>(
           `manage/tracks/${trackId}`,
           packet
@@ -113,7 +111,6 @@ const EditTrackRow: React.FC<{
         console.error(e);
       } finally {
         setIsSaving(false);
-        console.log("reloading");
         reload();
       }
     },

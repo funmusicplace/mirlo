@@ -26,6 +26,7 @@ export const corsCheck = async (...args: [Request, Response, NextFunction]) => {
           req.path.startsWith("/v1/checkout") ||
           req.path.startsWith("/v1/webhooks") ||
           // FIXME: This needs to be improved probably.
+          // Exclude artist feed endpoints
           (req.path.startsWith("/v1/artists/") && req.path.endsWith("/feed"))
         );
       // We only care about the API key for API requests

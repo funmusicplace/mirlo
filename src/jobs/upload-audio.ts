@@ -36,8 +36,6 @@ export default async (job: Job) => {
     logger.info(`upload-audio: getting file and storing it at ${originalPath}`);
     // FIXME: can this be converted to a stream.
     // It looks like ffmpeg has issues with streams
-    const { minioStat } = await statFile(incomingAudioBucket, audioId);
-    console.log("minioStat", minioStat);
     await getFile(incomingAudioBucket, audioId, originalPath);
     logger.info(`upload-audio: got file and put it at ${originalPath}`);
     let data: any;
