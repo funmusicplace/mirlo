@@ -24,7 +24,6 @@ const ReplaceTrackAudioInput: React.FC<{
           display: flex;
           justify-content: center;
           align-items: center;
-          background-color: var(--mi-darken-background-color);
           border-radius: var(--mi-border-radius);
         `}
       >

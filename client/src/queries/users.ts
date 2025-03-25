@@ -7,6 +7,7 @@ import {
 import * as api from "./fetch/fetchWrapper";
 import {
   QUERY_KEY_ARTISTS,
+  QUERY_KEY_PURCHASES,
   queryKeyIncludes,
   queryKeyMatches,
 } from "./queryKeys";
@@ -83,6 +84,39 @@ export function queryManagedMerch(merchId: string) {
   return queryOptions({
     queryKey: ["fetchManagedMerch", { merchId }],
     queryFn: fetchManagedMerch,
+  });
+}
+
+const fetchUserPurchases: QueryFunction<
+  { results: MerchPurchase[]; total: number },
+  ["fetchUserMerchPurchases", ...any]
+> = ({ queryKey: [_], signal }) => {
+  return api.get(`v1/manage/purchases/`, { signal });
+};
+
+export function queryUserPurchases() {
+  return queryOptions({
+    queryKey: ["fetchUserMerchPurchases", QUERY_KEY_PURCHASES],
+    queryFn: fetchUserPurchases,
+  });
+}
+
+async function updatePurchase(opts: {
+  purchaseId: string;
+  purchase: { fulfillmentStatus: string };
+}) {
+  await api.put(`v1/manage/purchases/${opts.purchaseId}`, opts.purchase);
+}
+
+export function useUpdatePurchaseMutation() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: updatePurchase,
+    onSuccess() {
+      client.invalidateQueries({
+        predicate: (query) => query.queryKey.includes(QUERY_KEY_PURCHASES),
+      });
+    },
   });
 }
 

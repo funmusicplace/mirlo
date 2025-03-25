@@ -13,7 +13,7 @@ import RSS from "rss";
 import prisma from "@mirlo/prisma";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { findArtistIdForURLSlug } from "../../../../utils/artist";
-import { markdownAsHtml, processSinglePost } from "../../../../utils/post";
+import { markdownAsHtml } from "../../../../utils/post";
 import { whereForPublishedTrackGroups } from "../../../../utils/trackGroup";
 import { isTrackGroup } from "../../../../utils/typeguards";
 import {

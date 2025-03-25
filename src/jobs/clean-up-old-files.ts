@@ -23,7 +23,6 @@ export default async (job: Job) => {
         }
 
         if (now > endTime) {
-          console.log("DEL:", filePath);
           return unlink(filePath, function (err) {
             if (err) return console.error(err);
           });

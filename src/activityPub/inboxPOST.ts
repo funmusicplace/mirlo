@@ -49,11 +49,8 @@ async function signAndSend(
       body: JSON.stringify(message),
     };
 
-    console.log("sending this to destination server", requestBody);
-
     try {
       const response = await fetch(requestBody.url, requestBody);
-      console.log("response", response.body);
     } catch (e) {
       console.log("had an error", e);
     }

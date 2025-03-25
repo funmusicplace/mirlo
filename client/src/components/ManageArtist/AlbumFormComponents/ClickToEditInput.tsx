@@ -19,7 +19,13 @@ const ClickToEditInput: React.FC<{
     },
   });
 
-  const currentValue = methods.getValues(formKey);
+  React.useEffect(() => {
+    if (defaultValue) {
+      methods.setValue(formKey, defaultValue);
+    }
+  }, [defaultValue, formKey]);
+
+  const currentValue = methods.watch(formKey);
 
   return (
     <>
@@ -44,7 +50,7 @@ const ClickToEditInput: React.FC<{
           `}
         >
           <FormProvider {...methods}>
-            <SavingInput formKey="title" url={url} reload={reload} />
+            <SavingInput formKey={formKey} url={url} reload={reload} />
             <Button
               type="button"
               variant="dashed"

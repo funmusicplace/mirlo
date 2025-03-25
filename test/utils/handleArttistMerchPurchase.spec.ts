@@ -141,8 +141,8 @@ describe("handleArtistMerchPurchase", () => {
     assert.equal(data0.message.to, "follower@follower.com");
     assert.equal(data0.locals.purchases[0].merchId, merch.id);
     assert.equal(data0.locals.purchases[0].amountPaid, 2000);
-    assert.equal(data0.locals.purchases[0].artistCut, 1860);
-    assert.equal(data0.locals.purchases[0].platformCut, 140);
+    assert.equal(data0.locals.purchases[0].artistCut, 1800);
+    assert.equal(data0.locals.purchases[0].platformCut, 200);
 
     const data1 = stub.getCall(1).args[0].data;
     assert.equal(data1.template, "tell-artist-about-merch-purchase");
@@ -348,8 +348,8 @@ describe("handleArtistMerchPurchase", () => {
     assert.equal(data0.message.to, "follower@follower.com");
     assert.equal(data0.locals.purchases[0].merchId, merch.id);
     assert.equal(data0.locals.purchases[0].amountPaid, 2000);
-    assert.equal(data0.locals.purchases[0].artistCut, 1860);
-    assert.equal(data0.locals.purchases[0].platformCut, 140);
+    assert.equal(data0.locals.purchases[0].artistCut, 1800);
+    assert.equal(data0.locals.purchases[0].platformCut, 200);
     assert.equal(data0.locals.purchases[0].options[0].name, "small");
     assert.equal(data0.locals.purchases[0].options.length, 1);
 

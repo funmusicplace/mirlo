@@ -20,14 +20,17 @@ export const corsCheck = async (...args: [Request, Response, NextFunction]) => {
     if ((req.path === "/health" && req.headers["health-check"]) || isTest) {
       // do nothing
     } else {
-      const isAPINonStripeEndpoint =
+      const isAPIEndpointPrivate =
         req.path.startsWith("/v1") &&
         !(
           req.path.startsWith("/v1/checkout") ||
-          req.path.startsWith("/v1/webhooks")
+          req.path.startsWith("/v1/webhooks") ||
+          // FIXME: This needs to be improved probably.
+          // Exclude artist feed endpoints
+          (req.path.startsWith("/v1/artists/") && req.path.endsWith("/feed"))
         );
       // We only care about the API key for API requests
-      if (isSameSite || !isAPINonStripeEndpoint) {
+      if (isSameSite || !isAPIEndpointPrivate) {
         clients = await prisma.client.findMany();
       } else if (!apiHeader || typeof apiHeader !== "string") {
         console.log("is not SameSite", req.path, req.headers);
