@@ -83,7 +83,8 @@ export const ImageAndDetailsWrapper = styled.div`
 export const AboutWrapper = styled.div<{
   trackGroupCredits: boolean;
 }>`
-  margin: 1.25rem 0 1.25rem;
+  margin: 1.25rem 0;
+  padding: 0.25rem;
   ${(props) =>
     props.trackGroupCredits
       ? "padding: 0.5rem 3rem 0.25rem 0rem;"
@@ -112,10 +113,10 @@ export const CreditsWrapper = styled.div<{
     line-height: 1.3rem;
   }
   ${(props) =>
-    props.trackGroupCredits ? "border-left: 1px solid;" : "display: none;"}
+    props.trackGroupCredits ? "border-left: 1px solid; " : "display: none;"}
   ${(props) =>
     props.trackGroupAbout
-      ? "margin: 1.25rem 0; padding: 0.5rem 0rem 0.5rem 2rem;"
+      ? "margin: 1.25rem 1.25rem; padding: 0.5rem 0rem 0.5rem 2rem;"
       : "margin: .25rem 0 1.25rem 0; border-left: none; padding: 0.5rem 0.25rem 0.5rem 0;"}
   @media screen and (max-width: ${bp.medium}px) {
     ${(props) => (props.trackGroupCredits ? "border-top: 1px solid;" : "")}

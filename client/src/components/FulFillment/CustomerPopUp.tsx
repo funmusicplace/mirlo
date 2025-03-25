@@ -1,14 +1,13 @@
 import { css } from "@emotion/css";
 import styled from "@emotion/styled";
 import Button from "components/common/Button";
-import Modal from "components/common/Modal";
 import { SelectEl } from "components/common/Select";
 import { formatDate } from "components/TrackGroup/ReleaseDate";
+import { useUpdatePurchaseMutation } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { FaExternalLinkAlt } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import api from "services/api";
 import { getArtistUrl, getMerchUrl } from "utils/artist";
 
 const Underline = styled.div`
@@ -38,13 +37,16 @@ const CustomerPopUp: React.FC<{ purchase: MerchPurchase }> = ({ purchase }) => {
 
   const [status, setStatus] = React.useState(purchase.fulfillmentStatus);
 
+  const { mutateAsync: updatePurchase } = useUpdatePurchaseMutation();
+
   const updateStatus = React.useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
+    async (e: React.ChangeEvent<HTMLSelectElement>) => {
       e.preventDefault();
       e.stopPropagation();
       try {
-        api.put(`manage/purchases/${purchase.id}`, {
-          fulfillmentStatus: e.target.value,
+        updatePurchase({
+          purchaseId: purchase.id,
+          purchase: { fulfillmentStatus: e.target.value },
         });
         setStatus(e.target.value as MerchPurchase["fulfillmentStatus"]);
       } catch (e) {}
@@ -94,33 +96,41 @@ const CustomerPopUp: React.FC<{ purchase: MerchPurchase }> = ({ purchase }) => {
           <label>{t("shippingAddress")}</label>
           <p>
             {purchase.user.name} <br />
-            {purchase.shippingAddress.line1 && (
+            {purchase.shippingAddress && (
               <>
-                {purchase.shippingAddress.line1}
-                <br />
+                {purchase.shippingAddress.line1 && (
+                  <>
+                    {purchase.shippingAddress.line1}
+                    <br />
+                  </>
+                )}
+                {purchase.shippingAddress.line1 && (
+                  <>
+                    {purchase.shippingAddress.line2}
+                    <br />
+                  </>
+                )}
+                {purchase.shippingAddress.city && (
+                  <>
+                    {purchase.shippingAddress.city}
+                    <br />
+                  </>
+                )}
+                {purchase.shippingAddress.state},
+                {purchase.shippingAddress.postal_code}
               </>
             )}
-            {purchase.shippingAddress.line1 && (
-              <>
-                {purchase.shippingAddress.line2}
-                <br />
-              </>
-            )}
-            {purchase.shippingAddress.city && (
-              <>
-                {purchase.shippingAddress.city}
-                <br />
-              </>
-            )}
-            {purchase.shippingAddress.state},
-            {purchase.shippingAddress.postal_code}
           </p>
         </Section>
       </Underline>
       <Underline>
         <Section>
           <label>{t("fulfillmentStatus")}</label>
-          <div>
+          <div
+            className={css`
+              margin-right: 1rem;
+            `}
+          >
             <p></p>
             <SelectEl value={status} onChange={updateStatus}>
               <option value="NO_PROGRESS">{t("noProgress")}</option>
@@ -129,6 +139,7 @@ const CustomerPopUp: React.FC<{ purchase: MerchPurchase }> = ({ purchase }) => {
               <option value="COMPLETED">{t("completed")}</option>
             </SelectEl>
           </div>
+          <Button type="button">Save</Button>
         </Section>
       </Underline>
     </div>

@@ -4,6 +4,8 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import api from "services/api";
 import FulfillmentRow from "./FulfillmentRow";
+import { useQuery } from "@tanstack/react-query";
+import { queryUserPurchases } from "queries";
 
 export const Fulfillment: React.FC = () => {
   const { t } = useTranslation("translation", {
@@ -22,6 +24,7 @@ export const Fulfillment: React.FC = () => {
     setTotal(totalResults);
     setResults(results);
   }, []);
+  const { data: purchaseResults, refetch } = useQuery(queryUserPurchases());
 
   React.useEffect(() => {
     callback();
@@ -42,7 +45,7 @@ export const Fulfillment: React.FC = () => {
       >
         {t("ordersAndFulfillment")}
       </h3>
-      <h4>{t("totalResults", { count: total })}</h4>
+      <h4>{t("totalResults", { count: purchaseResults?.total })}</h4>
       {results.length > 0 && (
         <div
           className={css`
@@ -66,7 +69,7 @@ export const Fulfillment: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {results.map((purchase, index) => (
+              {purchaseResults?.results.map((purchase, index) => (
                 <FulfillmentRow
                   key={purchase.id}
                   purchase={purchase}
