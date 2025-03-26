@@ -48,13 +48,20 @@ export default function () {
         include: {
           trackGroupTags: {
             include: {
-              trackGroup: {},
+              trackGroup: {
+                select: {
+                  id: true,
+                },
+              },
             },
           },
         },
       });
       return res.json({
-        results: tags,
+        results: tags.map((tag) => ({
+          ...tag,
+          trackGroupCount: tag.trackGroupTags.length,
+        })),
       });
     } catch (e) {
       next(e);

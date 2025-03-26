@@ -72,10 +72,26 @@ const ManageTags: React.FC<{ tags?: string[] }> = ({ tags: existingTags }) => {
   );
 
   const findTags = async (searchValue: string) => {
-    const tags = await api.getMany<{ tag: string; id: number }>(
-      `tags?tag=${searchValue}`
-    );
-    return tags.results.map((t) => ({ name: t.tag, id: t.tag }));
+    const tags = await api.getMany<{
+      tag: string;
+      id: number;
+      trackGroupCount: number;
+    }>(`tags?tag=${searchValue}`);
+    return tags.results
+      .sort((a, b) => {
+        if (a.tag === searchValue) {
+          return 1;
+        } else if (b.tag === searchValue) {
+          return 1;
+        } else {
+          if (a.trackGroupCount < b.trackGroupCount) {
+            return 1;
+          } else {
+            return -1;
+          }
+        }
+      })
+      .map((t) => ({ name: t.tag, id: t.tag }));
   };
 
   const saveTags = React.useCallback(
