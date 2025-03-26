@@ -5,9 +5,17 @@ import Table from "components/common/Table";
 import React from "react";
 import { Outlet, useNavigate, useParams } from "react-router-dom";
 import api from "services/api";
+import useAdminFilters from "./useAdminFilters";
+import ReleaseDate, { formatDate } from "components/TrackGroup/ReleaseDate";
+import { useTranslation } from "react-i18next";
 
 interface AdminSubscription extends ArtistUserSubscription {
   user: User;
+  artistUserSubscriptionCharges: {
+    createdAt: string;
+    amountPaid: number;
+    currency: string;
+  }[];
 }
 
 export const AdminSubscriptions: React.FC = () => {
@@ -15,16 +23,28 @@ export const AdminSubscriptions: React.FC = () => {
   const { trackgroupId } = useParams();
   const [results, setResults] = React.useState<AdminSubscription[]>([]);
   const [openModal, setOpenModal] = React.useState(false);
+  const [totalCount, setTotal] = React.useState<number>();
+  const { i18n } = useTranslation("translation", {
+    keyPrefix: "admin",
+  });
 
-  React.useEffect(() => {
-    const callback = async () => {
-      const { results } = await api.getMany<AdminSubscription>(
-        "admin/subscriptions?orderBy=createdAt"
+  const callback = React.useCallback(async (search?: URLSearchParams) => {
+    console.log("search", search);
+    if (search) {
+      search.append("orderBy", "createdAt");
+    }
+    const { results, total: totalResults } =
+      await api.getMany<AdminSubscription>(
+        `admin/subscriptions?${search?.toString()}`
       );
-      setResults(results);
-    };
-    callback();
+    setTotal(totalResults);
+    setResults(results);
   }, []);
+
+  const { Filters } = useAdminFilters({
+    onSubmitFilters: callback,
+    fields: ["lastSubscription"],
+  });
 
   React.useEffect(() => {
     if (trackgroupId) {
@@ -48,7 +68,7 @@ export const AdminSubscriptions: React.FC = () => {
       `}
     >
       <h3>Subscriptions</h3>
-
+      <Filters />
       <h4>Totals</h4>
       <Table
         className={css`
@@ -80,6 +100,7 @@ export const AdminSubscriptions: React.FC = () => {
               <th>Subscription</th>
               <th>Artist</th>
               <th>Amount</th>
+              <th>Last charge</th>
             </tr>
           </thead>
           <tbody>
@@ -100,6 +121,17 @@ export const AdminSubscriptions: React.FC = () => {
                 </td>
                 <td>
                   <Money amount={sub.amount / 100} currency={sub.currency} />
+                </td>
+                <td>
+                  {sub.artistUserSubscriptionCharges.map((charge) => (
+                    <>
+                      <Money
+                        amount={charge.amountPaid / 100}
+                        currency={charge.currency}
+                      ></Money>
+                      : {formatDate({ date: charge.createdAt, i18n })}
+                    </>
+                  ))}
                 </td>
               </tr>
             ))}

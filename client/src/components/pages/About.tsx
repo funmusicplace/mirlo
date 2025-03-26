@@ -238,10 +238,41 @@ const About: React.FC = () => {
           people who have helped us with get to where we are.
         </p>
         <p>
-          {" "}
           We're immensely grateful to everyone who is supporting us through
           labor or financial contributions to get us here.
         </p>
+        <h3>Our operating agreement</h3>
+        <div>
+          <p>
+            We're delighted to publicly share{" "}
+            <a href="https://mirlo.space/static/Mirlo-Bylaws.pdf">
+              our operating agreement
+            </a>
+            . The company is managed by its members, listed below.
+          </p>
+          <p>
+            Decisions on behalf of the company are made by consent of members,
+            meaning that no member objects to the decision taken. Feel free to{" "}
+            <a href="https://www.sociocracyforall.org/consent-decision-making/">
+              learn more here
+            </a>{" "}
+            about consent-based decision-making from our friends at Sociocracy
+            for All.
+          </p>
+          <p>
+            Members can also delegate specific domains of decision-making to
+            circles, defined teams that can include both members and
+            non-members. Those circles can make decisions within their delegated
+            domain by consent, without having to run it by the full members'
+            circle.{" "}
+            <a href="https://www.sociocracyforall.org/organizational-circle-structure-in-sociocracy/">
+              This article from Sociocracy for All
+            </a>{" "}
+            offers a good introduction to the organizational logic behind
+            circles, based on the principles of effectiveness, equivalence, and
+            transparency.
+          </p>
+        </div>
         <h3>The worker owners</h3>
         <Person>
           <span
