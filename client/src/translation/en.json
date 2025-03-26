@@ -282,7 +282,7 @@
     "mustBeAtLeast": "Must be at least {{minAmount}}",
     "letsSupport": "Support this artist",
     "cancelSubscription": "Cancel subscription",
-    "chooseThisSubscription": "Choose this subscription",
+    "chooseThisSubscription": "Change to this tier",
     "chooseATier": "Choose a tier to support this artist:",
     "contributionIsMonthly": "Make contribution monthly",
     "subscribeToArtist": "Subscribe to {{ artist }}",
