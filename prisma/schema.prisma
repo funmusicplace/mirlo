@@ -280,19 +280,19 @@ model ArtistTipTier {
 }
 
 model ArtistUserSubscription {
-  id                           Int                            @id @default(autoincrement())
-  artistSubscriptionTierId     Int
-  artistSubscriptionTier       ArtistSubscriptionTier         @relation(fields: [artistSubscriptionTierId], references: [id])
-  userId                       Int
-  user                         User                           @relation(fields: [userId], references: [id])
-  amount                       Int // In cents
-  currency                     String                         @default("USD")
-  stripeSubscriptionKey        String?
-  createdAt                    DateTime                       @default(now())
-  updatedAt                    DateTime                       @default(now()) @updatedAt
-  deletedAt                    DateTime?
-  notifications                Notification[]
-  artistUserSubscriptionCharge ArtistUserSubscriptionCharge[]
+  id                            Int                            @id @default(autoincrement())
+  artistSubscriptionTierId      Int
+  artistSubscriptionTier        ArtistSubscriptionTier         @relation(fields: [artistSubscriptionTierId], references: [id])
+  userId                        Int
+  user                          User                           @relation(fields: [userId], references: [id])
+  amount                        Int // In cents
+  currency                      String                         @default("USD")
+  stripeSubscriptionKey         String?
+  createdAt                     DateTime                       @default(now())
+  updatedAt                     DateTime                       @default(now()) @updatedAt
+  deletedAt                     DateTime?
+  notifications                 Notification[]
+  artistUserSubscriptionCharges ArtistUserSubscriptionCharge[]
 
   @@unique([userId, artistSubscriptionTierId])
 }

@@ -2,6 +2,7 @@ import { Prisma } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
 import { userAuthenticated, userHasPermission } from "../../../auth/passport";
+import { set } from "lodash";
 
 export default function () {
   const operations = {
@@ -9,10 +10,39 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
-    const { skip: skipQuery, take } = req.query;
+    const { skip: skipQuery, take, lastSubscription } = req.query;
 
     try {
       let where: Prisma.ArtistUserSubscriptionWhereInput = {};
+
+      if (lastSubscription && lastSubscription === "thisMonth") {
+        const startOfMonth = new Date();
+        startOfMonth.setDate(1);
+        startOfMonth.setHours(0, 0, 0, 0);
+        set(
+          where,
+          "artistUserSubscriptionCharges.some.createdAt.gte",
+          startOfMonth.toISOString()
+        );
+      } else if (lastSubscription && lastSubscription === "previousMonth") {
+        const startOfMonth = new Date();
+        startOfMonth.setDate(1);
+        startOfMonth.setMonth(startOfMonth.getMonth() - 1);
+        startOfMonth.setHours(0, 0, 0, 0);
+        const endOfMonth = new Date();
+        endOfMonth.setDate(1);
+        endOfMonth.setHours(0, 0, 0, 0);
+        set(
+          where,
+          "artistUserSubscriptionCharges.some.createdAt.gte",
+          startOfMonth.toISOString()
+        );
+        set(
+          where,
+          "artistUserSubscriptionCharges.some.createdAt.lt",
+          endOfMonth.toISOString()
+        );
+      }
 
       const itemCount = await prisma.artistUserSubscription.count({ where });
 
@@ -27,6 +57,7 @@ export default function () {
               artist: true,
             },
           },
+          artistUserSubscriptionCharges: true,
         },
         orderBy: {
           createdAt: "desc",

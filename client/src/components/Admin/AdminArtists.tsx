@@ -19,6 +19,7 @@ export const AdminArtists: React.FC = () => {
   const [total, setTotal] = React.useState<number>();
 
   const callback = React.useCallback(async (search?: URLSearchParams) => {
+    console.log("search", search);
     if (search) {
       search.append("orderBy", "createdAt");
     }
@@ -31,7 +32,7 @@ export const AdminArtists: React.FC = () => {
 
   const { Filters } = useAdminFilters({
     onSubmitFilters: callback,
-    fields: ["name", "acceptPayments"],
+    fields: ["name", "email", "acceptPayments"],
   });
 
   React.useEffect(() => {
