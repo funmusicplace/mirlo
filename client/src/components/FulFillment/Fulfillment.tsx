@@ -45,6 +45,7 @@ export const Fulfillment: React.FC = () => {
       >
         {t("ordersAndFulfillment")}
       </h3>
+      <p>{t("fulfillmentDescription")}</p>
       <h4>{t("totalResults", { count: purchaseResults?.total })}</h4>
       {results.length > 0 && (
         <div
