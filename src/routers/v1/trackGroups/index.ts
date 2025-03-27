@@ -5,6 +5,7 @@ import processor, {
   processTrackGroupQueryOrder,
   whereForPublishedTrackGroups,
 } from "../../../utils/trackGroup";
+import { turnItemsIntoRSS } from "../artists/{id}/feed";
 
 export default function () {
   const operations = {
@@ -22,6 +23,7 @@ export default function () {
       title,
     } = req.query;
     const distinctArtists = req.query.distinctArtists === "true";
+    const { format } = req.query;
 
     try {
       let skip = Number(skipQuery);
@@ -86,10 +88,19 @@ export default function () {
           cover: true,
         },
       });
-      res.json({
-        results: trackGroups.map(processor.single),
-        total: itemCount,
-      });
+      if (format === "rss") {
+        const feed = await turnItemsIntoRSS(
+          { name: "All", urlSlug: "trackGroups" },
+          trackGroups
+        );
+        res.set("Content-Type", "application/rss+xml");
+        res.send(feed.xml());
+      } else {
+        res.json({
+          results: trackGroups.map(processor.single),
+          total: itemCount,
+        });
+      }
     } catch (e) {
       next(e);
     }

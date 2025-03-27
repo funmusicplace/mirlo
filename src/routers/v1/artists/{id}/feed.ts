@@ -110,17 +110,23 @@ export const getPostsVisibleToUser = async (
   };
 };
 
-const getAlbumsVisibleToUser = async (artist: Artist) => {
+export const getAlbumsVisibleToUser = async (artist: Artist) => {
   const albums = await prisma.trackGroup.findMany({
     where: { ...whereForPublishedTrackGroups(), artistId: artist.id },
     include: { artist: true },
+    orderBy: {
+      releaseDate: "desc",
+    },
   });
   return albums;
 };
 
-const turnItemsIntoRSS = async (
-  artist: Artist,
-  zipped: ((TrackGroup & { artist: Artist }) | Post)[]
+export const turnItemsIntoRSS = async (
+  artist: { name: string; bio?: string | null; urlSlug: string },
+  zipped: (
+    | (TrackGroup & { artist: { name: string; urlSlug: string; id: number } })
+    | Post
+  )[]
 ) => {
   // TODO: probably want to convert this to some sort of module
   const client = await prisma.client.findFirst({
