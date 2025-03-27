@@ -8,6 +8,8 @@ import prisma from "@mirlo/prisma";
 import { deleteUser } from "../../../../utils/user";
 import bcrypt from "bcryptjs";
 import { AppError } from "../../../../utils/error";
+import sendMail from "../../../../jobs/send-mail";
+import { Job } from "bullmq";
 
 export default function () {
   const operations = {
@@ -81,6 +83,8 @@ export default function () {
         isLabelAccount,
       };
 
+      let changedEmail = false;
+
       if (req.user && newEmail) {
         const emailChanged = newEmail !== user.email;
 
@@ -101,6 +105,8 @@ export default function () {
                 httpCode: 401,
                 description: "Can't change user email, wrong password",
               });
+            } else {
+              changedEmail = true;
             }
           } else {
             throw new AppError({
@@ -137,6 +143,30 @@ export default function () {
           id: true,
         },
       });
+      if (changedEmail && refreshedUser) {
+        sendMail({
+          data: {
+            template: "user-changed-email",
+            message: {
+              to: refreshedUser.email,
+            },
+            locals: {
+              newEmail: refreshedUser.email,
+            },
+          },
+        } as Job);
+        sendMail({
+          data: {
+            template: "user-changed-email",
+            message: {
+              to: user.email,
+            },
+            locals: {
+              newEmail: refreshedUser.email,
+            },
+          },
+        } as Job);
+      }
       res.json({ result: refreshedUser });
     } catch (e) {
       next(e);
