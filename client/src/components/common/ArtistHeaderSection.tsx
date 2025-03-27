@@ -226,7 +226,7 @@ const ArtistHeaderSection: React.FC<{
                           <FollowArtist artistId={artist.id} />
                           <ArtistButtonAnchor
                             target="_blank"
-                            href={`${import.meta.env.VITE_API_DOMAIN}/v1/artists/${artist.id}/feed?format=rss`}
+                            href={`${import.meta.env.VITE_API_DOMAIN}/v1/artists/${artist.urlSlug}/feed?format=rss`}
                             rel="noreferrer"
                             onlyIcon
                             className={css`
