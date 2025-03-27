@@ -236,8 +236,7 @@ router.post(`/password-reset/set-password`, async (req, res, next) => {
       });
     }
   } catch (e) {
-    console.error(e);
-    res.status(500);
+    next(e);
   }
 });
 

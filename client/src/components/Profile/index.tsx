@@ -10,6 +10,13 @@ import UserSupports from "./UserSupports";
 import WidthContainer from "components/common/WidthContainer";
 import { useAuthContext } from "state/AuthContext";
 import ProfileForm from "./ProfileForm";
+import styled from "@emotion/styled";
+
+const ProfileSection = styled.div`
+  border-top: 1px solid var(--mi-darken-x-background-color);
+  margin-top: 2rem;
+  padding-top: 1rem;
+`;
 
 function Profile() {
   const { t } = useTranslation("translation", { keyPrefix: "profile" });
@@ -52,22 +59,20 @@ function Profile() {
             }
           `}
         >
-          {user.artistUserSubscriptions && (
-            <UserSupports
-              artistUserSubscriptions={user.artistUserSubscriptions}
-            />
-          )}
-
-          <ButtonLink to="/manage" style={{ marginTop: "1rem" }}>
-            {t("manageArtists")}
-          </ButtonLink>
-          <div
-            className={css`
-              border-top: 1px solid var(--mi-darken-x-background-color);
-              margin-top: 2rem;
-              padding-top: 1rem;
-            `}
-          >
+          <ProfileSection>
+            {user.artistUserSubscriptions && (
+              <UserSupports
+                artistUserSubscriptions={user.artistUserSubscriptions}
+              />
+            )}
+          </ProfileSection>
+          <ProfileSection>
+            <ButtonLink to="/manage" style={{ marginTop: "1rem" }}>
+              {t("manageArtists")}
+            </ButtonLink>
+          </ProfileSection>
+          <ProfileSection>
+            <h2>{t("deleteYourAccount")}</h2>
             <Button
               style={{
                 width: "100%",
@@ -78,7 +83,7 @@ function Profile() {
             >
               {t("deleteAccount")}
             </Button>
-          </div>
+          </ProfileSection>
         </div>
       </WidthContainer>
     </div>

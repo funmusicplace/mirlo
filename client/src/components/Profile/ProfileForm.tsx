@@ -14,12 +14,14 @@ import { useAuthContext } from "state/AuthContext";
 import { SelectEl } from "components/common/Select";
 import { finishedLanguages } from "i18n";
 import { Toggle } from "components/common/Toggle";
+import { useProfileMutation } from "queries";
 
 type FormData = {
-  email?: string;
   name: string;
   language: string;
   isLabelAccount: boolean;
+  newEmail?: string;
+  password?: string;
 };
 
 function ProfileForm() {
@@ -30,7 +32,7 @@ function ProfileForm() {
   const language = user?.language ?? navigator.language;
   const methods = useForm<FormData>({
     defaultValues: {
-      email: user?.email,
+      newEmail: user?.email,
       name: user?.name,
       language: language.split("-")[0],
       isLabelAccount: user?.isLabelAccount,
@@ -40,23 +42,20 @@ function ProfileForm() {
 
   const userId = user?.id;
   const snackbar = useSnackbar();
+  const { mutateAsync } = useProfileMutation();
 
   const isLabelAccount = watch("isLabelAccount");
+  const newEmail = watch("newEmail");
 
   const doSave = React.useCallback(
     async (data: FormData) => {
       if (userId) {
         try {
-          const emailChanged = data.email !== user?.email;
-          const confirmed = emailChanged
-            ? window.confirm(t("emailConfirmationRequired") ?? "")
-            : true;
-          if (confirmed) {
-            setIsSaving(true);
-            await api.put(`users/${userId}`, {
-              ...data,
-              client: import.meta.env.VITE_CLIENT_DOMAIN,
-            });
+          setIsSaving(true);
+          if (user.email !== data.newEmail && data.password === "") {
+            snackbar("Must set password", { type: "warning" });
+          } else {
+            await mutateAsync({ ...data, userId });
             i18n.changeLanguage(data.language);
             snackbar(t("profileUpdated"), { type: "success" });
           }
@@ -86,15 +85,14 @@ function ProfileForm() {
         <h1>{t("profile")}</h1>
         <FormComponent>
           <label>{t("email")}</label>
-          <InputEl {...register("email")} disabled />
-          <small
-            className={css`
-              margin-top: 0.5rem;
-            `}
-          >
-            {t("changingEmailDisabled")}
-          </small>
+          <InputEl {...register("newEmail")} />
         </FormComponent>
+        {newEmail !== user.email && (
+          <FormComponent>
+            <label>{t("password")}</label>
+            <InputEl {...register("password")} required type="password" />
+          </FormComponent>
+        )}
         <FormComponent>
           <label>{t("name")}</label>
           <InputEl {...register("name")} />

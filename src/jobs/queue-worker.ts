@@ -50,7 +50,6 @@ yargs // eslint-disable-line
     generateAlbumQueueWorker();
     sendMailQueue();
     cleanUpFilesQueue();
-    moveFilesToBackBlazeWorker();
   })
   .help().argv;
 
