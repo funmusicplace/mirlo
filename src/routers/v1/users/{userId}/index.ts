@@ -6,10 +6,12 @@ import {
 import { Prisma, User } from "@mirlo/prisma/client";
 import prisma from "@mirlo/prisma";
 import { deleteUser } from "../../../../utils/user";
+import bcrypt from "bcryptjs";
+import { AppError } from "../../../../utils/error";
 
 export default function () {
   const operations = {
-    GET,
+    GET: [userAuthenticated, userHasPermission("owner")],
     PUT: [userAuthenticated, userHasPermission("owner"), PUT],
     DELETE: [userAuthenticated, userHasPermission("owner"), DELETE],
   };
@@ -63,7 +65,7 @@ export default function () {
 
   async function PUT(req: Request, res: Response, next: NextFunction) {
     const { userId } = req.params as unknown as { userId: string };
-    const { email, name, currency, language, isLabelAccount } = req.body;
+    const { newEmail, name, currency, language, isLabelAccount } = req.body;
     const user = req.user as User;
 
     if (user.id !== Number(userId)) {
@@ -78,15 +80,34 @@ export default function () {
         language,
         isLabelAccount,
       };
-      if (email) {
-        const emailChanged = email !== user.email;
+
+      if (req.user && newEmail) {
+        const emailChanged = newEmail !== user.email;
+
         if (emailChanged) {
-          res
-            .json({
-              error:
-                "It's not yet possible to change the user's email via the API",
-            })
-            .status(400);
+          const password = req.body.password;
+
+          const foundUser = await prisma.user.findFirst({
+            where: {
+              email: user.email,
+              emailConfirmationToken: null,
+            },
+          });
+          if (foundUser && password && password !== "") {
+            const match = await bcrypt.compare(password, foundUser.password);
+
+            if (!match) {
+              throw new AppError({
+                httpCode: 401,
+                description: "Can't change user email, wrong password",
+              });
+            }
+          } else {
+            throw new AppError({
+              httpCode: 401,
+              description: "Can't change user email, not found",
+            });
+          }
         }
       }
 
@@ -102,13 +123,23 @@ export default function () {
         where: {
           id: Number(userId),
         },
-        data,
+        data: {
+          ...data,
+          email: newEmail,
+        },
       });
-
-      res.json(user);
+      const refreshedUser = await prisma.user.findFirst({
+        where: {
+          id: user.id,
+        },
+        select: {
+          email: true,
+          id: true,
+        },
+      });
+      res.json({ result: refreshedUser });
     } catch (e) {
-      console.error(`/users/${userId}`, e);
-      res.status(400);
+      next(e);
     }
   }
 

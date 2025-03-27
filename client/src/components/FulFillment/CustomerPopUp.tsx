@@ -44,7 +44,7 @@ const CustomerPopUp: React.FC<{ purchase: MerchPurchase }> = ({ purchase }) => {
       e.preventDefault();
       e.stopPropagation();
       try {
-        updatePurchase({
+        await updatePurchase({
           purchaseId: purchase.id,
           purchase: { fulfillmentStatus: e.target.value },
         });

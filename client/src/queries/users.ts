@@ -7,6 +7,7 @@ import {
 import * as api from "./fetch/fetchWrapper";
 import {
   QUERY_KEY_ARTISTS,
+  QUERY_KEY_AUTH,
   QUERY_KEY_PURCHASES,
   queryKeyIncludes,
   queryKeyMatches,
@@ -115,6 +116,30 @@ export function useUpdatePurchaseMutation() {
     onSuccess() {
       client.invalidateQueries({
         predicate: (query) => query.queryKey.includes(QUERY_KEY_PURCHASES),
+      });
+    },
+  });
+}
+
+type ProfileChangeBody = {
+  userId: number;
+  password?: string;
+  newEmail?: string;
+  language: string;
+  isLabelAccount: boolean;
+};
+
+async function updateProfile(body: ProfileChangeBody) {
+  await api.put(`v1/users/${body.userId}`, body);
+}
+
+export function useProfileMutation() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: updateProfile,
+    onSuccess() {
+      client.invalidateQueries({
+        predicate: (query) => query.queryKey.includes(QUERY_KEY_AUTH),
       });
     },
   });

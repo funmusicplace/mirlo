@@ -10,17 +10,26 @@ import {
   finalPostImageBucket,
 } from "./utils/minio";
 
-const buildOpenGraphTags = (
-  $: cheerio.CheerioAPI,
-  {
-    title,
-    description,
-    url,
-    imageUrl,
-  }: { title: string; description: string; url: string; imageUrl?: string }
-) => {
+type Options = {
+  title: string;
+  description: string;
+  url: string;
+  imageUrl?: string;
+  isAlbum?: boolean;
+  isSong?: boolean;
+};
+
+const determineType = (options: Options) => {
+  if (options.isAlbum) {
+    return "music.album";
+  }
+  return "article";
+};
+
+const buildOpenGraphTags = ($: cheerio.CheerioAPI, options: Options) => {
+  const { title, description, url, imageUrl } = options;
   $("head").append(`
-    <meta property="og:type" content="article">
+    <meta property="og:type" content="${determineType(options)}">
     <meta property="og:title" content="${title}">
     <meta property="og:description" content="${description}">
     <meta property="og:url" content="${url}">
@@ -134,6 +143,7 @@ const parseIndex = async (pathname: string) => {
           imageUrl: coverString
             ? generateFullStaticImageUrl(coverString, finalCoversBucket)
             : undefined,
+          isAlbum: true,
         });
       }
     } else if (route[1] === "widget") {
