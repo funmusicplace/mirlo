@@ -13,6 +13,8 @@ import { queryTrackGroups } from "queries";
 import { useQuery } from "@tanstack/react-query";
 import { queryTags } from "queries/tags";
 import TrackGroupPills from "./TrackGroup/TrackGroupPills";
+import { ButtonAnchor } from "./common/Button";
+import { FaRss } from "react-icons/fa";
 
 const pageSize = 40;
 
@@ -66,7 +68,14 @@ const Releases = () => {
         </SectionHeader>
       )}
       <SectionHeader>
-        <WidthContainer variant="big" justify="center">
+        <WidthContainer
+          variant="big"
+          justify="space-between"
+          className={css`
+            flex-direction: row;
+            display: flex;
+          `}
+        >
           <h1 className="h5 section-header__heading" id={headingId}>
             {tag ? (
               <Trans
@@ -81,6 +90,16 @@ const Releases = () => {
               t("recentReleases")
             )}
           </h1>
+          <ButtonAnchor
+            target="_blank"
+            href={`${import.meta.env.VITE_API_DOMAIN}/v1/trackGroups?format=rss`}
+            rel="noreferrer"
+            onlyIcon
+            className={css`
+              margin-top: 0.25rem;
+            `}
+            startIcon={<FaRss />}
+          />
         </WidthContainer>
       </SectionHeader>
       <div

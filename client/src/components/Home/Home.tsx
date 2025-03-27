@@ -24,6 +24,7 @@ export const SectionHeader = styled.div<{ userId?: number }>`
     font-weight: normal;
     color: var(--mi-pink);
     padding-bottom: 0 !important;
+    display: inline-block;
   }
 
   @media (prefers-color-scheme: dark) {
