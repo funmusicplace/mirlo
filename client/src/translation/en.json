@@ -326,7 +326,7 @@
     "typeForTags": "Start typing to add tags",
     "notEnabled": "This artist has not been enabled by site admin yet! Contact an admin to do so.",
     "manage": "Manage {{artist}}",
-    "paymentProcessorNotSetUp": "You haven't set up a payment processor yet. Go to your <manage>artists management page</manage> to do so.",
+    "paymentProcessorNotSetUp": "You haven't set up a payment processor yet. Set up your stripe account <manage>by clicking here</manage>.",
     "mustBeUnique": "Must be unique",
     "areYouSureDelete": "Are you sure you want to delete this artist?",
     "areYouSureDeletePost": "Are you sure you want to delete this post?",

@@ -61,13 +61,7 @@ const Box = styled.div<{
     switch (props.variant) {
       case "success":
         return `
-            background: repeating-linear-gradient(
-              45deg, 
-              var(--mi-success-background-color), 
-              var(--mi-success-background-color) 10px, 
-              var(--mi-normal-background-color) 10px, 
-              var(--mi-normal-background-color) 20px
-            );
+            background: var(--mi-success-background-color);
             border: var(--mi-success-background-color) 1px solid;
             color: var(--mi-normal-foreground-color); 
         `;
@@ -78,14 +72,13 @@ const Box = styled.div<{
         `;
       case "warning":
         return `
-            background: repeating-linear-gradient(45deg, 
-              var(--mi-warning-background-color), 
-              var(--mi-warning-background-color) 10px, 
-              var(--mi-normal-background-color) 10px, 
-              var(--mi-normal-background-color) 20px);
+            background: var(--mi-warning-background-color);
             border: var(--mi-warning-background-color) 1px solid;
             color: var(--mi-normal-foreground-color);
-        
+
+            a { 
+              color: var(--mi-white);
+            }
           `;
       default:
         return `
@@ -106,7 +99,6 @@ const Box = styled.div<{
 
   @media screen and (max-width: ${bp.medium}px) {
     padding: 0.5rem 0.7rem;
-    // background-color: var(--mi-normal-background-color);
   }
 `;
 
