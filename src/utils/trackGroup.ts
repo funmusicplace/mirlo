@@ -359,6 +359,93 @@ export const registerPurchase = async ({
   return refreshedPurchase;
 };
 
+export const registerTrackPurchase = async ({
+  userId,
+  trackId,
+  pricePaid,
+  currencyPaid,
+  paymentProcessorKey,
+}: {
+  userId: number;
+  pricePaid: number;
+  currencyPaid: string;
+  paymentProcessorKey: string | null;
+  trackId: number;
+}) => {
+  const token = randomUUID();
+
+  let purchase = await prisma.userTrackPurchase.findFirst({
+    where: {
+      userId: Number(userId),
+      trackId: Number(trackId),
+    },
+  });
+
+  if (purchase) {
+    await prisma.userTrackPurchase.update({
+      where: {
+        userId_trackId: {
+          userId: Number(userId),
+          trackId: Number(trackId),
+        },
+      },
+      data: {
+        singleDownloadToken: token,
+      },
+    });
+  }
+
+  if (!purchase) {
+    purchase = await prisma.userTrackPurchase.create({
+      data: {
+        userId: Number(userId),
+        trackId: Number(trackId),
+        pricePaid,
+        currencyPaid,
+        stripeSessionKey: paymentProcessorKey,
+        singleDownloadToken: token,
+      },
+    });
+  }
+
+  const refreshedPurchase = await prisma.userTrackPurchase.findFirst({
+    where: {
+      userId: Number(userId),
+      trackId: Number(trackId),
+    },
+    include: {
+      track: {
+        include: {
+          trackGroup: {
+            include: {
+              artist: true,
+            },
+          },
+        },
+      },
+      user: {
+        select: {
+          email: true,
+          id: true,
+        },
+      },
+    },
+  });
+
+  if (refreshedPurchase) {
+    await prisma.notification.create({
+      data: {
+        notificationType: "USER_BOUGHT_YOUR_TRACK",
+        userId: refreshedPurchase?.track.trackGroup.artist.userId,
+        relatedUserId: Number(userId),
+        trackId: Number(trackId),
+        artistId: refreshedPurchase?.track.trackGroup.artistId,
+      },
+    });
+  }
+  return refreshedPurchase;
+};
+
 export const basicTrackGroupInclude = {
   include: {
     tracks: {

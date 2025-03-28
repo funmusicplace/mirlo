@@ -4,7 +4,7 @@ import { MerchOption } from "@mirlo/prisma/client";
 
 import { logger } from "../logger";
 import sendMail from "../jobs/send-mail";
-import { registerPurchase } from "./trackGroup";
+import { registerPurchase, registerTrackPurchase } from "./trackGroup";
 import { registerSubscription } from "./subscriptionTier";
 import { getSiteSettings } from "./settings";
 import { Job } from "bullmq";
@@ -84,6 +84,100 @@ export const handleTrackGroupPurchase = async (
             pricePaid,
             platformCut:
               ((trackGroup.platformPercent ?? settings.platformPercent) *
+                pricePaid) /
+              100,
+            email: user.email,
+          },
+        },
+      } as Job);
+    }
+
+    return purchase;
+  } catch (e) {
+    logger.error(`Error creating album purchase: ${e}`);
+  }
+};
+
+export const handleTrackPurchase = async (
+  userId: number,
+  trackId: number,
+  session?: Stripe.Checkout.Session,
+  newUser?: boolean
+) => {
+  try {
+    const purchase = await registerTrackPurchase({
+      userId: Number(userId),
+      trackId: Number(trackId),
+      pricePaid: session?.amount_total ?? 0,
+      currencyPaid: session?.currency ?? "USD",
+      paymentProcessorKey: session?.id ?? null,
+    });
+
+    const settings = await getSiteSettings();
+
+    const user = await prisma.user.findFirst({
+      where: {
+        id: userId,
+      },
+    });
+
+    const track = await prisma.track.findFirst({
+      where: {
+        id: trackId,
+      },
+      include: {
+        trackGroup: {
+          include: {
+            artist: {
+              include: {
+                subscriptionTiers: true,
+                user: true,
+              },
+            },
+            paymentToUser: true,
+          },
+        },
+      },
+    });
+
+    if (user && track && purchase) {
+      const isBeforeReleaseDate =
+        new Date(track.trackGroup.releaseDate) > new Date();
+
+      await sendMail({
+        data: {
+          template: newUser ? "track-download" : "track-purchase-receipt",
+          message: {
+            to: user.email,
+          },
+          locals: {
+            track,
+            purchase,
+            isBeforeReleaseDate,
+            token: purchase.singleDownloadToken,
+            email: user.email,
+            client: process.env.REACT_APP_CLIENT_DOMAIN,
+            host: process.env.API_DOMAIN,
+          },
+        },
+      } as Job);
+
+      const pricePaid = purchase.pricePaid / 100;
+
+      await sendMail({
+        data: {
+          template: "track-purchase-artist-notification",
+          message: {
+            to:
+              track.trackGroup.paymentToUser?.email ??
+              track.trackGroup.artist.user.email,
+          },
+          locals: {
+            track,
+            purchase,
+            pricePaid,
+            platformCut:
+              ((track.trackGroup.platformPercent ?? settings.platformPercent) *
                 pricePaid) /
               100,
             email: user.email,
