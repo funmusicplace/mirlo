@@ -170,6 +170,7 @@
     "itemArtist": "Artist merch belongs",
     "fulfillmentStatus": "Fulfillment status",
     "ordersAndFulfillment": "Orders & Fulfillment",
+    "fulfillmentDescription": "Here you can see all purchases made for merch items across all your artist accounts. Use it to update status and ship things to your customers.",
     "orderDate": "Ordered on",
     "quantity": "Quantity",
     "address": "Address",

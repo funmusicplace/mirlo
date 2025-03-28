@@ -45,6 +45,10 @@ const TR = styled.tr<{ canPlayTrack: boolean }>`
       background-color: var(--mi-primary-color);
       color: var(--mi-secondary-color);
     }
+
+    .track-authors {
+      color: var(--mi-light-background-color) !important;
+    }
   }
 
   button.play-button {

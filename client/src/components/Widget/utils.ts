@@ -17,7 +17,10 @@ export function inMirlo() {
   }
 }
 
-export const WidgetWrapper = styled.div<{ embeddedInMirlo?: boolean }>`
+export const WidgetWrapper = styled.div<{
+  embeddedInMirlo?: boolean;
+  artistColors?: ArtistColors;
+}>`
   display: flex;
   border: var(--mi-border);
   flex-direction: column;
@@ -29,9 +32,14 @@ export const WidgetWrapper = styled.div<{ embeddedInMirlo?: boolean }>`
   border-radius: 0.3rem;
   overflow: hidden;
   box-sizing: border-box;
-  background: var(--mi-normal-background-color);
+  color: ${(props) =>
+    props.artistColors?.foreground ?? "var(--mi-normal-foreground-color)"};
+  background: ${(props) =>
+    props.artistColors?.background ?? "var(--mi-normal-background-color)"};
+
   a {
-    color: var(--mi-normal-foreground-color);
+    color: ${(props) =>
+      props.artistColors?.primary ?? "var(--mi-primary-color)"};
   }
 `;
 

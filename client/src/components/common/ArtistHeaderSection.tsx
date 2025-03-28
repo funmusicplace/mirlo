@@ -13,11 +13,9 @@ import { UpdateArtistBody, useUpdateArtistMutation } from "queries";
 import React from "react";
 import { useSnackbar } from "state/SnackbarContext";
 import { useAuthContext } from "state/AuthContext";
-import { ButtonLink } from "./Button";
 import { FaEye, FaPen, FaRss } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 import {
-  ArtistButton,
   ArtistButtonAnchor,
   ArtistButtonLink,
 } from "components/Artist/ArtistButtons";
@@ -226,7 +224,7 @@ const ArtistHeaderSection: React.FC<{
                           <FollowArtist artistId={artist.id} />
                           <ArtistButtonAnchor
                             target="_blank"
-                            href={`${import.meta.env.VITE_API_DOMAIN}/v1/artists/${artist.id}/feed?format=rss`}
+                            href={`${import.meta.env.VITE_API_DOMAIN}/v1/artists/${artist.urlSlug}/feed?format=rss`}
                             rel="noreferrer"
                             onlyIcon
                             className={css`
@@ -239,7 +237,6 @@ const ArtistHeaderSection: React.FC<{
                       {isManage && (
                         <div>
                           <ArtistButtonLink
-                            size="big"
                             rounded
                             collapsible
                             startIcon={<FaPen />}
@@ -252,7 +249,6 @@ const ArtistHeaderSection: React.FC<{
                           </ArtistButtonLink>
                           <ArtistButtonLink
                             to={`/${artist?.urlSlug?.toLowerCase() ?? artist?.id}`}
-                            size="big"
                             rounded
                             collapsible
                             startIcon={<FaEye />}

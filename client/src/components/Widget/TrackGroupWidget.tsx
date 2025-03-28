@@ -39,6 +39,7 @@ const TrackGroupWidget = () => {
   const [currentSeconds, setCurrentSeconds] = React.useState(0);
   const [trackGroup, setTrackGroup] = React.useState<TrackGroup>();
   const [isLoading, setIsLoading] = React.useState(true);
+  const [artist, setArtist] = React.useState<Artist>();
 
   const embeddedInMirlo = inIframe() && inMirlo();
 
@@ -48,6 +49,10 @@ const TrackGroupWidget = () => {
       try {
         const results = await api.get<TrackGroup>(`trackGroups/${params.id}`);
         setTrackGroup(results.result);
+        const response = await api.get<Artist>(
+          `artists/${results.result.artistId}`
+        );
+        setArtist(response.result);
       } catch (e) {
         console.error("e", e);
       } finally {
@@ -85,17 +90,14 @@ const TrackGroupWidget = () => {
 
   return (
     <WidgetWrapper
+      artistColors={artist?.properties?.colors}
       className={css`
         overflow: hidden;
-        background-color: white !important;
         a {
           text-decoration: none;
         }
         a:hover {
           text-decoration: underline;
-        }
-        @media (prefers-color-scheme: dark) {
-          background-color: black !important;
         }
       `}
     >
