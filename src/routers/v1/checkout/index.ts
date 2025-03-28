@@ -18,15 +18,23 @@ export default function () {
         const session = await stripe.checkout.sessions.retrieve(session_id, {
           stripeAccount: stripeAccountId,
         });
-        const { clientId, artistId, trackGroupId, tierId, gaveGift, merchId } =
-          session.metadata as unknown as {
-            clientId: number | null;
-            artistId: number | null;
-            gaveGift: 1 | null;
-            tierId: number | null;
-            trackGroupId: number | null;
-            merchId: string | null;
-          };
+        const {
+          clientId,
+          artistId,
+          trackGroupId,
+          trackId,
+          tierId,
+          gaveGift,
+          merchId,
+        } = session.metadata as unknown as {
+          clientId: number | null;
+          artistId: number | null;
+          gaveGift: 1 | null;
+          tierId: number | null;
+          trackGroupId: number | null;
+          trackId: number | null;
+          merchId: string | null;
+        };
         if (clientId && artistId) {
           const client = await prisma.client.findFirst({
             where: {
@@ -77,6 +85,17 @@ export default function () {
                 `/${artist?.urlSlug}?trackGroupPurchase=${
                   success ? "success" : "canceled"
                 }&trackGroupId=${trackGroupId}`
+            );
+          } else if (client && trackId && artistId) {
+            // FIXME: We'll probably want clients to be able to define the
+            // checkout callbackURL separately from the applicationURL
+            // and that callbackURL should probably contain a pattern that
+            // they can define
+            res.redirect(
+              client?.applicationUrl +
+                `/${artist?.urlSlug}?trackPurchase=${
+                  success ? "success" : "canceled"
+                }&trackId=${trackId}`
             );
           } else {
             res.status(500).json({
