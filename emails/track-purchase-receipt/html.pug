@@ -1,0 +1,25 @@
+doctype html
+html
+  head
+    block head
+      meta(charset="utf-8")
+      meta(name="viewport", content="width=device-width")
+      meta(http-equiv="X-UA-Compatible", content="IE=edge")
+      meta(name="x-apple-disable-message-reformatting")
+      style 
+        include ../style.css
+  body.sans-serif
+    p Wow! 
+    if isBeforeReleaseDate
+      p Thank you for supporting #{track.trackGroup.artist.name} with your pre-order of #{track.title}.
+    else
+      p Thank you for supporting #{track.trackGroup.artist.name} with your purchase of #{track.title}.
+     
+    div 
+      p #{track.title} from #{track.trackGroup.title}
+      p #{purchase.currencyPaid.toUpperCase()} #{(purchase.pricePaid / 100).toFixed(2)}
+    if isBeforeReleaseDate
+      p The track will become available in your collection for unlimited listening and downloading once it is released.
+    else 
+      p The track is now available in your collection for unlimited listening and downloading.
+    p Enjoy!

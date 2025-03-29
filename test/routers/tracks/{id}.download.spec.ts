@@ -5,6 +5,7 @@ import { describe, it } from "mocha";
 import {
   clearTables,
   createArtist,
+  createTrack,
   createTrackGroup,
   createUser,
 } from "../../utils";
@@ -17,7 +18,7 @@ import {
   finalAudioBucket,
 } from "../../../src/utils/minio";
 
-describe("trackGroups/{id}/download", () => {
+describe("tracks/{id}/download", () => {
   beforeEach(async () => {
     try {
       await clearTables();
@@ -29,7 +30,7 @@ describe("trackGroups/{id}/download", () => {
   describe("GET", () => {
     it("should GET / 404", async () => {
       const response = await requestApp
-        .get("trackGroups/1/download")
+        .get("tracks/1/download")
         .set("Accept", "application/json");
 
       assert(response.statusCode === 404);
@@ -42,7 +43,7 @@ describe("trackGroups/{id}/download", () => {
       const artist = await createArtist(user.id);
       const trackGroup = await createTrackGroup(artist.id);
       const response = await requestApp
-        .get(`trackGroups/${trackGroup.id}/download`)
+        .get(`tracks/${trackGroup.id}/download`)
         .set("Accept", "application/json");
 
       assert.equal(response.statusCode, 404);
@@ -54,16 +55,18 @@ describe("trackGroups/{id}/download", () => {
       });
       const artist = await createArtist(user.id);
       const trackGroup = await createTrackGroup(artist.id);
+      const track = await createTrack(trackGroup.id);
+
       await createBucketIfNotExists(finalAudioBucket);
 
       const { user: purchaser } = await createUser({
         email: "purchaser@artist.com",
       });
 
-      const purchase = await prisma.userTrackGroupPurchase.create({
+      const purchase = await prisma.userTrackPurchase.create({
         data: {
           userId: purchaser.id,
-          trackGroupId: trackGroup.id,
+          trackId: track.id,
           pricePaid: 0,
           singleDownloadToken: randomUUID(),
         },
@@ -71,7 +74,7 @@ describe("trackGroups/{id}/download", () => {
 
       const response = await requestApp
         .get(
-          `trackGroups/${trackGroup.id}/download?token=${purchase.singleDownloadToken}&email=${purchaser.email}`
+          `tracks/${track.id}/download?token=${purchase.singleDownloadToken}&email=${purchaser.email}`
         )
         .set("Accept", "application/json");
 
@@ -83,9 +86,9 @@ describe("trackGroups/{id}/download", () => {
 
       assert.notEqual(response.body.result.jobId, undefined);
 
-      const updatedPurchase = await prisma.userTrackGroupPurchase.findFirst({
+      const updatedPurchase = await prisma.userTrackPurchase.findFirst({
         where: {
-          trackGroupId: purchase.trackGroupId,
+          trackId: purchase.trackId,
           userId: purchase.userId,
         },
       });
@@ -98,23 +101,24 @@ describe("trackGroups/{id}/download", () => {
       });
       const artist = await createArtist(user.id);
       const trackGroup = await createTrackGroup(artist.id);
+      const track = await createTrack(trackGroup.id);
 
       const { user: purchaser, accessToken } = await createUser({
         email: "purchaser@artist.com",
       });
       const downloadToken = randomUUID();
 
-      const purchase = await prisma.userTrackGroupPurchase.create({
+      const purchase = await prisma.userTrackPurchase.create({
         data: {
           userId: purchaser.id,
-          trackGroupId: trackGroup.id,
+          trackId: track.id,
           pricePaid: 0,
           singleDownloadToken: downloadToken,
         },
       });
 
       const response = await requestApp
-        .get(`trackGroups/${trackGroup.id}/download`)
+        .get(`tracks/${track.id}/download`)
         .set("Accept", "application/json")
         .set("Cookie", [`jwt=${accessToken}`]);
 
@@ -125,9 +129,9 @@ describe("trackGroups/{id}/download", () => {
       assert.equal(response.statusCode, 200);
       assert.notEqual(response.body.result.jobId, undefined);
 
-      const updatedPurchase = await prisma.userTrackGroupPurchase.findFirst({
+      const updatedPurchase = await prisma.userTrackPurchase.findFirst({
         where: {
-          trackGroupId: purchase.trackGroupId,
+          trackId: purchase.trackId,
           userId: purchaser.id,
         },
       });
