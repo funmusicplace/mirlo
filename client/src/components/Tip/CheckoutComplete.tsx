@@ -1,5 +1,4 @@
 import { css } from "@emotion/css";
-
 import { useParams } from "react-router-dom";
 import Box from "../common/Box";
 import { useTranslation } from "react-i18next";
@@ -20,6 +19,10 @@ function TipArtist() {
   const { data: artist, isLoading: isLoadingArtist } = useQuery(
     queryArtist({ artistSlug: artistId ?? "" })
   );
+
+  if (!tipId) {
+    return null;
+  }
   const { data: tip, isLoading: isLoadingTip } = useQuery(
     queryTip({ tipId: tipId })
   );
