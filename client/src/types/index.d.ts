@@ -11,6 +11,7 @@ interface LoggedInUser {
   id: number;
   artistUserSubscriptions?: ArtistUserSubscription[];
   userTrackGroupPurchases?: { trackGroupId: number }[];
+  userTrackPurchases?: { trackId: number }[];
   isAdmin: boolean;
   currency?: string;
   isLabelAccount?: boolean;

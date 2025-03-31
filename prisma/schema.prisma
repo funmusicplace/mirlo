@@ -73,7 +73,7 @@ model User {
   paymentTrackGroups                  TrackGroup[]
   isLabelAccount                      Boolean                         @default(false)
   artistLabels                        ArtistLabel[]
-  UserTrackPurchase                   UserTrackPurchase[]
+  userTrackPurchases                  UserTrackPurchase[]
 }
 
 model UserArtistNotificationSetting {
@@ -207,7 +207,7 @@ model Artist {
   merch                              Merch[]
   artistLabels                       ArtistLabel[]
   activityPub                        Boolean                              @default(false)
-  ActivityPubArtistFollowers         ActivityPubArtistFollowers[]
+  activityPubArtistFollowers         ActivityPubArtistFollowers[]
 }
 
 model ArtistAvatar {

@@ -17,9 +17,8 @@ import { requestApp } from "../utils";
 import prisma from "@mirlo/prisma";
 import purchaseTrackEndpoint from "../../../src/routers/v1/tracks/{id}/purchase";
 import * as stripeUtils from "../../../src/utils/stripe";
-import Stripe from "stripe";
 
-describe.only("tracks/{id}/purchase", () => {
+describe("tracks/{id}/purchase", () => {
   beforeEach(async () => {
     try {
       await clearTables();

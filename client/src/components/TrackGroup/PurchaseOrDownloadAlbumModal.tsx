@@ -20,27 +20,27 @@ const PurchaseOrDownloadAlbum: React.FC<{
   const { state: artistState } = useArtistContext();
 
   const userId = user?.id;
-  const purchases = user?.userTrackGroupPurchases;
+  const trackGroupPurchases = user?.userTrackGroupPurchases;
+  const trackPurchases = user?.userTrackPurchases;
 
+  console.log("trackPurchases", trackPurchases, track);
   const checkForAlbumOwnership = React.useCallback(async () => {
     try {
       if (userId) {
-        const purchased = purchases?.find(
-          (p) => p.trackGroupId === trackGroup.id
-        );
+        const purchased = track
+          ? trackPurchases?.find((p) => p.trackId === track.id)
+          : trackGroupPurchases?.find((p) => p.trackGroupId === trackGroup.id);
 
         setIsOwned(!!purchased);
       }
     } catch (e) {
       console.error(e);
     }
-  }, [purchases, trackGroup.id, userId]);
+  }, [trackPurchases, trackGroupPurchases, trackGroup.id, userId]);
 
   React.useEffect(() => {
     checkForAlbumOwnership();
   }, [checkForAlbumOwnership]);
-
-  console.log("trackGroup", trackGroup, track);
 
   if (!trackGroup || !artistState?.artist) {
     return null;

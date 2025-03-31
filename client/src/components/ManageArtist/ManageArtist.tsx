@@ -43,9 +43,7 @@ const ManageArtist: React.FC<{}> = () => {
           <NavLink to="releases">{t("releases")}</NavLink>
         </li>
         <li>
-          <NavLink t o="posts">
-            {t("updates")}
-          </NavLink>
+          <NavLink to="posts">{t("updates")}</NavLink>
         </li>
         {artist && (
           <li>
