@@ -11,7 +11,8 @@ import { ArtistButton } from "components/Artist/ArtistButtons";
 
 const PurchaseOrDownloadAlbum: React.FC<{
   trackGroup: TrackGroup;
-}> = ({ trackGroup }) => {
+  track?: Track;
+}> = ({ trackGroup, track }) => {
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
   const { user } = useAuthContext();
   const [isPurchasingAlbum, setIsPurchasingAlbum] = React.useState(false);
@@ -38,6 +39,8 @@ const PurchaseOrDownloadAlbum: React.FC<{
   React.useEffect(() => {
     checkForAlbumOwnership();
   }, [checkForAlbumOwnership]);
+
+  console.log("trackGroup", trackGroup, track);
 
   if (!trackGroup || !artistState?.artist) {
     return null;
@@ -96,7 +99,7 @@ const PurchaseOrDownloadAlbum: React.FC<{
         )}
         {addToCollection && <AddToCollection trackGroup={trackGroup} />}
         {showDownload && (
-          <DownloadAlbumButton trackGroup={trackGroup} onlyIcon />
+          <DownloadAlbumButton trackGroup={trackGroup} onlyIcon track={track} />
         )}
       </div>
 
@@ -104,9 +107,11 @@ const PurchaseOrDownloadAlbum: React.FC<{
         size="small"
         open={isPurchasingAlbum}
         onClose={() => setIsPurchasingAlbum(false)}
-        title={t(purchaseTitle, { title: trackGroup.title }) ?? ""}
+        title={
+          t(purchaseTitle, { title: track?.title ?? trackGroup.title }) ?? ""
+        }
       >
-        <BuyTrackGroup trackGroup={trackGroup} />
+        <BuyTrackGroup trackGroup={trackGroup} track={track} />
       </Modal>
     </>
   );

@@ -531,27 +531,30 @@ model TrackGroupCover {
 }
 
 model Track {
-  id                 Int                 @id @default(autoincrement())
-  order              Int                 @default(0)
-  trackGroup         TrackGroup          @relation(fields: [trackGroupId], references: [id])
-  trackGroupId       Int
-  title              String?
-  audio              TrackAudio?
-  createdAt          DateTime            @default(now())
-  updatedAt          DateTime            @updatedAt
-  deletedAt          DateTime?
-  isPreview          Boolean             @default(true)
-  trackArtists       TrackArtist[]
-  metadata           Json?
-  plays              TrackPlay[]
-  license            License?            @relation(fields: [licenseId], references: [id])
-  licenseId          Int?
-  lyrics             String?
-  isrc               String?
-  stripeProductKey   String?
-  postTracks         PostTrack[]
-  userTrackPurchases UserTrackPurchase[]
-  Notification       Notification[]
+  id                  Int                 @id @default(autoincrement())
+  order               Int                 @default(0)
+  trackGroup          TrackGroup          @relation(fields: [trackGroupId], references: [id])
+  trackGroupId        Int
+  title               String?
+  audio               TrackAudio?
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  deletedAt           DateTime?
+  isPreview           Boolean             @default(true)
+  trackArtists        TrackArtist[]
+  metadata            Json?
+  plays               TrackPlay[]
+  license             License?            @relation(fields: [licenseId], references: [id])
+  licenseId           Int?
+  lyrics              String?
+  isrc                String?
+  stripeProductKey    String?
+  minPrice            Int? // in cents
+  currency            String?             @default("usd")
+  allowIndividualSale Boolean             @default(false)
+  postTracks          PostTrack[]
+  userTrackPurchases  UserTrackPurchase[]
+  Notification        Notification[]
 }
 
 model License {

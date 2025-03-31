@@ -7,12 +7,13 @@ import prisma from "@mirlo/prisma";
 import {
   FormatOptions,
   basicTrackGroupInclude,
-  findPurchaseAndVoidToken,
-  findPurchaseBasedOnTokenAndUpdate,
+  findTrackPurchaseAndVoidToken,
+  findTrackPurchaseBasedOnTokenAndUpdate,
 } from "../../../../utils/trackGroup";
 import {
   getReadStream,
   statFile,
+  trackFormatBucket,
   trackGroupFormatBucket,
 } from "../../../../utils/minio";
 import { startGeneratingZip } from "../../../../queues/album-queue";
@@ -26,7 +27,7 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
-    const { id: trackGroupId }: { id?: string } = req.params;
+    const { id: trackId }: { id?: string } = req.params;
     const {
       email,
       token,
@@ -38,108 +39,93 @@ export default function () {
     };
 
     try {
-      let trackGroup;
+      let track;
 
       if (req.user) {
         const user = req.user as User;
 
         if (!user.isAdmin) {
-          const purchase = await findPurchaseAndVoidToken(
-            Number(trackGroupId),
+          const purchase = await findTrackPurchaseAndVoidToken(
+            Number(trackId),
             user
           );
 
-          trackGroup = purchase.trackGroup;
+          track = purchase.track;
         } else {
-          logger.info(
-            `trackGroupId: ${trackGroupId} being downloaded by admin`
-          );
-          trackGroup = await prisma.trackGroup.findFirst({
+          logger.info(`trackId: ${trackId} being downloaded by admin`);
+          track = await prisma.track.findFirst({
             where: {
-              id: Number(trackGroupId),
+              id: Number(trackId),
             },
-            ...basicTrackGroupInclude,
+            include: {
+              trackGroup: basicTrackGroupInclude,
+            },
           });
         }
       } else {
         logger.info(
-          `trackGroupId: ${trackGroupId} being downloaded by a non-logged in user, ${email}, ${token}`
+          `trackId: ${trackId} being downloaded by a non-logged in user, ${email}, ${token}`
         );
         const user = await prisma.user.findFirst({
           where: { email },
         });
 
         if (user) {
-          trackGroup = await findPurchaseBasedOnTokenAndUpdate(
-            Number(trackGroupId),
+          track = await findTrackPurchaseBasedOnTokenAndUpdate(
+            Number(trackId),
             token,
             user?.id
           );
         }
       }
 
-      if (!trackGroup) {
+      if (!track) {
         res.status(404).json({
-          error: "No trackGroup found",
+          error: "No track found",
         });
         return next();
       }
 
-      logger.info(
-        `trackGroupId: ${trackGroupId} Found a trackgroup, preparing download`
-      );
+      logger.info(`trackId: ${trackId} Found a track, preparing download`);
 
-      const zipName = `${trackGroup.id}/${format}.zip`;
+      const zipName = `${track.id}/${format}.zip`;
 
       try {
-        logger.info("checking if trackgroup already zipped");
+        logger.info("checking if track already zipped");
         const { backblazeStat, minioStat } = await statFile(
-          trackGroupFormatBucket,
+          trackFormatBucket,
           zipName
         );
         if (!backblazeStat && !minioStat) {
-          logger.info("trackGroup doesn't exist yet, start generating it");
-          const jobId = await startGeneratingZip(
-            trackGroup,
-            trackGroup.tracks,
-            format
-          );
+          logger.info("Track not zipped");
           return res.json({
-            message: "We've started generating the album",
-            result: { jobId },
+            message: "Need to generate album first",
           });
         }
       } catch (e) {
-        logger.info("trackGroup doesn't exist yet, start generating it");
-        const jobId = await startGeneratingZip(
-          trackGroup,
-          trackGroup.tracks,
-          format
-        );
         return res.json({
-          message: "We've started generating the album",
-          result: { jobId },
+          message: "Need to generate album first",
         });
       }
 
       try {
         const title = cleanHeaderValue(
           filenamify(
-            `${trackGroup.artist.name} - ${trackGroup.title ?? "album"}`
+            `${track.trackGroup.artist.name} - ${track.title ?? "track"}`
           )
         );
         logger.info(`downloading ${title}.zip`);
         res.attachment(`${title}.zip`);
         res.set("Content-Disposition", `attachment; filename="${title}.zip"`);
 
-        const stream = await getReadStream(trackGroupFormatBucket, zipName);
+        const stream = await getReadStream(trackFormatBucket, zipName);
 
         if (stream) {
           stream.pipe(res);
         } else {
           throw new AppError({
             httpCode: 500,
-            description: `Remote file not found for ${trackGroupFormatBucket}/${zipName}`,
+            description: `Remote file not found for ${trackFormatBucket}/${zipName}`,
           });
         }
       } catch (e) {

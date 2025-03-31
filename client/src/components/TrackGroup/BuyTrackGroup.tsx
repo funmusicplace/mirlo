@@ -15,29 +15,21 @@ import { FormProvider, useForm } from "react-hook-form";
 import EmailInput from "./EmailInput";
 import PlatformPercent from "components/common/PlatformPercent";
 import { css } from "@emotion/css";
-import { useArtistContext } from "state/ArtistContext";
-import Tooltip from "components/common/Tooltip";
 import { testOwnership } from "./utils";
-import { useAuthContext } from "state/AuthContext";
 
 interface FormData {
   chosenPrice: string;
   userEmail: string;
 }
 
-const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup }> = ({
+const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
   trackGroup,
+  track,
 }) => {
   const snackbar = useSnackbar();
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
 
-  const { user } = useAuthContext();
-  const { state: artistState } = useArtistContext();
-
-  const userId = user?.id;
-  const userIsTrackGroupArtist = user && artistState.artist?.userId === userId;
-
-  const minPrice = trackGroup.minPrice;
+  const minPrice = track?.minPrice ?? trackGroup.minPrice;
   const methods = useForm<FormData>({
     defaultValues: {
       chosenPrice: `${minPrice ? minPrice / 100 : ""}`,
@@ -48,6 +40,8 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup }> = ({
   const { register, watch, handleSubmit, formState } = methods;
   const chosenPrice = watch("chosenPrice");
 
+  console.log("minPrice", minPrice);
+
   const purchaseAlbum = React.useCallback(
     async (data: FormData) => {
       try {
@@ -57,15 +51,15 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup }> = ({
           : true;
 
         if (confirmed) {
-          const response = await api.post<{}, { redirectUrl: string }>(
-            `trackGroups/${trackGroup.id}/purchase`,
-            {
-              price: data.chosenPrice
-                ? Number(data.chosenPrice) * 100
-                : undefined,
-              email: data.userEmail,
-            }
-          );
+          const url = track
+            ? `tracks/${track.id}/purchase`
+            : `trackGroups/${trackGroup.id}/purchase`;
+          const response = await api.post<{}, { redirectUrl: string }>(url, {
+            price: data.chosenPrice
+              ? Number(data.chosenPrice) * 100
+              : undefined,
+            email: data.userEmail,
+          });
           window.location.assign(response.redirectUrl);
         }
       } catch (e) {
@@ -73,31 +67,32 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup }> = ({
         console.error(e);
       }
     },
-    [snackbar, t, trackGroup.id]
+    [snackbar, t, trackGroup.id, track]
   );
 
   const lessThan1 = !isFinite(+chosenPrice) ? true : Number(chosenPrice) < 1;
 
   let lessThanMin = false;
   if (minPrice) {
-    lessThanMin = isFinite(+chosenPrice)
-      ? false
-      : Number(chosenPrice) < minPrice / 100;
+    lessThanMin =
+      isFinite(+chosenPrice) && Number(chosenPrice) < minPrice / 100;
   }
 
+  console.log(
+    "lessThanMin",
+    chosenPrice,
+    isFinite(+chosenPrice),
+    Number(chosenPrice)
+  );
   const isBeforeReleaseDate = new Date(trackGroup.releaseDate) > new Date();
   const purchaseText = isBeforeReleaseDate ? "preOrder" : "buy";
 
   return (
     <FormProvider {...methods}>
-      {!!trackGroup.minPrice && trackGroup.minPrice > 0 && (
+      {!!minPrice && minPrice > 0 && (
         <>
           {t("price")}{" "}
-          <Money
-            amount={trackGroup.minPrice / 100}
-            currency={trackGroup.currency}
-          />
-          , or
+          <Money amount={minPrice / 100} currency={trackGroup.currency} />, or
         </>
       )}
       <form onSubmit={handleSubmit(purchaseAlbum)}>
@@ -108,7 +103,7 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup }> = ({
           <InputEl
             {...register("chosenPrice")}
             type="number"
-            min={trackGroup.minPrice ? trackGroup.minPrice / 100 : 0}
+            min={minPrice ? minPrice / 100 : 0}
             step="0.01"
           />
           <PlatformPercent
@@ -121,23 +116,14 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup }> = ({
 
         <EmailInput required />
 
-        {userIsTrackGroupArtist && (
-          <Tooltip hoverText={t("usersCanPurchase")}>
-            <Button size="big" rounded type="submit" disabled>
-              {t(purchaseText)}
-            </Button>
-          </Tooltip>
-        )}
-        {!userIsTrackGroupArtist && (
-          <Button
-            size="big"
-            rounded
-            type="submit"
-            disabled={!!lessThan1 || lessThanMin || !formState.isValid}
-          >
-            {t(purchaseText)}
-          </Button>
-        )}
+        <Button
+          size="big"
+          rounded
+          type="submit"
+          disabled={!!lessThan1 || lessThanMin || !formState.isValid}
+        >
+          {t(purchaseText)}
+        </Button>
 
         <div
           className={css`
@@ -156,11 +142,11 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup }> = ({
       </form>
       {!isBeforeReleaseDate && (
         <>
-          {!!trackGroup.minPrice && lessThanMin && (
+          {!!minPrice && lessThanMin && (
             <strong>
               {t("lessThanMin", {
                 minPrice: moneyDisplay({
-                  amount: trackGroup.minPrice / 100,
+                  amount: minPrice / 100,
                   currency: trackGroup.currency,
                 }),
                 artistName: trackGroup.artist?.name,

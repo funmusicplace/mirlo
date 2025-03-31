@@ -31,18 +31,35 @@ const ManageTrackLicense = () => {
         <LicenseForm callback={refetch} />
       </Modal>
       <FormComponent>
-        <label
+        <SelectEl {...methods.register("licenseId")}>
+          {licenses?.results.map((license) => (
+            <option value={license.id}>{license.short}</option>
+          ))}
+        </SelectEl>
+        <div
           className={css`
             display: flex;
-            align-items: center;
-
-            button {
-              margin-left: 0.5rem;
-            }
           `}
         >
-          {t("license")}
-
+          <small
+            className={css`
+              display: flex;
+              align-items: center;
+            `}
+          >
+            {t("dontSeeTheLicenseYouWant")}
+            <Button
+              variant="dashed"
+              onClick={() => setIsModalOpen(true)}
+              type="button"
+              size="compact"
+              className={css`
+                margin-left: 0.25rem;
+              `}
+            >
+              {t("addIt")}
+            </Button>
+          </small>
           <InfoModal
             info={
               <Trans
@@ -52,31 +69,7 @@ const ManageTrackLicense = () => {
               />
             }
           />
-        </label>
-        <SelectEl {...methods.register("licenseId")}>
-          {licenses?.results.map((license) => (
-            <option value={license.id}>{license.short}</option>
-          ))}
-        </SelectEl>
-        <small
-          className={css`
-            display: flex;
-            align-items: center;
-          `}
-        >
-          {t("dontSeeTheLicenseYouWant")}
-          <Button
-            variant="dashed"
-            onClick={() => setIsModalOpen(true)}
-            type="button"
-            size="compact"
-            className={css`
-              margin-left: 0.25rem;
-            `}
-          >
-            {t("addIt")}
-          </Button>
-        </small>
+        </div>
       </FormComponent>
     </>
   );

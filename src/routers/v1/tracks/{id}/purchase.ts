@@ -3,14 +3,8 @@ import { NextFunction, Request, Response } from "express";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import prisma from "@mirlo/prisma";
 
-import {
-  createStripeCheckoutSessionForPurchase,
-  createStripeCheckoutSessionForTrackPurchase,
-} from "../../../../utils/stripe";
-import {
-  handleTrackGroupPurchase,
-  handleTrackPurchase,
-} from "../../../../utils/handleFinishedTransactions";
+import { createStripeCheckoutSessionForTrackPurchase } from "../../../../utils/stripe";
+import { handleTrackPurchase } from "../../../../utils/handleFinishedTransactions";
 import { subscribeUserToArtist } from "../../../../utils/artist";
 import { AppError } from "../../../../utils/error";
 
@@ -78,15 +72,14 @@ export default function () {
         track.trackGroup.artist.user.stripeAccountId;
 
       const priceNumber =
-        (price ? Number(price) : undefined) ?? track.trackGroup.minPrice ?? 0;
+        (price ? Number(price) : undefined) ?? track.minPrice ?? 0;
 
-      const priceZero =
-        (track.trackGroup.minPrice ?? 0) === 0 && priceNumber === 0;
+      const priceZero = (track.minPrice ?? 0) === 0 && priceNumber === 0;
 
       if (priceNumber < (track.trackGroup.minPrice ?? 0)) {
         throw new AppError({
           httpCode: 400,
-          description: `Have to pay at least ${track.trackGroup.minPrice} for this track. ${priceNumber} is not enough`,
+          description: `Have to pay at least ${track.minPrice} for this track. ${priceNumber} is not enough`,
         });
       }
 

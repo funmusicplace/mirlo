@@ -137,18 +137,7 @@ const Post: React.FC = () => {
           <MarkdownWrapper>{parse(post.content)}</MarkdownWrapper>
         )}
       </PageMarkdownWrapper>
-      {post.artist && (
-        <div
-          className={css`
-            text-align: center;
-            display: flex;
-            justify-content: center;
-            margin: 1rem;
-          `}
-        >
-          <SupportArtistPopUp artist={post.artist} />
-        </div>
-      )}
+      {post.artist && <SupportArtistPopUp artist={post.artist} />}
     </div>
   );
 };

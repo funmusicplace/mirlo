@@ -30,6 +30,8 @@ interface Track {
   trackGroupId: number;
   image: Image;
   order: number;
+  allowIndividualSale: boolean;
+  minPrice: number; // in cents;
   metadata: { [key: string]: any };
   audio?: {
     url: string;

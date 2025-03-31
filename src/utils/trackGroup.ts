@@ -27,7 +27,7 @@ import { deleteTrack } from "./tracks";
 import { randomUUID } from "crypto";
 import { Response } from "express";
 import { DefaultArgs } from "@prisma/client/runtime/library";
-import { doesTrackGroupBelongToUser } from "./ownership";
+import { doesTrackBelongToUser, doesTrackGroupBelongToUser } from "./ownership";
 import { AppError } from "./error";
 import { processSingleMerch } from "./merch";
 
@@ -470,6 +470,55 @@ export const basicTrackGroupInclude = {
   },
 };
 
+export const findTrackPurchaseAndVoidToken = async (
+  trackId: number,
+  user: User
+) => {
+  let isCreator;
+  try {
+    isCreator = await doesTrackBelongToUser(Number(trackId), user);
+  } catch (e) {}
+  logger.info(`trackId: ${trackId} isCreator: ${isCreator}`);
+
+  const purchase = await prisma.userTrackPurchase.findFirst({
+    where: {
+      trackId: Number(trackId),
+      ...(!isCreator
+        ? {
+            userId: Number(user.id),
+            trackGroup: {
+              published: true,
+            },
+          }
+        : {}),
+    },
+    include: {
+      track: {
+        include: {
+          trackGroup: basicTrackGroupInclude,
+        },
+      },
+    },
+  });
+
+  if (!purchase) {
+    throw new AppError({
+      httpCode: 404,
+      description: `trackId: ${trackId} no purchase found`,
+    });
+  }
+
+  // TODO: do we want a token to be reset after download?
+  // If so we probably want to do this once the download is
+  // complete on the client otherwise there might be errors
+  // await setDownloadTokenToNull({
+  //   userId: purchase.userId,
+  //   trackGroupId: purchase.trackGroupId,
+  // });
+
+  return purchase;
+};
+
 export const findPurchaseAndVoidToken = async (
   trackGroupId: number,
   user: User
@@ -513,6 +562,44 @@ export const findPurchaseAndVoidToken = async (
   // });
 
   return purchase;
+};
+
+export const findTrackPurchaseBasedOnTokenAndUpdate = async (
+  trackId: number,
+  token: string,
+  userId?: number
+) => {
+  const purchase = await prisma.userTrackPurchase.findFirst({
+    where: {
+      userId: userId,
+      singleDownloadToken: token,
+      trackId: Number(trackId),
+    },
+    include: {
+      track: {
+        include: {
+          trackGroup: basicTrackGroupInclude,
+        },
+      },
+    },
+  });
+
+  if (!purchase) {
+    throw new AppError({
+      httpCode: 404,
+      description: `Track Purchase doesn't exist for trackId: ${trackId}, userId: ${userId}`,
+    });
+  }
+
+  // TODO: do we want a token to be reset after download?
+  // If so we probably want to do this once the download is
+  // complete on the client otherwise there might be errors
+  // await setDownloadTokenToNull({
+  //   userId: user?.id,
+  //   trackGroupId: Number(trackGroupId),
+  // });
+
+  return purchase.track;
 };
 
 export const findPurchaseBasedOnTokenAndUpdate = async (

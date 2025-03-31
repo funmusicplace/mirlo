@@ -18,7 +18,6 @@ const FormCheckbox: React.FC<{
         padding: 0.25rem;
         align-items: center;
         font-size: 1rem;
-        margin-bottom: 1rem;
         input {
           width: 2rem;
           margin-right: 0.45rem;

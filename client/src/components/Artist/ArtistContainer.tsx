@@ -4,13 +4,13 @@ import { Outlet, useParams } from "react-router-dom";
 import ArtistHeaderSection from "../common/ArtistHeaderSection";
 import { useTranslation } from "react-i18next";
 import { ArtistPageWrapper } from "components/ManageArtist/ManageArtistContainer";
-import { ButtonLink } from "components/common/Button";
 import { FaEye, FaPen } from "react-icons/fa";
 import { bp } from "../../constants";
 import { useQuery } from "@tanstack/react-query";
 import { queryArtist } from "queries";
 import { useAuthContext } from "state/AuthContext";
 import FixedButtonLink from "components/common/FixedButton";
+import SupportArtistPopUp from "components/common/SupportArtistPopUp";
 
 const ArtistContainer: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });

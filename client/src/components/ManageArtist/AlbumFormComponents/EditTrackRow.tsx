@@ -21,6 +21,9 @@ import FormComponent from "components/common/FormComponent";
 import { useParams } from "react-router-dom";
 import { queryArtist } from "queries";
 import { useQuery } from "@tanstack/react-query";
+import ShowRawID3Data from "./ShowRawID3Data";
+import styled from "@emotion/styled";
+import FormCheckbox from "components/common/FormCheckbox";
 
 export interface FormData {
   title: string;
@@ -29,7 +32,17 @@ export interface FormData {
   licenseId: number;
   isrc: string;
   lyrics: string;
+  allowIndividualSale: boolean;
+  minPrice: string;
 }
+
+const IndentedTR = styled("tr")`
+  border-left: 1rem solid white;
+
+  td:first-child {
+    padding-left: 3rem;
+  }
+`;
 
 const EditTrackRow: React.FC<{
   track: Track;
@@ -57,6 +70,8 @@ const EditTrackRow: React.FC<{
       licenseId: track.licenseId,
       lyrics: track.lyrics,
       isrc: track.isrc,
+      minPrice: `${track?.minPrice !== undefined ? track.minPrice / 100 : ""}`,
+      allowIndividualSale: track.allowIndividualSale,
     },
   });
 
@@ -64,7 +79,8 @@ const EditTrackRow: React.FC<{
   const userId = user?.id;
   const snackbar = useSnackbar();
   const trackId = track.id;
-  const { register, reset } = methods;
+  const { register, reset, watch } = methods;
+  const allowIndividualSale = watch("allowIndividualSale");
 
   const onCancelEditing = React.useCallback(() => {
     reset({
@@ -73,6 +89,8 @@ const EditTrackRow: React.FC<{
       licenseId: track.licenseId,
       isrc: track.isrc,
       lyrics: track.lyrics,
+      minPrice: `${track?.minPrice !== undefined ? track.minPrice / 100 : ""}`,
+      allowIndividualSale: track.allowIndividualSale,
     });
     cancelEditing();
   }, [reset, track, cancelEditing]);
@@ -86,6 +104,10 @@ const EditTrackRow: React.FC<{
           isrc: formData.isrc,
           lyrics: formData.lyrics,
           isPreview: formData.status === "preview",
+          allowIndividualSale: formData.allowIndividualSale,
+          minPrice: formData.minPrice
+            ? Number(formData.minPrice) * 100
+            : undefined,
           licenseId: formData.licenseId
             ? Number(formData.licenseId)
             : undefined,
@@ -124,6 +146,9 @@ const EditTrackRow: React.FC<{
     <FormProvider {...methods}>
       <tr
         className={css`
+          td {
+            padding-bottom: 1.5rem !important;
+          }
           ${isDisabled || isSaving
             ? `
             opacity: .4;
@@ -145,7 +170,11 @@ const EditTrackRow: React.FC<{
           {!isSaving && <TrackUploadingState uploadingState={uploadingState} />}
         </td>
         <td>
-          <InputEl {...register(`title`)} disabled={isSaving || isDisabled} />
+          <InputEl
+            {...register(`title`)}
+            disabled={isSaving || isDisabled}
+            type="number"
+          />
         </td>
         <td>
           <ManageTrackArtists
@@ -195,41 +224,72 @@ const EditTrackRow: React.FC<{
           />
         </td>
       </tr>
-      <tr>
-        <td colSpan={3}>
-          <FormComponent>
-            <label>{t("isrcCode")}</label>
-            <InputEl {...register(`isrc`)} disabled={isSaving || isDisabled} />
-          </FormComponent>
+      {user?.isAdmin && (
+        <>
+          <IndentedTR>
+            <td colSpan={2}>
+              <label htmlFor="allowIndividualSale">
+                {t("allowIndividualSale")}
+              </label>
+            </td>
+            <td colSpan={99}>
+              <FormCheckbox
+                keyName="allowIndividualSale"
+                description={t("allowSaleDescription")}
+              />
+            </td>
+          </IndentedTR>
+          {allowIndividualSale && (
+            <IndentedTR>
+              <td colSpan={2}>
+                <label htmlFor="minPrice">{t("minPrice")}</label>
+              </td>
+              <td colSpan={99}>
+                <InputEl id="minPrice" {...register("minPrice")} />
+              </td>
+            </IndentedTR>
+          )}
+        </>
+      )}
+      <IndentedTR>
+        <td colSpan={2}>
+          <label htmlFor="isrc">{t("isrcCode")}</label>
         </td>
-        <td colSpan={3}>
-          <label>{t("lyrics")}</label>
+        <td colSpan={99}>
+          <InputEl
+            id="isrc"
+            {...register(`isrc`)}
+            disabled={isSaving || isDisabled}
+          />
+        </td>
+      </IndentedTR>
+      <IndentedTR>
+        <td colSpan={2}>
+          <label htmlFor="lyrics">{t("lyrics")}</label>
+        </td>
+        <td colSpan={99}>
           <TextArea
+            id="lyrics"
             {...register("lyrics")}
             className={css`
               width: 100%;
             `}
+            rows={8}
           />
         </td>
-      </tr>
-      <tr>
-        <td colSpan={2}>
+      </IndentedTR>
+      <IndentedTR>
+        <td colSpan={2}>{t("license")}</td>
+        <td colSpan={99}>
           <ManageTrackLicense />
         </td>
-        <td />
+      </IndentedTR>
+      <IndentedTR>
+        <td colSpan={2}>id3Tags</td>
         <td colSpan={99}>
-          <div
-            className={css`
-              max-width: 600px;
-              max-height: 200px;
-              overflow: scroll;
-            `}
-          >
-            <strong>raw id3 tag: </strong>
-            {JSON.stringify(track.metadata, null, 2)}
-          </div>
+          <ShowRawID3Data track={track} />
         </td>
-      </tr>
+      </IndentedTR>
     </FormProvider>
   );
 };

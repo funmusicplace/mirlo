@@ -7,7 +7,10 @@ import { useSnackbar } from "state/SnackbarContext";
 import { useArtistContext } from "state/ArtistContext";
 import Modal from "./Modal";
 import LoadingSpinner from "./LoadingSpinner";
-import { ArtistButton, ArtistButtonAnchor } from "components/Artist/ArtistButtons";
+import {
+  ArtistButton,
+  ArtistButtonAnchor,
+} from "components/Artist/ArtistButtons";
 
 const formats = ["flac", "wav", "opus", "320.mp3", "256.mp3", "128.mp3"];
 const formatsDisplay: { [format: string]: string } = {
@@ -25,16 +28,18 @@ const DownloadAlbumButton: React.FC<{
   onlyIcon?: boolean;
   token?: string;
   email?: string;
-}> = ({ trackGroup, onlyIcon, email, token }) => {
+  track?: Track;
+}> = ({ trackGroup, onlyIcon, email, token, track }) => {
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
   const [chosenFormat, setChosenFormat] = React.useState("");
   const [isGeneratingAlbum, setIsGeneratingAlbum] = React.useState(0);
   const [isPopupOpen, setIsPopupOpen] = React.useState(false);
   const snackbar = useSnackbar();
   const [isDownloading, setIsDownloading] = React.useState(false);
-  const { state } = useArtistContext();
 
-  const getDownloadUrl = () => {
+  const prefix = track ? `tracks/${track.id}` : `trackGroups/${trackGroup.id}`;
+
+  const getDownloadUrl = React.useCallback(() => {
     const queryParams = new URLSearchParams();
     queryParams.append("format", chosenFormat);
     if (email) {
@@ -43,8 +48,11 @@ const DownloadAlbumButton: React.FC<{
     if (token) {
       queryParams.append("token", token);
     }
-    return api.getFileDownloadUrl(`trackGroups/${trackGroup.id}/download?${queryParams.toString()}`);
-  };
+
+    return api.getFileDownloadUrl(
+      `${prefix}/download?${queryParams.toString()}`
+    );
+  }, [track, trackGroup.id, prefix, chosenFormat, email, token]);
 
   const generateAlbum = React.useCallback(
     async (format: string) => {
@@ -52,7 +60,7 @@ const DownloadAlbumButton: React.FC<{
         const queryParams = new URLSearchParams();
         queryParams.append("format", format);
         const resp = await api.generateDownload(
-          `trackGroups/${trackGroup.id}/generate?${queryParams.toString()}`
+          `${prefix}/generate?${queryParams.toString()}`
         );
         if ((resp as any).result.jobId) {
           setIsGeneratingAlbum(+(resp as any).result.jobId);
@@ -64,7 +72,7 @@ const DownloadAlbumButton: React.FC<{
         console.error(e);
       }
     },
-    [chosenFormat, trackGroup.id, t]
+    [chosenFormat, trackGroup.id, t, prefix, snackbar]
   );
 
   React.useEffect(() => {
@@ -84,7 +92,7 @@ const DownloadAlbumButton: React.FC<{
     return () => (interval ? clearInterval(interval) : undefined);
   }, [chosenFormat, isGeneratingAlbum, trackGroup.id, trackGroup.title]);
 
-  if (!trackGroup || !state?.artist) {
+  if (!trackGroup) {
     return null;
   }
 
@@ -137,28 +145,31 @@ const DownloadAlbumButton: React.FC<{
               {isGeneratingAlbum > 0 ? (
                 <p
                   className={css`
-                      svg {
-                        margin-right: 0.5rem;
-                      }
-                    `}
+                    svg {
+                      margin-right: 0.5rem;
+                    }
+                  `}
                 >
                   <LoadingSpinner />
                   {t("downloadButtonGenerating")}
                 </p>
-              ) : (<ArtistButtonAnchor
+              ) : (
+                <ArtistButtonAnchor
                   size="compact"
                   className={css`
-                  margin-top: 0.5rem;
-                  font-size: 1.2rem;
-                  background: transparent;
-                `}
+                    margin-top: 0.5rem;
+                    font-size: 1.2rem;
+                    background: transparent;
+                  `}
                   isLoading={isDownloading}
                   href={getDownloadUrl()}
                   onClick={async () => {
-                    setChosenFormat("")
+                    setChosenFormat("");
                     setIsPopupOpen(false);
                   }}
-                >{t("download")}</ArtistButtonAnchor>
+                >
+                  {t("download")}
+                </ArtistButtonAnchor>
               )}
               <p>
                 <ArtistButton

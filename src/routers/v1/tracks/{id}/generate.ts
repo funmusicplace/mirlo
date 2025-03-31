@@ -5,7 +5,11 @@ import {
   FormatOptions,
 } from "../../../../utils/trackGroup";
 import { logger } from "../../../../logger";
-import { statFile, trackGroupFormatBucket } from "../../../../utils/minio";
+import {
+  statFile,
+  trackFormatBucket,
+  trackGroupFormatBucket,
+} from "../../../../utils/minio";
 import { startGeneratingZip } from "../../../../queues/album-queue";
 import prisma from "@mirlo/prisma";
 
@@ -15,45 +19,55 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
-    const { id: trackGroupId }: { id?: string } = req.params;
+    const { id: trackId }: { id?: string } = req.params;
     const { format = "flac" } = req.query as {
       format?: FormatOptions;
     };
 
-    const trackGroup = await prisma.trackGroup.findFirst({
+    const track = await prisma.track.findFirst({
       where: {
-        id: Number(trackGroupId),
+        id: Number(trackId),
+        NOT: {
+          audio: null,
+        },
       },
-      ...basicTrackGroupInclude,
+      include: {
+        audio: true,
+        trackGroup: basicTrackGroupInclude,
+      },
     });
 
-    if (!trackGroup) {
+    if (!track) {
       res.status(404).json({
-        error: "No trackGroup found",
+        error: "No track found",
       });
       return next();
     }
 
-    logger.info(`trackGroupId: ${trackGroupId} Found a trackgroup`);
+    logger.info(`trackId: ${trackId} Found a track`);
 
-    const zipName = `${trackGroup.id}/${format}.zip`;
+    const zipName = `${track.id}/${format}.zip`;
     logger.info(`zipName: ${zipName}`);
 
     try {
-      logger.info("checking if trackgroup is already zipped");
-      const { backblazeStat } = await statFile(trackGroupFormatBucket, zipName);
-      if (backblazeStat) {
-        logger.info("the trackgroup is already zipped");
+      logger.info("checking if track is already zipped");
+      const { backblazeStat, minioStat } = await statFile(
+        trackFormatBucket,
+        zipName
+      );
+      if (backblazeStat || minioStat) {
+        logger.info("there is already a zip for this track");
         return res.json({
           message: "The album has already been generated",
           result: true,
         });
       } else {
-        logger.info("trackGroup doesn't exist yet, start generating it");
+        logger.info("folder for track doesn't exist yet, start generating it");
         const jobId = await startGeneratingZip(
-          trackGroup,
-          trackGroup.tracks,
-          format
+          track.trackGroup,
+          [track],
+          format,
+          trackFormatBucket
         );
         return res.json({
           message: "We've started generating the album",
@@ -61,21 +75,22 @@ export default function () {
         });
       }
     } catch (e) {
-      logger.info("trackGroup doesn't exist yet, start generating it");
+      logger.info("folder for track doesn't exist yet, start generating it");
       const jobId = await startGeneratingZip(
-        trackGroup,
-        trackGroup.tracks,
-        format
+        track.trackGroup,
+        [track],
+        format,
+        trackFormatBucket
       );
       return res.json({
-        message: "We've started generating the album",
+        message: "We've started generating the folder",
         result: { jobId },
       });
     }
   }
 
   GET.apiDoc = {
-    summary: "Generates a zipped trackGroup of the given format",
+    summary: "Generates a zipped folder of the given format for the track",
     parameters: [
       {
         in: "path",

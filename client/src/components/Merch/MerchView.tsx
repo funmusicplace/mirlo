@@ -21,7 +21,6 @@ import {
   ImageWrapper,
 } from "components/TrackGroup/TrackGroup";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
-import { ButtonLink } from "components/common/Button";
 import { getArtistManageMerchUrl, getReleaseUrl } from "utils/artist";
 import { FaPen } from "react-icons/fa";
 import { useAuthContext } from "state/AuthContext";
@@ -194,19 +193,9 @@ function MerchView() {
           </div>
         </div>
 
-        <div
-          className={css`
-            margin-top: 4rem;
-            text-align: center;
-            display: flex;
-            margin: 4rem auto;
-            justify-content: center;
-          `}
-        >
-          {merch.artist && stripeAccountStatus?.chargesEnabled && (
-            <SupportArtistPopUp artist={merch.artist} />
-          )}
-        </div>
+        {merch.artist && stripeAccountStatus?.chargesEnabled && (
+          <SupportArtistPopUp artist={merch.artist} />
+        )}
       </div>
     </WidthContainer>
   );
