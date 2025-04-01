@@ -17,6 +17,7 @@ type Options = {
   imageUrl?: string;
   isAlbum?: boolean;
   isSong?: boolean;
+  rss?: string;
 };
 
 const determineType = (options: Options) => {
@@ -27,7 +28,7 @@ const determineType = (options: Options) => {
 };
 
 const buildOpenGraphTags = ($: cheerio.CheerioAPI, options: Options) => {
-  const { title, description, url, imageUrl } = options;
+  const { title, description, url, imageUrl, rss } = options;
   $("head").append(`
     <meta property="og:type" content="${determineType(options)}">
     <meta property="og:title" content="${title}">
@@ -37,6 +38,7 @@ const buildOpenGraphTags = ($: cheerio.CheerioAPI, options: Options) => {
     <meta name="twitter:description" content=${description} />
 
     ${imageUrl ? `<meta property="og:image" content="${imageUrl}" />` : ""}
+    ${rss ? `<link rel="alternate" type="application/rss+xml" href="${rss}" />` : ""}
   `);
 };
 
@@ -62,6 +64,16 @@ const parseIndex = async (pathname: string) => {
 
   try {
     const client = await getClient();
+
+    if (route[1] === "releases") {
+      buildOpenGraphTags($, {
+        title: "Mirlo Releases",
+        description: "The latest releases on Mirlo",
+        url: `${client.applicationUrl}/${route.join("/")}`,
+        imageUrl: `${client.applicationUrl}/images/mirlo-typeface.png`,
+        rss: `${process.env.API_DOMAIN}/v1/trackGroups?format=rss`,
+      });
+    }
 
     const artist = await prisma.artist.findFirst({
       where: { urlSlug: route[1] },
