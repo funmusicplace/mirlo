@@ -91,6 +91,7 @@ const OptionType: React.FC<{
                     {...methods.register(
                       `optionTypes.${index}.options.${optionIndex}.additionalPrice`
                     )}
+                    step={0.01}
                     type="number"
                   />
                 </FormComponent>
