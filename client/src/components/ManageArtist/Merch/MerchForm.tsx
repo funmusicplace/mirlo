@@ -121,6 +121,7 @@ const MerchForm: React.FC<{
             formKey="minPrice"
             type="number"
             step="0.01"
+            min={0}
             url={`manage/merch/${merch.id}`}
             extraData={{}}
           />
@@ -133,6 +134,7 @@ const MerchForm: React.FC<{
             formKey="quantityRemaining"
             type="number"
             step="1"
+            min={0}
             url={`manage/merch/${merch.id}`}
             extraData={{}}
           />

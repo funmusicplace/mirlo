@@ -45,6 +45,7 @@ const PaymentSlider: React.FC<{
       <input
         type="range"
         step="1"
+        min={0}
         {...methods.register("platformPercent")}
         onMouseUp={onBlur}
         className={css`.

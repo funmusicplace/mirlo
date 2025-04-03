@@ -124,6 +124,7 @@ const SubscriptionForm: React.FC<{
                 step={0.01}
                 type="number"
                 {...register("minAmount", { min: 1 })}
+                min={0}
               />
               <span>
                 {t("inCurrency", { currency: user?.currency ?? "usd" })}in{" "}

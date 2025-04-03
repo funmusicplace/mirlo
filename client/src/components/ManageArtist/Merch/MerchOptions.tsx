@@ -92,6 +92,7 @@ const OptionType: React.FC<{
                       `optionTypes.${index}.options.${optionIndex}.additionalPrice`
                     )}
                     step={0.01}
+                    min={0}
                     type="number"
                   />
                 </FormComponent>
