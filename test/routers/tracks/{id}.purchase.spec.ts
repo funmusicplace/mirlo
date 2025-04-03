@@ -75,7 +75,7 @@ describe("tracks/{id}/purchase", () => {
       const track = await createTrack(trackGroup.id);
 
       const response = await requestApp
-        .post(`trackGroups/${track.id}/purchase`)
+        .post(`tracks/${track.id}/purchase`)
         .send({
           price: "200",
         })
@@ -160,7 +160,8 @@ describe("tracks/{id}/purchase", () => {
           .stub(stripeUtils.stripe.products, "retrieve")
           // @ts-ignore
           .callsFake(async (_params) => {
-            // return whatever
+            console.log("retrieving");
+            return "testProductKey";
           });
 
         const { user } = await createUser({
@@ -168,10 +169,10 @@ describe("tracks/{id}/purchase", () => {
           stripeAccountId: "aRandomWord",
         });
         const artist = await createArtist(user.id);
-        const trackGroup = await createTrackGroup(artist.id, {
+        const trackGroup = await createTrackGroup(artist.id);
+        const track = await createTrack(trackGroup.id, {
           stripeProductKey: "testProductKey",
         });
-        const track = await createTrack(trackGroup.id);
 
         await purchaseTrackEndpoint().POST[1](
           {
@@ -216,10 +217,11 @@ describe("tracks/{id}/purchase", () => {
         });
         const artist = await createArtist(artistUser.id);
         const trackGroup = await createTrackGroup(artist.id, {
-          stripeProductKey: "testProductKey",
           paymentToUserId: labelUser.id,
         });
-        const track = await createTrack(trackGroup.id);
+        const track = await createTrack(trackGroup.id, {
+          stripeProductKey: "testProductKey",
+        });
 
         await purchaseTrackEndpoint().POST[1](
           {
@@ -241,7 +243,7 @@ describe("tracks/{id}/purchase", () => {
         assert.equal(args[0].line_items?.[0].quantity, 1);
         assert.equal(
           args[0].line_items?.[0].price_data?.product,
-          trackGroup.stripeProductKey
+          track.stripeProductKey
         );
       });
     });

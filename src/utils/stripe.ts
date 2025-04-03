@@ -346,9 +346,11 @@ export const createStripeCheckoutSessionForTrackPurchase = async ({
       applicationName: "frontend",
     },
   });
+  console.log("client", client);
 
   const productKey = await createTrackStripeProduct(track, stripeAccountId);
 
+  console.log("productKey", productKey);
   if (!productKey) {
     throw new AppError({
       description: "Was not able to create a product for user",

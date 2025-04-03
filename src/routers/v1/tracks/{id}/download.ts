@@ -98,13 +98,15 @@ export default function () {
         );
         if (!backblazeStat && !minioStat) {
           logger.info("Track not zipped");
-          return res.json({
-            message: "Need to generate album first",
+          throw new AppError({
+            httpCode: 400,
+            description: "Need to generate track folder first",
           });
         }
       } catch (e) {
-        return res.json({
-          message: "Need to generate album first",
+        throw new AppError({
+          httpCode: 400,
+          description: "Need to generate track folder first",
         });
       }
 

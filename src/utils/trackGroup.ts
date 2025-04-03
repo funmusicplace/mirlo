@@ -486,8 +486,10 @@ export const findTrackPurchaseAndVoidToken = async (
       ...(!isCreator
         ? {
             userId: Number(user.id),
-            trackGroup: {
-              published: true,
+            track: {
+              trackGroup: {
+                published: true,
+              },
             },
           }
         : {}),

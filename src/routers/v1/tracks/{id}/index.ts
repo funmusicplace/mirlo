@@ -3,6 +3,7 @@ import processor from "../../../../utils/trackGroup";
 import prisma from "@mirlo/prisma";
 import { User } from "@mirlo/prisma/client";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
+import { AppError } from "../../../../utils/error";
 
 export default function () {
   const operations = {
@@ -41,6 +42,11 @@ export default function () {
         },
       });
 
+      if (!track) {
+        throw new AppError({ httpCode: 404, description: "Track not found" });
+      }
+
+      console.log("track", track);
       res.json({
         result: {
           ...track,

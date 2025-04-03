@@ -166,6 +166,7 @@ export const createTrack = async (
     data: {
       title: data?.title,
       trackGroupId,
+      stripeProductKey: data?.stripeProductKey,
     },
   });
 
