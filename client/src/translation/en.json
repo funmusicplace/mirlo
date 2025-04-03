@@ -128,6 +128,7 @@
     "removeFromWishlist": "Remove from wishlist"
   },
   "trackGroupCard": {
+    "thatsGenerous": "{{ chosenPrice }}? That's generous!",
     "notLoggedIn": "We'll need your email address to send you a one-time download link of the album. In the future you'll be able to create an account and access what you've bought.",
     "albumExists": "An album has already been bought using this email address, you can finish creating an account to see it in your collection. Do you want to proceed anyway?",
     "download": "Download",
