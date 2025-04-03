@@ -337,6 +337,8 @@ interface MerchPurchase {
   quantity: number;
   currencyPaid: string;
   amountPaid: number;
+  trackingNumber?: string;
+  trackingWebsite?: string;
   fulfillmentStatus: "NO_PROGRESS" | "STARTED" | "SHIPPED" | "COMPLETED";
   shippingAddress: {
     line1: string;

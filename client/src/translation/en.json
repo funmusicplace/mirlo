@@ -168,6 +168,8 @@
     "merchItem": "Merch item",
     "customer": "Customer",
     "email": "E-mail",
+    "trackingWebsite": "Tracking website URL",
+    "trackingNumber": "Tracking number",
     "itemArtist": "Artist merch belongs",
     "fulfillmentStatus": "Fulfillment status",
     "ordersAndFulfillment": "Orders & Fulfillment",

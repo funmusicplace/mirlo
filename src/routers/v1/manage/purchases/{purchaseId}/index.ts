@@ -18,7 +18,7 @@ export default function () {
 
   async function PUT(req: Request, res: Response, next: NextFunction) {
     const { purchaseId } = req.params as unknown as Params;
-    const { fulfillmentStatus } = req.body;
+    const { fulfillmentStatus, trackingNumber, trackingWebsite } = req.body;
     try {
       const updatedCount = await prisma.merchPurchase.updateMany({
         where: {
@@ -26,6 +26,8 @@ export default function () {
         },
         data: {
           fulfillmentStatus,
+          trackingNumber,
+          trackingWebsite,
         },
       });
 
