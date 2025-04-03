@@ -11,6 +11,7 @@ import Pill from "components/common/Pill";
 import { css } from "@emotion/css";
 import { FaTimes } from "react-icons/fa";
 import { hasId } from "../AlbumFormComponents/ManageTags";
+import LoadingSpinner from "components/common/LoadingSpinner";
 
 const SelectTrackGroup: React.FC<{
   merch: Merch;
@@ -25,14 +26,14 @@ const SelectTrackGroup: React.FC<{
   >(merch.includePurchaseTrackGroup);
 
   const doSave = React.useCallback(
-    async (val: unknown) => {
+    async (val: number | null) => {
       try {
-        if (hasId(val) && typeof val.id === "number") {
+        if (typeof val === "number" || val === null) {
           setIsSaving(true);
           const response = await api.put<Partial<Merch>, { result: Merch }>(
             `manage/merch/${merch.id}`,
             {
-              includePurchaseTrackGroupId: val.id,
+              includePurchaseTrackGroupId: val,
             }
           );
           setCurrentTrackGroup(response.result.includePurchaseTrackGroup);
@@ -68,12 +69,18 @@ const SelectTrackGroup: React.FC<{
           />
         </Pill>
       )}
-
-      <AutoCompleteTrackGroup
-        onSelect={(val) => doSave(val)}
-        filterByArtistId={merch.artistId}
-        placeholder={t("typeAlbumName") ?? ""}
-      />
+      <div
+        className={css`
+          display: flex;
+        `}
+      >
+        <AutoCompleteTrackGroup
+          onSelect={(val) => doSave(val)}
+          filterByArtistId={merch.artistId}
+          placeholder={t("typeAlbumName") ?? ""}
+        />
+        {isSaving && <LoadingSpinner />}
+      </div>
       <small
         className={css`
           margin-top: 1rem;
