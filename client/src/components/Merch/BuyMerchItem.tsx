@@ -156,6 +156,7 @@ const BuyMerchItem: React.FC<{
             {...methods.register("price", { min: minPrice })}
             type="number"
             min={minPrice}
+            step={0.01}
             className={css`
               max-width: 8rem;
             `}

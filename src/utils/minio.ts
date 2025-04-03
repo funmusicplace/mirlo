@@ -35,6 +35,7 @@ export const incomingAudioBucket = "incoming-track-audio";
 export const finalAudioBucket = "track-audio";
 
 export const trackGroupFormatBucket = "trackgroup-format";
+export const trackFormatBucket = "track-format";
 
 const {
   MINIO_HOST = "",
@@ -128,7 +129,7 @@ export const statFile = async (bucket: string, filename: string) => {
     try {
       minioStat = await minioClient.statObject(bucket, filename);
     } catch {
-      logger.error(`minio doesn't have the file. weird`);
+      logger.error(`minio doesn't have the file ${bucket}/${filename}`);
     }
   }
   return {
@@ -302,7 +303,7 @@ export const getReadStream = async (bucket: string, remoteFileName: string) => {
   } else {
     logger.info(`minio: getting buffer: ${bucket}/${remoteFileName}`);
 
-    return minioClient.getObject(trackGroupFormatBucket, remoteFileName);
+    return minioClient.getObject(bucket, remoteFileName);
   }
 };
 

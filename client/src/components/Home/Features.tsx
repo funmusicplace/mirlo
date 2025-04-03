@@ -4,7 +4,7 @@ import { MetaCard } from "components/common/MetaCard";
 import { WidthWrapper } from "components/common/WidthContainer";
 import { FaArrowDown, FaInfo } from "react-icons/fa";
 import { bp } from "../../constants";
-import Button, { ButtonLink } from "components/common/Button";
+import { ButtonLink } from "components/common/Button";
 import { Link } from "react-router-dom";
 import { Trans, useTranslation } from "react-i18next";
 import Tooltip from "components/common/Tooltip";

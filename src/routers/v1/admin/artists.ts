@@ -33,7 +33,6 @@ export default function () {
         where.user.email = { contains: email, mode: "insensitive" };
       }
       const itemCount = await prisma.artist.count({ where });
-      console.log("where", where);
       const artists = await prisma.artist.findMany({
         where,
         skip: skipQuery ? Number(skipQuery) : undefined,

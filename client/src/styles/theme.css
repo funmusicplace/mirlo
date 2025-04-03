@@ -28,7 +28,7 @@ html {
   --mi-success-foreground-color: --mi-white;
 
   --mi-warning-color: #f2897a;
-  --mi-warning-background-color: #f7dedb;
+  --mi-warning-background-color: var(--mi-warning-color);
   --mi-lighten-warning-background-color: #f3dad7;
 
   --mi-darken-warning-background-color: #e4aca4;

@@ -28,6 +28,7 @@ import {
   UnderneathImage,
 } from "./TrackGroup";
 import { getReleaseUrl } from "utils/artist";
+import PurchaseOrDownloadAlbum from "./PurchaseOrDownloadAlbumModal";
 
 function TrackView() {
   const { t } = useTranslation("translation", {
@@ -129,6 +130,12 @@ function TrackView() {
                 </ImageWrapper>
                 <UnderneathImage>
                   <ReleaseDate releaseDate={trackGroup.releaseDate} />
+                  {user?.isAdmin && filteredTrack.allowIndividualSale && (
+                    <PurchaseOrDownloadAlbum
+                      trackGroup={trackGroup}
+                      track={filteredTrack}
+                    />
+                  )}
                 </UnderneathImage>
                 {trackGroup.merch && trackGroup.merch.length > 0 && (
                   <TrackGroupMerch merch={trackGroup.merch} />

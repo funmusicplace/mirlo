@@ -2,7 +2,8 @@ import { Queue, QueueEvents } from "bullmq";
 import { REDIS_CONFIG } from "../config/redis";
 import { logger } from "../logger";
 import prisma from "@mirlo/prisma";
-import { Track, TrackGroup } from "@mirlo/prisma/client";
+import { Track, TrackAudio, TrackGroup } from "@mirlo/prisma/client";
+import { trackFormatBucket, trackGroupFormatBucket } from "../utils/minio";
 
 const queueOptions = {
   prefix: "mirlo",
@@ -62,13 +63,19 @@ generateAlbumQueueEvents.on("error", async (error) => {
   logger.error(`jobId ${JSON.stringify(error)} had an error`);
 });
 
-export const startGeneratingAlbum = async (
+export const startGeneratingZip = async (
   trackGroup: TrackGroup & { tracks: Track[] },
-  format: string
+  tracks: (Track & { audio: TrackAudio | null })[],
+  format: string,
+  destinationBucket:
+    | typeof trackFormatBucket
+    | typeof trackGroupFormatBucket = trackGroupFormatBucket
 ) => {
   const job = await generateAlbumQueue.add("generate-album", {
     trackGroup,
+    tracks,
     format,
+    destinationBucket,
   });
 
   return job.id;

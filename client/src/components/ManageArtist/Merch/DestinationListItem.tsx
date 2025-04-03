@@ -75,6 +75,8 @@ const DestinationListItem: React.FC<{
             <label>{t("costUnit")}</label>
             <InputEl
               type="number"
+              min={0}
+              step={0.01}
               {...methods.register(`destinations.${index}.costUnit`)}
             />
           </FormComponent>
@@ -82,6 +84,8 @@ const DestinationListItem: React.FC<{
             <label>{t("costExtraUnit")}</label>
             <InputEl
               type="number"
+              min={0}
+              step={0.01}
               {...methods.register(`destinations.${index}.costExtraUnit`)}
             />
           </FormComponent>

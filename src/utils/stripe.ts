@@ -13,6 +13,7 @@ import {
   handleArtistMerchPurchase,
   handleSubscription,
   handleTrackGroupPurchase,
+  handleTrackPurchase,
 } from "./handleFinishedTransactions";
 import countryCodesCurrencies from "./country-codes-currencies";
 import { manageSubscriptionReceipt } from "./subscription";
@@ -244,6 +245,55 @@ export const createTrackGroupStripeProduct = async (
   return productKey;
 };
 
+export const createTrackStripeProduct = async (
+  track: Prisma.TrackGetPayload<{
+    include: { trackGroup: { include: { artist: true; cover: true } } };
+  }>,
+  stripeAccountId: string
+) => {
+  let productKey = await checkForProductKey(
+    track.stripeProductKey,
+    stripeAccountId
+  );
+
+  if (!productKey) {
+    const about = await buildProductDescription(
+      track.title,
+      track.trackGroup.artist.name,
+      track.trackGroup.about
+    );
+    const product = await stripe.products.create(
+      {
+        name: `${track.title} by ${track.trackGroup.artist.name}`,
+        description: about,
+        tax_code: "txcd_10401100",
+        images: track.trackGroup.cover
+          ? [
+              generateFullStaticImageUrl(
+                track.trackGroup.cover?.url[4],
+                finalCoversBucket
+              ),
+            ]
+          : [],
+      },
+      {
+        stripeAccount: stripeAccountId,
+      }
+    );
+    await prisma.track.update({
+      where: {
+        id: track.id,
+      },
+      data: {
+        stripeProductKey: product.id,
+      },
+    });
+    productKey = product.id;
+  }
+
+  return productKey;
+};
+
 export const createSubscriptionStripeProduct = async (
   tier: Prisma.ArtistSubscriptionTierGetPayload<{ include: { artist: true } }>,
   stripeAccountId: string
@@ -274,6 +324,81 @@ export const createSubscriptionStripeProduct = async (
     productKey = product.id;
   }
   return productKey;
+};
+
+export const createStripeCheckoutSessionForTrackPurchase = async ({
+  loggedInUser,
+  email,
+  priceNumber,
+  track,
+  stripeAccountId,
+}: {
+  loggedInUser?: User;
+  email?: string;
+  priceNumber: number;
+  track: Prisma.TrackGetPayload<{
+    include: { trackGroup: { include: { artist: true; cover: true } } };
+  }>;
+  stripeAccountId: string;
+}) => {
+  const client = await prisma.client.findFirst({
+    where: {
+      applicationName: "frontend",
+    },
+  });
+  console.log("client", client);
+
+  const productKey = await createTrackStripeProduct(track, stripeAccountId);
+
+  console.log("productKey", productKey);
+  if (!productKey) {
+    throw new AppError({
+      description: "Was not able to create a product for user",
+      httpCode: 500,
+    });
+  }
+
+  const currency = track.trackGroup.currency?.toLowerCase() ?? "usd";
+
+  const session = await stripe.checkout.sessions.create(
+    {
+      billing_address_collection: "auto",
+      customer_email: loggedInUser?.email || email,
+      payment_intent_data: {
+        application_fee_amount: await calculateAppFee(
+          priceNumber,
+          currency,
+          track.trackGroup.platformPercent
+        ),
+      },
+      line_items: [
+        {
+          price_data: {
+            tax_behavior: "exclusive",
+            unit_amount: castToFixed(priceNumber),
+            currency,
+            product: productKey,
+          },
+          quantity: 1,
+        },
+      ],
+      metadata: {
+        clientId: client?.id ?? null,
+        trackId: track.id,
+        trackGroupId: track.trackGroupId,
+        artistId: track.trackGroup.artistId,
+        userId: loggedInUser?.id ?? null,
+        userEmail: email ?? null,
+        stripeAccountId,
+      },
+      mode: "payment",
+      success_url: `${API_DOMAIN}/v1/checkout?success=true&stripeAccountId=${stripeAccountId}&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${API_DOMAIN}/v1/checkout?canceled=true`,
+    },
+    { stripeAccount: stripeAccountId }
+  );
+
+  return session;
 };
 
 export const createStripeCheckoutSessionForPurchase = async ({
@@ -676,6 +801,7 @@ type SessionMetaData = {
   gaveGift: string;
   merchId: string;
   artistId: string;
+  trackId: string;
 };
 
 export const handleCheckoutSession = async (
@@ -689,6 +815,7 @@ export const handleCheckoutSession = async (
       trackGroupId,
       stripeAccountId,
       gaveGift,
+      trackId,
       artistId,
     } = metadata;
     let { userId, userEmail } = metadata;
@@ -731,6 +858,14 @@ export const handleCheckoutSession = async (
       await handleTrackGroupPurchase(
         Number(actualUserId),
         Number(trackGroupId),
+        session,
+        newUser
+      );
+    } else if (trackId && actualUserId) {
+      logger.info(`checkout.session: ${session.id} handleTrackGroupPurchase`);
+      await handleTrackPurchase(
+        Number(actualUserId),
+        Number(trackId),
         session,
         newUser
       );

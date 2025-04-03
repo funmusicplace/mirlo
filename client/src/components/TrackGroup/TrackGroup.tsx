@@ -310,18 +310,10 @@ function TrackGroup() {
           </TrackgroupInfosWrapper>
 
           <TrackGroupPills tags={trackGroup.tags} />
-          <div
-            className={css`
-              margin-top: 2rem;
-              text-align: center;
-              display: flex;
-              justify-content: center;
-            `}
-          >
-            {trackGroup.artist && (
-              <SupportArtistPopUp artist={trackGroup.artist} />
-            )}
-          </div>
+
+          {trackGroup.artist && (
+            <SupportArtistPopUp artist={trackGroup.artist} />
+          )}
         </div>
       </Container>
     </WidthContainer>

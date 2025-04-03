@@ -15,7 +15,7 @@ import {
   statFile,
   trackGroupFormatBucket,
 } from "../../../../utils/minio";
-import { startGeneratingAlbum } from "../../../../queues/album-queue";
+import { startGeneratingZip } from "../../../../queues/album-queue";
 import filenamify from "filenamify";
 import { cleanHeaderValue } from "../../../../utils/validate-http-headers";
 import { AppError } from "../../../../utils/error";
@@ -99,7 +99,11 @@ export default function () {
         );
         if (!backblazeStat && !minioStat) {
           logger.info("trackGroup doesn't exist yet, start generating it");
-          const jobId = await startGeneratingAlbum(trackGroup, format);
+          const jobId = await startGeneratingZip(
+            trackGroup,
+            trackGroup.tracks,
+            format
+          );
           return res.json({
             message: "We've started generating the album",
             result: { jobId },
@@ -107,7 +111,11 @@ export default function () {
         }
       } catch (e) {
         logger.info("trackGroup doesn't exist yet, start generating it");
-        const jobId = await startGeneratingAlbum(trackGroup, format);
+        const jobId = await startGeneratingZip(
+          trackGroup,
+          trackGroup.tracks,
+          format
+        );
         return res.json({
           message: "We've started generating the album",
           result: { jobId },

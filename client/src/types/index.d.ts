@@ -11,6 +11,7 @@ interface LoggedInUser {
   id: number;
   artistUserSubscriptions?: ArtistUserSubscription[];
   userTrackGroupPurchases?: { trackGroupId: number }[];
+  userTrackPurchases?: { trackId: number }[];
   isAdmin: boolean;
   currency?: string;
   isLabelAccount?: boolean;
@@ -30,6 +31,8 @@ interface Track {
   trackGroupId: number;
   image: Image;
   order: number;
+  allowIndividualSale: boolean;
+  minPrice: number; // in cents;
   metadata: { [key: string]: any };
   audio?: {
     url: string;

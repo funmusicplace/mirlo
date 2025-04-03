@@ -15,6 +15,7 @@ import Box, { ArtistBox } from "components/common/Box";
 import { useQuery } from "@tanstack/react-query";
 import { queryManagedArtist, queryUserStripeStatus } from "queries";
 import { useAuthContext } from "state/AuthContext";
+import api from "services/api";
 
 const Container = styled.div<{ artistBanner: boolean }>`
   width: 100%;
@@ -109,7 +110,9 @@ const ManageArtistContainer: React.FC<{}> = () => {
                 i18nKey={"paymentProcessorNotSetUp"}
                 components={{
                   // eslint-disable-next-line jsx-a11y/anchor-has-content
-                  manage: <Link to="/manage"></Link>,
+                  manage: (
+                    <a href={api.paymentProcessor.stripeConnect(user.id)}></a>
+                  ),
                 }}
               />
             </ArtistBox>

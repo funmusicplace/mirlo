@@ -6,7 +6,7 @@ import {
 } from "../../../../utils/trackGroup";
 import { logger } from "../../../../logger";
 import { statFile, trackGroupFormatBucket } from "../../../../utils/minio";
-import { startGeneratingAlbum } from "../../../../queues/album-queue";
+import { startGeneratingZip } from "../../../../queues/album-queue";
 import prisma from "@mirlo/prisma";
 
 export default function () {
@@ -50,7 +50,11 @@ export default function () {
         });
       } else {
         logger.info("trackGroup doesn't exist yet, start generating it");
-        const jobId = await startGeneratingAlbum(trackGroup, format);
+        const jobId = await startGeneratingZip(
+          trackGroup,
+          trackGroup.tracks,
+          format
+        );
         return res.json({
           message: "We've started generating the album",
           result: { jobId },
@@ -58,7 +62,11 @@ export default function () {
       }
     } catch (e) {
       logger.info("trackGroup doesn't exist yet, start generating it");
-      const jobId = await startGeneratingAlbum(trackGroup, format);
+      const jobId = await startGeneratingZip(
+        trackGroup,
+        trackGroup.tracks,
+        format
+      );
       return res.json({
         message: "We've started generating the album",
         result: { jobId },

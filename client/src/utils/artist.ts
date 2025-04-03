@@ -43,6 +43,16 @@ export const getReleaseUrl = (
   )}`;
 };
 
+export const getTrackUrl = (
+  artist: { urlSlug?: string; id: number },
+  trackGroup: { urlSlug?: string; id: number },
+  track: { id: number }
+) => {
+  return `/${getArtistUrlReference(artist)}/release/${getTrackGroupUrlReference(
+    trackGroup
+  )}/tracks/${track.id}`;
+};
+
 export const getMerchUrl = (
   artist: { urlSlug?: string; id: number },
   merch: { id: string }

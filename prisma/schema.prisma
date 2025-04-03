@@ -73,6 +73,7 @@ model User {
   paymentTrackGroups                  TrackGroup[]
   isLabelAccount                      Boolean                         @default(false)
   artistLabels                        ArtistLabel[]
+  userTrackPurchases                  UserTrackPurchase[]
 }
 
 model UserArtistNotificationSetting {
@@ -104,6 +105,8 @@ model Notification {
   content          String?
   trackGroupId     Int?
   trackGroup       TrackGroup?             @relation(fields: [trackGroupId], references: [id])
+  trackId          Int?
+  track            Track?                  @relation(fields: [trackId], references: [id])
   subscriptionId   Int?
   subscription     ArtistUserSubscription? @relation(fields: [subscriptionId], references: [id])
   postId           Int?
@@ -121,6 +124,7 @@ enum NotificationType {
   USER_FOLLOWED_YOU
   USER_BOUGHT_YOUR_ALBUM
   USER_SUBSCRIBED_TO_YOU
+  USER_BOUGHT_YOUR_TRACK
 }
 
 model Post {
@@ -203,7 +207,7 @@ model Artist {
   merch                              Merch[]
   artistLabels                       ArtistLabel[]
   activityPub                        Boolean                              @default(false)
-  ActivityPubArtistFollowers         ActivityPubArtistFollowers[]
+  activityPubArtistFollowers         ActivityPubArtistFollowers[]
 }
 
 model ArtistAvatar {
@@ -446,6 +450,20 @@ model UserTrackGroupPurchase {
   @@unique([userId, trackGroupId])
 }
 
+model UserTrackPurchase {
+  userId              Int
+  user                User     @relation(fields: [userId], references: [id])
+  trackId             Int
+  track               Track    @relation(fields: [trackId], references: [id])
+  pricePaid           Int // in cents
+  currencyPaid        String   @default("usd")
+  datePurchased       DateTime @default(now())
+  stripeSessionKey    String?
+  singleDownloadToken String?
+
+  @@unique([userId, trackId])
+}
+
 model UserTrackGroupWishlist {
   userId       Int
   user         User       @relation(fields: [userId], references: [id])
@@ -513,24 +531,30 @@ model TrackGroupCover {
 }
 
 model Track {
-  id           Int           @id @default(autoincrement())
-  order        Int           @default(0)
-  trackGroup   TrackGroup    @relation(fields: [trackGroupId], references: [id])
-  trackGroupId Int
-  title        String?
-  audio        TrackAudio?
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  deletedAt    DateTime?
-  isPreview    Boolean       @default(true)
-  trackArtists TrackArtist[]
-  metadata     Json?
-  plays        TrackPlay[]
-  license      License?      @relation(fields: [licenseId], references: [id])
-  licenseId    Int?
-  lyrics       String?
-  isrc         String?
-  postTracks   PostTrack[]
+  id                  Int                 @id @default(autoincrement())
+  order               Int                 @default(0)
+  trackGroup          TrackGroup          @relation(fields: [trackGroupId], references: [id])
+  trackGroupId        Int
+  title               String?
+  audio               TrackAudio?
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  deletedAt           DateTime?
+  isPreview           Boolean             @default(true)
+  trackArtists        TrackArtist[]
+  metadata            Json?
+  plays               TrackPlay[]
+  license             License?            @relation(fields: [licenseId], references: [id])
+  licenseId           Int?
+  lyrics              String?
+  isrc                String?
+  stripeProductKey    String?
+  minPrice            Int? // in cents
+  currency            String?             @default("usd")
+  allowIndividualSale Boolean             @default(false)
+  postTracks          PostTrack[]
+  userTrackPurchases  UserTrackPurchase[]
+  Notification        Notification[]
 }
 
 model License {

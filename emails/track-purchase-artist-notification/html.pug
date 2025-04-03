@@ -1,0 +1,33 @@
+doctype html
+html
+  head
+    block head
+      meta(charset="utf-8")
+      meta(name="viewport", content="width=device-width")
+      meta(http-equiv="X-UA-Compatible", content="IE=edge")
+      meta(name="x-apple-disable-message-reformatting")
+      style 
+        include ../style.css
+  body.sans-serif
+    div
+      div.mw600
+        p 
+          | Hello #{track.trackGroup.artist.user.name}!
+        p 
+          | Someone (#{email}) bought a digital copy of 
+          strong #{track.trackGroup.title}.
+      div.mw600
+        p 
+          | From album: 
+          strong #{track.trackGroup.title}
+        p 
+          | #{purchase.currencyPaid.toUpperCase()} 
+          | #{pricePaid.toFixed(2)} 
+          | (Mirlo percentage: #{track.trackGroup.platformPercent}% (#{purchase.currencyPaid.toUpperCase()} #{platformCut.toFixed(2)}))
+        p 
+          | Final: 
+          strong #{purchase.currencyPaid.toUpperCase()} #{(pricePaid - platformCut).toFixed(2)} 
+
+      p The final money will be available via your Stripe dashboard
+      p If you have any questions please reach out to hi@mirlo.space
+

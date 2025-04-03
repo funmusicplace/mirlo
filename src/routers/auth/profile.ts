@@ -25,6 +25,11 @@ const profile = async (req: Request, res: Response, next: NextFunction) => {
             trackGroupId: true,
           },
         },
+        userTrackPurchases: {
+          select: {
+            trackId: true,
+          },
+        },
         artistUserSubscriptions: {
           where: {
             deletedAt: null,
