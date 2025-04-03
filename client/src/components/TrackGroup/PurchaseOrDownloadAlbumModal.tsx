@@ -23,7 +23,6 @@ const PurchaseOrDownloadAlbum: React.FC<{
   const trackGroupPurchases = user?.userTrackGroupPurchases;
   const trackPurchases = user?.userTrackPurchases;
 
-  console.log("trackPurchases", trackPurchases, track);
   const checkForAlbumOwnership = React.useCallback(async () => {
     try {
       if (userId) {

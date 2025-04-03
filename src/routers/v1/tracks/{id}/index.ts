@@ -46,7 +46,6 @@ export default function () {
         throw new AppError({ httpCode: 404, description: "Track not found" });
       }
 
-      console.log("track", track);
       res.json({
         result: {
           ...track,

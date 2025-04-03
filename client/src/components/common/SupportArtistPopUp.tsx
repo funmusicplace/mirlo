@@ -58,7 +58,7 @@ const SupportArtistPopUp: React.FC<{
         margin: 1rem;
       `}
     >
-      <ArtistButton size="big" rounded wrap onClick={() => setIsOpen(true)}>
+      <ArtistButton size="big" rounded onClick={() => setIsOpen(true)}>
         {t("subscribeToArtist", { artist: artist.name })}
       </ArtistButton>
       <Modal

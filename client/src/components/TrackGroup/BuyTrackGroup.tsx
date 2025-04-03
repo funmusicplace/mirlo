@@ -40,8 +40,6 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
   const { register, watch, handleSubmit, formState } = methods;
   const chosenPrice = watch("chosenPrice");
 
-  console.log("minPrice", minPrice);
-
   const purchaseAlbum = React.useCallback(
     async (data: FormData) => {
       try {
@@ -78,12 +76,6 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
       isFinite(+chosenPrice) && Number(chosenPrice) < minPrice / 100;
   }
 
-  console.log(
-    "lessThanMin",
-    chosenPrice,
-    isFinite(+chosenPrice),
-    Number(chosenPrice)
-  );
   const isBeforeReleaseDate = new Date(trackGroup.releaseDate) > new Date();
   const purchaseText = isBeforeReleaseDate ? "preOrder" : "buy";
 

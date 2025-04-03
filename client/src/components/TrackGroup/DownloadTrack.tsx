@@ -15,16 +15,16 @@ import { queryArtist } from "queries";
 import DownloadAlbumButton from "components/common/DownloadAlbumButton";
 import React from "react";
 import api from "services/api";
-import { getArtistUrl, getReleaseUrl } from "utils/artist";
+import { getArtistUrl, getReleaseUrl, getTrackUrl } from "utils/artist";
 
-function DownloadAlbum() {
-  const [trackGroup, setTrackGroup] = React.useState<TrackGroup>();
+function DownloadTrack() {
+  const [track, setTrack] = React.useState<Track>();
   const [isOwned, setIsOwned] = React.useState(false);
-  const [isLoadingTrackGroup, setIsLoadingTrackGroup] = React.useState(true);
+  const [isLoadingTrack, setIsLoadingTrack] = React.useState(true);
   const [params] = useSearchParams();
   const token = params.get("token");
   const email = params.get("email");
-  const { trackGroupId, artistId } = useParams();
+  const { trackGroupId, artistId, trackId } = useParams();
 
   const { data: artist, isLoading: isLoadingArtist } = useQuery(
     queryArtist({ artistSlug: artistId ?? "" })
@@ -33,27 +33,26 @@ function DownloadAlbum() {
   React.useEffect(() => {
     const callback = async () => {
       try {
-        setIsLoadingTrackGroup(true);
+        setIsLoadingTrack(true);
         // We need to find the trackgroup id, not the slug
-        const tgResponse = await api.get<TrackGroup>(
-          `trackGroups/${trackGroupId}?artistId=${artistId}`
-        );
+        const tgResponse = await api.get<Track>(`tracks/${trackId}`);
 
         const result = await api.get<{ exists: boolean }>(
-          `trackGroups/${tgResponse.result.id}/testOwns?email=${email ?? ""}`
+          `tracks/${trackId}/testOwns?email=${email ?? ""}`
         );
+        console.log("result", result);
 
         if (result.result.exists) {
           setIsOwned(true);
 
           if (result.result) {
-            setTrackGroup(tgResponse.result);
+            setTrack(tgResponse.result);
           }
         }
       } catch (e) {
         console.error(e);
       } finally {
-        setIsLoadingTrackGroup(false);
+        setIsLoadingTrack(false);
       }
     };
     if (artistId) {
@@ -65,28 +64,32 @@ function DownloadAlbum() {
     return <Navigate to="/" replace />;
   } else if (!artist) {
     return <FullPageLoadingSpinner />;
-  } else if (artist && !isOwned && !isLoadingTrackGroup) {
+  } else if (artist && !isOwned && !isLoadingTrack) {
     return (
       <Navigate
-        to={getReleaseUrl(artist, {
-          urlSlug: trackGroupId,
-          id: Number(trackGroupId),
-        })}
+        to={getTrackUrl(
+          artist,
+          {
+            urlSlug: trackGroupId,
+            id: Number(trackGroupId),
+          },
+          { id: Number(trackId) }
+        )}
         replace
       />
     );
-  } else if (!trackGroup && !isLoadingTrackGroup) {
+  } else if (!track && !isLoadingTrack) {
     return <Navigate to={getArtistUrl(artist)} replace />;
-  } else if (!trackGroup) {
+  } else if (!track) {
     return <FullPageLoadingSpinner />;
   }
 
   return (
     <WidthWrapper variant="small">
       <MetaCard
-        title={trackGroup.title}
-        description={trackGroup.about ?? "An album on Mirlo"}
-        image={trackGroup.cover?.sizes?.[600]}
+        title={track.title}
+        description={"An track on Mirlo"}
+        image={track.trackGroup.cover?.sizes?.[600]}
       />
       <div
         className={css`
@@ -101,17 +104,18 @@ function DownloadAlbum() {
           `}
         >
           <ImageWithPlaceholder
-            src={trackGroup.cover?.sizes?.[120]}
+            src={track.trackGroup.cover?.sizes?.[120]}
             size={120}
-            alt={trackGroup.title}
+            alt={track.title}
           />
           <SmallTileDetails
-            title={trackGroup.title}
-            subtitle={trackGroup.artist?.name ?? ""}
+            title={track.title}
+            subtitle={track.trackGroup.artist?.name ?? ""}
           />
         </div>
         <DownloadAlbumButton
-          trackGroup={trackGroup}
+          trackGroup={track.trackGroup}
+          track={track}
           token={token ?? undefined}
           email={email ?? undefined}
         />
@@ -120,4 +124,4 @@ function DownloadAlbum() {
   );
 }
 
-export default DownloadAlbum;
+export default DownloadTrack;
