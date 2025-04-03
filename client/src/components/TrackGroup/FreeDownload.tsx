@@ -14,15 +14,20 @@ const FreeDownload: React.FC<{
 }> = ({ trackGroup, chosenPrice }) => {
   const { user } = useAuthContext();
   const [email, setEmail] = React.useState(user?.email);
+  const [isLoading, setIsloading] = React.useState(false);
   const snackbar = useSnackbar();
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
 
   const downloadAlbumAnyway = React.useCallback(async () => {
     try {
+      setIsloading(true);
       await api.post(`trackGroups/${trackGroup.id}/emailDownload`, { email });
+      snackbar(t("emailSent"), { type: "warning" });
     } catch (e) {
       snackbar(t("error"), { type: "warning" });
       console.error(e);
+    } finally {
+      setIsloading(false);
     }
   }, [email, snackbar, t, trackGroup.id]);
 
