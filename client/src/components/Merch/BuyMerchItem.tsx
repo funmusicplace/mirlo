@@ -155,7 +155,7 @@ const BuyMerchItem: React.FC<{
           <InputEl
             {...methods.register("price", { min: minPrice })}
             type="number"
-            min={minPrice}
+            min={minPrice ? minPrice : 0}
             step={0.01}
             className={css`
               max-width: 8rem;

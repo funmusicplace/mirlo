@@ -16,6 +16,7 @@ import EmailInput from "./EmailInput";
 import PlatformPercent from "components/common/PlatformPercent";
 import { css } from "@emotion/css";
 import { testOwnership } from "./utils";
+import Box from "components/common/Box";
 
 interface FormData {
   chosenPrice: string;
@@ -98,6 +99,17 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
             min={minPrice ? minPrice / 100 : 0}
             step="0.01"
           />
+          {minPrice}
+          {Number(chosenPrice) > (minPrice ?? 1) * 100 && (
+            <Box variant="success">
+              {t("thatsGenerous", {
+                chosenPrice: moneyDisplay({
+                  amount: chosenPrice,
+                  currency: trackGroup.currency,
+                }),
+              })}
+            </Box>
+          )}
           <PlatformPercent
             percent={trackGroup.platformPercent}
             chosenPrice={chosenPrice}

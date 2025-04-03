@@ -17,11 +17,22 @@ const SavingInput: React.FC<{
   url: string;
   extraData?: Object;
   rows?: number;
+  min?: number;
   required?: boolean;
   step?: string;
   type?: string;
   reload?: () => void;
-}> = ({ formKey, url, extraData = {}, type, required, rows, step, reload }) => {
+}> = ({
+  formKey,
+  min,
+  url,
+  extraData = {},
+  type,
+  required,
+  rows,
+  step,
+  reload,
+}) => {
   const { register, getValues } = useFormContext();
   const errorHandler = useErrorHandler();
 
@@ -93,6 +104,7 @@ const SavingInput: React.FC<{
           type={type}
           required={required}
           step={step}
+          min={min}
         />
       )}
       {rows && (

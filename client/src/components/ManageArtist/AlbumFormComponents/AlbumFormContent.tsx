@@ -131,6 +131,7 @@ const AlbumFormContent: React.FC<{
                   formKey="minPrice"
                   type="number"
                   step="0.01"
+                  min={0}
                   url={`manage/trackGroups/${trackGroupId}`}
                   extraData={{ artistId: Number(artistId) }}
                 />

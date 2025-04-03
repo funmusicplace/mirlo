@@ -541,6 +541,7 @@ model Track {
   updatedAt           DateTime            @updatedAt
   deletedAt           DateTime?
   isPreview           Boolean             @default(true)
+  isFeatured          Boolean             @default(false)
   trackArtists        TrackArtist[]
   metadata            Json?
   plays               TrackPlay[]

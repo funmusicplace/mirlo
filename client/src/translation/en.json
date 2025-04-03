@@ -128,9 +128,11 @@
     "removeFromWishlist": "Remove from wishlist"
   },
   "trackGroupCard": {
+    "thatsGenerous": "{{ chosenPrice }}? That's generous!",
     "notLoggedIn": "We'll need your email address to send you a one-time download link of the album. In the future you'll be able to create an account and access what you've bought.",
     "albumExists": "An album has already been bought using this email address, you can finish creating an account to see it in your collection. Do you want to proceed anyway?",
     "download": "Download",
+    "emailSent": "We've sent you an email with a download link!",
     "downloadDisclaimer": "We strongly encourage you to download purchases; we're not always in control of what might be required of us legally to keep the platform and releases up. We think people should try, as much as possible, to keep a local archive of the art that they buy online.",
     "error": "Something went wrong",
     "buy": "Buy",
@@ -167,6 +169,8 @@
     "merchItem": "Merch item",
     "customer": "Customer",
     "email": "E-mail",
+    "trackingWebsite": "Tracking website URL",
+    "trackingNumber": "Tracking number",
     "itemArtist": "Artist merch belongs",
     "fulfillmentStatus": "Fulfillment status",
     "ordersAndFulfillment": "Orders & Fulfillment",

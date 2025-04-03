@@ -151,6 +151,7 @@ const TipArtistForm: React.FC<{
                   type="number"
                   {...methods.register("price")}
                   step={0.01}
+                  min={0}
                 />
               </FormComponent>
             )}
