@@ -133,6 +133,21 @@ const routes: RouteObject[] = [
             },
           },
           {
+            path: "label",
+            async lazy() {
+              const { default: Component } = await import(
+                "components/Profile/Label"
+              );
+              return {
+                Component: () => (
+                  <AuthWrapper adminOnly>
+                    <Component />
+                  </AuthWrapper>
+                ),
+              };
+            },
+          },
+          {
             path: "collection",
             async lazy() {
               const { default: Component } = await import(
