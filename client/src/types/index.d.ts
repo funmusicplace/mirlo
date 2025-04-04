@@ -151,8 +151,12 @@ interface Link {
 
 interface ArtistLabel {
   artistId: number;
+  artist: Artist;
   labelUserId: number;
   labelUser: { name: string; email: string };
+  isLabelApproved: boolean;
+  canLabelManageArtist: boolean;
+  canLabelAddReleases: boolean;
 }
 
 interface Artist {

@@ -460,7 +460,7 @@ interface LocalArtist extends Artist {
     cover?: TrackGroupCover | null;
     tracks?: Track[];
   })[];
-  merch?: (Merch & { images: MerchImage[] })[];
+  merch?: (Merch & { images?: MerchImage[] })[];
 }
 
 export const addSizesToImage = (
