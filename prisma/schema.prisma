@@ -233,10 +233,13 @@ model ArtistBanner {
 }
 
 model ArtistLabel {
-  artist      Artist @relation(fields: [artistId], references: [id])
-  artistId    Int
-  labelUser   User   @relation(fields: [labelUserId], references: [id])
-  labelUserId Int
+  artist               Artist  @relation(fields: [artistId], references: [id])
+  artistId             Int
+  labelUser            User    @relation(fields: [labelUserId], references: [id])
+  labelUserId          Int
+  isLabelApproved      Boolean @default(false)
+  canLabelManageArtist Boolean @default(false)
+  canLabelAddReleases  Boolean @default(true)
 
   @@unique([labelUserId, artistId])
 }

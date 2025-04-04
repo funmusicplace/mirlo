@@ -210,6 +210,17 @@
     "destinationCost": "Cost to ship here: {{costUnit}}",
     "supportedShippingDestinations": "Choose the shipping destination that best matches you"
   },
+  "label": {
+    "artist": "Artist",
+    "labelProfile": "Manage artists",
+    "page": "Artist link",
+    "manage": "Manage artist",
+    "askArtist": "Ask artist to grant permission",
+    "canLabelManageArtist": "Can label manage entire artist page",
+    "canLabelAddReleases": "Can label add releases to this artist",
+    "isLabelApproved": "Will this artist show on the roster",
+    "showOnPage": "Show on roster"
+  },
   "artist": {
     "merch": "Merch",
     "artistCheckoutPage": "You will be taken to the artist's payment processor page to complete this subscription.",
