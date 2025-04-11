@@ -210,6 +210,17 @@
     "destinationCost": "Cost to ship here: {{costUnit}}",
     "supportedShippingDestinations": "Choose the shipping destination that best matches you"
   },
+  "label": {
+    "artist": "Artist",
+    "labelProfile": "Manage artists",
+    "page": "Artist link",
+    "manage": "Manage artist",
+    "askArtist": "Ask artist to grant permission",
+    "canLabelManageArtist": "Can label manage entire artist page",
+    "canLabelAddReleases": "Can label add releases to this artist",
+    "isLabelApproved": "Will this artist show on the roster",
+    "showOnPage": "Show on roster"
+  },
   "artist": {
     "merch": "Merch",
     "artistCheckoutPage": "You will be taken to the artist's payment processor page to complete this subscription.",
@@ -271,7 +282,7 @@
     "subscribe": "Subscribe to artist",
     "month": "month",
     "noBioYet": "You haven't added a biography for your artist yet.",
-    "addNewAlbum": "Add new album",
+    "addNewAlbum": "Add new release",
     "saveBio": "Save bio",
     "editBioButton": "Edit bio",
     "addNewLink": "Add new link",
@@ -340,7 +351,7 @@
     "editPost": "Edit post",
     "editDetails": "Edit artist details",
     "viewLive": "View live",
-    "addNewAlbum": "Add new album",
+    "addNewAlbum": "Add new release",
     "edit": "Edit",
     "editPage": "Manage artist page",
     "customizeLook": "Customize look",
@@ -551,7 +562,7 @@
     "updatedArtist": "Updated artist",
     "dimensionsTip": "For the best effect, upload a {{maxDimensions}} size image. File size is limited to {{ maxSize }}.",
     "yourAlbums": "Your albums",
-    "addNewAlbum": "Add new album to {{artistName}} page",
+    "addNewAlbum": "Add new release to {{artistName}} page",
     "posts": "Posts",
     "banner": "Background",
     "avatar": "Avatar",
@@ -600,7 +611,7 @@
     "name": "Name: ",
     "addNewTier": "Add new tier",
     "allowVariableDescription": "Allow supporters to enter a larger number?",
-    "autoAlbumPurchase": "If a user subscribes at this tier, they'll automatically get every new album you release.",
+    "autoAlbumPurchase": "If a user subscribes at this tier, they'll automatically get every new release you release.",
     "newSubscriptionTierFor": "New subscription tier for {{ artistName }}",
     "minimumAmount": "Minimum amount: ",
     "description": "Description",
@@ -621,7 +632,7 @@
   "notifications": {
     "notifications": "Notifications",
     "readPost": "Read post",
-    "viewAlbum": "View album",
+    "viewAlbum": "View release",
     "newPostByArtist": "New post by <link>{{artistName}}</link>"
   },
   "kickstarter": {

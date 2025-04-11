@@ -99,7 +99,6 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
             min={minPrice ? minPrice / 100 : 0}
             step="0.01"
           />
-          {minPrice}
           {Number(chosenPrice) > (minPrice ?? 1) * 100 && (
             <Box variant="success">
               {t("thatsGenerous", {

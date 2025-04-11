@@ -41,16 +41,14 @@ describe("tracks/{id}/purchase", () => {
       assert.equal(response.statusCode, 404);
     });
 
-    it("should POST / 400 if the price sent is less than the trackGroup price", async () => {
+    it("should POST / 400 if the price sent is less than the track price", async () => {
       const { user, accessToken } = await createUser({
         email: "artist@artist.com",
       });
       const artist = await createArtist(user.id);
-      const trackGroup = await createTrackGroup(artist.id, {
-        minPrice: 500,
-      });
+      const trackGroup = await createTrackGroup(artist.id);
 
-      const track = await createTrack(trackGroup.id);
+      const track = await createTrack(trackGroup.id, { minPrice: 500 });
 
       const response = await requestApp
         .post(`tracks/${track.id}/purchase`)

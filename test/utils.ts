@@ -167,6 +167,7 @@ export const createTrack = async (
       title: data?.title,
       trackGroupId,
       stripeProductKey: data?.stripeProductKey,
+      minPrice: data?.minPrice,
     },
   });
 

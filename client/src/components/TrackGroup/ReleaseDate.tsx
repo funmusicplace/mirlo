@@ -3,6 +3,7 @@ import React from "react";
 import { bp } from "../../constants";
 import { useTranslation } from "react-i18next";
 import { i18n } from "i18next";
+import { useGetArtistColors } from "components/Artist/ArtistButtons";
 
 export const formatDate = ({
   date,
@@ -29,6 +30,7 @@ export const formatDate = ({
 const ReleaseDate: React.FC<{ releaseDate: string }> = ({
   releaseDate: releaseDateString,
 }) => {
+  const { colors } = useGetArtistColors();
   const { t, i18n } = useTranslation("translation", {
     keyPrefix: "trackGroupDetails",
   });
@@ -49,8 +51,11 @@ const ReleaseDate: React.FC<{ releaseDate: string }> = ({
   return (
     <div
       className={css`
-        color: var(--mi-light-foreground-color);
+        color: ${colors
+          ? colors.foreground
+          : "var(--mi-light-foreground-color)"};
         font-size: 1rem;
+        filter: opacity(80%);
 
         @media screen and (max-width: ${bp.medium}px) {
           font-size: var(--mi-font-size-small);

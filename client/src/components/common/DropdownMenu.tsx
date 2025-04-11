@@ -5,12 +5,16 @@ import Background from "components/common/Background";
 import { FaEllipsisV } from "react-icons/fa";
 import Button from "./Button";
 
+import { useGetArtistColors } from "components/Artist/ArtistButtons";
+
 const DropdownMenu: React.FC<{
   children: React.ReactElement | React.ReactElement[];
   dashed?: boolean;
   icon?: React.ReactElement;
   compact?: boolean;
 }> = ({ children, icon, compact, dashed }) => {
+  const { colors } = useGetArtistColors();
+
   const [isMenuOpen, setIsMenuOpen] = React.useState<boolean>(false);
 
   if (!icon) {
@@ -26,7 +30,7 @@ const DropdownMenu: React.FC<{
           flex-grow: 1;
 
           svg {
-            fill: var(--mi-black);
+            fill: ${colors ? colors.primary : "var(--mi-black)"};
           }
 
           @media (prefers-color-scheme: dark) {

@@ -62,6 +62,7 @@ export default function () {
           description: `Track with ID ${trackId} not found`,
         });
       }
+      const currency = track?.currency ?? track.trackGroup?.currency;
 
       if (loggedInUser) {
         await subscribeUserToArtist(track.trackGroup?.artist, loggedInUser);
@@ -76,10 +77,10 @@ export default function () {
 
       const priceZero = (track.minPrice ?? 0) === 0 && priceNumber === 0;
 
-      if (priceNumber < (track.trackGroup.minPrice ?? 0)) {
+      if (track.minPrice && priceNumber < track.minPrice) {
         throw new AppError({
           httpCode: 400,
-          description: `Have to pay at least ${track.minPrice} for this track. ${priceNumber} is not enough`,
+          description: `Have to pay at least ${track.minPrice / 100} ${currency} for this track. ${priceNumber / 100} ${currency} is not enough`,
         });
       }
 
