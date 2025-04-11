@@ -3,7 +3,7 @@ import { useForm, FormProvider } from "react-hook-form";
 import { InputEl } from "components/common/Input";
 import { FaSave, FaTimes } from "react-icons/fa";
 import { css } from "@emotion/css";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { fmtMSS } from "utils/tracks";
 import SelectTrackPreview from "../SelectTrackPreview";
 import TrackUploadingState from "../TrackUploadingState";
@@ -24,6 +24,7 @@ import { useQuery } from "@tanstack/react-query";
 import ShowRawID3Data from "./ShowRawID3Data";
 import styled from "@emotion/styled";
 import FormCheckbox from "components/common/FormCheckbox";
+import InfoModal from "components/common/InfoModal";
 
 export interface FormData {
   title: string;
@@ -170,11 +171,7 @@ const EditTrackRow: React.FC<{
           {!isSaving && <TrackUploadingState uploadingState={uploadingState} />}
         </td>
         <td>
-          <InputEl
-            {...register(`title`)}
-            disabled={isSaving || isDisabled}
-            type="number"
-          />
+          <InputEl {...register(`title`)} disabled={isSaving || isDisabled} />
         </td>
         <td>
           <ManageTrackArtists
@@ -279,7 +276,25 @@ const EditTrackRow: React.FC<{
         </td>
       </IndentedTR>
       <IndentedTR>
-        <td colSpan={2}>{t("license")}</td>
+        <td colSpan={2}>
+          <div
+            className={css`
+              display: flex;
+              align-items: center;
+            `}
+          >
+            {t("license")}
+            <InfoModal
+              info={
+                <Trans
+                  t={t}
+                  i18nKey={"whatMeanLicense"}
+                  components={{ a: <a></a> }}
+                />
+              }
+            />
+          </div>
+        </td>
         <td colSpan={99}>
           <ManageTrackLicense />
         </td>

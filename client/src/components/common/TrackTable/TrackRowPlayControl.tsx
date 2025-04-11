@@ -73,7 +73,7 @@ const TrackRowPlayControl: React.FC<{
         <Button
           size="compact"
           startIcon={<TfiControlPause />}
-          data-cy="track-row-pause-button"
+          className="pause-button"
           onClick={onTrackPause}
           style={{ width: "2rem", textAlign: "center" }}
         />

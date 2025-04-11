@@ -28,62 +28,49 @@ const Wrapper = styled.div`
   }
 `;
 
-const ClickToPlayAlbum: React.FC<{
-  trackGroupId: number;
+const ClickToPlayTracks: React.FC<{
+  trackIds: number[];
   className?: string;
-}> = ({ trackGroupId, className }) => {
+}> = ({ trackIds, className }) => {
   const {
     state: { playing, playerQueueIds, currentlyPlayingIndex },
     dispatch,
   } = useGlobalStateContext();
   const { user } = useAuthContext();
-  const [trackIds, setTrackIds] = React.useState<number[]>([]);
+  const [localTrackIds, setLocalTrackIds] = React.useState<number[]>([]);
 
   const userId = user?.id;
 
   React.useEffect(() => {
     const callback = async () => {
-      const { result } = await api.get<TrackGroup>(
-        `trackGroups/${trackGroupId}`
-      );
       try {
-        let isOwned = false;
-        if (userId) {
-          const userIsTrackGroupArtist = result.artist?.userId === userId;
-
-          if (!userIsTrackGroupArtist) {
-            const { results: purchases } =
-              await api.getMany<UserTrackGroupPurchase>(
-                `users/${userId}/trackGroupPurchases?trackGroupId=${trackGroupId}`
-              );
-
-            isOwned = purchases.length > 0;
-          } else {
-            isOwned = true;
-          }
+        const params = new URLSearchParams();
+        for (const id of trackIds) {
+          params.append("trackIds[]", id.toString());
         }
-        const ids = result.tracks
-          .filter((item) => item.isPreview || isOwned)
-          .map((item) => item.id);
-        setTrackIds(ids);
+        const { results } = await api.getMany<number>(
+          `users/${userId}/tracksPlayable?${params.toString()}`
+        );
+
+        setLocalTrackIds(results);
       } catch (e) {
         console.error(e);
       }
     };
     callback();
-  }, [trackGroupId, userId]);
+  }, [trackIds, userId]);
 
   const onClickPlay = React.useCallback(async () => {
     dispatch({
       type: "startPlayingIds",
-      playerQueueIds: trackIds,
+      playerQueueIds: localTrackIds,
     });
-  }, [dispatch, trackIds]);
+  }, [dispatch, localTrackIds]);
 
   const currentlyPlaying =
     playing &&
     currentlyPlayingIndex !== undefined &&
-    trackIds.includes(playerQueueIds[currentlyPlayingIndex]);
+    localTrackIds.includes(playerQueueIds[currentlyPlayingIndex]);
 
   return (
     <Wrapper className={className}>
@@ -92,4 +79,4 @@ const ClickToPlayAlbum: React.FC<{
   );
 };
 
-export default ClickToPlayAlbum;
+export default ClickToPlayTracks;

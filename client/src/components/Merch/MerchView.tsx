@@ -11,7 +11,7 @@ import { bp } from "../../constants";
 
 import MarkdownContent from "components/common/MarkdownContent";
 import WidthContainer from "components/common/WidthContainer";
-import { ItemViewTitle } from "../TrackGroup/TrackGroupTitle";
+import { ItemViewTitle } from "../TrackGroup/ItemViewTitle";
 import SupportArtistPopUp from "components/common/SupportArtistPopUp";
 
 import { useQuery } from "@tanstack/react-query";

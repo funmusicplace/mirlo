@@ -1,7 +1,7 @@
 import { css } from "@emotion/css";
 
 import { useParams } from "react-router-dom";
-import ClickToPlayAlbum from "../common/ClickToPlayAlbum";
+import ClickToPlayAlbum from "../common/ClickToPlayTracks";
 import Box from "../common/Box";
 import { useTranslation } from "react-i18next";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
@@ -16,7 +16,7 @@ import MarkdownContent from "components/common/MarkdownContent";
 import Wishlist from "./Wishlist";
 import ReleaseDate from "./ReleaseDate";
 import WidthContainer from "components/common/WidthContainer";
-import TrackGroupTitle from "./TrackGroupTitle";
+import TrackGroupTitle from "./ItemViewTitle";
 import styled from "@emotion/styled";
 import SupportArtistPopUp from "components/common/SupportArtistPopUp";
 import TrackGroupPills from "./TrackGroupPills";
@@ -270,7 +270,7 @@ function TrackGroup() {
 
                 <SmallScreenPlayWrapper>
                   <ClickToPlayAlbum
-                    trackGroupId={trackGroup.id}
+                    trackIds={trackGroup.tracks.map((t) => t.id)}
                     className={css`
                       width: 50px !important;
                       margin-right: 10px;

@@ -32,6 +32,7 @@ const ManageTrackLicense = () => {
       </Modal>
       <FormComponent>
         <SelectEl {...methods.register("licenseId")}>
+          <option value="">{t("selectALicense")}</option>
           {licenses?.results.map((license) => (
             <option value={license.id}>{license.short}</option>
           ))}
@@ -45,6 +46,7 @@ const ManageTrackLicense = () => {
             className={css`
               display: flex;
               align-items: center;
+              flex-direction: row;
             `}
           >
             {t("dontSeeTheLicenseYouWant")}
@@ -60,15 +62,6 @@ const ManageTrackLicense = () => {
               {t("addIt")}
             </Button>
           </small>
-          <InfoModal
-            info={
-              <Trans
-                t={t}
-                i18nKey={"whatMeanLicense"}
-                components={{ a: <a></a> }}
-              />
-            }
-          />
         </div>
       </FormComponent>
     </>

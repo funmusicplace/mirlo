@@ -1,7 +1,7 @@
 import { css } from "@emotion/css";
 import { FaPen } from "react-icons/fa";
 import { Link, useParams } from "react-router-dom";
-import ClickToPlayAlbum from "../common/ClickToPlayAlbum";
+import ClickToPlayAlbum from "../common/ClickToPlayTracks";
 import Button, { ButtonLink } from "../common/Button";
 import { useTranslation } from "react-i18next";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
@@ -17,11 +17,12 @@ import FlagContent from "./FlagContent";
 import ArtistByLine from "./ArtistByLine";
 import { useQuery } from "@tanstack/react-query";
 import { queryArtist } from "queries";
+import { ArtistButtonLink } from "components/Artist/ArtistButtons";
 
 export const ItemViewTitle: React.FC<{
   title: string;
-  trackGroupId?: number;
-}> = ({ title, trackGroupId }) => {
+  trackIds?: number[];
+}> = ({ title, trackIds }) => {
   return (
     <div
       className={css`
@@ -33,7 +34,7 @@ export const ItemViewTitle: React.FC<{
         max-width: 80%;
       `}
     >
-      {trackGroupId && (
+      {trackIds && trackIds.length > 0 && (
         <div
           className={css`
             @media screen and (max-width: ${bp.small}px) {
@@ -42,7 +43,7 @@ export const ItemViewTitle: React.FC<{
           `}
         >
           <ClickToPlayAlbum
-            trackGroupId={trackGroupId}
+            trackIds={trackIds}
             className={css`
               width: 50px !important;
               margin-right: 10px;
@@ -89,7 +90,10 @@ const TrackGroupTitle: React.FC<{
 
   return (
     <>
-      <ItemViewTitle trackGroupId={trackGroup.id} title={title} />
+      <ItemViewTitle
+        trackIds={trackGroup.tracks.map((t) => t.id)}
+        title={title}
+      />
       <div
         className={css`
           display: flex;
@@ -110,7 +114,7 @@ const TrackGroupTitle: React.FC<{
           `}
         >
           {(ownedByUser || user?.isAdmin) && (
-            <ButtonLink
+            <ArtistButtonLink
               size="compact"
               startIcon={<FaPen />}
               variant="dashed"
@@ -118,7 +122,7 @@ const TrackGroupTitle: React.FC<{
               style={{ marginRight: "1rem" }}
             >
               {t("edit")}
-            </ButtonLink>
+            </ArtistButtonLink>
           )}
           <FlagContent trackGroupId={trackGroup.id} />
           {user?.isAdmin && (

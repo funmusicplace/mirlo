@@ -36,9 +36,14 @@ const TR = styled.tr<{ canPlayTrack: boolean }>`
         ? `background-color: var(--mi-normal-foreground-color);`
         : `background-color: var(--mi-normal-foreground-color) !important;`}
 
-    button.play-button {
+    button.play-button,
+    button.pause-button {
       color: var(--mi-normal-background-color);
       background: transparent;
+
+      svg {
+        fill: var(--mi-normal-background-color) !important;
+      }
     }
 
     .mi-dropdown-button {
@@ -141,13 +146,8 @@ const TrackRow: React.FC<{
   }, [addTracksToQueue, canPlayTrack, dispatch, track.id]);
 
   return (
-    <TR
-      key={track.id}
-      id={`${track.id}`}
-      onClick={onTrackPlay}
-      canPlayTrack={canPlayTrack}
-    >
-      <FirstTD>
+    <TR key={track.id} id={`${track.id}`} canPlayTrack={canPlayTrack}>
+      <FirstTD onClick={onTrackPlay}>
         <TrackRowPlayControl
           trackId={track.id}
           canPlayTrack={canPlayTrack}
@@ -165,10 +165,6 @@ const TrackRow: React.FC<{
             margin-bottom: 0rem;
             justify-content: space-between;
             align-items: center;
-
-            &:hover {
-              cursor: pointer;
-            }
 
             @media screen and (max-width: ${bp.small}px) {
               flex-wrap: nowrap;
@@ -239,39 +235,41 @@ const TrackRow: React.FC<{
               </li>
               {track.lyrics && (
                 <li>
-                  s <LyricsModal track={track} />
+                  <LyricsModal track={track} />
                 </li>
               )}
+              <li>
+                {size !== "small" &&
+                  track.license &&
+                  track.license?.short !== "copyright" && (
+                    <Tooltip hoverText={track.license.name}>
+                      {track.license.link && (
+                        <LicenseSpan
+                          as="a"
+                          target="_blank"
+                          href={track.license.link}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                          }}
+                          className={css`
+                            overflow: ellipsis;
+                          `}
+                        >
+                          {track.license.short}
+                        </LicenseSpan>
+                      )}
+                      {!track.license.link && (
+                        <LicenseSpan as="span">
+                          {track.license.short}
+                        </LicenseSpan>
+                      )}
+                    </Tooltip>
+                  )}
+              </li>
             </ul>
           </DropdownMenu>
         </td>
       )}
-      {size !== "small" &&
-        track.license &&
-        track.license?.short !== "copyright" && (
-          <td>
-            <Tooltip hoverText={track.license.name}>
-              {track.license.link && (
-                <LicenseSpan
-                  as="a"
-                  target="_blank"
-                  href={track.license.link}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                  }}
-                  className={css`
-                    overflow: ellipsis;
-                  `}
-                >
-                  {track.license.short}
-                </LicenseSpan>
-              )}
-              {!track.license.link && (
-                <LicenseSpan as="span">{track.license.short}</LicenseSpan>
-              )}
-            </Tooltip>
-          </td>
-        )}
     </TR>
   );
 };
