@@ -96,7 +96,7 @@ function DownloadTrack() {
           margin-top: 2rem;
         `}
       >
-        <h2>Download your new album!</h2>
+        <h2>Download your new release!</h2>
         <div
           className={css`
             display: flex;

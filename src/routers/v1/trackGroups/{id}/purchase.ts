@@ -72,10 +72,12 @@ export default function () {
 
       const priceZero = (trackGroup.minPrice ?? 0) === 0 && priceNumber === 0;
 
-      if (priceNumber < (trackGroup.minPrice ?? 0)) {
+      if (trackGroup.minPrice && priceNumber < trackGroup.minPrice) {
+        const currency = trackGroup?.currency;
+
         throw new AppError({
           httpCode: 400,
-          description: `Have to pay at least ${trackGroup.minPrice} for this trackGroup. ${priceNumber} is not enough`,
+          description: `Have to pay at least ${trackGroup.minPrice / 100} ${currency} for this track. ${priceNumber / 100} ${currency} is not enough`,
         });
       }
 
