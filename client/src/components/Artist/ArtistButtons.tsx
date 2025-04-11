@@ -11,14 +11,18 @@ import {
   useParams,
 } from "react-router-dom";
 
-const ArtistRouterLink: React.FC<LinkProps> = (props) => {
+export const useGetArtistColors = () => {
   const { artistId } = useParams();
 
   const { data: artist, isLoading: isLoadingArtist } = useQuery(
     queryArtist({ artistSlug: artistId ?? "" })
   );
 
-  const colors = artist?.properties?.colors;
+  return { colors: artist?.properties?.colors, isLoadingArtist };
+};
+
+const ArtistRouterLink: React.FC<LinkProps> = (props) => {
+  const { colors } = useGetArtistColors();
   return (
     <Link
       {...props}
@@ -37,13 +41,7 @@ const ArtistRouterLink: React.FC<LinkProps> = (props) => {
 export const ArtistButton: React.FC<
   ButtonProps & React.ButtonHTMLAttributes<HTMLButtonElement>
 > = ({ onClick, ...props }) => {
-  const { artistId } = useParams();
-
-  const { data: artist, isLoading: isLoadingArtist } = useQuery(
-    queryArtist({ artistSlug: artistId ?? "" })
-  );
-
-  const colors = artist?.properties?.colors;
+  const { colors } = useGetArtistColors();
 
   let variantStyles = () => {
     switch (props.variant) {
