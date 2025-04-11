@@ -1,7 +1,7 @@
 import { css } from "@emotion/css";
 
 import { useNavigate, useParams } from "react-router-dom";
-import ClickToPlayAlbum from "../common/ClickToPlayAlbum";
+import ClickToPlayAlbum from "../common/ClickToPlayTracks";
 import Box from "../common/Box";
 import { useTranslation } from "react-i18next";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
@@ -13,7 +13,7 @@ import { bp } from "../../constants";
 
 import ReleaseDate from "./ReleaseDate";
 import WidthContainer from "components/common/WidthContainer";
-import TrackGroupTitle from "./TrackGroupTitle";
+import TrackGroupTitle from "./ItemViewTitle";
 import SupportArtistPopUp from "components/common/SupportArtistPopUp";
 import { useAuthContext } from "state/AuthContext";
 import TrackGroupMerch from "./TrackGroupMerch";
@@ -105,7 +105,7 @@ function TrackView() {
             `}
           >
             <TrackGroupTitle
-              trackGroup={trackGroup}
+              trackGroup={{ ...trackGroup, tracks: [filteredTrack] }}
               title={filteredTrack.title}
             />
 
@@ -142,7 +142,7 @@ function TrackView() {
                 )}
                 <SmallScreenPlayWrapper>
                   <ClickToPlayAlbum
-                    trackGroupId={trackGroup.id}
+                    trackIds={[filteredTrack.id]}
                     className={css`
                       width: 50px !important;
                       margin-right: 10px;
