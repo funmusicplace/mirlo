@@ -313,6 +313,39 @@ describe("artists/{id}/feed", () => {
     assert.equal(obj.items[0].title, trackGroup.title);
   });
 
+  it("should GET / not display an album if it's not public", async () => {
+    const user = await prisma.user.create({
+      data: {
+        email: "test@test.com",
+      },
+    });
+    const artist = await prisma.artist.create({
+      data: {
+        name: "Test artist",
+        urlSlug: "test-artist",
+        userId: user.id,
+        enabled: true,
+      },
+    });
+
+    const trackGroup = await createTrackGroup(artist.id, { published: false });
+
+    const response = await requestApp
+      .get(`artists/${artist.id}/feed?format=rss`)
+      .set("Accept", "application/json");
+
+    assert(response.statusCode === 200);
+    let parser = new Parser();
+    const obj = await parser.parseString(response.text);
+    assert(response.text);
+    assert.equal(
+      obj.feedUrl,
+      `${process.env.API_DOMAIN}/v1/${artist.urlSlug}/feed?format=rss`
+    );
+    assert.equal(obj.title, `${artist.name} Feed`);
+    assert.equal(obj.items.length, 0);
+  });
+
   it("should GET / both an album and a post and display it in RSS", async () => {
     const user = await prisma.user.create({
       data: {

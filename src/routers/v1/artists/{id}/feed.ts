@@ -17,6 +17,7 @@ import { markdownAsHtml } from "../../../../utils/post";
 import { whereForPublishedTrackGroups } from "../../../../utils/trackGroup";
 import { isTrackGroup } from "../../../../utils/typeguards";
 import {
+  getClient,
   headersAreForActivityPub,
   turnFeedIntoOutbox,
 } from "../../../../activityPub/utils";
@@ -126,20 +127,22 @@ export const turnItemsIntoRSS = async (
   zipped: (
     | (TrackGroup & { artist: { name: string; urlSlug: string; id: number } })
     | Post
-  )[]
+  )[],
+  options?: {
+    feedUrl?: string;
+    siteUrl?: string;
+  }
 ) => {
   // TODO: probably want to convert this to some sort of module
-  const client = await prisma.client.findFirst({
-    where: {
-      applicationName: "frontend",
-    },
-  });
+  const client = await getClient();
 
   const feed = new RSS({
     title: `${artist.name} Feed`,
     description: artist.bio ?? undefined,
-    feed_url: `${process.env.API_DOMAIN}/v1/${artist.urlSlug}/feed?format=rss`,
-    site_url: `${client?.applicationUrl}/${artist.urlSlug}`,
+    feed_url: `${process.env.API_DOMAIN}/v1/${options?.feedUrl ? options?.feedUrl : `${artist.urlSlug}/feed`}?format=rss`,
+    site_url: options?.siteUrl
+      ? options.siteUrl
+      : `${client?.applicationUrl}/${artist.urlSlug}`,
   });
 
   for (const p of zipped) {

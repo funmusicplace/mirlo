@@ -6,6 +6,7 @@ import processor, {
   whereForPublishedTrackGroups,
 } from "../../../utils/trackGroup";
 import { turnItemsIntoRSS } from "../artists/{id}/feed";
+import { getClient } from "../../../activityPub/utils";
 
 export default function () {
   const operations = {
@@ -13,9 +14,11 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
+    const { format } = req.query;
+
     const {
       skip: skipQuery,
-      take = 10,
+      take = format === "rss" ? 50 : 10,
       orderBy,
       tag,
       search,
@@ -23,7 +26,6 @@ export default function () {
       title,
     } = req.query;
     const distinctArtists = req.query.distinctArtists === "true";
-    const { format } = req.query;
 
     try {
       let skip = Number(skipQuery);
@@ -84,14 +86,17 @@ export default function () {
               id: true,
             },
           },
-
           cover: true,
         },
       });
       if (format === "rss") {
         const feed = await turnItemsIntoRSS(
-          { name: "All", urlSlug: "trackGroups" },
-          trackGroups
+          { name: "All Mirlo Releases", urlSlug: "trackGroups" },
+          trackGroups,
+          {
+            feedUrl: "trackGroups",
+            siteUrl: (await getClient()).applicationUrl + "/releases",
+          }
         );
         res.set("Content-Type", "application/rss+xml");
         res.send(feed.xml());
