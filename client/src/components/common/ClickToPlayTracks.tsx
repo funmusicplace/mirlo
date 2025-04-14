@@ -49,7 +49,7 @@ const ClickToPlayTracks: React.FC<{
           params.append("trackIds[]", id.toString());
         }
         const { results } = await api.getMany<number>(
-          `users/${userId}/tracksPlayable?${params.toString()}`
+          `playable?${params.toString()}`
         );
 
         setLocalTrackIds(results);

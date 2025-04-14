@@ -196,7 +196,7 @@ describe("trackGroups", () => {
         obj.feedUrl,
         `${process.env.API_DOMAIN}/v1/trackGroups?format=rss`
       );
-      assert.equal(obj.title, "All Feed");
+      assert.equal(obj.title, "All Mirlo Releases Feed");
       assert.equal(obj.items.length, 0);
     });
 
