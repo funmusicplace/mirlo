@@ -19,7 +19,7 @@ export default function () {
       const tracks = await prisma.track.findMany({
         where: {
           id: {
-            in: trackIds.map((id) => Number(id)),
+            in: trackIds?.map((id) => Number(id)) ?? [],
           },
         },
         include: {
@@ -50,13 +50,18 @@ export default function () {
       });
 
       const areOwned = tracks.filter((track) => {
-        const userTrackPurchases = track.userTrackPurchases;
-        const userTrackGroupPurchases =
-          track.trackGroup.userTrackGroupPurchases;
+        const hasPurchasedTrack =
+          track.userTrackPurchases && track.userTrackPurchases.length > 0;
+        const hasPurchasedTrackGroup =
+          track.trackGroup.userTrackGroupPurchases &&
+          track.trackGroup.userTrackGroupPurchases.length > 0;
+        const isArtistOwner =
+          track.trackGroup.artist.userId === loggedInUser?.id;
+
         return (
-          (userTrackPurchases && userTrackPurchases.length > 0) ||
-          (userTrackGroupPurchases && userTrackGroupPurchases.length > 0) ||
-          track.trackGroup.artist.userId === loggedInUser?.id ||
+          hasPurchasedTrack ||
+          hasPurchasedTrackGroup ||
+          isArtistOwner ||
           track.isPreview
         );
       });
