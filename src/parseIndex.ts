@@ -130,6 +130,7 @@ const parseIndex = async (pathname: string) => {
       const avatarUrl = avatarString
         ? generateFullStaticImageUrl(avatarString, finalArtistAvatarBucket)
         : undefined;
+      const rss = `${process.env.API_DOMAIN}/v1/artists/${artist.urlSlug}/feed?format=rss`;
       if (route[2] === "posts") {
         const post = await prisma.post.findFirst({
           where: { id: Number(route[3]) },
@@ -142,6 +143,7 @@ const parseIndex = async (pathname: string) => {
           // it's a post
           buildOpenGraphTags($, {
             title: post.title,
+            rss,
             description: `A post by ${artistName}`,
             url: `${client.applicationUrl}/${post.artist?.urlSlug}/posts/${post.id}`,
             imageUrl: post.featuredImage
@@ -155,6 +157,7 @@ const parseIndex = async (pathname: string) => {
         } else {
           buildOpenGraphTags($, {
             title: artistName,
+            rss,
             description: `All posts by ${artistName} on Mirlo`,
             url: `${client.applicationUrl}/${artist?.urlSlug}/posts`,
             imageUrl: avatarUrl,
@@ -166,6 +169,7 @@ const parseIndex = async (pathname: string) => {
           description: `Support ${artistName} on Mirlo`,
           url: `${client.applicationUrl}/${artist?.urlSlug}/releases`,
           imageUrl: avatarUrl,
+          rss,
         });
       } else if (route[2] === "merch") {
         const merch = await prisma.merch.findFirst({
@@ -188,6 +192,7 @@ const parseIndex = async (pathname: string) => {
             imageUrl: coverString
               ? generateFullStaticImageUrl(coverString, finalMerchImageBucket)
               : avatarUrl,
+            rss,
           });
         } else {
           buildOpenGraphTags($, {
@@ -195,6 +200,7 @@ const parseIndex = async (pathname: string) => {
             description: `All merch by ${artistName} on Mirlo`,
             url: `${client.applicationUrl}/${artist?.urlSlug}/merch`,
             imageUrl: avatarUrl,
+            rss,
           });
         }
       }
