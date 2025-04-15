@@ -77,8 +77,6 @@ const PublishButton: React.FC<{
       {artist && trackGroup.published && (
         <ArtistButtonLink
           to={getReleaseUrl(artist, trackGroup)}
-          size="big"
-          rounded
           startIcon={<FaEye />}
           variant="dashed"
         >
@@ -86,8 +84,6 @@ const PublishButton: React.FC<{
         </ArtistButtonLink>
       )}
       <ArtistButton
-        size="big"
-        rounded
         startIcon={<FaLock />}
         isLoading={isPublishing}
         onClick={publishTrackGroup}

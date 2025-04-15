@@ -2,6 +2,7 @@ import { css } from "@emotion/css";
 import { ArtistButton } from "components/Artist/ArtistButtons";
 import AutoComplete from "components/common/AutoComplete";
 import Button from "components/common/Button";
+import FormComponent from "components/common/FormComponent";
 import Pill from "components/common/Pill";
 import { cloneDeep, uniq } from "lodash";
 import React from "react";
@@ -110,32 +111,13 @@ const ManageTags: React.FC<{ tags?: string[] }> = ({ tags: existingTags }) => {
   );
 
   return (
-    <div
+    <FormComponent
       className={css`
         margin-top: 1.5rem;
       `}
     >
-      <h2>{t("albumTags")}</h2>
-      {tags.length > 0 && (
-        <div
-          className={css`
-            list-style: none;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.25rem;
-            margin-bottom: 1rem;
-          `}
-        >
-          {tags.map((tag, index) => (
-            <ArtistTag
-              tag={tag}
-              index={index}
-              key={tag}
-              removeTag={removeTag}
-            />
-          ))}
-        </div>
-      )}
+      <label>{t("albumTags")}</label>
+
       <div
         className={css`
           display: inline-flex;
@@ -154,7 +136,27 @@ const ManageTags: React.FC<{ tags?: string[] }> = ({ tags: existingTags }) => {
           allowNew
         />
       </div>
-    </div>
+      {tags.length > 0 && (
+        <div
+          className={css`
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.25rem;
+            margin-top: 0.5rem;
+          `}
+        >
+          {tags.map((tag, index) => (
+            <ArtistTag
+              tag={tag}
+              index={index}
+              key={tag}
+              removeTag={removeTag}
+            />
+          ))}
+        </div>
+      )}
+    </FormComponent>
   );
 };
 

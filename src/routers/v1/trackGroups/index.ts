@@ -96,6 +96,7 @@ export default function () {
               id: true,
             },
           },
+          tracks: true,
           cover: true,
         },
       });

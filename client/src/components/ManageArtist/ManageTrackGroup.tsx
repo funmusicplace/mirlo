@@ -78,7 +78,11 @@ const ManageTrackGroup: React.FC<{}> = () => {
               align-items: center;
             `}
           >
-            <span className={css``}>
+            <span
+              className={css`
+                margin-top: 1rem;
+              `}
+            >
               {t(trackGroup ? "editAlbum" : "createAlbum")}
             </span>
           </h1>
