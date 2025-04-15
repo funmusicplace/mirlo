@@ -7,10 +7,6 @@ import { useTranslation } from "react-i18next";
 import WidthContainer from "components/common/WidthContainer";
 import { useAuthContext } from "state/AuthContext";
 import CollectionPurchaseSquare from "./CollectionPurchaseSquare";
-import {
-  isTrackgroup,
-  isTrack,
-} from "components/ManageArtist/UploadArtistImage";
 import { isTrackGroupPurchase, isTrackPurchase } from "types/typeguards";
 
 type PurchaseResponse =
@@ -35,7 +31,8 @@ function Profile() {
     );
     setPurchases(
       results.filter((r) => {
-        return isTrackPurchase(r) || isTrackGroupPurchase(r);
+        const isNotMerch = isTrackPurchase(r) || isTrackGroupPurchase(r);
+        return isNotMerch;
       })
     );
   }, [userId]);
