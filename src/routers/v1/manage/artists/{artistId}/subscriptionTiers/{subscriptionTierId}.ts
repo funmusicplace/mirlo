@@ -35,6 +35,7 @@ export default function () {
           name: req.body.name,
           description: req.body.description,
           allowVariable: req.body.allowVariable,
+          interval: req.body.interval ?? "MONTH",
           // TODO: make sure minAmount is alphanumeric
           minAmount: +req.body.minAmount,
           autoPurchaseAlbums: !!req.body.autoPurchaseAlbums,
