@@ -1,8 +1,7 @@
 import { css } from "@emotion/css";
 import { FaPen } from "react-icons/fa";
-import { Link, useParams } from "react-router-dom";
-import ClickToPlayAlbum from "../common/ClickToPlayTracks";
-import Button, { ButtonLink } from "../common/Button";
+import { useParams } from "react-router-dom";
+import ClickToPlayTracks from "../common/ClickToPlayTracks";
 import { useTranslation } from "react-i18next";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
 
@@ -42,7 +41,7 @@ export const ItemViewTitle: React.FC<{
             }
           `}
         >
-          <ClickToPlayAlbum
+          <ClickToPlayTracks
             trackIds={trackIds}
             className={css`
               width: 50px !important;

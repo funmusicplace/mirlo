@@ -1,7 +1,7 @@
 import { css } from "@emotion/css";
 
 import { useNavigate, useParams } from "react-router-dom";
-import ClickToPlayAlbum from "../common/ClickToPlayTracks";
+import ClickToPlayTracks from "../common/ClickToPlayTracks";
 import Box from "../common/Box";
 import { useTranslation } from "react-i18next";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
@@ -141,7 +141,7 @@ function TrackView() {
                   <TrackGroupMerch merch={trackGroup.merch} />
                 )}
                 <SmallScreenPlayWrapper>
-                  <ClickToPlayAlbum
+                  <ClickToPlayTracks
                     trackIds={[filteredTrack.id]}
                     className={css`
                       width: 50px !important;

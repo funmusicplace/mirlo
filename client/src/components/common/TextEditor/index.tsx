@@ -43,7 +43,7 @@ const extensions = (postId?: number, reload?: () => void) => () => [
       return [];
     },
   }),
-  new IframeExtension(),
+  new IframeExtension({ enableResizing: false }),
   new LinkExtension({ autoLink: true, selectTextOnClick: true }),
   ...wysiwygPreset(),
 ];

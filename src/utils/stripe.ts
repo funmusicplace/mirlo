@@ -739,7 +739,9 @@ export const createCheckoutSessionForSubscription = async ({
               : tier.minAmount ?? 0,
             currency: tier.currency ?? "USD",
             product: productKey,
-            recurring: { interval: "month" },
+            recurring: {
+              interval: tier.interval === "YEAR" ? "year" : "month",
+            },
           },
           quantity: 1,
         },

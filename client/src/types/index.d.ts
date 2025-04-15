@@ -267,6 +267,16 @@ interface UserTrackGroupPurchase {
   singleDownloadToken?: string;
 }
 
+interface UserTrackPurchase {
+  userId: number;
+  user?: User;
+  trackId: number;
+  track?: Track;
+  pricePaid: number;
+  currencyPaid: string;
+  datePurchased: string;
+}
+
 interface UserArtistTip {
   userId: number;
   artistId: number;

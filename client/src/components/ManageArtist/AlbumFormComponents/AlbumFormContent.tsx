@@ -16,6 +16,13 @@ import ManageTags from "./ManageTags";
 import PaymentSlider from "./PaymentSlider";
 import { getCurrencySymbol } from "components/common/Money";
 import { useAuthContext } from "state/AuthContext";
+import styled from "@emotion/styled";
+
+const FormSection = styled.div`
+  margin: 2rem 0;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--mi-darken-x-background-color);
+`;
 
 const AlbumFormContent: React.FC<{
   existingObject: TrackGroup;
@@ -29,22 +36,42 @@ const AlbumFormContent: React.FC<{
 
   return (
     <>
-      <FormComponent>
-        <label>{t("title")}</label>
-        <SavingInput
-          formKey="title"
-          url={`manage/trackGroups/${trackGroupId}`}
-          extraData={{ artistId: Number(artistId) }}
-        />
-      </FormComponent>
-      <div
-        className={css`
-          @media screen and (min-width: ${bp.medium}px) {
-            display: flex;
-            flex-direction: row;
-          }
-        `}
-      >
+      <FormSection>
+        <h2>About the album</h2>
+        <FormComponent>
+          <label>{t("title")}</label>
+          <SavingInput
+            formKey="title"
+            url={`manage/trackGroups/${trackGroupId}`}
+            extraData={{ artistId: Number(artistId) }}
+          />
+        </FormComponent>
+        <div
+          className={css`
+            @media screen and (min-width: ${bp.medium}px) {
+              display: flex;
+
+              > div {
+                flex-grow: 1;
+              }
+            }
+          `}
+        >
+          <FormComponent>
+            <label>{t("releaseDate")} </label>
+            <SavingInput
+              formKey="releaseDate"
+              type="date"
+              required
+              url={`manage/trackGroups/${trackGroupId}`}
+              extraData={{ artistId: Number(artistId) }}
+            />
+          </FormComponent>
+          <ManageTags tags={existingObject.tags} />
+        </div>
+      </FormSection>
+      <FormSection>
+        <h2>Artwork</h2>
         <FormComponent
           style={{
             flexDirection: "column",
@@ -76,23 +103,14 @@ const AlbumFormContent: React.FC<{
         </SelectEl>
         <small>The type is optional</small>
       </FormComponent> */}
-
+      </FormSection>
+      <FormSection>
+        <h2>Price and such</h2>
         <div
           className={css`
             flex-grow: 1;
           `}
         >
-          <FormComponent>
-            <label>{t("releaseDate")} </label>
-            <SavingInput
-              formKey="releaseDate"
-              type="date"
-              required
-              url={`manage/trackGroups/${trackGroupId}`}
-              extraData={{ artistId: Number(artistId) }}
-            />
-          </FormComponent>
-
           <div
             className={css`
               width: 100%;
@@ -104,7 +122,7 @@ const AlbumFormContent: React.FC<{
           >
             <FormComponent
               className={css`
-                max-width: 200px;
+                flex-grow: 1;
               `}
             >
               <label>{t("price")}</label>
@@ -137,11 +155,17 @@ const AlbumFormContent: React.FC<{
                 />
               </div>
               {errors.minPrice && <FormError>{t("priceZeroOrMore")}</FormError>}
-              <small>{t("currencyIsSetOnManageArtist")}</small>
+              <small
+                className={css`
+                  max-width: 200px;
+                `}
+              >
+                {t("currencyIsSetOnManageArtist")}
+              </small>
             </FormComponent>
             <FormComponent
               className={css`
-                width: 340px;
+                flex-grow: 1;
               `}
             >
               <label>{t("platformPercent")}</label>
@@ -152,14 +176,13 @@ const AlbumFormContent: React.FC<{
               {errors.minPrice && <FormError>{t("platformPercent")}</FormError>}
             </FormComponent>
           </div>
-          <ManageTags tags={existingObject.tags} />
         </div>
-      </div>
+      </FormSection>
       <FormComponent>
         <label>{t("about")} </label>
         <SavingInput
           formKey="about"
-          rows={8}
+          rows={5}
           url={`manage/trackGroups/${trackGroupId}`}
           extraData={{ artistId: Number(artistId) }}
         />
@@ -168,7 +191,7 @@ const AlbumFormContent: React.FC<{
         <label>{t("credits")} </label>
         <SavingInput
           formKey="credits"
-          rows={8}
+          rows={5}
           url={`manage/trackGroups/${trackGroupId}`}
           extraData={{ artistId: Number(artistId) }}
         />

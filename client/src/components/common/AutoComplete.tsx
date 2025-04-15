@@ -216,7 +216,6 @@ const AutoComplete: React.FC<{
           position: relative;
           margin-bottom: 0 !important;
           border: 1px solid var(--mi-normal-foreground-color);
-          background: var(--mi-normal-background-color) !important;
           overflow: hidden;
           text-overflow: ellipsis;
           &::placeholder {

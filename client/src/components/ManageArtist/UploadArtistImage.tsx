@@ -25,6 +25,13 @@ export function isTrackgroup(entity: unknown): entity is TrackGroup {
   return (entity as TrackGroup).cover !== undefined;
 }
 
+export function isTrack(entity: unknown): entity is Track {
+  if (!entity) {
+    return false;
+  }
+  return (entity as Track).trackGroupId !== undefined;
+}
+
 export function isMerch(entity: unknown): entity is Merch {
   if (!entity) {
     return false;

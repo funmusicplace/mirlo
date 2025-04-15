@@ -21,9 +21,9 @@ export default function () {
       take = format === "rss" ? 50 : 10,
       orderBy,
       tag,
-      search,
       artistId,
       title,
+      isReleased,
     } = req.query;
     const distinctArtists = req.query.distinctArtists === "true";
 
@@ -39,6 +39,16 @@ export default function () {
               tag: tag,
             },
           },
+        };
+      }
+
+      if (isReleased === "released") {
+        where.releaseDate = {
+          lte: new Date(),
+        };
+      } else if (isReleased === "not-released") {
+        where.releaseDate = {
+          gt: new Date(),
         };
       }
 
@@ -86,6 +96,7 @@ export default function () {
               id: true,
             },
           },
+          tracks: true,
           cover: true,
         },
       });

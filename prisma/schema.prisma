@@ -255,6 +255,7 @@ model ArtistSubscriptionTier {
   maxAmount             Int? // in cents
   defaultAmount         Int? // in cents
   currency              String                   @default("USD")
+  interval              Interval                 @default(MONTH)
   userSubscriptions     ArtistUserSubscription[]
   stripeProductKey      String?
   createdAt             DateTime                 @default(now())
@@ -265,6 +266,11 @@ model ArtistSubscriptionTier {
   isDefaultTier         Boolean                  @default(false)
   platformPercent       Int?                     @default(7)
   autoPurchaseAlbums    Boolean                  @default(false)
+}
+
+enum Interval {
+  MONTH
+  YEAR
 }
 
 model ArtistTipTier {

@@ -17,7 +17,6 @@ const SupportMirlo = () => {
       className={css`
         width: 100%;
         background-color: #be3455;
-        background-image: url("/static/images/grainy_bg_mirlo_red.webp");
         color: var(--mi-white);
 
         @media screen and (max-width: ${bp.medium}px) {
@@ -31,14 +30,13 @@ const SupportMirlo = () => {
     >
       <SplashWrapper
         className={css`
-          margin: 4rem 0;
-          background-image: none !important;
+          padding: 4rem 0;
 
           display: flex;
           min-height: auto !important;
 
           @media screen and (max-width: ${bp.medium}px) {
-            margin: 0;
+            padding: 0;
             min-height: calc(100vh - 60px) !important;
             flex-direction: column-reverse;
           }

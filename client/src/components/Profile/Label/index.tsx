@@ -8,18 +8,20 @@ import { useTranslation } from "react-i18next";
 import { MdCheckBox } from "react-icons/md";
 import { Link } from "react-router-dom";
 import { getArtistManageUrl, getArtistUrl } from "utils/artist";
+import AddArtistToRoster from "./AddArtistToRoster";
 
 const ProfileLabel: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "label" });
   const {
     data: { results: relationship } = { results: [] },
-    isLoading,
-    error,
+
+    refetch,
   } = useQuery(queryLabelArtists());
 
   return (
     <WidthContainer variant="big" justify="center">
       <h2>{t("manageArtists")}</h2>
+      <AddArtistToRoster refresh={refetch} />
       <Table>
         <thead>
           <tr>
