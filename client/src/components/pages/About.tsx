@@ -725,7 +725,7 @@ const About: React.FC = () => {
             }
           />
         </CollapsibleList>
-        <h3 id="product">Product</h3>
+        <h3 id="product">Product: or, what can Mirlo do</h3>
         <CollapsibleList>
           <CollapsibleLI
             title="Whats on your product roadmap?"
@@ -741,6 +741,17 @@ const About: React.FC = () => {
                   our ideas list
                 </a>{" "}
                 to vote on what you'd like to see.
+              </>
+            }
+          />
+          <CollapsibleLI
+            title="Is there a way to offer physical Vinyl/CDs for sale?"
+            id="sell-merch"
+            answer={
+              <>
+                Yes! You can use Mirlo to sell your merch. Check out our{" "}
+                <Link to="/pages/features">features page</Link> for a full list
+                of artist features.
               </>
             }
           />
@@ -796,6 +807,26 @@ const About: React.FC = () => {
                 For upload we support lossless file formats (flac, wav). We
                 convert files across formats to be available to purchasers, as
                 well as converting them to HLS and a couple of mp3 bitrates.
+              </>
+            }
+          />
+          <CollapsibleLI
+            title="When a customer buys a digital album, what can be included in the bundle"
+            id="download-bundle"
+            answer={
+              <>
+                <p>
+                  When someone buys a digital album they get to choose what
+                  format to download it in (flac, wav, mp3). The download will
+                  include basic metadata on the files and an image of the cover.
+                </p>
+                <p>
+                  There is an{" "}
+                  <a href="https://github.com/funmusicplace/mirlo/discussions/1089">
+                    feature request
+                  </a>{" "}
+                  for selling other things in an album
+                </p>
               </>
             }
           />
