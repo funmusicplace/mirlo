@@ -74,9 +74,10 @@ const ArtistTrackGroup: React.FC<{
             height: 400,
             url: trackGroup.cover?.sizes?.[600] ?? "",
           }}
-          trackGroupId={trackGroup.id}
+          trackIds={trackGroup.tracks.map((t) => t.id)}
           title={trackGroup.title}
           trackGroup={trackGroup}
+          showWishlist
         >
           <TrackGroupLinks>
             <TrackGroupInfo>

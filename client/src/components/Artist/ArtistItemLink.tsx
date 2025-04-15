@@ -1,25 +1,53 @@
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { css } from "@emotion/css";
-import { getMerchUrl, getReleaseUrl } from "utils/artist";
-import { isTrackgroup } from "components/ManageArtist/UploadArtistImage";
+import {
+  getArtistUrl,
+  getMerchUrl,
+  getReleaseUrl,
+  getTrackUrl,
+} from "utils/artist";
+import {
+  isMerch,
+  isTrack,
+  isTrackgroup,
+} from "components/ManageArtist/UploadArtistImage";
+
+type Item =
+  | (Merch & { artist?: Artist })
+  | (TrackGroup & { artist?: Artist })
+  | (Track & { trackGroup: TrackGroup & { artist?: Artist } });
+
+export const determineItemLink = (artist: Artist, item: Item) => {
+  let url = getArtistUrl(artist);
+
+  if (isTrackgroup(item)) {
+    url = getReleaseUrl(artist, item);
+  } else if (isMerch(item)) {
+    url = getMerchUrl(artist, item);
+  } else if (isTrack(item)) {
+    url = getTrackUrl(artist, item.trackGroup, item);
+  }
+  return url;
+};
 
 const ArtistItemLink: React.FC<{
-  item: (Merch & { artist?: Artist }) | (TrackGroup & { artist?: Artist });
+  item: Item;
 }> = ({ item }) => {
   const { t } = useTranslation("translation", { keyPrefix: "clickToPlay" });
 
-  if (!item.artist) {
+  const artist =
+    isTrackgroup(item) || isMerch(item) ? item.artist : item.trackGroup.artist;
+
+  if (!artist) {
     return null;
   }
 
+  const url = determineItemLink(artist, item);
+
   return (
     <Link
-      to={
-        isTrackgroup(item)
-          ? getReleaseUrl(item.artist, item)
-          : getMerchUrl(item.artist, item)
-      }
+      to={url}
       aria-label={`${t("goToAlbum")}: ${item.title || t("untitled")}`}
       className={
         item.title.length

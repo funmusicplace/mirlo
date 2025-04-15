@@ -7,6 +7,7 @@ import { processSingleMerch } from "../../../../utils/merch";
 import {
   isMerchPurchase,
   isTrackGroupPurchase,
+  isTrackPurchase,
 } from "../../../../utils/typeguards";
 
 type Params = {
@@ -32,6 +33,7 @@ export default function () {
             include: {
               artist: true,
               cover: true,
+              tracks: true,
             },
           },
         },
@@ -52,14 +54,40 @@ export default function () {
         },
       });
 
-      const mergedPurchases = [...merchPurchases, ...trackGroupPurchases].sort(
-        (a, b) => {
-          const timeA = isTrackGroupPurchase(a) ? a.datePurchased : a.createdAt;
+      const trackPurchases = await prisma.userTrackPurchase.findMany({
+        where: {
+          userId: Number(userId),
+        },
+        include: {
+          track: {
+            include: {
+              trackGroup: {
+                include: {
+                  artist: true,
+                  cover: true,
+                },
+              },
+            },
+          },
+        },
+      });
 
-          const timeB = isTrackGroupPurchase(b) ? b.datePurchased : b.createdAt;
-          return timeA > timeB ? -1 : 1;
-        }
-      );
+      const mergedPurchases = [
+        ...merchPurchases,
+        ...trackGroupPurchases,
+        ...trackPurchases,
+      ].sort((a, b) => {
+        const timeA =
+          isTrackGroupPurchase(a) || isTrackPurchase(a)
+            ? a.datePurchased
+            : a.createdAt;
+
+        const timeB =
+          isTrackGroupPurchase(b) || isTrackPurchase(b)
+            ? b.datePurchased
+            : b.createdAt;
+        return timeA > timeB ? -1 : 1;
+      });
 
       res.json({
         results: mergedPurchases.map((p) => ({
@@ -67,6 +95,11 @@ export default function () {
           trackGroup:
             isTrackGroupPurchase(p) && trackGroupProcessor.single(p.trackGroup),
           merch: isMerchPurchase(p) && processSingleMerch(p.merch),
+          ...(isTrackPurchase(p)
+            ? {
+                trackGroup: trackGroupProcessor.single(p.track.trackGroup),
+              }
+            : {}),
         })),
       });
     } else {

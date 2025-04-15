@@ -1,7 +1,7 @@
 import { css } from "@emotion/css";
 
 import { useParams } from "react-router-dom";
-import ClickToPlayAlbum from "../common/ClickToPlayTracks";
+import ClickToPlayTracks from "../common/ClickToPlayTracks";
 import Box from "../common/Box";
 import { useTranslation } from "react-i18next";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
@@ -269,7 +269,7 @@ function TrackGroup() {
                 )}
 
                 <SmallScreenPlayWrapper>
-                  <ClickToPlayAlbum
+                  <ClickToPlayTracks
                     trackIds={trackGroup.tracks.map((t) => t.id)}
                     className={css`
                       width: 50px !important;

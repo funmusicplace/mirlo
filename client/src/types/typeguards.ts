@@ -1,12 +1,3 @@
-import {
-  Merch,
-  MerchPurchase,
-  Track,
-  TrackGroup,
-  UserTrackGroupPurchase,
-  UserTrackPurchase,
-} from "@mirlo/prisma/client";
-
 type TrackGroupPurchaseWithTrackGroup = UserTrackGroupPurchase & {
   trackGroup: TrackGroup;
 };
@@ -15,7 +6,7 @@ type TrackPurchaseWithTrack = UserTrackPurchase & {
   track: Track;
 };
 
-export function isTrackGroupPurchase(
+export function isTrackGroupPurchaseWithTrackGroup(
   entity: unknown
 ): entity is TrackGroupPurchaseWithTrackGroup {
   if (!entity) {
@@ -24,7 +15,7 @@ export function isTrackGroupPurchase(
   return (entity as TrackGroupPurchaseWithTrackGroup).trackGroup !== undefined;
 }
 
-export function isTrackPurchase(
+export function isTrackPurchaseWithTrack(
   entity: unknown
 ): entity is TrackPurchaseWithTrack {
   if (!entity) {
@@ -51,4 +42,20 @@ export function isTrackGroup(entity: unknown): entity is TrackGroup {
     return false;
   }
   return (entity as TrackGroup).credits !== undefined;
+}
+
+export function isTrackPurchase(entity: unknown): entity is UserTrackPurchase {
+  if (!entity) {
+    return false;
+  }
+  return (entity as UserTrackPurchase).trackId !== undefined;
+}
+
+export function isTrackGroupPurchase(
+  entity: unknown
+): entity is UserTrackGroupPurchase {
+  if (!entity) {
+    return false;
+  }
+  return (entity as UserTrackGroupPurchase).trackGroupId !== undefined;
 }

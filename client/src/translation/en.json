@@ -312,6 +312,7 @@
   "clickToPlay": {
     "untitled": "Untitled",
     "goToAlbum": "Go to album",
+    "goToTrack": "Go to track",
     "play": "Play",
     "pause": "Pause"
   },
