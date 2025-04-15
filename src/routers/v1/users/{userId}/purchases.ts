@@ -81,7 +81,6 @@ export default function () {
           isTrackGroupPurchase(a) || isTrackPurchase(a)
             ? a.datePurchased
             : a.createdAt;
-
         const timeB =
           isTrackGroupPurchase(b) || isTrackPurchase(b)
             ? b.datePurchased
@@ -97,6 +96,10 @@ export default function () {
           merch: isMerchPurchase(p) && processSingleMerch(p.merch),
           ...(isTrackPurchase(p)
             ? {
+                track: {
+                  ...p.track,
+                  trackGroup: trackGroupProcessor.single(p.track.trackGroup),
+                },
                 trackGroup: trackGroupProcessor.single(p.track.trackGroup),
               }
             : {}),

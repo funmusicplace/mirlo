@@ -7,27 +7,20 @@ import { useAuthContext } from "state/AuthContext";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import { moneyDisplay } from "components/common/Money";
 import { Link } from "react-router-dom";
-import { getArtistUrl, getMerchUrl, getReleaseUrl } from "utils/artist";
+import {
+  getArtistUrl,
+  getMerchUrl,
+  getReleaseUrl,
+  getTrackUrl,
+} from "utils/artist";
 import { bp } from "../../constants";
-import { ReactElement } from "react-markdown/lib/react-markdown";
 import { formatDate } from "components/TrackGroup/ReleaseDate";
 import { css } from "@emotion/css";
-
-function isTrackGroupPurchase(
-  entity: unknown
-): entity is UserTrackGroupPurchase {
-  if (!entity) {
-    return false;
-  }
-  return !!(entity as UserTrackGroupPurchase).trackGroup;
-}
-
-function isMerchPurchase(entity: unknown): entity is MerchPurchase {
-  if (!entity) {
-    return false;
-  }
-  return !!(entity as MerchPurchase).merch;
-}
+import {
+  isMerchPurchase,
+  isTrackGroupPurchase,
+  isTrackPurchase,
+} from "types/typeguards";
 
 const PurchaseComponent: React.FC<{
   title: string;
@@ -188,6 +181,21 @@ function YourPurchases() {
               >
                 {purchases.map((p) => (
                   <li>
+                    {isTrackPurchase(p) && p.track && (
+                      <PurchaseComponent
+                        title={p.track.title}
+                        imageSrc={p.track.trackGroup.cover?.sizes?.[60]}
+                        currencyPaid={p.currencyPaid}
+                        pricePaid={p.pricePaid}
+                        artist={p.track.trackGroup.artist}
+                        url={getTrackUrl(
+                          p.track.trackGroup.artist,
+                          p.track.trackGroup,
+                          p.track
+                        )}
+                        purchaseDate={p.datePurchased}
+                      />
+                    )}
                     {isTrackGroupPurchase(p) && p.trackGroup && (
                       <PurchaseComponent
                         title={p.trackGroup.title}
