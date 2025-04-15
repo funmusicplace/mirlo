@@ -1,12 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import {
-  User,
-  Prisma,
-  TrackGroup,
-  Post,
-  Artist,
-  ArtistSubscriptionTier,
-} from "@mirlo/prisma/client";
+import { User, Prisma } from "@mirlo/prisma/client";
 
 import prisma from "@mirlo/prisma";
 import {
@@ -71,18 +64,29 @@ export default function () {
 
   async function POST(req: Request, res: Response, next: NextFunction) {
     let { artistId }: { artistId?: string } = req.params;
-    const { labelUserId } = req.body as { labelUserId?: number };
+    const { labelUserId, isLabelApproved } = req.body as {
+      labelUserId?: number;
+      isLabelApproved?: boolean;
+    };
+
+    const loggedInUser = req.user as User;
 
     try {
       if (!labelUserId) {
         throw new AppError({ httpCode: 400, description: "Need labelUserId" });
       }
 
+      const data: Prisma.ArtistLabelCreateArgs["data"] = {
+        labelUserId,
+        artistId: Number(artistId),
+      };
+
+      if (loggedInUser.id === labelUserId) {
+        data.isLabelApproved = isLabelApproved;
+      }
+
       await prisma.artistLabel.create({
-        data: {
-          labelUserId,
-          artistId: Number(artistId),
-        },
+        data,
       });
 
       const labels = await prisma.artistLabel.findMany({
