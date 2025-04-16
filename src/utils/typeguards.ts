@@ -1,6 +1,8 @@
 import {
+  Artist,
   Merch,
   MerchPurchase,
+  Post,
   Track,
   TrackGroup,
   UserTrackGroupPurchase,
@@ -51,4 +53,18 @@ export function isTrackGroup(entity: unknown): entity is TrackGroup {
     return false;
   }
   return (entity as TrackGroup).credits !== undefined;
+}
+
+export function isPost(entity: unknown): entity is Post {
+  if (!entity) {
+    return false;
+  }
+  return (entity as Post).content !== undefined;
+}
+
+export function isArtist(entity: unknown): entity is Artist {
+  if (!entity) {
+    return false;
+  }
+  return (entity as Artist).bio !== undefined;
 }
