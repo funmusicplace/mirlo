@@ -26,7 +26,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-          cache: 'yarn'
+          cache: "yarn"
 
       - name: Copy env file
         run: |
@@ -66,3 +66,33 @@ jobs:
       - name: Stop containers
         if: always()
         run: docker compose --profile=test down
+
+  cypress-run:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: "yarn"
+
+      - name: Copy env file
+        run: |
+          cp .env.example .env
+
+      - name: Install dependencies
+        run: yarn install --immutable
+      # Install npm dependencies, cache them correctly
+      # and run all Cypress tests
+
+      - name: Cypress run
+        uses: cypress-io/github-action@v6
+        with:
+          build: yarn client:build
+          start: yarn client:start
+          browser: chrome
