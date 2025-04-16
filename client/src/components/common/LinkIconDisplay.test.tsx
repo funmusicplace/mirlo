@@ -39,32 +39,38 @@ test("linkUrlHref doesn't affect emails that already have a mailto prefix", () =
 });
 
 test.each([
-  {url: "test@example.com", linkType: "Email"},
-  {url: "test@example.com", linkType: "Website"}
+  { url: "test@example.com", linkType: "Email" },
+  { url: "test@example.com", linkType: "Website" },
 ])("linkUrlDisplay returns Email when link is e-mail", (link) => {
   const result = linkUrlDisplay(link);
   expect(result).toBe("Email");
 });
 
 test("linkUrlDisplay ignores Email linkType if url is not e-mail", () => {
-  const result = linkUrlDisplay({url: "https://example.com/@user", linkType: "Email"});
+  const result = linkUrlDisplay({
+    url: "https://example.com/@user",
+    linkType: "Email",
+  });
   expect(result).toBe("Example");
 });
 
 test("linkUrlDisplay returns linkType if set", () => {
-  const result = linkUrlDisplay({url: "https://www.example.com/", linkType: "Anything"});
+  const result = linkUrlDisplay({
+    url: "https://www.example.com/",
+    linkType: "Anything",
+  });
   expect(result).toBe("Anything");
-})
+});
 
 test.each([
-  [{url: "http://mastodon.social/", linkType: undefined}, "Mastodon"],
-  [{url: "https://www.twitter.com/", linkType: undefined}, "Twitter"],
-  [{url: "https://www.x.com/", linkType: undefined}, "X"],
-  [{url: "https://www.facebook.com/", linkType: undefined}, "Facebook"],
-  [{url: "https://www.bandcamp.com/", linkType: undefined}, "Bandcamp"],
-  [{url: "https://www.instagram.com/", linkType: undefined}, "Instagram"],
-  [{url: "test@example.com", linkType: undefined}, "Email"],
-  [{url: "http://example.com/", linkType: undefined}, "Example"],
+  [{ url: "http://mastodon.social/", linkType: undefined }, "Mastodon"],
+  [{ url: "https://www.twitter.com/", linkType: undefined }, "Twitter"],
+  [{ url: "https://www.x.com/", linkType: undefined }, "X"],
+  [{ url: "https://www.facebook.com/", linkType: undefined }, "Facebook"],
+  [{ url: "https://www.bandcamp.com/", linkType: undefined }, "Bandcamp"],
+  [{ url: "https://www.instagram.com/", linkType: undefined }, "Instagram"],
+  [{ url: "test@example.com", linkType: undefined }, "Email"],
+  [{ url: "http://example.com/", linkType: undefined }, "Example"],
 ])("linkUrlDisplay guesses linkType when not set", (link: Link, expected) => {
   const result = linkUrlDisplay(link);
   expect(result).toBe(expected);
