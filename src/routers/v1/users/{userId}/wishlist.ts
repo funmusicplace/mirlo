@@ -32,6 +32,7 @@ export default function () {
             include: {
               artist: true,
               cover: true,
+              tracks: true,
             },
           },
         },
