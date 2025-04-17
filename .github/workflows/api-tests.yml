@@ -94,6 +94,6 @@ jobs:
         uses: cypress-io/github-action@v6
         with:
           start: yarn client:start
-          folder: client/cypress
+          working-directory: client
           browser: chrome
-          config-file: client/cypress.config.js
+          config-file: cypress.config.ts
