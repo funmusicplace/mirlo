@@ -11,8 +11,10 @@ on:
       - main
 
 jobs:
-  install:
+  client-unit:
+    timeout-minutes: 10
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -32,32 +34,6 @@ jobs:
 
       - name: Install dependencies
         run: yarn install --immutable
-
-      # Build the client and save the build folder as an artifact
-      - name: Save build folder
-        uses: actions/upload-artifact@v4
-        with:
-          name: build
-          if-no-files-found: error
-          path: .
-
-  client-unit:
-    needs: install
-    timeout-minutes: 10
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Enable Corepack
-        run: corepack enable
-
-      - name: Download the build folder
-        uses: actions/download-artifact@v4
-        with:
-          name: build
-          path: .
 
       - name: Run tests
         run: yarn client:test
@@ -92,26 +68,32 @@ jobs:
         run: docker compose --profile=test down
 
   cypress-run:
-    needs: install
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Enable Corepack
         run: corepack enable
 
-      - name: Download the build folder
-        uses: actions/download-artifact@v4
+      - name: Install node
+        uses: actions/setup-node@v4
         with:
-          name: build
-          path: client
+          node-version-file: .nvmrc
+          cache: "yarn"
 
+      - name: Copy env file
+        run: |
+          cp .env.example .env
+
+      - name: Install dependencies
+        run: yarn install --immutable
+      # Install npm dependencies, cache them correctly
       # and run all Cypress tests
+
       - name: Cypress run
         uses: cypress-io/github-action@v6
         with:
           start: yarn client:start
           folder: client/cypress
           browser: chrome
-          config-file: client/cypress.config.ts
+          config-file: client/cypress.config.js
