@@ -5,8 +5,7 @@ import processor, {
   processTrackGroupQueryOrder,
   whereForPublishedTrackGroups,
 } from "../../../utils/trackGroup";
-import { turnItemsIntoRSS } from "../artists/{id}/feed";
-import { getClient } from "../../../activityPub/utils";
+import { turnItemsIntoRSS } from "../../../utils/rss";
 
 export default function () {
   const operations = {
@@ -102,12 +101,13 @@ export default function () {
       });
       if (format === "rss") {
         const feed = await turnItemsIntoRSS(
-          { name: "All Mirlo Releases", urlSlug: "trackGroups" },
-          trackGroups,
           {
-            feedUrl: "trackGroups",
-            siteUrl: (await getClient()).applicationUrl + "/releases",
-          }
+            name: "All Mirlo Releases",
+            apiEndpoint: "trackGroups",
+            description: "Mirlo's most recent releases",
+            clientUrl: "releases",
+          },
+          trackGroups
         );
         res.set("Content-Type", "application/rss+xml");
         res.send(feed.xml());

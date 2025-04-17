@@ -126,7 +126,7 @@ describe("artists/{id}/feed", () => {
     assert(response.text);
     assert.equal(
       obj.feedUrl,
-      `${process.env.API_DOMAIN}/v1/${artist.urlSlug}/feed?format=rss`
+      `${process.env.API_DOMAIN}/v1/artists/${artist.urlSlug}/feed?format=rss`
     );
     assert.equal(obj.title, `${artist.name} Feed`);
     assert.equal(obj.items.length, 1);
@@ -305,7 +305,7 @@ describe("artists/{id}/feed", () => {
     assert(response.text);
     assert.equal(
       obj.feedUrl,
-      `${process.env.API_DOMAIN}/v1/${artist.urlSlug}/feed?format=rss`
+      `${process.env.API_DOMAIN}/v1/artists/${artist.urlSlug}/feed?format=rss`
     );
     assert.equal(obj.title, `${artist.name} Feed`);
     assert.equal(obj.items.length, 1);
@@ -328,7 +328,7 @@ describe("artists/{id}/feed", () => {
       },
     });
 
-    const trackGroup = await createTrackGroup(artist.id, { published: false });
+    await createTrackGroup(artist.id, { published: false });
 
     const response = await requestApp
       .get(`artists/${artist.id}/feed?format=rss`)
@@ -340,7 +340,7 @@ describe("artists/{id}/feed", () => {
     assert(response.text);
     assert.equal(
       obj.feedUrl,
-      `${process.env.API_DOMAIN}/v1/${artist.urlSlug}/feed?format=rss`
+      `${process.env.API_DOMAIN}/v1/artists/${artist.urlSlug}/feed?format=rss`
     );
     assert.equal(obj.title, `${artist.name} Feed`);
     assert.equal(obj.items.length, 0);
@@ -386,7 +386,7 @@ describe("artists/{id}/feed", () => {
     assert(response.text);
     assert.equal(
       obj.feedUrl,
-      `${process.env.API_DOMAIN}/v1/${artist.urlSlug}/feed?format=rss`
+      `${process.env.API_DOMAIN}/v1/artists/${artist.urlSlug}/feed?format=rss`
     );
 
     assert.equal(obj.title, `${artist.name} Feed`);

@@ -11,10 +11,8 @@ on:
       - main
 
 jobs:
-  client-unit:
-    timeout-minutes: 10
+  install:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,6 +26,12 @@ jobs:
           node-version-file: .nvmrc
           cache: "yarn"
 
+      - name: Cypress install
+        uses: cypress-io/github-action@v6
+        with:
+          # Disable running of tests within install job
+          runTests: false
+
       - name: Copy env file
         run: |
           cp .env.example .env
@@ -35,6 +39,19 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable
 
+      - name: Save build folder
+        uses: actions/upload-artifact@v4
+        with:
+          name: build
+          if-no-files-found: error
+          path: build
+
+  client-unit:
+    needs: install
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+
+    steps:
       - name: Run tests
         run: yarn client:test
 

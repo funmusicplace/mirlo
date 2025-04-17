@@ -173,7 +173,7 @@ export default function () {
           {
             name: artist.name,
             description: artist.bio,
-            apiEndpoint: `artists/${artist.id}/feed`,
+            apiEndpoint: `artists/${artist.urlSlug}/feed`,
             clientUrl: artist.urlSlug,
           },
           zipped

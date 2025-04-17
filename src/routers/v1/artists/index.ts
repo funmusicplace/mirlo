@@ -3,7 +3,6 @@ import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
 import { processSingleArtist } from "../../../utils/artist";
 import { whereForPublishedTrackGroups } from "../../../utils/trackGroup";
-import { getClient } from "../../../activityPub/utils";
 import { turnItemsIntoRSS } from "../../../utils/rss";
 
 export default function () {

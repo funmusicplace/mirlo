@@ -28,7 +28,6 @@ const ProfileContainer: React.FC = () => {
       >
         <div
           className={css`
-            border-bottom: var(--mi-border);
             margin-bottom: 1rem;
           `}
         >
