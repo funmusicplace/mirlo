@@ -39,12 +39,16 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable
 
+      - name: Build client
+        run: yarn client:build
+
+      # Build the client and save the build folder as an artifact
       - name: Save build folder
         uses: actions/upload-artifact@v4
         with:
           name: build
           if-no-files-found: error
-          path: build
+          path: client/dist
 
   client-unit:
     needs: install
@@ -52,6 +56,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download the build folder
+        uses: actions/download-artifact@v4
+        with:
+          name: build
+          path: client/dist
+
       - name: Run tests
         run: yarn client:test
 
