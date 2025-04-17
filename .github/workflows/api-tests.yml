@@ -39,7 +39,7 @@ jobs:
         with:
           name: build
           if-no-files-found: error
-          path: client
+          path: .
 
   client-unit:
     needs: install
@@ -57,7 +57,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build
-          path: client
+          path: .
 
       - name: Run tests
         run: yarn client:test
