@@ -33,16 +33,13 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable
 
-      - name: Build client
-        run: yarn client:build
-
       # Build the client and save the build folder as an artifact
       - name: Save build folder
         uses: actions/upload-artifact@v4
         with:
           name: build
           if-no-files-found: error
-          path: client/dist
+          path: client
 
   client-unit:
     needs: install
@@ -60,7 +57,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build
-          path: client/dist
+          path: client
 
       - name: Run tests
         run: yarn client:test
@@ -108,13 +105,12 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build
-          path: client/dist
+          path: client
 
       # and run all Cypress tests
       - name: Cypress run
         uses: cypress-io/github-action@v6
         with:
-          build: yarn client:build
           start: yarn client:start
           folder: client/cypress
           browser: chrome
