@@ -2,27 +2,22 @@ import { Request, Response } from "express";
 import {
   User,
   Prisma,
-  TrackGroup,
-  Post,
   Artist,
   ArtistSubscriptionTier,
 } from "@mirlo/prisma/client";
 
-import RSS from "rss";
-
 import prisma from "@mirlo/prisma";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { findArtistIdForURLSlug } from "../../../../utils/artist";
-import { markdownAsHtml } from "../../../../utils/post";
 import { whereForPublishedTrackGroups } from "../../../../utils/trackGroup";
 import { isTrackGroup } from "../../../../utils/typeguards";
 import {
-  getClient,
   headersAreForActivityPub,
   turnFeedIntoOutbox,
 } from "../../../../activityPub/utils";
 import { generateFullStaticImageUrl } from "../../../../utils/images";
 import { finalPostImageBucket } from "../../../../utils/minio";
+import { turnItemsIntoRSS } from "../../../../utils/rss";
 
 export const getPostsVisibleToUser = async (
   user: User,
@@ -122,44 +117,6 @@ export const getAlbumsVisibleToUser = async (artist: Artist) => {
   return albums;
 };
 
-export const turnItemsIntoRSS = async (
-  artist: { name: string; bio?: string | null; urlSlug: string },
-  zipped: (
-    | (TrackGroup & { artist: { name: string; urlSlug: string; id: number } })
-    | Post
-  )[],
-  options?: {
-    feedUrl?: string;
-    siteUrl?: string;
-  }
-) => {
-  // TODO: probably want to convert this to some sort of module
-  const client = await getClient();
-
-  const feed = new RSS({
-    title: `${artist.name} Feed`,
-    description: artist.bio ?? undefined,
-    feed_url: `${process.env.API_DOMAIN}/v1/${options?.feedUrl ? options?.feedUrl : `${artist.urlSlug}/feed`}?format=rss`,
-    site_url: options?.siteUrl
-      ? options.siteUrl
-      : `${client?.applicationUrl}/${artist.urlSlug}`,
-  });
-
-  for (const p of zipped) {
-    feed.item({
-      title: p.title ?? "",
-      description: isTrackGroup(p)
-        ? `<h2>An album release by artist ${p.artist.name}.</h2>`
-        : markdownAsHtml(p.content),
-      url: isTrackGroup(p)
-        ? `${client?.applicationUrl}/${p.artist.urlSlug}/release/${p.urlSlug}`
-        : `${client?.applicationUrl}/post/${p.id}`,
-      date: isTrackGroup(p) ? p.releaseDate : p.publishedAt,
-    });
-  }
-  return feed;
-};
-
 export default function () {
   const operations = {
     GET: [userLoggedInWithoutRedirect, GET],
@@ -212,7 +169,15 @@ export default function () {
 
         res.send(feed);
       } else if (format === "rss") {
-        const feed = await turnItemsIntoRSS(artist, zipped);
+        const feed = await turnItemsIntoRSS(
+          {
+            name: artist.name,
+            description: artist.bio,
+            apiEndpoint: `artists/${artist.urlSlug}/feed`,
+            clientUrl: artist.urlSlug,
+          },
+          zipped
+        );
         res.set("Content-Type", "application/rss+xml");
         res.send(feed.xml());
       } else {

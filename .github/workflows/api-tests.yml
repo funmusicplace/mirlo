@@ -1,4 +1,4 @@
-name: Unit tests
+name: Tests
 
 on:
   push:
@@ -93,6 +93,7 @@ jobs:
       - name: Cypress run
         uses: cypress-io/github-action@v6
         with:
-          build: yarn client:build
           start: yarn client:start
+          working-directory: client
           browser: chrome
+          config-file: cypress.config.ts

@@ -307,7 +307,7 @@
     "continueWithPrice": "Continue with {{ amount }}/month",
     "chooseToContinue": "Choose a support tier to support",
     "platformPercentDisclaimer": "Mirlo is evaluating the platform percentage and seeking input from artists in the next few weeks.",
-    "platformPercent": "{{ percent }}% ({{ money }}) will go to {{ artistName }}. This does not include the cut taken by our payment processor."
+    "platformPercent": "{{ artistName }} has chosen that they will get {{ percent }}% ({{ money }}) of this purchase. This does not include the cut taken by our payment processor."
   },
   "clickToPlay": {
     "untitled": "Untitled",

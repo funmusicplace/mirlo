@@ -156,7 +156,9 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
               })}
             </strong>
           )}
-          <FreeDownload trackGroup={trackGroup} chosenPrice={chosenPrice} />
+          {!minPrice && (
+            <FreeDownload trackGroup={trackGroup} chosenPrice={chosenPrice} />
+          )}
         </>
       )}
     </FormProvider>
