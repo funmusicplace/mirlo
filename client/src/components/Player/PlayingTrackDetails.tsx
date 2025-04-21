@@ -2,7 +2,7 @@ import { css } from "@emotion/css";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import { Link } from "react-router-dom";
 import { bp } from "../../constants";
-import { getReleaseUrl } from "utils/artist";
+import { getReleaseUrl, getTrackUrl } from "utils/artist";
 import React from "react";
 
 const PlayingTrackDetails: React.FC<{ currentTrack: Track }> = ({
@@ -73,8 +73,17 @@ const PlayingTrackDetails: React.FC<{ currentTrack: Track }> = ({
             font-size: var(--mi-font-size-normal);
           `}
           id="player-track-title"
+          title={currentTrack?.title}
         >
-          {currentTrack?.title}
+          <Link
+            to={getTrackUrl(
+              currentTrack.trackGroup.artist,
+              currentTrack.trackGroup,
+              currentTrack
+            )}
+          >
+            {currentTrack?.title}
+          </Link>
         </div>
         {currentTrack?.trackGroup && (
           <>
@@ -86,6 +95,7 @@ const PlayingTrackDetails: React.FC<{ currentTrack: Track }> = ({
                 overflow: hidden;
                 text-overflow: ellipsis;
               `}
+              title={currentTrack.trackGroup.title}
             >
               {currentTrack.trackGroup.artist && (
                 <Link
