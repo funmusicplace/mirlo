@@ -14,6 +14,7 @@ export const SplashWrapper = styled.div`
   align-items: center;
   display: relative;
   justify-content: center;
+
   width: 100%;
   overflow: hidden;
   position: relative;
@@ -178,7 +179,7 @@ const Splash = () => {
                 flex-direction: column;
                 gap: 24px;
 
-                color: var(--mi-black);
+                color: var(--mi-foreground-color);
               `}
             >
               <SplashTitle>
