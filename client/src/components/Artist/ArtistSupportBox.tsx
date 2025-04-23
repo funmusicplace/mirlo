@@ -121,7 +121,7 @@ const ArtistSupportBox: React.FC<{
           }
           currency={subscriptionTier.currency}
         />{" "}
-        / {t("month")}
+        / {t(subscriptionTier.interval === "MONTH" ? "monthly" : "yearly")}
       </div>
       <div
         className={css`

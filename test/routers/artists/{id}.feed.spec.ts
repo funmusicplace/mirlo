@@ -86,7 +86,7 @@ describe("artists/{id}/feed", () => {
 
     assert(response.statusCode === 200);
     assert(response.body.results.length === 1);
-    assert(response.body.results[0].title === postTitle);
+    assert.equal(response.body.results[0].title, `${postTitle}`);
   });
 
   it("should GET / a public post and display it in RSS", async () => {
@@ -131,7 +131,7 @@ describe("artists/{id}/feed", () => {
     assert.equal(obj.title, `${artist.name} Feed`);
     assert.equal(obj.items.length, 1);
     assert(obj.items[0].content?.includes("<h2"));
-    assert.equal(obj.items[0].title, postTitle);
+    assert.equal(obj.items[0].title, `${postTitle} by ${artist.name}`);
   });
 
   it("should not GET / a hidden post", async () => {
@@ -215,7 +215,7 @@ describe("artists/{id}/feed", () => {
 
     assert.equal(response.statusCode, 200);
     assert.equal(response.body.results.length, 1);
-    assert.equal(response.body.results[0].title, postTitle);
+    assert.equal(response.body.results[0].title, `${postTitle}`);
   });
 
   it("should GET / a hidden post if the user is subscribed above the minimum tier", async () => {
@@ -275,7 +275,7 @@ describe("artists/{id}/feed", () => {
       .set("Accept", "application/json");
     assert.equal(response.statusCode, 200);
     assert.equal(response.body.results.length, 1);
-    assert.equal(response.body.results[0].title, postTitle);
+    assert.equal(response.body.results[0].title, `${postTitle}`);
   });
 
   it("should GET / an album and display it in RSS", async () => {
@@ -310,7 +310,7 @@ describe("artists/{id}/feed", () => {
     assert.equal(obj.title, `${artist.name} Feed`);
     assert.equal(obj.items.length, 1);
     assert(obj.items[0].content?.includes(""));
-    assert.equal(obj.items[0].title, trackGroup.title);
+    assert.equal(obj.items[0].title, `${trackGroup.title} by ${artist.name}`);
   });
 
   it("should GET / not display an album if it's not public", async () => {
@@ -392,8 +392,8 @@ describe("artists/{id}/feed", () => {
     assert.equal(obj.title, `${artist.name} Feed`);
     assert.equal(obj.items.length, 2);
     assert(obj.items[0].content?.includes(""));
-    assert.equal(obj.items[0].title, trackGroup.title);
-    assert.equal(obj.items[1].title, postTitle);
+    assert.equal(obj.items[0].title, `${trackGroup.title} by ${artist.name}`);
+    assert.equal(obj.items[1].title, `${postTitle} by ${artist.name}`);
   });
 
   describe("ActivityPub", () => {

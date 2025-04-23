@@ -47,9 +47,7 @@ export const getManageReleaseUrl = (
   artist: { urlSlug?: string; id: number },
   trackGroup: { urlSlug?: string; id: number }
 ) => {
-  return `/${getArtistManageUrl(artist.id)}/release/${getTrackGroupUrlReference(
-    trackGroup
-  )}`;
+  return `${getArtistManageUrl(artist.id)}/release/${trackGroup.id}`;
 };
 
 export const getTrackUrl = (

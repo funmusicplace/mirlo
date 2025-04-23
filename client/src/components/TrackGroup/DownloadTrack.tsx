@@ -40,7 +40,6 @@ function DownloadTrack() {
         const result = await api.get<{ exists: boolean }>(
           `tracks/${trackId}/testOwns?email=${email ?? ""}`
         );
-        console.log("result", result);
 
         if (result.result.exists) {
           setIsOwned(true);

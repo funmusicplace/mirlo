@@ -14,9 +14,7 @@ import {
   getReadStream,
   statFile,
   trackFormatBucket,
-  trackGroupFormatBucket,
 } from "../../../../utils/minio";
-import { startGeneratingZip } from "../../../../queues/album-queue";
 import filenamify from "filenamify";
 import { cleanHeaderValue } from "../../../../utils/validate-http-headers";
 import { AppError } from "../../../../utils/error";
@@ -141,7 +139,7 @@ export default function () {
   }
 
   GET.apiDoc = {
-    summary: "Downloads a trackGroup file if the user has permission",
+    summary: "Downloads a track file if the user has permission",
     parameters: [
       {
         in: "path",
@@ -152,7 +150,7 @@ export default function () {
     ],
     responses: {
       200: {
-        description: "A zip file of trackgroup tracks",
+        description: "A zip file of tracks",
       },
       default: {
         description: "An error occurred",

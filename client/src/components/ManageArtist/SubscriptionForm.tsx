@@ -15,6 +15,7 @@ import { css } from "@emotion/css";
 import FormCheckbox from "components/common/FormCheckbox";
 import FormError from "components/common/FormError";
 import { useAuthContext } from "state/AuthContext";
+import { SelectEl } from "components/common/Select";
 
 const generateDefaultValues = (existing?: ArtistSubscriptionTier) => {
   const vals = {
@@ -45,6 +46,7 @@ const SubscriptionForm: React.FC<{
     minAmount: string;
     allowVariable: boolean;
     autoPurchaseAlbums: boolean;
+    interval: "MONTH" | "YEAR";
   }>({
     defaultValues: generateDefaultValues(existing),
   });
@@ -64,6 +66,7 @@ const SubscriptionForm: React.FC<{
               "name",
               "description",
               "allowVariable",
+              "interval",
               "autoPurchaseAlbums",
             ]),
             minAmount: data.minAmount ? +data.minAmount * 100 : undefined,
@@ -127,8 +130,7 @@ const SubscriptionForm: React.FC<{
                 min={0}
               />
               <span>
-                {t("inCurrency", { currency: user?.currency ?? "usd" })}in{" "}
-                {user?.currency ?? "usd"}
+                {t("inCurrency", { currency: user?.currency ?? "usd" })}
               </span>
             </div>
             {formState.errors.minAmount && (
@@ -138,13 +140,22 @@ const SubscriptionForm: React.FC<{
               </FormError>
             )}
           </FormComponent>
-          <FormCheckbox
-            idPrefix={`${existingId}`}
-            keyName="allowVariable"
-            description={t("allowVariableDescription")}
-          />
           <FormComponent>
-            {t("description")}
+            <FormCheckbox
+              idPrefix={`${existingId}`}
+              keyName="allowVariable"
+              description={t("allowVariableDescription")}
+            />
+          </FormComponent>
+          <FormComponent>
+            <label>{t("interval")}</label>
+            <SelectEl defaultValue="paid" {...register("interval")}>
+              <option value="MONTH">{t("monthly")}</option>
+              <option value="YEAR">{t("yearly")}</option>
+            </SelectEl>
+          </FormComponent>
+          <FormComponent>
+            <label>{t("description")}</label>
             <TextArea {...register("description")} />
           </FormComponent>
           <FormCheckbox
@@ -152,14 +163,16 @@ const SubscriptionForm: React.FC<{
             keyName="autoPurchaseAlbums"
             description={t("autoAlbumPurchase")}
           />
-          <Button
-            type="submit"
-            disabled={isSaving}
-            size="compact"
-            isLoading={isSaving}
-          >
-            {existing ? t("saveSubscription") : t("createSubscription")}
-          </Button>
+          <FormComponent>
+            <Button
+              type="submit"
+              disabled={isSaving}
+              size="compact"
+              isLoading={isSaving}
+            >
+              {existing ? t("saveSubscription") : t("createSubscription")}
+            </Button>
+          </FormComponent>
         </form>
       </Box>
     </FormProvider>

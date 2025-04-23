@@ -10,7 +10,6 @@ import {
   getFile,
   incomingAudioBucket,
   removeObjectFromStorage,
-  statFile,
   uploadWrapper,
 } from "../utils/minio";
 

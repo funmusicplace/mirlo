@@ -61,8 +61,6 @@ const PostForm: React.FC<{
       multiple: true,
     });
 
-  console.log("post", post);
-
   const methods = useForm<PostFormData>({
     defaultValues: post
       ? {
