@@ -18,7 +18,6 @@ interface TrackGroupFormData {
   published: boolean;
   enabled: boolean;
   id: number;
-  type: "lp" | "ep" | "album" | "single";
   releaseDate: string;
   about: string;
   artistId: number;
@@ -87,13 +86,6 @@ export const TrackGroupDetails: React.FC = () => {
       <form onSubmit={handleSubmit(doSave)}>
         <FormComponent>
           {t("title")} <InputEl {...register("title")} />
-        </FormComponent>
-        <FormComponent>
-          {t("type")}
-          <SelectEl defaultValue="lp" {...register("type")}>
-            <option value="lp">LP</option>
-            <option value="ep">EP</option>
-          </SelectEl>
         </FormComponent>
         <FormComponent>
           {t("releaseDate")}{" "}

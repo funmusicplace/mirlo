@@ -1,3 +1,8 @@
 # https://www.robotstxt.org/robotstxt.html
+# Disallow crawling the API
 User-agent: *
-Disallow:
+Disallow: /v1/
+
+# Disallow crawling the Auth endpoints 
+User-agent: *
+Disallow: /auth/

@@ -273,7 +273,8 @@ app.use("/", async (req, res) => {
         req.path.includes(".md") ||
         req.path.includes(".pdf") ||
         req.path.includes(".woff") ||
-        req.path.includes(".woff2")
+        req.path.includes(".woff2") ||
+        req.path.includes("robots.txt")
       )
     ) {
       const html = await parseIndex(req.path);

@@ -9,17 +9,6 @@ import { FaTrash } from "react-icons/fa";
 import { useSnackbar } from "state/SnackbarContext";
 import { ArtistButton } from "components/Artist/ArtistButtons";
 
-export interface TrackGroupFormData {
-  published: boolean;
-  title: string;
-  type: TrackGroup["type"];
-  minPrice: string;
-  releaseDate: string;
-  credits: string;
-  about: string;
-  coverFile: File[];
-}
-
 const DeleteMerch: React.FC<{}> = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageMerch" });
   const snackbar = useSnackbar();
