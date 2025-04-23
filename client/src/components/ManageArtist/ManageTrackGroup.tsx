@@ -11,15 +11,12 @@ import ManageSectionWrapper from "./ManageSectionWrapper";
 import { css } from "@emotion/css";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import BackToArtistLink from "./BackToArtistLink";
-import ManageTags from "./AlbumFormComponents/ManageTags";
 import { useQuery } from "@tanstack/react-query";
 import { queryArtist, queryManagedTrackGroup } from "queries";
-import AlbumPaymentReceiver from "./AlbumFormComponents/AlbumPaymentReceiver";
 
 export interface TrackGroupFormData {
   published: boolean;
   title: string;
-  type: TrackGroup["type"];
   minPrice: string;
   releaseDate: string;
   credits: string;
