@@ -1,9 +1,17 @@
+import { backendStorage } from "./minio";
+
+const { BACKBBLAZE_REGION = "" } = process.env;
+
 export const generateFullStaticImageUrl = (
   imageName: string,
   bucket: string,
   extension?: string
 ) => {
-  return `${process.env.STATIC_MEDIA_HOST}/images/${bucket}/${imageName}.${extension ?? "webp"}`;
+  if (backendStorage === "minio") {
+    return `${process.env.STATIC_MEDIA_HOST}/images/${bucket}/${imageName}.${extension ?? "webp"}`;
+  } else {
+    return `https://${bucket}.s3.${BACKBBLAZE_REGION}.backblaze2.com/${imageName}.${extension ?? "webp"}`;
+  }
 };
 
 export const convertURLArrayToSizes = (urls: string[], bucket: string) => {

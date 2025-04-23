@@ -43,6 +43,8 @@ const {
   MINIO_ROOT_PASSWORD = "",
   BACKBLAZE_KEY_ID = "",
   BACKBLAZE_APP_KEY = "",
+  BACKBLAZE_ENDPOINT = "https://s3.us-east-005.backblazeb2.com",
+  BACKBBLAZE_REGION = "us-east-005",
   MINIO_API_PORT = 9000,
   NODE_ENV,
 } = process.env;
@@ -57,24 +59,24 @@ export const minioClient = new Minio.Client({
   secretKey: MINIO_ROOT_PASSWORD,
 });
 
+// Toggle this to true if you want to test backblaze locally
+// Note: you'll need both the backblaze key id and app key
+// set for this to work.
+// FIXME: this should / could be set in the database as part
+// of the site settings.
+export const backendStorage: "minio" | "backblaze" =
+  NODE_ENV === "production" ? "backblaze" : "minio";
+
 // Instantiate a second minio client for backblaze
 export const backblazeClient = new S3Client({
-  region: "us-east-005",
-  endpoint: "https://s3.us-east-005.backblazeb2.com",
+  region: BACKBBLAZE_REGION,
+  endpoint: BACKBLAZE_ENDPOINT,
   credentials: {
     accessKeyId: BACKBLAZE_KEY_ID,
     secretAccessKey: BACKBLAZE_APP_KEY,
   },
   maxAttempts: 1,
 });
-
-// Toggle this to true if you want to test backblaze locally
-// Note: you'll need both the backblaze key id and app key
-// set for this to work.
-// FIXME: this should / could be set in the database as part
-// of the site settings.
-const backendStorage: "minio" | "backblaze" =
-  NODE_ENV === "production" ? "backblaze" : "minio";
 
 const createB2BucketIfNotExists = async (bucket: string) => {
   logger.info(`backblaze: checking if a bucket exists: ${bucket}`);
