@@ -4,12 +4,15 @@ import { VscPlay } from "react-icons/vsc";
 import { useGlobalStateContext } from "state/GlobalState";
 import Button from "./Button";
 import { useTranslation } from "react-i18next";
+import { ArtistButton } from "components/Artist/ArtistButtons";
 
 export const PlayButton: React.FC<{
   onPlay?: () => Promise<void> | void;
   className?: string;
   variant?: "outlined";
-}> = ({ onPlay, className, variant }) => {
+  disabled?: boolean;
+  onArtistPage?: boolean;
+}> = ({ onPlay, className, variant, disabled = false, onArtistPage }) => {
   const { dispatch } = useGlobalStateContext();
 
   const onPlayCallback = React.useCallback(() => {
@@ -26,21 +29,34 @@ export const PlayButton: React.FC<{
             font-size: 1.4rem;
             margin-right: 0.25rem;
             padding: 0.7rem 0.6rem 0.7rem 0.8rem;
-            border: solid 1.5px var(--mi-normal-foreground-color);
           }
         ` +
         " " +
         className
       }
     >
-      <Button
-        startIcon={<VscPlay />}
-        onClick={onPlay ?? onPlayCallback}
-        aria-label={`${t("play")}`}
-        title={`${t("play")}`}
-        className="play-button"
-        variant={variant}
-      />
+      {onArtistPage && (
+        <ArtistButton
+          startIcon={<VscPlay />}
+          onClick={onPlay ?? onPlayCallback}
+          aria-label={`${t("play")}`}
+          title={`${t("play")}`}
+          className="play-button"
+          variant={variant}
+          disabled={disabled}
+        />
+      )}
+      {!onArtistPage && (
+        <Button
+          startIcon={<VscPlay />}
+          onClick={onPlay ?? onPlayCallback}
+          aria-label={`${t("play")}`}
+          title={`${t("play")}`}
+          className="play-button"
+          variant={variant}
+          disabled={disabled}
+        />
+      )}
     </div>
   );
 };

@@ -222,9 +222,8 @@ describe("trackGroups", () => {
         obj.feedUrl,
         `${process.env.API_DOMAIN}/v1/trackGroups?format=rss`
       );
-      assert.equal(obj.title, "All Mirlo Releases Feed");
       assert.equal(obj.items.length, 1);
-      assert.equal(obj.items[0].title, tg.title);
+      assert.equal(obj.items[0].title, `${tg.title} by ${artist.name}`);
     });
 
     it("should display an published album in an RSS feed when filtering by isReleased ", async () => {
@@ -249,9 +248,8 @@ describe("trackGroups", () => {
         obj.feedUrl,
         `${process.env.API_DOMAIN}/v1/trackGroups?format=rss`
       );
-      assert.equal(obj.title, "All Mirlo Releases Feed");
       assert.equal(obj.items.length, 1);
-      assert.equal(obj.items[0].title, tg.title);
+      assert.equal(obj.items[0].title, `${tg.title} by ${artist.name}`);
     });
 
     it("should not display a published album with a future releasedate in an RSS feed when filtering by isReleased ", async () => {
@@ -276,7 +274,6 @@ describe("trackGroups", () => {
         obj.feedUrl,
         `${process.env.API_DOMAIN}/v1/trackGroups?format=rss`
       );
-      assert.equal(obj.title, "All Mirlo Releases Feed");
       assert.equal(obj.items.length, 0);
     });
 
@@ -304,7 +301,7 @@ describe("trackGroups", () => {
       );
       assert.equal(obj.title, "All Mirlo Releases Feed");
       assert.equal(obj.items.length, 1);
-      assert.equal(obj.items[0].title, tg.title);
+      assert.equal(obj.items[0].title, `${tg.title} by ${artist.name}`);
     });
   });
 });

@@ -99,7 +99,8 @@ const ArtistVariableSupport: React.FC<{
                 required: true,
               })}
             />
-            {tier.currency}
+            {tier.currency}{" "}
+            {t(tier.interval === "MONTH" ? "monthly" : "yearly")}
             {!!tier.minAmount && formState.errors?.amount && (
               <small>
                 {t("mustBeAtLeast", { minAmount: tier.minAmount / 100 })}

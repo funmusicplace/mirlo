@@ -1,6 +1,11 @@
 import { css } from "@emotion/css";
 import React from "react";
-import { FaExclamationTriangle, FaPen, FaTrash } from "react-icons/fa";
+import {
+  FaDownload,
+  FaExclamationTriangle,
+  FaPen,
+  FaTrash,
+} from "react-icons/fa";
 import useDraggableTrack from "utils/useDraggableTrack";
 
 import api from "services/api";
@@ -15,6 +20,10 @@ import Button from "components/common/Button";
 import { useAuthContext } from "state/AuthContext";
 import ManageTrackArtists from "./ManageTrackArtists";
 import ClickToEditInput from "./AlbumFormComponents/ClickToEditInput";
+import {
+  ArtistButton,
+  ArtistButtonAnchor,
+} from "components/Artist/ArtistButtons";
 
 const TrackRow = styled("tr")`
   > td > .play-button {
@@ -87,6 +96,16 @@ const ManageTrackRow: React.FC<{
         await reload?.();
         snackbar(t("deleteTrackSuccess"), { type: "success" });
       }
+    } catch (e) {
+      console.error(e);
+    }
+  }, [track.id, userId, reload, snackbar]);
+
+  const getDownloadOriginalUrl = React.useCallback(() => {
+    try {
+      return api.getFileDownloadUrl(
+        `manage/tracks/${track.id}/downloadOriginal`
+      );
     } catch (e) {
       console.error(e);
     }
@@ -240,22 +259,31 @@ const ManageTrackRow: React.FC<{
       <td
         align="right"
         className={css`
-          width: 120px;
+          width: 150px;
 
-          button {
+          button,
+          a {
             display: inline-block;
           }
         `}
       >
-        <Button
+        <ArtistButtonAnchor
+          size="compact"
+          startIcon={<FaDownload />}
+          variant="dashed"
+          href={getDownloadOriginalUrl()}
+          title={t("downloadOriginal") ?? ""}
+          style={{ marginRight: ".25rem" }}
+        ></ArtistButtonAnchor>
+        <ArtistButton
           size="compact"
           startIcon={<FaPen />}
           variant="dashed"
           onClick={() => setIsEditing(true)}
           title={t("edit") ?? ""}
           style={{ marginRight: ".25rem" }}
-        ></Button>
-        <Button
+        />
+        <ArtistButton
           variant="dashed"
           startIcon={<FaTrash />}
           size="compact"

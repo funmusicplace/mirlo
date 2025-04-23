@@ -43,6 +43,13 @@ export const getReleaseUrl = (
   )}`;
 };
 
+export const getManageReleaseUrl = (
+  artist: { urlSlug?: string; id: number },
+  trackGroup: { urlSlug?: string; id: number }
+) => {
+  return `${getArtistManageUrl(artist.id)}/release/${trackGroup.id}`;
+};
+
 export const getTrackUrl = (
   artist: { urlSlug?: string; id: number },
   trackGroup: { urlSlug?: string; id: number },

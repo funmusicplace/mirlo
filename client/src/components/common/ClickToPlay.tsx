@@ -10,7 +10,6 @@ import { useTranslation } from "react-i18next";
 import Wishlist from "components/TrackGroup/Wishlist";
 import PurchaseOrDownloadAlbum from "components/TrackGroup/PurchaseOrDownloadAlbumModal";
 import PauseButton from "./PauseButton";
-import { getReleaseUrl } from "utils/artist";
 import { useAuthContext } from "state/AuthContext";
 import { Link } from "react-router-dom";
 import { determineItemLink } from "components/Artist/ArtistItemLink";
@@ -224,7 +223,7 @@ const ClickToPlay: React.FC<
   const { user } = useAuthContext();
 
   const [localTrackIds, setLocalTrackIds] = React.useState<number[]>([]);
-  console.log("trackIds", trackGroup.urlSlug, trackIds);
+
   const { t } = useTranslation("translation", { keyPrefix: "clickToPlay" });
 
   const onClickPlay = React.useCallback(async () => {

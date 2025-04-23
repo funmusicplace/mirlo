@@ -72,9 +72,16 @@ const ClickToPlayTracks: React.FC<{
     currentlyPlayingIndex !== undefined &&
     localTrackIds.includes(playerQueueIds[currentlyPlayingIndex]);
 
+  console.log("localTrackIds", localTrackIds);
+
   return (
     <Wrapper className={className}>
-      <PlayControlButton onPlay={onClickPlay} isPlaying={currentlyPlaying} />
+      <PlayControlButton
+        onPlay={onClickPlay}
+        isPlaying={currentlyPlaying}
+        disabled={localTrackIds.length === 0}
+        onArtistPage
+      />
     </Wrapper>
   );
 };

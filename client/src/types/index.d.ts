@@ -225,6 +225,7 @@ interface ArtistSubscriptionTier {
   minAmount?: number;
   name: string;
   description: string;
+  interval: "MONTH" | "YEAR";
   isDefaultTier: boolean;
   platformPercent: number;
   allowVariable?: boolean;

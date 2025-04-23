@@ -46,8 +46,8 @@ export const ImageWithPlaceholder: React.FC<{
       {!src && (
         <div
           className={css`
-            width: 99vh;
-            height: 99vh;
+            width: ${size}px;
+            height: ${size}px;
             max-height: ${size}px;
             display: block;
           `}

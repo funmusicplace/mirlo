@@ -26,6 +26,7 @@ const FormComponent = styled.div<{ direction?: "row" | "column" }>`
     border: var(--mi-border);
     margin-bottom: 0.25rem;
   }
+
   textarea {
     border: var(--mi-border);
   }

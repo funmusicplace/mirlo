@@ -56,6 +56,8 @@ const ManageArtistAlbums: React.FC<{}> = () => {
         <div
           className={css`
             padding-bottom: 1rem;
+            display: flex;
+            flex-wrap: wrap;
           `}
         >
           {artist &&

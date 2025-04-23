@@ -46,7 +46,18 @@ const SupportArtistPopUp: React.FC<{
   }, [artist.id, isOpen, methods, user?.artistUserSubscriptions]);
 
   if (!stripeAccountStatus?.chargesEnabled) {
-    return <FollowArtist artistId={artist.id} />;
+    return (
+      <div
+        className={css`
+          text-align: center;
+          display: flex;
+          justify-content: center;
+          margin: 1rem;
+        `}
+      >
+        <FollowArtist artistId={artist.id} />
+      </div>
+    );
   }
 
   return (

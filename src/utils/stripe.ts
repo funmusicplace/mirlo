@@ -823,7 +823,7 @@ export const handleCheckoutSession = async (
     let { userId, userEmail } = metadata;
     userEmail = userEmail || (session.customer_details?.email ?? "");
     logger.info(
-      `checkout.session: ${session.id}, stripeAccountId: ${stripeAccountId}, tierId: ${tierId}, trackGroupId: ${trackGroupId}, artistId: ${artistId}, gaveGift: ${gaveGift}`
+      `checkout.session: ${session.id}, stripeAccountId: ${stripeAccountId}, tierId: ${tierId}, trackGroupId: ${trackGroupId}, trackId: ${trackId}, artistId: ${artistId}, gaveGift: ${gaveGift}`
     );
     logger.info(
       `checkout.session: ${session.id}, have user info: userId: ${userId} userEmail: ${userEmail}`
@@ -855,7 +855,7 @@ export const handleCheckoutSession = async (
     } else if (tierId && userEmail) {
       logger.info(`checkout.session: ${session.id} handling subscription`);
       await handleSubscription(Number(actualUserId), Number(tierId), session);
-    } else if (trackGroupId && actualUserId) {
+    } else if (trackGroupId && !trackId && actualUserId) {
       logger.info(`checkout.session: ${session.id} handleTrackGroupPurchase`);
       await handleTrackGroupPurchase(
         Number(actualUserId),

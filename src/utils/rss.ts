@@ -34,15 +34,19 @@ export const turnItemsIntoRSS = async (
   for (const p of zipped) {
     if (isTrackGroup(p)) {
       feed.item({
-        title: p.title ?? "",
+        title: p.title
+          ? `${p.title} by ${p.artist?.name}`
+          : `A release by ${p.artist?.name}`,
         description:
-          p.about ?? `<h2>An album release by artist ${p.artist?.name}.</h2>`,
+          p.about ?? `<h2>An release by artist ${p.artist?.name}.</h2>`,
         url: `${client?.applicationUrl}/${p.artist?.urlSlug}/release/${p.urlSlug}`,
         date: p.releaseDate,
       });
     } else if (isPost(p)) {
       feed.item({
-        title: p.title ?? "",
+        title: p.title
+          ? `${p.title} by ${p.artist?.name}`
+          : `A post by ${p.artist?.name}`,
         description: markdownAsHtml(p.content),
         url: `${client?.applicationUrl}/${p.artist?.urlSlug}/post/${p.id}`,
         date: p.publishedAt,
