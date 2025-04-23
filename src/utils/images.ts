@@ -10,7 +10,7 @@ export const generateFullStaticImageUrl = (
   if (backendStorage === "minio") {
     return `${process.env.STATIC_MEDIA_HOST}/images/${bucket}/${imageName}.${extension ?? "webp"}`;
   } else {
-    return `https://${bucket}.s3.${BACKBLAZE_REGION}.backblaze2.com/${imageName}.${extension ?? "webp"}`;
+    return `https://${bucket}.s3.${BACKBLAZE_REGION}.backblazeb2.com/${imageName}.${extension ?? "webp"}`;
   }
 };
 
