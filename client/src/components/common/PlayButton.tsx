@@ -4,7 +4,6 @@ import { VscPlay } from "react-icons/vsc";
 import { useGlobalStateContext } from "state/GlobalState";
 import Button from "./Button";
 import { useTranslation } from "react-i18next";
-import { useParams } from "react-router-dom";
 import { ArtistButton } from "components/Artist/ArtistButtons";
 
 export const PlayButton: React.FC<{
