@@ -92,17 +92,6 @@ const AlbumFormContent: React.FC<{
             maxSize="15mb"
           />
         </FormComponent>
-
-        {/* <FormComponent>
-        {t("type")}:{" "}
-        <SelectEl defaultValue="lp" {...register("type")}>
-          <option value="lp">{t("lp")}</option>
-          <option value="ep">{t("ep")}</option>
-          <option value="single">{t("single")}</option>
-          <option value="compilation">{t("compilation")}</option>
-        </SelectEl>
-        <small>The type is optional</small>
-      </FormComponent> */}
       </FormSection>
       <FormSection>
         <h2>Price and such</h2>

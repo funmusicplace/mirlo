@@ -68,7 +68,6 @@ interface TrackGroup {
   published: boolean;
   adminEnabled: boolean;
   id: number;
-  type?: "lp" | "ep" | "album" | "single";
   releaseDate: string;
   about?: string;
   currency: string;
