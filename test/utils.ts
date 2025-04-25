@@ -166,6 +166,7 @@ export const createTrack = async (
     data: {
       title: data?.title,
       trackGroupId,
+      description: data?.description,
       stripeProductKey: data?.stripeProductKey,
       minPrice: data?.minPrice,
       isPreview: data?.isPreview,

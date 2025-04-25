@@ -545,6 +545,7 @@ model Track {
   trackGroup          TrackGroup          @relation(fields: [trackGroupId], references: [id])
   trackGroupId        Int
   title               String?
+  description         String?
   audio               TrackAudio?
   createdAt           DateTime            @default(now())
   updatedAt           DateTime            @updatedAt

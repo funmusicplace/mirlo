@@ -32,6 +32,7 @@ interface Track {
   image: Image;
   order: number;
   allowIndividualSale: boolean;
+  description: string;
   minPrice: number; // in cents;
   metadata: { [key: string]: any };
   audio?: {

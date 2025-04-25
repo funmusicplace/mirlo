@@ -18,6 +18,7 @@ interface TrackBody {
   isrc: string;
   minPrice: number;
   allowIndividualSale: boolean;
+  description: string;
   trackArtists?: {
     artistName: string;
     id: string;
@@ -45,6 +46,7 @@ export default function () {
       allowIndividualSale,
       lyrics,
       isrc,
+      description,
     } = req.body as TrackBody;
 
     try {
@@ -60,6 +62,7 @@ export default function () {
           allowIndividualSale,
           minPrice,
           licenseId: Number(licenseId),
+          description,
         },
         include: {
           trackArtists: true,

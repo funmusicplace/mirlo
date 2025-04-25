@@ -33,6 +33,7 @@ export interface FormData {
   licenseId: number;
   isrc: string;
   lyrics: string;
+  description: string;
   allowIndividualSale: boolean;
   minPrice: string;
 }
@@ -70,6 +71,7 @@ const EditTrackRow: React.FC<{
       status: track.isPreview ? "preview" : "must-own",
       licenseId: track.licenseId,
       lyrics: track.lyrics,
+      description: track.description,
       isrc: track.isrc,
       minPrice: `${track?.minPrice !== undefined ? track.minPrice / 100 : ""}`,
       allowIndividualSale: track.allowIndividualSale,
@@ -90,6 +92,7 @@ const EditTrackRow: React.FC<{
       licenseId: track.licenseId,
       isrc: track.isrc,
       lyrics: track.lyrics,
+      description: track.description,
       minPrice: `${track?.minPrice !== undefined ? track.minPrice / 100 : ""}`,
       allowIndividualSale: track.allowIndividualSale,
     });
@@ -104,6 +107,7 @@ const EditTrackRow: React.FC<{
           title: formData.title,
           isrc: formData.isrc,
           lyrics: formData.lyrics,
+          description: formData.description,
           isPreview: formData.status === "preview",
           allowIndividualSale: formData.allowIndividualSale,
           minPrice: formData.minPrice
@@ -268,6 +272,21 @@ const EditTrackRow: React.FC<{
           <TextArea
             id="lyrics"
             {...register("lyrics")}
+            className={css`
+              width: 100%;
+            `}
+            rows={8}
+          />
+        </td>
+      </IndentedTR>
+      <IndentedTR>
+        <td colSpan={2}>
+          <label htmlFor="description">{t("description")}</label>
+        </td>
+        <td colSpan={99}>
+          <TextArea
+            id="description"
+            {...register("description")}
             className={css`
               width: 100%;
             `}
