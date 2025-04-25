@@ -60,6 +60,7 @@ export default function () {
       isPreview,
       lyrics,
       isrc,
+      description,
     } = req.body;
     try {
       await doesTrackGroupBelongToUser(Number(trackGroupId), loggedInUser);
@@ -72,6 +73,7 @@ export default function () {
           metadata,
           lyrics,
           isrc,
+          description,
           trackGroup: {
             connect: {
               id: Number(trackGroupId),
