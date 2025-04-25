@@ -165,6 +165,23 @@ function TrackView() {
                     trackGroup={trackGroup}
                   />
                 </TrackListingWrapper>
+                {filteredTrack.description && (
+                  <div
+                    className={css`
+                      padding: 1rem;
+                      white-space: pre-line;
+                    `}
+                  >
+                    <h3
+                      className={css`
+                        margin-bottom: 1rem;
+                      `}
+                    >
+                      Description
+                    </h3>
+                    {filteredTrack.description}
+                  </div>
+                )}
                 {filteredTrack.lyrics && (
                   <div
                     className={css`
