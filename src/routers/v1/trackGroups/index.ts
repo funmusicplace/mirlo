@@ -95,7 +95,7 @@ export default function () {
               id: true,
             },
           },
-          tracks: true,
+          tracks: { orderBy: { order: "asc" } },
           cover: true,
         },
       });

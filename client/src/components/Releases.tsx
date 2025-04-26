@@ -26,12 +26,23 @@ const Releases = () => {
   const tag = params.get("tag");
   const search = params.get("search");
 
-  const { data: trackGroups } = useQuery(
+  const { data: newReleases } = useQuery(
     queryTrackGroups({
       skip: pageSize * page,
       take: pageSize,
       tag: tag || undefined,
       title: search ?? undefined,
+      isReleased: "released",
+    })
+  );
+
+  const { data: futureReleases } = useQuery(
+    queryTrackGroups({
+      skip: pageSize * page,
+      take: pageSize,
+      tag: tag || undefined,
+      title: search ?? undefined,
+      isReleased: "not-released",
     })
   );
 
@@ -67,6 +78,67 @@ const Releases = () => {
           </WidthContainer>
         </SectionHeader>
       )}
+      {(futureReleases?.results ?? []) && (
+        <>
+          <SectionHeader>
+            <WidthContainer
+              variant="big"
+              justify="space-between"
+              className={css`
+                flex-direction: row;
+                display: flex;
+              `}
+            >
+              <h1 className="h5 section-header__heading" id={headingId}>
+                {t("futureReleases")}
+              </h1>
+              <ButtonAnchor
+                target="_blank"
+                href={`${import.meta.env.VITE_API_DOMAIN}/v1/trackGroups?released=not-released&format=rss`}
+                rel="noreferrer"
+                onlyIcon
+                className={css`
+                  margin-top: 0.25rem;
+                `}
+                startIcon={<FaRss />}
+              />
+            </WidthContainer>
+          </SectionHeader>
+          <div
+            className={css`
+              padding-top: 0.25rem;
+            `}
+          >
+            <WidthContainer variant="big" justify="center">
+              <div
+                className={css`
+                  display: flex;
+                  width: 100%;
+                  flex-direction: row;
+                  flex-wrap: wrap;
+                  padding: var(--mi-side-paddings-xsmall);
+                `}
+              >
+                <TrackgroupGrid
+                  gridNumber="6"
+                  as="ul"
+                  aria-labelledby={headingId}
+                  role="list"
+                >
+                  {futureReleases?.results?.map((trackGroup) => (
+                    <ArtistTrackGroup
+                      key={trackGroup.id}
+                      trackGroup={trackGroup}
+                      as="li"
+                      size="small"
+                    />
+                  ))}
+                </TrackgroupGrid>
+              </div>
+            </WidthContainer>
+          </div>
+        </>
+      )}
       <SectionHeader>
         <WidthContainer
           variant="big"
@@ -92,7 +164,7 @@ const Releases = () => {
           </h1>
           <ButtonAnchor
             target="_blank"
-            href={`${import.meta.env.VITE_API_DOMAIN}/v1/trackGroups?format=rss`}
+            href={`${import.meta.env.VITE_API_DOMAIN}/v1/trackGroups?released=released&format=rss`}
             rel="noreferrer"
             onlyIcon
             className={css`
@@ -102,6 +174,7 @@ const Releases = () => {
           />
         </WidthContainer>
       </SectionHeader>
+
       <div
         className={css`
           padding-top: 0.25rem;
@@ -123,7 +196,7 @@ const Releases = () => {
               aria-labelledby={headingId}
               role="list"
             >
-              {trackGroups?.results?.map((trackGroup) => (
+              {newReleases?.results?.map((trackGroup) => (
                 <ArtistTrackGroup
                   key={trackGroup.id}
                   trackGroup={trackGroup}
@@ -133,8 +206,8 @@ const Releases = () => {
             </TrackgroupGrid>
           </div>
 
-          {trackGroups && (
-            <PaginationComponent amount={trackGroups.results.length} />
+          {newReleases && (
+            <PaginationComponent amount={newReleases.results.length} />
           )}
         </WidthContainer>
       </div>

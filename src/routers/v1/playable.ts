@@ -48,27 +48,32 @@ export default function () {
           },
         },
       });
+      console.log("tracks", tracks);
 
-      const areOwned = tracks.filter((track) => {
-        const hasPurchasedTrack =
-          track.userTrackPurchases && track.userTrackPurchases.length > 0;
-        const hasPurchasedTrackGroup =
-          track.trackGroup.userTrackGroupPurchases &&
-          track.trackGroup.userTrackGroupPurchases.length > 0;
-        const isArtistOwner =
-          track.trackGroup.artist.userId === loggedInUser?.id;
+      const areOwned = trackIds.filter((id) => {
+        const track = tracks.find((t) => t.id === Number(id));
+        if (track) {
+          const hasPurchasedTrack =
+            track.userTrackPurchases && track.userTrackPurchases.length > 0;
+          const hasPurchasedTrackGroup =
+            track.trackGroup.userTrackGroupPurchases &&
+            track.trackGroup.userTrackGroupPurchases.length > 0;
+          const isArtistOwner =
+            track.trackGroup.artist.userId === loggedInUser?.id;
 
-        return (
-          hasPurchasedTrack ||
-          hasPurchasedTrackGroup ||
-          isArtistOwner ||
-          track.isPreview
-        );
+          return (
+            hasPurchasedTrack ||
+            hasPurchasedTrackGroup ||
+            isArtistOwner ||
+            track.isPreview
+          );
+        }
+        return false;
       });
 
       res
         .json({
-          results: areOwned.map((track) => track.id),
+          results: areOwned.map((track) => Number(track)),
         })
         .status(200);
     } catch (e) {
