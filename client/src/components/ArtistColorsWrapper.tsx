@@ -1,4 +1,5 @@
 import { css } from "@emotion/css";
+import styled from "@emotion/styled";
 import { useQuery } from "@tanstack/react-query";
 import { queryArtist, queryManagedArtist } from "queries";
 import React from "react";
@@ -67,12 +68,24 @@ prefersDark?.addEventListener("change", () =>
   updateTheme(undefined, prefersDark.matches ? "dark" : "light")
 );
 
-const ArtistColorsWrapper: React.FC<{ children: React.ReactElement }> = ({
-  children,
-}) => {
-  const params = useParams();
-  const artistId = params?.artistId ?? "";
-  // Because of type mismatch we couldn't choose which of these to query
+const WrapperDiv = styled.div`
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+
+  background-color: var(--mi-normal-background-color);
+  color: var(--mi-normal-foreground-color);
+
+  [data-mi-theme="dark"] & {
+    background-color: var(--mi-normal-background-color);
+    color: var(--mi-normal-foreground-color);
+  }
+`;
+
+const ArtistColors: React.FC<{
+  artistId: string;
+  children: React.ReactElement;
+}> = ({ artistId, children }) => {
   const { data: managedArtist } = useQuery(
     queryManagedArtist(Number(artistId))
   );
@@ -85,26 +98,19 @@ const ArtistColorsWrapper: React.FC<{ children: React.ReactElement }> = ({
     updateTheme(artistColors, prefersDark.matches ? "dark" : "light");
   }, [artistColors]);
 
-  return (
-    <div
-      id="artist-colors-wrapper"
-      className={css`
-        display: flex;
-        flex-direction: column;
-        min-height: 100vh;
+  return <WrapperDiv id="artist-colors-wrapper">{children}</WrapperDiv>;
+};
 
-        background-color: var(--mi-normal-background-color);
-        color: var(--mi-normal-foreground-color);
-
-        [data-mi-theme="dark"] & {
-          background-color: var(--mi-normal-background-color);
-          color: var(--mi-normal-foreground-color);
-        }
-      `}
-    >
-      {children}
-    </div>
-  );
+const ArtistColorsWrapper: React.FC<{ children: React.ReactElement }> = ({
+  children,
+}) => {
+  const params = useParams();
+  const artistId = params?.artistId ?? "";
+  // Because of type mismatch we couldn't choose which of these to query
+  if (artistId === "") {
+    return <WrapperDiv>{children}</WrapperDiv>;
+  }
+  <ArtistColors artistId={artistId} children={children} />;
 };
 
 export default ArtistColorsWrapper;
