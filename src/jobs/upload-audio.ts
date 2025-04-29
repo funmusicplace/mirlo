@@ -60,7 +60,7 @@ export default async (job: Job) => {
         .audioChannels(2)
         .audioBitrate("320k")
         .audioFrequency(48000)
-        .audioCodec("libfdk_aac") // convert using Fraunhofer FDK AAC
+        .audioCodec("libmp3lame") // convert using Fraunhofer FDK AAC
         .on("start", () => {
           logger.info("audioId ${audioId}: Converting original to hls");
         })
