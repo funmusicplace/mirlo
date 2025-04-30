@@ -11,6 +11,9 @@ export default function () {
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { trackIds } = req.query as unknown as { trackIds: string[] };
     try {
+      if (!trackIds || trackIds.length === 0) {
+        return res.status(200).json({ results: [] });
+      }
       const loggedInUser = req.user as User | undefined;
       const tracks = await prisma.track.findMany({
         where: {
@@ -66,6 +69,8 @@ export default function () {
         }
         return false;
       });
+
+      console.log("areOwned", areOwned);
 
       res
         .json({
