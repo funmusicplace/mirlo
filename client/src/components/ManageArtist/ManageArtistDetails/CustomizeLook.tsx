@@ -31,11 +31,11 @@ export interface ShareableTrackgroup {
   slug: string;
 }
 
-const allColorsSet = (artist: Artist) => {
+const someColorsSet = (artist: Artist) => {
   return (
-    artist.properties?.colors.primary &&
-    artist.properties?.colors.secondary &&
-    artist.properties?.colors.foreground &&
+    artist.properties?.colors.primary ||
+    artist.properties?.colors.secondary ||
+    artist.properties?.colors.foreground ||
     artist.properties?.colors.background
   );
 };
@@ -283,11 +283,11 @@ export const CustomizeLook: React.FC = () => {
                   `}
                 >
                   <FormComponent>
-                    {!allColorsSet(artist) && (
+                    {!someColorsSet(artist) && (
                       <ChooseYourTheme artistId={artist.id} />
                     )}
 
-                    {allColorsSet(artist) && <ArtistFormColors />}
+                    {someColorsSet(artist) && <ArtistFormColors />}
                   </FormComponent>
                 </div>
                 <div

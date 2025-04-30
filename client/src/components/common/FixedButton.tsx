@@ -13,7 +13,7 @@ const FixedButtonLink = styled(ButtonLink)`
   }
 
   @media screen and (min-width: ${bp.medium}px) {
-    padding: 1.2rem !important;
+    padding: 0.5rem !important;
   }
 `;
 

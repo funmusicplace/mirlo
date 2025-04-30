@@ -110,7 +110,7 @@ const ArtistColorsWrapper: React.FC<{ children: React.ReactElement }> = ({
   if (artistId === "") {
     return <WrapperDiv>{children}</WrapperDiv>;
   }
-  <ArtistColors artistId={artistId} children={children} />;
+  return <ArtistColors artistId={artistId} children={children} />;
 };
 
 export default ArtistColorsWrapper;

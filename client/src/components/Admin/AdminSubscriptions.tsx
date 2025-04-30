@@ -29,7 +29,6 @@ export const AdminSubscriptions: React.FC = () => {
   });
 
   const callback = React.useCallback(async (search?: URLSearchParams) => {
-    console.log("search", search);
     if (search) {
       search.append("orderBy", "createdAt");
     }

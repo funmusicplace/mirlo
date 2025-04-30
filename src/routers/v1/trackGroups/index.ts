@@ -95,7 +95,7 @@ export default function () {
               id: true,
             },
           },
-          tracks: { orderBy: { order: "asc" } },
+          tracks: { orderBy: { order: "asc" }, where: { deletedAt: null } },
           cover: true,
         },
       });

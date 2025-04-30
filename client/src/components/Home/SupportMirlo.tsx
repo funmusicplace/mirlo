@@ -68,6 +68,7 @@ const SupportMirlo = () => {
                 rounded
                 className={css`
                   display: block;
+                  border-radius: 9999px !important;
                   text-decoration: none;
                   text-align: center;
 

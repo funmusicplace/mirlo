@@ -48,7 +48,6 @@ const CustomerPopUp: React.FC<{ purchase: MerchPurchase }> = ({ purchase }) => {
 
   const updateStatus = React.useCallback(
     async (data: MerchPurchase) => {
-      console.log("data", data);
       try {
         await updatePurchase({
           purchaseId: purchase.id,

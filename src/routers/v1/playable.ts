@@ -3,10 +3,6 @@ import { NextFunction, Request, Response } from "express";
 import { userLoggedInWithoutRedirect } from "../../auth/passport";
 import prisma from "@mirlo/prisma";
 
-type Params = {
-  userId: string;
-};
-
 export default function () {
   const operations = {
     GET: [userLoggedInWithoutRedirect, GET],
@@ -21,6 +17,7 @@ export default function () {
           id: {
             in: trackIds?.map((id) => Number(id)) ?? [],
           },
+          deletedAt: null,
         },
         include: {
           ...(loggedInUser
@@ -48,7 +45,6 @@ export default function () {
           },
         },
       });
-      console.log("tracks", tracks);
 
       const areOwned = trackIds.filter((id) => {
         const track = tracks.find((t) => t.id === Number(id));
@@ -73,7 +69,7 @@ export default function () {
 
       res
         .json({
-          results: areOwned.map((track) => Number(track)),
+          results: areOwned.map(Number),
         })
         .status(200);
     } catch (e) {
