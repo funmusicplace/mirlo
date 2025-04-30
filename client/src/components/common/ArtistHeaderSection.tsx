@@ -54,23 +54,18 @@ const Header = styled.div`
   }
 `;
 
-const HeaderWrapper = styled.div`
+const HeaderWrapper = styled.div<{ colors?: ArtistColors }>`
   display: flex;
+  flex-direction: column;
   overflow: hidden;
   align-items: flex-end;
   justify-content: space-around;
-  border-bottom: solid 1px var(--mi-light-foreground-color);
+  border-bottom: solid 1px
+    ${(props) => props.colors?.primary ?? "var(--mi-light-foreground-color)"};
 
   @media screen and (max-width: ${bp.medium}px) {
     background: var(--mi-normal-background-color);
   }
-`;
-
-const DescriptionWrapperHasAvatar = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
 `;
 
 const ArtistActions = styled.div`
@@ -87,7 +82,6 @@ const ArtistActions = styled.div`
 
   @media screen and (max-width: ${bp.medium}px) {
     padding-left: 0.3rem;
-    flex-direction: column;
   }
 `;
 
@@ -137,7 +131,7 @@ const ArtistHeaderSection: React.FC<{
         description={artist.bio}
         image={artistAvatar?.sizes?.[500] ?? artistAvatar?.sizes?.[1200]}
       />
-      <HeaderWrapper>
+      <HeaderWrapper colors={artist.properties?.colors}>
         <Header>
           <div
             className={css`
@@ -227,71 +221,30 @@ const ArtistHeaderSection: React.FC<{
                             href={`${import.meta.env.VITE_API_DOMAIN}/v1/artists/${artist.urlSlug}/feed?format=rss`}
                             rel="noreferrer"
                             onlyIcon
-                            className={css`
-                              margin-top: 0.25rem;
-                            `}
                             startIcon={<FaRss />}
                           />
                         </>
-                      )}
-                      {isManage && (
-                        <div>
-                          <ArtistButtonLink
-                            rounded
-                            collapsible
-                            startIcon={<FaPen />}
-                            to={`/manage/artists/${artist.id}/customize`}
-                            className={css`
-                              margin-bottom: 0.25rem;
-                            `}
-                          >
-                            {t("editDetails")}
-                          </ArtistButtonLink>
-                          <ArtistButtonLink
-                            to={`/${artist?.urlSlug?.toLowerCase() ?? artist?.id}`}
-                            rounded
-                            collapsible
-                            startIcon={<FaEye />}
-                            disabled={!artist}
-                            className={css`
-                              margin-left: 0.5rem;
-                              margin-bottom: 0.25rem;
-                            `}
-                          >
-                            {t("viewLive")}
-                          </ArtistButtonLink>
-                        </div>
                       )}
                     </ArtistActions>
                   </div>
                 </SpaceBetweenDiv>
               </div>
-              {!artistAvatar && (
-                <div
-                  className={css`
-                    width: 100%;
-                    ${!artistAvatar ? "padding-top: .75rem;" : ""}
-                  `}
-                >
-                  <ArtistHeaderDescription
-                    isManage={!!isManage}
-                    artist={artist}
-                    onSubmit={handleSubmit}
-                  />
-                </div>
-              )}
             </div>
           </div>
-          {artistAvatar && (
-            <DescriptionWrapperHasAvatar>
-              <ArtistHeaderDescription
-                isManage={!!isManage}
-                artist={artist}
-                onSubmit={handleSubmit}
-              />
-            </DescriptionWrapperHasAvatar>
-          )}
         </Header>
+        {!artistAvatar && (
+          <div
+            className={css`
+              display: block;
+              height: 1rem;
+            `}
+          />
+        )}
+        <ArtistHeaderDescription
+          isManage={!!isManage}
+          artist={artist}
+          onSubmit={handleSubmit}
+        />
       </HeaderWrapper>
       <div
         className={css`
@@ -307,7 +260,7 @@ const ArtistHeaderSection: React.FC<{
           isManage={!!isManage}
           artist={artist}
           onSubmit={handleSubmit}
-        />
+        />{" "}
       </div>
     </div>
   );

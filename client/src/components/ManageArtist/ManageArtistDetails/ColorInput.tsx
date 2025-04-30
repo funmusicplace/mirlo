@@ -34,17 +34,26 @@ export const ColorInput: React.FC<{ name: string; title: string }> = ({
   const updateColorOnChange = React.useCallback(async () => {
     try {
       if (user && artistId) {
-        await updateArtist({
-          userId: user.id,
-          artistId: Number(artistId),
-          body: {
-            properties: {
-              colors,
+        const allValid = Object.keys(colors).every((color: string) =>
+          isValidColor(colors[color])
+        );
+        if (allValid) {
+          await updateArtist({
+            userId: user.id,
+            artistId: Number(artistId),
+            body: {
+              properties: {
+                colors,
+              },
             },
-          },
-        });
+          });
+        } else {
+          setError(name, { message: "Not a valid color" });
+        }
       }
-    } catch (e) {}
+    } catch (e) {
+      console.error("Error updating artist colors", e);
+    }
   }, [colors]);
 
   React.useEffect(() => {
@@ -56,12 +65,22 @@ export const ColorInput: React.FC<{ name: string; title: string }> = ({
   }, [color]);
 
   const errorMessage = getFieldState(name).error?.message ?? "";
+
   return (
     <FormComponent
       className={css`
         margin-bottom: 0 !important;
-        background-color: var(--mi-darken-background-color);
+        background-color: #e1e1e1;
         padding: 0.5rem 0.75rem;
+        color: var(--mi-black);
+
+        input {
+          color: var(--mi-black) !important;
+        }
+
+        :first-child {
+          margin-top: 0;
+        }
       `}
     >
       {title}

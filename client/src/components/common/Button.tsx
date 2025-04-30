@@ -227,7 +227,7 @@ const CustomButton = styled.button<Sizable>(
     const style = `
     ${sizeVariables()}
     ${isOnlyIcon}
-    ${props.rounded ? `border-radius: 99999px !important;` : ""}
+    ${props.rounded ? `border-radius: .5rem !important;` : ""}
      ${
        props.wrap
          ? `white-space: normal !important;

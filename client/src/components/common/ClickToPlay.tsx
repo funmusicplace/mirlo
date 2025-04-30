@@ -223,10 +223,9 @@ const ClickToPlay: React.FC<
   const { user } = useAuthContext();
 
   const [localTrackIds, setLocalTrackIds] = React.useState<number[]>([]);
-
   const { t } = useTranslation("translation", { keyPrefix: "clickToPlay" });
 
-  const onClickPlay = React.useCallback(async () => {
+  const detectTracksPlayable = React.useCallback(async () => {
     try {
       const params = new URLSearchParams();
       for (const id of trackIds ?? []) {
@@ -237,13 +236,27 @@ const ClickToPlay: React.FC<
       );
 
       setLocalTrackIds(results);
+      return results;
+    } catch (e) {
+      console.error("Error fetching playable tracks", e);
+    }
+    return [];
+  }, [trackIds]);
 
+  React.useEffect(() => {
+    detectTracksPlayable();
+  }, [trackIds]);
+
+  const onClickPlay = React.useCallback(async () => {
+    try {
       dispatch({
         type: "startPlayingIds",
-        playerQueueIds: results,
+        playerQueueIds: localTrackIds,
       });
-    } catch (e) {}
-  }, [dispatch, trackIds]);
+    } catch (e) {
+      console.error("Error fetching playable tracks", e);
+    }
+  }, [dispatch, localTrackIds, detectTracksPlayable]);
 
   const currentlyPlaying =
     playing &&
@@ -251,7 +264,6 @@ const ClickToPlay: React.FC<
     localTrackIds.includes(playerQueueIds[currentlyPlayingIndex]);
 
   const url = determineItemLink(trackGroup.artist, track ?? trackGroup);
-
   return (
     <ClickToPlayWrapper>
       <Wrapper className={className}>
@@ -274,7 +286,12 @@ const ClickToPlay: React.FC<
               </div>
             )}
 
-            {!currentlyPlaying && <PlayButton onPlay={onClickPlay} />}
+            {!currentlyPlaying && (
+              <PlayButton
+                disabled={localTrackIds.length === 0}
+                onPlay={onClickPlay}
+              />
+            )}
 
             {currentlyPlaying && <PauseButton />}
           </TrackgroupButtons>

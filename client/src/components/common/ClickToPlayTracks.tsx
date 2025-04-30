@@ -5,8 +5,11 @@ import api from "services/api";
 
 import PlayControlButton from "./PlayControlButton";
 import { useAuthContext } from "state/AuthContext";
+import { useQuery } from "@tanstack/react-query";
+import { useParams } from "react-router-dom";
+import { queryArtist } from "queries";
 
-const Wrapper = styled.div`
+const Wrapper = styled.div<{ colors?: ArtistColors }>`
   position: relative;
   max-width: 100%;
 
@@ -15,15 +18,29 @@ const Wrapper = styled.div`
   }
 
   button {
-    background-color: var(--mi-secondary-color);
-    color: var(--mi-primary-color);
+    background-color: ${(props) =>
+      props.colors?.primary ?? "var(--mi-primary-color)"} !important;
+    color: ${(props) =>
+      props.colors?.secondary ?? "var(--mi-secondary-color)"} !important;
     border: 0px !important;
     width: 3rem;
     height: 3rem;
 
+    svg {
+      fill: ${(props) =>
+        props.colors?.secondary ?? "var(--mi-secondary-color)"} !important;
+    }
+
     &:hover:not(:disabled) {
-      background-color: var(--mi-primary-color);
-      color: var(--mi-secondary-color);
+      color: ${(props) =>
+        props.colors?.primary ?? "var(--mi-primary-color)"} !important;
+      background-color: ${(props) =>
+        props.colors?.secondary ?? "var(--mi-secondary-color)"} !important;
+
+      svg {
+        fill: ${(props) =>
+          props.colors?.primary ?? "var(--mi-primary-color)"} !important;
+      }
     }
   }
 `;
@@ -38,6 +55,11 @@ const ClickToPlayTracks: React.FC<{
   } = useGlobalStateContext();
   const { user } = useAuthContext();
   const [localTrackIds, setLocalTrackIds] = React.useState<number[]>([]);
+  const params = useParams();
+
+  const { data: artist } = useQuery(
+    queryArtist({ artistSlug: params.artistId ?? "" })
+  );
 
   const userId = user?.id;
 
@@ -72,10 +94,12 @@ const ClickToPlayTracks: React.FC<{
     currentlyPlayingIndex !== undefined &&
     localTrackIds.includes(playerQueueIds[currentlyPlayingIndex]);
 
-  console.log("localTrackIds", localTrackIds);
+  if (!artist) {
+    return null;
+  }
 
   return (
-    <Wrapper className={className}>
+    <Wrapper className={className} colors={artist.properties?.colors}>
       <PlayControlButton
         onPlay={onClickPlay}
         isPlaying={currentlyPlaying}

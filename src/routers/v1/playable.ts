@@ -3,10 +3,6 @@ import { NextFunction, Request, Response } from "express";
 import { userLoggedInWithoutRedirect } from "../../auth/passport";
 import prisma from "@mirlo/prisma";
 
-type Params = {
-  userId: string;
-};
-
 export default function () {
   const operations = {
     GET: [userLoggedInWithoutRedirect, GET],
@@ -15,12 +11,16 @@ export default function () {
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { trackIds } = req.query as unknown as { trackIds: string[] };
     try {
+      if (!trackIds || trackIds.length === 0) {
+        return res.status(200).json({ results: [] });
+      }
       const loggedInUser = req.user as User | undefined;
       const tracks = await prisma.track.findMany({
         where: {
           id: {
             in: trackIds?.map((id) => Number(id)) ?? [],
           },
+          deletedAt: null,
         },
         include: {
           ...(loggedInUser
@@ -49,26 +49,32 @@ export default function () {
         },
       });
 
-      const areOwned = tracks.filter((track) => {
-        const hasPurchasedTrack =
-          track.userTrackPurchases && track.userTrackPurchases.length > 0;
-        const hasPurchasedTrackGroup =
-          track.trackGroup.userTrackGroupPurchases &&
-          track.trackGroup.userTrackGroupPurchases.length > 0;
-        const isArtistOwner =
-          track.trackGroup.artist.userId === loggedInUser?.id;
+      const areOwned = trackIds.filter((id) => {
+        const track = tracks.find((t) => t.id === Number(id));
+        if (track) {
+          const hasPurchasedTrack =
+            track.userTrackPurchases && track.userTrackPurchases.length > 0;
+          const hasPurchasedTrackGroup =
+            track.trackGroup.userTrackGroupPurchases &&
+            track.trackGroup.userTrackGroupPurchases.length > 0;
+          const isArtistOwner =
+            track.trackGroup.artist.userId === loggedInUser?.id;
 
-        return (
-          hasPurchasedTrack ||
-          hasPurchasedTrackGroup ||
-          isArtistOwner ||
-          track.isPreview
-        );
+          return (
+            hasPurchasedTrack ||
+            hasPurchasedTrackGroup ||
+            isArtistOwner ||
+            track.isPreview
+          );
+        }
+        return false;
       });
+
+      console.log("areOwned", areOwned);
 
       res
         .json({
-          results: areOwned.map((track) => track.id),
+          results: areOwned.map(Number),
         })
         .status(200);
     } catch (e) {
