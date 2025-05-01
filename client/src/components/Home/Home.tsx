@@ -7,7 +7,6 @@ import Posts from "./Posts";
 import SupportMirlo from "./SupportMirlo";
 
 export const SectionHeader = styled.div<{ userId?: number }>`
-  position: sticky !important;
   padding-bottom: 0;
   line-height: 1rem;
   background-color: var(--mi-normal-background-color);

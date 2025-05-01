@@ -3,11 +3,6 @@ import { css } from "@emotion/css";
 
 type Sizes = "full" | "big" | "medium" | "small";
 
-const FlexWrapper = styled.div`
-  display: flex;
-  width: 100%;
-`;
-
 export const WidthWrapper = styled.div<{
   variant?: Sizes;
   hasPaddings?: boolean;

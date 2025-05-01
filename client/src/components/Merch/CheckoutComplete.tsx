@@ -11,7 +11,7 @@ import { useQuery } from "@tanstack/react-query";
 import { queryArtist, queryMerch } from "queries";
 import Confetti from "./Confetti";
 
-function TrackGroup() {
+function CheckoutComplete() {
   const { t } = useTranslation("translation", {
     keyPrefix: "merchDetails",
   });
@@ -83,4 +83,4 @@ function TrackGroup() {
   );
 }
 
-export default TrackGroup;
+export default CheckoutComplete;

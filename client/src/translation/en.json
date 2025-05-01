@@ -26,7 +26,7 @@
     "recentReleases": "Recent releases",
     "futureReleases": "Future releases",
     "recentReleasesFor": "Recent releases for {{ search }}",
-    "releasesForTag": "Releases for <0>{{ tag }}</0>",
+    "releasesForTag": "Releases for <tag>{{ tag }}</tag>",
     "moreReleases": "More releases",
     "viewAllArtists": "View all artists",
     "popularTags": "Popular Tags"
@@ -689,7 +689,8 @@
     "privateAlbumDescription": "Private albums can not be listened to by Mirlo users.",
     "isEnabled": "Is enabled?",
     "saveTrackGroupButton": "Save album",
-    "doesNotExist": "This album does not exist or it does not have a public presence."
+    "doesNotExist": "This album does not exist or it does not have a public presence.",
+    "youveBoughtTrack": "You've bought <linkToTrack>{{trackName}}</linkToTrack>! It's now available in your <linkToCollection>collection</linkToCollection>."
   },
   "manageSubscriptionTierBox": {
     "edit": "Edit",
