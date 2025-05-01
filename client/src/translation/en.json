@@ -26,7 +26,7 @@
     "recentReleases": "Recent releases",
     "futureReleases": "Future releases",
     "recentReleasesFor": "Recent releases for {{ search }}",
-    "releasesForTag": "Releases for <0>{{ tag }}</0>",
+    "releasesForTag": "Releases for <tag>{{ tag }}</tag>",
     "moreReleases": "More releases",
     "viewAllArtists": "View all artists",
     "popularTags": "Popular Tags"

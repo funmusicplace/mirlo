@@ -17,6 +17,7 @@ import { ButtonAnchor } from "./common/Button";
 import { FaRss } from "react-icons/fa";
 
 const pageSize = 40;
+const futureReleasesPageSize = 6;
 
 const Releases = () => {
   const [params] = useSearchParams();
@@ -38,8 +39,8 @@ const Releases = () => {
 
   const { data: futureReleases } = useQuery(
     queryTrackGroups({
-      skip: pageSize * page,
-      take: pageSize,
+      skip: futureReleasesPageSize * page,
+      take: futureReleasesPageSize,
       tag: tag || undefined,
       title: search ?? undefined,
       isReleased: "not-released",
@@ -65,7 +66,11 @@ const Releases = () => {
       `}
     >
       {!tag && (
-        <SectionHeader>
+        <SectionHeader
+          className={css`
+            position: sticky;
+          `}
+        >
           <WidthContainer variant="big">
             <h2 className="h5 section-header__heading">Popular Tags</h2>
             <div
@@ -78,7 +83,7 @@ const Releases = () => {
           </WidthContainer>
         </SectionHeader>
       )}
-      {(futureReleases?.results ?? []) && (
+      {(futureReleases?.results ?? []).length > 0 && (
         <>
           <SectionHeader>
             <WidthContainer
@@ -94,7 +99,7 @@ const Releases = () => {
               </h1>
               <ButtonAnchor
                 target="_blank"
-                href={`${import.meta.env.VITE_API_DOMAIN}/v1/trackGroups?released=not-released&format=rss`}
+                href={`${import.meta.env.VITE_API_DOMAIN}/v1/trackGroups?tag=${tag}&released=not-released&format=rss`}
                 rel="noreferrer"
                 onlyIcon
                 className={css`
@@ -153,7 +158,7 @@ const Releases = () => {
               <Trans
                 t={t}
                 i18nKey={"releasesForTag"}
-                components={{ 0: <strong></strong> }}
+                components={{ tag: <strong></strong> }}
                 values={{ tag }}
               />
             ) : search ? (
@@ -164,7 +169,7 @@ const Releases = () => {
           </h1>
           <ButtonAnchor
             target="_blank"
-            href={`${import.meta.env.VITE_API_DOMAIN}/v1/trackGroups?released=released&format=rss`}
+            href={`${import.meta.env.VITE_API_DOMAIN}/v1/trackGroups?tag=${tag}&released=released&format=rss`}
             rel="noreferrer"
             onlyIcon
             className={css`

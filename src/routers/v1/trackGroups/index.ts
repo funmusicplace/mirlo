@@ -102,7 +102,7 @@ export default function () {
       if (format === "rss") {
         const feed = await turnItemsIntoRSS(
           {
-            name: "All Mirlo Releases",
+            name: tag ? `All Mirlo Releases for ${tag}` : "All Mirlo Releases",
             apiEndpoint: "trackGroups",
             description: "Mirlo's most recent releases",
             clientUrl: "releases",

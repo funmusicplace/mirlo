@@ -49,6 +49,7 @@ const TrackGroupCard: React.FC<{
         width: auto !important;
         flex-basis: 50%;
         flex-grow: 0;
+        padding: 0 2rem 0 0 !important;
         align-items: center;
 
         @media screen and (max-width: ${bp.medium}px) {

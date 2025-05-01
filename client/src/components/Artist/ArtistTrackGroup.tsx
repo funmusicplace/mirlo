@@ -8,6 +8,10 @@ import ArtistItemLink from "./ArtistItemLink";
 export const TrackGroupWrapper = styled.div`
   margin-bottom: 0.5rem;
 
+  img {
+    width: 100% !important;
+  }
+
   @media screen and (max-width: ${bp.medium}px) {
     padding: 0;
     margin-bottom: 1rem;
