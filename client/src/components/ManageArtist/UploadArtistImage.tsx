@@ -57,7 +57,7 @@ const getExistingImage = (
   }
   const actualImageLocation =
     imageType === "banner" ? image?.sizes?.[625] : image?.sizes?.[600];
-  return `${actualImageLocation}/?updatedAt=${image?.updatedAt}`;
+  return `${actualImageLocation}?updatedAt=${image?.updatedAt}`;
 };
 
 const buildRootUrl = (existing: TrackGroup | Artist | Merch) => {
