@@ -67,6 +67,7 @@ const DropdownMenu: React.FC<{
                 z-index: 999;
                 overflow: hidden;
                 min-width: 215px;
+                max-width: 215px;
                 text-overflow: ellipsis;
                 background: var(--mi-normal-background-color) !important;
 
