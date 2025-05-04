@@ -1,5 +1,4 @@
 import { css } from "@emotion/css";
-
 import { useParams } from "react-router-dom";
 import Box from "../common/Box";
 import { useTranslation } from "react-i18next";
@@ -9,30 +8,28 @@ import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import { WidthWrapper } from "components/common/WidthContainer";
 
 import { useQuery } from "@tanstack/react-query";
-import { queryArtist, queryMerch } from "queries";
+import { queryArtist, queryTip } from "queries";
 
-function CheckoutComplete() {
+function TipArtist() {
   const { t } = useTranslation("translation", {
-    keyPrefix: "merchDetails",
+    keyPrefix: "tipArtist",
   });
 
-  const { artistId, merchId } = useParams();
+  const { artistId, tipId } = useParams();
   const { data: artist, isLoading: isLoadingArtist } = useQuery(
     queryArtist({ artistSlug: artistId ?? "" })
   );
-  const { data: merch, isLoading: isLoadingMerch } = useQuery(
-    queryMerch({ merchId: merchId ?? "" })
+
+  if (!tipId) {
+    return null;
+  }
+  const { data: tip, isLoading: isLoadingTip } = useQuery(
+    queryTip({ tipId: tipId })
   );
 
   if (!artist && !isLoadingArtist) {
     return <Box>{t("doesNotExist")}</Box>;
   } else if (!artist) {
-    return <FullPageLoadingSpinner />;
-  }
-
-  if (!merch && !isLoadingMerch) {
-    return <Box>{t("doesNotExist")}</Box>;
-  } else if (!merch) {
     return <FullPageLoadingSpinner />;
   }
 
@@ -54,7 +51,7 @@ function CheckoutComplete() {
         }
       `}
     >
-      <h1>Purchase complete!</h1>
+      <h1>You have successfully tipped this artist!</h1>
       <div
         className={css`
           display: flex;
@@ -65,8 +62,8 @@ function CheckoutComplete() {
         `}
       >
         <ImageWithPlaceholder
-          src={merch.images?.[0]?.sizes?.[120]}
-          alt={merch.title}
+          src={artist.avatar?.sizes?.[120]}
+          alt={artist.name}
           size={120}
         />
         <div
@@ -75,7 +72,7 @@ function CheckoutComplete() {
           `}
         >
           {" "}
-          You've bought {merch.title}! The artist has been notified.
+          You've tipped {artist.name}! The artist has been notified.
         </div>
       </div>
       <Confetti />
@@ -83,4 +80,4 @@ function CheckoutComplete() {
   );
 }
 
-export default CheckoutComplete;
+export default TipArtist;
