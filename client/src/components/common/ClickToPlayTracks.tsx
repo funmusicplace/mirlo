@@ -98,8 +98,6 @@ const ClickToPlayTracks: React.FC<{
     return null;
   }
 
-  console.log("tracks playable", localTrackIds);
-
   return (
     <Wrapper className={className} colors={artist.properties?.colors}>
       <PlayControlButton

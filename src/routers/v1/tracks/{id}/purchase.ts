@@ -41,6 +41,7 @@ export default function () {
           id: Number(trackId),
         },
         include: {
+          trackArtists: true,
           trackGroup: {
             include: {
               artist: {
