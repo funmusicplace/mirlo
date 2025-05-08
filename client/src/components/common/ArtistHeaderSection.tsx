@@ -213,18 +213,7 @@ const ArtistHeaderSection: React.FC<{
                       />
                     </div>
                     <ArtistActions>
-                      {!isManage && (
-                        <>
-                          <FollowArtist artistId={artist.id} />
-                          <ArtistButtonAnchor
-                            target="_blank"
-                            href={`${import.meta.env.VITE_API_DOMAIN}/v1/artists/${artist.urlSlug}/feed?format=rss`}
-                            rel="noreferrer"
-                            onlyIcon
-                            startIcon={<FaRss />}
-                          />
-                        </>
-                      )}
+                      {!isManage && <FollowArtist artistId={artist.id} />}
                     </ArtistActions>
                   </div>
                 </SpaceBetweenDiv>
@@ -240,11 +229,36 @@ const ArtistHeaderSection: React.FC<{
             `}
           />
         )}
-        <ArtistHeaderDescription
-          isManage={!!isManage}
-          artist={artist}
-          onSubmit={handleSubmit}
-        />
+        <div
+          className={css`
+            display: flex;
+            flex-direction: row;
+            align-items: flex-end;
+          `}
+        >
+          <ArtistHeaderDescription
+            isManage={!!isManage}
+            artist={artist}
+            onSubmit={handleSubmit}
+          />
+          <ArtistButtonAnchor
+            target="_blank"
+            href={`${import.meta.env.VITE_API_DOMAIN}/v1/artists/${artist.urlSlug}/feed?format=rss`}
+            rel="noreferrer"
+            onlyIcon
+            className={css`
+              svg {
+                font-size: 0.8rem;
+              }
+              paddding: 0.25rem;
+              margin-left: 0.5rem;
+              margin-bottom: 0.25rem;
+              height: 1.5rem !important;
+              width: 1.5rem !important;
+            `}
+            startIcon={<FaRss />}
+          />
+        </div>
       </HeaderWrapper>
       <div
         className={css`

@@ -13,6 +13,7 @@ import api from "services/api";
 import { moneyDisplay } from "./Money";
 import { css } from "@emotion/css";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
+import { isEmpty } from "lodash";
 
 const SupportArtistTiersForm: React.FC<{
   artist: Pick<Artist, "id" | "name" | "userId" | "urlSlug">;
@@ -37,13 +38,35 @@ const SupportArtistTiersForm: React.FC<{
     };
     monthlyContribution: boolean;
     email: string;
-  }>({ defaultValues: { monthlyContribution: true } });
+  }>({
+    defaultValues: {
+      monthlyContribution: true,
+      tier: user?.artistUserSubscriptions?.find(
+        (s) => s.artistSubscriptionTier.artistId === artist.id
+      )?.artistSubscriptionTier,
+    },
+  });
 
   const { data: artistDetails } = useQuery(
     queryArtist({ artistSlug: artist.urlSlug ?? "", includeDefaultTier: true })
   );
 
   const options = artistDetails?.subscriptionTiers ?? [];
+
+  const unsubscribeFromArtist = async () => {
+    try {
+      setIsCheckingForSubscription(true);
+      await api.delete(`artists/${artist.id}/subscribe`);
+      snackbar(t("unsubscribedFromArtist"), { type: "success" });
+    } catch (e) {
+      snackbar(t("error"), { type: "warning" });
+      console.error(e);
+    } finally {
+      setIsCheckingForSubscription(false);
+      refreshLoggedInUser();
+      onFinishedSubscribing?.(false);
+    }
+  };
 
   const subscribeToTier = async () => {
     try {
@@ -68,7 +91,7 @@ const SupportArtistTiersForm: React.FC<{
         snackbar(t("verificationEmailSent"), { type: "success" });
       }
     } catch (e) {
-      snackbar(t("somethingWentWrong"), { type: "warning" });
+      snackbar(t("error"), { type: "warning" });
       console.error(e);
     } finally {
       setIsCheckingForSubscription(false);
@@ -76,8 +99,10 @@ const SupportArtistTiersForm: React.FC<{
       onFinishedSubscribing?.(false);
     }
   };
-
   const value = methods.watch("tier");
+
+  const noErrors =
+    methods.formState.isValid || isEmpty(methods.formState.errors);
   return (
     <>
       {!artistDetails && <LoadingBlocks rows={1} />}
@@ -104,36 +129,53 @@ const SupportArtistTiersForm: React.FC<{
           </FormComponent>
         )}
       </FormProvider>
-      {value && (
-        <Button
-          onClick={() => subscribeToTier()}
-          isLoading={isCheckingForSubscription}
-          disabled={!methods.formState.isValid || !value}
-          wrap
-          className={css`
-            width: 100% !important;
-          `}
-        >
-          {t(!value ? "chooseToContinue" : "continueWithPrice", {
+      <Button
+        onClick={() => subscribeToTier()}
+        isLoading={isCheckingForSubscription}
+        disabled={!noErrors || !value}
+        wrap
+        className={css`
+          width: 100% !important;
+        `}
+      >
+        {!value && t("chooseToContinue")}
+        {value &&
+          value?.isDefaultTier &&
+          t("followArtist", { artistName: artist.name })}
+        {value &&
+          !value.isDefaultTier &&
+          t("continueWithPrice", {
             amount: moneyDisplay({
               amount: value?.minAmount / 100,
               currency: value?.currency,
             }),
           })}
-        </Button>
-      )}
-      <div
+      </Button>
+      <Button
+        onClick={() => unsubscribeFromArtist()}
+        isLoading={isCheckingForSubscription}
+        wrap
         className={css`
+          width: 100% !important;
           margin-top: 1rem;
-
-          small {
-            display: block;
-            margin-bottom: 0.5rem;
-          }
         `}
       >
-        <small>{t("artistCheckoutPage")}</small>
-      </div>
+        {t("unsubscribeFromArtist")}
+      </Button>
+      {value && !value.isDefaultTier && (
+        <div
+          className={css`
+            margin-top: 1rem;
+
+            small {
+              display: block;
+              margin-bottom: 0.5rem;
+            }
+          `}
+        >
+          <small>{t("artistCheckoutPage")}</small>
+        </div>
+      )}
     </>
   );
 };

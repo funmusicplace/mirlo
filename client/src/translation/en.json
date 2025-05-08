@@ -268,6 +268,8 @@
     "releases": "Releases",
     "posts": "Posts",
     "justFollow": "Just follow",
+    "manageSubscription": "Manage subscription",
+    "unsubscribedFromArtist": "Successfully stopped following this artist",
     "noSubscriptionTiersYet": "This artist hasn't added any subscription tiers yet.",
     "toFollowThisArtist": "To follow this artist please enter your email address.",
     "followArtist": "Follow {{artistName}}",
@@ -336,6 +338,7 @@
   },
   "manageArtist": {
     "albumTags": "Album tags",
+    "downloadCodes": "Download codes",
     "typeForTags": "Start typing to add tags",
     "notEnabled": "This artist has not been enabled by site admin yet! Contact an admin to do so.",
     "manage": "Manage {{artist}}",
