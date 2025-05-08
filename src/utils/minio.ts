@@ -23,6 +23,9 @@ export const finalArtistBannerBucket = "artist-banners";
 export const incomingArtistAvatarBucket = "incoming-artist-avatars";
 export const finalArtistAvatarBucket = "artist-avatars";
 
+export const incomingUserAvatarBucket = "incoming-user-avatars";
+export const finalUserAvatarBucket = "user-avatars";
+
 export const incomingCoversBucket = "incoming-covers";
 export const finalCoversBucket = "trackgroup-covers";
 

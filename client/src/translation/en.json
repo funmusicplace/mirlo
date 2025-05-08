@@ -212,6 +212,7 @@
     "artist": "Artist",
     "labelProfile": "Manage artists",
     "page": "Artist link",
+    "manageArtists": "Manage artists",
     "manage": "Manage artist",
     "askArtist": "Ask artist to grant permission",
     "canLabelManageArtist": "Can label manage entire artist page?",

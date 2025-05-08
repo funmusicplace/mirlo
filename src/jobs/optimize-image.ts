@@ -156,6 +156,11 @@ const optimizeImage = async (job: Job) => {
         where: { id: destinationId },
         data: { url: urls },
       });
+    } else if (model === "userAvatar") {
+      await prisma.userAvatar.update({
+        where: { id: destinationId },
+        data: { url: urls },
+      });
     } else if (model === "artistAvatar") {
       const faviconFinalName = `${destinationId}_artist_avatar_favicon.ico`;
       ico.sharpsToIco([sharp(buffer)], faviconFinalName, {

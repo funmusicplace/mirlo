@@ -20,7 +20,7 @@ export default function () {
 
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { userId }: { userId?: string } = req.params;
-
+    console.log("looking for user");
     try {
       const user = await prisma.user.findUnique({
         where: { id: Number(userId) },
@@ -33,6 +33,7 @@ export default function () {
           isAdmin: true,
         },
       });
+      console.log("user", user);
       res.json({ result: user });
     } catch (e) {
       next(e);

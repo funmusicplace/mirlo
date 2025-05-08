@@ -20,6 +20,11 @@ interface LoggedInUser {
     trackGroupId: number;
   }[];
   language?: string;
+  userAvatar?: {
+    url: string;
+    sizes?: { [key: number]: string };
+    updatedAt: string;
+  };
 }
 
 interface Track {
@@ -157,6 +162,7 @@ interface ArtistLabel {
   isLabelApproved: boolean;
   canLabelManageArtist: boolean;
   canLabelAddReleases: boolean;
+  isArtistApproved: boolean;
 }
 
 interface Artist {

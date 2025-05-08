@@ -109,6 +109,7 @@ const routes = [
   "users",
   "users/{userId}",
   "users/{userId}/confirmEmail",
+  "users/{userId}/avatar",
   "users/{userId}/notifications",
   "users/{userId}/notifications/unreadCount",
   "users/{userId}/notifications/{notificationId}",
