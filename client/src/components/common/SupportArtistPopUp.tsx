@@ -18,16 +18,7 @@ const SupportArtistPopUp: React.FC<{
 }> = ({ artist }) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
-  const methods = useForm<{
-    tier: {
-      id: number;
-      name: string;
-      description: string;
-      isDefaultTier: boolean;
-    };
-    email: string;
-  }>();
-
+  const [isSubscribed, setIsSubscribed] = React.useState(false);
   const { user } = useAuthContext();
 
   const { data: stripeAccountStatus } = useQuery(
@@ -35,15 +26,13 @@ const SupportArtistPopUp: React.FC<{
   );
 
   React.useEffect(() => {
-    if (isOpen) {
-      const foundTier = user?.artistUserSubscriptions?.find(
-        (sub) => sub.artistSubscriptionTier.artistId === artist.id
-      )?.artistSubscriptionTier;
-      if (foundTier) {
-        methods.setValue("tier", foundTier);
-      }
+    const foundTier = user?.artistUserSubscriptions?.find(
+      (sub) => sub.artistSubscriptionTier.artistId === artist.id
+    )?.artistSubscriptionTier;
+    if (foundTier) {
+      setIsSubscribed(true);
     }
-  }, [artist.id, isOpen, methods, user?.artistUserSubscriptions]);
+  }, [artist.id, user?.artistUserSubscriptions]);
 
   if (!stripeAccountStatus?.chargesEnabled) {
     return (
@@ -70,7 +59,9 @@ const SupportArtistPopUp: React.FC<{
       `}
     >
       <ArtistButton size="big" rounded onClick={() => setIsOpen(true)}>
-        {t("subscribeToArtist", { artist: artist.name })}
+        {isSubscribed
+          ? t("manageArtistSubscription")
+          : t("supportArtist", { artist: artist.name })}
       </ArtistButton>
       <Modal
         title={t("supportArtist", { artist: artist.name }) ?? ""}

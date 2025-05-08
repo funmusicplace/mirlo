@@ -1,7 +1,10 @@
 import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
 import { addSizesToImage } from "../../utils/artist";
-import { finalArtistAvatarBucket } from "../../utils/minio";
+import {
+  finalArtistAvatarBucket,
+  finalUserAvatarBucket,
+} from "../../utils/minio";
 
 const profile = async (req: Request, res: Response, next: NextFunction) => {
   const { email } = req.user as { email: string };
@@ -30,6 +33,7 @@ const profile = async (req: Request, res: Response, next: NextFunction) => {
             trackId: true,
           },
         },
+        userAvatar: true,
         artistUserSubscriptions: {
           where: {
             deletedAt: null,
@@ -52,9 +56,14 @@ const profile = async (req: Request, res: Response, next: NextFunction) => {
       },
     });
 
+    console.log("foundUser", foundUser?.userAvatar);
+
     res.status(200).json({
       result: {
         ...foundUser,
+        userAvatar: foundUser?.userAvatar
+          ? addSizesToImage(finalUserAvatarBucket, foundUser.userAvatar)
+          : null,
         artistUserSubscriptions: foundUser?.artistUserSubscriptions.map(
           (aus) => ({
             ...aus,

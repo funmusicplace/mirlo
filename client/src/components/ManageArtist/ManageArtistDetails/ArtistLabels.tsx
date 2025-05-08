@@ -4,7 +4,7 @@ import { ArtistButton } from "components/Artist/ArtistButtons";
 import AutoComplete from "components/common/AutoComplete";
 import FormComponent from "components/common/FormComponent";
 import Pill from "components/common/Pill";
-import { queryManagedArtist, useUpdateArtistMutation } from "queries";
+import { queryManagedArtist } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { FaTimes } from "react-icons/fa";

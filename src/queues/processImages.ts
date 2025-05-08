@@ -9,6 +9,7 @@ import {
   finalArtistBannerBucket,
   finalMerchImageBucket,
   finalPostImageBucket,
+  finalUserAvatarBucket,
   incomingArtistAvatarBucket,
   incomingArtistBannerBucket,
   incomingMerchImageBucket,
@@ -95,7 +96,7 @@ export const uploadAndSendToImageQueue = async (
         const fileName = storeWithExtension
           ? `${image.id}.${[filenameArray[filenameArray.length - 1]]}`
           : image.id;
-        await uploadWrapper(incomingBucket, fileName, fileStream);
+        await uploadWrapper(incomingBucket, `${fileName}`, fileStream);
       } catch (e) {
         logger.error("There was an error uploading to storage");
         throw e;
@@ -122,6 +123,34 @@ export const uploadAndSendToImageQueue = async (
   });
 
   return jobId;
+};
+
+export const processUserAvatar = (ctx: APIContext) => {
+  return async (userId: number) => {
+    return uploadAndSendToImageQueue(
+      ctx,
+      incomingArtistAvatarBucket,
+      "userAvatar",
+      "avatar",
+      async (fileInfo: { filename: string }) => {
+        logger.info(`Upserting artist avatar`);
+        return prisma.userAvatar.upsert({
+          create: {
+            originalFilename: fileInfo.filename,
+            userId,
+          },
+          update: {
+            originalFilename: fileInfo.filename,
+            deletedAt: null,
+          },
+          where: {
+            userId,
+          },
+        });
+      },
+      finalUserAvatarBucket
+    );
+  };
 };
 
 export const processArtistAvatar = (ctx: APIContext) => {

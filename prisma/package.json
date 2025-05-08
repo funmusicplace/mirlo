@@ -16,6 +16,7 @@
   },
   "scripts": {
     "prisma:build": "pnpify prisma generate",
+    "prisma:format": "pnpify prisma format",
     "prisma:migrate": "DEBUG=prisma:client pnpify prisma migrate dev",
     "prisma:migrate:deploy": "DEBUG=prisma:client pnpify prisma migrate deploy",
     "prisma:seed": "pnpify prisma db seed"

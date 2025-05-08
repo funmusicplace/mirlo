@@ -46,7 +46,7 @@ const ManageArtistAlbums: React.FC<{}> = () => {
               margin-right: 0.25rem;
             `}
           >
-            {t("tools")}
+            {t("downloadCodes")}
           </ArtistButtonLink>
           {artist ? <NewAlbumButton artist={artist} /> : undefined}
         </div>

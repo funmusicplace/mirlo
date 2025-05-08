@@ -12,11 +12,8 @@ import AddArtistToRoster from "./AddArtistToRoster";
 
 const ProfileLabel: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "label" });
-  const {
-    data: { results: relationship } = { results: [] },
-
-    refetch,
-  } = useQuery(queryLabelArtists());
+  const { data: { results: relationship } = { results: [] }, refetch } =
+    useQuery(queryLabelArtists());
 
   return (
     <WidthContainer variant="big" justify="center">
@@ -55,6 +52,15 @@ const ProfileLabel: React.FC = () => {
               <td>
                 {relationship.canLabelAddReleases ? (
                   <MdCheckBox />
+                ) : (
+                  t("askArtist")
+                )}
+              </td>
+              <td>
+                {relationship.isArtistApproved ? (
+                  <Link to={getArtistManageUrl(relationship.artist.id)}>
+                    {t("manage")}
+                  </Link>
                 ) : (
                   t("askArtist")
                 )}

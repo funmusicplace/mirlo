@@ -4,8 +4,9 @@ import { useFormContext } from "react-hook-form";
 import { forwardRef } from "react";
 import { moneyDisplay } from "./Money";
 import { useTranslation } from "react-i18next";
+import { useGetArtistColors } from "components/Artist/ArtistButtons";
 
-const Label = styled.label`
+const Label = styled.label<{ colors?: ArtistColors }>`
   display: block;
   display: flex;
   justify-content: space-between;
@@ -30,13 +31,14 @@ const List = styled.ul`
   list-style: none;
 `;
 
-const ListItem = styled.li`
+const ListItem = styled.li<{ colors?: ArtistColors }>`
   input[type="radio"] {
     display: none;
   }
 
   input[type="radio"]:checked + label {
-    background-color: var(--mi-secondary-color);
+    background-color: ${(props) =>
+      props.colors?.background ?? "var(--mi-background-color)"};
 
     &:after {
       content: "✔";
@@ -55,11 +57,13 @@ const SupportArtistPopUpTiers = forwardRef<
   const currentValue: undefined | ArtistSubscriptionTier =
     methods.watch("tier");
 
+  const { colors } = useGetArtistColors();
+
   return (
     <List>
       {options.map((tier) => {
         return (
-          <ListItem key={tier.id}>
+          <ListItem key={tier.id} colors={colors}>
             <InputEl
               type="radio"
               id={`${tier.id}`}
@@ -75,6 +79,7 @@ const SupportArtistPopUpTiers = forwardRef<
               onClick={() => {
                 methods.setValue("tier", tier);
               }}
+              colors={colors}
             >
               <div>
                 <strong>

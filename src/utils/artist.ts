@@ -20,6 +20,7 @@ import { convertURLArrayToSizes } from "./images";
 import {
   finalArtistAvatarBucket,
   finalArtistBannerBucket,
+  finalUserAvatarBucket,
   removeObjectsFromBucket,
 } from "./minio";
 import {
@@ -295,6 +296,28 @@ export const deleteArtistAvatar = async (artistId: number) => {
 
     try {
       removeObjectsFromBucket(finalArtistAvatarBucket, avatar.id);
+    } catch (e) {
+      console.error("Found no files, that's okay");
+    }
+  }
+};
+
+export const deleteUserAvatar = async (userId: number) => {
+  const avatar = await prisma.userAvatar.findFirst({
+    where: {
+      userId,
+    },
+  });
+
+  if (avatar) {
+    await prisma.userAvatar.delete({
+      where: {
+        userId,
+      },
+    });
+
+    try {
+      removeObjectsFromBucket(finalUserAvatarBucket, avatar.id);
     } catch (e) {
       console.error("Found no files, that's okay");
     }

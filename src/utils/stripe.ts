@@ -1,6 +1,11 @@
 import Stripe from "stripe";
 import prisma from "@mirlo/prisma";
-import { Prisma, User, MerchShippingDestination } from "@mirlo/prisma/client";
+import {
+  Prisma,
+  User,
+  MerchShippingDestination,
+  Track,
+} from "@mirlo/prisma/client";
 import { logger } from "../logger";
 import { Request, Response } from "express";
 import { findOrCreateUserBasedOnEmail } from "./user";
@@ -247,7 +252,10 @@ export const createTrackGroupStripeProduct = async (
 
 export const createTrackStripeProduct = async (
   track: Prisma.TrackGetPayload<{
-    include: { trackGroup: { include: { artist: true; cover: true } } };
+    include: {
+      trackGroup: { include: { artist: true; cover: true } };
+      trackArtists: true;
+    };
   }>,
   stripeAccountId: string
 ) => {
@@ -257,14 +265,20 @@ export const createTrackStripeProduct = async (
   );
 
   if (!productKey) {
+    const trackArtist =
+      track.trackArtists?.length > 0
+        ? track.trackArtists.map((a) => a.artistName).join(", ")
+        : track.trackGroup.artist.name;
+
     const about = await buildProductDescription(
       track.title,
-      track.trackGroup.artist.name,
-      track.trackGroup.about
+      trackArtist,
+      track.description
     );
+
     const product = await stripe.products.create(
       {
-        name: `${track.title} by ${track.trackGroup.artist.name}`,
+        name: `${track.title} by ${trackArtist}`,
         description: about,
         tax_code: "txcd_10401100",
         images: track.trackGroup.cover
@@ -337,7 +351,10 @@ export const createStripeCheckoutSessionForTrackPurchase = async ({
   email?: string;
   priceNumber: number;
   track: Prisma.TrackGetPayload<{
-    include: { trackGroup: { include: { artist: true; cover: true } } };
+    include: {
+      trackGroup: { include: { artist: true; cover: true } };
+      trackArtists: true;
+    };
   }>;
   stripeAccountId: string;
 }) => {
@@ -346,11 +363,9 @@ export const createStripeCheckoutSessionForTrackPurchase = async ({
       applicationName: "frontend",
     },
   });
-  console.log("client", client);
 
   const productKey = await createTrackStripeProduct(track, stripeAccountId);
 
-  console.log("productKey", productKey);
   if (!productKey) {
     throw new AppError({
       description: "Was not able to create a product for user",
