@@ -22,6 +22,7 @@ import {
 } from "./handleFinishedTransactions";
 import countryCodesCurrencies from "./country-codes-currencies";
 import { manageSubscriptionReceipt } from "./subscription";
+import purchase from "../routers/v1/merch/{id}/purchase";
 
 const { STRIPE_KEY, API_DOMAIN } = process.env;
 
@@ -399,6 +400,7 @@ export const createStripeCheckoutSessionForTrackPurchase = async ({
       ],
       metadata: {
         clientId: client?.id ?? null,
+        purchaseType: "track",
         trackId: track.id,
         trackGroupId: track.trackGroupId,
         artistId: track.trackGroup.artistId,
@@ -475,6 +477,7 @@ export const createStripeCheckoutSessionForPurchase = async ({
       ],
       metadata: {
         clientId: client?.id ?? null,
+        purchaseType: "trackGroup",
         trackGroupId: trackGroup.id,
         artistId: trackGroup.artistId,
         userId: loggedInUser?.id ?? null,
@@ -631,6 +634,7 @@ export const createStripeCheckoutSessionForMerchPurchase = async ({
       metadata: {
         clientId: client?.id ?? null,
         merchId: merch.id,
+        purchaseType: "merch",
         artistId: merch.artistId,
         userId: loggedInUser?.id ?? null,
         userEmail: email ?? null,
@@ -689,6 +693,7 @@ export const createStripeCheckoutSessionForTip = async ({
         clientId: client?.id ?? null,
         artistId: artistId,
         gaveGift: 1,
+        purchaseType: "tip",
         userId: loggedInUser?.id ?? null,
         userEmail: email ?? null,
         stripeAccountId,
@@ -764,6 +769,7 @@ export const createCheckoutSessionForSubscription = async ({
       metadata: {
         clientId: client?.id ?? null,
         artistId,
+        purchaseType: "subscription",
         subscribed: 1,
         tierId: tier.id,
         userId: loggedInUser?.id ?? null,
@@ -819,6 +825,7 @@ type SessionMetaData = {
   merchId: string;
   artistId: string;
   trackId: string;
+  purchaseType: string;
 };
 
 export const handleCheckoutSession = async (
@@ -832,6 +839,7 @@ export const handleCheckoutSession = async (
       trackGroupId,
       stripeAccountId,
       gaveGift,
+      purchaseType,
       trackId,
       artistId,
     } = metadata;
@@ -857,20 +865,20 @@ export const handleCheckoutSession = async (
       userId
     );
     logger.info(`checkout.session: ${session.id} Processing session`);
-    if (gaveGift && `${gaveGift}` === "1" && artistId) {
+    if (purchaseType === "tip") {
       logger.info(`checkout.session: ${session.id} handling tip`);
       await handleArtistGift(Number(actualUserId), Number(artistId), session);
-    } else if (merchId && userEmail) {
+    } else if (purchaseType === "merch") {
       logger.info(`checkout.session: ${session.id} handling merch`);
       await handleArtistMerchPurchase(
         Number(actualUserId),
         session,
         stripeAccountId
       );
-    } else if (tierId && userEmail) {
+    } else if (purchaseType === "subscription") {
       logger.info(`checkout.session: ${session.id} handling subscription`);
       await handleSubscription(Number(actualUserId), Number(tierId), session);
-    } else if (trackGroupId && !trackId && actualUserId) {
+    } else if (purchaseType === "trackGroup") {
       logger.info(`checkout.session: ${session.id} handleTrackGroupPurchase`);
       await handleTrackGroupPurchase(
         Number(actualUserId),
@@ -878,7 +886,7 @@ export const handleCheckoutSession = async (
         session,
         newUser
       );
-    } else if (trackId && actualUserId) {
+    } else if (purchaseType === "track") {
       logger.info(`checkout.session: ${session.id} handleTrackGroupPurchase`);
       await handleTrackPurchase(
         Number(actualUserId),
