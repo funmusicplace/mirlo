@@ -17,6 +17,10 @@ interface LoggedInUser {
   currency?: string;
   featureFlags?: string[];
   isLabelAccount?: boolean;
+  trackFavorites?: {
+    userId: number;
+    trackId: number;
+  }[];
   wishlist?: {
     userId: number;
     trackGroupId: number;

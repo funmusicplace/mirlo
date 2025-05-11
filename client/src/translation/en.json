@@ -126,7 +126,9 @@
   },
   "wishlist": {
     "addToWishlist": "Add to wishlist",
-    "removeFromWishlist": "Remove from wishlist"
+    "removeFromWishlist": "Remove from wishlist",
+    "addToFavorites": "Add to favorites",
+    "removeFromFavorites": "Remove from favorites"
   },
   "trackGroupCard": {
     "thatsGenerous": "{{ chosenPrice }}? That's generous!",

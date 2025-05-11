@@ -25,6 +25,7 @@ const profile = async (req: Request, res: Response, next: NextFunction) => {
         urlSlug: true,
         featureFlags: true,
         isLabelAccount: true,
+        trackFavorites: true,
         userTrackGroupPurchases: {
           select: {
             trackGroupId: true,
