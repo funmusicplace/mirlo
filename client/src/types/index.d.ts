@@ -191,6 +191,11 @@ interface Artist {
   links?: string[];
   linksJson?: Link[];
   posts: Post[];
+  tourDates?: {
+    date: string;
+    location: string;
+    ticketsUrl: string;
+  }[];
   subscriptionTiers: ArtistSubscriptionTier[];
   properties?: {
     colors: ArtistColors;

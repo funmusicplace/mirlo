@@ -413,6 +413,7 @@ export const singleInclude = (queryOptions?: {
         },
       },
     },
+    tourDates: true,
     banner: {
       where: {
         deletedAt: null,

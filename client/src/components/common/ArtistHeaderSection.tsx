@@ -16,6 +16,8 @@ import { useAuthContext } from "state/AuthContext";
 import { FaRss } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 import { ArtistButtonAnchor } from "components/Artist/ArtistButtons";
+import ArtistTourDates from "components/Artist/ArtistTourDates";
+import FeatureFlag from "./FeatureFlag";
 
 export const ArtistTitle = styled.h1<{ artistAvatar: boolean }>`
   font-size: 2.4rem;
@@ -229,6 +231,13 @@ const ArtistHeaderSection: React.FC<{
             align-items: flex-end;
           `}
         >
+          <FeatureFlag featureFlag="tourDates">
+            <ArtistTourDates
+              isManage={!!isManage}
+              artist={artist}
+              onSubmit={handleSubmit}
+            />
+          </FeatureFlag>
           <ArtistHeaderDescription
             isManage={!!isManage}
             artist={artist}
@@ -267,7 +276,7 @@ const ArtistHeaderSection: React.FC<{
           isManage={!!isManage}
           artist={artist}
           onSubmit={handleSubmit}
-        />{" "}
+        />
       </div>
     </div>
   );
