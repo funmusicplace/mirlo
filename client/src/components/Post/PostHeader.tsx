@@ -25,12 +25,12 @@ const PostHeader: React.FC<{ post: Post }> = ({ post }) => {
   return (
     <div
       className={css`
-        height: ${featuredImage ? "50vh" : "30vh"};
+        min-height: ${featuredImage ? "50vh" : "20vh"};
         overflow: none;
         position: relative;
 
         @media (max-width: ${bp.medium}px) {
-          height: ${featuredImage ? "70vh" : "20vh"};
+          min-height: ${featuredImage ? "70vh" : "20vh"};
         }
       `}
     >
@@ -117,7 +117,15 @@ const PostHeader: React.FC<{ post: Post }> = ({ post }) => {
                 align-items: center;
               `}
             >
-              <h1>{post.title}</h1>
+              <h1
+                className={css`
+                  @media (max-width: ${bp.medium}px) {
+                    font-size: 2rem;
+                  }
+                `}
+              >
+                {post.title}
+              </h1>
               {(ownedByUser || user?.isAdmin) && (
                 <ButtonLink
                   to={`/manage/artists/${post.artistId}/post/${post.id}`}
