@@ -20,6 +20,7 @@ interface LoggedInUser {
   trackFavorites?: {
     userId: number;
     trackId: number;
+    track: Track;
   }[];
   wishlist?: {
     userId: number;

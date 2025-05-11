@@ -7,8 +7,8 @@ import { ImStarEmpty, ImStarFull } from "react-icons/im";
 
 const FavoriteTrack: React.FC<{
   track: { id: number };
-  inArtistPage?: boolean;
-}> = ({ track, inArtistPage }) => {
+  collapse?: boolean;
+}> = ({ track, collapse }) => {
   const { user } = useAuthContext();
   const { t } = useTranslation("translation", { keyPrefix: "wishlist" });
 
@@ -39,7 +39,7 @@ const FavoriteTrack: React.FC<{
       title={buttonLabel}
       startIcon={isInFavorites ? <ImStarFull /> : <ImStarEmpty />}
     >
-      {buttonLabel}
+      {!collapse && buttonLabel}
     </Button>
   );
 };

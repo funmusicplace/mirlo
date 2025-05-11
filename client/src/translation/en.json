@@ -117,6 +117,7 @@
     "wishlist": "Wishlist",
     "purchases": "Purchases",
     "paid": "Paid: {{ amount }}",
+    "favoritedTracks": "Favorited tracks",
     "purchasedOn": "Purchased on {{ date }}",
     "albumLink": "<albumLink>{{albumTitle}}</albumLink> by <artistLink>{{artistName}}</artistLink>",
     "wishlistEmpty": "There's nothing in your wishlist yet, browse the site!",

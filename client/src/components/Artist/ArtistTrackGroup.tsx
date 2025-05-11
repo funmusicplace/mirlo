@@ -69,7 +69,8 @@ const ArtistTrackGroup: React.FC<{
   trackGroup: TrackGroup & { artist?: Artist };
   as?: React.ElementType<any, keyof React.JSX.IntrinsicElements>;
   size?: "small" | "large";
-}> = ({ trackGroup, as, size = "large" }) => {
+  showTrackFavorite?: boolean;
+}> = ({ trackGroup, as, showTrackFavorite, size = "large" }) => {
   const length = size === "small" ? 300 : 300;
   return (
     <TrackGroupWrapper as={as}>
@@ -83,7 +84,8 @@ const ArtistTrackGroup: React.FC<{
           trackIds={trackGroup.tracks.map((t) => t.id)}
           title={trackGroup.title}
           trackGroup={trackGroup}
-          showWishlist
+          showWishlist={!showTrackFavorite}
+          showTrackFavorite={showTrackFavorite}
         >
           <TrackGroupLinks>
             <TrackGroupInfo>

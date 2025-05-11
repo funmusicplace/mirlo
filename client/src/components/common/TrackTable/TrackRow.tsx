@@ -235,7 +235,7 @@ const TrackRow: React.FC<{
                 />
               </li>
               <li>
-                <FavoriteTrack track={track} inArtistPage />
+                <FavoriteTrack track={track} />
               </li>
               {track.lyrics && (
                 <li>
