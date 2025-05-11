@@ -17,7 +17,6 @@ import { useAuthContext } from "state/AuthContext";
 import ManageTrackLicense from "../ManageTrackLicense";
 import ReplaceTrackAudioInput from "./ReplaceTrackAudioInput";
 import TextArea from "components/common/TextArea";
-import FormComponent from "components/common/FormComponent";
 import { useParams } from "react-router-dom";
 import { queryArtist } from "queries";
 import { useQuery } from "@tanstack/react-query";
@@ -73,7 +72,7 @@ const EditTrackRow: React.FC<{
       lyrics: track.lyrics,
       description: track.description,
       isrc: track.isrc,
-      minPrice: `${track?.minPrice !== undefined ? track.minPrice / 100 : ""}`,
+      minPrice: `${track?.minPrice !== undefined ? track.minPrice / 100 : "0"}`,
       allowIndividualSale: track.allowIndividualSale,
     },
   });
@@ -93,7 +92,7 @@ const EditTrackRow: React.FC<{
       isrc: track.isrc,
       lyrics: track.lyrics,
       description: track.description,
-      minPrice: `${track?.minPrice !== undefined ? track.minPrice / 100 : ""}`,
+      minPrice: `${track?.minPrice !== undefined ? track.minPrice / 100 : "0"}`,
       allowIndividualSale: track.allowIndividualSale,
     });
     cancelEditing();
