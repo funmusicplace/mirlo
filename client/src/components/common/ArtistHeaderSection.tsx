@@ -231,13 +231,11 @@ const ArtistHeaderSection: React.FC<{
             align-items: flex-end;
           `}
         >
-          <FeatureFlag featureFlag="tourDates">
-            <ArtistTourDates
-              isManage={!!isManage}
-              artist={artist}
-              onSubmit={handleSubmit}
-            />
-          </FeatureFlag>
+          <ArtistTourDates
+            isManage={!!isManage}
+            artist={artist}
+            onSubmit={handleSubmit}
+          />
           <ArtistHeaderDescription
             isManage={!!isManage}
             artist={artist}
