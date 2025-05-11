@@ -80,16 +80,16 @@ const LabelConfirmation: React.FC = () => {
         }
       `}
     >
-      <h2>Label & Collective Relationship</h2>
-      <p>Tracking your relationship with labels and collectives:</p>
+      <h2>{t("labelsAndCollectives")}</h2>
+      <p>{t("labelsAndCollectivesDescription")}</p>
 
       {fields.length > 0 && (
         <Table>
           <thead>
             <tr>
               <th />
-              <th>Label Name</th>
-              <th>Label Email</th>
+              <th>{t("name")}</th>
+              <th>{t("email")}</th>
               <th>{t("isLabelConfirmed")}</th>
               <th>{t("isArtistConfirmed")}</th>
             </tr>

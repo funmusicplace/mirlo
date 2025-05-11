@@ -46,8 +46,6 @@ const ProfileLabel: React.FC = () => {
     refetch();
   };
 
-  console.log(relationships);
-
   return (
     <WidthContainer variant="big" justify="center">
       <h2>{t("manageArtists")}</h2>

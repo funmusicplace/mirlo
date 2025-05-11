@@ -346,6 +346,8 @@
   "manageArtist": {
     "albumTags": "Album tags",
     "useUrlSlug": "Use this URL slug? '{{suggestedUrlSlug}}'",
+    "labelsAndCollectives": "Label and collectives",
+    "labelsAndCollectivesDescription": "If you are part of a label or collective, you can add them here. This will allow them to manage your artist page.",
     "useIt": "Use it",
     "needsToBeUnique": "This needs to be unique, try something else",
     "downloadCodes": "Download codes",
