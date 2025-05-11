@@ -9,6 +9,7 @@ import {
   finalCoversBucket,
   finalMerchImageBucket,
   finalPostImageBucket,
+  finalUserAvatarBucket,
 } from "./utils/minio";
 import { Client } from "@mirlo/prisma/client";
 
@@ -108,6 +109,26 @@ const parseIndex = async (pathname: string) => {
         url: `${client.applicationUrl}${route.join("/")}`,
         imageUrl: `${client.applicationUrl}/images/mirlo-typeface.png`,
         rss: `${process.env.API_DOMAIN}/v1/trackGroups?format=rss`,
+      });
+    } else if (route[1] === "label") {
+      const label = await prisma.user.findFirst({
+        where: { urlSlug: route[2], isLabelAccount: true },
+        include: {
+          userAvatar: true,
+        },
+      });
+
+      const avatarString = label?.userAvatar?.url.find((u) =>
+        u.includes("x600")
+      );
+
+      buildOpenGraphTags($, {
+        title: label?.name ?? "A Label on Mirlo",
+        description: `A label on Mirlo`,
+        url: `${client.applicationUrl}${route.join("/")}`,
+        imageUrl: avatarString
+          ? generateFullStaticImageUrl(avatarString, finalUserAvatarBucket)
+          : undefined,
       });
     }
 

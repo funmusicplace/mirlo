@@ -1,14 +1,11 @@
 import { css } from "@emotion/css";
 import MarkdownContent from "components/common/MarkdownContent";
 import { useTranslation } from "react-i18next";
-import Button from "components/common/Button";
 import React from "react";
 import { useSnackbar } from "state/SnackbarContext";
 import { useForm } from "react-hook-form";
-import { FaChevronDown, FaPen, FaSave, FaTimes } from "react-icons/fa";
+import { FaPen, FaSave, FaTimes } from "react-icons/fa";
 import TextArea from "components/common/TextArea";
-import { bp } from "../../constants";
-import { useSearchParams } from "react-router-dom";
 import { ArtistButton } from "./ArtistButtons";
 import Modal from "components/common/Modal";
 
@@ -29,9 +26,6 @@ const ArtistHeaderDescription: React.FC<ArtistHeaderDescriptionProps> = ({
   artist,
   onSubmit,
 }) => {
-  const [searchParams] = useSearchParams();
-  const isHeaderExpanded = searchParams.get("expandHeader");
-
   const snackbar = useSnackbar();
 
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
@@ -51,6 +45,7 @@ const ArtistHeaderDescription: React.FC<ArtistHeaderDescriptionProps> = ({
     },
     [onSubmit, snackbar, t]
   );
+
   if (!bio && !isManage) {
     return null;
   }
@@ -67,7 +62,7 @@ const ArtistHeaderDescription: React.FC<ArtistHeaderDescriptionProps> = ({
           border-top-right-radius: 0.5rem !important;
         `}
       >
-        About
+        {t("about")}
       </ArtistButton>
       <Modal open={isOpen} size="small" onClose={() => setIsOpen(false)}>
         {!isEditing && (

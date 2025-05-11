@@ -182,6 +182,7 @@ export type UpdateArtistBody = Partial<
     | "linksJson"
     | "urlSlug"
     | "properties"
+    | "tourDates"
   >
 >;
 

@@ -27,6 +27,12 @@ export const formatDate = ({
   return releaseFormat;
 };
 
+export const calculateDateWithTimezoneOffset = (dateString: string) => {
+  const date = new Date(dateString.split("T")[0]);
+  const userTimezoneOffset = date.getTimezoneOffset() * 60000;
+  return new Date(date.getTime() + userTimezoneOffset);
+};
+
 const ReleaseDate: React.FC<{ releaseDate: string }> = ({
   releaseDate: releaseDateString,
 }) => {
@@ -35,9 +41,7 @@ const ReleaseDate: React.FC<{ releaseDate: string }> = ({
     keyPrefix: "trackGroupDetails",
   });
 
-  const date = new Date(releaseDateString.split("T")[0]);
-  const userTimezoneOffset = date.getTimezoneOffset() * 60000;
-  const releaseDate = new Date(date.getTime() + userTimezoneOffset);
+  const releaseDate = calculateDateWithTimezoneOffset(releaseDateString);
   const beforeReleaseDate = releaseDate > new Date();
 
   const releaseFormat = formatDate({

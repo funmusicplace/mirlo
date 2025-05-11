@@ -13,6 +13,7 @@ import PauseButton from "./PauseButton";
 import { useAuthContext } from "state/AuthContext";
 import { Link } from "react-router-dom";
 import { determineItemLink } from "components/Artist/ArtistItemLink";
+import FavoriteTrack from "components/TrackGroup/Favorite";
 
 const TrackgroupButtons = styled.div`
   width: 100%;
@@ -199,6 +200,7 @@ const ClickToPlay: React.FC<
   React.PropsWithChildren<{
     trackGroup: TrackGroup;
     showWishlist?: boolean;
+    showTrackFavorite?: boolean;
     trackIds?: number[];
     track?: Track;
     title: string;
@@ -208,6 +210,7 @@ const ClickToPlay: React.FC<
 > = ({
   trackGroup,
   showWishlist,
+  showTrackFavorite,
   trackIds,
   track,
   title,
@@ -283,6 +286,11 @@ const ClickToPlay: React.FC<
             {user && showWishlist && (
               <div>
                 <Wishlist trackGroup={trackGroup} />
+              </div>
+            )}
+            {user && showTrackFavorite && (
+              <div>
+                <FavoriteTrack track={trackGroup.tracks[0]} collapse />
               </div>
             )}
 

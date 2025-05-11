@@ -10,16 +10,18 @@ import { useAuthContext } from "state/AuthContext";
 
 function WishlistCollection() {
   const { user } = useAuthContext();
+  console.log("user", user?.trackFavorites);
   const userId = user?.id;
-
-  const [purchases, setPurchases] = React.useState<UserTrackGroupWishlist[]>();
   const { t } = useTranslation("translation", { keyPrefix: "profile" });
+
+  const [wishlisted, setWishlisted] =
+    React.useState<UserTrackGroupWishlist[]>();
 
   const fetchWishlist = React.useCallback(async () => {
     const { results } = await api.getMany<UserTrackGroupWishlist>(
       `users/${userId}/wishlist`
     );
-    setPurchases(results);
+    setWishlisted(results);
   }, [userId]);
 
   React.useEffect(() => {
@@ -47,18 +49,43 @@ function WishlistCollection() {
               flex-wrap: wrap;
             `}
           >
-            {!purchases ||
-              (purchases?.length === 0 && <Box>{t("wishlistEmpty")}</Box>)}
-            <TrackgroupGrid gridNumber={"4"}>
-              {purchases?.map(
-                (purchase) =>
-                  purchase.trackGroup && (
+            {!wishlisted ||
+              (wishlisted?.length === 0 && <Box>{t("wishlistEmpty")}</Box>)}
+            <TrackgroupGrid gridNumber="6">
+              {wishlisted?.map(
+                (wishlist) =>
+                  wishlist.trackGroup && (
                     <ArtistTrackGroup
-                      trackGroup={purchase.trackGroup}
-                      key={purchase.trackGroupId}
+                      trackGroup={wishlist.trackGroup}
+                      key={wishlist.trackGroupId}
                     />
                   )
               )}
+            </TrackgroupGrid>
+          </div>
+        </WidthContainer>
+        <WidthContainer variant="big" justify="center">
+          <h1>{t("favoritedTracks")}</h1>
+          <div
+            className={css`
+              display: flex;
+              width: 100%;
+              flex-direction: row;
+              flex-wrap: wrap;
+            `}
+          >
+            {!user?.trackFavorites ||
+              (user?.trackFavorites?.length === 0 && (
+                <Box>{t("wishlistEmpty")}</Box>
+              ))}
+            <TrackgroupGrid gridNumber="6">
+              {user?.trackFavorites?.map((tf) => (
+                <ArtistTrackGroup
+                  trackGroup={{ ...tf.track.trackGroup, tracks: [tf.track] }}
+                  key={tf.trackId}
+                  showTrackFavorite
+                />
+              ))}
             </TrackgroupGrid>
           </div>
         </WidthContainer>

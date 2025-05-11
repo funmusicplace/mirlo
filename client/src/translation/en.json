@@ -89,6 +89,7 @@
     "password": "Updating your email requires entering your password",
     "deleteYourAccount": "No longer want to use Mirlo? Delete your account",
     "profile": "Profile",
+    "manageArtistsDescription": "Here you can manage your artist accounts. You can create new artists, and manage existing ones.",
     "labels": "Labels",
     "makeSearchable": "Enabling this will let artists find your label and request to be added to your roster. Artists will then be able to say for which albums payments will be sent to the payment processor linked to this Stripe account.",
     "isLabelAccount": "Is this an account for a record label or artist collective?",
@@ -116,6 +117,7 @@
     "wishlist": "Wishlist",
     "purchases": "Purchases",
     "paid": "Paid: {{ amount }}",
+    "favoritedTracks": "Favorited tracks",
     "purchasedOn": "Purchased on {{ date }}",
     "albumLink": "<albumLink>{{albumTitle}}</albumLink> by <artistLink>{{artistName}}</artistLink>",
     "wishlistEmpty": "There's nothing in your wishlist yet, browse the site!",
@@ -125,7 +127,9 @@
   },
   "wishlist": {
     "addToWishlist": "Add to wishlist",
-    "removeFromWishlist": "Remove from wishlist"
+    "removeFromWishlist": "Remove from wishlist",
+    "addToFavorites": "Add to favorites",
+    "removeFromFavorites": "Remove from favorites"
   },
   "trackGroupCard": {
     "thatsGenerous": "{{ chosenPrice }}? That's generous!",
@@ -227,6 +231,14 @@
   },
   "artist": {
     "merch": "Merch",
+    "about": "About",
+    "dates": "Dates",
+    "saveDates": "Save dates",
+    "addTourDates": "Manage tour dates",
+    "tourDate": "Event date",
+    "eventLocation": "Event location",
+    "ticketsUrl": "Tickets URL",
+    "addNewTourDate": "Add new tour date",
     "artistCheckoutPage": "You will be taken to the artist's payment processor page to complete this subscription.",
     "flagContent": "Flag content",
     "whyAreYouFlaggingIt": "Why are you flagging it?",

@@ -102,7 +102,7 @@ function CheckoutComplete() {
               linkToTrack: (
                 <Link to={getTrackUrl(artist, trackGroup, track)}></Link>
               ),
-              linkToCollection: <Link to="/collection"></Link>,
+              linkToCollection: <Link to="/profile/collection"></Link>,
             }}
             values={{ trackName: track.title }}
           />

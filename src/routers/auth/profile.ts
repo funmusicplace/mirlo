@@ -3,6 +3,7 @@ import prisma from "@mirlo/prisma";
 import { addSizesToImage } from "../../utils/artist";
 import {
   finalArtistAvatarBucket,
+  finalCoversBucket,
   finalUserAvatarBucket,
 } from "../../utils/minio";
 
@@ -23,7 +24,22 @@ const profile = async (req: Request, res: Response, next: NextFunction) => {
         language: true,
         wishlist: true,
         urlSlug: true,
+        featureFlags: true,
         isLabelAccount: true,
+        trackFavorites: {
+          include: {
+            track: {
+              include: {
+                trackGroup: {
+                  include: {
+                    artist: true,
+                    cover: true,
+                  },
+                },
+              },
+            },
+          },
+        },
         userTrackGroupPurchases: {
           select: {
             trackGroupId: true,
@@ -63,6 +79,19 @@ const profile = async (req: Request, res: Response, next: NextFunction) => {
         userAvatar: foundUser?.userAvatar
           ? addSizesToImage(finalUserAvatarBucket, foundUser.userAvatar)
           : null,
+        trackFavorites: foundUser?.trackFavorites.map((tf) => ({
+          ...tf,
+          track: {
+            ...tf.track,
+            trackGroup: {
+              ...tf.track.trackGroup,
+              cover: addSizesToImage(
+                finalCoversBucket,
+                tf.track.trackGroup.cover
+              ),
+            },
+          },
+        })),
         artistUserSubscriptions: foundUser?.artistUserSubscriptions.map(
           (aus) => ({
             ...aus,

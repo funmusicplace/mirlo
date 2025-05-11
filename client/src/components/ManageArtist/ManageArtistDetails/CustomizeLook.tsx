@@ -25,6 +25,7 @@ import DeleteArtist from "../DeleteArtist";
 import { Toggle } from "components/common/Toggle";
 import Box from "components/common/Box";
 import LabelConfirmation from "./LabelConfirmation";
+import FeatureFlag from "components/common/FeatureFlag";
 
 export interface ShareableTrackgroup {
   creatorId: number;
@@ -323,7 +324,9 @@ export const CustomizeLook: React.FC = () => {
           </div>
         </form>
       </FormProvider>
-      <LabelConfirmation />
+      <FeatureFlag featureFlag="label">
+        <LabelConfirmation />
+      </FeatureFlag>
 
       <DeleteArtist />
     </div>

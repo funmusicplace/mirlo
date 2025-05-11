@@ -36,6 +36,7 @@ export default function () {
       linksJson,
       location,
       activityPub,
+      tourDates,
     } = req.body;
 
     try {
@@ -57,6 +58,21 @@ export default function () {
           properties,
         },
       });
+      if (tourDates) {
+        await prisma.artistTourDate.deleteMany({
+          where: {
+            artistId: Number(artistId),
+          },
+        });
+        await prisma.artistTourDate.createMany({
+          data: tourDates.map((tourDate: any) => ({
+            artistId: Number(artistId),
+            location: tourDate.location,
+            date: new Date(tourDate.date),
+            ticketsUrl: tourDate.ticketsUrl,
+          })),
+        });
+      }
 
       if (updatedCount) {
         const artist = await prisma.artist.findFirst({

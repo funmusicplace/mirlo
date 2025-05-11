@@ -50,10 +50,6 @@ const LabelConfirmation: React.FC = () => {
     refetch();
   };
 
-  if (!user?.isAdmin) {
-    return null;
-  }
-
   if (isArtistLoading) {
     return (
       <Box variant="info">

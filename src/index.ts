@@ -87,6 +87,7 @@ const routes = [
   "tracks/{id}/download",
   "tracks/{id}/generate",
   "tracks/{id}/testOwns",
+  "tracks/{id}/favorite",
   "tracks/{id}/stream/{segment}",
   "artists",
   "artists/testExistence",

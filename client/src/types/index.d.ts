@@ -15,7 +15,13 @@ interface LoggedInUser {
   userTrackPurchases?: { trackId: number }[];
   isAdmin: boolean;
   currency?: string;
+  featureFlags?: string[];
   isLabelAccount?: boolean;
+  trackFavorites?: {
+    userId: number;
+    trackId: number;
+    track: Track;
+  }[];
   wishlist?: {
     userId: number;
     trackGroupId: number;
@@ -186,6 +192,11 @@ interface Artist {
   links?: string[];
   linksJson?: Link[];
   posts: Post[];
+  tourDates?: {
+    date: string;
+    location: string;
+    ticketsUrl: string;
+  }[];
   subscriptionTiers: ArtistSubscriptionTier[];
   properties?: {
     colors: ArtistColors;

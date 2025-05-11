@@ -99,6 +99,8 @@ function Profile() {
             )}
           </ProfileSection>
           <ProfileSection>
+            <h2>{t("manageArtists")}</h2>
+            <p>{t("manageArtistsDescription")}</p>
             <ButtonLink to="/manage" style={{ marginTop: "1rem" }}>
               {t("manageArtists")}
             </ButtonLink>

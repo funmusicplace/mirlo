@@ -17,7 +17,6 @@ import { useAuthContext } from "state/AuthContext";
 import ManageTrackLicense from "../ManageTrackLicense";
 import ReplaceTrackAudioInput from "./ReplaceTrackAudioInput";
 import TextArea from "components/common/TextArea";
-import FormComponent from "components/common/FormComponent";
 import { useParams } from "react-router-dom";
 import { queryArtist } from "queries";
 import { useQuery } from "@tanstack/react-query";
@@ -73,7 +72,7 @@ const EditTrackRow: React.FC<{
       lyrics: track.lyrics,
       description: track.description,
       isrc: track.isrc,
-      minPrice: `${track?.minPrice !== undefined ? track.minPrice / 100 : ""}`,
+      minPrice: `${track?.minPrice !== undefined ? track.minPrice / 100 : "0"}`,
       allowIndividualSale: track.allowIndividualSale,
     },
   });
@@ -93,7 +92,7 @@ const EditTrackRow: React.FC<{
       isrc: track.isrc,
       lyrics: track.lyrics,
       description: track.description,
-      minPrice: `${track?.minPrice !== undefined ? track.minPrice / 100 : ""}`,
+      minPrice: `${track?.minPrice !== undefined ? track.minPrice / 100 : "0"}`,
       allowIndividualSale: track.allowIndividualSale,
     });
     cancelEditing();
@@ -225,32 +224,28 @@ const EditTrackRow: React.FC<{
           />
         </td>
       </tr>
-      {user?.isAdmin && (
-        <>
-          <IndentedTR>
-            <td colSpan={2}>
-              <label htmlFor="allowIndividualSale">
-                {t("allowIndividualSale")}
-              </label>
-            </td>
-            <td colSpan={99}>
-              <FormCheckbox
-                keyName="allowIndividualSale"
-                description={t("allowSaleDescription")}
-              />
-            </td>
-          </IndentedTR>
-          {allowIndividualSale && (
-            <IndentedTR>
-              <td colSpan={2}>
-                <label htmlFor="minPrice">{t("minPrice")}</label>
-              </td>
-              <td colSpan={99}>
-                <InputEl id="minPrice" {...register("minPrice")} />
-              </td>
-            </IndentedTR>
-          )}
-        </>
+      <IndentedTR>
+        <td colSpan={2}>
+          <label htmlFor="allowIndividualSale">
+            {t("allowIndividualSale")}
+          </label>
+        </td>
+        <td colSpan={99}>
+          <FormCheckbox
+            keyName="allowIndividualSale"
+            description={t("allowSaleDescription")}
+          />
+        </td>
+      </IndentedTR>
+      {allowIndividualSale && (
+        <IndentedTR>
+          <td colSpan={2}>
+            <label htmlFor="minPrice">{t("minPrice")}</label>
+          </td>
+          <td colSpan={99}>
+            <InputEl id="minPrice" {...register("minPrice")} />
+          </td>
+        </IndentedTR>
       )}
       <IndentedTR>
         <td colSpan={2}>

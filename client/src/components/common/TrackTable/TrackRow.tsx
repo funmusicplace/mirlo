@@ -13,6 +13,7 @@ import EmbedLink from "./EmbedLink";
 import TrackLink from "./TrackLink";
 import DropdownMenu from "../DropdownMenu";
 import LyricsModal from "./LyricsModal";
+import FavoriteTrack from "components/TrackGroup/Favorite";
 
 const LicenseSpan = styled.a`
   text-wrap: nowrap;
@@ -232,6 +233,9 @@ const TrackRow: React.FC<{
                   trackGroup={trackGroup}
                   artist={trackGroup.artist}
                 />
+              </li>
+              <li>
+                <FavoriteTrack track={track} />
               </li>
               {track.lyrics && (
                 <li>

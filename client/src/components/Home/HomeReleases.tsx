@@ -59,7 +59,7 @@ const Releases = () => {
           >
             <div
               className={css`
-                display: flex;
+                display: w flex;
                 flex-direction: row;
                 flex-wrap: wrap;
                 padding: var(--mi-side-paddings-xsmall);
