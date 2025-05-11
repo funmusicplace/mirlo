@@ -25,12 +25,12 @@ const PostHeader: React.FC<{ post: Post }> = ({ post }) => {
   return (
     <div
       className={css`
-        height: ${featuredImage ? "50vh" : "20vh"};
+        height: ${featuredImage ? "50vh" : "30vh"};
         overflow: none;
         position: relative;
 
         @media (max-width: ${bp.medium}px) {
-          height: ${featuredImage ? "70vh" : "30vh"};
+          height: ${featuredImage ? "70vh" : "20vh"};
         }
       `}
     >
