@@ -89,6 +89,7 @@
     "password": "Updating your email requires entering your password",
     "deleteYourAccount": "No longer want to use Mirlo? Delete your account",
     "profile": "Profile",
+    "manageArtistsDescription": "Here you can manage your artist accounts. You can create new artists, and manage existing ones.",
     "labels": "Labels",
     "makeSearchable": "Enabling this will let artists find your label and request to be added to your roster. Artists will then be able to say for which albums payments will be sent to the payment processor linked to this Stripe account.",
     "isLabelAccount": "Is this an account for a record label or artist collective?",

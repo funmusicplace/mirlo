@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 import { NavLink, Outlet } from "react-router-dom";
 import UnreadCountPill from "components/common/UnreadCountPill";
 import { useAuthContext } from "state/AuthContext";
+import FeatureFlag from "components/common/FeatureFlag";
 
 const ProfileContainer: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "profile" });
@@ -66,11 +67,11 @@ const ProfileContainer: React.FC = () => {
               <li>
                 <NavLink to="/profile/purchases">{t("purchases")}</NavLink>
               </li>
-              {user?.isAdmin && (
+              <FeatureFlag featureFlag="label">
                 <li>
                   <NavLink to="/profile/label">{t("labels")}</NavLink>
                 </li>
-              )}
+              </FeatureFlag>
               <li>
                 <NavLink to="/profile/notifications">
                   {t("notifications")}

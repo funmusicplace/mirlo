@@ -23,6 +23,7 @@ const profile = async (req: Request, res: Response, next: NextFunction) => {
         language: true,
         wishlist: true,
         urlSlug: true,
+        featureFlags: true,
         isLabelAccount: true,
         userTrackGroupPurchases: {
           select: {

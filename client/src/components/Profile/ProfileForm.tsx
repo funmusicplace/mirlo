@@ -127,9 +127,17 @@ function ProfileForm() {
             <SlugInput type="user" currentName={name} />
           </FormComponent>
         )}
-        <Button type="submit" disabled={isSaving} isLoading={isSaving}>
-          {t("updateProfileButton")}
-        </Button>
+        <FormComponent
+          className={css`
+            display: flex;
+            align-items: flex-end !important;
+            justify-content: flex-end !important;
+          `}
+        >
+          <Button type="submit" disabled={isSaving} isLoading={isSaving}>
+            {t("updateProfileButton")}
+          </Button>
+        </FormComponent>
       </form>
       <Link
         className={css`

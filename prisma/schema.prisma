@@ -19,11 +19,12 @@ datasource db {
 }
 
 model Settings {
-  id         Int     @id @default(autoincrement())
+  id          Int     @id @default(autoincrement())
   /// [Settings]
-  settings   Json
-  publicKey  String? // Used for ActivityPub
-  privateKey String? // Used for ActivityPub
+  settings    Json
+  publicKey   String? // Used for ActivityPub
+  privateKey  String? // Used for ActivityPub
+  bucketNames Json? // Used for S3
 }
 
 model Client {
@@ -76,6 +77,8 @@ model User {
   artistLabels                        ArtistLabel[]
   userTrackPurchases                  UserTrackPurchase[]
   userAvatar                          UserAvatar?
+  featureFlags                        String[]
+  trackFavorites                      UserTrackFavorite[]
 }
 
 model UserAvatar {
@@ -222,6 +225,7 @@ model Artist {
   artistLabels                       ArtistLabel[]
   activityPub                        Boolean                              @default(false)
   activityPubArtistFollowers         ActivityPubArtistFollowers[]
+  tourDates                          ArtistTourDate[]
 }
 
 model ArtistAvatar {
@@ -257,6 +261,17 @@ model ArtistLabel {
   canLabelAddReleases  Boolean @default(true)
 
   @@unique([labelUserId, artistId])
+}
+
+model ArtistTourDate {
+  id         Int      @id @default(autoincrement())
+  artistId   Int
+  artist     Artist   @relation(fields: [artistId], references: [id])
+  date       DateTime
+  location   String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  ticketsUrl String?
 }
 
 model ArtistSubscriptionTier {
@@ -582,6 +597,17 @@ model Track {
   postTracks          PostTrack[]
   userTrackPurchases  UserTrackPurchase[]
   Notification        Notification[]
+  trackFavorites      UserTrackFavorite[]
+}
+
+model UserTrackFavorite {
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  trackId   Int
+  track     Track    @relation(fields: [trackId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([userId, trackId])
 }
 
 model License {

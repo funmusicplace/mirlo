@@ -15,6 +15,7 @@ interface LoggedInUser {
   userTrackPurchases?: { trackId: number }[];
   isAdmin: boolean;
   currency?: string;
+  featureFlags?: string[];
   isLabelAccount?: boolean;
   wishlist?: {
     userId: number;
