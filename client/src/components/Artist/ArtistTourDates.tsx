@@ -67,7 +67,7 @@ const ArtistTourDates: React.FC<ArtistHeaderDescriptionProps> = ({
     },
     [onSubmit, snackbar, t]
   );
-  if (!tourDates && !isManage) {
+  if ((!tourDates || tourDates.length === 0) && !isManage) {
     return null;
   }
 
