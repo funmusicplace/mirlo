@@ -225,32 +225,28 @@ const EditTrackRow: React.FC<{
           />
         </td>
       </tr>
-      {user?.isAdmin && (
-        <>
-          <IndentedTR>
-            <td colSpan={2}>
-              <label htmlFor="allowIndividualSale">
-                {t("allowIndividualSale")}
-              </label>
-            </td>
-            <td colSpan={99}>
-              <FormCheckbox
-                keyName="allowIndividualSale"
-                description={t("allowSaleDescription")}
-              />
-            </td>
-          </IndentedTR>
-          {allowIndividualSale && (
-            <IndentedTR>
-              <td colSpan={2}>
-                <label htmlFor="minPrice">{t("minPrice")}</label>
-              </td>
-              <td colSpan={99}>
-                <InputEl id="minPrice" {...register("minPrice")} />
-              </td>
-            </IndentedTR>
-          )}
-        </>
+      <IndentedTR>
+        <td colSpan={2}>
+          <label htmlFor="allowIndividualSale">
+            {t("allowIndividualSale")}
+          </label>
+        </td>
+        <td colSpan={99}>
+          <FormCheckbox
+            keyName="allowIndividualSale"
+            description={t("allowSaleDescription")}
+          />
+        </td>
+      </IndentedTR>
+      {allowIndividualSale && (
+        <IndentedTR>
+          <td colSpan={2}>
+            <label htmlFor="minPrice">{t("minPrice")}</label>
+          </td>
+          <td colSpan={99}>
+            <InputEl id="minPrice" {...register("minPrice")} />
+          </td>
+        </IndentedTR>
       )}
       <IndentedTR>
         <td colSpan={2}>

@@ -130,7 +130,7 @@ function TrackView() {
                 </ImageWrapper>
                 <UnderneathImage>
                   <ReleaseDate releaseDate={trackGroup.releaseDate} />
-                  {user?.isAdmin && filteredTrack.allowIndividualSale && (
+                  {filteredTrack.allowIndividualSale && (
                     <PurchaseOrDownloadAlbum
                       trackGroup={trackGroup}
                       track={filteredTrack}
