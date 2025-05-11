@@ -16,6 +16,7 @@ import { useQuery } from "@tanstack/react-query";
 import { queryManagedArtist, queryUserStripeStatus } from "queries";
 import { useAuthContext } from "state/AuthContext";
 import api from "services/api";
+import LabelConfirmation from "./ManageArtistDetails/LabelConfirmation";
 
 const Container = styled.div<{ artistBanner: boolean }>`
   width: 100%;

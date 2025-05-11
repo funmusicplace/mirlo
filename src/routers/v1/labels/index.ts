@@ -30,6 +30,8 @@ export default function () {
           name: true,
           email: true,
           id: true,
+          userAvatar: true,
+          urlSlug: true,
           artists: {
             where: {
               deletedAt: null,

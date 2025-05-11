@@ -7,9 +7,12 @@ import { useTranslation } from "react-i18next";
 
 import { NavLink, Outlet } from "react-router-dom";
 import UnreadCountPill from "components/common/UnreadCountPill";
+import { useAuthContext } from "state/AuthContext";
 
 const ProfileContainer: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "profile" });
+
+  const { user } = useAuthContext();
 
   return (
     <>
@@ -63,6 +66,11 @@ const ProfileContainer: React.FC = () => {
               <li>
                 <NavLink to="/profile/purchases">{t("purchases")}</NavLink>
               </li>
+              {user?.isAdmin && (
+                <li>
+                  <NavLink to="/profile/label">{t("labels")}</NavLink>
+                </li>
+              )}
               <li>
                 <NavLink to="/profile/notifications">
                   {t("notifications")}

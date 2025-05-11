@@ -40,6 +40,7 @@
     "react-router-dom": "^6.22.3",
     "remark-gfm": "^3.0.1",
     "remirror": "^2.0.38",
+    "slugify": "^1.6.6",
     "unist-util-visit": "^4.1.2",
     "uuid": "^9.0.1"
   },

@@ -15,6 +15,7 @@ import { SelectEl } from "components/common/Select";
 import { finishedLanguages } from "i18n";
 import { Toggle } from "components/common/Toggle";
 import { useProfileMutation } from "queries";
+import SlugInput from "components/common/SlugInput";
 
 type FormData = {
   name: string;
@@ -22,6 +23,7 @@ type FormData = {
   isLabelAccount: boolean;
   newEmail?: string;
   password?: string;
+  urlSlug?: string;
 };
 
 function ProfileForm() {
@@ -36,6 +38,7 @@ function ProfileForm() {
       name: user?.name,
       language: language.split("-")[0],
       isLabelAccount: user?.isLabelAccount,
+      urlSlug: user?.urlSlug,
     },
   });
   const { register, handleSubmit, watch, setValue } = methods;
@@ -46,6 +49,7 @@ function ProfileForm() {
 
   const isLabelAccount = watch("isLabelAccount");
   const newEmail = watch("newEmail");
+  const name = watch("name");
 
   const doSave = React.useCallback(
     async (data: FormData) => {
@@ -97,11 +101,14 @@ function ProfileForm() {
           <label>{t("name")}</label>
           <InputEl {...register("name")} />
         </FormComponent>
+
         <FormComponent>
           <label>{t("language")}</label>
           <SelectEl {...register("language")}>
             {finishedLanguages.map((lang) => (
-              <option value={lang.short}>{lang.name}</option>
+              <option key={lang.short} value={lang.short}>
+                {lang.name}
+              </option>
             ))}
           </SelectEl>
         </FormComponent>
@@ -115,6 +122,11 @@ function ProfileForm() {
           />
           <small>{t("makeSearchable")}</small>
         </FormComponent>
+        {isLabelAccount && (
+          <FormComponent>
+            <SlugInput type="user" currentName={name} />
+          </FormComponent>
+        )}
         <Button type="submit" disabled={isSaving} isLoading={isSaving}>
           {t("updateProfileButton")}
         </Button>
