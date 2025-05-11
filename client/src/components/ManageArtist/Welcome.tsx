@@ -138,7 +138,10 @@ const Welcome = () => {
                   }}
                 />
               </small>
-              <ArtistSlugInput currentArtistId={localArtist?.id} />
+              <ArtistSlugInput
+                type="artist"
+                currentArtistId={localArtist?.id}
+              />
             </FormComponent>
           )}
 
