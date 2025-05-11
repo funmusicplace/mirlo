@@ -1,12 +1,9 @@
 import { css } from "@emotion/css";
-import { useQuery } from "@tanstack/react-query";
 import AutoComplete from "components/common/AutoComplete";
 import FormComponent from "components/common/FormComponent";
 import { hasId } from "components/ManageArtist/AlbumFormComponents/ManageTags";
-import { queryManagedArtist } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { useParams } from "react-router-dom";
 import api from "services/api";
 import { useAuthContext } from "state/AuthContext";
 

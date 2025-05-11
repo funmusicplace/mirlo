@@ -33,6 +33,7 @@ import { AppError } from "./error";
 import logger from "../logger";
 import { Job } from "bullmq";
 import { processSingleMerch } from "./merch";
+import { url } from "inspector";
 
 type Params = {
   id: string;

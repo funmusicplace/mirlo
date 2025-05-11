@@ -2,7 +2,6 @@ import { Artist, User } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 import { pick } from "lodash";
 import {
-  contentBelongsToLoggedInUserArtist,
   trackGroupBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";

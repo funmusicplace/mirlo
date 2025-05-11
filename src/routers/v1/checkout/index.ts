@@ -75,7 +75,7 @@ export default function () {
                   success ? "success" : "canceled"
                 }&tierId=${tierId}`
             );
-          } else if (client && trackGroupId && artistId) {
+          } else if (client && trackGroupId && artistId && !trackId) {
             // FIXME: We'll probably want clients to be able to define the
             // checkout callbackURL separately from the applicationURL
             // and that callbackURL should probably contain a pattern that

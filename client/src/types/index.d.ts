@@ -9,6 +9,7 @@ interface LoggedInUser {
   email: string;
   name: string;
   id: number;
+  urlSlug?: string;
   artistUserSubscriptions?: ArtistUserSubscription[];
   userTrackGroupPurchases?: { trackGroupId: number }[];
   userTrackPurchases?: { trackId: number }[];
@@ -158,7 +159,12 @@ interface ArtistLabel {
   artistId: number;
   artist: Artist;
   labelUserId: number;
-  labelUser: { name: string; email: string };
+  labelUser: {
+    name: string;
+    email: string;
+    id: number;
+    userAvatar?: { sizes: string[] };
+  };
   isLabelApproved: boolean;
   canLabelManageArtist: boolean;
   canLabelAddReleases: boolean;

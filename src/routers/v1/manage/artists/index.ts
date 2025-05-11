@@ -6,11 +6,6 @@ import prisma from "@mirlo/prisma";
 import slugify from "slugify";
 import { AppError } from "../../../../utils/error";
 
-type Params = {
-  artistId: number;
-  userId: string;
-};
-
 const forbiddenNames = [
   "mirlo",
   "admin",
@@ -21,6 +16,8 @@ const forbiddenNames = [
   "pages",
   "widget",
   "post",
+  "label",
+  "track",
   "login",
   "password-reset",
   "artists",

@@ -3887,6 +3887,7 @@ __metadata:
     remark-gfm: "npm:^3.0.1"
     remirror: "npm:^2.0.38"
     rollup: "npm:^4.16.4"
+    slugify: "npm:^1.6.6"
     storybook: "npm:^8.1.1"
     storybook-addon-remix-react-router: "npm:^3.0.0"
     terser: "npm:^5.30.3"

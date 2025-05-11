@@ -13,12 +13,9 @@ import { UpdateArtistBody, useUpdateArtistMutation } from "queries";
 import React from "react";
 import { useSnackbar } from "state/SnackbarContext";
 import { useAuthContext } from "state/AuthContext";
-import { FaEye, FaPen, FaRss } from "react-icons/fa";
+import { FaRss } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
-import {
-  ArtistButtonAnchor,
-  ArtistButtonLink,
-} from "components/Artist/ArtistButtons";
+import { ArtistButtonAnchor } from "components/Artist/ArtistButtons";
 
 export const ArtistTitle = styled.h1<{ artistAvatar: boolean }>`
   font-size: 2.4rem;
@@ -36,7 +33,7 @@ export const ArtistTitle = styled.h1<{ artistAvatar: boolean }>`
   }
 `;
 
-const Header = styled.div`
+export const Header = styled.div`
   display: flex;
   width: 100%;
   flex-direction: column;
@@ -54,7 +51,44 @@ const Header = styled.div`
   }
 `;
 
-const HeaderWrapper = styled.div<{ colors?: ArtistColors }>`
+export const AvatarWrapper = styled.div<{ artistAvatar?: boolean }>`
+  display: flex;
+  padding-top: 1rem;
+  ${(props) => (props.artistAvatar ? "margin-bottom: 0.75rem;" : "")}
+  align-items: center;
+
+  @media screen and (max-width: ${bp.medium}px) {
+    padding-top: 0rem;
+    ${(props) => (props.artistAvatar ? "margin-bottom: 0.5rem;" : "")}
+  }
+`;
+
+export const ArtistTitleWrapper = styled.div<{ artistAvatar?: boolean }>`
+  width: 100%;
+  display: flex;
+  ${(props) =>
+    props.artistAvatar ? "min-height: 85px; margin-left: 1rem;" : ""}
+  flex-direction: column;
+  justify-content: center;
+  @media screen and (max-width: ${bp.medium}px) {
+    ${(props) =>
+      props.artistAvatar ? "min-height: 55px; margin-left: .5rem;" : ""}
+  }
+`;
+
+export const ArtistTitleText = styled.div`
+  min-height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  word-break: break-word;
+  width: 100%;
+  @media screen and (max-width: ${bp.medium}px) {
+    min-height: auto;
+  }
+`;
+
+export const HeaderWrapper = styled.div<{ colors?: ArtistColors }>`
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -133,19 +167,7 @@ const ArtistHeaderSection: React.FC<{
       />
       <HeaderWrapper colors={artist.properties?.colors}>
         <Header>
-          <div
-            className={css`
-              display: flex;
-              padding-top: 1rem;
-              ${artistAvatar ? "margin-bottom: 0.75rem;" : ""}
-              align-items: center;
-
-              @media screen and (max-width: ${bp.medium}px) {
-                padding-top: 0rem;
-                ${artistAvatar ? "margin-bottom: 0.5rem;" : ""}
-              }
-            `}
-          >
+          <AvatarWrapper artistAvatar={!!artistAvatar}>
             {artistAvatar && (
               <Avatar
                 avatar={
@@ -154,72 +176,43 @@ const ArtistHeaderSection: React.FC<{
               />
             )}
 
-            <div
-              className={css`
-                width: 100%;
-                display: flex;
-                ${artistAvatar ? "min-height: 85px; margin-left: 1rem;" : ""}
-                flex-direction: column;
-                justify-content: center;
-                @media screen and (max-width: ${bp.medium}px) {
-                  ${artistAvatar ? "min-height: 55px; margin-left: .5rem;" : ""}
-                }
-              `}
-            >
-              <div
+            <ArtistTitleWrapper artistAvatar={!!artistAvatar}>
+              <SpaceBetweenDiv
                 className={css`
-                  width: 100%;
+                  padding-bottom: 0 !important;
+                  margin-bottom: 0rem !important;
+                  @media screen and (max-width: ${bp.medium}px) {
+                    margin: 0rem !important;
+                  }
                 `}
               >
-                <SpaceBetweenDiv
-                  className={css`
-                    padding-bottom: 0 !important;
-                    margin-bottom: 0rem !important;
-                    @media screen and (max-width: ${bp.medium}px) {
-                      margin: 0rem !important;
-                    }
-                  `}
-                >
+                <ArtistTitleText>
                   <div
                     className={css`
-                      min-height: 50px;
                       display: flex;
-                      align-items: center;
-                      justify-content: space-between;
+                      flex-direction: column;
+                      justify-content: center;
                       word-break: break-word;
                       width: 100%;
-                      @media screen and (max-width: ${bp.medium}px) {
-                        min-height: auto;
-                      }
                     `}
                   >
-                    <div
-                      className={css`
-                        display: flex;
-                        flex-direction: column;
-                        justify-content: center;
-                        word-break: break-word;
-                        width: 100%;
-                      `}
-                    >
-                      <ArtistTitle artistAvatar={!!artistAvatar}>
-                        {artist.name}
-                      </ArtistTitle>
+                    <ArtistTitle artistAvatar={!!artistAvatar}>
+                      {artist.name}
+                    </ArtistTitle>
 
-                      <ArtistFormLocation
-                        isManage={!!isManage}
-                        artist={artist}
-                        onSubmit={handleSubmit}
-                      />
-                    </div>
-                    <ArtistActions>
-                      {!isManage && <FollowArtist artistId={artist.id} />}
-                    </ArtistActions>
+                    <ArtistFormLocation
+                      isManage={!!isManage}
+                      artist={artist}
+                      onSubmit={handleSubmit}
+                    />
                   </div>
-                </SpaceBetweenDiv>
-              </div>
-            </div>
-          </div>
+                  <ArtistActions>
+                    {!isManage && <FollowArtist artistId={artist.id} />}
+                  </ArtistActions>
+                </ArtistTitleText>
+              </SpaceBetweenDiv>
+            </ArtistTitleWrapper>
+          </AvatarWrapper>
         </Header>
         {!artistAvatar && (
           <div

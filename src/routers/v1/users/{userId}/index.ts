@@ -20,7 +20,6 @@ export default function () {
 
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { userId }: { userId?: string } = req.params;
-    console.log("looking for user");
     try {
       const user = await prisma.user.findUnique({
         where: { id: Number(userId) },
@@ -68,7 +67,8 @@ export default function () {
 
   async function PUT(req: Request, res: Response, next: NextFunction) {
     const { userId } = req.params as unknown as { userId: string };
-    const { newEmail, name, currency, language, isLabelAccount } = req.body;
+    const { newEmail, name, currency, language, urlSlug, isLabelAccount } =
+      req.body;
     const user = req.user as User;
 
     if (user.id !== Number(userId)) {
@@ -82,6 +82,7 @@ export default function () {
         currency,
         language,
         isLabelAccount,
+        urlSlug,
       };
 
       let changedEmail = false;
@@ -126,6 +127,7 @@ export default function () {
           emailConfirmationToken: true,
           currency: true,
           isLabelAccount: true,
+          urlSlug: true,
         },
         where: {
           id: Number(userId),

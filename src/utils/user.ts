@@ -21,6 +21,21 @@ export const deleteUser = async (userId: number) => {
   await prisma.user.delete({ where: { id: userId } });
 };
 
+export const findUserIdForURLSlug = async (id: string) => {
+  if (Number.isNaN(Number(id))) {
+    const user = await prisma.user.findFirst({
+      where: {
+        urlSlug: { equals: id, mode: "insensitive" },
+      },
+    });
+    id = `${user?.id ?? id}`;
+  }
+  if (Number.isNaN(Number(id))) {
+    return undefined;
+  }
+  return Number(id);
+};
+
 export const getUserCurrencyString = async (userId: number) => {
   const userForCurrency = await prisma.user.findFirst({
     where: { id: userId },

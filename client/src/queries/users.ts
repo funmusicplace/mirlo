@@ -32,24 +32,6 @@ export function queryUserStripeStatus(userId: number) {
   });
 }
 
-const fetchLabelArtists: QueryFunction<
-  {
-    results: ArtistLabel[];
-  },
-  ["fetchLabelArtists"]
-> = ({ queryKey: [_], signal }) => {
-  return api.get<{
-    results: ArtistLabel[];
-  }>(`v1/manage/label/`, { signal });
-};
-
-export function queryLabelArtists() {
-  return queryOptions({
-    queryKey: ["fetchLabelArtists"],
-    queryFn: fetchLabelArtists,
-  });
-}
-
 const fetchManagedArtist: QueryFunction<
   Artist,
   ["fetchManagedArtist", { artistId: number }]

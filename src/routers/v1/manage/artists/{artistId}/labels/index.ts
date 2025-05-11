@@ -7,6 +7,8 @@ import {
   userAuthenticated,
 } from "../../../../../../auth/passport";
 import { AppError } from "../../../../../../utils/error";
+import { addSizesToImage } from "../../../../../../utils/artist";
+import { finalUserAvatarBucket } from "../../../../../../utils/minio";
 
 export default function () {
   const operations = {
@@ -28,12 +30,22 @@ export default function () {
             select: {
               name: true,
               email: true,
+              userAvatar: true,
             },
           },
         },
       });
       res.json({
-        results: artistLabels,
+        results: artistLabels.map((label) => ({
+          ...label,
+          labelUser: {
+            ...label.labelUser,
+            userAvatar: addSizesToImage(
+              finalUserAvatarBucket,
+              label.labelUser.userAvatar
+            ),
+          },
+        })),
       });
     } catch (e) {
       console.error(`/v1/artists/{id}/labels ${e}`);
@@ -76,6 +88,19 @@ export default function () {
         throw new AppError({ httpCode: 400, description: "Need labelUserId" });
       }
 
+      const artist = await prisma.artist.findFirst({
+        where: {
+          id: Number(artistId),
+          deletedAt: null,
+        },
+      });
+      if (!artist) {
+        throw new AppError({
+          httpCode: 404,
+          description: "Artist not found",
+        });
+      }
+
       const data: Prisma.ArtistLabelCreateArgs["data"] = {
         labelUserId,
         artistId: Number(artistId),
@@ -83,6 +108,10 @@ export default function () {
 
       if (loggedInUser.id === labelUserId) {
         data.isLabelApproved = isLabelApproved;
+      }
+
+      if (loggedInUser.id === artist.userId) {
+        data.isArtistApproved = true;
       }
 
       await prisma.artistLabel.create({

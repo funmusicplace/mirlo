@@ -90,11 +90,6 @@ const SavingInput: React.FC<{
         display: flex;
         width: 100%;
         align-items: center;
-
-        input,
-        textarea {
-          margin-right: 1rem;
-        }
       `}
     >
       {!rows && (

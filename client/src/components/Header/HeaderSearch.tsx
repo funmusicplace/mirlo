@@ -27,13 +27,13 @@ const HeaderSearch: React.FC = () => {
 
   const getOptions = React.useCallback(async (searchString: string) => {
     const artists = await api.getMany<Artist>(`artists`, {
-      name: searchString,
+      name: searchString.trim(),
     });
     const trackGroups = await api.getMany<TrackGroup>(`trackGroups`, {
-      title: searchString,
+      title: searchString.trim(),
     });
     const tracks = await api.getMany<Track>(`tracks`, {
-      title: searchString,
+      title: searchString.trim(),
     });
     const results = [
       ...artists.results.map((r, rid) => ({

@@ -70,8 +70,6 @@ export default function () {
         return false;
       });
 
-      console.log("areOwned", areOwned);
-
       res
         .json({
           results: areOwned.map(Number),

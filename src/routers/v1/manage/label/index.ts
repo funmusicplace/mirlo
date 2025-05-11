@@ -40,6 +40,8 @@ export default function () {
 
       return res.json({
         results: artists.map((artist) => ({
+          ...artist,
+
           artist: processSingleArtist(artist.artist),
           labelId: artist.labelUserId,
         })),

@@ -136,7 +136,7 @@ const routes: RouteObject[] = [
             path: "label",
             async lazy() {
               const { default: Component } = await import(
-                "components/Profile/Label"
+                "components/Profile/ManageLabel"
               );
               return {
                 Component: () => (
@@ -184,6 +184,13 @@ const routes: RouteObject[] = [
             },
           },
         ],
+      },
+      {
+        path: "label/:labelSlug",
+        async lazy() {
+          const { default: Component } = await import("components/Label");
+          return { Component };
+        },
       },
       {
         path: "manage",

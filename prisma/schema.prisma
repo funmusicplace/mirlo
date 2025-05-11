@@ -58,6 +58,7 @@ model User {
   passwordResetConfirmationToken      String?
   passwordResetConfirmationExpiration DateTime?
   stripeAccountId                     String?
+  urlSlug                             String?
   receiveMailingList                  Boolean                         @default(false)
   wishlist                            UserTrackGroupWishlist[]
   plays                               TrackPlay[]
@@ -150,6 +151,7 @@ model Post {
   viewCount                 Int                     @default(0)
   artist                    Artist?                 @relation(fields: [artistId], references: [id])
   artistId                  Int?
+  urlSlug                   String?
   isDraft                   Boolean                 @default(true)
   isPublic                  Boolean                 @default(false) // is PUblic is different from is Draft. isPublic defined is the post is visible by non-followers
   minimumSubscriptionTierId Int?
@@ -250,6 +252,7 @@ model ArtistLabel {
   labelUser            User    @relation(fields: [labelUserId], references: [id])
   labelUserId          Int
   isLabelApproved      Boolean @default(false)
+  isArtistApproved     Boolean @default(false)
   canLabelManageArtist Boolean @default(false)
   canLabelAddReleases  Boolean @default(true)
 
@@ -557,6 +560,7 @@ model Track {
   trackGroup          TrackGroup          @relation(fields: [trackGroupId], references: [id])
   trackGroupId        Int
   title               String?
+  urlSlug             String?
   description         String?
   audio               TrackAudio?
   createdAt           DateTime            @default(now())

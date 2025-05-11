@@ -22,6 +22,7 @@ const profile = async (req: Request, res: Response, next: NextFunction) => {
         currency: true,
         language: true,
         wishlist: true,
+        urlSlug: true,
         isLabelAccount: true,
         userTrackGroupPurchases: {
           select: {
@@ -55,8 +56,6 @@ const profile = async (req: Request, res: Response, next: NextFunction) => {
         },
       },
     });
-
-    console.log("foundUser", foundUser?.userAvatar);
 
     res.status(200).json({
       result: {
