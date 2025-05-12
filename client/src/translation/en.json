@@ -235,6 +235,8 @@
     "dates": "Dates",
     "saveDates": "Save dates",
     "addTourDates": "Manage tour dates",
+    "buyTickets": "Get tickets",
+    "tourLocation": "Tour location",
     "tourDate": "Event date",
     "eventLocation": "Event location",
     "ticketsUrl": "Tickets URL",
