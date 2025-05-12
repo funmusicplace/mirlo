@@ -15,7 +15,7 @@ import { InputEl } from "../Input";
 import FormComponent from "../FormComponent";
 import Box from "../Box";
 import { useForm } from "react-hook-form";
-import { hasId } from "components/ManageArtist/AlbumFormComponents/ManageTags";
+import { hasId } from "components/ManageArtist/ManageTrackGroup/AlbumFormComponents/ManageTags";
 
 const InsertMirloWidgetButton: React.FC<{
   postId?: number;

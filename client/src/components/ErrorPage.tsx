@@ -7,7 +7,7 @@ export default function ErrorPage() {
   console.error(error);
 
   React.useEffect(() => {
-    if (error instanceof Error) {
+    if (process.env.VITE_ENV !== "development" && error instanceof Error) {
       console.error("Error:", error.message);
       if (error.message.includes("dynamically imported module")) {
         window.location.reload();

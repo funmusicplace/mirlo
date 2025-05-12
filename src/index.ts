@@ -120,6 +120,7 @@ const routes = [
   "users/{userId}/wishlist",
   "users/{userId}/charges",
   "users/{userId}/stripe/connect",
+  "users/{userId}/stripe/connectComplete",
   "users/{userId}/stripe/checkAccountStatus",
   "users/{userId}/feed",
   "manage/subscriptions",

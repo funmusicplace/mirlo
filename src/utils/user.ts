@@ -87,3 +87,82 @@ export const findOrCreateUserBasedOnEmail = async (
   }
   return { userId, newUser, user };
 };
+
+export const updateCurrencies = async (userId: number, currency: string) => {
+  await prisma.user.update({
+    where: {
+      id: userId,
+    },
+    data: {
+      currency,
+    },
+  });
+
+  await prisma.trackGroup.updateMany({
+    where: {
+      OR: [{ paymentToUserId: userId }, { artist: { userId } }],
+    },
+    data: {
+      currency,
+    },
+  });
+
+  await prisma.merch.updateMany({
+    where: {
+      artist: {
+        userId,
+      },
+    },
+    data: {
+      currency,
+    },
+  });
+
+  await prisma.merchShippingDestination.updateMany({
+    where: {
+      merch: {
+        artist: {
+          userId,
+        },
+      },
+    },
+    data: {
+      currency,
+    },
+  });
+
+  await prisma.track.updateMany({
+    where: {
+      trackGroup: {
+        artist: {
+          userId,
+        },
+      },
+    },
+    data: {
+      currency,
+    },
+  });
+
+  await prisma.artistSubscriptionTier.updateMany({
+    where: {
+      artist: {
+        userId,
+      },
+    },
+    data: {
+      currency,
+    },
+  });
+
+  await prisma.artistTipTier.updateMany({
+    where: {
+      artist: {
+        userId,
+      },
+    },
+    data: {
+      currency,
+    },
+  });
+};

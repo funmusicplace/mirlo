@@ -1,7 +1,7 @@
 import { css } from "@emotion/css";
 import AutoComplete from "components/common/AutoComplete";
 import FormComponent from "components/common/FormComponent";
-import { hasId } from "components/ManageArtist/AlbumFormComponents/ManageTags";
+import { hasId } from "components/ManageArtist/ManageTrackGroup/AlbumFormComponents/ManageTags";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import api from "services/api";

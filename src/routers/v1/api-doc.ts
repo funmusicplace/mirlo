@@ -87,7 +87,7 @@ const apiDoc = {
     },
     Track: {
       type: "object",
-      required: ["title"],
+      required: [],
       properties: {
         string: {
           description: "Title of the track",

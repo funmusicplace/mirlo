@@ -19,7 +19,7 @@ import styled from "@emotion/styled";
 import ChooseYourTheme from "../ChooseYourTheme";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
-import SavingInput from "../AlbumFormComponents/SavingInput";
+import SavingInput from "../ManageTrackGroup/AlbumFormComponents/SavingInput";
 import { QUERY_KEY_ARTISTS } from "queries/queryKeys";
 import DeleteArtist from "../DeleteArtist";
 import { Toggle } from "components/common/Toggle";

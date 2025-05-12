@@ -71,7 +71,7 @@ const CurrencySelect = () => {
         >
           <SelectEl {...register("currency")}>
             {stripeCountryCodes.map((cc) => (
-              <option value={cc} key={cc}>
+              <option value={cc.toLowerCase()} key={cc}>
                 {cc}
               </option>
             ))}

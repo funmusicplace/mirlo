@@ -2,8 +2,8 @@ import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
 import { useTranslation } from "react-i18next";
-import AlbumFormContent from "./AlbumFormComponents/AlbumFormContent";
-import { TrackGroupFormData } from "./ManageTrackGroup";
+import AlbumFormContent from "./ManageTrackGroup/AlbumFormComponents/AlbumFormContent";
+import { TrackGroupFormData } from "./ManageTrackGroup/ManageTrackGroup";
 import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
 import useErrorHandler from "services/useErrorHandler";
@@ -86,7 +86,7 @@ const AlbumForm: React.FC<{
     <div>
       <FormProvider {...methods}>
         <form onSubmit={handleSubmit(doSave)}>
-          <AlbumFormContent existingObject={trackGroup} />
+          <AlbumFormContent existingObject={trackGroup} reload={reload} />
         </form>
       </FormProvider>
     </div>

@@ -7,7 +7,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 import api from "services/api";
-import { hasId } from "../AlbumFormComponents/ManageTags";
+import { hasId } from "../ManageTrackGroup/AlbumFormComponents/ManageTags";
 
 const ArtistLabels: React.FC<{ refetch: () => void }> = ({ refetch }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artistForm" });

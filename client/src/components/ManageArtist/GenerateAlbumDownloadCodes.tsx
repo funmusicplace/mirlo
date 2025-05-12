@@ -16,7 +16,7 @@ import { useSnackbar } from "state/SnackbarContext";
 import { queryManagedArtist } from "queries";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
-import { hasId } from "./AlbumFormComponents/ManageTags";
+import { hasId } from "./ManageTrackGroup/AlbumFormComponents/ManageTags";
 
 type FormData = {
   group: string;

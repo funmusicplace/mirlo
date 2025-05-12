@@ -5,6 +5,9 @@ import prisma from "@mirlo/prisma";
 
 import stripe from "../../../../../utils/stripe";
 import logger from "../../../../../logger";
+import { getClient } from "../../../../../activityPub/utils";
+import { AppError } from "../../../../../utils/error";
+import { updateCurrencies } from "../../../../../utils/user";
 const { API_DOMAIN } = process.env;
 
 type Params = {
@@ -27,47 +30,29 @@ export default function () {
         });
         if (user) {
           let accountId = user.stripeAccountId;
-          const alreadyExisted = !!accountId;
-
-          logger.info(
-            `Connecting ${user.id} to Stripe. Have existing account: ${alreadyExisted} ${accountId}`
-          );
 
           if (!accountId) {
-            const account = await stripe.accounts.create({
-              type: "standard",
-              email: user.email,
-              business_profile: { name: user.name ?? "" },
+            throw new AppError({
+              httpCode: 400,
+              description: "No Stripe account found",
             });
-            await prisma.user.update({
-              where: {
-                id: user.id,
-              },
-              data: {
-                stripeAccountId: account.id,
-              },
-            });
-            accountId = account.id;
-            logger.info(`Created new stripe account ${account.id}`);
           }
+          const client = await getClient();
 
-          let stripeAccount;
+          logger.info(
+            `Connecting ${user.id} to Stripe. Have existing account:  ${accountId}`
+          );
+
           try {
-            stripeAccount = await stripe.accounts.retrieve(accountId);
+            const stripeAccount = await stripe.accounts.retrieve(accountId);
+            if (stripeAccount.default_currency) {
+              updateCurrencies(user.id, stripeAccount.default_currency);
+            }
           } catch (e) {
             console.error(`Error retrieving account information about user`, e);
           }
 
-          const accountLink = await stripe.accountLinks.create({
-            account: accountId,
-            refresh_url: `${API_DOMAIN}/v1/users/${userId}/stripe/connect`,
-            return_url: `${API_DOMAIN}/v1/users/${userId}/stripe/connectComplete`,
-            type: "account_onboarding", // FIXME: is it ever possible to pass "account_update" here?
-          });
-
-          logger.info(`Generated Stripe account link`);
-
-          res.redirect(accountLink.url);
+          res.redirect(`${client?.applicationUrl}/manage?stripeConnect=done`);
         }
       } else {
         res.status(401).json({

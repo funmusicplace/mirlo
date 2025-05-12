@@ -2,7 +2,7 @@ import React from "react";
 
 import AutoComplete from "./AutoComplete";
 import api from "services/api";
-import { hasId } from "components/ManageArtist/AlbumFormComponents/ManageTags";
+import { hasId } from "components/ManageArtist/ManageTrackGroup/AlbumFormComponents/ManageTags";
 
 const AutoCompleteTrackGroup: React.FC<{
   onSelect: (val: number) => void;

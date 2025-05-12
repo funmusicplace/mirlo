@@ -5,18 +5,19 @@ import FormComponent from "components/common/FormComponent";
 
 import { useTranslation } from "react-i18next";
 
-import UploadArtistImage from "../UploadArtistImage";
+import UploadArtistImage from "../../UploadArtistImage";
 import FormError from "components/common/FormError";
 import { useParams } from "react-router-dom";
 
 import SavingInput from "./SavingInput";
 import { css } from "@emotion/css";
-import { bp } from "../../../constants";
+import { bp } from "../../../../constants";
 import ManageTags from "./ManageTags";
 import PaymentSlider from "./PaymentSlider";
 import { getCurrencySymbol } from "components/common/Money";
 import { useAuthContext } from "state/AuthContext";
 import styled from "@emotion/styled";
+import SetPriceOfAllTracks from "../SetPriceOfAllTracks";
 
 const FormSection = styled.div`
   margin: 2rem 0;
@@ -26,7 +27,8 @@ const FormSection = styled.div`
 
 const AlbumFormContent: React.FC<{
   existingObject: TrackGroup;
-}> = ({ existingObject }) => {
+  reload: () => void;
+}> = ({ existingObject, reload }) => {
   const { user } = useAuthContext();
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const {
@@ -37,7 +39,7 @@ const AlbumFormContent: React.FC<{
   return (
     <>
       <FormSection>
-        <h2>About the album</h2>
+        <h2>{t("aboutTheAlbum")}</h2>
         <FormComponent>
           <label>{t("title")}</label>
           <SavingInput
@@ -50,6 +52,7 @@ const AlbumFormContent: React.FC<{
           className={css`
             @media screen and (min-width: ${bp.medium}px) {
               display: flex;
+              gap: 1rem;
 
               > div {
                 flex-grow: 1;
@@ -71,7 +74,7 @@ const AlbumFormContent: React.FC<{
         </div>
       </FormSection>
       <FormSection>
-        <h2>Artwork</h2>
+        <h2>{t("artwork")}</h2>
         <FormComponent
           style={{
             flexDirection: "column",
@@ -94,7 +97,7 @@ const AlbumFormContent: React.FC<{
         </FormComponent>
       </FormSection>
       <FormSection>
-        <h2>Price and such</h2>
+        <h2>{t("priceAndSuch")}</h2>
         <div
           className={css`
             flex-grow: 1;
@@ -165,6 +168,12 @@ const AlbumFormContent: React.FC<{
               {errors.minPrice && <FormError>{t("platformPercent")}</FormError>}
             </FormComponent>
           </div>
+          {existingObject && existingObject?.tracks?.length > 0 && (
+            <SetPriceOfAllTracks
+              tracks={existingObject.tracks}
+              reload={reload}
+            />
+          )}
         </div>
       </FormSection>
       <FormComponent>
