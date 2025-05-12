@@ -85,6 +85,7 @@ interface TrackGroup {
   releaseDate: string;
   about?: string;
   currency: string;
+  isGettable: boolean;
   credits?: string;
   artistId?: number;
   artist: Artist;

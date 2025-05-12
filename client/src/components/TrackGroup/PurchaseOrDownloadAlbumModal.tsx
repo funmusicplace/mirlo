@@ -59,7 +59,8 @@ const PurchaseOrDownloadAlbum: React.FC<{
     ? "preOrderingTrackGroup"
     : "buyingTrackGroup";
 
-  if (isBeforeReleaseDate && !userId) {
+  console.log("trackGroup.isGettable", trackGroup.isGettable);
+  if ((isBeforeReleaseDate && !userId) || !trackGroup.isGettable) {
     return null;
   }
 
