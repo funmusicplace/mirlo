@@ -7,6 +7,7 @@ import { createStripeCheckoutSessionForPurchase } from "../../../../utils/stripe
 import { handleTrackGroupPurchase } from "../../../../utils/handleFinishedTransactions";
 import { subscribeUserToArtist } from "../../../../utils/artist";
 import { AppError } from "../../../../utils/error";
+import { determinePrice } from "../../../../utils/purchasing";
 
 type Params = {
   id: string;
@@ -67,28 +68,19 @@ export default function () {
         trackGroup.paymentToUser?.stripeAccountId ??
         trackGroup.artist.user.stripeAccountId;
 
-      const priceNumber =
-        (price ? Number(price) : undefined) ?? trackGroup.minPrice ?? 0;
+      const { isPriceZero, priceNumber } = determinePrice(
+        price,
+        trackGroup.minPrice
+      );
 
-      const priceZero = (trackGroup.minPrice ?? 0) === 0 && priceNumber === 0;
-
-      if (trackGroup.minPrice && priceNumber < trackGroup.minPrice) {
-        const currency = trackGroup?.currency;
-
-        throw new AppError({
-          httpCode: 400,
-          description: `Have to pay at least ${trackGroup.minPrice / 100} ${currency} for this track. ${priceNumber / 100} ${currency} is not enough`,
-        });
-      }
-
-      if (!stripeAccountId && !priceZero) {
+      if (!stripeAccountId && !isPriceZero) {
         throw new AppError({
           httpCode: 400,
           description: "Artist not set up with a payment processor yet",
         });
       }
 
-      if (priceZero && loggedInUser) {
+      if (isPriceZero && loggedInUser) {
         await handleTrackGroupPurchase(loggedInUser.id, trackGroup.id);
         return res.status(200).json({
           redirectUrl: `/${

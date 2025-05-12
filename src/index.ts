@@ -93,6 +93,7 @@ const routes = [
   "artists/testExistence",
   "artists/{id}",
   "artists/{id}/subscribe",
+  "artists/{id}/purchaseCatalogue",
   "artists/{id}/feed",
   "artists/{id}/follow",
   "artists/{id}/posts",

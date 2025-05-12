@@ -80,6 +80,7 @@ interface TrackGroup {
   title: string;
   published: boolean;
   adminEnabled: boolean;
+  isBuyable: boolean;
   id: number;
   releaseDate: string;
   about?: string;
@@ -191,6 +192,7 @@ interface Artist {
   trackGroups: TrackGroup[];
   links?: string[];
   linksJson?: Link[];
+  purchaseEntireCatalogMinPrice?: number;
   posts: Post[];
   tourDates?: {
     date: string;

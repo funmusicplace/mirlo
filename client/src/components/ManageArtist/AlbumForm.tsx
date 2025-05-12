@@ -31,6 +31,7 @@ const AlbumForm: React.FC<{
       ...trackGroup,
       releaseDate: trackGroup?.releaseDate.split("T")[0],
       platformPercent: trackGroup?.platformPercent ?? 7,
+      isBuyable: trackGroup?.isBuyable ?? true,
       minPrice: `${
         trackGroup?.minPrice !== undefined ? trackGroup.minPrice / 100 : ""
       }`,

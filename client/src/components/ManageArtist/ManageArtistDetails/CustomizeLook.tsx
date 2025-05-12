@@ -26,6 +26,7 @@ import { Toggle } from "components/common/Toggle";
 import Box from "components/common/Box";
 import LabelConfirmation from "./LabelConfirmation";
 import FeatureFlag from "components/common/FeatureFlag";
+import useArtistQuery from "utils/useArtistQuery";
 
 export interface ShareableTrackgroup {
   creatorId: number;
@@ -96,8 +97,7 @@ export const CustomizeLook: React.FC = () => {
   const snackbar = useSnackbar();
   const { user } = useAuthContext();
   const userId = user?.id;
-  const { artistId } = useParams();
-  const { data: artist } = useQuery(queryManagedArtist(Number(artistId)));
+  const { data: artist } = useArtistQuery();
 
   const methods = useForm<FormData>({
     defaultValues: generateDefaults(artist),
@@ -218,7 +218,7 @@ export const CustomizeLook: React.FC = () => {
                   <label>{t("displayName")} </label>
                   <SavingInput
                     formKey="name"
-                    url={`manage/artists/${artistId}`}
+                    url={`manage/artists/${artist.id}`}
                     extraData={{}}
                   />
                 </FormComponent>
@@ -236,7 +236,7 @@ export const CustomizeLook: React.FC = () => {
                     <SavingInput
                       formKey="bio"
                       rows={7}
-                      url={`manage/artists/${artistId}`}
+                      url={`manage/artists/${artist.id}`}
                       extraData={{}}
                     />
                   </FormComponent>

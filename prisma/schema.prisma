@@ -534,6 +534,7 @@ model TrackGroup {
   cover                   TrackGroupCover?
   published               Boolean                   @default(false)
   type                    String?
+  isGettable              Boolean                   @default(true)
   releaseDate             DateTime                  @default(now())
   adminEnabled            Boolean                   @default(true)
   createdAt               DateTime                  @default(now())

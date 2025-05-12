@@ -18,8 +18,10 @@ import { getCurrencySymbol } from "components/common/Money";
 import { useAuthContext } from "state/AuthContext";
 import styled from "@emotion/styled";
 import SetPriceOfAllTracks from "../SetPriceOfAllTracks";
+import { CheckBoxLabel } from "components/common/FormCheckbox";
+import PriceAndSuch from "./PriceAndSuch";
 
-const FormSection = styled.div`
+export const FormSection = styled.div`
   margin: 2rem 0;
   padding-bottom: 1rem;
   border-bottom: 1px solid var(--mi-darken-x-background-color);
@@ -96,86 +98,7 @@ const AlbumFormContent: React.FC<{
           />
         </FormComponent>
       </FormSection>
-      <FormSection>
-        <h2>{t("priceAndSuch")}</h2>
-        <div
-          className={css`
-            flex-grow: 1;
-          `}
-        >
-          <div
-            className={css`
-              width: 100%;
-              @media screen and (min-width: ${bp.medium}px) {
-                display: flex;
-                flex-direction: row;
-              }
-            `}
-          >
-            <FormComponent
-              className={css`
-                flex-grow: 1;
-              `}
-            >
-              <label>{t("price")}</label>
-              <div
-                className={css`
-                  display: flex;
-                  align-items: center;
-                `}
-              >
-                <div
-                  className={css`
-                    width: 2rem;
-                    height: 89%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    margin-bottom: 0.25rem;
-                    background-color: var(--mi-darken-x-background-color);
-                  `}
-                >
-                  {user?.currency && getCurrencySymbol(user?.currency)}
-                </div>
-                <SavingInput
-                  formKey="minPrice"
-                  type="number"
-                  step="0.01"
-                  min={0}
-                  url={`manage/trackGroups/${trackGroupId}`}
-                  extraData={{ artistId: Number(artistId) }}
-                />
-              </div>
-              {errors.minPrice && <FormError>{t("priceZeroOrMore")}</FormError>}
-              <small
-                className={css`
-                  max-width: 200px;
-                `}
-              >
-                {t("currencyIsSetOnManageArtist")}
-              </small>
-            </FormComponent>
-            <FormComponent
-              className={css`
-                flex-grow: 1;
-              `}
-            >
-              <label>{t("platformPercent")}</label>
-              <PaymentSlider
-                url={`manage/trackGroups/${trackGroupId}`}
-                extraData={{ artistId: Number(artistId) }}
-              />
-              {errors.minPrice && <FormError>{t("platformPercent")}</FormError>}
-            </FormComponent>
-          </div>
-          {existingObject && existingObject?.tracks?.length > 0 && (
-            <SetPriceOfAllTracks
-              tracks={existingObject.tracks}
-              reload={reload}
-            />
-          )}
-        </div>
-      </FormSection>
+      <PriceAndSuch reload={reload} existingObject={existingObject} />
       <FormComponent>
         <label>{t("about")} </label>
         <SavingInput

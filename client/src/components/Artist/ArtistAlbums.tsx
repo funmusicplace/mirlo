@@ -10,9 +10,17 @@ import { useAuthContext } from "state/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { queryArtist } from "queries";
 import { NewAlbumButton } from "components/ManageArtist/NewAlbumButton";
+import { ArtistButton } from "./ArtistButtons";
+import Money from "components/common/Money";
+import api from "services/api";
+import { useSnackbar } from "state/SnackbarContext";
+import FeatureFlag from "components/common/FeatureFlag";
 
 const ArtistAlbums: React.FC = () => {
   const { user } = useAuthContext();
+  const { t } = useTranslation("translation", {
+    keyPrefix: "artist",
+  });
   const { artistId } = useParams();
   const { data: artist } = useQuery(
     queryArtist({ artistSlug: artistId ?? "" })
@@ -22,6 +30,21 @@ const ArtistAlbums: React.FC = () => {
     () => artist?.trackGroups?.map((trackGroup) => ({ ...trackGroup, artist })),
     [artist]
   );
+
+  const purchaseCatalogue = React.useCallback(async () => {
+    if (!artist) return;
+    try {
+      const response = await api.post<{}, { redirectUrl: string }>(
+        `artists/${artist.id}/purchaseCatalogue`,
+        {
+          price: artist.purchaseEntireCatalogMinPrice,
+        }
+      );
+      window.location.assign(response.redirectUrl);
+    } catch (error) {
+      console.error("Error purchasing catalogue:", error);
+    }
+  }, [artist]);
 
   if (
     !artist ||
@@ -60,6 +83,25 @@ const ArtistAlbums: React.FC = () => {
           />
         ))}
       </TrackgroupGrid>
+      <div
+        className={css`
+          margin-top: 2rem;
+          display: flex;
+          justify-content: center;
+        `}
+      >
+        <FeatureFlag featureFlag="cataloguePrice">
+          {artist.user && artist.purchaseEntireCatalogMinPrice && (
+            <ArtistButton size="big" type="button" onClick={purchaseCatalogue}>
+              Purchase Entire Artist Catalogue for{" "}
+              <Money
+                currency={artist.user.currency ?? "usd"}
+                amount={artist.purchaseEntireCatalogMinPrice / 100}
+              />
+            </ArtistButton>
+          )}
+        </FeatureFlag>
+      </div>
     </div>
   );
 };

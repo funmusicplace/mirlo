@@ -363,6 +363,12 @@
     "useUrlSlug": "Use this URL slug? '{{suggestedUrlSlug}}'",
     "labelsAndCollectives": "Label and collectives",
     "name": "Name",
+    "setEntireCataloguePrice": "Set entire catalogue price",
+    "save": "Save",
+    "setPriceTitle": "Set price for your catalogue",
+    "zeroForNone": "If you set this value to zero users won't be able to buy your catalogue.",
+    "setEntireCataloguePriceDescription": "Let a user buy your entire catalogue. It will include all albums at the time of purchase.",
+    "setEntireCataloguePriceDisclaimer": "This will only apply to albums for which you are the primary account holder. If an album is being administered by another account—for example a label or collective—your customer won't receive it in their purchase.",
     "email": "Email",
     "labelsAndCollectivesDescription": "If you are part of a label or collective, you can add them here. This will allow them to manage your artist page.",
     "useIt": "Use it",
@@ -498,6 +504,9 @@
     "howMuchModalText": "Mirlo thrives on artist contributions—whether through monthly support or a slice of album sales. But we get it: every cent counts, and only you know what you can afford. That’s why we let you decide how much of your sales goes to Mirlo. Your art, your call."
   },
   "manageAlbum": {
+    "isGettable": "Is it possible for a user to buy or get this album for free?",
+    "isGettableTooltip": "We don't want to take this for granted!",
+    "isGettableInfo": "Sometimes you just want to upload an album for people to listen to, but you don't want them to download or buy it.",
     "currencyIsSetOnManageArtist": "The currency is set by the payment processor you've linked on the manage artist page",
     "platformPercent": "How much goes to Mirlo?",
     "artwork": "Artwork",

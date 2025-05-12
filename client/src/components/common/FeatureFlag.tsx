@@ -2,7 +2,7 @@ import React from "react";
 import { useAuthContext } from "state/AuthContext";
 
 interface FeatureFlagProps {
-  featureFlag: string;
+  featureFlag: "label" | "cataloguePrice";
   children: React.ReactNode;
 }
 

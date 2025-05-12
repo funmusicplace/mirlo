@@ -7,6 +7,7 @@ export const deleteUser = async (userId: number) => {
   const userArtists = await prisma.artist.findMany({
     where: { userId: Number(userId) },
   });
+
   await Promise.all(
     userArtists.map((artist) => deleteArtist(Number(userId), artist.id))
   );
