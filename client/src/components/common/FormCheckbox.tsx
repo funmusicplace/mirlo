@@ -9,8 +9,12 @@ export const CheckBoxLabel = styled.label`
   align-items: center;
   font-size: 1rem;
   input {
-    width: 2rem;
+    width: 2rem !important;
     margin-right: 0.45rem;
+  }
+
+  > div {
+    width: 2rem !important;
   }
 `;
 

@@ -50,7 +50,7 @@ const PriceAndSuch: React.FC<{
               type="checkbox"
               url={`manage/trackGroups/${trackGroupId}`}
               extraData={{ artistId: Number(artistId) }}
-            />{" "}
+            />
             {t("isGettable")}
             <Tooltip hoverText={t("isGettableTooltip")}>
               <FaInfo />

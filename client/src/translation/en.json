@@ -330,7 +330,7 @@
     "chooseSupportLevel": "You can follow the artist or choose to support them financially",
     "continueWithPrice": "Continue with {{ amount }}/month",
     "chooseToContinue": "Choose a support tier to support",
-    "purchaseEntireCalague": "Purchase entire catalogue for {{amount}}",
+    "purchaseEntireCatalogue": "Purchase entire catalogue for {{amount}}",
     "platformPercent": "{{ artistName }} has chosen that they will get {{ percent }}% ({{ money }}) of this purchase. This does not include the cut taken by our payment processor."
   },
   "clickToPlay": {
@@ -508,16 +508,16 @@
     "howMuchModalText": "Mirlo thrives on artist contributions—whether through monthly support or a slice of album sales. But we get it: every cent counts, and only you know what you can afford. That’s why we let you decide how much of your sales goes to Mirlo. Your art, your call."
   },
   "manageAlbum": {
-    "isGettable": "Is it possible for a user to buy or get this album for free?",
-    "isGettableTooltip": "We don't want to take this for granted!",
-    "isGettableInfo": "Sometimes you just want to upload an album for people to listen to, but you don't want them to download or buy it.",
+    "isGettable": "Is it possible for a user to buy or download this album?",
+    "isGettableTooltip": "We don't want to take this for granted! Some musicians just want to share their music, but don't want to let people download it.",
+    "isGettableInfo": "Disabling this will make it so that users can't buy or download your album, but they can listen to it online for free. Most people will want to leave this enabled.",
     "currencyIsSetOnManageArtist": "The currency is set by the payment processor you've linked on the manage artist page",
     "platformPercent": "How much goes to Mirlo?",
     "artwork": "Artwork",
     "priceAndSuch": "Price & such",
     "aboutTheAlbum": "About the album",
-    "minPriceOnTags": "Set the min price on tags",
-    "setPriceOnAllTracks": "Set the price on all tracks",
+    "minPriceOnTracks": "Set the min price on tracks",
+    "setPriceOfAllTracks": "Set the price on all tracks",
     "dontAllowIndividualSale": "Don't allow individual sale",
     "dontSeeTheLicenseYouWant": "Don't see the license you want for this track?",
     "license": "Track license",
