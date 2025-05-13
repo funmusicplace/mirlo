@@ -123,9 +123,14 @@ function ProfileForm() {
           <small>{t("makeSearchable")}</small>
         </FormComponent>
         {isLabelAccount && (
-          <FormComponent>
-            <SlugInput type="user" currentName={name} />
-          </FormComponent>
+          <>
+            <FormComponent>
+              <SlugInput type="user" currentName={name} />
+            </FormComponent>
+            {user.urlSlug && (
+              <Link to={`/label/${user.urlSlug}`}>View Page</Link>
+            )}
+          </>
         )}
         <FormComponent
           className={css`

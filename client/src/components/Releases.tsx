@@ -19,7 +19,7 @@ import { FaRss } from "react-icons/fa";
 const pageSize = 40;
 const futureReleasesPageSize = 6;
 
-const Releases = () => {
+const Releases: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
   const [params] = useSearchParams();
   const { t } = useTranslation("translation", { keyPrefix: "releases" });
   const { page, PaginationComponent } = usePagination({ pageSize });
@@ -29,8 +29,8 @@ const Releases = () => {
 
   const { data: newReleases } = useQuery(
     queryTrackGroups({
-      skip: pageSize * page,
-      take: pageSize,
+      skip: limit * page,
+      take: limit,
       tag: tag || undefined,
       title: search ?? undefined,
       isReleased: "released",
@@ -60,6 +60,7 @@ const Releases = () => {
   return (
     <div
       className={css`
+        padding: 2rem 0;
         @media screen and (max-width: ${bp.medium}px) {
           margin-bottom: 0rem;
         }

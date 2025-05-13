@@ -29,7 +29,6 @@ import ArtistSquare from "components/Artist/ArtistSquare";
 
 function Label() {
   const { t } = useTranslation("translation", { keyPrefix: "label" });
-  const { user, refreshLoggedInUser } = useAuthContext();
 
   const { labelSlug } = useParams();
 
@@ -37,7 +36,7 @@ function Label() {
     return <div>{t("labelNotFound")}</div>;
   }
 
-  const { data: label, refetch } = useQuery(queryLabelBySlug(labelSlug));
+  const { data: label } = useQuery(queryLabelBySlug(labelSlug));
 
   const avatar = label?.userAvatar;
 
