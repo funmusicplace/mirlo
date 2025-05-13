@@ -1,15 +1,17 @@
 import { css } from "@emotion/css";
+import { ArtistButtonLink } from "components/Artist/ArtistButtons";
 import AutoComplete from "components/common/AutoComplete";
 import FormComponent from "components/common/FormComponent";
 import { hasId } from "components/ManageArtist/ManageTrackGroup/AlbumFormComponents/ManageTags";
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { FaChevronRight } from "react-icons/fa";
 import api from "services/api";
 import { useAuthContext } from "state/AuthContext";
 
 const AddArtistToRoster: React.FC<{ refresh: () => void }> = ({ refresh }) => {
   const { user } = useAuthContext();
-  const { t } = useTranslation("translation", { keyPrefix: "artistForm" });
+  const { t } = useTranslation("translation", { keyPrefix: "label" });
 
   const setLabel = React.useCallback(
     async (val: unknown) => {
@@ -33,7 +35,9 @@ const AddArtistToRoster: React.FC<{ refresh: () => void }> = ({ refresh }) => {
   );
 
   const searchArtists = React.useCallback(async (search: string) => {
-    const options = await api.getMany<Artist>(`artists?name=${search}`);
+    const options = await api.getMany<Artist>(
+      `artists?name=${search}&includeUnpublished=true`
+    );
     return options.results.map((r) => ({
       id: r.id,
       name: `${r.name} (${r.name})`,
@@ -51,8 +55,14 @@ const AddArtistToRoster: React.FC<{ refresh: () => void }> = ({ refresh }) => {
       `}
     >
       <FormComponent>
-        <label>{t("addArtistToRoster")}</label>
+        <label>{t("addExistingArtistToRoster")}</label>
         <AutoComplete getOptions={searchArtists} onSelect={setLabel} />
+      </FormComponent>
+      <FormComponent>
+        <label>{t("addNewArtistToRoster")}</label>
+        <ArtistButtonLink to="/manage/welcome" endIcon={<FaChevronRight />}>
+          {t("createNewArtist")}
+        </ArtistButtonLink>
       </FormComponent>
     </form>
   );

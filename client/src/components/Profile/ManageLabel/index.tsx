@@ -7,7 +7,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { MdCheckBox } from "react-icons/md";
 import { Link } from "react-router-dom";
-import { getArtistUrl } from "utils/artist";
+import { getArtistManageUrl, getArtistUrl } from "utils/artist";
 import AddArtistToRoster from "./AddArtistToRoster";
 import { useFieldArray, useForm } from "react-hook-form";
 import api from "services/api";
@@ -56,6 +56,7 @@ const ProfileLabel: React.FC = () => {
             <th></th>
             <th>{t("artist")}</th>
             <th>{t("page")}</th>
+            <th>{t("manage")}</th>
             {/* <th>{t("manage")}</th> */}
             {/* <th>{t("canLabelAddReleases")}</th> */}
             <th>{t("isArtistConfirmed")}</th>
@@ -72,7 +73,7 @@ const ProfileLabel: React.FC = () => {
               <td>
                 <Link to={getArtistUrl(relationship.artist)}>{t("page")}</Link>
               </td>
-              {/* <td>
+              <td>
                 {relationship.canLabelManageArtist ? (
                   <Link to={getArtistManageUrl(relationship.artist.id)}>
                     {t("manage")}
@@ -80,7 +81,7 @@ const ProfileLabel: React.FC = () => {
                 ) : (
                   t("askArtist")
                 )}
-              </td> */}
+              </td>
               {/* <td>
                 {relationship.canLabelAddReleases ? (
                   <MdCheckBox />

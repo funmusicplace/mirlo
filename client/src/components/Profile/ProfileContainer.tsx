@@ -69,7 +69,7 @@ const ProfileContainer: React.FC = () => {
               </li>
               <FeatureFlag featureFlag="label">
                 <li>
-                  <NavLink to="/profile/label">{t("labels")}</NavLink>
+                  <NavLink to="/profile/label">{t("label")}</NavLink>
                 </li>
               </FeatureFlag>
               <li>

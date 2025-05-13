@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 import { useSnackbar } from "state/SnackbarContext";
 
 import api from "../../services/api";
-import Button from "../common/Button";
+import Button, { ButtonLink } from "../common/Button";
 import FormComponent from "../common/FormComponent";
 import { InputEl } from "../common/Input";
 import useErrorHandler from "services/useErrorHandler";
@@ -16,6 +16,7 @@ import { finishedLanguages } from "i18n";
 import { Toggle } from "components/common/Toggle";
 import { useProfileMutation } from "queries";
 import SlugInput from "components/common/SlugInput";
+import { FaChevronRight } from "react-icons/fa";
 
 type FormData = {
   name: string;
@@ -123,14 +124,34 @@ function ProfileForm() {
           <small>{t("makeSearchable")}</small>
         </FormComponent>
         {isLabelAccount && (
-          <>
+          <div
+            className={css`
+              display: flex;
+              align-items: flex-start;
+
+              > div {
+                flex-grow: 1;
+              }
+
+              > a {
+                margin-left: 1rem;
+                margin-top: 0.75rem;
+              }
+            `}
+          >
             <FormComponent>
               <SlugInput type="user" currentName={name} />
             </FormComponent>
             {user.urlSlug && (
-              <Link to={`/label/${user.urlSlug}`}>View Page</Link>
+              <ButtonLink
+                to={`/label/${user.urlSlug}`}
+                endIcon={<FaChevronRight />}
+                variant="link"
+              >
+                View Page
+              </ButtonLink>
             )}
-          </>
+          </div>
         )}
         <FormComponent
           className={css`

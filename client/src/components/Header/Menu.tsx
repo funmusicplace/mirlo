@@ -60,6 +60,18 @@ const Menu: React.FC = (props) => {
               {t("profile")}
             </Button>
           </li>
+          {user.isLabelAccount && (
+            <li>
+              <Button
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  navigate("/profile/label");
+                }}
+              >
+                {t("label")}
+              </Button>
+            </li>
+          )}
           <li>
             <Button
               onClick={() => {

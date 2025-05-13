@@ -52,6 +52,18 @@ const AdminSettings = () => {
               />
             </td>
           </tr>
+          <tr>
+            <td>Instance artist ID</td>
+            <td>
+              <InputEl
+                {...register("instanceArtistId")}
+                type="number"
+                className={css`
+                  text-align: right;
+                `}
+              />
+            </td>
+          </tr>
         </Table>
         <Button type="submit">Save</Button>
       </form>

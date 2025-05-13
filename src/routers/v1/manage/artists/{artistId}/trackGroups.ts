@@ -1,7 +1,7 @@
 import { User } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 import {
-  contentBelongsToLoggedInUserArtist,
+  artistBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";
 import processor from "../../../../../utils/trackGroup";
@@ -10,8 +10,8 @@ import { getSiteSettings } from "../../../../../utils/settings";
 
 export default function () {
   const operations = {
-    GET: [userAuthenticated, contentBelongsToLoggedInUserArtist, GET],
-    POST: [userAuthenticated, contentBelongsToLoggedInUserArtist, POST],
+    GET: [userAuthenticated, artistBelongsToLoggedInUser, GET],
+    POST: [userAuthenticated, artistBelongsToLoggedInUser, POST],
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
@@ -120,7 +120,24 @@ export default function () {
         });
       }
 
-      const userHasPromo = !!userForCurrency?.promoCodes.length;
+      const artist = await prisma.artist.findFirst({
+        where: {
+          id: Number(artistId),
+        },
+        include: {
+          artistLabels: true,
+        },
+      });
+
+      let paymentToUserId: number | undefined = undefined;
+
+      if (
+        artist?.artistLabels?.some(
+          (label) => label.labelUserId === user.id && label.canLabelAddReleases
+        )
+      ) {
+        paymentToUserId = user.id;
+      }
 
       const result = await prisma.trackGroup.create({
         data: {
@@ -131,9 +148,8 @@ export default function () {
           artist: { connect: { id: artistId } },
           published,
           minPrice,
-          platformPercent: userHasPromo
-            ? 0
-            : (await getSiteSettings()).platformPercent,
+          paymentToUser: { connect: { id: paymentToUserId } },
+          platformPercent: (await getSiteSettings()).platformPercent,
           currency: userForCurrency?.currency ?? "usd",
           releaseDate: releaseDate ? new Date(releaseDate) : undefined,
           adminEnabled: true,

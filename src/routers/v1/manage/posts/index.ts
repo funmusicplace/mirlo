@@ -1,7 +1,7 @@
 import { Prisma } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 import {
-  contentBelongsToLoggedInUserArtist,
+  artistBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../auth/passport";
 
@@ -10,8 +10,8 @@ import { AppError } from "../../../../utils/error";
 
 export default function () {
   const operations = {
-    POST: [userAuthenticated, contentBelongsToLoggedInUserArtist, POST],
-    GET: [userAuthenticated, GET],
+    POST: [userAuthenticated, artistBelongsToLoggedInUser, POST],
+    GET: [userAuthenticated, artistBelongsToLoggedInUser, GET],
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {

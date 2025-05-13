@@ -18,7 +18,6 @@ export default function () {
   const operations = {
     PUT: [
       userAuthenticated,
-      artistBelongsToLoggedInUser,
       busboy({
         highWaterMark: 2 * 1024 * 1024,
         limits: {
@@ -27,7 +26,7 @@ export default function () {
       }),
       PUT,
     ],
-    DELETE: [userAuthenticated, artistBelongsToLoggedInUser, DELETE],
+    DELETE: [userAuthenticated, DELETE],
   };
 
   async function PUT(req: Request, res: Response, next: NextFunction) {

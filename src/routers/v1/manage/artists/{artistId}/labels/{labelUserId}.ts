@@ -26,6 +26,8 @@ export default function () {
         },
         data: {
           isArtistApproved,
+          canLabelManageArtist: isArtistApproved,
+          canLabelAddReleases: isArtistApproved,
         },
       });
 

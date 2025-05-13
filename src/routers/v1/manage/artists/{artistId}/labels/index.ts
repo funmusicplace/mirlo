@@ -13,7 +13,7 @@ import { finalUserAvatarBucket } from "../../../../../../utils/minio";
 export default function () {
   const operations = {
     GET: [userAuthenticated, artistBelongsToLoggedInUser, GET],
-    POST: [userAuthenticated, artistBelongsToLoggedInUser, POST],
+    POST: [userAuthenticated, POST],
     DELETE: [userAuthenticated, artistBelongsToLoggedInUser, DELETE],
   };
 
@@ -94,6 +94,7 @@ export default function () {
           deletedAt: null,
         },
       });
+      console.log("artist", artist);
       if (!artist) {
         throw new AppError({
           httpCode: 404,

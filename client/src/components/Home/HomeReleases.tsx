@@ -22,7 +22,7 @@ const HomeReleases = () => {
         className={css`
           display: flex;
           gap: 1rem;
-          justify-content: flex-end;
+          justify-content: flex-end !important;
           margin-bottom: 4rem !important;
         `}
       >

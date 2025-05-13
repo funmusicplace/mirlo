@@ -45,9 +45,16 @@ export const doesTrackGroupBelongToUser = async (
   } else {
     trackGroup = await prisma.trackGroup.findFirst({
       where: {
-        artist: {
-          userId: user.id,
-        },
+        OR: [
+          {
+            artist: {
+              userId: user.id,
+            },
+          },
+          {
+            paymentToUserId: user.id,
+          },
+        ],
         id: Number(trackGroupId),
       },
       include: trackGroupSingleInclude({ loggedInUserId: user.id }),
