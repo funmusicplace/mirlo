@@ -330,6 +330,7 @@
     "chooseSupportLevel": "You can follow the artist or choose to support them financially",
     "continueWithPrice": "Continue with {{ amount }}/month",
     "chooseToContinue": "Choose a support tier to support",
+    "purchaseEntireCalague": "Purchase entire catalogue for {{amount}}",
     "platformPercent": "{{ artistName }} has chosen that they will get {{ percent }}% ({{ money }}) of this purchase. This does not include the cut taken by our payment processor."
   },
   "clickToPlay": {

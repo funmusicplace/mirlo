@@ -16,6 +16,7 @@ import { AppError } from "./error";
 import {
   handleArtistGift,
   handleArtistMerchPurchase,
+  handleCataloguePurchase,
   handleSubscription,
   handleTrackGroupPurchase,
   handleTrackPurchase,
@@ -955,10 +956,18 @@ export const handleCheckoutSession = async (
         newUser
       );
     } else if (purchaseType === "track") {
-      logger.info(`checkout.session: ${session.id} handleTrackGroupPurchase`);
+      logger.info(`checkout.session: ${session.id} handleTrackPurchase`);
       await handleTrackPurchase(
         Number(actualUserId),
         Number(trackId),
+        session,
+        newUser
+      );
+    } else if (purchaseType === "catalogue") {
+      logger.info(`checkout.session: ${session.id} handleCataloguePurchase`);
+      await handleCataloguePurchase(
+        Number(actualUserId),
+        Number(artistId),
         session,
         newUser
       );

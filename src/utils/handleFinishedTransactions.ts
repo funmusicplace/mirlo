@@ -98,6 +98,96 @@ export const handleTrackGroupPurchase = async (
   }
 };
 
+export const handleCataloguePurchase = async (
+  userId: number,
+  artistId: number,
+  session?: Stripe.Checkout.Session,
+  newUser?: boolean
+) => {
+  try {
+    const artist = await prisma.artist.findFirst({
+      where: {
+        id: artistId,
+      },
+      include: {
+        user: true,
+      },
+    });
+    const artistTrackGroups = await prisma.trackGroup.findMany({
+      where: {
+        artistId: artistId,
+        paymentToUserId: null,
+        releaseDate: {
+          lte: new Date(),
+        },
+      },
+      include: {
+        artist: true,
+      },
+    });
+
+    const amountPaidPerTrackGroup =
+      (session?.amount_total ?? 0) / artistTrackGroups.length;
+
+    await Promise.all(
+      artistTrackGroups.map(async (trackGroup) => {
+        await registerPurchase({
+          userId: Number(userId),
+          trackGroupId: Number(trackGroup.id),
+          pricePaid: Number(amountPaidPerTrackGroup.toFixed(2)),
+          currencyPaid: session?.currency ?? "usd",
+          paymentProcessorKey: session?.id ?? null,
+        });
+      })
+    );
+
+    const settings = await getSiteSettings();
+
+    const user = await prisma.user.findFirst({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (user && artist && artistTrackGroups.length > 0) {
+      await sendMail({
+        data: {
+          template: "catalogue-receipt",
+          message: {
+            to: user.email,
+          },
+          locals: {
+            artist,
+            trackGroups: artistTrackGroups,
+            email: user.email,
+            client: process.env.REACT_APP_CLIENT_DOMAIN,
+            host: process.env.API_DOMAIN,
+          },
+        },
+      } as Job);
+
+      const pricePaid = session?.amount_total ?? 0;
+      await sendMail({
+        data: {
+          template: "catalogue-purchase-artist-notification",
+          message: {
+            to: artist.user.email,
+          },
+          locals: {
+            pricePaid,
+            currencyPaid: session?.currency ?? "usd",
+            platformCut:
+              calculateAppFee(pricePaid, session?.currency ?? "usd") ?? 0 / 100,
+            email: user.email,
+          },
+        },
+      } as Job);
+    }
+  } catch (e) {
+    logger.error(`Error creating album purchase: ${e}`);
+  }
+};
+
 export const handleTrackPurchase = async (
   userId: number,
   trackId: number,

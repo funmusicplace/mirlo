@@ -1,0 +1,33 @@
+doctype html
+html
+  head
+    block head
+      meta(charset="utf-8")
+      meta(name="viewport", content="width=device-width")
+      meta(http-equiv="X-UA-Compatible", content="IE=edge")
+      meta(name="x-apple-disable-message-reformatting")
+      style 
+        include ../style.css
+  body.sans-serif
+    p Nice! 
+    p 
+      | You bought #{artist.name} entire digital catalogue!
+      | This includes digital downloads of:
+    table 
+      each trackGroup in trackGroups
+        tr 
+          td #{trackGroup.title}
+          td 
+            a(href!=`${client}/${trackGroup.artist.urlSlug}/release/${trackGroup.urlSlug}/download?token=${token}&email=${email}`) download
+
+    p 
+    p 
+      | Consider supporting 
+      a(href!=`${client}/${trackGroup.artist.urlSlug}`) #{trackGroup.artist.name}
+      | with monthly or annual support .
+    p 
+      | If you want to have access to all your purchases for this e-mail address, 
+      | simply 
+      a(href!=`${client}/password-reset?email=${email}`) set a password for it
+      | .
+    p Enjoy!

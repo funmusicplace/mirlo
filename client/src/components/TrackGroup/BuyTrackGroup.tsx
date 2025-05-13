@@ -30,6 +30,7 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
   track,
 }) => {
   const snackbar = useSnackbar();
+  const [stripeLoading, setStripeLoading] = React.useState(false);
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
   const { user } = useAuthContext();
   const minPrice = track?.minPrice ?? trackGroup.minPrice;
@@ -46,6 +47,7 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
   const purchaseAlbum = React.useCallback(
     async (data: FormData) => {
       try {
+        setStripeLoading(true);
         const alreadyOwns = await testOwnership(trackGroup.id, data.userEmail);
         const confirmed = alreadyOwns
           ? window.confirm(t("albumExists") ?? "")
@@ -66,6 +68,7 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
       } catch (e) {
         snackbar(t("error"), { type: "warning" });
         console.error(e);
+        setStripeLoading(false);
       }
     },
     [snackbar, t, trackGroup.id, track]
@@ -132,6 +135,7 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
           size="big"
           rounded
           type="submit"
+          isLoading={stripeLoading}
           title={
             isDisabled
               ? user

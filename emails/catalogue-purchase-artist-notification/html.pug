@@ -1,0 +1,25 @@
+doctype html
+html
+  head
+    block head
+      meta(charset="utf-8")
+      meta(name="viewport", content="width=device-width")
+      meta(http-equiv="X-UA-Compatible", content="IE=edge")
+      meta(name="x-apple-disable-message-reformatting")
+      style 
+        include ../style.css
+  body.sans-serif
+    div
+      div.mw600
+        p 
+          | Hello #{artist.user.name}!
+        p 
+          | Someone (#{email}) bought your entire digital catalogue!
+      div.mw600
+          | #{currencyPaid.toUpperCase()} 
+          | #{pricePaid.toFixed(2)} 
+          | (Mirlo's share: #{platformCut.toFixed(2)})
+       
+      p The final money will be available via your Stripe dashboard
+      p If you have any questions please reach out to hi@mirlo.space
+

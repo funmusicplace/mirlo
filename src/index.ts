@@ -59,7 +59,7 @@ app.use(passport.initialize());
 if (!isDev) {
   const limiter = rateLimit({
     windowMs: 60 * 1000, // 1 minute
-    limit: 200, // 200 requests per minute, which is absurd, but one page load gets us 20
+    limit: 300, // 200 requests per minute, which is absurd, but one page load gets us 20
     // FIXME: is there a way to have this be determined on whether the user is logged in?
     standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   });

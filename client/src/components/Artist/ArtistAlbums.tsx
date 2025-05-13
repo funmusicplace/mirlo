@@ -11,7 +11,7 @@ import { useQuery } from "@tanstack/react-query";
 import { queryArtist } from "queries";
 import { NewAlbumButton } from "components/ManageArtist/NewAlbumButton";
 import { ArtistButton } from "./ArtistButtons";
-import Money from "components/common/Money";
+import Money, { moneyDisplay } from "components/common/Money";
 import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
 import FeatureFlag from "components/common/FeatureFlag";
@@ -26,6 +26,8 @@ const ArtistAlbums: React.FC = () => {
     queryArtist({ artistSlug: artistId ?? "" })
   );
 
+  const [loadingStripe, setLoadingStripe] = React.useState(false);
+
   const trackGroups = React.useMemo(
     () => artist?.trackGroups?.map((trackGroup) => ({ ...trackGroup, artist })),
     [artist]
@@ -34,6 +36,7 @@ const ArtistAlbums: React.FC = () => {
   const purchaseCatalogue = React.useCallback(async () => {
     if (!artist) return;
     try {
+      setLoadingStripe(true);
       const response = await api.post<{}, { redirectUrl: string }>(
         `artists/${artist.id}/purchaseCatalogue`,
         {
@@ -91,13 +94,19 @@ const ArtistAlbums: React.FC = () => {
         `}
       >
         <FeatureFlag featureFlag="cataloguePrice">
-          {artist.user && artist.purchaseEntireCatalogMinPrice && (
-            <ArtistButton size="big" type="button" onClick={purchaseCatalogue}>
-              Purchase Entire Artist Catalogue for{" "}
-              <Money
-                currency={artist.user.currency ?? "usd"}
-                amount={artist.purchaseEntireCatalogMinPrice / 100}
-              />
+          {user && artist.user && artist.purchaseEntireCatalogMinPrice && (
+            <ArtistButton
+              size="big"
+              type="button"
+              isLoading={loadingStripe}
+              onClick={purchaseCatalogue}
+            >
+              {t("purchaseEntireCatalogue", {
+                amount: moneyDisplay({
+                  amount: artist.purchaseEntireCatalogMinPrice,
+                  currency: artist.user.currency ?? "usd",
+                }),
+              })}
             </ArtistButton>
           )}
         </FeatureFlag>
