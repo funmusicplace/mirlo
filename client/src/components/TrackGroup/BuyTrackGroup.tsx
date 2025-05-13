@@ -17,6 +17,8 @@ import PlatformPercent from "components/common/PlatformPercent";
 import { css } from "@emotion/css";
 import { testOwnership } from "./utils";
 import Box from "components/common/Box";
+import { ArtistButton } from "components/Artist/ArtistButtons";
+import { useAuthContext } from "state/AuthContext";
 
 interface FormData {
   chosenPrice: string;
@@ -29,14 +31,14 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
 }) => {
   const snackbar = useSnackbar();
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
-
+  const { user } = useAuthContext();
   const minPrice = track?.minPrice ?? trackGroup.minPrice;
   const methods = useForm<FormData>({
     defaultValues: {
       chosenPrice: `${minPrice ? minPrice / 100 : ""}`,
       userEmail: "",
     },
-    reValidateMode: "onBlur",
+    reValidateMode: "onChange",
   });
   const { register, watch, handleSubmit, formState } = methods;
   const chosenPrice = watch("chosenPrice");
@@ -80,6 +82,10 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
   const isBeforeReleaseDate = new Date(trackGroup.releaseDate) > new Date();
   const purchaseText = isBeforeReleaseDate ? "preOrder" : "buy";
 
+  console.log("errors", formState.errors);
+
+  const isDisabled = !!lessThan1 || lessThanMin || !formState.isValid;
+
   return (
     <FormProvider {...methods}>
       {!!minPrice && minPrice > 0 && (
@@ -109,6 +115,9 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
               })}
             </Box>
           )}
+          {lessThanMin && (
+            <small>{t("pleaseEnterMoreThan", { minPrice })}</small>
+          )}
           <PlatformPercent
             percent={trackGroup.platformPercent}
             chosenPrice={chosenPrice}
@@ -119,14 +128,21 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
 
         <EmailInput required />
 
-        <Button
+        <ArtistButton
           size="big"
           rounded
           type="submit"
-          disabled={!!lessThan1 || lessThanMin || !formState.isValid}
+          title={
+            isDisabled
+              ? user
+                ? t("ensurePrice") ?? ""
+                : t("ensurePriceAndEmail") ?? ""
+              : ""
+          }
+          disabled={isDisabled}
         >
           {t(purchaseText)}
-        </Button>
+        </ArtistButton>
 
         <div
           className={css`

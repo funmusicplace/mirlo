@@ -314,6 +314,7 @@ export const Button: React.FC<
       onClick={onClick}
       disabled={disabled}
       onlyIcon={!children || onlyIcon}
+      aria-label={children ? children.toString() : ""}
       {...props}
     >
       {isLoading && (

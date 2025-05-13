@@ -18,6 +18,7 @@ export const NextButton: React.FC = () => {
     <Button
       startIcon={<MdSkipNext />}
       variant="transparent"
+      aria-label="Play next track"
       onClick={onClickNext}
     />
   );

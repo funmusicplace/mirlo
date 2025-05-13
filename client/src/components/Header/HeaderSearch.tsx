@@ -71,25 +71,27 @@ const HeaderSearch: React.FC = () => {
   }, []);
 
   return (
-    <AutoComplete
-      getOptions={getOptions}
-      showBackground
-      placeholder={t("search") ?? ""}
-      usesNavigation
-      onSelect={(value) => {
-        navigate(constructUrl(value));
-      }}
-      onEnter={onEnter}
-      resultsPrefix={t("searchSuggestions") ?? undefined}
-      optionDisplay={(r: {
-        id: number | string;
-        name: string;
-        artistId?: number | string;
-        trackGroupId?: number | string;
-      }) => {
-        return <Link to={constructUrl(r)}>{r.name}</Link>;
-      }}
-    />
+    <div role="search">
+      <AutoComplete
+        getOptions={getOptions}
+        showBackground
+        placeholder={t("search") ?? ""}
+        usesNavigation
+        onSelect={(value) => {
+          navigate(constructUrl(value));
+        }}
+        onEnter={onEnter}
+        resultsPrefix={t("searchSuggestions") ?? undefined}
+        optionDisplay={(r: {
+          id: number | string;
+          name: string;
+          artistId?: number | string;
+          trackGroupId?: number | string;
+        }) => {
+          return <Link to={constructUrl(r)}>{r.name}</Link>;
+        }}
+      />
+    </div>
   );
 };
 

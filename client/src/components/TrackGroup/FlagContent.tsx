@@ -56,6 +56,7 @@ const FlagContent: React.FC<{ trackGroupId: number }> = ({ trackGroupId }) => {
       <Button
         startIcon={<FaFlag />}
         variant="transparent"
+        aria-label="Flag content"
         onClick={() => setIsFlagOpen(true)}
       />
       <Modal
