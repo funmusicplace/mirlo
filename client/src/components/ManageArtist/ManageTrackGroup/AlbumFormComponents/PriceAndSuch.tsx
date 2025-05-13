@@ -32,7 +32,7 @@ const PriceAndSuch: React.FC<{
   } = useFormContext();
   const { user } = useAuthContext();
 
-  const isBuyable = watch("isBuyable");
+  const isGettable = watch("isGettable");
   return (
     <FormSection>
       <h2>{t("priceAndSuch")}</h2>
@@ -68,7 +68,7 @@ const PriceAndSuch: React.FC<{
             }
           `}
         >
-          {isBuyable && (
+          {isGettable && (
             <>
               <FormComponent
                 className={css`
