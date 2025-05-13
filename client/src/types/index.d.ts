@@ -80,7 +80,6 @@ interface TrackGroup {
   title: string;
   published: boolean;
   adminEnabled: boolean;
-  isBuyable: boolean;
   id: number;
   releaseDate: string;
   about?: string;
