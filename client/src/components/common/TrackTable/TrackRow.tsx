@@ -222,7 +222,7 @@ const TrackRow: React.FC<{
       </td> */}
       {size !== "small" && (
         <td align="right">
-          <DropdownMenu compact>
+          <DropdownMenu compact label="Track options">
             <ul>
               <li>
                 <EmbedLink track={track} />

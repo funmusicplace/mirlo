@@ -36,6 +36,7 @@ export default function () {
       linksJson,
       location,
       activityPub,
+      purchaseEntireCatalogMinPrice,
       tourDates,
     } = req.body;
 
@@ -52,6 +53,7 @@ export default function () {
           linksJson,
           location,
           activityPub,
+          purchaseEntireCatalogMinPrice,
           ...(urlSlug
             ? { urlSlug: slugify(urlSlug?.toLowerCase(), { strict: true }) }
             : {}),

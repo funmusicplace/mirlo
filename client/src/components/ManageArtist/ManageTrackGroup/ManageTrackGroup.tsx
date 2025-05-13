@@ -1,18 +1,20 @@
 import React from "react";
 import { useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import AlbumForm from "./AlbumForm";
-import BulkTrackUpload from "./BulkTrackUpload";
+import AlbumForm from "../AlbumForm";
+import BulkTrackUpload from "../BulkTrackUpload";
 import ManageTrackTable from "./ManageTrackTable";
-import PublishButton from "./PublishButton";
-import { bp } from "../../constants";
+import PublishButton from "../PublishButton";
+import { bp } from "../../../constants";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
-import ManageSectionWrapper from "./ManageSectionWrapper";
+import ManageSectionWrapper from "../ManageSectionWrapper";
 import { css } from "@emotion/css";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
-import BackToArtistLink from "./BackToArtistLink";
+import BackToArtistLink from "../BackToArtistLink";
 import { useQuery } from "@tanstack/react-query";
 import { queryArtist, queryManagedTrackGroup } from "queries";
+import FeatureFlag from "components/common/FeatureFlag";
+import AlbumPaymentReceiver from "./AlbumFormComponents/AlbumPaymentReceiver";
 
 export interface TrackGroupFormData {
   published: boolean;
@@ -102,7 +104,9 @@ const ManageTrackGroup: React.FC<{}> = () => {
           </div>
         </SpaceBetweenDiv>
       </div>
-      {/* <AlbumPaymentReceiver /> */}
+      <FeatureFlag featureFlag="label">
+        <AlbumPaymentReceiver />
+      </FeatureFlag>
       <AlbumForm
         trackGroup={trackGroup}
         artist={artist}

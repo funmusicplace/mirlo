@@ -26,6 +26,7 @@ export const corsCheck = async (...args: [Request, Response, NextFunction]) => {
           req.path.startsWith("/v1/checkout") ||
           req.path.startsWith("/v1/webhooks") ||
           req.path.endsWith("/stripe/connect") ||
+          req.path.endsWith("/stripe/connectComplete") ||
           // FIXME: This needs to be improved probably.
           // Exclude artist feed endpoints
           (req.path.startsWith("/v1/artists/") &&

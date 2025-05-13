@@ -20,6 +20,7 @@ export const ShuffleButton: React.FC = () => {
       startIcon={<RxShuffle />}
       buttonRole={shuffle ? "primary" : undefined}
       onClick={onShuffle}
+      aria-label="Shuffle music"
       variant={shuffle ? "default" : "outlined"}
       className={css`
         ${shuffle ? "color: white !important;" : ""}

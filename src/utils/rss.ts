@@ -48,7 +48,7 @@ export const turnItemsIntoRSS = async (
           ? `${p.title} by ${p.artist?.name}`
           : `A post by ${p.artist?.name}`,
         description: markdownAsHtml(p.content),
-        url: `${client?.applicationUrl}/${p.artist?.urlSlug}/post/${p.id}`,
+        url: `${client?.applicationUrl}/${p.artist?.urlSlug}/posts/${p.id}`,
         date: p.publishedAt,
       });
     } else if (isArtist(p)) {

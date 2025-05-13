@@ -11,6 +11,8 @@ import { NewAlbumButton } from "./NewAlbumButton";
 import { useQuery } from "@tanstack/react-query";
 import { queryArtist, queryManagedArtistTrackGroups } from "queries";
 import { ArtistButtonLink } from "components/Artist/ArtistButtons";
+import SetEntireCataloguePrice from "./SetEntireCataloguePrice";
+import FeatureFlag from "components/common/FeatureFlag";
 
 const ManageArtistAlbums: React.FC<{}> = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
@@ -36,6 +38,9 @@ const ManageArtistAlbums: React.FC<{}> = () => {
             display: flex;
           `}
         >
+          <FeatureFlag featureFlag="cataloguePrice">
+            <SetEntireCataloguePrice />
+          </FeatureFlag>
           <ArtistButtonLink
             to={`/manage/artists/${artistId}/releases/tools`}
             size="compact"
@@ -44,6 +49,7 @@ const ManageArtistAlbums: React.FC<{}> = () => {
             collapsible
             className={css`
               margin-right: 0.25rem;
+              margin-left: 0.25rem;
             `}
           >
             {t("downloadCodes")}
@@ -51,6 +57,7 @@ const ManageArtistAlbums: React.FC<{}> = () => {
           {artist ? <NewAlbumButton artist={artist} /> : undefined}
         </div>
       </SpaceBetweenDiv>
+
       {isLoading && <LoadingBlocks />}
       {(trackGroups?.results.length ?? 0) > 0 && (
         <div

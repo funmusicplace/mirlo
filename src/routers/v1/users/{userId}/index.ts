@@ -5,7 +5,7 @@ import {
 } from "../../../../auth/passport";
 import { Prisma, User } from "@mirlo/prisma/client";
 import prisma from "@mirlo/prisma";
-import { deleteUser } from "../../../../utils/user";
+import { deleteUser, updateCurrencies } from "../../../../utils/user";
 import bcrypt from "bcryptjs";
 import { AppError } from "../../../../utils/error";
 import sendMail from "../../../../jobs/send-mail";
@@ -137,6 +137,11 @@ export default function () {
           email: newEmail,
         },
       });
+
+      if (data.currency && typeof data.currency === "string") {
+        updateCurrencies(user.id, data.currency);
+      }
+
       const refreshedUser = await prisma.user.findFirst({
         where: {
           id: user.id,

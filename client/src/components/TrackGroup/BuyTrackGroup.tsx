@@ -17,6 +17,8 @@ import PlatformPercent from "components/common/PlatformPercent";
 import { css } from "@emotion/css";
 import { testOwnership } from "./utils";
 import Box from "components/common/Box";
+import { ArtistButton } from "components/Artist/ArtistButtons";
+import { useAuthContext } from "state/AuthContext";
 
 interface FormData {
   chosenPrice: string;
@@ -28,15 +30,16 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
   track,
 }) => {
   const snackbar = useSnackbar();
+  const [stripeLoading, setStripeLoading] = React.useState(false);
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
-
+  const { user } = useAuthContext();
   const minPrice = track?.minPrice ?? trackGroup.minPrice;
   const methods = useForm<FormData>({
     defaultValues: {
       chosenPrice: `${minPrice ? minPrice / 100 : ""}`,
       userEmail: "",
     },
-    reValidateMode: "onBlur",
+    reValidateMode: "onChange",
   });
   const { register, watch, handleSubmit, formState } = methods;
   const chosenPrice = watch("chosenPrice");
@@ -44,6 +47,7 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
   const purchaseAlbum = React.useCallback(
     async (data: FormData) => {
       try {
+        setStripeLoading(true);
         const alreadyOwns = await testOwnership(trackGroup.id, data.userEmail);
         const confirmed = alreadyOwns
           ? window.confirm(t("albumExists") ?? "")
@@ -64,6 +68,7 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
       } catch (e) {
         snackbar(t("error"), { type: "warning" });
         console.error(e);
+        setStripeLoading(false);
       }
     },
     [snackbar, t, trackGroup.id, track]
@@ -79,6 +84,10 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
 
   const isBeforeReleaseDate = new Date(trackGroup.releaseDate) > new Date();
   const purchaseText = isBeforeReleaseDate ? "preOrder" : "buy";
+
+  console.log("errors", formState.errors);
+
+  const isDisabled = !!lessThan1 || lessThanMin || !formState.isValid;
 
   return (
     <FormProvider {...methods}>
@@ -109,6 +118,9 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
               })}
             </Box>
           )}
+          {lessThanMin && (
+            <small>{t("pleaseEnterMoreThan", { minPrice })}</small>
+          )}
           <PlatformPercent
             percent={trackGroup.platformPercent}
             chosenPrice={chosenPrice}
@@ -119,14 +131,22 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
 
         <EmailInput required />
 
-        <Button
+        <ArtistButton
           size="big"
           rounded
           type="submit"
-          disabled={!!lessThan1 || lessThanMin || !formState.isValid}
+          isLoading={stripeLoading}
+          title={
+            isDisabled
+              ? user
+                ? t("ensurePrice") ?? ""
+                : t("ensurePriceAndEmail") ?? ""
+              : ""
+          }
+          disabled={isDisabled}
         >
           {t(purchaseText)}
-        </Button>
+        </ArtistButton>
 
         <div
           className={css`

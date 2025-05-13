@@ -19,6 +19,8 @@ export const SongTimeDisplay: React.FC<{
         top: 0;
         position: ${position};
       `}
+      title="Current track time"
+      aria-label="Current track time"
       onClick={(event: React.MouseEvent<HTMLDivElement>) => {
         const divWidth = event.currentTarget.offsetWidth;
         const clickX = event.clientX - event.currentTarget.offsetLeft;

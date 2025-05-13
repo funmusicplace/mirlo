@@ -84,6 +84,7 @@ interface TrackGroup {
   releaseDate: string;
   about?: string;
   currency: string;
+  isGettable: boolean;
   credits?: string;
   artistId?: number;
   artist: Artist;
@@ -191,6 +192,7 @@ interface Artist {
   trackGroups: TrackGroup[];
   links?: string[];
   linksJson?: Link[];
+  purchaseEntireCatalogMinPrice?: number;
   posts: Post[];
   tourDates?: {
     date: string;

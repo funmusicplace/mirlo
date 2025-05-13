@@ -2,11 +2,11 @@ import { cloneDeep } from "lodash";
 import React from "react";
 import { useGlobalStateContext } from "state/GlobalState";
 import api from "services/api";
-import { bp } from "../../constants";
+import { bp } from "../../../constants";
 
 import { determineNewTrackOrder } from "utils/tracks";
-import { CenteredSpinner } from "../common/Spinner";
-import Table from "../common/Table";
+import { CenteredSpinner } from "../../common/Spinner";
+import Table from "../../common/Table";
 import ManageTrackRow from "./ManageTrackRow";
 import { useTranslation } from "react-i18next";
 import styled from "@emotion/styled";

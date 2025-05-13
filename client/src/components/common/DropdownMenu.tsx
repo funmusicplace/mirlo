@@ -13,7 +13,8 @@ const DropdownMenu: React.FC<{
   dashed?: boolean;
   icon?: React.ReactElement;
   compact?: boolean;
-}> = ({ children, icon, compact, dashed }) => {
+  label?: string;
+}> = ({ children, icon, compact, dashed, label }) => {
   const { colors } = useGetArtistColors();
   const [buttonPosition, setButtonPosition] = React.useState<{
     x: number;
@@ -121,6 +122,8 @@ const DropdownMenu: React.FC<{
       <Button
         size={compact ? "compact" : undefined}
         variant={dashed ? "dashed" : "transparent"}
+        aria-label={label}
+        role="menu"
         onClick={(e) => {
           e.stopPropagation();
           // @ts-ignore

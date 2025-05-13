@@ -16,6 +16,8 @@ const SavingInput: React.FC<{
   formKey: string;
   url: string;
   extraData?: Object;
+  id?: string;
+  timer?: number;
   rows?: number;
   min?: number;
   required?: boolean;
@@ -30,6 +32,8 @@ const SavingInput: React.FC<{
   type,
   required,
   rows,
+  id,
+  timer,
   step,
   reload,
 }) => {
@@ -80,8 +84,8 @@ const SavingInput: React.FC<{
         errorHandler(e);
         setIsSaving(false);
       }
-    }, 1500),
-    [formKey, getValues, url, extraData]
+    }, timer ?? 1500),
+    [formKey, timer, getValues, url, extraData]
   );
 
   return (
@@ -100,6 +104,7 @@ const SavingInput: React.FC<{
           required={required}
           step={step}
           min={min}
+          id={id}
         />
       )}
       {rows && (

@@ -11,6 +11,7 @@ export const TRACK_GROUP_EXAMPLE: TrackGroup = {
   currency: "USD",
   isPriceFixed: false,
   urlSlug: "example-album",
+  isGettable: true,
   platformPercent: 7,
   artist: {
     name: "Example Artist",

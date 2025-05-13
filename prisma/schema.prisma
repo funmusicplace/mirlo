@@ -45,15 +45,12 @@ model User {
   name                                String?
   password                            String                          @default("")
   refresh                             String?
-  artists                             Artist[]
   createdAt                           DateTime                        @default(now())
   updatedAt                           DateTime                        @default(now()) @updatedAt
   deletedAt                           DateTime?
   isAdmin                             Boolean                         @default(false)
-  artistUserSubscriptions             ArtistUserSubscription[]
   countryCode                         String?
   currency                            String?
-  userTrackGroupPurchases             UserTrackGroupPurchase[]
   emailConfirmationToken              String?                         @default(uuid()) @db.Uuid
   emailConfirmationExpiration         DateTime?                       @default(dbgenerated("(NOW() + '00:20:00'::interval)"))
   passwordResetConfirmationToken      String?
@@ -61,23 +58,26 @@ model User {
   stripeAccountId                     String?
   urlSlug                             String?
   receiveMailingList                  Boolean                         @default(false)
+  promoCodes                          String[]
+  receivePlatformEmails               Boolean                         @default(true)
+  isLabelAccount                      Boolean                         @default(false)
+  featureFlags                        String[]
+  language                            String?
+  userTrackGroupPurchases             UserTrackGroupPurchase[]
+  artistUserSubscriptions             ArtistUserSubscription[]
   wishlist                            UserTrackGroupWishlist[]
+  artists                             Artist[]
   plays                               TrackPlay[]
   downloadCodes                       TrackGroupDownloadCodes[]
   userArtistNotificationSettings      UserArtistNotificationSetting[]
   receivingNotifications              Notification[]                  @relation("receivingUser")
   relatedNotifications                Notification[]                  @relation("relatedUser")
-  language                            String?
   userArtistTip                       UserArtistTip[]
   merchPurchase                       MerchPurchase[]
-  promoCodes                          String[]
-  receivePlatformEmails               Boolean                         @default(true)
   paymentTrackGroups                  TrackGroup[]
-  isLabelAccount                      Boolean                         @default(false)
   artistLabels                        ArtistLabel[]
   userTrackPurchases                  UserTrackPurchase[]
   userAvatar                          UserAvatar?
-  featureFlags                        String[]
   trackFavorites                      UserTrackFavorite[]
 }
 
@@ -534,6 +534,7 @@ model TrackGroup {
   cover                   TrackGroupCover?
   published               Boolean                   @default(false)
   type                    String?
+  isGettable              Boolean                   @default(true)
   releaseDate             DateTime                  @default(now())
   adminEnabled            Boolean                   @default(true)
   createdAt               DateTime                  @default(now())

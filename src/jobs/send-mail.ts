@@ -3,7 +3,6 @@ import nodemailer, { Transporter } from "nodemailer";
 import sendgrid from "nodemailer-sendgrid";
 import Email from "email-templates";
 import { logger } from "../logger";
-import { Job } from "bullmq";
 import Mail from "nodemailer/lib/mailer";
 
 const viewsDir = path.join(__dirname, "../emails");

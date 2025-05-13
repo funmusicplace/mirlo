@@ -10,7 +10,7 @@ import api from "services/api";
 import Pill from "components/common/Pill";
 import { css } from "@emotion/css";
 import { FaTimes } from "react-icons/fa";
-import { hasId } from "../AlbumFormComponents/ManageTags";
+import { hasId } from "../ManageTrackGroup/AlbumFormComponents/ManageTags";
 import LoadingSpinner from "components/common/LoadingSpinner";
 
 const SelectTrackGroup: React.FC<{

@@ -4,13 +4,14 @@ import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import prisma from "@mirlo/prisma";
 
 import {
-  createStripeCheckoutSessionForMerchPurchase,
+  createStripeCheckoutSessionForCatalogue,
   createStripeCheckoutSessionForPurchase,
 } from "../../../../utils/stripe";
 import { handleTrackGroupPurchase } from "../../../../utils/handleFinishedTransactions";
 import { subscribeUserToArtist } from "../../../../utils/artist";
 import { AppError } from "../../../../utils/error";
 import { determinePrice } from "../../../../utils/purchasing";
+import { tr } from "@faker-js/faker";
 
 type Params = {
   id: string;
@@ -22,15 +23,11 @@ export default function () {
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {
-    const { id: merchId } = req.params as unknown as Params;
-    let { price, email, quantity, merchOptionIds, shippingDestinationId } =
-      req.body as unknown as {
-        price?: string; // In cents
-        email?: string;
-        quantity?: number;
-        merchOptionIds: string[];
-        shippingDestinationId: string;
-      };
+    const { id: artistId } = req.params as unknown as Params;
+    let { price, email } = req.body as unknown as {
+      price?: string; // In cents
+      email?: string;
+    };
     const loggedInUser = req.user as User | undefined;
 
     try {
@@ -44,62 +41,33 @@ export default function () {
         email = user?.email;
       }
 
-      const merch = await prisma.merch.findFirst({
+      const artist = await prisma.artist.findFirst({
         where: {
-          id: merchId,
+          id: Number(artistId),
         },
         include: {
-          artist: {
-            include: {
-              user: true,
-              subscriptionTiers: true,
-            },
-          },
-          shippingDestinations: true,
-          images: true,
-          optionTypes: {
-            include: {
-              options: true,
-            },
-          },
+          user: true,
+          subscriptionTiers: true,
+          avatar: true,
         },
       });
 
-      if (!merch) {
+      if (!artist) {
         throw new AppError({
           httpCode: 404,
-          description: `Merch with ID ${merch} not found`,
+          description: `Artist with ID ${artistId} not found`,
         });
       }
-
-      // Check if the options passed are possible
-      const finalOptionIds: string[] = [];
-      const additionalPrices: number[] = [];
-      merch.optionTypes.forEach((ot) => {
-        ot.options.forEach((o) => {
-          if (merchOptionIds.includes(o.id)) {
-            finalOptionIds.push(o.id);
-            if (o.additionalPrice) {
-              additionalPrices.push(o.additionalPrice);
-            }
-          }
-        });
-      });
-
-      const additionalPrice = additionalPrices.reduce(
-        (aggr, price) => price + aggr,
-        0
-      );
 
       if (loggedInUser) {
-        await subscribeUserToArtist(merch?.artist, loggedInUser);
+        await subscribeUserToArtist(artist, loggedInUser);
       }
 
-      const stripeAccountId = merch.artist.user.stripeAccountId;
+      const stripeAccountId = artist.user.stripeAccountId;
 
-      const { priceNumber, isPriceZero } = determinePrice(
+      const { isPriceZero, priceNumber } = determinePrice(
         price,
-        merch.minPrice
+        artist.purchaseEntireCatalogMinPrice
       );
 
       if (!stripeAccountId && !isPriceZero) {
@@ -109,16 +77,20 @@ export default function () {
         });
       }
 
+      if (isPriceZero && loggedInUser) {
+        throw new AppError({
+          httpCode: 400,
+          description: "You can't purchase a catalogue for free",
+        });
+      }
+
       if (stripeAccountId) {
-        const session = await createStripeCheckoutSessionForMerchPurchase({
+        const session = await createStripeCheckoutSessionForCatalogue({
           loggedInUser,
           email,
-          priceNumber: priceNumber + additionalPrice,
-          merch,
-          quantity: quantity ?? 0,
+          priceNumber,
+          artist,
           stripeAccountId,
-          shippingDestinationId,
-          options: { merchOptionIds: finalOptionIds },
         });
         res.status(200).json({
           redirectUrl: session.url,
@@ -142,7 +114,7 @@ export default function () {
         in: "path",
         name: "id",
         required: true,
-        type: "string",
+        type: "number",
       },
       {
         in: "body",

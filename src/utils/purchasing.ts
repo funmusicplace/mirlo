@@ -1,11 +1,13 @@
 import { AppError } from "./error";
 
 export const determinePrice = (
-  userSubmittedPrice: number,
-  minPrice: number
+  userSubmittedPrice?: string,
+  minPrice?: number | null
 ) => {
   const priceNumber =
-    (userSubmittedPrice ? userSubmittedPrice : undefined) ?? minPrice ?? 0;
+    (userSubmittedPrice ? Number(userSubmittedPrice) : undefined) ??
+    minPrice ??
+    0;
 
   const isPriceZero = (minPrice ?? 0) === 0 && priceNumber === 0;
 

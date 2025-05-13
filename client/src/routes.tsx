@@ -331,7 +331,7 @@ const routes: RouteObject[] = [
                 path: "release/:trackGroupId",
                 async lazy() {
                   const { default: Component } = await import(
-                    "components/ManageArtist/ManageTrackGroup"
+                    "components/ManageArtist/ManageTrackGroup/ManageTrackGroup"
                   );
                   return { Component };
                 },

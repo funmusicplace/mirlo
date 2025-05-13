@@ -237,7 +237,9 @@ function TrackGroup() {
                 <ImageWrapper>
                   <ImageWithPlaceholder
                     src={trackGroup.cover?.sizes?.[600]}
-                    alt={trackGroup.title}
+                    alt={t(`coverForTitle`, {
+                      title: trackGroup.title,
+                    })}
                     size={600}
                   />
                 </ImageWrapper>
