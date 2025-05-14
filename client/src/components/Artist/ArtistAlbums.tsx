@@ -94,7 +94,7 @@ const ArtistAlbums: React.FC = () => {
         `}
       >
         <FeatureFlag featureFlag="cataloguePrice">
-          {user && artist.user && artist.purchaseEntireCatalogMinPrice && (
+          {user && artist.user && !!artist.purchaseEntireCatalogMinPrice && (
             <ArtistButton
               size="big"
               type="button"

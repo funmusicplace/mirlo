@@ -80,7 +80,7 @@ const SlugInput: React.FC<{
             align-items: center;
           `}
         >
-          {t("useUrlSlug", { suggestedUrlSlug: slugify("hell") })}
+          {t("useUrlSlug", { suggestedUrlSlug: slugify(currentName) })}
           <ArtistButton
             variant="link"
             size="compact"

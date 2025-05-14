@@ -4,18 +4,17 @@ import Box from "components/common/Box";
 import Table from "components/common/Table";
 import { Toggle } from "components/common/Toggle";
 import { queryArtistLabels, queryManagedArtist } from "queries";
-import React, { useState } from "react";
+import React from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
-import { useAuthContext } from "state/AuthContext";
 import api from "services/api";
 import ArtistLabels from "./ArtistLabels";
 import { css } from "@emotion/css";
+import FeatureFlag from "components/common/FeatureFlag";
 
 const LabelConfirmation: React.FC = () => {
   const { artistId } = useParams();
-  const { user } = useAuthContext();
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
 
   const {
@@ -23,7 +22,8 @@ const LabelConfirmation: React.FC = () => {
     isLoading: isArtistLoading,
     refetch,
   } = useQuery(queryManagedArtist(Number(artistId)));
-  const { data: labelRelationships, isLoading: isLabelsLoading } = useQuery(
+
+  const { data: labelRelationships, refetch: refetchLabels } = useQuery(
     queryArtistLabels(Number(artistId))
   );
 
@@ -43,11 +43,18 @@ const LabelConfirmation: React.FC = () => {
     }
   }, [labelRelationships, setValue]);
 
+  React.useEffect(() => {
+    if (labelRelationships) {
+      setValue("relationships", labelRelationships);
+    }
+  }, [labelRelationships, setValue]);
+
   const handleConfirm = async (labelUserId: number, newValue: boolean) => {
     await api.put(`manage/artists/${artistId}/labels/${labelUserId}`, {
       isArtistApproved: newValue,
     });
     refetch();
+    refetchLabels();
   };
 
   if (isArtistLoading) {
@@ -88,6 +95,8 @@ const LabelConfirmation: React.FC = () => {
               <th>{t("email")}</th>
               <th>{t("isLabelConfirmed")}</th>
               <th>{t("isArtistConfirmed")}</th>
+              <th>{t("canLabelManageArtist")}</th>
+              <th>{t("canLabelManageReleases")}</th>
             </tr>
           </thead>
           <tbody>
@@ -106,6 +115,7 @@ const LabelConfirmation: React.FC = () => {
                     toggled={fields[idx].isArtistApproved}
                     onClick={() => {
                       const newValue = !fields[idx].isArtistApproved;
+                      console.log("newValue", newValue);
                       setValue(
                         `relationships.${idx}.isArtistApproved`,
                         newValue
@@ -115,13 +125,17 @@ const LabelConfirmation: React.FC = () => {
                     label={t("confirmRelationship")}
                   />
                 </td>
+                <td>{relationship.canLabelManageArtist ? "Yes" : "No"}</td>
+                <td>{relationship.canLabelAddReleases ? "Yes" : "No"}</td>
               </tr>
             ))}
           </tbody>
         </Table>
       )}
 
-      <ArtistLabels refetch={refetch} />
+      <FeatureFlag featureFlag="label">
+        <ArtistLabels refetch={refetch} />
+      </FeatureFlag>
     </Box>
   );
 };

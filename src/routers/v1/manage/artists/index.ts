@@ -114,6 +114,19 @@ export default function () {
           },
         },
       });
+
+      if (user.isLabelAccount) {
+        await prisma.artistLabel.create({
+          data: {
+            artistId: result.id,
+            labelUserId: user.id,
+            isLabelApproved: true,
+            canLabelManageArtist: true,
+            canLabelAddReleases: true,
+            isArtistApproved: true,
+          },
+        });
+      }
       res.json({ result });
     } catch (e) {
       next(e);

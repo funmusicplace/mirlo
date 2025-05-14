@@ -11,6 +11,7 @@ import {
   createTrackGroup,
   createUser,
 } from "../../../utils";
+import prisma from "../../../../prisma/prisma";
 
 const baseURL = `${process.env.API_DOMAIN}/v1/`;
 const requestApp = request(baseURL);
@@ -191,8 +192,42 @@ describe("manage/artists/{artistId}/trackGroups", () => {
         })
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
-      assert.equal(response.status, 400);
-      assert.equal(response.body.error, "Artist must belong to user");
+      assert.equal(response.status, 404);
+      assert.equal(
+        response.body.error,
+        "Artist not found or does not belong to user"
+      );
+    });
+
+    it("should POST an album successfully with a different paymentToUserId", async () => {
+      const { user: labelUser, accessToken: labelAccessToken } =
+        await createUser({ email: "label@testcom" });
+      const { user } = await createUser({
+        email: "artist@testcom",
+      });
+      const artist = await createArtist(user.id);
+      await prisma.artistLabel.create({
+        data: {
+          labelUserId: labelUser.id,
+          artistId: artist.id,
+          canLabelAddReleases: true,
+          canLabelManageArtist: true,
+        },
+      });
+      const response = await requestApp
+        .post(`manage/artists/${artist.id}/trackGroups`)
+        .send({
+          artistId: artist.id,
+          minPrice: 500,
+          title: "A title",
+          urlSlug: "a-title",
+        })
+        .set("Cookie", [`jwt=${labelAccessToken}`])
+        .set("Accept", "application/json");
+      assert.equal(response.status, 200);
+      assert.equal(response.body.result.paymentToUserId, labelUser.id);
+      assert.equal(response.body.result.title, "A title");
+      assert.equal(response.body.result.minPrice, 500);
     });
   });
 });

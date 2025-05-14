@@ -2,7 +2,6 @@ import { User } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 import {
   userAuthenticated,
-  contentBelongsToLoggedInUserArtist,
   trackGroupBelongsToLoggedInUser,
 } from "../../../../../auth/passport";
 import { doesTrackGroupBelongToUser } from "../../../../../utils/ownership";

@@ -97,9 +97,15 @@ const ManageArtistContainer: React.FC<{}> = () => {
   return (
     <ArtistPageWrapper artistBanner={!!artistBanner}>
       <>
-        {user && artist.userId !== user.id && (
+        {user && artist.userId !== user.id && user.isAdmin && (
           <ArtistBox variant="warning">
             You are viewing this artist as an admin
+          </ArtistBox>
+        )}
+
+        {user && artist.userId !== user.id && !user.isAdmin && (
+          <ArtistBox variant="warning">
+            You are viewing this user as their label
           </ArtistBox>
         )}
         {user &&

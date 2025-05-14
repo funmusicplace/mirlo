@@ -29,7 +29,7 @@ export const SectionHeader = styled.div<{ userId?: number }>`
   @media (prefers-color-scheme: dark) {
     background-color: var(--mi-normal-background-color);
     .section-header__heading {
-      color: pink;
+      color: var(--mi-pink);
     }
   }
 

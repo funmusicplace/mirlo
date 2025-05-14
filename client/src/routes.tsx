@@ -139,11 +139,7 @@ const routes: RouteObject[] = [
                 "components/Profile/ManageLabel"
               );
               return {
-                Component: () => (
-                  <AuthWrapper adminOnly>
-                    <Component />
-                  </AuthWrapper>
-                ),
+                Component: () => <Component />,
               };
             },
           },

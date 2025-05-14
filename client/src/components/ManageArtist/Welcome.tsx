@@ -17,7 +17,7 @@ import { NewAlbumButton } from "./NewAlbumButton";
 import ChooseYourTheme from "./ChooseYourTheme";
 
 const PageWrapper = styled.div`
-  padding: 1rem;
+  padding: 2rem 0;
   max-width: 480px;
   margin: 0 auto;
 `;

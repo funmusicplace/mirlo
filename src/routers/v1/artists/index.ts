@@ -17,14 +17,16 @@ export default function () {
       skip: skipQuery,
       take = format === "rss" ? 50 : 10,
       name,
+      includeUnpublished,
     } = req.query;
 
     try {
-      let where: Prisma.ArtistWhereInput = {
-        trackGroups: {
+      let where: Prisma.ArtistWhereInput = {};
+      if (!includeUnpublished) {
+        where.trackGroups = {
           some: whereForPublishedTrackGroups(),
-        },
-      };
+        };
+      }
 
       if (name && typeof name === "string") {
         where.name = { contains: name, mode: "insensitive" };

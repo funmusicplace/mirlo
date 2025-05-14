@@ -324,9 +324,7 @@ export const CustomizeLook: React.FC = () => {
           </div>
         </form>
       </FormProvider>
-      <FeatureFlag featureFlag="label">
-        <LabelConfirmation />
-      </FeatureFlag>
+      <LabelConfirmation />
 
       <DeleteArtist />
     </div>
