@@ -1,17 +1,14 @@
-import { Prisma } from "@mirlo/prisma/client";
+import { Prisma, User } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
-import {
-  artistBelongsToLoggedInUser,
-  userAuthenticated,
-} from "../../../../auth/passport";
+import { userAuthenticated } from "../../../../auth/passport";
 
 import prisma from "@mirlo/prisma";
 import { AppError } from "../../../../utils/error";
 
 export default function () {
   const operations = {
-    POST: [userAuthenticated, artistBelongsToLoggedInUser, POST],
-    GET: [userAuthenticated, artistBelongsToLoggedInUser, GET],
+    POST: [userAuthenticated, POST],
+    GET: [userAuthenticated, GET],
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {
@@ -32,7 +29,21 @@ export default function () {
       publishedAt: string;
       shouldSendEmail: boolean;
     };
+
+    const user = req.user as User;
     try {
+      const artist = await prisma.artist.findFirst({
+        where: {
+          id: artistId,
+          userId: user.id,
+        },
+      });
+      if (!artist) {
+        throw new AppError({
+          description: "Artist must belong to logged in user",
+          httpCode: 400,
+        });
+      }
       let validTier;
       if (!minimumSubscriptionTierId) {
         validTier = await prisma.artistSubscriptionTier.findFirst({

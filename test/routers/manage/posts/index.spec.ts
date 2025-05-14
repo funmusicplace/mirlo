@@ -130,7 +130,7 @@ describe("manage/posts", () => {
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
       assert.equal(response.status, 400);
-      assert.equal(response.body.error, "Artist must belong to user");
+      assert.equal(response.body.error, "Artist must belong to logged in user");
     });
 
     it("should not POST a post when tier does not belong to artist", async () => {

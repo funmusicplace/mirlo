@@ -139,6 +139,8 @@ export default function () {
         paymentToUserId = user.id;
       }
 
+      console.log("paymentToUserId", paymentToUserId);
+
       const result = await prisma.trackGroup.create({
         data: {
           title,
@@ -148,7 +150,9 @@ export default function () {
           artist: { connect: { id: artistId } },
           published,
           minPrice,
-          paymentToUser: { connect: { id: paymentToUserId } },
+          paymentToUser: paymentToUserId
+            ? { connect: { id: paymentToUserId } }
+            : undefined,
           platformPercent: (await getSiteSettings()).platformPercent,
           currency: userForCurrency?.currency ?? "usd",
           releaseDate: releaseDate ? new Date(releaseDate) : undefined,

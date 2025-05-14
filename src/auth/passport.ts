@@ -162,7 +162,7 @@ export const artistBelongsToLoggedInUser = async (
 
       if (!artist) {
         res.status(404).json({
-          error: "Artist not found",
+          error: "Artist not found or does not belong to user",
         });
         return;
       }
