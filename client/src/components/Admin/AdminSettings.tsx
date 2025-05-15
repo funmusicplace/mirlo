@@ -9,6 +9,7 @@ import { useSnackbar } from "state/SnackbarContext";
 
 interface Settings {
   platformPercent: number;
+  instanceArtistId: number;
 }
 
 const AdminSettings = () => {
@@ -18,7 +19,10 @@ const AdminSettings = () => {
   React.useEffect(() => {
     const callback = async () => {
       const response = await api.get<Partial<Settings>>("admin/settings/");
-      reset(response.result);
+      reset({
+        platformPercent: response.result.platformPercent,
+        instanceArtistId: response.result.instanceArtistId,
+      });
     };
     callback();
   }, [reset]);
@@ -26,7 +30,10 @@ const AdminSettings = () => {
   const updateSettings = React.useCallback(
     async (data: Partial<Settings>) => {
       try {
-        await api.post("admin/settings", data);
+        await api.post("admin/settings", {
+          platformPercent: data.platformPercent,
+          instanceArtistId: Number(data.instanceArtistId),
+        });
       } catch (e) {
         console.error(e);
         snackbar("Oops something went wrong", { type: "warning" });
