@@ -96,7 +96,7 @@ const LabelConfirmation: React.FC = () => {
               <th>{t("isLabelConfirmed")}</th>
               <th>{t("isArtistConfirmed")}</th>
               <th>{t("canLabelManageArtist")}</th>
-              <th>{t("canLabelManageReleases")}</th>
+              <th>{t("canLabelAddReleases")}</th>
             </tr>
           </thead>
           <tbody>
@@ -104,7 +104,11 @@ const LabelConfirmation: React.FC = () => {
               <tr key={relationship.labelUser.id}>
                 <td>
                   {relationship.labelUser.userAvatar && (
-                    <img src={relationship.labelUser.userAvatar.sizes[60]} />
+                    <img
+                      src={relationship.labelUser.userAvatar.sizes[60]}
+                      width={30}
+                      height={30}
+                    />
                   )}
                 </td>
                 <td>{relationship.labelUser.name}</td>

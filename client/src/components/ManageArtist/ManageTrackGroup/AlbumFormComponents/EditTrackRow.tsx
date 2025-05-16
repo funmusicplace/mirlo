@@ -24,6 +24,7 @@ import ShowRawID3Data from "./ShowRawID3Data";
 import styled from "@emotion/styled";
 import FormCheckbox from "components/common/FormCheckbox";
 import InfoModal from "components/common/InfoModal";
+import { ArtistButton } from "components/Artist/ArtistButtons";
 
 export interface FormData {
   title: string;
@@ -198,7 +199,7 @@ const EditTrackRow: React.FC<{
             }
           `}
         >
-          <Button
+          <ArtistButton
             size="compact"
             onClick={onCancelEditing}
             type="button"
@@ -207,7 +208,7 @@ const EditTrackRow: React.FC<{
             startIcon={<FaTimes />}
             disabled={isSaving || isDisabled}
           />
-          <Button
+          <ArtistButton
             size="compact"
             variant="dashed"
             startIcon={<FaSave />}
@@ -317,6 +318,47 @@ const EditTrackRow: React.FC<{
         <td colSpan={2}>id3Tags</td>
         <td colSpan={99}>
           <ShowRawID3Data track={track} />
+        </td>
+      </IndentedTR>
+      <IndentedTR>
+        <td
+          colSpan={99}
+          className={css`
+            padding-bottom: 2rem !important;
+            white-space: nowrap;
+            button {
+              margin-right: 0.5rem;
+              float: right;
+            }
+          `}
+        >
+          <ArtistButton
+            size="compact"
+            startIcon={<FaSave />}
+            disabled={isSaving || isDisabled}
+            onClick={methods.handleSubmit(onSave)}
+            type="button"
+            className={css`
+              ${methods.formState.isDirty
+                ? `background-color: ${colors?.primary} !important; 
+                   color: ${colors?.background} !important;
+                   border-color: ${colors?.primary} !important;`
+                : ""}
+            `}
+          >
+            {t("saveTrack")}
+          </ArtistButton>
+          <ArtistButton
+            size="compact"
+            onClick={onCancelEditing}
+            type="button"
+            title="Close"
+            variant="dashed"
+            startIcon={<FaTimes />}
+            disabled={isSaving || isDisabled}
+          >
+            {t("cancelChanges")}
+          </ArtistButton>
         </td>
       </IndentedTR>
     </FormProvider>
