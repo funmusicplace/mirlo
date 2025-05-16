@@ -4,12 +4,14 @@ import App from "./App";
 import ErrorPage from "./components/ErrorPage";
 import { AuthWrapper } from "components/AuthWrapper";
 import { css } from "@emotion/css";
+import api from "services/api";
 
 async function markdownPage(source: string) {
   const { PageMarkdownWrapper } = await import("components/Post");
   const { default: MarkdownContent } = await import(
     "components/common/MarkdownContent"
   );
+
   return {
     Component: () => (
       <PageMarkdownWrapper>
@@ -41,15 +43,19 @@ const routes: RouteObject[] = [
       },
       {
         path: "pages/cookie-policy",
-        lazy: () => markdownPage("/static/pages/CookiePolicy.md"),
+        lazy: () => markdownPage("cookie-policy"),
       },
       {
         path: "pages/privacy",
-        lazy: () => markdownPage("/static/pages/Privacy.md"),
+        lazy: () => markdownPage("privacy"),
       },
       {
         path: "pages/terms",
-        lazy: () => markdownPage("/static/pages/Terms.md"),
+        lazy: () => markdownPage("terms"),
+      },
+      {
+        path: "pages/content-policy",
+        lazy: () => markdownPage("content-policy"),
       },
       {
         path: "pages/features",
