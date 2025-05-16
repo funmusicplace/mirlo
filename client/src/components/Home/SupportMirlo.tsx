@@ -8,9 +8,13 @@ import {
 import { ButtonLink } from "components/common/Button";
 import { useTranslation } from "react-i18next";
 import { bp } from "../../constants";
+import { getArtistUrl } from "utils/artist";
+import { queryInstanceArtist } from "queries/settings";
+import { useQuery } from "@tanstack/react-query";
 
 const SupportMirlo = () => {
   const { t } = useTranslation("translation", { keyPrefix: "home" });
+  const { data: instanceArtist } = useQuery(queryInstanceArtist());
 
   return (
     <div
@@ -63,7 +67,11 @@ const SupportMirlo = () => {
             <SplashTitle>{t("sustainedBy")}</SplashTitle>
             <SplashButtonWrapper>
               <ButtonLink
-                to="/team/support"
+                to={
+                  instanceArtist
+                    ? getArtistUrl(instanceArtist) + "/support"
+                    : ""
+                }
                 size="big"
                 rounded
                 className={css`

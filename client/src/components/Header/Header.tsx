@@ -16,6 +16,9 @@ import { useAuthContext } from "state/AuthContext";
 import { ButtonLink } from "components/common/Button";
 import { useTranslation } from "react-i18next";
 import { FaHandHoldingHeart } from "react-icons/fa";
+import { queryInstanceArtist, querySetting } from "queries/settings";
+import { useQuery } from "@tanstack/react-query";
+import { getArtistUrl } from "utils/artist";
 
 const HeaderWrapper = styled.div<{
   artistBanner?: boolean;
@@ -197,6 +200,7 @@ const Header = () => {
   const show = useShow();
   const transparent = !!artistBanner && !!artistId;
 
+  const { data: instanceArtist } = useQuery(queryInstanceArtist());
   return (
     <HeaderWrapper
       transparent={transparent}
@@ -240,43 +244,45 @@ const Header = () => {
             </DropdownMenu>
           )}
           {!isLoggedIn && <LogInPopup />}
-          <ButtonLink
-            to="/team/support"
-            collapsible
-            startIcon={<FaHandHoldingHeart />}
-            className={css`
-              display: block;
-              margin-left: 0.75rem;
-              text-decoration: none;
-              text-align: center;
-              &:hover {
-                text-decoration: underline;
-              }
+          {instanceArtist && (
+            <ButtonLink
+              to={getArtistUrl(instanceArtist) + "/support"}
+              collapsible
+              startIcon={<FaHandHoldingHeart />}
+              className={css`
+                display: block;
+                margin-left: 0.75rem;
+                text-decoration: none;
+                text-align: center;
+                &:hover {
+                  text-decoration: underline;
+                }
 
-              color: var(--mi-white) !important;
-
-              svg {
-                fill: white !important;
-              }
-
-              background-color: var(--mi-black) !important;
-
-              @media (prefers-color-scheme: dark) {
-                background-color: var(--mi-white) !important;
-                color: var(--mi-black) !important;
+                color: var(--mi-white) !important;
 
                 svg {
-                  fill: var(--mi-black) !important;
+                  fill: white !important;
                 }
-              }
 
-              @media screen and (max-width: ${bp.medium}px) {
-                font-size: var(--mi-font-size-xsmall) !important;
-              }
-            `}
-          >
-            <p>{t("donateNow")}</p>
-          </ButtonLink>
+                background-color: var(--mi-black) !important;
+
+                @media (prefers-color-scheme: dark) {
+                  background-color: var(--mi-white) !important;
+                  color: var(--mi-black) !important;
+
+                  svg {
+                    fill: var(--mi-black) !important;
+                  }
+                }
+
+                @media screen and (max-width: ${bp.medium}px) {
+                  font-size: var(--mi-font-size-xsmall) !important;
+                }
+              `}
+            >
+              <p>{t("donateNow")}</p>
+            </ButtonLink>
+          )}
         </div>
       </Content>
     </HeaderWrapper>

@@ -14,10 +14,7 @@ export default function () {
 
       const { setting } = req.params;
 
-      if (
-        setting === "instanceArtistId" &&
-        settings.settings?.instanceArtistId
-      ) {
+      if (setting === "instanceArtist" && settings.settings?.instanceArtistId) {
         const artist = await prisma.artist.findFirst({
           where: {
             id: settings.settings.instanceArtistId,
