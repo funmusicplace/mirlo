@@ -4046,6 +4046,7 @@ __metadata:
     terser: "npm:^5.30.3"
     typescript: "npm:5.8.2"
     unist-util-visit: "npm:^4.1.2"
+    use-debounce: "npm:^10.0.4"
     uuid: "npm:^9.0.1"
     vite: "npm:^5.2.9"
     vite-tsconfig-paths: "npm:^4.3.2"
@@ -23930,6 +23931,15 @@ __metadata:
   peerDependencies:
     react: ^16.8.0 || ^17 || ^18
   checksum: 10/bcd1242d1212c2dcf07f9eb8a7311bd0c17a45f472c382c29c95226cfa7fff1b9f89bd65e6117b9c0665317979083e56d9a8b0f809a656dbaa578636482d7f20
+  languageName: node
+  linkType: hard
+
+"use-debounce@npm:^10.0.4":
+  version: 10.0.4
+  resolution: "use-debounce@npm:10.0.4"
+  peerDependencies:
+    react: "*"
+  checksum: 10/e193bbed307204b655abab545704ca608b23db10680f299f4b9b48b935a9fd68b68827c79de3bf5517010524bfa15709bf6b0ab1f915d6305b5d2ce27bf11ad7
   languageName: node
   linkType: hard
 

@@ -19,13 +19,12 @@ datasource db {
 }
 
 model Settings {
-  id               Int     @id @default(autoincrement())
+  id          Int     @id @default(autoincrement())
   /// [Settings]
-  settings         Json
-  publicKey        String? // Used for ActivityPub
-  privateKey       String? // Used for ActivityPub
-  bucketNames      Json? // Used for S3
-  instanceArtistId Int? // The account id that receives donations for the account itself
+  settings    Json
+  publicKey   String? // Used for ActivityPub
+  privateKey  String? // Used for ActivityPub
+  bucketNames Json? // Used for S3
 }
 
 model Client {

@@ -91,6 +91,7 @@ export const ArtistButton: React.FC<
         return `
         background-color: ${colors?.primary} !important;
         color: ${colors?.secondary} !important;
+        border: 1px solid ${colors?.primary} !important;
 
         svg {
           fill: ${colors?.secondary} !important;

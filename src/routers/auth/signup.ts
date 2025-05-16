@@ -5,6 +5,8 @@ import { sendMail } from "../../jobs/send-mail";
 import { Job } from "bullmq";
 import logger from "../../logger";
 import { AppError } from "../../utils/error";
+import { subscribe } from "node:diagnostics_channel";
+import { subscribeUserToArtist } from "../../utils/artist";
 
 const signup = async (req: Request, res: Response, next: NextFunction) => {
   let {
@@ -71,11 +73,29 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
         select: {
           name: true,
           email: true,
+          currency: true,
           id: true,
           receiveMailingList,
           emailConfirmationToken: true,
         },
       });
+      if (receiveMailingList) {
+        const settings = await prisma.settings.findFirst();
+        if (settings) {
+          const artist = await prisma.artist.findFirst({
+            where: {
+              id: settings.settings.instanceArtistId,
+            },
+            include: {
+              user: true,
+              subscriptionTiers: true,
+            },
+          });
+          if (artist) {
+            await subscribeUserToArtist(artist, result);
+          }
+        }
+      }
 
       await sendMail({
         data: {

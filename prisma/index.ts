@@ -7,6 +7,7 @@ declare global {
     };
     type Settings = {
       platformPercent: number;
+      instanceArtistId?: number;
     };
   }
 }

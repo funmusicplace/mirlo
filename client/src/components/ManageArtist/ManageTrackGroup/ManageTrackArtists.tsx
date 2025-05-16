@@ -8,6 +8,7 @@ import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import Modal from "components/common/Modal";
 import api from "services/api";
 import { useAuthContext } from "state/AuthContext";
+import { ArtistButton } from "components/Artist/ArtistButtons";
 
 export interface FormData {
   trackArtists: {
@@ -79,7 +80,7 @@ const ManageTrackArtists: React.FC<{
           (field) => (field as unknown as { artistName: string })["artistName"]
         )
         .join(", ")}
-      <Button
+      <ArtistButton
         variant="dashed"
         onClick={() => setIsOpen(true)}
         startIcon={<FaPen />}
@@ -114,7 +115,7 @@ const ManageTrackArtists: React.FC<{
               align-items: center;
             `}
           >
-            <Button
+            <ArtistButton
               onClick={() => {
                 append({ artistName: "" });
               }}
@@ -125,8 +126,8 @@ const ManageTrackArtists: React.FC<{
               variant="dashed"
             >
               {t("addNewArtist")}
-            </Button>
-            <Button
+            </ArtistButton>
+            <ArtistButton
               onClick={handleSubmit(saveArtists)}
               type="button"
               className={css`
@@ -138,7 +139,7 @@ const ManageTrackArtists: React.FC<{
               variant="dashed"
             >
               {t("done")}
-            </Button>
+            </ArtistButton>
           </div>
         </div>
       </Modal>
