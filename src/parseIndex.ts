@@ -95,7 +95,12 @@ const parseIndex = async (pathname: string) => {
   );
 
   const route = pathname.split("/");
-  const buffer = await fs.readFileSync(fileLocation);
+  let buffer;
+  try {
+    buffer = await fs.readFileSync(fileLocation);
+  } catch (e) {
+    return "<html>No built client</html>";
+  }
   const $ = cheerio.load(buffer);
 
   try {
