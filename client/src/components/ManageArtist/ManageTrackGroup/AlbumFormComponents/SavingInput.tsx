@@ -1,6 +1,6 @@
 import React from "react";
 import { useFormContext } from "react-hook-form";
-
+import { useDebouncedCallback } from "use-debounce";
 import { InputEl } from "components/common/Input";
 import TextArea from "components/common/TextArea";
 
@@ -43,50 +43,47 @@ const SavingInput: React.FC<{
   const [isSaving, setIsSaving] = React.useState(false);
   const [saveSuccess, setSaveSuccess] = React.useState(false);
 
-  const saveOnInput = React.useCallback(
-    debounce(async () => {
-      try {
-        setSaveSuccess(false);
-        setIsSaving(true);
-        let value = getValues(formKey);
+  const saveOnInput = useDebouncedCallback(async () => {
+    try {
+      setSaveSuccess(false);
+      setIsSaving(true);
+      let value = getValues(formKey);
 
-        if (formKey === "releaseDate" || formKey === "publishedAt") {
-          value = new Date(value).toISOString();
-        } else if (formKey === "minPrice") {
-          value = value ? value * 100 : undefined;
-        }
-
-        if (type === "number") {
-          value = Number(value);
-        }
-
-        const data = {
-          [formKey]: value,
-          ...extraData,
-        };
-
-        await api.put<unknown, unknown>(url, data);
-
-        let timeout2: NodeJS.Timeout;
-        const timeout = setTimeout(() => {
-          setIsSaving(false);
-          setSaveSuccess(true);
-          reload?.();
-          timeout2 = setTimeout(() => {
-            setSaveSuccess(false);
-          }, 1000);
-        }, 1000);
-        return () => {
-          clearTimeout(timeout2);
-          clearTimeout(timeout);
-        };
-      } catch (e) {
-        errorHandler(e);
-        setIsSaving(false);
+      if (formKey === "releaseDate" || formKey === "publishedAt") {
+        value = new Date(value).toISOString();
+      } else if (formKey === "minPrice") {
+        value = value ? value * 100 : undefined;
       }
-    }, timer ?? 1500),
-    [formKey, timer, getValues, url, extraData]
-  );
+
+      if (type === "number") {
+        value = Number(value);
+      }
+
+      const data = {
+        [formKey]: value,
+        ...extraData,
+      };
+
+      await api.put<unknown, unknown>(url, data);
+
+      let timeout2: NodeJS.Timeout;
+      const timeout = setTimeout(() => {
+        setIsSaving(false);
+        setSaveSuccess(true);
+        reload?.();
+        timeout2 = setTimeout(() => {
+          setSaveSuccess(false);
+        }, 1000);
+      }, 1000);
+      return () => {
+        clearTimeout(timeout2);
+        clearTimeout(timeout);
+      };
+    } catch (e) {
+      errorHandler(e);
+      setIsSaving(false);
+    }
+  }, timer ?? 2500);
 
   return (
     <div
