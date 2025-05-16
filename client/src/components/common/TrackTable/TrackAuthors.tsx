@@ -13,8 +13,9 @@ const TrackAuthors: React.FC<{ track: Track; trackGroupArtistId?: number }> = ({
         <span
           className={
             css`
-              color: var(--mi-normal-foreground-color);
+              color: var(--mi-lighter-foreground-color);
               margin-left: 0.5rem;
+              font-size: 0.85rem;
             ` +
             " " +
             "track-authors"
