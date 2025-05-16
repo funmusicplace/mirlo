@@ -80,6 +80,7 @@ const routes = [
   "trackGroups/{id}/emailDownload",
   "trackGroups/{id}/generate",
   "playable",
+  "settings/{setting}",
   "tracks",
   "tracks/{id}",
   "tracks/{id}/audio",

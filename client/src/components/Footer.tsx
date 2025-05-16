@@ -66,6 +66,7 @@ export const Footer = () => {
                 terms: <Link to="/pages/terms"></Link>,
                 privacy: <Link to="/pages/privacy"></Link>,
                 cookie: <Link to="/pages/cookie-policy"></Link>,
+                content: <Link to="/pages/content-policy"></Link>,
               }}
             />
           </p>

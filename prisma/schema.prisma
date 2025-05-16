@@ -19,12 +19,16 @@ datasource db {
 }
 
 model Settings {
-  id          Int     @id @default(autoincrement())
+  id            Int     @id @default(autoincrement())
   /// [Settings]
-  settings    Json
-  publicKey   String? // Used for ActivityPub
-  privateKey  String? // Used for ActivityPub
-  bucketNames Json? // Used for S3
+  settings      Json
+  publicKey     String? // Used for ActivityPub
+  privateKey    String? // Used for ActivityPub
+  bucketNames   Json? // Used for S3
+  terms         String?
+  contentPolicy String?
+  privacyPolicy String?
+  cookiePolicy  String?
 }
 
 model Client {

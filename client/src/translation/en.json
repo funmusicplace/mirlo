@@ -684,7 +684,7 @@
   },
   "footer": {
     "getInTouch": "If you'd like to get in touch, join <discord>our Discord</discord>, <email>email us</email>, or check out <github>our Github</github>.",
-    "aboutUs": "<about>About us</about>, <terms>Terms and conditions</terms>, <privacy>Privacy</privacy>, <cookie>Our use of cookies</cookie>",
+    "aboutUs": "<about>About us</about>, <terms>Terms and conditions</terms>, <privacy>Privacy</privacy>, <cookie>Our use of cookies</cookie>, <content>Content policy</content>, <contact>Contact us</contact>",
     "socialInstagram": "{{username}} on Instagram",
     "socialMastodon": "{{username}} on Mastodon",
     "socialX": "{{username}} on X",

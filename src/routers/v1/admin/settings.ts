@@ -20,11 +20,12 @@ export default function () {
   }
 
   async function POST(req: Request, res: Response, next: NextFunction) {
-    const newSettings = req.body;
+    const { settings, terms, privacyPolicy, cookiePolicy, contentPolicy } =
+      req.body;
     try {
-      let settings = await prisma.settings.findFirst();
-      if (!settings) {
-        settings = await prisma.settings.create({
+      let existingSettings = await prisma.settings.findFirst();
+      if (!existingSettings) {
+        existingSettings = await prisma.settings.create({
           data: {
             settings: {
               platformPercent: 7,
@@ -34,10 +35,14 @@ export default function () {
       }
       await prisma.settings.update({
         data: {
-          settings: newSettings,
+          settings,
+          terms,
+          privacyPolicy,
+          cookiePolicy,
+          contentPolicy,
         },
         where: {
-          id: settings.id,
+          id: existingSettings.id,
         },
       });
       const refreshedSettings = await prisma.settings.findFirst();
