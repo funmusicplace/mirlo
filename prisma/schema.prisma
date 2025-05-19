@@ -170,7 +170,7 @@ model Post {
   images                    PostImage[]             @relation("images")
   featuredImage             PostImage?              @relation(fields: [featuredImageId], references: [id])
   featuredImageId           String?                 @db.Uuid
-  postTracks                PostTrack[]
+  tracks                    PostTrack[]
 }
 
 model PostImage {

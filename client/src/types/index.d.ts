@@ -121,6 +121,7 @@ interface Post {
   featuredImageId?: string;
   featuredImage?: { src: string };
   isDraft: boolean;
+  tracks?: { postId: number; trackId: number }[];
 }
 
 interface PostImage {

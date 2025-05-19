@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
 import { userLoggedInWithoutRedirect } from "../../../auth/passport";
 import { User } from "@mirlo/prisma/client";
-import postProcessor, { processSinglePost } from "../../../utils/post";
+import { processSinglePost } from "../../../utils/post";
 import { checkIsUserSubscriber } from "../../../utils/artist";
 import { AppError } from "../../../utils/error";
 
@@ -25,6 +25,7 @@ export default function () {
           isDraft: false,
         },
         include: {
+          tracks: true,
           featuredImage: true,
           artist: {
             include: {
@@ -44,7 +45,6 @@ export default function () {
           description: "Post not found",
         });
       }
-
       const isUserSubscriber = await checkIsUserSubscriber(user, post.artistId);
       res.json({
         result: processSinglePost(
