@@ -163,9 +163,11 @@ const parseIndex = async (pathname: string) => {
           include: {
             artist: true,
             featuredImage: true,
+            tracks: true,
           },
         });
         if (post) {
+          const hasTracks = post.tracks.length > 0;
           // it's a post
           buildOpenGraphTags($, {
             title: post.title,
@@ -179,6 +181,9 @@ const parseIndex = async (pathname: string) => {
                   post.featuredImage.extension
                 )
               : avatarUrl,
+            isPlayer: hasTracks
+              ? getTrackWidget(client, post.tracks[0].trackId)
+              : undefined,
           });
         } else {
           buildOpenGraphTags($, {

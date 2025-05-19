@@ -100,7 +100,7 @@ export default function () {
           id: post.id,
         },
         include: {
-          postTracks: true,
+          tracks: true,
           images: true,
         },
       });
@@ -158,6 +158,9 @@ export default function () {
     try {
       const post = await prisma.post.findUnique({
         where: { id: Number(postId) },
+        include: {
+          tracks: true,
+        },
       });
       res.json({ result: post });
     } catch (e) {

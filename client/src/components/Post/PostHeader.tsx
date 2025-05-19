@@ -12,6 +12,25 @@ import Avatar from "components/Artist/Avatar";
 import { useAuthContext } from "state/AuthContext";
 import { formatDate } from "components/TrackGroup/ReleaseDate";
 import TipArtist from "components/common/TipArtist";
+import styled from "@emotion/styled";
+import ClickToPlayTracks from "components/common/ClickToPlayTracks";
+
+const AvatarWrapper = styled.div`
+  margin-right: 0.25rem;
+  display: flex;
+  line-height: 2.2rem;
+
+  a {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 0.35rem;
+  }
+
+  img {
+    margin-right: 0.2rem;
+    max-width: 25px;
+  }
+`;
 
 const PostHeader: React.FC<{ post: Post }> = ({ post }) => {
   const { t, i18n } = useTranslation("translation", { keyPrefix: "post" });
@@ -21,6 +40,8 @@ const PostHeader: React.FC<{ post: Post }> = ({ post }) => {
   const ownedByUser = post.artist?.userId === user?.id;
 
   const featuredImage = post.featuredImage?.src;
+
+  const trackIds = post.tracks?.map((track) => track.trackId);
 
   return (
     <div
@@ -143,46 +164,45 @@ const PostHeader: React.FC<{ post: Post }> = ({ post }) => {
                   padding-top: 0.5rem;
                 `}
               >
-                <div>
-                  <div
-                    className={css`
-                      margin-right: 0.25rem;
-                      display: flex;
-                      line-height: 2.2rem;
-
-                      a {
-                        display: inline-flex;
-                        align-items: center;
-                        margin-left: 0.35rem;
-                      }
-
-                      img {
-                        margin-right: 0.2rem;
-                        max-width: 25px;
-                      }
-                    `}
-                  >
-                    by{" "}
-                    <Link
-                      to={`/${post.artist.urlSlug?.toLowerCase() ?? post.artistId}`}
-                    >
-                      <Avatar avatar={post.artist.avatar?.sizes?.[60]} />
-                      <span>{post.artist?.name}</span>
-                    </Link>
+                <div
+                  className={css`
+                    display: flex;
+                    align-items: center;
+                  `}
+                >
+                  {trackIds && (
+                    <ClickToPlayTracks
+                      trackIds={trackIds}
+                      className={css`
+                        width: 50px !important;
+                        margin-right: 10px;
+                      `}
+                    />
+                  )}
+                  <div>
+                    <AvatarWrapper>
+                      by{" "}
+                      <Link
+                        to={`/${post.artist.urlSlug?.toLowerCase() ?? post.artistId}`}
+                      >
+                        <Avatar avatar={post.artist.avatar?.sizes?.[60]} />
+                        <span>{post.artist?.name}</span>
+                      </Link>
+                    </AvatarWrapper>
+                    <small>
+                      <em>
+                        {t("publishedAt", {
+                          date: formatDate({
+                            date: post.publishedAt,
+                            i18n,
+                            options: {
+                              dateStyle: "medium",
+                            },
+                          }),
+                        })}
+                      </em>
+                    </small>
                   </div>
-                  <small>
-                    <em>
-                      {t("publishedAt", {
-                        date: formatDate({
-                          date: post.publishedAt,
-                          i18n,
-                          options: {
-                            dateStyle: "medium",
-                          },
-                        }),
-                      })}
-                    </em>
-                  </small>
                 </div>
                 {post.artistId && <FollowArtist artistId={post.artistId} />}
               </SpaceBetweenDiv>

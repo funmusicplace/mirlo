@@ -57,7 +57,7 @@ export default function () {
         include: {
           artist: true,
           featuredImage: true,
-          postTracks: true,
+          tracks: true,
         },
         orderBy: {
           publishedAt: "desc",
