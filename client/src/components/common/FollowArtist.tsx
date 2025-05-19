@@ -145,9 +145,7 @@ const FollowArtist: React.FC<{ artistId: number }> = ({ artistId }) => {
             })}
           </p>
         )}
-        {hasNoneDefaultSubscriptionTiers && (
-          <SupportArtistTiersForm artist={artist} excludeDefault={!!user} />
-        )}
+        <SupportArtistTiersForm artist={artist} excludeDefault={!!user} />
       </Modal>
       <ArtistButton
         size="compact"
