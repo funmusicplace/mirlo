@@ -81,16 +81,46 @@ export default function () {
             postId: post.id,
           },
         });
+        const trackOrder: { [key: number]: number } = {};
         const tracksToDelete = postTracks
           .filter((pt) => {
-            const inContent = content.includes(`track/${pt.trackId}`);
-            return !inContent;
+            const inContentIndex = content.indexOf(`track/${pt.trackId}`);
+            if (inContentIndex !== -1) {
+              trackOrder[inContentIndex] = pt.trackId;
+            }
+            return inContentIndex === -1;
           })
           .map((image) => image.trackId);
+
+        await Promise.all(
+          Object.keys(trackOrder)
+            .sort((a, b) => Number(a) - Number(b))
+            .map(async (key, index) => {
+              const trackId = trackOrder[Number(key)];
+              await prisma.postTrack.update({
+                where: {
+                  trackId_postId: {
+                    postId: post.id,
+                    trackId: trackId,
+                  },
+                },
+                data: {
+                  order: index + 1,
+                },
+              });
+            })
+        );
+
         await prisma.postTrack.deleteMany({
           where: {
             postId: post.id,
             trackId: { in: tracksToDelete },
+          },
+        });
+
+        const currentTracks = await prisma.postTrack.findMany({
+          where: {
+            postId: post.id,
           },
         });
       }

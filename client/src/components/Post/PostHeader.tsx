@@ -170,7 +170,7 @@ const PostHeader: React.FC<{ post: Post }> = ({ post }) => {
                     align-items: center;
                   `}
                 >
-                  {trackIds && (
+                  {trackIds && trackIds.length > 0 && (
                     <ClickToPlayTracks
                       trackIds={trackIds}
                       className={css`
