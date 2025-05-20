@@ -48,7 +48,7 @@ export default function () {
   }
 
   PUT.apiDoc = {
-    summary: "Updates a post image belonging to a user",
+    summary: "Updates a tracks on posts belonging to a user",
     parameters: [
       {
         in: "path",
