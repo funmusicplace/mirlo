@@ -25,7 +25,11 @@ export default function () {
           isDraft: false,
         },
         include: {
-          tracks: true,
+          tracks: {
+            orderBy: {
+              order: "asc",
+            },
+          },
           featuredImage: true,
           artist: {
             include: {

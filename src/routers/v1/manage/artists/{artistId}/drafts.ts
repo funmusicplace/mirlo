@@ -27,7 +27,11 @@ export default function () {
           artistId: Number(artistId),
         },
         include: {
-          tracks: true,
+          tracks: {
+            orderBy: {
+              order: "asc",
+            },
+          },
         },
       });
 
@@ -39,7 +43,11 @@ export default function () {
             artistId: Number(artistId),
           },
           include: {
-            tracks: true,
+            tracks: {
+              orderBy: {
+                order: "asc",
+              },
+            },
           },
         });
       }

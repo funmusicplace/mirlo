@@ -163,7 +163,11 @@ const parseIndex = async (pathname: string) => {
           include: {
             artist: true,
             featuredImage: true,
-            tracks: true,
+            tracks: {
+              orderBy: {
+                order: "asc",
+              },
+            },
           },
         });
         if (post) {
