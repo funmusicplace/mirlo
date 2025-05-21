@@ -18,7 +18,6 @@ export default function () {
         const session = await stripe.checkout.sessions.retrieve(session_id, {
           stripeAccount: stripeAccountId,
         });
-        console.log("checkout return", session);
         const {
           clientId,
           artistId,
@@ -28,6 +27,7 @@ export default function () {
           gaveGift,
           merchId,
           purchaseType,
+          tipId,
         } = session.metadata as unknown as {
           clientId: number | null;
           artistId: number | null;
@@ -37,6 +37,7 @@ export default function () {
           trackId: number | null;
           merchId: string | null;
           purchaseType: string | null;
+          tipId: string | null;
         };
         if (clientId && artistId) {
           const client = await prisma.client.findFirst({
@@ -65,7 +66,7 @@ export default function () {
             // they can define
             res.redirect(
               client?.applicationUrl +
-                `/${artist?.urlSlug}?tip=${success ? "success" : "canceled"}`
+                `/${artist.urlSlug}/tips/${tipId}/checkout-complete`
             );
           } else if (purchaseType === "subscription" && tierId && artist) {
             // FIXME: We'll probably want clients to be able to define the
@@ -74,9 +75,9 @@ export default function () {
             // they can define
             res.redirect(
               client?.applicationUrl +
-                `/${artist.urlSlug}?subscribe=${
+                `/${artist?.urlSlug}?trackGroupPurchase=${
                   success ? "success" : "canceled"
-                }&tierId=${tierId}`
+                }&trackGroupId=${trackGroupId}`
             );
           } else if (
             purchaseType === "trackGroup" &&
@@ -91,9 +92,7 @@ export default function () {
             // they can define
             res.redirect(
               client?.applicationUrl +
-                `/${artist?.urlSlug}?trackGroupPurchase=${
-                  success ? "success" : "canceled"
-                }&trackGroupId=${trackGroupId}`
+                `/${artist?.urlSlug}/release/${trackGroupId}/download`
             );
           } else if (
             purchaseType === "track" &&
