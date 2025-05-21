@@ -18,15 +18,23 @@ export default function () {
         const session = await stripe.checkout.sessions.retrieve(session_id, {
           stripeAccount: stripeAccountId,
         });
-        const { clientId, artistId, trackGroupId, tierId, gaveGift, merchId } =
-          session.metadata as unknown as {
-            clientId: number | null;
-            artistId: number | null;
-            gaveGift: 1 | null;
-            tierId: number | null;
-            trackGroupId: number | null;
-            merchId: string | null;
-          };
+        const {
+          clientId,
+          artistId,
+          trackGroupId,
+          tierId,
+          gaveGift,
+          merchId,
+          tipId,
+        } = session.metadata as unknown as {
+          clientId: number | null;
+          artistId: number | null;
+          gaveGift: 1 | null;
+          tierId: number | null;
+          trackGroupId: number | null;
+          merchId: string | null;
+          tipId: string | null;
+        };
         if (clientId && artistId) {
           const client = await prisma.client.findFirst({
             where: {
@@ -56,16 +64,14 @@ export default function () {
               client?.applicationUrl +
                 `/${artist?.urlSlug}?tip=${success ? "success" : "canceled"}`
             );
-          } else if (client && tierId && artist) {
+          } else if (tipId && artist) {
             // FIXME: We'll probably want clients to be able to define the
             // checkout callbackURL separately from the applicationURL
             // and that callbackURL should probably contain a pattern that
             // they can define
             res.redirect(
               client?.applicationUrl +
-                `/${artist.urlSlug}?subscribe=${
-                  success ? "success" : "canceled"
-                }&tierId=${tierId}`
+                `/${artist.urlSlug}/tips/${tipId}/checkout-complete`
             );
           } else if (client && trackGroupId && artistId) {
             // FIXME: We'll probably want clients to be able to define the
