@@ -4058,7 +4058,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@mirlo/prisma@workspace:prisma"
   dependencies:
-    "@types/node": "npm:18.11.12"
+    "@types/node": "npm:22"
     "@yarnpkg/pnpify": "npm:^4.0.1"
     prisma: "npm:5"
     prisma-json-types-generator: "npm:^3.0.4"
@@ -8547,19 +8547,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*, @types/node@npm:18.11.12":
+"@types/node@npm:*":
   version: 18.11.12
   resolution: "@types/node@npm:18.11.12"
   checksum: 10/b6ec76ea61ef7fdc3c4940ff8437c68f4a902f796f3bdd9845c25f49a6a1f4677049a827b6c660700f095f3ffe9713017e0a2e02e16eb0ff4d070b1da01c8116
   languageName: node
   linkType: hard
 
-"@types/node@npm:18":
-  version: 18.19.64
-  resolution: "@types/node@npm:18.19.64"
+"@types/node@npm:22":
+  version: 22.15.21
+  resolution: "@types/node@npm:22.15.21"
   dependencies:
-    undici-types: "npm:~5.26.4"
-  checksum: 10/c6383d4f6f3b3f1d48234b2e71e20d1ead4ac4ee31bbca7ef8719eedd1e79a425b35952d4b1ba3eff0a4e3eebd37b8a6e85e9af3bb88aa7b3fdae9cb66630820
+    undici-types: "npm:~6.21.0"
+  checksum: 10/cb4189587cca445bfb8166c0ed39f9344d743f37f3da892f2999a99bbabda45dc773237e61ecb7d1dc83dd95718cb1b5715b0be5dd7953565b19019e36a7cf39
   languageName: node
   linkType: hard
 
@@ -17934,7 +17934,7 @@ __metadata:
     "@types/minio": "npm:^7.0.18"
     "@types/mocha": "npm:^10.0.1"
     "@types/multer": "npm:^1.4.7"
-    "@types/node": "npm:18"
+    "@types/node": "npm:22"
     "@types/node-fetch": "npm:^2.6.11"
     "@types/nodemailer": "npm:^6.4.14"
     "@types/nodemailer-sendgrid": "npm:^1.0.0"
@@ -23655,6 +23655,13 @@ __metadata:
   version: 5.26.5
   resolution: "undici-types@npm:5.26.5"
   checksum: 10/0097779d94bc0fd26f0418b3a05472410408877279141ded2bd449167be1aed7ea5b76f756562cb3586a07f251b90799bab22d9019ceba49c037c76445f7cddd
+  languageName: node
+  linkType: hard
+
+"undici-types@npm:~6.21.0":
+  version: 6.21.0
+  resolution: "undici-types@npm:6.21.0"
+  checksum: 10/ec8f41aa4359d50f9b59fa61fe3efce3477cc681908c8f84354d8567bb3701fafdddf36ef6bff307024d3feb42c837cf6f670314ba37fc8145e219560e473d14
   languageName: node
   linkType: hard
 

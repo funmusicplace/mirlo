@@ -79,7 +79,7 @@
     "@types/minio": "^7.0.18",
     "@types/mocha": "^10.0.1",
     "@types/multer": "^1.4.7",
-    "@types/node": "18",
+    "@types/node": "22",
     "@types/node-fetch": "^2.6.11",
     "@types/nodemailer": "^6.4.14",
     "@types/nodemailer-sendgrid": "^1.0.0",

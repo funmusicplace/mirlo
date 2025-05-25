@@ -14,7 +14,7 @@ Main libraries:
 Prerequisites:
 
 - [Docker](https://www.docker.com/get-started/)
-- [Node.js 18](https://nodejs.org/en)
+- [Node.js 22](https://nodejs.org/en)
 - [Yarn 4](https://yarnpkg.com)
 
 Once node is installed, you can use [Corepack](https://nodejs.org/api/corepack.html) to automatically install the correct version of yarn (as defined in `package.json`):
