@@ -588,6 +588,7 @@ model Track {
   deletedAt           DateTime?
   isPreview           Boolean             @default(true)
   isFeatured          Boolean             @default(false)
+  allowMirloPromo     Boolean             @default(false)
   trackArtists        TrackArtist[]
   metadata            Json?
   plays               TrackPlay[]

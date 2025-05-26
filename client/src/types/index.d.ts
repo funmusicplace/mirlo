@@ -43,6 +43,7 @@ interface Track {
   trackGroupId: number;
   image: Image;
   order: number;
+  allowMirloPromo?: boolean;
   allowIndividualSale: boolean;
   description: string;
   minPrice: number; // in cents;

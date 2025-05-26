@@ -523,6 +523,8 @@
     "saveTrack": "Save track",
     "cancelChanges": "Cancel changes",
     "priceAndSuch": "Price & such",
+    "updatedAllTracks": "Updated all tracks",
+    "allowMirloPromo": "Allow Mirlo to use tracks in this album in their own promotional material. You will be credited.",
     "aboutTheAlbum": "About the album",
     "minPriceOnTracks": "Set the min price on tracks",
     "setPriceOfAllTracks": "Set the price on all tracks",
