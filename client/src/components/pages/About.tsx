@@ -225,9 +225,9 @@ const About: React.FC = () => {
       <div>
         <H2HashLink id="team">Our team</H2HashLink>
         <p>
-          Behind the platform Our members have experience working both within
-          Resonate and Ampled, other co-ops across several industries, and
-          complex high-traffic web platforms. We envision this platform as a
+          Behind the platform Our member stewards have experience working both
+          within Resonate and Ampled, other co-ops across several industries,
+          and complex high-traffic web platforms. We envision this platform as a
           tool to support musicians in cultivating direct and reciprocal
           relationships and resources to sustain one another’s creative
           practice.
@@ -248,11 +248,13 @@ const About: React.FC = () => {
             <a href="https://mirlo.space/static/Mirlo-Bylaws.pdf">
               our operating agreement
             </a>
-            . The company is managed by its members, listed below.
+            . The company is managed by its{" "}
+            <Link to="/team/posts/285/">member stewards</Link>, listed below.
           </p>
           <p>
-            Decisions on behalf of the company are made by consent of members,
-            meaning that no member objects to the decision taken. Feel free to{" "}
+            Decisions on behalf of the company are made by consent of member
+            stewards, meaning that no member steward objects to the decision
+            taken. Feel free to{" "}
             <a href="https://www.sociocracyforall.org/consent-decision-making/">
               learn more here
             </a>{" "}
@@ -260,11 +262,22 @@ const About: React.FC = () => {
             for All.
           </p>
           <p>
-            Members can also delegate specific domains of decision-making to
-            circles, defined teams that can include both members and
-            non-members. Those circles can make decisions within their delegated
-            domain by consent, without having to run it by the full members'
-            circle.{" "}
+            Stewards are the people who, through their contributions, help move
+            Mirlo forward; we want to ensure that anyone doing this work has an
+            opportunity to contribute meaningfully to the decisions that impact
+            how the platform runs itself. When someone joins Mirlo as a Steward,
+            they can also become legal owners; however, that is not a
+            requirement. Either way, Stewards are invited to the regular member
+            meetings and consent to decisions that impact the overall ecosystem
+            alongside legal members. To read more about how member stewards slot
+            operate within Mirlo, read our{" "}
+            <Link to="/team/posts/285/">blog post about it</Link>.
+          </p>
+          <p>
+            Work at Mirlo is done in circles, defined teams that can include
+            both stewards and organizer volunteers. Those circles can make
+            decisions within their delegated domain by consent, without having
+            to run it by the full members' circle.{" "}
             <a href="https://www.sociocracyforall.org/organizational-circle-structure-in-sociocracy/">
               This article from Sociocracy for All
             </a>{" "}
@@ -273,7 +286,7 @@ const About: React.FC = () => {
             transparency.
           </p>
         </div>
-        <h3>The worker owners</h3>
+        <h3>The member stewards</h3>
         <Person>
           <span
             className={css`
@@ -307,7 +320,8 @@ const About: React.FC = () => {
             with three Chilean collaborators. Alex has worked in the solidarity
             economy movement as co-founder of the mental health worker
             cooperative, Catalyst Cooperative Healing, as a working member of
-            Sociocracy for All, and as an Artist-Owner of Ampled.{" "}
+            Sociocracy for All, and as an Artist-Owner of Ampled. Alex is a
+            legal owner of Mirlo.
           </p>
         </Person>
         <Person>
@@ -337,10 +351,35 @@ const About: React.FC = () => {
             journalism in a past life. As a wage laborer he has worked as a
             software developer for UN organizations, fortune 500 companies, user
             experience agencies, fast growing start-ups, and not-for-profit
-            organizations.
+            organizations. Simon is a legal owner of Mirlo.
           </p>
         </Person>
+        <Person>
+          <span
+            className={css`
+              display: inline-block;
+              width: 10rem;
+              height: 10rem;
+              overflow: clip;
+              border-radius: 100%;
+              margin-right: 2rem;
+            `}
+          >
+            <img
+              src="https://mirlo.space/static/images/owner-pictures/llk.wbep"
+              alt="alex photo"
+              className={css`
+                margin-top: -2rem;
+              `}
+            />
+          </span>
 
+          <p>
+            LLK is a French musician and organizer. They make music for games,
+            movies, and as <Link to="/mowukis">Mowukis</Link>. They contribute
+            code, design, community engagement, and business strategy to Mirlo.
+          </p>
+        </Person>
         <h3>Previous member owners</h3>
         <ul>
           <li>

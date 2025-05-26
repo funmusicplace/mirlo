@@ -3,13 +3,7 @@ import { finalAudioBucket, removeObjectsFromBucket } from "../utils/minio";
 import ffmpeg from "fluent-ffmpeg";
 import logger from "../logger";
 import { Readable } from "stream";
-import {
-  Artist,
-  Track,
-  TrackArtist,
-  TrackAudio,
-  TrackGroup,
-} from "@mirlo/prisma/client";
+import { Artist, Track, TrackArtist, TrackAudio } from "@mirlo/prisma/client";
 import { Format } from "../jobs/generate-album";
 
 export const deleteTrack = async (trackId: number) => {
