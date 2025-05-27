@@ -62,9 +62,9 @@ export const getTrackUrl = (
 
 export const getMerchUrl = (
   artist: { urlSlug?: string; id: number },
-  merch: { id: string }
+  merch: { id: string; urlSlug?: string | null }
 ) => {
-  return `/${getArtistUrlReference(artist)}/merch/${merch.id}`;
+  return `/${getArtistUrlReference(artist)}/merch/${merch.urlSlug ?? merch.id}`;
 };
 
 export const getPostURLReference = (post: Post) => {

@@ -8,6 +8,7 @@ import {
 import prisma from "@mirlo/prisma";
 import { AppError } from "../../../../../utils/error";
 import { deleteMerch, processSingleMerch } from "../../../../../utils/merch";
+import slugify from "slugify";
 
 type Params = {
   merchId: string;
@@ -63,16 +64,18 @@ export default function () {
         "quantityRemaining",
         "isPublic",
         "includePurchaseTrackGroupId",
+        "urlSlug",
       ]);
+      const merch = await prisma.merch.findFirst({
+        where: {
+          id: merchId,
+        },
+      });
 
       if (newValues.includePurchaseTrackGroupId) {
         // check that the artist who owns this merch also
         // owns this trackgroup
-        const merch = await prisma.merch.findFirst({
-          where: {
-            id: merchId,
-          },
-        });
+
         const trackGroup = await prisma.trackGroup.findFirst({
           where: {
             artistId: merch?.artistId,
@@ -91,17 +94,22 @@ export default function () {
 
       await prisma.merch.updateMany({
         where: { id: merchId },
-        data: newValues,
+        data: {
+          ...newValues,
+          urlSlug: newValues.urlSlug
+            ? newValues.urlSlug?.trim()
+            : slugify(newValues.title ?? merch?.title),
+        },
       });
 
-      let merch = await prisma.merch.findFirst({
+      const updatedMerch = await prisma.merch.findFirst({
         where: { id: merchId },
         include: {
           includePurchaseTrackGroup: true,
         },
       });
 
-      res.json({ result: merch });
+      res.json({ result: updatedMerch });
     } catch (error) {
       next(error);
     }
