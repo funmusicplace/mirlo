@@ -18,11 +18,16 @@ export default function () {
     }
 
     try {
+      const merchForURLSlug = await prisma.merch.findFirst({
+        where: {
+          urlSlug: id,
+        },
+      });
       const merch = await prisma.merch.findFirst({
         where: {
           isPublic: true,
           deletedAt: null,
-          id,
+          id: merchForURLSlug?.id || id,
           shippingDestinations: {
             some: {},
           },

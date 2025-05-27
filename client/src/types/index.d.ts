@@ -43,6 +43,7 @@ interface Track {
   trackGroupId: number;
   image: Image;
   order: number;
+  allowMirloPromo?: boolean;
   allowIndividualSale: boolean;
   description: string;
   minPrice: number; // in cents;
@@ -353,6 +354,7 @@ interface Merch {
   title: string;
   minPrice: number;
   currency: string;
+  urlSlug: string | null;
   quantityRemaining: number;
   id: string;
   includePurchaseTrackGroupId?: number | null;

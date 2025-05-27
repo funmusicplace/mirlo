@@ -366,7 +366,7 @@ const About: React.FC = () => {
             `}
           >
             <img
-              src="https://mirlo.space/static/images/owner-pictures/llk.wbep"
+              src="https://mirlo.space/static/images/owner-pictures/llk.webp"
               alt="alex photo"
               className={css`
                 margin-top: -2rem;
@@ -395,13 +395,6 @@ const About: React.FC = () => {
           made this project a success, but we want to give a special shout out
           to:
           <ul>
-            <li>
-              <strong>
-                <a href="https://mowukis.com">Louis-Louise Kay</a>
-              </strong>
-              , who has tirelessly advocated, worked on, and given feedback on
-              the platform
-            </li>
             <li>
               <strong>Han</strong>, who has been a stalwart of our community,
               our insights, and collective education

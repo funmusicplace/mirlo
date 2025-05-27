@@ -36,6 +36,7 @@ export interface FormData {
   description: string;
   allowIndividualSale: boolean;
   minPrice: string;
+  allowMirloPromo: boolean;
 }
 
 const IndentedTR = styled("tr")`
@@ -71,6 +72,7 @@ const EditTrackRow: React.FC<{
       status: track.isPreview ? "preview" : "must-own",
       licenseId: track.licenseId,
       lyrics: track.lyrics,
+      allowMirloPromo: track.allowMirloPromo,
       description: track.description,
       isrc: track.isrc,
       minPrice: `${track?.minPrice !== undefined ? track.minPrice / 100 : "0"}`,
@@ -91,6 +93,7 @@ const EditTrackRow: React.FC<{
       status: track.isPreview ? "preview" : "must-own",
       licenseId: track.licenseId,
       isrc: track.isrc,
+      allowMirloPromo: track.allowMirloPromo,
       lyrics: track.lyrics,
       description: track.description,
       minPrice: `${track?.minPrice !== undefined ? track.minPrice / 100 : "0"}`,
@@ -108,6 +111,7 @@ const EditTrackRow: React.FC<{
           isrc: formData.isrc,
           lyrics: formData.lyrics,
           description: formData.description,
+          allowMirloPromo: formData.allowMirloPromo,
           isPreview: formData.status === "preview",
           allowIndividualSale: formData.allowIndividualSale,
           minPrice: formData.minPrice
@@ -248,6 +252,20 @@ const EditTrackRow: React.FC<{
           </td>
         </IndentedTR>
       )}
+      <IndentedTR>
+        <td colSpan={2}>
+          <label htmlFor={`${track.id}-allowMirloPromo`}>
+            {t("allowMirloPromo")}
+          </label>
+        </td>
+        <td colSpan={99}>
+          <FormCheckbox
+            idPrefix={`${track.id}-`}
+            keyName="allowMirloPromo"
+            description={t("allowMirloPromo")}
+          />
+        </td>
+      </IndentedTR>
       <IndentedTR>
         <td colSpan={2}>
           <label htmlFor="isrc">{t("isrcCode")}</label>

@@ -146,7 +146,7 @@ const MerchForm: React.FC<{
           rounded
           type="submit"
           disabled={isDisabled}
-          isLoading={isDisabled}
+          isLoading={isSaving}
         >
           {t("saveMerch")}
         </ArtistButton>
