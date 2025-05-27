@@ -23,6 +23,7 @@ const SavingInput: React.FC<{
   required?: boolean;
   step?: string;
   type?: string;
+  onEnter?: () => void;
   reload?: () => void;
 }> = ({
   formKey,
@@ -36,6 +37,7 @@ const SavingInput: React.FC<{
   timer,
   step,
   reload,
+  onEnter,
 }) => {
   const { register, getValues } = useFormContext();
   const errorHandler = useErrorHandler();
@@ -102,6 +104,11 @@ const SavingInput: React.FC<{
           step={step}
           min={min}
           id={id}
+          onKeyUp={(e) => {
+            if (e.key === "Enter") {
+              onEnter?.();
+            }
+          }}
         />
       )}
       {rows && (

@@ -385,6 +385,7 @@ model Merch {
   updatedAt                   DateTime                   @default(now()) @updatedAt
   deletedAt                   DateTime?
   artistId                    Int
+  urlSlug                     String?
   artist                      Artist                     @relation(fields: [artistId], references: [id])
   images                      MerchImage[]
   shippingDestinations        MerchShippingDestination[]
