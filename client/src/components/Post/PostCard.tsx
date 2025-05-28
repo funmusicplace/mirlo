@@ -2,13 +2,14 @@ import React from "react";
 import styled from "@emotion/styled";
 import { css } from "@emotion/css";
 import Box from "components/common/Box";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { getArtistUrl, getPostURLReference } from "utils/artist";
 import Overlay from "components/common/Overlay";
 import { useLinkContainer } from "utils/useLinkContainer";
 import { formatDate } from "components/TrackGroup/ReleaseDate";
 import { Trans, useTranslation } from "react-i18next";
 import { sample } from "lodash";
+import ArtistLink from "components/Artist/ArtistLink";
 
 const HalfTone: React.FC<{ color1?: string; color2?: string }> = ({
   color1,
@@ -59,10 +60,15 @@ const HalfTone: React.FC<{ color1?: string; color2?: string }> = ({
   );
 };
 
-const PostContainer = styled.li`
+const PostContainer = styled.li<{
+  isOnArtistPage?: boolean;
+  artistBackground?: string;
+}>`
   display: flex;
   border-radius: 5px;
-  background-color: var(--mi-darken-background-color);
+  background-color: ${(props) =>
+    (props.isOnArtistPage && props.artistBackground) ??
+    "var(--mi-normal-background-color)"};
   position: relative;
   filter: brightness(98%);
   width: 100%;
@@ -112,9 +118,22 @@ const PostCard: React.FC<{
     keyPrefix: "post",
   });
 
+  const { artistId } = useParams();
+
+  console.log("iar", artistId);
+
+  const isOnArtistPage = !!artistId;
+
+  const LinkToUse = isOnArtistPage ? ArtistLink : Link;
+  const artistBackground = post.artist?.properties?.colors?.background;
+
   return (
-    <PostContainer {...postContainerProps}>
-      <Overlay width="100%" height="100%" />
+    <PostContainer
+      isOnArtistPage={isOnArtistPage}
+      artistBackground={artistBackground}
+      {...postContainerProps}
+    >
+      <Overlay width="100%" height="100%" backgroundColor={artistBackground} />
       <Box
         className={css`
           height: 350px;
@@ -127,7 +146,8 @@ const PostCard: React.FC<{
           position: relative;
 
           @media (prefers-color-scheme: dark) {
-            background-color: var(--mi-normal-background-color);
+            background-color: ${(isOnArtistPage && artistBackground) ??
+            "var(--mi-normal-background-color)"};
           }
         `}
       >
@@ -165,7 +185,8 @@ const PostCard: React.FC<{
             overflow: hidden;
             transition: 0.2s ease-in-out;
             ${!post.featuredImage ? "height: 100%;" : ""}
-            background-color: var(--mi-normal-background-color);
+            background-color: ${(isOnArtistPage && artistBackground) ??
+            "var(--mi-normal-background-color)"};
           `}
         >
           {post.artist && (
@@ -188,7 +209,9 @@ const PostCard: React.FC<{
                   i18nKey="postByArtist"
                   values={{ artistName: post.artist?.name }}
                   components={{
-                    link: <Link to={getArtistUrl(post.artist)}></Link>,
+                    link: (
+                      <LinkToUse to={getArtistUrl(post.artist)}></LinkToUse>
+                    ),
                   }}
                 />
               </p>
@@ -210,7 +233,7 @@ const PostCard: React.FC<{
               }
             >
               {post.artist && (
-                <Link
+                <LinkToUse
                   to={postUrl}
                   className={
                     "post-container__link " +
@@ -222,7 +245,7 @@ const PostCard: React.FC<{
                   }
                 >
                   {post.title}
-                </Link>
+                </LinkToUse>
               )}
             </h3>
             <p

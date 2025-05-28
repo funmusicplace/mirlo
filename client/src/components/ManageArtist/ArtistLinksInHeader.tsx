@@ -10,7 +10,11 @@ import {
 import { FaPen, FaPlus } from "react-icons/fa";
 import { transformFromLinks } from "./ArtistFormLinks";
 import { Link } from "react-router-dom";
-import { ArtistButton } from "components/Artist/ArtistButtons";
+import {
+  ArtistButton,
+  ArtistButtonAnchor,
+  ArtistButtonLink,
+} from "components/Artist/ArtistButtons";
 
 const ArtistLinksInHeader: React.FC<{
   artist: Pick<Artist, "linksJson" | "links">;
@@ -31,36 +35,48 @@ const ArtistLinksInHeader: React.FC<{
     >
       <div
         className={css`
+          display: inline-flex;
+          align-items: center;
+          justify-content: flex-end;
+
           a {
             display: inline-flex;
             align-items: center;
             margin-right: 0.75rem;
-            color: var(--mi-normal-foreground-color);
 
             > svg {
               margin-right: 0.5rem;
             }
+          }
+
+          a:last-child {
+            margin-right: 0;
           }
         `}
       >
         {links.map((l) => {
           const site = findOutsideSite(l);
           return (
-            <a
+            <ArtistButtonAnchor
               rel="me"
               href={linkUrlHref(l.url, true)}
               key={l.url}
+              variant="link"
+              startIcon={site?.icon}
               target="_blank"
+              className={css`
+                display: inline-flex;
+                align-items: center;
+              `}
             >
-              {site.icon} {linkUrlDisplay(l)}
-            </a>
+              {linkUrlDisplay(l)}
+            </ArtistButtonAnchor>
           );
         })}
         {!isManage && allLinks.length > links.length && (
-          <Link to="links">
-            <FaPlus />
+          <ArtistButtonLink to="links" size="compact" variant="dashed">
             More links
-          </Link>
+          </ArtistButtonLink>
         )}
       </div>
 

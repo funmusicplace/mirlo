@@ -3,7 +3,8 @@ import { css } from "@emotion/css";
 const Overlay: React.FC<{
   height: string;
   width: string;
-}> = ({ height, width }) => {
+  backgroundColor?: string;
+}> = ({ height, width, backgroundColor }) => {
   const overlay = css`
     display: block;
     border: var(--mi-border);
@@ -17,8 +18,8 @@ const Overlay: React.FC<{
     transition: 0.2s ease-in-out;
     background: linear-gradient(
       0deg,
-      var(--mi-normal-background-color) 0%,
-      var(--mi-normal-background-color) 10%,
+      ${backgroundColor ?? "var(--mi-normal-background-color)"} 0%,
+      ${backgroundColor ?? "var(--mi-normal-background-color)"} 10%,
       rgba(0, 0, 0, 0) 30%,
       rgba(0, 0, 0, 0) 100%
     );
@@ -28,8 +29,8 @@ const Overlay: React.FC<{
       transition: 0.2s ease-in-out;
       background: linear-gradient(
         0deg,
-        var(--mi-normal-background-color) 0%,
-        var(--mi-normal-background-color) 10%,
+        ${backgroundColor ?? "var(--mi-normal-background-color)"} 0%,
+        ${backgroundColor ?? "var(--mi-normal-background-color)"} 10%,
         var(--mi-darken-background-color) 30%,
         rgba(0, 0, 0, 0) 100%
       );

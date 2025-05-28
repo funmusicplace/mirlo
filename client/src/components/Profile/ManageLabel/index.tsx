@@ -12,6 +12,9 @@ import AddArtistToRoster from "./AddArtistToRoster";
 import { useFieldArray, useForm } from "react-hook-form";
 import api from "services/api";
 import { useAuthContext } from "state/AuthContext";
+import { ButtonLink } from "components/common/Button";
+import { FaChevronRight } from "react-icons/fa";
+import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 
 const ProfileLabel: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "label" });
@@ -46,9 +49,22 @@ const ProfileLabel: React.FC = () => {
     refetch();
   };
 
+  if (!user) {
+    return <p>{t("notALabel")}</p>;
+  }
+
   return (
     <WidthContainer variant="big" justify="center">
-      <h2>{t("manageArtists")}</h2>
+      <SpaceBetweenDiv>
+        <h2>{t("manageArtists")}</h2>
+        <ButtonLink
+          to={`/label/${user.urlSlug}`}
+          endIcon={<FaChevronRight />}
+          variant="link"
+        >
+          {t("viewLabelPage")}
+        </ButtonLink>
+      </SpaceBetweenDiv>
       <AddArtistToRoster refresh={refetch} />
       <Table>
         <thead>

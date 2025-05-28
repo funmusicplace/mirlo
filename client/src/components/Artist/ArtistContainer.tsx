@@ -4,13 +4,8 @@ import { Outlet, useParams } from "react-router-dom";
 import ArtistHeaderSection from "../common/ArtistHeaderSection";
 import { useTranslation } from "react-i18next";
 import { ArtistPageWrapper } from "components/ManageArtist/ManageArtistContainer";
-import { FaEye, FaPen } from "react-icons/fa";
-import { bp } from "../../constants";
 import { useQuery } from "@tanstack/react-query";
 import { queryArtist } from "queries";
-import { useAuthContext } from "state/AuthContext";
-import FixedButtonLink from "components/common/FixedButton";
-import Manage from "components/ManageArtist/Manage";
 import ManageArtistButtons from "components/ManageArtist/ManageArtistButtons";
 
 const ArtistContainer: React.FC = () => {
@@ -21,7 +16,6 @@ const ArtistContainer: React.FC = () => {
   const { data: artist, isLoading: isArtistLoading } = useQuery(
     queryArtist({ artistSlug: artistId ?? "" })
   );
-  const { user } = useAuthContext();
 
   const artistBanner = artist?.banner?.sizes;
 
@@ -32,7 +26,10 @@ const ArtistContainer: React.FC = () => {
       <ManageArtistButtons />
       {!isPostOrRelease && (
         <>
-          <ArtistPageWrapper artistBanner={!!artistBanner}>
+          <ArtistPageWrapper
+            artistBanner={!!artistBanner}
+            artistBackground={artist?.properties?.colors?.background}
+          >
             <ArtistHeaderSection
               artist={artist}
               isLoading={isArtistLoading}

@@ -5,7 +5,6 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { useSnackbar } from "state/SnackbarContext";
 
-import api from "../../services/api";
 import Button, { ButtonLink } from "../common/Button";
 import FormComponent from "../common/FormComponent";
 import { InputEl } from "../common/Input";
@@ -148,7 +147,7 @@ function ProfileForm() {
                 endIcon={<FaChevronRight />}
                 variant="link"
               >
-                View Page
+                {t("viewLabelPage")}
               </ButtonLink>
             )}
           </div>

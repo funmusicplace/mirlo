@@ -16,7 +16,6 @@ import { useQuery } from "@tanstack/react-query";
 import { queryManagedArtist, queryUserStripeStatus } from "queries";
 import { useAuthContext } from "state/AuthContext";
 import api from "services/api";
-import LabelConfirmation from "./ManageArtistDetails/LabelConfirmation";
 
 const Container = styled.div<{ artistBanner: boolean }>`
   width: 100%;
@@ -42,7 +41,8 @@ const Container = styled.div<{ artistBanner: boolean }>`
 export const ArtistPageWrapper: React.FC<{
   children: React.ReactNode;
   artistBanner?: boolean;
-}> = ({ children, artistBanner }) => {
+  artistBackground?: string;
+}> = ({ children, artistBanner, artistBackground }) => {
   return (
     <Container artistBanner={!!artistBanner}>
       <div
@@ -50,7 +50,7 @@ export const ArtistPageWrapper: React.FC<{
           ${artistBanner
             ? "filter: drop-shadow(0 0 0.5rem rgba(50, 50, 50, 0.3));"
             : ""}
-          background: var(--mi-normal-background-color);
+          background-color: ${artistBackground ?? "transparent"};
           padding: 0 2rem 2rem;
           height: 100%;
 
@@ -95,7 +95,10 @@ const ManageArtistContainer: React.FC<{}> = () => {
     location.pathname.includes("/post/");
 
   return (
-    <ArtistPageWrapper artistBanner={!!artistBanner}>
+    <ArtistPageWrapper
+      artistBanner={!!artistBanner}
+      artistBackground={artist?.properties?.colors?.background}
+    >
       <>
         {user && artist.userId !== user.id && user.isAdmin && (
           <ArtistBox variant="warning">
