@@ -120,8 +120,6 @@ const PostCard: React.FC<{
 
   const { artistId } = useParams();
 
-  console.log("iar", artistId);
-
   const isOnArtistPage = !!artistId;
 
   const LinkToUse = isOnArtistPage ? ArtistLink : Link;
@@ -130,10 +128,14 @@ const PostCard: React.FC<{
   return (
     <PostContainer
       isOnArtistPage={isOnArtistPage}
-      artistBackground={artistBackground}
+      artistBackground={isOnArtistPage ? artistBackground : undefined}
       {...postContainerProps}
     >
-      <Overlay width="100%" height="100%" backgroundColor={artistBackground} />
+      <Overlay
+        width="100%"
+        height="100%"
+        backgroundColor={isOnArtistPage ? artistBackground : undefined}
+      />
       <Box
         className={css`
           height: 350px;

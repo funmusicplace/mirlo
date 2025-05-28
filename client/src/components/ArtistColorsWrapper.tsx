@@ -42,7 +42,9 @@ prefersDark?.addEventListener("change", () =>
   updateTheme(undefined, prefersDark.matches ? "dark" : "light")
 );
 
-const WrapperDiv = styled.div``;
+const WrapperDiv = styled.div`
+  min-height: 100vh;
+`;
 
 const ArtistColors: React.FC<{
   artistId: string;
