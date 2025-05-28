@@ -4,7 +4,8 @@ import FormCheckbox from "components/common/FormCheckbox";
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
 import React, { useState } from "react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
 
@@ -55,7 +56,15 @@ const AllowAllTracksForPromo: React.FC<BulkUpdateTracksProps> = ({
         checked={allowMirloPromo}
         onChange={() => handleBulkUpdate(!allowMirloPromo)}
       />{" "}
-      <label htmlFor="allowMirloPromo">{t("allowMirloPromo")}</label>
+      <label htmlFor="allowMirloPromo">
+        <Trans
+          t={t}
+          i18nKey={"allowMirloPromo"}
+          components={{
+            hype: <Link to="/team/posts/236/"></Link>,
+          }}
+        />
+      </label>
     </div>
   );
 };
