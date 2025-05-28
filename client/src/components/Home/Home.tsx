@@ -25,13 +25,6 @@ export const SectionHeader = styled.div<{ userId?: number }>`
     display: inline-block;
   }
 
-  @media (prefers-color-scheme: dark) {
-    background-color: var(--mi-normal-background-color);
-    .section-header__heading {
-      color: var(--mi-pink);
-    }
-  }
-
   @media screen and (max-width: ${bp.medium}px) {
     top: -0.1rem;
     .section-header__heading {

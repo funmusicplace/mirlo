@@ -58,7 +58,7 @@ const DropdownMenu: React.FC<{
             />
             <div
               className={css`
-                position: absolute;
+                position: fixed;
                 top: calc(${buttonPosition.y}px + 1.5rem);
                 left: ${buttonPosition.x}px;
                 transform: translateX(-100%);
@@ -126,12 +126,9 @@ const DropdownMenu: React.FC<{
         role="menu"
         onClick={(e) => {
           e.stopPropagation();
-          // @ts-ignore
           setButtonPosition({
-            // @ts-ignore
-            x: e.target.getBoundingClientRect().x,
-            // @ts-ignore
-            y: e.target.getBoundingClientRect().y,
+            x: e.clientX,
+            y: e.clientY,
           });
           setIsMenuOpen(true);
         }}
