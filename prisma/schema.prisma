@@ -67,6 +67,7 @@ model User {
   isLabelAccount                      Boolean                         @default(false)
   featureFlags                        String[]
   language                            String?
+  properties                          Json?
   userTrackGroupPurchases             UserTrackGroupPurchase[]
   artistUserSubscriptions             ArtistUserSubscription[]
   wishlist                            UserTrackGroupWishlist[]
