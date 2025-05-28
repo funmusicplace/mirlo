@@ -2,7 +2,7 @@ import React from "react";
 import { useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import AlbumForm from "../AlbumForm";
-import BulkTrackUpload from "../BulkTrackUpload";
+import BulkTrackUpload from "./BulkTrackUpload";
 import ManageTrackTable from "./ManageTrackTable";
 import PublishButton from "../PublishButton";
 import { bp } from "../../../constants";

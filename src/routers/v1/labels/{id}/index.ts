@@ -20,6 +20,7 @@ export default function () {
 
     try {
       const userId = await findUserIdForURLSlug(id);
+
       const label = await prisma.user.findUnique({
         where: { id: userId, isLabelAccount: true },
         select: {
@@ -39,6 +40,10 @@ export default function () {
                   trackGroups: {
                     include: {
                       cover: true,
+                      tracks: true,
+                    },
+                    where: {
+                      paymentToUserId: userId,
                     },
                     orderBy: {
                       releaseDate: "desc",

@@ -21,7 +21,7 @@ function CheckoutComplete() {
     queryArtist({ artistSlug: artistId ?? "" })
   );
   const { data: merch, isLoading: isLoadingMerch } = useQuery(
-    queryMerch({ merchId: merchId ?? "" })
+    queryMerch({ merchId: merchId ?? "", artistId: artistId ?? "" })
   );
 
   if (!artist && !isLoadingArtist) {

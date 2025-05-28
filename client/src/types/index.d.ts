@@ -112,6 +112,7 @@ interface TrackGroup {
 interface Post {
   title: string;
   id: number;
+  urlSlug?: string;
   content: string;
   publishedAt: string;
   artist?: Artist;
@@ -367,6 +368,12 @@ interface Merch {
   }[];
   shippingDestinations: ShippingDestination[];
   optionTypes: MerchOptionType[];
+}
+
+interface Label {
+  id: number;
+  name: string;
+  urlSlug: string;
 }
 
 interface MerchPurchase {

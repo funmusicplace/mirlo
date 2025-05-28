@@ -1,17 +1,11 @@
 import { css } from "@emotion/css";
 import React from "react";
 import { bp } from "../../constants";
-import {
-  Link,
-  Navigate,
-  Outlet,
-  useLocation,
-  useParams,
-} from "react-router-dom";
+import { Navigate, Outlet, useLocation, useParams } from "react-router-dom";
 import ArtistHeaderSection from "../common/ArtistHeaderSection";
 import { Trans, useTranslation } from "react-i18next";
 import styled from "@emotion/styled";
-import Box, { ArtistBox } from "components/common/Box";
+import { ArtistBox } from "components/common/Box";
 import { useQuery } from "@tanstack/react-query";
 import { queryManagedArtist, queryUserStripeStatus } from "queries";
 import { useAuthContext } from "state/AuthContext";

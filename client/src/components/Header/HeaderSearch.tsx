@@ -7,6 +7,11 @@ import AutoComplete from "components/common/AutoComplete";
 const constructUrl = (r: any) => {
   let url = "";
 
+  if (r.isLabel) {
+    url = `/label/${r.labelId}`;
+    return url;
+  }
+
   if (r.artistId) {
     url += r.artistId;
 
@@ -35,6 +40,11 @@ const HeaderSearch: React.FC = () => {
     const tracks = await api.getMany<Track>(`tracks`, {
       title: searchString.trim(),
     });
+
+    const labels = await api.getMany<Label>(`labels`, {
+      name: searchString.trim(),
+    });
+
     const results = [
       ...artists.results.map((r, rid) => ({
         firstInCategory: rid === 0,
@@ -61,6 +71,14 @@ const HeaderSearch: React.FC = () => {
         artistId: tr.trackGroup.artist.urlSlug ?? tr.trackGroup.artistId,
         name: tr.title,
         isTrack: true,
+      })),
+      ...labels.results.map((label, tid) => ({
+        firstInCategory: tid === 0,
+        id: label.id,
+        category: t("labels"),
+        labelId: label.urlSlug ?? label.id,
+        name: label.name,
+        isLabel: true,
       })),
     ];
     return results;

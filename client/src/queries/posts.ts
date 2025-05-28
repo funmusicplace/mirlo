@@ -2,25 +2,26 @@ import { QueryFunction, queryOptions } from "@tanstack/react-query";
 import * as api from "./fetch/fetchWrapper";
 import { QUERY_KEY_POSTS } from "./queryKeys";
 
-const fetchPost: QueryFunction<Post, ["fetchPost", { postId: number }]> = ({
-  queryKey: [_, { postId }],
-  signal,
-}) => {
+const fetchPost: QueryFunction<
+  Post,
+  ["fetchPost", { postId: string; artistId: string }]
+> = ({ queryKey: [_, { postId, artistId }], signal }) => {
   return api
     .get<{
       result: Post;
-    }>(`v1/posts/${postId}`, {
+    }>(`v1/posts/${postId}?artistId=${artistId}`, {
       signal,
     })
     .then((r) => r.result);
 };
 
-export function queryPost(opts: { postId: number }) {
+export function queryPost(opts: { postId: string; artistId: string }) {
   return queryOptions({
     queryKey: [
       "fetchPost",
       {
         postId: opts.postId,
+        artistId: opts.artistId,
       },
     ],
     queryFn: fetchPost,

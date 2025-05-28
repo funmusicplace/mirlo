@@ -1,16 +1,8 @@
 import { css } from "@emotion/css";
-import React from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate, useParams } from "react-router-dom";
-import { API_ROOT } from "../../constants";
+import { NavLink, Outlet, useParams } from "react-router-dom";
 import { bp } from "../../constants";
 
-import api from "../../services/api";
-import Button, { ButtonLink } from "../common/Button";
-import WidthContainer from "components/common/WidthContainer";
-import { useAuthContext } from "state/AuthContext";
-import styled from "@emotion/styled";
-import UploadArtistImage from "components/ManageArtist/UploadArtistImage";
 import { useQuery } from "@tanstack/react-query";
 import { queryLabelBySlug } from "queries";
 import { ArtistPageWrapper } from "components/ManageArtist/ManageArtistContainer";
@@ -24,8 +16,7 @@ import {
 } from "components/common/ArtistHeaderSection";
 import Avatar from "components/Artist/Avatar";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
-import TrackgroupGrid from "components/common/TrackgroupGrid";
-import ArtistSquare from "components/Artist/ArtistSquare";
+import Tabs from "components/common/Tabs";
 
 function Label() {
   const { t } = useTranslation("translation", { keyPrefix: "label" });
@@ -43,6 +34,13 @@ function Label() {
   if (!label) {
     return <div>{t("labelNotFound")}</div>;
   }
+
+  const trackGroups = label.artistLabels?.reduce((acc, al) => {
+    if (al.artist?.trackGroups) {
+      acc.push(...al.artist.trackGroups);
+    }
+    return acc;
+  }, [] as TrackGroup[]);
 
   return (
     <ArtistPageWrapper>
@@ -82,6 +80,20 @@ function Label() {
           </AvatarWrapper>
         </Header>
       </HeaderWrapper>
+      <Tabs
+        className={css`
+          margin-bottom: 1rem !important;
+        `}
+      >
+        <li>
+          <NavLink to="roster">{t("roster")}</NavLink>
+        </li>
+        {trackGroups.length > 0 && (
+          <li>
+            <NavLink to="releases">{t("releases")}</NavLink>
+          </li>
+        )}
+      </Tabs>
       <div
         className={css`
           display: flex;
@@ -91,12 +103,7 @@ function Label() {
           margin-top: 3rem;
         `}
       >
-        <h2>Roster</h2>
-        <TrackgroupGrid gridNumber="4" as="ul" role="list">
-          {label?.artistLabels?.map((al) => (
-            <ArtistSquare key={al.artist.id} artist={al.artist} />
-          ))}
-        </TrackgroupGrid>
+        <Outlet />
       </div>
     </ArtistPageWrapper>
   );

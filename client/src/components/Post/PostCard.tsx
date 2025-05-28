@@ -9,7 +9,7 @@ import { useLinkContainer } from "utils/useLinkContainer";
 import { formatDate } from "components/TrackGroup/ReleaseDate";
 import { Trans, useTranslation } from "react-i18next";
 import { sample } from "lodash";
-import ArtistLink from "components/Artist/ArtistLink";
+import { ArtistButtonLink } from "components/Artist/ArtistButtons";
 
 const HalfTone: React.FC<{ color1?: string; color2?: string }> = ({
   color1,
@@ -122,7 +122,7 @@ const PostCard: React.FC<{
 
   const isOnArtistPage = !!artistId;
 
-  const LinkToUse = isOnArtistPage ? ArtistLink : Link;
+  const LinkToUse = isOnArtistPage ? ArtistButtonLink : Link;
   const artistBackground = post.artist?.properties?.colors?.background;
 
   return (
@@ -204,6 +204,13 @@ const PostCard: React.FC<{
                   text-overflow: ellipsis;
                   padding-right: 3rem;
                   position: absolute;
+
+                  a {
+                    display: inline-block;
+                    width: auto;
+                    height: auto;
+                    margin-left: 0;
+                  }
                 `}
               >
                 <Trans
@@ -212,7 +219,10 @@ const PostCard: React.FC<{
                   values={{ artistName: post.artist?.name }}
                   components={{
                     link: (
-                      <LinkToUse to={getArtistUrl(post.artist)}></LinkToUse>
+                      <LinkToUse
+                        variant="link"
+                        to={getArtistUrl(post.artist)}
+                      ></LinkToUse>
                     ),
                   }}
                 />
@@ -231,24 +241,27 @@ const PostCard: React.FC<{
                 css`
                   padding-bottom: 0.3rem;
                   text-align: left;
+
+                  a {
+                    margin-left: 0;
+                  }
                 `
               }
             >
-              {post.artist && (
-                <LinkToUse
-                  to={postUrl}
-                  className={
-                    "post-container__link " +
-                    css`
-                      font-weight: normal;
-                      text-align: center;
-                      color: var(--mi-normal-foreground-color);
-                    `
-                  }
-                >
-                  {post.title}
-                </LinkToUse>
-              )}
+              <LinkToUse
+                to={postUrl}
+                variant="link"
+                className={
+                  "post-container__link " +
+                  css`
+                    font-weight: normal;
+                    text-align: center;
+                    color: var(--mi-normal-foreground-color);
+                  `
+                }
+              >
+                {post.title}
+              </LinkToUse>
             </h3>
             <p
               className={css`

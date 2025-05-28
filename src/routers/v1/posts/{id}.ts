@@ -13,12 +13,28 @@ export default function () {
 
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { id }: { id?: string } = req.params;
+    const { artistId }: { artistId?: string } = req.query;
     const user = req.user as User | undefined;
 
     try {
+      let postForURLSlug;
+      if (artistId) {
+        postForURLSlug = await prisma.post.findFirst({
+          where: {
+            AND: [
+              { urlSlug: id },
+              {
+                artist: {
+                  urlSlug: artistId,
+                },
+              },
+            ],
+          },
+        });
+      }
       const post = await prisma.post.findFirst({
         where: {
-          id: Number(id),
+          id: postForURLSlug?.id || Number(id),
           publishedAt: {
             lte: new Date(),
           },

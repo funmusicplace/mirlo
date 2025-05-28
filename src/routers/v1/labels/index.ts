@@ -8,7 +8,7 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
-    const { skip: skipQuery, take = 10, email } = req.query;
+    const { skip: skipQuery, take = 10, email, name } = req.query;
 
     try {
       let where: Prisma.UserWhereInput = {
@@ -16,7 +16,11 @@ export default function () {
       };
 
       if (email && typeof email === "string") {
-        where.name = { contains: email, mode: "insensitive" };
+        where.email = { contains: email, mode: "insensitive" };
+      }
+
+      if (name && typeof name === "string") {
+        where.name = { contains: name, mode: "insensitive" };
       }
 
       const users = await prisma.user.findMany({

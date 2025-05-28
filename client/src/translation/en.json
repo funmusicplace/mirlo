@@ -84,7 +84,8 @@
     "search": "Search music",
     "artists": "Artists",
     "albums": "Albums",
-    "tracks": "Tracks"
+    "tracks": "Tracks",
+    "labels": "Labels"
   },
   "profile": {
     "resetPasswordLink": "Want to change your password? Use the reset form",
@@ -236,7 +237,8 @@
     "addExistingArtistToRoster": "Invite an existing artist to join your roster. They'll have to accept your invite.",
     "createNewArtist": "Create new artist",
     "addNewArtistToRoster": "Create a new artist page and add them to your roster",
-    "roster": "Roster"
+    "roster": "Roster",
+    "releases": "Releases"
   },
   "artist": {
     "merch": "Merch",
@@ -599,6 +601,8 @@
     "artistOnMirlo": "Artist with a presence on Mirlo",
     "artist": "Artist",
     "editTrackArtists": "Edit track artists",
+    "nameOfAccountToReceivePayment": "Name of the account that will receive payments for this release.",
+    "receivePaymentDescription": "This is the account that will receive payments for this release. If you are part of a label or collective, this will be the label or collective account. Go to your artist page to manage these relationships.",
     "thereWasAnError": "There was an error uploading this track.",
     "doneUploading": "Uploaded all tracks. We still need to process them on our servers, but you can now safely close the browser.",
     "uploadingTracks": "Uploading tracks. This could take several minutes, please don't close the browser."
