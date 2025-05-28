@@ -5,7 +5,6 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { useSnackbar } from "state/SnackbarContext";
 
-import api from "../../services/api";
 import Button, { ButtonLink } from "../common/Button";
 import FormComponent from "../common/FormComponent";
 import { InputEl } from "../common/Input";
@@ -17,6 +16,7 @@ import { Toggle } from "components/common/Toggle";
 import { useProfileMutation } from "queries";
 import SlugInput from "components/common/SlugInput";
 import { FaChevronRight } from "react-icons/fa";
+import FeatureFlag from "components/common/FeatureFlag";
 
 type FormData = {
   name: string;
@@ -113,16 +113,18 @@ function ProfileForm() {
             ))}
           </SelectEl>
         </FormComponent>
-        <FormComponent>
-          <Toggle
-            label={t("isLabelAccount")}
-            toggled={isLabelAccount}
-            onClick={() => {
-              setValue("isLabelAccount", !isLabelAccount);
-            }}
-          />
-          <small>{t("makeSearchable")}</small>
-        </FormComponent>
+        <FeatureFlag featureFlag="label">
+          <FormComponent>
+            <Toggle
+              label={t("isLabelAccount")}
+              toggled={isLabelAccount}
+              onClick={() => {
+                setValue("isLabelAccount", !isLabelAccount);
+              }}
+            />
+            <small>{t("makeSearchable")}</small>
+          </FormComponent>
+        </FeatureFlag>
         {isLabelAccount && (
           <div
             className={css`
@@ -148,7 +150,7 @@ function ProfileForm() {
                 endIcon={<FaChevronRight />}
                 variant="link"
               >
-                View Page
+                {t("viewLabelPage")}
               </ButtonLink>
             )}
           </div>

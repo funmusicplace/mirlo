@@ -95,6 +95,12 @@ interface TrackGroup {
   tags?: string[];
   merch?: Merch[];
   isDraft?: boolean;
+  paymentToUserId?: number;
+  paymentToUser?: {
+    email: string;
+    name?: string;
+    id: number;
+  };
   cover?: {
     updatedAt: string;
     id: string;
@@ -112,6 +118,7 @@ interface TrackGroup {
 interface Post {
   title: string;
   id: number;
+  urlSlug?: string;
   content: string;
   publishedAt: string;
   artist?: Artist;
@@ -367,6 +374,12 @@ interface Merch {
   }[];
   shippingDestinations: ShippingDestination[];
   optionTypes: MerchOptionType[];
+}
+
+interface Label {
+  id: number;
+  name: string;
+  urlSlug: string;
 }
 
 interface MerchPurchase {

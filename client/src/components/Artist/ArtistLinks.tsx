@@ -14,6 +14,7 @@ import {
 import Avatar from "./Avatar";
 import { ArtistTitle } from "components/common/ArtistHeaderSection";
 import { FaChevronLeft } from "react-icons/fa";
+import { ArtistButtonAnchor, ArtistButtonLink } from "./ArtistButtons";
 
 const ArtistLinks: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
@@ -28,6 +29,7 @@ const ArtistLinks: React.FC = () => {
   }
 
   const artistAvatar = artist?.avatar;
+  const colors = artist?.properties?.colors;
 
   return (
     // <ArtistPageWrapper artistBanner={!!artistBanner}>
@@ -35,7 +37,6 @@ const ArtistLinks: React.FC = () => {
       <div
         className={css`
           max-width: 500px;
-          background: var(--mi-normal-background-color);
           margin: 3rem auto;
           padding: 4rem 3rem;
 
@@ -65,17 +66,18 @@ const ArtistLinks: React.FC = () => {
             <ArtistTitle artistAvatar={!!artistAvatar}>
               {artist.name}
             </ArtistTitle>
-            <Link
+            <ArtistButtonLink
               to={`/${artist.id}`}
+              startIcon={<FaChevronLeft />}
+              variant="link"
               className={css`
                 display: inline-flex;
                 margin-top: 1rem;
                 align-items: center;
               `}
             >
-              <FaChevronLeft />
-              Back to artist
-            </Link>
+              {t("backToArtist")}
+            </ArtistButtonLink>
           </div>
         </div>
         <ul
@@ -87,19 +89,20 @@ const ArtistLinks: React.FC = () => {
             list-style: none;
 
             li {
-              border: 1px solid var(--mi-darken-background-color);
+              border: 1px solid
+                ${colors?.primary ?? "var(--mi-darken-background-color)"};
               margin: 0.5rem;
 
               a {
-                padding: 0.8rem;
-                display: block;
+                padding: 1.6rem !important;
                 font-size: 1rem;
                 text-decoration: none;
                 margin-right: 0;
               }
 
               a:hover {
-                background-color: var(--mi-darken-x-background-color);
+                background-color: ${colors?.background ??
+                "var(--mi-darken-background-color)"};
               }
             }
           `}
@@ -108,23 +111,20 @@ const ArtistLinks: React.FC = () => {
             const site = findOutsideSite(l);
             return (
               <li key={l.url}>
-                <a
+                <ArtistButtonAnchor
                   rel="me"
                   href={linkUrlHref(l.url, true)}
                   target="_blank"
+                  variant="link"
+                  startIcon={site?.icon}
                   className={css`
-                    display: inline-flex;
                     align-items: center;
                     margin-right: 0.75rem;
-                    color: var(--mi-normal-foreground-color);
-
-                    > svg {
-                      margin-right: 0.5rem;
-                    }
+                    ${colors?.foreground ?? "var(--mi-foreground-color)"};
                   `}
                 >
-                  {site.icon} {linkUrlDisplay(l)}
-                </a>
+                  {linkUrlDisplay(l)}
+                </ArtistButtonAnchor>
               </li>
             );
           })}

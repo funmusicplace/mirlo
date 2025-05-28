@@ -21,6 +21,7 @@ import { Toggle } from "components/common/Toggle";
 import Box from "components/common/Box";
 import LabelConfirmation from "./LabelConfirmation";
 import useArtistQuery from "utils/useArtistQuery";
+import FeatureFlag from "components/common/FeatureFlag";
 
 export interface ShareableTrackgroup {
   creatorId: number;
@@ -287,24 +288,25 @@ export const CustomizeLook: React.FC = () => {
                 </div>
               </div>
             </ArtistFormSection>
-
-            <ArtistFormSection
-              className={css`
-                flex-direction: column;
-              `}
-            >
-              <Box variant="warning">{t("warningFeature")}</Box>
-              <FormComponent>
-                <Toggle
-                  label={t("enableActivityPub")}
-                  toggled={activityPub}
-                  onClick={() => {
-                    methods.setValue("activityPub", !activityPub);
-                  }}
-                />
-                <small>{t("makeSearchable")}</small>
-              </FormComponent>
-            </ArtistFormSection>
+            <FeatureFlag featureFlag="activityPub">
+              <ArtistFormSection
+                className={css`
+                  flex-direction: column;
+                `}
+              >
+                <Box variant="warning">{t("warningFeature")}</Box>
+                <FormComponent>
+                  <Toggle
+                    label={t("enableActivityPub")}
+                    toggled={activityPub}
+                    onClick={() => {
+                      methods.setValue("activityPub", !activityPub);
+                    }}
+                  />
+                  <small>{t("makeSearchable")}</small>
+                </FormComponent>
+              </ArtistFormSection>
+            </FeatureFlag>
             <ArtistFormSection
               isOdd
               className={css`

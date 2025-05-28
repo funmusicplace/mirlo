@@ -301,22 +301,19 @@ const About: React.FC = () => {
             <img
               src="https://mirlo.space/static/images/owner-pictures/alex-photo.png"
               alt="alex photo"
-              className={css`
-                margin-top: -2rem;
-              `}
             />
           </span>
 
           <p>
-            Alex (he / him) is a writer, organizer, and trombonist working at
-            the confluences of music and social transformation. He holds a PhD
-            in Ethnomusicology from UCLA, where his research focused on jazz
-            clubs and the communities that sustain them in Los Angeles, USA;
-            Santiago, Chile; and Novosibirsk, Siberia. His writing on the
-            contemporary jazz world has appeared in The Newark Star-Ledger, NPR
-            Music, LA Weekly, and DownBeat, among other outlets. He has also
-            trained in Deep Listening through the Center for Deep Listening and
-            is currently preparing his debut album project, Somewhere Else!!!!,
+            Alex is a writer, organizer, and trombonist working at the
+            confluences of music and social transformation. He holds a PhD in
+            Ethnomusicology from UCLA, where his research focused on jazz clubs
+            and the communities that sustain them in Los Angeles, USA; Santiago,
+            Chile; and Novosibirsk, Siberia. His writing on the contemporary
+            jazz world has appeared in The Newark Star-Ledger, NPR Music, LA
+            Weekly, and DownBeat, among other outlets. He has also trained in
+            Deep Listening through the Center for Deep Listening and is
+            currently preparing his debut album project, Somewhere Else!!!!,
             with three Chilean collaborators. Alex has worked in the solidarity
             economy movement as co-founder of the mental health worker
             cooperative, Catalyst Cooperative Healing, as a working member of
@@ -338,18 +335,15 @@ const About: React.FC = () => {
             <img
               src="https://mirlo.space/static/images/owner-pictures/simon-photo.jpg"
               alt="si photo"
-              className={css`
-                margin-top: -2rem;
-              `}
-            />{" "}
+            />
           </span>
 
           <p>
-            Simon (he / him) is a mutual aid, solidarity economy, and dual power
-            organizer in DC. In his free time he plays soccer and doodles. He
-            used to have a weekly radio slot on public radio, and has done music
-            journalism in a past life. As a wage laborer he has worked as a
-            software developer for UN organizations, fortune 500 companies, user
+            Simon is a mutual aid, solidarity economy, and dual power organizer
+            in DC. In his free time he plays soccer and doodles. He used to have
+            a weekly radio slot on public radio, and has done music journalism
+            in a past life. As a wage laborer he has worked as a software
+            developer for UN organizations, fortune 500 companies, user
             experience agencies, fast growing start-ups, and not-for-profit
             organizations. Simon is a legal owner of Mirlo.
           </p>
@@ -367,10 +361,7 @@ const About: React.FC = () => {
           >
             <img
               src="https://mirlo.space/static/images/owner-pictures/llk.webp"
-              alt="alex photo"
-              className={css`
-                margin-top: -2rem;
-              `}
+              alt="LLK photo"
             />
           </span>
 

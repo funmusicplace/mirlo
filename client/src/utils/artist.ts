@@ -69,7 +69,7 @@ export const getMerchUrl = (
 
 export const getPostURLReference = (post: Post) => {
   return post.artist
-    ? `/${getArtistUrlReference(post.artist)}/posts/${post.id}/`
+    ? `/${getArtistUrlReference(post.artist)}/posts/${post.urlSlug ?? post.id}/`
     : `/post/${post.id}`;
 };
 

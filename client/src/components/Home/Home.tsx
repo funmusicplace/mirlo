@@ -9,7 +9,6 @@ import SupportMirlo from "./SupportMirlo";
 export const SectionHeader = styled.div<{ userId?: number }>`
   padding-bottom: 0;
   line-height: 1rem;
-  background-color: var(--mi-normal-background-color);
   z-index: 5;
   margin-top: 0.25rem;
   margin-bottom: 0.25rem;
@@ -24,13 +23,6 @@ export const SectionHeader = styled.div<{ userId?: number }>`
     color: var(--mi-pink);
     padding-bottom: 0 !important;
     display: inline-block;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    background-color: var(--mi-normal-background-color);
-    .section-header__heading {
-      color: var(--mi-pink);
-    }
   }
 
   @media screen and (max-width: ${bp.medium}px) {

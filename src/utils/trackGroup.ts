@@ -158,6 +158,14 @@ export const trackGroupSingleInclude = (options: {
       },
       orderBy: { order: "asc" },
     },
+    paymentToUser: {
+      select: {
+        id: true,
+        name: true,
+        urlSlug: true,
+        userAvatar: true,
+      },
+    },
     artist: true,
     merch: {
       include: {

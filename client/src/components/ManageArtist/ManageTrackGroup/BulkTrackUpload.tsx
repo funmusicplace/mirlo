@@ -17,7 +17,7 @@ import {
   fileListIntoArray,
   parse,
   produceNewStatus,
-} from "./utils";
+} from "../utils";
 import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
 

@@ -193,6 +193,30 @@ const routes: RouteObject[] = [
           const { default: Component } = await import("components/Label");
           return { Component };
         },
+        children: [
+          {
+            path: "",
+            element: <Navigate to="roster" replace={true} />,
+          },
+          {
+            path: "roster",
+            async lazy() {
+              const { default: Component } = await import(
+                "components/Label/Roster"
+              );
+              return { Component };
+            },
+          },
+          {
+            path: "releases",
+            async lazy() {
+              const { default: Component } = await import(
+                "components/Label/Releases"
+              );
+              return { Component };
+            },
+          },
+        ],
       },
       {
         path: "manage",

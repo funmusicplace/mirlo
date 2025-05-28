@@ -12,12 +12,11 @@ import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
 import useJobStatusCheck from "utils/useJobStatusCheck";
 import LoadingSpinner from "components/common/LoadingSpinner";
-import Button from "components/common/Button";
 import { useAuthContext } from "state/AuthContext";
 import ManageTrackLicense from "../ManageTrackLicense";
 import ReplaceTrackAudioInput from "./ReplaceTrackAudioInput";
 import TextArea from "components/common/TextArea";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { queryArtist } from "queries";
 import { useQuery } from "@tanstack/react-query";
 import ShowRawID3Data from "./ShowRawID3Data";
@@ -255,7 +254,13 @@ const EditTrackRow: React.FC<{
       <IndentedTR>
         <td colSpan={2}>
           <label htmlFor={`${track.id}-allowMirloPromo`}>
-            {t("allowMirloPromo")}
+            <Trans
+              t={t}
+              i18nKey={"allowMirloPromo"}
+              components={{
+                hype: <Link to="/team/posts/236/"></Link>,
+              }}
+            />
           </label>
         </td>
         <td colSpan={99}>

@@ -1,17 +1,5 @@
-import {
-  QueryFunction,
-  queryOptions,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { QueryFunction, queryOptions } from "@tanstack/react-query";
 import * as api from "./fetch/fetchWrapper";
-import {
-  QUERY_KEY_ARTISTS,
-  QUERY_KEY_AUTH,
-  QUERY_KEY_PURCHASES,
-  queryKeyIncludes,
-  queryKeyMatches,
-} from "./queryKeys";
 
 const fetchArtistLabels: QueryFunction<
   ArtistLabel[],
