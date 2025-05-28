@@ -16,6 +16,7 @@ import { Toggle } from "components/common/Toggle";
 import { useProfileMutation } from "queries";
 import SlugInput from "components/common/SlugInput";
 import { FaChevronRight } from "react-icons/fa";
+import FeatureFlag from "components/common/FeatureFlag";
 
 type FormData = {
   name: string;
@@ -112,16 +113,18 @@ function ProfileForm() {
             ))}
           </SelectEl>
         </FormComponent>
-        <FormComponent>
-          <Toggle
-            label={t("isLabelAccount")}
-            toggled={isLabelAccount}
-            onClick={() => {
-              setValue("isLabelAccount", !isLabelAccount);
-            }}
-          />
-          <small>{t("makeSearchable")}</small>
-        </FormComponent>
+        <FeatureFlag featureFlag="label">
+          <FormComponent>
+            <Toggle
+              label={t("isLabelAccount")}
+              toggled={isLabelAccount}
+              onClick={() => {
+                setValue("isLabelAccount", !isLabelAccount);
+              }}
+            />
+            <small>{t("makeSearchable")}</small>
+          </FormComponent>
+        </FeatureFlag>
         {isLabelAccount && (
           <div
             className={css`

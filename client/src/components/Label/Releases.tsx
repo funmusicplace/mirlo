@@ -24,7 +24,9 @@ function Label() {
 
   const trackGroups = label.artistLabels?.reduce((acc, al) => {
     if (al.artist?.trackGroups) {
-      acc.push(...al.artist.trackGroups);
+      acc.push(
+        ...al.artist.trackGroups.map((tg) => ({ ...tg, artist: al.artist }))
+      );
     }
     return acc;
   }, [] as TrackGroup[]);

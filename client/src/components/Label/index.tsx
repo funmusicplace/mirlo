@@ -17,8 +17,12 @@ import {
 import Avatar from "components/Artist/Avatar";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import Tabs from "components/common/Tabs";
+import { ButtonLink } from "components/common/Button";
+import { useAuthContext } from "state/AuthContext";
+import { FaCog } from "react-icons/fa";
 
 function Label() {
+  const { user } = useAuthContext();
   const { t } = useTranslation("translation", { keyPrefix: "label" });
 
   const { labelSlug } = useParams();
@@ -75,6 +79,15 @@ function Label() {
                     </ArtistTitle>
                   </div>
                 </ArtistTitleText>
+                {label.id === user?.id && (
+                  <ButtonLink
+                    startIcon={<FaCog />}
+                    to="/profile/label"
+                    variant="dashed"
+                  >
+                    {t("manageLabel")}
+                  </ButtonLink>
+                )}
               </SpaceBetweenDiv>
             </ArtistTitleWrapper>
           </AvatarWrapper>
@@ -99,7 +112,6 @@ function Label() {
           display: flex;
           flex-direction: row;
           flex-wrap: wrap;
-          padding: var(--mi-side-paddings-xsmall);
           margin-top: 3rem;
         `}
       >

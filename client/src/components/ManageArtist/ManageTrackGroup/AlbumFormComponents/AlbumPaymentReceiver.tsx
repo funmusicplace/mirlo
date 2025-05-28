@@ -1,14 +1,26 @@
-import { ArtistButtonLink } from "components/Artist/ArtistButtons";
+import {
+  ArtistButton,
+  ArtistButtonLink,
+} from "components/Artist/ArtistButtons";
 import AutoComplete from "components/common/AutoComplete";
 import FormComponent from "components/common/FormComponent";
 import React from "react";
 import { Trans, useTranslation } from "react-i18next";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import api from "services/api";
 import { getArtistManageUrl } from "utils/artist";
 import useArtistQuery from "utils/useArtistQuery";
+import { hasId } from "./ManageTags";
+import { queryManagedTrackGroup, queryTrackGroup } from "queries";
+import { useQuery } from "@tanstack/react-query";
+import Pill from "components/common/Pill";
+import { FaTimes } from "react-icons/fa";
 
 const AlbumPaymentReceiver = () => {
+  const { trackGroupId } = useParams();
+  const { data: trackGroup, refetch } = useQuery(
+    queryManagedTrackGroup(Number(trackGroupId) || 0)
+  );
   const { data: artist } = useArtistQuery();
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
 
@@ -25,9 +37,21 @@ const AlbumPaymentReceiver = () => {
   }, []);
 
   const setLabelForPayment = React.useCallback(
-    (label: string | number | { id: string | number; name: string }) => {
-      // Handle the selection of a label for payment
-      console.log("Selected label for payment:", label);
+    async (
+      label: string | number | { id: string | number | null; name: string }
+    ) => {
+      try {
+        // Handle the selection of a label for payment
+        if (hasId(label)) {
+          await api.put(`manage/trackGroups/${trackGroupId}`, {
+            paymentToUserId: label.id,
+            artistId: artist?.id,
+          });
+        }
+        refetch();
+      } catch (error) {
+        console.error("Error setting label for payment:", error);
+      }
     },
     []
   );
@@ -40,10 +64,24 @@ const AlbumPaymentReceiver = () => {
     <div>
       <FormComponent>
         <label>{t("nameOfAccountToReceivePayment")}</label>
-        <AutoComplete
-          getOptions={searchUsers}
-          onSelect={setLabelForPayment}
-        ></AutoComplete>
+        {trackGroup?.paymentToUser && (
+          <Pill>
+            {trackGroup.paymentToUser.name}{" "}
+            <ArtistButton
+              variant="dashed"
+              startIcon={<FaTimes />}
+              onClick={() => {
+                setLabelForPayment({ id: null, name: "" });
+              }}
+            />
+          </Pill>
+        )}
+        {!trackGroup?.paymentToUser && (
+          <AutoComplete
+            getOptions={searchUsers}
+            onSelect={setLabelForPayment}
+          />
+        )}
         <small>
           <Trans
             t={t}

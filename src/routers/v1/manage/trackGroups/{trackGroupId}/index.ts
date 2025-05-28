@@ -100,6 +100,7 @@ export default function () {
         "credits",
         "platformPercent",
         "isGettable",
+        "paymentToUserId",
       ]);
 
       await prisma.trackGroup.updateMany({

@@ -95,6 +95,12 @@ interface TrackGroup {
   tags?: string[];
   merch?: Merch[];
   isDraft?: boolean;
+  paymentToUserId?: number;
+  paymentToUser?: {
+    email: string;
+    name?: string;
+    id: number;
+  };
   cover?: {
     updatedAt: string;
     id: string;

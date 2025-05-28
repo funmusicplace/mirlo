@@ -25,6 +25,7 @@ export default function () {
         where: { id: userId, isLabelAccount: true },
         select: {
           name: true,
+          id: true,
           currency: true,
           userAvatar: true,
           artistLabels: {
