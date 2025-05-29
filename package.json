@@ -56,7 +56,7 @@
     "shasum": "^1.0.2",
     "showdown": "^2.1.0",
     "slugify": "^1.6.6",
-    "stripe": "^12.0.0",
+    "stripe": "^13.0.0",
     "swagger-ui-express": "^4.6.0",
     "typescript": "5.1.6",
     "use-confirm": "^1.0.1",

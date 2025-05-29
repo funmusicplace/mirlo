@@ -254,20 +254,24 @@ const EditTrackRow: React.FC<{
       <IndentedTR>
         <td colSpan={2}>
           <label htmlFor={`${track.id}-allowMirloPromo`}>
-            <Trans
-              t={t}
-              i18nKey={"allowMirloPromo"}
-              components={{
-                hype: <Link to="/team/posts/236/"></Link>,
-              }}
-            />
+            {t("allowMirloPromoLabel")}
           </label>
         </td>
         <td colSpan={99}>
           <FormCheckbox
             idPrefix={`${track.id}-`}
             keyName="allowMirloPromo"
-            description={t("allowMirloPromo")}
+            description={
+              <p>
+                <Trans
+                  t={t}
+                  i18nKey={"allowMirloPromo"}
+                  components={{
+                    hype: <Link to="/team/posts/236/"></Link>,
+                  }}
+                />
+              </p>
+            }
           />
         </td>
       </IndentedTR>

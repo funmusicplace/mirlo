@@ -1,4 +1,3 @@
-import Button from "components/common/Button";
 import Money, {
   getCurrencySymbol,
   moneyDisplay,
@@ -7,6 +6,12 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
+
+import { loadStripe } from "@stripe/stripe-js";
+import {
+  EmbeddedCheckoutProvider,
+  EmbeddedCheckout,
+} from "@stripe/react-stripe-js";
 
 import { InputEl } from "components/common/Input";
 import FreeDownload from "./FreeDownload";
@@ -25,6 +30,11 @@ interface FormData {
   userEmail: string;
 }
 
+const stripeKey = import.meta.env.VITE_PUBLISHABLE_STRIPE_KEY;
+let stripePromise: ReturnType<typeof loadStripe> | undefined;
+if (stripeKey) {
+  stripePromise = loadStripe(stripeKey);
+}
 const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
   trackGroup,
   track,
@@ -43,6 +53,7 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
   });
   const { register, watch, handleSubmit, formState } = methods;
   const chosenPrice = watch("chosenPrice");
+  const [clientSecret, setClientSecret] = React.useState<string | null>(null);
 
   const purchaseAlbum = React.useCallback(
     async (data: FormData) => {
@@ -57,13 +68,18 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
           const url = track
             ? `tracks/${track.id}/purchase`
             : `trackGroups/${trackGroup.id}/purchase`;
-          const response = await api.post<{}, { redirectUrl: string }>(url, {
+          const response = await api.post<
+            {},
+            { redirectUrl: string; clientSecret: string }
+          >(url, {
             price: data.chosenPrice
               ? Number(data.chosenPrice) * 100
               : undefined,
             email: data.userEmail,
           });
-          window.location.assign(response.redirectUrl);
+          console.log("response", response.clientSecret);
+          setClientSecret(response.clientSecret);
+          // window.location.assign(response.redirectUrl);
         }
       } catch (e) {
         snackbar(t("error"), { type: "warning" });
@@ -89,98 +105,115 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
 
   const isDisabled = !!lessThan1 || lessThanMin || !formState.isValid;
 
+  if (clientSecret && stripePromise) {
+    return (
+      <EmbeddedCheckoutProvider
+        stripe={stripePromise}
+        options={{ clientSecret: clientSecret }}
+      >
+        <EmbeddedCheckout />
+      </EmbeddedCheckoutProvider>
+    );
+  }
+
   return (
     <FormProvider {...methods}>
-      {!!minPrice && minPrice > 0 && (
-        <>
-          {t("price")}{" "}
-          <Money amount={minPrice / 100} currency={trackGroup.currency} />, or
-        </>
-      )}
-      <form onSubmit={handleSubmit(purchaseAlbum)}>
-        <FormComponent>
-          {t("nameYourPrice", {
-            currency: getCurrencySymbol(trackGroup.currency, undefined),
-          })}
-          <InputEl
-            {...register("chosenPrice")}
-            type="number"
-            min={minPrice ? minPrice / 100 : 0}
-            step="0.01"
-          />
-          {Number(chosenPrice) > (minPrice ?? 1) * 100 && (
-            <Box variant="success">
-              {t("thatsGenerous", {
-                chosenPrice: moneyDisplay({
-                  amount: chosenPrice,
-                  currency: trackGroup.currency,
-                }),
-              })}
-            </Box>
-          )}
-          {lessThanMin && (
-            <small>{t("pleaseEnterMoreThan", { minPrice })}</small>
-          )}
-          <PlatformPercent
-            percent={trackGroup.platformPercent}
-            chosenPrice={chosenPrice}
-            currency={trackGroup.currency}
-            artist={trackGroup.artist}
-          />
-        </FormComponent>
+      <div
+        className={css`
+          padding: 1.5rem 2rem 2rem;
+        `}
+      >
+        {!!minPrice && minPrice > 0 && (
+          <>
+            {t("price")}{" "}
+            <Money amount={minPrice / 100} currency={trackGroup.currency} />, or
+          </>
+        )}
+        <form onSubmit={handleSubmit(purchaseAlbum)}>
+          <FormComponent>
+            {t("nameYourPrice", {
+              currency: getCurrencySymbol(trackGroup.currency, undefined),
+            })}
+            <InputEl
+              {...register("chosenPrice")}
+              type="number"
+              min={minPrice ? minPrice / 100 : 0}
+              step="0.01"
+            />
+            {Number(chosenPrice) > (minPrice ?? 1) * 100 && (
+              <Box variant="success">
+                {t("thatsGenerous", {
+                  chosenPrice: moneyDisplay({
+                    amount: chosenPrice,
+                    currency: trackGroup.currency,
+                  }),
+                })}
+              </Box>
+            )}
+            {lessThanMin && (
+              <small>{t("pleaseEnterMoreThan", { minPrice })}</small>
+            )}
+            <PlatformPercent
+              percent={trackGroup.platformPercent}
+              chosenPrice={chosenPrice}
+              currency={trackGroup.currency}
+              artist={trackGroup.artist}
+            />
+          </FormComponent>
 
-        <EmailInput required />
+          <EmailInput required />
 
-        <ArtistButton
-          size="big"
-          rounded
-          type="submit"
-          isLoading={stripeLoading}
-          title={
-            isDisabled
-              ? user
-                ? t("ensurePrice") ?? ""
-                : t("ensurePriceAndEmail") ?? ""
-              : ""
-          }
-          disabled={isDisabled}
-        >
-          {t(purchaseText)}
-        </ArtistButton>
-
-        <div
-          className={css`
-            margin-top: 1rem;
-
-            small {
-              display: block;
-              margin-bottom: 0.5rem;
+          <ArtistButton
+            size="big"
+            rounded
+            type="submit"
+            isLoading={stripeLoading}
+            title={
+              isDisabled
+                ? user
+                  ? (t("ensurePrice") ?? "")
+                  : (t("ensurePriceAndEmail") ?? "")
+                : ""
             }
-          `}
-        >
-          <small>{t("artistCheckoutPage")}</small>
+            disabled={isDisabled}
+          >
+            {t(purchaseText)}
+          </ArtistButton>
 
-          <small>{t("downloadDisclaimer")}</small>
-        </div>
-      </form>
-      {!isBeforeReleaseDate && (
-        <>
-          {!!minPrice && lessThanMin && (
-            <strong>
-              {t("lessThanMin", {
-                minPrice: moneyDisplay({
-                  amount: minPrice / 100,
-                  currency: trackGroup.currency,
-                }),
-                artistName: trackGroup.artist?.name,
-              })}
-            </strong>
-          )}
-          {!minPrice && (
-            <FreeDownload trackGroup={trackGroup} chosenPrice={chosenPrice} />
-          )}
-        </>
-      )}
+          <div
+            className={css`
+              margin-top: 1rem;
+
+              small {
+                display: block;
+                margin-bottom: 0.5rem;
+              }
+            `}
+          >
+            <small>{t("artistCheckoutPage")}</small>
+
+            <small>{t("downloadDisclaimer")}</small>
+          </div>
+        </form>
+        {!isBeforeReleaseDate && (
+          <>
+            {!!minPrice && lessThanMin && (
+              <strong>
+                {t("lessThanMin", {
+                  minPrice: moneyDisplay({
+                    amount: minPrice / 100,
+                    currency: trackGroup.currency,
+                  }),
+                  artistName: trackGroup.artist?.name,
+                })}
+              </strong>
+            )}
+            {!minPrice && (
+              <FreeDownload trackGroup={trackGroup} chosenPrice={chosenPrice} />
+            )}
+          </>
+        )}
+      </div>
     </FormProvider>
   );
 };

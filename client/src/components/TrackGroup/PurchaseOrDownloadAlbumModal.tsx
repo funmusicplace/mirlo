@@ -110,6 +110,7 @@ const PurchaseOrDownloadAlbum: React.FC<{
         title={
           t(purchaseTitle, { title: track?.title ?? trackGroup.title }) ?? ""
         }
+        noPadding
       >
         <BuyTrackGroup trackGroup={trackGroup} track={track} />
       </Modal>

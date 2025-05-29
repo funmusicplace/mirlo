@@ -157,7 +157,6 @@ describe("trackGroups/{id}/purchase", () => {
           .callsFake(async (_params) => {
             // return whatever
           });
-
         const { user } = await createUser({
           email: "artist@artist.com",
           stripeAccountId: "aRandomWord",
@@ -166,7 +165,6 @@ describe("trackGroups/{id}/purchase", () => {
         const trackGroup = await createTrackGroup(artist.id, {
           stripeProductKey: "testProductKey",
         });
-
         await purchaseAlbumEndpoint().POST[1](
           {
             body: { price: 15 },
@@ -175,9 +173,8 @@ describe("trackGroups/{id}/purchase", () => {
           {} as Response,
           () => {}
         );
-
         assert.equal(stubCreate.calledOnce, true);
-        const args = stubCreate.getCall(0).args;
+        const args = stubCreate.getCall(0).args as any; // Something wrong with how types get generated for the stub
         assert.equal(args[0].metadata?.artistId, artist.id);
         assert.equal(args[0].metadata?.trackGroupId, trackGroup.id);
         assert.equal(args[0].metadata?.stripeAccountId, user.stripeAccountId);
@@ -187,7 +184,6 @@ describe("trackGroups/{id}/purchase", () => {
           trackGroup.stripeProductKey
         );
       });
-
       it("should use the stripe account of the paymentUser", async () => {
         const stubCreate = sinon.stub(
           stripeUtils.stripe.checkout.sessions,
@@ -199,7 +195,6 @@ describe("trackGroups/{id}/purchase", () => {
           .callsFake(async (_params) => {
             // return whatever
           });
-
         const { user: artistUser } = await createUser({
           email: "artist@artist.com",
           stripeAccountId: "aRandomWord",
@@ -213,7 +208,6 @@ describe("trackGroups/{id}/purchase", () => {
           stripeProductKey: "testProductKey",
           paymentToUserId: labelUser.id,
         });
-
         await purchaseAlbumEndpoint().POST[1](
           {
             body: { price: 15 },
@@ -222,9 +216,8 @@ describe("trackGroups/{id}/purchase", () => {
           {} as Response,
           () => {}
         );
-
         assert.equal(stubCreate.calledOnce, true);
-        const args = stubCreate.getCall(0).args;
+        const args = stubCreate.getCall(0).args as any; // Something wrong with how types get generated for the stub
         assert.equal(args[0].metadata?.artistId, artist.id);
         assert.equal(args[0].metadata?.trackGroupId, trackGroup.id);
         assert.equal(

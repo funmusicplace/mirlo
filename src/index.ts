@@ -166,6 +166,7 @@ const routes = [
   "manage/posts/{postId}",
   "manage/posts",
   "checkout",
+  "checkout/status",
   "webhooks/stripe",
   "webhooks/stripe/connect",
   "jobs",

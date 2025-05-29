@@ -1,11 +1,6 @@
 import Stripe from "stripe";
 import prisma from "@mirlo/prisma";
-import {
-  Prisma,
-  User,
-  MerchShippingDestination,
-  Track,
-} from "@mirlo/prisma/client";
+import { Prisma, User, MerchShippingDestination } from "@mirlo/prisma/client";
 import { logger } from "../logger";
 import { Request, Response } from "express";
 import { findOrCreateUserBasedOnEmail } from "./user";
@@ -23,13 +18,12 @@ import {
 } from "./handleFinishedTransactions";
 import countryCodesCurrencies from "./country-codes-currencies";
 import { manageSubscriptionReceipt } from "./subscription";
-import purchase from "../routers/v1/merch/{id}/purchase";
 
 const { STRIPE_KEY, API_DOMAIN } = process.env;
 
 export const OPTION_JOINER = ";;";
 
-let stripeConfig: Stripe.StripeConfig = { apiVersion: "2022-11-15" };
+let stripeConfig: Stripe.StripeConfig = { apiVersion: "2023-08-16" };
 
 if (process.env.NODE_ENV === "test") {
   const { STRIPE_HOST, STRIPE_PORT, STRIPE_PROTOCOL } = process.env;
@@ -533,6 +527,7 @@ export const createStripeCheckoutSessionForPurchase = async ({
           trackGroup.platformPercent
         ),
       },
+      ui_mode: "embedded",
       line_items: [
         {
           price_data: {
@@ -554,8 +549,7 @@ export const createStripeCheckoutSessionForPurchase = async ({
         stripeAccountId,
       },
       mode: "payment",
-      success_url: `${API_DOMAIN}/v1/checkout?success=true&stripeAccountId=${stripeAccountId}&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${API_DOMAIN}/v1/checkout?canceled=true`,
+      return_url: `${API_DOMAIN}/v1/checkout?success=true&stripeAccountId=${stripeAccountId}&session_id={CHECKOUT_SESSION_ID}`,
     },
     { stripeAccount: stripeAccountId }
   );
@@ -825,7 +819,7 @@ export const createCheckoutSessionForSubscription = async ({
             tax_behavior: "exclusive",
             unit_amount: tier.allowVariable
               ? amount || (tier.minAmount ?? 0)
-              : tier.minAmount ?? 0,
+              : (tier.minAmount ?? 0),
             currency: tier.currency ?? "USD",
             product: productKey,
             recurring: {
