@@ -125,7 +125,7 @@ const PriceAndSuch: React.FC<{
                   url={`manage/trackGroups/${trackGroupId}`}
                   extraData={{ artistId: Number(artistId) }}
                 />
-                {errors.minPrice && (
+                {errors.platformPercent && (
                   <FormError>{t("platformPercent")}</FormError>
                 )}
               </FormComponent>

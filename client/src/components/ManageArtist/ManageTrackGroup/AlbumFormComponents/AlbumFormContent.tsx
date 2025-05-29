@@ -6,19 +6,16 @@ import FormComponent from "components/common/FormComponent";
 import { useTranslation } from "react-i18next";
 
 import UploadArtistImage from "../../UploadArtistImage";
-import FormError from "components/common/FormError";
 import { useParams } from "react-router-dom";
 
 import SavingInput from "./SavingInput";
 import { css } from "@emotion/css";
 import { bp } from "../../../../constants";
 import ManageTags from "./ManageTags";
-import PaymentSlider from "./PaymentSlider";
-import { getCurrencySymbol } from "components/common/Money";
+
 import { useAuthContext } from "state/AuthContext";
 import styled from "@emotion/styled";
-import SetPriceOfAllTracks from "../SetPriceOfAllTracks";
-import { CheckBoxLabel } from "components/common/FormCheckbox";
+
 import PriceAndSuch from "./PriceAndSuch";
 
 export const FormSection = styled.div`

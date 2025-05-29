@@ -301,6 +301,7 @@ model ArtistSubscriptionTier {
   isDefaultTier         Boolean                  @default(false)
   platformPercent       Int?                     @default(7)
   autoPurchaseAlbums    Boolean                  @default(false)
+  collectAddress        Boolean?                 @default(false)
 }
 
 enum Interval {
