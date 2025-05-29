@@ -46,12 +46,12 @@ const PostHeader: React.FC<{ post: Post }> = ({ post }) => {
   return (
     <div
       className={css`
-        height: ${featuredImage ? "50vh" : "30vh"};
+        ${featuredImage ? "height: 50vh" : "min-height: 20vh"};
         overflow: none;
         position: relative;
 
         @media (max-width: ${bp.medium}px) {
-          height: ${featuredImage ? "70vh" : "20vh"};
+          height: ${featuredImage ? "50vh" : "min-height: 20vh"};
         }
       `}
     >
@@ -78,35 +78,36 @@ const PostHeader: React.FC<{ post: Post }> = ({ post }) => {
             : ""};
           height: 100%;
           display: flex;
-          align-items: flex-end;
+          ${featuredImage ? "align-items: flex-end" : ""};
           position: relative;
           z-index: 1;
         `}
       >
         <div
           className={css`
-        padding: 1rem;
-    margin: 0 auto 0;
-    background: 
-    display: flex;
-    max-width: var(--mi-container-medium);
+            padding: 1rem;
+            margin: 0 auto 0;
+            display: flex;
+            max-width: var(--mi-container-medium);
 
-    justify-content: center;
-    width: 100%;
-    position: relative;
-    color: ${featuredImage ? "var(--mi-white)" : post?.artist?.properties?.colors?.primary} !important;
+            justify-content: center;
+            width: 100%;
+            position: relative;
+            color: ${featuredImage
+              ? "var(--mi-white)"
+              : post?.artist?.properties?.colors?.primary} !important;
 
-    h1 {
-      margin-bottom: 0.5rem;
-      font-size: 3rem;
-    }
+            h1 {
+              margin-bottom: 0.5rem;
+              font-size: 3rem;
+            }
 
-    @media (min-width: ${bp.medium}px) {
-      font-size: 1.2rem;
-      font-weight: 100;
-      line-height: 1.5rem;
-    }
-  `}
+            @media (min-width: ${bp.medium}px) {
+              font-size: 1.2rem;
+              font-weight: 100;
+              line-height: 1.5rem;
+            }
+          `}
         >
           {post.artistId && (
             <div

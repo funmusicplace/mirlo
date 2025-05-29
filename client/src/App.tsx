@@ -13,6 +13,7 @@ import { MetaCard } from "components/common/MetaCard";
 import ArtistColorsWrapper from "components/ArtistColorsWrapper";
 import CookieDisclaimer from "components/CookieDisclaimer";
 import { useAuthContext } from "state/AuthContext";
+import ScrollToTop from "components/ScrollToTop";
 
 function App() {
   const { isDisplayed } = useContext(SnackbarContext);
@@ -27,6 +28,7 @@ function App() {
 
   return (
     <>
+      <ScrollToTop />
       <MetaCard
         title="Mirlo"
         description="A music distribution and patronage site"

@@ -16,7 +16,7 @@ import { useAuthContext } from "state/AuthContext";
 import { ButtonLink } from "components/common/Button";
 import { useTranslation } from "react-i18next";
 import { FaHandHoldingHeart } from "react-icons/fa";
-import { queryInstanceArtist, querySetting } from "queries/settings";
+import { queryInstanceArtist } from "queries/settings";
 import { useQuery } from "@tanstack/react-query";
 import { getArtistUrl } from "utils/artist";
 
@@ -26,6 +26,12 @@ const HeaderWrapper = styled.div<{
   artistId?: boolean;
   show?: string;
   trackGroupId?: boolean;
+  colors?: {
+    primary?: string;
+    secondary?: string;
+    foreground?: string;
+    background?: string;
+  };
 }>`
   position: sticky;
   width: 100%;
@@ -56,20 +62,6 @@ const HeaderWrapper = styled.div<{
          box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1) !important;`
       : ""}
 
-  @media (prefers-color-scheme: dark) {
-    ${(props) =>
-      props.transparent
-        ? `background-color: transparent; 
-           box-shadow: 0px 1px 10px rgba(0, 0, 0, 0);`
-        : `background-color: #111; 
-           box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.3); 
-           color: pink;`}
-    ${(props) =>
-      props.artistId && !props.artistBanner
-        ? "background-color: var(--mi-normal-background-color);"
-        : ""}
-  }
-
   ${(props) =>
     props.trackGroupId
       ? "background-color: var(--mi-normal-background-color);"
@@ -93,7 +85,7 @@ const HeaderWrapper = styled.div<{
         ? `top: calc(var(--header-cover-sticky-height) - 25vw); 
            aspect-ratio: 4 / 1; 
            width: auto; 
-           min-height: auto; 
+           height: var(--header-cover-sticky-height); 
            transition: top 0.4s ease-out;`
         : ""}
     ${(props) =>
@@ -107,14 +99,6 @@ const HeaderWrapper = styled.div<{
 
 
     ${(props) => (props.trackGroupId ? "aspect-ratio: 0;" : "")}
-
-    @media (prefers-color-scheme: dark) {
-      ${(props) =>
-        props.artistBanner || props.transparent
-          ? `background: transparent; 
-             box-shadow: 0px 1px 10px rgba(0, 0, 0, 0);`
-          : "box-shadow: 0px 1px 10px rgba(0, 0, 0, .5);"}
-    }
   }
 `;
 
@@ -196,6 +180,7 @@ const Header = () => {
 
   const { object: artist } = usePublicArtist<Artist>("artists", artistId);
   const artistBanner = artist?.banner?.sizes;
+  const colors = artist?.properties?.colors;
 
   const show = useShow();
   const transparent = !!artistBanner && !!artistId;
@@ -208,6 +193,7 @@ const Header = () => {
       show={show}
       trackGroupId={!!trackGroupId}
       artistId={!!artistId}
+      colors={colors}
     >
       <div
         className={css`
@@ -265,15 +251,6 @@ const Header = () => {
                 }
 
                 background-color: var(--mi-black) !important;
-
-                @media (prefers-color-scheme: dark) {
-                  background-color: var(--mi-white) !important;
-                  color: var(--mi-black) !important;
-
-                  svg {
-                    fill: var(--mi-black) !important;
-                  }
-                }
 
                 @media screen and (max-width: ${bp.medium}px) {
                   font-size: var(--mi-font-size-xsmall) !important;

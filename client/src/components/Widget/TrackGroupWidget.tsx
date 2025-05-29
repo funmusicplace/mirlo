@@ -102,25 +102,15 @@ const TrackGroupWidget = () => {
       `}
     >
       <TgWidgetWrapper>
-        <MetaCard
-          title={`${trackGroup.title} by ${
-            trackGroup.artist?.name ?? "Unknown"
-          }`}
-          description={`An album on Mirlo`}
-          image={trackGroup.cover?.sizes?.[600]}
-          player={widgetUrl(trackGroup.id, "trackGroup")}
-        />
         <FlexWrapper
           className={css`
             flex: 55%;
             max-width: 360px;
             position: relative;
+            height: 100%;
 
-            @media screen and (max-width: ${bp.small}px) {
-              max-width: 227px;
+            > div {
               width: 100%;
-              flex: 100%;
-              margin-bottom: 0.5rem;
             }
           `}
         >
