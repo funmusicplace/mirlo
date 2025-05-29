@@ -115,11 +115,11 @@ const close = css`
   }
 `;
 
-function dialogIDFromTitle(title) {
+function dialogIDFromTitle(title: string | null) {
 	return !title ? null : title.toLowerCase().trim().replace(" ", "-")
 }
 
-function dialogLabelFromTitle(title) {
+function dialogLabelFromTitle(title: string | null) {
 	return !title ? null : title.toLowerCase().trim().replace(" ", "-").concat("-label")
 }
 
