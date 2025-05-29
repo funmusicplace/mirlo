@@ -3,7 +3,7 @@ import { User } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 import { TokenExpiredError } from "jsonwebtoken";
 import passport from "passport";
-import passportJWT from "passport-jwt";
+import passportJWT, { JwtFromRequestFunction } from "passport-jwt";
 import prisma from "@mirlo/prisma";
 import { findArtistIdForURLSlug } from "../utils/artist";
 import logger from "../logger";
@@ -18,7 +18,7 @@ const JWTStrategy = passportJWT.Strategy;
 
 const secret = process.env.JWT_SECRET;
 
-const cookieExtractor = (req: Request) => {
+const cookieExtractor: JwtFromRequestFunction = (req) => {
   let jwt = null;
 
   if (req && req.cookies) {
@@ -33,7 +33,7 @@ passport.use(
   new JWTStrategy(
     {
       jwtFromRequest: cookieExtractor,
-      secretOrKey: secret,
+      secretOrKey: secret ?? "",
     },
     async (jwtPayload, done) => {
       const { expiration, email } = jwtPayload;

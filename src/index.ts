@@ -54,7 +54,7 @@ app.use(
 
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
-app.use(passport.initialize());
+// app.use(passport.initialize()); // Supposedly we don't need this anymore
 
 if (!isDev) {
   const limiter = rateLimit({
@@ -202,6 +202,7 @@ initialize({
 
 app.use(
   "/docs",
+  // @ts-ignore
   swaggerUi.serve,
   swaggerUi.setup(undefined, {
     swaggerOptions: {
