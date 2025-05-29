@@ -806,6 +806,11 @@ export const createCheckoutSessionForSubscription = async ({
   const session = await stripe.checkout.sessions.create(
     {
       billing_address_collection: "auto",
+      shipping_address_collection: tier.collectAddress
+        ? {
+            allowed_countries: ["US", "GB", "CA", "AU", "NZ"],
+          }
+        : undefined,
       customer_email: loggedInUser?.email || email,
       subscription_data: {
         application_fee_percent: await calculatePlatformPercent(
