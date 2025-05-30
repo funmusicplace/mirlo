@@ -115,19 +115,19 @@ const close = css`
   }
 `;
 
-function dialogIDFromTitle(title: string | null) {
-	return !title ? null : title.toLowerCase().trim().replace(" ", "-")
+function dialogIDFromTitle(title?: string | null) {
+	return !title ? undefined : title.toLowerCase().trim().replace(" ", "-")
 }
 
-function dialogLabelFromTitle(title: string | null) {
-	return !title ? null : title.toLowerCase().trim().replace(" ", "-").concat("-label")
+function dialogLabelFromTitle(title?: string | null) {
+	return !title ? undefined : title.toLowerCase().trim().replace(" ", "-").concat("-label")
 }
 
 export const Modal: React.FC<{
   open: boolean;
   children: React.ReactNode;
   title?: string | null;
-	id?: string | null;
+	id?: string;
 	ariaDescribedBy?: string | null;
   onClose: () => void;
   size?: "small";
