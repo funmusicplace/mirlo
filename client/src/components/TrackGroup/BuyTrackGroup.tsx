@@ -87,7 +87,7 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
 
   console.log("errors", formState.errors);
 
-  const isDisabled = !!lessThan1 || lessThanMin || !formState.isValid;
+  const isDisabled = !!lessThan1 || lessThanMin;
 
   return (
     <FormProvider {...methods}>
