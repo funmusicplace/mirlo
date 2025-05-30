@@ -37,13 +37,10 @@ const updateTheme = (artistColors?: any, theme?: "dark" | "light") => {
   );
 };
 
-const prefersDark = window.matchMedia?.("(prefers-color-scheme: dark)");
-prefersDark?.addEventListener("change", () =>
-  updateTheme(undefined, prefersDark.matches ? "dark" : "light")
-);
-
 const WrapperDiv = styled.div`
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 `;
 
 const ArtistColors: React.FC<{
@@ -57,10 +54,6 @@ const ArtistColors: React.FC<{
 
   const artistColors =
     managedArtist?.properties?.colors ?? artist?.properties?.colors;
-
-  React.useEffect(() => {
-    updateTheme(artistColors, prefersDark.matches ? "dark" : "light");
-  }, [artistColors]);
 
   if (!artist) {
     return <WrapperDiv>{children}</WrapperDiv>;

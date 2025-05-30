@@ -519,6 +519,7 @@
     "howMuchModalText": "Mirlo thrives on artist contributions—whether through monthly support or a slice of album sales. But we get it: every cent counts, and only you know what you can afford. That’s why we let you decide how much of your sales goes to Mirlo. Your art, your call."
   },
   "manageAlbum": {
+    "allowMirloPromoLabel": "Allow Mirlo to use it for promotion?",
     "isGettable": "Is it possible for a user to buy or download this album?",
     "isGettableTooltip": "We don't want to take this for granted! Some musicians just want to share their music, but don't want to let people download it.",
     "isGettableInfo": "Disabling this will make it so that users can't buy or download your album, but they can listen to it online for free. Most people will want to leave this enabled.",
@@ -673,11 +674,15 @@
   },
   "subscriptionForm": {
     "supporters": "Manage supporters",
+    "theMoneyBit": "The money bit",
+    "platformPercent": "Platform cut",
     "inCurrency": "In {{ currency }}",
     "subscriptionUpdated": "Subscription updated",
     "interval": "What's the interval for this subscription?",
     "monthly": "Monthly",
     "yearly": "Yearly",
+    "rewards": "Rewards",
+    "collectAddress": "If rewards for this tier of support require shipping, collect the address of the supporter?",
     "name": "Name: ",
     "addNewTier": "Add new tier",
     "allowVariableDescription": "Allow supporters to enter a larger number?",

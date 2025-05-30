@@ -158,7 +158,6 @@ describe("tracks/{id}/purchase", () => {
           .stub(stripeUtils.stripe.products, "retrieve")
           // @ts-ignore
           .callsFake(async (_params) => {
-            console.log("retrieving");
             return "testProductKey";
           });
 
@@ -182,13 +181,13 @@ describe("tracks/{id}/purchase", () => {
         );
 
         assert.equal(stubCreate.calledOnce, true);
-        const args = stubCreate.getCall(0).args;
-        assert.equal(args[0].metadata?.artistId, artist.id);
-        assert.equal(args[0].metadata?.trackId, track.id);
-        assert.equal(args[0].metadata?.stripeAccountId, user.stripeAccountId);
-        assert.equal(args[0].line_items?.[0].quantity, 1);
+        const args = stubCreate.getCall(0).args as any; // Something wrong with how types get generated for the stub
+        assert.equal(args[0]?.metadata?.artistId, artist.id);
+        assert.equal(args[0]?.metadata?.trackId, track.id);
+        assert.equal(args[0]?.metadata?.stripeAccountId, user.stripeAccountId);
+        assert.equal(args[0]?.line_items?.[0].quantity, 1);
         assert.equal(
-          args[0].line_items?.[0].price_data?.product,
+          args[0]?.line_items?.[0].price_data?.product,
           track.stripeProductKey
         );
       });
@@ -231,14 +230,14 @@ describe("tracks/{id}/purchase", () => {
         );
 
         assert.equal(stubCreate.calledOnce, true);
-        const args = stubCreate.getCall(0).args;
-        assert.equal(args[0].metadata?.artistId, artist.id);
-        assert.equal(args[0].metadata?.trackId, track.id);
+        const args = stubCreate.getCall(0).args as any; // FIXME somethin wrong with how types get passed to the stub
+        assert.equal(args[0]?.metadata?.artistId, artist.id);
+        assert.equal(args[0]?.metadata?.trackId, track.id);
         assert.equal(
-          args[0].metadata?.stripeAccountId,
+          args[0]?.metadata?.stripeAccountId,
           labelUser.stripeAccountId
         );
-        assert.equal(args[0].line_items?.[0].quantity, 1);
+        assert.equal(args[0]?.line_items?.[0].quantity, 1);
         assert.equal(
           args[0].line_items?.[0].price_data?.product,
           track.stripeProductKey

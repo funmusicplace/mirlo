@@ -21,7 +21,7 @@ export const CheckBoxLabel = styled.label`
 const FormCheckbox: React.FC<{
   idPrefix?: string;
   keyName: string;
-  description: string;
+  description: string | React.ReactNode;
   disabled?: boolean;
 }> = ({ keyName, description, disabled, idPrefix = "" }) => {
   const { register } = useFormContext();

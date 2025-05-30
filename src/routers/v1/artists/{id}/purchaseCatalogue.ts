@@ -3,15 +3,10 @@ import { NextFunction, Request, Response } from "express";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import prisma from "@mirlo/prisma";
 
-import {
-  createStripeCheckoutSessionForCatalogue,
-  createStripeCheckoutSessionForPurchase,
-} from "../../../../utils/stripe";
-import { handleTrackGroupPurchase } from "../../../../utils/handleFinishedTransactions";
+import { createStripeCheckoutSessionForCatalogue } from "../../../../utils/stripe";
 import { subscribeUserToArtist } from "../../../../utils/artist";
 import { AppError } from "../../../../utils/error";
 import { determinePrice } from "../../../../utils/purchasing";
-import { tr } from "@faker-js/faker";
 
 type Params = {
   id: string;
