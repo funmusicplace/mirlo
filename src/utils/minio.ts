@@ -78,6 +78,8 @@ export const backblazeClient = new S3Client({
     accessKeyId: BACKBLAZE_KEY_ID,
     secretAccessKey: BACKBLAZE_APP_KEY,
   },
+  responseChecksumValidation: "WHEN_REQUIRED",
+  requestChecksumCalculation: "WHEN_REQUIRED",
   maxAttempts: 1,
 });
 
