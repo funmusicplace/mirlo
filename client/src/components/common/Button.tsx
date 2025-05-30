@@ -211,10 +211,6 @@ const CustomButton = styled.button<Sizable>(
 
           svg {
             fill: ${secondaryColor};
-             
-            @media (prefers-color-scheme: dark) {
-              fill: ${secondaryColor};
-            }
           }
 
           &:hover:not(:disabled) {

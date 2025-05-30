@@ -24,11 +24,12 @@ import { sendMailQueue } from "./queues/send-mail-queue";
 import path from "node:path";
 import activityPub from "./activityPub";
 import parseIndex from "./parseIndex";
+import qs from "qs";
 
 dotenv.config();
 
 const app = express();
-
+app.set("query parser", (str: string) => qs.parse(str));
 // See https://github.com/express-rate-limit/express-rate-limit/wiki/Troubleshooting-Proxy-Issues
 app.set("trust proxy", 2);
 app.get("/ip", (request, response) => response.send(request.ip));
@@ -54,12 +55,12 @@ app.use(
 
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
-app.use(passport.initialize());
+// app.use(passport.initialize()); // Supposedly we don't need this anymore
 
 if (!isDev) {
   const limiter = rateLimit({
     windowMs: 60 * 1000, // 1 minute
-    limit: 300, // 200 requests per minute, which is absurd, but one page load gets us 20
+    limit: 400, // 400 requests per minute, which is absurd, but one page load gets us 80
     // FIXME: is there a way to have this be determined on whether the user is logged in?
     standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   });
@@ -166,6 +167,7 @@ const routes = [
   "manage/posts/{postId}",
   "manage/posts",
   "checkout",
+  "checkout/status",
   "webhooks/stripe",
   "webhooks/stripe/connect",
   "jobs",
@@ -201,6 +203,7 @@ initialize({
 
 app.use(
   "/docs",
+  // @ts-ignore
   swaggerUi.serve,
   swaggerUi.setup(undefined, {
     swaggerOptions: {

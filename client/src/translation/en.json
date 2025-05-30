@@ -84,13 +84,15 @@
     "search": "Search music",
     "artists": "Artists",
     "albums": "Albums",
-    "tracks": "Tracks"
+    "tracks": "Tracks",
+    "labels": "Labels"
   },
   "profile": {
     "resetPasswordLink": "Want to change your password? Use the reset form",
     "password": "Updating your email requires entering your password",
     "deleteYourAccount": "No longer want to use Mirlo? Delete your account",
     "profile": "Profile",
+    "viewLabelPage": "View label page",
     "manageArtistsDescription": "Here you can manage your artist accounts. You can create new artists, and manage existing ones.",
     "label": "Label",
     "makeSearchable": "Enabling this will let artists find your label and request to be added to your roster. Artists will then be able to say for which albums payments will be sent to the payment processor linked to this Stripe account.",
@@ -222,6 +224,8 @@
     "artist": "Artist",
     "labelProfile": "Manage artists",
     "page": "Artist link",
+    "manageLabel": "Manage",
+    "viewLabelPage": "View label page",
     "manageArtists": "Manage artists",
     "manage": "Manage artist",
     "isArtistConfirmed": "Has artist confirmed relationship?",
@@ -234,7 +238,8 @@
     "addExistingArtistToRoster": "Invite an existing artist to join your roster. They'll have to accept your invite.",
     "createNewArtist": "Create new artist",
     "addNewArtistToRoster": "Create a new artist page and add them to your roster",
-    "roster": "Roster"
+    "roster": "Roster",
+    "releases": "Releases"
   },
   "artist": {
     "merch": "Merch",
@@ -514,6 +519,7 @@
     "howMuchModalText": "Mirlo thrives on artist contributions—whether through monthly support or a slice of album sales. But we get it: every cent counts, and only you know what you can afford. That’s why we let you decide how much of your sales goes to Mirlo. Your art, your call."
   },
   "manageAlbum": {
+    "allowMirloPromoLabel": "Allow Mirlo to use it for promotion?",
     "isGettable": "Is it possible for a user to buy or download this album?",
     "isGettableTooltip": "We don't want to take this for granted! Some musicians just want to share their music, but don't want to let people download it.",
     "isGettableInfo": "Disabling this will make it so that users can't buy or download your album, but they can listen to it online for free. Most people will want to leave this enabled.",
@@ -523,6 +529,8 @@
     "saveTrack": "Save track",
     "cancelChanges": "Cancel changes",
     "priceAndSuch": "Price & such",
+    "updatedAllTracks": "Updated all tracks",
+    "allowMirloPromo": "Allow Mirlo's <hype>Hype Circle</hype> to use these tracks for promotional material of the platform. You will be credited, and can set this for individual tracks.",
     "aboutTheAlbum": "About the album",
     "minPriceOnTracks": "Set the min price on tracks",
     "setPriceOfAllTracks": "Set the price on all tracks",
@@ -595,6 +603,8 @@
     "artistOnMirlo": "Artist with a presence on Mirlo",
     "artist": "Artist",
     "editTrackArtists": "Edit track artists",
+    "nameOfAccountToReceivePayment": "Name of the account that will receive payments for this release.",
+    "receivePaymentDescription": "This is the account that will receive payments for this release. If you are part of a label or collective, this will be the label or collective account. Go to your artist page to manage these relationships.",
     "thereWasAnError": "There was an error uploading this track.",
     "doneUploading": "Uploaded all tracks. We still need to process them on our servers, but you can now safely close the browser.",
     "uploadingTracks": "Uploading tracks. This could take several minutes, please don't close the browser."
@@ -664,11 +674,15 @@
   },
   "subscriptionForm": {
     "supporters": "Manage supporters",
+    "theMoneyBit": "The money bit",
+    "platformPercent": "Platform cut",
     "inCurrency": "In {{ currency }}",
     "subscriptionUpdated": "Subscription updated",
     "interval": "What's the interval for this subscription?",
     "monthly": "Monthly",
     "yearly": "Yearly",
+    "rewards": "Rewards",
+    "collectAddress": "If rewards for this tier of support require shipping, collect the address of the supporter?",
     "name": "Name: ",
     "addNewTier": "Add new tier",
     "allowVariableDescription": "Allow supporters to enter a larger number?",

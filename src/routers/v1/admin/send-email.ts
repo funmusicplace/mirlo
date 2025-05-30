@@ -9,7 +9,7 @@ export default function () {
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {
-    const { content, sendToOption, sendTo, title } = req.body;
+    const { content, sendToOption, sendTo, title } = req.body ?? {};
     try {
       let sendToUsers: { email: string }[] = [];
 

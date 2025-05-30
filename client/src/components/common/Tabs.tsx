@@ -20,8 +20,6 @@ const Tabs = styled.ul`
       font-size: 1.2rem;
       transition: 0.1s border-bottom;
       border-bottom: 4px solid transparent;
-      color: var(--mi-normal-foreground-color);
-
       @media screen and (max-width: ${bp.medium}px) {
         padding: 0rem 0.25rem calc(0.9rem - 4px) 0.25rem;
       }
@@ -49,6 +47,8 @@ export const ArtistTabs = styled(Tabs)<{ color?: string }>`
   > li {
     > a:not(.edit),
     button {
+      color: ${(props) => props.color ?? `var(--mi-primary-color)`} !important;
+
       &.active {
         border-bottom: 4px solid
           ${(props) => props.color ?? `var(--mi-primary-color)`} !important;

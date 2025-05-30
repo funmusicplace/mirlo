@@ -18,6 +18,7 @@ interface TrackBody {
   isrc: string;
   minPrice: number;
   allowIndividualSale: boolean;
+  allowMirloPromo: boolean;
   description: string;
   trackArtists?: {
     artistName: string;
@@ -47,6 +48,7 @@ export default function () {
       lyrics,
       isrc,
       description,
+      allowMirloPromo,
     } = req.body as TrackBody;
 
     try {
@@ -63,6 +65,7 @@ export default function () {
           minPrice,
           licenseId: Number(licenseId),
           description,
+          allowMirloPromo,
         },
         include: {
           trackArtists: true,

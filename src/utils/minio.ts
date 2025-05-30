@@ -1,4 +1,4 @@
-import { Client } from "minio";
+import { Client, BucketItem } from "minio";
 import { Logger } from "winston";
 import * as Minio from "minio";
 import {
@@ -412,14 +412,14 @@ export async function getFileFromMinio(
 export const getObjectList = async (
   bucket: string,
   prefix: string
-): Promise<{ name: string }[]> => {
+): Promise<BucketItem[]> => {
   if (backendStorage === "backblaze") {
     const result = await backblazeClient.send(
       new ListObjectsCommand({ Bucket: bucket, Prefix: prefix })
     );
     return (
       result.Contents?.map((c) => (c?.Key ? { name: c.Key } : undefined)) ?? []
-    ).filter((c) => !!c) as { name: string }[];
+    ).filter((c) => !!c) as BucketItem[];
   } else {
     const result = await getObjectListFromMinio(bucket, prefix);
     return result;
@@ -429,9 +429,9 @@ export const getObjectList = async (
 export const getObjectListFromMinio = async (
   bucket: string,
   prefix: string
-): Promise<{ name: string }[]> => {
+): Promise<BucketItem[]> => {
   return await new Promise((resolve, reject) => {
-    const data: { name: string }[] = [];
+    const data: BucketItem[] = [];
     const stream = minioClient.listObjectsV2(bucket, prefix, true);
     stream.on("data", function (obj) {
       data.push(obj);
@@ -453,14 +453,14 @@ export const removeObjectsFromBucket = async (
   const objects = await getObjectList(bucketName, prefix);
   if (backendStorage === "backblaze") {
     await Promise.all(
-      objects.map((o) => removeObjectFromStorage(bucketName, o.name))
+      objects.map((o) => removeObjectFromStorage(bucketName, o.name!))
     );
   } else {
     const minioObojects = await getObjectListFromMinio(bucketName, prefix);
 
     await minioClient.removeObjects(
       bucketName,
-      minioObojects.map((o) => o.name)
+      minioObojects.map((o) => o.name!)
     );
   }
 };

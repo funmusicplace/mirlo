@@ -10,7 +10,7 @@ import { css } from "@emotion/css";
 import { bp } from "../../../constants";
 import AutoCompleteTrackGroup from "../AutoCompleteTrackGroup";
 import { useTranslation } from "react-i18next";
-import BulkTrackUpload from "components/ManageArtist/BulkTrackUpload";
+import BulkTrackUpload from "components/ManageArtist/ManageTrackGroup/BulkTrackUpload";
 import { InputEl } from "../Input";
 import FormComponent from "../FormComponent";
 import Box from "../Box";

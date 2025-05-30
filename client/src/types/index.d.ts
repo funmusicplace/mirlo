@@ -43,6 +43,7 @@ interface Track {
   trackGroupId: number;
   image: Image;
   order: number;
+  allowMirloPromo?: boolean;
   allowIndividualSale: boolean;
   description: string;
   minPrice: number; // in cents;
@@ -94,6 +95,12 @@ interface TrackGroup {
   tags?: string[];
   merch?: Merch[];
   isDraft?: boolean;
+  paymentToUserId?: number;
+  paymentToUser?: {
+    email: string;
+    name?: string;
+    id: number;
+  };
   cover?: {
     updatedAt: string;
     id: string;
@@ -111,6 +118,7 @@ interface TrackGroup {
 interface Post {
   title: string;
   id: number;
+  urlSlug?: string;
   content: string;
   publishedAt: string;
   artist?: Artist;
@@ -353,6 +361,7 @@ interface Merch {
   title: string;
   minPrice: number;
   currency: string;
+  urlSlug: string | null;
   quantityRemaining: number;
   id: string;
   includePurchaseTrackGroupId?: number | null;
@@ -365,6 +374,12 @@ interface Merch {
   }[];
   shippingDestinations: ShippingDestination[];
   optionTypes: MerchOptionType[];
+}
+
+interface Label {
+  id: number;
+  name: string;
+  urlSlug: string;
 }
 
 interface MerchPurchase {

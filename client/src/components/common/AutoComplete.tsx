@@ -9,6 +9,7 @@ import Button from "./Button";
 import styled from "@emotion/styled";
 import { useLocation } from "react-router-dom";
 import { debounce } from "lodash";
+import { useDebouncedCallback } from "use-debounce";
 
 const SearchResultsDiv = styled.div`
   position: absolute;
@@ -143,33 +144,31 @@ const AutoComplete: React.FC<{
     []
   );
 
-  const searchCallback = React.useCallback(
-    debounce(async (searchString: string) => {
-      if (searchString && searchString.length > 1) {
-        setShowSuggestions(true);
-        setIsSearching(true);
-        const results = await getOptions(searchString);
-        const searchResultsMatchSearch = searchResults.find(
-          (result) =>
-            result.name.toLowerCase().replaceAll(/\-| /g, "") === searchString
-        );
-        if (allowNew && !searchResultsMatchSearch && results) {
-          results.push({
-            id: searchString,
-            name: searchString,
-            isNew: true,
-          });
-        }
-        setSearchResults(results ?? []);
-        setIsSearching(false);
-        setNavigationIndex(0);
-      } else {
-        setSearchResults([]);
-        setShowSuggestions(false);
+  const searchCallback = useDebouncedCallback(async (searchString: string) => {
+    if (searchString && searchString.length > 1) {
+      setShowSuggestions(true);
+      setIsSearching(true);
+      const results = await getOptions(searchString);
+      console.log("search results", searchResults);
+      const searchResultsMatchSearch = searchResults.find(
+        (result) =>
+          result.name.toLowerCase().replaceAll(/\-| /g, "") === searchString
+      );
+      if (allowNew && !searchResultsMatchSearch && results) {
+        results.push({
+          id: searchString,
+          name: searchString,
+          isNew: true,
+        });
       }
-    }, 500),
-    [getOptions, allowNew]
-  );
+      setSearchResults(results ?? []);
+      setIsSearching(false);
+      setNavigationIndex(0);
+    } else {
+      setSearchResults([]);
+      setShowSuggestions(false);
+    }
+  }, 500);
 
   const onSelectValue = React.useCallback(
     (value: string | number, index?: number) => {
@@ -275,7 +274,15 @@ const AutoComplete: React.FC<{
                 {searchResults.map((r, index) => {
                   return (
                     <>
-                      {r.firstInCategory && <>{r.category}</>}
+                      {r.firstInCategory && (
+                        <div
+                          className={css`
+                            margin: 0.4rem 0;
+                          `}
+                        >
+                          {r.category}
+                        </div>
+                      )}
                       <SearchResult
                         key={r.id}
                         className={navigationIndex === index ? "selected" : ""}

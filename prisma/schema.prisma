@@ -67,6 +67,7 @@ model User {
   isLabelAccount                      Boolean                         @default(false)
   featureFlags                        String[]
   language                            String?
+  properties                          Json?
   userTrackGroupPurchases             UserTrackGroupPurchase[]
   artistUserSubscriptions             ArtistUserSubscription[]
   wishlist                            UserTrackGroupWishlist[]
@@ -300,6 +301,7 @@ model ArtistSubscriptionTier {
   isDefaultTier         Boolean                  @default(false)
   platformPercent       Int?                     @default(7)
   autoPurchaseAlbums    Boolean                  @default(false)
+  collectAddress        Boolean?                 @default(false)
 }
 
 enum Interval {
@@ -385,6 +387,7 @@ model Merch {
   updatedAt                   DateTime                   @default(now()) @updatedAt
   deletedAt                   DateTime?
   artistId                    Int
+  urlSlug                     String?
   artist                      Artist                     @relation(fields: [artistId], references: [id])
   images                      MerchImage[]
   shippingDestinations        MerchShippingDestination[]
@@ -588,6 +591,7 @@ model Track {
   deletedAt           DateTime?
   isPreview           Boolean             @default(true)
   isFeatured          Boolean             @default(false)
+  allowMirloPromo     Boolean             @default(false)
   trackArtists        TrackArtist[]
   metadata            Json?
   plays               TrackPlay[]

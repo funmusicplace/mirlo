@@ -11,9 +11,8 @@ import { useQuery } from "@tanstack/react-query";
 import { queryArtist } from "queries";
 import { NewAlbumButton } from "components/ManageArtist/NewAlbumButton";
 import { ArtistButton } from "./ArtistButtons";
-import Money, { moneyDisplay } from "components/common/Money";
+import { moneyDisplay } from "components/common/Money";
 import api from "services/api";
-import { useSnackbar } from "state/SnackbarContext";
 import FeatureFlag from "components/common/FeatureFlag";
 
 const ArtistAlbums: React.FC = () => {

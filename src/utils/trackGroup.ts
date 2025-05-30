@@ -158,6 +158,14 @@ export const trackGroupSingleInclude = (options: {
       },
       orderBy: { order: "asc" },
     },
+    paymentToUser: {
+      select: {
+        id: true,
+        name: true,
+        urlSlug: true,
+        userAvatar: true,
+      },
+    },
     artist: true,
     merch: {
       include: {
@@ -683,10 +691,13 @@ export const processSingleTrackGroup = (
 });
 
 export const processTrackGroupQueryOrder = (orderByString?: unknown) => {
-  let orderByObj: Prisma.TrackGroupOrderByWithRelationAndSearchRelevanceInput =
-    {
-      releaseDate: "desc",
-    };
+  let orderByObj: Partial<{
+    releaseDate: "desc";
+    id: "desc";
+    createdAt: "desc";
+  }> = {
+    releaseDate: "desc",
+  };
   if (orderByString === "random") {
   } else if (orderByString === "id") {
     orderByObj = {

@@ -21,13 +21,10 @@ export const WidgetWrapper = styled.div<{
   embeddedInMirlo?: boolean;
   artistColors?: ArtistColors;
 }>`
-  display: flex;
   border: var(--mi-border);
-  flex-direction: column;
   width: 100%;
   ${(props) => props.embeddedInMirlo && "min-height: 154px;"}
   display: flex;
-  flex-direction: column;
   align-items: space-between;
   border-radius: 0.3rem;
   overflow: hidden;
@@ -47,7 +44,6 @@ export const TgWidgetWrapper = styled.div<{ embeddedInMirlo?: boolean }>`
   display: flex;
   width: 100%;
   ${(props) => props.embeddedInMirlo && "min-height: 371px;"}
-  flex-wrap: wrap;
   align-items: flex-start;
   justify-content: center;
   border-radius: 0.3rem;
@@ -56,6 +52,7 @@ export const TgWidgetWrapper = styled.div<{ embeddedInMirlo?: boolean }>`
   table {
     margin: 0;
   }
+  height: 100vh;
 
   @media screen and (max-width: ${bp.small}px) {
     grid-template-columns: repeat(1, 1fr);
@@ -91,7 +88,6 @@ export const TrackListWrapper = styled.div<{}>`
   }
 
   @media screen and (max-width: ${bp.small}px) {
-    max-height: 70px;
     overflow: auto;
   }
 `;

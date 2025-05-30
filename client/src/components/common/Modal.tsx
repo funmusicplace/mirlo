@@ -20,12 +20,13 @@ const wrapper = css`
   overflow: auto;
   display: flex;
   align-items: center;
+  overflow: hidden;
 `;
 
 const ChildrenWrapper = styled.div<{ title?: boolean; noPadding?: boolean }>`
   overflow-y: auto;
   ${(props) => (props.noPadding ? "padding: 0;" : "padding: 20px;")}
-  margin-bottom: 1rem;
+  ${(props) => (props.noPadding ? "" : "margin-bottom: 1rem;")}
   margin-left: 0rem;
   ::-webkit-scrollbar {
     width: 2px;
@@ -54,6 +55,7 @@ type ContentProps = {
 
 const Content = styled.div<ContentProps>`
   pointer-events: auto;
+  overflow: hidden;
   background-color: var(--mi-normal-background-color);
   position: absolute;
   left: 0;

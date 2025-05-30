@@ -26,60 +26,21 @@ const colors = {
 
 const updateTheme = (artistColors?: any, theme?: "dark" | "light") => {
   document.documentElement.setAttribute("data-mi-theme", theme ?? "light");
-  if (artistColors) {
-    // document.documentElement.style.setProperty(
-    //   "--mi-primary-color",
-    //   artistColors.primary
-    // );
-    // document.documentElement.style.setProperty(
-    //   "--mi-secondary-color",
-    //   artistColors.secondary
-    // );
-    document.documentElement.style.setProperty(
-      "--mi-normal-background-color",
-      artistColors.background
-    );
-    document.documentElement.style.setProperty(
-      "--mi-normal-foreground-color",
-      artistColors.foreground
-    );
-  } else {
-    // document.documentElement.style.setProperty(
-    //   "--mi-primary-color",
-    //   colors[theme ?? "light"]["primary"]
-    // );
-    // document.documentElement.style.setProperty(
-    //   "--mi-secondary-color",
-    //   colors[theme ?? "light"]["secondary"]
-    // );
-    document.documentElement.style.setProperty(
-      "--mi-normal-background-color",
-      colors[theme ?? "light"]["background"]
-    );
-    document.documentElement.style.setProperty(
-      "--mi-normal-foreground-color",
-      colors[theme ?? "light"]["foreground"]
-    );
-  }
+
+  document.documentElement.style.setProperty(
+    "--mi-normal-background-color",
+    colors[theme ?? "light"]["background"]
+  );
+  document.documentElement.style.setProperty(
+    "--mi-normal-foreground-color",
+    colors[theme ?? "light"]["foreground"]
+  );
 };
 
-const prefersDark = window.matchMedia?.("(prefers-color-scheme: dark)");
-prefersDark?.addEventListener("change", () =>
-  updateTheme(undefined, prefersDark.matches ? "dark" : "light")
-);
-
 const WrapperDiv = styled.div`
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
-
-  background-color: var(--mi-normal-background-color);
-  color: var(--mi-normal-foreground-color);
-
-  [data-mi-theme="dark"] & {
-    background-color: var(--mi-normal-background-color);
-    color: var(--mi-normal-foreground-color);
-  }
 `;
 
 const ArtistColors: React.FC<{
@@ -94,11 +55,23 @@ const ArtistColors: React.FC<{
   const artistColors =
     managedArtist?.properties?.colors ?? artist?.properties?.colors;
 
-  React.useEffect(() => {
-    updateTheme(artistColors, prefersDark.matches ? "dark" : "light");
-  }, [artistColors]);
-
-  return <WrapperDiv id="artist-colors-wrapper">{children}</WrapperDiv>;
+  if (!artist) {
+    return <WrapperDiv>{children}</WrapperDiv>;
+  } else {
+    return (
+      <WrapperDiv
+        id="artist-colors-wrapper"
+        className={css`
+          background-color: ${artistColors?.background ??
+          "var(--mi-normal-background-color)"};
+          color: ${artistColors?.foreground ??
+          "var(--mi-normal-foreground-color)"};
+        `}
+      >
+        {children}
+      </WrapperDiv>
+    );
+  }
 };
 
 const ArtistColorsWrapper: React.FC<{ children: React.ReactElement }> = ({

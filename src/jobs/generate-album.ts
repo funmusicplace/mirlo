@@ -43,7 +43,9 @@ const parseFormat = (format: string): Format => {
         ? undefined
         : (form as "flac" | "libmp3lame" | "opus");
   const bitrate =
-    form === "mp3" ? (split[0] as "320" | "256" | "128") : undefined;
+    form === "mp3" || form === "opus"
+      ? (split[0] as "320" | "256" | "128")
+      : undefined;
 
   return {
     format: form,

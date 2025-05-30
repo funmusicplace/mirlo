@@ -6,6 +6,8 @@ const ImageContainer = styled.div`
   display: block;
   max-width: 100%;
   background-color: var(--mi-darken-background-color);
+  aspect-ratio: 1 / 1;
+  height: 100%;
 
   img {
     transition: opacity 0.25s;
@@ -47,9 +49,9 @@ export const ImageWithPlaceholder: React.FC<{
         <div
           className={css`
             width: ${size}px;
-            height: ${size}px;
-            max-height: ${size}px;
             display: block;
+            aspect-ratio: 1 / 1;
+            height: 100%;
           `}
         />
       )}

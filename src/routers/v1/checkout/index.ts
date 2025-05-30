@@ -26,6 +26,7 @@ export default function () {
           tierId,
           gaveGift,
           merchId,
+          purchaseType,
         } = session.metadata as unknown as {
           clientId: number | null;
           artistId: number | null;
@@ -34,6 +35,7 @@ export default function () {
           trackGroupId: number | null;
           trackId: number | null;
           merchId: string | null;
+          purchaseType: string | null;
         };
         if (clientId && artistId) {
           const client = await prisma.client.findFirst({
@@ -46,7 +48,7 @@ export default function () {
             where: { id: +artistId },
           });
 
-          if (merchId && artist) {
+          if (purchaseType === "merch" && merchId) {
             // FIXME: We'll probably want clients to be able to define the
             // checkout callbackURL separately from the applicationURL
             // and that callbackURL should probably contain a pattern that
@@ -55,7 +57,7 @@ export default function () {
               client?.applicationUrl +
                 `/${artist?.urlSlug}/merch/${merchId}/checkout-complete`
             );
-          } else if (gaveGift && artist && client) {
+          } else if (purchaseType === "tip" && artist && client) {
             // FIXME: We'll probably want clients to be able to define the
             // checkout callbackURL separately from the applicationURL
             // and that callbackURL should probably contain a pattern that
@@ -64,7 +66,7 @@ export default function () {
               client?.applicationUrl +
                 `/${artist?.urlSlug}?tip=${success ? "success" : "canceled"}`
             );
-          } else if (client && tierId && artist) {
+          } else if (purchaseType === "subscription" && tierId && artist) {
             // FIXME: We'll probably want clients to be able to define the
             // checkout callbackURL separately from the applicationURL
             // and that callbackURL should probably contain a pattern that
@@ -75,7 +77,13 @@ export default function () {
                   success ? "success" : "canceled"
                 }&tierId=${tierId}`
             );
-          } else if (client && trackGroupId && artistId && !trackId) {
+          } else if (
+            purchaseType === "trackGroup" &&
+            client &&
+            trackGroupId &&
+            artistId &&
+            !trackId
+          ) {
             // FIXME: We'll probably want clients to be able to define the
             // checkout callbackURL separately from the applicationURL
             // and that callbackURL should probably contain a pattern that
@@ -86,7 +94,12 @@ export default function () {
                   success ? "success" : "canceled"
                 }&trackGroupId=${trackGroupId}`
             );
-          } else if (client && trackId && artistId) {
+          } else if (
+            purchaseType === "track" &&
+            client &&
+            trackId &&
+            artistId
+          ) {
             // FIXME: We'll probably want clients to be able to define the
             // checkout callbackURL separately from the applicationURL
             // and that callbackURL should probably contain a pattern that
@@ -103,7 +116,7 @@ export default function () {
             );
           } else {
             res.status(500).json({
-              error: "Something went wrong while completing a checkout",
+              error: "No purchase type set for checkout session",
             });
           }
         } else {
@@ -119,7 +132,7 @@ export default function () {
     } catch (e) {
       console.error(`Error in checkout process`, e);
       res.status(500).json({
-        error: "Something went wrong while subscribing the user",
+        error: "Something went wrong while completing a checkout",
       });
     }
   }

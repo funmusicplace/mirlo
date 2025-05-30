@@ -12,12 +12,11 @@ import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
 import useJobStatusCheck from "utils/useJobStatusCheck";
 import LoadingSpinner from "components/common/LoadingSpinner";
-import Button from "components/common/Button";
 import { useAuthContext } from "state/AuthContext";
 import ManageTrackLicense from "../ManageTrackLicense";
 import ReplaceTrackAudioInput from "./ReplaceTrackAudioInput";
 import TextArea from "components/common/TextArea";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { queryArtist } from "queries";
 import { useQuery } from "@tanstack/react-query";
 import ShowRawID3Data from "./ShowRawID3Data";
@@ -36,6 +35,7 @@ export interface FormData {
   description: string;
   allowIndividualSale: boolean;
   minPrice: string;
+  allowMirloPromo: boolean;
 }
 
 const IndentedTR = styled("tr")`
@@ -71,6 +71,7 @@ const EditTrackRow: React.FC<{
       status: track.isPreview ? "preview" : "must-own",
       licenseId: track.licenseId,
       lyrics: track.lyrics,
+      allowMirloPromo: track.allowMirloPromo,
       description: track.description,
       isrc: track.isrc,
       minPrice: `${track?.minPrice !== undefined ? track.minPrice / 100 : "0"}`,
@@ -91,6 +92,7 @@ const EditTrackRow: React.FC<{
       status: track.isPreview ? "preview" : "must-own",
       licenseId: track.licenseId,
       isrc: track.isrc,
+      allowMirloPromo: track.allowMirloPromo,
       lyrics: track.lyrics,
       description: track.description,
       minPrice: `${track?.minPrice !== undefined ? track.minPrice / 100 : "0"}`,
@@ -108,6 +110,7 @@ const EditTrackRow: React.FC<{
           isrc: formData.isrc,
           lyrics: formData.lyrics,
           description: formData.description,
+          allowMirloPromo: formData.allowMirloPromo,
           isPreview: formData.status === "preview",
           allowIndividualSale: formData.allowIndividualSale,
           minPrice: formData.minPrice
@@ -248,6 +251,30 @@ const EditTrackRow: React.FC<{
           </td>
         </IndentedTR>
       )}
+      <IndentedTR>
+        <td colSpan={2}>
+          <label htmlFor={`${track.id}-allowMirloPromo`}>
+            {t("allowMirloPromoLabel")}
+          </label>
+        </td>
+        <td colSpan={99}>
+          <FormCheckbox
+            idPrefix={`${track.id}-`}
+            keyName="allowMirloPromo"
+            description={
+              <p>
+                <Trans
+                  t={t}
+                  i18nKey={"allowMirloPromo"}
+                  components={{
+                    hype: <Link to="/team/posts/236/"></Link>,
+                  }}
+                />
+              </p>
+            }
+          />
+        </td>
+      </IndentedTR>
       <IndentedTR>
         <td colSpan={2}>
           <label htmlFor="isrc">{t("isrcCode")}</label>

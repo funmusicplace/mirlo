@@ -17,7 +17,7 @@ import prisma from "@mirlo/prisma";
 import checkoutEndpoint from "../../src/routers/v1/checkout";
 import * as stripeUtils from "../../src/utils/stripe";
 import Stripe from "stripe";
-import { session } from "passport";
+import purchase from "../../src/routers/v1/merch/{id}/purchase";
 
 describe("checkout", () => {
   beforeEach(async () => {
@@ -69,6 +69,7 @@ describe("checkout", () => {
               clientId: `${client.id}`,
               artistId: `${artist.id}`,
               trackGroupId: `${trackGroup.id}`,
+              purchaseType: "trackGroup",
             },
           } as unknown as Stripe.Response<Stripe.Checkout.Session>);
 
@@ -87,7 +88,9 @@ describe("checkout", () => {
           } as unknown as Request,
           {
             status: () => {
-              console.log("calling status");
+              return {
+                json: (obj: unknown) => {},
+              };
             },
             redirect: mockRedirect,
           } as unknown as Response,
@@ -98,7 +101,6 @@ describe("checkout", () => {
         const args = stubRetrieve.getCall(0).args;
         assert.equal(args[0], sessionId);
         assert.deepEqual(args[1], { stripeAccount: stripeAccountId });
-
         assert.equal(mockRedirect.calledOnce, true);
         assert.equal(
           mockRedirect.getCall(0).args[0],

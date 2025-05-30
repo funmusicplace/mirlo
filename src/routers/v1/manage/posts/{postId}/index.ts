@@ -3,6 +3,7 @@ import { userAuthenticated } from "../../../../../auth/passport";
 import prisma from "@mirlo/prisma";
 import { doesPostBelongToUser } from "../../../../../utils/post";
 import { AppError } from "../../../../../utils/error";
+import slugify from "slugify";
 
 export default function () {
   const operations = {
@@ -22,6 +23,7 @@ export default function () {
         publishedAt,
         minimumSubscriptionTierId,
         shouldSendEmail,
+        urlSlug,
       } = req.body;
 
       if (minimumSubscriptionTierId !== undefined) {
@@ -41,7 +43,13 @@ export default function () {
         }
       }
 
-      const post = await prisma.post.update({
+      const post = await prisma.post.findUnique({
+        where: {
+          id: Number(postId),
+        },
+      });
+
+      const updatedPost = await prisma.post.update({
         data: {
           title,
           artistId,
@@ -50,6 +58,7 @@ export default function () {
           publishedAt,
           minimumSubscriptionTierId,
           shouldSendEmail,
+          urlSlug: urlSlug ? urlSlug?.trim() : slugify(title ?? post?.title),
         },
         where: {
           id: Number(postId),
@@ -59,13 +68,13 @@ export default function () {
       if (content) {
         const postImages = await prisma.postImage.findMany({
           where: {
-            postId: post.id,
+            postId: updatedPost.id,
           },
         });
         const imagesToDelete = postImages
           .filter((image) => {
             const inContent = content.includes(image.id);
-            const isFeatured = post.featuredImageId === image.id;
+            const isFeatured = updatedPost.featuredImageId === image.id;
             return !(inContent || isFeatured);
           })
           .map((image) => image.id);
@@ -78,7 +87,7 @@ export default function () {
 
         const postTracks = await prisma.postTrack.findMany({
           where: {
-            postId: post.id,
+            postId: updatedPost.id,
           },
         });
         const trackOrder: { [key: number]: number } = {};
@@ -100,7 +109,7 @@ export default function () {
               await prisma.postTrack.update({
                 where: {
                   trackId_postId: {
-                    postId: post.id,
+                    postId: updatedPost.id,
                     trackId: trackId,
                   },
                 },
@@ -113,21 +122,15 @@ export default function () {
 
         await prisma.postTrack.deleteMany({
           where: {
-            postId: post.id,
+            postId: updatedPost.id,
             trackId: { in: tracksToDelete },
-          },
-        });
-
-        const currentTracks = await prisma.postTrack.findMany({
-          where: {
-            postId: post.id,
           },
         });
       }
 
       const refreshedPost = await prisma.post.findFirst({
         where: {
-          id: post.id,
+          id: updatedPost.id,
         },
         include: {
           tracks: {

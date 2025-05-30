@@ -9,24 +9,19 @@ import UploadArtistImage from "../UploadArtistImage";
 import { useTranslation } from "react-i18next";
 import ArtistFormColors from "./ArtistFormColors";
 import ArtistSlugInput from "../../common/SlugInput";
-import {
-  queryManagedArtist,
-  useCreateArtistMutation,
-  useUpdateArtistMutation,
-} from "queries";
+import { useCreateArtistMutation, useUpdateArtistMutation } from "queries";
 import { useAuthContext } from "state/AuthContext";
 import styled from "@emotion/styled";
 import ChooseYourTheme from "../ChooseYourTheme";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useParams } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import SavingInput from "../ManageTrackGroup/AlbumFormComponents/SavingInput";
 import { QUERY_KEY_ARTISTS } from "queries/queryKeys";
 import DeleteArtist from "../DeleteArtist";
 import { Toggle } from "components/common/Toggle";
 import Box from "components/common/Box";
 import LabelConfirmation from "./LabelConfirmation";
-import FeatureFlag from "components/common/FeatureFlag";
 import useArtistQuery from "utils/useArtistQuery";
+import FeatureFlag from "components/common/FeatureFlag";
 
 export interface ShareableTrackgroup {
   creatorId: number;
@@ -293,24 +288,25 @@ export const CustomizeLook: React.FC = () => {
                 </div>
               </div>
             </ArtistFormSection>
-
-            <ArtistFormSection
-              className={css`
-                flex-direction: column;
-              `}
-            >
-              <Box variant="warning">{t("warningFeature")}</Box>
-              <FormComponent>
-                <Toggle
-                  label={t("enableActivityPub")}
-                  toggled={activityPub}
-                  onClick={() => {
-                    methods.setValue("activityPub", !activityPub);
-                  }}
-                />
-                <small>{t("makeSearchable")}</small>
-              </FormComponent>
-            </ArtistFormSection>
+            <FeatureFlag featureFlag="activityPub">
+              <ArtistFormSection
+                className={css`
+                  flex-direction: column;
+                `}
+              >
+                <Box variant="warning">{t("warningFeature")}</Box>
+                <FormComponent>
+                  <Toggle
+                    label={t("enableActivityPub")}
+                    toggled={activityPub}
+                    onClick={() => {
+                      methods.setValue("activityPub", !activityPub);
+                    }}
+                  />
+                  <small>{t("makeSearchable")}</small>
+                </FormComponent>
+              </ArtistFormSection>
+            </FeatureFlag>
             <ArtistFormSection
               isOdd
               className={css`

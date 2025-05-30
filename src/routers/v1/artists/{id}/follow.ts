@@ -23,7 +23,7 @@ export default function () {
     const { id: artistId } = req.params as unknown as Params;
     const loggedInuser = req.user as User;
 
-    const { email } = req.body;
+    const { email } = req.body ?? {};
 
     try {
       const artist = await prisma.artist.findFirst({
