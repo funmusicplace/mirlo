@@ -35,6 +35,17 @@ interface SettingsFromAPI {
   settings: {
     platformPercent: number;
     instanceArtistId: number;
+    stripeKey?: string;
+    stripeWebhookSigningSecret?: string;
+    stripeWebhookConnectSigningSecret?: string;
+    sendgridApiKey?: string;
+    sendgridFromEmail?: string;
+    backblazeKeyId?: string;
+    backblazeApplicationKey?: string;
+    backblazeKeyName?: string;
+    backblazeEndpoint?: string;
+    backblazeRegion?: string;
+    cloudflareTurnstileSecret?: string;
   };
   terms: string;
   privacyPolicy: string;
@@ -53,6 +64,21 @@ const AdminSettings = () => {
       reset({
         platformPercent: response.result.settings?.platformPercent,
         instanceArtistId: response.result.settings?.instanceArtistId,
+        stripeKey: response.result.settings?.stripeKey,
+        stripeWebhookSigningSecret:
+          response.result.settings?.stripeWebhookSigningSecret,
+        stripeWebhookConnectSigningSecret:
+          response.result.settings?.stripeWebhookConnectSigningSecret,
+        sendgridApiKey: response.result.settings?.sendgridApiKey,
+        sendgridFromEmail: response.result.settings?.sendgridFromEmail,
+        backblazeKeyId: response.result.settings?.backblazeKeyId,
+        backblazeApplicationKey:
+          response.result.settings?.backblazeApplicationKey,
+        backblazeKeyName: response.result.settings?.backblazeKeyName,
+        backblazeEndpoint: response.result.settings?.backblazeEndpoint,
+        backblazeRegion: response.result.settings?.backblazeRegion,
+        cloudflareTurnstileSecret:
+          response.result.settings?.cloudflareTurnstileSecret,
         terms: response.result.terms,
         privacyPolicy: response.result.privacyPolicy,
         cookiePolicy: response.result.cookiePolicy,
@@ -69,6 +95,18 @@ const AdminSettings = () => {
           settings: {
             platformPercent: data.platformPercent,
             instanceArtistId: Number(data.instanceArtistId),
+            stripeKey: data.stripeKey,
+            stripeWebhookSigningSecret: data.stripeWebhookSigningSecret,
+            stripeWebhookConnectSigningSecret:
+              data.stripeWebhookConnectSigningSecret,
+            sendgridApiKey: data.sendgridApiKey,
+            sendgridFromEmail: data.sendgridFromEmail,
+            backblazeKeyId: data.backblazeKeyId,
+            backblazeApplicationKey: data.backblazeApplicationKey,
+            backblazeKeyName: data.backblazeKeyName,
+            backblazeEndpoint: data.backblazeEndpoint,
+            backblazeRegion: data.backblazeRegion,
+            cloudflareTurnstileSecret: data.cloudflareTurnstileSecret,
           },
           terms: data.terms,
           privacyPolicy: data.privacyPolicy,
