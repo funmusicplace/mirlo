@@ -17,7 +17,7 @@ export default function () {
   async function POST(req: Request, res: Response, next: NextFunction) {
     const { id: artistId } = req.params as unknown as Params;
     const user = req.user as User;
-    const { email } = req.body;
+    const { email } = req.body ?? {};
 
     try {
       let userIdToRemove: number | undefined = user?.id;

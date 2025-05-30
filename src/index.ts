@@ -24,11 +24,12 @@ import { sendMailQueue } from "./queues/send-mail-queue";
 import path from "node:path";
 import activityPub from "./activityPub";
 import parseIndex from "./parseIndex";
+import qs from "qs";
 
 dotenv.config();
 
 const app = express();
-
+app.set("query parser", (str: string) => qs.parse(str));
 // See https://github.com/express-rate-limit/express-rate-limit/wiki/Troubleshooting-Proxy-Issues
 app.set("trust proxy", 2);
 app.get("/ip", (request, response) => response.send(request.ip));

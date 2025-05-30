@@ -5,7 +5,7 @@ import { AppError } from "../../utils/error";
 
 const login = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { email, password } = req.body;
+    const { email, password } = req.body ?? {};
     if (!email || !password) {
       throw new AppError({
         httpCode: 401,

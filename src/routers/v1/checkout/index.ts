@@ -116,7 +116,7 @@ export default function () {
             );
           } else {
             res.status(500).json({
-              error: "Something went wrong while completing a checkout",
+              error: "No purchase type set for checkout session",
             });
           }
         } else {
@@ -132,7 +132,7 @@ export default function () {
     } catch (e) {
       console.error(`Error in checkout process`, e);
       res.status(500).json({
-        error: "Something went wrong while subscribing the user",
+        error: "Something went wrong while completing a checkout",
       });
     }
   }
