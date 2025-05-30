@@ -15,6 +15,20 @@ interface FormSettings {
   privacyPolicy: string;
   cookiePolicy: string;
   contentPolicy: string;
+  stripeKey?: string;
+  stripeWebhookSigningSecret?: string;
+  stripeWebhookConnectSigningSecret?: string;
+
+  sendgridApiKey?: string;
+  sendgridFromEmail?: string;
+
+  backblazeKeyId?: string;
+  backblazeApplicationKey?: string;
+  backblazeKeyName?: string;
+  backblazeEndpoint?: string;
+  backblazeRegion?: string;
+
+  cloudflareTurnstileSecret?: string;
 }
 
 interface SettingsFromAPI {
@@ -92,6 +106,116 @@ const AdminSettings = () => {
               <InputEl
                 {...register("instanceArtistId")}
                 type="number"
+                className={css`
+                  text-align: right;
+                `}
+              />
+            </td>
+          </tr>
+          <tr>
+            <td>stripeKey</td>
+            <td>
+              <InputEl
+                {...register("stripeKey")}
+                className={css`
+                  text-align: right;
+                `}
+              />
+            </td>
+          </tr>
+          <tr>
+            <td>stripeWebhookSigningSecret</td>
+            <td>
+              <InputEl
+                {...register("stripeWebhookSigningSecret")}
+                className={css`
+                  text-align: right;
+                `}
+              />
+            </td>
+          </tr>
+          <tr>
+            <td>sendgridApiKey</td>
+            <td>
+              <InputEl
+                {...register("sendgridFromEmail")}
+                className={css`
+                  text-align: right;
+                `}
+              />
+            </td>
+          </tr>{" "}
+          <tr>
+            <td>backblazeKeyId</td>
+            <td>
+              <InputEl
+                {...register("backblazeKeyId")}
+                className={css`
+                  text-align: right;
+                `}
+              />
+            </td>
+          </tr>{" "}
+          <tr>
+            <td>backblazeApplicationKey</td>
+            <td>
+              <InputEl
+                {...register("backblazeApplicationKey")}
+                className={css`
+                  text-align: right;
+                `}
+              />
+            </td>
+          </tr>{" "}
+          <tr>
+            <td>backblazeKeyName</td>
+            <td>
+              <InputEl
+                {...register("backblazeKeyName")}
+                className={css`
+                  text-align: right;
+                `}
+              />
+            </td>
+          </tr>
+          <tr>
+            <td>backblazeEndpoint</td>
+            <td>
+              <InputEl
+                {...register("backblazeEndpoint")}
+                className={css`
+                  text-align: right;
+                `}
+              />
+            </td>
+          </tr>
+          <tr>
+            <td>backblazeRegion</td>
+            <td>
+              <InputEl
+                {...register("backblazeRegion")}
+                className={css`
+                  text-align: right;
+                `}
+              />
+            </td>
+          </tr>
+          <tr>
+            <td>cloudflareTurnstileSecret</td>
+            <td>
+              <InputEl
+                {...register("cloudflareTurnstileSecret")}
+                className={css`
+                  text-align: right;
+                `}
+              />
+            </td>
+          </tr>
+          <tr>
+            <td>backblazeRegion</td>
+            <td>
+              <InputEl
+                {...register("backblazeRegion")}
                 className={css`
                   text-align: right;
                 `}
