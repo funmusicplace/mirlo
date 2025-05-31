@@ -131,15 +131,17 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
         )}
         <form onSubmit={handleSubmit(purchaseAlbum)}>
           <FormComponent>
-            {t("nameYourPrice", {
-              currency: getCurrencySymbol(trackGroup.currency, undefined),
-            })}
-            <InputEl
-              {...register("chosenPrice")}
-              type="number"
-              min={minPrice ? minPrice / 100 : 0}
-              step="0.01"
-            />
+            <label>
+              {t("nameYourPrice", {
+                currency: getCurrencySymbol(trackGroup.currency, undefined),
+              })}
+              <InputEl
+                {...register("chosenPrice")}
+                type="number"
+                min={minPrice ? minPrice / 100 : 0}
+                step="0.01"
+              />
+            </label>
             {Number(chosenPrice) > (minPrice ?? 1) * 100 && (
               <Box variant="success">
                 {t("thatsGenerous", {
