@@ -176,6 +176,14 @@ export const Modal: React.FC<{
     [onClose]
   );
 
+  React.useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "initial";
+    }
+  }, [open]);
+
   if (!open) {
     return null;
   }
