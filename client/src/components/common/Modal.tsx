@@ -7,6 +7,7 @@ import Background from "./Background";
 import { FaTimes } from "react-icons/fa";
 import SpaceBetweenDiv from "./SpaceBetweenDiv";
 import Button from "./Button";
+import { FocusTrap } from "focus-trap-react";
 
 const wrapper = css`
   position: fixed;
@@ -116,10 +117,22 @@ const close = css`
   }
 `;
 
+function dialogIDFromTitle(title?: string | null) {
+  return !title ? undefined : title.toLowerCase().trim().replace(" ", "-");
+}
+
+function dialogLabelFromTitle(title?: string | null) {
+  return !title
+    ? undefined
+    : title.toLowerCase().trim().replace(" ", "-").concat("-label");
+}
+
 export const Modal: React.FC<{
   open: boolean;
   children: React.ReactNode;
   title?: string | null;
+  id?: string;
+  ariaDescribedBy?: string | null;
   onClose: () => void;
   size?: "small";
   className?: string;
@@ -131,6 +144,8 @@ export const Modal: React.FC<{
   onClose,
   size,
   title,
+  id,
+  ariaDescribedBy,
   className,
   contentClassName,
   noPadding,
@@ -153,6 +168,7 @@ export const Modal: React.FC<{
       e:
         | React.MouseEvent<HTMLButtonElement, MouseEvent>
         | React.MouseEvent<HTMLDivElement, MouseEvent>
+        | React.KeyboardEvent<HTMLDivElement>
     ) => {
       e.stopPropagation();
       onClose();
@@ -160,59 +176,82 @@ export const Modal: React.FC<{
     [onClose]
   );
 
+  React.useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "initial";
+    }
+  }, [open]);
+
   if (!open) {
     return null;
   }
 
   return ReactDOM.createPortal(
-    <>
-      <Background onClick={onCloseWrapper} />
-      <div className={wrapper} data-cy="modal">
-        <Content size={size} className={className}>
-          <SpaceBetweenDiv
-            className={css`
-              position: sticky;
-              top: 0;
-              padding-top: 1rem;
-              align-items: center;
-              ${noPadding ? "margin-bottom: 0 !important;" : ""}
-              background-color: var(--mi-lighten-background-color) !important;
-              padding: 1rem;
-              border-radius: var(--mi-border-radius-x) var(--mi-border-radius-x)
-                0 0;
-              padding-bottom: 0.5rem !important;
-              background-color: inherit;
-              border-bottom: solid 1px rgba(125, 125, 125, 0.3);
-              z-index: 12;
+    <FocusTrap
+      focusTrapOptions={{
+        initialFocus: ".".concat(close),
+      }}
+    >
+      <div
+        id={id || dialogIDFromTitle(title)}
+        role="dialog"
+        aria-describedby={ariaDescribedBy || undefined}
+        aria-labelledby={dialogLabelFromTitle(title)}
+        aria-modal="true"
+        onKeyDown={(event) => {
+          event.key === "Escape" && onCloseWrapper(event);
+        }}
+      >
+        <Background onClick={onCloseWrapper} />
+        <div className={wrapper} data-cy="modal">
+          <Content size={size} className={className}>
+            <SpaceBetweenDiv
+              className={css`
+                position: sticky;
+                top: 0;
+                padding-top: 1rem;
+                align-items: center;
+                margin-bottom: 0.5rem;
+                background-color: var(--mi-lighten-background-color) !important;
+                padding: 1rem;
+                border-radius: var(--mi-border-radius-x)
+                  var(--mi-border-radius-x) 0 0;
+                padding-bottom: 0.5rem !important;
+                background-color: inherit;
+                border-bottom: solid 1px rgba(125, 125, 125, 0.3);
+                z-index: 12;
 
-              ${!title ? "justify-content: flex-end !important;" : ""}
-              button {
-                ${!title ? "margin-bottom: 0.2rem;" : ""}
-              }
+                ${!title ? "justify-content: flex-end !important;" : ""}
+                button {
+                  ${!title ? "margin-bottom: 0.2rem;" : ""}
+                }
 
-              h2 {
-                flex: 85%;
-                max-width: 85%;
-                margin-bottom: 0 !important;
-              }
-            `}
-          >
-            {title && <h2>{title}</h2>}
+                h2 {
+                  flex: 85%;
+                  max-width: 85%;
+                  margin-bottom: 0 !important;
+                }
+              `}
+            >
+              {title && <h2 id={dialogLabelFromTitle(title)}>{title}</h2>}
 
-            <Button
-              className={close}
-              size="compact"
-              startIcon={<FaTimes />}
-              onClick={onCloseWrapper}
-              aria-label="close"
-            ></Button>
-          </SpaceBetweenDiv>
-          <ChildrenWrapper className={contentClassName} noPadding={noPadding}>
-            {children}
-          </ChildrenWrapper>
-        </Content>
+              <Button
+                className={close}
+                size="compact"
+                startIcon={<FaTimes />}
+                onClick={onCloseWrapper}
+                aria-label="close"
+              ></Button>
+            </SpaceBetweenDiv>
+            <ChildrenWrapper className={contentClassName} noPadding={noPadding}>
+              {children}
+            </ChildrenWrapper>
+          </Content>
+        </div>
       </div>
-    </>,
+    </FocusTrap>,
     container
   );
 };
