@@ -155,7 +155,9 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
             )}
             {lessThanMin && (
               <small>
-                {t("pleaseEnterMoreThan", { minPrice: minPrice / 100 })}
+                {t("pleaseEnterMoreThan", {
+                  minPrice: (minPrice ?? 100) / 100,
+                })}
               </small>
             )}
             <PlatformPercent
