@@ -52,6 +52,7 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
     reValidateMode: "onChange",
   });
   const { register, watch, handleSubmit, formState } = methods;
+  const { isValid } = formState;
   const chosenPrice = watch("chosenPrice");
   const [clientSecret, setClientSecret] = React.useState<string | null>(null);
 
@@ -103,7 +104,7 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
 
   console.log("errors", formState.errors);
 
-  const isDisabled = !!lessThan1 || lessThanMin;
+  const isDisabled = !!lessThan1 || lessThanMin || !isValid;
 
   if (clientSecret && stripePromise) {
     return (
