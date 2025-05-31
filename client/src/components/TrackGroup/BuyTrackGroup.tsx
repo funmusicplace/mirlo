@@ -124,10 +124,10 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
         `}
       >
         {!!minPrice && minPrice > 0 && (
-          <>
+          <p>
             {t("price")}{" "}
             <Money amount={minPrice / 100} currency={trackGroup.currency} />, or
-          </>
+          </p>
         )}
         <form onSubmit={handleSubmit(purchaseAlbum)}>
           <FormComponent>
