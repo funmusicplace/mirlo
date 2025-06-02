@@ -3273,6 +3273,7 @@ __metadata:
     buffer: "npm:^6.0.3"
     cypress: "npm:^14.3.0"
     file-saver: "npm:^2.0.5"
+    focus-trap-react: "npm:^11.0.3"
     hast-util-from-parse5: "npm:^7.1.2"
     html-react-parser: "npm:^5.1.1"
     i18next: "npm:^22.4.15"
@@ -11689,6 +11690,30 @@ __metadata:
   languageName: node
   linkType: hard
 
+"focus-trap-react@npm:^11.0.3":
+  version: 11.0.3
+  resolution: "focus-trap-react@npm:11.0.3"
+  dependencies:
+    focus-trap: "npm:^7.6.4"
+    tabbable: "npm:^6.2.0"
+  peerDependencies:
+    "@types/react": ^18.0.0 || ^19.0.0
+    "@types/react-dom": ^18.0.0 || ^19.0.0
+    react: ^18.0.0 || ^19.0.0
+    react-dom: ^18.0.0 || ^19.0.0
+  checksum: 10/b37eb54de07ffbb94e19bc274dbe7b5882b2690dbe643ca2e4b4be92f1e8dec193df2d313ac6374dacbb249a5b936228d5ac14f288e986e52b4719a59687a076
+  languageName: node
+  linkType: hard
+
+"focus-trap@npm:^7.6.4":
+  version: 7.6.4
+  resolution: "focus-trap@npm:7.6.4"
+  dependencies:
+    tabbable: "npm:^6.2.0"
+  checksum: 10/75bf7aa4500935d24682ef4180c427d4f2fd9a1fd8ba5440c285c9bed9bbd591692a1dc014e6004a5a273ba35e2eea3f5718b592220df27ac242262e40e0d4fc
+  languageName: node
+  linkType: hard
+
 "follow-redirects@npm:^1.14.9, follow-redirects@npm:^1.15.6":
   version: 1.15.9
   resolution: "follow-redirects@npm:1.15.9"
@@ -19501,7 +19526,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tabbable@npm:^6.0.1":
+"tabbable@npm:^6.0.1, tabbable@npm:^6.2.0":
   version: 6.2.0
   resolution: "tabbable@npm:6.2.0"
   checksum: 10/980fa73476026e99dcacfc0d6e000d41d42c8e670faf4682496d30c625495e412c4369694f2a15cf1e5252d22de3c396f2b62edbe8d60b5dadc40d09e3f2dde3
