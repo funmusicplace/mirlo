@@ -236,7 +236,7 @@
     "isLabelApproved": "Will this artist show on the roster?",
     "showOnPage": "Show on roster",
     "addExistingArtistToRoster": "Invite an existing artist to join your roster. They'll have to accept your invite.",
-    "createNewArtist": "Create new artist",
+    "createNewArtist": "Create new artist page",
     "addNewArtistToRoster": "Create a new artist page and add them to your roster",
     "roster": "Roster",
     "releases": "Releases"
@@ -356,7 +356,7 @@
     "willPublishAt": "Will publish at {{ date }}"
   },
   "manage": {
-    "manageArtists": "Manage artists",
+    "manageArtists": "Manage artist pages",
     "managePayment": "Manage payment processor",
     "error": "Something went wrong",
     "setUpBankAccount": "Set up bank account",
@@ -549,7 +549,7 @@
     "allowSaleDescription": "Allow users to buy this track individually",
     "whatMeanLicense": "Don't know what this means? It's safe to leave it blank. Depending on your country, your work is most likely already copyrighted under the Berne Convention and/or the TRIPS agreement <a href='https://en.m.wikipedia.org/wiki/TRIPS_Agreement'>(more about it here)</a>.",
     "editAlbum": "Edit release",
-    "viewArtist": "Back to artist",
+    "viewArtist": "Back to artist page",
     "title": "Title",
     "isPublished": "Is it published?",
     "publishedDescription": "Published albums can be bought and listened to.",
@@ -601,7 +601,7 @@
     "trackArtists": "Track artists",
     "done": "Done",
     "artistOnMirlo": "Artist with a presence on Mirlo",
-    "artist": "Artist",
+    "artist": "Album artist",
     "editTrackArtists": "Edit track artists",
     "nameOfAccountToReceivePayment": "Name of the account that will receive payments for this release.",
     "receivePaymentDescription": "This is the account that will receive payments for this release. If you are part of a label or collective, this will be the label or collective account. Go to your artist page to manage these relationships.",
@@ -879,7 +879,7 @@
     "logIn": "Log in",
     "signUp": "Sign up",
     "featuresLink": "What is Mirlo? Check out <features>our features</features> and <about>about section</about>.",
-    "mirloConstruction": "Wanna talk more? <email>E-mail us</email>, <discord>join our Discord</discord>, or join us <office>for office hours</office>! Also check out our <about>About page</about>, and <github>the code on GitHub</github>. <br /> <br/ >Want to just receive our monthly newsletter? <mailingList>Sign up</mailingList>",
+    "mirloConstruction": "Wanna talk more? <email>E-mail us</email>, <discord>join our Discord</discord>, or join us <office>for office hours</office>! Also check out our <about>About page</about>, and <github>the code on GitHub</github>. <br /> <br />Want to just receive our monthly newsletter? <mailingList>Sign up</mailingList>",
     "latestCommunityPost": "Latest posts from the community",
     "supportUs": "Want to support us as we grow Mirlo? <support>Pitch in</support>"
   },
