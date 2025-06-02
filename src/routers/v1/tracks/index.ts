@@ -2,7 +2,6 @@ import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
 import { Prisma } from "@mirlo/prisma/client";
 import { userHasPermission } from "../../../auth/passport";
-import trackGroup from "../../../utils/trackGroup";
 import { addSizesToImage } from "../../../utils/artist";
 import { finalCoversBucket } from "../../../utils/minio";
 
@@ -52,7 +51,7 @@ export default function () {
         results: tracks.map((tr) => ({
           ...tr,
           trackGroup: {
-            ...trackGroup,
+            ...tr.trackGroup,
             cover: addSizesToImage(finalCoversBucket, tr.trackGroup.cover),
           },
         })),
