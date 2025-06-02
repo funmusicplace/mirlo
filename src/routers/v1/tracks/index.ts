@@ -38,7 +38,7 @@ export default function () {
           trackGroup: {
             include: {
               artist: true,
-              cover: true, //added this line
+              cover: true,
             },
           },
           audio: true,
