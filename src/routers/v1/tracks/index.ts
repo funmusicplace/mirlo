@@ -2,6 +2,9 @@ import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
 import { Prisma } from "@mirlo/prisma/client";
 import { userHasPermission } from "../../../auth/passport";
+import trackGroup from "../../../utils/trackGroup";
+import { addSizesToImage } from "../../../utils/artist";
+import { finalCoversBucket } from "../../../utils/minio";
 
 export default function () {
   const operations = {
@@ -36,6 +39,7 @@ export default function () {
           trackGroup: {
             include: {
               artist: true,
+              cover: true, //added this line
             },
           },
           audio: true,
@@ -44,7 +48,15 @@ export default function () {
         take: take ? Number(take) : undefined,
         where,
       });
-      res.json({ results: tracks });
+      res.json({
+        results: tracks.map((tr) => ({
+          ...tr,
+          trackGroup: {
+            ...trackGroup,
+            cover: addSizesToImage(finalCoversBucket, tr.trackGroup.cover),
+          },
+        })),
+      });
     } catch (e) {
       next(e);
     }
