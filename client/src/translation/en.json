@@ -88,7 +88,7 @@
     "labels": "Labels"
   },
   "profile": {
-    "resetPasswordLink": "Want to change your password? Use the reset form",
+    "resetPasswordLink": "Want to change your password? Use the reset form.",
     "password": "Updating your email requires entering your password",
     "deleteYourAccount": "No longer want to use Mirlo? Delete your account",
     "profile": "Profile",
@@ -260,7 +260,7 @@
     "submit": "Report",
     "reportContentDescription": "Is there a problem with this content? Please let us know.",
     "Email": "Email",
-    "exampleLocation": "Eg. North Pole",
+    "exampleLocation": "eg. North Pole",
     "backToArtist": "Back to artist",
     "postByArtist": "by <link>{{artistName}}</link>",
     "Website": "Website",
@@ -338,7 +338,7 @@
     "subscribeToArtist": "Subscribe to {{ artist }}",
     "chooseSupportLevel": "You can follow the artist or choose to support them financially",
     "continueWithPrice": "Continue with {{ amount }}/month",
-    "chooseToContinue": "Choose a support tier to support",
+    "chooseToContinue": "Choose a support tier to continue",
     "purchaseEntireCatalogue": "Purchase entire catalogue for {{amount}}",
     "platformPercent": "{{ artistName }} has chosen that they will get {{ percent }}% ({{ money }}) of this purchase. This does not include the cut taken by our payment processor."
   },
@@ -390,7 +390,7 @@
     "typeForTags": "Start typing to add tags",
     "notEnabled": "This artist has not been enabled by site admin yet! Contact an admin to do so.",
     "manage": "Manage {{artist}}",
-    "paymentProcessorNotSetUp": "There is no payment processor set up yet for this artist page. Set up your stripe account <manage>by clicking here</manage>.",
+    "paymentProcessorNotSetUp": "There is no payment processor set up yet for this artist page. Set up your Stripe account <manage>by clicking here</manage>.",
     "mustBeUnique": "Must be unique",
     "areYouSureDelete": "Are you sure you want to delete this artist page?",
     "areYouSureDeletePost": "Are you sure you want to delete this post?",
@@ -453,7 +453,7 @@
   },
   "manageLicense": {
     "shortLabelForLicense": "What's a unique short label for this license?",
-    "egShort": "eg. cc0",
+    "egShort": "eg. CC0",
     "longLabel": "What's the full name of this license?",
     "egLong": "eg. No Rights Reserved",
     "urlForLabel": "Where can you read more about this license?",
@@ -715,7 +715,7 @@
   },
   "admin": {
     "users": "Users",
-    "trackgroups": "Trackgroups",
+    "trackgroups": "Trackgroups (releases)",
     "tracks": "Tracks",
     "callServerTasks": "Call server tasks",
     "whatTaskCall": "What task do you want to call on the server?",
