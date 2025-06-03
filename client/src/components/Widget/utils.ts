@@ -96,13 +96,13 @@ export const WidgetTitleWrapper = styled.div<{}>`
   flex: 45%;
   border-left: var(--mi-border);
   max-width: 100%;
+  width: 100%;
   height: 100%;
   flex-direction: column;
   justify-content: flex-start;
 
   @media screen and (max-width: ${bp.small}px) {
     max-width: 100%;
-    flex: 100%;
     height: auto;
 
     a {
