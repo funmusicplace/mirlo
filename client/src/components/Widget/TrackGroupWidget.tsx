@@ -101,16 +101,24 @@ const TrackGroupWidget = () => {
         }
       `}
     >
-      <TgWidgetWrapper>
+      <TgWidgetWrapper
+        className={css`
+          @media screen and (max-width: ${bp.small}px) {
+            flex-direction: column;
+          }
+        `}
+      >
         <FlexWrapper
           className={css`
             flex: 55%;
-            max-width: 360px;
+            max-width: 100%;
+            width: 100%;
             position: relative;
             height: 100%;
 
             > div {
               width: 100%;
+              text-align: center;
             }
           `}
         >
@@ -126,7 +134,8 @@ const TrackGroupWidget = () => {
           <ImageWithPlaceholder
             src={trackGroup.cover?.sizes?.[600] ?? ""}
             alt={trackGroup.title}
-            size={400}
+            size={600}
+            square
           />
         </FlexWrapper>
 
@@ -135,12 +144,9 @@ const TrackGroupWidget = () => {
             className={css`
               padding: 0.5rem 0.5rem 0.5rem 1rem;
               max-height: 360px;
+
               @media screen and (max-width: ${bp.small}px) {
-                width: 227px;
-                padding: 0 0 0.5rem 0;
                 max-width: 100%;
-                flex: 100%;
-                align-self: center;
               }
             `}
           >

@@ -54,7 +54,7 @@ const buildOpenGraphTags = ($: cheerio.CheerioAPI, options: Options) => {
     <meta name="twitter:description" content="${description}" />
     <meta name="twitter:card" content="${isAlbum ? "player" : "summary"}" />
 
-    ${imageUrl ? `<meta property="og:image" content="${imageUrl}" />` : ""}
+    <meta property="og:image" content="${imageUrl ? imageUrl : "/android-chrome-512x512.png"}" />
     ${rss ? `<link rel="alternate" type="application/rss+xml" href="${rss}" />` : ""}
     ${
       isPlayer

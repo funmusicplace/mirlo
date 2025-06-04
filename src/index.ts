@@ -267,6 +267,7 @@ app.use("/health", async (req, res) => {
 
 // This has to be the last thing used so that other things don't get over-written
 app.use("/", async (req, res) => {
+  console.log("req.path", req.path);
   if (!res.headersSent) {
     if (req.path.startsWith("/v1")) {
       res.sendStatus(404);
@@ -284,7 +285,8 @@ app.use("/", async (req, res) => {
         req.path.includes(".pdf") ||
         req.path.includes(".woff") ||
         req.path.includes(".woff2") ||
-        req.path.includes("robots.txt")
+        req.path.includes("robots.txt") ||
+        req.path.startsWith("/static/")
       )
     ) {
       const html = await parseIndex(req.path);
