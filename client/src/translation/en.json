@@ -16,7 +16,7 @@
     "logIn": "Already have an account? Log in",
     "notArtistName": "You will be able to create multiple artist pages, this can be anything.",
     "termsAndPrivacy": "By signing up you agree to our <terms>terms</terms> and <privacy>privacy</privacy> policies.",
-    "receiveMailingList": "Stay up to date with Mirlo and our product by signing up to our mailing list."
+    "receiveMailingList": "Stay up to date with Mirlo and its projects by signing up to our mailing list."
   },
   "confirmationDialog": {
     "cancel": "Cancel",
@@ -45,8 +45,8 @@
     "features": "Features",
     "pricing": "Pricing",
     "featuresText": "<p>Mirlo provides a space for artists to upload their music, establish their online presence, sell their music, and receive ongoing monthly contributions from their audience.</p><p>For a thorough look at our features for artists, <featuresLink>check out our features page</featuresLink>.</p>",
-    "pricingText": "<p>Artists get to decide how much of their sale goes to Mirlo. They do this by setting a percentage on sales. So if an artist sells an album on for $10, they will decide whether Mirlo gets 70 cents, $1, or nothing. This lets artists decide how much of their money they need for themselves. By default, Mirlo charges 10% on each sale. <i>Then</i>, our payment processor Stripe, will take a cut of 2.9% + 30c (proportionally <proportionally>this is larger on small transactions</proportionally>).</p><p>Want to know more about our thought process? Check out <takeRate>our blog post explaining how we got there</takeRate>.</p> <p>As we develop our product and come to terms with the costs of running it, we will adjust these numbers and explore new ways of financing Mirlo.</p>",
-    "morePricing": "As we develop our product and come to terms with costs of running it, we will tweak these numbers and explore new ways of paying for the service and our work."
+    "pricingText": "<p>Artists get to decide how much of their sale goes to Mirlo. They do this by setting a percentage on sales. So if an artist sells an album on for $10, they will decide whether Mirlo gets 70 cents, $1, or nothing. This lets artists decide how much of their money they need for themselves. By default, Mirlo charges 10% on each sale. <i>Then</i>, our payment processor Stripe, will take a cut of 2.9% + 30c (proportionally <proportionally>this is larger on small transactions</proportionally>).</p><p>Want to know more about our thought process? Check out <takeRate>our blog post explaining how we got there</takeRate>.</p> <p>As we develop our project and come to terms with the costs of running it, we will adjust these numbers and explore new ways of financing Mirlo.</p>",
+    "morePricing": "As we develop our project and come to terms with costs of running it, we will tweak these numbers and explore new ways of paying for the service and our work."
   },
   "logIn": {
     "logIn": "Log in",
