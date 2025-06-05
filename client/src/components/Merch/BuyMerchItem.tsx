@@ -16,6 +16,8 @@ import { getCurrencySymbol, moneyDisplay } from "components/common/Money";
 import IncludesDigitalDownload from "./IncludesDigitalDownload";
 import { FaChevronRight } from "react-icons/fa";
 import countryCodesCurrencies from "components/ManageArtist/Merch/country-codes-currencies";
+import { flatten } from "lodash";
+import Box from "components/common/Box";
 
 type FormData = {
   quantity: number;
@@ -56,6 +58,8 @@ const BuyMerchItem: React.FC<{
     },
   });
 
+  const { formState, setError } = methods;
+
   const currentPrice = methods.watch("price");
   const quantity = methods.watch("quantity");
   const currentOptions = methods.watch("merchOptionIds");
@@ -65,6 +69,29 @@ const BuyMerchItem: React.FC<{
     async (data: FormData) => {
       try {
         if (merch) {
+          const options = flatten(
+            merch.optionTypes?.map((ot) =>
+              ot.options.find((o) => data.merchOptionIds.includes(o.id))
+            )
+          );
+
+          if (
+            options &&
+            options.find((o) => (o?.quantityRemaining ?? 0) < data.quantity)
+          ) {
+            setError("merchOptionIds", {
+              type: "manual",
+              message: t("notEnoughInStockQuantity") ?? "",
+            });
+            return;
+          }
+          if (data.quantity < 1 || data.quantity > merch.quantityRemaining) {
+            setError("quantity", {
+              type: "manual",
+              message: t("notEnoughInStockCategory") ?? "",
+            });
+            return;
+          }
           setIsLoadingStripe(true);
           const response = await api.post<{}, { redirectUrl: string }>(
             `merch/${merch.id}/purchase`,
@@ -91,13 +118,7 @@ const BuyMerchItem: React.FC<{
 
   let price = currentPrice;
 
-  merch.optionTypes.forEach((ot) =>
-    ot.options.forEach((o) =>
-      currentOptions.includes(o.id)
-        ? (price += o.additionalPrice / 100)
-        : undefined
-    )
-  );
+  console.log("currentOptions", currentOptions);
 
   merch.shippingDestinations.forEach((sd) => {
     if (sd.id === shippingDestination) {
@@ -147,6 +168,17 @@ const BuyMerchItem: React.FC<{
             min={1}
             max={merch.quantityRemaining}
           />
+          {formState.errors.quantity && (
+            <Box
+              variant="warning"
+              className={css`
+                margin-top: 0.5rem;
+              `}
+              compact
+            >
+              {formState.errors.quantity.message}
+            </Box>
+          )}
         </FormComponent>
         <FormComponent>
           <label>
@@ -167,13 +199,19 @@ const BuyMerchItem: React.FC<{
       {merch.optionTypes?.map((optionType, idx) => (
         <FormComponent>
           <label>{optionType.optionName}</label>
-          <SelectEl {...methods.register(`merchOptionIds.${idx}`)}>
+          <SelectEl {...methods.register(`merchOptionIds.${idx}`)} required>
+            <option value="">{t("choose")}</option>
+
             {optionType.options
               .sort((a, b) => {
                 return a.additionalPrice < b.additionalPrice ? -1 : 1;
               })
               .map((o) => (
-                <option key={o.name} value={o.id}>
+                <option
+                  key={o.name}
+                  value={o.id}
+                  disabled={o.quantityRemaining < quantity}
+                >
                   {o.additionalPrice
                     ? t("option", {
                         name: o.name,
@@ -186,6 +224,17 @@ const BuyMerchItem: React.FC<{
                 </option>
               ))}
           </SelectEl>
+          {formState.errors.merchOptionIds && (
+            <Box
+              variant="warning"
+              className={css`
+                margin-top: 0.5rem;
+              `}
+              compact
+            >
+              {formState.errors.merchOptionIds.message}
+            </Box>
+          )}
         </FormComponent>
       ))}
       <FormComponent>

@@ -92,7 +92,7 @@ const TrackGroupWidget = () => {
     <WidgetWrapper
       artistColors={artist?.properties?.colors}
       className={css`
-        overflow: hidden;
+        overflow: scroll;
         a {
           text-decoration: none;
         }
