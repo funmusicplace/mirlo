@@ -416,11 +416,16 @@ export const handleArtistMerchPurchase = async (
             if (merchProduct) {
               const optionIds =
                 product.metadata?.merchOptionIds?.split(OPTION_JOINER);
+
               const options: MerchOption[] = [];
+              const optionsToReduceQuantity: MerchOption[] = [];
               merchProduct.optionTypes.forEach((ot) =>
                 ot.options.forEach((o) => {
                   if (optionIds?.includes(o.id)) {
                     options.push(o);
+                    if (o.quantityRemaining) {
+                      optionsToReduceQuantity.push(o);
+                    }
                   }
                 })
               );
@@ -473,7 +478,10 @@ export const handleArtistMerchPurchase = async (
                 where: { id: createdMerchPurchase.merchId },
               });
 
-              if (merch?.quantityRemaining) {
+              if (
+                optionsToReduceQuantity.length === 0 &&
+                merch?.quantityRemaining
+              ) {
                 await prisma.merch.update({
                   where: {
                     id: createdMerchPurchase.merchId,
@@ -483,8 +491,22 @@ export const handleArtistMerchPurchase = async (
                       merch.quantityRemaining - createdMerchPurchase.quantity,
                   },
                 });
+              } else if (optionsToReduceQuantity.length > 0) {
+                await Promise.all(
+                  optionsToReduceQuantity.map((option) => {
+                    return prisma.merchOption.update({
+                      where: {
+                        id: option.id,
+                      },
+                      data: {
+                        quantityRemaining:
+                          (option.quantityRemaining ?? 0) -
+                          createdMerchPurchase.quantity,
+                      },
+                    });
+                  })
+                );
               }
-
               const merchPurchase = await prisma.merchPurchase.findFirst({
                 where: {
                   id: createdMerchPurchase.id,

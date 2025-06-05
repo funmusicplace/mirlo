@@ -96,6 +96,17 @@ const OptionType: React.FC<{
                     type="number"
                   />
                 </FormComponent>
+                <FormComponent>
+                  <label>{t("quantity")}</label>
+                  <InputEl
+                    {...methods.register(
+                      `optionTypes.${index}.options.${optionIndex}.quantityRemaining`
+                    )}
+                    step={1}
+                    min={0}
+                    type="number"
+                  />
+                </FormComponent>
                 <ArtistButton
                   type="button"
                   startIcon={<FaTrash />}

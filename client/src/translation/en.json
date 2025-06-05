@@ -200,6 +200,9 @@
   },
   "merchDetails": {
     "buy": "Buy",
+    "choose": "Choose an option",
+    "notEnoughInStockQuantity": "Not enough in stock",
+    "notEnoughInStockCategory": "Not enough in stock of this category",
     "orderTotal": "Order total: {{ amount }}",
     "goToCheckOut": "Proceed to checkout",
     "artistCheckoutPage": "You will be taken to the artist's payment processor page to complete this purchase.",
@@ -478,6 +481,7 @@
     "merchDescription": "Description",
     "price": "Price",
     "quantity": "Quantity in stock",
+    "quantityRemainingDescription": "Note that if any quantity remaining is set in the options, we'll use that to calculate the amount remaining.",
     "typeAlbumName": "Type album name",
     "everywhere": "Everywhere",
     "everywhereElse": "Everywhere else",
