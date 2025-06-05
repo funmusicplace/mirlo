@@ -63,8 +63,8 @@ const PriceAndSuch: React.FC<{
           className={css`
             width: 100%;
             @media screen and (min-width: ${bp.medium}px) {
-              display: flex;
-              flex-direction: row;
+              display: grid;
+              grid-template-columns: repeat(2, 1fr);
             }
           `}
         >

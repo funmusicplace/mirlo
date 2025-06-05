@@ -160,7 +160,7 @@
     "addToCollection": "Add to collection",
     "addToCollectionDescription": "You'll add this free album to your collection.",
     "addAlbumToCollection": "Add {{ title }} to your collection",
-    "getDownloadLink": "Get download link email",
+    "getDownloadLink": "Get download link in email",
     "email": "Email",
     "success": "Success",
     "nameYourPrice": "Name your price in {{ currency }}:",
