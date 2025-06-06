@@ -92,6 +92,7 @@ const TrackGroupWidget = () => {
     <WidgetWrapper
       artistColors={artist?.properties?.colors}
       className={css`
+        height: 100vh;
         overflow: scroll;
         a {
           text-decoration: none;
@@ -101,25 +102,11 @@ const TrackGroupWidget = () => {
         }
       `}
     >
-      <TgWidgetWrapper
-        className={css`
-          @media screen and (max-width: ${bp.small}px) {
-            flex-direction: column;
-          }
-        `}
-      >
+      <TgWidgetWrapper className={css``}>
         <FlexWrapper
           className={css`
-            flex: 55%;
-            max-width: 100%;
-            width: 100%;
             position: relative;
-            height: 100%;
-
-            > div {
-              width: 100%;
-              text-align: center;
-            }
+            width: 100%;
           `}
         >
           <div
@@ -139,22 +126,14 @@ const TrackGroupWidget = () => {
           />
         </FlexWrapper>
 
-        <WidgetTitleWrapper>
+        <WidgetTitleWrapper className={css``}>
           <div
             className={css`
-              padding: 0.5rem 0.5rem 0.5rem 1rem;
-              max-height: 360px;
-
-              @media screen and (max-width: ${bp.small}px) {
-                max-width: 100%;
-              }
+              padding: 1rem;
             `}
           >
             <FlexWrapper
               className={css`
-                align-items: center;
-                padding-bottom: 1rem;
-
                 a {
                   font-size: 1.5rem;
                 }

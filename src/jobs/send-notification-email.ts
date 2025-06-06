@@ -11,7 +11,9 @@ const sendNotificationEmail = async () => {
       createdAt: {
         lte: new Date(),
       },
-      notificationType: "NEW_ARTIST_POST",
+      notificationType: {
+        in: ["NEW_ARTIST_POST", "SYSTEM_MESSAGE"],
+      },
     },
     include: {
       post: {

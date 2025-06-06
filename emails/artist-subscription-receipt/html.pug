@@ -1,21 +1,13 @@
-doctype html
-html
-  head
-    block head
-      meta(charset="utf-8")
-      meta(name="viewport", content="width=device-width")
-      meta(http-equiv="X-UA-Compatible", content="IE=edge")
-      meta(name="x-apple-disable-message-reformatting")
-      style 
-        include ../style.css
-  body.sans-serif
-    p Wow! 
+extends ../layout.pug
+
+block content
+    p Hi,
     p
       | Thank you for supporting #{artist.name} with your monthly 
       | support at the "#{artistUserSubscription.artistSubscriptionTier.name}" tier.
     table 
       tr 
         td #{artist.name}
-        td #{artistUserSubscription.amount / 100} #{artistUserSubscription.currency}
+        td.pa3 #{artistUserSubscription.amount / 100} #{artistUserSubscription.currency}
     p To view all your subscriptions log in or create an account with this email address.
     p Enjoy!
