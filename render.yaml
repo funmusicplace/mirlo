@@ -183,7 +183,7 @@ services:
     plan: starter
     startCommand: yarn ts-node src/jobs/every-day-tasks.ts
     buildCommand: corepack enable && yarn install --immutable && yarn prisma:migrate:deploy
-    schedule: "0 0 1 * *"
+    schedule: "0 22 * * * ...."
     envVars:
       - key: NODE_OPTIONS
         value: --max-old-space-size=512
