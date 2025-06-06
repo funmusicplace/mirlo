@@ -138,4 +138,126 @@ describe("send-onboarding-email", () => {
 
     assert.equal(stub.calledOnce, true);
   });
+
+  it("should not send onboarding email to user who received an email more than two days ago, but there is no more emails to send", async () => {
+    const stub = sinon.stub(sendMailQueue, "add");
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 2);
+
+    const { user: artistUser } = await createUser({
+      email: "artist@artist.com",
+      receivePlatformEmails: true,
+      emailConfirmationToken: null,
+      onboardingEmailsSent: ["payment-processor"],
+      createdAt: faker.date.recent({ days: 3, refDate: yesterday }),
+      lastOnboardingEmailSentAt: faker.date.recent({
+        days: 3,
+        refDate: yesterday,
+      }),
+    });
+
+    await prisma.artist.create({
+      data: {
+        name: "Test artist",
+        urlSlug: "test-artist",
+        userId: artistUser.id,
+        enabled: true,
+      },
+    });
+
+    await sendOnboardingEmail();
+
+    const refreshedUser = await prisma.user.findUnique({
+      where: { id: artistUser.id },
+    });
+    assert.equal(refreshedUser?.onboardingEmailsSent.length, 1);
+    assert.equal(refreshedUser?.onboardingEmailsSent[0], "payment-processor");
+
+    assert.equal(stub.called, false);
+  });
+
+  it("should not send onboarding email to user hasn't received emails but who does have a stripe account id", async () => {
+    // const stub = sinon.stub(sendMail, "default");
+    const stub = sinon.stub(sendMailQueue, "add");
+
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 2);
+
+    const { user: artistUser } = await createUser({
+      email: "artist@artist.com",
+      receivePlatformEmails: true,
+      emailConfirmationToken: null,
+      stripeAccountId: "acct_1234567890",
+      createdAt: faker.date.recent({ days: 3, refDate: yesterday }), // Set to a date in the past
+    });
+
+    await prisma.artist.create({
+      data: {
+        name: "Test artist",
+        urlSlug: "test-artist",
+        userId: artistUser.id,
+        enabled: true,
+      },
+    });
+
+    await sendOnboardingEmail();
+
+    assert.equal(stub.called, false);
+  });
+
+  it("should not send onboarding email to user who signed up more than 14 days ago", async () => {
+    // const stub = sinon.stub(sendMail, "default");
+    const stub = sinon.stub(sendMailQueue, "add");
+
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 15);
+
+    const { user: artistUser } = await createUser({
+      email: "artist@artist.com",
+      receivePlatformEmails: true,
+      emailConfirmationToken: null,
+      createdAt: faker.date.recent({ days: 3, refDate: yesterday }), // Set to a date in the past
+    });
+
+    await prisma.artist.create({
+      data: {
+        name: "Test artist",
+        urlSlug: "test-artist",
+        userId: artistUser.id,
+        enabled: true,
+      },
+    });
+
+    await sendOnboardingEmail();
+
+    assert.equal(stub.called, false);
+  });
+
+  it("should not send onboarding email to user who doesn't have platform emails enabled", async () => {
+    // const stub = sinon.stub(sendMail, "default");
+    const stub = sinon.stub(sendMailQueue, "add");
+
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 15);
+
+    const { user: artistUser } = await createUser({
+      email: "artist@artist.com",
+      receivePlatformEmails: false,
+      emailConfirmationToken: null,
+      createdAt: faker.date.recent({ days: 3, refDate: yesterday }), // Set to a date in the past
+    });
+
+    await prisma.artist.create({
+      data: {
+        name: "Test artist",
+        urlSlug: "test-artist",
+        userId: artistUser.id,
+        enabled: true,
+      },
+    });
+
+    await sendOnboardingEmail();
+
+    assert.equal(stub.called, false);
+  });
 });
