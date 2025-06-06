@@ -268,6 +268,8 @@ export const getBufferFromStorage = async (
     logger.info(`minio: getting buffer: ${bucket}/${filename}`);
 
     return getBufferFromMinio(minioClient, bucket, filename);
+  } else {
+    return { buffer: null };
   }
 };
 

@@ -47,6 +47,13 @@ const optimizeImage = async (job: Job) => {
       destinationId
     );
 
+    if (!buffer) {
+      logger.error(
+        `No buffer found for ${incomingMinioBucket}/${destinationId}`
+      );
+      return { error: "No buffer found" };
+    }
+
     await createBucketIfNotExists(finalMinioBucket, logger);
 
     // logger.info(`Got object of size ${size}`);

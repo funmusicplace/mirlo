@@ -63,6 +63,8 @@ model User {
   urlSlug                             String?
   receiveMailingList                  Boolean                         @default(false)
   promoCodes                          String[]
+  onboardingEmailsSent                String[] // Used to track which onboarding emails have been sent
+  lastOnboardingEmailSentAt           DateTime?
   receivePlatformEmails               Boolean                         @default(true)
   isLabelAccount                      Boolean                         @default(false)
   featureFlags                        String[]
@@ -146,6 +148,7 @@ enum NotificationType {
   USER_BOUGHT_YOUR_ALBUM
   USER_SUBSCRIBED_TO_YOU
   USER_BOUGHT_YOUR_TRACK
+  SYSTEM_MESSAGE
 }
 
 model Post {

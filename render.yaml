@@ -177,11 +177,29 @@ services:
     branch: main # optional (defaults to master)
 
   - type: cron
-    name: monthly-tasks
+    name: every-day-tasks
     env: node
     repo: https://github.com/funmusicplace/mirlo.git # optional
     plan: starter
-    startCommand: yarn ts-node src/jobs/monthly-tasks.ts
+    startCommand: yarn ts-node src/jobs/every-day-tasks.ts
+    buildCommand: corepack enable && yarn install --immutable && yarn prisma:migrate:deploy
+    schedule: "0 0 1 * *"
+    envVars:
+      - key: NODE_OPTIONS
+        value: --max-old-space-size=512
+      - key: DATABASE_URL
+        fromDatabase:
+          name: blackbrd
+          property: connectionString
+      - fromGroup: blackbrd
+    branch: main # optional (defaults to master)
+
+  - type: cron
+    name: every-month-tasks
+    env: node
+    repo: https://github.com/funmusicplace/mirlo.git # optional
+    plan: starter
+    startCommand: yarn ts-node src/jobs/every-month-tasks.ts
     buildCommand: corepack enable && yarn install --immutable && yarn prisma:migrate:deploy
     schedule: "0 0 1 * *"
     envVars:
