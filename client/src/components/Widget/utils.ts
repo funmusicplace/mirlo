@@ -22,7 +22,7 @@ export const WidgetWrapper = styled.div<{
   artistColors?: ArtistColors;
 }>`
   border: var(--mi-border);
-  width: 100%;
+
   ${(props) => props.embeddedInMirlo && "min-height: 154px;"}
   display: flex;
   align-items: space-between;
@@ -41,31 +41,22 @@ export const WidgetWrapper = styled.div<{
 `;
 
 export const TgWidgetWrapper = styled.div<{ embeddedInMirlo?: boolean }>`
-  display: flex;
+  display: grid;
   width: 100%;
-  ${(props) => props.embeddedInMirlo && "min-height: 371px;"}
-  align-items: flex-start;
-  justify-content: center;
-  border-radius: 0.3rem;
-  box-sizing: border-box;
-  height: 100%;
-  table {
-    margin: 0;
-  }
-  height: 100vh;
+  grid-template-columns: 1fr 1fr;
 
   @media screen and (max-width: ${bp.small}px) {
-    grid-template-columns: repeat(1, 1fr);
-    padding: 0.5rem 0 0 0rem;
-    justify-content: center;
-    align-content: space-between;
-    gap: 0;
+    grid-template-columns: 1fr;
+    grid-template-rows: 50% 50%;
+
+    .image-container {
+      width: 100%;
+    }
   }
 `;
 
 export const TrackListWrapper = styled.div<{}>`
   border-top: var(--mi-border);
-  padding-right: 2%;
   overflow: auto;
   max-height: 280px;
   ::-webkit-scrollbar {
@@ -92,22 +83,12 @@ export const TrackListWrapper = styled.div<{}>`
   }
 `;
 export const WidgetTitleWrapper = styled.div<{}>`
-  display: flex;
-  flex: 45%;
   border-left: var(--mi-border);
-  max-width: 100%;
-  height: 100%;
-  flex-direction: column;
-  justify-content: flex-start;
+  overflow: scroll;
 
   @media screen and (max-width: ${bp.small}px) {
-    max-width: 100%;
-    flex: 100%;
-    height: auto;
-
     a {
       font-size: var(--mi-font-size-small) !important;
-      overflow: hidden;
       white-space: nowrap;
       max-width: 100%;
       display: block;

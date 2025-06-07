@@ -88,6 +88,135 @@ describe("handleArtistMerchPurchase", () => {
     assert.equal(data0.locals.purchases[0].amountPaid, 0);
   });
 
+  it("should reduce quantity from merch.quantityRemaining", async () => {
+    sinon
+      .stub(stripe.products, "retrieve")
+      // @ts-ignore
+      .returns({ metadata: {} });
+
+    const { user: artistUser } = await createUser({
+      email: "artist@artist.com",
+    });
+
+    const { user: purchaser } = await createUser({
+      email: "follower@follower.com",
+      emailConfirmationToken: null,
+    });
+
+    const artist = await prisma.artist.create({
+      data: {
+        name: "Test artist",
+        urlSlug: "test-artist",
+        userId: artistUser.id,
+        enabled: true,
+      },
+    });
+
+    const productKey = "productKey";
+
+    const merch = await createMerch(artist.id, {
+      title: "Our Custom Title",
+      stripeProductKey: productKey,
+      quantityRemaining: 10,
+    });
+
+    await handleArtistMerchPurchase(
+      purchaser.id,
+      {
+        metadata: {
+          quantity: "1",
+        } as Stripe.Metadata,
+        line_items: {
+          data: [{ price: { product: productKey } } as Stripe.LineItem],
+        } as Stripe.ApiList<Stripe.LineItem>,
+      } as Stripe.Checkout.Session,
+      stripeAccountId
+    );
+
+    const updatedMerch = await prisma.merch.findFirst({
+      where: { id: merch.id },
+    });
+
+    assert.equal(updatedMerch?.quantityRemaining, 9);
+  });
+
+  it("should reduce quantity from merchOptions.quantityRemaining", async () => {
+    const { user: artistUser } = await createUser({
+      email: "artist@artist.com",
+    });
+
+    const { user: purchaser } = await createUser({
+      email: "follower@follower.com",
+      emailConfirmationToken: null,
+    });
+
+    const artist = await prisma.artist.create({
+      data: {
+        name: "Test artist",
+        urlSlug: "test-artist",
+        userId: artistUser.id,
+        enabled: true,
+      },
+    });
+
+    const productKey = "productKey";
+
+    const merch = await createMerch(artist.id, {
+      title: "Our Custom Title",
+      stripeProductKey: productKey,
+    });
+
+    const merchOptions = await prisma.merchOptionType.create({
+      data: {
+        optionName: "size",
+        merchId: merch.id,
+        options: {
+          create: [
+            {
+              name: "small",
+              quantityRemaining: 10,
+            },
+            {
+              name: "large",
+              quantityRemaining: 10,
+            },
+          ],
+        },
+      },
+      include: {
+        options: true,
+      },
+    });
+
+    sinon.stub(stripe.products, "retrieve").returns({
+      // @ts-ignore
+      metadata: {
+        merchOptionIds: `${merchOptions.options[0].id}`,
+      },
+    });
+
+    console.log("merchOptions", merchOptions);
+
+    await handleArtistMerchPurchase(
+      purchaser.id,
+      {
+        metadata: {
+          quantity: "1",
+        } as Stripe.Metadata,
+        line_items: {
+          data: [{ price: { product: productKey } } as Stripe.LineItem],
+        } as Stripe.ApiList<Stripe.LineItem>,
+      } as Stripe.Checkout.Session,
+      stripeAccountId
+    );
+
+    const updatedMerch = await prisma.merch.findFirst({
+      where: { id: merch.id },
+      include: { optionTypes: { include: { options: true } } },
+    });
+    console.log("updatedMerch", updatedMerch?.optionTypes[0].options);
+  });
+
   it("should send correct price in emails", async () => {
     const stub = sinon.spy(sendMail, "default");
     sinon

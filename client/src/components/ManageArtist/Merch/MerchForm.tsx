@@ -138,6 +138,7 @@ const MerchForm: React.FC<{
             url={`manage/merch/${merch.id}`}
             extraData={{}}
           />
+          <small>{t("quantityRemainingDescription")}</small>
         </FormComponent>
 
         <SelectTrackGroup merch={merch} reload={reload} />

@@ -27,7 +27,7 @@ export const ImageWithPlaceholder: React.FC<{
   const [isError, setError] = React.useState(false);
 
   return (
-    <ImageContainer className={className}>
+    <ImageContainer className={className + " image-container"}>
       {src && (
         <img
           src={src}

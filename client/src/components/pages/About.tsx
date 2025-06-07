@@ -306,19 +306,37 @@ const About: React.FC = () => {
 
           <p>
             Alex is a writer, organizer, and trombonist working at the
-            confluences of music and social transformation. He holds a PhD in
-            Ethnomusicology from UCLA, where his research focused on jazz clubs
-            and the communities that sustain them in Los Angeles, USA; Santiago,
-            Chile; and Novosibirsk, Siberia. His writing on the contemporary
-            jazz world has appeared in The Newark Star-Ledger, NPR Music, LA
-            Weekly, and DownBeat, among other outlets. He has also trained in
-            Deep Listening through the Center for Deep Listening and is
-            currently preparing his debut album project, Somewhere Else!!!!,
-            with three Chilean collaborators. Alex has worked in the solidarity
-            economy movement as co-founder of the mental health worker
-            cooperative, Catalyst Cooperative Healing, as a working member of
-            Sociocracy for All, and as an Artist-Owner of Ampled. Alex is a
-            legal owner of Mirlo.
+            confluences of music and social transformation. His writing on the
+            contemporary jazz world has appeared in The Newark Star-Ledger, NPR
+            Music, LA Weekly, and DownBeat, among other outlets. Alex has also
+            worked in the solidarity economy movement as co-founder of the
+            mental health worker cooperative, Catalyst Cooperative Healing, as
+            facilitator for the Sociocracy for All Cooperatives Circle, and as
+            an Artist-Owner of Ampled. Alex is a legal owner of Mirlo.
+          </p>
+        </Person>
+
+        <Person>
+          <span
+            className={css`
+              display: inline-block;
+              width: 10rem;
+              height: 10rem;
+              overflow: clip;
+              border-radius: 100%;
+              margin-right: 2rem;
+            `}
+          >
+            <img
+              src="https://mirlo.space/static/images/owner-pictures/llk.webp"
+              alt="LLK photo"
+            />
+          </span>
+
+          <p>
+            LLK is a French musician and organizer. They make music for games,
+            movies, and as <Link to="/mowukis">Mowukis</Link>. They contribute
+            code, design, community engagement, and business strategy to Mirlo.
           </p>
         </Person>
         <Person>
@@ -346,29 +364,6 @@ const About: React.FC = () => {
             developer for UN organizations, fortune 500 companies, user
             experience agencies, fast growing start-ups, and not-for-profit
             organizations. Simon is a legal owner of Mirlo.
-          </p>
-        </Person>
-        <Person>
-          <span
-            className={css`
-              display: inline-block;
-              width: 10rem;
-              height: 10rem;
-              overflow: clip;
-              border-radius: 100%;
-              margin-right: 2rem;
-            `}
-          >
-            <img
-              src="https://mirlo.space/static/images/owner-pictures/llk.webp"
-              alt="LLK photo"
-            />
-          </span>
-
-          <p>
-            LLK is a French musician and organizer. They make music for games,
-            movies, and as <Link to="/mowukis">Mowukis</Link>. They contribute
-            code, design, community engagement, and business strategy to Mirlo.
           </p>
         </Person>
         <h3>Previous member owners</h3>

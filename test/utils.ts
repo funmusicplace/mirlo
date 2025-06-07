@@ -156,6 +156,7 @@ export const createMerch = async (
       artistId: artistId,
     },
   });
+
   return tg;
 };
 

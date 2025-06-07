@@ -89,6 +89,7 @@ const TrackWidget = () => {
           <FlexWrapper
             className={css`
               align-items: center;
+              width: 100%;
             `}
           >
             <ImageWithPlaceholder
@@ -99,6 +100,7 @@ const TrackWidget = () => {
               }
               alt={track.title}
               size={150}
+              square
               className={css`
                 width: auto !important;
                 border-radius: 0.3rem 0 0 0.3rem;

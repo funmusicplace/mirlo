@@ -52,6 +52,7 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
     reValidateMode: "onChange",
   });
   const { register, watch, handleSubmit, formState } = methods;
+  const { isValid } = formState;
   const chosenPrice = watch("chosenPrice");
   const [clientSecret, setClientSecret] = React.useState<string | null>(null);
 
@@ -103,7 +104,7 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
 
   console.log("errors", formState.errors);
 
-  const isDisabled = !!lessThan1 || lessThanMin || !formState.isValid;
+  const isDisabled = !!lessThan1 || lessThanMin || !isValid;
 
   if (clientSecret && stripePromise) {
     return (
@@ -124,22 +125,24 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
         `}
       >
         {!!minPrice && minPrice > 0 && (
-          <>
+          <p>
             {t("price")}{" "}
             <Money amount={minPrice / 100} currency={trackGroup.currency} />, or
-          </>
+          </p>
         )}
         <form onSubmit={handleSubmit(purchaseAlbum)}>
           <FormComponent>
-            {t("nameYourPrice", {
-              currency: getCurrencySymbol(trackGroup.currency, undefined),
-            })}
-            <InputEl
-              {...register("chosenPrice")}
-              type="number"
-              min={minPrice ? minPrice / 100 : 0}
-              step="0.01"
-            />
+            <label>
+              {t("nameYourPrice", {
+                currency: getCurrencySymbol(trackGroup.currency, undefined),
+              })}
+              <InputEl
+                {...register("chosenPrice")}
+                type="number"
+                min={minPrice ? minPrice / 100 : 0}
+                step="0.01"
+              />
+            </label>
             {Number(chosenPrice) > (minPrice ?? 1) * 100 && (
               <Box variant="success">
                 {t("thatsGenerous", {
@@ -151,7 +154,11 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
               </Box>
             )}
             {lessThanMin && (
-              <small>{t("pleaseEnterMoreThan", { minPrice })}</small>
+              <small>
+                {t("pleaseEnterMoreThan", {
+                  minPrice: (minPrice ?? 100) / 100,
+                })}
+              </small>
             )}
             <PlatformPercent
               percent={trackGroup.platformPercent}
