@@ -12,12 +12,12 @@ import {
   ArtistButtonAnchor,
 } from "components/Artist/ArtistButtons";
 
-const formats = ["flac", "wav", "opus", "320.mp3", "256.mp3", "128.mp3"];
+const formats = ["flac", "wav", "128.opus", "320.mp3", "256.mp3", "128.mp3"];
 const formatsDisplay: { [format: string]: string } = {
   "": "",
   flac: "FLAC",
   wav: "WAV",
-  opus: "OPUS",
+  "128.opus": "OPUS",
   "320.mp3": "MP3 320kbps",
   "256.mp3": "MP3 256kbps",
   "128.mp3": "MP3 128kbps",
