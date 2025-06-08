@@ -17,7 +17,7 @@ const formatsDisplay: { [format: string]: string } = {
   "": "",
   flac: "FLAC",
   wav: "WAV",
-  "128.opus": "OPUS",
+  "128.opus": "OPUS 128kbps",
   "320.mp3": "MP3 320kbps",
   "256.mp3": "MP3 256kbps",
   "128.mp3": "MP3 128kbps",
