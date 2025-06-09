@@ -2,10 +2,8 @@ import { Prisma } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
 import processor, {
-  processTrackGroupQueryOrder,
   whereForPublishedTrackGroups,
 } from "../../../utils/trackGroup";
-import { orderBy } from "lodash";
 
 export default function () {
   const operations = {
@@ -13,6 +11,7 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
+    const { take = 50 } = req.query;
     try {
       let where: Prisma.TrackGroupWhereInput = whereForPublishedTrackGroups();
 
@@ -26,17 +25,17 @@ export default function () {
             trackGroupId: "desc",
           },
         },
-        take: 50,
+        take: take ? Number(take) : undefined,
       });
 
       const trackGroupIds = topSoldIds.map((item) => item.trackGroupId);
 
-      const trackGroups = await prisma.findMany({
+      const trackGroups = await prisma.trackGroup.findMany({
         where: { ...where, id: { in: trackGroupIds } },
         include: {
           _count: {
             select: {
-              userTrackGroupPurchase: true,
+              userTrackGroupPurchases: true,
             },
           },
           artist: {
@@ -53,7 +52,10 @@ export default function () {
 
       const sortedTrackGroups = trackGroupIds
         .map((id) => trackGroups.find((trackGroup) => trackGroup.id === id))
-        .filter(Boolean);
+        .filter(
+          (trackGroup): trackGroup is NonNullable<typeof trackGroup> =>
+            trackGroup != null
+        );
 
       res.json({
         results: sortedTrackGroups.map(processor.single),
@@ -62,4 +64,27 @@ export default function () {
       next(e);
     }
   }
+
+  GET.apiDoc = {
+    summary: "Returns top sold trackGroups",
+    responses: {
+      200: {
+        description: "A list of trackGroups",
+        schema: {
+          type: "array",
+          items: {
+            $ref: "#/definitions/TrackGroup",
+          },
+        },
+      },
+      default: {
+        description: "An error occurred",
+        schema: {
+          additionalProperties: true,
+        },
+      },
+    },
+  };
+
+  return operations;
 }

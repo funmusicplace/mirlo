@@ -71,6 +71,7 @@ if (!isDev) {
 const routes = [
   "tags",
   "trackGroups",
+  "trackGroups/topSold",
   "trackGroups/testExistence",
   "trackGroups/{id}",
   "trackGroups/{id}/download",
@@ -83,6 +84,7 @@ const routes = [
   "playable",
   "settings/{setting}",
   "tracks",
+  "tracks/topSold",
   "tracks/{id}",
   "tracks/{id}/audio",
   "tracks/{id}/purchase",
