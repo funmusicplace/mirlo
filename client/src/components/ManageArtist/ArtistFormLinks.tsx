@@ -3,19 +3,24 @@ import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { InputEl } from "components/common/Input";
 import Button from "components/common/Button";
 import { css } from "@emotion/css";
-import { FaPlus, FaSave, FaTimes, FaTrash } from "react-icons/fa";
+import { FaPen, FaPlus, FaSave, FaTimes, FaTrash } from "react-icons/fa";
 import React from "react";
 import {
   findOutsideSite,
+  linkUrlDisplay,
   linkUrlHref,
   outsideLinks,
 } from "components/common/LinkIconDisplay";
-import ArtistLinksInHeader from "./ArtistLinksInHeader";
 import { useSnackbar } from "state/SnackbarContext";
 import Modal from "components/common/Modal";
 import { SelectEl } from "components/common/Select";
 import FormCheckbox from "components/common/FormCheckbox";
 import FormComponent from "components/common/FormComponent";
+import {
+  ArtistButton,
+  ArtistButtonAnchor,
+  ArtistButtonLink,
+} from "components/Artist/ArtistButtons";
 
 interface FormData {
   linkArray: Link[];
@@ -53,6 +58,7 @@ const ArtistFormLinks: React.FC<ArtistFormLinksProps> = ({
   onSubmit,
 }) => {
   const [isEditing, setIsEditing] = React.useState(false);
+  const [isOpen, setIsOpen] = React.useState(false);
   const snackbar = useSnackbar();
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const methods = useForm<FormData>({
@@ -64,15 +70,14 @@ const ArtistFormLinks: React.FC<ArtistFormLinksProps> = ({
     name: "linkArray",
   });
 
-  const links = watch(`linkArray`);
-
-  const addDisabled = links?.[links.length - 1]?.url === "";
+  const allLinks = transformFromLinks(artist).linkArray;
+  const links = isManage ? allLinks : allLinks.filter((l) => l.inHeader);
 
   const handleSave = React.useCallback(
     async (data: FormData) => {
       await onSubmit(transformToLinks(data));
       snackbar(t("updatedLinks"), { type: "success" });
-      setIsEditing(false);
+      setIsOpen(false);
     },
     [onSubmit, snackbar]
   );
@@ -85,161 +90,253 @@ const ArtistFormLinks: React.FC<ArtistFormLinksProps> = ({
     [setValue]
   );
 
-  if (!isEditing) {
-    return (
-      <ArtistLinksInHeader
-        artist={artist}
-        isManage={isManage}
-        setIsEditing={setIsEditing}
-      />
-    );
-  }
-
   return (
-    <Modal open={true} size="small" onClose={() => setIsEditing(false)}>
-      <FormProvider {...methods}>
-        {fields.map((field, index) => {
-          const linkType = watch(`linkArray.${index}.linkType`);
-          return (
-            <div
-              key={index}
-              className={css`
-                display: flex;
-                align-items: center;
-                margin-bottom: 1rem;
-                margin-left: 0.5rem;
+    <>
+      <div
+        className={css`
+          margin-bottom: 0.25rem;
+          display: flex;
+          align-items: center;
+        `}
+      >
+        <div
+          className={css`
+            display: inline-flex;
+            align-items: center;
+            justify-content: flex-end;
 
-                > svg {
-                  margin-right: 0.5rem;
-                  min-width: 1rem;
-                }
+            a {
+              display: inline-flex;
+              align-items: center;
+              margin-right: 0.75rem;
 
-                button {
+              > svg {
+                margin-right: 0.5rem;
+              }
+            }
+
+            a:last-child {
+              margin-right: 0;
+            }
+          `}
+        >
+          {links.map((l) => {
+            const site = findOutsideSite(l);
+            return (
+              <ArtistButtonAnchor
+                rel="me"
+                href={linkUrlHref(l.url, true)}
+                key={l.url}
+                variant="link"
+                startIcon={site?.icon}
+                target="_blank"
+                className={css`
+                  display: inline-flex;
+                  align-items: center;
+                `}
+              >
+                {linkUrlDisplay(l)}
+              </ArtistButtonAnchor>
+            );
+          })}
+          {!isManage && allLinks.length > links.length && (
+            <ArtistButtonLink to="links" size="compact" variant="dashed">
+              More links
+            </ArtistButtonLink>
+          )}
+        </div>
+
+        {isManage && (
+          <div>
+            <ArtistButton
+              size="compact"
+              variant="dashed"
+              onClick={() => setIsOpen(true)}
+              startIcon={<FaPen />}
+            >
+              {links?.length === 0 ? t("noLinksYet") : t("editLinks")}
+            </ArtistButton>
+          </div>
+        )}
+      </div>
+      <Modal open={isOpen} size="small" onClose={() => setIsOpen(false)}>
+        <FormProvider {...methods}>
+          {fields.map((field, index) => {
+            const linkType = watch(`linkArray.${index}.linkType`);
+            return (
+              <div
+                key={index}
+                className={css`
+                  display: flex;
+                  align-items: center;
+                  margin-bottom: 1rem;
                   margin-left: 0.5rem;
-                }
 
-                .header-wrapper {
-                  padding: 0.5rem;
-                  flex-grow: 1;
-                  > div {
-                    margin-bottom: 0;
+                  > svg {
+                    margin-right: 0.5rem;
+                    min-width: 1rem;
                   }
-                }
-                
-                .link-wrapper {
+
+                  button {
+                    margin-left: 0.5rem;
+                  }
+
+                  .header-wrapper {
+                    padding: 0.5rem;
+                    flex-grow: 1;
+                    > div {
+                      margin-bottom: 0;
+                    }
+                  }
+
+                  .link-wrapper {
                     display: grid;
                     align-items: center;
                     grid-template-columns: 1fr 2fr;
                     grid-gap: 1rem;
                     grid-template-areas:
-                        "iconLabel iconSelect"
-                        "nameLabel nameInput"
-                        "urlLabel urlInput"
-                        "checkbox checkbox"
-                }
+                      "iconLabel iconSelect"
+                      "nameLabel nameInput"
+                      "urlLabel urlInput"
+                      "checkbox checkbox";
+                  }
 
-                .link-wrapper label {
+                  .link-wrapper label {
                     text-align: right;
-                }
-              `}
-            >
-              <div className="link-wrapper">
-                <label className={css`grid-area: iconLabel`} htmlFor={`linkIcon${index}`}>Link icon</label>
-                <div id={`linkIcon${index}`}>
-                  <SelectEl
-                    {...register(`linkArray.${index}.linkType`)}>
-                    {outsideLinks
-                      .sort((a, b) => {
-                        if (a.name > b.name) {
-                          return 1;
-                        }
-                        if (a.name < b.name) {
-                          return -1;
-                        }
-                        return 0;
-                      })
-                      .map((site) => (
-                        <option key={site.name}>{t(site.name, site.name)}</option>
-                      ))}
-                  </SelectEl>
-                  &nbsp;{outsideLinks.find(l => l.name === linkType)?.icon}
-                </div>
-                <label className={css`grid-area: nameLabel`} htmlFor={`linkLabel${index}`}>Link text</label>
-                <InputEl className={css`grid-area: nameInput`} id={`linkLabel${index}`} {...register(`linkArray.${index}.linkLabel`, {
-                  onBlur: (e) => setValue(`linkArray.${index}.linkType`, e.target.value)
-                })}
-                  placeholder={t("linkLabel") ?? ""}
-                />
-                <label className={css`grid-area: urlLabel`} htmlFor={`linkUrl${index}`}>URL</label>
-                <InputEl
-                  className={css`grid-area: urlInput`}
-                  id={`linkUrl${index}`}
-                  {...register(`linkArray.${index}.url`, {
-                    setValueAs: linkUrlHref,
-                    onBlur: (e) => handleInputElBlur(e.target.value, index),
-                  })}
-                  placeholder={t("linkPlaceholder") ?? ""}
-                  key={field.id}
-                  type="url"
-                />
-                <FormComponent className={css`grid-area: checkbox`} style={{ display: "flex" }}>
-                  <FormCheckbox
-                    keyName={`linkArray.${index}.inHeader`}
-                    description={t("linkInHeader")}
+                  }
+                `}
+              >
+                <div className="link-wrapper">
+                  <label
+                    className={css`
+                      grid-area: iconLabel;
+                    `}
+                    htmlFor={`linkIcon${index}`}
+                  >
+                    Link icon
+                  </label>
+                  <div id={`linkIcon${index}`}>
+                    <SelectEl {...register(`linkArray.${index}.linkType`)}>
+                      {outsideLinks
+                        .sort((a, b) => {
+                          if (a.name > b.name) {
+                            return 1;
+                          }
+                          if (a.name < b.name) {
+                            return -1;
+                          }
+                          return 0;
+                        })
+                        .map((site) => (
+                          <option key={site.name}>
+                            {t(site.name, site.name)}
+                          </option>
+                        ))}
+                    </SelectEl>
+                    &nbsp;{outsideLinks.find((l) => l.name === linkType)?.icon}
+                  </div>
+                  <label
+                    className={css`
+                      grid-area: nameLabel;
+                    `}
+                    htmlFor={`linkLabel${index}`}
+                  >
+                    Link text
+                  </label>
+                  <InputEl
+                    className={css`
+                      grid-area: nameInput;
+                    `}
+                    id={`linkLabel${index}`}
+                    {...register(`linkArray.${index}.linkLabel`, {
+                      onBlur: (e) =>
+                        setValue(`linkArray.${index}.linkType`, e.target.value),
+                    })}
+                    placeholder={t("linkLabel") ?? ""}
                   />
-                </FormComponent>
+                  <label
+                    className={css`
+                      grid-area: urlLabel;
+                    `}
+                    htmlFor={`linkUrl${index}`}
+                  >
+                    URL
+                  </label>
+                  <InputEl
+                    className={css`
+                      grid-area: urlInput;
+                    `}
+                    id={`linkUrl${index}`}
+                    {...register(`linkArray.${index}.url`, {
+                      setValueAs: linkUrlHref,
+                      onBlur: (e) => handleInputElBlur(e.target.value, index),
+                    })}
+                    placeholder={t("linkPlaceholder") ?? ""}
+                    key={field.id}
+                    type="url"
+                  />
+                  <FormComponent
+                    className={css`
+                      grid-area: checkbox;
+                    `}
+                    style={{ display: "flex" }}
+                  >
+                    <FormCheckbox
+                      keyName={`linkArray.${index}.inHeader`}
+                      description={t("linkInHeader")}
+                    />
+                  </FormComponent>
+                </div>
+                <Button startIcon={<FaTrash />} onClick={() => remove(index)} />
               </div>
-              <Button startIcon={<FaTrash />} onClick={() => remove(index)} />
-            </div>
-          );
-        })}
-        <div
-          className={css`
-            display: flex;
-            align-items: center;
-            margin-bottom: 1rem;
-            flex-wrap: wrap;
-            button {
-              margin-left: 0.2rem;
-              margin-right: 0.5rem;
-            }
-          `}
-        >
-          <Button
-            size="compact"
-            variant="transparent"
-            onClick={() =>
-              append({
-                url: "",
-                linkType: "",
-              })
-            }
-            disabled={addDisabled}
-            startIcon={<FaPlus />}
+            );
+          })}
+          <div
+            className={css`
+              display: flex;
+              align-items: center;
+              margin-bottom: 1rem;
+              flex-wrap: wrap;
+              button {
+                margin-left: 0.2rem;
+                margin-right: 0.5rem;
+              }
+            `}
           >
-            {t("addNewLink")}
-          </Button>
-          <Button
-            size="compact"
-            startIcon={<FaSave />}
-            onClick={handleSubmit(handleSave)}
-            disabled={addDisabled}
-          >
-            {t("saveLinks")}
-          </Button>
-          <Button
-            size="compact"
-            startIcon={<FaTimes />}
-            onClick={() => {
-              reset();
-              setIsEditing(false);
-            }}
-          >
-            {t("cancel")}
-          </Button>
-        </div>
-      </FormProvider>
-    </Modal>
+            <Button
+              size="compact"
+              variant="transparent"
+              onClick={() =>
+                append({
+                  url: "",
+                  linkType: "",
+                })
+              }
+              startIcon={<FaPlus />}
+            >
+              {t("addNewLink")}
+            </Button>
+            <Button
+              size="compact"
+              startIcon={<FaSave />}
+              onClick={handleSubmit(handleSave)}
+            >
+              {t("saveLinks")}
+            </Button>
+            <Button
+              size="compact"
+              startIcon={<FaTimes />}
+              onClick={() => {
+                reset();
+                setIsOpen(false);
+              }}
+            >
+              {t("cancel")}
+            </Button>
+          </div>
+        </FormProvider>
+      </Modal>
+    </>
   );
 };
 
