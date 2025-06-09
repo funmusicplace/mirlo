@@ -337,7 +337,7 @@
     "cancelSubscription": "Cancel subscription",
     "chooseThisSubscription": "Change to this tier",
     "chooseATier": "Choose a tier to support this artist:",
-    "contributionIsMonthly": "Make contribution monthly",
+    "contributionIsMonthly": "Give the same amount every month and become a patron of the art!",
     "subscribeToArtist": "Subscribe to {{ artist }}",
     "chooseSupportLevel": "You can follow the artist or choose to support them financially",
     "continueWithPrice": "Continue with {{ amount }}/month",
