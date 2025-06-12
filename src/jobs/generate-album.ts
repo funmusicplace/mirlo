@@ -76,6 +76,7 @@ const downloadTracks = async ({
   let i = 0;
 
   for await (const track of tracks) {
+    logger.info(`trackId ${track.id}: Processing track ${track.title}`);
     const originalTrackLocation = `${track.audio.id}/original.${track.audio.fileExtension}`;
     logger.info(`audioId ${track.audio.id}: Fetching ${originalTrackLocation}`);
     const originalTrackPath = `${tempFolder}/original.${track.audio.fileExtension}`;

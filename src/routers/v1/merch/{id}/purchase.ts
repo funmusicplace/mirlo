@@ -74,6 +74,7 @@ export default function () {
 
       // Check if the options passed are possible
       const finalOptionIds: string[] = [];
+
       const additionalPrices: number[] = [];
       merch.optionTypes.forEach((ot) => {
         ot.options.forEach((o) => {
