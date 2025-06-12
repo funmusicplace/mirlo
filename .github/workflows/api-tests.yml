@@ -51,7 +51,7 @@ jobs:
           cp .env.example .env
 
       - name: Build docker image
-        run: docker compose build test
+        run: docker compose --profile test build test
 
       - name: Run tests
         run: docker compose run test
