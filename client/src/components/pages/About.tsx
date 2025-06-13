@@ -334,9 +334,9 @@ const About: React.FC = () => {
           </span>
 
           <p>
-            LLK is a French musician and organizer. They make music for games,
-            movies, and as <Link to="/mowukis">Mowukis</Link>. They contribute
-            code, design, community engagement, and business strategy to Mirlo.
+            Louis-Louise Kay is a French musician and organizer, who has been creating music for games,
+            movies, animation, and as a solo artist under the moniker <Link to="/mowukis">MOWUKIS</Link>. LLK has contributed to
+            code, design, community engagement, and business strategy since Mirlo's beginnings.
           </p>
         </Person>
         <Person>
