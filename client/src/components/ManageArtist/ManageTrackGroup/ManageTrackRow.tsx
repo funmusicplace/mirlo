@@ -12,6 +12,7 @@ import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
 import { fmtMSS } from "utils/tracks";
 import TrackRowPlayControl from "components/common/TrackTable/TrackRowPlayControl";
+import TrackAuthors from "components/common/TrackTable/TrackAuthors";
 import { useTranslation } from "react-i18next";
 import EditTrackRow from "./AlbumFormComponents/EditTrackRow";
 import styled from "@emotion/styled";
@@ -22,6 +23,7 @@ import {
   ArtistButton,
   ArtistButtonAnchor,
 } from "components/Artist/ArtistButtons";
+import TrackAuthors from "components/common/TrackTable/TrackAuthors";
 
 const TrackRow = styled("tr")`
   > td > .play-button {
@@ -54,10 +56,11 @@ const TrackRow = styled("tr")`
 
 const ManageTrackRow: React.FC<{
   track: Track;
+  artistId: number;
   addTracksToQueue: (id: number) => void;
   reload: () => Promise<void>;
   handleDrop: (val: React.DragEvent<HTMLTableRowElement>) => void;
-}> = ({ track, addTracksToQueue, reload, handleDrop }) => {
+}> = ({ track, artistId, addTracksToQueue, reload, handleDrop }) => {
   const { t } = useTranslation("translation", {
     keyPrefix: "manageTrackTable",
   });
@@ -202,6 +205,7 @@ const ManageTrackRow: React.FC<{
               formKey="title"
               reload={reload}
             />
+            <TrackAuthors track={track} trackGroupArtistId={artistId} />
             <small>
               {t("originalFilename", {
                 filename: track.audio?.originalFilename,
