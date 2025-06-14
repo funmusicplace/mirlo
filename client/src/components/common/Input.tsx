@@ -1,5 +1,5 @@
 import React from "react";
-
+import { UseFormRegister } from "react-hook-form";
 import styled from "@emotion/styled";
 
 interface Props extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -43,7 +43,7 @@ const StyledInput = styled.input`
 
 export const InputEl = React.forwardRef<
   HTMLInputElement,
-  Props & ReturnType<UseFormRegister<IFormValues>>
+  Props & ReturnType<UseFormRegister<any>>
 >(({ id, ariaDescribedByValue, onChange, ...props }, ref) => {
   if (!!id && !!ariaDescribedByValue) {
     const ariaDescribedById = id.concat("-describedby");
@@ -59,7 +59,7 @@ export const InputEl = React.forwardRef<
       </>
     );
   } else {
-    return <StyledInput onChange={onChange} {...props} />;
+    return <StyledInput onChange={onChange} ref={ref} {...props} />;
   }
 });
 
