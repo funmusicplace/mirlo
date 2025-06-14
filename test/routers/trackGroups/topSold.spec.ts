@@ -191,7 +191,7 @@ describe("Top sold trackGroups", () => {
       urlSlug: "least-purchased",
     });
 
-    // These loops generate the purchases for each track so we can
+    // These loops generate the purchases for each trackGroup so we can
     // later make sure they're ordered properly when we assert
     for (let i = 0; i < 5; i++) {
       await createUserTrackGroupPurchase(
