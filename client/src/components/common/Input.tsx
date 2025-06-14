@@ -9,9 +9,10 @@ interface Props extends React.InputHTMLAttributes<HTMLInputElement> {
   placeholder?: string;
   disabled?: boolean;
   className?: string;
+  ariaDescribedByValue?: string;
 }
 
-export const InputEl = styled.input`
+const StyledInput = styled.input`
   border: 1px solid var(--mi-darken-x-background-color);
   border-radius: var(--mi-border-radius);
   padding: 0.5rem 0.75rem;
@@ -40,8 +41,26 @@ export const InputEl = styled.input`
   }
 `;
 
-export const Input: React.FC<Props> = ({ onChange, ...props }) => {
-  return <InputEl onChange={onChange} {...props} />;
-};
+export const InputEl = React.forwardRef<
+  HTMLInputElement,
+  Props & ReturnType<UseFormRegister<IFormValues>>
+>(({ id, ariaDescribedByValue, onChange, ...props }, ref) => {
+  if (!!id && !!ariaDescribedByValue) {
+    const ariaDescribedById = id.concat("-describedby");
+    return (
+      <>
+        <StyledInput
+          aria-describedby={ariaDescribedById}
+          onChange={onChange}
+          ref={ref}
+          {...props}
+        />
+        <p id={ariaDescribedById}>{ariaDescribedByValue}</p>
+      </>
+    );
+  } else {
+    return <StyledInput onChange={onChange} {...props} />;
+  }
+});
 
-export default Input;
+export default InputEl;

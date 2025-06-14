@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
 
-import { Input } from "components/common/Input";
+import { InputEl } from "components/common/Input";
 import FormComponent from "components/common/FormComponent";
 import { useAuthContext } from "state/AuthContext";
 import { ArtistButton } from "components/Artist/ArtistButtons";
