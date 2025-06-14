@@ -18,7 +18,6 @@ import EditTrackRow from "./AlbumFormComponents/EditTrackRow";
 import styled from "@emotion/styled";
 import LoadingSpinner from "components/common/LoadingSpinner";
 import { useAuthContext } from "state/AuthContext";
-import ClickToEditInput from "./AlbumFormComponents/ClickToEditInput";
 import {
   ArtistButton,
   ArtistButtonAnchor,
@@ -199,12 +198,7 @@ const ManageTrackRow: React.FC<{
         >
           {!track.title && <FaExclamationTriangle />}
           <div>
-            <ClickToEditInput
-              defaultValue={track.title}
-              url={`manage/tracks/${track.id}`}
-              formKey="title"
-              reload={reload}
-            />
+            {track.title}
             <TrackAuthors track={track} trackGroupArtistId={artistId} />
             <small>
               {t("originalFilename", {
