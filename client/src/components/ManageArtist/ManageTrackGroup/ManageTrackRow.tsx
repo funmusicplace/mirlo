@@ -200,21 +200,15 @@ const ManageTrackRow: React.FC<{
           <div>
             {track.title}
             <TrackAuthors track={track} trackGroupArtistId={artistId} />
-            <small>
-              {t("originalFilename", {
-                filename: track.audio?.originalFilename,
-              })}
-              <div>
-                {uploadState === "SUCCESS" && t("doneUploadingTrack")}
-                {uploadState === "STARTED" && (
-                  <>
-                    <LoadingSpinner />
-                    {t("stillProcessing")}
-                  </>
-                )}
-                {uploadState === "ERROR" && t("thereWasAnError")}
-              </div>
-            </small>
+            <div>
+              {uploadState === "STARTED" && (
+                <>
+                  <LoadingSpinner />
+                  {t("stillProcessing")}
+                </>
+              )}
+              {uploadState === "ERROR" && t("thereWasAnError")}
+            </div>
           </div>
         </div>
       </td>
