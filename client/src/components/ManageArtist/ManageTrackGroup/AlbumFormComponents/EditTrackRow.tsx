@@ -263,6 +263,7 @@ const EditTrackRow: React.FC<{
                   artistIndex={artistIndex}
                   key={a.id}
                   disabled={isDisabled}
+                  onRemove={remove}
                 />
               ))}
             </div>
