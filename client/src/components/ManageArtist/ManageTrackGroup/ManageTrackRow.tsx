@@ -22,7 +22,6 @@ import {
   ArtistButton,
   ArtistButtonAnchor,
 } from "components/Artist/ArtistButtons";
-import TrackAuthors from "components/common/TrackTable/TrackAuthors";
 
 const TrackRow = styled("tr")`
   > td > .play-button {
@@ -198,7 +197,7 @@ const ManageTrackRow: React.FC<{
         >
           {!track.title && <FaExclamationTriangle />}
           <div>
-            {track.title}
+            {track.title || track.audio?.originalFilename}
             <TrackAuthors track={track} trackGroupArtistId={artistId} />
             <div>
               {uploadState === "STARTED" && (
