@@ -200,3 +200,18 @@ export const createUserTrackGroupPurchase = async (
 
   return purchase;
 };
+
+export const createUserTrackPurchase = async (
+  userId: number,
+  trackId: number,
+  data?: Partial<Prisma.UserTrackPurchaseCreateArgs["data"]>
+) => {
+  const purchase = await prisma.userTrackPurchase.create({
+    data: {
+      userId,
+      trackId,
+      pricePaid: 100,
+    },
+  });
+  return purchase;
+};
