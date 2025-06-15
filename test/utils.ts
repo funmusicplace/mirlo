@@ -184,3 +184,34 @@ export const createTrack = async (
   });
   return track;
 };
+
+export const createUserTrackGroupPurchase = async (
+  userId: number,
+  trackGroupId: number,
+  data?: Partial<Prisma.UserTrackGroupPurchaseCreateArgs["data"]>
+) => {
+  const purchase = await prisma.userTrackGroupPurchase.create({
+    data: {
+      userId,
+      trackGroupId,
+      pricePaid: 1000,
+    },
+  });
+
+  return purchase;
+};
+
+export const createUserTrackPurchase = async (
+  userId: number,
+  trackId: number,
+  data?: Partial<Prisma.UserTrackPurchaseCreateArgs["data"]>
+) => {
+  const purchase = await prisma.userTrackPurchase.create({
+    data: {
+      userId,
+      trackId,
+      pricePaid: 100,
+    },
+  });
+  return purchase;
+};
