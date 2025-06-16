@@ -76,7 +76,6 @@ describe("Top sold trackGroups", () => {
     assert(response.statusCode === 200);
   });
 
-  // NEEDS EDITING
   it("should GET /topSold in descending order of number of purchases", async () => {
     const { user: user1 } = await createUser({ email: "test@test.com" });
     const { user: user2 } = await createUser({ email: "test1@test.com" });
