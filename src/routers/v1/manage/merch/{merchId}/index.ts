@@ -96,9 +96,12 @@ export default function () {
         where: { id: merchId },
         data: {
           ...newValues,
-          urlSlug: newValues.urlSlug
-            ? newValues.urlSlug?.trim()
-            : slugify(newValues.title ?? merch?.title),
+          urlSlug: !merch?.urlSlug // only update slug if it was not set before
+            ? slugify(newValues.title ?? merch?.title, {
+                strict: true,
+                lower: true,
+              })
+            : undefined,
         },
       });
 

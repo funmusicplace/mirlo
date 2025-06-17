@@ -50,7 +50,7 @@ const generateDestination = (
 
 export const convertAudioToFormat = (
   content: {
-    track: Track & { audio: TrackAudio; trackArtists: TrackArtist[] };
+    track: Track & { audio?: TrackAudio; trackArtists: TrackArtist[] };
     artist: Artist;
     trackGroup: { title: string | null };
     coverLocation: string;
@@ -61,6 +61,10 @@ export const convertAudioToFormat = (
   onError?: (err: unknown) => void,
   onSuccess?: (dunno: null) => void
 ) => {
+  if (!content.track.audio) {
+    logger.error("No audio found for track, cannot convert, and so we'll skip");
+    return;
+  }
   const audioId = content.track.audio.id;
   const { format, audioBitrate, audioCodec } = formatDetails;
   logger.info(

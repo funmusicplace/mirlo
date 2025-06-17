@@ -171,8 +171,8 @@ const EditTrackRow: React.FC<{
           {!uploadingState && !isSaving && (
             <ReplaceTrackAudioInput
               trackId={trackId}
-              isSaving={isSaving}
               isDisabled={isDisabled}
+              reload={reload}
             />
           )}
           {!isSaving && <TrackUploadingState uploadingState={uploadingState} />}

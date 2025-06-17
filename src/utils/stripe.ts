@@ -382,6 +382,7 @@ export const createStripeCheckoutSessionForTrackPurchase = async ({
           track.trackGroup.platformPercent
         ),
       },
+      ui_mode: "embedded",
       line_items: [
         {
           price_data: {
@@ -404,8 +405,7 @@ export const createStripeCheckoutSessionForTrackPurchase = async ({
         stripeAccountId,
       },
       mode: "payment",
-      success_url: `${API_DOMAIN}/v1/checkout?success=true&stripeAccountId=${stripeAccountId}&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${API_DOMAIN}/v1/checkout?canceled=true`,
+      return_url: `${API_DOMAIN}/v1/checkout?success=true&stripeAccountId=${stripeAccountId}&session_id={CHECKOUT_SESSION_ID}`,
     },
     { stripeAccount: stripeAccountId }
   );

@@ -57,8 +57,15 @@ export default function () {
             trackGroup != null
         );
 
+      const purchaseCountMap = new Map(
+        topSoldIds.map((item) => [item.trackGroupId, item._count])
+      );
+
       res.json({
-        results: sortedTrackGroups.map(processor.single),
+        results: sortedTrackGroups.map((tg) => ({
+          ...processor.single(tg),
+          purchaseCount: purchaseCountMap.get(tg.id)?.trackGroupId,
+        })),
       });
     } catch (e) {
       next(e);

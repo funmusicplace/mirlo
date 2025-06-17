@@ -139,8 +139,6 @@ export default function () {
         paymentToUserId = user.id;
       }
 
-      console.log("paymentToUserId", paymentToUserId);
-
       const result = await prisma.trackGroup.create({
         data: {
           title,

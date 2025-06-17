@@ -94,7 +94,6 @@ export default function () {
           deletedAt: null,
         },
       });
-      console.log("artist", artist);
       if (!artist) {
         throw new AppError({
           httpCode: 404,

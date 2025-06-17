@@ -88,7 +88,7 @@ export default function () {
       }
 
       const slug = slugify(
-        urlSlug?.toLowerCase() ?? slugify(name.toLowerCase()),
+        urlSlug?.toLowerCase() ?? slugify(name, { lower: true, strict: true }),
         {
           strict: true,
         }

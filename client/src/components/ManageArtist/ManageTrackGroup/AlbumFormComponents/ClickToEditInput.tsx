@@ -1,11 +1,11 @@
 import React from "react";
-import { FormProvider, useForm, useFormContext } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import SavingInput from "./SavingInput";
-import Button from "components/common/Button";
 import { FaPencil } from "react-icons/fa6";
 import { css } from "@emotion/css";
 import { FaCheck } from "react-icons/fa";
 import api from "services/api";
+import { ArtistButton } from "components/Artist/ArtistButtons";
 
 const ClickToEditInput: React.FC<{
   defaultValue: string;
@@ -48,9 +48,14 @@ const ClickToEditInput: React.FC<{
   return (
     <>
       {!isEditing && (
-        <div>
+        <div
+          className={css`
+            display: flex;
+            align-items: center;
+          `}
+        >
           {currentValue}
-          <Button
+          <ArtistButton
             type="button"
             variant="dashed"
             className={css`
@@ -74,7 +79,7 @@ const ClickToEditInput: React.FC<{
               reload={reload}
               onEnter={save}
             />
-            <Button
+            <ArtistButton
               type="button"
               variant="dashed"
               startIcon={<FaCheck />}

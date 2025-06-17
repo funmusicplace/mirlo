@@ -22,7 +22,7 @@ export default function () {
         postForURLSlug = await prisma.post.findFirst({
           where: {
             AND: [
-              { urlSlug: id },
+              { urlSlug: { equals: id, mode: "insensitive" } },
               {
                 artist: {
                   urlSlug: artistId,
