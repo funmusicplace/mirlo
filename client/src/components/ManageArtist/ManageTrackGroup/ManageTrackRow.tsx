@@ -24,6 +24,7 @@ import {
   ArtistButtonAnchor,
 } from "components/Artist/ArtistButtons";
 import Tooltip from "components/common/Tooltip";
+import ReplaceTrackAudioInput from "./AlbumFormComponents/ReplaceTrackAudioInput";
 
 const TrackRow = styled("tr")`
   > td > .play-button {
@@ -173,6 +174,8 @@ const ManageTrackRow: React.FC<{
         {!track.audio && (
           <Tooltip hoverText="Track audio is missing">
             <FaExclamationTriangle />
+
+            <ReplaceTrackAudioInput trackId={track.id} reload={reload} />
           </Tooltip>
         )}
       </td>
