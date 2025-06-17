@@ -119,7 +119,6 @@ const LabelConfirmation: React.FC = () => {
                     toggled={fields[idx].isArtistApproved}
                     onClick={() => {
                       const newValue = !fields[idx].isArtistApproved;
-                      console.log("newValue", newValue);
                       setValue(
                         `relationships.${idx}.isArtistApproved`,
                         newValue

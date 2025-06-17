@@ -149,7 +149,6 @@ const AutoComplete: React.FC<{
       setShowSuggestions(true);
       setIsSearching(true);
       const results = await getOptions(searchString);
-      console.log("search results", searchResults);
       const searchResultsMatchSearch = searchResults.find(
         (result) =>
           result.name.toLowerCase().replaceAll(/\-| /g, "") === searchString

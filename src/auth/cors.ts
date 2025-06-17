@@ -39,8 +39,6 @@ export const corsCheck = async (...args: [Request, Response, NextFunction]) => {
       if (isSameSite || !isAPIEndpointPrivate) {
         clients = await prisma.client.findMany();
       } else if (!apiHeader || typeof apiHeader !== "string") {
-        console.log("is not SameSite", req.path, req.headers);
-
         throw new AppError({
           httpCode: 401,
           description: "Missing API Code",

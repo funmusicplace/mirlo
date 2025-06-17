@@ -137,8 +137,6 @@ const ManageTrackRow: React.FC<{
     );
   }
 
-  console.log("track", track.audio);
-
   return (
     <TrackRow
       key={track.id}

@@ -102,8 +102,6 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
   const isBeforeReleaseDate = new Date(trackGroup.releaseDate) > new Date();
   const purchaseText = isBeforeReleaseDate ? "preOrder" : "buy";
 
-  console.log("errors", formState.errors);
-
   const isDisabled = !!lessThan1 || lessThanMin || !isValid;
 
   if (clientSecret && stripePromise) {

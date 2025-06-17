@@ -34,8 +34,6 @@ const SlugInput: React.FC<{
           url = `users/testExistence?urlSlug=${value}`;
         }
 
-        console.log("url", url);
-
         const response = await api.get<{ exists: boolean }>(url);
         return !response.result.exists;
       } catch (e) {

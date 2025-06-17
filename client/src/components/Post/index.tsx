@@ -80,7 +80,6 @@ const Post: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "post" });
 
   const { artistId, postId } = useParams();
-  console.log("artistid", artistId, postId);
   const { data: post, isLoading } = useQuery(
     queryPost({ postId: postId ?? "", artistId: artistId ?? "" })
   );

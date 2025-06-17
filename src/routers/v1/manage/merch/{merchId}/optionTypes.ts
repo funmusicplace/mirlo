@@ -44,7 +44,9 @@ export default function () {
                   data: oType.options.map((o) => ({
                     name: o.name,
                     additionalPrice: Number(o.additionalPrice),
-                    quantityRemaining: Number(o.quantityRemaining),
+                    quantityRemaining: o.quantityRemaining
+                      ? Number(o.quantityRemaining)
+                      : null,
                   })),
                 },
               },
