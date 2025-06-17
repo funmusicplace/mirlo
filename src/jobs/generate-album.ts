@@ -64,7 +64,7 @@ const downloadTracks = async ({
   coverDestination,
   artist,
 }: {
-  tracks: (Track & { audio: TrackAudio; trackArtists: TrackArtist[] })[];
+  tracks: (Track & { audio?: TrackAudio; trackArtists: TrackArtist[] })[];
   trackGroup: { title: string | null };
   progress: number;
   job: Job;
@@ -77,6 +77,12 @@ const downloadTracks = async ({
 
   for await (const track of tracks) {
     logger.info(`trackId ${track.id}: Processing track ${track.title}`);
+    if (!track.audio) {
+      logger.error(
+        `trackId ${track.id}: No audio found for track, skipping conversion`
+      );
+      continue;
+    }
     const originalTrackLocation = `${track.audio.id}/original.${track.audio.fileExtension}`;
     logger.info(`audioId ${track.audio.id}: Fetching ${originalTrackLocation}`);
     const originalTrackPath = `${tempFolder}/original.${track.audio.fileExtension}`;
@@ -92,29 +98,30 @@ const downloadTracks = async ({
     await new Promise((resolve, reject) => {
       const trackFileName = `${tempFolder}/${track.order ?? i}-${filenamify(track.title ?? "")}`;
 
-      logger.info(
-        `audioId ${track.audio.id}: Processing stream for ${format.format}${
-          format.audioBitrate
-            ? `@${format.audioBitrate} to ${trackFileName}`
-            : ""
-        }`
-      );
+      if (track.audio) {
+        logger.info(
+          `audioId ${track.audio.id}: Processing stream for ${format.format}${
+            format.audioBitrate
+              ? `@${format.audioBitrate} to ${trackFileName}`
+              : ""
+          }`
+        );
 
-      convertAudioToFormat(
-        {
-          track,
-          artist,
-          trackGroup,
-          coverLocation: coverDestination,
-        },
-        createReadStream(originalTrackPath),
-        format,
-        trackFileName,
-        reject,
-        resolve
-      );
+        convertAudioToFormat(
+          {
+            track,
+            artist,
+            trackGroup,
+            coverLocation: coverDestination,
+          },
+          createReadStream(originalTrackPath),
+          format,
+          trackFileName,
+          reject,
+          resolve
+        );
+      }
     });
-
     await fsPromises.rm(originalTrackPath, { force: true });
   }
 };
