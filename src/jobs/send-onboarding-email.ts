@@ -37,14 +37,6 @@ const sendOnboardingEmail = async () => {
             date.getMonth(),
             date.getDate() - 1
           );
-          console.log(
-            "twoDaysAgo",
-            user.lastOnboardingEmailSentAt,
-            twoDaysAgo,
-            user.lastOnboardingEmailSentAt
-              ? user.lastOnboardingEmailSentAt > twoDaysAgo
-              : undefined
-          );
 
           if (
             user.lastOnboardingEmailSentAt &&

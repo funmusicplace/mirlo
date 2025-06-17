@@ -269,7 +269,6 @@ app.use("/health", async (req, res) => {
 
 // This has to be the last thing used so that other things don't get over-written
 app.use("/", async (req, res) => {
-  console.log("req.path", req.path);
   if (!res.headersSent) {
     if (req.path.startsWith("/v1")) {
       res.sendStatus(404);

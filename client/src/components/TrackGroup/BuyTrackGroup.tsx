@@ -78,9 +78,13 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
               : undefined,
             email: data.userEmail,
           });
+
           console.log("response", response.clientSecret);
-          setClientSecret(response.clientSecret);
-          // window.location.assign(response.redirectUrl);
+          if (!response.clientSecret) {
+            setClientSecret(response.clientSecret);
+          } else {
+            window.location.assign(response.redirectUrl);
+          }
         }
       } catch (e) {
         snackbar(t("error"), { type: "warning" });
@@ -101,8 +105,6 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
 
   const isBeforeReleaseDate = new Date(trackGroup.releaseDate) > new Date();
   const purchaseText = isBeforeReleaseDate ? "preOrder" : "buy";
-
-  console.log("errors", formState.errors);
 
   const isDisabled = !!lessThan1 || lessThanMin || !isValid;
 

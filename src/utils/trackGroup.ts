@@ -10,6 +10,7 @@ import {
   MerchImage,
   Artist,
   ArtistAvatar,
+  UploadState,
 } from "@mirlo/prisma/client";
 import prisma from "@mirlo/prisma";
 import { generateFullStaticImageUrl } from "./images";
@@ -458,11 +459,8 @@ export const basicTrackGroupInclude = {
   include: {
     tracks: {
       include: {
-        audio: true,
+        audio: { where: { uploadState: UploadState["SUCCESS"] } },
         trackArtists: true,
-      },
-      where: {
-        deletedAt: null,
       },
     },
     cover: {

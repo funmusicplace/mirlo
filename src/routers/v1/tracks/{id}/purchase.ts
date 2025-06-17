@@ -113,6 +113,7 @@ export default function () {
         });
         res.status(200).json({
           redirectUrl: session.url,
+          clientSecret: session.client_secret,
         });
       } else {
         throw new AppError({

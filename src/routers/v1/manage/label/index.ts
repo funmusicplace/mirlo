@@ -1,18 +1,9 @@
 import { NextFunction, Request, Response } from "express";
-import {
-  artistBelongsToLoggedInUser,
-  userAuthenticated,
-} from "../../../../auth/passport";
+import { userAuthenticated } from "../../../../auth/passport";
 import prisma from "@mirlo/prisma";
 import { User } from "@mirlo/prisma/client";
 
-import {
-  deleteArtist,
-  findArtistIdForURLSlug,
-  processSingleArtist,
-  singleInclude,
-} from "../../../../utils/artist";
-import slugify from "slugify";
+import { processSingleArtist, singleInclude } from "../../../../utils/artist";
 
 type Params = {
   artistId: string;

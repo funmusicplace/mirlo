@@ -113,7 +113,7 @@ export default function () {
       });
 
       if (trackGroup?.title && trackGroup.urlSlug.includes("mi-temp-slug")) {
-        let slug = slugify(newValues.title, { strict: true }).toLowerCase();
+        let slug = slugify(newValues.title, { strict: true, lower: true });
 
         if (slug === "") {
           slug = "blank";

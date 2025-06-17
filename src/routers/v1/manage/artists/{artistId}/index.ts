@@ -55,7 +55,7 @@ export default function () {
           activityPub,
           purchaseEntireCatalogMinPrice,
           ...(urlSlug
-            ? { urlSlug: slugify(urlSlug?.toLowerCase(), { strict: true }) }
+            ? { urlSlug: slugify(urlSlug, { strict: true, lower: true }) }
             : {}),
           properties,
         },

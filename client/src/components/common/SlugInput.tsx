@@ -34,8 +34,6 @@ const SlugInput: React.FC<{
           url = `users/testExistence?urlSlug=${value}`;
         }
 
-        console.log("url", url);
-
         const response = await api.get<{ exists: boolean }>(url);
         return !response.result.exists;
       } catch (e) {
@@ -48,7 +46,7 @@ const SlugInput: React.FC<{
 
   const useCurrentNameAsSlug = React.useCallback(() => {
     if (currentName) {
-      const slug = slugify(currentName, { lower: true });
+      const slug = slugify(currentName, { lower: true, strict: true });
       setValue("urlSlug", slug);
     }
     return "";
@@ -80,7 +78,11 @@ const SlugInput: React.FC<{
             align-items: center;
           `}
         >
-          {t("useUrlSlug", { suggestedUrlSlug: slugify(currentName) })}
+          {t("useUrlSlug", {
+            suggestedUrlSlug: slugify(currentName.toLowerCase(), {
+              strict: true,
+            }),
+          })}
           <ArtistButton
             variant="link"
             size="compact"

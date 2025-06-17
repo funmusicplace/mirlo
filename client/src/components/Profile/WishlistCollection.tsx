@@ -10,7 +10,6 @@ import { useAuthContext } from "state/AuthContext";
 
 function WishlistCollection() {
   const { user } = useAuthContext();
-  console.log("user", user?.trackFavorites);
   const userId = user?.id;
   const { t } = useTranslation("translation", { keyPrefix: "profile" });
 

@@ -118,8 +118,6 @@ const BuyMerchItem: React.FC<{
 
   let price = currentPrice;
 
-  console.log("currentOptions", currentOptions);
-
   merch.shippingDestinations.forEach((sd) => {
     if (sd.id === shippingDestination) {
       price += sd.costUnit / 100 + (sd.costExtraUnit * (quantity - 1)) / 100;
@@ -210,7 +208,11 @@ const BuyMerchItem: React.FC<{
                 <option
                   key={o.name}
                   value={o.id}
-                  disabled={o.quantityRemaining < quantity}
+                  disabled={
+                    o.quantityRemaining !== null
+                      ? o.quantityRemaining < quantity
+                      : false
+                  }
                 >
                   {o.additionalPrice
                     ? t("option", {
