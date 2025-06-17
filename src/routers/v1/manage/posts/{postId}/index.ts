@@ -58,7 +58,12 @@ export default function () {
           publishedAt,
           minimumSubscriptionTierId,
           shouldSendEmail,
-          urlSlug: urlSlug ? urlSlug?.trim() : slugify(title ?? post?.title),
+          urlSlug: !post?.urlSlug
+            ? slugify(urlSlug ?? title ?? post?.title, {
+                strict: true,
+                lower: true,
+              })
+            : undefined,
         },
         where: {
           id: Number(postId),

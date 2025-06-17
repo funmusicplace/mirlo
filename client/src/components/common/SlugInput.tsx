@@ -46,7 +46,7 @@ const SlugInput: React.FC<{
 
   const useCurrentNameAsSlug = React.useCallback(() => {
     if (currentName) {
-      const slug = slugify(currentName, { lower: true });
+      const slug = slugify(currentName, { lower: true, strict: true });
       setValue("urlSlug", slug);
     }
     return "";
@@ -78,7 +78,11 @@ const SlugInput: React.FC<{
             align-items: center;
           `}
         >
-          {t("useUrlSlug", { suggestedUrlSlug: slugify(currentName) })}
+          {t("useUrlSlug", {
+            suggestedUrlSlug: slugify(currentName.toLowerCase(), {
+              strict: true,
+            }),
+          })}
           <ArtistButton
             variant="link"
             size="compact"

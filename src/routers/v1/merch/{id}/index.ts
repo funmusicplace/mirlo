@@ -24,7 +24,7 @@ export default function () {
         merchForURLSlug = await prisma.merch.findFirst({
           where: {
             AND: [
-              { urlSlug: id },
+              { urlSlug: { equals: id, mode: "insensitive" } },
               {
                 artist: {
                   urlSlug: artistId,
