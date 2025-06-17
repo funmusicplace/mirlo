@@ -382,6 +382,7 @@ export const createStripeCheckoutSessionForTrackPurchase = async ({
           track.trackGroup.platformPercent
         ),
       },
+      ui_mode: "embedded",
       line_items: [
         {
           price_data: {
