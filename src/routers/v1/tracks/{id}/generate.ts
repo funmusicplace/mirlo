@@ -32,7 +32,7 @@ export default function () {
         },
       },
       include: {
-        audio: true,
+        audio: { where: { uploadState: "SUCCESS" } },
         trackGroup: basicTrackGroupInclude,
       },
     });
