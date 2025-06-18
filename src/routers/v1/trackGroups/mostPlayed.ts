@@ -16,6 +16,7 @@ export default function () {
     try {
       let where: Prisma.TrackGroupWhereInput = whereForPublishedTrackGroups();
 
+      // Only get the minimum amount of info needed for calculating total trackPlays across each trackGroup
       const trackGroups = await prisma.trackGroup.findMany({
         where,
         select: {
@@ -28,12 +29,15 @@ export default function () {
         },
       });
 
-      const playCountsById = trackGroups.map((tg) => [
-        tg.id,
-        tg.tracks.reduce((total, track) => total + track.plays.length, 0),
-      ]);
+      const idsToPlayCount = trackGroups.map((tg) => {
+        const idPlayPair = [
+          tg.id,
+          tg.tracks.reduce((total, track) => total + track.plays.length, 0),
+        ];
+        return idPlayPair;
+      });
 
-      const topTrackGroupIds = playCountsById
+      const topTrackGroupIds = idsToPlayCount
         .sort((a, b) => b[1] - a[1])
         .slice(0, Number(take))
         .map((tg) => tg[0]);
@@ -57,9 +61,17 @@ export default function () {
         .map((tgId) => fullTrackGroups.find((tg) => tg.id === tgId))
         .filter((tg): tg is NonNullable<typeof tg> => tg !== null);
 
+      const idPlayCountMap = new Map(
+        trackGroups.map((tg) => [
+          tg.id,
+          tg.tracks.reduce((total, track) => total + track.plays.length, 0),
+        ])
+      );
+
       res.json({
         results: sortedMostPlayedTrackGroups.map((tg) => ({
           ...processor.single(tg),
+          totalPlaysCount: idPlayCountMap.get(tg.id),
         })),
       });
     } catch (e) {
