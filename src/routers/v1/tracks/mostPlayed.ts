@@ -55,8 +55,13 @@ export default function () {
           audio: true,
         },
       });
+
+      const sortedTracks = mostPlayedIds
+        .map((item) => tracks.find((tr) => tr.id === item.trackId))
+        .filter((track): track is NonNullable<typeof track> => track !== null);
+
       res.json({
-        results: tracks.map((tr) => ({
+        results: sortedTracks.map((tr) => ({
           ...tr,
           trackGroup: {
             ...tr.trackGroup,
