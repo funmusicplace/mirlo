@@ -17,33 +17,35 @@ export default function () {
       let where: Prisma.TrackGroupWhereInput = whereForPublishedTrackGroups();
 
       // Only get the minimum amount of info needed for calculating total trackPlays across each trackGroup
-      const trackGroups = await prisma.trackGroup.findMany({
-        where,
-        select: {
-          id: true,
-          tracks: {
-            select: {
-              plays: true,
-            },
-          },
-        },
-      });
+      const mostPlayedTrackGroups = await prisma.$queryRaw<
+        { id: number; total_plays: number }[]
+      >`
+      SELECT tg.id, COUNT(tp.id)::int AS total_plays
+      FROM "TrackGroup" AS tg
+      INNER JOIN "Track" AS tr ON tg.id = tr."trackGroupId"
+      INNER JOIN "TrackPlay" AS tp ON tr.id = tp."trackId"
+      INNER JOIN "TrackGroupCover" AS tgc ON tg.id = tgc."trackGroupId"
+      WHERE tg.published = true 
+      AND tg."isDrafts" = false 
+      AND tg."deletedAt" IS NULL 
+      AND tgc.url IS NOT NULL 
+      AND array_length(tgc.url, 1) > 0
+      AND EXISTS (
+        SELECT 1
+        FROM "Track" AS t2
+        INNER JOIN "TrackAudio" AS ta ON t2.id = ta."trackId"
+        WHERE t2."trackGroupId" = tg.id 
+        AND ta."uploadState" = 'SUCCESS'
+      )
+      GROUP BY tg.id
+      ORDER BY total_plays DESC 
+      LIMIT ${Number(take) || 50}
+      `;
 
-      const idsToPlayCount = trackGroups.map((tg) => {
-        const idPlayPair = [
-          tg.id,
-          tg.tracks.reduce((total, track) => total + track.plays.length, 0),
-        ];
-        return idPlayPair;
-      });
-
-      const topTrackGroupIds = idsToPlayCount
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, Number(take))
-        .map((tg) => tg[0]);
+      const mostPlayedIds = mostPlayedTrackGroups.map((tg) => tg.id);
 
       const fullTrackGroups = await prisma.trackGroup.findMany({
-        where: { ...where, id: { in: topTrackGroupIds } },
+        where: { id: { in: mostPlayedIds } },
         include: {
           artist: {
             select: {
@@ -57,15 +59,12 @@ export default function () {
         },
       });
 
-      const sortedMostPlayedTrackGroups = topTrackGroupIds
+      const sortedMostPlayedTrackGroups = mostPlayedIds
         .map((tgId) => fullTrackGroups.find((tg) => tg.id === tgId))
         .filter((tg): tg is NonNullable<typeof tg> => tg !== null);
 
       const idPlayCountMap = new Map(
-        trackGroups.map((tg) => [
-          tg.id,
-          tg.tracks.reduce((total, track) => total + track.plays.length, 0),
-        ])
+        mostPlayedTrackGroups.map((tg) => [tg.id, tg.total_plays])
       );
 
       res.json({
@@ -80,7 +79,7 @@ export default function () {
   }
 
   GET.apiDoc = {
-    summary: "Returns top sold trackGroups",
+    summary: "Returns most played trackGroups",
     responses: {
       200: {
         description: "A list of trackGroups",

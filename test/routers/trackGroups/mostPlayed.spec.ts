@@ -122,6 +122,7 @@ describe("most played trackGroups", () => {
     const response = await requestApp
       .get("trackGroups/mostPlayed")
       .set("Accept", "application/json");
+
     assert.equal(response.body.results.length, 3);
     assert.equal(response.body.results[0].id, mostPlayed.id);
     assert.equal(response.body.results[1].id, middlePlayed.id);
@@ -173,6 +174,7 @@ describe("most played trackGroups", () => {
       .get("trackGroups/mostPlayed")
       .query("take=2")
       .set("Accept", "application/json");
+
     assert.equal(response.body.results.length, 2);
     assert.equal(response.body.results[0].id, mostPlayed.id);
     assert.equal(response.body.results[1].id, middlePlayed.id);
