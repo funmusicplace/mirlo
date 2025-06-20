@@ -61,6 +61,7 @@ const PurchaseOrDownloadAlbum: React.FC<{
 
   console.log("trackGroup.isGettable", trackGroup.isGettable);
   if ((isBeforeReleaseDate && !userId) || !trackGroup.isGettable) {
+    console.log("returning nul");
     return null;
   }
 
@@ -68,6 +69,7 @@ const PurchaseOrDownloadAlbum: React.FC<{
     !isOwned && artistState?.userStripeStatus?.chargesEnabled;
 
   const showDownload = isOwned && !isBeforeReleaseDate;
+  console.log("showPruchase", showPurchase);
 
   const addToCollection =
     !isOwned &&
