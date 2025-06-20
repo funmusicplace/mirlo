@@ -79,8 +79,8 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
             email: data.userEmail,
           });
 
-          console.log("response", response.clientSecret);
-          if (!response.clientSecret) {
+          console.log("response", response);
+          if (response.clientSecret) {
             setClientSecret(response.clientSecret);
           } else {
             window.location.assign(response.redirectUrl);

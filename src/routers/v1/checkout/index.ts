@@ -18,6 +18,7 @@ export default function () {
         const session = await stripe.checkout.sessions.retrieve(session_id, {
           stripeAccount: stripeAccountId,
         });
+        console.log("checkout return", session);
         const {
           clientId,
           artistId,
