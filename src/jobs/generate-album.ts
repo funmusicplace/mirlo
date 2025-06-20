@@ -79,15 +79,24 @@ const downloadTracks = async ({
     logger.info(`trackId ${track.id}: Processing track ${track.title}`);
     if (!track.audio) {
       logger.error(
-        `trackId ${track.id}: No audio found for track, skipping conversion`
+        `trackId ${track.id}: No audio data found for track, skipping conversion`
       );
       continue;
     }
     const originalTrackLocation = `${track.audio.id}/original.${track.audio.fileExtension}`;
     logger.info(`audioId ${track.audio.id}: Fetching ${originalTrackLocation}`);
-    const originalTrackPath = `${tempFolder}/original.${track.audio.fileExtension}`;
+    const tempTrackPath = `${tempFolder}/original.${track.audio.fileExtension}`;
 
-    await getFile(finalAudioBucket, originalTrackLocation, originalTrackPath);
+    try {
+      await getFile(finalAudioBucket, originalTrackLocation, tempTrackPath);
+    } catch (e) {
+      logger.error(
+        `Error fetching original track: ${e}: ${originalTrackLocation}`
+      );
+      await fsPromises.rm(tempTrackPath, { force: true });
+
+      continue;
+    }
     progress += (i * 70) / tracks.length;
     i += 1;
     await job.updateProgress(progress);
@@ -114,7 +123,7 @@ const downloadTracks = async ({
             trackGroup,
             coverLocation: coverDestination,
           },
-          createReadStream(originalTrackPath),
+          createReadStream(tempTrackPath),
           format,
           trackFileName,
           reject,
@@ -122,7 +131,7 @@ const downloadTracks = async ({
         );
       }
     });
-    await fsPromises.rm(originalTrackPath, { force: true });
+    await fsPromises.rm(tempTrackPath, { force: true });
   }
 };
 
