@@ -3238,6 +3238,7 @@ __metadata:
     "@emotion/styled": "npm:^11.10.5"
     "@gumlet/react-hls-player": "npm:^1.0.1"
     "@marsidev/react-turnstile": "npm:^1.0.2"
+    "@mirlo/mirlo-api-client": "npm:^1.0.0"
     "@optimize-lodash/rollup-plugin": "npm:^4.0.4"
     "@paypal/react-paypal-js": "npm:^7.8.2"
     "@remirror/pm": "npm:^2.0.8"
@@ -3312,6 +3313,17 @@ __metadata:
     vitest: "npm:^1.5.0"
   languageName: unknown
   linkType: soft
+
+"@mirlo/mirlo-api-client@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "@mirlo/mirlo-api-client@npm:1.0.0"
+  dependencies:
+    b64-to-blob: "npm:^1.2.19"
+    file-saver: "npm:^2.0.5"
+    typescript: "npm:^5.8.3"
+  checksum: 10/89fd295a24ad5c7d33a8196a49ffae8d2b500ced6a0ce24ea9b8992b9251f31a56c2d12f79c689bb46195832b2d21cd7947cd621d6963a7bf8fd60263d96dcba
+  languageName: node
+  linkType: hard
 
 "@mirlo/prisma@workspace:prisma":
   version: 0.0.0-use.local
@@ -20168,6 +20180,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"typescript@npm:^5.8.3":
+  version: 5.8.3
+  resolution: "typescript@npm:5.8.3"
+  bin:
+    tsc: bin/tsc
+    tsserver: bin/tsserver
+  checksum: 10/65c40944c51b513b0172c6710ee62e951b70af6f75d5a5da745cb7fab132c09ae27ffdf7838996e3ed603bb015dadd099006658046941bd0ba30340cc563ae92
+  languageName: node
+  linkType: hard
+
 "typescript@patch:typescript@npm%3A5.1.6#optional!builtin<compat/typescript>":
   version: 5.1.6
   resolution: "typescript@patch:typescript@npm%3A5.1.6#optional!builtin<compat/typescript>::version=5.1.6&hash=5da071"
@@ -20185,6 +20207,16 @@ __metadata:
     tsc: bin/tsc
     tsserver: bin/tsserver
   checksum: 10/6ae9b2c4d3254ec2eaee6f26ed997e19c02177a212422993209f81e87092b2bb0a4738085549c5b0164982a5609364c047c72aeb281f6c8d802cd0d1c6f0d353
+  languageName: node
+  linkType: hard
+
+"typescript@patch:typescript@npm%3A^5.8.3#optional!builtin<compat/typescript>":
+  version: 5.8.3
+  resolution: "typescript@patch:typescript@npm%3A5.8.3#optional!builtin<compat/typescript>::version=5.8.3&hash=5adc0c"
+  bin:
+    tsc: bin/tsc
+    tsserver: bin/tsserver
+  checksum: 10/98470634034ec37fd9ea61cc82dcf9a27950d0117a4646146b767d085a2ec14b137aae9642a83d1c62732d7fdcdac19bb6288b0bb468a72f7a06ae4e1d2c72c9
   languageName: node
   linkType: hard
 

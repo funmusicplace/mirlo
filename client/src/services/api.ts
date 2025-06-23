@@ -1,6 +1,9 @@
 import { API_ROOT } from "../constants";
-import APIInstance from "./APIInstance";
+import APIInstance from "@mirlo/mirlo-api-client";
 
-const api = APIInstance(API_ROOT?.replace(" ", "") ?? "");
+const api = APIInstance(
+  API_ROOT?.replace(" ", "") ?? "",
+  import.meta.env.VITE_MIRLO_API_KEY
+);
 
 export default api;
