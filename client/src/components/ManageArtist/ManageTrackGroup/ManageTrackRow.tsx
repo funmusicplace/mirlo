@@ -183,14 +183,6 @@ const ManageTrackRow: React.FC<{
           overflow: hidden;
           whitespace: nowrap;
           text-overflow: ellipsis;
-          background-color: ${!track.title
-            ? "var(--mi-warning-background-color)"
-            : "transparent"};
-          &:hover {
-            background-color: ${!track.title
-              ? "var(--mi-warning-background-color)"
-              : "transparent"};
-          }
 
           &:before {
             content: "${t("titleColumn")}: ";
@@ -201,13 +193,8 @@ const ManageTrackRow: React.FC<{
           className={css`
             display: flex;
             align-items: center;
-
-            > svg {
-              margin-right: 1rem;
-            }
           `}
         >
-          {!track.title && <FaExclamationTriangle />}
           <div>
             {track.title || track.audio?.originalFilename}
             <TrackAuthors track={track} trackGroupArtistId={artistId} />
