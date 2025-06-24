@@ -9,7 +9,7 @@ import { WidthWrapper } from "components/common/WidthContainer";
 
 import { useQuery } from "@tanstack/react-query";
 import { queryArtist, queryTrackGroup } from "queries";
-import Confetti from "components/Merch/Confetti";
+import Confetti from "components/common/Confetti";
 import { useMemo } from "react";
 import { getTrackUrl } from "utils/artist";
 
