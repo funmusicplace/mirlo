@@ -74,10 +74,11 @@ export const ManageTrackTable: React.FC<{
   tracks: Track[];
   isPlaylist?: boolean;
   trackGroupId?: number;
+  artistId: number;
   editable?: boolean;
   owned?: boolean;
   reload?: () => Promise<unknown>;
-}> = ({ tracks, trackGroupId, editable, reload }) => {
+}> = ({ tracks, trackGroupId, artistId, editable, reload }) => {
   const [isLoading, setIsLoading] = React.useState(false);
   const {
     state: { draggingTrackId },
@@ -177,6 +178,7 @@ export const ManageTrackTable: React.FC<{
           <ManageTrackRow
             key={track.id}
             track={track}
+            artistId={artistId}
             addTracksToQueue={addTracksToQueue}
             reload={reloadWrapper}
             handleDrop={handleDrop}

@@ -12,12 +12,12 @@ import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
 import { fmtMSS } from "utils/tracks";
 import TrackRowPlayControl from "components/common/TrackTable/TrackRowPlayControl";
+import TrackAuthors from "components/common/TrackTable/TrackAuthors";
 import { useTranslation } from "react-i18next";
 import EditTrackRow from "./AlbumFormComponents/EditTrackRow";
 import styled from "@emotion/styled";
 import LoadingSpinner from "components/common/LoadingSpinner";
 import { useAuthContext } from "state/AuthContext";
-import ClickToEditInput from "./AlbumFormComponents/ClickToEditInput";
 import {
   ArtistButton,
   ArtistButtonAnchor,
@@ -56,10 +56,11 @@ const TrackRow = styled("tr")`
 
 const ManageTrackRow: React.FC<{
   track: Track;
+  artistId: number;
   addTracksToQueue: (id: number) => void;
   reload: () => Promise<void>;
   handleDrop: (val: React.DragEvent<HTMLTableRowElement>) => void;
-}> = ({ track, addTracksToQueue, reload, handleDrop }) => {
+}> = ({ track, artistId, addTracksToQueue, reload, handleDrop }) => {
   const { t } = useTranslation("translation", {
     keyPrefix: "manageTrackTable",
   });
@@ -208,17 +209,10 @@ const ManageTrackRow: React.FC<{
         >
           {!track.title && <FaExclamationTriangle />}
           <div>
-            <ClickToEditInput
-              defaultValue={track.title}
-              url={`manage/tracks/${track.id}`}
-              formKey="title"
-              reload={reload}
-            />
-            <small>
-              {t("originalFilename", {
-                filename: track.audio?.originalFilename,
-              })}
-              <div>
+            {track.title || track.audio?.originalFilename}
+            <TrackAuthors track={track} trackGroupArtistId={artistId} />
+            <p>
+              <small>
                 {uploadState === "SUCCESS" && t("doneUploadingTrack")}
                 {uploadState === "STARTED" && (
                   <>
@@ -227,8 +221,8 @@ const ManageTrackRow: React.FC<{
                   </>
                 )}
                 {uploadState === "ERROR" && t("thereWasAnError")}
-              </div>
-            </small>
+              </small>
+            </p>
           </div>
         </div>
       </td>

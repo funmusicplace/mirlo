@@ -190,8 +190,23 @@ const EditTrackRow: React.FC<{
           )}
           {!isSaving && <TrackUploadingState uploadingState={uploadingState} />}
         </td>
-        <td>
-          <InputEl {...register(`title`)} disabled={isSaving || isDisabled} />
+        <td
+          className={css`
+            width: 40%;
+          `}
+        >
+          <InputEl
+            {...register(`title`)}
+            id={`${track.id}-title`}
+            disabled={isSaving || isDisabled}
+            aria-describedby={`${track.id}-title-info`}
+          />
+          <p id={`${track.id}-title-info`}>
+            {t("originalFilename", {
+              keyPrefix: "manageTrackTable",
+              filename: track.audio?.originalFilename,
+            })}
+          </p>
         </td>
         <td>
           <SelectTrackPreview statusKey="status" />
