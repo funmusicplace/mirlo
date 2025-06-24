@@ -1,13 +1,13 @@
 import React from "react";
-import { useForm, FormProvider } from "react-hook-form";
+import { useFieldArray, useForm, FormProvider } from "react-hook-form";
 import { InputEl } from "components/common/Input";
-import { FaSave, FaTimes } from "react-icons/fa";
+import { FaPlus, FaSave, FaTimes } from "react-icons/fa";
 import { css } from "@emotion/css";
 import { Trans, useTranslation } from "react-i18next";
 import { fmtMSS } from "utils/tracks";
 import SelectTrackPreview from "../../SelectTrackPreview";
 import TrackUploadingState from "../../TrackUploadingState";
-import ManageTrackArtists from "../ManageTrackArtists";
+import TrackArtistFormFields from "../TrackArtistFormFields";
 import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
 import useJobStatusCheck from "utils/useJobStatusCheck";
@@ -24,6 +24,7 @@ import styled from "@emotion/styled";
 import FormCheckbox from "components/common/FormCheckbox";
 import InfoModal from "components/common/InfoModal";
 import { ArtistButton } from "components/Artist/ArtistButtons";
+import { TrackData } from "components/ManageArtist/utils";
 
 export interface FormData {
   title: string;
@@ -36,6 +37,7 @@ export interface FormData {
   allowIndividualSale: boolean;
   minPrice: string;
   allowMirloPromo: boolean;
+  trackArtists: TrackData["trackArtists"];
 }
 
 const IndentedTR = styled("tr")`
@@ -68,6 +70,7 @@ const EditTrackRow: React.FC<{
   const methods = useForm<FormData>({
     defaultValues: {
       title: track.title,
+      trackArtists: track.trackArtists,
       status: track.isPreview ? "preview" : "must-own",
       licenseId: track.licenseId,
       lyrics: track.lyrics,
@@ -83,12 +86,21 @@ const EditTrackRow: React.FC<{
   const userId = user?.id;
   const snackbar = useSnackbar();
   const trackId = track.id;
-  const { register, reset, watch } = methods;
+  const { control, register, reset, watch } = methods;
   const allowIndividualSale = watch("allowIndividualSale");
+  const {
+    fields: trackArtists,
+    append,
+    remove,
+  } = useFieldArray({
+    control,
+    name: "trackArtists",
+  });
 
   const onCancelEditing = React.useCallback(() => {
     reset({
       title: track.title,
+      trackArtists: track.trackArtists,
       status: track.isPreview ? "preview" : "must-own",
       licenseId: track.licenseId,
       isrc: track.isrc,
@@ -107,6 +119,7 @@ const EditTrackRow: React.FC<{
         setIsSaving(true);
         const packet = {
           title: formData.title,
+          trackArtists: formData.trackArtists,
           isrc: formData.isrc,
           lyrics: formData.lyrics,
           description: formData.description,
@@ -181,13 +194,6 @@ const EditTrackRow: React.FC<{
           <InputEl {...register(`title`)} disabled={isSaving || isDisabled} />
         </td>
         <td>
-          <ManageTrackArtists
-            trackArtists={track.trackArtists ?? []}
-            onSave={reload}
-            trackId={track.id}
-          />
-        </td>
-        <td>
           <SelectTrackPreview statusKey="status" />
         </td>
         <td align="right">
@@ -228,6 +234,54 @@ const EditTrackRow: React.FC<{
           />
         </td>
       </tr>
+      <IndentedTR>
+        <td colSpan={2}>
+          <label htmlFor="listedArtists">
+            {t("listedArtists", { keyPrefix: "manageTrackTable" })}
+          </label>
+        </td>
+        <td colSpan={99}>
+          <div
+            className={css`
+              display: flex;
+              flex-direction: column;
+            `}
+          >
+            <div>
+              {trackArtists.map((a, artistIndex) => (
+                <TrackArtistFormFields
+                  artistIndex={artistIndex}
+                  key={a.id}
+                  disabled={isDisabled}
+                  onRemove={remove}
+                />
+              ))}
+            </div>
+            <div
+              className={css`
+                margin-top: 1rem;
+                display: flex;
+                justify-content: space-between;
+                width: 100%;
+                align-items: center;
+              `}
+            >
+              <ArtistButton
+                onClick={() => {
+                  append({ artistName: "" });
+                }}
+                type="button"
+                size="compact"
+                disabled={isDisabled}
+                startIcon={<FaPlus />}
+                variant="dashed"
+              >
+                {t("addNewArtist")}
+              </ArtistButton>
+            </div>
+          </div>
+        </td>
+      </IndentedTR>
       <IndentedTR>
         <td colSpan={2}>
           <label htmlFor="allowIndividualSale">

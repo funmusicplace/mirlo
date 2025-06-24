@@ -165,7 +165,6 @@ export const ManageTrackTable: React.FC<{
         <tr>
           <th />
           <th>{t("titleColumn")}</th>
-          <th>{t("listedArtists")}</th>
           <th>{t("status")}</th>
           <th>{t("durationColumn")}</th>
           <th className="alignRight" style={{ minWidth: "8rem" }}>

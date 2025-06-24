@@ -17,7 +17,6 @@ import EditTrackRow from "./AlbumFormComponents/EditTrackRow";
 import styled from "@emotion/styled";
 import LoadingSpinner from "components/common/LoadingSpinner";
 import { useAuthContext } from "state/AuthContext";
-import ManageTrackArtists from "./ManageTrackArtists";
 import ClickToEditInput from "./AlbumFormComponents/ClickToEditInput";
 import {
   ArtistButton,
@@ -232,19 +231,6 @@ const ManageTrackRow: React.FC<{
             </small>
           </div>
         </div>
-      </td>
-      <td
-        className={css`
-          &:before {
-            content: "${t("listedArtists")}: ";
-          }
-        `}
-      >
-        <ManageTrackArtists
-          trackArtists={track.trackArtists ?? []}
-          onSave={reload}
-          trackId={track.id}
-        />
       </td>
       <td
         className={css`

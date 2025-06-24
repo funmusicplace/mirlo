@@ -58,6 +58,8 @@ export interface TrackData {
     artistId?: number;
     role?: string;
     isCoAuthor?: boolean;
+    id?: string;
+    trackId?: number;
   }[];
 }
 
