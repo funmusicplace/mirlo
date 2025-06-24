@@ -53,7 +53,7 @@ const TrackRowPlayControl: React.FC<{
               "track-number " +
               css`
                 text-align: center;
-                margin: 0 0.5rem 0 0;
+                margin: 0 0 0 0;
               `
             }
           >
@@ -73,7 +73,7 @@ const TrackRowPlayControl: React.FC<{
         <Button
           size="compact"
           startIcon={<TfiControlPause />}
-          data-cy="track-row-pause-button"
+          className="pause-button"
           onClick={onTrackPause}
           style={{ width: "2rem", textAlign: "center" }}
         />

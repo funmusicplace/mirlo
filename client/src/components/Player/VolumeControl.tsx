@@ -22,6 +22,7 @@ export const VolumeControl: React.FC<{
       <Button
         startIcon={<FaVolumeDown />}
         variant="outlined"
+        title="Decrease volume"
         onClick={() => {
           setVolume((vol) => (vol === 0 ? 0 : +(vol -= 0.1).toFixed(1)));
         }}
@@ -37,6 +38,9 @@ export const VolumeControl: React.FC<{
           top: 0;
           position: inherit;
         `}
+        aria-label="Volume control"
+        role="button"
+        title="Volume control"
         onClick={(event: React.MouseEvent<HTMLDivElement>) => {
           const divWidth = event.currentTarget.offsetWidth;
           const clickX = event.clientX - event.currentTarget.offsetLeft;
@@ -85,6 +89,7 @@ export const VolumeControl: React.FC<{
       <Button
         startIcon={<FaVolumeUp />}
         variant="outlined"
+        title="Increase volume"
         onClick={() => {
           setVolume((vol) => (vol === 1 ? 1 : +(vol += 0.1).toFixed(1)));
         }}

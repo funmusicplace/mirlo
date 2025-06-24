@@ -4,12 +4,6 @@ import {
   merchBelongsToLoggedInUser,
 } from "../../../../../auth/passport";
 import prisma from "@mirlo/prisma";
-import countries from "../../../../../utils/country-codes-currencies";
-import {
-  getUserCountry,
-  getUserCurrencyString,
-} from "../../../../../utils/user";
-import { User } from "@mirlo/prisma/client";
 
 type Params = {
   merchId: string;
@@ -25,7 +19,11 @@ export default function () {
     const { merchId } = req.params as unknown as Params;
     const optionTypes = req.body as unknown as {
       optionName: string;
-      options: { name: string; additionalPrice: string }[];
+      options: {
+        name: string;
+        additionalPrice: string;
+        quantityRemaining?: string;
+      }[];
     }[];
 
     try {
@@ -46,6 +44,9 @@ export default function () {
                   data: oType.options.map((o) => ({
                     name: o.name,
                     additionalPrice: Number(o.additionalPrice),
+                    quantityRemaining: o.quantityRemaining
+                      ? Number(o.quantityRemaining)
+                      : null,
                   })),
                 },
               },

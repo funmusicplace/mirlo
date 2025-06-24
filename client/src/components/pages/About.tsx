@@ -39,6 +39,15 @@ const About: React.FC = () => {
 
         h1 {
           margin-top: 1rem;
+          font-family: "Cubano", var(--mi-font-family-stack);
+        }
+
+        h2 {
+          font-family: "Cubano", var(--mi-font-family-stack);
+        }
+
+        p {
+          margin-bottom: 1.25rem;
         }
       `}
     >
@@ -87,6 +96,9 @@ const About: React.FC = () => {
             p: <p></p>,
             giveDirectly: <Link to="/team/support"></Link>,
             i: <em></em>,
+            proportionally: (
+              <a href="https://nham.co.uk/2025/03/musicians-how-to-receive-more-money-for-each-track-sold/"></a>
+            ),
           }}
         />
       </div>
@@ -159,7 +171,7 @@ const About: React.FC = () => {
             >
               <img
                 alt="It could happen here"
-                src="/assets/images/media/ichh.jpg"
+                src="/static/images/media/ichh.jpg"
               />
             </a>
           </li>
@@ -213,9 +225,9 @@ const About: React.FC = () => {
       <div>
         <H2HashLink id="team">Our team</H2HashLink>
         <p>
-          Behind the platform Our members have experience working both within
-          Resonate and Ampled, other co-ops across several industries, and
-          complex high-traffic web platforms. We envision this platform as a
+          Behind the platform Our member stewards have experience working both
+          within Resonate and Ampled, other co-ops across several industries,
+          and complex high-traffic web platforms. We envision this platform as a
           tool to support musicians in cultivating direct and reciprocal
           relationships and resources to sustain one another’s creative
           practice.
@@ -226,11 +238,55 @@ const About: React.FC = () => {
           people who have helped us with get to where we are.
         </p>
         <p>
-          {" "}
           We're immensely grateful to everyone who is supporting us through
           labor or financial contributions to get us here.
         </p>
-        <h3>The worker owners</h3>
+        <h3>Our operating agreement</h3>
+        <div>
+          <p>
+            We're delighted to publicly share{" "}
+            <a href="https://mirlo.space/static/Mirlo-Bylaws.pdf">
+              our operating agreement
+            </a>
+            . The company is managed by its{" "}
+            <Link to="/team/posts/285/">member stewards</Link>, listed below.
+          </p>
+          <p>
+            Decisions on behalf of the company are made by consent of member
+            stewards, meaning that no member steward objects to the decision
+            taken. Feel free to{" "}
+            <a href="https://www.sociocracyforall.org/consent-decision-making/">
+              learn more here
+            </a>{" "}
+            about consent-based decision-making from our friends at Sociocracy
+            for All.
+          </p>
+          <p>
+            Stewards are the people who, through their contributions, help move
+            Mirlo forward; we want to ensure that anyone doing this work has an
+            opportunity to contribute meaningfully to the decisions that impact
+            how the platform runs itself. When someone joins Mirlo as a Steward,
+            they can also become legal owners; however, that is not a
+            requirement. Either way, Stewards are invited to the regular member
+            meetings and consent to decisions that impact the overall ecosystem
+            alongside legal members. To read more about how member stewards slot
+            operate within Mirlo, read our{" "}
+            <Link to="/team/posts/285/">blog post about it</Link>.
+          </p>
+          <p>
+            Work at Mirlo is done in circles, defined teams that can include
+            both stewards and organizer volunteers. Those circles can make
+            decisions within their delegated domain by consent, without having
+            to run it by the full members' circle.{" "}
+            <a href="https://www.sociocracyforall.org/organizational-circle-structure-in-sociocracy/">
+              This article from Sociocracy for All
+            </a>{" "}
+            offers a good introduction to the organizational logic behind
+            circles, based on the principles of effectiveness, equivalence, and
+            transparency.
+          </p>
+        </div>
+        <h3>The member stewards</h3>
         <Person>
           <span
             className={css`
@@ -245,26 +301,42 @@ const About: React.FC = () => {
             <img
               src="https://mirlo.space/static/images/owner-pictures/alex-photo.png"
               alt="alex photo"
-              className={css`
-                margin-top: -2rem;
-              `}
             />
           </span>
 
           <p>
-            Alex (he / him) is a writer, organizer, and trombonist working at
-            the confluences of music and social transformation. He holds a PhD
-            in Ethnomusicology from UCLA, where his research focused on jazz
-            clubs and the communities that sustain them in Los Angeles, USA;
-            Santiago, Chile; and Novosibirsk, Siberia. His writing on the
+            Alex is a writer, organizer, and trombonist working at the
+            confluences of music and social transformation. His writing on the
             contemporary jazz world has appeared in The Newark Star-Ledger, NPR
-            Music, LA Weekly, and DownBeat, among other outlets. He has also
-            trained in Deep Listening through the Center for Deep Listening and
-            is currently preparing his debut album project, Somewhere Else!!!!,
-            with three Chilean collaborators. Alex has worked in the solidarity
-            economy movement as co-founder of the mental health worker
-            cooperative, Catalyst Cooperative Healing, as a working member of
-            Sociocracy for All, and as an Artist-Owner of Ampled.{" "}
+            Music, LA Weekly, and DownBeat, among other outlets. Alex has also
+            worked in the solidarity economy movement as co-founder of the
+            mental health worker cooperative, Catalyst Cooperative Healing, as
+            facilitator for the Sociocracy for All Cooperatives Circle, and as
+            an Artist-Owner of Ampled. Alex is a legal owner of Mirlo.
+          </p>
+        </Person>
+
+        <Person>
+          <span
+            className={css`
+              display: inline-block;
+              width: 10rem;
+              height: 10rem;
+              overflow: clip;
+              border-radius: 100%;
+              margin-right: 2rem;
+            `}
+          >
+            <img
+              src="https://mirlo.space/static/images/owner-pictures/llk.webp"
+              alt="LLK photo"
+            />
+          </span>
+
+          <p>
+            Louis-Louise Kay is a French musician and organizer, who has been creating music for games,
+            movies, animation, and as a solo artist under the moniker <Link to="/mowukis">MOWUKIS</Link>. LLK has contributed to
+            code, design, community engagement, and business strategy since Mirlo's beginnings.
           </p>
         </Person>
         <Person>
@@ -281,23 +353,19 @@ const About: React.FC = () => {
             <img
               src="https://mirlo.space/static/images/owner-pictures/simon-photo.jpg"
               alt="si photo"
-              className={css`
-                margin-top: -2rem;
-              `}
-            />{" "}
+            />
           </span>
 
           <p>
-            Simon (he / him) is a mutual aid, solidarity economy, and dual power
-            organizer in DC. In his free time he plays soccer and doodles. He
-            used to have a weekly radio slot on public radio, and has done music
-            journalism in a past life. As a wage laborer he has worked as a
-            software developer for UN organizations, fortune 500 companies, user
+            Simon is a mutual aid, solidarity economy, and dual power organizer
+            in DC. In his free time he plays soccer and doodles. He used to have
+            a weekly radio slot on public radio, and has done music journalism
+            in a past life. As a wage laborer he has worked as a software
+            developer for UN organizations, fortune 500 companies, user
             experience agencies, fast growing start-ups, and not-for-profit
-            organizations.
+            organizations. Simon is a legal owner of Mirlo.
           </p>
         </Person>
-
         <h3>Previous member owners</h3>
         <ul>
           <li>
@@ -313,13 +381,6 @@ const About: React.FC = () => {
           made this project a success, but we want to give a special shout out
           to:
           <ul>
-            <li>
-              <strong>
-                <a href="https://mowukis.com">Louis-Louise Kay</a>
-              </strong>
-              , who has tirelessly advocated, worked on, and given feedback on
-              the platform
-            </li>
             <li>
               <strong>Han</strong>, who has been a stalwart of our community,
               our insights, and collective education
@@ -440,8 +501,10 @@ const About: React.FC = () => {
             id="different-from-other-products"
             answer={
               <>
-                Mirlo allows for direct and ongoing support of artists. It’s
-                different from other crowdfunding platforms because it:
+                <p>
+                  Mirlo allows for direct and ongoing support of artists. It’s
+                  different from other crowdfunding platforms because it:
+                </p>
                 <ul>
                   <li>
                     is rooted in mutual aid and is stewared by a worker co-op,
@@ -454,6 +517,141 @@ const About: React.FC = () => {
                     ecosystem.
                   </li>
                 </ul>
+                <table
+                  cellSpacing={0}
+                  className={css`
+                    min-width: 1080px;
+                    margin-left: -200px;
+                    padding: 2rem 0;
+                    font-size: 0.9rem;
+
+                    th,
+                    td {
+                      text-align: center;
+                      padding: 0.5rem;
+                      line-height: 1.3;
+                    }
+
+                    .comparison td,
+                    .comparison th {
+                      border-right: 1px solid black;
+                      text-align: center;
+                      max-width: 6rem;
+
+                      &:last-child {
+                        border-right: none;
+                      }
+                    }
+
+                    th:first-child {
+                      text-align: right;
+                      padding-right: 1rem;
+                    }
+                  `}
+                >
+                  <tr>
+                    <td></td>
+                    <th>Mirlo</th>
+                    <th>Bandcamp</th>
+                    <th>Patreon</th>
+                    {/* <th>Ampwall</th> */}
+                    {/* <th>Bandwagon</th> */}
+                    {/* <th>Subvert</th> */}
+                  </tr>
+                  <tr className="comparison">
+                    <th>Pricing</th>
+                    <td>You decide</td> {/* Mirlo */}
+                    <td>%15 of sales</td> {/* Bandcamp */}
+                    <td>%8 of support</td> {/* Patreon */}
+                    {/* <td>$10/year, 5% of sales</td> Ampwall */}
+                    {/* <td>Free</td> Bandwagon */}
+                    {/* <td>?</td> Subvert */}
+                  </tr>
+                  <tr className="comparison">
+                    <th>Upload music and sell music</th>
+                    <td>✅</td> {/* Mirlo */}
+                    <td>✅</td> {/* Bandcamp */}
+                    <td>❌</td> {/* Patreon */}
+                    {/* <td>✅</td> Ampwall */}
+                    {/* <td>✅ sales is being worked on</td> Bandwagon */}
+                    {/* <td>Presumably</td> Subvert */}
+                  </tr>
+                  <tr className="comparison">
+                    <th>Merch sales</th>
+                    <td>✅</td>
+                    <td>✅</td>
+                    <td>
+                      ❌ <br />
+                      but you can link merch sales to your audience
+                    </td>{" "}
+                    {/* Patreon */}
+                    {/* <td>✅</td> */}
+                    {/* <td>❌</td> */}
+                    {/* <td>❌</td> */}
+                  </tr>
+                  <tr className="comparison">
+                    <th>Monthly support</th>
+                    <td>✅</td>
+                    <td>✅</td>
+                    <td>✅</td> {/* Patreon */}
+                    {/* <td>✅</td> */}
+                    {/* <td>❌</td> */}
+                    {/* <td>❌</td> */}
+                  </tr>
+                  <tr className="comparison">
+                    <th>Blog posts to audience segments</th>
+                    <td>✅</td> {/* Mirlo */}
+                    <td>✅</td> {/* Bandcamp */}
+                    <td>✅</td> {/* Patreon */}
+                    {/* <td>❌</td> Ampwall */}
+                    {/* <td>❌</td> Bandwagon */}
+                    {/* <td>❌</td> Subvert */}
+                  </tr>
+                  <tr className="comparison">
+                    <th>Download codes and press kits</th>
+                    <td>✅</td> {/* Mirlo */}
+                    <td>✅</td> {/* Bandcamp */}
+                    <td>❌</td> {/* Patreon */}
+                    {/* <td>❌</td> Ampwall */}
+                    {/* <td>❌</td> Bandwagon */}
+                    {/* <td>❌</td> Subvert */}
+                  </tr>
+                  <tr className="comparison">
+                    <th>Tip jar</th>
+                    <td>✅</td> {/* Mirlo */}
+                    <td>❌</td> {/* Bandcamp */}
+                    <td>❌</td> {/* Patreon */}
+                    {/* <td>❌</td> Ampwall */}
+                    {/* <td>❌</td> Bandwagon */}
+                    {/* <td>❌</td> Subvert */}
+                  </tr>
+                  <tr className="comparison">
+                    <th>Embed music</th>
+                    <td>✅</td> {/* Mirlo */}
+                    <td>✅</td> {/* Bandcamp */}
+                    <td>✅</td> {/* Patreon */}
+                    {/* <td>✅</td> Ampwall */}
+                    {/* <td>❌</td> Bandwagon */}
+                    {/* <td>❌</td> Subvert */}
+                  </tr>
+                  <tr className="comparison">
+                    <th>Open Source</th>
+                    <td>✅</td>
+                    <td>❌</td> <td>❌</td>
+                    {/* <td>❌</td> */}
+                    {/* <td>✅</td> */}
+                    {/* <td>❌</td> */}
+                  </tr>
+                  <tr className="comparison">
+                    <th>Worker owned</th>
+                    <td>✅</td> {/* Mirlo */}
+                    <td>❌</td> {/* Bandcamp */}
+                    <td>❌</td>
+                    {/* <td>❌</td> Ampwall */}
+                    {/* <td>❌</td> Bandwagon */}
+                    {/* <td>❌</td> Subvert */}
+                  </tr>
+                </table>
               </>
             }
           />
@@ -545,7 +743,7 @@ const About: React.FC = () => {
             }
           />
         </CollapsibleList>
-        <h3 id="product">Product</h3>
+        <h3 id="product">Product: or, what can Mirlo do</h3>
         <CollapsibleList>
           <CollapsibleLI
             title="Whats on your product roadmap?"
@@ -561,6 +759,17 @@ const About: React.FC = () => {
                   our ideas list
                 </a>{" "}
                 to vote on what you'd like to see.
+              </>
+            }
+          />
+          <CollapsibleLI
+            title="Is there a way to offer physical Vinyl/CDs for sale?"
+            id="sell-merch"
+            answer={
+              <>
+                Yes! You can use Mirlo to sell your merch. Check out our{" "}
+                <Link to="/pages/features">features page</Link> for a full list
+                of artist features.
               </>
             }
           />
@@ -616,6 +825,26 @@ const About: React.FC = () => {
                 For upload we support lossless file formats (flac, wav). We
                 convert files across formats to be available to purchasers, as
                 well as converting them to HLS and a couple of mp3 bitrates.
+              </>
+            }
+          />
+          <CollapsibleLI
+            title="When a customer buys a digital album, what can be included in the bundle"
+            id="download-bundle"
+            answer={
+              <>
+                <p>
+                  When someone buys a digital album they get to choose what
+                  format to download it in (flac, wav, mp3). The download will
+                  include basic metadata on the files and an image of the cover.
+                </p>
+                <p>
+                  There is an{" "}
+                  <a href="https://github.com/funmusicplace/mirlo/discussions/1089">
+                    feature request
+                  </a>{" "}
+                  for selling other things in an album
+                </p>
               </>
             }
           />

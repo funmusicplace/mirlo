@@ -4,12 +4,14 @@ import App from "./App";
 import ErrorPage from "./components/ErrorPage";
 import { AuthWrapper } from "components/AuthWrapper";
 import { css } from "@emotion/css";
+import api from "services/api";
 
 async function markdownPage(source: string) {
   const { PageMarkdownWrapper } = await import("components/Post");
   const { default: MarkdownContent } = await import(
     "components/common/MarkdownContent"
   );
+
   return {
     Component: () => (
       <PageMarkdownWrapper>
@@ -41,15 +43,19 @@ const routes: RouteObject[] = [
       },
       {
         path: "pages/cookie-policy",
-        lazy: () => markdownPage("/static/pages/CookiePolicy.md"),
+        lazy: () => markdownPage("cookie-policy"),
       },
       {
         path: "pages/privacy",
-        lazy: () => markdownPage("/static/pages/Privacy.md"),
+        lazy: () => markdownPage("privacy"),
       },
       {
         path: "pages/terms",
-        lazy: () => markdownPage("/static/pages/Terms.md"),
+        lazy: () => markdownPage("terms"),
+      },
+      {
+        path: "pages/content-policy",
+        lazy: () => markdownPage("content-policy"),
       },
       {
         path: "pages/features",
@@ -133,6 +139,17 @@ const routes: RouteObject[] = [
             },
           },
           {
+            path: "label",
+            async lazy() {
+              const { default: Component } = await import(
+                "components/Profile/ManageLabel"
+              );
+              return {
+                Component: () => <Component />,
+              };
+            },
+          },
+          {
             path: "collection",
             async lazy() {
               const { default: Component } = await import(
@@ -164,6 +181,37 @@ const routes: RouteObject[] = [
             async lazy() {
               const { default: Component } = await import(
                 "components/Profile/YourPurchases"
+              );
+              return { Component };
+            },
+          },
+        ],
+      },
+      {
+        path: "label/:labelSlug",
+        async lazy() {
+          const { default: Component } = await import("components/Label");
+          return { Component };
+        },
+        children: [
+          {
+            path: "",
+            element: <Navigate to="roster" replace={true} />,
+          },
+          {
+            path: "roster",
+            async lazy() {
+              const { default: Component } = await import(
+                "components/Label/Roster"
+              );
+              return { Component };
+            },
+          },
+          {
+            path: "releases",
+            async lazy() {
+              const { default: Component } = await import(
+                "components/Label/Releases"
               );
               return { Component };
             },
@@ -325,7 +373,7 @@ const routes: RouteObject[] = [
                 path: "release/:trackGroupId",
                 async lazy() {
                   const { default: Component } = await import(
-                    "components/ManageArtist/ManageTrackGroup"
+                    "components/ManageArtist/ManageTrackGroup/ManageTrackGroup"
                   );
                   return { Component };
                 },
@@ -656,6 +704,26 @@ const routes: RouteObject[] = [
                 "components/TrackGroup/DownloadAlbum"
               );
               return { Component };
+            },
+          },
+          {
+            path: "release/:trackGroupId/tracks/:trackId/download",
+            async lazy() {
+              const { default: Component } = await import(
+                "components/TrackGroup/DownloadTrack"
+              );
+              return { Component };
+            },
+          },
+          {
+            path: "release/:trackGroupId/tracks/:trackId/checkout-complete",
+            async lazy() {
+              const { default: Component } = await import(
+                "components/TrackGroup/TrackCheckoutComplete"
+              );
+              return {
+                Component: () => <Component />,
+              };
             },
           },
           {

@@ -211,10 +211,6 @@ const CustomButton = styled.button<Sizable>(
 
           svg {
             fill: ${secondaryColor};
-             
-            @media (prefers-color-scheme: dark) {
-              fill: ${secondaryColor};
-            }
           }
 
           &:hover:not(:disabled) {
@@ -227,12 +223,11 @@ const CustomButton = styled.button<Sizable>(
     const style = `
     ${sizeVariables()}
     ${isOnlyIcon}
-    ${props.rounded ? `border-radius: 99999px !important;` : ""}
+    ${props.rounded ? `border-radius: .5rem !important;` : ""}
      ${
        props.wrap
          ? `white-space: normal !important;
                    height: auto;
-                   width: 94%;
                    word-break: break-word;
                    hyphens: auto;`
          : "white-space: nowrap;"
@@ -315,6 +310,7 @@ export const Button: React.FC<
       onClick={onClick}
       disabled={disabled}
       onlyIcon={!children || onlyIcon}
+      aria-label={children ? children.toString() : ""}
       {...props}
     >
       {isLoading && (

@@ -11,7 +11,9 @@ const sendNotificationEmail = async () => {
       createdAt: {
         lte: new Date(),
       },
-      notificationType: "NEW_ARTIST_POST",
+      notificationType: {
+        in: ["NEW_ARTIST_POST", "SYSTEM_MESSAGE"],
+      },
     },
     include: {
       post: {
@@ -72,7 +74,7 @@ const sendNotificationEmail = async () => {
                   ...notification.post,
                   htmlContent: notification.post.content,
                 },
-                email: notification.user.email,
+                email: encodeURIComponent(notification.user.email),
                 host: process.env.API_DOMAIN,
                 client: process.env.REACT_APP_CLIENT_DOMAIN,
               },

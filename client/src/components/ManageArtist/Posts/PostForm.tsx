@@ -19,7 +19,7 @@ import { queryManagedArtistSubscriptionTiers } from "queries";
 import ImagesInPostManager from "components/common/TextEditor/ImagesInPostManager";
 import useGetUserObjectById from "utils/useGetUserObjectById";
 import { ArtistButton } from "components/Artist/ArtistButtons";
-import SavingInput from "../AlbumFormComponents/SavingInput";
+import SavingInput from "../ManageTrackGroup/AlbumFormComponents/SavingInput";
 import EditPostHeader from "./EditPostHeader";
 
 export type PostFormData = {

@@ -1,12 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import {
-  User,
-  Prisma,
-  TrackGroup,
-  Post,
-  Artist,
-  ArtistSubscriptionTier,
-} from "@mirlo/prisma/client";
+import { User, Prisma } from "@mirlo/prisma/client";
 
 import prisma from "@mirlo/prisma";
 import {
@@ -14,11 +7,13 @@ import {
   userAuthenticated,
 } from "../../../../../../auth/passport";
 import { AppError } from "../../../../../../utils/error";
+import { addSizesToImage } from "../../../../../../utils/artist";
+import { finalUserAvatarBucket } from "../../../../../../utils/minio";
 
 export default function () {
   const operations = {
     GET: [userAuthenticated, artistBelongsToLoggedInUser, GET],
-    POST: [userAuthenticated, artistBelongsToLoggedInUser, POST],
+    POST: [userAuthenticated, POST],
     DELETE: [userAuthenticated, artistBelongsToLoggedInUser, DELETE],
   };
 
@@ -35,12 +30,22 @@ export default function () {
             select: {
               name: true,
               email: true,
+              userAvatar: true,
             },
           },
         },
       });
       res.json({
-        results: artistLabels,
+        results: artistLabels.map((label) => ({
+          ...label,
+          labelUser: {
+            ...label.labelUser,
+            userAvatar: addSizesToImage(
+              finalUserAvatarBucket,
+              label.labelUser.userAvatar
+            ),
+          },
+        })),
       });
     } catch (e) {
       console.error(`/v1/artists/{id}/labels ${e}`);
@@ -71,18 +76,46 @@ export default function () {
 
   async function POST(req: Request, res: Response, next: NextFunction) {
     let { artistId }: { artistId?: string } = req.params;
-    const { labelUserId } = req.body as { labelUserId?: number };
+    const { labelUserId, isLabelApproved } = req.body as {
+      labelUserId?: number;
+      isLabelApproved?: boolean;
+    };
+
+    const loggedInUser = req.user as User;
 
     try {
       if (!labelUserId) {
         throw new AppError({ httpCode: 400, description: "Need labelUserId" });
       }
 
-      await prisma.artistLabel.create({
-        data: {
-          labelUserId,
-          artistId: Number(artistId),
+      const artist = await prisma.artist.findFirst({
+        where: {
+          id: Number(artistId),
+          deletedAt: null,
         },
+      });
+      if (!artist) {
+        throw new AppError({
+          httpCode: 404,
+          description: "Artist not found",
+        });
+      }
+
+      const data: Prisma.ArtistLabelCreateArgs["data"] = {
+        labelUserId,
+        artistId: Number(artistId),
+      };
+
+      if (loggedInUser.id === labelUserId) {
+        data.isLabelApproved = isLabelApproved;
+      }
+
+      if (loggedInUser.id === artist.userId) {
+        data.isArtistApproved = true;
+      }
+
+      await prisma.artistLabel.create({
+        data,
       });
 
       const labels = await prisma.artistLabel.findMany({

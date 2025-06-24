@@ -37,7 +37,7 @@ export default function () {
           try {
             account = await stripe.accounts.retrieve(accountId);
           } catch (e) {
-            console.error(e);
+            console.error(`Error retreiving Stripe information about user`, e);
           }
           res.status(200).json({
             result: {

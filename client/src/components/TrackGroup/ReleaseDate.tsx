@@ -3,6 +3,7 @@ import React from "react";
 import { bp } from "../../constants";
 import { useTranslation } from "react-i18next";
 import { i18n } from "i18next";
+import { useGetArtistColors } from "components/Artist/ArtistButtons";
 
 export const formatDate = ({
   date,
@@ -26,16 +27,21 @@ export const formatDate = ({
   return releaseFormat;
 };
 
+export const calculateDateWithTimezoneOffset = (dateString: string) => {
+  const date = new Date(dateString.split("T")[0]);
+  const userTimezoneOffset = date.getTimezoneOffset() * 60000;
+  return new Date(date.getTime() + userTimezoneOffset);
+};
+
 const ReleaseDate: React.FC<{ releaseDate: string }> = ({
   releaseDate: releaseDateString,
 }) => {
+  const { colors } = useGetArtistColors();
   const { t, i18n } = useTranslation("translation", {
     keyPrefix: "trackGroupDetails",
   });
 
-  const date = new Date(releaseDateString.split("T")[0]);
-  const userTimezoneOffset = date.getTimezoneOffset() * 60000;
-  const releaseDate = new Date(date.getTime() + userTimezoneOffset);
+  const releaseDate = calculateDateWithTimezoneOffset(releaseDateString);
   const beforeReleaseDate = releaseDate > new Date();
 
   const releaseFormat = formatDate({
@@ -49,8 +55,11 @@ const ReleaseDate: React.FC<{ releaseDate: string }> = ({
   return (
     <div
       className={css`
-        color: var(--mi-light-foreground-color);
+        color: ${colors
+          ? colors.foreground
+          : "var(--mi-light-foreground-color)"};
         font-size: 1rem;
+        filter: opacity(80%);
 
         @media screen and (max-width: ${bp.medium}px) {
           font-size: var(--mi-font-size-small);

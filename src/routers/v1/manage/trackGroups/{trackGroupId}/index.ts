@@ -2,7 +2,6 @@ import { Artist, User } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 import { pick } from "lodash";
 import {
-  contentBelongsToLoggedInUserArtist,
   trackGroupBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";
@@ -100,6 +99,8 @@ export default function () {
         "minPrice",
         "credits",
         "platformPercent",
+        "isGettable",
+        "paymentToUserId",
       ]);
 
       await prisma.trackGroup.updateMany({
@@ -112,7 +113,7 @@ export default function () {
       });
 
       if (trackGroup?.title && trackGroup.urlSlug.includes("mi-temp-slug")) {
-        let slug = slugify(newValues.title, { strict: true }).toLowerCase();
+        let slug = slugify(newValues.title, { strict: true, lower: true });
 
         if (slug === "") {
           slug = "blank";

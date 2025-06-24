@@ -1,5 +1,4 @@
 import { css } from "@emotion/css";
-import ArtistTrackGroup from "components/Artist/ArtistTrackGroup";
 import Box from "components/common/Box";
 import TrackgroupGrid from "components/common/TrackgroupGrid";
 import React from "react";
@@ -7,19 +6,35 @@ import api from "../../../services/api";
 import { useTranslation } from "react-i18next";
 import WidthContainer from "components/common/WidthContainer";
 import { useAuthContext } from "state/AuthContext";
+import CollectionPurchaseSquare from "./CollectionPurchaseSquare";
+import { isTrackGroupPurchase, isTrackPurchase } from "types/typeguards";
+
+type PurchaseResponse =
+  | (UserTrackPurchase & { trackGroup: TrackGroup })
+  | MerchPurchase
+  | UserTrackGroupPurchase;
+
+type DigitalPurchase =
+  | (UserTrackPurchase & { trackGroup: TrackGroup })
+  | UserTrackGroupPurchase;
 
 function Profile() {
   const { user } = useAuthContext();
   const userId = user?.id;
 
-  const [purchases, setPurchases] = React.useState<UserTrackGroupPurchase[]>();
+  const [purchases, setPurchases] = React.useState<DigitalPurchase[]>();
   const { t } = useTranslation("translation", { keyPrefix: "profile" });
 
   const fetchTrackGroups = React.useCallback(async () => {
-    const { results } = await api.getMany<UserTrackGroupPurchase>(
+    const { results } = await api.getMany<PurchaseResponse>(
       `users/${userId}/purchases`
     );
-    setPurchases(results);
+    setPurchases(
+      results.filter((r) => {
+        const isNotMerch = isTrackPurchase(r) || isTrackGroupPurchase(r);
+        return isNotMerch;
+      })
+    );
   }, [userId]);
 
   React.useEffect(() => {
@@ -50,15 +65,24 @@ function Profile() {
             {!purchases ||
               (purchases?.length === 0 && <Box>{t("collectionEmpty")}</Box>)}
             <TrackgroupGrid gridNumber={"4"}>
-              {purchases?.map(
-                (purchase) =>
-                  purchase.trackGroup && (
-                    <ArtistTrackGroup
+              {purchases?.map((purchase) => {
+                if (isTrackGroupPurchase(purchase) && purchase.trackGroup) {
+                  return (
+                    <CollectionPurchaseSquare
                       trackGroup={purchase.trackGroup}
                       key={purchase.trackGroupId}
                     />
-                  )
-              )}
+                  );
+                } else if (isTrackPurchase(purchase)) {
+                  return (
+                    <CollectionPurchaseSquare
+                      trackGroup={purchase.trackGroup}
+                      track={purchase.track}
+                      key={purchase.trackId}
+                    />
+                  );
+                }
+              })}
             </TrackgroupGrid>
           </div>
         </WidthContainer>

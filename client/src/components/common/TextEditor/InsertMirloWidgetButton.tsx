@@ -10,11 +10,12 @@ import { css } from "@emotion/css";
 import { bp } from "../../../constants";
 import AutoCompleteTrackGroup from "../AutoCompleteTrackGroup";
 import { useTranslation } from "react-i18next";
-import BulkTrackUpload from "components/ManageArtist/BulkTrackUpload";
+import BulkTrackUpload from "components/ManageArtist/ManageTrackGroup/BulkTrackUpload";
 import { InputEl } from "../Input";
 import FormComponent from "../FormComponent";
 import Box from "../Box";
 import { useForm } from "react-hook-form";
+import { hasId } from "components/ManageArtist/ManageTrackGroup/AlbumFormComponents/ManageTags";
 
 const InsertMirloWidgetButton: React.FC<{
   postId?: number;
@@ -164,7 +165,12 @@ const InsertMirloWidgetButton: React.FC<{
               <AutoComplete
                 getOptions={getTrackOptions}
                 onSelect={(val) => {
-                  onAdd(val, "track");
+                  if (
+                    hasId(val) &&
+                    (typeof val.id === "string" || typeof val.id === "number")
+                  ) {
+                    onAdd(val.id, "track");
+                  }
                 }}
               />
               <br />

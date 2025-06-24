@@ -50,7 +50,7 @@ export const deleteMerch = async (merchId: string) => {
 };
 
 export const processSingleMerch = (
-  merch: Merch & { images: MerchImage[] }
+  merch: Merch & { images?: MerchImage[] }
 ) => ({
   ...merch,
   images: merch.images?.map((t) => addSizesToImage(finalMerchImageBucket, t)),

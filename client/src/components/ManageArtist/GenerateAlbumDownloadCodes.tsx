@@ -16,6 +16,7 @@ import { useSnackbar } from "state/SnackbarContext";
 import { queryManagedArtist } from "queries";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
+import { hasId } from "./ManageTrackGroup/AlbumFormComponents/ManageTags";
 
 type FormData = {
   group: string;
@@ -115,7 +116,9 @@ const GenerateAlbumDownloadCodes: React.FC<{ onDone: () => void }> = ({
             <AutoComplete
               getOptions={getTrackGroupOptions}
               onSelect={(val) => {
-                onChooseAlbum(val);
+                if (hasId(val) && typeof val.id === "number") {
+                  onChooseAlbum(val.id);
+                }
               }}
             />
           </>

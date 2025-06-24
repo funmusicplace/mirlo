@@ -9,7 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { queryManagedArtist, queryManagedArtistMerch } from "queries";
 import { NewMerchButton } from "./NewMerchButton";
 import { ButtonLink } from "components/common/Button";
-import { FaPen } from "react-icons/fa";
+import { FaEye, FaPen } from "react-icons/fa";
 import DashedList from "./DashedList";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import MerchFulfillmentLink from "./MerchFulfillmentLink";
@@ -17,6 +17,7 @@ import Pill from "components/common/Pill";
 import { useTranslation } from "react-i18next";
 import { ImWarning } from "react-icons/im";
 import { ArtistButtonLink } from "components/Artist/ArtistButtons";
+import { getMerchUrl } from "utils/artist";
 
 const ManageMerch: React.FC<{}> = () => {
   const { artistId } = useParams();
@@ -58,35 +59,55 @@ const ManageMerch: React.FC<{}> = () => {
       </div>
       <DashedList>
         {artist &&
-          merch?.results.map((item) => (
-            <li key={item.id}>
-              <div
-                className={css`
-                  display: flex;
-                  align-items: center;
+          merch?.results.map((item) => {
+            const cover = item.images?.[0]?.sizes?.[60];
+            return (
+              <li key={item.id}>
+                <div
+                  className={css`
+                    display: flex;
+                    align-items: center;
 
-                  > span {
-                    margin-left: 1rem;
-                  }
-                `}
-              >
-                <ImageWithPlaceholder
-                  src={item.images?.[0]?.sizes?.[60]}
-                  alt={item.title}
-                  size={60}
-                  square
-                />
-                <span>{item.title}</span>
-                {!item.isPublic && (
-                  <Pill variant="warning">
-                    <ImWarning />
-                    {t("notPublic")}
-                  </Pill>
-                )}
-              </div>
-              <ArtistButtonLink to={item.id} startIcon={<FaPen />} />
-            </li>
-          ))}
+                    > span {
+                      margin-left: 1rem;
+                    }
+
+                    ${!cover
+                      ? `&:first-child {
+                    max-width: 60px;
+                  }`
+                      : ""}
+                  `}
+                >
+                  <ImageWithPlaceholder
+                    src={item.images?.[0]?.sizes?.[60]}
+                    alt={item.title}
+                    size={60}
+                    square
+                  />
+                  <span>{item.title}</span>
+                  {!item.isPublic && (
+                    <Pill variant="warning">
+                      <ImWarning />
+                      {t("notPublic")}
+                    </Pill>
+                  )}
+                </div>
+                <div
+                  className={css`
+                    display: flex;
+                    gap: 0.5rem;
+                  `}
+                >
+                  <ArtistButtonLink
+                    to={getMerchUrl(artist, item)}
+                    startIcon={<FaEye />}
+                  />
+                  <ArtistButtonLink to={item.id} startIcon={<FaPen />} />
+                </div>
+              </li>
+            );
+          })}
       </DashedList>
 
       <MerchFulfillmentLink />

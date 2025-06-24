@@ -9,6 +9,8 @@ import { SectionHeader } from "./Home/Home";
 
 import usePagination from "utils/usePagination";
 import ArtistSquare from "./Artist/ArtistSquare";
+import { ButtonAnchor } from "./common/Button";
+import { FaRss } from "react-icons/fa";
 
 const pageSize = 20;
 
@@ -40,8 +42,25 @@ const Artists = () => {
       `}
     >
       <SectionHeader>
-        <WidthContainer variant="big" justify="center">
+        <WidthContainer
+          variant="big"
+          justify="space-between"
+          className={css`
+            flex-direction: row;
+            display: flex;
+          `}
+        >
           <h5>{t("artists")}</h5>
+          <ButtonAnchor
+            target="_blank"
+            href={`${import.meta.env.VITE_API_DOMAIN}/v1/artists?format=rss`}
+            rel="noreferrer"
+            onlyIcon
+            className={css`
+              margin-top: 0.25rem;
+            `}
+            startIcon={<FaRss />}
+          />
         </WidthContainer>
       </SectionHeader>
       <div

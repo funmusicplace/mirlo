@@ -28,11 +28,7 @@ export default function () {
         if (user) {
           let accountId = user.stripeAccountId;
           const alreadyExisted = !!accountId;
-          const client = await prisma.client.findFirst({
-            where: {
-              applicationName: "frontend",
-            },
-          });
+
           logger.info(
             `Connecting ${user.id} to Stripe. Have existing account: ${alreadyExisted} ${accountId}`
           );
@@ -59,13 +55,13 @@ export default function () {
           try {
             stripeAccount = await stripe.accounts.retrieve(accountId);
           } catch (e) {
-            console.error(e);
+            console.error(`Error retrieving account information about user`, e);
           }
 
           const accountLink = await stripe.accountLinks.create({
             account: accountId,
             refresh_url: `${API_DOMAIN}/v1/users/${userId}/stripe/connect`,
-            return_url: `${client?.applicationUrl}/manage?stripeConnect=done`,
+            return_url: `${API_DOMAIN}/v1/users/${userId}/stripe/connectComplete`,
             type: "account_onboarding", // FIXME: is it ever possible to pass "account_update" here?
           });
 

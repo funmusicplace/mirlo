@@ -17,7 +17,7 @@ const TrackGroupPills: React.FC<{ tags?: string[] }> = ({ tags }) => {
       `}
     >
       {tags?.map((tag) => (
-        <Link to={`/releases?tag=${tag}`}>
+        <Link to={`/releases?tag=${tag}`} key={tag}>
           <Pill isHoverable>{tag}</Pill>
         </Link>
       ))}

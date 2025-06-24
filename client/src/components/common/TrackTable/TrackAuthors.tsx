@@ -11,14 +11,15 @@ const TrackAuthors: React.FC<{ track: Track; trackGroupArtistId?: number }> = ({
     <>
       {coAuthors.find((author) => author.artistId !== trackGroupArtistId) && (
         <span
-          className={css`
-            color: var(--mi-lighter-foreground-color);
-            margin-left: 0.5rem;
-
-            @media (prefers-color-scheme: dark) {
-              color: var(--mi-light-foreground-color);
-            }
-          `}
+          className={
+            css`
+              color: var(--mi-lighter-foreground-color);
+              margin-left: 0.5rem;
+              font-size: 0.85rem;
+            ` +
+            " " +
+            "track-authors"
+          }
         >
           {coAuthors.map((a) => a.artistName).join(", ")}
         </span>

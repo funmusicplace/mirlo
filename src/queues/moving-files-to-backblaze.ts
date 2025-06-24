@@ -3,11 +3,9 @@ import { REDIS_CONFIG } from "../config/redis";
 import logger from "../logger";
 import {
   fileExistCheckBackblaze,
-  getObjectList,
   getObjectListFromMinio,
   minioClient,
   uploadFilesToBackblaze,
-  uploadWrapper,
 } from "../utils/minio";
 import { sendErrorEmail } from "../jobs/send-mail";
 
@@ -81,7 +79,7 @@ export const moveFilesToBackblazeJob = async (job: Job) => {
   try {
     const stat = await fileExistCheckBackblaze(bucketName, fileName);
 
-    if (!stat) {
+    if (!stat && minioClient) {
       logger.info(
         `file does not exist on backblaze yet, moving it: ${bucketName}/${fileName}`
       );

@@ -18,22 +18,27 @@ export default function () {
         const session = await stripe.checkout.sessions.retrieve(session_id, {
           stripeAccount: stripeAccountId,
         });
+        console.log("checkout return", session);
         const {
           clientId,
           artistId,
           trackGroupId,
+          trackId,
           tierId,
           gaveGift,
           merchId,
           tipId,
+          purchaseType,
         } = session.metadata as unknown as {
           clientId: number | null;
           artistId: number | null;
           gaveGift: 1 | null;
           tierId: number | null;
           trackGroupId: number | null;
-          merchId: string | null;
+          trackId: number | null;
           tipId: string | null;
+          merchId: string | null;
+          purchaseType: string | null;
         };
         if (clientId && artistId) {
           const client = await prisma.client.findFirst({
@@ -46,7 +51,7 @@ export default function () {
             where: { id: +artistId },
           });
 
-          if (merchId && artist) {
+          if (purchaseType === "merch" && merchId) {
             // FIXME: We'll probably want clients to be able to define the
             // checkout callbackURL separately from the applicationURL
             // and that callbackURL should probably contain a pattern that
@@ -55,7 +60,7 @@ export default function () {
               client?.applicationUrl +
                 `/${artist?.urlSlug}/merch/${merchId}/checkout-complete`
             );
-          } else if (gaveGift && artist && client) {
+          } else if (purchaseType === "tip" && artist && client) {
             // FIXME: We'll probably want clients to be able to define the
             // checkout callbackURL separately from the applicationURL
             // and that callbackURL should probably contain a pattern that
@@ -64,7 +69,7 @@ export default function () {
               client?.applicationUrl +
                 `/${artist?.urlSlug}?tip=${success ? "success" : "canceled"}`
             );
-          } else if (tipId && artist) {
+          } else if (purchaseType === "subscription" && tipId && tierId && artist) {
             // FIXME: We'll probably want clients to be able to define the
             // checkout callbackURL separately from the applicationURL
             // and that callbackURL should probably contain a pattern that
@@ -73,7 +78,13 @@ export default function () {
               client?.applicationUrl +
                 `/${artist.urlSlug}/tips/${tipId}/checkout-complete`
             );
-          } else if (client && trackGroupId && artistId) {
+          } else if (
+            purchaseType === "trackGroup" &&
+            client &&
+            trackGroupId &&
+            artistId &&
+            !trackId
+          ) {
             // FIXME: We'll probably want clients to be able to define the
             // checkout callbackURL separately from the applicationURL
             // and that callbackURL should probably contain a pattern that
@@ -84,9 +95,29 @@ export default function () {
                   success ? "success" : "canceled"
                 }&trackGroupId=${trackGroupId}`
             );
+          } else if (
+            purchaseType === "track" &&
+            client &&
+            trackId &&
+            artistId
+          ) {
+            // FIXME: We'll probably want clients to be able to define the
+            // checkout callbackURL separately from the applicationURL
+            // and that callbackURL should probably contain a pattern that
+            // they can define
+            const track = await prisma.track.findFirst({
+              where: { id: +trackId },
+              include: {
+                trackGroup: true,
+              },
+            });
+            res.redirect(
+              client?.applicationUrl +
+                `/${artist?.urlSlug}/release/${track?.trackGroup.urlSlug}/tracks/${trackId}/checkout-complete`
+            );
           } else {
             res.status(500).json({
-              error: "Something went wrong while completing a checkout",
+              error: "No purchase type set for checkout session",
             });
           }
         } else {
@@ -100,9 +131,9 @@ export default function () {
           .json({ error: "need session_id and stripeAccountId in query" });
       }
     } catch (e) {
-      console.error(e);
+      console.error(`Error in checkout process`, e);
       res.status(500).json({
-        error: "Something went wrong while subscribing the user",
+        error: "Something went wrong while completing a checkout",
       });
     }
   }

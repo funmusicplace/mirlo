@@ -1,13 +1,8 @@
-FROM jrottenberg/ffmpeg:5.1-ubuntu2204 AS ffmpeg
-
-FROM node:18-bookworm-slim AS base
+FROM node:22-bookworm-slim AS base
 
 # Install ffmpeg
-COPY --from=ffmpeg / /
-
 RUN apt-get update -qq
-RUN apt-get update && apt-get install -y apt-transport-https
-RUN apt-get install -qq libavdevice59 >/dev/null
+RUN apt-get install -qq --no-install-recommends ffmpeg >/dev/null
 
 # Create app directory
 ENV NODE_APP_DIR=/var/www/api/src \

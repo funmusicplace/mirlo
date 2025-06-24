@@ -13,6 +13,7 @@ import EmbedLink from "./EmbedLink";
 import TrackLink from "./TrackLink";
 import DropdownMenu from "../DropdownMenu";
 import LyricsModal from "./LyricsModal";
+import FavoriteTrack from "components/TrackGroup/Favorite";
 
 const LicenseSpan = styled.a`
   text-wrap: nowrap;
@@ -36,14 +37,23 @@ const TR = styled.tr<{ canPlayTrack: boolean }>`
         ? `background-color: var(--mi-normal-foreground-color);`
         : `background-color: var(--mi-normal-foreground-color) !important;`}
 
-    button.play-button {
+    button.play-button,
+    button.pause-button {
       color: var(--mi-normal-background-color);
       background: transparent;
+
+      svg {
+        fill: var(--mi-normal-background-color) !important;
+      }
     }
 
     .mi-dropdown-button {
       background-color: var(--mi-primary-color);
       color: var(--mi-secondary-color);
+    }
+
+    .track-authors {
+      color: var(--mi-light-background-color) !important;
     }
   }
 
@@ -137,13 +147,8 @@ const TrackRow: React.FC<{
   }, [addTracksToQueue, canPlayTrack, dispatch, track.id]);
 
   return (
-    <TR
-      key={track.id}
-      id={`${track.id}`}
-      onClick={onTrackPlay}
-      canPlayTrack={canPlayTrack}
-    >
-      <FirstTD>
+    <TR key={track.id} id={`${track.id}`} canPlayTrack={canPlayTrack}>
+      <FirstTD onClick={onTrackPlay}>
         <TrackRowPlayControl
           trackId={track.id}
           canPlayTrack={canPlayTrack}
@@ -161,10 +166,6 @@ const TrackRow: React.FC<{
             margin-bottom: 0rem;
             justify-content: space-between;
             align-items: center;
-
-            &:hover {
-              cursor: pointer;
-            }
 
             @media screen and (max-width: ${bp.small}px) {
               flex-wrap: nowrap;
@@ -221,7 +222,7 @@ const TrackRow: React.FC<{
       </td> */}
       {size !== "small" && (
         <td align="right">
-          <DropdownMenu compact>
+          <DropdownMenu compact label="Track options">
             <ul>
               <li>
                 <EmbedLink track={track} />
@@ -233,41 +234,46 @@ const TrackRow: React.FC<{
                   artist={trackGroup.artist}
                 />
               </li>
+              <li>
+                <FavoriteTrack track={track} />
+              </li>
               {track.lyrics && (
                 <li>
-                  s <LyricsModal track={track} />
+                  <LyricsModal track={track} />
                 </li>
               )}
+              <li>
+                {size !== "small" &&
+                  track.license &&
+                  track.license?.short !== "copyright" && (
+                    <Tooltip hoverText={track.license.name}>
+                      {track.license.link && (
+                        <LicenseSpan
+                          as="a"
+                          target="_blank"
+                          href={track.license.link}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                          }}
+                          className={css`
+                            overflow: ellipsis;
+                          `}
+                        >
+                          {track.license.short}
+                        </LicenseSpan>
+                      )}
+                      {!track.license.link && (
+                        <LicenseSpan as="span">
+                          {track.license.short}
+                        </LicenseSpan>
+                      )}
+                    </Tooltip>
+                  )}
+              </li>
             </ul>
           </DropdownMenu>
         </td>
       )}
-      {size !== "small" &&
-        track.license &&
-        track.license?.short !== "copyright" && (
-          <td>
-            <Tooltip hoverText={track.license.name}>
-              {track.license.link && (
-                <LicenseSpan
-                  as="a"
-                  target="_blank"
-                  href={track.license.link}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                  }}
-                  className={css`
-                    overflow: ellipsis;
-                  `}
-                >
-                  {track.license.short}
-                </LicenseSpan>
-              )}
-              {!track.license.link && (
-                <LicenseSpan as="span">{track.license.short}</LicenseSpan>
-              )}
-            </Tooltip>
-          </td>
-        )}
     </TR>
   );
 };

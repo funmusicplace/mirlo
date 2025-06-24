@@ -13,14 +13,11 @@ import { UpdateArtistBody, useUpdateArtistMutation } from "queries";
 import React from "react";
 import { useSnackbar } from "state/SnackbarContext";
 import { useAuthContext } from "state/AuthContext";
-import { ButtonLink } from "./Button";
-import { FaEye, FaPen, FaRss } from "react-icons/fa";
+import { FaRss } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
-import {
-  ArtistButton,
-  ArtistButtonAnchor,
-  ArtistButtonLink,
-} from "components/Artist/ArtistButtons";
+import { ArtistButtonAnchor } from "components/Artist/ArtistButtons";
+import ArtistTourDates from "components/Artist/ArtistTourDates";
+import FeatureFlag from "./FeatureFlag";
 
 export const ArtistTitle = styled.h1<{ artistAvatar: boolean }>`
   font-size: 2.4rem;
@@ -38,7 +35,7 @@ export const ArtistTitle = styled.h1<{ artistAvatar: boolean }>`
   }
 `;
 
-const Header = styled.div`
+export const Header = styled.div`
   display: flex;
   width: 100%;
   flex-direction: column;
@@ -56,23 +53,55 @@ const Header = styled.div`
   }
 `;
 
-const HeaderWrapper = styled.div`
+export const AvatarWrapper = styled.div<{ artistAvatar?: boolean }>`
   display: flex;
+  padding-top: 1rem;
+  ${(props) => (props.artistAvatar ? "margin-bottom: 0.75rem;" : "")}
+  align-items: center;
+
+  @media screen and (max-width: ${bp.medium}px) {
+    padding-top: 0rem;
+    ${(props) => (props.artistAvatar ? "margin-bottom: 0.5rem;" : "")}
+  }
+`;
+
+export const ArtistTitleWrapper = styled.div<{ artistAvatar?: boolean }>`
+  width: 100%;
+  display: flex;
+  ${(props) =>
+    props.artistAvatar ? "min-height: 85px; margin-left: 1rem;" : ""}
+  flex-direction: column;
+  justify-content: center;
+  @media screen and (max-width: ${bp.medium}px) {
+    ${(props) =>
+      props.artistAvatar ? "min-height: 55px; margin-left: .5rem;" : ""}
+  }
+`;
+
+export const ArtistTitleText = styled.div`
+  min-height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  word-break: break-word;
+  width: 100%;
+  @media screen and (max-width: ${bp.medium}px) {
+    min-height: auto;
+  }
+`;
+
+export const HeaderWrapper = styled.div<{ colors?: ArtistColors }>`
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
   align-items: flex-end;
   justify-content: space-around;
-  border-bottom: solid 1px var(--mi-light-foreground-color);
+  border-bottom: solid 1px
+    ${(props) => props.colors?.primary ?? "var(--mi-light-foreground-color)"};
 
   @media screen and (max-width: ${bp.medium}px) {
     background: var(--mi-normal-background-color);
   }
-`;
-
-const DescriptionWrapperHasAvatar = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
 `;
 
 const ArtistActions = styled.div`
@@ -89,7 +118,6 @@ const ArtistActions = styled.div`
 
   @media screen and (max-width: ${bp.medium}px) {
     padding-left: 0.3rem;
-    flex-direction: column;
   }
 `;
 
@@ -139,21 +167,9 @@ const ArtistHeaderSection: React.FC<{
         description={artist.bio}
         image={artistAvatar?.sizes?.[500] ?? artistAvatar?.sizes?.[1200]}
       />
-      <HeaderWrapper>
+      <HeaderWrapper colors={artist.properties?.colors}>
         <Header>
-          <div
-            className={css`
-              display: flex;
-              padding-top: 1rem;
-              ${artistAvatar ? "margin-bottom: 0.75rem;" : ""}
-              align-items: center;
-
-              @media screen and (max-width: ${bp.medium}px) {
-                padding-top: 0rem;
-                ${artistAvatar ? "margin-bottom: 0.5rem;" : ""}
-              }
-            `}
-          >
+          <AvatarWrapper artistAvatar={!!artistAvatar}>
             {artistAvatar && (
               <Avatar
                 avatar={
@@ -162,140 +178,87 @@ const ArtistHeaderSection: React.FC<{
               />
             )}
 
-            <div
-              className={css`
-                width: 100%;
-                display: flex;
-                ${artistAvatar ? "min-height: 85px; margin-left: 1rem;" : ""}
-                flex-direction: column;
-                justify-content: center;
-                @media screen and (max-width: ${bp.medium}px) {
-                  ${artistAvatar ? "min-height: 55px; margin-left: .5rem;" : ""}
-                }
-              `}
-            >
-              <div
+            <ArtistTitleWrapper artistAvatar={!!artistAvatar}>
+              <SpaceBetweenDiv
                 className={css`
-                  width: 100%;
+                  padding-bottom: 0 !important;
+                  margin-bottom: 0rem !important;
+                  @media screen and (max-width: ${bp.medium}px) {
+                    margin: 0rem !important;
+                  }
                 `}
               >
-                <SpaceBetweenDiv
-                  className={css`
-                    padding-bottom: 0 !important;
-                    margin-bottom: 0rem !important;
-                    @media screen and (max-width: ${bp.medium}px) {
-                      margin: 0rem !important;
-                    }
-                  `}
-                >
+                <ArtistTitleText>
                   <div
                     className={css`
-                      min-height: 50px;
                       display: flex;
-                      align-items: center;
-                      justify-content: space-between;
+                      flex-direction: column;
+                      justify-content: center;
                       word-break: break-word;
                       width: 100%;
-                      @media screen and (max-width: ${bp.medium}px) {
-                        min-height: auto;
-                      }
                     `}
                   >
-                    <div
-                      className={css`
-                        display: flex;
-                        flex-direction: column;
-                        justify-content: center;
-                        word-break: break-word;
-                        width: 100%;
-                      `}
-                    >
-                      <ArtistTitle artistAvatar={!!artistAvatar}>
-                        {artist.name}
-                      </ArtistTitle>
+                    <ArtistTitle artistAvatar={!!artistAvatar}>
+                      {artist.name}
+                    </ArtistTitle>
 
-                      <ArtistFormLocation
-                        isManage={!!isManage}
-                        artist={artist}
-                        onSubmit={handleSubmit}
-                      />
-                    </div>
-                    <ArtistActions>
-                      {!isManage && (
-                        <>
-                          <FollowArtist artistId={artist.id} />
-                          <ArtistButtonAnchor
-                            target="_blank"
-                            href={`${import.meta.env.VITE_API_DOMAIN}/v1/artists/${artist.id}/feed?format=rss`}
-                            rel="noreferrer"
-                            onlyIcon
-                            className={css`
-                              margin-top: 0.25rem;
-                            `}
-                            startIcon={<FaRss />}
-                          />
-                        </>
-                      )}
-                      {isManage && (
-                        <div>
-                          <ArtistButtonLink
-                            size="big"
-                            rounded
-                            collapsible
-                            startIcon={<FaPen />}
-                            to={`/manage/artists/${artist.id}/customize`}
-                            className={css`
-                              margin-bottom: 0.25rem;
-                            `}
-                          >
-                            {t("editDetails")}
-                          </ArtistButtonLink>
-                          <ArtistButtonLink
-                            to={`/${artist?.urlSlug?.toLowerCase() ?? artist?.id}`}
-                            size="big"
-                            rounded
-                            collapsible
-                            startIcon={<FaEye />}
-                            disabled={!artist}
-                            className={css`
-                              margin-left: 0.5rem;
-                              margin-bottom: 0.25rem;
-                            `}
-                          >
-                            {t("viewLive")}
-                          </ArtistButtonLink>
-                        </div>
-                      )}
-                    </ArtistActions>
+                    <ArtistFormLocation
+                      isManage={!!isManage}
+                      artist={artist}
+                      onSubmit={handleSubmit}
+                    />
                   </div>
-                </SpaceBetweenDiv>
-              </div>
-              {!artistAvatar && (
-                <div
-                  className={css`
-                    width: 100%;
-                    ${!artistAvatar ? "padding-top: .75rem;" : ""}
-                  `}
-                >
-                  <ArtistHeaderDescription
-                    isManage={!!isManage}
-                    artist={artist}
-                    onSubmit={handleSubmit}
-                  />
-                </div>
-              )}
-            </div>
-          </div>
-          {artistAvatar && (
-            <DescriptionWrapperHasAvatar>
-              <ArtistHeaderDescription
-                isManage={!!isManage}
-                artist={artist}
-                onSubmit={handleSubmit}
-              />
-            </DescriptionWrapperHasAvatar>
-          )}
+                  <ArtistActions>
+                    {!isManage && <FollowArtist artistId={artist.id} />}
+                  </ArtistActions>
+                </ArtistTitleText>
+              </SpaceBetweenDiv>
+            </ArtistTitleWrapper>
+          </AvatarWrapper>
         </Header>
+        {!artistAvatar && (
+          <div
+            className={css`
+              display: block;
+              height: 1rem;
+            `}
+          />
+        )}
+        <div
+          className={css`
+            display: flex;
+            flex-direction: row;
+            align-items: flex-end;
+          `}
+        >
+          <ArtistTourDates
+            isManage={!!isManage}
+            artist={artist}
+            onSubmit={handleSubmit}
+          />
+          <ArtistHeaderDescription
+            isManage={!!isManage}
+            artist={artist}
+            onSubmit={handleSubmit}
+          />
+          <ArtistButtonAnchor
+            target="_blank"
+            href={`${import.meta.env.VITE_API_DOMAIN}/v1/artists/${artist.urlSlug}/feed?format=rss`}
+            rel="noreferrer"
+            onlyIcon
+            className={css`
+              svg {
+                font-size: 0.8rem;
+              }
+              paddding: 0.25rem;
+              margin-left: 0.5rem;
+              margin-bottom: 0.25rem;
+              height: 1.5rem !important;
+              width: 1.5rem !important;
+            `}
+            startIcon={<FaRss />}
+          />
+        </div>
       </HeaderWrapper>
       <div
         className={css`

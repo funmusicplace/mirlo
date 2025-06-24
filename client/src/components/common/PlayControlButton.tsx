@@ -7,7 +7,9 @@ export const PlayControlButton: React.FC<{
   isPlaying?: boolean;
   playerButton?: boolean;
   onPlay?: () => Promise<void>;
-}> = ({ onPlay, isPlaying, playerButton }) => {
+  disabled?: boolean;
+  onArtistPage?: boolean;
+}> = ({ onPlay, isPlaying, playerButton, disabled, onArtistPage }) => {
   const {
     state: { playing },
   } = useGlobalStateContext();
@@ -30,7 +32,14 @@ export const PlayControlButton: React.FC<{
         }
       `}
     >
-      {!localIsPlaying && <PlayButton onPlay={onPlay} variant="outlined" />}
+      {!localIsPlaying && (
+        <PlayButton
+          onPlay={onPlay}
+          variant="outlined"
+          onArtistPage={onArtistPage}
+          disabled={disabled}
+        />
+      )}
       {localIsPlaying && <PauseButton />}
     </div>
   );

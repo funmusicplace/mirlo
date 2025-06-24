@@ -47,6 +47,13 @@ const optimizeImage = async (job: Job) => {
       destinationId
     );
 
+    if (!buffer) {
+      logger.error(
+        `No buffer found for ${incomingMinioBucket}/${destinationId}`
+      );
+      return { error: "No buffer found" };
+    }
+
     await createBucketIfNotExists(finalMinioBucket, logger);
 
     // logger.info(`Got object of size ${size}`);
@@ -153,6 +160,11 @@ const optimizeImage = async (job: Job) => {
       });
     } else if (model === "artistBanner") {
       await prisma.artistBanner.update({
+        where: { id: destinationId },
+        data: { url: urls },
+      });
+    } else if (model === "userAvatar") {
+      await prisma.userAvatar.update({
         where: { id: destinationId },
         data: { url: urls },
       });

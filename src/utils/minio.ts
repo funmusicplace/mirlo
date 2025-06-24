@@ -1,4 +1,4 @@
-import { Client } from "minio";
+import { Client, BucketItem } from "minio";
 import { Logger } from "winston";
 import * as Minio from "minio";
 import {
@@ -23,6 +23,9 @@ export const finalArtistBannerBucket = "artist-banners";
 export const incomingArtistAvatarBucket = "incoming-artist-avatars";
 export const finalArtistAvatarBucket = "artist-avatars";
 
+export const incomingUserAvatarBucket = "incoming-user-avatars";
+export const finalUserAvatarBucket = "mirlo-user-avatars";
+
 export const incomingCoversBucket = "incoming-covers";
 export const finalCoversBucket = "trackgroup-covers";
 
@@ -35,6 +38,7 @@ export const incomingAudioBucket = "incoming-track-audio";
 export const finalAudioBucket = "track-audio";
 
 export const trackGroupFormatBucket = "trackgroup-format";
+export const trackFormatBucket = "track-format";
 
 const {
   MINIO_HOST = "",
@@ -42,40 +46,53 @@ const {
   MINIO_ROOT_PASSWORD = "",
   BACKBLAZE_KEY_ID = "",
   BACKBLAZE_APP_KEY = "",
+  BACKBLAZE_ENDPOINT = "https://s3.us-east-005.backblazeb2.com",
+  BACKBBLAZE_REGION = "us-east-005",
   MINIO_API_PORT = 9000,
   NODE_ENV,
 } = process.env;
 
-// Instantiate the minio client with the endpoint
-// and access keys as shown below.
-export const minioClient = new Minio.Client({
-  endPoint: MINIO_HOST,
-  port: +MINIO_API_PORT,
-  useSSL: false, // NODE_ENV !== "development",
-  accessKey: MINIO_ROOT_USER,
-  secretKey: MINIO_ROOT_PASSWORD,
-});
+export const backendStorage: "minio" | "backblaze" =
+  NODE_ENV === "production" ? "backblaze" : "minio";
 
-// Instantiate a second minio client for backblaze
-export const backblazeClient = new S3Client({
-  region: "us-east-005",
-  endpoint: "https://s3.us-east-005.backblazeb2.com",
-  credentials: {
-    accessKeyId: BACKBLAZE_KEY_ID,
-    secretAccessKey: BACKBLAZE_APP_KEY,
-  },
-  maxAttempts: 1,
-});
+// and access keys as shown below.
+export const minioClient =
+  backendStorage === "minio"
+    ? new Minio.Client({
+        endPoint: MINIO_HOST,
+        port: +MINIO_API_PORT,
+        useSSL: false, // NODE_ENV !== "development",
+        accessKey: MINIO_ROOT_USER,
+        secretKey: MINIO_ROOT_PASSWORD,
+      })
+    : undefined;
 
 // Toggle this to true if you want to test backblaze locally
 // Note: you'll need both the backblaze key id and app key
 // set for this to work.
 // FIXME: this should / could be set in the database as part
 // of the site settings.
-const backendStorage: "minio" | "backblaze" =
-  NODE_ENV === "production" ? "backblaze" : "minio";
+
+// Instantiate a second minio client for backblaze
+export const backblazeClient =
+  backendStorage === "backblaze"
+    ? new S3Client({
+        region: BACKBBLAZE_REGION,
+        endpoint: BACKBLAZE_ENDPOINT,
+        credentials: {
+          accessKeyId: BACKBLAZE_KEY_ID,
+          secretAccessKey: BACKBLAZE_APP_KEY,
+        },
+        responseChecksumValidation: "WHEN_REQUIRED",
+        requestChecksumCalculation: "WHEN_REQUIRED",
+        maxAttempts: 1,
+      })
+    : undefined;
 
 const createB2BucketIfNotExists = async (bucket: string) => {
+  if (!backblazeClient) {
+    throw new Error("Backblaze client is not initialized");
+  }
   logger.info(`backblaze: checking if a bucket exists: ${bucket}`);
   let exists;
   try {
@@ -95,6 +112,9 @@ export const fileExistCheckBackblaze = async (
   bucket: string,
   filename: string
 ): Promise<HeadObjectCommandOutput | undefined> => {
+  if (!backblazeClient) {
+    throw new Error("Backblaze client is not initialized");
+  }
   let backblazeStat: HeadObjectCommandOutput | undefined = undefined;
   try {
     backblazeStat = await backblazeClient.send(
@@ -124,11 +144,11 @@ export const statFile = async (bucket: string, filename: string) => {
     }
   }
   // If the object doesn't exist on backblaze we check in minio
-  if (backendStorage === "minio") {
+  if (backendStorage === "minio" && minioClient) {
     try {
       minioStat = await minioClient.statObject(bucket, filename);
     } catch {
-      logger.error(`minio doesn't have the file. weird`);
+      logger.error(`minio doesn't have the file ${bucket}/${filename}`);
     }
   }
   return {
@@ -146,7 +166,7 @@ export const createBucketIfNotExists = async (
 
   if (backendStorage === "backblaze") {
     await createB2BucketIfNotExists(bucket);
-  } else {
+  } else if (backendStorage === "minio" && minioClient) {
     try {
       exists = await minioClient.bucketExists(bucket);
     } catch (e) {
@@ -173,6 +193,9 @@ export const uploadFilesToBackblaze = async (
   fileStream: Readable | Buffer,
   options?: { contentType?: string }
 ) => {
+  if (!backblazeClient) {
+    throw new Error("Backblaze client is not initialized");
+  }
   if (fileStream instanceof Buffer) {
     await backblazeClient.send(
       new PutObjectCommand({
@@ -211,7 +234,7 @@ export const uploadWrapper = async (
   );
   if (backendStorage === "backblaze") {
     await uploadFilesToBackblaze(bucket, fileName, fileStream, options);
-  } else {
+  } else if (backendStorage === "minio" && minioClient) {
     await minioClient.putObject(bucket, fileName, fileStream);
   }
 };
@@ -220,13 +243,13 @@ export const removeObjectFromStorage = async (
   bucket: string,
   fileName: string
 ) => {
-  if (backendStorage === "backblaze") {
+  if (backendStorage === "backblaze" && backblazeClient) {
     logger.info(`backblaze: removing fileStream: ${bucket}/${fileName}`);
 
     await backblazeClient.send(
       new DeleteObjectCommand({ Bucket: bucket, Key: fileName })
     );
-  } else {
+  } else if (backendStorage === "minio" && minioClient) {
     logger.info(`minio: removing fileStream: ${bucket}/${fileName}`);
 
     await minioClient.removeObject(bucket, fileName);
@@ -241,10 +264,12 @@ export const getBufferFromStorage = async (
     logger.info(`backblaze: getting buffer: ${bucket}/${filename}`);
 
     return getBufferFromBackblaze(bucket, filename);
-  } else {
+  } else if (backendStorage === "minio" && minioClient) {
     logger.info(`minio: getting buffer: ${bucket}/${filename}`);
 
     return getBufferFromMinio(minioClient, bucket, filename);
+  } else {
+    return { buffer: null };
   }
 };
 
@@ -252,6 +277,9 @@ export const getBufferFromBackblaze = async (
   bucket: string,
   filename: string
 ) => {
+  if (!backblazeClient) {
+    throw new Error("Backblaze client is not initialized");
+  }
   const result = await backblazeClient.send(
     new GetObjectCommand({ Bucket: bucket, Key: filename })
   );
@@ -266,6 +294,9 @@ export const downloadFileFromBackblaze = async (
   remoteFileName: string,
   localFilePath: string
 ) => {
+  if (!backblazeClient) {
+    throw new Error("Backblaze client is not initialized");
+  }
   const result = await backblazeClient.send(
     new GetObjectCommand({ Bucket: bucket, Key: remoteFileName })
   );
@@ -285,7 +316,7 @@ export const getFile = async (
     );
 
     return downloadFileFromBackblaze(bucket, remoteFileName, localFilePath);
-  } else {
+  } else if (backendStorage === "minio" && minioClient) {
     logger.info(
       `${backendStorage}: getting buffer: ${bucket}/${remoteFileName} storing at ${localFilePath}`
     );
@@ -299,10 +330,10 @@ export const getReadStream = async (bucket: string, remoteFileName: string) => {
     logger.info(`backblaze: getting buffer: ${bucket}/${remoteFileName}`);
 
     return getReadStreamFromBackblaze(bucket, remoteFileName);
-  } else {
+  } else if (backendStorage === "minio" && minioClient) {
     logger.info(`minio: getting buffer: ${bucket}/${remoteFileName}`);
 
-    return minioClient.getObject(trackGroupFormatBucket, remoteFileName);
+    return minioClient.getObject(bucket, remoteFileName);
   }
 };
 
@@ -310,6 +341,9 @@ export const getReadStreamFromBackblaze = async (
   bucket: string,
   remoteFileName: string
 ) => {
+  if (!backblazeClient) {
+    throw new Error("Backblaze client is not initialized");
+  }
   const result = await backblazeClient.send(
     new GetObjectCommand({ Bucket: bucket, Key: remoteFileName })
   );
@@ -327,7 +361,7 @@ export const getBufferBasedOnStat = async (
     const { buffer } = await getBufferFromBackblaze(bucket, filename);
 
     return buffer;
-  } else {
+  } else if (backendStorage === "minio" && minioClient) {
     const { buffer } = await getBufferFromMinio(minioClient, bucket, filename);
 
     return buffer;
@@ -364,6 +398,10 @@ export async function getFileFromMinio(
   filename: string,
   destinationFilePath: string
 ): Promise<{ filePath: string }> {
+  if (!minioClient) {
+    throw new Error("MinIO client is not initialized");
+  }
+
   return new Promise(
     async (resolve: (result: { filePath: string }) => any, reject) => {
       logger?.info(
@@ -406,14 +444,14 @@ export async function getFileFromMinio(
 export const getObjectList = async (
   bucket: string,
   prefix: string
-): Promise<{ name: string }[]> => {
-  if (backendStorage === "backblaze") {
+): Promise<BucketItem[]> => {
+  if (backendStorage === "backblaze" && backblazeClient) {
     const result = await backblazeClient.send(
       new ListObjectsCommand({ Bucket: bucket, Prefix: prefix })
     );
     return (
       result.Contents?.map((c) => (c?.Key ? { name: c.Key } : undefined)) ?? []
-    ).filter((c) => !!c) as { name: string }[];
+    ).filter((c) => !!c) as BucketItem[];
   } else {
     const result = await getObjectListFromMinio(bucket, prefix);
     return result;
@@ -423,9 +461,12 @@ export const getObjectList = async (
 export const getObjectListFromMinio = async (
   bucket: string,
   prefix: string
-): Promise<{ name: string }[]> => {
+): Promise<BucketItem[]> => {
+  if (!minioClient) {
+    throw new Error("MinIO client is not initialized");
+  }
   return await new Promise((resolve, reject) => {
-    const data: { name: string }[] = [];
+    const data: BucketItem[] = [];
     const stream = minioClient.listObjectsV2(bucket, prefix, true);
     stream.on("data", function (obj) {
       data.push(obj);
@@ -447,14 +488,14 @@ export const removeObjectsFromBucket = async (
   const objects = await getObjectList(bucketName, prefix);
   if (backendStorage === "backblaze") {
     await Promise.all(
-      objects.map((o) => removeObjectFromStorage(bucketName, o.name))
+      objects.map((o) => removeObjectFromStorage(bucketName, o.name!))
     );
-  } else {
+  } else if (backendStorage === "minio" && minioClient) {
     const minioObojects = await getObjectListFromMinio(bucketName, prefix);
 
     await minioClient.removeObjects(
       bucketName,
-      minioObojects.map((o) => o.name)
+      minioObojects.map((o) => o.name!)
     );
   }
 };

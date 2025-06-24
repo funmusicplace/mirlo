@@ -1,14 +1,16 @@
 import { css } from "@emotion/css";
 import styled from "@emotion/styled";
 import Button from "components/common/Button";
-import Modal from "components/common/Modal";
+import FormComponent from "components/common/FormComponent";
+import { InputEl } from "components/common/Input";
 import { SelectEl } from "components/common/Select";
 import { formatDate } from "components/TrackGroup/ReleaseDate";
+import { useUpdatePurchaseMutation } from "queries";
 import React from "react";
+import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { FaExternalLinkAlt } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import api from "services/api";
 import { getArtistUrl, getMerchUrl } from "utils/artist";
 
 const Underline = styled.div`
@@ -22,12 +24,16 @@ const Section = styled.div`
   margin-bottom: 0.5rem;
 
   label {
-    width: calc(3 / 12 * 100%) !important;
+    width: calc(4 / 12 * 100%) !important;
     font-weight: bold;
   }
 
   a {
     padding-left: 0.5rem;
+  }
+
+  input {
+    width: auto;
   }
 `;
 
@@ -36,17 +42,17 @@ const CustomerPopUp: React.FC<{ purchase: MerchPurchase }> = ({ purchase }) => {
     keyPrefix: "fulfillment",
   });
 
-  const [status, setStatus] = React.useState(purchase.fulfillmentStatus);
+  const methods = useForm({ defaultValues: purchase });
+
+  const { mutateAsync: updatePurchase } = useUpdatePurchaseMutation();
 
   const updateStatus = React.useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
-      e.preventDefault();
-      e.stopPropagation();
+    async (data: MerchPurchase) => {
       try {
-        api.put(`manage/purchases/${purchase.id}`, {
-          fulfillmentStatus: e.target.value,
+        await updatePurchase({
+          purchaseId: purchase.id,
+          purchase: data,
         });
-        setStatus(e.target.value as MerchPurchase["fulfillmentStatus"]);
       } catch (e) {}
     },
     [purchase.id]
@@ -83,7 +89,7 @@ const CustomerPopUp: React.FC<{ purchase: MerchPurchase }> = ({ purchase }) => {
         <Section>
           <label>{t("orderDate")}</label>
           {formatDate({
-            date: purchase.updatedAt,
+            date: purchase.createdAt,
             i18n,
             options: { dateStyle: "short" },
           })}
@@ -94,35 +100,51 @@ const CustomerPopUp: React.FC<{ purchase: MerchPurchase }> = ({ purchase }) => {
           <label>{t("shippingAddress")}</label>
           <p>
             {purchase.user.name} <br />
-            {purchase.shippingAddress.line1 && (
+            {purchase.shippingAddress && (
               <>
-                {purchase.shippingAddress.line1}
-                <br />
+                {purchase.shippingAddress.line1 && (
+                  <>
+                    {purchase.shippingAddress.line1}
+                    <br />
+                  </>
+                )}
+                {purchase.shippingAddress.line1 && (
+                  <>
+                    {purchase.shippingAddress.line2}
+                    <br />
+                  </>
+                )}
+                {purchase.shippingAddress.city && (
+                  <>
+                    {purchase.shippingAddress.city}
+                    <br />
+                  </>
+                )}
+                {purchase.shippingAddress.state},
+                {purchase.shippingAddress.postal_code}
               </>
             )}
-            {purchase.shippingAddress.line1 && (
-              <>
-                {purchase.shippingAddress.line2}
-                <br />
-              </>
-            )}
-            {purchase.shippingAddress.city && (
-              <>
-                {purchase.shippingAddress.city}
-                <br />
-              </>
-            )}
-            {purchase.shippingAddress.state},
-            {purchase.shippingAddress.postal_code}
           </p>
         </Section>
       </Underline>
       <Underline>
         <Section>
+          <label>{t("trackingNumber")}</label>
+          <InputEl {...methods.register("trackingNumber")}></InputEl>
+        </Section>
+        <Section>
+          <label>{t("trackingWebsite")}</label>
+          <InputEl {...methods.register("trackingWebsite")}></InputEl>
+        </Section>
+        <Section>
           <label>{t("fulfillmentStatus")}</label>
-          <div>
+          <div
+            className={css`
+              margin-right: 1rem;
+            `}
+          >
             <p></p>
-            <SelectEl value={status} onChange={updateStatus}>
+            <SelectEl {...methods.register("fulfillmentStatus")}>
               <option value="NO_PROGRESS">{t("noProgress")}</option>
               <option value="STARTED">{t("started")}</option>
               <option value="SHIPPED">{t("shipped")}</option>
@@ -131,6 +153,9 @@ const CustomerPopUp: React.FC<{ purchase: MerchPurchase }> = ({ purchase }) => {
           </div>
         </Section>
       </Underline>
+      <Button type="button" onClick={methods.handleSubmit(updateStatus)}>
+        Save
+      </Button>
     </div>
   );
 };

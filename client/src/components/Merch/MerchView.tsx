@@ -11,7 +11,7 @@ import { bp } from "../../constants";
 
 import MarkdownContent from "components/common/MarkdownContent";
 import WidthContainer from "components/common/WidthContainer";
-import { ItemViewTitle } from "../TrackGroup/TrackGroupTitle";
+import { ItemViewTitle } from "../TrackGroup/ItemViewTitle";
 import SupportArtistPopUp from "components/common/SupportArtistPopUp";
 
 import { useQuery } from "@tanstack/react-query";
@@ -21,7 +21,6 @@ import {
   ImageWrapper,
 } from "components/TrackGroup/TrackGroup";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
-import { ButtonLink } from "components/common/Button";
 import { getArtistManageMerchUrl, getReleaseUrl } from "utils/artist";
 import { FaPen } from "react-icons/fa";
 import { useAuthContext } from "state/AuthContext";
@@ -41,7 +40,7 @@ function MerchView() {
     queryArtist({ artistSlug: artistId ?? "" })
   );
   const { data: merch, isLoading: isLoadingMerch } = useQuery(
-    queryMerch({ merchId: merchId ?? "" })
+    queryMerch({ merchId: merchId ?? "", artistId: artistId ?? "" })
   );
 
   const { data: stripeAccountStatus } = useQuery(
@@ -194,19 +193,9 @@ function MerchView() {
           </div>
         </div>
 
-        <div
-          className={css`
-            margin-top: 4rem;
-            text-align: center;
-            display: flex;
-            margin: 4rem auto;
-            justify-content: center;
-          `}
-        >
-          {merch.artist && stripeAccountStatus?.chargesEnabled && (
-            <SupportArtistPopUp artist={merch.artist} />
-          )}
-        </div>
+        {merch.artist && stripeAccountStatus?.chargesEnabled && (
+          <SupportArtistPopUp artist={merch.artist} />
+        )}
       </div>
     </WidthContainer>
   );

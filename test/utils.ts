@@ -3,6 +3,7 @@ import { Prisma } from "@mirlo/prisma/client";
 import { buildTokens } from "../src/routers/auth";
 
 export const clearTables = async () => {
+  await prisma.$executeRaw`DELETE FROM "ArtistLabel";`;
   await prisma.$executeRaw`DELETE FROM "ActivityPubArtistFollowers";`;
   await prisma.$executeRaw`DELETE FROM "Notification";`;
   await prisma.$executeRaw`DELETE FROM "PostImage";`;
@@ -17,6 +18,8 @@ export const clearTables = async () => {
   await prisma.$executeRaw`DELETE FROM "Tag";`;
   await prisma.$executeRaw`DELETE FROM "TrackArtist";`;
   await prisma.$executeRaw`DELETE FROM "TrackAudio";`;
+  await prisma.$executeRaw`DELETE FROM "UserTrackPurchase";`;
+  await prisma.$executeRaw`DELETE FROM "TrackPlay";`;
   await prisma.$executeRaw`DELETE FROM "Track";`;
   await prisma.$executeRaw`DELETE FROM "UserTrackGroupWishlist";`;
   await prisma.$executeRaw`DELETE FROM "UserTrackGroupPurchase";`;
@@ -154,6 +157,7 @@ export const createMerch = async (
       artistId: artistId,
     },
   });
+
   return tg;
 };
 
@@ -165,6 +169,11 @@ export const createTrack = async (
     data: {
       title: data?.title,
       trackGroupId,
+      description: data?.description,
+      stripeProductKey: data?.stripeProductKey,
+      minPrice: data?.minPrice,
+      isPreview: data?.isPreview,
+      order: data?.order,
     },
   });
 
@@ -175,4 +184,47 @@ export const createTrack = async (
     },
   });
   return track;
+};
+
+export const createUserTrackGroupPurchase = async (
+  userId: number,
+  trackGroupId: number,
+  data?: Partial<Prisma.UserTrackGroupPurchaseCreateArgs["data"]>
+) => {
+  const purchase = await prisma.userTrackGroupPurchase.create({
+    data: {
+      userId,
+      trackGroupId,
+      pricePaid: 1000,
+    },
+  });
+
+  return purchase;
+};
+
+export const createUserTrackPurchase = async (
+  userId: number,
+  trackId: number,
+  data?: Partial<Prisma.UserTrackPurchaseCreateArgs["data"]>
+) => {
+  const purchase = await prisma.userTrackPurchase.create({
+    data: {
+      userId,
+      trackId,
+      pricePaid: 100,
+    },
+  });
+  return purchase;
+};
+
+export const createTrackPlay = async (
+  trackId: number,
+  data?: Partial<Prisma.TrackPlayCreateArgs["data"]>
+) => {
+  const trackPlay = await prisma.trackPlay.create({
+    data: {
+      trackId: trackId,
+    },
+  });
+  return trackPlay;
 };

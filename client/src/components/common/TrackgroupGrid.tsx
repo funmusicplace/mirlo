@@ -6,14 +6,19 @@ const TrackgroupGrid = styled.div<{
   wrap?: boolean;
 }>`
   display: grid;
-  grid-template-columns: ${(props) =>
-    props.gridNumber === "4"
-      ? "minmax(0,25%) minmax(0,25%) minmax(0,25%) minmax(0,25%)"
-      : ""};
-  grid-template-columns: ${(props) =>
-    props.gridNumber === "3"
-      ? "minmax(0,33%) minmax(0,33%) minmax(0,33%)"
-      : ""};
+
+  grid-template-columns: ${(props) => {
+    if (props.gridNumber === "2") {
+      return "minmax(0,50%) minmax(0,50%)";
+    }
+    if (props.gridNumber === "3") {
+      return "minmax(0,33%) minmax(0,33%) minmax(0,33%)";
+    }
+    if (props.gridNumber === "6") {
+      return "minmax(0,16%) minmax(0,16%) minmax(0,16%) minmax(0,16%) minmax(0,16%) minmax(0,16%)";
+    }
+    return "minmax(0,25%) minmax(0,25%) minmax(0,25%) minmax(0,25%)";
+  }};
   gap: 0 2%;
   width: 100%;
   white-space: nowrap;
@@ -27,10 +32,7 @@ const TrackgroupGrid = styled.div<{
   }
 
   @media screen and (max-width: ${bp.medium}px) {
-    grid-template-columns: ${(props) =>
-      props.gridNumber === "4"
-        ? "minmax(0,50%) minmax(0,50%)"
-        : "minmax(0,50%) minmax(0,50%)"};
+    grid-template-columns: minmax(0, 50%) minmax(0, 50%);
     gap: 0 3%;
     font-size: var(--mi-font-size-xsmall);
 

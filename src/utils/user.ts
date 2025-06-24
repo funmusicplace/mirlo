@@ -7,6 +7,7 @@ export const deleteUser = async (userId: number) => {
   const userArtists = await prisma.artist.findMany({
     where: { userId: Number(userId) },
   });
+
   await Promise.all(
     userArtists.map((artist) => deleteArtist(Number(userId), artist.id))
   );
@@ -19,6 +20,21 @@ export const deleteUser = async (userId: number) => {
     },
   });
   await prisma.user.delete({ where: { id: userId } });
+};
+
+export const findUserIdForURLSlug = async (id: string) => {
+  if (Number.isNaN(Number(id))) {
+    const user = await prisma.user.findFirst({
+      where: {
+        urlSlug: { equals: id, mode: "insensitive" },
+      },
+    });
+    id = `${user?.id ?? id}`;
+  }
+  if (Number.isNaN(Number(id))) {
+    return undefined;
+  }
+  return Number(id);
 };
 
 export const getUserCurrencyString = async (userId: number) => {
@@ -71,4 +87,83 @@ export const findOrCreateUserBasedOnEmail = async (
     });
   }
   return { userId, newUser, user };
+};
+
+export const updateCurrencies = async (userId: number, currency: string) => {
+  await prisma.user.update({
+    where: {
+      id: userId,
+    },
+    data: {
+      currency,
+    },
+  });
+
+  await prisma.trackGroup.updateMany({
+    where: {
+      OR: [{ paymentToUserId: userId }, { artist: { userId } }],
+    },
+    data: {
+      currency,
+    },
+  });
+
+  await prisma.merch.updateMany({
+    where: {
+      artist: {
+        userId,
+      },
+    },
+    data: {
+      currency,
+    },
+  });
+
+  await prisma.merchShippingDestination.updateMany({
+    where: {
+      merch: {
+        artist: {
+          userId,
+        },
+      },
+    },
+    data: {
+      currency,
+    },
+  });
+
+  await prisma.track.updateMany({
+    where: {
+      trackGroup: {
+        artist: {
+          userId,
+        },
+      },
+    },
+    data: {
+      currency,
+    },
+  });
+
+  await prisma.artistSubscriptionTier.updateMany({
+    where: {
+      artist: {
+        userId,
+      },
+    },
+    data: {
+      currency,
+    },
+  });
+
+  await prisma.artistTipTier.updateMany({
+    where: {
+      artist: {
+        userId,
+      },
+    },
+    data: {
+      currency,
+    },
+  });
 };

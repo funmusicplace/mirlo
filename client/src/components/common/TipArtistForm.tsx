@@ -147,7 +147,12 @@ const TipArtistForm: React.FC<{
                   margin-bottom: 0.5rem !important;
                 `}
               >
-                <InputEl type="number" {...methods.register("price")} />
+                <InputEl
+                  type="number"
+                  {...methods.register("price")}
+                  step={0.01}
+                  min={0}
+                />
               </FormComponent>
             )}
             {!user && (

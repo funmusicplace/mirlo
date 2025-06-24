@@ -8,33 +8,31 @@ import { useSnackbar } from "state/SnackbarContext";
 import UploadArtistImage from "../UploadArtistImage";
 import { useTranslation } from "react-i18next";
 import ArtistFormColors from "./ArtistFormColors";
-import ArtistSlugInput from "./ArtistSlugInput";
-import {
-  queryManagedArtist,
-  useCreateArtistMutation,
-  useUpdateArtistMutation,
-} from "queries";
+import ArtistSlugInput from "../../common/SlugInput";
+import { useCreateArtistMutation, useUpdateArtistMutation } from "queries";
 import { useAuthContext } from "state/AuthContext";
 import styled from "@emotion/styled";
 import ChooseYourTheme from "../ChooseYourTheme";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useParams } from "react-router-dom";
-import SavingInput from "../AlbumFormComponents/SavingInput";
+import { useQueryClient } from "@tanstack/react-query";
+import SavingInput from "../ManageTrackGroup/AlbumFormComponents/SavingInput";
 import { QUERY_KEY_ARTISTS } from "queries/queryKeys";
 import DeleteArtist from "../DeleteArtist";
-import ArtistLabels from "./ArtistLabels";
 import { Toggle } from "components/common/Toggle";
+import Box from "components/common/Box";
+import LabelConfirmation from "./LabelConfirmation";
+import useArtistQuery from "utils/useArtistQuery";
+import FeatureFlag from "components/common/FeatureFlag";
 
 export interface ShareableTrackgroup {
   creatorId: number;
   slug: string;
 }
 
-const allColorsSet = (artist: Artist) => {
+const someColorsSet = (artist: Artist) => {
   return (
-    artist.properties?.colors.primary &&
-    artist.properties?.colors.secondary &&
-    artist.properties?.colors.foreground &&
+    artist.properties?.colors.primary ||
+    artist.properties?.colors.secondary ||
+    artist.properties?.colors.foreground ||
     artist.properties?.colors.background
   );
 };
@@ -94,8 +92,7 @@ export const CustomizeLook: React.FC = () => {
   const snackbar = useSnackbar();
   const { user } = useAuthContext();
   const userId = user?.id;
-  const { artistId } = useParams();
-  const { data: artist } = useQuery(queryManagedArtist(Number(artistId)));
+  const { data: artist } = useArtistQuery();
 
   const methods = useForm<FormData>({
     defaultValues: generateDefaults(artist),
@@ -180,33 +177,18 @@ export const CustomizeLook: React.FC = () => {
 
   return (
     <div>
-      <ArtistLabels />
       <FormProvider {...methods}>
         <form onSubmit={handleSubmit(onValidSubmit)}>
           <div>
             <ArtistFormSection
               className={css`
-                display: grid !important;
-                grid-template-columns: repeat(5, 1fr);
-                grid-template-rows: repeat(3, 1fr);
-                grid-gap: 5% !important;
-                @media (max-width: ${bp.medium}px) {
-                  grid-template-rows: repeat(10, 0.25fr);
-                  row-gap: 0 !important;
-                }
+                display: flex;
               `}
             >
               <div
                 className={css`
-                  grid-column: 1 / 3;
-                  grid-row: 1 / 5;
-                  @media (max-width: ${bp.medium}px) {
-                    grid-column: 1 / 3;
-                    grid-row: 1 / 5;
-                    input {
-                      display: none;
-                    }
-                  }
+                  max-width: 15rem;
+                  margin-right: 2rem;
                 `}
               >
                 <FormComponent>
@@ -224,43 +206,36 @@ export const CustomizeLook: React.FC = () => {
 
               <div
                 className={css`
-                  padding-bottom: 1rem;
-                  grid-column: 3 / 6;
-                  grid-row: 1;
-                  @media (max-width: ${bp.medium}px) {
-                    grid-row: 2;
-                  }
+                  flex-grow: 1;
                 `}
               >
                 <FormComponent>
                   <label>{t("displayName")} </label>
                   <SavingInput
                     formKey="name"
-                    url={`manage/artists/${artistId}`}
+                    url={`manage/artists/${artist.id}`}
                     extraData={{}}
                   />
                 </FormComponent>
-              </div>
-
-              <div
-                className={css`
-                  grid-column: 3 / 6;
-                  grid-row: 2 / 5;
-                  @media (max-width: ${bp.medium}px) {
-                    grid-column: 1 / 6;
-                    grid-row: 6 / 11;
-                  }
-                `}
-              >
-                <FormComponent>
-                  <label>{t("bio")}</label>
-                  <SavingInput
-                    formKey="bio"
-                    rows={7}
-                    url={`manage/artists/${artistId}`}
-                    extraData={{}}
-                  />
+                <FormComponent
+                  className={css`
+                    width: 100%;
+                  `}
+                >
+                  <label>{t("urlSlug")} </label>
+                  <ArtistSlugInput currentArtistId={existingId} type="artist" />
                 </FormComponent>
+                <div className={css``}>
+                  <FormComponent>
+                    <label>{t("bio")}</label>
+                    <SavingInput
+                      formKey="bio"
+                      rows={7}
+                      url={`manage/artists/${artist.id}`}
+                      extraData={{}}
+                    />
+                  </FormComponent>
+                </div>
               </div>
             </ArtistFormSection>
             <ArtistFormSection isOdd>
@@ -282,11 +257,11 @@ export const CustomizeLook: React.FC = () => {
                   `}
                 >
                   <FormComponent>
-                    {!allColorsSet(artist) && (
+                    {!someColorsSet(artist) && (
                       <ChooseYourTheme artistId={artist.id} />
                     )}
 
-                    {allColorsSet(artist) && <ArtistFormColors />}
+                    {someColorsSet(artist) && <ArtistFormColors />}
                   </FormComponent>
                 </div>
                 <div
@@ -313,28 +288,25 @@ export const CustomizeLook: React.FC = () => {
                 </div>
               </div>
             </ArtistFormSection>
-
-            <ArtistFormSection>
-              <FormComponent
+            <FeatureFlag featureFlag="activityPub">
+              <ArtistFormSection
                 className={css`
-                  width: 100%;
+                  flex-direction: column;
                 `}
               >
-                <label>{t("urlSlug")} </label>
-                <ArtistSlugInput currentArtistId={existingId} />
-              </FormComponent>
-            </ArtistFormSection>
-            <FormComponent>
-              <Toggle
-                label={t("enableActivityPub")}
-                toggled={activityPub}
-                onClick={() => {
-                  methods.setValue("activityPub", !activityPub);
-                }}
-              />
-              <small>{t("makeSearchable")}</small>
-            </FormComponent>
-
+                <Box variant="warning">{t("warningFeature")}</Box>
+                <FormComponent>
+                  <Toggle
+                    label={t("enableActivityPub")}
+                    toggled={activityPub}
+                    onClick={() => {
+                      methods.setValue("activityPub", !activityPub);
+                    }}
+                  />
+                  <small>{t("makeSearchable")}</small>
+                </FormComponent>
+              </ArtistFormSection>
+            </FeatureFlag>
             <ArtistFormSection
               isOdd
               className={css`
@@ -348,6 +320,8 @@ export const CustomizeLook: React.FC = () => {
           </div>
         </form>
       </FormProvider>
+      <LabelConfirmation />
+
       <DeleteArtist />
     </div>
   );

@@ -9,5 +9,6 @@ export const clients: Prisma.ClientCreateInput[] = [
     createdAt: new Date(),
     updatedAt: new Date(),
     deletedAt: null,
+    key: "7de84393-13d5-445b-93b1-171b99215c3a",
   },
 ];

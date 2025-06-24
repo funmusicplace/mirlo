@@ -23,7 +23,6 @@ export const root = `${API_DOMAIN}/v1/artists/`.replace("api.", "");
 
 export const generateKeysForSiteIfNeeded = async () => {
   const settings = await getSiteSettings();
-  console.log("got site settings", settings.id);
   const { publicKey } = settings;
   if (!publicKey) {
     try {
@@ -45,7 +44,6 @@ export const generateKeysForSiteIfNeeded = async () => {
           },
         }
       );
-      console.log("id", settings.id);
       await prisma.settings.update({
         where: {
           id: settings.id,

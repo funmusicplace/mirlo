@@ -8,6 +8,7 @@ import prisma from "@mirlo/prisma";
 
 import { deleteTrack, updateTrackArtists } from "../../../../../utils/tracks";
 import { User } from "@mirlo/prisma/client";
+import { AppError } from "../../../../../utils/error";
 
 interface TrackBody {
   title: string;
@@ -15,6 +16,10 @@ interface TrackBody {
   licenseId: number;
   lyrics: string;
   isrc: string;
+  minPrice: number;
+  allowIndividualSale: boolean;
+  allowMirloPromo: boolean;
+  description: string;
   trackArtists?: {
     artistName: string;
     id: string;
@@ -33,8 +38,18 @@ export default function () {
 
   async function PUT(req: Request, res: Response, next: NextFunction) {
     const { trackId } = req.params;
-    const { title, isPreview, trackArtists, licenseId, lyrics, isrc } =
-      req.body as TrackBody;
+    const {
+      title,
+      isPreview,
+      trackArtists,
+      licenseId,
+      minPrice,
+      allowIndividualSale,
+      lyrics,
+      isrc,
+      description,
+      allowMirloPromo,
+    } = req.body as TrackBody;
 
     try {
       await updateTrackArtists(Number(trackId), trackArtists);
@@ -45,8 +60,12 @@ export default function () {
           title: title,
           lyrics,
           isrc,
-          isPreview: isPreview,
+          isPreview,
+          allowIndividualSale,
+          minPrice,
           licenseId: Number(licenseId),
+          description,
+          allowMirloPromo,
         },
         include: {
           trackArtists: true,
@@ -55,9 +74,8 @@ export default function () {
 
       res.json({ result: newTrack });
     } catch (error) {
-      res.json({
-        error: `Track with ID ${trackId} does not exist in the database`,
-      });
+      console.error(error);
+      next(error);
     }
   }
 

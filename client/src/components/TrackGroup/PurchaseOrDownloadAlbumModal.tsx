@@ -11,7 +11,8 @@ import { ArtistButton } from "components/Artist/ArtistButtons";
 
 const PurchaseOrDownloadAlbum: React.FC<{
   trackGroup: TrackGroup;
-}> = ({ trackGroup }) => {
+  track?: Track;
+}> = ({ trackGroup, track }) => {
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
   const { user } = useAuthContext();
   const [isPurchasingAlbum, setIsPurchasingAlbum] = React.useState(false);
@@ -19,21 +20,22 @@ const PurchaseOrDownloadAlbum: React.FC<{
   const { state: artistState } = useArtistContext();
 
   const userId = user?.id;
-  const purchases = user?.userTrackGroupPurchases;
+  const trackGroupPurchases = user?.userTrackGroupPurchases;
+  const trackPurchases = user?.userTrackPurchases;
 
   const checkForAlbumOwnership = React.useCallback(async () => {
     try {
       if (userId) {
-        const purchased = purchases?.find(
-          (p) => p.trackGroupId === trackGroup.id
-        );
+        const purchased = track
+          ? trackPurchases?.find((p) => p.trackId === track.id)
+          : trackGroupPurchases?.find((p) => p.trackGroupId === trackGroup.id);
 
         setIsOwned(!!purchased);
       }
     } catch (e) {
       console.error(e);
     }
-  }, [purchases, trackGroup.id, userId]);
+  }, [trackPurchases, trackGroupPurchases, trackGroup.id, userId]);
 
   React.useEffect(() => {
     checkForAlbumOwnership();
@@ -57,7 +59,9 @@ const PurchaseOrDownloadAlbum: React.FC<{
     ? "preOrderingTrackGroup"
     : "buyingTrackGroup";
 
-  if (isBeforeReleaseDate && !userId) {
+  console.log("trackGroup.isGettable", trackGroup.isGettable);
+  if ((isBeforeReleaseDate && !userId) || !trackGroup.isGettable) {
+    console.log("returning nul");
     return null;
   }
 
@@ -65,6 +69,7 @@ const PurchaseOrDownloadAlbum: React.FC<{
     !isOwned && artistState?.userStripeStatus?.chargesEnabled;
 
   const showDownload = isOwned && !isBeforeReleaseDate;
+  console.log("showPruchase", showPurchase);
 
   const addToCollection =
     !isOwned &&
@@ -96,7 +101,7 @@ const PurchaseOrDownloadAlbum: React.FC<{
         )}
         {addToCollection && <AddToCollection trackGroup={trackGroup} />}
         {showDownload && (
-          <DownloadAlbumButton trackGroup={trackGroup} onlyIcon />
+          <DownloadAlbumButton trackGroup={trackGroup} onlyIcon track={track} />
         )}
       </div>
 
@@ -104,9 +109,12 @@ const PurchaseOrDownloadAlbum: React.FC<{
         size="small"
         open={isPurchasingAlbum}
         onClose={() => setIsPurchasingAlbum(false)}
-        title={t(purchaseTitle, { title: trackGroup.title }) ?? ""}
+        title={
+          t(purchaseTitle, { title: track?.title ?? trackGroup.title }) ?? ""
+        }
+        noPadding
       >
-        <BuyTrackGroup trackGroup={trackGroup} />
+        <BuyTrackGroup trackGroup={trackGroup} track={track} />
       </Modal>
     </>
   );

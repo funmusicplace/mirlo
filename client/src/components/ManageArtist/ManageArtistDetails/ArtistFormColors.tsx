@@ -3,6 +3,7 @@ import ColorInput from "./ColorInput";
 import { css } from "@emotion/css";
 import React from "react";
 import styled from "@emotion/styled";
+import { ArtistButton } from "components/Artist/ArtistButtons";
 
 const ColorInputWrapper = styled.div`
   display: flex;
@@ -68,6 +69,19 @@ const ArtistFormColors: React.FC = () => {
           title={t("foregroundColor")}
         />
       </ColorInputWrapper>
+      <div>
+        <ArtistButton
+          rounded
+          type="button"
+          onClick={() => {
+            window.setTimeout(() => {
+              window.location.reload();
+            });
+          }}
+        >
+          {t("refreshPage")}
+        </ArtistButton>
+      </div>
     </>
   );
 };

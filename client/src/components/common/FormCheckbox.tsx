@@ -1,30 +1,33 @@
 import { css } from "@emotion/css";
 import { InputEl } from "./Input";
 import { useFormContext } from "react-hook-form";
+import styled from "@emotion/styled";
+
+export const CheckBoxLabel = styled.label`
+  display: flex;
+  padding: 0.25rem;
+  align-items: center;
+  font-size: 1rem;
+  input {
+    width: 2rem !important;
+    margin-right: 0.45rem;
+  }
+
+  > div {
+    width: 2rem !important;
+  }
+`;
 
 const FormCheckbox: React.FC<{
   idPrefix?: string;
   keyName: string;
-  description: string;
+  description: string | React.ReactNode;
   disabled?: boolean;
 }> = ({ keyName, description, disabled, idPrefix = "" }) => {
   const { register } = useFormContext();
 
   return (
-    <label
-      htmlFor={idPrefix + keyName}
-      className={css`
-        display: flex;
-        padding: 0.25rem;
-        align-items: center;
-        font-size: 1rem;
-        margin-bottom: 1rem;
-        input {
-          width: 2rem;
-          margin-right: 0.45rem;
-        }
-      `}
-    >
+    <CheckBoxLabel htmlFor={idPrefix + keyName}>
       <InputEl
         id={idPrefix + keyName}
         type="checkbox"
@@ -32,7 +35,7 @@ const FormCheckbox: React.FC<{
         disabled={disabled}
       />
       {description}
-    </label>
+    </CheckBoxLabel>
   );
 };
 

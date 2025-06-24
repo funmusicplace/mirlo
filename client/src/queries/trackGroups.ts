@@ -7,21 +7,24 @@ import {
 import * as api from "./fetch/fetchWrapper";
 import { QUERY_KEY_TRACK_GROUPS, queryKeyIncludes } from "./queryKeys";
 
+type TrackGroupQueryOptions = {
+  skip?: number;
+  take?: number;
+  orderBy?: "random";
+  tag?: string;
+  title?: string;
+  distinctArtists?: boolean;
+  isReleased?: "released" | "not-released";
+};
+
 const fetchTrackGroups: QueryFunction<
   { results: TrackGroup[]; total?: number },
-  [
-    "fetchTrackGroups",
-    {
-      skip?: number;
-      take?: number;
-      orderBy?: "random";
-      tag?: string;
-      distinctArtists?: boolean;
-    },
-    ...any,
-  ]
+  ["fetchTrackGroups", TrackGroupQueryOptions, ...any]
 > = ({
-  queryKey: [_, { skip, take, orderBy, tag, distinctArtists }],
+  queryKey: [
+    _,
+    { skip, take, orderBy, title, tag, distinctArtists, isReleased },
+  ],
   signal,
 }) => {
   const params = new URLSearchParams();
@@ -29,17 +32,14 @@ const fetchTrackGroups: QueryFunction<
   if (take) params.append("take", String(take));
   if (orderBy) params.append("orderBy", orderBy);
   if (tag) params.append("tag", tag);
+  if (title) params.append("title", title);
+  if (isReleased) params.append("isReleased", isReleased);
+
   params.append("distinctArtists", String(distinctArtists ?? false));
   return api.get(`v1/trackGroups?${params}`, { signal });
 };
 
-export function queryTrackGroups(opts: {
-  skip?: number;
-  take?: number;
-  orderBy?: "random";
-  tag?: string;
-  distinctArtists?: boolean;
-}) {
+export function queryTrackGroups(opts: TrackGroupQueryOptions) {
   return queryOptions({
     queryKey: ["fetchTrackGroups", opts, QUERY_KEY_TRACK_GROUPS],
     queryFn: fetchTrackGroups,

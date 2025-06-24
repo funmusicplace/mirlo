@@ -1,5 +1,50 @@
 import styled from "@emotion/styled";
 import { bp } from "../../constants";
+import React from "react";
+import { css } from "@emotion/css";
+import { useParams } from "react-router-dom";
+import { queryArtist } from "queries";
+import { useQuery } from "@tanstack/react-query";
+
+export const ArtistBox: React.FC<{
+  variant?: "success" | "info" | "warning";
+  compact?: boolean;
+  small?: boolean;
+  children: React.ReactNode;
+}> = (props) => {
+  const { artistId } = useParams();
+
+  const { data: artist, isLoading: isLoadingArtist } = useQuery(
+    queryArtist({ artistSlug: artistId ?? "" })
+  );
+
+  const colors = artist?.properties?.colors;
+  const styles = () => {
+    switch (props.variant) {
+      case "success":
+        return `
+        background: ${colors?.foreground} !important;
+        color: ${colors?.background} !important;
+        `;
+      case "warning":
+        return `
+        background: ${colors?.primary} !important;
+        color: ${colors?.background} !important;
+        `;
+      default:
+        return "";
+    }
+  };
+
+  return (
+    <Box
+      {...props}
+      className={css`
+        ${styles()}
+      `}
+    />
+  );
+};
 
 const Box = styled.div<{
   variant?: "success" | "info" | "warning";
@@ -16,13 +61,7 @@ const Box = styled.div<{
     switch (props.variant) {
       case "success":
         return `
-            background: repeating-linear-gradient(
-              45deg, 
-              var(--mi-success-background-color), 
-              var(--mi-success-background-color) 10px, 
-              var(--mi-normal-background-color) 10px, 
-              var(--mi-normal-background-color) 20px
-            );
+            background: var(--mi-success-background-color);
             border: var(--mi-success-background-color) 1px solid;
             color: var(--mi-normal-foreground-color); 
         `;
@@ -33,13 +72,13 @@ const Box = styled.div<{
         `;
       case "warning":
         return `
-            background: repeating-linear-gradient(45deg, 
-              var(--mi-warning-background-color), 
-              var(--mi-warning-background-color) 10px, 
-              var(--mi-normal-background-color) 10px, 
-              var(--mi-normal-background-color) 20px);
+            background: var(--mi-warning-background-color);
             border: var(--mi-warning-background-color) 1px solid;
             color: var(--mi-normal-foreground-color);
+
+            a { 
+              color: var(--mi-white);
+            }
           `;
       default:
         return `
@@ -60,7 +99,6 @@ const Box = styled.div<{
 
   @media screen and (max-width: ${bp.medium}px) {
     padding: 0.5rem 0.7rem;
-    // background-color: var(--mi-normal-background-color);
   }
 `;
 

@@ -8,6 +8,10 @@ import ArtistItemLink from "./ArtistItemLink";
 export const TrackGroupWrapper = styled.div`
   margin-bottom: 0.5rem;
 
+  img {
+    width: 100% !important;
+  }
+
   @media screen and (max-width: ${bp.medium}px) {
     padding: 0;
     margin-bottom: 1rem;
@@ -64,19 +68,24 @@ export const TrackGroupInfo = styled.div`
 const ArtistTrackGroup: React.FC<{
   trackGroup: TrackGroup & { artist?: Artist };
   as?: React.ElementType<any, keyof React.JSX.IntrinsicElements>;
-}> = ({ trackGroup, as }) => {
+  size?: "small" | "large";
+  showTrackFavorite?: boolean;
+}> = ({ trackGroup, as, showTrackFavorite, size = "large" }) => {
+  const length = size === "small" ? 300 : 300;
   return (
     <TrackGroupWrapper as={as}>
       <div>
         <ClickToPlay
           image={{
-            width: 400,
-            height: 400,
-            url: trackGroup.cover?.sizes?.[600] ?? "",
+            width: length,
+            height: length,
+            url: trackGroup.cover?.sizes?.[size === "small" ? 300 : 300] ?? "",
           }}
-          trackGroupId={trackGroup.id}
+          trackIds={trackGroup.tracks.map((t) => t.id)}
           title={trackGroup.title}
           trackGroup={trackGroup}
+          showWishlist={!showTrackFavorite}
+          showTrackFavorite={showTrackFavorite}
         >
           <TrackGroupLinks>
             <TrackGroupInfo>

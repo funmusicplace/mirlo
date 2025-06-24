@@ -96,6 +96,20 @@ function Artist() {
             <NavLink to="releases" id="artist-navlink-releases">
               {t("releases")}
             </NavLink>
+            {(isArtistUser || user?.isAdmin) && (
+              <ArtistButtonLink
+                startIcon={<FaEdit />}
+                to={getArtistManageUrl(artist.id) + "/releases"}
+                variant="dashed"
+                className={
+                  "edit " +
+                  css`
+                    margin-left: 0.5rem;
+                    margin-top: -0.5rem;
+                  `
+                }
+              />
+            )}
           </li>
         )}
         {(artist?.posts.length ?? 0) > 0 && (
@@ -103,6 +117,20 @@ function Artist() {
             <NavLink to="posts" id="artist-navlink-updates">
               {t("updates")}
             </NavLink>
+            {(isArtistUser || user?.isAdmin) && (
+              <ArtistButtonLink
+                startIcon={<FaEdit />}
+                to={getArtistManageUrl(artist.id) + "/posts"}
+                variant="dashed"
+                className={
+                  "edit " +
+                  css`
+                    margin-left: 0.5rem;
+                    margin-top: -0.5rem;
+                  `
+                }
+              />
+            )}
           </li>
         )}
         {canReceivePayments && (
@@ -113,6 +141,20 @@ function Artist() {
                 <NavLink to="support">
                   {t("support", { artist: artist.name })}
                 </NavLink>
+                {(isArtistUser || user?.isAdmin) && (
+                  <ArtistButtonLink
+                    startIcon={<FaEdit />}
+                    to={getArtistManageUrl(artist.id) + "/tiers"}
+                    variant="dashed"
+                    className={
+                      "edit " +
+                      css`
+                        margin-left: 0.5rem;
+                        margin-top: -0.5rem;
+                      `
+                    }
+                  />
+                )}
               </li>
             )}
           </>

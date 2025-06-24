@@ -9,6 +9,7 @@ import {
 import ArtistItemLink from "components/Artist/ArtistItemLink";
 import ArtistLink from "components/Artist/ArtistLink";
 import { Link } from "react-router-dom";
+import { getMerchUrl } from "utils/artist";
 
 const ArtistMerchListItem: React.FC<{
   merch: Merch & { artist?: Artist };
@@ -19,7 +20,7 @@ const ArtistMerchListItem: React.FC<{
   return (
     <TrackGroupWrapper as={as}>
       <div>
-        <Link to={merch.id}>
+        <Link to={getMerchUrl(merch.artist, merch)}>
           <ImageWithPlaceholder
             src={merchImageUrl}
             alt={merch.title}

@@ -43,16 +43,33 @@ export const getReleaseUrl = (
   )}`;
 };
 
+export const getManageReleaseUrl = (
+  artist: { urlSlug?: string; id: number },
+  trackGroup: { urlSlug?: string; id: number }
+) => {
+  return `${getArtistManageUrl(artist.id)}/release/${trackGroup.id}`;
+};
+
+export const getTrackUrl = (
+  artist: { urlSlug?: string; id: number },
+  trackGroup: { urlSlug?: string; id: number },
+  track: { id: number }
+) => {
+  return `/${getArtistUrlReference(artist)}/release/${getTrackGroupUrlReference(
+    trackGroup
+  )}/tracks/${track.id}`;
+};
+
 export const getMerchUrl = (
   artist: { urlSlug?: string; id: number },
-  merch: { id: string }
+  merch: { id: string; urlSlug?: string | null }
 ) => {
-  return `/${getArtistUrlReference(artist)}/merch/${merch.id}`;
+  return `/${getArtistUrlReference(artist)}/merch/${merch.urlSlug ?? merch.id}`;
 };
 
 export const getPostURLReference = (post: Post) => {
   return post.artist
-    ? `/${getArtistUrlReference(post.artist)}/posts/${post.id}/`
+    ? `/${getArtistUrlReference(post.artist)}/posts/${post.urlSlug ?? post.id}/`
     : `/post/${post.id}`;
 };
 

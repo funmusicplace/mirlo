@@ -83,10 +83,15 @@ const ManageSubscriptionTierBox: React.FC<{
               <Money
                 amount={tier.minAmount ? tier.minAmount / 100 : 0}
                 currency={tier.currency}
-              />
+              />{" "}
+              {t(tier.interval === "MONTH" ? "monthly" : "yearly")}
             </strong>
           </div>
-          <div>
+          <div
+            className={css`
+              display: flex;
+            `}
+          >
             <Button
               variant="dashed"
               startIcon={<FaPen />}

@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import {
-  contentBelongsToLoggedInUserArtist,
+  artistBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../../auth/passport";
 import prisma from "@mirlo/prisma";
@@ -14,8 +14,8 @@ type Params = {
 
 export default function () {
   const operations = {
-    GET: [userAuthenticated, contentBelongsToLoggedInUserArtist, GET],
-    POST: [userAuthenticated, contentBelongsToLoggedInUserArtist, POST],
+    GET: [userAuthenticated, artistBelongsToLoggedInUser, GET],
+    POST: [userAuthenticated, artistBelongsToLoggedInUser, POST],
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
@@ -60,6 +60,7 @@ export default function () {
         description,
         minAmount,
         maxAmount,
+        interval,
         allowVariable,
         defaultAmount,
         autoPurchaseAlbums,
@@ -71,6 +72,7 @@ export default function () {
           description,
           minAmount,
           maxAmount,
+          interval,
           autoPurchaseAlbums,
           platformPercent: userHasPromo ? 0 : settings.platformPercent,
           currency: userForCurrency?.currency ?? "usd",

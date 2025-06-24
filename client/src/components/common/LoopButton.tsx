@@ -44,6 +44,7 @@ export const LoopButton: React.FC = () => {
     <Button
       buttonRole={looping ? "primary" : undefined}
       variant={looping ? "default" : "outlined"}
+      aria-label="Loop music"
       onClick={onLoop}
       startIcon={
         <>

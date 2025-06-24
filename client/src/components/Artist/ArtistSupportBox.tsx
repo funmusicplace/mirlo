@@ -49,7 +49,6 @@ const ArtistSupportBox: React.FC<{
     React.useState(false);
 
   const snackbar = useSnackbar();
-  const userId = user?.id;
 
   const subscribeToTier = async (tier: ArtistSubscriptionTier) => {
     try {
@@ -122,7 +121,7 @@ const ArtistSupportBox: React.FC<{
           }
           currency={subscriptionTier.currency}
         />{" "}
-        / {t("month")}
+        / {t(subscriptionTier.interval === "MONTH" ? "monthly" : "yearly")}
       </div>
       <div
         className={css`
@@ -193,14 +192,12 @@ const ArtistSupportBox: React.FC<{
               `}
             >
               {user && isSubscribedToArtist && !isSubscribedToTier && (
-                <>
-                  <SupportBoxButton
-                    onClick={() => subscribeToTier(subscriptionTier)}
-                    isLoading={isCheckingForSubscription}
-                  >
-                    {t("chooseThisSubscription")}
-                  </SupportBoxButton>
-                </>
+                <SupportBoxButton
+                  onClick={() => subscribeToTier(subscriptionTier)}
+                  isLoading={isCheckingForSubscription}
+                >
+                  {t("chooseThisSubscription")}
+                </SupportBoxButton>
               )}
               {user && isSubscribedToTier && (
                 <SupportBoxButton onClick={() => cancelSubscription()}>

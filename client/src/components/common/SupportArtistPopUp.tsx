@@ -11,22 +11,14 @@ import { useQuery } from "@tanstack/react-query";
 import { queryUserStripeStatus } from "queries";
 import SupportArtistTiersForm from "./SupportArtistTiersForm";
 import { ArtistButton } from "components/Artist/ArtistButtons";
+import { css } from "@emotion/css";
 
 const SupportArtistPopUp: React.FC<{
   artist: Pick<Artist, "id" | "name" | "userId" | "urlSlug">;
 }> = ({ artist }) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
-  const methods = useForm<{
-    tier: {
-      id: number;
-      name: string;
-      description: string;
-      isDefaultTier: boolean;
-    };
-    email: string;
-  }>();
-
+  const [isSubscribed, setIsSubscribed] = React.useState(false);
   const { user } = useAuthContext();
 
   const { data: stripeAccountStatus } = useQuery(
@@ -34,24 +26,42 @@ const SupportArtistPopUp: React.FC<{
   );
 
   React.useEffect(() => {
-    if (isOpen) {
-      const foundTier = user?.artistUserSubscriptions?.find(
-        (sub) => sub.artistSubscriptionTier.artistId === artist.id
-      )?.artistSubscriptionTier;
-      if (foundTier) {
-        methods.setValue("tier", foundTier);
-      }
+    const foundTier = user?.artistUserSubscriptions?.find(
+      (sub) => sub.artistSubscriptionTier.artistId === artist.id
+    )?.artistSubscriptionTier;
+    if (foundTier) {
+      setIsSubscribed(true);
     }
-  }, [artist.id, isOpen, methods, user?.artistUserSubscriptions]);
+  }, [artist.id, user?.artistUserSubscriptions]);
 
   if (!stripeAccountStatus?.chargesEnabled) {
-    return <FollowArtist artistId={artist.id} />;
+    return (
+      <div
+        className={css`
+          text-align: center;
+          display: flex;
+          justify-content: center;
+          margin: 1rem;
+        `}
+      >
+        <FollowArtist artistId={artist.id} />
+      </div>
+    );
   }
 
   return (
-    <>
-      <ArtistButton size="big" rounded wrap onClick={() => setIsOpen(true)}>
-        {t("subscribeToArtist", { artist: artist.name })}
+    <div
+      className={css`
+        text-align: center;
+        display: flex;
+        justify-content: center;
+        margin: 1rem;
+      `}
+    >
+      <ArtistButton size="big" rounded onClick={() => setIsOpen(true)}>
+        {isSubscribed
+          ? t("manageArtistSubscription")
+          : t("supportArtist", { artist: artist.name })}
       </ArtistButton>
       <Modal
         title={t("supportArtist", { artist: artist.name }) ?? ""}
@@ -67,7 +77,7 @@ const SupportArtistPopUp: React.FC<{
           onFinishedSubscribing={() => setIsOpen(false)}
         />
       </Modal>
-    </>
+    </div>
   );
 };
 

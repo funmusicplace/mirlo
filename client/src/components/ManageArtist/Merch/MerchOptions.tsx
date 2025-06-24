@@ -91,6 +91,19 @@ const OptionType: React.FC<{
                     {...methods.register(
                       `optionTypes.${index}.options.${optionIndex}.additionalPrice`
                     )}
+                    step={0.01}
+                    min={0}
+                    type="number"
+                  />
+                </FormComponent>
+                <FormComponent>
+                  <label>{t("quantity")}</label>
+                  <InputEl
+                    {...methods.register(
+                      `optionTypes.${index}.options.${optionIndex}.quantityRemaining`
+                    )}
+                    step={1}
+                    min={0}
                     type="number"
                   />
                 </FormComponent>

@@ -9,16 +9,29 @@ interface LoggedInUser {
   email: string;
   name: string;
   id: number;
+  urlSlug?: string;
   artistUserSubscriptions?: ArtistUserSubscription[];
   userTrackGroupPurchases?: { trackGroupId: number }[];
+  userTrackPurchases?: { trackId: number }[];
   isAdmin: boolean;
   currency?: string;
+  featureFlags?: string[];
   isLabelAccount?: boolean;
+  trackFavorites?: {
+    userId: number;
+    trackId: number;
+    track: Track;
+  }[];
   wishlist?: {
     userId: number;
     trackGroupId: number;
   }[];
   language?: string;
+  userAvatar?: {
+    url: string;
+    sizes?: { [key: number]: string };
+    updatedAt: string;
+  };
 }
 
 interface Track {
@@ -30,6 +43,10 @@ interface Track {
   trackGroupId: number;
   image: Image;
   order: number;
+  allowMirloPromo?: boolean;
+  allowIndividualSale: boolean;
+  description: string;
+  minPrice: number; // in cents;
   metadata: { [key: string]: any };
   audio?: {
     url: string;
@@ -65,10 +82,10 @@ interface TrackGroup {
   published: boolean;
   adminEnabled: boolean;
   id: number;
-  type?: "lp" | "ep" | "album" | "single";
   releaseDate: string;
   about?: string;
   currency: string;
+  isGettable: boolean;
   credits?: string;
   artistId?: number;
   artist: Artist;
@@ -78,6 +95,12 @@ interface TrackGroup {
   tags?: string[];
   merch?: Merch[];
   isDraft?: boolean;
+  paymentToUserId?: number;
+  paymentToUser?: {
+    email: string;
+    name?: string;
+    id: number;
+  };
   cover?: {
     updatedAt: string;
     id: string;
@@ -95,6 +118,7 @@ interface TrackGroup {
 interface Post {
   title: string;
   id: number;
+  urlSlug?: string;
   content: string;
   publishedAt: string;
   artist?: Artist;
@@ -105,6 +129,7 @@ interface Post {
   featuredImageId?: string;
   featuredImage?: { src: string };
   isDraft: boolean;
+  tracks?: { postId: number; trackId: number }[];
 }
 
 interface PostImage {
@@ -142,13 +167,24 @@ interface Notification {
 interface Link {
   url: string;
   linkType?: string;
+  linkLabel?: string;
   inHeader?: boolean;
 }
 
 interface ArtistLabel {
   artistId: number;
+  artist: Artist;
   labelUserId: number;
-  labelUser: { name: string; email: string };
+  labelUser: {
+    name: string;
+    email: string;
+    id: number;
+    userAvatar?: { sizes: string[] };
+  };
+  isLabelApproved: boolean;
+  canLabelManageArtist: boolean;
+  canLabelAddReleases: boolean;
+  isArtistApproved: boolean;
 }
 
 interface Artist {
@@ -165,7 +201,13 @@ interface Artist {
   trackGroups: TrackGroup[];
   links?: string[];
   linksJson?: Link[];
+  purchaseEntireCatalogMinPrice?: number;
   posts: Post[];
+  tourDates?: {
+    date: string;
+    location: string;
+    ticketsUrl: string;
+  }[];
   subscriptionTiers: ArtistSubscriptionTier[];
   properties?: {
     colors: ArtistColors;
@@ -217,6 +259,7 @@ interface ArtistSubscriptionTier {
   minAmount?: number;
   name: string;
   description: string;
+  interval: "MONTH" | "YEAR";
   isDefaultTier: boolean;
   platformPercent: number;
   allowVariable?: boolean;
@@ -257,6 +300,16 @@ interface UserTrackGroupPurchase {
   currencyPaid: string;
   datePurchased: string;
   singleDownloadToken?: string;
+}
+
+interface UserTrackPurchase {
+  userId: number;
+  user?: User;
+  trackId: number;
+  track?: Track;
+  pricePaid: number;
+  currencyPaid: string;
+  datePurchased: string;
 }
 
 interface UserArtistTip {
@@ -308,6 +361,7 @@ interface Merch {
   title: string;
   minPrice: number;
   currency: string;
+  urlSlug: string | null;
   quantityRemaining: number;
   id: string;
   includePurchaseTrackGroupId?: number | null;
@@ -322,6 +376,12 @@ interface Merch {
   optionTypes: MerchOptionType[];
 }
 
+interface Label {
+  id: number;
+  name: string;
+  urlSlug: string;
+}
+
 interface MerchPurchase {
   merchId: string;
   id: string;
@@ -333,6 +393,8 @@ interface MerchPurchase {
   quantity: number;
   currencyPaid: string;
   amountPaid: number;
+  trackingNumber?: string;
+  trackingWebsite?: string;
   fulfillmentStatus: "NO_PROGRESS" | "STARTED" | "SHIPPED" | "COMPLETED";
   shippingAddress: {
     line1: string;

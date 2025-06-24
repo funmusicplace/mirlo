@@ -40,7 +40,7 @@ function DownloadAlbum() {
         );
 
         const result = await api.get<{ exists: boolean }>(
-          `trackGroups/${tgResponse.result.id}/testOwns?email=${email}`
+          `trackGroups/${tgResponse.result.id}/testOwns?email=${email ?? ""}`
         );
 
         if (result.result.exists) {
@@ -85,7 +85,7 @@ function DownloadAlbum() {
     <WidthWrapper variant="small">
       <MetaCard
         title={trackGroup.title}
-        description={trackGroup.about ?? "An album on Mirlo"}
+        description={trackGroup.about ?? "A release on Mirlo"}
         image={trackGroup.cover?.sizes?.[600]}
       />
       <div
@@ -93,7 +93,7 @@ function DownloadAlbum() {
           margin-top: 2rem;
         `}
       >
-        <h2>Download your new album!</h2>
+        <h2>Download your new release!</h2>
         <div
           className={css`
             display: flex;

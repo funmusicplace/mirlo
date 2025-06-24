@@ -236,26 +236,30 @@ router.post(`/password-reset/set-password`, async (req, res, next) => {
       });
     }
   } catch (e) {
-    console.error(e);
-    res.status(500);
+    next(e);
   }
 });
 
-router.post("/login", login, async (req, res) => {
+router.post("/login", login, async (req, res, next) => {
   let user;
-  if (res.locals.user) {
-    user = res.locals.user;
-  } else {
-    res.status(400).json({
-      error: "user not found",
+  try {
+    if (res.locals.user) {
+      user = res.locals.user;
+    } else {
+      res.status(400).json({
+        error: "user not found",
+      });
+    }
+
+    setTokens(res, user);
+
+    res.status(200).json({
+      message: "Success",
     });
+  } catch (e) {
+    console.error("Problem with logging in", e);
+    next(e);
   }
-
-  setTokens(res, user);
-
-  res.status(200).json({
-    message: "Success",
-  });
 });
 
 export const clearJWT = (res: Response) => {

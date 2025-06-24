@@ -17,50 +17,46 @@ export function inMirlo() {
   }
 }
 
-export const WidgetWrapper = styled.div<{ embeddedInMirlo?: boolean }>`
-  display: flex;
+export const WidgetWrapper = styled.div<{
+  embeddedInMirlo?: boolean;
+  artistColors?: ArtistColors;
+}>`
   border: var(--mi-border);
-  flex-direction: column;
-  width: 100%;
+
   ${(props) => props.embeddedInMirlo && "min-height: 154px;"}
   display: flex;
-  flex-direction: column;
   align-items: space-between;
   border-radius: 0.3rem;
   overflow: hidden;
   box-sizing: border-box;
-  background: var(--mi-normal-background-color);
+  color: ${(props) =>
+    props.artistColors?.foreground ?? "var(--mi-normal-foreground-color)"};
+  background: ${(props) =>
+    props.artistColors?.background ?? "var(--mi-normal-background-color)"};
+
   a {
-    color: var(--mi-normal-foreground-color);
+    color: ${(props) =>
+      props.artistColors?.primary ?? "var(--mi-primary-color)"};
   }
 `;
 
 export const TgWidgetWrapper = styled.div<{ embeddedInMirlo?: boolean }>`
-  display: flex;
+  display: grid;
   width: 100%;
-  ${(props) => props.embeddedInMirlo && "min-height: 371px;"}
-  flex-wrap: wrap;
-  align-items: flex-start;
-  justify-content: center;
-  border-radius: 0.3rem;
-  box-sizing: border-box;
-  height: 100%;
-  table {
-    margin: 0;
-  }
+  grid-template-columns: 1fr 1fr;
 
   @media screen and (max-width: ${bp.small}px) {
-    grid-template-columns: repeat(1, 1fr);
-    padding: 0.5rem 0 0 0rem;
-    justify-content: center;
-    align-content: space-between;
-    gap: 0;
+    grid-template-columns: 1fr;
+    grid-template-rows: 50% 50%;
+
+    .image-container {
+      width: 100%;
+    }
   }
 `;
 
 export const TrackListWrapper = styled.div<{}>`
   border-top: var(--mi-border);
-  padding-right: 2%;
   overflow: auto;
   max-height: 280px;
   ::-webkit-scrollbar {
@@ -83,27 +79,16 @@ export const TrackListWrapper = styled.div<{}>`
   }
 
   @media screen and (max-width: ${bp.small}px) {
-    max-height: 70px;
     overflow: auto;
   }
 `;
 export const WidgetTitleWrapper = styled.div<{}>`
-  display: flex;
-  flex: 45%;
   border-left: var(--mi-border);
-  max-width: 100%;
-  height: 100%;
-  flex-direction: column;
-  justify-content: flex-start;
+  overflow: scroll;
 
   @media screen and (max-width: ${bp.small}px) {
-    max-width: 100%;
-    flex: 100%;
-    height: auto;
-
     a {
       font-size: var(--mi-font-size-small) !important;
-      overflow: hidden;
       white-space: nowrap;
       max-width: 100%;
       display: block;

@@ -1,7 +1,7 @@
 import { css } from "@emotion/css";
 
 import { useNavigate, useParams } from "react-router-dom";
-import ClickToPlayAlbum from "../common/ClickToPlayAlbum";
+import ClickToPlayTracks from "../common/ClickToPlayTracks";
 import Box from "../common/Box";
 import { useTranslation } from "react-i18next";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
@@ -13,7 +13,7 @@ import { bp } from "../../constants";
 
 import ReleaseDate from "./ReleaseDate";
 import WidthContainer from "components/common/WidthContainer";
-import TrackGroupTitle from "./TrackGroupTitle";
+import TrackGroupTitle from "./ItemViewTitle";
 import SupportArtistPopUp from "components/common/SupportArtistPopUp";
 import { useAuthContext } from "state/AuthContext";
 import TrackGroupMerch from "./TrackGroupMerch";
@@ -28,6 +28,7 @@ import {
   UnderneathImage,
 } from "./TrackGroup";
 import { getReleaseUrl } from "utils/artist";
+import PurchaseOrDownloadAlbum from "./PurchaseOrDownloadAlbumModal";
 
 function TrackView() {
   const { t } = useTranslation("translation", {
@@ -104,7 +105,7 @@ function TrackView() {
             `}
           >
             <TrackGroupTitle
-              trackGroup={trackGroup}
+              trackGroup={{ ...trackGroup, tracks: [filteredTrack] }}
               title={filteredTrack.title}
             />
 
@@ -129,13 +130,19 @@ function TrackView() {
                 </ImageWrapper>
                 <UnderneathImage>
                   <ReleaseDate releaseDate={trackGroup.releaseDate} />
+                  {filteredTrack.allowIndividualSale && (
+                    <PurchaseOrDownloadAlbum
+                      trackGroup={trackGroup}
+                      track={filteredTrack}
+                    />
+                  )}
                 </UnderneathImage>
                 {trackGroup.merch && trackGroup.merch.length > 0 && (
                   <TrackGroupMerch merch={trackGroup.merch} />
                 )}
                 <SmallScreenPlayWrapper>
-                  <ClickToPlayAlbum
-                    trackGroupId={trackGroup.id}
+                  <ClickToPlayTracks
+                    trackIds={[filteredTrack.id]}
                     className={css`
                       width: 50px !important;
                       margin-right: 10px;
@@ -158,6 +165,23 @@ function TrackView() {
                     trackGroup={trackGroup}
                   />
                 </TrackListingWrapper>
+                {filteredTrack.description && (
+                  <div
+                    className={css`
+                      padding: 1rem;
+                      white-space: pre-line;
+                    `}
+                  >
+                    <h3
+                      className={css`
+                        margin-bottom: 1rem;
+                      `}
+                    >
+                      Description
+                    </h3>
+                    {filteredTrack.description}
+                  </div>
+                )}
                 {filteredTrack.lyrics && (
                   <div
                     className={css`

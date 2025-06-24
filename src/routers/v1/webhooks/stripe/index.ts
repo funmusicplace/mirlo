@@ -15,7 +15,7 @@ export default function () {
   const operations = {
     POST,
   };
-
+  // Is this endpoint still used at all? Most everything gets routed by the connect webhook
   async function POST(req: Request, res: Response) {
     logger.info("stripe-index: receiving global account webhook");
     const event = await verifyStripeSignature(

@@ -3,11 +3,6 @@ import { css } from "@emotion/css";
 
 type Sizes = "full" | "big" | "medium" | "small";
 
-const FlexWrapper = styled.div`
-  display: flex;
-  width: 100%;
-`;
-
 export const WidthWrapper = styled.div<{
   variant?: Sizes;
   hasPaddings?: boolean;
@@ -45,15 +40,22 @@ export const WidthContainer: React.FC<{
   children: React.ReactNode;
   variant: Sizes;
   justify?: string;
-}> = ({ children, variant, justify }) => {
+  className?: string;
+}> = ({ children, className, variant, justify }) => {
   return (
-    <FlexWrapper
-      className={css`
-        justify-content: ${justify ?? "flex-start"};
-      `}
+    <WidthWrapper
+      variant={variant}
+      className={
+        css`
+          width: 100%;
+          justify-content: ${justify ?? "flex-start"};
+        ` +
+        " " +
+        className
+      }
     >
-      <WidthWrapper variant={variant}>{children}</WidthWrapper>
-    </FlexWrapper>
+      {children}
+    </WidthWrapper>
   );
 };
 

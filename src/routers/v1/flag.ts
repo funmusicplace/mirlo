@@ -21,7 +21,6 @@ async function checkCloudFlare(token: unknown, ip: unknown) {
   });
 
   const outcome = await result.json();
-  console.log("flagging software check outcome", outcome);
   if (outcome.success) {
     return true;
   } else {

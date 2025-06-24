@@ -2,11 +2,11 @@ import { User } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 import {
   userAuthenticated,
-  contentBelongsToLoggedInUserArtist,
   trackGroupBelongsToLoggedInUser,
 } from "../../../../../auth/passport";
 import { doesTrackGroupBelongToUser } from "../../../../../utils/ownership";
 import prisma from "@mirlo/prisma";
+import { flatten, uniq } from "lodash";
 
 type Params = {
   trackGroupId: number;
@@ -34,8 +34,12 @@ export default function () {
         },
       });
 
+      const splitTags = uniq(
+        flatten(tags.map((tag) => tag.split(",").map((t) => t.trim())))
+      );
+
       const newTagIds = [];
-      for (const tag of tags) {
+      for (const tag of splitTags) {
         const tagObject = await prisma.tag.upsert({
           create: {
             tag,

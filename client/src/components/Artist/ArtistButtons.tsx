@@ -11,14 +11,18 @@ import {
   useParams,
 } from "react-router-dom";
 
-const ArtistRouterLink: React.FC<LinkProps> = (props) => {
+export const useGetArtistColors = () => {
   const { artistId } = useParams();
 
   const { data: artist, isLoading: isLoadingArtist } = useQuery(
     queryArtist({ artistSlug: artistId ?? "" })
   );
 
-  const colors = artist?.properties?.colors;
+  return { colors: artist?.properties?.colors, isLoadingArtist };
+};
+
+const ArtistRouterLink: React.FC<LinkProps> = (props) => {
+  const { colors } = useGetArtistColors();
   return (
     <Link
       {...props}
@@ -36,14 +40,8 @@ const ArtistRouterLink: React.FC<LinkProps> = (props) => {
 
 export const ArtistButton: React.FC<
   ButtonProps & React.ButtonHTMLAttributes<HTMLButtonElement>
-> = (props) => {
-  const { artistId } = useParams();
-
-  const { data: artist, isLoading: isLoadingArtist } = useQuery(
-    queryArtist({ artistSlug: artistId ?? "" })
-  );
-
-  const colors = artist?.properties?.colors;
+> = ({ onClick, ...props }) => {
+  const { colors } = useGetArtistColors();
 
   let variantStyles = () => {
     switch (props.variant) {
@@ -93,6 +91,7 @@ export const ArtistButton: React.FC<
         return `
         background-color: ${colors?.primary} !important;
         color: ${colors?.secondary} !important;
+        border: 1px solid ${colors?.primary} !important;
 
         svg {
           fill: ${colors?.secondary} !important;
@@ -107,6 +106,7 @@ export const ArtistButton: React.FC<
 
   return (
     <Button
+      onClick={onClick}
       {...props}
       className={
         css`

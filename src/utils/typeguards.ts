@@ -1,12 +1,20 @@
 import {
+  Artist,
   Merch,
   MerchPurchase,
+  Post,
+  Track,
   TrackGroup,
   UserTrackGroupPurchase,
+  UserTrackPurchase,
 } from "@mirlo/prisma/client";
 
 type TrackGroupPurchaseWithTrackGroup = UserTrackGroupPurchase & {
   trackGroup: TrackGroup;
+};
+
+type TrackPurchaseWithTrack = UserTrackPurchase & {
+  track: Track;
 };
 
 export function isTrackGroupPurchase(
@@ -16,6 +24,15 @@ export function isTrackGroupPurchase(
     return false;
   }
   return (entity as TrackGroupPurchaseWithTrackGroup).trackGroup !== undefined;
+}
+
+export function isTrackPurchase(
+  entity: unknown
+): entity is TrackPurchaseWithTrack {
+  if (!entity) {
+    return false;
+  }
+  return (entity as TrackPurchaseWithTrack).track !== undefined;
 }
 
 type MerchPurchaseWithMerch = MerchPurchase & {
@@ -36,4 +53,18 @@ export function isTrackGroup(entity: unknown): entity is TrackGroup {
     return false;
   }
   return (entity as TrackGroup).credits !== undefined;
+}
+
+export function isPost(entity: unknown): entity is Post {
+  if (!entity) {
+    return false;
+  }
+  return (entity as Post).content !== undefined;
+}
+
+export function isArtist(entity: unknown): entity is Artist {
+  if (!entity) {
+    return false;
+  }
+  return (entity as Artist).bio !== undefined;
 }

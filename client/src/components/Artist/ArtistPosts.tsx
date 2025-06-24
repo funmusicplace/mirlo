@@ -4,23 +4,31 @@ import { useTranslation } from "react-i18next";
 import { bp } from "../../constants";
 
 import PostGrid from "components/Post/PostGrid";
-import { queryArtist } from "queries";
+import { queryArtist, queryArtistPosts } from "queries";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
+import usePagination from "utils/usePagination";
+
+const pageSize = 6;
 
 const ArtistPosts: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const { artistId } = useParams();
+  const { page, PaginationComponent } = usePagination({ pageSize });
 
   const { data: artist } = useQuery(
     queryArtist({ artistSlug: artistId ?? "" })
   );
 
-  const posts = React.useMemo(() => {
-    return artist?.posts?.map((p) => ({ ...p, artist }));
-  }, [artist]);
+  const { data: posts } = useQuery(
+    queryArtistPosts({
+      artistId: artistId ?? "",
+      take: pageSize,
+      skip: pageSize * page,
+    })
+  );
 
-  if (!artist || artist.posts.length === 0) {
+  if (!posts || !artist || posts?.results?.length === 0) {
     return null;
   }
 
@@ -28,6 +36,7 @@ const ArtistPosts: React.FC = () => {
     <div>
       <div
         className={css`
+          margin-bottom: 2rem;
           @media screen and (max-width: ${bp.medium}px) {
             padding: 0 0 7.5rem 0 !important;
           }
@@ -40,8 +49,12 @@ const ArtistPosts: React.FC = () => {
         >
           {artist.posts?.length === 0 && <>{t("noUpdates")}</>}
         </div>
-        <PostGrid posts={posts} ariaLabelledBy="artist-navlink-updates" />
+        <PostGrid
+          posts={posts.results}
+          ariaLabelledBy="artist-navlink-updates"
+        />
       </div>
+      {posts.total && <PaginationComponent total={posts.total} />}
     </div>
   );
 };

@@ -16,7 +16,7 @@ const NewArtistAlbum: React.FC<{ notification: Notification }> = ({
   return (
     <>
       <div>
-        New album by{" "}
+        New release by{" "}
         {notification.trackGroup.artist && (
           <Link to={getArtistUrl(notification.trackGroup.artist)}>
             {notification.trackGroup.artist?.name}

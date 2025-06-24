@@ -15,7 +15,6 @@ import Box from "components/common/Box";
 import { Toggle } from "components/common/Toggle";
 import api from "services/api";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
-import { ButtonLink } from "components/common/Button";
 import { getArtistManageUrl, getMerchUrl } from "utils/artist";
 import { useSnackbar } from "state/SnackbarContext";
 import DeleteMerchButton from "./DeleteMerchButton";
@@ -64,17 +63,6 @@ const IsPublicToggle: React.FC<{ merch: Merch }> = ({ merch }) => {
     </Box>
   );
 };
-
-export interface TrackGroupFormData {
-  published: boolean;
-  title: string;
-  type: TrackGroup["type"];
-  minPrice: string;
-  releaseDate: string;
-  credits: string;
-  about: string;
-  coverFile: File[];
-}
 
 const EditMerch: React.FC<{}> = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageMerch" });

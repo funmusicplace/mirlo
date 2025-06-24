@@ -1,6 +1,11 @@
 import { css } from "@emotion/css";
 
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import {
+  Link,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 import Box from "../common/Box";
 import usePublicObjectById from "utils/usePublicObjectById";
 import { useTranslation } from "react-i18next";
@@ -17,7 +22,7 @@ import Button from "components/common/Button";
 import React from "react";
 import FormComponent from "components/common/FormComponent";
 import api from "services/api";
-import { getReleaseUrl } from "utils/artist";
+import { getArtistUrl, getReleaseUrl } from "utils/artist";
 import { useAuthContext } from "state/AuthContext";
 
 function RedeemCode() {
@@ -104,8 +109,16 @@ function RedeemCode() {
             alt={trackGroup.title}
           />
           <SmallTileDetails
-            title={trackGroup.title}
-            subtitle={trackGroup.artist?.name ?? ""}
+            title={
+              <Link to={getReleaseUrl(trackGroup.artist, trackGroup)}>
+                {trackGroup.title}
+              </Link>
+            }
+            subtitle={
+              <Link to={getArtistUrl(trackGroup.artist)}>
+                {trackGroup.artist?.name ?? ""}
+              </Link>
+            }
           />
         </div>
         <FormComponent>

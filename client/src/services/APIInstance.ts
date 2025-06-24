@@ -23,7 +23,14 @@ const APIInstance = (apiRoot: string) => {
     }
   ): Promise<R> => {
     const root = authEndpoints.includes(endpoint) ? auth : api;
-    const req = new Request(`${root}${endpoint}`, requestOptions);
+    const req = new Request(`${root}${endpoint}`, {
+      headers: {
+        ...requestOptions?.headers,
+      },
+      ...requestOptions,
+    });
+
+    req.headers.append("mirlo-api-key", import.meta.env.VITE_MIRLO_API_KEY);
 
     try {
       const resp = await fetch(req);
@@ -152,29 +159,8 @@ const APIInstance = (apiRoot: string) => {
       }
     },
 
-    downloadFileDirectly: (
-      fromEndpoint: string,
-      filename: string
-    ): null | unknown => {
-      return apiRequest<Response>(
-        fromEndpoint,
-        {
-          method: "GET",
-          credentials: "include",
-        },
-        {
-          noProcess: true,
-        }
-      ).then((resp) => {
-        if (resp.headers.get("content-type")?.includes("application/json")) {
-          return resp.json();
-        } else if (
-          resp.headers.get("content-type")?.includes("application/zip")
-        ) {
-          fileSaver.saveAs(`${api}${fromEndpoint}`, filename);
-          return;
-        }
-      });
+    getFileDownloadUrl: (fromEndpoint: string): string => {
+      return `${apiRoot}/v1/${fromEndpoint}`;
     },
 
     generateDownload: (endpoint: string) => {

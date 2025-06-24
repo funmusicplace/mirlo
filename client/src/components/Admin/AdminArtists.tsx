@@ -31,7 +31,7 @@ export const AdminArtists: React.FC = () => {
 
   const { Filters } = useAdminFilters({
     onSubmitFilters: callback,
-    fields: ["name", "acceptPayments"],
+    fields: ["name", "email", "acceptPayments"],
   });
 
   React.useEffect(() => {

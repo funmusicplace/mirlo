@@ -16,6 +16,9 @@ import { useAuthContext } from "state/AuthContext";
 import { ButtonLink } from "components/common/Button";
 import { useTranslation } from "react-i18next";
 import { FaHandHoldingHeart } from "react-icons/fa";
+import { queryInstanceArtist } from "queries/settings";
+import { useQuery } from "@tanstack/react-query";
+import { getArtistUrl } from "utils/artist";
 
 const HeaderWrapper = styled.div<{
   artistBanner?: boolean;
@@ -23,6 +26,12 @@ const HeaderWrapper = styled.div<{
   artistId?: boolean;
   show?: string;
   trackGroupId?: boolean;
+  colors?: {
+    primary?: string;
+    secondary?: string;
+    foreground?: string;
+    background?: string;
+  };
 }>`
   position: sticky;
   width: 100%;
@@ -44,7 +53,7 @@ const HeaderWrapper = styled.div<{
     props.transparent
       ? `background: transparent; 
          box-shadow: 0px 1px 10px rgba(0, 0, 0, 0);`
-      : `background: var(--mi-darken-background-color); 
+      : `background: var(--mi-normal-background-color); 
          box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1);`}
 
   ${(props) =>
@@ -52,20 +61,6 @@ const HeaderWrapper = styled.div<{
       ? `background-color: var(--mi-normal-background-color) !important; 
          box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1) !important;`
       : ""}
-
-  @media (prefers-color-scheme: dark) {
-    ${(props) =>
-      props.transparent
-        ? `background-color: transparent; 
-           box-shadow: 0px 1px 10px rgba(0, 0, 0, 0);`
-        : `background-color: #111; 
-           box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.3); 
-           color: pink;`}
-    ${(props) =>
-      props.artistId && !props.artistBanner
-        ? "background-color: var(--mi-normal-background-color);"
-        : ""}
-  }
 
   ${(props) =>
     props.trackGroupId
@@ -90,7 +85,7 @@ const HeaderWrapper = styled.div<{
         ? `top: calc(var(--header-cover-sticky-height) - 25vw); 
            aspect-ratio: 4 / 1; 
            width: auto; 
-           min-height: auto; 
+           height: var(--header-cover-sticky-height); 
            transition: top 0.4s ease-out;`
         : ""}
     ${(props) =>
@@ -104,14 +99,6 @@ const HeaderWrapper = styled.div<{
 
 
     ${(props) => (props.trackGroupId ? "aspect-ratio: 0;" : "")}
-
-    @media (prefers-color-scheme: dark) {
-      ${(props) =>
-        props.artistBanner || props.transparent
-          ? `background: transparent; 
-             box-shadow: 0px 1px 10px rgba(0, 0, 0, 0);`
-          : "box-shadow: 0px 1px 10px rgba(0, 0, 0, .5);"}
-    }
   }
 `;
 
@@ -192,18 +179,21 @@ const Header = () => {
   const { artistId, trackGroupId } = useParams();
 
   const { object: artist } = usePublicArtist<Artist>("artists", artistId);
-
   const artistBanner = artist?.banner?.sizes;
+  const colors = artist?.properties?.colors;
 
   const show = useShow();
+  const transparent = !!artistBanner && !!artistId;
 
+  const { data: instanceArtist } = useQuery(queryInstanceArtist());
   return (
     <HeaderWrapper
-      transparent={!!artistBanner && !!artistId}
+      transparent={transparent}
       artistBanner={!!artistBanner}
       show={show}
       trackGroupId={!!trackGroupId}
       artistId={!!artistId}
+      colors={colors}
     >
       <div
         className={css`
@@ -240,43 +230,36 @@ const Header = () => {
             </DropdownMenu>
           )}
           {!isLoggedIn && <LogInPopup />}
-          <ButtonLink
-            to="/team/support"
-            collapsible
-            startIcon={<FaHandHoldingHeart />}
-            className={css`
-              display: block;
-              margin-left: 0.75rem;
-              text-decoration: none;
-              text-align: center;
-              &:hover {
-                text-decoration: underline;
-              }
+          {instanceArtist && (
+            <ButtonLink
+              to={getArtistUrl(instanceArtist) + "/support"}
+              collapsible
+              startIcon={<FaHandHoldingHeart />}
+              className={css`
+                display: block;
+                margin-left: 0.75rem;
+                text-decoration: none;
+                text-align: center;
+                &:hover {
+                  text-decoration: underline;
+                }
 
-              color: var(--mi-white) !important;
-
-              svg {
-                fill: white !important;
-              }
-
-              background-color: var(--mi-black) !important;
-
-              @media (prefers-color-scheme: dark) {
-                background-color: var(--mi-white) !important;
-                color: var(--mi-black) !important;
+                color: var(--mi-white) !important;
 
                 svg {
-                  fill: var(--mi-black) !important;
+                  fill: white !important;
                 }
-              }
 
-              @media screen and (max-width: ${bp.medium}px) {
-                font-size: var(--mi-font-size-xsmall) !important;
-              }
-            `}
-          >
-            <p>{t("donateNow")}</p>
-          </ButtonLink>
+                background-color: var(--mi-black) !important;
+
+                @media screen and (max-width: ${bp.medium}px) {
+                  font-size: var(--mi-font-size-xsmall) !important;
+                }
+              `}
+            >
+              <p>{t("donateNow")}</p>
+            </ButtonLink>
+          )}
         </div>
       </Content>
     </HeaderWrapper>

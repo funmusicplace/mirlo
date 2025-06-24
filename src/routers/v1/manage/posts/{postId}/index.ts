@@ -3,6 +3,7 @@ import { userAuthenticated } from "../../../../../auth/passport";
 import prisma from "@mirlo/prisma";
 import { doesPostBelongToUser } from "../../../../../utils/post";
 import { AppError } from "../../../../../utils/error";
+import slugify from "slugify";
 
 export default function () {
   const operations = {
@@ -22,6 +23,7 @@ export default function () {
         publishedAt,
         minimumSubscriptionTierId,
         shouldSendEmail,
+        urlSlug,
       } = req.body;
 
       if (minimumSubscriptionTierId !== undefined) {
@@ -41,7 +43,13 @@ export default function () {
         }
       }
 
-      const post = await prisma.post.update({
+      const post = await prisma.post.findUnique({
+        where: {
+          id: Number(postId),
+        },
+      });
+
+      const updatedPost = await prisma.post.update({
         data: {
           title,
           artistId,
@@ -50,56 +58,91 @@ export default function () {
           publishedAt,
           minimumSubscriptionTierId,
           shouldSendEmail,
+          urlSlug: !post?.urlSlug
+            ? slugify(urlSlug ?? title ?? post?.title, {
+                strict: true,
+                lower: true,
+              })
+            : undefined,
         },
         where: {
           id: Number(postId),
         },
       });
 
-      const postImages = await prisma.postImage.findMany({
-        where: {
-          postId: post.id,
-        },
-      });
-      const imagesToDelete = postImages
-        .filter((image) => {
-          const inContent = content.includes(image.id);
-          const isFeatured = post.featuredImageId === image.id;
-          return !(inContent || isFeatured);
-        })
-        .map((image) => image.id);
+      if (content) {
+        const postImages = await prisma.postImage.findMany({
+          where: {
+            postId: updatedPost.id,
+          },
+        });
+        const imagesToDelete = postImages
+          .filter((image) => {
+            const inContent = content.includes(image.id);
+            const isFeatured = updatedPost.featuredImageId === image.id;
+            return !(inContent || isFeatured);
+          })
+          .map((image) => image.id);
 
-      await prisma.postImage.deleteMany({
-        where: {
-          id: { in: imagesToDelete },
-        },
-      });
+        await prisma.postImage.deleteMany({
+          where: {
+            id: { in: imagesToDelete },
+          },
+        });
 
-      const postTracks = await prisma.postTrack.findMany({
-        where: {
-          postId: post.id,
-        },
-      });
-      const tracksToDelete = postTracks
-        .filter((pt) => {
-          const inContent = content.includes(`track/${pt.trackId}`);
-          return !inContent;
-        })
-        .map((image) => image.trackId);
+        const postTracks = await prisma.postTrack.findMany({
+          where: {
+            postId: updatedPost.id,
+          },
+        });
+        const trackOrder: { [key: number]: number } = {};
+        const tracksToDelete = postTracks
+          .filter((pt) => {
+            const inContentIndex = content.indexOf(`track/${pt.trackId}`);
+            if (inContentIndex !== -1) {
+              trackOrder[inContentIndex] = pt.trackId;
+            }
+            return inContentIndex === -1;
+          })
+          .map((image) => image.trackId);
 
-      await prisma.postTrack.deleteMany({
-        where: {
-          postId: post.id,
-          trackId: { in: tracksToDelete },
-        },
-      });
+        await Promise.all(
+          Object.keys(trackOrder)
+            .sort((a, b) => Number(a) - Number(b))
+            .map(async (key, index) => {
+              const trackId = trackOrder[Number(key)];
+              await prisma.postTrack.update({
+                where: {
+                  trackId_postId: {
+                    postId: updatedPost.id,
+                    trackId: trackId,
+                  },
+                },
+                data: {
+                  order: index + 1,
+                },
+              });
+            })
+        );
+
+        await prisma.postTrack.deleteMany({
+          where: {
+            postId: updatedPost.id,
+            trackId: { in: tracksToDelete },
+          },
+        });
+      }
 
       const refreshedPost = await prisma.post.findFirst({
         where: {
-          id: post.id,
+          id: updatedPost.id,
         },
         include: {
-          postTracks: true,
+          tracks: {
+            orderBy: {
+              order: "asc",
+            },
+          },
           images: true,
         },
       });
@@ -157,6 +200,13 @@ export default function () {
     try {
       const post = await prisma.post.findUnique({
         where: { id: Number(postId) },
+        include: {
+          tracks: {
+            orderBy: {
+              order: "asc",
+            },
+          },
+        },
       });
       res.json({ result: post });
     } catch (e) {

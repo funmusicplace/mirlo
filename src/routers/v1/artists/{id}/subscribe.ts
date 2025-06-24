@@ -72,6 +72,7 @@ export default function () {
             },
           },
         });
+
         if (oldTier) {
           logger.info(
             `Deleting old subscriptions for ${artistId}, old tier: ${oldTier.id}`

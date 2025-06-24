@@ -1,19 +1,26 @@
 import { css } from "@emotion/css";
 import { Link } from "react-router-dom";
-import Logo from "../common/Logo";
 import { Trans, useTranslation } from "react-i18next";
 import { ButtonLink } from "components/common/Button";
 import styled from "@emotion/styled";
 import { bp } from "../../constants";
 import { useAuthContext } from "state/AuthContext";
 import { FaArrowRight } from "react-icons/fa";
+import React from "react";
+import Parallax from "parallax-js";
 
 export const SplashWrapper = styled.div`
   display: flex;
   align-items: center;
+  display: relative;
   justify-content: center;
+
   width: 100%;
-  padding: 2rem;
+  overflow: hidden;
+  position: relative;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' opacity='.3' viewBox='0 0 600 600'%3E%3Cfilter id='a'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23a)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 182px;
 
   @media (orientation: landscape) {
     min-height: calc(100vh - 177px);
@@ -34,10 +41,12 @@ export const TextWrapper = styled.div`
   padding-bottom: 1rem;
 `;
 
-export const SplashTitle = styled.h2`
+export const SplashTitle = styled.h1`
   font-size: 1.75rem;
   font-weight: 400;
   line-height: 1.25;
+
+  font-family: "cubano", var(--mi-font-family-stack);
 `;
 
 export const SplashButtonWrapper = styled.div`
@@ -45,79 +54,190 @@ export const SplashButtonWrapper = styled.div`
   gap: 16px;
 `;
 
+const ParallexObjectWrapper = styled.div`
+  background-size: contain;
+  background-repeat: no-repeat;
+`;
+
 const Splash = () => {
+  const sceneEl = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (sceneEl.current) {
+      const parallaxInstance = new Parallax(sceneEl.current, {
+        relativeInput: true,
+        hoverOnly: true,
+      });
+
+      parallaxInstance.enable();
+
+      return () => parallaxInstance.disable();
+    }
+  }, []);
+
   const { user } = useAuthContext();
   const { t } = useTranslation("translation", { keyPrefix: "home" });
 
   return (
-    <SplashWrapper>
-      <div
-        className={css`
-          display: none;
-
-          @media (min-width: 768px) {
-            display: block;
-            background-image: url("/static/images/blackbird-light.webp");
-            background-size: contain;
-            background-repeat: no-repeat;
-            width: 370px;
-            height: 285px;
-            margin-right: 60px;
-          }
-
-          @media (min-width: 768px) and (prefers-color-scheme: dark) {
-            background-image: url("/static/images/blackbird-dark.webp");
-          }
-        `}
-      />
-      <TextWrapper>
+    <>
+      <SplashWrapper>
         <div
           className={css`
+            width: 100%;
+            position: absolute !important;
+            height: 100%;
             display: flex;
-            flex-direction: column;
-            gap: 24px;
+            align-items: center;
+            justify-content: center;
+            z-index: 0;
           `}
+          ref={sceneEl}
         >
-          <SplashTitle>{t("support")}</SplashTitle>
-          {!user && (
-            <SplashButtonWrapper>
-              <ButtonLink size="big" to="/signup" rounded>
-                {t("signUp")}
-              </ButtonLink>
-              <ButtonLink
-                size="big"
-                to="/login"
-                variant="outlined"
-                rounded
-                endIcon={<FaArrowRight />}
-              >
-                {t("logIn")}
-              </ButtonLink>
-            </SplashButtonWrapper>
-          )}
-          <p
+          <ParallexObjectWrapper
+            data-depth=".2"
             className={css`
-              font-size: 1rem;
-              line-height: 1.5;
+              width: 60%;
+              height: 50px;
+              top: -30% !important;
+              left: 0rem !important;
+              background-image: url("/static/images/cloud-no-grain-3.svg");
+              z-index: 1;
 
-              br {
-                margin-bottom: 1rem;
+              @media screen and (max-width: ${bp.medium}px) {
+                top: -40% !important;
               }
             `}
-          >
-            <Trans
-              t={t}
-              i18nKey="featuresLink"
-              components={{
-                // eslint-disable-next-line jsx-a11y/anchor-has-content
-                features: <Link to="/pages/features"></Link>,
-                about: <Link to="/pages/about"></Link>,
-              }}
-            />
-          </p>
+          />
+          <ParallexObjectWrapper
+            data-depth=".4"
+            className={css`
+              height: 80px;
+              width: 70%;
+              top: 75% !important;
+              left: 10% !important;
+              z-index: -1;
+              background-image: url("/static/images/cloud-no-grain-2.svg");
+
+              @media screen and (max-width: ${bp.medium}px) {
+                margin-bottom: 0rem;
+                top: 38% !important;
+              }
+            `}
+          />
+          <ParallexObjectWrapper
+            data-depth=".6"
+            className={css`
+              height: 140px;
+              width: 60%;
+              top: 55% !important;
+              left: 35% !important;
+              z-index: -1;
+              background-image: url("/static/images/cloud-toneddowngrain-1.webp");
+
+              @media screen and (max-width: ${bp.medium}px) {
+                margin-bottom: 0rem;
+                top: 42% !important;
+              }
+            `}
+          ></ParallexObjectWrapper>
         </div>
-      </TextWrapper>
-    </SplashWrapper>
+        <div
+          className={css`
+            display: flex !important;
+            width: 100%;
+            height: 100%;
+            justify-content: center;
+            align-items: center;
+            z-index: 1;
+            @media screen and (max-width: ${bp.medium}px) {
+              flex-direction: column;
+            }
+          `}
+        >
+          <div
+            className={css`
+              background-image: url("/static/images/frog-mirlo-toneddowngrain.webp");
+              background-size: contain;
+              background-repeat: no-repeat;
+              z-index: 1;
+              width: 540px;
+              height: 370px;
+              margin-right: 4rem;
+
+              @media screen and (max-width: ${bp.medium}px) {
+                margin-right: 0;
+                margin-top: 4rem;
+                width: 300px;
+              }
+            `}
+          />
+
+          <TextWrapper>
+            <div
+              className={css`
+                display: flex;
+                flex-direction: column;
+                gap: 24px;
+
+                color: var(--mi-foreground-color);
+              `}
+            >
+              <SplashTitle>
+                <Trans
+                  t={t}
+                  i18nKey="support"
+                  components={{
+                    red: (
+                      <span
+                        className={css`
+                          color: var(--mi-pink);
+                        `}
+                      ></span>
+                    ),
+                  }}
+                ></Trans>
+              </SplashTitle>
+              {!user && (
+                <SplashButtonWrapper>
+                  <ButtonLink size="big" to="/signup" rounded>
+                    {t("signUp")}
+                  </ButtonLink>
+                  <ButtonLink
+                    size="big"
+                    to="/login"
+                    variant="outlined"
+                    rounded
+                    endIcon={<FaArrowRight />}
+                  >
+                    {t("logIn")}
+                  </ButtonLink>
+                </SplashButtonWrapper>
+              )}
+              <p
+                className={css`
+                  font-size: 1rem;
+                  line-height: 1.5;
+
+                  br {
+                    margin-bottom: 1rem;
+                  }
+                `}
+              >
+                <Trans
+                  t={t}
+                  i18nKey="featuresLink"
+                  components={{
+                    // eslint-disable-next-line jsx-a11y/anchor-has-content
+                    features: <Link to="/pages/features"></Link>,
+                    about: <Link to="/pages/about"></Link>,
+                  }}
+                />
+              </p>
+            </div>
+          </TextWrapper>
+        </div>
+      </SplashWrapper>
+    </>
   );
 };
 

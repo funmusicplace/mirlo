@@ -5,7 +5,7 @@ import { InputEl } from "components/common/Input";
 import { FormProvider, useForm } from "react-hook-form";
 import Button, { ButtonLink } from "components/common/Button";
 import React from "react";
-import ArtistSlugInput from "./ManageArtistDetails/ArtistSlugInput";
+import ArtistSlugInput from "../common/SlugInput";
 import api from "services/api";
 import UploadArtistImage from "./UploadArtistImage";
 import { FaArrowRight } from "react-icons/fa";
@@ -17,7 +17,7 @@ import { NewAlbumButton } from "./NewAlbumButton";
 import ChooseYourTheme from "./ChooseYourTheme";
 
 const PageWrapper = styled.div`
-  padding: 1rem;
+  padding: 2rem 0;
   max-width: 480px;
   margin: 0 auto;
 `;
@@ -138,7 +138,10 @@ const Welcome = () => {
                   }}
                 />
               </small>
-              <ArtistSlugInput currentArtistId={localArtist?.id} />
+              <ArtistSlugInput
+                type="artist"
+                currentArtistId={localArtist?.id}
+              />
             </FormComponent>
           )}
 

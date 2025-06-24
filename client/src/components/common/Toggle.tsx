@@ -48,7 +48,8 @@ export const Toggle: React.FC<{
         className={
           "toggle " +
           css`
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
             width: 60px;
             height: 30px;
 
@@ -63,7 +64,6 @@ export const Toggle: React.FC<{
               height: 25px;
               width: 25px;
               left: 3px;
-              bottom: 2.6px;
               background-color: #fff;
               border-radius: 50%;
               transition: 0.3s;

@@ -10,7 +10,6 @@ import {
   getFile,
   incomingAudioBucket,
   removeObjectFromStorage,
-  statFile,
   uploadWrapper,
 } from "../utils/minio";
 
@@ -36,8 +35,6 @@ export default async (job: Job) => {
     logger.info(`upload-audio: getting file and storing it at ${originalPath}`);
     // FIXME: can this be converted to a stream.
     // It looks like ffmpeg has issues with streams
-    const { minioStat } = await statFile(incomingAudioBucket, audioId);
-    console.log("minioStat", minioStat);
     await getFile(incomingAudioBucket, audioId, originalPath);
     logger.info(`upload-audio: got file and put it at ${originalPath}`);
     let data: any;
@@ -63,7 +60,7 @@ export default async (job: Job) => {
         .audioChannels(2)
         .audioBitrate("320k")
         .audioFrequency(48000)
-        .audioCodec("libfdk_aac") // convert using Fraunhofer FDK AAC
+        .audioCodec("libmp3lame") // convert using Fraunhofer FDK AAC
         .on("start", () => {
           logger.info("audioId ${audioId}: Converting original to hls");
         })

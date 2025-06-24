@@ -10,7 +10,7 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
-    const { skip: skipQuery, take, name, acceptPayments } = req.query;
+    const { skip: skipQuery, take, name, acceptPayments, email } = req.query;
     try {
       let where: Prisma.ArtistWhereInput = {
         deletedAt: null,
@@ -26,8 +26,13 @@ export default function () {
           },
         };
       }
+      if (email && typeof email === "string") {
+        if (!where.user) {
+          where.user = {};
+        }
+        where.user.email = { contains: email, mode: "insensitive" };
+      }
       const itemCount = await prisma.artist.count({ where });
-
       const artists = await prisma.artist.findMany({
         where,
         skip: skipQuery ? Number(skipQuery) : undefined,

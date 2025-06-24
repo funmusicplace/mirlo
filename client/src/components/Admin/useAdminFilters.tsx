@@ -18,6 +18,8 @@ const useAdminFilters = ({
     | "artistName"
     | "datePurchased"
     | "pricePaid"
+    | "email"
+    | "lastSubscription"
   )[];
 }) => {
   const { register, handleSubmit } = useForm();
@@ -40,6 +42,7 @@ const useAdminFilters = ({
         onSubmit={handleSubmit(submitToSearchParams)}
         className={css`
           display: flex;
+          align-items: center;
 
           > div {
             margin-right: 1rem;
@@ -48,6 +51,7 @@ const useAdminFilters = ({
       >
         {fields.includes("acceptPayments") && (
           <FormComponent>
+            <label>Accepts payments</label>
             <SelectEl {...register("acceptPayments")}>
               <option value="">All</option>
               <option value="true">Can accept payments</option>
@@ -56,6 +60,7 @@ const useAdminFilters = ({
         )}
         {fields.includes("isPublished") && (
           <FormComponent>
+            <label>Is published</label>
             <SelectEl {...register("isPublished")}>
               <option value="">All</option>
               <option value="true">Is published</option>
@@ -74,6 +79,12 @@ const useAdminFilters = ({
             <InputEl {...register("name")} />
           </FormComponent>
         )}
+        {fields.includes("email") && (
+          <FormComponent>
+            <label>email</label>
+            <InputEl {...register("email")} />
+          </FormComponent>
+        )}
         {fields.includes("title") && (
           <FormComponent>
             <label>title</label>
@@ -84,6 +95,16 @@ const useAdminFilters = ({
           <FormComponent>
             <label>Date filter</label>
             <SelectEl {...register("datePurchased")}>
+              <option value="">All</option>
+              <option value="thisMonth">Current month to date</option>
+              <option value="previousMonth">Previous month</option>
+            </SelectEl>
+          </FormComponent>
+        )}
+        {fields.includes("lastSubscription") && (
+          <FormComponent>
+            <label>Last subscription</label>
+            <SelectEl {...register("lastSubscription")}>
               <option value="">All</option>
               <option value="thisMonth">Current month to date</option>
               <option value="previousMonth">Previous month</option>

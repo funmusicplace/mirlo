@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import Button, { ButtonLink } from "./Button";
+import { ButtonLink } from "./Button";
 import { bp } from "../../constants";
 
 const FixedButtonLink = styled(ButtonLink)`
@@ -7,13 +7,15 @@ const FixedButtonLink = styled(ButtonLink)`
   background-color: rgba(255, 255, 255, 0.9) !important;
   color: black !important;
 
+  justify-content: left;
+
   :hover {
     background-color: rgba(0, 0, 0, 0.7) !important;
     color: white !important;
   }
 
   @media screen and (min-width: ${bp.medium}px) {
-    padding: 1.2rem !important;
+    padding: 0.5rem !important;
   }
 `;
 

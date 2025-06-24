@@ -20,6 +20,7 @@ import { convertURLArrayToSizes } from "./images";
 import {
   finalArtistAvatarBucket,
   finalArtistBannerBucket,
+  finalUserAvatarBucket,
   removeObjectsFromBucket,
 } from "./minio";
 import {
@@ -32,6 +33,7 @@ import { AppError } from "./error";
 import logger from "../logger";
 import { Job } from "bullmq";
 import { processSingleMerch } from "./merch";
+import { url } from "inspector";
 
 type Params = {
   id: string;
@@ -161,7 +163,7 @@ export const subscribeUserToArtist = async (
     subscriptionTiers: ArtistSubscriptionTier[];
     id: number;
   },
-  user?: User | null
+  user?: { currency: string | null; id: number } | null
 ) => {
   let defaultTier = artist.subscriptionTiers.find((tier) => tier.isDefaultTier);
 
@@ -171,7 +173,7 @@ export const subscribeUserToArtist = async (
         name: "follow",
         description: "follow an artist",
         minAmount: 0,
-        currency: artist.user.currency ?? "USD",
+        currency: artist.user.currency ?? "usd",
         isDefaultTier: true,
         artistId: artist.id,
       },
@@ -301,6 +303,28 @@ export const deleteArtistAvatar = async (artistId: number) => {
   }
 };
 
+export const deleteUserAvatar = async (userId: number) => {
+  const avatar = await prisma.userAvatar.findFirst({
+    where: {
+      userId,
+    },
+  });
+
+  if (avatar) {
+    await prisma.userAvatar.delete({
+      where: {
+        userId,
+      },
+    });
+
+    try {
+      removeObjectsFromBucket(finalUserAvatarBucket, avatar.id);
+    } catch (e) {
+      console.error("Found no files, that's okay");
+    }
+  }
+};
+
 export const deleteArtistBanner = async (artistId: number) => {
   const banner = await prisma.artistBanner.findFirst({
     where: {
@@ -389,6 +413,7 @@ export const singleInclude = (queryOptions?: {
         },
       },
     },
+    tourDates: true,
     banner: {
       where: {
         deletedAt: null,
@@ -460,7 +485,7 @@ interface LocalArtist extends Artist {
     cover?: TrackGroupCover | null;
     tracks?: Track[];
   })[];
-  merch?: (Merch & { images: MerchImage[] })[];
+  merch?: (Merch & { images?: MerchImage[] })[];
 }
 
 export const addSizesToImage = (

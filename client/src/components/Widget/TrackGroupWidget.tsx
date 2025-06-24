@@ -39,6 +39,7 @@ const TrackGroupWidget = () => {
   const [currentSeconds, setCurrentSeconds] = React.useState(0);
   const [trackGroup, setTrackGroup] = React.useState<TrackGroup>();
   const [isLoading, setIsLoading] = React.useState(true);
+  const [artist, setArtist] = React.useState<Artist>();
 
   const embeddedInMirlo = inIframe() && inMirlo();
 
@@ -48,6 +49,10 @@ const TrackGroupWidget = () => {
       try {
         const results = await api.get<TrackGroup>(`trackGroups/${params.id}`);
         setTrackGroup(results.result);
+        const response = await api.get<Artist>(
+          `artists/${results.result.artistId}`
+        );
+        setArtist(response.result);
       } catch (e) {
         console.error("e", e);
       } finally {
@@ -85,41 +90,23 @@ const TrackGroupWidget = () => {
 
   return (
     <WidgetWrapper
+      artistColors={artist?.properties?.colors}
       className={css`
-        overflow: hidden;
-        background-color: white !important;
+        height: 100vh;
+        overflow: scroll;
         a {
           text-decoration: none;
         }
         a:hover {
           text-decoration: underline;
         }
-        @media (prefers-color-scheme: dark) {
-          background-color: black !important;
-        }
       `}
     >
-      <TgWidgetWrapper>
-        <MetaCard
-          title={`${trackGroup.title} by ${
-            trackGroup.artist?.name ?? "Unknown"
-          }`}
-          description={`An album on Mirlo`}
-          image={trackGroup.cover?.sizes?.[600]}
-          player={widgetUrl(trackGroup.id, "trackGroup")}
-        />
+      <TgWidgetWrapper className={css``}>
         <FlexWrapper
           className={css`
-            flex: 55%;
-            max-width: 360px;
             position: relative;
-
-            @media screen and (max-width: ${bp.small}px) {
-              max-width: 227px;
-              width: 100%;
-              flex: 100%;
-              margin-bottom: 0.5rem;
-            }
+            width: 100%;
           `}
         >
           <div
@@ -134,29 +121,19 @@ const TrackGroupWidget = () => {
           <ImageWithPlaceholder
             src={trackGroup.cover?.sizes?.[600] ?? ""}
             alt={trackGroup.title}
-            size={400}
+            size={600}
+            square
           />
         </FlexWrapper>
 
-        <WidgetTitleWrapper>
+        <WidgetTitleWrapper className={css``}>
           <div
             className={css`
-              padding: 0.5rem 0.5rem 0.5rem 1rem;
-              max-height: 360px;
-              @media screen and (max-width: ${bp.small}px) {
-                width: 227px;
-                padding: 0 0 0.5rem 0;
-                max-width: 100%;
-                flex: 100%;
-                align-self: center;
-              }
+              padding: 1rem;
             `}
           >
             <FlexWrapper
               className={css`
-                align-items: center;
-                padding-bottom: 1rem;
-
                 a {
                   font-size: 1.5rem;
                 }

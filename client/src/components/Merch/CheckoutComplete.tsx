@@ -11,7 +11,7 @@ import { WidthWrapper } from "components/common/WidthContainer";
 import { useQuery } from "@tanstack/react-query";
 import { queryArtist, queryMerch } from "queries";
 
-function TrackGroup() {
+function CheckoutComplete() {
   const { t } = useTranslation("translation", {
     keyPrefix: "merchDetails",
   });
@@ -21,7 +21,7 @@ function TrackGroup() {
     queryArtist({ artistSlug: artistId ?? "" })
   );
   const { data: merch, isLoading: isLoadingMerch } = useQuery(
-    queryMerch({ merchId: merchId ?? "" })
+    queryMerch({ merchId: merchId ?? "", artistId: artistId ?? "" })
   );
 
   if (!artist && !isLoadingArtist) {
@@ -83,4 +83,4 @@ function TrackGroup() {
   );
 }
 
-export default TrackGroup;
+export default CheckoutComplete;

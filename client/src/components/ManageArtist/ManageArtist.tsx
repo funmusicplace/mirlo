@@ -1,26 +1,23 @@
 import { css } from "@emotion/css";
 import React from "react";
-import { NavLink, Outlet, useParams } from "react-router-dom";
+import { NavLink, Outlet, useLocation, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import Box from "components/common/Box";
 import { ArtistTabs } from "components/common/Tabs";
-import { ArtistSection } from "components/Artist/Artist";
 import { useQuery } from "@tanstack/react-query";
 import { queryManagedArtist } from "queries";
-import { AiOutlineWarning } from "react-icons/ai";
-import { useAuthContext } from "state/AuthContext";
 
 const ManageArtist: React.FC<{}> = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
 
   const { artistId } = useParams();
 
-  const { user } = useAuthContext();
-
   const { data: artist, isError } = useQuery(
     queryManagedArtist(Number(artistId))
   );
-
+  const { pathname } = useLocation();
+  const isCustomizePage =
+    pathname.includes("/manage/artists") && pathname.includes("customize");
   if (isError) {
     return <Box>{t("doesNotExist")}</Box>;
   }
@@ -43,26 +40,28 @@ const ManageArtist: React.FC<{}> = () => {
         </div>
       )}
 
-      <ArtistTabs color={artist.properties?.colors.primary}>
-        <li>
-          <NavLink to="releases">{t("releases")}</NavLink>
-        </li>
-        <li>
-          <NavLink to="posts">{t("updates")}</NavLink>
-        </li>
-        {artist && (
+      {!isCustomizePage && (
+        <ArtistTabs color={artist.properties?.colors.primary}>
           <li>
-            <NavLink to="tiers">
-              {t("support", { artist: artist.name })}
-            </NavLink>
+            <NavLink to="releases">{t("releases")}</NavLink>
           </li>
-        )}
-        {artist && (
           <li>
-            <NavLink to="merch">{t("merch")}</NavLink>
+            <NavLink to="posts">{t("updates")}</NavLink>
           </li>
-        )}
-      </ArtistTabs>
+          {artist && (
+            <li>
+              <NavLink to="tiers">
+                {t("support", { artist: artist.name })}
+              </NavLink>
+            </li>
+          )}
+          {artist && (
+            <li>
+              <NavLink to="merch">{t("merch")}</NavLink>
+            </li>
+          )}
+        </ArtistTabs>
+      )}
       <Outlet />
     </>
   );

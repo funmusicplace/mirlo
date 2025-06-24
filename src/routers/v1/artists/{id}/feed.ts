@@ -2,33 +2,34 @@ import { Request, Response } from "express";
 import {
   User,
   Prisma,
-  TrackGroup,
-  Post,
   Artist,
   ArtistSubscriptionTier,
 } from "@mirlo/prisma/client";
 
-import RSS from "rss";
-
 import prisma from "@mirlo/prisma";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { findArtistIdForURLSlug } from "../../../../utils/artist";
-import { markdownAsHtml } from "../../../../utils/post";
 import { whereForPublishedTrackGroups } from "../../../../utils/trackGroup";
 import { isTrackGroup } from "../../../../utils/typeguards";
 import {
   headersAreForActivityPub,
   turnFeedIntoOutbox,
 } from "../../../../activityPub/utils";
+import { generateFullStaticImageUrl } from "../../../../utils/images";
+import { finalPostImageBucket } from "../../../../utils/minio";
+import { turnItemsIntoRSS } from "../../../../utils/rss";
 
-const getPostsVisibleToUser = async (
+export const getPostsVisibleToUser = async (
   user: User,
-  artist: Artist & { subscriptionTiers: ArtistSubscriptionTier[] }
+  artist: Artist & { subscriptionTiers: ArtistSubscriptionTier[] },
+  take: number = 20,
+  skip: number = 0
 ) => {
   let where: Prisma.PostWhereInput = {
     publishedAt: { lte: new Date() },
     artistId: Number(artist.id),
     isPublic: true,
+    isDraft: false,
   };
 
   if (user) {
@@ -37,18 +38,23 @@ const getPostsVisibleToUser = async (
     // we don't have to post process this?
   }
 
+  const itemCount = await prisma.post.count({
+    where,
+  });
+
   let posts = await prisma.post.findMany({
     where,
     include: {
       artist: true,
       minimumSubscriptionTier: true,
       postSubscriptionTiers: true,
+      featuredImage: true,
     },
     orderBy: {
       publishedAt: "desc",
     },
-    take: 20,
   });
+
   if (user) {
     const userSubscription = await prisma.artistUserSubscription.findFirst({
       where: {
@@ -80,48 +86,35 @@ const getPostsVisibleToUser = async (
       posts = posts.filter((p) => p.isPublic);
     }
   }
-  return posts;
+
+  // This isn't very efficient for large number of posts
+  const takePosts = posts.slice(skip, take + skip);
+
+  return {
+    posts: takePosts.map((post) => ({
+      ...post,
+      featuredImage: post.featuredImage && {
+        ...post.featuredImage,
+        src: generateFullStaticImageUrl(
+          post.featuredImage.id,
+          finalPostImageBucket,
+          post.featuredImage.extension
+        ),
+      },
+    })),
+    total: posts.length,
+  };
 };
 
-const getAlbumsVisibleToUser = async (artist: Artist) => {
+export const getAlbumsVisibleToUser = async (artist: Artist) => {
   const albums = await prisma.trackGroup.findMany({
     where: { ...whereForPublishedTrackGroups(), artistId: artist.id },
     include: { artist: true },
-  });
-  return albums;
-};
-
-const turnItemsIntoRSS = async (
-  artist: Artist,
-  zipped: ((TrackGroup & { artist: Artist }) | Post)[]
-) => {
-  // TODO: probably want to convert this to some sort of module
-  const client = await prisma.client.findFirst({
-    where: {
-      applicationName: "frontend",
+    orderBy: {
+      releaseDate: "desc",
     },
   });
-
-  const feed = new RSS({
-    title: `${artist.name} Feed`,
-    description: artist.bio ?? undefined,
-    feed_url: `${process.env.API_DOMAIN}/v1/${artist.urlSlug}/feed?format=rss`,
-    site_url: `${client?.applicationUrl}/${artist.urlSlug}`,
-  });
-
-  for (const p of zipped) {
-    feed.item({
-      title: p.title ?? "",
-      description: isTrackGroup(p)
-        ? `<h2>An album release by artist ${p.artist.name}.</h2>`
-        : markdownAsHtml(p.content),
-      url: isTrackGroup(p)
-        ? `${client?.applicationUrl}/${p.artist.urlSlug}/release/${p.urlSlug}`
-        : `${client?.applicationUrl}/post/${p.id}`,
-      date: isTrackGroup(p) ? p.releaseDate : p.publishedAt,
-    });
-  }
-  return feed;
+  return albums;
 };
 
 export default function () {
@@ -158,7 +151,7 @@ export default function () {
 
       const albums = await getAlbumsVisibleToUser(artist);
 
-      const zipped = [...posts, ...albums].sort((a, b) => {
+      const zipped = [...posts.posts, ...albums].sort((a, b) => {
         const publishedDateA = isTrackGroup(a) ? a.releaseDate : a.publishedAt;
         const publishedDateB = isTrackGroup(b) ? b.releaseDate : b.publishedAt;
         if (publishedDateA > publishedDateB) {
@@ -176,7 +169,15 @@ export default function () {
 
         res.send(feed);
       } else if (format === "rss") {
-        const feed = await turnItemsIntoRSS(artist, zipped);
+        const feed = await turnItemsIntoRSS(
+          {
+            name: artist.name,
+            description: artist.bio,
+            apiEndpoint: `artists/${artist.urlSlug}/feed`,
+            clientUrl: artist.urlSlug,
+          },
+          zipped
+        );
         res.set("Content-Type", "application/rss+xml");
         res.send(feed.xml());
       } else {

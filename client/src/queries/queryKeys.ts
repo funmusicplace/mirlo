@@ -28,22 +28,29 @@ export const QUERY_KEY_TRACK_GROUPS = "trackGroups";
 export const QUERY_KEY_MERCH = "merch";
 
 /**
- * Categorizes any query that should be invalidated when any trackgroup is changed,
- * regardless of the trackGroupId.
+ * Categorizes any query that should be invalidated when any tag is changed,
+ * regardless of the tagId.
  */
 export const QUERY_KEY_TAGS = "tags";
 
 /**
- * Categorizes any query that should be invalidated when any trackgroup is changed,
- * regardless of the trackGroupId.
+ * Categorizes any query that should be invalidated when any post is changed,
+ * regardless of the postId.
  */
-export const QUERY_KEY_POSTS = "trackGroups";
+export const QUERY_KEY_POSTS = "posts";
+
+/**
+ * Categorizes any query that should be invalidated when any purchase is changed,
+ * regardless of the purchaseId.
+ */
+export const QUERY_KEY_PURCHASES = "purchases";
 
 export type QueryTag =
   | typeof QUERY_KEY_AUTH
   | typeof QUERY_KEY_ARTISTS
   | typeof QUERY_KEY_TRACK_GROUPS
-  | typeof QUERY_KEY_MERCH;
+  | typeof QUERY_KEY_MERCH
+  | typeof QUERY_KEY_PURCHASES;
 
 export type QueryArgs = {
   artistId: number;

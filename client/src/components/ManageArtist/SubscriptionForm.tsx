@@ -15,6 +15,20 @@ import { css } from "@emotion/css";
 import FormCheckbox from "components/common/FormCheckbox";
 import FormError from "components/common/FormError";
 import { useAuthContext } from "state/AuthContext";
+import { SelectEl } from "components/common/Select";
+import PaymentSlider from "./ManageTrackGroup/AlbumFormComponents/PaymentSlider";
+import styled from "@emotion/styled";
+import FeatureFlag from "components/common/FeatureFlag";
+
+export const FormSection = styled.div`
+  margin: 2rem 0;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--mi-darken-x-background-color);
+
+  h2 {
+    font-size: 1.3rem;
+  }
+`;
 
 const generateDefaultValues = (existing?: ArtistSubscriptionTier) => {
   const vals = {
@@ -45,6 +59,9 @@ const SubscriptionForm: React.FC<{
     minAmount: string;
     allowVariable: boolean;
     autoPurchaseAlbums: boolean;
+    platformPercent?: number;
+    collectAddress: boolean;
+    interval: "MONTH" | "YEAR";
   }>({
     defaultValues: generateDefaultValues(existing),
   });
@@ -64,7 +81,10 @@ const SubscriptionForm: React.FC<{
               "name",
               "description",
               "allowVariable",
+              "interval",
               "autoPurchaseAlbums",
+              "collectAddress",
+              "platformPercent",
             ]),
             minAmount: data.minAmount ? +data.minAmount * 100 : undefined,
           };
@@ -98,16 +118,19 @@ const SubscriptionForm: React.FC<{
 
   return (
     <FormProvider {...methods}>
-      <Box
-        className={css`
-          background-color: var(--mi-darken-background-color);
-        `}
-      >
-        <form onSubmit={handleSubmit(doSave)}>
+      <form onSubmit={handleSubmit(doSave)}>
+        <FormSection>
           <FormComponent>
             {t("name")}
             <InputEl {...register("name")} />
           </FormComponent>
+          <FormComponent>
+            <label>{t("description")}</label>
+            <TextArea {...register("description")} />
+          </FormComponent>
+        </FormSection>
+        <FormSection>
+          <h2>{t("theMoneyBit")}</h2>
           <FormComponent>
             {t("minimumAmount")}
             <div
@@ -120,10 +143,14 @@ const SubscriptionForm: React.FC<{
                 }
               `}
             >
-              <InputEl type="number" {...register("minAmount", { min: 1 })} />
+              <InputEl
+                step={0.01}
+                type="number"
+                {...register("minAmount", { min: 1 })}
+                min={0}
+              />
               <span>
-                {t("inCurrency", { currency: user?.currency ?? "usd" })}in{" "}
-                {user?.currency ?? "usd"}
+                {t("inCurrency", { currency: user?.currency ?? "usd" })}
               </span>
             </div>
             {formState.errors.minAmount && (
@@ -133,20 +160,59 @@ const SubscriptionForm: React.FC<{
               </FormError>
             )}
           </FormComponent>
-          <FormCheckbox
-            idPrefix={`${existingId}`}
-            keyName="allowVariable"
-            description={t("allowVariableDescription")}
-          />
+
+          {existingId && (
+            <FormComponent
+              className={css`
+                flex-grow: 1;
+              `}
+            >
+              <label>{t("platformPercent")}</label>
+              <PaymentSlider
+                url={`manage/artists/${artistId}/subscriptionTiers/${existingId}`}
+                extraData={{ artistId: Number(artistId) }}
+              />
+              {formState.errors.platformPercent && (
+                <FormError>{t("platformPercent")}</FormError>
+              )}
+            </FormComponent>
+          )}
+
           <FormComponent>
-            {t("description")}
-            <TextArea {...register("description")} />
+            <FormCheckbox
+              idPrefix={`${existingId}`}
+              keyName="allowVariable"
+              description={t("allowVariableDescription")}
+            />
           </FormComponent>
-          <FormCheckbox
-            idPrefix={`${existingId}`}
-            keyName="autoPurchaseAlbums"
-            description={t("autoAlbumPurchase")}
-          />
+          <FormComponent>
+            <label>{t("interval")}</label>
+            <SelectEl defaultValue="paid" {...register("interval")}>
+              <option value="MONTH">{t("monthly")}</option>
+              <option value="YEAR">{t("yearly")}</option>
+            </SelectEl>
+          </FormComponent>
+        </FormSection>
+        <FormSection>
+          <h2>{t("rewards")}</h2>
+          <FormComponent>
+            <FormCheckbox
+              idPrefix={`${existingId}`}
+              keyName="autoPurchaseAlbums"
+              description={t("autoAlbumPurchase")}
+            />
+          </FormComponent>
+          <FeatureFlag featureFlag="subscriptionFulfillment">
+            <FormComponent>
+              <FormCheckbox
+                idPrefix={`${existingId}`}
+                keyName="collectAddress"
+                description={t("collectAddress")}
+              />
+            </FormComponent>
+          </FeatureFlag>
+        </FormSection>
+        <FormComponent>
           <Button
             type="submit"
             disabled={isSaving}
@@ -155,8 +221,8 @@ const SubscriptionForm: React.FC<{
           >
             {existing ? t("saveSubscription") : t("createSubscription")}
           </Button>
-        </form>
-      </Box>
+        </FormComponent>
+      </form>
     </FormProvider>
   );
 };

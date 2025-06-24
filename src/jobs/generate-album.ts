@@ -9,6 +9,7 @@ import {
   finalCoversBucket,
   getBufferFromStorage,
   getFile,
+  trackFormatBucket,
   trackGroupFormatBucket,
   uploadWrapper,
 } from "../utils/minio";
@@ -16,6 +17,7 @@ import { convertAudioToFormat } from "../utils/tracks";
 import archiver from "archiver";
 import { PassThrough } from "stream";
 import {
+  Artist,
   Track,
   TrackArtist,
   TrackAudio,
@@ -25,7 +27,13 @@ import {
 import filenamify from "filenamify";
 import prisma from "@mirlo/prisma";
 
-const parseFormat = (format: string) => {
+export type Format = {
+  format: "mp3" | "wav" | "flac" | "opus" | "libmp3lame";
+  audioCodec?: "flac" | "libmp3lame" | "opus" | "wav";
+  audioBitrate?: "320" | "256" | "128";
+};
+
+const parseFormat = (format: string): Format => {
   const split = format.split(".");
   const form = split[split.length - 1] as "wav" | "mp3" | "flac" | "opus";
   const codec =
@@ -35,7 +43,9 @@ const parseFormat = (format: string) => {
         ? undefined
         : (form as "flac" | "libmp3lame" | "opus");
   const bitrate =
-    form === "mp3" ? (split[0] as "320" | "256" | "128") : undefined;
+    form === "mp3" || form === "opus"
+      ? (split[0] as "320" | "256" | "128")
+      : undefined;
 
   return {
     format: form,
@@ -44,60 +54,60 @@ const parseFormat = (format: string) => {
   };
 };
 
-export default async (job: Job) => {
-  const { trackGroup, format: formatString } = job.data as {
-    trackGroup: TrackGroup & {
-      tracks: (Track & { audio: TrackAudio; trackArtists: TrackArtist[] })[];
-      cover: TrackGroupCover;
-    };
-    format: string;
-  };
-  const format = parseFormat(formatString);
-  logger.info(
-    `trackGroupId: ${trackGroup.id} \t generating trackgroup for ${format.format}`
-  );
+const downloadTracks = async ({
+  tracks,
+  progress,
+  job,
+  tempFolder,
+  format,
+  trackGroup,
+  coverDestination,
+  artist,
+}: {
+  tracks: (Track & { audio?: TrackAudio; trackArtists: TrackArtist[] })[];
+  trackGroup: { title: string | null };
+  progress: number;
+  job: Job;
+  tempFolder: string;
+  coverDestination: string;
+  format: Format;
+  artist: Artist;
+}) => {
+  let i = 0;
 
-  let progress = 10;
-  const tempFolder = `/data/media/trackGroup/${trackGroup.id}`;
-
-  try {
-    await createBucketIfNotExists(trackGroupFormatBucket, logger);
-
-    logger.info(`Checking if folder exists, if not creating it ${tempFolder}`);
-    try {
-      await fsPromises.stat(tempFolder);
-    } catch (e) {
-      await fsPromises.mkdir(tempFolder, { recursive: true });
+  for await (const track of tracks) {
+    logger.info(`trackId ${track.id}: Processing track ${track.title}`);
+    if (!track.audio) {
+      logger.error(
+        `trackId ${track.id}: No audio data found for track, skipping conversion`
+      );
+      continue;
     }
+    const originalTrackLocation = `${track.audio.id}/original.${track.audio.fileExtension}`;
+    logger.info(`audioId ${track.audio.id}: Fetching ${originalTrackLocation}`);
+    const tempTrackPath = `${tempFolder}/original.${track.audio.fileExtension}`;
 
-    const profiler = logger.startTimer();
-
-    let i = 0;
-    for await (const track of trackGroup.tracks) {
-      const originalTrackLocation = `${track.audio.id}/original.${track.audio.fileExtension}`;
-      logger.info(
-        `audioId ${track.audio.id}: Fetching ${originalTrackLocation}`
+    try {
+      await getFile(finalAudioBucket, originalTrackLocation, tempTrackPath);
+    } catch (e) {
+      logger.error(
+        `Error fetching original track: ${e}: ${originalTrackLocation}`
       );
-      const originalTrackPath = `${tempFolder}/original.${track.audio.fileExtension}`;
+      await fsPromises.rm(tempTrackPath, { force: true });
 
-      await getFile(finalAudioBucket, originalTrackLocation, originalTrackPath);
-      progress += (i * 70) / trackGroup.tracks.length;
-      i += 1;
-      await job.updateProgress(progress);
-      logger.info(
-        `audioId ${track.audio.id}: Getting artist for trackGroup ${originalTrackLocation}`
-      );
-      const artist = await prisma.artist.findFirst({
-        where: { id: trackGroup.artistId },
-      });
+      continue;
+    }
+    progress += (i * 70) / tracks.length;
+    i += 1;
+    await job.updateProgress(progress);
+    logger.info(
+      `audioId ${track.audio.id}: Getting artist for trackGroup ${originalTrackLocation}`
+    );
 
-      if (!artist) {
-        throw "Couldn't find artist, weird";
-      }
+    await new Promise((resolve, reject) => {
+      const trackFileName = `${tempFolder}/${track.order ?? i}-${filenamify(track.title ?? "")}`;
 
-      await new Promise((resolve, reject) => {
-        const trackFileName = `${tempFolder}/${track.order ?? i}-${filenamify(track.title ?? "")}`;
-
+      if (track.audio) {
         logger.info(
           `audioId ${track.audio.id}: Processing stream for ${format.format}${
             format.audioBitrate
@@ -113,92 +123,217 @@ export default async (job: Job) => {
             trackGroup,
             coverLocation: coverDestination,
           },
-          createReadStream(originalTrackPath),
+          createReadStream(tempTrackPath),
           format,
           trackFileName,
           reject,
           resolve
         );
-      });
-
-      await fsPromises.rm(originalTrackPath, { force: true });
-    }
-
-    const coverDestination = `${tempFolder}/cover.webp`;
-    if (trackGroup.cover?.id) {
-      logger.info(`trackGroupId ${trackGroup.id}: Adding cover`);
-
-      const { buffer } = await getBufferFromStorage(
-        finalCoversBucket,
-        `${trackGroup.cover.id}-x1500.webp`
-      );
-      if (buffer) {
-        await fsPromises.writeFile(coverDestination, buffer);
       }
+    });
+    await fsPromises.rm(tempTrackPath, { force: true });
+  }
+};
+
+const zipFilesInFolder = async ({
+  tempFolder,
+  zipFileName,
+  destinationBucket,
+}: {
+  tempFolder: string;
+  zipFileName: string;
+  destinationBucket: string;
+}) => {
+  const profiler = logger.startTimer();
+
+  await new Promise(async (resolve: (value?: unknown) => void) => {
+    const finalFilesInFolder = await fsPromises.readdir(tempFolder);
+
+    const archive = archiver("zip", {
+      zlib: { level: 9 }, // Sets the compression level.
+    });
+
+    // good practice to catch warnings (ie stat failures and other non-blocking errors)
+    archive.on("warning", function (err) {
+      if (err.code === "ENOENT") {
+        // log warning
+      } else {
+        // throw error
+        throw err;
+      }
+    });
+
+    // good practice to catch this error explicitly
+    archive.on("error", function (err) {
+      console.error("erroring", err);
+      throw err;
+    });
+
+    archive.on("finish", () => {
+      resolve();
+    });
+
+    for await (const file of finalFilesInFolder) {
+      const uploadStream = await createReadStream(`${tempFolder}/${file}`);
+      const trackTitle = file;
+
+      archive.append(uploadStream, { name: trackTitle });
+
+      logger.info(`zipFilesInFolder: ${tempFolder}: Appending file ${file}`);
     }
 
-    await job.updateProgress(90);
+    profiler.done({ message: "Done appending files" });
 
+    const pass = new PassThrough();
+
+    archive.pipe(pass);
+    archive.finalize();
+
+    await uploadWrapper(destinationBucket, zipFileName, pass);
+
+    logger.info(`zipFilesInFolder: ${tempFolder}: Cleaned up incoming bucket`);
+    await fsPromises.rm(tempFolder, { recursive: true, force: true });
+    logger.info(`Cleaned up ${tempFolder}`);
+  });
+};
+
+const downloadCover = async ({
+  coverId,
+  coverDestination,
+}: {
+  coverId?: string;
+  coverDestination: string;
+}) => {
+  if (coverId) {
+    logger.info(`downloadCover: ${coverId}: Adding cover`);
+
+    const { buffer } = await getBufferFromStorage(
+      finalCoversBucket,
+      `${coverId}-x1500.webp`
+    );
+    if (buffer) {
+      await fsPromises.writeFile(coverDestination, buffer);
+    }
+  }
+};
+
+const downloadAndZipTracks = async ({
+  formatString,
+  tempFolder,
+  tracks,
+  trackGroup,
+  job,
+  artist,
+  destinationBucket,
+}: {
+  formatString: string;
+  tempFolder: string;
+  tracks: (Track & { audio: TrackAudio; trackArtists: TrackArtist[] })[];
+  trackGroup: {
+    title: string | null;
+    id: number;
+    cover: TrackGroupCover;
+  };
+  job: Job;
+  artist: Artist;
+  destinationBucket: DestinationBucket;
+}) => {
+  try {
+    const format = parseFormat(formatString);
+    logger.info(`downloadAndZipTracks: processing files for ${tempFolder}`);
+
+    let progress = 10;
+    const coverDestination = `${tempFolder}/cover.webp`;
+
+    await createBucketIfNotExists(destinationBucket, logger);
+
+    logger.info(`Checking if folder exists, if not creating it ${tempFolder}`);
+    try {
+      await fsPromises.stat(tempFolder);
+    } catch (e) {
+      await fsPromises.mkdir(tempFolder, { recursive: true });
+    }
+    logger.info(`Have folder locally ${tempFolder}`);
+
+    await downloadTracks({
+      tracks: tracks,
+      progress,
+      job,
+      tempFolder,
+      format,
+      trackGroup,
+      coverDestination,
+      artist,
+    });
+    logger.info(`Downloaded tracks ${tempFolder}`);
+
+    await downloadCover({
+      coverId: trackGroup.cover.id,
+      coverDestination,
+    });
     logger.info(`trackGroupId ${trackGroup.id}: Building zip`);
 
-    await new Promise(async (resolve: (value?: unknown) => void) => {
-      const finalFilesInFolder = await fsPromises.readdir(tempFolder);
+    await zipFilesInFolder({
+      tempFolder,
+      zipFileName: `${destinationBucket === trackFormatBucket ? tracks[0].id : trackGroup.id}/${formatString}.zip`,
+      destinationBucket,
+    });
 
-      const archive = archiver("zip", {
-        zlib: { level: 9 }, // Sets the compression level.
-      });
+    await job.updateProgress(90);
+  } catch (e) {
+    console.error(e);
+    logger.error(`Error building zip`);
+  }
+};
 
-      // good practice to catch warnings (ie stat failures and other non-blocking errors)
-      archive.on("warning", function (err) {
-        if (err.code === "ENOENT") {
-          // log warning
-        } else {
-          // throw error
-          throw err;
-        }
-      });
+type DestinationBucket =
+  | typeof trackFormatBucket
+  | typeof trackGroupFormatBucket;
 
-      // good practice to catch this error explicitly
-      archive.on("error", function (err) {
-        console.error("erroring", err);
-        throw err;
-      });
+export default async (job: Job) => {
+  const {
+    trackGroup,
+    format: formatString,
+    tracks,
+    destinationBucket,
+  } = job.data as {
+    tracks: (Track & {
+      audio: TrackAudio;
+      trackArtists: TrackArtist[];
+    })[];
+    trackGroup: TrackGroup & {
+      cover: TrackGroupCover;
+    };
+    format: string;
+    destinationBucket: DestinationBucket;
+  };
+  let tempFolder = `/data/media/trackGroup/${trackGroup.id}`;
 
-      archive.on("finish", () => {
-        resolve();
-      });
+  if (destinationBucket === "track-format") {
+    tempFolder = `/data/media/track/${tracks[0].id}`;
+  }
 
-      for await (const file of finalFilesInFolder) {
-        const uploadStream = await createReadStream(`${tempFolder}/${file}`);
-        const trackTitle = file;
+  try {
+    const artist = await prisma.artist.findFirst({
+      where: { id: trackGroup.artistId },
+    });
 
-        archive.append(uploadStream, { name: trackTitle });
+    if (!artist) {
+      throw "Couldn't find artist, weird";
+    }
 
-        logger.info(`trackGroupId: ${trackGroup.id}: Appending file ${file}`);
-      }
-
-      profiler.done({ message: "Done appending files" });
-
-      const pass = new PassThrough();
-
-      archive.pipe(pass);
-      archive.finalize();
-
-      await uploadWrapper(
-        trackGroupFormatBucket,
-        `${trackGroup.id}/${formatString}.zip`,
-        pass
-      );
-
-      logger.info(`trackGroupId ${trackGroup.id}: Cleaned up incoming bucket`);
-      await fsPromises.rm(tempFolder, { recursive: true, force: true });
-      logger.info(`Cleaned up ${tempFolder}`);
+    await downloadAndZipTracks({
+      formatString,
+      tempFolder,
+      tracks,
+      trackGroup,
+      job,
+      artist,
+      destinationBucket,
     });
   } catch (e) {
     await fsPromises.rm(tempFolder, { recursive: true, force: true });
-    logger.error(
-      `Error creating audio folder for trackGroupId: ${trackGroup.id}`
-    );
+    logger.error(`Error creating audio folder: ${tempFolder}`);
     if (e instanceof Error) {
       logger.error(`${e.message}: ${e.stack?.toString()}`);
     }

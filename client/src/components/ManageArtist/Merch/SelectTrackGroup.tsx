@@ -10,6 +10,8 @@ import api from "services/api";
 import Pill from "components/common/Pill";
 import { css } from "@emotion/css";
 import { FaTimes } from "react-icons/fa";
+import { hasId } from "../ManageTrackGroup/AlbumFormComponents/ManageTags";
+import LoadingSpinner from "components/common/LoadingSpinner";
 
 const SelectTrackGroup: React.FC<{
   merch: Merch;
@@ -26,17 +28,19 @@ const SelectTrackGroup: React.FC<{
   const doSave = React.useCallback(
     async (val: number | null) => {
       try {
-        setIsSaving(true);
-        const response = await api.put<Partial<Merch>, { result: Merch }>(
-          `manage/merch/${merch.id}`,
-          {
-            includePurchaseTrackGroupId: val,
-          }
-        );
-        setCurrentTrackGroup(response.result.includePurchaseTrackGroup);
-        snackbar(t("merchUpdated"), {
-          type: "success",
-        });
+        if (typeof val === "number" || val === null) {
+          setIsSaving(true);
+          const response = await api.put<Partial<Merch>, { result: Merch }>(
+            `manage/merch/${merch.id}`,
+            {
+              includePurchaseTrackGroupId: val,
+            }
+          );
+          setCurrentTrackGroup(response.result.includePurchaseTrackGroup);
+          snackbar(t("merchUpdated"), {
+            type: "success",
+          });
+        }
       } catch (e) {
         errorHandler(e);
       } finally {
@@ -65,12 +69,18 @@ const SelectTrackGroup: React.FC<{
           />
         </Pill>
       )}
-
-      <AutoCompleteTrackGroup
-        onSelect={(val) => doSave(val)}
-        filterByArtistId={merch.artistId}
-        placeholder={t("typeAlbumName") ?? ""}
-      />
+      <div
+        className={css`
+          display: flex;
+        `}
+      >
+        <AutoCompleteTrackGroup
+          onSelect={(val) => doSave(val)}
+          filterByArtistId={merch.artistId}
+          placeholder={t("typeAlbumName") ?? ""}
+        />
+        {isSaving && <LoadingSpinner />}
+      </div>
       <small
         className={css`
           margin-top: 1rem;

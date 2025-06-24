@@ -11,25 +11,26 @@ import {
   queryKeyMatches,
 } from "./queryKeys";
 
-const fetchMerch: QueryFunction<Merch, ["fetchMerch", { merchId: string }]> = ({
-  queryKey: [_, { merchId }],
-  signal,
-}) => {
+const fetchMerch: QueryFunction<
+  Merch,
+  ["fetchMerch", { merchId: string; artistId: string }]
+> = ({ queryKey: [_, { merchId, artistId }], signal }) => {
   return api
     .get<{
       result: Merch;
-    }>(`v1/merch/${merchId}`, {
+    }>(`v1/merch/${merchId}?artistId=${artistId}`, {
       signal,
     })
     .then((r) => r.result);
 };
 
-export function queryMerch(opts: { merchId: string }) {
+export function queryMerch(opts: { merchId: string; artistId: string }) {
   return queryOptions({
     queryKey: [
       "fetchMerch",
       {
         merchId: opts.merchId,
+        artistId: opts.artistId,
       },
     ],
     queryFn: fetchMerch,

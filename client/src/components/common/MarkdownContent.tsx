@@ -6,6 +6,7 @@ import remarkEmbedder from "utils/remarkEmbedder";
 import MarkdownWrapper from "./MarkdownWrapper";
 import LoadingSpinner from "./LoadingSpinner";
 import { isWidgetUrl } from "utils/tracks";
+import api from "services/api";
 
 const BlackbirdTransformer = {
   name: "BlackbirdTransformer",
@@ -31,7 +32,22 @@ const MarkdownContent: React.FC<{
   React.useEffect(() => {
     const callback = async () => {
       if (source) {
-        const sourceContent = await fetch(source).then((resp) => resp.text());
+        let sourceContent = "";
+        if (source.includes("cookie-policy")) {
+          const response = await api.get<string>("settings/cookiePolicy");
+          sourceContent = response.result;
+        } else if (source.includes("terms")) {
+          const response = await api.get<string>("settings/terms");
+          sourceContent = response.result;
+        } else if (source.includes("privacy")) {
+          const response = await api.get<string>("settings/privacyPolicy");
+          sourceContent = response.result;
+        } else if (source.includes("content-policy")) {
+          const response = await api.get<string>("settings/contentPolicy");
+          sourceContent = response.result;
+        } else {
+          sourceContent = await fetch(source).then((resp) => resp.text());
+        }
         setContent(sourceContent);
       } else {
         setContent(externalContent ?? "");

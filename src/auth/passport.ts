@@ -3,7 +3,7 @@ import { User } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 import { TokenExpiredError } from "jsonwebtoken";
 import passport from "passport";
-import passportJWT from "passport-jwt";
+import passportJWT, { JwtFromRequestFunction } from "passport-jwt";
 import prisma from "@mirlo/prisma";
 import { findArtistIdForURLSlug } from "../utils/artist";
 import logger from "../logger";
@@ -18,7 +18,7 @@ const JWTStrategy = passportJWT.Strategy;
 
 const secret = process.env.JWT_SECRET;
 
-const cookieExtractor = (req: Request) => {
+const cookieExtractor: JwtFromRequestFunction = (req) => {
   let jwt = null;
 
   if (req && req.cookies) {
@@ -33,7 +33,7 @@ passport.use(
   new JWTStrategy(
     {
       jwtFromRequest: cookieExtractor,
-      secretOrKey: secret,
+      secretOrKey: secret ?? "",
     },
     async (jwtPayload, done) => {
       const { expiration, email } = jwtPayload;
@@ -51,7 +51,11 @@ passport.use(
       if (!foundUser) {
         done(null, false);
       }
-      done(null, { ...jwtPayload, isAdmin: foundUser?.isAdmin });
+      done(null, {
+        ...jwtPayload,
+        isAdmin: foundUser?.isAdmin,
+        isLabelAccount: foundUser?.isLabelAccount,
+      });
     }
   )
 );
@@ -139,14 +143,26 @@ export const artistBelongsToLoggedInUser = async (
 
       const artist = await prisma.artist.findFirst({
         where: {
-          userId: loggedInUser.id,
+          OR: [
+            {
+              userId: loggedInUser.id,
+            },
+            {
+              artistLabels: {
+                some: {
+                  labelUserId: loggedInUser.id,
+                  canLabelManageArtist: true,
+                },
+              },
+            },
+          ],
           id: Number(castArtistId),
         },
       });
 
       if (!artist) {
         res.status(404).json({
-          error: "Artist not found",
+          error: "Artist not found or does not belong to user",
         });
         return;
       }
@@ -279,45 +295,6 @@ export const trackBelongsToLoggedInUser = async (
     return next(e);
   }
   return next();
-};
-
-export const contentBelongsToLoggedInUserArtist = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  const data = req.body;
-
-  const artistId = data.artistId ?? req.params.artistId;
-
-  const loggedInUser = req.user as User | undefined;
-
-  try {
-    if (!loggedInUser) {
-      res.status(401).json({ error: "Unauthorized" });
-    } else {
-      if (loggedInUser.isAdmin) {
-        return next();
-      }
-      const artist = await prisma.artist.findFirst({
-        where: {
-          userId: loggedInUser.id,
-          id: Number(artistId),
-        },
-      });
-
-      if (!artist) {
-        res.status(400).json({
-          error: "Artist must belong to user",
-        });
-        return;
-      }
-    }
-    return next();
-  } catch (e) {
-    next(e);
-  }
-  return;
 };
 
 export default {

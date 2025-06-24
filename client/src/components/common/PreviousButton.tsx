@@ -15,6 +15,7 @@ export const PreviousButton: React.FC = () => {
     <Button
       startIcon={<MdSkipPrevious />}
       variant="transparent"
+      aria-label="Play previous track"
       onClick={onClickPrevious}
     />
   );

@@ -8,7 +8,7 @@ import { Link } from "react-router-dom";
 import { useSnackbar } from "state/SnackbarContext";
 import { bp } from "../../constants";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
-import { getReleaseUrl } from "utils/artist";
+import { getManageReleaseUrl, getReleaseUrl } from "utils/artist";
 import { useDeleteTrackGroupMutation } from "queries";
 import ArtistRouterLink, {
   ArtistButton,
@@ -45,14 +45,13 @@ const TrackGroupCard: React.FC<{
     <Box
       key={album.id}
       className={css`
-        display: grid;
-        grid-template-columns: minmax(25%, 25%) minmax(25%, 75%);
-        width: 100%;
-        padding: 0 !important;
+        display: flex;
+        width: auto !important;
+        flex-basis: 50%;
+        flex-grow: 0;
+        padding: 0 2rem 0 0 !important;
+        align-items: center;
 
-        &:not(:first-of-type) {
-          margin-top: 1rem;
-        }
         @media screen and (max-width: ${bp.medium}px) {
           font-size: var(--mi-font-size-small);
           grid-template-columns: max(40%) max(60%);
@@ -73,7 +72,11 @@ const TrackGroupCard: React.FC<{
         `}
       >
         <ArtistRouterLink
-          to={getReleaseUrl(artist, album)}
+          to={
+            album.published
+              ? getReleaseUrl(artist, album)
+              : getManageReleaseUrl(artist, album)
+          }
           className={css`
             @media screen and (max-width: ${bp.small}px) {
               width: 100%;
@@ -81,9 +84,9 @@ const TrackGroupCard: React.FC<{
           `}
         >
           <ImageWithPlaceholder
-            src={album.cover?.sizes?.[600]}
+            src={album.cover?.sizes?.[300]}
             alt={album.title}
-            size={250}
+            size={150}
           />
         </ArtistRouterLink>
       </div>
@@ -94,8 +97,8 @@ const TrackGroupCard: React.FC<{
           flex-direction: column;
           border-radius: var(--mi-border-radius-focus);
           margin-left: 0.5rem;
-          justify-content: space-between;
           padding: 1rem;
+          flex-grow: 1;
           background-color: var(--mi-darken-background-color);
 
           > div > div {
@@ -149,7 +152,6 @@ const TrackGroupCard: React.FC<{
           className={css`
             display: flex;
             width: 100%;
-            justify-content: flex-end !important;
             text-align: right;
             margin-top: 0.5rem;
             align-items: center;
@@ -167,7 +169,7 @@ const TrackGroupCard: React.FC<{
           `}
         >
           <ArtistButtonLink
-            to={`/manage/artists/${album.artistId}/release/${album.id}`}
+            to={getManageReleaseUrl(album.artist, album)}
             size="compact"
             variant="outlined"
           >

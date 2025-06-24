@@ -5,6 +5,7 @@ import { userAuthenticated } from "../../../../../../auth/passport";
 import { doesSubscriptionTierBelongToUser } from "../../../../../../utils/ownership";
 import prisma from "@mirlo/prisma";
 import logger from "../../../../../../logger";
+import { getSiteSettings } from "../../../../../../utils/settings";
 
 export default function () {
   const operations = {
@@ -28,13 +29,17 @@ export default function () {
         });
         return next();
       }
-      logger.info(`Updating tier ${subscriptionTierId}`);
+
       const updatedTier = await prisma.artistSubscriptionTier.update({
         where: { id: Number(subscriptionTierId) },
         data: {
           name: req.body.name,
           description: req.body.description,
           allowVariable: req.body.allowVariable,
+          interval: req.body.interval ?? "MONTH",
+          platformPercent:
+            req.body.platformPercent ??
+            (await getSiteSettings()).platformPercent,
           // TODO: make sure minAmount is alphanumeric
           minAmount: +req.body.minAmount,
           autoPurchaseAlbums: !!req.body.autoPurchaseAlbums,

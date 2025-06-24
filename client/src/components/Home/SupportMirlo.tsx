@@ -8,15 +8,19 @@ import {
 import { ButtonLink } from "components/common/Button";
 import { useTranslation } from "react-i18next";
 import { bp } from "../../constants";
+import { getArtistUrl } from "utils/artist";
+import { queryInstanceArtist } from "queries/settings";
+import { useQuery } from "@tanstack/react-query";
 
 const SupportMirlo = () => {
   const { t } = useTranslation("translation", { keyPrefix: "home" });
+  const { data: instanceArtist } = useQuery(queryInstanceArtist());
 
   return (
     <div
       className={css`
         width: 100%;
-        background-color: #be3455;
+        background-color: #be3455 !important;
         color: var(--mi-white);
 
         @media screen and (max-width: ${bp.medium}px) {
@@ -30,12 +34,13 @@ const SupportMirlo = () => {
     >
       <SplashWrapper
         className={css`
-          margin: 4rem 0;
+          padding: 4rem 0;
+
           display: flex;
           min-height: auto !important;
 
           @media screen and (max-width: ${bp.medium}px) {
-            margin: 0;
+            padding: 0;
             min-height: calc(100vh - 60px) !important;
             flex-direction: column-reverse;
           }
@@ -62,11 +67,16 @@ const SupportMirlo = () => {
             <SplashTitle>{t("sustainedBy")}</SplashTitle>
             <SplashButtonWrapper>
               <ButtonLink
-                to="/team/support"
+                to={
+                  instanceArtist
+                    ? getArtistUrl(instanceArtist) + "/support"
+                    : ""
+                }
                 size="big"
                 rounded
                 className={css`
                   display: block;
+                  border-radius: 9999px !important;
                   text-decoration: none;
                   text-align: center;
 

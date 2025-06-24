@@ -37,7 +37,11 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
     <ManageSectionWrapper>
       <SpaceBetweenDiv>
         <div />
-        <div>
+        <div
+          className={css`
+            display: flex;
+          `}
+        >
           <ButtonLink
             to="supporters"
             className={css`

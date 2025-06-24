@@ -3,13 +3,8 @@ import { finalAudioBucket, removeObjectsFromBucket } from "../utils/minio";
 import ffmpeg from "fluent-ffmpeg";
 import logger from "../logger";
 import { Readable } from "stream";
-import {
-  Artist,
-  Track,
-  TrackArtist,
-  TrackAudio,
-  TrackGroup,
-} from "@mirlo/prisma/client";
+import { Artist, Track, TrackArtist, TrackAudio } from "@mirlo/prisma/client";
+import { Format } from "../jobs/generate-album";
 
 export const deleteTrack = async (trackId: number) => {
   await prisma.track.delete({
@@ -55,21 +50,21 @@ const generateDestination = (
 
 export const convertAudioToFormat = (
   content: {
-    track: Track & { audio: TrackAudio; trackArtists: TrackArtist[] };
+    track: Track & { audio?: TrackAudio; trackArtists: TrackArtist[] };
     artist: Artist;
-    trackGroup: TrackGroup;
+    trackGroup: { title: string | null };
     coverLocation: string;
   },
   stream: Readable,
-  formatDetails: {
-    format: "wav" | "flac" | "opus" | "mp3";
-    audioCodec?: "flac" | "wav" | "opus" | "libmp3lame";
-    audioBitrate?: "320" | "256" | "128";
-  },
+  formatDetails: Format,
   goingTo: string,
   onError?: (err: unknown) => void,
   onSuccess?: (dunno: null) => void
 ) => {
+  if (!content.track.audio) {
+    logger.error("No audio found for track, cannot convert, and so we'll skip");
+    return;
+  }
   const audioId = content.track.audio.id;
   const { format, audioBitrate, audioCodec } = formatDetails;
   logger.info(

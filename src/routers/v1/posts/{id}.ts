@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
 import { userLoggedInWithoutRedirect } from "../../../auth/passport";
 import { User } from "@mirlo/prisma/client";
-import postProcessor, { processSinglePost } from "../../../utils/post";
+import { processSinglePost } from "../../../utils/post";
 import { checkIsUserSubscriber } from "../../../utils/artist";
 import { AppError } from "../../../utils/error";
 
@@ -13,18 +13,39 @@ export default function () {
 
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { id }: { id?: string } = req.params;
+    const { artistId }: { artistId?: string } = req.query;
     const user = req.user as User | undefined;
 
     try {
+      let postForURLSlug;
+      if (artistId) {
+        postForURLSlug = await prisma.post.findFirst({
+          where: {
+            AND: [
+              { urlSlug: { equals: id, mode: "insensitive" } },
+              {
+                artist: {
+                  urlSlug: artistId,
+                },
+              },
+            ],
+          },
+        });
+      }
       const post = await prisma.post.findFirst({
         where: {
-          id: Number(id),
+          id: postForURLSlug?.id || Number(id),
           publishedAt: {
             lte: new Date(),
           },
           isDraft: false,
         },
         include: {
+          tracks: {
+            orderBy: {
+              order: "asc",
+            },
+          },
           featuredImage: true,
           artist: {
             include: {
@@ -44,7 +65,6 @@ export default function () {
           description: "Post not found",
         });
       }
-
       const isUserSubscriber = await checkIsUserSubscriber(user, post.artistId);
       res.json({
         result: processSinglePost(

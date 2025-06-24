@@ -10,9 +10,10 @@ import { useTranslation } from "react-i18next";
 import Wishlist from "components/TrackGroup/Wishlist";
 import PurchaseOrDownloadAlbum from "components/TrackGroup/PurchaseOrDownloadAlbumModal";
 import PauseButton from "./PauseButton";
-import { getReleaseUrl } from "utils/artist";
 import { useAuthContext } from "state/AuthContext";
 import { Link } from "react-router-dom";
+import { determineItemLink } from "components/Artist/ArtistItemLink";
+import FavoriteTrack from "components/TrackGroup/Favorite";
 
 const TrackgroupButtons = styled.div`
   width: 100%;
@@ -198,12 +199,25 @@ const ClickToPlayWrapper = styled.div`
 const ClickToPlay: React.FC<
   React.PropsWithChildren<{
     trackGroup: TrackGroup;
-    trackGroupId?: number;
+    showWishlist?: boolean;
+    showTrackFavorite?: boolean;
+    trackIds?: number[];
+    track?: Track;
     title: string;
     image?: { width: number; height: number; url: string };
     className?: string;
   }>
-> = ({ trackGroup, trackGroupId, title, image, className, children }) => {
+> = ({
+  trackGroup,
+  showWishlist,
+  showTrackFavorite,
+  trackIds,
+  track,
+  title,
+  image,
+  className,
+  children,
+}) => {
   const {
     state: { playing, playerQueueIds, currentlyPlayingIndex },
     dispatch,
@@ -211,32 +225,48 @@ const ClickToPlay: React.FC<
 
   const { user } = useAuthContext();
 
-  const [trackIds, setTrackIds] = React.useState<number[]>([]);
-
+  const [localTrackIds, setLocalTrackIds] = React.useState<number[]>([]);
   const { t } = useTranslation("translation", { keyPrefix: "clickToPlay" });
 
-  const onClickPlay = React.useCallback(async () => {
-    let ids: number[] = [];
-    if (trackGroupId) {
-      const { result } = await api.get<TrackGroup>(
-        `trackGroups/${trackGroupId}`
+  const detectTracksPlayable = React.useCallback(async () => {
+    try {
+      const params = new URLSearchParams();
+      for (const id of trackIds ?? []) {
+        params.append("trackIds[]", id.toString());
+      }
+      const { results } = await api.getMany<number>(
+        `playable?${params.toString()}`
       );
-      ids = result.tracks
-        .filter((item) => item.isPreview)
-        .map((item) => item.id);
-      setTrackIds(ids);
+
+      setLocalTrackIds(results);
+      return results;
+    } catch (e) {
+      console.error("Error fetching playable tracks", e);
     }
-    dispatch({
-      type: "startPlayingIds",
-      playerQueueIds: ids,
-    });
-  }, [dispatch, trackGroupId]);
+    return [];
+  }, [trackIds]);
+
+  React.useEffect(() => {
+    detectTracksPlayable();
+  }, [trackIds]);
+
+  const onClickPlay = React.useCallback(async () => {
+    try {
+      dispatch({
+        type: "startPlayingIds",
+        playerQueueIds: localTrackIds,
+      });
+    } catch (e) {
+      console.error("Error fetching playable tracks", e);
+    }
+  }, [dispatch, localTrackIds, detectTracksPlayable]);
 
   const currentlyPlaying =
     playing &&
     currentlyPlayingIndex !== undefined &&
-    trackIds.includes(playerQueueIds[currentlyPlayingIndex]);
+    localTrackIds.includes(playerQueueIds[currentlyPlayingIndex]);
 
+  const url = determineItemLink(trackGroup.artist, track ?? trackGroup);
   return (
     <ClickToPlayWrapper>
       <Wrapper className={className}>
@@ -247,23 +277,29 @@ const ClickToPlay: React.FC<
            * https://www.w3.org/TR/wai-aria/states_and_properties#aria-hidden
            */}
           {trackGroup.artist && (
-            <Link
-              to={getReleaseUrl(trackGroup.artist, trackGroup)}
-              aria-hidden
-              tabIndex={-1}
-            ></Link>
+            <Link to={url} aria-hidden tabIndex={-1}></Link>
           )}
           <TrackgroupButtons>
             <div>
               <PurchaseOrDownloadAlbum trackGroup={trackGroup} />
             </div>
-            {user && (
+            {user && showWishlist && (
               <div>
                 <Wishlist trackGroup={trackGroup} />
               </div>
             )}
+            {user && showTrackFavorite && (
+              <div>
+                <FavoriteTrack track={trackGroup.tracks[0]} collapse />
+              </div>
+            )}
 
-            {!currentlyPlaying && <PlayButton onPlay={onClickPlay} />}
+            {!currentlyPlaying && (
+              <PlayButton
+                disabled={localTrackIds.length === 0}
+                onPlay={onClickPlay}
+              />
+            )}
 
             {currentlyPlaying && <PauseButton />}
           </TrackgroupButtons>
@@ -271,7 +307,7 @@ const ClickToPlay: React.FC<
           {/*
            * Likewise, this "Go to album" text SHOULD also be used to describe the album link (through aria-label).
            */}
-          <p aria-hidden>{t("goToAlbum")}</p>
+          <p aria-hidden>{t(track ? "goToTrack" : "goToAlbum")}</p>
         </PlayWrapper>
 
         {currentlyPlaying && (

@@ -10,6 +10,7 @@ import {
   MerchImage,
   Artist,
   ArtistAvatar,
+  UploadState,
 } from "@mirlo/prisma/client";
 import prisma from "@mirlo/prisma";
 import { generateFullStaticImageUrl } from "./images";
@@ -27,7 +28,7 @@ import { deleteTrack } from "./tracks";
 import { randomUUID } from "crypto";
 import { Response } from "express";
 import { DefaultArgs } from "@prisma/client/runtime/library";
-import { doesTrackGroupBelongToUser } from "./ownership";
+import { doesTrackBelongToUser, doesTrackGroupBelongToUser } from "./ownership";
 import { AppError } from "./error";
 import { processSingleMerch } from "./merch";
 
@@ -157,6 +158,14 @@ export const trackGroupSingleInclude = (options: {
         license: true,
       },
       orderBy: { order: "asc" },
+    },
+    paymentToUser: {
+      select: {
+        id: true,
+        name: true,
+        urlSlug: true,
+        userAvatar: true,
+      },
     },
     artist: true,
     merch: {
@@ -359,15 +368,99 @@ export const registerPurchase = async ({
   return refreshedPurchase;
 };
 
+export const registerTrackPurchase = async ({
+  userId,
+  trackId,
+  pricePaid,
+  currencyPaid,
+  paymentProcessorKey,
+}: {
+  userId: number;
+  pricePaid: number;
+  currencyPaid: string;
+  paymentProcessorKey: string | null;
+  trackId: number;
+}) => {
+  const token = randomUUID();
+
+  let purchase = await prisma.userTrackPurchase.findFirst({
+    where: {
+      userId: Number(userId),
+      trackId: Number(trackId),
+    },
+  });
+
+  if (purchase) {
+    await prisma.userTrackPurchase.update({
+      where: {
+        userId_trackId: {
+          userId: Number(userId),
+          trackId: Number(trackId),
+        },
+      },
+      data: {
+        singleDownloadToken: token,
+      },
+    });
+  }
+
+  if (!purchase) {
+    purchase = await prisma.userTrackPurchase.create({
+      data: {
+        userId: Number(userId),
+        trackId: Number(trackId),
+        pricePaid,
+        currencyPaid,
+        stripeSessionKey: paymentProcessorKey,
+        singleDownloadToken: token,
+      },
+    });
+  }
+
+  const refreshedPurchase = await prisma.userTrackPurchase.findFirst({
+    where: {
+      userId: Number(userId),
+      trackId: Number(trackId),
+    },
+    include: {
+      track: {
+        include: {
+          trackGroup: {
+            include: {
+              artist: true,
+            },
+          },
+        },
+      },
+      user: {
+        select: {
+          email: true,
+          id: true,
+        },
+      },
+    },
+  });
+
+  if (refreshedPurchase) {
+    await prisma.notification.create({
+      data: {
+        notificationType: "USER_BOUGHT_YOUR_TRACK",
+        userId: refreshedPurchase?.track.trackGroup.artist.userId,
+        relatedUserId: Number(userId),
+        trackId: Number(trackId),
+        artistId: refreshedPurchase?.track.trackGroup.artistId,
+      },
+    });
+  }
+  return refreshedPurchase;
+};
+
 export const basicTrackGroupInclude = {
   include: {
     tracks: {
       include: {
-        audio: true,
+        audio: { where: { uploadState: UploadState["SUCCESS"] } },
         trackArtists: true,
-      },
-      where: {
-        deletedAt: null,
       },
     },
     cover: {
@@ -381,6 +474,57 @@ export const basicTrackGroupInclude = {
       },
     },
   },
+};
+
+export const findTrackPurchaseAndVoidToken = async (
+  trackId: number,
+  user: User
+) => {
+  let isCreator;
+  try {
+    isCreator = await doesTrackBelongToUser(Number(trackId), user);
+  } catch (e) {}
+  logger.info(`trackId: ${trackId} isCreator: ${isCreator}`);
+
+  const purchase = await prisma.userTrackPurchase.findFirst({
+    where: {
+      trackId: Number(trackId),
+      ...(!isCreator
+        ? {
+            userId: Number(user.id),
+            track: {
+              trackGroup: {
+                published: true,
+              },
+            },
+          }
+        : {}),
+    },
+    include: {
+      track: {
+        include: {
+          trackGroup: basicTrackGroupInclude,
+        },
+      },
+    },
+  });
+
+  if (!purchase) {
+    throw new AppError({
+      httpCode: 404,
+      description: `trackId: ${trackId} no purchase found`,
+    });
+  }
+
+  // TODO: do we want a token to be reset after download?
+  // If so we probably want to do this once the download is
+  // complete on the client otherwise there might be errors
+  // await setDownloadTokenToNull({
+  //   userId: purchase.userId,
+  //   trackGroupId: purchase.trackGroupId,
+  // });
+
+  return purchase;
 };
 
 export const findPurchaseAndVoidToken = async (
@@ -426,6 +570,44 @@ export const findPurchaseAndVoidToken = async (
   // });
 
   return purchase;
+};
+
+export const findTrackPurchaseBasedOnTokenAndUpdate = async (
+  trackId: number,
+  token: string,
+  userId?: number
+) => {
+  const purchase = await prisma.userTrackPurchase.findFirst({
+    where: {
+      userId: userId,
+      singleDownloadToken: token,
+      trackId: Number(trackId),
+    },
+    include: {
+      track: {
+        include: {
+          trackGroup: basicTrackGroupInclude,
+        },
+      },
+    },
+  });
+
+  if (!purchase) {
+    throw new AppError({
+      httpCode: 404,
+      description: `Track Purchase doesn't exist for trackId: ${trackId}, userId: ${userId}`,
+    });
+  }
+
+  // TODO: do we want a token to be reset after download?
+  // If so we probably want to do this once the download is
+  // complete on the client otherwise there might be errors
+  // await setDownloadTokenToNull({
+  //   userId: user?.id,
+  //   trackGroupId: Number(trackGroupId),
+  // });
+
+  return purchase.track;
 };
 
 export const findPurchaseBasedOnTokenAndUpdate = async (
@@ -507,10 +689,13 @@ export const processSingleTrackGroup = (
 });
 
 export const processTrackGroupQueryOrder = (orderByString?: unknown) => {
-  let orderByObj: Prisma.TrackGroupOrderByWithRelationAndSearchRelevanceInput =
-    {
-      releaseDate: "desc",
-    };
+  let orderByObj: Partial<{
+    releaseDate: "desc";
+    id: "desc";
+    createdAt: "desc";
+  }> = {
+    releaseDate: "desc",
+  };
   if (orderByString === "random") {
   } else if (orderByString === "id") {
     orderByObj = {

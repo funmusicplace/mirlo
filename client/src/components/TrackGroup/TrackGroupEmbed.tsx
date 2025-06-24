@@ -93,6 +93,7 @@ const TrackGroupEmbed: React.FC<{
       <div>
         <ArtistButton
           onlyIcon
+          title={t("embedOrShare") ?? ""}
           onClick={() => setIsPopupOpen(true)}
           startIcon={<BsShare />}
           className={css`

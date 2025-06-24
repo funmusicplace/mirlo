@@ -1,12 +1,4 @@
 import { NextFunction, Request, Response } from "express";
-import {
-  User,
-  Prisma,
-  TrackGroup,
-  Post,
-  Artist,
-  ArtistSubscriptionTier,
-} from "@mirlo/prisma/client";
 
 import prisma from "@mirlo/prisma";
 import {
@@ -18,7 +10,39 @@ import { AppError } from "../../../../../../utils/error";
 export default function () {
   const operations = {
     DELETE: [userAuthenticated, artistBelongsToLoggedInUser, DELETE],
+    PUT: [userAuthenticated, artistBelongsToLoggedInUser, PUT],
   };
+  async function PUT(req: Request, res: Response, next: NextFunction) {
+    let { artistId, labelUserId }: { artistId?: string; labelUserId?: string } =
+      req.params;
+
+    try {
+      const { isArtistApproved } = req.body;
+
+      await prisma.artistLabel.updateMany({
+        where: {
+          labelUserId: Number(labelUserId),
+          artistId: Number(artistId),
+        },
+        data: {
+          isArtistApproved,
+          canLabelManageArtist: isArtistApproved,
+          canLabelAddReleases: isArtistApproved,
+        },
+      });
+
+      const labels = await prisma.artistLabel.findMany({
+        where: {
+          artistId: Number(artistId),
+        },
+      });
+      res.json({
+        results: labels,
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
 
   async function DELETE(req: Request, res: Response, next: NextFunction) {
     let { artistId, labelUserId }: { artistId?: string; labelUserId?: string } =

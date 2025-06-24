@@ -13,21 +13,37 @@ import { queryTrackGroups } from "queries";
 import { useQuery } from "@tanstack/react-query";
 import { queryTags } from "queries/tags";
 import TrackGroupPills from "./TrackGroup/TrackGroupPills";
+import { ButtonAnchor } from "./common/Button";
+import { FaRss } from "react-icons/fa";
 
 const pageSize = 40;
+const futureReleasesPageSize = 6;
 
-const Releases = () => {
+const Releases: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
   const [params] = useSearchParams();
   const { t } = useTranslation("translation", { keyPrefix: "releases" });
   const { page, PaginationComponent } = usePagination({ pageSize });
 
   const tag = params.get("tag");
+  const search = params.get("search");
 
-  const { data: trackGroups } = useQuery(
+  const { data: newReleases } = useQuery(
     queryTrackGroups({
-      skip: pageSize * page,
-      take: pageSize,
+      skip: limit * page,
+      take: limit,
       tag: tag || undefined,
+      title: search ?? undefined,
+      isReleased: "released",
+    })
+  );
+
+  const { data: futureReleases } = useQuery(
+    queryTrackGroups({
+      skip: futureReleasesPageSize * page,
+      take: futureReleasesPageSize,
+      tag: tag || undefined,
+      title: search ?? undefined,
+      isReleased: "not-released",
     })
   );
 
@@ -44,14 +60,21 @@ const Releases = () => {
   return (
     <div
       className={css`
+        padding: 2rem 0;
+        background-color: var(--mi-white);
+
         @media screen and (max-width: ${bp.medium}px) {
           margin-bottom: 0rem;
         }
       `}
     >
-      {" "}
       {!tag && (
-        <SectionHeader>
+        <SectionHeader
+          className={css`
+            position: sticky;
+            background-color: var(--mi-white);
+          `}
+        >
           <WidthContainer variant="big">
             <h2 className="h5 section-header__heading">Popular Tags</h2>
             <div
@@ -64,22 +87,103 @@ const Releases = () => {
           </WidthContainer>
         </SectionHeader>
       )}
+      {(futureReleases?.results ?? []).length > 0 && (
+        <>
+          <SectionHeader>
+            <WidthContainer
+              variant="big"
+              justify="space-between"
+              className={css`
+                flex-direction: row;
+                display: flex;
+              `}
+            >
+              <h1 className="h5 section-header__heading" id={headingId}>
+                {t("futureReleases")}
+              </h1>
+              <ButtonAnchor
+                target="_blank"
+                href={`${import.meta.env.VITE_API_DOMAIN}/v1/trackGroups?tag=${tag}&released=not-released&format=rss`}
+                rel="noreferrer"
+                onlyIcon
+                className={css`
+                  margin-top: 0.25rem;
+                `}
+                startIcon={<FaRss />}
+              />
+            </WidthContainer>
+          </SectionHeader>
+          <div
+            className={css`
+              padding-top: 0.25rem;
+            `}
+          >
+            <WidthContainer variant="big" justify="center">
+              <div
+                className={css`
+                  display: flex;
+                  width: 100%;
+                  flex-direction: row;
+                  flex-wrap: wrap;
+                  padding: var(--mi-side-paddings-xsmall);
+                `}
+              >
+                <TrackgroupGrid
+                  gridNumber="6"
+                  as="ul"
+                  aria-labelledby={headingId}
+                  role="list"
+                >
+                  {futureReleases?.results?.map((trackGroup) => (
+                    <ArtistTrackGroup
+                      key={trackGroup.id}
+                      trackGroup={trackGroup}
+                      as="li"
+                      size="small"
+                    />
+                  ))}
+                </TrackgroupGrid>
+              </div>
+            </WidthContainer>
+          </div>
+        </>
+      )}
       <SectionHeader>
-        <WidthContainer variant="big" justify="center">
+        <WidthContainer
+          variant="big"
+          justify="space-between"
+          className={css`
+            flex-direction: row;
+            display: flex;
+          `}
+        >
           <h1 className="h5 section-header__heading" id={headingId}>
             {tag ? (
               <Trans
                 t={t}
                 i18nKey={"releasesForTag"}
-                components={{ 0: <strong></strong> }}
+                components={{ tag: <strong></strong> }}
                 values={{ tag }}
               />
+            ) : search ? (
+              t("recentReleasesFor", { search })
             ) : (
               t("recentReleases")
             )}
           </h1>
+          <ButtonAnchor
+            target="_blank"
+            href={`${import.meta.env.VITE_API_DOMAIN}/v1/trackGroups?tag=${tag}&released=released&format=rss`}
+            rel="noreferrer"
+            onlyIcon
+            className={css`
+              margin-top: 0.25rem;
+            `}
+            startIcon={<FaRss />}
+          />
         </WidthContainer>
       </SectionHeader>
+
       <div
         className={css`
           padding-top: 0.25rem;
@@ -101,7 +205,7 @@ const Releases = () => {
               aria-labelledby={headingId}
               role="list"
             >
-              {trackGroups?.results?.map((trackGroup) => (
+              {newReleases?.results?.map((trackGroup) => (
                 <ArtistTrackGroup
                   key={trackGroup.id}
                   trackGroup={trackGroup}
@@ -111,8 +215,8 @@ const Releases = () => {
             </TrackgroupGrid>
           </div>
 
-          {trackGroups && (
-            <PaginationComponent amount={trackGroups.results.length} />
+          {newReleases && (
+            <PaginationComponent amount={newReleases.results.length} />
           )}
         </WidthContainer>
       </div>

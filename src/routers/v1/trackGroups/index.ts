@@ -5,6 +5,7 @@ import processor, {
   processTrackGroupQueryOrder,
   whereForPublishedTrackGroups,
 } from "../../../utils/trackGroup";
+import { turnItemsIntoRSS } from "../../../utils/rss";
 
 export default function () {
   const operations = {
@@ -12,13 +13,16 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
+    const { format } = req.query;
+
     const {
       skip: skipQuery,
-      take = 10,
+      take = format === "rss" ? 50 : 10,
       orderBy,
       tag,
       artistId,
       title,
+      isReleased,
     } = req.query;
     const distinctArtists = req.query.distinctArtists === "true";
 
@@ -36,6 +40,17 @@ export default function () {
           },
         };
       }
+
+      if (isReleased === "released") {
+        where.releaseDate = {
+          lte: new Date(),
+        };
+      } else if (isReleased === "not-released") {
+        where.releaseDate = {
+          gt: new Date(),
+        };
+      }
+
       if (artistId) {
         where.artistId = Number(artistId);
       }
@@ -80,14 +95,28 @@ export default function () {
               id: true,
             },
           },
-
+          tracks: { orderBy: { order: "asc" }, where: { deletedAt: null } },
           cover: true,
         },
       });
-      res.json({
-        results: trackGroups.map(processor.single),
-        total: itemCount,
-      });
+      if (format === "rss") {
+        const feed = await turnItemsIntoRSS(
+          {
+            name: tag ? `All Mirlo Releases for ${tag}` : "All Mirlo Releases",
+            apiEndpoint: "trackGroups",
+            description: "Mirlo's most recent releases",
+            clientUrl: "releases",
+          },
+          trackGroups
+        );
+        res.set("Content-Type", "application/rss+xml");
+        res.send(feed.xml());
+      } else {
+        res.json({
+          results: trackGroups.map(processor.single),
+          total: itemCount,
+        });
+      }
     } catch (e) {
       next(e);
     }

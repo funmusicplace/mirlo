@@ -40,8 +40,10 @@ describe("send-notification-email", () => {
       email: "artist@artist.com",
     });
 
+    const followerEmail = "follower+subscription@follower.com";
+
     const { user: followerUser } = await createUser({
-      email: "follower@follower.com",
+      email: followerEmail,
       emailConfirmationToken: null,
     });
 
@@ -75,10 +77,10 @@ describe("send-notification-email", () => {
     assert.equal(args[0], "send-mail");
     const data = args[1];
     assert.equal(data.template, "announce-post-published");
-    assert.equal(data.message.to, "follower@follower.com");
+    assert.equal(data.message.to, followerEmail);
     assert.equal(data.locals.artist.id, artist.id);
     assert.equal(data.locals.post.id, post.id);
-    assert.equal(data.locals.email, followerUser.email);
+    assert.equal(data.locals.email, encodeURIComponent(followerEmail));
   });
 
   it("should not send email if post is marked as not shouldSendEmail", async () => {

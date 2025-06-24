@@ -24,11 +24,12 @@ import { sendMailQueue } from "./queues/send-mail-queue";
 import path from "node:path";
 import activityPub from "./activityPub";
 import parseIndex from "./parseIndex";
+import qs from "qs";
 
 dotenv.config();
 
 const app = express();
-
+app.set("query parser", (str: string) => qs.parse(str));
 // See https://github.com/express-rate-limit/express-rate-limit/wiki/Troubleshooting-Proxy-Issues
 app.set("trust proxy", 2);
 app.get("/ip", (request, response) => response.send(request.ip));
@@ -54,12 +55,12 @@ app.use(
 
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
-app.use(passport.initialize());
+// app.use(passport.initialize()); // Supposedly we don't need this anymore
 
 if (!isDev) {
   const limiter = rateLimit({
     windowMs: 60 * 1000, // 1 minute
-    limit: 200, // 200 requests per minute, which is absurd, but one page load gets us 20
+    limit: 400, // 400 requests per minute, which is absurd, but one page load gets us 80
     // FIXME: is there a way to have this be determined on whether the user is logged in?
     standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   });
@@ -70,6 +71,8 @@ if (!isDev) {
 const routes = [
   "tags",
   "trackGroups",
+  "trackGroups/topSold",
+  "trackGroups/mostPlayed",
   "trackGroups/testExistence",
   "trackGroups/{id}",
   "trackGroups/{id}/download",
@@ -79,16 +82,27 @@ const routes = [
   "trackGroups/{id}/wishlist",
   "trackGroups/{id}/emailDownload",
   "trackGroups/{id}/generate",
+  "playable",
+  "settings/{setting}",
   "tracks",
+  "tracks/topSold",
+  "tracks/mostPlayed",
   "tracks/{id}",
   "tracks/{id}/audio",
+  "tracks/{id}/purchase",
+  "tracks/{id}/download",
+  "tracks/{id}/generate",
+  "tracks/{id}/testOwns",
+  "tracks/{id}/favorite",
   "tracks/{id}/stream/{segment}",
   "artists",
   "artists/testExistence",
   "artists/{id}",
   "artists/{id}/subscribe",
+  "artists/{id}/purchaseCatalogue",
   "artists/{id}/feed",
   "artists/{id}/follow",
+  "artists/{id}/posts",
   "artists/{id}/followers",
   "artists/{id}/inbox",
   "artists/{id}/confirmFollow",
@@ -100,23 +114,27 @@ const routes = [
   "posts/{id}",
   "licenses",
   "labels",
+  "labels/{id}",
   "users",
+  "users/testExistence",
   "users/{userId}",
   "users/{userId}/confirmEmail",
+  "users/{userId}/avatar",
   "users/{userId}/notifications",
   "users/{userId}/notifications/unreadCount",
   "users/{userId}/notifications/{notificationId}",
-  "users/{userId}/trackGroupPurchases",
   "users/{userId}/purchases",
   "users/{userId}/wishlist",
   "users/{userId}/charges",
   "users/{userId}/stripe/connect",
+  "users/{userId}/stripe/connectComplete",
   "users/{userId}/stripe/checkAccountStatus",
   "users/{userId}/feed",
-  "users/{userId}/testExistence",
   "manage/subscriptions",
   "manage/subscriptions/{subscriptionId}",
   "manage/artists",
+  "manage/label",
+  "manage/label/artists/{artistId}",
   "manage/artists/{artistId}",
   "manage/artists/{artistId}/trackGroups",
   "manage/artists/{artistId}/merch",
@@ -143,6 +161,7 @@ const routes = [
   "manage/purchases/{purchaseId}",
   "manage/tracks",
   "manage/tracks/{trackId}/audio",
+  "manage/tracks/{trackId}/downloadOriginal",
   "manage/tracks/{trackId}",
   "manage/tracks/{trackId}/trackArtists",
   "manage/posts/{postId}/images",
@@ -152,6 +171,7 @@ const routes = [
   "manage/posts/{postId}",
   "manage/posts",
   "checkout",
+  "checkout/status",
   "webhooks/stripe",
   "webhooks/stripe/connect",
   "jobs",
@@ -187,6 +207,7 @@ initialize({
 
 app.use(
   "/docs",
+  // @ts-ignore
   swaggerUi.serve,
   swaggerUi.setup(undefined, {
     swaggerOptions: {
@@ -199,7 +220,7 @@ if (!isDev) {
   // Set a rate limiter on all auth endpoints to be only 5 requests a minute
   const authLimiter = rateLimit({
     windowMs: 60 * 1000, // 1 minute
-    limit: 100, // Limit each IP to 100 requests per `window`
+    limit: 50, // Limit each IP to 100 requests per `window`
     standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers,
   });
 
@@ -264,7 +285,11 @@ app.use("/", async (req, res) => {
         req.path.includes(".ico") ||
         req.path.includes(".webp") ||
         req.path.includes(".md") ||
-        req.path.includes(".pdf")
+        req.path.includes(".pdf") ||
+        req.path.includes(".woff") ||
+        req.path.includes(".woff2") ||
+        req.path.includes("robots.txt") ||
+        req.path.startsWith("/static/")
       )
     ) {
       const html = await parseIndex(req.path);

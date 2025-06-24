@@ -29,6 +29,7 @@ const TrackWidget = () => {
   const { t: artistTranslation } = useTranslation("translation", {
     keyPrefix: "artist",
   });
+  const [artist, setArtist] = React.useState<Artist>();
 
   const embeddedInMirlo = inIframe() && inMirlo();
 
@@ -37,7 +38,13 @@ const TrackWidget = () => {
       setIsLoading(true);
       try {
         const results = await api.get<Track>(`tracks/${params.id}`);
+        const track = results.result;
         setTrack(results.result);
+
+        const response = await api.get<Artist>(
+          `artists/${track.trackGroup.artistId}`
+        );
+        setArtist(response.result);
       } catch (e) {
         console.error("e", e);
       } finally {
@@ -70,7 +77,7 @@ const TrackWidget = () => {
         </div>
       )}
       {track?.id && (
-        <WidgetWrapper>
+        <WidgetWrapper artistColors={artist?.properties?.colors}>
           <MetaCard
             title={`${track.title} by ${
               track.trackGroup.artist?.name ?? "Unknown"
@@ -82,6 +89,7 @@ const TrackWidget = () => {
           <FlexWrapper
             className={css`
               align-items: center;
+              width: 100%;
             `}
           >
             <ImageWithPlaceholder
@@ -92,6 +100,7 @@ const TrackWidget = () => {
               }
               alt={track.title}
               size={150}
+              square
               className={css`
                 width: auto !important;
                 border-radius: 0.3rem 0 0 0.3rem;

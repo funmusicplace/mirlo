@@ -74,6 +74,7 @@ export default function () {
 
       // Check if the options passed are possible
       const finalOptionIds: string[] = [];
+
       const additionalPrices: number[] = [];
       merch.optionTypes.forEach((ot) => {
         ot.options.forEach((o) => {
@@ -98,7 +99,7 @@ export default function () {
       const stripeAccountId = merch.artist.user.stripeAccountId;
 
       const { priceNumber, isPriceZero } = determinePrice(
-        Number(price),
+        price,
         merch.minPrice
       );
 

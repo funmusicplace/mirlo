@@ -6,11 +6,6 @@ import prisma from "@mirlo/prisma";
 import slugify from "slugify";
 import { AppError } from "../../../../utils/error";
 
-type Params = {
-  artistId: number;
-  userId: string;
-};
-
 const forbiddenNames = [
   "mirlo",
   "admin",
@@ -21,6 +16,8 @@ const forbiddenNames = [
   "pages",
   "widget",
   "post",
+  "label",
+  "track",
   "login",
   "password-reset",
   "artists",
@@ -91,7 +88,7 @@ export default function () {
       }
 
       const slug = slugify(
-        urlSlug?.toLowerCase() ?? slugify(name.toLowerCase()),
+        urlSlug?.toLowerCase() ?? slugify(name, { lower: true, strict: true }),
         {
           strict: true,
         }
@@ -117,6 +114,19 @@ export default function () {
           },
         },
       });
+
+      if (user.isLabelAccount) {
+        await prisma.artistLabel.create({
+          data: {
+            artistId: result.id,
+            labelUserId: user.id,
+            isLabelApproved: true,
+            canLabelManageArtist: true,
+            canLabelAddReleases: true,
+            isArtistApproved: true,
+          },
+        });
+      }
       res.json({ result });
     } catch (e) {
       next(e);

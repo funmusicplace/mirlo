@@ -15,6 +15,7 @@ import { requestApp } from "../utils";
 import {
   createBucketIfNotExists,
   finalAudioBucket,
+  trackFormatBucket,
 } from "../../../src/utils/minio";
 
 describe("trackGroups/{id}/download", () => {
@@ -83,13 +84,7 @@ describe("trackGroups/{id}/download", () => {
 
       assert.notEqual(response.body.result.jobId, undefined);
 
-      const updatedPurchase = await prisma.userTrackGroupPurchase.findFirst({
-        where: {
-          trackGroupId: purchase.trackGroupId,
-          userId: purchase.trackGroupId,
-        },
-      });
-      assert.equal(updatedPurchase?.singleDownloadToken, null);
+      assert.equal(response.body.message, "We've started generating the album");
     });
 
     it("should GET / success with logged in user", async () => {

@@ -1,7 +1,7 @@
 import { css } from "@emotion/css";
 
 import { useParams } from "react-router-dom";
-import ClickToPlayAlbum from "../common/ClickToPlayAlbum";
+import ClickToPlayTracks from "../common/ClickToPlayTracks";
 import Box from "../common/Box";
 import { useTranslation } from "react-i18next";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
@@ -16,7 +16,7 @@ import MarkdownContent from "components/common/MarkdownContent";
 import Wishlist from "./Wishlist";
 import ReleaseDate from "./ReleaseDate";
 import WidthContainer from "components/common/WidthContainer";
-import TrackGroupTitle from "./TrackGroupTitle";
+import TrackGroupTitle from "./ItemViewTitle";
 import styled from "@emotion/styled";
 import SupportArtistPopUp from "components/common/SupportArtistPopUp";
 import TrackGroupPills from "./TrackGroupPills";
@@ -83,7 +83,8 @@ export const ImageAndDetailsWrapper = styled.div`
 export const AboutWrapper = styled.div<{
   trackGroupCredits: boolean;
 }>`
-  margin: 1.25rem 0 1.25rem;
+  margin: 1.25rem 0;
+  padding: 0.25rem;
   ${(props) =>
     props.trackGroupCredits
       ? "padding: 0.5rem 3rem 0.25rem 0rem;"
@@ -112,10 +113,10 @@ export const CreditsWrapper = styled.div<{
     line-height: 1.3rem;
   }
   ${(props) =>
-    props.trackGroupCredits ? "border-left: 1px solid;" : "display: none;"}
+    props.trackGroupCredits ? "border-left: 1px solid; " : "display: none;"}
   ${(props) =>
     props.trackGroupAbout
-      ? "margin: 1.25rem 0; padding: 0.5rem 0rem 0.5rem 2rem;"
+      ? "margin: 1.25rem 1.25rem; padding: 0.5rem 0rem 0.5rem 2rem;"
       : "margin: .25rem 0 1.25rem 0; border-left: none; padding: 0.5rem 0.25rem 0.5rem 0;"}
   @media screen and (max-width: ${bp.medium}px) {
     ${(props) => (props.trackGroupCredits ? "border-top: 1px solid;" : "")}
@@ -236,7 +237,9 @@ function TrackGroup() {
                 <ImageWrapper>
                   <ImageWithPlaceholder
                     src={trackGroup.cover?.sizes?.[600]}
-                    alt={trackGroup.title}
+                    alt={t(`coverForTitle`, {
+                      title: trackGroup.title,
+                    })}
                     size={600}
                   />
                 </ImageWrapper>
@@ -268,8 +271,8 @@ function TrackGroup() {
                 )}
 
                 <SmallScreenPlayWrapper>
-                  <ClickToPlayAlbum
-                    trackGroupId={trackGroup.id}
+                  <ClickToPlayTracks
+                    trackIds={trackGroup.tracks.map((t) => t.id)}
                     className={css`
                       width: 50px !important;
                       margin-right: 10px;
@@ -309,18 +312,10 @@ function TrackGroup() {
           </TrackgroupInfosWrapper>
 
           <TrackGroupPills tags={trackGroup.tags} />
-          <div
-            className={css`
-              margin-top: 2rem;
-              text-align: center;
-              display: flex;
-              justify-content: center;
-            `}
-          >
-            {trackGroup.artist && (
-              <SupportArtistPopUp artist={trackGroup.artist} />
-            )}
-          </div>
+
+          {trackGroup.artist && (
+            <SupportArtistPopUp artist={trackGroup.artist} />
+          )}
         </div>
       </Container>
     </WidthContainer>

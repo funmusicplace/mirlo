@@ -12,17 +12,33 @@ export default function () {
 
   async function GET(req: Request, res: Response, next: NextFunction) {
     let { id }: { id?: string } = req.params;
+    const { artistId }: { artistId?: string } = req.query;
 
     if (!id) {
       return res.status(400);
     }
 
     try {
+      let merchForURLSlug;
+      if (artistId) {
+        merchForURLSlug = await prisma.merch.findFirst({
+          where: {
+            AND: [
+              { urlSlug: { equals: id, mode: "insensitive" } },
+              {
+                artist: {
+                  urlSlug: artistId,
+                },
+              },
+            ],
+          },
+        });
+      }
       const merch = await prisma.merch.findFirst({
         where: {
           isPublic: true,
           deletedAt: null,
-          id,
+          id: merchForURLSlug?.id || id,
           shippingDestinations: {
             some: {},
           },

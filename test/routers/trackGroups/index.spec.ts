@@ -1,5 +1,4 @@
 import assert from "node:assert";
-import { Prisma } from "@mirlo/prisma/client";
 
 import * as dotenv from "dotenv";
 dotenv.config();
@@ -12,6 +11,8 @@ import {
 } from "../../utils";
 
 import { requestApp } from "../utils";
+import Parser from "rss-parser";
+import { faker } from "@faker-js/faker";
 
 describe("trackGroups", () => {
   beforeEach(async () => {
@@ -173,6 +174,134 @@ describe("trackGroups", () => {
       assert.equal(response.body.results[0].id, tg.id);
 
       assert(response.statusCode === 200);
+    });
+  });
+
+  describe("RSS", () => {
+    it("should not display an unpublished album in an RSS feed", async () => {
+      const { user } = await createUser({ email: "test@testcom" });
+      const artist = await createArtist(user.id);
+      await createTrackGroup(artist.id, { published: false });
+      const response = await requestApp
+        .get("trackGroups?format=rss")
+        .set("Accept", "application/json");
+
+      assert(response.statusCode === 200);
+      let parser = new Parser();
+
+      const obj = await parser.parseString(response.text);
+      console.log("obj", obj);
+
+      assert.equal(
+        obj.feedUrl,
+        `${process.env.API_DOMAIN}/v1/trackGroups?format=rss`
+      );
+      assert.equal(obj.title, "All Mirlo Releases Feed");
+      assert.equal(obj.items.length, 0);
+    });
+
+    it("should display an published album in an RSS feed", async () => {
+      const { user } = await createUser({ email: "test@testcom" });
+      const artist = await createArtist(user.id);
+      const releaseDate = faker.date.past();
+      const tg = await createTrackGroup(artist.id, {
+        published: true,
+        isDrafts: false,
+        releaseDate,
+      });
+      const response = await requestApp
+        .get("trackGroups?format=rss")
+        .set("Accept", "application/json");
+
+      assert(response.statusCode === 200);
+      let parser = new Parser();
+
+      const obj = await parser.parseString(response.text);
+
+      assert.equal(
+        obj.feedUrl,
+        `${process.env.API_DOMAIN}/v1/trackGroups?format=rss`
+      );
+      assert.equal(obj.items.length, 1);
+      assert.equal(obj.items[0].title, `${tg.title} by ${artist.name}`);
+    });
+
+    it("should display an published album in an RSS feed when filtering by isReleased ", async () => {
+      const { user } = await createUser({ email: "test@testcom" });
+      const artist = await createArtist(user.id);
+      const releaseDate = faker.date.past();
+      const tg = await createTrackGroup(artist.id, {
+        published: true,
+        isDrafts: false,
+        releaseDate,
+      });
+      const response = await requestApp
+        .get("trackGroups?format=rss&isReleased=released")
+        .set("Accept", "application/json");
+
+      assert(response.statusCode === 200);
+      let parser = new Parser();
+
+      const obj = await parser.parseString(response.text);
+
+      assert.equal(
+        obj.feedUrl,
+        `${process.env.API_DOMAIN}/v1/trackGroups?format=rss`
+      );
+      assert.equal(obj.items.length, 1);
+      assert.equal(obj.items[0].title, `${tg.title} by ${artist.name}`);
+    });
+
+    it("should not display a published album with a future releasedate in an RSS feed when filtering by isReleased ", async () => {
+      const { user } = await createUser({ email: "test@testcom" });
+      const artist = await createArtist(user.id);
+      const releaseDate = faker.date.future();
+      const tg = await createTrackGroup(artist.id, {
+        published: true,
+        isDrafts: false,
+        releaseDate,
+      });
+      const response = await requestApp
+        .get("trackGroups?format=rss&isReleased=released")
+        .set("Accept", "application/json");
+
+      assert(response.statusCode === 200);
+      let parser = new Parser();
+
+      const obj = await parser.parseString(response.text);
+
+      assert.equal(
+        obj.feedUrl,
+        `${process.env.API_DOMAIN}/v1/trackGroups?format=rss`
+      );
+      assert.equal(obj.items.length, 0);
+    });
+
+    it("should display a published album with a future releasedate in an RSS feed when filtering by isReleased=not-released", async () => {
+      const { user } = await createUser({ email: "test@testcom" });
+      const artist = await createArtist(user.id);
+      const releaseDate = faker.date.future();
+      const tg = await createTrackGroup(artist.id, {
+        published: true,
+        isDrafts: false,
+        releaseDate,
+      });
+      const response = await requestApp
+        .get("trackGroups?format=rss&isReleased=not-released")
+        .set("Accept", "application/json");
+
+      assert(response.statusCode === 200);
+      let parser = new Parser();
+
+      const obj = await parser.parseString(response.text);
+
+      assert.equal(
+        obj.feedUrl,
+        `${process.env.API_DOMAIN}/v1/trackGroups?format=rss`
+      );
+      assert.equal(obj.title, "All Mirlo Releases Feed");
+      assert.equal(obj.items.length, 1);
+      assert.equal(obj.items[0].title, `${tg.title} by ${artist.name}`);
     });
   });
 });

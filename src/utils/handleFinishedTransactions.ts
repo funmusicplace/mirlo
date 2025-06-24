@@ -4,7 +4,7 @@ import { MerchOption } from "@mirlo/prisma/client";
 
 import { logger } from "../logger";
 import sendMail from "../jobs/send-mail";
-import { registerPurchase } from "./trackGroup";
+import { registerPurchase, registerTrackPurchase } from "./trackGroup";
 import { registerSubscription } from "./subscriptionTier";
 import { getSiteSettings } from "./settings";
 import { Job } from "bullmq";
@@ -84,6 +84,190 @@ export const handleTrackGroupPurchase = async (
             pricePaid,
             platformCut:
               ((trackGroup.platformPercent ?? settings.platformPercent) *
+                pricePaid) /
+              100,
+            email: user.email,
+          },
+        },
+      } as Job);
+    }
+
+    return purchase;
+  } catch (e) {
+    logger.error(`Error creating album purchase: ${e}`);
+  }
+};
+
+export const handleCataloguePurchase = async (
+  userId: number,
+  artistId: number,
+  session?: Stripe.Checkout.Session,
+  newUser?: boolean
+) => {
+  try {
+    const artist = await prisma.artist.findFirst({
+      where: {
+        id: artistId,
+      },
+      include: {
+        user: true,
+      },
+    });
+    const artistTrackGroups = await prisma.trackGroup.findMany({
+      where: {
+        artistId: artistId,
+        paymentToUserId: null,
+        releaseDate: {
+          lte: new Date(),
+        },
+      },
+      include: {
+        artist: true,
+      },
+    });
+
+    const amountPaidPerTrackGroup =
+      (session?.amount_total ?? 0) / artistTrackGroups.length;
+
+    await Promise.all(
+      artistTrackGroups.map(async (trackGroup) => {
+        await registerPurchase({
+          userId: Number(userId),
+          trackGroupId: Number(trackGroup.id),
+          pricePaid: Number(amountPaidPerTrackGroup.toFixed(2)),
+          currencyPaid: session?.currency ?? "usd",
+          paymentProcessorKey: session?.id ?? null,
+        });
+      })
+    );
+
+    const settings = await getSiteSettings();
+
+    const user = await prisma.user.findFirst({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (user && artist && artistTrackGroups.length > 0) {
+      await sendMail({
+        data: {
+          template: "catalogue-receipt",
+          message: {
+            to: user.email,
+          },
+          locals: {
+            artist,
+            trackGroups: artistTrackGroups,
+            email: user.email,
+            client: process.env.REACT_APP_CLIENT_DOMAIN,
+            host: process.env.API_DOMAIN,
+          },
+        },
+      } as Job);
+
+      const pricePaid = session?.amount_total ?? 0;
+      await sendMail({
+        data: {
+          template: "catalogue-purchase-artist-notification",
+          message: {
+            to: artist.user.email,
+          },
+          locals: {
+            pricePaid,
+            currencyPaid: session?.currency ?? "usd",
+            platformCut:
+              calculateAppFee(pricePaid, session?.currency ?? "usd") ?? 0 / 100,
+            email: user.email,
+          },
+        },
+      } as Job);
+    }
+  } catch (e) {
+    logger.error(`Error creating album purchase: ${e}`);
+  }
+};
+
+export const handleTrackPurchase = async (
+  userId: number,
+  trackId: number,
+  session?: Stripe.Checkout.Session,
+  newUser?: boolean
+) => {
+  try {
+    const purchase = await registerTrackPurchase({
+      userId: Number(userId),
+      trackId: Number(trackId),
+      pricePaid: session?.amount_total ?? 0,
+      currencyPaid: session?.currency ?? "USD",
+      paymentProcessorKey: session?.id ?? null,
+    });
+
+    const settings = await getSiteSettings();
+
+    const user = await prisma.user.findFirst({
+      where: {
+        id: userId,
+      },
+    });
+
+    const track = await prisma.track.findFirst({
+      where: {
+        id: trackId,
+      },
+      include: {
+        trackGroup: {
+          include: {
+            artist: {
+              include: {
+                subscriptionTiers: true,
+                user: true,
+              },
+            },
+            paymentToUser: true,
+          },
+        },
+      },
+    });
+
+    if (user && track && purchase) {
+      const isBeforeReleaseDate =
+        new Date(track.trackGroup.releaseDate) > new Date();
+
+      await sendMail({
+        data: {
+          template: newUser ? "track-download" : "track-purchase-receipt",
+          message: {
+            to: user.email,
+          },
+          locals: {
+            track,
+            purchase,
+            isBeforeReleaseDate,
+            token: purchase.singleDownloadToken,
+            email: user.email,
+            client: process.env.REACT_APP_CLIENT_DOMAIN,
+            host: process.env.API_DOMAIN,
+          },
+        },
+      } as Job);
+
+      const pricePaid = purchase.pricePaid / 100;
+
+      await sendMail({
+        data: {
+          template: "track-purchase-artist-notification",
+          message: {
+            to:
+              track.trackGroup.paymentToUser?.email ??
+              track.trackGroup.artist.user.email,
+          },
+          locals: {
+            track,
+            purchase,
+            pricePaid,
+            platformCut:
+              ((track.trackGroup.platformPercent ?? settings.platformPercent) *
                 pricePaid) /
               100,
             email: user.email,
@@ -232,11 +416,16 @@ export const handleArtistMerchPurchase = async (
             if (merchProduct) {
               const optionIds =
                 product.metadata?.merchOptionIds?.split(OPTION_JOINER);
+
               const options: MerchOption[] = [];
+              const optionsToReduceQuantity: MerchOption[] = [];
               merchProduct.optionTypes.forEach((ot) =>
                 ot.options.forEach((o) => {
                   if (optionIds?.includes(o.id)) {
                     options.push(o);
+                    if (o.quantityRemaining) {
+                      optionsToReduceQuantity.push(o);
+                    }
                   }
                 })
               );
@@ -289,7 +478,10 @@ export const handleArtistMerchPurchase = async (
                 where: { id: createdMerchPurchase.merchId },
               });
 
-              if (merch?.quantityRemaining) {
+              if (
+                optionsToReduceQuantity.length === 0 &&
+                merch?.quantityRemaining
+              ) {
                 await prisma.merch.update({
                   where: {
                     id: createdMerchPurchase.merchId,
@@ -299,8 +491,22 @@ export const handleArtistMerchPurchase = async (
                       merch.quantityRemaining - createdMerchPurchase.quantity,
                   },
                 });
+              } else if (optionsToReduceQuantity.length > 0) {
+                await Promise.all(
+                  optionsToReduceQuantity.map((option) => {
+                    return prisma.merchOption.update({
+                      where: {
+                        id: option.id,
+                      },
+                      data: {
+                        quantityRemaining:
+                          (option.quantityRemaining ?? 0) -
+                          createdMerchPurchase.quantity,
+                      },
+                    });
+                  })
+                );
               }
-
               const merchPurchase = await prisma.merchPurchase.findFirst({
                 where: {
                   id: createdMerchPurchase.id,
