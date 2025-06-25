@@ -104,6 +104,7 @@ const routes = [
   "artists/{id}/follow",
   "artists/{id}/posts",
   "artists/{id}/followers",
+  "artists/{id}/supporters",
   "artists/{id}/inbox",
   "artists/{id}/confirmFollow",
   "artists/{id}/unfollow",

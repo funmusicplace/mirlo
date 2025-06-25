@@ -11,7 +11,7 @@ import {
 
 export default function () {
   const operations = {
-    GET: [userLoggedInWithoutRedirect, GET],
+    GET: [GET],
   };
 
   async function GET(req: Request, res: Response) {
