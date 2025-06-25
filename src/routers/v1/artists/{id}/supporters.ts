@@ -3,7 +3,7 @@ import { Request, Response } from "express";
 import prisma from "@mirlo/prisma";
 import { findArtistIdForURLSlug } from "../../../../utils/artist";
 
-const findPurchases = async (artistId: number, take: number, skip: number) => {
+const findPurchases = async (artistId: number) => {
   const supporters = await prisma.artistUserSubscription.findMany({
     where: {
       amount: { gt: 0 },
@@ -79,14 +79,11 @@ const findPurchases = async (artistId: number, take: number, skip: number) => {
       ...tgp,
       amount: tgp.pricePaid,
     })),
-  ]
-    .sort((a, b) => {
-      return (
-        new Date(b.datePurchased).getTime() -
-        new Date(a.datePurchased).getTime()
-      );
-    })
-    .slice(Number(skip), Number(take));
+  ].sort((a, b) => {
+    return (
+      new Date(b.datePurchased).getTime() - new Date(a.datePurchased).getTime()
+    );
+  });
 };
 
 export default function () {
@@ -118,14 +115,10 @@ export default function () {
         });
       }
 
-      const results = await findPurchases(
-        Number(parsedId),
-        Number(take),
-        Number(skip)
-      );
+      const results = await findPurchases(Number(parsedId));
 
       res.json({
-        results,
+        results: results.slice(Number(skip), Number(take)),
         total: results.length,
       });
     } catch (e) {
