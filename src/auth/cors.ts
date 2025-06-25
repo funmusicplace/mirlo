@@ -16,6 +16,7 @@ export const corsCheck = async (...args: [Request, Response, NextFunction]) => {
     const isSameSite =
       req.headers["sec-fetch-site"] === "same-site" ||
       req.headers["sec-fetch-site"] === "same-origin";
+    console.log("isSameSite", isSameSite, req.headers["sec-fetch-site"]);
     let clients: Client[] = [];
     if ((req.path === "/health" && req.headers["health-check"]) || isTest) {
       // do nothing
@@ -51,6 +52,7 @@ export const corsCheck = async (...args: [Request, Response, NextFunction]) => {
         });
       }
     }
+    console.log("clients", clients);
     const origin = [
       ...flatten(
         clients.map((c) =>

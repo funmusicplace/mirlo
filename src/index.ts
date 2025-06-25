@@ -1,6 +1,5 @@
 import express from "express";
 import cookieParser from "cookie-parser";
-import passport from "passport";
 import { initialize } from "express-openapi";
 import swaggerUi from "swagger-ui-express";
 import * as dotenv from "dotenv";
@@ -104,6 +103,7 @@ const routes = [
   "artists/{id}/follow",
   "artists/{id}/posts",
   "artists/{id}/followers",
+  "artists/{id}/supporters",
   "artists/{id}/inbox",
   "artists/{id}/confirmFollow",
   "artists/{id}/unfollow",
