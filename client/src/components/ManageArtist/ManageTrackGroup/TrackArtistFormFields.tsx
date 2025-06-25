@@ -14,13 +14,10 @@ import { hasId } from "./AlbumFormComponents/ManageTags";
 const TrackArtistFormFields: React.FC<{
   artistIndex: number;
   disabled?: boolean;
-}> = ({ artistIndex, disabled }) => {
+  onRemove: (index: number) => any;
+}> = ({ artistIndex, disabled, onRemove }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const { register, control, setValue, watch } = useFormContext();
-  const { fields, remove } = useFieldArray({
-    control,
-    name: "trackArtists",
-  });
 
   const getOptions = React.useCallback(async (searchString: string) => {
     const results = await api.getMany<Artist>(`artists`, {
@@ -120,19 +117,17 @@ const TrackArtistFormFields: React.FC<{
           disabled={disabled}
         />
       </div>
-      {fields.length > 1 && (
-        <Button
-          onClick={() => {
-            remove(artistIndex);
-          }}
-          type="button"
-          variant="dashed"
-          size="compact"
-          disabled={disabled}
-        >
-          Remove this artist
-        </Button>
-      )}
+      <Button
+        onClick={() => {
+          onRemove(artistIndex);
+        }}
+        type="button"
+        variant="dashed"
+        size="compact"
+        disabled={disabled}
+      >
+        Remove this artist
+      </Button>
     </div>
   );
 };
