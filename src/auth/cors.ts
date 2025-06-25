@@ -16,12 +16,7 @@ export const corsCheck = async (...args: [Request, Response, NextFunction]) => {
     const isSameSite =
       req.headers["sec-fetch-site"] === "same-site" ||
       req.headers["sec-fetch-site"] === "same-origin";
-    console.log(
-      "isSameSite",
-      req.path,
-      isSameSite,
-      req.headers["sec-fetch-site"]
-    );
+
     let clients: Client[] = [];
     if ((req.path === "/health" && req.headers["health-check"]) || isTest) {
       // do nothing
@@ -75,8 +70,6 @@ export const corsCheck = async (...args: [Request, Response, NextFunction]) => {
     // if (process.env.NODE_ENV === "development") {
     //   origin.push("http://localhost:8080"); // Just... for ease of coding
     // }
-
-    console.log("origins", origin);
 
     return cors({
       origin,

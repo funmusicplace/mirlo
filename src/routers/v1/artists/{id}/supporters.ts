@@ -3,6 +3,92 @@ import { Request, Response } from "express";
 import prisma from "@mirlo/prisma";
 import { findArtistIdForURLSlug } from "../../../../utils/artist";
 
+const findPurchases = async (artistId: number, take: number, skip: number) => {
+  const supporters = await prisma.artistUserSubscription.findMany({
+    where: {
+      amount: { gt: 0 },
+      artistSubscriptionTier: {
+        artistId: Number(artistId),
+      },
+    },
+    select: {
+      amount: true,
+      createdAt: true,
+      artistSubscriptionTier: true,
+    },
+  });
+
+  const tips = await prisma.userArtistTip.findMany({
+    where: {
+      pricePaid: { gt: 0 },
+      artistTipTier: {
+        artistId: Number(artistId),
+      },
+    },
+    select: {
+      pricePaid: true,
+      datePurchased: true,
+      artistTipTier: true,
+    },
+  });
+
+  const trackPurchases = await prisma.userTrackPurchase.findMany({
+    where: {
+      pricePaid: { gt: 0 },
+      track: {
+        trackGroup: {
+          artistId: Number(artistId),
+        },
+      },
+    },
+    select: {
+      pricePaid: true,
+      datePurchased: true,
+      track: {
+        include: { trackGroup: true },
+      },
+    },
+  });
+
+  const trackGroupPurchases = await prisma.userTrackGroupPurchase.findMany({
+    where: {
+      pricePaid: { gt: 0 },
+      trackGroup: {
+        artistId: Number(artistId),
+      },
+    },
+    select: {
+      pricePaid: true,
+      datePurchased: true,
+      trackGroup: true,
+    },
+  });
+
+  return [
+    ...supporters.map((s) => ({
+      ...s,
+      amount: s.amount,
+      datePurchased: s.createdAt,
+    })),
+    ...tips.map((t) => ({ ...t, amount: t.pricePaid })),
+    ...trackPurchases.map((tp) => ({
+      ...tp,
+      amount: tp.pricePaid,
+    })),
+    ...trackGroupPurchases.map((tgp) => ({
+      ...tgp,
+      amount: tgp.pricePaid,
+    })),
+  ]
+    .sort((a, b) => {
+      return (
+        new Date(b.datePurchased).getTime() -
+        new Date(a.datePurchased).getTime()
+      );
+    })
+    .slice(Number(skip), Number(take));
+};
+
 export default function () {
   const operations = {
     GET: [GET],
@@ -10,6 +96,7 @@ export default function () {
 
   async function GET(req: Request, res: Response) {
     let { id }: { id?: string } = req.params;
+    let { take = 20, skip = 0 } = req.query;
 
     try {
       const parsedId = await findArtistIdForURLSlug(id);
@@ -31,83 +118,15 @@ export default function () {
         });
       }
 
-      const supporters = await prisma.artistUserSubscription.findMany({
-        where: {
-          amount: { gt: 0 },
-          artistSubscriptionTier: {
-            artistId: Number(parsedId),
-          },
-        },
-        select: {
-          amount: true,
-          createdAt: true,
-          artistSubscriptionTier: true,
-        },
-      });
-
-      const tips = await prisma.userArtistTip.findMany({
-        where: {
-          pricePaid: { gt: 0 },
-          artistTipTier: {
-            artistId: Number(parsedId),
-          },
-        },
-        select: {
-          pricePaid: true,
-          datePurchased: true,
-          artistTipTier: true,
-        },
-      });
-
-      const trackPurchases = await prisma.userTrackPurchase.findMany({
-        where: {
-          pricePaid: { gt: 0 },
-          track: {
-            trackGroup: {
-              artistId: Number(parsedId),
-            },
-          },
-        },
-        select: {
-          pricePaid: true,
-          datePurchased: true,
-          track: {
-            include: { trackGroup: true },
-          },
-        },
-      });
-
-      const trackGroupPurchases = await prisma.userTrackGroupPurchase.findMany({
-        where: {
-          pricePaid: { gt: 0 },
-          trackGroup: {
-            artistId: Number(parsedId),
-          },
-        },
-        select: {
-          pricePaid: true,
-          datePurchased: true,
-          trackGroup: true,
-        },
-      });
+      const results = await findPurchases(
+        Number(parsedId),
+        Number(take),
+        Number(skip)
+      );
 
       res.json({
-        result: [
-          ...supporters.map((s) => ({
-            ...s,
-            amount: s.amount,
-            datePurchased: s.createdAt,
-          })),
-          ...tips.map((t) => ({ ...t, amount: t.pricePaid })),
-          ...trackPurchases.map((tp) => ({
-            ...tp,
-            amount: tp.pricePaid,
-          })),
-          ...trackGroupPurchases.map((tgp) => ({
-            ...tgp,
-            amount: tgp.pricePaid,
-          })),
-        ],
+        results,
+        total: results.length,
       });
     } catch (e) {
       console.error(`/v1/artists/{id}/followers ${e}`);
