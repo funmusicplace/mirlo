@@ -57,10 +57,7 @@ export const corsCheck = async (...args: [Request, Response, NextFunction]) => {
         });
       }
     }
-    console.log(
-      "clients",
-      clients.map((c) => c.allowedCorsOrigins)
-    );
+
     const origin = [
       ...flatten(
         clients.map((c) =>
@@ -78,6 +75,8 @@ export const corsCheck = async (...args: [Request, Response, NextFunction]) => {
     // if (process.env.NODE_ENV === "development") {
     //   origin.push("http://localhost:8080"); // Just... for ease of coding
     // }
+
+    console.log("origins", origin);
 
     return cors({
       origin,
