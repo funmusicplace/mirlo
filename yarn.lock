@@ -3238,7 +3238,7 @@ __metadata:
     "@emotion/styled": "npm:^11.10.5"
     "@gumlet/react-hls-player": "npm:^1.0.1"
     "@marsidev/react-turnstile": "npm:^1.0.2"
-    "@mirlo/mirlo-api-client": "npm:^1.0.0"
+    "@mirlo/mirlo-api-client": "npm:^1.0.1"
     "@optimize-lodash/rollup-plugin": "npm:^4.0.4"
     "@paypal/react-paypal-js": "npm:^7.8.2"
     "@remirror/pm": "npm:^2.0.8"
@@ -3314,14 +3314,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@mirlo/mirlo-api-client@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "@mirlo/mirlo-api-client@npm:1.0.0"
+"@mirlo/mirlo-api-client@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "@mirlo/mirlo-api-client@npm:1.0.1"
   dependencies:
     b64-to-blob: "npm:^1.2.19"
     file-saver: "npm:^2.0.5"
     typescript: "npm:^5.8.3"
-  checksum: 10/89fd295a24ad5c7d33a8196a49ffae8d2b500ced6a0ce24ea9b8992b9251f31a56c2d12f79c689bb46195832b2d21cd7947cd621d6963a7bf8fd60263d96dcba
+  checksum: 10/474b2662cf4ef29fd2d4a7568ed6f36017bab6e7926783e0725acde065f98dc717d182e8672f09614c0589295347706c6b660ada8f2ff62b424041c80a89f4e2
   languageName: node
   linkType: hard
 
