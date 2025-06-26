@@ -9,7 +9,7 @@ const findPurchases = async (artistId: number) => {
       artistUserSubscription: {
         amount: { gt: 0 },
         artistSubscriptionTier: {
-          artistId: Number(artistId),
+          artistId: artistId,
         },
       },
     },
@@ -24,9 +24,7 @@ const findPurchases = async (artistId: number) => {
   const tips = await prisma.userArtistTip.findMany({
     where: {
       pricePaid: { gt: 0 },
-      artistTipTier: {
-        artistId: Number(artistId),
-      },
+      artistId: artistId,
     },
     select: {
       pricePaid: true,
@@ -40,7 +38,7 @@ const findPurchases = async (artistId: number) => {
       pricePaid: { gt: 0 },
       track: {
         trackGroup: {
-          artistId: Number(artistId),
+          artistId: artistId,
         },
       },
     },
