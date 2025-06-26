@@ -4,17 +4,20 @@ import prisma from "@mirlo/prisma";
 import { findArtistIdForURLSlug } from "../../../../utils/artist";
 
 const findPurchases = async (artistId: number) => {
-  const supporters = await prisma.artistUserSubscription.findMany({
+  const supporters = await prisma.artistUserSubscriptionCharge.findMany({
     where: {
-      amount: { gt: 0 },
-      artistSubscriptionTier: {
-        artistId: Number(artistId),
+      artistUserSubscription: {
+        amount: { gt: 0 },
+        artistSubscriptionTier: {
+          artistId: Number(artistId),
+        },
       },
     },
     select: {
-      amount: true,
+      artistUserSubscription: {
+        select: { amount: true, artistSubscriptionTier: true },
+      },
       createdAt: true,
-      artistSubscriptionTier: true,
     },
   });
 
@@ -67,7 +70,8 @@ const findPurchases = async (artistId: number) => {
   return [
     ...supporters.map((s) => ({
       ...s,
-      amount: s.amount,
+      amount: s.artistUserSubscription.amount,
+      artistSubscriptionTier: s.artistUserSubscription.artistSubscriptionTier,
       datePurchased: s.createdAt,
     })),
     ...tips.map((t) => ({ ...t, amount: t.pricePaid })),
@@ -120,6 +124,7 @@ export default function () {
       res.json({
         results: results.slice(Number(skip), Number(take)),
         total: results.length,
+        totalAmount: results.reduce((acc, curr) => acc + curr.amount, 0),
       });
     } catch (e) {
       console.error(`/v1/artists/{id}/followers ${e}`);
