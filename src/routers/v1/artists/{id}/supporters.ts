@@ -15,7 +15,7 @@ const findPurchases = async (artistId: number) => {
     },
     select: {
       artistUserSubscription: {
-        select: { amount: true, artistSubscriptionTier: true },
+        select: { amount: true, artistSubscriptionTier: true, userId: true },
       },
       createdAt: true,
     },
@@ -30,6 +30,7 @@ const findPurchases = async (artistId: number) => {
       pricePaid: true,
       datePurchased: true,
       artistTipTier: true,
+      userId: true,
     },
   });
 
@@ -43,6 +44,7 @@ const findPurchases = async (artistId: number) => {
       },
     },
     select: {
+      userId: true,
       pricePaid: true,
       datePurchased: true,
       track: {
@@ -62,6 +64,7 @@ const findPurchases = async (artistId: number) => {
       pricePaid: true,
       datePurchased: true,
       trackGroup: true,
+      userId: true,
     },
   });
 
@@ -71,6 +74,7 @@ const findPurchases = async (artistId: number) => {
       amount: s.artistUserSubscription.amount,
       artistSubscriptionTier: s.artistUserSubscription.artistSubscriptionTier,
       datePurchased: s.createdAt,
+      userId: s.artistUserSubscription.userId,
     })),
     ...tips.map((t) => ({ ...t, amount: t.pricePaid })),
     ...trackPurchases.map((tp) => ({
@@ -120,9 +124,30 @@ export default function () {
       const results = await findPurchases(Number(parsedId));
 
       res.json({
-        results: results.slice(Number(skip), Number(take)),
+        results: results.slice(Number(skip), Number(take)).map((r) => {
+          // Strip user ids from results
+          return {
+            ...r,
+            userId: undefined,
+          };
+        }),
         total: results.length,
         totalAmount: results.reduce((acc, curr) => acc + curr.amount, 0),
+        totalSupporters: Object.keys(
+          results.reduce(
+            (acc, curr) => {
+              if (acc[curr.userId]) {
+                return acc;
+              } else {
+                return {
+                  ...acc,
+                  [curr.userId]: 1,
+                };
+              }
+            },
+            {} as Record<number, number>
+          )
+        ).length,
       });
     } catch (e) {
       console.error(`/v1/artists/{id}/followers ${e}`);
