@@ -24,10 +24,12 @@ import { testOwnership } from "./utils";
 import Box from "components/common/Box";
 import { ArtistButton } from "components/Artist/ArtistButtons";
 import { useAuthContext } from "state/AuthContext";
+import TextArea from "components/common/TextArea";
 
 interface FormData {
   chosenPrice: string;
   userEmail: string;
+  message?: string;
 }
 
 const stripeKey = import.meta.env.VITE_PUBLISHABLE_STRIPE_KEY;
@@ -77,9 +79,9 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
               ? Number(data.chosenPrice) * 100
               : undefined,
             email: data.userEmail,
+            message: data.message,
           });
 
-          console.log("response", response);
           if (response.clientSecret) {
             setClientSecret(response.clientSecret);
           } else {
@@ -134,17 +136,19 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
         )}
         <form onSubmit={handleSubmit(purchaseAlbum)}>
           <FormComponent>
-            <label>
+            <label htmlFor="priceInput">
               {t("nameYourPrice", {
                 currency: getCurrencySymbol(trackGroup.currency, undefined),
-              })}
-              <InputEl
-                {...register("chosenPrice")}
-                type="number"
-                min={minPrice ? minPrice / 100 : 0}
-                step="0.01"
-              />
+              })}{" "}
             </label>
+
+            <InputEl
+              {...register("chosenPrice")}
+              type="number"
+              min={minPrice ? minPrice / 100 : 0}
+              step="0.01"
+              id="priceInput"
+            />
             {Number(chosenPrice) > (minPrice ?? 1) * 100 && (
               <Box variant="success">
                 {t("thatsGenerous", {
@@ -168,6 +172,12 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
               currency={trackGroup.currency}
               artist={trackGroup.artist}
             />
+          </FormComponent>
+
+          <FormComponent>
+            <label htmlFor="message">{t("leaveAComment")}</label>
+            <TextArea id="message" {...methods.register("message")} rows={2} />
+            <small>{t("messageToArtist")}</small>
           </FormComponent>
 
           <EmailInput required />

@@ -172,12 +172,13 @@ const BuyMerchItem: React.FC<{
         `}
       >
         <FormComponent>
-          <label>{t("howMany")}</label>
+          <label htmlFor="quantity">{t("howMany")}</label>
           <InputEl
             {...methods.register("quantity", {
               min: 1,
               max: merch.quantityRemaining,
             })}
+            id="quantity"
             type="number"
             min={1}
             max={merch.quantityRemaining}
@@ -194,12 +195,13 @@ const BuyMerchItem: React.FC<{
           )}
         </FormComponent>
         <FormComponent>
-          <label>
+          <label htmlFor="price">
             {t("howMuch", { currency: getCurrencySymbol(merch.currency) })}
           </label>
           <InputEl
             {...methods.register("price", { min: minPrice })}
             type="number"
+            id="price"
             min={minPrice ? minPrice : 0}
             step={0.01}
           />
@@ -232,8 +234,14 @@ const BuyMerchItem: React.FC<{
       >
         {merch.optionTypes?.map((optionType, idx) => (
           <FormComponent>
-            <label>{optionType.optionName}</label>
-            <SelectEl {...methods.register(`merchOptionIds.${idx}`)} required>
+            <label htmlFor={`merchOptionIds.${idx}`}>
+              {optionType.optionName}
+            </label>
+            <SelectEl
+              id={`merchOptionIds.${idx}`}
+              {...methods.register(`merchOptionIds.${idx}`)}
+              required
+            >
               <option value="">{t("choose")}</option>
 
               {optionType.options
@@ -283,8 +291,13 @@ const BuyMerchItem: React.FC<{
           border-bottom: 1px solid var(--mi-darken-x-background-color);
         `}
       >
-        <label>{t("supportedShippingDestinations")}</label>
-        <SelectEl {...methods.register(`shippingDestinationId`)}>
+        <label htmlFor="shippingDestinationId">
+          {t("supportedShippingDestinations")}
+        </label>
+        <SelectEl
+          id="shippingDestinationId"
+          {...methods.register(`shippingDestinationId`)}
+        >
           {merch.shippingDestinations.map((o) => (
             <option key={o.id} value={o.id}>
               {o.destinationCountry && o.destinationCountry !== ""
@@ -327,8 +340,8 @@ const BuyMerchItem: React.FC<{
       </div>
 
       <FormComponent>
-        <label>{t("leaveAComment")}</label>
-        <TextArea {...methods.register("message")} rows={4} />
+        <label htmlFor="comment">{t("leaveAComment")}</label>
+        <TextArea id="comment" {...methods.register("message")} rows={2} />
         <small>{t("messageToArtist")}</small>
       </FormComponent>
 

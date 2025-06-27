@@ -280,12 +280,14 @@ export const registerPurchase = async ({
   userId,
   trackGroupId,
   pricePaid,
+  message,
   currencyPaid,
   paymentProcessorKey,
 }: {
   userId: number;
   pricePaid: number;
   currencyPaid: string;
+  message?: string | null;
   paymentProcessorKey: string | null;
   trackGroupId: number;
 }) => {
@@ -319,6 +321,7 @@ export const registerPurchase = async ({
         trackGroupId: Number(trackGroupId),
         pricePaid,
         currencyPaid,
+        message: message ?? null,
         stripeSessionKey: paymentProcessorKey,
         singleDownloadToken: token,
       },
@@ -374,11 +377,13 @@ export const registerTrackPurchase = async ({
   pricePaid,
   currencyPaid,
   paymentProcessorKey,
+  message,
 }: {
   userId: number;
   pricePaid: number;
   currencyPaid: string;
   paymentProcessorKey: string | null;
+  message?: string | null;
   trackId: number;
 }) => {
   const token = randomUUID();
@@ -410,6 +415,7 @@ export const registerTrackPurchase = async ({
         userId: Number(userId),
         trackId: Number(trackId),
         pricePaid,
+        message: message ?? null,
         currencyPaid,
         stripeSessionKey: paymentProcessorKey,
         singleDownloadToken: token,

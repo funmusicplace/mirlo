@@ -258,6 +258,8 @@
   "artist": {
     "merch": "Merch",
     "about": "About",
+    "messageToArtist": "This will be shown publicly on the artist's page.",
+    "leaveAComment": "Show the artist some love",
     "youveBoughtMerch": "You've bought <linkToMerch>{{title}}</linkToMerch>! The artist will ship it to the address you provided.",
     "youveBoughtRelease": "You've bought <linkToRelease>{{title}}</linkToRelease>! It's now available in your <linkToCollection>collection</linkToCollection>.",
     "youveBoughtTrack": "You've bought <linkToTrack>{{trackName}}</linkToTrack>! It's now available in your <linkToCollection>collection</linkToCollection>.",
@@ -761,6 +763,8 @@
     "successfullyUpdated": "Successfully updated track"
   },
   "trackGroupDetails": {
+    "messageToArtist": "This will be shown publicly on the artist's page.",
+    "leaveAComment": "Show the artist some love",
     "trackgroup": "Album:",
     "downloadCodecsInfo": "Includes downloads in FLAC, WAV, mp3 and more. Paying supporters also get unlimited streaming on the Mirlo website.",
     "embedCode": "Embed code",
