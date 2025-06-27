@@ -208,9 +208,11 @@
   },
   "merchDetails": {
     "buy": "Buy",
+    "leaveAComment": "Show the artist some love",
     "choose": "Choose an option",
     "notEnoughInStockQuantity": "Not enough in stock",
     "notEnoughInStockCategory": "Not enough in stock of this category",
+    "priceMustBeAtLeast": "Price must be at least {{ price }}",
     "orderTotal": "Order total: {{ amount }}",
     "goToCheckOut": "Proceed to checkout",
     "artistCheckoutPage": "You will be taken to the artist's payment processor page to complete this purchase.",

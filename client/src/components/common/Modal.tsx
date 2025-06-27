@@ -70,7 +70,7 @@ const Content = styled.div<ContentProps>`
     props.size === "small"
       ? "width: 30%;"
       : props.size === "medium"
-        ? "width: 50%; max-width: 500px;"
+        ? "width: 500px;"
         : "width: 80%; max-width: var(--mi-container-medium);"};
 
   border-radius: var(--mi-border-radius-x);

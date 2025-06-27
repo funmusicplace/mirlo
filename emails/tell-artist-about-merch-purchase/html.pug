@@ -23,9 +23,12 @@ html
             strong 
               | Total: #{purchase.currencyPaid.toUpperCase()} #{(purchase.artistCut / 100).toFixed(2)} 
 
-      p  
-        | To learn more about this order, please see your 
-        a(href="https://mirlo.space/fulfillment") fulfillment dashboard 
+      if message 
+        p
+          | The buyer left a message for you: "#{message}"
+      p
+        | To learn more about this order, please see your
+        a(href="https://mirlo.space/fulfillment") fulfillment dashboard
         | .
       p The final money will be available via your Stripe dashboard
       p If you have any questions please reach out to hi@mirlo.space

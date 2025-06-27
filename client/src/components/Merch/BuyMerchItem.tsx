@@ -18,12 +18,14 @@ import { FaChevronRight } from "react-icons/fa";
 import countryCodesCurrencies from "components/ManageArtist/Merch/country-codes-currencies";
 import { flatten } from "lodash";
 import Box from "components/common/Box";
+import TextArea from "components/common/TextArea";
 
 type FormData = {
   quantity: number;
   price: number;
   merchOptionIds: string[];
   shippingDestinationId: string;
+  message?: string;
 };
 
 const codeToCountryMap = countryCodesCurrencies.reduce(
@@ -63,6 +65,7 @@ const BuyMerchItem: React.FC<{
   const currentPrice = methods.watch("price");
   const quantity = methods.watch("quantity");
   const shippingDestination = methods.watch("shippingDestinationId");
+  const merchOptionIds = methods.watch("merchOptionIds");
 
   const onSubmit = React.useCallback(
     async (data: FormData) => {
@@ -99,6 +102,7 @@ const BuyMerchItem: React.FC<{
               quantity: data.quantity,
               merchOptionIds: data.merchOptionIds,
               shippingDestinationId: data.shippingDestinationId,
+              message: data.message,
             }
           );
           window.location.assign(response.redirectUrl);
@@ -116,6 +120,7 @@ const BuyMerchItem: React.FC<{
   }
 
   let price = Number(currentPrice) * Number(quantity);
+  let amountAvailable = merch.quantityRemaining;
 
   merch.shippingDestinations.forEach((sd) => {
     if (sd.id === shippingDestination) {
@@ -126,6 +131,19 @@ const BuyMerchItem: React.FC<{
       price += costUnit + costExtraUnit;
     }
   });
+
+  merch.optionTypes.forEach((ot) => {
+    ot.options.forEach((o) => {
+      if (merchOptionIds.includes(o.id)) {
+        price += (o.additionalPrice * Number(quantity)) / 100;
+        if (o.quantityRemaining) {
+          amountAvailable = Math.min(o.quantityRemaining ?? 0, amountAvailable);
+        }
+      }
+    });
+  });
+
+  const exceedsAvailable = amountAvailable < Number(quantity);
 
   const onlyOneDestination = merch.shippingDestinations.length === 1;
   const defaultOption = onlyOneDestination
@@ -148,7 +166,7 @@ const BuyMerchItem: React.FC<{
           }
 
           > div {
-            flex: 1;
+            width: 49%;
             margin-right: 1rem;
           }
         `}
@@ -160,22 +178,18 @@ const BuyMerchItem: React.FC<{
               min: 1,
               max: merch.quantityRemaining,
             })}
-            className={css`
-              max-width: 8rem;
-            `}
             type="number"
             min={1}
             max={merch.quantityRemaining}
           />
           {formState.errors.quantity && (
-            <Box
-              variant="warning"
-              className={css`
-                margin-top: 0.5rem;
-              `}
-              compact
-            >
+            <Box variant="warning" compact>
               {formState.errors.quantity.message}
+            </Box>
+          )}
+          {exceedsAvailable && (
+            <Box variant="warning" compact>
+              {t("notEnoughInStockQuantity")}
             </Box>
           )}
         </FormComponent>
@@ -188,10 +202,17 @@ const BuyMerchItem: React.FC<{
             type="number"
             min={minPrice ? minPrice : 0}
             step={0.01}
-            className={css`
-              max-width: 8rem;
-            `}
           />
+          {price < minPrice && (
+            <Box variant="warning" compact>
+              {t("priceMustBeAtLeast", {
+                price: moneyDisplay({
+                  amount: minPrice,
+                  currency: merch.currency,
+                }),
+              })}
+            </Box>
+          )}
         </FormComponent>
       </div>
       <div
@@ -204,7 +225,7 @@ const BuyMerchItem: React.FC<{
           margin-bottom: 2rem;
           border-bottom: 1px solid var(--mi-darken-x-background-color);
           > div {
-            flex: 1;
+            width: 49%;
             margin-right: 1rem;
           }
         `}
@@ -305,15 +326,28 @@ const BuyMerchItem: React.FC<{
         <IncludesDigitalDownload merch={merch} artist={artist} />
       </div>
 
-      <Button
-        disabled={!methods.formState.isValid}
-        isLoading={isLoadingStripe}
-        size="big"
-        rounded
-        endIcon={<FaChevronRight />}
+      <FormComponent>
+        <label>{t("leaveAComment")}</label>
+        <TextArea {...methods.register("message")} rows={4} />
+      </FormComponent>
+
+      <div
+        className={css`
+          display: flex;
+          justify-content: flex-end;
+          margin-bottom: 2rem;
+        `}
       >
-        {t("goToCheckOut")}
-      </Button>
+        <Button
+          disabled={!methods.formState.isValid || exceedsAvailable}
+          isLoading={isLoadingStripe}
+          size="big"
+          rounded
+          endIcon={<FaChevronRight />}
+        >
+          {t("goToCheckOut")}
+        </Button>
+      </div>
       <div
         className={css`
           margin-top: 1rem;

@@ -620,6 +620,7 @@ export const createStripeCheckoutSessionForMerchPurchase = async ({
   email,
   priceNumber,
   merch,
+  message,
   quantity,
   options,
   stripeAccountId,
@@ -627,6 +628,7 @@ export const createStripeCheckoutSessionForMerchPurchase = async ({
 }: {
   loggedInUser?: User;
   email?: string;
+  message?: string;
   priceNumber: number;
   quantity: number;
   merch: Prisma.MerchGetPayload<{
@@ -702,6 +704,7 @@ export const createStripeCheckoutSessionForMerchPurchase = async ({
         userId: loggedInUser?.id ?? null,
         userEmail: email ?? null,
         stripeAccountId,
+        message: message ?? null,
       },
       mode: "payment",
       success_url: `${API_DOMAIN}/v1/checkout?success=true&stripeAccountId=${stripeAccountId}&session_id={CHECKOUT_SESSION_ID}`,
@@ -903,7 +906,6 @@ export const handleCheckoutSession = async (
     const metadata = session.metadata as unknown as SessionMetaData;
     const {
       tierId,
-      merchId,
       trackGroupId,
       stripeAccountId,
       gaveGift,

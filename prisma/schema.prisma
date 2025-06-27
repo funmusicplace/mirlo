@@ -344,6 +344,7 @@ model ArtistUserSubscription {
   updatedAt                     DateTime                       @default(now()) @updatedAt
   deletedAt                     DateTime?
   notifications                 Notification[]
+  message                       String?
   artistUserSubscriptionCharges ArtistUserSubscriptionCharge[]
 
   @@unique([userId, artistSubscriptionTierId])
@@ -455,6 +456,7 @@ model MerchPurchase {
   stripeTransactionKey String?
   userId               Int
   quantity             Int
+  message              String?
   user                 User              @relation(fields: [userId], references: [id])
   shippingAddress      Json?
   billingAddress       Json?
@@ -479,6 +481,7 @@ model UserArtistTip {
   pricePaid        Int // in cents
   currencyPaid     String         @default("USD")
   datePurchased    DateTime       @default(now())
+  message          String?
   stripeSessionKey String?
   artistTipTier    ArtistTipTier? @relation(fields: [artistTipTierId], references: [id])
   artistTipTierId  Int?
@@ -495,6 +498,7 @@ model UserTrackGroupPurchase {
   datePurchased       DateTime   @default(now())
   stripeSessionKey    String?
   singleDownloadToken String?
+  message             String?
 
   @@unique([userId, trackGroupId])
 }
@@ -509,6 +513,7 @@ model UserTrackPurchase {
   datePurchased       DateTime @default(now())
   stripeSessionKey    String?
   singleDownloadToken String?
+  message             String?
 
   @@unique([userId, trackId])
 }

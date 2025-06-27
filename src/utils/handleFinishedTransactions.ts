@@ -442,6 +442,7 @@ export const handleArtistMerchPurchase = async (
                   currencyPaid: item.currency ?? "USD",
                   stripeTransactionKey: session?.id ?? null,
                   fulfillmentStatus: "NO_PROGRESS",
+                  message: session?.metadata?.message ?? null,
                   shippingAddress: session?.shipping_details?.address,
                   billingAddress: session?.customer_details?.address,
                   quantity: item.quantity ?? 1,
@@ -564,6 +565,7 @@ export const handleArtistMerchPurchase = async (
             to: purchases?.[0]?.merch?.artist.user.email,
           },
           locals: {
+            message: session?.metadata?.message ?? null,
             purchases,
             artist: purchases[0].merch.artist,
             calculateAppFee,
