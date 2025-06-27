@@ -52,7 +52,14 @@ function Artist() {
   const canReceivePayments = stripeAccountStatus?.chargesEnabled;
 
   React.useEffect(() => {
-    const subPages = ["posts", "releases", "support", "links", "merch"];
+    const subPages = [
+      "posts",
+      "releases",
+      "support",
+      "links",
+      "merch",
+      "checkout-complete",
+    ];
     const end = pathname.split("/")[2];
 
     if (!subPages.includes(end)) {

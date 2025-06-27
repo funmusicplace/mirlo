@@ -8,7 +8,7 @@ const fetchTip: QueryFunction<
   return api
     .get<{
       result: UserArtistTip;
-    }>(`/v1/manage/tips/${tipId}`, {
+    }>(`v1/manage/tips/${tipId}`, {
       signal,
     })
     .then((r) => r.result);
