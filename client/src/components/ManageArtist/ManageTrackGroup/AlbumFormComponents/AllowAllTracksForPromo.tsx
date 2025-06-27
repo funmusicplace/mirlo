@@ -3,6 +3,7 @@ import { ArtistButton } from "components/Artist/ArtistButtons";
 import FormCheckbox from "components/common/FormCheckbox";
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
+import { openOutsideLinkAfter } from "components/Merch/IncludesDigitalDownload";
 import React, { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
@@ -61,7 +62,13 @@ const AllowAllTracksForPromo: React.FC<BulkUpdateTracksProps> = ({
           t={t}
           i18nKey={"allowMirloPromo"}
           components={{
-            hype: <Link to="/team/posts/236/"></Link>,
+            hype: (
+              <Link
+                className={openOutsideLinkAfter}
+                to="/team/posts/236/"
+                target="_blank"
+              ></Link>
+            ),
           }}
         />
       </label>

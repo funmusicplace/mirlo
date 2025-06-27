@@ -48,7 +48,7 @@ export function queryTrackGroups(opts: TrackGroupQueryOptions) {
 
 const fetchTrackGroup: QueryFunction<
   TrackGroup,
-  ["fetchTrackGroup", { albumSlug: string; artistId?: string }]
+  ["fetchTrackGroup", { albumSlug?: string | null; artistId?: string }]
 > = ({ queryKey: [_, { albumSlug, artistId }], signal }) => {
   return api
     .get<{
@@ -60,7 +60,7 @@ const fetchTrackGroup: QueryFunction<
 };
 
 export function queryTrackGroup(opts: {
-  albumSlug: string;
+  albumSlug?: string | null;
   artistId?: string;
 }) {
   return queryOptions({

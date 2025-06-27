@@ -62,7 +62,6 @@ const BuyMerchItem: React.FC<{
 
   const currentPrice = methods.watch("price");
   const quantity = methods.watch("quantity");
-  const currentOptions = methods.watch("merchOptionIds");
   const shippingDestination = methods.watch("shippingDestinationId");
 
   const onSubmit = React.useCallback(
@@ -116,11 +115,15 @@ const BuyMerchItem: React.FC<{
     return null;
   }
 
-  let price = currentPrice;
+  let price = Number(currentPrice) * Number(quantity);
 
   merch.shippingDestinations.forEach((sd) => {
     if (sd.id === shippingDestination) {
-      price += sd.costUnit / 100 + (sd.costExtraUnit * (quantity - 1)) / 100;
+      const otherUnitCount = Number(quantity) - 1;
+      const costUnit = sd.costUnit / 100;
+      const costExtraUnit = (sd.costExtraUnit * otherUnitCount) / 100;
+
+      price += costUnit + costExtraUnit;
     }
   });
 
@@ -141,14 +144,12 @@ const BuyMerchItem: React.FC<{
         className={css`
           @media screen and (min-width: ${bp.medium}px) {
             display: flex;
-            backround: blue;
             flex-direction: row;
+          }
 
-            > div {
-              max-width: 49%;
-              margin-right: 1rem;
-              margin-bottom: 0.5rem;
-            }
+          > div {
+            flex: 1;
+            margin-right: 1rem;
           }
         `}
       >
@@ -193,53 +194,74 @@ const BuyMerchItem: React.FC<{
           />
         </FormComponent>
       </div>
+      <div
+        className={css`
+          @media screen and (min-width: ${bp.medium}px) {
+            display: flex;
+            flex-direction: row;
+          }
+          padding-bottom: 1rem;
+          margin-bottom: 2rem;
+          border-bottom: 1px solid var(--mi-darken-x-background-color);
+          > div {
+            flex: 1;
+            margin-right: 1rem;
+          }
+        `}
+      >
+        {merch.optionTypes?.map((optionType, idx) => (
+          <FormComponent>
+            <label>{optionType.optionName}</label>
+            <SelectEl {...methods.register(`merchOptionIds.${idx}`)} required>
+              <option value="">{t("choose")}</option>
 
-      {merch.optionTypes?.map((optionType, idx) => (
-        <FormComponent>
-          <label>{optionType.optionName}</label>
-          <SelectEl {...methods.register(`merchOptionIds.${idx}`)} required>
-            <option value="">{t("choose")}</option>
-
-            {optionType.options
-              .sort((a, b) => {
-                return a.additionalPrice < b.additionalPrice ? -1 : 1;
-              })
-              .map((o) => (
-                <option
-                  key={o.name}
-                  value={o.id}
-                  disabled={
-                    o.quantityRemaining !== null
-                      ? o.quantityRemaining < quantity
-                      : false
-                  }
-                >
-                  {o.additionalPrice
-                    ? t("option", {
-                        name: o.name,
-                        costUnit: moneyDisplay({
-                          amount: o.additionalPrice / 100,
-                          currency: merch.currency,
-                        }),
-                      })
-                    : o.name}
-                </option>
-              ))}
-          </SelectEl>
-          {formState.errors.merchOptionIds && (
-            <Box
-              variant="warning"
-              className={css`
-                margin-top: 0.5rem;
-              `}
-              compact
-            >
-              {formState.errors.merchOptionIds.message}
-            </Box>
-          )}
-        </FormComponent>
-      ))}
-      <FormComponent>
+              {optionType.options
+                .sort((a, b) => {
+                  return a.additionalPrice < b.additionalPrice ? -1 : 1;
+                })
+                .map((o) => (
+                  <option
+                    key={o.name}
+                    value={o.id}
+                    disabled={
+                      o.quantityRemaining !== null
+                        ? o.quantityRemaining < quantity
+                        : false
+                    }
+                  >
+                    {o.additionalPrice
+                      ? t("option", {
+                          name: o.name,
+                          costUnit: moneyDisplay({
+                            amount: o.additionalPrice / 100,
+                            currency: merch.currency,
+                          }),
+                        })
+                      : o.name}
+                  </option>
+                ))}
+            </SelectEl>
+            {formState.errors.merchOptionIds && (
+              <Box
+                variant="warning"
+                className={css`
+                  margin-top: 0.5rem;
+                `}
+                compact
+              >
+                {formState.errors.merchOptionIds.message}
+              </Box>
+            )}
+          </FormComponent>
+        ))}
+      </div>
+      <FormComponent
+        className={css`
+          padding-bottom: 2rem;
+          margin-bottom: 2rem !important;
+          border-bottom: 1px solid var(--mi-darken-x-background-color);
+        `}
+      >
         <label>{t("supportedShippingDestinations")}</label>
         <SelectEl {...methods.register(`shippingDestinationId`)}>
           {merch.shippingDestinations.map((o) => (
@@ -253,23 +275,36 @@ const BuyMerchItem: React.FC<{
                   amount: o.costUnit / 100,
                   currency: o.currency,
                 }),
+                costExtraUnit: moneyDisplay({
+                  amount: o.costExtraUnit / 100,
+                  currency: o.currency,
+                }),
               })}
               )
             </option>
           ))}
         </SelectEl>
       </FormComponent>
-      <IncludesDigitalDownload merch={merch} artist={artist} />
-      <p
+      <div
         className={css`
-          margin: 1rem auto;
-          font-weight: bold;
+          border-bottom: 1px solid var(--mi-darken-x-background-color);
+          padding-bottom: 1rem;
+          margin-bottom: 2rem;
         `}
       >
-        {t("orderTotal", {
-          amount: moneyDisplay({ amount: price, currency: merch.currency }),
-        })}
-      </p>
+        <p
+          className={css`
+            margin: 1rem auto;
+            font-weight: bold;
+          `}
+        >
+          {t("orderTotal", {
+            amount: moneyDisplay({ amount: price, currency: merch.currency }),
+          })}
+        </p>
+        <IncludesDigitalDownload merch={merch} artist={artist} />
+      </div>
+
       <Button
         disabled={!methods.formState.isValid}
         isLoading={isLoadingStripe}

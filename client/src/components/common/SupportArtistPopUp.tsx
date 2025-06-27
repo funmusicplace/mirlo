@@ -55,7 +55,7 @@ const SupportArtistPopUp: React.FC<{
         text-align: center;
         display: flex;
         justify-content: center;
-        margin: 1rem;
+        margin: 3rem 1rem 1rem;
       `}
     >
       <ArtistButton size="big" rounded onClick={() => setIsOpen(true)}>

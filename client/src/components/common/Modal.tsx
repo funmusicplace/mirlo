@@ -50,7 +50,7 @@ const ChildrenWrapper = styled.div<{ title?: boolean; noPadding?: boolean }>`
 `;
 
 type ContentProps = {
-  size?: "small";
+  size?: "small" | "medium";
 };
 
 const Content = styled.div<ContentProps>`
@@ -69,14 +69,14 @@ const Content = styled.div<ContentProps>`
   ${(props) =>
     props.size === "small"
       ? "width: 30%;"
-      : "width: 80%; max-width: var(--mi-container-medium);"};
+      : props.size === "medium"
+        ? "width: 50%; max-width: 500px;"
+        : "width: 80%; max-width: var(--mi-container-medium);"};
 
   border-radius: var(--mi-border-radius-x);
 
   ${(props) =>
-    props.size === "small"
-      ? ""
-      : "bottom: 0; border-radius: var(--mi-border-radius-x) var(--mi-border-radius-x) 0 0; max-height: calc(100vh - 70px);"}
+    props.size === "small" ? "" : "max-height: calc(100vh - 70px);"}
 
   animation: 300ms ease-out forwards slide-up;
 
@@ -134,7 +134,7 @@ export const Modal: React.FC<{
   id?: string;
   ariaDescribedBy?: string | null;
   onClose: () => void;
-  size?: "small";
+  size?: ContentProps["size"];
   className?: string;
   contentClassName?: string;
   noPadding?: boolean;

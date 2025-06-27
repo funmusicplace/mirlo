@@ -609,17 +609,6 @@ const routes: RouteObject[] = [
                 path: "merch",
                 children: [
                   {
-                    path: ":merchId/checkout-complete",
-                    async lazy() {
-                      const { default: Component } = await import(
-                        "components/Merch/CheckoutComplete"
-                      );
-                      return {
-                        Component: () => <Component />,
-                      };
-                    },
-                  },
-                  {
                     path: ":merchId",
                     async lazy() {
                       const { default: Component } = await import(

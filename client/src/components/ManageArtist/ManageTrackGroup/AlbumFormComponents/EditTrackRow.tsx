@@ -25,6 +25,7 @@ import FormCheckbox from "components/common/FormCheckbox";
 import InfoModal from "components/common/InfoModal";
 import { ArtistButton } from "components/Artist/ArtistButtons";
 import { TrackData } from "components/ManageArtist/utils";
+import { openOutsideLinkAfter } from "components/Merch/IncludesDigitalDownload";
 
 export interface FormData {
   title: string;
@@ -69,16 +70,9 @@ const EditTrackRow: React.FC<{
 
   const methods = useForm<FormData>({
     defaultValues: {
-      title: track.title,
-      trackArtists: track.trackArtists,
+      ...track,
       status: track.isPreview ? "preview" : "must-own",
-      licenseId: track.licenseId,
-      lyrics: track.lyrics,
-      allowMirloPromo: track.allowMirloPromo,
-      description: track.description,
-      isrc: track.isrc,
       minPrice: `${track?.minPrice !== undefined ? track.minPrice / 100 : "0"}`,
-      allowIndividualSale: track.allowIndividualSale,
     },
   });
 
@@ -336,7 +330,13 @@ const EditTrackRow: React.FC<{
                   t={t}
                   i18nKey={"allowMirloPromo"}
                   components={{
-                    hype: <Link to="/team/posts/236/"></Link>,
+                    hype: (
+                      <Link
+                        className={openOutsideLinkAfter}
+                        to="/team/posts/236/"
+                        target="_blank"
+                      ></Link>
+                    ),
                   }}
                 />
               </p>

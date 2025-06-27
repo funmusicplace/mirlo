@@ -151,13 +151,17 @@ function MerchView() {
                 flex-direction: column;
                 display: flex;
                 flex-grow: 1;
-                padding: 1rem;
+                padding: 0 1rem 1rem 1rem;
+
+                > button {
+                  margin: 0 1rem;
+                }
               `}
             >
               <MerchButtonPopUp merch={merch} artist={artist} />
               <div
                 className={css`
-                  margin-left: 1rem;
+                  margin: 1rem 1rem 0 1rem;
                   @media screen and (max-width: ${bp.small}px) {
                     max-width: 100%;
                     flex: 100%;
@@ -174,7 +178,7 @@ function MerchView() {
                     merch.includePurchaseTrackGroup
                   )}
                   className={css`
-                    margin: 1rem 0;
+                    margin: 1rem;
                   `}
                 >
                   {t("merchFor", {

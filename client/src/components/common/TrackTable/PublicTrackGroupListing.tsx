@@ -9,12 +9,16 @@ import { css } from "@emotion/css";
 import { bp } from "../../../constants";
 import { isTrackOwnedOrPreview } from "utils/tracks";
 import { useAuthContext } from "state/AuthContext";
+import { useTranslation } from "react-i18next";
 
 export const PublicTrackGroupListing: React.FC<{
   tracks: Track[];
   trackGroup: TrackGroup;
   size?: "small";
 }> = ({ tracks, trackGroup, size }) => {
+  const { t } = useTranslation("translation", {
+    keyPrefix: "trackGroupDetails",
+  });
   const { user } = useAuthContext();
   const [isLoading, setIsLoading] = React.useState(true);
   const { dispatch } = useGlobalStateContext();
@@ -72,7 +76,7 @@ export const PublicTrackGroupListing: React.FC<{
         {!isLoading && displayTracks.length === 0 && (
           <tr>
             <td colSpan={999} style={{ textAlign: "center" }}>
-              There's no tracks yet in this playlist!
+              {t("noTracks")}
             </td>
           </tr>
         )}

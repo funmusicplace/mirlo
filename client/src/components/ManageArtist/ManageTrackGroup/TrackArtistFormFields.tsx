@@ -10,6 +10,7 @@ import { useTranslation } from "react-i18next";
 import { FaTimes } from "react-icons/fa";
 import api from "services/api";
 import { hasId } from "./AlbumFormComponents/ManageTags";
+import { ArtistButton } from "components/Artist/ArtistButtons";
 
 const TrackArtistFormFields: React.FC<{
   artistIndex: number;
@@ -94,7 +95,7 @@ const TrackArtistFormFields: React.FC<{
             {t(watchId ? "artistOnMirlo" : "artist")}:{" "}
             <Pill>
               {watchName}{" "}
-              <Button
+              <ArtistButton
                 size="compact"
                 startIcon={<FaTimes />}
                 variant="dashed"
@@ -117,7 +118,7 @@ const TrackArtistFormFields: React.FC<{
           disabled={disabled}
         />
       </div>
-      <Button
+      <ArtistButton
         onClick={() => {
           onRemove(artistIndex);
         }}
@@ -127,7 +128,7 @@ const TrackArtistFormFields: React.FC<{
         disabled={disabled}
       >
         Remove this artist
-      </Button>
+      </ArtistButton>
     </div>
   );
 };

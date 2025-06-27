@@ -228,7 +228,7 @@
     "everywhereElse": "Everywhere else",
     "option": "{{ name }} ({{costUnit}})",
     "includesDownloadOf": "Includes a download of <albumLink>{{albumTitle}}</albumLink>",
-    "destinationCost": "Cost to ship here: {{costUnit}}",
+    "destinationCost": "Cost to ship here: {{costUnit}} ({{costExtraUnit}} per extra item)",
     "supportedShippingDestinations": "Choose the shipping destination that best matches you"
   },
   "label": {
@@ -778,6 +778,7 @@
     "pastRelease": "Released on {{date}}",
     "futureRelease": "Will be released on {{date}}",
     "about": "About:",
+    "noTracks": "There are no tracks in this album yet.",
     "isPrivate": "Is private?",
     "privateAlbumDescription": "Private albums can not be listened to by Mirlo users.",
     "isEnabled": "Is enabled?",
