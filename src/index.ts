@@ -158,6 +158,7 @@ const routes = [
   "manage/merch/{merchId}/destinations",
   "manage/merch/{merchId}/optionTypes",
   "manage/purchases",
+  "manage/sales",
   "manage/purchases/{purchaseId}",
   "manage/tracks",
   "manage/tracks/{trackId}/audio",

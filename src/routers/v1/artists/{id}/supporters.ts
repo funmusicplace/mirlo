@@ -3,19 +3,23 @@ import { Request, Response } from "express";
 import prisma from "@mirlo/prisma";
 import { findArtistIdForURLSlug } from "../../../../utils/artist";
 
-const findPurchases = async (artistId: number) => {
+export const findSales = async (artistId: number[]) => {
   const supporters = await prisma.artistUserSubscriptionCharge.findMany({
     where: {
       artistUserSubscription: {
         amount: { gt: 0 },
         artistSubscriptionTier: {
-          artistId: artistId,
+          artistId: { in: artistId },
         },
       },
     },
     select: {
       artistUserSubscription: {
-        select: { amount: true, artistSubscriptionTier: true, userId: true },
+        select: {
+          amount: true,
+          artistSubscriptionTier: { include: { artist: true } },
+          userId: true,
+        },
       },
       createdAt: true,
     },
@@ -24,12 +28,14 @@ const findPurchases = async (artistId: number) => {
   const tips = await prisma.userArtistTip.findMany({
     where: {
       pricePaid: { gt: 0 },
-      artistId: artistId,
+      artistId: { in: artistId },
     },
     select: {
+      artist: { include: { user: { select: { currency: true } } } },
       pricePaid: true,
       datePurchased: true,
       artistTipTier: true,
+      currencyPaid: true,
       userId: true,
     },
   });
@@ -39,16 +45,17 @@ const findPurchases = async (artistId: number) => {
       pricePaid: { gt: 0 },
       track: {
         trackGroup: {
-          artistId: artistId,
+          artistId: { in: artistId },
         },
       },
     },
     select: {
       userId: true,
+      currencyPaid: true,
       pricePaid: true,
       datePurchased: true,
       track: {
-        include: { trackGroup: true },
+        include: { trackGroup: { include: { artist: true } } },
       },
     },
   });
@@ -57,13 +64,14 @@ const findPurchases = async (artistId: number) => {
     where: {
       pricePaid: { gt: 0 },
       trackGroup: {
-        artistId: Number(artistId),
+        artistId: { in: artistId },
       },
     },
     select: {
       pricePaid: true,
+      currencyPaid: true,
       datePurchased: true,
-      trackGroup: true,
+      trackGroup: { include: { artist: true } },
       userId: true,
     },
   });
@@ -71,19 +79,28 @@ const findPurchases = async (artistId: number) => {
   return [
     ...supporters.map((s) => ({
       ...s,
+      artist: s.artistUserSubscription.artistSubscriptionTier.artist,
       amount: s.artistUserSubscription.amount,
       artistSubscriptionTier: s.artistUserSubscription.artistSubscriptionTier,
       datePurchased: s.createdAt,
       userId: s.artistUserSubscription.userId,
     })),
-    ...tips.map((t) => ({ ...t, amount: t.pricePaid })),
+    ...tips.map((t) => ({
+      ...t,
+      amount: t.pricePaid,
+      currency: t.currencyPaid,
+    })),
     ...trackPurchases.map((tp) => ({
       ...tp,
+      artist: tp.track.trackGroup.artist,
       amount: tp.pricePaid,
+      currency: tp.currencyPaid,
     })),
     ...trackGroupPurchases.map((tgp) => ({
       ...tgp,
+      artist: tgp.trackGroup.artist,
       amount: tgp.pricePaid,
+      currency: tgp.currencyPaid,
     })),
   ].sort((a, b) => {
     return (
@@ -121,7 +138,7 @@ export default function () {
         });
       }
 
-      const results = await findPurchases(Number(parsedId));
+      const results = await findSales([Number(parsedId)]);
 
       res.json({
         results: results.slice(Number(skip), Number(take)).map((r) => {
