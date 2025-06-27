@@ -247,6 +247,9 @@
   "artist": {
     "merch": "Merch",
     "about": "About",
+    "youveBoughtMerch": "You've bought <linkToMerch>{{title}}</linkToMerch>! The artist will ship it to the address you provided.",
+    "youveBoughtRelease": "You've bought <linkToRelease>{{title}}</linkToRelease>! It's now available in your <linkToCollection>collection</linkToCollection>.",
+    "youveBoughtTrack": "You've bought <linkToTrack>{{trackName}}</linkToTrack>! It's now available in your <linkToCollection>collection</linkToCollection>.",
     "dates": "Dates",
     "saveDates": "Save dates",
     "addTourDates": "Manage tour dates",
@@ -303,6 +306,8 @@
     "noUpdates": "There are no posts yet for this artist.",
     "releases": "Releases",
     "posts": "Posts",
+    "purchaseComplete": "You've completed your purchase!",
+    "youveTippedArtist": "You tipped this artist!",
     "justFollow": "Just follow",
     "manageSubscription": "Manage subscription",
     "unsubscribedFromArtist": "Successfully stopped following this artist",
@@ -769,8 +774,7 @@
     "privateAlbumDescription": "Private albums can not be listened to by Mirlo users.",
     "isEnabled": "Is enabled?",
     "saveTrackGroupButton": "Save album",
-    "doesNotExist": "This album does not exist or it does not have a public presence.",
-    "youveBoughtTrack": "You've bought <linkToTrack>{{trackName}}</linkToTrack>! It's now available in your <linkToCollection>collection</linkToCollection>."
+    "doesNotExist": "This album does not exist or it does not have a public presence."
   },
   "manageSubscriptionTierBox": {
     "edit": "Edit",

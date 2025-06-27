@@ -635,6 +635,17 @@ const routes: RouteObject[] = [
                 ],
               },
               {
+                path: "checkout-complete",
+                async lazy() {
+                  const { default: Component } = await import(
+                    "components/Artist/CheckoutComplete"
+                  );
+                  return {
+                    Component: () => <Component />,
+                  };
+                },
+              },
+              {
                 path: "releases",
                 async lazy() {
                   const { default: Component } = await import(
@@ -700,22 +711,18 @@ const routes: RouteObject[] = [
             },
           },
           {
-            path: "release/:trackGroupId/tracks/:trackId/checkout-complete",
-            async lazy() {
-              const { default: Component } = await import(
-                "components/TrackGroup/TrackCheckoutComplete"
-              );
-              return {
-                Component: () => <Component />,
-              };
-            },
-          },
-          {
             path: "release/:trackGroupId/tracks/:trackId",
             async lazy() {
               const { default: Component } = await import(
                 "components/TrackGroup/TrackView"
               );
+              return { Component };
+            },
+          },
+          {
+            path: "posts/:postId",
+            async lazy() {
+              const { default: Component } = await import("components/Post");
               return { Component };
             },
           },

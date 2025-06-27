@@ -119,7 +119,7 @@ const ArtistTourDates: React.FC<ArtistHeaderDescriptionProps> = ({
                 `}
               >
                 {tourDates.map((td) => (
-                  <li>
+                  <li key={td.date + td.location}>
                     <div>
                       <span>{td.location}</span>
                       {formatDate({

@@ -104,7 +104,7 @@ describe("checkout", () => {
         assert.equal(mockRedirect.calledOnce, true);
         assert.equal(
           mockRedirect.getCall(0).args[0],
-          `${client.applicationUrl}/${artist.urlSlug}?trackGroupPurchase=success&trackGroupId=${trackGroup.id}`
+          `${client.applicationUrl}/${artist.urlSlug}/checkout-complete?purchaseType=trackGroup&trackGroupId=${trackGroup.id}`
         );
       });
     });
