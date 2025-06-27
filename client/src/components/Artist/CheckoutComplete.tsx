@@ -1,10 +1,5 @@
 import { css } from "@emotion/css";
-import {
-  Link,
-  useLocation,
-  useParams,
-  useSearchParams,
-} from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import Box from "../common/Box";
 import { Trans, useTranslation } from "react-i18next";
 import Confetti from "components/common/Confetti";

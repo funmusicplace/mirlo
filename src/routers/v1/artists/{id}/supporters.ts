@@ -17,6 +17,7 @@ export const findSales = async (artistId: number[]) => {
       artistUserSubscription: {
         select: {
           amount: true,
+          currency: true,
           artistSubscriptionTier: { include: { artist: true } },
           userId: true,
         },
@@ -84,6 +85,7 @@ export const findSales = async (artistId: number[]) => {
       artistSubscriptionTier: s.artistUserSubscription.artistSubscriptionTier,
       datePurchased: s.createdAt,
       userId: s.artistUserSubscription.userId,
+      currency: s.artistUserSubscription.currency,
     })),
     ...tips.map((t) => ({
       ...t,
