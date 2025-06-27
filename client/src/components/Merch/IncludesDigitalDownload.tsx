@@ -6,6 +6,18 @@ import { css } from "@emotion/css";
 
 import { getReleaseUrl } from "utils/artist";
 
+export const openOutsideLinkAfter = css`
+  ::after {
+    content: "⤴";
+    display: inline-block;
+    width: 0.5rem;
+    height: 0.5rem;
+    margin-left: 0.1rem;
+    margin-right: 0.3rem;
+    background-size: contain;
+  }
+`;
+
 const IncludesDigitalDownload: React.FC<{ merch: Merch; artist: Artist }> = ({
   merch,
   artist,
@@ -35,10 +47,15 @@ const IncludesDigitalDownload: React.FC<{ merch: Merch; artist: Artist }> = ({
         components={{
           albumLink: (
             <Link
-              className={css`
-                font-weight: bold;
-              `}
+              className={
+                css`
+                  font-weight: bold;
+                ` +
+                " " +
+                openOutsideLinkAfter
+              }
               to={getReleaseUrl(merch.artist, merch.includePurchaseTrackGroup)}
+              target="_blank"
             ></Link>
           ),
         }}

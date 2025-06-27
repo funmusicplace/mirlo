@@ -3,11 +3,7 @@ import { NextFunction, Request, Response } from "express";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import prisma from "@mirlo/prisma";
 
-import {
-  createStripeCheckoutSessionForMerchPurchase,
-  createStripeCheckoutSessionForPurchase,
-} from "../../../../utils/stripe";
-import { handleTrackGroupPurchase } from "../../../../utils/handleFinishedTransactions";
+import { createStripeCheckoutSessionForMerchPurchase } from "../../../../utils/stripe";
 import { subscribeUserToArtist } from "../../../../utils/artist";
 import { AppError } from "../../../../utils/error";
 import { determinePrice } from "../../../../utils/purchasing";
@@ -23,14 +19,21 @@ export default function () {
 
   async function POST(req: Request, res: Response, next: NextFunction) {
     const { id: merchId } = req.params as unknown as Params;
-    let { price, email, quantity, merchOptionIds, shippingDestinationId } =
-      req.body as unknown as {
-        price?: string; // In cents
-        email?: string;
-        quantity?: number;
-        merchOptionIds: string[];
-        shippingDestinationId: string;
-      };
+    let {
+      price,
+      email,
+      quantity,
+      merchOptionIds,
+      message,
+      shippingDestinationId,
+    } = req.body as unknown as {
+      price?: string; // In cents
+      email?: string;
+      quantity?: number;
+      merchOptionIds: string[];
+      shippingDestinationId: string;
+      message?: string; // Optional message for the artist
+    };
     const loggedInUser = req.user as User | undefined;
 
     try {
@@ -116,6 +119,7 @@ export default function () {
           email,
           priceNumber: priceNumber + additionalPrice,
           merch,
+          message,
           quantity: quantity ?? 0,
           stripeAccountId,
           shippingDestinationId,

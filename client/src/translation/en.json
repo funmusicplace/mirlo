@@ -208,13 +208,16 @@
   },
   "merchDetails": {
     "buy": "Buy",
+    "leaveAComment": "Show the artist some love",
     "choose": "Choose an option",
     "notEnoughInStockQuantity": "Not enough in stock",
     "notEnoughInStockCategory": "Not enough in stock of this category",
+    "priceMustBeAtLeast": "Price must be at least {{ price }}",
     "orderTotal": "Order total: {{ amount }}",
     "goToCheckOut": "Proceed to checkout",
     "artistCheckoutPage": "You will be taken to the artist's payment processor page to complete this purchase.",
     "buyMerch": "Buy",
+    "messageToArtist": "This will be shown publicly on the artist's page.",
     "buyFor": "Buy for {{amount}}",
     "buyFrom": "Buy from {{amount}}",
     "merchFor": "This merch is for '{{ album }}' and you'll receive a download of it when you buy it.",
@@ -228,7 +231,7 @@
     "everywhereElse": "Everywhere else",
     "option": "{{ name }} ({{costUnit}})",
     "includesDownloadOf": "Includes a download of <albumLink>{{albumTitle}}</albumLink>",
-    "destinationCost": "Cost to ship here: {{costUnit}}",
+    "destinationCost": "Cost to ship here: {{costUnit}} ({{costExtraUnit}} per extra item)",
     "supportedShippingDestinations": "Choose the shipping destination that best matches you"
   },
   "label": {
@@ -255,6 +258,8 @@
   "artist": {
     "merch": "Merch",
     "about": "About",
+    "messageToArtist": "This will be shown publicly on the artist's page.",
+    "leaveAComment": "Show the artist some love",
     "youveBoughtMerch": "You've bought <linkToMerch>{{title}}</linkToMerch>! The artist will ship it to the address you provided.",
     "youveBoughtRelease": "You've bought <linkToRelease>{{title}}</linkToRelease>! It's now available in your <linkToCollection>collection</linkToCollection>.",
     "youveBoughtTrack": "You've bought <linkToTrack>{{trackName}}</linkToTrack>! It's now available in your <linkToCollection>collection</linkToCollection>.",
@@ -758,6 +763,8 @@
     "successfullyUpdated": "Successfully updated track"
   },
   "trackGroupDetails": {
+    "messageToArtist": "This will be shown publicly on the artist's page.",
+    "leaveAComment": "Show the artist some love",
     "trackgroup": "Album:",
     "downloadCodecsInfo": "Includes downloads in FLAC, WAV, mp3 and more. Paying supporters also get unlimited streaming on the Mirlo website.",
     "embedCode": "Embed code",
@@ -778,6 +785,7 @@
     "pastRelease": "Released on {{date}}",
     "futureRelease": "Will be released on {{date}}",
     "about": "About:",
+    "noTracks": "There are no tracks in this album yet.",
     "isPrivate": "Is private?",
     "privateAlbumDescription": "Private albums can not be listened to by Mirlo users.",
     "isEnabled": "Is enabled?",

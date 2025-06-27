@@ -12,6 +12,7 @@ import api from "services/api";
 import { moneyDisplay } from "./Money";
 import { css } from "@emotion/css";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
+import TextArea from "./TextArea";
 
 const defaultGifts = [
   { value: 5 },
@@ -34,6 +35,7 @@ const TipArtistForm: React.FC<{
   const methods = useForm<{
     price: number;
     email: string;
+    message?: string;
     priceButton: number | "other";
   }>({ defaultValues: {} });
 
@@ -52,11 +54,12 @@ const TipArtistForm: React.FC<{
           buttonPrice === "other" ? methods.getValues("price") : buttonPrice;
         const email = methods.getValues("email");
         const response = await api.post<
-          { price: number; email: string },
+          { price: number; email: string; message?: string },
           { redirectUrl: string }
         >(`artists/${artistDetails.id}/tip`, {
           price: Number(price) * 100,
           email,
+          message: methods.getValues("message"),
         });
         window.location.assign(response.redirectUrl);
         if (!user) {
@@ -166,6 +169,11 @@ const TipArtistForm: React.FC<{
               </FormComponent>
             )}
           </FormProvider>
+          <FormComponent>
+            <label htmlFor="comment">{t("leaveAComment")}</label>
+            <TextArea id="comment" {...methods.register("message")} rows={2} />
+            <small>{t("messageToArtist")}</small>
+          </FormComponent>
           <Button
             onClick={() => subscribeToTier()}
             isLoading={isCheckingForSubscription}

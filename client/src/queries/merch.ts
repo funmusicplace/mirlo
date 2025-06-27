@@ -34,6 +34,7 @@ export function queryMerch(opts: { merchId: string; artistId: string }) {
       },
     ],
     queryFn: fetchMerch,
+    enabled: !!opts.merchId,
   });
 }
 

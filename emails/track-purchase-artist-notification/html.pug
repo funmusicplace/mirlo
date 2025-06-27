@@ -28,6 +28,10 @@ html
           | Final: 
           strong #{purchase.currencyPaid.toUpperCase()} #{(pricePaid - platformCut).toFixed(2)} 
 
+      if message
+        p
+          | The buyer left a message for you: "#{message}"
+
       p The final money will be available via your Stripe dashboard
       p If you have any questions please reach out to hi@mirlo.space
 

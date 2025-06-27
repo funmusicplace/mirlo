@@ -18,9 +18,10 @@ export default function () {
 
   async function POST(req: Request, res: Response, next: NextFunction) {
     const { id: artistId } = req.params as unknown as Params;
-    let { price, email } = req.body as unknown as {
+    let { price, email, message } = req.body as unknown as {
       price?: string; // In cents
       email?: string;
+      message?: string; // Optional message to the artist
     };
     const loggedInUser = req.user as User | undefined;
 
@@ -79,6 +80,7 @@ export default function () {
           loggedInUser,
           email,
           priceNumber,
+          message,
           stripeAccountId,
           artistId: Number(artistId),
           currency: artist.user.currency ?? "usd",

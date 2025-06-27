@@ -4,7 +4,7 @@ import { QUERY_KEY_MERCH, QUERY_KEY_TRACK_GROUPS } from "./queryKeys";
 
 const fetchArtist: QueryFunction<
   Artist,
-  ["fetchArtist", { artistSlug: string; includeDefaultTier?: boolean }]
+  ["fetchArtist", { artistSlug?: string; includeDefaultTier?: boolean }]
 > = ({ queryKey: [_, { artistSlug, includeDefaultTier }], signal }) => {
   return api
     .get<{
@@ -16,7 +16,7 @@ const fetchArtist: QueryFunction<
 };
 
 export function queryArtist(opts: {
-  artistSlug: string;
+  artistSlug?: string;
   includeDefaultTier?: boolean;
 }) {
   return queryOptions({

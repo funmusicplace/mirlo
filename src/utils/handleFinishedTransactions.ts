@@ -22,6 +22,7 @@ export const handleTrackGroupPurchase = async (
       userId: Number(userId),
       trackGroupId: Number(trackGroupId),
       pricePaid: session?.amount_total ?? 0,
+      message: session?.metadata?.message ?? null,
       currencyPaid: session?.currency ?? "USD",
       paymentProcessorKey: session?.id ?? null,
     });
@@ -141,8 +142,6 @@ export const handleCataloguePurchase = async (
       })
     );
 
-    const settings = await getSiteSettings();
-
     const user = await prisma.user.findFirst({
       where: {
         id: userId,
@@ -199,6 +198,7 @@ export const handleTrackPurchase = async (
       userId: Number(userId),
       trackId: Number(trackId),
       pricePaid: session?.amount_total ?? 0,
+      message: session?.metadata?.message ?? null,
       currencyPaid: session?.currency ?? "USD",
       paymentProcessorKey: session?.id ?? null,
     });
@@ -265,6 +265,7 @@ export const handleTrackPurchase = async (
           locals: {
             track,
             purchase,
+            message: purchase.message ?? null,
             pricePaid,
             platformCut:
               ((track.trackGroup.platformPercent ?? settings.platformPercent) *
@@ -295,6 +296,7 @@ export const handleArtistGift = async (
         pricePaid: session?.amount_total ?? 0,
         currencyPaid: session?.currency ?? "USD",
         stripeSessionKey: session?.id ?? null,
+        message: session?.metadata?.message ?? null,
       },
     });
 
@@ -341,6 +343,7 @@ export const handleArtistGift = async (
           locals: {
             tip,
             pricePaid,
+            message: tip.message ?? null,
             platformCut,
             email: user.email,
           },
@@ -442,6 +445,7 @@ export const handleArtistMerchPurchase = async (
                   currencyPaid: item.currency ?? "USD",
                   stripeTransactionKey: session?.id ?? null,
                   fulfillmentStatus: "NO_PROGRESS",
+                  message: session?.metadata?.message ?? null,
                   shippingAddress: session?.shipping_details?.address,
                   billingAddress: session?.customer_details?.address,
                   quantity: item.quantity ?? 1,
@@ -564,6 +568,7 @@ export const handleArtistMerchPurchase = async (
             to: purchases?.[0]?.merch?.artist.user.email,
           },
           locals: {
+            message: session?.metadata?.message ?? null,
             purchases,
             artist: purchases[0].merch.artist,
             calculateAppFee,

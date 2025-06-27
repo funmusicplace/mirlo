@@ -26,12 +26,12 @@ function CheckoutComplete() {
   const [searchParams] = useSearchParams();
   const trackGroupId = searchParams.get("trackGroupId");
   const trackId = searchParams.get("trackId");
-  const { data: trackGroup, isLoading } = useQuery(
-    queryTrackGroup({ artistId: artistId ?? "", albumSlug: trackGroupId ?? "" })
+  const { data: trackGroup } = useQuery(
+    queryTrackGroup({ albumSlug: trackGroupId })
   );
 
   const { data: artist, isLoading: isLoadingArtist } = useQuery(
-    queryArtist({ artistSlug: artistId ?? "" })
+    queryArtist({ artistSlug: artistId })
   );
   const { data: merch } = useQuery(
     queryMerch({

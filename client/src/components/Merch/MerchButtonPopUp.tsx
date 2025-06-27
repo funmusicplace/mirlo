@@ -30,9 +30,9 @@ const MerchButtonPopUp: React.FC<{ merch: Merch; artist: Artist }> = ({
     return null;
   }
 
-  const hasPricedOptions = merch.optionTypes.find((ot) =>
-    ot.options.find((o) => o.additionalPrice)
-  );
+  const hasPricedOptions =
+    merch.optionTypes.find((ot) => ot.options.find((o) => o.additionalPrice)) ||
+    merch.shippingDestinations.find((sd) => sd.costUnit);
 
   const amount = moneyDisplay({
     amount: merch.minPrice / 100,
@@ -50,8 +50,8 @@ const MerchButtonPopUp: React.FC<{ merch: Merch; artist: Artist }> = ({
       </ArtistButton>
       <Modal
         open={isOpen}
-        size="small"
         title={t("buyMerch")}
+        size="medium"
         onClose={() => setIsOpen(false)}
         className={css`
           form {

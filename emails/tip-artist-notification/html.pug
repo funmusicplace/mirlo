@@ -22,5 +22,10 @@ html
           | (Mirlo percentage: #{platformCut.toFixed(2)})
           
       p The final money will be available via your Stripe dashboard
+
+      if message 
+        p
+          | The buyer left a message for you: "#{message}"
+
       p If you have any questions please reach out to hi@mirlo.space
 
