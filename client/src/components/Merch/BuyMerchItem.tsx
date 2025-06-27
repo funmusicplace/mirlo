@@ -329,6 +329,7 @@ const BuyMerchItem: React.FC<{
       <FormComponent>
         <label>{t("leaveAComment")}</label>
         <TextArea {...methods.register("message")} rows={4} />
+        <small>{t("messageToArtist")}</small>
       </FormComponent>
 
       <div

@@ -217,6 +217,7 @@
     "goToCheckOut": "Proceed to checkout",
     "artistCheckoutPage": "You will be taken to the artist's payment processor page to complete this purchase.",
     "buyMerch": "Buy",
+    "messageToArtist": "This will be shown publicly on the artist's page.",
     "buyFor": "Buy for {{amount}}",
     "buyFrom": "Buy from {{amount}}",
     "merchFor": "This merch is for '{{ album }}' and you'll receive a download of it when you buy it.",
