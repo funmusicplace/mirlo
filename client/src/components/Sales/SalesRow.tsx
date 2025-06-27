@@ -6,8 +6,7 @@ import { moneyDisplay } from "components/common/Money";
 
 const SalesRow: React.FC<{
   sale: Sale;
-  index: number;
-}> = ({ sale, index }) => {
+}> = ({ sale }) => {
   const { i18n, t } = useTranslation("translation", {
     keyPrefix: "sales",
   });

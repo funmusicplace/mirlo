@@ -16,7 +16,8 @@ html
       p Thank you for supporting #{track.trackGroup.artist.name} with your purchase of #{track.title}.
      
     div 
-      p #{track.title} from #{track.trackGroup.title}
+      p #{track.title} from 
+        em #{track.trackGroup.title}
       p #{purchase.currencyPaid.toUpperCase()} #{(purchase.pricePaid / 100).toFixed(2)}
     if isBeforeReleaseDate
       p The track will become available in your collection for unlimited listening and downloading once it is released.

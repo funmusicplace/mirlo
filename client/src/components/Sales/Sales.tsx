@@ -28,7 +28,7 @@ export const Sales: React.FC = () => {
       search.append("orderBy", "createdAt");
     }
     const { results, total: totalResults } = await api.getMany<Sale>(
-      `manage/sales?${search?.toString()}`
+      `manage/sales?${search ? search?.toString() : ""}`
     );
     setTotal(totalResults);
     setResults(results);
@@ -73,11 +73,7 @@ export const Sales: React.FC = () => {
             </thead>
             <tbody>
               {results.map((sale, index) => (
-                <SalesRow
-                  key={sale.datePurchased + index}
-                  sale={sale}
-                  index={index}
-                />
+                <SalesRow key={sale.datePurchased + index} sale={sale} />
               ))}
             </tbody>
           </Table>
