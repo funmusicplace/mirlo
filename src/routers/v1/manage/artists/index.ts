@@ -27,6 +27,7 @@ const forbiddenNames = [
   "you",
   "guest",
   "fulfillment",
+  "sales",
   "account",
   "administrator",
   "system",

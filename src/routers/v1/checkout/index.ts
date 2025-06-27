@@ -50,11 +50,12 @@ export default function () {
 
           const searchParams = new URLSearchParams();
           searchParams.set("purchaseType", purchaseType ?? "");
-          searchParams.set("trackGroupId", trackGroupId?.toString() ?? "");
-          searchParams.set("trackId", trackId?.toString() ?? "");
-          searchParams.set("tierId", tierId?.toString() ?? "");
-          searchParams.set("merchId", merchId ?? "");
-          searchParams.set("tipId", tipId ?? "");
+          trackGroupId &&
+            searchParams.set("trackGroupId", trackGroupId.toString());
+          trackId && searchParams.set("trackId", trackId.toString());
+          tierId && searchParams.set("tierId", tierId.toString());
+          merchId && searchParams.set("merchId", merchId);
+          tipId && searchParams.set("tipId", tipId);
 
           res.redirect(
             client?.applicationUrl +
