@@ -53,9 +53,12 @@ const fetchTrackGroup: QueryFunction<
   return api
     .get<{
       result: TrackGroup;
-    }>(`v1/trackGroups/${albumSlug}/?artistId=${artistId}`, {
-      signal,
-    })
+    }>(
+      `v1/trackGroups/${albumSlug}/${artistId ? `?artistId=${artistId}` : ""}`,
+      {
+        signal,
+      }
+    )
     .then((r) => r.result);
 };
 

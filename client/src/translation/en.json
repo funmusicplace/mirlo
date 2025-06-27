@@ -136,6 +136,8 @@
     "removeFromFavorites": "Remove from favorites"
   },
   "trackGroupCard": {
+    "messageToArtist": "This will be shown publicly on the artist's page.",
+    "leaveAComment": "Show the artist some love",
     "thatsGenerous": "{{ chosenPrice }}? That's generous!",
     "notLoggedIn": "We'll need your email address to send you a one-time download link of the album. In the future you'll be able to create an account and access what you've bought.",
     "albumExists": "An album has already been bought using this email address, you can finish creating an account to see it in your collection. Do you want to proceed anyway?",
@@ -763,8 +765,6 @@
     "successfullyUpdated": "Successfully updated track"
   },
   "trackGroupDetails": {
-    "messageToArtist": "This will be shown publicly on the artist's page.",
-    "leaveAComment": "Show the artist some love",
     "trackgroup": "Album:",
     "downloadCodecsInfo": "Includes downloads in FLAC, WAV, mp3 and more. Paying supporters also get unlimited streaming on the Mirlo website.",
     "embedCode": "Embed code",
