@@ -20,7 +20,14 @@ export const SmallTileDetails: React.FC<{
   subtitle: string | React.ReactElement;
   footer?: string | React.ReactElement;
   moreActions?: React.ReactElement;
-}> = ({ title, subtitle, moreActions, footer }) => {
+  textColor?: string;
+}> = ({
+  title,
+  subtitle,
+  moreActions,
+  footer,
+  textColor = "var(--mi-normal-foreground-color)",
+}) => {
   return (
     <>
       <div
@@ -57,7 +64,7 @@ export const SmallTileDetails: React.FC<{
         {subtitle && (
           <WidgetSection
             className={css`
-              color: var(--mi-normal-foreground-color);
+              color: ${textColor};
               font-size: 1rem;
               margin-bottom: 1rem;
               span:first-of-type {
@@ -83,7 +90,7 @@ export const SmallTileDetails: React.FC<{
         {footer && (
           <WidgetSection
             className={css`
-              color: var(--mi-normal-foreground-color);
+              color: ${textColor};
               font-size: 0.85rem;
               margin-top: 0.25rem;
               ul > li {

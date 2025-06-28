@@ -69,7 +69,8 @@ const errorHandler = (
   // Errors we should probably know about
   console.error(
     `ERROR: ${req.method}: ${req.path} params: ${JSON.stringify(req.params)}`,
-    err
+    err,
+    err.captureStackTrace ? err.captureStackTrace() : ""
   );
 
   if (

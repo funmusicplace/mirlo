@@ -102,43 +102,45 @@ function CheckoutComplete() {
               justify-content: flex-start;
             `}
           >
-            {purchaseType === "trackGroup" && trackGroup && (
-              <Trans
-                t={t}
-                i18nKey="youveBoughtRelease"
-                components={{
-                  linkToRelease: (
-                    <Link to={getReleaseUrl(artist, trackGroup)}></Link>
-                  ),
-                  linkToCollection: <Link to="/profile/collection"></Link>,
-                }}
-                values={{ title: trackGroup.title }}
-              />
-            )}
-            {purchaseType === "track" && track && trackGroup && (
-              <Trans
-                t={t}
-                i18nKey="youveBoughtTrack"
-                components={{
-                  linkToTrack: (
-                    <Link to={getTrackUrl(artist, trackGroup, track)}></Link>
-                  ),
-                  linkToCollection: <Link to="/profile/collection"></Link>,
-                }}
-                values={{ trackName: track.title }}
-              />
-            )}
-            {purchaseType === "merch" && merch && (
-              <Trans
-                t={t}
-                i18nKey="youveBoughtMerch"
-                components={{
-                  linkToMerch: <Link to={getMerchUrl(artist, merch)}></Link>,
-                }}
-                values={{ merchName: merch.title }}
-              />
-            )}
-            {purchaseType === "tip" && t("youveTippedArtist")}
+            <span>
+              {purchaseType === "trackGroup" && trackGroup && (
+                <Trans
+                  t={t}
+                  i18nKey="youveBoughtRelease"
+                  components={{
+                    linkToRelease: (
+                      <Link to={getReleaseUrl(artist, trackGroup)}></Link>
+                    ),
+                    linkToCollection: <Link to="/profile/collection"></Link>,
+                  }}
+                  values={{ title: trackGroup.title }}
+                />
+              )}
+              {purchaseType === "track" && track && trackGroup && (
+                <Trans
+                  t={t}
+                  i18nKey="youveBoughtTrack"
+                  components={{
+                    linkToTrack: (
+                      <Link to={getTrackUrl(artist, trackGroup, track)}></Link>
+                    ),
+                    linkToCollection: <Link to="/profile/collection"></Link>,
+                  }}
+                  values={{ trackName: track.title }}
+                />
+              )}
+              {purchaseType === "merch" && merch && (
+                <Trans
+                  t={t}
+                  i18nKey="youveBoughtMerch"
+                  components={{
+                    linkToMerch: <Link to={getMerchUrl(artist, merch)}></Link>,
+                  }}
+                  values={{ title: merch.title }}
+                />
+              )}
+              {purchaseType === "tip" && t("youveTippedArtist")}
+            </span>
             <Confetti />
           </div>
         </div>

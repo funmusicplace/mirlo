@@ -8,7 +8,7 @@ import SmallTileDetails from "components/common/SmallTileDetails";
 import React from "react";
 import { useTranslation } from "react-i18next";
 
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import api from "services/api";
 import { isTrackOwnedOrPreview, widgetUrl } from "utils/tracks";
 import { FlexWrapper, WidgetWrapper, inIframe, inMirlo } from "./utils";
@@ -17,6 +17,8 @@ import DisplayAudioWrapper from "./DisplayAudio";
 import { bp } from "../../constants";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import { useAuthContext } from "state/AuthContext";
+import { getReleaseUrl } from "utils/artist";
+import { TrackArtistLinks } from "components/Player/PlayingTrackDetails";
 
 const TrackWidget = () => {
   const params = useParams();
@@ -134,11 +136,20 @@ const TrackWidget = () => {
                 <SmallTileDetails
                   title={track.title}
                   subtitle={
-                    track.trackGroup.isDraft ? "Drafts" : track.trackGroup.title
+                    <Link
+                      to={getReleaseUrl(
+                        track.trackGroup.artist,
+                        track.trackGroup
+                      )}
+                    >
+                      {track.trackGroup.isDraft
+                        ? "Drafts"
+                        : track.trackGroup.title}
+                    </Link>
                   }
-                  footer={
-                    track.trackGroup.artist?.name ??
-                    (artistTranslation("unknown") as string)
+                  footer={<TrackArtistLinks track={track} />}
+                  textColor={
+                    track.trackGroup.artist?.properties?.colors?.primary
                   }
                 />
               </FlexWrapper>

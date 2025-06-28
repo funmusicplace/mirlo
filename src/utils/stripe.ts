@@ -421,11 +421,13 @@ export const createStripeCheckoutSessionForCatalogue = async ({
   email,
   priceNumber,
   artist,
+  message,
   stripeAccountId,
 }: {
   loggedInUser?: User;
   email?: string;
   priceNumber: number;
+  message?: string;
   artist: Prisma.ArtistGetPayload<{ include: { user: true; avatar: true } }>;
   stripeAccountId: string;
 }) => {
@@ -473,6 +475,7 @@ export const createStripeCheckoutSessionForCatalogue = async ({
         userId: loggedInUser?.id ?? null,
         userEmail: email ?? null,
         stripeAccountId,
+        message: message ?? null,
       },
       mode: "payment",
       success_url: `${API_DOMAIN}/v1/checkout?success=true&stripeAccountId=${stripeAccountId}&session_id={CHECKOUT_SESSION_ID}`,
@@ -925,7 +928,7 @@ export const handleCheckoutSession = async (
     let { userId, userEmail } = metadata;
     userEmail = userEmail || (session.customer_details?.email ?? "");
     logger.info(
-      `checkout.session: ${session.id}, stripeAccountId: ${stripeAccountId}, tierId: ${tierId}, trackGroupId: ${trackGroupId}, trackId: ${trackId}, artistId: ${artistId}, gaveGift: ${gaveGift}`
+      `checkout.session: ${session.id}, stripeAccountId: ${stripeAccountId}, ${JSON.stringify(metadata)}`
     );
     logger.info(
       `checkout.session: ${session.id}, have user info: userId: ${userId} userEmail: ${userEmail}`
@@ -973,7 +976,7 @@ export const handleCheckoutSession = async (
         session,
         newUser
       );
-    } else if (purchaseType === "catalogue") {
+    } else if (purchaseType === "artistCatalogue") {
       logger.info(`checkout.session: ${session.id} handleCataloguePurchase`);
       await handleCataloguePurchase(
         Number(actualUserId),

@@ -12,6 +12,7 @@ import {
   finalUserAvatarBucket,
 } from "./utils/minio";
 import { Client } from "@mirlo/prisma/client";
+import { isNumber } from "lodash";
 
 type Options = {
   title: string;
@@ -158,18 +159,35 @@ const parseIndex = async (pathname: string) => {
         : undefined;
       const rss = `${process.env.API_DOMAIN}/v1/artists/${artist.urlSlug}/feed?format=rss`;
       if (route[2] === "posts") {
-        const post = await prisma.post.findFirst({
-          where: { id: Number(route[3]) },
-          include: {
-            artist: true,
-            featuredImage: true,
-            tracks: {
-              orderBy: {
-                order: "asc",
+        let post;
+        if (isNumber(route[3])) {
+          post = await prisma.post.findFirst({
+            where: { id: Number(route[3]) },
+            include: {
+              artist: true,
+              featuredImage: true,
+              tracks: {
+                orderBy: {
+                  order: "asc",
+                },
               },
             },
-          },
-        });
+          });
+        } else if (route[3]) {
+          post = await prisma.post.findFirst({
+            where: { urlSlug: { equals: route[3], mode: "insensitive" } },
+            include: {
+              artist: true,
+              featuredImage: true,
+              tracks: {
+                orderBy: {
+                  order: "asc",
+                },
+              },
+            },
+          });
+        }
+
         if (post) {
           const hasTracks = post.tracks.length > 0;
           // it's a post
@@ -207,13 +225,25 @@ const parseIndex = async (pathname: string) => {
           rss,
         });
       } else if (route[2] === "merch") {
-        const merch = await prisma.merch.findFirst({
-          where: { id: route[3] },
-          include: {
-            artist: true,
-            images: true,
-          },
-        });
+        let merch;
+        if (route[3] && isNumber(route[3])) {
+          merch = await prisma.merch.findFirst({
+            where: { id: route[3] },
+            include: {
+              artist: true,
+              images: true,
+            },
+          });
+        } else if (route[3]) {
+          // it is about a merch item
+          merch = await prisma.merch.findFirst({
+            where: { urlSlug: { equals: route[3], mode: "insensitive" } },
+            include: {
+              artist: true,
+              images: true,
+            },
+          });
+        }
         if (merch) {
           const coverString = merch.images?.[0]?.url.find((u) =>
             u.includes("x600")

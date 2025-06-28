@@ -5,19 +5,34 @@ import { bp } from "../../constants";
 import { getReleaseUrl, getTrackUrl } from "utils/artist";
 import React from "react";
 
-const PlayingTrackDetails: React.FC<{ currentTrack: Track }> = ({
-  currentTrack,
-}) => {
+export const TrackArtistLinks: React.FC<{ track: Track }> = ({ track }) => {
   const artists =
-    currentTrack.trackArtists?.filter((artist) => artist.isCoAuthor) ?? [];
+    track.trackArtists?.filter((artist) => artist.isCoAuthor) ?? [];
 
   if (artists.length === 0) {
     artists.push({
-      artistId: currentTrack.trackGroup.artistId,
-      artistName: currentTrack.trackGroup.artist.name,
+      artistId: track.trackGroup.artistId,
+      artistName: track.trackGroup.artist.name,
     });
   }
 
+  return artists.map((artist, index) => (
+    <React.Fragment key={artist.artistName}>
+      {artist.artistId ? (
+        <Link to={`/${artist.artistId}`} id="player-artist-name">
+          {artist.artistName}
+        </Link>
+      ) : (
+        artist.artistName
+      )}
+      {index < artists.length - 1 && ", "}
+    </React.Fragment>
+  ));
+};
+
+const PlayingTrackDetails: React.FC<{ currentTrack: Track }> = ({
+  currentTrack,
+}) => {
   return (
     <div
       className={css`
@@ -117,18 +132,7 @@ const PlayingTrackDetails: React.FC<{ currentTrack: Track }> = ({
                 text-overflow: ellipsis;
               `}
             >
-              {artists.map((artist, index) => (
-                <React.Fragment key={artist.artistName}>
-                  {artist.artistId ? (
-                    <Link to={`/${artist.artistId}`} id="player-artist-name">
-                      {artist.artistName}
-                    </Link>
-                  ) : (
-                    artist.artistName
-                  )}
-                  {index < artists.length - 1 && ", "}
-                </React.Fragment>
-              ))}
+              <TrackArtistLinks track={currentTrack} />
             </div>
           </>
         )}

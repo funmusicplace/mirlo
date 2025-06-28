@@ -135,6 +135,7 @@ export const handleCataloguePurchase = async (
         await registerPurchase({
           userId: Number(userId),
           trackGroupId: Number(trackGroup.id),
+          message: session?.metadata?.message ?? null,
           pricePaid: Number(amountPaidPerTrackGroup.toFixed(2)),
           currencyPaid: session?.currency ?? "usd",
           paymentProcessorKey: session?.id ?? null,

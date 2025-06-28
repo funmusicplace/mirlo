@@ -79,7 +79,13 @@ const BuyMerchItem: React.FC<{
 
           if (
             options &&
-            options.find((o) => (o?.quantityRemaining ?? 0) < data.quantity)
+            options.find(
+              (o) =>
+                o &&
+                o.quantityRemaining !== undefined &&
+                o.quantityRemaining !== null &&
+                o.quantityRemaining < data.quantity
+            )
           ) {
             setError("merchOptionIds", {
               type: "manual",
@@ -136,13 +142,14 @@ const BuyMerchItem: React.FC<{
     ot.options.forEach((o) => {
       if (merchOptionIds.includes(o.id)) {
         price += (o.additionalPrice * Number(quantity)) / 100;
-        if (o.quantityRemaining) {
+        if (o.quantityRemaining !== null && o.quantityRemaining !== undefined) {
           amountAvailable = Math.min(o.quantityRemaining ?? 0, amountAvailable);
         }
       }
     });
   });
-
+  console.log("amountAvailable", amountAvailable, quantity);
+  console.log("formState", formState.errors);
   const exceedsAvailable = amountAvailable < Number(quantity);
 
   const onlyOneDestination = merch.shippingDestinations.length === 1;
