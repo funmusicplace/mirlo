@@ -92,23 +92,21 @@ const ArtistAlbums: React.FC = () => {
           justify-content: center;
         `}
       >
-        <FeatureFlag featureFlag="cataloguePrice">
-          {user && artist.user && !!artist.purchaseEntireCatalogMinPrice && (
-            <ArtistButton
-              size="big"
-              type="button"
-              isLoading={loadingStripe}
-              onClick={purchaseCatalogue}
-            >
-              {t("purchaseEntireCatalogue", {
-                amount: moneyDisplay({
-                  amount: artist.purchaseEntireCatalogMinPrice / 100,
-                  currency: artist.user.currency ?? "usd",
-                }),
-              })}
-            </ArtistButton>
-          )}
-        </FeatureFlag>
+        {user && artist.user && !!artist.purchaseEntireCatalogMinPrice && (
+          <ArtistButton
+            size="big"
+            type="button"
+            isLoading={loadingStripe}
+            onClick={purchaseCatalogue}
+          >
+            {t("purchaseEntireCatalogue", {
+              amount: moneyDisplay({
+                amount: artist.purchaseEntireCatalogMinPrice / 100,
+                currency: artist.user.currency ?? "usd",
+              }),
+            })}
+          </ArtistButton>
+        )}
       </div>
     </div>
   );

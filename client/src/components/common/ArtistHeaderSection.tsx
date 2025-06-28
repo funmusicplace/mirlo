@@ -17,7 +17,6 @@ import { FaRss } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 import { ArtistButtonAnchor } from "components/Artist/ArtistButtons";
 import ArtistTourDates from "components/Artist/ArtistTourDates";
-import FeatureFlag from "./FeatureFlag";
 
 export const ArtistTitle = styled.h1<{ artistAvatar: boolean }>`
   font-size: 2.4rem;
