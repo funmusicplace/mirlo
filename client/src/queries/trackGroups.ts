@@ -46,6 +46,28 @@ export function queryTrackGroups(opts: TrackGroupQueryOptions) {
   });
 }
 
+const fetchTopSoldTrackGroups: QueryFunction<
+  { results: TrackGroup[]; total?: number },
+  [
+    "fetchTopSoldTrackGroups",
+    Pick<TrackGroupQueryOptions, "skip" | "take">,
+    ...any,
+  ]
+> = ({ queryKey: [_, { skip, take }], signal }) => {
+  const params = new URLSearchParams();
+  if (skip) params.append("skip", String(skip));
+  if (take) params.append("take", String(take));
+
+  return api.get(`v1/trackGroups/topSold`, { signal });
+};
+
+export function queryTopSoldTrackGroups(opts: TrackGroupQueryOptions) {
+  return queryOptions({
+    queryKey: ["fetchTopSoldTrackGroups", opts, QUERY_KEY_TRACK_GROUPS],
+    queryFn: fetchTopSoldTrackGroups,
+  });
+}
+
 const fetchTrackGroup: QueryFunction<
   TrackGroup,
   ["fetchTrackGroup", { albumSlug?: string | null; artistId?: string }]

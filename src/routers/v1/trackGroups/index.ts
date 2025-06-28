@@ -73,20 +73,24 @@ export default function () {
 
       const orderByClause = processTrackGroupQueryOrder(orderBy);
       if (orderBy === "random") {
-        // This isn't ideal, but it'll basically take a random slice
-        // anywhere. Prisma does not support random slices.
-        skip = Math.max(
-          0,
-          Math.floor(Math.random() * (itemCount ?? 100)) - Number(take)
-        );
+        const rawTrackGroups = await prisma.$queryRaw<
+          Array<{ id: number }>
+        >`SELECT DISTINCT ON ("artistId") id FROM "TrackGroup" WHERE "releaseDate" <= NOW() AND "published" = true ORDER BY "artistId", RANDOM() LIMIT ${Number(take)}`;
+
+        const randomIds = rawTrackGroups.map((row) => row.id);
+        where.id = { in: randomIds };
+        delete where.releaseDate; // Remove releaseDate filter for random query
+        delete where.tags;
+        delete where.artistId; // Remove artistId filter for random query
+        delete where.title;
       }
 
       const trackGroups = await prisma.trackGroup.findMany({
         where,
         ...(distinctArtists ? { distinct: "artistId" } : {}),
-        orderBy: orderByClause,
-        skip: skip ? Number(skip) : undefined,
-        take: take ? Number(take) : undefined,
+        orderBy: where.id ? undefined : orderByClause,
+        skip: skip && !where.id ? Number(skip) : undefined,
+        take: take && !where.id ? Number(take) : undefined,
         include: {
           artist: {
             select: {
@@ -99,6 +103,7 @@ export default function () {
           cover: true,
         },
       });
+
       if (format === "rss") {
         const feed = await turnItemsIntoRSS(
           {
