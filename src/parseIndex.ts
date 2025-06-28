@@ -175,7 +175,7 @@ const parseIndex = async (pathname: string) => {
           });
         } else if (route[3]) {
           post = await prisma.post.findFirst({
-            where: { urlSlug: route[3] },
+            where: { urlSlug: { equals: route[3], mode: "insensitive" } },
             include: {
               artist: true,
               featuredImage: true,
@@ -237,7 +237,7 @@ const parseIndex = async (pathname: string) => {
         } else if (route[3]) {
           // it is about a merch item
           merch = await prisma.merch.findFirst({
-            where: { urlSlug: route[3] },
+            where: { urlSlug: { equals: route[3], mode: "insensitive" } },
             include: {
               artist: true,
               images: true,
