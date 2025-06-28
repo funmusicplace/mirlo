@@ -17,11 +17,7 @@ import DisplayAudioWrapper from "./DisplayAudio";
 import { bp } from "../../constants";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import { useAuthContext } from "state/AuthContext";
-import {
-  getArtistUrl,
-  getReleaseUrl,
-  getTrackGroupUrlReference,
-} from "utils/artist";
+import { getReleaseUrl } from "utils/artist";
 import { TrackArtistLinks } from "components/Player/PlayingTrackDetails";
 
 const TrackWidget = () => {

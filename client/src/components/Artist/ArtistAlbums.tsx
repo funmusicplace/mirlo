@@ -102,7 +102,7 @@ const ArtistAlbums: React.FC = () => {
             >
               {t("purchaseEntireCatalogue", {
                 amount: moneyDisplay({
-                  amount: artist.purchaseEntireCatalogMinPrice,
+                  amount: artist.purchaseEntireCatalogMinPrice / 100,
                   currency: artist.user.currency ?? "usd",
                 }),
               })}
