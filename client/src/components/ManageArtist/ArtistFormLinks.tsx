@@ -147,7 +147,11 @@ const ArtistFormLinks: React.FC<ArtistFormLinksProps> = ({
         </div>
 
         {isManage && (
-          <div>
+          <div
+            className={css`
+              margin-left: 1rem;
+            `}
+          >
             <ArtistButton
               size="compact"
               variant="dashed"
