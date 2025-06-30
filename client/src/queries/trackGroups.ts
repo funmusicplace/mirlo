@@ -58,7 +58,7 @@ const fetchTopSoldTrackGroups: QueryFunction<
   if (skip) params.append("skip", String(skip));
   if (take) params.append("take", String(take));
 
-  return api.get(`v1/trackGroups/topSold`, { signal });
+  return api.get(`v1/trackGroups/topSold?${params}`, { signal });
 };
 
 export function queryTopSoldTrackGroups(opts: TrackGroupQueryOptions) {
