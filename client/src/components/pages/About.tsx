@@ -334,9 +334,11 @@ const About: React.FC = () => {
           </span>
 
           <p>
-            Louis-Louise Kay is a French musician and organizer, who has been creating music for games,
-            movies, animation, and as a solo artist under the moniker <Link to="/mowukis">MOWUKIS</Link>. LLK has contributed to
-            code, design, community engagement, and business strategy since Mirlo's beginnings.
+            Louis-Louise Kay is a French musician and organizer, who has been
+            creating music for games, movies, animation, and as a solo artist
+            under the moniker <Link to="/mowukis">MOWUKIS</Link>. LLK has
+            contributed to code, design, community engagement, and business
+            strategy since Mirlo's beginnings.
           </p>
         </Person>
         <Person>
@@ -858,24 +860,23 @@ const About: React.FC = () => {
               <>
                 <p>
                   Yes! Check out our{" "}
-                  <a href="/public/logo-guidelines-jun-30.pdf">
+                  <a href="https://public.3.basecamp.com/p/jJKu6kzsJFLS7n9s6uua688B">
                     logo guidelines as of June 30, 2024
                   </a>
                   .{" "}
                 </p>
                 <p>
                   Logo downloads:{" "}
-                  <a href="/public/Logo-With-Wordmark.svg">SVG with wordmark</a>
-                  ,{" "}
-                  <a href="/public/Logo_Mirlo_Transparent_RedCircle.svg">
+                  <a href="/Logo-With-Wordmark.svg">SVG with wordmark</a>,{" "}
+                  <a href="/Logo_Mirlo_Transparent_RedCircle.svg">
                     SVG logo, red
                   </a>
                   ,{" "}
-                  <a href="/public/android-chrome-512x512.png">
+                  <a href="/android-chrome-512x512.png">
                     png logo, red (512x512)
                   </a>
                   ,{" "}
-                  <a href="/public/Logo_Mirlo_Transparent_BlackCircle.png">
+                  <a href="/Logo_Mirlo_Transparent_BlackCircle.png">
                     png logo, black and white (285x285)
                   </a>
                 </p>
