@@ -44,7 +44,6 @@ const Releases: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
       take: futureReleasesPageSize,
       tag: tag || undefined,
       title: search ?? undefined,
-      isReleased: "not-released",
     })
   );
 
@@ -52,6 +51,7 @@ const Releases: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
     queryTopSoldTrackGroups({
       skip: futureReleasesPageSize * page,
       take: futureReleasesPageSize,
+      datePurchased: "thisMonth",
     })
   );
 
@@ -84,7 +84,7 @@ const Releases: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
           `}
         >
           <WidthContainer variant="big">
-            <h2 className="h5 section-header__heading">Popular Tags</h2>
+            <h2 className="h5 section-header__heading">{"popularTags"}</h2>
             <div
               className={css`
                 margin: 0 0.5rem;

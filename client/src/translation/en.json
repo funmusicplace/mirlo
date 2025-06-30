@@ -25,7 +25,7 @@
   "releases": {
     "recentReleases": "Recent releases",
     "futureReleases": "Future releases",
-    "popularReleases": "Popular releases",
+    "popularReleases": "Recent purchases",
     "recentReleasesFor": "Recent releases for {{ search }}",
     "releasesForTag": "Releases for <tag>{{ tag }}</tag>",
     "moreReleases": "More releases",
