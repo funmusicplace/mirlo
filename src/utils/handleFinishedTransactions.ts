@@ -121,6 +121,10 @@ export const handleCataloguePurchase = async (
         releaseDate: {
           lte: new Date(),
         },
+        isDrafts: false,
+        published: true,
+        isGettable: true,
+        adminEnabled: true,
       },
       include: {
         artist: true,
