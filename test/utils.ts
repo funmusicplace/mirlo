@@ -196,6 +196,7 @@ export const createUserTrackGroupPurchase = async (
       userId,
       trackGroupId,
       pricePaid: 1000,
+      datePurchased: data?.datePurchased,
     },
   });
 

@@ -102,6 +102,12 @@
     "profileUpdated": "Profile updated",
     "errorUpdatingProfile": "There was a problem with the API.",
     "email": "Email:",
+    "viewDetails": "View details",
+    "theStatusOfThisMerchFulfillment": "The status of this merch fulfillment",
+    "shipped": "Shipped",
+    "completed": "Completed",
+    "started": "Started",
+    "noprogress": "No progress",
     "name": "Name:",
     "noPurchases": "You haven't bought anything on Mirlo yet.",
     "reimbursals": "Please reach out to the artist from whom you purchased the content if you have concerns or want a reimbursal.",
@@ -178,7 +184,7 @@
     "downloadFiletypeQuery": "What file type do you want to download?"
   },
   "sales": {
-    "Sales": "Sales",
+    "sales": "Sales",
     "artist": "Artist",
     "amount": "Amount",
     "date": "Date",
@@ -187,6 +193,7 @@
   },
   "fulfillment": {
     "artist": "Artist",
+    "messageSent": "Message sent to artist",
     "merchItem": "Merch item",
     "customer": "Customer",
     "email": "E-mail",
@@ -207,7 +214,8 @@
     "completed": "Completed",
     "purchaseDetails": "Purchase details",
     "shippingAddress": "Shipping address:",
-    "itemPurchased": "Purchased"
+    "itemPurchased": "Purchased",
+    "contactArtistMessage": "Have a question about this purchase? Send a message to the artist:"
   },
   "merchDetails": {
     "buy": "Buy",

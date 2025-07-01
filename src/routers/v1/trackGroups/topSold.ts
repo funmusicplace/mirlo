@@ -14,7 +14,9 @@ export default function () {
     const { take = 50, datePurchased } = req.query;
     try {
       let where: Prisma.TrackGroupWhereInput = whereForPublishedTrackGroups();
-      let topWhere: Prisma.UserTrackGroupPurchaseWhereInput = {};
+      let topWhere: Prisma.UserTrackGroupPurchaseWhereInput = {
+        trackGroup: whereForPublishedTrackGroups(),
+      };
 
       if (datePurchased === "thisMonth") {
         const startOfMonth = new Date();

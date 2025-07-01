@@ -716,8 +716,8 @@ export const createStripeCheckoutSessionForMerchPurchase = async ({
         message: message ?? null,
       },
       mode: "payment",
-      success_url: `${API_DOMAIN}/v1/checkout?success=true&stripeAccountId=${stripeAccountId}&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${API_DOMAIN}/v1/checkout?canceled=true`,
+      ui_mode: "embedded",
+      return_url: `${API_DOMAIN}/v1/checkout?success=true&stripeAccountId=${stripeAccountId}&session_id={CHECKOUT_SESSION_ID}`,
     },
     { stripeAccount: stripeAccountId }
   );

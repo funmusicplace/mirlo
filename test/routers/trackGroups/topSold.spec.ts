@@ -12,7 +12,6 @@ import {
 } from "../../utils";
 
 import { requestApp } from "../utils";
-import Parser from "rss-parser";
 import { faker } from "@faker-js/faker";
 
 describe("Top sold trackGroups", () => {
@@ -226,6 +225,91 @@ describe("Top sold trackGroups", () => {
     assert.equal(response.body.results.length, 2);
     assert.equal(response.body.results[0].id, mostPurchased.id);
     assert.equal(response.body.results[1].id, secondPurchased.id);
+
+    assert(response.statusCode === 200);
+  });
+
+  it("should GET /topSold only get the results from thisMonth if queried", async () => {
+    const { user: user1 } = await createUser({ email: "test@test.com" });
+    const { user: user2 } = await createUser({ email: "test1@test.com" });
+    const artist1 = await createArtist(user1.id);
+    const artist2 = await createArtist(user2.id, { urlSlug: "artist-2" });
+
+    const { user: buyer1 } = await createUser({ email: "test2@test.com" });
+    const { user: buyer2 } = await createUser({ email: "test3@test.com" });
+    const { user: buyer3 } = await createUser({ email: "test4@test.com" });
+    const { user: buyer4 } = await createUser({ email: "test5@test.com" });
+    const { user: buyer5 } = await createUser({ email: "test6@test.com" });
+
+    const buyers = {
+      0: buyer1,
+      1: buyer2,
+      2: buyer3,
+      3: buyer4,
+      4: buyer5,
+    };
+
+    const mostPurchased = await createTrackGroup(artist1.id, {
+      title: "most purchased",
+      urlSlug: "most-purchased",
+    });
+    const secondPurchased = await createTrackGroup(artist1.id, {
+      title: "second most purchased",
+      urlSlug: "second-most-purchased",
+    });
+    const thirdPurchased = await createTrackGroup(artist1.id, {
+      title: "third purchased",
+      urlSlug: "third-purchased",
+    });
+
+    const leastPurchased = await createTrackGroup(artist2.id, {
+      title: "least purchased",
+      urlSlug: "least-purchased",
+    });
+
+    // These loops generate the purchases for each trackGroup so we can
+    // later make sure they're ordered properly when we assert
+    for (let i = 0; i < 5; i++) {
+      await createUserTrackGroupPurchase(
+        buyers[i as keyof typeof buyers].id,
+        mostPurchased.id,
+        {
+          datePurchased: faker.date.past({
+            years: 10,
+            refDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+          }),
+        }
+      );
+    }
+
+    for (let i = 0; i < 4; i++) {
+      await createUserTrackGroupPurchase(
+        buyers[i as keyof typeof buyers].id,
+        secondPurchased.id
+      );
+    }
+    for (let i = 0; i < 3; i++) {
+      await createUserTrackGroupPurchase(
+        buyers[i as keyof typeof buyers].id,
+        thirdPurchased.id
+      );
+    }
+    for (let i = 0; i < 2; i++) {
+      await createUserTrackGroupPurchase(
+        buyers[i as keyof typeof buyers].id,
+        leastPurchased.id
+      );
+    }
+
+    const response = await requestApp
+      .get("trackGroups/topSold")
+      .query("datePurchased=thisMonth")
+      .set("Accept", "application/json");
+
+    assert.equal(response.body.results.length, 3);
+    assert.equal(response.body.results[0].id, secondPurchased.id);
+    assert.equal(response.body.results[1].id, thirdPurchased.id);
+    assert.equal(response.body.results[2].id, leastPurchased.id);
 
     assert(response.statusCode === 200);
   });

@@ -52,6 +52,7 @@ const MerchButtonPopUp: React.FC<{ merch: Merch; artist: Artist }> = ({
         open={isOpen}
         title={t("buyMerch")}
         size="medium"
+        noPadding
         onClose={() => setIsOpen(false)}
         className={css`
           form {

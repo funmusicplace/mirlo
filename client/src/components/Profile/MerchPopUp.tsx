@@ -1,59 +1,37 @@
 import { css } from "@emotion/css";
-import styled from "@emotion/styled";
 import Button from "components/common/Button";
 import FormComponent from "components/common/FormComponent";
-import { InputEl } from "components/common/Input";
-import { SelectEl } from "components/common/Select";
+import TextArea from "components/common/TextArea";
+import { Section, Underline } from "components/FulFillment/CustomerPopUp";
 import { formatDate } from "components/TrackGroup/ReleaseDate";
-import { useUpdatePurchaseMutation } from "queries";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { FaExternalLinkAlt } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import api from "services/api";
+import { useSnackbar } from "state/SnackbarContext";
 import { getArtistUrl, getMerchUrl } from "utils/artist";
 
-export const Underline = styled.div`
-  border-bottom: 1px solid var(--mi-darken-x-background-color);
-  padding-bottom: 1rem;
-  margin-bottom: 1rem;
-`;
-
-export const Section = styled.div`
-  display: flex;
-  margin-bottom: 0.5rem;
-
-  label {
-    width: calc(4 / 12 * 100%) !important;
-    font-weight: bold;
-  }
-
-  a {
-    padding-left: 0.5rem;
-  }
-
-  input {
-    width: auto;
-  }
-`;
-
-const CustomerPopUp: React.FC<{ purchase: MerchPurchase }> = ({ purchase }) => {
+const MerchPopUp: React.FC<{ purchase: MerchPurchase }> = ({ purchase }) => {
   const { i18n, t } = useTranslation("translation", {
     keyPrefix: "fulfillment",
   });
+  const snackbar = useSnackbar();
 
-  const methods = useForm({ defaultValues: purchase });
+  const methods = useForm({ defaultValues: { message: "" } });
 
-  const { mutateAsync: updatePurchase } = useUpdatePurchaseMutation();
-
-  const updateStatus = React.useCallback(
-    async (data: MerchPurchase) => {
+  const sendContactMessage = React.useCallback(
+    async (data: { message: string }) => {
       try {
-        await updatePurchase({
-          purchaseId: purchase.id,
-          purchase: data,
+        await api.post(`manage/purchases/${purchase.id}/contactArtist`, {
+          ...data,
         });
-      } catch (e) {}
+        methods.reset();
+        snackbar(t("messageSent", { type: "success" }));
+      } catch (e) {
+        snackbar(t("messageFailed", { type: "error" }));
+      }
     },
     [purchase.id]
   );
@@ -61,7 +39,6 @@ const CustomerPopUp: React.FC<{ purchase: MerchPurchase }> = ({ purchase }) => {
   return (
     <div>
       <Underline>
-        <h2>{purchase.user.name}</h2>
         <Section>
           <label>{t("itemArtist")}</label>{" "}
           <span>
@@ -99,7 +76,6 @@ const CustomerPopUp: React.FC<{ purchase: MerchPurchase }> = ({ purchase }) => {
         <Section>
           <label>{t("shippingAddress")}</label>
           <p>
-            {purchase.user.name} <br />
             {purchase.shippingAddress && (
               <>
                 {purchase.shippingAddress.line1 && (
@@ -130,34 +106,35 @@ const CustomerPopUp: React.FC<{ purchase: MerchPurchase }> = ({ purchase }) => {
       <Underline>
         <Section>
           <label>{t("trackingNumber")}</label>
-          <InputEl {...methods.register("trackingNumber")}></InputEl>
+          <span>{purchase.trackingNumber}</span>
         </Section>
         <Section>
           <label>{t("trackingWebsite")}</label>
-          <InputEl {...methods.register("trackingWebsite")}></InputEl>
+          <span>{purchase.trackingWebsite}</span>
         </Section>
         <Section>
           <label>{t("fulfillmentStatus")}</label>
-          <div
-            className={css`
-              margin-right: 1rem;
-            `}
-          >
-            <p></p>
-            <SelectEl {...methods.register("fulfillmentStatus")}>
-              <option value="NO_PROGRESS">{t("noProgress")}</option>
-              <option value="STARTED">{t("started")}</option>
-              <option value="SHIPPED">{t("shipped")}</option>
-              <option value="COMPLETED">{t("completed")}</option>
-            </SelectEl>
-          </div>
+
+          <span>{t(purchase.fulfillmentStatus.toLowerCase())}</span>
         </Section>
       </Underline>
-      <Button type="button" onClick={methods.handleSubmit(updateStatus)}>
-        Save
-      </Button>
+
+      <form onSubmit={methods.handleSubmit(sendContactMessage)}>
+        <FormComponent>
+          <label htmlFor="message">{t("contactArtistMessage")}</label>
+          <TextArea id="message" {...methods.register("message")} required />
+          <Button
+            className={css`
+              margin-top: 1rem;
+            `}
+            type="submit"
+          >
+            {t("contactArtist")}
+          </Button>
+        </FormComponent>
+      </form>
     </div>
   );
 };
 
-export default CustomerPopUp;
+export default MerchPopUp;
