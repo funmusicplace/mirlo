@@ -46,22 +46,23 @@ export function queryTrackGroups(opts: TrackGroupQueryOptions) {
   });
 }
 
+type TopSoldQueryOptions = Pick<TrackGroupQueryOptions, "skip" | "take"> & {
+  datePurchased?: "thisMonth";
+};
+
 const fetchTopSoldTrackGroups: QueryFunction<
   { results: TrackGroup[]; total?: number },
-  [
-    "fetchTopSoldTrackGroups",
-    Pick<TrackGroupQueryOptions, "skip" | "take">,
-    ...any,
-  ]
-> = ({ queryKey: [_, { skip, take }], signal }) => {
+  ["fetchTopSoldTrackGroups", TopSoldQueryOptions, ...any]
+> = ({ queryKey: [_, { skip, take, datePurchased }], signal }) => {
   const params = new URLSearchParams();
   if (skip) params.append("skip", String(skip));
   if (take) params.append("take", String(take));
+  if (datePurchased) params.append("datePurchased", datePurchased);
 
   return api.get(`v1/trackGroups/topSold?${params}`, { signal });
 };
 
-export function queryTopSoldTrackGroups(opts: TrackGroupQueryOptions) {
+export function queryTopSoldTrackGroups(opts: TopSoldQueryOptions) {
   return queryOptions({
     queryKey: ["fetchTopSoldTrackGroups", opts, QUERY_KEY_TRACK_GROUPS],
     queryFn: fetchTopSoldTrackGroups,

@@ -85,7 +85,7 @@ export const backblazeClient =
         },
         responseChecksumValidation: "WHEN_REQUIRED",
         requestChecksumCalculation: "WHEN_REQUIRED",
-        maxAttempts: 1,
+        maxAttempts: 4,
       })
     : undefined;
 

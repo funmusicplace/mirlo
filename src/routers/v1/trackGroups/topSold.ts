@@ -11,12 +11,24 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
-    const { take = 50 } = req.query;
+    const { take = 50, datePurchased } = req.query;
     try {
       let where: Prisma.TrackGroupWhereInput = whereForPublishedTrackGroups();
+      let topWhere: Prisma.UserTrackGroupPurchaseWhereInput = {};
+
+      if (datePurchased === "thisMonth") {
+        const startOfMonth = new Date();
+        startOfMonth.setDate(1);
+        startOfMonth.setHours(0, 0, 0, 0);
+
+        topWhere.datePurchased = {
+          gte: startOfMonth.toISOString(),
+        };
+      }
 
       const topSoldIds = await prisma.userTrackGroupPurchase.groupBy({
         by: ["trackGroupId"],
+        where: topWhere,
         _count: {
           trackGroupId: true,
         },

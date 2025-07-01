@@ -67,6 +67,7 @@ const ArtistTourDates: React.FC<ArtistHeaderDescriptionProps> = ({
     },
     [onSubmit, snackbar, t]
   );
+
   if ((!tourDates || tourDates.length === 0) && !isManage) {
     return null;
   }
@@ -114,6 +115,21 @@ const ArtistTourDates: React.FC<ArtistHeaderDescriptionProps> = ({
                       justify-content: space-between;
                       flex-grow: 1;
                       padding-right: 1rem;
+
+                      > div {
+                        display: flex;
+                        flex-direction: column;
+                        align-items: flex-end;
+                        text-align: right;
+                      }
+
+                      em {
+                        font-style: italic;
+                        color: var(--mi-normal-foreground-color);
+                      }
+                    }
+                    > a {
+                      min-width: 9rem;
                     }
                   }
                 `}
@@ -122,22 +138,32 @@ const ArtistTourDates: React.FC<ArtistHeaderDescriptionProps> = ({
                   <li key={td.date + td.location}>
                     <div>
                       <span>{td.location}</span>
-                      {formatDate({
-                        date: calculateDateWithTimezoneOffset(
-                          td.date
-                        ).toISOString(),
-                        i18n,
-                        options: { dateStyle: "short" },
-                      })}
+                      <div>
+                        {formatDate({
+                          date: calculateDateWithTimezoneOffset(
+                            td.date
+                          ).toISOString(),
+                          i18n,
+                          options: { dateStyle: "short" },
+                        })}
+                        {new Date(td.date) < new Date() && (
+                          <em>{t("pastEvent")}</em>
+                        )}
+                      </div>
                     </div>
-                    <ArtistButtonAnchor
-                      href={td.ticketsUrl}
-                      size="compact"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {t("buyTickets")}
-                    </ArtistButtonAnchor>
+
+                    {td.ticketsUrl && (
+                      <ArtistButtonAnchor
+                        href={td.ticketsUrl}
+                        size="compact"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {new Date(td.date) < new Date()
+                          ? t("eventPage")
+                          : t("buyTickets")}
+                      </ArtistButtonAnchor>
+                    )}
                   </li>
                 ))}
               </ul>
