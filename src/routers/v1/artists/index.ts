@@ -17,6 +17,7 @@ export default function () {
       skip: skipQuery,
       take = format === "rss" ? 50 : 10,
       name,
+      orderBy,
       includeUnpublished,
     } = req.query;
 
@@ -36,13 +37,21 @@ export default function () {
         where,
       });
 
+      const orderByClause: Prisma.ArtistOrderByWithRelationInput = {};
+
+      if (orderBy && typeof orderBy === "string") {
+        if (orderBy === "name") {
+          orderByClause.name = "asc";
+        } else if (orderBy === "createdAt") {
+          orderByClause.createdAt = "desc";
+        }
+      }
+
       const artists = await prisma.artist.findMany({
         where,
         skip: skipQuery ? Number(skipQuery) : undefined,
         take: take ? Number(take) : undefined,
-        orderBy: {
-          createdAt: "desc",
-        },
+        orderBy: orderByClause,
         include: {
           trackGroups: {
             where: whereForPublishedTrackGroups(),
