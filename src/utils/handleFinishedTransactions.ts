@@ -11,6 +11,51 @@ import { Job } from "bullmq";
 import stripe, { calculateAppFee, OPTION_JOINER } from "./stripe";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 
+const getPaymentIntent = async (
+  paymentIntentId: string,
+  stripeAccount: string
+) => {
+  try {
+    return await stripe.paymentIntents.retrieve(paymentIntentId, undefined, {
+      stripeAccount,
+    });
+  } catch (error) {
+    logger.error(`Error retrieving payment intent: ${error}`);
+    throw new Error("Failed to retrieve payment intent");
+  }
+};
+
+const getApplicationFee = async (session?: Stripe.Checkout.Session) => {
+  try {
+    const paymentIntentId =
+      typeof session?.payment_intent === "string"
+        ? session?.payment_intent
+        : (session?.payment_intent?.id ?? null);
+
+    const stripeAccount = session?.metadata?.stripeAccount ?? null;
+
+    if (!paymentIntentId || !stripeAccount) {
+      logger.warn("No payment intent ID found in session metadata");
+      return 0;
+    }
+    const paymentIntent = await getPaymentIntent(
+      paymentIntentId,
+      stripeAccount
+    );
+    if (paymentIntent.application_fee_amount) {
+      return paymentIntent.application_fee_amount;
+    } else {
+      logger.warn(
+        `No application fee found for payment intent ${paymentIntentId}`
+      );
+      return 0;
+    }
+  } catch (error) {
+    logger.error(`Error retrieving application fee: ${error}`);
+    throw new Error("Failed to retrieve application fee");
+  }
+};
+
 export const handleTrackGroupPurchase = async (
   userId: number,
   trackGroupId: number,
@@ -18,6 +63,7 @@ export const handleTrackGroupPurchase = async (
   newUser?: boolean
 ) => {
   try {
+    const applicationFee = await getApplicationFee(session);
     const purchase = await registerPurchase({
       userId: Number(userId),
       trackGroupId: Number(trackGroupId),
@@ -25,6 +71,7 @@ export const handleTrackGroupPurchase = async (
       message: session?.metadata?.message ?? null,
       currencyPaid: session?.currency ?? "USD",
       paymentProcessorKey: session?.id ?? null,
+      platformCut: applicationFee ?? null,
     });
 
     const settings = await getSiteSettings();
@@ -102,8 +149,7 @@ export const handleTrackGroupPurchase = async (
 export const handleCataloguePurchase = async (
   userId: number,
   artistId: number,
-  session?: Stripe.Checkout.Session,
-  newUser?: boolean
+  session?: Stripe.Checkout.Session
 ) => {
   try {
     const artist = await prisma.artist.findFirst({
@@ -134,6 +180,10 @@ export const handleCataloguePurchase = async (
     const amountPaidPerTrackGroup =
       (session?.amount_total ?? 0) / artistTrackGroups.length;
 
+    const applicationFee = await getApplicationFee(session);
+    const appFeePerTrackGroup =
+      (applicationFee ?? 0) / artistTrackGroups.length;
+
     await Promise.all(
       artistTrackGroups.map(async (trackGroup) => {
         await registerPurchase({
@@ -143,6 +193,7 @@ export const handleCataloguePurchase = async (
           pricePaid: Number(amountPaidPerTrackGroup.toFixed(2)),
           currencyPaid: session?.currency ?? "usd",
           paymentProcessorKey: session?.id ?? null,
+          platformCut: Number(appFeePerTrackGroup.toFixed(2)),
         });
       })
     );
@@ -199,6 +250,7 @@ export const handleTrackPurchase = async (
   newUser?: boolean
 ) => {
   try {
+    const applicationFee = await getApplicationFee(session);
     const purchase = await registerTrackPurchase({
       userId: Number(userId),
       trackId: Number(trackId),
@@ -206,6 +258,7 @@ export const handleTrackPurchase = async (
       message: session?.metadata?.message ?? null,
       currencyPaid: session?.currency ?? "USD",
       paymentProcessorKey: session?.id ?? null,
+      platformCut: applicationFee ?? null,
     });
 
     const settings = await getSiteSettings();
@@ -294,6 +347,7 @@ export const handleArtistGift = async (
   session?: Stripe.Checkout.Session
 ) => {
   try {
+    const platformCut = await getApplicationFee(session);
     const createdTip = await prisma.userArtistTip.create({
       data: {
         userId,
@@ -302,6 +356,7 @@ export const handleArtistGift = async (
         currencyPaid: session?.currency ?? "USD",
         stripeSessionKey: session?.id ?? null,
         message: session?.metadata?.message ?? null,
+        platformCut: platformCut ?? null,
       },
     });
 
@@ -442,6 +497,8 @@ export const handleArtistMerchPurchase = async (
                 `handleArtistMerchPurchase: userId: ${userId}, merchId: ${merchProduct.id}, amountPaid: ${item.amount_total}${item.currency}`
               );
 
+              const applicationFee = await getApplicationFee(session);
+
               const createdMerchPurchase = await prisma.merchPurchase.create({
                 data: {
                   userId,
@@ -453,6 +510,7 @@ export const handleArtistMerchPurchase = async (
                   message: session?.metadata?.message ?? null,
                   shippingAddress: session?.shipping_details?.address,
                   billingAddress: session?.customer_details?.address,
+                  platformCut: applicationFee ?? null,
                   quantity: item.quantity ?? 1,
                   options: {
                     connect: options.map((o) => ({
@@ -596,12 +654,14 @@ export const handleSubscription = async (
   session: Stripe.Checkout.Session
 ) => {
   try {
+    const platformCut = await getApplicationFee(session);
     const artistUserSubscription = await registerSubscription({
       userId: Number(userId),
       tierId: Number(tierId),
       amount: session.amount_total ?? 0,
       currency: session.currency ?? "USD",
       paymentProcessorKey: session.subscription as string, // FIXME: should this be session id? Maybe subscriptionId?
+      platformCut: platformCut ?? null,
     });
 
     if (artistUserSubscription) {
