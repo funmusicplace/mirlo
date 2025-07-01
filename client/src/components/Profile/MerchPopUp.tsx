@@ -1,36 +1,37 @@
 import { css } from "@emotion/css";
-import styled from "@emotion/styled";
 import Button from "components/common/Button";
 import FormComponent from "components/common/FormComponent";
-import { InputEl } from "components/common/Input";
-import { SelectEl } from "components/common/Select";
+import TextArea from "components/common/TextArea";
 import { Section, Underline } from "components/FulFillment/CustomerPopUp";
 import { formatDate } from "components/TrackGroup/ReleaseDate";
-import { useUpdatePurchaseMutation } from "queries";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { FaExternalLinkAlt } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import api from "services/api";
+import { useSnackbar } from "state/SnackbarContext";
 import { getArtistUrl, getMerchUrl } from "utils/artist";
 
 const MerchPopUp: React.FC<{ purchase: MerchPurchase }> = ({ purchase }) => {
   const { i18n, t } = useTranslation("translation", {
     keyPrefix: "fulfillment",
   });
+  const snackbar = useSnackbar();
 
-  const methods = useForm({ defaultValues: purchase });
+  const methods = useForm({ defaultValues: { message: "" } });
 
-  const { mutateAsync: updatePurchase } = useUpdatePurchaseMutation();
-
-  const updateStatus = React.useCallback(
-    async (data: MerchPurchase) => {
+  const sendContactMessage = React.useCallback(
+    async (data: { message: string }) => {
       try {
-        await updatePurchase({
-          purchaseId: purchase.id,
-          purchase: data,
+        await api.post(`manage/purchases/${purchase.id}/contactArtist`, {
+          ...data,
         });
-      } catch (e) {}
+        methods.reset();
+        snackbar(t("messageSent", { type: "success" }));
+      } catch (e) {
+        snackbar(t("messageFailed", { type: "error" }));
+      }
     },
     [purchase.id]
   );
@@ -117,6 +118,21 @@ const MerchPopUp: React.FC<{ purchase: MerchPurchase }> = ({ purchase }) => {
           <span>{t(purchase.fulfillmentStatus.toLowerCase())}</span>
         </Section>
       </Underline>
+
+      <form onSubmit={methods.handleSubmit(sendContactMessage)}>
+        <FormComponent>
+          <label htmlFor="message">{t("contactArtistMessage")}</label>
+          <TextArea id="message" {...methods.register("message")} required />
+          <Button
+            className={css`
+              margin-top: 1rem;
+            `}
+            type="submit"
+          >
+            {t("contactArtist")}
+          </Button>
+        </FormComponent>
+      </form>
     </div>
   );
 };

@@ -1,0 +1,12 @@
+extends ../layout.pug
+
+block content
+    p Hello from Mirlo!
+    p A supporter is contacting you regarding a merch purchase they made:
+    div 
+      p Purchase ID: #{purchase.id}
+      p Supporter: #{purchase.user.name} (#{purchase.user.email})
+      p Item: #{purchase.merch.title}
+      p Status: #{purchase.fulfillmentStatus}
+      p "#{message}"
+    p Please respond to the supporter directly via email at #{purchase.user.email}.

@@ -20,7 +20,9 @@ import { Link } from "react-router-dom";
 const Artists = () => {
   const { t } = useTranslation("translation", { keyPrefix: "artists" });
   const [artists, setArtists] = React.useState<Artist[]>([]);
-  const [artistsTotal, setArtistsTotal] = React.useState(0);
+  const [artistsTotal, setArtistsTotal] = React.useState<number | undefined>(
+    undefined
+  );
   const [pageSize, setPageSize] = React.useState(20);
   const { page, PaginationComponent } = usePagination({ pageSize });
   const [orderBy, setOrderBy] = React.useState("createdAt");
