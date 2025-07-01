@@ -14,8 +14,9 @@ export default function () {
     const { take = 50, datePurchased } = req.query;
     try {
       let where: Prisma.TrackGroupWhereInput = whereForPublishedTrackGroups();
-      let topWhere: Prisma.UserTrackGroupPurchaseWhereInput =
-        whereForPublishedTrackGroups();
+      let topWhere: Prisma.UserTrackGroupPurchaseWhereInput = {
+        trackGroup: whereForPublishedTrackGroups(),
+      };
 
       if (datePurchased === "thisMonth") {
         const startOfMonth = new Date();
@@ -26,8 +27,6 @@ export default function () {
           gte: startOfMonth.toISOString(),
         };
       }
-
-      console.log("topWhere", topWhere);
 
       const topSoldIds = await prisma.userTrackGroupPurchase.groupBy({
         by: ["trackGroupId"],
@@ -42,8 +41,6 @@ export default function () {
         },
         take: take ? Number(take) : undefined,
       });
-
-      console.log("topSoldIds", topSoldIds);
 
       const trackGroupIds = topSoldIds.map((item) => item.trackGroupId);
 
