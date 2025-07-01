@@ -28,6 +28,8 @@ export default function () {
         };
       }
 
+      console.log("topWhere:", topWhere);
+
       const topSoldIds = await prisma.userTrackGroupPurchase.groupBy({
         by: ["trackGroupId"],
         where: topWhere,
@@ -43,6 +45,7 @@ export default function () {
       });
 
       const trackGroupIds = topSoldIds.map((item) => item.trackGroupId);
+      console.log("topSoldIds:", trackGroupIds);
 
       const trackGroups = await prisma.trackGroup.findMany({
         where: { ...where, id: { in: trackGroupIds } },
