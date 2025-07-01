@@ -20,7 +20,8 @@ import { Link } from "react-router-dom";
 const Artists = () => {
   const { t } = useTranslation("translation", { keyPrefix: "artists" });
   const [artists, setArtists] = React.useState<Artist[]>([]);
-  const [pageSize, setPageSize] = React.useState(40);
+  const [artistsTotal, setArtistsTotal] = React.useState(0);
+  const [pageSize, setPageSize] = React.useState(20);
   const { page, PaginationComponent } = usePagination({ pageSize });
   const [orderBy, setOrderBy] = React.useState("createdAt");
 
@@ -40,6 +41,7 @@ const Artists = () => {
       params.append("take", `${pageSize}`);
       const results = await api.getMany<Artist>(`artists?${params.toString()}`);
       setArtists(results.results);
+      setArtistsTotal(results.total);
     };
 
     callback();
@@ -188,7 +190,7 @@ const Artists = () => {
             )}
           </div>
 
-          <PaginationComponent amount={artists.length} />
+          <PaginationComponent amount={artists.length} total={artistsTotal} />
         </WidthContainer>
       </div>
     </div>
