@@ -84,7 +84,7 @@ const Releases: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
           `}
         >
           <WidthContainer variant="big">
-            <h2 className="h5 section-header__heading">{"popularTags"}</h2>
+            <h2 className="h5 section-header__heading">{t("popularTags")}</h2>
             <div
               className={css`
                 margin: 0 0.5rem;
