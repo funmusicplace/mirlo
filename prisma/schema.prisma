@@ -338,6 +338,7 @@ model ArtistUserSubscription {
   userId                        Int
   user                          User                           @relation(fields: [userId], references: [id])
   amount                        Int // In cents
+  platformCut                   Int? // in cents
   currency                      String                         @default("USD")
   stripeSubscriptionKey         String?
   createdAt                     DateTime                       @default(now())
@@ -453,6 +454,7 @@ model MerchPurchase {
   merchId              String            @db.Uuid
   currencyPaid         String
   amountPaid           Int // in cents
+  platformCut          Int? // in cents
   stripeTransactionKey String?
   userId               Int
   quantity             Int
@@ -479,6 +481,7 @@ model UserArtistTip {
   artistId         Int
   artist           Artist         @relation(fields: [artistId], references: [id])
   pricePaid        Int // in cents
+  platformCut      Int? // in cents
   currencyPaid     String         @default("USD")
   datePurchased    DateTime       @default(now())
   message          String?
@@ -494,6 +497,7 @@ model UserTrackGroupPurchase {
   trackGroupId        Int
   trackGroup          TrackGroup @relation(fields: [trackGroupId], references: [id])
   pricePaid           Int // in cents
+  platformCut         Int? // in cents
   currencyPaid        String     @default("usd")
   datePurchased       DateTime   @default(now())
   stripeSessionKey    String?
@@ -509,6 +513,7 @@ model UserTrackPurchase {
   trackId             Int
   track               Track    @relation(fields: [trackId], references: [id])
   pricePaid           Int // in cents
+  platformCut         Int? // in cents
   currencyPaid        String   @default("usd")
   datePurchased       DateTime @default(now())
   stripeSessionKey    String?

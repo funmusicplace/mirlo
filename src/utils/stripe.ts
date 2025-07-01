@@ -981,8 +981,7 @@ export const handleCheckoutSession = async (
       await handleCataloguePurchase(
         Number(actualUserId),
         Number(artistId),
-        session,
-        newUser
+        session
       );
     }
   } catch (e) {
