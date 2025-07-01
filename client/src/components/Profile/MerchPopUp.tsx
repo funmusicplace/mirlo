@@ -4,6 +4,7 @@ import Button from "components/common/Button";
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
 import { SelectEl } from "components/common/Select";
+import { Section, Underline } from "components/FulFillment/CustomerPopUp";
 import { formatDate } from "components/TrackGroup/ReleaseDate";
 import { useUpdatePurchaseMutation } from "queries";
 import React from "react";
@@ -13,31 +14,7 @@ import { FaExternalLinkAlt } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { getArtistUrl, getMerchUrl } from "utils/artist";
 
-export const Underline = styled.div`
-  border-bottom: 1px solid var(--mi-darken-x-background-color);
-  padding-bottom: 1rem;
-  margin-bottom: 1rem;
-`;
-
-export const Section = styled.div`
-  display: flex;
-  margin-bottom: 0.5rem;
-
-  label {
-    width: calc(4 / 12 * 100%) !important;
-    font-weight: bold;
-  }
-
-  a {
-    padding-left: 0.5rem;
-  }
-
-  input {
-    width: auto;
-  }
-`;
-
-const CustomerPopUp: React.FC<{ purchase: MerchPurchase }> = ({ purchase }) => {
+const MerchPopUp: React.FC<{ purchase: MerchPurchase }> = ({ purchase }) => {
   const { i18n, t } = useTranslation("translation", {
     keyPrefix: "fulfillment",
   });
@@ -61,7 +38,6 @@ const CustomerPopUp: React.FC<{ purchase: MerchPurchase }> = ({ purchase }) => {
   return (
     <div>
       <Underline>
-        <h2>{purchase.user.name}</h2>
         <Section>
           <label>{t("itemArtist")}</label>{" "}
           <span>
@@ -99,7 +75,6 @@ const CustomerPopUp: React.FC<{ purchase: MerchPurchase }> = ({ purchase }) => {
         <Section>
           <label>{t("shippingAddress")}</label>
           <p>
-            {purchase.user.name} <br />
             {purchase.shippingAddress && (
               <>
                 {purchase.shippingAddress.line1 && (
@@ -130,34 +105,20 @@ const CustomerPopUp: React.FC<{ purchase: MerchPurchase }> = ({ purchase }) => {
       <Underline>
         <Section>
           <label>{t("trackingNumber")}</label>
-          <InputEl {...methods.register("trackingNumber")}></InputEl>
+          <span>{purchase.trackingNumber}</span>
         </Section>
         <Section>
           <label>{t("trackingWebsite")}</label>
-          <InputEl {...methods.register("trackingWebsite")}></InputEl>
+          <span>{purchase.trackingWebsite}</span>
         </Section>
         <Section>
           <label>{t("fulfillmentStatus")}</label>
-          <div
-            className={css`
-              margin-right: 1rem;
-            `}
-          >
-            <p></p>
-            <SelectEl {...methods.register("fulfillmentStatus")}>
-              <option value="NO_PROGRESS">{t("noProgress")}</option>
-              <option value="STARTED">{t("started")}</option>
-              <option value="SHIPPED">{t("shipped")}</option>
-              <option value="COMPLETED">{t("completed")}</option>
-            </SelectEl>
-          </div>
+
+          <span>{t(purchase.fulfillmentStatus.toLowerCase())}</span>
         </Section>
       </Underline>
-      <Button type="button" onClick={methods.handleSubmit(updateStatus)}>
-        Save
-      </Button>
     </div>
   );
 };
 
-export default CustomerPopUp;
+export default MerchPopUp;

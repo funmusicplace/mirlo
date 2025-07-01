@@ -6,6 +6,10 @@ import { Link } from "react-router-dom";
 import { getArtistUrl } from "utils/artist";
 import { formatDate } from "components/TrackGroup/ReleaseDate";
 import { css } from "@emotion/css";
+import { Button } from "components/common/Button";
+import Tooltip from "components/common/Tooltip";
+import Modal from "components/common/Modal";
+import MerchPopUp from "./MerchPopUp";
 
 const PurchaseComponent: React.FC<{
   title: string;
@@ -15,6 +19,7 @@ const PurchaseComponent: React.FC<{
   currencyPaid: string;
   artist: Artist;
   purchaseDate: string;
+  merchPurchase?: MerchPurchase;
 }> = ({
   title,
   imageSrc,
@@ -23,8 +28,10 @@ const PurchaseComponent: React.FC<{
   artist,
   url,
   purchaseDate,
+  merchPurchase,
 }) => {
   const { t, i18n } = useTranslation("translation", { keyPrefix: "profile" });
+  const [isViewingMerchPopUp, setIsViewingMerchPopUp] = React.useState(false);
 
   return (
     <>
@@ -70,6 +77,29 @@ const PurchaseComponent: React.FC<{
           </div>
         </div>
       </div>
+      {merchPurchase && (
+        <div
+          className={css`
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+          `}
+        >
+          <Tooltip hoverText={t("theStatusOfThisMerchFulfillment")}>
+            {t(merchPurchase.fulfillmentStatus).toLowerCase()}
+          </Tooltip>
+          <Button onClick={() => setIsViewingMerchPopUp(true)}>
+            {t("viewDetails")}
+          </Button>
+          <Modal
+            open={isViewingMerchPopUp}
+            onClose={() => setIsViewingMerchPopUp(false)}
+            title={t("purchaseDetails")}
+          >
+            <MerchPopUp purchase={merchPurchase} />
+          </Modal>
+        </div>
+      )}
       <span>
         {t("paid", {
           amount: moneyDisplay({

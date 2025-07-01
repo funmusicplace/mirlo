@@ -93,11 +93,6 @@ function YourPurchases() {
                     img {
                       min-width: 50px;
                     }
-
-                    span {
-                      min-width: 200px;
-                      text-align: right;
-                    }
                   }
 
                   li:last-child {
@@ -142,6 +137,7 @@ function YourPurchases() {
                         artist={p.merch.artist}
                         purchaseDate={p.createdAt}
                         url={getMerchUrl(p.merch.artist, p.merch)}
+                        merchPurchase={p}
                       />
                     )}
                   </li>
