@@ -155,6 +155,10 @@ function MerchView() {
 
                 > button {
                   margin: 0 1rem;
+
+                  @media screen and (max-width: ${bp.small}px) {
+                    margin: 1rem 0 0;
+                  }
                 }
               `}
             >
@@ -179,6 +183,10 @@ function MerchView() {
                   )}
                   className={css`
                     margin: 1rem;
+
+                    @media screen and (max-width: ${bp.small}px) {
+                      margin: 0.5rem 0 1rem;
+                    }
                   `}
                 >
                   {t("merchFor", {

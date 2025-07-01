@@ -19,6 +19,7 @@ import countryCodesCurrencies from "components/ManageArtist/Merch/country-codes-
 import { flatten } from "lodash";
 import Box from "components/common/Box";
 import TextArea from "components/common/TextArea";
+import EmbeddedStripeForm from "components/common/EmbeddedStripe";
 
 type FormData = {
   quantity: number;
@@ -66,6 +67,7 @@ const BuyMerchItem: React.FC<{
   const quantity = methods.watch("quantity");
   const shippingDestination = methods.watch("shippingDestinationId");
   const merchOptionIds = methods.watch("merchOptionIds");
+  const [clientSecret, setClientSecret] = React.useState<string | null>(null);
 
   const onSubmit = React.useCallback(
     async (data: FormData) => {
@@ -101,17 +103,21 @@ const BuyMerchItem: React.FC<{
             return;
           }
           setIsLoadingStripe(true);
-          const response = await api.post<{}, { redirectUrl: string }>(
-            `merch/${merch.id}/purchase`,
-            {
-              price: data.price ? Number(data.price) * 100 : undefined,
-              quantity: data.quantity,
-              merchOptionIds: data.merchOptionIds,
-              shippingDestinationId: data.shippingDestinationId,
-              message: data.message,
-            }
-          );
-          window.location.assign(response.redirectUrl);
+          const response = await api.post<
+            {},
+            { redirectUrl: string; clientSecret: string }
+          >(`merch/${merch.id}/purchase`, {
+            price: data.price ? Number(data.price) * 100 : undefined,
+            quantity: data.quantity,
+            merchOptionIds: data.merchOptionIds,
+            shippingDestinationId: data.shippingDestinationId,
+            message: data.message,
+          });
+          if (response.clientSecret) {
+            setClientSecret(response.clientSecret);
+          } else {
+            window.location.assign(response.redirectUrl);
+          }
           setIsLoadingStripe(false);
         }
       } catch (e) {
@@ -148,14 +154,17 @@ const BuyMerchItem: React.FC<{
       }
     });
   });
-  console.log("amountAvailable", amountAvailable, quantity);
-  console.log("formState", formState.errors);
+
   const exceedsAvailable = amountAvailable < Number(quantity);
 
   const onlyOneDestination = merch.shippingDestinations.length === 1;
   const defaultOption = onlyOneDestination
     ? t("everywhere")
     : t("everywhereElse");
+
+  if (clientSecret) {
+    return <EmbeddedStripeForm clientSecret={clientSecret} />;
+  }
 
   return (
     <form

@@ -212,8 +212,8 @@ export const Modal: React.FC<{
                 position: sticky;
                 top: 0;
                 padding-top: 1rem;
+                margin-bottom: 0 !important;
                 align-items: center;
-                margin-bottom: 0.5rem;
                 background-color: var(--mi-lighten-background-color) !important;
                 padding: 1rem;
                 border-radius: var(--mi-border-radius-x)

@@ -7,12 +7,6 @@ import { useTranslation } from "react-i18next";
 import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
 
-import { loadStripe } from "@stripe/stripe-js";
-import {
-  EmbeddedCheckoutProvider,
-  EmbeddedCheckout,
-} from "@stripe/react-stripe-js";
-
 import { InputEl } from "components/common/Input";
 import FreeDownload from "./FreeDownload";
 import FormComponent from "components/common/FormComponent";
@@ -25,6 +19,7 @@ import Box from "components/common/Box";
 import { ArtistButton } from "components/Artist/ArtistButtons";
 import { useAuthContext } from "state/AuthContext";
 import TextArea from "components/common/TextArea";
+import EmbeddedStripeForm from "components/common/EmbeddedStripe";
 
 interface FormData {
   chosenPrice: string;
@@ -32,11 +27,6 @@ interface FormData {
   message?: string;
 }
 
-const stripeKey = import.meta.env.VITE_PUBLISHABLE_STRIPE_KEY;
-let stripePromise: ReturnType<typeof loadStripe> | undefined;
-if (stripeKey) {
-  stripePromise = loadStripe(stripeKey);
-}
 const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
   trackGroup,
   track,
@@ -110,15 +100,8 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
 
   const isDisabled = !!lessThan1 || lessThanMin || !isValid;
 
-  if (clientSecret && stripePromise) {
-    return (
-      <EmbeddedCheckoutProvider
-        stripe={stripePromise}
-        options={{ clientSecret: clientSecret }}
-      >
-        <EmbeddedCheckout />
-      </EmbeddedCheckoutProvider>
-    );
+  if (clientSecret) {
+    return <EmbeddedStripeForm clientSecret={clientSecret} />;
   }
 
   return (
