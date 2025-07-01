@@ -51,7 +51,7 @@ const Releases: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
     queryTopSoldTrackGroups({
       skip: futureReleasesPageSize * page,
       take: futureReleasesPageSize,
-      datePurchased: "thisMonth",
+      datePurchased: "pastMonth",
     })
   );
 

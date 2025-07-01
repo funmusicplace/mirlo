@@ -47,7 +47,7 @@ export function queryTrackGroups(opts: TrackGroupQueryOptions) {
 }
 
 type TopSoldQueryOptions = Pick<TrackGroupQueryOptions, "skip" | "take"> & {
-  datePurchased?: "thisMonth";
+  datePurchased?: "pastMonth";
 };
 
 const fetchTopSoldTrackGroups: QueryFunction<
