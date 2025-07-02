@@ -166,6 +166,10 @@ const BuyMerchItem: React.FC<{
     return <EmbeddedStripeForm clientSecret={clientSecret} />;
   }
 
+  const currentDestination = merch.shippingDestinations.find(
+    (sd) => sd.id === shippingDestination
+  );
+
   return (
     <form
       onSubmit={methods.handleSubmit(onSubmit)}
@@ -319,21 +323,23 @@ const BuyMerchItem: React.FC<{
               {o.destinationCountry && o.destinationCountry !== ""
                 ? `${codeToCountryMap[o.destinationCountry].countryName} (${o.destinationCountry})`
                 : defaultOption}{" "}
-              (
-              {t("destinationCost", {
-                costUnit: moneyDisplay({
-                  amount: o.costUnit / 100,
-                  currency: o.currency,
-                }),
-                costExtraUnit: moneyDisplay({
-                  amount: o.costExtraUnit / 100,
-                  currency: o.currency,
-                }),
-              })}
-              )
             </option>
           ))}
         </SelectEl>
+        {currentDestination && (
+          <small>
+            {t("destinationCost", {
+              costUnit: moneyDisplay({
+                amount: currentDestination.costUnit / 100,
+                currency: currentDestination.currency,
+              }),
+              costExtraUnit: moneyDisplay({
+                amount: currentDestination.costExtraUnit / 100,
+                currency: currentDestination.currency,
+              }),
+            })}
+          </small>
+        )}
       </FormComponent>
       <div
         className={css`
