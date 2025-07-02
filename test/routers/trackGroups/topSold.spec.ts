@@ -270,14 +270,15 @@ describe("Top sold trackGroups", () => {
     // These loops generate the purchases for each trackGroup so we can
     // later make sure they're ordered properly when we assert
     for (let i = 0; i < 5; i++) {
+      const pastDate = faker.date.past({
+        years: 10,
+        refDate: new Date(Date.now() - 31 * 24 * 60 * 60 * 1000),
+      });
       await createUserTrackGroupPurchase(
         buyers[i as keyof typeof buyers].id,
         mostPurchased.id,
         {
-          datePurchased: faker.date.past({
-            years: 10,
-            refDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
-          }),
+          datePurchased: pastDate,
         }
       );
     }
@@ -303,7 +304,7 @@ describe("Top sold trackGroups", () => {
 
     const response = await requestApp
       .get("trackGroups/topSold")
-      .query("datePurchased=thisMonth")
+      .query("datePurchased=pastMonth")
       .set("Accept", "application/json");
 
     assert.equal(response.body.results.length, 3);

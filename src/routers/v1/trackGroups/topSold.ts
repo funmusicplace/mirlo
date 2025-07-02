@@ -18,17 +18,14 @@ export default function () {
         trackGroup: whereForPublishedTrackGroups(),
       };
 
-      if (datePurchased === "thisMonth") {
+      if (datePurchased === "pastMonth") {
         const startOfMonth = new Date();
-        startOfMonth.setDate(1);
-        startOfMonth.setHours(0, 0, 0, 0);
+        startOfMonth.setDate(startOfMonth.getDate() - 30);
 
         topWhere.datePurchased = {
           gte: startOfMonth.toISOString(),
         };
       }
-
-      console.log("topWhere:", topWhere);
 
       const topSoldIds = await prisma.userTrackGroupPurchase.groupBy({
         by: ["trackGroupId"],
@@ -45,7 +42,6 @@ export default function () {
       });
 
       const trackGroupIds = topSoldIds.map((item) => item.trackGroupId);
-      console.log("topSoldIds:", trackGroupIds);
 
       const trackGroups = await prisma.trackGroup.findMany({
         where: { ...where, id: { in: trackGroupIds } },
