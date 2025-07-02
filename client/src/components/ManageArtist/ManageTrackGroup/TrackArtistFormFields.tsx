@@ -37,7 +37,7 @@ const TrackArtistFormFields: React.FC<{
         setValue(`trackArtists.${artistIndex}.artistName`, artist.result.name, {
           shouldDirty: true,
         });
-        setValue(`trackArtists.${artistIndex}.artistId`, val, {
+        setValue(`trackArtists.${artistIndex}.artistId`, val.id, {
           shouldDirty: true,
         });
       } else if (hasId(val) && typeof val.id === "string") {
