@@ -22,11 +22,9 @@ export default function () {
       let userEmail = email;
       let exists = false;
       if (!userEmail) {
-        console.log("user users email", email, user.email);
         userEmail = user.email;
       }
       if (userEmail) {
-        console.log("final email", email);
         const purchase = await prisma.userTrackPurchase.findFirst({
           where: {
             user: {
