@@ -67,7 +67,7 @@ function TrackView() {
   return (
     <WidthContainer variant="big" justify="center">
       <MetaCard
-        title={filteredTrack.title}
+        title={filteredTrack.title ?? "Untitled track"}
         description={`A track by ${trackGroup.artist?.name ?? "an artist"} on Mirlo`}
         image={trackGroup.cover?.sizes?.[600]}
       />
@@ -106,7 +106,7 @@ function TrackView() {
           >
             <TrackGroupTitle
               trackGroup={{ ...trackGroup, tracks: [filteredTrack] }}
-              title={filteredTrack.title}
+              title={filteredTrack.title ?? ""}
             />
 
             <div

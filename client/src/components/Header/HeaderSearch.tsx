@@ -60,7 +60,7 @@ const HeaderSearch: React.FC = () => {
         id: tr.urlSlug ?? tr.id,
         artistId: tr.artist?.urlSlug ?? tr.artistId,
         trackGroupId: tr.urlSlug ?? tr.id,
-        name: tr.title ?? "",
+        name: tr.title ?? t("untitled") ?? "",
         isTrackGroup: true,
       })),
       ...tracks.results.map((tr, tid) => ({
@@ -69,7 +69,7 @@ const HeaderSearch: React.FC = () => {
         category: t("tracks"),
         trackGroupId: tr.trackGroup.urlSlug ?? tr.trackGroupId,
         artistId: tr.trackGroup.artist.urlSlug ?? tr.trackGroup.artistId,
-        name: tr.title ?? t("untitled"),
+        name: tr.title ?? t("untitled") ?? "",
         isTrack: true,
       })),
       ...labels.results.map((label, tid) => ({

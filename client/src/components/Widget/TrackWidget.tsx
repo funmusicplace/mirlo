@@ -100,7 +100,7 @@ const TrackWidget = () => {
                 track.trackGroup.artist?.avatar?.sizes?.[300] ??
                 ""
               }
-              alt={track.title}
+              alt={track.title ?? "Untitled track"}
               size={150}
               square
               className={css`
@@ -134,7 +134,7 @@ const TrackWidget = () => {
                 `}
               >
                 <SmallTileDetails
-                  title={track.title}
+                  title={track.title ?? ""}
                   subtitle={
                     <Link
                       to={getReleaseUrl(

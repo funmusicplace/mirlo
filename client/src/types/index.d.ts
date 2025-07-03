@@ -35,7 +35,7 @@ interface LoggedInUser {
 }
 
 interface Track {
-  title: string;
+  title?: string;
   id: number;
   status: "preview" | "must-own";
   artistId: number;

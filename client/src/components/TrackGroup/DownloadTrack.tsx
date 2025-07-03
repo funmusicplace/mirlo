@@ -86,7 +86,7 @@ function DownloadTrack() {
   return (
     <WidthWrapper variant="small">
       <MetaCard
-        title={track.title}
+        title={track.title ?? "Untitled track"}
         description={"An track on Mirlo"}
         image={track.trackGroup.cover?.sizes?.[600]}
       />
@@ -105,10 +105,10 @@ function DownloadTrack() {
           <ImageWithPlaceholder
             src={track.trackGroup.cover?.sizes?.[120]}
             size={120}
-            alt={track.title}
+            alt={track.title ?? "Untitled track"}
           />
           <SmallTileDetails
-            title={track.title}
+            title={track.title ?? ""}
             subtitle={track.trackGroup.artist?.name ?? ""}
           />
         </div>
