@@ -120,7 +120,7 @@ const TrackGroupWidget = () => {
           </div>
           <ImageWithPlaceholder
             src={trackGroup.cover?.sizes?.[600] ?? ""}
-            alt={trackGroup.title}
+            alt={trackGroup.title ?? "Untitled release"}
             size={600}
             square
           />

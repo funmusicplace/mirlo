@@ -89,7 +89,7 @@ function CheckoutComplete() {
           {trackGroup && (
             <ImageWithPlaceholder
               src={trackGroup.cover?.sizes?.[300]}
-              alt={trackGroup.title}
+              alt={trackGroup.title ?? ""}
               size={300}
             />
           )}

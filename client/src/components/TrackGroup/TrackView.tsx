@@ -124,7 +124,7 @@ function TrackView() {
                 <ImageWrapper>
                   <ImageWithPlaceholder
                     src={trackGroup.cover?.sizes?.[960]}
-                    alt={trackGroup.title}
+                    alt={trackGroup.title ?? "Untitled release"}
                     size={960}
                   />
                 </ImageWrapper>

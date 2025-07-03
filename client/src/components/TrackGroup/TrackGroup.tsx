@@ -183,7 +183,7 @@ function TrackGroup() {
   return (
     <WidthContainer variant="big" justify="center">
       <MetaCard
-        title={trackGroup.title}
+        title={trackGroup.title ?? "Untitled release"}
         description={`An album by ${trackGroup.artist?.name ?? "an artist"} on Mirlo`}
         image={trackGroup.cover?.sizes?.[600]}
       />
@@ -220,7 +220,10 @@ function TrackGroup() {
               }
             `}
           >
-            <TrackGroupTitle trackGroup={trackGroup} title={trackGroup.title} />
+            <TrackGroupTitle
+              trackGroup={trackGroup}
+              title={trackGroup.title ?? ""}
+            />
 
             <div
               className={css`

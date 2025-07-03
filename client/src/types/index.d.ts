@@ -78,7 +78,7 @@ interface Tag {
 }
 
 interface TrackGroup {
-  title: string;
+  title?: string;
   published: boolean;
   adminEnabled: boolean;
   id: number;

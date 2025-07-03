@@ -85,7 +85,7 @@ const TrackGroupCard: React.FC<{
         >
           <ImageWithPlaceholder
             src={album.cover?.sizes?.[300]}
-            alt={album.title}
+            alt={album.title ?? "Untitled release"}
             size={150}
           />
         </ArtistRouterLink>

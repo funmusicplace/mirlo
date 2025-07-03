@@ -50,7 +50,7 @@ const ArtistItemLink: React.FC<{
       to={url}
       aria-label={`${t("goToAlbum")}: ${item.title || t("untitled")}`}
       className={
-        item.title.length
+        item.title?.length
           ? css`
               color: var(--mi-normal-foreground-color);
             `
@@ -60,7 +60,7 @@ const ArtistItemLink: React.FC<{
             `
       }
     >
-      {item.title.length ? item.title : t("untitled")}
+      {item.title?.length ? item.title : t("untitled")}
     </Link>
   );
 };

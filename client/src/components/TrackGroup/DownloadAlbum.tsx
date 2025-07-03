@@ -84,7 +84,7 @@ function DownloadAlbum() {
   return (
     <WidthWrapper variant="small">
       <MetaCard
-        title={trackGroup.title}
+        title={trackGroup.title ?? "Untitled release"}
         description={trackGroup.about ?? "A release on Mirlo"}
         image={trackGroup.cover?.sizes?.[600]}
       />
@@ -103,10 +103,10 @@ function DownloadAlbum() {
           <ImageWithPlaceholder
             src={trackGroup.cover?.sizes?.[120]}
             size={120}
-            alt={trackGroup.title}
+            alt={trackGroup.title ?? "Untitled release"}
           />
           <SmallTileDetails
-            title={trackGroup.title}
+            title={trackGroup.title ?? "Untitled release"}
             subtitle={trackGroup.artist?.name ?? ""}
           />
         </div>
