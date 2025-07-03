@@ -1,6 +1,10 @@
 import { QueryFunction, queryOptions } from "@tanstack/react-query";
 import * as api from "./fetch/fetchWrapper";
-import { QUERY_KEY_MERCH, QUERY_KEY_TRACK_GROUPS } from "./queryKeys";
+import {
+  QUERY_KEY_ARTISTS,
+  QUERY_KEY_MERCH,
+  QUERY_KEY_TRACK_GROUPS,
+} from "./queryKeys";
 
 const fetchArtist: QueryFunction<
   Artist,
@@ -29,6 +33,20 @@ export function queryArtist(opts: {
     ],
     queryFn: fetchArtist,
     enabled: !!opts.artistSlug,
+  });
+}
+
+const fetchManagedArtists: QueryFunction<
+  { results: Artist[] },
+  ["fetchManagedArtists", {}, ...any]
+> = ({ queryKey: [_], signal }) => {
+  return api.get(`v1/manage/artists`, { signal });
+};
+
+export function queryManagedArtists(opts?: {}) {
+  return queryOptions({
+    queryKey: ["fetchManagedArtists", opts ?? {}, QUERY_KEY_ARTISTS],
+    queryFn: fetchManagedArtists,
   });
 }
 

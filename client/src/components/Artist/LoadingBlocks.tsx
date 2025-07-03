@@ -22,7 +22,11 @@ const Shine = styled("div")`
   }
 `;
 
-const LoadingBlocks: React.FC<{ rows?: number }> = ({ rows = 4 }) => {
+const LoadingBlocks: React.FC<{
+  rows?: number;
+  height?: string;
+  margin?: string;
+}> = ({ rows = 4, height = "10rem", margin = "2rem" }) => {
   return (
     <>
       {range(rows).map((r) => (
@@ -30,9 +34,9 @@ const LoadingBlocks: React.FC<{ rows?: number }> = ({ rows = 4 }) => {
           key={r}
           style={{
             width: "100%",
-            height: "10rem",
-            marginTop: "2rem",
-            marginBottom: "2rem",
+            height,
+            marginTop: margin,
+            marginBottom: margin,
           }}
         />
       ))}
