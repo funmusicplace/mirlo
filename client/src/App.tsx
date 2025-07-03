@@ -83,11 +83,10 @@ function App() {
               </div>
               <Footer />
             </div>
-
-            <Player />
           </div>
         </>
-      </ArtistColorsWrapper>
+      </ArtistColorsWrapper>{" "}
+      <Player />
     </>
   );
 }

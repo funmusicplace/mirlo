@@ -26,7 +26,7 @@ const CollectionPurchaseSquare: React.FC<{
           trackIds={
             track ? [track.id] : trackGroup.tracks.map((track) => track.id)
           }
-          title={track?.title ?? trackGroup.title}
+          title={track?.title ?? trackGroup.title ?? ""}
           trackGroup={trackGroup}
           track={track}
         >

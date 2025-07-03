@@ -135,10 +135,10 @@ const GenerateAlbumDownloadCodes: React.FC<{ onDone: () => void }> = ({
               <ImageWithPlaceholder
                 src={selectedTrackGroup.cover?.sizes?.[120]}
                 size={120}
-                alt={selectedTrackGroup.title}
+                alt={selectedTrackGroup.title ?? "Untitled release"}
               />
               <SmallTileDetails
-                title={selectedTrackGroup.title}
+                title={selectedTrackGroup.title ?? ""}
                 subtitle={selectedTrackGroup.artist?.name ?? ""}
               />
               <Button

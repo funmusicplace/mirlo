@@ -35,7 +35,7 @@ interface LoggedInUser {
 }
 
 interface Track {
-  title: string;
+  title?: string;
   id: number;
   status: "preview" | "must-own";
   artistId: number;
@@ -78,7 +78,7 @@ interface Tag {
 }
 
 interface TrackGroup {
-  title: string;
+  title?: string;
   published: boolean;
   adminEnabled: boolean;
   id: number;

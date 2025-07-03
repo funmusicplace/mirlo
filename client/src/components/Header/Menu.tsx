@@ -6,8 +6,10 @@ import { useSnackbar } from "state/SnackbarContext";
 import Button from "../common/Button";
 import api from "services/api";
 import { useAuthContext } from "state/AuthContext";
-import { useLogoutMutation } from "queries";
+import { queryManagedArtists, useLogoutMutation } from "queries";
 import { getArtistManageUrl } from "utils/artist";
+import { useQuery } from "@tanstack/react-query";
+import LoadingBlocks from "components/Artist/LoadingBlocks";
 
 const Menu: React.FC = (props) => {
   const { setIsMenuOpen } = props as {
@@ -16,23 +18,14 @@ const Menu: React.FC = (props) => {
   const { t } = useTranslation("translation", { keyPrefix: "headerMenu" });
   const navigate = useNavigate();
   const snackbar = useSnackbar();
-  const [artists, setArtists] = React.useState<Artist[]>([]);
+  // const [artists, setArtists] = React.useState<Artist[]>([]);
 
   const { user } = useAuthContext();
+
+  const { data: { results: artists } = {}, isLoading } = useQuery(
+    queryManagedArtists()
+  );
   const userId = user?.id;
-
-  const fetchArtists = React.useCallback(async () => {
-    if (userId) {
-      const fetchedArtists = await api.getMany<Artist>(`manage/artists`);
-      if (fetchedArtists) {
-        setArtists(fetchedArtists.results);
-      }
-    }
-  }, [userId]);
-
-  React.useEffect(() => {
-    fetchArtists();
-  }, [fetchArtists]);
 
   const { mutate: logout } = useLogoutMutation();
 
@@ -109,7 +102,10 @@ const Menu: React.FC = (props) => {
                 flex-direction: column;
               `}
             >
-              {artists.map((a) => {
+              {isLoading && (
+                <LoadingBlocks rows={1} height="2rem" margin=".25rem" />
+              )}
+              {artists?.map((a) => {
                 return (
                   <li key={a.id}>
                     <Button

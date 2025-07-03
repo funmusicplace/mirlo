@@ -28,7 +28,6 @@ export default function () {
           applicationName: "frontend",
         },
       });
-      console.log("url", url);
 
       if (url.includes("release")) {
         const matches = url.matchAll(/(.*)\/(.*)\/release\/(.*)/gm);

@@ -82,7 +82,7 @@ const ArtistTrackGroup: React.FC<{
             url: trackGroup.cover?.sizes?.[size === "small" ? 300 : 300] ?? "",
           }}
           trackIds={trackGroup.tracks.map((t) => t.id)}
-          title={trackGroup.title}
+          title={trackGroup.title ?? ""}
           trackGroup={trackGroup}
           showWishlist={!showTrackFavorite}
           showTrackFavorite={showTrackFavorite}

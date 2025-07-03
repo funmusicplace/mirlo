@@ -88,7 +88,7 @@ function RedeemCode() {
   return (
     <WidthWrapper variant="small">
       <MetaCard
-        title={trackGroup.title}
+        title={trackGroup.title ?? "Untitled release"}
         description={trackGroup.about ?? "An album on Mirlo"}
         image={trackGroup.cover?.sizes?.[600]}
       />
@@ -106,7 +106,7 @@ function RedeemCode() {
           <ImageWithPlaceholder
             src={trackGroup.cover?.sizes?.[120]}
             size={120}
-            alt={trackGroup.title}
+            alt={trackGroup.title ?? "Untitled release"}
           />
           <SmallTileDetails
             title={

@@ -9,8 +9,6 @@ const usePagination = ({ pageSize }: { pageSize: number }) => {
   const pageSearch = search.get("page");
   const page = pageSearch ? +pageSearch : 0;
 
-  console.log("usePagination", page, pageSize);
-
   return {
     page,
     PaginationComponent: ({

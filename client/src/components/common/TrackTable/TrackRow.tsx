@@ -14,6 +14,7 @@ import TrackLink from "./TrackLink";
 import DropdownMenu from "../DropdownMenu";
 import LyricsModal from "./LyricsModal";
 import FavoriteTrack from "components/TrackGroup/Favorite";
+import { useGetArtistColors } from "components/Artist/ArtistButtons";
 
 const LicenseSpan = styled.a`
   text-wrap: nowrap;
@@ -24,47 +25,61 @@ const LicenseSpan = styled.a`
   overflow: hidden;
 `;
 
-const TR = styled.tr<{ canPlayTrack: boolean }>`
+const TR = styled.tr<{ canPlayTrack: boolean; colors?: ArtistColors }>`
   ${(props) =>
     !props.canPlayTrack
-      ? `color: var(--mi-normal-foreground-color); opacity: .3;`
+      ? `color: ${props.colors?.primary ?? "var(--mi-normal-foreground-color)"}; opacity: .6;`
       : ""}
 
   &:hover {
-    color: var(--mi-normal-background-color) !important;
-    ${(props) =>
-      !props.canPlayTrack
-        ? `background-color: var(--mi-normal-foreground-color);`
-        : `background-color: var(--mi-normal-foreground-color) !important;`}
+    color: ${(props) =>
+      props.colors?.background ??
+      "var(--mi-normal-foreground-color)"} !important;
+    background-color: ${(props) =>
+      props.colors?.foreground ??
+      "var(--mi-normal-background-color)"} !important;
 
     button.play-button,
     button.pause-button {
-      color: var(--mi-normal-background-color);
+      color: ${(props) =>
+        props.colors?.background ?? "var(--mi-normal-background-color)"};
       background: transparent;
 
       svg {
-        fill: var(--mi-normal-background-color) !important;
+        fill: ${(props) =>
+          props.colors?.background ??
+          "var(--mi-normal-background-color)"} !important;
       }
     }
 
     .mi-dropdown-button {
-      background-color: var(--mi-primary-color);
-      color: var(--mi-secondary-color);
+      background-color: ${(props) =>
+        props.colors?.background ??
+        "var(--mi-normal-foreground-color)"} !important;
+      color: ${(props) =>
+        props.colors?.foreground ??
+        "var(--mi-normal-background-color)"} !important;
     }
 
     .track-authors {
-      color: var(--mi-light-background-color) !important;
+      color: ${(props) =>
+        props.colors?.background ??
+        "var(--mi-normal-foreground-color)"} !important;
+      opacity: 0.8 !important;
     }
   }
 
-  button.play-button {
-    color: var(--mi-normal-foreground-color);
+  button.play-button,
+  button.pause-button {
+    color: ${(props) =>
+      props.colors?.primary ?? "var(--mi-normal-foreground-color)"};
     background: transparent;
     font-size: 0.8rem;
 
-    &:hover {
-      color: var(--mi-normal-background-color) !important;
-      background: transparent;
+    svg {
+      fill: ${(props) =>
+        props.colors?.primary ??
+        "var(--mi-normal-foreground-color)"} !important;
     }
   }
 
@@ -75,12 +90,9 @@ const TR = styled.tr<{ canPlayTrack: boolean }>`
     display: block;
     width: 2rem;
   }
-  &:hover > td > .play-button {
+  &:hover > td > .play-button,
+  &:hover > td > .pause-button {
     display: block;
-
-    svg {
-      fill: var(--mi-white);
-    }
   }
   ${(props) =>
     props.canPlayTrack
@@ -136,6 +148,7 @@ const TrackRow: React.FC<{
   const { dispatch } = useGlobalStateContext();
   const [trackTitle] = React.useState(track.title);
   const { user } = useAuthContext();
+  const { colors } = useGetArtistColors();
 
   const canPlayTrack = isTrackOwnedOrPreview(track, user, trackGroup);
 
@@ -147,7 +160,12 @@ const TrackRow: React.FC<{
   }, [addTracksToQueue, canPlayTrack, dispatch, track.id]);
 
   return (
-    <TR key={track.id} id={`${track.id}`} canPlayTrack={canPlayTrack}>
+    <TR
+      key={track.id}
+      id={`${track.id}`}
+      canPlayTrack={canPlayTrack}
+      colors={colors}
+    >
       <FirstTD onClick={onTrackPlay}>
         <TrackRowPlayControl
           trackId={track.id}

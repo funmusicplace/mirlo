@@ -32,7 +32,6 @@ export default function () {
           isAdmin: true,
         },
       });
-      console.log("user", user);
       res.json({ result: user });
     } catch (e) {
       next(e);

@@ -12,7 +12,7 @@ import Modal from "components/common/Modal";
 import MerchPopUp from "./MerchPopUp";
 
 const PurchaseComponent: React.FC<{
-  title: string;
+  title?: string;
   url: string;
   imageSrc?: string;
   pricePaid: number;

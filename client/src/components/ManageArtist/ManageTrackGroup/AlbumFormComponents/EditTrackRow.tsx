@@ -237,7 +237,13 @@ const EditTrackRow: React.FC<{
               ${methods.formState.isDirty
                 ? `background-color: ${colors?.primary} !important; 
                    color: ${colors?.background} !important;
-                   border-color: ${colors?.primary} !important;`
+                   border-color: ${colors?.primary} !important;
+
+                   animation: shake 0.5s;
+                   
+                   svg {
+                     fill: ${colors?.background} !important;
+                   }`
                 : ""}
             `}
           />
