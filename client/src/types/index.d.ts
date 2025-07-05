@@ -197,6 +197,7 @@ interface Artist {
   location?: string;
   enabled: boolean;
   createdAt: string;
+  defaultPlatformFee?: number;
   artistLabels?: ArtistLabel[];
   trackGroups: TrackGroup[];
   links?: string[];

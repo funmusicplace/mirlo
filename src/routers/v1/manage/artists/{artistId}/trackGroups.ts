@@ -7,6 +7,7 @@ import {
 import processor from "../../../../../utils/trackGroup";
 import prisma from "@mirlo/prisma";
 import { getSiteSettings } from "../../../../../utils/settings";
+import { getPlatformFeeForArtist } from "../../../../../utils/artist";
 
 export default function () {
   const operations = {
@@ -129,6 +130,12 @@ export default function () {
         },
       });
 
+      if (!artist) {
+        return res.status(404).json({
+          error: "Artist not found",
+        });
+      }
+
       let paymentToUserId: number | undefined = undefined;
 
       if (
@@ -151,7 +158,7 @@ export default function () {
           paymentToUser: paymentToUserId
             ? { connect: { id: paymentToUserId } }
             : undefined,
-          platformPercent: (await getSiteSettings()).platformPercent,
+          platformPercent: await getPlatformFeeForArtist(artist.id),
           currency: userForCurrency?.currency ?? "usd",
           releaseDate: releaseDate ? new Date(releaseDate) : undefined,
           adminEnabled: true,

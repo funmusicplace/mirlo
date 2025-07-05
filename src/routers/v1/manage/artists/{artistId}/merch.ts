@@ -10,6 +10,7 @@ import {
   getUserCurrencyString,
 } from "../../../../../utils/user";
 import { processSingleMerch } from "../../../../../utils/merch";
+import { getPlatformFeeForArtist } from "../../../../../utils/artist";
 
 export default function () {
   const operations = {
@@ -84,6 +85,7 @@ export default function () {
           currency: currencyString,
           quantityRemaining: 0,
           isPublic: false,
+          platformPercent: await getPlatformFeeForArtist(artistId),
         },
       });
 

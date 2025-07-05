@@ -22,6 +22,8 @@ import Box from "components/common/Box";
 import LabelConfirmation from "./LabelConfirmation";
 import useArtistQuery from "utils/useArtistQuery";
 import FeatureFlag from "components/common/FeatureFlag";
+import Artist from "components/Artist/Artist";
+import PaymentSlider from "../ManageTrackGroup/AlbumFormComponents/PaymentSlider";
 
 export interface ShareableTrackgroup {
   creatorId: number;
@@ -61,6 +63,7 @@ type FormData = {
   banner: File[];
   avatar: File[];
   activityPub: boolean;
+  defaultPlatformFee: number;
   properties: {
     colors: {
       primary: string;
@@ -76,6 +79,7 @@ const generateDefaults = (existing?: Artist) => ({
   bio: existing?.bio ?? "",
   urlSlug: existing?.urlSlug ?? "",
   activityPub: existing?.activityPub ?? false,
+  defaultPlatformFee: existing?.defaultPlatformFee ?? 10,
   properties: {
     colors: {
       primary: "",
@@ -225,17 +229,15 @@ export const CustomizeLook: React.FC = () => {
                   <label>{t("urlSlug")} </label>
                   <ArtistSlugInput currentArtistId={existingId} type="artist" />
                 </FormComponent>
-                <div className={css``}>
-                  <FormComponent>
-                    <label>{t("bio")}</label>
-                    <SavingInput
-                      formKey="bio"
-                      rows={7}
-                      url={`manage/artists/${artist.id}`}
-                      extraData={{}}
-                    />
-                  </FormComponent>
-                </div>
+                <FormComponent>
+                  <label>{t("bio")}</label>
+                  <SavingInput
+                    formKey="bio"
+                    rows={7}
+                    url={`manage/artists/${artist.id}`}
+                    extraData={{}}
+                  />
+                </FormComponent>
               </div>
             </ArtistFormSection>
             <ArtistFormSection isOdd>
@@ -287,6 +289,23 @@ export const CustomizeLook: React.FC = () => {
                   </FormComponent>
                 </div>
               </div>
+            </ArtistFormSection>
+            <ArtistFormSection>
+              <FormComponent
+                className={css`
+                  width: 300px;
+                `}
+              >
+                <label>{t("defaultPlatformFee")}</label>
+                <PaymentSlider
+                  url={`manage/artists/${artist.id}`}
+                  keyName="defaultPlatformFee"
+                  extraData={{
+                    artistId: 0,
+                  }}
+                />
+                <small>{t("defaultPlatformFeeDescription")}</small>
+              </FormComponent>
             </ArtistFormSection>
             <FeatureFlag featureFlag="activityPub">
               <ArtistFormSection

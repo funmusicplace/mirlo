@@ -81,7 +81,7 @@ const ManageTags: React.FC<{ tags?: string[] }> = ({ tags: existingTags }) => {
     return tags.results
       .sort((a, b) => {
         if (a.tag === searchValue) {
-          return 1;
+          return -1;
         } else if (b.tag === searchValue) {
           return 1;
         } else {

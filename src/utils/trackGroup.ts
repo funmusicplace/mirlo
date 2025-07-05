@@ -294,6 +294,9 @@ export const registerPurchase = async ({
   platformCut?: number | null;
 }) => {
   const token = randomUUID();
+  logger.info(
+    `registerPurchase: userId: ${userId}, trackGroupId: ${trackGroupId}, pricePaid: ${pricePaid}, currencyPaid: ${currencyPaid}, paymentProcessorKey: ${paymentProcessorKey}, platformCut: ${platformCut}, message: ${message}`
+  );
 
   let purchase = await prisma.userTrackGroupPurchase.findFirst({
     where: {

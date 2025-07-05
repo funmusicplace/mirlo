@@ -15,7 +15,7 @@ import {
 
 const fetchUserStripeStatus: QueryFunction<
   AccountStatus,
-  ["fetchUserStripeStatus", { userId: number }]
+  ["fetchUserStripeStatus", { userId?: number }]
 > = ({ queryKey: [_, { userId }], signal }) => {
   return api
     .get<{
@@ -24,11 +24,11 @@ const fetchUserStripeStatus: QueryFunction<
     .then((r) => r.result);
 };
 
-export function queryUserStripeStatus(userId: number) {
+export function queryUserStripeStatus(userId?: number) {
   return queryOptions({
     queryKey: ["fetchUserStripeStatus", { userId }],
     queryFn: fetchUserStripeStatus,
-    enabled: isFinite(userId),
+    enabled: !!userId && isFinite(userId),
   });
 }
 
