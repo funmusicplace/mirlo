@@ -163,7 +163,7 @@ export const handleCataloguePurchase = async (
     const artistTrackGroups = await prisma.trackGroup.findMany({
       where: {
         artistId: artistId,
-        paymentToUserId: null,
+        OR: [{ paymentToUserId: null }, { paymentToUserId: artist?.userId }],
         releaseDate: {
           lte: new Date(),
         },
