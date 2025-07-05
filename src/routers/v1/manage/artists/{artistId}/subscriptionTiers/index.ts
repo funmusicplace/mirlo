@@ -6,6 +6,7 @@ import {
 import prisma from "@mirlo/prisma";
 import { User } from "@mirlo/prisma/client";
 import { getSiteSettings } from "../../../../../../utils/settings";
+import { getPlatformFeeForArtist } from "../../../../../../utils/artist";
 
 type Params = {
   artistId: string;
@@ -53,6 +54,7 @@ export default function () {
           promoCodes: true,
         },
       });
+
       const userHasPromo = !!userForCurrency?.promoCodes.length;
 
       const {
@@ -76,7 +78,7 @@ export default function () {
           maxAmount,
           interval,
           autoPurchaseAlbums,
-          platformPercent: userHasPromo ? 0 : settings.platformPercent,
+          platformPercent: await getPlatformFeeForArtist(artistId),
           currency: userForCurrency?.currency ?? "usd",
           allowVariable,
           defaultAmount,

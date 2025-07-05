@@ -661,6 +661,8 @@
     "urlSlug": "Text that will appear in the URL",
     "replaceImage": "Replace image",
     "saveArtist": "Save artist page",
+    "defaultPlatformFee": "Default platform fee",
+    "defaultPlatformFeeDescription": "This is the default platform fee that will be applied to all your releases. You can change it on a per-release basis.",
     "createArtist": "Create artist page",
     "newArtist": "New artist page",
     "refreshPage": "Refresh page",

@@ -216,6 +216,7 @@ model Artist {
   avatar                             ArtistAvatar?
   urlSlug                            String                               @unique
   properties                         Json?
+  defaultPlatformFee                 Int?                                 @default(10) // in percent
   trackArtists                       TrackArtist[]
   links                              String[] // Legacy, use linksJson instead
   /// [ArtistLink]

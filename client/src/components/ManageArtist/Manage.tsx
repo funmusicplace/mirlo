@@ -9,12 +9,17 @@ import Box from "components/common/Box";
 import CountrySelect from "./CountrySelectForm";
 import WidthContainer from "components/common/WidthContainer";
 import { useAuthContext } from "state/AuthContext";
+import { queryUserStripeStatus } from "queries";
+import { useQuery } from "@tanstack/react-query";
+import LoadingBlocks from "components/Artist/LoadingBlocks";
 
 export const Manage: React.FC = () => {
   const { user } = useAuthContext();
   const [artists, setArtists] = React.useState<Artist[]>([]);
-  const [stripeAccountStatus, setStripeAccountStatus] =
-    React.useState<AccountStatus>();
+
+  const { data: stripeAccountStatus, isLoading: isLoadingStripe } = useQuery(
+    queryUserStripeStatus(user?.id)
+  );
   const { t } = useTranslation("translation", { keyPrefix: "manage" });
 
   const userId = user?.id;
@@ -25,11 +30,6 @@ export const Manage: React.FC = () => {
       if (fetchedArtists) {
         setArtists(fetchedArtists.results);
       }
-
-      const checkAccountStatus = await api.get<AccountStatus>(
-        `users/${userId}/stripe/checkAccountStatus`
-      );
-      setStripeAccountStatus(checkAccountStatus.result);
     }
   }, [userId]);
 
@@ -113,23 +113,28 @@ export const Manage: React.FC = () => {
           >
             <h2>{t("managePayment")}</h2>
             <CountrySelect />
-            {stripeAccountStatus?.detailsSubmitted && (
-              <Box variant="info">
-                {!stripeAccountStatus?.chargesEnabled &&
-                  stripeAccountStatus?.detailsSubmitted &&
-                  t("waitingStripeAccountVerification")}
-                {stripeAccountStatus?.chargesEnabled &&
-                  t("stripeAccountVerified")}
-              </Box>
-            )}
-            {userId && (
-              <a href={api.paymentProcessor.stripeConnect(userId)}>
-                <Button>
-                  {stripeAccountStatus?.detailsSubmitted
-                    ? t("updateBankAccount")
-                    : t("setUpBankAccount")}
-                </Button>
-              </a>
+            {isLoadingStripe && <LoadingBlocks rows={2} height="2rem" />}
+            {!isLoadingStripe && (
+              <>
+                {stripeAccountStatus?.detailsSubmitted && (
+                  <Box variant="info">
+                    {!stripeAccountStatus?.chargesEnabled &&
+                      stripeAccountStatus?.detailsSubmitted &&
+                      t("waitingStripeAccountVerification")}
+                    {stripeAccountStatus?.chargesEnabled &&
+                      t("stripeAccountVerified")}
+                  </Box>
+                )}
+                {userId && (
+                  <a href={api.paymentProcessor.stripeConnect(userId)}>
+                    <Button>
+                      {stripeAccountStatus?.detailsSubmitted
+                        ? t("updateBankAccount")
+                        : t("setUpBankAccount")}
+                    </Button>
+                  </a>
+                )}
+              </>
             )}
           </div>
         </WidthContainer>
