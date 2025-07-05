@@ -13,8 +13,9 @@ import api from "services/api";
 
 const PaymentSlider: React.FC<{
   url: string;
-  extraData: { artistId: number };
-}> = ({ url, extraData }) => {
+  keyName?: string;
+  extraData?: { artistId: number };
+}> = ({ url, extraData, keyName = "platformPercent" }) => {
   const { artistId } = useParams();
   const { t } = useTranslation("translation", { keyPrefix: "platformSlider" });
   const [isOpen, setIsInfoOpen] = React.useState(false);
@@ -23,13 +24,13 @@ const PaymentSlider: React.FC<{
     queryArtist({ artistSlug: artistId ?? "" })
   );
   const methods = useFormContext();
-  const current = methods.watch("platformPercent");
+  const current = methods.watch(keyName);
 
   const onBlur = React.useCallback(async () => {
     try {
       await api.put<unknown, unknown>(url, {
         ...extraData,
-        platformPercent: Number(current),
+        [keyName]: Number(current),
       });
     } catch (e) {
       console.error(e);
@@ -46,37 +47,39 @@ const PaymentSlider: React.FC<{
         type="range"
         step="1"
         min={0}
-        {...methods.register("platformPercent")}
+        {...methods.register(keyName)}
         onMouseUp={onBlur}
-        className={css`.
-  -webkit-appearance: none;
-  width: 100%;
-  height: 15px;
-  border-radius: 5px;  
-  background: #d3d3d3;
-  outline: none;
-  opacity: 0.7;
-  -webkit-transition: .2s;
-  transition: opacity .2s;
-  margin-top: .7rem;
+        className={css`
+          -webkit-appearance: none;
+          width: 100%;
+          max-width: 300px;
+          height: 15px;
+          border-radius: 5px;
+          background: #d3d3d3;
+          outline: none;
+          opacity: 0.7;
+          -webkit-transition: 0.2s;
+          transition: opacity 0.2s;
+          margin-top: 0.7rem;
 
-  &::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 25px;
-    height: 25px;
-    border-radius: 50%; 
-    background: ${artist?.properties?.colors.primary};
-    cursor: pointer;
-  }
+          &::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: ${artist?.properties?.colors.primary};
+            cursor: pointer;
+          }
 
-  &::-moz-range-thumb {
-    width: 25px;
-    height: 25px;
-    border-radius: 50%;
-    background: ${artist?.properties?.colors.primary};
-    cursor: pointer;
-  }`}
+          &::-moz-range-thumb {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: ${artist?.properties?.colors.primary};
+            cursor: pointer;
+          }
+        `}
       />
       <div
         className={css`

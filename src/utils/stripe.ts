@@ -18,6 +18,7 @@ import {
 } from "./handleFinishedTransactions";
 import countryCodesCurrencies from "./country-codes-currencies";
 import { manageSubscriptionReceipt } from "./subscription";
+import { getPlatformFeeForArtist } from "./artist";
 
 const { STRIPE_KEY, API_DOMAIN } = process.env;
 
@@ -444,7 +445,11 @@ export const createStripeCheckoutSessionForCatalogue = async ({
       billing_address_collection: "auto",
       customer_email: loggedInUser?.email || email,
       payment_intent_data: {
-        application_fee_amount: await calculateAppFee(priceNumber, currency),
+        application_fee_amount: await calculateAppFee(
+          priceNumber,
+          currency,
+          await getPlatformFeeForArtist(artist.id)
+        ),
       },
       line_items: [
         {
@@ -753,7 +758,11 @@ export const createStripeCheckoutSessionForTip = async ({
       billing_address_collection: "auto",
       customer_email: loggedInUser?.email || email,
       payment_intent_data: {
-        application_fee_amount: await calculateAppFee(priceNumber, currency),
+        application_fee_amount: await calculateAppFee(
+          priceNumber,
+          currency,
+          await getPlatformFeeForArtist(artistId)
+        ),
       },
       line_items: [
         {

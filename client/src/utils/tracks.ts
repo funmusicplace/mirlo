@@ -16,8 +16,15 @@ export const isEqualDurations = (n1: number, n2: number) => {
   return Math.abs(n1 - n2) < 0.00001;
 };
 
-export const fmtMSS = (s: number) => {
-  return (s - (s %= 60)) / 60 + (9 < s ? ":" : ":0") + s.toFixed(0);
+export const fmtMSS = (sec_num: number) => {
+  const hours = Math.floor(sec_num / 3600);
+  const minutes = Math.floor(sec_num / 60) % 60;
+  const seconds = Math.floor(sec_num % 60);
+
+  return [hours, minutes, seconds]
+    .map((v) => (v < 10 ? "0" + v : v))
+    .filter((v, i) => v !== "00" || i > 0)
+    .join(":");
 };
 
 export const isTrackOwnedOrPreview = (

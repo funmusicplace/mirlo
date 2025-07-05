@@ -33,7 +33,7 @@ import { AppError } from "./error";
 import logger from "../logger";
 import { Job } from "bullmq";
 import { processSingleMerch } from "./merch";
-import { url } from "inspector";
+import { getSiteSettings } from "./settings";
 
 type Params = {
   id: string;
@@ -100,6 +100,26 @@ export const checkIsUserSubscriber = async (
     userSubscriber = !!subscriber;
   }
   return userSubscriber;
+};
+
+export const getPlatformFeeForArtist = async (
+  artistId: number | string | null
+): Promise<number> => {
+  const settings = await getSiteSettings();
+  if (!artistId) {
+    return settings.platformPercent;
+  }
+
+  const artist = await prisma.artist.findFirst({
+    where: {
+      id: Number(artistId),
+    },
+    select: {
+      defaultPlatformFee: true,
+    },
+  });
+
+  return artist?.defaultPlatformFee ?? settings.platformPercent;
 };
 
 export const findArtistIdForURLSlug = async (id: string) => {

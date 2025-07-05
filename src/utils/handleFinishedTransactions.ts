@@ -32,10 +32,14 @@ const getApplicationFee = async (session?: Stripe.Checkout.Session) => {
         ? session?.payment_intent
         : (session?.payment_intent?.id ?? null);
 
-    const stripeAccount = session?.metadata?.stripeAccount ?? null;
+    const stripeAccount = session?.metadata?.stripeAccountId ?? null;
 
-    if (!paymentIntentId || !stripeAccount) {
+    if (!paymentIntentId) {
       logger.warn("No payment intent ID found in session metadata");
+      return 0;
+    }
+    if (!stripeAccount) {
+      logger.warn("No stripe account found in session metadata");
       return 0;
     }
     const paymentIntent = await getPaymentIntent(
@@ -163,7 +167,7 @@ export const handleCataloguePurchase = async (
     const artistTrackGroups = await prisma.trackGroup.findMany({
       where: {
         artistId: artistId,
-        paymentToUserId: null,
+        OR: [{ paymentToUserId: null }, { paymentToUserId: artist?.userId }],
         releaseDate: {
           lte: new Date(),
         },
