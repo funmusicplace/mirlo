@@ -10,7 +10,7 @@ import LoadingSpinner from "components/common/LoadingSpinner";
 import { css } from "@emotion/css";
 import useErrorHandler from "services/useErrorHandler";
 import { FaCheck } from "react-icons/fa";
-import { debounce } from "lodash";
+import { useGetArtistColors } from "components/Artist/ArtistButtons";
 
 const SavingInput: React.FC<{
   formKey: string;
@@ -39,6 +39,7 @@ const SavingInput: React.FC<{
   reload,
   onEnter,
 }) => {
+  const { colors } = useGetArtistColors();
   const { register, getValues } = useFormContext();
   const errorHandler = useErrorHandler();
 
@@ -93,10 +94,12 @@ const SavingInput: React.FC<{
         display: flex;
         width: 100%;
         align-items: center;
+        gap: 0.5rem;
       `}
     >
       {!rows && (
         <InputEl
+          colors={colors}
           {...register(formKey)}
           onInput={saveOnInput}
           type={type}
@@ -112,9 +115,14 @@ const SavingInput: React.FC<{
         />
       )}
       {rows && (
-        <TextArea {...register(formKey)} rows={rows} onInput={saveOnInput} />
+        <TextArea
+          {...register(formKey)}
+          rows={rows}
+          colors={colors}
+          onInput={saveOnInput}
+        />
       )}
-      {isSaving && <LoadingSpinner />}
+      {isSaving && <LoadingSpinner fill={colors?.foreground} />}
       {saveSuccess && <FaCheck />}
     </div>
   );

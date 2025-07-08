@@ -1,5 +1,8 @@
 import { css } from "@emotion/css";
-import { ArtistButton } from "components/Artist/ArtistButtons";
+import {
+  ArtistButton,
+  useGetArtistColors,
+} from "components/Artist/ArtistButtons";
 import { InputEl } from "components/common/Input";
 import React from "react";
 import { useFormContext } from "react-hook-form";
@@ -13,6 +16,7 @@ const SlugInput: React.FC<{
   currentArtistId?: number;
   currentName?: string;
 }> = ({ currentArtistId, isDisabled, type, currentName }) => {
+  const { colors } = useGetArtistColors();
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
   const {
     register,
@@ -57,6 +61,7 @@ const SlugInput: React.FC<{
   return (
     <>
       <InputEl
+        colors={colors}
         {...register("urlSlug", {
           validate: { unique: validation },
           disabled: isDisabled,

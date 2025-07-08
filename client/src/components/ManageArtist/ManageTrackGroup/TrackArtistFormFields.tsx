@@ -1,22 +1,25 @@
 import { css } from "@emotion/css";
 import AutoComplete from "components/common/AutoComplete";
-import Button from "components/common/Button";
 import FormCheckbox from "components/common/FormCheckbox";
 import { InputEl } from "components/common/Input";
 import Pill from "components/common/Pill";
 import React from "react";
-import { useFieldArray, useFormContext } from "react-hook-form";
+import { useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { FaTimes } from "react-icons/fa";
 import api from "services/api";
 import { hasId } from "./AlbumFormComponents/ManageTags";
-import { ArtistButton } from "components/Artist/ArtistButtons";
+import {
+  ArtistButton,
+  useGetArtistColors,
+} from "components/Artist/ArtistButtons";
 
 const TrackArtistFormFields: React.FC<{
   artistIndex: number;
   disabled?: boolean;
   onRemove: (index: number) => any;
 }> = ({ artistIndex, disabled, onRemove }) => {
+  const { colors } = useGetArtistColors();
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const { register, control, setValue, watch } = useFormContext();
 
@@ -79,6 +82,7 @@ const TrackArtistFormFields: React.FC<{
       <div>
         {!watchId && !watchName && (
           <AutoComplete
+            colors={colors}
             getOptions={getOptions}
             showBackground
             allowNew
@@ -109,6 +113,7 @@ const TrackArtistFormFields: React.FC<{
         <InputEl
           {...register(`trackArtists.${artistIndex}.role`)}
           placeholder="Role"
+          colors={colors}
           disabled={disabled}
         />
 

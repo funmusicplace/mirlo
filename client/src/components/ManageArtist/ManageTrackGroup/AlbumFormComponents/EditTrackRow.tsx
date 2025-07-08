@@ -16,14 +16,15 @@ import { useAuthContext } from "state/AuthContext";
 import ManageTrackLicense from "../ManageTrackLicense";
 import ReplaceTrackAudioInput from "./ReplaceTrackAudioInput";
 import TextArea from "components/common/TextArea";
-import { Link, useParams } from "react-router-dom";
-import { queryArtist } from "queries";
-import { useQuery } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
 import ShowRawID3Data from "./ShowRawID3Data";
 import styled from "@emotion/styled";
 import FormCheckbox from "components/common/FormCheckbox";
 import InfoModal from "components/common/InfoModal";
-import { ArtistButton } from "components/Artist/ArtistButtons";
+import {
+  ArtistButton,
+  useGetArtistColors,
+} from "components/Artist/ArtistButtons";
 import { TrackData } from "components/ManageArtist/utils";
 import { openOutsideLinkAfter } from "components/Merch/IncludesDigitalDownload";
 
@@ -41,9 +42,12 @@ export interface FormData {
   trackArtists: TrackData["trackArtists"];
 }
 
-const IndentedTR = styled("tr")`
-  border-left: 1rem solid white;
-
+const IndentedTR = styled("tr")<{ colors?: { foreground: string } }>`
+  border-left: 1rem solid ${(props) => props.colors?.foreground ?? "white"};
+  border-bottom: 1px solid ${(props) => props.colors?.foreground ?? "white"};
+  td {
+    padding: 1rem 0;
+  }
   td:first-child {
     padding-left: 3rem;
   }
@@ -54,19 +58,12 @@ const EditTrackRow: React.FC<{
   onCancelEditing: () => void;
   reload: () => void;
 }> = ({ track, onCancelEditing: cancelEditing, reload }) => {
+  const { colors } = useGetArtistColors();
   const [isSaving, setIsSaving] = React.useState(false);
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const { uploadJobs, setUploadJobs } = useJobStatusCheck({
     reload: cancelEditing,
   });
-
-  const { artistId } = useParams();
-
-  const { data: artist } = useQuery(
-    queryArtist({ artistSlug: artistId ?? "" })
-  );
-
-  const colors = artist?.properties?.colors;
 
   const methods = useForm<FormData>({
     defaultValues: {
@@ -190,6 +187,7 @@ const EditTrackRow: React.FC<{
           `}
         >
           <InputEl
+            colors={colors}
             {...register(`title`)}
             id={`${track.id}-title`}
             disabled={isSaving || isDisabled}
@@ -249,7 +247,7 @@ const EditTrackRow: React.FC<{
           />
         </td>
       </tr>
-      <IndentedTR>
+      <IndentedTR colors={colors}>
         <td colSpan={2}>
           <label htmlFor="listedArtists">
             {t("listedArtists", { keyPrefix: "manageTrackTable" })}
@@ -297,7 +295,7 @@ const EditTrackRow: React.FC<{
           </div>
         </td>
       </IndentedTR>
-      <IndentedTR>
+      <IndentedTR colors={colors}>
         <td colSpan={2}>
           <label htmlFor="allowIndividualSale">
             {t("allowIndividualSale")}
@@ -311,16 +309,16 @@ const EditTrackRow: React.FC<{
         </td>
       </IndentedTR>
       {allowIndividualSale && (
-        <IndentedTR>
+        <IndentedTR colors={colors}>
           <td colSpan={2}>
             <label htmlFor="minPrice">{t("minPrice")}</label>
           </td>
           <td colSpan={99}>
-            <InputEl id="minPrice" {...register("minPrice")} />
+            <InputEl colors={colors} id="minPrice" {...register("minPrice")} />
           </td>
         </IndentedTR>
       )}
-      <IndentedTR>
+      <IndentedTR colors={colors}>
         <td colSpan={2}>
           <label htmlFor={`${track.id}-allowMirloPromo`}>
             {t("allowMirloPromoLabel")}
@@ -350,24 +348,26 @@ const EditTrackRow: React.FC<{
           />
         </td>
       </IndentedTR>
-      <IndentedTR>
+      <IndentedTR colors={colors}>
         <td colSpan={2}>
           <label htmlFor="isrc">{t("isrcCode")}</label>
         </td>
         <td colSpan={99}>
           <InputEl
+            colors={colors}
             id="isrc"
             {...register(`isrc`)}
             disabled={isSaving || isDisabled}
           />
         </td>
       </IndentedTR>
-      <IndentedTR>
+      <IndentedTR colors={colors}>
         <td colSpan={2}>
           <label htmlFor="lyrics">{t("lyrics")}</label>
         </td>
         <td colSpan={99}>
           <TextArea
+            colors={colors}
             id="lyrics"
             {...register("lyrics")}
             className={css`
@@ -377,12 +377,13 @@ const EditTrackRow: React.FC<{
           />
         </td>
       </IndentedTR>
-      <IndentedTR>
+      <IndentedTR colors={colors}>
         <td colSpan={2}>
           <label htmlFor="description">{t("description")}</label>
         </td>
         <td colSpan={99}>
           <TextArea
+            colors={colors}
             id="description"
             {...register("description")}
             className={css`
@@ -392,7 +393,7 @@ const EditTrackRow: React.FC<{
           />
         </td>
       </IndentedTR>
-      <IndentedTR>
+      <IndentedTR colors={colors}>
         <td colSpan={2}>
           <div
             className={css`
@@ -416,13 +417,13 @@ const EditTrackRow: React.FC<{
           <ManageTrackLicense />
         </td>
       </IndentedTR>
-      <IndentedTR>
+      <IndentedTR colors={colors}>
         <td colSpan={2}>id3Tags</td>
         <td colSpan={99}>
           <ShowRawID3Data track={track} />
         </td>
       </IndentedTR>
-      <IndentedTR>
+      <IndentedTR colors={colors}>
         <td
           colSpan={99}
           className={css`

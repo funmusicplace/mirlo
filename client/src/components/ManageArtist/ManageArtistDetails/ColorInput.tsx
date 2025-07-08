@@ -1,4 +1,5 @@
 import { css } from "@emotion/css";
+import { useGetArtistColors } from "components/Artist/ArtistButtons";
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
 import { useUpdateArtistMutation } from "queries";
@@ -30,6 +31,7 @@ export const ColorInput: React.FC<{ name: string; title: string }> = ({
   const { user } = useAuthContext();
   const { mutateAsync: updateArtist } = useUpdateArtistMutation();
   const { artistId } = useParams();
+  const { colors: artistColors } = useGetArtistColors();
 
   const updateColorOnChange = React.useCallback(async () => {
     try {

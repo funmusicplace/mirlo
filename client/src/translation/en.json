@@ -274,6 +274,7 @@
   "artist": {
     "merch": "Merch",
     "about": "About",
+    "pastEvent": "Past event",
     "messageToArtist": "This will be shown publicly on the artist's page.",
     "leaveAComment": "Show the artist some love",
     "youveBoughtMerch": "You've bought <linkToMerch>{{title}}</linkToMerch>! The artist will ship it to the address you provided.",
@@ -441,7 +442,7 @@
     "addNewAlbum": "Add new release",
     "edit": "Edit",
     "editPage": "Manage artist page",
-    "customizeLook": "Manage artist details",
+    "customizeLook": "Customize artist page",
     "canLabelManageArtist": "Can label manage this artist?",
     "canLabelAddReleases": "Can label add releases to this artist?",
     "delete": "Delete",
