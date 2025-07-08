@@ -90,7 +90,6 @@ const PriceAndSuch: React.FC<{
                       align-items: center;
                       justify-content: center;
                       margin-bottom: 0.25rem;
-                      background-color: var(--mi-darken-x-background-color);
                     `}
                   >
                     {user?.currency && getCurrencySymbol(user?.currency)}

@@ -1,5 +1,8 @@
 import { css } from "@emotion/css";
-import { ArtistButton } from "components/Artist/ArtistButtons";
+import {
+  ArtistButton,
+  useGetArtistColors,
+} from "components/Artist/ArtistButtons";
 import AutoComplete from "components/common/AutoComplete";
 import Button from "components/common/Button";
 import FormComponent from "components/common/FormComponent";
@@ -46,7 +49,7 @@ const ArtistTag: React.FC<{
 
 const ManageTags: React.FC<{ tags?: string[] }> = ({ tags: existingTags }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
-
+  const { colors } = useGetArtistColors();
   const [tags, setTags] = React.useState<string[]>(existingTags ?? []);
   const { trackGroupId } = useParams();
   const { user } = useAuthContext();
@@ -131,6 +134,7 @@ const ManageTags: React.FC<{ tags?: string[] }> = ({ tags: existingTags }) => {
       >
         <AutoComplete
           getOptions={findTags}
+          colors={colors}
           onSelect={saveTags}
           placeholder={t("typeForTags")}
           allowNew

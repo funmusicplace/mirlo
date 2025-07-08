@@ -1,5 +1,8 @@
 import { css } from "@emotion/css";
-import { ArtistButton } from "components/Artist/ArtistButtons";
+import {
+  ArtistButton,
+  useGetArtistColors,
+} from "components/Artist/ArtistButtons";
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
 import React, { useState } from "react";
@@ -16,6 +19,7 @@ const SetPriceOfAllTracks: React.FC<BulkUpdateTracksProps> = ({
   reload,
   tracks,
 }) => {
+  const { colors } = useGetArtistColors();
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const snackbar = useSnackbar();
   const [minPrice, setMinPrice] = useState<number>();
@@ -63,6 +67,7 @@ const SetPriceOfAllTracks: React.FC<BulkUpdateTracksProps> = ({
 
         <InputEl
           id="minPriceOnTracks"
+          colors={colors}
           type="number"
           value={minPrice}
           className={css`

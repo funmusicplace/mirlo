@@ -54,7 +54,7 @@ const AlbumFormContent: React.FC<{
               gap: 1rem;
 
               > div {
-                flex-grow: 1;
+                width: 50%;
               }
             }
           `}

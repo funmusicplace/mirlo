@@ -89,6 +89,7 @@ type Result = {
 };
 
 const AutoComplete: React.FC<{
+  colors?: { background: string; foreground: string };
   getOptions: (val: string) => Promise<Result[]> | Result[] | undefined;
   resultsPrefix?: string;
   onSelect?: (
@@ -127,6 +128,7 @@ const AutoComplete: React.FC<{
   placeholder,
   allowNew,
   showBackground,
+  colors,
 }) => {
   const [searchValue, setSearchValue] = React.useState("");
   const { t } = useTranslation("translation", { keyPrefix: "headerSearch" });
@@ -201,6 +203,7 @@ const AutoComplete: React.FC<{
     >
       <InputEl
         name="search"
+        colors={colors}
         value={searchValue}
         placeholder={placeholder ?? ""}
         data-lpignore="true"

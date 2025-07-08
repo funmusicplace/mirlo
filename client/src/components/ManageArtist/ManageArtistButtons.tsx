@@ -13,7 +13,8 @@ const ManageArtistButtons: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
   const { pathname } = useLocation();
   const { artistId, trackGroupId } = useParams();
-  const isManagePage = pathname.includes("/manage/artists");
+  const isManagePage =
+    pathname.includes("/manage/artists") && !pathname.includes("/customize");
   const { data: artist, isLoading: isArtistLoading } = useQuery(
     queryArtist({ artistSlug: artistId ?? "" })
   );
