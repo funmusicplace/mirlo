@@ -29,6 +29,9 @@ interface FormSettings {
   backblazeRegion?: string;
 
   cloudflareTurnstileSecret?: string;
+
+  paypalClientId?: string;
+  paypalSecret?: string;
 }
 
 interface SettingsFromAPI {
@@ -46,6 +49,8 @@ interface SettingsFromAPI {
     backblazeEndpoint?: string;
     backblazeRegion?: string;
     cloudflareTurnstileSecret?: string;
+    paypalClientId?: string;
+    paypalSecret?: string;
   };
   terms: string;
   privacyPolicy: string;
@@ -83,6 +88,8 @@ const AdminSettings = () => {
         privacyPolicy: response.result.privacyPolicy,
         cookiePolicy: response.result.cookiePolicy,
         contentPolicy: response.result.contentPolicy,
+        paypalClientId: response.result.settings?.paypalClientId,
+        paypalSecret: response.result.settings?.paypalSecret,
       });
     };
     callback();
@@ -107,6 +114,8 @@ const AdminSettings = () => {
             backblazeEndpoint: data.backblazeEndpoint,
             backblazeRegion: data.backblazeRegion,
             cloudflareTurnstileSecret: data.cloudflareTurnstileSecret,
+            paypalClientId: data.paypalClientId,
+            paypalSecret: data.paypalSecret,
           },
           terms: data.terms,
           privacyPolicy: data.privacyPolicy,
@@ -144,6 +153,28 @@ const AdminSettings = () => {
               <InputEl
                 {...register("instanceArtistId")}
                 type="number"
+                className={css`
+                  text-align: right;
+                `}
+              />
+            </td>
+          </tr>
+          <tr>
+            <td>PayPal Client ID</td>
+            <td>
+              <InputEl
+                {...register("paypalClientId")}
+                className={css`
+                  text-align: right;
+                `}
+              />
+            </td>
+          </tr>
+          <tr>
+            <td>PayPal Secret</td>
+            <td>
+              <InputEl
+                {...register("paypalSecret")}
                 className={css`
                   text-align: right;
                 `}
