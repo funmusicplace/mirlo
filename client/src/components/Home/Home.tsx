@@ -10,7 +10,7 @@ export const SectionHeader = styled.div<{ userId?: number }>`
   padding-bottom: 0;
   line-height: 1rem;
   z-index: 5;
-  margin-top: 0.25rem;
+  margin-top: 2rem;
   margin-bottom: 0.25rem;
   width: 100%;
   ${(props) =>

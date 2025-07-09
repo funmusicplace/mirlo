@@ -75,14 +75,23 @@ export default function () {
 
       if (orderBy === "random") {
         const rawTrackGroups = await prisma.$queryRaw<Array<{ id: number }>>`
-          SELECT id FROM (
-            SELECT DISTINCT ON ("artistId") id
-            FROM "TrackGroup"
-            WHERE "releaseDate" <= NOW()
-              AND "releaseDate" >= NOW() - INTERVAL '3 months'
-              AND "published" = true
-            ORDER BY "artistId", "releaseDate" DESC
-          ) AS distinct_groups
+              SELECT id FROM (
+              SELECT DISTINCT ON ("artistId") id
+              FROM "TrackGroup"
+              WHERE "releaseDate" <= NOW()
+                AND "releaseDate" >= NOW() - INTERVAL '3 months'
+                AND "published" = true
+                and exists (
+                	select id from "Track" t	
+                	where t."trackGroupId" = "TrackGroup".id
+                	and t."deletedAt" is null
+                	and exists (
+                		select id from "TrackAudio" ta
+						        where ta."deletedAt" is null
+                		)
+                )
+              ORDER BY "artistId", "releaseDate" DESC
+            ) AS distinct_groups
           ORDER BY RANDOM()
           LIMIT ${Number(take)}
         `;

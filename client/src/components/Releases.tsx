@@ -8,22 +8,23 @@ import WidthContainer from "./common/WidthContainer";
 import { SectionHeader } from "./Home/Home";
 
 import usePagination from "utils/usePagination";
-import { useSearchParams } from "react-router-dom";
-import { queryTopSoldTrackGroups, queryTrackGroups } from "queries";
+import { useLocation, useSearchParams } from "react-router-dom";
+import { queryTrackGroups } from "queries";
 import { useQuery } from "@tanstack/react-query";
 import { queryTags } from "queries/tags";
 import TrackGroupPills from "./TrackGroup/TrackGroupPills";
 import { ButtonAnchor } from "./common/Button";
 import { FaRss } from "react-icons/fa";
 
-const pageSize = 40;
+const pageSize = 4;
 const futureReleasesPageSize = 6;
 
 const Releases: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
+  const location = useLocation();
+  const { pathname } = location;
   const [params] = useSearchParams();
   const { t } = useTranslation("translation", { keyPrefix: "releases" });
-  const { page, PaginationComponent } = usePagination({ pageSize });
-
+  const { page, PaginationComponent } = usePagination({ pageSize: limit });
   const tag = params.get("tag");
   const search = params.get("search");
 
@@ -31,12 +32,14 @@ const Releases: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
     queryTrackGroups({
       skip: limit * page,
       take: limit,
-      orderBy: "random",
+      orderBy: pathname?.includes("releases") ? undefined : "random",
       tag: tag || undefined,
       title: search ?? undefined,
-      isReleased: "released",
+      isReleased: pathname?.includes("releases") ? undefined : "released",
     })
   );
+
+  console.log("newReleases", newReleases);
 
   const { data: futureReleases } = useQuery(
     queryTrackGroups({
@@ -44,14 +47,6 @@ const Releases: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
       take: futureReleasesPageSize,
       tag: tag || undefined,
       title: search ?? undefined,
-    })
-  );
-
-  const { data: popularReleases } = useQuery(
-    queryTopSoldTrackGroups({
-      skip: futureReleasesPageSize * page,
-      take: futureReleasesPageSize,
-      datePurchased: "pastMonth",
     })
   );
 
@@ -95,7 +90,7 @@ const Releases: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
           </WidthContainer>
         </SectionHeader>
       )}
-      {(futureReleases?.results ?? []).length > 0 && (
+      {page === 0 && (futureReleases?.results ?? []).length > 0 && (
         <>
           <SectionHeader>
             <WidthContainer
@@ -228,57 +223,6 @@ const Releases: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
           )}
         </WidthContainer>
       </div>
-      {(popularReleases?.results ?? []).length > 0 && (
-        <>
-          <SectionHeader>
-            <WidthContainer
-              variant="big"
-              justify="space-between"
-              className={css`
-                flex-direction: row;
-                display: flex;
-              `}
-            >
-              <h1 className="h5 section-header__heading" id={headingId}>
-                {t("popularReleases")}
-              </h1>
-            </WidthContainer>
-          </SectionHeader>
-          <div
-            className={css`
-              padding-top: 0.25rem;
-            `}
-          >
-            <WidthContainer variant="big" justify="center">
-              <div
-                className={css`
-                  display: flex;
-                  width: 100%;
-                  flex-direction: row;
-                  flex-wrap: wrap;
-                  padding: var(--mi-side-paddings-xsmall);
-                `}
-              >
-                <TrackgroupGrid
-                  gridNumber="6"
-                  as="ul"
-                  aria-labelledby={headingId}
-                  role="list"
-                >
-                  {popularReleases?.results?.map((trackGroup) => (
-                    <ArtistTrackGroup
-                      key={trackGroup.id}
-                      trackGroup={trackGroup}
-                      as="li"
-                      size="small"
-                    />
-                  ))}
-                </TrackgroupGrid>
-              </div>
-            </WidthContainer>
-          </div>
-        </>
-      )}
     </div>
   );
 };

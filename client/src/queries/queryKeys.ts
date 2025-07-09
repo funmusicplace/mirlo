@@ -45,6 +45,12 @@ export const QUERY_KEY_POSTS = "posts";
  */
 export const QUERY_KEY_PURCHASES = "purchases";
 
+/**
+ * Sales aren't stored in the database by id, but a are a combination of merch,
+ * tracks, trackGroup, and tip purchases
+ */
+export const QUERY_KEY_SALES = "sales";
+
 export type QueryTag =
   | typeof QUERY_KEY_AUTH
   | typeof QUERY_KEY_ARTISTS

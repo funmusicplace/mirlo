@@ -1,6 +1,7 @@
 import React from "react";
 import { range } from "lodash";
 import styled from "@emotion/styled";
+import { css } from "@emotion/css";
 
 const Shine = styled("div")`
   animation: 0.75s shine linear infinite;
@@ -28,7 +29,11 @@ const LoadingBlocks: React.FC<{
   margin?: string;
 }> = ({ rows = 4, height = "10rem", margin = "2rem" }) => {
   return (
-    <>
+    <div
+      className={css`
+        width: 100%;
+      `}
+    >
       {range(rows).map((r) => (
         <Shine
           key={r}
@@ -40,7 +45,7 @@ const LoadingBlocks: React.FC<{
           }}
         />
       ))}
-    </>
+    </div>
   );
 };
 

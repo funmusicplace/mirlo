@@ -18,7 +18,7 @@ export default function () {
     } = req.query as {
       take: number | string;
       skip: number | string;
-      artistIds?: string[] | number[] | undefined;
+      artistIds?: string | string[] | number[] | undefined;
     };
 
     const user = req.user as User;
@@ -32,6 +32,9 @@ export default function () {
             },
           })
         ).map((a) => a.id);
+      } else if (typeof artistIds === "string") {
+        // If artistIds is a string, split it into an array
+        artistIds = artistIds.split(",");
       }
       const results = await findSales(artistIds.map((a) => Number(a)));
 

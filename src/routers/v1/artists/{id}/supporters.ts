@@ -94,6 +94,8 @@ export const findSales = async (artistId: number[]) => {
     })),
     ...trackPurchases.map((tp) => ({
       ...tp,
+      urlSlug: tp.track.urlSlug,
+
       artist: tp.track.trackGroup.artist,
       amount: tp.pricePaid,
       currency: tp.currencyPaid,
@@ -101,6 +103,7 @@ export const findSales = async (artistId: number[]) => {
     ...trackGroupPurchases.map((tgp) => ({
       ...tgp,
       artist: tgp.trackGroup.artist,
+      urlSlug: tgp.trackGroup.urlSlug,
       amount: tgp.pricePaid,
       currency: tgp.currencyPaid,
     })),
