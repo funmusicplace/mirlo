@@ -1,8 +1,10 @@
 import { formatDate } from "components/TrackGroup/ReleaseDate";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Sale } from "./Sales";
 import { moneyDisplay } from "components/common/Money";
+import { Link } from "react-router-dom";
+import { getMerchUrl, getReleaseUrl, getTrackUrl } from "utils/artist";
+import { Sale } from "queries";
 
 const SalesRow: React.FC<{
   sale: Sale;
@@ -20,12 +22,37 @@ const SalesRow: React.FC<{
       </td>
       <td>{formatDate({ date: sale.datePurchased, i18n })} </td>
       <td>
+        {sale.trackGroup
+          ? t("trackGroup")
+          : sale.merch
+            ? t("merch")
+            : sale.track
+              ? t("track")
+              : sale.artistSubscriptionTier
+                ? t("subscription")
+                : t("tip")}
+      </td>
+      <td>
         {sale.trackGroup ? (
-          <span>{sale.trackGroup.title}</span>
+          <span>
+            <Link to={getReleaseUrl(sale.artist, sale.trackGroup)}>
+              {sale.trackGroup.title}
+            </Link>
+          </span>
         ) : sale.merch ? (
-          <span>{sale.merch.title}</span>
+          <span>
+            <Link to={getMerchUrl(sale.artist, sale.merch)}>
+              {sale.merch.title}
+            </Link>
+          </span>
         ) : sale.track ? (
-          <span>{sale.track.title}</span>
+          <span>
+            <Link
+              to={getTrackUrl(sale.artist, sale.track.trackGroup, sale.track)}
+            >
+              {sale.track.title}
+            </Link>
+          </span>
         ) : sale.artistSubscriptionTier ? (
           <span>{sale.artistSubscriptionTier.name}</span>
         ) : (

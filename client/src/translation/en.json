@@ -194,6 +194,12 @@
     "amount": "Amount",
     "date": "Date",
     "item": "Item",
+    "type": "Type",
+    "merch": "Merch",
+    "trackGroup": "Release",
+    "track": "Track",
+    "subscription": "Subscription",
+    "selectArtist": "Select an artist",
     "tip": "Tip"
   },
   "fulfillment": {

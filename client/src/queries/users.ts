@@ -9,6 +9,7 @@ import {
   QUERY_KEY_ARTISTS,
   QUERY_KEY_AUTH,
   QUERY_KEY_PURCHASES,
+  QUERY_KEY_SALES,
   queryKeyIncludes,
   queryKeyMatches,
 } from "./queryKeys";
@@ -241,5 +242,43 @@ export function useDeleteArtistMutation() {
           queryKeyIncludes(query, QUERY_KEY_ARTISTS),
       });
     },
+  });
+}
+
+export type Sale = {
+  amount: number;
+  artist: Partial<Artist> & { id: number; urlSlug: string };
+  currency: string;
+  datePurchased: string;
+  trackGroup?: Partial<TrackGroup> & { id: number; urlSlug: string };
+  merch?: Partial<Merch> & { id: string; urlSlug: string };
+  track?: Partial<Track> & {
+    id: number;
+    urlSlug: string;
+    trackGroup: Partial<TrackGroup> & { id: number; urlSlug: string };
+  };
+  artistSubscriptionTier?: Partial<ArtistSubscriptionTier>;
+};
+
+const fetchUserSales: QueryFunction<
+  { results: Sale[]; total: number },
+  ["fetchUserSales", opts: { artistIds?: number[] }, ...any]
+> = ({ queryKey: [_, opts], signal }) => {
+  const { artistIds } = opts;
+  const params = new URLSearchParams();
+  if (artistIds) {
+    artistIds.forEach((id) => {
+      if (isFinite(id)) {
+        params.append("artistIds", String(id));
+      }
+    });
+  }
+  return api.get(`v1/manage/sales/?${params.toString()}`, { signal });
+};
+
+export function queryUserSales(opts: { artistIds?: number[] } = {}) {
+  return queryOptions({
+    queryKey: ["fetchUserSales", opts, QUERY_KEY_SALES],
+    queryFn: fetchUserSales,
   });
 }
