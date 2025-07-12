@@ -130,7 +130,7 @@ const EditTrackRow: React.FC<{
           packet
         );
 
-        if (formData.trackFile.length > 0) {
+        if (!!formData.trackFile && formData.trackFile.length > 0) {
           const jobInfo = await api.uploadFile(
             `manage/tracks/${trackId}/audio`,
             [formData.trackFile[0]]
