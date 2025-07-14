@@ -942,8 +942,10 @@
     "people": "The people doing it "
   },
   "mobile": {
-    "bestSelling": "Best Selling",
-    "topListened": "Most Listened To",
-    "searchByPopular": "Search By Popular Tags"
+    "searchScreen": {
+      "bestSelling": "Best Selling",
+      "topListened": "Most Listened To",
+      "searchByPopular": "Search By Popular Tags"
+    }
   }
 }
