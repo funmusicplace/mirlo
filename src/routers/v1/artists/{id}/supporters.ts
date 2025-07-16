@@ -3,7 +3,13 @@ import { Request, Response } from "express";
 import prisma from "@mirlo/prisma";
 import { findArtistIdForURLSlug } from "../../../../utils/artist";
 
-export const findSales = async (artistId: number[]) => {
+export const findSales = async (artistId: number[], sinceDate?: string) => {
+  if (sinceDate) {
+    const date = new Date(sinceDate);
+    if (isNaN(date.getTime())) {
+      throw new Error("Invalid date format");
+    }
+  }
   const supporters = await prisma.artistUserSubscriptionCharge.findMany({
     where: {
       artistUserSubscription: {
@@ -12,6 +18,7 @@ export const findSales = async (artistId: number[]) => {
           artistId: { in: artistId },
         },
       },
+      createdAt: sinceDate ? { gte: new Date(sinceDate) } : undefined,
     },
     select: {
       artistUserSubscription: {
@@ -30,6 +37,7 @@ export const findSales = async (artistId: number[]) => {
     where: {
       pricePaid: { gt: 0 },
       artistId: { in: artistId },
+      datePurchased: sinceDate ? { gte: new Date(sinceDate) } : undefined,
     },
     select: {
       artist: { include: { user: { select: { currency: true } } } },
@@ -44,6 +52,7 @@ export const findSales = async (artistId: number[]) => {
   const trackPurchases = await prisma.userTrackPurchase.findMany({
     where: {
       pricePaid: { gt: 0 },
+      datePurchased: sinceDate ? { gte: new Date(sinceDate) } : undefined,
       track: {
         trackGroup: {
           artistId: { in: artistId },
@@ -64,6 +73,7 @@ export const findSales = async (artistId: number[]) => {
   const trackGroupPurchases = await prisma.userTrackGroupPurchase.findMany({
     where: {
       pricePaid: { gt: 0 },
+      datePurchased: sinceDate ? { gte: new Date(sinceDate) } : undefined,
       trackGroup: {
         artistId: { in: artistId },
       },
@@ -95,7 +105,6 @@ export const findSales = async (artistId: number[]) => {
     ...trackPurchases.map((tp) => ({
       ...tp,
       urlSlug: tp.track.urlSlug,
-
       artist: tp.track.trackGroup.artist,
       amount: tp.pricePaid,
       currency: tp.currencyPaid,
@@ -121,7 +130,7 @@ export default function () {
 
   async function GET(req: Request, res: Response) {
     let { id }: { id?: string } = req.params;
-    let { take = 20, skip = 0 } = req.query;
+    let { take = 20, skip = 0, sinceDate } = req.query;
 
     try {
       const parsedId = await findArtistIdForURLSlug(id);
@@ -143,7 +152,7 @@ export default function () {
         });
       }
 
-      const results = await findSales([Number(parsedId)]);
+      const results = await findSales([Number(parsedId)], sinceDate as string);
 
       res.json({
         results: results.slice(Number(skip), Number(take)).map((r) => {
