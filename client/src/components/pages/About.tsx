@@ -18,14 +18,22 @@ const Person = styled.div`
   align-items: flex-start;
   margin-bottom: 2rem;
 
+  p {
+    margin-top: -0.25rem;
+  }
+`;
+
+const PersonPicture = styled.span`
+  display: inline-block;
+  width: 10rem;
+  height: 10rem;
+  overflow: clip;
+  border-radius: 100%;
+  margin-right: 2rem;
   img {
     max-width: 10rem;
     margin-right: 2rem;
     border-radius: var(--mi-border-radius);
-  }
-
-  p {
-    margin-top: -0.25rem;
   }
 `;
 
@@ -288,21 +296,12 @@ const About: React.FC = () => {
         </div>
         <h3>The member stewards</h3>
         <Person>
-          <span
-            className={css`
-              display: inline-block;
-              width: 10rem;
-              height: 10rem;
-              overflow: clip;
-              border-radius: 100%;
-              margin-right: 2rem;
-            `}
-          >
+          <PersonPicture>
             <img
               src="https://mirlo.space/static/images/owner-pictures/alex-photo.png"
               alt="alex photo"
             />
-          </span>
+          </PersonPicture>
 
           <p>
             Alex is a writer, organizer, and trombonist working at the
@@ -317,21 +316,12 @@ const About: React.FC = () => {
         </Person>
 
         <Person>
-          <span
-            className={css`
-              display: inline-block;
-              width: 10rem;
-              height: 10rem;
-              overflow: clip;
-              border-radius: 100%;
-              margin-right: 2rem;
-            `}
-          >
+          <PersonPicture>
             <img
               src="https://mirlo.space/static/images/owner-pictures/llk.webp"
               alt="LLK photo"
             />
-          </span>
+          </PersonPicture>
 
           <p>
             Louis-Louise Kay is a French musician and organizer, who has been
@@ -342,21 +332,31 @@ const About: React.FC = () => {
           </p>
         </Person>
         <Person>
-          <span
-            className={css`
-              display: inline-block;
-              width: 10rem;
-              height: 10rem;
-              overflow: clip;
-              border-radius: 100%;
-              margin-right: 2rem;
-            `}
-          >
+          <PersonPicture>
+            <img
+              src="https://mirlo.space/static/images/owner-pictures/roberta.gif"
+              alt="Roberta photo"
+            />
+          </PersonPicture>
+          <p>
+            Roberta is a musician, video maker and amateur puppeteer from the
+            Isle of Wight, UK, making “wildly maximalist, mildly-anarchic pop
+            music” and has appeared on The Guardian, The Independent and KEXP.
+          </p>
+          <p>
+            She has also previously worked as a designer and marketer,
+            occasional stage manager and been involved in an independent makers
+            group support network as a co-organiser and social media manager,
+            securing funding for events and creating an online community hub.
+          </p>
+        </Person>
+        <Person>
+          <PersonPicture>
             <img
               src="https://mirlo.space/static/images/owner-pictures/simon-photo.jpg"
-              alt="si photo"
+              alt="Simon photo"
             />
-          </span>
+          </PersonPicture>
 
           <p>
             Simon is a mutual aid, solidarity economy, and dual power organizer
@@ -368,6 +368,16 @@ const About: React.FC = () => {
             organizations. Simon is a legal owner of Mirlo.
           </p>
         </Person>
+        <h3>Previous member owners</h3>
+        <ul>
+          <li>
+            <strong>jodi</strong>, one of our original co-owners, who helped
+            guide the direction and culture of mirlo during its first year
+          </li>
+        </ul>
+
+        <h3>Everyone else</h3>
+
         <h3>Previous member owners</h3>
         <ul>
           <li>
