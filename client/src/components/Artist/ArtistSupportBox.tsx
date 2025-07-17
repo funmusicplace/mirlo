@@ -15,6 +15,10 @@ import ArtistVariableSupport, {
   SupportBoxButton,
 } from "./ArtistVariableSupport";
 import { useAuthContext } from "state/AuthContext";
+import { queryArtist } from "queries";
+import { useQuery } from "@tanstack/react-query";
+import { useParams } from "react-router-dom";
+import { useGetArtistColors } from "./ArtistButtons";
 
 const StyledSupportBox = styled(Box)`
   background-color: var(--mi-darken-background-color);
@@ -41,10 +45,13 @@ const ArtistSupportBox: React.FC<{
 }> = ({ subscriptionTier }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const { user, refreshLoggedInUser } = useAuthContext();
-  const {
-    state: { artist },
-    refresh,
-  } = useArtistContext();
+  const { artistId } = useParams();
+  const { data: artist, refetch: refresh } = useQuery(
+    queryArtist({ artistSlug: artistId })
+  );
+
+  const { colors } = useGetArtistColors();
+
   const [isCheckingForSubscription, setIsCheckingForSubscription] =
     React.useState(false);
 
@@ -207,6 +214,17 @@ const ArtistSupportBox: React.FC<{
             </div>
           </Box>
         )}
+      </div>
+      <div
+        className={css`
+          width: 100%;
+          background-color: ${colors?.background};
+          border-top: 1px solid ${colors?.foreground};
+          padding: 0.5rem 0.75rem;
+          text-align: center;
+        `}
+      >
+        {t("includesNewReleases")}
       </div>
     </StyledSupportBox>
   );

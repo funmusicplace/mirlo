@@ -211,6 +211,7 @@
     "trackingWebsite": "Tracking website URL",
     "trackingNumber": "Tracking number",
     "itemArtist": "Artist merch belongs",
+    "type": "Types",
     "fulfillmentStatus": "Fulfillment status",
     "ordersAndFulfillment": "Orders & Fulfillment",
     "fulfillmentDescription": "Here you can see all purchases made for merch items across all the artist pages you manage. Use it to update status and ship things to your customers.",
@@ -279,6 +280,8 @@
   },
   "artist": {
     "merch": "Merch",
+    "includesNewReleases": "Includes new releases",
+    "includesNewReleasesLong": "Supporting at this tier will automatically include new releases from this artist.",
     "about": "About",
     "pastEvent": "Past event",
     "messageToArtist": "This will be shown publicly on the artist's page.",

@@ -81,6 +81,7 @@ export default function () {
               WHERE "releaseDate" <= NOW()
                 AND "releaseDate" >= NOW() - INTERVAL '3 months'
                 AND "published" = true
+                AND "adminEnabled" = true
                 and exists (
                 	select id from "Track" t	
                 	where t."trackGroupId" = "TrackGroup".id

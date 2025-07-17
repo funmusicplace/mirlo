@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import Button from "components/common/Button";
 import { queryManagedMerch } from "queries";
 import { FaPen, FaPlus, FaTrash } from "react-icons/fa";
 import { useParams } from "react-router-dom";
@@ -151,7 +150,7 @@ const MerchOptions: React.FC<{}> = () => {
 
   const methods = useForm<OptionTypesForm>({
     defaultValues: {
-      optionTypes: merch?.optionTypes.map((ot) => ({
+      optionTypes: merch?.optionTypes?.map((ot) => ({
         ...ot,
         options: ot.options?.map((o) => ({
           ...o,

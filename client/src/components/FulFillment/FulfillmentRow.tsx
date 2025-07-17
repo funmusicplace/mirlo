@@ -40,7 +40,18 @@ const FulfillmentRow: React.FC<{ purchase: MerchPurchase; index: number }> = ({
         <td>{purchase.merch.title} </td>
         <td>{purchase.user.name}</td>
         <td>{purchase.user.email}</td>
+
         <td>{purchase.quantity}</td>
+        <td>
+          {purchase.merch.optionTypes?.map((option) => (
+            <span key={option.id}>
+              {option.optionName}:{" "}
+              {option.options
+                .map((opt) => <span key={opt.id}>{opt.name}</span>)
+                .join("; ")}
+            </span>
+          ))}
+        </td>
         <td>
           <Button>{t(statusMap[purchase.fulfillmentStatus])}</Button>
         </td>

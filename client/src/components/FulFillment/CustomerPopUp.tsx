@@ -87,6 +87,19 @@ const CustomerPopUp: React.FC<{ purchase: MerchPurchase }> = ({ purchase }) => {
           <label>{t("quantity")}</label> <span>{purchase.quantity}</span>
         </Section>
         <Section>
+          <label>{t("type")}</label>{" "}
+          {purchase.merch.optionTypes?.map((option) => (
+            <ul key={option.id}>
+              <li>
+                {option.optionName}:{" "}
+                {option.options
+                  .map((opt) => <span key={opt.id}>{opt.name}</span>)
+                  .join("; ")}
+              </li>
+            </ul>
+          ))}
+        </Section>
+        <Section>
           <label>{t("orderDate")}</label>
           {formatDate({
             date: purchase.createdAt,
