@@ -374,7 +374,7 @@ interface Merch {
     sizes?: { [key: number]: string };
   }[];
   shippingDestinations: ShippingDestination[];
-  optionTypes: MerchOptionType[];
+  optionTypes?: MerchOptionType[];
 }
 
 interface Label {
