@@ -97,10 +97,6 @@ export const HeaderWrapper = styled.div<{ colors?: ArtistColors }>`
   justify-content: space-around;
   border-bottom: solid 1px
     ${(props) => props.colors?.primary ?? "var(--mi-light-foreground-color)"};
-
-  @media screen and (max-width: ${bp.medium}px) {
-    background: var(--mi-normal-background-color);
-  }
 `;
 
 const ArtistActions = styled.div`
