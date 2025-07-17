@@ -1,16 +1,20 @@
 import { css } from "@emotion/css";
 import styled from "@emotion/styled";
+import { useQuery } from "@tanstack/react-query";
 import Button from "components/common/Button";
 import { InputEl } from "components/common/Input";
 import Modal from "components/common/Modal";
 import { isEmpty } from "lodash";
+import { queryArtist } from "queries";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { useParams } from "react-router-dom";
 import api from "services/api";
 import { useArtistContext } from "state/ArtistContext";
 import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
+import { useGetArtistColors } from "./ArtistButtons";
 
 export const SupportBoxButton = styled(Button)`
   white-space: normal !important;
@@ -33,7 +37,9 @@ const ArtistVariableSupport: React.FC<{
   const [isCheckingForSubscription, setIsCheckingForSubscription] =
     React.useState(false);
   const snackbar = useSnackbar();
-  const { refresh } = useArtistContext();
+  const { artistId } = useParams();
+  const { refetch: refresh } = useQuery(queryArtist({ artistSlug: artistId }));
+  const { colors } = useGetArtistColors();
 
   const subscribeToTier = async (tier: ArtistSubscriptionTier) => {
     try {
@@ -106,6 +112,15 @@ const ArtistVariableSupport: React.FC<{
                 {t("mustBeAtLeast", { minAmount: tier.minAmount / 100 })}
               </small>
             )}
+          </div>
+
+          <div
+            className={css`
+              width: 100%;
+              padding: 0.5rem 0m;
+            `}
+          >
+            {t("includesNewReleasesLong")}
           </div>
 
           <SupportBoxButton
