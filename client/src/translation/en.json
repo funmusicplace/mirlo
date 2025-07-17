@@ -944,11 +944,9 @@
     "whatWeBuilding": "What we're building",
     "people": "The people doing it "
   },
-  "mobileApp": {
-    "searchScreen": {
-      "bestSelling": "Best Selling",
-      "topListened": "Most Listened To",
-      "searchByPopular": "Search By Popular Tags"
-    }
+  "mobileApp.searchScreen": {
+    "bestSelling": "Best Selling",
+    "topListened": "Most Listened To",
+    "searchByPopular": "Search By Popular Tags"
   }
 }
