@@ -31,8 +31,9 @@ const MerchButtonPopUp: React.FC<{ merch: Merch; artist: Artist }> = ({
   }
 
   const hasPricedOptions =
-    merch.optionTypes.find((ot) => ot.options.find((o) => o.additionalPrice)) ||
-    merch.shippingDestinations.find((sd) => sd.costUnit);
+    merch.optionTypes?.find((ot) =>
+      ot.options.find((o) => o.additionalPrice)
+    ) || merch.shippingDestinations.find((sd) => sd.costUnit);
 
   const amount = moneyDisplay({
     amount: merch.minPrice / 100,

@@ -144,7 +144,7 @@ const BuyMerchItem: React.FC<{
     }
   });
 
-  merch.optionTypes.forEach((ot) => {
+  merch.optionTypes?.forEach((ot) => {
     ot.options.forEach((o) => {
       if (merchOptionIds.includes(o.id)) {
         price += (o.additionalPrice * Number(quantity)) / 100;

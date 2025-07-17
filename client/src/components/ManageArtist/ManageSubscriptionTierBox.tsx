@@ -110,24 +110,22 @@ const ManageSubscriptionTierBox: React.FC<{
       </SpaceBetweenDiv>
 
       <MarkdownContent content={tier.description} />
-      {manageTier && (
-        <Modal
-          open={!!manageTier}
-          title={t("editTier")}
-          onClose={() => setManageTier(undefined)}
-          size="small"
-        >
-          {/* There is some overly complex state management going on here with the reloads being passed around */}
-          <SubscriptionForm
-            existing={tier}
-            reload={() => {
-              reload();
-              setManageTier(undefined);
-            }}
-            artist={artist}
-          />
-        </Modal>
-      )}
+      <Modal
+        open={!!manageTier}
+        title={t("editTier")}
+        onClose={() => setManageTier(undefined)}
+        size="small"
+      >
+        {/* There is some overly complex state management going on here with the reloads being passed around */}
+        <SubscriptionForm
+          existing={tier}
+          reload={() => {
+            reload();
+            setManageTier(undefined);
+          }}
+          artist={artist}
+        />
+      </Modal>
     </Box>
   );
 };

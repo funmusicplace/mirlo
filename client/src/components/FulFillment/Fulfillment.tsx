@@ -64,6 +64,7 @@ export const Fulfillment: React.FC = () => {
                 <th>{t("customer")}</th>
                 <th>{t("email")}</th>
                 <th>{t("quantity")}</th>
+                <th>{t("type")}</th>
                 <th>{t("fulfillmentStatus")}</th>
                 <th>{t("orderDate ")}</th>
                 <th>{t("lastUpdated")}</th>
