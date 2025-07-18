@@ -217,7 +217,7 @@ const ArtistFormLinks: React.FC<ArtistFormLinksProps> = ({
                     `}
                     htmlFor={`linkIcon${index}`}
                   >
-                    Link icon
+                    {t("linkIcon")}
                   </label>
                   <div id={`linkIcon${index}`}>
                     <SelectEl {...register(`linkArray.${index}.linkType`)}>
@@ -245,7 +245,7 @@ const ArtistFormLinks: React.FC<ArtistFormLinksProps> = ({
                     `}
                     htmlFor={`linkLabel${index}`}
                   >
-                    Link text
+                    {t("linkLabel")}
                   </label>
                   <InputEl
                     className={css`
@@ -264,7 +264,7 @@ const ArtistFormLinks: React.FC<ArtistFormLinksProps> = ({
                     `}
                     htmlFor={`linkUrl${index}`}
                   >
-                    URL
+                    {t("url")}
                   </label>
                   <InputEl
                     className={css`
