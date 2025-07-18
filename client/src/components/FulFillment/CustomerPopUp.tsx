@@ -88,13 +88,10 @@ const CustomerPopUp: React.FC<{ purchase: MerchPurchase }> = ({ purchase }) => {
         </Section>
         <Section>
           <label>{t("type")}</label>{" "}
-          {purchase.merch.optionTypes?.map((option) => (
+          {purchase.options?.map((option) => (
             <ul key={option.id}>
               <li>
-                {option.optionName}:{" "}
-                {option.options
-                  .map((opt) => <span key={opt.id}>{opt.name}</span>)
-                  .join("; ")}
+                {option.merchOptionType?.optionName}: {option.name}
               </li>
             </ul>
           ))}

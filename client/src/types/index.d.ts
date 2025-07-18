@@ -347,6 +347,8 @@ interface MerchOption {
   sku: string;
   id: string;
   additionalPrice: number;
+  merchOptionType?: MerchOptionType;
+  merchOptionTypeId?: string;
 }
 
 interface MerchOptionType {
@@ -396,6 +398,7 @@ interface MerchPurchase {
   amountPaid: number;
   trackingNumber?: string;
   trackingWebsite?: string;
+  options?: MerchOption[];
   fulfillmentStatus: "NO_PROGRESS" | "STARTED" | "SHIPPED" | "COMPLETED";
   shippingAddress: {
     line1: string;

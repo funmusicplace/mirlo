@@ -43,12 +43,9 @@ const FulfillmentRow: React.FC<{ purchase: MerchPurchase; index: number }> = ({
 
         <td>{purchase.quantity}</td>
         <td>
-          {purchase.merch.optionTypes?.map((option) => (
+          {purchase.options?.map((option) => (
             <span key={option.id}>
-              {option.optionName}:{" "}
-              {option.options
-                .map((opt) => <span key={opt.id}>{opt.name}</span>)
-                .join("; ")}
+              {option.merchOptionType?.optionName}: {option.name}
             </span>
           ))}
         </td>
