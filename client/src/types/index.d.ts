@@ -264,6 +264,7 @@ interface ArtistSubscriptionTier {
   isDefaultTier: boolean;
   platformPercent: number;
   allowVariable?: boolean;
+  autoPurchaseAlbums?: boolean;
 }
 
 interface ArtistUserSubscription {

@@ -215,17 +215,19 @@ const ArtistSupportBox: React.FC<{
           </Box>
         )}
       </div>
-      <div
-        className={css`
-          width: 100%;
-          background-color: ${colors?.background};
-          border-top: 1px solid ${colors?.foreground};
-          padding: 0.5rem 0.75rem;
-          text-align: center;
-        `}
-      >
-        {t("includesNewReleases")}
-      </div>
+      {subscriptionTier.autoPurchaseAlbums && (
+        <div
+          className={css`
+            width: 100%;
+            background-color: ${colors?.background};
+            border-top: 1px solid ${colors?.foreground};
+            padding: 0.5rem 0.75rem;
+            text-align: center;
+          `}
+        >
+          {t("includesNewReleases")}
+        </div>
+      )}
     </StyledSupportBox>
   );
 };
