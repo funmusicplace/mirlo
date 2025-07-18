@@ -6,6 +6,7 @@ import api from "services/api";
 import useErrorHandler from "services/useErrorHandler";
 import FormComponent from "./FormComponent";
 import { useTranslation } from "react-i18next";
+import { useSnackbar } from "state/SnackbarContext";
 
 interface FormData {
   short: string;
@@ -16,12 +17,14 @@ interface FormData {
 const LicenseForm: React.FC<{ callback: () => void }> = ({ callback }) => {
   const methods = useForm<FormData>();
   const errorHandler = useErrorHandler();
+  const snackbar = useSnackbar();
   const { t } = useTranslation("translation", { keyPrefix: "manageLicense" });
 
   const onSubmit = React.useCallback(async (data: FormData) => {
     try {
       await api.post(`licenses`, data);
       await callback();
+      snackbar(t("licenseAdded"));
     } catch (e) {
       errorHandler(e);
     }

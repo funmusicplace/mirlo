@@ -508,7 +508,8 @@
     "egLong": "eg. No Rights Reserved",
     "urlForLabel": "Where can you read more about this license?",
     "egLink": "eg. https://creativecommons.org/public-domain/cc0/",
-    "add": "Add"
+    "add": "Add",
+    "licenseAdded": "License added"
   },
   "manageMerch": {
     "saveDestinations": "Save destinations",
