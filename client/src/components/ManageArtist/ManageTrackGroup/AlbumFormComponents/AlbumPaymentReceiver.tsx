@@ -9,7 +9,7 @@ import { Trans, useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 import api from "services/api";
 import { getArtistManageUrl } from "utils/artist";
-import useArtistQuery from "utils/useArtistQuery";
+import useManagedArtistQuery from "utils/useManagedArtistQuery";
 import { hasId } from "./ManageTags";
 import { queryManagedTrackGroup, queryTrackGroup } from "queries";
 import { useQuery } from "@tanstack/react-query";
@@ -21,7 +21,7 @@ const AlbumPaymentReceiver = () => {
   const { data: trackGroup, refetch } = useQuery(
     queryManagedTrackGroup(Number(trackGroupId) || 0)
   );
-  const { data: artist } = useArtistQuery();
+  const { data: artist } = useManagedArtistQuery();
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
 
   const searchUsers = React.useCallback(async (search: string) => {

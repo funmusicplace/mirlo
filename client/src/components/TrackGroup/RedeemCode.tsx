@@ -24,6 +24,9 @@ import FormComponent from "components/common/FormComponent";
 import api from "services/api";
 import { getArtistUrl, getReleaseUrl } from "utils/artist";
 import { useAuthContext } from "state/AuthContext";
+import { useQuery } from "@tanstack/react-query";
+import useArtistQuery from "utils/useArtistQuery";
+import { queryTrackGroup } from "queries";
 
 function RedeemCode() {
   const { t } = useTranslation("translation", {
@@ -33,20 +36,17 @@ function RedeemCode() {
   const { user } = useAuthContext();
   const navigate = useNavigate();
   const [params] = useSearchParams();
+  console.log("params", params);
   const [code, setCode] = React.useState(params.get("code") ?? "");
   const [email, setEmail] = React.useState("");
-
-  const {
-    state: { artist, isLoading: isLoadingArtist },
-  } = useArtistContext();
   const { artistId, trackGroupId } = useParams();
+  const { data: artist, isPending: isLoadingArtist } = useArtistQuery();
 
-  const { object: trackGroup, isLoadingObject: isLoadingTrackGroup } =
-    usePublicObjectById<TrackGroup>(
-      "trackGroups",
-      trackGroupId,
-      `?artistId=${artistId}`
-    );
+  const { data: trackGroup, isLoading: isLoadingTrackGroup } = useQuery(
+    queryTrackGroup({ albumSlug: trackGroupId, artistId: artistId })
+  );
+
+  console.log("artist", artist, isLoadingArtist);
 
   const tId = trackGroup?.id;
 
