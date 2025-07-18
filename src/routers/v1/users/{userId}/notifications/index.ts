@@ -50,6 +50,9 @@ export default function () {
 
       res.json({
         results: notifications,
+        total: await prisma.notification.count({
+          where: { userId: Number(userId) },
+        }),
       });
     } else {
       throw new AppError({

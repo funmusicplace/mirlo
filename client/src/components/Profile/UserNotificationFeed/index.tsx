@@ -10,52 +10,51 @@ import NewArtistPost from "./NewArtistPost";
 import NewArtistAlbum from "./NewArtistAlbum";
 import UserFollowedYou from "./UserFollowedYou";
 import { useAuthContext } from "state/AuthContext";
+import { useQuery } from "@tanstack/react-query";
+import { queryNotifications } from "queries/notifications";
+import LoadingBlocks from "components/Artist/LoadingBlocks";
+import usePagination from "utils/usePagination";
 
 const LI = styled.li<{ isRead: boolean }>`
   background-color: ${(props) =>
     props.isRead
       ? `var(--mi-background-color)`
-      : `var(--mi-lighten-x-background-color)`};
+      : `var(--mi-darken-background-color)`};
   transition: background 0.5s;
-  padding: 0.5rem 1rem;
+  padding: 0.75rem 1rem;
   display: flex;
   flex-direction: column;
   margin-bottom: 1rem;
 `;
+const pageSize = 30;
 
 const UserNotificationFeed = () => {
   const { t } = useTranslation("translation", { keyPrefix: "notifications" });
-  const [notifications, setNotifications] = React.useState<Notification[]>([]);
   const hoverRef = React.useRef<NodeJS.Timeout>();
   const { user } = useAuthContext();
-  const userId = user?.id;
-
-  const fetchNotifications = React.useCallback(
-    async (id: number | undefined) => {
-      if (id) {
-        const response = await api.getMany<Notification>(
-          `users/${id}/notifications`
-        );
-        setNotifications(response.results);
-      }
-    },
-    []
+  const { page, PaginationComponent } = usePagination({ pageSize });
+  const {
+    data: notifications,
+    refetch,
+    isPending,
+  } = useQuery(
+    queryNotifications(user?.id, { skip: pageSize * page, take: pageSize })
   );
+
+  const userId = user?.id;
 
   const markNotificationAsRead = React.useCallback(
     (id: string) => {
       const timeout = setTimeout(async () => {
         await api.put(`users/${userId}/notifications/${id}`, {});
-        fetchNotifications(userId);
-      }, 2000);
+        refetch();
+      }, 1000);
       hoverRef.current = timeout;
     },
-    [fetchNotifications, userId]
+    [userId]
   );
 
-  React.useEffect(() => {
-    fetchNotifications(userId);
-  }, [fetchNotifications, userId]);
+  console.log("notifications", notifications);
 
   return (
     <WidthWrapper
@@ -65,12 +64,13 @@ const UserNotificationFeed = () => {
       `}
     >
       <h2>{t("notifications")}</h2>
+      {isPending && <LoadingBlocks height="4rem" rows={5} />}
       <ul
         className={css`
           list-style: none;
         `}
       >
-        {notifications.map((notification) => (
+        {notifications?.results.map((notification) => (
           <LI
             key={notification.id}
             onMouseEnter={() => markNotificationAsRead(notification.id)}
@@ -99,6 +99,10 @@ const UserNotificationFeed = () => {
           </LI>
         ))}
       </ul>
+      <PaginationComponent
+        amount={notifications?.results.length}
+        total={notifications?.total}
+      />
     </WidthWrapper>
   );
 };

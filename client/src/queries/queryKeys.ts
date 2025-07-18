@@ -51,6 +51,12 @@ export const QUERY_KEY_PURCHASES = "purchases";
  */
 export const QUERY_KEY_SALES = "sales";
 
+/**
+ * Categorizes any query that should be invalidated when any notification is changed,
+ * regardless of the notificationId.
+ */
+export const QUERY_KEY_NOTIFICATIONS = "notifications";
+
 export type QueryTag =
   | typeof QUERY_KEY_AUTH
   | typeof QUERY_KEY_ARTISTS
