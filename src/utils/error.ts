@@ -53,14 +53,16 @@ const errorHandler = (
   next: NextFunction
 ) => {
   if (err instanceof AppError) {
-    console.error(
-      "Found instance of AppError",
-      req.path,
-      req.method,
-      err.httpCode,
-      err.name,
-      err.description
-    );
+    if (err.httpCode >= 500) {
+      console.error(
+        "Found instance of AppError",
+        req.path,
+        req.method,
+        err.httpCode,
+        err.name,
+        err.description
+      );
+    }
     return res.status(err.httpCode).json({
       error: err.message,
     });
