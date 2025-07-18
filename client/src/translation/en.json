@@ -320,7 +320,9 @@
     "monthly": "Monthly",
     "yearly": "Yearly",
     "updatedLinks": "Updated links",
-    "linkInHeader": "Show this link in your artist header, or just on the links page?",
+    "linkInHeader": "Include this link in your artist header",
+    "linkIcon": "Link icon",
+    "url": "URL",
     "enterEmail": "Enter your email:",
     "tipThisArtist": "Tip this artist",
     "manageArtistSubscription": "Manage artist subscription",
@@ -506,7 +508,8 @@
     "egLong": "eg. No Rights Reserved",
     "urlForLabel": "Where can you read more about this license?",
     "egLink": "eg. https://creativecommons.org/public-domain/cc0/",
-    "add": "Add"
+    "add": "Add",
+    "licenseAdded": "License added"
   },
   "manageMerch": {
     "saveDestinations": "Save destinations",

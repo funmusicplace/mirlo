@@ -1,6 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
 import { userAuthenticated } from "../../../auth/passport";
+import { AppError, HttpCode } from "../../../utils/error";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 
 export default function () {
   const operations = {
@@ -54,6 +56,14 @@ export default function () {
       });
       res.json({ result });
     } catch (e) {
+      if (e instanceof PrismaClientKnownRequestError && e.code === "P2002") {
+        return next(
+          new AppError({
+            httpCode: HttpCode.BAD_REQUEST,
+            description: `License with short "${short}" already exists.`,
+          })
+        );
+      }
       next(e);
     }
   }

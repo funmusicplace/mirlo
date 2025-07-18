@@ -21,9 +21,9 @@ import { corsCheck } from "./auth/cors";
 import errorHandler from "./utils/error";
 import { sendMailQueue } from "./queues/send-mail-queue";
 import path from "node:path";
-import activityPub from "./activityPub";
 import parseIndex from "./parseIndex";
 import qs from "qs";
+import wellKnown from "./wellKnown";
 
 dotenv.config();
 
@@ -256,7 +256,7 @@ if (isDev) {
   app.use("/admin/queues", serverAdapter.getRouter());
 }
 
-app.use(activityPub);
+app.use(wellKnown);
 
 // This has to be the last thing used so that other things don't get over-written
 app.use("/health", async (req, res) => {

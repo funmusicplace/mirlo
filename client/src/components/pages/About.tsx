@@ -830,13 +830,28 @@ const About: React.FC = () => {
           />
 
           <CollapsibleLI
-            title="What file formats do you support?"
+            title="What file formats do you support? What's the audio quality?"
             id="file-formats-supported"
             answer={
               <>
-                For upload we support lossless file formats (flac, wav). We
-                convert files across formats to be available to purchasers, as
-                well as converting them to HLS and a couple of mp3 bitrates.
+                <p>
+                  For upload we support lossless file formats (flac, wav). Upon
+                  request we convert files across formats to be available to
+                  purchasers, as well as converting them to HLS and a couple of
+                  mp3 bitrates. We store the original file you upload without
+                  changing it.
+                </p>
+                <p>
+                  When someone <strong>streams</strong> an album on our site,
+                  they are listening to a 320k stream, using the libmp3lame
+                  codec. For streaming, fmmpeg mixes channels down to 2.
+                </p>
+                <p>
+                  When someone <strong>downloads</strong> a digital album, they
+                  can choose what format to download. Downloading WAV and FLAC
+                  files will be lossless, and will preserver multichannel audio.
+                  MP3 and OPUS files will not support multichannel audio.
+                </p>
               </>
             }
           />

@@ -1,5 +1,4 @@
 import React from "react";
-import { useArtistContext } from "state/ArtistContext";
 import { useTranslation } from "react-i18next";
 import api from "services/api";
 import { css } from "@emotion/css";
@@ -8,6 +7,7 @@ import GenerateAlbumDownloadCodes from "./GenerateAlbumDownloadCodes";
 import { FaFileCsv } from "react-icons/fa";
 import Button from "components/common/Button";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
+import useManagedArtistQuery from "utils/useManagedArtistQuery";
 
 type AlbumCode = {
   group: string;
@@ -22,9 +22,7 @@ const ShowAlbumCodes: React.FC<{}> = () => {
   });
   const [albumCodes, setAlbumCodes] = React.useState<AlbumCode[]>([]);
   const [isDownloadingCodes, setIsdDownloadingCodes] = React.useState(false);
-  const {
-    state: { artist },
-  } = useArtistContext();
+  const { data: artist } = useManagedArtistQuery();
   const userId = artist?.userId;
   const artistId = artist?.id;
   const artistSlug = artist?.urlSlug ?? artist?.id;
@@ -45,9 +43,14 @@ const ShowAlbumCodes: React.FC<{}> = () => {
       setIsdDownloadingCodes(true);
       try {
         if (userId && artistId) {
+          const searchParams = new URLSearchParams();
+          if (group) {
+            searchParams.append("group", group);
+          }
+          searchParams.append("format", "csv");
           await api.getFile(
             `${group ? group : "all"}-codes-for-${artistSlug}`,
-            `manage/artists/${artistId}/codes?format=csv&group=${group}`,
+            `manage/artists/${artistId}/codes?${searchParams.toString()}`,
             "text/csv"
           );
         }

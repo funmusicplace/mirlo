@@ -21,6 +21,11 @@ const ManageTrackLicense = () => {
 
   const { data: licenses, refetch } = useQuery(queryLicenses());
 
+  const callback = React.useCallback(() => {
+    refetch();
+    setIsModalOpen(false);
+  }, [refetch]);
+
   return (
     <>
       <Modal
@@ -28,7 +33,7 @@ const ManageTrackLicense = () => {
         onClose={() => setIsModalOpen(false)}
         title={t("addALicense")}
       >
-        <LicenseForm callback={refetch} />
+        <LicenseForm callback={callback} />
       </Modal>
       <FormComponent>
         <SelectEl {...methods.register("licenseId")}>

@@ -20,7 +20,7 @@ import DeleteArtist from "../DeleteArtist";
 import { Toggle } from "components/common/Toggle";
 import Box from "components/common/Box";
 import LabelConfirmation from "./LabelConfirmation";
-import useArtistQuery from "utils/useArtistQuery";
+import useManagedArtistQuery from "utils/useManagedArtistQuery";
 import FeatureFlag from "components/common/FeatureFlag";
 import Artist from "components/Artist/Artist";
 import PaymentSlider from "../ManageTrackGroup/AlbumFormComponents/PaymentSlider";
@@ -96,7 +96,7 @@ export const CustomizeLook: React.FC = () => {
   const snackbar = useSnackbar();
   const { user } = useAuthContext();
   const userId = user?.id;
-  const { data: artist } = useArtistQuery();
+  const { data: artist } = useManagedArtistQuery();
 
   const methods = useForm<FormData>({
     defaultValues: generateDefaults(artist),

@@ -7,7 +7,7 @@ import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
-import useArtistQuery from "utils/useArtistQuery";
+import useManagedArtistQuery from "utils/useManagedArtistQuery";
 
 const SetEntireCataloguePrice: React.FC = () => {
   const { t } = useTranslation("translation", {
@@ -15,7 +15,7 @@ const SetEntireCataloguePrice: React.FC = () => {
   });
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [price, setPrice] = useState("");
-  const { data: artist } = useArtistQuery();
+  const { data: artist } = useManagedArtistQuery();
   const snackbar = useSnackbar();
 
   const showModal = () => {
