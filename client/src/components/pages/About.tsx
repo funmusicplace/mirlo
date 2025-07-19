@@ -338,17 +338,20 @@ const About: React.FC = () => {
               alt="Roberta photo"
             />
           </PersonPicture>
-          <p>
-            Roberta is a musician, video maker and amateur puppeteer from the
-            Isle of Wight, UK, making “wildly maximalist, mildly-anarchic pop
-            music” and has appeared on The Guardian, The Independent and KEXP.
-          </p>
-          <p>
-            She has also previously worked as a designer and marketer,
-            occasional stage manager and been involved in an independent makers
-            group support network as a co-organiser and social media manager,
-            securing funding for events and creating an online community hub.
-          </p>
+          <div>
+            <p>
+              Roberta is a musician, video maker and amateur puppeteer from the
+              Isle of Wight, UK, making “wildly maximalist, mildly-anarchic pop
+              music” and has appeared on The Guardian, The Independent and KEXP.
+            </p>
+            <p>
+              She has also previously worked as a designer and marketer,
+              occasional stage manager and been involved in an independent
+              makers group support network as a co-organiser and social media
+              manager, securing funding for events and creating an online
+              community hub.
+            </p>
+          </div>
         </Person>
         <Person>
           <PersonPicture>

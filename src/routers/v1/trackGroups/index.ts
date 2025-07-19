@@ -6,6 +6,7 @@ import processor, {
   whereForPublishedTrackGroups,
 } from "../../../utils/trackGroup";
 import { turnItemsIntoRSS } from "../../../utils/rss";
+import { set } from "lodash";
 
 export default function () {
   const operations = {
@@ -21,6 +22,7 @@ export default function () {
       orderBy,
       tag,
       artistId,
+      license,
       title,
       isReleased,
     } = req.query;
@@ -32,28 +34,66 @@ export default function () {
       let itemCount = undefined;
 
       if (tag && typeof tag === "string") {
-        where.tags = {
+        set(where, "tags", {
           some: {
             tag: {
               tag: tag,
             },
           },
-        };
+        });
       }
 
       if (isReleased === "released") {
-        where.releaseDate = {
+        set(where, "releaseDate", {
           lte: new Date(),
-        };
+        });
       } else if (isReleased === "not-released") {
-        where.releaseDate = {
+        set(where, "releaseDate", {
           gt: new Date(),
-        };
+        });
       }
 
       if (artistId) {
         where.artistId = Number(artistId);
       }
+
+      if (license && license !== "" && license !== "all") {
+        const licenseOptions = await prisma.license.findMany();
+        let ids: (number | null)[] = [];
+        const licenseIdWhere = {};
+        if (license === "public-domain") {
+          ids = licenseOptions
+            .filter(
+              (l) =>
+                l.short.toLowerCase() === "cc0" ||
+                l.short.toLowerCase() === "pd"
+            )
+            .map((l) => l.id);
+        }
+        if (license === "all-rights-reserved") {
+          ids = licenseOptions
+            .filter(
+              (l) =>
+                !(
+                  l.link?.includes("creativecommons") ||
+                  l.short.toLowerCase() === "cc0" ||
+                  l.short.toLowerCase() === "pd"
+                )
+            )
+            .map((l) => l.id);
+          set(where, "tracks.some.OR", [
+            { licenseId: { in: ids } }, // Include tracks with specified licenses
+            { licenseId: null }, // Include tracks without a license
+          ]);
+        }
+        if (license === "creative-commons") {
+          ids = licenseOptions
+            .filter((l) => l.link?.includes("creativecommons"))
+            .map((l) => l.id);
+          set(where, "tracks.some.licenseId.in", ids);
+        }
+      }
+      console.log("where", where, where.tracks);
 
       if (title && typeof title === "string") {
         where.title = {

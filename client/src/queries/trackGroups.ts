@@ -7,7 +7,7 @@ import {
 import * as api from "./fetch/fetchWrapper";
 import { QUERY_KEY_TRACK_GROUPS, queryKeyIncludes } from "./queryKeys";
 
-type TrackGroupQueryOptions = {
+export type TrackGroupQueryOptions = {
   skip?: number;
   take?: number;
   orderBy?: "random";
@@ -15,6 +15,7 @@ type TrackGroupQueryOptions = {
   title?: string;
   distinctArtists?: boolean;
   isReleased?: "released" | "not-released";
+  license?: "public-domain" | "all-rights-reserved" | "creative-commons";
 };
 
 const fetchTrackGroups: QueryFunction<
@@ -23,7 +24,7 @@ const fetchTrackGroups: QueryFunction<
 > = ({
   queryKey: [
     _,
-    { skip, take, orderBy, title, tag, distinctArtists, isReleased },
+    { skip, take, orderBy, title, tag, distinctArtists, isReleased, license },
   ],
   signal,
 }) => {
@@ -34,6 +35,7 @@ const fetchTrackGroups: QueryFunction<
   if (tag) params.append("tag", tag);
   if (title) params.append("title", title);
   if (isReleased) params.append("isReleased", isReleased);
+  if (license) params.append("license", license);
 
   params.append("distinctArtists", String(distinctArtists ?? false));
   return api.get(`v1/trackGroups?${params}`, { signal });

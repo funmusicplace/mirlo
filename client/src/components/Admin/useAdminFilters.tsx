@@ -20,6 +20,7 @@ const useAdminFilters = ({
     | "pricePaid"
     | "email"
     | "lastSubscription"
+    | "allowMirloPromo"
   )[];
 }) => {
   const { register, handleSubmit } = useForm();
@@ -71,6 +72,12 @@ const useAdminFilters = ({
           <FormComponent>
             <label>artist.name</label>
             <InputEl {...register("artistName")} />
+          </FormComponent>
+        )}
+        {fields.includes("allowMirloPromo") && (
+          <FormComponent>
+            <label>Allow Mirlo Promo</label>
+            <InputEl type="checkbox" {...register("allowMirloPromo")} />
           </FormComponent>
         )}
         {fields.includes("name") && (

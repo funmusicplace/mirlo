@@ -178,6 +178,7 @@ const routes = [
   "webhooks/stripe/connect",
   "jobs",
   "admin/tasks",
+  "admin/tracks",
   "admin/trackGroups",
   "admin/artists",
   "admin/subscriptions",

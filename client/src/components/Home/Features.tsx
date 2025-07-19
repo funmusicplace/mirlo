@@ -15,10 +15,6 @@ const Container = styled(WidthWrapper)`
     line-height: 3rem;
   }
 
-  @media (prefers-color-scheme: dark) {
-    background-color: #be3455;
-  }
-
   @media screen and (max-width: ${bp.medium}px) {
     padding: var(--mi-side-paddings-xsmall);
   }
@@ -99,15 +95,7 @@ const Features = () => {
   const { t } = useTranslation("translation", { keyPrefix: "home" });
 
   return (
-    <WidthWrapper
-      variant="full"
-      className={css`
-        background-color: #f5f0f0 !important;
-        @media (prefers-color-scheme: dark) {
-          background-color: #161616 !important;
-        }
-      `}
-    >
+    <WidthWrapper variant="full">
       <MetaCard
         title="Features"
         description="What's packaged with a Mirlo account? Here's some of our features"
@@ -118,13 +106,11 @@ const Features = () => {
           min-height: 64vh;
           display: flex;
           align-items: center;
-          background-color: #f5f0f0 !important;
           & > div {
             flex-direction: column-reverse;
           }
 
           @media (prefers-color-scheme: dark) {
-            background-color: #161616 !important;
             height: auto;
           }
         `}
@@ -443,10 +429,8 @@ const Features = () => {
           min-height: 34vh;
           display: flex;
           align-items: center;
-          background-color: #f5f0f0 !important;
 
           @media (prefers-color-scheme: dark) {
-            background-color: #161616 !important;
             height: auto;
             padding: 1rem;
             & > div {
