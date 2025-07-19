@@ -126,6 +126,7 @@ const routes = [
   "users/{userId}/purchases",
   "users/{userId}/wishlist",
   "users/{userId}/charges",
+  "users/{userId}/paypal/connect",
   "users/{userId}/stripe/connect",
   "users/{userId}/stripe/connectComplete",
   "users/{userId}/stripe/checkAccountStatus",
