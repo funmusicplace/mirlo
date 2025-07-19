@@ -21,14 +21,19 @@ export const AdminTracks: React.FC = () => {
   const [results, setResults] = React.useState<Track[]>([]);
   const { page, PaginationComponent } = usePagination({ pageSize });
 
-  const callback = React.useCallback(async () => {
-    const params = new URLSearchParams();
-    params.append("skip", `${pageSize * page}`);
-    params.append("take", `${pageSize}`);
+  const callback = React.useCallback(
+    async (search?: URLSearchParams) => {
+      const params = search ? search : new URLSearchParams();
+      params.append("skip", `${pageSize * page}`);
+      params.append("take", `${pageSize}`);
 
-    const { results } = await api.getMany<Track>(`tracks?${params.toString()}`);
-    setResults(results);
-  }, [page]);
+      const { results } = await api.getMany<Track>(
+        `admin/tracks?${params.toString()}`
+      );
+      setResults(results);
+    },
+    [page]
+  );
 
   React.useEffect(() => {
     callback();
@@ -64,6 +69,7 @@ export const AdminTracks: React.FC = () => {
         <Table>
           <thead>
             <tr>
+              <th />
               <th>Title</th>
               <th>Album</th>
               <th>Album artist</th>
@@ -74,7 +80,13 @@ export const AdminTracks: React.FC = () => {
           <tbody>
             {results.map((track, index) => (
               <tr key={track.id}>
-                <td>
+                <td
+                  className={css`
+                    .track-number {
+                      display: none;
+                    }
+                  `}
+                >
                   <TrackRowPlayControl
                     trackId={track.id}
                     trackNumber={index + 1}
@@ -86,14 +98,19 @@ export const AdminTracks: React.FC = () => {
                 <td>{track.trackGroup.artist?.name}</td>
                 <td>{track.isPreview}</td>
 
-                <td className="alignRight">
+                <td
+                  className={
+                    "alignRight " +
+                    css`
+                      display: flex;
+                    `
+                  }
+                >
                   <Button
                     startIcon={<FaEdit />}
                     size="compact"
                     onClick={() => onClickQueue(track.id)}
                   />
-                </td>
-                <td className="alignRight">
                   <ButtonLink
                     startIcon={<FaEye />}
                     size="compact"

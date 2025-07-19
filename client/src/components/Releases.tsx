@@ -9,12 +9,14 @@ import { SectionHeader } from "./Home/Home";
 
 import usePagination from "utils/usePagination";
 import { useLocation, useSearchParams } from "react-router-dom";
-import { queryTrackGroups } from "queries";
+import { queryTrackGroups, TrackGroupQueryOptions } from "queries";
 import { useQuery } from "@tanstack/react-query";
 import { queryTags } from "queries/tags";
 import TrackGroupPills from "./TrackGroup/TrackGroupPills";
 import { ButtonAnchor } from "./common/Button";
 import { FaRss } from "react-icons/fa";
+import { SelectEl } from "./common/Select";
+import React from "react";
 
 const pageSize = 40;
 const futureReleasesPageSize = 6;
@@ -27,6 +29,11 @@ const Releases: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
   const { page, PaginationComponent } = usePagination({ pageSize: limit });
   const tag = params.get("tag");
   const search = params.get("search");
+  const [license, setLicense] = React.useState<
+    TrackGroupQueryOptions["license"] | ""
+  >((params.get("license") as TrackGroupQueryOptions["license"]) || "");
+
+  const onReleasesPage = pathname.includes("releases");
 
   const { data: newReleases } = useQuery(
     queryTrackGroups({
@@ -36,6 +43,7 @@ const Releases: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
       tag: tag || undefined,
       title: search ?? undefined,
       isReleased: pathname?.includes("releases") ? undefined : "released",
+      license: license || undefined,
     })
   );
 
@@ -88,68 +96,67 @@ const Releases: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
           </WidthContainer>
         </SectionHeader>
       )}
-      {!pathname.includes("releases") &&
-        (futureReleases?.results ?? []).length > 0 && (
-          <>
-            <SectionHeader>
-              <WidthContainer
-                variant="big"
-                justify="space-between"
-                className={css`
-                  flex-direction: row;
-                  display: flex;
-                `}
-              >
-                <h1 className="h5 section-header__heading" id={headingId}>
-                  {t("futureReleases")}
-                </h1>
-                <ButtonAnchor
-                  target="_blank"
-                  href={`${import.meta.env.VITE_API_DOMAIN}/v1/trackGroups?tag=${tag}&released=not-released&format=rss`}
-                  rel="noreferrer"
-                  onlyIcon
-                  className={css`
-                    margin-top: 0.25rem;
-                  `}
-                  startIcon={<FaRss />}
-                />
-              </WidthContainer>
-            </SectionHeader>
-            <div
+      {!onReleasesPage && (futureReleases?.results ?? []).length > 0 && (
+        <>
+          <SectionHeader>
+            <WidthContainer
+              variant="big"
+              justify="space-between"
               className={css`
-                padding-top: 0.25rem;
+                flex-direction: row;
+                display: flex;
               `}
             >
-              <WidthContainer variant="big" justify="center">
-                <div
-                  className={css`
-                    display: flex;
-                    width: 100%;
-                    flex-direction: row;
-                    flex-wrap: wrap;
-                    padding: var(--mi-side-paddings-xsmall);
-                  `}
+              <h1 className="h5 section-header__heading" id={headingId}>
+                {t("futureReleases")}
+              </h1>
+              <ButtonAnchor
+                target="_blank"
+                href={`${import.meta.env.VITE_API_DOMAIN}/v1/trackGroups?tag=${tag}&released=not-released&format=rss`}
+                rel="noreferrer"
+                onlyIcon
+                className={css`
+                  margin-top: 0.25rem;
+                `}
+                startIcon={<FaRss />}
+              />
+            </WidthContainer>
+          </SectionHeader>
+          <div
+            className={css`
+              padding-top: 0.25rem;
+            `}
+          >
+            <WidthContainer variant="big" justify="center">
+              <div
+                className={css`
+                  display: flex;
+                  width: 100%;
+                  flex-direction: row;
+                  flex-wrap: wrap;
+                  padding: var(--mi-side-paddings-xsmall);
+                `}
+              >
+                <TrackgroupGrid
+                  gridNumber="6"
+                  as="ul"
+                  aria-labelledby={headingId}
+                  role="list"
                 >
-                  <TrackgroupGrid
-                    gridNumber="6"
-                    as="ul"
-                    aria-labelledby={headingId}
-                    role="list"
-                  >
-                    {futureReleases?.results?.map((trackGroup) => (
-                      <ArtistTrackGroup
-                        key={trackGroup.id}
-                        trackGroup={trackGroup}
-                        as="li"
-                        size="small"
-                      />
-                    ))}
-                  </TrackgroupGrid>
-                </div>
-              </WidthContainer>
-            </div>
-          </>
-        )}
+                  {futureReleases?.results?.map((trackGroup) => (
+                    <ArtistTrackGroup
+                      key={trackGroup.id}
+                      trackGroup={trackGroup}
+                      as="li"
+                      size="small"
+                    />
+                  ))}
+                </TrackgroupGrid>
+              </div>
+            </WidthContainer>
+          </div>
+        </>
+      )}
       <SectionHeader>
         <WidthContainer
           variant="big"
@@ -173,16 +180,39 @@ const Releases: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
               t("recentReleases")
             )}
           </h1>
-          <ButtonAnchor
-            target="_blank"
-            href={`${import.meta.env.VITE_API_DOMAIN}/v1/trackGroups?tag=${tag}&released=released&format=rss`}
-            rel="noreferrer"
-            onlyIcon
+          <div
             className={css`
-              margin-top: 0.25rem;
+              display: flex;
+              gap: 0.75rem;
             `}
-            startIcon={<FaRss />}
-          />
+          >
+            {onReleasesPage && (
+              <SelectEl
+                onChange={(e) => {
+                  const newLicense = e.target
+                    .value as TrackGroupQueryOptions["license"];
+                  setLicense(newLicense);
+                }}
+              >
+                <option value="">{t("all")}</option>
+                <option value="public-domain">{t("publicDomain")}</option>
+                <option value="creative-commons">{t("creativeCommons")}</option>
+                <option value="all-rights-reserved">
+                  {t("allRightsReserved")}
+                </option>
+              </SelectEl>
+            )}
+            <ButtonAnchor
+              target="_blank"
+              href={`${import.meta.env.VITE_API_DOMAIN}/v1/trackGroups?tag=${tag}&released=released&format=rss`}
+              rel="noreferrer"
+              onlyIcon
+              className={css`
+                margin-top: 0.25rem;
+              `}
+              startIcon={<FaRss />}
+            />
+          </div>
         </WidthContainer>
       </SectionHeader>
 
