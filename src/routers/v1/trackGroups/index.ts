@@ -60,7 +60,6 @@ export default function () {
       if (license && license !== "" && license !== "all") {
         const licenseOptions = await prisma.license.findMany();
         let ids: (number | null)[] = [];
-        const licenseIdWhere = {};
         if (license === "public-domain") {
           ids = licenseOptions
             .filter(
@@ -69,8 +68,8 @@ export default function () {
                 l.short.toLowerCase() === "pd"
             )
             .map((l) => l.id);
-        }
-        if (license === "all-rights-reserved") {
+          set(where, "tracks.some.licenseId.in", ids);
+        } else if (license === "all-rights-reserved") {
           ids = licenseOptions
             .filter(
               (l) =>
@@ -81,12 +80,12 @@ export default function () {
                 )
             )
             .map((l) => l.id);
+          console.log("ids", ids);
           set(where, "tracks.some.OR", [
             { licenseId: { in: ids } }, // Include tracks with specified licenses
             { licenseId: null }, // Include tracks without a license
           ]);
-        }
-        if (license === "creative-commons") {
+        } else if (license === "creative-commons") {
           ids = licenseOptions
             .filter((l) => l.link?.includes("creativecommons"))
             .map((l) => l.id);
