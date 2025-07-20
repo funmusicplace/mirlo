@@ -281,8 +281,8 @@ const downloadAndZipTracks = async ({
 
     await job.updateProgress(90);
   } catch (e) {
-    console.error(e);
     logger.error(`Error building zip`);
+    console.error(e);
   }
 };
 
@@ -332,11 +332,12 @@ export default async (job: Job) => {
       destinationBucket,
     });
   } catch (e) {
-    await fsPromises.rm(tempFolder, { recursive: true, force: true });
-    logger.error(`Error creating audio folder: ${tempFolder}`);
+    logger.error(`Error creating zip of tracks folder: ${tempFolder}`);
     if (e instanceof Error) {
       logger.error(`${e.message}: ${e.stack?.toString()}`);
     }
+    await fsPromises.rm(tempFolder, { recursive: true, force: true });
+
     return { error: e };
   }
 };
