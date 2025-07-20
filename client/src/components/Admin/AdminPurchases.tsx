@@ -2,7 +2,7 @@ import { css } from "@emotion/css";
 import Money from "components/common/Money";
 import Table from "components/common/Table";
 import React from "react";
-import { Form, Link } from "react-router-dom";
+import { Form, Link, useSearchParams } from "react-router-dom";
 import api from "services/api";
 import { getReleaseUrl } from "utils/artist";
 import useAdminFilters from "./useAdminFilters";
@@ -17,7 +17,7 @@ interface AdminPurchase extends UserTrackGroupPurchase {
   trackGroup: TrackGroup;
 }
 
-const pageSize = 500;
+const pageSize = 100;
 
 export const AdminPurchases: React.FC = () => {
   const [results, setResults] = React.useState<AdminPurchase[]>([]);
@@ -25,22 +25,20 @@ export const AdminPurchases: React.FC = () => {
   const [purchasers, setPurchasers] = React.useState("");
   const [trackGroupId, setTrackGroupId] = React.useState("");
   const [pricePaid, setPricePaid] = React.useState("");
+  const [searchParams] = useSearchParams();
 
-  const callback = React.useCallback(
-    async (search?: URLSearchParams) => {
-      const params = search ? search : new URLSearchParams();
+  const callback = React.useCallback(async () => {
+    const params =
+      new URLSearchParams(searchParams.toString()) || new URLSearchParams();
+    params.append("orderBy", "datePurchased");
+    params.append("skip", `${pageSize * page}`);
+    params.append("take", `${pageSize}`);
 
-      params.append("orderBy", "datePurchased");
-      params.append("skip", `${pageSize * page}`);
-      params.append("take", `${pageSize}`);
-
-      const { results } = await api.getMany<AdminPurchase>(
-        `admin/purchases?${params.toString() ?? ""}`
-      );
-      setResults(results);
-    },
-    [page]
-  );
+    const { results } = await api.getMany<AdminPurchase>(
+      `admin/purchases?${params.toString() ?? ""}`
+    );
+    setResults(results);
+  }, [page, searchParams]);
 
   const { Filters } = useAdminFilters({
     onSubmitFilters: callback,

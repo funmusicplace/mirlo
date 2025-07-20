@@ -4,6 +4,7 @@ import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
 import { SelectEl } from "components/common/Select";
 import { useForm } from "react-hook-form";
+import { useSearchParams } from "react-router-dom";
 
 const useAdminFilters = ({
   onSubmitFilters,
@@ -24,6 +25,7 @@ const useAdminFilters = ({
   )[];
 }) => {
   const { register, handleSubmit } = useForm();
+  const [_, setSearchParams] = useSearchParams();
 
   const submitToSearchParams = (
     data?: string | string[][] | Record<string, string> | undefined
@@ -31,8 +33,15 @@ const useAdminFilters = ({
     let search = new URLSearchParams();
 
     if (data) {
-      search = new URLSearchParams(data);
+      let o = Object.fromEntries(
+        Object.entries(data).filter(
+          ([_, v]) => v !== null && v !== "" && v !== undefined
+        )
+      );
+      search = new URLSearchParams(o);
     }
+
+    setSearchParams(search, { replace: true });
 
     onSubmitFilters(search);
   };

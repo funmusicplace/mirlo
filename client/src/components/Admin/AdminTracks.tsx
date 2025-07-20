@@ -4,11 +4,15 @@ import Modal from "components/common/Modal";
 import Table from "components/common/Table";
 import React from "react";
 import { FaEdit, FaEye } from "react-icons/fa";
-import { Outlet, useNavigate, useParams } from "react-router-dom";
+import {
+  Outlet,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 import api from "services/api";
 import usePagination from "utils/usePagination";
 import useAdminFilters from "./useAdminFilters";
-import PlayButton from "components/common/PlayButton";
 import TrackRowPlayControl from "components/common/TrackTable/TrackRowPlayControl";
 import { getTrackUrl } from "utils/artist";
 
@@ -20,20 +24,19 @@ export const AdminTracks: React.FC = () => {
   const [openModal, setOpenModal] = React.useState(false);
   const [results, setResults] = React.useState<Track[]>([]);
   const { page, PaginationComponent } = usePagination({ pageSize });
+  const [searchParams] = useSearchParams();
 
-  const callback = React.useCallback(
-    async (search?: URLSearchParams) => {
-      const params = search ? search : new URLSearchParams();
-      params.append("skip", `${pageSize * page}`);
-      params.append("take", `${pageSize}`);
+  const callback = React.useCallback(async () => {
+    const params =
+      new URLSearchParams(searchParams.toString()) || new URLSearchParams();
+    params.set("skip", `${pageSize * page}`);
+    params.set("take", `${pageSize}`);
 
-      const { results } = await api.getMany<Track>(
-        `admin/tracks?${params.toString()}`
-      );
-      setResults(results);
-    },
-    [page]
-  );
+    const { results } = await api.getMany<Track>(
+      `admin/tracks?${params.toString()}`
+    );
+    setResults(results);
+  }, [searchParams, page]);
 
   React.useEffect(() => {
     callback();

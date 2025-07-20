@@ -3,11 +3,17 @@ import Modal from "components/common/Modal";
 import Money from "components/common/Money";
 import Table from "components/common/Table";
 import React from "react";
-import { Outlet, useNavigate, useParams } from "react-router-dom";
+import {
+  Outlet,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 import api from "services/api";
 import useAdminFilters from "./useAdminFilters";
 import ReleaseDate, { formatDate } from "components/TrackGroup/ReleaseDate";
 import { useTranslation } from "react-i18next";
+import usePagination from "utils/usePagination";
 
 interface AdminSubscription extends ArtistUserSubscription {
   user: User;
@@ -18,6 +24,8 @@ interface AdminSubscription extends ArtistUserSubscription {
   }[];
 }
 
+const pageSize = 100;
+
 export const AdminSubscriptions: React.FC = () => {
   const navigate = useNavigate();
   const { trackgroupId } = useParams();
@@ -27,18 +35,25 @@ export const AdminSubscriptions: React.FC = () => {
   const { i18n } = useTranslation("translation", {
     keyPrefix: "admin",
   });
+  const [searchParams] = useSearchParams();
+  const { page, PaginationComponent } = usePagination({ pageSize });
 
-  const callback = React.useCallback(async (search?: URLSearchParams) => {
-    if (search) {
-      search.append("orderBy", "createdAt");
+  const callback = React.useCallback(async () => {
+    const params =
+      new URLSearchParams(searchParams.toString()) || new URLSearchParams();
+    if (params) {
+      params.append("orderBy", "createdAt");
     }
+    params.set("skip", `${pageSize * page}`);
+    params.set("take", `${pageSize}`);
+
     const { results, total: totalResults } =
       await api.getMany<AdminSubscription>(
-        `admin/subscriptions?${search?.toString()}`
+        `admin/subscriptions?${params.toString()}`
       );
     setTotal(totalResults);
     setResults(results);
-  }, []);
+  }, [searchParams, page]);
 
   const { Filters } = useAdminFilters({
     onSubmitFilters: callback,
@@ -137,6 +152,8 @@ export const AdminSubscriptions: React.FC = () => {
           </tbody>
         </Table>
       )}
+      <PaginationComponent amount={results.length} />
+
       {/* <LoadingButton /> */}
       <Modal
         open={openModal}

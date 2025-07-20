@@ -5,9 +5,20 @@ import { useSearchParams } from "react-router-dom";
 
 const usePagination = ({ pageSize }: { pageSize: number }) => {
   const [search] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const pageSearch = search.get("page");
   const page = pageSearch ? +pageSearch : 0;
+
+  const previousPage = new URLSearchParams({
+    ...Object.fromEntries(searchParams),
+    page: `${page - 1}`,
+  });
+
+  const nextPage = new URLSearchParams({
+    ...Object.fromEntries(searchParams),
+    page: `${page + 1}`,
+  });
 
   return {
     page,
@@ -29,7 +40,7 @@ const usePagination = ({ pageSize }: { pageSize: number }) => {
         `}
       >
         {page > 0 && (
-          <LinkWithIcon to={`?page=${page - 1}`}>
+          <LinkWithIcon to={`?${previousPage.toString()}`}>
             <FaChevronLeft /> Previous page
           </LinkWithIcon>
         )}
@@ -44,7 +55,7 @@ const usePagination = ({ pageSize }: { pageSize: number }) => {
           </span>
         )}
         {(amount === pageSize || (total && total > pageSize * (page + 1))) && (
-          <LinkWithIcon to={`?page=${page + 1}`}>
+          <LinkWithIcon to={`?${nextPage.toString()}`}>
             Next page <FaChevronRight />
           </LinkWithIcon>
         )}

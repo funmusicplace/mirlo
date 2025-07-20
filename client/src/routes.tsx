@@ -4,7 +4,6 @@ import App from "./App";
 import ErrorPage from "./components/ErrorPage";
 import { AuthWrapper } from "components/AuthWrapper";
 import { css } from "@emotion/css";
-import api from "services/api";
 
 async function markdownPage(source: string) {
   const { PageMarkdownWrapper } = await import("components/Post");
@@ -428,7 +427,7 @@ const routes: RouteObject[] = [
             path: "tracks",
             async lazy() {
               const { default: Component } = await import(
-                "components/Admin/Tracks"
+                "components/Admin/AdminTracks"
               );
               return { Component };
             },

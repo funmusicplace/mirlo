@@ -4,7 +4,12 @@ import Modal from "components/common/Modal";
 import Table from "components/common/Table";
 import React from "react";
 import { FaCheck, FaEdit } from "react-icons/fa";
-import { Outlet, useNavigate, useParams } from "react-router-dom";
+import {
+  Outlet,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 import api from "services/api";
 import useAdminFilters from "./useAdminFilters";
 import usePagination from "utils/usePagination";
@@ -18,23 +23,22 @@ export const AdminTrackGroups: React.FC = () => {
   const [openModal, setOpenModal] = React.useState(false);
   const [total, setTotal] = React.useState<number>();
   const { page, PaginationComponent } = usePagination({ pageSize });
+  const [searchParams] = useSearchParams();
 
-  const callback = React.useCallback(
-    async (search?: URLSearchParams) => {
-      const params = search ? search : new URLSearchParams();
+  const callback = React.useCallback(async () => {
+    const params =
+      new URLSearchParams(searchParams.toString()) || new URLSearchParams();
 
-      params.append("orderBy", "createdAt");
-      params.append("skip", `${pageSize * page}`);
-      params.append("take", `${pageSize}`);
+    params.append("orderBy", "createdAt");
+    params.append("skip", `${pageSize * page}`);
+    params.append("take", `${pageSize}`);
 
-      const { results, total: totalReuslts } = await api.getMany<TrackGroup>(
-        `admin/trackGroups?${params?.toString()}`
-      );
-      setResults(results);
-      setTotal(totalReuslts);
-    },
-    [page]
-  );
+    const { results, total: totalReuslts } = await api.getMany<TrackGroup>(
+      `admin/trackGroups?${params?.toString()}`
+    );
+    setResults(results);
+    setTotal(totalReuslts);
+  }, [searchParams, page]);
 
   const { Filters } = useAdminFilters({
     onSubmitFilters: callback,

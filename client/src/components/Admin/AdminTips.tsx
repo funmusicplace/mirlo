@@ -2,7 +2,7 @@ import { css } from "@emotion/css";
 import Money from "components/common/Money";
 import Table from "components/common/Table";
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import api from "services/api";
 import { getArtistUrl, getReleaseUrl } from "utils/artist";
 import useAdminFilters from "./useAdminFilters";
@@ -18,22 +18,20 @@ const pageSize = 500;
 export const AdminTips: React.FC = () => {
   const [results, setResults] = React.useState<AdminPurchase[]>([]);
   const { page, PaginationComponent } = usePagination({ pageSize });
+  const [searchParams] = useSearchParams();
 
-  const callback = React.useCallback(
-    async (search?: URLSearchParams) => {
-      const params = search ? search : new URLSearchParams();
+  const callback = React.useCallback(async () => {
+    const params =
+      new URLSearchParams(searchParams.toString()) || new URLSearchParams();
+    params.append("orderBy", "datePurchased");
+    params.append("skip", `${pageSize * page}`);
+    params.append("take", `${pageSize}`);
 
-      params.append("orderBy", "datePurchased");
-      params.append("skip", `${pageSize * page}`);
-      params.append("take", `${pageSize}`);
-
-      const { results } = await api.getMany<AdminPurchase>(
-        `admin/tips?${params.toString() ?? ""}`
-      );
-      setResults(results);
-    },
-    [page]
-  );
+    const { results } = await api.getMany<AdminPurchase>(
+      `admin/tips?${params.toString() ?? ""}`
+    );
+    setResults(results);
+  }, [searchParams, page]);
 
   const { Filters } = useAdminFilters({
     onSubmitFilters: callback,

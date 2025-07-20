@@ -3,13 +3,21 @@ import Modal from "components/common/Modal";
 import Table from "components/common/Table";
 import React from "react";
 import { FaCheck } from "react-icons/fa";
-import { Outlet, useNavigate, useParams } from "react-router-dom";
+import {
+  Outlet,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 import api from "services/api";
 import useAdminFilters from "./useAdminFilters";
+import usePagination from "utils/usePagination";
 
 interface AdminArtist extends Artist {
   user: User;
 }
+
+const pageSize = 100;
 
 export const AdminArtists: React.FC = () => {
   const navigate = useNavigate();
@@ -17,17 +25,23 @@ export const AdminArtists: React.FC = () => {
   const [results, setResults] = React.useState<AdminArtist[]>([]);
   const [openModal, setOpenModal] = React.useState(false);
   const [total, setTotal] = React.useState<number>();
+  const [searchParams] = useSearchParams();
+  const { page, PaginationComponent } = usePagination({ pageSize });
 
-  const callback = React.useCallback(async (search?: URLSearchParams) => {
-    if (search) {
-      search.append("orderBy", "createdAt");
+  const callback = React.useCallback(async () => {
+    const params =
+      new URLSearchParams(searchParams.toString()) || new URLSearchParams();
+    if (params) {
+      params.append("orderBy", "createdAt");
     }
+    params.set("skip", `${pageSize * page}`);
+    params.set("take", `${pageSize}`);
     const { results, total: totalResults } = await api.getMany<AdminArtist>(
-      `admin/artists?${search?.toString()}`
+      `admin/artists?${params.toString()}`
     );
     setTotal(totalResults);
     setResults(results);
-  }, []);
+  }, [searchParams, page]);
 
   const { Filters } = useAdminFilters({
     onSubmitFilters: callback,
@@ -83,6 +97,7 @@ export const AdminArtists: React.FC = () => {
         </Table>
       )}
       {/* <LoadingButton /> */}
+      <PaginationComponent amount={results.length} total={total} />
       <Modal
         open={openModal}
         onClose={() => {

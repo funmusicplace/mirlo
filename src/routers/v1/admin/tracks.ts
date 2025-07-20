@@ -48,10 +48,10 @@ export default function () {
       if (isPublished) {
         set(where, "trackGroup.published", true);
       }
-      console.log("query", req.query);
       if (allowMirloPromo) {
         set(where, "allowMirloPromo", true);
       }
+
       const itemCount = await prisma.track.count({ where });
 
       const tracks = await prisma.track.findMany({
