@@ -27,11 +27,13 @@ import { useAuthContext } from "state/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import useArtistQuery from "utils/useArtistQuery";
 import { queryTrackGroup } from "queries";
+import { useGetArtistColors } from "components/Artist/ArtistButtons";
 
 function RedeemCode() {
   const { t } = useTranslation("translation", {
     keyPrefix: "trackGroupDetails",
   });
+  const { colors } = useGetArtistColors();
 
   const { user } = useAuthContext();
   const navigate = useNavigate();
@@ -45,8 +47,6 @@ function RedeemCode() {
   const { data: trackGroup, isLoading: isLoadingTrackGroup } = useQuery(
     queryTrackGroup({ albumSlug: trackGroupId, artistId: artistId })
   );
-
-  console.log("artist", artist, isLoadingArtist);
 
   const tId = trackGroup?.id;
 
@@ -124,6 +124,7 @@ function RedeemCode() {
         <FormComponent>
           <label>Enter download code below:</label>
           <InputEl
+            colors={colors}
             className={css`
               margin-bottom: 1rem;
             `}
@@ -134,6 +135,7 @@ function RedeemCode() {
             <FormComponent>
               <label>Your email:</label>
               <InputEl
+                colors={colors}
                 className={css`
                   margin-bottom: 1rem;
                 `}
