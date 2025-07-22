@@ -8,15 +8,19 @@ import usePagination from "utils/usePagination";
 import { useQuery } from "@tanstack/react-query";
 import { queryTags } from "queries/tags";
 import TrackGroupPills from "./TrackGroup/TrackGroupPills";
+import SpaceBetweenDiv from "./common/SpaceBetweenDiv";
+import Select, { SelectEl } from "./common/Select";
+import { useState } from "react";
 
-const pageSize = 20;
+const pageSize = 200;
 
 const Tags = () => {
   const { t } = useTranslation("translation", { keyPrefix: "releases" });
   const { page, PaginationComponent } = usePagination({ pageSize });
+  const [orderBy, setOrderBy] = useState<"count" | "name">("count");
 
   const { data: tags } = useQuery(
-    queryTags({ skip: pageSize * page, take: pageSize, orderBy: "count" })
+    queryTags({ skip: pageSize * page, take: pageSize, orderBy })
   );
 
   return (
@@ -27,13 +31,29 @@ const Tags = () => {
         }
       `}
     >
-      {" "}
       <SectionHeader>
         <WidthContainer variant="big">
-          <h2 className="h5 section-header__heading">{t("popularTags")}</h2>
+          <SpaceBetweenDiv>
+            <h2 className="h5 section-header__heading">{t("popularTags")}</h2>
+            <Select
+              options={[
+                { label: t("mostPopular"), value: "count" },
+                { label: t("alphabetical"), value: "name" },
+              ]}
+              value={orderBy}
+              onChange={(e) => {
+                setOrderBy(e.target.value as "count" | "name");
+              }}
+            />
+          </SpaceBetweenDiv>
           <div
             className={css`
               margin: 0 0.5rem;
+
+              & > div {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+              }
             `}
           >
             <TrackGroupPills tags={tags?.results.map((tag) => tag.tag)} />

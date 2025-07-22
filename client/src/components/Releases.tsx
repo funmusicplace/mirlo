@@ -13,9 +13,9 @@ import { queryTrackGroups, TrackGroupQueryOptions } from "queries";
 import { useQuery } from "@tanstack/react-query";
 import { queryTags } from "queries/tags";
 import TrackGroupPills from "./TrackGroup/TrackGroupPills";
-import { ButtonAnchor } from "./common/Button";
-import { FaRss } from "react-icons/fa";
-import { SelectEl } from "./common/Select";
+import { ButtonAnchor, ButtonLink } from "./common/Button";
+import { FaChevronRight, FaRss } from "react-icons/fa";
+import Select from "./common/Select";
 import React from "react";
 
 const pageSize = 40;
@@ -31,7 +31,7 @@ const Releases: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
   const search = params.get("search");
   const [license, setLicense] = React.useState<
     TrackGroupQueryOptions["license"] | ""
-  >((params.get("license") as TrackGroupQueryOptions["license"]) || "");
+  >((params.get("license") as TrackGroupQueryOptions["license"]) ?? "");
 
   const onReleasesPage = pathname.includes("releases");
 
@@ -92,6 +92,23 @@ const Releases: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
               `}
             >
               <TrackGroupPills tags={tags?.results.map((tag) => tag.tag)} />
+            </div>
+            <div
+              className={css`
+                display: flex;
+                justify-content: flex-end;
+              `}
+            >
+              <ButtonLink
+                to="/tags"
+                className={css`
+                  margin-top: 0.25rem;
+                `}
+                variant="outlined"
+                endIcon={<FaChevronRight />}
+              >
+                {t("browseTags")}
+              </ButtonLink>
             </div>
           </WidthContainer>
         </SectionHeader>
@@ -187,20 +204,23 @@ const Releases: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
             `}
           >
             {onReleasesPage && (
-              <SelectEl
+              <Select
+                value={license ?? ""}
                 onChange={(e) => {
                   const newLicense = e.target
                     .value as TrackGroupQueryOptions["license"];
                   setLicense(newLicense);
                 }}
-              >
-                <option value="">{t("all")}</option>
-                <option value="public-domain">{t("publicDomain")}</option>
-                <option value="creative-commons">{t("creativeCommons")}</option>
-                <option value="all-rights-reserved">
-                  {t("allRightsReserved")}
-                </option>
-              </SelectEl>
+                options={[
+                  { label: t("all"), value: "" },
+                  { label: t("publicDomain"), value: "public-domain" },
+                  { label: t("creativeCommons"), value: "creative-commons" },
+                  {
+                    label: t("allRightsReserved"),
+                    value: "all-rights-reserved",
+                  },
+                ]}
+              />
             )}
             <ButtonAnchor
               target="_blank"
