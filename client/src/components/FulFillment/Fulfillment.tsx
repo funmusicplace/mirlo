@@ -6,6 +6,9 @@ import api from "services/api";
 import FulfillmentRow from "./FulfillmentRow";
 import { useQuery } from "@tanstack/react-query";
 import { queryUserPurchases } from "queries";
+import WidthContainer from "components/common/WidthContainer";
+import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
+import { ButtonLink } from "components/common/Button";
 
 export const Fulfillment: React.FC = () => {
   const { t } = useTranslation("translation", {
@@ -31,20 +34,26 @@ export const Fulfillment: React.FC = () => {
   }, [callback]);
 
   return (
-    <div
+    <WidthContainer
+      variant="big"
       className={css`
-        flex-grow: 1;
         padding: 1rem;
-        max-width: 100%;
       `}
     >
-      <h3
-        className={css`
-          margin: 0.5rem 0;
-        `}
-      >
-        {t("ordersAndFulfillment")}
-      </h3>
+      <SpaceBetweenDiv>
+        <h3
+          className={css`
+            margin: 0.5rem 0;
+          `}
+        >
+          {t("ordersAndFulfillment")}
+        </h3>
+        <div>
+          <ButtonLink variant="outlined" to="/sales">
+            {t("viewSales")}
+          </ButtonLink>
+        </div>
+      </SpaceBetweenDiv>
       <p>{t("fulfillmentDescription")}</p>
       <h4>{t("totalResults", { count: purchaseResults?.total })}</h4>
       {results.length > 0 && (
@@ -78,7 +87,7 @@ export const Fulfillment: React.FC = () => {
           </Table>
         </div>
       )}
-    </div>
+    </WidthContainer>
   );
 };
 

@@ -89,7 +89,8 @@
     "about": "About",
     "admin": "Admin",
     "label": "Label",
-    "fulfillment": "Order fulfillment"
+    "fulfillment": "Order fulfillment",
+    "viewSalesPage": "View sales"
   },
   "headerSearch": {
     "searchSuggestions": "Search suggestions:",
@@ -207,7 +208,8 @@
     "track": "Track",
     "subscription": "Subscription",
     "selectArtist": "Select an artist",
-    "tip": "Tip"
+    "tip": "Tip",
+    "viewFulfillment": "View Fulfillment"
   },
   "fulfillment": {
     "artist": "Artist",
@@ -234,6 +236,7 @@
     "purchaseDetails": "Purchase details",
     "shippingAddress": "Shipping address:",
     "itemPurchased": "Purchased",
+    "viewSales": "View sales",
     "contactArtistMessage": "Have a question about this purchase? Send a message to the artist:"
   },
   "merchDetails": {
@@ -267,6 +270,8 @@
   "label": {
     "artist": "Artist",
     "labelProfile": "Manage artists",
+    "viewSalesPage": "View sales page",
+    "viewFulfillmentPage": "View fulfillment page",
     "page": "Artist link",
     "manageLabel": "Manage",
     "viewLabelPage": "View label page",

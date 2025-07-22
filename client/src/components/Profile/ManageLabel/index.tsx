@@ -12,9 +12,10 @@ import AddArtistToRoster from "./AddArtistToRoster";
 import { useFieldArray, useForm } from "react-hook-form";
 import api from "services/api";
 import { useAuthContext } from "state/AuthContext";
-import { ButtonLink } from "components/common/Button";
+import Button, { ButtonLink } from "components/common/Button";
 import { FaChevronRight } from "react-icons/fa";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
+import { css } from "@emotion/css";
 
 const ProfileLabel: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "label" });
@@ -57,13 +58,27 @@ const ProfileLabel: React.FC = () => {
     <WidthContainer variant="big" justify="center">
       <SpaceBetweenDiv>
         <h2>{t("manageArtists")}</h2>
-        <ButtonLink
-          to={`/label/${user.urlSlug}`}
-          endIcon={<FaChevronRight />}
-          variant="link"
+        <div
+          className={css`
+            display: flex;
+            gap: 1rem;
+          `}
         >
-          {t("viewLabelPage")}
-        </ButtonLink>
+          <ButtonLink variant="outlined" to="/sales" size="compact">
+            {t("viewSalesPage")}
+          </ButtonLink>
+          <ButtonLink variant="outlined" to="/fulfillment" size="compact">
+            {t("viewFulfillmentPage")}
+          </ButtonLink>
+          <ButtonLink
+            to={`/label/${user.urlSlug}`}
+            endIcon={<FaChevronRight />}
+            variant="link"
+            size="compact"
+          >
+            {t("viewLabelPage")}
+          </ButtonLink>
+        </div>
       </SpaceBetweenDiv>
       <AddArtistToRoster refresh={refetch} />
       <Table>

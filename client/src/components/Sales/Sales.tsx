@@ -10,6 +10,7 @@ import LoadingBlocks from "components/Artist/LoadingBlocks";
 import WidthContainer from "components/common/WidthContainer";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import { SelectEl } from "components/common/Select";
+import { ButtonLink } from "components/common/Button";
 
 export const Sales: React.FC = () => {
   const { t } = useTranslation("translation", {
@@ -42,22 +43,32 @@ export const Sales: React.FC = () => {
         >
           {t("sales")}
         </h3>
-        <SelectEl
-          onChange={(e) => {
-            const artistId = e.target.value
-              ? Number(e.target.value)
-              : undefined;
-            setFilteredArtistId(artistId);
-          }}
-          value={filteredArtistId ?? ""}
+        <div
+          className={css`
+            display: flex;
+            gap: 1rem;
+          `}
         >
-          <option value="">{t("selectArtist")}</option>
-          {managedArtists?.results.map((artist) => (
-            <option key={artist.id} value={artist.id}>
-              {artist.name}
-            </option>
-          ))}
-        </SelectEl>
+          <SelectEl
+            onChange={(e) => {
+              const artistId = e.target.value
+                ? Number(e.target.value)
+                : undefined;
+              setFilteredArtistId(artistId);
+            }}
+            value={filteredArtistId ?? ""}
+          >
+            <option value="">{t("selectArtist")}</option>
+            {managedArtists?.results.map((artist) => (
+              <option key={artist.id} value={artist.id}>
+                {artist.name}
+              </option>
+            ))}
+          </SelectEl>
+          <ButtonLink variant="outlined" to="/fulfillment">
+            {t("viewFulfillment")}
+          </ButtonLink>
+        </div>
       </SpaceBetweenDiv>
       {isLoading && <LoadingBlocks rows={5} height="2rem" margin=".5rem" />}
       {results.length > 0 && (
