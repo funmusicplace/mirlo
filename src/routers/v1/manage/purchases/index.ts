@@ -34,6 +34,7 @@ export default function () {
               artist: true,
             },
           },
+          options: true,
           user: true,
         },
       });

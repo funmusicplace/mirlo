@@ -195,8 +195,6 @@ describe("handleArtistMerchPurchase", () => {
       },
     });
 
-    console.log("merchOptions", merchOptions);
-
     await handleArtistMerchPurchase(
       purchaser.id,
       {
@@ -214,6 +212,21 @@ describe("handleArtistMerchPurchase", () => {
       where: { id: merch.id },
       include: { optionTypes: { include: { options: true } } },
     });
+
+    const purchase = await prisma.merchPurchase.findFirst({
+      where: { userId: purchaser.id },
+      include: { options: true },
+    });
+
+    assert.equal(purchase?.options?.[0].name, "small");
+    assert.equal(purchase?.options?.[0].quantityRemaining, 9);
+    console.log(
+      "purchase",
+      await prisma.merchPurchase.findFirst({
+        where: { userId: purchaser.id },
+        include: { options: true },
+      })
+    );
     console.log("updatedMerch", updatedMerch?.optionTypes[0].options);
   });
 
