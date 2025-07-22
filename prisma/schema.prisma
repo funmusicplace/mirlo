@@ -467,6 +467,7 @@ model MerchPurchase {
   options              MerchOption[]
   trackingNumber       String?
   trackingWebsite      String?
+  orderDetails         String? // JSON string with order details
 }
 
 enum FulfillmentStatus {

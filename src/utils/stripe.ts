@@ -6,7 +6,11 @@ import { Request, Response } from "express";
 import { findOrCreateUserBasedOnEmail } from "./user";
 import { getSiteSettings } from "./settings";
 import { generateFullStaticImageUrl } from "./images";
-import { finalArtistAvatarBucket, finalCoversBucket } from "./minio";
+import {
+  finalArtistAvatarBucket,
+  finalCoversBucket,
+  finalMerchImageBucket,
+} from "./minio";
 import { AppError } from "./error";
 import {
   handleArtistGift,
@@ -168,7 +172,7 @@ export const createMerchStripeProduct = async (
             ? [
                 generateFullStaticImageUrl(
                   merch.images?.[0]?.url[4],
-                  finalCoversBucket
+                  finalMerchImageBucket
                 ),
               ]
             : [],
@@ -929,7 +933,6 @@ export const handleCheckoutSession = async (
       tierId,
       trackGroupId,
       stripeAccountId,
-      gaveGift,
       purchaseType,
       trackId,
       artistId,

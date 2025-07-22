@@ -95,7 +95,9 @@ const HomeReleases = () => {
           margin-bottom: 4rem !important;
         `}
       >
-        <LinkWithIcon to="/artists">{t("viewAllArtists")}</LinkWithIcon>
+        <ButtonLink variant="outlined" to="/artists">
+          {t("viewAllArtists")}
+        </ButtonLink>
         <ButtonLink to="/releases" endIcon={<FaChevronRight />}>
           {t("moreReleases")}
         </ButtonLink>

@@ -498,7 +498,7 @@ export const handleArtistMerchPurchase = async (
               );
 
               logger.info(
-                `handleArtistMerchPurchase: userId: ${userId}, merchId: ${merchProduct.id}, amountPaid: ${item.amount_total}${item.currency}`
+                `handleArtistMerchPurchase: userId: ${userId}, merchId: ${merchProduct.id}, amountPaid: ${item.amount_total}${item.currency}, options: ${options.map((o) => o.id).join(", ")}`
               );
 
               const applicationFee = await getApplicationFee(session);

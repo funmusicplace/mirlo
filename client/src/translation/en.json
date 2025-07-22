@@ -34,7 +34,10 @@
     "publicDomain": "Public Domain",
     "creativeCommons": "Creative Commons",
     "allRightsReserved": "All Rights Reserved",
-    "all": "All"
+    "all": "All",
+    "mostPopular": "Most popular",
+    "browseTags": "Browse tags",
+    "alphabetical": "Alphabetical"
   },
   "cookies": {
     "weUseCookies": "We use cookies to keep you logged in and to maintain your music queue.",

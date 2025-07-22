@@ -61,13 +61,17 @@ const BuyMerchItem: React.FC<{
     },
   });
 
-  const { formState, setError } = methods;
+  const { formState, setError, setValue } = methods;
 
   const currentPrice = methods.watch("price");
   const quantity = methods.watch("quantity");
   const shippingDestination = methods.watch("shippingDestinationId");
   const merchOptionIds = methods.watch("merchOptionIds");
   const [clientSecret, setClientSecret] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    setValue("price", minPrice * quantity);
+  }, [quantity, minPrice, setValue]);
 
   const onSubmit = React.useCallback(
     async (data: FormData) => {
@@ -222,7 +226,7 @@ const BuyMerchItem: React.FC<{
             {...methods.register("price", { min: minPrice })}
             type="number"
             id="price"
-            min={minPrice ? minPrice : 0}
+            min={minPrice ? minPrice * quantity : 0}
             step={0.01}
           />
           {price < minPrice && (
