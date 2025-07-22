@@ -87,6 +87,23 @@ export const findSales = async (artistId: number[], sinceDate?: string) => {
     },
   });
 
+  const merchPurchases = await prisma.merchPurchase.findMany({
+    where: {
+      amountPaid: { gt: 0 },
+      createdAt: sinceDate ? { gte: new Date(sinceDate) } : undefined,
+      merch: {
+        artistId: { in: artistId },
+      },
+    },
+    select: {
+      amountPaid: true,
+      currencyPaid: true,
+      createdAt: true,
+      merch: { include: { artist: true } },
+      userId: true,
+    },
+  });
+
   return [
     ...supporters.map((s) => ({
       ...s,
@@ -115,6 +132,14 @@ export const findSales = async (artistId: number[], sinceDate?: string) => {
       urlSlug: tgp.trackGroup.urlSlug,
       amount: tgp.pricePaid,
       currency: tgp.currencyPaid,
+    })),
+    ...merchPurchases.map((mp) => ({
+      ...mp,
+      artist: mp.merch.artist,
+      datePurchased: mp.createdAt,
+      amount: mp.amountPaid,
+      urlSlug: mp.merch.urlSlug,
+      currency: mp.currencyPaid,
     })),
   ].sort((a, b) => {
     return (

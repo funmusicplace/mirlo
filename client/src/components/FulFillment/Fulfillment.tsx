@@ -72,11 +72,7 @@ export const Fulfillment: React.FC = () => {
             </thead>
             <tbody>
               {purchaseResults?.results.map((purchase, index) => (
-                <FulfillmentRow
-                  key={purchase.id}
-                  purchase={purchase}
-                  index={index}
-                />
+                <FulfillmentRow key={purchase.id} purchase={purchase} />
               ))}
             </tbody>
           </Table>

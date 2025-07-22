@@ -15,9 +15,8 @@ const statusMap = {
   COMPLETED: "completed",
 };
 
-const FulfillmentRow: React.FC<{ purchase: MerchPurchase; index: number }> = ({
+const FulfillmentRow: React.FC<{ purchase: MerchPurchase }> = ({
   purchase,
-  index,
 }) => {
   const { i18n, t } = useTranslation("translation", {
     keyPrefix: "fulfillment",
