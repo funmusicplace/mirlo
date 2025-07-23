@@ -371,6 +371,22 @@ const About: React.FC = () => {
             organizations. Simon is a legal owner of Mirlo.
           </p>
         </Person>
+        <Person>
+          <PersonPicture>
+            <img
+              src="https://mirlo.space/static/images/owner-pictures/tim-photo.jpg"
+              alt="A portrait of Tim in a colorful sweater with a background of lush, green foliage"
+            />
+          </PersonPicture>
+          <p>
+            Tim is a software designer and programmer, drummer, audio engineer,
+            electronics-tinkerer, and lover of music. Tim has made software in
+            the media industry and has played various instruments at local
+            venues including radio stations such as WPTS and regionally on the
+            Saturday Light Brigade show. With Mirlo, Tim is focused on driving
+            accessibility, usability, creativity, and community.
+          </p>
+        </Person>
         <h3>Previous member owners</h3>
         <ul>
           <li>
