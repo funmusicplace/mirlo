@@ -388,15 +388,6 @@ const About: React.FC = () => {
             accessibility, usability, creativity, and community.
           </p>
         </Person>
-        <h3>Previous member owners</h3>
-        <ul>
-          <li>
-            <strong>jodi</strong>, one of our original co-owners, who helped
-            guide the direction and culture of mirlo during its first year
-          </li>
-        </ul>
-
-        <h3>Everyone else</h3>
 
         <h3>Previous member owners</h3>
         <ul>
