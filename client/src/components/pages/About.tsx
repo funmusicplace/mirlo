@@ -25,6 +25,7 @@ const Person = styled.div`
 
 const PersonPicture = styled.span`
   display: inline-block;
+  flex: none;
   width: 10rem;
   height: 10rem;
   overflow: clip;
