@@ -288,14 +288,16 @@ function TrackGroup() {
                   tracks={trackGroup.tracks}
                   trackGroup={trackGroup}
                 />
-                <p
-                  className={css`
-                    margin-left: 2.5rem;
-                    margin-top: 1rem;
-                  `}
-                >
-                  <small>{t("downloadCodecsInfo")}</small>
-                </p>
+                {trackGroup.isGettable && (
+                  <p
+                    className={css`
+                      margin-left: 2.5rem;
+                      margin-top: 1rem;
+                    `}
+                  >
+                    <small>{t("downloadCodecsInfo")}</small>
+                  </p>
+                )}
               </TrackListingWrapper>
             </div>
           </div>
