@@ -2,7 +2,7 @@ import { css } from "@emotion/css";
 import { Link } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import usePublicArtist from "utils/usePublicObjectById";
-import PageHeader from "components/common/PageHeader";
+import PageBanner from "components/common/PageBanner";
 import { bp } from "../../constants";
 import HeaderSearch from "./HeaderSearch";
 import Menu from "./Menu";
@@ -202,7 +202,7 @@ const Header = () => {
           }
         `}
       >
-        <PageHeader />
+        <PageBanner />
       </div>
       <div
         className={css`

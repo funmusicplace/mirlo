@@ -212,11 +212,12 @@ interface Artist {
   subscriptionTiers: ArtistSubscriptionTier[];
   properties?: {
     colors: ArtistColors;
+    tileBackgroundImage?: boolean;
   };
   user?: Partial<User>;
   banner?: {
     url: string;
-    sizes?: { [key: number]: string };
+    sizes?: { [key: number]: string; original: string };
     updatedAt: string;
   };
   avatar?: {

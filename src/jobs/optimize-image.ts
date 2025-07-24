@@ -73,83 +73,123 @@ const optimizeImage = async (job: Job) => {
           variants: { width: number; height: number }[];
         };
 
-        return variants.map(
-          async (
-            variant: {
-              extract?: any;
-              resize?: any;
-              outputOptions?: any;
-              blur?: any;
-              width?: number;
-              height?: number;
-              suffix?: any;
-            },
-            j
-          ) => {
-            // This is a pretty hacky way of sleeping and probably something we shoudl
-            // not do?
-            // But basically the reason we have to do this is because backblaze
-            // seems to not like it when we bombard it with files all in one go,
-            // so when we do Promise.all at the end of this we're sending all the
-            // files and it just doesn't process anything but the first one.
-            await sleep((i + 1) * (j + 1) * 1500);
-            const { width, height, suffix = `-x${width}` } = variant;
+        const outputOptions = Object.assign(
+          {},
+          defaultOptions[outputType].outputOptions,
+          options
+        );
 
-            const finalFileName = `${destinationId}${suffix}${ext}`;
+        const ar = [1];
 
-            logger.info(`Destination: ${finalFileName}`);
+        return [
+          ...ar.map(async () => {
+            logger.info(`Optimizing image to ${outputType}`);
+            const originalSize = await sharp(buffer)
+              .rotate()
+              [outputType](outputOptions)
+              .toBuffer();
 
-            const resizeOptions = Object.assign(
+            await uploadWrapper(
+              finalMinioBucket,
+              `${destinationId}-original${ext}`,
+              originalSize,
               {
-                width,
-                height,
-                withoutEnlargement: true,
+                contentType: `image/${outputType}`,
+              }
+            );
+
+            return {
+              width: "original",
+              height: "original",
+              format: outputType,
+            };
+          }),
+          ...variants.map(
+            async (
+              variant: {
+                extract?: any;
+                resize?: any;
+                outputOptions?: any;
+                blur?: any;
+                width?: number;
+                height?: number;
+                suffix?: any;
               },
-              variant.resize || {}
-            );
+              j
+            ) => {
+              // This is a pretty hacky way of sleeping and probably something we shoudl
+              // not do?
+              // But basically the reason we have to do this is because backblaze
+              // seems to not like it when we bombard it with files all in one go,
+              // so when we do Promise.all at the end of this we're sending all the
+              // files and it just doesn't process anything but the first one.
+              await sleep((i + 1) * (j + 1) * 1500);
+              const { width, height, suffix = `-x${width}` } = variant;
 
-            const outputOptions = Object.assign(
-              {},
-              defaultOptions[outputType].outputOptions,
-              options,
-              variant.outputOptions || {}
-            );
+              const finalFileName = `${destinationId}${suffix}${ext}`;
 
-            let newBuffer;
-            try {
-              newBuffer = await sharp(buffer)
-                .rotate()
-                .resize(resizeOptions)
-                [outputType](outputOptions)
-                .toBuffer();
-              logger.info(
-                `created size ${resizeOptions.width}x${resizeOptions.height} for ${outputType}`
+              logger.info(`Destination: ${finalFileName}`);
+
+              const resizeOptions = Object.assign(
+                {
+                  width,
+                  height,
+                  withoutEnlargement: true,
+                },
+                variant.resize || {}
               );
 
-              logger.info("Uploading image to bucket");
-              await uploadWrapper(finalMinioBucket, finalFileName, newBuffer, {
-                contentType: `image/${outputType}`,
-              });
+              let newBuffer;
 
-              logger.info(`Converted and optimized image to ${outputType}`, {
-                ratio: `${width}x${height})`,
-              });
-              return {
-                width: width,
-                height: height,
-                format: outputType,
+              const variantOptions = {
+                ...outputOptions,
+                ...(variant.outputOptions ?? {}),
               };
-            } catch (e) {
-              console.error(e);
+
+              try {
+                newBuffer = await sharp(buffer)
+                  .rotate()
+                  .resize(resizeOptions)
+                  [outputType](variantOptions)
+                  .toBuffer();
+                logger.info(
+                  `created size ${resizeOptions.width}x${resizeOptions.height} for ${outputType}`
+                );
+
+                logger.info("Uploading image to bucket");
+                await uploadWrapper(
+                  finalMinioBucket,
+                  finalFileName,
+                  newBuffer,
+                  {
+                    contentType: `image/${outputType}`,
+                  }
+                );
+
+                logger.info(`Converted and optimized image to ${outputType}`, {
+                  ratio: `${width}x${height})`,
+                });
+                return {
+                  width: width,
+                  height: height,
+                  format: outputType,
+                };
+              } catch (e) {
+                console.error(e);
+              }
             }
-          }
-        );
+          ),
+        ];
       })
       .flat(1);
 
     const results = await Promise.all(promises);
     const urls = uniq(
-      results.map((r?: { width?: number }) => `${destinationId}-x${r?.width}`)
+      results.map((r?: { width?: number | string }) =>
+        r?.width !== "original"
+          ? `${destinationId}-x${r?.width}`
+          : `${destinationId}-original`
+      )
     ) as string[];
     logger.info(`Saving URLs [${urls.join(", ")}]`);
 

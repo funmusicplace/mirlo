@@ -1,19 +1,20 @@
 import { css } from "@emotion/css";
 import { useLocation, useParams } from "react-router-dom";
 import { bp } from "../../constants";
-import { useArtistContext } from "state/ArtistContext";
+import useArtistQuery from "utils/useArtistQuery";
 
-const PageHeader = () => {
+const PageBanner = () => {
   const { pathname } = useLocation();
 
   const isManage = pathname.includes("manage");
   const { trackGroupId, postId } = useParams();
 
-  const artistContext = useArtistContext();
-  const artistBanner = artistContext?.state?.artist?.banner;
+  const { data: artist } = useArtistQuery();
+  const artistBanner = artist?.banner;
 
   const showBanner = !(trackGroupId || postId) || isManage;
 
+  console.log("artist", artist);
   return (
     <>
       {artistBanner && showBanner && (
@@ -44,7 +45,7 @@ const PageHeader = () => {
               }
             `}
           >
-            {artistBanner && (
+            {artistBanner && !artist.properties?.tileBackgroundImage && (
               <img
                 src={
                   artistBanner?.sizes?.[2500] + `?${artistBanner?.updatedAt}`
@@ -58,6 +59,19 @@ const PageHeader = () => {
                   @media screen and (max-width: ${bp.medium}px) {
                     object-fit: cover;
                   }
+                `}
+              />
+            )}
+            {artistBanner && artist.properties?.tileBackgroundImage && (
+              <div
+                className={css`
+                  width: 100%;
+                  height: 100%;
+                  background-image: url(${artistBanner.sizes?.original +
+                  `?${artistBanner?.updatedAt}`});
+                  background-repeat: repeat;
+                  background-position: center;
+                  filter: brightness(0.8);
                 `}
               />
             )}
@@ -77,4 +91,4 @@ const PageHeader = () => {
   );
 };
 
-export default PageHeader;
+export default PageBanner;

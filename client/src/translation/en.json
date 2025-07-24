@@ -693,6 +693,7 @@
     "refreshPage": "Refresh page",
     "uploading": "Uploading...",
     "replace": "Replace",
+    "tileImage": "Tile background image?",
     "updatedArtist": "Updated artist",
     "dimensionsTip": "For the best effect, upload a {{maxDimensions}} size image. File size is limited to {{ maxSize }}.",
     "yourAlbums": "Your albums",

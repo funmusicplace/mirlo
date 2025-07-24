@@ -38,7 +38,6 @@ function RedeemCode() {
   const { user } = useAuthContext();
   const navigate = useNavigate();
   const [params] = useSearchParams();
-  console.log("params", params);
   const [code, setCode] = React.useState(params.get("code") ?? "");
   const [email, setEmail] = React.useState("");
   const { artistId, trackGroupId } = useParams();

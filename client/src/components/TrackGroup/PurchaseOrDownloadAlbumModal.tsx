@@ -67,7 +67,6 @@ const PurchaseOrDownloadAlbum: React.FC<{
     !isOwned && artistState?.userStripeStatus?.chargesEnabled;
 
   const showDownload = isOwned && !isBeforeReleaseDate;
-  console.log("showPruchase", showPurchase);
 
   const addToCollection =
     !isOwned &&

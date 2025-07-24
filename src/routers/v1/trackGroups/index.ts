@@ -80,7 +80,6 @@ export default function () {
                 )
             )
             .map((l) => l.id);
-          console.log("ids", ids);
           set(where, "tracks.some.OR", [
             { licenseId: { in: ids } }, // Include tracks with specified licenses
             { licenseId: null }, // Include tracks without a license
@@ -92,7 +91,6 @@ export default function () {
           set(where, "tracks.some.licenseId.in", ids);
         }
       }
-      console.log("where", where, where.tracks);
 
       if (title && typeof title === "string") {
         where.title = {

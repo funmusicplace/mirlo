@@ -2,12 +2,12 @@ import styled from "@emotion/styled";
 import React from "react";
 
 export const SelectEl = styled.select`
-  font-size: 1rem;
+  font-size: 0.85rem;
   max-width: 100%;
-  padding: 0.5rem;
+  padding: 0.4rem;
 
   option {
-    padding: 0.5rem;
+    padding: 0.4rem;
   }
 `;
 

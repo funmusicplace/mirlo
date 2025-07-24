@@ -16,6 +16,13 @@ export const generateFullStaticImageUrl = (
 
 export const convertURLArrayToSizes = (urls: string[], bucket: string) => {
   return urls.reduce((aggr, url) => {
+    console.log(`Processing URL: ${url}`);
+    if (!url.includes("-x")) {
+      return {
+        ...aggr,
+        original: generateFullStaticImageUrl(url, bucket),
+      };
+    }
     return {
       ...aggr,
       [url.split("-x")[1]]: generateFullStaticImageUrl(url, bucket),

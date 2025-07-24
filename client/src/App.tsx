@@ -1,5 +1,5 @@
 import { css } from "@emotion/css";
-import PageHeader from "components/common/PageHeader";
+import PageBanner from "components/common/PageBanner";
 import Snackbar from "components/common/Snackbar";
 import Player from "components/Player";
 import { useContext } from "react";
@@ -48,7 +48,7 @@ function App() {
               }
             `}
           >
-            <PageHeader />
+            <PageBanner />
           </div>
           <div
             className={css`
