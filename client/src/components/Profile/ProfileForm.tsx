@@ -17,6 +17,8 @@ import { useProfileMutation } from "queries";
 import SlugInput from "components/common/SlugInput";
 import { FaChevronRight } from "react-icons/fa";
 import FeatureFlag from "components/common/FeatureFlag";
+import { ProfileSection } from ".";
+import ProfileImages from "./ProfileImages";
 
 type FormData = {
   name: string;
@@ -25,6 +27,7 @@ type FormData = {
   newEmail?: string;
   password?: string;
   urlSlug?: string;
+  properties?: LoggedInUser["properties"];
 };
 
 function ProfileForm() {
@@ -40,6 +43,7 @@ function ProfileForm() {
       language: language.split("-")[0],
       isLabelAccount: user?.isLabelAccount,
       urlSlug: user?.urlSlug,
+      properties: user?.properties || {},
     },
   });
   const { register, handleSubmit, watch, setValue } = methods;
@@ -87,7 +91,6 @@ function ProfileForm() {
           flex-direction: column;
         `}
       >
-        <h1>{t("profile")}</h1>
         <FormComponent>
           <label>{t("email")}</label>
           <InputEl {...register("newEmail")} />
@@ -176,6 +179,11 @@ function ProfileForm() {
       >
         {t("resetPasswordLink")}
       </Link>
+      <FeatureFlag featureFlag="label">
+        <ProfileSection>
+          <ProfileImages />
+        </ProfileSection>
+      </FeatureFlag>
     </FormProvider>
   );
 }

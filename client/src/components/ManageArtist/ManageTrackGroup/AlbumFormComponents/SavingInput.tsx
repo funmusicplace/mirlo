@@ -11,6 +11,7 @@ import { css } from "@emotion/css";
 import useErrorHandler from "services/useErrorHandler";
 import { FaCheck } from "react-icons/fa";
 import { useGetArtistColors } from "components/Artist/ArtistButtons";
+import { set } from "lodash";
 
 const SavingInput: React.FC<{
   formKey: string;
@@ -61,11 +62,16 @@ const SavingInput: React.FC<{
       if (type === "number") {
         value = Number(value);
       }
+      let data = {};
 
-      const data = {
-        [formKey]: value,
-        ...extraData,
-      };
+      if (formKey.includes(".")) {
+        set(data, formKey, value);
+      } else {
+        data = {
+          [formKey]: value,
+          ...extraData,
+        };
+      }
 
       await api.put<unknown, unknown>(url, data);
 
@@ -102,6 +108,7 @@ const SavingInput: React.FC<{
           colors={colors}
           {...register(formKey)}
           onInput={saveOnInput}
+          // onChange={type === "checkbox" ? saveOnInput : undefined}
           type={type}
           required={required}
           step={step}

@@ -17,28 +17,38 @@ import logger from "../logger";
 import { Upload } from "@aws-sdk/lib-storage";
 import { Readable } from "stream";
 
-export const incomingArtistBannerBucket = "incoming-artist-banners";
-export const finalArtistBannerBucket = "artist-banners";
+const s3UniquePrefix = "";
 
-export const incomingArtistAvatarBucket = "incoming-artist-avatars";
-export const finalArtistAvatarBucket = "artist-avatars";
+export const incomingArtistBannerBucket =
+  s3UniquePrefix + "incoming-artist-banners";
+export const finalArtistBannerBucket = s3UniquePrefix + "artist-banners";
 
-export const incomingUserAvatarBucket = "incoming-user-avatars";
-export const finalUserAvatarBucket = "mirlo-user-avatars";
+export const incomingArtistAvatarBucket =
+  s3UniquePrefix + "incoming-artist-avatars";
+export const finalArtistAvatarBucket = s3UniquePrefix + "artist-avatars";
 
-export const incomingCoversBucket = "incoming-covers";
-export const finalCoversBucket = "trackgroup-covers";
+export const incomingUserAvatarBucket =
+  s3UniquePrefix + "incoming-user-avatars";
+export const finalUserAvatarBucket = s3UniquePrefix + "mirlo-user-avatars";
 
-export const incomingMerchImageBucket = "incoming-merch-images";
-export const finalMerchImageBucket = "merch-images";
+export const incomingUserBannerBucket =
+  s3UniquePrefix + "incoming-user-banners";
+export const finalUserBannerBucket = s3UniquePrefix + "mirlo-user-banners";
 
-export const finalPostImageBucket = "post-images";
+export const incomingCoversBucket = s3UniquePrefix + "incoming-covers";
+export const finalCoversBucket = s3UniquePrefix + "trackgroup-covers";
 
-export const incomingAudioBucket = "incoming-track-audio";
-export const finalAudioBucket = "track-audio";
+export const incomingMerchImageBucket =
+  s3UniquePrefix + "incoming-merch-images";
+export const finalMerchImageBucket = s3UniquePrefix + "merch-images";
 
-export const trackGroupFormatBucket = "trackgroup-format";
-export const trackFormatBucket = "track-format";
+export const finalPostImageBucket = s3UniquePrefix + "post-images";
+
+export const incomingAudioBucket = s3UniquePrefix + "incoming-track-audio";
+export const finalAudioBucket = s3UniquePrefix + "track-audio";
+
+export const trackGroupFormatBucket = s3UniquePrefix + "trackgroup-format";
+export const trackFormatBucket = s3UniquePrefix + "track-format";
 
 const {
   MINIO_HOST = "",

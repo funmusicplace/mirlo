@@ -24,6 +24,8 @@ import useManagedArtistQuery from "utils/useManagedArtistQuery";
 import FeatureFlag from "components/common/FeatureFlag";
 import Artist from "components/Artist/Artist";
 import PaymentSlider from "../ManageTrackGroup/AlbumFormComponents/PaymentSlider";
+import { InputEl } from "components/common/Input";
+import { register } from "module";
 
 export interface ShareableTrackgroup {
   creatorId: number;
@@ -71,6 +73,7 @@ type FormData = {
       background: string;
       foreground: string;
     };
+    tileBackgroundImage?: boolean;
   };
 };
 
@@ -285,6 +288,13 @@ export const CustomizeLook: React.FC = () => {
                       width="100%"
                       maxDimensions="2500x2500"
                       maxSize="15mb"
+                    />
+                  </FormComponent>
+                  <FormComponent>
+                    <label>{t("tileImage")}</label>
+                    <InputEl
+                      type="checkbox"
+                      {...methods.register("properties.tileBackgroundImage")}
                     />
                   </FormComponent>
                 </div>

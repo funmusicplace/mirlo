@@ -2,7 +2,7 @@ import { css } from "@emotion/css";
 import { Link } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import usePublicArtist from "utils/usePublicObjectById";
-import PageHeader from "components/common/PageHeader";
+import PageBanner from "components/common/ArtistBanner";
 import { bp } from "../../constants";
 import HeaderSearch from "./HeaderSearch";
 import Menu from "./Menu";
@@ -19,6 +19,7 @@ import { FaHandHoldingHeart } from "react-icons/fa";
 import { queryInstanceArtist } from "queries/settings";
 import { useQuery } from "@tanstack/react-query";
 import { getArtistUrl } from "utils/artist";
+import UserBanner from "components/common/UserBanner";
 
 const HeaderWrapper = styled.div<{
   artistBanner?: boolean;
@@ -202,7 +203,8 @@ const Header = () => {
           }
         `}
       >
-        <PageHeader />
+        <PageBanner />
+        <UserBanner />
       </div>
       <div
         className={css`

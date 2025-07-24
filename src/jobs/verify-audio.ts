@@ -63,8 +63,6 @@ export default async (job: Job) => {
       method: "POST",
       body: jsonBody,
     });
-    console.log("status", response.status);
-    console.log("response", await response.json());
 
     await fsPromises.rm(localTrackPath, { recursive: true });
     logger.info(`Cleaned up ${localTrackPath}`);

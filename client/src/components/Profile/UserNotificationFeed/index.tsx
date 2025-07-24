@@ -54,8 +54,6 @@ const UserNotificationFeed = () => {
     [userId]
   );
 
-  console.log("notifications", notifications);
-
   return (
     <WidthWrapper
       variant="medium"

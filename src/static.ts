@@ -22,6 +22,7 @@ export const serveStatic = async (
     return;
   }
 
+  console.log("looking for file", req.params.bucket, req.params.filename);
   // Cache assets for 1 week
   res.setHeader(
     "Cache-Control",

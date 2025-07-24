@@ -66,8 +66,15 @@ export default function () {
 
   async function PUT(req: Request, res: Response, next: NextFunction) {
     const { userId } = req.params as unknown as { userId: string };
-    const { newEmail, name, currency, language, urlSlug, isLabelAccount } =
-      req.body;
+    const {
+      newEmail,
+      name,
+      properties,
+      currency,
+      language,
+      urlSlug,
+      isLabelAccount,
+    } = req.body;
     const user = req.user as User;
 
     if (user.id !== Number(userId)) {
@@ -82,6 +89,7 @@ export default function () {
         language,
         isLabelAccount,
         urlSlug,
+        properties,
       };
 
       let changedEmail = false;

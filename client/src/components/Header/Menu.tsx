@@ -85,7 +85,6 @@ const Menu: React.FC = (props) => {
               {t("manage")}
             </Button>
           </li>
-
           <li
             className={css`
               padding: 0;
@@ -141,18 +140,26 @@ const Menu: React.FC = (props) => {
               </Button>
             </li>
           )}
-          {user?.isAdmin && (
-            <li>
-              <Button
-                onClick={() => {
-                  setIsMenuOpen(false);
-                  navigate("/fulfillment");
-                }}
-              >
-                {t("fulfillment")}
-              </Button>
-            </li>
-          )}
+          <li>
+            <Button
+              onClick={() => {
+                setIsMenuOpen(false);
+                navigate("/fulfillment");
+              }}
+            >
+              {t("fulfillment")}
+            </Button>
+          </li>{" "}
+          <li>
+            <Button
+              onClick={() => {
+                setIsMenuOpen(false);
+                navigate("/sales");
+              }}
+            >
+              {t("viewSalesPage")}
+            </Button>
+          </li>
           <li>
             <Button
               onClick={onLogOut}

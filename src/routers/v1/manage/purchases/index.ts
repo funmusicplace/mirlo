@@ -34,7 +34,11 @@ export default function () {
               artist: true,
             },
           },
-          options: true,
+          options: {
+            include: {
+              merchOptionType: true,
+            },
+          },
           user: true,
         },
       });

@@ -17,6 +17,7 @@ interface LoggedInUser {
   currency?: string;
   featureFlags?: string[];
   isLabelAccount?: boolean;
+  properties?: { tileBackgroundImage?: boolean };
   trackFavorites?: {
     userId: number;
     trackId: number;
@@ -28,6 +29,11 @@ interface LoggedInUser {
   }[];
   language?: string;
   userAvatar?: {
+    url: string;
+    sizes?: { [key: number]: string };
+    updatedAt: string;
+  };
+  userBanner?: {
     url: string;
     sizes?: { [key: number]: string };
     updatedAt: string;
@@ -212,11 +218,12 @@ interface Artist {
   subscriptionTiers: ArtistSubscriptionTier[];
   properties?: {
     colors: ArtistColors;
+    tileBackgroundImage?: boolean;
   };
   user?: Partial<User>;
   banner?: {
     url: string;
-    sizes?: { [key: number]: string };
+    sizes?: { [key: number]: string; original: string };
     updatedAt: string;
   };
   avatar?: {

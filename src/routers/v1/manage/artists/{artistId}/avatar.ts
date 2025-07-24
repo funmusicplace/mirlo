@@ -8,6 +8,7 @@ import busboy from "connect-busboy";
 import { User } from "@mirlo/prisma/client";
 import prisma from "@mirlo/prisma";
 import { deleteArtistAvatar } from "../../../../../utils/artist";
+import { busboyOptions } from "../../../../../utils/images";
 
 type Params = {
   artistId: string;
@@ -19,12 +20,7 @@ export default function () {
     PUT: [
       userAuthenticated,
       artistBelongsToLoggedInUser,
-      busboy({
-        highWaterMark: 2 * 1024 * 1024,
-        limits: {
-          fileSize: 15 * 1024 * 1024,
-        },
-      }),
+      busboy(busboyOptions),
       PUT,
     ],
     DELETE: [userAuthenticated, artistBelongsToLoggedInUser, DELETE],

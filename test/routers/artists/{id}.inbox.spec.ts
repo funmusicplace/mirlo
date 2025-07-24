@@ -116,15 +116,12 @@ describe("artists/{id}/inbox", () => {
           type: "Follow",
         })
         .set("content-type", "application/activity+json");
-      console.log("response", response.body);
 
       const result = await prisma.activityPubArtistFollowers.findFirst({
         where: {
           artistId: artist.id,
         },
       });
-
-      console.log("result", result);
 
       assert.equal(response.statusCode, 200);
     }).timeout(5000);

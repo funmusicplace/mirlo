@@ -37,6 +37,7 @@ export default function () {
           description: req.body.description,
           allowVariable: req.body.allowVariable,
           interval: req.body.interval ?? "MONTH",
+          collectAddress: req.body.collectAddress ?? false,
           platformPercent:
             req.body.platformPercent ??
             (await getSiteSettings()).platformPercent,

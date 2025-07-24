@@ -38,20 +38,47 @@ export function queryLabelArtists() {
   });
 }
 
+const fetchPublicLabelTrackGroups: QueryFunction<
+  {
+    results: TrackGroup[];
+  },
+  ["fetchLabelTrackGroups", { labelSlug?: string }]
+> = ({ queryKey: [_, { labelSlug }], signal }) => {
+  return api.get<{
+    results: TrackGroup[];
+  }>(`v1/labels/${labelSlug}/trackGroups`, { signal });
+};
+
+export function queryPublicLabelTrackGroups(labelSlug?: string) {
+  return queryOptions({
+    queryKey: ["fetchLabelTrackGroups", { labelSlug }],
+    queryFn: fetchPublicLabelTrackGroups,
+    enabled: !!labelSlug,
+  });
+}
+
 type Label = {
   id: number;
   name: string;
   urlSlug: string;
   description: string;
-  userAvatar: { sizes: string[]; url: string; updatedAt: string };
+  avatar: { sizes: string[]; url: string; updatedAt: string };
+  banner?: {
+    sizes?: { [key: number]: string; original: string };
+    url: string;
+    updatedAt: string;
+  };
   createdAt: string;
   updatedAt: string;
   artistLabels: { artist: Artist }[];
+  properties?: {
+    tileBackgroundImage?: boolean;
+  };
 };
 
 const fetchLabel: QueryFunction<
   Label,
-  ["fetchLabel", { labelSlug: string }]
+  ["fetchLabel", { labelSlug?: string }]
 > = ({ queryKey: [_, { labelSlug }], signal }) => {
   return api
     .get<{
@@ -60,9 +87,10 @@ const fetchLabel: QueryFunction<
     .then((r) => r.result);
 };
 
-export function queryLabelBySlug(labelSlug: string) {
+export function queryLabelBySlug(labelSlug?: string) {
   return queryOptions({
     queryKey: ["fetchLabel", { labelSlug }],
     queryFn: fetchLabel,
+    enabled: !!labelSlug,
   });
 }

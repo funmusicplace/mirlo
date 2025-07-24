@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 
 import { useQuery } from "@tanstack/react-query";
-import { queryLabelBySlug } from "queries";
+import { queryPublicLabelTrackGroups } from "queries";
 
 import TrackgroupGrid from "components/common/TrackgroupGrid";
 import ArtistTrackGroup from "components/Artist/ArtistTrackGroup";
@@ -16,29 +16,20 @@ function Label() {
     return <div>{t("labelNotFound")}</div>;
   }
 
-  const { data: label } = useQuery(queryLabelBySlug(labelSlug));
+  const { data: releases } = useQuery(queryPublicLabelTrackGroups(labelSlug));
 
-  if (!label) {
+  if (!releases) {
     return <div>{t("labelNotFound")}</div>;
   }
 
-  const trackGroups = label.artistLabels?.reduce((acc, al) => {
-    if (al.artist?.trackGroups) {
-      acc.push(
-        ...al.artist.trackGroups.map((tg) => ({ ...tg, artist: al.artist }))
-      );
-    }
-    return acc;
-  }, [] as TrackGroup[]);
-
-  if (trackGroups.length === 0) {
+  if (releases.results.length === 0) {
     return <div>{t("noReleasesFound")}</div>;
   }
 
   return (
     <>
       <TrackgroupGrid gridNumber="4" as="ul" role="list">
-        {trackGroups.map((tg) => (
+        {releases.results.map((tg) => (
           <ArtistTrackGroup key={tg.id} trackGroup={tg} />
         ))}
       </TrackgroupGrid>

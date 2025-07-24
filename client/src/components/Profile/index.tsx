@@ -11,9 +11,10 @@ import WidthContainer from "components/common/WidthContainer";
 import { useAuthContext } from "state/AuthContext";
 import ProfileForm from "./ProfileForm";
 import styled from "@emotion/styled";
-import UploadArtistImage from "components/ManageArtist/UploadArtistImage";
+import FeatureFlag from "components/common/FeatureFlag";
+import ProfileImages from "./ProfileImages";
 
-const ProfileSection = styled.div`
+export const ProfileSection = styled.div`
   border-top: 1px solid var(--mi-darken-x-background-color);
   margin-top: 2rem;
   padding-top: 1rem;
@@ -52,38 +53,10 @@ function Profile() {
       `}
     >
       <WidthContainer variant="medium" justify="center">
-        <div
-          className={css`
-            > div {
-              flex-direction: row;
-              max-width: 100%;
-              align-items: center;
+        <h1>{t("profile")}</h1>
 
-              img {
-                width: 10rem;
-              }
-
-              > div {
-                padding: 0 1rem;
-              }
-
-              div:last-child {
-                width: auto !important;
-              }
-            }
-          `}
-        >
-          <UploadArtistImage
-            existing={user}
-            imageTypeDescription={t("yourAvatar")}
-            imageType="avatar"
-            height="auto"
-            width="100%"
-            maxDimensions="1500x1500"
-            maxSize="15mb"
-          />
-        </div>
         <ProfileForm />
+
         <div
           className={css`
             button {

@@ -57,7 +57,11 @@ const getExistingImage = (
   } else if (isMerch(existing)) {
     image = existing.images?.[0];
   } else if (isUser(existing)) {
-    image = existing.userAvatar;
+    if (isUser(existing) && imageType === "avatar") {
+      image = existing.userAvatar;
+    } else if (isUser(existing) && imageType === "banner") {
+      image = existing.userBanner;
+    }
   } else if (imageType === "avatar" || imageType === "banner") {
     image = existing[imageType];
   }

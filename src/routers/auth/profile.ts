@@ -5,6 +5,7 @@ import {
   finalArtistAvatarBucket,
   finalCoversBucket,
   finalUserAvatarBucket,
+  finalUserBannerBucket,
 } from "../../utils/minio";
 
 const profile = async (req: Request, res: Response, next: NextFunction) => {
@@ -25,6 +26,7 @@ const profile = async (req: Request, res: Response, next: NextFunction) => {
         wishlist: true,
         urlSlug: true,
         featureFlags: true,
+        properties: true,
         isLabelAccount: true,
         trackFavorites: {
           include: {
@@ -51,6 +53,7 @@ const profile = async (req: Request, res: Response, next: NextFunction) => {
           },
         },
         userAvatar: true,
+        userBanner: true,
         artistUserSubscriptions: {
           where: {
             deletedAt: null,
@@ -78,6 +81,9 @@ const profile = async (req: Request, res: Response, next: NextFunction) => {
         ...foundUser,
         userAvatar: foundUser?.userAvatar
           ? addSizesToImage(finalUserAvatarBucket, foundUser.userAvatar)
+          : null,
+        userBanner: foundUser?.userBanner
+          ? addSizesToImage(finalUserBannerBucket, foundUser.userBanner)
           : null,
         trackFavorites: foundUser?.trackFavorites.map((tf) => ({
           ...tf,

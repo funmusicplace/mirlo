@@ -504,7 +504,11 @@ const routes: RouteObject[] = [
             "components/FulFillment/Fulfillment"
           );
           return {
-            Component: () => <Fulfillment />,
+            Component: () => (
+              <AuthWrapper>
+                <Fulfillment />
+              </AuthWrapper>
+            ),
           };
         },
       },
@@ -513,7 +517,11 @@ const routes: RouteObject[] = [
         async lazy() {
           const { default: Sales } = await import("components/Sales/Sales");
           return {
-            Component: () => <Sales />,
+            Component: () => (
+              <AuthWrapper>
+                <Sales />
+              </AuthWrapper>
+            ),
           };
         },
       },

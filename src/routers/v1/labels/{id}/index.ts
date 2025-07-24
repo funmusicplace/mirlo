@@ -8,6 +8,7 @@ import {
   finalArtistBannerBucket,
   finalCoversBucket,
   finalUserAvatarBucket,
+  finalUserBannerBucket,
 } from "../../../../utils/minio";
 
 export default function () {
@@ -28,6 +29,8 @@ export default function () {
           id: true,
           currency: true,
           userAvatar: true,
+          userBanner: true,
+          properties: true,
           artistLabels: {
             where: {
               isArtistApproved: true,
@@ -43,9 +46,6 @@ export default function () {
                       cover: true,
                       tracks: true,
                     },
-                    where: {
-                      paymentToUserId: userId,
-                    },
                     orderBy: {
                       releaseDate: "desc",
                     },
@@ -59,7 +59,8 @@ export default function () {
       res.json({
         result: {
           ...label,
-          userAvatar: addSizesToImage(finalUserAvatarBucket, label?.userAvatar),
+          banner: addSizesToImage(finalUserBannerBucket, label?.userBanner),
+          avatar: addSizesToImage(finalUserAvatarBucket, label?.userAvatar),
           artistLabels: label?.artistLabels.map((al) => ({
             ...al,
             artist: {

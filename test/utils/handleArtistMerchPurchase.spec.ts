@@ -220,14 +220,11 @@ describe("handleArtistMerchPurchase", () => {
 
     assert.equal(purchase?.options?.[0].name, "small");
     assert.equal(purchase?.options?.[0].quantityRemaining, 9);
-    console.log(
-      "purchase",
-      await prisma.merchPurchase.findFirst({
-        where: { userId: purchaser.id },
-        include: { options: true },
-      })
-    );
-    console.log("updatedMerch", updatedMerch?.optionTypes[0].options);
+    await prisma.merchPurchase.findFirst({
+      where: { userId: purchaser.id },
+      include: { options: true },
+    });
+    updatedMerch?.optionTypes[0].options;
   });
 
   it("should send correct price in emails", async () => {
