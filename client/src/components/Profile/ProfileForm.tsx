@@ -87,7 +87,6 @@ function ProfileForm() {
           flex-direction: column;
         `}
       >
-        <h1>{t("profile")}</h1>
         <FormComponent>
           <label>{t("email")}</label>
           <InputEl {...register("newEmail")} />
