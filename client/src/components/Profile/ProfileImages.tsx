@@ -1,4 +1,7 @@
 import { css } from "@emotion/css";
+import { CheckBoxLabel } from "components/common/FormCheckbox";
+import FormComponent from "components/common/FormComponent";
+import SavingInput from "components/ManageArtist/ManageTrackGroup/AlbumFormComponents/SavingInput";
 import UploadArtistImage from "components/ManageArtist/UploadArtistImage";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -78,6 +81,18 @@ const ProfileImages: React.FC = () => {
           maxDimensions="1500x1500"
           maxSize="15mb"
         />
+        <FormComponent>
+          <CheckBoxLabel htmlFor="tileBackgroundImage">
+            <SavingInput
+              type="checkbox"
+              id="tileBackgroundImage"
+              formKey="properties.tileBackgroundImage"
+              url={"users/" + user.id}
+              timer={0}
+            />
+            {t("tileBackgroundImage")}
+          </CheckBoxLabel>
+        </FormComponent>
       </div>
     </>
   );

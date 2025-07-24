@@ -17,6 +17,7 @@ interface LoggedInUser {
   currency?: string;
   featureFlags?: string[];
   isLabelAccount?: boolean;
+  properties?: { tileBackgroundImage?: boolean };
   trackFavorites?: {
     userId: number;
     trackId: number;

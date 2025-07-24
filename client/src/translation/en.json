@@ -104,6 +104,7 @@
   "profile": {
     "yourAvatar": "Your avatar",
     "yourBanner": "Your banner",
+    "tileBackgroundImage": "Tile background image",
     "resetPasswordLink": "Want to change your password? Use the reset form.",
     "password": "Updating your email requires entering your password",
     "deleteYourAccount": "No longer want to use Mirlo? Delete your account",
@@ -271,8 +272,10 @@
   },
   "label": {
     "artist": "Artist",
+    "linkToProfile": "Go to <link>your profile page</link> to edit your avatar and background.",
     "labelProfile": "Manage artists",
     "viewSalesPage": "View sales page",
+    "manageLabelDescription": "Here you can manage your label page. You can add artists to your roster, manage their pages, view your sales, and fulfillment orders.",
     "viewFulfillmentPage": "View fulfillment page",
     "page": "Artist link",
     "manageLabel": "Manage",

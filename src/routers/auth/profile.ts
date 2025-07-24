@@ -26,6 +26,7 @@ const profile = async (req: Request, res: Response, next: NextFunction) => {
         wishlist: true,
         urlSlug: true,
         featureFlags: true,
+        properties: true,
         isLabelAccount: true,
         trackFavorites: {
           include: {

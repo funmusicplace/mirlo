@@ -116,7 +116,6 @@ const UploadArtistImage: React.FC<{
   const [existingImage, setExistingImage] = React.useState(
     getExistingImage(existing, imageType)
   );
-  console.log("existingImage", existingImage);
   const [isSaving, setIsSaving] = React.useState(false);
 
   const resetWrapper = React.useCallback(async () => {

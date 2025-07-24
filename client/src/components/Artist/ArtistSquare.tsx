@@ -13,7 +13,6 @@ import {
 const ArtistSquare: React.FC<{
   artist: Artist;
 }> = ({ artist }) => {
-  console.log("artist", artist);
   return (
     <TrackGroupWrapper>
       <div>

@@ -11,11 +11,10 @@ import WidthContainer from "components/common/WidthContainer";
 import { useAuthContext } from "state/AuthContext";
 import ProfileForm from "./ProfileForm";
 import styled from "@emotion/styled";
-import UploadArtistImage from "components/ManageArtist/UploadArtistImage";
 import FeatureFlag from "components/common/FeatureFlag";
 import ProfileImages from "./ProfileImages";
 
-const ProfileSection = styled.div`
+export const ProfileSection = styled.div`
   border-top: 1px solid var(--mi-darken-x-background-color);
   margin-top: 2rem;
   padding-top: 1rem;
@@ -57,11 +56,7 @@ function Profile() {
         <h1>{t("profile")}</h1>
 
         <ProfileForm />
-        <FeatureFlag featureFlag="label">
-          <ProfileSection>
-            <ProfileImages />
-          </ProfileSection>
-        </FeatureFlag>
+
         <div
           className={css`
             button {

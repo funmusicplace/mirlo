@@ -190,7 +190,6 @@ describe("trackGroups", () => {
       let parser = new Parser();
 
       const obj = await parser.parseString(response.text);
-      console.log("obj", obj);
 
       assert.equal(
         obj.feedUrl,

@@ -11,15 +11,12 @@ import { useQuery } from "@tanstack/react-query";
 const UserBanner = () => {
   const { pathname } = useLocation();
 
-  const isManage = pathname.includes("manage");
   const isLabel = pathname.startsWith("/label/");
   const { labelSlug } = useParams();
 
   const { data: label } = useQuery(queryLabelBySlug(labelSlug));
 
   const banner = label?.banner;
-  console.log("label", label);
-  console.log("banner", banner);
 
   const showBanner = isLabel;
 

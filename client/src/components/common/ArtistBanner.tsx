@@ -56,7 +56,6 @@ const ArtistBanner = () => {
 
   const showBanner = !(trackGroupId || postId) || isManage;
 
-  console.log("artist", artist);
   return (
     <>
       {artistBanner && showBanner && (
