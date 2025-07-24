@@ -10,9 +10,11 @@ import {
   finalMerchImageBucket,
   finalPostImageBucket,
   finalUserAvatarBucket,
+  finalUserBannerBucket,
   incomingArtistAvatarBucket,
   incomingArtistBannerBucket,
   incomingMerchImageBucket,
+  incomingUserBannerBucket,
   uploadWrapper,
 } from "../utils/minio";
 import prisma from "@mirlo/prisma";
@@ -149,6 +151,34 @@ export const processUserAvatar = (ctx: APIContext) => {
         });
       },
       finalUserAvatarBucket
+    );
+  };
+};
+
+export const processUserBanner = (ctx: APIContext) => {
+  return async (userId: number) => {
+    return uploadAndSendToImageQueue(
+      ctx,
+      incomingUserBannerBucket,
+      "userBanner",
+      "banner",
+      async (fileInfo: { filename: string }) => {
+        logger.info(`Upserting user banner`);
+        return prisma.userBanner.upsert({
+          create: {
+            originalFilename: fileInfo.filename,
+            userId,
+          },
+          update: {
+            originalFilename: fileInfo.filename,
+            deletedAt: null,
+          },
+          where: {
+            userId,
+          },
+        });
+      },
+      finalUserBannerBucket
     );
   };
 };

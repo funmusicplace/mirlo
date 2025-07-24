@@ -2,6 +2,13 @@ import { backendStorage } from "./minio";
 
 const { BACKBLAZE_REGION = "" } = process.env;
 
+export const busboyOptions = {
+  highWaterMark: 2 * 1024 * 1024,
+  limits: {
+    fileSize: 20 * 1024 * 1024, // 20 MB
+  },
+};
+
 export const generateFullStaticImageUrl = (
   imageName: string,
   bucket: string,
@@ -16,7 +23,6 @@ export const generateFullStaticImageUrl = (
 
 export const convertURLArrayToSizes = (urls: string[], bucket: string) => {
   return urls.reduce((aggr, url) => {
-    console.log(`Processing URL: ${url}`);
     if (!url.includes("-x")) {
       return {
         ...aggr,

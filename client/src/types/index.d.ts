@@ -32,6 +32,11 @@ interface LoggedInUser {
     sizes?: { [key: number]: string };
     updatedAt: string;
   };
+  userBanner?: {
+    url: string;
+    sizes?: { [key: number]: string };
+    updatedAt: string;
+  };
 }
 
 interface Track {

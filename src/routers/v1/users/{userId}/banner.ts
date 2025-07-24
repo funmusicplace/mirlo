@@ -3,13 +3,16 @@ import busboy from "connect-busboy";
 import {
   artistBelongsToLoggedInUser,
   userAuthenticated,
-} from "../../../../../auth/passport";
-import { processArtistBanner } from "../../../../../queues/processImages";
+} from "../../../../auth/passport";
+import {
+  processArtistBanner,
+  processUserBanner,
+} from "../../../../queues/processImages";
 import prisma from "@mirlo/prisma";
 import { User } from "@mirlo/prisma/client";
-import { deleteArtistBanner } from "../../../../../utils/artist";
-import { AppError } from "../../../../../utils/error";
-import { busboyOptions } from "../../../../../utils/images";
+import { deleteArtistBanner } from "../../../../utils/artist";
+import { AppError } from "../../../../utils/error";
+import { busboyOptions } from "../../../../utils/images";
 
 type Params = {
   artistId: string;
@@ -18,21 +21,16 @@ type Params = {
 
 export default function () {
   const operations = {
-    PUT: [
-      userAuthenticated,
-      artistBelongsToLoggedInUser,
-      busboy(busboyOptions),
-      PUT,
-    ],
+    PUT: [userAuthenticated, busboy(busboyOptions), PUT],
     DELETE: [userAuthenticated, artistBelongsToLoggedInUser, DELETE],
   };
 
   async function PUT(req: Request, res: Response, next: NextFunction) {
-    const { artistId } = req.params as unknown as Params;
+    const loggedInUser = req.user as User;
 
     try {
       let jobId = null;
-      jobId = await processArtistBanner({ req, res })(Number(artistId));
+      jobId = await processUserBanner({ req, res })(loggedInUser.id);
 
       res.json({ result: { jobId } });
     } catch (error) {
@@ -41,11 +39,11 @@ export default function () {
   }
 
   PUT.apiDoc = {
-    summary: "Updates an artist banner belonging to a user",
+    summary: "Updates a banner for a user",
     parameters: [
       {
         in: "path",
-        name: "artistId",
+        name: "userId",
         required: true,
         type: "string",
       },
@@ -59,7 +57,7 @@ export default function () {
     ],
     responses: {
       200: {
-        description: "Updated Artist",
+        description: "Updated User",
         schema: {
           type: "object",
         },

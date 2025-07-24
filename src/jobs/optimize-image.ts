@@ -204,7 +204,20 @@ const optimizeImage = async (job: Job) => {
         data: { url: urls },
       });
     } else if (model === "userAvatar") {
+      const faviconFinalName = `${destinationId}_user_avatar_favicon.ico`;
+      ico.sharpsToIco([sharp(buffer)], faviconFinalName, {
+        sizes: [48],
+        resizeOptions: {},
+      });
+      logger.info("Uploading user avatar favicon to bucket");
+      await uploadWrapper(finalMinioBucket, faviconFinalName, sharp(buffer));
+
       await prisma.userAvatar.update({
+        where: { id: destinationId },
+        data: { url: urls },
+      });
+    } else if (model === "userBanner") {
+      await prisma.userBanner.update({
         where: { id: destinationId },
         data: { url: urls },
       });

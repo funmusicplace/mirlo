@@ -83,6 +83,37 @@ function Profile() {
             maxSize="15mb"
           />
         </div>
+        <div
+          className={css`
+            > div {
+              flex-direction: row;
+              max-width: 100%;
+              align-items: center;
+
+              img {
+                width: 10rem;
+              }
+
+              > div {
+                padding: 0 1rem;
+              }
+
+              div:last-child {
+                width: auto !important;
+              }
+            }
+          `}
+        >
+          <UploadArtistImage
+            existing={user}
+            imageTypeDescription={t("yourBanner")}
+            imageType="banner"
+            height="auto"
+            width="100%"
+            maxDimensions="1500x1500"
+            maxSize="15mb"
+          />
+        </div>
         <ProfileForm />
         <div
           className={css`

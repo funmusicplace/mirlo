@@ -1,5 +1,5 @@
 import { css } from "@emotion/css";
-import PageBanner from "components/common/PageBanner";
+import PageBanner from "components/common/ArtistBanner";
 import Snackbar from "components/common/Snackbar";
 import Player from "components/Player";
 import { useContext } from "react";
@@ -14,6 +14,7 @@ import ArtistColorsWrapper from "components/ArtistColorsWrapper";
 import CookieDisclaimer from "components/CookieDisclaimer";
 import { useAuthContext } from "state/AuthContext";
 import ScrollToTop from "components/ScrollToTop";
+import UserBanner from "components/common/UserBanner";
 
 function App() {
   const { isDisplayed } = useContext(SnackbarContext);
@@ -49,6 +50,7 @@ function App() {
             `}
           >
             <PageBanner />
+            <UserBanner />
           </div>
           <div
             className={css`

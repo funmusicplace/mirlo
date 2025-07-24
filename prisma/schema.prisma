@@ -85,10 +85,22 @@ model User {
   artistLabels                        ArtistLabel[]
   userTrackPurchases                  UserTrackPurchase[]
   userAvatar                          UserAvatar?
+  userBanner                          UserBanner?
   trackFavorites                      UserTrackFavorite[]
 }
 
 model UserAvatar {
+  id               String    @id @default(uuid()) @db.Uuid
+  url              String[]
+  user             User      @relation(fields: [userId], references: [id])
+  userId           Int       @unique
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  deletedAt        DateTime?
+  originalFilename String?
+}
+
+model UserBanner {
   id               String    @id @default(uuid()) @db.Uuid
   url              String[]
   user             User      @relation(fields: [userId], references: [id])

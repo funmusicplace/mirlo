@@ -57,7 +57,11 @@ const getExistingImage = (
   } else if (isMerch(existing)) {
     image = existing.images?.[0];
   } else if (isUser(existing)) {
-    image = existing.userAvatar;
+    if (isUser(existing) && imageType === "avatar") {
+      image = existing.userAvatar;
+    } else if (isUser(existing) && imageType === "banner") {
+      image = existing.userBanner;
+    }
   } else if (imageType === "avatar" || imageType === "banner") {
     image = existing[imageType];
   }
@@ -112,6 +116,7 @@ const UploadArtistImage: React.FC<{
   const [existingImage, setExistingImage] = React.useState(
     getExistingImage(existing, imageType)
   );
+  console.log("existingImage", existingImage);
   const [isSaving, setIsSaving] = React.useState(false);
 
   const resetWrapper = React.useCallback(async () => {

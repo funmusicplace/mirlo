@@ -20,26 +20,30 @@ import Tabs from "components/common/Tabs";
 import { ButtonLink } from "components/common/Button";
 import { useAuthContext } from "state/AuthContext";
 import { FaCog } from "react-icons/fa";
+import LoadingBlocks from "components/Artist/LoadingBlocks";
 
 function Label() {
   const { user } = useAuthContext();
   const { t } = useTranslation("translation", { keyPrefix: "label" });
 
   const { labelSlug } = useParams();
+  const { data: label, isPending } = useQuery(queryLabelBySlug(labelSlug));
 
-  if (!labelSlug) {
+  const avatar = label?.avatar;
+
+  if (!label && !isPending) {
     return <div>{t("labelNotFound")}</div>;
   }
 
-  const { data: label } = useQuery(queryLabelBySlug(labelSlug));
-
-  const avatar = label?.userAvatar;
-
-  if (!label) {
-    return <div>{t("labelNotFound")}</div>;
+  if (isPending) {
+    return (
+      <ArtistPageWrapper>
+        <LoadingBlocks />
+      </ArtistPageWrapper>
+    );
   }
 
-  const trackGroups = label.artistLabels?.reduce((acc, al) => {
+  const trackGroups = label?.artistLabels?.reduce((acc, al) => {
     if (al.artist?.trackGroups) {
       acc.push(...al.artist.trackGroups);
     }
