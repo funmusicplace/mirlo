@@ -126,13 +126,18 @@ export const Manage: React.FC = () => {
                   </Box>
                 )}
                 {userId && (
-                  <a href={api.paymentProcessor.stripeConnect(userId)}>
-                    <Button>
-                      {stripeAccountStatus?.detailsSubmitted
-                        ? t("updateBankAccount")
-                        : t("setUpBankAccount")}
-                    </Button>
-                  </a>
+                  <>
+                    <a href={api.paymentProcessor.stripeConnect(userId)}>
+                      <Button>
+                        {stripeAccountStatus?.detailsSubmitted
+                          ? t("updateBankAccount")
+                          : t("setUpBankAccount")}
+                      </Button>
+                    </a>
+                    <a href={api.paymentProcessor.paypalConnect(userId)}>
+                      <Button>{t("paypal")}</Button>
+                    </a>
+                  </>
                 )}
               </>
             )}

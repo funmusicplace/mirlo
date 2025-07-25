@@ -8,6 +8,9 @@ declare global {
     type Settings = {
       platformPercent: number;
       instanceArtistId?: number;
+      paypalClientId?: string;
+      paypalSecret?: string;
+      stripeKey?: string;
     };
   }
 }
