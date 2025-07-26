@@ -680,6 +680,7 @@
   },
   "artistForm": {
     "deleteArtist": "Permanently delete artist page",
+    "areYouSureDelete": "Are your sure you want to delete this artist page?",
     "whatLabelsisThisArtistPartOf": "What label is this artist a part of?",
     "terminationDanger": " Artist page termination ",
     "backgroundImageLabel": "Background image",
