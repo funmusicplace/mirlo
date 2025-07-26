@@ -35,9 +35,9 @@
     "creativeCommons": "Creative Commons",
     "allRightsReserved": "All Rights Reserved",
     "all": "All",
-    "mostPopular": "Most popular",
+    "mostPopular": "Popularity (top to last)",
     "browseTags": "Browse tags",
-    "alphabetical": "Alphabetical"
+    "alphabetical": "Name (A to Z)"
   },
   "cookies": {
     "weUseCookies": "We use cookies to keep you logged in and to maintain your music queue.",
