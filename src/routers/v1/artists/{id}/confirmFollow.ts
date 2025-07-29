@@ -47,12 +47,8 @@ export default function () {
         });
 
       if (!confirmation) {
-        next(
-          new AppError({
-            name: "Token not found",
-            httpCode: 404,
-            description: "Token not found",
-          })
+        res.redirect(
+          process.env.REACT_APP_CLIENT_DOMAIN + `/?message=Something went wrong`
         );
       }
 
@@ -83,7 +79,7 @@ export default function () {
 
           res.redirect(
             process.env.REACT_APP_CLIENT_DOMAIN +
-              `/${artist.urlSlug}/?followSuccess=true`
+              `/${artist.urlSlug}/checkout-complete?purchaseType=follow`
           );
         }
       }

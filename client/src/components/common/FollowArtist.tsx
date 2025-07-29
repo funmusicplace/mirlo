@@ -140,9 +140,14 @@ const FollowArtist: React.FC<{ artistId: number }> = ({ artistId }) => {
               margin-bottom: 1rem;
             `}
           >
-            {t("chooseSupportLevel", {
-              artistName: artist?.name,
-            })}
+            {t(
+              hasNoneDefaultSubscriptionTiers
+                ? "chooseSupportLevel"
+                : "youCanFollowThisArtist",
+              {
+                artistName: artist?.name,
+              }
+            )}
           </p>
         )}
         <SupportArtistTiersForm artist={artist} excludeDefault={!!user} />

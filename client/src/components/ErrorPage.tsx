@@ -1,3 +1,4 @@
+import { css } from "@emotion/css";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { useRouteError } from "react-router-dom";
@@ -18,7 +19,7 @@ export default function ErrorPage() {
   const { t } = useTranslation("translation", { keyPrefix: "errorPage" });
 
   return (
-    <div>
+    <div className={css``}>
       <h1>{t("reactError")}</h1>
       <p>{t("unexpectedError")}</p>
       <p>
