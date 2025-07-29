@@ -676,6 +676,7 @@ export const handleSubscription = async (
             to: artistUserSubscription.user.email,
           },
           locals: {
+            interval: artistUserSubscription.artistSubscriptionTier.interval,
             artist: artistUserSubscription.artistSubscriptionTier.artist,
             artistUserSubscription,
             user: artistUserSubscription.user,
@@ -693,6 +694,7 @@ export const handleSubscription = async (
             to: artistUserSubscription.artistSubscriptionTier.artist.user.email,
           },
           locals: {
+            interval: artistUserSubscription.artistSubscriptionTier.interval,
             artist: artistUserSubscription.artistSubscriptionTier.artist,
             artistUserSubscription,
             user: artistUserSubscription.user,
