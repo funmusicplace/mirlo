@@ -3,7 +3,7 @@ extends ../layout.pug
 block content
     p Hi,
     p
-      | Thank you for supporting #{artist.name} with your monthly 
+      | Thank you for supporting #{artist.name} with your #{interval === 'month' ? 'monthly': 'yearly'} 
       | support at the "#{artistUserSubscription.artistSubscriptionTier.name}" tier.
     table 
       tr 
