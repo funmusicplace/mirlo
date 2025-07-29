@@ -20,6 +20,23 @@ const hlsConfig = {
     xhr.withCredentials = true;
     // xhr.setRequestHeader("Authorization", `Bearer ${token}`);
   },
+  maxBufferLength: 60,
+  fragLoadPolicy: {
+    default: {
+      maxTimeToFirstByteMs: 10000,
+      maxLoadTimeMs: 120000,
+      timeoutRetry: {
+        maxNumRetry: 4,
+        retryDelayMs: 1000,
+        maxRetryDelayMs: 0,
+      },
+      errorRetry: {
+        maxNumRetry: 6,
+        retryDelayMs: 1000,
+        maxRetryDelayMs: 8000,
+      },
+    },
+  },
 };
 
 export const AudioWrapper: React.FC<{

@@ -1,5 +1,7 @@
 import React from "react";
 import { css } from "@emotion/css";
+import { useQuery } from "@tanstack/react-query";
+import useArtistQuery from "utils/useArtistQuery";
 
 export const SongTimeDisplay: React.FC<{
   position: string;
@@ -32,11 +34,11 @@ export const SongTimeDisplay: React.FC<{
     >
       <div
         className={css`
-          height: 0.25rem;
+          height: 0.4rem;
           overflow: none;
-          transition: 0.1s width;
+          transition: 0.2s width;
           width: ${percent * 100}%;
-          background: var(--mi-secondary-color);
+          background: var(--mi-pink);
           pointer-events: none;
         `}
       ></div>
