@@ -6,7 +6,6 @@ import {
   confirmArtistIdExists,
   subscribeUserToArtist,
 } from "../../../../utils/artist";
-import { AppError } from "../../../../utils/error";
 
 type Params = {
   id: string;

@@ -12,6 +12,7 @@ const forbiddenNames = [
   "manage",
   "profile",
   "signup",
+  "verify-email",
   "about",
   "pages",
   "widget",

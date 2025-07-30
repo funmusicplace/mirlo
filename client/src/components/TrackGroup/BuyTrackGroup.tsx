@@ -8,7 +8,6 @@ import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
 
 import { InputEl } from "components/common/Input";
-import FreeDownload from "./FreeDownload";
 import FormComponent from "components/common/FormComponent";
 import { FormProvider, useForm } from "react-hook-form";
 import EmailInput from "./EmailInput";
@@ -20,6 +19,7 @@ import { ArtistButton } from "components/Artist/ArtistButtons";
 import { useAuthContext } from "state/AuthContext";
 import TextArea from "components/common/TextArea";
 import EmbeddedStripeForm from "components/common/EmbeddedStripe";
+import EmailVerification from "components/common/EmailVerification";
 
 interface FormData {
   chosenPrice: string;
@@ -36,10 +36,10 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
   const { user } = useAuthContext();
   const minPrice = track?.minPrice ?? trackGroup.minPrice;
+  const [verifiedEmail, setVerifiedEmail] = React.useState<string | null>(null);
   const methods = useForm<FormData>({
     defaultValues: {
       chosenPrice: `${minPrice ? minPrice / 100 : ""}`,
-      userEmail: "",
     },
     reValidateMode: "onChange",
   });
@@ -87,8 +87,6 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
     [snackbar, t, trackGroup.id, track]
   );
 
-  const lessThan1 = !isFinite(+chosenPrice) ? true : Number(chosenPrice) < 1;
-
   let lessThanMin = false;
   if (minPrice) {
     lessThanMin =
@@ -98,7 +96,7 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
   const isBeforeReleaseDate = new Date(trackGroup.releaseDate) > new Date();
   const purchaseText = isBeforeReleaseDate ? "preOrder" : "buy";
 
-  const isDisabled = !!lessThan1 || lessThanMin || !isValid;
+  const isDisabled = lessThanMin || !isValid;
 
   if (clientSecret) {
     return <EmbeddedStripeForm clientSecret={clientSecret} />;
@@ -163,24 +161,26 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
             <small>{t("messageToArtist")}</small>
           </FormComponent>
 
-          <EmailInput required />
+          <EmailVerification setVerifiedEmail={setVerifiedEmail} />
 
-          <ArtistButton
-            size="big"
-            rounded
-            type="submit"
-            isLoading={stripeLoading}
-            title={
-              isDisabled
-                ? user
-                  ? (t("ensurePrice") ?? "")
-                  : (t("ensurePriceAndEmail") ?? "")
-                : ""
-            }
-            disabled={isDisabled}
-          >
-            {t(purchaseText)}
-          </ArtistButton>
+          {(user || verifiedEmail) && (
+            <ArtistButton
+              size="big"
+              rounded
+              type="submit"
+              isLoading={stripeLoading}
+              title={
+                isDisabled
+                  ? user
+                    ? (t("ensurePrice") ?? "")
+                    : (t("ensurePriceAndEmail") ?? "")
+                  : ""
+              }
+              disabled={isDisabled}
+            >
+              {t(purchaseText)}
+            </ArtistButton>
+          )}
 
           <div
             className={css`
@@ -209,9 +209,6 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
                   artistName: trackGroup.artist?.name,
                 })}
               </strong>
-            )}
-            {!minPrice && (
-              <FreeDownload trackGroup={trackGroup} chosenPrice={chosenPrice} />
             )}
           </>
         )}

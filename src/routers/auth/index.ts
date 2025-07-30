@@ -11,6 +11,7 @@ import signup from "./signup";
 import refresh from "./refresh";
 import { Job } from "bullmq";
 import login from "./login";
+import verifyEmail from "./verifyEmail";
 
 const jwt_secret = process.env.JWT_SECRET ?? "";
 const refresh_secret = process.env.REFRESH_TOKEN_SECRET ?? "";
@@ -22,6 +23,8 @@ export async function hashPassword(password: string) {
 }
 
 router.post(`/signup`, signup);
+
+router.post(`/verify-email`, verifyEmail);
 
 router.get(`/confirmation/:emailConfirmationToken`, async (req, res, next) => {
   try {
