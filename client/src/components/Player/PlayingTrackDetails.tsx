@@ -44,8 +44,8 @@ const PlayingTrackDetails: React.FC<{ currentTrack: Track }> = ({
 
         margin-right: 1rem;
         margin-left: 1rem;
-        margin-bottom: 0.3rem;
-        padding-top: 0.5rem;
+        margin-bottom: 0.5rem;
+        padding-top: 0.7rem;
 
         a {
           text-decoration: none;

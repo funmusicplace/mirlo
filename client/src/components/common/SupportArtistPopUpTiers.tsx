@@ -39,7 +39,8 @@ const ListItem = styled.li<{ colors?: ArtistColors }>`
   input[type="radio"]:checked + label {
     background-color: ${(props) =>
       props.colors?.background ?? "var(--mi-background-color)"};
-
+    color: ${(props) =>
+      props.colors?.foreground ?? "var(--mi-foreground-color)"};
     &:after {
       content: "✔";
     }

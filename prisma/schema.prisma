@@ -70,6 +70,8 @@ model User {
   featureFlags                        String[]
   language                            String?
   properties                          Json?
+  userConfirmationCode                String?
+  userConfirmationCodeExpiration      DateTime?
   userTrackGroupPurchases             UserTrackGroupPurchase[]
   artistUserSubscriptions             ArtistUserSubscription[]
   wishlist                            UserTrackGroupWishlist[]
@@ -87,6 +89,15 @@ model User {
   userAvatar                          UserAvatar?
   userBanner                          UserBanner?
   trackFavorites                      UserTrackFavorite[]
+}
+
+model EmailVerification {
+  id              String    @id @default(uuid()) @db.Uuid
+  email           String
+  token           String
+  tokenExpiration DateTime? @default(dbgenerated("(NOW() + '06:00:00'::interval)"))
+
+  @@unique([email])
 }
 
 model UserAvatar {

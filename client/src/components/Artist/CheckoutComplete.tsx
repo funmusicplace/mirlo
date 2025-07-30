@@ -63,7 +63,11 @@ function CheckoutComplete() {
         }
       `}
     >
-      <h1>{t("purchaseComplete")}</h1>
+      <h1>
+        {purchaseType === "follow"
+          ? t("successfullyFollowedArtist")
+          : t("purchaseComplete")}
+      </h1>
       <div
         className={css`
           display: flex;

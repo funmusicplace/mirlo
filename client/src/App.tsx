@@ -3,8 +3,8 @@ import PageBanner from "components/common/ArtistBanner";
 import Snackbar from "components/common/Snackbar";
 import Player from "components/Player";
 import { useContext } from "react";
-import { Outlet, useLocation } from "react-router-dom";
-import SnackbarContext from "state/SnackbarContext";
+import { Outlet, useLocation, useSearchParams } from "react-router-dom";
+import SnackbarContext, { useSnackbar } from "state/SnackbarContext";
 import useWidgetListener from "utils/useWidgetListener";
 import Header from "./components/Header/Header";
 import { Footer } from "components/Footer";
@@ -15,17 +15,33 @@ import CookieDisclaimer from "components/CookieDisclaimer";
 import { useAuthContext } from "state/AuthContext";
 import ScrollToTop from "components/ScrollToTop";
 import UserBanner from "components/common/UserBanner";
+import React from "react";
 
 function App() {
   const { isDisplayed } = useContext(SnackbarContext);
   useWidgetListener();
   const location = useLocation();
+  const snackbar = useSnackbar();
+  const [search, setSearch] = useSearchParams();
   const { user } = useAuthContext();
 
   // In the case of a widget we don't show all the wrapper stuff
   if (location.pathname.includes("widget")) {
     return <Outlet />;
   }
+
+  React.useEffect(() => {
+    if (search.get("message")) {
+      const message = search.get("message");
+      if (message) {
+        snackbar(message, { type: "warning" });
+        setSearch((prev) => {
+          prev.delete("message");
+          return prev;
+        });
+      }
+    }
+  }, [search]);
 
   return (
     <>

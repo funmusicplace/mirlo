@@ -34,7 +34,10 @@ export const corsCheck = async (...args: [Request, Response, NextFunction]) => {
             req.path.endsWith("/feed") &&
             req.query?.format === "rss") ||
           (req.path.startsWith("/v1/trackGroups") &&
-            req.query?.format === "rss")
+            req.query?.format === "rss") ||
+          // confirmFollow is public cause it comes from an email
+          (req.path.startsWith("/v1/artists/") &&
+            req.path.endsWith("/confirmFollow"))
         );
       // We only care about the API key for API requests
       if (isSameSite || !isAPIEndpointPrivate) {

@@ -27,6 +27,11 @@ const SupportArtistTiersForm: React.FC<{
     React.useState(false);
   const snackbar = useSnackbar();
 
+  const { data: artistDetails } = useQuery(
+    queryArtist({ artistSlug: artist.urlSlug ?? "", includeDefaultTier: true })
+  );
+
+  const options = artistDetails?.subscriptionTiers ?? [];
   const methods = useForm<{
     tier: {
       id: number;
@@ -41,17 +46,14 @@ const SupportArtistTiersForm: React.FC<{
   }>({
     defaultValues: {
       monthlyContribution: true,
-      tier: user?.artistUserSubscriptions?.find(
-        (s) => s.artistSubscriptionTier.artistId === artist.id
-      )?.artistSubscriptionTier,
+      tier:
+        user?.artistUserSubscriptions?.find(
+          (s) => s.artistSubscriptionTier.artistId === artist.id
+        )?.artistSubscriptionTier || options.length === 1
+          ? options[0]
+          : undefined,
     },
   });
-
-  const { data: artistDetails } = useQuery(
-    queryArtist({ artistSlug: artist.urlSlug ?? "", includeDefaultTier: true })
-  );
-
-  const options = artistDetails?.subscriptionTiers ?? [];
 
   const unsubscribeFromArtist = async () => {
     try {
@@ -103,6 +105,7 @@ const SupportArtistTiersForm: React.FC<{
 
   const noErrors =
     methods.formState.isValid || isEmpty(methods.formState.errors);
+
   return (
     <>
       {!artistDetails && <LoadingBlocks rows={1} />}

@@ -1,4 +1,6 @@
 import prisma from "@mirlo/prisma";
+import { User } from "@mirlo/prisma/client";
+
 import logger from "../logger";
 import { deleteArtist, deleteStripeSubscriptions } from "./artist";
 import countries from "./country-codes-currencies";
@@ -63,7 +65,7 @@ export const findOrCreateUserBasedOnEmail = async (
   userId?: string | number
 ) => {
   let newUser = false;
-  let user;
+  let user: User | undefined | null;
 
   if (!userId && userEmail) {
     newUser = true; // If this is true the user wasn't logged in when making the purchase
