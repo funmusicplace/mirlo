@@ -47,6 +47,7 @@ export default function () {
             include: {
               user: true,
               subscriptionTiers: true,
+              paymentToUser: true,
             },
           },
           paymentToUser: true,
@@ -67,6 +68,7 @@ export default function () {
 
       const stripeAccountId =
         trackGroup.paymentToUser?.stripeAccountId ??
+        trackGroup.artist.paymentToUser?.stripeAccountId ??
         trackGroup.artist.user.stripeAccountId;
 
       const { isPriceZero, priceNumber } = determinePrice(

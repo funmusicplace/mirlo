@@ -48,6 +48,7 @@ export default function () {
               artist: {
                 include: {
                   user: true,
+                  paymentToUser: true,
                   subscriptionTiers: true,
                 },
               },
@@ -72,6 +73,7 @@ export default function () {
 
       const stripeAccountId =
         track.trackGroup.paymentToUser?.stripeAccountId ??
+        track.trackGroup.artist.paymentToUser?.stripeAccountId ??
         track.trackGroup.artist.user.stripeAccountId;
 
       const priceNumber =

@@ -16,7 +16,7 @@ type Params = {
 
 export default function () {
   const operations = {
-    GET: [userAuthenticated, GET],
+    GET: [GET],
   };
 
   async function GET(req: Request, res: Response) {

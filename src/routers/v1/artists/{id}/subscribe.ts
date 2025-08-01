@@ -25,6 +25,7 @@ const findTierById = async (tierId: number) => {
       artist: {
         include: {
           user: true,
+          paymentToUser: true,
         },
       },
     },
@@ -98,7 +99,9 @@ export default function () {
           description: "Tier not found",
         });
       }
-      const stripeAccountId = newTier.artist.user.stripeAccountId;
+      const stripeAccountId =
+        newTier.artist.paymentToUser?.stripeAccountId ??
+        newTier.artist.user.stripeAccountId;
 
       if (!stripeAccountId) {
         throw new AppError({
