@@ -67,7 +67,7 @@ function BuyMerchItem() {
   );
 
   if (!artist && !isLoadingArtist) {
-    return <Box>{t("doesNotExist", {artistName: artist.name})}</Box>;
+    return <Box>{t("doesNotExist")}</Box>;
   } else if (!artist) {
     return <FullPageLoadingSpinner />;
   }
