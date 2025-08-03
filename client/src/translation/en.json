@@ -150,7 +150,7 @@
     "tipArtist": "Tip artist",
     "likeWhatTheyAreDoing": "Like what {{artistName}} is doing? The best way to support them is on a monthly basis.",
     "unsubscribeFromArtist": "Stop receiving emails from {{artistName}}",
-    "stopReceivingUpdates": "Stop receiving posts",
+    "stopReceivingUpdates": "Stop receiving posts from {{artistName}}",
     "giveOnce": "Tip {{amount}} once",
     "enterGiftAmount": "Choose tip amount",
     "orGiveOnce": "Or, you can give just this once",
