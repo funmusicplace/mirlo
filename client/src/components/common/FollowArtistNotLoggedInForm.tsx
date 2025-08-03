@@ -28,7 +28,7 @@ const FollowArtistNotLoggedInForm: React.FC<{ artistId: number }> = ({
 
   return (
     <form>
-      <p>{t("toFollowThisArtist")}</p>
+      <p>{t("toFollowThisArtist", {artistName: artist.name})}</p>
       <FormComponent>
         {t("email")}
         <Input
