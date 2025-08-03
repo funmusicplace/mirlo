@@ -72,7 +72,7 @@ function ArtistUnsubscribe() {
         <p>{t("unsubscribeFromArtist", {artistName: artist.name})}</p>
         <label>{t("enterEmail")}</label>
         <InputEl {...register("email")} type="email" required />
-        <Button type="submit">{t("stopReceivingUpdates")}</Button>
+        <Button type="submit">{t("stopReceivingUpdates, {artistName: artist.name}")}</Button>
       </form>
     </WidthWrapper>
   );
