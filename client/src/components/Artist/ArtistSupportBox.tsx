@@ -183,7 +183,7 @@ const ArtistSupportBox: React.FC<{
             <p>
               {isSubscribedToArtist &&
                 !isSubscribedToTier &&
-                t("areSupporting")}
+                t("areSupporting", {artistName: artist.name})}
               {isSubscribedToTier && t("supportAtThisTier")}
             </p>
             <div
