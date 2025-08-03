@@ -59,7 +59,7 @@ const SupportArtistPopUp: React.FC<{
         onClose={() => setIsOpen(false)}
       >
         <SpaceBetweenDiv>
-          <div>{t("chooseATier")}</div>
+          <div>{t("chooseATier", {artistName: artist.name})}</div>
         </SpaceBetweenDiv>
         <SupportArtistTiersForm
           artist={artist}
