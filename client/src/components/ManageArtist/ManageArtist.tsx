@@ -29,7 +29,7 @@ const ManageArtist: React.FC<{}> = () => {
   const { mutate: deleteArtist } = useDeleteArtistMutation();
 
   const onDelete = React.useCallback(() => {
-    if (!!artist && window.confirm(t("areYouSureDelete") ?? "")) {
+    if (!!artist && window.confirm(t("areYouSureDelete, {artistName: artist.name}") ?? "")) {
       deleteArtist(
         { artistId: artist.id, artistSlug: artist.urlSlug ?? "" },
         {
