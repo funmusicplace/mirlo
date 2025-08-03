@@ -14,6 +14,8 @@ import { useTranslation } from "react-i18next";
 import Button from "components/common/Button";
 import { useSnackbar } from "state/SnackbarContext";
 import { getArtistUrl } from "utils/artist";
+import useArtistQuery from "utils/useArtistQuery";
+import LoadingBlocks from "./LoadingBlocks";
 
 function ArtistUnsubscribe() {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
@@ -26,10 +28,7 @@ function ArtistUnsubscribe() {
     defaultValues: { email },
   });
 
-  const {
-    state: { artist },
-  } = useArtistContext();
-
+  const { data: artist, isPending } = useArtistQuery();
   const artistId = artist?.id;
 
   const unsubscribe = React.useCallback(
@@ -48,6 +47,14 @@ function ArtistUnsubscribe() {
     },
     [artist, artistId, email, snackbar, navigate]
   );
+
+  if (isPending) {
+    return <LoadingBlocks />;
+  }
+
+  if (!artist) {
+    return null;
+  }
 
   return (
     <WidthWrapper variant="small">
@@ -69,10 +76,12 @@ function ArtistUnsubscribe() {
           }
         `}
       >
-        <p>{t("unsubscribeFromArtist", {artistName: artist.name})}</p>
+        <p>{t("unsubscribeFromArtist", { artistName: artist.name })}</p>
         <label>{t("enterEmail")}</label>
         <InputEl {...register("email")} type="email" required />
-        <Button type="submit">{t("stopReceivingUpdates, {artistName: artist.name}")}</Button>
+        <Button type="submit">
+          {t("stopReceivingUpdates, {artistName: artist.name}")}
+        </Button>
       </form>
     </WidthWrapper>
   );
