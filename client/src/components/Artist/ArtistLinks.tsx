@@ -130,7 +130,7 @@ const ArtistLinks: React.FC = () => {
               </li>
             );
           })}
-          {artist.linksJson?.length === 0 && <>{t("noUpdates")}</>}
+          {artist.linksJson?.length === 0 && <>{t("noUpdates", {artistName: artist.name})}</>}
         </ul>
       </div>
     </div>
