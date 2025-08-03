@@ -42,7 +42,7 @@ const FreeDownload: React.FC<{
           </strong>
           <form style={{ marginTop: "1rem" }}>
             <p style={{ marginBottom: "1rem" }}>
-              {t(user ? "justDownloadLoggedIn" : "justDownloadNoUser")}
+              {t(user ? "justDownloadLoggedIn", {artistName: artist.name} : "justDownloadNoUser", {artistName: artist.name})}
             </p>
             {!user && (
               <FormComponent>
