@@ -1,17 +1,18 @@
 {
   "name": "@mirlo/prisma",
+  "main": "./prisma.ts",
   "exports": {
     ".": {
-      "require": {
-        "types": "./prisma.ts",
-        "default": "./prisma.ts"
-      }
+      "import": "./prisma.ts",
+      "require": "./prisma.ts",
+      "types": "./prisma.ts",
+      "default": "./prisma.ts"
     },
     "./client": {
-      "require": {
-        "types": "./__generated__/index.d.ts",
-        "default": "./__generated__/index.js"
-      }
+      "import": "./__generated__/index.js",
+      "require": "./__generated__/index.js",
+      "types": "./__generated__/index.d.ts",
+      "default": "./__generated__/index.js"
     }
   },
   "scripts": {
