@@ -185,16 +185,14 @@ const TrackGroupCard: React.FC<{
               {t("viewLive")}
             </ArtistButtonLink>
           )}
-          {!album.published && (
-            <ArtistButton
-              size="compact"
-              startIcon={<FaTrash />}
-              onClick={handleDelete}
-              isLoading={isDeletePending}
-            >
-              {t("delete")}
-            </ArtistButton>
-          )}
+          <ArtistButton
+            size="compact"
+            startIcon={<FaTrash />}
+            onClick={handleDelete}
+            isLoading={isDeletePending}
+          >
+            {t("delete")}
+          </ArtistButton>
         </div>
       </div>
     </Box>
