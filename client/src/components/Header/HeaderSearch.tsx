@@ -124,7 +124,11 @@ const HeaderSearch: React.FC = () => {
           artistId?: number | string;
           trackGroupId?: number | string;
         }) => {
-          return <Link to={constructUrl(r)}>{r.name}</Link>;
+          return (
+            <Link to={constructUrl(r)}>
+              {r.name.length > 17 ? r.name.substring(0, 17) + "..." : r.name}
+            </Link>
+          );
         }}
       />
     </div>
