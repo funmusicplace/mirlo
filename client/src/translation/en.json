@@ -544,6 +544,8 @@
     "areYouSureDelete": "Are you sure you want to delete this merch item?",
     "problemDeletingMerch": "Problem deleting merch",
     "merchTitle": "Name",
+    "merchOptionsUpdated": "Merch options updated",
+    "problemUpdatingMerchOptions": "Problem updating merch options",
     "publishedPost": "Published merch!",
     "merchDescription": "Description",
     "price": "Price",

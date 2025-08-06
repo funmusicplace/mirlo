@@ -16,6 +16,7 @@ import { useTranslation } from "react-i18next";
 import { InputEl } from "components/common/Input";
 import api from "services/api";
 import { ArtistButton } from "components/Artist/ArtistButtons";
+import { useSnackbar } from "state/SnackbarContext";
 
 type OptionTypesForm = {
   optionTypes: Partial<MerchOptionType>[];
@@ -145,7 +146,7 @@ const MerchOptions: React.FC<{}> = () => {
   const { merchId: merchParamId } = useParams();
   const { t } = useTranslation("translation", { keyPrefix: "manageMerch" });
   const [isEditing, setIsEditing] = React.useState(false);
-
+  const snackbar = useSnackbar();
   const { data: merch } = useQuery(queryManagedMerch(merchParamId ?? ""));
 
   const methods = useForm<OptionTypesForm>({
@@ -176,8 +177,10 @@ const MerchOptions: React.FC<{}> = () => {
       }));
       try {
         await api.put(`manage/merch/${merchParamId}/optionTypes`, packet);
+        snackbar(t("merchOptionsUpdated"), { type: "success" });
       } catch (e) {
         console.error("e", e);
+        snackbar(t("problemUpdatingMerchOptions"), { type: "warning" });
       }
     },
     [merchParamId]
