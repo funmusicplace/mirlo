@@ -7,6 +7,11 @@ import AutoComplete from "components/common/AutoComplete";
 const constructUrl = (r: any) => {
   let url = "";
 
+  if (r.id === "more") {
+    url = `/releases?search=${r.query}`;
+    return url;
+  }
+
   if (r.isLabel) {
     url = `/label/${r.labelId}`;
     return url;
@@ -33,16 +38,20 @@ const HeaderSearch: React.FC = () => {
   const getOptions = React.useCallback(async (searchString: string) => {
     const artists = await api.getMany<Artist>(`artists`, {
       name: searchString.trim(),
+      take: "3",
     });
     const trackGroups = await api.getMany<TrackGroup>(`trackGroups`, {
       title: searchString.trim(),
+      take: "3",
     });
     const tracks = await api.getMany<Track>(`tracks`, {
       title: searchString.trim(),
+      take: "3",
     });
 
     const labels = await api.getMany<Label>(`labels`, {
       name: searchString.trim(),
+      take: "3",
     });
 
     const results = [
@@ -54,6 +63,15 @@ const HeaderSearch: React.FC = () => {
         name: r.name,
         isArtist: true,
       })),
+      ...((artists.total ?? 0) > artists.results.length
+        ? [
+            {
+              id: "more",
+              name: t("moreArtist"),
+              query: searchString,
+            },
+          ]
+        : []),
       ...trackGroups.results.map((tr, tid) => ({
         firstInCategory: tid === 0,
         category: t("albums"),

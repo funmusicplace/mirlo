@@ -99,7 +99,8 @@
     "artists": "Artists",
     "albums": "Albums",
     "tracks": "Tracks",
-    "labels": "Labels"
+    "labels": "Labels",
+    "moreArtist": "More artist results"
   },
   "profile": {
     "yourAvatar": "Your avatar",
