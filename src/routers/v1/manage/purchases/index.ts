@@ -41,6 +41,9 @@ export default function () {
           },
           user: true,
         },
+        orderBy: {
+          createdAt: "desc",
+        },
       });
 
       return res.status(200).json({
