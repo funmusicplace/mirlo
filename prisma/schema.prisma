@@ -238,7 +238,8 @@ model Artist {
   subscriptionTiers                  ArtistSubscriptionTier[]
   banner                             ArtistBanner?
   avatar                             ArtistAvatar?
-  urlSlug                            String                               @unique
+  urlSlug                            String
+  /// [Properties]                              @unique
   properties                         Json?
   defaultPlatformFee                 Int?                                 @default(10) // in percent
   trackArtists                       TrackArtist[]

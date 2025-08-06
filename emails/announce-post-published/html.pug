@@ -1,23 +1,14 @@
-doctype html
-html
-  head
-    block head
-      meta(charset="utf-8")
-      meta(name="viewport", content="width=device-width")
-      meta(http-equiv="X-UA-Compatible", content="IE=edge")
-      meta(name="x-apple-disable-message-reformatting")
-      style 
-        include ../style.css
-  body.sans-serif
+extends ../layout.pug
+
+block content
     p  
     p #{artist.name} just published a new post on Mirlo: 
     h2 #{post.title}
     p 
       a(href!=`${client}/post/${post.id}`) Read it on Mirlo.
-    div 
+    div.mw600 
       | !{post.htmlContent}
-    p
     hr
-    p Don't want to receive emails from #{artist.name} anymore?       
+    p.mw600 Don't want to receive emails from #{artist.name} anymore?       
       a(href!=`${client}/${artist.urlSlug || artist.id}/unsubscribe?email=${email}`) Unsubscribe.
 

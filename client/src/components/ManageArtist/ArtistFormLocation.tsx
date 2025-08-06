@@ -17,7 +17,7 @@ interface FormData {
 
 interface ArtistLocationProps {
   isManage: boolean;
-  artist: Pick<Artist, "location">;
+  artist: Pick<Artist, "location" | "properties">;
   onSubmit: (data: FormData) => Promise<void>;
 }
 
@@ -117,6 +117,7 @@ const ArtistFormLocation: React.FC<ArtistLocationProps> = ({
           <InputEl
             {...register(`location`)}
             placeholder={t("exampleLocation") ?? ""}
+            colors={artist.properties?.colors}
           />
         </div>
         <div

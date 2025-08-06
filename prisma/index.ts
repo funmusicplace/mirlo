@@ -9,6 +9,14 @@ declare global {
       platformPercent: number;
       instanceArtistId?: number;
     };
+    type Properties = {
+      colors?: {
+        primary?: string;
+        secondary?: string;
+        background?: string;
+        foreground?: string;
+      };
+    };
   }
 }
 
