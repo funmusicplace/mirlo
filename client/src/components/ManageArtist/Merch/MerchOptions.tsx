@@ -15,7 +15,11 @@ import FormComponent from "components/common/FormComponent";
 import { useTranslation } from "react-i18next";
 import { InputEl } from "components/common/Input";
 import api from "services/api";
-import { ArtistButton } from "components/Artist/ArtistButtons";
+import {
+  ArtistButton,
+  useGetArtistColors,
+} from "components/Artist/ArtistButtons";
+import { useSnackbar } from "state/SnackbarContext";
 
 type OptionTypesForm = {
   optionTypes: Partial<MerchOptionType>[];
@@ -25,17 +29,19 @@ const OptionType: React.FC<{
   optionType: Partial<MerchOptionType>;
   index: number;
   isEditing: boolean;
-}> = ({ optionType, isEditing, index }) => {
+  deleteOptionType: () => void;
+}> = ({ optionType, isEditing, index, deleteOptionType }) => {
+  const { colors } = useGetArtistColors();
   const { t } = useTranslation("translation", { keyPrefix: "manageMerch" });
 
-  const methods = useFormContext();
+  const { control, register } = useFormContext();
 
   const {
     fields: options,
     append,
     remove,
   } = useFieldArray({
-    control: methods.control,
+    control: control,
     name: `optionTypes.${index}.options`,
   });
 
@@ -56,7 +62,7 @@ const OptionType: React.FC<{
         >
           <FormComponent>
             <label>{t("optionType")}</label>
-            <InputEl {...methods.register(`optionTypes.${index}.optionName`)} />
+            <InputEl {...register(`optionTypes.${index}.optionName`)} />
           </FormComponent>
           <FormComponent
             className={css`
@@ -74,36 +80,40 @@ const OptionType: React.FC<{
                   display: flex;
                   gap: 1rem;
                 `}
+                key={o.id}
               >
                 <FormComponent>
                   <label>{t("subtypeName")}</label>
                   <InputEl
-                    {...methods.register(
+                    {...register(
                       `optionTypes.${index}.options.${optionIndex}.name`
                     )}
                     required
+                    colors={colors}
                   />
                 </FormComponent>
                 <FormComponent>
                   <label>{t("additionalPrice")}</label>
                   <InputEl
-                    {...methods.register(
+                    {...register(
                       `optionTypes.${index}.options.${optionIndex}.additionalPrice`
                     )}
                     step={0.01}
                     min={0}
                     type="number"
+                    colors={colors}
                   />
                 </FormComponent>
                 <FormComponent>
                   <label>{t("quantity")}</label>
                   <InputEl
-                    {...methods.register(
+                    {...register(
                       `optionTypes.${index}.options.${optionIndex}.quantityRemaining`
                     )}
                     step={1}
                     min={0}
                     type="number"
+                    colors={colors}
                   />
                 </FormComponent>
                 <ArtistButton
@@ -113,17 +123,34 @@ const OptionType: React.FC<{
                 />
               </div>
             ))}
-            <ArtistButton
-              onClick={() => {
-                append("");
-              }}
-              type="button"
-              size="compact"
-              startIcon={<FaPlus />}
-              variant="dashed"
+            <div
+              className={css`
+                display: flex;
+                gap: 0.5rem;
+              `}
             >
-              {t("addNewOptionSubType")}
-            </ArtistButton>
+              <ArtistButton
+                onClick={() => {
+                  append("");
+                }}
+                type="button"
+                size="compact"
+                startIcon={<FaPlus />}
+                variant="dashed"
+              >
+                {t("addNewOptionSubType")}
+              </ArtistButton>
+              <ArtistButton
+                type="button"
+                onClick={() => {
+                  console.log("clicking", index);
+                  deleteOptionType();
+                }}
+                startIcon={<FaTrash />}
+              >
+                {t("deleteCategory")}
+              </ArtistButton>
+            </div>
           </FormComponent>
         </div>
       )}
@@ -145,7 +172,7 @@ const MerchOptions: React.FC<{}> = () => {
   const { merchId: merchParamId } = useParams();
   const { t } = useTranslation("translation", { keyPrefix: "manageMerch" });
   const [isEditing, setIsEditing] = React.useState(false);
-
+  const snackbar = useSnackbar();
   const { data: merch } = useQuery(queryManagedMerch(merchParamId ?? ""));
 
   const methods = useForm<OptionTypesForm>({
@@ -160,7 +187,11 @@ const MerchOptions: React.FC<{}> = () => {
     },
   });
 
-  const { fields, append } = useFieldArray({
+  const {
+    fields,
+    append,
+    remove: deleteOptionType,
+  } = useFieldArray({
     control: methods.control,
     name: `optionTypes`,
   });
@@ -176,8 +207,10 @@ const MerchOptions: React.FC<{}> = () => {
       }));
       try {
         await api.put(`manage/merch/${merchParamId}/optionTypes`, packet);
+        snackbar(t("merchOptionsUpdated"), { type: "success" });
       } catch (e) {
         console.error("e", e);
+        snackbar(t("problemUpdatingMerchOptions"), { type: "warning" });
       }
     },
     [merchParamId]
@@ -208,6 +241,7 @@ const MerchOptions: React.FC<{}> = () => {
                 key={optionType.id}
                 isEditing={isEditing}
                 index={index}
+                deleteOptionType={() => deleteOptionType(index)}
               />
             ))}
           </DashedList>

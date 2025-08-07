@@ -75,7 +75,7 @@ model User {
   userTrackGroupPurchases             UserTrackGroupPurchase[]
   artistUserSubscriptions             ArtistUserSubscription[]
   wishlist                            UserTrackGroupWishlist[]
-  artists                             Artist[]
+  artists                             Artist[]                        @relation("artistUser")
   plays                               TrackPlay[]
   downloadCodes                       TrackGroupDownloadCodes[]
   userArtistNotificationSettings      UserArtistNotificationSetting[]
@@ -89,6 +89,7 @@ model User {
   userAvatar                          UserAvatar?
   userBanner                          UserBanner?
   trackFavorites                      UserTrackFavorite[]
+  receivesPaymentsFor                 Artist[]                        @relation("paymentToUser")
 }
 
 model EmailVerification {
@@ -226,7 +227,7 @@ model Artist {
   id                                 Int                                  @id @default(autoincrement())
   name                               String
   bio                                String?
-  user                               User                                 @relation(fields: [userId], references: [id])
+  user                               User                                 @relation(fields: [userId], references: [id], name: "artistUser")
   userId                             Int
   posts                              Post[]
   trackGroups                        TrackGroup[]
@@ -237,7 +238,8 @@ model Artist {
   subscriptionTiers                  ArtistSubscriptionTier[]
   banner                             ArtistBanner?
   avatar                             ArtistAvatar?
-  urlSlug                            String                               @unique
+  urlSlug                            String
+  /// [Properties]                              @unique
   properties                         Json?
   defaultPlatformFee                 Int?                                 @default(10) // in percent
   trackArtists                       TrackArtist[]
@@ -258,6 +260,8 @@ model Artist {
   activityPub                        Boolean                              @default(false)
   activityPubArtistFollowers         ActivityPubArtistFollowers[]
   tourDates                          ArtistTourDate[]
+  paymentToUserId                    Int? // User to which the payments for this artist go
+  paymentToUser                      User?                                @relation(fields: [paymentToUserId], references: [id], name: "paymentToUser")
 }
 
 model ArtistAvatar {

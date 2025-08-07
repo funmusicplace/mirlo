@@ -6,12 +6,20 @@ interface FeatureFlagProps {
   children: React.ReactNode;
 }
 
+export const checkIfFeatureEnabled = (
+  user: LoggedInUser | null,
+  featureFlag: string
+): boolean => {
+  return (
+    (user?.isAdmin ||
+      !!user?.featureFlags?.find((flag) => flag === featureFlag)) ??
+    false
+  );
+};
+
 const FeatureFlag: React.FC<FeatureFlagProps> = ({ featureFlag, children }) => {
   const { user } = useAuthContext();
-  const isFeatureEnabled =
-    (user?.isAdmin ||
-      user?.featureFlags?.find((flag) => flag === featureFlag)) ??
-    false;
+  const isFeatureEnabled = checkIfFeatureEnabled(user ?? null, featureFlag);
   return <>{isFeatureEnabled ? children : null}</>;
 };
 

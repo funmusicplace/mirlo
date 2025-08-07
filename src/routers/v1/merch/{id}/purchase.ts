@@ -56,6 +56,7 @@ export default function () {
             include: {
               user: true,
               subscriptionTiers: true,
+              paymentToUser: true,
             },
           },
           shippingDestinations: true,
@@ -99,7 +100,9 @@ export default function () {
         await subscribeUserToArtist(merch?.artist, loggedInUser);
       }
 
-      const stripeAccountId = merch.artist.user.stripeAccountId;
+      const stripeAccountId =
+        merch.artist.paymentToUser?.stripeAccountId ??
+        merch.artist.user.stripeAccountId;
 
       const { priceNumber, isPriceZero } = determinePrice(
         price,

@@ -43,6 +43,7 @@ export default function () {
         include: {
           user: true,
           subscriptionTiers: true,
+          paymentToUser: true,
         },
       });
 
@@ -57,7 +58,8 @@ export default function () {
         await subscribeUserToArtist(artist, loggedInUser);
       }
 
-      const stripeAccountId = artist.user.stripeAccountId;
+      const stripeAccountId =
+        artist.paymentToUser?.stripeAccountId ?? artist.user.stripeAccountId;
 
       const priceNumber = price ? Number(price) : undefined;
 

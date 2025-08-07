@@ -83,58 +83,65 @@ const LabelConfirmation: React.FC = () => {
         }
       `}
     >
-      <h2>{t("labelsAndCollectives")}</h2>
-      <p>{t("labelsAndCollectivesDescription")}</p>
+      {!fields ||
+        (fields.length === 0 && (
+          <>
+            <h2>{t("labelsAndCollectives")}</h2>
+            <p>{t("labelsAndCollectivesDescription")}</p>
 
-      {fields.length > 0 && (
-        <Table>
-          <thead>
-            <tr>
-              <th />
-              <th>{t("name")}</th>
-              <th>{t("email")}</th>
-              <th>{t("isLabelConfirmed")}</th>
-              <th>{t("isArtistConfirmed")}</th>
-              <th>{t("canLabelManageArtist")}</th>
-              <th>{t("canLabelAddReleases")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {fields?.map((relationship, idx) => (
-              <tr key={relationship.labelUser.id}>
-                <td>
-                  {relationship.labelUser.userAvatar && (
-                    <img
-                      src={relationship.labelUser.userAvatar.sizes[60]}
-                      width={30}
-                      height={30}
-                    />
-                  )}
-                </td>
-                <td>{relationship.labelUser.name}</td>
-                <td>{relationship.labelUser.email}</td>
-                <td>{relationship.isLabelApproved ? "Yes" : "No"}</td>
-                <td>
-                  <Toggle
-                    toggled={fields[idx].isArtistApproved}
-                    onClick={() => {
-                      const newValue = !fields[idx].isArtistApproved;
-                      setValue(
-                        `relationships.${idx}.isArtistApproved`,
-                        newValue
-                      );
-                      handleConfirm(fields[idx].labelUserId, newValue);
-                    }}
-                    label={t("confirmRelationship")}
-                  />
-                </td>
-                <td>{relationship.canLabelManageArtist ? "Yes" : "No"}</td>
-                <td>{relationship.canLabelAddReleases ? "Yes" : "No"}</td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
-      )}
+            {fields.length > 0 && (
+              <Table>
+                <thead>
+                  <tr>
+                    <th />
+                    <th>{t("name")}</th>
+                    <th>{t("email")}</th>
+                    <th>{t("isLabelConfirmed")}</th>
+                    <th>{t("isArtistConfirmed")}</th>
+                    <th>{t("canLabelManageArtist")}</th>
+                    <th>{t("canLabelAddReleases")}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {fields?.map((relationship, idx) => (
+                    <tr key={relationship.labelUser.id}>
+                      <td>
+                        {relationship.labelUser.userAvatar && (
+                          <img
+                            src={relationship.labelUser.userAvatar.sizes[60]}
+                            width={30}
+                            height={30}
+                          />
+                        )}
+                      </td>
+                      <td>{relationship.labelUser.name}</td>
+                      <td>{relationship.labelUser.email}</td>
+                      <td>{relationship.isLabelApproved ? "Yes" : "No"}</td>
+                      <td>
+                        <Toggle
+                          toggled={fields[idx].isArtistApproved}
+                          onClick={() => {
+                            const newValue = !fields[idx].isArtistApproved;
+                            setValue(
+                              `relationships.${idx}.isArtistApproved`,
+                              newValue
+                            );
+                            handleConfirm(fields[idx].labelUserId, newValue);
+                          }}
+                          label={t("confirmRelationship")}
+                        />
+                      </td>
+                      <td>
+                        {relationship.canLabelManageArtist ? "Yes" : "No"}
+                      </td>
+                      <td>{relationship.canLabelAddReleases ? "Yes" : "No"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            )}
+          </>
+        ))}
 
       <FeatureFlag featureFlag="label">
         <ArtistLabels refetch={refetch} />
