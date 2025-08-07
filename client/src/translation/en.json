@@ -586,6 +586,7 @@
   },
   "platformSlider": {
     "howMuchGoesToMirlo": "How much goes to Mirlo?",
+    "none": "None",
     "solidarity": "Solidarity",
     "sustain": "Sustain",
     "fullCost": "Full cost",
