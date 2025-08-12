@@ -47,7 +47,7 @@ const ArtistPosts: React.FC = () => {
             padding-bottom: 0.7rem;
           `}
         >
-          {artist.posts?.length === 0 && <>{t("noUpdates")}</>}
+          {artist.posts?.length === 0 && <>{t("noUpdates", {artistName: artist.name})}</>}
         </div>
         <PostGrid
           posts={posts.results}
