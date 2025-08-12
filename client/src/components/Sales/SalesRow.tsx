@@ -54,7 +54,10 @@ const SalesRow: React.FC<{
             </Link>
           </span>
         ) : sale.artistSubscriptionTier ? (
-          <span>{sale.artistSubscriptionTier.name}</span>
+          <span>
+            {sale.artistSubscriptionTier.name}{" "}
+            {sale.artistSubscriptionTier.interval}
+          </span>
         ) : (
           <span>{t("tip")}</span>
         )}
