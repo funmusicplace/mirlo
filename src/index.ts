@@ -25,6 +25,7 @@ import parseIndex from "./parseIndex";
 import qs from "qs";
 import wellKnown from "./wellKnown";
 import passport from "./auth/passport";
+import logger from "./logger";
 
 dotenv.config();
 
@@ -248,6 +249,13 @@ if (!isDev) {
 } else {
   app.use("/auth", auth);
 }
+
+app.use((req, res, next) => {
+  // Basic logging
+  logger.info(
+    `Request: ${req.method} ${req.path} - ${JSON.stringify(req.query)}`
+  );
+});
 
 app.use(express.static("public"));
 
