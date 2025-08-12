@@ -61,6 +61,8 @@ const TrackWidget = () => {
     return <LoadingBlocks />;
   }
 
+  console.log("track", track);
+
   return (
     <>
       {(!track || !track.id) && !isLoading && (
@@ -137,6 +139,7 @@ const TrackWidget = () => {
                   title={track.title ?? ""}
                   subtitle={
                     <Link
+                      target="_blank"
                       to={getReleaseUrl(
                         track.trackGroup.artist,
                         track.trackGroup
@@ -147,7 +150,7 @@ const TrackWidget = () => {
                         : track.trackGroup.title}
                     </Link>
                   }
-                  footer={<TrackArtistLinks track={track} />}
+                  footer={<TrackArtistLinks track={track} target="_blank" />}
                   textColor={
                     track.trackGroup.artist?.properties?.colors?.primary
                   }

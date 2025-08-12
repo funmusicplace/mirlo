@@ -179,6 +179,9 @@
     "preOrder": "Pre-order",
     "released": "Released: {{date}}",
     "title": "Title:",
+    "verifyEmail": "Send email verification",
+    "verificationCode": "Enter verification code:",
+    "checkEmail": "Check your email for the verification code.",
     "published": "Published:",
     "tracks": "Tracks:",
     "releaseDate": "Release date:",
@@ -411,7 +414,7 @@
     "continueWithPrice": "Continue with {{ amount }}/month",
     "chooseToContinue": "Choose a support tier to continue",
     "purchaseEntireCatalogue": "Purchase entire catalogue for {{amount}}",
-    "platformPercent": "{{ artistName }} has chosen that they will get {{ percent }}% ({{ money }}) of this purchase. This does not include the cut taken by our payment processor."
+    "platformPercent": "{{ artistName }} has chosen that they will get {{ percent }}% ({{ money }}) of this purchase. Mirlo will receive {{ mirloCut }}. Their payment processor will take a cut of {{ paymentProcessorCut }}."
   },
   "clickToPlay": {
     "untitled": "Untitled",
@@ -587,6 +590,7 @@
   },
   "platformSlider": {
     "howMuchGoesToMirlo": "How much goes to Mirlo?",
+    "none": "None",
     "solidarity": "Solidarity",
     "sustain": "Sustain",
     "fullCost": "Full cost",

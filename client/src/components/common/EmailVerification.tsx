@@ -101,7 +101,7 @@ const EmailVerification: React.FC<{
               }}
             />
           </FormComponent>
-          <ArtistButton type="button" onClick={verifyEmail}>
+          <ArtistButton type="button" onClick={verifyEmail} size="big" rounded>
             {t("verifyEmail")}
           </ArtistButton>
         </>

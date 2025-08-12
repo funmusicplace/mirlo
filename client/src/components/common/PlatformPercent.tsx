@@ -30,6 +30,14 @@ const PlatformPercent: React.FC<{
         percent: (100 - percent).toFixed(),
         artistName: artist?.name ?? "the artist",
         money: moneyDisplay({ amount, currency }),
+        mirloCut: moneyDisplay({
+          amount: Number(chosenPrice) - amount,
+          currency,
+        }),
+        paymentProcessorCut: moneyDisplay({
+          amount: (chosenNumber * 0.029 + 0.3) / 100,
+          currency,
+        }),
       })}
     </div>
   );

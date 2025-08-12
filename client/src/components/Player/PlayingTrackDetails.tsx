@@ -5,13 +5,16 @@ import { bp } from "../../constants";
 import { getReleaseUrl, getTrackUrl } from "utils/artist";
 import React from "react";
 
-export const TrackArtistLinks: React.FC<{ track: Track }> = ({ track }) => {
-  const artists =
+export const TrackArtistLinks: React.FC<{
+  track: Track;
+  target?: "_blank";
+}> = ({ track, target }) => {
+  const artists: { artistId?: string | number; artistName?: string }[] =
     track.trackArtists?.filter((artist) => artist.isCoAuthor) ?? [];
 
   if (artists.length === 0) {
     artists.push({
-      artistId: track.trackGroup.artistId,
+      artistId: track.trackGroup.artist.urlSlug ?? track.trackGroup.artistId,
       artistName: track.trackGroup.artist.name,
     });
   }
@@ -19,7 +22,11 @@ export const TrackArtistLinks: React.FC<{ track: Track }> = ({ track }) => {
   return artists.map((artist, index) => (
     <React.Fragment key={artist.artistName}>
       {artist.artistId ? (
-        <Link to={`/${artist.artistId}`} id="player-artist-name">
+        <Link
+          to={`/${artist.artistId}`}
+          id="player-artist-name"
+          target={target}
+        >
           {artist.artistName}
         </Link>
       ) : (
