@@ -24,6 +24,7 @@ import path from "node:path";
 import parseIndex from "./parseIndex";
 import qs from "qs";
 import wellKnown from "./wellKnown";
+import passport from "./auth/passport";
 
 dotenv.config();
 
@@ -59,9 +60,23 @@ app.use(express.urlencoded({ extended: true }));
 if (!isDev) {
   const limiter = rateLimit({
     windowMs: 60 * 1000, // 1 minute
-    limit: 400, // 400 requests per minute, which is absurd, but one page load gets us 80
+    limit: 100, // 100 requests per minute, which is absurd, but one page load gets us 80
     // FIXME: is there a way to have this be determined on whether the user is logged in?
-    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers,
+    skip: async (req, res) => {
+      // skip the rate limiting for logged in users
+      const isAuthenticated = await new Promise<boolean>((resolve) => {
+        passport.authenticate(
+          "jwt",
+          { session: false },
+          (err: unknown, user?: Express.User) => {
+            if (err || !user) return resolve(false);
+            resolve(true);
+          }
+        )(req, res, () => {});
+      });
+      return isAuthenticated;
+    },
   });
 
   app.use(limiter);
