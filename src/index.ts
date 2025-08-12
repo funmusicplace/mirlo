@@ -59,7 +59,7 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 // app.use(passport.initialize()); // Supposedly we don't need this anymore
 
-if (!isDev && process.env.NODE_ENV !== "test" && !process.env.CI) {
+if (process.env.NODE_ENV === "production") {
   const limiter = rateLimit({
     windowMs: 60 * 1000, // 1 minute
     limit: 100, // 100 requests per minute, which is absurd, but one page load gets us 80
@@ -77,6 +77,8 @@ if (!isDev && process.env.NODE_ENV !== "test" && !process.env.CI) {
           }
         )(req, res, () => {});
       });
+      logger.info(`Rate limiting check: ${isAuthenticated}`);
+      // If the user is authenticated, skip the rate limiting
       return isAuthenticated;
     },
   });
@@ -252,9 +254,9 @@ if (!isDev) {
 }
 
 app.use((req, res, next) => {
-  // Basic logging
+  // Basic logging for requests that aren't handled by the API or auth.
   logger.info(
-    `Request: ${req.method} ${req.path} - ${JSON.stringify(req.query)}`
+    `front-end request: ${req.method} ${req.path} - ${JSON.stringify(req.query)} - ${JSON.stringify(req.body)} - ${JSON.stringify(req.headers)}`
   );
   next();
 });
