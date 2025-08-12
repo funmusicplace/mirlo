@@ -38,7 +38,6 @@ app.get("/x-forwarded-for", (request, response) =>
   response.send(request.headers["x-forwarded-for"])
 );
 
-console.log(process.env.NODE_ENV);
 const isDev = process.env.NODE_ENV === "development";
 
 app.use(corsCheck);
@@ -77,7 +76,6 @@ if (process.env.NODE_ENV === "production") {
           }
         )(req, res, () => {});
       });
-      logger.info(`Rate limiting check: ${isAuthenticated}`);
       // If the user is authenticated, skip the rate limiting
       return isAuthenticated;
     },
