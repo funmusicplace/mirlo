@@ -21,6 +21,7 @@ export default function () {
 
   async function GET(req: Request, res: Response, next: NextFunction) {
     let { id }: { id?: string } = req.params;
+    console.log("got to endpoint");
     const { includeDefaultTier }: { includeDefaultTier?: boolean } = req.query;
     const user = req.user as User;
     if (!id || id === "undefined") {
