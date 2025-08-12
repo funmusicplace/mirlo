@@ -17,6 +17,9 @@ export const Admin: React.FC = () => {
     >
       <Tabs>
         <li>
+          <NavLink to="dashboard">{t("dashboard")}</NavLink>
+        </li>
+        <li>
           <NavLink to="settings">{t("settings")}</NavLink>
         </li>
         <li>
