@@ -123,14 +123,10 @@ export default function () {
       }
 
       try {
-        const title = cleanHeaderValue(
-          filenamify(
-            `${trackGroup.artist.name} - ${trackGroup.title ?? "album"}`
-          )
-        );
-        logger.info(`downloading ${title}.zip`);
-        res.attachment(`${title}.zip`);
-        res.set("Content-Disposition", `attachment; filename="${title}.zip"`);
+        const originalTitle = `${trackGroup.artist.name} - ${trackGroup.title ?? "album"}`;
+        const asciiTitle = filenamify(originalTitle);
+        
+        res.setHeader('Content-Disposition', `attachment; filename="${asciiTitle}.zip"; filename*=UTF-8''${encodeURIComponent(`${originalTitle}.zip`)}`);
 
         const stream = await getReadStream(trackGroupFormatBucket, zipName);
 

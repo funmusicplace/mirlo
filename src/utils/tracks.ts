@@ -87,6 +87,7 @@ export const convertAudioToFormat = (
     // .outputOptions("-map_metadata:s:a", "0:s:a")
     // .outputOption("-map_metadata:s:a 0:s:a")
     // .outputOptions("-map_metadata 0:s")
+    .outputOptions("-charset", "UTF-8")
     .outputOptions("-id3v2_version 3")
     .outputOptions("-metadata", `title=${content.track.title}`)
     .outputOptions("-metadata", `album=${content.trackGroup.title}`)
