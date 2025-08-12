@@ -38,6 +38,7 @@ app.get("/x-forwarded-for", (request, response) =>
   response.send(request.headers["x-forwarded-for"])
 );
 
+console.log(process.env.NODE_ENV);
 const isDev = process.env.NODE_ENV === "development";
 
 app.use(corsCheck);
@@ -58,7 +59,7 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 // app.use(passport.initialize()); // Supposedly we don't need this anymore
 
-if (!isDev) {
+if (!isDev && process.env.NODE_ENV !== "test" && !process.env.CI) {
   const limiter = rateLimit({
     windowMs: 60 * 1000, // 1 minute
     limit: 100, // 100 requests per minute, which is absurd, but one page load gets us 80
@@ -255,6 +256,7 @@ app.use((req, res, next) => {
   logger.info(
     `Request: ${req.method} ${req.path} - ${JSON.stringify(req.query)}`
   );
+  next();
 });
 
 app.use(express.static("public"));
