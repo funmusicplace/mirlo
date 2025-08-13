@@ -22,6 +22,8 @@ const SearchResultsDiv = styled.div`
   color: var(--mi-normal-foreground-color);
   margin-top: 0.5rem;
   border-radius: 5px;
+  max-height: 400px;
+  overflow-y: scroll;
 
   @media (max-width: ${bp.small}px) {
     position: fixed;
@@ -46,7 +48,7 @@ const SearchResultList = styled.ol`
 const SearchResult = styled.li`
   a,
   button {
-    padding: 0.75rem 1rem !important;
+    padding: 0.5rem 0.75rem !important;
     color: var(--mi-normal-foreground-color) !important;
     display: block;
     background: transparent;
@@ -280,6 +282,8 @@ const AutoComplete: React.FC<{
                         <div
                           className={css`
                             margin: 0.4rem 0;
+                            border-bottom: 1px solid
+                              var(--mi-light-foreground-color);
                           `}
                         >
                           {r.category}
