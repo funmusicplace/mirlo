@@ -29,6 +29,7 @@ model Settings {
   contentPolicy String?
   privacyPolicy String?
   cookiePolicy  String?
+  defconLevel   Int?    @default(0) // 0 = normal, 1 = low, 2 = medium, 3 = high
 }
 
 model Client {
@@ -72,6 +73,7 @@ model User {
   properties                          Json?
   userConfirmationCode                String?
   userConfirmationCodeExpiration      DateTime?
+  trustLevel                          Int?                            @default(0) // 0 = normal, 1 = low, 2 = medium, 3 = high
   userTrackGroupPurchases             UserTrackGroupPurchase[]
   artistUserSubscriptions             ArtistUserSubscription[]
   wishlist                            UserTrackGroupWishlist[]
