@@ -80,7 +80,7 @@ export const parseOutIframes = async (content: string) => {
                       justify-content: center;
                       border-radius: 24px;
                       font-weight: bold;">
-                        ▶
+                        &#9658;
                       </a>
                     </div>
                     <div>
@@ -119,12 +119,12 @@ export const parseOutIframes = async (content: string) => {
                       justify-content: center;
                       border-radius: 24px;
                       font-weight: bold;">
-                      ▶
+                      &#9658;
                     </a>
                   </div>
                   <div>
                     <strong>${t.title}</strong><br/>
-                    <a href="${process.env.REACT_APP_CLIENT_DOMAIN}/${t.trackGroup.artist.urlSlug}" style="color:#1db954;text-decoration:none;">
+                    <a href="${process.env.REACT_APP_CLIENT_DOMAIN}/${t.trackGroup.artist.urlSlug}" style="color:${foreground}; text-decoration:none;">
                       ${t.trackGroup.artist?.name || "Unknown"}
                     </a>
                   </div>
