@@ -44,8 +44,6 @@ export default function () {
     const { artistId } = req.params as unknown as Params;
     const user = req.user as User;
 
-    const settings = await getSiteSettings();
-
     try {
       const userForCurrency = await prisma.user.findFirst({
         where: { id: user.id },

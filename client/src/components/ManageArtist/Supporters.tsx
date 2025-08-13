@@ -3,7 +3,6 @@ import ArtistSubscriberDataDownload from "./ArtistSubscriberDataDownload";
 import Table from "components/common/Table";
 import api from "services/api";
 import React from "react";
-import { useArtistContext } from "state/ArtistContext";
 import { ArtistSection } from "components/Artist/Artist";
 import Money from "components/common/Money";
 import styled from "@emotion/styled";
@@ -13,6 +12,7 @@ import DropdownMenu from "components/common/DropdownMenu";
 import { css } from "@emotion/css";
 import { sumBy } from "lodash";
 import { useTranslation } from "react-i18next";
+import useArtistQuery from "utils/useArtistQuery";
 
 export const SupporterTable = styled(Table)`
   @media screen and (max-width: ${bp.small}px) {
@@ -32,15 +32,18 @@ type SupportTier = {
 };
 
 const Supporters = () => {
-  const {
-    state: { artist },
-  } = useArtistContext();
+  const { data: artist } = useArtistQuery();
   const artistId = artist?.id;
   const { t } = useTranslation("translation", {
     keyPrefix: "artistSupporters",
   });
   const userId = artist?.userId;
-  const [supporters, setSupporters] = React.useState<SupportTier[]>([]);
+  const [monthlySupporters, setMonthlySupporters] = React.useState<
+    SupportTier[]
+  >([]);
+  const [annualSupporters, setAnnualSupporters] = React.useState<SupportTier[]>(
+    []
+  );
   const [followers, setFollowers] = React.useState<SupportTier[]>([]);
 
   const loadSupporters = React.useCallback(async () => {
@@ -48,8 +51,19 @@ const Supporters = () => {
       `manage/artists/${artistId}/subscribers`
     );
 
-    setSupporters(
-      response.results.filter((r) => !r.artistSubscriptionTier.isDefaultTier)
+    setMonthlySupporters(
+      response.results.filter(
+        (r) =>
+          !r.artistSubscriptionTier.isDefaultTier &&
+          r.artistSubscriptionTier.interval === "MONTH"
+      )
+    );
+    setAnnualSupporters(
+      response.results.filter(
+        (r) =>
+          !r.artistSubscriptionTier.isDefaultTier &&
+          r.artistSubscriptionTier.interval === "YEAR"
+      )
     );
     setFollowers(
       response.results.filter((r) => r.artistSubscriptionTier.isDefaultTier)
@@ -60,7 +74,7 @@ const Supporters = () => {
     loadSupporters();
   }, [loadSupporters]);
 
-  const amount = sumBy(supporters, "amount");
+  const amount = sumBy([...monthlySupporters, ...annualSupporters], "amount");
 
   return (
     <>
@@ -68,17 +82,29 @@ const Supporters = () => {
         <SpaceBetweenDiv>
           <div>
             <h4>{t("supporters")}</h4>
-            {t("totalComingIn")}:{" "}
+            {t("totalComingInMonthly")}:{" "}
             <Money
               amount={amount / 100}
               currency={
-                supporters[0]?.artistSubscriptionTier.currency ??
+                monthlySupporters[0]?.artistSubscriptionTier.currency ??
                 artist?.user?.currency ??
                 "usd"
               }
             />
             <br />
-            {t("totalSupporters", { count: supporters.length })}
+            {t("totalComingInAnnually")}:{" "}
+            <Money
+              amount={amount / 100}
+              currency={
+                annualSupporters[0]?.artistSubscriptionTier.currency ??
+                artist?.user?.currency ??
+                "usd"
+              }
+            />
+            <br />
+            {t("totalSupporters", {
+              count: monthlySupporters.length + annualSupporters.length,
+            })}
           </div>
           <DropdownMenu dashed>
             <ArtistSubscriberDataDownload />
@@ -91,15 +117,21 @@ const Supporters = () => {
               <th>{t("name")}</th>
               <th>{t("email")}</th>
               <th>{t("tier")}</th>
+              <th>{t("interval")}</th>
               <th>{t("amount")}</th>
             </tr>
           </thead>
           <tbody>
-            {supporters.map((r) => (
+            {[...monthlySupporters, ...annualSupporters].map((r) => (
               <tr key={r.user.id}>
                 <td>{r.user.name ?? "-"}</td>
                 <td>{r.user.email}</td>
                 <td>{r.artistSubscriptionTier.name}</td>
+                <td>
+                  {r.artistSubscriptionTier.interval === "MONTH"
+                    ? t("monthly")
+                    : t("yearly")}
+                </td>
                 <td>
                   <Money
                     amount={r.amount / 100}
@@ -114,7 +146,7 @@ const Supporters = () => {
             ))}
           </tbody>
         </SupporterTable>
-        {supporters.length === 0 && (
+        {monthlySupporters.length + annualSupporters.length === 0 && (
           <div
             className={css`
               padding: 2rem;

@@ -418,7 +418,7 @@ const EditTrackRow: React.FC<{
         </td>
       </IndentedTR>
       <IndentedTR colors={colors}>
-        <td colSpan={2}>id3Tags</td>
+        <td colSpan={2}>{t("id3Data")}</td>
         <td colSpan={99}>
           <ShowRawID3Data track={track} />
         </td>

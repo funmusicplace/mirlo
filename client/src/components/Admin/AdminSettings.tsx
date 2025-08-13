@@ -29,6 +29,7 @@ interface FormSettings {
   backblazeRegion?: string;
 
   cloudflareTurnstileSecret?: string;
+  defconLevel?: number;
 }
 
 interface SettingsFromAPI {
@@ -51,6 +52,7 @@ interface SettingsFromAPI {
   privacyPolicy: string;
   cookiePolicy: string;
   contentPolicy: string;
+  defconLevel: number;
 }
 
 const AdminSettings = () => {
@@ -83,6 +85,7 @@ const AdminSettings = () => {
         privacyPolicy: response.result.privacyPolicy,
         cookiePolicy: response.result.cookiePolicy,
         contentPolicy: response.result.contentPolicy,
+        defconLevel: response.result.defconLevel,
       });
     };
     callback();
@@ -112,6 +115,7 @@ const AdminSettings = () => {
           privacyPolicy: data.privacyPolicy,
           cookiePolicy: data.cookiePolicy,
           contentPolicy: data.contentPolicy,
+          defconLevel: Number(data.defconLevel),
         });
       } catch (e) {
         console.error(e);
@@ -282,6 +286,17 @@ const AdminSettings = () => {
             <td>Content Policy Markdown</td>
             <td>
               <TextArea {...register("contentPolicy")} rows={10} />
+            </td>
+          </tr>
+          <tr>
+            <td>defconLevel</td>
+            <td>
+              <InputEl
+                {...register("defconLevel")}
+                className={css`
+                  text-align: right;
+                `}
+              />
             </td>
           </tr>
         </Table>

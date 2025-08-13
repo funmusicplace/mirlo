@@ -18,7 +18,6 @@ const AlbumForm: React.FC<{
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const snackbar = useSnackbar();
   const errorHandler = useErrorHandler();
-  const [isSaving, setIsSaving] = React.useState(false);
 
   const methods = useForm<TrackGroupFormData>();
   const { handleSubmit } = methods;
@@ -45,15 +44,12 @@ const AlbumForm: React.FC<{
   const doSave = React.useCallback(async () => {
     if (userId) {
       try {
-        setIsSaving(true);
-
         snackbar(t("trackGroupUpdated"), {
           type: "success",
         });
       } catch (e) {
         errorHandler(e);
       } finally {
-        setIsSaving(false);
         await reload();
       }
     }

@@ -86,7 +86,7 @@ const TrackArtistFormFields: React.FC<{
             getOptions={getOptions}
             showBackground
             allowNew
-            placeholder="Search artists"
+            placeholder={t("searchArtists")}
             onSelect={onSelect}
           />
         )}
@@ -112,7 +112,7 @@ const TrackArtistFormFields: React.FC<{
 
         <InputEl
           {...register(`trackArtists.${artistIndex}.role`)}
-          placeholder="Role"
+          placeholder={t("role") ?? ""}
           colors={colors}
           disabled={disabled}
         />

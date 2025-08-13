@@ -23,6 +23,11 @@ export default function () {
         Number(user.id)
       );
 
+      const artist = await prisma.artist.findFirst({
+        where: { id: subscriptionTier?.artistId },
+        select: { defaultPlatformFee: true },
+      });
+
       if (!subscriptionTier) {
         res.status(400).json({
           error: "Subscription must belong to user",
@@ -39,7 +44,8 @@ export default function () {
           interval: req.body.interval ?? "MONTH",
           collectAddress: req.body.collectAddress ?? false,
           platformPercent:
-            req.body.platformPercent ??
+            Number(req.body.platformPercent) ??
+            artist?.defaultPlatformFee ??
             (await getSiteSettings()).platformPercent,
           // TODO: make sure minAmount is alphanumeric
           minAmount: +req.body.minAmount,

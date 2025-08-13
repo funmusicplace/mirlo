@@ -12,6 +12,11 @@ export const ManageSectionWrapper = styled.div`
     padding-top: 0rem;
     padding-bottom: 1rem;
   }
+
+  h3 {
+    margin-top: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
 `;
 
 export default ManageSectionWrapper;

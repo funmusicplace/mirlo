@@ -19,8 +19,14 @@ export default function () {
   }
 
   async function POST(req: Request, res: Response, next: NextFunction) {
-    const { settings, terms, privacyPolicy, cookiePolicy, contentPolicy } =
-      req.body;
+    const {
+      settings,
+      terms,
+      privacyPolicy,
+      cookiePolicy,
+      contentPolicy,
+      defconLevel,
+    } = req.body;
     try {
       let existingSettings = await prisma.settings.findFirst();
       if (!existingSettings) {
@@ -39,6 +45,7 @@ export default function () {
           privacyPolicy,
           cookiePolicy,
           contentPolicy,
+          defconLevel: Number(defconLevel),
         },
         where: {
           id: existingSettings.id,
