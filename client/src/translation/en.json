@@ -450,6 +450,8 @@
     "useUrlSlug": "Use this URL slug? '{{suggestedUrlSlug}}'",
     "labelsAndCollectives": "Label and collectives",
     "name": "Name",
+    "unpublishedReleases": "Unpublished releases",
+    "publishedReleases": "Published releases",
     "setEntireCataloguePrice": "Set entire catalogue price",
     "save": "Save",
     "setPriceTitle": "Set price for your catalogue",
