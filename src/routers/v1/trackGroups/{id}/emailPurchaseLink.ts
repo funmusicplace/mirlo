@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
+import { userAuthenticated } from "../../../../auth/passport";
 import prisma from "@mirlo/prisma";
 
 import sendMail from "../../../../jobs/send-mail";
@@ -7,7 +7,7 @@ import { Job } from "bullmq";
 
 export default function () {
   const operations = {
-    POST: [userLoggedInWithoutRedirect, POST],
+    POST: [userAuthenticated, POST],
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {
