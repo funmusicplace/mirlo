@@ -1,0 +1,34 @@
+doctype html
+html
+  head
+    block head
+      meta(charset="utf-8")
+      meta(name="viewport", content="width=device-width")
+      meta(http-equiv="X-UA-Compatible", content="IE=edge")
+      meta(name="x-apple-disable-message-reformatting")
+      style 
+        include ../style.css
+  body.sans-serif
+
+    if albumImage
+        img(src=albumImage alt="Album Cover")
+
+    h2 #{trackGroup.title} 
+    p 
+      | by 
+      strong #{trackGroup.artist.name}.
+  
+    a(
+        href!=`${client}/${trackGroup.artist.urlSlug}/release/${trackGroup.urlSlug}`
+        style="background-color:#007bff;color:#ffffff;padding:12px 24px;text-decoration:none;font-size:16px;border-radius:4px;display:inline-block;"
+    )
+      | Buy Now
+
+    p 
+      | Consider supporting 
+      a(href!=`${client}/${trackGroup.artist.urlSlug}`) #{trackGroup.artist.name} 
+      | with a subscription or a purchase.
+    p Enjoy!
+     
+    p 
+      | If this was not you, you can safely ignore this email.
