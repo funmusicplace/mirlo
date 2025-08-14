@@ -388,6 +388,15 @@ const routes: RouteObject[] = [
         },
         children: [
           {
+            path: "dashboard",
+            async lazy() {
+              const { default: Component } = await import(
+                "components/Admin/AdminDashboard"
+              );
+              return { Component };
+            },
+          },
+          {
             path: "users",
             async lazy() {
               const { default: Component } = await import(

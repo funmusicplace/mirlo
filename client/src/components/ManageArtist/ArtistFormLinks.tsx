@@ -57,7 +57,6 @@ const ArtistFormLinks: React.FC<ArtistFormLinksProps> = ({
   isManage,
   onSubmit,
 }) => {
-  const [isEditing, setIsEditing] = React.useState(false);
   const [isOpen, setIsOpen] = React.useState(false);
   const snackbar = useSnackbar();
   const { t } = useTranslation("translation", { keyPrefix: "artist" });

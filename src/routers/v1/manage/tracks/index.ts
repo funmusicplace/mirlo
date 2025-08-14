@@ -65,6 +65,34 @@ export default function () {
     try {
       await doesTrackGroupBelongToUser(Number(trackGroupId), loggedInUser);
 
+      const allTracksOnAlbums = await prisma.track.findMany({
+        where: {
+          trackGroupId: Number(trackGroupId),
+          deletedAt: null,
+        },
+        select: {
+          allowMirloPromo: true,
+          allowIndividualSale: true,
+          minPrice: true,
+          currency: true,
+        },
+      });
+
+      let allowMirloPromo = false;
+      if (allTracksOnAlbums.every((track) => track.allowMirloPromo)) {
+        // Assume if all tracks in the group allow Mirlo promo, then the new track should also allow it
+        allowMirloPromo = true;
+      }
+      let minPrice: number | null = null;
+      let allowIndividualSale = false;
+      if (allTracksOnAlbums.every((track) => track.allowIndividualSale)) {
+        minPrice = Math.min(
+          ...allTracksOnAlbums.map((track) => track.minPrice ?? 0)
+        );
+        allowIndividualSale = true;
+      }
+      console.log("Creating track with data:", minPrice, allowMirloPromo);
+
       const createdTrack = await prisma.track.create({
         data: {
           title,
@@ -74,6 +102,10 @@ export default function () {
           lyrics,
           isrc,
           description,
+          allowMirloPromo,
+          allowIndividualSale,
+          minPrice,
+          currency: allTracksOnAlbums[0]?.currency,
           trackGroup: {
             connect: {
               id: Number(trackGroupId),
@@ -84,6 +116,7 @@ export default function () {
           },
         },
       });
+
       const track = await prisma.track.findFirst({
         where: {
           id: createdTrack.id,

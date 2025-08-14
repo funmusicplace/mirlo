@@ -12,10 +12,15 @@ import { queryUserStripeStatus } from "queries";
 import SupportArtistTiersForm from "./SupportArtistTiersForm";
 import { ArtistButton } from "components/Artist/ArtistButtons";
 import { css } from "@emotion/css";
+import useArtistQuery from "utils/useArtistQuery";
 
 const SupportArtistPopUp: React.FC<{
-  artist: Pick<Artist, "id" | "name" | "userId" | "urlSlug">;
+  artist: Pick<
+    Artist,
+    "id" | "name" | "userId" | "urlSlug" | "subscriptionTiers"
+  >;
 }> = ({ artist }) => {
+  const { data: artistData } = useArtistQuery();
   const [isOpen, setIsOpen] = React.useState(false);
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const [isSubscribed, setIsSubscribed] = React.useState(false);
@@ -34,7 +39,10 @@ const SupportArtistPopUp: React.FC<{
     }
   }, [artist.id, user?.artistUserSubscriptions]);
 
-  if (!stripeAccountStatus?.chargesEnabled) {
+  const onlyDefaultTier =
+    artistData?.subscriptionTiers.every((tier) => tier.isDefaultTier) &&
+    artistData?.subscriptionTiers.length === 1;
+  if (!stripeAccountStatus?.chargesEnabled || onlyDefaultTier) {
     return (
       <div
         className={css`
@@ -70,7 +78,7 @@ const SupportArtistPopUp: React.FC<{
         onClose={() => setIsOpen(false)}
       >
         <SpaceBetweenDiv>
-          <div>{t("chooseATier")}</div>
+          <div>{t("chooseATier", { artistName: artist.name })}</div>
         </SpaceBetweenDiv>
         <SupportArtistTiersForm
           artist={artist}

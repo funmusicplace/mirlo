@@ -151,6 +151,7 @@ const zipFilesInFolder = async ({
 
     const archive = archiver("zip", {
       zlib: { level: 9 }, // Sets the compression level.
+      forceLocalTime: true, // Workaround for UTF-8 support for filenames
     });
 
     // good practice to catch warnings (ie stat failures and other non-blocking errors)

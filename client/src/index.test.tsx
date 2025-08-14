@@ -9,7 +9,7 @@ test("renders homepage", async () => {
   await import("./index");
 
   await waitFor(() => {
-    expect(document.title).toEqual("Mirlo: Mirlo");
+    expect(document.title).toEqual("Mirlo on Mirlo");
     expect(screen.queryByText("Log in")).toBeInTheDocument();
   });
 });

@@ -24,6 +24,8 @@ import path from "node:path";
 import parseIndex from "./parseIndex";
 import qs from "qs";
 import wellKnown from "./wellKnown";
+import passport from "./auth/passport";
+import logger from "./logger";
 
 dotenv.config();
 
@@ -56,12 +58,27 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 // app.use(passport.initialize()); // Supposedly we don't need this anymore
 
-if (!isDev) {
+if (process.env.NODE_ENV === "production") {
   const limiter = rateLimit({
     windowMs: 60 * 1000, // 1 minute
-    limit: 400, // 400 requests per minute, which is absurd, but one page load gets us 80
+    limit: 100, // 100 requests per minute, which is absurd, but one page load gets us 80
     // FIXME: is there a way to have this be determined on whether the user is logged in?
-    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers,
+    skip: async (req, res) => {
+      // skip the rate limiting for logged in users
+      const isAuthenticated = await new Promise<boolean>((resolve) => {
+        passport.authenticate(
+          "jwt",
+          { session: false },
+          (err: unknown, user?: Express.User) => {
+            if (err || !user) return resolve(false);
+            resolve(true);
+          }
+        )(req, res, () => {});
+      });
+      // If the user is authenticated, skip the rate limiting
+      return isAuthenticated;
+    },
   });
 
   app.use(limiter);
@@ -233,6 +250,14 @@ if (!isDev) {
 } else {
   app.use("/auth", auth);
 }
+
+app.use((req, res, next) => {
+  // Basic logging for requests that aren't handled by the API or auth.
+  logger.info(
+    `front-end request: ${req.method} ${req.path} - ${JSON.stringify(req.query)} - ${JSON.stringify(req.body)} - ${JSON.stringify(req.headers)}`
+  );
+  next();
+});
 
 app.use(express.static("public"));
 

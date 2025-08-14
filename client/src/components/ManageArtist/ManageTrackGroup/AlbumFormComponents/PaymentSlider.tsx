@@ -37,6 +37,8 @@ const PaymentSlider: React.FC<{
     }
   }, [extraData, current]);
 
+  console.log("current", current);
+
   return (
     <div
       className={css`
@@ -100,7 +102,8 @@ const PaymentSlider: React.FC<{
         {t("platformCut", { percent: current })}
         <div>
           <Pill>
-            {current >= 0 && current < 5 && t("solidarity")}
+            {current == 0 && t("none")}
+            {current > 0 && current < 5 && t("solidarity")}
             {current >= 5 && current < 10 && t("sustain")}
             {current >= 10 && current < 15 && t("fullCost")}
             {current >= 15 && t("redistribution")}

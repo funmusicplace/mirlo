@@ -25,6 +25,8 @@ const SupportArtistTiersForm: React.FC<{
   const { user, refreshLoggedInUser } = useAuthContext();
   const [isCheckingForSubscription, setIsCheckingForSubscription] =
     React.useState(false);
+  const [isRemovingSubscription, setIsRemovingSubscription] =
+    React.useState(false);
   const snackbar = useSnackbar();
 
   const { data: artistDetails } = useQuery(
@@ -57,14 +59,14 @@ const SupportArtistTiersForm: React.FC<{
 
   const unsubscribeFromArtist = async () => {
     try {
-      setIsCheckingForSubscription(true);
+      setIsRemovingSubscription(true);
       await api.delete(`artists/${artist.id}/subscribe`);
       snackbar(t("unsubscribedFromArtist"), { type: "success" });
     } catch (e) {
       snackbar(t("error"), { type: "warning" });
       console.error(e);
     } finally {
-      setIsCheckingForSubscription(false);
+      setIsRemovingSubscription(false);
       refreshLoggedInUser();
       onFinishedSubscribing?.(false);
     }
@@ -156,14 +158,14 @@ const SupportArtistTiersForm: React.FC<{
       </Button>
       <Button
         onClick={() => unsubscribeFromArtist()}
-        isLoading={isCheckingForSubscription}
+        isLoading={isRemovingSubscription}
         wrap
         className={css`
           width: 100% !important;
           margin-top: 1rem;
         `}
       >
-        {t("unsubscribeFromArtist")}
+        {t("unsubscribeFromArtist", { artistName: artist.name })}
       </Button>
       {value && !value.isDefaultTier && (
         <div

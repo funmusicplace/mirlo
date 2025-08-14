@@ -25,6 +25,12 @@ const ManageArtistAlbums: React.FC<{}> = () => {
     queryManagedArtistTrackGroups({ artistId: Number(artistId) })
   );
 
+  const publishedReleases =
+    trackGroups?.results.filter((album) => album.published) ?? [];
+
+  const unpublishedReleases =
+    trackGroups?.results.filter((album) => !album.published) ?? [];
+
   return (
     <ManageSectionWrapper>
       <SpaceBetweenDiv>
@@ -56,19 +62,40 @@ const ManageArtistAlbums: React.FC<{}> = () => {
       </SpaceBetweenDiv>
 
       {isLoading && <LoadingBlocks />}
-      {(trackGroups?.results.length ?? 0) > 0 && (
-        <div
-          className={css`
-            padding-bottom: 1rem;
-            display: flex;
-            flex-wrap: wrap;
-          `}
-        >
-          {artist &&
-            trackGroups?.results.map((album) => (
-              <TrackGroupCard artist={artist} album={album} key={album.id} />
-            ))}
-        </div>
+      {(unpublishedReleases.length ?? 0) > 0 && (
+        <>
+          {" "}
+          <h3>{t("unpublishedReleases")}</h3>
+          <div
+            className={css`
+              padding-bottom: 1rem;
+              display: flex;
+              flex-wrap: wrap;
+            `}
+          >
+            {artist &&
+              unpublishedReleases.map((album) => (
+                <TrackGroupCard artist={artist} album={album} key={album.id} />
+              ))}
+          </div>
+        </>
+      )}
+      {(publishedReleases.length ?? 0) > 0 && (
+        <>
+          <h3>{t("publishedReleases")}</h3>
+          <div
+            className={css`
+              padding-bottom: 1rem;
+              display: flex;
+              flex-wrap: wrap;
+            `}
+          >
+            {artist &&
+              publishedReleases.map((album) => (
+                <TrackGroupCard artist={artist} album={album} key={album.id} />
+              ))}
+          </div>
+        </>
       )}
     </ManageSectionWrapper>
   );

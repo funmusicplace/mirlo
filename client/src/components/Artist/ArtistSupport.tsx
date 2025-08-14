@@ -101,7 +101,7 @@ const ArtistSupport: React.FC = () => {
           margin: 2rem 0;
         `}
       >
-        {t("noSubscriptionTiersYet")}
+        {t("noSubscriptionTiersYet", {artistName: artist.name})}
       </div>
     );
   }
@@ -140,7 +140,7 @@ const ArtistSupport: React.FC = () => {
             text-align: center;
           `}
         >
-          {t("noSubscriptionTiersYet")}
+          {t("noSubscriptionTiersYet", {artistName: artist.name})}
         </Box>
       )}
       <ArtistSupportGrid>

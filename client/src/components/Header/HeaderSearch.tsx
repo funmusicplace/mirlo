@@ -117,7 +117,6 @@ const HeaderSearch: React.FC = () => {
           navigate(constructUrl(value));
         }}
         onEnter={onEnter}
-        resultsPrefix={t("searchSuggestions") ?? undefined}
         optionDisplay={(r: {
           id: number | string;
           name: string;

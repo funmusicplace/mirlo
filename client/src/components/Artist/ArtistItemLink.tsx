@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { css } from "@emotion/css";
 import {
   getArtistUrl,
@@ -34,6 +34,7 @@ export const determineItemLink = (artist: Artist, item: Item) => {
 const ArtistItemLink: React.FC<{
   item: Item;
 }> = ({ item }) => {
+  const { artistId } = useParams();
   const { t } = useTranslation("translation", { keyPrefix: "clickToPlay" });
 
   const artist =
@@ -52,10 +53,14 @@ const ArtistItemLink: React.FC<{
       className={
         item.title?.length
           ? css`
-              color: var(--mi-normal-foreground-color);
+              color: ${artistId
+                ? artist.properties?.colors?.foreground
+                : "var(--mi-normal-foreground-color)"};
             `
           : css`
-              color: var(--mi-light-foreground-color);
+              color: ${artistId
+                ? artist.properties?.colors?.foreground
+                : "var(--mi-light-foreground-color)"};
               font-style: italic;
             `
       }

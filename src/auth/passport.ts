@@ -297,6 +297,4 @@ export const trackBelongsToLoggedInUser = async (
   return next();
 };
 
-export default {
-  userLoggedInWithoutRedirect,
-};
+export default passport;

@@ -5,6 +5,7 @@ import { forwardRef } from "react";
 import { moneyDisplay } from "./Money";
 import { useTranslation } from "react-i18next";
 import { useGetArtistColors } from "components/Artist/ArtistButtons";
+import { css } from "@emotion/css";
 
 const Label = styled.label<{ colors?: ArtistColors }>`
   display: block;
@@ -64,7 +65,17 @@ const SupportArtistPopUpTiers = forwardRef<
     <List>
       {options.map((tier) => {
         return (
-          <ListItem key={tier.id} colors={colors}>
+          <ListItem
+            key={tier.id}
+            colors={colors}
+            className={
+              options.length === 1
+                ? css`
+                    display: none;
+                  `
+                : ""
+            }
+          >
             <InputEl
               type="radio"
               id={`${tier.id}`}

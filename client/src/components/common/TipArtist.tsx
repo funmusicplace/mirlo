@@ -48,7 +48,7 @@ const TipArtist: React.FC<{ artistId: number; transparent?: boolean }> = ({
             margin-bottom: 0.5rem;
           `}
         >
-          {t("likeWhatTheyAreDoing")}
+          {t("likeWhatTheyAreDoing", {artistName: artist.name})}
         </p>
         <SupportArtistTiersForm artist={artist} excludeDefault={!!user} />
         <TipArtistForm artist={artist} />

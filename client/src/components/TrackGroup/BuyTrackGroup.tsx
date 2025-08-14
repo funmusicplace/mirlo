@@ -161,7 +161,7 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
             <small>{t("messageToArtist")}</small>
           </FormComponent>
 
-          <EmailVerification setVerifiedEmail={setVerifiedEmail} />
+          {!user && <EmailVerification setVerifiedEmail={setVerifiedEmail} />}
 
           {(user || verifiedEmail) && (
             <ArtistButton
