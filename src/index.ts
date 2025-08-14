@@ -97,6 +97,7 @@ const routes = [
   "trackGroups/{id}/testOwns",
   "trackGroups/{id}/wishlist",
   "trackGroups/{id}/emailDownload",
+  "trackGroups/{id}/emailPurchaseLink",
   "trackGroups/{id}/generate",
   "playable",
   "settings/{setting}",
