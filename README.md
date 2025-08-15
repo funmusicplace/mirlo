@@ -29,16 +29,11 @@ corepack enable
 git clone https://github.com/funmusicplace/mirlo
 cd mirlo
 cp .env.example .env
-docker compose watch
+docker compose watch # launches the server.
+docker exec -it blackbird-api yarn prisma:seed # Seeds data for development
 ```
 
 Go to `localhost:3000/docs` and see the Swagger API docs.
-
-This should run the **seeding** script by default. If it doesn't do so, you can add run the seed by running:
-
-```sh
-docker exec -it blackbird-api yarn prisma:seed
-```
 
 #### For the client:
 
