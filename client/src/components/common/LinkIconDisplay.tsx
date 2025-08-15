@@ -11,6 +11,7 @@ import {
   FaBluesky,
   FaYoutube,
   FaPatreon,
+  FaTiktok,
   FaXTwitter,
   FaTwitch,
   FaVideo,
@@ -103,6 +104,7 @@ export const outsideLinks = [
   { matches: "youtube.com", icon: <FaYoutube />, name: "YouTube" },
   { matches: "patreon.com", icon: <FaPatreon />, name: "Patreon" },
   { matches: "twitch.tv", icon: <FaTwitch />, name: "Twitch" },
+  { matches: "tiktok.com", icon: <FaTiktok />, name: "TikTok" },
   { matches: "@", icon: <FiMail />, name: "Email" },
   { matches: "", icon: <FaGlobe />, name: "Website" },
 ];
