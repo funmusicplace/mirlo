@@ -7,7 +7,6 @@ import { FaPen, FaPlus, FaSave, FaTimes, FaTrash } from "react-icons/fa";
 import React from "react";
 import {
   findOutsideSite,
-  linkUrlDisplay,
   linkUrlHref,
   outsideLinks,
 } from "components/common/LinkIconDisplay";
@@ -134,7 +133,6 @@ const ArtistFormLinks: React.FC<ArtistFormLinksProps> = ({
                   align-items: center;
                 `}
               >
-                {linkUrlDisplay(l)}
               </ArtistButtonAnchor>
             );
           })}
