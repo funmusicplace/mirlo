@@ -12,6 +12,7 @@ import FormComponent from "./common/FormComponent";
 import Checkbox from "./common/FormCheckbox";
 import styled from "@emotion/styled";
 import WidthContainer from "./common/WidthContainer";
+import useErrorHandler from "services/useErrorHandler";
 
 type SignupInputs = {
   email: string;
@@ -61,6 +62,7 @@ function Signup() {
   const { t } = useTranslation("translation", { keyPrefix: "signUp" });
   const [search] = useSearchParams();
   const snackbar = useSnackbar();
+  const errorHandler = useErrorHandler();
   const [hasRegistered, setHasRegistered] = React.useState(false);
   const [accountIncomplete, setAccountIncomplete] = React.useState(false);
   const methods = useForm<SignupInputs>({
@@ -101,8 +103,7 @@ function Signup() {
           setAccountIncomplete(true);
           setHasRegistered(true);
         } else {
-          snackbar((e as Error).message, { type: "warning" });
-          console.error(e);
+          errorHandler(e);
         }
       }
     },

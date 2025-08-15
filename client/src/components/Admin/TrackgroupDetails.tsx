@@ -11,6 +11,7 @@ import { useParams } from "react-router-dom";
 import api from "services/api";
 import { useTranslation } from "react-i18next";
 import FormCheckbox from "components/common/FormCheckbox";
+import useErrorHandler from "services/useErrorHandler";
 
 interface TrackGroupFormData {
   coverFile: File[];
@@ -32,6 +33,7 @@ export const TrackGroupDetails: React.FC = () => {
   const { t } = useTranslation("translation", {
     keyPrefix: "trackGroupDetails",
   });
+  const errorHandler = useErrorHandler();
 
   const [trackgroup, setTrackgroup] = React.useState<TrackGroup>();
 
@@ -69,13 +71,13 @@ export const TrackGroupDetails: React.FC = () => {
           }
           snackbar("Successfully updated track group", { type: "success" });
         } catch (e) {
-          console.error(e);
+          errorHandler(e);
         } finally {
           setIsLoading(false);
         }
       }
     },
-    [trackgroupId, snackbar]
+    [trackgroupId, errorHandler, snackbar]
   );
 
   return (

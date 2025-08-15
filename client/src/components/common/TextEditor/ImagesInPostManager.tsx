@@ -6,6 +6,7 @@ import { FaCheckCircle } from "react-icons/fa";
 import api from "services/api";
 import { InputEl } from "../Input";
 import { useSnackbar } from "state/SnackbarContext";
+import useErrorHandler from "services/useErrorHandler";
 
 const ImagesInPostManager: React.FC<{
   images?: PostImage[];
@@ -15,6 +16,7 @@ const ImagesInPostManager: React.FC<{
   const { t } = useTranslation("translation", { keyPrefix: "postForm" });
   const [isSaving, setIsSaving] = React.useState(false);
   const snackbar = useSnackbar();
+  const errorHandler = useErrorHandler();
 
   const markImageAsFeatured = React.useCallback(
     async (imageId: string) => {
@@ -43,8 +45,7 @@ const ImagesInPostManager: React.FC<{
           markImageAsFeatured(imageId);
         }
       } catch (e) {
-        snackbar("Something went wrong", { type: "warning" });
-        console.error(e);
+        errorHandler(e);
       } finally {
         setIsSaving(false);
       }

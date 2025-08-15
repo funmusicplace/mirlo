@@ -6,6 +6,7 @@ import api from "services/api";
 import Box from "../common/Box";
 import Button from "../common/Button";
 import { useAuthContext } from "state/AuthContext";
+import useErrorHandler from "services/useErrorHandler";
 
 const ArtistManageSubscription: React.FC<{
   userSubscription?: ArtistUserSubscription;
@@ -15,6 +16,7 @@ const ArtistManageSubscription: React.FC<{
   const [isEditOpen, setIsEditOpen] = React.useState(false);
   const { user } = useAuthContext();
   const userId = user?.id;
+  const errorHandler = useErrorHandler();
 
   const cancelSubscription = React.useCallback(async () => {
     try {
@@ -23,9 +25,9 @@ const ArtistManageSubscription: React.FC<{
         await reload();
       }
     } catch (e) {
-      console.error(e);
+      errorHandler(e);
     }
-  }, [reload, userId, userSubscription]);
+  }, [reload, userId, errorHandler, userSubscription]);
 
   return (
     <Box

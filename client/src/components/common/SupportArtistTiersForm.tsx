@@ -14,6 +14,7 @@ import { moneyDisplay } from "./Money";
 import { css } from "@emotion/css";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import { isEmpty } from "lodash";
+import useErrorHandler from "services/useErrorHandler";
 
 const SupportArtistTiersForm: React.FC<{
   artist: Pick<Artist, "id" | "name" | "userId" | "urlSlug">;
@@ -28,6 +29,7 @@ const SupportArtistTiersForm: React.FC<{
   const [isRemovingSubscription, setIsRemovingSubscription] =
     React.useState(false);
   const snackbar = useSnackbar();
+  const errorHandler = useErrorHandler();
 
   const { data: artistDetails } = useQuery(
     queryArtist({ artistSlug: artist.urlSlug ?? "", includeDefaultTier: true })
@@ -63,8 +65,7 @@ const SupportArtistTiersForm: React.FC<{
       await api.delete(`artists/${artist.id}/subscribe`);
       snackbar(t("unsubscribedFromArtist"), { type: "success" });
     } catch (e) {
-      snackbar(t("error"), { type: "warning" });
-      console.error(e);
+      errorHandler(e);
     } finally {
       setIsRemovingSubscription(false);
       refreshLoggedInUser();
@@ -95,8 +96,7 @@ const SupportArtistTiersForm: React.FC<{
         snackbar(t("verificationEmailSent"), { type: "success" });
       }
     } catch (e) {
-      snackbar(t("error"), { type: "warning" });
-      console.error(e);
+      errorHandler(e);
     } finally {
       setIsCheckingForSubscription(false);
       refreshLoggedInUser();

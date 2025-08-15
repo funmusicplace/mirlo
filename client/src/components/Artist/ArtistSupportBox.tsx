@@ -19,6 +19,7 @@ import { queryArtist } from "queries";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { useGetArtistColors } from "./ArtistButtons";
+import useErrorHandler from "services/useErrorHandler";
 
 const StyledSupportBox = styled(Box)`
   background-color: var(--mi-darken-background-color);
@@ -56,6 +57,7 @@ const ArtistSupportBox: React.FC<{
     React.useState(false);
 
   const snackbar = useSnackbar();
+  const errorHandler = useErrorHandler();
 
   const subscribeToTier = async (tier: ArtistSubscriptionTier) => {
     try {
@@ -69,8 +71,7 @@ const ArtistSupportBox: React.FC<{
       });
       window.location.assign(response.sessionUrl);
     } catch (e) {
-      snackbar("Something went wrong", { type: "warning" });
-      console.error(e);
+      errorHandler(e);
     } finally {
       setIsCheckingForSubscription(false);
       refresh();
@@ -84,8 +85,7 @@ const ArtistSupportBox: React.FC<{
       refresh();
       refreshLoggedInUser();
     } catch (e) {
-      snackbar("Something went wrong", { type: "warning" });
-      console.error(e);
+      errorHandler(e);
     } finally {
     }
   };
@@ -188,7 +188,7 @@ const ArtistSupportBox: React.FC<{
             <p>
               {isSubscribedToArtist &&
                 !isSubscribedToTier &&
-                t("areSupporting", {artistName: artist.name})}
+                t("areSupporting", { artistName: artist.name })}
               {isSubscribedToTier && t("supportAtThisTier")}
             </p>
             <div

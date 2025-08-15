@@ -11281,12 +11281,34 @@ __metadata:
   languageName: node
   linkType: hard
 
+"express-rate-limit@npm:8":
+  version: 8.0.1
+  resolution: "express-rate-limit@npm:8.0.1"
+  dependencies:
+    ip-address: "npm:10.0.1"
+  peerDependencies:
+    express: ">= 4.11"
+  checksum: 10/182a4706ae000659a8164de204d61c73261a4d9da5f8a5c24cb961287cd801855085485119573376b5c00279d2e54aadc9a7ea97f2ae1d5443720d07346404e0
+  languageName: node
+  linkType: hard
+
 "express-rate-limit@npm:^7.1.4":
   version: 7.5.0
   resolution: "express-rate-limit@npm:7.5.0"
   peerDependencies:
     express: ^4.11 || 5 || ^5.0.0-beta.1
   checksum: 10/eff34c83bf586789933a332a339b66649e2cca95c8e977d193aa8bead577d3182ac9f0e9c26f39389287539b8038890ff023f910b54ebb506a26a2ce135b92ca
+  languageName: node
+  linkType: hard
+
+"express-slow-down@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "express-slow-down@npm:3.0.0"
+  dependencies:
+    express-rate-limit: "npm:8"
+  peerDependencies:
+    express: 4 || 5 || ^5.0.0-beta.1
+  checksum: 10/bd4d3705f0e6882012a55848cef98f9f76f552d0355ce0bc82c8a32b21aa6dd79ef914be555c32903b02d343632013b92ded4431e30e2839cf30ab923be2df47
   languageName: node
   linkType: hard
 
@@ -12850,6 +12872,13 @@ __metadata:
     redis-parser: "npm:^3.0.0"
     standard-as-callback: "npm:^2.1.0"
   checksum: 10/632186e21f2d8b94a12918b5feef0f5df70315e303988989adb0d190377759ffa601660be7536489c0768803a0fb6eb94f861b33c1fcfc673d518fdd31c541e2
+  languageName: node
+  linkType: hard
+
+"ip-address@npm:10.0.1":
+  version: 10.0.1
+  resolution: "ip-address@npm:10.0.1"
+  checksum: 10/09731acda32cd8e14c46830c137e7e5940f47b36d63ffb87c737331270287d631cf25aa95570907a67d3f919fdb25f4470c404eda21e62f22e0a55927f4dd0fb
   languageName: node
   linkType: hard
 
@@ -15282,6 +15311,7 @@ __metadata:
     express: "npm:^5.1.0"
     express-openapi: "npm:^12.1.3"
     express-rate-limit: "npm:^7.1.4"
+    express-slow-down: "npm:^3.0.0"
     file-type: "npm:16"
     filenamify: "npm:^4.3.0"
     fluent-ffmpeg: "npm:^2.1.2"

@@ -20,15 +20,18 @@ const LicenseForm: React.FC<{ callback: () => void }> = ({ callback }) => {
   const snackbar = useSnackbar();
   const { t } = useTranslation("translation", { keyPrefix: "manageLicense" });
 
-  const onSubmit = React.useCallback(async (data: FormData) => {
-    try {
-      await api.post(`licenses`, data);
-      await callback();
-      snackbar(t("licenseAdded"));
-    } catch (e) {
-      errorHandler(e);
-    }
-  }, []);
+  const onSubmit = React.useCallback(
+    async (data: FormData) => {
+      try {
+        await api.post(`licenses`, data);
+        await callback();
+        snackbar(t("licenseAdded"));
+      } catch (e) {
+        errorHandler(e);
+      }
+    },
+    [errorHandler, snackbar, t, callback]
+  );
 
   return (
     <form onSubmit={methods.handleSubmit(onSubmit)}>

@@ -11,6 +11,7 @@ import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { FaExternalLinkAlt } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import useErrorHandler from "services/useErrorHandler";
 import { getArtistUrl, getMerchUrl } from "utils/artist";
 
 export const Underline = styled.div`
@@ -43,6 +44,7 @@ const CustomerPopUp: React.FC<{ purchase: MerchPurchase }> = ({ purchase }) => {
   });
 
   const methods = useForm({ defaultValues: purchase });
+  const errorHandler = useErrorHandler();
 
   const { mutateAsync: updatePurchase } = useUpdatePurchaseMutation();
 
@@ -53,7 +55,9 @@ const CustomerPopUp: React.FC<{ purchase: MerchPurchase }> = ({ purchase }) => {
           purchaseId: purchase.id,
           purchase: data,
         });
-      } catch (e) {}
+      } catch (e) {
+        errorHandler(e);
+      }
     },
     [purchase.id]
   );

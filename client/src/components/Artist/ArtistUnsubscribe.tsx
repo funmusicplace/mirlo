@@ -16,6 +16,7 @@ import { useSnackbar } from "state/SnackbarContext";
 import { getArtistUrl } from "utils/artist";
 import useArtistQuery from "utils/useArtistQuery";
 import LoadingBlocks from "./LoadingBlocks";
+import useErrorHandler from "services/useErrorHandler";
 
 function ArtistUnsubscribe() {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
@@ -23,6 +24,7 @@ function ArtistUnsubscribe() {
   const navigate = useNavigate();
   const snackbar = useSnackbar();
   const email = params.get("email");
+  const errorHandler = useErrorHandler();
 
   const { register, handleSubmit } = useForm({
     defaultValues: { email },
@@ -41,7 +43,7 @@ function ArtistUnsubscribe() {
           snackbar("successfullyUnsubscribed", { type: "success" });
           navigate(getArtistUrl(artist));
         } catch (e) {
-          snackbar("error", { type: "warning" });
+          errorHandler(e);
         }
       }
     },

@@ -15,6 +15,7 @@ import { useArtistContext } from "state/ArtistContext";
 import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
 import { useGetArtistColors } from "./ArtistButtons";
+import useErrorHandler from "services/useErrorHandler";
 
 export const SupportBoxButton = styled(Button)`
   white-space: normal !important;
@@ -39,7 +40,7 @@ const ArtistVariableSupport: React.FC<{
   const snackbar = useSnackbar();
   const { artistId } = useParams();
   const { refetch: refresh } = useQuery(queryArtist({ artistSlug: artistId }));
-  const { colors } = useGetArtistColors();
+  const errorHandler = useErrorHandler();
 
   const subscribeToTier = async (tier: ArtistSubscriptionTier) => {
     try {
@@ -53,8 +54,7 @@ const ArtistVariableSupport: React.FC<{
       });
       window.location.assign(response.sessionUrl);
     } catch (e) {
-      snackbar("Something went wrong", { type: "warning" });
-      console.error(e);
+      errorHandler(e);
     } finally {
       setIsCheckingForSubscription(false);
       refresh();

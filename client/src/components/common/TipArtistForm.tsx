@@ -13,6 +13,7 @@ import { moneyDisplay } from "./Money";
 import { css } from "@emotion/css";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import TextArea from "./TextArea";
+import useErrorHandler from "services/useErrorHandler";
 
 const defaultGifts = [
   { value: 5 },
@@ -26,6 +27,7 @@ const TipArtistForm: React.FC<{
   artist: Pick<Artist, "id" | "name" | "userId" | "urlSlug">;
 }> = ({ artist }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
+  const errorHandler = useErrorHandler();
 
   const { user, refreshLoggedInUser } = useAuthContext();
   const [isCheckingForSubscription, setIsCheckingForSubscription] =
@@ -67,8 +69,7 @@ const TipArtistForm: React.FC<{
         }
       }
     } catch (e) {
-      snackbar(t("somethingWentWrong"), { type: "warning" });
-      console.error(e);
+      errorHandler(e);
     } finally {
       setIsCheckingForSubscription(false);
       refreshLoggedInUser();
