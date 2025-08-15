@@ -272,7 +272,6 @@ const parseIndex = async (pathname: string) => {
         }
       }
     } else if (artist && route[2] === "release") {
-      console.log("accessing trackgroup route", route);
       // it is about n individual release
       const tg = await prisma.trackGroup.findFirst({
         where: {
@@ -287,7 +286,6 @@ const parseIndex = async (pathname: string) => {
         },
       });
       if (tg && route[4] === "tracks") {
-        console.log("accessing track route", route);
         // it's a track
         const track = await prisma.track.findFirst({
           where: {
@@ -300,7 +298,6 @@ const parseIndex = async (pathname: string) => {
           },
         });
         if (track) {
-          console.log("generating for track", track.id);
           const coverString = tg.cover?.url.find((u) => u.includes("x600"));
           buildOpenGraphTags($, {
             title: track.title ?? "A track on Mirlo",
@@ -314,7 +311,6 @@ const parseIndex = async (pathname: string) => {
           });
         }
       } else if (tg) {
-        console.log("generating for tg", tg.title);
         const coverString = tg.cover?.url.find((u) => u.includes("x600"));
         buildOpenGraphTags($, {
           title: tg.title ?? "Mirlo Album",
