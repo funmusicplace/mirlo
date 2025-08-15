@@ -16,6 +16,7 @@ import FormComponent from "../FormComponent";
 import Box from "../Box";
 import { useForm } from "react-hook-form";
 import { hasId } from "components/ManageArtist/ManageTrackGroup/AlbumFormComponents/ManageTags";
+import useErrorHandler from "services/useErrorHandler";
 
 const InsertMirloWidgetButton: React.FC<{
   postId?: number;
@@ -27,6 +28,7 @@ const InsertMirloWidgetButton: React.FC<{
   const methods = useForm<{ titles: string[] }>();
   const { addIframe } = useCommands();
   const { t } = useTranslation("translation", { keyPrefix: "textEditor" });
+  const errorHandler = useErrorHandler();
 
   const titles = methods.watch("titles");
 
@@ -76,7 +78,7 @@ const InsertMirloWidgetButton: React.FC<{
         );
         newSongs.forEach((song) => onAdd(song.id, "track"));
       } catch (e) {
-        console.error(e);
+        errorHandler(e, true);
       }
     }
   }, [newSongs, methods]);
@@ -89,7 +91,7 @@ const InsertMirloWidgetButton: React.FC<{
         setNewSongs((existing) => [...(existing ?? []), result]);
         loadDraft();
       } catch (e) {
-        console.error(e);
+        errorHandler(e, true);
       }
     }
   }, []);
@@ -106,7 +108,9 @@ const InsertMirloWidgetButton: React.FC<{
   React.useEffect(() => {
     try {
       loadDraft();
-    } catch (e) {}
+    } catch (e) {
+      errorHandler(e, true);
+    }
   }, []);
 
   const hasEmptyStrings = titles?.filter((title) => title === "").length > 0;

@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form";
 import { useParams } from "react-router-dom";
 import api from "services/api";
 import { useTranslation } from "react-i18next";
+import useErrorHandler from "services/useErrorHandler";
 // import { AdminTrack, fetchTrack, updateTrack } from "services/api/Admin";
 
 export const TrackDetails: React.FC = () => {
@@ -15,6 +16,7 @@ export const TrackDetails: React.FC = () => {
   const snackbar = useSnackbar();
   const { register, handleSubmit, reset } = useForm();
   const [isLoading, setIsLoading] = React.useState(false);
+  const errorHandler = useErrorHandler();
 
   const [track, setTrack] = React.useState<Track>();
 
@@ -45,7 +47,7 @@ export const TrackDetails: React.FC = () => {
           await api.put<Track, Track>(`tracks/${trackId}`, data as Track);
           snackbar("sucessfullyUpdated", { type: "success" });
         } catch (e) {
-          console.error(e);
+          errorHandler(e);
         } finally {
           setIsLoading(false);
         }

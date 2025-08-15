@@ -14,6 +14,7 @@ import { useAuthContext } from "state/AuthContext";
 import { Link } from "react-router-dom";
 import { determineItemLink } from "components/Artist/ArtistItemLink";
 import FavoriteTrack from "components/TrackGroup/Favorite";
+import useErrorHandler from "services/useErrorHandler";
 
 const TrackgroupButtons = styled.div`
   width: 100%;
@@ -227,6 +228,7 @@ const ClickToPlay: React.FC<
 
   const [localTrackIds, setLocalTrackIds] = React.useState<number[]>([]);
   const { t } = useTranslation("translation", { keyPrefix: "clickToPlay" });
+  const errorHandler = useErrorHandler();
 
   const detectTracksPlayable = React.useCallback(async () => {
     try {
@@ -241,7 +243,7 @@ const ClickToPlay: React.FC<
       setLocalTrackIds(results);
       return results;
     } catch (e) {
-      console.error("Error fetching playable tracks", e);
+      errorHandler(e, true);
     }
     return [];
   }, [trackIds]);
@@ -257,7 +259,7 @@ const ClickToPlay: React.FC<
         playerQueueIds: localTrackIds,
       });
     } catch (e) {
-      console.error("Error fetching playable tracks", e);
+      errorHandler(e, true);
     }
   }, [dispatch, localTrackIds, detectTracksPlayable]);
 

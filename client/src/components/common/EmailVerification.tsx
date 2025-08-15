@@ -84,7 +84,7 @@ const EmailVerification: React.FC<{
             isLoading={isLoading}
             onClick={verifyCode}
           >
-            {t("verify")}
+            {t("verifyEmailCode")}
           </ArtistButton>
         </Box>
       ) : (

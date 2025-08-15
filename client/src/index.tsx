@@ -14,7 +14,6 @@ import { QueryClientWrapper } from "queries/QueryClientWrapper";
 import { AuthContextProvider } from "state/AuthContext";
 import { ConfirmContextProvider } from "utils/useConfirm";
 import { ConfirmDialog } from "components/common/ConfirmDialog";
-import ScrollToTop from "components/ScrollToTop";
 
 const router = createBrowserRouter(routes);
 
