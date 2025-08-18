@@ -1,45 +1,17 @@
 import express from "express";
-import cookieParser from "cookie-parser";
 import { initialize } from "express-openapi";
 
 import apiDoc from "./routers/v1/api-doc";
 import "./auth/passport";
 
-import { corsCheck } from "./auth/cors";
 import errorHandler from "./utils/error";
 
-import qs from "qs";
 import logger from "./logger";
 import rateLimiter from "./rateLimiter";
 import slowDown from "express-slow-down";
 import routes from "./routes";
 
 const apiApp = express();
-
-apiApp.set("query parser", (str: string) => qs.parse(str));
-// See https://github.com/express-rate-limit/express-rate-limit/wiki/Troubleshooting-Proxy-Issues
-apiApp.set("trust proxy", 2);
-apiApp.get("/ip", (request, response) => response.send(request.ip));
-apiApp.get("/x-forwarded-for", (request, response) =>
-  response.send(request.headers["x-forwarded-for"])
-);
-
-apiApp.use(corsCheck);
-
-apiApp.use(
-  express.json({
-    limit: "5mb",
-    type: ["application/*+json", "application/json"],
-    verify: (req, res, buf) => {
-      // See https://stackoverflow.com/a/70951912/154392
-      // @ts-ignore
-      req.rawBody = buf.toString();
-    },
-  })
-);
-
-apiApp.use(cookieParser());
-apiApp.use(express.urlencoded({ extended: true }));
 
 apiApp.use(rateLimiter);
 apiApp.use(

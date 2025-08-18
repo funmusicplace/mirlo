@@ -21,11 +21,40 @@ import parseIndex from "./parseIndex";
 import wellKnown from "./wellKnown";
 import logger from "./logger";
 import apiApp from "./api";
+import { corsCheck } from "./auth/cors";
+import cookieParser from "cookie-parser";
+import qs from "qs";
 
 dotenv.config();
 
 const app = express();
 const isDev = process.env.NODE_ENV === "development";
+
+app.set("query parser", (str: string) => qs.parse(str));
+// See https://github.com/express-rate-limit/express-rate-limit/wiki/Troubleshooting-Proxy-Issues
+app.set("trust proxy", 2);
+
+app.get("/ip", (request, response) => response.send(request.ip));
+app.get("/x-forwarded-for", (request, response) =>
+  response.send(request.headers["x-forwarded-for"])
+);
+
+app.use(corsCheck);
+app.use(cookieParser());
+
+apiApp.use(express.urlencoded({ extended: true }));
+
+app.use(
+  express.json({
+    limit: "5mb",
+    type: ["application/*+json", "application/json"],
+    verify: (req, res, buf) => {
+      // See https://stackoverflow.com/a/70951912/154392
+      // @ts-ignore
+      req.rawBody = buf.toString();
+    },
+  })
+);
 
 app.use("/v1", apiApp);
 
