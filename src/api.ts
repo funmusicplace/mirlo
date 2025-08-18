@@ -10,8 +10,25 @@ import logger from "./logger";
 import rateLimiter from "./rateLimiter";
 import slowDown from "express-slow-down";
 import routes from "./routes";
+import qs from "qs";
+import { corsCheck } from "./auth/cors";
+import cookieParser from "cookie-parser";
 
 const apiApp = express();
+apiApp.set("query parser", (str: string) => qs.parse(str));
+apiApp.use(corsCheck);
+apiApp.use(cookieParser());
+apiApp.use(
+  express.json({
+    limit: "5mb",
+    type: ["application/*+json", "application/json"],
+    verify: (req, res, buf) => {
+      // See https://stackoverflow.com/a/70951912/154392
+      // @ts-ignore
+      req.rawBody = buf.toString();
+    },
+  })
+);
 
 apiApp.use(rateLimiter);
 apiApp.use(
