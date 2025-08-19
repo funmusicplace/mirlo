@@ -18,6 +18,8 @@ const apiApp = express();
 apiApp.set("query parser", (str: string) => qs.parse(str));
 apiApp.use(corsCheck);
 apiApp.use(cookieParser());
+apiApp.use(express.urlencoded({ extended: true }));
+
 apiApp.use(
   express.json({
     limit: "5mb",

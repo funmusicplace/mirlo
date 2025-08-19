@@ -41,8 +41,7 @@ app.get("/x-forwarded-for", (request, response) =>
 
 app.use(corsCheck);
 app.use(cookieParser());
-
-apiApp.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true }));
 
 app.use(
   express.json({
