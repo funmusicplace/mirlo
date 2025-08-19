@@ -3,6 +3,7 @@ import { NextFunction, Request, Response } from "express";
 import { logger } from "../../../../logger";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import prisma from "@mirlo/prisma";
+import contentDisposition from "content-disposition";
 
 import {
   FormatOptions,
@@ -125,8 +126,11 @@ export default function () {
       try {
         const originalTitle = `${trackGroup.artist.name} - ${trackGroup.title ?? "album"}`;
         const asciiTitle = filenamify(originalTitle);
-        
-        res.setHeader('Content-Disposition', `attachment; filename="${asciiTitle}.zip"; filename*=UTF-8''${encodeURIComponent(`${originalTitle}.zip`)}`);
+
+        res.setHeader(
+          "Content-Disposition",
+          contentDisposition(`${asciiTitle}.zip`, { type: "attachment" })
+        );
 
         const stream = await getReadStream(trackGroupFormatBucket, zipName);
 

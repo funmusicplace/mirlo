@@ -3260,6 +3260,7 @@ __metadata:
     "@testing-library/user-event": "npm:^14.5.2"
     "@transifex/cli": "npm:^5.4.0"
     "@transifex/i18next": "npm:^5.4.0"
+    "@types/content-disposition": "npm:^0"
     "@types/file-saver": "npm:^2.0.5"
     "@types/lodash": "npm:^4.14.192"
     "@types/parallax-js": "npm:^3"
@@ -3272,6 +3273,7 @@ __metadata:
     "@vitejs/plugin-react": "npm:^4.2.1"
     b64-to-blob: "npm:^1.2.19"
     buffer: "npm:^6.0.3"
+    content-disposition: "npm:^0.5.4"
     cypress: "npm:^14.3.0"
     file-saver: "npm:^2.0.5"
     focus-trap-react: "npm:^11.0.3"
@@ -6815,6 +6817,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/content-disposition@npm:^0":
+  version: 0.5.9
+  resolution: "@types/content-disposition@npm:0.5.9"
+  checksum: 10/d895703c0027ca6c4c0c1ede363909dbb590deec3b206a84b88a49c8b2840bcbd31b4ddeb2e1e6caa1af00801cc79c5b69a5c75a8152f2959810b10fe75a4e1f
+  languageName: node
+  linkType: hard
+
 "@types/cookie-parser@npm:^1.4.3":
   version: 1.4.8
   resolution: "@types/cookie-parser@npm:1.4.8"
@@ -9618,7 +9627,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"content-disposition@npm:0.5.4":
+"content-disposition@npm:0.5.4, content-disposition@npm:^0.5.4":
   version: 0.5.4
   resolution: "content-disposition@npm:0.5.4"
   dependencies:
