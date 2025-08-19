@@ -8,6 +8,7 @@ import { useAuthContext } from "state/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { queryArtist } from "queries";
+import useErrorHandler from "services/useErrorHandler";
 
 const Wrapper = styled.div<{ colors?: ArtistColors }>`
   position: relative;
@@ -56,6 +57,7 @@ const ClickToPlayTracks: React.FC<{
   const { user } = useAuthContext();
   const [localTrackIds, setLocalTrackIds] = React.useState<number[]>([]);
   const params = useParams();
+  const errorHandler = useErrorHandler();
 
   const { data: artist } = useQuery(
     queryArtist({ artistSlug: params.artistId ?? "" })
@@ -76,7 +78,7 @@ const ClickToPlayTracks: React.FC<{
 
         setLocalTrackIds(results);
       } catch (e) {
-        console.error(e);
+        errorHandler(e, true);
       }
     };
     callback();

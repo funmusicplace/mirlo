@@ -13,6 +13,7 @@ import { useArtistContext } from "state/ArtistContext";
 import { useAuthContext } from "state/AuthContext";
 import { useQueryClient } from "@tanstack/react-query";
 import { QUERY_KEY_AUTH, queryKeyIncludes } from "queries/queryKeys";
+import useErrorHandler from "services/useErrorHandler";
 
 const ArtistSupportGrid = styled.div`
   display: grid;
@@ -48,6 +49,7 @@ const ArtistSupport: React.FC = () => {
   const artistId = artist?.id;
   const userSubscriptions = user?.artistUserSubscriptions;
   const artistTiers = artist?.subscriptionTiers;
+  const errorHandler = useErrorHandler();
 
   const checkForSubscription = React.useCallback(async () => {
     try {
@@ -66,11 +68,11 @@ const ArtistSupport: React.FC = () => {
         setUserSubscriptionTier(hasId);
       }
     } catch (e) {
-      console.error(e);
+      errorHandler(e, true);
     } finally {
       setIsLoading(false);
     }
-  }, [userId, userSubscriptions, artistTiers, artistId]);
+  }, [userId, userSubscriptions, errorHandler, artistTiers, artistId]);
 
   React.useEffect(() => {
     checkForSubscription();
@@ -101,7 +103,7 @@ const ArtistSupport: React.FC = () => {
           margin: 2rem 0;
         `}
       >
-        {t("noSubscriptionTiersYet", {artistName: artist.name})}
+        {t("noSubscriptionTiersYet", { artistName: artist.name })}
       </div>
     );
   }
@@ -140,7 +142,7 @@ const ArtistSupport: React.FC = () => {
             text-align: center;
           `}
         >
-          {t("noSubscriptionTiersYet", {artistName: artist.name})}
+          {t("noSubscriptionTiersYet", { artistName: artist.name })}
         </Box>
       )}
       <ArtistSupportGrid>

@@ -14,7 +14,12 @@ export function isError(entity: unknown): entity is APIError {
 
 const useErrorHandler = () => {
   const snackbar = useSnackbar();
-  return (e: unknown) => {
+  return (e: unknown, skipSnackbar?: boolean) => {
+    console.error(e);
+
+    if (skipSnackbar) {
+      return;
+    }
     if (isError(e)) {
       snackbar(e.message, { type: "warning" });
     } else {

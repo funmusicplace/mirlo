@@ -11,6 +11,7 @@ import {
   ArtistButton,
   ArtistButtonAnchor,
 } from "components/Artist/ArtistButtons";
+import useErrorHandler from "services/useErrorHandler";
 
 const formats = ["flac", "wav", "128.opus", "320.mp3", "256.mp3", "128.mp3"];
 const formatsDisplay: { [format: string]: string } = {
@@ -34,8 +35,8 @@ const DownloadAlbumButton: React.FC<{
   const [chosenFormat, setChosenFormat] = React.useState("");
   const [isGeneratingAlbum, setIsGeneratingAlbum] = React.useState(0);
   const [isPopupOpen, setIsPopupOpen] = React.useState(false);
-  const snackbar = useSnackbar();
   const [isDownloading, setIsDownloading] = React.useState(false);
+  const errorHandler = useErrorHandler();
 
   const prefix = track ? `tracks/${track.id}` : `trackGroups/${trackGroup.id}`;
 
@@ -68,11 +69,10 @@ const DownloadAlbumButton: React.FC<{
           setIsGeneratingAlbum(0);
         }
       } catch (e) {
-        snackbar(t("error"), { type: "warning" });
-        console.error(e);
+        errorHandler(e);
       }
     },
-    [chosenFormat, trackGroup.id, t, prefix, snackbar]
+    [chosenFormat, trackGroup.id, t, prefix, errorHandler]
   );
 
   React.useEffect(() => {

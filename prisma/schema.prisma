@@ -575,37 +575,40 @@ model TrackGroupDownloadCodes {
 }
 
 model TrackGroup {
-  id                      Int                       @id @default(autoincrement())
-  about                   String?
-  artist                  Artist                    @relation(fields: [artistId], references: [id])
-  artistId                Int
-  title                   String?
-  isDrafts                Boolean                   @default(false)
-  tracks                  Track[]
-  cover                   TrackGroupCover?
-  published               Boolean                   @default(false)
-  type                    String?
-  isGettable              Boolean                   @default(true)
-  releaseDate             DateTime                  @default(now())
-  adminEnabled            Boolean                   @default(true)
-  createdAt               DateTime                  @default(now())
-  updatedAt               DateTime                  @updatedAt
-  deletedAt               DateTime?
-  minPrice                Int? // in cents
-  currency                String?                   @default("usd")
-  isPriceFixed            Boolean                   @default(false)
-  userTrackGroupPurchases UserTrackGroupPurchase[]
-  stripeProductKey        String?
-  urlSlug                 String
-  credits                 String?
-  userTrackGroupWishlist  UserTrackGroupWishlist[]
-  platformPercent         Int?                      @default(7)
-  tags                    TrackGroupTag[]
-  downloadCodes           TrackGroupDownloadCodes[]
-  notifications           Notification[]
-  merch                   Merch[]
-  paymentToUserId         Int?
-  paymentToUser           User?                     @relation(fields: [paymentToUserId], references: [id])
+  id                              Int                       @id @default(autoincrement())
+  about                           String?
+  artist                          Artist                    @relation(fields: [artistId], references: [id])
+  artistId                        Int
+  title                           String?
+  isDrafts                        Boolean                   @default(false)
+  tracks                          Track[]
+  cover                           TrackGroupCover?
+  published                       Boolean                   @default(false)
+  type                            String?
+  isGettable                      Boolean                   @default(true)
+  releaseDate                     DateTime                  @default(now())
+  adminEnabled                    Boolean                   @default(true)
+  createdAt                       DateTime                  @default(now())
+  updatedAt                       DateTime                  @updatedAt
+  deletedAt                       DateTime?
+  minPrice                        Int? // in cents
+  currency                        String?                   @default("usd")
+  isPriceFixed                    Boolean                   @default(false)
+  defaultTrackMinPrice            Int? // in cents
+  defaultTrackAllowIndividualSale Boolean                   @default(false)
+  defaultAllowMirloPromo          Boolean                   @default(false)
+  userTrackGroupPurchases         UserTrackGroupPurchase[]
+  stripeProductKey                String?
+  urlSlug                         String
+  credits                         String?
+  userTrackGroupWishlist          UserTrackGroupWishlist[]
+  platformPercent                 Int?                      @default(7)
+  tags                            TrackGroupTag[]
+  downloadCodes                   TrackGroupDownloadCodes[]
+  notifications                   Notification[]
+  merch                           Merch[]
+  paymentToUserId                 Int?
+  paymentToUser                   User?                     @relation(fields: [paymentToUserId], references: [id])
 
   @@unique([artistId, urlSlug])
 }

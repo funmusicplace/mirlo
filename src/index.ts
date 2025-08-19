@@ -1,6 +1,4 @@
 import express from "express";
-import cookieParser from "cookie-parser";
-import { initialize } from "express-openapi";
 import swaggerUi from "swagger-ui-express";
 import * as dotenv from "dotenv";
 import {
@@ -9,7 +7,6 @@ import {
   ExpressAdapter,
 } from "@bull-board/express";
 
-import apiDoc from "./routers/v1/api-doc";
 import auth from "./routers/auth";
 import "./auth/passport";
 import { imageQueue } from "./queues/processImages";
@@ -17,30 +14,35 @@ import { audioQueue } from "./queues/processTrackAudio";
 import { serveStatic } from "./static";
 import prisma from "@mirlo/prisma";
 import { rateLimit } from "express-rate-limit";
-import { corsCheck } from "./auth/cors";
 import errorHandler from "./utils/error";
 import { sendMailQueue } from "./queues/send-mail-queue";
 import path from "node:path";
 import parseIndex from "./parseIndex";
-import qs from "qs";
 import wellKnown from "./wellKnown";
-import passport from "./auth/passport";
 import logger from "./logger";
+import apiApp from "./api";
+import { corsCheck } from "./auth/cors";
+import cookieParser from "cookie-parser";
+import qs from "qs";
 
 dotenv.config();
 
 const app = express();
+const isDev = process.env.NODE_ENV === "development";
+
 app.set("query parser", (str: string) => qs.parse(str));
 // See https://github.com/express-rate-limit/express-rate-limit/wiki/Troubleshooting-Proxy-Issues
 app.set("trust proxy", 2);
+
 app.get("/ip", (request, response) => response.send(request.ip));
 app.get("/x-forwarded-for", (request, response) =>
   response.send(request.headers["x-forwarded-for"])
 );
 
-const isDev = process.env.NODE_ENV === "development";
-
 app.use(corsCheck);
+app.use(cookieParser());
+
+apiApp.use(express.urlencoded({ extended: true }));
 
 app.use(
   express.json({
@@ -54,179 +56,7 @@ app.use(
   })
 );
 
-app.use(cookieParser());
-app.use(express.urlencoded({ extended: true }));
-// app.use(passport.initialize()); // Supposedly we don't need this anymore
-
-if (process.env.NODE_ENV === "production") {
-  const limiter = rateLimit({
-    windowMs: 60 * 1000, // 1 minute
-    limit: 100, // 100 requests per minute, which is absurd, but one page load gets us 80
-    // FIXME: is there a way to have this be determined on whether the user is logged in?
-    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers,
-    skip: async (req, res) => {
-      // skip the rate limiting for logged in users
-      const isAuthenticated = await new Promise<boolean>((resolve) => {
-        passport.authenticate(
-          "jwt",
-          { session: false },
-          (err: unknown, user?: Express.User) => {
-            if (err || !user) return resolve(false);
-            resolve(true);
-          }
-        )(req, res, () => {});
-      });
-      // If the user is authenticated, skip the rate limiting
-      return isAuthenticated;
-    },
-  });
-
-  app.use(limiter);
-}
-
-const routes = [
-  "tags",
-  "trackGroups",
-  "trackGroups/topSold",
-  "trackGroups/mostPlayed",
-  "trackGroups/testExistence",
-  "trackGroups/{id}",
-  "trackGroups/{id}/download",
-  "trackGroups/{id}/redeemCode",
-  "trackGroups/{id}/purchase",
-  "trackGroups/{id}/testOwns",
-  "trackGroups/{id}/wishlist",
-  "trackGroups/{id}/emailDownload",
-  "trackGroups/{id}/emailPurchaseLink",
-  "trackGroups/{id}/generate",
-  "playable",
-  "settings/{setting}",
-  "tracks",
-  "tracks/topSold",
-  "tracks/mostPlayed",
-  "tracks/{id}",
-  "tracks/{id}/audio",
-  "tracks/{id}/purchase",
-  "tracks/{id}/download",
-  "tracks/{id}/generate",
-  "tracks/{id}/testOwns",
-  "tracks/{id}/favorite",
-  "tracks/{id}/stream/{segment}",
-  "artists",
-  "artists/testExistence",
-  "artists/{id}",
-  "artists/{id}/subscribe",
-  "artists/{id}/purchaseCatalogue",
-  "artists/{id}/feed",
-  "artists/{id}/follow",
-  "artists/{id}/posts",
-  "artists/{id}/followers",
-  "artists/{id}/supporters",
-  "artists/{id}/inbox",
-  "artists/{id}/confirmFollow",
-  "artists/{id}/unfollow",
-  "artists/{id}/tip",
-  "merch/{id}",
-  "merch/{id}/purchase",
-  "posts",
-  "posts/{id}",
-  "licenses",
-  "labels",
-  "labels/{id}",
-  "labels/{id}/trackGroups",
-  "users",
-  "users/testExistence",
-  "users/{userId}",
-  "users/{userId}/confirmEmail",
-  "users/{userId}/avatar",
-  "users/{userId}/banner",
-  "users/{userId}/notifications",
-  "users/{userId}/notifications/unreadCount",
-  "users/{userId}/notifications/{notificationId}",
-  "users/{userId}/purchases",
-  "users/{userId}/wishlist",
-  "users/{userId}/charges",
-  "users/{userId}/stripe/connect",
-  "users/{userId}/stripe/connectComplete",
-  "users/{userId}/stripe/checkAccountStatus",
-  "users/{userId}/feed",
-  "manage/subscriptions",
-  "manage/subscriptions/{subscriptionId}",
-  "manage/artists",
-  "manage/label",
-  "manage/label/artists/{artistId}",
-  "manage/artists/{artistId}",
-  "manage/artists/{artistId}/trackGroups",
-  "manage/artists/{artistId}/merch",
-  "manage/artists/{artistId}/labels",
-  "manage/artists/{artistId}/labels/{labelUserId}",
-  "manage/artists/{artistId}/codes",
-  "manage/artists/{artistId}/subscribers",
-  "manage/artists/{artistId}/banner",
-  "manage/artists/{artistId}/avatar",
-  "manage/artists/{artistId}/drafts",
-  "manage/artists/{artistId}/subscriptionTiers",
-  "manage/artists/{artistId}/subscriptionTiers/{subscriptionTierId}",
-  "manage/trackGroups/{trackGroupId}",
-  "manage/trackGroups/{trackGroupId}/trackOrder",
-  "manage/trackGroups/{trackGroupId}/publish",
-  "manage/trackGroups/{trackGroupId}/tags",
-  "manage/trackGroups/{trackGroupId}/cover",
-  "manage/trackGroups/{trackGroupId}/codes",
-  "manage/merch/{merchId}",
-  "manage/merch/{merchId}/image",
-  "manage/merch/{merchId}/destinations",
-  "manage/merch/{merchId}/optionTypes",
-  "manage/purchases",
-  "manage/purchases/{purchaseId}",
-  "manage/purchases/{purchaseId}/contactArtist",
-  "manage/sales",
-  "manage/tracks",
-  "manage/tracks/{trackId}/audio",
-  "manage/tracks/{trackId}/downloadOriginal",
-  "manage/tracks/{trackId}",
-  "manage/tracks/{trackId}/trackArtists",
-  "manage/posts/{postId}/images",
-  "manage/posts/{postId}/tracks",
-  "manage/posts/{postId}/featuredImage",
-  "manage/posts/{postId}/publish",
-  "manage/posts/{postId}",
-  "manage/posts",
-  "checkout",
-  "checkout/status",
-  "webhooks/stripe",
-  "webhooks/stripe/connect",
-  "jobs",
-  "admin/tasks",
-  "admin/tracks",
-  "admin/trackGroups",
-  "admin/artists",
-  "admin/subscriptions",
-  "admin/purchases",
-  "admin/settings",
-  "admin/tips",
-  "admin/users",
-  "admin/send-email",
-  "oembed",
-  "flag",
-];
-
-initialize({
-  app,
-  apiDoc,
-  // FIXME: it looks like express-openapi doesn't handle
-  // typescript files very well.
-  // https://github.com/kogosoftwarellc/open-api/issues/838
-  // paths: "./src/routers/v1",
-  // routesGlob: "**/*.{ts,js}",
-  // routesIndexFileRegExp: /(?:index)?\.[tj]s$/,
-  paths: routes.map((r) => ({
-    path: "/v1/" + r,
-    module: require(`./routers/v1/${r}`),
-  })),
-
-  errorMiddleware: errorHandler,
-});
+app.use("/v1", apiApp);
 
 app.use(
   "/docs",
@@ -234,7 +64,7 @@ app.use(
   swaggerUi.serve,
   swaggerUi.setup(undefined, {
     swaggerOptions: {
-      url: `${process.env.API_DOMAIN ?? "http://localhost:3000"}/api-docs`,
+      url: `${process.env.API_DOMAIN ?? "http://localhost:3000"}/v1/api-docs`,
     },
   })
 );
@@ -252,23 +82,9 @@ if (!isDev) {
   app.use("/auth", auth);
 }
 
-app.use((req, res, next) => {
-  // Basic logging for requests that aren't handled by the API or auth.
-  logger.info(
-    `front-end request: ${req.method} ${req.path} - ${JSON.stringify(req.query)} - ${JSON.stringify(req.body)} - ${JSON.stringify(req.headers)}`
-  );
-  next();
-});
-
 app.use(express.static("public"));
 
-// TODO: figure this out, as it's would the app to run on one
-// instance.
-// app.use(function (req, res, next) {
-//   res.sendFile(path.join(__dirname, "../", "public", "app.html"));
-// });
 app.use("/images/:bucket/:filename", serveStatic);
-// app.use("/audio", express.static("data/media/audio"));
 
 // Setting up a bull worker dashboard
 if (isDev) {
@@ -298,6 +114,21 @@ app.use("/health", async (req, res) => {
     console.error(`health check failed ${e}`);
     res.status(500);
   }
+});
+
+app.use((req, res, next) => {
+  // Basic logging for requests that aren't handled by the API or auth.
+  if (
+    !req.path.includes("/assets/") &&
+    !req.path.includes("/static/") &&
+    !req.path.startsWith("/fonts/")
+  ) {
+    // Don't log requests to static assets
+    logger.info(
+      `front-end request: ${req.method} ${req.path} - ${JSON.stringify(req.query)} - ${JSON.stringify(req.headers)}`
+    );
+  }
+  next();
 });
 
 // This has to be the last thing used so that other things don't get over-written

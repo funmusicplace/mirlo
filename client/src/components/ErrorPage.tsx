@@ -2,15 +2,18 @@ import { css } from "@emotion/css";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { useRouteError } from "react-router-dom";
+import { useSnackbar } from "state/SnackbarContext";
 
 export default function ErrorPage() {
   const error = useRouteError();
   console.error(error);
+  const snackbar = useSnackbar();
 
   React.useEffect(() => {
     if (process.env.NODE_ENV !== "development" && error instanceof Error) {
       console.error("Error:", error.message);
       if (error.message.includes("dynamically imported module")) {
+        snackbar("Hey, there's a new version of Mirlo! Reloading...");
         window.location.reload();
       }
     }
