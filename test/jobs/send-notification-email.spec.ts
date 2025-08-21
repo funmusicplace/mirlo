@@ -21,7 +21,7 @@ import {
   sendMailQueueEvents,
 } from "../../src/queues/send-mail-queue";
 
-describe("send-notification-email", () => {
+describe.only("send-notification-email", () => {
   beforeEach(async () => {
     try {
       await clearTables();
@@ -130,6 +130,66 @@ describe("send-notification-email", () => {
     await sendNotificationEmail();
 
     assert.equal(stub.called, false);
+  });
+
+  it.only("should send email with post that has a featured image", async () => {
+    const stub = sinon.stub(sendMailQueue, "add");
+
+    const { user: artistUser } = await createUser({
+      email: "artist@artist.com",
+    });
+
+    const { user: followerUser } = await createUser({
+      email: "follower@follower.com",
+      emailConfirmationToken: null,
+    });
+
+    const artist = await prisma.artist.create({
+      data: {
+        name: "Test artist",
+        urlSlug: "test-artist",
+        userId: artistUser.id,
+        enabled: true,
+      },
+    });
+
+    const post = await createPost(artist.id, {
+      title: "Our Custom Title",
+      content: "# HI",
+    });
+
+    const image = await prisma.postImage.create({
+      data: {
+        postId: post.id,
+        extension: "jpg",
+        mimeType: "image/jpeg",
+      },
+    });
+
+    await prisma.post.update({
+      where: {
+        id: post.id,
+      },
+      data: {
+        featuredImageId: image.id,
+      },
+    });
+
+    await prisma.notification.create({
+      data: {
+        userId: followerUser.id,
+        postId: post.id,
+        isRead: false,
+        notificationType: "NEW_ARTIST_POST",
+      },
+    });
+
+    await sendNotificationEmail();
+
+    assert.equal(stub.called, true);
+    const args = stub.getCall(0).args;
+    const src: string = args[1].locals.post.featuredImage.src;
+    assert(src.endsWith(`/post-images/${image.id}.${image.extension}`));
   });
 
   it("should not send email if post content is blank", async () => {
