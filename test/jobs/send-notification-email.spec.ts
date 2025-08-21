@@ -21,7 +21,7 @@ import {
   sendMailQueueEvents,
 } from "../../src/queues/send-mail-queue";
 
-describe.only("send-notification-email", () => {
+describe("send-notification-email", () => {
   beforeEach(async () => {
     try {
       await clearTables();
@@ -132,7 +132,7 @@ describe.only("send-notification-email", () => {
     assert.equal(stub.called, false);
   });
 
-  it.only("should send email with post that has a featured image", async () => {
+  it("should send email with post that has a featured image", async () => {
     const stub = sinon.stub(sendMailQueue, "add");
 
     const { user: artistUser } = await createUser({

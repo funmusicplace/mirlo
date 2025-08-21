@@ -92,7 +92,7 @@ const ArtistAlbums: React.FC = () => {
           justify-content: center;
         `}
       >
-        {user && artist.user && !!artist.purchaseEntireCatalogMinPrice && (
+        {artist.user && !!artist.purchaseEntireCatalogMinPrice && (
           <ArtistButton
             size="big"
             type="button"
