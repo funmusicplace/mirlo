@@ -1,6 +1,11 @@
 extends ../layout.pug
 
 block content
+
+    if post.featuredImage
+      div.mw600 
+        a(href!=`${client}/post/${post.id}`) 
+          img(src=post.featuredImage.src, alt="Featured Image", style="width:100%;height:auto;max-height:400px;object-fit:cover;margin-bottom:16px;")
     p  
     p #{artist.name} just published a new post on Mirlo: 
     h2 #{post.title}

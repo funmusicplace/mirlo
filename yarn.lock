@@ -6817,7 +6817,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/content-disposition@npm:^0":
+"@types/content-disposition@npm:^0, @types/content-disposition@npm:^0.5.9":
   version: 0.5.9
   resolution: "@types/content-disposition@npm:0.5.9"
   checksum: 10/d895703c0027ca6c4c0c1ede363909dbb590deec3b206a84b88a49c8b2840bcbd31b4ddeb2e1e6caa1af00801cc79c5b69a5c75a8152f2959810b10fe75a4e1f
@@ -15276,6 +15276,7 @@ __metadata:
     "@types/bcryptjs": "npm:^2.4.2"
     "@types/bytes": "npm:^3.1.1"
     "@types/connect-busboy": "npm:^1.0.3"
+    "@types/content-disposition": "npm:^0.5.9"
     "@types/cookie-parser": "npm:^1.4.3"
     "@types/cors": "npm:^2.8.13"
     "@types/dotenv-safe": "npm:^8.1.2"

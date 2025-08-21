@@ -1,6 +1,7 @@
 import prisma from "@mirlo/prisma";
 import logger from "../logger";
 import { sendMailQueue, sendMailQueueEvents } from "../queues/send-mail-queue";
+import { processSinglePost } from "../utils/post";
 
 export const parseOutIframes = async (content: string) => {
   // Replace <iframe src="https://mirlo.space/widget/trackGroup/:id"> or <iframe src="https://mirlo.space/widget/track/:id">
@@ -160,6 +161,7 @@ const sendNotificationEmail = async () => {
       post: {
         include: {
           artist: true,
+          featuredImage: true,
         },
       },
       trackGroup: {
@@ -184,9 +186,11 @@ const sendNotificationEmail = async () => {
         notification.notificationType === "NEW_ARTIST_POST" &&
         notification.post?.artist
       ) {
-        if (!notification.post.shouldSendEmail) {
+        const post = processSinglePost(notification.post);
+
+        if (!post.shouldSendEmail) {
           logger.info(
-            `sendNotificationEmail: post asked not to be emailed: ${notification.post.title} to ${notification.user.email}`
+            `sendNotificationEmail: post asked not to be emailed: ${post.title} to ${notification.user.email}`
           );
           await prisma.notification.update({
             where: {
@@ -197,13 +201,14 @@ const sendNotificationEmail = async () => {
             },
           });
           logger.info(`sendNotificationEmail: updated notification`);
-        } else if (!!notification.post.content) {
+        } else if (!!post.content) {
           // If the post doesn't have content we shouldn't send it.
           // It's likely an error
           logger.info(
-            `sendNotificationEmail: sending to queue notification for: ${notification.post.title} to ${notification.user.email}`
+            `sendNotificationEmail: sending to queue notification for: ${post.title} to ${notification.user.email}`
           );
-          const htmlContent = await parseOutIframes(notification.post.content);
+          const htmlContent = await parseOutIframes(post.content);
+
           try {
             await sendMailQueue.add("send-mail", {
               template: "announce-post-published",
@@ -211,9 +216,9 @@ const sendNotificationEmail = async () => {
                 to: notification.user.email,
               },
               locals: {
-                artist: notification.post.artist,
+                artist: post.artist,
                 post: {
-                  ...notification.post,
+                  ...post,
                   htmlContent,
                 },
                 email: encodeURIComponent(notification.user.email),
