@@ -143,7 +143,6 @@ const OptionType: React.FC<{
               <ArtistButton
                 type="button"
                 onClick={() => {
-                  console.log("clicking", index);
                   deleteOptionType();
                 }}
                 startIcon={<FaTrash />}

@@ -11,20 +11,32 @@ import WidthContainer from "components/common/WidthContainer";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import { SelectEl } from "components/common/Select";
 import { ButtonLink } from "components/common/Button";
+import usePagination from "utils/usePagination";
+import { moneyDisplay } from "components/common/Money";
+
+const pageSize = 50;
 
 export const Sales: React.FC = () => {
   const { t } = useTranslation("translation", {
     keyPrefix: "sales",
   });
 
+  const { page, PaginationComponent } = usePagination({ pageSize });
   const [filteredArtistId, setFilteredArtistId] = React.useState<number>();
 
-  const { data: { results, total } = { results: [], total: 0 }, isLoading } =
-    useQuery(
-      queryUserSales({
-        artistIds: filteredArtistId ? [filteredArtistId] : undefined,
-      })
-    );
+  const {
+    data: { results, total, totalAmount, totalSupporters } = {
+      results: [],
+      total: 0,
+    },
+    isLoading,
+  } = useQuery(
+    queryUserSales({
+      artistIds: filteredArtistId ? [filteredArtistId] : undefined,
+      take: pageSize,
+      skip: page * pageSize,
+    })
+  );
 
   const { data: managedArtists } = useQuery(queryManagedArtists());
 
@@ -71,6 +83,29 @@ export const Sales: React.FC = () => {
         </div>
       </SpaceBetweenDiv>
       {isLoading && <LoadingBlocks rows={5} height="2rem" margin=".5rem" />}
+      {totalAmount && totalAmount > 0 && (
+        <div
+          className={css`
+            padding-bottom: 1rem;
+          `}
+        >
+          <p>
+            <strong>{t("totalSalesIncome")}: </strong>
+            {moneyDisplay({
+              amount: totalAmount / 100,
+              currency: "USD",
+            })}
+          </p>{" "}
+          <p>
+            <strong>{t("totalSales")}: </strong>
+            {total}
+          </p>
+          <p>
+            <strong>{t("totalSupporters")}: </strong>
+            {totalSupporters}
+          </p>
+        </div>
+      )}
       {results.length > 0 && (
         <div
           className={css`
@@ -96,6 +131,7 @@ export const Sales: React.FC = () => {
               ))}
             </tbody>
           </Table>
+          <PaginationComponent amount={results.length} total={total} />
         </div>
       )}
     </WidthContainer>

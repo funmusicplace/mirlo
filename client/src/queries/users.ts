@@ -252,6 +252,8 @@ export type Sale = {
   datePurchased: string;
   trackGroup?: Partial<TrackGroup> & { id: number; urlSlug: string };
   merch?: Partial<Merch> & { id: string; urlSlug: string };
+  shippingAddress?: { country: string };
+  quantity?: number;
   track?: Partial<Track> & {
     id: number;
     urlSlug: string;
@@ -261,8 +263,17 @@ export type Sale = {
 };
 
 const fetchUserSales: QueryFunction<
-  { results: Sale[]; total: number },
-  ["fetchUserSales", opts: { artistIds?: number[] }, ...any]
+  {
+    results: Sale[];
+    total: number;
+    totalAmount: number;
+    totalSupporters: number;
+  },
+  [
+    "fetchUserSales",
+    opts: { artistIds?: number[]; take?: number; skip?: number },
+    ...any,
+  ]
 > = ({ queryKey: [_, opts], signal }) => {
   const { artistIds } = opts;
   const params = new URLSearchParams();
@@ -273,10 +284,18 @@ const fetchUserSales: QueryFunction<
       }
     });
   }
+  if (opts.take) {
+    params.append("take", String(opts.take));
+  }
+  if (opts.skip) {
+    params.append("skip", String(opts.skip));
+  }
   return api.get(`v1/manage/sales/?${params.toString()}`, { signal });
 };
 
-export function queryUserSales(opts: { artistIds?: number[] } = {}) {
+export function queryUserSales(
+  opts: { artistIds?: number[]; take?: number; skip?: number } = {}
+) {
   return queryOptions({
     queryKey: ["fetchUserSales", opts, QUERY_KEY_SALES],
     queryFn: fetchUserSales,

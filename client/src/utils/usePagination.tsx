@@ -28,39 +28,42 @@ const usePagination = ({ pageSize }: { pageSize: number }) => {
     }: {
       amount?: number;
       total?: number;
-    }) => (
-      <div
-        className={css`
-          display: flex;
-          width: 100%;
-          justify-content: center;
-          flex-direction: row;
-          flex-wrap: wrap;
-          padding: var(--mi-side-paddings-xsmall);
-        `}
-      >
-        {page > 0 && (
-          <LinkWithIcon to={`?${previousPage.toString()}`}>
-            <FaChevronLeft /> Previous page
-          </LinkWithIcon>
-        )}
-        {page > 0 && amount === pageSize && (
-          <span
-            className={css`
-              padding: 0 1rem;
-            `}
-          >
-            {" "}
-            -{" "}
-          </span>
-        )}
-        {(amount === pageSize || (total && total > pageSize * (page + 1))) && (
-          <LinkWithIcon to={`?${nextPage.toString()}`}>
-            Next page <FaChevronRight />
-          </LinkWithIcon>
-        )}
-      </div>
-    ),
+    }) => {
+      const showNextPage = total && total > pageSize * (page + 1);
+      return (
+        <div
+          className={css`
+            display: flex;
+            width: 100%;
+            justify-content: center;
+            flex-direction: row;
+            flex-wrap: wrap;
+            padding: var(--mi-side-paddings-xsmall);
+          `}
+        >
+          {page > 0 && (
+            <LinkWithIcon to={`?${previousPage.toString()}`}>
+              <FaChevronLeft /> Previous page
+            </LinkWithIcon>
+          )}
+          {page > 0 && amount === pageSize && (
+            <span
+              className={css`
+                padding: 0 1rem;
+              `}
+            >
+              {" "}
+              -{" "}
+            </span>
+          )}
+          {(amount === pageSize || showNextPage) && (
+            <LinkWithIcon to={`?${nextPage.toString()}`}>
+              Next page <FaChevronRight />
+            </LinkWithIcon>
+          )}
+        </div>
+      );
+    },
   };
 };
 

@@ -12,7 +12,7 @@ export default function () {
 
   async function GET(req: Request, res: Response) {
     let {
-      take = 20,
+      take = 50,
       skip = 0,
       artistIds = undefined,
     } = req.query as {
@@ -37,9 +37,12 @@ export default function () {
         artistIds = artistIds.split(",");
       }
       const results = await findSales(artistIds.map((a) => Number(a)));
-
+      const slicedResults = results.slice(
+        Number(skip),
+        Number(skip) + Number(take)
+      );
       res.json({
-        results: results.slice(Number(skip), Number(take)).map((r) => {
+        results: slicedResults.map((r) => {
           // Strip user ids from results
           return {
             ...r,
