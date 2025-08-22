@@ -91,7 +91,6 @@ export default function () {
         );
         allowIndividualSale = true;
       }
-      console.log("Creating track with data:", minPrice, allowMirloPromo);
 
       const createdTrack = await prisma.track.create({
         data: {

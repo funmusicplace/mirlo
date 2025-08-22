@@ -98,8 +98,17 @@ export const findSales = async (artistId: number[], sinceDate?: string) => {
     select: {
       amountPaid: true,
       currencyPaid: true,
+      quantity: true,
       createdAt: true,
-      merch: { include: { artist: true } },
+      shippingAddress: true,
+      merch: {
+        include: {
+          artist: true,
+          shippingDestinations: {
+            select: { costUnit: true, destinationCountry: true },
+          },
+        },
+      },
       userId: true,
     },
   });

@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 import api from "services/api";
 import AutoComplete from "components/common/AutoComplete";
+import { css } from "@emotion/css";
 
 const constructUrl = (r: any) => {
   let url = "";
@@ -55,23 +56,25 @@ const HeaderSearch: React.FC = () => {
     });
 
     const results = [
+      ...((artists.total ?? 0) > artists.results.length
+        ? [
+            {
+              id: "more",
+              firstInCategory: true,
+              category: t("artists"),
+              name: t("moreArtist"),
+              query: searchString,
+              isArtist: true,
+            },
+          ]
+        : []),
       ...artists.results.map((r, rid) => ({
-        firstInCategory: rid === 0,
         category: t("artists"),
         artistId: r.urlSlug ?? r.id,
         id: r.id,
         name: r.name,
         isArtist: true,
       })),
-      ...((artists.total ?? 0) > artists.results.length
-        ? [
-            {
-              id: "more",
-              name: t("moreArtist"),
-              query: searchString,
-            },
-          ]
-        : []),
       ...trackGroups.results.map((tr, tid) => ({
         firstInCategory: tid === 0,
         category: t("albums"),
@@ -124,8 +127,26 @@ const HeaderSearch: React.FC = () => {
           trackGroupId?: number | string;
         }) => {
           return (
-            <Link to={constructUrl(r)}>
-              {r.name.length > 17 ? r.name.substring(0, 17) + "..." : r.name}
+            <Link
+              to={constructUrl(r)}
+              className={
+                r.id === "more"
+                  ? css`
+                      font-style: italic;
+                      text-decoration: none;
+                      text-align: right;
+                      font-size: 0.9rem;
+                      &:before {
+                        content: "→";
+                        margin-right: 0.5rem;
+                      }
+                    `
+                  : ""
+              }
+            >
+              {r.id !== "more" && r.name.length > 17
+                ? r.name.substring(0, 17) + "..."
+                : r.name}
             </Link>
           );
         }}
