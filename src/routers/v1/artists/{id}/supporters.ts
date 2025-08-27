@@ -242,15 +242,7 @@ export default function () {
         });
       }
 
-      if (!trackGroupIds) {
-        trackGroupIds = (
-          await prisma.trackGroup.findMany({
-            where: {
-              artistId: artist.id,
-            },
-          })
-        ).map((tg) => tg.id);
-      } else if (typeof trackGroupIds === "string") {
+      if (typeof trackGroupIds === "string") {
         // If trackGroupIds is a string, split it into an array
         trackGroupIds = trackGroupIds.split(",");
       }
@@ -258,9 +250,11 @@ export default function () {
       const results = await findSales({
         artistId: [Number(parsedId)],
         sinceDate: sinceDate as string,
-        filters: {
-          trackGroupIds: trackGroupIds.map((id) => Number(id)),
-        },
+        filters: trackGroupIds
+          ? {
+              trackGroupIds: trackGroupIds.map((id) => Number(id)),
+            }
+          : undefined,
       });
 
       res.json({

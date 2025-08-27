@@ -15,6 +15,7 @@ const FundraisingGoal: React.FC = () => {
   } = useFormContext();
   const { artistId, trackGroupId } = useParams();
   const { user } = useAuthContext();
+  console.log("user", user);
   return (
     <FormSection>
       <h2>{t("fundraisingGoal")}</h2>
