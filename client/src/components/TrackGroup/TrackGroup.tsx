@@ -25,6 +25,7 @@ import { useAuthContext } from "state/AuthContext";
 import TrackGroupMerch from "./TrackGroupMerch";
 import { useQuery } from "@tanstack/react-query";
 import { queryArtist, queryTrackGroup, queryUserStripeStatus } from "queries";
+import Fundraiser from "./Fundraiser";
 
 export const Container = styled.div<{ user?: LoggedInUser | null }>`
   ${(props) =>
@@ -180,6 +181,11 @@ function TrackGroup() {
   const trackGroupCredits = trackGroup.credits;
   const trackGroupAbout = trackGroup.about;
 
+  const showAboutInsteadOfTrackListing =
+    trackGroup.tracks.length === 0 &&
+    (trackGroup.fundraisingGoal ?? 0) > 0 &&
+    trackGroupAbout;
+
   return (
     <WidthContainer variant="big" justify="center">
       <MetaCard
@@ -209,6 +215,7 @@ function TrackGroup() {
             }
           `}
         >
+          <Fundraiser />
           <div
             className={css`
               display: flex;
@@ -283,26 +290,37 @@ function TrackGroup() {
                   />
                 </SmallScreenPlayWrapper>
               </ImageAndDetailsWrapper>
-              <TrackListingWrapper>
-                <PublicTrackGroupListing
-                  tracks={trackGroup.tracks}
-                  trackGroup={trackGroup}
-                />
-                {trackGroup.isGettable && (
-                  <p
-                    className={css`
-                      margin-left: 2.5rem;
-                      margin-top: 1rem;
-                    `}
-                  >
-                    <small>{t("downloadCodecsInfo")}</small>
-                  </p>
-                )}
-              </TrackListingWrapper>
+              {trackGroup.tracks.length > 0 && (
+                <TrackListingWrapper>
+                  <PublicTrackGroupListing
+                    tracks={trackGroup.tracks}
+                    trackGroup={trackGroup}
+                  />
+                  {trackGroup.isGettable && (
+                    <p
+                      className={css`
+                        margin-left: 2.5rem;
+                        margin-top: 1rem;
+                      `}
+                    >
+                      <small>{t("downloadCodecsInfo")}</small>
+                    </p>
+                  )}
+                </TrackListingWrapper>
+              )}
+              {showAboutInsteadOfTrackListing && (
+                <div
+                  className={css`
+                    max-width: 50%;
+                  `}
+                >
+                  <MarkdownContent content={trackGroup.about} />
+                </div>
+              )}
             </div>
           </div>
           <TrackgroupInfosWrapper>
-            {trackGroupAbout && (
+            {!showAboutInsteadOfTrackListing && trackGroupAbout && (
               <AboutWrapper trackGroupCredits={Boolean(trackGroupCredits)}>
                 <MarkdownContent content={trackGroup.about} />
               </AboutWrapper>

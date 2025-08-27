@@ -294,7 +294,12 @@ const fetchUserSales: QueryFunction<
 };
 
 export function queryUserSales(
-  opts: { artistIds?: number[]; take?: number; skip?: number } = {}
+  opts: {
+    artistIds?: number[];
+    take?: number;
+    skip?: number;
+    trackGroupIds?: number[];
+  } = {}
 ) {
   return queryOptions({
     queryKey: ["fetchUserSales", opts, QUERY_KEY_SALES],

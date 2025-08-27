@@ -13,7 +13,6 @@ import { NewAlbumButton } from "components/ManageArtist/NewAlbumButton";
 import { ArtistButton } from "./ArtistButtons";
 import { moneyDisplay } from "components/common/Money";
 import api from "services/api";
-import FeatureFlag from "components/common/FeatureFlag";
 
 const ArtistAlbums: React.FC = () => {
   const { user } = useAuthContext();

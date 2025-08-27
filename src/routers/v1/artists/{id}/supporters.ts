@@ -3,14 +3,8 @@ import { Request, Response } from "express";
 import prisma from "@mirlo/prisma";
 import { findArtistIdForURLSlug } from "../../../../utils/artist";
 
-export const findSales = async (artistId: number[], sinceDate?: string) => {
-  if (sinceDate) {
-    const date = new Date(sinceDate);
-    if (isNaN(date.getTime())) {
-      throw new Error("Invalid date format");
-    }
-  }
-  const supporters = await prisma.artistUserSubscriptionCharge.findMany({
+const querySupporters = (artistId: number[], sinceDate?: string) =>
+  prisma.artistUserSubscriptionCharge.findMany({
     where: {
       artistUserSubscription: {
         amount: { gt: 0 },
@@ -33,7 +27,8 @@ export const findSales = async (artistId: number[], sinceDate?: string) => {
     },
   });
 
-  const tips = await prisma.userArtistTip.findMany({
+const queryTips = (artistId: number[], sinceDate?: string) =>
+  prisma.userArtistTip.findMany({
     where: {
       pricePaid: { gt: 0 },
       artistId: { in: artistId },
@@ -49,7 +44,8 @@ export const findSales = async (artistId: number[], sinceDate?: string) => {
     },
   });
 
-  const trackPurchases = await prisma.userTrackPurchase.findMany({
+const queryTracks = (artistId: number[], sinceDate?: string) =>
+  prisma.userTrackPurchase.findMany({
     where: {
       pricePaid: { gt: 0 },
       datePurchased: sinceDate ? { gte: new Date(sinceDate) } : undefined,
@@ -70,11 +66,17 @@ export const findSales = async (artistId: number[], sinceDate?: string) => {
     },
   });
 
-  const trackGroupPurchases = await prisma.userTrackGroupPurchase.findMany({
+const queryTrackGroups = (
+  artistId: number[],
+  sinceDate?: string,
+  trackGroupIds?: number[]
+) =>
+  prisma.userTrackGroupPurchase.findMany({
     where: {
       pricePaid: { gt: 0 },
       datePurchased: sinceDate ? { gte: new Date(sinceDate) } : undefined,
       trackGroup: {
+        id: { in: trackGroupIds },
         artistId: { in: artistId },
       },
     },
@@ -87,7 +89,8 @@ export const findSales = async (artistId: number[], sinceDate?: string) => {
     },
   });
 
-  const merchPurchases = await prisma.merchPurchase.findMany({
+const queryMerch = (artistId: number[], sinceDate?: string) =>
+  prisma.merchPurchase.findMany({
     where: {
       amountPaid: { gt: 0 },
       createdAt: sinceDate ? { gte: new Date(sinceDate) } : undefined,
@@ -112,6 +115,48 @@ export const findSales = async (artistId: number[], sinceDate?: string) => {
       userId: true,
     },
   });
+
+export const findSales = async ({
+  artistId,
+  sinceDate,
+  filters,
+}: {
+  artistId: number[];
+  sinceDate?: string;
+  filters?: {
+    trackGroupIds?: number[];
+  };
+}) => {
+  if (sinceDate) {
+    const date = new Date(sinceDate);
+    if (isNaN(date.getTime())) {
+      throw new Error("Invalid date format");
+    }
+  }
+
+  let supporters: Awaited<ReturnType<typeof querySupporters>> = [];
+  let tips: Awaited<ReturnType<typeof queryTips>> = [];
+  let trackPurchases: Awaited<ReturnType<typeof queryTracks>> = [];
+  let trackGroupPurchases: Awaited<ReturnType<typeof queryTrackGroups>> = [];
+  let merchPurchases: Awaited<ReturnType<typeof queryMerch>> = [];
+
+  if (!filters) {
+    supporters = await querySupporters(artistId, sinceDate);
+
+    tips = await queryTips(artistId, sinceDate);
+
+    trackPurchases = await queryTracks(artistId, sinceDate);
+
+    trackGroupPurchases = await queryTrackGroups(artistId, sinceDate);
+
+    merchPurchases = await queryMerch(artistId, sinceDate);
+  } else if (filters.trackGroupIds) {
+    trackGroupPurchases = await queryTrackGroups(
+      artistId,
+      sinceDate,
+      filters.trackGroupIds
+    );
+  }
 
   return [
     ...supporters.map((s) => ({
@@ -164,7 +209,18 @@ export default function () {
 
   async function GET(req: Request, res: Response) {
     let { id }: { id?: string } = req.params;
-    let { take = 20, skip = 0, sinceDate } = req.query;
+    let {
+      take = 20,
+      skip = 0,
+      sinceDate,
+      trackGroupIds,
+    } = req.query as {
+      take: number | string;
+      skip: number | string;
+      sinceDate?: string | undefined;
+      artistIds?: string | string[] | number[] | undefined;
+      trackGroupIds?: string | string[] | number[] | undefined;
+    };
 
     try {
       const parsedId = await findArtistIdForURLSlug(id);
@@ -186,7 +242,26 @@ export default function () {
         });
       }
 
-      const results = await findSales([Number(parsedId)], sinceDate as string);
+      if (!trackGroupIds) {
+        trackGroupIds = (
+          await prisma.trackGroup.findMany({
+            where: {
+              artistId: artist.id,
+            },
+          })
+        ).map((tg) => tg.id);
+      } else if (typeof trackGroupIds === "string") {
+        // If trackGroupIds is a string, split it into an array
+        trackGroupIds = trackGroupIds.split(",");
+      }
+
+      const results = await findSales({
+        artistId: [Number(parsedId)],
+        sinceDate: sinceDate as string,
+        filters: {
+          trackGroupIds: trackGroupIds.map((id) => Number(id)),
+        },
+      });
 
       res.json({
         results: results.slice(Number(skip), Number(take)).map((r) => {

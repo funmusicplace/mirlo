@@ -119,6 +119,8 @@ interface TrackGroup {
   userTrackGroupWishlist?: { userId: number }[];
   platformPercent: number;
   isPriceFixed: boolean;
+  fundraisingGoal?: number;
+  fundraisingEndDate?: string;
 }
 
 interface Post {

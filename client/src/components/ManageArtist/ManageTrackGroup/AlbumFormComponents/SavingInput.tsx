@@ -12,6 +12,7 @@ import useErrorHandler from "services/useErrorHandler";
 import { FaCheck } from "react-icons/fa";
 import { useGetArtistColors } from "components/Artist/ArtistButtons";
 import { set } from "lodash";
+import { getCurrencySymbol } from "components/common/Money";
 
 const SavingInput: React.FC<{
   formKey: string;
@@ -24,6 +25,7 @@ const SavingInput: React.FC<{
   required?: boolean;
   step?: string;
   type?: string;
+  currency?: string;
   onEnter?: () => void;
   reload?: () => void;
 }> = ({
@@ -34,6 +36,7 @@ const SavingInput: React.FC<{
   type,
   required,
   rows,
+  currency,
   id,
   timer,
   step,
@@ -53,9 +56,13 @@ const SavingInput: React.FC<{
       setIsSaving(true);
       let value = getValues(formKey);
 
-      if (formKey === "releaseDate" || formKey === "publishedAt") {
+      if (
+        formKey === "releaseDate" ||
+        formKey === "publishedAt" ||
+        formKey === "fundraisingEndDate"
+      ) {
         value = new Date(value).toISOString();
-      } else if (formKey === "minPrice") {
+      } else if (formKey === "minPrice" || !!currency) {
         value = value ? value * 100 : undefined;
       }
 
@@ -103,6 +110,15 @@ const SavingInput: React.FC<{
         gap: 0.5rem;
       `}
     >
+      {currency && (
+        <div
+          className={css`
+            margin-left: 0.5rem;
+          `}
+        >
+          {getCurrencySymbol(currency)}
+        </div>
+      )}
       {!rows && (
         <InputEl
           colors={colors}

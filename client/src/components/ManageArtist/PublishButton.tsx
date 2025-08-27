@@ -1,10 +1,8 @@
 import React from "react";
 import { useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { useArtistContext } from "state/ArtistContext";
 import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
-import Button, { ButtonLink } from "components/common/Button";
 import { css } from "@emotion/css";
 import { getReleaseUrl } from "utils/artist";
 import { FaEye, FaLock } from "react-icons/fa";
@@ -12,6 +10,7 @@ import {
   ArtistButton,
   ArtistButtonLink,
 } from "components/Artist/ArtistButtons";
+import useArtistQuery from "utils/useArtistQuery";
 
 const PublishButton: React.FC<{
   trackGroup: TrackGroup;
@@ -23,18 +22,20 @@ const PublishButton: React.FC<{
   const [isPublishing, setIsPublishing] = React.useState(false);
 
   const { trackGroupId } = useParams();
-  const {
-    state: { artist },
-  } = useArtistContext();
+  const { data: artist } = useArtistQuery();
 
   const artistUserId = artist?.userId;
 
   const publishTrackGroup = React.useCallback(async () => {
     setIsPublishing(true);
+    const noTracks = trackGroup.tracks.length === 0;
     const anyIncomplete = trackGroup.tracks.find(
       (t) => t.audio?.uploadState !== "SUCCESS"
     );
-    if (anyIncomplete && !window.confirm(t("areYouSurePublish") ?? "")) {
+    if (
+      (anyIncomplete || noTracks) &&
+      !window.confirm(t(anyIncomplete ? "areYouSurePublish" : "noTracks") ?? "")
+    ) {
       setIsPublishing(false);
       return;
     }

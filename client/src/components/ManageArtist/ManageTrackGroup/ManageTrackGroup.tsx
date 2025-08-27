@@ -99,9 +99,10 @@ const ManageTrackGroup: React.FC<{}> = () => {
               }
             `}
           >
-            {trackGroup && trackGroup.tracks?.length > 0 && (
-              <PublishButton trackGroup={trackGroup} reload={refetch} />
-            )}
+            {trackGroup &&
+              (trackGroup.tracks?.length > 0 || trackGroup.fundraisingGoal) && (
+                <PublishButton trackGroup={trackGroup} reload={refetch} />
+              )}
           </div>
         </SpaceBetweenDiv>
       </div>
