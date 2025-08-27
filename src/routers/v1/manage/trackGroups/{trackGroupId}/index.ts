@@ -101,6 +101,8 @@ export default function () {
         "platformPercent",
         "isGettable",
         "paymentToUserId",
+        "fundraisingEndDate",
+        "fundraisingGoal",
       ]);
 
       await prisma.trackGroup.updateMany({

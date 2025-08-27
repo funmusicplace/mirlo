@@ -609,6 +609,8 @@ model TrackGroup {
   merch                           Merch[]
   paymentToUserId                 Int?
   paymentToUser                   User?                     @relation(fields: [paymentToUserId], references: [id])
+  fundraisingGoal                 Int? // in cents
+  fundraisingEndDate              DateTime?
 
   @@unique([artistId, urlSlug])
 }

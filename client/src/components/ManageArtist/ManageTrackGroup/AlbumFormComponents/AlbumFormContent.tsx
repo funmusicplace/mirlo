@@ -17,6 +17,8 @@ import { useAuthContext } from "state/AuthContext";
 import styled from "@emotion/styled";
 
 import PriceAndSuch from "./PriceAndSuch";
+import FeatureFlag from "components/common/FeatureFlag";
+import FundraisingGoal from "./FundraisingGoal";
 
 export const FormSection = styled.div`
   margin: 2rem 0;
@@ -28,7 +30,6 @@ const AlbumFormContent: React.FC<{
   existingObject: TrackGroup;
   reload: () => void;
 }> = ({ existingObject, reload }) => {
-  const { user } = useAuthContext();
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const {
     formState: { errors },
@@ -114,6 +115,9 @@ const AlbumFormContent: React.FC<{
           extraData={{ artistId: Number(artistId) }}
         />
       </FormComponent>
+      <FeatureFlag featureFlag="fundraiser">
+        <FundraisingGoal />
+      </FeatureFlag>
     </>
   );
 };

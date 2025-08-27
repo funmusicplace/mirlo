@@ -34,6 +34,14 @@ const AlbumForm: React.FC<{
       minPrice: `${
         trackGroup?.minPrice !== undefined ? trackGroup.minPrice / 100 : ""
       }`,
+      fundraisingGoal: `${
+        trackGroup?.fundraisingGoal ? trackGroup.fundraisingGoal / 100 : ""
+      }`,
+      fundraisingEndDate: `${
+        trackGroup?.fundraisingEndDate
+          ? trackGroup.fundraisingEndDate.split("T")[0]
+          : ""
+      }`,
     };
     methods.reset(defaultValues);
   }, [trackGroup]);

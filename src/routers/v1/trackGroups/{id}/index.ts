@@ -32,7 +32,12 @@ export default function () {
           where: {
             id: actualId,
             published: true,
-            tracks: { some: { audio: { uploadState: "SUCCESS" } } },
+            OR: [
+              { fundraisingGoal: { gt: 0 } },
+              {
+                tracks: { some: { audio: { uploadState: "SUCCESS" } } },
+              },
+            ],
           },
           include: {
             ...trackGroupSingleInclude({

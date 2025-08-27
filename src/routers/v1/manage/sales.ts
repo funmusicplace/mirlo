@@ -15,10 +15,12 @@ export default function () {
       take = 50,
       skip = 0,
       artistIds = undefined,
+      trackGroupIds = undefined,
     } = req.query as {
       take: number | string;
       skip: number | string;
       artistIds?: string | string[] | number[] | undefined;
+      trackGroupIds?: string | string[] | number[] | undefined;
     };
 
     const user = req.user as User;
@@ -36,7 +38,20 @@ export default function () {
         // If artistIds is a string, split it into an array
         artistIds = artistIds.split(",");
       }
-      const results = await findSales(artistIds.map((a) => Number(a)));
+
+      if (typeof trackGroupIds === "string") {
+        // If trackGroupIds is a string, split it into an array
+        trackGroupIds = trackGroupIds.split(",");
+      }
+
+      const results = await findSales({
+        artistId: artistIds.map((a) => Number(a)),
+        filters: trackGroupIds
+          ? {
+              trackGroupIds: trackGroupIds.map((tg) => Number(tg)),
+            }
+          : undefined,
+      });
       const slicedResults = results.slice(
         Number(skip),
         Number(skip) + Number(take)
