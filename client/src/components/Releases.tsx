@@ -113,7 +113,7 @@ const Releases: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
           </WidthContainer>
         </SectionHeader>
       )}
-      {!onReleasesPage && (futureReleases?.results ?? []).length > 0 && (
+      {/* {!onReleasesPage && (futureReleases?.results ?? []).length > 0 && (
         <>
           <SectionHeader>
             <WidthContainer
@@ -173,7 +173,7 @@ const Releases: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
             </WidthContainer>
           </div>
         </>
-      )}
+      )} */}
       <SectionHeader>
         <WidthContainer
           variant="big"
