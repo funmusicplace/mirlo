@@ -1,13 +1,10 @@
 import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
-import { Money } from "components/common/Money";
-import {
-  queryArtistSupporters,
-  queryTrackGroup,
-  queryUserSales,
-} from "queries";
-import { useParams } from "react-router-dom";
-import useArtistQuery from "utils/useArtistQuery";
+import { moneyDisplay } from "components/common/Money";
+import { queryArtistSupporters } from "queries";
+
+import PurchaseOrDownloadAlbum from "./PurchaseOrDownloadAlbumModal";
+import { Trans, useTranslation } from "react-i18next";
 
 function Thermometer({
   current,
@@ -20,6 +17,10 @@ function Thermometer({
   artist: Artist;
   trackGroup: TrackGroup;
 }) {
+  const { t } = useTranslation("translation", {
+    keyPrefix: "trackGroupDetails",
+  });
+
   const {
     data: { results, total, totalAmount, totalSupporters } = {
       results: [],
@@ -27,14 +28,12 @@ function Thermometer({
       totalAmount: 0,
       totalSupporters: 0,
     },
-    isLoading,
   } = useQuery(
     queryArtistSupporters({
       artistId: artist.id,
       trackGroupIds: [trackGroup.id],
     })
   );
-  console.log({ results, total, totalAmount, totalSupporters });
 
   const percent = Math.min(totalAmount / goal, 100);
   return (
@@ -62,8 +61,19 @@ function Thermometer({
               font-size: 1rem;
             `}
           >
-            raised:{" "}
-            <Money amount={totalAmount / 100} currency={trackGroup?.currency} />
+            <Trans
+              t={t}
+              i18nKey="raisedAmount"
+              values={{
+                money: moneyDisplay({
+                  amount: totalAmount / 100,
+                  currency: trackGroup?.currency,
+                }),
+              }}
+              components={{
+                strong: <strong></strong>,
+              }}
+            />
           </span>
           <span
             className={css`
@@ -72,25 +82,44 @@ function Thermometer({
               margin-left: 0.25rem;
             `}
           >
-            from {totalSupporters} supporters
+            <Trans
+              t={t}
+              i18nKey="fromXSupporters"
+              values={{
+                supporters: totalSupporters,
+              }}
+            />
           </span>
         </div>
         <div
           className={css`
-            margin-left: 0.5rem;
-            font-size: 1rem;
-            margin-top: 0.35rem;
+            display: flex;
+            align-items: center;
+            gap: 0.76rem;
           `}
         >
-          of{" "}
-          <span
+          <div
             className={css`
-              font-weight: bold;
+              margin-left: 0.5rem;
+              font-size: 1rem;
+              margin-top: 0.35rem;
             `}
           >
-            ${goal.toLocaleString()}
-          </span>{" "}
-          goal
+            <Trans
+              t={t}
+              i18nKey="ofGoal"
+              values={{
+                goal: moneyDisplay({
+                  amount: goal / 100,
+                  currency: trackGroup?.currency,
+                }),
+              }}
+              components={{
+                strong: <strong></strong>,
+              }}
+            />
+          </div>
+          <PurchaseOrDownloadAlbum trackGroup={trackGroup} />
         </div>
       </div>
       <div

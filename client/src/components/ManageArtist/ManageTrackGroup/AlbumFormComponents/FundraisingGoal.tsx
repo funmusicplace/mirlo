@@ -27,7 +27,7 @@ const FundraisingGoal: React.FC = () => {
           grid-template-columns: repeat(2, 1fr);
         `}
       >
-        <FormComponent>
+        {/* <FormComponent>
           <label>{t("fundraisingEndDate")}</label>
           <SavingInput
             formKey="fundraisingEndDate"
@@ -36,7 +36,7 @@ const FundraisingGoal: React.FC = () => {
             url={`manage/trackGroups/${trackGroupId}`}
             extraData={{ artistId: Number(artistId) }}
           />
-        </FormComponent>
+        </FormComponent> */}
         <FormComponent>
           <label>{t("goal")}</label>
           <SavingInput

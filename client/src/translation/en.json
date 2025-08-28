@@ -658,6 +658,7 @@
     "about": "About",
     "price": "Price",
     "saveAlbum": "Save album",
+    "goal": "Goal",
     "publish": "Publish release",
     "publishedSuccess": "Successfully published album, it's now publicly available.",
     "publishPreorder": "Publish pre-order",
@@ -854,6 +855,9 @@
   },
   "trackGroupDetails": {
     "trackgroup": "Album:",
+    "raisedAmount": "Raised <strong>{{money}}</strong>",
+    "fromXSupporters": "From {{supporters}} supporters",
+    "ofGoal": "Of <strong>{{goal}}</strong> goal",
     "downloadCodecsInfo": "Includes downloads in FLAC, WAV, mp3 and more. Paying supporters also get unlimited streaming on the Mirlo website.",
     "embedCode": "Embed code",
     "viewLyrics": "View lyrics",
