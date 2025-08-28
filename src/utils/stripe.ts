@@ -3,7 +3,7 @@ import prisma from "@mirlo/prisma";
 import { Prisma, User, MerchShippingDestination } from "@mirlo/prisma/client";
 import { logger } from "../logger";
 import { Request, Response } from "express";
-import { findOrCreateUserBasedOnEmail } from "./user";
+import { findOrCreateUserBasedOnEmail, updateCurrencies } from "./user";
 import { getSiteSettings } from "./settings";
 import { generateFullStaticImageUrl } from "./images";
 import {
@@ -1016,6 +1016,19 @@ export const handleInvoicePaid = async (invoice: Stripe.Invoice) => {
 };
 
 export const handleAccountUpdate = async (account: Stripe.Account) => {
+  try {
+    const stripeAccount = await stripe.accounts.retrieve(account.id);
+    const user = await prisma.user.findFirst({
+      where: {
+        stripeAccountId: account.id,
+      },
+    });
+    if (user && stripeAccount.default_currency) {
+      updateCurrencies(user.id, stripeAccount.default_currency);
+    }
+  } catch (e) {
+    console.error(`Error retrieving account information about user`, e);
+  }
   logger.info(`account.update: received update for ${account.id}`);
 };
 
