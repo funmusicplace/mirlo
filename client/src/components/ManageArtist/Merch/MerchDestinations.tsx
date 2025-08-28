@@ -56,7 +56,7 @@ const MerchDestinations: React.FC<{}> = () => {
     },
   });
 
-  const { fields, append } = useFieldArray({
+  const { fields, append, remove } = useFieldArray({
     control: methods.control,
     name: `destinations`,
   });
@@ -105,6 +105,7 @@ const MerchDestinations: React.FC<{}> = () => {
                 key={dest.id}
                 isEditing={isEditing}
                 index={index}
+                onRemove={() => remove(index)}
               />
             ))}
           </DashedList>

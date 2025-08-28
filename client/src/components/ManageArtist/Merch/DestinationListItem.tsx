@@ -1,20 +1,27 @@
 import { moneyDisplay } from "components/common/Money";
 import { css } from "@emotion/css";
 import React from "react";
-import { useFormContext } from "react-hook-form";
+import { useFieldArray, useFormContext } from "react-hook-form";
 import FormComponent from "components/common/FormComponent";
 import { useTranslation } from "react-i18next";
 import { SelectEl } from "components/common/Select";
 import countryCodesCurrencies from "./country-codes-currencies";
 import { InputEl } from "components/common/Input";
+import { ArtistButton } from "components/Artist/ArtistButtons";
+import { FaTrash } from "react-icons/fa";
 
 const DestinationListItem: React.FC<{
   dest: Partial<ShippingDestination>;
   index: number;
   isEditing: boolean;
-}> = ({ dest, isEditing, index }) => {
+  onRemove: () => void;
+}> = ({ dest, isEditing, index, onRemove }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageMerch" });
   const methods = useFormContext();
+  const { remove } = useFieldArray({
+    control: methods.control,
+    name: "destinations",
+  });
 
   const allDestinations = methods.watch("destinations");
   const onlyOneDestination = allDestinations.length === 1;
@@ -36,7 +43,7 @@ const DestinationListItem: React.FC<{
             justify-content: space-between;
 
             > div {
-              max-width: 30%;
+              max-width: 25%;
               display: inline-block;
               margin-right: 1rem;
             }
@@ -89,6 +96,13 @@ const DestinationListItem: React.FC<{
               {...methods.register(`destinations.${index}.costExtraUnit`)}
             />
           </FormComponent>
+          <ArtistButton
+            className={css`
+              align-self: center;
+            `}
+            onClick={onRemove}
+            startIcon={<FaTrash />}
+          ></ArtistButton>
         </div>
       )}
       {!isEditing && (
