@@ -43,21 +43,27 @@ const ManageArtist: React.FC<{}> = () => {
       {!isCustomizePage && (
         <ArtistTabs color={artist.properties?.colors.primary}>
           <li>
-            <NavLink to="releases">{t("releases")}</NavLink>
+            <NavLink to="releases">
+              {artist.properties?.titles?.releases || t("releases")}
+            </NavLink>
           </li>
           <li>
-            <NavLink to="posts">{t("updates")}</NavLink>
+            <NavLink to="posts">
+              {artist.properties?.titles?.posts || t("updates")}
+            </NavLink>
           </li>
           {artist && (
             <li>
               <NavLink to="tiers">
-                {t("support", { artist: artist.name })}
+                {artist.properties?.titles?.support || t("support")}
               </NavLink>
             </li>
           )}
           {artist && (
             <li>
-              <NavLink to="merch">{t("merch")}</NavLink>
+              <NavLink to="merch">
+                {artist.properties?.titles?.merch || t("merch")}
+              </NavLink>
             </li>
           )}
         </ArtistTabs>

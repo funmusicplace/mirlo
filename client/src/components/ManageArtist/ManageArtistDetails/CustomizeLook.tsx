@@ -22,10 +22,8 @@ import Box from "components/common/Box";
 import LabelConfirmation from "./LabelConfirmation";
 import useManagedArtistQuery from "utils/useManagedArtistQuery";
 import FeatureFlag from "components/common/FeatureFlag";
-import Artist from "components/Artist/Artist";
 import PaymentSlider from "../ManageTrackGroup/AlbumFormComponents/PaymentSlider";
 import { InputEl } from "components/common/Input";
-import { register } from "module";
 
 export interface ShareableTrackgroup {
   creatorId: number;
@@ -74,6 +72,12 @@ type FormData = {
       foreground: string;
     };
     tileBackgroundImage?: boolean;
+    titles?: {
+      releases: string;
+      merch: string;
+      posts: string;
+      support: string;
+    };
   };
 };
 
@@ -323,7 +327,6 @@ export const CustomizeLook: React.FC = () => {
                   flex-direction: column;
                 `}
               >
-                <Box variant="warning">{t("warningFeature")}</Box>
                 <FormComponent>
                   <Toggle
                     label={t("enableActivityPub")}
@@ -336,6 +339,56 @@ export const CustomizeLook: React.FC = () => {
                 </FormComponent>
               </ArtistFormSection>
             </FeatureFlag>
+            <ArtistFormSection>
+              <div
+                className={css`
+                  width: 100%;
+                `}
+              >
+                <h2>{t("customTitles")}</h2>
+                <p>{t("customTitlesDescription")}</p>
+                <div
+                  className={css`
+                    display: grid;
+                    grid-template-columns: 1fr 1fr 1fr 1fr;
+                    gap: 1rem;
+                  `}
+                >
+                  <FormComponent>
+                    <label>{t("releasesTab")}</label>
+                    <InputEl
+                      type="text"
+                      placeholder={t("releases") ?? ""}
+                      {...methods.register("properties.titles.releases")}
+                    />
+                  </FormComponent>
+                  <FormComponent>
+                    <label>{t("merchTab")}</label>
+                    <InputEl
+                      type="text"
+                      placeholder={t("merch") ?? ""}
+                      {...methods.register("properties.titles.merch")}
+                    />
+                  </FormComponent>
+                  <FormComponent>
+                    <label>{t("postsTab")}</label>
+                    <InputEl
+                      type="text"
+                      placeholder={t("posts") ?? ""}
+                      {...methods.register("properties.titles.posts")}
+                    />
+                  </FormComponent>
+                  <FormComponent>
+                    <label>{t("supportTab")}</label>
+                    <InputEl
+                      type="text"
+                      placeholder={t("support") ?? ""}
+                      {...methods.register("properties.titles.support")}
+                    />
+                  </FormComponent>
+                </div>
+              </div>
+            </ArtistFormSection>
             <ArtistFormSection
               isOdd
               className={css`

@@ -95,15 +95,17 @@ function Artist() {
 
   const isArtistUser = artist.userId === user?.id;
 
+  const canEdit = isArtistUser || user?.isAdmin;
+
   return (
     <>
       <ArtistTabs color={artist.properties?.colors.primary}>
         {(artist?.trackGroups.length ?? 0) > 0 && (
           <li>
             <NavLink to="releases" id="artist-navlink-releases">
-              {t("releases")}
+              {artist.properties?.titles?.releases || t("releases")}
             </NavLink>
-            {(isArtistUser || user?.isAdmin) && (
+            {canEdit && (
               <ArtistButtonLink
                 startIcon={<FaEdit />}
                 to={getArtistManageUrl(artist.id) + "/releases"}
@@ -122,9 +124,9 @@ function Artist() {
         {(artist?.posts.length ?? 0) > 0 && (
           <li>
             <NavLink to="posts" id="artist-navlink-updates">
-              {t("updates")}
+              {artist.properties?.titles?.posts || t("updates")}
             </NavLink>
-            {(isArtistUser || user?.isAdmin) && (
+            {canEdit && (
               <ArtistButtonLink
                 startIcon={<FaEdit />}
                 to={getArtistManageUrl(artist.id) + "/posts"}
@@ -146,9 +148,10 @@ function Artist() {
               .length ?? 0) > 0 && (
               <li>
                 <NavLink to="support">
-                  {t("support", { artist: artist.name })}
+                  {artist.properties?.titles?.support ||
+                    t("support", { artist: artist.name })}
                 </NavLink>
-                {(isArtistUser || user?.isAdmin) && (
+                {canEdit && (
                   <ArtistButtonLink
                     startIcon={<FaEdit />}
                     to={getArtistManageUrl(artist.id) + "/tiers"}
@@ -173,8 +176,10 @@ function Artist() {
                 display: flex;
               `}
             >
-              <NavLink to="merch">{t("merch")}</NavLink>
-              {(isArtistUser || user?.isAdmin) && (
+              <NavLink to="merch">
+                {artist.properties?.titles?.merch || t("merch")}
+              </NavLink>
+              {canEdit && (
                 <ArtistButtonLink
                   startIcon={<FaEdit />}
                   to={getArtistManageUrl(artist.id) + "/merch"}
