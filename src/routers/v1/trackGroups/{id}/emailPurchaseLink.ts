@@ -36,8 +36,6 @@ export default function () {
           },
           locals: {
             trackGroup,
-            email,
-            host: process.env.API_DOMAIN,
             client: process.env.REACT_APP_CLIENT_DOMAIN,
           },
         },
