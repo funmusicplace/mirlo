@@ -1,6 +1,8 @@
 import { css } from "@emotion/css";
 import Button from "components/common/Button";
+import { Select, SelectEl } from "components/common/Select";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
+import { Toggle } from "components/common/Toggle";
 import React from "react";
 import { FaArrowCircleLeft, FaCheck, FaTimes } from "react-icons/fa";
 import { Link, useParams } from "react-router-dom";
@@ -9,14 +11,16 @@ import api from "services/api";
 const AdminManageUser = () => {
   const { id } = useParams();
   const [user, setUser] = React.useState<UserFromAdmin>();
+  const [featureFlags, setFeatureFlags] = React.useState<string[]>([]);
 
   const callback = React.useCallback(async () => {
-    const response = await api.get<UserFromAdmin>(`users/${id}`);
+    const response = await api.get<UserFromAdmin>(`admin/users/${id}`);
     setUser(response.result);
+    setFeatureFlags(response.result.featureFlags);
   }, [id]);
 
   const onConfirmationEmailClick = React.useCallback(async () => {
-    await api.post(`users/${id}/confirmEmail`, {});
+    await api.post(`manage/users/${id}/confirmEmail`, {});
     callback();
   }, [callback, id]);
 
@@ -65,8 +69,19 @@ const AdminManageUser = () => {
                 <td>{user.artists.length}</td>
               </tr>
               <tr>
-                <td>isAdmin</td>
-                <td>{user.isAdmin}</td>
+                <td>is admin?</td>
+                <td>
+                  <Toggle
+                    toggled={user.isAdmin}
+                    label=""
+                    onClick={async (checked) => {
+                      await api.put(`admin/users/${id}`, {
+                        isAdmin: checked,
+                      });
+                      callback();
+                    }}
+                  />
+                </td>
               </tr>
               <tr>
                 <td>currency</td>
@@ -76,6 +91,61 @@ const AdminManageUser = () => {
                 <td>email confirmed?</td>
                 <td>
                   {user.emailConfirmationToken ? <FaTimes /> : <FaCheck />}
+                </td>
+              </tr>
+              <tr>
+                <td>is label account?</td>
+                <td>
+                  <Toggle
+                    toggled={user.isLabelAccount}
+                    label=""
+                    onClick={async (checked) => {
+                      await api.put(`admin/users/${id}`, {
+                        isLabelAccount: checked,
+                      });
+                      callback();
+                    }}
+                  />
+                </td>
+              </tr>
+
+              <tr>
+                <td>Feature flags</td>
+                <td>
+                  <SelectEl
+                    multiple
+                    defaultValue={featureFlags}
+                    onChange={(e) => {
+                      const selectedOptions = Array.from(
+                        e.target.selectedOptions,
+                        (option) => option.value
+                      );
+                      setFeatureFlags(selectedOptions);
+                    }}
+                  >
+                    {[
+                      "label",
+                      "activityPub",
+                      "subscriptionFulfillment",
+                      "fundraiser",
+                    ].map((flag) => (
+                      <option key={flag} value={flag}>
+                        {flag}
+                      </option>
+                    ))}
+                  </SelectEl>
+                </td>
+                <td>
+                  <Button
+                    onClick={async () => {
+                      await api.put(`admin/users/${id}`, {
+                        featureFlags: featureFlags,
+                      });
+                      callback();
+                    }}
+                  >
+                    Save
+                  </Button>
                 </td>
               </tr>
               <tr>

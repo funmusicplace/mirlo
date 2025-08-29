@@ -18,7 +18,6 @@ export default rateLimit({
     return 120;
   },
   handler: (req, res) => {
-    console.log("Rate limit exceeded for", req.path);
     res.status(429).json({
       error: "Too many requests",
       message: "You have exceeded the request limit. Please try again later.",
