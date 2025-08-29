@@ -18,11 +18,13 @@ const PlatformPercent: React.FC<{
   }
 
   const amount = (chosenNumber * (100 - percent)) / 100;
+  const paymentAmount = chosenNumber * 0.029 + 0.3;
 
   return (
     <div
       className={css`
         margin-bottom: 0.5rem;
+        margin-top: 0.5rem;
         font-size: 0.8rem;
       `}
     >
@@ -35,7 +37,7 @@ const PlatformPercent: React.FC<{
           currency,
         }),
         paymentProcessorCut: moneyDisplay({
-          amount: (chosenNumber * 0.029 + 0.3) / 100,
+          amount: paymentAmount,
           currency,
         }),
       })}

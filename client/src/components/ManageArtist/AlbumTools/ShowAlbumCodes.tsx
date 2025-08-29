@@ -3,17 +3,28 @@ import { useTranslation } from "react-i18next";
 import api from "services/api";
 import { css } from "@emotion/css";
 import Table from "components/common/Table";
-import GenerateAlbumDownloadCodes from "./GenerateAlbumDownloadCodes";
+import GenerateAlbumDownloadCodes from "../GenerateAlbumDownloadCodes";
 import { FaFileCsv } from "react-icons/fa";
 import Button from "components/common/Button";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import useManagedArtistQuery from "utils/useManagedArtistQuery";
+import AlbumCodesRow from "./AlbumCodesRow";
 
-type AlbumCode = {
+export type AlbumCode = {
   group: string;
   trackGroupId: number;
   trackGroup: TrackGroup;
   redeemedByUserId: number;
+  id: string;
+  url: string;
+};
+
+export type Reduced = {
+  quantity: number;
+  quantityRedeemed: number;
+  trackGroupId: number;
+  trackGroup: TrackGroup;
+  group: string;
 };
 
 const ShowAlbumCodes: React.FC<{}> = () => {
@@ -67,35 +78,26 @@ const ShowAlbumCodes: React.FC<{}> = () => {
     return null;
   }
 
-  const reduced = albumCodes.reduce(
-    (aggr, item) => {
-      const existing = aggr.find(
-        (a) => a.trackGroupId === item.trackGroupId && a.group === item.group
-      );
-      if (existing) {
-        existing.quantity += 1;
-        if (item.redeemedByUserId) {
-          existing.quantityRedeemed += 1;
-        }
-      } else {
-        aggr.push({
-          trackGroupId: item.trackGroupId,
-          trackGroup: item.trackGroup,
-          quantity: 1,
-          group: item.group,
-          quantityRedeemed: item.redeemedByUserId ? 1 : 0,
-        });
+  const reduced = albumCodes.reduce((aggr, item) => {
+    const existing = aggr.find(
+      (a) => a.trackGroupId === item.trackGroupId && a.group === item.group
+    );
+    if (existing) {
+      existing.quantity += 1;
+      if (item.redeemedByUserId) {
+        existing.quantityRedeemed += 1;
       }
-      return aggr;
-    },
-    [] as {
-      quantityRedeemed: number;
-      trackGroupId: number;
-      trackGroup: TrackGroup;
-      quantity: number;
-      group: string;
-    }[]
-  );
+    } else {
+      aggr.push({
+        trackGroupId: item.trackGroupId,
+        trackGroup: item.trackGroup,
+        quantity: 1,
+        group: item.group,
+        quantityRedeemed: item.redeemedByUserId ? 1 : 0,
+      });
+    }
+    return aggr;
+  }, [] as Reduced[]);
 
   return (
     <div>
@@ -136,20 +138,12 @@ const ShowAlbumCodes: React.FC<{}> = () => {
         </thead>
         <tbody>
           {reduced.map((r) => (
-            <tr key={r.group + r.trackGroupId}>
-              <td>{r.trackGroup.title}</td>
-              <td>{r.group}</td>
-              <td className="alignRight">{r.quantity}</td>
-              <td className="alignRight">{r.quantityRedeemed}</td>
-              <td className="alignRight">
-                <Button
-                  size="compact"
-                  startIcon={<FaFileCsv />}
-                  onClick={() => downloadCodes(r.group)}
-                  variant="dashed"
-                />
-              </td>
-            </tr>
+            <AlbumCodesRow
+              key={r.group + r.trackGroupId}
+              r={r}
+              downloadCodes={downloadCodes}
+              albumCodes={albumCodes.filter((code) => code.group === r.group)}
+            />
           ))}
         </tbody>
       </Table>

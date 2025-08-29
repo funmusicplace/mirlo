@@ -97,10 +97,16 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
   const purchaseText = isBeforeReleaseDate ? "preOrder" : "buy";
 
   const isDisabled = lessThanMin || !isValid;
-
+  const addMoneyAmount = (val: number) => {
+    const currentPrice = Number(chosenPrice || 0);
+    const newPrice = currentPrice + val;
+    methods.setValue("chosenPrice", newPrice.toString());
+  };
   if (clientSecret) {
     return <EmbeddedStripeForm clientSecret={clientSecret} />;
   }
+
+  console.log("minPrice");
 
   return (
     <FormProvider {...methods}>
@@ -130,6 +136,42 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
               step="0.01"
               id="priceInput"
             />
+            <div
+              className={css`
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 0.5rem;
+              `}
+            >
+              <ArtistButton
+                variant="dashed"
+                type="button"
+                onClick={() => addMoneyAmount(1)}
+              >
+                +<Money amount={1} currency={trackGroup.currency} />
+              </ArtistButton>
+              <ArtistButton
+                variant="dashed"
+                type="button"
+                onClick={() => addMoneyAmount(2)}
+              >
+                +<Money amount={2} currency={trackGroup.currency} />
+              </ArtistButton>
+              <ArtistButton
+                variant="dashed"
+                type="button"
+                onClick={() => addMoneyAmount(5)}
+              >
+                +<Money amount={5} currency={trackGroup.currency} />
+              </ArtistButton>
+              <ArtistButton
+                variant="dashed"
+                type="button"
+                onClick={() => addMoneyAmount(10)}
+              >
+                +<Money amount={10} currency={trackGroup.currency} />
+              </ArtistButton>
+            </div>
             {Number(chosenPrice) > (minPrice ?? 1) * 100 && (
               <Box variant="success">
                 {t("thatsGenerous", {

@@ -2,7 +2,7 @@ import React from "react";
 import { useArtistContext } from "state/ArtistContext";
 import { ManageSectionWrapper } from "./ManageSectionWrapper";
 import { css } from "@emotion/css";
-import ShowAlbumCodes from "./ShowAlbumCodes";
+import ShowAlbumCodes from "./AlbumTools/ShowAlbumCodes";
 
 const ManageArtistAlbumsTools: React.FC<{}> = () => {
   const {

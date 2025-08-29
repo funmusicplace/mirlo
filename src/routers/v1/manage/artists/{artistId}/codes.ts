@@ -88,7 +88,10 @@ export default function () {
       }
 
       res.json({
-        results: artistCodes,
+        results: artistCodes.map((c) => ({
+          ...c,
+          url: `${process.env.REACT_APP_CLIENT_DOMAIN}/${c.trackGroup.artist.urlSlug}/release/${c.trackGroup.urlSlug}/redeem?code=${c.downloadCode}`,
+        })),
       });
     } catch (error) {
       next(error);

@@ -221,6 +221,12 @@ interface Artist {
   properties?: {
     colors: ArtistColors;
     tileBackgroundImage?: boolean;
+    titles?: {
+      releases: string;
+      merch: string;
+      posts: string;
+      support: string;
+    };
   };
   user?: Partial<User>;
   banner?: {
