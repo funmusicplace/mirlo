@@ -4,9 +4,10 @@ import Table from "components/common/Table";
 import TextArea from "components/common/TextArea";
 import React from "react";
 import { FaCheck, FaEdit } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import api from "services/api";
 import usePagination from "utils/usePagination";
+import useAdminFilters from "./useAdminFilters";
 
 const pageSize = 100;
 
@@ -14,18 +15,25 @@ export const AdminUsers: React.FC = () => {
   const [results, setResults] = React.useState<User[]>([]);
   const [newUsers, setNewUsers] = React.useState("");
   const { page, PaginationComponent } = usePagination({ pageSize });
+  const [searchParams] = useSearchParams();
+
+  const callback = async () => {
+    const params =
+      new URLSearchParams(searchParams.toString()) || new URLSearchParams();
+
+    if (params) {
+      params.append("orderBy", "createdAt");
+    }
+
+    params.append("skip", `${pageSize * page}`);
+    params.append("take", `${pageSize}`);
+    const { results } = await api.getMany<User>(
+      `admin/users?${params?.toString()}`
+    );
+    setResults(results);
+  };
 
   React.useEffect(() => {
-    const callback = async () => {
-      const params = new URLSearchParams();
-
-      params.append("skip", `${pageSize * page}`);
-      params.append("take", `${pageSize}`);
-      const { results } = await api.getMany<User>(
-        `users?${params?.toString()}`
-      );
-      setResults(results);
-    };
     callback();
   }, [page]);
 
@@ -43,6 +51,11 @@ export const AdminUsers: React.FC = () => {
     uploadUsers(users);
   }, [newUsers, uploadUsers]);
 
+  const { Filters } = useAdminFilters({
+    onSubmitFilters: callback,
+    fields: ["name", "email"],
+  });
+
   return (
     <div
       className={css`
@@ -58,6 +71,9 @@ export const AdminUsers: React.FC = () => {
       <Button type="button" onClick={processTextArea}>
         Bulk Add Emails as Users
       </Button>
+
+      <hr />
+      <Filters />
 
       {results.length > 0 && (
         <Table>

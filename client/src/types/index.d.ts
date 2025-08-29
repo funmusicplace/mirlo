@@ -265,6 +265,8 @@ interface UserFromAdmin {
   emailConfirmationToken: string;
   isAdmin: boolean;
   receiveMailingList: boolean;
+  isLabelAccount: boolean;
+  featureFlags: string[];
 }
 
 interface ArtistSubscriptionTier {

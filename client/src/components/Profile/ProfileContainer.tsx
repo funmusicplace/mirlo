@@ -68,9 +68,11 @@ const ProfileContainer: React.FC = () => {
                 <NavLink to="/profile/purchases">{t("purchases")}</NavLink>
               </li>
               <FeatureFlag featureFlag="label">
-                <li>
-                  <NavLink to="/profile/label">{t("label")}</NavLink>
-                </li>
+                {user?.isLabelAccount && (
+                  <li>
+                    <NavLink to="/profile/label">{t("label")}</NavLink>
+                  </li>
+                )}
               </FeatureFlag>
               <li>
                 <NavLink to="/profile/notifications">

@@ -123,6 +123,7 @@ const routes = [
   "admin/settings",
   "admin/tips",
   "admin/users",
+  "admin/users/{id}",
   "admin/send-email",
   "oembed",
   "flag",

@@ -47,10 +47,6 @@ export const determineNewTrackGroupOrder = produce(
 );
 
 const SortableArtistAlbums: React.FC = () => {
-  const { user } = useAuthContext();
-  const { t } = useTranslation("translation", {
-    keyPrefix: "artist",
-  });
   const [isLoading, setIsLoading] = useState(false);
   const { artistId } = useParams();
 
@@ -63,20 +59,12 @@ const SortableArtistAlbums: React.FC = () => {
     [artist]
   );
 
-  const [activeId, setActiveId] = useState<null | string | number>(null);
-
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
-
-  function handleDragStart(event: DragStartEvent) {
-    const { active } = event;
-
-    setActiveId(active.id);
-  }
 
   async function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
@@ -120,11 +108,7 @@ const SortableArtistAlbums: React.FC = () => {
         </Background>
       )}
 
-      <DndContext
-        sensors={sensors}
-        onDragEnd={handleDragEnd}
-        onDragStart={handleDragStart}
-      >
+      <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
         {trackGroups && (
           <SortableContext items={trackGroups}>
             {trackGroups?.map((trackGroup) => (
