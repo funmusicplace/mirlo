@@ -28,7 +28,7 @@ export default function () {
         res.status(404);
         return next();
       }
-      await sendMail({
+      sendMail({
         data: {
           template: "album-purchase-link",
           message: {
