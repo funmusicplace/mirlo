@@ -7,11 +7,13 @@ import { ArtistButton } from "./ArtistButtons";
 import { FaCrosshairs } from "react-icons/fa";
 import { css } from "@emotion/css";
 import { useAuthContext } from "state/AuthContext";
+import useArtistQuery from "utils/useArtistQuery";
 
 const SortableTrackGroupItem: React.FC<{
   id: number;
   trackGroup: TrackGroup;
 }> = (props) => {
+  const { data: artist } = useArtistQuery();
   const { user } = useAuthContext();
 
   const {
@@ -37,7 +39,7 @@ const SortableTrackGroupItem: React.FC<{
         position: relative;
       `}
     >
-      {user?.id === props.trackGroup.artistId && (
+      {user?.id === artist?.userId && (
         <ArtistButton
           className={css`
             position: absolute;
