@@ -420,9 +420,12 @@ export const singleInclude = (queryOptions?: {
         isDrafts: false,
         tracks: { some: { audio: { uploadState: "SUCCESS" } } },
       },
-      orderBy: {
-        releaseDate: "desc",
-      },
+      orderBy: [
+        {
+          orderIndex: "asc",
+        },
+        { releaseDate: "desc" },
+      ],
       include: {
         tracks: {
           where: { deletedAt: null },

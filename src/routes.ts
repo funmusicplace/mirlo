@@ -81,6 +81,7 @@ const routes = [
   "manage/artists/{artistId}/banner",
   "manage/artists/{artistId}/avatar",
   "manage/artists/{artistId}/drafts",
+  "manage/artists/{artistId}/trackGroupOrder",
   "manage/artists/{artistId}/subscriptionTiers",
   "manage/artists/{artistId}/subscriptionTiers/{subscriptionTierId}",
   "manage/trackGroups/{trackGroupId}",
