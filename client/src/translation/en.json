@@ -941,7 +941,15 @@
     "existingAlbumCodes": "Existing album codes",
     "album": "Album",
     "codeGroup": "Code group",
-    "quantityRedeemed": "Quantity redeemed"
+    "quantityRedeemed": "Quantity redeemed",
+    "no": "No",
+    "yes": "Yes",
+    "code": "Code",
+    "trackGroup": "Release",
+    "url": "Link",
+    "redeemed": "Redeemed",
+    "codeCopies": "Copied '{{ code }}' to your clipboard.",
+    "urlCopied": "Copied the link to your clipboard."
   },
   "artists": {
     "artists": "All artists",

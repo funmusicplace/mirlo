@@ -47,7 +47,7 @@ const TrackGroupCard: React.FC<{
       className={css`
         display: flex;
         width: auto !important;
-        flex-basis: 50%;
+        flex-basis: 49%;
         flex-grow: 0;
         padding: 0 2rem 0 0 !important;
         align-items: center;
