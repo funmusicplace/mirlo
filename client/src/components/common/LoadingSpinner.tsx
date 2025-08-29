@@ -5,7 +5,8 @@ import { AiOutlineLoading } from "react-icons/ai";
 export const LoadingSpinner: React.FC<{
   className?: string;
   fill?: string;
-}> = ({ className, fill }) => {
+  size?: "small" | "medium" | "large";
+}> = ({ className, fill, size }) => {
   return (
     <AiOutlineLoading
       className={
@@ -18,6 +19,10 @@ export const LoadingSpinner: React.FC<{
           animation-timing-function: linear;
         ` + ` ${className}`
       }
+      style={{
+        width: size === "small" ? "1em" : size === "medium" ? "2em" : "3em",
+        height: size === "small" ? "1em" : size === "medium" ? "2em" : "3em",
+      }}
     />
   );
 };

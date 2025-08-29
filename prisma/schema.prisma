@@ -600,6 +600,7 @@ model TrackGroup {
   userTrackGroupPurchases         UserTrackGroupPurchase[]
   stripeProductKey                String?
   urlSlug                         String
+  orderIndex                      Int?
   credits                         String?
   userTrackGroupWishlist          UserTrackGroupWishlist[]
   platformPercent                 Int?                      @default(7)

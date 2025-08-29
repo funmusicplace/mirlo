@@ -13,6 +13,7 @@ import { NewAlbumButton } from "components/ManageArtist/NewAlbumButton";
 import { ArtistButton } from "./ArtistButtons";
 import { moneyDisplay } from "components/common/Money";
 import api from "services/api";
+import SortableArtistAlbums from "./SortableArtistAlbums";
 
 const ArtistAlbums: React.FC = () => {
   const { user } = useAuthContext();
@@ -69,21 +70,7 @@ const ArtistAlbums: React.FC = () => {
         <div />
         {artist.userId === user?.id && <NewAlbumButton artist={artist} />}
       </SpaceBetweenDiv>
-      <TrackgroupGrid
-        gridNumber={"3"}
-        wrap
-        as="ul"
-        role="list"
-        aria-labelledby="artist-navlink-releases"
-      >
-        {trackGroups?.map((trackGroup) => (
-          <ArtistTrackGroup
-            key={trackGroup.id}
-            trackGroup={trackGroup}
-            as="li"
-          />
-        ))}
-      </TrackgroupGrid>
+      {<SortableArtistAlbums />}
       <div
         className={css`
           margin-top: 2rem;

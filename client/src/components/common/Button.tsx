@@ -290,6 +290,7 @@ export interface ButtonProps extends Sizable {
   className?: string;
   isLoading?: boolean;
   as?: React.ElementType<any, keyof React.JSX.IntrinsicElements>;
+  ref?: React.Ref<HTMLButtonElement>;
 }
 
 export const Button: React.FC<

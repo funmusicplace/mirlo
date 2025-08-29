@@ -1984,6 +1984,55 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@dnd-kit/accessibility@npm:^3.1.1":
+  version: 3.1.1
+  resolution: "@dnd-kit/accessibility@npm:3.1.1"
+  dependencies:
+    tslib: "npm:^2.0.0"
+  peerDependencies:
+    react: ">=16.8.0"
+  checksum: 10/961000456a36700a9cd13be51147a818bc100f7dfabb332b80438d02e06f3b556aa0ff46ddf13bdff3b70bc8f9b63dd5a392cc285597ab1f7026e672660c54b6
+  languageName: node
+  linkType: hard
+
+"@dnd-kit/core@npm:^6.3.1":
+  version: 6.3.1
+  resolution: "@dnd-kit/core@npm:6.3.1"
+  dependencies:
+    "@dnd-kit/accessibility": "npm:^3.1.1"
+    "@dnd-kit/utilities": "npm:^3.2.2"
+    tslib: "npm:^2.0.0"
+  peerDependencies:
+    react: ">=16.8.0"
+    react-dom: ">=16.8.0"
+  checksum: 10/a5ae6fa8404765712aa80e308f58cb79bac9a306c274ec8272c405c2a59dd277d24b966348fe8ca6340bb3f0d75f90b8a021fa781edcf65255114d3cf2bef891
+  languageName: node
+  linkType: hard
+
+"@dnd-kit/sortable@npm:^10.0.0":
+  version: 10.0.0
+  resolution: "@dnd-kit/sortable@npm:10.0.0"
+  dependencies:
+    "@dnd-kit/utilities": "npm:^3.2.2"
+    tslib: "npm:^2.0.0"
+  peerDependencies:
+    "@dnd-kit/core": ^6.3.0
+    react: ">=16.8.0"
+  checksum: 10/bc61c25e76905204a53f91294b8116bf106fa27247eebca2c66478450b2051d7177115a384054e7e5639e6c4430083ade63056f79ee45f549da537cf05bc5288
+  languageName: node
+  linkType: hard
+
+"@dnd-kit/utilities@npm:^3.2.2":
+  version: 3.2.2
+  resolution: "@dnd-kit/utilities@npm:3.2.2"
+  dependencies:
+    tslib: "npm:^2.0.0"
+  peerDependencies:
+    react: ">=16.8.0"
+  checksum: 10/6cfe46a5fcdaced943982e7ae66b08b89235493e106eb5bc833737c25905e13375c6ecc3aa0c357d136cb21dae3966213dba063f19b7a60b1235a29a7b05ff84
+  languageName: node
+  linkType: hard
+
 "@emnapi/runtime@npm:^1.4.3":
   version: 1.4.3
   resolution: "@emnapi/runtime@npm:1.4.3"
@@ -3232,13 +3281,15 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@mirlo/client@workspace:client"
   dependencies:
+    "@dnd-kit/core": "npm:^6.3.1"
+    "@dnd-kit/sortable": "npm:^10.0.0"
     "@emotion/babel-plugin": "npm:^11.10.5"
     "@emotion/css": "npm:^11.10.5"
     "@emotion/react": "npm:^11.10.5"
     "@emotion/styled": "npm:^11.10.5"
     "@gumlet/react-hls-player": "npm:^1.0.1"
     "@marsidev/react-turnstile": "npm:^1.0.2"
-    "@mirlo/mirlo-api-client": "npm:1.0.5"
+    "@mirlo/mirlo-api-client": "npm:1.0.6"
     "@optimize-lodash/rollup-plugin": "npm:^4.0.4"
     "@paypal/react-paypal-js": "npm:^7.8.2"
     "@remirror/pm": "npm:^2.0.8"
@@ -3316,14 +3367,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@mirlo/mirlo-api-client@npm:1.0.5":
-  version: 1.0.5
-  resolution: "@mirlo/mirlo-api-client@npm:1.0.5"
+"@mirlo/mirlo-api-client@npm:1.0.6":
+  version: 1.0.6
+  resolution: "@mirlo/mirlo-api-client@npm:1.0.6"
   dependencies:
     b64-to-blob: "npm:^1.2.19"
     file-saver: "npm:^2.0.5"
     typescript: "npm:^5.8.3"
-  checksum: 10/3ca6a1036b02f53929173db006ae62d5a3a0c86a2adbfc73282ccf3853a04f268e55d7a31f8f3541ef5b91a1d22c6347ff99e97f8cdccc8d8cbe097a975e931a
+  checksum: 10/6f5acf81a623d50c627e6813c6de0a4b41631f1f3b3e8a10028b77dc05ca7fae38c2f20bc1689960d1336fd7168bdfd284d2e23411f3be707e43d1309e1c5239
   languageName: node
   linkType: hard
 

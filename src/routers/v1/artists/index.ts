@@ -58,6 +58,7 @@ export default function () {
             include: {
               cover: true,
             },
+            orderBy: { orderIndex: "asc" },
           },
           avatar: {
             where: {

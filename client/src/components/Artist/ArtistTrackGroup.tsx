@@ -1,9 +1,12 @@
-import React from "react";
+import React, { forwardRef } from "react";
 import ClickToPlay from "../common/ClickToPlay";
 import { bp } from "../../constants";
 import styled from "@emotion/styled";
 import ArtistLink from "./ArtistLink";
 import ArtistItemLink from "./ArtistItemLink";
+import { ArtistButton } from "./ArtistButtons";
+import { FaCrosshairs, FaICursor } from "react-icons/fa";
+import { css } from "@emotion/css";
 
 export const TrackGroupWrapper = styled.div`
   margin-bottom: 0.5rem;
@@ -65,16 +68,31 @@ export const TrackGroupInfo = styled.div`
   }
 `;
 
-const ArtistTrackGroup: React.FC<{
+type ArtistTrackGroupProps = {
   trackGroup: TrackGroup & { artist?: Artist };
   as?: React.ElementType<any, keyof React.JSX.IntrinsicElements>;
   size?: "small" | "large";
   showTrackFavorite?: boolean;
-}> = ({ trackGroup, as, showTrackFavorite, size = "large" }) => {
+  myRef?: React.Ref<HTMLDivElement>;
+  style?: React.CSSProperties;
+};
+
+const ArtistTrackGroup: React.FC<ArtistTrackGroupProps> = ({
+  trackGroup,
+  as,
+  showTrackFavorite,
+  size = "large",
+  myRef,
+  ...props
+}) => {
   const length = size === "small" ? 300 : 300;
   return (
-    <TrackGroupWrapper as={as}>
-      <div>
+    <TrackGroupWrapper as={as} ref={myRef} {...props}>
+      <div
+        className={css`
+          position: relative;
+        `}
+      >
         <ClickToPlay
           image={{
             width: length,
