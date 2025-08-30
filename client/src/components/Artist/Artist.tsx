@@ -17,7 +17,11 @@ import { FaChevronRight, FaEdit } from "react-icons/fa";
 import { css } from "@emotion/css";
 import { useAuthContext } from "state/AuthContext";
 import { useQuery } from "@tanstack/react-query";
-import { queryArtist, queryUserStripeStatus } from "queries";
+import {
+  queryArtist,
+  queryPublicLabelTrackGroups,
+  queryUserStripeStatus,
+} from "queries";
 import { getArtistManageUrl } from "utils/artist";
 import { ArtistButtonLink } from "./ArtistButtons";
 
@@ -46,6 +50,7 @@ function Artist() {
   const { data: stripeAccountStatus } = useQuery(
     queryUserStripeStatus(artist?.userId ?? 0)
   );
+  const { data: releases } = useQuery(queryPublicLabelTrackGroups(artistId));
 
   const { pathname } = useLocation();
   const navigate = useNavigate();
@@ -58,12 +63,15 @@ function Artist() {
       "support",
       "links",
       "merch",
+      "roster",
       "checkout-complete",
     ];
     const end = pathname.split("/")[2];
 
     if (!subPages.includes(end)) {
-      if (artist?.trackGroups.length) {
+      if (artist?.isLabelProfile) {
+        navigate("roster", { replace: true });
+      } else if (artist?.trackGroups.length) {
         // has track groups
         navigate("releases", { replace: true });
       } else if (artist?.posts.length) {
@@ -100,7 +108,29 @@ function Artist() {
   return (
     <>
       <ArtistTabs color={artist.properties?.colors.primary}>
-        {(artist?.trackGroups.length ?? 0) > 0 && (
+        {artist.isLabelProfile && (
+          <li>
+            <NavLink to="roster">
+              {artist.properties?.titles?.roster || t("roster")}
+            </NavLink>
+            {canEdit && (
+              <ArtistButtonLink
+                startIcon={<FaEdit />}
+                to={"/profile/label"}
+                variant="dashed"
+                className={
+                  "edit " +
+                  css`
+                    margin-left: 0.5rem;
+                    margin-top: -0.5rem;
+                  `
+                }
+              />
+            )}
+          </li>
+        )}
+        {((artist?.trackGroups.length ?? 0) > 0 ||
+          (releases?.results.length ?? 0) > 0) && (
           <li>
             <NavLink to="releases" id="artist-navlink-releases">
               {artist.properties?.titles?.releases || t("releases")}

@@ -10,6 +10,7 @@ import bcrypt from "bcryptjs";
 import { AppError } from "../../../../utils/error";
 import sendMail from "../../../../jobs/send-mail";
 import { Job } from "bullmq";
+import slugify from "slugify";
 
 export default function () {
   const operations = {
@@ -126,7 +127,7 @@ export default function () {
         }
       }
 
-      await prisma.user.update({
+      const updatedUser = await prisma.user.update({
         select: {
           email: true,
           name: true,
@@ -144,6 +145,32 @@ export default function () {
           email: newEmail,
         },
       });
+
+      if (data.isLabelAccount) {
+        const hasLabelProfile = await prisma.artist.findFirst({
+          where: {
+            userId: user.id,
+            isLabelProfile: true,
+            deletedAt: null,
+          },
+        });
+        if (!hasLabelProfile) {
+          await prisma.artist.create({
+            data: {
+              userId: user.id,
+              name: updatedUser.name ?? updatedUser.email,
+              isLabelProfile: true,
+              // other artist fields
+              urlSlug:
+                updatedUser.urlSlug ??
+                slugify(updatedUser.name ?? updatedUser.email, {
+                  lower: true,
+                  strict: true,
+                }),
+            },
+          });
+        }
+      }
 
       if (data.currency && typeof data.currency === "string") {
         updateCurrencies(user.id, data.currency);

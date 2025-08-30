@@ -7,6 +7,7 @@ import {
   processSingleTrackGroup,
   whereForPublishedTrackGroups,
 } from "../../../../utils/trackGroup";
+import { findArtistIdForURLSlug } from "../../../../utils/artist";
 
 export default function () {
   const operations = {
@@ -17,13 +18,19 @@ export default function () {
     const { id }: { id?: string } = req.params;
 
     try {
-      const userId = await findUserIdForURLSlug(id);
+      const artistId = await findArtistIdForURLSlug(id);
+      const labelProfile = await prisma.artist.findFirst({
+        where: { id: artistId, isLabelProfile: true },
+      });
       const where = whereForPublishedTrackGroups();
 
       const trackGroups = await prisma.trackGroup.findMany({
         where: {
           ...where,
-          OR: [{ paymentToUserId: userId }, { artist: { id: userId } }],
+          OR: [
+            { paymentToUserId: labelProfile?.userId },
+            { artist: { userId: labelProfile?.userId } },
+          ],
         },
         include: {
           cover: true,

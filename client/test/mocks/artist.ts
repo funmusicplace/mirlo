@@ -10,4 +10,5 @@ export const ARTIST_EXAMPLE: Artist = {
   subscriptionTiers: [],
   merch: [],
   activityPub: false,
+  isLabelProfile: false,
 };

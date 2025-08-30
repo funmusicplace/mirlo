@@ -308,6 +308,7 @@
   },
   "artist": {
     "merch": "Merch",
+    "roster": "Roster",
     "includesNewReleases": "Includes new releases",
     "includesNewReleasesLong": "Supporting at this tier will automatically include new releases from this artist.",
     "about": "About",
@@ -449,13 +450,15 @@
     "updateBankAccount": "Change bank account information",
     "countryCurrencyCode": "Country currency code:",
     "saveCountryCode": "Save",
-    "success": "Details saved!"
+    "success": "Details saved!",
+    "label": "(Label)"
   },
   "manageArtist": {
     "albumTags": "Album tags",
     "useUrlSlug": "Use this URL slug? '{{suggestedUrlSlug}}'",
     "labelsAndCollectives": "Label and collectives",
     "name": "Name",
+    "roster": "Roster",
     "unpublishedReleases": "Unpublished releases",
     "publishedReleases": "Published releases",
     "setEntireCataloguePrice": "Set entire catalogue price",
@@ -484,8 +487,10 @@
     "viewLive": "View live",
     "addNewAlbum": "Add new release",
     "edit": "Edit",
-    "editPage": "Manage artist page",
+    "editPage": "Manage artist details",
+    "editLabelPage": "Manage label details",
     "customizeLook": "Customize artist page",
+    "customizeLabelLook": "Customize label page",
     "canLabelManageArtist": "Can label manage this artist?",
     "canLabelAddReleases": "Can label add releases to this artist?",
     "delete": "Delete",

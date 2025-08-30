@@ -22,7 +22,7 @@ export const FullPageLoadingSpinner: React.FC<{ className?: string }> = ({
         background-color: var(--mi-darken-background-color);
       `}
     >
-      <LoadingSpinner />
+      <LoadingSpinner size="small" />
     </div>
   );
 };

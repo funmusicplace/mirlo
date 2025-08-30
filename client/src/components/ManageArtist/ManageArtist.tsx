@@ -66,6 +66,13 @@ const ManageArtist: React.FC<{}> = () => {
               </NavLink>
             </li>
           )}
+          {artist && artist.isLabelProfile && (
+            <li>
+              <NavLink to="/profile/label">
+                {artist.properties?.titles?.roster || t("roster")}
+              </NavLink>
+            </li>
+          )}
         </ArtistTabs>
       )}
       <Outlet />

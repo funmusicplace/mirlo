@@ -149,7 +149,7 @@ function ProfileForm() {
             </FormComponent>
             {user.urlSlug && (
               <ButtonLink
-                to={`/label/${user.urlSlug}`}
+                to={`/${user.urlSlug}`}
                 endIcon={<FaChevronRight />}
                 variant="link"
               >

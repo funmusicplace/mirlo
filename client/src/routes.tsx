@@ -1,4 +1,4 @@
-import { Navigate, type RouteObject } from "react-router-dom";
+import { Navigate, useParams, type RouteObject } from "react-router-dom";
 
 import App from "./App";
 import ErrorPage from "./components/ErrorPage";
@@ -188,34 +188,14 @@ const routes: RouteObject[] = [
       },
       {
         path: "label/:labelSlug",
-        async lazy() {
-          const { default: Component } = await import("components/Label");
-          return { Component };
-        },
-        children: [
-          {
-            path: "",
-            element: <Navigate to="roster" replace={true} />,
-          },
-          {
-            path: "roster",
-            async lazy() {
-              const { default: Component } = await import(
-                "components/Label/Roster"
-              );
-              return { Component };
-            },
-          },
-          {
-            path: "releases",
-            async lazy() {
-              const { default: Component } = await import(
-                "components/Label/Releases"
-              );
-              return { Component };
-            },
-          },
-        ],
+        element: (
+          <>
+            {() => {
+              const { labelSlug } = useParams();
+              return <Navigate to={`/${labelSlug}`} />;
+            }}
+          </>
+        ),
       },
       {
         path: "manage",
@@ -657,6 +637,15 @@ const routes: RouteObject[] = [
                   return {
                     Component: () => <Component />,
                   };
+                },
+              },
+              {
+                path: "roster",
+                async lazy() {
+                  const { default: Component } = await import(
+                    "components/Label/Roster"
+                  );
+                  return { Component };
                 },
               },
               {

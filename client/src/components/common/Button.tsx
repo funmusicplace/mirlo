@@ -316,7 +316,7 @@ export const Button: React.FC<
     >
       {isLoading && (
         <span className="startIcon" aria-hidden>
-          <LoadingSpinner />
+          <LoadingSpinner size="small" />
         </span>
       )}
       {!isLoading && startIcon ? (
