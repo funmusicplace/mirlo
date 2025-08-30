@@ -54,9 +54,8 @@ const SortableArtistAlbums: React.FC = () => {
     queryArtist({ artistSlug: artistId ?? "" })
   );
 
-  const trackGroups = React.useMemo(
-    () => artist?.trackGroups?.map((trackGroup) => ({ ...trackGroup, artist })),
-    [artist]
+  const [trackGroups, setTrackGroups] = React.useState(() =>
+    artist?.trackGroups?.map((trackGroup) => ({ ...trackGroup, artist }))
   );
 
   const sensors = useSensors(
@@ -74,6 +73,8 @@ const SortableArtistAlbums: React.FC = () => {
         over.id as number,
         active.id as number
       );
+
+      setTrackGroups(newOrder);
 
       setIsLoading(true);
 
