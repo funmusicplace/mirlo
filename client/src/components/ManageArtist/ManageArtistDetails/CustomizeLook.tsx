@@ -77,6 +77,7 @@ type FormData = {
       merch: string;
       posts: string;
       support: string;
+      roster: string;
     };
   };
 };
@@ -402,7 +403,7 @@ export const CustomizeLook: React.FC = () => {
           </div>
         </form>
       </FormProvider>
-      <LabelConfirmation />
+      {!artist.isLabelProfile && <LabelConfirmation />}
 
       <DeleteArtist />
     </div>

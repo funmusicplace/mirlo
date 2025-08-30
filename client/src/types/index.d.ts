@@ -198,6 +198,7 @@ interface ArtistLabel {
 interface Artist {
   name: string;
   bio: string;
+  isLabelProfile: boolean;
   activityPub: boolean;
   urlSlug?: string;
   userId: number;
@@ -226,6 +227,7 @@ interface Artist {
       merch: string;
       posts: string;
       support: string;
+      roster: string;
     };
   };
   user?: Partial<User>;

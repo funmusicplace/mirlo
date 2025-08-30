@@ -73,19 +73,21 @@ export const Manage: React.FC = () => {
                 flex-wrap: wrap;
               `}
             >
-              {artists.map((a) => (
-                <ButtonLink
-                  key={a.id}
-                  to={`artists/${a.id}`}
-                  variant="outlined"
-                  className={css`
-                    margin-right: 1rem;
-                    margin-bottom: 1rem;
-                  `}
-                >
-                  {a.name}
-                </ButtonLink>
-              ))}
+              {artists
+                .filter((a) => !a.isLabelProfile)
+                .map((a) => (
+                  <ButtonLink
+                    key={a.id}
+                    to={`artists/${a.id}`}
+                    variant="outlined"
+                    className={css`
+                      margin-right: 1rem;
+                      margin-bottom: 1rem;
+                    `}
+                  >
+                    {a.name}
+                  </ButtonLink>
+                ))}
               <div
                 className={css`
                   width: 100%;

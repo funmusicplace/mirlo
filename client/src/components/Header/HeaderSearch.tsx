@@ -14,7 +14,7 @@ const constructUrl = (r: any) => {
   }
 
   if (r.isLabel) {
-    url = `/label/${r.labelId}`;
+    url = `${r.labelId}`;
     return url;
   }
 

@@ -8,7 +8,7 @@ import { useParams } from "react-router-dom";
 import TrackgroupGrid from "components/common/TrackgroupGrid";
 import { useAuthContext } from "state/AuthContext";
 import { useQuery } from "@tanstack/react-query";
-import { queryArtist } from "queries";
+import { queryArtist, queryPublicLabelTrackGroups } from "queries";
 import { NewAlbumButton } from "components/ManageArtist/NewAlbumButton";
 import { ArtistButton } from "./ArtistButtons";
 import { moneyDisplay } from "components/common/Money";
@@ -25,12 +25,9 @@ const ArtistAlbums: React.FC = () => {
     queryArtist({ artistSlug: artistId ?? "" })
   );
 
-  const [loadingStripe, setLoadingStripe] = React.useState(false);
+  const { data: releases } = useQuery(queryPublicLabelTrackGroups(artistId));
 
-  const trackGroups = React.useMemo(
-    () => artist?.trackGroups?.map((trackGroup) => ({ ...trackGroup, artist })),
-    [artist]
-  );
+  const [loadingStripe, setLoadingStripe] = React.useState(false);
 
   const purchaseCatalogue = React.useCallback(async () => {
     if (!artist) return;
@@ -70,7 +67,22 @@ const ArtistAlbums: React.FC = () => {
         <div />
         {artist.userId === user?.id && <NewAlbumButton artist={artist} />}
       </SpaceBetweenDiv>
-      {<SortableArtistAlbums />}
+      <SortableArtistAlbums />
+      {artist.isLabelProfile && (
+        <>
+          <TrackgroupGrid
+            gridNumber={"3"}
+            wrap
+            as="ul"
+            role="list"
+            aria-labelledby="artist-navlink-releases"
+          >
+            {releases?.results.map((release) => (
+              <ArtistTrackGroup key={release.id} trackGroup={release} />
+            ))}
+          </TrackgroupGrid>
+        </>
+      )}
       <div
         className={css`
           margin-top: 2rem;

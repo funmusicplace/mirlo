@@ -2,7 +2,10 @@ import { NextFunction, Request, Response } from "express";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import prisma from "@mirlo/prisma";
 import { findUserIdForURLSlug } from "../../../../utils/user";
-import { addSizesToImage } from "../../../../utils/artist";
+import {
+  addSizesToImage,
+  findArtistIdForURLSlug,
+} from "../../../../utils/artist";
 import {
   finalArtistAvatarBucket,
   finalArtistBannerBucket,
@@ -20,10 +23,14 @@ export default function () {
     const { id }: { id?: string } = req.params;
 
     try {
-      const userId = await findUserIdForURLSlug(id);
+      const artistId = await findArtistIdForURLSlug(id);
+
+      const labelProfile = await prisma.artist.findFirst({
+        where: { id: artistId, isLabelProfile: true },
+      });
 
       const label = await prisma.user.findUnique({
-        where: { id: userId, isLabelAccount: true },
+        where: { id: labelProfile?.userId, isLabelAccount: true },
         select: {
           name: true,
           id: true,

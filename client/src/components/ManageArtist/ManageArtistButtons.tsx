@@ -51,7 +51,9 @@ const ManageArtistButtons: React.FC = () => {
               size="compact"
               variant="dashed"
             >
-              {t("customizeLook")}
+              {t(
+                artist.isLabelProfile ? "customizeLabelLook" : "customizeLook"
+              )}
             </FixedButtonLink>
             {!isManagePage && (
               <FixedButtonLink
@@ -60,7 +62,7 @@ const ManageArtistButtons: React.FC = () => {
                 size="compact"
                 variant="dashed"
               >
-                {t("editPage")}
+                {t(artist.isLabelProfile ? "editLabelPage" : "editPage")}
               </FixedButtonLink>
             )}
             <FixedButtonLink
