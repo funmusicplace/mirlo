@@ -24,6 +24,8 @@ import {
 } from "queries";
 import { getArtistManageUrl } from "utils/artist";
 import { ArtistButtonLink } from "./ArtistButtons";
+import useManagedArtistQuery from "utils/useManagedArtistQuery";
+import useArtistQuery from "utils/useArtistQuery";
 
 export const ArtistSection = styled.div`
   margin-bottom: 2rem;
@@ -35,6 +37,36 @@ export const ArtistSection = styled.div`
     margin-bottom: 1.5rem;
   }
 `;
+
+export const ArtistButtonQuickLink: React.FC<{
+  to: string;
+  icon: React.ReactElement;
+}> = ({ to, icon }) => {
+  const { user } = useAuthContext();
+  const { data: viewingArtist } = useArtistQuery();
+  const { data: managedArtist } = useManagedArtistQuery();
+
+  const artist = viewingArtist ?? managedArtist;
+  const isArtistUser = artist?.userId === user?.id;
+
+  const canEdit = isArtistUser || user?.isAdmin;
+  if (!canEdit) return null;
+
+  return (
+    <ArtistButtonLink
+      startIcon={icon}
+      to={to}
+      variant="dashed"
+      className={
+        "edit " +
+        css`
+          margin-left: 0.5rem;
+          margin-top: -0.5rem;
+        `
+      }
+    />
+  );
+};
 
 function Artist() {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
@@ -103,8 +135,6 @@ function Artist() {
 
   const isArtistUser = artist.userId === user?.id;
 
-  const canEdit = isArtistUser || user?.isAdmin;
-
   return (
     <>
       <ArtistTabs color={artist.properties?.colors.primary}>
@@ -113,20 +143,7 @@ function Artist() {
             <NavLink to="roster">
               {artist.properties?.titles?.roster || t("roster")}
             </NavLink>
-            {canEdit && (
-              <ArtistButtonLink
-                startIcon={<FaEdit />}
-                to={"/profile/label"}
-                variant="dashed"
-                className={
-                  "edit " +
-                  css`
-                    margin-left: 0.5rem;
-                    margin-top: -0.5rem;
-                  `
-                }
-              />
-            )}
+            <ArtistButtonQuickLink to="profile/label" icon={<FaEdit />} />
           </li>
         )}
         {((artist?.trackGroups.length ?? 0) > 0 ||
@@ -135,20 +152,10 @@ function Artist() {
             <NavLink to="releases" id="artist-navlink-releases">
               {artist.properties?.titles?.releases || t("releases")}
             </NavLink>
-            {canEdit && (
-              <ArtistButtonLink
-                startIcon={<FaEdit />}
-                to={getArtistManageUrl(artist.id) + "/releases"}
-                variant="dashed"
-                className={
-                  "edit " +
-                  css`
-                    margin-left: 0.5rem;
-                    margin-top: -0.5rem;
-                  `
-                }
-              />
-            )}
+            <ArtistButtonQuickLink
+              to={getArtistManageUrl(artist.id) + "/releases"}
+              icon={<FaEdit />}
+            />
           </li>
         )}
         {(artist?.posts.length ?? 0) > 0 && (
@@ -156,20 +163,10 @@ function Artist() {
             <NavLink to="posts" id="artist-navlink-updates">
               {artist.properties?.titles?.posts || t("updates")}
             </NavLink>
-            {canEdit && (
-              <ArtistButtonLink
-                startIcon={<FaEdit />}
-                to={getArtistManageUrl(artist.id) + "/posts"}
-                variant="dashed"
-                className={
-                  "edit " +
-                  css`
-                    margin-left: 0.5rem;
-                    margin-top: -0.5rem;
-                  `
-                }
-              />
-            )}
+            <ArtistButtonQuickLink
+              to={getArtistManageUrl(artist.id) + "/posts"}
+              icon={<FaEdit />}
+            />
           </li>
         )}
         {canReceivePayments && (
@@ -181,20 +178,10 @@ function Artist() {
                   {artist.properties?.titles?.support ||
                     t("support", { artist: artist.name })}
                 </NavLink>
-                {canEdit && (
-                  <ArtistButtonLink
-                    startIcon={<FaEdit />}
-                    to={getArtistManageUrl(artist.id) + "/tiers"}
-                    variant="dashed"
-                    className={
-                      "edit " +
-                      css`
-                        margin-left: 0.5rem;
-                        margin-top: -0.5rem;
-                      `
-                    }
-                  />
-                )}
+                <ArtistButtonQuickLink
+                  to={getArtistManageUrl(artist.id) + "/tiers"}
+                  icon={<FaEdit />}
+                />
               </li>
             )}
           </>
@@ -209,20 +196,10 @@ function Artist() {
               <NavLink to="merch">
                 {artist.properties?.titles?.merch || t("merch")}
               </NavLink>
-              {canEdit && (
-                <ArtistButtonLink
-                  startIcon={<FaEdit />}
-                  to={getArtistManageUrl(artist.id) + "/merch"}
-                  variant="dashed"
-                  className={
-                    "edit " +
-                    css`
-                      margin-left: 0.5rem;
-                      margin-top: -0.5rem;
-                    `
-                  }
-                />
-              )}
+              <ArtistButtonQuickLink
+                to={getArtistManageUrl(artist.id) + "/merch"}
+                icon={<FaEdit />}
+              />
             </li>
           </>
         )}

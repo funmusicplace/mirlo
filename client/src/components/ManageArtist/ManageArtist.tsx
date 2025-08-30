@@ -6,6 +6,9 @@ import Box from "components/common/Box";
 import { ArtistTabs } from "components/common/Tabs";
 import { useQuery } from "@tanstack/react-query";
 import { queryManagedArtist } from "queries";
+import { getArtistUrl } from "utils/artist";
+import { ArtistButtonQuickLink } from "components/Artist/Artist";
+import { FaEye } from "react-icons/fa";
 
 const ManageArtist: React.FC<{}> = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
@@ -46,17 +49,29 @@ const ManageArtist: React.FC<{}> = () => {
             <NavLink to="releases">
               {artist.properties?.titles?.releases || t("releases")}
             </NavLink>
+            <ArtistButtonQuickLink
+              to={getArtistUrl(artist) + "/releases"}
+              icon={<FaEye />}
+            />
           </li>
           <li>
             <NavLink to="posts">
               {artist.properties?.titles?.posts || t("updates")}
-            </NavLink>
+            </NavLink>{" "}
+            <ArtistButtonQuickLink
+              to={getArtistUrl(artist) + "/posts"}
+              icon={<FaEye />}
+            />
           </li>
           {artist && (
             <li>
               <NavLink to="tiers">
                 {artist.properties?.titles?.support || t("support")}
               </NavLink>
+              <ArtistButtonQuickLink
+                to={getArtistUrl(artist) + "/support"}
+                icon={<FaEye />}
+              />
             </li>
           )}
           {artist && (
@@ -64,6 +79,10 @@ const ManageArtist: React.FC<{}> = () => {
               <NavLink to="merch">
                 {artist.properties?.titles?.merch || t("merch")}
               </NavLink>
+              <ArtistButtonQuickLink
+                to={getArtistUrl(artist) + "/merch"}
+                icon={<FaEye />}
+              />
             </li>
           )}
           {artist && artist.isLabelProfile && (
@@ -71,6 +90,10 @@ const ManageArtist: React.FC<{}> = () => {
               <NavLink to="/profile/label">
                 {artist.properties?.titles?.roster || t("roster")}
               </NavLink>
+              <ArtistButtonQuickLink
+                to={getArtistUrl(artist) + "/roster"}
+                icon={<FaEye />}
+              />
             </li>
           )}
         </ArtistTabs>
