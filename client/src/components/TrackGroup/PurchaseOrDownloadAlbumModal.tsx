@@ -8,6 +8,10 @@ import DownloadAlbumButton from "components/common/DownloadAlbumButton";
 import AddToCollection from "./AddToCollection";
 import { useAuthContext } from "state/AuthContext";
 import { ArtistButton } from "components/Artist/ArtistButtons";
+import useArtistQuery from "utils/useArtistQuery";
+import { useQuery } from "@tanstack/react-query";
+import { queryUserStripeStatus } from "queries";
+import BackingThisProject from "./BackingThisProject";
 
 const PurchaseOrDownloadAlbum: React.FC<{
   trackGroup: TrackGroup;
@@ -17,7 +21,10 @@ const PurchaseOrDownloadAlbum: React.FC<{
   const { user } = useAuthContext();
   const [isPurchasingAlbum, setIsPurchasingAlbum] = React.useState(false);
   const [isOwned, setIsOwned] = React.useState(false);
-  const { state: artistState } = useArtistContext();
+  const { data: artist } = useArtistQuery();
+  const { data: userStripeStatus } = useQuery(
+    queryUserStripeStatus(artist?.userId)
+  );
 
   const userId = user?.id;
   const trackGroupPurchases = user?.userTrackGroupPurchases;
@@ -41,8 +48,25 @@ const PurchaseOrDownloadAlbum: React.FC<{
     checkForAlbumOwnership();
   }, [checkForAlbumOwnership]);
 
-  if (!trackGroup || !artistState?.artist) {
+  if (!trackGroup || !artist) {
     return null;
+  }
+
+  if (!trackGroup.isGettable) {
+    return null;
+  }
+
+  const hasPledge = user?.pledges?.find(
+    (p) => p.trackGroupId === trackGroup.id
+  );
+
+  if (trackGroup.isAllOrNothing && hasPledge) {
+    return (
+      <BackingThisProject
+        amount={hasPledge.amount}
+        currency={trackGroup?.currency}
+      />
+    );
   }
 
   const isBeforeReleaseDate = new Date(trackGroup.releaseDate) > new Date();
@@ -61,19 +85,14 @@ const PurchaseOrDownloadAlbum: React.FC<{
     ? "preOrderingTrackGroup"
     : "buyingTrackGroup";
 
-  if (!trackGroup.isGettable) {
-    return null;
-  }
-
-  const showPurchase =
-    !isOwned && artistState?.userStripeStatus?.chargesEnabled;
+  const showPurchase = !isOwned && userStripeStatus?.chargesEnabled;
 
   const showDownload = isOwned && !isBeforeReleaseDate;
 
   const addToCollection =
     !isOwned &&
     userId &&
-    !artistState?.userStripeStatus?.chargesEnabled &&
+    !userStripeStatus?.chargesEnabled &&
     (trackGroup.minPrice === 0 || trackGroup.minPrice === null);
 
   return (

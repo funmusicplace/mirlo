@@ -14,6 +14,11 @@ interface LoggedInUser {
   artistUserSubscriptions?: ArtistUserSubscription[];
   userTrackGroupPurchases?: { trackGroupId: number }[];
   userTrackPurchases?: { trackId: number }[];
+  pledges?: {
+    trackGroupId: number;
+    trackGroup: { currency: string };
+    amount: number;
+  }[];
   isAdmin: boolean;
   currency?: string;
   featureFlags?: string[];

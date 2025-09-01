@@ -732,3 +732,46 @@ export default {
   cover: generateFullStaticImageUrl,
   single: processSingleTrackGroup,
 };
+
+export const createOrUpdatePledge = async ({
+  userId,
+  trackGroupId,
+  message,
+  amount,
+  stripeSetupIntentId,
+}: {
+  userId: number;
+  trackGroupId: number;
+  message?: string;
+  amount: number;
+  stripeSetupIntentId: string;
+}) => {
+  await prisma.trackGroupPledge.upsert({
+    where: {
+      userId_trackGroupId: {
+        userId,
+        trackGroupId: Number(trackGroupId),
+      },
+    },
+    create: {
+      user: {
+        connect: {
+          id: userId,
+        },
+      },
+      trackGroup: {
+        connect: {
+          id: Number(trackGroupId),
+        },
+      },
+      message: message,
+      amount: Number(amount),
+      stripeSetupIntentId: stripeSetupIntentId,
+    },
+    update: {
+      message: message,
+      amount: Number(amount),
+      stripeSetupIntentId: stripeSetupIntentId,
+    },
+  });
+};

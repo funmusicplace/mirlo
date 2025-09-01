@@ -23,6 +23,7 @@ import {
 import countryCodesCurrencies from "./country-codes-currencies";
 import { manageSubscriptionReceipt } from "./subscription";
 import { getPlatformFeeForArtist } from "./artist";
+import { createOrUpdatePledge } from "./trackGroup";
 
 const { STRIPE_KEY, API_DOMAIN } = process.env;
 
@@ -210,6 +211,7 @@ export const findOrCreateStripeCustomer = async (
   let user;
   let searchEmail = email;
   if (userId) {
+    console.log("there is a userid");
     user = await prisma.user.findUnique({
       where: {
         id: userId,
@@ -219,6 +221,7 @@ export const findOrCreateStripeCustomer = async (
   }
 
   if (user?.stripeCustomerId) {
+    console.log("there is a stripeCustomerId");
     const existingCustomer = await stripe.customers.retrieve(
       user.stripeCustomerId,
       {
@@ -237,7 +240,9 @@ export const findOrCreateStripeCustomer = async (
       stripeAccount: stripeAccountId,
     }
   );
+  console.log("existing customer");
   if (user && existingCustomer.data.length > 0) {
+    console.log("update user");
     await prisma.user.update({
       where: {
         email: searchEmail,
@@ -248,6 +253,7 @@ export const findOrCreateStripeCustomer = async (
     });
     return existingCustomer.data[0];
   }
+  console.log("create customers");
   const customer = await stripe.customers.create(
     {
       email: searchEmail,
@@ -600,12 +606,14 @@ export const createStripeCheckoutSessionForPurchase = async ({
 
   const currency = trackGroup.currency?.toLowerCase() ?? "usd";
 
+  console.log("attempting to create customer");
   const customer = await findOrCreateStripeCustomer(
     stripeAccountId,
     loggedInUser?.id,
     email
   );
 
+  console.log("is tg all or noghtin", trackGroup.isAllOrNothing);
   if (trackGroup.isAllOrNothing) {
     // For all or nothing track groups, we need to create a setupIntent for the payment
     // which we will charge when the project hits its goal.
@@ -625,11 +633,12 @@ export const createStripeCheckoutSessionForPurchase = async ({
     );
     return setupIntent;
   }
+  console.log("not intent, continue");
   const session = await stripe.checkout.sessions.create(
     {
       billing_address_collection: "auto",
       customer_email: loggedInUser?.email || email,
-      customer: customer.id,
+      customer: customer?.id,
       payment_intent_data: {
         application_fee_amount: await calculateAppFee(
           priceNumber,
@@ -1122,31 +1131,12 @@ export const handleSetupIntentSucceeded = async (
     });
 
     if (trackGroup) {
-      await prisma.trackGroupPledge.upsert({
-        where: {
-          userId_trackGroupId: {
-            userId: Number(userId),
-            trackGroupId: trackGroup.id,
-          },
-        },
-        create: {
-          amount: intent.metadata?.paymentIntentAmount
-            ? Number(intent.metadata?.paymentIntentAmount)
-            : 0,
-          user: {
-            connect: {
-              id: Number(actualUserId),
-            },
-          },
-          message: intent.metadata?.message,
-          stripeSetupIntentId: intent.id,
-          trackGroup: {
-            connect: {
-              id: trackGroup.id,
-            },
-          },
-        },
-        update: {},
+      await createOrUpdatePledge({
+        userId: Number(actualUserId),
+        trackGroupId: trackGroup.id,
+        message: intent.metadata?.message,
+        amount: Number(intent.metadata?.paymentIntentAmount),
+        stripeSetupIntentId: intent.id,
       });
     }
   }

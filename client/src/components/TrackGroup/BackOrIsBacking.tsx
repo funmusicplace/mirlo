@@ -7,6 +7,7 @@ import api from "services/api";
 import PurchaseOrDownloadAlbum from "./PurchaseOrDownloadAlbumModal";
 import { css } from "@emotion/css";
 import Confetti from "components/common/Confetti";
+import BackingThisProject from "./BackingThisProject";
 
 const BackOrIsBacking: React.FC<{ trackGroup: TrackGroup; artist: Artist }> = ({
   trackGroup,
@@ -65,28 +66,10 @@ const BackOrIsBacking: React.FC<{ trackGroup: TrackGroup; artist: Artist }> = ({
       {!isLoading && (
         <>
           {paymentStatus === "succeeded" && paymentIntentAmount && (
-            <div
-              className={css`
-                margin-left: 0.5rem;
-                font-size: 1rem;
-                margin-top: 0.35rem;
-                display: flex;
-                align-items: center;
-                svg {
-                  width: 40px;
-                  margin-top: -0.5rem;
-                }
-              `}
-            >
-              <Confetti />
-              <span>
-                Backing this project for{" "}
-                {moneyDisplay({
-                  amount: paymentIntentAmount / 100,
-                  currency: trackGroup?.currency,
-                })}
-              </span>
-            </div>
+            <BackingThisProject
+              amount={paymentIntentAmount}
+              currency={trackGroup?.currency}
+            />
           )}
           {!paymentStatus && (
             <PurchaseOrDownloadAlbum trackGroup={trackGroup} />

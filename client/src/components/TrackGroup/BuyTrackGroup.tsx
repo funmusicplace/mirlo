@@ -119,8 +119,6 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
     methods.setValue("chosenPrice", newPrice.toString());
   };
 
-  console.log("stripe", stripeAccountStatus);
-
   if (clientSecret && stripeAccountStatus?.stripeAccountId) {
     return (
       <EmbeddedStripeForm

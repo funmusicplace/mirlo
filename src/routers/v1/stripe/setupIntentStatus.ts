@@ -6,6 +6,7 @@ import prisma from "@mirlo/prisma";
 import stripe from "../../../utils/stripe";
 import { findOrCreateUserBasedOnEmail } from "../../../utils/user";
 import { Stripe } from "stripe";
+import { createOrUpdatePledge } from "../../../utils/trackGroup";
 
 export default function () {
   const operations = {
@@ -50,30 +51,12 @@ export default function () {
             intent.metadata?.trackGroupId &&
             intent.metadata?.paymentIntentAmount
           ) {
-            // Handle successful setup intent
-            await prisma.trackGroupPledge.upsert({
-              where: {
-                userId_trackGroupId: {
-                  userId,
-                  trackGroupId: Number(intent.metadata?.trackGroupId),
-                },
-              },
-              create: {
-                user: {
-                  connect: {
-                    id: userId,
-                  },
-                },
-                trackGroup: {
-                  connect: {
-                    id: Number(intent.metadata?.trackGroupId),
-                  },
-                },
-                message: intent.metadata?.message,
-                amount: Number(intent.metadata?.paymentIntentAmount),
-                stripeSetupIntentId: intent.id,
-              },
-              update: {},
+            await createOrUpdatePledge({
+              userId,
+              trackGroupId: Number(intent.metadata?.trackGroupId),
+              message: intent.metadata?.message,
+              amount: Number(intent.metadata?.paymentIntentAmount),
+              stripeSetupIntentId: intent.id,
             });
           }
 
