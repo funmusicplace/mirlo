@@ -5,7 +5,11 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import * as api from "./fetch/fetchWrapper";
-import { QUERY_KEY_TRACK_GROUPS, queryKeyIncludes } from "./queryKeys";
+import {
+  QUERY_KEY_TRACK_GROUPS,
+  QUERY_KEY_SALES,
+  queryKeyIncludes,
+} from "./queryKeys";
 
 export type TrackGroupQueryOptions = {
   skip?: number;
@@ -160,5 +164,62 @@ export function useDeleteTrackGroupMutation() {
         predicate: (query) => queryKeyIncludes(query, QUERY_KEY_TRACK_GROUPS),
       });
     },
+  });
+}
+
+const fetchTrackGroupSupporters: QueryFunction<
+  {
+    results: {
+      name: string;
+      amount: number;
+      message?: string;
+      datePurchased: string;
+    }[];
+    total: number;
+    totalAmount: number;
+    totalSupporters: number;
+  },
+  [
+    "fetchTrackGroupSupporters",
+    trackGroupId: number,
+    opts?: {
+      take?: number;
+      skip?: number;
+      trackGroupId?: number;
+    },
+    ...any,
+  ]
+> = ({ queryKey: [_, trackGroupId, opts], signal }) => {
+  const params = new URLSearchParams();
+
+  if (opts?.take) {
+    params.append("take", String(opts.take));
+  }
+  if (opts?.skip) {
+    params.append("skip", String(opts.skip));
+  }
+  return api.get(
+    `v1/trackGroups/${trackGroupId}/supporters/?${params.toString()}`,
+    {
+      signal,
+    }
+  );
+};
+
+export function queryTrackGroupSupporters(
+  trackGroupId: number,
+  opts?: {
+    take?: number;
+    skip?: number;
+  }
+) {
+  return queryOptions({
+    queryKey: [
+      "fetchTrackGroupSupporters",
+      trackGroupId,
+      opts,
+      QUERY_KEY_SALES,
+    ],
+    queryFn: fetchTrackGroupSupporters,
   });
 }

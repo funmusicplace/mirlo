@@ -103,6 +103,7 @@ interface TrackGroup {
   merch?: Merch[];
   isDraft?: boolean;
   paymentToUserId?: number;
+  isAllOrNothing?: boolean;
   paymentToUser?: {
     email: string;
     name?: string;
@@ -345,6 +346,7 @@ interface UserArtistTip {
 type AccountStatus = {
   chargesEnabled: boolean;
   detailsSubmitted: boolean;
+  stripeAccountId: string;
 };
 
 interface License {

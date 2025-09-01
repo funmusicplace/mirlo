@@ -3301,7 +3301,7 @@ __metadata:
     "@storybook/blocks": "npm:^8.1.1"
     "@storybook/react": "npm:^8.1.1"
     "@storybook/react-vite": "npm:^8.1.1"
-    "@stripe/react-stripe-js": "npm:^3.7.0"
+    "@stripe/react-stripe-js": "npm:^3.9.2"
     "@stripe/stripe-js": "npm:^7.3.1"
     "@tanstack/react-query": "npm:^5.28.14"
     "@tanstack/react-query-devtools": "npm:^5.28.14"
@@ -6451,16 +6451,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@stripe/react-stripe-js@npm:^3.7.0":
-  version: 3.7.0
-  resolution: "@stripe/react-stripe-js@npm:3.7.0"
+"@stripe/react-stripe-js@npm:^3.9.2":
+  version: 3.9.2
+  resolution: "@stripe/react-stripe-js@npm:3.9.2"
   dependencies:
     prop-types: "npm:^15.7.2"
   peerDependencies:
     "@stripe/stripe-js": ">=1.44.1 <8.0.0"
     react: ">=16.8.0 <20.0.0"
     react-dom: ">=16.8.0 <20.0.0"
-  checksum: 10/a91320515d99762e9578198456767088e01dee17a7bb20bd36b95d424dd924fd0de6f91ac0242f9d415886a8c2ca3b53309f2b312c98e073eea1e6270e8ba3ab
+  checksum: 10/90c1ffa2ad1ba00f49ce2d2ffaed8c7e5deff90e8c01aa5c412102ef61ecb4fe41c9ae53f0aca5ea7d7a210cca07cd2d8aee418166119dc8d8f716125c374945
   languageName: node
   linkType: hard
 

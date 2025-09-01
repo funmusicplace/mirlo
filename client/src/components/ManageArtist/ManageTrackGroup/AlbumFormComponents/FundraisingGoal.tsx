@@ -8,13 +8,16 @@ import { FormSection } from "./AlbumFormContent";
 import { css } from "@emotion/css";
 import { useAuthContext } from "state/AuthContext";
 
-const FundraisingGoal: React.FC = () => {
+const FundraisingGoal: React.FC<{ trackGroup: TrackGroup }> = ({
+  trackGroup,
+}) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const {
     formState: { errors },
   } = useFormContext();
   const { artistId, trackGroupId } = useParams();
   const { user } = useAuthContext();
+
   return (
     <FormSection>
       <h2>{t("fundraisingGoal")}</h2>
@@ -24,6 +27,7 @@ const FundraisingGoal: React.FC = () => {
           width: 100%;
           display: grid;
           grid-template-columns: repeat(2, 1fr);
+          gap: 0.5rem;
         `}
       >
         {/* <FormComponent>
@@ -49,6 +53,15 @@ const FundraisingGoal: React.FC = () => {
           />
         </FormComponent>
       </div>
+      <FormComponent>
+        <label>{t("isAllOrNothing")}</label>
+        <SavingInput
+          formKey="isAllOrNothing"
+          url={`manage/trackGroups/${trackGroupId}`}
+          extraData={{ artistId: Number(artistId) }}
+          type="checkbox"
+        />
+      </FormComponent>
     </FormSection>
   );
 };

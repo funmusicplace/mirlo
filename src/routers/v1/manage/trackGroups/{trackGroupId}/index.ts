@@ -103,6 +103,7 @@ export default function () {
         "paymentToUserId",
         "fundraisingEndDate",
         "fundraisingGoal",
+        "isAllOrNothing",
       ]);
 
       await prisma.trackGroup.updateMany({

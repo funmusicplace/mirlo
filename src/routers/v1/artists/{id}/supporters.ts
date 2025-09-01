@@ -139,7 +139,6 @@ export const findSales = async ({
   let trackPurchases: Awaited<ReturnType<typeof queryTracks>> = [];
   let trackGroupPurchases: Awaited<ReturnType<typeof queryTrackGroups>> = [];
   let merchPurchases: Awaited<ReturnType<typeof queryMerch>> = [];
-
   if (!filters) {
     supporters = await querySupporters(artistId, sinceDate);
 
@@ -290,10 +289,10 @@ export default function () {
   }
 
   GET.apiDoc = {
-    summary: "Returns followers, primarily used for activityPub",
+    summary: "Returns supporters of this artist",
     responses: {
       200: {
-        description: "A list of published posts",
+        description: "A list of supporters of this artist",
         schema: {
           type: "array",
           items: {

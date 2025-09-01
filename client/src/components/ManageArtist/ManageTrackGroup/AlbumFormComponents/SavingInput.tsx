@@ -145,7 +145,7 @@ const SavingInput: React.FC<{
           onInput={saveOnInput}
         />
       )}
-      {isSaving && <LoadingSpinner fill={colors?.foreground} />}
+      {isSaving && <LoadingSpinner fill={colors?.foreground} size="small" />}
       {saveSuccess && <FaCheck />}
     </div>
   );

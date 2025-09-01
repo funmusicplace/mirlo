@@ -19,7 +19,7 @@ import countryCodesCurrencies from "components/ManageArtist/Merch/country-codes-
 import { flatten } from "lodash";
 import Box from "components/common/Box";
 import TextArea from "components/common/TextArea";
-import EmbeddedStripeForm from "components/common/EmbeddedStripe";
+import EmbeddedStripeForm from "components/common/stripe/EmbeddedStripe";
 
 type FormData = {
   quantity: number;
@@ -48,7 +48,7 @@ const BuyMerchItem: React.FC<{
   const [isLoadingStripe, setIsLoadingStripe] = React.useState(false);
 
   const { data: stripeAccountStatus } = useQuery(
-    queryUserStripeStatus(artist?.userId ?? 0)
+    queryUserStripeStatus(artist.userId)
   );
 
   const minPrice = (merch?.minPrice ?? 0) / 100;
@@ -166,8 +166,13 @@ const BuyMerchItem: React.FC<{
     ? t("everywhere")
     : t("everywhereElse");
 
-  if (clientSecret) {
-    return <EmbeddedStripeForm clientSecret={clientSecret} />;
+  if (clientSecret && stripeAccountStatus?.stripeAccountId) {
+    return (
+      <EmbeddedStripeForm
+        clientSecret={clientSecret}
+        stripeAccountId={stripeAccountStatus.stripeAccountId}
+      />
+    );
   }
 
   const currentDestination = merch.shippingDestinations.find(

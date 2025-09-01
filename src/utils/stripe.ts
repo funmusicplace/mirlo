@@ -202,6 +202,73 @@ export const createMerchStripeProduct = async (
   return productKey;
 };
 
+export const findOrCreateStripeCustomer = async (
+  stripeAccountId: string,
+  userId?: number,
+  email?: string
+) => {
+  let user;
+  let searchEmail = email;
+  if (userId) {
+    user = await prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+    searchEmail = user?.email ?? email;
+  }
+
+  if (user?.stripeCustomerId) {
+    const existingCustomer = await stripe.customers.retrieve(
+      user.stripeCustomerId,
+      {
+        stripeAccount: stripeAccountId,
+      }
+    );
+    if (existingCustomer) {
+      return existingCustomer;
+    }
+  }
+  const existingCustomer = await stripe.customers.list(
+    {
+      email: searchEmail,
+    },
+    {
+      stripeAccount: stripeAccountId,
+    }
+  );
+  if (user && existingCustomer.data.length > 0) {
+    await prisma.user.update({
+      where: {
+        email: searchEmail,
+      },
+      data: {
+        stripeCustomerId: existingCustomer.data[0].id,
+      },
+    });
+    return existingCustomer.data[0];
+  }
+  const customer = await stripe.customers.create(
+    {
+      email: searchEmail,
+    },
+    {
+      stripeAccount: stripeAccountId,
+    }
+  );
+  if (user) {
+    await prisma.user.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        stripeCustomerId: customer.id,
+      },
+    });
+  }
+  return customer;
+};
+
 export const createTrackGroupStripeProduct = async (
   trackGroup: Prisma.TrackGroupGetPayload<{
     include: { artist: true; cover: true };
@@ -533,10 +600,36 @@ export const createStripeCheckoutSessionForPurchase = async ({
 
   const currency = trackGroup.currency?.toLowerCase() ?? "usd";
 
+  const customer = await findOrCreateStripeCustomer(
+    stripeAccountId,
+    loggedInUser?.id,
+    email
+  );
+
+  if (trackGroup.isAllOrNothing) {
+    // For all or nothing track groups, we need to create a setupIntent for the payment
+    // which we will charge when the project hits its goal.
+    const setupIntent = await stripe.setupIntents.create(
+      {
+        customer: customer.id,
+        automatic_payment_methods: {
+          enabled: true,
+        },
+        metadata: {
+          trackGroupId: trackGroup.id,
+          paymentIntentAmount: priceNumber,
+          stripeAccountId,
+        },
+      },
+      { stripeAccount: stripeAccountId }
+    );
+    return setupIntent;
+  }
   const session = await stripe.checkout.sessions.create(
     {
       billing_address_collection: "auto",
       customer_email: loggedInUser?.email || email,
+      customer: customer.id,
       payment_intent_data: {
         application_fee_amount: await calculateAppFee(
           priceNumber,
@@ -998,6 +1091,64 @@ export const handleCheckoutSession = async (
     }
   } catch (e) {
     console.error(e);
+  }
+};
+
+export const handleSetupIntentSucceeded = async (
+  setupIntent: Stripe.SetupIntent
+) => {
+  logger.info(`setup_intent.succeeded: ${setupIntent.id}`);
+  const intent = await stripe.setupIntents.retrieve(setupIntent.id, {
+    stripeAccount: setupIntent.metadata?.stripeAccountId,
+  });
+
+  const trackGroupId = setupIntent.metadata?.trackGroupId;
+
+  const { userId, userEmail } = setupIntent.metadata as unknown as {
+    userId: string;
+    userEmail: string;
+  };
+
+  let { userId: actualUserId, newUser } = await findOrCreateUserBasedOnEmail(
+    userEmail,
+    userId
+  );
+
+  if (trackGroupId) {
+    const trackGroup = await prisma.trackGroup.findUnique({
+      where: {
+        id: Number(trackGroupId),
+      },
+    });
+
+    if (trackGroup) {
+      await prisma.trackGroupPledge.upsert({
+        where: {
+          userId_trackGroupId: {
+            userId: Number(userId),
+            trackGroupId: trackGroup.id,
+          },
+        },
+        create: {
+          amount: intent.metadata?.paymentIntentAmount
+            ? Number(intent.metadata?.paymentIntentAmount)
+            : 0,
+          user: {
+            connect: {
+              id: Number(actualUserId),
+            },
+          },
+          message: intent.metadata?.message,
+          stripeSetupIntentId: intent.id,
+          trackGroup: {
+            connect: {
+              id: trackGroup.id,
+            },
+          },
+        },
+        update: {},
+      });
+    }
   }
 };
 

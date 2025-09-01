@@ -24,7 +24,6 @@ export default function () {
       });
       if (user) {
         let accountId = user.stripeAccountId;
-
         if (!accountId) {
           res.status(200).json({
             result: {
@@ -42,6 +41,7 @@ export default function () {
           res.status(200).json({
             result: {
               chargesEnabled: account?.charges_enabled ?? false,
+              stripeAccountId: accountId,
               ...(loggedInUser
                 ? { detailsSubmitted: account?.details_submitted ?? false }
                 : {}),

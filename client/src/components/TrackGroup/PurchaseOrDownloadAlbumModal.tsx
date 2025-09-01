@@ -52,14 +52,16 @@ const PurchaseOrDownloadAlbum: React.FC<{
       ? "nameYourPriceLabel"
       : "buy";
 
-  const preOrderOrBuyText = isBeforeReleaseDate
-    ? "preOrder"
-    : payOrNameYourPrice;
+  const preOrderOrBuyText = trackGroup.isAllOrNothing
+    ? "backThisProject"
+    : isBeforeReleaseDate
+      ? "preOrder"
+      : payOrNameYourPrice;
   const purchaseTitle = isBeforeReleaseDate
     ? "preOrderingTrackGroup"
     : "buyingTrackGroup";
 
-  if ((isBeforeReleaseDate && !userId) || !trackGroup.isGettable) {
+  if (!trackGroup.isGettable) {
     return null;
   }
 
