@@ -85,7 +85,7 @@ const ProfileLabel: React.FC = () => {
               {t("viewFulfillmentPage")}
             </ButtonLink>
             <ButtonLink
-              to={`/label/${user.urlSlug}`}
+              to={`/${user.urlSlug}`}
               endIcon={<FaChevronRight />}
               variant="link"
               size="compact"

@@ -45,6 +45,28 @@ export default function () {
           return next();
         }
 
+        if (artist.isLabelProfile) {
+          const user = await prisma.user.findUnique({
+            where: {
+              id: artist.userId,
+              isLabelAccount: true,
+            },
+            select: {
+              artistLabels: true,
+            },
+          });
+          if (user) {
+            const labelArtists = await prisma.artist.findMany({
+              where: {
+                id: {
+                  in: user.artistLabels.map((al) => al.artistId),
+                },
+                enabled: true,
+              },
+            });
+          }
+        }
+
         if (headersAreForActivityPub(req.headers, "accept")) {
           if (req.headers.accept) {
             res.set("content-type", "application/activity+json");

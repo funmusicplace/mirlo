@@ -6,17 +6,22 @@ import { queryLabelBySlug } from "queries";
 
 import TrackgroupGrid from "components/common/TrackgroupGrid";
 import ArtistSquare from "components/Artist/ArtistSquare";
+import LoadingBlocks from "components/Artist/LoadingBlocks";
 
 function Label() {
   const { t } = useTranslation("translation", { keyPrefix: "label" });
 
-  const { labelSlug } = useParams();
+  const { artistId } = useParams();
 
-  if (!labelSlug) {
+  if (!artistId) {
     return <div>{t("labelNotFound")}</div>;
   }
 
-  const { data: label } = useQuery(queryLabelBySlug(labelSlug));
+  const { data: label, isFetching } = useQuery(queryLabelBySlug(artistId));
+
+  if (isFetching) {
+    return <LoadingBlocks />;
+  }
 
   if (!label) {
     return <div>{t("labelNotFound")}</div>;

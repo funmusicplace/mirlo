@@ -104,28 +104,30 @@ const Menu: React.FC = (props) => {
               {isLoading && (
                 <LoadingBlocks rows={1} height="2rem" margin=".25rem" />
               )}
-              {artists?.map((a) => {
-                return (
-                  <li key={a.id}>
-                    <Button
-                      onClick={() => {
-                        setIsMenuOpen(false);
-                        navigate(getArtistManageUrl(a.id));
-                      }}
-                    >
-                      <div
-                        className={css`
-                          font-weight: bold;
-                          opacity: 0.7;
-                          font-size: 0.9rem;
-                        `}
+              {artists
+                ?.filter((a) => !a.isLabelProfile)
+                .map((a) => {
+                  return (
+                    <li key={a.id}>
+                      <Button
+                        onClick={() => {
+                          setIsMenuOpen(false);
+                          navigate(getArtistManageUrl(a.id));
+                        }}
                       >
-                        {a.name}
-                      </div>
-                    </Button>
-                  </li>
-                );
-              })}
+                        <div
+                          className={css`
+                            font-weight: bold;
+                            opacity: 0.7;
+                            font-size: 0.9rem;
+                          `}
+                        >
+                          {a.name}
+                        </div>
+                      </Button>
+                    </li>
+                  );
+                })}
             </ul>
           </li>
           {user?.isAdmin && (

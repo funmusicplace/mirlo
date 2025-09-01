@@ -264,6 +264,7 @@ model Artist {
   tourDates                          ArtistTourDate[]
   paymentToUserId                    Int? // User to which the payments for this artist go
   paymentToUser                      User?                                @relation(fields: [paymentToUserId], references: [id], name: "paymentToUser")
+  isLabelProfile                     Boolean                              @default(false)
 }
 
 model ArtistAvatar {
