@@ -7,6 +7,7 @@ import stripe from "../../../utils/stripe";
 import { findOrCreateUserBasedOnEmail } from "../../../utils/user";
 import { Stripe } from "stripe";
 import { createOrUpdatePledge } from "../../../utils/trackGroup";
+import { subscribeUserToArtist } from "../../../utils/artist";
 
 export default function () {
   const operations = {
@@ -58,6 +59,22 @@ export default function () {
               amount: Number(intent.metadata?.paymentIntentAmount),
               stripeSetupIntentId: intent.id,
             });
+            const artist = await prisma.artist.findFirst({
+              where: {
+                trackGroups: {
+                  some: {
+                    id: Number(intent.metadata.trackGroupId),
+                  },
+                },
+              },
+              include: { user: true, subscriptionTiers: true },
+            });
+            const user = await prisma.user.findUnique({
+              where: { id: userId },
+            });
+            if (artist && user) {
+              await subscribeUserToArtist(artist, user);
+            }
           }
 
           return res

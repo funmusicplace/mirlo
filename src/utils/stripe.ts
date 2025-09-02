@@ -22,7 +22,7 @@ import {
 } from "./handleFinishedTransactions";
 import countryCodesCurrencies from "./country-codes-currencies";
 import { manageSubscriptionReceipt } from "./subscription";
-import { getPlatformFeeForArtist } from "./artist";
+import { getPlatformFeeForArtist, subscribeUserToArtist } from "./artist";
 import { createOrUpdatePledge } from "./trackGroup";
 
 const { STRIPE_KEY, API_DOMAIN } = process.env;
@@ -606,14 +606,12 @@ export const createStripeCheckoutSessionForPurchase = async ({
 
   const currency = trackGroup.currency?.toLowerCase() ?? "usd";
 
-  console.log("attempting to create customer");
   const customer = await findOrCreateStripeCustomer(
     stripeAccountId,
     loggedInUser?.id,
     email
   );
 
-  console.log("is tg all or noghtin", trackGroup.isAllOrNothing);
   if (trackGroup.isAllOrNothing) {
     // For all or nothing track groups, we need to create a setupIntent for the payment
     // which we will charge when the project hits its goal.
@@ -633,12 +631,10 @@ export const createStripeCheckoutSessionForPurchase = async ({
     );
     return setupIntent;
   }
-  console.log("not intent, continue");
   const session = await stripe.checkout.sessions.create(
     {
       billing_address_collection: "auto",
       customer_email: loggedInUser?.email || email,
-      customer: customer?.id,
       payment_intent_data: {
         application_fee_amount: await calculateAppFee(
           priceNumber,
@@ -1118,15 +1114,24 @@ export const handleSetupIntentSucceeded = async (
     userEmail: string;
   };
 
-  let { userId: actualUserId, newUser } = await findOrCreateUserBasedOnEmail(
-    userEmail,
-    userId
-  );
+  let {
+    userId: actualUserId,
+    user,
+    newUser,
+  } = await findOrCreateUserBasedOnEmail(userEmail, userId);
 
   if (trackGroupId) {
     const trackGroup = await prisma.trackGroup.findUnique({
       where: {
         id: Number(trackGroupId),
+      },
+      include: {
+        artist: {
+          include: {
+            user: true,
+            subscriptionTiers: true,
+          },
+        },
       },
     });
 
@@ -1138,6 +1143,7 @@ export const handleSetupIntentSucceeded = async (
         amount: Number(intent.metadata?.paymentIntentAmount),
         stripeSetupIntentId: intent.id,
       });
+      await subscribeUserToArtist(trackGroup.artist, user);
     }
   }
 };

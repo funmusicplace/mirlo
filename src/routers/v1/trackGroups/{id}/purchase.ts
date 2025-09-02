@@ -115,6 +115,7 @@ export default function () {
         });
       }
     } catch (e) {
+      console.error(e);
       next(e);
     }
   }
