@@ -82,6 +82,8 @@ function ProfileForm() {
     return null;
   }
 
+  const userLabel = user.artists.find((a) => a.isLabelProfile);
+
   return (
     <FormProvider {...methods}>
       <form
@@ -144,12 +146,9 @@ function ProfileForm() {
               }
             `}
           >
-            <FormComponent>
-              <SlugInput type="user" currentName={name} />
-            </FormComponent>
-            {user.urlSlug && (
+            {userLabel?.urlSlug && (
               <ButtonLink
-                to={`/${user.urlSlug}`}
+                to={`/${userLabel.urlSlug}`}
                 endIcon={<FaChevronRight />}
                 variant="link"
               >
