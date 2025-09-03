@@ -16,7 +16,8 @@ import BackingThisProject from "./BackingThisProject";
 const PurchaseOrDownloadAlbum: React.FC<{
   trackGroup: TrackGroup;
   track?: Track;
-}> = ({ trackGroup, track }) => {
+  collapse?: boolean;
+}> = ({ trackGroup, track, collapse }) => {
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
   const { user } = useAuthContext();
   const [isPurchasingAlbum, setIsPurchasingAlbum] = React.useState(false);
@@ -65,6 +66,7 @@ const PurchaseOrDownloadAlbum: React.FC<{
       <BackingThisProject
         amount={hasPledge.amount}
         currency={trackGroup?.currency}
+        collapse={collapse}
       />
     );
   }

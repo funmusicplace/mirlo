@@ -31,6 +31,7 @@ import { DefaultArgs } from "@prisma/client/runtime/library";
 import { doesTrackBelongToUser, doesTrackGroupBelongToUser } from "./ownership";
 import { AppError } from "./error";
 import { processSingleMerch } from "./merch";
+import { sendBasecampAMessage } from "./basecamp";
 
 export const whereForPublishedTrackGroups = (): Prisma.TrackGroupWhereInput => {
   return {
@@ -774,4 +775,12 @@ export const createOrUpdatePledge = async ({
       stripeSetupIntentId: stripeSetupIntentId,
     },
   });
+
+  await sendBasecampAMessage(
+    `New pledge amount: trackGroupId: <i>${trackGroupId}</i> pledged ${amount / 100} <b>${userId}</b>`
+  );
+};
+
+const chargePledges = (trackGroupId: number) => {
+  // Logic to charge pledges for the given trackGroupId
 };

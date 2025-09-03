@@ -1148,6 +1148,60 @@ export const handleSetupIntentSucceeded = async (
   }
 };
 
+export const chargePledgePayments = async (
+  trackGroupId: number,
+  user: User
+) => {
+  try {
+    logger.info(
+      `Charging pledge payments for track group ${trackGroupId} and user ${user.id}`
+    );
+    let customerId = user.stripeCustomerId;
+    if (user.stripeCustomerId === null) {
+      const customersForEmail = await stripe.customers.list({
+        email: user.email,
+      });
+      customerId = customersForEmail.data[0]?.id;
+    }
+    if (customerId) {
+      const paymentMethods = await stripe.paymentMethods.list({
+        customer: customerId,
+      });
+      if (paymentMethods.data[0]?.id) {
+        const paymentIntent = await stripe.paymentIntents.create({
+          amount: 1099,
+          currency: "usd",
+          // In the latest version of the API, specifying the `automatic_payment_methods` parameter is optional because Stripe enables its functionality by default.
+          automatic_payment_methods: { enabled: true },
+          customer: customerId,
+          payment_method: paymentMethods.data[0]?.id,
+          return_url: "https://example.com/order/123/complete",
+          off_session: true,
+          confirm: true,
+        });
+      }
+    }
+  } catch (err) {
+    if (err instanceof Stripe.errors.StripeError) {
+      console.log("Error code is: ", err.code);
+      if (
+        err.raw &&
+        typeof err.raw === "object" &&
+        "payment_intent" in err.raw &&
+        err.raw.payment_intent &&
+        typeof err.raw.payment_intent === "object" &&
+        "id" in err.raw.payment_intent &&
+        typeof err.raw.payment_intent.id === "string"
+      ) {
+        const paymentIntentRetrieved = await stripe.paymentIntents.retrieve(
+          err.raw.payment_intent.id
+        );
+        console.log("PI retrieved: ", paymentIntentRetrieved.id);
+      }
+    }
+  }
+};
+
 export const handleInvoicePaid = async (invoice: Stripe.Invoice) => {
   const subscription = invoice.subscription;
   logger.info(`invoice.paid: ${invoice.id} for ${subscription}`);

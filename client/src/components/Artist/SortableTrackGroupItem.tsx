@@ -4,10 +4,10 @@ import { CSS } from "@dnd-kit/utilities";
 
 import ArtistTrackGroup from "./ArtistTrackGroup";
 import { ArtistButton } from "./ArtistButtons";
-import { FaCrosshairs } from "react-icons/fa";
 import { css } from "@emotion/css";
 import { useAuthContext } from "state/AuthContext";
 import useArtistQuery from "utils/useArtistQuery";
+import { AiOutlineDrag } from "react-icons/ai";
 
 const SortableTrackGroupItem: React.FC<{
   id: number;
@@ -37,6 +37,12 @@ const SortableTrackGroupItem: React.FC<{
       {...attributes}
       className={css`
         position: relative;
+        button {
+          opacity: 0;
+        }
+        &:hover button {
+          opacity: 1;
+        }
       `}
     >
       {user?.id === artist?.userId && (
@@ -49,7 +55,7 @@ const SortableTrackGroupItem: React.FC<{
           `}
           {...listeners}
           ref={setActivatorNodeRef}
-          startIcon={<FaCrosshairs />}
+          startIcon={<AiOutlineDrag />}
         />
       )}
       <ArtistTrackGroup trackGroup={props.trackGroup} as="li" />

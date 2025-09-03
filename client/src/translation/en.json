@@ -161,8 +161,10 @@
     "removeFromFavorites": "Remove from favorites"
   },
   "trackGroupCard": {
+    "backingThisProjectFor": "Backing this project for {{amount}}",
     "messageToArtist": "This will be shown publicly on the artist's page.",
     "leaveAComment": "Show the artist some love",
+    "youWillBeChargedWhenItsFullyFunded": "You are backing this project. You will be charged when it's fully funded.",
     "consentToStoreData": "I understand that my payment method will be stored to process when the project reaches its fundraising goal.",
     "backThisProject": "Back this project",
     "thatsGenerous": "{{ chosenPrice }}? That's generous!",

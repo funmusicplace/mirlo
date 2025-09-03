@@ -31,10 +31,10 @@ interface FormData {
   consentToStoreData: boolean;
 }
 
-const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
-  trackGroup,
-  track,
-}) => {
+const BuyTrackGroup: React.FC<{
+  trackGroup: TrackGroup;
+  track?: Track;
+}> = ({ trackGroup, track }) => {
   const snackbar = useSnackbar();
   const [stripeLoading, setStripeLoading] = React.useState(false);
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
