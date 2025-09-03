@@ -10,6 +10,7 @@ interface LoggedInUser {
   name: string;
   id: number;
   urlSlug?: string;
+  artists: Artist[];
   artistUserSubscriptions?: ArtistUserSubscription[];
   userTrackGroupPurchases?: { trackGroupId: number }[];
   userTrackPurchases?: { trackId: number }[];

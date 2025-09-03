@@ -1,15 +1,7 @@
-doctype html
-html
-  head
-    block head
-      meta(charset="utf-8")
-      meta(name="viewport", content="width=device-width")
-      meta(http-equiv="X-UA-Compatible", content="IE=edge")
-      meta(name="x-apple-disable-message-reformatting")
-      style 
-        include ../style.css
-  body.sans-serif
-    p Hi {userSubscriptions[0].user.name}
+extends ../layout.pug
+
+block content
+    p Hi #{userSubscriptions[0].user.name}
     p From all the folks at and using Mirlo, thank you! 
     p Your support means a lot to us.
     p You're supporting the following artists: 
@@ -17,7 +9,7 @@ html
       each val in userSubscriptions
         tr
           td #{val.artistSubscriptionTier.artist.name}
-          td #{val.amount}
+          td #{val.currency} #{val.amount / 100}
         
     p We love to see it.
     p Enjoy!
