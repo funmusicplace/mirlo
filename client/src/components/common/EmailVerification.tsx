@@ -7,7 +7,6 @@ import { useSnackbar } from "state/SnackbarContext";
 import { Input, InputEl } from "components/common/Input";
 import FormComponent from "components/common/FormComponent";
 import { useAuthContext } from "state/AuthContext";
-import { ArtistButton } from "components/Artist/ArtistButtons";
 import Box from "components/common/Box";
 
 const EmailVerification: React.FC<{
@@ -26,7 +25,7 @@ const EmailVerification: React.FC<{
   const verifyEmail = React.useCallback(async () => {
     try {
       setIsloading(true);
-      const response = await api.post("verify-email", { email });
+      await api.post("verify-email", { email });
       snackbar(t("emailVerificationSent"), { type: "success" });
       setWaitingForVerification(true);
     } catch (e) {
@@ -78,32 +77,31 @@ const EmailVerification: React.FC<{
               value={code}
               onChange={(e) => setCode(e.target.value)}
             />
-          </FormComponent>
-          <ArtistButton
-            type="button"
-            isLoading={isLoading}
-            onClick={verifyCode}
-          >
+          </FormComponent>{" "}
+          <Button type="button" isLoading={isLoading} onClick={verifyCode}>
             {t("verifyEmailCode")}
-          </ArtistButton>
+          </Button>
         </Box>
       ) : (
         <>
           <FormComponent>
             <label>{t("email")}</label>
-            <Input
-              name="email"
-              type="email"
-              value={email}
-              required
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                setEmail(e.target.value);
-              }}
-            />
+            <div className="inline-button">
+              <Input
+                name="email"
+                type="email"
+                value={email}
+                required
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  setEmail(e.target.value);
+                }}
+              />
+              <Button type="button" onClick={verifyEmail}>
+                {t("verifyEmail")}
+              </Button>
+            </div>
+            <small>{t("emailVerificationInfo")}</small>
           </FormComponent>
-          <ArtistButton type="button" onClick={verifyEmail} size="big" rounded>
-            {t("verifyEmail")}
-          </ArtistButton>
         </>
       )}
     </>

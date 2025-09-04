@@ -283,7 +283,7 @@ const ClickToPlay: React.FC<
           )}
           <TrackgroupButtons>
             <div>
-              <PurchaseOrDownloadAlbum trackGroup={trackGroup} />
+              <PurchaseOrDownloadAlbum trackGroup={trackGroup} collapse />
             </div>
             {user && showWishlist && (
               <div>

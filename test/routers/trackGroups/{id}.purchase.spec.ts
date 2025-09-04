@@ -146,6 +146,26 @@ describe("trackGroups/{id}/purchase", () => {
     });
 
     describe("endpoint as function", () => {
+      beforeEach(() => {
+        sinon
+          .stub(stripeUtils.stripe.customers, "create")
+          // @ts-ignore
+          .callsFake(async (_params) => {
+            // return whatever
+          });
+        sinon
+          .stub(stripeUtils.stripe.customers, "list")
+          // @ts-ignore
+          .callsFake(async (_params) => {
+            // return whatever
+          });
+        sinon
+          .stub(stripeUtils.stripe.customers, "retrieve")
+          // @ts-ignore
+          .callsFake(async (_params) => {
+            // return whatever
+          });
+      });
       it("should correctly send data to stripe for a checkout session", async () => {
         const stubCreate = sinon.stub(
           stripeUtils.stripe.checkout.sessions,
@@ -157,6 +177,7 @@ describe("trackGroups/{id}/purchase", () => {
           .callsFake(async (_params) => {
             // return whatever
           });
+
         const { user } = await createUser({
           email: "artist@artist.com",
           stripeAccountId: "aRandomWord",

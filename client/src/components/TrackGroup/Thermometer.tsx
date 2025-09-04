@@ -1,10 +1,15 @@
 import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
 import { moneyDisplay } from "components/common/Money";
-import { queryArtistSupporters } from "queries";
+import {
+  queryArtistSupporters,
+  queryTrackGroupSupporters,
+  queryUserStripeStatus,
+} from "queries";
 
-import PurchaseOrDownloadAlbum from "./PurchaseOrDownloadAlbumModal";
 import { Trans, useTranslation } from "react-i18next";
+
+import BackOrIsBacking from "./BackOrIsBacking";
 
 function Thermometer({
   current,
@@ -28,12 +33,7 @@ function Thermometer({
       totalAmount: 0,
       totalSupporters: 0,
     },
-  } = useQuery(
-    queryArtistSupporters({
-      artistId: artist.id,
-      trackGroupIds: [trackGroup.id],
-    })
-  );
+  } = useQuery(queryTrackGroupSupporters(trackGroup.id));
 
   const percent = Math.min(totalAmount / goal, 100);
   return (
@@ -95,7 +95,9 @@ function Thermometer({
           className={css`
             display: flex;
             align-items: center;
+            justify-content: flex-end;
             gap: 0.76rem;
+            width: 50%;
           `}
         >
           <div
@@ -110,7 +112,7 @@ function Thermometer({
               i18nKey="ofGoal"
               values={{
                 goal: moneyDisplay({
-                  amount: goal / 100,
+                  amount: goal,
                   currency: trackGroup?.currency,
                 }),
               }}
@@ -119,7 +121,7 @@ function Thermometer({
               }}
             />
           </div>
-          <PurchaseOrDownloadAlbum trackGroup={trackGroup} />
+          <BackOrIsBacking artist={artist} trackGroup={trackGroup} />
         </div>
       </div>
       <div

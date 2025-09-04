@@ -3,6 +3,7 @@ import {
   handleAccountUpdate,
   handleCheckoutSession,
   handleInvoicePaid,
+  handleSetupIntentSucceeded,
   verifyStripeSignature,
 } from "../../../../utils/stripe";
 import logger from "../../../../logger";
@@ -39,6 +40,16 @@ export default function () {
         logger.info(`stripe-connect: checkout status is ${session.status}.`);
 
         handleCheckoutSession(session);
+        break;
+      case "setup_intent.succeeded":
+        // To trigger this event type use
+        // `stripe trigger setup_intent.succeeded --add setup_intent:metadata.userId=3`
+        const setupIntent = event.data.object;
+        logger.info(
+          `stripe-connect: setup intent status is ${setupIntent.status}.`
+        );
+
+        handleSetupIntentSucceeded(setupIntent);
         break;
       case "invoice.paid":
         const invoice = event.data.object;

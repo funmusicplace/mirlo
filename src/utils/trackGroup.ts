@@ -31,6 +31,7 @@ import { DefaultArgs } from "@prisma/client/runtime/library";
 import { doesTrackBelongToUser, doesTrackGroupBelongToUser } from "./ownership";
 import { AppError } from "./error";
 import { processSingleMerch } from "./merch";
+import { sendBasecampAMessage } from "./basecamp";
 
 export const whereForPublishedTrackGroups = (): Prisma.TrackGroupWhereInput => {
   return {
@@ -731,4 +732,55 @@ export const processTrackGroupQueryOrder = (orderByString?: unknown) => {
 export default {
   cover: generateFullStaticImageUrl,
   single: processSingleTrackGroup,
+};
+
+export const createOrUpdatePledge = async ({
+  userId,
+  trackGroupId,
+  message,
+  amount,
+  stripeSetupIntentId,
+}: {
+  userId: number;
+  trackGroupId: number;
+  message?: string;
+  amount: number;
+  stripeSetupIntentId: string;
+}) => {
+  await prisma.trackGroupPledge.upsert({
+    where: {
+      userId_trackGroupId: {
+        userId,
+        trackGroupId: Number(trackGroupId),
+      },
+    },
+    create: {
+      user: {
+        connect: {
+          id: userId,
+        },
+      },
+      trackGroup: {
+        connect: {
+          id: Number(trackGroupId),
+        },
+      },
+      message: message,
+      amount: Number(amount),
+      stripeSetupIntentId: stripeSetupIntentId,
+    },
+    update: {
+      message: message,
+      amount: Number(amount),
+      stripeSetupIntentId: stripeSetupIntentId,
+    },
+  });
+
+  await sendBasecampAMessage(
+    `New pledge amount: trackGroupId: <i>${trackGroupId}</i> pledged ${amount / 100} <b>${userId}</b>`
+  );
+};
+
+const chargePledges = (trackGroupId: number) => {
+  // Logic to charge pledges for the given trackGroupId
 };

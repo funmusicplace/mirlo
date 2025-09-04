@@ -22,7 +22,8 @@ import {
 } from "./handleFinishedTransactions";
 import countryCodesCurrencies from "./country-codes-currencies";
 import { manageSubscriptionReceipt } from "./subscription";
-import { getPlatformFeeForArtist } from "./artist";
+import { getPlatformFeeForArtist, subscribeUserToArtist } from "./artist";
+import { createOrUpdatePledge } from "./trackGroup";
 
 const { STRIPE_KEY, API_DOMAIN } = process.env;
 
@@ -200,6 +201,78 @@ export const createMerchStripeProduct = async (
   }
 
   return productKey;
+};
+
+export const findOrCreateStripeCustomer = async (
+  stripeAccountId: string,
+  userId?: number,
+  email?: string
+) => {
+  let user;
+  let searchEmail = email;
+  if (userId) {
+    console.log("there is a userid");
+    user = await prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+    searchEmail = user?.email ?? email;
+  }
+
+  if (user?.stripeCustomerId) {
+    console.log("there is a stripeCustomerId");
+    const existingCustomer = await stripe.customers.retrieve(
+      user.stripeCustomerId,
+      {
+        stripeAccount: stripeAccountId,
+      }
+    );
+    if (existingCustomer) {
+      return existingCustomer;
+    }
+  }
+  const existingCustomer = await stripe.customers.list(
+    {
+      email: searchEmail,
+    },
+    {
+      stripeAccount: stripeAccountId,
+    }
+  );
+  console.log("existing customer");
+  if (user && existingCustomer.data.length > 0) {
+    console.log("update user");
+    await prisma.user.update({
+      where: {
+        email: searchEmail,
+      },
+      data: {
+        stripeCustomerId: existingCustomer.data[0].id,
+      },
+    });
+    return existingCustomer.data[0];
+  }
+  console.log("create customers");
+  const customer = await stripe.customers.create(
+    {
+      email: searchEmail,
+    },
+    {
+      stripeAccount: stripeAccountId,
+    }
+  );
+  if (user) {
+    await prisma.user.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        stripeCustomerId: customer.id,
+      },
+    });
+  }
+  return customer;
 };
 
 export const createTrackGroupStripeProduct = async (
@@ -533,6 +606,31 @@ export const createStripeCheckoutSessionForPurchase = async ({
 
   const currency = trackGroup.currency?.toLowerCase() ?? "usd";
 
+  const customer = await findOrCreateStripeCustomer(
+    stripeAccountId,
+    loggedInUser?.id,
+    email
+  );
+
+  if (trackGroup.isAllOrNothing) {
+    // For all or nothing track groups, we need to create a setupIntent for the payment
+    // which we will charge when the project hits its goal.
+    const setupIntent = await stripe.setupIntents.create(
+      {
+        customer: customer.id,
+        automatic_payment_methods: {
+          enabled: true,
+        },
+        metadata: {
+          trackGroupId: trackGroup.id,
+          paymentIntentAmount: priceNumber,
+          stripeAccountId,
+        },
+      },
+      { stripeAccount: stripeAccountId }
+    );
+    return setupIntent;
+  }
   const session = await stripe.checkout.sessions.create(
     {
       billing_address_collection: "auto",
@@ -998,6 +1096,109 @@ export const handleCheckoutSession = async (
     }
   } catch (e) {
     console.error(e);
+  }
+};
+
+export const handleSetupIntentSucceeded = async (
+  setupIntent: Stripe.SetupIntent
+) => {
+  logger.info(`setup_intent.succeeded: ${setupIntent.id}`);
+  const intent = await stripe.setupIntents.retrieve(setupIntent.id, {
+    stripeAccount: setupIntent.metadata?.stripeAccountId,
+  });
+
+  const trackGroupId = setupIntent.metadata?.trackGroupId;
+
+  const { userId, userEmail } = setupIntent.metadata as unknown as {
+    userId: string;
+    userEmail: string;
+  };
+
+  let {
+    userId: actualUserId,
+    user,
+    newUser,
+  } = await findOrCreateUserBasedOnEmail(userEmail, userId);
+
+  if (trackGroupId) {
+    const trackGroup = await prisma.trackGroup.findUnique({
+      where: {
+        id: Number(trackGroupId),
+      },
+      include: {
+        artist: {
+          include: {
+            user: true,
+            subscriptionTiers: true,
+          },
+        },
+      },
+    });
+
+    if (trackGroup) {
+      await createOrUpdatePledge({
+        userId: Number(actualUserId),
+        trackGroupId: trackGroup.id,
+        message: intent.metadata?.message,
+        amount: Number(intent.metadata?.paymentIntentAmount),
+        stripeSetupIntentId: intent.id,
+      });
+      await subscribeUserToArtist(trackGroup.artist, user);
+    }
+  }
+};
+
+export const chargePledgePayments = async (
+  trackGroupId: number,
+  user: User
+) => {
+  try {
+    logger.info(
+      `Charging pledge payments for track group ${trackGroupId} and user ${user.id}`
+    );
+    let customerId = user.stripeCustomerId;
+    if (user.stripeCustomerId === null) {
+      const customersForEmail = await stripe.customers.list({
+        email: user.email,
+      });
+      customerId = customersForEmail.data[0]?.id;
+    }
+    if (customerId) {
+      const paymentMethods = await stripe.paymentMethods.list({
+        customer: customerId,
+      });
+      if (paymentMethods.data[0]?.id) {
+        const paymentIntent = await stripe.paymentIntents.create({
+          amount: 1099,
+          currency: "usd",
+          // In the latest version of the API, specifying the `automatic_payment_methods` parameter is optional because Stripe enables its functionality by default.
+          automatic_payment_methods: { enabled: true },
+          customer: customerId,
+          payment_method: paymentMethods.data[0]?.id,
+          return_url: "https://example.com/order/123/complete",
+          off_session: true,
+          confirm: true,
+        });
+      }
+    }
+  } catch (err) {
+    if (err instanceof Stripe.errors.StripeError) {
+      console.log("Error code is: ", err.code);
+      if (
+        err.raw &&
+        typeof err.raw === "object" &&
+        "payment_intent" in err.raw &&
+        err.raw.payment_intent &&
+        typeof err.raw.payment_intent === "object" &&
+        "id" in err.raw.payment_intent &&
+        typeof err.raw.payment_intent.id === "string"
+      ) {
+        const paymentIntentRetrieved = await stripe.paymentIntents.retrieve(
+          err.raw.payment_intent.id
+        );
+        console.log("PI retrieved: ", paymentIntentRetrieved.id);
+      }
+    }
   }
 };
 

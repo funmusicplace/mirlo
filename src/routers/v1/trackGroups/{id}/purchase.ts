@@ -104,7 +104,7 @@ export default function () {
           stripeAccountId,
         });
         res.status(200).json({
-          redirectUrl: session.url,
+          // redirectUrl: session.url,
           clientSecret: session.client_secret,
         });
       } else {
@@ -115,6 +115,7 @@ export default function () {
         });
       }
     } catch (e) {
+      console.error(e);
       next(e);
     }
   }

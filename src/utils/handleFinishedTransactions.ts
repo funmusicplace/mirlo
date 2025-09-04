@@ -10,6 +10,7 @@ import { getSiteSettings } from "./settings";
 import { Job } from "bullmq";
 import stripe, { calculateAppFee, OPTION_JOINER } from "./stripe";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import { sendBasecampAMessage } from "./basecamp";
 
 const getPaymentIntent = async (
   paymentIntentId: string,
@@ -142,6 +143,10 @@ export const handleTrackGroupPurchase = async (
           },
         },
       } as Job);
+
+      await sendBasecampAMessage(
+        `New album purchase: <i>${trackGroup.title}</i> by ${trackGroup.artist.name}, purchased by <b>${user.email}</b>`
+      );
     }
 
     return purchase;

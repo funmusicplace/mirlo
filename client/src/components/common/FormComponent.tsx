@@ -27,6 +27,16 @@ const FormComponent = styled.div<{ direction?: "row" | "column" }>`
     margin-bottom: 0.25rem;
   }
 
+  .inline-button {
+    display: flex;
+    align-items: center;
+
+    input {
+      margin-bottom: 0;
+    }
+    margin-bottom: 0.25rem;
+  }
+
   textarea {
     border: var(--mi-border);
   }

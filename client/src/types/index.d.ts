@@ -14,6 +14,11 @@ interface LoggedInUser {
   artistUserSubscriptions?: ArtistUserSubscription[];
   userTrackGroupPurchases?: { trackGroupId: number }[];
   userTrackPurchases?: { trackId: number }[];
+  pledges?: {
+    trackGroupId: number;
+    trackGroup: { currency: string };
+    amount: number;
+  }[];
   isAdmin: boolean;
   currency?: string;
   featureFlags?: string[];
@@ -103,6 +108,7 @@ interface TrackGroup {
   merch?: Merch[];
   isDraft?: boolean;
   paymentToUserId?: number;
+  isAllOrNothing?: boolean;
   paymentToUser?: {
     email: string;
     name?: string;
@@ -345,6 +351,7 @@ interface UserArtistTip {
 type AccountStatus = {
   chargesEnabled: boolean;
   detailsSubmitted: boolean;
+  stripeAccountId: string;
 };
 
 interface License {

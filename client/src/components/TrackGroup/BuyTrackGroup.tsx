@@ -10,27 +10,31 @@ import { useSnackbar } from "state/SnackbarContext";
 import { InputEl } from "components/common/Input";
 import FormComponent from "components/common/FormComponent";
 import { FormProvider, useForm } from "react-hook-form";
-import EmailInput from "./EmailInput";
 import PlatformPercent from "components/common/PlatformPercent";
 import { css } from "@emotion/css";
 import { testOwnership } from "./utils";
 import Box from "components/common/Box";
-import { ArtistButton } from "components/Artist/ArtistButtons";
 import { useAuthContext } from "state/AuthContext";
 import TextArea from "components/common/TextArea";
-import EmbeddedStripeForm from "components/common/EmbeddedStripe";
+import EmbeddedStripeForm from "components/common/stripe/EmbeddedStripe";
 import EmailVerification from "components/common/EmailVerification";
+import Button from "components/common/Button";
+import { FaArrowRight } from "react-icons/fa";
+import { useQuery } from "@tanstack/react-query";
+import { queryUserStripeStatus } from "queries";
+import AddMoneyValueButtons from "components/common/AddMoneyValueButtons";
 
 interface FormData {
   chosenPrice: string;
   userEmail: string;
   message?: string;
+  consentToStoreData: boolean;
 }
 
-const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
-  trackGroup,
-  track,
-}) => {
+const BuyTrackGroup: React.FC<{
+  trackGroup: TrackGroup;
+  track?: Track;
+}> = ({ trackGroup, track }) => {
   const snackbar = useSnackbar();
   const [stripeLoading, setStripeLoading] = React.useState(false);
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
@@ -43,9 +47,13 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
     },
     reValidateMode: "onChange",
   });
+  const { data: stripeAccountStatus } = useQuery(
+    queryUserStripeStatus(trackGroup.artist?.userId ?? 0)
+  );
   const { register, watch, handleSubmit, formState } = methods;
   const { isValid } = formState;
   const chosenPrice = watch("chosenPrice");
+  const consentToStoreData = watch("consentToStoreData");
   const [clientSecret, setClientSecret] = React.useState<string | null>(null);
 
   const purchaseAlbum = React.useCallback(
@@ -68,7 +76,7 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
             price: data.chosenPrice
               ? Number(data.chosenPrice) * 100
               : undefined,
-            email: data.userEmail,
+            email: data.userEmail ?? verifiedEmail,
             message: data.message,
           });
 
@@ -84,7 +92,7 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
         setStripeLoading(false);
       }
     },
-    [snackbar, t, trackGroup.id, track]
+    [snackbar, t, trackGroup.id, track, verifiedEmail]
   );
 
   let lessThanMin = false;
@@ -94,19 +102,32 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
   }
 
   const isBeforeReleaseDate = new Date(trackGroup.releaseDate) > new Date();
-  const purchaseText = isBeforeReleaseDate ? "preOrder" : "buy";
+  const purchaseText = trackGroup.isAllOrNothing
+    ? "backThisProject"
+    : isBeforeReleaseDate
+      ? "preOrder"
+      : "buy";
 
-  const isDisabled = lessThanMin || !isValid;
+  const isDisabled =
+    lessThanMin ||
+    !isValid ||
+    (trackGroup.isAllOrNothing && !consentToStoreData);
+
   const addMoneyAmount = (val: number) => {
     const currentPrice = Number(chosenPrice || 0);
     const newPrice = currentPrice + val;
     methods.setValue("chosenPrice", newPrice.toString());
   };
-  if (clientSecret) {
-    return <EmbeddedStripeForm clientSecret={clientSecret} />;
-  }
 
-  console.log("minPrice");
+  if (clientSecret && stripeAccountStatus?.stripeAccountId) {
+    return (
+      <EmbeddedStripeForm
+        clientSecret={clientSecret}
+        isSetupIntent={trackGroup.isAllOrNothing}
+        stripeAccountId={stripeAccountStatus?.stripeAccountId}
+      />
+    );
+  }
 
   return (
     <FormProvider {...methods}>
@@ -115,6 +136,15 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
           padding: 1.5rem 2rem 2rem;
         `}
       >
+        {trackGroup.isAllOrNothing && (
+          <p
+            className={css`
+              margin-bottom: 1rem;
+            `}
+          >
+            {t("backThisProjectDescription")}
+          </p>
+        )}
         {!!minPrice && minPrice > 0 && (
           <p>
             {t("price")}{" "}
@@ -128,7 +158,6 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
                 currency: getCurrencySymbol(trackGroup.currency, undefined),
               })}{" "}
             </label>
-
             <InputEl
               {...register("chosenPrice")}
               type="number"
@@ -136,42 +165,7 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
               step="0.01"
               id="priceInput"
             />
-            <div
-              className={css`
-                display: grid;
-                grid-template-columns: repeat(4, 1fr);
-                gap: 0.5rem;
-              `}
-            >
-              <ArtistButton
-                variant="dashed"
-                type="button"
-                onClick={() => addMoneyAmount(1)}
-              >
-                +<Money amount={1} currency={trackGroup.currency} />
-              </ArtistButton>
-              <ArtistButton
-                variant="dashed"
-                type="button"
-                onClick={() => addMoneyAmount(2)}
-              >
-                +<Money amount={2} currency={trackGroup.currency} />
-              </ArtistButton>
-              <ArtistButton
-                variant="dashed"
-                type="button"
-                onClick={() => addMoneyAmount(5)}
-              >
-                +<Money amount={5} currency={trackGroup.currency} />
-              </ArtistButton>
-              <ArtistButton
-                variant="dashed"
-                type="button"
-                onClick={() => addMoneyAmount(10)}
-              >
-                +<Money amount={10} currency={trackGroup.currency} />
-              </ArtistButton>
-            </div>
+
             {Number(chosenPrice) > (minPrice ?? 1) * 100 && (
               <Box variant="success">
                 {t("thatsGenerous", {
@@ -189,6 +183,10 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
                 })}
               </small>
             )}
+            <AddMoneyValueButtons
+              addMoneyAmount={addMoneyAmount}
+              currency={trackGroup.currency}
+            />
             <PlatformPercent
               percent={trackGroup.platformPercent}
               chosenPrice={chosenPrice}
@@ -206,22 +204,37 @@ const BuyTrackGroup: React.FC<{ trackGroup: TrackGroup; track?: Track }> = ({
           {!user && <EmailVerification setVerifiedEmail={setVerifiedEmail} />}
 
           {(user || verifiedEmail) && (
-            <ArtistButton
-              size="big"
-              rounded
-              type="submit"
-              isLoading={stripeLoading}
-              title={
-                isDisabled
-                  ? user
-                    ? (t("ensurePrice") ?? "")
-                    : (t("ensurePriceAndEmail") ?? "")
-                  : ""
-              }
-              disabled={isDisabled}
-            >
-              {t(purchaseText)}
-            </ArtistButton>
+            <>
+              {trackGroup.isAllOrNothing && (
+                <FormComponent direction="row">
+                  <InputEl
+                    type="checkbox"
+                    id="consentToStoreData"
+                    {...methods.register("consentToStoreData")}
+                  />
+                  <label htmlFor="consentToStoreData">
+                    {t("consentToStoreData")}
+                  </label>
+                </FormComponent>
+              )}
+              <Button
+                size="big"
+                rounded
+                type="submit"
+                endIcon={<FaArrowRight />}
+                isLoading={stripeLoading}
+                title={
+                  isDisabled
+                    ? user
+                      ? (t("ensurePrice") ?? "")
+                      : (t("ensurePriceAndEmail") ?? "")
+                    : ""
+                }
+                disabled={isDisabled}
+              >
+                {t(purchaseText)}
+              </Button>
+            </>
           )}
 
           <div

@@ -74,6 +74,7 @@ model User {
   userConfirmationCode                String?
   userConfirmationCodeExpiration      DateTime?
   trustLevel                          Int?                            @default(0) // 0 = normal, 1 = low, 2 = medium, 3 = high
+  stripeCustomerId                    String?
   userTrackGroupPurchases             UserTrackGroupPurchase[]
   artistUserSubscriptions             ArtistUserSubscription[]
   wishlist                            UserTrackGroupWishlist[]
@@ -92,6 +93,7 @@ model User {
   userBanner                          UserBanner?
   trackFavorites                      UserTrackFavorite[]
   receivesPaymentsFor                 Artist[]                        @relation("paymentToUser")
+  pledges                             TrackGroupPledge[]
 }
 
 model EmailVerification {
@@ -613,6 +615,8 @@ model TrackGroup {
   paymentToUser                   User?                     @relation(fields: [paymentToUserId], references: [id])
   fundraisingGoal                 Int? // in cents
   fundraisingEndDate              DateTime?
+  isAllOrNothing                  Boolean                   @default(false)
+  pledges                         TrackGroupPledge[]
 
   @@unique([artistId, urlSlug])
 }
@@ -626,6 +630,21 @@ model TrackGroupCover {
   updatedAt        DateTime   @updatedAt
   deletedAt        DateTime?
   originalFilename String?
+}
+
+model TrackGroupPledge {
+  id                  Int        @id @default(autoincrement())
+  trackGroup          TrackGroup @relation(fields: [trackGroupId], references: [id])
+  trackGroupId        Int
+  userId              Int
+  user                User       @relation(fields: [userId], references: [id])
+  amount              Int
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+  stripeSetupIntentId String
+  message             String?
+
+  @@unique([userId, trackGroupId])
 }
 
 model Track {

@@ -13,7 +13,6 @@ import { css } from "@emotion/css";
 import { bp } from "../../../../constants";
 import ManageTags from "./ManageTags";
 
-import { useAuthContext } from "state/AuthContext";
 import styled from "@emotion/styled";
 
 import PriceAndSuch from "./PriceAndSuch";
@@ -116,7 +115,7 @@ const AlbumFormContent: React.FC<{
         />
       </FormComponent>
       <FeatureFlag featureFlag="fundraiser">
-        <FundraisingGoal />
+        <FundraisingGoal trackGroup={existingObject} />
       </FeatureFlag>
     </>
   );

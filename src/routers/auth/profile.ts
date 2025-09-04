@@ -47,6 +47,12 @@ const profile = async (req: Request, res: Response, next: NextFunction) => {
             trackGroupId: true,
           },
         },
+        pledges: {
+          select: {
+            trackGroupId: true,
+            amount: true,
+          },
+        },
         userTrackPurchases: {
           select: {
             trackId: true,
