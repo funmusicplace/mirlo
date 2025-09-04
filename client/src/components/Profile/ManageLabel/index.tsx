@@ -55,6 +55,8 @@ const ProfileLabel: React.FC = () => {
     return <p>{t("notALabel")}</p>;
   }
 
+  const labelProfile = user.artists?.find((a) => a.isLabelProfile);
+
   return (
     <WidthContainer variant="big" justify="center">
       <ProfileSection>
@@ -85,7 +87,7 @@ const ProfileLabel: React.FC = () => {
               {t("viewFulfillmentPage")}
             </ButtonLink>
             <ButtonLink
-              to={`/${user.urlSlug}`}
+              to={`/${labelProfile?.urlSlug}`}
               endIcon={<FaChevronRight />}
               variant="link"
               size="compact"

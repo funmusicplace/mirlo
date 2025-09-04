@@ -41,6 +41,14 @@ apiApp.use(
   })
 );
 
+apiApp.use((req, res, next) => {
+  // Basic logging for API requests
+  logger.info(
+    `API: ${req.method} ${req.path} - ${JSON.stringify(req.query)} - ${JSON.stringify(req.headers)}`
+  );
+  next();
+});
+
 initialize({
   app: apiApp,
   apiDoc,
@@ -56,15 +64,6 @@ initialize({
   })),
 
   errorMiddleware: errorHandler,
-});
-
-apiApp.use((req, res, next) => {
-  // Basic logging for API requests
-
-  logger.info(
-    `API request: ${req.method} ${req.path} - ${JSON.stringify(req.query)} - ${JSON.stringify(req.headers)}`
-  );
-  next();
 });
 
 export default apiApp;

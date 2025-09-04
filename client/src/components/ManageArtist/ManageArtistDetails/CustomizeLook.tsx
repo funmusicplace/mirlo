@@ -18,7 +18,6 @@ import SavingInput from "../ManageTrackGroup/AlbumFormComponents/SavingInput";
 import { QUERY_KEY_ARTISTS } from "queries/queryKeys";
 import DeleteArtist from "../DeleteArtist";
 import { Toggle } from "components/common/Toggle";
-import Box from "components/common/Box";
 import LabelConfirmation from "./LabelConfirmation";
 import useManagedArtistQuery from "utils/useManagedArtistQuery";
 import FeatureFlag from "components/common/FeatureFlag";

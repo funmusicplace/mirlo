@@ -105,6 +105,7 @@
   "profile": {
     "yourAvatar": "Your avatar",
     "yourBanner": "Your banner",
+    "manageLabel": "Manage label",
     "tileBackgroundImage": "Tile background image",
     "resetPasswordLink": "Want to change your password? Use the reset form.",
     "password": "Updating your email requires entering your password",
@@ -628,6 +629,7 @@
     "searchArtists": "Search artists",
     "role": "Role",
     "isAllOrNothing": "Is it all or nothing?",
+    "isAllOrNothingDescription": "If this is enabled, users will only be charged if the fundraising goal is met.",
     "fundraisingGoal": "Fundraising goal",
     "noTracks": "You have no tracks listed on this album, are you sure you want to continue?",
     "fundraisingEndDate": "Fundraising end date",
@@ -850,7 +852,10 @@
     "serverTasks": "Server tasks",
     "subscriptions": "Subscriptions",
     "purchases": "Purchases",
-    "settings": "Settings"
+    "settings": "Settings",
+    "fundraising": "Fundraising",
+    "sendEmails": "Send emails",
+    "dashboard": "Dashboard"
   },
   "trackDetails": {
     "track": "Track:",

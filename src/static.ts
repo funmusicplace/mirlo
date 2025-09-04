@@ -1,11 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import {
-  getBufferBasedOnStat,
-  getBufferFromBackblaze,
-  getBufferFromMinio,
-  statFile,
-} from "./utils/minio";
-import { minioClient } from "./utils/minio";
+import { getBufferBasedOnStat, statFile } from "./utils/minio";
 
 export const serveStatic = async (
   req: Request,

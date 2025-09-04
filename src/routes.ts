@@ -127,6 +127,7 @@ const routes = [
   "admin/users",
   "admin/users/{id}",
   "admin/send-email",
+  "admin/chargePledges",
   "oembed",
   "flag",
 ];

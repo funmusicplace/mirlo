@@ -1,6 +1,11 @@
 import Stripe from "stripe";
 import prisma from "@mirlo/prisma";
-import { Prisma, User, MerchShippingDestination } from "@mirlo/prisma/client";
+import {
+  Prisma,
+  User,
+  MerchShippingDestination,
+  TrackGroupPledge,
+} from "@mirlo/prisma/client";
 import { logger } from "../logger";
 import { Request, Response } from "express";
 import { findOrCreateUserBasedOnEmail, updateCurrencies } from "./user";
@@ -211,7 +216,6 @@ export const findOrCreateStripeCustomer = async (
   let user;
   let searchEmail = email;
   if (userId) {
-    console.log("there is a userid");
     user = await prisma.user.findUnique({
       where: {
         id: userId,
@@ -220,18 +224,6 @@ export const findOrCreateStripeCustomer = async (
     searchEmail = user?.email ?? email;
   }
 
-  if (user?.stripeCustomerId) {
-    console.log("there is a stripeCustomerId");
-    const existingCustomer = await stripe.customers.retrieve(
-      user.stripeCustomerId,
-      {
-        stripeAccount: stripeAccountId,
-      }
-    );
-    if (existingCustomer) {
-      return existingCustomer;
-    }
-  }
   const existingCustomer = await stripe.customers.list(
     {
       email: searchEmail,
@@ -240,20 +232,10 @@ export const findOrCreateStripeCustomer = async (
       stripeAccount: stripeAccountId,
     }
   );
-  console.log("existing customer");
-  if (user && existingCustomer.data.length > 0) {
-    console.log("update user");
-    await prisma.user.update({
-      where: {
-        email: searchEmail,
-      },
-      data: {
-        stripeCustomerId: existingCustomer.data[0].id,
-      },
-    });
+
+  if (existingCustomer.data.length > 0) {
     return existingCustomer.data[0];
   }
-  console.log("create customers");
   const customer = await stripe.customers.create(
     {
       email: searchEmail,
@@ -265,16 +247,7 @@ export const findOrCreateStripeCustomer = async (
       stripeAccount: stripeAccountId,
     }
   );
-  if (user) {
-    await prisma.user.update({
-      where: {
-        id: user.id,
-      },
-      data: {
-        stripeCustomerId: customer.id,
-      },
-    });
-  }
+
   return customer;
 };
 
@@ -1154,28 +1127,26 @@ export const handleSetupIntentSucceeded = async (
 };
 
 export const chargePledgePayments = async (
-  trackGroupId: number,
-  user: User
+  trackGroupPledge: TrackGroupPledge & { user: User } & {
+    trackGroup: { currency: string | null };
+  }
 ) => {
   try {
     logger.info(
-      `Charging pledge payments for track group ${trackGroupId} and user ${user.id}`
+      `Charging pledge payments for track group ${trackGroupPledge.trackGroupId} and user ${trackGroupPledge.userId}`
     );
-    let customerId = user.stripeCustomerId;
-    if (user.stripeCustomerId === null) {
-      const customersForEmail = await stripe.customers.list({
-        email: user.email,
-      });
-      customerId = customersForEmail.data[0]?.id;
-    }
+    const customersForEmail = await stripe.customers.list({
+      email: trackGroupPledge.user.email,
+    });
+    const customerId = customersForEmail.data[0]?.id;
     if (customerId) {
       const paymentMethods = await stripe.paymentMethods.list({
         customer: customerId,
       });
       if (paymentMethods.data[0]?.id) {
         const paymentIntent = await stripe.paymentIntents.create({
-          amount: 1099,
-          currency: "usd",
+          amount: trackGroupPledge.amount,
+          currency: trackGroupPledge.trackGroup.currency ?? "usd",
           // In the latest version of the API, specifying the `automatic_payment_methods` parameter is optional because Stripe enables its functionality by default.
           automatic_payment_methods: { enabled: true },
           customer: customerId,
@@ -1183,6 +1154,18 @@ export const chargePledgePayments = async (
           return_url: "https://example.com/order/123/complete",
           off_session: true,
           confirm: true,
+        });
+        logger.info(
+          `Created payment intent ${paymentIntent.id} for pledge ${trackGroupPledge.id}`
+        );
+
+        await prisma.trackGroupPledge.update({
+          where: {
+            id: trackGroupPledge.id,
+          },
+          data: {
+            paidAt: new Date(),
+          },
         });
       }
     }

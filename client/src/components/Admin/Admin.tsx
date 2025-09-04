@@ -49,6 +49,9 @@ export const Admin: React.FC = () => {
         <li>
           <NavLink to="sendEmails">{t("sendEmails")}</NavLink>
         </li>
+        <li>
+          <NavLink to="fundraising">{t("fundraising")}</NavLink>
+        </li>
       </Tabs>
       <div
         className={css`

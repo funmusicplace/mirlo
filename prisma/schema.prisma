@@ -177,6 +177,7 @@ enum NotificationType {
   USER_SUBSCRIBED_TO_YOU
   USER_BOUGHT_YOUR_TRACK
   SYSTEM_MESSAGE
+  LABEL_ADDED_ARTIST
 }
 
 model Post {
@@ -643,6 +644,8 @@ model TrackGroupPledge {
   updatedAt           DateTime   @updatedAt
   stripeSetupIntentId String
   message             String?
+  paidAt              DateTime?
+  cancelledAt         DateTime?
 
   @@unique([userId, trackGroupId])
 }
