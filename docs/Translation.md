@@ -13,7 +13,7 @@ Please DM us on discord **with your email and the language you want to help tran
 
 ## How to translate Mirlo using Transifex
 
-First off, you'll find general directions for Mirlo's tone and vocabulary in this document: [MIRLO - Words we choose and why](https://cryptpad.fr/pad/#/2/pad/view/nbohzknMYqYX-Lrxx0xrayedV5AG45AyU48+8QUtlN0/embed/)
+First off, you'll find general directions for Mirlo's tone and vocabulary in this document: [Verbal communication guidelines](https://github.com/funmusicplace/mirlo/blob/main/docs/Verbal%20communication%20guidelines%20(words%20we%20choose%20and%20why).md)
 
 * Try to understand where the string will appear on Mirlo's website.
 The "key" of each string will give you some insight, don't hesitate to look up Comments or write a new one for this string if you lack good context. Transifex allows your edits to appear Live immediately after you save them, so you can see how what you just wrote integrates with the whole. Keep Mirlo open in another tab and check back and forth regularly :)
