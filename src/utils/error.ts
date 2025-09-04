@@ -55,7 +55,7 @@ const errorHandler = (
   if (err instanceof AppError) {
     if (err.httpCode >= 500) {
       console.error(
-        "Found instance of AppError",
+        "Found instance of unhandled AppError",
         req.path,
         req.method,
         err.httpCode,

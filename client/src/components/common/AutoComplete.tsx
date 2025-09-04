@@ -272,7 +272,7 @@ const AutoComplete: React.FC<{
           />
           <SearchResultsDiv>
             {resultsPrefix}
-            {isSearching && <LoadingSpinner />}
+            {isSearching && <LoadingSpinner size="small" />}
             {!isSearching && searchResults.length > 0 && (
               <SearchResultList>
                 {searchResults.map((r, index) => {

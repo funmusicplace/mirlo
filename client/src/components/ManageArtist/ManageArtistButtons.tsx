@@ -8,10 +8,12 @@ import { useQuery } from "@tanstack/react-query";
 import { queryArtist } from "queries";
 import { useAuthContext } from "state/AuthContext";
 import FixedButtonLink from "components/common/FixedButton";
+import { IoIosColorPalette } from "react-icons/io";
 
 const ManageArtistButtons: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
   const { pathname } = useLocation();
+  const [iconOnly, setIconOnly] = React.useState(false);
   const { artistId, trackGroupId } = useParams();
   const isManagePage =
     pathname.includes("/manage/artists") && !pathname.includes("/customize");
@@ -26,9 +28,15 @@ const ManageArtistButtons: React.FC = () => {
         (user?.isAdmin ||
           (artist && user?.id === artist?.userId && !trackGroupId)) && (
           <div
+            onMouseEnter={() => {
+              setIconOnly(false);
+            }}
+            onMouseLeave={() => {
+              setIconOnly(true);
+            }}
             className={css`
               z-index: 999999;
-              top: 75px;
+              bottom: 75px;
               right: 1rem;
               position: fixed;
               display: flex;
@@ -36,6 +44,7 @@ const ManageArtistButtons: React.FC = () => {
               a {
                 margin-bottom: 0.5rem;
               }
+              transition: all 0.3s ease;
 
               @media screen and (max-width: ${bp.medium}px) {
                 left: 1rem;
@@ -47,8 +56,10 @@ const ManageArtistButtons: React.FC = () => {
           >
             <FixedButtonLink
               to={`/manage/artists/${artist.id}/customize`}
-              startIcon={<FaEye />}
+              endIcon={<IoIosColorPalette />}
+              onlyIcon={iconOnly}
               size="compact"
+              rounded
               variant="dashed"
             >
               {t(
@@ -58,19 +69,23 @@ const ManageArtistButtons: React.FC = () => {
             {!isManagePage && (
               <FixedButtonLink
                 to={`/manage/artists/${artist.id}`}
-                startIcon={<FaPen />}
+                endIcon={<FaPen />}
                 size="compact"
                 variant="dashed"
+                rounded
+                onlyIcon={iconOnly}
               >
                 {t(artist.isLabelProfile ? "editLabelPage" : "editPage")}
               </FixedButtonLink>
             )}
             <FixedButtonLink
               to={`/${artist?.urlSlug?.toLowerCase() ?? artist?.id}`}
-              startIcon={<FaEye />}
+              endIcon={<FaEye />}
               disabled={!artist}
               variant="dashed"
               size="compact"
+              rounded
+              onlyIcon={iconOnly}
             >
               {t("viewLive")}
             </FixedButtonLink>

@@ -106,6 +106,7 @@ export const BulkTrackUpload: React.FC<{
             firstTrack.t.file,
           ]);
         } catch (e) {
+          console.error(e);
           snackbar(
             `Something went wrong uploading track ${packet.title}. Please report this incident to hi@mirlo.space`,
             {
