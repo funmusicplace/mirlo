@@ -188,7 +188,7 @@
     "title": "Title:",
     "verifyEmail": "Verify e-mail",
     "backThisProjectDescription": "You're pledging to support this project if it meets its fundraising goal.",
-    "emailVerificationInfo": "Because you're not logged in, we need to verify you're real.",
+    "emailVerificationInfo": "Because no account is logged in, we need to verify you're not a robot.",
     "verificationCode": "Enter verification code:",
     "checkEmail": "Check your email for the verification code.",
     "published": "Published:",
