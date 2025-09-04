@@ -17,7 +17,7 @@ export const InputEl = styled.input<{
 }>`
   border: 1px solid
     ${(props) =>
-      props.colors?.foreground ?? "var(--mi-lighten-foreground-color)"};
+      props.colors?.foreground ?? "var(--mi-lighter-foreground-color)"};
   border-radius: var(--mi-border-radius);
   padding: 0.5rem 0.75rem;
   font-size: 1rem;

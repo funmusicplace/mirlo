@@ -643,6 +643,8 @@ model TrackGroupPledge {
   updatedAt           DateTime   @updatedAt
   stripeSetupIntentId String
   message             String?
+  paidAt              DateTime?
+  cancelledAt         DateTime?
 
   @@unique([userId, trackGroupId])
 }

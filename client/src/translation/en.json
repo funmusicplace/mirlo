@@ -851,7 +851,10 @@
     "serverTasks": "Server tasks",
     "subscriptions": "Subscriptions",
     "purchases": "Purchases",
-    "settings": "Settings"
+    "settings": "Settings",
+    "fundraising": "Fundraising",
+    "sendEmails": "Send emails",
+    "dashboard": "Dashboard"
   },
   "trackDetails": {
     "track": "Track:",
