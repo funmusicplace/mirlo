@@ -1,6 +1,10 @@
 # Mirlo
 
-A RESTful API and client.
+A RESTful API and client that allows artists to sell their music online, and listeners to browse and buy it.
+
+## Features
+
+## How it works
 
 Main libraries:
 
@@ -8,6 +12,11 @@ Main libraries:
 - [Prisma Client](https://www.prisma.io/docs)
 
 ## Contributing
+
+We're open to any kind of contributions ! Code or non-code.
+Browse our contribution guideline in the [CONTRIBUTING.md](https://github.com/funmusicplace/mirlo/blob/main/CONTRIBUTING.md) doc.
+
+If you'd like to financially contribute to this project, follow this link : https://mirlo.space/team/support
 
 ### Download and install
 
@@ -50,13 +59,13 @@ admin@admin.com
 test1234
 ```
 
-## Email
+### Email
 
 On production email gets sent by sendgrid. During local development emails appear in the docker logs for the api.
 
-## Background Jobs
+### Background Jobs
 
-### Making changes to background jobs.
+#### Making changes to background jobs.
 
 Changes in background jobs aren't detected. You'll need to restart the docker container for them:
 
@@ -64,7 +73,7 @@ Changes in background jobs aren't detected. You'll need to restart the docker co
 docker compose up -d --force-recreate --no-deps background
 ```
 
-## Workers (Uploading Music, Images, Etc)
+### Workers (Uploading Music, Images, Etc)
 
 If you want to upload music or upload images, you'll need a worker running.
 
@@ -76,7 +85,7 @@ docker exec -it blackbird-api yarn ts-node src/jobs/queue-worker.ts run
 
 > NOTE: In local development you can see the worker queue at /admin/queues on the server
 
-### Running migrations
+#### Running migrations
 
 Migrations will run automatically on `docker-compose up`. To make changes to the database, change the schema.prisma file and then run:
 
@@ -92,7 +101,7 @@ If your typescript for prisma is ever out of date, you can re-generate it with:
 yarn prisma:build
 ```
 
-## Stripe
+### Stripe
 
 By default Mirlo uses Stripe as its payment processor.
 
@@ -115,7 +124,7 @@ stripe trigger checkout.session.completed --add checkout_session:metadata.userId
 
 You'll also want fake Stripe data. You can find [the details on that here](https://stripe.com/docs/connect/testing).
 
-## CRON Jobs
+### CRON Jobs
 
 Some cron jobs exist:
 
@@ -123,19 +132,19 @@ Some cron jobs exist:
 docker exec -it blackbird-api yarn ts-node src/jobs/every-minute-tasks.ts
 ```
 
-## MinIO
+### MinIO
 
 You can access dev MinIO at localhost:9001 with the MINIO_ROOT_USER and MINIO_ROOT_PASSWORD you set in .env
 
-## Database
+### Database
 
 If you want to do logging in the database, you need to uncomment the `log` line in the `prisma/prisma.ts` file.
 
-## Tests
+### Tests
 
 See the [test/README.md](/test/README.md) instructions.
 
-## Apple Chip Errors w/ Docker
+### Apple Chip Errors w/ Docker
 
 If you get errors when running the backbird-api and blackbird-background service like `Error relocating /usr/lib/libgcc_s.so.1: unsupported relocation type 7`, you'll need to follow these steps.
 
@@ -144,7 +153,7 @@ If you get errors when running the backbird-api and blackbird-background service
 3. Delete any previously created images
 4. Run `DOCKER_DEFAULT_PLATFORM=linux/amd64 docker compose up`
 
-## Docker connectivity issues.
+### Docker connectivity issues.
 
 It might be that your docker container can't reach yarn or github. As [described here](https://github.com/moby/moby/issues/32106#issuecomment-382228854): either in Docker Desktop, edit the Docker Engine file to show the DNS, or edit /etc/docker/daemon.json directly:
 
@@ -155,6 +164,14 @@ It might be that your docker container can't reach yarn or github. As [described
   ],
 ```
 
+# Support
+
+Reach out to us on our [Discord server](https://discord.gg/FfNZuSqJ) or send us an email at hi@mirlo.space
+
 # Credits
 
 A lot of the code here was originally written for the [Resonate API](https://github.com/resonatecoop/api) and [UI](https://github.com/resonatecoop/beam/)
+
+# License
+
+This project is under the [GNU GPL license](https://github.com/funmusicplace/mirlo/blob/main/LICENSE.md).
