@@ -16,7 +16,6 @@ import { requestApp } from "../utils";
 import prisma from "@mirlo/prisma";
 import purchaseAlbumEndpoint from "../../../src/routers/v1/trackGroups/{id}/purchase";
 import * as stripeUtils from "../../../src/utils/stripe";
-import Stripe from "stripe";
 
 describe("trackGroups/{id}/purchase", () => {
   beforeEach(async () => {
@@ -158,6 +157,13 @@ describe("trackGroups/{id}/purchase", () => {
           // @ts-ignore
           .callsFake(async (_params) => {
             // return whatever
+            return {
+              data: [
+                {
+                  id: "aCustomerId",
+                },
+              ],
+            };
           });
         sinon
           .stub(stripeUtils.stripe.customers, "retrieve")

@@ -216,7 +216,6 @@ export const findOrCreateStripeCustomer = async (
   let user;
   let searchEmail = email;
   if (userId) {
-    console.log("there is a userid");
     user = await prisma.user.findUnique({
       where: {
         id: userId,
@@ -233,13 +232,10 @@ export const findOrCreateStripeCustomer = async (
       stripeAccount: stripeAccountId,
     }
   );
-  console.log("existing customer");
 
   if (existingCustomer.data.length > 0) {
-    console.log("found existing customer");
     return existingCustomer.data[0];
   }
-  console.log("create customers");
   const customer = await stripe.customers.create(
     {
       email: searchEmail,
