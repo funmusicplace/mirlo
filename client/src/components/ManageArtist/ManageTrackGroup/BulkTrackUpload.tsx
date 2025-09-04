@@ -98,10 +98,12 @@ export const BulkTrackUpload: React.FC<{
             `manage/tracks`,
             packet
           );
+          console.log("successfully created track", firstTrack);
           newTrack = response.result;
           setUploadQueue((queue) =>
             produceNewStatus(queue, firstTrack.t.title, 25)
           );
+          console.log("attempting to upload file", firstTrack.t.file);
           await api.uploadFile(`manage/tracks/${newTrack.id}/audio`, [
             firstTrack.t.file,
           ]);
@@ -145,9 +147,12 @@ export const BulkTrackUpload: React.FC<{
 
   const processUploadedFiles = React.useCallback(
     (filesToProcess: FileList) => {
+      console.log("files to process", filesToProcess);
       const filesToParse = fileListIntoArray(filesToProcess);
+      console.log("file list into array", filesToParse);
       const callback = async () => {
         const parsed = await parse(filesToParse);
+        console.log("parsed files", parsed);
         const newTracks = parsed
           .sort((a, b) => {
             const firstComparable = a.metadata.common.track.no ?? a.file.name;

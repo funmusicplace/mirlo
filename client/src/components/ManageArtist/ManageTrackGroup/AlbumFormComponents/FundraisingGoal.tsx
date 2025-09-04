@@ -61,6 +61,7 @@ const FundraisingGoal: React.FC<{ trackGroup: TrackGroup }> = ({
           extraData={{ artistId: Number(artistId) }}
           type="checkbox"
         />
+        <small>{t("isAllOrNothingDescription")}</small>
       </FormComponent>
     </FormSection>
   );
