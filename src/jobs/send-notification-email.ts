@@ -154,7 +154,7 @@ const sendNotificationEmail = async () => {
         lte: new Date(),
       },
       notificationType: {
-        in: ["NEW_ARTIST_POST", "SYSTEM_MESSAGE"],
+        in: ["NEW_ARTIST_POST", "SYSTEM_MESSAGE", "LABEL_ADDED_ARTIST"],
       },
     },
     include: {

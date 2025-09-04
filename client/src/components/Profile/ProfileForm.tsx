@@ -15,7 +15,7 @@ import { finishedLanguages } from "i18n";
 import { Toggle } from "components/common/Toggle";
 import { useProfileMutation } from "queries";
 import SlugInput from "components/common/SlugInput";
-import { FaChevronRight } from "react-icons/fa";
+import { FaChevronRight, FaEye } from "react-icons/fa";
 import FeatureFlag from "components/common/FeatureFlag";
 import { ProfileSection } from ".";
 import ProfileImages from "./ProfileImages";
@@ -134,26 +134,31 @@ function ProfileForm() {
           <div
             className={css`
               display: flex;
-              align-items: flex-start;
-
-              > div {
-                flex-grow: 1;
-              }
+              justify-content: flex-end;
 
               > a {
                 margin-left: 1rem;
-                margin-top: 0.75rem;
+                margin-bottom: 1.5rem;
               }
             `}
           >
             {userLabel?.urlSlug && (
-              <ButtonLink
-                to={`/${userLabel.urlSlug}`}
-                endIcon={<FaChevronRight />}
-                variant="link"
-              >
-                {t("viewLabelPage")}
-              </ButtonLink>
+              <>
+                <ButtonLink
+                  to={`/profile/label`}
+                  endIcon={<FaChevronRight />}
+                  variant="link"
+                >
+                  {t("manageLabel")}
+                </ButtonLink>
+                <ButtonLink
+                  to={`/${userLabel.urlSlug}`}
+                  endIcon={<FaEye />}
+                  variant="link"
+                >
+                  {t("viewLabelPage")}
+                </ButtonLink>
+              </>
             )}
           </div>
         )}

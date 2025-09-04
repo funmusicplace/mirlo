@@ -105,6 +105,7 @@
   "profile": {
     "yourAvatar": "Your avatar",
     "yourBanner": "Your banner",
+    "manageLabel": "Manage label",
     "tileBackgroundImage": "Tile background image",
     "resetPasswordLink": "Want to change your password? Use the reset form.",
     "password": "Updating your email requires entering your password",

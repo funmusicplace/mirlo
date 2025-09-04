@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { User, Prisma } from "@mirlo/prisma/client";
+import { User, Prisma, Artist } from "@mirlo/prisma/client";
 
 import prisma from "@mirlo/prisma";
 import {
@@ -9,6 +9,7 @@ import {
 import { AppError } from "../../../../../../utils/error";
 import { addSizesToImage } from "../../../../../../utils/artist";
 import { finalUserAvatarBucket } from "../../../../../../utils/minio";
+import { getClient } from "../../../../../../activityPub/utils";
 
 export default function () {
   const operations = {
@@ -74,6 +75,45 @@ export default function () {
     },
   };
 
+  const sendArtistNotificationOfLabel = async (
+    artist: Artist,
+    labelUser: User
+  ) => {
+    const client = await getClient();
+    const existingNotification = await prisma.notification.findFirst({
+      where: {
+        userId: artist.userId,
+        notificationType: "LABEL_ADDED_ARTIST",
+        relatedUserId: labelUser.id,
+        artistId: artist.id,
+      },
+    });
+    if (!existingNotification) {
+      await prisma.notification.create({
+        data: {
+          userId: artist.userId,
+          notificationType: "LABEL_ADDED_ARTIST",
+          content: `
+          <p>
+            The label <strong>${labelUser.name}</strong> 
+            has invited you to join their roster.
+          </p>
+          <p>To accept their invitation, 
+            <a href="${client}/manage/artists/${artist.id}/customize#labels">
+            manage your artist account on Mirlo</a>.
+          </p>
+          <p>
+          If you do not wish to be associated with this label,
+          you can ignore this message.
+          </p>
+        `,
+          artistId: artist.id,
+          relatedUserId: labelUser.id,
+        },
+      });
+    }
+  };
+
   async function POST(req: Request, res: Response, next: NextFunction) {
     let { artistId }: { artistId?: string } = req.params;
     const { labelUserId, isLabelApproved } = req.body as {
@@ -106,11 +146,14 @@ export default function () {
         artistId: Number(artistId),
       };
 
-      if (loggedInUser.id === labelUserId) {
+      const isLabelAddingArtist = loggedInUser.id === labelUserId;
+      const isArtistAddingLabel = loggedInUser.id === artist.userId;
+
+      if (isLabelAddingArtist) {
         data.isLabelApproved = isLabelApproved;
       }
 
-      if (loggedInUser.id === artist.userId) {
+      if (isArtistAddingLabel) {
         data.isArtistApproved = true;
       }
 
@@ -123,6 +166,10 @@ export default function () {
           artistId: Number(artistId),
         },
       });
+
+      if (isLabelAddingArtist) {
+        sendArtistNotificationOfLabel(artist, loggedInUser);
+      }
       res.json({
         results: labels,
       });
