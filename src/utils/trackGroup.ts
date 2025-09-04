@@ -747,38 +747,48 @@ export const createOrUpdatePledge = async ({
   amount: number;
   stripeSetupIntentId: string;
 }) => {
-  await prisma.trackGroupPledge.upsert({
-    where: {
-      userId_trackGroupId: {
-        userId,
-        trackGroupId: Number(trackGroupId),
-      },
-    },
-    create: {
-      user: {
-        connect: {
-          id: userId,
-        },
-      },
-      trackGroup: {
-        connect: {
-          id: Number(trackGroupId),
-        },
-      },
-      message: message,
-      amount: Number(amount),
-      stripeSetupIntentId: stripeSetupIntentId,
-    },
-    update: {
-      message: message,
-      amount: Number(amount),
-      stripeSetupIntentId: stripeSetupIntentId,
-    },
-  });
-
-  await sendBasecampAMessage(
-    `New pledge amount: trackGroupId: <i>${trackGroupId}</i> pledged ${amount / 100} <b>${userId}</b>`
+  logger.info(
+    `Creating or updating pledge for userId: ${userId}, trackGroupId: ${trackGroupId}`
   );
+  try {
+    await prisma.trackGroupPledge.upsert({
+      where: {
+        userId_trackGroupId: {
+          userId,
+          trackGroupId: Number(trackGroupId),
+        },
+      },
+      create: {
+        user: {
+          connect: {
+            id: userId,
+          },
+        },
+        trackGroup: {
+          connect: {
+            id: Number(trackGroupId),
+          },
+        },
+        message,
+        amount: Number(amount),
+        stripeSetupIntentId: stripeSetupIntentId,
+      },
+      update: {
+        message: message,
+        amount: Number(amount),
+        stripeSetupIntentId: stripeSetupIntentId,
+      },
+    });
+
+    await sendBasecampAMessage(
+      `New pledge amount: trackGroupId: <i>${trackGroupId}</i> pledged ${amount / 100} <b>${userId}</b>`
+    );
+  } catch (e) {
+    throw new AppError({
+      httpCode: 500,
+      description: "Failed to create or update pledge.",
+    });
+  }
 };
 
 const chargePledges = (trackGroupId: number) => {

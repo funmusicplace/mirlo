@@ -8,6 +8,7 @@ import { findOrCreateUserBasedOnEmail } from "../../../utils/user";
 import { Stripe } from "stripe";
 import { createOrUpdatePledge } from "../../../utils/trackGroup";
 import { subscribeUserToArtist } from "../../../utils/artist";
+import { logger } from "../../../logger";
 
 export default function () {
   const operations = {
@@ -37,11 +38,10 @@ export default function () {
             if (
               customer &&
               typeof customer === "object" &&
-              "email" in customer
+              "email" in customer &&
+              customer.email
             ) {
-              let response = await findOrCreateUserBasedOnEmail(
-                (customer as Stripe.Customer).email || ""
-              );
+              let response = await findOrCreateUserBasedOnEmail(customer.email);
 
               userId = Number(response.userId);
             }
@@ -52,6 +52,9 @@ export default function () {
             intent.metadata?.trackGroupId &&
             intent.metadata?.paymentIntentAmount
           ) {
+            logger.info(
+              `Setting up succeeded intent: ${userId}, trackGroupId: ${intent.metadata?.trackGroupId}`
+            );
             await createOrUpdatePledge({
               userId,
               trackGroupId: Number(intent.metadata?.trackGroupId),

@@ -257,6 +257,9 @@ export const findOrCreateStripeCustomer = async (
   const customer = await stripe.customers.create(
     {
       email: searchEmail,
+      metadata: {
+        userId: user?.id ?? null,
+      },
     },
     {
       stripeAccount: stripeAccountId,
@@ -623,7 +626,9 @@ export const createStripeCheckoutSessionForPurchase = async ({
         },
         metadata: {
           trackGroupId: trackGroup.id,
+          userId: loggedInUser?.id ?? null,
           paymentIntentAmount: priceNumber,
+          message: message ? message : null,
           stripeAccountId,
         },
       },
