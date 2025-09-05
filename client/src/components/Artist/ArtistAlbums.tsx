@@ -45,10 +45,14 @@ const ArtistAlbums: React.FC = () => {
     }
   }, [artist]);
 
-  if (
-    !artist ||
-    (artist.trackGroups.length === 0 && artist.userId !== user?.id)
-  ) {
+  if (!artist) {
+    return null;
+  }
+
+  const hasArtistReleases = (artist.trackGroups?.length ?? 0) > 0;
+  const hasLabelReleases = (releases?.results.length ?? 0) > 0;
+
+  if (!hasArtistReleases && !hasLabelReleases && artist.userId !== user?.id) {
     return null;
   }
 
