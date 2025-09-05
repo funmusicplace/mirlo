@@ -1,0 +1,10 @@
+[
+  {
+    "allowedHeaders": ["authorization", "range", "content-type"],
+    "allowedOperations": ["s3_head", "s3_get", "s3_put"],
+    "allowedOrigins": ["*"],
+    "corsRuleName": "s3DownloadFromAnyOrigin",
+    "exposeHeaders": null,
+    "maxAgeSeconds": 3600
+  }
+]

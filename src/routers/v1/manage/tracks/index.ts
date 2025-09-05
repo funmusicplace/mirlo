@@ -4,6 +4,11 @@ import { User } from "@mirlo/prisma/client";
 import { userAuthenticated } from "../../../../auth/passport";
 import prisma from "@mirlo/prisma";
 import { doesTrackGroupBelongToUser } from "../../../../utils/ownership";
+import {
+  getPresignedUploadUrl,
+  incomingAudioBucket,
+} from "../../../../utils/minio";
+import { buildTrackStreamURL } from "../../../../queues/processTrackAudio";
 
 export default function () {
   const operations = {
@@ -61,6 +66,7 @@ export default function () {
       lyrics,
       isrc,
       description,
+      filename,
     } = req.body;
     try {
       await doesTrackGroupBelongToUser(Number(trackGroupId), loggedInUser);
@@ -123,9 +129,33 @@ export default function () {
         include: {
           trackGroup: true,
           trackArtists: true,
+          audio: true,
         },
       });
-      res.json({ result: track });
+      let uploadUrl = null;
+      if (track && !track?.audio) {
+        const audio = await prisma.trackAudio.upsert({
+          create: {
+            trackId: track.id,
+            originalFilename: filename,
+            fileExtension: filename?.split(".").pop() ?? undefined,
+            url: buildTrackStreamURL(track.id),
+            uploadState: "STARTED",
+          },
+          update: {
+            trackId: track.id,
+            originalFilename: filename,
+            fileExtension: filename?.split(".").pop() ?? undefined,
+            url: buildTrackStreamURL(track.id),
+            uploadState: "STARTED",
+          },
+          where: {
+            trackId: Number(track.id),
+          },
+        });
+        uploadUrl = await getPresignedUploadUrl(incomingAudioBucket, audio.id);
+      }
+      res.json({ result: track, uploadUrl });
     } catch (e) {
       next(e);
     }
