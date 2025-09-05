@@ -76,7 +76,7 @@ const ArtistLinks: React.FC = () => {
                 align-items: center;
               `}
             >
-              {t("backToArtist")}
+              {t(artist.isLabelProfile ? "backToLabel" : "backToArtist")}
             </ArtistButtonLink>
           </div>
         </div>
@@ -128,7 +128,9 @@ const ArtistLinks: React.FC = () => {
               </li>
             );
           })}
-          {artist.linksJson?.length === 0 && <>{t("noUpdates", {artistName: artist.name})}</>}
+          {artist.linksJson?.length === 0 && (
+            <>{t("noUpdates", { artistName: artist.name })}</>
+          )}
         </ul>
       </div>
     </div>
