@@ -629,7 +629,7 @@
     "searchArtists": "Search artists",
     "role": "Role",
     "isAllOrNothing": "Is it all or nothing?",
-    "isAllOrNothingDescription": "If this is enabled, users will only be charged if the fundraising goal is met.",
+    "isAllOrNothingDescription": "If this is enabled, supporters will only be charged if the fundraising goal is met.",
     "fundraisingGoal": "Fundraising goal",
     "noTracks": "You have no tracks listed on this album, are you sure you want to continue?",
     "fundraisingEndDate": "Fundraising end date",
