@@ -51,6 +51,9 @@ export const finalAudioBucket = s3UniquePrefix + "track-audio";
 export const trackGroupFormatBucket = s3UniquePrefix + "trackgroup-format";
 export const trackFormatBucket = s3UniquePrefix + "track-format";
 
+export const downloadableContentBucket =
+  s3UniquePrefix + "mirlo-downloadable-content";
+
 const {
   MINIO_HOST = "",
   MINIO_ROOT_USER = "",

@@ -200,6 +200,60 @@ export const trackGroupBelongsToLoggedInUser = async (
   return next();
 };
 
+export const contentBelongsToLoggedInUser = async (
+  req: Request,
+  _res: Response,
+  next: NextFunction
+) => {
+  const { trackGroupId, merchId } = req.params as unknown as {
+    trackGroupId?: string;
+    merchId?: string;
+  };
+
+  const loggedInUser = req.user as User | undefined;
+
+  try {
+    if (!loggedInUser) {
+      throw new AppError({
+        description: "Not logged in user",
+        httpCode: 401,
+      });
+    } else {
+      if (!trackGroupId && !merchId) {
+        throw new AppError({
+          description: "No trackGroupId or merchId provided",
+          httpCode: 400,
+        });
+      }
+      if (trackGroupId) {
+        const trackGroup = await doesTrackGroupBelongToUser(
+          Number(trackGroupId),
+          loggedInUser
+        );
+        if (!trackGroup) {
+          throw new AppError({
+            description: "TrackGroup does not exist or does not belong to user",
+            httpCode: 400,
+          });
+        }
+      }
+      if (merchId) {
+        const merch = await doesMerchBelongToUser(merchId, loggedInUser);
+
+        if (!merch) {
+          throw new AppError({
+            description: "Merch does not exist or does not belong to user",
+            httpCode: 400,
+          });
+        }
+      }
+    }
+  } catch (e) {
+    next(e);
+  }
+  return next();
+};
+
 export const merchBelongsToLoggedInUser = async (
   req: Request,
   _res: Response,
