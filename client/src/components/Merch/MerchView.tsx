@@ -44,8 +44,6 @@ function MerchView() {
     queryMerch({ merchId: merchId ?? "", artistId: artistId ?? "" })
   );
 
-  console.log("user", user);
-
   const { data: stripeAccountStatus } = useQuery(
     queryUserStripeStatus(artist?.userId ?? 0)
   );
@@ -68,10 +66,6 @@ function MerchView() {
       : merch.description;
 
   const userIsOwner = user?.id === artist.userId || user?.isAdmin;
-
-  const userHasPurchasedMerch = user?.merchPurchase?.some(
-    (m) => m.merchId === merch.id
-  );
 
   return (
     <WidthContainer variant="big" justify="center">

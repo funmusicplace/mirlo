@@ -42,8 +42,6 @@ const MerchDownloadableContent: React.FC<{ merch: Merch; artist: Artist }> = ({
 
   const { user } = useAuthContext();
 
-  console.log("user", user);
-
   const userIsOwner = user?.id === artist.userId || user?.isAdmin;
 
   const userHasPurchasedMerch = user?.merchPurchase?.some(
@@ -53,14 +51,17 @@ const MerchDownloadableContent: React.FC<{ merch: Merch; artist: Artist }> = ({
   if (userHasPurchasedMerch || userIsOwner) {
     return merch.downloadableContent && merch.downloadableContent.length > 0 ? (
       <div
-        className={css`
-          margin: 1.5rem 1rem 0 1rem;
-          @media screen and (max-width: ${bp.small}px) {
-            max-width: 100%;
-            flex: 100%;
-            margin-left: 0;
-          }
-        `}
+        className={
+          "includes " +
+          css`
+            margin: 1.5rem 1rem 0 1rem;
+            @media screen and (max-width: ${bp.small}px) {
+              max-width: 100%;
+              flex: 100%;
+              margin-left: 0;
+            }
+          `
+        }
       >
         <p>
           <strong>{t("yourPurchaseIncludes")}</strong>

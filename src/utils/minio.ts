@@ -67,7 +67,7 @@ const {
 } = process.env;
 
 export const backendStorage: "minio" | "backblaze" =
-  NODE_ENV === "production" ? "backblaze" : "backblaze";
+  NODE_ENV === "production" ? "backblaze" : "minio";
 
 // and access keys as shown below.
 export const minioClient =
