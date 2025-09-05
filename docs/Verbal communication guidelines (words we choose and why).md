@@ -21,7 +21,7 @@ Feel free to reach out if there's anything you'd like to see changed or added to
 
 \-discussed [here](https://discord.com/channels/1070731899317796974/1245375152246755441)  
 
-> we're happy to be a testing ground for advocating for gender inclusive language in different languages, so if that means using new or unusual pronouns or conjugations I think that's fine. But I also think we should not be prescriptive across all languages because what makes sense in one place / language might not make sense in another.  
+We're happy to be a testing ground for advocating for gender inclusive language in different languages, so if that means using new or unusual pronouns or conjugations, go ahead. But we're not prescriptive either across all languages, because what makes sense for one culture or language might not make sense in another.
 
 Whenever possible, try to:
 
@@ -34,7 +34,7 @@ Whenever possible, try to:
     This may considerably increase the lenght of your sentence.  
     
 
-This list is only recomendations, feel free to mix and match them with your own tricks and weight them down depending on the occasion and the language you're using. Keep in mind: what we write and say should always be respectful _and_ understandable.  
+Feel free to mix and match these recommandations with your own personal tricks, and weight them down depending on the occasion and the language you're using. Keep in mind: what we write and say should always be respectful _and_ understandable.  
 
 ## Easy to read, easy to learn
 
@@ -47,7 +47,7 @@ Mirlo's communications wil be read by people from widely different backgrounds. 
 *   Choose words which most can understand  
     Avoid excessive technical vocabulary and jargon when possible, as well as long-winded, complex sentences.  
     
-*   Keep long explanations o  
+*   Keep long explanations out of the main document  
     If you have to explain something, do it with a few words, but if a longer explanation is warranted, use tools like footnotes, external links, appendices documents etc...  
     
 *   Reuse the same words for the same concept  
