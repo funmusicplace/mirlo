@@ -68,9 +68,10 @@ export const BulkTrackUpload: React.FC<{
       if (firstTrack) {
         const metadata = pick(firstTrack.t.metadata, ["format", "common"]);
         delete metadata.common.picture;
-
+        console.log("f", firstTrack);
         const packet = {
           title: firstTrack.t.title,
+          filename: firstTrack.t.file.name,
           metadata: metadata,
           artistId: trackgroup.artistId,
           isPreview: firstTrack.t.status === "preview",
@@ -94,19 +95,45 @@ export const BulkTrackUpload: React.FC<{
         let newTrack: Track | undefined = undefined;
 
         try {
-          const response = await api.post<Partial<Track>, { result: Track }>(
-            `manage/tracks`,
-            packet
-          );
+          const response = await api.post<
+            Partial<Track>,
+            { result: Track; uploadUrl: string }
+          >(`manage/tracks`, packet);
           console.log("successfully created track", firstTrack);
+          console.log("uploadUrl", response.uploadUrl);
           newTrack = response.result;
           setUploadQueue((queue) =>
             produceNewStatus(queue, firstTrack.t.title, 25)
           );
           console.log("attempting to upload file", firstTrack.t.file);
-          await api.uploadFile(`manage/tracks/${newTrack.id}/audio`, [
-            firstTrack.t.file,
-          ]);
+          if (
+            response.uploadUrl &&
+            // We maintain this specific catch because of CORS issues
+            // with uploading directly to minio. See /docs/FilesStorage.md
+            // for more details.
+            !response.uploadUrl.includes("minio:9000")
+          ) {
+            const result = await fetch(response.uploadUrl, {
+              method: "PUT",
+              body: firstTrack.t.file,
+              headers: {
+                Origin: "http://minio:9000",
+              },
+            });
+            if (result.ok) {
+              // Tell the backend to process the uploaded audio
+              await api.put(`manage/tracks/${newTrack.id}/process`, {
+                source: "upload",
+              });
+              setUploadQueue((queue) =>
+                produceNewStatus(queue, firstTrack.t.title, 90)
+              );
+            }
+          } else {
+            await api.uploadFile(`manage/tracks/${newTrack.id}/audio`, [
+              firstTrack.t.file,
+            ]);
+          }
         } catch (e) {
           console.error(e);
           snackbar(

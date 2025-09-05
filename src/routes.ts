@@ -102,6 +102,7 @@ const routes = [
   "manage/sales",
   "manage/tracks",
   "manage/tracks/{trackId}/audio",
+  "manage/tracks/{trackId}/process",
   "manage/tracks/{trackId}/downloadOriginal",
   "manage/tracks/{trackId}",
   "manage/tracks/{trackId}/trackArtists",

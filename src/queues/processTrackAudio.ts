@@ -12,7 +12,7 @@ import {
 } from "../utils/minio";
 import { verifyAudioQueue } from "./verify-audio-queue";
 
-const buildTrackStreamURL = (trackId: number) => {
+export const buildTrackStreamURL = (trackId: number) => {
   return `/v1/tracks/${trackId}/stream/playlist.m3u8`;
 };
 
@@ -91,6 +91,31 @@ audioQueueEvents.on("stalled", async (result: { jobId: string }) => {
 audioQueueEvents.on("error", async (error) => {
   logger.error(`jobId ${JSON.stringify(error)} had an error`);
 });
+
+export const startAudioQueueForTrack = async (trackId: number) => {
+  const track = await prisma.track.findFirst({
+    where: {
+      id: trackId,
+    },
+    include: {
+      audio: true,
+    },
+  });
+
+  if (track && track.audio && track.audio.uploadState !== "SUCCESS") {
+    const job = await audioQueue.add("upload-audio", {
+      audioId: track.audio.id,
+      fileExtension: track.audio.fileExtension,
+    });
+    logger.info(`trackId: ${track.id} sent to audioQueue with jobId ${job.id}`);
+
+    return job;
+  } else {
+    logger.info(
+      `trackId: ${trackId} not sent to audioQueue - no audio or already uploaded`
+    );
+  }
+};
 
 /*
  * Process an audio then queue it for upload

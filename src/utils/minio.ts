@@ -15,6 +15,7 @@ import {
 import fs from "fs";
 import logger from "../logger";
 import { Upload } from "@aws-sdk/lib-storage";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { Readable } from "stream";
 
 const s3UniquePrefix = "";
@@ -231,6 +232,36 @@ export const uploadFilesToBackblaze = async (
   logger.info(
     `${backendStorage}: done uploading filestream|buffer: ${bucket}/${fileName}`
   );
+};
+
+export const getPresignedUploadUrl = async (
+  bucket: string,
+  fileName: string,
+  expiresInSeconds = 3600
+) => {
+  if (backendStorage === "backblaze") {
+    if (!backblazeClient) {
+      throw new Error("Backblaze client is not initialized");
+    }
+    const command = new PutObjectCommand({
+      Bucket: bucket,
+      Key: fileName,
+    });
+
+    const url = await getSignedUrl(backblazeClient, command, {
+      expiresIn: expiresInSeconds,
+    });
+    return url;
+  } else if (backendStorage === "minio" && minioClient) {
+    const url = await minioClient.presignedGetObject(
+      bucket,
+      fileName,
+      expiresInSeconds
+    );
+    return url;
+  } else {
+    throw new Error("No storage backend configured");
+  }
 };
 
 export const uploadWrapper = async (

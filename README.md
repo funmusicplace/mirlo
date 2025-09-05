@@ -123,9 +123,9 @@ Some cron jobs exist:
 docker exec -it blackbird-api yarn ts-node src/jobs/every-minute-tasks.ts
 ```
 
-## MinIO
+## File Storage
 
-You can access dev MinIO at localhost:9001 with the MINIO_ROOT_USER and MINIO_ROOT_PASSWORD you set in .env
+See [the file storage docs](/docs/FileStorage.md) for details.
 
 ## Database
 
