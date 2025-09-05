@@ -14,6 +14,8 @@ import { QUERY_KEY_MERCH } from "queries/queryKeys";
 import SelectTrackGroup from "./SelectTrackGroup";
 import { useQueryClient } from "@tanstack/react-query";
 import { ArtistButton } from "components/Artist/ArtistButtons";
+import DownloadableContent from "./DownloadableContent";
+import FeatureFlag from "components/common/FeatureFlag";
 
 const MerchForm: React.FC<{
   merch: Merch;
@@ -142,6 +144,9 @@ const MerchForm: React.FC<{
         </FormComponent>
 
         <SelectTrackGroup merch={merch} reload={reload} />
+        <FeatureFlag featureFlag="downloadableContent">
+          <DownloadableContent merch={merch} reload={reload} />
+        </FeatureFlag>
         <ArtistButton
           size="big"
           rounded

@@ -67,7 +67,7 @@ const {
 } = process.env;
 
 export const backendStorage: "minio" | "backblaze" =
-  NODE_ENV === "production" ? "backblaze" : "minio";
+  NODE_ENV === "production" ? "backblaze" : "backblaze";
 
 // and access keys as shown below.
 export const minioClient =
@@ -242,6 +242,7 @@ export const getPresignedUploadUrl = async (
   fileName: string,
   expiresInSeconds = 3600
 ) => {
+  await createBucketIfNotExists(bucket);
   if (backendStorage === "backblaze") {
     if (!backblazeClient) {
       throw new Error("Backblaze client is not initialized");

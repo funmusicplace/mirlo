@@ -34,7 +34,7 @@ export default function () {
         merch = await doesMerchBelongToUser(merchId, loggedInUser);
       }
 
-      if (!trackGroup || !merch) {
+      if (!trackGroup && !merch) {
         res
           .status(403)
           .json({ error: "You do not own this track group or merch" });

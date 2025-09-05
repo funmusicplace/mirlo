@@ -12,6 +12,7 @@ import { css } from "@emotion/css";
 import { FaTimes } from "react-icons/fa";
 import { hasId } from "../ManageTrackGroup/AlbumFormComponents/ManageTags";
 import LoadingSpinner from "components/common/LoadingSpinner";
+import { ArtistButton } from "components/Artist/ArtistButtons";
 
 const SelectTrackGroup: React.FC<{
   merch: Merch;
@@ -61,7 +62,9 @@ const SelectTrackGroup: React.FC<{
           `}
         >
           {currentTrackGroup.title}
-          <FaTimes
+          <ArtistButton
+            startIcon={<FaTimes />}
+            variant="dashed"
             onClick={() => doSave(null)}
             className={css`
               cursor: pointer;
@@ -79,7 +82,7 @@ const SelectTrackGroup: React.FC<{
           filterByArtistId={merch.artistId}
           placeholder={t("typeAlbumName") ?? ""}
         />
-        {isSaving && <LoadingSpinner />}
+        {isSaving && <LoadingSpinner size="small" />}
       </div>
       <small
         className={css`

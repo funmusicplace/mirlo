@@ -73,13 +73,6 @@ export const PublicTrackGroupListing: React.FC<{
             size={size}
           />
         ))}
-        {!isLoading && displayTracks.length === 0 && (
-          <tr>
-            <td colSpan={999} style={{ textAlign: "center" }}>
-              {t("noTracks")}
-            </td>
-          </tr>
-        )}
       </tbody>
     </Table>
   );

@@ -28,6 +28,7 @@ import PublicTrackGroupListing from "components/common/TrackTable/PublicTrackGro
 
 import MerchButtonPopUp from "./MerchButtonPopUp";
 import { ArtistButtonLink } from "components/Artist/ArtistButtons";
+import MerchDownloadableContent from "./MerchDownloadableContent";
 
 function MerchView() {
   const { t } = useTranslation("translation", {
@@ -42,6 +43,8 @@ function MerchView() {
   const { data: merch, isLoading: isLoadingMerch } = useQuery(
     queryMerch({ merchId: merchId ?? "", artistId: artistId ?? "" })
   );
+
+  console.log("user", user);
 
   const { data: stripeAccountStatus } = useQuery(
     queryUserStripeStatus(artist?.userId ?? 0)
@@ -65,6 +68,10 @@ function MerchView() {
       : merch.description;
 
   const userIsOwner = user?.id === artist.userId || user?.isAdmin;
+
+  const userHasPurchasedMerch = user?.merchPurchase?.some(
+    (m) => m.merchId === merch.id
+  );
 
   return (
     <WidthContainer variant="big" justify="center">
@@ -201,6 +208,7 @@ function MerchView() {
                   size="small"
                 />
               )}
+              <MerchDownloadableContent merch={merch} artist={artist} />
             </div>
           </div>
         </div>

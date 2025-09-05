@@ -219,33 +219,42 @@ export const contentBelongsToLoggedInUser = async (
         httpCode: 401,
       });
     } else {
-      if (!trackGroupId && !merchId) {
+      const content = await prisma.downloadableContent.findFirst({
+        where: {
+          id: req.params.contentId,
+        },
+        include: {
+          trackGroups: {
+            where: {
+              trackGroup: {
+                artist: {
+                  userId: loggedInUser.id,
+                },
+              },
+            },
+          },
+          merch: {
+            where: {
+              merch: {
+                artist: {
+                  userId: loggedInUser.id,
+                },
+              },
+            },
+          },
+        },
+      });
+      if (!content) {
         throw new AppError({
-          description: "No trackGroupId or merchId provided",
-          httpCode: 400,
+          description: "Content does not exist",
+          httpCode: 404,
         });
       }
-      if (trackGroupId) {
-        const trackGroup = await doesTrackGroupBelongToUser(
-          Number(trackGroupId),
-          loggedInUser
-        );
-        if (!trackGroup) {
-          throw new AppError({
-            description: "TrackGroup does not exist or does not belong to user",
-            httpCode: 400,
-          });
-        }
-      }
-      if (merchId) {
-        const merch = await doesMerchBelongToUser(merchId, loggedInUser);
-
-        if (!merch) {
-          throw new AppError({
-            description: "Merch does not exist or does not belong to user",
-            httpCode: 400,
-          });
-        }
+      if (content.trackGroups.length === 0 && content.merch.length === 0) {
+        throw new AppError({
+          description: "Content does not belong to user",
+          httpCode: 403,
+        });
       }
     }
   } catch (e) {

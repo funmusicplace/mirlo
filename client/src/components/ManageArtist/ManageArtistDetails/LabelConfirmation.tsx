@@ -28,8 +28,6 @@ const LabelConfirmation: React.FC = () => {
     queryArtistLabels(Number(artistId))
   );
 
-  console.log("labelRelationships", labelRelationships);
-
   const { control, setValue } = useForm<{ relationships: ArtistLabel[] }>({
     defaultValues: {
       relationships: labelRelationships,
@@ -60,8 +58,6 @@ const LabelConfirmation: React.FC = () => {
     refetchLabels();
   };
 
-  console.log("fields", fields);
-
   if (isArtistLoading) {
     return (
       <Box variant="info">
@@ -70,13 +66,9 @@ const LabelConfirmation: React.FC = () => {
     );
   }
 
-  console.log("artist", artist);
-
   if (!artist) {
     return null;
   }
-
-  console.log("proceeding");
 
   return (
     <Box

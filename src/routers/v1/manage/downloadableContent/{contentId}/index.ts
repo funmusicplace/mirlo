@@ -2,11 +2,11 @@ import { NextFunction, Request, Response } from "express";
 import {
   contentBelongsToLoggedInUser,
   userAuthenticated,
-} from "../../../../auth/passport";
+} from "../../../../../auth/passport";
 import prisma from "@mirlo/prisma";
 
-import { AppError } from "../../../../utils/error";
-import { deleteDownloadableContent } from "../../../../utils/content";
+import { AppError } from "../../../../../utils/error";
+import { deleteDownloadableContent } from "../../../../../utils/content";
 
 type Params = {
   contentId: string;
@@ -79,7 +79,7 @@ export default function () {
     parameters: [
       {
         in: "path",
-        name: "downloadableContentId",
+        name: "contentId",
         required: true,
         type: "string",
       },

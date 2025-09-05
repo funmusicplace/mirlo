@@ -5,6 +5,7 @@ interface FeatureFlagProps {
   featureFlag:
     | "label"
     | "activityPub"
+    | "downloadableContent"
     | "subscriptionFulfillment"
     | "fundraiser";
   children: React.ReactNode;
