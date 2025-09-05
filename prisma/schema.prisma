@@ -433,6 +433,7 @@ model Merch {
   optionTypes                 MerchOptionType[]
   purchases                   MerchPurchase[]
   stripeProductKey            String?
+  downloadableContent         MerchDownloadableContent[]
 }
 
 model MerchItemType {
@@ -579,45 +580,46 @@ model TrackGroupDownloadCodes {
 }
 
 model TrackGroup {
-  id                              Int                       @id @default(autoincrement())
+  id                              Int                             @id @default(autoincrement())
   about                           String?
-  artist                          Artist                    @relation(fields: [artistId], references: [id])
+  artist                          Artist                          @relation(fields: [artistId], references: [id])
   artistId                        Int
   title                           String?
-  isDrafts                        Boolean                   @default(false)
+  isDrafts                        Boolean                         @default(false)
   tracks                          Track[]
   cover                           TrackGroupCover?
-  published                       Boolean                   @default(false)
+  published                       Boolean                         @default(false)
   type                            String?
-  isGettable                      Boolean                   @default(true)
-  releaseDate                     DateTime                  @default(now())
-  adminEnabled                    Boolean                   @default(true)
-  createdAt                       DateTime                  @default(now())
-  updatedAt                       DateTime                  @updatedAt
+  isGettable                      Boolean                         @default(true)
+  releaseDate                     DateTime                        @default(now())
+  adminEnabled                    Boolean                         @default(true)
+  createdAt                       DateTime                        @default(now())
+  updatedAt                       DateTime                        @updatedAt
   deletedAt                       DateTime?
   minPrice                        Int? // in cents
-  currency                        String?                   @default("usd")
-  isPriceFixed                    Boolean                   @default(false)
+  currency                        String?                         @default("usd")
+  isPriceFixed                    Boolean                         @default(false)
   defaultTrackMinPrice            Int? // in cents
-  defaultTrackAllowIndividualSale Boolean                   @default(false)
-  defaultAllowMirloPromo          Boolean                   @default(false)
+  defaultTrackAllowIndividualSale Boolean                         @default(false)
+  defaultAllowMirloPromo          Boolean                         @default(false)
   userTrackGroupPurchases         UserTrackGroupPurchase[]
   stripeProductKey                String?
   urlSlug                         String
   orderIndex                      Int?
   credits                         String?
   userTrackGroupWishlist          UserTrackGroupWishlist[]
-  platformPercent                 Int?                      @default(7)
+  platformPercent                 Int?                            @default(7)
   tags                            TrackGroupTag[]
   downloadCodes                   TrackGroupDownloadCodes[]
   notifications                   Notification[]
   merch                           Merch[]
   paymentToUserId                 Int?
-  paymentToUser                   User?                     @relation(fields: [paymentToUserId], references: [id])
+  paymentToUser                   User?                           @relation(fields: [paymentToUserId], references: [id])
   fundraisingGoal                 Int? // in cents
   fundraisingEndDate              DateTime?
-  isAllOrNothing                  Boolean                   @default(false)
+  isAllOrNothing                  Boolean                         @default(false)
   pledges                         TrackGroupPledge[]
+  downloadableContent             TrackGroupDownloadableContent[]
 
   @@unique([artistId, urlSlug])
 }
@@ -767,4 +769,36 @@ model Tag {
   id             Int             @id @default(autoincrement())
   tag            String          @unique
   trackGroupTags TrackGroupTag[]
+}
+
+model DownloadableContent {
+  id               String                          @id @default(uuid()) @db.Uuid
+  url              String?                         @unique
+  originalFilename String?
+  fileExtension    String?
+  uploadState      UploadState                     @default(STARTED)
+  mimeType         String?
+  size             Int?
+  createdAt        DateTime                        @default(now())
+  updatedAt        DateTime                        @updatedAt
+  trackGroups      TrackGroupDownloadableContent[]
+  merch            MerchDownloadableContent[]
+}
+
+model TrackGroupDownloadableContent {
+  trackGroupId          Int
+  trackGroup            TrackGroup          @relation(fields: [trackGroupId], references: [id])
+  downloadableContentId String              @db.Uuid
+  downloadableContent   DownloadableContent @relation(fields: [downloadableContentId], references: [id])
+
+  @@unique([trackGroupId, downloadableContentId])
+}
+
+model MerchDownloadableContent {
+  merchId               String              @db.Uuid
+  merch                 Merch               @relation(fields: [merchId], references: [id])
+  downloadableContentId String              @db.Uuid
+  downloadableContent   DownloadableContent @relation(fields: [downloadableContentId], references: [id])
+
+  @@unique([merchId, downloadableContentId])
 }

@@ -215,6 +215,17 @@ const downloadCover = async ({
     if (buffer) {
       await fsPromises.writeFile(coverDestination, buffer);
     }
+
+    const { buffer: buffer2 } = await getBufferFromStorage(
+      finalCoversBucket,
+      `${coverId}-x1500.jpg`
+    );
+    if (buffer2) {
+      await fsPromises.writeFile(
+        coverDestination.replace(".webp", ".jpg"),
+        buffer2
+      );
+    }
   }
 };
 

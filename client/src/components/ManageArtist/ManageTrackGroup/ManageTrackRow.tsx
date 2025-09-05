@@ -203,7 +203,7 @@ const ManageTrackRow: React.FC<{
                 {uploadState === "SUCCESS" && t("doneUploadingTrack")}
                 {uploadState === "STARTED" && (
                   <>
-                    <LoadingSpinner />
+                    <LoadingSpinner size="small" />
                     {t("stillProcessing")}
                   </>
                 )}

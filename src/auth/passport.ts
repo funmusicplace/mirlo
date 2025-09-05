@@ -200,6 +200,69 @@ export const trackGroupBelongsToLoggedInUser = async (
   return next();
 };
 
+export const contentBelongsToLoggedInUser = async (
+  req: Request,
+  _res: Response,
+  next: NextFunction
+) => {
+  const { trackGroupId, merchId } = req.params as unknown as {
+    trackGroupId?: string;
+    merchId?: string;
+  };
+
+  const loggedInUser = req.user as User | undefined;
+
+  try {
+    if (!loggedInUser) {
+      throw new AppError({
+        description: "Not logged in user",
+        httpCode: 401,
+      });
+    } else {
+      const content = await prisma.downloadableContent.findFirst({
+        where: {
+          id: req.params.contentId,
+        },
+        include: {
+          trackGroups: {
+            where: {
+              trackGroup: {
+                artist: {
+                  userId: loggedInUser.id,
+                },
+              },
+            },
+          },
+          merch: {
+            where: {
+              merch: {
+                artist: {
+                  userId: loggedInUser.id,
+                },
+              },
+            },
+          },
+        },
+      });
+      if (!content) {
+        throw new AppError({
+          description: "Content does not exist",
+          httpCode: 404,
+        });
+      }
+      if (content.trackGroups.length === 0 && content.merch.length === 0) {
+        throw new AppError({
+          description: "Content does not belong to user",
+          httpCode: 403,
+        });
+      }
+    }
+  } catch (e) {
+    next(e);
+  }
+  return next();
+};
+
 export const merchBelongsToLoggedInUser = async (
   req: Request,
   _res: Response,

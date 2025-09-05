@@ -44,6 +44,7 @@ interface LoggedInUser {
     sizes?: { [key: number]: string };
     updatedAt: string;
   };
+  merchPurchase?: MerchPurchase[];
 }
 
 interface Track {
@@ -128,6 +129,7 @@ interface TrackGroup {
   isPriceFixed: boolean;
   fundraisingGoal?: number;
   fundraisingEndDate?: string;
+  downloadableContent?: TrackGroupDownloadableContent[];
 }
 
 interface Post {
@@ -405,6 +407,7 @@ interface Merch {
   }[];
   shippingDestinations: ShippingDestination[];
   optionTypes?: MerchOptionType[];
+  downloadableContent?: MerchDownloadableContent[];
 }
 
 interface Label {
@@ -436,4 +439,29 @@ interface MerchPurchase {
     state?: string;
     country?: string;
   };
+}
+
+interface DownloadableContent {
+  id: number;
+  createdAt: string;
+  updatedAt: string;
+  originalFilename: string;
+  trackGroups: TrackGroupDownloadableContent[];
+  merch: MerchDownloadableContent[];
+
+  downloadUrl?: string;
+}
+
+interface MerchDownloadableContent {
+  merchId: string;
+  merch: Merch;
+  downloadableContentId: number;
+  downloadableContent: DownloadableContent;
+}
+
+interface TrackGroupDownloadableContent {
+  trackGroupId: number;
+  trackGroup: TrackGroup;
+  downloadableContentId: number;
+  downloadableContent: DownloadableContent;
 }

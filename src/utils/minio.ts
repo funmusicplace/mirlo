@@ -51,6 +51,9 @@ export const finalAudioBucket = s3UniquePrefix + "track-audio";
 export const trackGroupFormatBucket = s3UniquePrefix + "trackgroup-format";
 export const trackFormatBucket = s3UniquePrefix + "track-format";
 
+export const downloadableContentBucket =
+  s3UniquePrefix + "mirlo-downloadable-content";
+
 const {
   MINIO_HOST = "",
   MINIO_ROOT_USER = "",
@@ -239,6 +242,7 @@ export const getPresignedUploadUrl = async (
   fileName: string,
   expiresInSeconds = 3600
 ) => {
+  await createBucketIfNotExists(bucket);
   if (backendStorage === "backblaze") {
     if (!backblazeClient) {
       throw new Error("Backblaze client is not initialized");

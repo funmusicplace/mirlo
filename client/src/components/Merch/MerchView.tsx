@@ -28,6 +28,7 @@ import PublicTrackGroupListing from "components/common/TrackTable/PublicTrackGro
 
 import MerchButtonPopUp from "./MerchButtonPopUp";
 import { ArtistButtonLink } from "components/Artist/ArtistButtons";
+import MerchDownloadableContent from "./MerchDownloadableContent";
 
 function MerchView() {
   const { t } = useTranslation("translation", {
@@ -201,6 +202,7 @@ function MerchView() {
                   size="small"
                 />
               )}
+              <MerchDownloadableContent merch={merch} artist={artist} />
             </div>
           </div>
         </div>

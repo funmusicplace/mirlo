@@ -172,6 +172,7 @@ export const trackGroupSingleInclude = (options: {
         userAvatar: true,
       },
     },
+    downloadableContent: true,
     artist: true,
     merch: {
       include: {

@@ -8,7 +8,6 @@ import Background from "components/common/Background";
 import Button from "./Button";
 import styled from "@emotion/styled";
 import { useLocation } from "react-router-dom";
-import { debounce } from "lodash";
 import { useDebouncedCallback } from "use-debounce";
 
 const SearchResultsDiv = styled.div`

@@ -47,6 +47,9 @@ export default function () {
           artist: true,
           images: true,
           shippingDestinations: true,
+          downloadableContent: {
+            include: { downloadableContent: true },
+          },
           includePurchaseTrackGroup: {
             include: {
               tracks: {

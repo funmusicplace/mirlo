@@ -33,6 +33,11 @@ export default function () {
           shippingDestinations: true,
           images: true,
           includePurchaseTrackGroup: true,
+          downloadableContent: {
+            include: {
+              downloadableContent: true,
+            },
+          },
           optionTypes: { include: { options: true } },
         },
       });

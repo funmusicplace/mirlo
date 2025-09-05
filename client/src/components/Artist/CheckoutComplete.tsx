@@ -10,6 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import { queryArtist, queryMerch, queryTrackGroup } from "queries";
 import { getMerchUrl, getReleaseUrl, getTrackUrl } from "utils/artist";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
+import MerchDownloadableContent from "components/Merch/MerchDownloadableContent";
 
 function CheckoutComplete() {
   const { t } = useTranslation("translation", {
@@ -21,6 +22,7 @@ function CheckoutComplete() {
   const [searchParams] = useSearchParams();
   const trackGroupId = searchParams.get("trackGroupId");
   const trackId = searchParams.get("trackId");
+  const merchId = searchParams.get("merchId");
   const { data: trackGroup } = useQuery(
     queryTrackGroup({ albumSlug: trackGroupId })
   );
@@ -31,7 +33,7 @@ function CheckoutComplete() {
   const { data: merch } = useQuery(
     queryMerch({
       artistId: artistId ?? "",
-      merchId: searchParams.get("merchId") ?? "",
+      merchId: merchId ?? "",
     })
   );
   const track = trackGroup?.tracks.find((t) => t.id === Number(trackId));
@@ -104,6 +106,14 @@ function CheckoutComplete() {
               flex-direction: column;
 
               justify-content: flex-start;
+
+              .includes {
+                padding: 1.5rem 0.5rem;
+                border: 1px dashed ${artist.properties?.colors?.secondary};
+                ul {
+                  list-style: none;
+                }
+              }
             `}
           >
             <span>
@@ -134,14 +144,19 @@ function CheckoutComplete() {
                 />
               )}
               {purchaseType === "merch" && merch && (
-                <Trans
-                  t={t}
-                  i18nKey="youveBoughtMerch"
-                  components={{
-                    linkToMerch: <Link to={getMerchUrl(artist, merch)}></Link>,
-                  }}
-                  values={{ title: merch.title }}
-                />
+                <>
+                  <Trans
+                    t={t}
+                    i18nKey="youveBoughtMerch"
+                    components={{
+                      linkToMerch: (
+                        <Link to={getMerchUrl(artist, merch)}></Link>
+                      ),
+                    }}
+                    values={{ title: merch.title }}
+                  />
+                  <MerchDownloadableContent merch={merch} artist={artist} />
+                </>
               )}
               {purchaseType === "tip" && t("youveTippedArtist")}
             </span>
