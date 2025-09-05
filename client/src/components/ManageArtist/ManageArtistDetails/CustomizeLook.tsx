@@ -87,6 +87,7 @@ const generateDefaults = (existing?: Artist) => ({
   urlSlug: existing?.urlSlug ?? "",
   activityPub: existing?.activityPub ?? false,
   defaultPlatformFee: existing?.defaultPlatformFee ?? 10,
+  shortDescription: existing?.shortDescription ?? "",
   properties: {
     colors: {
       primary: "",
@@ -235,6 +236,15 @@ export const CustomizeLook: React.FC = () => {
                 >
                   <label>{t("urlSlug")} </label>
                   <ArtistSlugInput currentArtistId={existingId} type="artist" />
+                </FormComponent>
+                <FormComponent>
+                  <label>{t("shortDescription")}</label>
+                  <SavingInput
+                    formKey="shortDescription"
+                    maxLength={160}
+                    url={`manage/artists/${artist.id}`}
+                    extraData={{}}
+                  />
                 </FormComponent>
                 <FormComponent>
                   <label>{t("bio")}</label>

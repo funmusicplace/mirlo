@@ -729,6 +729,7 @@
   },
   "artistForm": {
     "deleteArtist": "Permanently delete artist page",
+    "shortDescription": "Something short about you",
     "areYouSureDelete": "Are your sure you want to delete this artist page?",
     "whatLabelsisThisArtistPartOf": "What label is this artist a part of?",
     "terminationDanger": " Artist page termination ",
@@ -737,7 +738,7 @@
     "yourAvatar": "your avatar",
     "backgroundImageDescription": "the image that appears in the background of your page",
     "displayName": "Display name",
-    "bio": "Artist biography",
+    "bio": "About / biography",
     "urlSlug": "Text that will appear in the URL",
     "replaceImage": "Replace image",
     "releasesTab": "Releases tab",

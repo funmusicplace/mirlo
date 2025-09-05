@@ -196,7 +196,21 @@ const ArtistHeaderSection: React.FC<{
                     <ArtistTitle artistAvatar={!!artistAvatar}>
                       {artist.name}
                     </ArtistTitle>
-
+                    {artist.shortDescription && (
+                      <div
+                        className={css`
+                          font-size: 1rem;
+                          line-height: 1.2rem;
+                          margin-top: 0.25rem;
+                          @media screen and (max-width: ${bp.medium}px) {
+                            font-size: 0.9rem;
+                            line-height: 1.1rem;
+                          }
+                        `}
+                      >
+                        {artist.shortDescription}
+                      </div>
+                    )}
                     <ArtistFormLocation
                       isManage={!!isManage}
                       artist={artist}

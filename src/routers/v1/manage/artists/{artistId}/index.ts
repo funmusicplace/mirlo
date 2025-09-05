@@ -39,6 +39,7 @@ export default function () {
       purchaseEntireCatalogMinPrice,
       defaultPlatformFee,
       tourDates,
+      shortDescription,
     } = req.body;
 
     try {
@@ -56,6 +57,7 @@ export default function () {
           activityPub,
           purchaseEntireCatalogMinPrice,
           defaultPlatformFee,
+          shortDescription,
           ...(urlSlug
             ? { urlSlug: slugify(urlSlug, { strict: true, lower: true }) }
             : {}),

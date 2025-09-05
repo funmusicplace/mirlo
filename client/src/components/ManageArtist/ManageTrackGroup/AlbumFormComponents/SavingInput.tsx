@@ -22,6 +22,7 @@ const SavingInput: React.FC<{
   timer?: number;
   rows?: number;
   min?: number;
+  maxLength?: number;
   required?: boolean;
   step?: string;
   type?: string;
@@ -40,6 +41,7 @@ const SavingInput: React.FC<{
   id,
   timer,
   step,
+  maxLength,
   reload,
   onEnter,
 }) => {
@@ -130,6 +132,7 @@ const SavingInput: React.FC<{
           step={step}
           min={min}
           id={id}
+          maxLength={maxLength}
           onKeyUp={(e) => {
             if (e.key === "Enter") {
               onEnter?.();
