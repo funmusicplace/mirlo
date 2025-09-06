@@ -93,9 +93,9 @@ export default function () {
       const newValues = pick(data, [
         "title",
         "releaseDate",
-        "published",
         "type",
         "about",
+        "published",
         "minPrice",
         "credits",
         "platformPercent",
@@ -104,7 +104,12 @@ export default function () {
         "fundraisingEndDate",
         "fundraisingGoal",
         "isAllOrNothing",
+        "publishedAt",
       ]);
+
+      if (newValues.publishedAt) {
+        newValues.published = new Date(newValues.publishedAt) <= new Date();
+      }
 
       await prisma.trackGroup.updateMany({
         where: { id: Number(trackGroupId), artistId: artist.id },

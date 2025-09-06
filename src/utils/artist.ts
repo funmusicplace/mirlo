@@ -415,10 +415,9 @@ export const singleInclude = (queryOptions?: {
   return {
     trackGroups: {
       where: {
-        published: true,
+        OR: [{ published: true }, { publishedAt: { lte: new Date() } }],
         deletedAt: null,
         isDrafts: false,
-        tracks: { some: { audio: { uploadState: "SUCCESS" } } },
       },
       orderBy: [
         {

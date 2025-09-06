@@ -20,7 +20,7 @@ export default function () {
       );
       const updatedTrackgroup = await prisma.trackGroup.update({
         where: { id: Number(trackGroupId) || undefined },
-        data: { published: !trackGroup?.published },
+        data: { published: !trackGroup?.published, publishedAt: new Date() },
       });
       if (updatedTrackgroup.published) {
         const artistFollowers = await prisma.artistUserSubscription.findMany({

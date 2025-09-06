@@ -34,10 +34,18 @@ const ManageArtistAlbums: React.FC<{}> = () => {
   );
 
   const publishedReleases =
-    trackGroups?.results.filter((album) => album.published) ?? [];
+    trackGroups?.results.filter(
+      (album) =>
+        album.published ||
+        (album.publishedAt && new Date(album.publishedAt) < new Date())
+    ) ?? [];
 
   const unpublishedReleases =
-    trackGroups?.results.filter((album) => !album.published) ?? [];
+    trackGroups?.results.filter(
+      (album) =>
+        !album.published &&
+        !(album.publishedAt && new Date(album.publishedAt) < new Date())
+    ) ?? [];
 
   return (
     <ManageSectionWrapper>

@@ -2,7 +2,7 @@ import { css } from "@emotion/css";
 
 import { useParams } from "react-router-dom";
 import ClickToPlayTracks from "../common/ClickToPlayTracks";
-import Box from "../common/Box";
+import Box, { ArtistBox } from "../common/Box";
 import { useTranslation } from "react-i18next";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
 import PublicTrackGroupListing from "components/common/TrackTable/PublicTrackGroupListing";
@@ -178,13 +178,14 @@ function TrackGroup() {
     return <FullPageLoadingSpinner />;
   }
 
+  const isPublished =
+    trackGroup.published ||
+    (trackGroup.publishedAt && new Date(trackGroup.publishedAt) <= new Date());
+
   const trackGroupCredits = trackGroup.credits;
   const trackGroupAbout = trackGroup.about;
 
-  const showAboutInsteadOfTrackListing =
-    trackGroup.tracks.length === 0 &&
-    (trackGroup.fundraisingGoal ?? 0) > 0 &&
-    trackGroupAbout;
+  const showAboutInsteadOfTrackListing = trackGroup.tracks.length === 0;
 
   return (
     <WidthContainer variant="big" justify="center">
@@ -215,6 +216,9 @@ function TrackGroup() {
             }
           `}
         >
+          {!isPublished && (
+            <ArtistBox variant="warning">{t("notPublishedWarning")}</ArtistBox>
+          )}
           <Fundraiser />
           <div
             className={css`
@@ -314,7 +318,19 @@ function TrackGroup() {
                     max-width: 50%;
                   `}
                 >
-                  <MarkdownContent content={trackGroup.about} />
+                  <MarkdownContent content={trackGroupAbout} />
+                  {!trackGroupAbout && (
+                    <div
+                      className={css`
+                        margin: 1.25rem 0;
+                        padding: 0.25rem;
+                        font-style: italic;
+                        opacity: 0.7;
+                      `}
+                    >
+                      <p>{t("noOtherInfoAboutThisAlbum")}</p>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
