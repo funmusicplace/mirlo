@@ -21,6 +21,9 @@ import ArtistTourDates from "components/Artist/ArtistTourDates";
 export const ArtistTitle = styled.h1<{ artistAvatar: boolean }>`
   font-size: 2.4rem;
   line-height: 2.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 
   @media screen and (max-width: ${bp.medium}px) {
     font-size: 1.2rem;

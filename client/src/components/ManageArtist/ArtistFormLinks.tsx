@@ -118,24 +118,27 @@ const ArtistFormLinks: React.FC<ArtistFormLinksProps> = ({
             }
           `}
         >
-          {links.map((l) => {
-            const site = findOutsideSite(l);
-            return (
-              <ArtistButtonAnchor
-                rel="me"
-                href={linkUrlHref(l.url, true)}
-                key={l.url}
-                variant="link"
-                startIcon={site?.icon}
-                target="_blank"
-                className={css`
-                  display: inline-flex;
-                  align-items: center;
-                `}
-              >
-              </ArtistButtonAnchor>
-            );
-          })}
+          {links
+            .sort((l) => (findOutsideSite(l).showFull ? 1 : -1))
+            .map((l) => {
+              const site = findOutsideSite(l);
+              return (
+                <ArtistButtonAnchor
+                  rel="me"
+                  href={linkUrlHref(l.url, true)}
+                  key={l.url}
+                  variant="link"
+                  startIcon={site?.icon}
+                  target="_blank"
+                  className={css`
+                    display: inline-flex;
+                    align-items: center;
+                  `}
+                >
+                  {site.showFull ? l.linkLabel || l.url : ""}
+                </ArtistButtonAnchor>
+              );
+            })}
           {!isManage && allLinks.length > links.length && (
             <ArtistButtonLink to="links" size="compact" variant="dashed">
               More links

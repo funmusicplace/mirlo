@@ -13,12 +13,15 @@ import {
 } from "components/common/LinkIconDisplay";
 import Avatar from "./Avatar";
 import { ArtistTitle } from "components/common/ArtistHeaderSection";
-import { FaChevronLeft } from "react-icons/fa";
+import { FaChevronLeft, FaPen } from "react-icons/fa";
 import { ArtistButtonAnchor, ArtistButtonLink } from "./ArtistButtons";
+import { getArtistManageUrl, getArtistUrl } from "utils/artist";
+import { useAuthContext } from "state/AuthContext";
 
 const ArtistLinks: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const { artistId } = useParams();
+  const { user } = useAuthContext();
 
   const { data: artist } = useQuery(
     queryArtist({ artistSlug: artistId ?? "" })
@@ -30,6 +33,8 @@ const ArtistLinks: React.FC = () => {
 
   const artistAvatar = artist?.avatar;
   const colors = artist?.properties?.colors;
+
+  const isOwningArtist = artist?.userId === user?.id;
 
   return (
     // <ArtistPageWrapper artistBanner={!!artistBanner}>
@@ -62,18 +67,30 @@ const ArtistLinks: React.FC = () => {
               }
             />
           )}
-          <div>
+          <div
+            className={css`
+              display: flex;
+              flex-direction: column;
+              align-items: flex-start;
+              justify-content: flex-start;
+            `}
+          >
             <ArtistTitle artistAvatar={!!artistAvatar}>
               {artist.name}
+              {isOwningArtist && (
+                <ArtistButtonLink
+                  to={getArtistManageUrl(artist.id)}
+                  variant="dashed"
+                  startIcon={<FaPen />}
+                />
+              )}
             </ArtistTitle>
             <ArtistButtonLink
-              to={`/${artist.id}`}
+              to={getArtistUrl(artist)}
               startIcon={<FaChevronLeft />}
               variant="link"
               className={css`
-                display: inline-flex;
                 margin-top: 1rem;
-                align-items: center;
               `}
             >
               {t(artist.isLabelProfile ? "backToLabel" : "backToArtist")}

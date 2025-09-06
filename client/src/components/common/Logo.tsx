@@ -2,22 +2,33 @@ import React from "react";
 import { css } from "@emotion/css";
 import { useParams } from "react-router-dom";
 
-export const Logo: React.FC<{ noWordmark?: boolean }> = ({
+export const Logo: React.FC<{
+  noWordmark?: boolean;
+  width?: number | string;
+  height?: number | string;
+  className?: string;
+}> = ({
   noWordmark = false,
+  className = "",
+  width = noWordmark ? 40 : 119,
+  height = 40,
 }) => {
-  const { artistId } = useParams();
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width="119"
-      height="40"
-      viewBox="0 0 119 40"
-      className={css`
-        fill: var(--mi-black);
-        @media (prefers-color-scheme: dark) {
-          fill: var(--mi-white);
-        }
-      `}
+      width={width}
+      height={height}
+      viewBox={`0 0 ${width} ${height}`}
+      className={
+        className +
+        " " +
+        css`
+          fill: var(--mi-black);
+          @media (prefers-color-scheme: dark) {
+            fill: var(--mi-white);
+          }
+        `
+      }
     >
       {!noWordmark && (
         <path

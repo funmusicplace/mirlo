@@ -88,6 +88,9 @@ function Artist() {
   const navigate = useNavigate();
   const canReceivePayments = stripeAccountStatus?.chargesEnabled;
 
+  const urlSlug = artist?.urlSlug;
+
+  console.log("pathname", pathname);
   React.useEffect(() => {
     const subPages = [
       "posts",
@@ -99,29 +102,30 @@ function Artist() {
       "checkout-complete",
     ];
     const end = pathname.split("/")[2];
-
+    console.log("end", subPages, end);
     if (!subPages.includes(end)) {
       if (artist?.isLabelProfile) {
-        navigate("roster", { replace: true });
+        navigate(`/${urlSlug}/roster`, { replace: true });
       } else if (artist?.trackGroups.length) {
         // has track groups
-        navigate("releases", { replace: true });
+        navigate(`/${urlSlug}/releases`, { replace: true });
       } else if (artist?.posts.length) {
         // has track groups
-        navigate("posts", { replace: true });
+        navigate(`/${urlSlug}/posts`, { replace: true });
       } else if (canReceivePayments) {
         // has track groups
-        navigate("support", { replace: true });
+        navigate(`/${urlSlug}/support`, { replace: true });
       } else if (artist?.linksJson?.length) {
         // has links
-        navigate("links", { replace: true });
+        console.log("navigating to links");
+        navigate(`/${urlSlug}/links`, { replace: true });
       }
     }
   }, [
     pathname,
     navigate,
     user?.id,
-    artist?.id,
+    urlSlug,
     artist?.trackGroups.length,
     artist?.posts.length,
     canReceivePayments,
