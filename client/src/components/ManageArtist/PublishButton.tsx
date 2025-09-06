@@ -28,6 +28,19 @@ const PublishButton: React.FC<{
 
   const publishTrackGroup = React.useCallback(async () => {
     setIsPublishing(true);
+
+    if (
+      trackGroup.publishedAt &&
+      new Date(trackGroup.publishedAt) > new Date() &&
+      !window.confirm(
+        t("publishNowInsteadOf", {
+          futureDate: trackGroup.publishedAt.split("T")[0],
+        }) ?? ""
+      )
+    ) {
+      setIsPublishing(false);
+      return;
+    }
     const noTracks = trackGroup.tracks.length === 0;
     const anyIncomplete = trackGroup.tracks.find(
       (t) => t.audio?.uploadState !== "SUCCESS"
@@ -62,6 +75,10 @@ const PublishButton: React.FC<{
     reload,
   ]);
 
+  const isPublished =
+    trackGroup.published ||
+    (trackGroup.publishedAt && new Date(trackGroup.publishedAt) <= new Date());
+
   const beforeReleaseDate = new Date(trackGroup.releaseDate) > new Date();
 
   const publishButton = beforeReleaseDate ? "publishPreorder" : "publish";
@@ -75,7 +92,17 @@ const PublishButton: React.FC<{
         display: flex;
       `}
     >
-      {artist && trackGroup.published && (
+      {" "}
+      {!isPublished && artist && (
+        <ArtistButtonLink
+          to={getReleaseUrl(artist, trackGroup)}
+          startIcon={<FaEye />}
+          variant="dashed"
+        >
+          {t("previewRelease")}
+        </ArtistButtonLink>
+      )}
+      {artist && isPublished && (
         <ArtistButtonLink
           to={getReleaseUrl(artist, trackGroup)}
           startIcon={<FaEye />}
@@ -93,7 +120,7 @@ const PublishButton: React.FC<{
           margin-left: 0.75rem;
         `}
       >
-        {t(trackGroup.published ? privateButton : publishButton)}
+        {t(isPublished ? privateButton : publishButton)}
       </ArtistButton>
     </div>
   );

@@ -58,6 +58,14 @@ const SortableArtistAlbums: React.FC = () => {
     artist?.trackGroups?.map((trackGroup) => ({ ...trackGroup, artist }))
   );
 
+  React.useEffect(() => {
+    setTrackGroups(
+      artist?.trackGroups?.map((trackGroup) => ({ ...trackGroup, artist }))
+    );
+  }, [artist?.trackGroups]);
+
+  console.log("artist", trackGroups);
+
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {

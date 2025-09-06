@@ -84,6 +84,7 @@ function Artist() {
   );
   const { data: releases } = useQuery(queryPublicLabelTrackGroups(artistId));
 
+  console.log("artist", artist);
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const canReceivePayments = stripeAccountStatus?.chargesEnabled;

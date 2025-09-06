@@ -71,6 +71,14 @@ const PurchaseOrDownloadAlbum: React.FC<{
     );
   }
 
+  const isPublished =
+    trackGroup.published ||
+    (trackGroup.publishedAt && new Date(trackGroup.publishedAt) <= new Date());
+
+  if (!isPublished) {
+    return null;
+  }
+
   const isBeforeReleaseDate = new Date(trackGroup.releaseDate) > new Date();
 
   const payOrNameYourPrice =

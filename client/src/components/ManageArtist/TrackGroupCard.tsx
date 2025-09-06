@@ -41,6 +41,11 @@ const TrackGroupCard: React.FC<{
     }
   }, [artist, album, t]);
 
+  const isPublished =
+    album.published ||
+    (album.publishedAt && new Date(album.publishedAt) < new Date());
+
+  console.log("isPublished", album.published, album.publishedAt, isPublished);
   return (
     <Box
       key={album.id}
@@ -136,8 +141,8 @@ const TrackGroupCard: React.FC<{
             {album.title}
           </div>
           <div>
-            <strong>{trackGroupCardTranslation("published")}</strong>{" "}
-            {album.published ? <FaCheck /> : <FaTimes />}
+            <strong>{trackGroupCardTranslation("publishedAt")} </strong>
+            {album.publishedAt?.split("T")[0]}
           </div>
           <div>
             <strong>{trackGroupCardTranslation("tracks")}</strong>{" "}
@@ -175,7 +180,7 @@ const TrackGroupCard: React.FC<{
           >
             {t("manageAlbum")}
           </ArtistButtonLink>
-          {album.artist && album.published && (
+          {album.artist && isPublished && (
             <ArtistButtonLink
               to={getReleaseUrl(album.artist, album)}
               size="compact"
@@ -183,6 +188,16 @@ const TrackGroupCard: React.FC<{
               startIcon={<FaEye />}
             >
               {t("viewLive")}
+            </ArtistButtonLink>
+          )}
+          {album.artist && !isPublished && (
+            <ArtistButtonLink
+              to={getReleaseUrl(album.artist, album)}
+              size="compact"
+              variant="dashed"
+              startIcon={<FaEye />}
+            >
+              {t("preview")}
             </ArtistButtonLink>
           )}
           <ArtistButton

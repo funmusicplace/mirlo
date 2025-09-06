@@ -162,6 +162,7 @@
     "removeFromFavorites": "Remove from favorites"
   },
   "trackGroupCard": {
+    "publishedAt": "Publish date:",
     "backingThisProjectFor": "Backing this project for {{amount}}",
     "messageToArtist": "This will be shown publicly on the artist's page.",
     "leaveAComment": "Show the artist some love",
@@ -466,6 +467,7 @@
   "manageArtist": {
     "albumTags": "Album tags",
     "label": "Label",
+    "preview": "Preview",
     "labelReleases": "Releases from artists on this roster",
     "labelReleasesDescription": "These are releases from artists on your roster. If you are administering payments for these artists, you'll receive payments for these releases.",
     "linkedToLabel": "This artist is linked to a label/collective <label>{{label}}</label> who have payment processing set up. You can talk to them about collecting payments.",
@@ -515,7 +517,7 @@
     "yourAlbums": "Albums",
     "manageAlbum": "Manage",
     "tools": "Tools",
-    "publish": "Publish",
+    "publish": "Publish now",
     "primaryColor": "Primary color",
     "secondaryColor": "Secondary color",
     "backgroundColor": "Background color",
@@ -633,6 +635,8 @@
   },
   "manageAlbum": {
     "allowMirloPromoLabel": "Allow Mirlo to use it for promotion?",
+    "publishedAt": "Publication date",
+    "previewRelease": "Preview release",
     "isGettable": "Is it possible for a user to buy or download this album?",
     "isGettableTooltip": "We don't want to take this for granted! Some musicians just want to share their music, but don't want to let people download it.",
     "isGettableInfo": "Disabling this will make it so that users can't buy or download your album, but they can listen to it online for free. Most people will want to leave this enabled.",
@@ -687,7 +691,8 @@
     "goal": "Goal",
     "publish": "Publish release",
     "publishedSuccess": "Successfully published album, it's now publicly available.",
-    "publishPreorder": "Publish pre-order",
+    "publishPreorder": "Publish pre-order now",
+    "publishNowInsteadOf": "You've set a future publication date of {{ futureDate }}. Do you want to publish it now instead?",
     "uploadTracks": "Manage tracks",
     "uploadTracksDescription": "Attach files from your computer to get started uploading tracks.",
     "addTheFollowingTracks": "We'll add the following tracks",
@@ -889,6 +894,8 @@
   },
   "trackGroupDetails": {
     "trackgroup": "Album:",
+    "noOtherInfoAboutThisAlbum": "There is no other information about this album.",
+    "notPublishedWarning": "This album is not published yet, only you can see it.",
     "raisedAmount": "Raised <strong>{{money}}</strong>",
     "fromXSupporters": "From {{supporters}} supporters",
     "ofGoal": "Of <strong>{{goal}}</strong> goal",

@@ -31,13 +31,6 @@ export default function () {
         trackGroup = await prisma.trackGroup.findFirst({
           where: {
             id: actualId,
-            published: true,
-            OR: [
-              { fundraisingGoal: { gt: 0 } },
-              {
-                tracks: { some: { audio: { uploadState: "SUCCESS" } } },
-              },
-            ],
           },
           include: {
             ...trackGroupSingleInclude({
@@ -53,6 +46,23 @@ export default function () {
             },
           },
         });
+      }
+
+      console.log("trackGroup", trackGroup);
+
+      const isPublished =
+        trackGroup?.published ||
+        (trackGroup?.publishedAt && trackGroup.publishedAt < new Date());
+
+      console.log("isPublished", loggedInUser, isPublished);
+
+      const canSeeUnpublished =
+        loggedInUser?.isAdmin || loggedInUser?.id === trackGroup?.artist.userId;
+
+      if (trackGroup && !isPublished) {
+        if (!canSeeUnpublished) {
+          trackGroup = null;
+        }
       }
 
       if (!trackGroup) {

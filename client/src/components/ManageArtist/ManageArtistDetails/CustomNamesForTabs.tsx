@@ -45,6 +45,7 @@ export const CustomNamesForTabs: React.FC = () => {
             <label>{t("releasesTab")}</label>
             <InputEl
               type="text"
+              colors={artist.properties?.colors}
               placeholder={t("releases") ?? ""}
               {...methods.register("properties.titles.releases")}
             />
@@ -53,6 +54,7 @@ export const CustomNamesForTabs: React.FC = () => {
             <label>{t("merchTab")}</label>
             <InputEl
               type="text"
+              colors={artist.properties?.colors}
               placeholder={t("merch") ?? ""}
               {...methods.register("properties.titles.merch")}
             />
@@ -61,6 +63,7 @@ export const CustomNamesForTabs: React.FC = () => {
             <label>{t("postsTab")}</label>
             <InputEl
               type="text"
+              colors={artist.properties?.colors}
               placeholder={t("posts") ?? ""}
               {...methods.register("properties.titles.posts")}
             />
@@ -69,6 +72,7 @@ export const CustomNamesForTabs: React.FC = () => {
             <label>{t("supportTab")}</label>
             <InputEl
               type="text"
+              colors={artist.properties?.colors}
               placeholder={t("support") ?? ""}
               {...methods.register("properties.titles.support")}
             />
@@ -78,6 +82,7 @@ export const CustomNamesForTabs: React.FC = () => {
               <label>{t("groupName")}</label>
               <InputEl
                 type="text"
+                colors={artist.properties?.colors}
                 placeholder={t("label") ?? ""}
                 {...methods.register("properties.titles.groupName")}
               />

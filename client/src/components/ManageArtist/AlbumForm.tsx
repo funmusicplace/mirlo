@@ -29,6 +29,7 @@ const AlbumForm: React.FC<{
     const defaultValues = {
       ...trackGroup,
       releaseDate: trackGroup?.releaseDate.split("T")[0],
+      publishedAt: trackGroup?.publishedAt?.split("T")[0],
       platformPercent: trackGroup?.platformPercent ?? 7,
       isGettable: trackGroup?.isGettable ?? true,
       minPrice: `${

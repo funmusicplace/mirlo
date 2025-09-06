@@ -35,13 +35,12 @@ import { sendBasecampAMessage } from "./basecamp";
 
 export const whereForPublishedTrackGroups = (): Prisma.TrackGroupWhereInput => {
   return {
-    published: true,
+    OR: [{ published: true }, { publishedAt: { lte: new Date() } }],
     isDrafts: false,
     adminEnabled: true,
     artist: {
       enabled: true,
     },
-    tracks: { some: { audio: { uploadState: "SUCCESS" } } },
     deletedAt: null,
     cover: {
       url: {

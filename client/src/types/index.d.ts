@@ -96,6 +96,7 @@ interface TrackGroup {
   adminEnabled: boolean;
   id: number;
   releaseDate: string;
+  publishedAt?: string;
   about?: string;
   currency: string;
   isGettable: boolean;

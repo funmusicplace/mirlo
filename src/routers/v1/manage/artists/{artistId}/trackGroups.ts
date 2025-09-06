@@ -87,6 +87,7 @@ export default function () {
       artistId,
       published,
       releaseDate,
+      publishedAt,
       credits,
       type,
       minPrice,
@@ -154,6 +155,7 @@ export default function () {
           type,
           artist: { connect: { id: artistId } },
           published,
+          publishedAt: publishedAt ? new Date(publishedAt) : undefined,
           minPrice,
           paymentToUser: paymentToUserId
             ? { connect: { id: paymentToUserId } }

@@ -140,9 +140,7 @@ const ManageTrackGroup: React.FC<{}> = () => {
         />
       )}
       <hr style={{ marginTop: "1rem", marginBottom: "1rem" }} />
-      {trackGroup && trackGroup.tracks?.length > 0 && (
-        <PublishButton trackGroup={trackGroup} reload={refetch} />
-      )}
+      <PublishButton trackGroup={trackGroup} reload={refetch} />
     </ManageSectionWrapper>
   );
 };

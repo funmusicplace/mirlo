@@ -45,20 +45,6 @@ describe("trackGroups", () => {
       assert(response.statusCode === 200);
     });
 
-    it("should GET / not get without tracks", async () => {
-      const { user } = await createUser({ email: "test@testcom" });
-      const artist = await createArtist(user.id);
-      await createTrackGroup(artist.id, {
-        tracks: [],
-      });
-      const response = await requestApp
-        .get("trackGroups")
-        .set("Accept", "application/json");
-
-      assert.equal(response.body.results.length, 0);
-      assert(response.statusCode === 200);
-    });
-
     it("should GET / not get an unpublished", async () => {
       const { user } = await createUser({ email: "test@testcom" });
       const artist = await createArtist(user.id);
