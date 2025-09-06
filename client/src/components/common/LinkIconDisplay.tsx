@@ -17,6 +17,7 @@ import {
   FaVideo,
 } from "react-icons/fa6";
 import { FiMail } from "react-icons/fi";
+import Logo from "./Logo";
 
 // See: https://html.spec.whatwg.org/multipage/input.html#e-mail-state-(type%3Demail)
 // This is modified to exclude the "/" symbol if it occurs before an @ sign - which avoids mastodon links being parsed as emails
@@ -106,6 +107,7 @@ export const outsideLinks = [
   { matches: "twitch.tv", icon: <FaTwitch />, name: "Twitch" },
   { matches: "tiktok.com", icon: <FaTiktok />, name: "TikTok" },
   { matches: "@", icon: <FiMail />, name: "Email" },
+  { matches: "mirlo.space", icon: <Logo />, name: "Mirlo" },
   { matches: "", icon: <FaGlobe />, name: "Website" },
 ];
 
