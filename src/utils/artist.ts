@@ -474,6 +474,12 @@ export const singleInclude = (queryOptions?: {
             id: true,
             name: true,
             email: true,
+            artists: {
+              where: {
+                isLabelProfile: true,
+              },
+            },
+            stripeAccountId: true,
           },
         },
       },

@@ -41,6 +41,10 @@ export const ArtistBox: React.FC<{
       {...props}
       className={css`
         ${styles()}
+
+        p {
+          margin-bottom: 0.5rem;
+        }
       `}
     />
   );

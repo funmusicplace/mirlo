@@ -1,4 +1,5 @@
 import prisma from "@mirlo/prisma";
+import { Artist, Notification, Post } from "@mirlo/prisma/client";
 import logger from "../logger";
 import { sendMailQueue, sendMailQueueEvents } from "../queues/send-mail-queue";
 import { processSinglePost } from "../utils/post";
@@ -144,6 +145,139 @@ export const parseOutIframes = async (content: string) => {
   return htmlContent;
 };
 
+const sendPostNotifications = async (
+  notification: Notification & { post: Post | null } & {
+    user: { email: string };
+  }
+) => {
+  if (!notification.post) {
+    return;
+  }
+  const post = processSinglePost(notification.post);
+
+  if (!post.shouldSendEmail) {
+    logger.info(
+      `sendNotificationEmail: post asked not to be emailed: ${post.title} to ${notification.user.email}`
+    );
+    await prisma.notification.update({
+      where: {
+        id: notification.id,
+      },
+      data: {
+        isRead: true,
+      },
+    });
+    logger.info(`sendNotificationEmail: updated notification`);
+  } else if (!!post.content) {
+    // If the post doesn't have content we shouldn't send it.
+    // It's likely an error
+    logger.info(
+      `sendNotificationEmail: sending to queue notification for: ${post.title} to ${notification.user.email}`
+    );
+    const htmlContent = await parseOutIframes(post.content);
+
+    try {
+      await sendMailQueue.add("send-mail", {
+        template: "announce-post-published",
+        message: {
+          to: notification.user.email,
+        },
+        locals: {
+          artist: post.artist,
+          post: {
+            ...post,
+            htmlContent,
+          },
+          email: encodeURIComponent(notification.user.email),
+          host: process.env.API_DOMAIN,
+          client: process.env.REACT_APP_CLIENT_DOMAIN,
+        },
+      });
+
+      await prisma.notification.update({
+        where: {
+          id: notification.id,
+        },
+        data: {
+          isRead: true,
+        },
+      });
+      logger.info(`sendNotificationEmail: updated notification`);
+    } catch (e) {
+      logger.error(
+        `sendNotificationEmail: failed to send to queue notification ${notification.id} to ${notification.user.email}`
+      );
+      logger.error(e);
+    }
+  }
+};
+
+const sendLabelInviteNotification = async (
+  notification: Notification & { artist: Artist | null } & {
+    user: { email: string } | null;
+  } & { relatedUser: { email: string; name: string | null } | null }
+) => {
+  await prisma.notification.update({
+    where: {
+      id: notification.id,
+    },
+    data: {
+      isRead: true,
+    },
+  });
+  if (!notification.artist) {
+    return;
+  }
+  if (!notification.relatedUser || !notification.relatedUserId) {
+    return;
+  }
+  if (!notification.user) {
+    return;
+  }
+
+  logger.info(
+    `sendNotificationEmail: sending to queue notification for: invite ${notification.artist.name} to ${notification.relatedUser.email}`
+  );
+
+  const labelProfile = await prisma.artist.findFirst({
+    where: {
+      userId: notification.relatedUserId,
+      isLabelProfile: true,
+    },
+  });
+
+  try {
+    await sendMailQueue.add("send-mail", {
+      template: "announce-label-invite",
+      message: {
+        to: notification.user.email,
+      },
+      locals: {
+        artist: notification.artist,
+        email: encodeURIComponent(notification.user.email),
+        host: process.env.API_DOMAIN,
+        label: labelProfile,
+        client: process.env.REACT_APP_CLIENT_DOMAIN,
+      },
+    });
+
+    await prisma.notification.update({
+      where: {
+        id: notification.id,
+      },
+      data: {
+        isRead: true,
+      },
+    });
+    logger.info(`sendNotificationEmail: updated notification`);
+  } catch (e) {
+    logger.error(
+      `sendNotificationEmail: failed to send to queue notification ${notification.id} to ${notification.user.email}`
+    );
+    logger.error(e);
+  }
+};
+
 const sendNotificationEmail = async () => {
   logger.info(`sendNotificationEmail: sending notifications`);
 
@@ -169,6 +303,21 @@ const sendNotificationEmail = async () => {
           artist: true,
         },
       },
+      artist: {
+        include: {
+          user: {
+            select: { email: true },
+          },
+        },
+      },
+      relatedUser: {
+        select: {
+          artists: true,
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
       user: true,
     },
   });
@@ -183,66 +332,19 @@ const sendNotificationEmail = async () => {
         `sendNotificationEmail: checking for notification ${notification.id}`
       );
       if (
+        notification.post &&
         notification.notificationType === "NEW_ARTIST_POST" &&
-        notification.post?.artist
+        notification.post.artist
       ) {
-        const post = processSinglePost(notification.post);
-
-        if (!post.shouldSendEmail) {
-          logger.info(
-            `sendNotificationEmail: post asked not to be emailed: ${post.title} to ${notification.user.email}`
-          );
-          await prisma.notification.update({
-            where: {
-              id: notification.id,
-            },
-            data: {
-              isRead: true,
-            },
-          });
-          logger.info(`sendNotificationEmail: updated notification`);
-        } else if (!!post.content) {
-          // If the post doesn't have content we shouldn't send it.
-          // It's likely an error
-          logger.info(
-            `sendNotificationEmail: sending to queue notification for: ${post.title} to ${notification.user.email}`
-          );
-          const htmlContent = await parseOutIframes(post.content);
-
-          try {
-            await sendMailQueue.add("send-mail", {
-              template: "announce-post-published",
-              message: {
-                to: notification.user.email,
-              },
-              locals: {
-                artist: post.artist,
-                post: {
-                  ...post,
-                  htmlContent,
-                },
-                email: encodeURIComponent(notification.user.email),
-                host: process.env.API_DOMAIN,
-                client: process.env.REACT_APP_CLIENT_DOMAIN,
-              },
-            });
-
-            await prisma.notification.update({
-              where: {
-                id: notification.id,
-              },
-              data: {
-                isRead: true,
-              },
-            });
-            logger.info(`sendNotificationEmail: updated notification`);
-          } catch (e) {
-            logger.error(
-              `sendNotificationEmail: failed to send to queue notification ${notification.id} to ${notification.user.email}`
-            );
-            logger.error(e);
-          }
-        }
+        sendPostNotifications(notification);
+      }
+      if (
+        notification &&
+        notification.notificationType === "LABEL_ADDED_ARTIST" &&
+        notification.artist &&
+        notification.relatedUser
+      ) {
+        await sendLabelInviteNotification(notification);
       }
     }
   } catch (e) {

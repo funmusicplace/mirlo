@@ -231,6 +231,7 @@ model PostSubscriptionTier {
 model Artist {
   id                                 Int                                  @id @default(autoincrement())
   name                               String
+  shortDescription                   String?
   bio                                String?
   user                               User                                 @relation(fields: [userId], references: [id], name: "artistUser")
   userId                             Int

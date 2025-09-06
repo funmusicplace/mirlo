@@ -1,7 +1,13 @@
 import { css } from "@emotion/css";
 import React from "react";
 import { bp } from "../../constants";
-import { Navigate, Outlet, useLocation, useParams } from "react-router-dom";
+import {
+  Link,
+  Navigate,
+  Outlet,
+  useLocation,
+  useParams,
+} from "react-router-dom";
 import ArtistHeaderSection from "../common/ArtistHeaderSection";
 import { Trans, useTranslation } from "react-i18next";
 import styled from "@emotion/styled";
@@ -10,6 +16,7 @@ import { useQuery } from "@tanstack/react-query";
 import { queryManagedArtist, queryUserStripeStatus } from "queries";
 import { useAuthContext } from "state/AuthContext";
 import api from "services/api";
+import { getArtistUrl } from "utils/artist";
 
 const Container = styled.div<{ artistBanner: boolean }>`
   width: 100%;
@@ -67,8 +74,15 @@ const ManageArtistContainer: React.FC<{}> = () => {
   const { data: artist, isLoading: isArtistLoading } = useQuery(
     queryManagedArtist(Number(artistId))
   );
+
+  const hasLabel = artist?.artistLabels?.find((al) => al.labelUser.id);
+
   const { data: stripeAccountStatus } = useQuery(
     queryUserStripeStatus(artist?.userId ?? 0)
+  );
+
+  const { data: labelStripeAccountStatus } = useQuery(
+    queryUserStripeStatus(hasLabel?.labelUser.id ?? 0)
   );
 
   const location = useLocation();
@@ -87,6 +101,10 @@ const ManageArtistContainer: React.FC<{}> = () => {
     location.pathname.includes("/release/") ||
     location.pathname.includes("/new-release") ||
     location.pathname.includes("/post/");
+
+  const labelProfile = hasLabel?.labelUser.artists?.find(
+    (a) => a.isLabelProfile
+  );
 
   return (
     <ArtistPageWrapper
@@ -109,16 +127,32 @@ const ManageArtistContainer: React.FC<{}> = () => {
           stripeAccountStatus &&
           !stripeAccountStatus?.chargesEnabled && (
             <ArtistBox variant="warning">
-              <Trans
-                t={t}
-                i18nKey={"paymentProcessorNotSetUp"}
-                components={{
-                  // eslint-disable-next-line jsx-a11y/anchor-has-content
-                  manage: (
-                    <a href={api.paymentProcessor.stripeConnect(user.id)}></a>
-                  ),
-                }}
-              />
+              <p>
+                <Trans
+                  t={t}
+                  i18nKey={"paymentProcessorNotSetUp"}
+                  components={{
+                    // eslint-disable-next-line jsx-a11y/anchor-has-content
+                    manage: (
+                      <a href={api.paymentProcessor.stripeConnect(user.id)}></a>
+                    ),
+                  }}
+                />
+              </p>
+              {labelStripeAccountStatus && labelProfile && (
+                <p>
+                  <Trans
+                    t={t}
+                    i18nKey={"linkedToLabel"}
+                    components={{
+                      label: <Link to={getArtistUrl(labelProfile)}></Link>,
+                    }}
+                    values={{
+                      label: labelProfile?.name || "the label",
+                    }}
+                  />
+                </p>
+              )}
             </ArtistBox>
           )}
 

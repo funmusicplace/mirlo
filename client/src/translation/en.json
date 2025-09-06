@@ -465,6 +465,10 @@
   },
   "manageArtist": {
     "albumTags": "Album tags",
+    "label": "Label",
+    "labelReleases": "Releases from artists on this roster",
+    "labelReleasesDescription": "These are releases from artists on your roster. If you are administering payments for these artists, you'll receive payments for these releases.",
+    "linkedToLabel": "This artist is linked to a label/collective <label>{{label}}</label> who have payment processing set up. You can talk to them about collecting payments.",
     "useUrlSlug": "Use this URL slug? '{{suggestedUrlSlug}}'",
     "labelsAndCollectives": "Label and collectives",
     "name": "Name",
@@ -729,6 +733,7 @@
   },
   "artistForm": {
     "deleteArtist": "Permanently delete artist page",
+    "shortDescription": "Something short about you",
     "areYouSureDelete": "Are your sure you want to delete this artist page?",
     "whatLabelsisThisArtistPartOf": "What label is this artist a part of?",
     "terminationDanger": " Artist page termination ",
@@ -737,7 +742,7 @@
     "yourAvatar": "your avatar",
     "backgroundImageDescription": "the image that appears in the background of your page",
     "displayName": "Display name",
-    "bio": "Artist biography",
+    "bio": "About / biography",
     "urlSlug": "Text that will appear in the URL",
     "replaceImage": "Replace image",
     "releasesTab": "Releases tab",
@@ -748,8 +753,8 @@
     "releases": "Releases",
     "merch": "Merch",
     "customTitles": "Custom titles",
-    "customTitlesDescription": "You can set the names of the tabs on the artist page",
-    "saveArtist": "Save artist page",
+    "customTitlesDescription": "You can change what words appear on some parts of your public profile.",
+    "saveArtist": "Save changes",
     "defaultPlatformFee": "Default platform fee",
     "defaultPlatformFeeDescription": "This is the default platform fee that will be applied to all your releases. You can change it on a per-release basis.",
     "createArtist": "Create artist page",
@@ -777,6 +782,8 @@
     "deleteImage": "Delete image",
     "warningFeature": "Warning: this is an experimental feature. You shouldn't rely on it.",
     "enableActivityPub": "Enable ActivityPub",
+    "groupName": "What should we show as the group type? Label? Collective?",
+    "label": "Label",
     "makeSearchable": "Do you want to make this artist searchable on the fediverse? This will enable ActivityPub for this artist."
   },
   "manageSubscriptions": {
@@ -843,7 +850,9 @@
     "notifications": "Notifications",
     "readPost": "Read post",
     "viewAlbum": "View release",
-    "newPostByArtist": "New post by <link>{{artistName}}</link>"
+    "newPostByArtist": "New post by <link>{{artistName}}</link>",
+    "inviteToJoinLabel": "<linkToLabel>{{labelName}}</linkToLabel> has invited you to join their label/collective.",
+    "manageOnArtistPage": "Manage on artist page"
   },
   "kickstarter": {
     "donateNow": "Donate now"

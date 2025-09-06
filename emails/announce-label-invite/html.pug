@@ -1,0 +1,13 @@
+extends ../layout.pug
+
+block content
+  p 
+    | Hi #{user.name || 'there'},
+  p 
+    | You've been invited to join 
+    strong #{label.name} 
+    | on Mirlo.
+  p accept the invite here: 
+    a(href!=`${client}/manage/${artist.id}/customize`) Accept Invite
+  p 
+    a(href!=`${client}/${label.urlSlug || label.id}`) View #{label.name} on Mirlo.

@@ -172,7 +172,8 @@ interface Notification {
     | "NEW_ARTIST_ALBUM"
     | "USER_BOUGHT_YOUR_ALBUM"
     | "USER_FOLLOWED_YOU"
-    | "USER_SUBSCRIBED_TO_YOU";
+    | "USER_SUBSCRIBED_TO_YOU"
+    | "LABEL_ADDED_ARTIST";
   post?: Post;
   relatedUser?: User;
   artist?: Artist;
@@ -196,7 +197,9 @@ interface ArtistLabel {
     name: string;
     email: string;
     id: number;
+    stripeAccountId?: string;
     userAvatar?: { sizes: string[] };
+    artists?: Artist[];
   };
   isLabelApproved: boolean;
   canLabelManageArtist: boolean;
@@ -206,6 +209,7 @@ interface ArtistLabel {
 
 interface Artist {
   name: string;
+  shortDescription?: string;
   bio: string;
   isLabelProfile: boolean;
   activityPub: boolean;
@@ -232,11 +236,12 @@ interface Artist {
     colors: ArtistColors;
     tileBackgroundImage?: boolean;
     titles?: {
-      releases: string;
-      merch: string;
-      posts: string;
-      support: string;
-      roster: string;
+      releases?: string;
+      merch?: string;
+      posts?: string;
+      support?: string;
+      roster?: string;
+      groupName?: string;
     };
   };
   user?: Partial<User>;
@@ -278,6 +283,7 @@ interface UserFromAdmin {
   receiveMailingList: boolean;
   isLabelAccount: boolean;
   featureFlags: string[];
+  trustLevel: number;
 }
 
 interface ArtistSubscriptionTier {
