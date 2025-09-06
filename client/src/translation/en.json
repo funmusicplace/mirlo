@@ -465,6 +465,7 @@
   },
   "manageArtist": {
     "albumTags": "Album tags",
+    "label": "Label",
     "useUrlSlug": "Use this URL slug? '{{suggestedUrlSlug}}'",
     "labelsAndCollectives": "Label and collectives",
     "name": "Name",
@@ -749,8 +750,8 @@
     "releases": "Releases",
     "merch": "Merch",
     "customTitles": "Custom titles",
-    "customTitlesDescription": "You can set the names of the tabs on the artist page",
-    "saveArtist": "Save artist page",
+    "customTitlesDescription": "You can change what words appear on some parts of your public profile.",
+    "saveArtist": "Save changes",
     "defaultPlatformFee": "Default platform fee",
     "defaultPlatformFeeDescription": "This is the default platform fee that will be applied to all your releases. You can change it on a per-release basis.",
     "createArtist": "Create artist page",
@@ -778,6 +779,8 @@
     "deleteImage": "Delete image",
     "warningFeature": "Warning: this is an experimental feature. You shouldn't rely on it.",
     "enableActivityPub": "Enable ActivityPub",
+    "groupName": "What should we show as the group type? Label? Collective?",
+    "label": "Label",
     "makeSearchable": "Do you want to make this artist searchable on the fediverse? This will enable ActivityPub for this artist."
   },
   "manageSubscriptions": {

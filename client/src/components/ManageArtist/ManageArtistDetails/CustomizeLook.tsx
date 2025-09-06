@@ -23,6 +23,7 @@ import useManagedArtistQuery from "utils/useManagedArtistQuery";
 import FeatureFlag from "components/common/FeatureFlag";
 import PaymentSlider from "../ManageTrackGroup/AlbumFormComponents/PaymentSlider";
 import { InputEl } from "components/common/Input";
+import CustomNamesForTabs from "./CustomNamesForTabs";
 
 export interface ShareableTrackgroup {
   creatorId: number;
@@ -55,7 +56,7 @@ export const ArtistFormSection = styled.div<{ isOdd?: boolean }>`
   }
 `;
 
-type FormData = {
+export type ArtistFormData = {
   name: string;
   bio: string;
   urlSlug: string;
@@ -77,6 +78,7 @@ type FormData = {
       posts: string;
       support: string;
       roster: string;
+      groupName: string;
     };
   };
 };
@@ -106,7 +108,7 @@ export const CustomizeLook: React.FC = () => {
   const userId = user?.id;
   const { data: artist } = useManagedArtistQuery();
 
-  const methods = useForm<FormData>({
+  const methods = useForm<ArtistFormData>({
     defaultValues: generateDefaults(artist),
   });
 
@@ -136,7 +138,7 @@ export const CustomizeLook: React.FC = () => {
   }, [snackbar]);
 
   const onValidSubmit = React.useCallback(
-    (data: FormData) => {
+    (data: ArtistFormData) => {
       if (!userId) return;
 
       const sending = {
@@ -349,56 +351,7 @@ export const CustomizeLook: React.FC = () => {
                 </FormComponent>
               </ArtistFormSection>
             </FeatureFlag>
-            <ArtistFormSection>
-              <div
-                className={css`
-                  width: 100%;
-                `}
-              >
-                <h2>{t("customTitles")}</h2>
-                <p>{t("customTitlesDescription")}</p>
-                <div
-                  className={css`
-                    display: grid;
-                    grid-template-columns: 1fr 1fr 1fr 1fr;
-                    gap: 1rem;
-                  `}
-                >
-                  <FormComponent>
-                    <label>{t("releasesTab")}</label>
-                    <InputEl
-                      type="text"
-                      placeholder={t("releases") ?? ""}
-                      {...methods.register("properties.titles.releases")}
-                    />
-                  </FormComponent>
-                  <FormComponent>
-                    <label>{t("merchTab")}</label>
-                    <InputEl
-                      type="text"
-                      placeholder={t("merch") ?? ""}
-                      {...methods.register("properties.titles.merch")}
-                    />
-                  </FormComponent>
-                  <FormComponent>
-                    <label>{t("postsTab")}</label>
-                    <InputEl
-                      type="text"
-                      placeholder={t("posts") ?? ""}
-                      {...methods.register("properties.titles.posts")}
-                    />
-                  </FormComponent>
-                  <FormComponent>
-                    <label>{t("supportTab")}</label>
-                    <InputEl
-                      type="text"
-                      placeholder={t("support") ?? ""}
-                      {...methods.register("properties.titles.support")}
-                    />
-                  </FormComponent>
-                </div>
-              </div>
-            </ArtistFormSection>
+            <CustomNamesForTabs />
             <ArtistFormSection
               isOdd
               className={css`
@@ -414,7 +367,7 @@ export const CustomizeLook: React.FC = () => {
       </FormProvider>
       {!artist.isLabelProfile && <LabelConfirmation />}
 
-      <DeleteArtist />
+      {!artist.isLabelProfile && <DeleteArtist />}
     </div>
   );
 };

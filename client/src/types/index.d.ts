@@ -233,11 +233,12 @@ interface Artist {
     colors: ArtistColors;
     tileBackgroundImage?: boolean;
     titles?: {
-      releases: string;
-      merch: string;
-      posts: string;
-      support: string;
-      roster: string;
+      releases?: string;
+      merch?: string;
+      posts?: string;
+      support?: string;
+      roster?: string;
+      groupName?: string;
     };
   };
   user?: Partial<User>;

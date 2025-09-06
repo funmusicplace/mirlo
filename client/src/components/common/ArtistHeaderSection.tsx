@@ -235,38 +235,57 @@ const ArtistHeaderSection: React.FC<{
         )}
         <div
           className={css`
+            width: 100%;
             display: flex;
             flex-direction: row;
-            align-items: flex-end;
+            align-items: center;
+            justify-content: space-between;
           `}
         >
-          <ArtistTourDates
-            isManage={!!isManage}
-            artist={artist}
-            onSubmit={handleSubmit}
-          />
-          <ArtistHeaderDescription
-            isManage={!!isManage}
-            artist={artist}
-            onSubmit={handleSubmit}
-          />
-          <ArtistButtonAnchor
-            target="_blank"
-            href={`${import.meta.env.VITE_API_DOMAIN}/v1/artists/${artist.urlSlug}/feed?format=rss`}
-            rel="noreferrer"
-            onlyIcon
+          <div
             className={css`
-              svg {
-                font-size: 0.8rem;
-              }
-              paddding: 0.25rem;
-              margin-left: 0.5rem;
-              margin-bottom: 0.25rem;
-              height: 1.5rem !important;
-              width: 1.5rem !important;
+              color: ${artist.properties?.colors?.primary ||
+              "var(--mi-foreground-color)"};
             `}
-            startIcon={<FaRss />}
-          />
+          >
+            {artist.isLabelProfile &&
+              (artist.properties?.titles?.groupName ?? t("label"))}
+          </div>
+          <div
+            className={css`
+              display: flex;
+              flex-direction: row;
+              align-items: flex-end;
+            `}
+          >
+            <ArtistTourDates
+              isManage={!!isManage}
+              artist={artist}
+              onSubmit={handleSubmit}
+            />
+            <ArtistHeaderDescription
+              isManage={!!isManage}
+              artist={artist}
+              onSubmit={handleSubmit}
+            />
+            <ArtistButtonAnchor
+              target="_blank"
+              href={`${import.meta.env.VITE_API_DOMAIN}/v1/artists/${artist.urlSlug}/feed?format=rss`}
+              rel="noreferrer"
+              onlyIcon
+              className={css`
+                svg {
+                  font-size: 0.8rem;
+                }
+                paddding: 0.25rem;
+                margin-left: 0.5rem;
+                margin-bottom: 0.25rem;
+                height: 1.5rem !important;
+                width: 1.5rem !important;
+              `}
+              startIcon={<FaRss />}
+            />
+          </div>
         </div>
       </HeaderWrapper>
       <div
