@@ -14,6 +14,7 @@ import { useQuery } from "@tanstack/react-query";
 import { queryNotifications } from "queries/notifications";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import usePagination from "utils/usePagination";
+import LabelInvite from "./LabelInvite";
 
 const LI = styled.li<{ isRead: boolean }>`
   background-color: ${(props) =>
@@ -93,6 +94,9 @@ const UserNotificationFeed = () => {
             )}
             {notification.notificationType === "NEW_ARTIST_ALBUM" && (
               <NewArtistAlbum notification={notification} />
+            )}
+            {notification.notificationType === "LABEL_ADDED_ARTIST" && (
+              <LabelInvite notification={notification} />
             )}
           </LI>
         ))}

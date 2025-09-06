@@ -65,6 +65,10 @@ const AdminManageUser = () => {
                 <td>{user.name}</td>
               </tr>
               <tr>
+                <td>Trust level</td>
+                <td>{user.trustLevel}</td>
+              </tr>
+              <tr>
                 <td>artists</td>
                 <td>{user.artists.length}</td>
               </tr>

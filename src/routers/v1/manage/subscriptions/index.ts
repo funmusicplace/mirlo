@@ -2,7 +2,6 @@ import { Prisma, User } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 import { userAuthenticated } from "../../../../auth/passport";
 import prisma from "@mirlo/prisma";
-import { AppError } from "../../../../utils/error";
 
 type Params = {
   userId: string;

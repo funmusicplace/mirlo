@@ -466,6 +466,9 @@
   "manageArtist": {
     "albumTags": "Album tags",
     "label": "Label",
+    "labelReleases": "Releases from artists on this roster",
+    "labelReleasesDescription": "These are releases from artists on your roster. If you are administering payments for these artists, you'll receive payments for these releases.",
+    "linkedToLabel": "This artist is linked to a label/collective <label>{{label}}</label> who have payment processing set up. You can talk to them about collecting payments.",
     "useUrlSlug": "Use this URL slug? '{{suggestedUrlSlug}}'",
     "labelsAndCollectives": "Label and collectives",
     "name": "Name",
@@ -847,7 +850,9 @@
     "notifications": "Notifications",
     "readPost": "Read post",
     "viewAlbum": "View release",
-    "newPostByArtist": "New post by <link>{{artistName}}</link>"
+    "newPostByArtist": "New post by <link>{{artistName}}</link>",
+    "inviteToJoinLabel": "<linkToLabel>{{labelName}}</linkToLabel> has invited you to join their label/collective.",
+    "manageOnArtistPage": "Manage on artist page"
   },
   "kickstarter": {
     "donateNow": "Donate now"

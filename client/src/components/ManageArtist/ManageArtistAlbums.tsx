@@ -9,7 +9,11 @@ import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import ManageSectionWrapper from "./ManageSectionWrapper";
 import { NewAlbumButton } from "./NewAlbumButton";
 import { useQuery } from "@tanstack/react-query";
-import { queryArtist, queryManagedArtistTrackGroups } from "queries";
+import {
+  queryArtist,
+  queryManagedArtistTrackGroups,
+  queryPublicLabelTrackGroups,
+} from "queries";
 import { ArtistButtonLink } from "components/Artist/ArtistButtons";
 import SetEntireCataloguePrice from "./SetEntireCataloguePrice";
 
@@ -23,6 +27,10 @@ const ManageArtistAlbums: React.FC<{}> = () => {
 
   const { data: trackGroups, isLoading: isLoadingTrackGroups } = useQuery(
     queryManagedArtistTrackGroups({ artistId: Number(artistId) })
+  );
+
+  const { data: labelReleases } = useQuery(
+    queryPublicLabelTrackGroups(artistId)
   );
 
   const publishedReleases =
@@ -92,6 +100,25 @@ const ManageArtistAlbums: React.FC<{}> = () => {
           >
             {artist &&
               publishedReleases.map((album) => (
+                <TrackGroupCard artist={artist} album={album} key={album.id} />
+              ))}
+          </div>
+        </>
+      )}
+
+      {labelReleases?.results && (labelReleases.results.length ?? 0) > 0 && (
+        <>
+          <h3>{t("labelReleases")}</h3>
+          <p>{t("labelReleasesDescription")}</p>
+          <div
+            className={css`
+              padding-bottom: 1rem;
+              display: flex;
+              flex-wrap: wrap;
+            `}
+          >
+            {artist &&
+              labelReleases.results.map((album) => (
                 <TrackGroupCard artist={artist} album={album} key={album.id} />
               ))}
           </div>
