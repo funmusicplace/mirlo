@@ -239,9 +239,9 @@ const sendLabelInviteNotification = async (
     `sendNotificationEmail: sending to queue notification for: invite ${notification.artist.name} to ${notification.relatedUser.email}`
   );
 
-  const labelArtist = await prisma.artist.findFirst({
+  const labelProfile = await prisma.artist.findFirst({
     where: {
-      id: notification.relatedUserId,
+      userId: notification.relatedUserId,
       isLabelProfile: true,
     },
   });
@@ -256,7 +256,7 @@ const sendLabelInviteNotification = async (
         artist: notification.artist,
         email: encodeURIComponent(notification.user.email),
         host: process.env.API_DOMAIN,
-        label: labelArtist,
+        label: labelProfile,
         client: process.env.REACT_APP_CLIENT_DOMAIN,
       },
     });
@@ -344,7 +344,7 @@ const sendNotificationEmail = async () => {
         notification.artist &&
         notification.relatedUser
       ) {
-        sendLabelInviteNotification(notification);
+        await sendLabelInviteNotification(notification);
       }
     }
   } catch (e) {

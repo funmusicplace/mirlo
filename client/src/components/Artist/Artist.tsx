@@ -90,7 +90,6 @@ function Artist() {
 
   const urlSlug = artist?.urlSlug;
 
-  console.log("pathname", pathname);
   React.useEffect(() => {
     const subPages = [
       "posts",
@@ -102,7 +101,6 @@ function Artist() {
       "checkout-complete",
     ];
     const end = pathname.split("/")[2];
-    console.log("end", subPages, end);
     if (!subPages.includes(end)) {
       if (artist?.isLabelProfile) {
         navigate(`/${urlSlug}/roster`, { replace: true });
@@ -117,7 +115,6 @@ function Artist() {
         navigate(`/${urlSlug}/support`, { replace: true });
       } else if (artist?.linksJson?.length) {
         // has links
-        console.log("navigating to links");
         navigate(`/${urlSlug}/links`, { replace: true });
       }
     }

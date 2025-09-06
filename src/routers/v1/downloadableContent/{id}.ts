@@ -49,8 +49,6 @@ export default function () {
         contentId
       );
 
-      console.log("backblazeStat", backblazeStat);
-
       if (!backblazeStat) {
         throw new AppError({
           httpCode: 404,
