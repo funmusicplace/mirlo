@@ -47,6 +47,7 @@ export const ArtistButton: React.FC<
     switch (props.variant) {
       case "link":
         return `
+        display: inline-flex !important;
         color: ${colors?.primary} !important;
 
         svg {

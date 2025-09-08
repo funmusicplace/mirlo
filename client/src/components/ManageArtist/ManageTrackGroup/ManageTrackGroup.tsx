@@ -106,9 +106,7 @@ const ManageTrackGroup: React.FC<{}> = () => {
           </div>
         </SpaceBetweenDiv>
       </div>
-      <FeatureFlag featureFlag="label">
-        <AlbumPaymentReceiver />
-      </FeatureFlag>
+      <AlbumPaymentReceiver />
       <AlbumForm
         trackGroup={trackGroup}
         artist={artist}
