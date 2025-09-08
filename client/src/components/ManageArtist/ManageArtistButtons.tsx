@@ -5,10 +5,11 @@ import { useTranslation } from "react-i18next";
 import { FaEye, FaFlag, FaPen } from "react-icons/fa";
 import { bp } from "../../constants";
 import { useQuery } from "@tanstack/react-query";
-import { queryArtist } from "queries";
+import { queryArtist, queryTrackGroup } from "queries";
 import { useAuthContext } from "state/AuthContext";
 import FixedButtonLink from "components/common/FixedButton";
 import { IoIosColorPalette } from "react-icons/io";
+import FlagContent from "components/TrackGroup/FlagContent";
 
 const ManageArtistButtons: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
@@ -19,6 +20,12 @@ const ManageArtistButtons: React.FC = () => {
     pathname.includes("/manage/artists") && !pathname.includes("/customize");
   const { data: artist, isLoading: isArtistLoading } = useQuery(
     queryArtist({ artistSlug: artistId ?? "" })
+  );
+  const { data: trackGroup } = useQuery(
+    queryTrackGroup({
+      albumSlug: trackGroupId ?? "",
+      artistId,
+    })
   );
   const { user } = useAuthContext();
 
@@ -43,7 +50,8 @@ const ManageArtistButtons: React.FC = () => {
             position: fixed;
             display: flex;
             flex-direction: column;
-            a {
+            a,
+            button {
               margin-bottom: 0.5rem;
             }
             transition: all 0.3s ease;
@@ -95,18 +103,8 @@ const ManageArtistButtons: React.FC = () => {
               {t("viewLive")}
             </FixedButtonLink>
           )}
-          {isAlbumPage && (
-            <FixedButtonLink
-              to={`/${artist?.urlSlug?.toLowerCase() ?? artist?.id}`}
-              endIcon={<FaFlag />}
-              disabled={!artist}
-              variant="dashed"
-              size="compact"
-              rounded
-              onlyIcon={iconOnly}
-            >
-              {t("flag")}
-            </FixedButtonLink>
+          {isAlbumPage && trackGroup && (
+            <FlagContent trackGroupId={trackGroup.id} onlyIcon={iconOnly} />
           )}
         </div>
       )}

@@ -19,11 +19,7 @@ import PublicTrackGroupListing from "components/common/TrackTable/PublicTrackGro
 import { PlayButtonsWrapper } from "./PlayButtonsWrapper";
 import DisplayAudioWrapper from "./DisplayAudio";
 import useCurrentTrackHook from "components/Player/useCurrentTrackHook";
-import {
-  getArtistUrl,
-  getArtistUrlReference,
-  getReleaseUrl,
-} from "utils/artist";
+import { getArtistUrl } from "utils/artist";
 import { bp } from "../../constants";
 import { useAuthContext } from "state/AuthContext";
 

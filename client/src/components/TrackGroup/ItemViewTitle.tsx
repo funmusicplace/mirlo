@@ -123,7 +123,6 @@ const TrackGroupTitle: React.FC<{
               {t("edit")}
             </ArtistButtonLink>
           )}
-          <FlagContent trackGroupId={trackGroup.id} />
           {user?.isAdmin && (
             <div
               className={css`
