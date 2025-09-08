@@ -5,7 +5,6 @@ import { findUserIdForURLSlug } from "../../../../utils/user";
 import {
   addSizesToImage,
   findArtistIdForURLSlug,
-  processSingleArtist,
 } from "../../../../utils/artist";
 import {
   finalArtistAvatarBucket,
@@ -14,6 +13,7 @@ import {
   finalUserAvatarBucket,
   finalUserBannerBucket,
 } from "../../../../utils/minio";
+import { whereForPublishedTrackGroups } from "../../../../utils/trackGroup";
 
 export default function () {
   const operations = {
@@ -28,69 +28,40 @@ export default function () {
 
       const labelProfile = await prisma.artist.findFirst({
         where: { id: artistId, isLabelProfile: true },
-        include: {
-          banner: true,
-          avatar: true,
-        },
       });
 
-      const label = await prisma.user.findUnique({
-        where: { id: labelProfile?.userId, isLabelAccount: true },
-        select: {
-          name: true,
-          id: true,
-          currency: true,
-          userAvatar: true,
-          userBanner: true,
-          properties: true,
+      const labelArtists = await prisma.artist.findMany({
+        where: {
           artistLabels: {
-            where: {
-              isArtistApproved: true,
+            some: {
+              labelUserId: labelProfile?.userId,
               isLabelApproved: true,
-            },
-            include: {
-              artist: {
-                include: {
-                  avatar: true,
-                  banner: true,
-                  trackGroups: {
-                    include: {
-                      cover: true,
-                      tracks: true,
-                    },
-                    orderBy: {
-                      releaseDate: "desc",
-                    },
-                  },
-                },
-              },
+              isArtistApproved: true,
             },
           },
         },
       });
-      res.json({
-        result: {
-          ...label,
-          artistLabels: label?.artistLabels.map((al) => ({
-            ...al,
-            artist: {
-              ...al.artist,
-              avatar: addSizesToImage(
-                finalArtistAvatarBucket,
-                al.artist.avatar
-              ),
-              banner: addSizesToImage(
-                finalArtistBannerBucket,
-                al.artist.banner
-              ),
-              trackGroups: al.artist.trackGroups.map((tg) => ({
-                ...tg,
-                cover: addSizesToImage(finalCoversBucket, tg.cover),
-              })),
+
+      const tracks = await prisma.track.findMany({
+        where: {
+          trackGroup: {
+            artistId: {
+              in: [
+                ...(labelProfile ? [labelProfile.id] : []),
+                ...(labelArtists || []).map((a) => a.id),
+              ],
             },
-          })),
-          profile: labelProfile && processSingleArtist(labelProfile),
+            ...whereForPublishedTrackGroups(),
+          },
+          isPreview: true,
         },
+        include: {
+          trackGroup: true,
+        },
+      });
+
+      res.json({
+        results: tracks,
       });
     } catch (e) {
       next(e);

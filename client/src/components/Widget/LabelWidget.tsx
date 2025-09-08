@@ -27,18 +27,18 @@ import {
 import { bp } from "../../constants";
 import { useAuthContext } from "state/AuthContext";
 
-const TrackGroupWidget = () => {
+const LabelWidget = () => {
   const { t } = useTranslation("translation", {
-    keyPrefix: "trackGroupDetails",
+    keyPrefix: "labelWidget",
   });
   const params = useParams();
   const { user } = useAuthContext();
 
   const { currentTrack } = useCurrentTrackHook();
   const [currentSeconds, setCurrentSeconds] = React.useState(0);
-  const [trackGroup, setTrackGroup] = React.useState<TrackGroup>();
+  const [label, setLabel] = React.useState<Label>();
   const [isLoading, setIsLoading] = React.useState(true);
-  const [artist, setArtist] = React.useState<Artist>();
+  const [tracks, setTracks] = React.useState<Track[]>();
 
   const embeddedInMirlo = inIframe() && inMirlo();
 
@@ -46,12 +46,12 @@ const TrackGroupWidget = () => {
     const callback = async () => {
       setIsLoading(true);
       try {
-        const results = await api.get<TrackGroup>(`trackGroups/${params.id}`);
-        setTrackGroup(results.result);
-        const response = await api.get<Artist>(
-          `artists/${results.result.artistId}`
+        const results = await api.get<Label>(`labels/${params.id}`);
+        setLabel(results.result);
+        const trackResults = await api.getMany<Track>(
+          `labels/${params.id}/tracks`
         );
-        setArtist(response.result);
+        setTracks(trackResults.results);
       } catch (e) {
         console.error("e", e);
       } finally {
@@ -62,7 +62,7 @@ const TrackGroupWidget = () => {
     callback();
   }, [params.id]);
 
-  if ((!trackGroup || !trackGroup.id) && !isLoading) {
+  if ((!label || !label.id) && !isLoading) {
     return (
       <div
         className={css`
@@ -79,17 +79,17 @@ const TrackGroupWidget = () => {
     );
   }
 
-  if (!trackGroup) {
+  if (!label || !tracks) {
     return null;
   }
 
-  const playableTracks = trackGroup.tracks.filter((track) => {
-    return isTrackOwnedOrPreview(track, user, trackGroup);
+  const playableTracks = tracks.filter((track) => {
+    return isTrackOwnedOrPreview(track, user);
   });
 
   return (
     <WidgetWrapper
-      artistColors={artist?.properties?.colors}
+      artistColors={label?.profile?.properties?.colors}
       className={css`
         height: 100vh;
         overflow: scroll;
@@ -118,8 +118,8 @@ const TrackGroupWidget = () => {
             <PlayButtonsWrapper ids={playableTracks.map((t) => t.id)} />
           </div>
           <ImageWithPlaceholder
-            src={trackGroup.cover?.sizes?.[600] ?? ""}
-            alt={trackGroup.title ?? "Untitled release"}
+            src={label?.profile?.avatar?.sizes?.[600] ?? ""}
+            alt={label?.profile?.name ?? "A label"}
             size={600}
             square
           />
@@ -141,57 +141,25 @@ const TrackGroupWidget = () => {
                 }
               `}
             >
-              {embeddedInMirlo && trackGroup.artist && (
-                <Link
-                  target={`"_blank"`}
-                  to={getReleaseUrl(trackGroup.artist, trackGroup)}
-                >
-                  {trackGroup.title}
+              {embeddedInMirlo && label.profile && (
+                <Link target={`"_blank"`} to={getArtistUrl(label.profile)}>
+                  {label.profile.name}
                 </Link>
               )}
-              {!embeddedInMirlo && trackGroup.artist && (
+              {!embeddedInMirlo && label.profile && (
                 <a
                   target={`"_blank"`}
-                  href={`${import.meta.env.VITE_CLIENT_DOMAIN}${getReleaseUrl(
-                    trackGroup.artist,
-                    trackGroup
+                  href={`${import.meta.env.VITE_CLIENT_DOMAIN}${getArtistUrl(
+                    label.profile
                   )}`}
                 >
-                  {trackGroup.title}
+                  {label.profile.name}
                 </a>
               )}
             </FlexWrapper>{" "}
-            <FlexWrapper
-              className={css`
-                align-items: flex-end;
-                a {
-                  padding-left: 0.25rem;
-                }
-              `}
-            >
-              by{" "}
-              {embeddedInMirlo && trackGroup.artist && (
-                <Link target={`"_blank"`} to={getArtistUrl(trackGroup.artist)}>
-                  {trackGroup.artist.name}
-                </Link>
-              )}
-              {!embeddedInMirlo && trackGroup.artist && (
-                <a
-                  target={`"_blank"`}
-                  href={`${
-                    import.meta.env.VITE_CLIENT_DOMAIN
-                  }/${getArtistUrlReference(trackGroup.artist)}`}
-                >
-                  {trackGroup.artist.name}
-                </a>
-              )}
-            </FlexWrapper>
           </div>
           <TrackListWrapper>
-            <PublicTrackGroupListing
-              tracks={trackGroup.tracks}
-              trackGroup={trackGroup}
-            />
+            <PublicTrackGroupListing tracks={tracks} />
           </TrackListWrapper>
         </WidgetTitleWrapper>
       </TgWidgetWrapper>
@@ -211,4 +179,4 @@ const TrackGroupWidget = () => {
   );
 };
 
-export default TrackGroupWidget;
+export default LabelWidget;

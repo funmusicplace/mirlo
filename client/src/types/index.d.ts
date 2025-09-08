@@ -424,6 +424,7 @@ interface Label {
   id: number;
   name: string;
   urlSlug: string;
+  profile: Artist;
 }
 
 interface MerchPurchase {

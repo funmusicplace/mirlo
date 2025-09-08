@@ -84,6 +84,15 @@ const routes: RouteObject[] = [
         },
       },
       {
+        path: "widget/label/:id",
+        async lazy() {
+          const { default: Component } = await import(
+            "components/Widget/LabelWidget"
+          );
+          return { Component };
+        },
+      },
+      {
         path: "post/:postId",
         async lazy() {
           const { default: Component } = await import("components/Post");
