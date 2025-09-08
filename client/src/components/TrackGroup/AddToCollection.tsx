@@ -7,6 +7,7 @@ import { useSnackbar } from "state/SnackbarContext";
 import api from "services/api";
 import { useNavigate } from "react-router-dom";
 import { ArtistButton } from "components/Artist/ArtistButtons";
+import { IoAddSharp } from "react-icons/io5";
 
 const AddToCollection: React.FC<{ trackGroup: TrackGroup }> = ({
   trackGroup,
@@ -46,6 +47,7 @@ const AddToCollection: React.FC<{ trackGroup: TrackGroup }> = ({
           className={css`
             font-size: 1rem !important;
           `}
+          startIcon={<IoAddSharp />}
         >
           {t("addToCollection")}
         </ArtistButton>
