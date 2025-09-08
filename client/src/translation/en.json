@@ -1038,8 +1038,9 @@
     "embed": "Embed {{ name }} in another website",
     "embedOrShare": "Embed or share album",
     "share": "Share",
-    "copyAlbum": "Copy album link",
-    "copyIframe": "If you want to embed the track in another website, copy the code below:",
+    "copyAlbum": "Copy link to this page",
+    "copyLabelLink": "Copy label/collective link",
+    "copyIframe": "If you want to embed this music in another website, copy the code below:",
     "copiedToClipboard": "Copied to clipboard!"
   },
   "home": {
