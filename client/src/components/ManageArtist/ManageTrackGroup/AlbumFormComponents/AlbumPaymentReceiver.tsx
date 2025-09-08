@@ -29,11 +29,13 @@ const AlbumPaymentReceiver = () => {
     const trimmedSearch = search.trim().toLowerCase();
     const labels = (artist?.artistLabels ?? []).filter(
       (label) =>
-        label.labelUser?.name?.toLowerCase().includes(trimmedSearch) ||
-        label.labelUser?.email?.toLowerCase().includes(trimmedSearch) ||
-        label.labelUser?.artists?.some((a) =>
-          a.name.toLowerCase().includes(trimmedSearch)
-        )
+        label.isArtistApproved &&
+        label.isLabelApproved &&
+        (label.labelUser?.name?.toLowerCase().includes(trimmedSearch) ||
+          label.labelUser?.email?.toLowerCase().includes(trimmedSearch) ||
+          label.labelUser?.artists?.some((a) =>
+            a.name.toLowerCase().includes(trimmedSearch)
+          ))
     );
 
     return labels.map((label) => ({
