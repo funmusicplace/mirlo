@@ -1,8 +1,7 @@
 import prisma from "@mirlo/prisma";
 
 import logger from "../logger";
-import { flatten, uniqBy } from "lodash";
-import sendMail from "./send-mail";
+
 import { sendMailQueue } from "../queues/send-mail-queue";
 
 const sendOnboardingEmail = async () => {

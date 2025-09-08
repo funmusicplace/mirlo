@@ -15,6 +15,7 @@ import { Link } from "react-router-dom";
 import { determineItemLink } from "components/Artist/ArtistItemLink";
 import FavoriteTrack from "components/TrackGroup/Favorite";
 import useErrorHandler from "services/useErrorHandler";
+import { css } from "@emotion/css";
 
 const TrackgroupButtons = styled.div`
   width: 100%;
@@ -282,7 +283,12 @@ const ClickToPlay: React.FC<
             <Link to={url} aria-hidden tabIndex={-1}></Link>
           )}
           <TrackgroupButtons>
-            <div>
+            <div
+              className={css`
+                text-overflow: ellipsis;
+                overflow: hidden;
+              `}
+            >
               <PurchaseOrDownloadAlbum trackGroup={trackGroup} collapse />
             </div>
             {user && showWishlist && (

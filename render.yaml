@@ -191,7 +191,18 @@ services:
         fromDatabase:
           name: blackbrd
           property: connectionString
+      - key: REDIS_HOST
+        fromService:
+          type: redis
+          name: redis
+          property: host
+      - key: REDIS_PORT
+        fromService:
+          type: redis
+          name: redis
+          property: port
       - fromGroup: blackbrd
+
     branch: main # optional (defaults to master)
 
   - type: cron
@@ -209,6 +220,16 @@ services:
         fromDatabase:
           name: blackbrd
           property: connectionString
+      - key: REDIS_HOST
+        fromService:
+          type: redis
+          name: redis
+          property: host
+      - key: REDIS_PORT
+        fromService:
+          type: redis
+          name: redis
+          property: port
       - fromGroup: blackbrd
     branch: main # optional (defaults to master)
 

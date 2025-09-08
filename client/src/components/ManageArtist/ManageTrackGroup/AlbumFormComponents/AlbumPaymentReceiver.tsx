@@ -15,6 +15,7 @@ import { queryManagedTrackGroup, queryTrackGroup } from "queries";
 import { useQuery } from "@tanstack/react-query";
 import Pill from "components/common/Pill";
 import { FaTimes } from "react-icons/fa";
+import { css } from "@emotion/css";
 
 const AlbumPaymentReceiver = () => {
   const { trackGroupId } = useParams();
@@ -25,13 +26,21 @@ const AlbumPaymentReceiver = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
 
   const searchUsers = React.useCallback(async (search: string) => {
-    const labels = await api.getMany<Label>(`labels`, {
-      name: search.trim(),
-    });
+    const trimmedSearch = search.trim().toLowerCase();
+    const labels = (artist?.artistLabels ?? []).filter(
+      (label) =>
+        label.isArtistApproved &&
+        label.isLabelApproved &&
+        (label.labelUser?.name?.toLowerCase().includes(trimmedSearch) ||
+          label.labelUser?.email?.toLowerCase().includes(trimmedSearch) ||
+          label.labelUser?.artists?.some((a) =>
+            a.name.toLowerCase().includes(trimmedSearch)
+          ))
+    );
 
-    return labels.results.map((label) => ({
-      id: label.id,
-      name: label.name,
+    return labels.map((label) => ({
+      id: label.labelUserId,
+      name: label.labelUser.name,
       isLabel: true,
     }));
   }, []);
@@ -60,10 +69,33 @@ const AlbumPaymentReceiver = () => {
     return null;
   }
 
+  if ((artist.artistLabels ?? []).length === 0) {
+    return null;
+  }
+
   return (
     <div>
       <FormComponent>
         <label>{t("nameOfAccountToReceivePayment")}</label>
+        <small
+          className={css`
+            display: block;
+            margin-bottom: 0.5rem;
+          `}
+        >
+          <Trans
+            t={t}
+            i18nKey={"receivePaymentDescription"}
+            components={{
+              artistPage: (
+                <ArtistButtonLink
+                  variant="link"
+                  to={getArtistManageUrl(artist.id)}
+                ></ArtistButtonLink>
+              ),
+            }}
+          />
+        </small>
         {trackGroup?.paymentToUser && (
           <Pill>
             {trackGroup.paymentToUser.name}{" "}
@@ -82,19 +114,6 @@ const AlbumPaymentReceiver = () => {
             onSelect={setLabelForPayment}
           />
         )}
-        <small>
-          <Trans
-            t={t}
-            i18nKey={"receivePaymentDescription"}
-            components={{
-              artistPage: (
-                <ArtistButtonLink
-                  to={getArtistManageUrl(artist.id)}
-                ></ArtistButtonLink>
-              ),
-            }}
-          />
-        </small>
       </FormComponent>
     </div>
   );

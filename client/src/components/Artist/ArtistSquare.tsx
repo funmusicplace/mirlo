@@ -16,16 +16,18 @@ const ArtistSquare: React.FC<{
   return (
     <TrackGroupWrapper>
       <div>
-        <ImageWithPlaceholder
-          src={
-            artist.avatar?.sizes?.[300] ??
-            artist.banner?.sizes?.[625] ??
-            artist.trackGroups?.[0]?.cover?.sizes?.[300]
-          }
-          alt={artist.name}
-          size={300}
-          square
-        />
+        <Link to={getArtistUrl(artist)} aria-label={artist.name}>
+          <ImageWithPlaceholder
+            src={
+              artist.avatar?.sizes?.[300] ??
+              artist.banner?.sizes?.[625] ??
+              artist.trackGroups?.[0]?.cover?.sizes?.[300]
+            }
+            alt={artist.name}
+            size={300}
+            square
+          />
+        </Link>
 
         <TrackGroupLinks>
           <TrackGroupInfo>
