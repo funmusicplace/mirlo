@@ -13,9 +13,8 @@ import LoadingBlocks from "components/Artist/LoadingBlocks";
 import BackToArtistLink from "../BackToArtistLink";
 import { useQuery } from "@tanstack/react-query";
 import { queryArtist, queryManagedTrackGroup } from "queries";
-import FeatureFlag from "components/common/FeatureFlag";
 import AlbumPaymentReceiver from "./AlbumFormComponents/AlbumPaymentReceiver";
-import AllowAllTracksForPromo from "./AlbumFormComponents/AllowAllTracksForPromo";
+import ManageTrackDefaults from "./AlbumFormComponents/ManageTrackDefaults";
 
 export interface TrackGroupFormData {
   published: boolean;
@@ -119,7 +118,7 @@ const ManageTrackGroup: React.FC<{}> = () => {
       >
         {t("uploadTracks")}
       </h2>
-      <AllowAllTracksForPromo reload={refetch} tracks={trackGroup.tracks} />
+      <ManageTrackDefaults reload={refetch} trackGroup={trackGroup} />
       {trackGroup && trackGroup?.tracks?.length > 0 && (
         <ManageTrackTable
           tracks={trackGroup.tracks}

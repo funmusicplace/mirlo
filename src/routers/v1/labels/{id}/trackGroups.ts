@@ -43,6 +43,9 @@ export default function () {
             },
           },
         },
+        orderBy: {
+          releaseDate: "desc",
+        },
       });
       res.json({
         results: trackGroups.map(processSingleTrackGroup),

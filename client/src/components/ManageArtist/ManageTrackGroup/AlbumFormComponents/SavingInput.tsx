@@ -29,6 +29,7 @@ const SavingInput: React.FC<{
   currency?: string;
   onEnter?: () => void;
   reload?: () => void;
+  width?: string | number;
 }> = ({
   formKey,
   min,
@@ -43,6 +44,7 @@ const SavingInput: React.FC<{
   step,
   maxLength,
   reload,
+  width,
   onEnter,
 }) => {
   const { colors } = useGetArtistColors();
@@ -107,7 +109,7 @@ const SavingInput: React.FC<{
     <div
       className={css`
         display: flex;
-        width: 100%;
+        width: ${width ?? "100%"};
         align-items: center;
         gap: 0.5rem;
       `}

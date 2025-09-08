@@ -64,8 +64,6 @@ const SortableArtistAlbums: React.FC = () => {
     );
   }, [artist?.trackGroups]);
 
-  console.log("artist", trackGroups);
-
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {

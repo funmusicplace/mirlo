@@ -2,7 +2,7 @@ import { css } from "@emotion/css";
 import React from "react";
 import { useLocation, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { FaEye, FaPen } from "react-icons/fa";
+import { FaEye, FaFlag, FaPen } from "react-icons/fa";
 import { bp } from "../../constants";
 import { useQuery } from "@tanstack/react-query";
 import { queryArtist } from "queries";
@@ -22,38 +22,41 @@ const ManageArtistButtons: React.FC = () => {
   );
   const { user } = useAuthContext();
 
+  const isCurrentArtist = artist && user?.id === artist?.userId;
+
+  const isAlbumPage = Boolean(trackGroupId);
+
   return (
     <>
-      {artist &&
-        (user?.isAdmin ||
-          (artist && user?.id === artist?.userId && !trackGroupId)) && (
-          <div
-            onMouseEnter={() => {
-              setIconOnly(false);
-            }}
-            onMouseLeave={() => {
-              setIconOnly(true);
-            }}
-            className={css`
-              z-index: 999999;
-              bottom: 75px;
-              right: 1rem;
-              position: fixed;
-              display: flex;
-              flex-direction: column;
-              a {
-                margin-bottom: 0.5rem;
-              }
-              transition: all 0.3s ease;
+      {artist && (
+        <div
+          onMouseEnter={() => {
+            setIconOnly(false);
+          }}
+          onMouseLeave={() => {
+            setIconOnly(true);
+          }}
+          className={css`
+            z-index: 999999;
+            bottom: 75px;
+            right: 1rem;
+            position: fixed;
+            display: flex;
+            flex-direction: column;
+            a {
+              margin-bottom: 0.5rem;
+            }
+            transition: all 0.3s ease;
 
-              @media screen and (max-width: ${bp.medium}px) {
-                left: 1rem;
-                bottom: 75px;
-                top: auto;
-                right: auto;
-              }
-            `}
-          >
+            @media screen and (max-width: ${bp.medium}px) {
+              left: 1rem;
+              bottom: 75px;
+              top: auto;
+              right: auto;
+            }
+          `}
+        >
+          {isCurrentArtist && !isAlbumPage && (
             <FixedButtonLink
               to={`/manage/artists/${artist.id}/customize`}
               endIcon={<IoIosColorPalette />}
@@ -66,18 +69,20 @@ const ManageArtistButtons: React.FC = () => {
                 artist.isLabelProfile ? "customizeLabelLook" : "customizeLook"
               )}
             </FixedButtonLink>
-            {!isManagePage && (
-              <FixedButtonLink
-                to={`/manage/artists/${artist.id}`}
-                endIcon={<FaPen />}
-                size="compact"
-                variant="dashed"
-                rounded
-                onlyIcon={iconOnly}
-              >
-                {t(artist.isLabelProfile ? "editLabelPage" : "editPage")}
-              </FixedButtonLink>
-            )}
+          )}
+          {isCurrentArtist && !isManagePage && !isAlbumPage && (
+            <FixedButtonLink
+              to={`/manage/artists/${artist.id}`}
+              endIcon={<FaPen />}
+              size="compact"
+              variant="dashed"
+              rounded
+              onlyIcon={iconOnly}
+            >
+              {t(artist.isLabelProfile ? "editLabelPage" : "editPage")}
+            </FixedButtonLink>
+          )}
+          {isCurrentArtist && !isAlbumPage && (
             <FixedButtonLink
               to={`/${artist?.urlSlug?.toLowerCase() ?? artist?.id}`}
               endIcon={<FaEye />}
@@ -89,8 +94,22 @@ const ManageArtistButtons: React.FC = () => {
             >
               {t("viewLive")}
             </FixedButtonLink>
-          </div>
-        )}
+          )}
+          {isAlbumPage && (
+            <FixedButtonLink
+              to={`/${artist?.urlSlug?.toLowerCase() ?? artist?.id}`}
+              endIcon={<FaFlag />}
+              disabled={!artist}
+              variant="dashed"
+              size="compact"
+              rounded
+              onlyIcon={iconOnly}
+            >
+              {t("flag")}
+            </FixedButtonLink>
+          )}
+        </div>
+      )}
     </>
   );
 };

@@ -45,7 +45,6 @@ const TrackGroupCard: React.FC<{
     album.published ||
     (album.publishedAt && new Date(album.publishedAt) < new Date());
 
-  console.log("isPublished", album.published, album.publishedAt, isPublished);
   return (
     <Box
       key={album.id}

@@ -35,6 +35,12 @@ const SetPriceOfAllTracks: React.FC<BulkUpdateTracksProps> = ({
           });
         })
       );
+      await api.put(`manage/trackGroups/${tracks[0].trackGroupId}`, {
+        defaultTrackAllowIndividualSale: allowIndividualSale,
+        defaultTrackMinPrice:
+          minPrice && allowIndividualSale ? minPrice * 100 : undefined,
+      });
+      // If individual sale is not allowed, clear minPrice state
       if (!allowIndividualSale) {
         setMinPrice(undefined);
       }

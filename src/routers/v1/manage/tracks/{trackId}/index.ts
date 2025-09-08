@@ -8,7 +8,6 @@ import prisma from "@mirlo/prisma";
 
 import { deleteTrack, updateTrackArtists } from "../../../../../utils/tracks";
 import { User } from "@mirlo/prisma/client";
-import { AppError } from "../../../../../utils/error";
 
 interface TrackBody {
   title: string;
