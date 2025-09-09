@@ -2,12 +2,18 @@ import { NextFunction, Request, Response } from "express";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import prisma from "@mirlo/prisma";
 import { findUserIdForURLSlug } from "../../../../utils/user";
-
 import {
-  processSingleTrackGroup,
-  whereForPublishedTrackGroups,
-} from "../../../../utils/trackGroup";
-import { findArtistIdForURLSlug } from "../../../../utils/artist";
+  addSizesToImage,
+  findArtistIdForURLSlug,
+} from "../../../../utils/artist";
+import {
+  finalArtistAvatarBucket,
+  finalArtistBannerBucket,
+  finalCoversBucket,
+  finalUserAvatarBucket,
+  finalUserBannerBucket,
+} from "../../../../utils/minio";
+import { whereForPublishedTrackGroups } from "../../../../utils/trackGroup";
 
 export default function () {
   const operations = {
@@ -19,36 +25,43 @@ export default function () {
 
     try {
       const artistId = await findArtistIdForURLSlug(id);
+
       const labelProfile = await prisma.artist.findFirst({
         where: { id: artistId, isLabelProfile: true },
       });
-      const where = whereForPublishedTrackGroups();
 
-      const trackGroups = await prisma.trackGroup.findMany({
+      const labelArtists = await prisma.artist.findMany({
         where: {
-          ...where,
-          OR: [
-            { paymentToUserId: labelProfile?.userId },
-            { artist: { userId: labelProfile?.userId } },
-          ],
-        },
-        include: {
-          cover: true,
-          tracks: { orderBy: { order: "asc" }, where: { deletedAt: null } },
-          artist: {
-            select: {
-              name: true,
-              urlSlug: true,
-              id: true,
+          artistLabels: {
+            some: {
+              labelUserId: labelProfile?.userId,
+              isLabelApproved: true,
+              isArtistApproved: true,
             },
           },
         },
-        orderBy: {
-          releaseDate: "desc",
+      });
+
+      const tracks = await prisma.track.findMany({
+        where: {
+          trackGroup: {
+            artistId: {
+              in: [
+                ...(labelProfile ? [labelProfile.id] : []),
+                ...(labelArtists || []).map((a) => a.id),
+              ],
+            },
+            ...whereForPublishedTrackGroups(),
+          },
+          isPreview: true,
+        },
+        include: {
+          trackGroup: true,
         },
       });
+
       res.json({
-        results: trackGroups.map(processSingleTrackGroup),
+        results: tracks,
       });
     } catch (e) {
       next(e);

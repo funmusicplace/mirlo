@@ -13,6 +13,9 @@ export const TRACK_GROUP_EXAMPLE: TrackGroup = {
   urlSlug: "example-album",
   isGettable: true,
   platformPercent: 7,
+  defaultAllowMirloPromo: true,
+  defaultTrackAllowIndividualSale: true,
+  defaultTrackMinPrice: 0,
   artist: {
     name: "Example Artist",
     urlSlug: "example-artist",

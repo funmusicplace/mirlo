@@ -48,7 +48,7 @@
     "home": "Home",
     "intro": "Mirlo provides a user-friendly space to help artists sell digital music, receive financial support, manage mailing lists, and share with their supporters.",
     "ourMission": "Our mission",
-    "missionStatement": "<1>The music industry does not work for artists or listeners and needs a radical re-imagining.<2>Mirlo hosts a community of artists, listeners, organizers, and coders who are daring to do just that: taking lessons learned from working in the solidarity economy and applying them to our platform.</1><1>We are building an online audio distribution and patronage platform that aims to be radical, accessible, open source (free & libre), modular, and standards based.</1>",
+    "missionStatement": "<1>The music industry does not work for artists or listeners and needs a radical re-imagining.</1><2>Mirlo hosts a community of artists, listeners, organizers, and coders who are daring to do just that: taking lessons learned from working in the solidarity economy and applying them to our platform.</2><3>We are building an online audio distribution and patronage platform that aims to be radical, accessible, open source (free & libre), modular, and standards based.</3>",
     "pricingAndFeatures": "Pricing & Features",
     "features": "Features",
     "pricing": "Pricing",
@@ -635,6 +635,8 @@
   },
   "manageAlbum": {
     "allowMirloPromoLabel": "Allow Mirlo to use it for promotion?",
+    "defaultTrackAllowIndividualSale": "By default, tracks will be available for individual sale.",
+    "defaultTrackMinPrice": "By default, tracks will have this minimum price.",
     "publishedAt": "Publication date",
     "previewRelease": "Preview release",
     "isGettable": "Is it possible for a user to buy or download this album?",
@@ -1036,8 +1038,9 @@
     "embed": "Embed {{ name }} in another website",
     "embedOrShare": "Embed or share album",
     "share": "Share",
-    "copyAlbum": "Copy album link",
-    "copyIframe": "If you want to embed the track in another website, copy the code below:",
+    "copyAlbum": "Copy link to this page",
+    "copyLabelLink": "Copy label/collective link",
+    "copyIframe": "If you want to embed this music in another website, copy the code below:",
     "copiedToClipboard": "Copied to clipboard!"
   },
   "home": {
@@ -1048,10 +1051,11 @@
     "logIn": "Log in",
     "signUp": "Sign up",
     "featuresLink": "What is Mirlo? Check out <features>our features</features> and <about>about section</about>.",
-    "mirloConstruction": "Wanna talk more? <email>E-mail us</email>, <discord>join our Discord</discord>, or join us <office>for office hours</office>! Also check out our <about>About page</about>, and <github>the code on GitHub</github>. <br /> <br />Want to just receive our monthly newsletter? <mailingList>Sign up</mailingList>",
+    "mirloConstruction": "Wanna talk more? <email>E-mail us</email> or <discord>join our Discord</discord>! Also check out our <about>About page</about>, and <github>the code on GitHub</github>. <br /> <br />Want to just receive our monthly newsletter? <mailingList>Sign up</mailingList>",
     "latestCommunityPost": "Latest posts from the community",
     "supportUs": "Want to support us as we grow Mirlo? <support>Pitch in</support>"
   },
+
   "faq": {
     "title": "Frequently Asked Questions (FAQ)",
     "home": "Home",

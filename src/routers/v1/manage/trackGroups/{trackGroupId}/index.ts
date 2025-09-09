@@ -83,13 +83,6 @@ export default function () {
     const data = req.body;
 
     try {
-      const artist = (await prisma.artist.findFirst({
-        where: {
-          id: Number(data.artistId),
-        },
-      })) as Artist; // By now we know that the artist exists
-      // and the user can edit it
-
       const newValues = pick(data, [
         "title",
         "releaseDate",
@@ -105,6 +98,9 @@ export default function () {
         "fundraisingGoal",
         "isAllOrNothing",
         "publishedAt",
+        "defaultAllowMirloPromo",
+        "defaultTrackAllowIndividualSale",
+        "defaultTrackMinPrice",
       ]);
 
       if (newValues.publishedAt) {
@@ -112,7 +108,7 @@ export default function () {
       }
 
       await prisma.trackGroup.updateMany({
-        where: { id: Number(trackGroupId), artistId: artist.id },
+        where: { id: Number(trackGroupId) },
         data: newValues,
       });
 
@@ -126,7 +122,7 @@ export default function () {
         if (slug === "") {
           slug = "blank";
         }
-        const newSlug = await findNewSlug(slug, 0, artist.id);
+        const newSlug = await findNewSlug(slug, 0, trackGroup.artistId);
         await prisma.trackGroup.update({
           where: { id: trackGroup.id },
           data: {

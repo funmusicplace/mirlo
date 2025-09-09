@@ -34,6 +34,10 @@ export const getTrackGroupWidget = (trackGroupId: number) => {
   return `${import.meta.env.VITE_CLIENT_DOMAIN}/widget/trackGroup/${trackGroupId}`;
 };
 
+export const getLabelWidget = (labelId: number) => {
+  return `${import.meta.env.VITE_CLIENT_DOMAIN}/widget/label/${labelId}`;
+};
+
 export const getReleaseUrl = (
   artist: { urlSlug?: string; id: number },
   trackGroup: { urlSlug?: string; id: number }

@@ -17,6 +17,20 @@ import { FaRss } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 import { ArtistButtonAnchor } from "components/Artist/ArtistButtons";
 import ArtistTourDates from "components/Artist/ArtistTourDates";
+import TrackGroupEmbed, {
+  LabelEmbed,
+} from "components/TrackGroup/TrackGroupEmbed";
+
+const smallButtonClass = css`
+  svg {
+    font-size: 0.8rem;
+  }
+  paddding: 0.25rem;
+  margin-left: 0.5rem;
+  margin-bottom: 0.25rem;
+  height: 1.5rem !important;
+  width: 1.5rem !important;
+`;
 
 export const ArtistTitle = styled.h1<{ artistAvatar: boolean }>`
   font-size: 2.4rem;
@@ -276,18 +290,12 @@ const ArtistHeaderSection: React.FC<{
               href={`${import.meta.env.VITE_API_DOMAIN}/v1/artists/${artist.urlSlug}/feed?format=rss`}
               rel="noreferrer"
               onlyIcon
-              className={css`
-                svg {
-                  font-size: 0.8rem;
-                }
-                paddding: 0.25rem;
-                margin-left: 0.5rem;
-                margin-bottom: 0.25rem;
-                height: 1.5rem !important;
-                width: 1.5rem !important;
-              `}
+              className={smallButtonClass}
               startIcon={<FaRss />}
             />
+            {artist.isLabelProfile && (
+              <LabelEmbed label={artist} buttonClassName={smallButtonClass} />
+            )}
           </div>
         </div>
       </HeaderWrapper>

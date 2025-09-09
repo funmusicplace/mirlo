@@ -13,8 +13,12 @@ import api from "services/api";
 import { Turnstile } from "@marsidev/react-turnstile";
 import TextArea from "components/common/TextArea";
 import { useSnackbar } from "state/SnackbarContext";
+import { FixedButton } from "components/common/FixedButton";
 
-const FlagContent: React.FC<{ trackGroupId: number }> = ({ trackGroupId }) => {
+const FlagContent: React.FC<{ trackGroupId: number; onlyIcon?: boolean }> = ({
+  trackGroupId,
+  onlyIcon,
+}) => {
   const [isFlagOpen, setIsFlagOpen] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
   const snackbar = useSnackbar();
@@ -53,12 +57,17 @@ const FlagContent: React.FC<{ trackGroupId: number }> = ({ trackGroupId }) => {
 
   return (
     <>
-      <Button
-        startIcon={<FaFlag />}
-        variant="transparent"
-        aria-label="Flag content"
+      <FixedButton
+        endIcon={<FaFlag />}
+        onlyIcon={onlyIcon}
+        aria-label={t("flagContent") ?? undefined}
+        variant="dashed"
+        size="compact"
+        rounded
         onClick={() => setIsFlagOpen(true)}
-      />
+      >
+        {t("flagContent")}
+      </FixedButton>
       <Modal
         size="small"
         open={isFlagOpen}

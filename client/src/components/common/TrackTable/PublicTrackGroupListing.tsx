@@ -13,7 +13,7 @@ import { useTranslation } from "react-i18next";
 
 export const PublicTrackGroupListing: React.FC<{
   tracks: Track[];
-  trackGroup: TrackGroup;
+  trackGroup?: TrackGroup;
   size?: "small";
 }> = ({ tracks, trackGroup, size }) => {
   const { t } = useTranslation("translation", {
@@ -69,7 +69,7 @@ export const PublicTrackGroupListing: React.FC<{
             key={track.id}
             track={track}
             addTracksToQueue={addTracksToQueue}
-            trackGroup={trackGroup}
+            trackGroup={track.trackGroup ?? trackGroup}
             size={size}
           />
         ))}

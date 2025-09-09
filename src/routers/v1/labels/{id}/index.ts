@@ -5,6 +5,7 @@ import { findUserIdForURLSlug } from "../../../../utils/user";
 import {
   addSizesToImage,
   findArtistIdForURLSlug,
+  processSingleArtist,
 } from "../../../../utils/artist";
 import {
   finalArtistAvatarBucket,
@@ -27,6 +28,10 @@ export default function () {
 
       const labelProfile = await prisma.artist.findFirst({
         where: { id: artistId, isLabelProfile: true },
+        include: {
+          banner: true,
+          avatar: true,
+        },
       });
 
       const label = await prisma.user.findUnique({
@@ -66,8 +71,6 @@ export default function () {
       res.json({
         result: {
           ...label,
-          banner: addSizesToImage(finalUserBannerBucket, label?.userBanner),
-          avatar: addSizesToImage(finalUserAvatarBucket, label?.userAvatar),
           artistLabels: label?.artistLabels.map((al) => ({
             ...al,
             artist: {
@@ -86,6 +89,7 @@ export default function () {
               })),
             },
           })),
+          profile: labelProfile && processSingleArtist(labelProfile),
         },
       });
     } catch (e) {

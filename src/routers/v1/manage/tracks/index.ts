@@ -65,38 +65,23 @@ export default function () {
       isPreview,
       lyrics,
       isrc,
+      allowIndividualSale,
+      minPrice,
+      allowMirloPromo,
       description,
       filename,
     } = req.body;
     try {
       await doesTrackGroupBelongToUser(Number(trackGroupId), loggedInUser);
 
-      const allTracksOnAlbums = await prisma.track.findMany({
+      const trackGroup = await prisma.trackGroup.findFirst({
         where: {
-          trackGroupId: Number(trackGroupId),
-          deletedAt: null,
+          id: Number(trackGroupId),
         },
-        select: {
-          allowMirloPromo: true,
-          allowIndividualSale: true,
-          minPrice: true,
-          currency: true,
+        include: {
+          tracks: true,
         },
       });
-
-      let allowMirloPromo = false;
-      if (allTracksOnAlbums.every((track) => track.allowMirloPromo)) {
-        // Assume if all tracks in the group allow Mirlo promo, then the new track should also allow it
-        allowMirloPromo = true;
-      }
-      let minPrice: number | null = null;
-      let allowIndividualSale = false;
-      if (allTracksOnAlbums.every((track) => track.allowIndividualSale)) {
-        minPrice = Math.min(
-          ...allTracksOnAlbums.map((track) => track.minPrice ?? 0)
-        );
-        allowIndividualSale = true;
-      }
 
       const createdTrack = await prisma.track.create({
         data: {
@@ -107,10 +92,12 @@ export default function () {
           lyrics,
           isrc,
           description,
-          allowMirloPromo,
-          allowIndividualSale,
-          minPrice,
-          currency: allTracksOnAlbums[0]?.currency,
+          allowMirloPromo:
+            allowMirloPromo ?? trackGroup?.defaultAllowMirloPromo,
+          allowIndividualSale:
+            allowIndividualSale ?? trackGroup?.defaultTrackAllowIndividualSale,
+          minPrice: minPrice ?? trackGroup?.defaultTrackMinPrice,
+          currency: trackGroup?.currency,
           trackGroup: {
             connect: {
               id: Number(trackGroupId),

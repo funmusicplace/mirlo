@@ -131,6 +131,9 @@ interface TrackGroup {
   fundraisingGoal?: number;
   fundraisingEndDate?: string;
   downloadableContent?: TrackGroupDownloadableContent[];
+  defaultAllowMirloPromo: boolean;
+  defaultTrackAllowIndividualSale: boolean;
+  defaultTrackMinPrice?: number; // in cents
 }
 
 interface Post {
@@ -421,6 +424,7 @@ interface Label {
   id: number;
   name: string;
   urlSlug: string;
+  profile: Artist;
 }
 
 interface MerchPurchase {
