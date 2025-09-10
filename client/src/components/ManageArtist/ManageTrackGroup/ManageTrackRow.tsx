@@ -196,7 +196,15 @@ const ManageTrackRow: React.FC<{
           `}
         >
           <div>
-            {track.title || track.audio?.originalFilename}
+            {track.title || (
+              <div
+                className={css`
+                  filter: hue-rotate(90deg);
+                `}
+              >
+                <FaExclamationTriangle /> {t("missingTitle")}
+              </div>
+            )}
             <TrackAuthors track={track} trackGroupArtistId={artistId} />
             <p>
               <small>

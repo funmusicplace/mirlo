@@ -18,9 +18,14 @@ export default function () {
         Number(trackGroupId),
         loggedInUser
       );
+      const isCurrentlyPublished =
+        trackGroup?.published || trackGroup.publishedAt;
       const updatedTrackgroup = await prisma.trackGroup.update({
         where: { id: Number(trackGroupId) || undefined },
-        data: { published: !trackGroup?.published, publishedAt: new Date() },
+        data: {
+          published: !isCurrentlyPublished,
+          publishedAt: isCurrentlyPublished ? null : new Date(),
+        },
       });
       if (updatedTrackgroup.published) {
         const artistFollowers = await prisma.artistUserSubscription.findMany({

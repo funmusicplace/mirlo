@@ -2,7 +2,7 @@ import { Prisma } from "../__generated__";
 
 export const users: Prisma.UserCreateInput[] = [
   {
-    email: "admin@admin.com",
+    email: "admin@admin.example",
     name: "Admin",
     password: "",
     isAdmin: true,
