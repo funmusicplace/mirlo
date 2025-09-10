@@ -958,6 +958,7 @@
     "areYouSureDelete": "Are you sure you want to delete this track?",
     "durationColumn": "Duration",
     "manageColumn": "Manage",
+    "missingTitle": "Missing title",
     "emptyTracklist": "There's no tracks yet!",
     "delete": "Delete",
     "deleteTrackSuccess": "Delete track success",
