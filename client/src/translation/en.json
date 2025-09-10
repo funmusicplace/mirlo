@@ -647,6 +647,7 @@
     "artwork": "Artwork",
     "searchArtists": "Search artists",
     "role": "Role",
+    "tracksMissingTitle": "{{ count }} tracks are missing a title. Are you sure you want to continue?",
     "isAllOrNothing": "Is it all or nothing?",
     "isAllOrNothingDescription": "If this is enabled, supporters will only be charged if the fundraising goal is met.",
     "fundraisingGoal": "Fundraising goal",

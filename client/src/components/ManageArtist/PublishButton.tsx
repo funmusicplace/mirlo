@@ -45,6 +45,7 @@ const PublishButton: React.FC<{
     const anyIncomplete = trackGroup.tracks.find(
       (t) => t.audio?.uploadState !== "SUCCESS"
     );
+
     if (
       (anyIncomplete || noTracks) &&
       !window.confirm(t(anyIncomplete ? "areYouSurePublish" : "noTracks") ?? "")
@@ -52,6 +53,21 @@ const PublishButton: React.FC<{
       setIsPublishing(false);
       return;
     }
+
+    const tracksBlank = trackGroup.tracks.filter(
+      (t) => !t.title || t.title.trim() === ""
+    );
+
+    if (
+      tracksBlank.length > 0 &&
+      !window.confirm(
+        t("tracksMissingTitle", { count: tracksBlank.length }) ?? ""
+      )
+    ) {
+      setIsPublishing(false);
+      return;
+    }
+
     try {
       if (artistUserId && trackGroupId) {
         await api.put(`manage/trackGroups/${trackGroupId}/publish`, {});
@@ -79,6 +95,13 @@ const PublishButton: React.FC<{
     trackGroup.published ||
     (trackGroup.publishedAt && new Date(trackGroup.publishedAt) <= new Date());
 
+  console.log(
+    "isPublished",
+    isPublished,
+    trackGroup.published,
+    trackGroup.publishedAt
+  );
+
   const beforeReleaseDate = new Date(trackGroup.releaseDate) > new Date();
 
   const publishButton = beforeReleaseDate ? "publishPreorder" : "publish";
@@ -92,7 +115,6 @@ const PublishButton: React.FC<{
         display: flex;
       `}
     >
-      {" "}
       {!isPublished && artist && (
         <ArtistButtonLink
           to={getReleaseUrl(artist, trackGroup)}
