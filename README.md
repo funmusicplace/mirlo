@@ -46,7 +46,7 @@ yarn client:start
 You can log in with these credentials:
 
 ```
-admin@admin.com
+admin@admin.example
 test1234
 ```
 
