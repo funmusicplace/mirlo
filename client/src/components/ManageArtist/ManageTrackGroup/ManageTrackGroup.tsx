@@ -32,6 +32,7 @@ export interface TrackGroupFormData {
   credits: string;
   about: string;
   coverFile: File[];
+  catalogNumber?: string;
 }
 
 const ManageTrackGroup: React.FC<{}> = () => {

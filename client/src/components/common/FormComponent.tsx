@@ -23,6 +23,7 @@ const FormComponent = styled.div<{ direction?: "row" | "column" }>`
     margin-left: 0.5rem;
     margin-bottom: 0.25rem;
   }
+
   input {
     border: var(--mi-border);
     margin-bottom: 0.25rem;

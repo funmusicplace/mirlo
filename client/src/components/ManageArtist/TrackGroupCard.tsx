@@ -151,6 +151,7 @@ const TrackGroupCard: React.FC<{
             <strong>{trackGroupCardTranslation("releaseDate")} </strong>
             {album.releaseDate?.split("T")[0]}
           </div>
+          {album.catalogNumber && <div>{album.catalogNumber}</div>}
         </div>
         <div
           className={css`

@@ -101,6 +101,7 @@ export default function () {
         "defaultAllowMirloPromo",
         "defaultTrackAllowIndividualSale",
         "defaultTrackMinPrice",
+        "catalogNumber",
       ]);
 
       if (newValues.publishedAt) {

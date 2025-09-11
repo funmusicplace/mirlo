@@ -70,6 +70,7 @@ export default function () {
         "isPublic",
         "includePurchaseTrackGroupId",
         "urlSlug",
+        "catalogNumber",
       ]);
       const merch = await prisma.merch.findFirst({
         where: {

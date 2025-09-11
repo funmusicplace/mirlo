@@ -30,15 +30,13 @@ const AlbumFormContent: React.FC<{
   reload: () => void;
 }> = ({ existingObject, reload }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
-  const {
-    formState: { errors },
-  } = useFormContext();
+
   const { artistId, trackGroupId } = useParams();
 
   return (
     <>
       <FormSection>
-        <h2>{t("aboutTheAlbum")}</h2>
+        <h2>{t("keyDetails")}</h2>
         <FormComponent>
           <label>{t("title")}</label>
           <SavingInput
@@ -54,7 +52,7 @@ const AlbumFormContent: React.FC<{
               gap: 1rem;
 
               > div {
-                width: 50%;
+                width: 33%;
               }
             }
           `}
@@ -111,7 +109,7 @@ const AlbumFormContent: React.FC<{
       </FormSection>
       <PriceAndSuch reload={reload} existingObject={existingObject} />
       <FormSection>
-        <h2>{t("moreAboutTheAlbum")}</h2>
+        <h2>{t("aboutTheAlbum")}</h2>
         <FormComponent>
           <label>{t("about")} </label>
           <SavingInput
@@ -130,6 +128,26 @@ const AlbumFormContent: React.FC<{
             extraData={{ artistId: Number(artistId) }}
           />
         </FormComponent>
+        <div
+          className={css`
+            @media screen and (min-width: ${bp.medium}px) {
+              display: flex;
+              gap: 1rem;
+              > div {
+                width: 33%;
+              }
+            }
+          `}
+        >
+          <FormComponent>
+            <label>{t("catalogNumber")}</label>
+            <SavingInput
+              formKey="catalogNumber"
+              url={`manage/trackGroups/${trackGroupId}`}
+              extraData={{ artistId: Number(artistId) }}
+            />
+          </FormComponent>
+        </div>
       </FormSection>
       <FeatureFlag featureFlag="fundraiser">
         <FundraisingGoal trackGroup={existingObject} />
