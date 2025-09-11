@@ -690,6 +690,8 @@
     "duration": "Duration",
     "about": "About",
     "price": "Price",
+    "publishedAtHint": "The date the album will be publicly listed. If you leave this blank it'll go live when you press Publish.",
+    "releasedAtHint": "The date the album will be available to buy and download. If you leave this blank it'll be available immediately after you press Publish.",
     "saveAlbum": "Save album",
     "goal": "Goal",
     "publish": "Publish release",
@@ -735,6 +737,7 @@
     "editTrackArtists": "Edit track artists",
     "nameOfAccountToReceivePayment": "Name of the account that will receive payments for this release.",
     "receivePaymentDescription": "You are seeing this because you are part of a label. This is the account that will receive payments for this release. If you are part of a label or collective, this will be the label or collective account. Go to your <artistPage>artist page</artistPage> to manage these relationships. If you leave this blank, payments will continue going to your personal account.",
+    "labelReceivePaymentDescription": "You are a label who can manage albums for this artist. This is the account that will receive payments for this release. Go to your <labelPage>label page</labelPage> to manage these relationships. If you leave this blank, payments will go to the artist's personal account.",
     "thereWasAnError": "There was an error uploading this track.",
     "doneUploading": "Uploaded all tracks. We still need to process them on our servers, but you can now safely close the browser.",
     "uploadingTracks": "Uploading tracks. This could take several minutes, please don't close the browser."

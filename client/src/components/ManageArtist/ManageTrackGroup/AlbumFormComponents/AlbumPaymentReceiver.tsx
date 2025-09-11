@@ -16,12 +16,14 @@ import { useQuery } from "@tanstack/react-query";
 import Pill from "components/common/Pill";
 import { FaTimes } from "react-icons/fa";
 import { css } from "@emotion/css";
+import { useAuthContext } from "state/AuthContext";
 
 const AlbumPaymentReceiver = () => {
   const { trackGroupId } = useParams();
   const { data: trackGroup, refetch } = useQuery(
     queryManagedTrackGroup(Number(trackGroupId) || 0)
   );
+  const { user } = useAuthContext();
   const { data: artist } = useManagedArtistQuery();
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
 
@@ -65,6 +67,9 @@ const AlbumPaymentReceiver = () => {
     []
   );
 
+  const isLabelUser =
+    user && artist?.artistLabels?.some((al) => al.labelUserId === user.id);
+
   if (!artist) {
     return null;
   }
@@ -85,12 +90,22 @@ const AlbumPaymentReceiver = () => {
         >
           <Trans
             t={t}
-            i18nKey={"receivePaymentDescription"}
+            i18nKey={
+              isLabelUser
+                ? "labelReceivePaymentDescription"
+                : "receivePaymentDescription"
+            }
             components={{
               artistPage: (
                 <ArtistButtonLink
                   variant="link"
                   to={getArtistManageUrl(artist.id)}
+                ></ArtistButtonLink>
+              ),
+              labelPage: (
+                <ArtistButtonLink
+                  variant="link"
+                  to={"/profile/label"}
                 ></ArtistButtonLink>
               ),
             }}

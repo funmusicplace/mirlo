@@ -9,9 +9,14 @@ import { ArtistButton } from "components/Artist/ArtistButtons";
 
 interface NewAlbumButtonProps extends React.PropsWithChildren {
   artist: Pick<Artist, "id" | "userId">;
+  onlyIcon?: boolean;
 }
 
-export function NewAlbumButton(props: NewAlbumButtonProps) {
+export function NewAlbumButton({
+  artist,
+  onlyIcon,
+  children,
+}: NewAlbumButtonProps) {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
@@ -24,13 +29,11 @@ export function NewAlbumButton(props: NewAlbumButtonProps) {
         trackGroup: {
           title: "",
           urlSlug: `mi-temp-slug-new-album-${uuid()}`,
-          artistId: props.artist.id,
+          artistId: artist.id,
         },
       });
 
-      navigate(
-        `/manage/artists/${props.artist.id}/release/${newAlbum.result.id}`
-      );
+      navigate(`/manage/artists/${artist.id}/release/${newAlbum.result.id}`);
     }),
     []
   );
@@ -41,10 +44,11 @@ export function NewAlbumButton(props: NewAlbumButtonProps) {
       startIcon={<FaPlus />}
       variant="dashed"
       collapsible
+      onlyIcon={onlyIcon}
       isLoading={isPending}
       onClick={handleClick}
     >
-      {props.children ?? t("artist.addNewAlbum")}
+      {children ?? t("artist.addNewAlbum")}
     </ArtistButton>
   );
 }

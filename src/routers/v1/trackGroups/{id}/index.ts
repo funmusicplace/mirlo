@@ -48,13 +48,9 @@ export default function () {
         });
       }
 
-      console.log("trackGroup", trackGroup);
-
       const isPublished =
         trackGroup?.published ||
         (trackGroup?.publishedAt && trackGroup.publishedAt < new Date());
-
-      console.log("isPublished", loggedInUser, isPublished);
 
       const canSeeUnpublished =
         loggedInUser?.isAdmin || loggedInUser?.id === trackGroup?.artist.userId;
