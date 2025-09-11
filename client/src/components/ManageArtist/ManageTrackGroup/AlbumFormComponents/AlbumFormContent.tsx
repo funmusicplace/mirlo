@@ -67,6 +67,7 @@ const AlbumFormContent: React.FC<{
               required
               url={`manage/trackGroups/${trackGroupId}`}
               extraData={{ artistId: Number(artistId) }}
+              reload={reload}
             />
             <small>{t("publishedAtHint")}</small>
           </FormComponent>
@@ -109,24 +110,27 @@ const AlbumFormContent: React.FC<{
         </FormComponent>
       </FormSection>
       <PriceAndSuch reload={reload} existingObject={existingObject} />
-      <FormComponent>
-        <label>{t("about")} </label>
-        <SavingInput
-          formKey="about"
-          rows={5}
-          url={`manage/trackGroups/${trackGroupId}`}
-          extraData={{ artistId: Number(artistId) }}
-        />
-      </FormComponent>
-      <FormComponent>
-        <label>{t("credits")} </label>
-        <SavingInput
-          formKey="credits"
-          rows={5}
-          url={`manage/trackGroups/${trackGroupId}`}
-          extraData={{ artistId: Number(artistId) }}
-        />
-      </FormComponent>
+      <FormSection>
+        <h2>{t("moreAboutTheAlbum")}</h2>
+        <FormComponent>
+          <label>{t("about")} </label>
+          <SavingInput
+            formKey="about"
+            rows={5}
+            url={`manage/trackGroups/${trackGroupId}`}
+            extraData={{ artistId: Number(artistId) }}
+          />
+        </FormComponent>
+        <FormComponent>
+          <label>{t("credits")} </label>
+          <SavingInput
+            formKey="credits"
+            rows={5}
+            url={`manage/trackGroups/${trackGroupId}`}
+            extraData={{ artistId: Number(artistId) }}
+          />
+        </FormComponent>
+      </FormSection>
       <FeatureFlag featureFlag="fundraiser">
         <FundraisingGoal trackGroup={existingObject} />
       </FeatureFlag>

@@ -11,12 +11,15 @@ import {
   ArtistButtonLink,
 } from "components/Artist/ArtistButtons";
 import useArtistQuery from "utils/useArtistQuery";
+import { formatDate } from "components/TrackGroup/ReleaseDate";
 
 const PublishButton: React.FC<{
   trackGroup: TrackGroup;
   reload: () => Promise<unknown>;
 }> = ({ trackGroup, reload }) => {
-  const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
+  const { t, i18n } = useTranslation("translation", {
+    keyPrefix: "manageAlbum",
+  });
   const snackbar = useSnackbar();
 
   const [isPublishing, setIsPublishing] = React.useState(false);
@@ -91,6 +94,14 @@ const PublishButton: React.FC<{
     reload,
   ]);
 
+  if (!trackGroup || !artist) {
+    return null;
+  }
+
+  if (trackGroup.tracks?.length === 0 && !trackGroup.fundraisingGoal) {
+    return null;
+  }
+
   const isPublished =
     trackGroup.published ||
     (trackGroup.publishedAt && new Date(trackGroup.publishedAt) <= new Date());
@@ -106,6 +117,7 @@ const PublishButton: React.FC<{
     <div
       className={css`
         display: flex;
+        gap: 0.75rem;
       `}
     >
       {!isPublished && artist && (
@@ -131,11 +143,16 @@ const PublishButton: React.FC<{
         isLoading={isPublishing}
         onClick={publishTrackGroup}
         disabled={isPublishing}
-        className={css`
-          margin-left: 0.75rem;
-        `}
       >
-        {t(isPublished ? privateButton : publishButton)}
+        {t(isPublished ? privateButton : publishButton, {
+          date: trackGroup.publishedAt
+            ? formatDate({
+                date: trackGroup.publishedAt,
+                options: { year: "numeric", month: "short", day: "numeric" },
+                i18n,
+              })
+            : t("now"),
+        })}
       </ArtistButton>
     </div>
   );

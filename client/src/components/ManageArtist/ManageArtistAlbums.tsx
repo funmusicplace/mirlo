@@ -16,6 +16,7 @@ import {
 } from "queries";
 import { ArtistButtonLink } from "components/Artist/ArtistButtons";
 import SetEntireCataloguePrice from "./SetEntireCataloguePrice";
+import { MdOutlineDownloadForOffline } from "react-icons/md";
 
 const ManageArtistAlbums: React.FC<{}> = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
@@ -63,7 +64,7 @@ const ManageArtistAlbums: React.FC<{}> = () => {
           <ArtistButtonLink
             to={`/manage/artists/${artistId}/releases/tools`}
             size="compact"
-            startIcon={<FaWrench />}
+            startIcon={<MdOutlineDownloadForOffline />}
             variant="outlined"
             collapsible
             className={css`
@@ -80,7 +81,6 @@ const ManageArtistAlbums: React.FC<{}> = () => {
       {isLoading && <LoadingBlocks />}
       {(unpublishedReleases.length ?? 0) > 0 && (
         <>
-          {" "}
           <h3>{t("unpublishedReleases")}</h3>
           <div
             className={css`

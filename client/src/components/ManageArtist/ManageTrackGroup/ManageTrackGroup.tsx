@@ -15,6 +15,14 @@ import { useQuery } from "@tanstack/react-query";
 import { queryArtist, queryManagedTrackGroup } from "queries";
 import AlbumPaymentReceiver from "./AlbumFormComponents/AlbumPaymentReceiver";
 import ManageTrackDefaults from "./AlbumFormComponents/ManageTrackDefaults";
+import {
+  ArtistButton,
+  ArtistButtonAnchor,
+  ArtistButtonLink,
+} from "components/Artist/ArtistButtons";
+import { MdOutlineDownloadForOffline } from "react-icons/md";
+import { getArtistManageUrl, getManageReleaseUrl } from "utils/artist";
+import { formatDate } from "components/TrackGroup/ReleaseDate";
 
 export interface TrackGroupFormData {
   published: boolean;
@@ -27,7 +35,9 @@ export interface TrackGroupFormData {
 }
 
 const ManageTrackGroup: React.FC<{}> = () => {
-  const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
+  const { t, i18n } = useTranslation("translation", {
+    keyPrefix: "manageAlbum",
+  });
 
   const { artistId: artistParamId, trackGroupId: trackGroupParamId } =
     useParams();
@@ -69,7 +79,7 @@ const ManageTrackGroup: React.FC<{}> = () => {
           align-items: flex-start;
         `}
       >
-        <BackToArtistLink />
+        <BackToArtistLink subPage="releases" />
         <SpaceBetweenDiv>
           <h1
             className={css`
@@ -89,6 +99,7 @@ const ManageTrackGroup: React.FC<{}> = () => {
             className={css`
               display: flex;
               align-items: center;
+              gap: 0.75rem;
 
               @media (max-width: ${bp.small}px) {
                 width: 100%;
@@ -98,10 +109,13 @@ const ManageTrackGroup: React.FC<{}> = () => {
               }
             `}
           >
-            {trackGroup &&
-              (trackGroup.tracks?.length > 0 || trackGroup.fundraisingGoal) && (
-                <PublishButton trackGroup={trackGroup} reload={refetch} />
-              )}
+            <PublishButton trackGroup={trackGroup} reload={refetch} />
+            <ArtistButtonLink
+              to={getArtistManageUrl(artist.id) + "/releases/tools"}
+              startIcon={<MdOutlineDownloadForOffline />}
+            >
+              {t("downloadCodes")}
+            </ArtistButtonLink>
           </div>
         </SpaceBetweenDiv>
       </div>
@@ -137,6 +151,7 @@ const ManageTrackGroup: React.FC<{}> = () => {
         />
       )}
       <hr style={{ marginTop: "1rem", marginBottom: "1rem" }} />
+
       <PublishButton trackGroup={trackGroup} reload={refetch} />
     </ManageSectionWrapper>
   );

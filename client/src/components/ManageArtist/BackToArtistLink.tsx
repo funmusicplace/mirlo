@@ -1,15 +1,16 @@
 import { css } from "@emotion/css";
-import ArtistRouterLink from "components/Artist/ArtistButtons";
+import ArtistRouterLink, {
+  ArtistButtonLink,
+} from "components/Artist/ArtistButtons";
 import Tooltip from "components/common/Tooltip";
 import { useTranslation } from "react-i18next";
 import { FaChevronLeft } from "react-icons/fa";
-import { Link } from "react-router-dom";
-import { useArtistContext } from "state/ArtistContext";
+import useArtistQuery from "utils/useArtistQuery";
 
-const BackToArtistLink: React.FC<{ subPage?: "posts" }> = ({ subPage }) => {
-  const {
-    state: { artist },
-  } = useArtistContext();
+const BackToArtistLink: React.FC<{ subPage?: "posts" | "releases" }> = ({
+  subPage,
+}) => {
+  const { data: artist } = useArtistQuery();
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
 
   if (!artist) {
@@ -18,22 +19,18 @@ const BackToArtistLink: React.FC<{ subPage?: "posts" }> = ({ subPage }) => {
 
   return (
     <Tooltip hoverText={t("backToArtist")} underline={false}>
-      <ArtistRouterLink
+      <ArtistButtonLink
         className={css`
           display: flex;
           align-items: center;
           font-size: 1.2rem;
         `}
+        variant="link"
+        startIcon={<FaChevronLeft />}
         to={`/manage/artists/${artist.id}/${subPage ?? ""}`}
       >
-        <FaChevronLeft
-          className={css`
-            margin-right: 0.5rem;
-            font-size: 1.2rem;
-          `}
-        />
         {artist.name}
-      </ArtistRouterLink>
+      </ArtistButtonLink>
     </Tooltip>
   );
 };
