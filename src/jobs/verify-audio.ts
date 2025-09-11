@@ -43,7 +43,6 @@ export default async (job: Job) => {
     // const stream = await createReadStream(localTrackPath);
     // const file = await readFileSync(localTrackPath);
     // const blob = new Blob([file], { type: `audio/${fileExtension}` });
-    // console.log("file", file);
 
     // const formData = new FormData();
     // formData.append("file", blob);

@@ -30,6 +30,11 @@ export const ArtistBox: React.FC<{
         return `
         background: ${colors?.primary} !important;
         color: ${colors?.background} !important;
+
+        a {
+          color: ${colors?.background} !important;
+          filter: hue-rotate(90deg);
+        }
         `;
       default:
         return "";

@@ -140,7 +140,7 @@ const CustomButton = styled.button<Sizable>(
         case "link":
           return `
           color: ${primaryColor};
-          margin-left: .3rem;
+          font-size: inherit;
           font-weight: bold;
           padding: 0 !important;
           background-color: transparent !important;

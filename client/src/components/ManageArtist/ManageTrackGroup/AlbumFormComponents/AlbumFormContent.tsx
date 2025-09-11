@@ -60,7 +60,7 @@ const AlbumFormContent: React.FC<{
           `}
         >
           <FormComponent>
-            <label>{t("publishedAt")} </label>
+            <label>{t("publishedAt")}</label>
             <SavingInput
               formKey="publishedAt"
               type="date"
@@ -68,16 +68,18 @@ const AlbumFormContent: React.FC<{
               url={`manage/trackGroups/${trackGroupId}`}
               extraData={{ artistId: Number(artistId) }}
             />
+            <small>{t("publishedAtHint")}</small>
           </FormComponent>
           <FormComponent>
-            <label>{t("releaseDate")} </label>
+            <label>{t("releaseDate")}</label>
             <SavingInput
               formKey="releaseDate"
               type="date"
               required
               url={`manage/trackGroups/${trackGroupId}`}
               extraData={{ artistId: Number(artistId) }}
-            />
+            />{" "}
+            <small>{t("releasedAtHint")}</small>
           </FormComponent>
 
           <ManageTags tags={existingObject.tags} />

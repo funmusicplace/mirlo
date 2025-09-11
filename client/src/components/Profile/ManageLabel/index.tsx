@@ -17,6 +17,7 @@ import { FaChevronRight } from "react-icons/fa";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import { css } from "@emotion/css";
 import { ProfileSection } from "..";
+import { NewAlbumButton } from "components/ManageArtist/NewAlbumButton";
 
 const ProfileLabel: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "label" });
@@ -108,6 +109,7 @@ const ProfileLabel: React.FC = () => {
               {/* <th>{t("canLabelAddReleases")}</th> */}
               <th>{t("isArtistConfirmed")}</th>
               <th>{t("isLabelConfirmed")}</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
@@ -124,9 +126,11 @@ const ProfileLabel: React.FC = () => {
                 </td>
                 <td>
                   {relationship.canLabelManageArtist ? (
-                    <Link to={getArtistManageUrl(relationship.artist.id)}>
-                      {t("manage")}
-                    </Link>
+                    <>
+                      <Link to={getArtistManageUrl(relationship.artist.id)}>
+                        {t("manage")}
+                      </Link>
+                    </>
                   ) : (
                     t("askArtist")
                   )}
@@ -158,6 +162,13 @@ const ProfileLabel: React.FC = () => {
                     }}
                     label={t("showOnPage")}
                   />
+                </td>
+                <td>
+                  {relationship.canLabelManageArtist && (
+                    <>
+                      <NewAlbumButton artist={relationship.artist} />
+                    </>
+                  )}
                 </td>
               </tr>
             ))}

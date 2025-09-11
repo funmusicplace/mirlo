@@ -95,13 +95,6 @@ const PublishButton: React.FC<{
     trackGroup.published ||
     (trackGroup.publishedAt && new Date(trackGroup.publishedAt) <= new Date());
 
-  console.log(
-    "isPublished",
-    isPublished,
-    trackGroup.published,
-    trackGroup.publishedAt
-  );
-
   const beforeReleaseDate = new Date(trackGroup.releaseDate) > new Date();
 
   const publishButton = beforeReleaseDate ? "publishPreorder" : "publish";
