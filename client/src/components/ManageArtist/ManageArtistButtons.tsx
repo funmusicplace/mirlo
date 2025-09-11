@@ -29,8 +29,13 @@ const ManageArtistButtons: React.FC = () => {
   );
   const { user } = useAuthContext();
 
-  const isCurrentArtist =
-    artist && (user?.id === artist?.userId || user?.isAdmin);
+  const canLabelEditArtist = artist?.artistLabels?.some(
+    (label) => label.labelUserId === user?.id && label.canLabelAddReleases
+  );
+
+  const canEditArtist =
+    artist &&
+    (user?.id === artist?.userId || user?.isAdmin || canLabelEditArtist);
 
   const isAlbumPage = Boolean(trackGroupId);
 
@@ -65,7 +70,7 @@ const ManageArtistButtons: React.FC = () => {
             }
           `}
         >
-          {isCurrentArtist && !isAlbumPage && (
+          {canEditArtist && !isAlbumPage && (
             <FixedButtonLink
               to={`/manage/artists/${artist.id}/customize`}
               endIcon={<IoIosColorPalette />}
@@ -79,7 +84,7 @@ const ManageArtistButtons: React.FC = () => {
               )}
             </FixedButtonLink>
           )}
-          {isCurrentArtist && !isManagePage && !isAlbumPage && (
+          {canEditArtist && !isManagePage && !isAlbumPage && (
             <FixedButtonLink
               to={`/manage/artists/${artist.id}`}
               endIcon={<FaPen />}
@@ -91,7 +96,7 @@ const ManageArtistButtons: React.FC = () => {
               {t(artist.isLabelProfile ? "editLabelPage" : "editPage")}
             </FixedButtonLink>
           )}
-          {isCurrentArtist && !isAlbumPage && (
+          {canEditArtist && isManagePage && !isAlbumPage && (
             <FixedButtonLink
               to={`/${artist?.urlSlug?.toLowerCase() ?? artist?.id}`}
               endIcon={<FaEye />}
