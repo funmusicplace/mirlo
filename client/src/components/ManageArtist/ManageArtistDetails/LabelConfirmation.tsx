@@ -140,9 +140,7 @@ const LabelConfirmation: React.FC = () => {
           )}
         </>
       )}
-      <FeatureFlag featureFlag="label">
-        <ArtistLabels refetch={refetch} />
-      </FeatureFlag>
+      <ArtistLabels refetch={refetch} />
     </Box>
   );
 };

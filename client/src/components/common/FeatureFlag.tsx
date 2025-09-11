@@ -3,7 +3,6 @@ import { useAuthContext } from "state/AuthContext";
 
 interface FeatureFlagProps {
   featureFlag:
-    | "label"
     | "activityPub"
     | "downloadableContent"
     | "subscriptionFulfillment"
