@@ -29,7 +29,8 @@ const ManageArtistButtons: React.FC = () => {
   );
   const { user } = useAuthContext();
 
-  const isCurrentArtist = artist && user?.id === artist?.userId;
+  const isCurrentArtist =
+    artist && (user?.id === artist?.userId || user?.isAdmin);
 
   const isAlbumPage = Boolean(trackGroupId);
 
