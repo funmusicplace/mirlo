@@ -118,18 +118,16 @@ function ProfileForm() {
             ))}
           </SelectEl>
         </FormComponent>
-        <FeatureFlag featureFlag="label">
-          <FormComponent>
-            <Toggle
-              label={t("isLabelAccount")}
-              toggled={isLabelAccount}
-              onClick={() => {
-                setValue("isLabelAccount", !isLabelAccount);
-              }}
-            />
-            <small>{t("makeSearchable")}</small>
-          </FormComponent>
-        </FeatureFlag>
+        <FormComponent>
+          <Toggle
+            label={t("isLabelAccount")}
+            toggled={isLabelAccount}
+            onClick={() => {
+              setValue("isLabelAccount", !isLabelAccount);
+            }}
+          />
+          <small>{t("makeSearchable")}</small>
+        </FormComponent>
         {isLabelAccount && (
           <div
             className={css`
@@ -183,11 +181,9 @@ function ProfileForm() {
       >
         {t("resetPasswordLink")}
       </Link>
-      <FeatureFlag featureFlag="label">
-        <ProfileSection>
-          <ProfileImages />
-        </ProfileSection>
-      </FeatureFlag>
+      <ProfileSection>
+        <ProfileImages />
+      </ProfileSection>
     </FormProvider>
   );
 }

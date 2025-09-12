@@ -29,6 +29,7 @@ const AlbumForm: React.FC<{
     const defaultValues = {
       ...trackGroup,
       releaseDate: trackGroup?.releaseDate.split("T")[0],
+      catalogNumber: trackGroup?.catalogNumber ?? "",
       publishedAt: trackGroup?.publishedAt?.split("T")[0],
       platformPercent: trackGroup?.platformPercent ?? 7,
       isGettable: trackGroup?.isGettable ?? true,

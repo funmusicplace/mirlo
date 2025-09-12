@@ -53,14 +53,16 @@ const FundraisingGoal: React.FC<{ trackGroup: TrackGroup }> = ({
           />
         </FormComponent>
       </div>
-      <FormComponent>
+      <FormComponent direction="row">
+        <div>
+          <SavingInput
+            formKey="isAllOrNothing"
+            url={`manage/trackGroups/${trackGroupId}`}
+            extraData={{ artistId: Number(artistId) }}
+            type="checkbox"
+          />
+        </div>
         <label>{t("isAllOrNothing")}</label>
-        <SavingInput
-          formKey="isAllOrNothing"
-          url={`manage/trackGroups/${trackGroupId}`}
-          extraData={{ artistId: Number(artistId) }}
-          type="checkbox"
-        />
         <small>{t("isAllOrNothingDescription")}</small>
       </FormComponent>
     </FormSection>

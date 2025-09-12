@@ -4,6 +4,7 @@ import { bp } from "../../constants";
 const FormComponent = styled.div<{ direction?: "row" | "column" }>`
   margin-bottom: 1.5rem;
   margin-top: 0.35rem;
+  gap: 0.5rem;
 
   display: flex;
   flex-direction: column;
@@ -22,6 +23,7 @@ const FormComponent = styled.div<{ direction?: "row" | "column" }>`
     margin-left: 0.5rem;
     margin-bottom: 0.25rem;
   }
+
   input {
     border: var(--mi-border);
     margin-bottom: 0.25rem;

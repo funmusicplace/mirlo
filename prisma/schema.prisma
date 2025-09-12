@@ -419,6 +419,7 @@ model Merch {
   platformPercent             Int?                       @default(7)
   sku                         String?
   includePurchaseTrackGroupId Int?
+  catalogNumber               String?
   includePurchaseTrackGroup   TrackGroup?                @relation(fields: [includePurchaseTrackGroupId], references: [id])
   isPublic                    Boolean
   itemTypeId                  Int?
@@ -609,6 +610,7 @@ model TrackGroup {
   urlSlug                         String
   orderIndex                      Int?
   credits                         String?
+  catalogNumber                   String?
   userTrackGroupWishlist          UserTrackGroupWishlist[]
   platformPercent                 Int?                            @default(7)
   tags                            TrackGroupTag[]

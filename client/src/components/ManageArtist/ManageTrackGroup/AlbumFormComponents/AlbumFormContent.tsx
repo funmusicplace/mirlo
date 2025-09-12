@@ -30,15 +30,13 @@ const AlbumFormContent: React.FC<{
   reload: () => void;
 }> = ({ existingObject, reload }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
-  const {
-    formState: { errors },
-  } = useFormContext();
+
   const { artistId, trackGroupId } = useParams();
 
   return (
     <>
       <FormSection>
-        <h2>{t("aboutTheAlbum")}</h2>
+        <h2>{t("keyDetails")}</h2>
         <FormComponent>
           <label>{t("title")}</label>
           <SavingInput
@@ -54,7 +52,7 @@ const AlbumFormContent: React.FC<{
               gap: 1rem;
 
               > div {
-                width: 50%;
+                width: 33%;
               }
             }
           `}
@@ -67,6 +65,7 @@ const AlbumFormContent: React.FC<{
               required
               url={`manage/trackGroups/${trackGroupId}`}
               extraData={{ artistId: Number(artistId) }}
+              reload={reload}
             />
             <small>{t("publishedAtHint")}</small>
           </FormComponent>
@@ -109,24 +108,47 @@ const AlbumFormContent: React.FC<{
         </FormComponent>
       </FormSection>
       <PriceAndSuch reload={reload} existingObject={existingObject} />
-      <FormComponent>
-        <label>{t("about")} </label>
-        <SavingInput
-          formKey="about"
-          rows={5}
-          url={`manage/trackGroups/${trackGroupId}`}
-          extraData={{ artistId: Number(artistId) }}
-        />
-      </FormComponent>
-      <FormComponent>
-        <label>{t("credits")} </label>
-        <SavingInput
-          formKey="credits"
-          rows={5}
-          url={`manage/trackGroups/${trackGroupId}`}
-          extraData={{ artistId: Number(artistId) }}
-        />
-      </FormComponent>
+      <FormSection>
+        <h2>{t("aboutTheAlbum")}</h2>
+        <FormComponent>
+          <label>{t("about")} </label>
+          <SavingInput
+            formKey="about"
+            rows={5}
+            url={`manage/trackGroups/${trackGroupId}`}
+            extraData={{ artistId: Number(artistId) }}
+          />
+        </FormComponent>
+        <FormComponent>
+          <label>{t("credits")} </label>
+          <SavingInput
+            formKey="credits"
+            rows={5}
+            url={`manage/trackGroups/${trackGroupId}`}
+            extraData={{ artistId: Number(artistId) }}
+          />
+        </FormComponent>
+        <div
+          className={css`
+            @media screen and (min-width: ${bp.medium}px) {
+              display: flex;
+              gap: 1rem;
+              > div {
+                width: 33%;
+              }
+            }
+          `}
+        >
+          <FormComponent>
+            <label>{t("catalogNumber")}</label>
+            <SavingInput
+              formKey="catalogNumber"
+              url={`manage/trackGroups/${trackGroupId}`}
+              extraData={{ artistId: Number(artistId) }}
+            />
+          </FormComponent>
+        </div>
+      </FormSection>
       <FeatureFlag featureFlag="fundraiser">
         <FundraisingGoal trackGroup={existingObject} />
       </FeatureFlag>

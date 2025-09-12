@@ -638,6 +638,9 @@
     "defaultTrackAllowIndividualSale": "By default, tracks will be available for individual sale.",
     "defaultTrackMinPrice": "By default, tracks will have this minimum price.",
     "publishedAt": "Publication date",
+    "downloadCodes": "Promo codes",
+    "keyDetails": "Key details",
+    "catalogNumber": "Catalog number",
     "previewRelease": "Preview release",
     "isGettable": "Is it possible for a user to buy or download this album?",
     "isGettableTooltip": "We don't want to take this for granted! Some musicians just want to share their music, but don't want to let people download it.",
@@ -694,7 +697,8 @@
     "releasedAtHint": "The date the album will be available to buy and download. If you leave this blank it'll be available immediately after you press Publish.",
     "saveAlbum": "Save album",
     "goal": "Goal",
-    "publish": "Publish release",
+    "now": "now",
+    "publish": "Publish release {{ date }}",
     "publishedSuccess": "Successfully published album, it's now publicly available.",
     "publishPreorder": "Publish pre-order now",
     "publishNowInsteadOf": "You've set a future publication date of {{ futureDate }}. Do you want to publish it now instead?",
@@ -977,7 +981,7 @@
     "stillProcessing": "Still processing audio"
   },
   "manageArtistTools": {
-    "downloadCodes": "Download codes",
+    "downloadCodes": "Promo codes",
     "downloadAllCodes": "Download all codes",
     "downloadCodesExplain": "You can share download codes with other people to give them free access to this album. Think press, friends, and family.",
     "addDownloadCodes": "Add download codes",
