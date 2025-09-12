@@ -8,7 +8,6 @@ import ManageArtistButtons from "./ManageArtistButtons";
 const ManageContainer: React.FC = () => {
   return (
     <>
-      <ManageArtistButtons />
       <div
         className={css`
           z-index: 1;

@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import { FaEdit, FaEye, FaFlag, FaPen } from "react-icons/fa";
 import { bp } from "../../constants";
 import { useQuery } from "@tanstack/react-query";
-import { queryArtist, queryTrackGroup } from "queries";
+import { queryArtist, queryManagedTrackGroup, queryTrackGroup } from "queries";
 import { useAuthContext } from "state/AuthContext";
 import FixedButtonLink from "components/common/FixedButton";
 import { IoIosColorPalette } from "react-icons/io";
@@ -14,7 +14,7 @@ import { useGlobalStateContext } from "state/GlobalState";
 import Wishlist from "components/TrackGroup/Wishlist";
 import TipArtist from "components/common/TipArtist";
 import useCurrentTrackHook from "components/Player/useCurrentTrackHook";
-import { getManageReleaseUrl } from "utils/artist";
+import { getManageReleaseUrl, getReleaseUrl } from "utils/artist";
 
 const PlayingTrack: React.FC = () => {
   const { state } = useGlobalStateContext();
@@ -61,6 +61,9 @@ const ManageArtistButtons: React.FC = () => {
       artistId,
     })
   );
+  const { data: managedTrackGroup } = useQuery(
+    queryManagedTrackGroup(Number(trackGroupId) ?? 0)
+  );
   const { user } = useAuthContext();
 
   const canLabelEditArtist = artist?.artistLabels?.some(
@@ -73,17 +76,22 @@ const ManageArtistButtons: React.FC = () => {
 
   const isAlbumPage = Boolean(trackGroupId);
 
+  const beforeReleaseDate =
+    managedTrackGroup?.releaseDate &&
+    new Date(managedTrackGroup?.releaseDate) > new Date();
+
   return (
     <>
       {artist && (
         <div
           className={css`
             z-index: 999999;
-            bottom: 75px;
+            bottom: 80px;
             left: 1rem;
             position: fixed;
             display: flex;
             flex-direction: column;
+
             a,
             button {
               margin-bottom: 0.5rem;
@@ -91,8 +99,6 @@ const ManageArtistButtons: React.FC = () => {
             transition: all 0.3s ease;
 
             @media screen and (max-width: ${bp.medium}px) {
-              bottom: 75px;
-
               .children {
                 display: none;
               }
@@ -151,12 +157,24 @@ const ManageArtistButtons: React.FC = () => {
               {t("editRelease")}
             </FixedButtonLink>
           )}
+          {canEditArtist && managedTrackGroup && (
+            <FixedButtonLink
+              to={getReleaseUrl(artist, managedTrackGroup)}
+              endIcon={<FaEye />}
+              disabled={!artist}
+              variant="dashed"
+              size="compact"
+              rounded
+            >
+              {t(beforeReleaseDate ? "viewPreorder" : "viewLive")}
+            </FixedButtonLink>
+          )}
         </div>
       )}
       <div
         className={css`
           z-index: 999999;
-          bottom: 75px;
+          bottom: 80px;
           right: 1rem;
           position: fixed;
           display: flex;
@@ -166,11 +184,6 @@ const ManageArtistButtons: React.FC = () => {
             margin-bottom: 0.5rem;
           }
           transition: all 0.3s ease;
-
-          @media screen and (max-width: ${bp.medium}px) {
-            bottom: 75px;
-            top: auto;
-          }
         `}
       >
         <PlayingTrack />

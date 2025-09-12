@@ -23,7 +23,6 @@ const ArtistContainer: React.FC = () => {
 
   return (
     <>
-      <ManageArtistButtons />
       {!isPostOrRelease && (
         <>
           <ArtistPageWrapper

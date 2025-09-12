@@ -403,6 +403,7 @@ interface Merch {
   description: string;
   artist: Artist;
   title: string;
+  catalogNumber?: string;
   minPrice: number;
   currency: string;
   urlSlug: string | null;

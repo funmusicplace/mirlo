@@ -16,6 +16,7 @@ import LyricsModal from "./LyricsModal";
 import FavoriteTrack from "components/TrackGroup/Favorite";
 import { useGetArtistColors } from "components/Artist/ArtistButtons";
 import { useTranslation } from "react-i18next";
+import { FaExternalLinkAlt } from "react-icons/fa";
 
 const LicenseSpan = styled.a`
   text-wrap: nowrap;
@@ -283,9 +284,16 @@ const TrackRow: React.FC<{
                           }}
                           className={css`
                             overflow: ellipsis;
+                            font-size: 0.9rem;
+                            text-align: right;
+                            display: flex;
+                            align-items: center;
+                            gap: 1rem;
+                            width: 100%;
                           `}
                         >
-                          {track.license.short}
+                          <span>{track.license.short}</span>{" "}
+                          <FaExternalLinkAlt />
                         </LicenseSpan>
                       )}
                       {!track.license.link && (

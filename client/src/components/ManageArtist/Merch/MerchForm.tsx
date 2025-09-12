@@ -34,6 +34,7 @@ const MerchForm: React.FC<{
     description: string;
     minPrice: string;
     quantityRemaining: number;
+    catalogNumber: string;
   }>();
   const {
     handleSubmit,
@@ -142,7 +143,19 @@ const MerchForm: React.FC<{
           />
           <small>{t("quantityRemainingDescription")}</small>
         </FormComponent>
-
+        <FormComponent>
+          <label>{t("catalogNumber")}</label>
+          <SavingInput
+            formKey="catalogNumber"
+            step="0.01"
+            min={0}
+            url={`manage/merch/${merch.id}`}
+            extraData={{}}
+          />
+          {errors.catalogNumber && (
+            <FormError>{t("catalogNumberInvalid")}</FormError>
+          )}
+        </FormComponent>
         <SelectTrackGroup merch={merch} reload={reload} />
         <FeatureFlag featureFlag="downloadableContent">
           <DownloadableContent merch={merch} reload={reload} />

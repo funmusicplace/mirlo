@@ -97,7 +97,10 @@ const DropdownMenu: React.FC<{
                   align-items: center;
                   justify-content: flex-end;
                   border: none;
+                }
 
+                li > a,
+                li > button {
                   &:hover {
                     border-radius: 0;
                     background: var(--mi-normal-foreground-color) !important;
