@@ -467,6 +467,7 @@
   "manageArtist": {
     "albumTags": "Album tags",
     "label": "Label",
+    "editRelease": "Edit release",
     "preview": "Preview",
     "labelReleases": "Releases from artists on this roster",
     "labelReleasesDescription": "These are releases from artists on your roster. If you are administering payments for these artists, you'll receive payments for these releases.",
@@ -904,6 +905,11 @@
   },
   "trackGroupDetails": {
     "trackgroup": "Album:",
+    "untitled": "Untitled",
+    "enterDownloadCode": "Enter download code",
+    "yourEmail": "Your email:",
+    "redeem": "Redeem",
+    "gotADownloadCode": "Got a download code?",
     "noOtherInfoAboutThisAlbum": "There is no other information about this album.",
     "notPublishedWarning": "This album is not published yet, only you can see it.",
     "raisedAmount": "Raised <strong>{{money}}</strong>",

@@ -46,6 +46,11 @@ const AddToCollection: React.FC<{ trackGroup: TrackGroup }> = ({
           onClick={() => setIsAddingToCollection(true)}
           className={css`
             font-size: 1rem !important;
+
+            .children {
+              overflow: hidden;
+              text-overflow: ellipsis;
+            }
           `}
           startIcon={<IoAddSharp />}
         >

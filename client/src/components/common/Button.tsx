@@ -87,7 +87,10 @@ const CustomButton = styled.button<Sizable>(
           size === "compact"
             ? `
             height: 1.7rem; 
-            width: 1.7rem; 
+            padding: .9rem .5rem;
+            svg {
+              font-size: 1.2rem !important;
+            }
             `
             : ""
         };
@@ -141,7 +144,6 @@ const CustomButton = styled.button<Sizable>(
           return `
           color: ${primaryColor};
           font-size: inherit;
-          font-weight: bold;
           padding: 0 !important;
           background-color: transparent !important;
           text-decoration: underline;
@@ -239,7 +241,8 @@ const CustomButton = styled.button<Sizable>(
       0.25s color,
       0.25s border-radius,
       0.25s opacity,
-      0.25s filter;
+      0.25s filter
+      0.25s fill;
     text-decoration: none;
   
     &:hover:not(:disabled) {

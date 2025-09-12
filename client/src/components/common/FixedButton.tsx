@@ -11,9 +11,17 @@ export const FixedButton = styled(Button)`
 
   justify-content: space-between;
 
+  svg {
+    fill: black;
+  }
+
   :hover {
     background-color: rgba(0, 0, 0, 0.7) !important;
     color: white !important;
+
+    svg {
+      fill: white !important;
+    }
   }
 
   @media screen and (min-width: ${bp.medium}px) {

@@ -27,7 +27,11 @@ import { useAuthContext } from "state/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import useArtistQuery from "utils/useArtistQuery";
 import { queryTrackGroup } from "queries";
-import { useGetArtistColors } from "components/Artist/ArtistButtons";
+import {
+  ArtistButton,
+  useGetArtistColors,
+} from "components/Artist/ArtistButtons";
+import { bp } from "../../constants";
 
 function RedeemCode() {
   const { t } = useTranslation("translation", {
@@ -83,9 +87,10 @@ function RedeemCode() {
   } else if (!trackGroup) {
     return <FullPageLoadingSpinner />;
   }
+  console.log("sizes", trackGroup.cover?.sizes);
 
   return (
-    <WidthWrapper variant="small">
+    <WidthWrapper variant="big">
       <MetaCard
         title={trackGroup.title ?? "Untitled release"}
         description={trackGroup.about ?? "An album on Mirlo"}
@@ -93,58 +98,98 @@ function RedeemCode() {
       />
       <div
         className={css`
-          margin-top: 2rem;
+          margin-top: 5rem;
+          margin-bottom: 5rem;
+          @media screen and (max-width: ${bp.small}px) {
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+          }
         `}
       >
-        <h2>Got a download code?</h2>
         <div
           className={css`
             display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            gap: 2rem;
+
+            @media screen and (max-width: ${bp.small}px) {
+              flex-direction: column-reverse;
+              align-items: center;
+            }
           `}
         >
           <ImageWithPlaceholder
-            src={trackGroup.cover?.sizes?.[120]}
-            size={120}
+            src={trackGroup.cover?.sizes?.[600]}
+            size={600}
             alt={trackGroup.title ?? "Untitled release"}
           />
-          <SmallTileDetails
-            title={
-              <Link to={getReleaseUrl(trackGroup.artist, trackGroup)}>
-                {trackGroup.title}
-              </Link>
-            }
-            subtitle={
-              <Link to={getArtistUrl(trackGroup.artist)}>
-                {trackGroup.artist?.name ?? ""}
-              </Link>
-            }
-          />
-        </div>
-        <FormComponent>
-          <label>Enter download code below:</label>
-          <InputEl
-            colors={colors}
+          <div
             className={css`
-              margin-bottom: 1rem;
+              padding: 0 2rem;
+              width: 50%;
+
+              @media screen and (max-width: ${bp.small}px) {
+                width: 100%;
+              }
             `}
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-          />
-          {!user && (
-            <FormComponent>
-              <label>Your email:</label>
+          >
+            <h2>{t("gotADownloadCode")}</h2>
+
+            <SmallTileDetails
+              title={
+                <Link to={getReleaseUrl(trackGroup.artist, trackGroup)}>
+                  {trackGroup.title}
+                </Link>
+              }
+              textColor={colors?.foreground}
+              subtitle={
+                <Link to={getArtistUrl(trackGroup.artist)}>
+                  {trackGroup.artist?.name ?? ""}
+                </Link>
+              }
+            />
+            <FormComponent
+              className={css`
+                margin-top: 2rem !important;
+
+                label {
+                  font-size: 1.25rem !important;
+                }
+
+                input {
+                  max-width: 300px;
+                }
+              `}
+            >
+              <label>{t("enterDownloadCode")}</label>
               <InputEl
                 colors={colors}
                 className={css`
                   margin-bottom: 1rem;
                 `}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
               />
+              {!user && (
+                <FormComponent>
+                  <label>{t("yourEmail")}</label>
+                  <InputEl
+                    colors={colors}
+                    className={css`
+                      margin-bottom: 1rem;
+                    `}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </FormComponent>
+              )}
+              <ArtistButton onClick={() => redeemAlbum(code, email)}>
+                {t("redeem")}
+              </ArtistButton>
             </FormComponent>
-          )}
-          <Button onClick={() => redeemAlbum(code, email)}>Redeem</Button>
-        </FormComponent>
+          </div>
+        </div>
       </div>
     </WidthWrapper>
   );

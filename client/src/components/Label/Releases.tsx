@@ -30,7 +30,7 @@ function Label() {
     <>
       <TrackgroupGrid gridNumber="4" as="ul" role="list">
         {releases.results.map((tg) => (
-          <ArtistTrackGroup key={tg.id} trackGroup={tg} />
+          <ArtistTrackGroup key={tg.id} trackGroup={tg} showArtist />
         ))}
       </TrackgroupGrid>
     </>

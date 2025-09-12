@@ -122,7 +122,7 @@ const PostHeader: React.FC<{ post: Post }> = ({ post }) => {
                   top: 4rem;
                 `}
               >
-                <TipArtist artistId={post.artistId} transparent={false} />
+                <TipArtist artistId={post.artistId} />
               </div>
             </div>
           )}

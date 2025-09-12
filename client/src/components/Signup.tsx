@@ -71,10 +71,12 @@ function Signup() {
       promoCode: search.get("promo") ?? "",
     },
   });
+  const [isLoading, setIsLoading] = React.useState(false);
   const { register, handleSubmit } = methods;
 
   const onSubmit = React.useCallback(
     async (data: SignupInputs) => {
+      setIsLoading(true);
       try {
         await api.post(
           "signup",
@@ -105,6 +107,8 @@ function Signup() {
         } else {
           errorHandler(e);
         }
+      } finally {
+        setIsLoading(false);
       }
     },
     [snackbar, t]
@@ -219,6 +223,7 @@ function Signup() {
               margin-top: 1rem;
             `}
             type="submit"
+            isLoading={isLoading}
           >
             {t("signUpButton")}
           </Button>

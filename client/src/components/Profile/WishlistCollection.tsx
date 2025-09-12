@@ -57,6 +57,7 @@ function WishlistCollection() {
                     <ArtistTrackGroup
                       trackGroup={wishlist.trackGroup}
                       key={wishlist.trackGroupId}
+                      showArtist
                     />
                   )
               )}
@@ -83,6 +84,7 @@ function WishlistCollection() {
                   trackGroup={{ ...tf.track.trackGroup, tracks: [tf.track] }}
                   key={tf.trackId}
                   showTrackFavorite
+                  showArtist
                 />
               ))}
             </TrackgroupGrid>

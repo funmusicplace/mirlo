@@ -55,7 +55,13 @@ export const LoopButton: React.FC = () => {
       className={css`
         margin-left: 0.25rem;
         position: relative;
-        ${looping ? "color: var(--mi-link-color) !important;" : ""}
+        svg {
+          color: ${looping ? "white !important" : "inherit"};
+        }
+        ${looping
+          ? `color: var(--mi-link-color) !important; 
+             `
+          : ""}
       `}
     />
   );

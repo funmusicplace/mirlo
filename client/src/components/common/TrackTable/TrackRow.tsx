@@ -15,6 +15,7 @@ import DropdownMenu from "../DropdownMenu";
 import LyricsModal from "./LyricsModal";
 import FavoriteTrack from "components/TrackGroup/Favorite";
 import { useGetArtistColors } from "components/Artist/ArtistButtons";
+import { useTranslation } from "react-i18next";
 
 const LicenseSpan = styled.a`
   text-wrap: nowrap;
@@ -145,6 +146,9 @@ const TrackRow: React.FC<{
   addTracksToQueue: (id: number) => void;
   size?: "small";
 }> = ({ track, addTracksToQueue, trackGroup, size }) => {
+  const { t } = useTranslation("translation", {
+    keyPrefix: "trackGroupDetails",
+  });
   const { dispatch } = useGlobalStateContext();
   const [trackTitle] = React.useState(track.title);
   const { user } = useAuthContext();
@@ -195,6 +199,10 @@ const TrackRow: React.FC<{
               overflow: hidden;
               text-overflow: ellipsis;
 
+              i {
+                opacity: 0.8;
+              }
+
               @media screen and (max-width: ${bp.medium}px) {
                 font-size: 0.9rem;
               }
@@ -206,7 +214,7 @@ const TrackRow: React.FC<{
               }
             `}
           >
-            {trackTitle}
+            {trackTitle ?? <i>{t("untitled")}</i>}
             <TrackAuthors
               track={track}
               trackGroupArtistId={trackGroup.artistId}

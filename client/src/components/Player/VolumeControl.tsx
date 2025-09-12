@@ -1,7 +1,8 @@
 import { css } from "@emotion/css";
 import Button from "components/common/Button";
-import { FaVolumeDown, FaVolumeUp } from "react-icons/fa";
+import { FaVolumeDown, FaVolumeMute, FaVolumeUp } from "react-icons/fa";
 import { bp } from "../../constants";
+import { FaVolumeHigh } from "react-icons/fa6";
 
 export const VolumeControl: React.FC<{
   setVolume: React.Dispatch<React.SetStateAction<number>>;
@@ -12,7 +13,9 @@ export const VolumeControl: React.FC<{
       className={css`
         display: flex;
         align-items: center;
-        width: 140px;
+        width: 100px;
+        margin-right: 1rem;
+        margin-left: 1.5rem;
 
         @media screen and (max-width: ${bp.small}px) {
           display: none;
@@ -20,11 +23,14 @@ export const VolumeControl: React.FC<{
       `}
     >
       <Button
-        startIcon={<FaVolumeDown />}
-        variant="outlined"
-        title="Decrease volume"
+        startIcon={volume === 0 ? <FaVolumeMute /> : <FaVolumeHigh />}
+        variant="link"
+        className={css`
+          font-size: 1.25rem !important;
+        `}
+        title="Mute volume"
         onClick={() => {
-          setVolume((vol) => (vol === 0 ? 0 : +(vol -= 0.1).toFixed(1)));
+          setVolume((val) => (val > 0 ? 0 : 0.5));
         }}
       />
 
@@ -41,7 +47,7 @@ export const VolumeControl: React.FC<{
         aria-label="Volume control"
         role="button"
         title="Volume control"
-        onClick={(event: React.MouseEvent<HTMLDivElement>) => {
+        onMouseUp={(event: React.MouseEvent<HTMLDivElement>) => {
           const divWidth = event.currentTarget.offsetWidth;
           const clickX = event.clientX - event.currentTarget.offsetLeft;
           const clickPercent = clickX / divWidth;
@@ -85,15 +91,6 @@ export const VolumeControl: React.FC<{
           `}
         />
       </div>
-
-      <Button
-        startIcon={<FaVolumeUp />}
-        variant="outlined"
-        title="Increase volume"
-        onClick={() => {
-          setVolume((vol) => (vol === 1 ? 1 : +(vol += 0.1).toFixed(1)));
-        }}
-      />
     </div>
   );
 };

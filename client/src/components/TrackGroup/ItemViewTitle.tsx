@@ -85,8 +85,6 @@ const TrackGroupTitle: React.FC<{
     return <FullPageLoadingSpinner />;
   }
 
-  const ownedByUser = artist.userId === user?.id;
-
   return (
     <>
       <ItemViewTitle
@@ -112,21 +110,11 @@ const TrackGroupTitle: React.FC<{
             align-items: center;
           `}
         >
-          {(ownedByUser || user?.isAdmin) && (
-            <ArtistButtonLink
-              size="compact"
-              startIcon={<FaPen />}
-              variant="dashed"
-              to={`/manage/artists/${artist.id}/release/${trackGroup.id}`}
-              style={{ marginRight: "1rem" }}
-            >
-              {t("edit")}
-            </ArtistButtonLink>
-          )}
           {user?.isAdmin && (
             <div
               className={css`
                 padding-left: 0.5rem;
+                padding-right: 0.4rem;
               `}
             >
               <DropdownMenu compact>

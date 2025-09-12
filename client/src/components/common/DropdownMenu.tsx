@@ -5,7 +5,10 @@ import Background from "components/common/Background";
 import { FaEllipsisV } from "react-icons/fa";
 import Button from "./Button";
 
-import { useGetArtistColors } from "components/Artist/ArtistButtons";
+import {
+  ArtistButton,
+  useGetArtistColors,
+} from "components/Artist/ArtistButtons";
 import { createPortal } from "react-dom";
 
 const DropdownMenu: React.FC<{
@@ -15,7 +18,6 @@ const DropdownMenu: React.FC<{
   compact?: boolean;
   label?: string;
 }> = ({ children, icon, compact, dashed, label }) => {
-  const { colors } = useGetArtistColors();
   const [buttonPosition, setButtonPosition] = React.useState<{
     x: number;
     y: number;
@@ -26,6 +28,10 @@ const DropdownMenu: React.FC<{
   if (!icon) {
     icon = <FaEllipsisV />;
   }
+
+  const colors = useGetArtistColors();
+
+  const LocalButton = colors ? ArtistButton : Button;
 
   return (
     <div
@@ -109,11 +115,17 @@ const DropdownMenu: React.FC<{
           document.body
         )}
 
-      <Button
+      <LocalButton
         size={compact ? "compact" : undefined}
         variant={dashed ? "dashed" : "transparent"}
         aria-label={label}
         role="menu"
+        className={css`
+          background: transparent !important;
+          &:hover {
+            background: transparent !important;
+          }
+        `}
         onClick={(e) => {
           e.stopPropagation();
           setButtonPosition({

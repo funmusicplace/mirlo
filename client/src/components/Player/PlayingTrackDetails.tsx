@@ -133,7 +133,6 @@ const PlayingTrackDetails: React.FC<{ currentTrack: Track }> = ({
             </div>
             <div
               className={css`
-                font-weight: bold;
                 overflow: hidden;
                 white-space: nowrap;
                 text-overflow: ellipsis;

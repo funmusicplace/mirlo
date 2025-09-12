@@ -77,6 +77,7 @@ const HomeReleases = () => {
                       trackGroup={trackGroup}
                       as="li"
                       size="small"
+                      showArtist
                     />
                   ))}
                 </TrackgroupGrid>
