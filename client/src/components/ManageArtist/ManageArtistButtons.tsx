@@ -2,7 +2,7 @@ import { css } from "@emotion/css";
 import React from "react";
 import { useLocation, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { FaEye, FaFlag, FaPen } from "react-icons/fa";
+import { FaEdit, FaEye, FaFlag, FaPen } from "react-icons/fa";
 import { bp } from "../../constants";
 import { useQuery } from "@tanstack/react-query";
 import { queryArtist, queryTrackGroup } from "queries";
@@ -10,14 +10,48 @@ import { useAuthContext } from "state/AuthContext";
 import FixedButtonLink from "components/common/FixedButton";
 import { IoIosColorPalette } from "react-icons/io";
 import FlagContent from "components/TrackGroup/FlagContent";
+import { useGlobalStateContext } from "state/GlobalState";
+import Wishlist from "components/TrackGroup/Wishlist";
+import TipArtist from "components/common/TipArtist";
+import useCurrentTrackHook from "components/Player/useCurrentTrackHook";
+import { getManageReleaseUrl } from "utils/artist";
+
+const PlayingTrack: React.FC = () => {
+  const { state } = useGlobalStateContext();
+  const { currentTrack, isLoading } = useCurrentTrackHook();
+
+  if (!state.playing) {
+    return null;
+  }
+
+  if (!currentTrack || isLoading) {
+    return null;
+  }
+
+  return (
+    <div
+      className={css`
+        margin-top: 0.5rem;
+        display: flex;
+        gap: 0.5rem;
+      `}
+    >
+      <Wishlist trackGroup={{ id: currentTrack.trackGroupId }} fixed />
+      {/* {state.playing && ( */}
+      {currentTrack.trackGroup.artistId && (
+        <TipArtist artistId={currentTrack.trackGroup.artistId} fixed />
+      )}
+    </div>
+  );
+};
 
 const ManageArtistButtons: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
   const { pathname } = useLocation();
-  const [iconOnly, setIconOnly] = React.useState(false);
   const { artistId, trackGroupId } = useParams();
   const isManagePage =
     pathname.includes("/manage/artists") && !pathname.includes("/customize");
+  const seeViewLink = pathname.includes("/manage/artists");
   const { data: artist, isLoading: isArtistLoading } = useQuery(
     queryArtist({ artistSlug: artistId ?? "" })
   );
@@ -43,16 +77,10 @@ const ManageArtistButtons: React.FC = () => {
     <>
       {artist && (
         <div
-          onMouseEnter={() => {
-            setIconOnly(false);
-          }}
-          onMouseLeave={() => {
-            setIconOnly(true);
-          }}
           className={css`
             z-index: 999999;
             bottom: 75px;
-            right: 1rem;
+            left: 1rem;
             position: fixed;
             display: flex;
             flex-direction: column;
@@ -63,10 +91,15 @@ const ManageArtistButtons: React.FC = () => {
             transition: all 0.3s ease;
 
             @media screen and (max-width: ${bp.medium}px) {
-              left: 1rem;
               bottom: 75px;
-              top: auto;
-              right: auto;
+
+              .children {
+                display: none;
+              }
+
+              .endIcon {
+                margin: 0 !important;
+              }
             }
           `}
         >
@@ -74,7 +107,6 @@ const ManageArtistButtons: React.FC = () => {
             <FixedButtonLink
               to={`/manage/artists/${artist.id}/customize`}
               endIcon={<IoIosColorPalette />}
-              onlyIcon={iconOnly}
               size="compact"
               rounded
               variant="dashed"
@@ -91,12 +123,11 @@ const ManageArtistButtons: React.FC = () => {
               size="compact"
               variant="dashed"
               rounded
-              onlyIcon={iconOnly}
             >
               {t(artist.isLabelProfile ? "editLabelPage" : "editPage")}
             </FixedButtonLink>
           )}
-          {canEditArtist && isManagePage && !isAlbumPage && (
+          {canEditArtist && seeViewLink && !isAlbumPage && (
             <FixedButtonLink
               to={`/${artist?.urlSlug?.toLowerCase() ?? artist?.id}`}
               endIcon={<FaEye />}
@@ -104,16 +135,46 @@ const ManageArtistButtons: React.FC = () => {
               variant="dashed"
               size="compact"
               rounded
-              onlyIcon={iconOnly}
             >
               {t("viewLive")}
             </FixedButtonLink>
           )}
-          {isAlbumPage && trackGroup && (
-            <FlagContent trackGroupId={trackGroup.id} onlyIcon={iconOnly} />
+          {canEditArtist && trackGroup && isAlbumPage && (
+            <FixedButtonLink
+              to={getManageReleaseUrl(artist, trackGroup)}
+              endIcon={<FaEdit />}
+              disabled={!artist}
+              variant="dashed"
+              size="compact"
+              rounded
+            >
+              {t("editRelease")}
+            </FixedButtonLink>
           )}
         </div>
       )}
+      <div
+        className={css`
+          z-index: 999999;
+          bottom: 75px;
+          right: 1rem;
+          position: fixed;
+          display: flex;
+          flex-direction: column;
+          a,
+          button {
+            margin-bottom: 0.5rem;
+          }
+          transition: all 0.3s ease;
+
+          @media screen and (max-width: ${bp.medium}px) {
+            bottom: 75px;
+            top: auto;
+          }
+        `}
+      >
+        <PlayingTrack />
+      </div>
     </>
   );
 };

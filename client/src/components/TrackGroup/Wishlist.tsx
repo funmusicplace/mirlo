@@ -5,11 +5,13 @@ import api from "services/api";
 import { useAuthContext } from "state/AuthContext";
 import { useTranslation } from "react-i18next";
 import { ArtistButton } from "components/Artist/ArtistButtons";
+import { FixedButton } from "components/common/FixedButton";
 
 const Wishlist: React.FC<{
   trackGroup: { id: number };
   inArtistPage?: boolean;
-}> = ({ trackGroup, inArtistPage }) => {
+  fixed?: boolean;
+}> = ({ trackGroup, inArtistPage, fixed }) => {
   const { user } = useAuthContext();
   const { t } = useTranslation("translation", { keyPrefix: "wishlist" });
 
@@ -29,6 +31,20 @@ const Wishlist: React.FC<{
   }
 
   const buttonLabel = `${isInWishlist ? t("removeFromWishlist") : t("addToWishlist")}`;
+
+  if (fixed) {
+    return (
+      <FixedButton
+        onClick={onClick}
+        aria-label={buttonLabel}
+        className="wishlist"
+        title={buttonLabel}
+        rounded
+        size="compact"
+        endIcon={isInWishlist ? <IoIosHeart /> : <IoIosHeartEmpty />}
+      />
+    );
+  }
 
   if (inArtistPage) {
     return (

@@ -1,5 +1,5 @@
 import { css } from "@emotion/css";
-import Button from "components/common/Button";
+import Button, { ButtonLink } from "components/common/Button";
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
 import Modal from "components/common/Modal";
@@ -14,6 +14,7 @@ import { Turnstile } from "@marsidev/react-turnstile";
 import TextArea from "components/common/TextArea";
 import { useSnackbar } from "state/SnackbarContext";
 import { FixedButton } from "components/common/FixedButton";
+import { ArtistButton } from "components/Artist/ArtistButtons";
 
 const FlagContent: React.FC<{ trackGroupId: number; onlyIcon?: boolean }> = ({
   trackGroupId,
@@ -57,17 +58,19 @@ const FlagContent: React.FC<{ trackGroupId: number; onlyIcon?: boolean }> = ({
 
   return (
     <>
-      <FixedButton
-        endIcon={<FaFlag />}
+      <ArtistButton
         onlyIcon={onlyIcon}
         aria-label={t("flagContent") ?? undefined}
-        variant="dashed"
-        size="compact"
-        rounded
+        variant="link"
+        className={css`
+          font-weight: normal !important;
+          font-size: 0.9rem !important;
+          margin-right: 1.25rem;
+        `}
         onClick={() => setIsFlagOpen(true)}
       >
         {t("flagContent")}
-      </FixedButton>
+      </ArtistButton>
       <Modal
         size="small"
         open={isFlagOpen}

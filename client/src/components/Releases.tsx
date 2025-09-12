@@ -113,67 +113,7 @@ const Releases: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
           </WidthContainer>
         </SectionHeader>
       )}
-      {/* {!onReleasesPage && (futureReleases?.results ?? []).length > 0 && (
-        <>
-          <SectionHeader>
-            <WidthContainer
-              variant="big"
-              justify="space-between"
-              className={css`
-                flex-direction: row;
-                display: flex;
-              `}
-            >
-              <h1 className="h5 section-header__heading" id={headingId}>
-                {t("futureReleases")}
-              </h1>
-              <ButtonAnchor
-                target="_blank"
-                href={`${import.meta.env.VITE_API_DOMAIN}/v1/trackGroups?tag=${tag}&released=not-released&format=rss`}
-                rel="noreferrer"
-                onlyIcon
-                className={css`
-                  margin-top: 0.25rem;
-                `}
-                startIcon={<FaRss />}
-              />
-            </WidthContainer>
-          </SectionHeader>
-          <div
-            className={css`
-              padding-top: 0.25rem;
-            `}
-          >
-            <WidthContainer variant="big" justify="center">
-              <div
-                className={css`
-                  display: flex;
-                  width: 100%;
-                  flex-direction: row;
-                  flex-wrap: wrap;
-                  padding: var(--mi-side-paddings-xsmall);
-                `}
-              >
-                <TrackgroupGrid
-                  gridNumber="6"
-                  as="ul"
-                  aria-labelledby={headingId}
-                  role="list"
-                >
-                  {futureReleases?.results?.map((trackGroup) => (
-                    <ArtistTrackGroup
-                      key={trackGroup.id}
-                      trackGroup={trackGroup}
-                      as="li"
-                      size="small"
-                    />
-                  ))}
-                </TrackgroupGrid>
-              </div>
-            </WidthContainer>
-          </div>
-        </>
-      )} */}
+
       <SectionHeader>
         <WidthContainer
           variant="big"
@@ -262,6 +202,7 @@ const Releases: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
                   key={trackGroup.id}
                   trackGroup={trackGroup}
                   as="li"
+                  showArtist
                 />
               ))}
             </TrackgroupGrid>

@@ -1,8 +1,7 @@
 import { css } from "@emotion/css";
-import ArtistRouterLink from "components/Artist/ArtistButtons";
+import { ArtistButtonLink } from "components/Artist/ArtistButtons";
 
 import { Trans, useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
 import { getArtistUrl, getReleaseUrl } from "utils/artist";
 
 const ArtistByLine: React.FC<{ artist: Artist; fromAlbum?: TrackGroup }> = ({
@@ -30,9 +29,9 @@ const ArtistByLine: React.FC<{ artist: Artist; fromAlbum?: TrackGroup }> = ({
             }}
             components={{
               albumLink: (
-                <ArtistRouterLink
+                <ArtistButtonLink
                   to={getReleaseUrl(artist, fromAlbum)}
-                ></ArtistRouterLink>
+                ></ArtistButtonLink>
               ),
             }}
           />{" "}
@@ -46,7 +45,10 @@ const ArtistByLine: React.FC<{ artist: Artist; fromAlbum?: TrackGroup }> = ({
         }}
         components={{
           artistLink: (
-            <ArtistRouterLink to={getArtistUrl(artist)}></ArtistRouterLink>
+            <ArtistButtonLink
+              variant="link"
+              to={getArtistUrl(artist)}
+            ></ArtistButtonLink>
           ),
         }}
       />

@@ -82,7 +82,11 @@ const ArtistAlbums: React.FC = () => {
             aria-labelledby="artist-navlink-releases"
           >
             {releases?.results.map((release) => (
-              <ArtistTrackGroup key={release.id} trackGroup={release} />
+              <ArtistTrackGroup
+                key={release.id}
+                trackGroup={release}
+                showArtist
+              />
             ))}
           </TrackgroupGrid>
         </>

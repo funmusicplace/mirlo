@@ -69,6 +69,7 @@ export const TrackGroupInfo = styled.div`
 `;
 
 type ArtistTrackGroupProps = {
+  showArtist?: boolean;
   trackGroup: TrackGroup & { artist?: Artist };
   as?: React.ElementType<any, keyof React.JSX.IntrinsicElements>;
   size?: "small" | "large";
@@ -80,6 +81,7 @@ type ArtistTrackGroupProps = {
 const ArtistTrackGroup: React.FC<ArtistTrackGroupProps> = ({
   trackGroup,
   as,
+  showArtist,
   showTrackFavorite,
   size = "large",
   myRef,
@@ -108,7 +110,7 @@ const ArtistTrackGroup: React.FC<ArtistTrackGroupProps> = ({
           <TrackGroupLinks>
             <TrackGroupInfo>
               <ArtistItemLink item={trackGroup} />
-              <ArtistLink artist={trackGroup.artist} />
+              {showArtist && <ArtistLink artist={trackGroup.artist} />}
             </TrackGroupInfo>
           </TrackGroupLinks>
         </ClickToPlay>

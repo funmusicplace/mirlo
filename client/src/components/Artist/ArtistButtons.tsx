@@ -53,6 +53,14 @@ export const ArtistButton: React.FC<
         svg {
           fill: ${colors?.primary} !important;
         }
+
+        &:hover:not(:disabled) {
+          color: ${colors?.secondary} !important;
+
+          svg {
+            fill: ${colors?.secondary} !important;
+          }
+        }
       `;
       case "outlined":
       case "dashed":
@@ -81,11 +89,11 @@ export const ArtistButton: React.FC<
         }
 
         &:hover:not(:disabled) {
-          color: ${colors?.primary} !important;
-          background-color: ${colors?.secondary} !important;
+          color: ${colors?.secondary} !important;
+          background-color: transparent !important;
 
           svg {
-            fill: ${colors?.primary} !important;
+            fill: ${colors?.secondary} !important;
           }
         }`;
       default:

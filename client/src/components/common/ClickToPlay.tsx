@@ -34,8 +34,15 @@ const TrackgroupButtons = styled.div`
       color: white !important;
       font-weight: normal;
       font-size: 1.3rem;
+      text-overflow: ellipsis;
+      overflow: hidden;
       text-transform: uppercase;
       width: 100%;
+      border-color: transparent !important;
+
+      &:hover {
+        color: white !important;
+      }
     }
 
     svg {

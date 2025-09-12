@@ -40,7 +40,8 @@ const HalfTone: React.FC<{ color1?: string; color2?: string }> = ({
           --stop1: 3%;
           --stop2: 65%;
 
-          background-image: radial-gradient(
+          background-image:
+            radial-gradient(
               circle at center,
               ${color2 || "var(--mi-pink)"} var(--stop1),
               transparent var(--stop2)
@@ -81,8 +82,15 @@ const PostContainer = styled.li<{
     text-align: left;
     height: 1.5rem;
     width: 100%;
+    font-weight: normal;
+    justify-content: flex-start;
     text-overflow: ellipsis;
     white-space: nowrap;
+
+    .children {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
   }
 
   &:hover {
@@ -194,7 +202,7 @@ const PostCard: React.FC<{
           {post.artist && (
             <div
               className={css`
-                padding-bottom: 2rem;
+                padding-bottom: 1.5rem;
               `}
             >
               <p

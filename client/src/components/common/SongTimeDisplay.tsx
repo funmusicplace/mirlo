@@ -18,7 +18,7 @@ export const SongTimeDisplay: React.FC<{
         filter: brightness(1);
         cursor: pointer;
         width: 100%;
-        top: 0;
+        top: -0.25rem;
         position: ${position};
       `}
       title="Current track time"

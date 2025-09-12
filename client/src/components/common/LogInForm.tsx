@@ -19,7 +19,7 @@ const LogInForm: React.FC<{ afterLogIn: () => void }> = ({ afterLogIn }) => {
   const { register, handleSubmit } = useForm<SignupInputs>();
   const snackbar = useSnackbar();
 
-  const { mutate: login } = useLoginMutation();
+  const { mutate: login, isPending } = useLoginMutation();
 
   const onSubmit = React.useCallback(
     async (data: SignupInputs) => {
@@ -55,7 +55,9 @@ const LogInForm: React.FC<{ afterLogIn: () => void }> = ({ afterLogIn }) => {
           <label>{t("password")}</label>
           <InputEl {...register("password")} type="password" />
         </FormComponent>
-        <Button type="submit">{t("logIn")}</Button>
+        <Button isLoading={isPending} type="submit">
+          {t("logIn")}
+        </Button>
       </form>
       <Link
         to="/password-reset"

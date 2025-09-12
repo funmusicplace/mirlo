@@ -26,6 +26,7 @@ import TrackGroupMerch from "./TrackGroupMerch";
 import { useQuery } from "@tanstack/react-query";
 import { queryArtist, queryTrackGroup, queryUserStripeStatus } from "queries";
 import Fundraiser from "./Fundraiser";
+import FlagContent from "./FlagContent";
 
 export const Container = styled.div<{ user?: LoggedInUser | null }>`
   ${(props) =>
@@ -97,7 +98,8 @@ export const AboutWrapper = styled.div<{
 
   @media screen and (max-width: ${bp.medium}px) {
     max-width: 100%;
-    padding: 0.5rem 0rem 0.25rem 0rem;
+    padding: 0.5rem 0.25rem 0.5rem 0rem;
+    margin: 1.25rem 1.25rem;
     margin-bottom: 0.5rem;
     border-right: 0;
   }
@@ -122,7 +124,7 @@ export const CreditsWrapper = styled.div<{
   @media screen and (max-width: ${bp.medium}px) {
     ${(props) => (props.trackGroupCredits ? "border-top: 1px solid;" : "")}
     max-width: 100%;
-    padding: 1rem 0.25rem 0.5rem 0rem;
+    padding: 0.5rem 0.25rem 0.5rem 0rem;
     margin-top: 0;
     border-left: 0;
   }
@@ -141,7 +143,7 @@ export const TrackgroupInfosWrapper = styled.div`
 export const TrackListingWrapper = styled.div`
   max-width: 59%;
   flex: 59%;
-  margin: 0 0.5rem;
+  margin: 0 0 0 0.5rem;
 
   @media screen and (max-width: ${bp.small}px) {
     max-width: 100%;
@@ -350,8 +352,16 @@ function TrackGroup() {
             </CreditsWrapper>
           </TrackgroupInfosWrapper>
 
-          <TrackGroupPills tags={trackGroup.tags} />
-
+          <div
+            className={css`
+              display: flex;
+              justify-content: space-between;
+              margin-bottom: 2rem;
+            `}
+          >
+            <TrackGroupPills tags={trackGroup.tags} />
+            <FlagContent trackGroupId={trackGroup.id} />
+          </div>
           {trackGroup.artist && (
             <SupportArtistPopUp artist={trackGroup.artist} />
           )}

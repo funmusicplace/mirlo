@@ -10,10 +10,11 @@ import { useQuery } from "@tanstack/react-query";
 import { queryArtist, queryUserStripeStatus } from "queries";
 import { css } from "@emotion/css";
 import TipArtistForm from "./TipArtistForm";
+import { FixedButton } from "./FixedButton";
 
-const TipArtist: React.FC<{ artistId: number; transparent?: boolean }> = ({
+const TipArtist: React.FC<{ artistId: number; fixed?: boolean }> = ({
   artistId,
-  transparent = true,
+  fixed = false,
 }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const { user } = useAuthContext();
@@ -35,6 +36,27 @@ const TipArtist: React.FC<{ artistId: number; transparent?: boolean }> = ({
     return null;
   }
 
+  const button = fixed ? (
+    <FixedButton
+      className="tip-artist"
+      onClick={onTipClick}
+      startIcon={<FaDonate />}
+      rounded
+      size="compact"
+    >
+      {t("tipArtist")}
+    </FixedButton>
+  ) : (
+    <Button
+      className="tip-artist"
+      type="button"
+      onClick={onTipClick}
+      startIcon={<FaDonate />}
+    >
+      {t("tipArtist")}
+    </Button>
+  );
+
   return (
     <>
       <Modal
@@ -48,21 +70,12 @@ const TipArtist: React.FC<{ artistId: number; transparent?: boolean }> = ({
             margin-bottom: 0.5rem;
           `}
         >
-          {t("likeWhatTheyAreDoing", {artistName: artist.name})}
+          {t("likeWhatTheyAreDoing", { artistName: artist.name })}
         </p>
         <SupportArtistTiersForm artist={artist} excludeDefault={!!user} />
         <TipArtistForm artist={artist} />
       </Modal>
-      <Button
-        size="compact"
-        variant={transparent ? "transparent" : undefined}
-        className="tip-artist"
-        type="button"
-        onClick={onTipClick}
-        startIcon={<FaDonate />}
-      >
-        {t("tipArtist")}
-      </Button>
+      {button}
     </>
   );
 };
