@@ -93,6 +93,7 @@ const ManageMerch: React.FC<{}> = () => {
                     </Pill>
                   )}
                 </div>
+                <div>{item.catalogNumber}</div>
                 <div
                   className={css`
                     display: flex;

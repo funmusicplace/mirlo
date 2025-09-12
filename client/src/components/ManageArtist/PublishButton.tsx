@@ -129,15 +129,6 @@ const PublishButton: React.FC<{
           {t("previewRelease")}
         </ArtistButtonLink>
       )}
-      {artist && isPublished && (
-        <ArtistButtonLink
-          to={getReleaseUrl(artist, trackGroup)}
-          startIcon={<FaEye />}
-          variant="dashed"
-        >
-          {t(beforeReleaseDate ? "viewPreorder" : "view")}
-        </ArtistButtonLink>
-      )}
       <ArtistButton
         startIcon={<FaLock />}
         isLoading={isPublishing}

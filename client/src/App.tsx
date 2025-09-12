@@ -16,6 +16,7 @@ import { useAuthContext } from "state/AuthContext";
 import ScrollToTop from "components/ScrollToTop";
 import UserBanner from "components/common/UserBanner";
 import React from "react";
+import ManageArtistButtons from "components/ManageArtist/ManageArtistButtons";
 
 function App() {
   const { isDisplayed } = useContext(SnackbarContext);
@@ -97,6 +98,8 @@ function App() {
                   flex-grow: 1;
                 `}
               >
+                {" "}
+                <ManageArtistButtons />
                 <Outlet />
               </div>
               <Footer />

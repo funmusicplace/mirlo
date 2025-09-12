@@ -30,6 +30,7 @@ const ArtistByLine: React.FC<{ artist: Artist; fromAlbum?: TrackGroup }> = ({
             components={{
               albumLink: (
                 <ArtistButtonLink
+                  variant="link"
                   to={getReleaseUrl(artist, fromAlbum)}
                 ></ArtistButtonLink>
               ),

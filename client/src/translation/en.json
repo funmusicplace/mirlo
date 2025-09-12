@@ -502,6 +502,7 @@
     "editPost": "Edit post",
     "editDetails": "Edit artist details",
     "viewLive": "View live",
+    "viewPreorder": "View pre-order",
     "addNewAlbum": "Add new release",
     "edit": "Edit",
     "editPage": "Manage artist details",
@@ -567,6 +568,7 @@
   },
   "manageMerch": {
     "saveDestinations": "Save destinations",
+    "catalogNumber": "Catalog number",
     "updatedShippingDestinations": "Updated shipping destinations",
     "saveOptions": "Save options",
     "backToMerchList": "Back to merch list",
