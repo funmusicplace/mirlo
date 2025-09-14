@@ -580,7 +580,7 @@
     "deleteMerch": "Delete merch item",
     "deleteCategory": "Delete merch category",
     "merchImage": "merch image",
-    "relatedToTrackGroup": "Optionally, should this merch item include an album purchase?",
+    "relatedToTrackGroup": "Is this merch item included in an album purchase? (optional)",
     "relatedTrackGroupSmall": "When a user buys this merch item, they'll automatically receive a digital copy of this album.",
     "areYouSureDelete": "Are you sure you want to delete this merch item?",
     "problemDeletingMerch": "Problem deleting merch",
