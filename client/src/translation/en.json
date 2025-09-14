@@ -116,7 +116,7 @@
     "manageArtistsDescription": "Here you can manage your artist pages. You can create new pages and manage existing ones.",
     "label": "Label",
     "makeSearchable": "Enabling this will let artists find your label and request to be added to your roster. Artists will then be able to say for which albums payments will be sent to the payment processor linked to this Stripe account.",
-    "isLabelAccount": "Is this an account for a record label or artist collective?",
+    "isLabelAccount": "Label/Collective account",
     "notifications": "Notifications",
     "profileUpdated": "Profile updated",
     "errorUpdatingProfile": "There was a problem with the API.",
