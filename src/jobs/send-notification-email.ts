@@ -177,6 +177,7 @@ const sendPostNotifications = async (
       `sendNotificationEmail: sending to queue notification for: ${post.title} to ${notification.user.email}`
     );
     const htmlContent = await parseOutIframes(post.content);
+    console.log("html", htmlContent);
 
     try {
       await sendMailQueue.add("send-mail", {
@@ -298,8 +299,13 @@ const sendNotificationEmail = async () => {
       notificationType: true,
       post: {
         select: {
+          id: true,
+          title: true,
+          urlSlug: true,
+          featuredImageId: true,
           content: true,
           artist: true,
+          shouldSendEmail: true,
           featuredImage: true,
         },
       },
