@@ -146,7 +146,9 @@ export const parseOutIframes = async (content: string) => {
 };
 
 const sendPostNotifications = async (
-  notification: Notification & { post: Post | null } & {
+  notification: { id: string; notificationType: string } & {
+    post: Partial<Post> | null;
+  } & {
     user: { email: string };
   }
 ) => {
@@ -213,7 +215,7 @@ const sendPostNotifications = async (
 };
 
 const sendLabelInviteNotification = async (
-  notification: Notification & { artist: Artist | null } & {
+  notification: Notification & { artist: Partial<Artist> | null } & {
     user: { email: string } | null;
   } & { relatedUser: { email: string; name: string | null } | null }
 ) => {
@@ -281,23 +283,72 @@ const sendLabelInviteNotification = async (
 const sendNotificationEmail = async () => {
   logger.info(`sendNotificationEmail: sending notifications`);
 
-  const notifications = await prisma.notification.findMany({
+  const postNotifciations = await prisma.notification.findMany({
     where: {
       isRead: false,
       createdAt: {
         lte: new Date(),
       },
       notificationType: {
-        in: ["NEW_ARTIST_POST", "SYSTEM_MESSAGE", "LABEL_ADDED_ARTIST"],
+        in: ["NEW_ARTIST_POST", "SYSTEM_MESSAGE"],
       },
     },
-    include: {
+    select: {
+      id: true,
+      notificationType: true,
       post: {
-        include: {
+        select: {
+          content: true,
           artist: true,
           featuredImage: true,
         },
       },
+      artist: {
+        include: {
+          user: {
+            select: { email: true },
+          },
+        },
+      },
+      user: true,
+    },
+  });
+
+  logger.info(
+    `sendNotificationEmail: found ${postNotifciations.length} post notifications`
+  );
+
+  try {
+    for await (const notification of postNotifciations) {
+      logger.info(
+        `sendNotificationEmail: checking for post notification ${notification.id}`
+      );
+      if (
+        notification.post &&
+        notification.notificationType === "NEW_ARTIST_POST" &&
+        notification.post.artist
+      ) {
+        sendPostNotifications(notification);
+      }
+    }
+  } catch (e) {
+    logger.error(
+      `sendNotificationEmail: failed to send out all post notifications`
+    );
+    logger.error(e);
+  }
+
+  const labelNotifications = await prisma.notification.findMany({
+    where: {
+      isRead: false,
+      createdAt: {
+        lte: new Date(),
+      },
+      notificationType: {
+        in: ["LABEL_ADDED_ARTIST"],
+      },
+    },
+    include: {
       trackGroup: {
         include: {
           artist: true,
@@ -323,21 +374,14 @@ const sendNotificationEmail = async () => {
   });
 
   logger.info(
-    `sendNotificationEmail: found ${notifications.length} notifications to send out`
+    `sendNotificationEmail: found ${labelNotifications.length} label notifications`
   );
 
   try {
-    for await (const notification of notifications) {
+    for await (const notification of labelNotifications) {
       logger.info(
-        `sendNotificationEmail: checking for notification ${notification.id}`
+        `sendNotificationEmail: checking for label notification ${notification.id}`
       );
-      if (
-        notification.post &&
-        notification.notificationType === "NEW_ARTIST_POST" &&
-        notification.post.artist
-      ) {
-        sendPostNotifications(notification);
-      }
       if (
         notification &&
         notification.notificationType === "LABEL_ADDED_ARTIST" &&
@@ -348,7 +392,9 @@ const sendNotificationEmail = async () => {
       }
     }
   } catch (e) {
-    logger.error(`sendNotificationEmail: failed to send out all notifications`);
+    logger.error(
+      `sendNotificationEmail: failed to send out label notifications`
+    );
     logger.error(e);
   } finally {
     logger.info(`sendNotificationEmail: closing queue`);
