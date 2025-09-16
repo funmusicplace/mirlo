@@ -27,6 +27,7 @@ export default function () {
       contentPolicy,
       defconLevel,
       isClosedToPublicArtistSignup,
+      showQueueDashboard,
     } = req.body;
     try {
       let existingSettings = await prisma.settings.findFirst();
@@ -48,6 +49,7 @@ export default function () {
           cookiePolicy,
           contentPolicy,
           defconLevel: Number(defconLevel),
+          showQueueDashboard,
         },
         where: {
           id: existingSettings.id,

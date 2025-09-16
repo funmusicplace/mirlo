@@ -177,7 +177,6 @@ const sendPostNotifications = async (
       `sendNotificationEmail: sending to queue notification for: ${post.title} to ${notification.user.email}`
     );
     const htmlContent = await parseOutIframes(post.content);
-    console.log("html", htmlContent);
 
     try {
       await sendMailQueue.add("send-mail", {

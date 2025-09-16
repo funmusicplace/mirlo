@@ -18,6 +18,8 @@ interface FormSettings {
   stripeKey?: string;
   stripeWebhookSigningSecret?: string;
   stripeWebhookConnectSigningSecret?: string;
+  isClosedToPublicArtistSignup: boolean;
+  showQueueDashboard: boolean;
 
   sendgridApiKey?: string;
   sendgridFromEmail?: string;
@@ -51,6 +53,8 @@ interface SettingsFromAPI {
   terms: string;
   privacyPolicy: string;
   cookiePolicy: string;
+  showQueueDashboard: boolean;
+  isClosedToPublicArtistSignup: boolean;
   contentPolicy: string;
   defconLevel: number;
 }
@@ -64,6 +68,9 @@ const AdminSettings = () => {
       const response =
         await api.get<Partial<SettingsFromAPI>>("admin/settings/");
       reset({
+        isClosedToPublicArtistSignup:
+          response.result.isClosedToPublicArtistSignup,
+        showQueueDashboard: response.result.showQueueDashboard,
         platformPercent: response.result.settings?.platformPercent,
         instanceArtistId: response.result.settings?.instanceArtistId,
         stripeKey: response.result.settings?.stripeKey,
@@ -112,6 +119,8 @@ const AdminSettings = () => {
             cloudflareTurnstileSecret: data.cloudflareTurnstileSecret,
           },
           terms: data.terms,
+          showQueueDashboard: data.showQueueDashboard,
+          isClosedToPublicArtistSignup: data.isClosedToPublicArtistSignup,
           privacyPolicy: data.privacyPolicy,
           cookiePolicy: data.cookiePolicy,
           contentPolicy: data.contentPolicy,
@@ -136,6 +145,30 @@ const AdminSettings = () => {
               <InputEl
                 {...register("platformPercent")}
                 type="number"
+                className={css`
+                  text-align: right;
+                `}
+              />
+            </td>
+          </tr>
+          <tr>
+            <td>Is closed to public artist signup</td>
+            <td>
+              <InputEl
+                {...register("isClosedToPublicArtistSignup")}
+                type="checkbox"
+                className={css`
+                  text-align: right;
+                `}
+              />
+            </td>
+          </tr>
+          <tr>
+            <td>Show queue dashboard</td>
+            <td>
+              <InputEl
+                {...register("showQueueDashboard")}
+                type="checkbox"
                 className={css`
                   text-align: right;
                 `}
