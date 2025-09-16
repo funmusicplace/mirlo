@@ -24,6 +24,8 @@ import apiApp from "./api";
 import { corsCheck } from "./auth/cors";
 import cookieParser from "cookie-parser";
 import qs from "qs";
+import { getSiteSettings } from "./utils/settings";
+import { userAuthenticated, userHasPermission } from "./auth/passport";
 
 dotenv.config();
 
@@ -85,20 +87,27 @@ app.use(express.static("public"));
 
 app.use("/images/:bucket/:filename", serveStatic);
 
+app.use("/admin/queues", userHasPermission("admin"), async (req, res) => {
+  console.log("userHasPermission middleware passed");
+  const settings = await getSiteSettings();
+  if (isDev || settings.showQueueDashboard) {
+    const serverAdapter = new ExpressAdapter();
+    createBullBoard({
+      queues: [
+        new BullMQAdapter(imageQueue),
+        new BullMQAdapter(audioQueue),
+        new BullMQAdapter(sendMailQueue),
+      ],
+      serverAdapter: serverAdapter,
+    });
+    serverAdapter.setBasePath("/admin/queues");
+    await serverAdapter.getRouter()(req, res);
+  } else {
+    res.status(404);
+  }
+});
+
 // Setting up a bull worker dashboard
-if (isDev) {
-  const serverAdapter = new ExpressAdapter();
-  createBullBoard({
-    queues: [
-      new BullMQAdapter(imageQueue),
-      new BullMQAdapter(audioQueue),
-      new BullMQAdapter(sendMailQueue),
-    ],
-    serverAdapter: serverAdapter,
-  });
-  serverAdapter.setBasePath("/admin/queues");
-  app.use("/admin/queues", serverAdapter.getRouter());
-}
 
 app.use(wellKnown);
 

@@ -23,6 +23,7 @@ model Settings {
   /// [Settings]
   settings                     Json
   isClosedToPublicArtistSignup Boolean @default(false)
+  showQueueDashboard           Boolean @default(false)
   publicKey                    String? // Used for ActivityPub
   privateKey                   String? // Used for ActivityPub
   bucketNames                  Json? // Used for S3
