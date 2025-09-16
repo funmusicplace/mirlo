@@ -19,17 +19,18 @@ datasource db {
 }
 
 model Settings {
-  id            Int     @id @default(autoincrement())
+  id                           Int     @id @default(autoincrement())
   /// [Settings]
-  settings      Json
-  publicKey     String? // Used for ActivityPub
-  privateKey    String? // Used for ActivityPub
-  bucketNames   Json? // Used for S3
-  terms         String?
-  contentPolicy String?
-  privacyPolicy String?
-  cookiePolicy  String?
-  defconLevel   Int?    @default(0) // 0 = normal, 1 = low, 2 = medium, 3 = high
+  settings                     Json
+  isClosedToPublicArtistSignup Boolean @default(false)
+  publicKey                    String? // Used for ActivityPub
+  privateKey                   String? // Used for ActivityPub
+  bucketNames                  Json? // Used for S3
+  terms                        String?
+  contentPolicy                String?
+  privacyPolicy                String?
+  cookiePolicy                 String?
+  defconLevel                  Int?    @default(0) // 0 = normal, 1 = low, 2 = medium, 3 = high
 }
 
 model Client {

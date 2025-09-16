@@ -304,19 +304,26 @@ const sendNotificationEmail = async () => {
           urlSlug: true,
           featuredImageId: true,
           content: true,
-          artist: true,
+          artist: {
+            select: {
+              name: true,
+              avatar: {
+                select: {
+                  url: true,
+                },
+              },
+              user: {
+                select: { email: true },
+              },
+            },
+          },
           shouldSendEmail: true,
           featuredImage: true,
         },
       },
-      artist: {
-        include: {
-          user: {
-            select: { email: true },
-          },
-        },
+      user: {
+        select: { email: true },
       },
-      user: true,
     },
   });
 
