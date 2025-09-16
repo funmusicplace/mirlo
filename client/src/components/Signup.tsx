@@ -13,13 +13,15 @@ import Checkbox from "./common/FormCheckbox";
 import styled from "@emotion/styled";
 import WidthContainer from "./common/WidthContainer";
 import useErrorHandler from "services/useErrorHandler";
+import { useQuery } from "@tanstack/react-query";
+import { querySetting } from "queries/settings";
 
 type SignupInputs = {
   email: string;
   name: string;
   password: string;
   receiveMailingList: boolean;
-  accountType: "listener";
+  accountType: "listener" | "artist";
   promoCode: string;
 };
 
@@ -62,6 +64,9 @@ function Signup() {
   const { t } = useTranslation("translation", { keyPrefix: "signUp" });
   const [search] = useSearchParams();
   const snackbar = useSnackbar();
+  const { data: isClosedToPublicArtistSignup, isFetching } = useQuery(
+    querySetting("isClosedToPublicArtistSignup")
+  );
   const errorHandler = useErrorHandler();
   const [hasRegistered, setHasRegistered] = React.useState(false);
   const [accountIncomplete, setAccountIncomplete] = React.useState(false);
@@ -165,35 +170,44 @@ function Signup() {
             <InputEl {...register("password")} type="password" />
           </FormComponent>
 
-          <div
-            className={css`
-              margin-bottom: 1rem;
-            `}
-          >
-            <strong>{t("howUse")}</strong>
-          </div>
+          {!isClosedToPublicArtistSignup && !isFetching && (
+            <>
+              <div
+                className={css`
+                  margin-bottom: 1rem;
+                `}
+              >
+                <strong>{t("howUse")}</strong>
+              </div>
 
-          <ArtistToggle>
-            <label>
-              <input
-                type="radio"
-                value="listener"
-                {...register("accountType")}
-              />
-              <span>{t("imJustHereToListen")}</span>
-            </label>
-            <label>
-              <input type="radio" value="artist" {...register("accountType")} />
-              <span>{t("shareMyMusic")}</span>
-            </label>
-          </ArtistToggle>
-          <small
-            className={css`
-              margin-bottom: 1rem;
-            `}
-          >
-            {t("alwaysCreateLater")}
-          </small>
+              <ArtistToggle>
+                <label>
+                  <input
+                    type="radio"
+                    value="listener"
+                    {...register("accountType")}
+                  />
+                  <span>{t("imJustHereToListen")}</span>
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    value="artist"
+                    {...register("accountType")}
+                  />
+                  <span>{t("shareMyMusic")}</span>
+                </label>
+              </ArtistToggle>
+
+              <small
+                className={css`
+                  margin-bottom: 1rem;
+                `}
+              >
+                {t("alwaysCreateLater")}
+              </small>
+            </>
+          )}
 
           <FormComponent>
             <Checkbox

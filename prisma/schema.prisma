@@ -95,6 +95,30 @@ model User {
   trackFavorites                      UserTrackFavorite[]
   receivesPaymentsFor                 Artist[]                        @relation("paymentToUser")
   pledges                             TrackGroupPledge[]
+  invitesSent                         Invite[]                        @relation("invitedBy")
+  invitesUsed                         Invite[]                        @relation("usedBy")
+}
+
+model Invite {
+  id          String     @id @default(uuid()) @db.Uuid
+  email       String
+  token       String     @default(uuid())
+  createdAt   DateTime   @default(now())
+  usedAt      DateTime?
+  usedById    Int?
+  usedBy      User?      @relation(name: "usedBy", fields: [usedById], references: [id])
+  invitedById Int
+  invitedBy   User       @relation(name: "invitedBy", fields: [invitedById], references: [id])
+  accountType INVITETYPE @default(LISTENER)
+  message     String?
+
+  @@unique([email])
+}
+
+enum INVITETYPE {
+  LISTENER
+  ARTIST
+  LABEL
 }
 
 model EmailVerification {

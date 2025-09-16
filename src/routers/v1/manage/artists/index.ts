@@ -1,6 +1,9 @@
 import { User } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
-import { userAuthenticated } from "../../../../auth/passport";
+import {
+  canUserCreateArtists,
+  userAuthenticated,
+} from "../../../../auth/passport";
 
 import prisma from "@mirlo/prisma";
 import slugify from "slugify";
@@ -39,7 +42,7 @@ const forbiddenNames = [
 export default function () {
   const operations = {
     GET: [userAuthenticated, GET],
-    POST: [userAuthenticated, POST],
+    POST: [userAuthenticated, canUserCreateArtists, POST],
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {

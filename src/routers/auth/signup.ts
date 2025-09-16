@@ -7,6 +7,7 @@ import logger from "../../logger";
 import { AppError } from "../../utils/error";
 import { subscribe } from "node:diagnostics_channel";
 import { subscribeUserToArtist } from "../../utils/artist";
+import { getSiteSettings } from "../../utils/settings";
 
 const signup = async (req: Request, res: Response, next: NextFunction) => {
   let {
@@ -28,6 +29,12 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
     );
   }
   try {
+    const settings = await getSiteSettings();
+
+    if (settings.isClosedToPublicArtistSignup) {
+      accountType = "listener";
+    }
+
     email = email.toLowerCase();
 
     const existing = await prisma.user.findFirst({

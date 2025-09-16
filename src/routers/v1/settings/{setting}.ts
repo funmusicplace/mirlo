@@ -51,7 +51,11 @@ export default function () {
         }
         return res.status(200).json({ result: settings.contentPolicy });
       }
-      return res.status(200).json({ result: settings });
+      return res.status(200).json({
+        result: Object.keys(settings).includes(setting)
+          ? settings[setting as keyof typeof settings]
+          : settings,
+      });
     } catch (e) {
       next(e);
     }

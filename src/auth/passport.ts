@@ -13,6 +13,7 @@ import {
   doesMerchPurchaseBelongToUser,
   doesTrackGroupBelongToUser,
 } from "../utils/ownership";
+import { getSiteSettings } from "../utils/settings";
 
 const JWTStrategy = passportJWT.Strategy;
 
@@ -120,6 +121,47 @@ export const userHasPermission = (role: "admin" | "owner") => {
     }
     return next();
   };
+};
+
+export const canUserCreateArtists = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const loggedInUser = req.user as User | undefined;
+
+  if (!loggedInUser) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
+
+  const settings = await getSiteSettings();
+
+  if (settings.isClosedToPublicArtistSignup) {
+    if (loggedInUser.isAdmin) {
+      return next();
+    }
+
+    if (loggedInUser.isLabelAccount) {
+      return next();
+    }
+    // If the user has been invited as an artist specifically, allow them to create an artist account
+    const invite = await prisma.invite.findFirst({
+      where: {
+        usedById: loggedInUser.id,
+        accountType: "ARTIST",
+      },
+    });
+    if (invite) {
+      return next();
+    }
+
+    return res
+      .status(403)
+      .json({ error: "Artist signups are currently closed" });
+  } else {
+    return next();
+  }
 };
 
 export const artistBelongsToLoggedInUser = async (
