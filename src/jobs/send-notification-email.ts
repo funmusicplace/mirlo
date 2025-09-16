@@ -306,7 +306,9 @@ const sendNotificationEmail = async () => {
           content: true,
           artist: {
             select: {
+              id: true,
               name: true,
+              urlSlug: true,
               avatar: {
                 select: {
                   url: true,
