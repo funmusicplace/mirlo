@@ -52,7 +52,7 @@ const ManageArtistButtons: React.FC = () => {
   const isManagePage =
     pathname.includes("/manage/artists") && !pathname.includes("/customize");
   const seeViewLink = pathname.includes("/manage/artists");
-  const { data: artist, isLoading: isArtistLoading } = useQuery(
+  const { data: artist } = useQuery(
     queryArtist({ artistSlug: artistId ?? "" })
   );
   const { data: trackGroup } = useQuery(

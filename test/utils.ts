@@ -77,6 +77,7 @@ export const createPost = async (
       title: data?.title ?? "Test title",
       artistId: artistId,
       isPublic: data?.isPublic ?? true,
+      urlSlug: data?.urlSlug ?? "test-post",
       content: data?.content ?? "The content",
       shouldSendEmail: data?.shouldSendEmail,
       isDraft: data?.isDraft ?? true,

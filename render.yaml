@@ -1,20 +1,4 @@
 services:
-  # A static site
-  - type: web
-    name: client
-    env: static
-    buildCommand: corepack enable && yarn install --immutable && yarn client:build && mv client/dist/index.html client/dist/app.html
-    staticPublishPath: ./client/dist
-    pullRequestPreviewsEnabled: true # optional
-    envVars:
-      - fromGroup: blackbrd
-      - key: SKIP_INSTALL_DEPS
-        value: true
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html
-
   # A node web service
   - type: web
     name: api

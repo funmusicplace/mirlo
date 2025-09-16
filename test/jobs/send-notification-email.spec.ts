@@ -67,7 +67,7 @@ describe("send-notification-email", () => {
 
       const post = await createPost(artist.id, {
         title: "Our Custom Title",
-        content: "# HI",
+        content: `<h2 id="hi">HI</h2>`,
       });
 
       await prisma.notification.create({
@@ -87,8 +87,14 @@ describe("send-notification-email", () => {
       const data = args[1];
       assert.equal(data.template, "announce-post-published");
       assert.equal(data.message.to, followerEmail);
-      assert.equal(data.locals.artist.id, artist.id);
       assert.equal(data.locals.post.id, post.id);
+      assert.equal(data.locals.post.title, post.title);
+      assert.equal(data.locals.post.htmlContent.trim(), '<h2 id="hi">HI</h2>');
+      assert.equal(data.locals.artist.urlSlug, artist.urlSlug);
+      assert.equal(data.locals.post.urlSlug, post.urlSlug);
+      assert.equal(data.locals.artist.id, artist.id);
+      assert.equal(data.locals.artist.name, artist.name);
+      assert.equal(post.featuredImageId, null);
       assert.equal(data.locals.email, encodeURIComponent(followerEmail));
     });
 

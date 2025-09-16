@@ -40,23 +40,26 @@ const addPostToNotifications = async () => {
         },
       },
     },
-    include: {
+    select: {
+      id: true,
+      artistId: true,
+      content: true,
       artist: {
         where: {
           deletedAt: null,
         },
-        include: {
+        select: {
           subscriptionTiers: {
             where: {
               deletedAt: null,
             },
-            include: {
+            select: {
               userSubscriptions: {
                 where: {
                   deletedAt: null,
                 },
-                include: {
-                  user: true,
+                select: {
+                  userId: true,
                 },
               },
             },
@@ -77,7 +80,7 @@ const addPostToNotifications = async () => {
         const subscriptions = uniqBy(flatSubscriptions, "userId");
 
         logger.info(
-          `addPostToNotifciations: creating notifications for ${post.id}, ${post.artistId} with content: ${post.content}`
+          `addPostToNotifciations: creating notifications for ${post.id}, ${post.artistId}, to ${subscriptions.length} with content: ${post.content}`
         );
 
         await prisma.$transaction(async (tx) => {
