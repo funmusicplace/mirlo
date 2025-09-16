@@ -94,7 +94,8 @@ describe("send-notification-email", () => {
       assert.equal(data.locals.post.urlSlug, post.urlSlug);
       assert.equal(data.locals.artist.id, artist.id);
       assert.equal(data.locals.artist.name, artist.name);
-      assert.equal(post.featuredImageId, null);
+      assert.equal(data.featuredImageId, null);
+      assert.equal(data.featuredImage, null);
       assert.equal(data.locals.email, encodeURIComponent(followerEmail));
     });
 

@@ -12,6 +12,7 @@ import { useAuthContext } from "state/AuthContext";
 import { queryUserStripeStatus } from "queries";
 import { useQuery } from "@tanstack/react-query";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
+import { querySetting } from "queries/settings";
 
 export const Manage: React.FC = () => {
   const { user } = useAuthContext();
@@ -21,7 +22,9 @@ export const Manage: React.FC = () => {
     queryUserStripeStatus(user?.id)
   );
   const { t } = useTranslation("translation", { keyPrefix: "manage" });
-
+  const { data: isClosedToPublicArtistSignup, isFetching } = useQuery(
+    querySetting("isClosedToPublicArtistSignup")
+  );
   const userId = user?.id;
 
   const fetchArtists = React.useCallback(async () => {
