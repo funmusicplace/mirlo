@@ -88,7 +88,6 @@ app.use(express.static("public"));
 app.use("/images/:bucket/:filename", serveStatic);
 
 app.use("/admin/queues", async (req, res) => {
-  console.log("req.user", req.user);
   const settings = await getSiteSettings();
   if (isDev || settings.showQueueDashboard) {
     const serverAdapter = new ExpressAdapter();
