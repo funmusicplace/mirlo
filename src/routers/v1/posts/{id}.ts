@@ -31,6 +31,16 @@ export default function () {
             ],
           },
         });
+      } else {
+        // If there's just one post with this slug we don't need an artistId
+        const possiblePosts = await prisma.post.findMany({
+          where: {
+            urlSlug: { equals: id, mode: "insensitive" },
+          },
+        });
+        if (possiblePosts.length === 1) {
+          postForURLSlug = possiblePosts[0];
+        }
       }
       const post = await prisma.post.findFirst({
         where: {

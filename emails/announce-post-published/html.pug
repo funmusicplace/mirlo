@@ -10,7 +10,7 @@ block content
     p #{artist.name} just published a new post on Mirlo: 
     h2 #{post.title}
     p 
-      a(href!=`${client}/post/${post.urlSlug}`) Read it on Mirlo.
+      a(href!=`${client}/${artist.urlSlug}/posts/${post.urlSlug}`) Read it on Mirlo.
     div.mw600 
       | !{post.htmlContent}
     hr
