@@ -802,10 +802,10 @@ const About: React.FC = () => {
             answer={
               <>
                 Our front-end is a TypeScript react app and our back-end is a
-                node TypeScript express app. We’re hosted on
+                node TypeScript express app. We’re hosted on{" "}
                 <a href="https://render.com/">Render</a>. You can see all of{" "}
                 <a href="https://github.com/funmusicplace/mirlo/">
-                  our code on GitHub
+                  our code on GitHub.
                 </a>
               </>
             }
