@@ -141,7 +141,7 @@ const ArtistFormLinks: React.FC<ArtistFormLinksProps> = ({
             })}
           {!isManage && allLinks.length > links.length && (
             <ArtistButtonLink to="links" size="compact" variant="dashed">
-              More links
+              {t('moreLinks')}
             </ArtistButtonLink>
           )}
         </div>
