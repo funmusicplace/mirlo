@@ -1,4 +1,4 @@
-We welcome contributions to Mirlo in the form of [bug reports](https://github.com/funmusicplace/mirlo/issues), [feature requests](https://github.com/funmusicplace/mirlo/discussions/categories/ideas) and/or code contributions.
+We welcome contributions to Mirlo in the form of [bug reports](https://github.com/funmusicplace/mirlo/issues), [feature requests](https://github.com/funmusicplace/mirlo/discussions/categories/ideas), [translations](https://github.com/funmusicplace/mirlo/blob/main/docs/Translation.md) and/or code contributions.
 
 We encourage you to talk to us about your contribution first. You can:
 
