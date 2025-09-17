@@ -81,7 +81,7 @@ const FollowArtist: React.FC<{ artistId: number }> = ({ artistId }) => {
   }
 
   if (isSubscribed) {
-    return <>Subscribed</>;
+    return <>{t('isSubscribed')}</>;
   }
 
   const hasNoneDefaultSubscriptionTiers = artist.subscriptionTiers.find(

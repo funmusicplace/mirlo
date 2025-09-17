@@ -432,7 +432,9 @@
     "continueWithPrice": "Continue with {{ amount }}/month",
     "chooseToContinue": "Choose a support tier to continue",
     "purchaseEntireCatalogue": "Purchase entire catalogue for {{amount}}",
-    "platformPercent": "{{ artistName }} has chosen that they will get {{ percent }}% ({{ money }}) of this purchase. Mirlo will receive {{ mirloCut }}. Their payment processor will take a cut of {{ paymentProcessorCut }}."
+    "platformPercent": "{{ artistName }} has chosen that they will get {{ percent }}% ({{ money }}) of this purchase. Mirlo will receive {{ mirloCut }}. Their payment processor will take a cut of {{ paymentProcessorCut }}.",
+    "isSubscribed": "Subscribed",
+    "moreLinks": "More links"
   },
   "clickToPlay": {
     "untitled": "Untitled",
@@ -1009,8 +1011,10 @@
     "trackGroup": "Release",
     "url": "Link",
     "redeemed": "Redeemed",
-    "codeCopies": "Copied '{{ code }}' to your clipboard.",
-    "urlCopied": "Copied the link to your clipboard."
+    "codeCopied": "Copied '{{ code }}' to your clipboard.",
+    "urlCopied": "Copied the link to your clipboard.",
+    "viewCodes": "Overview of your codes",
+    "codesForGroup": "Codes for {{ group }}"
   },
   "artists": {
     "artists": "All artists",
