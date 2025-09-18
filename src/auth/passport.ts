@@ -137,6 +137,12 @@ export const canUserCreateArtists = async (
 
   const settings = await getSiteSettings();
 
+  if (settings.defconLevel === 2) {
+    return res
+      .status(403)
+      .json({ error: "This server has temporarily closed sign-ups" });
+  }
+
   if (settings.isClosedToPublicArtistSignup) {
     if (loggedInUser.isAdmin) {
       return next();
@@ -156,9 +162,10 @@ export const canUserCreateArtists = async (
       return next();
     }
 
-    return res
-      .status(403)
-      .json({ error: "Artist signups are currently closed" });
+    return res.status(403).json({
+      error:
+        "Your instance administrator needs to invite you to become an artist.",
+    });
   } else {
     return next();
   }
