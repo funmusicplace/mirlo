@@ -72,6 +72,8 @@ describe("subscription", () => {
         processorSubscriptionReferenceId: subscriptionKey,
         amountPaid: 10,
         currency: "usd",
+        platformCut: 2,
+        paymentProcessorFee: 0.3,
       });
 
       const charge = await prisma.artistUserSubscriptionCharge.findMany({

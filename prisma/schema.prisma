@@ -430,6 +430,8 @@ model ArtistUserSubscriptionCharge {
   stripeInvoiceId          String? // Stripe Invoice Id
   paymentProcessor         String
   amountPaid               Int // in cents
+  paymentProcessorFee      Int? // in cents
+  platformCut              Int? // in cents
   currency                 String
   createdAt                DateTime               @default(now())
 }
