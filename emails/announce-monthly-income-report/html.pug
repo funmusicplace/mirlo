@@ -1,0 +1,18 @@
+extends ../layout.pug
+
+block content
+    p Hi #{user.name}
+    p Your sales report for the past month : 
+    table
+      each val in userSales
+        tr
+          td #{val.artist.name}
+          td #{val.datePurchased.split('T')[0]}
+          td #{val.saleType}
+          td #{val.title}
+          td #{val.user.name} (#{val.user.email})
+          td #{val.currency} #{val.amount / 100}
+    
+    p Total Income: #{totalIncome / 100} #{artistSales[0]?.currency || 'USD'}
+    p We love to see it.
+    p Enjoy!
