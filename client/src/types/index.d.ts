@@ -44,6 +44,7 @@ interface LoggedInUser {
     sizes?: { [key: number]: string };
     updatedAt: string;
   };
+  invitesUsed: { accountType: "ARTIST" | "LISTENER" | "LABEL" }[];
   merchPurchase?: MerchPurchase[];
 }
 

@@ -28,6 +28,7 @@ const profile = async (req: Request, res: Response, next: NextFunction) => {
         featureFlags: true,
         properties: true,
         isLabelAccount: true,
+        invitesUsed: true,
         trackFavorites: {
           include: {
             track: {

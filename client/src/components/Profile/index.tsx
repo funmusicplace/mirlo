@@ -13,6 +13,7 @@ import ProfileForm from "./ProfileForm";
 import styled from "@emotion/styled";
 import FeatureFlag from "components/common/FeatureFlag";
 import ProfileImages from "./ProfileImages";
+import CanCreateArtists from "components/CanCreateArtists";
 
 export const ProfileSection = styled.div`
   border-top: 1px solid var(--mi-darken-x-background-color);
@@ -71,13 +72,15 @@ function Profile() {
               />
             )}
           </ProfileSection>
-          <ProfileSection>
-            <h2>{t("manageArtists")}</h2>
-            <p>{t("manageArtistsDescription")}</p>
-            <ButtonLink to="/manage" style={{ marginTop: "1rem" }}>
-              {t("manageArtists")}
-            </ButtonLink>
-          </ProfileSection>
+          <CanCreateArtists>
+            <ProfileSection>
+              <h2>{t("manageArtists")}</h2>
+              <p>{t("manageArtistsDescription")}</p>
+              <ButtonLink to="/manage" style={{ marginTop: "1rem" }}>
+                {t("manageArtists")}
+              </ButtonLink>
+            </ProfileSection>
+          </CanCreateArtists>
           <ProfileSection>
             <h2>{t("deleteYourAccount")}</h2>
             <Button

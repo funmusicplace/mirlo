@@ -4,6 +4,7 @@ import App from "./App";
 import ErrorPage from "./components/ErrorPage";
 import { AuthWrapper } from "components/AuthWrapper";
 import { css } from "@emotion/css";
+import CanCreateArtists from "components/CanCreateArtists";
 
 async function markdownPage(source: string) {
   const { PageMarkdownWrapper } = await import("components/Post");
@@ -215,7 +216,9 @@ const routes: RouteObject[] = [
           return {
             Component: () => (
               <AuthWrapper>
-                <ManageContainer />
+                <CanCreateArtists>
+                  <ManageContainer />
+                </CanCreateArtists>
               </AuthWrapper>
             ),
           };

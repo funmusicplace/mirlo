@@ -10,6 +10,8 @@ import { queryManagedArtists, useLogoutMutation } from "queries";
 import { getArtistManageUrl } from "utils/artist";
 import { useQuery } from "@tanstack/react-query";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
+import { querySetting } from "queries/settings";
+import CanCreateArtists from "components/CanCreateArtists";
 
 const Menu: React.FC = (props) => {
   const { setIsMenuOpen } = props as {
@@ -18,14 +20,15 @@ const Menu: React.FC = (props) => {
   const { t } = useTranslation("translation", { keyPrefix: "headerMenu" });
   const navigate = useNavigate();
   const snackbar = useSnackbar();
-  // const [artists, setArtists] = React.useState<Artist[]>([]);
+  const { data: isClosedToPublicArtistSignup } = useQuery(
+    querySetting("isClosedToPublicArtistSignup")
+  );
 
   const { user } = useAuthContext();
 
   const { data: { results: artists } = {}, isLoading } = useQuery(
     queryManagedArtists()
   );
-  const userId = user?.id;
 
   const { mutate: logout } = useLogoutMutation();
 
@@ -38,6 +41,8 @@ const Menu: React.FC = (props) => {
       },
     });
   }, [logout, navigate, setIsMenuOpen, snackbar, t]);
+
+  const seeOrderPages = user?.isLabelAccount || !!artists?.length;
 
   return (
     <menu className={css``}>
@@ -75,61 +80,63 @@ const Menu: React.FC = (props) => {
               {t("collection")}
             </Button>
           </li>
-          <li>
-            <Button
-              onClick={() => {
-                setIsMenuOpen(false);
-                navigate("/manage");
-              }}
-            >
-              {t("manage")}
-            </Button>
-          </li>
-          <li
-            className={css`
-              padding: 0;
-            `}
-          >
-            <ul
+          <CanCreateArtists>
+            <li>
+              <Button
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  navigate("/manage");
+                }}
+              >
+                {t("manage")}
+              </Button>
+            </li>
+            <li
               className={css`
-                border-bottom: 1px solid var(--mi-normal-foreground-color) !important;
-                border-top: 1px solid var(--mi-normal-foreground-color) !important;
-                margin: 0;
-                padding: 0 !important ;
-                max-height: 190px;
-                overflow: auto;
-                flex-direction: column;
+                padding: 0;
               `}
             >
-              {isLoading && (
-                <LoadingBlocks rows={1} height="2rem" margin=".25rem" />
-              )}
-              {artists
-                ?.filter((a) => !a.isLabelProfile)
-                .map((a) => {
-                  return (
-                    <li key={a.id}>
-                      <Button
-                        onClick={() => {
-                          setIsMenuOpen(false);
-                          navigate(getArtistManageUrl(a.id));
-                        }}
-                      >
-                        <div
-                          className={css`
-                            font-weight: bold;
-                            opacity: 0.7;
-                            font-size: 0.9rem;
-                          `}
+              <ul
+                className={css`
+                  border-bottom: 1px solid var(--mi-normal-foreground-color) !important;
+                  border-top: 1px solid var(--mi-normal-foreground-color) !important;
+                  margin: 0;
+                  padding: 0 !important ;
+                  max-height: 190px;
+                  overflow: auto;
+                  flex-direction: column;
+                `}
+              >
+                {isLoading && (
+                  <LoadingBlocks rows={1} height="2rem" margin=".25rem" />
+                )}
+                {artists
+                  ?.filter((a) => !a.isLabelProfile)
+                  .map((a) => {
+                    return (
+                      <li key={a.id}>
+                        <Button
+                          onClick={() => {
+                            setIsMenuOpen(false);
+                            navigate(getArtistManageUrl(a.id));
+                          }}
                         >
-                          {a.name}
-                        </div>
-                      </Button>
-                    </li>
-                  );
-                })}
-            </ul>
-          </li>
+                          <div
+                            className={css`
+                              font-weight: bold;
+                              opacity: 0.7;
+                              font-size: 0.9rem;
+                            `}
+                          >
+                            {a.name}
+                          </div>
+                        </Button>
+                      </li>
+                    );
+                  })}
+              </ul>
+            </li>
+          </CanCreateArtists>
           {user?.isAdmin && (
             <li>
               <Button
@@ -142,26 +149,30 @@ const Menu: React.FC = (props) => {
               </Button>
             </li>
           )}
-          <li>
-            <Button
-              onClick={() => {
-                setIsMenuOpen(false);
-                navigate("/fulfillment");
-              }}
-            >
-              {t("fulfillment")}
-            </Button>
-          </li>{" "}
-          <li>
-            <Button
-              onClick={() => {
-                setIsMenuOpen(false);
-                navigate("/sales");
-              }}
-            >
-              {t("viewSalesPage")}
-            </Button>
-          </li>
+          {seeOrderPages && (
+            <>
+              <li>
+                <Button
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    navigate("/fulfillment");
+                  }}
+                >
+                  {t("fulfillment")}
+                </Button>
+              </li>{" "}
+              <li>
+                <Button
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    navigate("/sales");
+                  }}
+                >
+                  {t("viewSalesPage")}
+                </Button>
+              </li>
+            </>
+          )}
           <li>
             <Button
               onClick={onLogOut}

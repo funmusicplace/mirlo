@@ -14,6 +14,23 @@ export default function () {
 
       const { setting } = req.params;
 
+      const okaySettings = [
+        "instanceArtist",
+        "privacyPolicy",
+        "terms",
+        "cookiePolicy",
+        "contentPolicy",
+        "isClosedToPublicArtistSignup",
+        "platformPercent",
+      ];
+
+      if (!okaySettings.includes(setting)) {
+        throw new AppError({
+          httpCode: 404,
+          description: "Page not found",
+        });
+      }
+
       if (setting === "instanceArtist" && settings.settings?.instanceArtistId) {
         const artist = await prisma.artist.findFirst({
           where: {
