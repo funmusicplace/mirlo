@@ -1194,12 +1194,29 @@ export const handleInvoicePaid = async (invoice: Stripe.Invoice) => {
   const subscription = invoice.subscription;
   logger.info(`invoice.paid: ${invoice.id} for ${subscription}`);
   if (typeof subscription === "string") {
+    const paymentIntent = invoice.payment_intent;
+    const intent = await stripe.paymentIntents.retrieve(
+      paymentIntent as string,
+      {
+        expand: ["latest_charge.balance_transaction.fee_details"],
+      }
+    );
+    const feeDetails =
+      intent.latest_charge &&
+      typeof intent.latest_charge !== "string" &&
+      intent.latest_charge.balance_transaction &&
+      typeof intent.latest_charge.balance_transaction !== "string"
+        ? intent.latest_charge.balance_transaction?.fee_details
+        : undefined;
+    const stripeFee = feeDetails?.find((fd) => fd.type === "stripe_fee");
     await manageSubscriptionReceipt({
       paymentProcessor: "stripe",
       processorPaymentReferenceId: invoice.id,
       processorSubscriptionReferenceId: subscription,
       amountPaid: invoice.amount_paid,
       currency: invoice.currency,
+      platformCut: invoice.application_fee_amount || 0,
+      paymentProcessorFee: stripeFee?.amount || 0,
     });
   }
 };

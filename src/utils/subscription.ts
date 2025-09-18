@@ -15,12 +15,16 @@ export const manageSubscriptionReceipt = async ({
   processorSubscriptionReferenceId,
   amountPaid,
   currency,
+  platformCut,
+  paymentProcessorFee,
 }: {
   paymentProcessor: "stripe";
   processorPaymentReferenceId: string;
   processorSubscriptionReferenceId: string;
   amountPaid: number;
   currency: string;
+  platformCut: number;
+  paymentProcessorFee: number;
 }) => {
   const artistUserSubscription = await prisma.artistUserSubscription.findFirst({
     where: {
@@ -44,6 +48,8 @@ export const manageSubscriptionReceipt = async ({
         paymentProcessor,
         amountPaid,
         currency,
+        platformCut,
+        paymentProcessorFee,
       },
     });
     logger.info(

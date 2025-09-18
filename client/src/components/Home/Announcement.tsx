@@ -19,11 +19,11 @@ const Announcement: React.FC = () => {
         gap: 1rem;
       `}
     >
-      Help us get to Nashville!
+      A barrage of bots! 😲
       <ButtonAnchor
         variant="outlined"
         startIcon={<FaArrowRight />}
-        href="https://nashville.mirlo.space"
+        href="https://mirlo.space/team/posts/a-barrage-of-bots-fighting-fire-without-money/"
         className={css`
           background-color: black !important;
           border: 1px solid var(--mi-white) !important;
@@ -40,7 +40,7 @@ const Announcement: React.FC = () => {
           }
         `}
       >
-        Donate
+        Read update
       </ButtonAnchor>
     </div>
   );

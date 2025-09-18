@@ -22,9 +22,7 @@ export const Manage: React.FC = () => {
     queryUserStripeStatus(user?.id)
   );
   const { t } = useTranslation("translation", { keyPrefix: "manage" });
-  const { data: isClosedToPublicArtistSignup, isFetching } = useQuery(
-    querySetting("isClosedToPublicArtistSignup")
-  );
+
   const userId = user?.id;
 
   const fetchArtists = React.useCallback(async () => {

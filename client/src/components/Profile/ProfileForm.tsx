@@ -14,11 +14,10 @@ import { SelectEl } from "components/common/Select";
 import { finishedLanguages } from "i18n";
 import { Toggle } from "components/common/Toggle";
 import { useProfileMutation } from "queries";
-import SlugInput from "components/common/SlugInput";
 import { FaChevronRight, FaEye } from "react-icons/fa";
-import FeatureFlag from "components/common/FeatureFlag";
 import { ProfileSection } from ".";
 import ProfileImages from "./ProfileImages";
+import CanCreateArtists from "components/CanCreateArtists";
 
 type FormData = {
   name: string;
@@ -118,16 +117,18 @@ function ProfileForm() {
             ))}
           </SelectEl>
         </FormComponent>
-        <FormComponent>
-          <Toggle
-            label={t("isLabelAccount")}
-            toggled={isLabelAccount}
-            onClick={() => {
-              setValue("isLabelAccount", !isLabelAccount);
-            }}
-          />
-          <small>{t("makeSearchable")}</small>
-        </FormComponent>
+        <CanCreateArtists>
+          <FormComponent>
+            <Toggle
+              label={t("isLabelAccount")}
+              toggled={isLabelAccount}
+              onClick={() => {
+                setValue("isLabelAccount", !isLabelAccount);
+              }}
+            />
+            <small>{t("makeSearchable")}</small>
+          </FormComponent>
+        </CanCreateArtists>
         {isLabelAccount && (
           <div
             className={css`

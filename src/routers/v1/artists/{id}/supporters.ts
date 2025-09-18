@@ -3,8 +3,28 @@ import { Request, Response } from "express";
 import prisma from "@mirlo/prisma";
 import { findArtistIdForURLSlug } from "../../../../utils/artist";
 
-const querySupporters = (artistId: number[], sinceDate?: string) =>
-  prisma.artistUserSubscriptionCharge.findMany({
+const constructDateFilter = (
+  sinceDate?: string,
+  untilDate?: string
+): { gte?: Date; lte?: Date } | undefined => {
+  if (sinceDate && untilDate) {
+    return { gte: new Date(sinceDate), lte: new Date(untilDate) };
+  } else if (sinceDate) {
+    return { gte: new Date(sinceDate) };
+  } else if (untilDate) {
+    return { lte: new Date(untilDate) };
+  } else {
+    return undefined;
+  }
+};
+
+const querySupporters = (
+  artistId: number[],
+  sinceDate?: string,
+  untilDate?: string
+) => {
+  const dateFilter = constructDateFilter(sinceDate, untilDate);
+  return prisma.artistUserSubscriptionCharge.findMany({
     where: {
       artistUserSubscription: {
         amount: { gt: 0 },
@@ -12,7 +32,7 @@ const querySupporters = (artistId: number[], sinceDate?: string) =>
           artistId: { in: artistId },
         },
       },
-      createdAt: sinceDate ? { gte: new Date(sinceDate) } : undefined,
+      createdAt: dateFilter,
     },
     select: {
       artistUserSubscription: {
@@ -26,13 +46,20 @@ const querySupporters = (artistId: number[], sinceDate?: string) =>
       createdAt: true,
     },
   });
+};
 
-const queryTips = (artistId: number[], sinceDate?: string) =>
-  prisma.userArtistTip.findMany({
+const queryTips = (
+  artistId: number[],
+  sinceDate?: string,
+  untilDate?: string
+) => {
+  const dateFilter = constructDateFilter(sinceDate, untilDate);
+
+  return prisma.userArtistTip.findMany({
     where: {
       pricePaid: { gt: 0 },
       artistId: { in: artistId },
-      datePurchased: sinceDate ? { gte: new Date(sinceDate) } : undefined,
+      datePurchased: dateFilter,
     },
     select: {
       artist: { include: { user: { select: { currency: true } } } },
@@ -43,12 +70,19 @@ const queryTips = (artistId: number[], sinceDate?: string) =>
       userId: true,
     },
   });
+};
 
-const queryTracks = (artistId: number[], sinceDate?: string) =>
-  prisma.userTrackPurchase.findMany({
+const queryTracks = (
+  artistId: number[],
+  sinceDate?: string,
+  untilDate?: string
+) => {
+  const dateFilter = constructDateFilter(sinceDate, untilDate);
+
+  return prisma.userTrackPurchase.findMany({
     where: {
       pricePaid: { gt: 0 },
-      datePurchased: sinceDate ? { gte: new Date(sinceDate) } : undefined,
+      datePurchased: dateFilter,
       track: {
         trackGroup: {
           artistId: { in: artistId },
@@ -65,16 +99,20 @@ const queryTracks = (artistId: number[], sinceDate?: string) =>
       },
     },
   });
+};
 
 const queryTrackGroups = (
   artistId: number[],
   sinceDate?: string,
+  untilDate?: string,
   trackGroupIds?: number[]
-) =>
-  prisma.userTrackGroupPurchase.findMany({
+) => {
+  const dateFilter = constructDateFilter(sinceDate, untilDate);
+
+  return prisma.userTrackGroupPurchase.findMany({
     where: {
       pricePaid: { gt: 0 },
-      datePurchased: sinceDate ? { gte: new Date(sinceDate) } : undefined,
+      datePurchased: dateFilter,
       trackGroup: {
         id: { in: trackGroupIds },
         artistId: { in: artistId },
@@ -88,12 +126,19 @@ const queryTrackGroups = (
       userId: true,
     },
   });
+};
 
-const queryMerch = (artistId: number[], sinceDate?: string) =>
-  prisma.merchPurchase.findMany({
+const queryMerch = (
+  artistId: number[],
+  sinceDate?: string,
+  untilDate?: string
+) => {
+  const dateFilter = constructDateFilter(sinceDate, untilDate);
+
+  return prisma.merchPurchase.findMany({
     where: {
       amountPaid: { gt: 0 },
-      createdAt: sinceDate ? { gte: new Date(sinceDate) } : undefined,
+      createdAt: dateFilter,
       merch: {
         artistId: { in: artistId },
       },
@@ -115,17 +160,22 @@ const queryMerch = (artistId: number[], sinceDate?: string) =>
       userId: true,
     },
   });
+};
 
 export const findSales = async ({
   artistId,
   sinceDate,
+  untilDate,
   filters,
+  orderBy,
 }: {
   artistId: number[];
   sinceDate?: string;
+  untilDate?: string;
   filters?: {
     trackGroupIds?: number[];
   };
+  orderBy?: { datePurchased: "asc" | "desc" };
 }) => {
   if (sinceDate) {
     const date = new Date(sinceDate);
@@ -140,19 +190,24 @@ export const findSales = async ({
   let trackGroupPurchases: Awaited<ReturnType<typeof queryTrackGroups>> = [];
   let merchPurchases: Awaited<ReturnType<typeof queryMerch>> = [];
   if (!filters) {
-    supporters = await querySupporters(artistId, sinceDate);
+    supporters = await querySupporters(artistId, sinceDate, untilDate);
 
-    tips = await queryTips(artistId, sinceDate);
+    tips = await queryTips(artistId, sinceDate, untilDate);
 
-    trackPurchases = await queryTracks(artistId, sinceDate);
+    trackPurchases = await queryTracks(artistId, sinceDate, untilDate);
 
-    trackGroupPurchases = await queryTrackGroups(artistId, sinceDate);
+    trackGroupPurchases = await queryTrackGroups(
+      artistId,
+      sinceDate,
+      untilDate
+    );
 
-    merchPurchases = await queryMerch(artistId, sinceDate);
+    merchPurchases = await queryMerch(artistId, sinceDate, untilDate);
   } else if (filters.trackGroupIds) {
     trackGroupPurchases = await queryTrackGroups(
       artistId,
       sinceDate,
+      untilDate,
       filters.trackGroupIds
     );
   }
@@ -163,14 +218,18 @@ export const findSales = async ({
       artist: s.artistUserSubscription.artistSubscriptionTier.artist,
       amount: s.artistUserSubscription.amount,
       artistSubscriptionTier: s.artistUserSubscription.artistSubscriptionTier,
+      title: `${s.artistUserSubscription.artistSubscriptionTier.name}`,
       datePurchased: s.createdAt,
       userId: s.artistUserSubscription.userId,
       currency: s.artistUserSubscription.currency,
+      saleType: "subscription",
     })),
     ...tips.map((t) => ({
       ...t,
       amount: t.pricePaid,
       currency: t.currencyPaid,
+      title: `Tip`,
+      saleType: "tip",
     })),
     ...trackPurchases.map((tp) => ({
       ...tp,
@@ -178,23 +237,35 @@ export const findSales = async ({
       artist: tp.track.trackGroup.artist,
       amount: tp.pricePaid,
       currency: tp.currencyPaid,
+      title: tp.track.title,
+      saleType: "track",
     })),
     ...trackGroupPurchases.map((tgp) => ({
       ...tgp,
+      title: tgp.trackGroup.title,
       artist: tgp.trackGroup.artist,
       urlSlug: tgp.trackGroup.urlSlug,
       amount: tgp.pricePaid,
       currency: tgp.currencyPaid,
+      saleType: "trackGroup",
     })),
     ...merchPurchases.map((mp) => ({
       ...mp,
+      title: mp.merch.title,
       artist: mp.merch.artist,
       datePurchased: mp.createdAt,
       amount: mp.amountPaid,
       urlSlug: mp.merch.urlSlug,
       currency: mp.currencyPaid,
+      saleType: "merch",
     })),
   ].sort((a, b) => {
+    if (orderBy?.datePurchased === "asc") {
+      return (
+        new Date(a.datePurchased).getTime() -
+        new Date(b.datePurchased).getTime()
+      );
+    }
     return (
       new Date(b.datePurchased).getTime() - new Date(a.datePurchased).getTime()
     );
