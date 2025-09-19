@@ -80,8 +80,6 @@ const TipArtistForm: React.FC<{
   const value = methods.watch("price");
   const valueButton = methods.watch("priceButton");
 
-  console.log("value", value, valueButton);
-
   const actualValue = valueButton === "other" ? value : valueButton;
 
   return (

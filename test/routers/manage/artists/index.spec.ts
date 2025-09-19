@@ -48,6 +48,7 @@ describe("manage/artists/{artistId}", () => {
         });
         const { accessToken } = await createUser({
           email: "test@testcom",
+          canCreateArtists: false,
         });
 
         const response = await requestApp
@@ -62,11 +63,9 @@ describe("manage/artists/{artistId}", () => {
         );
       });
 
-      it("should create an artist if user is invited", async () => {
+      it("should create an artist if user canCreateArtists", async () => {
         const settings = await getSiteSettings();
-        const { user: invitedByUser } = await createUser({
-          email: "admin@admin.com",
-        });
+
         await prisma.settings.update({
           where: {
             id: settings.id,
@@ -77,15 +76,7 @@ describe("manage/artists/{artistId}", () => {
         });
         const { user, accessToken } = await createUser({
           email: "test@testcom",
-        });
-
-        await prisma.invite.create({
-          data: {
-            email: "test@test.com",
-            usedById: user.id,
-            accountType: "ARTIST",
-            invitedById: invitedByUser.id,
-          },
+          canCreateArtists: true,
         });
 
         const response = await requestApp

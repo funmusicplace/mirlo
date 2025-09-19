@@ -1190,7 +1190,10 @@ export const chargePledgePayments = async (
   }
 };
 
-export const handleInvoicePaid = async (invoice: Stripe.Invoice) => {
+export const handleInvoicePaid = async (
+  invoice: Stripe.Invoice,
+  accountId: string
+) => {
   const subscription = invoice.subscription;
   logger.info(`invoice.paid: ${invoice.id} for ${subscription}`);
   if (typeof subscription === "string") {
@@ -1199,7 +1202,8 @@ export const handleInvoicePaid = async (invoice: Stripe.Invoice) => {
       paymentIntent as string,
       {
         expand: ["latest_charge.balance_transaction.fee_details"],
-      }
+      },
+      { stripeAccount: accountId }
     );
     const feeDetails =
       intent.latest_charge &&

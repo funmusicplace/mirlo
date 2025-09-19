@@ -56,6 +56,7 @@ passport.use(
         ...jwtPayload,
         isAdmin: foundUser?.isAdmin,
         isLabelAccount: foundUser?.isLabelAccount,
+        canCreateArtists: foundUser?.canCreateArtists,
       });
     }
   )
