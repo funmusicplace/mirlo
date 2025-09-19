@@ -14,6 +14,8 @@
     "alwaysCreateLater": "You can always add an artist page later",
     "imJustHereToListen": "I'm just here to listen",
     "logIn": "Already have an account? Log in",
+    "invitedByAsArtist": "You were invited by {{ name }} to join this Mirlo instance as an artist.",
+    "invitedByAsListener": "You were invited by {{ name }} to join this Mirlo instance.",
     "notArtistName": "You will be able to create multiple artist pages. The name you use to create an account does not have to be the name for your artist page.",
     "termsAndPrivacy": "By signing up you agree to our <terms>terms</terms> and <privacy>privacy</privacy> policies.",
     "receiveMailingList": "Stay up to date with Mirlo and its projects by signing up to our mailing list."
@@ -139,7 +141,7 @@
     "areYouSureDeleteAccount": "Are you sure you want to delete your account?",
     "deleteAccount": "Delete account",
     "changingEmailDisabled": "Changing your email has been disabled for now. Please contact an admin if you want to do so.",
-    "collectionEmpty": "There's nothing in your collection yet, support some artists and buy their music!",
+    "collectionEmpty": "There's nothing in your collection yet. Check out some recent <releases>releases</releases>, browse some <tags>tags</tags>, or browse some <artists>artists</artists>.",
     "yourCollection": "Your collection",
     "yourWishlist": "Your wishlist",
     "yourPurchases": "Your purchases",
@@ -318,6 +320,11 @@
   },
   "artist": {
     "merch": "Merch",
+    "supportThisArtist": "Support this artist",
+    "orTipJustOnce": "Or tip just once",
+    "tipThem": "Tip them",
+    "youAreFollowingThisArtist": "You're already receiving updates this artist. You can choose to support them on a regular basis!",
+    "youAreAlreadySubscribed": "You're already subscribed to this tier",
     "roster": "Roster",
     "includesNewReleases": "Includes new releases",
     "includesNewReleasesLong": "Supporting at this tier will automatically include new releases from this artist.",
@@ -892,7 +899,9 @@
     "settings": "Settings",
     "fundraising": "Fundraising",
     "sendEmails": "Send emails",
-    "dashboard": "Dashboard"
+    "dashboard": "Dashboard",
+    "invites": "Invites",
+    "transactions": "Transactions"
   },
   "trackDetails": {
     "track": "Track:",

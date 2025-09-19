@@ -15,14 +15,19 @@ import WidthContainer from "./common/WidthContainer";
 import useErrorHandler from "services/useErrorHandler";
 import { useQuery } from "@tanstack/react-query";
 import { querySetting } from "queries/settings";
+import Lottie from "lottie-react";
+
+import checkmark from "../animations/lotties/checkmark.json";
 
 type SignupInputs = {
   email: string;
   name: string;
   password: string;
   receiveMailingList: boolean;
+  emailInvited: string;
   accountType: "listener" | "artist";
   promoCode: string;
+  inviteToken: string;
 };
 
 const ArtistToggle = styled(FormComponent)`
@@ -68,12 +73,17 @@ function Signup() {
     querySetting("isClosedToPublicArtistSignup")
   );
   const errorHandler = useErrorHandler();
+  const invitedBy = search.get("invitedBy");
+  const accountType = search.get("accountType");
   const [hasRegistered, setHasRegistered] = React.useState(false);
   const [accountIncomplete, setAccountIncomplete] = React.useState(false);
   const methods = useForm<SignupInputs>({
     defaultValues: {
-      accountType: "listener",
+      email: search.get("email") ?? "",
+      inviteToken: search.get("inviteToken") ?? "",
+      accountType: accountType === "artist" ? "artist" : "listener",
       promoCode: search.get("promo") ?? "",
+      emailInvited: search.get("email") ?? "",
     },
   });
   const [isLoading, setIsLoading] = React.useState(false);
@@ -137,11 +147,24 @@ function Signup() {
     return (
       <Box
         className={css`
-          margin: 0 auto;
+          margin: 2rem auto;
           max-width: 320px;
           text-align: center;
+          font-size: 1rem;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          flex-direction: column;
+          gap: 1rem;
         `}
       >
+        <Lottie
+          animationData={checkmark}
+          loop={false}
+          width={100}
+          style={{ width: 100, height: 100 }}
+          height={100}
+        />
         {t("hasRegistered")}
       </Box>
     );
@@ -161,6 +184,25 @@ function Signup() {
           onSubmit={handleSubmit(onSubmit)}
         >
           <h2>{t("register")}</h2>
+          {invitedBy && (
+            <Box
+              className={css`
+                margin: 0 auto;
+                max-width: 320px;
+                text-align: center;
+              `}
+              variant="info"
+            >
+              {t(
+                accountType === "artist"
+                  ? "invitedByAsArtist"
+                  : "invitedByAsListener",
+                {
+                  name: invitedBy,
+                }
+              )}
+            </Box>
+          )}
           <FormComponent>
             <label>{t("email")}</label>
             <InputEl type="email" {...register("email")} />
@@ -216,6 +258,8 @@ function Signup() {
             />
           </FormComponent>
           <InputEl type="hidden" {...register("promoCode")} />
+          <InputEl type="hidden" {...register("inviteToken")} />
+          <InputEl type="hidden" {...register("emailInvited")} />
 
           <div
             className={css`

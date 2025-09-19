@@ -6,7 +6,6 @@ import {
   userAuthenticated,
   userHasPermission,
 } from "../../../../auth/passport";
-import { uniqBy } from "lodash";
 
 export default function () {
   const operations = {
@@ -15,12 +14,14 @@ export default function () {
   };
 
   async function PUT(req: Request, res: Response, next: NextFunction) {
-    const { email, isLabelAccount, isAdmin, featureFlags } = req.body as {
-      email: string;
-      isLabelAccount: boolean;
-      featureFlags: string[];
-      isAdmin: boolean;
-    };
+    const { email, isLabelAccount, isAdmin, featureFlags, canCreateArtists } =
+      req.body as {
+        email: string;
+        isLabelAccount: boolean;
+        featureFlags: string[];
+        isAdmin: boolean;
+        canCreateArtists: boolean;
+      };
     try {
       await prisma.user.update({
         where: { id: Number(req.params.id) },
@@ -29,6 +30,7 @@ export default function () {
           isLabelAccount,
           featureFlags,
           isAdmin,
+          canCreateArtists,
         },
       });
       res.json({

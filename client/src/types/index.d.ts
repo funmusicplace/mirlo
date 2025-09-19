@@ -44,7 +44,7 @@ interface LoggedInUser {
     sizes?: { [key: number]: string };
     updatedAt: string;
   };
-  invitesUsed: { accountType: "ARTIST" | "LISTENER" | "LABEL" }[];
+  canCreateArtists?: boolean;
   merchPurchase?: MerchPurchase[];
 }
 
@@ -275,6 +275,21 @@ interface User {
   stripeAccountId?: string;
 }
 
+interface Invite {
+  id: string;
+  email: string;
+  createdAt: string;
+  usedAt?: string;
+  invitedBy?: {
+    id: number;
+    email: string;
+    name?: string;
+  };
+  invitedById?: number;
+  accountType: "ARTIST" | "LISTENER" | "LABEL";
+  usedBy: User;
+}
+
 interface UserFromAdmin {
   id: number;
   email: string;
@@ -290,6 +305,7 @@ interface UserFromAdmin {
   isLabelAccount: boolean;
   featureFlags: string[];
   trustLevel: number;
+  canCreateArtists: boolean;
 }
 
 interface ArtistSubscriptionTier {

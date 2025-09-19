@@ -3,11 +3,12 @@ import Box from "components/common/Box";
 import TrackgroupGrid from "components/common/TrackgroupGrid";
 import React from "react";
 import api from "../../../services/api";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import WidthContainer from "components/common/WidthContainer";
 import { useAuthContext } from "state/AuthContext";
 import CollectionPurchaseSquare from "./CollectionPurchaseSquare";
 import { isTrackGroupPurchase, isTrackPurchase } from "types/typeguards";
+import { Link } from "react-router-dom";
 
 type PurchaseResponse =
   | (UserTrackPurchase & { trackGroup: TrackGroup })
@@ -63,7 +64,23 @@ function Profile() {
             `}
           >
             {!purchases ||
-              (purchases?.length === 0 && <Box>{t("collectionEmpty")}</Box>)}
+              (purchases?.length === 0 && (
+                <Box
+                  className={css`
+                    border: 1px solid var(--mi-darken-x-background-color);
+                  `}
+                >
+                  <Trans
+                    t={t}
+                    i18nKey="collectionEmpty"
+                    components={{
+                      releases: <Link to="/releases"></Link>,
+                      artists: <Link to="/artists"></Link>,
+                      tags: <Link to="/tags"></Link>,
+                    }}
+                  />
+                </Box>
+              ))}
             <TrackgroupGrid gridNumber={"4"}>
               {purchases?.map((purchase) => {
                 if (isTrackGroupPurchase(purchase) && purchase.trackGroup) {

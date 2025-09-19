@@ -14,6 +14,7 @@ import { css } from "@emotion/css";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import TextArea from "./TextArea";
 import useErrorHandler from "services/useErrorHandler";
+import { ArtistButton } from "components/Artist/ArtistButtons";
 
 const defaultGifts = [
   { value: 5 },
@@ -82,18 +83,7 @@ const TipArtistForm: React.FC<{
   const actualValue = valueButton === "other" ? value : valueButton;
 
   return (
-    <div
-      className={css`
-        margin-top: 2rem;
-      `}
-    >
-      <p
-        className={css`
-          margin-bottom: 0.5rem;
-        `}
-      >
-        {t("orGiveOnce")}
-      </p>
+    <div className={css``}>
       {!artistDetails && <LoadingBlocks rows={1} />}
 
       {currency && artistDetails && (
@@ -101,7 +91,9 @@ const TipArtistForm: React.FC<{
           <FormProvider {...methods}>
             <ul
               className={css`
-                margin-bottom: 0.5rem;
+                display: flex;
+                gap: 0.5rem;
+                flex-wrap: wrap;
               `}
             >
               {defaultGifts.map((gift) => (
@@ -117,14 +109,22 @@ const TipArtistForm: React.FC<{
                     label {
                       padding: 0.75rem 1rem;
                       display: block;
-                      border: 1px solid var(--mi-darken-background-color);
+                      border-radius: 0.5rem;
+                      color: ${artistDetails.properties?.colors.primary ??
+                      "var(--mi-text-color)"};
+                      border: 1px dashed
+                        ${artistDetails.properties?.colors.primary ??
+                        "var(--mi-primary-color)"};
                       margin-right: 0.2rem;
-                      background-color: var(--mi-lighten-background-color);
+                      background-color: ${artistDetails.properties?.colors
+                        .background ?? "var(--mi-background-color)"};
+                      text-align: center;
                       cursor: pointer;
                     }
 
                     input:checked + label {
-                      background-color: var(--mi-info-background-color);
+                      background-color: ${artistDetails.properties?.colors
+                        .secondary ?? "var(--mi-secondary-color)"};
                     }
                   `}
                 >
@@ -132,9 +132,9 @@ const TipArtistForm: React.FC<{
                     type="radio"
                     value={gift.value}
                     {...methods.register("priceButton")}
-                    id={`priceButton-${gift.value}`}
+                    id={`${artist.id}-priceButton-${gift.value}`}
                   />
-                  <label htmlFor={`priceButton-${gift.value}`}>
+                  <label htmlFor={`${artist.id}-priceButton-${gift.value}`}>
                     {gift.value !== "other"
                       ? moneyDisplay({
                           amount: gift.value,
@@ -170,12 +170,16 @@ const TipArtistForm: React.FC<{
               </FormComponent>
             )}
           </FormProvider>
-          <FormComponent>
+          <FormComponent
+            className={css`
+              margin-top: 1rem !important ;
+            `}
+          >
             <label htmlFor="comment">{t("leaveAComment")}</label>
             <TextArea id="comment" {...methods.register("message")} rows={2} />
             <small>{t("messageToArtist")}</small>
           </FormComponent>
-          <Button
+          <ArtistButton
             onClick={() => subscribeToTier()}
             isLoading={isCheckingForSubscription}
             disabled={!methods.formState.isValid || !actualValue}
@@ -191,7 +195,7 @@ const TipArtistForm: React.FC<{
                   currency,
                 }),
               })}
-          </Button>
+          </ArtistButton>
         </>
       )}
     </div>

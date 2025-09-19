@@ -380,6 +380,44 @@ const routes: RouteObject[] = [
         },
         children: [
           {
+            path: "transactions",
+            async lazy() {
+              const { default: Component } = await import(
+                "components/Admin/AdminTransactions"
+              );
+              return { Component };
+            },
+            children: [
+              {
+                path: "purchases",
+                async lazy() {
+                  const { default: Component } = await import(
+                    "components/Admin/AdminPurchases"
+                  );
+                  return { Component };
+                },
+              },
+              {
+                path: "tips",
+                async lazy() {
+                  const { default: Component } = await import(
+                    "components/Admin/AdminTips"
+                  );
+                  return { Component };
+                },
+              },
+              {
+                path: "subscriptions",
+                async lazy() {
+                  const { default: Component } = await import(
+                    "components/Admin/AdminSubscriptions"
+                  );
+                  return { Component };
+                },
+              },
+            ],
+          },
+          {
             path: "dashboard",
             async lazy() {
               const { default: Component } = await import(
@@ -405,16 +443,37 @@ const routes: RouteObject[] = [
               );
               return { Component };
             },
+            children: [
+              {
+                path: "",
+                async lazy() {
+                  const { default: Component } = await import(
+                    "components/Admin/AdminUsersList"
+                  );
+                  return { Component };
+                },
+              },
+              {
+                path: "invites",
+                async lazy() {
+                  const { default: Component } = await import(
+                    "components/Admin/AdminInvitesList"
+                  );
+                  return { Component };
+                },
+              },
+              {
+                path: ":id",
+                async lazy() {
+                  const { default: Component } = await import(
+                    "components/Admin/AdminManageUser"
+                  );
+                  return { Component };
+                },
+              },
+            ],
           },
-          {
-            path: "users/:id",
-            async lazy() {
-              const { default: Component } = await import(
-                "components/Admin/AdminManageUser"
-              );
-              return { Component };
-            },
-          },
+
           {
             path: "artists",
             async lazy() {
@@ -442,33 +501,7 @@ const routes: RouteObject[] = [
               return { Component };
             },
           },
-          {
-            path: "purchases",
-            async lazy() {
-              const { default: Component } = await import(
-                "components/Admin/AdminPurchases"
-              );
-              return { Component };
-            },
-          },
-          {
-            path: "tips",
-            async lazy() {
-              const { default: Component } = await import(
-                "components/Admin/AdminTips"
-              );
-              return { Component };
-            },
-          },
-          {
-            path: "subscriptions",
-            async lazy() {
-              const { default: Component } = await import(
-                "components/Admin/AdminSubscriptions"
-              );
-              return { Component };
-            },
-          },
+
           {
             path: "serverTasks",
             async lazy() {
@@ -613,6 +646,15 @@ const routes: RouteObject[] = [
               return { Component };
             },
             children: [
+              {
+                path: "tip",
+                async lazy() {
+                  const { default: Component } = await import(
+                    "components/Artist/ArtistTip"
+                  );
+                  return { Component };
+                },
+              },
               {
                 path: "posts",
                 async lazy() {

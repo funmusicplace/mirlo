@@ -34,17 +34,9 @@ export const Admin: React.FC = () => {
         <li>
           <NavLink to="tracks">{t("tracks")}</NavLink>
         </li>
+
         <li>
-          <NavLink to="purchases">{t("purchases")}</NavLink>
-        </li>
-        <li>
-          <NavLink to="subscriptions">{t("subscriptions")}</NavLink>
-        </li>
-        <li>
-          <NavLink to="tips">{t("tips")}</NavLink>
-        </li>
-        <li>
-          <NavLink to="serverTasks">{t("serverTasks")}</NavLink>
+          <NavLink to="transactions">{t("transactions")}</NavLink>
         </li>
         <li>
           <NavLink to="sendEmails">{t("sendEmails")}</NavLink>

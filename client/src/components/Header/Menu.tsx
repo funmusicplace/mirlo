@@ -20,21 +20,21 @@ const Menu: React.FC = (props) => {
   const { t } = useTranslation("translation", { keyPrefix: "headerMenu" });
   const navigate = useNavigate();
   const snackbar = useSnackbar();
-  const { data: isClosedToPublicArtistSignup } = useQuery(
-    querySetting("isClosedToPublicArtistSignup")
-  );
 
   const { user } = useAuthContext();
 
-  const { data: { results: artists } = {}, isLoading } = useQuery(
-    queryManagedArtists()
-  );
+  const {
+    data: { results: artists } = {},
+    isLoading,
+    refetch,
+  } = useQuery(queryManagedArtists());
 
   const { mutate: logout } = useLogoutMutation();
 
   const onLogOut = React.useCallback(() => {
     logout(undefined, {
       onSuccess() {
+        refetch();
         snackbar(t("logOutSuccess"), { type: "success" });
         navigate("/");
         setIsMenuOpen(false);

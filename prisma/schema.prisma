@@ -77,6 +77,7 @@ model User {
   userConfirmationCodeExpiration      DateTime?
   trustLevel                          Int?                            @default(0) // 0 = normal, 1 = low, 2 = medium, 3 = high
   stripeCustomerId                    String?
+  canCreateArtists                    Boolean                         @default(true)
   userTrackGroupPurchases             UserTrackGroupPurchase[]
   artistUserSubscriptions             ArtistUserSubscription[]
   wishlist                            UserTrackGroupWishlist[]

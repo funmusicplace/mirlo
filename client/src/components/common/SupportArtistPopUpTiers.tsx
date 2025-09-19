@@ -33,6 +33,11 @@ const List = styled.ul`
 `;
 
 const ListItem = styled.li<{ colors?: ArtistColors }>`
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  border: 1px solid
+    ${(props) => props.colors?.primary ?? "var(--mi-darken-x-background-color)"};
+
   input[type="radio"] {
     display: none;
   }

@@ -8,7 +8,6 @@ import { useTranslation } from "react-i18next";
 import { NavLink, Outlet } from "react-router-dom";
 import UnreadCountPill from "components/common/UnreadCountPill";
 import { useAuthContext } from "state/AuthContext";
-import FeatureFlag from "components/common/FeatureFlag";
 
 const ProfileContainer: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "profile" });

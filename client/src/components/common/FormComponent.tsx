@@ -3,7 +3,7 @@ import { bp } from "../../constants";
 
 const FormComponent = styled.div<{ direction?: "row" | "column" }>`
   margin-bottom: 1.5rem;
-  margin-top: 0.35rem;
+  margin-top: 0.45rem;
   gap: 0.5rem;
 
   display: flex;
@@ -43,9 +43,14 @@ const FormComponent = styled.div<{ direction?: "row" | "column" }>`
     border: var(--mi-border);
   }
 
+  input + small,
+  textarea + small {
+    margin-top: -0.5rem;
+  }
+
   label {
     font-size: 1rem;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0rem;
 
     font-weight: 600;
   }

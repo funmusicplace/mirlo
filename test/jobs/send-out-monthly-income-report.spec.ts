@@ -2,7 +2,7 @@ import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
 
-import { clearTables, createPost, createUser } from "../utils";
+import { clearTables, createUser } from "../utils";
 
 import prisma from "@mirlo/prisma";
 import assert from "assert";

@@ -15,6 +15,8 @@ import { css } from "@emotion/css";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import { isEmpty } from "lodash";
 import useErrorHandler from "services/useErrorHandler";
+import { ArtistButton } from "components/Artist/ArtistButtons";
+import useGetArtistSubscriptionTiers from "utils/useGetArtistSubscriptionTiers";
 
 const SupportArtistTiersForm: React.FC<{
   artist: Pick<Artist, "id" | "name" | "userId" | "urlSlug">;
@@ -26,16 +28,16 @@ const SupportArtistTiersForm: React.FC<{
   const { user, refreshLoggedInUser } = useAuthContext();
   const [isCheckingForSubscription, setIsCheckingForSubscription] =
     React.useState(false);
-  const [isRemovingSubscription, setIsRemovingSubscription] =
-    React.useState(false);
+
   const snackbar = useSnackbar();
   const errorHandler = useErrorHandler();
 
-  const { data: artistDetails } = useQuery(
-    queryArtist({ artistSlug: artist.urlSlug ?? "", includeDefaultTier: true })
-  );
+  const {
+    data: artistDetails,
+    tiers: options,
+    currentTier,
+  } = useGetArtistSubscriptionTiers(artist.urlSlug);
 
-  const options = artistDetails?.subscriptionTiers ?? [];
   const methods = useForm<{
     tier: {
       id: number;
@@ -50,28 +52,9 @@ const SupportArtistTiersForm: React.FC<{
   }>({
     defaultValues: {
       monthlyContribution: true,
-      tier:
-        user?.artistUserSubscriptions?.find(
-          (s) => s.artistSubscriptionTier.artistId === artist.id
-        )?.artistSubscriptionTier || options.length === 1
-          ? options[0]
-          : undefined,
+      tier: currentTier,
     },
   });
-
-  const unsubscribeFromArtist = async () => {
-    try {
-      setIsRemovingSubscription(true);
-      await api.delete(`artists/${artist.id}/subscribe`);
-      snackbar(t("unsubscribedFromArtist"), { type: "success" });
-    } catch (e) {
-      errorHandler(e);
-    } finally {
-      setIsRemovingSubscription(false);
-      refreshLoggedInUser();
-      onFinishedSubscribing?.(false);
-    }
-  };
 
   const subscribeToTier = async () => {
     try {
@@ -108,6 +91,9 @@ const SupportArtistTiersForm: React.FC<{
   const noErrors =
     methods.formState.isValid || isEmpty(methods.formState.errors);
 
+  const isSubscribedToCurrentTier =
+    value && currentTier && value.id === currentTier.id;
+
   return (
     <>
       {!artistDetails && <LoadingBlocks rows={1} />}
@@ -134,17 +120,22 @@ const SupportArtistTiersForm: React.FC<{
           </FormComponent>
         )}
       </FormProvider>
-      <Button
+      <ArtistButton
         onClick={() => subscribeToTier()}
         isLoading={isCheckingForSubscription}
-        disabled={!noErrors || !value}
+        disabled={!noErrors || !value || isSubscribedToCurrentTier}
         wrap
         className={css`
           width: 100% !important;
         `}
       >
-        {!value && t("chooseToContinue")}
-        {value &&
+        {isSubscribedToCurrentTier &&
+          (value?.isDefaultTier
+            ? t("youAreFollowingThisArtist")
+            : t("youAreAlreadySubscribed"))}
+        {!value && !isSubscribedToCurrentTier && t("chooseToContinue")}
+        {value?.id !== currentTier?.id &&
+          value &&
           value?.isDefaultTier &&
           t("followArtist", { artistName: artist.name })}
         {value &&
@@ -155,18 +146,8 @@ const SupportArtistTiersForm: React.FC<{
               currency: value?.currency,
             }),
           })}
-      </Button>
-      <Button
-        onClick={() => unsubscribeFromArtist()}
-        isLoading={isRemovingSubscription}
-        wrap
-        className={css`
-          width: 100% !important;
-          margin-top: 1rem;
-        `}
-      >
-        {t("unsubscribeFromArtist", { artistName: artist.name })}
-      </Button>
+      </ArtistButton>
+
       {value && !value.isDefaultTier && (
         <div
           className={css`

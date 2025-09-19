@@ -22,7 +22,7 @@ export default function () {
     POST,
   };
 
-  async function POST(req: Request, res: Response) {
+  async function POST(req: Request, res: Response, next: Function) {
     logger.info("stripe-connect: receiving user account webhook");
     const event = await verifyStripeSignature(
       req,
@@ -31,44 +31,49 @@ export default function () {
     );
     logger.info(`stripe-connect: event for stripe account ${event.account}`);
 
-    // Handle the event
-    switch (event.type) {
-      case "checkout.session.completed":
-        // To trigger this event type use
-        // `stripe trigger checkout.session.completed --add checkout_session:metadata.userId=3 --add checkout_session:metadata.tierId=2`
-        const session = event.data.object;
-        logger.info(`stripe-connect: checkout status is ${session.status}.`);
+    try {
+      // Handle the event
+      switch (event.type) {
+        case "checkout.session.completed":
+          // To trigger this event type use
+          // `stripe trigger checkout.session.completed --add checkout_session:metadata.userId=3 --add checkout_session:metadata.tierId=2`
+          const session = event.data.object;
+          logger.info(`stripe-connect: checkout status is ${session.status}.`);
 
-        handleCheckoutSession(session);
-        break;
-      case "setup_intent.succeeded":
-        // To trigger this event type use
-        // `stripe trigger setup_intent.succeeded --add setup_intent:metadata.userId=3`
-        const setupIntent = event.data.object;
-        logger.info(
-          `stripe-connect: setup intent status is ${setupIntent.status}.`
-        );
+          handleCheckoutSession(session);
+          break;
+        case "setup_intent.succeeded":
+          // To trigger this event type use
+          // `stripe trigger setup_intent.succeeded --add setup_intent:metadata.userId=3`
+          const setupIntent = event.data.object;
+          logger.info(
+            `stripe-connect: setup intent status is ${setupIntent.status}.`
+          );
 
-        handleSetupIntentSucceeded(setupIntent);
-        break;
-      case "invoice.paid":
-        const invoice = event.data.object;
+          handleSetupIntentSucceeded(setupIntent);
+          break;
+        case "invoice.paid":
+          const invoice = event.data.object;
 
-        handleInvoicePaid(invoice);
-        break;
-      case "account.updated":
-        const accountUpdate = event.data.object;
+          handleInvoicePaid(invoice, event.account);
+          break;
+        case "account.updated":
+          const accountUpdate = event.data.object;
 
-        handleAccountUpdate(accountUpdate);
-        break;
-      default:
-        // Unexpected event type
-        logger.info(
-          `stripe-connect: unhandled Stripe event type ${event.type}.`
-        );
+          handleAccountUpdate(accountUpdate);
+          break;
+        default:
+          // Unexpected event type
+          logger.info(
+            `stripe-connect: unhandled Stripe event type ${event.type}.`
+          );
+      }
+      // Return a 200 response to acknowledge receipt of the event
+      res.send();
+    } catch (err) {
+      logger.error("stripe-connect: error in webhook handler", err);
+      next(err);
     }
-    // Return a 200 response to acknowledge receipt of the event
-    res.send();
   }
 
   return operations;

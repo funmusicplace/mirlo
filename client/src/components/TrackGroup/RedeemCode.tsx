@@ -87,7 +87,6 @@ function RedeemCode() {
   } else if (!trackGroup) {
     return <FullPageLoadingSpinner />;
   }
-  console.log("sizes", trackGroup.cover?.sizes);
 
   return (
     <WidthWrapper variant="big">

@@ -85,6 +85,12 @@ export default function () {
     const { name, bio, urlSlug } = req.body;
     const user = req.user as User;
     try {
+      if (!name) {
+        throw new AppError({
+          description: '"name" is required',
+          httpCode: 400,
+        });
+      }
       if (forbiddenNames.includes(urlSlug)) {
         throw new AppError({
           description: `"urlSlug" can't be one of: ${forbiddenNames.join(", ")}`,

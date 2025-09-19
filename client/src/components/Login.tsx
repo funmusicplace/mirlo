@@ -9,7 +9,7 @@ function Login() {
   const navigate = useNavigate();
 
   const afterLogIn = React.useCallback(() => {
-    navigate("/");
+    // navigate("/");
   }, [navigate]);
 
   return (

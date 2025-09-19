@@ -1,0 +1,11 @@
+extends ../layout.pug
+
+block content
+
+    h2.mw600 You've just been invited to join a Mirlo instance!
+    p.mw600 #{invitedBy.name} (#{invitedBy.email}) has invited you to join their Mirlo instance.
+    p.mw600
+      a(href!=`${client}/signup/?inviteToken=${token}&email=${email}&accountType=${accountType.toLowerCase()}&invitedBy=${invitedBy.name}`) Claim your invite.
+
+    p.mw600 Not interested? You can safely ignore this e-mail.    
+

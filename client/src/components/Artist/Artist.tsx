@@ -93,6 +93,7 @@ function Artist() {
   React.useEffect(() => {
     const subPages = [
       "posts",
+      "tip",
       "releases",
       "support",
       "links",
@@ -101,6 +102,7 @@ function Artist() {
       "checkout-complete",
     ];
     const end = pathname.split("/")[2];
+
     if (!subPages.includes(end)) {
       if (artist?.isLabelProfile) {
         navigate(`/${urlSlug}/roster`, { replace: true });
