@@ -5,7 +5,6 @@ import { sendMail } from "../../jobs/send-mail";
 import { Job } from "bullmq";
 import logger from "../../logger";
 import { AppError } from "../../utils/error";
-import { subscribe } from "node:diagnostics_channel";
 import { subscribeUserToArtist } from "../../utils/artist";
 import { getSiteSettings } from "../../utils/settings";
 
@@ -18,6 +17,8 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
     receiveMailingList,
     accountType,
     promoCode,
+    emailInvited,
+    inviteToken,
   } = req.body;
 
   if (!email || !password) {
@@ -30,9 +31,23 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
   }
   try {
     const settings = await getSiteSettings();
+    let hasInvite = null;
 
     if (settings.isClosedToPublicArtistSignup) {
-      accountType = "listener";
+      if (inviteToken && emailInvited) {
+        hasInvite = await prisma.invite.findFirst({
+          where: {
+            email: emailInvited.toLowerCase(),
+            token: inviteToken,
+            usedAt: null,
+          },
+        });
+      }
+      if (!hasInvite) {
+        accountType = "listener";
+      } else {
+        accountType = hasInvite.accountType.toLowerCase();
+      }
     }
 
     email = email.toLowerCase();
@@ -86,6 +101,18 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
           emailConfirmationToken: true,
         },
       });
+
+      if (hasInvite) {
+        await prisma.invite.update({
+          where: {
+            id: hasInvite.id,
+          },
+          data: {
+            usedAt: new Date(),
+            usedById: result.id,
+          },
+        });
+      }
       if (receiveMailingList) {
         const settings = await prisma.settings.findFirst();
         if (settings) {

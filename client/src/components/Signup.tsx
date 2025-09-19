@@ -24,6 +24,7 @@ type SignupInputs = {
   name: string;
   password: string;
   receiveMailingList: boolean;
+  emailInvited: string;
   accountType: "listener" | "artist";
   promoCode: string;
   inviteToken: string;
@@ -82,6 +83,7 @@ function Signup() {
       inviteToken: search.get("inviteToken") ?? "",
       accountType: accountType === "artist" ? "artist" : "listener",
       promoCode: search.get("promo") ?? "",
+      emailInvited: search.get("email") ?? "",
     },
   });
   const [isLoading, setIsLoading] = React.useState(false);
@@ -257,6 +259,7 @@ function Signup() {
           </FormComponent>
           <InputEl type="hidden" {...register("promoCode")} />
           <InputEl type="hidden" {...register("inviteToken")} />
+          <InputEl type="hidden" {...register("emailInvited")} />
 
           <div
             className={css`

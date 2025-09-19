@@ -8,8 +8,7 @@ import { useSnackbar } from "state/SnackbarContext";
 import React from "react";
 import { Link } from "react-router-dom";
 import { useLoginMutation } from "queries/auth";
-import { useQuery } from "@tanstack/react-query";
-import { querySetting } from "queries/settings";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 type SignupInputs = {
   email: string;
@@ -20,6 +19,7 @@ const LogInForm: React.FC<{ afterLogIn: () => void }> = ({ afterLogIn }) => {
   const { t } = useTranslation("translation", { keyPrefix: "logIn" });
   const { register, handleSubmit } = useForm<SignupInputs>();
   const snackbar = useSnackbar();
+  const queryClient = useQueryClient();
 
   const { mutate: login, isPending } = useLoginMutation();
 
@@ -27,6 +27,8 @@ const LogInForm: React.FC<{ afterLogIn: () => void }> = ({ afterLogIn }) => {
     async (data: SignupInputs) => {
       login(data, {
         onSuccess() {
+          queryClient.invalidateQueries({ queryKey: ["fetchManagedArtists"] });
+
           afterLogIn?.();
         },
         onError(e) {

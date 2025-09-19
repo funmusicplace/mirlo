@@ -51,7 +51,6 @@ export default function () {
           message: true,
         },
       });
-      console.log("invfites", invites);
 
       invites.forEach(async (newUser) => {
         await sendMailQueue.add("send-mail", {
@@ -101,6 +100,7 @@ export default function () {
           accountType: true,
           message: true,
           token: true,
+          usedAt: true,
         },
       });
       res.json({

@@ -54,7 +54,8 @@ export const AdminInvitesList: React.FC = () => {
               <th>Email</th>
               <th>Invited by</th>
               <th>Created at</th>
-              <th />
+              <th>Used by</th>
+              <th>Used at</th>
             </tr>
           </thead>
           <tbody>
@@ -64,6 +65,8 @@ export const AdminInvitesList: React.FC = () => {
                 <td>{user.email}</td>
                 <td>{user.invitedBy?.name}</td>
                 <td>{user.createdAt?.split("T")[0]}</td>
+                <td>{user.usedBy?.name ?? user.usedBy?.email}</td>
+                <td>{user.usedAt?.split("T")[0]}</td>
               </tr>
             ))}
           </tbody>
