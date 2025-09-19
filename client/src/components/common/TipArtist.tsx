@@ -11,6 +11,8 @@ import { queryArtist, queryUserStripeStatus } from "queries";
 import { css } from "@emotion/css";
 import TipArtistForm from "./TipArtistForm";
 import { FixedButton } from "./FixedButton";
+import UnsubscribeButton from "./UnsubscribeButton";
+import useGetArtistSubscriptionTiers from "utils/useGetArtistSubscriptionTiers";
 
 const TipArtist: React.FC<{ artistId: number; fixed?: boolean }> = ({
   artistId,
@@ -21,7 +23,7 @@ const TipArtist: React.FC<{ artistId: number; fixed?: boolean }> = ({
   const { data: artist } = useQuery(
     queryArtist({ artistSlug: `${artistId}`, includeDefaultTier: true })
   );
-
+  const { hasNonDefaultTiers } = useGetArtistSubscriptionTiers(artist?.urlSlug);
   const { data: stripeAccountStatus } = useQuery(
     queryUserStripeStatus(artist?.userId ?? 0)
   );
@@ -65,15 +67,30 @@ const TipArtist: React.FC<{ artistId: number; fixed?: boolean }> = ({
         onClose={() => setIsTipPopUpOpen(false)}
         title={t("tipThisArtist") ?? ""}
       >
+        {hasNonDefaultTiers && (
+          <>
+            <p
+              className={css`
+                margin-bottom: 0.5rem;
+                margin-top: 1rem;
+              `}
+            >
+              {t("likeWhatTheyAreDoing", { artistName: artist.name })}
+            </p>
+            <SupportArtistTiersForm artist={artist} excludeDefault={!!user} />
+          </>
+        )}
         <p
           className={css`
             margin-bottom: 0.5rem;
+            margin-top: 1rem;
           `}
         >
-          {t("likeWhatTheyAreDoing", { artistName: artist.name })}
+          {hasNonDefaultTiers ? t("orTipJustOnce") : t("tipThem")}
         </p>
-        <SupportArtistTiersForm artist={artist} excludeDefault={!!user} />
         <TipArtistForm artist={artist} />
+
+        <UnsubscribeButton artist={artist} />
       </Modal>
       {button}
     </>
