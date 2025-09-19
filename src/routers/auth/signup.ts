@@ -32,8 +32,10 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const settings = await getSiteSettings();
     let hasInvite = null;
+    let canCreateArtists = true;
 
     if (settings.isClosedToPublicArtistSignup) {
+      canCreateArtists = false;
       if (inviteToken && emailInvited) {
         hasInvite = await prisma.invite.findFirst({
           where: {
@@ -46,6 +48,12 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
       if (!hasInvite) {
         accountType = "listener";
       } else {
+        if (
+          hasInvite.accountType === "ARTIST" ||
+          hasInvite.accountType === "LABEL"
+        ) {
+          canCreateArtists = true;
+        }
         accountType = hasInvite.accountType.toLowerCase();
       }
     }
@@ -91,6 +99,7 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
           receiveMailingList: !!receiveMailingList,
           password: await hashPassword(password),
           promoCodes: promoCode ? [promoCode] : [],
+          canCreateArtists,
         },
         select: {
           name: true,

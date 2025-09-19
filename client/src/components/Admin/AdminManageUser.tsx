@@ -1,4 +1,5 @@
 import { css } from "@emotion/css";
+import CanCreateArtists from "components/CanCreateArtists";
 import Button from "components/common/Button";
 import { Select, SelectEl } from "components/common/Select";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
@@ -81,6 +82,21 @@ const AdminManageUser = () => {
                     onClick={async (checked) => {
                       await api.put(`admin/users/${id}`, {
                         isAdmin: checked,
+                      });
+                      callback();
+                    }}
+                  />
+                </td>
+              </tr>
+              <tr>
+                <td>Can create artists?</td>
+                <td>
+                  <Toggle
+                    toggled={user.canCreateArtists}
+                    label=""
+                    onClick={async (checked) => {
+                      await api.put(`admin/users/${id}`, {
+                        canCreateArtists: checked,
                       });
                       callback();
                     }}

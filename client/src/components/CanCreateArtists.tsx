@@ -18,8 +18,7 @@ const CanCreateArtists: React.FC<{
     queryManagedArtists()
   );
   const canSeeManageArtists = isClosedToPublicArtistSignup
-    ? user?.invitesUsed?.find((invite) => invite.accountType === "ARTIST") ||
-      !!artists?.length
+    ? user?.canCreateArtists || !!artists?.length
     : true;
 
   if (!isFetched || !isFetchedSetting) {

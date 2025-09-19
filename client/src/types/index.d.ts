@@ -44,7 +44,7 @@ interface LoggedInUser {
     sizes?: { [key: number]: string };
     updatedAt: string;
   };
-  invitesUsed: { accountType: "ARTIST" | "LISTENER" | "LABEL" }[];
+  canCreateArtists?: boolean;
   merchPurchase?: MerchPurchase[];
 }
 
@@ -305,6 +305,7 @@ interface UserFromAdmin {
   isLabelAccount: boolean;
   featureFlags: string[];
   trustLevel: number;
+  canCreateArtists: boolean;
 }
 
 interface ArtistSubscriptionTier {

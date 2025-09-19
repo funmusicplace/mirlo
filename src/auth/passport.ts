@@ -152,13 +152,7 @@ export const canUserCreateArtists = async (
       return next();
     }
     // If the user has been invited as an artist specifically, allow them to create an artist account
-    const invite = await prisma.invite.findFirst({
-      where: {
-        usedById: loggedInUser.id,
-        accountType: "ARTIST",
-      },
-    });
-    if (invite) {
+    if (loggedInUser.canCreateArtists) {
       return next();
     }
 
