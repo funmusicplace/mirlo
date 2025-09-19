@@ -275,6 +275,21 @@ interface User {
   stripeAccountId?: string;
 }
 
+interface Invite {
+  id: string;
+  email: string;
+  createdAt: string;
+  usedAt?: string;
+  invitedBy?: {
+    id: number;
+    email: string;
+    name?: string;
+  };
+  invitedById?: number;
+  accountType: "ARTIST" | "LISTENER" | "LABEL";
+  usedBy: User;
+}
+
 interface UserFromAdmin {
   id: number;
   email: string;

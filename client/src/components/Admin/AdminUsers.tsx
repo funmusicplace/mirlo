@@ -1,60 +1,46 @@
 import { css } from "@emotion/css";
-import Button, { ButtonLink } from "components/common/Button";
-import Table from "components/common/Table";
+import Button from "components/common/Button";
 import TextArea from "components/common/TextArea";
 import React from "react";
-import { FaCheck, FaEdit } from "react-icons/fa";
-import { Link, useSearchParams } from "react-router-dom";
+import { NavLink, Outlet } from "react-router-dom";
 import api from "services/api";
-import usePagination from "utils/usePagination";
-import useAdminFilters from "./useAdminFilters";
+import { FormSection } from "components/ManageArtist/ManageTrackGroup/AlbumFormComponents/AlbumFormContent";
+import FormComponent from "components/common/FormComponent";
+import { SelectEl } from "components/common/Select";
+import Tabs from "components/common/Tabs";
+import { useTranslation } from "react-i18next";
 
 const pageSize = 100;
 
 export const AdminUsers: React.FC = () => {
-  const [results, setResults] = React.useState<User[]>([]);
+  const { t } = useTranslation("translation", { keyPrefix: "admin" });
+
   const [newUsers, setNewUsers] = React.useState("");
-  const { page, PaginationComponent } = usePagination({ pageSize });
-  const [searchParams] = useSearchParams();
+  const [type, setType] = React.useState("LISTENER");
 
-  const callback = async () => {
-    const params =
-      new URLSearchParams(searchParams.toString()) || new URLSearchParams();
-
-    if (params) {
-      params.append("orderBy", "createdAt");
+  const uploadUsers = async (
+    users: { email: string }[],
+    inviteType: "add" | "invite"
+  ) => {
+    if (inviteType === "invite") {
+      await api.post(`admin/invites`, { users, inviteType: type });
+      return;
     }
-
-    params.append("skip", `${pageSize * page}`);
-    params.append("take", `${pageSize}`);
-    const { results } = await api.getMany<User>(
-      `admin/users?${params?.toString()}`
-    );
-    setResults(results);
+    await api.post(`admin/users`, { users, inviteType });
   };
 
-  React.useEffect(() => {
-    callback();
-  }, [page]);
-
-  const uploadUsers = async (users: { email: string }[]) => {
-    await api.post(`admin/users`, { users });
-  };
-
-  const processTextArea = React.useCallback(() => {
-    const emailsAsList =
-      newUsers
-        ?.split(/,|\r?\n/)
-        .map((email) => email.replaceAll(" ", ""))
-        .filter((email) => !!email) ?? [];
-    const users = emailsAsList?.map((email) => ({ email }));
-    uploadUsers(users);
-  }, [newUsers, uploadUsers]);
-
-  const { Filters } = useAdminFilters({
-    onSubmitFilters: callback,
-    fields: ["name", "email"],
-  });
+  const processTextArea = React.useCallback(
+    (inviteType: "add" | "invite") => {
+      const emailsAsList =
+        newUsers
+          ?.split(/,|\r?\n/)
+          .map((email) => email.replaceAll(" ", ""))
+          .filter((email) => !!email) ?? [];
+      const users = emailsAsList?.map((email) => ({ email }));
+      uploadUsers(users, inviteType);
+    },
+    [newUsers, uploadUsers]
+  );
 
   return (
     <div
@@ -64,62 +50,47 @@ export const AdminUsers: React.FC = () => {
     >
       <h2>Users</h2>
 
-      <TextArea
-        onChange={(e) => setNewUsers(e.target.value)}
-        value={newUsers}
-      />
-      <Button type="button" onClick={processTextArea}>
-        Bulk Add Emails as Users
-      </Button>
-
-      <hr />
-      <Filters />
-
-      {results.length > 0 && (
-        <Table>
-          <thead>
-            <tr>
-              <th />
-              <th>Name</th>
-              <th>Email</th>
-              <th>Created at</th>
-              <th>Updated at</th>
-              <th>Artists</th>
-              <th>Stripe set up</th>
-              <th />
-            </tr>
-          </thead>
-          <tbody>
-            {results.map((user, index) => (
-              <tr key={user.id}>
-                <td>{index + 1}</td>
-                <td>{user.name}</td>
-                <td>{user.email}</td>
-
-                <td>{user.createdAt?.split("T")[0]}</td>
-                <td>{user.updatedAt?.split("T")[0]}</td>
-                <td>
-                  {user.artists.map((artist, i) => (
-                    <React.Fragment key={artist.id}>
-                      <Link to={`/${artist.urlSlug}`}>{artist.name}</Link>
-                      {i < user.artists.length - 1 ? ", " : ""}
-                    </React.Fragment>
-                  ))}
-                </td>
-                <td>{user.stripeAccountId ? <FaCheck /> : ""}</td>
-                <td className="alignRight">
-                  <ButtonLink
-                    size="compact"
-                    startIcon={<FaEdit />}
-                    to={`/admin/users/${user.id}`}
-                  />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
-      )}
-      <PaginationComponent amount={results.length} />
+      <FormSection>
+        <FormComponent>
+          <label>Enter comma or newline separated e-mails here:</label>
+          <TextArea
+            onChange={(e) => setNewUsers(e.target.value)}
+            value={newUsers}
+          />
+        </FormComponent>
+        <FormComponent>
+          <label>Type of invite to send:</label>
+          <SelectEl value={type} onChange={(e) => setType(e.target.value)}>
+            <option value="ARTIST">Artist</option>
+            <option value="LABEL">Label</option>
+            <option value="LISTENER">Listener</option>
+          </SelectEl>
+        </FormComponent>
+        <div
+          className={css`
+            display: flex;
+            gap: 10px;
+          `}
+        >
+          <Button type="button" onClick={() => processTextArea("add")}>
+            Bulk add emails as users directly
+          </Button>
+          <Button type="button" onClick={() => processTextArea("invite")}>
+            Invite e-mails
+          </Button>
+        </div>
+      </FormSection>
+      <Tabs>
+        <li>
+          <NavLink to="" end>
+            {t("users")}
+          </NavLink>
+        </li>
+        <li>
+          <NavLink to="invites">{t("invites")}</NavLink>
+        </li>
+      </Tabs>
+      <Outlet />
     </div>
   );
 };
