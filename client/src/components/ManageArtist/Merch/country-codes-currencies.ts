@@ -94,6 +94,7 @@ export default [
     population: "8205000",
     capital: "Vienna",
     continentName: "Europe",
+    isEU: true,
   },
   {
     countryCode: "AU",
@@ -158,6 +159,7 @@ export default [
     population: "10403000",
     capital: "Brussels",
     continentName: "Europe",
+    isEU: true,
   },
   {
     countryCode: "BF",
@@ -174,6 +176,7 @@ export default [
     population: "7148785",
     capital: "Sofia",
     continentName: "Europe",
+    isEU: true,
   },
   {
     countryCode: "BH",
@@ -441,6 +444,7 @@ export default [
   },
   {
     countryCode: "CZ",
+    isEU: true,
     countryName: "Czechia",
     currencyCode: "CZK",
     population: "10476000",
@@ -452,6 +456,7 @@ export default [
     countryName: "Germany",
     currencyCode: "EUR",
     population: "81802257",
+    isEU: true,
     capital: "Berlin",
     continentName: "Europe",
   },
@@ -466,6 +471,7 @@ export default [
   {
     countryCode: "DK",
     countryName: "Denmark",
+    isEU: true,
     currencyCode: "DKK",
     population: "5484000",
     capital: "Copenhagen",
@@ -509,6 +515,7 @@ export default [
     currencyCode: "EUR",
     population: "1291170",
     capital: "Tallinn",
+    isEU: true,
     continentName: "Europe",
   },
   {
@@ -539,6 +546,7 @@ export default [
     countryCode: "ES",
     countryName: "Spain",
     currencyCode: "EUR",
+    isEU: true,
     population: "46505963",
     capital: "Madrid",
     continentName: "Europe",
@@ -552,9 +560,15 @@ export default [
     continentName: "Africa",
   },
   {
+    countryCode: "EU",
+    countryName: "European Union",
+    currencyCode: "EUR",
+  },
+  {
     countryCode: "FI",
     countryName: "Finland",
     currencyCode: "EUR",
+    isEU: true,
     population: "5244000",
     capital: "Helsinki",
     continentName: "Europe",
@@ -597,6 +611,7 @@ export default [
     currencyCode: "EUR",
     population: "64768389",
     capital: "Paris",
+    isEU: true,
     continentName: "Europe",
   },
   {
@@ -708,6 +723,7 @@ export default [
     countryName: "Greece",
     currencyCode: "EUR",
     population: "11000000",
+    isEU: true,
     capital: "Athens",
     continentName: "Europe",
   },
@@ -779,6 +795,7 @@ export default [
     countryCode: "HR",
     countryName: "Croatia",
     currencyCode: "HRK",
+    isEU: true,
     population: "4284889",
     capital: "Zagreb",
     continentName: "Europe",
@@ -793,6 +810,7 @@ export default [
   },
   {
     countryCode: "HU",
+    isEU: true,
     countryName: "Hungary",
     currencyCode: "HUF",
     population: "9982000",
@@ -877,6 +895,7 @@ export default [
     currencyCode: "EUR",
     population: "60340328",
     capital: "Rome",
+    isEU: true,
     continentName: "Europe",
   },
   {
@@ -1062,6 +1081,7 @@ export default [
     population: "2944459",
     capital: "Vilnius",
     continentName: "Europe",
+    isEU: true,
   },
   {
     countryCode: "LU",
@@ -1070,6 +1090,7 @@ export default [
     population: "497538",
     capital: "Luxembourg",
     continentName: "Europe",
+    isEU: true,
   },
   {
     countryCode: "LV",
@@ -1078,6 +1099,7 @@ export default [
     population: "2217969",
     capital: "Riga",
     continentName: "Europe",
+    isEU: true,
   },
   {
     countryCode: "LY",
@@ -1218,6 +1240,7 @@ export default [
   {
     countryCode: "MT",
     countryName: "Malta",
+    isEU: true,
     currencyCode: "EUR",
     population: "403000",
     capital: "Valletta",
@@ -1324,6 +1347,7 @@ export default [
     countryName: "Netherlands",
     currencyCode: "EUR",
     population: "16645000",
+    isEU: true,
     capital: "Amsterdam",
     continentName: "Europe",
   },
@@ -1429,6 +1453,7 @@ export default [
     currencyCode: "PLN",
     population: "38500000",
     capital: "Warsaw",
+    isEU: true,
     continentName: "Europe",
   },
   {
@@ -1469,6 +1494,7 @@ export default [
     currencyCode: "EUR",
     population: "10676000",
     capital: "Lisbon",
+    isEU: true,
     continentName: "Europe",
   },
   {
@@ -1509,6 +1535,7 @@ export default [
     currencyCode: "RON",
     population: "21959278",
     capital: "Bucharest",
+    isEU: true,
     continentName: "Europe",
   },
   {
@@ -1573,6 +1600,7 @@ export default [
     currencyCode: "SEK",
     population: "9828655",
     capital: "Stockholm",
+    isEU: true,
     continentName: "Europe",
   },
   {
@@ -1596,6 +1624,7 @@ export default [
     countryName: "Slovenia",
     currencyCode: "EUR",
     population: "2007000",
+    isEU: true,
     capital: "Ljubljana",
     continentName: "Europe",
   },
@@ -1609,6 +1638,7 @@ export default [
   },
   {
     countryCode: "SK",
+    isEU: true,
     countryName: "Slovakia",
     currencyCode: "EUR",
     population: "5455000",

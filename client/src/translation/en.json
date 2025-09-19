@@ -577,8 +577,8 @@
   },
   "manageMerch": {
     "saveDestinations": "Save destinations",
-    "catalogNumber": "Catalog number",
     "updatedShippingDestinations": "Updated shipping destinations",
+    "catalogNumber": "Catalog number",
     "saveOptions": "Save options",
     "backToMerchList": "Back to merch list",
     "homeCountry": "Home country",

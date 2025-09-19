@@ -654,14 +654,48 @@ export const createStripeCheckoutSessionForPurchase = async ({
 const stripeBannedDestinations =
   "AS, CX, CC, CU, HM, IR, KP, MH, FM, NF, MP, PW, SD, SY, UM, VI".split(", ");
 
+const SCHENGEN_COUNTRY_CODES = [
+  "AT",
+  "BE",
+  "BG",
+  "CZ",
+  "DE",
+  "EE",
+  "ES",
+  "FI",
+  "GR",
+  "HR",
+  "HU",
+  "IT",
+  "LT",
+  "LU",
+  "LV",
+  "MT",
+  "NL",
+  "PL",
+  "PT",
+  "RO",
+  "SE",
+  "SI",
+  "SK",
+];
+
 const determineShipping = (
   shippingDestinations: MerchShippingDestination[],
   shippingDestinationId: string,
   quantity: number = 0
 ) => {
-  const destination = shippingDestinations.find(
-    (s) => s.id === shippingDestinationId
+  const isShippingToSchengen = SCHENGEN_COUNTRY_CODES.includes(
+    shippingDestinationId.toUpperCase()
   );
+
+  const euCosts = shippingDestinations.find(
+    (s) => s.destinationCountry === "EU"
+  );
+
+  const destination = isShippingToSchengen
+    ? { currency: "usd", ...euCosts, destinationCountry: shippingDestinationId }
+    : shippingDestinations.find((s) => s.id === shippingDestinationId);
 
   if (!destination) {
     throw new AppError({
@@ -674,8 +708,8 @@ const determineShipping = (
   let possibleDestinations = [destination.destinationCountry];
 
   if (
-    destination?.destinationCountry === "" ||
-    destination?.destinationCountry === null
+    destination.destinationCountry === "" ||
+    destination.destinationCountry === null
   ) {
     const specificShippingCosts = shippingDestinations.filter(
       (d) => d.destinationCountry !== ""
@@ -699,8 +733,9 @@ const determineShipping = (
       fixed_amount: {
         currency: destination?.currency,
         amount: castToFixed(
-          destination?.costUnit +
-            (quantity > 1 ? quantity * destination?.costExtraUnit : 0)
+          destination?.costUnit ??
+            0 +
+              (quantity > 1 ? quantity * (destination?.costExtraUnit ?? 0) : 0)
         ),
       },
       type: "fixed_amount" as "fixed_amount",
