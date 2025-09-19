@@ -61,10 +61,12 @@ interface SettingsFromAPI {
 
 const AdminSettings = () => {
   const snackbar = useSnackbar();
+  const [isLoading, setIsLoading] = React.useState(false);
   const { reset, register, handleSubmit } = useForm<FormSettings>();
 
   React.useEffect(() => {
     const callback = async () => {
+      setIsLoading(true);
       const response =
         await api.get<Partial<SettingsFromAPI>>("admin/settings/");
       reset({
@@ -94,6 +96,8 @@ const AdminSettings = () => {
         contentPolicy: response.result.contentPolicy,
         defconLevel: response.result.defconLevel,
       });
+      setIsLoading(false);
+      snackbar("Settings loaded", { type: "success" });
     };
     callback();
   }, [reset]);
@@ -333,7 +337,9 @@ const AdminSettings = () => {
             </td>
           </tr>
         </Table>
-        <Button type="submit">Save</Button>
+        <Button type="submit" isLoading={isLoading}>
+          Save
+        </Button>
       </form>
     </div>
   );
