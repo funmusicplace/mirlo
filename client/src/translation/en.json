@@ -101,6 +101,7 @@
     "artists": "Artists",
     "albums": "Albums",
     "tracks": "Tracks",
+    "tags": "Tags",
     "labels": "Labels",
     "moreArtist": "More artist results"
   },
