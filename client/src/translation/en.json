@@ -171,6 +171,7 @@
   },
   "trackGroupCard": {
     "publishedAt": "Publish date:",
+    "weWillSendACodeToYourEmail": "We'll send a verification code to your email.",
     "backingThisProjectFor": "Backing this project for {{amount}}",
     "messageToArtist": "This will be shown publicly on the artist's page.",
     "leaveAComment": "Show the artist some love",

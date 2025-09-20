@@ -23,6 +23,8 @@ const Menu: React.FC = (props) => {
 
   const { user } = useAuthContext();
 
+  console.log("user in menu", user);
+
   const {
     data: { results: artists } = {},
     isLoading,
