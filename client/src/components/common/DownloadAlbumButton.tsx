@@ -30,7 +30,8 @@ const DownloadAlbumButton: React.FC<{
   token?: string;
   email?: string;
   track?: Track;
-}> = ({ trackGroup, onlyIcon, email, token, track }) => {
+  fixed?: boolean;
+}> = ({ trackGroup, onlyIcon, email, token, track, fixed }) => {
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
   const [chosenFormat, setChosenFormat] = React.useState("");
   const [isGeneratingAlbum, setIsGeneratingAlbum] = React.useState(0);

@@ -2,19 +2,19 @@ import { css } from "@emotion/css";
 import React from "react";
 import { useLocation, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { FaEdit, FaEye, FaFlag, FaPen } from "react-icons/fa";
+import { FaEdit, FaEye, FaPen } from "react-icons/fa";
 import { bp } from "../../constants";
 import { useQuery } from "@tanstack/react-query";
 import { queryArtist, queryManagedTrackGroup, queryTrackGroup } from "queries";
 import { useAuthContext } from "state/AuthContext";
 import FixedButtonLink from "components/common/FixedButton";
 import { IoIosColorPalette } from "react-icons/io";
-import FlagContent from "components/TrackGroup/FlagContent";
 import { useGlobalStateContext } from "state/GlobalState";
 import Wishlist from "components/TrackGroup/Wishlist";
 import TipArtist from "components/common/TipArtist";
 import useCurrentTrackHook from "components/Player/useCurrentTrackHook";
 import { getManageReleaseUrl, getReleaseUrl } from "utils/artist";
+import PurchaseOrDownloadAlbum from "components/TrackGroup/PurchaseOrDownloadAlbumModal";
 
 const PlayingTrack: React.FC = () => {
   const { state } = useGlobalStateContext();
@@ -40,6 +40,10 @@ const PlayingTrack: React.FC = () => {
       {/* {state.playing && ( */}
       {currentTrack.trackGroup.artistId && (
         <TipArtist artistId={currentTrack.trackGroup.artistId} fixed />
+      )}
+
+      {currentTrack.trackGroup && (
+        <PurchaseOrDownloadAlbum trackGroup={currentTrack.trackGroup} fixed />
       )}
     </div>
   );

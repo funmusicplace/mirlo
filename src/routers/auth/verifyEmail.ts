@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
-import { hashPassword } from ".";
+import { hashPassword, setTokens } from ".";
 import { sendMail } from "../../jobs/send-mail";
 import { Job } from "bullmq";
 import logger from "../../logger";
@@ -79,10 +79,19 @@ const verifyEmail = async (req: Request, res: Response, next: NextFunction) => {
           },
         });
         const { user } = await findOrCreateUserBasedOnEmail(email);
-        res.json({
-          message: "Success! Email verified.",
-          userId: user?.id,
-        });
+
+        if (user) {
+          setTokens(res, user);
+          res.json({
+            message: "Success! Email verified.",
+            userId: user?.id,
+          });
+        } else {
+          throw new AppError({
+            httpCode: 500,
+            description: "Could not find or create user",
+          });
+        }
       }
     } else {
       // If no code is provided, we send a verification email to the provided email

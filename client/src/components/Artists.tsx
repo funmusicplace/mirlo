@@ -13,7 +13,6 @@ import Button, { ButtonAnchor } from "./common/Button";
 import { FaRss } from "react-icons/fa";
 import { SelectEl } from "./common/Select";
 import { BsGrid, BsList } from "react-icons/bs";
-import { Table } from "./common/Table";
 import { getArtistUrl } from "utils/artist";
 import { Link } from "react-router-dom";
 

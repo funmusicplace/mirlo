@@ -21,6 +21,8 @@ export const QUERY_KEY_ARTISTS = "artists";
  */
 export const QUERY_KEY_TRACK_GROUPS = "trackGroups";
 
+export const QUERY_KEY_TRACKS = "tracks";
+
 /**
  * Categorizes any query that should be invalidated when any merch is changed,
  * regardless of the merchId.
@@ -57,12 +59,24 @@ export const QUERY_KEY_SALES = "sales";
  */
 export const QUERY_KEY_NOTIFICATIONS = "notifications";
 
+/**
+ * Categorizes any query that should be invalidated when any notification is changed,
+ * regardless of the notificationId.
+ */
+export const QUERY_KEY_LABELS = "labels";
+
 export type QueryTag =
   | typeof QUERY_KEY_AUTH
   | typeof QUERY_KEY_ARTISTS
   | typeof QUERY_KEY_TRACK_GROUPS
+  | typeof QUERY_KEY_TRACKS
   | typeof QUERY_KEY_MERCH
-  | typeof QUERY_KEY_PURCHASES;
+  | typeof QUERY_KEY_PURCHASES
+  | typeof QUERY_KEY_SALES
+  | typeof QUERY_KEY_TAGS
+  | typeof QUERY_KEY_POSTS
+  | typeof QUERY_KEY_NOTIFICATIONS
+  | typeof QUERY_KEY_LABELS;
 
 export type QueryArgs = {
   artistId: number;

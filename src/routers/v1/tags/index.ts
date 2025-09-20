@@ -28,12 +28,12 @@ export default function () {
             from "TrackGroupTag" tgt 
             join "Tag" t on t.id = tgt."tagId" 
             join "TrackGroup" tg on tg.id = tgt."trackGroupId" where tg.published = true
+              and t.tag ilike ${`%${tag}%`}
             group by  tgt."tagId", t.tag 
             order by  "trackGroupsCount" desc
-            limit ${Number(take) ?? 20}
-            offset ${Number(skip) ?? 0}
+            limit ${take ? Number(take) : 20}
+            offset ${skip ? Number(skip) : 0}
             `;
-
         return res.json({
           results: tags.map((tag) => ({
             ...tag,
@@ -45,6 +45,8 @@ export default function () {
       const tags = await prisma.tag.findMany({
         where,
         orderBy: { tag: "asc" },
+        take: take ? Number(take) : 20,
+        skip: skip ? Number(skip) : 0,
         include: {
           trackGroupTags: {
             include: {

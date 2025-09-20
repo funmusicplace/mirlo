@@ -31,6 +31,7 @@
     "recentReleasesFor": "Recent releases for {{ search }}",
     "releasesForTag": "Releases for <tag>{{ tag }}</tag>",
     "moreReleases": "More releases",
+
     "viewAllArtists": "View all artists",
     "popularTags": "Popular Tags",
     "publicDomain": "Public Domain",
@@ -39,7 +40,11 @@
     "all": "All",
     "mostPopular": "Popularity (top to last)",
     "browseTags": "Browse tags",
-    "alphabetical": "Name (A to Z)"
+    "alphabetical": "Name (A to Z)",
+    "tagSearchResults": "Tags matching '{{ search }}'",
+    "artistsForSearch": "Artists for '{{ search }}'",
+    "releasesForSearch": "Releases for '{{ search }}'",
+    "labelsForSearch": "Labels for '{{ search }}'"
   },
   "cookies": {
     "weUseCookies": "We use cookies to keep you logged in and to maintain your music queue.",
@@ -101,6 +106,7 @@
     "artists": "Artists",
     "albums": "Albums",
     "tracks": "Tracks",
+    "tags": "Tags",
     "labels": "Labels",
     "moreArtist": "More artist results"
   },
@@ -165,6 +171,7 @@
   },
   "trackGroupCard": {
     "publishedAt": "Publish date:",
+    "weWillSendACodeToYourEmail": "We'll send a verification code to your email.",
     "backingThisProjectFor": "Backing this project for {{amount}}",
     "messageToArtist": "This will be shown publicly on the artist's page.",
     "leaveAComment": "Show the artist some love",
