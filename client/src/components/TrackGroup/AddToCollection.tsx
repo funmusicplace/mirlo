@@ -8,10 +8,12 @@ import api from "services/api";
 import { useNavigate } from "react-router-dom";
 import { ArtistButton } from "components/Artist/ArtistButtons";
 import { IoAddSharp } from "react-icons/io5";
+import { FixedButton } from "components/common/FixedButton";
 
-const AddToCollection: React.FC<{ trackGroup: TrackGroup }> = ({
-  trackGroup,
-}) => {
+const AddToCollection: React.FC<{
+  trackGroup: TrackGroup;
+  fixed?: boolean;
+}> = ({ trackGroup, fixed }) => {
   const [isAddingToCollection, setIsAddingToCollection] = React.useState(false);
   const snackbar = useSnackbar();
   const navigate = useNavigate();
@@ -33,6 +35,32 @@ const AddToCollection: React.FC<{ trackGroup: TrackGroup }> = ({
     }
   }, [navigate, snackbar, t, trackGroup.id]);
 
+  const button = fixed ? (
+    <FixedButton
+      rounded
+      onClick={() => setIsAddingToCollection(true)}
+      startIcon={<IoAddSharp />}
+    >
+      {t("addToCollection")}
+    </FixedButton>
+  ) : (
+    <ArtistButton
+      variant="outlined"
+      onClick={() => setIsAddingToCollection(true)}
+      className={css`
+        font-size: 1rem !important;
+
+        .children {
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+      `}
+      startIcon={<IoAddSharp />}
+    >
+      {t("addToCollection")}
+    </ArtistButton>
+  );
+
   return (
     <>
       <div
@@ -41,21 +69,7 @@ const AddToCollection: React.FC<{ trackGroup: TrackGroup }> = ({
           z-index: 2;
         `}
       >
-        <ArtistButton
-          variant="outlined"
-          onClick={() => setIsAddingToCollection(true)}
-          className={css`
-            font-size: 1rem !important;
-
-            .children {
-              overflow: hidden;
-              text-overflow: ellipsis;
-            }
-          `}
-          startIcon={<IoAddSharp />}
-        >
-          {t("addToCollection")}
-        </ArtistButton>
+        {button}
       </div>
       <Modal
         size="small"
