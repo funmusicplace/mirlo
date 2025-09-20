@@ -123,7 +123,7 @@ const HeaderSearch: React.FC = () => {
   }, []);
 
   const onEnter = React.useCallback((value: string) => {
-    navigate(`/releases?search=${value}`);
+    navigate(`/search?search=${value}`);
   }, []);
 
   return (
