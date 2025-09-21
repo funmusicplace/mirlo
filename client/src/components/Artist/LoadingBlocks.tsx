@@ -23,15 +23,28 @@ const Shine = styled("div")`
   }
 `;
 
+/**
+ * Loading skeleton blocks for placeholder content.
+ * @param rows Number of rows to display.
+ * @param height Height of each block.
+ * @param margin Margin around each block.
+ * @returns Loading skeleton blocks.
+ */
 const LoadingBlocks: React.FC<{
   rows?: number;
   height?: string;
   margin?: string;
-}> = ({ rows = 4, height = "10rem", margin = "2rem" }) => {
+  squares?: boolean;
+}> = ({ rows = 4, height = "10rem", margin = "2rem", squares = false }) => {
   return (
     <div
       className={css`
         width: 100%;
+        display: ${squares ? "grid" : "block"};
+        grid-template-columns: ${squares
+          ? "repeat(auto-fit, minmax(150px, 1fr))"
+          : "none"};
+        gap: ${squares ? margin : "0"};
       `}
     >
       {range(rows).map((r) => (
@@ -40,8 +53,6 @@ const LoadingBlocks: React.FC<{
           style={{
             width: "100%",
             height,
-            marginTop: margin,
-            marginBottom: margin,
           }}
         />
       ))}

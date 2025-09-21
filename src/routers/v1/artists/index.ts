@@ -18,17 +18,21 @@ export default function () {
       take = format === "rss" ? 50 : 10,
       name,
       orderBy,
+      isLabel,
       includeUnpublished,
     } = req.query;
 
     try {
       let where: Prisma.ArtistWhereInput = {
-        isLabelProfile: false,
+        isLabelProfile:
+          isLabel === "true" ? true : isLabel === "false" ? false : false,
       };
       if (!includeUnpublished) {
-        where.trackGroups = {
-          some: whereForPublishedTrackGroups(),
-        };
+        where.trackGroups = where.isLabelProfile
+          ? undefined
+          : {
+              some: whereForPublishedTrackGroups(),
+            };
       }
 
       if (name && typeof name === "string") {
@@ -48,6 +52,8 @@ export default function () {
           orderByClause.createdAt = "desc";
         }
       }
+
+      console.log("where", where);
 
       const artists = await prisma.artist.findMany({
         where,
