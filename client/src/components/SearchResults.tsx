@@ -17,13 +17,15 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { queryTags } from "queries/tags";
 import TrackGroupPills from "./TrackGroup/TrackGroupPills";
-import { ButtonLink } from "./common/Button";
+import Button, { ButtonLink } from "./common/Button";
 import { FaChevronRight } from "react-icons/fa";
 import React from "react";
 import ArtistSquare from "./Artist/ArtistSquare";
 import ArtistTrackGroup from "./Artist/ArtistTrackGroup";
 import { queryTracks } from "queries/tracks";
 import CollectionPurchaseSquare from "./Profile/Collection/CollectionPurchaseSquare";
+import LoadingBlocks from "./Artist/LoadingBlocks";
+import SpaceBetweenDiv from "./common/SpaceBetweenDiv";
 
 const pageSize = 40;
 
@@ -38,7 +40,7 @@ const SearchResults: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
     TrackGroupQueryOptions["license"] | ""
   >((params.get("license") as TrackGroupQueryOptions["license"]) ?? "");
 
-  const { data: newReleases } = useQuery(
+  const { data: newReleases, isFetching: isLoadingReleases } = useQuery(
     queryTrackGroups({
       skip: limit * page,
       take: limit,
@@ -48,7 +50,7 @@ const SearchResults: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
     })
   );
 
-  const { data: tags } = useQuery(
+  const { data: tags, isFetching: isLoadingTags } = useQuery(
     queryTags({
       orderBy: "count",
       tag: search ?? undefined,
@@ -56,21 +58,22 @@ const SearchResults: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
     })
   );
 
-  const { data: artists } = useQuery(
+  const { data: artists, isFetching: isLoadingArtists } = useQuery(
     queryArtists({
       name: search ?? undefined,
       take: 20,
     })
   );
 
-  const { data: labels } = useQuery(
-    queryLabels({
+  const { data: labels, isFetching: isLoadingLabels } = useQuery(
+    queryArtists({
       name: search ?? undefined,
+      isLabel: true,
       take: 20,
     })
   );
 
-  const { data: tracks } = useQuery(
+  const { data: tracks, isFetching: isLoadingTracks } = useQuery(
     queryTracks({
       title: search ?? undefined,
       take: 20,
@@ -91,7 +94,7 @@ const SearchResults: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
         }
       `}
     >
-      {!tag && (
+      {!tag && !!tags?.results.length && (
         <SectionHeader
           className={css`
             position: sticky;
@@ -129,174 +132,204 @@ const SearchResults: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
           </WidthContainer>
         </SectionHeader>
       )}
-
-      {!!artists?.results.length && (
-        <>
-          <SectionHeader>
-            <WidthContainer
-              variant="big"
-              justify="space-between"
-              className={css`
-                flex-direction: row;
-                display: flex;
-              `}
-            >
-              <h1 className="h5 section-header__heading" id={headingId}>
-                {search ? t("artistsForSearch", { search }) : t("artists")}
-              </h1>
-            </WidthContainer>
-          </SectionHeader>
-
-          <WidthContainer variant="big" justify="center">
-            <div
-              className={css`
-                display: flex;
-                width: 100%;
-                flex-direction: row;
-                flex-wrap: wrap;
-                padding: var(--mi-side-paddings-xsmall);
-              `}
-            >
-              <TrackgroupGrid gridNumber="4">
-                {artists?.results?.map((artist) => (
-                  <ArtistSquare key={artist.id} artist={artist} />
-                ))}
-              </TrackgroupGrid>
-            </div>
-          </WidthContainer>
-        </>
-      )}
-      {!!newReleases?.results.length && (
-        <>
-          <SectionHeader>
-            <WidthContainer
-              variant="big"
-              justify="space-between"
-              className={css`
-                flex-direction: row;
-                display: flex;
-              `}
-            >
-              <h1 className="h5 section-header__heading" id={headingId}>
-                {search
-                  ? t("releasesForSearch", { search })
-                  : t("recentReleases")}
-              </h1>
-            </WidthContainer>
-          </SectionHeader>
-          <WidthContainer variant="big" justify="center">
-            <div
-              className={css`
-                display: flex;
-                width: 100%;
-                flex-direction: row;
-                flex-wrap: wrap;
-                padding: var(--mi-side-paddings-xsmall);
-              `}
-            >
-              <TrackgroupGrid
-                gridNumber="4"
-                as="ul"
-                aria-labelledby={headingId}
-                role="list"
+      <SectionHeader>
+        <WidthContainer
+          variant="big"
+          justify="space-between"
+          className={css`
+            flex-direction: row;
+            display: flex;
+          `}
+        >
+          <h1 className="h5 section-header__heading" id={headingId}>
+            {search ? t("artistsForSearch", { search }) : t("artists")}
+          </h1>
+        </WidthContainer>
+      </SectionHeader>
+      <WidthContainer variant="big" justify="center">
+        <div
+          className={css`
+            display: flex;
+            width: 100%;
+            flex-direction: row;
+            flex-wrap: wrap;
+            padding: var(--mi-side-paddings-xsmall);
+          `}
+        >
+          {!!artists?.results.length && (
+            <TrackgroupGrid gridNumber="4">
+              {artists?.results?.map((artist) => (
+                <ArtistSquare key={artist.id} artist={artist} />
+              ))}
+            </TrackgroupGrid>
+          )}
+          {isLoadingArtists && <LoadingBlocks squares />}
+          {!isLoadingArtists && !artists?.results.length && (
+            <SpaceBetweenDiv>
+              <p>{t("noArtistsFound")}</p>
+              <ButtonLink
+                to="/artists"
+                variant="outlined"
+                endIcon={<FaChevronRight />}
               >
-                {newReleases?.results?.map((trackGroup) => (
-                  <ArtistTrackGroup
-                    key={trackGroup.id}
-                    trackGroup={trackGroup}
-                    as="li"
-                    showArtist
-                  />
-                ))}
-              </TrackgroupGrid>
-            </div>
-          </WidthContainer>
-        </>
-      )}
-
-      {!!tracks?.results.length && (
-        <>
-          <SectionHeader>
-            <WidthContainer
-              variant="big"
-              justify="space-between"
-              className={css`
-                flex-direction: row;
-                display: flex;
-              `}
-            >
-              <h1 className="h5 section-header__heading" id={headingId}>
-                {search
-                  ? t("releasesForSearch", { search })
-                  : t("recentReleases")}
-              </h1>
-            </WidthContainer>
-          </SectionHeader>
-          <WidthContainer variant="big" justify="center">
-            <div
-              className={css`
-                display: flex;
-                width: 100%;
-                flex-direction: row;
-                flex-wrap: wrap;
-                padding: var(--mi-side-paddings-xsmall);
-              `}
-            >
-              <TrackgroupGrid
-                gridNumber="4"
-                as="ul"
-                aria-labelledby={headingId}
-                role="list"
+                {t("viewAllArtists")}
+              </ButtonLink>
+            </SpaceBetweenDiv>
+          )}
+        </div>
+      </WidthContainer>
+      <SectionHeader>
+        <WidthContainer
+          variant="big"
+          justify="space-between"
+          className={css`
+            flex-direction: row;
+            display: flex;
+          `}
+        >
+          <h1 className="h5 section-header__heading" id={headingId}>
+            {search ? t("releasesForSearch", { search }) : t("recentReleases")}
+          </h1>
+        </WidthContainer>
+      </SectionHeader>
+      <WidthContainer variant="big" justify="center">
+        <div
+          className={css`
+            display: flex;
+            width: 100%;
+            flex-direction: row;
+            flex-wrap: wrap;
+            padding: var(--mi-side-paddings-xsmall);
+          `}
+        >
+          {isLoadingReleases && <LoadingBlocks squares />}
+          {!isLoadingReleases && !newReleases?.results.length && (
+            <SpaceBetweenDiv>
+              <p>{t("noReleasesFound")}</p>
+              <ButtonLink
+                to="/releases"
+                variant="outlined"
+                endIcon={<FaChevronRight />}
               >
-                {tracks?.results?.map((track) => (
-                  <CollectionPurchaseSquare
-                    trackGroup={track.trackGroup}
-                    key={track.id}
-                    track={track}
-                  />
-                ))}
-              </TrackgroupGrid>
-            </div>
-          </WidthContainer>
-        </>
-      )}
-
-      {!!labels?.results.length && (
-        <>
-          <SectionHeader>
-            <WidthContainer
-              variant="big"
-              justify="space-between"
-              className={css`
-                flex-direction: row;
-                display: flex;
-              `}
-            >
-              <h1 className="h5 section-header__heading" id={headingId}>
-                {search ? t("labelsForSearch", { search }) : t("labels")}
-              </h1>
-            </WidthContainer>
-          </SectionHeader>
-
-          <WidthContainer variant="big" justify="center">
-            <div
-              className={css`
-                display: flex;
-                width: 100%;
-                flex-direction: row;
-                flex-wrap: wrap;
-                padding: var(--mi-side-paddings-xsmall);
-              `}
-            >
-              <TrackgroupGrid gridNumber="4">
-                {labels?.results?.map((label) => (
-                  <ArtistSquare key={label.id} artist={label} />
-                ))}
-              </TrackgroupGrid>
-            </div>
-          </WidthContainer>
-        </>
-      )}
+                {t("viewAllReleases")}
+              </ButtonLink>
+            </SpaceBetweenDiv>
+          )}
+          <TrackgroupGrid
+            gridNumber="4"
+            as="ul"
+            aria-labelledby={headingId}
+            role="list"
+          >
+            {newReleases?.results?.map((trackGroup) => (
+              <ArtistTrackGroup
+                key={trackGroup.id}
+                trackGroup={trackGroup}
+                as="li"
+                showArtist
+              />
+            ))}
+          </TrackgroupGrid>
+        </div>
+      </WidthContainer>
+      <SectionHeader>
+        <WidthContainer
+          variant="big"
+          justify="space-between"
+          className={css`
+            flex-direction: row;
+            display: flex;
+          `}
+        >
+          <h1 className="h5 section-header__heading" id={headingId}>
+            {search ? t("tracksForSearch", { search }) : t("recentTracks")}
+          </h1>
+        </WidthContainer>
+      </SectionHeader>
+      <WidthContainer variant="big" justify="center">
+        <div
+          className={css`
+            display: flex;
+            width: 100%;
+            flex-direction: row;
+            flex-wrap: wrap;
+            padding: var(--mi-side-paddings-xsmall);
+          `}
+        >
+          {isLoadingTracks && <LoadingBlocks squares />}
+          {!isLoadingTracks && !tracks?.results.length && (
+            <SpaceBetweenDiv>
+              <p>{t("noTracksFound")}</p>
+              <ButtonLink
+                to="/releases"
+                variant="outlined"
+                endIcon={<FaChevronRight />}
+              >
+                {t("viewAllReleases")}
+              </ButtonLink>
+            </SpaceBetweenDiv>
+          )}
+          <TrackgroupGrid
+            gridNumber="4"
+            as="ul"
+            aria-labelledby={headingId}
+            role="list"
+          >
+            {tracks?.results?.map((track) => (
+              <CollectionPurchaseSquare
+                trackGroup={track.trackGroup}
+                key={track.id}
+                track={track}
+              />
+            ))}
+          </TrackgroupGrid>
+        </div>
+      </WidthContainer>
+      <SectionHeader>
+        <WidthContainer
+          variant="big"
+          justify="space-between"
+          className={css`
+            flex-direction: row;
+            display: flex;
+          `}
+        >
+          <h1 className="h5 section-header__heading" id={headingId}>
+            {search ? t("labelsForSearch", { search }) : t("labels")}
+          </h1>
+        </WidthContainer>
+      </SectionHeader>
+      <WidthContainer variant="big" justify="center">
+        <div
+          className={css`
+            display: flex;
+            width: 100%;
+            flex-direction: row;
+            flex-wrap: wrap;
+            padding: var(--mi-side-paddings-xsmall);
+          `}
+        >
+          {isLoadingLabels && <LoadingBlocks squares />}
+          {!isLoadingLabels && !labels?.results.length && (
+            <SpaceBetweenDiv>
+              <p>{t("noLabelsFound")}</p>
+              <ButtonLink
+                to="/releases"
+                variant="outlined"
+                endIcon={<FaChevronRight />}
+              >
+                {t("viewAllReleases")}
+              </ButtonLink>
+            </SpaceBetweenDiv>
+          )}
+          <TrackgroupGrid gridNumber="4">
+            {labels?.results?.map((label) => (
+              <ArtistSquare key={label.id} artist={label} />
+            ))}
+          </TrackgroupGrid>
+        </div>
+      </WidthContainer>
+      s
     </div>
   );
 };

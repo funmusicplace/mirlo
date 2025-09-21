@@ -14,7 +14,8 @@ import { FaRss } from "react-icons/fa";
 import { SelectEl } from "./common/Select";
 import { BsGrid, BsList } from "react-icons/bs";
 import { getArtistUrl } from "utils/artist";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
+import LoadingBlocks from "./Artist/LoadingBlocks";
 
 const Artists = () => {
   const { t } = useTranslation("translation", { keyPrefix: "artists" });
@@ -22,6 +23,9 @@ const Artists = () => {
   const [artistsTotal, setArtistsTotal] = React.useState<number | undefined>(
     undefined
   );
+  const [isLoadingArtists, setIsLoadingArtists] = React.useState(false);
+  const [searchParams] = useSearchParams();
+  const isLabel = searchParams.get("isLabel") ?? "all";
   const [pageSize, setPageSize] = React.useState(20);
   const { page, PaginationComponent } = usePagination({ pageSize });
   const [orderBy, setOrderBy] = React.useState("createdAt");
@@ -35,18 +39,21 @@ const Artists = () => {
 
   React.useEffect(() => {
     const callback = async () => {
+      setIsLoadingArtists(true);
       const params = new URLSearchParams();
 
       params.append("orderBy", orderBy);
+      params.append("isLabel", isLabel);
       params.append("skip", `${pageSize * page}`);
       params.append("take", `${pageSize}`);
       const results = await api.getMany<Artist>(`artists?${params.toString()}`);
       setArtists(results.results);
       setArtistsTotal(results.total);
+      setIsLoadingArtists(false);
     };
 
     callback();
-  }, [page, orderBy]);
+  }, [page, orderBy, pageSize, isLabel]);
 
   return (
     <div
@@ -70,7 +77,9 @@ const Artists = () => {
             align-items: center;
           `}
         >
-          <h2 className="h5 section-header__heading">{t("artists")}</h2>
+          <h2 className="h5 section-header__heading">
+            {t(isLabel ? "labels" : "artists")}
+          </h2>
           <div
             className={css`
               display: flex;
@@ -133,6 +142,10 @@ const Artists = () => {
               padding: var(--mi-side-paddings-xsmall);
             `}
           >
+            {isLoadingArtists && (
+              <LoadingBlocks squares={viewAsTiles} margin="1rem" />
+            )}
+            {!isLoadingArtists && !artists?.length && t("No results found")}
             {viewAsTiles && (
               <TrackgroupGrid gridNumber="4">
                 {artists?.map((artist) => (

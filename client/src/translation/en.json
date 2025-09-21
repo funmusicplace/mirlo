@@ -31,7 +31,13 @@
     "recentReleasesFor": "Recent releases for {{ search }}",
     "releasesForTag": "Releases for <tag>{{ tag }}</tag>",
     "moreReleases": "More releases",
-
+    "noArtistsFound": "No artists found.",
+    "viewAllReleases": "View all releases",
+    "noReleasesFound": "No releases found.",
+    "noLabelsFound": "No labels found.",
+    "tracksForSearch": "Tracks for '{{ search }}'",
+    "recentTracks": "Recent tracks",
+    "noTracksFound": "No tracks found.",
     "viewAllArtists": "View all artists",
     "popularTags": "Popular Tags",
     "publicDomain": "Public Domain",
@@ -1036,7 +1042,8 @@
     "artists": "All artists",
     "sortBy": "Sort by",
     "sortByName": "Name",
-    "sortByLatest": "Latest"
+    "sortByLatest": "Latest",
+    "labels": "All labels"
   },
   "postForm": {
     "imagesInPost": "Manage images in post",

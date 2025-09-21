@@ -30,6 +30,8 @@ const usePagination = ({ pageSize }: { pageSize: number }) => {
       total?: number;
     }) => {
       const showNextPage = total && total > pageSize * (page + 1);
+
+      console.log({ page, amount, pageSize, showNextPage });
       return (
         <div
           className={css`
@@ -56,7 +58,7 @@ const usePagination = ({ pageSize }: { pageSize: number }) => {
               -{" "}
             </span>
           )}
-          {(amount === pageSize || showNextPage) && (
+          {(amount === pageSize || !!showNextPage) && (
             <LinkWithIcon to={`?${nextPage.toString()}`}>
               Next page <FaChevronRight />
             </LinkWithIcon>
