@@ -1,13 +1,19 @@
 import { Prisma, PrismaClient } from "./__generated__";
 
+const ENABLE_LOGGING = false;
+
 const prisma = new PrismaClient({
   // The following controls logging of the database
-  // log: [
-  //   {
-  //     emit: "event",
-  //     level: "query",
-  //   },
-  // ],
+  ...(ENABLE_LOGGING
+    ? {
+        log: [
+          {
+            emit: "event",
+            level: "query",
+          },
+        ],
+      }
+    : {}),
 });
 
 /**

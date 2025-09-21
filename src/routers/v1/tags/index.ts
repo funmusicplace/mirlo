@@ -28,7 +28,7 @@ export default function () {
             from "TrackGroupTag" tgt 
             join "Tag" t on t.id = tgt."tagId" 
             join "TrackGroup" tg on tg.id = tgt."trackGroupId" where tg.published = true
-              and t.tag ilike ${`%${tag}%`}
+              and t.tag ilike ${`%${tag ?? ""}%`}
             group by  tgt."tagId", t.tag 
             order by  "trackGroupsCount" desc
             limit ${take ? Number(take) : 20}
