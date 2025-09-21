@@ -1,19 +1,10 @@
 import { css } from "@emotion/css";
-import { useGetArtistColors } from "components/Artist/ArtistButtons";
 import FormComponent from "components/common/FormComponent";
-import { InputEl } from "components/common/Input";
 import { useUpdateArtistMutation } from "queries";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 import { useParams } from "react-router-dom";
 import { useAuthContext } from "state/AuthContext";
-
-const generateColor = (name: string) => {
-  if (["background", "foreground"].includes(name)) {
-    return `var(--mi-normal-${name}-color)`;
-  }
-  return `var(--mi-${name}-color)`;
-};
 
 const isValidColor = (val: string) => {
   const matcher = val.match(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/);
@@ -31,7 +22,6 @@ export const ColorInput: React.FC<{ name: string; title: string }> = ({
   const { user } = useAuthContext();
   const { mutateAsync: updateArtist } = useUpdateArtistMutation();
   const { artistId } = useParams();
-  const { colors: artistColors } = useGetArtistColors();
 
   const updateColorOnChange = React.useCallback(async () => {
     try {
@@ -86,24 +76,42 @@ export const ColorInput: React.FC<{ name: string; title: string }> = ({
       `}
     >
       {title}
-      <div
+      <input
+        type="color"
+        {...register(name, {
+          onChange: (e) => {
+            const newColor = e.target.value;
+            setValue(name, newColor, { shouldDirty: true });
+            clearErrors(name);
+            if (!isValidColor(newColor)) {
+              setError(name, { message: "Not a valid color!" });
+            } else {
+              updateColorOnChange();
+            }
+          },
+          validate: (val) =>
+            isValidColor(val) || "Not a valid color!",
+        })}
+        value={watch(name) || "#000000"}
         className={css`
-          display: flex;
-          align-items: stretch;
+          align-self: center;
+          height: 2rem;
+          width: 80%;
+          cursor: pointer;
+
+          /* For WebKit browsers (Chrome, Safari) */
+          &::-webkit-color-swatch-wrapper {
+            padding: 0;
+          }
+          &::-webkit-color-swatch {
+            border: none;
+          }
+          /* For Firefox */
+          &::-moz-color-swatch {
+            border: none;
+          }
         `}
-      >
-        <span
-          className={css`
-            display: inline-block;
-            width: 2rem;
-            margin: 0.25rem 0.15rem 0.5rem;
-            background-color: ${color !== ""
-              ? color
-              : generateColor(name.split(".")[2])};
-          `}
-        ></span>
-        <InputEl {...register(name)} onBlur={updateColorOnChange} />
-      </div>
+      />
       {errorMessage && (
         <small
           className={css`
