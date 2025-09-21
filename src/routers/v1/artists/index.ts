@@ -22,7 +22,9 @@ export default function () {
     } = req.query;
 
     try {
-      let where: Prisma.ArtistWhereInput = {};
+      let where: Prisma.ArtistWhereInput = {
+        isLabelProfile: false,
+      };
       if (!includeUnpublished) {
         where.trackGroups = {
           some: whereForPublishedTrackGroups(),

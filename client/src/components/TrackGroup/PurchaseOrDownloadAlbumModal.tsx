@@ -1,28 +1,26 @@
-import Modal from "components/common/Modal";
 import React from "react";
 import { css } from "@emotion/css";
-import { useTranslation } from "react-i18next";
-import BuyTrackGroup from "components/TrackGroup/BuyTrackGroup";
-import { useArtistContext } from "state/ArtistContext";
+
 import DownloadAlbumButton from "components/common/DownloadAlbumButton";
 import AddToCollection from "./AddToCollection";
 import { useAuthContext } from "state/AuthContext";
-import { ArtistButton } from "components/Artist/ArtistButtons";
-import useArtistQuery from "utils/useArtistQuery";
+
 import { useQuery } from "@tanstack/react-query";
-import { queryUserStripeStatus } from "queries";
+import { queryArtist, queryUserStripeStatus } from "queries";
 import BackingThisProject from "./BackingThisProject";
+import PurchaseAlbumModal from "./PurchaseAlbumModal";
 
 const PurchaseOrDownloadAlbum: React.FC<{
   trackGroup: TrackGroup;
   track?: Track;
   collapse?: boolean;
-}> = ({ trackGroup, track, collapse }) => {
-  const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
+  fixed?: boolean;
+}> = ({ trackGroup, track, collapse, fixed }) => {
   const { user } = useAuthContext();
-  const [isPurchasingAlbum, setIsPurchasingAlbum] = React.useState(false);
   const [isOwned, setIsOwned] = React.useState(false);
-  const { data: artist } = useArtistQuery();
+  const { data: artist } = useQuery(
+    queryArtist({ artistSlug: trackGroup.artist.urlSlug })
+  );
   const { data: userStripeStatus } = useQuery(
     queryUserStripeStatus(artist?.userId)
   );
@@ -81,20 +79,6 @@ const PurchaseOrDownloadAlbum: React.FC<{
 
   const isBeforeReleaseDate = new Date(trackGroup.releaseDate) > new Date();
 
-  const payOrNameYourPrice =
-    trackGroup.minPrice === 0 && !trackGroup.isPriceFixed
-      ? "nameYourPriceLabel"
-      : "buy";
-
-  const preOrderOrBuyText = trackGroup.isAllOrNothing
-    ? "backThisProject"
-    : isBeforeReleaseDate
-      ? "preOrder"
-      : payOrNameYourPrice;
-  const purchaseTitle = isBeforeReleaseDate
-    ? "preOrderingTrackGroup"
-    : "buyingTrackGroup";
-
   const showPurchase = !isOwned && userStripeStatus?.chargesEnabled;
 
   const showDownload = isOwned && !isBeforeReleaseDate;
@@ -113,37 +97,19 @@ const PurchaseOrDownloadAlbum: React.FC<{
         `}
       >
         {showPurchase && (
-          <div
-            className={css`
-              margin-top: 0rem;
-              z-index: 2;
-            `}
-          >
-            <ArtistButton
-              variant="outlined"
-              onClick={() => setIsPurchasingAlbum(true)}
-            >
-              {t(preOrderOrBuyText)}
-            </ArtistButton>
-          </div>
+          <PurchaseAlbumModal
+            trackGroup={trackGroup}
+            track={track}
+            fixed={fixed}
+          />
         )}
-        {addToCollection && <AddToCollection trackGroup={trackGroup} />}
-        {showDownload && (
+        {addToCollection && (
+          <AddToCollection trackGroup={trackGroup} fixed={fixed} />
+        )}
+        {showDownload && !fixed && (
           <DownloadAlbumButton trackGroup={trackGroup} onlyIcon track={track} />
         )}
       </div>
-
-      <Modal
-        size="small"
-        open={isPurchasingAlbum}
-        onClose={() => setIsPurchasingAlbum(false)}
-        title={
-          t(purchaseTitle, { title: track?.title ?? trackGroup.title }) ?? ""
-        }
-        noPadding
-      >
-        <BuyTrackGroup trackGroup={trackGroup} track={track} />
-      </Modal>
     </>
   );
 };

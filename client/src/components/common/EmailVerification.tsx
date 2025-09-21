@@ -8,10 +8,13 @@ import { Input, InputEl } from "components/common/Input";
 import FormComponent from "components/common/FormComponent";
 import { useAuthContext } from "state/AuthContext";
 import Box from "components/common/Box";
+import { useQueryClient } from "@tanstack/react-query";
+import { QUERY_KEY_AUTH, queryKeyIncludes } from "queries/queryKeys";
 
 const EmailVerification: React.FC<{
   setVerifiedEmail: (verifiedEmail: string) => void;
-}> = ({ setVerifiedEmail }) => {
+  smallText?: string;
+}> = ({ setVerifiedEmail, smallText = "emailVerificationInfo" }) => {
   const snackbar = useSnackbar();
   const { user } = useAuthContext();
   const [code, setCode] = React.useState("");
@@ -20,6 +23,7 @@ const EmailVerification: React.FC<{
   const [waitingForVerification, setWaitingForVerification] =
     React.useState(false);
   const [email, setEmail] = React.useState(user?.email);
+  const queryClient = useQueryClient();
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
 
   const verifyEmail = React.useCallback(async () => {
@@ -51,6 +55,9 @@ const EmailVerification: React.FC<{
           setVerifiedEmail(email);
           snackbar(t("emailVerified"), { type: "success" });
           setEmailVerified(true);
+          queryClient.invalidateQueries({
+            predicate: (query) => queryKeyIncludes(query, QUERY_KEY_AUTH),
+          });
         }
       }
     } catch (e) {
@@ -59,7 +66,7 @@ const EmailVerification: React.FC<{
     } finally {
       setIsloading(false);
     }
-  }, [code, email, snackbar, t]);
+  }, [code, email, snackbar, t, queryClient, setVerifiedEmail]);
 
   if (emailVerified) {
     return null;
@@ -100,7 +107,7 @@ const EmailVerification: React.FC<{
                 {t("verifyEmail")}
               </Button>
             </div>
-            <small>{t("emailVerificationInfo")}</small>
+            <small>{t(smallText)}</small>
           </FormComponent>
         </>
       )}

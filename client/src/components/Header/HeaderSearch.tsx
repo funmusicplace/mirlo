@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import api from "services/api";
 import AutoComplete from "components/common/AutoComplete";
 import { css } from "@emotion/css";
+import { first, orderBy } from "lodash";
 
 const constructUrl = (r: any) => {
   let url = "";
@@ -55,8 +56,16 @@ const HeaderSearch: React.FC = () => {
       take: "3",
     });
 
+    const tags = await api.getMany<Tag>(`tags`, {
+      tag: searchString.trim(),
+      orderBy: "count",
+      take: "3",
+    });
+
+    const manyMoreArtists = (artists.total ?? 0) > artists.results.length;
+
     const results = [
-      ...((artists.total ?? 0) > artists.results.length
+      ...(manyMoreArtists
         ? [
             {
               id: "more",
@@ -70,6 +79,7 @@ const HeaderSearch: React.FC = () => {
         : []),
       ...artists.results.map((r, rid) => ({
         category: t("artists"),
+        firstInCategory: manyMoreArtists ? false : rid === 0,
         artistId: r.urlSlug ?? r.id,
         id: r.id,
         name: r.name,
@@ -101,12 +111,19 @@ const HeaderSearch: React.FC = () => {
         name: label.name,
         isLabel: true,
       })),
+      ...tags.results.map((r, rid) => ({
+        firstInCategory: rid === 0,
+        category: t("tags"),
+        id: r.tag,
+        name: r.tag,
+        isTag: true,
+      })),
     ];
     return results;
   }, []);
 
   const onEnter = React.useCallback((value: string) => {
-    navigate(`/releases?search=${value}`);
+    navigate(`/search?search=${value}`);
   }, []);
 
   return (

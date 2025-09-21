@@ -9,6 +9,8 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { useLoginMutation } from "queries/auth";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import EmailVerification from "./EmailVerification";
+import { QUERY_KEY_AUTH, queryKeyIncludes } from "queries/queryKeys";
 
 type SignupInputs = {
   email: string;
@@ -38,11 +40,11 @@ const LogInForm: React.FC<{ afterLogIn: () => void }> = ({ afterLogIn }) => {
         },
       });
     },
-    [login, afterLogIn, snackbar]
+    [login, afterLogIn, snackbar, queryClient]
   );
 
   return (
-    <>
+    <div>
       <form
         className={css`
           display: flex;
@@ -63,6 +65,32 @@ const LogInForm: React.FC<{ afterLogIn: () => void }> = ({ afterLogIn }) => {
           {t("logIn")}
         </Button>
       </form>
+
+      <span
+        className={css`
+          display: flex;
+          justify-content: stretch;
+          align-items: center;
+          margin: 1rem 0;
+          width: 100%;
+
+          hr {
+            flex-grow: 1;
+            margin: 1rem;
+            border-color: var(--mi-darken-x-background-color);
+          }
+        `}
+      >
+        <hr />
+        OR
+        <hr />
+      </span>
+
+      <EmailVerification
+        setVerifiedEmail={afterLogIn}
+        smallText={"weWillSendACodeToYourEmail"}
+      />
+
       <Link
         to="/password-reset"
         onClick={() => {
@@ -90,7 +118,7 @@ const LogInForm: React.FC<{ afterLogIn: () => void }> = ({ afterLogIn }) => {
       >
         {t("signUp")}
       </Link>
-    </>
+    </div>
   );
 };
 

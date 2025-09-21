@@ -110,17 +110,19 @@ describe("send-out-monthly-income-report", () => {
       },
     });
 
-    await prisma.userArtistTip.create({
+    const tip = await prisma.userArtistTip.create({
       data: {
         pricePaid: 7,
         datePurchased: faker.date.recent({
-          days: 30,
+          days: 27,
           refDate: new Date(new Date().setDate(1)),
         }),
         userId: followerUser.id,
         artistId: artist.id,
       },
     });
+
+    console.log("tip date", tip.datePurchased);
 
     await sendOutMonthlyIncomeReport();
 
@@ -171,7 +173,7 @@ describe("send-out-monthly-income-report", () => {
       },
     });
 
-    await prisma.artistUserSubscriptionCharge.create({
+    const charge = await prisma.artistUserSubscriptionCharge.create({
       data: {
         artistUserSubscriptionId: aus.id,
         amountPaid: 5,
@@ -187,6 +189,8 @@ describe("send-out-monthly-income-report", () => {
         currency: "usd",
       },
     });
+
+    console.log("charge date", charge.createdAt);
 
     await sendOutMonthlyIncomeReport();
 
@@ -230,7 +234,7 @@ describe("send-out-monthly-income-report", () => {
       },
     });
 
-    await prisma.artistUserSubscriptionCharge.create({
+    const charge = await prisma.artistUserSubscriptionCharge.create({
       data: {
         artistUserSubscriptionId: aus.id,
         amountPaid: 5,
@@ -242,6 +246,8 @@ describe("send-out-monthly-income-report", () => {
         currency: "usd",
       },
     });
+
+    console.log("charge date", charge.createdAt);
 
     await sendOutMonthlyIncomeReport();
 
@@ -327,7 +333,7 @@ describe("send-out-monthly-income-report", () => {
       },
     });
 
-    await prisma.artistUserSubscriptionCharge.create({
+    const charge = await prisma.artistUserSubscriptionCharge.create({
       data: {
         artistUserSubscriptionId: aus.id,
         amountPaid: 5,
@@ -339,6 +345,8 @@ describe("send-out-monthly-income-report", () => {
         currency: "usd",
       },
     });
+
+    console.log("charge date", charge.createdAt);
 
     await sendOutMonthlyIncomeReport();
 
@@ -383,7 +391,7 @@ describe("send-out-monthly-income-report", () => {
       },
     });
 
-    await prisma.userArtistTip.create({
+    const tip1 = await prisma.userArtistTip.create({
       data: {
         pricePaid: 7,
         datePurchased: faker.date.between({
@@ -399,7 +407,7 @@ describe("send-out-monthly-income-report", () => {
       },
     });
 
-    await prisma.userArtistTip.create({
+    const tip2 = await prisma.userArtistTip.create({
       data: {
         pricePaid: 3,
         datePurchased: faker.date.between({
@@ -414,6 +422,9 @@ describe("send-out-monthly-income-report", () => {
         artistId: artist2.id,
       },
     });
+
+    console.log("tip1 date", tip1.datePurchased);
+    console.log("tip2 date", tip2.datePurchased);
 
     await sendOutMonthlyIncomeReport();
 

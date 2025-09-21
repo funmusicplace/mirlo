@@ -163,3 +163,30 @@ export function queryArtistSupporters(opts: {
     queryFn: fetchArtistSupporters,
   });
 }
+
+export type ArtistQueryOptions = {
+  skip?: number;
+  take?: number;
+  orderBy?: "random";
+  name?: string;
+};
+
+const fetchArtists: QueryFunction<
+  { results: Artist[]; total?: number },
+  ["fetchArtists", ArtistQueryOptions, ...any]
+> = ({ queryKey: [_, { skip, take, orderBy, name }], signal }) => {
+  const params = new URLSearchParams();
+  if (skip) params.append("skip", String(skip));
+  if (take) params.append("take", String(take));
+  if (orderBy) params.append("orderBy", orderBy);
+  if (name) params.append("name", name);
+
+  return api.get(`v1/artists?${params}`, { signal });
+};
+
+export function queryArtists(opts: ArtistQueryOptions) {
+  return queryOptions({
+    queryKey: ["fetchArtists", opts, QUERY_KEY_ARTISTS],
+    queryFn: fetchArtists,
+  });
+}

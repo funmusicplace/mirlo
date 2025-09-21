@@ -586,6 +586,25 @@ const routes: RouteObject[] = [
         },
       },
       {
+        path: "search",
+        async lazy() {
+          const { default: SearchResults } = await import(
+            "components/SearchResults"
+          );
+          return {
+            Component: () => (
+              <div
+                className={css`
+                  width: 100%;
+                `}
+              >
+                <SearchResults />
+              </div>
+            ),
+          };
+        },
+      },
+      {
         path: "tags",
         async lazy() {
           const { default: Tags } = await import("components/Tags");

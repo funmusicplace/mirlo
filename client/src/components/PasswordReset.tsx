@@ -23,6 +23,7 @@ function PasswordReset() {
   const token = search.get("token");
   const id = search.get("id");
   const accountIncomplete = search.get("accountIncomplete") === "true";
+  const error = search.get("error");
   const { register: initRegister, handleSubmit: initSubmit } =
     useForm<SignupInputs>();
   const { register: newRegister, handleSubmit: newSubmit } =
@@ -84,6 +85,16 @@ function PasswordReset() {
           `}
         >
           {t("setAPasswordToFinishAccountSetUp")}
+        </Box>
+      )}
+      {error && (
+        <Box
+          variant="warning"
+          className={css`
+            margin-top: 1rem;
+          `}
+        >
+          {error}
         </Box>
       )}
       {!token && (
