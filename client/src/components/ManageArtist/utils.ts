@@ -91,7 +91,7 @@ export const convertMetaData = (
     }`,
     duration: p.metadata.format.duration,
     file: p.file,
-    title: p.metadata.common.title,
+    title: title,
     status: "preview",
     lyrics: p.metadata.common.lyrics,
     isrc: isrc,
