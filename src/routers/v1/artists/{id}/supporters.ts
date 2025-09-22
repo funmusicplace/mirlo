@@ -184,6 +184,13 @@ export const findSales = async ({
     }
   }
 
+  if (untilDate) {
+    const date = new Date(untilDate);
+    if (isNaN(date.getTime())) {
+      throw new Error("Invalid date format");
+    }
+  }
+
   let supporters: Awaited<ReturnType<typeof querySupporters>> = [];
   let tips: Awaited<ReturnType<typeof queryTips>> = [];
   let trackPurchases: Awaited<ReturnType<typeof queryTracks>> = [];

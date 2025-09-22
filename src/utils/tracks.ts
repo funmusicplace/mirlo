@@ -80,6 +80,8 @@ export const convertAudioToFormat = (
   ).map((artist) => artist.artistName);
 
   let destination = generateDestination(format, goingTo, audioBitrate);
+  logger.info(`audioId ${audioId}: destination: ${destination}`);
+
   const processor = ffmpeg(stream)
     .noVideo()
     .toFormat(format)
@@ -95,6 +97,7 @@ export const convertAudioToFormat = (
     .outputOptions("-metadata", `track=${content.track.order}`)
     .on("stderr", function (stderrLine) {
       // logger.info("Stderr output: " +resolve stderrLine);
+      onError?.(stderrLine);
     })
     .on("error", (err: { message: unknown }) => {
       logger.error(`Error converting to ${format}: ${err.message}`);
