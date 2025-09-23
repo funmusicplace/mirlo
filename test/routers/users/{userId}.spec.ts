@@ -9,7 +9,7 @@ import { clearTables, createUser } from "../../utils";
 
 import { requestApp } from "../utils";
 import { faker } from "@faker-js/faker";
-import { hashPassword } from "../../../src/routers/auth";
+import { hashPassword } from "../../../src/routers/auth/utils";
 
 describe("users/{userId}", () => {
   beforeEach(async () => {

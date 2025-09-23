@@ -1,9 +1,11 @@
-import { PrismaClient, Prisma } from "./__generated__";
+import { PrismaClient } from "./__generated__";
 import { users } from "./seeds/users";
-import { hashPassword } from "../src/routers/auth";
+import { hashPassword } from "../src/routers/auth/utils";
 import { clients } from "./seeds/clients";
 
 const prisma = new PrismaClient();
+
+console.log("Seeding database...");
 
 async function main() {
   console.log(`Start seeding ...`);

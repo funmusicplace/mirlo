@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from "express";
-import { AppError } from "../../utils/error";
 import jwt, { JwtPayload, VerifyErrors } from "jsonwebtoken";
-import { clearJWT, setTokens } from ".";
+import { clearJWT, setTokens } from "./utils";
 import prisma from "@mirlo/prisma";
 
 const refresh_secret = process.env.REFRESH_TOKEN_SECRET ?? "";

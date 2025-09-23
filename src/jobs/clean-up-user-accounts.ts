@@ -1,7 +1,7 @@
 import prisma from "@mirlo/prisma";
 import logger from "../logger";
 import { faker } from "@faker-js/faker";
-import { hashPassword } from "../routers/auth";
+import { hashPassword } from "../routers/auth/utils";
 
 const cleanUpUserAccounts = async () => {
   try {

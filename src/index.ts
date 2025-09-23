@@ -25,7 +25,6 @@ import { corsCheck } from "./auth/cors";
 import cookieParser from "cookie-parser";
 import qs from "qs";
 import { getSiteSettings } from "./utils/settings";
-import { userAuthenticated, userHasPermission } from "./auth/passport";
 
 dotenv.config();
 

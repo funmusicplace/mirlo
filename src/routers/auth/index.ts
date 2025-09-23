@@ -1,6 +1,4 @@
 import express, { Response } from "express";
-import jwt from "jsonwebtoken";
-import bcrypt from "bcryptjs";
 import { userAuthenticated } from "../../auth/passport";
 import prisma from "@mirlo/prisma";
 
@@ -14,15 +12,9 @@ import {
   passwordResetInitiate,
   passwordResetSetPassword,
 } from "./passwordReset";
-
-const jwt_secret = process.env.JWT_SECRET ?? "";
-const refresh_secret = process.env.REFRESH_TOKEN_SECRET ?? "";
+import { clearJWT, setTokens } from "./utils";
 
 const router = express.Router();
-
-export async function hashPassword(password: string) {
-  return await bcrypt.hash(password, 3);
-}
 
 router.post(`/signup`, signup);
 
@@ -121,10 +113,6 @@ router.post("/login", login, async (req, res, next) => {
   }
 });
 
-export const clearJWT = (res: Response) => {
-  return res.clearCookie("jwt").clearCookie("refresh");
-};
-
 router.get("/logout", (req, res) => {
   if (req.cookies["jwt"]) {
     clearJWT(res).status(200).json({
@@ -140,40 +128,5 @@ router.get("/logout", (req, res) => {
 router.get("/profile", userAuthenticated, profile);
 
 router.post("/refresh", refresh);
-
-export const buildTokens = (user: { email: string; id: number }) => {
-  const payload = {
-    email: user.email,
-    id: user.id,
-  };
-
-  const accessToken = jwt.sign(payload, jwt_secret, {
-    expiresIn: "1w",
-  });
-  const refreshToken = jwt.sign(payload, refresh_secret, {
-    expiresIn: "4w",
-  });
-
-  return { accessToken, refreshToken };
-};
-
-export const setTokens = (
-  res: Response,
-  user: { email: string; id: number }
-) => {
-  const { accessToken, refreshToken } = buildTokens(user);
-
-  res
-    .cookie("jwt", accessToken, {
-      httpOnly: true,
-      sameSite: process.env.NODE_ENV !== "development" ? "strict" : undefined,
-      secure: process.env.NODE_ENV !== "development",
-    })
-    .cookie("refresh", refreshToken, {
-      httpOnly: true,
-      sameSite: process.env.NODE_ENV !== "development" ? "strict" : undefined,
-      secure: process.env.NODE_ENV !== "development",
-    });
-};
 
 export default router;
