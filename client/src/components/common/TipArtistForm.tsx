@@ -159,43 +159,55 @@ const TipArtistForm: React.FC<{
                 />
               </FormComponent>
             )}
-            {!user && (
-              <FormComponent
-                className={css`
-                  margin-bottom: 0.5rem !important;
-                `}
-              >
-                {t("email")}
-                <InputEl {...methods.register("email")} type="email" required />
-              </FormComponent>
+            {actualValue && (
+              <>
+                {!user && (
+                  <FormComponent
+                    className={css`
+                      margin-bottom: 0.5rem !important;
+                    `}
+                  >
+                    {t("email")}
+                    <InputEl
+                      {...methods.register("email")}
+                      type="email"
+                      required
+                    />
+                  </FormComponent>
+                )}
+                <FormComponent
+                  className={css`
+                    margin-top: 1rem !important ;
+                  `}
+                >
+                  <label htmlFor="comment">{t("leaveAComment")}</label>
+                  <TextArea
+                    id="comment"
+                    {...methods.register("message")}
+                    rows={2}
+                  />
+                  <small>{t("messageToArtist")}</small>
+                </FormComponent>
+                <ArtistButton
+                  onClick={() => subscribeToTier()}
+                  isLoading={isCheckingForSubscription}
+                  disabled={!methods.formState.isValid || !actualValue}
+                  wrap
+                  className={css`
+                    width: 100% !important;
+                  `}
+                >
+                  {currency &&
+                    t(!actualValue ? "enterGiftAmount" : "giveOnce", {
+                      amount: moneyDisplay({
+                        amount: actualValue,
+                        currency,
+                      }),
+                    })}
+                </ArtistButton>
+              </>
             )}
           </FormProvider>
-          <FormComponent
-            className={css`
-              margin-top: 1rem !important ;
-            `}
-          >
-            <label htmlFor="comment">{t("leaveAComment")}</label>
-            <TextArea id="comment" {...methods.register("message")} rows={2} />
-            <small>{t("messageToArtist")}</small>
-          </FormComponent>
-          <ArtistButton
-            onClick={() => subscribeToTier()}
-            isLoading={isCheckingForSubscription}
-            disabled={!methods.formState.isValid || !actualValue}
-            wrap
-            className={css`
-              width: 100% !important;
-            `}
-          >
-            {currency &&
-              t(!actualValue ? "enterGiftAmount" : "giveOnce", {
-                amount: moneyDisplay({
-                  amount: actualValue,
-                  currency,
-                }),
-              })}
-          </ArtistButton>
         </>
       )}
     </div>

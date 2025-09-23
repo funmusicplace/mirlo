@@ -8,9 +8,8 @@ import { useSnackbar } from "state/SnackbarContext";
 import React from "react";
 import { Link } from "react-router-dom";
 import { useLoginMutation } from "queries/auth";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import EmailVerification from "./EmailVerification";
-import { QUERY_KEY_AUTH, queryKeyIncludes } from "queries/queryKeys";
 
 type SignupInputs = {
   email: string;
@@ -82,7 +81,7 @@ const LogInForm: React.FC<{ afterLogIn: () => void }> = ({ afterLogIn }) => {
         `}
       >
         <hr />
-        OR
+        {t("or")}
         <hr />
       </span>
 

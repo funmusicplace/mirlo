@@ -78,7 +78,7 @@ export const uploadAndSendToImageQueue = async (
   }: {
     filename: string;
     mimeType: string;
-  }) => Promise<{ id: string }>,
+  }) => Promise<{ id: string } | void>,
   finalBucket?: string, // If this is not supplied, we this basically just uploads to the first bucket,0
   storeWithExtension?: boolean
 ) => {
@@ -92,6 +92,11 @@ export const uploadAndSendToImageQueue = async (
   const jobId = await new Promise((resolve, reject) => {
     ctx.req.busboy.on("file", async (_fieldname, fileStream, fileInfo) => {
       const image = await createDatabaseEntry(fileInfo);
+
+      if (!image) {
+        reject("Could not create database entry");
+        return;
+      }
 
       try {
         const filenameArray = fileInfo.filename.split(".");

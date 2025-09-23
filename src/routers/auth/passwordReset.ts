@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
-import { hashPassword, setTokens } from ".";
+import { hashPassword, setTokens } from "./utils";
 import { sendMail } from "../../jobs/send-mail";
 import { Job } from "bullmq";
 import logger from "../../logger";

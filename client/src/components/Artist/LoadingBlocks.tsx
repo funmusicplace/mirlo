@@ -40,11 +40,12 @@ const LoadingBlocks: React.FC<{
     <div
       className={css`
         width: 100%;
-        display: ${squares ? "grid" : "block"};
+        display: ${squares ? "grid" : "flex"};
+        flex-direction: ${squares ? "none" : "column"};
         grid-template-columns: ${squares
           ? "repeat(auto-fit, minmax(150px, 1fr))"
           : "none"};
-        gap: ${squares ? margin : "0"};
+        gap: ${margin};
       `}
     >
       {range(rows).map((r) => (

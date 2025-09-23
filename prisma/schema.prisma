@@ -367,6 +367,26 @@ model ArtistSubscriptionTier {
   platformPercent       Int?                     @default(7)
   autoPurchaseAlbums    Boolean                  @default(false)
   collectAddress        Boolean?                 @default(false)
+  images                SubscriptionTierImage[]
+}
+
+model SubscriptionTierImage {
+  imageId String                 @db.Uuid
+  image   Image                  @relation(fields: [imageId], references: [id])
+  tierId  Int
+  tier    ArtistSubscriptionTier @relation(fields: [tierId], references: [id])
+
+  @@unique([imageId, tierId])
+}
+
+model Image {
+  id               String                  @id @default(uuid()) @db.Uuid
+  url              String[]
+  createdAt        DateTime                @default(now())
+  updatedAt        DateTime                @updatedAt
+  deletedAt        DateTime?
+  originalFilename String?
+  tiers            SubscriptionTierImage[]
 }
 
 enum Interval {

@@ -96,7 +96,7 @@ const SupportArtistTiersForm: React.FC<{
 
   return (
     <>
-      {!artistDetails && <LoadingBlocks rows={1} />}
+      {!artistDetails && <LoadingBlocks rows={1} margin="1rem" />}
       <FormProvider {...methods}>
         <Controller
           name="tier"

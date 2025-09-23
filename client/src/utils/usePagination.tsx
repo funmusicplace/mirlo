@@ -31,7 +31,6 @@ const usePagination = ({ pageSize }: { pageSize: number }) => {
     }) => {
       const showNextPage = total && total > pageSize * (page + 1);
 
-      console.log({ page, amount, pageSize, showNextPage });
       return (
         <div
           className={css`
