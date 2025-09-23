@@ -1,16 +1,30 @@
+import { css } from "@emotion/css";
 import { cloneDeep } from "lodash";
 import React from "react";
 import { useGlobalStateContext } from "state/GlobalState";
 import api from "services/api";
 import { bp } from "../../../constants";
+import {
+  FaDownload,
+  FaExclamationTriangle,
+  FaPen,
+  FaTrash,
+} from "react-icons/fa";
 
-import { determineNewTrackOrder } from "utils/tracks";
+import { determineNewTrackOrder, fmtMSS } from "utils/tracks";
 import { CenteredSpinner } from "../../common/Spinner";
 import Table from "../../common/Table";
 import ManageTrackRow from "./ManageTrackRow";
 import { useTranslation } from "react-i18next";
 import styled from "@emotion/styled";
 import { useAuthContext } from "state/AuthContext";
+import TrackRowPlayControl from "components/common/TrackTable/TrackRowPlayControl";
+import TrackAuthors from "components/common/TrackTable/TrackAuthors";
+import {
+  ArtistButton,
+  ArtistButtonAnchor,
+} from "components/Artist/ArtistButtons";
+import EditTrackRow from "./AlbumFormComponents/EditTrackRow";
 
 const TrackTableComponent = styled(Table)`
   margin-bottom: 1.5rem;
@@ -161,10 +175,92 @@ export const ManageTrackTable: React.FC<{
   }
 
   return (
-    <TrackTableComponent>
+<>
+		<ol>
+			{displayTracks?.map((track) => (
+				<li key={track.id}>
+				<details>
+				<summary style={{ display: "flex", position: "sticky", top: "0" }}>
+        {track.audio && (
+          <TrackRowPlayControl
+            trackId={track.id}
+            canPlayTrack={true}
+            trackNumber={track.order}
+            onTrackPlayCallback={addTracksToQueue}
+            isDisabled={track.audio && track.audio.uploadState === "STARTED" && !isOlderThan4Hours}
+          />
+        )}
+        {!track.audio && (
+          <Tooltip hoverText="Track audio is missing">
+            <FaExclamationTriangle />
+
+            <ReplaceTrackAudioInput trackId={track.id} reload={reload} />
+          </Tooltip>
+        )}
+        <div
+          className={css`
+            display: flex;
+            align-items: center;
+          `}
+        >
+          <div>
+            {track.title || (
+              <div
+                className={css`
+                  filter: hue-rotate(90deg);
+                `}
+              >
+                <FaExclamationTriangle /> {t("missingTitle")}
+              </div>
+            )}
+            <TrackAuthors track={track} trackGroupArtistId={artistId} />
+            <p>
+              <small>
+                {track.audio?.uploadState === "SUCCESS" && t("doneUploadingTrack")}
+                {track.audio?.uploadState === "STARTED" && (
+                  <>
+                    <LoadingSpinner size="small" />
+                    {t("stillProcessing")}
+                  </>
+                )}
+                {track.audio?.uploadState === "ERROR" && t("thereWasAnError")}
+              </small>
+            </p>
+          </div>
+        </div>
+        {track.audio?.duration && fmtMSS(track.audio?.duration)}
+        <ArtistButtonAnchor
+          size="compact"
+          startIcon={<FaDownload />}
+          variant="dashed"
+          href={"hello" // getDownloadOriginalUrl()
+}
+          title={t("downloadOriginal") ?? ""}
+          style={{ marginRight: ".25rem" }}
+        ></ArtistButtonAnchor>
+        <ArtistButton
+          variant="dashed"
+          startIcon={<FaTrash />}
+          size="compact"
+          onClick={() => console.log("poop") // onDeleteClick
+}
+          title={t("delete") ?? ""}
+        />
+				</summary>
+					      <EditTrackRow
+        track={track}
+        onCancelEditing={() => console.log("cancel")}
+        reload={reload}
+      />
+				</details>
+ 			</li>
+			))}
+		</ol>
+{/*
+		<TrackTableComponent>
       <thead>
         <tr>
-          <th />
+          <th></th>
           <th>{t("titleColumn")}</th>
           <th>{t("status")}</th>
           <th>{t("durationColumn")}</th>
@@ -193,6 +289,8 @@ export const ManageTrackTable: React.FC<{
         )}
       </tbody>
     </TrackTableComponent>
+*/}
+</>
   );
 };
 
