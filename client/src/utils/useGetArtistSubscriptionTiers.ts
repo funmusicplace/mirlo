@@ -9,12 +9,15 @@ function useGetArtistSubscriptionTiers(urlSlug?: string) {
     queryArtist({ artistSlug: urlSlug ?? "", includeDefaultTier: true })
   );
 
+  const userTierForArtist = user?.artistUserSubscriptions?.find(
+    (s) => s.artistSubscriptionTier.artistId === artistDetails?.id
+  );
+
   const currentTier =
-    user?.artistUserSubscriptions?.find(
-      (s) => s.artistSubscriptionTier.artistId === artistDetails?.id
-    )?.artistSubscriptionTier || artistDetails?.subscriptionTiers?.length === 1
-      ? artistDetails?.subscriptionTiers[0]
-      : undefined;
+    userTierForArtist?.artistSubscriptionTier ||
+    artistDetails?.subscriptionTiers.find(
+      (tier) => tier.id === userTierForArtist?.artistSubscriptionTierId
+    );
 
   return {
     data: artistDetails,

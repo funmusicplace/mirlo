@@ -6,6 +6,8 @@ import { moneyDisplay } from "./Money";
 import { useTranslation } from "react-i18next";
 import { useGetArtistColors } from "components/Artist/ArtistButtons";
 import { css } from "@emotion/css";
+import Box, { ArtistBox } from "./Box";
+import React from "react";
 
 const Label = styled.label<{ colors?: ArtistColors }>`
   display: block;
@@ -66,21 +68,17 @@ const SupportArtistPopUpTiers = forwardRef<
 
   const { colors } = useGetArtistColors();
 
+  React.useEffect(() => {
+    if (options.length === 1) {
+      methods.setValue("tier", options[0]);
+    }
+  });
+
   return (
     <List>
       {options.map((tier) => {
         return (
-          <ListItem
-            key={tier.id}
-            colors={colors}
-            className={
-              options.length === 1
-                ? css`
-                    display: none;
-                  `
-                : ""
-            }
-          >
+          <ListItem key={tier.id} colors={colors}>
             <InputEl
               type="radio"
               id={`${tier.id}`}
@@ -111,6 +109,10 @@ const SupportArtistPopUpTiers = forwardRef<
                           amount: tier.minAmount ? tier.minAmount / 100 : 0,
                           currency: tier.currency,
                         }),
+                        interval:
+                          tier.interval === "MONTH"
+                            ? t("monthly")
+                            : t("yearly"),
                       })
                     : ""}
                 </strong>

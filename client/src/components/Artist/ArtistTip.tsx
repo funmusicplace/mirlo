@@ -61,8 +61,26 @@ const ArtistTip: React.FC = () => {
           `}
         >
           <h2>{t("supportThisArtist")}</h2>
-          <SupportArtistTiersForm artist={artist} excludeDefault={!!user} />
-          <h2>{t("orTipJustOnce")}</h2>
+          <SupportArtistTiersForm artist={artist} />
+          <div
+            className={css`
+              display: flex;
+              justify-content: stretch;
+              align-items: center;
+              margin: 1rem 0;
+              width: 100%;
+
+              hr {
+                flex-grow: 1;
+                margin: 1rem;
+                border-color: var(--mi-darken-x-background-color);
+              }
+            `}
+          >
+            <hr />
+            {t("orTipJustOnce")}
+            <hr />
+          </div>{" "}
           <TipArtistForm artist={artist} />
         </div>
       </div>

@@ -80,14 +80,25 @@ const TipArtist: React.FC<{ artistId: number; fixed?: boolean }> = ({
             <SupportArtistTiersForm artist={artist} excludeDefault={!!user} />
           </>
         )}
-        <p
+        <div
           className={css`
-            margin-bottom: 0.5rem;
-            margin-top: 1rem;
+            display: flex;
+            justify-content: stretch;
+            align-items: center;
+            margin: 1rem 0;
+            width: 100%;
+
+            hr {
+              flex-grow: 1;
+              margin: 1rem;
+              border-color: var(--mi-darken-x-background-color);
+            }
           `}
         >
+          <hr />
           {hasNonDefaultTiers ? t("orTipJustOnce") : t("tipThem")}
-        </p>
+          <hr />
+        </div>
         <TipArtistForm artist={artist} />
 
         <UnsubscribeButton artist={artist} />
