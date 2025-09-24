@@ -338,7 +338,7 @@
     "orTipJustOnce": "Or tip just once",
     "tipThem": "Tip them",
     "email": "E-mail",
-    "youAreFollowingThisArtist": "You're already receiving updates for this artist. You can choose to support them on a regular basis!",
+    "youAreFollowingThisArtist": "You're already receiving updates from {{ artistName }}. You can choose to support them on a regular basis!",
     "youAreAlreadySubscribed": "You're already subscribed to this tier",
     "roster": "Roster",
     "includesNewReleases": "Includes new releases",
