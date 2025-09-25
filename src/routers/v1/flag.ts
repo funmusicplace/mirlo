@@ -3,6 +3,7 @@ import fetch from "node-fetch";
 import { AppError } from "../../utils/error";
 import sendMail from "../../jobs/send-mail";
 import { Job } from "bullmq";
+import prisma from "@mirlo/prisma";
 
 const { CLOUDFLARE_TURNSTILE_API_SECRET } = process.env;
 
@@ -41,6 +42,24 @@ export default function () {
     try {
       await checkCloudFlare(cfTurnstile, connectingIP);
 
+      let trackGroup;
+      if (trackGroupId) {
+        if (!isNaN(Number(trackGroupId))) {
+          trackGroup = await prisma.trackGroup.findUnique({
+            where: { id: Number(trackGroupId) },
+            include: {
+              artist: true,
+            },
+          });
+          if (!trackGroup) {
+            throw new AppError({
+              httpCode: 400,
+              description: "Invalid track group",
+            });
+          }
+        }
+      }
+
       await sendMail({
         data: {
           template: "report-album-problem",
@@ -48,10 +67,12 @@ export default function () {
             to: "hi@mirlo.space",
           },
           locals: {
+            client: process.env.REACT_APP_CLIENT_DOMAIN,
             email,
             reason,
             description,
             trackGroupId,
+            trackGroup,
           },
         },
       } as Job);

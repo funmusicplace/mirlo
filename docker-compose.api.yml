@@ -26,7 +26,7 @@ services:
       target: api
     environment:
       - NODE_ENV=${NODE_ENV:-development}
-
+      - REDIS_HOST=${REDIS_HOST:-redis}
     depends_on:
       - redis
       - pgsql
