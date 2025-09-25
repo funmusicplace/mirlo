@@ -2,6 +2,13 @@
 
 It could happen that something goes wrong, and that whoever knows best might not be able to fix it right away. This guide is to help make decisions on what the appropriate response is. It should be a living document and built based on experience.
 
+## Resolving DNS issues
+
+We've had a weird instance where things in Cloudflare seem to not be connecting to the website. Here's some things to try:
+
+- Disable proxying on Cloudflare. This should be instant.
+- Disable the Custom DNS on Namecheap. This might take a second to update.
+
 ## Something wrong at a regular interval
 
 It could be that something is repeatedly going wrong at a very regular interval--the most obvious indication of this is if an e-mail is getting sent out every x minutes. This likely means that a cron job is breaking and not completing, and the next time it runs it tries to do it with the same set of information. See: the famous April 13 incident with the April Update Email, which some users received 11 times.
