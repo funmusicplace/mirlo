@@ -83,30 +83,57 @@ function useFloatingLinkState() {
     setHref(url);
   }, [url]);
 
-  const submitHref = useCallback(() => {
-    setIsEditing(false);
-    const range = linkShortcut ?? undefined;
+  const submitHref = useCallback(
+    (e?: KeyboardEvent<HTMLInputElement>) => {
+      // Prevent default behavior that might cause page jump
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
 
-    if (href === "") {
-      chain.removeLink();
-    } else {
-      chain.updateLink({ href, auto: false }, range);
-    }
+      setIsEditing(false);
+      const range = linkShortcut ?? undefined;
 
-    chain.focus(range?.to ?? to).run();
-  }, [setIsEditing, linkShortcut, chain, href, to]);
+      if (href === "") {
+        chain.removeLink();
+      } else {
+        chain.updateLink({ href, auto: false }, range);
+      }
 
-  const cancelHref = useCallback(() => {
-    setIsEditing(false);
-  }, [setIsEditing]);
+      chain.focus(range?.to ?? to).run();
+    },
+    [setIsEditing, linkShortcut, chain, href, to]
+  );
 
-  const clickEdit = useCallback(() => {
-    if (empty) {
-      chain.selectLink();
-    }
+  const cancelHref = useCallback(
+    (e?: KeyboardEvent<HTMLInputElement>) => {
+      // Prevent default behavior that might cause page jump
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
 
-    setIsEditing(true);
-  }, [chain, empty, setIsEditing]);
+      setIsEditing(false);
+    },
+    [setIsEditing]
+  );
+
+  const clickEdit = useCallback(
+    (e?: MouseEvent) => {
+      // Prevent default behavior that might cause page jump
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+
+      if (empty) {
+        chain.selectLink();
+      }
+
+      setIsEditing(true);
+    },
+    [chain, empty, setIsEditing]
+  );
 
   return useMemo(
     () => ({
@@ -145,7 +172,7 @@ const DelayAutoFocusInput = ({
     }
 
     const frame = window.requestAnimationFrame(() => {
-      inputRef.current?.focus();
+      inputRef.current?.focus({ preventScroll: true }); // Prevent scroll when focusing
     });
 
     return () => {
@@ -179,9 +206,29 @@ const FloatingLinkToolbar: React.FC = () => {
   const activeLink = active.link();
   const { empty } = useCurrentSelection();
 
-  const handleClickEdit = useCallback(() => {
-    clickEdit();
-  }, [clickEdit]);
+  const handleClickEdit = useCallback(
+    (e?: any) => {
+      // Prevent default behavior and event bubbling
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      clickEdit(e);
+    },
+    [clickEdit]
+  );
+
+  const handleRemove = useCallback(
+    (e?: any) => {
+      // Prevent default behavior and event bubbling
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      onRemove();
+    },
+    [onRemove]
+  );
 
   const linkEditButtons = activeLink ? (
     <>
@@ -193,7 +240,7 @@ const FloatingLinkToolbar: React.FC = () => {
       />
       <CommandButton
         commandName="removeLink"
-        onSelect={onRemove}
+        onSelect={handleRemove}
         icon="linkUnlink"
         enabled
       />
@@ -240,27 +287,33 @@ const FloatingLinkToolbar: React.FC = () => {
         // to be fixed
         // renderOutsideEditor
       >
-        <DelayAutoFocusInput
-          style={{ zIndex: 10000 }}
-          autoFocus
-          placeholder="Enter link..."
-          onChange={(event: ChangeEvent<HTMLInputElement>) =>
-            setHref(event.target.value)
-          }
-          value={href}
-          onKeyPress={(event: KeyboardEvent<HTMLInputElement>) => {
-            const { code } = event;
-            if (code === "Enter") {
-              event.preventDefault();
-              submitHref();
-            }
-
-            if (code === "Escape") {
-              event.preventDefault();
-              cancelHref();
-            }
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            submitHref();
           }}
-        />
+          style={{ margin: 0, padding: 0 }}
+        >
+          <DelayAutoFocusInput
+            style={{ zIndex: 10000 }}
+            autoFocus
+            placeholder="Enter link..."
+            onChange={(event: ChangeEvent<HTMLInputElement>) =>
+              setHref(event.target.value)
+            }
+            value={href}
+            onKeyDown={(event: KeyboardEvent<HTMLInputElement>) => {
+              const { key } = event;
+              if (key === "Enter") {
+                submitHref(event);
+              }
+
+              if (key === "Escape") {
+                cancelHref(event);
+              }
+            }}
+          />
+        </form>
       </FloatingWrapper>
     </>
   );
