@@ -39,7 +39,7 @@ const EditPostHeader: React.FC<{
         align-items: center;
         padding: 1.2rem 0;
         margin-bottom: 1rem;
-        z-index: 1;
+        z-index: 2;
 
         @media screen and (max-width: ${bp.medium}px) {
           padding-top: 0.5rem;

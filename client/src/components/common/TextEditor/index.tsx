@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   PlaceholderExtension,
   TableExtension,
@@ -62,6 +62,59 @@ const TextEditor: React.FC<{
     selection: "end",
   });
 
+  const [headerHeight, setHeaderHeight] = useState(0);
+
+  useEffect(() => {
+    const updateHeaderHeight = () => {
+      // Look for visible sticky elements that are actually positioned at the top
+      const allElements = document.querySelectorAll("*");
+      let validHeader: HTMLElement | null = null;
+
+      for (const element of allElements) {
+        const className = element.getAttribute("class");
+        if (!className || !className.includes("EditPostHeader")) continue;
+        const styles = window.getComputedStyle(element);
+        const rect = element.getBoundingClientRect();
+        if (rect.top === 0 && rect.height !== 0) {
+          validHeader = element as HTMLElement;
+          break;
+        }
+      }
+
+      if (validHeader) {
+        const rect = validHeader.getBoundingClientRect();
+        setHeaderHeight(rect.bottom);
+      } else {
+        setHeaderHeight(75); // Fallback value
+      }
+    };
+
+    // Update initially and on resize
+    updateHeaderHeight();
+
+    const resizeObserver = new ResizeObserver(updateHeaderHeight);
+    const mutationObserver = new MutationObserver(updateHeaderHeight);
+
+    // Observe document changes
+    resizeObserver.observe(document.body);
+    mutationObserver.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["style", "class"],
+    });
+
+    window.addEventListener("resize", updateHeaderHeight);
+    window.addEventListener("scroll", updateHeaderHeight);
+
+    return () => {
+      resizeObserver.disconnect();
+      mutationObserver.disconnect();
+      window.removeEventListener("resize", updateHeaderHeight);
+      window.removeEventListener("scroll", updateHeaderHeight);
+    };
+  }, []);
+
   return (
     <div
       className={
@@ -71,11 +124,20 @@ const TextEditor: React.FC<{
             margin-bottom: 1rem;
           }
           width: 100%;
+          position: relative;
+
+          /* Sticky toolbar styles */
+          .sticky-toolbar-container {
+            position: sticky;
+            top: ${headerHeight}px;
+            z-index: 1;
+          }
 
           .remirror-editor {
             width: 100%;
             .ProseMirror {
               border: 1px solid var(--mi-darken-x-background-color);
+              border-top: none;
             }
 
             iframe {
@@ -111,14 +173,14 @@ const TextEditor: React.FC<{
         manager={manager}
         state={state}
         onChange={(parameter) => {
-          // Update the state to the latest value.
           onChange(prosemirrorNodeToHtml(parameter.state.doc));
           setState(parameter.state);
         }}
       >
-        <TopToolbar postId={postId} artistId={artistId} />
+        <div className="sticky-toolbar-container">
+          <TopToolbar postId={postId} artistId={artistId} />
+        </div>
         <EditorComponent />
-        {/* <BubbleMenu /> */}
         <TableComponents />
         <FloatingLinkToolbar />
       </Remirror>
