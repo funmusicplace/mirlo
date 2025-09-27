@@ -65,6 +65,13 @@ const HeaderSearch: React.FC = () => {
     const manyMoreArtists = (artists.total ?? 0) > artists.results.length;
 
     const results = [
+      ...tags.results.map((r, rid) => ({
+        firstInCategory: rid === 0,
+        category: t("tags"),
+        id: r.tag,
+        name: r.tag,
+        isTag: true,
+      })),
       ...(manyMoreArtists
         ? [
             {
@@ -110,13 +117,6 @@ const HeaderSearch: React.FC = () => {
         labelId: label.urlSlug ?? label.id,
         name: label.name,
         isLabel: true,
-      })),
-      ...tags.results.map((r, rid) => ({
-        firstInCategory: rid === 0,
-        category: t("tags"),
-        id: r.tag,
-        name: r.tag,
-        isTag: true,
       })),
     ];
     return results;
