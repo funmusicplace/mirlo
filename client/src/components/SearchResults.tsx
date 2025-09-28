@@ -94,44 +94,51 @@ const SearchResults: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
         }
       `}
     >
-      {!tag && !!tags?.results.length && (
-        <SectionHeader
+      {/* Tags Section */}
+      <SectionHeader>
+        <WidthContainer
+          variant="big"
+          justify="space-between"
           className={css`
-            position: sticky;
-            background-color: var(--mi-white);
+            flex-direction: row;
+            display: flex;
           `}
         >
-          <WidthContainer variant="big">
-            <h2 className="h5 section-header__heading">
-              {t("tagSearchResults", { search })}
-            </h2>
-            <div
-              className={css`
-                margin: 0 0.5rem;
-              `}
-            >
+          <h1 className="h5 section-header__heading" id={headingId}>
+            {search ? t("tagSearchResults", { search }) : t("tags")}
+          </h1>
+        </WidthContainer>
+      </SectionHeader>
+      <WidthContainer variant="big" justify="center">
+        <div
+          className={css`
+            display: flex;
+            width: 100%;
+            flex-direction: row;
+            flex-wrap: wrap;
+            padding: var(--mi-side-paddings-xsmall);
+          `}
+        >
+          {!!tags?.results.length && (
+            <TrackgroupGrid gridNumber="4">
               <TrackGroupPills tags={tags?.results.map((tag) => tag.tag)} />
-            </div>
-            <div
-              className={css`
-                display: flex;
-                justify-content: flex-end;
-              `}
-            >
+            </TrackgroupGrid>
+          )}
+          {isLoadingTags && <LoadingBlocks squares />}
+          {!isLoadingTags && !tags?.results.length && (
+            <SpaceBetweenDiv>
+              <p>{t("noTagsFound")}</p>
               <ButtonLink
                 to="/tags"
-                className={css`
-                  margin-top: 0.25rem;
-                `}
                 variant="outlined"
                 endIcon={<FaChevronRight />}
               >
                 {t("browseTags")}
               </ButtonLink>
-            </div>
-          </WidthContainer>
-        </SectionHeader>
-      )}
+            </SpaceBetweenDiv>
+          )}
+        </div>
+      </WidthContainer>
       <SectionHeader>
         <WidthContainer
           variant="big"
@@ -329,7 +336,6 @@ const SearchResults: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
           </TrackgroupGrid>
         </div>
       </WidthContainer>
-      s
     </div>
   );
 };
