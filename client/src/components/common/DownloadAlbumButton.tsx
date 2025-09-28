@@ -151,7 +151,7 @@ const DownloadAlbumButton: React.FC<{
                     }
                   `}
                 >
-                  <LoadingSpinner />
+                  <LoadingSpinner size="small" />
                   {t("downloadButtonGenerating")}
                 </p>
               ) : (
