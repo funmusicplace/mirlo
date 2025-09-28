@@ -36,11 +36,11 @@ export default function () {
     try {
       await doesTrackGroupBelongToUser(Number(trackGroupId), loggedInUser);
 
-      const jobId = await processTrackGroupCover({ req, res })(
+      const { jobId, imageId } = await processTrackGroupCover({ req, res })(
         Number(trackGroupId)
       );
 
-      res.json({ result: { jobId } });
+      res.json({ result: { jobId, imageId } });
     } catch (error) {
       next(error);
     }

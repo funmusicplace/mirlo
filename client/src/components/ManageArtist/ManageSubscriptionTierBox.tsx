@@ -52,80 +52,90 @@ const ManageSubscriptionTierBox: React.FC<{
         margin-bottom: 0.5rem;
         background: var(--mi-darken-background-color);
       `}
+      noPadding
     >
-      <SpaceBetweenDiv
+      {tier.images?.[0]?.image.sizes?.[625] && (
+        <img
+          src={tier.images[0].image.sizes[625] + `?updatedAt=${Date.now()}`}
+          width="100%"
+          height="120px"
+          className={css`
+            object-fit: cover;
+          `}
+        />
+      )}
+      <div
         className={css`
-          flex-direction: column;
+          padding: 0.25rem 1rem;
         `}
       >
-        <div
+        <SpaceBetweenDiv
           className={css`
-            margin-top: 0.5rem;
-            margin-bottom: 0.5rem;
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            padding-bottom: 1rem;
-            align-items: center;
-            border-bottom: var(--mi-border);
-            strong {
-              text-transform: uppercase;
-            }
+            flex-direction: column;
           `}
         >
           <div
             className={css`
-              width: 70%;
-            `}
-          >
-            <strong>
-              {tier.name}:{" "}
-              <Money
-                amount={tier.minAmount ? tier.minAmount / 100 : 0}
-                currency={tier.currency}
-              />{" "}
-              {t(tier.interval === "MONTH" ? "monthly" : "yearly")}
-            </strong>
-          </div>
-          <div
-            className={css`
+              margin-top: 0.5rem;
+              margin-bottom: 0.5rem;
+              width: 100%;
               display: flex;
+              justify-content: space-between;
+              padding-bottom: 1rem;
+              align-items: center;
+              border-bottom: var(--mi-border);
+              strong {
+                text-transform: uppercase;
+              }
             `}
           >
-            <Button
-              variant="dashed"
-              startIcon={<FaPen />}
-              onClick={() => setManageTier(true)}
-            />
-
-            <Button
+            <div
               className={css`
-                margin-left: 0.5rem;
+                width: 70%;
               `}
-              startIcon={<FaTrash />}
-              onClick={() => deleteTier(tier.id)}
-            />
-          </div>
-        </div>
-      </SpaceBetweenDiv>
+            >
+              <strong>
+                {tier.name}:{" "}
+                <Money
+                  amount={tier.minAmount ? tier.minAmount / 100 : 0}
+                  currency={tier.currency}
+                />{" "}
+                {t(tier.interval === "MONTH" ? "monthly" : "yearly")}
+              </strong>
+            </div>
+            <div
+              className={css`
+                display: flex;
+              `}
+            >
+              <Button
+                variant="dashed"
+                startIcon={<FaPen />}
+                onClick={() => setManageTier(true)}
+              />
 
-      <MarkdownContent content={tier.description} />
-      <Modal
-        open={!!manageTier}
-        title={t("editTier")}
-        onClose={() => setManageTier(undefined)}
-        size="small"
-      >
-        {/* There is some overly complex state management going on here with the reloads being passed around */}
-        <SubscriptionForm
-          existing={tier}
-          reload={() => {
-            reload();
-            setManageTier(undefined);
-          }}
-          artist={artist}
-        />
-      </Modal>
+              <Button
+                className={css`
+                  margin-left: 0.5rem;
+                `}
+                startIcon={<FaTrash />}
+                onClick={() => deleteTier(tier.id)}
+              />
+            </div>
+          </div>
+        </SpaceBetweenDiv>
+
+        <MarkdownContent content={tier.description} />
+        <Modal
+          open={!!manageTier}
+          title={t("editTier")}
+          onClose={() => setManageTier(undefined)}
+          size="small"
+        >
+          {/* There is some overly complex state management going on here with the reloads being passed around */}
+          <SubscriptionForm existing={tier} reload={reload} artist={artist} />
+        </Modal>
+      </div>
     </Box>
   );
 };

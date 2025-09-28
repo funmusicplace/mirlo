@@ -69,6 +69,9 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
       <div
         className={css`
           margin-bottom: 1rem;
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 1rem;
         `}
       >
         {tiers?.results.map((tier) => (

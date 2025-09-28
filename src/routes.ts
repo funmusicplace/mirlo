@@ -44,6 +44,7 @@ const routes = [
   "artists/{id}/unfollow",
   "artists/{id}/tip",
   "downloadableContent/{id}",
+  "images/{id}",
   "merch/{id}",
   "merch/{id}/purchase",
   "posts",

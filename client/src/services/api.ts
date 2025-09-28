@@ -1,5 +1,6 @@
 import { API_ROOT } from "../constants";
-import APIInstance from "@mirlo/mirlo-api-client";
+// import APIInstance from "@mirlo/mirlo-api-client";
+import APIInstance from "./APIInstance";
 
 const api = APIInstance(
   API_ROOT?.replace(" ", "") ?? "",

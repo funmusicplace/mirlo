@@ -145,13 +145,13 @@ const PostCard: React.FC<{
         backgroundColor={isOnArtistPage ? artistBackground : undefined}
       />
       <Box
+        noPadding
         className={css`
           height: 350px;
           width: 100% !important;
           border: solid 1px transparent;
           margin-bottom: 0 !important;
           overflow: hidden;
-          padding: 0 !important;
           justify-content: space-between;
           position: relative;
 

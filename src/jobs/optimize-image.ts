@@ -193,6 +193,13 @@ const optimizeImage = async (job: Job) => {
     ) as string[];
     logger.info(`Saving URLs [${urls.join(", ")}]`);
 
+    if (model === "image") {
+      await prisma.image.update({
+        where: { id: destinationId },
+        data: { url: urls },
+      });
+    }
+
     if (model === "trackGroupCover") {
       await prisma.trackGroupCover.update({
         where: { id: destinationId },

@@ -29,10 +29,11 @@ export default function () {
     const loggedInUser = req.user as User;
 
     try {
-      let jobId = null;
-      jobId = await processUserBanner({ req, res })(loggedInUser.id);
+      const { jobId, imageId } = await processUserBanner({ req, res })(
+        loggedInUser.id
+      );
 
-      res.json({ result: { jobId } });
+      res.json({ result: { jobId, imageId } });
     } catch (error) {
       next(error);
     }

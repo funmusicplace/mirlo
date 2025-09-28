@@ -387,6 +387,7 @@ model Image {
   deletedAt        DateTime?
   originalFilename String?
   tiers            SubscriptionTierImage[]
+  dimensions       String // e.g. "square", "banner"
 }
 
 enum Interval {

@@ -3,7 +3,6 @@ import {
   PrismaClientValidationError,
 } from "@prisma/client/runtime/library";
 import { NextFunction, Request, Response } from "express";
-import { MulterError } from "multer";
 
 export enum HttpCode {
   OK = 200,
@@ -103,8 +102,6 @@ const errorHandler = (
     res.status(400).json({
       error: message,
     });
-  } else if (err instanceof MulterError) {
-    res.status(400).json({ error: err.message });
   } else if (res.statusCode === 429) {
     res.json({ error: "Too many requests" });
   } else {

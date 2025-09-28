@@ -37,7 +37,7 @@ export default function () {
         set(where, "tags", {
           some: {
             tag: {
-              tag: tag,
+              tag,
             },
           },
         });

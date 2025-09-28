@@ -123,6 +123,10 @@ app.use("/health", async (req, res) => {
 });
 
 app.use((req, res, next) => {
+  if (isDev) {
+    next();
+    return;
+  }
   // Basic logging for requests that aren't handled by the API or auth.
   if (
     !req.path.includes("/assets/") &&

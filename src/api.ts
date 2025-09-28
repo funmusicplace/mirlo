@@ -13,6 +13,7 @@ import routes from "./routes";
 import qs from "qs";
 import { corsCheck } from "./auth/cors";
 import cookieParser from "cookie-parser";
+const isDev = process.env.NODE_ENV === "development";
 
 const apiApp = express();
 apiApp.set("query parser", (str: string) => qs.parse(str));
@@ -42,6 +43,10 @@ apiApp.use(
 );
 
 apiApp.use((req, res, next) => {
+  if (isDev) {
+    next();
+    return;
+  }
   // Basic logging for API requests
   logger.info(
     `API: ${req.method} ${req.path} - ${JSON.stringify(req.query)} - ${JSON.stringify(req.headers)}`

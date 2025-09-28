@@ -4,7 +4,6 @@ import {
   userAuthenticated,
 } from "../../../../../auth/passport";
 import busboy from "connect-busboy";
-import processTrackGroupCover from "../../../../../utils/processTrackGroupCover";
 import { deleteMerchCover } from "../../../../../utils/merch";
 import { processMerchImage } from "../../../../../queues/processImages";
 
@@ -32,9 +31,9 @@ export default function () {
   async function PUT(req: Request, res: Response, next: NextFunction) {
     const { merchId } = req.params as unknown as Params;
     try {
-      const jobId = await processMerchImage({ req, res })(merchId);
+      const { jobId, imageId } = await processMerchImage({ req, res })(merchId);
 
-      res.json({ result: { jobId } });
+      res.json({ result: { jobId, imageId } });
     } catch (error) {
       next(error);
     }

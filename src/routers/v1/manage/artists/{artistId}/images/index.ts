@@ -3,55 +3,20 @@ import {
   artistBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../../auth/passport";
-import {
-  processArtistAvatar,
-  uploadAndSendToImageQueue,
-} from "../../../../../../queues/processImages";
+import { uploadAndSendToImageQueue } from "../../../../../../queues/processImages";
 import busboy from "connect-busboy";
-import { User, Prisma } from "@mirlo/prisma/client";
+import { User } from "@mirlo/prisma/client";
 import prisma from "@mirlo/prisma";
 import { deleteArtistAvatar } from "../../../../../../utils/artist";
 import { busboyOptions } from "../../../../../../utils/images";
 import {
-  finalArtistAvatarBucket,
-  finalArtistBannerBucket,
-  finalUserAvatarBucket,
-  finalUserBannerBucket,
-  incomingArtistAvatarBucket,
-  incomingArtistBannerBucket,
-  incomingUserAvatarBucket,
-  incomingUserBannerBucket,
+  finalImageBucket,
+  incomingImageBucket,
 } from "../../../../../../utils/minio";
 
 type Params = {
   artistId: string;
   userId: string;
-};
-
-const determineIncomingBucket = (bucket: string) => {
-  switch (bucket) {
-    case finalArtistAvatarBucket:
-      return incomingArtistAvatarBucket;
-    case finalArtistBannerBucket:
-      return incomingArtistBannerBucket;
-    case finalUserAvatarBucket:
-      return incomingUserAvatarBucket;
-    case finalUserBannerBucket:
-      return incomingUserBannerBucket;
-    default:
-      throw new Error("Invalid bucket");
-  }
-};
-
-const determineConfigKey = (bucket: string) => {
-  if ([finalArtistAvatarBucket, finalUserAvatarBucket].includes(bucket)) {
-    return "avatar";
-  } else if (
-    [finalArtistBannerBucket, finalUserBannerBucket].includes(bucket)
-  ) {
-    return "banner";
-  }
-  return "avatar";
 };
 
 export default function () {
@@ -67,36 +32,45 @@ export default function () {
 
   async function PUT(req: Request, res: Response, next: NextFunction) {
     const { artistId } = req.params as unknown as Params;
-    const { bucket } = req.body as {
-      bucket: string;
-    };
 
     try {
-      let jobId = null;
-      jobId = await uploadAndSendToImageQueue(
+      const { jobId, imageId } = await uploadAndSendToImageQueue(
         { req, res },
-        determineIncomingBucket(bucket),
+        incomingImageBucket,
         "image",
-        determineConfigKey(bucket),
-        async (fileInfo: { filename: string }) => {
-          let obj = {
-            create: {
-              originalFilename: fileInfo.filename,
-              artistId: Number(artistId),
-            },
-            update: {
-              originalFilename: fileInfo.filename,
-              deletedAt: null,
-            },
-            where: {
-              artistId: Number(artistId),
-            },
-          };
+        "inFormData",
+        async (
+          fileInfo: { filename: string },
+          details: {
+            dimensions: "square" | "banner";
+            imageId?: string;
+            relation?: string;
+            tierId?: number;
+          }
+        ) => {
+          let image;
+          if (details.imageId) {
+            image = await prisma.image.findUnique({
+              where: {
+                id: details.imageId,
+              },
+            });
+          }
+          if (!image) {
+            image = await prisma.image.create({
+              data: {
+                originalFilename: fileInfo.filename,
+                dimensions: details.dimensions,
+              },
+            });
+          }
+
+          return image;
         },
-        bucket
+        finalImageBucket
       );
 
-      res.json({ result: { jobId } });
+      res.json({ result: { jobId, imageId } });
     } catch (error) {
       next(error);
     }

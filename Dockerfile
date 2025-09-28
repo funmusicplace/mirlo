@@ -1,8 +1,7 @@
 FROM node:22-bookworm-slim AS base
 
 # Install ffmpeg
-RUN apt-get update -qq
-RUN apt-get install -qq --no-install-recommends ffmpeg >/dev/null
+RUN apt-get update -qq && apt-get install -qq --no-install-recommends ffmpeg >/dev/null
 
 # Create app directory
 ENV NODE_APP_DIR=/var/www/api/src \
