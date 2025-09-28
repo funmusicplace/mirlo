@@ -104,39 +104,37 @@ const downloadTracks = async ({
       `audioId ${track.audio.id}: Getting artist for trackGroup ${originalTrackLocation}`
     );
 
-    try {
-      await new Promise((resolve, reject) => {
-        const trackFileName = `${tempFolder}/${track.order ?? i}-${filenamify(track.title ?? "")}`;
+    await new Promise((resolve, reject) => {
+      const trackFileName = `${tempFolder}/${track.order ?? i}-${filenamify(track.title ?? "")}`;
 
-        if (track.audio) {
-          logger.info(
-            `audioId ${track.audio.id}: Processing stream for ${format.format}${
-              format.audioBitrate
-                ? `@${format.audioBitrate} to ${trackFileName}`
-                : ""
-            }`
-          );
+      if (track.audio) {
+        logger.info(
+          `audioId ${track.audio.id}: Processing stream for ${format.format}${
+            format.audioBitrate
+              ? `@${format.audioBitrate} to ${trackFileName}`
+              : ""
+          }`
+        );
 
-          convertAudioToFormat(
-            {
-              track,
-              artist,
-              trackGroup,
-              coverLocation: coverDestination,
-            },
-            createReadStream(tempTrackPath),
-            format,
-            trackFileName,
-            reject,
-            resolve
-          );
-        }
-      });
-    } catch (e) {
-      logger.error(`Error converting track: ${e}`);
-    } finally {
-      await fsPromises.rm(tempTrackPath, { force: true });
-    }
+        convertAudioToFormat(
+          {
+            track,
+            artist,
+            trackGroup,
+            coverLocation: coverDestination,
+          },
+          createReadStream(tempTrackPath),
+          format,
+          trackFileName,
+          reject,
+          resolve
+        );
+      } else {
+        reject("No audio found for track, cannot convert");
+      }
+    });
+    logger.info("Cleaning up audio files", tempTrackPath);
+    await fsPromises.rm(tempTrackPath, { force: true });
   }
 };
 
