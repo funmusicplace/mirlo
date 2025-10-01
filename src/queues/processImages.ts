@@ -107,7 +107,7 @@ export const uploadAndSendToImageQueue = async (
       }
     });
     ctx.req.busboy.on("file", async (_fieldname, fileStream, fileInfo) => {
-      if (!fromBody.dimensions) {
+      if (sharpConfigKey === "inFormData" && !fromBody.dimensions) {
         reject("Must provide dimensions field in form data");
         return;
       }
@@ -139,7 +139,7 @@ export const uploadAndSendToImageQueue = async (
 
         const config: "square" | "banner" | "avatar" | "artwork" =
           sharpConfigKey === "inFormData"
-            ? fromBody.dimensions
+            ? (fromBody.dimensions ?? "square")
             : sharpConfigKey;
 
         const job = await imageQueue.add("optimize-image", {

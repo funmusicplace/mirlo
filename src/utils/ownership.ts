@@ -18,7 +18,6 @@ export const doesSubscriptionTierBelongToUser = async (
       userId: Number(userId),
     },
   });
-  console.log("artists", artists);
 
   const subscription = await prisma.artistSubscriptionTier.findFirst({
     where: {

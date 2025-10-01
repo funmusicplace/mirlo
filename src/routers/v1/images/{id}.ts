@@ -1,18 +1,8 @@
 import { NextFunction, Request, Response } from "express";
-import { User } from "@mirlo/prisma/client";
 
 import prisma from "@mirlo/prisma";
-import {
-  addSizesToImage,
-  checkIsUserSubscriber,
-  findArtistIdForURLSlug,
-  processSingleArtist,
-  singleInclude,
-} from "../../../utils/artist";
-import {
-  headersAreForActivityPub,
-  turnArtistIntoActor,
-} from "../../../activityPub/utils";
+import { addSizesToImage } from "../../../utils/artist";
+
 import { finalImageBucket } from "../../../utils/minio";
 
 export default function () {

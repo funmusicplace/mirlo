@@ -128,10 +128,7 @@ const APIInstance = (apiRoot: string, mirloApiKey: string) => {
           fd.append(`${key}`, bodyParams[key]);
         });
       }
-      console.log("uploaidng", JSON.stringify(fd));
-      fd.forEach((value, key) => {
-        console.log(key + " " + value);
-      });
+
       for (let i = 0; i < files.length; i++) {
         fd.append("upload", files[i]);
       }

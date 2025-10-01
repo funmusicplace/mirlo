@@ -126,7 +126,6 @@ const UploadGeneralImage: React.FC<{
     let result = await api.get<ExistingImage>(`images/${localImageId}`);
 
     setExistingImage(result.result);
-    console.log("calling after save");
     afterSave?.();
   }, [localImageId, afterSave, setValue]);
 
@@ -167,7 +166,6 @@ const UploadGeneralImage: React.FC<{
             { jobId: jobInfo.result.jobId, jobStatus: "waiting" },
           ]);
           setLocalImageId(jobInfo.result.imageId);
-          console.log("setting value in parent", jobInfo.result.imageId);
           setValue("imageId", jobInfo.result.imageId);
         }
       } catch (e) {

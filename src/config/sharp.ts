@@ -23,18 +23,18 @@ export default {
         overshootDeringing: true, // required mozjpeg support
       },
     },
-    // png: {
-    //   ext: ".png",
-    //   outputOptions: {
-    //     chromaSubsampling: "4:4:4",
-    //     optimiseCoding: true,
-    //     quantisationTable: 3,
-    //     progressive: false,
-    //     optimiseScans: false, // required mozjpeg support
-    //     trellisQuantisation: true, // required mozjpeg support
-    //     overshootDeringing: true, // required mozjpeg support
-    //   },
-    // },
+    png: {
+      ext: ".png",
+      outputOptions: {
+        chromaSubsampling: "4:4:4",
+        optimiseCoding: true,
+        quantisationTable: 3,
+        progressive: false,
+        optimiseScans: false, // required mozjpeg support
+        trellisQuantisation: true, // required mozjpeg support
+        overshootDeringing: true, // required mozjpeg support
+      },
+    },
   },
   config: {
     square: {

@@ -104,7 +104,6 @@ const SubscriptionForm: React.FC<{
               Partial<ArtistSubscriptionTier>,
               { result: ArtistSubscriptionTier }
             >(`manage/artists/${artistId}/subscriptionTiers/`, sending);
-            console.log("result", result);
             await api.get<ArtistSubscriptionTier>(
               `manage/artists/${artistId}/subscriptionTiers/${result.result.id}`
             );
