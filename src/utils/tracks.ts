@@ -96,7 +96,7 @@ export const convertAudioToFormat = (
     .outputOptions("-metadata", `album_artist=${content.artist.name}`)
     .outputOptions("-metadata", `track=${content.track.order}`)
     .on("stderr", function (stderrLine) {
-      logger.info("Stderr output: " + stderrLine);
+      // logger.info("Stderr output: " + stderrLine);
       // onError?.(stderrLine);
     })
     .on("error", (err: { message: unknown }) => {
