@@ -3334,7 +3334,7 @@ __metadata:
     "@emotion/styled": "npm:^11.10.5"
     "@gumlet/react-hls-player": "npm:^1.0.1"
     "@marsidev/react-turnstile": "npm:^1.0.2"
-    "@mirlo/mirlo-api-client": "npm:1.0.6"
+    "@mirlo/mirlo-api-client": "npm:1.0.7"
     "@optimize-lodash/rollup-plugin": "npm:^4.0.4"
     "@paypal/react-paypal-js": "npm:^7.8.2"
     "@remirror/pm": "npm:^2.0.8"
@@ -3412,14 +3412,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@mirlo/mirlo-api-client@npm:1.0.6":
-  version: 1.0.6
-  resolution: "@mirlo/mirlo-api-client@npm:1.0.6"
+"@mirlo/mirlo-api-client@npm:1.0.7":
+  version: 1.0.7
+  resolution: "@mirlo/mirlo-api-client@npm:1.0.7"
   dependencies:
     b64-to-blob: "npm:^1.2.19"
     file-saver: "npm:^2.0.5"
     typescript: "npm:^5.8.3"
-  checksum: 10/6f5acf81a623d50c627e6813c6de0a4b41631f1f3b3e8a10028b77dc05ca7fae38c2f20bc1689960d1336fd7168bdfd284d2e23411f3be707e43d1309e1c5239
+  checksum: 10/c73e6bd3bed094f1698e9981b86cc7cdfa5219dff33399da81b3916a0c4518138e9cb65e3771cb15a372682fe3b0efc8fc441b4775390e9ac58bec445d0409e1
   languageName: node
   linkType: hard
 
@@ -7266,15 +7266,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/multer@npm:^1.4.7":
-  version: 1.4.12
-  resolution: "@types/multer@npm:1.4.12"
-  dependencies:
-    "@types/express": "npm:*"
-  checksum: 10/3d2b32da58ddd67f972d4ef1021492f78d65f33f936b6fb25dd461bb6cc7b03bfd1de1a11562c4310680dac8054e4398038db51767a0ffbf1fe62457b3706e95
-  languageName: node
-  linkType: hard
-
 "@types/node-fetch@npm:^2.6.11":
   version: 2.6.12
   resolution: "@types/node-fetch@npm:2.6.12"
@@ -8320,13 +8311,6 @@ __metadata:
     normalize-path: "npm:^3.0.0"
     picomatch: "npm:^2.0.4"
   checksum: 10/3e044fd6d1d26545f235a9fe4d7a534e2029d8e59fa7fd9f2a6eb21230f6b5380ea1eaf55136e60cbf8e613544b3b766e7a6fa2102e2a3a117505466e3025dc2
-  languageName: node
-  linkType: hard
-
-"append-field@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "append-field@npm:1.0.0"
-  checksum: 10/afb50f5ff668af1cb66bc5cfebb55ed9a1d99e24901782ee83d00aed1a499835f9375a149cf27b17f79595ecfcc3d1de0cd5b020b210a5359c43eaf607c217de
   languageName: node
   linkType: hard
 
@@ -9732,18 +9716,6 @@ __metadata:
   version: 0.0.1
   resolution: "concat-map@npm:0.0.1"
   checksum: 10/9680699c8e2b3af0ae22592cb764acaf973f292a7b71b8a06720233011853a58e256c89216a10cbe889727532fd77f8bcd49a760cedfde271b8e006c20e079f2
-  languageName: node
-  linkType: hard
-
-"concat-stream@npm:^1.5.2":
-  version: 1.6.2
-  resolution: "concat-stream@npm:1.6.2"
-  dependencies:
-    buffer-from: "npm:^1.0.0"
-    inherits: "npm:^2.0.3"
-    readable-stream: "npm:^2.2.2"
-    typedarray: "npm:^0.0.6"
-  checksum: 10/71db903c84fc073ca35a274074e8d26c4330713d299f8623e993c448c1f6bf8b967806dd1d1a7b0f8add6f15ab1af7435df21fe79b4fe7efd78420c89e054e28
   languageName: node
   linkType: hard
 
@@ -15473,7 +15445,6 @@ __metadata:
     "@types/jsonwebtoken": "npm:^9.0.6"
     "@types/lodash": "npm:^4.14.191"
     "@types/mocha": "npm:^10.0.1"
-    "@types/multer": "npm:^1.4.7"
     "@types/node": "npm:22"
     "@types/node-fetch": "npm:^2.6.11"
     "@types/nodemailer": "npm:^6.4.14"
@@ -15521,7 +15492,6 @@ __metadata:
     lottie-react: "npm:^2.4.1"
     minio: "npm:^8.0.5"
     mocha: "npm:^10.2.0"
-    multer: "npm:^1.4.5-lts.1"
     music-metadata: "npm:7.13.3"
     node-fetch: "npm:2"
     nodemailer: "npm:^6.9.1"
@@ -15550,17 +15520,6 @@ __metadata:
     yargs: "npm:^17.6.2"
   languageName: unknown
   linkType: soft
-
-"mkdirp@npm:^0.5.4":
-  version: 0.5.6
-  resolution: "mkdirp@npm:0.5.6"
-  dependencies:
-    minimist: "npm:^1.2.6"
-  bin:
-    mkdirp: bin/cmd.js
-  checksum: 10/0c91b721bb12c3f9af4b77ebf73604baf350e64d80df91754dc509491ae93bf238581e59c7188360cec7cb62fc4100959245a42cfe01834efedc5e9d068376c2
-  languageName: node
-  linkType: hard
 
 "mkdirp@npm:^1.0.3":
   version: 1.0.4
@@ -15698,21 +15657,6 @@ __metadata:
     msgpackr-extract:
       optional: true
   checksum: 10/131d9d676c8b931fb522550913afd390d361bd9dde993e9927f5ad35d58d9165c940433800b69a2caff556db632c3c510bc064cc3a5776e1c2d63a7cb280a470
-  languageName: node
-  linkType: hard
-
-"multer@npm:^1.4.5-lts.1":
-  version: 1.4.5-lts.2
-  resolution: "multer@npm:1.4.5-lts.2"
-  dependencies:
-    append-field: "npm:^1.0.0"
-    busboy: "npm:^1.0.0"
-    concat-stream: "npm:^1.5.2"
-    mkdirp: "npm:^0.5.4"
-    object-assign: "npm:^4.1.1"
-    type-is: "npm:^1.6.4"
-    xtend: "npm:^4.0.0"
-  checksum: 10/9aa3ebc765954409e0adbb751ea7154a19ce1404e3b65091621685402c724b286552c89d7305facd3778eea73bff283f353a3beb036c094ed4e52c2cd726610f
   languageName: node
   linkType: hard
 
@@ -17824,7 +17768,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"readable-stream@npm:^2.0.5, readable-stream@npm:^2.2.2":
+"readable-stream@npm:^2.0.5":
   version: 2.3.8
   resolution: "readable-stream@npm:2.3.8"
   dependencies:
@@ -20313,16 +20257,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"type-is@npm:^1.6.4, type-is@npm:~1.6.18":
-  version: 1.6.18
-  resolution: "type-is@npm:1.6.18"
-  dependencies:
-    media-typer: "npm:0.3.0"
-    mime-types: "npm:~2.1.24"
-  checksum: 10/0bd9eeae5efd27d98fd63519f999908c009e148039d8e7179a074f105362d4fcc214c38b24f6cda79c87e563cbd12083a4691381ed28559220d4a10c2047bed4
-  languageName: node
-  linkType: hard
-
 "type-is@npm:^2.0.0, type-is@npm:^2.0.1":
   version: 2.0.1
   resolution: "type-is@npm:2.0.1"
@@ -20331,6 +20265,16 @@ __metadata:
     media-typer: "npm:^1.1.0"
     mime-types: "npm:^3.0.0"
   checksum: 10/bacdb23c872dacb7bd40fbd9095e6b2fca2895eedbb689160c05534d7d4810a7f4b3fd1ae87e96133c505958f6d602967a68db5ff577b85dd6be76eaa75d58af
+  languageName: node
+  linkType: hard
+
+"type-is@npm:~1.6.18":
+  version: 1.6.18
+  resolution: "type-is@npm:1.6.18"
+  dependencies:
+    media-typer: "npm:0.3.0"
+    mime-types: "npm:~2.1.24"
+  checksum: 10/0bd9eeae5efd27d98fd63519f999908c009e148039d8e7179a074f105362d4fcc214c38b24f6cda79c87e563cbd12083a4691381ed28559220d4a10c2047bed4
   languageName: node
   linkType: hard
 
@@ -20384,13 +20328,6 @@ __metadata:
     possible-typed-array-names: "npm:^1.0.0"
     reflect.getprototypeof: "npm:^1.0.6"
   checksum: 10/d6b2f0e81161682d2726eb92b1dc2b0890890f9930f33f9bcf6fc7272895ce66bc368066d273e6677776de167608adc53fcf81f1be39a146d64b630edbf2081c
-  languageName: node
-  linkType: hard
-
-"typedarray@npm:^0.0.6":
-  version: 0.0.6
-  resolution: "typedarray@npm:0.0.6"
-  checksum: 10/2cc1bcf7d8c1237f6a16c04efc06637b2c5f2d74e58e84665445cf87668b85a21ab18dd751fa49eee6ae024b70326635d7b79ad37b1c370ed2fec6aeeeb52714
   languageName: node
   linkType: hard
 

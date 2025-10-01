@@ -58,10 +58,12 @@ export const ArtistBox: React.FC<{
 const Box = styled.div<{
   variant?: "success" | "info" | "warning";
   compact?: boolean;
+  noPadding?: boolean;
   small?: boolean;
 }>`
   width: 100%;
-  padding: ${(props) => (props.compact ? ".25rem .5rem" : "1.25rem")};
+  padding: ${(props) =>
+    props?.noPadding ? "0" : props.compact ? ".25rem .5rem" : "1.25rem"};
   transition: 0.4s border-radius;
   margin-bottom: 0.5rem;
   border-radius: 5px;

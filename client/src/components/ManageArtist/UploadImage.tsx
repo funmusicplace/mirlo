@@ -1,9 +1,7 @@
 import { css } from "@emotion/css";
-import { InputEl } from "components/common/Input";
 import LoadingSpinner from "components/common/LoadingSpinner";
 import { bp } from "../../constants";
 import React from "react";
-import { useFormContext } from "react-hook-form";
 import styled from "@emotion/styled";
 import { FaFileUpload } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
@@ -11,6 +9,7 @@ import { useTranslation } from "react-i18next";
 export const Img = styled.img<{ rounded?: boolean }>`
   transition: .25s background-color, .25s filter;
   aspect-ratio: 1/1;
+  object-fit: cover;
 
   &:hover {
     filter: brightness(80%);
@@ -29,16 +28,14 @@ export const ReplaceSpan = styled.span<{ rounded?: boolean }>`
   vertical-align: middle;
   line-height: 100%;
   width: 100%;
-  height: 98.5%;
+  height: 100%;
   cursor: pointer;
-  padding-top: 47%;
   background: rgba(0, 0, 0, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
   justify-content: center;
   z-index: 999;
-  display: block;
   ${({ rounded }) => (rounded ? "border-radius: 100% !important" : "")}}
 `;
 

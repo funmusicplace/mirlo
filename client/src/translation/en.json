@@ -861,6 +861,7 @@
   "subscriptionForm": {
     "supporters": "Manage supporters",
     "theMoneyBit": "The money bit",
+    "tierImageDescription": "an image for this support level (optional)",
     "platformPercent": "Platform cut",
     "inCurrency": "In {{ currency }}",
     "subscriptionUpdated": "Subscription updated",

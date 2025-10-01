@@ -321,6 +321,15 @@ interface ArtistSubscriptionTier {
   platformPercent: number;
   allowVariable?: boolean;
   autoPurchaseAlbums?: boolean;
+  images: {
+    imageId: string;
+    image: {
+      id: string;
+      url: string[];
+      sizes: { [key: number]: string };
+      updatedAt: string;
+    };
+  }[];
 }
 
 interface ArtistUserSubscription {

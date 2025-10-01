@@ -6,7 +6,11 @@ import {
 import prisma from "@mirlo/prisma";
 import { User } from "@mirlo/prisma/client";
 import { getSiteSettings } from "../../../../../../utils/settings";
-import { getPlatformFeeForArtist } from "../../../../../../utils/artist";
+import {
+  addSizesToImage,
+  getPlatformFeeForArtist,
+} from "../../../../../../utils/artist";
+import { finalImageBucket } from "../../../../../../utils/minio";
 
 type Params = {
   artistId: string;
@@ -32,9 +36,22 @@ export default function () {
         orderBy: {
           minAmount: "asc",
         },
+        include: {
+          images: {
+            include: { image: true },
+          },
+        },
       });
 
-      res.status(200).json({ results: subscriptions });
+      res.status(200).json({
+        results: subscriptions.map((s) => ({
+          ...s,
+          images: s.images.map((si) => ({
+            ...si,
+            image: addSizesToImage(finalImageBucket, si.image),
+          })),
+        })),
+      });
     } catch (e) {
       next(e);
     }
@@ -53,8 +70,6 @@ export default function () {
         },
       });
 
-      const userHasPromo = !!userForCurrency?.promoCodes.length;
-
       const {
         name,
         description,
@@ -65,6 +80,7 @@ export default function () {
         allowVariable,
         defaultAmount,
         autoPurchaseAlbums,
+        imageId,
       } = req.body;
       const subscription = await prisma.artistSubscriptionTier.create({
         data: {
@@ -82,6 +98,19 @@ export default function () {
           defaultAmount,
         },
       });
+      if (imageId) {
+        await prisma.subscriptionTierImage.deleteMany({
+          where: {
+            tierId: subscription.id,
+          },
+        });
+        await prisma.subscriptionTierImage.create({
+          data: {
+            imageId: imageId,
+            tierId: subscription.id,
+          },
+        });
+      }
       res.json({ result: subscription });
     } catch (e) {
       res.status(500).json({

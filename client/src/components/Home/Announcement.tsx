@@ -19,11 +19,11 @@ const Announcement: React.FC = () => {
         gap: 1rem;
       `}
     >
-      A barrage of bots! 😲
+      Introducing label accounts 🎉
       <ButtonAnchor
         variant="outlined"
         startIcon={<FaArrowRight />}
-        href="https://mirlo.space/team/posts/a-barrage-of-bots-fighting-fire-without-money/"
+        href="https://mirlo.space/team/posts/introducing-label-pages/"
         className={css`
           background-color: black !important;
           border: 1px solid var(--mi-white) !important;

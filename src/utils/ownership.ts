@@ -7,7 +7,6 @@ import {
 
 import prisma from "@mirlo/prisma";
 import { AppError } from "./error";
-import { DefaultArgs } from "@prisma/client/runtime/library";
 import { trackGroupSingleInclude } from "./trackGroup";
 
 export const doesSubscriptionTierBelongToUser = async (
@@ -24,6 +23,11 @@ export const doesSubscriptionTierBelongToUser = async (
     where: {
       artistId: { in: artists.map((a) => a.id) },
       id: Number(subscriptionId),
+    },
+    include: {
+      images: {
+        include: { image: true },
+      },
     },
   });
 

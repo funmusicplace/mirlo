@@ -30,10 +30,11 @@ export default function () {
     const { artistId } = req.params as unknown as Params;
 
     try {
-      let jobId = null;
-      jobId = await processArtistAvatar({ req, res })(Number(artistId));
+      const { jobId, imageId } = await processArtistAvatar({ req, res })(
+        Number(artistId)
+      );
 
-      res.json({ result: { jobId } });
+      res.json({ result: { jobId, imageId } });
     } catch (error) {
       next(error);
     }

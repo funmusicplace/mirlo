@@ -8,7 +8,6 @@ import FormComponent from "components/common/FormComponent";
 import { useSnackbar } from "state/SnackbarContext";
 import { pick } from "lodash";
 import api from "../../services/api";
-import Box from "components/common/Box";
 import useErrorHandler from "services/useErrorHandler";
 import { useTranslation } from "react-i18next";
 import { css } from "@emotion/css";
@@ -19,6 +18,7 @@ import { SelectEl } from "components/common/Select";
 import PaymentSlider from "./ManageTrackGroup/AlbumFormComponents/PaymentSlider";
 import styled from "@emotion/styled";
 import FeatureFlag from "components/common/FeatureFlag";
+import UploadGeneralImage from "./UploadGeneralImage";
 
 export const FormSection = styled.div`
   margin: 2rem 0;
@@ -62,12 +62,14 @@ const SubscriptionForm: React.FC<{
     platformPercent?: number;
     collectAddress: boolean;
     interval: "MONTH" | "YEAR";
+    imageId?: string;
   }>({
     defaultValues: generateDefaultValues(existing),
   });
   const { register, handleSubmit, reset, formState } = methods;
 
-  const existingId = existing?.id;
+  const [localExisting, setLocalExisting] = React.useState(existing);
+  const localExistingId = localExisting?.id;
   const userId = user?.id;
   const artistId = artist.id;
 
@@ -85,22 +87,27 @@ const SubscriptionForm: React.FC<{
               "autoPurchaseAlbums",
               "collectAddress",
               "platformPercent",
+              "imageId",
             ]),
             minAmount: data.minAmount ? +data.minAmount * 100 : undefined,
           };
-          if (existingId) {
+          if (localExistingId) {
             await api.put<
               Partial<ArtistSubscriptionTier>,
               ArtistSubscriptionTier
             >(
-              `manage/artists/${artistId}/subscriptionTiers/${existingId}`,
+              `manage/artists/${artistId}/subscriptionTiers/${localExistingId}`,
               sending
             );
           } else {
-            await api.post<
+            const result = await api.post<
               Partial<ArtistSubscriptionTier>,
-              ArtistSubscriptionTier
+              { result: ArtistSubscriptionTier }
             >(`manage/artists/${artistId}/subscriptionTiers/`, sending);
+            await api.get<ArtistSubscriptionTier>(
+              `manage/artists/${artistId}/subscriptionTiers/${result.result.id}`
+            );
+            setLocalExisting(result.result);
           }
 
           snackbar(t("subscriptionUpdated"), { type: "success" });
@@ -113,12 +120,33 @@ const SubscriptionForm: React.FC<{
         }
       }
     },
-    [userId, existingId, t, snackbar, reset, reload, artistId, errorHandler]
+    [
+      userId,
+      localExistingId,
+      t,
+      snackbar,
+      reset,
+      reload,
+      artistId,
+      errorHandler,
+    ]
   );
 
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(doSave)}>
+        <UploadGeneralImage
+          artistId={artist.id}
+          imageTypeDescription={t("tierImageDescription")}
+          height="200px"
+          image={existing?.images?.[0]?.image}
+          width="100%"
+          size={625}
+          dimensions="banner"
+          maxDimensions="1500x1500"
+          maxSize="15mb"
+          afterSave={handleSubmit(doSave)}
+        />
         <FormSection>
           <FormComponent>
             {t("name")}
@@ -161,7 +189,7 @@ const SubscriptionForm: React.FC<{
             )}
           </FormComponent>
 
-          {existingId && (
+          {localExistingId && (
             <FormComponent
               className={css`
                 flex-grow: 1;
@@ -169,7 +197,7 @@ const SubscriptionForm: React.FC<{
             >
               <label>{t("platformPercent")}</label>
               <PaymentSlider
-                url={`manage/artists/${artistId}/subscriptionTiers/${existingId}`}
+                url={`manage/artists/${artistId}/subscriptionTiers/${localExistingId}`}
                 extraData={{ artistId: Number(artistId) }}
               />
               {formState.errors.platformPercent && (
@@ -180,7 +208,7 @@ const SubscriptionForm: React.FC<{
 
           <FormComponent>
             <FormCheckbox
-              idPrefix={`${existingId}`}
+              idPrefix={`${localExistingId}`}
               keyName="allowVariable"
               description={t("allowVariableDescription")}
             />
@@ -197,7 +225,7 @@ const SubscriptionForm: React.FC<{
           <h2>{t("rewards")}</h2>
           <FormComponent>
             <FormCheckbox
-              idPrefix={`${existingId}`}
+              idPrefix={`${localExistingId}`}
               keyName="autoPurchaseAlbums"
               description={t("autoAlbumPurchase")}
             />
@@ -205,7 +233,7 @@ const SubscriptionForm: React.FC<{
           <FeatureFlag featureFlag="subscriptionFulfillment">
             <FormComponent>
               <FormCheckbox
-                idPrefix={`${existingId}`}
+                idPrefix={`${localExistingId}`}
                 keyName="collectAddress"
                 description={t("collectAddress")}
               />
@@ -219,7 +247,7 @@ const SubscriptionForm: React.FC<{
             size="compact"
             isLoading={isSaving}
           >
-            {existing ? t("saveSubscription") : t("createSubscription")}
+            {localExistingId ? t("saveSubscription") : t("createSubscription")}
           </Button>
         </FormComponent>
       </form>

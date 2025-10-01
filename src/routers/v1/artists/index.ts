@@ -53,8 +53,6 @@ export default function () {
         }
       }
 
-      console.log("where", where);
-
       const artists = await prisma.artist.findMany({
         where,
         skip: skipQuery ? Number(skipQuery) : undefined,

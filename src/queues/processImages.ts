@@ -71,14 +71,17 @@ export const uploadAndSendToImageQueue = async (
   ctx: APIContext,
   incomingBucket: string,
   model: string,
-  sharpConfigKey: "artwork" | "avatar" | "banner",
-  createDatabaseEntry: ({
-    filename,
-    mimeType,
-  }: {
-    filename: string;
-    mimeType: string;
-  }) => Promise<{ id: string } | void>,
+  sharpConfigKey: "artwork" | "avatar" | "banner" | "inFormData",
+  createDatabaseEntry: (
+    {
+      filename,
+      mimeType,
+    }: {
+      filename: string;
+      mimeType: string;
+    },
+    details: { dimensions: "square" | "banner" }
+  ) => Promise<{ id: string } | void>,
   finalBucket?: string, // If this is not supplied, we this basically just uploads to the first bucket,0
   storeWithExtension?: boolean
 ) => {
@@ -88,10 +91,32 @@ export const uploadAndSendToImageQueue = async (
   logger.info("Made bucket");
 
   ctx.req.pipe(ctx.req.busboy);
+  const fromBody: {
+    dimensions?: "square" | "banner";
+    relation?: "subscriptionTierImage";
+    imageId?: string;
+  } = {};
 
-  const jobId = await new Promise((resolve, reject) => {
+  const details = await new Promise((resolve, reject) => {
+    ctx.req.busboy.on("field", function (fieldname, val) {
+      if (fieldname === "dimensions" && ["square", "banner"].includes(val)) {
+        fromBody["dimensions"] = val as "square" | "banner";
+      }
+      if (fieldname === "imageId") {
+        fromBody["imageId"] = val;
+      }
+    });
     ctx.req.busboy.on("file", async (_fieldname, fileStream, fileInfo) => {
-      const image = await createDatabaseEntry(fileInfo);
+      if (sharpConfigKey === "inFormData" && !fromBody.dimensions) {
+        reject("Must provide dimensions field in form data");
+        return;
+      }
+      const image = await createDatabaseEntry(fileInfo, {
+        ...(fromBody as {
+          dimensions: "square";
+          relation?: "subscriptionTierImage";
+        }),
+      });
 
       if (!image) {
         reject("Could not create database entry");
@@ -112,16 +137,21 @@ export const uploadAndSendToImageQueue = async (
       if (finalBucket) {
         logger.info("Adding image to queue");
 
+        const config: "square" | "banner" | "avatar" | "artwork" =
+          sharpConfigKey === "inFormData"
+            ? (fromBody.dimensions ?? "square")
+            : sharpConfigKey;
+
         const job = await imageQueue.add("optimize-image", {
           destinationId: image.id,
           model,
           incomingMinioBucket: incomingBucket,
           finalMinioBucket: finalBucket,
-          config: sharpConfig.config[sharpConfigKey],
+          config: sharpConfig.config[config],
         });
-        resolve(job.id);
+        resolve({ jobId: job.id, imageId: image.id });
       } else {
-        resolve(image.id);
+        resolve({ imageId: image.id });
       }
     });
   }).catch((e) => {
@@ -129,7 +159,7 @@ export const uploadAndSendToImageQueue = async (
     throw e;
   });
 
-  return jobId;
+  return details as { jobId?: string; imageId: string };
 };
 
 export const processUserAvatar = (ctx: APIContext) => {

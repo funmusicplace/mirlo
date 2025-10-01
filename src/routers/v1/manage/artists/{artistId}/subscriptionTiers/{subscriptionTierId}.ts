@@ -1,16 +1,60 @@
 import { User } from "@mirlo/prisma/client";
 
 import { NextFunction, Request, Response } from "express";
-import { userAuthenticated } from "../../../../../../auth/passport";
+import {
+  artistBelongsToLoggedInUser,
+  userAuthenticated,
+} from "../../../../../../auth/passport";
 import { doesSubscriptionTierBelongToUser } from "../../../../../../utils/ownership";
 import prisma from "@mirlo/prisma";
-import logger from "../../../../../../logger";
 import { getSiteSettings } from "../../../../../../utils/settings";
 
 export default function () {
   const operations = {
-    PUT: [userAuthenticated, PUT],
-    DELETE: [userAuthenticated, DELETE],
+    PUT: [userAuthenticated, artistBelongsToLoggedInUser, PUT],
+    DELETE: [userAuthenticated, artistBelongsToLoggedInUser, DELETE],
+    GET: [userAuthenticated, artistBelongsToLoggedInUser, GET],
+  };
+
+  async function GET(req: Request, res: Response, next: NextFunction) {
+    const { artistId, subscriptionTierId } = req.params;
+    const user = req.user as User;
+
+    try {
+      const subscriptionTier = await doesSubscriptionTierBelongToUser(
+        Number(subscriptionTierId),
+        Number(user.id)
+      );
+
+      return res.json({
+        result: subscriptionTier,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  GET.apiDoc = {
+    summary: "Returns artist subscription tier for id",
+    parameters: [
+      {
+        in: "path",
+        name: "artistId",
+        required: true,
+        type: "string",
+      },
+    ],
+    responses: {
+      200: {
+        description: "An subscription tier that is the artists drafts album",
+      },
+      default: {
+        description: "An error occurred",
+        schema: {
+          additionalProperties: true,
+        },
+      },
+    },
   };
 
   async function PUT(req: Request, res: Response, next: NextFunction) {
@@ -52,6 +96,20 @@ export default function () {
           autoPurchaseAlbums: !!req.body.autoPurchaseAlbums,
         },
       });
+
+      if (req.body.imageId) {
+        await prisma.subscriptionTierImage.deleteMany({
+          where: {
+            tierId: updatedTier.id,
+          },
+        });
+        await prisma.subscriptionTierImage.create({
+          data: {
+            imageId: req.body.imageId,
+            tierId: updatedTier.id,
+          },
+        });
+      }
 
       res.json({ result: updatedTier });
     } catch (error) {

@@ -59,7 +59,7 @@ export default function () {
   async function PUT(req: Request, res: Response, next: NextFunction) {
     const { postId } = req.params as unknown as Params;
     try {
-      const imageId = await processPostImage({ req, res })(Number(postId));
+      const { imageId } = await processPostImage({ req, res })(Number(postId));
       const image = await prisma.postImage.findFirst({
         where: {
           id: imageId as string,

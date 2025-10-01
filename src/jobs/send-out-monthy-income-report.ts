@@ -32,7 +32,6 @@ const sendOutMonthlyIncomeReport = async () => {
     const mappedArtists = keyBy(allArtists, "id");
 
     const groupedSales = groupBy(sales, "artist.userId");
-    console.log("grouepdSales", groupedSales);
     for (const [userId, userSales] of Object.entries(groupedSales)) {
       if (userSales.length === 0) {
         continue;

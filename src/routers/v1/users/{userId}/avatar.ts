@@ -20,10 +20,11 @@ export default function () {
     const loggedInUser = req.user as User;
 
     try {
-      let jobId = null;
-      jobId = await processUserAvatar({ req, res })(Number(loggedInUser.id));
+      const { jobId, imageId } = await processUserAvatar({ req, res })(
+        Number(loggedInUser.id)
+      );
 
-      res.json({ result: { jobId } });
+      res.json({ result: { jobId, imageId } });
     } catch (error) {
       next(error);
     }

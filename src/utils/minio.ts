@@ -53,6 +53,8 @@ export const trackFormatBucket = s3UniquePrefix + "track-format";
 
 export const downloadableContentBucket =
   s3UniquePrefix + "mirlo-downloadable-content";
+export const incomingImageBucket = s3UniquePrefix + "incoming-mirlo-images";
+export const finalImageBucket = s3UniquePrefix + "mirlo-images";
 
 const {
   MINIO_HOST = "",
