@@ -660,7 +660,21 @@
     "fullCost": "Full cost",
     "platformCut": "Platform cut: {{percent}}%",
     "redistribution": "Redistribution",
-    "howMuchModalText": "Mirlo thrives on artist contributions—whether through monthly support or a slice of album sales. But we get it: every cent counts, and only you know what you can afford. That’s why we let you decide how much of your sales goes to Mirlo. Your art, your call."
+    "howMuchModalText": "Mirlo thrives on artist contributions—whether through monthly support or a slice of album sales. But we get it: every cent counts, and only you know what you can afford. That’s why we let you decide how much of your sales goes to Mirlo. Your art, your call.",
+    "howMuchModalRowSolidarityPercent": "0%",
+    "howMuchModalRowSolidarityLabel": "Solidarity",
+    "howMuchModalRowSolidarityDescription": "You need the money.",
+    "howMuchModalRowSustainPercent": "5%",
+    "howMuchModalRowSustainLabel": "Sustain",
+    "howMuchModalRowSustainDescription": "You can pitch in some.",
+    "howMuchModalRowFullCostPercent": "7%",
+    "howMuchModalRowFullCostLabel": "Full cost",
+    "howMuchModalRowFullCostDescription": "Best estimate to cover all our work.",
+    "howMuchModalRowRedistributionPercent": "15%",
+    "howMuchModalRowRedistributionLabel": "Redistribution",
+    "howMuchModalRowRedistributionDescription": "You really want to see Mirlo succeed and you can afford it.",
+    "howMuchModalCalculator": "If you're having trouble deciding on a rate, you can use <link>this sliding scale calculator</link> for individuals provided by the Aorta Co-operative.",
+    "howMuchModalFinances": "Curious about how Mirlo uses money? We post quarterly financial statements <link>on our blog</link>."
   },
   "manageAlbum": {
     "allowMirloPromoLabel": "Allow Mirlo to use it for promotion?",

@@ -6,7 +6,7 @@ import Pill from "components/common/Pill";
 import { queryArtist } from "queries";
 import React from "react";
 import { useFormContext } from "react-hook-form";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { IoHelp } from "react-icons/io5";
 import { useParams } from "react-router-dom";
 import api from "services/api";
@@ -35,7 +35,27 @@ const PaymentSlider: React.FC<{
     } catch (e) {
       console.error(e);
     }
-  }, [extraData, current]);
+  }, [current, extraData, url]);
+
+  const modalRows = React.useMemo(() => {
+    const tiers = [
+      "solidarity",
+      "sustain",
+      "fullCost",
+      "redistribution",
+    ] as const;
+
+    return tiers.map((tier) => {
+      const keySuffix = `${tier.charAt(0).toUpperCase()}${tier.slice(1)}`;
+
+      return {
+        key: tier,
+        percent: t(`howMuchModalRow${keySuffix}Percent`),
+        label: t(`howMuchModalRow${keySuffix}Label`),
+        description: t(`howMuchModalRow${keySuffix}Description`),
+      };
+    });
+  }, [t]);
 
   return (
     <div
@@ -114,7 +134,7 @@ const PaymentSlider: React.FC<{
           <Modal
             size="small"
             open={isOpen}
-            title="How much goes to Mirlo?"
+            title={t("howMuchGoesToMirlo")}
             onClose={() => setIsInfoOpen(false)}
             className={css`
               p {
@@ -124,11 +144,19 @@ const PaymentSlider: React.FC<{
           >
             <p>{t("howMuchModalText")}</p>
             <p>
-              If you're having trouble deciding on a rate, you can use{" "}
-              <a href="https://aorta.coop/public-program-rates">
-                this sliding scale calculator
-              </a>{" "}
-              for individuals provided by the Aorta Co-operative.
+              <Trans
+                t={t}
+                i18nKey="howMuchModalCalculator"
+                components={{
+                  link: (
+                    <a
+                      href="https://aorta.coop/public-program-rates"
+                      target="_blank"
+                      rel="noreferrer"
+                    />
+                  ),
+                }}
+              />
             </p>
             <table
               className={css`
@@ -151,36 +179,30 @@ const PaymentSlider: React.FC<{
                 }
               `}
             >
-              <tr>
-                <td>0%</td>
-                <td>Solidarity</td>
-                <td>You need the money.</td>
-              </tr>
-              <tr>
-                <td>5%</td>
-                <td>Sustain</td>
-                <td>You can pitch in some.</td>
-              </tr>
-              <tr>
-                <td>7%</td>
-                <td>Full cost</td>
-                <td>Best estimate to cover all our work.</td>
-              </tr>
-              <tr>
-                <td>15%</td>
-                <td>Full cost</td>
-                <td>
-                  You really want to see Mirlo succeed and you can afford it.
-                </td>
-              </tr>
+              <tbody>
+                {modalRows.map((row) => (
+                  <tr key={row.key}>
+                    <td>{row.percent}</td>
+                    <td>{row.label}</td>
+                    <td>{row.description}</td>
+                  </tr>
+                ))}
+              </tbody>
             </table>
             <p>
-              Curious about how Mirlo uses money? We post quarterly financial
-              statements{" "}
-              <a href="https://mirlo.space/team/posts?tag=finances">
-                on our blog
-              </a>
-              .
+              <Trans
+                t={t}
+                i18nKey="howMuchModalFinances"
+                components={{
+                  link: (
+                    <a
+                      href="https://mirlo.space/team/posts?tag=finances"
+                      target="_blank"
+                      rel="noreferrer"
+                    />
+                  ),
+                }}
+              />
             </p>
           </Modal>
         </div>
