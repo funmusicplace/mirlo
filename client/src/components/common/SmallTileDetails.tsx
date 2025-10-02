@@ -29,10 +29,6 @@ export const SmallTileDetails: React.FC<{
   footer,
   textColor = "var(--mi-normal-foreground-color)",
 }) => {
-  const SubtitleComponent = () => <span>{subtitle}</span>;
-
-  const FooterComponent = () => <>{footer}</>;
-
   return (
     <>
       <div
@@ -93,7 +89,7 @@ export const SmallTileDetails: React.FC<{
               i18nKey="smallTileDetails.subtitle"
               components={{
                 label: <span />,
-                subtitle: <SubtitleComponent />,
+                subtitle: <>{subtitle}</>,
               }}
             />
           </WidgetSection>
@@ -125,7 +121,7 @@ export const SmallTileDetails: React.FC<{
               i18nKey="smallTileDetails.footer"
               components={{
                 label: <span />,
-                footer: <FooterComponent />,
+                footer: <>{footer}</>,
               }}
             />
           </WidgetSection>
