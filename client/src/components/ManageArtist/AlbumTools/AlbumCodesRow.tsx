@@ -21,9 +21,10 @@ const OverflowTD = styled.td`
 
 const AlbumCodesRow: React.FC<{
   r: Reduced;
-  downloadCodes: (group: string) => Promise<void>;
+  downloadCodes: (group: string, trackGroupId: number) => Promise<void>;
   albumCodes: AlbumCode[];
-}> = ({ r, downloadCodes, albumCodes }) => {
+  isDownloading: boolean;
+}> = ({ r, downloadCodes, albumCodes, isDownloading }) => {
   const snackbar = useSnackbar();
   const { t } = useTranslation("translation", {
     keyPrefix: "manageArtistTools",
@@ -45,8 +46,9 @@ const AlbumCodesRow: React.FC<{
         <ArtistButton
           size="compact"
           startIcon={<FaFileCsv />}
-          onClick={() => downloadCodes(r.group)}
+          onClick={() => downloadCodes(r.group, r.trackGroupId)}
           variant="dashed"
+          isLoading={isDownloading}
         />
         <ArtistButton
           size="compact"
