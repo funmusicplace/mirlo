@@ -673,7 +673,7 @@
     "howMuchModalRowRedistributionPercent": "15%",
     "howMuchModalRowRedistributionLabel": "Redistribution",
     "howMuchModalRowRedistributionDescription": "You really want to see Mirlo succeed and you can afford it.",
-    "howMuchModalCalculator": "If you're having trouble deciding on a rate, you can use <link>this sliding scale calculator</link> for individuals provided by the Aorta Co-operative.",
+    "howMuchModalCalculator": "If you're having trouble deciding on a rate, you can use <link>this sliding scale calculator</link> for individuals (in english) provided by the Aorta Co-operative.",
     "howMuchModalFinances": "Curious about how Mirlo uses money? We post quarterly financial statements <link>on our blog</link>."
   },
   "manageAlbum": {
@@ -875,7 +875,7 @@
   "subscriptionForm": {
     "supporters": "Manage supporters",
     "theMoneyBit": "The money bit",
-    "tierImageDescription": "an image for this support level (optional)",
+    "tierImageDescription": "add an image to illustrate this support tier (optional)",
     "platformPercent": "Platform cut",
     "inCurrency": "In {{ currency }}",
     "subscriptionUpdated": "Subscription updated",
