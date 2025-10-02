@@ -312,6 +312,7 @@ export const CustomizeLook: React.FC = () => {
                       type="checkbox"
                       {...methods.register("properties.tileBackgroundImage")}
                     />
+                    <small>{t("tileImageDescription")}</small>
                   </FormComponent>
                 </div>
               </div>
