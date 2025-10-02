@@ -1091,7 +1091,7 @@
     "shouldSendEmail": "Send an email to your supporters when this post is published?",
     "shouldSendEmailContext": "If yes, an e-mail will be sent and they will get notified on the website, if not, they'll only get the notification.",
     "follow": "Everyone who pressed the \"Follow\" button on your profile",
-    "ifNotPublic": "If not public, which of your subscription tier should be the minimum tier to receive your posts?"
+    "ifNotPublic": "Which of your subscription tiers should be the minimum tier to receive your posts?"
   },
   "errorPage": {
     "reactError": "React error ",
