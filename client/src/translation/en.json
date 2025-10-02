@@ -1057,6 +1057,10 @@
     "viewCodes": "Overview of your codes",
     "codesForGroup": "Codes for {{ group }}"
   },
+  "smallTileDetails": {
+    "subtitle": "<label>from</label> <subtitle/>",
+    "footer": "<label>by</label> <footer/>"
+  },
   "artists": {
     "artists": "All artists",
     "sortBy": "Sort by",
