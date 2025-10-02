@@ -32,7 +32,8 @@ const PriceAndSuch: React.FC<{
   } = useFormContext();
   const { user } = useAuthContext();
 
-  const isGettable = watch("isGettable");
+  const preventAlbumPurchase = watch("isGettable", false);
+  const isAlbumGettable = !preventAlbumPurchase;
   return (
     <FormSection>
       <h2>{t("priceAndSuch")}</h2>
@@ -50,6 +51,7 @@ const PriceAndSuch: React.FC<{
               type="checkbox"
               url={`manage/trackGroups/${trackGroupId}`}
               extraData={{ artistId: Number(artistId) }}
+              valueTransform={(value) => !value}
             />
             {t("isGettable")}
             <Tooltip hoverText={t("isGettableTooltip")}>
@@ -68,7 +70,7 @@ const PriceAndSuch: React.FC<{
             }
           `}
         >
-          {isGettable && (
+          {isAlbumGettable && (
             <>
               <FormComponent
                 className={css`
