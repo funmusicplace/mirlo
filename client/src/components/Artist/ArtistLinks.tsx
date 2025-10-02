@@ -5,7 +5,7 @@ import { bp } from "../../constants";
 
 import { useQuery } from "@tanstack/react-query";
 import { queryArtist } from "queries";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import {
   findOutsideSite,
   linkUrlDisplay,
