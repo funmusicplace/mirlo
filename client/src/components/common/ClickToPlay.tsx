@@ -271,12 +271,18 @@ const ClickToPlay: React.FC<
     }
   }, [dispatch, localTrackIds, detectTracksPlayable]);
 
+  const isSingleTrackGroup = !track && trackGroup.tracks.length === 1;
+
+  const linkTarget = track ?? (isSingleTrackGroup ? trackGroup.tracks[0] : trackGroup);
+
+  const linkLabelKey = track || isSingleTrackGroup ? "goToTrack" : "goToAlbum";
+
   const currentlyPlaying =
     playing &&
     currentlyPlayingIndex !== undefined &&
     localTrackIds.includes(playerQueueIds[currentlyPlayingIndex]);
 
-  const url = determineItemLink(trackGroup.artist, track ?? trackGroup);
+  const url = determineItemLink(trackGroup.artist, linkTarget);
   return (
     <ClickToPlayWrapper>
       <Wrapper className={className}>
@@ -322,7 +328,7 @@ const ClickToPlay: React.FC<
           {/*
            * Likewise, this "Go to album" text SHOULD also be used to describe the album link (through aria-label).
            */}
-          <p aria-hidden>{t(track ? "goToTrack" : "goToAlbum")}</p>
+          <p aria-hidden>{t(linkLabelKey)}</p>
         </PlayWrapper>
 
         {currentlyPlaying && (
