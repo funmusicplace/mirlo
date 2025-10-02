@@ -70,6 +70,7 @@ const PostForm: React.FC<{
       : {
           publishedAt: publishedAt.toISOString().slice(0, 16),
           shouldSendEmail: true,
+          isPublic: true,
         },
   });
 
@@ -211,8 +212,21 @@ const PostForm: React.FC<{
             }
           `}
         >
-          <input id="private" type="checkbox" {...register("isPublic")} />{" "}
-          <label htmlFor="private">
+          <Controller
+            name="isPublic"
+            render={({ field: { value = true, onChange, onBlur, ref, name } }) => (
+              <input
+                id="subscribers-only"
+                type="checkbox"
+                name={name}
+                ref={ref}
+                checked={!value}
+                onChange={(event) => onChange(!event.target.checked)}
+                onBlur={onBlur}
+              />
+            )}
+          />{" "}
+          <label htmlFor="subscribers-only">
             {t("isSubscriptionOnly")}
             <small>{t("isSubscriptionPostOnly")}</small>
           </label>
