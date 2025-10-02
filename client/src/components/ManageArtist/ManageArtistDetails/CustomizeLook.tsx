@@ -45,7 +45,7 @@ export const ArtistFormSection = styled.div<{ isOdd?: boolean }>`
   margin-bottom: 1rem;
   ${(props) =>
     !props.isOdd ? "background: var(--mi-lighten-background-color);" : ""}
-  gap: 0;
+  gap: 1rem;
 
   @media (max-width: ${bp.medium}px) {
     flex-direction: column;
@@ -90,6 +90,7 @@ const generateDefaults = (existing?: Artist) => ({
   activityPub: existing?.activityPub ?? false,
   defaultPlatformFee: existing?.defaultPlatformFee ?? 10,
   shortDescription: existing?.shortDescription ?? "",
+  maxFreePlays: existing?.maxFreePlays,
   properties: {
     colors: {
       primary: "",
@@ -332,6 +333,22 @@ export const CustomizeLook: React.FC = () => {
                   }}
                 />
                 <small>{t("defaultPlatformFeeDescription")}</small>
+              </FormComponent>
+              <FormComponent
+                className={css`
+                  width: 300px;
+                `}
+              >
+                <label>{t("maxFreePlays")}</label>
+                <SavingInput
+                  type="number"
+                  min={0}
+                  step={1}
+                  placeholder="0"
+                  url={`manage/artists/${artist.id}`}
+                  formKey="maxFreePlays"
+                />
+                <small>{t("maxFreePlaysDescription")}</small>
               </FormComponent>
             </ArtistFormSection>
             <FeatureFlag featureFlag="activityPub">
