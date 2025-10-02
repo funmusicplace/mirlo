@@ -47,15 +47,6 @@ const Releases: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
     })
   );
 
-  const { data: futureReleases } = useQuery(
-    queryTrackGroups({
-      skip: futureReleasesPageSize * page,
-      take: futureReleasesPageSize,
-      tag: tag || undefined,
-      title: search ?? undefined,
-    })
-  );
-
   const { data: tags } = useQuery(
     queryTags({
       orderBy: "count",

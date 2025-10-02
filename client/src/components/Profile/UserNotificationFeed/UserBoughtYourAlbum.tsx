@@ -3,11 +3,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { FaChevronRight } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import {
-  getArtistUrl,
-  getReleaseUrl,
-  getTrackGroupUrlReference,
-} from "utils/artist";
+import { getArtistUrl, getReleaseUrl } from "utils/artist";
 
 const UserBoughtYourAlbum: React.FC<{ notification: Notification }> = ({
   notification,

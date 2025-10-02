@@ -18,7 +18,7 @@ type Item =
   | (TrackGroup & { artist?: Artist })
   | (Track & { trackGroup: TrackGroup & { artist?: Artist } });
 
-export const determineItemLink = (artist: Artist, item: Item) => {
+export const determineItemLink = (artist: Artist, item?: Item) => {
   let url = getArtistUrl(artist);
 
   if (isTrackgroup(item)) {

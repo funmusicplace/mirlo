@@ -7,13 +7,11 @@ import { SelectEl } from "components/common/Select";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { FaFlag } from "react-icons/fa";
 import api from "services/api";
 
 import { Turnstile } from "@marsidev/react-turnstile";
 import TextArea from "components/common/TextArea";
 import { useSnackbar } from "state/SnackbarContext";
-import { FixedButton } from "components/common/FixedButton";
 import { ArtistButton } from "components/Artist/ArtistButtons";
 
 const FlagContent: React.FC<{ trackGroupId: number; onlyIcon?: boolean }> = ({
