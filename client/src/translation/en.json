@@ -821,7 +821,7 @@
     "uploading": "Uploading...",
     "replace": "Replace",
     "tileImage": "Tile background image?",
-    "tileImageDescription": "The image will be duplicated to cover the whole background area.",
+    "tileImageDescription": "The image will be duplicated to cover the whole background area of the artist page.",
     "updatedArtist": "Updated artist",
     "dimensionsTip": "For the best effect, upload a {{maxDimensions}} size image. File size is limited to {{ maxSize }}.",
     "yourAlbums": "Your albums",
