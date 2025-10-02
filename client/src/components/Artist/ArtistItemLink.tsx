@@ -46,10 +46,15 @@ const ArtistItemLink: React.FC<{
 
   const url = determineItemLink(artist, item);
 
+  const labelKey =
+    isTrack(item) || (isTrackgroup(item) && item.tracks?.length === 1)
+      ? "goToTrack"
+      : "goToAlbum";
+
   return (
     <Link
       to={url}
-      aria-label={`${t("goToAlbum")}: ${item.title || t("untitled")}`}
+      aria-label={`${t(labelKey)}: ${item.title || t("untitled")}`}
       className={
         item.title?.length
           ? css`
