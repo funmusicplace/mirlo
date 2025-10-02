@@ -18,6 +18,7 @@ const routes = [
   "trackGroups/{id}/supporters",
   "playable",
   "settings/{setting}",
+  "newsletter",
   "tracks",
   "tracks/topSold",
   "tracks/mostPlayed",

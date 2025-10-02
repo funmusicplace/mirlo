@@ -208,6 +208,7 @@
     "verifyEmail": "Verify e-mail",
     "backThisProjectDescription": "You're pledging to support this project if it meets its fundraising goal.",
     "emailVerificationInfo": "Because no account is logged in, we need to verify you're not a robot.",
+    "newsletterVerificationInfo": "We'll send you a verification code before adding you to the newsletter.",
     "verificationCode": "Enter verification code:",
     "checkEmail": "Check your email for the verification code.",
     "published": "Published:",
@@ -1116,7 +1117,18 @@
     "featuresLink": "What is Mirlo? Check out <features>our features</features> and <about>about section</about>.",
     "mirloConstruction": "Wanna talk more? <email>E-mail us</email> or <discord>join our Discord</discord>! Also check out our <about>About page</about>, and <github>the code on GitHub</github>. <br /> <br />Want to just receive our monthly newsletter? <mailingList>Sign up</mailingList>",
     "latestCommunityPost": "Latest posts from the community",
-    "supportUs": "Want to support us as we grow Mirlo? <support>Pitch in</support>"
+    "supportUs": "Want to support us as we grow Mirlo? <support>Pitch in</support>",
+    "newsletterDescription": "Sign up to receive monthly updates from the Mirlo team.",
+    "newsletterEmailLabel": "Email address",
+    "newsletterPlaceholder": "you@example.com",
+    "newsletterButton": "Sign up",
+    "newsletterSuccess": "Thanks! You're on the list.",
+    "newsletterError": "We couldn't add you to the mailing list. Please try again.",
+    "newsletterVerificationHint": "Verify your email below before signing up.",
+    "newsletterVerificationRequired": "Please verify your email before signing up.",
+    "newsletterCaptchaRequired": "Please complete the spam check before signing up.",
+    "newsletterVerifiedEmail": "Ready to subscribe with {{email}}.",
+    "newsletterChangeEmail": "Use a different email"
   },
 
   "faq": {
