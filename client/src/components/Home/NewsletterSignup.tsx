@@ -142,6 +142,11 @@ const NewsletterSignup: React.FC = () => {
       return;
     }
 
+    if (!instanceArtist?.id) {
+      snackbar(t("newsletterError"), { type: "warning" });
+      return;
+    }
+
     if (!verifiedEmail) {
       snackbar(t("newsletterVerificationRequired"), { type: "warning" });
       return;
@@ -156,7 +161,7 @@ const NewsletterSignup: React.FC = () => {
       setIsSubmitting(true);
       const cfTurnstile = turnstileSiteKey ? turnstileToken ?? undefined : undefined;
 
-      await api.post("newsletter", {
+      await api.post(`artists/${instanceArtist.id}/follow`, {
         email: verifiedEmail,
         ...(cfTurnstile ? { cfTurnstile } : {}),
       });
@@ -215,6 +220,7 @@ const NewsletterSignup: React.FC = () => {
                 disabled={
                   !hasVerifiedEmail ||
                   isSubmitting ||
+                  !instanceArtist?.id ||
                   (Boolean(turnstileSiteKey) && !turnstileToken)
                 }
               >

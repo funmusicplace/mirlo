@@ -8,14 +8,38 @@ import prisma from "@mirlo/prisma";
 import { clearTables, createArtist, createUser } from "../utils";
 import { requestApp } from "./utils";
 
-describe("newsletter", () => {
+async function createInstanceArtist() {
+  const { user: artistUser } = await createUser({
+    email: "artist@example.com",
+  });
+
+  const artist = await createArtist(artistUser.id, {
+    name: "Instance Artist",
+    urlSlug: `instance-artist-${randomUUID()}`,
+  });
+
+  await prisma.settings.create({
+    data: {
+      settings: {
+        platformPercent: 10,
+        instanceArtistId: artist.id,
+      },
+    },
+  });
+
+  return { artist };
+}
+
+describe("artists/{id}/follow newsletter", () => {
   beforeEach(async () => {
     await clearTables();
   });
 
-  it("requires an email address", async () => {
+  it("requires an email address when not authenticated", async () => {
+    const { artist } = await createInstanceArtist();
+
     const response = await requestApp
-      .post("newsletter")
+      .post(`artists/${artist.id}/follow`)
       .set("Accept", "application/json");
 
     assert.equal(response.status, 400);
@@ -23,32 +47,17 @@ describe("newsletter", () => {
   });
 
   it("requires the email to be verified", async () => {
-    const { user: artistUser } = await createUser({
-      email: "artist@example.com",
-    });
+    const { artist } = await createInstanceArtist();
 
-    const artist = await createArtist(artistUser.id, {
-      name: "Instance Artist",
-      urlSlug: "instance-artist",
-    });
-
-    await prisma.settings.create({
-      data: {
-        settings: {
-          platformPercent: 10,
-          instanceArtistId: artist.id,
-        },
-      },
-    });
-
-    await createUser({
+    const { user: listener, accessToken } = await createUser({
       email: "listener@example.com",
       emailConfirmationToken: randomUUID(),
     });
 
     const response = await requestApp
-      .post("newsletter")
-      .send({ email: "listener@example.com" })
+      .post(`artists/${artist.id}/follow`)
+      .send({ email: listener.email })
+      .set("Cookie", [`jwt=${accessToken}`])
       .set("Accept", "application/json");
 
     assert.equal(response.status, 401);
@@ -59,25 +68,9 @@ describe("newsletter", () => {
   });
 
   it("subscribes a verified user", async () => {
-    const { user: artistUser } = await createUser({
-      email: "artist@example.com",
-    });
+    const { artist } = await createInstanceArtist();
 
-    const artist = await createArtist(artistUser.id, {
-      name: "Instance Artist",
-      urlSlug: "instance-artist",
-    });
-
-    await prisma.settings.create({
-      data: {
-        settings: {
-          platformPercent: 10,
-          instanceArtistId: artist.id,
-        },
-      },
-    });
-
-    const { user: listener } = await createUser({
+    const { user: listener, accessToken } = await createUser({
       email: "listener@example.com",
       emailConfirmationToken: null,
       emailConfirmationExpiration: null,
@@ -85,12 +78,13 @@ describe("newsletter", () => {
     });
 
     const response = await requestApp
-      .post("newsletter")
-      .send({ email: "listener@example.com" })
+      .post(`artists/${artist.id}/follow`)
+      .send({ email: listener.email })
+      .set("Cookie", [`jwt=${accessToken}`])
       .set("Accept", "application/json");
 
     assert.equal(response.status, 200);
-    assert.equal(response.body.message, "success");
+    assert(Array.isArray(response.body.results));
 
     const subscriber = await prisma.user.findFirstOrThrow({
       where: {
@@ -113,25 +107,9 @@ describe("newsletter", () => {
   });
 
   it("updates an existing user to receive the mailing list", async () => {
-    const { user: artistUser } = await createUser({
-      email: "artist2@example.com",
-    });
+    const { artist } = await createInstanceArtist();
 
-    const artist = await createArtist(artistUser.id, {
-      name: "Instance Artist",
-      urlSlug: "instance-artist-2",
-    });
-
-    await prisma.settings.create({
-      data: {
-        settings: {
-          platformPercent: 10,
-          instanceArtistId: artist.id,
-        },
-      },
-    });
-
-    const { user: existingUser } = await createUser({
+    const { user: existingUser, accessToken } = await createUser({
       email: "existing@example.com",
       receiveMailingList: false,
       emailConfirmationToken: null,
@@ -139,8 +117,9 @@ describe("newsletter", () => {
     });
 
     const response = await requestApp
-      .post("newsletter")
-      .send({ email: "existing@example.com" })
+      .post(`artists/${artist.id}/follow`)
+      .send({ email: existingUser.email })
+      .set("Cookie", [`jwt=${accessToken}`])
       .set("Accept", "application/json");
 
     assert.equal(response.status, 200);
@@ -164,5 +143,36 @@ describe("newsletter", () => {
     });
 
     assert(subscription);
+  });
+
+  it("marks confirmed subscribers for the mailing list", async () => {
+    const { artist } = await createInstanceArtist();
+
+    const token = randomUUID();
+    const email = "new-listener@example.com";
+
+    await prisma.artistUserSubscriptionConfirmation.create({
+      data: {
+        email,
+        artistId: artist.id,
+        token,
+        tokenExpiration: new Date(Date.now() + 60 * 60 * 1000),
+      },
+    });
+
+    process.env.REACT_APP_CLIENT_DOMAIN = "https://example.com";
+
+    const response = await requestApp
+      .get(`artists/${artist.id}/confirmFollow`)
+      .query({ email, token })
+      .set("Accept", "application/json");
+
+    assert.equal(response.status, 302);
+
+    const subscriber = await prisma.user.findFirstOrThrow({
+      where: { email },
+    });
+
+    assert.equal(subscriber.receiveMailingList, true);
   });
 });

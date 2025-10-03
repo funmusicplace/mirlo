@@ -6,6 +6,7 @@ import {
   confirmArtistIdExists,
   subscribeUserToArtist,
 } from "../../../../utils/artist";
+import { getSiteSettings } from "../../../../utils/settings";
 
 type Params = {
   id: string;
@@ -65,6 +66,22 @@ export default function () {
               emailConfirmationToken: null,
               emailConfirmationExpiration: null,
             },
+          });
+        }
+
+        const settings = await getSiteSettings();
+        const instanceArtistId = settings.settings?.instanceArtistId;
+
+        if (
+          user &&
+          artist &&
+          instanceArtistId &&
+          artist.id === instanceArtistId &&
+          !user.receiveMailingList
+        ) {
+          user = await prisma.user.update({
+            where: { id: user.id },
+            data: { receiveMailingList: true },
           });
         }
 
