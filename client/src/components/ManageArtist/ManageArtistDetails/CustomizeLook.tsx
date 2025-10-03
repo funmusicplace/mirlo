@@ -98,6 +98,13 @@ const generateDefaults = (existing?: Artist) => ({
       background: "",
       foreground: "",
     },
+    titles: {
+      releases: "Releases",
+      merch: "Merch",
+      posts: "Posts",
+      support: "Support",
+      roster: "Roster",
+    },
     ...existing?.properties,
   },
 });
@@ -113,7 +120,7 @@ export const CustomizeLook: React.FC = () => {
     defaultValues: generateDefaults(artist),
   });
 
-  const { handleSubmit } = methods;
+  const { handleSubmit, formState } = methods;
 
   const existingId = artist?.id;
 
@@ -173,7 +180,7 @@ export const CustomizeLook: React.FC = () => {
           },
         });
 
-        snackbar(t("merchUpdated"), {
+        snackbar(t("updated"), {
           type: "success",
         });
       }, 2000);
