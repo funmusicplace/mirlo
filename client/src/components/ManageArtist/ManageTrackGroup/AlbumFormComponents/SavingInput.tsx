@@ -24,7 +24,8 @@ const SavingInput: React.FC<{
   min?: number;
   maxLength?: number;
   required?: boolean;
-  step?: string;
+  placeholder?: string;
+  step?: string | number;
   type?: string;
   currency?: string;
   onEnter?: () => void;

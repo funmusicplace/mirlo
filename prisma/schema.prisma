@@ -282,6 +282,7 @@ model Artist {
   location                           String?
   allowPurchaseEntireCatalog         Boolean                              @default(false)
   purchaseEntireCatalogMinPrice      Int                                  @default(0) // in cents  
+  maxFreePlays                       Int?
   artistUserSubscriptionConfirmation ArtistUserSubscriptionConfirmation[]
   userArtistNotificationSettings     UserArtistNotificationSetting[]
   notifications                      Notification[]
