@@ -4,7 +4,6 @@ import { Link, useNavigate } from "react-router-dom";
 import api from "services/api";
 import AutoComplete from "components/common/AutoComplete";
 import { css } from "@emotion/css";
-import { first, orderBy } from "lodash";
 
 const constructUrl = (r: any) => {
   let url = "";
@@ -51,8 +50,9 @@ const HeaderSearch: React.FC = () => {
       take: "3",
     });
 
-    const labels = await api.getMany<Label>(`labels`, {
+    const labels = await api.getMany<Label>(`artists`, {
       name: searchString.trim(),
+      isLabel: "true",
       take: "3",
     });
 
