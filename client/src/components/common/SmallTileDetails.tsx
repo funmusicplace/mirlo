@@ -2,6 +2,7 @@ import { css } from "@emotion/css";
 import { bp } from "../../constants";
 import React from "react";
 import styled from "@emotion/styled";
+import { Trans } from "react-i18next";
 
 const WidgetSection = styled.div`
   overflow: hidden;
@@ -83,8 +84,14 @@ export const SmallTileDetails: React.FC<{
               }
             `}
           >
-            <span>from </span>
-            <span>{subtitle}</span>
+            <Trans
+              ns="translation"
+              i18nKey="smallTileDetails.subtitle"
+              components={{
+                label: <span />,
+                subtitle: <>{subtitle}</>,
+              }}
+            />
           </WidgetSection>
         )}
         {footer && (
@@ -109,7 +116,14 @@ export const SmallTileDetails: React.FC<{
               }
             `}
           >
-            {"by"} {footer}
+            <Trans
+              ns="translation"
+              i18nKey="smallTileDetails.footer"
+              components={{
+                label: <span />,
+                footer: <>{footer}</>,
+              }}
+            />
           </WidgetSection>
         )}
       </div>
