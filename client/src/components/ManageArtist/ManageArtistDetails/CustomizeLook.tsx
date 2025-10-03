@@ -334,22 +334,24 @@ export const CustomizeLook: React.FC = () => {
                 />
                 <small>{t("defaultPlatformFeeDescription")}</small>
               </FormComponent>
-              <FormComponent
-                className={css`
-                  width: 300px;
-                `}
-              >
-                <label>{t("maxFreePlays")}</label>
-                <SavingInput
-                  type="number"
-                  min={0}
-                  step={1}
-                  placeholder="0"
-                  url={`manage/artists/${artist.id}`}
-                  formKey="maxFreePlays"
-                />
-                <small>{t("maxFreePlaysDescription")}</small>
-              </FormComponent>
+              <FeatureFlag featureFlag="maxFreePlays">
+                <FormComponent
+                  className={css`
+                    width: 300px;
+                  `}
+                >
+                  <label>{t("maxFreePlays")}</label>
+                  <SavingInput
+                    type="number"
+                    min={0}
+                    step={1}
+                    placeholder="0"
+                    url={`manage/artists/${artist.id}`}
+                    formKey="maxFreePlays"
+                  />
+                  <small>{t("maxFreePlaysDescription")}</small>
+                </FormComponent>
+              </FeatureFlag>
             </ArtistFormSection>
             <FeatureFlag featureFlag="activityPub">
               <ArtistFormSection

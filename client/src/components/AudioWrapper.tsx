@@ -20,6 +20,7 @@ const hlsConfig = {
     xhr.withCredentials = true;
     // xhr.setRequestHeader("Authorization", `Bearer ${token}`);
   },
+
   maxBufferLength: 60,
   fragLoadPolicy: {
     default: {
@@ -184,6 +185,12 @@ export const AudioWrapper: React.FC<{
         width="100%"
         height="2rem"
         onPlay={onPlay}
+        onError={(e) => {
+          console.error("HLS error", e);
+        }}
+        onErrorCapture={(e) => {
+          console.error("HLS error capture", e);
+        }}
         onEnded={onEnded}
         playerRef={playerRef}
         onTimeUpdate={onListen}
