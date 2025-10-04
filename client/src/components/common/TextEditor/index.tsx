@@ -63,6 +63,128 @@ const TextEditor: React.FC<{
   });
 
   const [headerHeight, setHeaderHeight] = useState(0);
+  const processedPastedImagesRef = useRef<Map<string, string>>(new Map());
+  const uploadingPastedImagesRef = useRef<Set<string>>(new Set());
+
+  const dataUriToFile = useCallback((dataUri: string, index: number) => {
+    const [meta, base64Data] = dataUri.split(",");
+    const mimeMatch = meta?.match(/data:(.*?);/);
+    const mimeType = mimeMatch?.[1] ?? "image/png";
+
+    const extensionMap: Record<string, string> = {
+      "image/jpeg": "jpg",
+      "image/jpg": "jpg",
+      "image/png": "png",
+      "image/gif": "gif",
+      "image/webp": "webp",
+      "image/svg+xml": "svg",
+    };
+
+    const extension = extensionMap[mimeType] ?? "png";
+
+    const byteString = atob(base64Data ?? "");
+    const arrayBuffer = new Uint8Array(byteString.length);
+    for (let i = 0; i < byteString.length; i++) {
+      arrayBuffer[i] = byteString.charCodeAt(i);
+    }
+
+    return new File([arrayBuffer], `pasted-image-${Date.now()}-${index}.${extension}`, {
+      type: mimeType,
+    });
+  }, []);
+
+  const uploadPastedImages = useCallback(
+    async (html: string) => {
+      if (!postId) {
+        return;
+      }
+
+      if (!html.includes("data:image")) {
+        return;
+      }
+
+      const parser = document.createElement("div");
+      parser.innerHTML = html;
+
+      const images = Array.from(parser.querySelectorAll<HTMLImageElement>("img"));
+      const replacements: { original: string; replacement: string }[] = [];
+      let shouldReloadImages = false;
+
+      for (const [index, image] of images.entries()) {
+        const src = image.getAttribute("src");
+        if (!src || !src.startsWith("data:image")) {
+          continue;
+        }
+
+        const cachedResult = processedPastedImagesRef.current.get(src);
+        if (cachedResult) {
+          replacements.push({ original: src, replacement: cachedResult });
+          continue;
+        }
+
+        if (uploadingPastedImagesRef.current.has(src)) {
+          continue;
+        }
+
+        try {
+          uploadingPastedImagesRef.current.add(src);
+          const file = dataUriToFile(src, index);
+          const response = await api.uploadFile(
+            `manage/posts/${postId}/images`,
+            [file]
+          );
+
+          processedPastedImagesRef.current.set(src, response.result.jobId);
+          replacements.push({
+            original: src,
+            replacement: response.result.jobId,
+          });
+          shouldReloadImages = true;
+        } catch (error) {
+          console.error("Failed to upload pasted image", error);
+          processedPastedImagesRef.current.delete(src);
+        } finally {
+          uploadingPastedImagesRef.current.delete(src);
+        }
+      }
+
+      if (replacements.length > 0) {
+        const view = manager.view;
+        if (!view) {
+          return;
+        }
+
+        const currentHtml = prosemirrorNodeToHtml(view.state.doc);
+        let sanitizedHtml = currentHtml;
+        let hasChanges = false;
+
+        for (const { original, replacement } of replacements) {
+          if (sanitizedHtml.includes(original)) {
+            sanitizedHtml = sanitizedHtml.split(original).join(replacement);
+            hasChanges = true;
+          }
+        }
+
+        if (!hasChanges) {
+          return;
+        }
+
+        const newState = manager.createState({
+          content: sanitizedHtml,
+          selection: "end",
+          stringHandler: "html",
+        });
+
+        setState(newState);
+        onChange(sanitizedHtml);
+
+        if (shouldReloadImages) {
+          reloadImages?.();
+        }
+      }
+    },
+    [dataUriToFile, manager, onChange, postId, reloadImages, setState]
+  );
 
   useEffect(() => {
     const updateHeaderHeight = () => {
@@ -173,8 +295,10 @@ const TextEditor: React.FC<{
         manager={manager}
         state={state}
         onChange={(parameter) => {
-          onChange(prosemirrorNodeToHtml(parameter.state.doc));
+          const html = prosemirrorNodeToHtml(parameter.state.doc);
+          onChange(html);
           setState(parameter.state);
+          void uploadPastedImages(html);
         }}
       >
         <div className="sticky-toolbar-container">
