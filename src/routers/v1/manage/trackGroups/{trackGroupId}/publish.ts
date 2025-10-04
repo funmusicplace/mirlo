@@ -3,6 +3,7 @@ import prisma from "@mirlo/prisma";
 import { userAuthenticated } from "../../../../../auth/passport";
 import { doesTrackGroupBelongToUser } from "../../../../../utils/ownership";
 import { User } from "@mirlo/prisma/client";
+import { AppError, HttpCode } from "../../../../../utils/error";
 
 export default function () {
   const operations = {
@@ -18,8 +19,51 @@ export default function () {
         Number(trackGroupId),
         loggedInUser
       );
-      const isCurrentlyPublished =
-        trackGroup?.published || trackGroup.publishedAt;
+      const isCurrentlyPublished = Boolean(
+        trackGroup?.published || trackGroup.publishedAt
+      );
+      if (!isCurrentlyPublished) {
+        const successfulTrackCount = await prisma.track.count({
+          where: {
+            trackGroupId: trackGroup.id,
+            deletedAt: null,
+            audio: {
+              uploadState: "SUCCESS",
+            },
+          },
+        });
+        const hasSuccessfulTrack = successfulTrackCount > 0;
+
+        if (!hasSuccessfulTrack) {
+          throw new AppError({
+            httpCode: HttpCode.BAD_REQUEST,
+            description:
+              "TrackGroup must have at least one processed track before publishing",
+          });
+        }
+
+        type CoverWithUrl = { url?: string[] | null };
+        const coverRecords: CoverWithUrl[] = Array.isArray(trackGroup?.cover)
+          ? trackGroup.cover
+          : trackGroup?.cover
+          ? [trackGroup.cover]
+          : [];
+        const hasCover = coverRecords.some(
+          (coverRecord) =>
+            Array.isArray(coverRecord.url) &&
+            coverRecord.url.some(
+              (url) => typeof url === "string" && url.trim().length > 0
+            )
+        );
+
+        if (!hasCover) {
+          throw new AppError({
+            httpCode: HttpCode.BAD_REQUEST,
+            description: "TrackGroup must have a cover before publishing",
+          });
+        }
+      }
+      
       const updatedTrackgroup = await prisma.trackGroup.update({
         where: { id: Number(trackGroupId) || undefined },
         data: {
