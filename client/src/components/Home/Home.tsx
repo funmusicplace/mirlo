@@ -6,6 +6,7 @@ import Splash from "./Splash";
 import Posts from "./Posts";
 import SupportMirlo from "./SupportMirlo";
 import Announcement from "./Announcement";
+import NewsletterSignup from "./NewsletterSignup";
 
 export const SectionHeader = styled.div<{ userId?: number }>`
   padding-bottom: 0;
@@ -53,6 +54,7 @@ function Home() {
       <Splash />
       <Releases />
       <SupportMirlo />
+      <NewsletterSignup />
       <Posts />
     </div>
   );

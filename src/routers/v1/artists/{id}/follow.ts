@@ -9,6 +9,11 @@ import {
   createSubscriptionConfirmation,
   subscribeUserToArtist,
 } from "../../../../utils/artist";
+import { AppError } from "../../../../utils/error";
+import { getSiteSettings } from "../../../../utils/settings";
+import { checkCloudFlareTurnstile } from "../../../../utils/cloudflare";
+
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 type Params = {
   id: string;
@@ -21,11 +26,39 @@ export default function () {
 
   async function POST(req: Request, res: Response, next: NextFunction) {
     const { id: artistId } = req.params as unknown as Params;
-    const loggedInuser = req.user as User;
+    const loggedInuser = req.user as User | undefined;
 
-    const { email } = req.body ?? {};
+    const { email, cfTurnstile } = req.body ?? {};
+    const normalisedEmail =
+      typeof email === "string" ? email.trim().toLowerCase() : undefined;
 
     try {
+      const isLoggedIn = Boolean(loggedInuser?.id);
+
+      if (!isLoggedIn && !normalisedEmail) {
+        throw new AppError({
+          httpCode: 400,
+          description: "Email is required",
+        });
+      }
+
+      if (normalisedEmail && !emailRegex.test(normalisedEmail)) {
+        throw new AppError({
+          httpCode: 400,
+          description: "Email must be valid",
+        });
+      }
+
+      if (!isLoggedIn) {
+        const connectingIP =
+          req.get("cf-connecting-ip") ?? req.ip ?? req.socket.remoteAddress;
+        await checkCloudFlareTurnstile({
+          token: cfTurnstile,
+          ip: connectingIP ?? undefined,
+          skipIfNoSecret: true,
+        });
+      }
+
       const artist = await prisma.artist.findFirst({
         where: {
           id: Number(artistId),
@@ -36,26 +69,101 @@ export default function () {
         },
       });
 
-      if (!loggedInuser?.id && email && artist) {
-        await createSubscriptionConfirmation(email, artist);
-        res.status(200).json({
-          message: "Success",
+      if (!artist) {
+        throw new AppError({
+          httpCode: 404,
+          description: "Artist not found",
         });
-      } else {
-        const user = await prisma.user.findFirst({
-          where: {
-            id: loggedInuser.id,
-          },
+      }
+
+      const settings = await getSiteSettings();
+      const instanceArtistId = settings.settings?.instanceArtistId;
+      const isInstanceArtist =
+        instanceArtistId !== undefined && instanceArtistId !== null
+          ? artist.id === instanceArtistId
+          : false;
+      const requiresVerifiedEmail = true;
+
+      const userSelect = {
+        id: true,
+        currency: true,
+        email: true,
+        receiveMailingList: true,
+        emailConfirmationToken: true,
+      } as const;
+
+      let user: Pick<
+        User,
+        "id" | "currency" | "email" | "receiveMailingList" | "emailConfirmationToken"
+      > | null = null;
+
+      if (isLoggedIn && loggedInuser?.id) {
+        user = await prisma.user.findFirst({
+          where: { id: loggedInuser.id },
+          select: userSelect,
         });
 
-        if (artist) {
-          const results = await subscribeUserToArtist(artist, user);
-
-          res.status(200).json({
-            results,
+        if (!user) {
+          throw new AppError({
+            httpCode: 401,
+            description: "User not found",
           });
         }
+
+        if (requiresVerifiedEmail && user.emailConfirmationToken) {
+          throw new AppError({
+            httpCode: 401,
+            description: "Please verify your email before subscribing.",
+          });
+        }
+
+        if (isInstanceArtist && !user.receiveMailingList) {
+          user = await prisma.user.update({
+            where: { id: user.id },
+            data: { receiveMailingList: true },
+            select: userSelect,
+          });
+        }
+
+        const results = await subscribeUserToArtist(artist, {
+          id: user.id,
+          currency: user.currency,
+        });
+
+        res.status(200).json({
+          results,
+        });
+        return;
       }
+
+      if (!normalisedEmail) {
+        throw new AppError({
+          httpCode: 400,
+          description: "Email is required",
+        });
+      }
+
+      user = await prisma.user.findFirst({
+        where: { email: normalisedEmail },
+        select: userSelect,
+      });
+
+      if (
+        requiresVerifiedEmail &&
+        user?.email &&
+        user.email.toLowerCase() === normalisedEmail &&
+        user.emailConfirmationToken
+      ) {
+        throw new AppError({
+          httpCode: 401,
+          description: "Please verify your email before subscribing.",
+        });
+      }
+
+      await createSubscriptionConfirmation(normalisedEmail, artist);
+      res.status(200).json({
+        message: "Success",
+      });
     } catch (e) {
       next(e);
     }
