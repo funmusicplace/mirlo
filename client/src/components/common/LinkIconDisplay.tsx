@@ -20,6 +20,13 @@ import { FiMail } from "react-icons/fi";
 import Logo from "./Logo";
 import { css } from "@emotion/css";
 
+const customIconClass = css`
+  width: 1rem;
+  height: 1rem;
+  border-radius: 0.25rem;
+  object-fit: cover;
+`;
+
 // See: https://html.spec.whatwg.org/multipage/input.html#e-mail-state-(type%3Demail)
 // This is modified to exclude the "/" symbol if it occurs before an @ sign - which avoids mastodon links being parsed as emails
 const EMAIL_REGEX =
@@ -52,12 +59,13 @@ export const linkUrlDisplay = (link: Link): string => {
     return "Email";
   }
 
-  var linkDisplay = link.linkType;
+  let linkDisplay = link.linkType;
   if (!linkDisplay || linkDisplay === "Email") {
     linkDisplay = findOutsideSite(link).name;
   }
 
-  if (linkDisplay === outsideLinks[outsideLinks.length - 1].name) {
+  const websiteSite = getWebsiteSite();
+  if (linkDisplay === websiteSite.name) {
     linkDisplay = parseUnknownSiteNameFromUrl(link.url) ?? linkDisplay;
   }
 
@@ -65,15 +73,44 @@ export const linkUrlDisplay = (link: Link): string => {
 };
 
 export const findOutsideSite = (link: Link) => {
-  var result =
-    outsideLinks.find(
-      (site) => link.linkType !== "Email" && link.linkType === site.name
-    ) ??
-    outsideLinks.find((site) => link.url.includes(site.matches)) ??
-    outsideLinks[outsideLinks.length - 1];
-  if (result.name === "Email" && !isEmailLink(link.url)) {
-    result = outsideLinks[outsideLinks.length - 1];
+  const matchingSite = link.linkType
+    ? outsideLinks.find((site) => site.name === link.linkType)
+    : undefined;
+
+  const websiteSite = getWebsiteSite();
+  const allowsCustomIcon =
+    !!link.iconUrl && (!matchingSite || matchingSite.matches === "");
+
+  if (allowsCustomIcon && link.iconUrl) {
+    const derivedName =
+      link.linkType && link.linkType.length > 0
+        ? link.linkType
+        : parseUnknownSiteNameFromUrl(link.url) ?? websiteSite.name;
+
+    return {
+      ...websiteSite,
+      icon: (
+        <img
+          src={link.iconUrl}
+          alt=""
+          className={customIconClass}
+          aria-hidden
+        />
+      ),
+      name: derivedName,
+      showFull: true,
+    };
   }
+
+  let result =
+    matchingSite ??
+    outsideLinks.find((site) => link.url.includes(site.matches)) ??
+    websiteSite;
+
+  if (result.name === "Email" && !isEmailLink(link.url)) {
+    result = websiteSite;
+  }
+
   return result;
 };
 
@@ -124,6 +161,13 @@ export const outsideLinks = [
   },
   { matches: "", icon: <FaGlobe />, name: "Website", showFull: true },
 ];
+
+function getWebsiteSite() {
+  return (
+    outsideLinks.find((site) => site.matches === "") ??
+    outsideLinks[outsideLinks.length - 1]
+  );
+}
 
 const LinkIconDisplay: React.FC<{ url: string }> = ({ url }) => {
   let icon = <FaGlobe />;

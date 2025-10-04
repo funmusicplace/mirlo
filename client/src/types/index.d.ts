@@ -193,6 +193,7 @@ interface Link {
   linkType?: string;
   linkLabel?: string;
   inHeader?: boolean;
+  iconUrl?: string;
 }
 
 interface ArtistLabel {
