@@ -1,6 +1,5 @@
 import { User } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
-import fetch from "node-fetch";
 
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import prisma from "@mirlo/prisma";
@@ -12,43 +11,9 @@ import {
 } from "../../../../utils/artist";
 import { AppError } from "../../../../utils/error";
 import { getSiteSettings } from "../../../../utils/settings";
+import { checkCloudFlareTurnstile } from "../../../../utils/cloudflare";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const { CLOUDFLARE_TURNSTILE_API_SECRET } = process.env;
-
-async function checkCloudFlare(token: unknown, ip: string | undefined) {
-  if (!CLOUDFLARE_TURNSTILE_API_SECRET) {
-    return;
-  }
-
-  if (!token || typeof token !== "string") {
-    throw new AppError({
-      httpCode: 400,
-      description: "Spam protection challenge is required",
-    });
-  }
-
-  const url = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
-  const result = await fetch(url, {
-    body: JSON.stringify({
-      secret: CLOUDFLARE_TURNSTILE_API_SECRET,
-      response: token,
-      remoteip: ip,
-    }),
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-
-  const outcome = await result.json();
-  if (!outcome.success) {
-    throw new AppError({
-      httpCode: 400,
-      description: "Spam protection failed",
-    });
-  }
-}
 
 type Params = {
   id: string;
@@ -87,7 +52,11 @@ export default function () {
       if (!isLoggedIn) {
         const connectingIP =
           req.get("cf-connecting-ip") ?? req.ip ?? req.socket.remoteAddress;
-        await checkCloudFlare(cfTurnstile, connectingIP ?? undefined);
+        await checkCloudFlareTurnstile({
+          token: cfTurnstile,
+          ip: connectingIP ?? undefined,
+          skipIfNoSecret: true,
+        });
       }
 
       const artist = await prisma.artist.findFirst({
@@ -109,10 +78,11 @@ export default function () {
 
       const settings = await getSiteSettings();
       const instanceArtistId = settings.settings?.instanceArtistId;
-      const requiresVerifiedEmail =
+      const isInstanceArtist =
         instanceArtistId !== undefined && instanceArtistId !== null
           ? artist.id === instanceArtistId
           : false;
+      const requiresVerifiedEmail = true;
 
       const userSelect = {
         id: true,
@@ -147,7 +117,7 @@ export default function () {
           });
         }
 
-        if (requiresVerifiedEmail && !user.receiveMailingList) {
+        if (isInstanceArtist && !user.receiveMailingList) {
           user = await prisma.user.update({
             where: { id: user.id },
             data: { receiveMailingList: true },

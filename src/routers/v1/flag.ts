@@ -1,33 +1,9 @@
 import { NextFunction, Request, Response } from "express";
-import fetch from "node-fetch";
 import { AppError } from "../../utils/error";
 import sendMail from "../../jobs/send-mail";
 import { Job } from "bullmq";
 import prisma from "@mirlo/prisma";
-
-const { CLOUDFLARE_TURNSTILE_API_SECRET } = process.env;
-
-async function checkCloudFlare(token: unknown, ip: unknown) {
-  const url = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
-  const result = await fetch(url, {
-    body: JSON.stringify({
-      secret: CLOUDFLARE_TURNSTILE_API_SECRET,
-      response: token,
-      remoteip: ip,
-    }),
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-
-  const outcome = await result.json();
-  if (outcome.success) {
-    return true;
-  } else {
-    throw new AppError({ httpCode: 400, description: "Sounds like a robot" });
-  }
-}
+import { checkCloudFlareTurnstile } from "../../utils/cloudflare";
 
 export default function () {
   const operations = {
@@ -40,7 +16,12 @@ export default function () {
     const cfTurnstile = req.body["cfTurnstile"];
 
     try {
-      await checkCloudFlare(cfTurnstile, connectingIP);
+      await checkCloudFlareTurnstile({
+        token: cfTurnstile,
+        ip: connectingIP,
+        missingTokenMessage: "Sounds like a robot",
+        failureMessage: "Sounds like a robot",
+      });
 
       let trackGroup;
       if (trackGroupId) {

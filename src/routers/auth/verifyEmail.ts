@@ -81,7 +81,17 @@ const verifyEmail = async (req: Request, res: Response, next: NextFunction) => {
         const { user } = await findOrCreateUserBasedOnEmail(email);
 
         if (user) {
-          setTokens(res, user);
+          if (user.emailConfirmationToken || user.emailConfirmationExpiration) {
+            await prisma.user.update({
+              where: { id: user.id },
+              data: {
+                emailConfirmationToken: null,
+                emailConfirmationExpiration: null,
+              },
+            });
+          }
+
+          setTokens(res, { email: user.email, id: user.id });
           res.json({
             message: "Success! Email verified.",
             userId: user?.id,
