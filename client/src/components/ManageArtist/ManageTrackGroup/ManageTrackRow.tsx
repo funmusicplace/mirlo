@@ -207,7 +207,12 @@ const ManageTrackRow: React.FC<{
             )}
             <TrackAuthors track={track} trackGroupArtistId={artistId} />
             <p>
-              <small>
+              <small
+                className={css`
+                  gap: 0.4rem;
+                  display: flex;
+                `}
+              >
                 {uploadState === "SUCCESS" && t("doneUploadingTrack")}
                 {uploadState === "STARTED" && (
                   <>

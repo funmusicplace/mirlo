@@ -144,6 +144,9 @@ export const doesTrackBelongToUser = async (trackId: number, user: User) => {
       where: {
         id: trackId,
       },
+      select: {
+        trackGroupId: true,
+      },
     });
 
     if (track) {
@@ -171,9 +174,43 @@ export const canUserListenToTrack = async (trackId?: number, user?: User) => {
     where: {
       id: trackId,
     },
+    select: {
+      id: true,
+      isPreview: true,
+      trackGroupId: true,
+      trackGroup: {
+        select: {
+          artist: {
+            select: {
+              maxFreePlays: true,
+            },
+          },
+        },
+      },
+    },
   });
 
   if (track?.isPreview) {
+    if (user) {
+      const trackGroup = await doesTrackBelongToUser(track.trackGroupId, user);
+      if (trackGroup) {
+        return true;
+      }
+
+      const maxFreePlays = track.trackGroup?.artist?.maxFreePlays;
+      if (maxFreePlays) {
+        const userPlays = await prisma.trackPlay.count({
+          where: {
+            userId: user.id,
+            trackId: track.id,
+          },
+        });
+        if (userPlays >= maxFreePlays) {
+          return "exceeded";
+        }
+      }
+    }
+
     return true;
   }
 

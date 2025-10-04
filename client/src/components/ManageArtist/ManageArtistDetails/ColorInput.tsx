@@ -89,8 +89,9 @@ export const ColorInput: React.FC<{ name: string; title: string }> = ({
               updateColorOnChange();
             }
           },
-          validate: (val) =>
-            isValidColor(val) || "Not a valid color!",
+          validate: {
+            validColor: (val) => !!isValidColor(val) || "Not a valid color!",
+          },
         })}
         value={watch(name) || "#000000"}
         className={css`

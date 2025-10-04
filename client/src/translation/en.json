@@ -674,7 +674,7 @@
     "howMuchModalRowRedistributionPercent": "15%",
     "howMuchModalRowRedistributionLabel": "Redistribution",
     "howMuchModalRowRedistributionDescription": "You really want to see Mirlo succeed and you can afford it.",
-    "howMuchModalCalculator": "If you're having trouble deciding on a rate, you can use <link>this sliding scale calculator</link> for individuals provided by the Aorta Co-operative.",
+    "howMuchModalCalculator": "If you're having trouble deciding on a rate, you can use <link>this sliding scale calculator</link> for individuals (in english) provided by the Aorta Co-operative.",
     "howMuchModalFinances": "Curious about how Mirlo uses money? We post quarterly financial statements <link>on our blog</link>."
   },
   "manageAlbum": {
@@ -686,9 +686,9 @@
     "keyDetails": "Key details",
     "catalogNumber": "Catalog number",
     "previewRelease": "Preview release",
-    "isGettable": "Is it possible for a user to buy or download this album?",
-    "isGettableTooltip": "We don't want to take this for granted! Some musicians just want to share their music, but don't want to let people download it.",
-    "isGettableInfo": "Disabling this will make it so that users can't buy or download your album, but they can listen to it online for free. Most people will want to leave this enabled.",
+    "isGettable": "Prevent users from downloading and buying this album",
+    "isGettableTooltip": "Turn this on if you only want people to stream the album. When enabled, downloads and purchases are disabled.",
+    "isGettableInfo": "Leave this unchecked to let fans buy or download your album. Checking it means listeners can only stream it for free.",
     "currencyIsSetOnManageArtist": "The currency is set by the payment processor you've linked on the manage artist page.",
     "platformPercent": "How much goes to Mirlo?",
     "artwork": "Artwork",
@@ -799,6 +799,9 @@
     "backgroundImageLabel": "Background image",
     "clickToUploadType": "Click to upload {{ imageType }}",
     "yourAvatar": "your avatar",
+    "maxFreePlays": "Max free plays",
+    "updated": "Updated artist",
+    "maxFreePlaysDescription": "How many times can a user listen to a track before they have to buy it or add it to their collection? This only applies to tracks not in a user's collection.",
     "backgroundImageDescription": "the image that appears in the background of your page",
     "displayName": "Display name",
     "bio": "About / biography",
@@ -822,6 +825,7 @@
     "uploading": "Uploading...",
     "replace": "Replace",
     "tileImage": "Tile background image?",
+    "tileImageDescription": "The image will be duplicated to cover the whole background area.",
     "updatedArtist": "Updated artist",
     "dimensionsTip": "For the best effect, upload a {{maxDimensions}} size image. File size is limited to {{ maxSize }}.",
     "yourAlbums": "Your albums",
@@ -876,7 +880,7 @@
   "subscriptionForm": {
     "supporters": "Manage supporters",
     "theMoneyBit": "The money bit",
-    "tierImageDescription": "an image for this support level (optional)",
+    "tierImageDescription": "add an image to illustrate this support tier (optional)",
     "platformPercent": "Platform cut",
     "inCurrency": "In {{ currency }}",
     "subscriptionUpdated": "Subscription updated",
@@ -1058,6 +1062,10 @@
     "viewCodes": "Overview of your codes",
     "codesForGroup": "Codes for {{ group }}"
   },
+  "smallTileDetails": {
+    "subtitle": "<label>from</label> <subtitle/>",
+    "footer": "<label>by</label> <footer/>"
+  },
   "artists": {
     "artists": "All artists",
     "sortBy": "Sort by",
@@ -1076,8 +1084,8 @@
     "title": "Title:",
     "publicationDate": "Publication date:",
     "content": "Content",
-    "isSubscriptionOnly": "Once published, will this post be publicly readable?",
-    "isSubscriptionPostOnly": "Should anyone be able to read this post? Uncheck this if only your subscribers should see it",
+    "isSubscriptionOnly": "Subscribers only?",
+    "isSubscriptionPostOnly": "Check this to limit the post to your subscribers. Leave it unchecked to make it available to everyone.",
     "post": "post",
     "save": "Save",
     "publishPost": "Publish post",
@@ -1092,7 +1100,7 @@
     "shouldSendEmail": "Send an email to your supporters when this post is published?",
     "shouldSendEmailContext": "If yes, an e-mail will be sent and they will get notified on the website, if not, they'll only get the notification.",
     "follow": "Everyone who pressed the \"Follow\" button on your profile",
-    "ifNotPublic": "If not public, which of your subscription tier should be the minimum tier to receive your posts?"
+    "ifNotPublic": "Which of your subscription tiers should be the minimum tier to receive your posts?"
   },
   "errorPage": {
     "reactError": "React error ",

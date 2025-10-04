@@ -24,12 +24,14 @@ const SavingInput: React.FC<{
   min?: number;
   maxLength?: number;
   required?: boolean;
-  step?: string;
+  placeholder?: string;
+  step?: string | number;
   type?: string;
   currency?: string;
   onEnter?: () => void;
   reload?: () => void;
   width?: string | number;
+  valueTransform?: (value: unknown) => unknown;
 }> = ({
   formKey,
   min,
@@ -46,6 +48,7 @@ const SavingInput: React.FC<{
   reload,
   width,
   onEnter,
+  valueTransform,
 }) => {
   const { colors } = useGetArtistColors();
   const { register, getValues } = useFormContext();
@@ -68,6 +71,10 @@ const SavingInput: React.FC<{
         value = new Date(value).toISOString();
       } else if (formKey === "minPrice" || !!currency) {
         value = value ? value * 100 : undefined;
+      }
+
+      if (valueTransform) {
+        value = valueTransform(value);
       }
 
       if (type === "number") {

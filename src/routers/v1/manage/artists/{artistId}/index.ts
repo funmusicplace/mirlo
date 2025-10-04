@@ -40,6 +40,7 @@ export default function () {
       defaultPlatformFee,
       tourDates,
       shortDescription,
+      maxFreePlays,
     } = req.body;
 
     try {
@@ -58,6 +59,7 @@ export default function () {
           purchaseEntireCatalogMinPrice,
           defaultPlatformFee,
           shortDescription,
+          maxFreePlays,
           ...(urlSlug
             ? { urlSlug: slugify(urlSlug, { strict: true, lower: true }) }
             : {}),

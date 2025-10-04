@@ -271,12 +271,26 @@ const ClickToPlay: React.FC<
     }
   }, [dispatch, localTrackIds, detectTracksPlayable]);
 
+  const isSingleTrackGroup = !track && trackGroup.tracks?.length === 1;
+
+  const linkTarget =
+    track ?? (isSingleTrackGroup ? trackGroup.tracks?.[0] : trackGroup);
+
+  const linkLabelKey = track || isSingleTrackGroup ? "goToTrack" : "goToAlbum";
+
   const currentlyPlaying =
     playing &&
     currentlyPlayingIndex !== undefined &&
     localTrackIds.includes(playerQueueIds[currentlyPlayingIndex]);
 
-  const url = determineItemLink(trackGroup.artist, track ?? trackGroup);
+  const url =
+    linkTarget &&
+    determineItemLink(
+      trackGroup.artist,
+      // Need to attach the trackGroup on the link if it's just a track.
+      isSingleTrackGroup ? { ...linkTarget, trackGroup } : linkTarget
+    );
+
   return (
     <ClickToPlayWrapper>
       <Wrapper className={className}>
@@ -286,7 +300,7 @@ const ClickToPlay: React.FC<
            * As such, it is safe to exclude this from the accessibility tree.
            * https://www.w3.org/TR/wai-aria/states_and_properties#aria-hidden
            */}
-          {trackGroup.artist && (
+          {trackGroup.artist && url && (
             <Link to={url} aria-hidden tabIndex={-1}></Link>
           )}
           <TrackgroupButtons>
@@ -303,7 +317,7 @@ const ClickToPlay: React.FC<
                 <Wishlist trackGroup={trackGroup} />
               </div>
             )}
-            {user && showTrackFavorite && (
+            {user && showTrackFavorite && trackGroup.tracks && (
               <div>
                 <FavoriteTrack track={trackGroup.tracks[0]} collapse />
               </div>
@@ -322,7 +336,7 @@ const ClickToPlay: React.FC<
           {/*
            * Likewise, this "Go to album" text SHOULD also be used to describe the album link (through aria-label).
            */}
-          <p aria-hidden>{t(track ? "goToTrack" : "goToAlbum")}</p>
+          <p aria-hidden>{t(linkLabelKey)}</p>
         </PlayWrapper>
 
         {currentlyPlaying && (

@@ -215,6 +215,7 @@ interface ArtistLabel {
 
 interface Artist {
   name: string;
+  maxFreePlays?: number;
   shortDescription?: string;
   bio: string;
   isLabelProfile: boolean;

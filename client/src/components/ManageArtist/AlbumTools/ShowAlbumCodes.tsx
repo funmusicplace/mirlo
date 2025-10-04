@@ -32,7 +32,13 @@ const ShowAlbumCodes: React.FC<{}> = () => {
     keyPrefix: "manageArtistTools",
   });
   const [albumCodes, setAlbumCodes] = React.useState<AlbumCode[]>([]);
-  const [isDownloadingCodes, setIsdDownloadingCodes] = React.useState(false);
+  type DownloadTarget =
+    | { type: "all" }
+    | { type: "group"; group: string; trackGroupId: number };
+
+  const [downloadingTarget, setDownloadingTarget] = React.useState<
+    DownloadTarget | null
+  >(null);
   const { data: artist } = useManagedArtistQuery();
   const userId = artist?.userId;
   const artistId = artist?.id;
@@ -50,17 +56,19 @@ const ShowAlbumCodes: React.FC<{}> = () => {
   }, [callback]);
 
   const downloadCodes = React.useCallback(
-    async (group?: string) => {
-      setIsdDownloadingCodes(true);
+    async (target: DownloadTarget) => {
+      setDownloadingTarget(target);
       try {
         if (userId && artistId) {
           const searchParams = new URLSearchParams();
-          if (group) {
-            searchParams.append("group", group);
+          if (target.type === "group") {
+            searchParams.append("group", target.group);
           }
           searchParams.append("format", "csv");
           await api.getFile(
-            `${group ? group : "all"}-codes-for-${artistSlug}`,
+            `${
+              target.type === "group" ? target.group : "all"
+            }-codes-for-${artistSlug}`,
             `manage/artists/${artistId}/codes?${searchParams.toString()}`,
             "text/csv"
           );
@@ -68,10 +76,16 @@ const ShowAlbumCodes: React.FC<{}> = () => {
       } catch (e) {
         console.error(e);
       } finally {
-        setIsdDownloadingCodes(false);
+        setDownloadingTarget(null);
       }
     },
     [artistSlug, artistId, userId]
+  );
+
+  const downloadGroupCodes = React.useCallback(
+    (group: string, trackGroupId: number) =>
+      downloadCodes({ type: "group", group, trackGroupId }),
+    [downloadCodes]
   );
 
   if (!artist) {
@@ -120,8 +134,8 @@ const ShowAlbumCodes: React.FC<{}> = () => {
         <h3>{t("existingAlbumCodes")}</h3>
         <Button
           startIcon={<FaFileCsv />}
-          isLoading={isDownloadingCodes}
-          onClick={() => downloadCodes()}
+          isLoading={downloadingTarget?.type === "all"}
+          onClick={() => downloadCodes({ type: "all" })}
         >
           {t("downloadAllCodes")}
         </Button>
@@ -141,8 +155,13 @@ const ShowAlbumCodes: React.FC<{}> = () => {
             <AlbumCodesRow
               key={r.group + r.trackGroupId}
               r={r}
-              downloadCodes={downloadCodes}
+              downloadCodes={downloadGroupCodes}
               albumCodes={albumCodes.filter((code) => code.group === r.group)}
+              isDownloading={
+                downloadingTarget?.type === "group" &&
+                downloadingTarget.group === r.group &&
+                downloadingTarget.trackGroupId === r.trackGroupId
+              }
             />
           ))}
         </tbody>

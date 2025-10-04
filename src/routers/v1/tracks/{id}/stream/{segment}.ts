@@ -69,6 +69,10 @@ export default function () {
         return next();
       }
 
+      if (isUserAbleToListenToTrack === "exceeded") {
+        res.status(403).send("Track play limit exceeded");
+      }
+
       if (track.audio) {
         const segmentString = segment.split("-")[1]?.split(".")?.[0];
         const segmentNumber = segmentString ? +segmentString : undefined;
