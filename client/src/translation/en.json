@@ -460,6 +460,12 @@
     "isSubscribed": "Subscribed",
     "moreLinks": "More links"
   },
+  "checkoutError": {
+    "title": "Checkout not completed",
+    "generic": "We couldn't finish your checkout. Please try again or contact support if the issue keeps happening.",
+    "userCanceled": "It looks like you left the checkout before finishing your purchase.",
+    "returnHome": "Return to Mirlo"
+  },
   "clickToPlay": {
     "untitled": "Untitled",
     "goToAlbum": "Go to album",

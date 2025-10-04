@@ -115,6 +115,17 @@ const routes: RouteObject[] = [
         },
       },
       {
+        path: "checkout-error",
+        async lazy() {
+          const { default: Component } = await import(
+            "components/Checkout/CheckoutError"
+          );
+          return {
+            Component: () => <Component />,
+          };
+        },
+      },
+      {
         path: "password-reset",
         async lazy() {
           const { default: Component } = await import(
@@ -715,6 +726,17 @@ const routes: RouteObject[] = [
                 async lazy() {
                   const { default: Component } = await import(
                     "components/Artist/CheckoutComplete"
+                  );
+                  return {
+                    Component: () => <Component />,
+                  };
+                },
+              },
+              {
+                path: "checkout-error",
+                async lazy() {
+                  const { default: Component } = await import(
+                    "components/Checkout/CheckoutError"
                   );
                   return {
                     Component: () => <Component />,
