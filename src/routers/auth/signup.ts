@@ -7,6 +7,7 @@ import logger from "../../logger";
 import { AppError } from "../../utils/error";
 import { subscribeUserToArtist } from "../../utils/artist";
 import { getSiteSettings } from "../../utils/settings";
+import { sendVerificationEmail } from "./sendVerificationEmail";
 
 const signup = async (req: Request, res: Response, next: NextFunction) => {
   let {
@@ -74,7 +75,24 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
     if (!client) {
       res.status(400).json({ error: "This client does not exist " });
     } else if (existing) {
-      if (existing.password) {
+      const hasPassword = !!existing.password;
+      if (hasPassword && existing.emailConfirmationToken) {
+        logger.info(
+          `auth/signup: attempt to signup with completed account pending verification`
+        );
+        const emailConfirmationExpired =
+          !!existing.emailConfirmationExpiration &&
+          existing.emailConfirmationExpiration < new Date();
+        return res.status(400).json({
+          error: "A user with this email already exists",
+          requiresEmailVerification: true,
+          emailConfirmationExpired,
+          emailConfirmationExpiresAt:
+            existing.emailConfirmationExpiration?.toISOString() ?? null,
+        });
+      }
+
+      if (hasPassword) {
         logger.info(`auth/signup: attempt to signup with completed account`);
         return next(
           new AppError({
@@ -108,6 +126,7 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
           id: true,
           receiveMailingList,
           emailConfirmationToken: true,
+          emailConfirmationExpiration: true,
         },
       });
 
@@ -140,20 +159,11 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
         }
       }
 
-      await sendMail({
-        data: {
-          template: "new-user",
-          message: {
-            to: result.email,
-          },
-          locals: {
-            accountType,
-            user: result,
-            host: process.env.API_DOMAIN,
-            client: client.id,
-          },
-        },
-      } as Job);
+      await sendVerificationEmail({
+        user: result,
+        clientId: client.id,
+        accountType,
+      });
 
       return res.json(result);
     }

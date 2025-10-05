@@ -7,6 +7,7 @@ import signup from "./signup";
 import refresh from "./refresh";
 import login from "./login";
 import verifyEmail from "./verifyEmail";
+import resendVerificationEmail from "./resendVerificationEmail";
 import {
   passwordResetConfirmation,
   passwordResetInitiate,
@@ -19,6 +20,8 @@ const router = express.Router();
 router.post(`/signup`, signup);
 
 router.post(`/verify-email`, verifyEmail);
+
+router.post(`/resend-verification-email`, resendVerificationEmail);
 
 router.get(`/confirmation/:emailConfirmationToken`, async (req, res, next) => {
   try {
