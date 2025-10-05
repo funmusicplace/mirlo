@@ -477,6 +477,7 @@
     "pause": "Pause"
   },
   "post": {
+    "postByArtist": "by <link>{{artistName}}</link>",
     "byArtist": "by {{artist}}",
     "noPostFound": "No post found",
     "returnToArtist": ", return to <link>artistPage</link>",
@@ -939,6 +940,7 @@
     "newPostByArtist": "New post by <link>{{artistName}}</link>",
     "inviteToJoinLabel": "<linkToLabel>{{labelName}}</linkToLabel> has invited you to join their label/collective.",
     "followedYourArtist": "{{relatedUser}} followed your artist",
+    "boughtYourAlbum": "{{relatedUser}} bought your album",
     "atSubcriptionTier": "at {{subscriptionTier}}",
     "manageOnArtistPage": "Manage on artist page"
   },
