@@ -164,6 +164,7 @@ export default function () {
               urlSlug:
                 updatedUser.urlSlug ??
                 slugify(updatedUser.name ?? updatedUser.email, {
+                  locale: updatedUser.language ?? undefined,
                   lower: true,
                   strict: true,
                 }),

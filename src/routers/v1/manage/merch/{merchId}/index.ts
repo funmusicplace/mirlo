@@ -6,6 +6,7 @@ import {
 } from "../../../../../auth/passport";
 
 import prisma from "@mirlo/prisma";
+import { User } from "@mirlo/prisma/client";
 import { AppError } from "../../../../../utils/error";
 import { deleteMerch, processSingleMerch } from "../../../../../utils/merch";
 import slugify from "slugify";
@@ -98,12 +99,14 @@ export default function () {
         }
       }
 
+      const user = req.user as User;
       await prisma.merch.updateMany({
         where: { id: merchId },
         data: {
           ...newValues,
           urlSlug: !merch?.urlSlug // only update slug if it was not set before
             ? slugify(newValues.title ?? merch?.title, {
+                locale: user.language ?? undefined,
                 strict: true,
                 lower: true,
               })

@@ -99,8 +99,14 @@ export default function () {
       }
 
       const slug = slugify(
-        urlSlug?.toLowerCase() ?? slugify(name, { lower: true, strict: true }),
+        urlSlug?.toLowerCase() ??
+          slugify(name, {
+            locale: user.language ?? undefined,
+            lower: true,
+            strict: true,
+          }),
         {
+          locale: user.language ?? undefined,
           strict: true,
         }
       );

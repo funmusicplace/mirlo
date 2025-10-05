@@ -42,6 +42,7 @@ export default function () {
       shortDescription,
       maxFreePlays,
     } = req.body;
+    const user = req.user as User;
 
     try {
       // FIXME: check type of properties object.
@@ -61,7 +62,13 @@ export default function () {
           shortDescription,
           maxFreePlays,
           ...(urlSlug
-            ? { urlSlug: slugify(urlSlug, { strict: true, lower: true }) }
+            ? {
+                urlSlug: slugify(urlSlug, {
+                  locale: user.language ?? undefined,
+                  strict: true,
+                  lower: true,
+                }),
+              }
             : {}),
           properties,
         },

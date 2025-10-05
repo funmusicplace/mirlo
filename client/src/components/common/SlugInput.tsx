@@ -17,7 +17,9 @@ const SlugInput: React.FC<{
   currentName?: string;
 }> = ({ currentArtistId, isDisabled, type, currentName }) => {
   const { colors } = useGetArtistColors();
-  const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
+  const { i18n, t } = useTranslation("translation", {
+    keyPrefix: "manageArtist",
+  });
   const {
     register,
     watch,
@@ -50,7 +52,11 @@ const SlugInput: React.FC<{
 
   const useCurrentNameAsSlug = React.useCallback(() => {
     if (currentName) {
-      const slug = slugify(currentName, { lower: true, strict: true });
+      const slug = slugify(currentName, {
+        locale: i18n.language,
+        lower: true,
+        strict: true,
+      });
       setValue("urlSlug", slug);
     }
     return "";
@@ -85,6 +91,7 @@ const SlugInput: React.FC<{
         >
           {t("useUrlSlug", {
             suggestedUrlSlug: slugify(currentName.toLowerCase(), {
+              locale: i18n.language,
               strict: true,
             }),
           })}
