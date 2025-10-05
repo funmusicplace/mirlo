@@ -91,8 +91,8 @@ function RedeemCode() {
   return (
     <WidthWrapper variant="big">
       <MetaCard
-        title={trackGroup.title ?? "Untitled release"}
-        description={trackGroup.about ?? "An album on Mirlo"}
+        title={trackGroup.title ?? t("untitledRelease")}
+        description={trackGroup.about ?? t("releaseOnMirlo")}
         image={trackGroup.cover?.sizes?.[600]}
       />
       <div
@@ -121,7 +121,7 @@ function RedeemCode() {
           <ImageWithPlaceholder
             src={trackGroup.cover?.sizes?.[600]}
             size={600}
-            alt={trackGroup.title ?? "Untitled release"}
+            alt={trackGroup.title ?? t("untitledRelease")}
           />
           <div
             className={css`

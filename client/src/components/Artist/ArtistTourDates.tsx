@@ -249,7 +249,7 @@ const ArtistTourDates: React.FC<ArtistHeaderDescriptionProps> = ({
                   onClick={() => remove(index)}
                   startIcon={<FaTimes />}
                 >
-                  {t("remove")}
+                  {t("removeTourDate")}
                 </ArtistButton>
               </div>
             ))}

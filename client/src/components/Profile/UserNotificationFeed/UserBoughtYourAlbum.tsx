@@ -16,13 +16,15 @@ const UserBoughtYourAlbum: React.FC<{ notification: Notification }> = ({
   return (
     <>
       <div>
-        {notification.relatedUser?.name} bought your album:{" "}
+        {t("boughtYourAlbum", { relatedUser: notification.relatedUser?.name })}
+        {": "}
         {notification.trackGroup.artist && (
           <Link to={getArtistUrl(notification.trackGroup.artist)}>
             {notification.trackGroup.artist?.name}
           </Link>
         )}
-        : <strong>{notification.trackGroup.title}</strong>
+        {notification.trackGroup.artist ? ": " : ""}
+        <strong>{notification.trackGroup.title}</strong>
       </div>
       <Link
         to={getReleaseUrl(

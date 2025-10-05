@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { moneyDisplay } from "components/common/Money";
 import { queryUserStripeStatus } from "queries";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import api from "services/api";
 import PurchaseOrDownloadAlbum from "./PurchaseOrDownloadAlbumModal";
@@ -13,6 +14,7 @@ const BackOrIsBacking: React.FC<{ trackGroup: TrackGroup; artist: Artist }> = ({
   trackGroup,
   artist,
 }) => {
+  const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
   const { data: stripeAccountStatus, isFetching } = useQuery(
     queryUserStripeStatus(trackGroup.artist?.userId ?? 0)
   );
@@ -62,7 +64,7 @@ const BackOrIsBacking: React.FC<{ trackGroup: TrackGroup; artist: Artist }> = ({
 
   return (
     <>
-      {isLoading && <div>Loading...</div>}
+      {isLoading && <div>{t("loading")}</div>}
       {!isLoading && (
         <>
           {paymentStatus === "succeeded" && paymentIntentAmount && (

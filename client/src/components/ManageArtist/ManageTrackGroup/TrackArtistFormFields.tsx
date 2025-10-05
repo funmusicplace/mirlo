@@ -132,7 +132,7 @@ const TrackArtistFormFields: React.FC<{
         size="compact"
         disabled={disabled}
       >
-        Remove this artist
+        {t("removeArtist")}
       </ArtistButton>
     </div>
   );

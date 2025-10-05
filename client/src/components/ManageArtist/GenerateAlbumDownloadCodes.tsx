@@ -78,7 +78,7 @@ const GenerateAlbumDownloadCodes: React.FC<{ onDone: () => void }> = ({
           ]);
           methods.reset();
           setSelectedTrackGroup(undefined);
-          snackbar("Success", { type: "success" });
+          snackbar(t("success"), { type: "success" });
           setIsOpen(false);
           onDone();
         } catch (e) {

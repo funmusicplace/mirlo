@@ -56,7 +56,7 @@ const LicenseForm: React.FC<{ callback: () => void }> = ({ callback }) => {
           placeholder={t("egLink") ?? ""}
         />{" "}
       </FormComponent>
-      <Button>{"add"}</Button>
+      <Button>{t("add")}</Button>
     </form>
   );
 };

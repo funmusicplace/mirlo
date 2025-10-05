@@ -116,7 +116,7 @@ const LabelConfirmation: React.FC = () => {
                     </td>
                     <td>{relationship.labelUser.name}</td>
                     <td>{relationship.labelUser.email}</td>
-                    <td>{relationship.isLabelApproved ? "Yes" : "No"}</td>
+                    <td>{relationship.isLabelApproved ? t("yes") : t("no")}</td>
                     <td>
                       <Toggle
                         toggled={fields[idx].isArtistApproved}
@@ -131,8 +131,12 @@ const LabelConfirmation: React.FC = () => {
                         label={t("confirmRelationship")}
                       />
                     </td>
-                    <td>{relationship.canLabelManageArtist ? "Yes" : "No"}</td>
-                    <td>{relationship.canLabelAddReleases ? "Yes" : "No"}</td>
+                    <td>
+                      {relationship.canLabelManageArtist ? t("yes") : t("no")}
+                    </td>
+                    <td>
+                      {relationship.canLabelAddReleases ? t("yes") : t("no")}
+                    </td>
                   </tr>
                 ))}
               </tbody>

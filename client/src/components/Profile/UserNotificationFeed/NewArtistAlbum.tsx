@@ -1,6 +1,6 @@
 import { css } from "@emotion/css";
 import React from "react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { FaChevronRight } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { getArtistUrl, getReleaseUrl } from "utils/artist";
@@ -16,13 +16,22 @@ const NewArtistAlbum: React.FC<{ notification: Notification }> = ({
   return (
     <>
       <div>
-        New release by{" "}
-        {notification.trackGroup.artist && (
-          <Link to={getArtistUrl(notification.trackGroup.artist)}>
-            {notification.trackGroup.artist?.name}
-          </Link>
-        )}
-        : <strong>{notification.trackGroup.title}</strong>
+        <Trans
+          t={t}
+          i18nKey="newReleaseByArtist"
+          values={{
+            artistName:
+              notification.trackGroup.artist?.name ||
+              notification.trackGroup.title,
+          }}
+          components={{
+            link: notification.trackGroup.artist ? (
+              <Link to={getArtistUrl(notification.trackGroup.artist)}></Link>
+            ) : (
+              <strong></strong>
+            ),
+          }}
+        />
       </div>
       <Link
         to={getReleaseUrl(

@@ -200,7 +200,7 @@ const DownloadAlbumButton: React.FC<{
           setIsPopupOpen(true);
         }}
       >
-        {onlyIcon ? "" : "Download"}
+        {onlyIcon ? "" : t("download")}
       </ArtistButton>
     </div>
   );

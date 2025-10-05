@@ -1,7 +1,9 @@
 import { ArtistButton } from "components/Artist/ArtistButtons";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 const ShowRawID3Data: React.FC<{ track: Track }> = ({ track }) => {
+  const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const [isVisible, setIsVisible] = useState(false);
 
   const toggleVisibility = () => {
@@ -15,7 +17,7 @@ const ShowRawID3Data: React.FC<{ track: Track }> = ({ track }) => {
         variant="outlined"
         size="compact"
       >
-        {isVisible ? "Hide Raw ID3 Data" : "Show Raw ID3 Data"}
+        {isVisible ? t("hideRawId3Data") : t("showRawId3Data")}
       </ArtistButton>
       {isVisible && (
         <div>

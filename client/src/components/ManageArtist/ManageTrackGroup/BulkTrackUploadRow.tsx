@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { css } from "@emotion/css";
 
 import styled from "@emotion/styled";
@@ -39,6 +40,8 @@ export const PercentUpload = styled("div")<{ percentUpload: number }>`
 export const BulkTrackUploadRow: React.FC<{
   track: { title: string; status: number };
 }> = ({ track }) => {
+  const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
+
   return (
     <div
       className={css`
@@ -55,7 +58,7 @@ export const BulkTrackUploadRow: React.FC<{
           z-index: 1;
         `}
       >
-        Uploading {track.title}
+        {t("uploading", { title: track.title })}
       </div>
     </div>
   );

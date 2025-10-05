@@ -222,7 +222,7 @@ const PostCard: React.FC<{
                 `}
               >
                 <Trans
-                  t={t}
+                  t={i18n}
                   i18nKey="postByArtist"
                   values={{ artistName: post.artist?.name }}
                   components={{

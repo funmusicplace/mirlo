@@ -143,7 +143,7 @@ const ArtistSubscriberUploadData: React.FC<{
   return (
     <>
       <Modal
-        title="Upload subscribers"
+        title={t("uploadSubscribers")}
         open={isOpen}
         onClose={() => setIsOpen(false)}
       >
@@ -185,7 +185,7 @@ const ArtistSubscriberUploadData: React.FC<{
             font-weight: normal;
           `}
         >
-          Two ways to add emails:
+          {t("waysToAddEmails")}
         </h3>
 
         <div>
@@ -234,7 +234,7 @@ const ArtistSubscriberUploadData: React.FC<{
             onChange={(e) => setEmailText(e.target.value)}
             value={emailText}
           />
-          <Button onClick={() => processTextArea()}>Next</Button>
+          <Button onClick={() => processTextArea()}>{t("next")}</Button>
         </div>
       </Modal>
       <li>
