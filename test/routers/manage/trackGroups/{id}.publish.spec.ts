@@ -74,14 +74,15 @@ describe("manage/trackGroups/{trackGroupId}/publish", () => {
       assert.equal(unchangedTrackGroup?.publishedAt, null);
     });
 
-    it("should reject publishing when the track group has no tracks", async () => {
+    it("should publish a track group without tracks when fundraising", async () => {
       const { user, accessToken } = await createUser({
-        email: "artist-no-tracks@example.com",
+        email: "artist-goal@example.com",
       });
       const artist = await createArtist(user.id);
       const trackGroup = await createTrackGroup(artist.id, {
         published: false,
         tracks: [],
+        fundraisingGoal: 1000,
       });
 
       const response = await requestApp
@@ -89,17 +90,17 @@ describe("manage/trackGroups/{trackGroupId}/publish", () => {
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
 
-      assert.equal(response.statusCode, 400);
+      assert.equal(response.statusCode, 200);
 
-      const unchangedTrackGroup = await prisma.trackGroup.findFirst({
+      const updatedTrackGroup = await prisma.trackGroup.findFirst({
         where: { id: trackGroup.id },
       });
 
-      assert.equal(unchangedTrackGroup?.published, false);
-      assert.equal(unchangedTrackGroup?.publishedAt, null);
+      assert.equal(updatedTrackGroup?.published, true);
+      assert.ok(updatedTrackGroup?.publishedAt);
     });
 
-    it("should reject publishing when tracks are still processing", async () => {
+    it("should publish even if track audio is still processing", async () => {
       const { user, accessToken } = await createUser({
         email: "artist-processing-tracks@example.com",
       });
@@ -122,14 +123,14 @@ describe("manage/trackGroups/{trackGroupId}/publish", () => {
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
 
-      assert.equal(response.statusCode, 400);
+      assert.equal(response.statusCode, 200);
 
-      const unchangedTrackGroup = await prisma.trackGroup.findFirst({
+      const updatedTrackGroup = await prisma.trackGroup.findFirst({
         where: { id: trackGroup.id },
       });
 
-      assert.equal(unchangedTrackGroup?.published, false);
-      assert.equal(unchangedTrackGroup?.publishedAt, null);
+      assert.equal(updatedTrackGroup?.published, true);
+      assert.ok(updatedTrackGroup?.publishedAt);
     });
   });
 });
