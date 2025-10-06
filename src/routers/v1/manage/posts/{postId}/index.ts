@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { userAuthenticated } from "../../../../../auth/passport";
 import prisma from "@mirlo/prisma";
+import { User } from "@mirlo/prisma/client";
 import { doesPostBelongToUser } from "../../../../../utils/post";
 import { AppError } from "../../../../../utils/error";
 import slugify from "slugify";
@@ -25,6 +26,7 @@ export default function () {
         shouldSendEmail,
         urlSlug,
       } = req.body;
+      const user = req.user as User;
 
       if (minimumSubscriptionTierId !== undefined) {
         const validTier = await prisma.artistSubscriptionTier.findFirst({
@@ -60,6 +62,7 @@ export default function () {
           shouldSendEmail,
           urlSlug: !post?.urlSlug
             ? slugify(urlSlug ?? title ?? post?.title, {
+                locale: user.language ?? undefined,
                 strict: true,
                 lower: true,
               })

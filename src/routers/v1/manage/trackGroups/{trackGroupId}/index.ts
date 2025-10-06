@@ -118,7 +118,12 @@ export default function () {
       });
 
       if (trackGroup?.title && trackGroup.urlSlug.includes("mi-temp-slug")) {
-        let slug = slugify(newValues.title, { strict: true, lower: true });
+        const loggedInUser = req.user as User;
+        let slug = slugify(newValues.title, {
+          locale: loggedInUser.language ?? undefined,
+          strict: true,
+          lower: true,
+        });
 
         if (slug === "") {
           slug = "blank";

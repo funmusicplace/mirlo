@@ -57,6 +57,7 @@ passport.use(
         isAdmin: foundUser?.isAdmin,
         isLabelAccount: foundUser?.isLabelAccount,
         canCreateArtists: foundUser?.canCreateArtists,
+        language: foundUser?.language,
       });
     }
   )
