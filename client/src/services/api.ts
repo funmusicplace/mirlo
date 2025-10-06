@@ -1,6 +1,6 @@
 import { API_ROOT } from "../constants";
 // import APIInstance from "@mirlo/mirlo-api-client";
-import APIInstance from "./APIInstance";
+import APIInstance, { APIResponseError } from "./APIInstance";
 
 const api = APIInstance(
   API_ROOT?.replace(" ", "") ?? "",
@@ -8,3 +8,4 @@ const api = APIInstance(
 );
 
 export default api;
+export { APIResponseError };

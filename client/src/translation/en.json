@@ -18,7 +18,14 @@
     "invitedByAsListener": "You were invited by {{ name }} to join this Mirlo instance.",
     "notArtistName": "You will be able to create multiple artist pages. The name you use to create an account does not have to be the name for your artist page.",
     "termsAndPrivacy": "By signing up you agree to our <terms>terms</terms> and <privacy>privacy</privacy> policies.",
-    "receiveMailingList": "Stay up to date with Mirlo and its projects by signing up to our mailing list."
+    "receiveMailingList": "Stay up to date with Mirlo and its projects by signing up to our mailing list.",
+    "pendingVerificationSnackbar": "We found an account for {{ email }} that still needs to be verified.",
+    "pendingVerificationMessage": "We just need to confirm your email address to finish setting up {{ email }}.",
+    "pendingVerificationInstructions": "Check your inbox for the verification email. If it hasn't arrived yet, you can request another one below.",
+    "pendingVerificationExpired": "It looks like the previous verification link expired, so you'll need a new one.",
+    "pendingVerificationExpiresAt": "Your current verification link expires {{ date }}.",
+    "pendingVerificationResendButton": "Resend verification email",
+    "pendingVerificationResent": "We've sent a new verification email to {{ email }}."
   },
   "confirmationDialog": {
     "cancel": "Cancel",

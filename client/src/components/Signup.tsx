@@ -2,7 +2,7 @@ import { css } from "@emotion/css";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
-import api from "services/api";
+import api, { APIResponseError } from "services/api";
 import Button from "./common/Button";
 import { InputEl } from "./common/Input";
 import { useSnackbar } from "state/SnackbarContext";
@@ -25,9 +25,27 @@ type SignupInputs = {
   password: string;
   receiveMailingList: boolean;
   emailInvited: string;
-  accountType: "listener" | "artist";
+  accountType: "listener" | "artist" | "label";
   promoCode: string;
   inviteToken: string;
+};
+
+type SignupErrorResponse = {
+  requiresEmailVerification?: boolean;
+  emailConfirmationExpired?: boolean;
+  emailConfirmationExpiresAt?: string | null;
+};
+
+type PendingVerificationState = {
+  email: string;
+  accountType: SignupInputs["accountType"];
+  emailConfirmationExpired: boolean;
+  emailConfirmationExpiresAt: string | null;
+};
+
+type ResendVerificationResponse = {
+  message: string;
+  emailConfirmationExpiresAt: string | null;
 };
 
 const ArtistToggle = styled(FormComponent)`
@@ -81,18 +99,43 @@ function Signup() {
     defaultValues: {
       email: search.get("email") ?? "",
       inviteToken: search.get("inviteToken") ?? "",
-      accountType: accountType === "artist" ? "artist" : "listener",
+      accountType:
+        accountType === "artist"
+          ? "artist"
+          : accountType === "label"
+          ? "label"
+          : "listener",
       promoCode: search.get("promo") ?? "",
       emailInvited: search.get("email") ?? "",
     },
   });
   const [isLoading, setIsLoading] = React.useState(false);
+  const [pendingVerification, setPendingVerification] =
+    React.useState<PendingVerificationState | null>(null);
+  const [isResendingVerification, setIsResendingVerification] =
+    React.useState(false);
+  const formattedVerificationExpiration = React.useMemo(() => {
+    if (!pendingVerification?.emailConfirmationExpiresAt) {
+      return null;
+    }
+
+    const date = new Date(pendingVerification.emailConfirmationExpiresAt);
+    if (Number.isNaN(date.getTime())) {
+      return null;
+    }
+
+    return new Intl.DateTimeFormat(undefined, {
+      dateStyle: "medium",
+      timeStyle: "short",
+    }).format(date);
+  }, [pendingVerification?.emailConfirmationExpiresAt]);
   const { register, handleSubmit } = methods;
 
   const onSubmit = React.useCallback(
     async (data: SignupInputs) => {
       setIsLoading(true);
       try {
+        setPendingVerification(null);
         await api.post(
           "signup",
           {
@@ -107,6 +150,22 @@ function Signup() {
         setHasRegistered(true);
         snackbar(t("success"), { type: "success" });
       } catch (e) {
+        if (e instanceof APIResponseError) {
+          const errorBody = e.body as SignupErrorResponse | undefined;
+          if (errorBody?.requiresEmailVerification) {
+            setPendingVerification({
+              email: data.email,
+              accountType: data.accountType,
+              emailConfirmationExpired: errorBody.emailConfirmationExpired ?? false,
+              emailConfirmationExpiresAt:
+                errorBody.emailConfirmationExpiresAt ?? null,
+            });
+            snackbar(t("pendingVerificationSnackbar", { email: data.email }), {
+              type: "warning",
+            });
+            return;
+          }
+        }
         if ((e as Error).message.includes("incomplete")) {
           await api.post("password-reset/initiate", {
             ...data,
@@ -126,8 +185,47 @@ function Signup() {
         setIsLoading(false);
       }
     },
-    [snackbar, t]
+    [errorHandler, snackbar, t]
   );
+
+  const handleResendVerification = React.useCallback(async () => {
+    if (!pendingVerification) {
+      return;
+    }
+
+    setIsResendingVerification(true);
+    try {
+      const response = await api.post<
+        {
+          email: string;
+          client: string;
+          accountType: SignupInputs["accountType"];
+        },
+        ResendVerificationResponse
+      >("resend-verification-email", {
+        email: pendingVerification.email,
+        client: import.meta.env.VITE_CLIENT_DOMAIN,
+        accountType: pendingVerification.accountType,
+      });
+      snackbar(t("pendingVerificationResent", { email: pendingVerification.email }), {
+        type: "success",
+      });
+      setPendingVerification((prev) =>
+        prev
+          ? {
+              ...prev,
+              emailConfirmationExpired: false,
+              emailConfirmationExpiresAt:
+                response.emailConfirmationExpiresAt ?? null,
+            }
+          : prev
+      );
+    } catch (error) {
+      errorHandler(error);
+    } finally {
+      setIsResendingVerification(false);
+    }
+  }, [errorHandler, pendingVerification, snackbar, t]);
 
   if (accountIncomplete) {
     return (
@@ -201,6 +299,41 @@ function Signup() {
                   name: invitedBy,
                 }
               )}
+            </Box>
+          )}
+          {pendingVerification && (
+            <Box
+              variant={pendingVerification.emailConfirmationExpired ? "warning" : "info"}
+              className={css`
+                display: flex;
+                flex-direction: column;
+                gap: 0.75rem;
+              `}
+            >
+              <div>
+                <p>
+                  {t("pendingVerificationMessage", {
+                    email: pendingVerification.email,
+                  })}
+                </p>
+                <p>{t("pendingVerificationInstructions")}</p>
+                {pendingVerification.emailConfirmationExpired ? (
+                  <p>{t("pendingVerificationExpired")}</p>
+                ) : formattedVerificationExpiration ? (
+                  <p>
+                    {t("pendingVerificationExpiresAt", {
+                      date: formattedVerificationExpiration,
+                    })}
+                  </p>
+                ) : null}
+              </div>
+              <Button
+                onClick={handleResendVerification}
+                disabled={isResendingVerification}
+                isLoading={isResendingVerification}
+              >
+                {t("pendingVerificationResendButton")}
+              </Button>
             </Box>
           )}
           <FormComponent>
