@@ -32,9 +32,21 @@ interface ArtistFormLinksProps {
   onSubmit: (data: Pick<Artist, "linksJson">) => Promise<void>;
 }
 
+const normalizeStoredLink = (link: Link): Link => ({
+  ...link,
+  inHeader: link.inHeader ?? true,
+  linkLabel: link.linkLabel ?? "",
+  linkType: link.linkType ?? "",
+  iconUrl: link.iconUrl ?? undefined,
+});
+
 export function transformFromLinks(
   artist: Pick<Artist, "links" | "linksJson">
 ): FormData {
+  const normalizedJsonLinks = (artist.linksJson ?? []).map((link) =>
+    normalizeStoredLink(link)
+  );
+
   return {
     linkArray: [
       ...(artist.links?.map((l) => ({
@@ -44,13 +56,7 @@ export function transformFromLinks(
         inHeader: true,
         iconUrl: undefined,
       })) ?? []),
-      ...((artist.linksJson ?? []).map((link) => ({
-        ...link,
-        inHeader: link.inHeader ?? true,
-        linkLabel: link.linkLabel ?? "",
-        linkType: link.linkType ?? "",
-        iconUrl: link.iconUrl ?? undefined,
-      })) as Link[]),
+      ...normalizedJsonLinks,
     ],
   };
 }
