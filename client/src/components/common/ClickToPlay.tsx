@@ -317,7 +317,7 @@ const ClickToPlay: React.FC<
                 <Wishlist trackGroup={trackGroup} />
               </div>
             )}
-            {user && showTrackFavorite && trackGroup.tracks && (
+            {showTrackFavorite && trackGroup.tracks && (
               <div>
                 <FavoriteTrack track={trackGroup.tracks[0]} collapse />
               </div>
