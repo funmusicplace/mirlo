@@ -62,7 +62,15 @@ const queryTips = (
       datePurchased: dateFilter,
     },
     select: {
-      artist: { include: { user: { select: { currency: true } } } },
+      artist: {
+        select: {
+          id: true,
+          name: true,
+          urlSlug: true,
+          userId: true,
+          user: { select: { currency: true } },
+        },
+      },
       pricePaid: true,
       datePurchased: true,
       artistTipTier: true,
