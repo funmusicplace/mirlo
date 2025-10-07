@@ -6,17 +6,17 @@ import { useGlobalStateContext } from "state/GlobalState";
 import SongTimeDisplay from "../common/SongTimeDisplay";
 import { useAuthContext } from "state/AuthContext";
 import BuyTrackModal from "./BuyTrackModal";
-import Hls from "hls.js";
+import Hls, { HlsConfig } from "hls.js";
 
 // Load react-hls-player asynchronously (the hls bundle is quite big)
 const ReactHlsPlayer = React.lazy(() => import("@mirlo/react-hls-player"));
 
-const hlsConfig = {
+const hlsConfig: Partial<HlsConfig> = {
   xhrSetup: function (xhr: XMLHttpRequest, url: string) {
     xhr.setRequestHeader("Content-Type", "application/octet-stream");
     xhr.withCredentials = true;
   },
-
+  autoStartLoad: false,
   maxBufferLength: 60,
   fragLoadPolicy: {
     default: {
@@ -73,7 +73,6 @@ export const AudioWrapper: React.FC<{
 
   React.useEffect(() => {
     if (currentTrack) {
-      console.log("rsetting");
       setMostlyListened(false);
       setHasOverplayedSong(false);
       setHasShownBuyModalBeenShown(false);
@@ -96,7 +95,6 @@ export const AudioWrapper: React.FC<{
           console.error(e);
         }
       }
-      console.log("listening");
       setHasShownBuyModalBeenShown(false);
       setCurrentSeconds(e.target.currentTime);
     },
@@ -170,13 +168,18 @@ export const AudioWrapper: React.FC<{
   const streamUrl = api.streamUrl(currentTrack);
 
   const onPlay = React.useCallback(async () => {
-    console.log("obj", hasOverplayedSong, hasShownBuyModalBeenShown);
+    dispatch({ type: "setPlaying", playing: true });
+  }, [dispatch]);
+
+  React.useEffect(() => {
     if (hasOverplayedSong && !hasShownBuyModalBeenShown) {
       setShowBuyModal(true);
       setHasShownBuyModalBeenShown(true);
+      if (playerRef.current) {
+        playerRef.current.pause();
+      }
     }
-    dispatch({ type: "setPlaying", playing: true });
-  }, [dispatch, hasOverplayedSong, hasShownBuyModalBeenShown, dispatch]);
+  }, [hasOverplayedSong, hasShownBuyModalBeenShown]);
 
   React.useEffect(() => {
     if (playerRef.current) {
@@ -187,17 +190,14 @@ export const AudioWrapper: React.FC<{
   if (!streamUrl) {
     return null;
   }
-  console.log(
-    "hasOverplayedSong",
-    hasOverplayedSong,
-    hasShownBuyModalBeenShown
-  );
 
   return (
     <>
       <BuyTrackModal
         showBuyModal={showBuyModal}
         setShowBuyModal={setShowBuyModal}
+        trackId={currentTrack.id}
+        trackGroupId={currentTrack.trackGroupId}
       />
       <ReactHlsPlayer
         src={streamUrl}
@@ -222,7 +222,7 @@ export const AudioWrapper: React.FC<{
         }}
         width="100%"
         height="2rem"
-        onPlay={() => onPlay()}
+        onPlay={onPlay}
         onEnded={onEnded}
         playerRef={playerRef}
         onTimeUpdate={onListen}
