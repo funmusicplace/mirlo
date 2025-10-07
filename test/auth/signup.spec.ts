@@ -7,13 +7,9 @@ import assert from "assert";
 import { clearTables, createUser } from "../utils";
 
 describe("auth/signup", () => {
-  beforeEach(async () => {
-    try {
-      await clearTables();
-    } catch (e) {
-      console.error(e);
-    }
-  });
+  let mockRes: Response;
+  let statusStub: sinon.SinonStub;
+  let jsonStub: sinon.SinonStub;
   const mockReq = {
     body: {
       email: "test@example.com",
@@ -21,11 +17,22 @@ describe("auth/signup", () => {
       name: "Test User",
     },
   } as unknown as Request;
-  const mockRes = {
-    status: sinon.stub().returnsThis(),
-    json: sinon.stub(),
-  } as unknown as Response;
   const mockNext = sinon.stub();
+
+  beforeEach(async () => {
+    try {
+      await clearTables();
+    } catch (e) {
+      console.error(e);
+    }
+
+    statusStub = sinon.stub().returnsThis();
+    jsonStub = sinon.stub();
+    mockRes = {
+      status: statusStub,
+      json: jsonStub,
+    } as unknown as Response;
+  });
 
   afterEach(() => {
     sinon.restore();
@@ -133,21 +140,66 @@ describe("auth/signup", () => {
       email: "test@test.com",
       password: "tstt",
     });
-    let error;
-    try {
-      await signup(
-        { body: { email: user.email, password: "hi" } } as unknown as Request,
-        mockRes,
-        mockNext
-      );
-      assert(mockNext.called);
-      assert.equal(
-        mockNext.firstCall.firstArg.message,
-        "A user with this email already exists"
-      );
-    } catch (e) {
-      error = e;
-    }
-    assert(!error);
+    
+    await signup(
+      { body: { email: user.email, password: "hi" } } as unknown as Request,
+      mockRes,
+      mockNext
+    );
+
+    assert(mockNext.notCalled);
+    assert(statusStub.calledWith(400));
+    assert(
+      jsonStub.calledWithMatch(
+        sinon.match({
+          error: "A user with this email already exists",
+          requiresEmailVerification: true,
+          emailConfirmationExpired: false,
+          emailConfirmationExpiresAt: sinon.match((value) =>
+            typeof value === "string"
+          ),
+        })
+      )
+    );
+  });
+
+  it("signup should flag expired confirmation tokens", async () => {
+    sinon.stub(sendMail, "sendMail");
+
+    await prisma.client.create({
+      data: {
+        applicationUrl: "test",
+        applicationName: "test",
+        updatedAt: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+      },
+    });
+
+    const { user } = await createUser({
+      email: "expired@example.com",
+      password: "tstt",
+      emailConfirmationExpiration: new Date(Date.now() - 1000),
+    });
+
+    await signup(
+      { body: { email: user.email, password: "hi" } } as unknown as Request,
+      mockRes,
+      mockNext
+    );
+
+    assert(mockNext.notCalled);
+    assert(statusStub.calledWith(400));
+    assert(
+      jsonStub.calledWithMatch(
+        sinon.match({
+          error: "A user with this email already exists",
+          requiresEmailVerification: true,
+          emailConfirmationExpired: true,
+          emailConfirmationExpiresAt: sinon.match((value) =>
+            typeof value === "string"
+          ),
+        })
+      )
+    );
   });
 });

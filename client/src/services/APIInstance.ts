@@ -1,6 +1,17 @@
 import b64ToBlob from "b64-to-blob";
 import fileSaver from "file-saver";
 
+export class APIResponseError<T = unknown> extends Error {
+  status: number;
+  body: T;
+
+  constructor(message: string, status: number, body: T) {
+    super(message);
+    this.status = status;
+    this.body = body;
+  }
+}
+
 const APIInstance = (apiRoot: string, mirloApiKey: string) => {
   const api = `${apiRoot}/v1/`;
   const auth = `${apiRoot}/auth/`;
@@ -12,6 +23,7 @@ const APIInstance = (apiRoot: string, mirloApiKey: string) => {
     "verify-email",
     "verify-password",
     "signup",
+    "resend-verification-email",
     "password-reset/initiate",
     "password-reset/set-password",
   ];
@@ -53,7 +65,8 @@ const APIInstance = (apiRoot: string, mirloApiKey: string) => {
       }
 
       if (resp.status >= 400) {
-        throw new Error(json.error);
+        const message = json?.error ?? "There was a problem with the API";
+        throw new APIResponseError(message, resp.status, json);
       }
       return json;
     } catch (e) {
