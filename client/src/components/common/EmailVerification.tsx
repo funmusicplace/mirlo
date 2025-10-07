@@ -10,6 +10,7 @@ import { useAuthContext } from "state/AuthContext";
 import Box from "components/common/Box";
 import { useQueryClient } from "@tanstack/react-query";
 import { QUERY_KEY_AUTH, queryKeyIncludes } from "queries/queryKeys";
+import { css } from "@emotion/css";
 
 const EmailVerification: React.FC<{
   setVerifiedEmail: (verifiedEmail: string) => void;
@@ -90,26 +91,28 @@ const EmailVerification: React.FC<{
           </Button>
         </Box>
       ) : (
-        <>
-          <FormComponent>
-            <label>{t("email")}</label>
-            <div className="inline-button">
-              <Input
-                name="email"
-                type="email"
-                value={email}
-                required
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  setEmail(e.target.value);
-                }}
-              />
-              <Button type="button" onClick={verifyEmail}>
-                {t("verifyEmail")}
-              </Button>
-            </div>
-            <small>{t(smallText)}</small>
-          </FormComponent>
-        </>
+        <FormComponent
+          className={css`
+            width: 100%;
+          `}
+        >
+          <label>{t("email")}</label>
+          <div className="inline-button">
+            <Input
+              name="email"
+              type="email"
+              value={email}
+              required
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                setEmail(e.target.value);
+              }}
+            />
+            <Button type="button" onClick={verifyEmail}>
+              {t("verifyEmail")}
+            </Button>
+          </div>
+          <small>{t(smallText)}</small>
+        </FormComponent>
       )}
     </>
   );

@@ -54,8 +54,8 @@ function Home() {
       <Splash />
       <Releases />
       <SupportMirlo />
-      <NewsletterSignup />
       <Posts />
+      <NewsletterSignup />
     </div>
   );
 }
