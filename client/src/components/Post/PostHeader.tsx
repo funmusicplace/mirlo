@@ -1,7 +1,7 @@
 import { css } from "@emotion/css";
 import { ButtonLink } from "components/common/Button";
 import React from "react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { FaPen } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { bp } from "../../constants";
@@ -31,6 +31,17 @@ const AvatarWrapper = styled.div`
     max-width: 25px;
   }
 `;
+
+const AvatarLink: React.FC<{
+  avatar?: string;
+  children?: React.ReactNode;
+  to: string;
+}> = ({ avatar, children, to }) => (
+  <Link to={to}>
+    <Avatar avatar={avatar} />
+    <span>{children}</span>
+  </Link>
+);
 
 const PostHeader: React.FC<{ post: Post }> = ({ post }) => {
   const { t, i18n } = useTranslation("translation", { keyPrefix: "post" });
@@ -182,13 +193,19 @@ const PostHeader: React.FC<{ post: Post }> = ({ post }) => {
                   )}
                   <div>
                     <AvatarWrapper>
-                      by{" "}
-                      <Link
-                        to={`/${post.artist.urlSlug?.toLowerCase() ?? post.artistId}`}
-                      >
-                        <Avatar avatar={post.artist.avatar?.sizes?.[60]} />
-                        <span>{post.artist?.name}</span>
-                      </Link>
+                      <Trans
+                        t={t}
+                        i18nKey="postByArtist"
+                        values={{ artistName: post.artist?.name }}
+                        components={{
+                          link: (
+                            <AvatarLink
+                              avatar={post.artist.avatar?.sizes?.[60]}
+                              to={`/${post.artist.urlSlug?.toLowerCase() ?? post.artistId}`}
+                            ></AvatarLink>
+                          ),
+                        }}
+                      />
                     </AvatarWrapper>
                     <small>
                       <em>

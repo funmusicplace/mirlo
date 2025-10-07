@@ -2,7 +2,7 @@ import { css } from "@emotion/css";
 import { MetaCard } from "components/common/MetaCard";
 import parse from "html-react-parser";
 import React from "react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router-dom";
 import { bp } from "../../constants";
 import Box from "components/common/Box";
@@ -93,11 +93,15 @@ const Post: React.FC = () => {
             text-align: center;
           `}
         >
-          No post found
+          {t("noPostFound")}
           {artistId && (
-            <>
-              , return to <Link to={`/${artistId}`}>artist page</Link>
-            </>
+            <Trans
+              t={t}
+              i18nKey="returnToArtist"
+              components={{
+                link: <Link to={`/${artistId}`}></Link>,
+              }}
+            />
           )}
           .
         </Box>
@@ -114,7 +118,7 @@ const Post: React.FC = () => {
       `}
     >
       <MetaCard
-        title={`${post.title} by ${post.artist?.name}`}
+        title={`${post.title} ${t("byArtist", { artist: post.artist?.name })}`}
         description={post.content.slice(0, 500)}
         image={post.featuredImage?.src}
       />

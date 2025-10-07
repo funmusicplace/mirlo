@@ -14,10 +14,14 @@ import { useQuery } from "@tanstack/react-query";
 import { queryArtist } from "queries";
 import DownloadAlbumButton from "components/common/DownloadAlbumButton";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import api from "services/api";
 import { getArtistUrl, getReleaseUrl } from "utils/artist";
 
 function DownloadAlbum() {
+  const { t } = useTranslation("translation", {
+    keyPrefix: "trackGroupDetails",
+  });
   const [trackGroup, setTrackGroup] = React.useState<TrackGroup>();
   const [isOwned, setIsOwned] = React.useState(false);
   const [isLoadingTrackGroup, setIsLoadingTrackGroup] = React.useState(true);
@@ -84,8 +88,8 @@ function DownloadAlbum() {
   return (
     <WidthWrapper variant="small">
       <MetaCard
-        title={trackGroup.title ?? "Untitled release"}
-        description={trackGroup.about ?? "A release on Mirlo"}
+        title={trackGroup.title ?? t("untitledRelease")}
+        description={trackGroup.about ?? t("releaseOnMirlo")}
         image={trackGroup.cover?.sizes?.[600]}
       />
       <div
@@ -93,7 +97,7 @@ function DownloadAlbum() {
           margin-top: 2rem;
         `}
       >
-        <h2>Download your new release!</h2>
+        <h2>{t("downloadYourRelease")}</h2>
         <div
           className={css`
             display: flex;
@@ -103,10 +107,10 @@ function DownloadAlbum() {
           <ImageWithPlaceholder
             src={trackGroup.cover?.sizes?.[120]}
             size={120}
-            alt={trackGroup.title ?? "Untitled release"}
+            alt={trackGroup.title ?? t("untitledRelease")}
           />
           <SmallTileDetails
-            title={trackGroup.title ?? "Untitled release"}
+            title={trackGroup.title ?? t("untitledRelease").toString()}
             subtitle={trackGroup.artist?.name ?? ""}
           />
         </div>

@@ -10,6 +10,7 @@ import {
   ImageAttributes,
 } from "remirror/extensions";
 import { CommandFunctionProps, DelayedPromiseCreator } from "@remirror/core";
+import { useTranslation } from "react-i18next";
 
 import { EditorComponent, Remirror, useRemirror } from "@remirror/react";
 import "remirror/styles/all.css";
@@ -22,31 +23,32 @@ import TopToolbar from "./TopToolbar";
 import FloatingLinkToolbar from "./FloatingLinkToolbar";
 import api from "services/api";
 
-const extensions = (postId?: number, reload?: () => void) => () => [
-  new PlaceholderExtension({ placeholder: "Type something" }),
-  new TableExtension({}),
-  new DropCursorExtension({}),
-  new ImageExtension({
-    uploadHandler: (
-      files: { file: File; progress: (progress: number) => void }[]
-    ): DelayedPromiseCreator<ImageAttributes>[] => {
-      if (postId) {
-        return files.map((f) => async (props: CommandFunctionProps) => {
-          const response = await api.uploadFile(
-            `manage/posts/${postId}/images`,
-            [f.file]
-          );
-          reload?.();
-          return { src: response.result.jobId };
-        });
-      }
-      return [];
-    },
-  }),
-  new IframeExtension({ enableResizing: false }),
-  new LinkExtension({ autoLink: true, selectTextOnClick: true }),
-  ...wysiwygPreset(),
-];
+const extensions =
+  (placeholder: string, postId?: number, reload?: () => void) => () => [
+    new PlaceholderExtension({ placeholder }),
+    new TableExtension({}),
+    new DropCursorExtension({}),
+    new ImageExtension({
+      uploadHandler: (
+        files: { file: File; progress: (progress: number) => void }[]
+      ): DelayedPromiseCreator<ImageAttributes>[] => {
+        if (postId) {
+          return files.map((f) => async (props: CommandFunctionProps) => {
+            const response = await api.uploadFile(
+              `manage/posts/${postId}/images`,
+              [f.file]
+            );
+            reload?.();
+            return { src: response.result.jobId };
+          });
+        }
+        return [];
+      },
+    }),
+    new IframeExtension({ enableResizing: false }),
+    new LinkExtension({ autoLink: true, selectTextOnClick: true }),
+    ...wysiwygPreset(),
+  ];
 
 const TextEditor: React.FC<{
   onChange: (val: any) => void;
@@ -55,8 +57,9 @@ const TextEditor: React.FC<{
   artistId?: number;
   reloadImages?: () => void;
 }> = ({ onChange, value, postId, reloadImages, artistId }) => {
+  const { t } = useTranslation("translation", { keyPrefix: "textEditor" });
   const { manager, state, setState } = useRemirror({
-    extensions: extensions(postId, reloadImages),
+    extensions: extensions(t("typeSomething").toString(), postId, reloadImages),
     content: value,
     stringHandler: "html",
     selection: "end",

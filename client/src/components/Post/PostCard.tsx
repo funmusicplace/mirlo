@@ -122,7 +122,7 @@ const PostCard: React.FC<{
   const postContainerProps = useLinkContainer({ to: postUrl });
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
 
-  const { i18n } = useTranslation("translation", {
+  const { i18n, t: postT } = useTranslation("translation", {
     keyPrefix: "post",
   });
 
@@ -222,7 +222,7 @@ const PostCard: React.FC<{
                 `}
               >
                 <Trans
-                  t={t}
+                  t={postT}
                   i18nKey="postByArtist"
                   values={{ artistName: post.artist?.name }}
                   components={{

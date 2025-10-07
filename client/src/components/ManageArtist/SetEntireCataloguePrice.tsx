@@ -38,7 +38,7 @@ const SetEntireCataloguePrice: React.FC = () => {
       await api.put(`manage/artists/${artist?.id}`, {
         purchaseEntireCatalogMinPrice: Number(price) * 100,
       });
-      snackbar("Catalogue price saved!", { type: "success" });
+      snackbar(t("cataloguePriceSaved"), { type: "success" });
     } catch (error) {
       console.error("Error updating price:", error);
     }
@@ -95,7 +95,7 @@ const SetEntireCataloguePrice: React.FC = () => {
                 type="number"
                 value={price}
                 onChange={handlePriceChange}
-                placeholder="Enter price"
+                placeholder={t("enterPrice") ?? undefined}
               />
             </FormComponent>
             <ArtistButton type="button" onClick={handleOk}>

@@ -86,9 +86,11 @@ const FlagContent: React.FC<{ trackGroupId: number; onlyIcon?: boolean }> = ({
           <FormComponent>
             <label>{t("whyAreYouFlaggingIt")}</label>
             <SelectEl {...methods.register("reason")}>
-              <option value="copyrightViolation">Copyright violation</option>
+              <option value="copyrightViolation">
+                {t("copyrightViolation")}
+              </option>
               <option value="inappropriateContent">
-                Inappropriate content
+                {t("inappropriateContent")}
               </option>
             </SelectEl>
           </FormComponent>
@@ -103,7 +105,7 @@ const FlagContent: React.FC<{ trackGroupId: number; onlyIcon?: boolean }> = ({
           <Turnstile siteKey={import.meta.env.VITE_CLOUDFLARE_CLIENT_KEY} />
 
           <Button isLoading={isLoading} type="submit" disabled={isLoading}>
-            {t("report")}
+            {t("submit")}
           </Button>
         </form>
       </Modal>

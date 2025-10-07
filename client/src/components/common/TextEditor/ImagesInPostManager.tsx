@@ -121,7 +121,7 @@ const ImagesInPostManager: React.FC<{
             <UploadPrompt
               width="100px"
               height="100px"
-              imageTypeDescription={"featured image"}
+              imageTypeDescription={t("featuredImage").toString()}
             />
           </label>
           <InputEl

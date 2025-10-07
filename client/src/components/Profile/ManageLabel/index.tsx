@@ -65,6 +65,7 @@ const ProfileLabel: React.FC = () => {
         <p>{t("manageLabelDescription")}</p>
         <p>
           <Trans
+            t={t}
             i18nKey="linkToProfile"
             components={{
               link: <Link to={`/profile/${user.id}`}></Link>,
