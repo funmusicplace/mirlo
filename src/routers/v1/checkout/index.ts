@@ -66,14 +66,12 @@ export default function () {
         const clientId = parseNumericQueryParam(req.query.clientId);
         const artistId = parseNumericQueryParam(req.query.artistId);
 
-        const clientPromise = clientId
-          ? prisma.client.findUnique({ where: { id: clientId } })
-          : Promise.resolve(null);
-        const artistPromise = artistId
-          ? prisma.artist.findUnique({ where: { id: artistId } })
-          : Promise.resolve(null);
-        const client = await clientPromise;
-        const artist = await artistPromise;
+        const client = clientId
+          ? await prisma.client.findUnique({ where: { id: clientId } })
+          : null;
+        const artist = artistId
+          ? await prisma.artist.findUnique({ where: { id: artistId } })
+          : null;
 
         const checkoutPath = artist?.urlSlug
           ? `${artist.urlSlug}/checkout-error`
@@ -124,10 +122,10 @@ export default function () {
           tipId: string | null;
         };
         if (clientId && artistId) {
-          const clientPromise = prisma.client.findUnique({
+          const client = await prisma.client.findUnique({
             where: { id: +clientId },
           });
-          const artistPromise = prisma.artist.findUnique({
+          const artist = await prisma.artist.findUnique({
             where: { id: +artistId },
           });
           const client = await clientPromise;
