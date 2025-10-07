@@ -460,6 +460,15 @@
     "isSubscribed": "Subscribed",
     "moreLinks": "More links"
   },
+  "checkoutError": {
+    "title": "Checkout not completed",
+    "generic": "We couldn't finish your checkout. Please try again or contact support if the issue keeps happening.",
+    "userCanceled": "It looks like you left the checkout before finishing your purchase.",
+    "abandoned": "The checkout closed before Stripe confirmed your payment. Please start over to try again.",
+    "paymentFailed": "Stripe couldn't process your payment method. Please try another card or contact support if this continues.",
+    "expired": "This checkout session expired before the payment was completed. Please restart the checkout to continue.",
+    "returnHome": "Return to Mirlo"
+  },
   "clickToPlay": {
     "untitled": "Untitled",
     "goToAlbum": "Go to album",
