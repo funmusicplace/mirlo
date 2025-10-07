@@ -18,6 +18,14 @@ const constructDateFilter = (
   }
 };
 
+const SALE_TYPE_ORDER: Record<string, number> = {
+  trackGroup: 0,
+  track: 1,
+  merch: 2,
+  subscription: 3,
+  tip: 4,
+};
+
 const querySupporters = (
   artistId: number[],
   sinceDate?: string,
@@ -219,6 +227,8 @@ export const findSales = async ({
     );
   }
 
+  const asc = orderBy?.datePurchased === "asc";
+
   return [
     ...supporters.map((s) => ({
       ...s,
@@ -267,15 +277,36 @@ export const findSales = async ({
       saleType: "merch",
     })),
   ].sort((a, b) => {
-    if (orderBy?.datePurchased === "asc") {
-      return (
-        new Date(a.datePurchased).getTime() -
-        new Date(b.datePurchased).getTime()
-      );
+    const aDate =
+      a.datePurchased != null ? new Date(a.datePurchased) : undefined;
+    const bDate =
+      b.datePurchased != null ? new Date(b.datePurchased) : undefined;
+    const aTime = aDate?.getTime();
+    const bTime = bDate?.getTime();
+    const hasATime = typeof aTime === "number" && !Number.isNaN(aTime);
+    const hasBTime = typeof bTime === "number" && !Number.isNaN(bTime);
+
+    if (hasATime && hasBTime && aTime !== bTime) {
+      return asc ? (aTime as number) - (bTime as number) : (bTime as number) - (aTime as number);
     }
-    return (
-      new Date(b.datePurchased).getTime() - new Date(a.datePurchased).getTime()
-    );
+    
+    if (!hasATime && hasBTime) {
+      return 1;
+    }
+
+    if (hasATime && !hasBTime) {
+      return -1;
+    }
+
+    const saleTypeDifference =
+      (SALE_TYPE_ORDER[a.saleType ?? ""] ?? Number.MAX_SAFE_INTEGER) -
+      (SALE_TYPE_ORDER[b.saleType ?? ""] ?? Number.MAX_SAFE_INTEGER);
+
+    if (saleTypeDifference !== 0) {
+      return saleTypeDifference;
+    }
+
+    return 0;
   });
 };
 
@@ -335,7 +366,9 @@ export default function () {
       });
 
       res.json({
-        results: results.slice(Number(skip), Number(take)).map((r) => {
+        results: results
+          .slice(Number(skip), Number(skip) + Number(take))
+          .map((r) => {
           // Strip user ids from results
           return {
             ...r,
