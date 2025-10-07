@@ -128,8 +128,6 @@ export default function () {
           const artist = await prisma.artist.findUnique({
             where: { id: +artistId },
           });
-          const client = await clientPromise;
-          const artist = await artistPromise;
 
           const searchParams = new URLSearchParams();
           searchParams.set("purchaseType", purchaseType ?? "");
