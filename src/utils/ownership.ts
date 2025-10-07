@@ -44,7 +44,6 @@ export const doesTrackGroupBelongToUser = async (
       where: {
         id: Number(trackGroupId),
       },
-      include: trackGroupSingleInclude({ loggedInUserId: user.id }),
     });
   } else {
     trackGroup = await prisma.trackGroup.findFirst({
@@ -61,7 +60,6 @@ export const doesTrackGroupBelongToUser = async (
         ],
         id: Number(trackGroupId),
       },
-      include: trackGroupSingleInclude({ loggedInUserId: user.id }),
     });
   }
 

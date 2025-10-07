@@ -1,5 +1,5 @@
 import { css } from "@emotion/css";
-import { AudioWrapper } from "components/AudioWrapper";
+import { AudioWrapper } from "components/Player/AudioWrapper";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import React from "react";
 import { useTranslation } from "react-i18next";

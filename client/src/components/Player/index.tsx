@@ -2,7 +2,7 @@ import React from "react";
 import { css } from "@emotion/css";
 
 import { bp } from "../../constants";
-import { AudioWrapper } from "../AudioWrapper";
+import { AudioWrapper } from "./AudioWrapper";
 import Spinner from "../common/Spinner";
 import { useGlobalStateContext } from "state/GlobalState";
 import { fmtMSS, isTrackOwnedOrPreview } from "utils/tracks";

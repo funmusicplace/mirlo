@@ -493,6 +493,9 @@
     "play": "Play",
     "pause": "Pause"
   },
+  "player": {
+    "trackLimitExplanation": "You have reached the play limit for this track. Purchase   it to continue listening."
+  },
   "post": {
     "postByArtist": "by <link>{{artistName}}</link>",
     "byArtist": "by {{artist}}",

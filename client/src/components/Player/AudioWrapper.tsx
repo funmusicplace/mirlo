@@ -2,23 +2,19 @@
 
 import React from "react";
 import api from "services/api";
-
 import { useGlobalStateContext } from "state/GlobalState";
-// import { fmtMSS } from "utils/tracks";
-// import { bp } from "../constants";
-import SongTimeDisplay from "./common/SongTimeDisplay";
+import SongTimeDisplay from "../common/SongTimeDisplay";
 import { useAuthContext } from "state/AuthContext";
+import BuyTrackModal from "./BuyTrackModal";
+import Hls from "hls.js";
 
 // Load react-hls-player asynchronously (the hls bundle is quite big)
-const ReactHlsPlayer = React.lazy(() => import("@gumlet/react-hls-player"));
+const ReactHlsPlayer = React.lazy(() => import("@mirlo/react-hls-player"));
 
 const hlsConfig = {
   xhrSetup: function (xhr: XMLHttpRequest, url: string) {
-    // const { token } = getToken();
-    // FIXME: need to set cookies on the xhr for the hls
     xhr.setRequestHeader("Content-Type", "application/octet-stream");
     xhr.withCredentials = true;
-    // xhr.setRequestHeader("Authorization", `Bearer ${token}`);
   },
 
   maxBufferLength: 60,
@@ -53,6 +49,10 @@ export const AudioWrapper: React.FC<{
   setCurrentSeconds,
   currentSeconds,
 }) => {
+  const [showBuyModal, setShowBuyModal] = React.useState(false);
+  const [hasShownBuyModalBeenShown, setHasShownBuyModalBeenShown] =
+    React.useState(false);
+  const [hasOverplayedSong, setHasOverplayedSong] = React.useState(false);
   const {
     state: { playerQueueIds, currentlyPlayingIndex, playing, looping },
     dispatch,
@@ -71,6 +71,15 @@ export const AudioWrapper: React.FC<{
     setMostlyListened(false);
   }, [playerRef, dispatch, looping]);
 
+  React.useEffect(() => {
+    if (currentTrack) {
+      console.log("rsetting");
+      setMostlyListened(false);
+      setHasOverplayedSong(false);
+      setHasShownBuyModalBeenShown(false);
+    }
+  }, [currentTrack.id]);
+
   const onListen = React.useCallback(
     async (e: any) => {
       // setCurrentTime(fmtMSS(e.target.currentTime.toFixed()));
@@ -82,12 +91,13 @@ export const AudioWrapper: React.FC<{
       ) {
         setMostlyListened(true);
         try {
-          // const result = await registerPlay(currentTrack.id);
-          // dispatch({ type: "setUserCredits", credits: result.total });
+          await api.get(`tracks/${currentTrack.id}/trackPlay`);
         } catch (e) {
           console.error(e);
         }
       }
+      console.log("listening");
+      setHasShownBuyModalBeenShown(false);
       setCurrentSeconds(e.target.currentTime);
     },
     [currentTrack, mostlyListened, userId]
@@ -159,9 +169,14 @@ export const AudioWrapper: React.FC<{
 
   const streamUrl = api.streamUrl(currentTrack);
 
-  const onPlay = React.useCallback(() => {
+  const onPlay = React.useCallback(async () => {
+    console.log("obj", hasOverplayedSong, hasShownBuyModalBeenShown);
+    if (hasOverplayedSong && !hasShownBuyModalBeenShown) {
+      setShowBuyModal(true);
+      setHasShownBuyModalBeenShown(true);
+    }
     dispatch({ type: "setPlaying", playing: true });
-  }, [dispatch]);
+  }, [dispatch, hasOverplayedSong, hasShownBuyModalBeenShown, dispatch]);
 
   React.useEffect(() => {
     if (playerRef.current) {
@@ -172,9 +187,18 @@ export const AudioWrapper: React.FC<{
   if (!streamUrl) {
     return null;
   }
+  console.log(
+    "hasOverplayedSong",
+    hasOverplayedSong,
+    hasShownBuyModalBeenShown
+  );
 
   return (
     <>
+      <BuyTrackModal
+        showBuyModal={showBuyModal}
+        setShowBuyModal={setShowBuyModal}
+      />
       <ReactHlsPlayer
         src={streamUrl}
         autoPlay={false}
@@ -182,15 +206,23 @@ export const AudioWrapper: React.FC<{
         // controls={true}
         // @ts-ignore
         hlsConfig={hlsConfig}
+        onError={(event: any, data: any) => {
+          if (data.details === Hls.ErrorDetails.MANIFEST_LOAD_ERROR) {
+            if (data.networkDetails?.responseText) {
+              if (
+                data.networkDetails.responseText.includes(
+                  "Track play limit exceeded"
+                ) &&
+                !hasShownBuyModalBeenShown
+              ) {
+                setHasOverplayedSong(true);
+              }
+            }
+          }
+        }}
         width="100%"
         height="2rem"
-        onPlay={onPlay}
-        onError={(e) => {
-          console.error("HLS error", e);
-        }}
-        onErrorCapture={(e) => {
-          console.error("HLS error capture", e);
-        }}
+        onPlay={() => onPlay()}
         onEnded={onEnded}
         playerRef={playerRef}
         onTimeUpdate={onListen}

@@ -1,5 +1,5 @@
 import { css } from "@emotion/css";
-import { AudioWrapper } from "components/AudioWrapper";
+import { AudioWrapper } from "components/Player/AudioWrapper";
 // import { AudioWrapper } from "components/AudioWrapper";
 // import ClickToPlay from "components/common/ClickToPlay";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";

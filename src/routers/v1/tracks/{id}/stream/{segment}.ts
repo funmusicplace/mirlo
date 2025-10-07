@@ -74,16 +74,6 @@ export default function () {
       }
 
       if (track.audio) {
-        const segmentString = segment.split("-")[1]?.split(".")?.[0];
-        const segmentNumber = segmentString ? +segmentString : undefined;
-        if (segmentNumber === 4) {
-          await prisma.trackPlay.create({
-            data: {
-              trackId: track.id,
-              ...(user ? { userId: user.id } : { ip: req.ip }),
-            },
-          });
-        }
         await fetchFile(res, track.audio.id, segment);
       }
     } catch (e) {

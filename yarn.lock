@@ -3388,6 +3388,7 @@ __metadata:
     react-currency-input-field: "npm:^3.6.10"
     react-dom: "npm:^18.2.0"
     react-helmet: "npm:^6.1.0"
+    react-hls-video-player: "npm:^3.2.4"
     react-hook-form: "npm:^7.40.0"
     react-i18n: "npm:^1.0.1"
     react-i18next: "npm:^12.2.2"
@@ -3435,6 +3436,18 @@ __metadata:
     typescript: "npm:5.1.6"
   languageName: unknown
   linkType: soft
+
+"@mirlo/react-hls-player@npm:^3.3.0":
+  version: 3.3.0
+  resolution: "@mirlo/react-hls-player@npm:3.3.0"
+  dependencies:
+    hls.js: "npm:^1.5.15"
+  peerDependencies:
+    react: ^18.3.1
+    react-dom: ^18.3.1
+  checksum: 10/247b8253827995bc4f27b53e6b9baa9cd29dd8bbaf91be9089295789211defd647428383c17c985a9503e7715859516e28931b178186d57183d5cfd08ee64e2d
+  languageName: node
+  linkType: hard
 
 "@mixmark-io/domino@npm:^2.2.0":
   version: 2.2.0
@@ -12545,6 +12558,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"hls.js@npm:^1.5.15":
+  version: 1.6.13
+  resolution: "hls.js@npm:1.6.13"
+  checksum: 10/4de045fddbeb6edc3859021ff60b268a642aa87e83347a3a764e53299b616d57f36eecef0b91eab240ffde84f75d1ab5f7cc0916a929de265707d0f0b27d1c71
+  languageName: node
+  linkType: hard
+
 "hoist-non-react-statics@npm:^3.3.1":
   version: 3.3.2
   resolution: "hoist-non-react-statics@npm:3.3.2"
@@ -15429,6 +15449,7 @@ __metadata:
     "@aws-sdk/s3-request-presigner": "npm:^3.882.0"
     "@bull-board/express": "npm:^4.11.0"
     "@faker-js/faker": "npm:^8.3.1"
+    "@mirlo/react-hls-player": "npm:^3.3.0"
     "@prisma/client": "npm:5"
     "@types/archiver": "npm:^5.3.2"
     "@types/bcryptjs": "npm:^2.4.2"
@@ -17544,6 +17565,18 @@ __metadata:
   peerDependencies:
     react: ">=16.3.0"
   checksum: 10/eff25231384bb0a229870a0552839953a59af17f0ff5e8bca1b8c8fdf19a329e4c00c7fa2fcedc8be5d73f5c7bebb30cf9a32ea58efc7c8f726a10dba51f48a2
+  languageName: node
+  linkType: hard
+
+"react-hls-video-player@npm:^3.2.4":
+  version: 3.2.4
+  resolution: "react-hls-video-player@npm:3.2.4"
+  dependencies:
+    hls.js: "npm:^1.5.15"
+  peerDependencies:
+    react: ^18.3.1
+    react-dom: ^18.3.1
+  checksum: 10/a211cbf32db0fd4888dfd8838b6d3a1d25a094dc53725f7899879f4322fd84e7741ea4de3faea8df1604a816f6818e35f0add23c433221291411c5ca0b96614d
   languageName: node
   linkType: hard
 

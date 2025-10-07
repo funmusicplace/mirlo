@@ -27,6 +27,7 @@ const routes = [
   "tracks/{id}/download",
   "tracks/{id}/generate",
   "tracks/{id}/testOwns",
+  "tracks/{id}/trackPlay",
   "tracks/{id}/favorite",
   "tracks/{id}/stream/{segment}",
   "artists",

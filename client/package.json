@@ -38,6 +38,7 @@
     "react-currency-input-field": "^3.6.10",
     "react-dom": "^18.2.0",
     "react-helmet": "^6.1.0",
+    "react-hls-video-player": "^3.2.4",
     "react-hook-form": "^7.40.0",
     "react-i18n": "^1.0.1",
     "react-i18next": "^12.2.2",
