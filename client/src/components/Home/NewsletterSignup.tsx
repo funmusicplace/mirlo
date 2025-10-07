@@ -58,6 +58,7 @@ const formStyles = css`
   flex-direction: column;
   gap: 1.25rem;
   flex: 1;
+  max-width: 500px;
 
   form {
     display: flex;
@@ -77,7 +78,6 @@ const helperTextStyles = css`
 `;
 
 const verificationStyles = css`
-  margin-top: 1rem;
   width: 100%;
 
   @media screen and (max-width: ${bp.medium}px) {
@@ -89,18 +89,21 @@ const turnstileStyles = css`
   display: flex;
   align-items: center;
   justify-content: flex-start;
+  width: 100%;
 `;
 
 const turnstileRowStyles = css`
   display: flex;
   gap: 1rem;
+  width: 100%;
   align-items: center;
   flex-wrap: wrap;
 `;
 
 const verifiedEmailStyles = css`
+  justify-content: space-between;
+  width: 100%;
   display: flex;
-  flex-direction: column;
   gap: 0.5rem;
   color: var(--mi-normal-foreground-color);
 `;
@@ -159,7 +162,9 @@ const NewsletterSignup: React.FC = () => {
 
     try {
       setIsSubmitting(true);
-      const cfTurnstile = turnstileSiteKey ? turnstileToken ?? undefined : undefined;
+      const cfTurnstile = turnstileSiteKey
+        ? (turnstileToken ?? undefined)
+        : undefined;
 
       await api.post(`artists/${instanceArtist.id}/follow`, {
         email: verifiedEmail,
@@ -214,18 +219,6 @@ const NewsletterSignup: React.FC = () => {
                   />
                 </div>
               ) : null}
-              <Button
-                type="submit"
-                isLoading={isSubmitting}
-                disabled={
-                  !hasVerifiedEmail ||
-                  isSubmitting ||
-                  !instanceArtist?.id ||
-                  (Boolean(turnstileSiteKey) && !turnstileToken)
-                }
-              >
-                {t("newsletterButton")}
-              </Button>
             </div>
             {!hasVerifiedEmail ? (
               <small className={helperTextStyles}>
@@ -258,6 +251,18 @@ const NewsletterSignup: React.FC = () => {
               />
             </div>
           ) : null}
+          <Button
+            type="submit"
+            isLoading={isSubmitting}
+            disabled={
+              !hasVerifiedEmail ||
+              isSubmitting ||
+              !instanceArtist?.id ||
+              (Boolean(turnstileSiteKey) && !turnstileToken)
+            }
+          >
+            {t("newsletterButton")}
+          </Button>
         </div>
       </div>
     </section>
