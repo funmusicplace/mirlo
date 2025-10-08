@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef } from "react";
 import { prosemirrorNodeToHtml } from "@remirror/core-utils";
+import type { EditorState } from "prosemirror-state";
 
 import api from "services/api";
 
