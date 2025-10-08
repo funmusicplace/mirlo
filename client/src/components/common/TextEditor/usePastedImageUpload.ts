@@ -7,7 +7,7 @@ export type UsePastedImageUploadArgs = {
   manager: { view: any };
   postId?: number;
   reloadImages?: () => void;
-  setState: (state: unknown) => void;
+  setState: (state: Readonly<EditorState>) => void;
   onChange: (html: string) => void;
 };
 
