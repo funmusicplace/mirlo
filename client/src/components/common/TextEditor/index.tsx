@@ -22,6 +22,7 @@ import { prosemirrorNodeToHtml } from "@remirror/core-utils";
 import TopToolbar from "./TopToolbar";
 import FloatingLinkToolbar from "./FloatingLinkToolbar";
 import api from "services/api";
+import { usePastedImageUpload } from "./usePastedImageUpload";
 
 const extensions =
   (placeholder: string, postId?: number, reload?: () => void) => () => [
@@ -66,6 +67,13 @@ const TextEditor: React.FC<{
   });
 
   const [headerHeight, setHeaderHeight] = useState(0);
+  const uploadPastedImages = usePastedImageUpload({
+    manager,
+    postId,
+    reloadImages,
+    setState,
+    onChange,
+  });
 
   useEffect(() => {
     const updateHeaderHeight = () => {
@@ -176,8 +184,10 @@ const TextEditor: React.FC<{
         manager={manager}
         state={state}
         onChange={(parameter) => {
-          onChange(prosemirrorNodeToHtml(parameter.state.doc));
+          const html = prosemirrorNodeToHtml(parameter.state.doc);
+          onChange(html);
           setState(parameter.state);
+          void uploadPastedImages();
         }}
       >
         <div className="sticky-toolbar-container">
