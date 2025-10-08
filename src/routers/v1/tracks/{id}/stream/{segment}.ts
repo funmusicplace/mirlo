@@ -69,7 +69,10 @@ export default function () {
         return next();
       }
 
-      if (isUserAbleToListenToTrack === "exceeded") {
+      if (
+        segment.includes("playlist.m3u8") &&
+        isUserAbleToListenToTrack === "exceeded"
+      ) {
         res.status(403).send("Track play limit exceeded");
       }
 

@@ -103,6 +103,7 @@ export const AudioWrapper: React.FC<{
 
   const determineIfShouldPlay = React.useCallback(() => {
     try {
+      console.log("deterimining if should play");
       if (
         currentTrack &&
         currentlyPlayingIndex !== undefined &&
@@ -110,9 +111,17 @@ export const AudioWrapper: React.FC<{
         playing
       ) {
         if (playerRef?.current) {
-          playerRef.current.setAttribute("muted", "");
-          playerRef.current.playsInline = true;
-          playerRef.current.play();
+          if (hasOverplayedSong && !hasShownBuyModalBeenShown) {
+            setShowBuyModal(true);
+            setHasShownBuyModalBeenShown(true);
+            if (playerRef.current) {
+              playerRef.current.pause();
+            }
+          } else {
+            playerRef.current.setAttribute("muted", "");
+            playerRef.current.playsInline = true;
+            playerRef.current.play();
+          }
         }
       } else if (playerRef?.current && playing === false) {
         if (playerRef?.current) {
@@ -172,16 +181,6 @@ export const AudioWrapper: React.FC<{
   }, [dispatch]);
 
   React.useEffect(() => {
-    if (hasOverplayedSong && !hasShownBuyModalBeenShown) {
-      setShowBuyModal(true);
-      setHasShownBuyModalBeenShown(true);
-      if (playerRef.current) {
-        playerRef.current.pause();
-      }
-    }
-  }, [hasOverplayedSong, hasShownBuyModalBeenShown]);
-
-  React.useEffect(() => {
     if (playerRef.current) {
       playerRef.current.volume = volume;
     }
@@ -215,6 +214,10 @@ export const AudioWrapper: React.FC<{
                 ) &&
                 !hasShownBuyModalBeenShown
               ) {
+                console.log(
+                  "setting has overplayed song to true",
+                  currentTrack.id
+                );
                 setHasOverplayedSong(true);
               }
             }

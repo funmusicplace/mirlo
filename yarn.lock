@@ -2641,18 +2641,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@gumlet/react-hls-player@npm:^1.0.1":
-  version: 1.0.1
-  resolution: "@gumlet/react-hls-player@npm:1.0.1"
-  dependencies:
-    hls.js: "npm:^1.2.7"
-  peerDependencies:
-    react: ^16.13.1
-    react-dom: ^16.13.1
-  checksum: 10/a3e46f3933d41206b8250f2858aee0a2f902819cfc746debdf1097d91fa671199c858a270b70029d2a32d576caf6f9ec777676c22effa01f374913a6a076f6db
-  languageName: node
-  linkType: hard
-
 "@hapi/boom@npm:^10.0.0":
   version: 10.0.1
   resolution: "@hapi/boom@npm:10.0.1"
@@ -3332,9 +3320,9 @@ __metadata:
     "@emotion/css": "npm:^11.10.5"
     "@emotion/react": "npm:^11.10.5"
     "@emotion/styled": "npm:^11.10.5"
-    "@gumlet/react-hls-player": "npm:^1.0.1"
     "@marsidev/react-turnstile": "npm:^1.0.2"
     "@mirlo/mirlo-api-client": "npm:1.0.7"
+    "@mirlo/react-hls-player": "npm:^3.3.0"
     "@optimize-lodash/rollup-plugin": "npm:^4.0.4"
     "@paypal/react-paypal-js": "npm:^7.8.2"
     "@remirror/pm": "npm:^2.0.8"
@@ -3388,7 +3376,6 @@ __metadata:
     react-currency-input-field: "npm:^3.6.10"
     react-dom: "npm:^18.2.0"
     react-helmet: "npm:^6.1.0"
-    react-hls-video-player: "npm:^3.2.4"
     react-hook-form: "npm:^7.40.0"
     react-i18n: "npm:^1.0.1"
     react-i18next: "npm:^12.2.2"
@@ -12551,13 +12538,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"hls.js@npm:^1.2.7":
-  version: 1.6.3
-  resolution: "hls.js@npm:1.6.3"
-  checksum: 10/8062a43a715941e2f7f9806064d52491714604982c23bb2525e9abdeb57dd4b6c9f0bdec81f3030a4d8cc3cffe0d261cf1b97d90a970cd254e4ac523dda351a8
-  languageName: node
-  linkType: hard
-
 "hls.js@npm:^1.5.15":
   version: 1.6.13
   resolution: "hls.js@npm:1.6.13"
@@ -15449,7 +15429,6 @@ __metadata:
     "@aws-sdk/s3-request-presigner": "npm:^3.882.0"
     "@bull-board/express": "npm:^4.11.0"
     "@faker-js/faker": "npm:^8.3.1"
-    "@mirlo/react-hls-player": "npm:^3.3.0"
     "@prisma/client": "npm:5"
     "@types/archiver": "npm:^5.3.2"
     "@types/bcryptjs": "npm:^2.4.2"
@@ -17565,18 +17544,6 @@ __metadata:
   peerDependencies:
     react: ">=16.3.0"
   checksum: 10/eff25231384bb0a229870a0552839953a59af17f0ff5e8bca1b8c8fdf19a329e4c00c7fa2fcedc8be5d73f5c7bebb30cf9a32ea58efc7c8f726a10dba51f48a2
-  languageName: node
-  linkType: hard
-
-"react-hls-video-player@npm:^3.2.4":
-  version: 3.2.4
-  resolution: "react-hls-video-player@npm:3.2.4"
-  dependencies:
-    hls.js: "npm:^1.5.15"
-  peerDependencies:
-    react: ^18.3.1
-    react-dom: ^18.3.1
-  checksum: 10/a211cbf32db0fd4888dfd8838b6d3a1d25a094dc53725f7899879f4322fd84e7741ea4de3faea8df1604a816f6818e35f0add23c433221291411c5ca0b96614d
   languageName: node
   linkType: hard
 

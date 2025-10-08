@@ -79,7 +79,7 @@ const PurchaseOrDownloadAlbum: React.FC<{
 
   const isBeforeReleaseDate = new Date(trackGroup.releaseDate) > new Date();
 
-  const showPurchase = true; // !isOwned && userStripeStatus?.chargesEnabled;
+  const showPurchase = !isOwned && userStripeStatus?.chargesEnabled;
 
   const showDownload = isOwned && !isBeforeReleaseDate;
 
