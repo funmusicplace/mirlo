@@ -10,6 +10,7 @@ import { useTranslation } from "react-i18next";
 import Button, { ButtonLink } from "components/common/Button";
 import { FaPlus, FaWrench } from "react-icons/fa";
 import TextEditor from "components/common/TextEditor";
+import { pickBy, isString } from "lodash";
 import {
   queryManagedArtist,
   queryManagedArtistSubscriptionTiers,
@@ -18,6 +19,66 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
+
+type ArtistEmailKey = keyof NonNullable<NonNullable<Artist["properties"]>["emails"]>;
+
+const getEmailMessageFromProperties = (
+  properties: Artist["properties"] | undefined,
+  key: ArtistEmailKey
+): string => {
+  const emails = properties?.emails;
+  const value = emails?.[key];
+  return typeof value === "string" ? value : "";
+};
+
+const isEditorContentEmpty = (value: string) => {
+  if (!value) return true;
+  const textContent = value
+    .replace(/<[^>]*>/g, "")
+    .replace(/&nbsp;/g, "")
+    .trim();
+  return textContent.length === 0;
+};
+
+const normalizeEditorValue = (value: string) =>
+  isEditorContentEmpty(value) ? "" : value;
+
+const mergeArtistPropertiesWithEmailUpdates = (
+  properties: Artist["properties"] | undefined,
+  updates: Partial<Record<ArtistEmailKey, string | undefined>>
+) => {
+  const nextProperties: NonNullable<Artist["properties"]> = properties
+    ? { ...properties }
+    : ({} as NonNullable<Artist["properties"]>);
+
+  const existingEmails = pickBy(properties?.emails ?? {}, isString) as Partial<
+    Record<ArtistEmailKey, string>
+  >;
+
+  const sanitizedUpdates = pickBy(
+    updates,
+    (value): value is string => typeof value === "string" && !isEditorContentEmpty(value)
+  ) as Partial<Record<ArtistEmailKey, string>>;
+
+  const nextEmails: Partial<Record<ArtistEmailKey, string>> = {
+    ...existingEmails,
+    ...sanitizedUpdates,
+  };
+
+  (Object.keys(updates) as ArtistEmailKey[]).forEach((key) => {
+    if (!(key in sanitizedUpdates)) {
+      delete nextEmails[key];
+    }
+  });
+
+  if (Object.keys(nextEmails).length > 0) {
+    nextProperties.emails = nextEmails;
+  } else {
+    delete nextProperties.emails;
+  }
+
+  return nextProperties;
+};
 
 const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
   const [addingNewTier, setAddingNewTier] = React.useState(false);
@@ -42,21 +103,15 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
   const { mutate: updateArtist, isPending: isUpdatingMessages } =
     useUpdateArtistMutation();
 
-  const originalSupportMessage = React.useMemo(() => {
-    const emails = (
-      (artist?.properties as { emails?: { support?: string | null } })?.emails ??
-      {}
-    ) as { support?: string | null };
-    return typeof emails.support === "string" ? emails.support : "";
-  }, [artist]);
+  const originalSupportMessage = React.useMemo(
+    () => getEmailMessageFromProperties(artist?.properties, "support"),
+    [artist]
+  );
 
-  const originalPurchaseMessage = React.useMemo(() => {
-    const emails = (
-      (artist?.properties as { emails?: { purchase?: string | null } })?.emails ??
-      {}
-    ) as { purchase?: string | null };
-    return typeof emails.purchase === "string" ? emails.purchase : "";
-  }, [artist]);
+  const originalPurchaseMessage = React.useMemo(
+    () => getEmailMessageFromProperties(artist?.properties, "purchase"),
+    [artist]
+  );
 
   const [supportMessage, setSupportMessage] = React.useState<string>("");
   const [purchaseMessage, setPurchaseMessage] = React.useState<string>("");
@@ -65,20 +120,6 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
     setSupportMessage(originalSupportMessage ?? "");
     setPurchaseMessage(originalPurchaseMessage ?? "");
   }, [originalSupportMessage, originalPurchaseMessage]);
-
-  const isEditorContentEmpty = React.useCallback((value: string) => {
-    if (!value) return true;
-    const textContent = value
-      .replace(/<[^>]*>/g, "")
-      .replace(/&nbsp;/g, "")
-      .trim();
-    return textContent.length === 0;
-  }, []);
-
-  const normalizeEditorValue = React.useCallback(
-    (value: string) => (isEditorContentEmpty(value) ? "" : value),
-    [isEditorContentEmpty]
-  );
 
   const normalizedSupportMessage = normalizeEditorValue(supportMessage);
   const normalizedPurchaseMessage = normalizeEditorValue(purchaseMessage);
@@ -105,37 +146,13 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
       ? undefined
       : purchaseMessage;
 
-    const existingEmails = artist.properties?.emails ?? {};
-    const updatedEmails: Record<string, string> = {};
-
-    Object.entries(existingEmails).forEach(([key, value]) => {
-      if (typeof value === "string") {
-        updatedEmails[key] = value;
+    const updatedProperties = mergeArtistPropertiesWithEmailUpdates(
+      artist.properties,
+      {
+        support: supportValue,
+        purchase: purchaseValue,
       }
-    });
-
-    if (typeof supportValue === "string") {
-      updatedEmails.support = supportValue;
-    } else {
-      delete updatedEmails.support;
-    }
-
-    if (typeof purchaseValue === "string") {
-      updatedEmails.purchase = purchaseValue;
-    } else {
-      delete updatedEmails.purchase;
-    }
-
-    const updatedProperties: NonNullable<Artist["properties"]> =
-      artist.properties
-        ? { ...artist.properties }
-        : ({} as NonNullable<Artist["properties"]>);
-
-    if (Object.keys(updatedEmails).length > 0) {
-      updatedProperties.emails = updatedEmails;
-    } else {
-      delete updatedProperties.emails;
-    }
+    );
 
     updateArtist(
       {
@@ -165,6 +182,7 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
     updateArtist,
     userId,
     isEditorContentEmpty,
+    mergeArtistPropertiesWithEmailUpdates,
   ]);
 
   if (!artist) {
