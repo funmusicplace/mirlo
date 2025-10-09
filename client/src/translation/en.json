@@ -939,7 +939,14 @@
     "createSubscription": "Create subscription",
     "editTier": "Edit tier",
     "editSubscriptionTierFor": "Edit subscription tier for {{artistName}}",
-    "minAmountError": "The amount for a support tier must be more than or equal to 1."
+    "minAmountError": "The amount for a support tier must be more than or equal to 1.",
+    "thankYouMessages": "Thank you messages",
+    "thankYouMessagesDescription": "Add a personal note that will appear in the emails supporters receive after they subscribe or purchase.",
+    "supportEmailLabel": "Subscription thank you message",
+    "purchaseEmailLabel": "Purchase thank you message",
+    "saveMessages": "Save messages",
+    "messagesUpdated": "Thank you messages updated",
+    "messagesUpdateError": "We couldn't save your messages. Please try again."
   },
   "footer": {
     "getInTouch": "If you'd like to get in touch, join <discord>our Discord</discord>, <email>email us</email>, or check out <github>our Github</github>.",

@@ -251,6 +251,10 @@ interface Artist {
       roster?: string;
       groupName?: string;
     };
+    emails?: {
+      support?: string | null;
+      purchase?: string | null;
+    };
   };
   user?: Partial<User>;
   banner?: {

@@ -9,11 +9,15 @@ import Modal from "components/common/Modal";
 import { useTranslation } from "react-i18next";
 import Button, { ButtonLink } from "components/common/Button";
 import { FaPlus, FaWrench } from "react-icons/fa";
+import TextEditor from "components/common/TextEditor";
 import {
   queryManagedArtist,
   queryManagedArtistSubscriptionTiers,
+  useUpdateArtistMutation,
 } from "queries";
 import { useQuery } from "@tanstack/react-query";
+import { useAuthContext } from "state/AuthContext";
+import { useSnackbar } from "state/SnackbarContext";
 
 const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
   const [addingNewTier, setAddingNewTier] = React.useState(false);
@@ -22,18 +26,206 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
   });
 
   const { artistId } = useParams();
-  const { data: artist } = useQuery(queryManagedArtist(Number(artistId)));
-  const { data: tiers, refetch } = useQuery(
+  const { user } = useAuthContext();
+  const snackbar = useSnackbar();
+  const { data: artist, refetch: refetchArtist } = useQuery(
+    queryManagedArtist(Number(artistId))
+  );
+  const { data: tiers, refetch: refetchTiers } = useQuery(
     queryManagedArtistSubscriptionTiers({
       artistId: Number(artistId),
     })
   );
+
+  const userId = user?.id;
+
+  const { mutate: updateArtist, isPending: isUpdatingMessages } =
+    useUpdateArtistMutation();
+
+  const originalSupportMessage = React.useMemo(() => {
+    const emails = (
+      (artist?.properties as { emails?: { support?: string | null } })?.emails ??
+      {}
+    ) as { support?: string | null };
+    return typeof emails.support === "string" ? emails.support : "";
+  }, [artist]);
+
+  const originalPurchaseMessage = React.useMemo(() => {
+    const emails = (
+      (artist?.properties as { emails?: { purchase?: string | null } })?.emails ??
+      {}
+    ) as { purchase?: string | null };
+    return typeof emails.purchase === "string" ? emails.purchase : "";
+  }, [artist]);
+
+  const [supportMessage, setSupportMessage] = React.useState<string>("");
+  const [purchaseMessage, setPurchaseMessage] = React.useState<string>("");
+
+  React.useEffect(() => {
+    setSupportMessage(originalSupportMessage ?? "");
+    setPurchaseMessage(originalPurchaseMessage ?? "");
+  }, [originalSupportMessage, originalPurchaseMessage]);
+
+  const isEditorContentEmpty = React.useCallback((value: string) => {
+    if (!value) return true;
+    const textContent = value
+      .replace(/<[^>]*>/g, "")
+      .replace(/&nbsp;/g, "")
+      .trim();
+    return textContent.length === 0;
+  }, []);
+
+  const normalizeEditorValue = React.useCallback(
+    (value: string) => (isEditorContentEmpty(value) ? "" : value),
+    [isEditorContentEmpty]
+  );
+
+  const normalizedSupportMessage = normalizeEditorValue(supportMessage);
+  const normalizedPurchaseMessage = normalizeEditorValue(purchaseMessage);
+  const normalizedOriginalSupportMessage = normalizeEditorValue(
+    originalSupportMessage ?? ""
+  );
+  const normalizedOriginalPurchaseMessage = normalizeEditorValue(
+    originalPurchaseMessage ?? ""
+  );
+
+  const hasMessageChanges =
+    normalizedSupportMessage !== normalizedOriginalSupportMessage ||
+    normalizedPurchaseMessage !== normalizedOriginalPurchaseMessage;
+
+  const handleSaveMessages = React.useCallback(() => {
+    if (!artist || !userId) {
+      return;
+    }
+
+    const supportValue = isEditorContentEmpty(supportMessage)
+      ? undefined
+      : supportMessage;
+    const purchaseValue = isEditorContentEmpty(purchaseMessage)
+      ? undefined
+      : purchaseMessage;
+
+    const existingProperties =
+      (artist.properties as Record<string, unknown>) ?? {};
+    const existingEmails = (
+      existingProperties.emails as Record<string, string | undefined>
+    ) ?? {};
+
+    const updatedEmails: Record<string, string> = {};
+    Object.entries(existingEmails).forEach(([key, value]) => {
+      if (typeof value === "string") {
+        updatedEmails[key] = value;
+      }
+    });
+
+    if (typeof supportValue === "string") {
+      updatedEmails.support = supportValue;
+    } else {
+      delete updatedEmails.support;
+    }
+
+    if (typeof purchaseValue === "string") {
+      updatedEmails.purchase = purchaseValue;
+    } else {
+      delete updatedEmails.purchase;
+    }
+
+    const updatedProperties: Record<string, unknown> = {
+      ...existingProperties,
+    };
+
+    if (Object.keys(updatedEmails).length > 0) {
+      updatedProperties.emails = updatedEmails;
+    } else {
+      delete updatedProperties.emails;
+    }
+
+    updateArtist(
+      {
+        userId,
+        artistId: artist.id,
+        body: {
+          properties: updatedProperties,
+        },
+      },
+      {
+        onSuccess: () => {
+          snackbar(t("messagesUpdated"), { type: "success" });
+          refetchArtist();
+        },
+        onError: () => {
+          snackbar(t("messagesUpdateError"), { type: "warning" });
+        },
+      }
+    );
+  }, [
+    artist,
+    purchaseMessage,
+    refetchArtist,
+    snackbar,
+    supportMessage,
+    t,
+    updateArtist,
+    userId,
+    isEditorContentEmpty,
+  ]);
 
   if (!artist) {
     return null;
   }
 
   return (
+    <ManageSectionWrapper>
+      <h3>{t("thankYouMessages")}</h3>
+      <p
+        className={css`
+          margin-bottom: 1.5rem;
+          max-width: 60ch;
+        `}
+      >
+        {t("thankYouMessagesDescription")}
+      </p>
+      <div
+        className={css`
+          margin-bottom: 1.5rem;
+        `}
+      >
+        <h4
+          className={css`
+            margin-bottom: 0.5rem;
+          `}
+        >
+          {t("supportEmailLabel")}
+        </h4>
+        <TextEditor
+          value={supportMessage}
+          onChange={(value: string) => setSupportMessage(value)}
+        />
+      </div>
+      <div
+        className={css`
+          margin-bottom: 1.5rem;
+        `}
+      >
+        <h4
+          className={css`
+            margin-bottom: 0.5rem;
+          `}
+        >
+          {t("purchaseEmailLabel")}
+        </h4>
+        <TextEditor
+          value={purchaseMessage}
+          onChange={(value: string) => setPurchaseMessage(value)}
+        />
+        </div>
+      <Button
+        onClick={handleSaveMessages}
+        disabled={!hasMessageChanges || isUpdatingMessages || !userId}
+      >
+        {t("saveMessages")}
+      </Button>
+    </ManageSectionWrapper>
     <ManageSectionWrapper>
       <SpaceBetweenDiv>
         <div />
@@ -78,7 +270,7 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
           <ManageSubscriptionTierBox
             tier={tier}
             key={tier.id}
-            reload={refetch}
+            reload={refetchTiers}
             artist={artist}
           />
         ))}
@@ -88,7 +280,7 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
         onClose={() => setAddingNewTier(false)}
         title={t("newSubscriptionTierFor", { artistName: artist.name }) ?? ""}
       >
-        <SubscriptionForm artist={artist} reload={refetch} />
+        <SubscriptionForm artist={artist} reload={refetchTiers} />
       </Modal>
     </ManageSectionWrapper>
   );
