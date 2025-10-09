@@ -175,114 +175,116 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
   }
 
   return (
-    <ManageSectionWrapper>
-      <h3>{t("thankYouMessages")}</h3>
-      <p
-        className={css`
-          margin-bottom: 1.5rem;
-          max-width: 60ch;
-        `}
-      >
-        {t("thankYouMessagesDescription")}
-      </p>
-      <div
-        className={css`
-          margin-bottom: 1.5rem;
-        `}
-      >
-        <h4
+    <>
+      <ManageSectionWrapper>
+        <h3>{t("thankYouMessages")}</h3>
+        <p
           className={css`
-            margin-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+            max-width: 60ch;
           `}
         >
-          {t("supportEmailLabel")}
-        </h4>
-        <TextEditor
-          value={supportMessage}
-          onChange={(value: string) => setSupportMessage(value)}
-        />
-      </div>
-      <div
-        className={css`
-          margin-bottom: 1.5rem;
-        `}
-      >
-        <h4
-          className={css`
-            margin-bottom: 0.5rem;
-          `}
-        >
-          {t("purchaseEmailLabel")}
-        </h4>
-        <TextEditor
-          value={purchaseMessage}
-          onChange={(value: string) => setPurchaseMessage(value)}
-        />
-        </div>
-      <Button
-        onClick={handleSaveMessages}
-        disabled={!hasMessageChanges || isUpdatingMessages || !userId}
-      >
-        {t("saveMessages")}
-      </Button>
-    </ManageSectionWrapper>
-    <ManageSectionWrapper>
-      <SpaceBetweenDiv>
-        <div />
+          {t("thankYouMessagesDescription")}
+        </p>
         <div
           className={css`
-            display: flex;
+            margin-bottom: 1.5rem;
           `}
         >
-          <ButtonLink
-            to="supporters"
+          <h4
             className={css`
-              margin-right: 0.25rem;
+              margin-bottom: 0.5rem;
             `}
-            variant="dashed"
-            size="compact"
-            collapsible
-            startIcon={<FaWrench />}
           >
-            {t("supporters")}
-          </ButtonLink>
-          <Button
-            onClick={() => {
-              setAddingNewTier(true);
-            }}
-            startIcon={<FaPlus />}
-            size="compact"
-            variant="dashed"
-          >
-            {t("addNewTier")}
-          </Button>
-        </div>
-      </SpaceBetweenDiv>
-      <div
-        className={css`
-          margin-bottom: 1rem;
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 1rem;
-        `}
-      >
-        {tiers?.results.map((tier) => (
-          <ManageSubscriptionTierBox
-            tier={tier}
-            key={tier.id}
-            reload={refetchTiers}
-            artist={artist}
+            {t("supportEmailLabel")}
+          </h4>
+          <TextEditor
+            value={supportMessage}
+            onChange={(value: string) => setSupportMessage(value)}
           />
-        ))}
-      </div>
-      <Modal
-        open={addingNewTier}
-        onClose={() => setAddingNewTier(false)}
-        title={t("newSubscriptionTierFor", { artistName: artist.name }) ?? ""}
-      >
-        <SubscriptionForm artist={artist} reload={refetchTiers} />
-      </Modal>
-    </ManageSectionWrapper>
+        </div>
+        <div
+          className={css`
+            margin-bottom: 1.5rem;
+          `}
+        >
+          <h4
+            className={css`
+              margin-bottom: 0.5rem;
+            `}
+          >
+            {t("purchaseEmailLabel")}
+          </h4>
+          <TextEditor
+            value={purchaseMessage}
+            onChange={(value: string) => setPurchaseMessage(value)}
+          />
+          </div>
+        <Button
+          onClick={handleSaveMessages}
+          disabled={!hasMessageChanges || isUpdatingMessages || !userId}
+        >
+          {t("saveMessages")}
+        </Button>
+      </ManageSectionWrapper>
+      <ManageSectionWrapper>
+        <SpaceBetweenDiv>
+          <div />
+          <div
+            className={css`
+              display: flex;
+            `}
+          >
+            <ButtonLink
+              to="supporters"
+              className={css`
+                margin-right: 0.25rem;
+              `}
+              variant="dashed"
+              size="compact"
+              collapsible
+              startIcon={<FaWrench />}
+            >
+              {t("supporters")}
+            </ButtonLink>
+            <Button
+              onClick={() => {
+                setAddingNewTier(true);
+              }}
+              startIcon={<FaPlus />}
+              size="compact"
+              variant="dashed"
+            >
+              {t("addNewTier")}
+            </Button>
+          </div>
+        </SpaceBetweenDiv>
+        <div
+          className={css`
+            margin-bottom: 1rem;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+          `}
+        >
+          {tiers?.results.map((tier) => (
+            <ManageSubscriptionTierBox
+              tier={tier}
+              key={tier.id}
+              reload={refetchTiers}
+              artist={artist}
+            />
+          ))}
+        </div>
+        <Modal
+          open={addingNewTier}
+          onClose={() => setAddingNewTier(false)}
+          title={t("newSubscriptionTierFor", { artistName: artist.name }) ?? ""}
+        >
+          <SubscriptionForm artist={artist} reload={refetchTiers} />
+        </Modal>
+      </ManageSectionWrapper>
+    </>
   );
 };
 
