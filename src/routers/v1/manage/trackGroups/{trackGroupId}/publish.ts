@@ -23,19 +23,7 @@ export default function () {
         trackGroup?.published || trackGroup.publishedAt
       );
       if (!isCurrentlyPublished) {
-        type CoverWithUrl = { url?: string[] | null };
-        const coverRecords: CoverWithUrl[] = Array.isArray(trackGroup?.cover)
-          ? trackGroup.cover
-          : trackGroup?.cover
-          ? [trackGroup.cover]
-          : [];
-        const hasCover = coverRecords.some(
-          (coverRecord) =>
-            Array.isArray(coverRecord.url) &&
-            coverRecord.url.some(
-              (url) => typeof url === "string" && url.trim().length > 0
-            )
-        );
+        const hasCover = Boolean(trackGroup?.cover?.url?.length);
 
         if (!hasCover) {
           throw new AppError({
@@ -44,7 +32,7 @@ export default function () {
           });
         }
       }
-      
+
       const updatedTrackgroup = await prisma.trackGroup.update({
         where: { id: Number(trackGroupId) || undefined },
         data: {

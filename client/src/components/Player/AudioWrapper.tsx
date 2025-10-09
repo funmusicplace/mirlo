@@ -103,7 +103,6 @@ export const AudioWrapper: React.FC<{
 
   const determineIfShouldPlay = React.useCallback(() => {
     try {
-      console.log("deterimining if should play");
       if (
         currentTrack &&
         currentlyPlayingIndex !== undefined &&
@@ -214,10 +213,6 @@ export const AudioWrapper: React.FC<{
                 ) &&
                 !hasShownBuyModalBeenShown
               ) {
-                console.log(
-                  "setting has overplayed song to true",
-                  currentTrack.id
-                );
                 setHasOverplayedSong(true);
               }
             }

@@ -3,6 +3,9 @@ import fetch from "node-fetch";
 import { AppError } from "./error";
 
 const { CLOUDFLARE_TURNSTILE_API_SECRET } = process.env;
+const isDev =
+  process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test";
+
 const CLOUDFLARE_VERIFY_URL =
   "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 
@@ -21,6 +24,10 @@ export async function checkCloudFlareTurnstile({
   failureMessage = "Spam protection failed",
   skipIfNoSecret = false,
 }: CheckTurnstileOptions) {
+  if (isDev) {
+    // TBD if this is desirable--kind of prevents tests from being written for it.
+    return;
+  }
   if (!CLOUDFLARE_TURNSTILE_API_SECRET) {
     if (skipIfNoSecret) {
       return;
