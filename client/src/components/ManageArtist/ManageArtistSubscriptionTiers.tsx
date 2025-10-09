@@ -105,13 +105,9 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
       ? undefined
       : purchaseMessage;
 
-    const existingProperties =
-      (artist.properties as Record<string, unknown>) ?? {};
-    const existingEmails = (
-      existingProperties.emails as Record<string, string | undefined>
-    ) ?? {};
-
+    const existingEmails = artist.properties?.emails ?? {};
     const updatedEmails: Record<string, string> = {};
+
     Object.entries(existingEmails).forEach(([key, value]) => {
       if (typeof value === "string") {
         updatedEmails[key] = value;
@@ -130,9 +126,10 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
       delete updatedEmails.purchase;
     }
 
-    const updatedProperties: Record<string, unknown> = {
-      ...existingProperties,
-    };
+    const updatedProperties: NonNullable<Artist["properties"]> =
+      artist.properties
+        ? { ...artist.properties }
+        : ({} as NonNullable<Artist["properties"]>);
 
     if (Object.keys(updatedEmails).length > 0) {
       updatedProperties.emails = updatedEmails;
