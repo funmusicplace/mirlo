@@ -19,11 +19,12 @@ const Announcement: React.FC = () => {
         gap: 1rem;
       `}
     >
-      Introducing label accounts 🎉
+    Join the beta test for mirlo's upcoming iOS app!
       <ButtonAnchor
         variant="outlined"
         startIcon={<FaArrowRight />}
-        href="https://mirlo.space/team/posts/introducing-label-pages/"
+        target="_blank"
+        href="https://testflight.apple.com/join/SjkPHPqp"
         className={css`
           background-color: black !important;
           border: 1px solid var(--mi-white) !important;
@@ -40,7 +41,7 @@ const Announcement: React.FC = () => {
           }
         `}
       >
-        Read update
+        Join Here
       </ButtonAnchor>
     </div>
   );
