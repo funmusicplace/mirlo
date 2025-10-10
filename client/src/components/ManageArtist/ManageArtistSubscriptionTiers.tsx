@@ -2,18 +2,16 @@ import { css } from "@emotion/css";
 import React from "react";
 import ManageSubscriptionTierBox from "./ManageSubscriptionTierBox";
 import SubscriptionForm from "./SubscriptionForm";
-import { useParams } from "react-router-dom";
+import { useOutletContext } from "react-router-dom";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import { ManageSectionWrapper } from "./ManageSectionWrapper";
 import Modal from "components/common/Modal";
 import { useTranslation } from "react-i18next";
 import Button, { ButtonLink } from "components/common/Button";
 import { FaPlus, FaWrench } from "react-icons/fa";
-import {
-  queryManagedArtist,
-  queryManagedArtistSubscriptionTiers,
-} from "queries";
+import { queryManagedArtistSubscriptionTiers } from "queries";
 import { useQuery } from "@tanstack/react-query";
+import { ManageArtistOutletContext } from "./ManageArtist";
 
 const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
   const [addingNewTier, setAddingNewTier] = React.useState(false);
@@ -21,15 +19,14 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
     keyPrefix: "subscriptionForm",
   });
 
-  const { artistId } = useParams();
-  const { data: artist } = useQuery(
-    queryManagedArtist(Number(artistId))
-  );
-  const { data: tiers, refetch: refetchTiers } = useQuery(
-    queryManagedArtistSubscriptionTiers({
-      artistId: Number(artistId),
-    })
-  );
+  const { artist } = useOutletContext<ManageArtistOutletContext>();
+
+  const { data: tiers, refetch: refetchTiers } = useQuery({
+    ...queryManagedArtistSubscriptionTiers({
+      artistId: artist?.id,
+    }),
+    enabled: Boolean(artist?.id),
+  });
 
   if (!artist) {
     return null;
