@@ -13,16 +13,15 @@ import { UploadField, UploadLabelWrapper } from "../utils";
 import {
   ArtistButton,
   ArtistButtonAnchor,
-  ArtistButtonLink,
   useGetArtistColors,
 } from "components/Artist/ArtistButtons";
 import LoadingSpinner from "components/common/LoadingSpinner";
-import useArtistQuery from "utils/useArtistQuery";
 
 const DownloadableContent: React.FC<{
-  merch: Merch;
+  item: Merch | TrackGroup;
   reload: () => void;
-}> = ({ merch, reload }) => {
+  itemType?: "merch" | "release";
+}> = ({ item, reload, itemType = "merch" }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageMerch" });
   const snackbar = useSnackbar();
   const errorHandler = useErrorHandler();
@@ -54,25 +53,34 @@ const DownloadableContent: React.FC<{
           }
         >("manage/downloadableContent", {
           filename: nextFile.file.name,
-          merchId: merch.id,
+          ...(itemType === "release"
+            ? { trackGroupId: item.id }
+            : { merchId: item.id }),
         });
 
         if (response && response.uploadUrl) {
-          const result = await fetch(response.uploadUrl, {
-            method: "PUT",
-            body: nextFile.file,
-            headers: {
-              "Content-Type": "application/pdf",
-            },
-          });
-
-          if (result.ok) {
-            snackbar(t("fileUploaded"), { type: "success" });
-            reload();
+          try {
+            const result = await fetch(response.uploadUrl, {
+              method: "PUT",
+              body: nextFile.file,
+              headers: {
+                "Content-Type": "application/pdf",
+              },
+            });
+            if (result.ok) {
+              snackbar(t("fileUploaded"), { type: "success" });
+              reload();
+            }
+          } catch (e) {
+            await api.delete(
+              `manage/downloadableContent/${response.result.id}`
+            );
+            console.error("Error uploading to remote server", e);
           }
         }
       }
     } catch (e) {
+      console.error(e);
       errorHandler(e);
     }
     if (files.length > 0) {
@@ -100,32 +108,31 @@ const DownloadableContent: React.FC<{
           <LoadingSpinner size="small" fill={colors?.primary} />
         </div>
       )}
-      {merch.downloadableContent &&
-        merch.downloadableContent.map((c) => (
-          <Pill
-            key={c.downloadableContentId}
-            className={css`
-              margin: 0.5rem 0 1rem;
-              gap: 0.25rem;
-            `}
-          >
-            {c.downloadableContent.originalFilename}
-            <ArtistButtonAnchor
-              startIcon={<FaDownload />}
-              variant="dashed"
-              href={c.downloadableContent.downloadUrl as string}
-              rel="noopener noreferrer"
-              target="_blank"
-            />
-            <ArtistButton
-              startIcon={<FaTimes />}
-              variant="dashed"
-              onClick={() => {
-                deleteContent(c.downloadableContentId);
-              }}
-            />
-          </Pill>
-        ))}
+      {item.downloadableContent?.map((c) => (
+        <Pill
+          key={c.downloadableContentId}
+          className={css`
+            margin: 0.5rem 0 1rem;
+            gap: 0.25rem;
+          `}
+        >
+          {c.downloadableContent.originalFilename}
+          <ArtistButtonAnchor
+            startIcon={<FaDownload />}
+            variant="dashed"
+            href={c.downloadableContent.downloadUrl as string}
+            rel="noopener noreferrer"
+            target="_blank"
+          />
+          <ArtistButton
+            startIcon={<FaTimes />}
+            variant="dashed"
+            onClick={() => {
+              deleteContent(c.downloadableContentId);
+            }}
+          />
+        </Pill>
+      ))}
 
       <UploadLabelWrapper
         htmlFor="downloadableContent"
@@ -144,7 +151,7 @@ const DownloadableContent: React.FC<{
           id="downloadableContent"
           multiple
           onChange={(e) => handleFileChange(e.target.files)}
-          accept="application/pdf"
+          accept="application/pdf,image/*"
         />
       </UploadLabelWrapper>
       <small
@@ -152,7 +159,9 @@ const DownloadableContent: React.FC<{
           margin-top: 1rem;
         `}
       >
-        {t("relatedDownloadableContentInfo")}
+        {itemType === "release"
+          ? t("relatedDownloadableContentInfo")
+          : t("trackGroupRelatedDownloadableContent")}
       </small>
     </FormComponent>
   );

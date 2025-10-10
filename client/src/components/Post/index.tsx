@@ -15,6 +15,7 @@ import MarkdownWrapper from "components/common/MarkdownWrapper";
 import { useQuery } from "@tanstack/react-query";
 import { queryPost } from "queries";
 import PostHeader from "./PostHeader";
+import useArtistQuery from "utils/useArtistQuery";
 
 export const PageMarkdownWrapper = styled.div`
   width: 100%;
@@ -80,6 +81,7 @@ const Post: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "post" });
 
   const { artistId, postId } = useParams();
+  const { data: artist } = useArtistQuery();
   const { data: post, isLoading } = useQuery(
     queryPost({ postId: postId ?? "", artistId: artistId ?? "" })
   );
@@ -98,8 +100,9 @@ const Post: React.FC = () => {
             <Trans
               t={t}
               i18nKey="returnToArtist"
+              values={{ artistName: artist?.name }}
               components={{
-                link: <Link to={`/${artistId}`}></Link>,
+                link: <Link to={`/${artistId}`}>{artist?.name}</Link>,
               }}
             />
           )}

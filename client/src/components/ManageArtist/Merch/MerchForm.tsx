@@ -5,7 +5,6 @@ import { useTranslation } from "react-i18next";
 import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
 import useErrorHandler from "services/useErrorHandler";
-import Button from "components/common/Button";
 import SavingInput from "../ManageTrackGroup/AlbumFormComponents/SavingInput";
 import FormComponent from "components/common/FormComponent";
 import { css } from "@emotion/css";
@@ -157,9 +156,7 @@ const MerchForm: React.FC<{
           )}
         </FormComponent>
         <SelectTrackGroup merch={merch} reload={reload} />
-        <FeatureFlag featureFlag="downloadableContent">
-          <DownloadableContent merch={merch} reload={reload} />
-        </FeatureFlag>
+        <DownloadableContent item={merch} reload={reload} itemType="merch" />
         <ArtistButton
           size="big"
           rounded

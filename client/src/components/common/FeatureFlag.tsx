@@ -4,7 +4,6 @@ import { useAuthContext } from "state/AuthContext";
 interface FeatureFlagProps {
   featureFlag:
     | "activityPub"
-    | "downloadableContent"
     | "maxFreePlays"
     | "subscriptionFulfillment"
     | "fundraiser";
@@ -13,7 +12,7 @@ interface FeatureFlagProps {
 
 export const checkIfFeatureEnabled = (
   user: LoggedInUser | null,
-  featureFlag: string
+  featureFlag: FeatureFlagProps["featureFlag"]
 ): boolean => {
   return (
     (user?.isAdmin ||

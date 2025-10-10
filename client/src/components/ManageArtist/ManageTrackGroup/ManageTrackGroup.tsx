@@ -15,14 +15,10 @@ import { useQuery } from "@tanstack/react-query";
 import { queryArtist, queryManagedTrackGroup } from "queries";
 import AlbumPaymentReceiver from "./AlbumFormComponents/AlbumPaymentReceiver";
 import ManageTrackDefaults from "./AlbumFormComponents/ManageTrackDefaults";
-import {
-  ArtistButton,
-  ArtistButtonAnchor,
-  ArtistButtonLink,
-} from "components/Artist/ArtistButtons";
+import { ArtistButtonLink } from "components/Artist/ArtistButtons";
 import { MdOutlineDownloadForOffline } from "react-icons/md";
-import { getArtistManageUrl, getManageReleaseUrl } from "utils/artist";
-import { formatDate } from "components/TrackGroup/ReleaseDate";
+import { getArtistManageUrl } from "utils/artist";
+import DownloadableContent from "../Merch/DownloadableContent";
 
 export interface TrackGroupFormData {
   published: boolean;
@@ -36,7 +32,7 @@ export interface TrackGroupFormData {
 }
 
 const ManageTrackGroup: React.FC<{}> = () => {
-  const { t, i18n } = useTranslation("translation", {
+  const { t } = useTranslation("translation", {
     keyPrefix: "manageAlbum",
   });
 
@@ -152,7 +148,12 @@ const ManageTrackGroup: React.FC<{}> = () => {
         />
       )}
       <hr style={{ marginTop: "1rem", marginBottom: "1rem" }} />
-
+      <DownloadableContent
+        reload={refetch}
+        item={trackGroup}
+        itemType="release"
+      />
+      <hr style={{ marginTop: "1rem", marginBottom: "1rem" }} />
       <PublishButton trackGroup={trackGroup} reload={refetch} />
     </ManageSectionWrapper>
   );
