@@ -49,6 +49,9 @@ export const ArtistBox: React.FC<{
 
         p {
           margin-bottom: 0.5rem;
+          &:last-child {
+            margin-bottom: 0;
+          }
         }
       `}
     />

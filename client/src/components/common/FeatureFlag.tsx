@@ -13,7 +13,7 @@ interface FeatureFlagProps {
 
 export const checkIfFeatureEnabled = (
   user: LoggedInUser | null,
-  featureFlag: string
+  featureFlag: FeatureFlagProps["featureFlag"]
 ): boolean => {
   return (
     (user?.isAdmin ||

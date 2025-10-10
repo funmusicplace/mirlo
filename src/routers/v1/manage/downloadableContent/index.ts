@@ -35,9 +35,7 @@ export default function () {
       }
 
       if (!trackGroup && !merch) {
-        res
-          .status(403)
-          .json({ error: "You do not own this track group or merch" });
+        res.status(403).json({ error: "You do not own this release or merch" });
         return;
       }
 
