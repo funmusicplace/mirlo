@@ -24,6 +24,7 @@ import FeatureFlag from "components/common/FeatureFlag";
 import PaymentSlider from "../ManageTrackGroup/AlbumFormComponents/PaymentSlider";
 import { InputEl } from "components/common/Input";
 import CustomNamesForTabs from "./CustomNamesForTabs";
+import ThankYouMessageEditors from "./ThankYouMessageEditors";
 
 export interface ShareableTrackgroup {
   creatorId: number;
@@ -114,7 +115,7 @@ export const CustomizeLook: React.FC = () => {
   const snackbar = useSnackbar();
   const { user } = useAuthContext();
   const userId = user?.id;
-  const { data: artist } = useManagedArtistQuery();
+  const { data: artist, refetch: refetchArtist } = useManagedArtistQuery();
 
   const methods = useForm<ArtistFormData>({
     defaultValues: generateDefaults(artist),
@@ -379,8 +380,13 @@ export const CustomizeLook: React.FC = () => {
               </ArtistFormSection>
             </FeatureFlag>
             <CustomNamesForTabs />
+            <ArtistFormSection isOdd>
+              <ThankYouMessageEditors
+                artist={artist}
+                onArtistUpdated={refetchArtist}
+              />
+            </ArtistFormSection>
             <ArtistFormSection
-              isOdd
               className={css`
                 margin-bottom: 0 !important;
               `}
