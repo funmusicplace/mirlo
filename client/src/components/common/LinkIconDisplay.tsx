@@ -15,6 +15,8 @@ import {
   FaXTwitter,
   FaTwitch,
   FaVideo,
+  FaSpotify,
+  FaDeezer,
 } from "react-icons/fa6";
 import { FiMail } from "react-icons/fi";
 import Logo from "./Logo";
@@ -85,7 +87,7 @@ export const findOutsideSite = (link: Link) => {
     const derivedName =
       link.linkType && link.linkType.length > 0
         ? link.linkType
-        : parseUnknownSiteNameFromUrl(link.url) ?? websiteSite.name;
+        : (parseUnknownSiteNameFromUrl(link.url) ?? websiteSite.name);
 
     return {
       ...websiteSite,
@@ -144,6 +146,8 @@ export const outsideLinks = [
   { matches: "patreon.com", icon: <FaPatreon />, name: "Patreon" },
   { matches: "twitch.tv", icon: <FaTwitch />, name: "Twitch" },
   { matches: "tiktok.com", icon: <FaTiktok />, name: "TikTok" },
+  { matches: "spotify.com", icon: <FaSpotify />, name: "Spotify" },
+  { matches: "deezer.com", icon: <FaDeezer />, name: "Deezer" },
   { matches: "@", icon: <FiMail />, name: "Email" },
   {
     matches: "mirlo.space",

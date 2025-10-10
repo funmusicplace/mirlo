@@ -34,7 +34,8 @@ interface FormData {
 const BuyTrackGroup: React.FC<{
   trackGroup: TrackGroup;
   track?: Track;
-}> = ({ trackGroup, track }) => {
+  noPadding?: boolean;
+}> = ({ trackGroup, track, noPadding }) => {
   const snackbar = useSnackbar();
   const [stripeLoading, setStripeLoading] = React.useState(false);
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
@@ -132,9 +133,13 @@ const BuyTrackGroup: React.FC<{
   return (
     <FormProvider {...methods}>
       <div
-        className={css`
-          padding: 1.5rem 2rem 2rem;
-        `}
+        className={
+          noPadding
+            ? ""
+            : css`
+                padding: 1.5rem 2rem 2rem;
+              `
+        }
       >
         {trackGroup.isAllOrNothing && (
           <p

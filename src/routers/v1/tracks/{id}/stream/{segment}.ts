@@ -69,21 +69,14 @@ export default function () {
         return next();
       }
 
-      if (isUserAbleToListenToTrack === "exceeded") {
+      if (
+        segment.includes("playlist.m3u8") &&
+        isUserAbleToListenToTrack === "exceeded"
+      ) {
         res.status(403).send("Track play limit exceeded");
       }
 
       if (track.audio) {
-        const segmentString = segment.split("-")[1]?.split(".")?.[0];
-        const segmentNumber = segmentString ? +segmentString : undefined;
-        if (segmentNumber === 4) {
-          await prisma.trackPlay.create({
-            data: {
-              trackId: track.id,
-              ...(user ? { userId: user.id } : { ip: req.ip }),
-            },
-          });
-        }
         await fetchFile(res, track.audio.id, segment);
       }
     } catch (e) {

@@ -161,7 +161,7 @@ describe("artists/{id]/follow", () => {
       assert.equal(response.status, 401);
       assert.equal(
         response.body.error,
-        "Please verify your email before subscribing.",
+        "Please verify your email before subscribing."
       );
     });
 
@@ -192,7 +192,7 @@ describe("artists/{id]/follow", () => {
       assert.equal(response.status, 401);
       assert.equal(
         response.body.error,
-        "Please verify your email before subscribing.",
+        "Please verify your email before subscribing."
       );
     });
   });

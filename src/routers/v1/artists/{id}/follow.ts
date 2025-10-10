@@ -94,7 +94,11 @@ export default function () {
 
       let user: Pick<
         User,
-        "id" | "currency" | "email" | "receiveMailingList" | "emailConfirmationToken"
+        | "id"
+        | "currency"
+        | "email"
+        | "receiveMailingList"
+        | "emailConfirmationToken"
       > | null = null;
 
       if (isLoggedIn && loggedInuser?.id) {

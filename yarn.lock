@@ -2641,18 +2641,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@gumlet/react-hls-player@npm:^1.0.1":
-  version: 1.0.1
-  resolution: "@gumlet/react-hls-player@npm:1.0.1"
-  dependencies:
-    hls.js: "npm:^1.2.7"
-  peerDependencies:
-    react: ^16.13.1
-    react-dom: ^16.13.1
-  checksum: 10/a3e46f3933d41206b8250f2858aee0a2f902819cfc746debdf1097d91fa671199c858a270b70029d2a32d576caf6f9ec777676c22effa01f374913a6a076f6db
-  languageName: node
-  linkType: hard
-
 "@hapi/boom@npm:^10.0.0":
   version: 10.0.1
   resolution: "@hapi/boom@npm:10.0.1"
@@ -3332,9 +3320,9 @@ __metadata:
     "@emotion/css": "npm:^11.10.5"
     "@emotion/react": "npm:^11.10.5"
     "@emotion/styled": "npm:^11.10.5"
-    "@gumlet/react-hls-player": "npm:^1.0.1"
     "@marsidev/react-turnstile": "npm:^1.0.2"
     "@mirlo/mirlo-api-client": "npm:1.0.7"
+    "@mirlo/react-hls-player": "npm:^3.3.0"
     "@optimize-lodash/rollup-plugin": "npm:^4.0.4"
     "@paypal/react-paypal-js": "npm:^7.8.2"
     "@remirror/pm": "npm:^2.0.8"
@@ -3435,6 +3423,18 @@ __metadata:
     typescript: "npm:5.1.6"
   languageName: unknown
   linkType: soft
+
+"@mirlo/react-hls-player@npm:^3.3.0":
+  version: 3.3.0
+  resolution: "@mirlo/react-hls-player@npm:3.3.0"
+  dependencies:
+    hls.js: "npm:^1.5.15"
+  peerDependencies:
+    react: ^18.3.1
+    react-dom: ^18.3.1
+  checksum: 10/247b8253827995bc4f27b53e6b9baa9cd29dd8bbaf91be9089295789211defd647428383c17c985a9503e7715859516e28931b178186d57183d5cfd08ee64e2d
+  languageName: node
+  linkType: hard
 
 "@mixmark-io/domino@npm:^2.2.0":
   version: 2.2.0
@@ -12538,10 +12538,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"hls.js@npm:^1.2.7":
-  version: 1.6.3
-  resolution: "hls.js@npm:1.6.3"
-  checksum: 10/8062a43a715941e2f7f9806064d52491714604982c23bb2525e9abdeb57dd4b6c9f0bdec81f3030a4d8cc3cffe0d261cf1b97d90a970cd254e4ac523dda351a8
+"hls.js@npm:^1.5.15":
+  version: 1.6.13
+  resolution: "hls.js@npm:1.6.13"
+  checksum: 10/4de045fddbeb6edc3859021ff60b268a642aa87e83347a3a764e53299b616d57f36eecef0b91eab240ffde84f75d1ab5f7cc0916a929de265707d0f0b27d1c71
   languageName: node
   linkType: hard
 
