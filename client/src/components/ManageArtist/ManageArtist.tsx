@@ -36,6 +36,7 @@ const ManageArtist: React.FC<{}> = () => {
           className={css`
             background-color: var(--mi-warning-background-color);
             padding: 1rem;
+            margin-top: 1rem;
             color: var(--mi-warning-text-color);
           `}
         >
