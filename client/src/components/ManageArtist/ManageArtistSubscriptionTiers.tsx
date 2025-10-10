@@ -192,57 +192,6 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
   return (
     <>
       <ManageSectionWrapper>
-        <h3>{t("thankYouMessages")}</h3>
-        <p
-          className={css`
-            margin-bottom: 1.5rem;
-            max-width: 60ch;
-          `}
-        >
-          {t("thankYouMessagesDescription")}
-        </p>
-        <div
-          className={css`
-            margin-bottom: 1.5rem;
-          `}
-        >
-          <h4
-            className={css`
-              margin-bottom: 0.5rem;
-            `}
-          >
-            {t("supportEmailLabel")}
-          </h4>
-          <TextEditor
-            value={supportMessage}
-            onChange={(value: string) => setSupportMessage(value)}
-          />
-        </div>
-        <div
-          className={css`
-            margin-bottom: 1.5rem;
-          `}
-        >
-          <h4
-            className={css`
-              margin-bottom: 0.5rem;
-            `}
-          >
-            {t("purchaseEmailLabel")}
-          </h4>
-          <TextEditor
-            value={purchaseMessage}
-            onChange={(value: string) => setPurchaseMessage(value)}
-          />
-          </div>
-        <Button
-          onClick={handleSaveMessages}
-          disabled={!hasMessageChanges || isUpdatingMessages || !userId}
-        >
-          {t("saveMessages")}
-        </Button>
-      </ManageSectionWrapper>
-      <ManageSectionWrapper>
         <SpaceBetweenDiv>
           <div />
           <div
@@ -298,6 +247,79 @@ const ManageArtistSubscriptionTiers: React.FC<{}> = () => {
         >
           <SubscriptionForm artist={artist} reload={refetchTiers} />
         </Modal>
+      </ManageSectionWrapper>
+      <ManageSectionWrapper>
+        <h3>{t("thankYouMessages")}</h3>
+        <p
+          className={css`
+            margin-bottom: 1.5rem;
+            max-width: 60ch;
+          `}
+        >
+          {t("thankYouMessagesDescription")}
+        </p>
+        <div
+          className={css`
+            display: grid;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+
+            @media (min-width: 960px) {
+              grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+          `}
+        >
+          <div
+            className={css`
+              display: flex;
+              flex-direction: column;
+            `}
+          >
+            <h4
+              className={css`
+                margin-bottom: 0.5rem;
+              `}
+            >
+              {t("supportEmailLabel")}
+            </h4>
+            <TextEditor
+              value={supportMessage}
+              onChange={(value: string) => setSupportMessage(value)}
+              className={css`
+                margin-top: 0.5rem;
+              `}
+              disableFloatingToolbar
+            />
+          </div>
+          <div
+            className={css`
+              display: flex;
+              flex-direction: column;
+            `}
+          >
+            <h4
+              className={css`
+                margin-bottom: 0.5rem;
+              `}
+            >
+              {t("purchaseEmailLabel")}
+            </h4>
+            <TextEditor
+              value={purchaseMessage}
+              onChange={(value: string) => setPurchaseMessage(value)}
+              className={css`
+                margin-top: 0.5rem;
+              `}
+              disableFloatingToolbar
+            />
+          </div>
+        </div>
+      <Button
+          onClick={handleSaveMessages}
+          disabled={!hasMessageChanges || isUpdatingMessages || !userId}
+        >
+          {t("saveMessages")}
+        </Button>
       </ManageSectionWrapper>
     </>
   );

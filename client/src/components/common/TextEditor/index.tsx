@@ -57,7 +57,17 @@ const TextEditor: React.FC<{
   postId?: number;
   artistId?: number;
   reloadImages?: () => void;
-}> = ({ onChange, value, postId, reloadImages, artistId }) => {
+  className?: string;
+  disableFloatingToolbar?: boolean;
+}> = ({
+  onChange,
+  value,
+  postId,
+  reloadImages,
+  artistId,
+  className,
+  disableFloatingToolbar,
+}) => {
   const { t } = useTranslation("translation", { keyPrefix: "textEditor" });
   const { manager, state, setState } = useRemirror({
     extensions: extensions(t("typeSomething").toString(), postId, reloadImages),
@@ -76,6 +86,10 @@ const TextEditor: React.FC<{
   });
 
   useEffect(() => {
+    if (disableFloatingToolbar) {
+      return;
+    }
+
     const updateHeaderHeight = () => {
       // Look for visible sticky elements that are actually positioned at the top
       const allElements = document.querySelectorAll("*");
@@ -124,62 +138,67 @@ const TextEditor: React.FC<{
       window.removeEventListener("resize", updateHeaderHeight);
       window.removeEventListener("scroll", updateHeaderHeight);
     };
-  }, []);
+  }, [disableFloatingToolbar]);
+
+  const baseClassName = css`
+    p {
+      margin-bottom: 1rem;
+    }
+    width: 100%;
+    position: relative;
+
+    /* Sticky toolbar styles */
+    .sticky-toolbar-container {
+      position: ${disableFloatingToolbar ? "static" : "sticky"};
+      top: ${disableFloatingToolbar ? "auto" : `${headerHeight}px`};
+      z-index: 1;
+    }
+
+    .remirror-editor {
+      width: 100%;
+      .ProseMirror {
+        border: 1px solid var(--mi-darken-x-background-color);
+        border-top: none;
+      }
+
+      iframe {
+        width: 100%;
+      }
+
+      iframe.remirror-iframe-youtube {
+        min-height: 390px;
+      }
+
+      padding: 1rem;
+      background-color: var(--mi-lighten-x-background-color);
+
+      img {
+        max-width: 100%;
+      }
+
+      ul,
+      ol {
+        margin-left: 1rem;
+        margin-bottom: 1.5rem;
+      }
+
+      li > ol,
+      li > ul {
+        list-style: lower-alpha;
+      }
+    }
+  `;
+
+  const combinedClassName = [
+    "remirror-theme",
+    baseClassName,
+    className,
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
-    <div
-      className={
-        `remirror-theme ` +
-        css`
-          p {
-            margin-bottom: 1rem;
-          }
-          width: 100%;
-          position: relative;
-
-          /* Sticky toolbar styles */
-          .sticky-toolbar-container {
-            position: sticky;
-            top: ${headerHeight}px;
-            z-index: 1;
-          }
-
-          .remirror-editor {
-            width: 100%;
-            .ProseMirror {
-              border: 1px solid var(--mi-darken-x-background-color);
-              border-top: none;
-            }
-
-            iframe {
-              width: 100%;
-            }
-
-            iframe.remirror-iframe-youtube {
-              min-height: 390px;
-            }
-
-            padding: 1rem;
-            background-color: var(--mi-lighten-x-background-color);
-
-            img {
-              max-width: 100%;
-            }
-
-            ul,
-            ol {
-              margin-left: 1rem;
-              margin-bottom: 1.5rem;
-            }
-
-            li > ol,
-            li > ul {
-              list-style: lower-alpha;
-            }
-          }
-        `
-      }
-    >
+    <div className={combinedClassName}>
       <Remirror
         manager={manager}
         state={state}
