@@ -14,4 +14,8 @@ html
      
     div 
       p #{tip.currencyPaid.toUpperCase()} #{(pricePaid).toFixed(2)}
-    p Your support keeps our community strong.
+    - const supportMessage = tip.artist?.properties?.emails?.support
+    if supportMessage
+      div!= supportMessage
+    else
+      p Your support keeps our community strong.

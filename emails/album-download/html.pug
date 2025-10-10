@@ -26,9 +26,13 @@ html
       | Consider supporting 
       a(href!=`${client}/${trackGroup.artist.urlSlug}`) #{trackGroup.artist.name}
       | with a subscription.
-    p 
-      | If you want to have access to all your purchases for this e-mail address, 
-      | simply 
+    p
+      | If you want to have access to all your purchases for this e-mail address,
+      | simply
       a(href!=`${client}/password-reset?email=${email}`) set a password for it
       | .
-    p Enjoy!
+    - const purchaseMessage = trackGroup.artist?.properties?.emails?.purchase
+    if purchaseMessage
+      div!= purchaseMessage
+    else
+      p Enjoy!
