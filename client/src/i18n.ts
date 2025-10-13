@@ -25,6 +25,7 @@ export const finishedLanguages = [
   { short: "en", name: "English" },
   { short: "fr", name: "Français" },
   { short: "es", name: "Español" },
+  { short: "uk", name: "Українська" },
 ];
 
 const defaultLanguage = finishedLanguages.find((lang) =>
