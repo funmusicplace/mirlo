@@ -10,10 +10,6 @@ import { getArtistUrl } from "utils/artist";
 import { ArtistButtonQuickLink } from "components/Artist/Artist";
 import { FaEye } from "react-icons/fa";
 
-export type ManageArtistOutletContext = {
-  artist: Artist;
-};
-
 const ManageArtist: React.FC<{}> = () => {
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
 
@@ -102,7 +98,7 @@ const ManageArtist: React.FC<{}> = () => {
           )}
         </ArtistTabs>
       )}
-      <Outlet context={{ artist }} />
+      <Outlet />
     </>
   );
 };
