@@ -22,4 +22,8 @@ html
       p The album will become available in your collection for unlimited listening and downloading once it is released.
     else 
       p The album is now available in your collection for unlimited listening and downloading.
-    p Enjoy!
+    - const purchaseMessage = trackGroup.artist?.properties?.emails?.purchase
+    if purchaseMessage
+      div!= purchaseMessage
+    else
+      p Enjoy!

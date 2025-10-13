@@ -10,4 +10,8 @@ block content
         td #{artist.name}
         td.pa3 #{artistUserSubscription.amount / 100} #{artistUserSubscription.currency}
     p To view all your subscriptions log in or create an account with this email address.
-    p Enjoy!
+    - const supportMessage = artist?.properties?.emails?.support
+    if supportMessage
+      div!= supportMessage
+    else
+      p Enjoy!

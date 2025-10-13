@@ -31,4 +31,8 @@ html
       | simply 
       a(href!=`${client}/password-reset?email=${email}`) set a password for it
       | .
-    p Enjoy!
+    - const purchaseMessage = track.trackGroup.artist?.properties?.emails?.purchase
+    if purchaseMessage
+      div!= purchaseMessage
+    else
+      p Enjoy!

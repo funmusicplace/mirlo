@@ -10,4 +10,8 @@ block content
            | #{purchase.currencyPaid.toUpperCase()} #{(purchase.amountPaid / 100).toFixed(2)}
         
     p The artist will start fulfilling your order and be in touch.
-    p Enjoy!
+    - const purchaseMessage = artist?.properties?.emails?.purchase
+    if purchaseMessage
+      div!= purchaseMessage
+    else
+      p Enjoy!
