@@ -55,16 +55,6 @@ export default function () {
               artistLabels: true,
             },
           });
-          if (user) {
-            const labelArtists = await prisma.artist.findMany({
-              where: {
-                id: {
-                  in: user.artistLabels.map((al) => al.artistId),
-                },
-                enabled: true,
-              },
-            });
-          }
         }
 
         if (headersAreForActivityPub(req.headers, "accept")) {

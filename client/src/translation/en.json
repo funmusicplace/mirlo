@@ -473,7 +473,7 @@
     "continueWithPrice": "Continue with {{ amount }}/month",
     "chooseToContinue": "Choose a support tier to continue",
     "purchaseEntireCatalogue": "Purchase entire catalogue for {{amount}}",
-    "platformPercent": "{{ artistName }} has chosen that they will get {{ percent }}% ({{ money }}) of this purchase. Mirlo will receive {{ mirloCut }}. Their payment processor will take a cut of {{ paymentProcessorCut }}.",
+    "platformPercent": "{{ artistName }} has chosen that they will get {{ percent }}% ({{ money }}) of this purchase. The platform will receive {{ mirloCut }}. Their payment processor will take a cut of {{ paymentProcessorCut }}.",
     "isSubscribed": "Subscribed",
     "moreLinks": "More links"
   },

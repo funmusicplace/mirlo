@@ -9,11 +9,12 @@ import { css } from "@emotion/css";
 import { bp } from "../../constants";
 import FollowArtist from "components/common/FollowArtist";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
-import { useArtistContext } from "state/ArtistContext";
 import { useAuthContext } from "state/AuthContext";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { QUERY_KEY_AUTH, queryKeyIncludes } from "queries/queryKeys";
 import useErrorHandler from "services/useErrorHandler";
+import useArtistQuery from "utils/useArtistQuery";
+import { queryUserStripeStatus } from "queries";
 
 const ArtistSupportGrid = styled.div`
   display: grid;
@@ -34,10 +35,11 @@ const ArtistSupportGrid = styled.div`
 
 const ArtistSupport: React.FC = () => {
   const { user } = useAuthContext();
+  const { data: artist } = useArtistQuery();
+  const { data: userStripeStatus } = useQuery(
+    queryUserStripeStatus(artist?.userId || 0)
+  );
 
-  const {
-    state: { artist, userStripeStatus },
-  } = useArtistContext();
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
   const [isLoading, setIsLoading] = React.useState(false);
   const [userSubscription, setUserSubscription] =

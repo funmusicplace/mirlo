@@ -58,7 +58,7 @@ const ManageSubscriptionTierBox: React.FC<{
         <img
           src={tier.images[0].image.sizes[625] + `?updatedAt=${Date.now()}`}
           width="100%"
-          height="120px"
+          height="180px"
           className={css`
             object-fit: cover;
           `}

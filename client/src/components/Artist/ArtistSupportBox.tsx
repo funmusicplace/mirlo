@@ -1,14 +1,12 @@
 import { css } from "@emotion/css";
 import React from "react";
 import api from "services/api";
-import { useSnackbar } from "state/SnackbarContext";
 import Box from "../common/Box";
 import Money from "../common/Money";
 import { useTranslation } from "react-i18next";
 import MarkdownContent from "components/common/MarkdownContent";
 import { bp } from "../../constants";
 import PlatformPercent from "components/common/PlatformPercent";
-import { useArtistContext } from "state/ArtistContext";
 import LoadingBlocks from "./LoadingBlocks";
 import styled from "@emotion/styled";
 import ArtistVariableSupport, {
@@ -24,7 +22,7 @@ import useErrorHandler from "services/useErrorHandler";
 const StyledSupportBox = styled(Box)`
   background-color: var(--mi-darken-background-color);
   margin-bottom: 1rem;
-  padding: 0 1.5rem 0.25rem 1.5rem !important;
+  padding: 0 !important;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -56,7 +54,6 @@ const ArtistSupportBox: React.FC<{
   const [isCheckingForSubscription, setIsCheckingForSubscription] =
     React.useState(false);
 
-  const snackbar = useSnackbar();
   const errorHandler = useErrorHandler();
 
   const subscribeToTier = async (tier: ArtistSubscriptionTier) => {
@@ -107,9 +104,22 @@ const ArtistSupportBox: React.FC<{
 
   return (
     <StyledSupportBox>
+      {subscriptionTier.images?.[0]?.image.sizes?.[625] && (
+        <img
+          src={
+            subscriptionTier.images[0].image.sizes[625] +
+            `?updatedAt=${Date.now()}`
+          }
+          width="100%"
+          height="180px"
+          className={css`
+            object-fit: cover;
+          `}
+        />
+      )}
       <div
         className={css`
-          padding: 1.5rem 0;
+          padding: 1.5rem 0.25rem;
           border-bottom: var(--mi-border);
           text-align: center;
           h3 {
@@ -132,7 +142,7 @@ const ArtistSupportBox: React.FC<{
       </div>
       <div
         className={css`
-          padding-top: 1rem;
+          padding: 1rem 1.5rem 0;
           height: 100%;
           p {
             align-items: flex-start;
@@ -143,6 +153,7 @@ const ArtistSupportBox: React.FC<{
       </div>
       <div
         className={css`
+          padding: 0 1.5rem;
           margin: 0.5rem 0 1.25rem;
 
           button:hover {
@@ -152,8 +163,7 @@ const ArtistSupportBox: React.FC<{
         `}
       >
         {!isSubscribedToTier && !isSubscribedToArtist && (
-          <>
-            {" "}
+          <div className={css``}>
             <div
               className={css`
                 display: flex;
@@ -175,11 +185,12 @@ const ArtistSupportBox: React.FC<{
               artist={artist}
               currency={subscriptionTier.currency}
             />
-          </>
+          </div>
         )}
         {(isSubscribedToTier || isSubscribedToArtist) && (
           <Box
             className={css`
+              padding: 0 1.5rem;
               text-align: center;
               background-color: var(--mi-darken-background-color);
               margin-bottom: 0;
@@ -218,6 +229,7 @@ const ArtistSupportBox: React.FC<{
       {subscriptionTier.autoPurchaseAlbums && (
         <div
           className={css`
+            padding: 1.5rem;
             width: 100%;
             background-color: ${colors?.background};
             border-top: 1px solid ${colors?.foreground};

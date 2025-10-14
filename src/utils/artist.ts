@@ -11,6 +11,7 @@ import {
   Prisma,
   Merch,
   MerchImage,
+  Image,
 } from "@mirlo/prisma/client";
 import prisma from "@mirlo/prisma";
 import stripe from "./stripe";
@@ -20,6 +21,7 @@ import { convertURLArrayToSizes } from "./images";
 import {
   finalArtistAvatarBucket,
   finalArtistBannerBucket,
+  finalImageBucket,
   finalUserAvatarBucket,
   removeObjectsFromBucket,
 } from "./minio";
@@ -34,6 +36,7 @@ import logger from "../logger";
 import { Job } from "bullmq";
 import { processSingleMerch } from "./merch";
 import { getSiteSettings } from "./settings";
+import subscriptionTiers from "../routers/v1/manage/artists/{artistId}/subscriptionTiers";
 
 type Params = {
   id: string;
@@ -465,6 +468,18 @@ export const singleInclude = (queryOptions?: {
       orderBy: {
         minAmount: "asc",
       },
+      include: {
+        images: {
+          where: {
+            image: {
+              deletedAt: null,
+            },
+          },
+          include: {
+            image: true,
+          },
+        },
+      },
     },
     artistLabels: {
       include: {
@@ -515,6 +530,9 @@ interface LocalArtist extends Artist {
     tracks?: Track[];
   })[];
   merch?: (Merch & { images?: MerchImage[] })[];
+  subscriptionTiers: (ArtistSubscriptionTier & {
+    images?: { image: Image }[];
+  })[];
 }
 
 export const addSizesToImage = (
@@ -543,5 +561,12 @@ export const processSingleArtist = (
     banner: addSizesToImage(finalArtistBannerBucket, artist?.banner),
     avatar: addSizesToImage(finalArtistAvatarBucket, artist?.avatar),
     trackGroups: artist?.trackGroups?.map(processSingleTrackGroup),
+    subscriptionTiers: artist.subscriptionTiers.map((tier) => ({
+      ...tier,
+      images: tier.images?.map((img) => ({
+        ...img,
+        image: addSizesToImage(finalImageBucket, img.image),
+      })),
+    })),
   };
 };

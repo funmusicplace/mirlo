@@ -14,12 +14,10 @@ import api from "services/api";
 import { useArtistContext } from "state/ArtistContext";
 import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
-import { useGetArtistColors } from "./ArtistButtons";
 import useErrorHandler from "services/useErrorHandler";
 
 export const SupportBoxButton = styled(Button)`
   white-space: normal !important;
-  margin-top: 1rem;
   padding: 0.5rem 0.5rem;
 `;
 
@@ -37,7 +35,6 @@ const ArtistVariableSupport: React.FC<{
   const [open, setOpen] = React.useState(false);
   const [isCheckingForSubscription, setIsCheckingForSubscription] =
     React.useState(false);
-  const snackbar = useSnackbar();
   const { artistId } = useParams();
   const { refetch: refresh } = useQuery(queryArtist({ artistSlug: artistId }));
   const errorHandler = useErrorHandler();
