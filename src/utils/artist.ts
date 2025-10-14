@@ -530,7 +530,7 @@ interface LocalArtist extends Artist {
     tracks?: Track[];
   })[];
   merch?: (Merch & { images?: MerchImage[] })[];
-  subscriptionTiers: (ArtistSubscriptionTier & {
+  subscriptionTiers?: (ArtistSubscriptionTier & {
     images?: { image: Image }[];
   })[];
 }
@@ -561,7 +561,7 @@ export const processSingleArtist = (
     banner: addSizesToImage(finalArtistBannerBucket, artist?.banner),
     avatar: addSizesToImage(finalArtistAvatarBucket, artist?.avatar),
     trackGroups: artist?.trackGroups?.map(processSingleTrackGroup),
-    subscriptionTiers: artist.subscriptionTiers.map((tier) => ({
+    subscriptionTiers: artist.subscriptionTiers?.map((tier) => ({
       ...tier,
       images: tier.images?.map((img) => ({
         ...img,

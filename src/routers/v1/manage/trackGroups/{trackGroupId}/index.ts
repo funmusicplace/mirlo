@@ -62,6 +62,11 @@ export default function () {
               images: true,
             },
           },
+          downloadableContent: {
+            include: {
+              downloadableContent: true,
+            },
+          },
         },
       });
 

@@ -9,10 +9,10 @@ import { useAuthContext } from "state/AuthContext";
 
 import { ArtistButtonAnchor } from "components/Artist/ArtistButtons";
 
-const MerchDownloadableContent: React.FC<{ merch: Merch; artist: Artist }> = ({
-  merch,
-  artist,
-}) => {
+const ReleaseDownloadableContent: React.FC<{
+  trackGroup: TrackGroup;
+  artist: Artist;
+}> = ({ trackGroup, artist }) => {
   const { t } = useTranslation("translation", {
     keyPrefix: "merchDetails",
   });
@@ -21,12 +21,13 @@ const MerchDownloadableContent: React.FC<{ merch: Merch; artist: Artist }> = ({
 
   const userIsOwner = user?.id === artist.userId || user?.isAdmin;
 
-  const userHasPurchasedMerch = user?.merchPurchase?.some(
-    (m) => m.merchId === merch.id
+  const userHasPurchasedTrackGroup = user?.userTrackGroupPurchases?.some(
+    (m) => m.trackGroupId === trackGroup.id
   );
 
-  if (userHasPurchasedMerch || userIsOwner) {
-    return merch.downloadableContent && merch.downloadableContent.length > 0 ? (
+  if (userHasPurchasedTrackGroup || userIsOwner) {
+    return trackGroup.downloadableContent &&
+      trackGroup.downloadableContent.length > 0 ? (
       <div
         className={
           "includes " +
@@ -50,7 +51,7 @@ const MerchDownloadableContent: React.FC<{ merch: Merch; artist: Artist }> = ({
             margin-left: 1.5rem;
           `}
         >
-          {merch.downloadableContent.map((content) => (
+          {trackGroup.downloadableContent.map((content) => (
             <li key={content.downloadableContentId}>
               <ArtistButtonAnchor
                 href={content.downloadableContent.downloadUrl}
@@ -70,37 +71,38 @@ const MerchDownloadableContent: React.FC<{ merch: Merch; artist: Artist }> = ({
 
   return (
     <>
-      {merch.downloadableContent && merch.downloadableContent.length > 0 && (
-        <div
-          className={css`
-            margin: 1.5rem 1rem 0 1rem;
-            @media screen and (max-width: ${bp.small}px) {
-              max-width: 100%;
-              flex: 100%;
-              margin-left: 0;
-            }
-          `}
-        >
-          <p>
-            <strong>{t("purchaseIncludesThisDownloadableContent")}</strong>
-          </p>
-          <ul
+      {trackGroup.downloadableContent &&
+        trackGroup.downloadableContent.length > 0 && (
+          <div
             className={css`
-              list-style-type: disc;
-              margin-top: 0.5rem;
-              margin-left: 1.5rem;
+              margin: 1.5rem 1rem 0 1rem;
+              @media screen and (max-width: ${bp.small}px) {
+                max-width: 100%;
+                flex: 100%;
+                margin-left: 0;
+              }
             `}
           >
-            {merch.downloadableContent.map((content) => (
-              <li key={content.downloadableContentId}>
-                {content.downloadableContent.originalFilename}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+            <p>
+              <strong>{t("purchaseIncludesThisDownloadableContent")}</strong>
+            </p>
+            <ul
+              className={css`
+                list-style-type: disc;
+                margin-top: 0.5rem;
+                margin-left: 1.5rem;
+              `}
+            >
+              {trackGroup.downloadableContent.map((content) => (
+                <li key={content.downloadableContentId}>
+                  {content.downloadableContent.originalFilename}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
     </>
   );
 };
 
-export default MerchDownloadableContent;
+export default ReleaseDownloadableContent;

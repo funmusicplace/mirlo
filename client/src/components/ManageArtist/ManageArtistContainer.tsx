@@ -111,7 +111,11 @@ const ManageArtistContainer: React.FC<{}> = () => {
       artistBanner={!!artistBanner}
       artistBackground={artist?.properties?.colors?.background}
     >
-      <>
+      <div
+        className={css`
+          padding-top: 1rem;
+        `}
+      >
         {user && artist.userId !== user.id && user.isAdmin && (
           <ArtistBox variant="warning">
             You are viewing this artist as an admin
@@ -168,7 +172,7 @@ const ManageArtistContainer: React.FC<{}> = () => {
           <ArtistBox variant="warning">{t("notEnabled")}</ArtistBox>
         )}
         <Outlet />
-      </>
+      </div>
     </ArtistPageWrapper>
   );
 };

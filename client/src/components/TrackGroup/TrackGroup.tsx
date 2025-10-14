@@ -27,6 +27,7 @@ import { useQuery } from "@tanstack/react-query";
 import { queryArtist, queryTrackGroup, queryUserStripeStatus } from "queries";
 import Fundraiser from "./Fundraiser";
 import FlagContent from "./FlagContent";
+import ReleaseDownloadableContent from "./ReleaseDownloadableContent";
 
 export const Container = styled.div<{ user?: LoggedInUser | null }>`
   ${(props) =>
@@ -285,6 +286,13 @@ function TrackGroup() {
                 {trackGroup.merch && trackGroup.merch.length > 0 && (
                   <TrackGroupMerch merch={trackGroup.merch} />
                 )}
+                {trackGroup.downloadableContent &&
+                  trackGroup.downloadableContent.length > 0 && (
+                    <ReleaseDownloadableContent
+                      trackGroup={trackGroup}
+                      artist={artist}
+                    />
+                  )}
 
                 <SmallScreenPlayWrapper>
                   <ClickToPlayTracks

@@ -500,7 +500,7 @@
     "postByArtist": "by <link>{{artistName}}</link>",
     "byArtist": "by {{artist}}",
     "noPostFound": "No post found",
-    "returnToArtist": ", return to <link>artistPage</link>",
+    "returnToArtist": ", return to <link>{{artistName}}</link>",
     "edit": "Edit",
     "notAvailable": "This post was made private.",
     "publishedAt": "Published {{ date }}",
@@ -684,7 +684,8 @@
     "viewFulfillment": "View fulfillment",
     "downloadableContent": "Does the user get to download anything after purchase?",
     "noDownloadableContent": "No downloadable content linked.",
-    "relatedDownloadableContentInfo": "Purchasing this merch will make this content available to the user.",
+    "relatedDownloadableContentInfo": "Purchasing this merch will make this content downloadable to the user.",
+    "trackGroupRelatedDownloadableContent": "Purchasing this release will make this content downloadable to the user.",
     "merchFulfillmentParagraph": "To manage orders for merch, check your fulfillment page",
     "setDifferentCostPerDestination": "You'll want to set a different shipping cost per destination. It's likely much more expensive to ship to another country"
   },
