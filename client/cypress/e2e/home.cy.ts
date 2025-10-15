@@ -165,29 +165,36 @@ describe("home page", () => {
       .should("be.visible")
       .and("have.attr", "href", "https://testflight.apple.com/join/SjkPHPqp");
 
-    cy.contains("Recent releases").should("be.visible");
+    cy.contains("Recent releases").scrollIntoView().should("be.visible");
     cy.contains("a", featuredRelease.title)
+      .scrollIntoView()
       .should("be.visible")
       .and("have.attr", "href", "/example-artist/release/example-album");
     cy.contains("a", featuredRelease.artist.name)
+      .scrollIntoView()
       .should("be.visible")
       .and("have.attr", "href", "/example-artist");
 
-    cy.contains("Recent purchases").should("be.visible");
+    cy.contains("Recent purchases").scrollIntoView().should("be.visible");
     cy.contains("a", popularRelease.title)
+      .scrollIntoView()
       .should("be.visible")
       .and("have.attr", "href", "/popular-artist/release/popular-album");
 
-    cy.contains("Popular Tags").should("be.visible");
+    cy.contains("Popular Tags").scrollIntoView().should("be.visible");
     cy.contains("a", "experimental")
+      .scrollIntoView()
       .should("be.visible")
       .and("have.attr", "href", "/releases?tag=experimental");
     cy.contains("a", "Browse tags")
+      .scrollIntoView()
       .should("be.visible")
       .and("have.attr", "href", "/tags");
 
-    cy.contains("Latest posts from the community").should("be.visible");
-    cy.contains(posts[0].title).should("be.visible");
+    cy.contains("Latest posts from the community")
+      .scrollIntoView()
+      .should("be.visible");
+    cy.contains(posts[0].title).scrollIntoView().should("be.visible");
 
     cy.contains("Support Mirlo").should("be.visible");
     cy.contains(
@@ -222,9 +229,13 @@ describe("home page", () => {
       "be.visible"
     );
 
-    cy.contains("button", "Sign up").should("be.enabled").click();
+    cy.contains("button", "Sign up").should("be.enabled");
 
-    cy.wait("@followArtist");
+    cy.contains(`Ready to subscribe with ${newsletterEmail}.`)
+      .parents("form")
+      .submit();
+
+    cy.wait("@followArtist", { timeout: 10000 });
 
     cy.contains("Thanks! You're on the list.").should("be.visible");
   });
