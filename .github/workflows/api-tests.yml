@@ -98,7 +98,7 @@ jobs:
           PORT: 8080
           CI: "1"
         with:
-          start: yarn workspace @mirlo/client client:start -- --host 127.0.0.1 --port 8080
+          start: yarn workspace @mirlo/client run client:start -- --host 127.0.0.1 --port 8080
           wait-on: "http://127.0.0.1:8080/__vite_ping"
           wait-on-timeout: 120
           browser: electron
