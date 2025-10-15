@@ -21,7 +21,7 @@
     "receiveMailingList": "Stay up to date with Mirlo and its projects by signing up to our mailing list.",
     "pendingVerificationSnackbar": "We found an account for {{ email }} that still needs to be verified.",
     "pendingVerificationMessage": "We just need to confirm your email address to finish setting up {{ email }}.",
-    "pendingVerificationInstructions": "Check your inbox for the verification email. If it hasn't arrived yet, you can request another one below.",
+    "pendingVerificationInstructions": "Check your inbox for the verification email. If you didn't receive it, you can request another one below.",
     "pendingVerificationExpired": "It looks like the previous verification link expired, so you'll need a new one.",
     "pendingVerificationExpiresAt": "Your current verification link expires {{ date }}.",
     "pendingVerificationResendButton": "Resend verification email",
@@ -418,7 +418,7 @@
     "getEmails": "Get on this artist's mailing list.",
     "unfollow": "Stop following",
     "oneTimeSupport": "Buy a drink",
-    "supportArtist": "Support {{artist}}",
+    "supportArtist": "Support {{artist}}!",
     "supportAtThisTier": "You're supporting at this tier",
     "areSupporting": "You're supporting {{artistName}}!",
     "updatedBio": "Updated bio",
@@ -494,7 +494,7 @@
     "pause": "Pause"
   },
   "player": {
-    "trackLimitExplanation": "You have reached the play limit for this track. Purchase   it to continue listening."
+    "trackLimitExplanation": "You have reached the play limit for this track. Purchase it to continue listening."
   },
   "post": {
     "postByArtist": "by <link>{{artistName}}</link>",
@@ -601,7 +601,7 @@
     "viewLive": "View live"
   },
   "textEditor": {
-    "typeSomething": "Type something",
+    "typeSomething": "Type something here",
     "uploadImage": "Upload an image",
     "uploadImageDescription": "Choose an image to upload",
     "addImage": "Add image",
@@ -684,8 +684,8 @@
     "viewFulfillment": "View fulfillment",
     "downloadableContent": "Does the user get to download anything after purchase?",
     "noDownloadableContent": "No downloadable content linked.",
-    "relatedDownloadableContentInfo": "Purchasing this merch will make this content downloadable to the user.",
-    "trackGroupRelatedDownloadableContent": "Purchasing this release will make this content downloadable to the user.",
+    "relatedDownloadableContentInfo": "Purchasing this merch will also allow access to this content.",
+    "trackGroupRelatedDownloadableContent": "Purchasing this release will also allow the download of this content.",
     "merchFulfillmentParagraph": "To manage orders for merch, check your fulfillment page",
     "setDifferentCostPerDestination": "You'll want to set a different shipping cost per destination. It's likely much more expensive to ship to another country"
   },
@@ -840,7 +840,7 @@
     "clickToUploadType": "Click to upload {{ imageType }}",
     "yourAvatar": "your avatar",
     "maxFreePlays": "Max free plays",
-    "updated": "Updated artist",
+    "updated": "Updated artist page",
     "maxFreePlaysDescription": "How many times can a user listen to a track before they have to buy it or add it to their collection? This only applies to tracks not in a user's collection.",
     "backgroundImageDescription": "the image that appears in the background of your page",
     "displayName": "Display name",
@@ -890,7 +890,7 @@
     "makeSearchable": "Do you want to make this artist searchable on the fediverse? This will enable ActivityPub for this artist."
   },
   "manageSubscriptions": {
-    "uploadSuscribers": "Upload subscribers",
+    "uploadSuscribers": "Upload subscriber e-mail adresses",
     "waysToAddEmails": "Two ways to add emails",
     "pasteEmailsHere": "If you have a list of e-mail addresses, paste them here:",
     "downloadSubscriberData": "Download subscriber data",
@@ -945,7 +945,7 @@
     "editSubscriptionTierFor": "Edit subscription tier for {{artistName}}",
     "minAmountError": "The amount for a support tier must be more than or equal to 1.",
     "thankYouMessages": "Thank you messages",
-    "thankYouMessagesDescription": "Add a personal note that will appear in the emails supporters receive after they subscribe or purchase.",
+    "thankYouMessagesDescription": "Add a personalized note that will appear in the emails supporters receive after they subscribe or purchase.",
     "supportEmailLabel": "Subscription thank you message",
     "purchaseEmailLabel": "Purchase thank you message",
     "saveMessages": "Save messages",
@@ -1192,7 +1192,7 @@
     "newsletterEmailLabel": "Email address",
     "newsletterPlaceholder": "you@example.com",
     "newsletterButton": "Sign up",
-    "newsletterSuccess": "Thanks! You're on the list.",
+    "newsletterSuccess": "Thanks! You're now on the list.",
     "newsletterError": "We couldn't add you to the mailing list. Please try again.",
     "newsletterVerificationHint": "Verify your email below before signing up.",
     "newsletterVerificationRequired": "Please verify your email before signing up.",
