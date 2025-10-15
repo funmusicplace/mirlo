@@ -98,8 +98,8 @@ jobs:
           PORT: 8080
           CI: "1"
         with:
-          start: yarn workspace @mirlo/client run client:start -- --host 127.0.0.1 --port 8080
-          wait-on: "http://127.0.0.1:8080/__vite_ping"
+          start: yarn workspace @mirlo/client run client:start
+          wait-on: "http://localhost:8080"
           wait-on-timeout: 120
           browser: electron
           config-file: client/cypress.config.ts
