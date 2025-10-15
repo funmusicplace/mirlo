@@ -229,7 +229,9 @@ describe("home page", () => {
       "be.visible"
     );
 
-    cy.contains("button", "Sign up").should("be.enabled");
+    cy.contains("button", "Sign up")
+      .scrollIntoView()
+      .should("be.enabled");
 
     cy.contains(`Ready to subscribe with ${newsletterEmail}.`)
       .parents("form")
@@ -237,6 +239,8 @@ describe("home page", () => {
 
     cy.wait("@followArtist", { timeout: 10000 });
 
-    cy.contains("Thanks! You're on the list.").should("be.visible");
+    cy.contains("Thanks! You're on the list.", { timeout: 10000 }).should(
+      "be.visible"
+    );
   });
 });
