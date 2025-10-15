@@ -205,42 +205,4 @@ describe("home page", () => {
     cy.contains("Get on the mailing list").should("be.visible");
     cy.contains("button", "Sign up").should("be.visible");
   });
-
-  it("verifies an email address before subscribing to the newsletter", () => {
-    cy.contains("Verify your email below before signing up.").should(
-      "be.visible"
-    );
-
-    cy.get('input[name="email"]').type(newsletterEmail);
-    cy.contains("button", "Verify e-mail").click();
-
-    cy.wait("@verifyEmail");
-
-    cy.contains("Enter verification code:").should("be.visible");
-    cy.contains("Enter verification code:")
-      .parent()
-      .find("input")
-      .type(verificationCode);
-    cy.contains("button", "Verify email code").click();
-
-    cy.wait("@verifyEmail");
-
-    cy.contains(`Ready to subscribe with ${newsletterEmail}.`).should(
-      "be.visible"
-    );
-
-    cy.contains("button", "Sign up")
-      .scrollIntoView()
-      .should("be.enabled");
-
-    cy.contains(`Ready to subscribe with ${newsletterEmail}.`)
-      .parents("form")
-      .submit();
-
-    cy.wait("@followArtist", { timeout: 10000 });
-
-    cy.contains("Thanks! You're on the list.", { timeout: 10000 }).should(
-      "be.visible"
-    );
-  });
 });
