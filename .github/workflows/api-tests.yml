@@ -94,8 +94,11 @@ jobs:
 
       - name: Run E2E tests
         uses: cypress-io/github-action@v6
+        env:
+          PORT: 8080
+          CI: "1"
         with:
-          start: PORT=8080 CI=1 yarn workspace @mirlo/client client:start -- --host 127.0.0.1 --port 8080
+          start: yarn workspace @mirlo/client client:start -- --host 127.0.0.1 --port 8080
           wait-on: "http://127.0.0.1:8080/__vite_ping"
           wait-on-timeout: 120
           browser: electron
