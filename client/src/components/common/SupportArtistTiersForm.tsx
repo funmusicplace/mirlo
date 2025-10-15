@@ -131,8 +131,9 @@ const SupportArtistTiersForm: React.FC<{
       >
         {isSubscribedToCurrentTier &&
           (value?.isDefaultTier
-            ? t("youAreFollowingThisArtist, { artistName: artist.name }")
+            ? t("youAreFollowingThisArtist", { artistName: artist.name })
             : t("youAreAlreadySubscribed"))}
+        {isSubscribedToCurrentTier && " "}
         {!value && !isSubscribedToCurrentTier && t("chooseToContinue")}
         {value?.id !== currentTier?.id &&
           value &&
