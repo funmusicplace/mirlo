@@ -17,7 +17,7 @@ export default defineConfig({
     legacy(),
   ],
   server: {
-    open: true,
+    open: !process.env.CI,
     port: Number(process.env.PORT) || 8080,
   },
   build: {
