@@ -6,6 +6,13 @@ expect.extend(matchers);
 
 Object.assign(import.meta.env, { VITE_API_DOMAIN: "http://localhost:3000" });
 
+// NOTE: Exercising the Vitest suite against a fully booted API environment
+// (via docker-compose) would dramatically increase setup time in CI and makes
+// local runs brittle when the backing services are unavailable. The lightweight
+// fetch stubs below keep the component tests deterministic while mirroring the
+// minimal data shapes the UI expects. We can revisit a full-environment run if
+// we invest in faster orchestration for the backend stack.
+
 const jsonResponse = (body: unknown, init?: ResponseInit) =>
   new Response(JSON.stringify(body), {
     status: 200,

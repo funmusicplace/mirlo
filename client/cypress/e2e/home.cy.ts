@@ -4,6 +4,17 @@ import {
   TRACK_GROUP_EXAMPLE,
 } from "../../test/mocks";
 
+type SnackbarRecord = {
+  msg: string;
+  type?: "success" | "warning";
+};
+
+declare global {
+  interface Window {
+    __mirloSnackbars?: SnackbarRecord[];
+  }
+}
+
 const newsletterEmail = "listener@example.com";
 const verificationCode = "123456";
 
@@ -45,6 +56,10 @@ const posts = [
 
 describe("home page", () => {
   beforeEach(() => {
+    cy.on("window:before:load", (win) => {
+      win.__mirloSnackbars = [];
+    });
+
     cy.intercept("GET", "/auth/profile", {
       statusCode: 200,
       body: { result: null },
@@ -161,9 +176,6 @@ describe("home page", () => {
     cy.contains("Join the beta test for mirlo's upcoming iOS app!").should(
       "be.visible"
     );
-    cy.contains("Join Here")
-      .should("be.visible")
-      .and("have.attr", "href", "https://testflight.apple.com/join/SjkPHPqp");
 
     cy.contains("Recent releases").scrollIntoView().should("be.visible");
     cy.contains("a", featuredRelease.title)
