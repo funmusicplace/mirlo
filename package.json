@@ -104,7 +104,8 @@
     "rss-parser": "^3.13.0",
     "sinon": "^17.0.1",
     "supertest": "^6.3.3",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "wait-on": "^7.2.0"
   },
   "lint-staged": {
     "*.{js,ts,jsx,tsx,json}": "prettier --write"

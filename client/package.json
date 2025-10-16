@@ -60,7 +60,9 @@
     "client:test": "tsc --noEmit && vitest",
     "client:storybook": "storybook dev -p 6006",
     "client:storybook:build": "storybook build",
-    "client:cy:open": "cypress open"
+    "client:cy:open": "cypress open",
+    "client:cy:run": "cypress run --browser electron --headless",
+    "client:e2e": "concurrently -k --success first \"CI=1 yarn client:start -- --host 0.0.0.0 --port 8080\" \"wait-on http://localhost:8080 && yarn client:cy:run\""
   },
   "browserslist": {
     "production": [
@@ -100,6 +102,7 @@
     "@types/uuid": "^9.0.8",
     "@vitejs/plugin-legacy": "^5.3.2",
     "@vitejs/plugin-react": "^4.2.1",
+    "concurrently": "^7.6.0",
     "cypress": "^14.3.0",
     "jsdom": "^24.0.0",
     "prop-types": "^15.8.1",
@@ -110,6 +113,7 @@
     "typescript": "5.8.2",
     "vite": "^5.2.9",
     "vite-tsconfig-paths": "^4.3.2",
-    "vitest": "^1.5.0"
+    "vitest": "^1.5.0",
+    "wait-on": "^7.2.0"
   }
 }

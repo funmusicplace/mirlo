@@ -68,10 +68,12 @@ jobs:
         run: docker compose --profile=test down
 
   cypress-run:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Enable Corepack
         run: corepack enable
 
@@ -90,10 +92,15 @@ jobs:
       # Install npm dependencies, cache them correctly
       # and run all Cypress tests
 
-      - name: Cypress run
+      - name: Run E2E tests
         uses: cypress-io/github-action@v6
+        env:
+          PORT: 8080
+          CI: "1"
         with:
-          start: yarn client:start
-          working-directory: client
-          browser: chrome
-          config-file: cypress.config.ts
+          start: yarn workspace @mirlo/client run client:start
+          wait-on: "http://localhost:8080"
+          wait-on-timeout: 120
+          browser: electron
+          config-file: client/cypress.config.ts
+          command: yarn workspace @mirlo/client client:cy:run
