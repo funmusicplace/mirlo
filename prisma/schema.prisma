@@ -675,6 +675,7 @@ model TrackGroup {
   isAllOrNothing                  Boolean                         @default(false)
   pledges                         TrackGroupPledge[]
   downloadableContent             TrackGroupDownloadableContent[]
+  hideFromSearch                  Boolean                         @default(false)
 
   @@unique([artistId, urlSlug])
 }

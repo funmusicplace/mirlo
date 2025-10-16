@@ -127,6 +127,7 @@ const routes = [
   "admin/tasks",
   "admin/tracks",
   "admin/trackGroups",
+  "admin/trackGroups/{id}",
   "admin/artists",
   "admin/subscriptions",
   "admin/purchases",

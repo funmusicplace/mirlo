@@ -41,6 +41,7 @@ export const whereForPublishedTrackGroups = (): Prisma.TrackGroupWhereInput => {
     artist: {
       enabled: true,
     },
+    hideFromSearch: false,
     deletedAt: null,
     cover: {
       url: {

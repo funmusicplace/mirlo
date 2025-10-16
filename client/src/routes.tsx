@@ -495,6 +495,15 @@ const routes: RouteObject[] = [
             },
           },
           {
+            path: "trackGroups/:id",
+            async lazy() {
+              const { default: Component } = await import(
+                "components/Admin/TrackgroupDetails"
+              );
+              return { Component };
+            },
+          },
+          {
             path: "trackGroups",
             async lazy() {
               const { default: Component } = await import(
@@ -503,6 +512,7 @@ const routes: RouteObject[] = [
               return { Component };
             },
           },
+
           {
             path: "tracks",
             async lazy() {
