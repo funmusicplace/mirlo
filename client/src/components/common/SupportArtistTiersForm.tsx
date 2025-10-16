@@ -133,7 +133,6 @@ const SupportArtistTiersForm: React.FC<{
           (value?.isDefaultTier
             ? t("youAreFollowingThisArtist", { artistName: artist.name })
             : t("youAreAlreadySubscribed"))}
-        {isSubscribedToCurrentTier && " "}
         {!value && !isSubscribedToCurrentTier && t("chooseToContinue")}
         {value?.id !== currentTier?.id &&
           value &&
@@ -141,6 +140,7 @@ const SupportArtistTiersForm: React.FC<{
           t("followArtist", { artistName: artist.name })}
         {value &&
           !value.isDefaultTier &&
+          !isSubscribedToCurrentTier &&
           t("continueWithPrice", {
             amount: moneyDisplay({
               amount: value?.minAmount / 100,
