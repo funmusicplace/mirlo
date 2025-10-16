@@ -1,7 +1,7 @@
 import { css } from "@emotion/css";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useSnackbar } from "state/SnackbarContext";
 import Button from "../common/Button";
 import api from "services/api";
@@ -115,11 +115,12 @@ const Menu: React.FC = (props) => {
                   .map((a) => {
                     return (
                       <li key={a.id}>
-                        <Button
+                        <Link
+                          title={a.name}
                           onClick={() => {
                             setIsMenuOpen(false);
-                            navigate(getArtistManageUrl(a.id));
                           }}
+                          to={getArtistManageUrl(a.id)}
                         >
                           <div
                             className={css`
@@ -130,7 +131,7 @@ const Menu: React.FC = (props) => {
                           >
                             {a.name}
                           </div>
-                        </Button>
+                        </Link>
                       </li>
                     );
                   })}
