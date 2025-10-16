@@ -59,6 +59,7 @@ const TextEditor: React.FC<{
   reloadImages?: () => void;
   className?: string;
   disableFloatingToolbar?: boolean;
+  basicStyles?: boolean;
 }> = ({
   onChange,
   value,
@@ -67,6 +68,7 @@ const TextEditor: React.FC<{
   artistId,
   className,
   disableFloatingToolbar,
+  basicStyles = false,
 }) => {
   const { t } = useTranslation("translation", { keyPrefix: "textEditor" });
   const { manager, state, setState } = useRemirror({
@@ -189,11 +191,7 @@ const TextEditor: React.FC<{
     }
   `;
 
-  const combinedClassName = [
-    "remirror-theme",
-    baseClassName,
-    className,
-  ]
+  const combinedClassName = ["remirror-theme", baseClassName, className]
     .filter(Boolean)
     .join(" ");
 
@@ -210,7 +208,11 @@ const TextEditor: React.FC<{
         }}
       >
         <div className="sticky-toolbar-container">
-          <TopToolbar postId={postId} artistId={artistId} />
+          <TopToolbar
+            postId={postId}
+            artistId={artistId}
+            basicStyles={basicStyles}
+          />
         </div>
         <EditorComponent />
         <TableComponents />

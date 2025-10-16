@@ -15,46 +15,7 @@ export const ColorInput: React.FC<{ name: string; title: string }> = ({
   name,
   title,
 }) => {
-  const { watch, register, clearErrors, setError, setValue, getFieldState } =
-    useFormContext();
-  const color = watch(name);
-  const colors = watch("properties.colors");
-  const { user } = useAuthContext();
-  const { mutateAsync: updateArtist } = useUpdateArtistMutation();
-  const { artistId } = useParams();
-
-  const updateColorOnChange = React.useCallback(async () => {
-    try {
-      if (user && artistId) {
-        const allValid = Object.keys(colors).every((color: string) =>
-          isValidColor(colors[color])
-        );
-        if (allValid) {
-          await updateArtist({
-            userId: user.id,
-            artistId: Number(artistId),
-            body: {
-              properties: {
-                colors,
-              },
-            },
-          });
-        } else {
-          setError(name, { message: "Not a valid color" });
-        }
-      }
-    } catch (e) {
-      console.error("Error updating artist colors", e);
-    }
-  }, [colors]);
-
-  React.useEffect(() => {
-    clearErrors(name);
-    if (!isValidColor(color)) {
-      setError(name, { message: "Not a valid color" });
-    }
-    setValue(name, color, { shouldDirty: true });
-  }, [color]);
+  const { register, getFieldState } = useFormContext();
 
   const errorMessage = getFieldState(name).error?.message ?? "";
 
@@ -79,21 +40,10 @@ export const ColorInput: React.FC<{ name: string; title: string }> = ({
       <input
         type="color"
         {...register(name, {
-          onChange: (e) => {
-            const newColor = e.target.value;
-            setValue(name, newColor, { shouldDirty: true });
-            clearErrors(name);
-            if (!isValidColor(newColor)) {
-              setError(name, { message: "Not a valid color!" });
-            } else {
-              updateColorOnChange();
-            }
-          },
           validate: {
             validColor: (val) => !!isValidColor(val) || "Not a valid color!",
           },
         })}
-        value={watch(name) || "#000000"}
         className={css`
           align-self: center;
           height: 2rem;

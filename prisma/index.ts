@@ -16,6 +16,20 @@ declare global {
         background?: string;
         foreground?: string;
       };
+      emails?: {
+        support?: string;
+        purchase?: string;
+      };
+      titles?: {
+        releases?: string;
+        merch?: string;
+        about?: string;
+        posts?: string;
+        roster?: string;
+        groupName?: string;
+        support?: string;
+      };
+      tileBackgroundImage?: boolean;
     };
   }
 }

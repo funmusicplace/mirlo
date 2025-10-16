@@ -45,7 +45,7 @@ const ManageArtist: React.FC<{}> = () => {
       )}
 
       {!isCustomizePage && (
-        <ArtistTabs color={artist.properties?.colors.primary}>
+        <ArtistTabs color={artist.properties?.colors?.primary}>
           <li>
             <NavLink to="releases">
               {artist.properties?.titles?.releases || t("releases")}

@@ -83,7 +83,7 @@ function TrackView() {
             }
 
             a {
-              color: ${artist.properties?.colors.primary};
+              color: ${artist.properties?.colors?.primary};
             }
 
             @media screen and (max-width: ${bp.small}px) {

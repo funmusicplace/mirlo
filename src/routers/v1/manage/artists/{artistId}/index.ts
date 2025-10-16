@@ -13,6 +13,7 @@ import {
   singleInclude,
 } from "../../../../../utils/artist";
 import slugify from "slugify";
+import { merge, set } from "lodash";
 
 type Params = {
   artistId: string;
@@ -45,7 +46,14 @@ export default function () {
     const user = req.user as User;
 
     try {
+      const existingArtist = await prisma.artist.findFirst({
+        where: {
+          id: Number(artistId),
+        },
+      });
       // FIXME: check type of properties object.
+      const oldProperties = existingArtist?.properties || {};
+
       const updatedCount = await prisma.artist.updateMany({
         where: {
           id: Number(artistId),
@@ -70,7 +78,7 @@ export default function () {
                 }),
               }
             : {}),
-          properties,
+          properties: merge(oldProperties, properties),
         },
       });
       if (tourDates) {

@@ -25,6 +25,8 @@ import PaymentSlider from "../ManageTrackGroup/AlbumFormComponents/PaymentSlider
 import { InputEl } from "components/common/Input";
 import CustomNamesForTabs from "./CustomNamesForTabs";
 import ThankYouMessageEditors from "./ThankYouMessageEditors";
+import { merge } from "lodash";
+import { ArtistButton } from "components/Artist/ArtistButtons";
 
 export interface ShareableTrackgroup {
   creatorId: number;
@@ -33,10 +35,10 @@ export interface ShareableTrackgroup {
 
 const someColorsSet = (artist: Artist) => {
   return (
-    artist.properties?.colors.primary ||
-    artist.properties?.colors.secondary ||
-    artist.properties?.colors.foreground ||
-    artist.properties?.colors.background
+    artist.properties?.colors?.primary ||
+    artist.properties?.colors?.secondary ||
+    artist.properties?.colors?.foreground ||
+    artist.properties?.colors?.background
   );
 };
 
@@ -84,31 +86,35 @@ export type ArtistFormData = {
   };
 };
 
-const generateDefaults = (existing?: Artist) => ({
-  name: existing?.name ?? "",
-  bio: existing?.bio ?? "",
-  urlSlug: existing?.urlSlug ?? "",
-  activityPub: existing?.activityPub ?? false,
-  defaultPlatformFee: existing?.defaultPlatformFee ?? 10,
-  shortDescription: existing?.shortDescription ?? "",
-  maxFreePlays: existing?.maxFreePlays,
-  properties: {
-    colors: {
-      primary: "",
-      secondary: "",
-      background: "",
-      foreground: "",
-    },
-    titles: {
-      releases: "Releases",
-      merch: "Merch",
-      posts: "Posts",
-      support: "Support",
-      roster: "Roster",
-    },
-    ...existing?.properties,
-  },
-});
+const generateDefaults = (existing?: Artist) => {
+  return {
+    name: existing?.name ?? "",
+    bio: existing?.bio ?? "",
+    urlSlug: existing?.urlSlug ?? "",
+    activityPub: existing?.activityPub ?? false,
+    defaultPlatformFee: existing?.defaultPlatformFee ?? 10,
+    shortDescription: existing?.shortDescription ?? "",
+    maxFreePlays: existing?.maxFreePlays,
+    properties: merge(
+      {
+        colors: {
+          primary: "",
+          secondary: "",
+          background: "",
+          foreground: "",
+        },
+        titles: {
+          releases: "Releases",
+          merch: "Merch",
+          posts: "Posts",
+          support: "Support",
+          roster: "Roster",
+        },
+      },
+      existing?.properties ?? {}
+    ),
+  };
+};
 
 export const CustomizeLook: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "artistForm" });
@@ -121,13 +127,16 @@ export const CustomizeLook: React.FC = () => {
     defaultValues: generateDefaults(artist),
   });
 
-  const { handleSubmit, formState } = methods;
+  const { handleSubmit } = methods;
 
   const existingId = artist?.id;
 
   React.useEffect(() => {
     if (existingId) {
-      methods.reset(generateDefaults(artist));
+      console.log("artist changed", JSON.stringify(artist.properties?.colors));
+      const defaults = generateDefaults(artist);
+      console.log("defaults", defaults.properties?.colors);
+      methods.reset(defaults);
     }
   }, [artist, existingId, methods]);
 
@@ -391,9 +400,13 @@ export const CustomizeLook: React.FC = () => {
                 margin-bottom: 0 !important;
               `}
             >
-              <Button type="submit" disabled={isPending} isLoading={isPending}>
+              <ArtistButton
+                type="submit"
+                disabled={isPending}
+                isLoading={isPending}
+              >
                 {t("saveArtist")}
-              </Button>
+              </ArtistButton>
             </ArtistFormSection>
           </div>
         </form>

@@ -241,7 +241,7 @@ interface Artist {
   }[];
   subscriptionTiers: ArtistSubscriptionTier[];
   properties?: {
-    colors: ArtistColors;
+    colors?: ArtistColors;
     tileBackgroundImage?: boolean;
     titles?: {
       releases?: string;
