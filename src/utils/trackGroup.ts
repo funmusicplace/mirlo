@@ -330,6 +330,16 @@ export const registerPurchase = async ({
   }
 
   if (!purchase) {
+    const transaction = await prisma.userTransaction.create({
+      data: {
+        userId: Number(userId),
+        amount: pricePaid,
+        currency: currencyPaid,
+        platformCut: platformCut ?? null,
+        stripeId: paymentProcessorKey ?? "",
+      },
+    });
+
     purchase = await prisma.userTrackGroupPurchase.create({
       data: {
         userId: Number(userId),
@@ -340,6 +350,7 @@ export const registerPurchase = async ({
         message: message ?? null,
         stripeSessionKey: paymentProcessorKey,
         singleDownloadToken: token,
+        userTransactionId: transaction.id,
       },
     });
   }
