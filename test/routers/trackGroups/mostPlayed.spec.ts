@@ -10,12 +10,9 @@ import {
   createTrackGroup,
   createTrackPlay,
   createUser,
-  createUserTrackGroupPurchase,
 } from "../../utils";
 
 import { requestApp } from "../utils";
-import Parser from "rss-parser";
-import { faker } from "@faker-js/faker";
 
 describe("most played trackGroups", () => {
   beforeEach(async () => {

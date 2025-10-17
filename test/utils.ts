@@ -18,6 +18,7 @@ export const clearTables = async () => {
   await prisma.$executeRaw`DELETE FROM "Tag";`;
   await prisma.$executeRaw`DELETE FROM "TrackArtist";`;
   await prisma.$executeRaw`DELETE FROM "TrackAudio";`;
+  await prisma.$executeRaw`DELETE FROM "UserTransaction";`;
   await prisma.$executeRaw`DELETE FROM "UserTrackPurchase";`;
   await prisma.$executeRaw`DELETE FROM "TrackPlay";`;
   await prisma.$executeRaw`DELETE FROM "Track";`;
@@ -186,6 +187,23 @@ export const createTrack = async (
     },
   });
   return track;
+};
+
+export const createUserTrackGroupPurchase = async (
+  userId: number,
+  trackGroupId: number,
+  data?: Partial<Prisma.UserTrackGroupPurchaseCreateArgs["data"]>
+) => {
+  const purchase = await prisma.userTrackGroupPurchase.create({
+    data: {
+      userId,
+      trackGroupId,
+      pricePaid: 1000,
+      datePurchased: data?.datePurchased,
+    },
+  });
+
+  return purchase;
 };
 
 export const createUserTrackPurchase = async (
