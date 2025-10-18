@@ -159,7 +159,7 @@ export const handleTrackGroupPurchase = async (
         },
       } as Job);
 
-      const pricePaid = purchase.pricePaid / 100;
+      const pricePaid = (purchase.transaction?.amount ?? 0) / 100;
 
       await sendMail({
         data: {
@@ -589,7 +589,6 @@ export const handleArtistMerchPurchase = async (
                   await prisma.userTrackGroupPurchase.create({
                     data: {
                       trackGroupId: merchProduct.includePurchaseTrackGroupId,
-                      pricePaid: 0,
                       userId: createdMerchPurchase.userId,
                     },
                   });

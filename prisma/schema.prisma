@@ -582,15 +582,10 @@ model UserArtistTip {
 }
 
 model UserTrackGroupPurchase {
-  userId              Int
+  userId              Int // Do we need this if we have userTransactionId? It would help for quicker look-ups
   user                User             @relation(fields: [userId], references: [id])
   trackGroupId        Int
   trackGroup          TrackGroup       @relation(fields: [trackGroupId], references: [id])
-  pricePaid           Int // in cents
-  platformCut         Int? // in cents
-  currencyPaid        String           @default("usd")
-  datePurchased       DateTime         @default(now())
-  stripeSessionKey    String?
   singleDownloadToken String?
   message             String?
   userTransactionId   String?

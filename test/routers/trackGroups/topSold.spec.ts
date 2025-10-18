@@ -278,7 +278,7 @@ describe("Top sold trackGroups", () => {
         buyers[i as keyof typeof buyers].id,
         mostPurchased.id,
         {
-          datePurchased: pastDate,
+          createdAt: pastDate,
         }
       );
     }
