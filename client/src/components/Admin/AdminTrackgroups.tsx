@@ -111,16 +111,6 @@ export const AdminTrackGroups: React.FC = () => {
         </Table>
       )}
       <PaginationComponent amount={results.length} />
-
-      <Modal
-        open={openModal}
-        onClose={() => {
-          setOpenModal(false);
-          navigate("/admin/trackgroups");
-        }}
-      >
-        <Outlet />
-      </Modal>
     </div>
   );
 };

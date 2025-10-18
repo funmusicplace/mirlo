@@ -12,6 +12,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { FaTrash } from "react-icons/fa";
 import { AiOutlineWarning } from "react-icons/ai";
 import { ArtistSection } from "components/Artist/Artist";
+import { ArtistButton } from "components/Artist/ArtistButtons";
 
 export const DeleteArtist: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "artistForm" });
@@ -74,9 +75,13 @@ export const DeleteArtist: React.FC = () => {
           }
         `}
       >
-        <Button buttonRole="warning" startIcon={<FaTrash />} onClick={onDelete}>
+        <ArtistButton
+          buttonRole="warning"
+          startIcon={<FaTrash />}
+          onClick={onDelete}
+        >
           {t("deleteArtist")}
-        </Button>
+        </ArtistButton>
       </div>
     </ArtistSection>
   );

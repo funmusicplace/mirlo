@@ -140,7 +140,7 @@ function Artist() {
 
   return (
     <>
-      <ArtistTabs color={artist.properties?.colors.primary}>
+      <ArtistTabs color={artist.properties?.colors?.primary}>
         {artist.isLabelProfile && (
           <li>
             <NavLink to="roster">

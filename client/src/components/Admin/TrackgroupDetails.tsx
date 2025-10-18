@@ -1,12 +1,10 @@
 import Button from "components/common/Button";
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
-import LoadingSpinner from "components/common/LoadingSpinner";
-import { SelectEl } from "components/common/Select";
 import TextArea from "components/common/TextArea";
 import { useSnackbar } from "state/SnackbarContext";
 import React from "react";
-import { useForm } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import { useParams } from "react-router-dom";
 import api from "services/api";
 import { useTranslation } from "react-i18next";
@@ -26,12 +24,13 @@ interface TrackGroupFormData {
 }
 
 export const TrackGroupDetails: React.FC = () => {
-  const { trackgroupId } = useParams();
+  const { id } = useParams();
   const snackbar = useSnackbar();
-  const { register, handleSubmit, reset } = useForm<TrackGroupFormData>();
+  const methods = useForm<TrackGroupFormData>();
+  const { register, handleSubmit, reset } = methods;
   const [isLoading, setIsLoading] = React.useState(false);
   const { t } = useTranslation("translation", {
-    keyPrefix: "trackGroupDetails",
+    keyPrefix: "admin",
   });
   const errorHandler = useErrorHandler();
 
@@ -41,6 +40,7 @@ export const TrackGroupDetails: React.FC = () => {
     async (id: string) => {
       const { result } = await api.get<TrackGroup>(`trackGroups/${id}`);
       setTrackgroup(result);
+      console.log(result);
       reset({
         ...result,
       });
@@ -49,26 +49,20 @@ export const TrackGroupDetails: React.FC = () => {
   );
 
   React.useEffect(() => {
-    if (trackgroupId) {
-      fetchTrackWrapper(trackgroupId);
+    if (id) {
+      fetchTrackWrapper(id);
     }
-  }, [fetchTrackWrapper, trackgroupId]);
+  }, [fetchTrackWrapper, id]);
 
   const doSave = React.useCallback(
     async (data: TrackGroupFormData) => {
-      if (trackgroupId) {
+      if (id) {
         try {
           setIsLoading(true);
           await api.put<TrackGroupFormData, TrackGroup>(
-            `trackGroups/${trackgroupId}`,
+            `admin/trackGroups/${id}`,
             data
           );
-          if (data.coverFile[0] && typeof data.coverFile[0] !== "string") {
-            await api.uploadFile(
-              `trackGroups/${trackgroupId}/cover`,
-              data.coverFile
-            );
-          }
           snackbar("Successfully updated track group", { type: "success" });
         } catch (e) {
           errorHandler(e);
@@ -77,42 +71,34 @@ export const TrackGroupDetails: React.FC = () => {
         }
       }
     },
-    [trackgroupId, errorHandler, snackbar]
+    [id, errorHandler, snackbar]
   );
 
   return (
-    <>
+    <FormProvider {...methods}>
       <h3>
         {t("trackgroup")} {trackgroup?.title}
       </h3>
       <form onSubmit={handleSubmit(doSave)}>
-        <FormComponent>
-          {t("title")} <InputEl {...register("title")} />
-        </FormComponent>
-        <FormComponent>
-          {t("releaseDate")}{" "}
-          <InputEl type="date" {...register("releaseDate")} />
-        </FormComponent>
-        <FormComponent>
-          {t("about")} <TextArea {...register("about")} />
+        <FormComponent style={{ display: "flex" }}>
+          <FormCheckbox keyName="adminEnabled" description={t("isEnabled")} />
         </FormComponent>
         <FormComponent style={{ display: "flex" }}>
-          <FormCheckbox keyName="published" description={t("isPrivate")} />
+          <FormCheckbox
+            keyName="hideFromSearch"
+            description={t("hideFromSearch")}
+          />
         </FormComponent>
-        <FormComponent style={{ display: "flex" }}>
-          <FormCheckbox keyName="enabled" description={t("isEnabled")} />
-        </FormComponent>
-
         <Button
           type="submit"
           style={{ marginTop: "1rem" }}
           disabled={isLoading}
           isLoading={isLoading}
         >
-          {t("saveTrackGroupButton")}
+          {t("save")}
         </Button>
       </form>
-    </>
+    </FormProvider>
   );
 };
 

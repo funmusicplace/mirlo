@@ -13,6 +13,7 @@ import {
   finalImageBucket,
   incomingImageBucket,
 } from "../../../../../../utils/minio";
+import { logger } from "../../../../../../logger";
 
 type Params = {
   artistId: string;
@@ -49,6 +50,7 @@ export default function () {
           }
         ) => {
           let image;
+          logger.info(`Upserting image for new image ${fileInfo.filename}`);
           if (details.imageId) {
             image = await prisma.image.findUnique({
               where: {
@@ -64,7 +66,7 @@ export default function () {
               },
             });
           }
-
+          logger.info("Done upserting image, id: " + image.id);
           return image;
         },
         finalImageBucket

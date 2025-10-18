@@ -1,9 +1,12 @@
 import { NextFunction, Request, Response } from "express";
-import { userAuthenticated, userHasPermission } from "../../../auth/passport";
+import {
+  userAuthenticated,
+  userHasPermission,
+} from "../../../../auth/passport";
 import prisma from "@mirlo/prisma";
 import processor, {
   processTrackGroupQueryOrder,
-} from "../../../utils/trackGroup";
+} from "../../../../utils/trackGroup";
 import { Prisma } from "@mirlo/prisma/client";
 
 export default function () {

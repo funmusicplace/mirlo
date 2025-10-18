@@ -66,6 +66,7 @@ export const manageSubscriptionReceipt = async ({
           to: artistUserSubscription.user.email,
         },
         locals: {
+          interval: artistUserSubscription.artistSubscriptionTier.interval,
           artist: artistUserSubscription.artistSubscriptionTier.artist,
           artistUserSubscription,
           host: process.env.API_DOMAIN,

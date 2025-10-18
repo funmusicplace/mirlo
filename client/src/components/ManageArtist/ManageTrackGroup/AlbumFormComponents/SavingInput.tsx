@@ -1,5 +1,5 @@
 import React from "react";
-import { useFormContext } from "react-hook-form";
+import { Controller, useFormContext } from "react-hook-form";
 import { useDebouncedCallback } from "use-debounce";
 import { InputEl } from "components/common/Input";
 import TextArea from "components/common/TextArea";
@@ -13,6 +13,7 @@ import { FaCheck } from "react-icons/fa";
 import { useGetArtistColors } from "components/Artist/ArtistButtons";
 import { set } from "lodash";
 import { getCurrencySymbol } from "components/common/Money";
+import TextEditor from "components/common/TextEditor";
 
 const SavingInput: React.FC<{
   formKey: string;
@@ -32,8 +33,12 @@ const SavingInput: React.FC<{
   reload?: () => void;
   width?: string | number;
   valueTransform?: (value: unknown) => unknown;
+  textEditor?: boolean;
+  textEditorProps?: { disableFloatingToolbar?: boolean; basicStyles?: boolean };
 }> = ({
   formKey,
+  textEditor,
+  textEditorProps,
   min,
   url,
   extraData = {},
@@ -90,6 +95,7 @@ const SavingInput: React.FC<{
           ...extraData,
         };
       }
+      console.log("data", data);
 
       await api.put<unknown, unknown>(url, data);
 
@@ -119,6 +125,7 @@ const SavingInput: React.FC<{
         width: ${width ?? "100%"};
         align-items: center;
         gap: 0.5rem;
+        position: relative;
       `}
     >
       {currency && (
@@ -130,35 +137,67 @@ const SavingInput: React.FC<{
           {getCurrencySymbol(currency)}
         </div>
       )}
-      {!rows && (
-        <InputEl
-          colors={colors}
-          {...register(formKey)}
-          onInput={saveOnInput}
-          // onChange={type === "checkbox" ? saveOnInput : undefined}
-          type={type}
-          required={required}
-          step={step}
-          min={min}
-          id={id}
-          maxLength={maxLength}
-          onKeyUp={(e) => {
-            if (e.key === "Enter") {
-              onEnter?.();
-            }
+      {!textEditor && (
+        <>
+          {!rows && (
+            <InputEl
+              colors={colors}
+              {...register(formKey)}
+              onInput={saveOnInput}
+              // onChange={type === "checkbox" ? saveOnInput : undefined}
+              type={type}
+              required={required}
+              step={step}
+              min={min}
+              id={id}
+              maxLength={maxLength}
+              onKeyUp={(e) => {
+                if (e.key === "Enter") {
+                  onEnter?.();
+                }
+              }}
+            />
+          )}
+          {rows && (
+            <TextArea
+              {...register(formKey)}
+              rows={rows}
+              colors={colors}
+              onInput={saveOnInput}
+            />
+          )}
+        </>
+      )}
+      {textEditor && (
+        <Controller
+          name={formKey}
+          render={({ field: { onChange, value } }) => {
+            return (
+              <TextEditor
+                onChange={(val: any) => {
+                  onChange(val);
+                  saveOnInput();
+                }}
+                value={value}
+                {...textEditorProps}
+              />
+            );
           }}
         />
       )}
-      {rows && (
-        <TextArea
-          {...register(formKey)}
-          rows={rows}
-          colors={colors}
-          onInput={saveOnInput}
-        />
-      )}
-      {isSaving && <LoadingSpinner fill={colors?.foreground} size="small" />}
-      {saveSuccess && <FaCheck />}
+      <div
+        className={css`
+          position: absolute;
+          right: 0.5rem;
+          top: 0.5rem;
+          z-index: 99999;
+          -webkit-filter: invert(100%);
+          filter: invert(100%);
+        `}
+      >
+        {isSaving && <LoadingSpinner fill={colors?.foreground} size="small" />}
+        {saveSuccess && <FaCheck />}
+      </div>
     </div>
   );
 };

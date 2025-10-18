@@ -7,8 +7,11 @@ import Button from "components/common/Button";
 import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
 import { useUpdateArtistMutation } from "queries";
+import SavingInput from "../ManageTrackGroup/AlbumFormComponents/SavingInput";
 
-type ArtistEmailKey = keyof NonNullable<NonNullable<Artist["properties"]>["emails"]>;
+type ArtistEmailKey = keyof NonNullable<
+  NonNullable<Artist["properties"]>["emails"]
+>;
 
 const getEmailMessageFromProperties = (
   properties: Artist["properties"] | undefined,
@@ -45,7 +48,8 @@ const mergeArtistPropertiesWithEmailUpdates = (
 
   const sanitizedUpdates = pickBy(
     updates,
-    (value): value is string => typeof value === "string" && !isEditorContentEmpty(value)
+    (value): value is string =>
+      typeof value === "string" && !isEditorContentEmpty(value)
   ) as Partial<Record<ArtistEmailKey, string>>;
 
   const nextEmails: Partial<Record<ArtistEmailKey, string>> = {
@@ -77,96 +81,11 @@ const ThankYouMessageEditors: React.FC<ThankYouMessageEditorsProps> = ({
   artist,
   onArtistUpdated,
 }) => {
-  const { t } = useTranslation("translation", { keyPrefix: "subscriptionForm" });
+  const { t } = useTranslation("translation", {
+    keyPrefix: "subscriptionForm",
+  });
   const snackbar = useSnackbar();
   const { user } = useAuthContext();
-  const userId = user?.id;
-  const { mutate: updateArtist, isPending: isUpdatingMessages } =
-    useUpdateArtistMutation();
-
-  const originalSupportMessage = React.useMemo(
-    () => getEmailMessageFromProperties(artist?.properties, "support"),
-    [artist]
-  );
-
-  const originalPurchaseMessage = React.useMemo(
-    () => getEmailMessageFromProperties(artist?.properties, "purchase"),
-    [artist]
-  );
-
-  const [supportMessage, setSupportMessage] = React.useState<string>(
-    originalSupportMessage
-  );
-  const [purchaseMessage, setPurchaseMessage] = React.useState<string>(
-    originalPurchaseMessage
-  );
-
-  React.useEffect(() => {
-    setSupportMessage(originalSupportMessage);
-    setPurchaseMessage(originalPurchaseMessage);
-  }, [originalSupportMessage, originalPurchaseMessage]);
-
-  const normalizedSupportMessage = normalizeEditorValue(supportMessage);
-  const normalizedPurchaseMessage = normalizeEditorValue(purchaseMessage);
-  const normalizedOriginalSupportMessage = normalizeEditorValue(
-    originalSupportMessage
-  );
-  const normalizedOriginalPurchaseMessage = normalizeEditorValue(
-    originalPurchaseMessage
-  );
-
-  const hasMessageChanges =
-    normalizedSupportMessage !== normalizedOriginalSupportMessage ||
-    normalizedPurchaseMessage !== normalizedOriginalPurchaseMessage;
-
-  const handleSaveMessages = React.useCallback(() => {
-    if (!userId) {
-      return;
-    }
-
-    const supportValue = isEditorContentEmpty(supportMessage)
-      ? undefined
-      : supportMessage;
-    const purchaseValue = isEditorContentEmpty(purchaseMessage)
-      ? undefined
-      : purchaseMessage;
-
-    const updatedProperties = mergeArtistPropertiesWithEmailUpdates(
-      artist.properties,
-      {
-        support: supportValue,
-        purchase: purchaseValue,
-      }
-    );
-
-    updateArtist(
-      {
-        userId,
-        artistId: artist.id,
-        body: {
-          properties: updatedProperties,
-        },
-      },
-      {
-        onSuccess: () => {
-          snackbar(t("messagesUpdated"), { type: "success" });
-          onArtistUpdated?.();
-        },
-        onError: () => {
-          snackbar(t("messagesUpdateError"), { type: "warning" });
-        },
-      }
-    );
-  }, [
-    artist,
-    purchaseMessage,
-    supportMessage,
-    t,
-    updateArtist,
-    userId,
-    snackbar,
-    onArtistUpdated,
-  ]);
 
   return (
     <div
@@ -209,13 +128,14 @@ const ThankYouMessageEditors: React.FC<ThankYouMessageEditorsProps> = ({
           >
             {t("supportEmailLabel")}
           </h4>
-          <TextEditor
-            value={supportMessage}
-            onChange={(value: string) => setSupportMessage(value)}
-            className={css`
-              margin-top: 0.5rem;
-            `}
-            disableFloatingToolbar
+          <SavingInput
+            formKey="properties.emails.support"
+            textEditor
+            textEditorProps={{
+              disableFloatingToolbar: true,
+              basicStyles: true,
+            }}
+            url={`manage/artists/${artist.id}`}
           />
         </div>
         <div
@@ -231,22 +151,17 @@ const ThankYouMessageEditors: React.FC<ThankYouMessageEditorsProps> = ({
           >
             {t("purchaseEmailLabel")}
           </h4>
-          <TextEditor
-            value={purchaseMessage}
-            onChange={(value: string) => setPurchaseMessage(value)}
-            className={css`
-              margin-top: 0.5rem;
-            `}
-            disableFloatingToolbar
+          <SavingInput
+            formKey="properties.emails.purchase"
+            textEditor
+            textEditorProps={{
+              disableFloatingToolbar: true,
+              basicStyles: true,
+            }}
+            url={`manage/artists/${artist.id}`}
           />
         </div>
       </div>
-      <Button
-        onClick={handleSaveMessages}
-        disabled={!hasMessageChanges || isUpdatingMessages || !userId}
-      >
-        {t("saveMessages")}
-      </Button>
     </div>
   );
 };

@@ -270,6 +270,15 @@ const parseIndex = async (pathname: string) => {
             rss,
           });
         }
+      } else {
+        // it's about the artist in general
+        buildOpenGraphTags($, {
+          title: artistName,
+          description: `All ${route[2]} by ${artistName} on Mirlo`,
+          url: `${client.applicationUrl}/${artist?.urlSlug}/${route[2]}`,
+          imageUrl: avatarUrl,
+          rss,
+        });
       }
     } else if (artist && route[2] === "release") {
       // it is about n individual release

@@ -16,10 +16,11 @@ import { css } from "@emotion/css";
 import InsertMirloWidgetButton from "./InsertMirloWidgetButton";
 import InsertImageButton from "./InsertImageButton";
 
-const TopToolbar: React.FC<{ postId?: number; artistId?: number }> = ({
-  postId,
-  artistId,
-}) => {
+const TopToolbar: React.FC<{
+  postId?: number;
+  artistId?: number;
+  basicStyles?: boolean;
+}> = ({ postId, artistId, basicStyles }) => {
   return (
     <div
       className={css`
@@ -79,12 +80,14 @@ const TopToolbar: React.FC<{ postId?: number; artistId?: number }> = ({
           <ToggleOrderedListButton />
           <CreateTableButton />
         </CommandButtonGroup>
-        <CommandButtonGroup>
-          {/* <Button startIcon={<FaImage />} /> */}
-          <InsertVideoButton />
-          <InsertMirloWidgetButton postId={postId} artistId={artistId} />
-          <InsertImageButton postId={postId} />
-        </CommandButtonGroup>
+        {!basicStyles && (
+          <CommandButtonGroup>
+            {/* <Button startIcon={<FaImage />} /> */}
+            <InsertVideoButton />
+            <InsertMirloWidgetButton postId={postId} artistId={artistId} />
+            <InsertImageButton postId={postId} />
+          </CommandButtonGroup>
+        )}
       </Toolbar>
     </div>
   );

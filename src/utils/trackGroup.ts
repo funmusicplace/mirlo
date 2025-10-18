@@ -41,6 +41,7 @@ export const whereForPublishedTrackGroups = (): Prisma.TrackGroupWhereInput => {
     artist: {
       enabled: true,
     },
+    hideFromSearch: false,
     deletedAt: null,
     cover: {
       url: {
@@ -293,6 +294,7 @@ export const registerPurchase = async ({
   currencyPaid,
   paymentProcessorKey,
   platformCut = null,
+  transactionId,
 }: {
   userId: number;
   pricePaid: number;
@@ -301,6 +303,7 @@ export const registerPurchase = async ({
   paymentProcessorKey: string | null;
   trackGroupId: number;
   platformCut?: number | null;
+  transactionId?: string | null;
 }) => {
   const token = randomUUID();
   logger.info(
@@ -339,6 +342,7 @@ export const registerPurchase = async ({
         message: message ?? null,
         stripeSessionKey: paymentProcessorKey,
         singleDownloadToken: token,
+        userTransactionId: transactionId,
       },
     });
   }

@@ -977,6 +977,13 @@
   },
   "admin": {
     "users": "Users",
+    "hideFromSearch": "Hide from search",
+    "isPrivate": "Is private?",
+    "isEnabled": "Is enabled?",
+    "releaseDate": "Release date",
+    "title": "Title",
+    "trackGroup": "Trackgroup",
+    "save": "Save",
     "trackgroups": "Trackgroups (releases)",
     "tracks": "Tracks",
     "callServerTasks": "Call server tasks",

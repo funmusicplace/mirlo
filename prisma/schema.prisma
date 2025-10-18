@@ -99,6 +99,7 @@ model User {
   pledges                             TrackGroupPledge[]
   invitesSent                         Invite[]                        @relation("invitedBy")
   invitesUsed                         Invite[]                        @relation("usedBy")
+  transactions                        UserTransaction[]
 }
 
 model Invite {
@@ -582,18 +583,33 @@ model UserArtistTip {
 
 model UserTrackGroupPurchase {
   userId              Int
-  user                User       @relation(fields: [userId], references: [id])
+  user                User             @relation(fields: [userId], references: [id])
   trackGroupId        Int
-  trackGroup          TrackGroup @relation(fields: [trackGroupId], references: [id])
+  trackGroup          TrackGroup       @relation(fields: [trackGroupId], references: [id])
   pricePaid           Int // in cents
   platformCut         Int? // in cents
-  currencyPaid        String     @default("usd")
-  datePurchased       DateTime   @default(now())
+  currencyPaid        String           @default("usd")
+  datePurchased       DateTime         @default(now())
   stripeSessionKey    String?
   singleDownloadToken String?
   message             String?
+  userTransactionId   String?
+  transaction         UserTransaction? @relation(fields: [userTransactionId], references: [id])
 
   @@unique([userId, trackGroupId])
+}
+
+model UserTransaction {
+  id                  String                   @id @default(uuid())
+  userId              Int
+  user                User                     @relation(fields: [userId], references: [id])
+  createdAt           DateTime                 @default(now())
+  amount              Int // in cents
+  currency            String
+  platformCut         Int? // in cents
+  stripeCut           Int? // in cents
+  stripeId            String?
+  trackGroupPurchases UserTrackGroupPurchase[]
 }
 
 model UserTrackPurchase {
@@ -675,6 +691,7 @@ model TrackGroup {
   isAllOrNothing                  Boolean                         @default(false)
   pledges                         TrackGroupPledge[]
   downloadableContent             TrackGroupDownloadableContent[]
+  hideFromSearch                  Boolean                         @default(false)
 
   @@unique([artistId, urlSlug])
 }
