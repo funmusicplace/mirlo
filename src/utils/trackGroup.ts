@@ -336,11 +336,7 @@ export const registerPurchase = async ({
       data: {
         userId: Number(userId),
         trackGroupId: Number(trackGroupId),
-        platformCut: platformCut ?? null,
-        pricePaid,
-        currencyPaid,
         message: message ?? null,
-        stripeSessionKey: paymentProcessorKey,
         singleDownloadToken: token,
         userTransactionId: transactionId,
       },
@@ -362,6 +358,7 @@ export const registerPurchase = async ({
       trackGroupId: Number(trackGroupId),
     },
     include: {
+      transaction: true,
       trackGroup: {
         include: {
           artist: true,
