@@ -11,8 +11,6 @@ import { Job } from "bullmq";
 import stripe, { calculateAppFee, OPTION_JOINER } from "./stripe";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { sendBasecampAMessage } from "./basecamp";
-import { application } from "express";
-import app from "..";
 
 const getPaymentIntent = async (
   paymentIntentId: string,
@@ -62,10 +60,14 @@ const getApplicationFee = async (session?: Stripe.Checkout.Session) => {
         | Stripe.BalanceTransaction
         | undefined;
 
+    const stripeFee = balance_transaction?.fee_details.find(
+      (fee) => fee.type === "stripe_fee"
+    );
+
     if (paymentIntent.application_fee_amount) {
       return {
         applicationFee: paymentIntent.application_fee_amount,
-        paymentProcessorFee: balance_transaction?.fee ?? 0,
+        paymentProcessorFee: stripeFee?.amount ?? 0,
       };
     } else {
       logger.warn(
@@ -98,7 +100,7 @@ export const handleTrackGroupPurchase = async (
         userId: Number(userId),
         amount: pricePaid,
         currency: currencyPaid,
-        platformCut: paymentProcessorFee ?? null,
+        platformCut: applicationFee ?? null,
         stripeId: paymentProcessorKey ?? "",
         stripeCut: paymentProcessorFee ?? null,
       },
