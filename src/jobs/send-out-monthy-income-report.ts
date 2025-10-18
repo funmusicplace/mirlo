@@ -6,6 +6,20 @@ import { groupBy, keyBy } from "lodash";
 import sendMail from "./send-mail";
 import { Job } from "bullmq";
 
+export type MonthlyIncomeReportEmailType = {
+  user: { name: string; email: string };
+  userSales: {
+    artist: { name: string; id: number }[];
+    datePurchased: string;
+    saleType: string;
+    title: string;
+    user: { name: string; email: string };
+    currency: string;
+    amount: number;
+  }[];
+  totalIncome: number;
+};
+
 const sendOutMonthlyIncomeReport = async () => {
   try {
     const startOfLastMonth = new Date();
@@ -31,7 +45,7 @@ const sendOutMonthlyIncomeReport = async () => {
 
     const mappedArtists = keyBy(allArtists, "id");
 
-    const groupedSales = groupBy(sales, "artist.userId");
+    const groupedSales = groupBy(sales, "userId");
     for (const [userId, userSales] of Object.entries(groupedSales)) {
       if (userSales.length === 0) {
         continue;
@@ -39,9 +53,9 @@ const sendOutMonthlyIncomeReport = async () => {
       const artist = userSales[0].artist;
       const totalIncome = userSales.reduce((sum, sale) => sum + sale.amount, 0);
 
-      const user = mappedArtists[Number(artist.id)]?.user;
+      const user = mappedArtists[Number(artist[0].id)]?.user;
       try {
-        sendMail({
+        sendMail<MonthlyIncomeReportEmailType>({
           data: {
             template: "announce-monthly-income-report",
             message: {

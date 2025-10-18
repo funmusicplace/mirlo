@@ -364,14 +364,23 @@ interface UserTrackGroupWishlist {
   createdAt: string;
 }
 
+interface UserTransaction {
+  userId: number;
+  user: User;
+  platformCut: number;
+  currency: string;
+  amount: number;
+  createdAt: string;
+  id: string;
+  trackGroupPurchases?: TrackGroupPurchaseWithTrackGroup[];
+  merchPurchases?: MerchPurchaseWithMerch[];
+}
+
 interface UserTrackGroupPurchase {
   userId: number;
   user?: User;
   trackGroupId: number;
   trackGroup?: TrackGroup;
-  pricePaid: number;
-  currencyPaid: string;
-  datePurchased: string;
   singleDownloadToken?: string;
 }
 

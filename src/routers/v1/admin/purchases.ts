@@ -23,13 +23,13 @@ export default function () {
     };
 
     try {
-      let where: Prisma.UserTrackGroupPurchaseWhereInput = {};
+      let where: Prisma.UserTransactionWhereInput = {};
 
       if (datePurchased && datePurchased === "thisMonth") {
         const startOfMonth = new Date();
         startOfMonth.setDate(1);
         startOfMonth.setHours(0, 0, 0, 0);
-        where.datePurchased = {
+        where.createdAt = {
           gte: startOfMonth.toISOString(),
         };
       } else if (datePurchased && datePurchased === "previousMonth") {
@@ -40,36 +40,36 @@ export default function () {
         const endOfMonth = new Date();
         endOfMonth.setDate(1);
         endOfMonth.setHours(0, 0, 0, 0);
-        where.datePurchased = {
+        where.createdAt = {
           gte: startOfMonth.toISOString(),
           lt: endOfMonth.toISOString(),
         };
       }
 
       if (pricePaid && pricePaid === "paid") {
-        where.pricePaid = {
+        where.amount = {
           gt: 0,
         };
       } else if (pricePaid && pricePaid === "free") {
-        where.pricePaid = 0;
+        where.amount = 0;
       }
 
-      const itemCount = await prisma.userTrackGroupPurchase.count({ where });
+      const itemCount = await prisma.userTransaction.count({ where });
 
-      const purchases = await prisma.userTrackGroupPurchase.findMany({
+      const purchases = await prisma.userTransaction.findMany({
         where,
         skip: skipQuery ? Number(skipQuery) : undefined,
         take: take ? Number(take) : undefined,
         include: {
           user: true,
-          trackGroup: {
+          trackGroupPurchases: {
             include: {
-              artist: true,
+              trackGroup: { include: { artist: true } },
             },
           },
         },
         orderBy: {
-          datePurchased: "desc",
+          createdAt: "desc",
         },
       });
       res.json({

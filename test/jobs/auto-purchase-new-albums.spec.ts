@@ -8,7 +8,9 @@ import prisma from "@mirlo/prisma";
 import assert from "assert";
 import * as sendMail from "../../src/jobs/send-mail";
 import sinon from "sinon";
-import autoPurchaseNewAlbums from "../../src/jobs/auto-purchase-new-albums";
+import autoPurchaseNewAlbums, {
+  AutomaticallyReceivedAlbumEmailType,
+} from "../../src/jobs/auto-purchase-new-albums";
 
 describe("auto-purchase-new-albums", () => {
   beforeEach(async () => {
@@ -72,7 +74,8 @@ describe("auto-purchase-new-albums", () => {
     const data0 = stub.getCall(0).args[0].data;
     assert.equal(data0.template, "automatically-received-album");
     assert.equal(data0.message.to, "follower@follower.com");
-    assert.equal(data0.locals.trackGroup.id, tg.id);
-    assert.equal(data0.locals.artist.id, artist.id);
+    const locals0 = data0.locals as AutomaticallyReceivedAlbumEmailType;
+    assert.equal(locals0.trackGroup.id, tg.id);
+    assert.equal(locals0.artist.id, artist.id);
   });
 });

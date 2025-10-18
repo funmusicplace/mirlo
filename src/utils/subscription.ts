@@ -3,6 +3,19 @@ import { logger } from "../logger";
 import sendMail from "../jobs/send-mail";
 
 import { Job } from "bullmq";
+import { Artist } from "@mirlo/prisma/client";
+
+export type ArtistSubscriptionReceiptEmailType = {
+  interval: "MONTH" | "YEAR";
+  artist: Artist;
+  host: string;
+  client: string;
+  artistUserSubscription: {
+    id: number;
+    createdAt: Date;
+    updatedAt: Date;
+  };
+};
 
 /**
  * We'll probably want to change this to be more neutral. Right now we assume the payment processor is Stripe.
@@ -59,7 +72,7 @@ export const manageSubscriptionReceipt = async ({
     logger.info(
       `invoice.paid: ${processorPaymentReferenceId} found subscription, sending receipt`
     );
-    await sendMail({
+    await sendMail<ArtistSubscriptionReceiptEmailType>({
       data: {
         template: "artist-subscription-receipt",
         message: {
@@ -71,7 +84,7 @@ export const manageSubscriptionReceipt = async ({
           artistUserSubscription,
           host: process.env.API_DOMAIN,
           client: process.env.REACT_APP_CLIENT_DOMAIN,
-        },
+        } as ArtistSubscriptionReceiptEmailType,
       },
     } as Job);
   }

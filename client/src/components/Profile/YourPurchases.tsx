@@ -16,8 +16,11 @@ import {
   isMerchPurchase,
   isTrackGroupPurchase,
   isTrackPurchase,
+  isUserTransaction,
 } from "types/typeguards";
 import PurchaseComponent from "./PurchaseComponent";
+import { isUser } from "components/ManageArtist/UploadArtistImage";
+import TransactionComponent from "./TransactionComponent";
 
 function YourPurchases() {
   const { user } = useAuthContext();
@@ -97,7 +100,20 @@ function YourPurchases() {
                 `}
               >
                 {purchases.map((p) => (
-                  <li>
+                  <li
+                    key={
+                      isTrackPurchase(p)
+                        ? p.track?.id
+                        : isMerchPurchase(p)
+                          ? p.merch?.id
+                          : isUserTransaction(p)
+                            ? p.id
+                            : ""
+                    }
+                  >
+                    {isUserTransaction(p) && (
+                      <TransactionComponent userTransaction={p} />
+                    )}
                     {isTrackPurchase(p) && p.track && (
                       <PurchaseComponent
                         title={p.track.title}
@@ -110,17 +126,6 @@ function YourPurchases() {
                           p.track.trackGroup,
                           p.track
                         )}
-                        purchaseDate={p.datePurchased}
-                      />
-                    )}
-                    {isTrackGroupPurchase(p) && p.trackGroup && (
-                      <PurchaseComponent
-                        title={p.trackGroup.title}
-                        imageSrc={p.trackGroup.cover?.sizes?.[60]}
-                        currencyPaid={p.currencyPaid}
-                        pricePaid={p.pricePaid}
-                        artist={p.trackGroup.artist}
-                        url={getReleaseUrl(p.trackGroup.artist, p.trackGroup)}
                         purchaseDate={p.datePurchased}
                       />
                     )}

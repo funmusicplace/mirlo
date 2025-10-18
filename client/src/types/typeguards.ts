@@ -59,3 +59,10 @@ export function isTrackGroupPurchase(
   }
   return (entity as UserTrackGroupPurchase).trackGroupId !== undefined;
 }
+
+export function isUserTransaction(entity: unknown): entity is UserTransaction {
+  if (!entity) {
+    return false;
+  }
+  return (entity as UserTransaction).trackGroupPurchases !== undefined;
+}

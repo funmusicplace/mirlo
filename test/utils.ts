@@ -192,14 +192,22 @@ export const createTrack = async (
 export const createUserTrackGroupPurchase = async (
   userId: number,
   trackGroupId: number,
-  data?: Partial<Prisma.UserTrackGroupPurchaseCreateArgs["data"]>
+  data?: { amount?: number; currency?: string; createdAt?: Date }
 ) => {
+  const transaction = await prisma.userTransaction.create({
+    data: {
+      userId,
+      amount: data?.amount ?? 1000,
+      currency: data?.currency ?? "USD",
+      createdAt: data?.createdAt,
+    },
+  });
+
   const purchase = await prisma.userTrackGroupPurchase.create({
     data: {
       userId,
       trackGroupId,
-      pricePaid: 1000,
-      datePurchased: data?.datePurchased,
+      userTransactionId: transaction.id,
     },
   });
 

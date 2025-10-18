@@ -30,11 +30,11 @@ export const sendErrorEmail = async (error: Error) => {
   });
 };
 
-export const sendMail = async (job: {
+export const sendMail = async <T>(job: {
   data: {
     template: string;
     message: Mail.Options;
-    locals: { [key: string]: any };
+    locals: T;
   };
 }) => {
   logger.info(`sendMail: sending: ${job.data.template}`);

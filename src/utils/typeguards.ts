@@ -7,6 +7,7 @@ import {
   TrackGroup,
   UserTrackGroupPurchase,
   UserTrackPurchase,
+  UserTransaction,
 } from "@mirlo/prisma/client";
 
 type TrackGroupPurchaseWithTrackGroup = UserTrackGroupPurchase & {
@@ -24,6 +25,13 @@ export function isTrackGroupPurchase(
     return false;
   }
   return (entity as TrackGroupPurchaseWithTrackGroup).trackGroup !== undefined;
+}
+
+export function isUserTransaction(entity: unknown): entity is UserTransaction {
+  if (!entity) {
+    return false;
+  }
+  return (entity as UserTransaction).platformCut !== undefined;
 }
 
 export function isTrackPurchase(

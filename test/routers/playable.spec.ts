@@ -123,7 +123,6 @@ describe("playable", () => {
         data: {
           userId: purchaser.id,
           trackGroupId: tg.id,
-          pricePaid: 0,
         },
       });
 

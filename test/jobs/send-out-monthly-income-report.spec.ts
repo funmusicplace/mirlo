@@ -8,7 +8,9 @@ import prisma from "@mirlo/prisma";
 import assert from "assert";
 import * as sendMail from "../../src/jobs/send-mail";
 import sinon from "sinon";
-import sendOutMonthlyIncomeReport from "../../src/jobs/send-out-monthy-income-report";
+import sendOutMonthlyIncomeReport, {
+  MonthlyIncomeReportEmailType,
+} from "../../src/jobs/send-out-monthy-income-report";
 import { faker } from "@faker-js/faker";
 
 describe("send-out-monthly-income-report", () => {
@@ -80,10 +82,11 @@ describe("send-out-monthly-income-report", () => {
     const data0 = stub.getCall(0).args[0].data;
     assert.equal(data0.template, "announce-monthly-income-report");
     assert.equal(data0.message.to, "artist@artist.com");
-    assert.equal(data0.locals.userSales.length, 1);
-    assert.equal(data0.locals.totalIncome, 5);
-    assert.equal(data0.locals.userSales[0].amount, 5);
-    assert.equal(data0.locals.userSales[0].saleType, "subscription");
+    const locals = data0.locals as MonthlyIncomeReportEmailType;
+    assert.equal(locals.userSales.length, 1);
+    assert.equal(locals.totalIncome, 5);
+    assert.equal(locals.userSales[0].amount, 5);
+    assert.equal(locals.userSales[0].saleType, "subscription");
   });
 
   it("should send an income report to an artist who has gained a tip", async () => {
@@ -130,10 +133,11 @@ describe("send-out-monthly-income-report", () => {
     const data0 = stub.getCall(0).args[0].data;
     assert.equal(data0.template, "announce-monthly-income-report");
     assert.equal(data0.message.to, "artist@artist.com");
-    assert.equal(data0.locals.userSales.length, 1);
-    assert.equal(data0.locals.totalIncome, 7);
-    assert.equal(data0.locals.userSales[0].amount, 7);
-    assert.equal(data0.locals.userSales[0].saleType, "tip");
+    const locals = data0.locals as MonthlyIncomeReportEmailType;
+    assert.equal(locals.userSales.length, 1);
+    assert.equal(locals.totalIncome, 7);
+    assert.equal(locals.userSales[0].amount, 7);
+    assert.equal(locals.userSales[0].saleType, "tip");
   });
 
   it("should not send an e-mail if sale is from two months ago", async () => {
@@ -354,10 +358,11 @@ describe("send-out-monthly-income-report", () => {
     const data0 = stub.getCall(0).args[0].data;
     assert.equal(data0.template, "announce-monthly-income-report");
     assert.equal(data0.message.to, "artist@artist.com");
-    assert.equal(data0.locals.userSales.length, 1);
-    assert.equal(data0.locals.totalIncome, 5);
-    assert.equal(data0.locals.userSales[0].amount, 5);
-    assert.equal(data0.locals.userSales[0].saleType, "subscription");
+    const locals = data0.locals as MonthlyIncomeReportEmailType;
+    assert.equal(locals.userSales.length, 1);
+    assert.equal(locals.totalIncome, 5);
+    assert.equal(locals.userSales[0].amount, 5);
+    assert.equal(locals.userSales[0].saleType, "subscription");
   });
 
   it("should send an income report for multiple artists if a user has more than one artist sales", async () => {
@@ -432,14 +437,15 @@ describe("send-out-monthly-income-report", () => {
     const data0 = stub.getCall(0).args[0].data;
     assert.equal(data0.template, "announce-monthly-income-report");
     assert.equal(data0.message.to, "artist@artist.com");
-    assert.equal(data0.locals.userSales.length, 2);
-    assert.equal(data0.locals.user.name, "Gia");
-    assert.equal(data0.locals.totalIncome, 10);
-    assert.equal(data0.locals.userSales[0].amount, 7);
-    assert.equal(data0.locals.userSales[0].artist.id, artist.id);
-    assert.equal(data0.locals.userSales[0].saleType, "tip");
-    assert.equal(data0.locals.userSales[1].amount, 3);
-    assert.equal(data0.locals.userSales[1].artist.id, artist2.id);
-    assert.equal(data0.locals.userSales[1].saleType, "tip");
+    const locals = data0.locals as MonthlyIncomeReportEmailType;
+    assert.equal(locals.userSales.length, 2);
+    assert.equal(locals.user.name, "Gia");
+    assert.equal(locals.totalIncome, 10);
+    assert.equal(locals.userSales[0].amount, 7);
+    assert.equal(locals.userSales[0].artist[0].id, artist.id);
+    assert.equal(locals.userSales[0].saleType, "tip");
+    assert.equal(locals.userSales[1].amount, 3);
+    assert.equal(locals.userSales[1].artist[0].id, artist2.id);
+    assert.equal(locals.userSales[1].saleType, "tip");
   });
 });

@@ -8,7 +8,11 @@ import prisma from "@mirlo/prisma";
 import assert from "assert";
 import sinon from "sinon";
 import * as sendMail from "../../src/jobs/send-mail";
-import { handleSubscription } from "../../src/utils/handleFinishedTransactions";
+import {
+  ArtistNewSubscriberAnnounceEmailType,
+  ArtistSubscriptionReceiptEmailType,
+  handleSubscription,
+} from "../../src/utils/handleFinishedTransactions";
 import Stripe from "stripe";
 
 describe("handleSubscription", () => {
@@ -61,18 +65,20 @@ describe("handleSubscription", () => {
     const data0 = stub.getCall(0).args[0].data;
     assert.equal(data0.template, "artist-subscription-receipt");
     assert.equal(data0.message.to, "follower@follower.com");
+    const locals = data0.locals as ArtistSubscriptionReceiptEmailType;
     assert.equal(
-      data0.locals.artistUserSubscription.artistSubscriptionTierId,
+      locals.artistUserSubscription.artistSubscriptionTierId,
       tier.id
     );
-    assert.equal(data0.locals.artistUserSubscription.amount, 0);
+    assert.equal(locals.artistUserSubscription.amount, 0);
     const data1 = stub.getCall(1).args[0].data;
     assert.equal(data1.template, "artist-new-subscriber-announce");
     assert.equal(data1.message.to, artistUser.email);
+    const locals0 = data1.locals as ArtistNewSubscriberAnnounceEmailType;
     assert.equal(
-      data1.locals.artistUserSubscription.artistSubscriptionTierId,
+      locals0.artistUserSubscription.artistSubscriptionTierId,
       tier.id
     );
-    assert.equal(data1.locals.artistUserSubscription.amount, 0);
+    assert.equal(locals0.artistUserSubscription.amount, 0);
   });
 });

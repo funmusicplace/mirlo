@@ -556,6 +556,8 @@ model MerchPurchase {
   trackingNumber       String?
   trackingWebsite      String?
   orderDetails         String? // JSON string with order details
+  transactionId        String?
+  transaction          UserTransaction?  @relation(fields: [transactionId], references: [id])
 }
 
 enum FulfillmentStatus {
@@ -582,19 +584,15 @@ model UserArtistTip {
 }
 
 model UserTrackGroupPurchase {
-  userId              Int
+  userId              Int // Do we need this if we have userTransactionId? It would help for quicker look-ups
   user                User             @relation(fields: [userId], references: [id])
   trackGroupId        Int
   trackGroup          TrackGroup       @relation(fields: [trackGroupId], references: [id])
-  pricePaid           Int // in cents
-  platformCut         Int? // in cents
-  currencyPaid        String           @default("usd")
-  datePurchased       DateTime         @default(now())
-  stripeSessionKey    String?
   singleDownloadToken String?
   message             String?
   userTransactionId   String?
   transaction         UserTransaction? @relation(fields: [userTransactionId], references: [id])
+  createdAt           DateTime         @default(now())
 
   @@unique([userId, trackGroupId])
 }
@@ -610,20 +608,25 @@ model UserTransaction {
   stripeCut           Int? // in cents
   stripeId            String?
   trackGroupPurchases UserTrackGroupPurchase[]
+
+  merchPurchases MerchPurchase[]
+  trackPurchases UserTrackPurchase[]
 }
 
 model UserTrackPurchase {
   userId              Int
-  user                User     @relation(fields: [userId], references: [id])
+  user                User             @relation(fields: [userId], references: [id])
   trackId             Int
-  track               Track    @relation(fields: [trackId], references: [id])
+  track               Track            @relation(fields: [trackId], references: [id])
   pricePaid           Int // in cents
   platformCut         Int? // in cents
-  currencyPaid        String   @default("usd")
-  datePurchased       DateTime @default(now())
+  currencyPaid        String           @default("usd")
+  datePurchased       DateTime         @default(now())
   stripeSessionKey    String?
   singleDownloadToken String?
   message             String?
+  transactionId       String?
+  transaction         UserTransaction? @relation(fields: [transactionId], references: [id])
 
   @@unique([userId, trackId])
 }

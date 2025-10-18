@@ -24,18 +24,22 @@ export default function () {
 
     const loggedInUser = req.user as User;
     if (Number(userId) === Number(loggedInUser.id)) {
-      const trackGroupPurchases = await prisma.userTrackGroupPurchase.findMany({
+      const trackGroupPurchases = await prisma.userTransaction.findMany({
         where: {
           userId: Number(userId),
         },
         include: {
-          trackGroup: {
+          trackGroupPurchases: {
             include: {
-              artist: true,
-              cover: true,
-              tracks: {
-                orderBy: {
-                  order: "asc",
+              trackGroup: {
+                include: {
+                  artist: true,
+                  cover: true,
+                  tracks: {
+                    orderBy: {
+                      order: "asc",
+                    },
+                  },
                 },
               },
             },
@@ -81,14 +85,8 @@ export default function () {
         ...trackGroupPurchases,
         ...trackPurchases,
       ].sort((a, b) => {
-        const timeA =
-          isTrackGroupPurchase(a) || isTrackPurchase(a)
-            ? a.datePurchased
-            : a.createdAt;
-        const timeB =
-          isTrackGroupPurchase(b) || isTrackPurchase(b)
-            ? b.datePurchased
-            : b.createdAt;
+        const timeA = isTrackPurchase(a) ? a.datePurchased : a.createdAt;
+        const timeB = isTrackPurchase(b) ? b.datePurchased : b.createdAt;
         return timeA > timeB ? -1 : 1;
       });
 

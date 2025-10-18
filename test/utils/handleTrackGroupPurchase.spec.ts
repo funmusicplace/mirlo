@@ -8,7 +8,11 @@ import prisma from "@mirlo/prisma";
 import assert from "assert";
 import sinon from "sinon";
 import * as sendMail from "../../src/jobs/send-mail";
-import { handleTrackGroupPurchase } from "../../src/utils/handleFinishedTransactions";
+import {
+  AlbumPurchaseArtistNotificationEmailType,
+  AlbumPurchaseEmailType,
+  handleTrackGroupPurchase,
+} from "../../src/utils/handleFinishedTransactions";
 
 describe("handleTrackGroupPurchase", () => {
   beforeEach(async () => {
@@ -54,13 +58,17 @@ describe("handleTrackGroupPurchase", () => {
     const data0 = stub.getCall(0).args[0].data;
     assert.equal(data0.template, "album-purchase-receipt");
     assert.equal(data0.message.to, "follower@follower.com");
-    assert.equal(data0.locals.trackGroup.id, trackGroup.id);
-    assert.equal(data0.locals.purchase.pricePaid, 0);
+    const locals0 = data0.locals as AlbumPurchaseEmailType;
+    assert.equal(locals0.trackGroup.id, trackGroup.id);
+    assert.equal(locals0.purchase.transaction?.amount, 0);
     const data1 = stub.getCall(1).args[0].data;
     assert.equal(data1.template, "album-purchase-artist-notification");
     assert.equal(data1.message.to, artistUser.email);
-    assert.equal(data1.locals.trackGroup.id, trackGroup.id);
-    assert.equal(data1.locals.purchase.pricePaid, 0);
+    const locals1 = data1.locals as AlbumPurchaseArtistNotificationEmailType;
+    assert.equal(locals1.trackGroup.id, trackGroup.id);
+    assert.equal(locals1.purchase.transaction?.amount, 0);
+    assert.equal(locals1.purchase.transaction?.platformCut, 0);
+    assert.equal(locals1.purchase.transaction?.stripeCut, 0);
   });
 
   it("should send out emails for track group purchase without log-in", async () => {
@@ -99,12 +107,14 @@ describe("handleTrackGroupPurchase", () => {
     const data0 = stub.getCall(0).args[0].data;
     assert.equal(data0.template, "album-download");
     assert.equal(data0.message.to, "follower@follower.com");
-    assert.equal(data0.locals.trackGroup.id, trackGroup.id);
-    assert.equal(data0.locals.purchase.pricePaid, 0);
+    const locals0 = data0.locals as AlbumPurchaseEmailType;
+    assert.equal(locals0.trackGroup.id, trackGroup.id);
+    assert.equal(locals0.purchase.transaction?.amount, 0);
     const data1 = stub.getCall(1).args[0].data;
     assert.equal(data1.template, "album-purchase-artist-notification");
     assert.equal(data1.message.to, artistUser.email);
-    assert.equal(data1.locals.trackGroup.id, trackGroup.id);
-    assert.equal(data1.locals.purchase.pricePaid, 0);
+    const locals1 = data1.locals as AlbumPurchaseArtistNotificationEmailType;
+    assert.equal(locals1.trackGroup.id, trackGroup.id);
+    assert.equal(locals1.purchase.transaction?.amount, 0);
   });
 });

@@ -5,6 +5,19 @@ import logger from "../logger";
 import { groupBy } from "lodash";
 import { Job } from "bullmq";
 
+export type AnnounceMonthlyReceiptsEmailType = {
+  userSubscriptions: {
+    amount: number;
+    artistSubscriptionTier: { artistId: number; artist: { name: string } };
+  }[];
+  user: {
+    id: number;
+    email: string;
+  };
+  host: string;
+  client: string;
+};
+
 const sendOutMonthlyReceipts = async () => {
   try {
     logger.info("Starting to send out monthly receipts");
@@ -41,7 +54,7 @@ const sendOutMonthlyReceipts = async () => {
             `user ${userId} subscribes to ${userSubscriptions.length} artists`
           );
 
-          return sendMail({
+          return sendMail<AnnounceMonthlyReceiptsEmailType>({
             data: {
               template: "announce-monthly-receipts",
               message: {
@@ -52,7 +65,7 @@ const sendOutMonthlyReceipts = async () => {
                 user: userSubscriptions[0].user,
                 host: process.env.API_DOMAIN,
                 client: process.env.REACT_APP_CLIENT_DOMAIN,
-              },
+              } as AnnounceMonthlyReceiptsEmailType,
             },
           } as Job);
         }

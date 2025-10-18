@@ -10,6 +10,7 @@ import sinon from "sinon";
 import * as sendMail from "../../src/jobs/send-mail";
 
 import { manageSubscriptionReceipt } from "../../src/utils/subscription";
+import { ArtistSubscriptionReceiptEmailType } from "../../src/utils/handleFinishedTransactions";
 
 describe("subscription", () => {
   beforeEach(async () => {
@@ -91,11 +92,12 @@ describe("subscription", () => {
       const data0 = stub.getCall(0).args[0].data;
       assert.equal(data0.template, "artist-subscription-receipt");
       assert.equal(data0.message.to, "follower@follower.com");
+      const locals = data0.locals as ArtistSubscriptionReceiptEmailType;
       assert.equal(
-        data0.locals.artistUserSubscription.artistSubscriptionTierId,
+        locals.artistUserSubscription.artistSubscriptionTierId,
         tier.id
       );
-      assert.equal(data0.locals.artistUserSubscription.amount, 10);
+      assert.equal(locals.artistUserSubscription.amount, 10);
     });
   });
 });

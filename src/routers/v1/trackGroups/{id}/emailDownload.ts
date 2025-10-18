@@ -70,7 +70,6 @@ export default function () {
           data: {
             userId: userId,
             trackGroupId: Number(trackGroupId),
-            pricePaid: 0,
             singleDownloadToken: randomUUID(),
           },
         });
