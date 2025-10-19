@@ -9,12 +9,14 @@ import useArtistQuery from "utils/useArtistQuery";
 import { FixedButton } from "components/common/FixedButton";
 import { useQuery } from "@tanstack/react-query";
 import { queryArtist } from "queries";
+import CurrencyCoinIcon from "components/common/CurrencyCoinIcon";
 
 const PurchaseAlbumModal: React.FC<{
   trackGroup: TrackGroup;
   track?: Track;
   fixed?: boolean;
-}> = ({ trackGroup, track, fixed }) => {
+  collapse?: boolean;
+}> = ({ trackGroup, track, fixed, collapse }) => {
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
   const [isPurchasingAlbum, setIsPurchasingAlbum] = React.useState(false);
   const { data: artist } = useQuery(
@@ -62,8 +64,8 @@ const PurchaseAlbumModal: React.FC<{
       {t(preOrderOrBuyText)}
     </FixedButton>
   ) : (
-    <ArtistButton type="button" onClick={() => setIsPurchasingAlbum(true)}>
-      {t(preOrderOrBuyText)}
+    <ArtistButton type="button" onClick={() => setIsPurchasingAlbum(true)} startIcon={collapse ? <CurrencyCoinIcon currency={trackGroup.currency} /> : undefined}>
+      {collapse ? "" : t(preOrderOrBuyText)}
     </ArtistButton>
   );
 

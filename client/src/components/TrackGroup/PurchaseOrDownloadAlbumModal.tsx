@@ -101,6 +101,7 @@ const PurchaseOrDownloadAlbum: React.FC<{
             trackGroup={trackGroup}
             track={track}
             fixed={fixed}
+            collapse={collapse}
           />
         )}
         {addToCollection && (
