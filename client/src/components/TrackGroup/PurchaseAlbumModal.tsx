@@ -9,7 +9,7 @@ import useArtistQuery from "utils/useArtistQuery";
 import { FixedButton } from "components/common/FixedButton";
 import { useQuery } from "@tanstack/react-query";
 import { queryArtist } from "queries";
-import { IoCart } from "react-icons/io5";
+import CurrencyCoinIcon from "components/common/CurrencyCoinIcon";
 
 const PurchaseAlbumModal: React.FC<{
   trackGroup: TrackGroup;
@@ -64,7 +64,7 @@ const PurchaseAlbumModal: React.FC<{
       {t(preOrderOrBuyText)}
     </FixedButton>
   ) : (
-    <ArtistButton type="button" onClick={() => setIsPurchasingAlbum(true)} startIcon={collapse ? <IoCart /> : undefined}>
+    <ArtistButton type="button" onClick={() => setIsPurchasingAlbum(true)} startIcon={collapse ? <CurrencyCoinIcon currency={trackGroup.currency} /> : undefined}>
       {collapse ? "" : t(preOrderOrBuyText)}
     </ArtistButton>
   );
