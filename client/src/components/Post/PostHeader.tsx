@@ -34,12 +34,12 @@ const AvatarWrapper = styled.div`
 
 const AvatarLink: React.FC<{
   avatar?: string;
-  children?: React.ReactNode;
+  name?: string;
   to: string;
-}> = ({ avatar, children, to }) => (
+}> = ({ avatar, name, to }) => (
   <Link to={to}>
     <Avatar avatar={avatar} />
-    <span>{children}</span>
+    <span>{name}</span>
   </Link>
 );
 
@@ -196,12 +196,12 @@ const PostHeader: React.FC<{ post: Post }> = ({ post }) => {
                       <Trans
                         t={t}
                         i18nKey="postByArtist"
-                        values={{ artistName: post.artist?.name }}
                         components={{
                           link: (
                             <AvatarLink
                               avatar={post.artist.avatar?.sizes?.[60]}
                               to={`/${post.artist.urlSlug?.toLowerCase() ?? post.artistId}`}
+                              name={post.artist.name}
                             ></AvatarLink>
                           ),
                         }}

@@ -388,7 +388,7 @@
     "exampleLocation": "eg. North Pole",
     "backToArtist": "Back to artist",
     "backToLabel": "Back to label",
-    "postByArtist": "by <link>{{artistName}}</link>",
+    "postByArtist": "by <link></link>",
     "Website": "Website",
     "bioPlaceholder": "Let listeners know a bit about yourself",
     "linkLabel": "Name of linked website",
@@ -497,7 +497,7 @@
     "trackLimitExplanation": "You have reached the play limit for this track. Purchase it to continue listening."
   },
   "post": {
-    "postByArtist": "by <link>{{artistName}}</link>",
+    "postByArtist": "by <link></link>",
     "byArtist": "by {{artist}}",
     "noPostFound": "No post found",
     "returnToArtist": ", return to <link>{{artistName}}</link>",
