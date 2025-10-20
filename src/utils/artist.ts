@@ -15,7 +15,11 @@ import {
 } from "@mirlo/prisma/client";
 import prisma from "@mirlo/prisma";
 import stripe from "./stripe";
-import { deleteTrackGroup, processSingleTrackGroup } from "./trackGroup";
+import {
+  deleteTrackGroup,
+  processSingleTrackGroup,
+  trackGroupPublishedObject,
+} from "./trackGroup";
 import postProcessor from "./post";
 import { convertURLArrayToSizes } from "./images";
 import {
@@ -418,9 +422,7 @@ export const singleInclude = (queryOptions?: {
   return {
     trackGroups: {
       where: {
-        OR: [{ published: true }, { publishedAt: { lte: new Date() } }],
-        deletedAt: null,
-        isDrafts: false,
+        ...trackGroupPublishedObject,
       },
       orderBy: [
         {

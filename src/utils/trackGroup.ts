@@ -638,6 +638,12 @@ export const findTrackPurchaseBasedOnTokenAndUpdate = async (
   return purchase.track;
 };
 
+export const trackGroupPublishedObject = {
+  OR: [{ published: true }, { publishedAt: { lte: new Date() } }],
+  deletedAt: null,
+  isDrafts: false,
+};
+
 export const findPurchaseBasedOnTokenAndUpdate = async (
   trackGroupId: number,
   token: string,
@@ -649,7 +655,7 @@ export const findPurchaseBasedOnTokenAndUpdate = async (
       singleDownloadToken: token,
       trackGroupId: Number(trackGroupId),
       trackGroup: {
-        published: true,
+        ...trackGroupPublishedObject,
       },
     },
     include: {
