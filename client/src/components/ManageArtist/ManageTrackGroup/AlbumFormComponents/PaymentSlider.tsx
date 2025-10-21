@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ArtistButton } from "components/Artist/ArtistButtons";
 import Modal from "components/common/Modal";
 import Pill from "components/common/Pill";
+import { LogoWrapper } from "components/Header/Header";
 import { queryArtist } from "queries";
 import React from "react";
 import { useFormContext } from "react-hook-form";
@@ -131,10 +132,10 @@ const PaymentSlider: React.FC<{
             type="button"
             onClick={() => setIsInfoOpen(true)}
           />
+
           <Modal
-            size="small"
+            size="medium"
             open={isOpen}
-            title={t("howMuchGoesToMirlo")}
             onClose={() => setIsInfoOpen(false)}
             className={css`
               p {
@@ -142,54 +143,122 @@ const PaymentSlider: React.FC<{
               }
             `}
           >
-            <p>{t("howMuchModalText")}</p>
-            <p>
-              <Trans
-                t={t}
-                i18nKey="howMuchModalCalculator"
-                components={{
-                  link: (
-                    <a
-                      href="https://aorta.coop/public-program-rates"
-                      target="_blank"
-                      rel="noreferrer"
-                    />
-                  ),
-                }}
-              />
-            </p>
-            <table
+            <div
               className={css`
-                width: 100%;
-                margin-top: 1rem;
-                border-collapse: collapse;
-                td {
-                  padding: 0.5rem;
-                }
-
-                td:nth-of-type(1) {
-                  width: 2rem;
-                  text-align: right;
-                  border-right: var(--mi-darken-x-background-color) 1px solid;
-                }
-
-                td:nth-of-type(2) {
-                  width: 75px;
-                  border-right: var(--mi-darken-x-background-color) 1px solid;
-                }
+                display: flex;
+                align-items: center;
+                flex-direction: column;
               `}
             >
-              <tbody>
-                {modalRows.map((row) => (
-                  <tr key={row.key}>
-                    <td>{row.percent}</td>
-                    <td>{row.label}</td>
-                    <td>{row.description}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            <p>
+              <LogoWrapper />
+              <div
+                className={css`
+                  background-color: var(--mi-primary-color);
+                  color: var(--mi-white);
+                  padding: 1rem;
+                  margin-top: 2rem;
+                  border-radius: 0.5rem;
+                  text-align: center;
+                `}
+              >
+                <h2
+                  className={css`
+                    padding-top: 0.5rem;
+                  `}
+                >
+                  {t("howMuchGoesToMirlo")}
+                </h2>
+                <i
+                  className={css`
+                    padding: 0.5rem;
+                    padding-bottom: 1rem;
+                  `}
+                >
+                  {t("howMuchModalText")}
+                </i>
+                <p></p>
+                <i
+                  className={css`
+                    padding: 0.5rem;
+                  `}
+                >
+                  <Trans
+                    t={t}
+                    i18nKey="howMuchModalCalculator"
+                    components={{
+                      link: (
+                        <a
+                          href="https://aorta.coop/public-program-rates"
+                          target="_blank"
+                          rel="noreferrer"
+                        />
+                      ),
+                    }}
+                  />
+                </i>
+              </div>
+            </div>
+
+            <div
+              className={css`
+                display: flex;
+                flex-direction: column;
+                align-items: left;
+                margin-top: 1rem;
+                gap: 0.5rem;
+              `}
+            >
+              {modalRows.map((row) => (
+                <div
+                  className={css`
+                    display: flex;
+                    flex-direction: row;
+                    gap: 1rem;
+                    width: 100%;
+                  `}
+                  key={row.key}
+                >
+                  <span
+                    className={css`
+                      min-width: 2rem;
+                    `}
+                  >
+                    <span
+                      className={css`
+                        padding-right: ${Number.parseInt(
+                          row.percent.slice(0, -1)
+                        ) * 0.5}rem;
+                        margin-right: ${Number.parseInt(
+                          row.percent.slice(0, -1)
+                        ) * -0.5}rem;
+                        background-color: var(--mi-primary-color);
+                      `}
+                    ></span>
+                    {row.percent}
+                  </span>
+                  <span
+                    className={css`
+                      min-width: 7rem;
+                    `}
+                  >
+                    {row.label}
+                  </span>
+                  <span
+                    className={css`
+                      min-width: 2rem;
+                    `}
+                  >
+                    {row.description}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <p
+              className={css`
+                margin-top: 1rem;
+              `}
+            >
               <Trans
                 t={t}
                 i18nKey="howMuchModalFinances"
