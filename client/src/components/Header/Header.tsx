@@ -103,7 +103,7 @@ const HeaderWrapper = styled.div<{
   }
 `;
 
-const LogoWrapper = () => {
+export const LogoWrapper = () => {
   return (
     <h1
       className={css`
