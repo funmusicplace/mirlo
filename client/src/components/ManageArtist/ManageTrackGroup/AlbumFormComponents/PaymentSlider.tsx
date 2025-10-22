@@ -3,7 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import { ArtistButton } from "components/Artist/ArtistButtons";
 import Modal from "components/common/Modal";
 import Pill from "components/common/Pill";
-import { LogoWrapper } from "components/Header/Header";
 import { queryArtist } from "queries";
 import React from "react";
 import { useFormContext } from "react-hook-form";
@@ -150,13 +149,11 @@ const PaymentSlider: React.FC<{
                 flex-direction: column;
               `}
             >
-              <LogoWrapper />
               <div
                 className={css`
                   background-color: var(--mi-primary-color);
                   color: var(--mi-white);
                   padding: 1rem;
-                  margin-top: 2rem;
                   border-radius: 0.5rem;
                   text-align: center;
                 `}
