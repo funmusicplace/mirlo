@@ -14,29 +14,20 @@ import {
 } from "types/typeguards";
 import { Link } from "react-router-dom";
 
-type PurchaseResponse =
-  | (UserTrackPurchase & { trackGroup: TrackGroup })
-  | MerchPurchase
-  | UserTrackGroupPurchase;
-
-type DigitalPurchase =
-  | (UserTrackPurchase & { trackGroup: TrackGroup })
-  | UserTrackGroupPurchase;
-
 function Profile() {
   const { user } = useAuthContext();
   const userId = user?.id;
 
-  const [purchases, setPurchases] = React.useState<DigitalPurchase[]>();
+  const [purchases, setPurchases] = React.useState<UserTransaction[]>();
   const { t } = useTranslation("translation", { keyPrefix: "profile" });
 
   const fetchTrackGroups = React.useCallback(async () => {
-    const { results } = await api.getMany<PurchaseResponse>(
+    const { results } = await api.getMany<UserTransaction>(
       `users/${userId}/purchases`
     );
     setPurchases(
       results.filter((r) => {
-        const isNotMerch = isTrackPurchase(r) || isTrackGroupPurchase(r);
+        const isNotMerch = r.merchPurchases?.length === 0;
         return isNotMerch;
       })
     );
@@ -87,19 +78,25 @@ function Profile() {
               ))}
             <TrackgroupGrid gridNumber={"4"}>
               {purchases?.map((purchase) => {
-                if (isTrackGroupPurchase(purchase) && purchase.trackGroup) {
+                if (
+                  isUserTransaction(purchase) &&
+                  purchase.trackGroupPurchases
+                ) {
                   return (
                     <CollectionPurchaseSquare
-                      trackGroup={purchase.trackGroup}
-                      key={purchase.trackGroup?.id}
+                      trackGroup={purchase.trackGroupPurchases[0].trackGroup}
+                      key={purchase.id}
                     />
                   );
-                } else if (isTrackPurchase(purchase)) {
+                } else if (
+                  isUserTransaction(purchase) &&
+                  purchase.trackPurchases?.[0]?.track
+                ) {
                   return (
                     <CollectionPurchaseSquare
-                      trackGroup={purchase.trackGroup}
-                      track={purchase.track}
-                      key={purchase.trackId}
+                      trackGroup={purchase.trackPurchases[0].track?.trackGroup}
+                      track={purchase.trackPurchases[0].track}
+                      key={purchase.id}
                     />
                   );
                 }
