@@ -15,6 +15,7 @@ import TipArtist from "components/common/TipArtist";
 import useCurrentTrackHook from "components/Player/useCurrentTrackHook";
 import { getManageReleaseUrl, getReleaseUrl } from "utils/artist";
 import PurchaseOrDownloadAlbum from "components/TrackGroup/PurchaseOrDownloadAlbumModal";
+import { RiAdminLine } from "react-icons/ri";
 
 const PlayingTrack: React.FC = () => {
   const { state } = useGlobalStateContext();
@@ -113,6 +114,30 @@ const ManageArtistButtons: React.FC = () => {
             }
           `}
         >
+          {user?.isAdmin && (
+            <>
+              <FixedButtonLink
+                to={`/admin/users/${artist.userId}`}
+                endIcon={<RiAdminLine />}
+                size="compact"
+                rounded
+                variant="dashed"
+              >
+                {t("adminEditUser")}
+              </FixedButtonLink>
+              {isAlbumPage && trackGroup && (
+                <FixedButtonLink
+                  to={`/admin/trackGroups/${trackGroup.id}`}
+                  endIcon={<RiAdminLine />}
+                  size="compact"
+                  rounded
+                  variant="dashed"
+                >
+                  {t("adminEditRelease")}
+                </FixedButtonLink>
+              )}
+            </>
+          )}
           {canEditArtist && !isAlbumPage && (
             <FixedButtonLink
               to={`/manage/artists/${artist.id}/customize`}

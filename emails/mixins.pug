@@ -1,0 +1,6 @@
+mixin currency(amount, currency, platformCut, paymentProcessorCut)
+  | #{currency.toUpperCase()} #{(amount / 100).toFixed(2)}
+  if (platformCut)
+    | (platform cut: #{(platformCut / 100).toFixed(2)})
+  if (paymentProcessorCut)
+    | (payment processor: #{(paymentProcessorCut / 100).toFixed(2)})

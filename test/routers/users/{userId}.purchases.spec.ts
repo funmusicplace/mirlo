@@ -36,15 +36,26 @@ describe("users/{userId}/purchases", () => {
       const trackGroup = await createTrackGroup(artist.id);
       const merch = await createMerch(artist.id);
 
+      const transaction = await prisma.userTransaction.create({
+        data: {
+          userId: purchaser.id,
+          amount: 10,
+          currency: "usd",
+          platformCut: 0,
+          stripeCut: 0,
+          createdAt: faker.date.between({
+            from: "2022-01-01T00:00:00.000Z",
+            to: "2023-01-01T00:00:00.000Z",
+          }),
+        },
+      });
+
       await prisma.userTrackGroupPurchase.create({
         data: {
           trackGroupId: trackGroup.id,
           userId: purchaser.id,
-          pricePaid: 10,
-          datePurchased: faker.date.between({
-            from: "2022-01-01T00:00:00.000Z",
-            to: "2023-01-01T00:00:00.000Z",
-          }),
+          userTransactionId: transaction.id,
+          createdAt: transaction.createdAt,
         },
       });
 
@@ -76,8 +87,14 @@ describe("users/{userId}/purchases", () => {
       assert.equal(response.body.results[1].trackGroup, false);
 
       assert.equal(response.body.results[0].userId, purchaser.id);
-      assert.equal(response.body.results[0].trackGroupId, trackGroup.id);
-      assert.equal(response.body.results[0].trackGroup.artistId, artist.id);
+      assert.equal(
+        response.body.results[0].trackGroupPurchases[0].trackGroupId,
+        trackGroup.id
+      );
+      assert.equal(
+        response.body.results[0].trackGroupPurchases[0].trackGroup.artistId,
+        artist.id
+      );
       assert.equal(response.body.results[0].merch, false);
     });
   });

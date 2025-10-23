@@ -15,7 +15,6 @@ import { requestApp } from "../utils";
 import {
   createBucketIfNotExists,
   finalAudioBucket,
-  trackFormatBucket,
 } from "../../../src/utils/minio";
 
 describe("trackGroups/{id}/download", () => {
@@ -65,7 +64,6 @@ describe("trackGroups/{id}/download", () => {
         data: {
           userId: purchaser.id,
           trackGroupId: trackGroup.id,
-          pricePaid: 0,
           singleDownloadToken: randomUUID(),
         },
       });
@@ -103,7 +101,6 @@ describe("trackGroups/{id}/download", () => {
         data: {
           userId: purchaser.id,
           trackGroupId: trackGroup.id,
-          pricePaid: 0,
           singleDownloadToken: downloadToken,
         },
       });

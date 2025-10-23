@@ -4,17 +4,6 @@ import {
   TRACK_GROUP_EXAMPLE,
 } from "../../test/mocks";
 
-type SnackbarRecord = {
-  msg: string;
-  type?: "success" | "warning";
-};
-
-declare global {
-  interface Window {
-    __mirloSnackbars?: SnackbarRecord[];
-  }
-}
-
 const newsletterEmail = "listener@example.com";
 const verificationCode = "123456";
 
@@ -56,10 +45,6 @@ const posts = [
 
 describe("home page", () => {
   beforeEach(() => {
-    cy.on("window:before:load", (win) => {
-      win.__mirloSnackbars = [];
-    });
-
     cy.intercept("GET", "/auth/profile", {
       statusCode: 200,
       body: { result: null },
@@ -106,10 +91,7 @@ describe("home page", () => {
       req.reply({
         statusCode: 200,
         body: {
-          results: [
-            { tag: "experimental" },
-            { tag: "ambient" },
-          ],
+          results: [{ tag: "experimental" }, { tag: "ambient" }],
           total: 2,
         },
       });
@@ -212,7 +194,10 @@ describe("home page", () => {
     cy.contains(
       "Mirlo's work is sustained by our community, not by venture capital."
     ).should("be.visible");
-    cy.get('a[href="/example-artist/support"]').should("contain", "Support Mirlo");
+    cy.get('a[href="/example-artist/support"]').should(
+      "contain",
+      "Support Mirlo"
+    );
 
     cy.contains("Get on the mailing list").should("be.visible");
     cy.contains("button", "Sign up").should("be.visible");

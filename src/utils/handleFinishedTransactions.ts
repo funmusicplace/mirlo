@@ -1,6 +1,6 @@
 import Stripe from "stripe";
 import prisma from "@mirlo/prisma";
-import { MerchOption } from "@mirlo/prisma/client";
+import { Artist, MerchOption, TrackGroup } from "@mirlo/prisma/client";
 
 import { logger } from "../logger";
 import sendMail from "../jobs/send-mail";
@@ -81,6 +81,87 @@ const getApplicationFee = async (session?: Stripe.Checkout.Session) => {
   }
 };
 
+export type AlbumPurchaseEmailType = {
+  trackGroup: {
+    title: string;
+    id: number;
+    artist: {
+      name: string;
+      id: number;
+      properties?: { emails?: { purchase?: string } };
+    };
+  };
+  purchase: {
+    id: number;
+    singleDownloadToken: string;
+    transaction?: {
+      amount: number;
+      currency: string;
+    };
+  };
+  isBeforeReleaseDate: boolean;
+  token: string;
+  email: string;
+  client: string;
+  host: string;
+};
+
+export type TrackPurchaseEmailType = {
+  track: {
+    title: string;
+    id: number;
+    trackGroup: TrackGroup;
+  };
+  purchase: {
+    singleDownloadToken: string;
+    transaction?: {
+      amount: number;
+      currency: string;
+    };
+  };
+  token: string;
+  email: string;
+  client: string;
+  host: string;
+};
+
+export type TrackPurchaseArtistNotificationEmailType = {
+  track: {
+    title: string;
+    id: number;
+    trackGroup: TrackGroup;
+  };
+  purchase: {
+    singleDownloadToken: string;
+    transaction?: {
+      amount: number;
+      currency: string;
+    };
+  };
+  pricePaid: number;
+  platformCut: number;
+  email: string;
+};
+
+export type AlbumPurchaseArtistNotificationEmailType = {
+  trackGroup: {
+    title: string;
+    id: number;
+    artist: { name: string; id: number; user: { name: string } };
+  };
+  purchase: {
+    singleDownloadToken: string;
+    transaction?: {
+      amount: number;
+      id: string;
+      currency: string;
+      stripeCut: number;
+      platformCut: number;
+    };
+  };
+  email: string;
+};
+
 export const handleTrackGroupPurchase = async (
   userId: number,
   trackGroupId: number,
@@ -117,8 +198,6 @@ export const handleTrackGroupPurchase = async (
       transactionId: transaction.id,
     });
 
-    const settings = await getSiteSettings();
-
     const user = await prisma.user.findFirst({
       where: {
         id: userId,
@@ -143,7 +222,7 @@ export const handleTrackGroupPurchase = async (
     if (user && trackGroup && purchase) {
       const isBeforeReleaseDate = new Date(trackGroup.releaseDate) > new Date();
 
-      await sendMail({
+      await sendMail<AlbumPurchaseEmailType>({
         data: {
           template: newUser ? "album-download" : "album-purchase-receipt",
           message: {
@@ -161,9 +240,7 @@ export const handleTrackGroupPurchase = async (
         },
       } as Job);
 
-      const pricePaid = purchase.pricePaid / 100;
-
-      await sendMail({
+      await sendMail<AlbumPurchaseArtistNotificationEmailType>({
         data: {
           template: "album-purchase-artist-notification",
           message: {
@@ -172,13 +249,8 @@ export const handleTrackGroupPurchase = async (
           locals: {
             trackGroup,
             purchase,
-            pricePaid,
-            platformCut:
-              ((trackGroup.platformPercent ?? settings.platformPercent) *
-                pricePaid) /
-              100,
             email: user.email,
-          },
+          } as AlbumPurchaseArtistNotificationEmailType,
         },
       } as Job);
 
@@ -358,7 +430,7 @@ export const handleTrackPurchase = async (
       const isBeforeReleaseDate =
         new Date(track.trackGroup.releaseDate) > new Date();
 
-      await sendMail({
+      await sendMail<TrackPurchaseEmailType>({
         data: {
           template: newUser ? "track-download" : "track-purchase-receipt",
           message: {
@@ -372,13 +444,13 @@ export const handleTrackPurchase = async (
             email: user.email,
             client: process.env.REACT_APP_CLIENT_DOMAIN,
             host: process.env.API_DOMAIN,
-          },
+          } as TrackPurchaseEmailType,
         },
       } as Job);
 
       const pricePaid = purchase.pricePaid / 100;
 
-      await sendMail({
+      await sendMail<TrackPurchaseArtistNotificationEmailType>({
         data: {
           template: "track-purchase-artist-notification",
           message: {
@@ -396,7 +468,7 @@ export const handleTrackPurchase = async (
                 pricePaid) /
               100,
             email: user.email,
-          },
+          } as TrackPurchaseArtistNotificationEmailType,
         },
       } as Job);
     }
@@ -405,6 +477,35 @@ export const handleTrackPurchase = async (
   } catch (e) {
     logger.error(`Error creating album purchase: ${e}`);
   }
+};
+
+export type ArtistTipReceiptEmailType = {
+  tip: {
+    id: string;
+    userId: number;
+    artist: {
+      name: string;
+      properties?: { emails?: { support?: string } };
+    };
+    artistId: number;
+    pricePaid: number;
+    currencyPaid: string;
+  };
+  pricePaid: number;
+  email: string;
+};
+
+export type ArtistTipNotificationEmailType = {
+  tip: {
+    id: string;
+    userId: number;
+    artistId: number;
+    pricePaid: number;
+    message: string | null;
+  };
+  pricePaid: number;
+  platformCut: number;
+  email: string;
 };
 
 export const handleArtistGift = async (
@@ -442,7 +543,7 @@ export const handleArtistGift = async (
     if (user && tip) {
       const pricePaid = tip.pricePaid / 100;
 
-      await sendMail({
+      await sendMail<ArtistTipReceiptEmailType>({
         data: {
           template: "artist-tip-receipt",
           message: {
@@ -454,13 +555,13 @@ export const handleArtistGift = async (
             pricePaid,
             client: process.env.REACT_APP_CLIENT_DOMAIN,
             host: process.env.API_DOMAIN,
-          },
+          } as ArtistTipReceiptEmailType,
         },
       } as Job);
 
       const platformCut = await calculateAppFee(pricePaid, tip.currencyPaid);
 
-      await sendMail({
+      await sendMail<ArtistTipNotificationEmailType>({
         data: {
           template: "tip-artist-notification",
           message: {
@@ -472,7 +573,7 @@ export const handleArtistGift = async (
             message: tip.message ?? null,
             platformCut,
             email: user.email,
-          },
+          } as ArtistTipNotificationEmailType,
         },
       } as Job);
     }
@@ -482,6 +583,36 @@ export const handleArtistGift = async (
     logger.error(`Error creating tip: ${e}`);
     throw e;
   }
+};
+
+export type ArtistMerchPurchaseReceiptEmailType = {
+  artist: Artist;
+  purchases: {
+    artistCut: number;
+    platformCut: number;
+    options: MerchOption[];
+    merchId: string;
+    merch: {
+      title: string;
+    };
+    quantity: string;
+    currencyPaid: string;
+    amountPaid: number;
+  }[];
+};
+
+export type TellArtistAboutMerchPurchaseEmailType = {
+  artist: Artist;
+  email: string;
+  purchases: {
+    merchId: string;
+    merch: {
+      title: string;
+    };
+    quantity: string;
+    currencyPaid: string;
+    amountPaid: number;
+  }[];
 };
 
 // FIXME: is it possible to refactor all checkout sessions to use line_items
@@ -563,7 +694,19 @@ export const handleArtistMerchPurchase = async (
                 `handleArtistMerchPurchase: userId: ${userId}, merchId: ${merchProduct.id}, amountPaid: ${item.amount_total}${item.currency}, options: ${options.map((o) => o.id).join(", ")}`
               );
 
-              const { applicationFee } = await getApplicationFee(session);
+              const { applicationFee, paymentProcessorFee } =
+                await getApplicationFee(session);
+
+              const transaction = await prisma.userTransaction.create({
+                data: {
+                  userId,
+                  amount: item.amount_total ?? 0,
+                  currency: item.currency ?? "usd",
+                  platformCut: applicationFee ?? null,
+                  stripeCut: paymentProcessorFee ?? null,
+                  stripeId: session?.id ?? "",
+                },
+              });
 
               const createdMerchPurchase = await prisma.merchPurchase.create({
                 data: {
@@ -578,6 +721,7 @@ export const handleArtistMerchPurchase = async (
                   billingAddress: session?.customer_details?.address,
                   platformCut: applicationFee ?? null,
                   quantity: item.quantity ?? 1,
+                  transactionId: transaction.id,
                   options: {
                     connect: options.map((o) => ({
                       id: o.id,
@@ -591,7 +735,6 @@ export const handleArtistMerchPurchase = async (
                   await prisma.userTrackGroupPurchase.create({
                     data: {
                       trackGroupId: merchProduct.includePurchaseTrackGroupId,
-                      pricePaid: 0,
                       userId: createdMerchPurchase.userId,
                     },
                   });
@@ -674,7 +817,7 @@ export const handleArtistMerchPurchase = async (
     });
 
     if (purchaser && purchases.length > 0 && purchases?.[0]?.merch?.artist) {
-      await sendMail({
+      await sendMail<ArtistMerchPurchaseReceiptEmailType>({
         data: {
           template: "artist-merch-purchase-receipt",
           message: {
@@ -690,7 +833,7 @@ export const handleArtistMerchPurchase = async (
         },
       } as Job);
 
-      await sendMail({
+      await sendMail<TellArtistAboutMerchPurchaseEmailType>({
         data: {
           template: "tell-artist-about-merch-purchase",
           message: {
@@ -714,6 +857,47 @@ export const handleArtistMerchPurchase = async (
   }
 };
 
+export type ArtistSubscriptionReceiptEmailType = {
+  interval: "monthly" | "yearly";
+  artist: Artist;
+  artistUserSubscription: {
+    id: number;
+    amount: number;
+    currency: string;
+    artistSubscriptionTierId: number;
+    artistSubscriptionTier: {
+      name: string;
+    };
+  };
+  user: {
+    name: string;
+    email: string;
+  };
+  email: string;
+  client: string;
+  host: string;
+};
+
+export type ArtistNewSubscriberAnnounceEmailType = {
+  interval: "monthly" | "yearly";
+  artist: Artist;
+  artistUserSubscription: {
+    artistSubscriptionTierId: number;
+    id: number;
+    amount: number;
+    artistSubscriptionTier: {
+      name: string;
+    };
+  };
+  user: {
+    name: string;
+    email: string;
+  };
+  email: string;
+  client: string;
+  host: string;
+};
+
 export const handleSubscription = async (
   userId: number,
   tierId: number,
@@ -731,7 +915,7 @@ export const handleSubscription = async (
     });
 
     if (artistUserSubscription) {
-      await sendMail({
+      await sendMail<ArtistSubscriptionReceiptEmailType>({
         data: {
           template: "artist-subscription-receipt",
           message: {
@@ -749,7 +933,7 @@ export const handleSubscription = async (
         },
       } as Job);
 
-      await sendMail({
+      await sendMail<ArtistNewSubscriberAnnounceEmailType>({
         data: {
           template: "artist-new-subscriber-announce",
           message: {

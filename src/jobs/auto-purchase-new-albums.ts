@@ -5,6 +5,21 @@ import logger from "../logger";
 import { registerPurchase } from "../utils/trackGroup";
 import { Job } from "bullmq";
 
+export type AutomaticallyReceivedAlbumEmailType = {
+  trackGroup: {
+    id: number;
+    title: string;
+    // add other properties if needed
+  };
+  artist: {
+    id: number;
+    name: string;
+    // add other properties if needed
+  };
+  host: string;
+  client: string;
+};
+
 const autoPurchaseNewAlbums = async () => {
   const currentDate = new Date();
   const tenMinutesAgo = new Date();
@@ -66,7 +81,7 @@ const autoPurchaseNewAlbums = async () => {
             paymentProcessorKey: null,
           });
 
-          return sendMail({
+          return sendMail<AutomaticallyReceivedAlbumEmailType>({
             data: {
               template: "automatically-received-album",
               message: {
@@ -77,7 +92,7 @@ const autoPurchaseNewAlbums = async () => {
                 artist: sub.artistSubscriptionTier.artist,
                 host: process.env.API_DOMAIN,
                 client: process.env.REACT_APP_CLIENT_DOMAIN,
-              },
+              } as AutomaticallyReceivedAlbumEmailType,
             },
           } as Job);
         })

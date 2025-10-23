@@ -116,7 +116,6 @@ describe("trackGroups/{id}/purchase", () => {
         },
       });
       assert(purchase);
-      assert.equal(purchase.pricePaid, 0);
       assert.notEqual(purchase.singleDownloadToken, null);
     });
 

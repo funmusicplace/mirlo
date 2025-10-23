@@ -13,6 +13,7 @@ import { queryUserStripeStatus } from "queries";
 import { useQuery } from "@tanstack/react-query";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import { querySetting } from "queries/settings";
+import { FaPlus } from "react-icons/fa";
 
 export const Manage: React.FC = () => {
   const { user } = useAuthContext();
@@ -89,16 +90,12 @@ export const Manage: React.FC = () => {
                     {a.name}
                   </ButtonLink>
                 ))}
-              <div
-                className={css`
-                  width: 100%;
-                `}
-              >
+              <div>
                 <ButtonLink
                   to="/manage/welcome"
                   buttonRole="primary"
+                  startIcon={<FaPlus />}
                   className={css`
-                    flex-grow: 1;
                     text-align: center;
                     border-radius: 6px;
                     justify-self: none;

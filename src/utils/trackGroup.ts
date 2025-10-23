@@ -336,11 +336,7 @@ export const registerPurchase = async ({
       data: {
         userId: Number(userId),
         trackGroupId: Number(trackGroupId),
-        platformCut: platformCut ?? null,
-        pricePaid,
-        currencyPaid,
         message: message ?? null,
-        stripeSessionKey: paymentProcessorKey,
         singleDownloadToken: token,
         userTransactionId: transactionId,
       },
@@ -362,6 +358,7 @@ export const registerPurchase = async ({
       trackGroupId: Number(trackGroupId),
     },
     include: {
+      transaction: true,
       trackGroup: {
         include: {
           artist: true,
@@ -417,6 +414,18 @@ export const registerTrackPurchase = async ({
   });
 
   if (purchase) {
+    let transaction;
+    if (!purchase.transactionId) {
+      transaction = await prisma.userTransaction.create({
+        data: {
+          userId: Number(userId),
+          amount: pricePaid,
+          currency: currencyPaid,
+          stripeId: paymentProcessorKey,
+          platformCut: platformCut,
+        },
+      });
+    }
     await prisma.userTrackPurchase.update({
       where: {
         userId_trackId: {
@@ -426,11 +435,21 @@ export const registerTrackPurchase = async ({
       },
       data: {
         singleDownloadToken: token,
+        transactionId: transaction?.id,
       },
     });
   }
 
   if (!purchase) {
+    const transaction = await prisma.userTransaction.create({
+      data: {
+        userId: Number(userId),
+        amount: pricePaid,
+        currency: currencyPaid,
+        stripeId: paymentProcessorKey,
+        platformCut: platformCut,
+      },
+    });
     purchase = await prisma.userTrackPurchase.create({
       data: {
         userId: Number(userId),
@@ -441,6 +460,7 @@ export const registerTrackPurchase = async ({
         stripeSessionKey: paymentProcessorKey,
         singleDownloadToken: token,
         platformCut: platformCut ?? null,
+        transactionId: transaction.id,
       },
     });
   }
@@ -460,6 +480,7 @@ export const registerTrackPurchase = async ({
           },
         },
       },
+      transaction: true,
       user: {
         select: {
           email: true,

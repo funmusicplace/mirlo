@@ -2,7 +2,7 @@ import { css } from "@emotion/css";
 import Money from "components/common/Money";
 import Table from "components/common/Table";
 import React from "react";
-import { Form, Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import api from "services/api";
 import { getReleaseUrl } from "utils/artist";
 import useAdminFilters from "./useAdminFilters";
@@ -12,15 +12,10 @@ import Button from "components/common/Button";
 import { InputEl } from "components/common/Input";
 import FormComponent from "components/common/FormComponent";
 
-interface AdminPurchase extends UserTrackGroupPurchase {
-  user: User;
-  trackGroup: TrackGroup;
-}
-
 const pageSize = 100;
 
 export const AdminPurchases: React.FC = () => {
-  const [results, setResults] = React.useState<AdminPurchase[]>([]);
+  const [results, setResults] = React.useState<UserTransaction[]>([]);
   const { page, PaginationComponent } = usePagination({ pageSize });
   const [purchasers, setPurchasers] = React.useState("");
   const [trackGroupId, setTrackGroupId] = React.useState("");
@@ -34,7 +29,7 @@ export const AdminPurchases: React.FC = () => {
     params.append("skip", `${pageSize * page}`);
     params.append("take", `${pageSize}`);
 
-    const { results } = await api.getMany<AdminPurchase>(
+    const { results } = await api.getMany<UserTransaction>(
       `admin/purchases?${params.toString() ?? ""}`
     );
     setResults(results);
@@ -50,11 +45,11 @@ export const AdminPurchases: React.FC = () => {
   }, [callback]);
 
   const total = results.reduce((aggr, r) => {
-    const currencyPaid = r.currencyPaid.toLowerCase();
+    const currencyPaid = r.currency.toLowerCase();
     if (aggr[currencyPaid]) {
-      aggr[currencyPaid] += r.pricePaid;
+      aggr[currencyPaid] += r.amount;
     } else {
-      aggr[currencyPaid] = r.pricePaid;
+      aggr[currencyPaid] = r.amount;
     }
     return aggr;
   }, {} as any);
@@ -155,30 +150,34 @@ export const AdminPurchases: React.FC = () => {
           </thead>
           <tbody>
             {results.map((purchase, index) => (
-              <tr key={purchase.trackGroupId + purchase.userId}>
+              <tr key={purchase.id}>
                 <td>{index + 1}</td>
 
                 <td>
                   {purchase.user.email} (userId: {purchase.userId})
                 </td>
                 <td>
-                  <Link
-                    to={getReleaseUrl(
-                      purchase.trackGroup.artist ?? {
-                        id: purchase.trackGroup.artistId!,
-                      },
-                      purchase.trackGroup
-                    )}
-                  >
-                    {purchase.trackGroup.title}
-                  </Link>{" "}
-                  (id: {purchase.trackGroup.id})
+                  {purchase.trackGroupPurchases?.map((tgp) => (
+                    <>
+                      <Link
+                        to={getReleaseUrl(
+                          tgp.trackGroup.artist ?? {
+                            id: tgp.trackGroup.artistId!,
+                          },
+                          tgp.trackGroup
+                        )}
+                      >
+                        {tgp.trackGroup.title}
+                      </Link>{" "}
+                      (id: {tgp.trackGroup.id})
+                    </>
+                  ))}
                 </td>
-                <td>{purchase.datePurchased}</td>
+                <td>{purchase.createdAt}</td>
                 <td>
                   <Money
-                    amount={purchase.pricePaid / 100}
-                    currency={purchase.currencyPaid}
+                    amount={purchase.amount / 100}
+                    currency={purchase.currency.toLowerCase()}
                   />
                 </td>
               </tr>

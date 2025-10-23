@@ -247,10 +247,14 @@ export function useDeleteArtistMutation() {
 
 export type Sale = {
   amount: number;
-  artist: Partial<Artist> & { id: number; urlSlug: string };
+  artist: (Partial<Artist> & { id: number; urlSlug: string })[];
   currency: string;
   datePurchased: string;
-  trackGroup?: Partial<TrackGroup> & { id: number; urlSlug: string };
+  trackGroupPurchases?: {
+    message: string;
+    trackGroupId: number;
+    trackGroup: TrackGroup;
+  }[];
   merch?: Partial<Merch> & { id: string; urlSlug: string };
   shippingAddress?: { country: string };
   quantity?: number;

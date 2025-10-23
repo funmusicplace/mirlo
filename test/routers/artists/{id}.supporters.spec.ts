@@ -51,7 +51,7 @@ describe("artists/{id}/supporters", () => {
     assert.equal(response.statusCode, 200);
     assert(response.body.result === 0);
   });
-  it("should GET / supporters correctly", async () => {
+  it("should GET / no supporters correctly", async () => {
     const { user } = await createUser({ email: "supporter@test.com" });
     const artist = await createArtist(user.id, {
       name: "Test artist",
@@ -84,10 +84,20 @@ describe("artists/{id}/supporters", () => {
       artistId: artist.id,
     });
 
+    const transaction = await prisma.userTransaction.create({
+      data: {
+        userId: user.id,
+        amount: 1000,
+        currency: "usd",
+        platformCut: 0,
+        stripeCut: 0,
+      },
+    });
+
     await prisma.userTrackGroupPurchase.create({
       data: {
         userId: user.id,
-        pricePaid: 1000,
+        userTransactionId: transaction.id,
         trackGroupId: trackGroup.id,
       },
     });
@@ -99,7 +109,13 @@ describe("artists/{id}/supporters", () => {
     assert.equal(response.statusCode, 200);
     assert.equal(response.body.results.length, 1);
     assert.equal(response.body.total, 1);
-    assert.equal(response.body.results[0].pricePaid, 1000);
+
+    assert.equal(response.body.results[0].amount, 1000);
+    assert.equal(
+      response.body.results[0].trackGroupPurchases[0].trackGroupId,
+      trackGroup.id
+    );
+
     assert.equal(response.body.totalAmount, 1000);
     assert.equal(response.body.totalSupporters, 1);
   });
@@ -127,10 +143,20 @@ describe("artists/{id}/supporters", () => {
       },
     });
 
+    const transaction = await prisma.userTransaction.create({
+      data: {
+        userId: user.id,
+        amount: 1000,
+        currency: "usd",
+        platformCut: 0,
+        stripeCut: 0,
+      },
+    });
+
     await prisma.userTrackGroupPurchase.create({
       data: {
         userId: user.id,
-        pricePaid: 1000,
+        userTransactionId: transaction.id,
         trackGroupId: trackGroup.id,
       },
     });
@@ -142,7 +168,7 @@ describe("artists/{id}/supporters", () => {
     assert.equal(response.statusCode, 200);
     assert.equal(response.body.results.length, 2);
     assert.equal(response.body.total, 2);
-    assert.equal(response.body.results[0].pricePaid, 1000);
+    assert.equal(response.body.results[0].amount, 1000);
     assert.equal(response.body.totalAmount, 4000);
     assert.equal(response.body.totalSupporters, 1);
   });

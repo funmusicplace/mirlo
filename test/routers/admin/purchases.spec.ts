@@ -59,11 +59,20 @@ describe("admin/purchases", () => {
 
       const trackGroup = await createTrackGroup(artist.id);
 
+      const transaction = await prisma.userTransaction.create({
+        data: {
+          userId: user.id,
+          amount: 0,
+          currency: "usd",
+          platformCut: 0,
+          stripeCut: 0,
+        },
+      });
       await prisma.userTrackGroupPurchase.create({
         data: {
           userId: user.id,
           trackGroupId: trackGroup.id,
-          pricePaid: 0,
+          userTransactionId: transaction.id,
         },
       });
 
@@ -106,12 +115,22 @@ describe("admin/purchases", () => {
         to: new Date(),
       });
 
+      const transaction = await prisma.userTransaction.create({
+        data: {
+          userId: user.id,
+          amount: 0,
+          currency: "usd",
+          platformCut: 0,
+          stripeCut: 0,
+          createdAt: thisMonthPurchase,
+        },
+      });
+
       await prisma.userTrackGroupPurchase.create({
         data: {
           userId: user.id,
           trackGroupId: trackGroup.id,
-          pricePaid: 0,
-          datePurchased: thisMonthPurchase,
+          userTransactionId: transaction.id,
         },
       });
 
@@ -120,12 +139,22 @@ describe("admin/purchases", () => {
         to: endOfMonth,
       });
 
+      const lastMonthTransaction = await prisma.userTransaction.create({
+        data: {
+          userId: secondPurchaser.id,
+          amount: 0,
+          currency: "usd",
+          platformCut: 0,
+          stripeCut: 0,
+          createdAt: lastMonthDate,
+        },
+      });
+
       await prisma.userTrackGroupPurchase.create({
         data: {
           userId: secondPurchaser.id,
           trackGroupId: trackGroup.id,
-          pricePaid: 0,
-          datePurchased: lastMonthDate,
+          userTransactionId: lastMonthTransaction.id,
         },
       });
 
@@ -136,7 +165,10 @@ describe("admin/purchases", () => {
 
       assert(response.statusCode === 200);
       assert.equal(response.body.results.length, 1);
-      assert.equal(response.body.results[0].trackGroupId, trackGroup.id);
+      assert.equal(
+        response.body.results[0].trackGroupPurchases[0].trackGroupId,
+        trackGroup.id
+      );
 
       const lastMonthResponse = await requestApp
         .get("admin/purchases?datePurchased=previousMonth")
@@ -146,7 +178,7 @@ describe("admin/purchases", () => {
       assert.equal(lastMonthResponse.statusCode, 200);
       assert.equal(lastMonthResponse.body.results.length, 1);
       assert.equal(
-        lastMonthResponse.body.results[0].trackGroupId,
+        lastMonthResponse.body.results[0].trackGroupPurchases[0].trackGroupId,
         trackGroup.id
       );
     });

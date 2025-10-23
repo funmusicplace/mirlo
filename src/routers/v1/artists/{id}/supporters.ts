@@ -109,7 +109,7 @@ const queryTracks = (
   });
 };
 
-const queryTrackGroups = (
+const queryUserTransactions = (
   artistId: number[],
   sinceDate?: string,
   untilDate?: string,
@@ -117,21 +117,38 @@ const queryTrackGroups = (
 ) => {
   const dateFilter = constructDateFilter(sinceDate, untilDate);
 
-  return prisma.userTrackGroupPurchase.findMany({
+  return prisma.userTransaction.findMany({
     where: {
-      pricePaid: { gt: 0 },
-      datePurchased: dateFilter,
-      trackGroup: {
-        id: { in: trackGroupIds },
-        artistId: { in: artistId },
+      amount: { gt: 0 },
+      createdAt: dateFilter,
+      trackGroupPurchases: {
+        some: {
+          trackGroupId: trackGroupIds ? { in: trackGroupIds } : undefined,
+          trackGroup: {
+            artistId: { in: artistId },
+          },
+        },
       },
     },
     select: {
-      pricePaid: true,
-      currencyPaid: true,
-      datePurchased: true,
-      trackGroup: { include: { artist: true } },
+      amount: true,
+      currency: true,
+      createdAt: true,
       userId: true,
+
+      trackGroupPurchases: {
+        select: {
+          message: true,
+          trackGroupId: true,
+          trackGroup: {
+            select: {
+              artist: { select: { name: true, id: true, urlSlug: true } },
+              title: true,
+              urlSlug: true,
+            },
+          },
+        },
+      },
     },
   });
 };
@@ -202,7 +219,7 @@ export const findSales = async ({
   let supporters: Awaited<ReturnType<typeof querySupporters>> = [];
   let tips: Awaited<ReturnType<typeof queryTips>> = [];
   let trackPurchases: Awaited<ReturnType<typeof queryTracks>> = [];
-  let trackGroupPurchases: Awaited<ReturnType<typeof queryTrackGroups>> = [];
+  let userTransactions: Awaited<ReturnType<typeof queryUserTransactions>> = [];
   let merchPurchases: Awaited<ReturnType<typeof queryMerch>> = [];
   if (!filters) {
     supporters = await querySupporters(artistId, sinceDate, untilDate);
@@ -211,7 +228,7 @@ export const findSales = async ({
 
     trackPurchases = await queryTracks(artistId, sinceDate, untilDate);
 
-    trackGroupPurchases = await queryTrackGroups(
+    userTransactions = await queryUserTransactions(
       artistId,
       sinceDate,
       untilDate
@@ -219,7 +236,7 @@ export const findSales = async ({
 
     merchPurchases = await queryMerch(artistId, sinceDate, untilDate);
   } else if (filters.trackGroupIds) {
-    trackGroupPurchases = await queryTrackGroups(
+    userTransactions = await queryUserTransactions(
       artistId,
       sinceDate,
       untilDate,
@@ -230,7 +247,7 @@ export const findSales = async ({
   return [
     ...supporters.map((s) => ({
       ...s,
-      artist: s.artistUserSubscription.artistSubscriptionTier.artist,
+      artist: [s.artistUserSubscription.artistSubscriptionTier.artist],
       amount: s.artistUserSubscription.amount,
       artistSubscriptionTier: s.artistUserSubscription.artistSubscriptionTier,
       title: `${s.artistUserSubscription.artistSubscriptionTier.name}`,
@@ -241,6 +258,7 @@ export const findSales = async ({
     })),
     ...tips.map((t) => ({
       ...t,
+      artist: [t.artist],
       amount: t.pricePaid,
       currency: t.currencyPaid,
       title: `Tip`,
@@ -249,25 +267,30 @@ export const findSales = async ({
     ...trackPurchases.map((tp) => ({
       ...tp,
       urlSlug: tp.track.urlSlug,
-      artist: tp.track.trackGroup.artist,
+      artist: [tp.track.trackGroup.artist],
       amount: tp.pricePaid,
       currency: tp.currencyPaid,
       title: tp.track.title,
       saleType: "track",
     })),
-    ...trackGroupPurchases.map((tgp) => ({
-      ...tgp,
-      title: tgp.trackGroup.title,
-      artist: tgp.trackGroup.artist,
-      urlSlug: tgp.trackGroup.urlSlug,
-      amount: tgp.pricePaid,
-      currency: tgp.currencyPaid,
-      saleType: "trackGroup",
+    ...userTransactions.map((ut) => ({
+      ...ut,
+      datePurchased: ut.createdAt,
+      title: ut.trackGroupPurchases
+        .map((tgp) => tgp.trackGroup.title)
+        .join(", "),
+      artist: ut.trackGroupPurchases.map((tgp) => tgp.trackGroup.artist),
+      urlSlug: ut.trackGroupPurchases
+        .map((tgp) => tgp.trackGroup.urlSlug)
+        .join(", "),
+      amount: ut.amount,
+      currency: ut.currency,
+      saleType: "transaction",
     })),
     ...merchPurchases.map((mp) => ({
       ...mp,
       title: mp.merch.title,
-      artist: mp.merch.artist,
+      artist: [mp.merch.artist],
       datePurchased: mp.createdAt,
       amount: mp.amountPaid,
       urlSlug: mp.merch.urlSlug,

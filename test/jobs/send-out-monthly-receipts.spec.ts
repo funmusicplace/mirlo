@@ -4,7 +4,9 @@ import { describe, it } from "mocha";
 
 import { clearTables, createPost, createUser } from "../utils";
 
-import sendOutMonthlyReceipts from "../../src/jobs/send-out-monthly-receipts";
+import sendOutMonthlyReceipts, {
+  AnnounceMonthlyReceiptsEmailType,
+} from "../../src/jobs/send-out-monthly-receipts";
 import prisma from "@mirlo/prisma";
 import assert from "assert";
 import * as sendMail from "../../src/jobs/send-mail";
@@ -66,8 +68,10 @@ describe("send-out-monthly-receipts", () => {
     const data0 = stub.getCall(0).args[0].data;
     assert.equal(data0.template, "announce-monthly-receipts");
     assert.equal(data0.message.to, "follower@follower.com");
-    assert.equal(data0.locals.userSubscriptions.length, 1);
-    assert.equal(data0.locals.user.email, followerUser.email);
+    const locals = data0.locals as AnnounceMonthlyReceiptsEmailType;
+
+    assert.equal(locals.userSubscriptions.length, 1);
+    assert.equal(locals.user.email, followerUser.email);
   });
 
   it("should not send out monthly receipt if amount is 0", async () => {
@@ -180,12 +184,13 @@ describe("send-out-monthly-receipts", () => {
     const data0 = stub.getCall(0).args[0].data;
     assert.equal(data0.template, "announce-monthly-receipts");
     assert.equal(data0.message.to, "follower@follower.com");
-    assert.equal(data0.locals.userSubscriptions[0].amount, 5);
+    const locals = data0.locals as AnnounceMonthlyReceiptsEmailType;
+    assert.equal(locals.userSubscriptions[0].amount, 5);
     assert.equal(
-      data0.locals.userSubscriptions[0].artistSubscriptionTier.artistId,
+      locals.userSubscriptions[0].artistSubscriptionTier.artistId,
       artist2.id
     );
-    assert.equal(data0.locals.userSubscriptions.length, 1);
-    assert.equal(data0.locals.user.email, followerUser.email);
+    assert.equal(locals.userSubscriptions.length, 1);
+    assert.equal(locals.user.email, followerUser.email);
   });
 });

@@ -27,7 +27,7 @@ const SalesRow: React.FC<{
   return (
     <tr>
       <td />
-      <td>{sale.artist.name}</td>
+      <td>{sale.artist[0].name}</td>
       <td>
         {moneyDisplay({ amount: sale.amount / 100, currency: sale.currency })}
         {sale.shippingAddress && (
@@ -49,7 +49,7 @@ const SalesRow: React.FC<{
       </td>
       <td>{formatDate({ date: sale.datePurchased, i18n })} </td>
       <td>
-        {sale.trackGroup
+        {sale.trackGroupPurchases?.length
           ? t("trackGroup")
           : sale.merch
             ? t("merch")
@@ -60,15 +60,20 @@ const SalesRow: React.FC<{
                 : t("tip")}
       </td>
       <td>
-        {sale.trackGroup ? (
+        {sale.trackGroupPurchases?.length ? (
           <span>
-            <Link to={getReleaseUrl(sale.artist, sale.trackGroup)}>
-              {sale.trackGroup.title}
-            </Link>
+            {sale.trackGroupPurchases.map((group) => (
+              <Link
+                key={group.trackGroupId}
+                to={getReleaseUrl(sale.artist[0], group.trackGroup)}
+              >
+                {group.message}
+              </Link>
+            ))}
           </span>
         ) : sale.merch ? (
           <span>
-            <Link to={getMerchUrl(sale.artist, sale.merch)}>
+            <Link to={getMerchUrl(sale.artist[0], sale.merch)}>
               {sale.merch.title}
             </Link>{" "}
             (
@@ -80,7 +85,11 @@ const SalesRow: React.FC<{
         ) : sale.track ? (
           <span>
             <Link
-              to={getTrackUrl(sale.artist, sale.track.trackGroup, sale.track)}
+              to={getTrackUrl(
+                sale.artist[0],
+                sale.track.trackGroup,
+                sale.track
+              )}
             >
               {sale.track.title}
             </Link>
