@@ -26,16 +26,15 @@ function YourPurchases() {
   const { user } = useAuthContext();
   const userId = user?.id;
 
-  const [purchases, setPurchases] =
-    React.useState<(UserTrackGroupPurchase | MerchPurchase)[]>();
+  const [purchases, setPurchases] = React.useState<UserTransaction[]>();
   const { t } = useTranslation("translation", { keyPrefix: "profile" });
   const [charges, setCharges] =
     React.useState<ArtistUserSubscriptionCharge[]>();
 
   const fetchPurchases = React.useCallback(async () => {
-    const { results } = await api.getMany<
-      UserTrackGroupPurchase | MerchPurchase
-    >(`users/${userId}/purchases`);
+    const { results } = await api.getMany<UserTransaction>(
+      `users/${userId}/purchases`
+    );
     setPurchases(results);
     const { results: fetchedCharges } =
       await api.getMany<ArtistUserSubscriptionCharge>(
