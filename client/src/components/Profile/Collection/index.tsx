@@ -78,20 +78,14 @@ function Profile() {
               ))}
             <TrackgroupGrid gridNumber={"4"}>
               {purchases?.map((purchase) => {
-                if (
-                  isUserTransaction(purchase) &&
-                  purchase.trackGroupPurchases
-                ) {
+                if (purchase.trackGroupPurchases?.[0]) {
                   return (
                     <CollectionPurchaseSquare
                       trackGroup={purchase.trackGroupPurchases[0].trackGroup}
                       key={purchase.id}
                     />
                   );
-                } else if (
-                  isUserTransaction(purchase) &&
-                  purchase.trackPurchases?.[0]?.track
-                ) {
+                } else if (purchase.trackPurchases?.[0]?.track) {
                   return (
                     <CollectionPurchaseSquare
                       trackGroup={purchase.trackPurchases[0].track?.trackGroup}

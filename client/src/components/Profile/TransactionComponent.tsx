@@ -102,7 +102,7 @@ const TransactionComponent: React.FC<{
           <Trans
             t={t}
             i18nKey="albumLink"
-            values={{ albumTitle: title, artistName: artist.name }}
+            values={{ albumTitle: title, artistName: artist?.name }}
             components={{
               albumLink: <Link to={url}></Link>,
               artistLink: <Link to={getArtistUrl(artist)}></Link>,
