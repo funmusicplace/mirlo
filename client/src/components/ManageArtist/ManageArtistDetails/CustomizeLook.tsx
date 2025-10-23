@@ -1,5 +1,4 @@
 import React from "react";
-import Button from "../../common/Button";
 import { FormProvider, useForm } from "react-hook-form";
 import { bp } from "../../../constants";
 import FormComponent from "components/common/FormComponent";
@@ -351,24 +350,22 @@ export const CustomizeLook: React.FC = () => {
                 />
                 <small>{t("defaultPlatformFeeDescription")}</small>
               </FormComponent>
-              <FeatureFlag featureFlag="maxFreePlays">
-                <FormComponent
-                  className={css`
-                    width: 300px;
-                  `}
-                >
-                  <label>{t("maxFreePlays")}</label>
-                  <SavingInput
-                    type="number"
-                    min={0}
-                    step={1}
-                    placeholder="0"
-                    url={`manage/artists/${artist.id}`}
-                    formKey="maxFreePlays"
-                  />
-                  <small>{t("maxFreePlaysDescription")}</small>
-                </FormComponent>
-              </FeatureFlag>
+              <FormComponent
+                className={css`
+                  width: 300px;
+                `}
+              >
+                <label>{t("maxFreePlays")}</label>
+                <SavingInput
+                  type="number"
+                  min={0}
+                  step={1}
+                  placeholder=""
+                  url={`manage/artists/${artist.id}`}
+                  formKey="maxFreePlays"
+                />
+                <small>{t("maxFreePlaysDescription")}</small>
+              </FormComponent>
             </ArtistFormSection>
             <FeatureFlag featureFlag="activityPub">
               <ArtistFormSection

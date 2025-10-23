@@ -210,7 +210,7 @@ export const canUserListenToTrack = async (trackId?: number, user?: User) => {
       }
 
       const maxFreePlays = track.trackGroup?.artist?.maxFreePlays;
-      if (maxFreePlays) {
+      if (!!maxFreePlays) {
         const userPlays = await prisma.trackPlay.count({
           where: {
             userId: user.id,
