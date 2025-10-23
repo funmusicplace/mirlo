@@ -374,6 +374,7 @@ interface UserTransaction {
   id: string;
   trackGroupPurchases?: TrackGroupPurchaseWithTrackGroup[];
   merchPurchases?: MerchPurchaseWithMerch[];
+  trackPurchases?: UserTrackPurchase[];
 }
 
 interface UserTrackGroupPurchase {

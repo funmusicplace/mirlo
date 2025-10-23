@@ -69,7 +69,7 @@ describe("send-out-monthly-income-report", () => {
         amountPaid: 5,
         paymentProcessor: "stripe",
         createdAt: faker.date.recent({
-          days: 30,
+          days: 28,
           refDate: new Date(new Date().setDate(1)),
         }),
         currency: "usd",

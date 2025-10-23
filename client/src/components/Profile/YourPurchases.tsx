@@ -100,46 +100,9 @@ function YourPurchases() {
                 `}
               >
                 {purchases.map((p) => (
-                  <li
-                    key={
-                      isTrackPurchase(p)
-                        ? p.track?.id
-                        : isMerchPurchase(p)
-                          ? p.merch?.id
-                          : isUserTransaction(p)
-                            ? p.id
-                            : ""
-                    }
-                  >
+                  <li key={isUserTransaction(p) ? p.id : ""}>
                     {isUserTransaction(p) && (
                       <TransactionComponent userTransaction={p} />
-                    )}
-                    {isTrackPurchase(p) && p.track && (
-                      <PurchaseComponent
-                        title={p.track.title}
-                        imageSrc={p.track.trackGroup.cover?.sizes?.[60]}
-                        currencyPaid={p.currencyPaid}
-                        pricePaid={p.pricePaid}
-                        artist={p.track.trackGroup.artist}
-                        url={getTrackUrl(
-                          p.track.trackGroup.artist,
-                          p.track.trackGroup,
-                          p.track
-                        )}
-                        purchaseDate={p.datePurchased}
-                      />
-                    )}
-                    {isMerchPurchase(p) && p.merch && (
-                      <PurchaseComponent
-                        title={p.merch.title}
-                        imageSrc={p.merch.images[0]?.sizes?.[60]}
-                        currencyPaid={p.currencyPaid}
-                        pricePaid={p.amountPaid}
-                        artist={p.merch.artist}
-                        purchaseDate={p.createdAt}
-                        url={getMerchUrl(p.merch.artist, p.merch)}
-                        merchPurchase={p}
-                      />
                     )}
                   </li>
                 ))}

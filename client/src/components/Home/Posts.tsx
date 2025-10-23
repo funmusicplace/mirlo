@@ -29,6 +29,7 @@ const Posts = () => {
         <div
           className={css`
             padding-top: 1rem;
+            margin-bottom: 5rem;
           `}
         >
           <SectionHeader className={css``}>
