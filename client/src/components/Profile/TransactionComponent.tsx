@@ -49,27 +49,37 @@ const TransactionComponent: React.FC<{
   console.log("userTransaction", userTransaction);
   const isTrackGroupPurchase = !!userTransaction.trackGroupPurchases?.length;
   const isMerchPurchase = !!userTransaction.merchPurchases?.length;
+  const isTrackPurchase = !!userTransaction.trackPurchases?.length;
 
   const imageSrc = isTrackGroupPurchase
     ? userTransaction.trackGroupPurchases?.[0]?.trackGroup?.cover?.sizes?.[60]
     : isMerchPurchase
       ? userTransaction.merchPurchases?.[0]?.merch?.images?.[0]?.sizes?.[60]
-      : undefined;
+      : isTrackPurchase
+        ? userTransaction.trackPurchases?.[0]?.track?.trackGroup?.cover
+            ?.sizes?.[60]
+        : undefined;
   const title = isTrackGroupPurchase
     ? userTransaction.trackGroupPurchases?.[0]?.trackGroup?.title
     : isMerchPurchase
       ? userTransaction.merchPurchases?.[0]?.merch?.title
-      : undefined;
+      : isTrackPurchase
+        ? userTransaction.trackPurchases?.[0]?.track?.title
+        : undefined;
   const artist = isTrackGroupPurchase
     ? userTransaction.trackGroupPurchases?.[0]?.trackGroup?.artist
     : isMerchPurchase
       ? userTransaction.merchPurchases?.[0]?.merch?.artist
-      : undefined;
+      : isTrackPurchase
+        ? userTransaction.trackPurchases?.[0]?.track?.trackGroup?.artist
+        : undefined;
   const url = isTrackGroupPurchase
     ? `/${artist?.urlSlug}/release/${userTransaction.trackGroupPurchases?.[0]?.trackGroup?.urlSlug}`
     : isMerchPurchase
       ? `/${artist?.urlSlug}/merch/${userTransaction.merchPurchases?.[0]?.merch?.urlSlug}`
-      : "";
+      : isTrackPurchase
+        ? `/${artist?.urlSlug}/release/${userTransaction.trackPurchases?.[0]?.track?.trackGroup?.urlSlug}/tracks/${userTransaction.trackPurchases?.[0]?.track?.urlSlug ?? userTransaction.trackPurchases?.[0]?.track?.id}`
+        : "#";
 
   return (
     <>

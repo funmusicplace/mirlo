@@ -84,6 +84,7 @@ interface Track {
     link?: string;
   };
   isrc?: string;
+  urlSlug?: string;
   lyrics?: string;
 }
 
