@@ -152,6 +152,7 @@
     "shipped": "Shipped",
     "completed": "Completed",
     "started": "Started",
+    "no_progress": "No progress",
     "noprogress": "No progress",
     "name": "Name:",
     "noPurchases": "You haven't bought anything on Mirlo yet.",
@@ -283,6 +284,7 @@
     "totalResults": "Total results: {{count}}",
     "lastUpdated": "Last updated",
     "noProgress": "No progress",
+    "no_progress": "No progress",
     "started": "Started",
     "shipped": "Shipped",
     "completed": "Completed",
@@ -500,6 +502,7 @@
   },
   "post": {
     "postByArtist": "by <link></link>",
+    "postBy": "by <link>{{artistName}}</link>",
     "byArtist": "by {{artist}}",
     "noPostFound": "No post found",
     "returnToArtist": ", return to <link>{{artistName}}</link>",

@@ -120,11 +120,7 @@ const PostCard: React.FC<{
 }> = ({ post }) => {
   const postUrl = getPostURLReference(post);
   const postContainerProps = useLinkContainer({ to: postUrl });
-  const { t } = useTranslation("translation", { keyPrefix: "artist" });
-
-  const { i18n, t: postT } = useTranslation("translation", {
-    keyPrefix: "post",
-  });
+  const { t, i18n } = useTranslation("translation", { keyPrefix: "post" });
 
   const { artistId } = useParams();
 
@@ -132,6 +128,8 @@ const PostCard: React.FC<{
 
   const LinkToUse = isOnArtistPage ? ArtistButtonLink : Link;
   const artistBackground = post.artist?.properties?.colors?.background;
+
+  console.log("post", post);
 
   return (
     <PostContainer
@@ -222,8 +220,8 @@ const PostCard: React.FC<{
                 `}
               >
                 <Trans
-                  t={postT}
-                  i18nKey="postByArtist"
+                  t={t}
+                  i18nKey="postBy"
                   values={{ artistName: post.artist?.name }}
                   components={{
                     link: (

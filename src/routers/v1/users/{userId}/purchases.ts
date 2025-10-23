@@ -8,6 +8,7 @@ import {
   isMerchPurchase,
   isTrackGroupPurchase,
   isTrackPurchase,
+  isUserTransaction,
 } from "../../../../utils/typeguards";
 
 type Params = {
@@ -24,7 +25,7 @@ export default function () {
 
     const loggedInUser = req.user as User;
     if (Number(userId) === Number(loggedInUser.id)) {
-      const trackGroupPurchases = await prisma.userTransaction.findMany({
+      const transactions = await prisma.userTransaction.findMany({
         where: {
           userId: Number(userId),
         },
@@ -44,35 +45,27 @@ export default function () {
               },
             },
           },
-        },
-      });
-
-      const merchPurchases = await prisma.merchPurchase.findMany({
-        where: {
-          userId: Number(userId),
-        },
-        include: {
-          merch: {
+          merchPurchases: {
             include: {
-              artist: true,
-              includePurchaseTrackGroup: true,
-              images: true,
-            },
-          },
-        },
-      });
-
-      const trackPurchases = await prisma.userTrackPurchase.findMany({
-        where: {
-          userId: Number(userId),
-        },
-        include: {
-          track: {
-            include: {
-              trackGroup: {
+              merch: {
                 include: {
                   artist: true,
-                  cover: true,
+                  includePurchaseTrackGroup: true,
+                  images: true,
+                },
+              },
+            },
+          },
+          trackPurchases: {
+            include: {
+              track: {
+                include: {
+                  trackGroup: {
+                    include: {
+                      artist: true,
+                      cover: true,
+                    },
+                  },
                 },
               },
             },
@@ -80,31 +73,28 @@ export default function () {
         },
       });
 
-      const mergedPurchases = [
-        ...merchPurchases,
-        ...trackGroupPurchases,
-        ...trackPurchases,
-      ].sort((a, b) => {
-        const timeA = isTrackPurchase(a) ? a.datePurchased : a.createdAt;
-        const timeB = isTrackPurchase(b) ? b.datePurchased : b.createdAt;
-        return timeA > timeB ? -1 : 1;
+      const mergedPurchases = [...transactions].sort((a, b) => {
+        return a.createdAt > b.createdAt ? -1 : 1;
       });
 
       res.json({
         results: mergedPurchases.map((p) => ({
           ...p,
-          trackGroup:
-            isTrackGroupPurchase(p) && trackGroupProcessor.single(p.trackGroup),
-          merch: isMerchPurchase(p) && processSingleMerch(p.merch),
-          ...(isTrackPurchase(p)
-            ? {
-                track: {
-                  ...p.track,
-                  trackGroup: trackGroupProcessor.single(p.track.trackGroup),
-                },
-                trackGroup: trackGroupProcessor.single(p.track.trackGroup),
-              }
-            : {}),
+          trackGroupPurchases: p.trackGroupPurchases?.map((tgp) => ({
+            ...tgp,
+            trackGroup: trackGroupProcessor.single(tgp.trackGroup),
+          })),
+          merchPurchases: p.merchPurchases?.map((mp) => ({
+            ...mp,
+            merch: processSingleMerch(mp.merch),
+          })),
+          trackPurchases: p.trackPurchases?.map((tp) => ({
+            ...tp,
+            track: {
+              ...tp.track,
+              trackGroup: trackGroupProcessor.single(tp.track.trackGroup),
+            },
+          })),
         })),
       });
     } else {

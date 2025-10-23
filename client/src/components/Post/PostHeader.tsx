@@ -37,9 +37,14 @@ const AvatarLink: React.FC<{
   name?: string;
   to: string;
 }> = ({ avatar, name, to }) => (
-  <Link to={to}>
-    <Avatar avatar={avatar} />
-    <span>{name}</span>
+  <Link
+    to={to}
+    className={css`
+      display: flex;
+      gap: 0.25rem;
+    `}
+  >
+    <Avatar avatar={avatar} /> <span>{name}</span>
   </Link>
 );
 

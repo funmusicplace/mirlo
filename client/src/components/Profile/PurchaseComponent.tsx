@@ -77,29 +77,7 @@ const PurchaseComponent: React.FC<{
           </div>
         </div>
       </div>
-      {merchPurchase && (
-        <div
-          className={css`
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-          `}
-        >
-          <Tooltip hoverText={t("theStatusOfThisMerchFulfillment")}>
-            {t(merchPurchase.fulfillmentStatus).toLowerCase()}
-          </Tooltip>
-          <Button onClick={() => setIsViewingMerchPopUp(true)}>
-            {t("viewDetails")}
-          </Button>
-          <Modal
-            open={isViewingMerchPopUp}
-            onClose={() => setIsViewingMerchPopUp(false)}
-            title={t("purchaseDetails")}
-          >
-            <MerchPopUp purchase={merchPurchase} />
-          </Modal>
-        </div>
-      )}
+
       <span>
         {t("paid", {
           amount: moneyDisplay({

@@ -7,7 +7,11 @@ import { Trans, useTranslation } from "react-i18next";
 import WidthContainer from "components/common/WidthContainer";
 import { useAuthContext } from "state/AuthContext";
 import CollectionPurchaseSquare from "./CollectionPurchaseSquare";
-import { isTrackGroupPurchase, isTrackPurchase } from "types/typeguards";
+import {
+  isTrackGroupPurchase,
+  isTrackPurchase,
+  isUserTransaction,
+} from "types/typeguards";
 import { Link } from "react-router-dom";
 
 type PurchaseResponse =
@@ -87,7 +91,7 @@ function Profile() {
                   return (
                     <CollectionPurchaseSquare
                       trackGroup={purchase.trackGroup}
-                      key={purchase.trackGroupId}
+                      key={purchase.trackGroup?.id}
                     />
                   );
                 } else if (isTrackPurchase(purchase)) {

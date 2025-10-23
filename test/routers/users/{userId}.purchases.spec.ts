@@ -59,6 +59,20 @@ describe("users/{userId}/purchases", () => {
         },
       });
 
+      const merchTransaction = await prisma.userTransaction.create({
+        data: {
+          userId: purchaser.id,
+          amount: 10,
+          currency: "usd",
+          platformCut: 0,
+          stripeCut: 0,
+          createdAt: faker.date.between({
+            from: "2020-01-01T00:00:00.000Z",
+            to: "2021-01-01T00:00:00.000Z",
+          }),
+        },
+      });
+
       await prisma.merchPurchase.create({
         data: {
           merchId: merch.id,
@@ -67,10 +81,8 @@ describe("users/{userId}/purchases", () => {
           currencyPaid: "usd",
           quantity: 1,
           fulfillmentStatus: "NO_PROGRESS",
-          createdAt: faker.date.between({
-            from: "2020-01-01T00:00:00.000Z",
-            to: "2021-01-01T00:00:00.000Z",
-          }),
+          transactionId: merchTransaction.id,
+          createdAt: merchTransaction.createdAt,
         },
       });
 
@@ -82,9 +94,15 @@ describe("users/{userId}/purchases", () => {
       assert.equal(response.statusCode, 200);
 
       assert.equal(response.body.results[1].userId, purchaser.id);
-      assert.equal(response.body.results[1].merchId, merch.id);
-      assert.equal(response.body.results[1].merch.artistId, artist.id);
-      assert.equal(response.body.results[1].trackGroup, false);
+      assert.equal(
+        response.body.results[1].merchPurchases[0].merchId,
+        merch.id
+      );
+      assert.equal(
+        response.body.results[1].merchPurchases[0].merch.artistId,
+        artist.id
+      );
+      assert.equal(response.body.results[1].trackGroupPurchases.length, 0);
 
       assert.equal(response.body.results[0].userId, purchaser.id);
       assert.equal(
@@ -95,7 +113,7 @@ describe("users/{userId}/purchases", () => {
         response.body.results[0].trackGroupPurchases[0].trackGroup.artistId,
         artist.id
       );
-      assert.equal(response.body.results[0].merch, false);
+      assert.equal(response.body.results[0].merchPurchases.length, 0);
     });
   });
 });

@@ -11,21 +11,65 @@ import Tooltip from "components/common/Tooltip";
 import Modal from "components/common/Modal";
 import MerchPopUp from "./MerchPopUp";
 
+const MerchPurchaseDetails: React.FC<{
+  merchPurchase: MerchPurchase;
+}> = ({ merchPurchase }) => {
+  const { t, i18n } = useTranslation("translation", { keyPrefix: "profile" });
+  const [isViewingMerchPopUp, setIsViewingMerchPopUp] = React.useState(false);
+
+  return (
+    <div
+      className={css`
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      `}
+    >
+      <Tooltip hoverText={t("theStatusOfThisMerchFulfillment")}>
+        {t(merchPurchase.fulfillmentStatus.toLowerCase())}
+      </Tooltip>
+      <Button onClick={() => setIsViewingMerchPopUp(true)}>
+        {t("viewDetails")}
+      </Button>
+      <Modal
+        open={isViewingMerchPopUp}
+        onClose={() => setIsViewingMerchPopUp(false)}
+        title={t("purchaseDetails")}
+      >
+        <MerchPopUp purchase={merchPurchase} />
+      </Modal>
+    </div>
+  );
+};
+
 const TransactionComponent: React.FC<{
   userTransaction: UserTransaction;
 }> = ({ userTransaction }) => {
   const { t, i18n } = useTranslation("translation", { keyPrefix: "profile" });
-  const [isViewingMerchPopUp, setIsViewingMerchPopUp] = React.useState(false);
+  console.log("userTransaction", userTransaction);
+  const isTrackGroupPurchase = !!userTransaction.trackGroupPurchases?.length;
+  const isMerchPurchase = !!userTransaction.merchPurchases?.length;
 
-  const imageSrc =
-    userTransaction.trackGroupPurchases?.[0]?.trackGroup?.cover?.sizes?.[60];
-  const title = userTransaction.trackGroupPurchases?.[0]?.trackGroup?.title;
-  const artist = userTransaction.trackGroupPurchases?.[0]?.trackGroup
-    ?.artist ?? {
-    id: "",
-    name: "",
-  };
-  const url = `/release/${userTransaction.trackGroupPurchases?.[0]?.trackGroupId}`;
+  const imageSrc = isTrackGroupPurchase
+    ? userTransaction.trackGroupPurchases?.[0]?.trackGroup?.cover?.sizes?.[60]
+    : isMerchPurchase
+      ? userTransaction.merchPurchases?.[0]?.merch?.images?.[0]?.sizes?.[60]
+      : undefined;
+  const title = isTrackGroupPurchase
+    ? userTransaction.trackGroupPurchases?.[0]?.trackGroup?.title
+    : isMerchPurchase
+      ? userTransaction.merchPurchases?.[0]?.merch?.title
+      : undefined;
+  const artist = isTrackGroupPurchase
+    ? userTransaction.trackGroupPurchases?.[0]?.trackGroup?.artist
+    : isMerchPurchase
+      ? userTransaction.merchPurchases?.[0]?.merch?.artist
+      : undefined;
+  const url = isTrackGroupPurchase
+    ? `/${artist?.urlSlug}/release/${userTransaction.trackGroupPurchases?.[0]?.trackGroup?.urlSlug}`
+    : isMerchPurchase
+      ? `/${artist?.urlSlug}/merch/${userTransaction.merchPurchases?.[0]?.merch?.urlSlug}`
+      : "";
 
   return (
     <>
@@ -71,29 +115,11 @@ const TransactionComponent: React.FC<{
           </div>
         </div>
       </div>
-      {/* {merchPurchase && (
-        <div
-          className={css`
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-          `}
-        >
-          <Tooltip hoverText={t("theStatusOfThisMerchFulfillment")}>
-            {t(merchPurchase.fulfillmentStatus).toLowerCase()}
-          </Tooltip>
-          <Button onClick={() => setIsViewingMerchPopUp(true)}>
-            {t("viewDetails")}
-          </Button>
-          <Modal
-            open={isViewingMerchPopUp}
-            onClose={() => setIsViewingMerchPopUp(false)}
-            title={t("purchaseDetails")}
-          >
-            <MerchPopUp purchase={merchPurchase} />
-          </Modal>
-        </div>
-      )} */}
+      {isMerchPurchase && userTransaction.merchPurchases?.[0] && (
+        <MerchPurchaseDetails
+          merchPurchase={userTransaction.merchPurchases?.[0]}
+        />
+      )}
       <span>
         {t("paid", {
           amount: moneyDisplay({
