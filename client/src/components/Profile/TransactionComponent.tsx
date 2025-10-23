@@ -99,15 +99,17 @@ const TransactionComponent: React.FC<{
           </div>
         )}
         <div>
-          <Trans
-            t={t}
-            i18nKey="albumLink"
-            values={{ albumTitle: title, artistName: artist?.name }}
-            components={{
-              albumLink: <Link to={url}></Link>,
-              artistLink: <Link to={getArtistUrl(artist)}></Link>,
-            }}
-          />
+          {artist && (
+            <Trans
+              t={t}
+              i18nKey="albumLink"
+              values={{ albumTitle: title, artistName: artist.name }}
+              components={{
+                albumLink: <Link to={url}></Link>,
+                artistLink: <Link to={getArtistUrl(artist)}></Link>,
+              }}
+            />
+          )}
           <div
             className={css`
               margin-top: 0.2rem;
