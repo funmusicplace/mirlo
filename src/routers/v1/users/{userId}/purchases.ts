@@ -4,12 +4,6 @@ import { userAuthenticated } from "../../../../auth/passport";
 import prisma from "@mirlo/prisma";
 import trackGroupProcessor from "../../../../utils/trackGroup";
 import { processSingleMerch } from "../../../../utils/merch";
-import {
-  isMerchPurchase,
-  isTrackGroupPurchase,
-  isTrackPurchase,
-  isUserTransaction,
-} from "../../../../utils/typeguards";
 
 type Params = {
   userId: string;
