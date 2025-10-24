@@ -29,7 +29,7 @@ html
     p 
       | If you want to have access to all your purchases for this e-mail address, 
       | simply 
-      a(href!=`${client}/password-reset?email=${email}`) set a password for it
+      a(href!=`${client}/password-reset?email=${email}&accountIncomplete=true`) set a password for it
       | .
     - const purchaseMessage = track.trackGroup.artist?.properties?.emails?.purchase
     if purchaseMessage

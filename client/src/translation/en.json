@@ -848,7 +848,7 @@
     "yourAvatar": "your avatar",
     "maxFreePlays": "Max free plays",
     "updated": "Updated artist page",
-    "maxFreePlaysDescription": "How many times can a user listen to a track before they have to buy it or add it to their collection? This only applies to tracks not in a user's collection.",
+    "maxFreePlaysDescription": "How many times can a user listen to a track before they have to buy it or add it to their collection? This only applies to tracks not in a user's collection. Leaving this zero or blank will mean unlimited.",
     "backgroundImageDescription": "the image that appears in the background of your page",
     "displayName": "Display name",
     "bio": "About / biography",
