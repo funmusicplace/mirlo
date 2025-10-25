@@ -8,9 +8,14 @@ import { css } from "@emotion/css";
 const constructUrl = (r: any) => {
   let url = "";
 
+  console.log("r", r);
   if (r.id === "more") {
     url = `/releases?search=${r.query}`;
     return url;
+  }
+
+  if (r.isTag) {
+    return `releases?tag=${encodeURIComponent(r.id)}`;
   }
 
   if (r.isLabel) {

@@ -67,6 +67,7 @@ const routes = [
   "users/{userId}/notifications/{notificationId}",
   "users/{userId}/purchases",
   "users/{userId}/wishlist",
+  "users/{userId}/collection",
   "users/{userId}/charges",
   "users/{userId}/stripe/connect",
   "users/{userId}/stripe/connectComplete",
