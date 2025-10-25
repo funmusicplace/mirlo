@@ -263,7 +263,9 @@
     "totalSales": "Total sales",
     "totalSupporters": "Total supporters",
     "tip": "Tip",
-    "viewFulfillment": "View Fulfillment"
+    "viewFulfillment": "View Fulfillment",
+    "platformCut": "Platform cut",
+    "paymentProcessorCut": "Payment processor cut"
   },
   "fulfillment": {
     "artist": "Artist",
@@ -649,7 +651,7 @@
     "deleteMerch": "Delete merch item",
     "deleteCategory": "Delete merch category",
     "merchImage": "merch image",
-    "relatedToTrackGroup": "Is this merch item included in an album purchase? (optional)",
+    "relatedToTrackGroup": "Does buying this merch item give the customer access to a digital copy of an album? (optional)",
     "relatedTrackGroupSmall": "When a user buys this merch item, they'll automatically receive a digital copy of this album.",
     "areYouSureDelete": "Are you sure you want to delete this merch item?",
     "problemDeletingMerch": "Problem deleting merch",
