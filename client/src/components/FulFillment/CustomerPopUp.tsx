@@ -12,6 +12,7 @@ import { useTranslation } from "react-i18next";
 import { FaExternalLinkAlt } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import useErrorHandler from "services/useErrorHandler";
+import { useSnackbar } from "state/SnackbarContext";
 import { getArtistUrl, getMerchUrl } from "utils/artist";
 
 export const Underline = styled.div`
@@ -44,6 +45,8 @@ const CustomerPopUp: React.FC<{ purchase: MerchPurchase }> = ({ purchase }) => {
   });
 
   const methods = useForm({ defaultValues: purchase });
+
+  const snackbar = useSnackbar();
   const errorHandler = useErrorHandler();
 
   const { mutateAsync: updatePurchase } = useUpdatePurchaseMutation();
@@ -55,6 +58,7 @@ const CustomerPopUp: React.FC<{ purchase: MerchPurchase }> = ({ purchase }) => {
           purchaseId: purchase.id,
           purchase: data,
         });
+        snackbar(t("updateSuccess"), { type: "success" });
       } catch (e) {
         errorHandler(e);
       }

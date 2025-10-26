@@ -705,6 +705,7 @@ export const handleArtistMerchPurchase = async (
                   platformCut: applicationFee ?? null,
                   stripeCut: paymentProcessorFee ?? null,
                   stripeId: session?.id ?? "",
+                  shippingFeeAmount: session.shipping_cost?.amount_total ?? 0,
                 },
               });
 

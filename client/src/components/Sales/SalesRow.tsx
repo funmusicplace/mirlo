@@ -20,34 +20,10 @@ const SalesRow: React.FC<{
       sale.shippingAddress?.country?.toLowerCase()
   );
 
-  const hasShippingCost =
-    sale.shippingAddress &&
-    (shippingDestination?.costUnit ?? 0) * (sale?.quantity ?? 0);
-
   return (
     <tr>
       <td />
       <td>{sale.artist[0].name}</td>
-      <td>
-        {moneyDisplay({ amount: sale.amount / 100, currency: sale.currency })}
-        {sale.shippingAddress && (
-          <span>
-            <br />
-            <small>
-              {" "}
-              (<strong>{t("shippingCost")}: </strong>
-              {shippingDestination?.destinationCountry?.toUpperCase()}{" "}
-              {hasShippingCost &&
-                moneyDisplay({
-                  amount: hasShippingCost / 100,
-                  currency: sale.currency,
-                })}
-              )
-            </small>
-          </span>
-        )}
-      </td>
-      <td>{formatDate({ date: sale.datePurchased, i18n })} </td>
       <td>
         {sale.trackGroupPurchases?.length
           ? t("trackGroup")
@@ -58,6 +34,38 @@ const SalesRow: React.FC<{
               : sale.artistSubscriptionTier
                 ? t("subscription")
                 : t("tip")}
+      </td>{" "}
+      <td>{formatDate({ date: sale.datePurchased, i18n })} </td>
+      <td>
+        {moneyDisplay({ amount: sale.amount / 100, currency: sale.currency })}
+        {sale.shippingAddress && (
+          <span>
+            <br />
+            <small>
+              {" "}
+              (<strong>{t("shippingCost")}: </strong>
+              {shippingDestination?.destinationCountry?.toUpperCase()}{" "}
+              {sale.shippingFeeAmount &&
+                moneyDisplay({
+                  amount: sale.shippingFeeAmount / 100,
+                  currency: sale.currency,
+                })}
+              )
+            </small>
+          </span>
+        )}
+      </td>
+      <td>
+        {moneyDisplay({
+          amount: sale.platformCut / 100,
+          currency: sale.currency,
+        })}
+      </td>
+      <td>
+        {moneyDisplay({
+          amount: sale.paymentProcessorCut / 100,
+          currency: sale.currency,
+        })}
       </td>
       <td>
         {sale.trackGroupPurchases?.length ? (

@@ -2,7 +2,9 @@ import { Prisma, User } from "@mirlo/prisma/client";
 import { Request, Response } from "express";
 import { userAuthenticated } from "../../../../auth/passport";
 import prisma from "@mirlo/prisma";
-import trackGroupProcessor from "../../../../utils/trackGroup";
+import trackGroupProcessor, {
+  processSingleTrackGroup,
+} from "../../../../utils/trackGroup";
 import { merge } from "lodash";
 import { isTrackGroup } from "../../../../utils/typeguards";
 
@@ -74,8 +76,21 @@ export default function () {
         },
       });
 
+      const mappedTG = tgPurchases.map((purchase) => {
+        const processedTG = processSingleTrackGroup(purchase.trackGroup);
+        return { ...purchase, trackGroup: processedTG };
+      });
+
+      const mappedTracks = trackPurchases.map((purchase) => {
+        const processedTG = processSingleTrackGroup(purchase.track.trackGroup);
+        return {
+          ...purchase,
+          track: { ...purchase.track, trackGroup: processedTG },
+        };
+      });
+
       // combine both lists and sort by transaction created date (newest first)
-      const combined = [...tgPurchases, ...trackPurchases].sort((a, b) => {
+      const combined = [...mappedTG, ...mappedTracks].sort((a, b) => {
         return (a.transaction?.createdAt ?? 0) > (b.transaction?.createdAt ?? 0)
           ? -1
           : 1;

@@ -250,6 +250,9 @@ export type Sale = {
   artist: (Partial<Artist> & { id: number; urlSlug: string })[];
   currency: string;
   datePurchased: string;
+  paymentProcessorCut: number;
+  platformCut: number;
+  shippingFeeAmount?: number;
   trackGroupPurchases?: {
     message: string;
     trackGroupId: number;

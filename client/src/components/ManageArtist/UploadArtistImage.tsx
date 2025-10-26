@@ -267,7 +267,7 @@ const UploadArtistImage: React.FC<{
           className={css`
             width: 100%;
             flex: 100%;
-            margin-top: 0.5rem;
+            margin-top: 0.5rem !important;
             @media (max-width: ${bp.medium}px) {
               font-size: var(--mi-font-size-xsmall);
             }

@@ -135,6 +135,8 @@ const queryUserTransactions = (
       currency: true,
       createdAt: true,
       userId: true,
+      stripeCut: true,
+      platformCut: true,
 
       trackGroupPurchases: {
         select: {
@@ -275,6 +277,7 @@ export const findSales = async ({
     })),
     ...userTransactions.map((ut) => ({
       ...ut,
+      paymentProcessorCut: ut.stripeCut,
       datePurchased: ut.createdAt,
       title: ut.trackGroupPurchases
         .map((tgp) => tgp.trackGroup.title)

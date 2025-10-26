@@ -32,6 +32,7 @@ import { doesTrackBelongToUser, doesTrackGroupBelongToUser } from "./ownership";
 import { AppError } from "./error";
 import { processSingleMerch } from "./merch";
 import { sendBasecampAMessage } from "./basecamp";
+import downloadableContent from "../routers/v1/manage/downloadableContent";
 
 export const whereForPublishedTrackGroups = (): Prisma.TrackGroupWhereInput => {
   return {
@@ -727,6 +728,10 @@ export const processSingleTrackGroup = (
     merch?: (Merch & { images: MerchImage[] })[];
     tracks?: Track[];
     tags?: (TrackGroupTag & { tag?: { tag?: string } })[];
+    downloadableContent?: {
+      downloadableContent: Record<string, unknown>;
+      downloadableContentId: string;
+    }[];
   }
 ) => ({
   ...tg,
@@ -741,6 +746,15 @@ export const processSingleTrackGroup = (
   merch: tg.merch?.map(processSingleMerch),
   tags: tg.tags?.map((t) => t.tag?.tag) ?? [],
   cover: addSizesToImage(finalCoversBucket, tg.cover),
+  downloadableContent: tg.downloadableContent?.map((dc) => ({
+    ...dc,
+    downloadableContent: {
+      ...dc.downloadableContent,
+      downloadUrl:
+        process.env.API_DOMAIN +
+        `/v1/downloadableContent/${dc.downloadableContentId}`,
+    },
+  })),
 });
 
 export const processTrackGroupQueryOrder = (orderByString?: unknown) => {

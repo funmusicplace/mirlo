@@ -30,15 +30,14 @@ import SpaceBetweenDiv from "./common/SpaceBetweenDiv";
 const pageSize = 40;
 
 const SearchResults: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
-  const location = useLocation();
   const [params] = useSearchParams();
   const { t } = useTranslation("translation", { keyPrefix: "releases" });
-  const { page, PaginationComponent } = usePagination({ pageSize: limit });
+  const { page } = usePagination({ pageSize: limit });
   const tag = params.get("tag");
   const search = params.get("search");
-  const [license, setLicense] = React.useState<
-    TrackGroupQueryOptions["license"] | ""
-  >((params.get("license") as TrackGroupQueryOptions["license"]) ?? "");
+  const [license] = React.useState<TrackGroupQueryOptions["license"] | "">(
+    (params.get("license") as TrackGroupQueryOptions["license"]) ?? ""
+  );
 
   const { data: newReleases, isFetching: isLoadingReleases } = useQuery(
     queryTrackGroups({

@@ -119,9 +119,11 @@ export const Sales: React.FC = () => {
               <tr>
                 <th />
                 <th>{t("artist")}</th>
-                <th>{t("amount")}</th>
-                <th>{t("date")}</th>
                 <th>{t("type")}</th>
+                <th>{t("date")}</th>
+                <th>{t("amount")}</th>
+                <th>{t("platformCut")}</th>
+                <th>{t("paymentProcessorCut")}</th>
                 <th>{t("item")}</th>
               </tr>
             </thead>
