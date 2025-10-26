@@ -8,6 +8,7 @@ import { FaDownload } from "react-icons/fa";
 import { useAuthContext } from "state/AuthContext";
 
 import { ArtistButtonAnchor } from "components/Artist/ArtistButtons";
+import api from "services/api";
 
 const ReleaseDownloadableContent: React.FC<{
   trackGroup: TrackGroup;
@@ -24,6 +25,33 @@ const ReleaseDownloadableContent: React.FC<{
   const userHasPurchasedTrackGroup = user?.userTrackGroupPurchases?.some(
     (m) => m.trackGroupId === trackGroup.id
   );
+
+  const download = async (contentId: string, filename: string) => {
+    const resp = await api.request(
+      `downloadableContent/${contentId}`,
+      {
+        method: "GET",
+        credentials: "include",
+      },
+      {
+        noProcess: true,
+      }
+    );
+
+    (resp as any).blob().then((blob: Blob) => {
+      const href = URL.createObjectURL(blob);
+
+      const anchorElement = document.createElement("a");
+      anchorElement.href = href;
+      anchorElement.download = filename;
+
+      document.body.appendChild(anchorElement);
+      anchorElement.click();
+
+      document.body.removeChild(anchorElement);
+      window.URL.revokeObjectURL(href);
+    });
+  };
 
   if (userHasPurchasedTrackGroup || userIsOwner) {
     return trackGroup.downloadableContent &&
@@ -54,9 +82,13 @@ const ReleaseDownloadableContent: React.FC<{
           {trackGroup.downloadableContent.map((content) => (
             <li key={content.downloadableContentId}>
               <ArtistButtonAnchor
-                href={content.downloadableContent.downloadUrl}
-                target="_blank"
-                rel="noreferrer"
+                onClick={(e) => {
+                  e.preventDefault;
+                  download(
+                    content.downloadableContentId,
+                    content.downloadableContent.originalFilename
+                  );
+                }}
                 variant="link"
                 endIcon={<FaDownload />}
               >

@@ -8,7 +8,6 @@ import { css } from "@emotion/css";
 const constructUrl = (r: any) => {
   let url = "";
 
-  console.log("r", r);
   if (r.id === "more") {
     url = `/releases?search=${r.query}`;
     return url;

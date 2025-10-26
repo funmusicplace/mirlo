@@ -132,9 +132,7 @@ export const CustomizeLook: React.FC = () => {
 
   React.useEffect(() => {
     if (existingId) {
-      console.log("artist changed", JSON.stringify(artist.properties?.colors));
       const defaults = generateDefaults(artist);
-      console.log("defaults", defaults.properties?.colors);
       methods.reset(defaults);
     }
   }, [artist, existingId, methods]);

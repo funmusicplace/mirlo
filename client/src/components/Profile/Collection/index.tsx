@@ -27,7 +27,6 @@ function Profile() {
     const { results } = await api.getMany<UserPurchase>(
       `users/${userId}/collection`
     );
-    console.log("fetched collection", results);
     setPurchases(results);
   }, [userId]);
 

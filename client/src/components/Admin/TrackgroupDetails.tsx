@@ -40,7 +40,6 @@ export const TrackGroupDetails: React.FC = () => {
     async (id: string) => {
       const { result } = await api.get<TrackGroup>(`trackGroups/${id}`);
       setTrackgroup(result);
-      console.log(result);
       reset({
         ...result,
       });

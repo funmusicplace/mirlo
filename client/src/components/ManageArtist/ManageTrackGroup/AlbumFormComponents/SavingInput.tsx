@@ -95,7 +95,6 @@ const SavingInput: React.FC<{
           ...extraData,
         };
       }
-      console.log("data", data);
 
       await api.put<unknown, unknown>(url, data);
 

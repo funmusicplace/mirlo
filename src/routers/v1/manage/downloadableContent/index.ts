@@ -20,7 +20,7 @@ export default function () {
   async function POST(req: Request, res: Response, next: NextFunction) {
     const loggedInUser = req.user as User;
 
-    const { filename, trackGroupId, merchId } = req.body;
+    const { filename, trackGroupId, merchId, mimeType } = req.body;
     try {
       let trackGroup;
       let merch;
@@ -42,6 +42,7 @@ export default function () {
       const downloadableContent = await prisma.downloadableContent.create({
         data: {
           originalFilename: filename,
+          mimeType: mimeType,
         },
       });
 

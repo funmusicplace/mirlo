@@ -129,8 +129,6 @@ const PostCard: React.FC<{
   const LinkToUse = isOnArtistPage ? ArtistButtonLink : Link;
   const artistBackground = post.artist?.properties?.colors?.background;
 
-  console.log("post", post);
-
   return (
     <PostContainer
       isOnArtistPage={isOnArtistPage}
