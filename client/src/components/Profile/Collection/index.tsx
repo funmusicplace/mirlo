@@ -14,28 +14,26 @@ import {
 } from "types/typeguards";
 import { Link } from "react-router-dom";
 
+type UserPurchase = UserTrackGroupPurchase | UserTrackPurchase;
+
 function Profile() {
   const { user } = useAuthContext();
   const userId = user?.id;
 
-  const [purchases, setPurchases] = React.useState<UserTransaction[]>();
+  const [purchases, setPurchases] = React.useState<UserPurchase[]>();
   const { t } = useTranslation("translation", { keyPrefix: "profile" });
 
-  const fetchTrackGroups = React.useCallback(async () => {
-    const { results } = await api.getMany<UserTransaction>(
-      `users/${userId}/purchases`
+  const fetchCollection = React.useCallback(async () => {
+    const { results } = await api.getMany<UserPurchase>(
+      `users/${userId}/collection`
     );
-    setPurchases(
-      results.filter((r) => {
-        const isNotMerch = r.merchPurchases?.length === 0;
-        return isNotMerch;
-      })
-    );
+    console.log("fetched collection", results);
+    setPurchases(results);
   }, [userId]);
 
   React.useEffect(() => {
-    fetchTrackGroups();
-  }, [fetchTrackGroups]);
+    fetchCollection();
+  }, [fetchCollection]);
 
   if (!user) {
     return null;
@@ -78,19 +76,19 @@ function Profile() {
               ))}
             <TrackgroupGrid gridNumber={"4"}>
               {purchases?.map((purchase) => {
-                if (purchase.trackGroupPurchases?.[0]) {
+                if (isTrackGroupPurchase(purchase) && purchase.trackGroup) {
                   return (
                     <CollectionPurchaseSquare
-                      trackGroup={purchase.trackGroupPurchases[0].trackGroup}
-                      key={purchase.id}
+                      trackGroup={purchase.trackGroup}
+                      key={purchase.trackGroupId}
                     />
                   );
-                } else if (purchase.trackPurchases?.[0]?.track) {
+                } else if (isTrackPurchase(purchase) && purchase.track) {
                   return (
                     <CollectionPurchaseSquare
-                      trackGroup={purchase.trackPurchases[0].track?.trackGroup}
-                      track={purchase.trackPurchases[0].track}
-                      key={purchase.id}
+                      trackGroup={purchase.track.trackGroup}
+                      track={purchase.track}
+                      key={purchase.track.id}
                     />
                   );
                 }
