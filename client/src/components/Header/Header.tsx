@@ -1,6 +1,6 @@
 import { css } from "@emotion/css";
 import { Link } from "react-router-dom";
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import usePublicArtist from "utils/usePublicObjectById";
 import PageBanner from "components/common/ArtistBanner";
 import { bp } from "../../constants";
@@ -33,8 +33,9 @@ const HeaderWrapper = styled.div<{
     foreground?: string;
     background?: string;
   };
+  isManageTrackGroup: boolean;
 }>`
-  position: sticky;
+  position: ${(props) => (props.isManageTrackGroup ? "static" : "sticky")};
   width: 100%;
   z-index: 999;
   transition: top 0.4s ease-out;
@@ -69,7 +70,7 @@ const HeaderWrapper = styled.div<{
       : ""}
 
   @media screen and (max-width: ${bp.medium}px) {
-    position: sticky;
+    position: ${(props) => (props.isManageTrackGroup ? "static" : "sticky")};
     display: flex;
     align-items: flex-start;
 
@@ -146,7 +147,7 @@ const LogoWrapper = () => {
   );
 };
 
-const Content = styled.div<{ artistId?: string }>`
+const Content = styled.div<{ artistId?: string; isManageTrackGroup: boolean }>`
   ${(props) =>
     props.artistId
       ? "max-width: 100%; transition: all ease-in-out .4s;"
@@ -157,7 +158,7 @@ const Content = styled.div<{ artistId?: string }>`
   padding: 0.5rem 1rem;
   width: 100%;
   z-index: 999;
-  position: sticky;
+  position: ${(props) => (props.isManageTrackGroup ? "static" : "sticky")};
   top: 0px;
   margin: 0 auto;
   height: var(--header-cover-sticky-height);
@@ -166,7 +167,7 @@ const Content = styled.div<{ artistId?: string }>`
     padding-top: 0.5rem;
     padding-bottom: 0.5rem;
     padding: var(--mi-side-paddings-xsmall);
-    position: sticky;
+    position: ${(props) => (props.isManageTrackGroup ? "static" : "sticky")};
     top: 0;
   }
 `;
@@ -177,6 +178,9 @@ const Header = () => {
   const { user } = useAuthContext();
   const isLoggedIn = !!user?.id;
 
+  const { pathname } = useLocation();
+  const isManageTrackGroup =
+    pathname.match("/manage/artists/[0-9]+/release/[0-9]+") !== null;
   const { artistId, trackGroupId } = useParams();
 
   const { object: artist } = usePublicArtist<Artist>("artists", artistId);
@@ -195,6 +199,7 @@ const Header = () => {
       trackGroupId={!!trackGroupId}
       artistId={!!artistId}
       colors={colors}
+      isManageTrackGroup={isManageTrackGroup}
     >
       <div
         className={css`
@@ -216,7 +221,7 @@ const Header = () => {
           }
         `}
       ></div>
-      <Content artistId={artistId}>
+      <Content artistId={artistId} isManageTrackGroup={isManageTrackGroup}>
         <LogoWrapper />
         <div
           className={css`

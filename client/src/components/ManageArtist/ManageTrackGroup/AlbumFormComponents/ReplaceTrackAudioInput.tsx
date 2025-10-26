@@ -68,13 +68,6 @@ const ReplaceTrackAudioInput: React.FC<{
         <input
           disabled={isSaving || isDisabled}
           type="file"
-          className={css`
-            display: none;
-
-            &::file-selector-button {
-              display: none;
-            }
-          `}
           placeholder="Replace"
           id={`track.${trackId}`}
           {...register("trackFile", {

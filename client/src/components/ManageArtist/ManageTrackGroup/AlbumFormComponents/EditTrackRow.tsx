@@ -42,15 +42,9 @@ export interface FormData {
   trackArtists: TrackData["trackArtists"];
 }
 
-const IndentedTR = styled("tr")<{ colors?: { foreground: string } }>`
+const IndentedDiv = styled("div")<{ colors?: { foreground: string } }>`
   border-left: 1rem solid ${(props) => props.colors?.foreground ?? "white"};
   border-bottom: 1px solid ${(props) => props.colors?.foreground ?? "white"};
-  td {
-    padding: 1rem 0;
-  }
-  td:first-child {
-    padding-left: 3rem;
-  }
 `;
 
 const EditTrackRow: React.FC<{
@@ -156,104 +150,57 @@ const EditTrackRow: React.FC<{
 
   return (
     <FormProvider {...methods}>
-      <tr
-        className={css`
-          td {
-            padding-bottom: 1.5rem !important;
-          }
-          ${isDisabled || isSaving
-            ? `
-            opacity: .4;
-            pointer-events: none;
-            `
-            : ""}
-        `}
-      >
-        <td>
-          {isSaving && <LoadingSpinner />}
+      <IndentedDiv colors={colors}>
+				<div
+					className={css`
+						display: flex;
 
-          {!uploadingState && !isSaving && (
-            <ReplaceTrackAudioInput
-              trackId={trackId}
-              isDisabled={isDisabled}
-              reload={reload}
-            />
-          )}
-          {!isSaving && <TrackUploadingState uploadingState={uploadingState} />}
-        </td>
-        <td
-          className={css`
-            width: 40%;
-          `}
-        >
-          <InputEl
-            colors={colors}
-            {...register(`title`)}
-            id={`${track.id}-title`}
-            disabled={isSaving || isDisabled}
-            aria-describedby={`${track.id}-title-info`}
-          />
-          <p id={`${track.id}-title-info`}>
-            {t("originalFilename", {
-              keyPrefix: "manageTrackTable",
-              filename: track.audio?.originalFilename,
-            })}
-          </p>
-        </td>
-        <td>
+						${isDisabled || isSaving
+							? `
+							opacity: .4;
+							pointer-events: none;
+							`
+							: ""}
+					`}
+				>
+					<div>
+						<InputEl
+							colors={colors}
+							{...register(`title`)}
+							id={`${track.id}-title`}
+							disabled={isSaving || isDisabled}
+							aria-describedby={`${track.id}-title-info`}
+						/>
+					</div>
+					<div className={css`
+						display: flex;
+					`}>
+						<p id={`${track.id}-title-info`}>
+							{t("originalFilename", {
+								keyPrefix: "manageTrackTable",
+								filename: track.audio?.originalFilename,
+							})}
+						</p>
+						{isSaving && <LoadingSpinner />}
+							{!uploadingState && !isSaving && (
+								<ReplaceTrackAudioInput
+									trackId={trackId}
+									isDisabled={isDisabled}
+									reload={reload}
+								/>
+							)}
+							{!isSaving && <TrackUploadingState uploadingState={uploadingState} />}
+					</div>
+				</div>
+        <div>
           <SelectTrackPreview statusKey="status" />
-        </td>
-        <td align="right">
-          {track.audio?.duration && fmtMSS(+track.audio.duration)}
-        </td>
-        <td
-          align="right"
-          className={css`
-            button {
-              display: inline-block;
-              margin-left: 0.25rem;
-            }
-          `}
-        >
-          <ArtistButton
-            size="compact"
-            onClick={onCancelEditing}
-            type="button"
-            title="Close"
-            variant="dashed"
-            startIcon={<FaTimes />}
-            disabled={isSaving || isDisabled}
-          />
-          <ArtistButton
-            size="compact"
-            variant="dashed"
-            startIcon={<FaSave />}
-            disabled={isSaving || isDisabled}
-            onClick={methods.handleSubmit(onSave)}
-            type="button"
-            className={css`
-              ${methods.formState.isDirty
-                ? `background-color: ${colors?.primary} !important; 
-                   color: ${colors?.background} !important;
-                   border-color: ${colors?.primary} !important;
-
-                   animation: shake 0.5s;
-                   
-                   svg {
-                     fill: ${colors?.background} !important;
-                   }`
-                : ""}
-            `}
-          />
-        </td>
-      </tr>
-      <IndentedTR colors={colors}>
-        <td colSpan={2}>
+        </div>
+        <div>
           <label htmlFor="listedArtists">
             {t("listedArtists", { keyPrefix: "manageTrackTable" })}
           </label>
-        </td>
-        <td colSpan={99}>
+        </div>
+        <div>
           <div
             className={css`
               display: flex;
@@ -293,38 +240,28 @@ const EditTrackRow: React.FC<{
               </ArtistButton>
             </div>
           </div>
-        </td>
-      </IndentedTR>
-      <IndentedTR colors={colors}>
-        <td colSpan={2}>
-          <label htmlFor="allowIndividualSale">
-            {t("allowIndividualSale")}
-          </label>
-        </td>
-        <td colSpan={99}>
+        </div>
+      </IndentedDiv>
+      <IndentedDiv colors={colors}>
+        <div>
           <FormCheckbox
             keyName="allowIndividualSale"
             description={t("allowSaleDescription")}
           />
-        </td>
-      </IndentedTR>
+        </div>
+      </IndentedDiv>
       {allowIndividualSale && (
-        <IndentedTR colors={colors}>
-          <td colSpan={2}>
+        <IndentedDiv colors={colors}>
+          <div>
             <label htmlFor="minPrice">{t("minPrice")}</label>
-          </td>
-          <td colSpan={99}>
+          </div>
+          <div>
             <InputEl colors={colors} id="minPrice" {...register("minPrice")} />
-          </td>
-        </IndentedTR>
+          </div>
+        </IndentedDiv>
       )}
-      <IndentedTR colors={colors}>
-        <td colSpan={2}>
-          <label htmlFor={`${track.id}-allowMirloPromo`}>
-            {t("allowMirloPromoLabel")}
-          </label>
-        </td>
-        <td colSpan={99}>
+      <IndentedDiv colors={colors}>
+        <div>
           <FormCheckbox
             idPrefix={`${track.id}-`}
             keyName="allowMirloPromo"
@@ -346,26 +283,26 @@ const EditTrackRow: React.FC<{
               </p>
             }
           />
-        </td>
-      </IndentedTR>
-      <IndentedTR colors={colors}>
-        <td colSpan={2}>
+        </div>
+      </IndentedDiv>
+      <IndentedDiv colors={colors}>
+        <div>
           <label htmlFor="isrc">{t("isrcCode")}</label>
-        </td>
-        <td colSpan={99}>
+        </div>
+        <div>
           <InputEl
             colors={colors}
             id="isrc"
             {...register(`isrc`)}
             disabled={isSaving || isDisabled}
           />
-        </td>
-      </IndentedTR>
-      <IndentedTR colors={colors}>
-        <td colSpan={2}>
+        </div>
+      </IndentedDiv>
+      <IndentedDiv colors={colors}>
+        <div>
           <label htmlFor="lyrics">{t("lyrics")}</label>
-        </td>
-        <td colSpan={99}>
+        </div>
+        <div>
           <TextArea
             colors={colors}
             id="lyrics"
@@ -375,13 +312,13 @@ const EditTrackRow: React.FC<{
             `}
             rows={8}
           />
-        </td>
-      </IndentedTR>
-      <IndentedTR colors={colors}>
-        <td colSpan={2}>
+        </div>
+      </IndentedDiv>
+      <IndentedDiv colors={colors}>
+        <div>
           <label htmlFor="description">{t("description")}</label>
-        </td>
-        <td colSpan={99}>
+        </div>
+        <div>
           <TextArea
             colors={colors}
             id="description"
@@ -391,10 +328,10 @@ const EditTrackRow: React.FC<{
             `}
             rows={8}
           />
-        </td>
-      </IndentedTR>
-      <IndentedTR colors={colors}>
-        <td colSpan={2}>
+        </div>
+      </IndentedDiv>
+      <IndentedDiv colors={colors}>
+        <div>
           <div
             className={css`
               display: flex;
@@ -412,20 +349,19 @@ const EditTrackRow: React.FC<{
               }
             />
           </div>
-        </td>
-        <td colSpan={99}>
+        </div>
+        <div>
           <ManageTrackLicense />
-        </td>
-      </IndentedTR>
-      <IndentedTR colors={colors}>
-        <td colSpan={2}>{t("id3Data")}</td>
-        <td colSpan={99}>
+        </div>
+      </IndentedDiv>
+      <IndentedDiv colors={colors}>
+        <div>{t("id3Data")}</div>
+        <div>
           <ShowRawID3Data track={track} />
-        </td>
-      </IndentedTR>
-      <IndentedTR colors={colors}>
-        <td
-          colSpan={99}
+        </div>
+      </IndentedDiv>
+      <IndentedDiv colors={colors}>
+        <div
           className={css`
             padding-bottom: 2rem !important;
             white-space: nowrap;
@@ -462,8 +398,8 @@ const EditTrackRow: React.FC<{
           >
             {t("cancelChanges")}
           </ArtistButton>
-        </td>
-      </IndentedTR>
+        </div>
+      </IndentedDiv>
     </FormProvider>
   );
 };

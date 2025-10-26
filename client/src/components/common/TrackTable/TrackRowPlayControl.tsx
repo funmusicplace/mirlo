@@ -48,6 +48,7 @@ const TrackRowPlayControl: React.FC<{
     <>
       {(!playing || currentPlayingTrackId !== trackId) && (
         <>
+          {/*
           <span
             className={
               "track-number " +
@@ -59,6 +60,7 @@ const TrackRowPlayControl: React.FC<{
           >
             {trackNumber}
           </span>
+*/}
           {canPlayTrack && !isDisabled && (
             <Button
               size="compact"
