@@ -46,7 +46,6 @@ const TransactionComponent: React.FC<{
   userTransaction: UserTransaction;
 }> = ({ userTransaction }) => {
   const { t, i18n } = useTranslation("translation", { keyPrefix: "profile" });
-  console.log("userTransaction", userTransaction);
   const isTrackGroupPurchase = !!userTransaction.trackGroupPurchases?.length;
   const isMerchPurchase = !!userTransaction.merchPurchases?.length;
   const isTrackPurchase = !!userTransaction.trackPurchases?.length;

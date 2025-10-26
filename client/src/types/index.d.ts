@@ -511,13 +511,13 @@ interface DownloadableContent {
 interface MerchDownloadableContent {
   merchId: string;
   merch: Merch;
-  downloadableContentId: number;
+  downloadableContentId: string;
   downloadableContent: DownloadableContent;
 }
 
 interface TrackGroupDownloadableContent {
   trackGroupId: number;
   trackGroup: TrackGroup;
-  downloadableContentId: number;
+  downloadableContentId: string;
   downloadableContent: DownloadableContent;
 }

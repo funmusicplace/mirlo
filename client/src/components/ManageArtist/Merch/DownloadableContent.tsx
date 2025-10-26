@@ -53,6 +53,7 @@ const DownloadableContent: React.FC<{
           }
         >("manage/downloadableContent", {
           filename: nextFile.file.name,
+          mimeType: nextFile.file.type,
           ...(itemType === "release"
             ? { trackGroupId: item.id }
             : { merchId: item.id }),
@@ -64,7 +65,7 @@ const DownloadableContent: React.FC<{
               method: "PUT",
               body: nextFile.file,
               headers: {
-                "Content-Type": "application/pdf",
+                "Content-Type": nextFile.file.type,
               },
             });
             if (result.ok) {
@@ -90,7 +91,7 @@ const DownloadableContent: React.FC<{
     }
   };
 
-  const deleteContent = async (contentId: number) => {
+  const deleteContent = async (contentId: string) => {
     try {
       await api.delete(`manage/downloadableContent/${contentId}`);
       snackbar(t("fileDeleted"), { type: "success" });

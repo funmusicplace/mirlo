@@ -103,7 +103,6 @@ const ChooseYourTheme: React.FC<{ artistId: number }> = ({ artistId }) => {
             },
           },
         });
-        console.log("should invalidate");
       }
     } catch (e) {}
   }, []);
