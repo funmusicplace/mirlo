@@ -22,16 +22,16 @@ export type AutomaticallyReceivedAlbumEmailType = {
 
 const autoPurchaseNewAlbums = async () => {
   const currentDate = new Date();
-  const tenMinutesAgo = new Date();
-  tenMinutesAgo.setMinutes(currentDate.getMinutes() - 10);
+  const oneDayAgo = new Date();
+  oneDayAgo.setDate(currentDate.getDate() - 1);
 
   const recentAlbums = await prisma.trackGroup.findMany({
     where: {
       releaseDate: {
-        gte: tenMinutesAgo,
+        gte: oneDayAgo,
         lte: currentDate,
       },
-      published: true,
+      OR: [{ published: true }, { publishedAt: { lte: new Date() } }],
       deletedAt: null,
     },
   });
