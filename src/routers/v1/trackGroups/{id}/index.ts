@@ -44,6 +44,11 @@ export default function () {
                 optionTypes: { include: { options: true } },
               },
             },
+            downloadableContent: {
+              include: {
+                downloadableContent: true,
+              },
+            },
           },
         });
       }
