@@ -53,7 +53,6 @@ export const convertAudioToFormat = (
     track: Track & { audio?: TrackAudio; trackArtists: TrackArtist[] };
     artist: Artist;
     trackGroup: { title: string | null };
-    coverLocation: string;
   },
   stream: Readable,
   formatDetails: Format,

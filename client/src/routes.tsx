@@ -391,6 +391,35 @@ const routes: RouteObject[] = [
         },
         children: [
           {
+            path: "tasks",
+            async lazy() {
+              const { default: Component } = await import(
+                "components/Admin/AdminServerTasks"
+              );
+              return { Component };
+            },
+            children: [
+              {
+                path: "serverTasks",
+                async lazy() {
+                  const { default: Component } = await import(
+                    "components/Admin/CallServerTasks"
+                  );
+                  return { Component };
+                },
+              },
+              {
+                path: "fundraising",
+                async lazy() {
+                  const { default: Component } = await import(
+                    "components/Admin/AdminFundraising"
+                  );
+                  return { Component };
+                },
+              },
+            ],
+          },
+          {
             path: "transactions",
             async lazy() {
               const { default: Component } = await import(
@@ -437,15 +466,7 @@ const routes: RouteObject[] = [
               return { Component };
             },
           },
-          {
-            path: "fundraising",
-            async lazy() {
-              const { default: Component } = await import(
-                "components/Admin/AdminFundraising"
-              );
-              return { Component };
-            },
-          },
+
           {
             path: "users",
             async lazy() {
@@ -523,15 +544,6 @@ const routes: RouteObject[] = [
             },
           },
 
-          {
-            path: "serverTasks",
-            async lazy() {
-              const { default: Component } = await import(
-                "components/Admin/CallServerTasks"
-              );
-              return { Component };
-            },
-          },
           {
             path: "licenses",
             async lazy() {

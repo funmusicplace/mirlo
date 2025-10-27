@@ -34,7 +34,6 @@ export const Admin: React.FC = () => {
         <li>
           <NavLink to="tracks">{t("tracks")}</NavLink>
         </li>
-
         <li>
           <NavLink to="transactions">{t("transactions")}</NavLink>
         </li>
@@ -42,7 +41,7 @@ export const Admin: React.FC = () => {
           <NavLink to="sendEmails">{t("sendEmails")}</NavLink>
         </li>
         <li>
-          <NavLink to="fundraising">{t("fundraising")}</NavLink>
+          <NavLink to="tasks/fundraising">{t("tasks")}</NavLink>
         </li>
       </Tabs>
       <div

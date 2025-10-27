@@ -26,6 +26,7 @@ const ArtistSquare: React.FC<{
             alt={artist.name}
             size={300}
             square
+            objectFit="contain"
           />
         </Link>
 

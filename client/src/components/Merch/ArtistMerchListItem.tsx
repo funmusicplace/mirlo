@@ -26,6 +26,7 @@ const ArtistMerchListItem: React.FC<{
             alt={merch.title}
             size={400}
             square
+            objectFit="contain"
           />
         </Link>
         <TrackGroupLinks>

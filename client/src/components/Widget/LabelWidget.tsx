@@ -118,6 +118,7 @@ const LabelWidget = () => {
             alt={label?.profile?.name ?? "A label"}
             size={600}
             square
+            objectFit="contain"
           />
         </FlexWrapper>
 

@@ -250,11 +250,6 @@ export const contentBelongsToLoggedInUser = async (
   _res: Response,
   next: NextFunction
 ) => {
-  const { trackGroupId, merchId } = req.params as unknown as {
-    trackGroupId?: string;
-    merchId?: string;
-  };
-
   const loggedInUser = req.user as User | undefined;
 
   try {
@@ -264,6 +259,9 @@ export const contentBelongsToLoggedInUser = async (
         httpCode: 401,
       });
     } else {
+      if (loggedInUser.isAdmin) {
+        return next();
+      }
       const content = await prisma.downloadableContent.findFirst({
         where: {
           id: req.params.contentId,

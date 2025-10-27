@@ -103,6 +103,7 @@ const TrackWidget = () => {
               alt={track.title ?? "Untitled track"}
               size={150}
               square
+              objectFit="contain"
               className={css`
                 width: auto !important;
                 border-radius: 0.3rem 0 0 0.3rem;

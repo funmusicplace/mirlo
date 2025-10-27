@@ -35,7 +35,7 @@ const AdminFundraising = () => {
       <form onSubmit={handleSubmit(triggerPledgeCollection)}>
         <Table>
           <tr>
-            <td>trackGroupId</td>
+            <td>Trigger pledge collection for track group id: </td>
             <td>
               <InputEl
                 {...register("trackGroupId")}

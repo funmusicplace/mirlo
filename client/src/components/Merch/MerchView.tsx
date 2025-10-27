@@ -144,6 +144,8 @@ function MerchView() {
                   }
                   alt={merch.title}
                   size={960}
+                  square
+                  objectFit="cover"
                 />
               </ImageWrapper>
             </ImageAndDetailsWrapper>

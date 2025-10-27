@@ -51,6 +51,7 @@ const TrackGroupMerchItem: React.FC<{ item: Merch }> = ({ item }) => {
           alt={item.title}
           size={60}
           square
+          objectFit="contain"
         />
         <Link to={getMerchUrl(artist, item)}>{item.title}</Link>
       </div>

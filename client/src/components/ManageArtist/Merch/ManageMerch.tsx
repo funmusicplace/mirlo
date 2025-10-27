@@ -84,6 +84,7 @@ const ManageMerch: React.FC<{}> = () => {
                     alt={item.title}
                     size={60}
                     square
+                    objectFit="contain"
                   />
                   <span>{item.title}</span>
                   {!item.isPublic && (

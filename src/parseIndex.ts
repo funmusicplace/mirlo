@@ -148,7 +148,17 @@ const parseIndex = async (pathname: string) => {
     });
 
     const avatarString = artist?.avatar?.url.find((u) => u.includes("x600"));
-    if (
+    const avatarUrl = avatarString
+      ? generateFullStaticImageUrl(avatarString, finalArtistAvatarBucket)
+      : undefined;
+    if (artist && route.length === 2) {
+      buildOpenGraphTags($, {
+        title: artist.name ?? "A Mirlo Artist",
+        description: artist.bio ?? "An artist on Mirlo",
+        url: `${client.applicationUrl}${route.join("/")}`,
+        imageUrl: avatarUrl,
+      });
+    } else if (
       (route[2] === "releases" ||
         route[2] === "posts" ||
         route[2] === "merch" ||
@@ -156,9 +166,7 @@ const parseIndex = async (pathname: string) => {
       artist
     ) {
       const artistName = artist.name ?? "A Mirlo Artist";
-      const avatarUrl = avatarString
-        ? generateFullStaticImageUrl(avatarString, finalArtistAvatarBucket)
-        : undefined;
+
       const rss = `${process.env.API_DOMAIN}/v1/artists/${artist.urlSlug}/feed?format=rss`;
       if (route[2] === "posts") {
         let post;

@@ -122,6 +122,7 @@ const TrackGroupWidget = () => {
             alt={trackGroup.title ?? "Untitled release"}
             size={600}
             square
+            objectFit="contain"
           />
         </FlexWrapper>
 

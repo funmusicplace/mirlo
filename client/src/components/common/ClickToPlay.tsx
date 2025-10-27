@@ -273,8 +273,7 @@ const ClickToPlay: React.FC<
 
   const isSingleTrackGroup = !track && trackGroup.tracks?.length === 1;
 
-  const linkTarget =
-    track ?? (isSingleTrackGroup ? trackGroup.tracks?.[0] : trackGroup);
+  const linkTarget = track ?? trackGroup;
 
   const linkLabelKey = track || isSingleTrackGroup ? "goToTrack" : "goToAlbum";
 
@@ -283,13 +282,7 @@ const ClickToPlay: React.FC<
     currentlyPlayingIndex !== undefined &&
     localTrackIds.includes(playerQueueIds[currentlyPlayingIndex]);
 
-  const url =
-    linkTarget &&
-    determineItemLink(
-      trackGroup.artist,
-      // Need to attach the trackGroup on the link if it's just a track.
-      isSingleTrackGroup ? { ...linkTarget, trackGroup } : linkTarget
-    );
+  const url = linkTarget && determineItemLink(trackGroup.artist, linkTarget);
 
   return (
     <ClickToPlayWrapper>
@@ -351,6 +344,7 @@ const ClickToPlay: React.FC<
             alt={title}
             size={image.width}
             square
+            objectFit="contain"
           />
         )}
       </Wrapper>
