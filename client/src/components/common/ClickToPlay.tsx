@@ -351,6 +351,7 @@ const ClickToPlay: React.FC<
             alt={title}
             size={image.width}
             square
+            objectFit="contain"
           />
         )}
       </Wrapper>

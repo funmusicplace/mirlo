@@ -22,7 +22,8 @@ export const ImageWithPlaceholder: React.FC<{
   size: number;
   className?: string;
   square?: boolean;
-}> = ({ src, alt, size, square, className }) => {
+  objectFit?: "contain" | "cover";
+}> = ({ src, alt, size, square, className, objectFit }) => {
   const [isLoading, setLoading] = React.useState(true);
   const [isError, setError] = React.useState(false);
 
@@ -40,7 +41,7 @@ export const ImageWithPlaceholder: React.FC<{
           onError={() => setError(true)}
           style={{
             aspectRatio: square ? "1" : "unset",
-            objectFit: square ? "contain" : "unset",
+            objectFit: objectFit || "unset",
             opacity: isLoading || isError ? 0 : 1,
           }}
         />

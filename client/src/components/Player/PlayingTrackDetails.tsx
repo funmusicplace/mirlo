@@ -68,6 +68,7 @@ const PlayingTrackDetails: React.FC<{ currentTrack: Track }> = ({
         src={currentTrack?.trackGroup.cover?.sizes?.[120]}
         size={48}
         square
+        objectFit="contain"
         alt={currentTrack?.title ?? "Loading album"}
         className={css`
           width: 48px;
