@@ -211,22 +211,34 @@ const downloadCover = async ({
   if (coverId) {
     logger.info(`downloadCover: ${coverId}: Adding cover`);
 
-    const { buffer } = await getBufferFromStorage(
-      finalCoversBucket,
-      `${coverId}-x1500.webp`
-    );
-    if (buffer) {
-      await fsPromises.writeFile(coverDestination, buffer);
+    try {
+      const { buffer } = await getBufferFromStorage(
+        finalCoversBucket,
+        `${coverId}-x1500.webp`
+      );
+      if (buffer) {
+        await fsPromises.writeFile(coverDestination, buffer);
+      }
+    } catch (e) {
+      logger.error(
+        `downloadCover: ${coverId}: Error fetching cover in webp: ${e}`
+      );
     }
 
-    const { buffer: buffer2 } = await getBufferFromStorage(
-      finalCoversBucket,
-      `${coverId}-x1500.jpg`
-    );
-    if (buffer2) {
-      await fsPromises.writeFile(
-        coverDestination.replace(".webp", ".jpg"),
-        buffer2
+    try {
+      const { buffer: buffer2 } = await getBufferFromStorage(
+        finalCoversBucket,
+        `${coverId}-x1500.jpg`
+      );
+      if (buffer2) {
+        await fsPromises.writeFile(
+          coverDestination.replace(".webp", ".jpg"),
+          buffer2
+        );
+      }
+    } catch (e) {
+      logger.error(
+        `downloadCover: ${coverId}: Error fetching cover in jpg: ${e}`
       );
     }
   }
