@@ -5,6 +5,7 @@ import { createReadStream, promises as fsPromises } from "fs";
 import { logger } from "./queue-worker";
 import {
   createBucketIfNotExists,
+  downloadableContentBucket,
   finalAudioBucket,
   finalCoversBucket,
   getBufferFromStorage,
@@ -61,7 +62,6 @@ const downloadTracks = async ({
   tempFolder,
   format,
   trackGroup,
-  coverDestination,
   artist,
 }: {
   tracks: (Track & { audio?: TrackAudio; trackArtists: TrackArtist[] })[];
@@ -69,7 +69,6 @@ const downloadTracks = async ({
   progress: number;
   job: Job;
   tempFolder: string;
-  coverDestination: string;
   format: Format;
   artist: Artist;
 }) => {
@@ -121,7 +120,6 @@ const downloadTracks = async ({
             track,
             artist,
             trackGroup,
-            coverLocation: coverDestination,
           },
           createReadStream(tempTrackPath),
           format,
@@ -199,6 +197,58 @@ const zipFilesInFolder = async ({
     await fsPromises.rm(tempFolder, { recursive: true, force: true });
     logger.info(`Cleaned up ${tempFolder}`);
   });
+};
+
+const downloadTrackGroupContent = async ({
+  trackGroupId,
+  contentDestination,
+}: {
+  trackGroupId: number;
+  contentDestination: string;
+}) => {
+  logger.info(`downloadTrackGroupContent: ${trackGroupId}: Adding content`);
+
+  try {
+    const content = await prisma.downloadableContent.findMany({
+      where: {
+        trackGroups: {
+          some: {
+            trackGroupId,
+          },
+        },
+      },
+    });
+
+    if (content.length === 0) {
+      logger.info(
+        `downloadTrackGroupContent: ${trackGroupId}: No downloadable content found`
+      );
+      return;
+    }
+    await Promise.all(
+      content.map(async (item) => {
+        logger.info(
+          `downloadTrackGroupContent: ${trackGroupId}: Fetching content ${item.id}`
+        );
+        const { buffer } = await getBufferFromStorage(
+          downloadableContentBucket,
+          item.id
+        );
+
+        if (buffer) {
+          logger.info(
+            `downloadTrackGroupContent: ${trackGroupId} writing content to disk`
+          );
+          const tempPath = `${contentDestination}/${filenamify(item.originalFilename ?? item.id)}`;
+          await fsPromises.writeFile(tempPath, buffer);
+        }
+      })
+    );
+  } catch (e) {
+    logger.error(
+      `downloadTrackGroupContent: ${trackGroupId}: Error fetching content: ${e}`
+    );
+  }
 };
 
 const downloadCover = async ({
@@ -289,7 +339,6 @@ const downloadAndZipTracks = async ({
       tempFolder,
       format,
       trackGroup,
-      coverDestination,
       artist,
     });
     logger.info(`Downloaded tracks ${tempFolder}`);
@@ -299,6 +348,11 @@ const downloadAndZipTracks = async ({
       coverDestination,
     });
     logger.info(`trackGroupId ${trackGroup.id}: Building zip`);
+
+    await downloadTrackGroupContent({
+      trackGroupId: trackGroup.id,
+      contentDestination: tempFolder,
+    });
 
     await zipFilesInFolder({
       tempFolder,

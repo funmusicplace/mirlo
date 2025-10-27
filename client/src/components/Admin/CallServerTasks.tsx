@@ -3,10 +3,12 @@ import Button from "components/common/Button";
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
 import { SelectEl } from "components/common/Select";
+import Tabs from "components/common/Tabs";
 import React from "react";
 import { useForm } from "react-hook-form";
 
 import { useTranslation } from "react-i18next";
+import { NavLink } from "react-router-dom";
 import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
 
@@ -35,31 +37,33 @@ export const Admin: React.FC = () => {
   );
 
   return (
-    <form
-      {...methods}
-      onSubmit={methods.handleSubmit(onSave)}
-      className={css`
-        border: 1px solid grey;
-        padding: 1rem;
-      `}
-    >
-      <h2>{t("callServerTasks")}</h2>
-      <FormComponent>
-        <label>{t("whatTaskCall")}</label>
-        <SelectEl {...methods.register("jobName")}>
-          <option value="cleanUpFiles">cleanUpFiles</option>
-          <option value="moveBucketToBackblaze">moveBucketToBackblaze</option>
-          <option value="initiateUserNotifications">
-            initiateUserNotifications
-          </option>
-        </SelectEl>
-      </FormComponent>
-      <FormComponent direction="row">
-        <label>jobParam</label>
-        <InputEl {...methods.register("jobParam")} />
-      </FormComponent>
-      <Button>{t("submitServerTask")}</Button>
-    </form>
+    <>
+      <form
+        {...methods}
+        onSubmit={methods.handleSubmit(onSave)}
+        className={css`
+          border: 1px solid grey;
+          padding: 1rem;
+        `}
+      >
+        <h2>{t("callServerTasks")}</h2>
+        <FormComponent>
+          <label>{t("whatTaskCall")}</label>
+          <SelectEl {...methods.register("jobName")}>
+            <option value="cleanUpFiles">cleanUpFiles</option>
+            <option value="moveBucketToBackblaze">moveBucketToBackblaze</option>
+            <option value="initiateUserNotifications">
+              initiateUserNotifications
+            </option>
+          </SelectEl>
+        </FormComponent>
+        <FormComponent direction="row">
+          <label>jobParam</label>
+          <InputEl {...methods.register("jobParam")} />
+        </FormComponent>
+        <Button>{t("submitServerTask")}</Button>
+      </form>
+    </>
   );
 };
 
