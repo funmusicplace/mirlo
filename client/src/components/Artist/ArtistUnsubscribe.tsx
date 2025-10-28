@@ -40,7 +40,7 @@ function ArtistUnsubscribe() {
           await api.post(`artists/${artistId}/unfollow`, {
             email: email?.replaceAll(" ", ""),
           });
-          snackbar("successfullyUnsubscribed", { type: "success" });
+          snackbar(t("successfullyUnsubscribed"), { type: "success" });
           navigate(getArtistUrl(artist));
         } catch (e) {
           errorHandler(e);
