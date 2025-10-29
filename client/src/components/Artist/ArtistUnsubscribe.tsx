@@ -40,7 +40,7 @@ function ArtistUnsubscribe() {
           await api.post(`artists/${artistId}/unfollow`, {
             email: email?.replaceAll(" ", ""),
           });
-          snackbar("successfullyUnsubscribed", { type: "success" });
+          snackbar(t("successfullyUnsubscribed"), { type: "success" });
           navigate(getArtistUrl(artist));
         } catch (e) {
           errorHandler(e);
@@ -82,7 +82,7 @@ function ArtistUnsubscribe() {
         <label>{t("enterEmail")}</label>
         <InputEl {...register("email")} type="email" required />
         <Button type="submit">
-          {t("stopReceivingUpdates, {artistName: artist.name}")}
+          {t("stopReceivingUpdates", {artistName: artist.name})}
         </Button>
       </form>
     </WidthWrapper>
