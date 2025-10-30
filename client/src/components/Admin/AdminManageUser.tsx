@@ -6,13 +6,17 @@ import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import { Toggle } from "components/common/Toggle";
 import React from "react";
 import { FaArrowCircleLeft, FaCheck, FaTimes } from "react-icons/fa";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import api from "services/api";
+import { useSnackbar } from "state/SnackbarContext";
+import { getArtistUrl } from "utils/artist";
 
 const AdminManageUser = () => {
   const { id } = useParams();
   const [user, setUser] = React.useState<UserFromAdmin>();
   const [featureFlags, setFeatureFlags] = React.useState<string[]>([]);
+  const snackbar = useSnackbar();
+  const navigate = useNavigate();
 
   const callback = React.useCallback(async () => {
     const response = await api.get<UserFromAdmin>(`admin/users/${id}`);
@@ -24,6 +28,18 @@ const AdminManageUser = () => {
     await api.post(`manage/users/${id}/confirmEmail`, {});
     callback();
   }, [callback, id]);
+
+  const onDeleteClick = React.useCallback(async () => {
+    if (
+      window.confirm(
+        `Are you sure you want to delete user ${user?.email}? This action cannot be undone.`
+      )
+    ) {
+      await api.delete(`admin/users/${id}`);
+      snackbar(`User ${user?.email} deleted`, { type: "success" });
+      navigate("/admin/users");
+    }
+  }, [id, user?.email]);
 
   React.useEffect(() => {
     callback();
@@ -71,7 +87,13 @@ const AdminManageUser = () => {
               </tr>
               <tr>
                 <td>artists</td>
-                <td>{user.artists.length}</td>
+                <td>
+                  {user.artists.map((a) => (
+                    <Link to={getArtistUrl(a)} key={a.id}>
+                      {a.name}
+                    </Link>
+                  ))}
+                </td>
               </tr>
               <tr>
                 <td>is admin?</td>
@@ -179,6 +201,7 @@ const AdminManageUser = () => {
             </tbody>
           </table>
           <Button onClick={onConfirmationEmailClick}>Confirm user email</Button>
+          <Button onClick={onDeleteClick}>Delete user</Button>
         </div>
       </div>
     </>
