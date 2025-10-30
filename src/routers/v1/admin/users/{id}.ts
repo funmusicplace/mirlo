@@ -1,4 +1,4 @@
-import { Prisma } from "@mirlo/prisma/client";
+import { User } from "@mirlo/prisma/client";
 
 import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
@@ -6,11 +6,13 @@ import {
   userAuthenticated,
   userHasPermission,
 } from "../../../../auth/passport";
+import { deleteUser } from "../../../../utils/user";
 
 export default function () {
   const operations = {
     PUT: [userAuthenticated, userHasPermission("admin"), PUT],
     GET: [userAuthenticated, userHasPermission("admin"), GET],
+    DELETE: [userAuthenticated, userHasPermission("admin"), DELETE],
   };
 
   async function PUT(req: Request, res: Response, next: NextFunction) {
@@ -67,6 +69,40 @@ export default function () {
       next(e);
     }
   }
+
+  async function DELETE(req: Request, res: Response, next: NextFunction) {
+    const { id } = req.params;
+    try {
+      await deleteUser(Number(id));
+    } catch (e) {
+      res.status(400);
+      next();
+    }
+    res.json({ message: "Success" });
+  }
+
+  DELETE.apiDoc = {
+    summary: "Deletes a user",
+    parameters: [
+      {
+        in: "path",
+        name: "id",
+        required: true,
+        type: "string",
+      },
+    ],
+    responses: {
+      200: {
+        description: "Delete success",
+      },
+      default: {
+        description: "An error occurred",
+        schema: {
+          additionalProperties: true,
+        },
+      },
+    },
+  };
 
   return operations;
 }
