@@ -46,7 +46,7 @@ export default function () {
           ...(user ? { userId: user.id } : { ip: req.ip }),
         },
       });
-
+      res.sendStatus(200);
       return;
     } catch (e) {
       next(e);
