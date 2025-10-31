@@ -7,13 +7,23 @@ block content
           | Hello #{artist.user.name}!
         p 
           | Someone (#{email}) bought something from you!.
-      ul.mw600
-        each purchase in purchases 
-          li #{purchase.merch.title} amount #{purchase.quantity}:
-            | #{purchase.currencyPaid.toUpperCase()} #{(purchase.amountPaid / 100).toFixed(2)}
-            | Mirlo's cut: (#{purchase.currencyPaid.toUpperCase()} #{(purchase.platformCut / 100).toFixed(2)})
-            strong 
-              | Total: #{purchase.currencyPaid.toUpperCase()} #{(purchase.artistCut / 100).toFixed(2)} 
+      table.mw600
+        tr 
+          th Item
+          th Quantity
+          th Total Price
+          th Mirlo's Cut
+          th Payment Processor Fee
+          th Shipping Fee
+        tbody
+          each purchase in purchases 
+            tr
+              td #{purchase.merch.title}
+              td #{purchase.quantity}
+              td #{purchase.transaction.currency.toUpperCase()} #{(purchase.transaction.amount / 100).toFixed(2)}
+              td #{purchase.transaction.currency.toUpperCase()} #{(purchase.transaction.platformCut / 100).toFixed(2)}
+              td #{purchase.transaction.currency.toUpperCase()} #{(purchase.transaction.stripeCut / 100).toFixed(2)}
+              td #{purchase.transaction.currency.toUpperCase()} #{(purchase.transaction.shippingFeeAmount / 100).toFixed(2)}
 
       if message 
         p

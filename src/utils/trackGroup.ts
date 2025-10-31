@@ -535,7 +535,9 @@ export const registerTrackPurchase = async ({
 export const basicTrackGroupInclude = {
   include: {
     tracks: {
-      deletedAt: null,
+      where: {
+        deletedAt: null,
+      },
       include: {
         audio: { where: { uploadState: UploadState["SUCCESS"] } },
         trackArtists: true,
