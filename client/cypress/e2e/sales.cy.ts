@@ -1,3 +1,4 @@
+/// <reference types="cypress" />
 import {
   ARTIST_EXAMPLE,
   POST_EXAMPLE,
@@ -46,22 +47,9 @@ const posts = [
 describe("sales page", () => {
   beforeEach(() => {
     cy.setCookie("jwt", "valid-token", { httpOnly: true });
-    cy.intercept("GET", "/auth/profile", {
-      statusCode: 200,
-      body: {
-        result: {
-          id: 1,
-          email: "artist@example.com",
-        },
-      },
-    }).as("authProfile");
+    cy.intercept("GET", "/auth/profile").as("authProfile");
 
-    cy.intercept("GET", "/v1/settings/instanceArtist", {
-      statusCode: 200,
-      body: {
-        result: instanceArtist,
-      },
-    }).as("instanceArtist");
+    cy.intercept("GET", "/v1/settings/instanceArtist").as("instanceArtist");
 
     cy.intercept("GET", "/v1/manage/sales/*", (req) => {
       expect(req.query).to.include({
@@ -146,12 +134,7 @@ describe("sales page", () => {
 
     cy.visit("/sales");
 
-    cy.wait([
-      "@fetchManagedArtists",
-      "@fetchSales",
-      "@authProfile",
-      "@instanceArtist",
-    ]);
+    cy.wait(["@authProfile"]);
   });
 
   it("renders sales from the API for a logged in user", () => {

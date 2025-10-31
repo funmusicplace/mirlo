@@ -20,6 +20,7 @@ import {
   removeObjectsFromBucket,
   getReadStream,
   finalArtistAvatarBucket,
+  downloadableContentBucket,
 } from "./minio";
 import { addSizesToImage, findArtistIdForURLSlug } from "./artist";
 import { logger } from "../logger";
@@ -33,6 +34,7 @@ import { AppError } from "./error";
 import { processSingleMerch } from "./merch";
 import { sendBasecampAMessage } from "./basecamp";
 import downloadableContent from "../routers/v1/manage/downloadableContent";
+import { deleteDownloadableContent } from "./content";
 
 export const whereForPublishedTrackGroups = (): Prisma.TrackGroupWhereInput => {
   return {
@@ -86,6 +88,31 @@ export const deleteTrackGroup = async (
   deleteAll?: boolean
 ) => {
   await deleteTrackGroupCover(Number(trackGroupId));
+
+  await prisma.trackGroupPledge.deleteMany({
+    where: {
+      trackGroupId,
+    },
+  });
+
+  await prisma.trackGroupTag.deleteMany({
+    where: {
+      trackGroupId,
+    },
+  });
+
+  const downloadableContents =
+    await prisma.trackGroupDownloadableContent.findMany({
+      where: {
+        trackGroupId,
+      },
+    });
+
+  await Promise.all(
+    downloadableContents.map((dc) =>
+      deleteDownloadableContent(dc.downloadableContentId)
+    )
+  );
 
   await prisma.trackGroup.delete({
     where: {
@@ -508,6 +535,9 @@ export const registerTrackPurchase = async ({
 export const basicTrackGroupInclude = {
   include: {
     tracks: {
+      where: {
+        deletedAt: null,
+      },
       include: {
         audio: { where: { uploadState: UploadState["SUCCESS"] } },
         trackArtists: true,

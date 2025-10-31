@@ -75,6 +75,10 @@ const downloadTracks = async ({
   let i = 0;
 
   for await (const track of tracks) {
+    if (track.deletedAt) {
+      logger.info(`trackId ${track.id}: Track is deleted, skipping conversion`);
+      continue;
+    }
     logger.info(`trackId ${track.id}: Processing track ${track.title}`);
     if (!track.audio) {
       logger.error(

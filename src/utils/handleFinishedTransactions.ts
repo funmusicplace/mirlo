@@ -793,6 +793,7 @@ export const handleArtistMerchPurchase = async (
                     include: { artist: { include: { user: true } } },
                   },
                   options: true,
+                  transaction: true,
                 },
               });
               const platformCut = await calculateAppFee(
@@ -844,7 +845,6 @@ export const handleArtistMerchPurchase = async (
             message: session?.metadata?.message ?? null,
             purchases,
             artist: purchases[0].merch.artist,
-            calculateAppFee,
             email: purchaser.email,
           },
         },
