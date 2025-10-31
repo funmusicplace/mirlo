@@ -1,4 +1,4 @@
-import { Merch, MerchImage } from "@mirlo/prisma/client";
+import { DownloadableContent, Merch, MerchImage } from "@mirlo/prisma/client";
 
 import prisma from "@mirlo/prisma";
 import {
@@ -8,7 +8,7 @@ import {
 } from "./minio";
 import { addSizesToImage } from "./artist";
 import logger from "../logger";
-import { generateFullStaticImageUrl } from "./images";
+import { deleteDownloadableContent } from "./content";
 
 export const deleteMerchCover = async (merchId: string) => {
   const image = await prisma.merchImage.findFirst({
@@ -46,6 +46,18 @@ export const deleteMerchCover = async (merchId: string) => {
  */
 export const deleteMerch = async (merchId: string) => {
   await deleteMerchCover(merchId);
+
+  const downloadableContents = await prisma.merchDownloadableContent.findMany({
+    where: {
+      merchId,
+    },
+  });
+
+  await Promise.all(
+    downloadableContents.map((dc) =>
+      deleteDownloadableContent(dc.downloadableContentId)
+    )
+  );
 
   await prisma.merch.delete({
     where: {

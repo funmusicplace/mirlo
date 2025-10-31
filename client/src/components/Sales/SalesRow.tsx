@@ -14,27 +14,30 @@ const SalesRow: React.FC<{
     keyPrefix: "sales",
   });
 
-  const shippingDestination = sale.merch?.shippingDestinations?.find(
-    (dest) =>
-      dest.destinationCountry?.toLowerCase() ===
-      sale.shippingAddress?.country?.toLowerCase()
-  );
+  let shippingDestinations: ShippingDestination[] | undefined;
+  sale.merchPurchases?.forEach((purchase) => {
+    shippingDestinations = purchase.merch.shippingDestinations?.filter(
+      (dest) =>
+        dest.destinationCountry?.toLowerCase() ===
+        sale.shippingAddress?.country?.toLowerCase()
+    );
+  });
+
+  const saleType = sale.trackGroupPurchases?.length
+    ? "trackGroup"
+    : sale.merchPurchases?.length
+      ? "merch"
+      : sale.trackPurchases?.length
+        ? "track"
+        : sale.artistSubscriptionTier
+          ? "subscription"
+          : "tip";
 
   return (
     <tr>
       <td />
       <td>{sale.artist[0].name}</td>
-      <td>
-        {sale.trackGroupPurchases?.length
-          ? t("trackGroup")
-          : sale.merch
-            ? t("merch")
-            : sale.track
-              ? t("track")
-              : sale.artistSubscriptionTier
-                ? t("subscription")
-                : t("tip")}
-      </td>{" "}
+      <td>{t(saleType)}</td>{" "}
       <td>{formatDate({ date: sale.datePurchased, i18n })} </td>
       <td>
         {moneyDisplay({ amount: sale.amount / 100, currency: sale.currency })}
@@ -44,7 +47,7 @@ const SalesRow: React.FC<{
             <small>
               {" "}
               (<strong>{t("shippingCost")}: </strong>
-              {shippingDestination?.destinationCountry?.toUpperCase()}{" "}
+              {shippingDestinations?.[0]?.destinationCountry?.toUpperCase()}{" "}
               {sale.shippingFeeAmount &&
                 moneyDisplay({
                   amount: sale.shippingFeeAmount / 100,
@@ -79,28 +82,36 @@ const SalesRow: React.FC<{
               </Link>
             ))}
           </span>
-        ) : sale.merch ? (
+        ) : sale.merchPurchases?.length ? (
           <span>
-            <Link to={getMerchUrl(sale.artist[0], sale.merch)}>
-              {sale.merch.title}
-            </Link>{" "}
+            {sale.merchPurchases.map((merch) => (
+              <Link
+                key={merch.merchId}
+                to={getMerchUrl(sale.artist[0], merch.merch)}
+              >
+                {merch.merch.title}
+              </Link>
+            ))}
             (
             <Link target="_blank" to="/fulfillment">
               Fulfillment <FaExternalLinkAlt />
             </Link>
             )
           </span>
-        ) : sale.track ? (
+        ) : sale.trackPurchases?.length ? (
           <span>
-            <Link
-              to={getTrackUrl(
-                sale.artist[0],
-                sale.track.trackGroup,
-                sale.track
-              )}
-            >
-              {sale.track.title}
-            </Link>
+            {sale.trackPurchases.map((track) => (
+              <Link
+                key={track.trackId}
+                to={getTrackUrl(
+                  sale.artist[0],
+                  track.track.trackGroup,
+                  track.track
+                )}
+              >
+                {track.track.title}
+              </Link>
+            ))}
           </span>
         ) : sale.artistSubscriptionTier ? (
           <span>

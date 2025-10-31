@@ -258,14 +258,18 @@ export type Sale = {
     trackGroupId: number;
     trackGroup: TrackGroup;
   }[];
-  merch?: Partial<Merch> & { id: string; urlSlug: string };
+  trackPurchases?: {
+    message: string;
+    trackId: number;
+    track: Track;
+  }[];
+  merchPurchases?: {
+    message: string;
+    merchId: number;
+    merch: Merch;
+  }[];
   shippingAddress?: { country: string };
   quantity?: number;
-  track?: Partial<Track> & {
-    id: number;
-    urlSlug: string;
-    trackGroup: Partial<TrackGroup> & { id: number; urlSlug: string };
-  };
   artistSubscriptionTier?: Partial<ArtistSubscriptionTier>;
 };
 

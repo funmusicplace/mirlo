@@ -38,7 +38,7 @@ import { NextFunction, Request, Response } from "express";
 import { AppError } from "./error";
 import logger from "../logger";
 import { Job } from "bullmq";
-import { processSingleMerch } from "./merch";
+import { deleteMerch, processSingleMerch } from "./merch";
 import { getSiteSettings } from "./settings";
 import subscriptionTiers from "../routers/v1/manage/artists/{artistId}/subscriptionTiers";
 
@@ -298,6 +298,14 @@ export const deleteArtist = async (userId: number, artistId: number) => {
       artistSubscriptionTier: { artistId: Number(artistId) },
     },
   });
+
+  const merch = await prisma.merch.findMany({
+    where: {
+      artistId: Number(artistId),
+    },
+  });
+
+  await Promise.all(merch.map((m) => deleteMerch(m.id)));
 
   const trackGroups = await prisma.trackGroup.findMany({
     where: {
