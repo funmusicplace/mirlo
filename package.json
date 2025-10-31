@@ -1,7 +1,8 @@
 {
   "name": "mirlo",
   "version": "1.0.0",
-  "license": "GPL-3.0",
+  "license": "AGPL-3.0",
+  "module": "commonjs",
   "scripts": {
     "api:test": "tsc --noEmit && mocha test",
     "api:watch": "NODE_ENV=development PORT=3000 nodemon src/index.ts",

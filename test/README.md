@@ -15,3 +15,7 @@ To clean up these containers afterwards, the `--profile=test` argument needs to 
 ```
 docker compose --profile=test down
 ```
+
+## Cypress tests
+
+See the `client/cypress` folder.

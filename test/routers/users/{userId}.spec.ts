@@ -99,7 +99,7 @@ describe("users/{userId}", () => {
     it("should  update user email if password is correct", async () => {
       const { user, accessToken } = await createUser({
         email: "user@test.com",
-        password: await hashPassword("test1234"),
+        password: "test1234",
         emailConfirmationToken: null,
       });
 

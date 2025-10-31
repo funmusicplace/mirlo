@@ -233,8 +233,6 @@ export const findSales = async ({
     );
   }
 
-  console.log("userTransactions", userTransactions);
-
   return [
     ...supporters.map((s) => ({
       ...s,

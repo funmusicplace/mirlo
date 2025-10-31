@@ -1,6 +1,6 @@
 import prisma from "../prisma/prisma";
 import { Prisma } from "@mirlo/prisma/client";
-import { buildTokens } from "../src/routers/auth/utils";
+import { buildTokens, hashPassword } from "../src/routers/auth/utils";
 
 export const clearTables = async () => {
   await prisma.$executeRaw`DELETE FROM "ArtistLabel";`;
@@ -25,6 +25,7 @@ export const clearTables = async () => {
   await prisma.$executeRaw`DELETE FROM "UserTrackGroupWishlist";`;
   await prisma.$executeRaw`DELETE FROM "UserTrackGroupPurchase";`;
   await prisma.$executeRaw`DELETE FROM "TrackGroupCover";`;
+  await prisma.$executeRaw`DELETE FROM "TrackGroupDownloadableContent";`;
   await prisma.$executeRaw`DELETE FROM "TrackGroupDownloadCodes";`;
   await prisma.$executeRaw`DELETE FROM "TrackGroup";`;
   await prisma.$executeRaw`DELETE FROM "ArtistBanner";`;
@@ -38,9 +39,26 @@ export const clearTables = async () => {
   await prisma.$executeRaw`DELETE FROM "Settings";`;
 };
 
+export const createClient = async (clientKey: string) => {
+  const client = await prisma.client.create({
+    data: {
+      key: clientKey,
+      applicationName: "Test Client",
+      applicationUrl: "http://localhost",
+      allowedCorsOrigins: ["http://localhost/callback"],
+    },
+  });
+  return client;
+};
+
 export const createUser = async (data: Prisma.UserCreateArgs["data"]) => {
+  const createData: Prisma.UserCreateArgs["data"] = {
+    ...data,
+    password: data.password ? await hashPassword(data.password) : undefined,
+  };
+
   const user = await prisma.user.create({
-    data,
+    data: createData,
   });
 
   const { accessToken } = buildTokens(user);
@@ -217,13 +235,22 @@ export const createUserTrackGroupPurchase = async (
 export const createUserTrackPurchase = async (
   userId: number,
   trackId: number,
-  data?: Partial<Prisma.UserTrackPurchaseCreateArgs["data"]>
+  data?: { amount?: number; currency?: string; createdAt?: Date }
 ) => {
+  const transaction = await prisma.userTransaction.create({
+    data: {
+      userId,
+      amount: data?.amount ?? 1000,
+      currency: data?.currency ?? "USD",
+      createdAt: data?.createdAt,
+    },
+  });
   const purchase = await prisma.userTrackPurchase.create({
     data: {
       userId,
       trackId,
-      pricePaid: 100,
+      pricePaid: data?.amount ?? 1000,
+      transactionId: transaction.id,
     },
   });
   return purchase;
@@ -239,4 +266,18 @@ export const createTrackPlay = async (
     },
   });
   return trackPlay;
+};
+
+export default {
+  createArtist,
+  createPost,
+  createTier,
+  createTrackGroup,
+  createTrack,
+  createUser,
+  createUserTrackGroupPurchase,
+  createUserTrackPurchase,
+  createTrackPlay,
+  clearTables,
+  createClient,
 };

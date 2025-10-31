@@ -75,10 +75,10 @@ const SalesRow: React.FC<{
           <span>
             {sale.trackGroupPurchases.map((group) => (
               <Link
-                key={group.trackGroupId}
+                key={`tg-${group.trackGroupId}`}
                 to={getReleaseUrl(sale.artist[0], group.trackGroup)}
               >
-                {group.message}
+                {group.trackGroup.title}
               </Link>
             ))}
           </span>
@@ -86,7 +86,7 @@ const SalesRow: React.FC<{
           <span>
             {sale.merchPurchases.map((merch) => (
               <Link
-                key={merch.merchId}
+                key={`m-${merch.merchId}`}
                 to={getMerchUrl(sale.artist[0], merch.merch)}
               >
                 {merch.merch.title}
@@ -102,7 +102,7 @@ const SalesRow: React.FC<{
           <span>
             {sale.trackPurchases.map((track) => (
               <Link
-                key={track.trackId}
+                key={`t-${track.trackId}`}
                 to={getTrackUrl(
                   sale.artist[0],
                   track.track.trackGroup,

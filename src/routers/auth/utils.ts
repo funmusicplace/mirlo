@@ -2,8 +2,8 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { Response } from "express";
 
-const jwt_secret = process.env.JWT_SECRET ?? "";
-const refresh_secret = process.env.REFRESH_TOKEN_SECRET ?? "";
+const jwt_secret = process.env.JWT_SECRET ?? "secretkey";
+const refresh_secret = process.env.REFRESH_TOKEN_SECRET ?? "refreshkey";
 
 export async function hashPassword(password: string) {
   return await bcrypt.hash(password, 3);

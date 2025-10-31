@@ -2,7 +2,7 @@ import {
   ARTIST_EXAMPLE,
   POST_EXAMPLE,
   TRACK_GROUP_EXAMPLE,
-} from "../../test/mocks";
+} from "../../../client/test/mocks";
 
 const newsletterEmail = "listener@example.com";
 const verificationCode = "123456";

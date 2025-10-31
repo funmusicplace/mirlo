@@ -7,12 +7,13 @@ import { NextFunction, Request, Response } from "express";
 import { AppError } from "../utils/error";
 
 const isTest = process.env.NODE_ENV === "test" || process.env.CI;
+const MIRLO_API_KEY_HEADER = "mirlo-api-key";
 
 export const corsCheck = async (...args: [Request, Response, NextFunction]) => {
   const [req, _res, next] = args;
 
   try {
-    const apiHeader = req.headers["mirlo-api-key"];
+    const apiHeader = req.headers[MIRLO_API_KEY_HEADER];
     const isSameSite =
       req.headers["sec-fetch-site"] === "same-site" ||
       req.headers["sec-fetch-site"] === "same-origin";
@@ -70,9 +71,9 @@ export const corsCheck = async (...args: [Request, Response, NextFunction]) => {
       process.env.API_DOMAIN ?? "http://localhost:3000",
     ];
 
-    // if (process.env.NODE_ENV === "development") {
-    //   origin.push("http://localhost:8080"); // Just... for ease of coding
-    // }
+    if (process.env.NODE_ENV === "development") {
+      origin.push("http://localhost:8080"); // Just... for ease of coding
+    }
 
     return cors({
       origin,
