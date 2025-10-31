@@ -22,13 +22,13 @@ export type AutomaticallyReceivedAlbumEmailType = {
 
 const autoPurchaseNewAlbums = async () => {
   const currentDate = new Date();
-  const oneDayAgo = new Date();
-  oneDayAgo.setDate(currentDate.getDate() - 1);
+  const oneHourAgo = new Date();
+  oneHourAgo.setHours(currentDate.getHours() - 1);
 
   const recentAlbums = await prisma.trackGroup.findMany({
     where: {
       releaseDate: {
-        gte: oneDayAgo,
+        gte: oneHourAgo,
         lte: currentDate,
       },
       OR: [{ published: true }, { publishedAt: { lte: new Date() } }],
@@ -73,6 +73,23 @@ const autoPurchaseNewAlbums = async () => {
           logger.info(
             `autoPurchaseNewAlbums: album ${album.id}: registering purchase for ${sub.userId}`
           );
+
+          // check if purchase already exists
+          const existingPurchase =
+            await prisma.userTrackGroupPurchase.findFirst({
+              where: {
+                userId: sub.userId,
+                trackGroupId: album.id,
+              },
+            });
+
+          if (existingPurchase) {
+            logger.info(
+              `autoPurchaseNewAlbums: album ${album.id}: user ${sub.userId} already has a purchase, skipping`
+            );
+            return;
+          }
+
           await registerPurchase({
             userId: sub.userId,
             trackGroupId: album.id,
