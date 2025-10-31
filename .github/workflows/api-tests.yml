@@ -92,6 +92,9 @@ jobs:
       # Install npm dependencies, cache them correctly
       # and run all Cypress tests
 
+      - name: Build docker image
+        run: docker compose up -d
+
       - name: Run E2E tests
         uses: cypress-io/github-action@v6
         env:
@@ -104,3 +107,7 @@ jobs:
           browser: electron
           config-file: client/cypress.config.ts
           command: yarn workspace @mirlo/client client:cy:run
+
+      - name: Stop containers
+        if: always()
+        run: docker compose down
