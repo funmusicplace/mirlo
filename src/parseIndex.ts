@@ -300,6 +300,7 @@ const parseIndex = async (pathname: string) => {
         include: {
           artist: true,
           cover: true,
+          tracks: true,
         },
       });
       if (tg && route[4] === "tracks") {
