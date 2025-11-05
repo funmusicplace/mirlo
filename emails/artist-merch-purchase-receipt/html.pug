@@ -7,7 +7,7 @@ block content
     ul 
       each purchase in purchases 
         li #{purchase.merch.title} amount #{purchase.quantity}: 
-           | #{purchase.currencyPaid.toUpperCase()} #{(purchase.amountPaid / 100).toFixed(2)}
+           | #{purchase.transaction.currency.toUpperCase()} #{(purchase.transaction.amount / 100).toFixed(2)}
         
     p The artist will start fulfilling your order and be in touch.
     - const purchaseMessage = artist?.properties?.emails?.purchase

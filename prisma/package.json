@@ -1,6 +1,7 @@
 {
   "name": "@mirlo/prisma",
   "main": "./prisma.ts",
+  "type": "commonjs",
   "exports": {
     ".": {
       "import": "./prisma.ts",

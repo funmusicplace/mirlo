@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-namespace */
 /// <reference types="cypress" />
 // ***********************************************
 // This example commands.ts shows you how to
@@ -25,13 +26,27 @@
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 //
-// declare global {
-//   namespace Cypress {
-//     interface Chainable {
-//       login(email: string, password: string): Chainable<void>
-//       drag(subject: string, options?: Partial<TypeOptions>): Chainable<Element>
-//       dismiss(subject: string, options?: Partial<TypeOptions>): Chainable<Element>
-//       visit(originalFn: CommandOriginalFn, url: string, options: Partial<VisitOptions>): Chainable<Element>
-//     }
-//   }
-// }
+
+const THISURL = Cypress.env("API_DOMAIN") || "http://localhost:3000";
+
+Cypress.Commands.add("login", (data) => {
+  cy.log(JSON.stringify(Cypress.env()));
+  cy.log(`Logging in as ${data.email}`);
+  cy.request({
+    method: "POST",
+    url: `${THISURL}/auth/login`,
+    body: {
+      email: data.email,
+      password: data.password,
+    },
+  }).then((response) => {
+    expect(response.status).to.eq(200);
+    cy.log(`Logged in as ${data.email} successfully`);
+    const jwtCookie = response.headers["set-cookie"][0]
+      .split(";")[0]
+      .split("=")[1];
+    cy.setCookie("jwt", jwtCookie, {
+      httpOnly: true,
+    });
+  });
+});

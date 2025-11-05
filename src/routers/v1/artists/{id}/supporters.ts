@@ -80,35 +80,6 @@ const queryTips = (
   });
 };
 
-const queryTracks = (
-  artistId: number[],
-  sinceDate?: string,
-  untilDate?: string
-) => {
-  const dateFilter = constructDateFilter(sinceDate, untilDate);
-
-  return prisma.userTrackPurchase.findMany({
-    where: {
-      pricePaid: { gt: 0 },
-      datePurchased: dateFilter,
-      track: {
-        trackGroup: {
-          artistId: { in: artistId },
-        },
-      },
-    },
-    select: {
-      userId: true,
-      currencyPaid: true,
-      pricePaid: true,
-      datePurchased: true,
-      track: {
-        include: { trackGroup: { include: { artist: true } } },
-      },
-    },
-  });
-};
-
 const queryUserTransactions = (
   artistId: number[],
   sinceDate?: string,
@@ -121,14 +92,36 @@ const queryUserTransactions = (
     where: {
       amount: { gt: 0 },
       createdAt: dateFilter,
-      trackGroupPurchases: {
-        some: {
-          trackGroupId: trackGroupIds ? { in: trackGroupIds } : undefined,
-          trackGroup: {
-            artistId: { in: artistId },
+      OR: [
+        {
+          trackGroupPurchases: {
+            some: {
+              trackGroupId: trackGroupIds ? { in: trackGroupIds } : undefined,
+              trackGroup: {
+                artistId: { in: artistId },
+              },
+            },
           },
         },
-      },
+        {
+          merchPurchases: {
+            some: {
+              merch: {
+                artistId: { in: artistId },
+              },
+            },
+          },
+        },
+        {
+          trackPurchases: {
+            some: {
+              track: {
+                trackGroup: { artistId: { in: artistId } },
+              },
+            },
+          },
+        },
+      ],
     },
     select: {
       amount: true,
@@ -137,6 +130,7 @@ const queryUserTransactions = (
       userId: true,
       stripeCut: true,
       platformCut: true,
+      shippingFeeAmount: true,
 
       trackGroupPurchases: {
         select: {
@@ -151,40 +145,39 @@ const queryUserTransactions = (
           },
         },
       },
-    },
-  });
-};
 
-const queryMerch = (
-  artistId: number[],
-  sinceDate?: string,
-  untilDate?: string
-) => {
-  const dateFilter = constructDateFilter(sinceDate, untilDate);
-
-  return prisma.merchPurchase.findMany({
-    where: {
-      amountPaid: { gt: 0 },
-      createdAt: dateFilter,
-      merch: {
-        artistId: { in: artistId },
-      },
-    },
-    select: {
-      amountPaid: true,
-      currencyPaid: true,
-      quantity: true,
-      createdAt: true,
-      shippingAddress: true,
-      merch: {
-        include: {
-          artist: true,
-          shippingDestinations: {
-            select: { costUnit: true, destinationCountry: true },
+      merchPurchases: {
+        select: {
+          merch: {
+            select: {
+              title: true,
+              urlSlug: true,
+              artist: { select: { name: true, id: true, urlSlug: true } },
+            },
           },
         },
       },
-      userId: true,
+
+      trackPurchases: {
+        select: {
+          track: {
+            select: {
+              title: true,
+              id: true,
+              urlSlug: true,
+              trackGroup: {
+                select: {
+                  id: true,
+                  urlSlug: true,
+                  artist: {
+                    select: { name: true, id: true, urlSlug: true },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     },
   });
 };
@@ -220,23 +213,17 @@ export const findSales = async ({
 
   let supporters: Awaited<ReturnType<typeof querySupporters>> = [];
   let tips: Awaited<ReturnType<typeof queryTips>> = [];
-  let trackPurchases: Awaited<ReturnType<typeof queryTracks>> = [];
   let userTransactions: Awaited<ReturnType<typeof queryUserTransactions>> = [];
-  let merchPurchases: Awaited<ReturnType<typeof queryMerch>> = [];
   if (!filters) {
     supporters = await querySupporters(artistId, sinceDate, untilDate);
 
     tips = await queryTips(artistId, sinceDate, untilDate);
-
-    trackPurchases = await queryTracks(artistId, sinceDate, untilDate);
 
     userTransactions = await queryUserTransactions(
       artistId,
       sinceDate,
       untilDate
     );
-
-    merchPurchases = await queryMerch(artistId, sinceDate, untilDate);
   } else if (filters.trackGroupIds) {
     userTransactions = await queryUserTransactions(
       artistId,
@@ -266,39 +253,27 @@ export const findSales = async ({
       title: `Tip`,
       saleType: "tip",
     })),
-    ...trackPurchases.map((tp) => ({
-      ...tp,
-      urlSlug: tp.track.urlSlug,
-      artist: [tp.track.trackGroup.artist],
-      amount: tp.pricePaid,
-      currency: tp.currencyPaid,
-      title: tp.track.title,
-      saleType: "track",
-    })),
     ...userTransactions.map((ut) => ({
       ...ut,
       paymentProcessorCut: ut.stripeCut,
       datePurchased: ut.createdAt,
-      title: ut.trackGroupPurchases
-        .map((tgp) => tgp.trackGroup.title)
-        .join(", "),
-      artist: ut.trackGroupPurchases.map((tgp) => tgp.trackGroup.artist),
+      title:
+        ut.trackGroupPurchases?.map((tgp) => tgp.trackGroup.title).join(", ") ??
+        ut.merchPurchases?.map((mp) => mp.merch.title).join(", ") ??
+        ut.trackPurchases?.map((tp) => tp.track.title).join(", ") ??
+        "Transaction",
+
+      artist: [
+        ut.trackGroupPurchases.map((tgp) => tgp.trackGroup.artist),
+        ut.merchPurchases.map((mp) => mp.merch.artist),
+        ut.trackPurchases.map((tp) => tp.track.trackGroup.artist),
+      ].flat(),
       urlSlug: ut.trackGroupPurchases
         .map((tgp) => tgp.trackGroup.urlSlug)
         .join(", "),
       amount: ut.amount,
       currency: ut.currency,
       saleType: "transaction",
-    })),
-    ...merchPurchases.map((mp) => ({
-      ...mp,
-      title: mp.merch.title,
-      artist: [mp.merch.artist],
-      datePurchased: mp.createdAt,
-      amount: mp.amountPaid,
-      urlSlug: mp.merch.urlSlug,
-      currency: mp.currencyPaid,
-      saleType: "merch",
     })),
   ].sort((a, b) => {
     if (orderBy?.datePurchased === "asc") {

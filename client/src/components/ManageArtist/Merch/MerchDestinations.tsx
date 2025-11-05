@@ -71,7 +71,7 @@ const MerchDestinations: React.FC<{}> = () => {
       try {
         await api.put(`manage/merch/${merchParamId}/destinations`, packet);
         refetch();
-        snackbar("updatedShippingDestinations", { type: "success" });
+        snackbar(t("updatedShippingDestinations"), { type: "success" });
       } catch (e) {
         console.error("e", e);
       }

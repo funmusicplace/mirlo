@@ -69,6 +69,8 @@ jobs:
 
   cypress-run:
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: "postgresql://nomads:nomads@localhost:5434/nomads?schema=public"
     timeout-minutes: 15
     steps:
       - name: Checkout
@@ -89,8 +91,29 @@ jobs:
 
       - name: Install dependencies
         run: yarn install --immutable
-      # Install npm dependencies, cache them correctly
-      # and run all Cypress tests
+
+      - name: Build client
+        run: yarn client:build
+
+        # Cypress needs access to the __generated__ folder in prisma
+        # so we build prisma here as well
+      - name: Build Prisma
+        run: yarn prisma:build
+
+      - name: Build docker image
+        run: docker compose up -d
+
+      - name: Wait for services to be ready
+        run: |
+          # Wait for API to be ready
+          sleep 10
+          until curl -s http://localhost:3000/health; do
+            echo "Waiting for API to be ready..."
+            sleep 5
+          done
+
+      - name: print out what's in prisma folder
+        run: ls -la prisma/
 
       - name: Run E2E tests
         uses: cypress-io/github-action@v6
@@ -98,9 +121,12 @@ jobs:
           PORT: 8080
           CI: "1"
         with:
-          start: yarn workspace @mirlo/client run client:start
-          wait-on: "http://localhost:8080"
+          wait-on: "http://localhost:3000"
           wait-on-timeout: 120
           browser: electron
           config-file: client/cypress.config.ts
-          command: yarn workspace @mirlo/client client:cy:run
+          command: yarn client:cy:run
+
+      - name: Stop containers
+        if: always()
+        run: docker compose down

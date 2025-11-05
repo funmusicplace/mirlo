@@ -1,30 +1,30 @@
-import {
-  ARTIST_EXAMPLE,
-  POST_EXAMPLE,
-  TRACK_GROUP_EXAMPLE,
-} from "../../test/mocks";
+/// <reference types="cypress" />
+
+const adminUserEmail = "admin@admin.example";
+const adminPassword = "test1234";
 
 const newsletterEmail = "listener@example.com";
 const verificationCode = "123456";
 
 const instanceArtist = {
-  ...ARTIST_EXAMPLE,
+  // ...ARTIST_EXAMPLE,
+  name: "Example Artist",
   urlSlug: "example-artist",
 };
 
 const featuredRelease = {
-  ...TRACK_GROUP_EXAMPLE,
+  // ...TRACK_GROUP_EXAMPLE,
   title: "Example Album",
   urlSlug: "example-album",
 };
 
 const popularRelease = {
-  ...TRACK_GROUP_EXAMPLE,
+  // ...TRACK_GROUP_EXAMPLE,
   id: 2,
   title: "Popular Album",
   urlSlug: "popular-album",
   artist: {
-    ...TRACK_GROUP_EXAMPLE.artist,
+    // ...TRACK_GROUP_EXAMPLE.artist,
     id: 2,
     name: "Popular Artist",
     urlSlug: "popular-artist",
@@ -33,10 +33,10 @@ const popularRelease = {
 
 const posts = [
   {
-    ...POST_EXAMPLE,
+    // ...POST_EXAMPLE,
   },
   {
-    ...POST_EXAMPLE,
+    // ...POST_EXAMPLE,
     id: 2,
     title: "Latest tour update",
     urlSlug: "latest-tour-update",
@@ -44,91 +44,81 @@ const posts = [
 ];
 
 describe("sales page", () => {
-  beforeEach(() => {
-    cy.setCookie("jwt", "valid-token", { httpOnly: true });
-    cy.intercept("GET", "/auth/profile", {
-      statusCode: 200,
-      body: {
-        result: {
-          id: 1,
-          email: "artist@example.com",
-        },
-      },
-    }).as("authProfile");
+  let listenerId: number;
+  let trackId: number;
+  before(() => {
+    cy.task("clearTables");
 
-    cy.intercept("GET", "/v1/settings/instanceArtist", {
-      statusCode: 200,
-      body: {
-        result: instanceArtist,
-      },
-    }).as("instanceArtist");
+    cy.task("createUser", {
+      email: newsletterEmail,
+      password: "listenerpassword",
+      emailConfirmationToken: null,
+      name: "Listener",
+    })
+      .then((listener) => {
+        cy.log("listener", listener.user);
+        listenerId = listener.user.id;
+        return cy.task("createUser", {
+          email: adminUserEmail,
+          password: adminPassword,
+          emailConfirmationToken: null,
+          name: "Jim",
+        });
+      })
+      .then((user) => {
+        cy.log("user", user.user);
+        return cy
+          .login({ email: adminUserEmail, password: adminPassword })
+          .then((response) => {
+            cy.log(`usrId: ${user.user.id}`);
+            return cy.task("createArtist", {
+              userId: user.user.id,
+              name: instanceArtist.name,
+              urlSlug: instanceArtist.urlSlug,
+            });
+          });
+      })
+
+      .then((artist) => {
+        cy.task("createTrackGroup", {
+          title: featuredRelease.title,
+          urlSlug: featuredRelease.urlSlug,
+          artistId: artist.id,
+        });
+      })
+      .then((trackGroup) => {
+        cy.task("createUserTrackGroupPurchase", {
+          trackGroupId: trackGroup.id,
+          purchaserUserId: listenerId,
+        });
+        cy.task("createTrack", {
+          title: "Example Track",
+          urlSlug: "example-track",
+          trackGroupId: trackGroup.id,
+          allowIndividualSale: true,
+        });
+      })
+      .then((track) => {
+        trackId = track.id;
+        cy.task("createUserTrackPurchase", {
+          trackId: track.id,
+          purchaserUserId: listenerId,
+          data: { amount: 999 },
+        });
+      });
+  });
+
+  beforeEach(() => {
+    cy.intercept("GET", "/auth/profile").as("authProfile");
+    cy.intercept("GET", "/v1/settings/instanceArtist").as("instanceArtist");
 
     cy.intercept("GET", "/v1/manage/sales/*", (req) => {
       expect(req.query).to.include({
         take: "50",
       });
-
-      req.reply({
-        statusCode: 200,
-        body: {
-          results: [
-            {
-              amount: 999,
-              artist: [
-                {
-                  id: 1,
-                  name: "Example Artist",
-                  urlSlug: "example-artist",
-                },
-              ],
-              currency: "usd",
-              datePurchased: "2024-01-01T00:00:00.000Z",
-              trackGroupPurchases: [],
-              track: {
-                id: 1,
-                urlSlug: "example-track",
-                title: "Example Track",
-                trackGroup: {
-                  id: 1,
-                  urlSlug: "example-album",
-                  title: "Example Album",
-                },
-              },
-            },
-            {
-              amount: 1000,
-              artist: [
-                {
-                  id: 1,
-                  name: "Example Artist",
-                  urlSlug: "example-artist",
-                },
-              ],
-              currency: "usd",
-              datePurchased: "2024-01-02T00:00:00.000Z",
-              trackGroupPurchases: [
-                {
-                  trackGroupId: 1,
-                  message: "Example Album",
-                  trackGroup: {
-                    id: 1,
-                    urlSlug: "example-album",
-                    title: "Example Album",
-                  },
-                },
-              ],
-            },
-          ],
-          total: 2,
-          totalAmount: 1999,
-          totalSupporters: 2,
-        },
-      });
     }).as("fetchSales");
 
     cy.intercept("GET", "/v1/manage/artists*", (req) => {
-      // expect(req.query).to.include({ take: "50" });
-
       req.reply({
         statusCode: 200,
         body: {
@@ -146,18 +136,13 @@ describe("sales page", () => {
 
     cy.visit("/sales");
 
-    cy.wait([
-      "@fetchManagedArtists",
-      "@fetchSales",
-      "@authProfile",
-      "@instanceArtist",
-    ]);
+    cy.wait(["@authProfile"]);
   });
 
   it("renders sales from the API for a logged in user", () => {
     cy.contains("Sales");
     cy.contains("Total sales income: $19.99");
-    cy.contains("Total supporters: 2");
+    cy.contains("Total supporters: 1");
     cy.contains("Total sales: 2");
 
     cy.get("table tbody").within(() => {
@@ -169,7 +154,7 @@ describe("sales page", () => {
           cy.contains("$9.99");
           cy.contains("Track");
           cy.get(
-            '[href="/example-artist/release/example-album/tracks/1"]'
+            `[href="/example-artist/release/example-album/tracks/${trackId}"]`
           ).should("exist");
         });
       cy.get("tr")
