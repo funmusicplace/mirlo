@@ -4,6 +4,7 @@ import {
   merchBelongsToLoggedInUser,
 } from "../../../../../auth/passport";
 import prisma from "@mirlo/prisma";
+import { isNumber } from "lodash";
 
 type Params = {
   merchId: string;
@@ -44,7 +45,7 @@ export default function () {
                   data: oType.options.map((o) => ({
                     name: o.name,
                     additionalPrice: Number(o.additionalPrice),
-                    quantityRemaining: o.quantityRemaining
+                    quantityRemaining: isNumber(o.quantityRemaining)
                       ? Number(o.quantityRemaining)
                       : null,
                   })),
