@@ -1,0 +1,43 @@
+extends ../layout.pug
+
+mixin purchaseRow(title, transaction)
+  tr
+    td #{title}
+    td #{transaction.currency.toUpperCase()} #{(transaction.amount / 100).toFixed(2)}
+    td #{transaction.platformFee / 100 ? `(Platform fee: ${transaction.platformFee / 100})` : ''}
+    td #{transaction.stripeCut / 100 ? `(Payment processor fee: ${transaction.stripeCut / 100})` : ''}
+
+block content
+  p Thank you for your purchase!
+    
+  table 
+    each transaction in transactions
+      each purchase in transaction.trackGroupPurchases
+        +purchaseRow(purchase.trackGroup.title, transaction)
+        tr 
+          td(colspan="4")
+            | See the release in 
+            a(href!=`${client}/profile/collection`) your collection
+            | .
+      each purchase in transaction.trackPurchases
+        +purchaseRow(purchase.track.title, transaction)
+        tr 
+          td(colspan="4")
+            | See the release in 
+            a(href=`${client}/profile/collection`) your collection
+            | .
+      each purchase in transaction.merchPurchases
+        +purchaseRow(purchase.merch.title, transaction)
+      each tip in transaction.tips
+        +purchaseRow('Tip', transaction)
+  - const supportMessage = artist?.properties?.emails?.purchase
+  if supportMessage
+    div!= supportMessage
+  else
+    p Your support keeps our community strong. 
+    hr 
+    p New to mirlo? 
+      | If you want to have access to all your purchases for this e-mail address, 
+      | simply 
+      a(href!=`${client}/password-reset?email=${email}`) set a password for it
+      | .

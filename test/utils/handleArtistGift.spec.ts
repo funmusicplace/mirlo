@@ -9,9 +9,9 @@ import assert from "assert";
 import sinon from "sinon";
 import * as sendMail from "../../src/jobs/send-mail";
 import {
-  ArtistTipNotificationEmailType,
-  ArtistTipReceiptEmailType,
+  ArtistPurchaseNotificationEmailType,
   handleArtistGift,
+  PurchaseReceiptEmailType,
 } from "../../src/utils/handleFinishedTransactions";
 
 describe("handleArtistGift", () => {
@@ -56,18 +56,18 @@ describe("handleArtistGift", () => {
 
     assert.equal(stub.calledTwice, true);
     const data0 = stub.getCall(0).args[0].data;
-    assert.equal(data0.template, "artist-tip-receipt");
+    assert.equal(data0.template, "purchase-receipt");
     assert.equal(data0.message.to, "follower@follower.com");
-    const locals = data0.locals as ArtistTipReceiptEmailType;
-    assert.equal(locals.tip.userId, tip?.userId);
-    assert.equal(locals.tip.artistId, tip?.artistId);
-    assert.equal(locals.tip.pricePaid, 0);
+    const locals = data0.locals as PurchaseReceiptEmailType;
+    assert.equal(locals.transactions[0].userId, tip?.userId);
+    assert.equal(locals.transactions[0].tips?.[0].artist.id, tip?.artistId);
+    assert.equal(locals.transactions[0].amount, 0);
     const data1 = stub.getCall(1).args[0].data;
-    assert.equal(data1.template, "tip-artist-notification");
+    assert.equal(data1.template, "artist-purchase-notification");
     assert.equal(data1.message.to, artistUser.email);
-    const locals1 = data1.locals as ArtistTipNotificationEmailType;
-    assert.equal(locals1.tip.userId, tip?.userId);
-    assert.equal(locals1.tip.artistId, tip?.artistId);
-    assert.equal(locals1.tip.pricePaid, 0);
+    const locals1 = data1.locals as ArtistPurchaseNotificationEmailType;
+    assert.equal(locals1.transactions[0].userId, tip?.userId);
+    assert.equal(locals1.transactions[0].tips?.[0].artist.id, tip?.artistId);
+    assert.equal(locals1.transactions[0].amount, 0);
   });
 });

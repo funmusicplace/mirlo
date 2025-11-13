@@ -1,6 +1,6 @@
 import Stripe from "stripe";
 import prisma from "@mirlo/prisma";
-import { Artist, MerchOption, TrackGroup } from "@mirlo/prisma/client";
+import { Artist, MerchOption, TrackGroup, User } from "@mirlo/prisma/client";
 
 import { logger } from "../logger";
 import sendMail from "../jobs/send-mail";
@@ -384,8 +384,7 @@ export const handleCataloguePurchase = async (
 export const handleTrackPurchase = async (
   userId: number,
   trackId: number,
-  session?: Stripe.Checkout.Session,
-  newUser?: boolean
+  session?: Stripe.Checkout.Session
 ) => {
   try {
     const { applicationFee } = await getApplicationFee(session);
@@ -398,8 +397,6 @@ export const handleTrackPurchase = async (
       paymentProcessorKey: session?.id ?? null,
       platformCut: applicationFee ?? null,
     });
-
-    const settings = await getSiteSettings();
 
     const user = await prisma.user.findFirst({
       where: {
@@ -426,51 +423,10 @@ export const handleTrackPurchase = async (
       },
     });
 
-    if (user && track && purchase) {
-      const isBeforeReleaseDate =
-        new Date(track.trackGroup.releaseDate) > new Date();
-
-      await sendMail<TrackPurchaseEmailType>({
-        data: {
-          template: newUser ? "track-download" : "track-purchase-receipt",
-          message: {
-            to: user.email,
-          },
-          locals: {
-            track,
-            purchase,
-            isBeforeReleaseDate,
-            token: purchase.singleDownloadToken,
-            email: user.email,
-            client: process.env.REACT_APP_CLIENT_DOMAIN,
-            host: process.env.API_DOMAIN,
-          } as TrackPurchaseEmailType,
-        },
-      } as Job);
-
-      const pricePaid = purchase.pricePaid / 100;
-
-      await sendMail<TrackPurchaseArtistNotificationEmailType>({
-        data: {
-          template: "track-purchase-artist-notification",
-          message: {
-            to:
-              track.trackGroup.paymentToUser?.email ??
-              track.trackGroup.artist.user.email,
-          },
-          locals: {
-            track,
-            purchase,
-            message: purchase.message ?? null,
-            pricePaid,
-            platformCut:
-              ((track.trackGroup.platformPercent ?? settings.platformPercent) *
-                pricePaid) /
-              100,
-            email: user.email,
-          } as TrackPurchaseArtistNotificationEmailType,
-        },
-      } as Job);
+    if (user && track && purchase && purchase.transactionId) {
+      await sendSaleEmails(track.trackGroup.artist, user, [
+        purchase.transactionId,
+      ]);
     }
 
     return purchase;
@@ -479,33 +435,159 @@ export const handleTrackPurchase = async (
   }
 };
 
-export type ArtistTipReceiptEmailType = {
-  tip: {
-    id: string;
-    userId: number;
-    artist: {
-      name: string;
-      properties?: { emails?: { support?: string } };
-    };
-    artistId: number;
-    pricePaid: number;
-    currencyPaid: string;
+type PurchaseTransaction = {
+  userId: number;
+  user: {
+    name: string;
+    email: string;
   };
-  pricePaid: number;
+  trackGroupPurchases?: { trackGroup: { title: string; id: number } }[];
+  trackPurchases?: {
+    track: {
+      trackGroup: { title: string; id: number };
+      title: string;
+      id: number;
+    };
+  }[];
+  merchPurchases?: {
+    merch: { title: string; id: string };
+    quantity: number;
+  }[];
+  tips?: {
+    artist: { name: string; id: number };
+  }[];
+  amount: number;
+  currency: string;
+  id: string;
+  stripeCut: number;
+  platformCut: number;
+};
+
+export type PurchaseReceiptEmailType = {
+  transactions: PurchaseTransaction[];
+  email: string;
+  client: string;
+  host: string;
+  artist: {
+    user: User;
+    properties?: { emails?: { purchase?: string } } | null;
+  };
+};
+
+export type ArtistPurchaseNotificationEmailType = {
+  artist: {
+    user: User;
+    properties?: { emails?: { purchase?: string } } | null;
+  };
+  transactions: PurchaseTransaction[];
+  message: string | null;
   email: string;
 };
 
-export type ArtistTipNotificationEmailType = {
-  tip: {
-    id: string;
-    userId: number;
-    artistId: number;
-    pricePaid: number;
-    message: string | null;
-  };
-  pricePaid: number;
-  platformCut: number;
-  email: string;
+const sendSaleEmails = async (
+  artist: {
+    user: User;
+    properties?: { emails?: { purchase?: string } } | null;
+  },
+  purchaser: User,
+  transactionIds: string[],
+  message?: string
+) => {
+  const transactions = await prisma.userTransaction.findMany({
+    where: {
+      id: {
+        in: transactionIds,
+      },
+    },
+    include: {
+      user: true,
+      tips: {
+        include: {
+          artist: {
+            include: {
+              user: true,
+            },
+          },
+        },
+      },
+      trackGroupPurchases: {
+        include: {
+          trackGroup: {
+            include: {
+              artist: {
+                include: {
+                  user: true,
+                },
+              },
+            },
+          },
+        },
+      },
+      merchPurchases: {
+        include: {
+          merch: {
+            include: {
+              artist: {
+                include: {
+                  user: true,
+                },
+              },
+            },
+          },
+        },
+      },
+      trackPurchases: {
+        include: {
+          track: {
+            include: {
+              trackGroup: {
+                include: {
+                  artist: {
+                    include: {
+                      user: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  await sendMail<PurchaseReceiptEmailType>({
+    data: {
+      template: "purchase-receipt",
+      message: {
+        to: purchaser.email,
+      },
+      locals: {
+        artist,
+        transactions,
+        email: purchaser.email,
+        client: process.env.REACT_APP_CLIENT_DOMAIN,
+        host: process.env.API_DOMAIN,
+      } as PurchaseReceiptEmailType,
+    },
+  } as Job);
+
+  await sendMail<ArtistPurchaseNotificationEmailType>({
+    data: {
+      template: "artist-purchase-notification",
+      message: {
+        to: artist.user.email,
+      },
+      locals: {
+        artist,
+        transactions,
+        message: message ?? null,
+        email: purchaser.email,
+        client: process.env.REACT_APP_CLIENT_DOMAIN,
+        host: process.env.API_DOMAIN,
+      } as ArtistPurchaseNotificationEmailType,
+    },
+  } as Job);
 };
 
 export const handleArtistGift = async (
@@ -514,7 +596,20 @@ export const handleArtistGift = async (
   session?: Stripe.Checkout.Session
 ) => {
   try {
-    const { applicationFee } = await getApplicationFee(session);
+    const { applicationFee, paymentProcessorFee } =
+      await getApplicationFee(session);
+
+    const transaction = await prisma.userTransaction.create({
+      data: {
+        userId: Number(userId),
+        amount: session?.amount_total ?? 0,
+        currency: session?.currency ?? "usd",
+        platformCut: applicationFee ?? null,
+        stripeCut: paymentProcessorFee ?? null,
+        stripeId: session?.id ?? "",
+      },
+    });
+
     const createdTip = await prisma.userArtistTip.create({
       data: {
         userId,
@@ -524,6 +619,7 @@ export const handleArtistGift = async (
         stripeSessionKey: session?.id ?? null,
         message: session?.metadata?.message ?? null,
         platformCut: applicationFee ?? null,
+        transactionId: transaction.id,
       },
     });
 
@@ -541,41 +637,7 @@ export const handleArtistGift = async (
     });
 
     if (user && tip) {
-      const pricePaid = tip.pricePaid / 100;
-
-      await sendMail<ArtistTipReceiptEmailType>({
-        data: {
-          template: "artist-tip-receipt",
-          message: {
-            to: user.email,
-          },
-          locals: {
-            tip,
-            email: user.email,
-            pricePaid,
-            client: process.env.REACT_APP_CLIENT_DOMAIN,
-            host: process.env.API_DOMAIN,
-          } as ArtistTipReceiptEmailType,
-        },
-      } as Job);
-
-      const platformCut = await calculateAppFee(pricePaid, tip.currencyPaid);
-
-      await sendMail<ArtistTipNotificationEmailType>({
-        data: {
-          template: "tip-artist-notification",
-          message: {
-            to: tip.artist.user.email,
-          },
-          locals: {
-            tip,
-            pricePaid,
-            message: tip.message ?? null,
-            platformCut,
-            email: user.email,
-          } as ArtistTipNotificationEmailType,
-        },
-      } as Job);
+      await sendSaleEmails(tip.artist, user, [transaction.id]);
     }
 
     return tip;
