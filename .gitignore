@@ -14,3 +14,4 @@ __generated__/
 
 *storybook.log
 .idea/
+docs/.vitepress/cache/

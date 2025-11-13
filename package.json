@@ -65,7 +65,6 @@
     "stripe": "^13.0.0",
     "swagger-ui-express": "^5.0.1",
     "typescript": "5.1.6",
-    "use-confirm": "^1.0.1",
     "winston": "^3.8.2",
     "yargs": "^17.6.2"
   },
