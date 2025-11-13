@@ -5,17 +5,17 @@
 version: 2
 
 build:
-   os: ubuntu-lts-latest
-   tools:
-       nodejs: "latest"
-   jobs:
-       install:
-           - npm install vitepress
-       build:
-           html:
-               # The site was created by running `vitepress init`
-               # and following the official guide
-               # https://vitepress.dev/guide/getting-started
-               - vitepress build docs
-               - mkdir -p $READTHEDOCS_OUTPUT/
-               - mv docs/.vitepress/dist $READTHEDOCS_OUTPUT/html
+  os: ubuntu-lts-latest
+  tools:
+    nodejs: "22"
+  jobs:
+    install:
+      - npm install vitepress
+    build:
+      html:
+        # The site was created by running `vitepress init`
+        # and following the official guide
+        # https://vitepress.dev/guide/getting-started
+        - vitepress build docs
+        - mkdir -p $READTHEDOCS_OUTPUT/
+        - mv docs/.vitepress/dist $READTHEDOCS_OUTPUT/html

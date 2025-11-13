@@ -1942,7 +1942,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.17.8, @babel/runtime@npm:^7.18.3, @babel/runtime@npm:^7.20.13, @babel/runtime@npm:^7.20.6, @babel/runtime@npm:^7.21.0, @babel/runtime@npm:^7.22.3, @babel/runtime@npm:^7.23.8, @babel/runtime@npm:^7.23.9, @babel/runtime@npm:^7.5.5, @babel/runtime@npm:^7.8.7":
+"@babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.17.8, @babel/runtime@npm:^7.18.3, @babel/runtime@npm:^7.20.13, @babel/runtime@npm:^7.20.6, @babel/runtime@npm:^7.21.0, @babel/runtime@npm:^7.22.3, @babel/runtime@npm:^7.23.2, @babel/runtime@npm:^7.23.8, @babel/runtime@npm:^7.23.9, @babel/runtime@npm:^7.5.5, @babel/runtime@npm:^7.8.7":
   version: 7.28.4
   resolution: "@babel/runtime@npm:7.28.4"
   checksum: 10/6c9a70452322ea80b3c9b2a412bcf60771819213a67576c8cec41e88a95bb7bf01fc983754cda35dc19603eef52df22203ccbf7777b9d6316932f9fb77c25163
@@ -3577,11 +3577,12 @@ __metadata:
     focus-trap-react: "npm:^11.0.3"
     hast-util-from-parse5: "npm:^7.1.2"
     html-react-parser: "npm:^5.1.1"
-    i18next: "npm:^22.4.15"
+    i18next: "npm:^23.0.1"
     id3-parser: "npm:^3.0.0"
     immer: "npm:^9.0.7"
     jsdom: "npm:^24.0.0"
     lodash: "npm:^4.17.21"
+    lottie-react: "npm:^2.4.1"
     music-metadata-browser: "npm:^2.5.10"
     parallax-js: "npm:^3.1.0"
     parse5: "npm:^7.1.2"
@@ -3592,7 +3593,7 @@ __metadata:
     react-helmet: "npm:^6.1.0"
     react-hook-form: "npm:^7.40.0"
     react-i18n: "npm:^1.0.1"
-    react-i18next: "npm:^12.2.2"
+    react-i18next: "npm:^12.3.1"
     react-icons: "npm:^5.3.0"
     react-markdown: "npm:^8.0.6"
     react-papaparse: "npm:^4.4.0"
@@ -13562,12 +13563,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"i18next@npm:^22.4.15":
-  version: 22.5.1
-  resolution: "i18next@npm:22.5.1"
+"i18next@npm:^23.0.1":
+  version: 23.16.8
+  resolution: "i18next@npm:23.16.8"
   dependencies:
-    "@babel/runtime": "npm:^7.20.6"
-  checksum: 10/ab1a0adee97911917fc46fb4216b8eb7c4ec0a243966609dda6a384e4b22acd25386a817dc51146328d5272ce1c6133558361788ebc4a36fbca250b8b3e90bd1
+    "@babel/runtime": "npm:^7.23.2"
+  checksum: 10/d5c38011de4d3b4aa466fac6773520eb28007b9d6138e03432bfbfc0d041c04df45e15c67d96f22cd660088cc9b24d3eda32cddc9fb4c6508c5afada6c2e6290
   languageName: node
   linkType: hard
 
@@ -16280,7 +16281,6 @@ __metadata:
     jsonwebtoken: "npm:^8.5.1"
     lint-staged: "npm:14.0.1"
     lodash: "npm:^4.17.21"
-    lottie-react: "npm:^2.4.1"
     minio: "npm:^8.0.5"
     mocha: "npm:^10.2.0"
     music-metadata: "npm:7.13.3"
@@ -18395,7 +18395,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-i18next@npm:^12.2.2":
+"react-i18next@npm:^12.3.1":
   version: 12.3.1
   resolution: "react-i18next@npm:12.3.1"
   dependencies:
