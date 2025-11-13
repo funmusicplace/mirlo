@@ -64,17 +64,14 @@ const getApplicationFee = async (session?: Stripe.Checkout.Session) => {
       (fee) => fee.type === "stripe_fee"
     );
 
-    if (paymentIntent.application_fee_amount) {
-      return {
-        applicationFee: paymentIntent.application_fee_amount,
-        paymentProcessorFee: stripeFee?.amount ?? 0,
-      };
-    } else {
-      logger.warn(
-        `No application fee found for payment intent ${paymentIntentId}`
-      );
-      return { applicationFee: 0, paymentProcessorFee: 0 };
-    }
+    logger.info(
+      `Application fee: ${paymentIntent.application_fee_amount}, Stripe fee: ${stripeFee?.amount}`
+    );
+
+    return {
+      applicationFee: paymentIntent.application_fee_amount ?? 0,
+      paymentProcessorFee: stripeFee?.amount ?? 0,
+    };
   } catch (error) {
     logger.error(`Error retrieving application fee: ${error}`);
     throw new Error("Failed to retrieve application fee");
