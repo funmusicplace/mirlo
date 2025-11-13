@@ -1131,12 +1131,7 @@ export const handleCheckoutSession = async (
       );
     } else if (purchaseType === "track") {
       logger.info(`checkout.session: ${session.id} handleTrackPurchase`);
-      await handleTrackPurchase(
-        Number(actualUserId),
-        Number(trackId),
-        session,
-        newUser
-      );
+      await handleTrackPurchase(Number(actualUserId), Number(trackId), session);
     } else if (purchaseType === "artistCatalogue") {
       logger.info(`checkout.session: ${session.id} handleCataloguePurchase`);
       await handleCataloguePurchase(

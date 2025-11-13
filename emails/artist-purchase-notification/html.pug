@@ -1,0 +1,26 @@
+extends ../layout.pug
+
+mixin purchaseRow(title, transaction)
+  tr
+    td #{title}
+    td #{transaction.currency.toUpperCase()} #{(transaction.amount / 100).toFixed(2)}
+    td #{transaction.platformFee / 100 ? `(Platform fee: ${transaction.platformFee / 100})` : ''}
+    td #{transaction.stripeCut / 100 ? `(Payment processor fee: ${transaction.stripeCut / 100})` : ''}
+
+block content
+  p Someone supported you via Mirlo:
+    
+  table 
+    each transaction in transactions
+      each purchase in transaction.trackGroupPurchases
+        +purchaseRow(purchase.trackGroup.title, transaction)
+      each purchase in transaction.trackPurchases
+        +purchaseRow(purchase.track.title, transaction)
+      each purchase in transaction.merchPurchases
+        +purchaseRow(purchase.merch.title, transaction)
+      each tip in transaction.tips
+        +purchaseRow('Tip', transaction)
+
+  p You can view your sales in your 
+    a(href!=`${client}/sales`) artist dashboard
+    | .
