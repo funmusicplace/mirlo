@@ -331,10 +331,10 @@ const parseIndex = async (pathname: string) => {
       } else if (tg) {
         const coverString = tg.cover?.url.find((u) => u.includes("x600"));
         //render a text tracklist to display in the description
-        const tracklist = ''
-        for ( const [ index, value ] of tg.tracks.entries() ) {
-          const trackListItem = `${index + 1}. ${value.title} by ${value.artist}`
-          tracklist.concat("\n", trackListItem)
+        const tracklist = "";
+        for (const [index, value] of tg.tracks.entries()) {
+          const trackListItem = `${index + 1}. ${value.title} by ${tg.artist}`;
+          tracklist.concat("\n", trackListItem);
         }
         buildOpenGraphTags($, {
           title: tg.title ?? "Mirlo Album",
