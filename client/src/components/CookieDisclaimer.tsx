@@ -34,6 +34,7 @@ const CookieDisclaimer = () => {
           margin-left: 1rem;
         }
       `}
+      data-nosnippet
     >
       {t("weUseCookies")}
       <Button onClick={() => dispatch({ type: "setCookieDisclaimerRead" })}>

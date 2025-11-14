@@ -4,13 +4,11 @@ import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 import { useSnackbar } from "state/SnackbarContext";
 import Button from "../common/Button";
-import api from "services/api";
 import { useAuthContext } from "state/AuthContext";
 import { queryManagedArtists, useLogoutMutation } from "queries";
 import { getArtistManageUrl } from "utils/artist";
 import { useQuery } from "@tanstack/react-query";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
-import { querySetting } from "queries/settings";
 import CanCreateArtists from "components/CanCreateArtists";
 
 const Menu: React.FC = (props) => {
@@ -45,7 +43,7 @@ const Menu: React.FC = (props) => {
   const seeOrderPages = user?.isLabelAccount || !!artists?.length;
 
   return (
-    <menu className={css``}>
+    <menu data-nosnippet>
       {user && (
         <>
           <li>
