@@ -36,7 +36,7 @@ const Tabs = styled.ul`
 `;
 
 export const ArtistTabs = styled(Tabs)<{ color?: string }>`
-  margin: 0rem 0.5rem 0 0;
+  margin: 0rem 0.5rem 1rem 0;
 
   @media screen and (max-width: ${bp.medium}px) {
     padding: var(--mi-side-paddings-xsmall);
