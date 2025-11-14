@@ -42,7 +42,7 @@ describe("trackGroups/{id}/redeemCode", () => {
         .set("Accept", "application/json");
 
       assert.equal(response.statusCode, 404);
-      assert.equal(response.body.error, "Code not found");
+      assert.equal(response.body.error, "Code not found or already used.");
     });
 
     it("should GET / fail without an email or logged in user", async () => {

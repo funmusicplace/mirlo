@@ -32,13 +32,14 @@ import {
   useGetArtistColors,
 } from "components/Artist/ArtistButtons";
 import { bp } from "../../constants";
+import { useSnackbar } from "state/SnackbarContext";
 
 function RedeemCode() {
   const { t } = useTranslation("translation", {
     keyPrefix: "trackGroupDetails",
   });
   const { colors } = useGetArtistColors();
-
+  const snackbar = useSnackbar();
   const { user } = useAuthContext();
   const navigate = useNavigate();
   const [params] = useSearchParams();
@@ -70,7 +71,9 @@ function RedeemCode() {
               result.singleDownloadToken
             }&email=${result.user?.email ?? user?.email ?? email}`
           );
-        } catch (e) {}
+        } catch (e) {
+          snackbar(t("codeRedeemError"), { type: "warning" });
+        }
       }
     },
     [artist, navigate, tId, trackGroup, user?.email]

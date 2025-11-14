@@ -10,7 +10,7 @@ build:
     nodejs: "22"
   jobs:
     install:
-      - npm install vitepress
+      - npm install vitepress --force
     build:
       html:
         # The site was created by running `vitepress init`

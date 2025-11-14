@@ -52,7 +52,7 @@ export default function () {
       if (!downloadCode) {
         throw new AppError({
           httpCode: 404,
-          description: "Code not found",
+          description: "Code not found or already used.",
         });
       }
 

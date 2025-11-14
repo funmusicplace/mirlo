@@ -1028,6 +1028,7 @@
     "untitled": "Untitled",
     "enterDownloadCode": "Enter download code",
     "yourEmail": "Your email:",
+    "redeemCodeError": "Code not found or already used.",
     "redeem": "Redeem",
     "gotADownloadCode": "Got a download code?",
     "untitledRelease": "Untitled release",
