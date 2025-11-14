@@ -136,7 +136,7 @@ const BuyMerchItem: React.FC<{
     return null;
   }
 
-  let price = Number(currentPrice) * Number(quantity);
+  let price = Number(currentPrice);
   let amountAvailable = merch.quantityRemaining;
 
   merch.optionTypes?.forEach((ot) => {
@@ -227,11 +227,11 @@ const BuyMerchItem: React.FC<{
               min={minPrice ? minPrice * quantity : 0}
               step={0.01}
             />
-            {price < minPrice && (
+            {price < minPrice * quantity && (
               <Box variant="warning" compact>
                 {t("priceMustBeAtLeast", {
                   price: moneyDisplay({
-                    amount: minPrice,
+                    amount: minPrice * quantity,
                     currency: merch.currency,
                   }),
                 })}

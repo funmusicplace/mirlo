@@ -73,6 +73,7 @@ export const Manage: React.FC = () => {
                 justify-content: stretch;
                 margin-top: 1rem;
                 flex-wrap: wrap;
+                gap: 1rem;
               `}
             >
               {artists
@@ -82,28 +83,22 @@ export const Manage: React.FC = () => {
                     key={a.id}
                     to={`artists/${a.id}`}
                     variant="outlined"
-                    className={css`
-                      margin-right: 1rem;
-                      margin-bottom: 1rem;
-                    `}
                   >
                     {a.name}
                   </ButtonLink>
                 ))}
-              <div>
-                <ButtonLink
-                  to="/manage/welcome"
-                  buttonRole="primary"
-                  startIcon={<FaPlus />}
-                  className={css`
-                    text-align: center;
-                    border-radius: 6px;
-                    justify-self: none;
-                  `}
-                >
-                  {t("createNewArtist")}
-                </ButtonLink>
-              </div>
+              <ButtonLink
+                to="/manage/welcome"
+                buttonRole="primary"
+                startIcon={<FaPlus />}
+                className={css`
+                  text-align: center;
+                  border-radius: 6px;
+                  justify-self: none;
+                `}
+              >
+                {t("createNewArtist")}
+              </ButtonLink>
             </div>
           </div>
           <div
