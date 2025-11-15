@@ -3,12 +3,10 @@ import FormComponent from "./FormComponent";
 import { InputEl } from "./Input";
 import SupportArtistPopUpTiers from "./SupportArtistPopUpTiers";
 import { useAuthContext } from "state/AuthContext";
-import Button from "./Button";
 import React from "react";
 import { useSnackbar } from "state/SnackbarContext";
 import { useTranslation } from "react-i18next";
-import { useQuery } from "@tanstack/react-query";
-import { queryArtist } from "queries";
+
 import api from "services/api";
 import { moneyDisplay } from "./Money";
 import { css } from "@emotion/css";
@@ -17,6 +15,7 @@ import { isEmpty } from "lodash";
 import useErrorHandler from "services/useErrorHandler";
 import { ArtistButton } from "components/Artist/ArtistButtons";
 import useGetArtistSubscriptionTiers from "utils/useGetArtistSubscriptionTiers";
+import { Turnstile } from "@marsidev/react-turnstile";
 
 const SupportArtistTiersForm: React.FC<{
   artist: Pick<Artist, "id" | "name" | "userId" | "urlSlug">;
@@ -120,6 +119,14 @@ const SupportArtistTiersForm: React.FC<{
           </FormComponent>
         )}
       </FormProvider>
+
+      <Turnstile
+        className={css`
+          width: 100%;
+        `}
+        siteKey={import.meta.env.VITE_CLOUDFLARE_CLIENT_KEY}
+      />
+
       <ArtistButton
         onClick={() => subscribeToTier()}
         isLoading={isCheckingForSubscription}
@@ -127,6 +134,7 @@ const SupportArtistTiersForm: React.FC<{
         wrap
         className={css`
           width: 100% !important;
+          margin-top: 0.25rem;
         `}
       >
         {isSubscribedToCurrentTier &&
