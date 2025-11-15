@@ -315,7 +315,7 @@
     "merchFor": "This merch is for '{{ album }}' and you'll receive a download of it when you buy it.",
     "supportThisArtistByPurchasing": "Support this artist!",
     "howMany": "How many do you want?",
-    "howMuch": "Pay {{ currency }}",
+    "howMuch": "Pay {{ currency }} per item",
     "editMerch": "Edit merch",
     "shipsTo": "Ships to {{ destinations }}",
     "doesNotExist": "The page you are looking for does not exist",
