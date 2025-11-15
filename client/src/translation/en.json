@@ -476,6 +476,7 @@
     "contributionIsMonthly": "Make contribution monthly",
     "subscribeToArtist": "Subscribe to {{ artist }}",
     "chooseSupportLevel": "You can follow {{artistName}} or choose to support them financially",
+    "youCanFollowThisArtist": "You can follow {{artistName}}",
     "continueWithPrice": "Continue with {{ amount }}/month",
     "chooseToContinue": "Choose a support tier to continue",
     "purchaseEntireCatalogue": "Purchase entire catalogue for {{amount}}",

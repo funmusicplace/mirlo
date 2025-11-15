@@ -1,5 +1,5 @@
 import { css } from "@emotion/css";
-import Button, { ButtonLink } from "components/common/Button";
+import Button from "components/common/Button";
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
 import Modal from "components/common/Modal";

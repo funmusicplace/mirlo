@@ -12,6 +12,7 @@ import { queryArtist } from "queries";
 import { css } from "@emotion/css";
 import Box from "./Box";
 import { ArtistButton } from "components/Artist/ArtistButtons";
+import { Turnstile } from "@marsidev/react-turnstile";
 
 const FollowArtist: React.FC<{ artistId: number }> = ({ artistId }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
@@ -59,10 +60,13 @@ const FollowArtist: React.FC<{ artistId: number }> = ({ artistId }) => {
   const onFollowClick = React.useCallback(async () => {
     try {
       if (user) {
+        // @ts-ignore
+        const cfTurnstile = turnstile.getResponse();
+
         setIsLoading(true);
         await api.post(
           `artists/${localArtistId}/${isFollowing ? "unfollow" : "follow"}`,
-          {}
+          { cfTurnstile }
         );
         await refreshLoggedInUser();
         if (!isFollowing) {
@@ -81,7 +85,7 @@ const FollowArtist: React.FC<{ artistId: number }> = ({ artistId }) => {
   }
 
   if (isSubscribed) {
-    return <>{t('isSubscribed')}</>;
+    return <>{t("isSubscribed")}</>;
   }
 
   const hasNoneDefaultSubscriptionTiers = artist.subscriptionTiers.find(
@@ -150,8 +154,10 @@ const FollowArtist: React.FC<{ artistId: number }> = ({ artistId }) => {
             )}
           </p>
         )}
+
         <SupportArtistTiersForm artist={artist} excludeDefault={!!user} />
       </Modal>
+
       <ArtistButton
         size="compact"
         variant="outlined"

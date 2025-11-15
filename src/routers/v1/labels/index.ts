@@ -79,6 +79,7 @@ export default function () {
           },
         },
       });
+
       if (format === "rss") {
         const feed = await turnItemsIntoRSS(
           {
