@@ -755,16 +755,16 @@ const determineShipping = (
       .filter((country) => !!country);
   }
 
+  const destinationCost =
+    (destination.costUnit ?? 0) +
+    (quantity > 1 ? (quantity - 1) * (destination?.costExtraUnit ?? 0) : 0);
+
   return {
     shipping_rate_data: {
       display_name: `Shipping to ${!!destination.destinationCountry ? destination.destinationCountry : "Everywhere"}`,
       fixed_amount: {
         currency: destination?.currency,
-        amount: castToFixed(
-          destination?.costUnit ??
-            0 +
-              (quantity > 1 ? quantity * (destination?.costExtraUnit ?? 0) : 0)
-        ),
+        amount: castToFixed(destinationCost),
       },
       type: "fixed_amount" as "fixed_amount",
     },

@@ -177,7 +177,7 @@ app.use("/", async (req, res) => {
         );
         res.sendFile(fileLocation);
       } catch (e) {
-        console.log(`didn't find that file`, req.path);
+        console.error(`didn't find that file`, req.path);
       }
     }
   }

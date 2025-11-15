@@ -21,6 +21,7 @@ import Box from "components/common/Box";
 import TextArea from "components/common/TextArea";
 import EmbeddedStripeForm from "components/common/stripe/EmbeddedStripe";
 import BuyMerchItemDestinations from "./BuyMerchItemDestinations";
+import AddMoneyValueButtons from "components/common/AddMoneyValueButtons";
 
 export type BuyMerchFormData = {
   quantity: number;
@@ -112,7 +113,9 @@ const BuyMerchItem: React.FC<{
             {},
             { redirectUrl: string; clientSecret: string }
           >(`merch/${merch.id}/purchase`, {
-            price: data.price ? Number(data.price) * 100 : undefined,
+            price: data.price
+              ? Number(data.price / data.quantity) * 100
+              : undefined,
             quantity: data.quantity,
             merchOptionIds: data.merchOptionIds,
             shippingDestinationId: data.shippingDestinationId,
@@ -160,6 +163,12 @@ const BuyMerchItem: React.FC<{
     }
   });
 
+  const addMoneyAmount = (val: number) => {
+    const whatsCurrentlyThePrice = Number(currentPrice || 0);
+    const newPrice = whatsCurrentlyThePrice + val;
+    methods.setValue("price", newPrice);
+  };
+
   const exceedsAvailable = amountAvailable < Number(quantity);
 
   if (clientSecret && stripeAccountStatus?.stripeAccountId) {
@@ -190,6 +199,7 @@ const BuyMerchItem: React.FC<{
             > div {
               width: 49%;
               margin-right: 1rem;
+              margin-bottom: 0.25rem;
             }
           `}
         >
@@ -224,14 +234,14 @@ const BuyMerchItem: React.FC<{
               {...methods.register("price", { min: minPrice })}
               type="number"
               id="price"
-              min={minPrice ? minPrice * quantity : 0}
+              min={minPrice ? minPrice : 0}
               step={0.01}
             />
-            {price < minPrice * quantity && (
+            {price < minPrice && (
               <Box variant="warning" compact>
                 {t("priceMustBeAtLeast", {
                   price: moneyDisplay({
-                    amount: minPrice * quantity,
+                    amount: minPrice,
                     currency: merch.currency,
                   }),
                 })}
@@ -239,12 +249,17 @@ const BuyMerchItem: React.FC<{
             )}
           </FormComponent>
         </div>
+        <AddMoneyValueButtons
+          addMoneyAmount={addMoneyAmount}
+          currency={merch.currency}
+        />
         <div
           className={css`
             @media screen and (min-width: ${bp.medium}px) {
               display: flex;
               flex-direction: row;
             }
+            margin-top: 1rem;
             padding-bottom: 1rem;
             margin-bottom: 2rem;
             border-bottom: 1px solid var(--mi-darken-x-background-color);

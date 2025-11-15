@@ -52,7 +52,7 @@ generateAlbumQueueEvents.on("stalled", async (result: { jobId: string }) => {
   try {
     const job = await generateAlbumQueue.getJob(result.jobId);
     if (job) {
-      console.log("job details", job);
+      logger.info("job details", job);
     }
   } catch (err) {
     logger.error(`generateAlbumQueueEvents.stalled: ${JSON.stringify(err)}`);
