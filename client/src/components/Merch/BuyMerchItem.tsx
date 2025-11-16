@@ -71,10 +71,6 @@ const BuyMerchItem: React.FC<{
   const merchOptionIds = methods.watch("merchOptionIds");
   const [clientSecret, setClientSecret] = React.useState<string | null>(null);
 
-  React.useEffect(() => {
-    setValue("price", minPrice * quantity);
-  }, [quantity, minPrice, setValue]);
-
   const onSubmit = React.useCallback(
     async (data: BuyMerchFormData) => {
       try {
@@ -113,9 +109,7 @@ const BuyMerchItem: React.FC<{
             {},
             { redirectUrl: string; clientSecret: string }
           >(`merch/${merch.id}/purchase`, {
-            price: data.price
-              ? Number(data.price / data.quantity) * 100
-              : undefined,
+            price: data.price ? Number(data.price) * 100 : undefined,
             quantity: data.quantity,
             merchOptionIds: data.merchOptionIds,
             shippingDestinationId: data.shippingDestinationId,
@@ -139,7 +133,7 @@ const BuyMerchItem: React.FC<{
     return null;
   }
 
-  let price = Number(currentPrice);
+  let price = Number(currentPrice * quantity);
   let amountAvailable = merch.quantityRemaining;
 
   merch.optionTypes?.forEach((ot) => {
@@ -336,7 +330,10 @@ const BuyMerchItem: React.FC<{
             `}
           >
             {t("orderTotal", {
-              amount: moneyDisplay({ amount: price, currency: merch.currency }),
+              amount: moneyDisplay({
+                amount: price,
+                currency: merch.currency,
+              }),
             })}
           </p>
           <IncludesDigitalDownload merch={merch} artist={artist} />
