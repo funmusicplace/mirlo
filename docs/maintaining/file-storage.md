@@ -4,7 +4,7 @@ During development we use Minio to store our files. On production, mirlo.spaces 
 
 You can access dev MinIO at localhost:9001 with the MINIO_ROOT_USER and MINIO_ROOT_PASSWORD you set in .env
 
-See [the design decisions and thinking that went into this](./technical_designs/2024-12-scalable-audio-storage.md).
+See [the design decisions and thinking that went into this](../technical_designs/2024-12-scalable-audio-storage.md).
 
 For bandwidth reasons, we get a pre-signed upload URL when uploading a track, that uploads directly to the relevant Backblaze bucket (incoming track audio for now).
 

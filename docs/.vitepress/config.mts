@@ -8,26 +8,43 @@ export default defineConfig({
     ? new URL(process.env.READTHEDOCS_CANONICAL_URL).pathname.replace(/\/$/, "")
     : "",
   title: "Mirlo",
-  description: "Mirlo Docs",
+  description:
+    "Documentation for an open source music sales and patronage platform.",
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: "Home", link: "/" },
-      { text: "Examples", link: "/markdown-examples" },
+      { text: "FAQ", link: "/faq" },
     ],
-
+    i18nRouting: true,
     sidebar: [
       {
-        text: "Examples",
+        text: "Home",
+        link: "/",
+      },
+      {
+        text: "FAQ",
+        link: "/faq",
+      },
+      {
+        text: "API",
+        link: "/api",
+      },
+      {
+        text: "Maintaining Mirlo",
+        link: "/maintaining",
         items: [
-          { text: "Markdown Examples", link: "/markdown-examples" },
-          { text: "Runtime API Examples", link: "/api-examples" },
+          {
+            text: "System Architecture",
+            link: "/maintaining/system-architecture",
+          },
+          { text: "Rapid Response", link: "/maintaining/rapid-response" },
         ],
       },
     ],
 
     socialLinks: [
-      { icon: "github", link: "https://github.com/vuejs/vitepress" },
+      { icon: "github", link: "https://github.com/funmusicplace/mirlo" },
     ],
   },
 });

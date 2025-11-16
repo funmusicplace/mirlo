@@ -60,13 +60,10 @@ const FollowArtist: React.FC<{ artistId: number }> = ({ artistId }) => {
   const onFollowClick = React.useCallback(async () => {
     try {
       if (user) {
-        // @ts-ignore
-        const cfTurnstile = turnstile.getResponse();
-
         setIsLoading(true);
         await api.post(
           `artists/${localArtistId}/${isFollowing ? "unfollow" : "follow"}`,
-          { cfTurnstile }
+          {}
         );
         await refreshLoggedInUser();
         if (!isFollowing) {

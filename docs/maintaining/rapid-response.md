@@ -15,13 +15,13 @@ It could be that something is repeatedly going wrong at a very regular interval-
 
 We've got two cron jobs: every-minute-tasks (runs every 10 minutes) and monthly-tasks (runs every month). These are controlled by two separate Render services, which you can find on [the dashboard](https://dashboard.render.com/).
 
-![repeating tasks](images/repeating-tasks-screenshot.png)
+![repeating tasks](../images/repeating-tasks-screenshot.png)
 
 You can see what these jobs do in the `src/jobs/monthly-tasks.ts` and `src/jobs/every-minute-tasks.ts` files.
 
 Currently there's nothing critical that a cron job does that needs to run every ten minutes, so it is safe to suspend both of these jobs until we're able to figure out what is wrong. Here's how:
 
-![navigating to suspend](images/navigating-to-suspend.gif).
+![navigating to suspend](../images/navigating-to-suspend.gif).
 
 > Note: suspending any other service (anything that is not a cron job) will negatively impact the service and likely make core functionality unavailable. Suspending the service is **likely not the solution** for those scenarios.
 

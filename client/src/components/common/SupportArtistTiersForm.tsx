@@ -70,8 +70,11 @@ const SupportArtistTiersForm: React.FC<{
         });
         window.location.assign(response.sessionUrl);
       } else {
+        // @ts-ignore
+        const cfTurnstile = turnstile.getResponse();
         await api.post(`artists/${artist.id}/follow`, {
           email,
+          cfTurnstile,
         });
       }
       if (!user) {
