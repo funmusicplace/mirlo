@@ -54,6 +54,7 @@ export default function () {
           createdAt: true,
           updatedAt: true,
           id: true,
+          emailConfirmationToken: true,
           userAvatar: true,
           artists: true,
           isLabelAccount: true,
