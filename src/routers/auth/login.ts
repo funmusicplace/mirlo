@@ -15,14 +15,22 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
     const foundUser = await prisma.user.findFirst({
       where: {
         email: email.toLowerCase(),
-        emailConfirmationToken: null,
       },
     });
+
     if (foundUser) {
+      const userIsVerified = foundUser.emailConfirmationToken == null;
       const match = await bcrypt.compare(password, foundUser.password);
       if (match) {
-        res.locals.user = foundUser;
-        next();
+        if (userIsVerified) {
+          res.locals.user = foundUser;
+          next();
+        } else {
+          throw new AppError({
+            httpCode: 401,
+            description: "User is unverified",
+          });
+        }
       } else {
         throw new AppError({
           httpCode: 401,
