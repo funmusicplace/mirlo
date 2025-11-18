@@ -25,7 +25,7 @@ const AdminManageUser = () => {
   }, [id]);
 
   const onConfirmationEmailClick = React.useCallback(async () => {
-    await api.post(`manage/users/${id}/confirmEmail`, {});
+    await api.post(`users/${id}/confirmEmail`, {});
     callback();
   }, [callback, id]);
 
