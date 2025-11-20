@@ -202,13 +202,35 @@ export const canUserListenToTrack = async (trackId?: number, user?: User) => {
     },
   });
 
+  if (!track) {
+    return false;
+  }
+
+  if (user) {
+    const purchaseTrackGroup = await prisma.userTrackGroupPurchase.findFirst({
+      where: {
+        trackGroupId: track.trackGroupId,
+        userId: user.id,
+      },
+    });
+    const purchaseTrack = await prisma.userTrackPurchase.findFirst({
+      where: {
+        trackId: track.id,
+        userId: user.id,
+      },
+    });
+    if (purchaseTrackGroup || purchaseTrack) {
+      return true;
+    }
+
+    const trackGroup = await doesTrackBelongToUser(track.id, user);
+    if (trackGroup) {
+      return true;
+    }
+  }
+
   if (track?.isPreview) {
     if (user) {
-      const trackGroup = await doesTrackBelongToUser(track.trackGroupId, user);
-      if (trackGroup) {
-        return true;
-      }
-
       const maxFreePlays = track.trackGroup?.artist?.maxFreePlays;
       if (!!maxFreePlays) {
         const userPlays = await prisma.trackPlay.count({
@@ -226,22 +248,5 @@ export const canUserListenToTrack = async (trackId?: number, user?: User) => {
     return true;
   }
 
-  if (track && user) {
-    const trackGroup = await doesTrackBelongToUser(track.trackGroupId, user);
-    if (trackGroup) {
-      return true;
-    }
-
-    const purchase = await prisma.userTrackGroupPurchase.findFirst({
-      where: {
-        trackGroupId: track.trackGroupId,
-        userId: user.id,
-      },
-    });
-
-    if (purchase) {
-      return true;
-    }
-  }
   return false;
 };
