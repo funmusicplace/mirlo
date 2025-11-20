@@ -8,30 +8,33 @@ import { useQuery } from "@tanstack/react-query";
 import { queryUserPurchases } from "queries";
 import WidthContainer from "components/common/WidthContainer";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
-import { ButtonLink } from "components/common/Button";
+import Button, { ButtonLink } from "components/common/Button";
+import DropdownMenu from "components/common/DropdownMenu";
+import { FaDownload } from "react-icons/fa";
 
 export const Fulfillment: React.FC = () => {
   const { t } = useTranslation("translation", {
     keyPrefix: "fulfillment",
   });
-  const [results, setResults] = React.useState<MerchPurchase[]>([]);
-  const [total, setTotal] = React.useState<number>();
+  const [isLoadingFulfillments, setIsLoadingFulfillments] =
+    React.useState(false);
 
-  const callback = React.useCallback(async (search?: URLSearchParams) => {
-    if (search) {
-      search.append("orderBy", "createdAt");
+  const downloadOrderData = React.useCallback(async () => {
+    setIsLoadingFulfillments(true);
+    try {
+      await api.getFile(
+        "fulfillments",
+        `manage/purchases?format=csv`,
+        "text/csv"
+      );
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsLoadingFulfillments(false);
     }
-    const { results, total: totalResults } = await api.getMany<MerchPurchase>(
-      `manage/purchases?${search?.toString()}`
-    );
-    setTotal(totalResults);
-    setResults(results);
   }, []);
-  const { data: purchaseResults, refetch } = useQuery(queryUserPurchases());
 
-  React.useEffect(() => {
-    callback();
-  }, [callback]);
+  const { data: purchaseResults } = useQuery(queryUserPurchases());
 
   return (
     <WidthContainer
@@ -48,15 +51,35 @@ export const Fulfillment: React.FC = () => {
         >
           {t("ordersAndFulfillment")}
         </h3>
-        <div>
+        <div
+          className={css`
+            align-items: center;
+            display: flex;
+            gap: 1rem;
+          `}
+        >
           <ButtonLink variant="outlined" to="/sales">
             {t("viewSales")}
           </ButtonLink>
+          <DropdownMenu>
+            <ul>
+              <li>
+                <Button
+                  onClick={downloadOrderData}
+                  size="compact"
+                  startIcon={<FaDownload />}
+                  isLoading={isLoadingFulfillments}
+                >
+                  {t("downloadOrderData")}
+                </Button>
+              </li>
+            </ul>
+          </DropdownMenu>
         </div>
       </SpaceBetweenDiv>
       <p>{t("fulfillmentDescription")}</p>
       <h4>{t("totalResults", { count: purchaseResults?.total })}</h4>
-      {results.length > 0 && (
+      {(purchaseResults?.results.length ?? 0) > 0 && (
         <div
           className={css`
             max-width: 100%;
@@ -75,7 +98,7 @@ export const Fulfillment: React.FC = () => {
                 <th>{t("quantity")}</th>
                 <th>{t("type")}</th>
                 <th>{t("fulfillmentStatus")}</th>
-                <th>{t("orderDate ")}</th>
+                <th>{t("orderDate")}</th>
                 <th>{t("lastUpdated")}</th>
               </tr>
             </thead>

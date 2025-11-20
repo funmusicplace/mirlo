@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { getMerchUrl, getReleaseUrl, getTrackUrl } from "utils/artist";
 import { Sale } from "queries";
 import { FaExternalLinkAlt } from "react-icons/fa";
+import { css } from "@emotion/css";
 
 const SalesRow: React.FC<{
   sale: Sale;
@@ -91,10 +92,15 @@ const SalesRow: React.FC<{
               >
                 {merch.merch.title}
               </Link>
-            ))}
+            ))}{" "}
             (
             <Link target="_blank" to="/fulfillment">
-              Fulfillment <FaExternalLinkAlt />
+              Fulfillment{" "}
+              <FaExternalLinkAlt
+                className={css`
+                  font-size: 0.8rem;
+                `}
+              />
             </Link>
             )
           </span>

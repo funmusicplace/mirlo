@@ -121,6 +121,15 @@ const queryUserTransactions = (
             },
           },
         },
+        {
+          tips: {
+            some: {
+              artistId: {
+                in: artistId,
+              },
+            },
+          },
+        },
       ],
     },
     select: {
@@ -154,6 +163,14 @@ const queryUserTransactions = (
               urlSlug: true,
               artist: { select: { name: true, id: true, urlSlug: true } },
             },
+          },
+        },
+      },
+
+      tips: {
+        select: {
+          artist: {
+            select: { name: true, id: true, urlSlug: true },
           },
         },
       },
@@ -212,12 +229,9 @@ export const findSales = async ({
   }
 
   let supporters: Awaited<ReturnType<typeof querySupporters>> = [];
-  let tips: Awaited<ReturnType<typeof queryTips>> = [];
   let userTransactions: Awaited<ReturnType<typeof queryUserTransactions>> = [];
   if (!filters) {
     supporters = await querySupporters(artistId, sinceDate, untilDate);
-
-    tips = await queryTips(artistId, sinceDate, untilDate);
 
     userTransactions = await queryUserTransactions(
       artistId,
@@ -245,14 +259,6 @@ export const findSales = async ({
       currency: s.artistUserSubscription.currency,
       saleType: "subscription",
     })),
-    ...tips.map((t) => ({
-      ...t,
-      artist: [t.artist],
-      amount: t.pricePaid,
-      currency: t.currencyPaid,
-      title: `Tip`,
-      saleType: "tip",
-    })),
     ...userTransactions.map((ut) => ({
       ...ut,
       paymentProcessorCut: ut.stripeCut,
@@ -261,12 +267,12 @@ export const findSales = async ({
         ut.trackGroupPurchases?.map((tgp) => tgp.trackGroup.title).join(", ") ??
         ut.merchPurchases?.map((mp) => mp.merch.title).join(", ") ??
         ut.trackPurchases?.map((tp) => tp.track.title).join(", ") ??
-        "Transaction",
-
+        (ut.tips ? "Tips" : "Transaction"),
       artist: [
         ut.trackGroupPurchases.map((tgp) => tgp.trackGroup.artist),
         ut.merchPurchases.map((mp) => mp.merch.artist),
         ut.trackPurchases.map((tp) => tp.track.trackGroup.artist),
+        ut.tips.map((tip) => tip.artist),
       ].flat(),
       urlSlug: ut.trackGroupPurchases
         .map((tgp) => tgp.trackGroup.urlSlug)
