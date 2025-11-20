@@ -63,18 +63,22 @@ describe("send-out-monthly-income-report", () => {
       },
     });
 
+    const chargeDate = faker.date.recent({
+      days: 20,
+      refDate: new Date(new Date().setDate(0)),
+    });
+
     await prisma.artistUserSubscriptionCharge.create({
       data: {
         artistUserSubscriptionId: aus.id,
         amountPaid: 5,
         paymentProcessor: "stripe",
-        createdAt: faker.date.recent({
-          days: 28,
-          refDate: new Date(new Date().setDate(1)),
-        }),
+        createdAt: chargeDate,
         currency: "usd",
       },
     });
+
+    console.log("charge date", chargeDate);
 
     await sendOutMonthlyIncomeReport();
 
@@ -125,7 +129,20 @@ describe("send-out-monthly-income-report", () => {
       },
     });
 
-    console.log("tip date", tip.datePurchased);
+    await prisma.userTransaction.create({
+      data: {
+        currency: "usd",
+        userId: followerUser.id,
+        tips: {
+          connect: { id: tip.id },
+        },
+        amount: 7,
+        createdAt: faker.date.recent({
+          days: 27,
+          refDate: new Date(new Date().setDate(1)),
+        }),
+      },
+    });
 
     await sendOutMonthlyIncomeReport();
 
@@ -137,7 +154,8 @@ describe("send-out-monthly-income-report", () => {
     assert.equal(locals.userSales.length, 1);
     assert.equal(locals.totalIncome, 7);
     assert.equal(locals.userSales[0].amount, 7);
-    assert.equal(locals.userSales[0].saleType, "tip");
+    assert.equal(locals.userSales[0].saleType, "transaction");
+    assert.equal(locals.userSales[0].title, "Tip");
   });
 
   it("should not send an e-mail if sale is from two months ago", async () => {
@@ -343,8 +361,8 @@ describe("send-out-monthly-income-report", () => {
         amountPaid: 5,
         paymentProcessor: "stripe",
         createdAt: faker.date.recent({
-          days: 30,
-          refDate: new Date(new Date().setDate(1)),
+          days: 25,
+          refDate: new Date(new Date().setDate(0)),
         }),
         currency: "usd",
       },
@@ -396,17 +414,20 @@ describe("send-out-monthly-income-report", () => {
       },
     });
 
+    const tip1date = faker.date.between({
+      from: new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1),
+      to: new Date(new Date().getFullYear(), new Date().getMonth() - 1, 10),
+    });
+
+    const tip2date = faker.date.between({
+      from: new Date(new Date().getFullYear(), new Date().getMonth() - 1, 11),
+      to: new Date(new Date().getFullYear(), new Date().getMonth() - 1, 20),
+    });
+
     const tip1 = await prisma.userArtistTip.create({
       data: {
         pricePaid: 7,
-        datePurchased: faker.date.between({
-          from: new Date(
-            new Date().getFullYear(),
-            new Date().getMonth() - 1,
-            1
-          ),
-          to: new Date(new Date().getFullYear(), new Date().getMonth() - 1, 10),
-        }),
+        datePurchased: tip1date,
         userId: followerUser.id,
         artistId: artist.id,
       },
@@ -415,21 +436,35 @@ describe("send-out-monthly-income-report", () => {
     const tip2 = await prisma.userArtistTip.create({
       data: {
         pricePaid: 3,
-        datePurchased: faker.date.between({
-          from: new Date(
-            new Date().getFullYear(),
-            new Date().getMonth() - 1,
-            11
-          ),
-          to: new Date(new Date().getFullYear(), new Date().getMonth() - 1, 20),
-        }),
+        datePurchased: tip2date,
         userId: followerUser.id,
         artistId: artist2.id,
       },
     });
 
-    console.log("tip1 date", tip1.datePurchased);
-    console.log("tip2 date", tip2.datePurchased);
+    await prisma.userTransaction.create({
+      data: {
+        currency: "usd",
+        userId: followerUser.id,
+        tips: {
+          connect: { id: tip1.id },
+        },
+        amount: 7,
+        createdAt: tip1date,
+      },
+    });
+
+    await prisma.userTransaction.create({
+      data: {
+        currency: "usd",
+        userId: followerUser.id,
+        tips: {
+          connect: { id: tip2.id },
+        },
+        amount: 3,
+        createdAt: tip2date,
+      },
+    });
 
     await sendOutMonthlyIncomeReport();
 
@@ -443,9 +478,11 @@ describe("send-out-monthly-income-report", () => {
     assert.equal(locals.totalIncome, 10);
     assert.equal(locals.userSales[0].amount, 7);
     assert.equal(locals.userSales[0].artist[0].id, artist.id);
-    assert.equal(locals.userSales[0].saleType, "tip");
+    assert.equal(locals.userSales[0].saleType, "transaction");
     assert.equal(locals.userSales[1].amount, 3);
     assert.equal(locals.userSales[1].artist[0].id, artist2.id);
-    assert.equal(locals.userSales[1].saleType, "tip");
+    assert.equal(locals.userSales[1].saleType, "transaction");
+    assert.equal(locals.userSales[0].title, "Tip");
+    assert.equal(locals.userSales[1].title, "Tip");
   });
 });

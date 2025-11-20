@@ -135,15 +135,26 @@ describe("artists/{id}/supporters", () => {
       artistId: artist.id,
     });
 
+    const transactionTip = await prisma.userTransaction.create({
+      data: {
+        userId: user.id,
+        amount: 3000,
+        currency: "usd",
+        platformCut: 0,
+        stripeCut: 0,
+      },
+    });
+
     await prisma.userArtistTip.create({
       data: {
         userId: user.id,
         pricePaid: 3000,
         artistId: artist.id,
+        transactionId: transactionTip.id,
       },
     });
 
-    const transaction = await prisma.userTransaction.create({
+    const transactionTrackGroupPurchase = await prisma.userTransaction.create({
       data: {
         userId: user.id,
         amount: 1000,
@@ -156,7 +167,7 @@ describe("artists/{id}/supporters", () => {
     await prisma.userTrackGroupPurchase.create({
       data: {
         userId: user.id,
-        userTransactionId: transaction.id,
+        userTransactionId: transactionTrackGroupPurchase.id,
         trackGroupId: trackGroup.id,
       },
     });

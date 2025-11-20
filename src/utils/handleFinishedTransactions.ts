@@ -777,7 +777,11 @@ export const handleArtistMerchPurchase = async (
                   stripeTransactionKey: session?.id ?? null,
                   fulfillmentStatus: "NO_PROGRESS",
                   message: session?.metadata?.message ?? null,
-                  shippingAddress: session?.shipping_details?.address,
+                  shippingAddress: {
+                    ...session?.shipping_details?.address,
+                    name: session?.shipping_details?.name,
+                    phone: session?.shipping_details?.phone,
+                  },
                   billingAddress: session?.customer_details?.address,
                   platformCut: applicationFee ?? null,
                   quantity: item.quantity ?? 1,

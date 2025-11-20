@@ -117,9 +117,14 @@ const CustomerPopUp: React.FC<{ purchase: MerchPurchase }> = ({ purchase }) => {
         <Section>
           <label>{t("shippingAddress")}</label>
           <p>
-            {purchase.user.name} <br />
             {purchase.shippingAddress && (
               <>
+                {purchase.shippingAddress.name && (
+                  <>
+                    {purchase.shippingAddress.name}
+                    <br />
+                  </>
+                )}
                 {purchase.shippingAddress.line1 && (
                   <>
                     {purchase.shippingAddress.line1}
@@ -140,6 +145,8 @@ const CustomerPopUp: React.FC<{ purchase: MerchPurchase }> = ({ purchase }) => {
                 )}
                 {purchase.shippingAddress.state},
                 {purchase.shippingAddress.postal_code}
+                <br />
+                {purchase.shippingAddress.phone}
               </>
             )}
           </p>
