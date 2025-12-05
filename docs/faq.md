@@ -94,6 +94,8 @@ Our community is primarily hanging out on [the Discord](https://discord.gg/XuV7F
 
 No ! When people buy things from your artist page, all they see during and after the Stripe checkout process is your Mirlo shop and artist name, none of the personal information you provide Stripes when setting up your account are shared with customers. We understand that this is a priority for many people, since a lot of artists tend to have pseudonyms, or don't necessarily operate from a business location and want to avoid their personnal address to be disclosed.
 
+:::
+
 ## Other questions
 
 ::: details Have you heard /project x/?
