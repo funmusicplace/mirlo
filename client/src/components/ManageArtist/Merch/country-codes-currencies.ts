@@ -172,7 +172,7 @@ export default [
   {
     countryCode: "BG",
     countryName: "Bulgaria",
-    currencyCode: "BGN",
+    currencyCode: "EUR",
     population: "7148785",
     capital: "Sofia",
     continentName: "Europe",

@@ -98,7 +98,6 @@ const stripeCountryCodes = [
   "BAM",
   "BBD",
   "BDT",
-  "BGN",
   "BIF",
   "BMD",
   "BND",
