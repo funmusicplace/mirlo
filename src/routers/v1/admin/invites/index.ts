@@ -31,26 +31,29 @@ export default function () {
       const newUsers = users.filter(
         (user) => !existingInvites.includes(user.email)
       );
-      const invites = await prisma.invite.createManyAndReturn({
-        data: uniqBy(newUsers, "email").map((newUser) => {
-          return {
-            email: newUser.email,
-            invitedById: loggedInUser.id,
-            accountType: inviteType,
-          };
-        }),
-        select: {
-          invitedBy: {
-            select: { name: true, email: true },
-          },
-          email: true,
-          id: true,
-          createdAt: true,
-          accountType: true,
-          token: true,
-          message: true,
-        },
-      });
+      const uniqueUsers = uniqBy(newUsers, "email");
+      const invites = await Promise.all(
+        uniqueUsers.map((user) =>
+          prisma.invite.create({
+            data: {
+              email: user.email,
+              invitedById: loggedInUser.id,
+              accountType: inviteType,
+            },
+            select: {
+              invitedBy: {
+                select: { name: true, email: true },
+              },
+              email: true,
+              id: true,
+              createdAt: true,
+              accountType: true,
+              token: true,
+              message: true,
+            },
+          })
+        )
+      );
 
       invites.forEach(async (newUser) => {
         await sendMailQueue.add("send-mail", {

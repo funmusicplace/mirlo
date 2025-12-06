@@ -3,10 +3,10 @@ import React from "react";
 import api from "services/api";
 
 import { useTranslation } from "react-i18next";
-import { useArtistContext } from "state/ArtistContext";
 import { useParams } from "react-router-dom";
 import { FaDownload } from "react-icons/fa";
 import { useAuthContext } from "state/AuthContext";
+import useArtistQuery from "utils/useArtistQuery";
 
 const ArtistSubscriberDataDownload: React.FC = () => {
   const { user } = useAuthContext();
@@ -16,9 +16,7 @@ const ArtistSubscriberDataDownload: React.FC = () => {
 
   const [isLoadingSubscriberData, setIsLoadingSubscriberData] =
     React.useState(false);
-  const {
-    state: { artist },
-  } = useArtistContext();
+  const { data: artist } = useArtistQuery();
   const { artistId } = useParams();
 
   const userId = user?.id;

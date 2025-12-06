@@ -48,38 +48,6 @@ const querySupporters = (
   });
 };
 
-const queryTips = (
-  artistId: number[],
-  sinceDate?: string,
-  untilDate?: string
-) => {
-  const dateFilter = constructDateFilter(sinceDate, untilDate);
-
-  return prisma.userArtistTip.findMany({
-    where: {
-      pricePaid: { gt: 0 },
-      artistId: { in: artistId },
-      datePurchased: dateFilter,
-    },
-    select: {
-      artist: {
-        select: {
-          id: true,
-          name: true,
-          urlSlug: true,
-          userId: true,
-          user: { select: { currency: true } },
-        },
-      },
-      pricePaid: true,
-      datePurchased: true,
-      artistTipTier: true,
-      currencyPaid: true,
-      userId: true,
-    },
-  });
-};
-
 const queryUserTransactions = (
   artistId: number[],
   sinceDate?: string,
@@ -121,6 +89,15 @@ const queryUserTransactions = (
             },
           },
         },
+        {
+          tips: {
+            some: {
+              artistId: {
+                in: artistId,
+              },
+            },
+          },
+        },
       ],
     },
     select: {
@@ -158,6 +135,14 @@ const queryUserTransactions = (
         },
       },
 
+      tips: {
+        select: {
+          artist: {
+            select: { name: true, id: true, urlSlug: true },
+          },
+        },
+      },
+
       trackPurchases: {
         select: {
           track: {
@@ -180,6 +165,17 @@ const queryUserTransactions = (
       },
     },
   });
+};
+
+const generateTitle = (
+  ut: Awaited<ReturnType<typeof queryUserTransactions>>[0]
+) => {
+  return (
+    ut.trackGroupPurchases?.map((tgp) => tgp.trackGroup.title).join(", ") ||
+    ut.merchPurchases?.map((mp) => mp.merch.title).join(", ") ||
+    ut.trackPurchases?.map((tp) => tp.track.title).join(", ") ||
+    (ut.tips ? "Tip" : "Transaction")
+  );
 };
 
 export const findSales = async ({
@@ -212,12 +208,9 @@ export const findSales = async ({
   }
 
   let supporters: Awaited<ReturnType<typeof querySupporters>> = [];
-  let tips: Awaited<ReturnType<typeof queryTips>> = [];
   let userTransactions: Awaited<ReturnType<typeof queryUserTransactions>> = [];
   if (!filters) {
     supporters = await querySupporters(artistId, sinceDate, untilDate);
-
-    tips = await queryTips(artistId, sinceDate, untilDate);
 
     userTransactions = await queryUserTransactions(
       artistId,
@@ -245,28 +238,16 @@ export const findSales = async ({
       currency: s.artistUserSubscription.currency,
       saleType: "subscription",
     })),
-    ...tips.map((t) => ({
-      ...t,
-      artist: [t.artist],
-      amount: t.pricePaid,
-      currency: t.currencyPaid,
-      title: `Tip`,
-      saleType: "tip",
-    })),
     ...userTransactions.map((ut) => ({
       ...ut,
       paymentProcessorCut: ut.stripeCut,
       datePurchased: ut.createdAt,
-      title:
-        ut.trackGroupPurchases?.map((tgp) => tgp.trackGroup.title).join(", ") ??
-        ut.merchPurchases?.map((mp) => mp.merch.title).join(", ") ??
-        ut.trackPurchases?.map((tp) => tp.track.title).join(", ") ??
-        "Transaction",
-
+      title: generateTitle(ut),
       artist: [
-        ut.trackGroupPurchases.map((tgp) => tgp.trackGroup.artist),
-        ut.merchPurchases.map((mp) => mp.merch.artist),
-        ut.trackPurchases.map((tp) => tp.track.trackGroup.artist),
+        ut.trackGroupPurchases?.map((tgp) => tgp.trackGroup.artist),
+        ut.merchPurchases?.map((mp) => mp.merch.artist),
+        ut.trackPurchases?.map((tp) => tp.track.trackGroup.artist),
+        ut.tips?.map((tip) => tip.artist),
       ].flat(),
       urlSlug: ut.trackGroupPurchases
         .map((tgp) => tgp.trackGroup.urlSlug)
