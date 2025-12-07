@@ -1,11 +1,9 @@
 import express from "express";
 import swaggerUi from "swagger-ui-express";
 import * as dotenv from "dotenv";
-import {
-  BullMQAdapter,
-  createBullBoard,
-  ExpressAdapter,
-} from "@bull-board/express";
+import { ExpressAdapter } from "@bull-board/express";
+const { createBullBoard } = require("@bull-board/api");
+const { BullMQAdapter } = require("@bull-board/api/bullMQAdapter");
 
 import auth from "./routers/auth";
 import "./auth/passport";

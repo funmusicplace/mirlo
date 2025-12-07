@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { Queue } from "bullmq";
+import { JobProgress, JobState, Queue } from "bullmq";
 import { REDIS_CONFIG } from "../../../config/redis";
 
 const queueOptions = {
@@ -39,8 +39,8 @@ export default function () {
     };
     let states: {
       jobId: string;
-      jobStatus: string;
-      progress?: number | object;
+      jobStatus: JobState | "unknown";
+      progress?: JobProgress;
     }[] = [];
     try {
       if (Array.isArray(ids)) {

@@ -71,12 +71,16 @@ export const startGeneratingZip = async (
     | typeof trackFormatBucket
     | typeof trackGroupFormatBucket = trackGroupFormatBucket
 ) => {
-  const job = await generateAlbumQueue.add("generate-album", {
-    trackGroup,
-    tracks,
-    format,
-    destinationBucket,
-  });
+  const job = await generateAlbumQueue.add(
+    "generate-album",
+    {
+      trackGroup,
+      tracks,
+      format,
+      destinationBucket,
+    },
+    { deduplication: { id: `${trackGroup.id}-${format}`, ttl: 5000 } }
+  );
 
   return job.id;
 };
