@@ -127,12 +127,16 @@ export async function generateAlbumQueueWorker() {
   const worker = new Worker("generate-album", generateAlbumJob, workerOptions);
   logger.info("Generate Album worker started");
 
+  worker.on("active", (job: any) => {
+    logger.info(`active:generate-album: jobId=${job.id}`);
+  });
+
   worker.on("completed", (job: any) => {
-    logger.info("completed:generate-album");
+    logger.info(`completed:generate-album: jobId=${job.id}`);
   });
 
   worker.on("failed", (job: any, err: any) => {
-    logger.error("failed:generate-album", err);
+    logger.error(`failed:generate-album: jobId=${job.id}`, err);
   });
 
   worker.on("error", (err: any) => {

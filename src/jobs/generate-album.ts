@@ -88,8 +88,8 @@ const downloadTracks = async ({
     }
     const originalTrackLocation = `${track.audio.id}/original.${track.audio.fileExtension}`;
     logger.info(`audioId ${track.audio.id}: Fetching ${originalTrackLocation}`);
-    const tempTrackPath = `${tempFolder}/original.${track.audio.fileExtension}`;
-
+    const tempTrackPath = `${tempFolder}/${track.audio.id}-original.${track.audio.fileExtension}`;
+    logger.info(`audioId ${track.audio.id}: Downloading to ${tempTrackPath}`);
     try {
       await getFile(finalAudioBucket, originalTrackLocation, tempTrackPath);
     } catch (e) {
@@ -104,7 +104,7 @@ const downloadTracks = async ({
     i += 1;
     await job.updateProgress(progress);
     logger.info(
-      `audioId ${track.audio.id}: Getting artist for trackGroup ${originalTrackLocation}`
+      `audioId ${track.audio.id}: going to convert audio ${originalTrackLocation} to format ${format.format}${format.audioBitrate ? `@${format.audioBitrate}` : ""}`
     );
 
     await new Promise((resolve, reject) => {
@@ -153,6 +153,10 @@ const zipFilesInFolder = async ({
 
   await new Promise(async (resolve: (value?: unknown) => void) => {
     const finalFilesInFolder = await fsPromises.readdir(tempFolder);
+
+    logger.info(
+      `zipFilesInFolder: ${tempFolder}: Zipping files to ${zipFileName} in bucket ${destinationBucket}: ${finalFilesInFolder.join(", ")}`
+    );
 
     const archive = archiver("zip", {
       zlib: { level: 9 }, // Sets the compression level.
@@ -345,18 +349,20 @@ const downloadAndZipTracks = async ({
       trackGroup,
       artist,
     });
+
     logger.info(`Downloaded tracks ${tempFolder}`);
 
     await downloadCover({
       coverId: trackGroup.cover.id,
       coverDestination,
     });
-    logger.info(`trackGroupId ${trackGroup.id}: Building zip`);
 
     await downloadTrackGroupContent({
       trackGroupId: trackGroup.id,
       contentDestination: tempFolder,
     });
+
+    logger.info(`trackGroupId ${trackGroup.id}: Building zip`);
 
     await zipFilesInFolder({
       tempFolder,
