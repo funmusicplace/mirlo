@@ -131,7 +131,12 @@ const HeaderSearch: React.FC = () => {
   }, []);
 
   return (
-    <div role="search">
+    <div
+      role="search"
+      className={css`
+        margin-left: 0.5rem;
+      `}
+    >
       <AutoComplete
         getOptions={getOptions}
         showBackground
