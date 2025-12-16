@@ -130,6 +130,7 @@ const routes = [
   "admin/trackGroups",
   "admin/trackGroups/{id}",
   "admin/artists",
+  "admin/artists/{id}",
   "admin/subscriptions",
   "admin/purchases",
   "admin/settings",

@@ -508,12 +508,26 @@ const routes: RouteObject[] = [
 
           {
             path: "artists",
-            async lazy() {
-              const { default: Component } = await import(
-                "components/Admin/AdminArtists"
-              );
-              return { Component };
-            },
+            children: [
+              {
+                path: "",
+                async lazy() {
+                  const { default: Component } = await import(
+                    "components/Admin/AdminArtists"
+                  );
+                  return { Component };
+                },
+              },
+              {
+                path: ":id",
+                async lazy() {
+                  const { default: Component } = await import(
+                    "components/Admin/AdminManageArtist"
+                  );
+                  return { Component };
+                },
+              },
+            ],
           },
           {
             path: "trackGroups/:id",

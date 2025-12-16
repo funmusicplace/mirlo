@@ -539,6 +539,7 @@
     "editRelease": "Edit release",
     "preview": "Preview",
     "adminEditUser": "Admin: edit user",
+    "adminEditArtist": "Admin: edit artist",
     "adminEditRelease": "Admin: edit release",
     "labelReleases": "Releases from artists on this roster",
     "labelReleasesDescription": "These are releases from artists on your roster. If you are administering payments for these artists, you'll receive payments for these releases.",

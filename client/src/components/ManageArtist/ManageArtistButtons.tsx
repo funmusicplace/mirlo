@@ -125,6 +125,15 @@ const ManageArtistButtons: React.FC = () => {
               >
                 {t("adminEditUser")}
               </FixedButtonLink>
+              <FixedButtonLink
+                to={`/admin/artists/${artist.id}`}
+                endIcon={<RiAdminLine />}
+                size="compact"
+                rounded
+                variant="dashed"
+              >
+                {t("adminEditArtist")}
+              </FixedButtonLink>
               {isAlbumPage && trackGroup && (
                 <FixedButtonLink
                   to={`/admin/trackGroups/${trackGroup.id}`}

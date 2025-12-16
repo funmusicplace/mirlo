@@ -83,6 +83,14 @@ export default function () {
       return next();
     }
 
+    // Can only toggle label account if user canCreateArtists
+    if (isLabelAccount && !user.canCreateArtists) {
+      throw new AppError({
+        httpCode: 401,
+        description: "User can't be changed to label account",
+      });
+    }
+
     try {
       let data: Prisma.UserUpdateInput = {
         name,

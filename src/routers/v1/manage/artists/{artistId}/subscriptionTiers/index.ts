@@ -1,11 +1,11 @@
 import { NextFunction, Request, Response } from "express";
 import {
   artistBelongsToLoggedInUser,
+  canUserCreateArtists,
   userAuthenticated,
 } from "../../../../../../auth/passport";
 import prisma from "@mirlo/prisma";
 import { User } from "@mirlo/prisma/client";
-import { getSiteSettings } from "../../../../../../utils/settings";
 import {
   addSizesToImage,
   getPlatformFeeForArtist,
@@ -19,8 +19,18 @@ type Params = {
 
 export default function () {
   const operations = {
-    GET: [userAuthenticated, artistBelongsToLoggedInUser, GET],
-    POST: [userAuthenticated, artistBelongsToLoggedInUser, POST],
+    GET: [
+      userAuthenticated,
+      canUserCreateArtists,
+      artistBelongsToLoggedInUser,
+      GET,
+    ],
+    POST: [
+      userAuthenticated,
+      canUserCreateArtists,
+      artistBelongsToLoggedInUser,
+      POST,
+    ],
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {

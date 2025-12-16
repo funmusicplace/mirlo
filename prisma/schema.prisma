@@ -789,6 +789,7 @@ model TrackArtist {
   artist     Artist? @relation(fields: [artistId], references: [id])
   role       String?
   isCoAuthor Boolean @default(false)
+  order      Int     @default(0)
 }
 
 model TrackAudio {

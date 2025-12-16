@@ -1,8 +1,11 @@
 import { Prisma } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
-import { processSingleArtist } from "../../../utils/artist";
-import { userAuthenticated, userHasPermission } from "../../../auth/passport";
+import { processSingleArtist } from "../../../../utils/artist";
+import {
+  userAuthenticated,
+  userHasPermission,
+} from "../../../../auth/passport";
 
 export default function () {
   const operations = {

@@ -7,6 +7,7 @@ import {
   userHasPermission,
 } from "../../../../auth/passport";
 import { deleteUser } from "../../../../utils/user";
+import { deleteArtist } from "../../../../utils/artist";
 
 export default function () {
   const operations = {
@@ -16,23 +17,14 @@ export default function () {
   };
 
   async function PUT(req: Request, res: Response, next: NextFunction) {
-    const { email, isLabelAccount, isAdmin, featureFlags, canCreateArtists } =
-      req.body as {
-        email: string;
-        isLabelAccount: boolean;
-        featureFlags: string[];
-        isAdmin: boolean;
-        canCreateArtists: boolean;
-      };
+    const { enabled } = req.body as {
+      enabled: boolean;
+    };
     try {
-      await prisma.user.update({
+      await prisma.artist.update({
         where: { id: Number(req.params.id) },
         data: {
-          email,
-          isLabelAccount,
-          featureFlags,
-          isAdmin,
-          canCreateArtists,
+          enabled,
         },
       });
       res.json({
@@ -46,27 +38,26 @@ export default function () {
   async function GET(req: Request, res: Response, next: NextFunction) {
     const { id } = req.params;
     try {
-      const user = await prisma.user.findUnique({
+      const artist = await prisma.artist.findUnique({
         where: { id: Number(id) },
         select: {
-          email: true,
           name: true,
+          enabled: true,
           createdAt: true,
           updatedAt: true,
           id: true,
-          canCreateArtists: true,
-          emailConfirmationToken: true,
-          userAvatar: true,
-          artists: true,
-          isLabelAccount: true,
-          isAdmin: true,
-          featureFlags: true,
+          user: {
+            select: {
+              email: true,
+              id: true,
+            },
+          },
         },
       });
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
+      if (!artist) {
+        return res.status(404).json({ message: "Artist not found" });
       }
-      res.json({ result: user });
+      res.json({ result: artist });
     } catch (e) {
       next(e);
     }
@@ -75,7 +66,17 @@ export default function () {
   async function DELETE(req: Request, res: Response, next: NextFunction) {
     const { id } = req.params;
     try {
-      await deleteUser(Number(id));
+      const artist = await prisma.artist.findFirst({
+        where: { id: Number(id) },
+        select: {
+          id: true,
+          userId: true,
+        },
+      });
+      if (!artist) {
+        return res.status(404).json({ message: "Artist not found" });
+      }
+      await deleteArtist(artist.userId, Number(id));
     } catch (e) {
       res.status(400);
       next();
