@@ -83,7 +83,6 @@ export default function () {
           artist: { connect: { id: artistId } },
           minPrice: 0,
           currency: currencyString,
-          quantityRemaining: 0,
           isPublic: false,
           platformPercent: await getPlatformFeeForArtist(artistId),
         },

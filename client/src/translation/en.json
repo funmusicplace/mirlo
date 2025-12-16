@@ -299,6 +299,7 @@
   },
   "merchDetails": {
     "buy": "Buy",
+    "soldOut": "Sold out",
     "leaveAComment": "Show the artist some love",
     "choose": "Choose an option",
     "purchaseIncludesThisDownloadableContent": "After purchase you'll be able to download:",

@@ -128,7 +128,7 @@ export default function () {
   }
 
   PUT.apiDoc = {
-    summary: "Updates a merch belonging to a user",
+    summary: "Updates a merch item belonging to a user",
     parameters: [
       {
         in: "path",

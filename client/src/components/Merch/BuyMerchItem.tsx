@@ -163,7 +163,9 @@ const BuyMerchItem: React.FC<{
     methods.setValue("price", newPrice);
   };
 
-  const exceedsAvailable = amountAvailable < Number(quantity);
+  const exceedsAvailable = Number.isFinite(amountAvailable)
+    ? amountAvailable < Number(quantity)
+    : false;
 
   if (clientSecret && stripeAccountStatus?.stripeAccountId) {
     return (

@@ -27,7 +27,7 @@ const MerchButtonPopUp: React.FC<{ merch: Merch; artist: Artist }> = ({
   const [isOpen, setIsOpen] = React.useState(false);
 
   if (!stripeAccountStatus?.chargesEnabled || merch.quantityRemaining === 0) {
-    return null;
+    return <Button disabled>{t("soldOut")}</Button>;
   }
 
   const hasPricedOptions =

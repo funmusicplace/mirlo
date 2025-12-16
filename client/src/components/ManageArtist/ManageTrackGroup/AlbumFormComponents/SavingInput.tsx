@@ -83,7 +83,11 @@ const SavingInput: React.FC<{
       }
 
       if (type === "number") {
-        value = Number(value);
+        if (value === "") {
+          value = null;
+        } else {
+          value = Number(value);
+        }
       }
       let data = {};
 

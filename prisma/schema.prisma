@@ -466,7 +466,7 @@ model Merch {
   description                 String
   minPrice                    Int // In cents
   currency                    String?                    @default("usd")
-  quantityRemaining           Int
+  quantityRemaining           Int?
   startShippingDate           DateTime?
   platformPercent             Int?                       @default(7)
   sku                         String?
