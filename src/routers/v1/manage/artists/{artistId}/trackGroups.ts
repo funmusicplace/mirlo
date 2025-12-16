@@ -2,17 +2,22 @@ import { User } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 import {
   artistBelongsToLoggedInUser,
+  canUserCreateArtists,
   userAuthenticated,
 } from "../../../../../auth/passport";
 import processor from "../../../../../utils/trackGroup";
 import prisma from "@mirlo/prisma";
-import { getSiteSettings } from "../../../../../utils/settings";
 import { getPlatformFeeForArtist } from "../../../../../utils/artist";
 
 export default function () {
   const operations = {
     GET: [userAuthenticated, artistBelongsToLoggedInUser, GET],
-    POST: [userAuthenticated, artistBelongsToLoggedInUser, POST],
+    POST: [
+      userAuthenticated,
+      artistBelongsToLoggedInUser,
+      canUserCreateArtists,
+      POST,
+    ],
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {

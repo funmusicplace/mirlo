@@ -3,6 +3,7 @@ import CanCreateArtists from "components/CanCreateArtists";
 import Button from "components/common/Button";
 import { Select, SelectEl } from "components/common/Select";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
+import Table from "components/common/Table";
 import { Toggle } from "components/common/Toggle";
 import React from "react";
 import { FaArrowCircleLeft, FaCheck, FaTimes } from "react-icons/fa";
@@ -17,6 +18,7 @@ const AdminManageUser = () => {
   const [featureFlags, setFeatureFlags] = React.useState<string[]>([]);
   const snackbar = useSnackbar();
   const navigate = useNavigate();
+  console.log("user", user);
 
   const callback = React.useCallback(async () => {
     const response = await api.get<UserFromAdmin>(`admin/users/${id}`);
@@ -71,7 +73,7 @@ const AdminManageUser = () => {
           </div>
         </SpaceBetweenDiv>
         <div>
-          <table>
+          <Table>
             <tbody>
               <tr>
                 <td>email</td>
@@ -113,16 +115,28 @@ const AdminManageUser = () => {
               <tr>
                 <td>Can create artists?</td>
                 <td>
-                  <Toggle
-                    toggled={user.canCreateArtists}
-                    label=""
-                    onClick={async (checked) => {
-                      await api.put(`admin/users/${id}`, {
-                        canCreateArtists: checked,
-                      });
-                      callback();
-                    }}
-                  />
+                  <div
+                    className={css`
+                      display: flex;
+                      flex-direction: column;
+                    `}
+                  >
+                    <Toggle
+                      toggled={user.canCreateArtists}
+                      label=""
+                      onClick={async (checked) => {
+                        await api.put(`admin/users/${id}`, {
+                          canCreateArtists: checked,
+                        });
+                        callback();
+                      }}
+                    />
+                    <small>
+                      Disabling the ability to create artists for a user also
+                      prevents them from creating releases, merch, etc and will
+                      unlist their music from public view.
+                    </small>
+                  </div>
                 </td>
               </tr>
               <tr>
@@ -199,7 +213,7 @@ const AdminManageUser = () => {
                 <td>{user.receiveMailingList ? <FaCheck /> : <FaTimes />}</td>
               </tr>
             </tbody>
-          </table>
+          </Table>
           <Button onClick={onConfirmationEmailClick}>Confirm user email</Button>
           <Button onClick={onDeleteClick}>Delete user</Button>
         </div>

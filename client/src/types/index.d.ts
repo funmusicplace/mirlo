@@ -315,6 +315,11 @@ interface UserFromAdmin {
   canCreateArtists: boolean;
 }
 
+interface ArtistFromAdmin {
+  id: number;
+  name?: string;
+  enabled: boolean;
+}
 interface ArtistSubscriptionTier {
   id: number;
   artistId: number;

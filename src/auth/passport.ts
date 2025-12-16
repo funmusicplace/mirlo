@@ -137,6 +137,18 @@ export const canUserCreateArtists = async (
     return;
   }
 
+  if (loggedInUser.canCreateArtists) {
+    return next();
+  }
+
+  if (loggedInUser.isAdmin) {
+    return next();
+  }
+
+  if (loggedInUser.isLabelAccount) {
+    return next();
+  }
+
   const settings = await getSiteSettings();
 
   if (settings.defconLevel === 2) {
@@ -146,18 +158,6 @@ export const canUserCreateArtists = async (
   }
 
   if (settings.isClosedToPublicArtistSignup) {
-    if (loggedInUser.isAdmin) {
-      return next();
-    }
-
-    if (loggedInUser.isLabelAccount) {
-      return next();
-    }
-    // If the user has been invited as an artist specifically, allow them to create an artist account
-    if (loggedInUser.canCreateArtists) {
-      return next();
-    }
-
     return res.status(403).json({
       error:
         "Your instance administrator needs to invite you to become an artist.",

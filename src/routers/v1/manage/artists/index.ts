@@ -37,6 +37,7 @@ const forbiddenNames = [
   "system",
   "help",
   "error",
+  "docs",
 ];
 
 export default function () {

@@ -33,7 +33,6 @@ import { doesTrackBelongToUser, doesTrackGroupBelongToUser } from "./ownership";
 import { AppError } from "./error";
 import { processSingleMerch } from "./merch";
 import { sendBasecampAMessage } from "./basecamp";
-import downloadableContent from "../routers/v1/manage/downloadableContent";
 import { deleteDownloadableContent } from "./content";
 
 export const whereForPublishedTrackGroups = (): Prisma.TrackGroupWhereInput => {
@@ -43,6 +42,7 @@ export const whereForPublishedTrackGroups = (): Prisma.TrackGroupWhereInput => {
     adminEnabled: true,
     artist: {
       enabled: true,
+      user: { canCreateArtists: true },
     },
     hideFromSearch: false,
     deletedAt: null,

@@ -4,6 +4,7 @@ import Table from "components/common/Table";
 import React from "react";
 import { FaCheck } from "react-icons/fa";
 import {
+  Link,
   Outlet,
   useNavigate,
   useParams,
@@ -21,7 +22,6 @@ const pageSize = 100;
 
 export const AdminArtists: React.FC = () => {
   const navigate = useNavigate();
-  const { trackgroupId } = useParams();
   const [results, setResults] = React.useState<AdminArtist[]>([]);
   const [openModal, setOpenModal] = React.useState(false);
   const [total, setTotal] = React.useState<number>();
@@ -51,12 +51,6 @@ export const AdminArtists: React.FC = () => {
   React.useEffect(() => {
     callback();
   }, [callback]);
-
-  React.useEffect(() => {
-    if (trackgroupId) {
-      setOpenModal(true);
-    }
-  }, [trackgroupId]);
 
   return (
     <div
@@ -91,6 +85,9 @@ export const AdminArtists: React.FC = () => {
                 </td>
                 <td>{artist.user.stripeAccountId ? <FaCheck /> : ""}</td>
                 <td>{artist.createdAt}</td>
+                <td>
+                  <Link to={`/admin/artists/${artist.id}`}>Manage</Link>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -98,15 +95,6 @@ export const AdminArtists: React.FC = () => {
       )}
       {/* <LoadingButton /> */}
       <PaginationComponent amount={results.length} total={total} />
-      <Modal
-        open={openModal}
-        onClose={() => {
-          setOpenModal(false);
-          navigate("/admin/trackgroups");
-        }}
-      >
-        <Outlet />
-      </Modal>
     </div>
   );
 };

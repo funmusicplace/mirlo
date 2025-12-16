@@ -4,6 +4,7 @@ import { User, Prisma, Artist } from "@mirlo/prisma/client";
 import prisma from "@mirlo/prisma";
 import {
   artistBelongsToLoggedInUser,
+  canUserCreateArtists,
   userAuthenticated,
 } from "../../../../../../auth/passport";
 import { AppError } from "../../../../../../utils/error";
@@ -14,7 +15,7 @@ import { getClient } from "../../../../../../activityPub/utils";
 export default function () {
   const operations = {
     GET: [userAuthenticated, artistBelongsToLoggedInUser, GET],
-    POST: [userAuthenticated, POST],
+    POST: [userAuthenticated, canUserCreateArtists, POST],
     DELETE: [userAuthenticated, artistBelongsToLoggedInUser, DELETE],
   };
 
