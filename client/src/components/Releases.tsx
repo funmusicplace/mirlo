@@ -92,7 +92,6 @@ const Releases: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
               <ButtonLink
                 to="/tags"
                 className={css`
-                  position: sticky;
                   margin-top: 0.25rem;
                 `}
                 variant="outlined"
