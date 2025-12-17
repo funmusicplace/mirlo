@@ -71,7 +71,6 @@ const Releases: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
       {!tag && (
         <SectionHeader
           className={css`
-            position: sticky;
             background-color: var(--mi-white);
           `}
         >
