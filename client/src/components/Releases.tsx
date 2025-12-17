@@ -71,7 +71,6 @@ const Releases: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
       {!tag && (
         <SectionHeader
           className={css`
-            position: sticky;
             background-color: var(--mi-white);
           `}
         >
@@ -93,6 +92,7 @@ const Releases: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
               <ButtonLink
                 to="/tags"
                 className={css`
+                  position: sticky;
                   margin-top: 0.25rem;
                 `}
                 variant="outlined"
