@@ -84,14 +84,7 @@ export const SmallTileDetails: React.FC<{
               }
             `}
           >
-            <Trans
-              ns="translation"
-              i18nKey="smallTileDetails.subtitle"
-              components={{
-                label: <span />,
-                subtitle: <>{subtitle}</>,
-              }}
-            />
+            {subtitle}
           </WidgetSection>
         )}
         {footer && (
@@ -116,14 +109,7 @@ export const SmallTileDetails: React.FC<{
               }
             `}
           >
-            <Trans
-              ns="translation"
-              i18nKey="smallTileDetails.footer"
-              components={{
-                label: <span />,
-                footer: <>{footer}</>,
-              }}
-            />
+            {footer}
           </WidgetSection>
         )}
       </div>

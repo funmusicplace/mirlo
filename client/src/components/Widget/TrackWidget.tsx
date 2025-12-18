@@ -137,19 +137,46 @@ const TrackWidget = () => {
                 <SmallTileDetails
                   title={track.title ?? ""}
                   subtitle={
-                    <Link
-                      target="_blank"
-                      to={getReleaseUrl(
-                        track.trackGroup.artist,
-                        track.trackGroup
+                    <>
+                      {t("from")}{" "}
+                      {embeddedInMirlo && (
+                        <Link
+                          target="_blank"
+                          to={getReleaseUrl(
+                            track.trackGroup.artist,
+                            track.trackGroup
+                          )}
+                        >
+                          {track.trackGroup.isDraft
+                            ? "Drafts"
+                            : track.trackGroup.title}
+                        </Link>
                       )}
-                    >
-                      {track.trackGroup.isDraft
-                        ? "Drafts"
-                        : track.trackGroup.title}
-                    </Link>
+                      {!embeddedInMirlo && (
+                        <a
+                          target={`"_blank"`}
+                          href={`${import.meta.env.VITE_CLIENT_DOMAIN}${getReleaseUrl(
+                            track.trackGroup.artist,
+                            track.trackGroup
+                          )}`}
+                        >
+                          {track.trackGroup.isDraft
+                            ? "Drafts"
+                            : track.trackGroup.title}
+                        </a>
+                      )}
+                    </>
                   }
-                  footer={<TrackArtistLinks track={track} target="_blank" />}
+                  footer={
+                    <>
+                      {t("by")}{" "}
+                      <TrackArtistLinks
+                        track={track}
+                        target="_blank"
+                        fullLink
+                      />
+                    </>
+                  }
                   textColor={
                     track.trackGroup.artist?.properties?.colors?.primary
                   }
