@@ -8,7 +8,8 @@ import React from "react";
 export const TrackArtistLinks: React.FC<{
   track: Track;
   target?: "_blank";
-}> = ({ track, target }) => {
+  fullLink?: boolean;
+}> = ({ track, target, fullLink }) => {
   const artists: { artistId?: string | number; artistName?: string }[] =
     track.trackArtists?.filter((artist) => artist.isCoAuthor) ?? [];
 
@@ -22,13 +23,24 @@ export const TrackArtistLinks: React.FC<{
   return artists.map((artist, index) => (
     <React.Fragment key={artist.artistName}>
       {artist.artistId ? (
-        <Link
-          to={`/${artist.artistId}`}
-          id="player-artist-name"
-          target={target}
-        >
-          {artist.artistName}
-        </Link>
+        <>
+          {fullLink ? (
+            <a
+              target={`"_blank"`}
+              href={`${import.meta.env.VITE_CLIENT_DOMAIN}/${artist.artistId}`}
+            >
+              {artist.artistName}
+            </a>
+          ) : (
+            <Link
+              to={`/${artist.artistId}`}
+              id="player-artist-name"
+              target={target}
+            >
+              {artist.artistName}
+            </Link>
+          )}
+        </>
       ) : (
         artist.artistName
       )}

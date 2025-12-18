@@ -1016,6 +1016,8 @@
   },
   "trackDetails": {
     "track": "Track:",
+    "from": "from",
+    "by": "by",
     "saveButton": "Save track",
     "trackDoesntExist": "That track doesn't exist",
     "saveTrackForm.title": "Title",
@@ -1030,6 +1032,7 @@
   "trackGroupDetails": {
     "trackgroup": "Album:",
     "untitled": "Untitled",
+    "by": "by",
     "enterDownloadCode": "Enter download code",
     "yourEmail": "Your email:",
     "redeemCodeError": "Code not found or already used.",
@@ -1145,8 +1148,8 @@
     "codesForGroup": "Codes for {{ group }}"
   },
   "smallTileDetails": {
-    "subtitle": "<label>from</label> <subtitle/>",
-    "footer": "<label>by</label> <footer/>"
+    "subtitle": "<label>from</label> <subtitle></subtitle>",
+    "footer": "<label>by</label> <footer></footer>"
   },
   "artists": {
     "artists": "All artists",

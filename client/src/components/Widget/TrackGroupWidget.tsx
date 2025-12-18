@@ -170,7 +170,7 @@ const TrackGroupWidget = () => {
                 }
               `}
             >
-              by{" "}
+              {t("by")}{" "}
               {embeddedInMirlo && trackGroup.artist && (
                 <Link target={`"_blank"`} to={getArtistUrl(trackGroup.artist)}>
                   {trackGroup.artist.name}
