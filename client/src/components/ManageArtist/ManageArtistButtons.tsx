@@ -147,65 +147,71 @@ const ManageArtistButtons: React.FC = () => {
               )}
             </>
           )}
-          {canEditArtist && !isAlbumPage && (
-            <FixedButtonLink
-              to={`/manage/artists/${artist.id}/customize`}
-              endIcon={<IoIosColorPalette />}
-              size="compact"
-              rounded
-              variant="dashed"
-            >
-              {t(
-                artist.isLabelProfile ? "customizeLabelLook" : "customizeLook"
+          {canEditArtist && (
+            <>
+              {!isAlbumPage && (
+                <FixedButtonLink
+                  to={`/manage/artists/${artist.id}/customize`}
+                  endIcon={<IoIosColorPalette />}
+                  size="compact"
+                  rounded
+                  variant="dashed"
+                >
+                  {t(
+                    artist.isLabelProfile
+                      ? "customizeLabelLook"
+                      : "customizeLook"
+                  )}
+                </FixedButtonLink>
               )}
-            </FixedButtonLink>
-          )}
-          {canEditArtist && !isManagePage && !isAlbumPage && (
-            <FixedButtonLink
-              to={`/manage/artists/${artist.id}`}
-              endIcon={<FaPen />}
-              size="compact"
-              variant="dashed"
-              rounded
-            >
-              {t(artist.isLabelProfile ? "editLabelPage" : "editPage")}
-            </FixedButtonLink>
-          )}
-          {canEditArtist && seeViewLink && !isAlbumPage && (
-            <FixedButtonLink
-              to={`/${artist?.urlSlug?.toLowerCase() ?? artist?.id}`}
-              endIcon={<FaEye />}
-              disabled={!artist}
-              variant="dashed"
-              size="compact"
-              rounded
-            >
-              {t("viewLive")}
-            </FixedButtonLink>
-          )}
-          {canEditArtist && trackGroup && isAlbumPage && (
-            <FixedButtonLink
-              to={getManageReleaseUrl(artist, trackGroup)}
-              endIcon={<FaEdit />}
-              disabled={!artist}
-              variant="dashed"
-              size="compact"
-              rounded
-            >
-              {t("editRelease")}
-            </FixedButtonLink>
-          )}
-          {canEditArtist && managedTrackGroup && (
-            <FixedButtonLink
-              to={getReleaseUrl(artist, managedTrackGroup)}
-              endIcon={<FaEye />}
-              disabled={!artist}
-              variant="dashed"
-              size="compact"
-              rounded
-            >
-              {t(beforeReleaseDate ? "viewPreorder" : "viewLive")}
-            </FixedButtonLink>
+              {!isManagePage && !isAlbumPage && (
+                <FixedButtonLink
+                  to={`/manage/artists/${artist.id}`}
+                  endIcon={<FaPen />}
+                  size="compact"
+                  variant="dashed"
+                  rounded
+                >
+                  {t(artist.isLabelProfile ? "editLabelPage" : "editPage")}
+                </FixedButtonLink>
+              )}
+              {seeViewLink && !isAlbumPage && (
+                <FixedButtonLink
+                  to={`/${artist?.urlSlug?.toLowerCase() ?? artist?.id}`}
+                  endIcon={<FaEye />}
+                  disabled={!artist}
+                  variant="dashed"
+                  size="compact"
+                  rounded
+                >
+                  {t("viewLive")}
+                </FixedButtonLink>
+              )}
+              {trackGroup && isAlbumPage && (
+                <FixedButtonLink
+                  to={getManageReleaseUrl(artist, trackGroup)}
+                  endIcon={<FaEdit />}
+                  disabled={!artist}
+                  variant="dashed"
+                  size="compact"
+                  rounded
+                >
+                  {t("editRelease")}
+                </FixedButtonLink>
+              )}
+              {managedTrackGroup && (
+                <FixedButtonLink
+                  to={getReleaseUrl(artist, managedTrackGroup)}
+                  endIcon={<FaEye />}
+                  disabled={!artist}
+                  variant="dashed"
+                  size="compact"
+                  rounded
+                >
+                  {t(beforeReleaseDate ? "viewPreorder" : "viewLive")}
+                </FixedButtonLink>
+              )}
+            </>
           )}
         </div>
       )}
