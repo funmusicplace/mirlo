@@ -19,7 +19,6 @@ import Select from "./common/Select";
 import React from "react";
 
 const pageSize = 40;
-const futureReleasesPageSize = 6;
 
 const Releases: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
   const location = useLocation();
