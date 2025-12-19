@@ -83,9 +83,11 @@ export default function () {
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {
-    const { name, bio, urlSlug } = req.body;
+    let { name, bio, urlSlug } = req.body;
     const user = req.user as User;
     try {
+      name = name?.trim();
+      urlSlug = urlSlug?.trim();
       if (!name) {
         throw new AppError({
           description: '"name" is required',
