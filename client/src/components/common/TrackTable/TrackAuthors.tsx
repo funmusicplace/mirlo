@@ -6,8 +6,9 @@ const TrackAuthors: React.FC<{ track: Track; trackGroupArtistId?: number }> = ({
   track,
   trackGroupArtistId,
 }) => {
-  const coAuthors =
-    track.trackArtists?.filter((artist) => artist.isCoAuthor) ?? [];
+  const coAuthors = (
+    track.trackArtists?.filter((artist) => artist.isCoAuthor) ?? []
+  ).sort((a, b) => a.order - b.order);
 
   return (
     <>

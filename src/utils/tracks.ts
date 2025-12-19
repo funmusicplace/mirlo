@@ -149,6 +149,7 @@ export const updateTrackArtists = async (
     artistId: number;
     role: string;
     isCoAuthor: boolean;
+    order: number;
   }[]
 ) => {
   if (!trackArtists) {
@@ -175,6 +176,7 @@ export const updateTrackArtists = async (
       artistName: nta.artistName,
       role: nta.role,
       isCoAuthor: nta.isCoAuthor,
+      order: nta.order,
     })),
   });
 
@@ -189,6 +191,7 @@ export const updateTrackArtists = async (
           artistName: eta.artistName,
           role: eta.role,
           isCoAuthor: eta.isCoAuthor,
+          order: eta.order,
         },
       })
     )
