@@ -12,8 +12,8 @@ import {
   processSingleArtist,
   singleInclude,
 } from "../../../../../utils/artist";
-import slugify from "slugify";
-import { merge, set } from "lodash";
+import { merge } from "lodash";
+import generateSlug from "../../../../../utils/generateSlug";
 
 type Params = {
   artistId: string;
@@ -71,11 +71,7 @@ export default function () {
           maxFreePlays,
           ...(urlSlug
             ? {
-                urlSlug: slugify(urlSlug, {
-                  locale: user.language ?? undefined,
-                  strict: true,
-                  lower: true,
-                }),
+                urlSlug: generateSlug(urlSlug),
               }
             : {}),
           properties: merge(oldProperties, properties),

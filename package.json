@@ -43,6 +43,7 @@
     "filenamify": "^4.3.0",
     "fluent-ffmpeg": "^2.1.2",
     "form-data": "^4.0.1",
+    "github-slugger": "^1.5.0",
     "husky": "^8.0.3",
     "image-size": "^1.0.2",
     "json2csv": "^6.0.0-alpha.2",

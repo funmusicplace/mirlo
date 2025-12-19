@@ -9,7 +9,7 @@ import prisma from "@mirlo/prisma";
 import { User } from "@mirlo/prisma/client";
 import { AppError } from "../../../../../utils/error";
 import { deleteMerch, processSingleMerch } from "../../../../../utils/merch";
-import slugify from "slugify";
+import generateSlug from "../../../../../utils/generateSlug";
 
 type Params = {
   merchId: string;
@@ -105,11 +105,7 @@ export default function () {
         data: {
           ...newValues,
           urlSlug: !merch?.urlSlug // only update slug if it was not set before
-            ? slugify(newValues.title ?? merch?.title, {
-                locale: user.language ?? undefined,
-                strict: true,
-                lower: true,
-              })
+            ? generateSlug(newValues.title, merch?.title)
             : undefined,
         },
       });

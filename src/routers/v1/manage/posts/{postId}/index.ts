@@ -4,7 +4,7 @@ import prisma from "@mirlo/prisma";
 import { User } from "@mirlo/prisma/client";
 import { doesPostBelongToUser } from "../../../../../utils/post";
 import { AppError } from "../../../../../utils/error";
-import slugify from "slugify";
+import generateSlug from "../../../../../utils/generateSlug";
 
 export default function () {
   const operations = {
@@ -61,11 +61,7 @@ export default function () {
           minimumSubscriptionTierId,
           shouldSendEmail,
           urlSlug: !post?.urlSlug
-            ? slugify(urlSlug ?? title ?? post?.title, {
-                locale: user.language ?? undefined,
-                strict: true,
-                lower: true,
-              })
+            ? generateSlug(urlSlug ?? title ?? post?.title)
             : undefined,
         },
         where: {

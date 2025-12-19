@@ -3577,6 +3577,7 @@ __metadata:
     cypress: "npm:^14.3.0"
     file-saver: "npm:^2.0.5"
     focus-trap-react: "npm:^11.0.3"
+    github-slugger: "npm:^1.5.0"
     hast-util-from-parse5: "npm:^7.1.2"
     html-react-parser: "npm:^5.1.1"
     i18next: "npm:^23.0.1"
@@ -12827,6 +12828,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"github-slugger@npm:^1.5.0":
+  version: 1.5.0
+  resolution: "github-slugger@npm:1.5.0"
+  checksum: 10/c70988224578b3bdaa25df65973ffc8c24594a77a28550c3636e495e49d17aef5cdb04c04fa3f1744babef98c61eecc6a43299a13ea7f3cc33d680bf9053ffbe
+  languageName: node
+  linkType: hard
+
 "glob-parent@npm:^5.1.2, glob-parent@npm:~5.1.2":
   version: 5.1.2
   resolution: "glob-parent@npm:5.1.2"
@@ -16155,6 +16163,7 @@ __metadata:
     filenamify: "npm:^4.3.0"
     fluent-ffmpeg: "npm:^2.1.2"
     form-data: "npm:^4.0.1"
+    github-slugger: "npm:^1.5.0"
     husky: "npm:^8.0.3"
     image-size: "npm:^1.0.2"
     json2csv: "npm:^6.0.0-alpha.2"

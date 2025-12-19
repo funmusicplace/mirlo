@@ -6,8 +6,9 @@ import {
 } from "../../../../auth/passport";
 
 import prisma from "@mirlo/prisma";
-import slugify from "slugify";
+
 import { AppError } from "../../../../utils/error";
+import generateSlug from "../../../../utils/generateSlug";
 
 const forbiddenNames = [
   "mirlo",
@@ -101,24 +102,13 @@ export default function () {
         });
       }
 
-      const slug = slugify(
-        urlSlug?.toLowerCase() ??
-          slugify(name, {
-            locale: user.language ?? undefined,
-            lower: true,
-            strict: true,
-          }),
-        {
-          locale: user.language ?? undefined,
-          strict: true,
-        }
-      );
+      const newSlug = generateSlug(urlSlug, name);
 
       const result = await prisma.artist.create({
         data: {
           name,
           bio,
-          urlSlug: slug,
+          urlSlug: newSlug,
           user: {
             connect: {
               id: Number(user.id),
@@ -181,4 +171,7 @@ export default function () {
   };
 
   return operations;
+}
+function generateSlugFromString(urlSlug: any, name: any) {
+  throw new Error("Function not implemented.");
 }

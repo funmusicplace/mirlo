@@ -12,7 +12,6 @@ import { useAuthContext } from "state/AuthContext";
 import { queryUserStripeStatus } from "queries";
 import { useQuery } from "@tanstack/react-query";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
-import { querySetting } from "queries/settings";
 import { FaPlus } from "react-icons/fa";
 
 export const Manage: React.FC = () => {
