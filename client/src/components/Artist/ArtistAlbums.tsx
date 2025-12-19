@@ -71,7 +71,7 @@ const ArtistAlbums: React.FC = () => {
         <div />
         {artist.userId === user?.id && <NewAlbumButton artist={artist} />}
       </SpaceBetweenDiv>
-      <SortableArtistAlbums />
+      {!artist.isLabelProfile && <SortableArtistAlbums />}
       {artist.isLabelProfile && (
         <>
           <TrackgroupGrid
