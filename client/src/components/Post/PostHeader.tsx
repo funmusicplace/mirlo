@@ -145,7 +145,7 @@ const PostHeader: React.FC<{ post: Post }> = ({ post }) => {
           <div
             className={css`
               flex: 100%;
-              max-width: 700px;
+              max-width: var(--mi-container-medium);
             `}
           >
             <div
