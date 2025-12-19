@@ -101,7 +101,7 @@ const TrackGroupWidget = () => {
         }
       `}
     >
-      <TgWidgetWrapper className={css``}>
+      <TgWidgetWrapper>
         <FlexWrapper
           className={css`
             position: relative;
@@ -197,16 +197,14 @@ const TrackGroupWidget = () => {
         </WidgetTitleWrapper>
       </TgWidgetWrapper>
       {currentTrack && !embeddedInMirlo && (
-        <div>
-          <DisplayAudioWrapper>
-            <AudioWrapper
-              currentTrack={currentTrack}
-              position="relative"
-              setCurrentSeconds={setCurrentSeconds}
-              currentSeconds={currentSeconds}
-            />
-          </DisplayAudioWrapper>
-        </div>
+        <DisplayAudioWrapper>
+          <AudioWrapper
+            currentTrack={currentTrack}
+            position="relative"
+            setCurrentSeconds={setCurrentSeconds}
+            currentSeconds={currentSeconds}
+          />
+        </DisplayAudioWrapper>
       )}
     </WidgetWrapper>
   );

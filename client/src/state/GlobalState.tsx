@@ -216,6 +216,7 @@ export const stateReducer = produce((draft: GlobalState, action: Actions) => {
     default:
       break;
   }
+
   localStorage.setItem(
     "nomadState",
     JSON.stringify({
