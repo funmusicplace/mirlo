@@ -29,15 +29,58 @@ export const WidgetWrapper = styled.div<{
   border-radius: 0.3rem;
   overflow: hidden;
   box-sizing: border-box;
-  color: ${(props) =>
-    props.artistColors?.foreground ?? "var(--mi-normal-foreground-color)"};
-  background: ${(props) =>
-    props.artistColors?.background ?? "var(--mi-normal-background-color)"};
 
   a {
     color: ${(props) =>
       props.artistColors?.primary ?? "var(--mi-primary-color)"};
+    }
+
+  color: ${(props) =>
+    props.artistColors?.foreground ??
+    "var(--mi-normal-foreground-color)"} !important;
+    background-color: ${(props) =>
+      props.artistColors?.background ??
+      "var(--mi-normal-background-color)"} !important;
+      
+      button.play-button,
+      button.pause-button {
+      color: ${(props) =>
+        props.artistColors?.foreground ?? "var(--mi-normal-foreground-color)"};
+        
+        background: transparent;
+        
+        svg {
+        fill: ${(props) =>
+          props.artistColors?.foreground ??
+          "var(--mi-normal-foreground-color)"} !important; 
+        }   
+    } 
+
+  tr {
+  
+  &:hover {
+  color: ${(props) =>
+    props.artistColors?.background ??
+    "var(--mi-normal-foreground-color)"} !important;
+    background-color: ${(props) =>
+      props.artistColors?.foreground ??
+      "var(--mi-normal-background-color)"} !important;
+      
+      button.play-button,
+      button.pause-button {
+      color: ${(props) =>
+        props.artistColors?.background ?? "var(--mi-normal-foreground-color)"};
+        
+        background: transparent;
+        
+        svg {
+        fill: ${(props) =>
+          props.artistColors?.background ??
+          "var(--mi-normal-foreground-color)"} !important; 
+        }   
+    } 
   }
+
 `;
 
 export const TgWidgetWrapper = styled.div<{ embeddedInMirlo?: boolean }>`
@@ -77,14 +120,12 @@ export const TrackListWrapper = styled.div<{}>`
     border-radius: 0px;
     background-color: rgba(255, 255, 255, 0.2);
   }
-
   @media screen and (max-width: ${bp.small}px) {
     overflow: auto;
   }
 `;
 export const WidgetTitleWrapper = styled.div<{}>`
   border-left: var(--mi-border);
-  overflow: scroll;
 
   @media screen and (max-width: ${bp.small}px) {
     a {
