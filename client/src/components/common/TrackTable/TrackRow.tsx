@@ -27,7 +27,10 @@ const LicenseSpan = styled.a`
   overflow: hidden;
 `;
 
-const TR = styled.tr<{ canPlayTrack: boolean; colors?: ArtistColors }>`
+const TR = styled.tr<{
+  canPlayTrack: boolean;
+  colors?: ArtistColors;
+}>`
   ${(props) =>
     !props.canPlayTrack
       ? `color: ${props.colors?.primary ?? "var(--mi-normal-foreground-color)"}; opacity: .6;`
@@ -44,13 +47,13 @@ const TR = styled.tr<{ canPlayTrack: boolean; colors?: ArtistColors }>`
     button.play-button,
     button.pause-button {
       color: ${(props) =>
-        props.colors?.background ?? "var(--mi-normal-background-color)"};
+        props.colors?.background ?? "var(--mi-normal-foreground-color)"};
       background: transparent;
 
       svg {
         fill: ${(props) =>
           props.colors?.background ??
-          "var(--mi-normal-background-color)"} !important;
+          "var(--mi-normal-foreground-color)"} !important;
       }
     }
 
@@ -80,8 +83,7 @@ const TR = styled.tr<{ canPlayTrack: boolean; colors?: ArtistColors }>`
 
     svg {
       fill: ${(props) =>
-        props.colors?.primary ??
-        "var(--mi-normal-foreground-color)"} !important;
+        props.colors?.primary ?? "var(--mi-normal-foreground-color)"};
     }
   }
 
@@ -91,6 +93,7 @@ const TR = styled.tr<{ canPlayTrack: boolean; colors?: ArtistColors }>`
   > td > .track-number {
     display: block;
     width: 2rem;
+    line-height: 2rem !important;
   }
   &:hover > td > .play-button,
   &:hover > td > .pause-button {
@@ -141,12 +144,19 @@ const TrackTitleTD = styled.td`
   margin: 0rem;
 `;
 
+const DropdownTD = styled.td<{
+  showDropdown?: boolean;
+}>`
+  ${(props) => (props.showDropdown ? `display: visible;` : "display : none;")}
+`;
+
 const TrackRow: React.FC<{
+  showDropdown?: boolean;
   track: Track;
   trackGroup: TrackGroup;
   addTracksToQueue: (id: number) => void;
   size?: "small";
-}> = ({ track, addTracksToQueue, trackGroup, size }) => {
+}> = ({ track, addTracksToQueue, trackGroup, size, showDropdown }) => {
   const { t } = useTranslation("translation", {
     keyPrefix: "trackGroupDetails",
   });
@@ -247,8 +257,9 @@ const TrackRow: React.FC<{
           artist={trackGroup.artist}
         />
       </td> */}
+
       {size !== "small" && (
-        <td align="right">
+        <DropdownTD showDropdown={showDropdown} align="right">
           <DropdownMenu compact label="Track options">
             <ul>
               <li>
@@ -306,7 +317,7 @@ const TrackRow: React.FC<{
               </li>
             </ul>
           </DropdownMenu>
-        </td>
+        </DropdownTD>
       )}
     </TR>
   );

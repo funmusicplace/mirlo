@@ -15,7 +15,8 @@ export const PublicTrackGroupListing: React.FC<{
   tracks: Track[];
   trackGroup?: TrackGroup;
   size?: "small";
-}> = ({ tracks, trackGroup, size }) => {
+  showDropdown?: boolean;
+}> = ({ tracks, trackGroup, size, showDropdown = true }) => {
   const { t } = useTranslation("translation", {
     keyPrefix: "trackGroupDetails",
   });
@@ -66,6 +67,7 @@ export const PublicTrackGroupListing: React.FC<{
       <tbody>
         {displayTracks?.map((track) => (
           <TrackRow
+            showDropdown={showDropdown}
             key={track.id}
             track={track}
             addTracksToQueue={addTracksToQueue}

@@ -190,6 +190,8 @@ const TrackGroupWidget = () => {
           </div>
           <TrackListWrapper>
             <PublicTrackGroupListing
+              size="small"
+              showDropdown={false}
               tracks={trackGroup.tracks}
               trackGroup={trackGroup}
             />
