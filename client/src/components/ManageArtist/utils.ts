@@ -60,6 +60,7 @@ export interface TrackData {
     isCoAuthor?: boolean;
     id?: string;
     trackId?: number;
+    order: number;
   }[];
 }
 
@@ -96,10 +97,11 @@ export const convertMetaData = (
     lyrics: p.metadata.common.lyrics,
     isrc: isrc,
     trackArtists:
-      p.metadata.common.artists?.map((artist) => ({
+      p.metadata.common.artists?.map((artist, idx) => ({
         artistName: artist ?? "",
         role: "",
         isCoAuthor: true,
+        order: idx,
         artistId:
           artist === trackGroup.artist?.name ? trackGroup.artistId : undefined,
       })) ?? [],

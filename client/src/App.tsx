@@ -106,7 +106,7 @@ function App() {
             </div>
           </div>
         </>
-      </ArtistColorsWrapper>{" "}
+      </ArtistColorsWrapper>
       <Player />
     </>
   );

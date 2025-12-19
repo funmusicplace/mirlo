@@ -10,7 +10,7 @@ import bcrypt from "bcryptjs";
 import { AppError } from "../../../../utils/error";
 import sendMail from "../../../../jobs/send-mail";
 import { Job } from "bullmq";
-import slugify from "slugify";
+import generateSlug from "../../../../utils/generateSlug";
 
 export default function () {
   const operations = {
@@ -171,11 +171,7 @@ export default function () {
               // other artist fields
               urlSlug:
                 updatedUser.urlSlug ??
-                slugify(updatedUser.name ?? updatedUser.email, {
-                  locale: updatedUser.language ?? undefined,
-                  lower: true,
-                  strict: true,
-                }),
+                generateSlug(updatedUser.name ?? updatedUser.email),
             },
           });
         }

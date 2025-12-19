@@ -10,8 +10,8 @@ import processor, {
 } from "../../../../../utils/trackGroup";
 import prisma from "@mirlo/prisma";
 import { deleteTrackGroup } from "../../../../../utils/trackGroup";
-import slugify from "slugify";
 import { AppError } from "../../../../../utils/error";
+import generateSlug from "../../../../../utils/generateSlug";
 
 type Params = {
   trackGroupId: string;
@@ -123,13 +123,7 @@ export default function () {
       });
 
       if (trackGroup?.title && trackGroup.urlSlug.includes("mi-temp-slug")) {
-        const loggedInUser = req.user as User;
-        let slug = slugify(newValues.title, {
-          locale: loggedInUser.language ?? undefined,
-          strict: true,
-          lower: true,
-        });
-
+        let slug = generateSlug(newValues.title);
         if (slug === "") {
           slug = "blank";
         }

@@ -6,8 +6,9 @@ import {
 } from "../../../../auth/passport";
 
 import prisma from "@mirlo/prisma";
-import slugify from "slugify";
+
 import { AppError } from "../../../../utils/error";
+import generateSlug from "../../../../utils/generateSlug";
 
 const forbiddenNames = [
   "mirlo",
@@ -83,9 +84,11 @@ export default function () {
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {
-    const { name, bio, urlSlug } = req.body;
+    let { name, bio, urlSlug } = req.body;
     const user = req.user as User;
     try {
+      name = name?.trim();
+      urlSlug = urlSlug?.trim();
       if (!name) {
         throw new AppError({
           description: '"name" is required',
@@ -99,24 +102,13 @@ export default function () {
         });
       }
 
-      const slug = slugify(
-        urlSlug?.toLowerCase() ??
-          slugify(name, {
-            locale: user.language ?? undefined,
-            lower: true,
-            strict: true,
-          }),
-        {
-          locale: user.language ?? undefined,
-          strict: true,
-        }
-      );
+      const newSlug = generateSlug(urlSlug, name);
 
       const result = await prisma.artist.create({
         data: {
           name,
           bio,
-          urlSlug: slug,
+          urlSlug: newSlug,
           user: {
             connect: {
               id: Number(user.id),
@@ -179,4 +171,7 @@ export default function () {
   };
 
   return operations;
+}
+function generateSlugFromString(urlSlug: any, name: any) {
+  throw new Error("Function not implemented.");
 }

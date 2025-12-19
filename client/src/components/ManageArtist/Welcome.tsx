@@ -7,14 +7,11 @@ import Button, { ButtonLink } from "components/common/Button";
 import React from "react";
 import ArtistSlugInput from "../common/SlugInput";
 import api from "services/api";
-import UploadArtistImage from "./UploadArtistImage";
 import { FaArrowRight } from "react-icons/fa";
 import { css } from "@emotion/css";
 import { useNavigate } from "react-router-dom";
 import useErrorHandler from "services/useErrorHandler";
 import { useAuthContext } from "state/AuthContext";
-import { NewAlbumButton } from "./NewAlbumButton";
-import ChooseYourTheme from "./ChooseYourTheme";
 
 const PageWrapper = styled.div`
   padding: 2rem 0;

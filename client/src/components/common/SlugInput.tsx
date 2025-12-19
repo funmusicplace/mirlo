@@ -8,7 +8,8 @@ import React from "react";
 import { useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import api from "services/api";
-import slugify from "slugify";
+// @ts-ignore: Ignore import errors for github-slugger
+import { slug } from "github-slugger";
 
 const SlugInput: React.FC<{
   isDisabled?: boolean;
@@ -52,12 +53,8 @@ const SlugInput: React.FC<{
 
   const useCurrentNameAsSlug = React.useCallback(() => {
     if (currentName) {
-      const slug = slugify(currentName, {
-        locale: i18n.language,
-        lower: true,
-        strict: true,
-      });
-      setValue("urlSlug", slug);
+      const newSlug = slug(currentName);
+      setValue("urlSlug", newSlug);
     }
     return "";
   }, [currentName]);
@@ -90,10 +87,7 @@ const SlugInput: React.FC<{
           `}
         >
           {t("useUrlSlug", {
-            suggestedUrlSlug: slugify(currentName.toLowerCase(), {
-              locale: i18n.language,
-              strict: true,
-            }),
+            suggestedUrlSlug: slug(currentName.toLowerCase()),
           })}
           <ArtistButton
             variant="link"

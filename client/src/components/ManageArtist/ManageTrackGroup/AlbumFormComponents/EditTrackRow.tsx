@@ -281,7 +281,7 @@ const EditTrackRow: React.FC<{
             >
               <ArtistButton
                 onClick={() => {
-                  append({ artistName: "" });
+                  append({ artistName: "", order: trackArtists.length });
                 }}
                 type="button"
                 size="compact"

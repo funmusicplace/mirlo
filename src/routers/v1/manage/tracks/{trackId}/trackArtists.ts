@@ -14,6 +14,7 @@ interface TrackBody {
     artistId: number;
     role: string;
     isCoAuthor: boolean;
+    order: number;
   }[];
 }
 

@@ -76,6 +76,7 @@ interface Track {
     artistName?: string;
     isCoAuthor?: boolean;
     trackId?: number;
+    order: number;
   }[];
   licenseId?: number;
   license?: {
