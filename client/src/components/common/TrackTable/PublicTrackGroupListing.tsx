@@ -16,7 +16,7 @@ export const PublicTrackGroupListing: React.FC<{
   trackGroup?: TrackGroup;
   size?: "small";
   showDropdown?: boolean;
-}> = ({ tracks, trackGroup, size, showDropdown }) => {
+}> = ({ tracks, trackGroup, size, showDropdown = true }) => {
   const { t } = useTranslation("translation", {
     keyPrefix: "trackGroupDetails",
   });
@@ -24,7 +24,6 @@ export const PublicTrackGroupListing: React.FC<{
   const [isLoading, setIsLoading] = React.useState(true);
   const { dispatch } = useGlobalStateContext();
   const [displayTracks, setDisplayTracks] = React.useState<Track[]>([]);
-  showDropdown = showDropdown ?? true;
 
   const fetchTracks = React.useCallback(async () => {
     setIsLoading(false);
