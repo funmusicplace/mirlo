@@ -846,7 +846,11 @@
   "artistForm": {
     "deleteArtist": "Permanently delete artist page",
     "shortDescription": "Something short about you",
-    "areYouSureDelete": "Are your sure you want to delete this artist page?",
+    "announcement": "Write an announcement:",
+    "editAnnouncement": "Edit announcement",
+    "close": "Close",
+    "announcementDescription": "This will appear at the top of your profile page in a highlighted box. Leave it blank if you don't want to use it. You can use markdown in it.",
+    "areYouSureDelete": "Are your sure you want to delete this profile page?",
     "whatLabelsisThisArtistPartOf": "What label is this artist a part of?",
     "terminationDanger": " Artist page termination ",
     "backgroundImageLabel": "Background image",

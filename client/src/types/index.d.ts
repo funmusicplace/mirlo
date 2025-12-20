@@ -257,6 +257,7 @@ interface Artist {
       purchase?: string | null;
     };
   };
+  announcementText?: string;
   user?: Partial<User>;
   banner?: {
     url: string;

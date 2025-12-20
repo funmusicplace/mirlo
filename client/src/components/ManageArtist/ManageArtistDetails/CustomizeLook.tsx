@@ -26,6 +26,8 @@ import CustomNamesForTabs from "./CustomNamesForTabs";
 import ThankYouMessageEditors from "./ThankYouMessageEditors";
 import { merge } from "lodash";
 import { ArtistButton } from "components/Artist/ArtistButtons";
+import TextArea from "components/common/TextArea";
+import ManageArtistAnnouncement from "./ManageArtistAnnouncement";
 
 export interface ShareableTrackgroup {
   creatorId: number;

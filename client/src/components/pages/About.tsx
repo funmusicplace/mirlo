@@ -2,7 +2,6 @@ import { Trans, useTranslation } from "react-i18next";
 import { PageMarkdownWrapper } from "components/Post/index";
 import { MetaCard } from "../common/MetaCard";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import MarkdownWrapper from "../common/MarkdownWrapper";
 import React from "react";
 import { css } from "@emotion/css";
 import styled from "@emotion/styled";

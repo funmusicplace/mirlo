@@ -71,17 +71,11 @@ export const Footer = () => {
               }}
             />
           </p>
-          <p
-            className={css`
-              a {
-                margin: 0.5rem;
-                font-size: 1.5rem;
-              }
-            `}
-          >
+          <p className="flex justify-center gap-1 pb-1">
             <a
               href="https://instagram.com/mirlo.space"
               title="Instagram"
+              className="text-2xl"
               aria-label={`${t("socialInstagram", { username: "@mirlo.space" })}`}
             >
               <FaInstagram aria-hidden />
@@ -89,20 +83,15 @@ export const Footer = () => {
             <a
               href="https://musician.social/@mirlo"
               title="Mastodon"
+              className="text-2xl"
               aria-label={`${t("socialMastodon", { username: "@mirlo@musician.social" })}`}
             >
               <FaMastodon aria-hidden />
             </a>
             <a
-              href="https://x.com/mirlospace"
-              title="X"
-              aria-label={`${t("socialX", { username: "@mirlospace" })}`}
-            >
-              <FaTwitter aria-hidden />
-            </a>
-            <a
               href="https://bsky.app/profile/mirlo.space"
               title="BlueSky"
+              className="text-2xl"
               aria-label={`${t("socialBlueSky", { username: "mirlo.bsky.social" })}`}
             >
               <FaBluesky />

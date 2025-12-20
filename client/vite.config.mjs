@@ -4,6 +4,7 @@ import react from "@vitejs/plugin-react";
 import viteTsconfigPaths from "vite-tsconfig-paths";
 import legacy from "@vitejs/plugin-legacy";
 import { optimizeLodashImports } from "@optimize-lodash/rollup-plugin";
+import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
   base: "/",
@@ -15,6 +16,7 @@ export default defineConfig({
     }),
     viteTsconfigPaths(),
     legacy(),
+    tailwindcss(),
   ],
   server: {
     open: !process.env.CI,

@@ -30,6 +30,7 @@ const SavingInput: React.FC<{
   type?: string;
   currency?: string;
   onEnter?: () => void;
+  saveOnBlur?: boolean;
   reload?: () => void;
   width?: string | number;
   valueTransform?: (value: unknown) => unknown;
@@ -54,6 +55,7 @@ const SavingInput: React.FC<{
   width,
   onEnter,
   valueTransform,
+  saveOnBlur,
 }) => {
   const { colors } = useGetArtistColors();
   const { register, getValues } = useFormContext();
@@ -62,7 +64,7 @@ const SavingInput: React.FC<{
   const [isSaving, setIsSaving] = React.useState(false);
   const [saveSuccess, setSaveSuccess] = React.useState(false);
 
-  const saveOnInput = useDebouncedCallback(async () => {
+  const saveOnInput = async () => {
     try {
       setSaveSuccess(false);
       setIsSaving(true);
@@ -119,6 +121,10 @@ const SavingInput: React.FC<{
       errorHandler(e);
       setIsSaving(false);
     }
+  };
+
+  const saveOnInputDebounced = useDebouncedCallback(() => {
+    saveOnInput();
   }, timer ?? 2500);
 
   return (
@@ -146,13 +152,14 @@ const SavingInput: React.FC<{
             <InputEl
               colors={colors}
               {...register(formKey)}
-              onInput={saveOnInput}
+              onInput={saveOnInputDebounced}
               // onChange={type === "checkbox" ? saveOnInput : undefined}
               type={type}
               required={required}
               step={step}
               min={min}
               id={id}
+              {...(saveOnBlur && { onBlur: saveOnInput })}
               maxLength={maxLength}
               onKeyUp={(e) => {
                 if (e.key === "Enter") {
@@ -166,7 +173,8 @@ const SavingInput: React.FC<{
               {...register(formKey)}
               rows={rows}
               colors={colors}
-              onInput={saveOnInput}
+              {...(saveOnBlur && { onBlur: saveOnInput })}
+              onInput={saveOnInputDebounced}
             />
           )}
         </>
@@ -179,9 +187,10 @@ const SavingInput: React.FC<{
               <TextEditor
                 onChange={(val: any) => {
                   onChange(val);
-                  saveOnInput();
+                  saveOnInputDebounced();
                 }}
                 value={value}
+                {...(saveOnBlur && { onBlur: saveOnInput })}
                 {...textEditorProps}
               />
             );
@@ -198,8 +207,8 @@ const SavingInput: React.FC<{
           filter: invert(100%);
         `}
       >
-        {isSaving && <LoadingSpinner fill={colors?.foreground} size="small" />}
-        {saveSuccess && <FaCheck />}
+        {isSaving && <LoadingSpinner fill={colors?.primary} size="small" />}
+        {saveSuccess && <FaCheck fill={colors?.primary} />}
       </div>
     </div>
   );

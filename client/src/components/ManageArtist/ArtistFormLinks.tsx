@@ -21,6 +21,7 @@ import {
   ArtistButtonAnchor,
   ArtistButtonLink,
 } from "components/Artist/ArtistButtons";
+import ManageArtistAnnouncement from "./ManageArtistDetails/ManageArtistAnnouncement";
 
 interface FormData {
   linkArray: Link[];
@@ -68,8 +69,7 @@ function transformToLinks(data: FormData): Pick<Artist, "linksJson" | "links"> {
       const matchingSite = trimmedLinkType
         ? outsideLinks.find((site) => site.name === trimmedLinkType)
         : undefined;
-      const allowsCustomIcon =
-        !matchingSite || matchingSite.matches === "";
+      const allowsCustomIcon = !matchingSite || matchingSite.matches === "";
 
       const sanitizedIconUrl = link.iconUrl?.trim();
 
@@ -198,7 +198,9 @@ const ArtistFormLinks: React.FC<ArtistFormLinksProps> = ({
         return;
       }
 
-      if (!allowsCustomIconForLinkType(getValues(`linkArray.${index}.linkType`))) {
+      if (
+        !allowsCustomIconForLinkType(getValues(`linkArray.${index}.linkType`))
+      ) {
         return;
       }
 
@@ -211,13 +213,7 @@ const ArtistFormLinks: React.FC<ArtistFormLinksProps> = ({
 
   return (
     <>
-      <div
-        className={css`
-          margin-bottom: 0.25rem;
-          display: flex;
-          align-items: center;
-        `}
-      >
+      <div className="flex align-center mb-2">
         <div
           className={css`
             display: inline-flex;
@@ -267,7 +263,7 @@ const ArtistFormLinks: React.FC<ArtistFormLinksProps> = ({
             })}
           {!isManage && allLinks.length > links.length && (
             <ArtistButtonLink to="links" size="compact" variant="dashed">
-              {t('moreLinks')}
+              {t("moreLinks")}
             </ArtistButtonLink>
           )}
         </div>
