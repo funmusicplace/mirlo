@@ -28,7 +28,8 @@ html {
   --header-cover-sticky-height: 55px;
 
   --mi-font-family-stack:
-    system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+    "Segoe UI Symbol", "Noto Color Emoji";
 
   --mi-font-size-normal: 1rem;
   --mi-font-size-small: 0.875rem;
@@ -46,8 +47,6 @@ html {
 
 * {
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
 }
 
 html {
@@ -225,3 +224,5 @@ button {
     transform: translateX(0);
   }
 }
+
+@import "tailwindcss";

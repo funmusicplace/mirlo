@@ -284,15 +284,16 @@ model Artist {
   allowPurchaseEntireCatalog         Boolean                              @default(false)
   purchaseEntireCatalogMinPrice      Int                                  @default(0) // in cents  
   maxFreePlays                       Int?
+  merchStoreURL                      String?
+  activityPub                        Boolean                              @default(false)
+  announcementText                   String?
   artistUserSubscriptionConfirmation ArtistUserSubscriptionConfirmation[]
   userArtistNotificationSettings     UserArtistNotificationSetting[]
   notifications                      Notification[]
   userArtistTip                      UserArtistTip[]
   artistTipTier                      ArtistTipTier[]
-  merchStoreURL                      String?
   merch                              Merch[]
   artistLabels                       ArtistLabel[]
-  activityPub                        Boolean                              @default(false)
   activityPubArtistFollowers         ActivityPubArtistFollowers[]
   tourDates                          ArtistTourDate[]
   paymentToUserId                    Int? // User to which the payments for this artist go

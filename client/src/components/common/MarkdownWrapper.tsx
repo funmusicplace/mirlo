@@ -79,6 +79,10 @@ const MarkdownWrapper = styled.div`
     margin-bottom: 0.75rem;
   }
 
+  p:last-child {
+    margin-bottom: 0 !important;
+  }
+
   strong {
     font-weight: bold;
   }

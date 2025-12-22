@@ -17,9 +17,8 @@ import { FaRss } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 import { ArtistButtonAnchor } from "components/Artist/ArtistButtons";
 import ArtistTourDates from "components/Artist/ArtistTourDates";
-import TrackGroupEmbed, {
-  LabelEmbed,
-} from "components/TrackGroup/TrackGroupEmbed";
+import { LabelEmbed } from "components/TrackGroup/TrackGroupEmbed";
+import ManageArtistAnnouncement from "components/ManageArtist/ManageArtistDetails/ManageArtistAnnouncement";
 
 const smallButtonClass = css`
   svg {
@@ -299,16 +298,29 @@ const ArtistHeaderSection: React.FC<{
           </div>
         </div>
       </HeaderWrapper>
+
       <div
         className={css`
           display: flex;
           justify-content: flex-end;
           padding-top: 0.5rem;
-          @media screen and (max-width: ${bp.medium}px) {
-            display: none;
-          }
+          margin-bottom: 1rem;
+          align-items: flex-start;
+
+          ${artist.announcementText
+            ? `flex-direction: column;
+            justify-content: flex-end;
+            align-items: flex-end;
+            padding-top: 0;
+
+            > div {
+              margin-bottom: 0.5rem;}
+            `
+            : ""}
         `}
       >
+        <ManageArtistAnnouncement showButtons={isManage} />
+
         <ArtistFormLinks
           isManage={!!isManage}
           artist={artist}

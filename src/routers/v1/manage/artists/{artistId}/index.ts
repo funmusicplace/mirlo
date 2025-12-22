@@ -42,6 +42,7 @@ export default function () {
       tourDates,
       shortDescription,
       maxFreePlays,
+      announcementText,
     } = req.body;
     const user = req.user as User;
 
@@ -69,6 +70,7 @@ export default function () {
           defaultPlatformFee,
           shortDescription,
           maxFreePlays,
+          announcementText,
           ...(urlSlug
             ? {
                 urlSlug: generateSlug(urlSlug),
