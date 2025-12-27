@@ -62,6 +62,8 @@ const BackOrIsBacking: React.FC<{ trackGroup: TrackGroup; artist: Artist }> = ({
     stripeAccountStatus?.stripeAccountId,
   ]);
 
+  console.log("Payment status:", paymentStatus);
+
   return (
     <>
       {isLoading && <div>{t("loading")}</div>}
@@ -71,6 +73,7 @@ const BackOrIsBacking: React.FC<{ trackGroup: TrackGroup; artist: Artist }> = ({
             <BackingThisProject
               amount={paymentIntentAmount}
               currency={trackGroup?.currency}
+              trackGroup={trackGroup}
             />
           )}
           {!paymentStatus && (

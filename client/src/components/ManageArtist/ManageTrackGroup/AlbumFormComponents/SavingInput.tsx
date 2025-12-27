@@ -11,7 +11,7 @@ import { css } from "@emotion/css";
 import useErrorHandler from "services/useErrorHandler";
 import { FaCheck } from "react-icons/fa";
 import { useGetArtistColors } from "components/Artist/ArtistButtons";
-import { set } from "lodash";
+import { multiply, set } from "lodash";
 import { getCurrencySymbol } from "components/common/Money";
 import TextEditor from "components/common/TextEditor";
 
@@ -19,6 +19,7 @@ const SavingInput: React.FC<{
   formKey: string;
   url: string;
   extraData?: Object;
+  multiplyBy100?: boolean;
   id?: string;
   timer?: number;
   rows?: number;
@@ -56,6 +57,7 @@ const SavingInput: React.FC<{
   onEnter,
   valueTransform,
   saveOnBlur,
+  multiplyBy100,
 }) => {
   const { colors } = useGetArtistColors();
   const { register, getValues } = useFormContext();
@@ -76,9 +78,11 @@ const SavingInput: React.FC<{
         formKey === "fundraisingEndDate"
       ) {
         value = new Date(value).toISOString();
-      } else if (formKey === "minPrice" || !!currency) {
+      } else if (formKey === "minPrice" || !!currency || multiplyBy100) {
         value = value ? value * 100 : undefined;
       }
+
+      console.log("saving value", value);
 
       if (valueTransform) {
         value = valueTransform(value);

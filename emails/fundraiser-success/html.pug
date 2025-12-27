@@ -1,0 +1,10 @@
+extends ../layout.pug
+
+block content
+  p The fundraiser for #{artist.name}'s #{trackGroup.title} has been successfully funded! 
+  
+  p You contributed #{currency} #{pledgedAmountFormatted} towards the goal of #{currency} #{fundraisingGoalFormatted}, and your card has been charged!
+  p 
+    a(href!=`${client}/${artist.urlSlug}/releases/${trackGroup.urlSlug}`) View it on Mirlo.
+  hr
+  p Thank you for supporting independent artists on Mirlo!

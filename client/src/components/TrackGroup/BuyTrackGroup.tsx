@@ -1,7 +1,4 @@
-import Money, {
-  getCurrencySymbol,
-  moneyDisplay,
-} from "components/common/Money";
+import Money, { moneyDisplay } from "components/common/Money";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import api from "services/api";
@@ -10,10 +7,8 @@ import { useSnackbar } from "state/SnackbarContext";
 import { InputEl } from "components/common/Input";
 import FormComponent from "components/common/FormComponent";
 import { FormProvider, useForm } from "react-hook-form";
-import PlatformPercent from "components/common/PlatformPercent";
 import { css } from "@emotion/css";
 import { testOwnership } from "./utils";
-import Box from "components/common/Box";
 import { useAuthContext } from "state/AuthContext";
 import TextArea from "components/common/TextArea";
 import EmbeddedStripeForm from "components/common/stripe/EmbeddedStripe";
@@ -23,6 +18,7 @@ import { FaArrowRight } from "react-icons/fa";
 import { useQuery } from "@tanstack/react-query";
 import { queryUserStripeStatus } from "queries";
 import AddMoneyValueButtons from "components/common/AddMoneyValueButtons";
+import PaymentInputElement from "./PaymentInputElement";
 
 interface FormData {
   chosenPrice: string;
@@ -51,7 +47,7 @@ const BuyTrackGroup: React.FC<{
   const { data: stripeAccountStatus } = useQuery(
     queryUserStripeStatus(trackGroup.artist?.userId ?? 0)
   );
-  const { register, watch, handleSubmit, formState } = methods;
+  const { watch, handleSubmit, formState } = methods;
   const { isValid } = formState;
   const chosenPrice = watch("chosenPrice");
   const consentToStoreData = watch("consentToStoreData");
@@ -104,7 +100,7 @@ const BuyTrackGroup: React.FC<{
 
   const isBeforeReleaseDate = new Date(trackGroup.releaseDate) > new Date();
   const purchaseText = trackGroup.isAllOrNothing
-    ? "backThisProject"
+    ? "addPaymentInformation"
     : isBeforeReleaseDate
       ? "preOrder"
       : "buy";
@@ -113,12 +109,6 @@ const BuyTrackGroup: React.FC<{
     lessThanMin ||
     !isValid ||
     (trackGroup.isAllOrNothing && !consentToStoreData);
-
-  const addMoneyAmount = (val: number) => {
-    const currentPrice = Number(chosenPrice || 0);
-    const newPrice = currentPrice + val;
-    methods.setValue("chosenPrice", newPrice.toString());
-  };
 
   if (clientSecret && stripeAccountStatus?.stripeAccountId) {
     return (
@@ -158,45 +148,11 @@ const BuyTrackGroup: React.FC<{
         )}
         <form onSubmit={handleSubmit(purchaseAlbum)}>
           <FormComponent>
-            <label htmlFor="priceInput">
-              {t("nameYourPrice", {
-                currency: getCurrencySymbol(trackGroup.currency, undefined),
-              })}{" "}
-            </label>
-            <InputEl
-              {...register("chosenPrice")}
-              type="number"
-              min={minPrice ? minPrice / 100 : 0}
-              step="0.01"
-              id="priceInput"
-            />
-
-            {Number(chosenPrice) > (minPrice ?? 1) * 100 && (
-              <Box variant="success">
-                {t("thatsGenerous", {
-                  chosenPrice: moneyDisplay({
-                    amount: chosenPrice,
-                    currency: trackGroup.currency,
-                  }),
-                })}
-              </Box>
-            )}
-            {lessThanMin && (
-              <small>
-                {t("pleaseEnterMoreThan", {
-                  minPrice: (minPrice ?? 100) / 100,
-                })}
-              </small>
-            )}
-            <AddMoneyValueButtons
-              addMoneyAmount={addMoneyAmount}
+            <PaymentInputElement
               currency={trackGroup.currency}
-            />
-            <PlatformPercent
-              percent={trackGroup.platformPercent}
-              chosenPrice={chosenPrice}
-              currency={trackGroup.currency}
-              artist={trackGroup.artist}
+              platformPercent={trackGroup.platformPercent}
+              minPrice={minPrice}
+              artistName={trackGroup.artist?.name}
             />
           </FormComponent>
 

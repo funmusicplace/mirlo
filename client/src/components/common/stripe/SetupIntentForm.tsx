@@ -8,17 +8,28 @@ import {
 import { Button } from "../Button";
 import { css } from "@emotion/css";
 import useErrorHandler from "services/useErrorHandler";
+import LoadingBlocks from "components/Artist/LoadingBlocks";
+import { useTranslation } from "react-i18next";
+import {
+  StripeError,
+  StripePaymentElementChangeEvent,
+} from "@stripe/stripe-js";
 
 const SetupIntentForm: React.FC<{
   clientSecret: string;
 }> = ({ clientSecret }) => {
   const stripe = useStripe();
+  const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
   const elements = useElements();
   const handler = useErrorHandler();
+  const [showButton, setShowButton] = useState(false);
+  const [isFormComplete, setIsFormComplete] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
+    setIsLoading(true);
     // We don't want to let default form submission happen here,
     // which would refresh the page.
     event.preventDefault();
@@ -47,6 +58,29 @@ const SetupIntentForm: React.FC<{
       // methods like iDEAL, your customer will be redirected to an intermediate
       // site first to authorize the payment, then redirected to the `return_url`.
     }
+    setIsLoading(false);
+  };
+
+  const handleOnReady = () => {
+    setShowButton(true);
+  };
+
+  const handleOnError = ({
+    elementType,
+    error,
+  }: {
+    elementType: "payment";
+    error: StripeError;
+  }) => {
+    console.error(error);
+    handler(t("somethingWentWrongStripe") ?? "");
+  };
+
+  const handleOnChange = (e: StripePaymentElementChangeEvent) => {
+    console.log("e", e);
+    if (e.complete) {
+      setIsFormComplete(true);
+    }
   };
 
   return (
@@ -56,16 +90,26 @@ const SetupIntentForm: React.FC<{
         margin: auto;
       `}
     >
-      <PaymentElement options={{ layout: "accordion" }} />
-      <Button
-        onClick={handleSubmit}
-        size="big"
-        className={css`
-          margin-top: 1rem;
-        `}
-      >
-        Back this project
-      </Button>
+      {!showButton && <LoadingBlocks rows={1} />}
+      <PaymentElement
+        options={{ layout: "accordion" }}
+        onReady={handleOnReady}
+        onLoadError={handleOnError}
+        onChange={handleOnChange}
+      />
+      {showButton && (
+        <Button
+          onClick={handleSubmit}
+          size="big"
+          isLoading={isLoading}
+          disabled={!stripe || !elements || !isFormComplete}
+          className={css`
+            margin-top: 1rem;
+          `}
+        >
+          {t("backThisProject")}
+        </Button>
+      )}
     </div>
   );
 };

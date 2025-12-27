@@ -12,12 +12,10 @@ import { Trans, useTranslation } from "react-i18next";
 import BackOrIsBacking from "./BackOrIsBacking";
 
 function Thermometer({
-  current,
   goal,
   artist,
   trackGroup,
 }: {
-  current: number;
   goal: number;
   artist: Artist;
   trackGroup: TrackGroup;
@@ -27,7 +25,7 @@ function Thermometer({
   });
 
   const {
-    data: { results, total, totalAmount, totalSupporters } = {
+    data: { totalAmount, totalSupporters } = {
       results: [],
       total: 0,
       totalAmount: 0,
@@ -37,18 +35,8 @@ function Thermometer({
 
   const percent = Math.min(totalAmount / goal, 100);
   return (
-    <div>
-      <div
-        className={css`
-          position: relative;
-          width: 100%;
-          height: 2.5rem;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          margin-bottom: 0.5rem;
-        `}
-      >
+    <div className="text-sm md:text-base">
+      <div className="flex items-center justify-between mb-1 relative w-full">
         <div
           className={css`
             display: flex;
@@ -56,11 +44,7 @@ function Thermometer({
             align-items: flex-end;
           `}
         >
-          <span
-            className={css`
-              font-size: 1rem;
-            `}
-          >
+          <span>
             <Trans
               t={t}
               i18nKey="raisedAmount"
@@ -75,13 +59,7 @@ function Thermometer({
               }}
             />
           </span>
-          <span
-            className={css`
-              margin-top: 0.35rem;
-              font-style: italic;
-              margin-left: 0.25rem;
-            `}
-          >
+          <span className="ml-2 mt-2 text-gray-500 hidden md:inline">
             <Trans
               t={t}
               i18nKey="fromXSupporters"
@@ -91,22 +69,8 @@ function Thermometer({
             />
           </span>
         </div>
-        <div
-          className={css`
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            gap: 0.76rem;
-            width: 50%;
-          `}
-        >
-          <div
-            className={css`
-              margin-left: 0.5rem;
-              font-size: 1rem;
-              margin-top: 0.35rem;
-            `}
-          >
+        <div className="flex items-center justify-end gap-1 w-2/3 md:w-1/2 lg:w-1/3">
+          <div className="">
             <Trans
               t={t}
               i18nKey="ofGoal"

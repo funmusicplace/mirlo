@@ -9,6 +9,7 @@ import {
   QUERY_KEY_TRACK_GROUPS,
   QUERY_KEY_SALES,
   queryKeyIncludes,
+  QUERY_KEY_AUTH,
 } from "./queryKeys";
 
 export type TrackGroupQueryOptions = {
@@ -143,6 +144,30 @@ export function useUpdateTrackGroupMutation() {
     async onSuccess() {
       await client.invalidateQueries({
         predicate: (query) => queryKeyIncludes(query, QUERY_KEY_TRACK_GROUPS),
+      });
+    },
+  });
+}
+
+async function updateTrackGroupPledge(opts: {
+  trackGroupId: number;
+  amount: number;
+}) {
+  await api.put(`v1/trackGroups/${opts.trackGroupId}/changePledge`, {
+    amount: opts.amount,
+  });
+}
+
+export function useUpdateTrackGroupPledgeMutation() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: updateTrackGroupPledge,
+    async onSuccess() {
+      await client.invalidateQueries({
+        predicate: (query) =>
+          queryKeyIncludes(query, QUERY_KEY_TRACK_GROUPS) ||
+          queryKeyIncludes(query, QUERY_KEY_AUTH) ||
+          queryKeyIncludes(query, QUERY_KEY_SALES),
       });
     },
   });

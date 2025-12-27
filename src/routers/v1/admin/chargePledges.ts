@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response } from "express";
 import { userAuthenticated, userHasPermission } from "../../../auth/passport";
-import { getSiteSettings } from "../../../utils/settings";
 import prisma from "@mirlo/prisma";
 import { chargePledgePayments } from "../../../utils/stripe";
 
@@ -20,7 +19,7 @@ export default function () {
         },
         include: {
           user: true,
-          trackGroup: true,
+          trackGroup: { include: { artist: { include: { user: true } } } },
         },
       });
 

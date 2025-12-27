@@ -1,42 +1,122 @@
 import { css } from "@emotion/css";
 import Confetti from "components/common/Confetti";
+import Modal from "components/common/Modal";
 import { moneyDisplay } from "components/common/Money";
 import Tooltip from "components/common/Tooltip";
 import React from "react";
 import { useTranslation } from "react-i18next";
+import PaymentInputElement from "./PaymentInputElement";
+import { FormProvider, useForm } from "react-hook-form";
+import FormComponent from "components/common/FormComponent";
+import Button from "components/common/Button";
+import api from "services/api";
+import { useSnackbar } from "state/SnackbarContext";
+import { useUpdateTrackGroupPledgeMutation } from "queries";
+
+interface FormData {
+  chosenPrice: string;
+  userEmail: string;
+  message?: string;
+  consentToStoreData: boolean;
+}
 
 const BackingThisProject: React.FC<{
   amount: number;
   currency: string;
   collapse?: boolean;
-}> = ({ amount, collapse, currency }) => {
+  trackGroup: TrackGroup;
+}> = ({ amount, collapse, currency, trackGroup }) => {
+  const [isChangingPledge, setIsChangingPledge] = React.useState(false);
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
-  return (
-    <Tooltip hoverText={t("youWillBeChargedWhenItsFullyFunded")}>
-      <div
-        className={css`
-          margin-left: 0.5rem;
-          font-size: 1rem;
-          margin-top: 0.35rem;
-          display: flex;
-          align-items: center;
-          svg {
-            width: 40px;
-            margin-top: -0.5rem;
-          }
-        `}
-      >
-        <Confetti />
+  const minPrice = trackGroup?.minPrice;
+  const snackbar = useSnackbar();
+  const { mutateAsync: updatePledge } = useUpdateTrackGroupPledgeMutation();
 
-        {!collapse && (
-          <span>
-            {t("backingThisProjectFor", {
-              amount: moneyDisplay({ amount: amount / 100, currency }),
-            })}
-          </span>
-        )}
-      </div>
-    </Tooltip>
+  const [isSavingPledge, setIsSavingPledge] = React.useState(false);
+
+  const methods = useForm<FormData>({
+    defaultValues: {
+      chosenPrice: `${minPrice ? minPrice / 100 : ""}`,
+    },
+    reValidateMode: "onChange",
+  });
+
+  const { setValue } = methods;
+
+  if (!trackGroup) {
+    return null;
+  }
+
+  const onUpdatePledge = async (data: FormData) => {
+    const newPledgeAmount = Number(data.chosenPrice) * 100;
+    if (isFinite(newPledgeAmount) && newPledgeAmount > 0) {
+      setIsSavingPledge(true);
+
+      try {
+        const response = await updatePledge({
+          trackGroupId: trackGroup.id,
+          amount: newPledgeAmount,
+        });
+        setIsChangingPledge(false);
+        setValue("chosenPrice", data.chosenPrice);
+        snackbar(t("pledgeUpdatedSuccessfully"), { type: "success" });
+      } catch (e) {
+        console.error("Error updating pledge:", e);
+      } finally {
+        setIsSavingPledge(false);
+      }
+    }
+  };
+
+  return (
+    <>
+      <Modal
+        open={isChangingPledge}
+        onClose={() => setIsChangingPledge(false)}
+        size="small"
+        title={t("changePledge")}
+      >
+        <FormProvider {...methods}>
+          <form onSubmit={methods.handleSubmit(onUpdatePledge)}>
+            <FormComponent>
+              <PaymentInputElement
+                currency={trackGroup.currency}
+                platformPercent={trackGroup.platformPercent}
+                minPrice={trackGroup.minPrice}
+                artistName={trackGroup.artist?.name}
+              />
+            </FormComponent>
+            <Button type="submit" isLoading={isSavingPledge}>
+              {t("updatePledge")}
+            </Button>
+          </form>
+        </FormProvider>
+      </Modal>
+      <Tooltip hoverText={t("youWillBeChargedWhenItsFullyFunded")}>
+        <div
+          className={css`
+            margin-left: 0.5rem;
+            display: flex;
+            align-items: center;
+            svg {
+              width: 40px;
+              margin-top: -0.5rem;
+            }
+          `}
+          onClick={() => setIsChangingPledge(true)}
+        >
+          <Confetti />
+
+          {!collapse && (
+            <span>
+              {t("backingThisProjectFor", {
+                amount: moneyDisplay({ amount: amount / 100, currency }),
+              })}
+            </span>
+          )}
+        </div>
+      </Tooltip>
+    </>
   );
 };
 
