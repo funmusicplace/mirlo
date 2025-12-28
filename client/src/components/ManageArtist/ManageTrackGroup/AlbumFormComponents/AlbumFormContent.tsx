@@ -150,7 +150,7 @@ const AlbumFormContent: React.FC<{
         </div>
       </FormSection>
       <FeatureFlag featureFlag="fundraiser">
-        <FundraisingGoal trackGroup={existingObject} />
+        <FundraisingGoal trackGroupId={existingObject.id} />
       </FeatureFlag>
     </>
   );

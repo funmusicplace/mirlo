@@ -7,8 +7,8 @@ const PlatformPercent: React.FC<{
   percent: number;
   chosenPrice?: string | number;
   currency: string;
-  artist?: Pick<Artist, "name">;
-}> = ({ percent, chosenPrice, currency = "USD", artist }) => {
+  artistName?: string;
+}> = ({ percent, chosenPrice, currency = "USD", artistName }) => {
   const chosenNumber =
     chosenPrice && isFinite(+chosenPrice) ? Number(chosenPrice) : null;
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
@@ -30,7 +30,7 @@ const PlatformPercent: React.FC<{
     >
       {t("platformPercent", {
         percent: (100 - percent).toFixed(),
-        artistName: artist?.name ?? "the artist",
+        artistName: artistName ?? "the artist",
         money: moneyDisplay({ amount, currency }),
         mirloCut: moneyDisplay({
           amount: Number(chosenPrice) - amount,

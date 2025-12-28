@@ -8,7 +8,6 @@ import {
 } from "@stripe/react-stripe-js";
 
 import SetupIntentForm from "./SetupIntentForm";
-import { l } from "vite/dist/node/types.d-aGj9QkWt";
 
 interface FormData {
   chosenPrice: string;
