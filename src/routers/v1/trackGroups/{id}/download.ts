@@ -18,7 +18,6 @@ import {
 } from "../../../../utils/minio";
 import { startGeneratingZip } from "../../../../queues/album-queue";
 import filenamify from "filenamify";
-import { cleanHeaderValue } from "../../../../utils/validate-http-headers";
 import { AppError } from "../../../../utils/error";
 
 export default function () {
