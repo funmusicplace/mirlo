@@ -594,8 +594,8 @@ model UserTrackGroupPurchase {
   singleDownloadToken String?
   message             String?
   userTransactionId   String?
-  transaction         UserTransaction? @relation(fields: [userTransactionId], references: [id])
   createdAt           DateTime         @default(now())
+  transaction         UserTransaction? @relation(fields: [userTransactionId], references: [id])
 
   @@unique([userId, trackGroupId])
 }
@@ -615,6 +615,7 @@ model UserTransaction {
   merchPurchases      MerchPurchase[]
   trackPurchases      UserTrackPurchase[]
   tips                UserArtistTip[]
+  associatedPledges   TrackGroupPledge?
 }
 
 model UserTrackPurchase {
@@ -715,18 +716,20 @@ model TrackGroupCover {
 }
 
 model TrackGroupPledge {
-  id                  Int        @id @default(autoincrement())
-  trackGroup          TrackGroup @relation(fields: [trackGroupId], references: [id])
-  trackGroupId        Int
-  userId              Int
-  user                User       @relation(fields: [userId], references: [id])
-  amount              Int
-  createdAt           DateTime   @default(now())
-  updatedAt           DateTime   @updatedAt
-  stripeSetupIntentId String
-  message             String?
-  paidAt              DateTime?
-  cancelledAt         DateTime?
+  id                      Int              @id @default(autoincrement())
+  trackGroup              TrackGroup       @relation(fields: [trackGroupId], references: [id])
+  trackGroupId            Int
+  userId                  Int
+  user                    User             @relation(fields: [userId], references: [id])
+  amount                  Int
+  createdAt               DateTime         @default(now())
+  updatedAt               DateTime         @updatedAt
+  stripeSetupIntentId     String
+  message                 String?
+  paidAt                  DateTime?
+  cancelledAt             DateTime?
+  associatedTransaction   UserTransaction? @relation(fields: [associatedTransactionId], references: [id])
+  associatedTransactionId String?          @unique
 
   @@unique([userId, trackGroupId])
 }

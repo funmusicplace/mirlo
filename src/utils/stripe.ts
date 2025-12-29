@@ -1265,6 +1265,38 @@ export const chargePledgePayments = async (
         logger.info(
           `Created payment intent ${paymentIntent.id} for pledge ${trackGroupPledge.id}`
         );
+
+        const transaction = await prisma.userTransaction.create({
+          data: {
+            userId: trackGroupPledge.userId,
+            amount: trackGroupPledge.amount,
+            currency: trackGroupPledge.trackGroup.currency ?? "usd",
+            createdAt: new Date(),
+          },
+        });
+
+        await prisma.trackGroupPledge.update({
+          where: {
+            id: trackGroupPledge.id,
+          },
+          data: {
+            paidAt: new Date(),
+            associatedTransactionId: transaction.id,
+          },
+        });
+
+        await prisma.userTrackGroupPurchase.create({
+          data: {
+            userId: trackGroupPledge.userId,
+            trackGroupId: trackGroupPledge.trackGroupId,
+            createdAt: new Date(),
+            userTransactionId: transaction.id,
+          },
+        });
+
+        logger.info(
+          `Updated pledge ${trackGroupPledge.id} as paid and created transaction ${transaction.id}`
+        );
       }
     }
   } catch (err) {

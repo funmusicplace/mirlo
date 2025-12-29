@@ -45,6 +45,23 @@ export default function () {
           },
         });
 
+        const transaction = await prisma.userTransaction.create({
+          data: {
+            userId: pledge.userId,
+            amount: pledge.amount,
+            currency: pledge.trackGroup.currency ?? "usd",
+            createdAt: new Date(),
+          },
+        });
+        const purchase = await prisma.userTrackGroupPurchase.create({
+          data: {
+            userId: pledge.userId,
+            trackGroupId: pledge.trackGroupId,
+            createdAt: new Date(),
+            userTransactionId: transaction.id,
+          },
+        });
+
         await sendMailQueue.add("send-mail", {
           template: "fundraiser-success",
           message: {
