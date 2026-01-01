@@ -21,17 +21,11 @@ const Fundraiser: React.FC = () => {
   if (!trackGroup.fundraisingGoal) return null;
 
   return (
-    <div
-      className={css`
-        padding: 2rem 0;
-      `}
-    >
-      <Thermometer
-        goal={trackGroup.fundraisingGoal / 100}
-        artist={artist}
-        trackGroup={trackGroup}
-      />
-    </div>
+    <Thermometer
+      goal={trackGroup.fundraisingGoal / 100}
+      artist={artist}
+      trackGroup={trackGroup}
+    />
   );
 };
 

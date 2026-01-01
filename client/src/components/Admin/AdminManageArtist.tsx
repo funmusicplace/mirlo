@@ -1,27 +1,22 @@
 import { css } from "@emotion/css";
 import Button from "components/common/Button";
-import { SelectEl } from "components/common/Select";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import Table from "components/common/Table";
 import { Toggle } from "components/common/Toggle";
 import React from "react";
-import { FaArrowCircleLeft, FaCheck, FaTimes } from "react-icons/fa";
+import { FaArrowCircleLeft } from "react-icons/fa";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
-import { getArtistUrl } from "utils/artist";
 
 const AdminManageArtist = () => {
   const { id } = useParams();
-  console.log("getting artist", id);
   const [artist, setArtist] = React.useState<ArtistFromAdmin>();
-  const [featureFlags, setFeatureFlags] = React.useState<string[]>([]);
   const snackbar = useSnackbar();
   const navigate = useNavigate();
 
   const callback = React.useCallback(async () => {
     const response = await api.get<ArtistFromAdmin>(`admin/artists/${id}`);
-    console.log("response", response);
     setArtist(response.result);
   }, [id]);
 

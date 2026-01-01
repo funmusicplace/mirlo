@@ -1,14 +1,12 @@
 import styled from "@emotion/styled";
 import React from "react";
 import { useGlobalStateContext } from "state/GlobalState";
-import api from "services/api";
 
 import PlayControlButton from "./PlayControlButton";
 import { useAuthContext } from "state/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { queryArtist } from "queries";
-import useErrorHandler from "services/useErrorHandler";
 
 const Wrapper = styled.div<{ colors?: ArtistColors }>`
   position: relative;
@@ -51,13 +49,20 @@ const ClickToPlayTracks: React.FC<{
   className?: string;
 }> = ({ trackIds, className }) => {
   const {
-    state: { playing, playerQueueIds, currentlyPlayingIndex },
+    state: {
+      playing,
+      playerQueueIds,
+      currentlyPlayingIndex,
+      tracksPlayableTracker,
+    },
     dispatch,
   } = useGlobalStateContext();
   const { user } = useAuthContext();
-  const [localTrackIds, setLocalTrackIds] = React.useState<number[]>([]);
   const params = useParams();
-  const errorHandler = useErrorHandler();
+
+  const playableTracks = React.useMemo(() => {
+    return trackIds?.filter((id) => tracksPlayableTracker?.[id]) ?? [];
+  }, [tracksPlayableTracker, trackIds]);
 
   const { data: artist } = useQuery(
     queryArtist({ artistSlug: params.artistId ?? "" })
@@ -66,35 +71,26 @@ const ClickToPlayTracks: React.FC<{
   const userId = user?.id;
 
   React.useEffect(() => {
-    const callback = async () => {
-      try {
-        const params = new URLSearchParams();
-        for (const id of trackIds) {
-          params.append("trackIds[]", id.toString());
-        }
-        const { results } = await api.getMany<number>(
-          `playable?${params.toString()}`
-        );
-
-        setLocalTrackIds(results);
-      } catch (e) {
-        errorHandler(e, true);
-      }
-    };
-    callback();
-  }, [trackIds, userId]);
+    if (trackIds?.length) {
+      dispatch({
+        type: "addToPlayableTracksTracker",
+        trackIds,
+        playable: false,
+      });
+    }
+  }, [trackIds, dispatch]);
 
   const onClickPlay = React.useCallback(async () => {
     dispatch({
       type: "startPlayingIds",
-      playerQueueIds: localTrackIds,
+      playerQueueIds: playableTracks,
     });
-  }, [dispatch, localTrackIds]);
+  }, [dispatch, playableTracks]);
 
   const currentlyPlaying =
     playing &&
     currentlyPlayingIndex !== undefined &&
-    localTrackIds.includes(playerQueueIds[currentlyPlayingIndex]);
+    playableTracks.includes(playerQueueIds[currentlyPlayingIndex]);
 
   if (!artist) {
     return null;
@@ -105,7 +101,7 @@ const ClickToPlayTracks: React.FC<{
       <PlayControlButton
         onPlay={onClickPlay}
         isPlaying={currentlyPlaying}
-        disabled={localTrackIds.length === 0}
+        disabled={playableTracks.length === 0}
         onArtistPage
       />
     </Wrapper>

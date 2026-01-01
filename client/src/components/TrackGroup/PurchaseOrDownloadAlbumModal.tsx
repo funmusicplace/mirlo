@@ -59,10 +59,7 @@ const PurchaseOrDownloadAlbum: React.FC<{
     (p) => p.trackGroupId === trackGroup.id
   );
 
-  console.log("pledges", user?.pledges, hasPledge, trackGroup.isAllOrNothing);
-
   if (trackGroup.isAllOrNothing && hasPledge) {
-    console.log("showing backing");
     return (
       <BackingThisProject
         amount={hasPledge.amount}

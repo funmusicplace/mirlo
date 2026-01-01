@@ -22,7 +22,9 @@ export default function () {
           },
           deletedAt: null,
         },
-        include: {
+        select: {
+          id: true,
+          isPreview: true,
           ...(loggedInUser
             ? {
                 userTrackPurchases: {
@@ -33,8 +35,12 @@ export default function () {
               }
             : {}),
           trackGroup: {
-            include: {
-              artist: true,
+            select: {
+              artist: {
+                select: {
+                  userId: true,
+                },
+              },
               ...(loggedInUser
                 ? {
                     userTrackGroupPurchases: {

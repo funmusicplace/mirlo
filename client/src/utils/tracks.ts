@@ -1,4 +1,5 @@
 import produce from "immer";
+import api from "services/api";
 
 export const determineNewTrackOrder = produce(
   (oldTracks: Track[], droppedInId: number, draggingTrackId: number) => {
@@ -11,6 +12,17 @@ export const determineNewTrackOrder = produce(
     return oldTracks;
   }
 );
+
+export const sendToPlayableEndpoint = async (trackIds: number[]) => {
+  const params = new URLSearchParams();
+  for (const id of trackIds ?? []) {
+    params.append("trackIds[]", id.toString());
+  }
+  const { results } = await api.getMany<number>(
+    `playable?${params.toString()}`
+  );
+  return results;
+};
 
 export const isEqualDurations = (n1: number, n2: number) => {
   return Math.abs(n1 - n2) < 0.00001;

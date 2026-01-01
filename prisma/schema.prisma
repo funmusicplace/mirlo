@@ -696,6 +696,7 @@ model TrackGroup {
   paymentToUser                   User?                           @relation(fields: [paymentToUserId], references: [id])
   fundraisingGoal                 Int? // in cents
   fundraisingEndDate              DateTime?
+  // Is the fundraiser all or nothing
   isAllOrNothing                  Boolean                         @default(false)
   pledges                         TrackGroupPledge[]
   downloadableContent             TrackGroupDownloadableContent[]
