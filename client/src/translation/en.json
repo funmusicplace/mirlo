@@ -855,7 +855,7 @@
     "announcement": "Write an announcement:",
     "editAnnouncement": "Edit announcement",
     "close": "Close",
-    "announcementDescription": "This will appear at the top of the Artist page in a highlighted box. Leave it blank if you don't want to use it. You can use markdown in it.",
+    "announcementDescription": "This announcement will appear at the top of the Artist page in a highlighted box. Leave it blank to not display anything. You can format it with Markdown syntax.",
     "areYouSureDelete": "Are your sure you want to delete this profile page?",
     "whatLabelsisThisArtistPartOf": "What label is this artist a part of?",
     "terminationDanger": " Artist page termination ",
