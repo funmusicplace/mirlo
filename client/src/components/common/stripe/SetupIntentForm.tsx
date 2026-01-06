@@ -77,7 +77,6 @@ const SetupIntentForm: React.FC<{
   };
 
   const handleOnChange = (e: StripePaymentElementChangeEvent) => {
-    console.log("e", e);
     if (e.complete) {
       setIsFormComplete(true);
     }

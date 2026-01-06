@@ -82,8 +82,6 @@ const SavingInput: React.FC<{
         value = value ? value * 100 : undefined;
       }
 
-      console.log("saving value", value);
-
       if (valueTransform) {
         value = valueTransform(value);
       }

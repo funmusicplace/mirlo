@@ -34,6 +34,18 @@ export default function () {
       }
 
       for (const pledge of pledgesForTrackGroups) {
+        // If the user already has a purchase for this track group, skip charging them
+        // likely a weird edge case.
+        const purchaseExists = await prisma.userTrackGroupPurchase.findFirst({
+          where: {
+            userId: pledge.userId,
+            trackGroupId: pledge.trackGroupId,
+          },
+        });
+
+        if (purchaseExists) {
+          continue;
+        }
         await chargePledgePayments(pledge);
 
         await prisma.trackGroupPledge.update({
@@ -53,6 +65,7 @@ export default function () {
             createdAt: new Date(),
           },
         });
+
         const purchase = await prisma.userTrackGroupPurchase.create({
           data: {
             userId: pledge.userId,

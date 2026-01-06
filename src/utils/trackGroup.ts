@@ -20,7 +20,6 @@ import {
   removeObjectsFromBucket,
   getReadStream,
   finalArtistAvatarBucket,
-  downloadableContentBucket,
 } from "./minio";
 import { addSizesToImage, findArtistIdForURLSlug } from "./artist";
 import { logger } from "../logger";

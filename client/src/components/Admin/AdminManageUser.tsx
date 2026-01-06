@@ -18,7 +18,6 @@ const AdminManageUser = () => {
   const [featureFlags, setFeatureFlags] = React.useState<string[]>([]);
   const snackbar = useSnackbar();
   const navigate = useNavigate();
-  console.log("user", user);
 
   const callback = React.useCallback(async () => {
     const response = await api.get<UserFromAdmin>(`admin/users/${id}`);

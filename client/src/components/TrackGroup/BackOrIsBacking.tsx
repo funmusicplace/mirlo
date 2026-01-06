@@ -1,13 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
-import { moneyDisplay } from "components/common/Money";
 import { queryUserStripeStatus } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import api from "services/api";
 import PurchaseOrDownloadAlbum from "./PurchaseOrDownloadAlbumModal";
-import { css } from "@emotion/css";
-import Confetti from "components/common/Confetti";
+
 import BackingThisProject from "./BackingThisProject";
 
 const BackOrIsBacking: React.FC<{ trackGroup: TrackGroup; artist: Artist }> = ({
@@ -59,10 +57,9 @@ const BackOrIsBacking: React.FC<{ trackGroup: TrackGroup; artist: Artist }> = ({
     artist.id,
     trackGroup.id,
     setupIntent,
+    isFetching,
     stripeAccountStatus?.stripeAccountId,
   ]);
-
-  console.log("Payment status:", paymentStatus);
 
   return (
     <>

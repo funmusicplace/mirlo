@@ -228,48 +228,44 @@ const ClickToPlay: React.FC<
   children,
 }) => {
   const {
-    state: { playing, playerQueueIds, currentlyPlayingIndex },
+    state: {
+      playing,
+      playerQueueIds,
+      currentlyPlayingIndex,
+      tracksPlayableTracker,
+    },
     dispatch,
   } = useGlobalStateContext();
 
   const { user } = useAuthContext();
 
-  const [localTrackIds, setLocalTrackIds] = React.useState<number[]>([]);
   const { t } = useTranslation("translation", { keyPrefix: "clickToPlay" });
   const errorHandler = useErrorHandler();
 
-  const detectTracksPlayable = React.useCallback(async () => {
-    try {
-      const params = new URLSearchParams();
-      for (const id of trackIds ?? []) {
-        params.append("trackIds[]", id.toString());
-      }
-      const { results } = await api.getMany<number>(
-        `playable?${params.toString()}`
-      );
-
-      setLocalTrackIds(results);
-      return results;
-    } catch (e) {
-      errorHandler(e, true);
-    }
-    return [];
-  }, [trackIds]);
+  const playableTracks = React.useMemo(() => {
+    return trackIds?.filter((id) => tracksPlayableTracker?.[id]) ?? [];
+  }, [tracksPlayableTracker, trackIds]);
 
   React.useEffect(() => {
-    detectTracksPlayable();
-  }, [trackIds]);
+    if (trackIds?.length) {
+      dispatch({
+        type: "addToPlayableTracksTracker",
+        trackIds,
+        playable: false,
+      });
+    }
+  }, [trackIds, dispatch]);
 
   const onClickPlay = React.useCallback(async () => {
     try {
       dispatch({
         type: "startPlayingIds",
-        playerQueueIds: localTrackIds,
+        playerQueueIds: playableTracks,
       });
     } catch (e) {
       errorHandler(e, true);
     }
-  }, [dispatch, localTrackIds, detectTracksPlayable]);
+  }, [dispatch, playableTracks]);
 
   const isSingleTrackGroup = !track && trackGroup.tracks?.length === 1;
 
@@ -280,7 +276,7 @@ const ClickToPlay: React.FC<
   const currentlyPlaying =
     playing &&
     currentlyPlayingIndex !== undefined &&
-    localTrackIds.includes(playerQueueIds[currentlyPlayingIndex]);
+    playableTracks.includes(playerQueueIds[currentlyPlayingIndex]);
 
   const url = linkTarget && determineItemLink(trackGroup.artist, linkTarget);
 
@@ -318,7 +314,7 @@ const ClickToPlay: React.FC<
 
             {!currentlyPlaying && (
               <PlayButton
-                disabled={localTrackIds.length === 0}
+                disabled={playableTracks.length === 0}
                 onPlay={onClickPlay}
               />
             )}
