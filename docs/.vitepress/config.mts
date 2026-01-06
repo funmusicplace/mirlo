@@ -19,12 +19,17 @@ export default defineConfig({
     i18nRouting: true,
     sidebar: [
       {
-        text: "Home",
-        link: "/",
+        text: "Features",
+        link: "/features",
       },
       {
-        text: "FAQ",
-        link: "/faq",
+        text: "How Tos",
+        link: "/how-tos",
+        items: [
+          { text: "Label Guide", link: "/how-tos/label-guide" },
+          { text: "Customizing Mirlo", link: "/how-tos/customizing-mirlo" },
+          { text: "Managing Users", link: "/how-tos/managing-users" },
+        ],
       },
       {
         text: "API",
