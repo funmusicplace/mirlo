@@ -154,7 +154,7 @@ const CustomButton = styled.button<Sizable>(
           }
 
           &:hover:not(:disabled) {
-            filter: brightness(95%) saturate(30%);
+            filter: brightness(80%) saturate(30%);
           }
         `;
         case "outlined":

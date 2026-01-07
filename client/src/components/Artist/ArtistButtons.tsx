@@ -54,13 +54,6 @@ export const ArtistButton: React.FC<
           fill: ${colors?.primary} !important;
         }
 
-        &:hover:not(:disabled) {
-          color: ${colors?.secondary} !important;
-
-          svg {
-            fill: ${colors?.secondary} !important;
-          }
-        }
       `;
       case "outlined":
       case "dashed":
