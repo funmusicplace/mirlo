@@ -4,6 +4,7 @@ import WidthContainer from "../common/WidthContainer";
 import { FaChevronRight } from "react-icons/fa";
 import LinkWithIcon from "components/common/LinkWithIcon";
 
+import { bp } from "../../constants";
 import { ButtonLink } from "components/common/Button";
 import Releases from "components/Releases";
 import { SectionHeader } from "./Home";
@@ -94,6 +95,10 @@ const HomeReleases = () => {
           gap: 1rem;
           justify-content: flex-end !important;
           margin-bottom: 4rem !important;
+
+          @media screen and (max-width: ${bp.medium}px) {
+            padding: var(--mi-side-paddings-xsmall);
+          }
         `}
       >
         <ButtonLink variant="outlined" to="/artists">

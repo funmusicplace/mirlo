@@ -16,6 +16,7 @@ import Modal from "components/common/Modal";
 import { SelectEl } from "components/common/Select";
 import FormCheckbox from "components/common/FormCheckbox";
 import FormComponent from "components/common/FormComponent";
+import { bp } from "../../constants";
 import {
   ArtistButton,
   ArtistButtonAnchor,
@@ -236,6 +237,10 @@ const ArtistFormLinks: React.FC<ArtistFormLinksProps> = ({
 
             a:last-child {
               margin-right: 0;
+            }
+
+            @media screen and (max-width: ${bp.medium}px) {
+              padding: var(--mi-side-paddings-xsmall);
             }
           `}
         >
