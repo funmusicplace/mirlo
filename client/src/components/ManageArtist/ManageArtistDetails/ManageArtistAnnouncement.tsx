@@ -37,46 +37,52 @@ const ManageArtistAnnouncement: React.FC<{
         className={css`
           width: 100%;
           margin-top: 0 !important;
-          padding: 1rem;
           font-size: 1rem;
           line-height: 1.5rem;
           position: relative;
 
-          color: ${artist.properties?.colors?.background ||
-          "var(--mi-background-color)"};
-          background-color: ${artist.properties?.colors?.primary ||
+          color: ${artist.properties?.colors?.primary ||
           "var(--mi-foreground-color)"};
-
-          > div {
-            margin-top: 0 !important;
-          }
-
-          a {
-            color: ${artist.properties?.colors?.background ||
-            "var(--mi-background-color)"};
-            text-decoration: underline;
-          }
+          background-color: ${artist.properties?.colors?.secondary ||
+          "var(--mi-secondary-color)"};
         `}
       >
-        <MarkdownContent content={artist.announcementText} />
-        {showButtons && !isOpen && (
-          <Button
-            variant="dashed"
-            size="compact"
-            onClick={() => setIsOpen(true)}
-            className={css`
-              position: absolute;
-              top: 0.75rem;
-              right: 1rem;
-              background-color: ${artist.properties?.colors?.background ||
-              "var(--mi-background-color)"} !important;
-              color: ${artist.properties?.colors?.primary ||
-              "var(--mi-foreground-color)"} !important;
-            `}
-          >
-            {t("editAnnouncement")}
-          </Button>
-        )}
+        <div
+          className={css`
+            backdrop-filter: brightness(95%) grayscale(10%);
+            padding: 1rem;
+
+            > div {
+              margin-top: 0 !important;
+            }
+
+            a {
+              color: ${artist.properties?.colors?.background ||
+              "var(--mi-background-color)"};
+              text-decoration: underline;
+            }
+          `}
+        >
+          <MarkdownContent content={artist.announcementText} />
+          {showButtons && !isOpen && (
+            <Button
+              variant="dashed"
+              size="compact"
+              onClick={() => setIsOpen(true)}
+              className={css`
+                position: absolute;
+                top: 0.75rem;
+                right: 1rem;
+                background-color: ${artist.properties?.colors?.background ||
+                "var(--mi-background-color)"} !important;
+                color: ${artist.properties?.colors?.primary ||
+                "var(--mi-foreground-color)"} !important;
+              `}
+            >
+              {t("editAnnouncement")}
+            </Button>
+          )}
+        </div>
       </div>
     );
   }
