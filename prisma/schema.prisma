@@ -537,28 +537,24 @@ model MerchOption {
 }
 
 model MerchPurchase {
-  id                   String            @id @default(uuid()) @db.Uuid
-  createdAt            DateTime          @default(now())
-  updatedAt            DateTime          @default(now()) @updatedAt
-  merch                Merch             @relation(fields: [merchId], references: [id])
-  merchId              String            @db.Uuid
-  currencyPaid         String
-  amountPaid           Int // in cents
-  platformCut          Int? // in cents
-  stripeTransactionKey String?
-  userId               Int
-  quantity             Int
-  message              String?
-  user                 User              @relation(fields: [userId], references: [id])
-  shippingAddress      Json?
-  billingAddress       Json?
-  fulfillmentStatus    FulfillmentStatus
-  options              MerchOption[]
-  trackingNumber       String?
-  trackingWebsite      String?
-  orderDetails         String? // JSON string with order details
-  transactionId        String?
-  transaction          UserTransaction?  @relation(fields: [transactionId], references: [id])
+  id                String            @id @default(uuid()) @db.Uuid
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @default(now()) @updatedAt
+  merch             Merch             @relation(fields: [merchId], references: [id])
+  merchId           String            @db.Uuid
+  userId            Int
+  quantity          Int
+  message           String?
+  user              User              @relation(fields: [userId], references: [id])
+  shippingAddress   Json?
+  billingAddress    Json?
+  fulfillmentStatus FulfillmentStatus
+  options           MerchOption[]
+  trackingNumber    String?
+  trackingWebsite   String?
+  orderDetails      String? // JSON string with order details
+  transactionId     String?
+  transaction       UserTransaction?  @relation(fields: [transactionId], references: [id])
 }
 
 enum FulfillmentStatus {
@@ -569,21 +565,17 @@ enum FulfillmentStatus {
 }
 
 model UserArtistTip {
-  userId           Int
-  user             User             @relation(fields: [userId], references: [id])
-  artistId         Int
-  artist           Artist           @relation(fields: [artistId], references: [id])
-  pricePaid        Int // in cents
-  platformCut      Int? // in cents
-  currencyPaid     String           @default("USD")
-  datePurchased    DateTime         @default(now())
-  message          String?
-  stripeSessionKey String?
-  artistTipTier    ArtistTipTier?   @relation(fields: [artistTipTierId], references: [id])
-  artistTipTierId  Int?
-  id               String           @id @default(uuid()) @db.Uuid
-  transactionId    String?
-  transaction      UserTransaction? @relation(fields: [transactionId], references: [id])
+  userId          Int
+  user            User             @relation(fields: [userId], references: [id])
+  artistId        Int
+  artist          Artist           @relation(fields: [artistId], references: [id])
+  datePurchased   DateTime         @default(now())
+  message         String?
+  artistTipTier   ArtistTipTier?   @relation(fields: [artistTipTierId], references: [id])
+  artistTipTierId Int?
+  id              String           @id @default(uuid()) @db.Uuid
+  transactionId   String?
+  transaction     UserTransaction? @relation(fields: [transactionId], references: [id])
 }
 
 model UserTrackGroupPurchase {
