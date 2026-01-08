@@ -15,28 +15,36 @@ export default defineConfig({
     nav: [
       { text: "Home", link: "/" },
       { text: "FAQ", link: "/faq" },
+      { text: "Features", link: "/features" },
     ],
     i18nRouting: true,
     sidebar: [
       {
         text: "Features",
         link: "/features",
+        items: [
+          { text: "For artists", link: "/features/for-artists" },
+          { text: "For labels", link: "/features/for-labels" },
+        ],
       },
+      { text: "FAQ", link: "/faq" },
       {
         text: "How Tos",
         link: "/how-tos",
         items: [
-          { text: "Label Guide", link: "/how-tos/label-guide" },
-          { text: "Customizing Mirlo", link: "/how-tos/customizing-mirlo" },
-          { text: "Managing Users", link: "/how-tos/managing-users" },
+          { text: "Label Guide", link: "/how-tos/label-accounts" },
+          {
+            text: "Customizing your profile",
+            link: "/how-tos/customizing-mirlo",
+          },
         ],
       },
       {
-        text: "API",
+        text: "For Developers",
         link: "/api",
       },
       {
-        text: "Maintaining Mirlo",
+        text: "For Mirlo Maintainers",
         link: "/maintaining",
         items: [
           {
