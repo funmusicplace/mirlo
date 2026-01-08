@@ -148,7 +148,6 @@ describe("artists/{id}/supporters", () => {
     await prisma.userArtistTip.create({
       data: {
         userId: user.id,
-        pricePaid: 3000,
         artistId: artist.id,
         transactionId: transactionTip.id,
       },

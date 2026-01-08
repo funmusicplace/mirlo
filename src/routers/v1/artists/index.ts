@@ -86,9 +86,9 @@ export default function () {
       if (format === "rss") {
         const feed = await turnItemsIntoRSS(
           {
-            name: "All Mirlo Releases",
-            apiEndpoint: "trackGroups",
-            clientUrl: "/releases",
+            name: "All Mirlo Artists",
+            apiEndpoint: "artists",
+            clientUrl: "/artists",
           },
           artists
         );

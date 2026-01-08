@@ -8,7 +8,7 @@ hero:
   tagline: 🐦‍⬛
   actions:
     - theme: brand
-      text: About Mirlo
+      text: Mirlo features
       link: /features
     - theme: alt
       text: FAQ

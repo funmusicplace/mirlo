@@ -84,14 +84,14 @@ describe("handleArtistMerchPurchase", () => {
     assert.equal(data0.message.to, "follower@follower.com");
     const locals = data0.locals as ArtistMerchPurchaseReceiptEmailType;
     assert.equal(locals.purchases[0].merchId, merch.id);
-    assert.equal(locals.purchases[0].amountPaid, 0);
+    assert.equal(locals.purchases[0].transaction.amount, 0);
 
     const data1 = stub.getCall(1).args[0].data;
     assert.equal(data1.template, "tell-artist-about-merch-purchase");
     assert.equal(data1.message.to, artistUser.email);
     const locals1 = data1.locals as TellArtistAboutMerchPurchaseEmailType;
     assert.equal(locals1.purchases[0].merchId, merch.id);
-    assert.equal(locals1.purchases[0].amountPaid, 0);
+    assert.equal(locals1.purchases[0].transaction.amount, 0);
   });
 
   it("should reduce quantity from merch.quantityRemaining", async () => {
@@ -286,7 +286,7 @@ describe("handleArtistMerchPurchase", () => {
     assert.equal(data0.message.to, "follower@follower.com");
     const locals = data0.locals as ArtistMerchPurchaseReceiptEmailType;
     assert.equal(locals.purchases[0].merchId, merch.id);
-    assert.equal(locals.purchases[0].amountPaid, 2000);
+    assert.equal(locals.purchases[0].transaction.amount, 2000);
     assert.equal(locals.purchases[0].artistCut, 1800);
     assert.equal(locals.purchases[0].platformCut, 200);
 
@@ -295,7 +295,7 @@ describe("handleArtistMerchPurchase", () => {
     assert.equal(data1.message.to, artistUser.email);
     const locals1 = data1.locals as TellArtistAboutMerchPurchaseEmailType;
     assert.equal(locals1.purchases[0].merchId, merch.id);
-    assert.equal(locals1.purchases[0].amountPaid, 2000);
+    assert.equal(locals1.purchases[0].transaction.amount, 2000);
   });
 
   it("should add a related trackgroup to the users' collection", async () => {
@@ -495,7 +495,7 @@ describe("handleArtistMerchPurchase", () => {
     assert.equal(data0.message.to, "follower@follower.com");
     const locals = data0.locals as ArtistMerchPurchaseReceiptEmailType;
     assert.equal(locals.purchases[0].merchId, merch.id);
-    assert.equal(locals.purchases[0].amountPaid, 2000);
+    assert.equal(locals.purchases[0].transaction.amount, 2000);
     assert.equal(locals.purchases[0].artistCut, 1800);
     assert.equal(locals.purchases[0].platformCut, 200);
     assert.equal(locals.purchases[0].options[0].name, "small");
@@ -506,7 +506,7 @@ describe("handleArtistMerchPurchase", () => {
     assert.equal(data1.message.to, artistUser.email);
     const locals1 = data1.locals as TellArtistAboutMerchPurchaseEmailType;
     assert.equal(locals1.purchases[0].merchId, merch.id);
-    assert.equal(locals1.purchases[0].amountPaid, 2000);
+    assert.equal(locals1.purchases[0].transaction.amount, 2000);
 
     const purchase = await prisma.merchPurchase.findFirst({
       where: { userId: purchaser.id },

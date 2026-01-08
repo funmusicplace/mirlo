@@ -488,8 +488,6 @@ interface MerchPurchase {
   createdAt: string;
   updatedAt: string;
   quantity: number;
-  currencyPaid: string;
-  amountPaid: number;
   trackingNumber?: string;
   trackingWebsite?: string;
   options?: MerchOption[];

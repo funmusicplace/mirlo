@@ -10,19 +10,19 @@ import {
   createTrack,
   createTrackGroup,
 } from "../../utils";
+import Parser from "rss-parser";
 
 const baseURL = `${process.env.API_DOMAIN}/v1/`;
 
 describe("artists", () => {
+  beforeEach(async () => {
+    try {
+      await clearTables();
+    } catch (e) {
+      console.error(e);
+    }
+  });
   describe("/", () => {
-    beforeEach(async () => {
-      try {
-        await clearTables();
-      } catch (e) {
-        console.error(e);
-      }
-    });
-
     it("should GET / with no artists in database", async () => {
       const response = await request(baseURL)
         .get("artists/")
@@ -70,6 +70,34 @@ describe("artists", () => {
         .set("Accept", "application/json");
 
       assert.equal(response.body.results.length, 0);
+    });
+  });
+  describe("RSS", () => {
+    it("should GET / in RSS format", async () => {
+      const user = await prisma.user.create({
+        data: {
+          email: "test@test.com",
+        },
+      });
+      const artist = await createArtist(user.id);
+
+      const trackGroup = await createTrackGroup(artist.id);
+
+      await createTrack(trackGroup.id);
+
+      const response = await request(baseURL).get("artists?format=rss");
+
+      assert(response.statusCode === 200);
+      let parser = new Parser();
+
+      const obj = await parser.parseString(response.text);
+      assert.equal(
+        obj.feedUrl,
+        `${process.env.API_DOMAIN}/v1/artists?format=rss`
+      );
+      assert.equal(obj.title, "All Mirlo Artists Feed");
+      assert.equal(obj.items.length, 1);
+      assert.equal(obj.items[0].title, `${artist.name}`);
     });
   });
 });

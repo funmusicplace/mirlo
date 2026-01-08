@@ -77,8 +77,6 @@ describe("users/{userId}/purchases", () => {
         data: {
           merchId: merch.id,
           userId: purchaser.id,
-          amountPaid: 10,
-          currencyPaid: "usd",
           quantity: 1,
           fulfillmentStatus: "NO_PROGRESS",
           transactionId: merchTransaction.id,
