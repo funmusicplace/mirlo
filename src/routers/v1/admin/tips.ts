@@ -46,11 +46,13 @@ export default function () {
       }
 
       if (pricePaid && pricePaid === "paid") {
-        where.pricePaid = {
-          gt: 0,
+        where.transaction = {
+          amount: { gt: 0 },
         };
       } else if (pricePaid && pricePaid === "free") {
-        where.pricePaid = 0;
+        where.transaction = {
+          amount: 0,
+        };
       }
 
       const itemCount = await prisma.userArtistTip.count({ where });

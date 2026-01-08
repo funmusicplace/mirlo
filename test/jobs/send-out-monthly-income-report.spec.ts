@@ -119,7 +119,6 @@ describe("send-out-monthly-income-report", () => {
 
     const tip = await prisma.userArtistTip.create({
       data: {
-        pricePaid: 7,
         datePurchased: faker.date.recent({
           days: 27,
           refDate: new Date(new Date().setDate(1)),
@@ -137,10 +136,7 @@ describe("send-out-monthly-income-report", () => {
           connect: { id: tip.id },
         },
         amount: 7,
-        createdAt: faker.date.recent({
-          days: 27,
-          refDate: new Date(new Date().setDate(1)),
-        }),
+        createdAt: tip.datePurchased,
       },
     });
 
@@ -426,7 +422,6 @@ describe("send-out-monthly-income-report", () => {
 
     const tip1 = await prisma.userArtistTip.create({
       data: {
-        pricePaid: 7,
         datePurchased: tip1date,
         userId: followerUser.id,
         artistId: artist.id,
@@ -435,7 +430,6 @@ describe("send-out-monthly-income-report", () => {
 
     const tip2 = await prisma.userArtistTip.create({
       data: {
-        pricePaid: 3,
         datePurchased: tip2date,
         userId: followerUser.id,
         artistId: artist2.id,

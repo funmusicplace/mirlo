@@ -6,7 +6,6 @@ import { logger } from "../logger";
 import sendMail from "../jobs/send-mail";
 import { registerPurchase, registerTrackPurchase } from "./trackGroup";
 import { registerSubscription } from "./subscriptionTier";
-import { getSiteSettings } from "./settings";
 import { Job } from "bullmq";
 import stripe, { calculateAppFee, OPTION_JOINER } from "./stripe";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
@@ -611,11 +610,7 @@ export const handleArtistGift = async (
       data: {
         userId,
         artistId,
-        pricePaid: session?.amount_total ?? 0,
-        currencyPaid: session?.currency ?? "USD",
-        stripeSessionKey: session?.id ?? null,
         message: session?.metadata?.message ?? null,
-        platformCut: applicationFee ?? null,
         transactionId: transaction.id,
       },
     });
@@ -654,9 +649,11 @@ export type ArtistMerchPurchaseReceiptEmailType = {
     merch: {
       title: string;
     };
+    transaction: {
+      amount: number;
+      currency: string;
+    };
     quantity: string;
-    currencyPaid: string;
-    amountPaid: number;
   }[];
 };
 
@@ -668,9 +665,12 @@ export type TellArtistAboutMerchPurchaseEmailType = {
     merch: {
       title: string;
     };
+    transaction: {
+      amount: number;
+      currency: string;
+    };
+    options: MerchOption[];
     quantity: string;
-    currencyPaid: string;
-    amountPaid: number;
   }[];
 };
 
@@ -772,9 +772,6 @@ export const handleArtistMerchPurchase = async (
                 data: {
                   userId,
                   merchId: merchProduct.id,
-                  amountPaid: item.amount_total ?? 0,
-                  currencyPaid: item.currency ?? "USD",
-                  stripeTransactionKey: session?.id ?? null,
                   fulfillmentStatus: "NO_PROGRESS",
                   message: session?.metadata?.message ?? null,
                   shippingAddress: {
@@ -783,7 +780,6 @@ export const handleArtistMerchPurchase = async (
                     phone: session?.shipping_details?.phone,
                   },
                   billingAddress: session?.customer_details?.address,
-                  platformCut: applicationFee ?? null,
                   quantity: item.quantity ?? 1,
                   transactionId: transaction.id,
                   options: {
@@ -847,26 +843,34 @@ export const handleArtistMerchPurchase = async (
                   })
                 );
               }
-              const merchPurchase = await prisma.merchPurchase.findFirst({
-                where: {
-                  id: createdMerchPurchase.id,
-                },
-                include: {
-                  merch: {
-                    include: { artist: { include: { user: true } } },
+              const refreshedMerchPurchase =
+                await prisma.merchPurchase.findFirst({
+                  where: {
+                    id: createdMerchPurchase.id,
                   },
-                  options: true,
-                  transaction: true,
-                },
-              });
+                  include: {
+                    merch: {
+                      include: { artist: { include: { user: true } } },
+                    },
+                    options: true,
+                    transaction: true,
+                  },
+                });
+
+              if (!refreshedMerchPurchase?.transaction) {
+                return null;
+              }
+
               const platformCut = await calculateAppFee(
-                createdMerchPurchase.amountPaid,
-                createdMerchPurchase.currencyPaid
+                refreshedMerchPurchase.transaction.amount,
+                refreshedMerchPurchase.transaction.currency
               );
 
               return {
-                ...merchPurchase,
-                artistCut: (merchPurchase?.amountPaid ?? 0) - platformCut,
+                ...refreshedMerchPurchase,
+                artistCut:
+                  (refreshedMerchPurchase?.transaction.amount ?? 0) -
+                  platformCut,
                 platformCut,
               };
             }
