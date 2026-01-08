@@ -18,8 +18,11 @@ export const corsCheck = async (...args: [Request, Response, NextFunction]) => {
       req.headers["sec-fetch-site"] === "same-site" ||
       req.headers["sec-fetch-site"] === "same-origin";
 
+    const isHealthCheck = req.path === "/health" && req.headers["health-check"];
+    const isRSSFormat = req.query?.format === "rss";
+
     let clients: Client[] = [];
-    if ((req.path === "/health" && req.headers["health-check"]) || isTest) {
+    if (isHealthCheck || isTest || isRSSFormat) {
       // do nothing
     } else {
       const isAPIEndpointPrivate =

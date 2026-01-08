@@ -153,7 +153,7 @@ const Releases: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
             )}
             <ButtonAnchor
               target="_blank"
-              href={`${import.meta.env.VITE_API_DOMAIN}/v1/trackGroups?tag=${tag}&released=released&format=rss`}
+              href={`${import.meta.env.VITE_API_DOMAIN}/v1/trackGroups?${tag ? `tag=${tag}` : ""}&released=released&format=rss`}
               rel="noreferrer"
               onlyIcon
               className={css`
