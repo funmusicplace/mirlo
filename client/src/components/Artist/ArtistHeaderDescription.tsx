@@ -58,6 +58,7 @@ const ArtistHeaderDescription: React.FC<ArtistHeaderDescriptionProps> = ({
         className={css`
           margin-top: -1rem;
           margin-bottom: -1px;
+          border-radius: 0rem !important;
           border-top-left-radius: 0.5rem !important;
           border-top-right-radius: 0.5rem !important;
         `}

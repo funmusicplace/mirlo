@@ -272,6 +272,10 @@ const ArtistHeaderSection: React.FC<{
               display: flex;
               flex-direction: row;
               align-items: flex-end;
+
+              @media screen and (max-width: ${bp.medium}px) {
+                padding: var(--mi-side-paddings-xsmall);
+              }
             `}
           >
             <ArtistTourDates

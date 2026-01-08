@@ -59,7 +59,7 @@ export const TrackGroupInfo = styled.div`
     font-weight: normal;
     margin-bottom: 0.2rem;
   }
-  a:last-of-type {
+  a:not(:first-of-type) {
     font-size: var(--mi-font-size-xsmall);
   }
 

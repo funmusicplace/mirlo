@@ -86,6 +86,10 @@ const Releases: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
               className={css`
                 display: flex;
                 justify-content: flex-end;
+
+                @media screen and (max-width: ${bp.medium}px) {
+                  padding: var(--mi-side-paddings-xsmall);
+                }
               `}
             >
               <ButtonLink

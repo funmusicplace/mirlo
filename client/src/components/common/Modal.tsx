@@ -25,9 +25,15 @@ const wrapper = css`
 
 const ChildrenWrapper = styled.div<{ title?: boolean; noPadding?: boolean }>`
   overflow-y: auto;
+
   ${(props) => (props.noPadding ? "padding: 0;" : "padding: 20px;")}
   ${(props) => (props.noPadding ? "" : "margin-bottom: 1rem;")}
   margin-left: 0rem;
+
+  ${(props) =>
+    props.title
+      ? ""
+      : "background-color: var(--mi-normal-background-color) !important; border-radius: var(--mi-border-radius-x) var(--mi-border-radius-x) !important; padding-bottom: 1.5rem !important;"}
   ::-webkit-scrollbar {
     width: 2px;
   }
@@ -51,12 +57,12 @@ const ChildrenWrapper = styled.div<{ title?: boolean; noPadding?: boolean }>`
 
 type ContentProps = {
   size?: "small" | "medium";
+  contentTitle?: string | null;
 };
 
 const Content = styled.div<ContentProps>`
   pointer-events: auto;
   overflow: hidden;
-  background-color: var(--mi-normal-background-color);
   position: absolute;
   left: 0;
   right: 0;
@@ -66,6 +72,11 @@ const Content = styled.div<ContentProps>`
   border: 1px solid var(--mi-darken-background-color);
   display: flex;
   flex-direction: column;
+  ${(props) =>
+    props.contentTitle
+      ? "background-color: var(--mi-normal-background-color);"
+      : ""}
+
   ${(props) =>
     props.size === "small"
       ? "width: 30%;"
@@ -206,7 +217,7 @@ export const Modal: React.FC<{
       >
         <Background onClick={onCloseWrapper} />
         <div className={wrapper} data-cy="modal">
-          <Content size={size} className={className}>
+          <Content size={size} contentTitle={title} className={className}>
             <SpaceBetweenDiv
               className={css`
                 position: sticky;
@@ -214,7 +225,7 @@ export const Modal: React.FC<{
                 padding-top: 1rem;
                 margin-bottom: 0 !important;
                 align-items: center;
-                background-color: var(--mi-lighten-background-color) !important;
+
                 padding: 1rem;
                 border-radius: var(--mi-border-radius-x)
                   var(--mi-border-radius-x) 0 0;
@@ -223,7 +234,9 @@ export const Modal: React.FC<{
                 border-bottom: solid 1px rgba(125, 125, 125, 0.3);
                 z-index: 12;
 
-                ${!title ? "justify-content: flex-end !important;" : ""}
+                ${title
+                  ? "background-color: var(--mi-lighten-background-color) !important;"
+                  : "justify-content: flex-end !important; background-color: transparent; padding-right: 0 !important;"}
                 button {
                   ${!title ? "margin-bottom: 0.2rem;" : ""}
                 }
