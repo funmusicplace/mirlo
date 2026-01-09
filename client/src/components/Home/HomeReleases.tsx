@@ -101,10 +101,10 @@ const HomeReleases = () => {
           }
         `}
       >
-        <ButtonLink variant="outlined" to="/artists">
+        <ButtonLink wrap variant="outlined" to="/artists">
           {t("viewAllArtists")}
         </ButtonLink>
-        <ButtonLink to="/releases" endIcon={<FaChevronRight />}>
+        <ButtonLink wrap to="/releases" endIcon={<FaChevronRight />}>
           {t("moreReleases")}
         </ButtonLink>
       </WidthContainer>

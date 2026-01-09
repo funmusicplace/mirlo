@@ -87,6 +87,10 @@ const TR = styled.tr<{
     }
   }
 
+  > td {
+    line-height: 2rem !important;
+  }
+
   > td > .play-button {
     display: none;
   }
@@ -97,7 +101,7 @@ const TR = styled.tr<{
   }
   &:hover > td > .play-button,
   &:hover > td > .pause-button {
-    display: block;
+    display: flex;
   }
   ${(props) =>
     props.canPlayTrack
@@ -111,10 +115,8 @@ const TR = styled.tr<{
       padding: 0.15rem 0.3rem;
     }
     > td > .play-button {
-      margin-left: 0.5rem;
     }
     > td > .track-number {
-      margin-left: 0.5rem;
     }
   }
 `;
@@ -189,7 +191,7 @@ const TrackRow: React.FC<{
           onTrackPlayCallback={addTracksToQueue}
         />
       </FirstTD>
-      <TrackTitleTD>
+      <TrackTitleTD onClick={onTrackPlay}>
         <div
           className={css`
             display: flex;
@@ -260,7 +262,7 @@ const TrackRow: React.FC<{
 
       {size !== "small" && (
         <DropdownTD showDropdown={showDropdown} align="right">
-          <DropdownMenu compact label="Track options">
+          <DropdownMenu smallIcon compact label="Track options">
             <ul>
               <li>
                 <EmbedLink track={track} />

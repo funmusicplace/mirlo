@@ -59,6 +59,8 @@ const ReleaseDate: React.FC<{ releaseDate: string }> = ({
           ? colors.foreground
           : "var(--mi-light-foreground-color)"};
         font-size: 1rem;
+        width: 100%;
+        font-size: var(--mi-font-size-small);
         filter: opacity(80%);
 
         @media screen and (max-width: ${bp.medium}px) {

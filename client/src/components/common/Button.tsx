@@ -18,6 +18,7 @@ export interface Sizable {
   variant?: "link" | "outlined" | "dashed" | "transparent" | "default";
   uppercase?: boolean;
   onlyIcon?: boolean;
+  smallIcon?: boolean;
 }
 
 function lightOrDark(color: string) {
@@ -82,7 +83,15 @@ const CustomButton = styled.button<Sizable>(
       height: 2rem;
       width: 2rem;
 
+      @media screen and (max-width: ${bp.medium}px) {
+      
+      ${props.smallIcon ? "height: 1.2rem; width: 1.2rem; svg { width: 0.5rem; }" : ""}
+      
+      }      
+
       @media screen and (max-width: ${bp.small}px) {
+      
+
         ${
           size === "compact"
             ? `

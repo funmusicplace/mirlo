@@ -94,6 +94,7 @@ const Releases: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
             >
               <ButtonLink
                 to="/tags"
+                wrap
                 className={css`
                   margin-top: 0.25rem;
                 `}
@@ -134,6 +135,9 @@ const Releases: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
             className={css`
               display: flex;
               gap: 0.75rem;
+              @media screen and (max-width: ${bp.medium}px) {
+                padding: var(--mi-side-paddings-xsmall);
+              }
             `}
           >
             {onReleasesPage && (
@@ -160,6 +164,7 @@ const Releases: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
               href={`${import.meta.env.VITE_API_DOMAIN}/v1/trackGroups?${tag ? `tag=${tag}` : ""}&released=released&format=rss`}
               rel="noreferrer"
               onlyIcon
+              smallIcon
               className={css`
                 margin-top: 0.25rem;
               `}

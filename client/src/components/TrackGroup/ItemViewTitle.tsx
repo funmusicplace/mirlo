@@ -117,7 +117,7 @@ const TrackGroupTitle: React.FC<{
                 padding-right: 0.4rem;
               `}
             >
-              <DropdownMenu compact>
+              <DropdownMenu smallIcon compact>
                 <TrackGroupAdminMenu trackGroupId={trackGroup.id} />
               </DropdownMenu>
             </div>
