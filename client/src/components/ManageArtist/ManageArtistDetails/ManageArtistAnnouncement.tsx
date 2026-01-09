@@ -94,10 +94,16 @@ const ManageArtistAnnouncement: React.FC<{
         size="compact"
         onClick={() => setIsOpen(true)}
         className={css`
+          margin-top: 0.5rem;
           background-color: ${artist.properties?.colors?.background ||
           "var(--mi-background-color)"} !important;
           color: ${artist.properties?.colors?.primary ||
           "var(--mi-foreground-color)"} !important;
+
+          @media screen and (max-width: ${bp.medium}px) {
+            margin: var(--mi-side-paddings-xsmall);
+            margin-top: 0.5rem;
+          }
         `}
       >
         {t("editAnnouncement")}
@@ -112,9 +118,9 @@ const ManageArtistAnnouncement: React.FC<{
           width: 100%;
           position: relative;
           textarea {
-            color: ${artist.properties?.colors?.background ||
-            "var(--mi-background-color)"};
-            background-color: ${artist.properties?.colors?.primary ||
+            color: ${artist.properties?.colors?.primary ||
+            "var(--mi-primary-color)"};
+            background-color: ${artist.properties?.colors?.secondary ||
             "var(--mi-foreground-color)"};
           }
 

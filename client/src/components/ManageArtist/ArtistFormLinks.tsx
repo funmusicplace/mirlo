@@ -214,12 +214,27 @@ const ArtistFormLinks: React.FC<ArtistFormLinksProps> = ({
 
   return (
     <>
-      <div className="flex align-center mb-2">
+      <div className="flex align-center mb-2 max-w-full pr-2 pl-2">
         <div
           className={css`
-            display: inline-flex;
+            max-width: 100%;
+            overflow: scroll;
+            display: flex;
+            justify-content: flex-start;
             align-items: center;
-            justify-content: flex-end;
+
+            ::-webkit-scrollbar {
+              width: 0;
+              height: 3px;
+            }
+            ::-webkit-scrollbar-track {
+              background-color: inset 0 0 0px rgba(0, 0, 0);
+              border-radius: 4px;
+            }
+            ::-webkit-scrollbar-thumb {
+              border-radius: 4px;
+              background-color: rgba(100, 100, 100, 0.5);
+            }
 
             a {
               display: inline-flex;
@@ -241,6 +256,7 @@ const ArtistFormLinks: React.FC<ArtistFormLinksProps> = ({
 
             @media screen and (max-width: ${bp.medium}px) {
               padding: var(--mi-side-paddings-xsmall);
+              padding-bottom: 0.5rem;
             }
           `}
         >
