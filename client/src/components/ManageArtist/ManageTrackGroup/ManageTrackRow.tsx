@@ -251,10 +251,12 @@ const ManageTrackRow: React.FC<{
         align="right"
         className={css`
           width: 150px;
+          display: flex;
+          flex-direction: row;
+          justify-content: flex-end;
 
           button,
           a {
-            display: inline-block;
           }
         `}
       >
