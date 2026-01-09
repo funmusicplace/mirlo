@@ -56,9 +56,15 @@ export const ImageWrapper = styled.div`
 export const UnderneathImage = styled.div`
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
+  gap: 0.5rem;
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: start;
+
+  @media screen and (max-width: ${bp.medium}px) {
+    margin-top: 0.25rem;
+    flex-wrap: wrap;
+  }
 `;
 
 export const SmallScreenPlayWrapper = styled.div`
@@ -100,7 +106,7 @@ export const AboutWrapper = styled.div<{
   @media screen and (max-width: ${bp.medium}px) {
     max-width: 100%;
     padding: 0.5rem 0.25rem 0.5rem 0rem;
-    margin: 1.25rem 1.25rem;
+    margin: var(--mi-side-paddings-xsmall);
     margin-bottom: 0.5rem;
     border-right: 0;
   }
@@ -126,6 +132,7 @@ export const CreditsWrapper = styled.div<{
     ${(props) => (props.trackGroupCredits ? "border-top: 1px solid;" : "")}
     max-width: 100%;
     padding: 0.5rem 0.25rem 0.5rem 0rem;
+    margin: var(--mi-side-paddings-xsmall);
     margin-top: 0;
     border-left: 0;
   }
@@ -260,6 +267,7 @@ function TrackGroup() {
                     size={600}
                   />
                 </ImageWrapper>
+
                 <UnderneathImage>
                   <ReleaseDate releaseDate={trackGroup.releaseDate} />
                   <div
@@ -268,6 +276,7 @@ function TrackGroup() {
                       justify-content: flex-end;
                       align-items: center;
                       gap: 0.5rem;
+                      width: 100%;
 
                       a {
                         font-size: var(--mi-font-size-normal);
@@ -313,8 +322,13 @@ function TrackGroup() {
                   {trackGroup.isGettable && (
                     <p
                       className={css`
-                        margin-left: 2.5rem;
-                        margin-top: 1rem;
+                        padding: var(--mi-side-paddings-xsmall);
+
+                        @media screen and (min-width: ${bp.medium}px) {
+                          margin-left: 2.5rem;
+                          margin-top: 1rem;
+                          padding: 0;
+                        }
                       `}
                     >
                       <small>{t("downloadCodecsInfo")}</small>
@@ -326,6 +340,12 @@ function TrackGroup() {
                 <div
                   className={css`
                     max-width: 50%;
+
+                    @media screen and (max-width: ${bp.medium}px) {
+                      max-width: 100%;
+                      margin: var(--mi-side-paddings-xsmall);
+                      margin-bottom: 1.5rem;
+                    }
                   `}
                 >
                   <MarkdownContent content={trackGroupAbout} />
@@ -365,14 +385,20 @@ function TrackGroup() {
               display: flex;
               justify-content: space-between;
               margin-bottom: 2rem;
+
+              @media screen and (max-width: ${bp.medium}px) {
+                max-width: 100%;
+                margin: var(--mi-side-paddings-xsmall);
+                margin-bottom: 1.5rem;
+              }
             `}
           >
             <TrackGroupPills tags={trackGroup.tags} />
-            <FlagContent trackGroupId={trackGroup.id} />
           </div>
           {trackGroup.artist && (
             <SupportArtistPopUp artist={trackGroup.artist} />
           )}
+          <FlagContent trackGroupId={trackGroup.id} />
         </div>
       </Container>
     </WidthContainer>
