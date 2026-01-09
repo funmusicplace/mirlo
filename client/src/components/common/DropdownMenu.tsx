@@ -1,5 +1,6 @@
 import { css } from "@emotion/css";
 import React from "react";
+import { bp } from "../../constants";
 
 import Background from "components/common/Background";
 import { FaEllipsisV } from "react-icons/fa";
@@ -14,10 +15,11 @@ import { createPortal } from "react-dom";
 const DropdownMenu: React.FC<{
   children: React.ReactElement | React.ReactElement[];
   dashed?: boolean;
+  smallIcon?: boolean;
   icon?: React.ReactElement;
   compact?: boolean;
   label?: string;
-}> = ({ children, icon, compact, dashed, label }) => {
+}> = ({ children, icon, compact, dashed, label, smallIcon }) => {
   const [buttonPosition, setButtonPosition] = React.useState<{
     x: number;
     y: number;
@@ -123,10 +125,21 @@ const DropdownMenu: React.FC<{
         variant={dashed ? "dashed" : "transparent"}
         aria-label={label}
         role="menu"
+        smallIcon
         className={css`
           background: transparent !important;
+
           &:hover {
             background: transparent !important;
+          }
+
+          @media screen and (max-width: ${bp.medium}px) {
+            ${smallIcon
+              ? "width: 2rem !important; height: 2rem !important;"
+              : ""}
+            svg {
+              ${smallIcon ? "width: .3rem !important;" : ""}
+            }
           }
         `}
         onClick={(e) => {
