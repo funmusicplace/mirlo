@@ -13,6 +13,7 @@ import { Turnstile } from "@marsidev/react-turnstile";
 import TextArea from "components/common/TextArea";
 import { useSnackbar } from "state/SnackbarContext";
 import { ArtistButton } from "components/Artist/ArtistButtons";
+import { bp } from "../../constants";
 
 const FlagContent: React.FC<{ trackGroupId: number; onlyIcon?: boolean }> = ({
   trackGroupId,
@@ -64,6 +65,11 @@ const FlagContent: React.FC<{ trackGroupId: number; onlyIcon?: boolean }> = ({
           font-weight: normal !important;
           font-size: 0.9rem !important;
           margin-right: 1.25rem;
+
+          @media screen and (max-width: ${bp.medium}px) {
+            max-width: 100%;
+            margin: var(--mi-side-paddings-xsmall);
+          }
         `}
         onClick={() => setIsFlagOpen(true)}
       >

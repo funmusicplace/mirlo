@@ -101,6 +101,7 @@ const ArtistAlbums: React.FC = () => {
         {artist.user && !!artist.purchaseEntireCatalogMinPrice && (
           <ArtistButton
             size="big"
+            wrap
             type="button"
             isLoading={loadingStripe}
             onClick={purchaseCatalogue}
