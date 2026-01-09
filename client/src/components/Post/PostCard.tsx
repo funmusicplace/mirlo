@@ -10,6 +10,7 @@ import { formatDate } from "components/TrackGroup/ReleaseDate";
 import { Trans, useTranslation } from "react-i18next";
 import { sample } from "lodash";
 import { ArtistButtonLink } from "components/Artist/ArtistButtons";
+import { bp } from "../../constants";
 
 const HalfTone: React.FC<{ color1?: string; color2?: string }> = ({
   color1,
@@ -154,6 +155,10 @@ const PostCard: React.FC<{
           @media (prefers-color-scheme: dark) {
             background-color: ${(isOnArtistPage && artistBackground) ??
             "var(--mi-normal-background-color)"};
+          }
+
+          @media screen and (max-width: ${bp.medium}px) {
+            padding: 0 !important;
           }
         `}
       >
