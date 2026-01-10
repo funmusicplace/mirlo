@@ -23,7 +23,7 @@ import Logo from "./Logo";
 import { css } from "@emotion/css";
 
 const customIconClass = css`
-  width: 1rem;
+  min-width: 1rem;
   height: 1rem;
   border-radius: 0.25rem;
   object-fit: cover;

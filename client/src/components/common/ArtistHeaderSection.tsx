@@ -71,12 +71,11 @@ export const Header = styled.div`
 export const AvatarWrapper = styled.div<{ artistAvatar?: boolean }>`
   display: flex;
   padding-top: 1rem;
-  ${(props) => (props.artistAvatar ? "margin-bottom: 0.75rem;" : "")}
   align-items: center;
 
   @media screen and (max-width: ${bp.medium}px) {
     padding-top: 0rem;
-    ${(props) => (props.artistAvatar ? "margin-bottom: 0.5rem;" : "")}
+    ${(props) => (props.artistAvatar ? "margin-bottom: 0rem;" : "")}
   }
 `;
 
@@ -303,12 +302,12 @@ const ArtistHeaderSection: React.FC<{
         </div>
       </HeaderWrapper>
 
+      <ManageArtistAnnouncement showButtons={isManage} />
       <div
         className={css`
           display: flex;
           justify-content: flex-end;
           padding-top: 0.5rem;
-          margin-bottom: 1rem;
           align-items: flex-start;
 
           ${artist.announcementText
@@ -323,8 +322,6 @@ const ArtistHeaderSection: React.FC<{
             : ""}
         `}
       >
-        <ManageArtistAnnouncement showButtons={isManage} />
-
         <ArtistFormLinks
           isManage={!!isManage}
           artist={artist}

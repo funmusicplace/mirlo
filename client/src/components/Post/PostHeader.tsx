@@ -62,12 +62,12 @@ const PostHeader: React.FC<{ post: Post }> = ({ post }) => {
   return (
     <div
       className={css`
-        ${featuredImage ? "height: 50vh" : "min-height: 20vh"};
+        min-height: ${featuredImage ? "40vh" : "min-height: 20vh"};
         overflow: none;
         position: relative;
 
         @media (max-width: ${bp.medium}px) {
-          height: ${featuredImage ? "50vh" : "min-height: 20vh"};
+          min-height: ${featuredImage ? "50vh" : "min-height: 20vh"};
         }
       `}
     >
@@ -92,11 +92,16 @@ const PostHeader: React.FC<{ post: Post }> = ({ post }) => {
             rgba(0, 0, 0, 1) 100%
           )`
             : ""};
-          height: 100%;
+          min-height: ${featuredImage ? "40vh" : "min-height: 20vh"};
+
           display: flex;
           ${featuredImage ? "align-items: flex-end" : ""};
           position: relative;
           z-index: 1;
+
+          @media (max-width: ${bp.medium}px) {
+            min-height: ${featuredImage ? "50vh" : "min-height: 20vh"};
+          }
         `}
       >
         <div

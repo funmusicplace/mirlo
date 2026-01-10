@@ -35,7 +35,7 @@ const ChildrenWrapper = styled.div<{ title?: boolean; noPadding?: boolean }>`
       ? ""
       : "background-color: var(--mi-normal-background-color) !important; border-radius: var(--mi-border-radius-x) var(--mi-border-radius-x) !important; padding-bottom: 1.5rem !important;"}
   ::-webkit-scrollbar {
-    width: 2px;
+    width: 3px;
   }
   ::-webkit-scrollbar-track {
     background-color: inset 0 0 0px rgba(0, 0, 0);

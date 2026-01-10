@@ -82,7 +82,9 @@ const ArtistFormLocation: React.FC<ArtistLocationProps> = ({
             variant="dashed"
             size="compact"
             onlyIcon
+            smallIcon
             onClick={() => setIsEditing(true)}
+            className={css``}
             startIcon={<FaPen />}
           ></ArtistButton>
         )}

@@ -64,7 +64,7 @@ const ReleaseDownloadableContent: React.FC<{
             @media screen and (max-width: ${bp.small}px) {
               max-width: 100%;
               flex: 100%;
-              margin-left: 0;
+              margin: 1rem;
             }
           `
         }

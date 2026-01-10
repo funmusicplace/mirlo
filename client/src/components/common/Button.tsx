@@ -85,7 +85,7 @@ const CustomButton = styled.button<Sizable>(
 
       @media screen and (max-width: ${bp.medium}px) {
       
-      ${props.smallIcon ? "height: 1.2rem; width: 1.2rem; svg { width: 0.5rem; }" : ""}
+      ${props.smallIcon ? "height: 1.2rem !important; width: 1.2rem !important; svg { width: 0.6rem; }; padding: .6rem !important;" : ""}
       
       }      
 

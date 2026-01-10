@@ -125,7 +125,7 @@ const DropdownMenu: React.FC<{
         variant={dashed ? "dashed" : "transparent"}
         aria-label={label}
         role="menu"
-        smallIcon
+        smallIcon={smallIcon}
         className={css`
           background: transparent !important;
 

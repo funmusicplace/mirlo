@@ -9,11 +9,11 @@ const Avatar: React.FC<{ avatar?: string }> = ({ avatar }) => {
   return (
     <div
       className={css`
-        max-width: 85px;
+        max-width: 110px;
         display: flex;
 
         @media screen and (max-width: ${bp.medium}px) {
-          max-width: 50px;
+          max-width: 70px;
           padding-bottom: 0rem;
           margin-bottom: 0rem;
         }
