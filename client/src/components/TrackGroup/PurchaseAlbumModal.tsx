@@ -46,7 +46,7 @@ const PurchaseAlbumModal: React.FC<{
       ? "nameYourPriceLabel"
       : "buy";
 
-  const preOrderOrBuyText = trackGroup.isAllOrNothing
+  const preOrderOrBuyText = trackGroup.fundraiser?.isAllOrNothing
     ? "backThisProject"
     : isBeforeReleaseDate
       ? "preOrder"
@@ -64,7 +64,15 @@ const PurchaseAlbumModal: React.FC<{
       {t(preOrderOrBuyText)}
     </FixedButton>
   ) : (
-    <ArtistButton type="button" onClick={() => setIsPurchasingAlbum(true)} startIcon={collapse ? <CurrencyCoinIcon currency={trackGroup.currency} /> : undefined}>
+    <ArtistButton
+      type="button"
+      onClick={() => setIsPurchasingAlbum(true)}
+      startIcon={
+        collapse ? (
+          <CurrencyCoinIcon currency={trackGroup.currency} />
+        ) : undefined
+      }
+    >
       {collapse ? "" : t(preOrderOrBuyText)}
     </ArtistButton>
   );

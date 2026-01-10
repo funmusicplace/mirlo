@@ -16,6 +16,16 @@ const apiDoc = {
         },
       },
     },
+    Fundraiser: {
+      type: "object",
+      required: [],
+      properties: {
+        string: {
+          description: "Name of the fundraiser",
+          type: "string",
+        },
+      },
+    },
     Merch: {
       type: "object",
       required: [],

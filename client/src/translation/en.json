@@ -131,6 +131,7 @@
   "profile": {
     "yourAvatar": "Your avatar",
     "yourBanner": "Your banner",
+    "purchaseDetails": "Purchase details",
     "manageLabel": "Manage label",
     "tileBackgroundImage": "Tile background image",
     "resetPasswordLink": "Want to change your password? Use the reset form.",
@@ -739,6 +740,9 @@
     "downloadCodes": "Promo codes",
     "keyDetails": "Key details",
     "chargePledges": "Charge pledges now",
+    "addFundraiser": "Add fundraiser",
+    "addFundraiserDescription": "Create a new fundraiser to support this release.",
+    "addFundraiserToThisRelease": "Add a fundraiser to this release",
     "catalogNumber": "Catalog number",
     "previewRelease": "Preview release",
     "isGettable": "Prevent users from downloading and buying this album",
@@ -1042,7 +1046,9 @@
   "trackGroupDetails": {
     "trackgroup": "Album:",
     "untitled": "Untitled",
+    "allOrNothingFullyFunded": "This project is fully funded! Backing it now means you'll contribute to its future success.",
     "by": "by",
+
     "enterDownloadCode": "Enter download code",
     "yourEmail": "Your email:",
     "redeemCodeError": "Code not found or already used.",

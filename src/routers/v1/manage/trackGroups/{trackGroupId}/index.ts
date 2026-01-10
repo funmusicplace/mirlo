@@ -62,6 +62,7 @@ export default function () {
               images: true,
             },
           },
+          fundraiser: true,
           downloadableContent: {
             include: {
               downloadableContent: true,

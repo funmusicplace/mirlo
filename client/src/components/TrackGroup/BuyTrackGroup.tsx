@@ -17,7 +17,6 @@ import Button from "components/common/Button";
 import { FaArrowRight } from "react-icons/fa";
 import { useQuery } from "@tanstack/react-query";
 import { queryUserStripeStatus } from "queries";
-import AddMoneyValueButtons from "components/common/AddMoneyValueButtons";
 import PaymentInputElement from "./PaymentInputElement";
 
 interface FormData {
@@ -99,7 +98,7 @@ const BuyTrackGroup: React.FC<{
   }
 
   const isBeforeReleaseDate = new Date(trackGroup.releaseDate) > new Date();
-  const purchaseText = trackGroup.isAllOrNothing
+  const purchaseText = trackGroup.fundraiser?.isAllOrNothing
     ? "addPaymentInformation"
     : isBeforeReleaseDate
       ? "preOrder"
@@ -108,13 +107,13 @@ const BuyTrackGroup: React.FC<{
   const isDisabled =
     lessThanMin ||
     !isValid ||
-    (trackGroup.isAllOrNothing && !consentToStoreData);
+    (trackGroup.fundraiser?.isAllOrNothing && !consentToStoreData);
 
   if (clientSecret && stripeAccountStatus?.stripeAccountId) {
     return (
       <EmbeddedStripeForm
         clientSecret={clientSecret}
-        isSetupIntent={trackGroup.isAllOrNothing}
+        isSetupIntent={trackGroup.fundraiser?.isAllOrNothing}
         stripeAccountId={stripeAccountStatus?.stripeAccountId}
       />
     );
@@ -131,7 +130,7 @@ const BuyTrackGroup: React.FC<{
               `
         }
       >
-        {trackGroup.isAllOrNothing && (
+        {trackGroup.fundraiser?.isAllOrNothing && (
           <p
             className={css`
               margin-bottom: 1rem;
@@ -166,7 +165,7 @@ const BuyTrackGroup: React.FC<{
 
           {(user || verifiedEmail) && (
             <>
-              {trackGroup.isAllOrNothing && (
+              {trackGroup.fundraiser?.isAllOrNothing && (
                 <FormComponent direction="row">
                   <InputEl
                     type="checkbox"

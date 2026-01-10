@@ -180,6 +180,10 @@ Whether or not you want to maintain a separation between your artist account and
 
 :::
 
+::: details Can I sell individual tracks?
+
+Yes! To do so, simply add a price to each track in your album, or set a price for all tracks.
+
 ::: details Will you use my music for AI training purposes?
 
 No!

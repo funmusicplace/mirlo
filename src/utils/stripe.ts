@@ -4,7 +4,7 @@ import {
   Prisma,
   User,
   MerchShippingDestination,
-  TrackGroupPledge,
+  FundraiserPledge,
 } from "@mirlo/prisma/client";
 import { logger } from "../logger";
 import { Request, Response } from "express";
@@ -617,26 +617,35 @@ export const createStripeCheckoutSessionForPurchase = async ({
     email
   );
 
-  if (trackGroup.isAllOrNothing) {
-    // For all or nothing track groups, we need to create a setupIntent for the payment
-    // which we will charge when the project hits its goal.
-    const setupIntent = await stripe.setupIntents.create(
-      {
-        customer: customer.id,
-        automatic_payment_methods: {
-          enabled: true,
-        },
-        metadata: {
-          trackGroupId: trackGroup.id,
-          userId: loggedInUser?.id ?? null,
-          paymentIntentAmount: priceNumber,
-          message: message ? message : null,
-          stripeAccountId,
-        },
+  if (trackGroup.fundraiserId) {
+    const fundraiser = await prisma.fundraiser.findFirst({
+      where: {
+        id: trackGroup.fundraiserId,
       },
-      { stripeAccount: stripeAccountId }
-    );
-    return setupIntent;
+    });
+
+    if (fundraiser?.isAllOrNothing) {
+      // For all or nothing track groups, we need to create a setupIntent for the payment
+      // which we will charge when the project hits its goal.
+      const setupIntent = await stripe.setupIntents.create(
+        {
+          customer: customer.id,
+          automatic_payment_methods: {
+            enabled: true,
+          },
+          metadata: {
+            fundraiserId: fundraiser.id,
+            trackGroupId: trackGroup.id,
+            userId: loggedInUser?.id ?? null,
+            paymentIntentAmount: priceNumber,
+            message: message ? message : null,
+            stripeAccountId,
+          },
+        },
+        { stripeAccount: stripeAccountId }
+      );
+      return setupIntent;
+    }
   }
   const session = await stripe.checkout.sessions.create(
     {
@@ -1154,7 +1163,7 @@ export const handleSetupIntentSucceeded = async (
     stripeAccount: setupIntent.metadata?.stripeAccountId,
   });
 
-  const trackGroupId = setupIntent.metadata?.trackGroupId;
+  const fundraiserId = setupIntent.metadata?.fundraiserId;
 
   const { userId, userEmail } = setupIntent.metadata as unknown as {
     userId: string;
@@ -1167,47 +1176,55 @@ export const handleSetupIntentSucceeded = async (
     newUser,
   } = await findOrCreateUserBasedOnEmail(userEmail, userId);
 
-  if (trackGroupId) {
-    const trackGroup = await prisma.trackGroup.findUnique({
+  if (fundraiserId) {
+    const fundraiser = await prisma.fundraiser.findUnique({
       where: {
-        id: Number(trackGroupId),
+        id: Number(fundraiserId),
       },
       include: {
-        artist: {
+        trackGroups: {
           include: {
-            user: true,
-            subscriptionTiers: true,
+            artist: {
+              include: {
+                user: true,
+                subscriptionTiers: true,
+              },
+            },
           },
         },
       },
     });
 
-    if (trackGroup) {
+    if (fundraiser) {
       await createOrUpdatePledge({
         userId: Number(actualUserId),
-        trackGroupId: trackGroup.id,
+        fundraiserId: fundraiser.id,
         message: intent.metadata?.message,
         amount: Number(intent.metadata?.paymentIntentAmount),
         stripeSetupIntentId: intent.id,
       });
-      await subscribeUserToArtist(trackGroup.artist, user);
+      await subscribeUserToArtist(fundraiser.trackGroups[0].artist, user);
     }
   }
 };
 
 export const chargePledgePayments = async (
-  trackGroupPledge: TrackGroupPledge & { user: User } & {
-    trackGroup: {
-      fundraisingGoal: number | null;
-      currency: string | null;
-      urlSlug: string;
-      artist: { urlSlug: string; user: { stripeAccountId: string | null } };
+  pledge: FundraiserPledge & { user: User } & {
+    fundraiser: {
+      goalAmount: number | null;
+      trackGroups: {
+        currency: string | null;
+        urlSlug: string;
+        id: number;
+        platformPercent: number | null;
+        artist: { urlSlug: string; user: { stripeAccountId: string | null } };
+      }[];
     };
   }
 ) => {
   const client = await getClient();
 
-  if (!trackGroupPledge.trackGroup.artist.user.stripeAccountId) {
+  if (!pledge.fundraiser.trackGroups[0].artist.user.stripeAccountId) {
     throw new AppError({
       description: "Artist does not have a connected stripe account",
       httpCode: 400,
@@ -1215,14 +1232,14 @@ export const chargePledgePayments = async (
   }
 
   const stripeAccountId =
-    trackGroupPledge.trackGroup.artist.user.stripeAccountId;
+    pledge.fundraiser.trackGroups[0].artist.user.stripeAccountId;
   try {
     logger.info(
-      `Charging pledge payments for track group ${trackGroupPledge.trackGroupId} and user ${trackGroupPledge.userId}`
+      `Charging pledge payments for track group ${pledge.trackGroupId} and user ${pledge.userId}`
     );
     const customersForEmail = await stripe.customers.list(
       {
-        email: trackGroupPledge.user.email,
+        email: pledge.user.email,
       },
       {
         stripeAccount: stripeAccountId,
@@ -1230,7 +1247,7 @@ export const chargePledgePayments = async (
     );
     const customerId = customersForEmail.data[0]?.id;
     logger.info(
-      `Found e-mail: ${trackGroupPledge.user.email}, stripe customerId: ${customerId}`
+      `Found e-mail: ${pledge.user.email}, stripe customerId: ${customerId}`
     );
 
     if (customerId) {
@@ -1248,36 +1265,41 @@ export const chargePledgePayments = async (
       if (paymentMethods.data[0]?.id) {
         const paymentIntent = await stripe.paymentIntents.create(
           {
-            amount: trackGroupPledge.amount,
-            currency: trackGroupPledge.trackGroup.currency ?? "usd",
+            amount: pledge.amount,
+            currency: pledge.fundraiser.trackGroups[0].currency ?? "usd",
             // In the latest version of the API, specifying the `automatic_payment_methods` parameter is optional because Stripe enables its functionality by default.
             automatic_payment_methods: { enabled: true },
             customer: customerId,
             payment_method: paymentMethods.data[0]?.id,
-            return_url: `${client.applicationUrl}/${trackGroupPledge.trackGroup.artist.urlSlug}/release/${trackGroupPledge.trackGroup.urlSlug}`,
+            return_url: `${client.applicationUrl}/${pledge.fundraiser.trackGroups[0].artist.urlSlug}/release/${pledge.fundraiser.trackGroups[0].urlSlug}`,
             off_session: true,
             confirm: true,
+            application_fee_amount: await calculateAppFee(
+              pledge.amount,
+              pledge.fundraiser.trackGroups[0].currency ?? "usd",
+              pledge.fundraiser.trackGroups[0].platformPercent
+            ),
           },
           {
             stripeAccount: stripeAccountId,
           }
         );
         logger.info(
-          `Created payment intent ${paymentIntent.id} for pledge ${trackGroupPledge.id}`
+          `Created payment intent ${paymentIntent.id} for pledge ${pledge.id}`
         );
 
         const transaction = await prisma.userTransaction.create({
           data: {
-            userId: trackGroupPledge.userId,
-            amount: trackGroupPledge.amount,
-            currency: trackGroupPledge.trackGroup.currency ?? "usd",
+            userId: pledge.userId,
+            amount: pledge.amount,
+            currency: pledge.fundraiser.trackGroups[0].currency ?? "usd",
             createdAt: new Date(),
           },
         });
 
-        await prisma.trackGroupPledge.update({
+        await prisma.fundraiserPledge.update({
           where: {
-            id: trackGroupPledge.id,
+            id: pledge.id,
           },
           data: {
             paidAt: new Date(),
@@ -1285,17 +1307,21 @@ export const chargePledgePayments = async (
           },
         });
 
-        await prisma.userTrackGroupPurchase.create({
-          data: {
-            userId: trackGroupPledge.userId,
-            trackGroupId: trackGroupPledge.trackGroupId,
-            createdAt: new Date(),
-            userTransactionId: transaction.id,
-          },
-        });
+        await Promise.all(
+          pledge.fundraiser.trackGroups.map(async (tg) => {
+            await prisma.userTrackGroupPurchase.create({
+              data: {
+                userId: pledge.userId,
+                trackGroupId: tg.id,
+                createdAt: new Date(),
+                userTransactionId: transaction.id,
+              },
+            });
+          })
+        );
 
         logger.info(
-          `Updated pledge ${trackGroupPledge.id} as paid and created transaction ${transaction.id}`
+          `Updated pledge ${pledge.id} as paid and created transaction ${transaction.id}`
         );
       }
     }

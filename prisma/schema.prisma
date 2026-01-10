@@ -688,7 +688,6 @@ model TrackGroup {
   paymentToUser                   User?                           @relation(fields: [paymentToUserId], references: [id])
   fundraisingGoal                 Int? // in cents
   fundraisingEndDate              DateTime?
-  // Is the fundraiser all or nothing
   isAllOrNothing                  Boolean                         @default(false)
   pledges                         FundraiserPledge[]
   downloadableContent             TrackGroupDownloadableContent[]
@@ -700,16 +699,18 @@ model TrackGroup {
 }
 
 model Fundraiser {
-  id          Int                @id @default(autoincrement())
-  name        String
-  createdAt   DateTime           @default(now())
-  updatedAt   DateTime           @updatedAt
-  goalAmount  Int                @default(0) // in cents 
-  description String?
-  endDate     DateTime?
-  status      FundraiserStatus   @default(ACTIVE)
-  trackGroups TrackGroup[]
-  pledges     FundraiserPledge[]
+  id             Int                @id @default(autoincrement())
+  name           String
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+  goalAmount     Int                @default(0) // in cents 
+  description    String?
+  endDate        DateTime?
+  // Is the fundraiser all or nothing
+  isAllOrNothing Boolean            @default(false)
+  status         FundraiserStatus   @default(ACTIVE)
+  trackGroups    TrackGroup[]
+  pledges        FundraiserPledge[]
 }
 
 enum FundraiserStatus {
@@ -733,8 +734,8 @@ model FundraiserPledge {
   id                      Int              @id @default(autoincrement())
   fundraiserId            Int
   fundraiser              Fundraiser       @relation(fields: [fundraiserId], references: [id])
-  trackGroup              TrackGroup       @relation(fields: [trackGroupId], references: [id])
-  trackGroupId            Int
+  trackGroup              TrackGroup?      @relation(fields: [trackGroupId], references: [id])
+  trackGroupId            Int?
   userId                  Int
   user                    User             @relation(fields: [userId], references: [id])
   amount                  Int
@@ -747,7 +748,7 @@ model FundraiserPledge {
   associatedTransaction   UserTransaction? @relation(fields: [associatedTransactionId], references: [id])
   associatedTransactionId String?          @unique
 
-  @@unique([userId, trackGroupId])
+  @@unique([userId, fundraiserId])
 }
 
 model Track {

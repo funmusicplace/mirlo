@@ -18,14 +18,14 @@ export default function () {
     const { id } = req.params;
     const loggedInUser = req.user as User;
     try {
-      const pledge = await prisma.trackGroupPledge.findFirst({
+      const pledge = await prisma.fundraiserPledge.findFirst({
         where: {
           userId: loggedInUser.id,
-          trackGroupId: Number(id),
+          fundraiserId: Number(id),
         },
       });
       if (pledge) {
-        await prisma.trackGroupPledge.update({
+        await prisma.fundraiserPledge.update({
           where: {
             id: pledge.id,
           },

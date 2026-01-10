@@ -51,8 +51,8 @@ const profile = async (req: Request, res: Response, next: NextFunction) => {
         },
         pledges: {
           select: {
-            trackGroupId: true,
             amount: true,
+            fundraiserId: true,
           },
         },
         userTrackPurchases: {

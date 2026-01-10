@@ -132,7 +132,7 @@ export default function () {
               ORDER BY "artistId", "releaseDate" DESC
             ) AS distinct_groups
           ORDER BY RANDOM()
-          LIMIT ${Number(take)}
+          LIMIT ${Number(take) * 1.5}
         `;
 
         const randomIds = rawTrackGroups.map((row) => row.id);
@@ -157,6 +157,7 @@ export default function () {
               id: true,
             },
           },
+          fundraiser: true,
           tracks: { orderBy: { order: "asc" }, where: { deletedAt: null } },
           cover: true,
         },
