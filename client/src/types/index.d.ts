@@ -368,6 +368,7 @@ interface ArtistUserSubscriptionCharge {
   artistUserSubscriptionId: number;
   artistUserSubscription: ArtistUserSubscription;
   createdAt: string;
+  transaction?: UserTransaction;
 }
 
 interface UserTrackGroupWishlist {

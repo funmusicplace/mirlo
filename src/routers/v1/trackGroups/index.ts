@@ -135,7 +135,9 @@ export default function () {
           LIMIT ${Number(take) * 1.5}
         `;
 
-        const randomIds = rawTrackGroups.map((row) => row.id);
+        const randomIds = rawTrackGroups
+          .map((row) => row.id)
+          .slice(0, Number(take));
         where.id = { in: randomIds };
         delete where.releaseDate; // Remove releaseDate filter for random query
         delete where.tags;

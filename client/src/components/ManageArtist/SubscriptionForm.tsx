@@ -227,15 +227,13 @@ const SubscriptionForm: React.FC<{
               description={t("autoAlbumPurchase")}
             />
           </FormComponent>
-          <FeatureFlag featureFlag="subscriptionFulfillment">
-            <FormComponent>
-              <FormCheckbox
-                idPrefix={`${localExistingId}`}
-                keyName="collectAddress"
-                description={t("collectAddress")}
-              />
-            </FormComponent>
-          </FeatureFlag>
+          <FormComponent>
+            <FormCheckbox
+              idPrefix={`${localExistingId}`}
+              keyName="collectAddress"
+              description={t("collectAddress")}
+            />
+          </FormComponent>
         </FormSection>
         <FormComponent>
           <Button type="submit" disabled={isSaving} isLoading={isSaving}>
