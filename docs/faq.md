@@ -18,11 +18,11 @@ We've looked at other payment platforms like PayPal and Wise, but currently the 
 
 Artists get to decide how much of their sale goes to Mirlo. They do this by setting a percentage on sales. So if an artist sells an album on for $10, they will decide whether Mirlo gets 70 cents, $1, or nothing. This lets artists decide how much of their money they need for themselves. By default, Mirlo charges 10% on each sale. _Then_, our payment processor Stripe, will take a cut of 2.9% + 30c (proportionally [this is larger on small transactions](https://nham.co.uk/2025/03/musicians-how-to-receive-more-money-for-each-track-sold/)).
 
-Want to know more about our thought process? Check out [our blog post explaining how we got there](/team/posts/204).
+Want to know more about our thought process? Check out [our blog post explaining how we got there](https://mirlo.space/team/posts/204).
 
 As we develop our project and come to terms with the costs of running it, we will adjust these numbers and explore new ways of financing Mirlo.
 
-For now, please pitch in to [help cover our costs](/team/support).
+For now, please pitch in to [help cover our costs](https://mirlo.space/team/support).
 
 ::: details What are some of Mirlo's features?
 
