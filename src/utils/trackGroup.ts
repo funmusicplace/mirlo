@@ -451,6 +451,7 @@ export const registerTrackPurchase = async ({
           currency: currencyPaid,
           stripeId: paymentProcessorKey,
           platformCut: platformCut,
+          paymentStatus: "COMPLETED",
         },
       });
     }
@@ -476,6 +477,7 @@ export const registerTrackPurchase = async ({
         currency: currencyPaid,
         stripeId: paymentProcessorKey,
         platformCut: platformCut,
+        paymentStatus: "COMPLETED",
       },
     });
     purchase = await prisma.userTrackPurchase.create({

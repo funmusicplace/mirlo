@@ -62,6 +62,7 @@ export const manageSubscriptionReceipt = async ({
         platformCut,
         stripeId: processorPaymentReferenceId,
         stripeCut: paymentProcessorFee,
+        paymentStatus: "COMPLETED",
       },
     });
     const created = await prisma.artistUserSubscriptionCharge.create({

@@ -218,6 +218,7 @@ export const createUserTrackGroupPurchase = async (
       amount: data?.amount ?? 1000,
       currency: data?.currency ?? "USD",
       createdAt: data?.createdAt,
+      paymentStatus: "COMPLETED",
     },
   });
 

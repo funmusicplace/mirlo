@@ -359,6 +359,16 @@ interface ArtistUserSubscription {
   userId: number;
   artistSubscriptionTierId: number;
   artistSubscriptionTier: ArtistSubscriptionTier;
+  shippingAddress?: {
+    name: string;
+    phone: string;
+    line1: string;
+    line2: string;
+    postal_code: string;
+    city?: string;
+    state?: string;
+    country?: string;
+  };
 }
 
 interface ArtistUserSubscriptionCharge {

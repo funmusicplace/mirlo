@@ -53,7 +53,6 @@ export default function () {
           : undefined,
       });
 
-      console.log(" Found sales:", results.length);
       const slicedResults = results.slice(
         Number(skip),
         Number(skip) + Number(take)

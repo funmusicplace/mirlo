@@ -128,8 +128,11 @@ const queryUserTransactions = (
         select: {
           artistUserSubscription: {
             select: {
+              shippingAddress: true,
               artistSubscriptionTier: {
                 select: {
+                  name: true,
+                  interval: true,
                   artist: {
                     select: { name: true, id: true, urlSlug: true },
                   },

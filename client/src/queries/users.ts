@@ -270,7 +270,7 @@ export type Sale = {
   }[];
   shippingAddress?: { country: string };
   quantity?: number;
-  artistSubscriptionTier?: Partial<ArtistSubscriptionTier>;
+  artistUserSubscriptionCharges?: Partial<ArtistUserSubscriptionCharge>[];
 };
 
 const fetchUserSales: QueryFunction<

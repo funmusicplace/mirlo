@@ -73,6 +73,7 @@ export default function () {
             amount: pledge.amount,
             currency: trackGroup.currency ?? "usd",
             createdAt: new Date(),
+            paymentStatus: "COMPLETED",
           },
         });
 

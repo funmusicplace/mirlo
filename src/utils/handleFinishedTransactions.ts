@@ -180,6 +180,7 @@ export const handleTrackGroupPurchase = async (
         platformCut: applicationFee ?? null,
         stripeId: paymentProcessorKey ?? "",
         stripeCut: paymentProcessorFee ?? null,
+        paymentStatus: "COMPLETED",
       },
     });
 
@@ -314,6 +315,7 @@ export const handleCataloguePurchase = async (
         platformCut: paymentProcessorFee ?? null,
         stripeId: paymentProcessorKey ?? "",
         stripeCut: paymentProcessorFee ?? null,
+        paymentStatus: "COMPLETED",
       },
     });
 
@@ -603,6 +605,7 @@ export const handleArtistGift = async (
         platformCut: applicationFee ?? null,
         stripeCut: paymentProcessorFee ?? null,
         stripeId: session?.id ?? "",
+        paymentStatus: "COMPLETED",
       },
     });
 
@@ -765,6 +768,7 @@ export const handleArtistMerchPurchase = async (
                   stripeCut: paymentProcessorFee ?? null,
                   stripeId: session?.id ?? "",
                   shippingFeeAmount: session.shipping_cost?.amount_total ?? 0,
+                  paymentStatus: "COMPLETED",
                 },
               });
 

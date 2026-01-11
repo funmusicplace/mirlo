@@ -39,6 +39,48 @@ export const Section = styled.div`
   }
 `;
 
+export const RenderAddress = ({
+  shippingAddress,
+}: {
+  shippingAddress: Record<string, string>;
+}) => {
+  return (
+    <div>
+      <>
+        {shippingAddress.name && (
+          <>
+            {shippingAddress.name}
+            <br />
+          </>
+        )}
+        {shippingAddress.line1 && (
+          <>
+            {shippingAddress.line1}
+            <br />
+          </>
+        )}
+        {shippingAddress.line2 && (
+          <>
+            {shippingAddress.line2}
+            <br />
+          </>
+        )}
+        {shippingAddress.city && (
+          <>
+            {shippingAddress.city}
+            <br />
+          </>
+        )}
+        {shippingAddress.state}, {shippingAddress.postal_code}
+        <br />
+        {shippingAddress.country}
+        <br />
+        {shippingAddress.phone}
+      </>
+    </div>
+  );
+};
+
 const CustomerPopUp: React.FC<{ purchase: MerchPurchase }> = ({ purchase }) => {
   const { i18n, t } = useTranslation("translation", {
     keyPrefix: "fulfillment",
@@ -118,36 +160,7 @@ const CustomerPopUp: React.FC<{ purchase: MerchPurchase }> = ({ purchase }) => {
           <label>{t("shippingAddress")}</label>
           <p>
             {purchase.shippingAddress && (
-              <>
-                {purchase.shippingAddress.name && (
-                  <>
-                    {purchase.shippingAddress.name}
-                    <br />
-                  </>
-                )}
-                {purchase.shippingAddress.line1 && (
-                  <>
-                    {purchase.shippingAddress.line1}
-                    <br />
-                  </>
-                )}
-                {purchase.shippingAddress.line1 && (
-                  <>
-                    {purchase.shippingAddress.line2}
-                    <br />
-                  </>
-                )}
-                {purchase.shippingAddress.city && (
-                  <>
-                    {purchase.shippingAddress.city}
-                    <br />
-                  </>
-                )}
-                {purchase.shippingAddress.state},
-                {purchase.shippingAddress.postal_code}
-                <br />
-                {purchase.shippingAddress.phone}
-              </>
+              <RenderAddress shippingAddress={purchase.shippingAddress} />
             )}
           </p>
         </Section>

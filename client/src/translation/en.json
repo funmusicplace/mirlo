@@ -260,6 +260,7 @@
     "totalSalesIncome": "Total sales income",
     "totalAmountOfSales": "Total amount of sales",
     "shippingCost": "Shipping cost",
+    "shippingAddress": "Shipping address",
     "date": "Date",
     "item": "Item",
     "type": "Type",
