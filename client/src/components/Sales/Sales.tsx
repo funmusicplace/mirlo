@@ -2,9 +2,8 @@ import { css } from "@emotion/css";
 import Table from "components/common/Table";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import api from "services/api";
 import SalesRow from "./SalesRow";
-import { useQueries, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { queryManagedArtists, queryUserSales } from "queries";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import WidthContainer from "components/common/WidthContainer";
@@ -82,8 +81,9 @@ export const Sales: React.FC = () => {
           </ButtonLink>
         </div>
       </SpaceBetweenDiv>
+      {results.length === 0 && !isLoading && <p>{t("noSales")}</p>}
       {isLoading && <LoadingBlocks rows={5} height="2rem" margin=".5rem" />}
-      {totalAmount && totalAmount > 0 && (
+      {(totalAmount ?? 0) > 0 && (
         <div
           className={css`
             padding-bottom: 1rem;
@@ -92,7 +92,7 @@ export const Sales: React.FC = () => {
           <p>
             <strong>{t("totalSalesIncome")}: </strong>
             {moneyDisplay({
-              amount: totalAmount / 100,
+              amount: (totalAmount ?? 0) / 100,
               currency: "USD",
             })}
           </p>{" "}

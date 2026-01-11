@@ -433,6 +433,7 @@ model ArtistUserSubscription {
   notifications                 Notification[]
   message                       String?
   artistUserSubscriptionCharges ArtistUserSubscriptionCharge[]
+  shippingAddress               Json?
 
   @@unique([userId, artistSubscriptionTierId])
 }

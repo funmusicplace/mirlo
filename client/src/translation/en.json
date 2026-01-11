@@ -255,6 +255,7 @@
     "sales": "Sales",
     "artist": "Artist",
     "amount": "Amount",
+    "noSales": "No sales yet.",
     "totalSalesIncome": "Total sales income",
     "totalAmountOfSales": "Total amount of sales",
     "shippingCost": "Shipping cost",

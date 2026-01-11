@@ -978,8 +978,9 @@ export const handleSubscription = async (
       tierId: Number(tierId),
       amount: session.amount_total ?? 0,
       currency: session.currency ?? "USD",
-      paymentProcessorKey: session.subscription as string, // FIXME: should this be session id? Maybe subscriptionId?
+      paymentProcessorKey: session.subscription as string,
       platformCut: applicationFee ?? null,
+      shippingAddress: session.shipping_details ?? null,
     });
 
     if (artistUserSubscription) {

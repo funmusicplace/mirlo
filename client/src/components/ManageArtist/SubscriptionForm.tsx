@@ -92,13 +92,14 @@ const SubscriptionForm: React.FC<{
             minAmount: data.minAmount ? +data.minAmount * 100 : undefined,
           };
           if (localExistingId) {
-            await api.put<
+            const result = await api.put<
               Partial<ArtistSubscriptionTier>,
               ArtistSubscriptionTier
             >(
               `manage/artists/${artistId}/subscriptionTiers/${localExistingId}`,
               sending
             );
+            reload();
           } else {
             const result = await api.post<
               Partial<ArtistSubscriptionTier>,
@@ -108,10 +109,10 @@ const SubscriptionForm: React.FC<{
               `manage/artists/${artistId}/subscriptionTiers/${result.result.id}`
             );
             setLocalExisting(result.result);
+            reset();
           }
 
           snackbar(t("subscriptionUpdated"), { type: "success" });
-          reset();
           reload();
         } catch (e) {
           errorHandler(e);
@@ -190,11 +191,7 @@ const SubscriptionForm: React.FC<{
           </FormComponent>
 
           {localExistingId && (
-            <FormComponent
-              className={css`
-                flex-grow: 1;
-              `}
-            >
+            <FormComponent className="grow backdrop-brightness-95 p-4">
               <label>{t("platformPercent")}</label>
               <PaymentSlider
                 url={`manage/artists/${artistId}/subscriptionTiers/${localExistingId}`}
@@ -241,12 +238,7 @@ const SubscriptionForm: React.FC<{
           </FeatureFlag>
         </FormSection>
         <FormComponent>
-          <Button
-            type="submit"
-            disabled={isSaving}
-            size="compact"
-            isLoading={isSaving}
-          >
+          <Button type="submit" disabled={isSaving} isLoading={isSaving}>
             {localExistingId ? t("saveSubscription") : t("createSubscription")}
           </Button>
         </FormComponent>

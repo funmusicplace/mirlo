@@ -24,6 +24,7 @@ const querySupporters = (
   untilDate?: string
 ) => {
   const dateFilter = constructDateFilter(sinceDate, untilDate);
+  console.log("dateFilter", dateFilter, artistId);
   return prisma.artistUserSubscriptionCharge.findMany({
     where: {
       artistUserSubscription: {
@@ -225,6 +226,8 @@ export const findSales = async ({
       filters.trackGroupIds
     );
   }
+
+  console.log("supporters", supporters);
 
   return [
     ...supporters.map((s) => ({

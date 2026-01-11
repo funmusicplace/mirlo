@@ -150,7 +150,9 @@ const ArtistSupport: React.FC = () => {
       <ArtistSupportGrid>
         {artist.subscriptionTiers
           ?.filter((p) => !p.isDefaultTier)
-          .map((p) => <ArtistSupportBox key={p.id} subscriptionTier={p} />)}
+          .map((p) => (
+            <ArtistSupportBox key={p.id} subscriptionTier={p} />
+          ))}
       </ArtistSupportGrid>
     </>
   );

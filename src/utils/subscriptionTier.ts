@@ -8,6 +8,7 @@ export const registerSubscription = async ({
   currency,
   paymentProcessorKey,
   platformCut = null,
+  shippingAddress = null,
 }: {
   tierId: number;
   userId: number;
@@ -15,6 +16,7 @@ export const registerSubscription = async ({
   currency: string;
   paymentProcessorKey: string;
   platformCut?: number | null;
+  shippingAddress?: object | null;
 }) => {
   const artistUserSubscription = await prisma.artistUserSubscription.upsert({
     create: {
@@ -25,6 +27,7 @@ export const registerSubscription = async ({
       deletedAt: null,
       stripeSubscriptionKey: paymentProcessorKey,
       platformCut,
+      shippingAddress,
     },
     update: {
       artistSubscriptionTierId: Number(tierId),
@@ -34,6 +37,7 @@ export const registerSubscription = async ({
       deletedAt: null, // Undelete
       platformCut,
       stripeSubscriptionKey: paymentProcessorKey, // FIXME: should this be session id? Maybe subscriptionId?
+      shippingAddress,
     },
     where: {
       userId_artistSubscriptionTierId: {
