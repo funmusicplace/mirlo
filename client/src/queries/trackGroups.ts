@@ -149,19 +149,16 @@ export function useUpdateTrackGroupMutation() {
   });
 }
 
-async function updateTrackGroupPledge(opts: {
-  trackGroupId: number;
-  amount: number;
-}) {
-  await api.put(`v1/trackGroups/${opts.trackGroupId}/changePledge`, {
+async function updatePledge(opts: { fundraiserId: number; amount: number }) {
+  await api.put(`v1/fundraisers/${opts.fundraiserId}/changePledge`, {
     amount: opts.amount,
   });
 }
 
-export function useUpdateTrackGroupPledgeMutation() {
+export function useUpdatePledgeMutation() {
   const client = useQueryClient();
   return useMutation({
-    mutationFn: updateTrackGroupPledge,
+    mutationFn: updatePledge,
     async onSuccess() {
       await client.invalidateQueries({
         predicate: (query) =>

@@ -1,15 +1,12 @@
 import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
 import { moneyDisplay } from "components/common/Money";
-import {
-  queryArtistSupporters,
-  queryTrackGroupSupporters,
-  queryUserStripeStatus,
-} from "queries";
+import { queryTrackGroupSupporters } from "queries";
 
 import { Trans, useTranslation } from "react-i18next";
 
 import BackOrIsBacking from "./BackOrIsBacking";
+import { AnnouncementWrapper } from "components/ManageArtist/ManageArtistDetails/ManageArtistAnnouncement";
 
 function Thermometer({
   goal,
@@ -25,7 +22,7 @@ function Thermometer({
   });
 
   const {
-    data: { totalAmount, totalSupporters } = {
+    data: { totalAmount, totalSupporters, total } = {
       results: [],
       total: 0,
       totalAmount: 0,
@@ -33,7 +30,8 @@ function Thermometer({
     },
   } = useQuery(queryTrackGroupSupporters(trackGroup.id));
 
-  const percent = Math.min(totalAmount / goal, 100);
+  const percent = Math.min(Math.floor(totalAmount / goal), 100);
+
   return (
     <div className="text-sm md:text-base">
       <div className="flex items-center justify-between mb-1 relative w-full">
@@ -89,29 +87,50 @@ function Thermometer({
         </div>
       </div>
       <div
-        className={css`
-          position: relative;
-          width: 100%;
-          height: 1.25rem;
-          background-color: rgba(156, 163, 175, 0.2);
-          border-radius: 0.25rem;
-          overflow: hidden;
-        `}
+        className={
+          "relative w-full flex items-center " +
+          css`
+            height: 2rem;
+            background-color: rgba(156, 163, 175, 0.2);
+            border-radius: 0.25rem;
+            overflow: hidden;
+          `
+        }
       >
         <div
-          className={css`
-            height: 100%;
-            background-color: ${artist?.properties?.colors?.primary};
-            transition: all 0.5s;
-            position: relative;
-            width: ${percent}%;
-          `}
+          className={
+            "h-full relative inline-flex pr-2 items-center justify-end " +
+            css`
+              background-color: ${artist?.properties?.colors?.primary ??
+              "var(--mi-primary-color)"};
+              transition: all 0.5s;
+              width: ${percent}%;
+            `
+          }
           aria-valuenow={totalAmount / 100}
           aria-valuemax={goal}
           aria-valuemin={0}
           role="progressbar"
-        ></div>
+        >
+          {percent > 10 && (
+            <span className="invert font-bold whitespace-nowrap">
+              {percent.toFixed(0)} %
+            </span>
+          )}
+        </div>
+        {percent <= 10 && (
+          <span className="pl-3 font-bold whitespace-nowrap">
+            {percent.toFixed(0)} %
+          </span>
+        )}
       </div>
+      {percent >= 100 && trackGroup.fundraiser?.isAllOrNothing && (
+        <div className="mt-3">
+          <AnnouncementWrapper artistColors={artist?.properties?.colors}>
+            {t("allOrNothingFullyFunded")}
+          </AnnouncementWrapper>
+        </div>
+      )}
     </div>
   );
 }

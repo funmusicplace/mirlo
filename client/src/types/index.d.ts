@@ -15,8 +15,8 @@ interface LoggedInUser {
   userTrackGroupPurchases?: { trackGroupId: number }[];
   userTrackPurchases?: { trackId: number }[];
   pledges?: {
-    trackGroupId: number;
-    trackGroup: { currency: string };
+    fundraiserId: number;
+    fundraiser: { goalAmount: number; isAllOrNothing: boolean };
     amount: number;
   }[];
   isAdmin: boolean;
@@ -114,7 +114,13 @@ interface TrackGroup {
   merch?: Merch[];
   isDraft?: boolean;
   paymentToUserId?: number;
-  isAllOrNothing?: boolean;
+  fundraiserId?: number;
+  fundraiser?: {
+    id: number;
+    goalAmount: number;
+    isAllOrNothing: boolean;
+    endDate: string;
+  } | null;
   paymentToUser?: {
     email: string;
     name?: string;

@@ -11,7 +11,7 @@ export default function () {
   async function POST(req: Request, res: Response, next: NextFunction) {
     const { trackGroupId } = req.body;
     try {
-      const pledgesForTrackGroups = await prisma.trackGroupPledge.findMany({
+      const pledgesForFundraiser = await prisma.fundraiserPledge.findMany({
         where: {
           trackGroupId: trackGroupId ? Number(trackGroupId) : undefined,
           paidAt: null,
@@ -19,11 +19,15 @@ export default function () {
         },
         include: {
           user: true,
-          trackGroup: { include: { artist: { include: { user: true } } } },
+          fundraiser: {
+            include: {
+              trackGroups: { include: { artist: { include: { user: true } } } },
+            },
+          },
         },
       });
 
-      for (const pledge of pledgesForTrackGroups) {
+      for (const pledge of pledgesForFundraiser) {
         await chargePledgePayments(pledge);
       }
 

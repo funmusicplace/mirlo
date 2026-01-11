@@ -18,11 +18,11 @@ const Fundraiser: React.FC = () => {
 
   if (!artist || !trackGroup) return null;
 
-  if (!trackGroup.fundraisingGoal) return null;
+  if (!trackGroup.fundraiser) return null;
 
   return (
     <Thermometer
-      goal={trackGroup.fundraisingGoal / 100}
+      goal={trackGroup.fundraiser.goalAmount / 100}
       artist={artist}
       trackGroup={trackGroup}
     />

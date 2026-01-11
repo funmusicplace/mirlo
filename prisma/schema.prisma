@@ -96,7 +96,7 @@ model User {
   userBanner                          UserBanner?
   trackFavorites                      UserTrackFavorite[]
   receivesPaymentsFor                 Artist[]                        @relation("paymentToUser")
-  pledges                             TrackGroupPledge[]
+  pledges                             FundraiserPledge[]
   invitesSent                         Invite[]                        @relation("invitedBy")
   invitesUsed                         Invite[]                        @relation("usedBy")
   transactions                        UserTransaction[]
@@ -607,7 +607,7 @@ model UserTransaction {
   merchPurchases      MerchPurchase[]
   trackPurchases      UserTrackPurchase[]
   tips                UserArtistTip[]
-  associatedPledges   TrackGroupPledge?
+  associatedPledges   FundraiserPledge?
 }
 
 model UserTrackPurchase {
@@ -688,13 +688,35 @@ model TrackGroup {
   paymentToUser                   User?                           @relation(fields: [paymentToUserId], references: [id])
   fundraisingGoal                 Int? // in cents
   fundraisingEndDate              DateTime?
-  // Is the fundraiser all or nothing
   isAllOrNothing                  Boolean                         @default(false)
-  pledges                         TrackGroupPledge[]
+  pledges                         FundraiserPledge[]
   downloadableContent             TrackGroupDownloadableContent[]
   hideFromSearch                  Boolean                         @default(false)
+  fundraiser                      Fundraiser?                     @relation(fields: [fundraiserId], references: [id])
+  fundraiserId                    Int?
 
   @@unique([artistId, urlSlug])
+}
+
+model Fundraiser {
+  id             Int                @id @default(autoincrement())
+  name           String
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+  goalAmount     Int                @default(0) // in cents 
+  description    String?
+  endDate        DateTime?
+  // Is the fundraiser all or nothing
+  isAllOrNothing Boolean            @default(false)
+  status         FundraiserStatus   @default(ACTIVE)
+  trackGroups    TrackGroup[]
+  pledges        FundraiserPledge[]
+}
+
+enum FundraiserStatus {
+  ACTIVE
+  SUCCESSFUL
+  FAILED
 }
 
 model TrackGroupCover {
@@ -708,10 +730,12 @@ model TrackGroupCover {
   originalFilename String?
 }
 
-model TrackGroupPledge {
+model FundraiserPledge {
   id                      Int              @id @default(autoincrement())
-  trackGroup              TrackGroup       @relation(fields: [trackGroupId], references: [id])
-  trackGroupId            Int
+  fundraiserId            Int
+  fundraiser              Fundraiser       @relation(fields: [fundraiserId], references: [id])
+  trackGroup              TrackGroup?      @relation(fields: [trackGroupId], references: [id])
+  trackGroupId            Int?
   userId                  Int
   user                    User             @relation(fields: [userId], references: [id])
   amount                  Int
@@ -724,7 +748,7 @@ model TrackGroupPledge {
   associatedTransaction   UserTransaction? @relation(fields: [associatedTransactionId], references: [id])
   associatedTransactionId String?          @unique
 
-  @@unique([userId, trackGroupId])
+  @@unique([userId, fundraiserId])
 }
 
 model Track {

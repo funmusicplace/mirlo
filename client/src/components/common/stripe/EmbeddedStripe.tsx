@@ -9,12 +9,6 @@ import {
 
 import SetupIntentForm from "./SetupIntentForm";
 
-interface FormData {
-  chosenPrice: string;
-  userEmail: string;
-  message?: string;
-}
-
 const stripeKey = import.meta.env.VITE_PUBLISHABLE_STRIPE_KEY;
 
 const EmbeddedStripeForm: React.FC<{

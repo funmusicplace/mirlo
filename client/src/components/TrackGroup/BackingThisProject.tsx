@@ -9,9 +9,8 @@ import PaymentInputElement from "./PaymentInputElement";
 import { FormProvider, useForm } from "react-hook-form";
 import FormComponent from "components/common/FormComponent";
 import Button from "components/common/Button";
-import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
-import { useUpdateTrackGroupPledgeMutation } from "queries";
+import { useUpdatePledgeMutation } from "queries";
 
 interface FormData {
   chosenPrice: string;
@@ -30,13 +29,13 @@ const BackingThisProject: React.FC<{
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
   const minPrice = trackGroup?.minPrice;
   const snackbar = useSnackbar();
-  const { mutateAsync: updatePledge } = useUpdateTrackGroupPledgeMutation();
+  const { mutateAsync: updatePledge } = useUpdatePledgeMutation();
 
   const [isSavingPledge, setIsSavingPledge] = React.useState(false);
 
   const methods = useForm<FormData>({
     defaultValues: {
-      chosenPrice: `${minPrice ? minPrice / 100 : ""}`,
+      chosenPrice: `${amount ? amount / 100 : minPrice ? minPrice / 100 : ""}`,
     },
     reValidateMode: "onChange",
   });
@@ -53,8 +52,12 @@ const BackingThisProject: React.FC<{
       setIsSavingPledge(true);
 
       try {
-        const response = await updatePledge({
-          trackGroupId: trackGroup.id,
+        if (!trackGroup.fundraiserId) {
+          console.error("No fundraiser associated with this track group");
+          return;
+        }
+        await updatePledge({
+          fundraiserId: trackGroup.fundraiserId,
           amount: newPledgeAmount,
         });
         setIsChangingPledge(false);

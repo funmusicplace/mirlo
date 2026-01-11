@@ -62,6 +62,7 @@ export const Footer = () => {
               t={t}
               i18nKey="aboutUs"
               components={{
+                documentation: <Link to="https://docs.mirlo.space"></Link>,
                 about: <Link to="/pages/about"></Link>,
                 terms: <Link to="/pages/terms"></Link>,
                 privacy: <Link to="/pages/privacy"></Link>,

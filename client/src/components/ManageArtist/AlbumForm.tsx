@@ -37,12 +37,15 @@ const AlbumForm: React.FC<{
       minPrice: `${
         trackGroup?.minPrice !== undefined ? trackGroup.minPrice / 100 : ""
       }`,
-      fundraisingGoal: `${
-        trackGroup?.fundraisingGoal ? trackGroup.fundraisingGoal / 100 : ""
+      goalAmount: `${
+        trackGroup?.fundraiser?.goalAmount
+          ? trackGroup.fundraiser.goalAmount / 100
+          : ""
       }`,
-      fundraisingEndDate: `${
-        trackGroup?.fundraisingEndDate
-          ? trackGroup.fundraisingEndDate.split("T")[0]
+      isAllOrNothing: trackGroup?.fundraiser?.isAllOrNothing ?? false,
+      endDate: `${
+        trackGroup?.fundraiser?.endDate
+          ? trackGroup.fundraiser.endDate.split("T")[0]
           : ""
       }`,
     };

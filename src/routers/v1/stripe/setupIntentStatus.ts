@@ -1,11 +1,9 @@
-import { User } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 import { userLoggedInWithoutRedirect } from "../../../auth/passport";
 import prisma from "@mirlo/prisma";
 
 import stripe from "../../../utils/stripe";
 import { findOrCreateUserBasedOnEmail } from "../../../utils/user";
-import { Stripe } from "stripe";
 import { createOrUpdatePledge } from "../../../utils/trackGroup";
 import { subscribeUserToArtist } from "../../../utils/artist";
 import { logger } from "../../../logger";
@@ -49,15 +47,15 @@ export default function () {
           if (
             intent.status === "succeeded" &&
             userId &&
-            intent.metadata?.trackGroupId &&
+            intent.metadata?.fundraiserId &&
             intent.metadata?.paymentIntentAmount
           ) {
             logger.info(
-              `Setting up succeeded intent: ${userId}, trackGroupId: ${intent.metadata?.trackGroupId}`
+              `Setting up succeeded intent: ${userId}, fundraiserId: ${intent.metadata?.fundraiserId}`
             );
             await createOrUpdatePledge({
               userId,
-              trackGroupId: Number(intent.metadata?.trackGroupId),
+              fundraiserId: Number(intent.metadata?.fundraiserId),
               message: intent.metadata?.message,
               amount: Number(intent.metadata?.paymentIntentAmount),
               stripeSetupIntentId: intent.id,
@@ -96,6 +94,7 @@ export default function () {
         res.status(404);
       }
     } catch (e) {
+      console.error(e);
       next(e);
     }
   }

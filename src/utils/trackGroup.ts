@@ -88,7 +88,7 @@ export const deleteTrackGroup = async (
 ) => {
   await deleteTrackGroupCover(Number(trackGroupId));
 
-  await prisma.trackGroupPledge.deleteMany({
+  await prisma.fundraiserPledge.deleteMany({
     where: {
       trackGroupId,
     },
@@ -210,6 +210,7 @@ export const trackGroupSingleInclude = (options: {
         images: true,
       },
     },
+    fundraiser: true,
     tags: {
       include: { tag: true },
     },
@@ -814,26 +815,26 @@ export default {
 
 export const createOrUpdatePledge = async ({
   userId,
-  trackGroupId,
   message,
+  fundraiserId,
   amount,
   stripeSetupIntentId,
 }: {
   userId: number;
-  trackGroupId: number;
+  fundraiserId: number;
   message?: string;
   amount: number;
   stripeSetupIntentId: string;
 }) => {
   logger.info(
-    `Creating or updating pledge for userId: ${userId}, trackGroupId: ${trackGroupId}`
+    `Creating or updating pledge for userId: ${userId}, fundraiserId: ${fundraiserId}`
   );
   try {
-    await prisma.trackGroupPledge.upsert({
+    await prisma.fundraiserPledge.upsert({
       where: {
-        userId_trackGroupId: {
+        userId_fundraiserId: {
           userId,
-          trackGroupId: Number(trackGroupId),
+          fundraiserId: Number(fundraiserId),
         },
       },
       create: {
@@ -842,9 +843,9 @@ export const createOrUpdatePledge = async ({
             id: userId,
           },
         },
-        trackGroup: {
+        fundraiser: {
           connect: {
-            id: Number(trackGroupId),
+            id: Number(fundraiserId),
           },
         },
         message,
@@ -859,7 +860,7 @@ export const createOrUpdatePledge = async ({
     });
 
     await sendBasecampAMessage(
-      `New pledge amount: trackGroupId: <i>${trackGroupId}</i> pledged ${amount / 100} <b>${userId}</b>`
+      `New pledge amount: fundraiserId: <i>${fundraiserId}</i> pledged ${amount / 100} <b>${userId}</b>`
     );
   } catch (e) {
     throw new AppError({
@@ -869,6 +870,6 @@ export const createOrUpdatePledge = async ({
   }
 };
 
-const chargePledges = (trackGroupId: number) => {
-  // Logic to charge pledges for the given trackGroupId
+const chargePledges = (fundraiserId: number) => {
+  // Logic to charge pledges for the given fundraiserId
 };

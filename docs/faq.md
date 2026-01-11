@@ -16,7 +16,114 @@ We've looked at other payment platforms like PayPal and Wise, but currently the 
 
 ::: details What are some of Mirlo's features?
 
-Table TBD
+<table
+  cellSpacing={0}
+>
+<tbody>
+  <tr>
+    <td></td>
+    <th>Mirlo</th>
+    <th>Bandcamp</th>
+    <th>Patreon</th>
+    <!-- <th>Ampwall</th> -->
+    <!-- <th>Bandwagon</th> -->
+    <!-- <th>Subvert</th> -->
+  </tr>
+  <tr className="comparison">
+    <th>Pricing</th>
+    <td>You decide</td> <!-- Mirlo -->
+    <td>%15 of sales</td> <!-- Bandcamp -->
+    <td>%8 of support</td> <!-- Patreon -->
+    <!-- <td>$10/year, 5% of sales</td> Ampwall -->
+    <!-- <td>Free</td> Bandwagon -->
+    <!-- <td>?</td> Subvert -->
+  </tr>
+  <tr className="comparison">
+    <th>Upload music and sell music</th>
+    <td>✅</td> <!-- Mirlo -->
+    <td>✅</td> <!-- Bandcamp -->
+    <td>❌</td> <!-- Patreon -->
+    <!-- <td>✅</td> Ampwall -->
+    <!-- <td>✅ sales is being worked on</td> Bandwagon -->
+    <!-- <td>Presumably</td> Subvert -->
+  </tr>
+  <tr className="comparison">
+    <th>Merch sales</th>
+    <td>✅</td>
+    <td>✅</td>
+    <td>
+      ❌ <br />
+      but you can link merch sales to your audience
+    </td>
+    <!-- Patreon -->
+    <!-- <td>✅</td> -->
+    <!-- <td>❌</td> -->
+    <!-- <td>❌</td> -->
+  </tr>
+  <tr className="comparison">
+    <th>Monthly support</th>
+    <td>✅</td>
+    <td>✅</td>
+    <td>✅</td> <!-- Patreon -->
+    <!-- <td>✅</td> -->
+    <!-- <td>❌</td> -->
+    <!-- <td>❌</td> -->
+  </tr>
+  <tr className="comparison">
+    <th>Blog posts to audience segments</th>
+    <td>✅</td> <!-- Mirlo -->
+    <td>✅</td> <!-- Bandcamp -->
+    <td>✅</td> <!-- Patreon -->
+    <!-- <td>❌</td> Ampwall -->
+    <!-- <td>❌</td> Bandwagon -->
+    <!-- <td>❌</td> Subvert -->
+  </tr>
+  <tr className="comparison">
+    <th>Download codes and press kits</th>
+    <td>✅</td> <!-- Mirlo -->
+    <td>✅</td> <!-- Bandcamp -->
+    <td>❌</td> <!-- Patreon -->
+    <!-- <td>❌</td> Ampwall -->
+    <!-- <td>❌</td> Bandwagon -->
+    <!-- <td>❌</td> Subvert -->
+  </tr>
+  <tr className="comparison">
+    <th>Tip jar</th>
+    <td>✅</td> <!-- Mirlo -->
+    <td>❌</td> <!-- Bandcamp -->
+    <td>❌</td> <!-- Patreon -->
+    <!-- <td>❌</td> Ampwall -->
+    <!-- <td>❌</td> Bandwagon -->
+    <!-- <td>❌</td> Subvert -->
+  </tr>
+  <tr className="comparison">
+    <th>Embed music</th>
+    <td>✅</td> <!-- Mirlo -->
+    <td>✅</td> <!-- Bandcamp -->
+    <td>✅</td> <!-- Patreon -->
+    <!-- <td>✅</td> Ampwall -->
+    <!-- <td>❌</td> Bandwagon -->
+    <!-- <td>❌</td> Subvert -->
+  </tr>
+  <tr className="comparison">
+    <th>Open Source</th>
+    <td>✅</td>
+    <td>❌</td> <td>❌</td>
+    <!-- <td>❌</td> -->
+    <!-- <td>✅</td> -->
+    <!-- <td>❌</td> -->
+  </tr>
+  <tr className="comparison">
+    <th>Worker owned</th>
+    <td>✅</td> <!-- Mirlo -->
+    <td>❌</td> <!-- Bandcamp -->
+    <td>❌</td>
+    <!-- <td>❌</td> Ampwall -->
+    <!-- <td>❌</td> Bandwagon -->
+    <!-- <td>❌</td> Subvert -->
+  </tr>
+</tbody>
+</table>
 
 :::
 
@@ -43,6 +150,46 @@ Yes! You can use Mirlo to sell your merch. Check out [our features page](https:/
 
 :::
 
+::: details Do I have to set a price on my music?
+
+No you don't. You can make your music available to download for free, or just upload it without letting people download it. It's your choice.
+
+:::
+
+::: details What file formats do you support? What's the audio quality?
+
+For upload we support lossless file formats (flac, wav). Upon request we convert files across formats to be available to purchasers, as well as converting them to HLS and a couple of mp3 bitrates. We store the original file you upload without changing it.
+
+When someone <strong>streams</strong> an album on our site, they are listening to a 320k stream, using the libmp3lame codec. For streaming, fmmpeg mixes channels down to 2.
+
+When someone <strong>downloads</strong> a digital album, they can choose what format to download. Downloading WAV and FLAC files will be lossless, and will preserver multichannel audio. MP3 and OPUS files will not support multichannel audio.
+
+:::
+
+::: details When a customer buys a digital album, what can be included in the bundle?
+
+When someone buys a digital album they get to choose what format to download it in (flac, wav, mp3). The download will include basic metadata on the files and an image of the cover. You can optionally include pdfs or other images on an album for downloading.
+
+:::
+
+::: details Can an artist make a listern account? Will that be a problem in the future?
+
+There’s only one account type on Mirlo! Any user can make an artist to upload music to at any point. To do so, click on the top right menu and click on “Manage Artist”, this will let you add new artists.
+
+Whether or not you want to maintain a separation between your artist account and your listening, is your call.
+
+:::
+
+::: details Can I sell individual tracks?
+
+Yes! To do so, simply add a price to each track in your album, or set a price for all tracks.
+
+::: details Will you use my music for AI training purposes?
+
+No!
+
+:::
+
 ## Technical details
 
 ::: details Are you open source?
@@ -54,6 +201,12 @@ Yes! And we want your help 🙂. Check [out our code](https://github.com/funmusi
 ::: details Tell me about your tech stack.
 
 Our front-end is a TypeScript react app and our back-end is a node TypeScript express app. Our API and background jobs are hosted [on Render](https://render.com/). Our files are hosted on [Backblaze](https://backblaze.com). You can see all of our [code on GitHub](https://github.com/funmusicplace/mirlo/).
+
+:::
+
+::: details Can I help with testing?
+
+Yes please! Reach out via [e-mail](mailto:hi@mirlo.space) or on [our Discord](https://discord.gg/XuV7F4YRqB).
 
 :::
 
@@ -76,7 +229,7 @@ Mirlo is maintained by a worker co-operative heavily rooted in a community of mu
 
 ::: details What are the main blockers facing Mirlo?
 
-Our main blocker is paying our worker-owners to make space to work on Mirlo. Since we don't take venture capital money to fund our project we are almost entirely dependent on the support of our community. Want to talk about this? Via [e-mail](mailto:mirlodotspace@protonmail.com) or on [our Discord](https://discord.gg/XuV7F4YRqB).
+Our main blocker is paying our worker-owners to make space to work on Mirlo. Since we don't take venture capital money to fund our project we are almost entirely dependent on the support of our community. Want to talk about this? Via [e-mail](mailto:hi@mirlo.space) or on [our Discord](https://discord.gg/XuV7F4YRqB).
 
 Want to support us with a monthly gift? Do so on our team's [own Mirlo profile](https://mirlo.space/team/support).
 
@@ -88,11 +241,37 @@ Our community is primarily hanging out on [the Discord](https://discord.gg/XuV7F
 
 :::
 
+::: details do you have brand / logo guidelines?
+
+Yes! Check out our
+<a href="https://public.3.basecamp.com/p/jJKu6kzsJFLS7n9s6uua688B">
+logo guidelines as of June 30, 2024
+</a>.
+
+Logo downloads: <a href="/Logo-With-Wordmark.svg">SVG with wordmark</a>, <a href="/Logo_Mirlo_Transparent_RedCircle.svg">SVG logo, red</a>,
+<a href="/android-chrome-512x512.png"> png logo, red (512x512)</a>, <a href="/Logo_Mirlo_Transparent_BlackCircle.png">
+png logo, black and white (285x285)</a>.
+
+:::
+
 ## Support
 
-::: details Can people see my personal informations when they buy things from my artist page on Mirlo ? 
+::: details Can people see my personal informations when they buy things from my artist page on Mirlo ?
 
 No ! When people buy things from your artist page, all they see during and after the Stripe checkout process is your Mirlo shop and artist name, none of the personal information you provide Stripes when setting up your account are shared with customers. We understand that this is a priority for many people, since a lot of artists tend to have pseudonyms, or don't necessarily operate from a business location and want to avoid their personnal address to be disclosed.
+
+:::
+
+::: details
+
+You can add support tiers by going to your artist's profile,
+clicking “edit page” (or navigating to it through the top
+right dropdown menu), and then switching to the “Support
+tiers” tab. There's an “+ add tier” button that will let you
+create a support tier.
+
+To enable this you'll need to sign up with our payment
+processor Stripe first.
 
 :::
 

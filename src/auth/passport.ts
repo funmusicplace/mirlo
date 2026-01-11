@@ -219,6 +219,49 @@ export const artistBelongsToLoggedInUser = async (
   return;
 };
 
+export const fundraiserBelongsToLoggedInUser = async (
+  req: Request,
+  _res: Response,
+  next: NextFunction
+) => {
+  const { fundraiserId } = req.params as unknown as {
+    fundraiserId: string;
+  };
+
+  const loggedInUser = req.user as User | undefined;
+
+  try {
+    if (!loggedInUser) {
+      throw new AppError({
+        description: "Not logged in user",
+        httpCode: 401,
+      });
+    } else {
+      const fundraiser = await prisma.fundraiser.findFirst({
+        where: {
+          id: Number(fundraiserId),
+        },
+        include: {
+          trackGroups: true,
+        },
+      });
+      if (!fundraiser) {
+        throw new AppError({
+          description: "Fundraiser does not exist",
+          httpCode: 404,
+        });
+      }
+      await doesTrackGroupBelongToUser(
+        Number(fundraiser?.trackGroups[0].id),
+        loggedInUser
+      );
+    }
+  } catch (e) {
+    return next(e);
+  }
+  return next();
+};
+
 export const trackGroupBelongsToLoggedInUser = async (
   req: Request,
   _res: Response,

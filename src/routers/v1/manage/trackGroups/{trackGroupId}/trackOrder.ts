@@ -60,7 +60,7 @@ export default function () {
   }
 
   PUT.apiDoc = {
-    summary: "Updates a trackGroup cover belonging to a user",
+    summary: "Updates track order belonging to a trackGroup",
     parameters: [
       {
         in: "path",

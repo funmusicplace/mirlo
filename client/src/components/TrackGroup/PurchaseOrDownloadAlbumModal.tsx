@@ -56,10 +56,10 @@ const PurchaseOrDownloadAlbum: React.FC<{
   }
 
   const hasPledge = user?.pledges?.find(
-    (p) => p.trackGroupId === trackGroup.id
+    (p) => p.fundraiserId === trackGroup.fundraiserId
   );
 
-  if (trackGroup.isAllOrNothing && hasPledge) {
+  if (trackGroup.fundraiser?.isAllOrNothing && hasPledge) {
     return (
       <BackingThisProject
         amount={hasPledge.amount}

@@ -10,6 +10,45 @@ import { bp } from "../../../constants";
 import useArtistQuery from "utils/useArtistQuery";
 import useManagedArtistQuery from "utils/useManagedArtistQuery";
 
+export const AnnouncementWrapper: React.FC<{
+  artistColors?: { primary: string; secondary: string; background: string };
+  children: React.ReactNode;
+}> = ({ artistColors, children }) => {
+  return (
+    <div
+      className={css`
+        width: 100%;
+        margin-top: 0 !important;
+        font-size: 1rem;
+        line-height: 1.5rem;
+        position: relative;
+
+        color: ${artistColors?.primary || "var(--mi-foreground-color)"};
+        background-color: ${artistColors?.secondary ||
+        "var(--mi-secondary-color)"};
+      `}
+    >
+      <div
+        className={css`
+          backdrop-filter: brightness(95%) grayscale(10%);
+          padding: 1rem;
+
+          > div {
+            margin-top: 0 !important;
+          }
+
+          a {
+            color: ${artistColors?.background || "var(--mi-background-color)"};
+            text-decoration: underline;
+          }
+        `}
+      >
+        {children}
+      </div>
+    </div>
+  );
+};
+
 const ManageArtistAnnouncement: React.FC<{
   showButtons?: boolean;
 }> = ({ showButtons }) => {
@@ -33,57 +72,27 @@ const ManageArtistAnnouncement: React.FC<{
 
   if (!isOpen && artist.announcementText) {
     return (
-      <div
-        className={css`
-          width: 100%;
-          margin-top: 0 !important;
-          font-size: 1rem;
-          line-height: 1.5rem;
-          position: relative;
-
-          color: ${artist.properties?.colors?.primary ||
-          "var(--mi-foreground-color)"};
-          background-color: ${artist.properties?.colors?.secondary ||
-          "var(--mi-secondary-color)"};
-        `}
-      >
-        <div
-          className={css`
-            backdrop-filter: brightness(95%) grayscale(10%);
-            padding: 1rem;
-
-            > div {
-              margin-top: 0 !important;
-            }
-
-            a {
-              color: ${artist.properties?.colors?.background ||
-              "var(--mi-background-color)"};
-              text-decoration: underline;
-            }
-          `}
-        >
-          <MarkdownContent content={artist.announcementText} />
-          {showButtons && !isOpen && (
-            <Button
-              variant="dashed"
-              size="compact"
-              onClick={() => setIsOpen(true)}
-              className={css`
-                position: absolute;
-                top: 0.75rem;
-                right: 1rem;
-                background-color: ${artist.properties?.colors?.background ||
-                "var(--mi-background-color)"} !important;
-                color: ${artist.properties?.colors?.primary ||
-                "var(--mi-foreground-color)"} !important;
-              `}
-            >
-              {t("editAnnouncement")}
-            </Button>
-          )}
-        </div>
-      </div>
+      <AnnouncementWrapper artistColors={artist.properties?.colors}>
+        <MarkdownContent content={artist.announcementText} />
+        {showButtons && !isOpen && (
+          <Button
+            variant="dashed"
+            size="compact"
+            onClick={() => setIsOpen(true)}
+            className={css`
+              position: absolute;
+              top: 0.75rem;
+              right: 1rem;
+              background-color: ${artist.properties?.colors?.background ||
+              "var(--mi-background-color)"} !important;
+              color: ${artist.properties?.colors?.primary ||
+              "var(--mi-foreground-color)"} !important;
+            `}
+          >
+            {t("editAnnouncement")}
+          </Button>
+        )}
+      </AnnouncementWrapper>
     );
   }
 

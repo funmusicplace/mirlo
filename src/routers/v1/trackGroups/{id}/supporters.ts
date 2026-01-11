@@ -27,6 +27,7 @@ export default function () {
         },
         include: {
           artist: true,
+          fundraiser: true,
         },
       });
 
@@ -43,11 +44,15 @@ export default function () {
           filters: { trackGroupIds: [Number(id)] },
         });
 
-      if (trackGroup.fundraisingGoal && trackGroup.isAllOrNothing) {
+      if (
+        trackGroup.fundraiser &&
+        trackGroup.fundraiser.goalAmount &&
+        trackGroup.fundraiser.isAllOrNothing
+      ) {
         // Handle all-or-nothing fundraising logic
-        const pledges = await prisma.trackGroupPledge.findMany({
+        const pledges = await prisma.fundraiserPledge.findMany({
           where: {
-            trackGroupId: Number(id),
+            fundraiserId: Number(trackGroup.fundraiser.id),
           },
         });
         results.push(
