@@ -1,3 +1,5 @@
+type FundraiserStatus = 'DRAFT' | 'FUNDING' | 'COMPLETE' | 'FAILED' | 'CANCELLED' | 'SUSPENDED';
+
 interface Paginated<T> {
   results: T[];
   limit: number;
@@ -16,7 +18,7 @@ interface LoggedInUser {
   userTrackPurchases?: { trackId: number }[];
   pledges?: {
     fundraiserId: number;
-    fundraiser: { goalAmount: number; isAllOrNothing: boolean };
+    fundraiser: { goalAmount: number; isAllOrNothing: boolean; fundraiserStatus: FundraiserStatus };
     amount: number;
   }[];
   isAdmin: boolean;
@@ -120,6 +122,7 @@ interface TrackGroup {
     goalAmount: number;
     isAllOrNothing: boolean;
     endDate: string;
+    fundraiserStatus: FundraiserStatus;
   } | null;
   paymentToUser?: {
     email: string;

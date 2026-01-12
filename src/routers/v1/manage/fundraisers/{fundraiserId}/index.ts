@@ -57,6 +57,7 @@ export default function () {
         "endDate",
         "goalAmount",
         "isAllOrNothing",
+        "fundraiserStatus",
       ]);
 
       await prisma.fundraiser.updateMany({

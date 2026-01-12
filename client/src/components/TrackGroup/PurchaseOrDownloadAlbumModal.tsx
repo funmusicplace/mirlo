@@ -59,7 +59,9 @@ const PurchaseOrDownloadAlbum: React.FC<{
     (p) => p.fundraiserId === trackGroup.fundraiserId
   );
 
-  if (trackGroup.fundraiser?.isAllOrNothing && hasPledge) {
+  const fundraiserIsComplete = trackGroup.fundraiser?.fundraiserStatus === 'COMPLETE';
+
+  if (trackGroup.fundraiser?.isAllOrNothing && hasPledge && !fundraiserIsComplete) {
     return (
       <BackingThisProject
         amount={hasPledge.amount}
