@@ -707,16 +707,19 @@ model Fundraiser {
   description    String?
   endDate        DateTime?
   // Is the fundraiser all or nothing
-  isAllOrNothing Boolean            @default(false)
-  status         FundraiserStatus   @default(ACTIVE)
-  trackGroups    TrackGroup[]
-  pledges        FundraiserPledge[]
+  isAllOrNothing   Boolean            @default(false)
+  fundraiserStatus FundraiserStatus   @default(FUNDING)
+  trackGroups      TrackGroup[]
+  pledges          FundraiserPledge[]
 }
 
 enum FundraiserStatus {
-  ACTIVE
-  SUCCESSFUL
+  DRAFT
+  FUNDING
+  COMPLETE
   FAILED
+  CANCELLED
+  SUSPENDED
 }
 
 model TrackGroupCover {

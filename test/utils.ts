@@ -27,7 +27,9 @@ export const clearTables = async () => {
   await prisma.$executeRaw`DELETE FROM "TrackGroupCover";`;
   await prisma.$executeRaw`DELETE FROM "TrackGroupDownloadableContent";`;
   await prisma.$executeRaw`DELETE FROM "TrackGroupDownloadCodes";`;
+  await prisma.$executeRaw`DELETE FROM "FundraiserPledge";`;
   await prisma.$executeRaw`DELETE FROM "TrackGroup";`;
+  await prisma.$executeRaw`DELETE FROM "Fundraiser";`;
   await prisma.$executeRaw`DELETE FROM "ArtistBanner";`;
   await prisma.$executeRaw`DELETE FROM "UserArtistTip";`;
   await prisma.$executeRaw`DELETE FROM "ArtistAvatar";`;
@@ -268,6 +270,22 @@ export const createTrackPlay = async (
   return trackPlay;
 };
 
+export const createFundraiser = async (
+  data?: Partial<Prisma.FundraiserCreateArgs["data"]>
+) => {
+  const fundraiser = await prisma.fundraiser.create({
+    data: {
+      name: data?.name ?? "Test Fundraiser",
+      goalAmount: data?.goalAmount ?? 100000,
+      isAllOrNothing: data?.isAllOrNothing ?? false,
+      fundraiserStatus: data?.fundraiserStatus ?? "FUNDING",
+      description: data?.description,
+      endDate: data?.endDate,
+    },
+  });
+  return fundraiser;
+};
+
 export default {
   createArtist,
   createPost,
@@ -278,6 +296,7 @@ export default {
   createUserTrackGroupPurchase,
   createUserTrackPurchase,
   createTrackPlay,
+  createFundraiser,
   clearTables,
   createClient,
 };

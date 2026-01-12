@@ -19,6 +19,7 @@ const FundraisingGoal: React.FC<{
     id: number;
     goalAmount: number;
     isAllOrNothing: boolean;
+    fundraiserStatus: string;
   } | null;
 }> = ({ trackGroupId, fundraiser }) => {
   const snackbar = useSnackbar();
@@ -65,6 +66,24 @@ const FundraisingGoal: React.FC<{
     }
   };
 
+  const onMarkComplete = async () => {
+    try {
+      setIsLoading(true);
+      if (!fundraiser) {
+        return;
+      }
+      await api.put(`manage/fundraisers/${fundraiser.id}`, {
+        fundraiserStatus: 'COMPLETE',
+      });
+      snackbar(t("markCompleteSuccess"), { type: "success" });
+      refetch();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const onAddFundraiser = async () => {
     try {
       setIsLoading(true);
@@ -96,11 +115,18 @@ const FundraisingGoal: React.FC<{
     <FormSection>
       <div className="flex justify-between items-center w-full">
         <h2>{t("fundraisingGoal")}</h2>
-        {chargePledgesVisible && (
-          <Button type="button" onClick={onChargePledges} isLoading={isLoading}>
-            {t("chargePledges")}
-          </Button>
-        )}
+        <div className="flex gap-2">
+          {chargePledgesVisible && (
+            <Button type="button" onClick={onChargePledges} isLoading={isLoading}>
+              {t("chargePledges")}
+            </Button>
+          )}
+          {fundraiser?.fundraiserStatus === 'FUNDING' && (
+            <Button type="button" onClick={onMarkComplete} isLoading={isLoading}>
+              {t("markComplete")}
+            </Button>
+          )}
+        </div>
       </div>
       <p>{t("fundraisingGoalDescription")}</p>
       <div
