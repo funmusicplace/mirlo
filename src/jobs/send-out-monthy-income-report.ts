@@ -16,6 +16,9 @@ export type MonthlyIncomeReportEmailType = {
     user: { name: string; email: string };
     currency: string;
     amount: number;
+    artistUserSubscriptionCharges?: {
+      artistUserSubscription?: { shippingAddress: true };
+    }[];
   }[];
   totalIncome: number;
 };
@@ -36,6 +39,7 @@ const sendOutMonthlyIncomeReport = async () => {
         userId: true,
       },
     });
+
     const sales = await findSales({
       artistId: allArtists.map((artist) => artist.id),
       sinceDate: startOfLastMonth.toISOString(),
@@ -45,7 +49,7 @@ const sendOutMonthlyIncomeReport = async () => {
 
     const mappedArtists = keyBy(allArtists, "id");
 
-    const groupedSales = groupBy(sales, "userId");
+    const groupedSales = groupBy(sales, (a) => a.artist[0].userId);
     for (const [userId, userSales] of Object.entries(groupedSales)) {
       if (userSales.length === 0) {
         continue;

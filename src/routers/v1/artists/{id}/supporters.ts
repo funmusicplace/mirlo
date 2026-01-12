@@ -96,7 +96,9 @@ const queryUserTransactions = (
           trackGroupId: true,
           trackGroup: {
             select: {
-              artist: { select: { name: true, id: true, urlSlug: true } },
+              artist: {
+                select: { name: true, id: true, urlSlug: true, userId: true },
+              },
               title: true,
               urlSlug: true,
             },
@@ -110,7 +112,9 @@ const queryUserTransactions = (
             select: {
               title: true,
               urlSlug: true,
-              artist: { select: { name: true, id: true, urlSlug: true } },
+              artist: {
+                select: { name: true, id: true, urlSlug: true, userId: true },
+              },
             },
           },
         },
@@ -119,7 +123,7 @@ const queryUserTransactions = (
       tips: {
         select: {
           artist: {
-            select: { name: true, id: true, urlSlug: true },
+            select: { name: true, id: true, urlSlug: true, userId: true },
           },
         },
       },
@@ -134,7 +138,12 @@ const queryUserTransactions = (
                   name: true,
                   interval: true,
                   artist: {
-                    select: { name: true, id: true, urlSlug: true },
+                    select: {
+                      name: true,
+                      id: true,
+                      urlSlug: true,
+                      userId: true,
+                    },
                   },
                 },
               },
@@ -155,7 +164,12 @@ const queryUserTransactions = (
                   id: true,
                   urlSlug: true,
                   artist: {
-                    select: { name: true, id: true, urlSlug: true },
+                    select: {
+                      name: true,
+                      id: true,
+                      urlSlug: true,
+                      userId: true,
+                    },
                   },
                 },
               },

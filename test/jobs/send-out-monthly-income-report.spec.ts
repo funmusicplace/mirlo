@@ -68,6 +68,14 @@ describe("send-out-monthly-income-report", () => {
       refDate: new Date(new Date().setDate(0)),
     });
 
+    const transaction = await prisma.userTransaction.create({
+      data: {
+        currency: "usd",
+        userId: followerUser.id,
+        amount: 5,
+        createdAt: chargeDate,
+      },
+    });
     await prisma.artistUserSubscriptionCharge.create({
       data: {
         artistUserSubscriptionId: aus.id,
@@ -75,10 +83,9 @@ describe("send-out-monthly-income-report", () => {
         paymentProcessor: "stripe",
         createdAt: chargeDate,
         currency: "usd",
+        transactionId: transaction.id,
       },
     });
-
-    console.log("charge date", chargeDate);
 
     await sendOutMonthlyIncomeReport();
 
@@ -90,7 +97,8 @@ describe("send-out-monthly-income-report", () => {
     assert.equal(locals.userSales.length, 1);
     assert.equal(locals.totalIncome, 5);
     assert.equal(locals.userSales[0].amount, 5);
-    assert.equal(locals.userSales[0].saleType, "subscription");
+    assert.equal(locals.userSales[0].saleType, "transaction");
+    assert.equal(locals.userSales[0].artistUserSubscriptionCharges?.length, 1);
   });
 
   it("should send an income report to an artist who has gained a tip", async () => {
@@ -191,20 +199,28 @@ describe("send-out-monthly-income-report", () => {
       },
     });
 
+    const createdDate = faker.date.between({
+      from: new Date(new Date().getFullYear(), new Date().getMonth() - 2, 1),
+      to: new Date(new Date().getFullYear(), new Date().getMonth() - 2, 28),
+    });
+
+    const transaction = await prisma.userTransaction.create({
+      data: {
+        currency: "usd",
+        userId: followerUser.id,
+        amount: 5,
+        createdAt: createdDate,
+      },
+    });
+
     const charge = await prisma.artistUserSubscriptionCharge.create({
       data: {
         artistUserSubscriptionId: aus.id,
         amountPaid: 5,
         paymentProcessor: "stripe",
-        createdAt: faker.date.between({
-          from: new Date(
-            new Date().getFullYear(),
-            new Date().getMonth() - 2,
-            1
-          ),
-          to: new Date(new Date().getFullYear(), new Date().getMonth() - 2, 28),
-        }),
+        createdAt: createdDate,
         currency: "usd",
+        transactionId: transaction.id,
       },
     });
 
@@ -321,6 +337,10 @@ describe("send-out-monthly-income-report", () => {
       email: "artist@artist.com",
     });
 
+    const { user: artistUser2 } = await createUser({
+      email: "artist2@artist.com",
+    });
+
     const { user: followerUser } = await createUser({
       email: "follower@follower.com",
       emailConfirmationToken: null,
@@ -343,6 +363,23 @@ describe("send-out-monthly-income-report", () => {
       },
     });
 
+    const artist2 = await prisma.artist.create({
+      data: {
+        name: "Test artist 2",
+        urlSlug: "test-artist-2",
+        userId: artistUser2.id,
+        enabled: true,
+        subscriptionTiers: {
+          create: {
+            name: "a tier",
+          },
+        },
+      },
+      include: {
+        subscriptionTiers: true,
+      },
+    });
+
     const aus = await prisma.artistUserSubscription.create({
       data: {
         userId: followerUser.id,
@@ -351,24 +388,57 @@ describe("send-out-monthly-income-report", () => {
       },
     });
 
-    const charge = await prisma.artistUserSubscriptionCharge.create({
+    const createdDate = faker.date.recent({
+      days: 25,
+      refDate: new Date(new Date().setDate(0)),
+    });
+
+    const transaction = await prisma.userTransaction.create({
+      data: {
+        currency: "usd",
+        userId: followerUser.id,
+        amount: 5,
+        createdAt: createdDate,
+      },
+    });
+
+    await prisma.artistUserSubscriptionCharge.create({
       data: {
         artistUserSubscriptionId: aus.id,
         amountPaid: 5,
         paymentProcessor: "stripe",
-        createdAt: faker.date.recent({
-          days: 25,
-          refDate: new Date(new Date().setDate(0)),
-        }),
+        createdAt: createdDate,
         currency: "usd",
+        transactionId: transaction.id,
       },
     });
 
-    console.log("charge date", charge.createdAt);
+    const tip = await prisma.userArtistTip.create({
+      data: {
+        datePurchased: faker.date.recent({
+          days: 10,
+          refDate: new Date(new Date().setDate(1)),
+        }),
+        userId: followerUser.id,
+        artistId: artist2.id,
+      },
+    });
+
+    await prisma.userTransaction.create({
+      data: {
+        currency: "usd",
+        userId: followerUser.id,
+        tips: {
+          connect: { id: tip.id },
+        },
+        amount: 7,
+        createdAt: tip.datePurchased,
+      },
+    });
 
     await sendOutMonthlyIncomeReport();
 
-    assert.equal(stub.calledOnce, true);
+    assert.equal(stub.calledTwice, true);
     const data0 = stub.getCall(0).args[0].data;
     assert.equal(data0.template, "announce-monthly-income-report");
     assert.equal(data0.message.to, "artist@artist.com");
@@ -376,7 +446,18 @@ describe("send-out-monthly-income-report", () => {
     assert.equal(locals.userSales.length, 1);
     assert.equal(locals.totalIncome, 5);
     assert.equal(locals.userSales[0].amount, 5);
-    assert.equal(locals.userSales[0].saleType, "subscription");
+    assert.equal(locals.userSales[0].saleType, "transaction");
+    assert.equal(locals.userSales[0].artist[0]?.id, artist.id);
+
+    const data1 = stub.getCall(1).args[0].data;
+    assert.equal(data1.template, "announce-monthly-income-report");
+    assert.equal(data1.message.to, "artist2@artist.com");
+    const locals2 = data1.locals as MonthlyIncomeReportEmailType;
+    assert.equal(locals2.userSales.length, 1);
+    assert.equal(locals2.totalIncome, 7);
+    assert.equal(locals2.userSales[0].amount, 7);
+    assert.equal(locals2.userSales[0].saleType, "transaction");
+    assert.equal(locals2.userSales[0].artist[0]?.id, artist2.id);
   });
 
   it("should send an income report for multiple artists if a user has more than one artist sales", async () => {
