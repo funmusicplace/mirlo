@@ -5,7 +5,8 @@ export const SelectEl = styled.select`
   font-size: 0.85rem;
   max-width: 100%;
   padding: 0.4rem;
-
+  background-color: var(--mi-background-color);
+  backdrop-filter: brightness(95%);
   option {
     padding: 0.4rem;
   }

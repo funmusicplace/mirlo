@@ -17,7 +17,6 @@ import { useAuthContext } from "state/AuthContext";
 import { SelectEl } from "components/common/Select";
 import PaymentSlider from "./ManageTrackGroup/AlbumFormComponents/PaymentSlider";
 import styled from "@emotion/styled";
-import FeatureFlag from "components/common/FeatureFlag";
 import UploadGeneralImage from "./UploadGeneralImage";
 
 export const FormSection = styled.div`
@@ -39,6 +38,19 @@ const generateDefaultValues = (existing?: ArtistSubscriptionTier) => {
   };
   return vals;
 };
+
+type FormData = {
+  name: string;
+  description: string;
+  minAmount: string;
+  allowVariable: boolean;
+  autoPurchaseAlbums: boolean;
+  platformPercent?: number;
+  collectAddress: boolean;
+  interval: "MONTH" | "YEAR";
+  imageId?: string;
+};
+
 const SubscriptionForm: React.FC<{
   artist: Artist;
   existing?: ArtistSubscriptionTier;
@@ -53,17 +65,7 @@ const SubscriptionForm: React.FC<{
   const errorHandler = useErrorHandler();
   const [isSaving, setIsSaving] = React.useState(false);
 
-  const methods = useForm<{
-    name: string;
-    description: string;
-    minAmount: string;
-    allowVariable: boolean;
-    autoPurchaseAlbums: boolean;
-    platformPercent?: number;
-    collectAddress: boolean;
-    interval: "MONTH" | "YEAR";
-    imageId?: string;
-  }>({
+  const methods = useForm<FormData>({
     defaultValues: generateDefaultValues(existing),
   });
   const { register, handleSubmit, reset, formState } = methods;
@@ -74,7 +76,7 @@ const SubscriptionForm: React.FC<{
   const artistId = artist.id;
 
   const doSave = React.useCallback(
-    async (data: { name: string; description: string; minAmount: string }) => {
+    async (data: FormData) => {
       if (userId) {
         try {
           setIsSaving(true);

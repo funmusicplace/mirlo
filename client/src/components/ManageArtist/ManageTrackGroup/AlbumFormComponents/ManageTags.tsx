@@ -4,7 +4,6 @@ import {
   useGetArtistColors,
 } from "components/Artist/ArtistButtons";
 import AutoComplete from "components/common/AutoComplete";
-import Button from "components/common/Button";
 import FormComponent from "components/common/FormComponent";
 import Pill from "components/common/Pill";
 import { cloneDeep, uniq } from "lodash";
