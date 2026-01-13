@@ -9,13 +9,15 @@ import { useQuery } from "@tanstack/react-query";
 import { queryArtist, queryUserStripeStatus } from "queries";
 import BackingThisProject from "./BackingThisProject";
 import PurchaseAlbumModal from "./PurchaseAlbumModal";
+import { bp } from "../../constants";
 
 const PurchaseOrDownloadAlbum: React.FC<{
   trackGroup: TrackGroup;
   track?: Track;
   collapse?: boolean;
   fixed?: boolean;
-}> = ({ trackGroup, track, collapse, fixed }) => {
+  flex?: boolean;
+}> = ({ trackGroup, track, collapse, fixed, flex }) => {
   const { user } = useAuthContext();
   const [isOwned, setIsOwned] = React.useState(false);
   const { data: artist } = useQuery(
@@ -95,6 +97,12 @@ const PurchaseOrDownloadAlbum: React.FC<{
       <div
         className={css`
           z-index: 2;
+          ${flex ? "display: flex; justify-content: end;" : ""};
+          @media screen and (max-width: ${bp.medium}px) {
+            display: block;
+
+            ${flex ? "width: 100%;" : ""};
+          }
         `}
       >
         {showPurchase && (

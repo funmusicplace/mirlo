@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { ArtistButton } from "components/Artist/ArtistButtons";
 import { IoAddSharp } from "react-icons/io5";
 import { FixedButton } from "components/common/FixedButton";
+import { bp } from "../../constants";
 
 const AddToCollection: React.FC<{
   trackGroup: TrackGroup;
@@ -53,6 +54,10 @@ const AddToCollection: React.FC<{
         .children {
           overflow: hidden;
           text-overflow: ellipsis;
+        }
+
+        @media screen and (max-width: ${bp.medium}px) {
+          width: 100%;
         }
       `}
       startIcon={<IoAddSharp />}

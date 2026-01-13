@@ -74,7 +74,7 @@ const BackOrIsBacking: React.FC<{ trackGroup: TrackGroup; artist: Artist }> = ({
             />
           )}
           {!paymentStatus && (
-            <PurchaseOrDownloadAlbum trackGroup={trackGroup} />
+            <PurchaseOrDownloadAlbum flex trackGroup={trackGroup} />
           )}
         </>
       )}
