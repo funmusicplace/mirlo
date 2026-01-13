@@ -235,7 +235,15 @@ function TrackGroup() {
           `}
         >
           {!isPublished && (
-            <ArtistBox variant="warning">{t("notPublishedWarning")}</ArtistBox>
+            <div
+              className={css`
+                margin-top: 0.5rem;
+              `}
+            >
+              <ArtistBox variant="warning">
+                {t("notPublishedWarning")}
+              </ArtistBox>
+            </div>
           )}
           <Fundraiser />
           <div
