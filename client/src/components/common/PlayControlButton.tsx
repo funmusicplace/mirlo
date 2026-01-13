@@ -27,11 +27,11 @@ export const PlayControlButton: React.FC<{
           justify-content: center;
 
           span {
-            ${playerButton ? "font-size: 1.1rem !important;" : ""}
+            ${playerButton ? "font-size: 1.1rem !important; " : ""}
           }
 
           svg {
-            ${playerButton ? "fill: white; " : ""}
+            ${playerButton ? "fill: lightgrey; " : ""}
           }
         }
       `}

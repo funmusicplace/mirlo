@@ -171,7 +171,7 @@ const Player = () => {
 
                   button {
                     color: lightgrey;
-                    border: solid 1px lightgrey;
+                    border: solid 1px grey;
                   }
 
                   @media (max-width: ${bp.small}px) {
@@ -186,8 +186,10 @@ const Player = () => {
               <div
                 className={css`
                   button {
-                    color: lightgrey !important;
-                    border: solid 1px lightgrey !important;
+                    svg {
+                      fill: lightgrey;
+                    }
+                    border: solid 1px grey;
                   }
                 `}
               >
@@ -197,8 +199,10 @@ const Player = () => {
               <div
                 className={css`
                   button {
-                    color: lightgrey !important;
-                    border: solid 1px lightgrey !important;
+                    svg {
+                      fill: lightgrey;
+                    }
+                    border: solid 1px grey;
                   }
                 `}
               >
