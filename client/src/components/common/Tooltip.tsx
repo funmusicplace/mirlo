@@ -1,4 +1,5 @@
 import styled from "@emotion/styled";
+import { bp } from "../../constants";
 import React from "react";
 
 const TooltipWrapper = styled.div<{ underline: boolean }>`
@@ -11,6 +12,10 @@ const TooltipWrapper = styled.div<{ underline: boolean }>`
 
   &:hover .tooltiptext {
     visibility: visible;
+  }
+
+  @media screen and (max-width: ${bp.medium}px) {
+    display: none !important;
   }
 `;
 
@@ -30,7 +35,6 @@ const TooltipText = styled.span`
   z-index: 999;
 
   top: 100%;
-  margin-left: -100px;
 
   &:after {
     content: " ";
@@ -41,6 +45,10 @@ const TooltipText = styled.span`
     border-width: 5px;
     border-style: solid;
     border-color: transparent transparent black transparent;
+  }
+
+  @media screen and (max-width: ${bp.medium}px) {
+    display: none !important;
   }
 `;
 
