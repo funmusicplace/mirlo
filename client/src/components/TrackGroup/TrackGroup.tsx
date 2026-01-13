@@ -267,7 +267,6 @@ function TrackGroup() {
                     size={600}
                   />
                 </ImageWrapper>
-
                 <UnderneathImage>
                   <ReleaseDate releaseDate={trackGroup.releaseDate} />
                   <div
@@ -295,14 +294,6 @@ function TrackGroup() {
                 {trackGroup.merch && trackGroup.merch.length > 0 && (
                   <TrackGroupMerch merch={trackGroup.merch} />
                 )}
-                {trackGroup.downloadableContent &&
-                  trackGroup.downloadableContent.length > 0 && (
-                    <ReleaseDownloadableContent
-                      trackGroup={trackGroup}
-                      artist={artist}
-                    />
-                  )}
-
                 <SmallScreenPlayWrapper>
                   <ClickToPlayTracks
                     trackIds={trackGroup.tracks.map((t) => t.id)}
@@ -364,6 +355,13 @@ function TrackGroup() {
                 </div>
               )}
             </div>
+            {trackGroup.downloadableContent &&
+              trackGroup.downloadableContent.length > 0 && (
+                <ReleaseDownloadableContent
+                  trackGroup={trackGroup}
+                  artist={artist}
+                />
+              )}
           </div>
           <TrackgroupInfosWrapper>
             {!showAboutInsteadOfTrackListing && trackGroupAbout && (

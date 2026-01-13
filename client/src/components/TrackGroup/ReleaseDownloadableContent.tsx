@@ -60,23 +60,34 @@ const ReleaseDownloadableContent: React.FC<{
         className={
           "includes " +
           css`
-            margin: 1.5rem 1rem 0 1rem;
+            margin-top: 1rem;
+            font-size: var(--mi-font-size-small);
             @media screen and (max-width: ${bp.small}px) {
               max-width: 100%;
               flex: 100%;
-              margin: 1rem;
+              margin: var(--mi-side-paddings-xsmall);
+              margin-top: 1rem;
             }
           `
         }
       >
         <p>
-          <strong>{t("yourPurchaseIncludes")}</strong>
+          <strong
+            className={css`
+              font-size: var(--mi-font-size-small);
+              }
+            `}
+          >
+            {t("yourPurchaseIncludes")}
+          </strong>
         </p>
         <ul
           className={css`
             list-style-type: disc;
+            margin: var(--mi-side-paddings-xsmall);
             margin-top: 0.5rem;
-            margin-left: 1.5rem;
+            font-size: var(--mi-font-size-small);
+            margin-left: 1rem;
           `}
         >
           {trackGroup.downloadableContent.map((content) => (
@@ -107,11 +118,13 @@ const ReleaseDownloadableContent: React.FC<{
         trackGroup.downloadableContent.length > 0 && (
           <div
             className={css`
-              margin: 1.5rem 1rem 0 1rem;
+              margin-top: 1rem;
+              font-size: var(--mi-font-size-small);
               @media screen and (max-width: ${bp.small}px) {
                 max-width: 100%;
                 flex: 100%;
-                margin-left: 0;
+                margin: var(--mi-side-paddings-xsmall);
+                margin-top: 1rem;
               }
             `}
           >
@@ -121,8 +134,10 @@ const ReleaseDownloadableContent: React.FC<{
             <ul
               className={css`
                 list-style-type: disc;
+                margin: var(--mi-side-paddings-xsmall);
                 margin-top: 0.5rem;
-                margin-left: 1.5rem;
+                font-size: var(--mi-font-size-small);
+                margin-left: 1rem;
               `}
             >
               {trackGroup.downloadableContent.map((content) => (
