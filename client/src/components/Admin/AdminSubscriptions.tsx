@@ -19,8 +19,10 @@ interface AdminSubscription extends ArtistUserSubscription {
   user: User;
   artistUserSubscriptionCharges: {
     createdAt: string;
-    amountPaid: number;
-    currency: string;
+    transaction: {
+      amount: number;
+      currency: string;
+    };
   }[];
 }
 
@@ -140,8 +142,8 @@ export const AdminSubscriptions: React.FC = () => {
                   {sub.artistUserSubscriptionCharges.map((charge) => (
                     <>
                       <Money
-                        amount={charge.amountPaid / 100}
-                        currency={charge.currency}
+                        amount={charge.transaction.amount / 100}
+                        currency={charge.transaction.currency}
                       ></Money>
                       : {formatDate({ date: charge.createdAt, i18n })}
                     </>

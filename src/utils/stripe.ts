@@ -1294,6 +1294,7 @@ export const chargePledgePayments = async (
             amount: pledge.amount,
             currency: pledge.fundraiser.trackGroups[0].currency ?? "usd",
             createdAt: new Date(),
+            paymentStatus: "COMPLETED",
           },
         });
 

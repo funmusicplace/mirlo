@@ -52,6 +52,7 @@ export default function () {
             }
           : undefined,
       });
+
       const slicedResults = results.slice(
         Number(skip),
         Number(skip) + Number(take)

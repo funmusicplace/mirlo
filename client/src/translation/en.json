@@ -76,8 +76,9 @@
     "pricingAndFeatures": "Pricing & Features",
     "features": "Features",
     "pricing": "Pricing",
+    "faq": "FAQ",
+    "linkToDocumentation": "<p>For a thorough look at how Mirlo works, <faq>check out our documentation</faq>.</p>",
     "featuresText": "<p>Mirlo provides a space for artists to upload their music, establish their online presence, sell their music, and receive ongoing monthly contributions from their audience.</p><p>For a thorough look at our features for artists, <featuresLink>check out our features page</featuresLink>.</p>",
-    "pricingText": "<p>Artists get to decide how much of their sale goes to Mirlo. They do this by setting a percentage on sales. So if an artist sells an album on for $10, they will decide whether Mirlo gets 70 cents, $1, or nothing. This lets artists decide how much of their money they need for themselves. By default, Mirlo charges 10% on each sale. <i>Then</i>, our payment processor Stripe, will take a cut of 2.9% + 30c (proportionally <proportionally>this is larger on small transactions</proportionally>).</p><p>Want to know more about our thought process? Check out <takeRate>our blog post explaining how we got there</takeRate>.</p> <p>As we develop our project and come to terms with the costs of running it, we will adjust these numbers and explore new ways of financing Mirlo.</p>",
     "morePricing": "As we develop our project and come to terms with costs of running it, we will tweak these numbers and explore new ways of paying for the service and our work."
   },
   "logIn": {
@@ -255,9 +256,11 @@
     "sales": "Sales",
     "artist": "Artist",
     "amount": "Amount",
+    "noSales": "No sales yet.",
     "totalSalesIncome": "Total sales income",
     "totalAmountOfSales": "Total amount of sales",
     "shippingCost": "Shipping cost",
+    "shippingAddress": "Shipping address",
     "date": "Date",
     "item": "Item",
     "type": "Type",

@@ -91,22 +91,16 @@ const About: React.FC = () => {
           t={t}
           components={{
             p: <p></p>,
-            featuresLink: <Link to="/pages/features"></Link>,
+            featuresLink: <Link to="https://docs.mirlo.space/features/"></Link>,
           }}
         />
 
-        <H2HashLink id="pricing">{t("pricing")}</H2HashLink>
+        <H2HashLink id="FAQ">{t("faq")}</H2HashLink>
         <Trans
           t={t}
-          i18nKey="pricingText"
+          i18nKey="linkToDocumentation"
           components={{
-            takeRate: <Link to="/team/posts/204"></Link>,
-            p: <p></p>,
-            giveDirectly: <Link to="/team/support"></Link>,
-            i: <em></em>,
-            proportionally: (
-              <a href="https://nham.co.uk/2025/03/musicians-how-to-receive-more-money-for-each-track-sold/"></a>
-            ),
+            faq: <a href="https://docs.mirlo.space"></a>,
           }}
         />
       </div>
@@ -148,86 +142,6 @@ const About: React.FC = () => {
           agreement to incorporate consent-based cooperative governance into our
           foundational protocols, inspired by the principles of{" "}
           <a href="https://www.sociocracyforall.org/sociocracy/">Sociocracy</a>.
-        </p>
-      </div>
-      <div>
-        <H2HashLink id="media">In the media</H2HashLink>
-        <h3>Podcasts</h3>
-        <ul
-          className={css`
-            margin-left: 0 !important;
-            list-style: none;
-            list-decoration: none;
-
-            & li {
-              margin-left: 0;
-              display: inline-block;
-              margin-right: 1rem;
-
-              img {
-                width: 100px;
-                height: 100px;
-                border-radius: var(--mi-border-radius);
-              }
-            }
-          `}
-        >
-          <li>
-            <a
-              href="https://pca.st/53x15cjf"
-              title="Interview on It Could Happen Here"
-            >
-              <img
-                alt="It could happen here"
-                src="/static/images/media/ichh.jpg"
-              />
-            </a>
-          </li>
-          <li>
-            <a
-              title="Second interview on Everything Co-op"
-              href="https://everything.coop/episodes/simon-vansintjan-alex-rodr%C3%ADguez-highlight-advancements-and-future-endeavors-for-music-platform-mirlo/"
-            >
-              <img
-                alt="Everything Co-op"
-                src="/static/images/media/everything-co-op.png"
-              />
-            </a>
-          </li>
-          <li>
-            <a
-              title="An Interview with Alex Rodríguez of Mirlo"
-              href="https://www.youtube.com/watch?v=HjumzWRTR7U"
-            >
-              <img
-                alt="Grassroots Economic Organizing"
-                src="/static/images/media/geo-logo-sun-road.png"
-              />
-            </a>
-          </li>
-          <li>
-            <a
-              title="Simon Vansintjan on Mirlo"
-              href="https://podcast.sustainoss.org/234"
-            >
-              <img alt="Sustain" src="/static/images/media/sustain.jpg" />
-            </a>
-          </li>
-          <li>
-            <a
-              title="The music industry is dependent on underpaid workers"
-              href="https://podcasts.apple.com/us/podcast/the-music-industry-is-dependent-on-underpaid-workers/id1375082413?i=1000678928151"
-            >
-              <img
-                alt="Power Station"
-                src="/static/images/media/power-station.webp"
-              />
-            </a>
-          </li>
-        </ul>
-        <p>
-          Want to to talk to us? Contact us at{" "}
-          <a href="mailto:hi@mirlo.space">hi@mirlo.space</a>.
         </p>
       </div>
       <div>
@@ -520,10 +434,9 @@ const H2HashLink: React.FC<{
         }
       `}
     >
-      {" "}
       <H2>
         {children}
-        <FaLink />{" "}
+        <FaLink className="inline" />
       </H2>
     </Link>
   );

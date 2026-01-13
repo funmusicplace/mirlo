@@ -12,14 +12,8 @@ import {
 } from "utils/artist";
 import { bp } from "../../constants";
 import { css } from "@emotion/css";
-import {
-  isMerchPurchase,
-  isTrackGroupPurchase,
-  isTrackPurchase,
-  isUserTransaction,
-} from "types/typeguards";
+import { isUserTransaction } from "types/typeguards";
 import PurchaseComponent from "./PurchaseComponent";
-import { isUser } from "components/ManageArtist/UploadArtistImage";
 import TransactionComponent from "./TransactionComponent";
 
 function YourPurchases() {
@@ -164,21 +158,23 @@ function YourPurchases() {
                 `}
               >
                 {charges.map((p) => (
-                  <li>
-                    <PurchaseComponent
-                      title={
-                        p.artistUserSubscription.artistSubscriptionTier.name
-                      }
-                      currencyPaid={p.currency}
-                      pricePaid={p.amountPaid}
-                      artist={
-                        p.artistUserSubscription.artistSubscriptionTier.artist
-                      }
-                      url={getArtistUrl(
-                        p.artistUserSubscription.artistSubscriptionTier.artist
-                      )}
-                      purchaseDate={p.createdAt}
-                    />
+                  <li key={p.id}>
+                    {p.transaction && (
+                      <PurchaseComponent
+                        title={
+                          p.artistUserSubscription.artistSubscriptionTier.name
+                        }
+                        currencyPaid={p.transaction?.currency}
+                        pricePaid={p.transaction?.amount}
+                        artist={
+                          p.artistUserSubscription.artistSubscriptionTier.artist
+                        }
+                        url={getArtistUrl(
+                          p.artistUserSubscription.artistSubscriptionTier.artist
+                        )}
+                        purchaseDate={p.createdAt}
+                      />
+                    )}
                   </li>
                 ))}
               </ol>

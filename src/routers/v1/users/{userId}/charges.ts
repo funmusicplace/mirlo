@@ -1,8 +1,7 @@
-import { Prisma, User } from "@mirlo/prisma/client";
+import { User } from "@mirlo/prisma/client";
 import { Request, Response } from "express";
 import { userAuthenticated } from "../../../../auth/passport";
 import prisma from "@mirlo/prisma";
-import trackGroupProcessor from "../../../../utils/trackGroup";
 
 type Params = {
   userId: string;
@@ -25,6 +24,7 @@ export default function () {
           },
         },
         include: {
+          transaction: true,
           artistUserSubscription: {
             include: {
               artistSubscriptionTier: {

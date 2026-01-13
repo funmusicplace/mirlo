@@ -433,6 +433,7 @@ model ArtistUserSubscription {
   notifications                 Notification[]
   message                       String?
   artistUserSubscriptionCharges ArtistUserSubscriptionCharge[]
+  shippingAddress               Json?
 
   @@unique([userId, artistSubscriptionTierId])
 }
@@ -459,6 +460,8 @@ model ArtistUserSubscriptionCharge {
   platformCut              Int? // in cents
   currency                 String
   createdAt                DateTime               @default(now())
+  transactionId            String?
+  transaction              UserTransaction?       @relation(fields: [transactionId], references: [id])
 }
 
 model Merch {
@@ -593,21 +596,29 @@ model UserTrackGroupPurchase {
 }
 
 model UserTransaction {
-  id                  String                   @id @default(uuid())
-  userId              Int
-  user                User                     @relation(fields: [userId], references: [id])
-  createdAt           DateTime                 @default(now())
-  amount              Int // in cents
-  currency            String
-  platformCut         Int? // in cents
-  stripeCut           Int? // in cents
-  stripeId            String?
-  shippingFeeAmount   Int? // in cents
-  trackGroupPurchases UserTrackGroupPurchase[]
-  merchPurchases      MerchPurchase[]
-  trackPurchases      UserTrackPurchase[]
-  tips                UserArtistTip[]
-  associatedPledges   FundraiserPledge?
+  id                            String                         @id @default(uuid())
+  userId                        Int
+  user                          User                           @relation(fields: [userId], references: [id])
+  createdAt                     DateTime                       @default(now())
+  amount                        Int // in cents
+  currency                      String
+  platformCut                   Int? // in cents
+  stripeCut                     Int? // in cents
+  stripeId                      String?
+  shippingFeeAmount             Int? // in cents
+  trackGroupPurchases           UserTrackGroupPurchase[]
+  merchPurchases                MerchPurchase[]
+  trackPurchases                UserTrackPurchase[]
+  tips                          UserArtistTip[]
+  associatedPledges             FundraiserPledge?
+  artistUserSubscriptionCharges ArtistUserSubscriptionCharge[]
+  paymentStatus                 PaymentStatus                  @default(PENDING)
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
 }
 
 model UserTrackPurchase {

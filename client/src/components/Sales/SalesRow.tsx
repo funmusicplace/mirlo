@@ -7,6 +7,9 @@ import { getMerchUrl, getReleaseUrl, getTrackUrl } from "utils/artist";
 import { Sale } from "queries";
 import { FaExternalLinkAlt } from "react-icons/fa";
 import { css } from "@emotion/css";
+import { Button } from "components/common/Button";
+import { Modal } from "components/common/Modal";
+import { RenderAddress } from "components/FulFillment/CustomerPopUp";
 
 const SalesRow: React.FC<{
   sale: Sale;
@@ -14,6 +17,8 @@ const SalesRow: React.FC<{
   const { i18n, t } = useTranslation("translation", {
     keyPrefix: "sales",
   });
+
+  const [openShippingAddress, setOpenShippingAddress] = React.useState(false);
 
   let shippingDestinations: ShippingDestination[] | undefined;
   sale.merchPurchases?.forEach((purchase) => {
@@ -30,7 +35,7 @@ const SalesRow: React.FC<{
       ? "merch"
       : sale.trackPurchases?.length
         ? "track"
-        : sale.artistSubscriptionTier
+        : sale.artistUserSubscriptionCharges?.length
           ? "subscription"
           : "tip";
 
@@ -119,10 +124,38 @@ const SalesRow: React.FC<{
               </Link>
             ))}
           </span>
-        ) : sale.artistSubscriptionTier ? (
+        ) : sale.artistUserSubscriptionCharges?.length ? (
           <span>
-            {sale.artistSubscriptionTier.name}{" "}
-            {sale.artistSubscriptionTier.interval}
+            {
+              sale.artistUserSubscriptionCharges[0].artistUserSubscription
+                ?.artistSubscriptionTier.name
+            }{" "}
+            (
+            {
+              sale.artistUserSubscriptionCharges[0]?.artistUserSubscription
+                ?.artistSubscriptionTier?.interval
+            }
+            )
+            {sale.artistUserSubscriptionCharges[0]?.artistUserSubscription
+              ?.shippingAddress && (
+              <>
+                <Modal
+                  open={openShippingAddress}
+                  title={t("shippingAddress")}
+                  onClose={() => setOpenShippingAddress(false)}
+                >
+                  <RenderAddress
+                    shippingAddress={
+                      sale.artistUserSubscriptionCharges[0]
+                        ?.artistUserSubscription?.shippingAddress!
+                    }
+                  />
+                </Modal>
+                <Button onClick={() => setOpenShippingAddress(true)}>
+                  Has Shipping
+                </Button>
+              </>
+            )}
           </span>
         ) : (
           <span>{t("tip")}</span>

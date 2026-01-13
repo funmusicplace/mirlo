@@ -18,36 +18,6 @@ const constructDateFilter = (
   }
 };
 
-const querySupporters = (
-  artistId: number[],
-  sinceDate?: string,
-  untilDate?: string
-) => {
-  const dateFilter = constructDateFilter(sinceDate, untilDate);
-  return prisma.artistUserSubscriptionCharge.findMany({
-    where: {
-      artistUserSubscription: {
-        amount: { gt: 0 },
-        artistSubscriptionTier: {
-          artistId: { in: artistId },
-        },
-      },
-      createdAt: dateFilter,
-    },
-    select: {
-      artistUserSubscription: {
-        select: {
-          amount: true,
-          currency: true,
-          artistSubscriptionTier: { include: { artist: true } },
-          userId: true,
-        },
-      },
-      createdAt: true,
-    },
-  });
-};
-
 const queryUserTransactions = (
   artistId: number[],
   sinceDate?: string,
@@ -98,6 +68,17 @@ const queryUserTransactions = (
             },
           },
         },
+        {
+          artistUserSubscriptionCharges: {
+            some: {
+              artistUserSubscription: {
+                artistSubscriptionTier: {
+                  artistId: { in: artistId },
+                },
+              },
+            },
+          },
+        },
       ],
     },
     select: {
@@ -115,7 +96,9 @@ const queryUserTransactions = (
           trackGroupId: true,
           trackGroup: {
             select: {
-              artist: { select: { name: true, id: true, urlSlug: true } },
+              artist: {
+                select: { name: true, id: true, urlSlug: true, userId: true },
+              },
               title: true,
               urlSlug: true,
             },
@@ -129,7 +112,9 @@ const queryUserTransactions = (
             select: {
               title: true,
               urlSlug: true,
-              artist: { select: { name: true, id: true, urlSlug: true } },
+              artist: {
+                select: { name: true, id: true, urlSlug: true, userId: true },
+              },
             },
           },
         },
@@ -138,7 +123,31 @@ const queryUserTransactions = (
       tips: {
         select: {
           artist: {
-            select: { name: true, id: true, urlSlug: true },
+            select: { name: true, id: true, urlSlug: true, userId: true },
+          },
+        },
+      },
+
+      artistUserSubscriptionCharges: {
+        select: {
+          artistUserSubscription: {
+            select: {
+              shippingAddress: true,
+              artistSubscriptionTier: {
+                select: {
+                  name: true,
+                  interval: true,
+                  artist: {
+                    select: {
+                      name: true,
+                      id: true,
+                      urlSlug: true,
+                      userId: true,
+                    },
+                  },
+                },
+              },
+            },
           },
         },
       },
@@ -155,7 +164,12 @@ const queryUserTransactions = (
                   id: true,
                   urlSlug: true,
                   artist: {
-                    select: { name: true, id: true, urlSlug: true },
+                    select: {
+                      name: true,
+                      id: true,
+                      urlSlug: true,
+                      userId: true,
+                    },
                   },
                 },
               },
@@ -207,11 +221,8 @@ export const findSales = async ({
     }
   }
 
-  let supporters: Awaited<ReturnType<typeof querySupporters>> = [];
   let userTransactions: Awaited<ReturnType<typeof queryUserTransactions>> = [];
   if (!filters) {
-    supporters = await querySupporters(artistId, sinceDate, untilDate);
-
     userTransactions = await queryUserTransactions(
       artistId,
       sinceDate,
@@ -227,17 +238,6 @@ export const findSales = async ({
   }
 
   return [
-    ...supporters.map((s) => ({
-      ...s,
-      artist: [s.artistUserSubscription.artistSubscriptionTier.artist],
-      amount: s.artistUserSubscription.amount,
-      artistSubscriptionTier: s.artistUserSubscription.artistSubscriptionTier,
-      title: `${s.artistUserSubscription.artistSubscriptionTier.name}`,
-      datePurchased: s.createdAt,
-      userId: s.artistUserSubscription.userId,
-      currency: s.artistUserSubscription.currency,
-      saleType: "subscription",
-    })),
     ...userTransactions.map((ut) => ({
       ...ut,
       paymentProcessorCut: ut.stripeCut,
@@ -248,6 +248,9 @@ export const findSales = async ({
         ut.merchPurchases?.map((mp) => mp.merch.artist),
         ut.trackPurchases?.map((tp) => tp.track.trackGroup.artist),
         ut.tips?.map((tip) => tip.artist),
+        ut.artistUserSubscriptionCharges?.map(
+          (asc) => asc.artistUserSubscription.artistSubscriptionTier.artist
+        ),
       ].flat(),
       urlSlug: ut.trackGroupPurchases
         .map((tgp) => tgp.trackGroup.urlSlug)
