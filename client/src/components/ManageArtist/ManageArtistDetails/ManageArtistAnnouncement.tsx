@@ -18,10 +18,11 @@ export const AnnouncementWrapper: React.FC<{
     <div
       className={css`
         width: 100%;
-        margin-top: 0 !important;
+        margin-top: 0;
         font-size: 1rem;
         line-height: 1.5rem;
         position: relative;
+        margin-bottom: 0.25rem;
 
         color: ${artistColors?.primary || "var(--mi-foreground-color)"};
         background-color: ${artistColors?.secondary ||
@@ -32,7 +33,7 @@ export const AnnouncementWrapper: React.FC<{
         className={css`
           backdrop-filter: brightness(95%) grayscale(10%);
           padding: 1rem;
-
+          margin-bottom: 0.5rem;
           > div {
             margin-top: 0 !important;
           }
@@ -75,22 +76,31 @@ const ManageArtistAnnouncement: React.FC<{
       <AnnouncementWrapper artistColors={artist.properties?.colors}>
         <MarkdownContent content={artist.announcementText} />
         {showButtons && !isOpen && (
-          <Button
-            variant="dashed"
-            size="compact"
-            onClick={() => setIsOpen(true)}
+          <div
             className={css`
-              position: absolute;
-              top: 0.75rem;
-              right: 1rem;
-              background-color: ${artist.properties?.colors?.background ||
-              "var(--mi-background-color)"} !important;
-              color: ${artist.properties?.colors?.primary ||
-              "var(--mi-foreground-color)"} !important;
+              @media screen and (max-width: ${bp.medium}px) {
+                padding: var(--mi-side-paddings-xsmall);
+                width: 100%;
+              }
             `}
           >
-            {t("editAnnouncement")}
-          </Button>
+            <Button
+              variant="dashed"
+              size="compact"
+              onClick={() => setIsOpen(true)}
+              className={css`
+                position: absolute;
+                top: 0.75rem;
+                right: 1rem;
+                background-color: ${artist.properties?.colors?.background ||
+                "var(--mi-background-color)"} !important;
+                color: ${artist.properties?.colors?.primary ||
+                "var(--mi-foreground-color)"} !important;
+              `}
+            >
+              {t("editAnnouncement")}
+            </Button>
+          </div>
         )}
       </AnnouncementWrapper>
     );
@@ -98,25 +108,36 @@ const ManageArtistAnnouncement: React.FC<{
 
   if (showButtons && !isOpen && !artist.announcementText) {
     return (
-      <Button
-        variant="dashed"
-        size="compact"
-        onClick={() => setIsOpen(true)}
+      <div
         className={css`
-          margin-top: 0.5rem;
-          background-color: ${artist.properties?.colors?.background ||
-          "var(--mi-background-color)"} !important;
-          color: ${artist.properties?.colors?.primary ||
-          "var(--mi-foreground-color)"} !important;
+          padding: var(--mi-side-paddings-xsmall);
+          padding-top: 0.5rem;
+          padding-bottom: 0.5rem;
+          background-color: ${artist.properties?.colors?.secondary ||
+          "var(--mi-secondary-color)"} !important;
+          filter: brightness(95%) grayscale(10%);
 
           @media screen and (max-width: ${bp.medium}px) {
-            margin: var(--mi-side-paddings-xsmall);
-            margin-top: 0.5rem;
+            padding-top: 0.5rem;
           }
         `}
       >
-        {t("editAnnouncement")}
-      </Button>
+        <Button
+          variant="dashed"
+          size="compact"
+          onClick={() => setIsOpen(true)}
+          className={css`
+            background-color: ${artist.properties?.colors?.background ||
+            "var(--mi-background-color)"} !important;
+            color: ${artist.properties?.colors?.primary ||
+            "var(--mi-foreground-color)"} !important;
+            width: 100%;
+            padding: var(--mi-side-paddings-xsmall);
+          `}
+        >
+          {t("editAnnouncement")}
+        </Button>
+      </div>
     );
   }
 
@@ -126,6 +147,7 @@ const ManageArtistAnnouncement: React.FC<{
         className={css`
           width: 100%;
           position: relative;
+
           textarea {
             color: ${artist.properties?.colors?.primary ||
             "var(--mi-primary-color)"};
@@ -172,7 +194,7 @@ const ManageArtistAnnouncement: React.FC<{
           <FormComponent
             className={css`
               margin-top: 0 !important;
-              margin-bottom: 0 !important;
+              margin-bottom: 0.5rem !important;
 
               textarea {
                 margin-bottom: 0 !important;
