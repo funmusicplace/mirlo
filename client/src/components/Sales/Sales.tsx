@@ -39,7 +39,6 @@ export const Sales: React.FC = () => {
 
   const { data: managedArtists } = useQuery(queryManagedArtists());
 
-  console.log("results", results);
   return (
     <WidthContainer
       className={css`

@@ -53,6 +53,7 @@ export default function () {
         const pledges = await prisma.fundraiserPledge.findMany({
           where: {
             fundraiserId: Number(trackGroup.fundraiser.id),
+            cancelledAt: null,
           },
         });
         results.push(

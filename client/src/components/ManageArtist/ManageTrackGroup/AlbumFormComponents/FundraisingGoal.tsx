@@ -78,8 +78,6 @@ const FundraisingGoal: React.FC<{
     }
   };
 
-  console.log("trackGroup", fundraiser);
-
   if (!fundraiser) {
     return (
       <div>

@@ -170,6 +170,25 @@ export function useUpdatePledgeMutation() {
   });
 }
 
+async function deletePledge({ fundraiserId }: { fundraiserId: number }) {
+  return api.del(`v1/fundraisers/${fundraiserId}/changePledge`);
+}
+
+export function useDeletePledgeMutation() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: deletePledge,
+    async onSuccess(_, {}) {
+      await client.invalidateQueries({
+        predicate: (query) =>
+          queryKeyIncludes(query, QUERY_KEY_TRACK_GROUPS) ||
+          queryKeyIncludes(query, QUERY_KEY_AUTH) ||
+          queryKeyIncludes(query, QUERY_KEY_SALES),
+      });
+    },
+  });
+}
+
 async function deleteTrackGroup(opts: {
   userId: number;
   trackGroupId: number;

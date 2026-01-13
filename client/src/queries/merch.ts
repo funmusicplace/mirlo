@@ -58,6 +58,7 @@ export function useCreateMerchMutation() {
     },
   });
 }
+
 async function deleteMerch({ merchId }: { merchId: string }) {
   return api.del(`v1/manage/merch/${merchId}`);
 }

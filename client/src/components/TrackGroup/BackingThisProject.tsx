@@ -10,7 +10,8 @@ import { FormProvider, useForm } from "react-hook-form";
 import FormComponent from "components/common/FormComponent";
 import Button from "components/common/Button";
 import { useSnackbar } from "state/SnackbarContext";
-import { useUpdatePledgeMutation } from "queries";
+import { useDeletePledgeMutation, useUpdatePledgeMutation } from "queries";
+import { useConfirm } from "utils/useConfirm";
 
 interface FormData {
   chosenPrice: string;
@@ -30,6 +31,8 @@ const BackingThisProject: React.FC<{
   const minPrice = trackGroup?.minPrice;
   const snackbar = useSnackbar();
   const { mutateAsync: updatePledge } = useUpdatePledgeMutation();
+  const { mutateAsync: deletePledge } = useDeletePledgeMutation();
+  const { ask } = useConfirm();
 
   const [isSavingPledge, setIsSavingPledge] = React.useState(false);
 
@@ -71,6 +74,27 @@ const BackingThisProject: React.FC<{
     }
   };
 
+  const onClickStopBacking = async () => {
+    setIsChangingPledge(false);
+    const response = await ask(t("areYouSureYouWantToStopBacking"));
+    if (!response) {
+      return;
+    }
+    try {
+      if (!trackGroup.fundraiserId) {
+        console.error("No fundraiser associated with this track group");
+        return;
+      }
+      await deletePledge({ fundraiserId: trackGroup.fundraiserId });
+      setIsChangingPledge(false);
+      snackbar(t("pledgeDeletedSuccessfully"), { type: "success" });
+    } catch (e) {
+      console.error("Error deleting pledge:", e);
+    }
+  };
+
+  const chosenPrice = methods.watch("chosenPrice");
+
   return (
     <>
       <Modal
@@ -89,9 +113,25 @@ const BackingThisProject: React.FC<{
                 artistName={trackGroup.artist?.name}
               />
             </FormComponent>
-            <Button type="submit" isLoading={isSavingPledge}>
-              {t("updatePledge")}
-            </Button>
+            <div className="flex justify-between">
+              <Button
+                type="submit"
+                size="big"
+                isLoading={isSavingPledge}
+                disabled={
+                  Number(chosenPrice) < (trackGroup.minPrice ?? 0) / 100
+                }
+              >
+                {t("updatePledge")}
+              </Button>
+              <Button
+                variant="transparent"
+                type="button"
+                onClick={onClickStopBacking}
+              >
+                {t("stopBacking")}
+              </Button>
+            </div>
           </form>
         </FormProvider>
       </Modal>
