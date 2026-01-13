@@ -189,7 +189,6 @@ const Player = () => {
                     svg {
                       fill: lightgrey;
                     }
-                    border: solid 1px grey;
                   }
                 `}
               >
@@ -202,7 +201,6 @@ const Player = () => {
                     svg {
                       fill: lightgrey;
                     }
-                    border: solid 1px grey;
                   }
                 `}
               >
