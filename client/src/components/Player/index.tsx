@@ -170,8 +170,8 @@ const Player = () => {
                   align-items: center;
 
                   button {
-                    color: lightgrey !important;
-                    border: solid 1px lightgrey !important;
+                    color: lightgrey;
+                    border: solid 1px lightgrey;
                   }
 
                   @media (max-width: ${bp.small}px) {
