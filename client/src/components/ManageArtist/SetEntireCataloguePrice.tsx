@@ -51,7 +51,14 @@ const SetEntireCataloguePrice: React.FC = () => {
 
   return (
     <div>
-      <ArtistButton onClick={showModal} size="compact" variant="outlined">
+      <ArtistButton
+        onClick={showModal}
+        size="compact"
+        variant="outlined"
+        className={css`
+          height: 100%;
+        `}
+      >
         {t("setEntireCataloguePrice")}
       </ArtistButton>
       <Modal
