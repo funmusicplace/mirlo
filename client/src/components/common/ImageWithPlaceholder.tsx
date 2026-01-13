@@ -50,7 +50,7 @@ export const ImageWithPlaceholder: React.FC<{
         <div
           className={css`
             width: ${size}px;
-            display: block;
+            display: flex;
             aspect-ratio: 1 / 1;
             height: 100%;
           `}
