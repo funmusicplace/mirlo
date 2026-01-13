@@ -124,7 +124,7 @@ const Player = () => {
             font-size: var(--mi-font-size-small);
             justify-content: space-between;
             a {
-              color: lightgrey !important;
+              color: lightgrey;
             }
 
             @media (max-width: ${bp.small}px) {
