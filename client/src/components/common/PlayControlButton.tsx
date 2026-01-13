@@ -31,7 +31,7 @@ export const PlayControlButton: React.FC<{
           }
 
           svg {
-            ${playerButton ? "fill: white !important; " : ""}
+            ${playerButton ? "fill: white; " : ""}
           }
         }
       `}
