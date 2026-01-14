@@ -7,6 +7,7 @@ import Modal from "components/common/Modal";
 import { moneyDisplay } from "components/common/Money";
 import BuyMerchItem from "components/Merch/BuyMerchItem";
 import MerchButtonPopUp from "components/Merch/MerchButtonPopUp";
+import { bp } from "../../constants";
 import { queryArtist } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -30,22 +31,12 @@ const TrackGroupMerchItem: React.FC<{ item: Merch }> = ({ item }) => {
   }
 
   return (
-    <li key={item.id}>
-      <div
-        className={css`
-          display: flex;
-          align-items: center;
-
-          > a {
-            margin-left: 1rem;
-            font-size: 0.9rem;
-          }
-
-          img {
-            height: 60px;
-          }
-        `}
-      >
+    <div
+      className={css`
+        padding: 0.5rem !important;
+      `}
+    >
+      <li key={item.id}>
         <ImageWithPlaceholder
           src={item.images?.[0]?.sizes?.[60]}
           alt={item.title}
@@ -53,10 +44,41 @@ const TrackGroupMerchItem: React.FC<{ item: Merch }> = ({ item }) => {
           square
           objectFit="contain"
         />
-        <Link to={getMerchUrl(artist, item)}>{item.title}</Link>
-      </div>
-      <MerchButtonPopUp artist={artist} merch={item} />
-    </li>
+        <div
+          className={css`
+            display: flex;
+            align-items: center;
+            > a {
+              margin-left: 1rem;
+              font-size: 0.9rem;
+            }
+
+            img {
+              height: 60px;
+            }
+
+            @media (max-width: ${bp.medium}px) {
+              justify-content: center;
+              width: 75%;
+              flex-wrap: wrap;
+              margin-left: 0.5rem !important;
+
+              button {
+                width: 100%;
+              }
+              > a {
+                margin: 0rem;
+                padding-bottom: 0.5rem;
+                font-size: 0.9rem;
+              }
+            }
+          `}
+        >
+          <Link to={getMerchUrl(artist, item)}>{item.title}</Link>
+          <MerchButtonPopUp artist={artist} merch={item} />
+        </div>
+      </li>
+    </div>
   );
 };
 
