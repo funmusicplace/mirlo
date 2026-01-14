@@ -218,7 +218,7 @@ const ArtistFormLinks: React.FC<ArtistFormLinksProps> = ({
         <div
           className={css`
             max-width: 100%;
-            overflow: scroll;
+            overflow: auto;
             display: flex;
             justify-content: flex-start;
             align-items: center;
