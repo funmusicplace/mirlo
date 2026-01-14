@@ -30,7 +30,16 @@ export default function () {
           id: Number(fundraiserId),
         },
         include: {
-          trackGroups: true,
+          trackGroups: {
+            include: {
+              artist: {
+                select: {
+                  urlSlug: true,
+                  id: true,
+                },
+              },
+            },
+          },
         },
       });
 

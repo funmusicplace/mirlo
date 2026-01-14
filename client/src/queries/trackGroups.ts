@@ -208,6 +208,63 @@ export function useDeleteTrackGroupMutation() {
   });
 }
 
+const fetchManagedFundraiser: QueryFunction<
+  Fundraiser,
+  ["fetchManagedFundraiser", { fundraiserId: number }, ...any]
+> = ({ queryKey: [_, { fundraiserId }], signal }) => {
+  return api
+    .get<{
+      result: Fundraiser;
+    }>(`v1/manage/fundraisers/${fundraiserId}`, { signal })
+    .then((r) => r.result);
+};
+
+export function queryManagedFundraiser(fundraiserId: number) {
+  return queryOptions({
+    queryKey: [
+      "fetchManagedFundraiser",
+      { fundraiserId },
+      QUERY_KEY_TRACK_GROUPS,
+    ],
+    queryFn: fetchManagedFundraiser,
+    enabled: isFinite(fundraiserId),
+  });
+}
+
+const fetchFundraiserPledges: QueryFunction<
+  { results: FundraiserPledge[]; total: number },
+  [
+    "fetchFundraiserPledges",
+    { fundraiserId: number; includeCancelled?: boolean },
+    ...any,
+  ]
+> = ({ queryKey: [_, { fundraiserId, includeCancelled }], signal }) => {
+  const params = new URLSearchParams();
+  if (includeCancelled) {
+    params.append("includeCancelled", "true");
+  }
+  return api.get(`v1/manage/fundraisers/${fundraiserId}/pledges?${params}`, {
+    signal,
+  });
+};
+
+export function queryFundraiserPledges(opts: {
+  fundraiserId: number;
+  includeCancelled?: boolean;
+}) {
+  return queryOptions({
+    queryKey: [
+      "fetchFundraiserPledges",
+      {
+        fundraiserId: opts.fundraiserId,
+        includeCancelled: opts.includeCancelled,
+      },
+      QUERY_KEY_TRACK_GROUPS,
+    ],
+    queryFn: fetchFundraiserPledges,
+  });
+}
+
 const fetchTrackGroupSupporters: QueryFunction<
   {
     results: {

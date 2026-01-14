@@ -3,6 +3,8 @@ import { Prisma } from "@mirlo/prisma/client";
 import { buildTokens, hashPassword } from "../src/routers/auth/utils";
 
 export const clearTables = async () => {
+  await prisma.$executeRaw`DELETE FROM "FundraiserPledge";`;
+  await prisma.$executeRaw`DELETE FROM "Fundraiser";`;
   await prisma.$executeRaw`DELETE FROM "ArtistLabel";`;
   await prisma.$executeRaw`DELETE FROM "ActivityPubArtistFollowers";`;
   await prisma.$executeRaw`DELETE FROM "Notification";`;
@@ -269,6 +271,49 @@ export const createTrackPlay = async (
   return trackPlay;
 };
 
+export const createFundraiser = async (
+  trackGroupId: number,
+  data?: Partial<Prisma.FundraiserCreateArgs["data"]>
+) => {
+  const fundraiser = await prisma.fundraiser.create({
+    data: {
+      name: data?.name ?? "Test Fundraiser",
+      goalAmount: data?.goalAmount ?? 50000,
+      description: data?.description,
+      isAllOrNothing: data?.isAllOrNothing ?? false,
+      status: data?.status ?? "ACTIVE",
+      endDate: data?.endDate,
+      trackGroups: {
+        connect: {
+          id: trackGroupId,
+        },
+      },
+    },
+  });
+  return fundraiser;
+};
+
+export const createFundraiserPledge = async (
+  fundraiserId: number,
+  userId: number,
+  data?: Partial<Prisma.FundraiserPledgeCreateArgs["data"]>
+) => {
+  const pledge = await prisma.fundraiserPledge.create({
+    data: {
+      fundraiserId,
+      userId,
+      amount: data?.amount ?? 5000,
+      stripeSetupIntentId:
+        data?.stripeSetupIntentId ?? `seti_test_${Math.random()}`,
+      trackGroupId: data?.trackGroupId,
+      message: data?.message,
+      paidAt: data?.paidAt,
+      cancelledAt: data?.cancelledAt,
+    },
+  });
+  return pledge;
+};
+
 export default {
   createArtist,
   createPost,
@@ -279,6 +324,8 @@ export default {
   createUserTrackGroupPurchase,
   createUserTrackPurchase,
   createTrackPlay,
+  createFundraiser,
+  createFundraiserPledge,
   clearTables,
   createClient,
 };

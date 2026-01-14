@@ -738,6 +738,26 @@
     "howMuchModalCalculator": "If you're having trouble deciding on a rate, you can use <link>this sliding scale calculator</link> for individuals (in english) provided by the Aorta Co-operative.",
     "howMuchModalFinances": "Curious about how Mirlo uses money? We post quarterly financial statements <link>on our blog</link>."
   },
+  "fundraiserPledges": {
+    "pledges": "Pledges",
+    "fundraiserFor": "Fundraiser for",
+    "filterPledges": "Filter pledges",
+    "activePledgesOnly": "Active Pledges Only",
+    "allPledges": "All Pledges",
+    "totalPledges": "Total Pledges",
+    "activePledgers": "Active Pledgers",
+    "noPledges": "No pledges yet.",
+    "name": "Name",
+    "email": "Email",
+    "amount": "Amount",
+    "createdAt": "Pledged On",
+    "status": "Status",
+    "cancelled": "Cancelled",
+    "paid": "Paid",
+    "pending": "Pending",
+    "viewRelease": "View related release",
+    "manageRelease": "Manage"
+  },
   "manageAlbum": {
     "allowMirloPromoLabel": "Allow Mirlo to use it for promotion?",
     "defaultTrackAllowIndividualSale": "By default, tracks will be available for individual sale.",

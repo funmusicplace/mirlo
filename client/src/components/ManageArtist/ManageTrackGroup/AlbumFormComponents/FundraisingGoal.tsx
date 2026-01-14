@@ -3,7 +3,7 @@ import React from "react";
 import SavingInput from "./SavingInput";
 import { useTranslation } from "react-i18next";
 import { useFormContext } from "react-hook-form";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { FormSection } from "./AlbumFormContent";
 import { css } from "@emotion/css";
 import { useAuthContext } from "state/AuthContext";
@@ -12,6 +12,7 @@ import { queryManagedTrackGroup, queryTrackGroupSupporters } from "queries";
 import { useQuery } from "@tanstack/react-query";
 import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
+import { FaEye } from "react-icons/fa";
 
 const FundraisingGoal: React.FC<{
   trackGroupId: number;
@@ -94,11 +95,27 @@ const FundraisingGoal: React.FC<{
     <FormSection>
       <div className="flex justify-between items-center w-full">
         <h2>{t("fundraisingGoal")}</h2>
-        {chargePledgesVisible && (
-          <Button type="button" onClick={onChargePledges} isLoading={isLoading}>
-            {t("chargePledges")}
-          </Button>
-        )}
+        <div className="flex gap-2">
+          {fundraiser && (
+            <Link
+              to={`/manage/artists/${artistId}/fundraiser/${fundraiser.id}/pledges`}
+              className="flex items-center gap-1"
+            >
+              <Button type="button" startIcon={<FaEye />}>
+                {t("viewPledges", { defaultValue: "View pledges" })}
+              </Button>
+            </Link>
+          )}
+          {chargePledgesVisible && (
+            <Button
+              type="button"
+              onClick={onChargePledges}
+              isLoading={isLoading}
+            >
+              {t("chargePledges")}
+            </Button>
+          )}
+        </div>
       </div>
       <p>{t("fundraisingGoalDescription")}</p>
       <div
