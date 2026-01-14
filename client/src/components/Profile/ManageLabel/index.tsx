@@ -60,122 +60,141 @@ const ProfileLabel: React.FC = () => {
 
   return (
     <WidthContainer variant="big" justify="center">
-      <ProfileSection>
-        <h1>{t("manageLabel")}</h1>
-        <p>{t("manageLabelDescription")}</p>
-        <p>
-          <Trans
-            t={t}
-            i18nKey="linkToProfile"
-            components={{
-              link: <Link to={`/profile/${user.id}`}></Link>,
-            }}
-          />
-        </p>
-      </ProfileSection>
-      <ProfileSection>
-        <SpaceBetweenDiv>
-          <h2>{t("manageArtists")}</h2>
+      <div
+        className={css`
+          padding: var(--mi-side-paddings-xsmall);
+        `}
+      >
+        <ProfileSection>
+          <h1>{t("manageLabel")}</h1>
+          <p>{t("manageLabelDescription")}</p>
+          <p>
+            <Trans
+              t={t}
+              i18nKey="linkToProfile"
+              components={{
+                link: <Link to={`/profile/${user.id}`}></Link>,
+              }}
+            />
+          </p>
+        </ProfileSection>
+        <ProfileSection>
+          <SpaceBetweenDiv>
+            <h2>{t("manageArtists")}</h2>
+            <div
+              className={css`
+                display: flex;
+                flex-wrap: wrap;
+                gap: 1rem;
+              `}
+            >
+              <ButtonLink variant="outlined" to="/sales" size="compact">
+                {t("viewSalesPage")}
+              </ButtonLink>
+              <ButtonLink variant="outlined" to="/fulfillment" size="compact">
+                {t("viewFulfillmentPage")}
+              </ButtonLink>
+              <ButtonLink
+                to={`/${labelProfile?.urlSlug}`}
+                endIcon={<FaChevronRight />}
+                variant="link"
+                size="compact"
+              >
+                {t("viewLabelPage")}
+              </ButtonLink>
+            </div>
+          </SpaceBetweenDiv>
+          <AddArtistToRoster refresh={refetch} />
           <div
             className={css`
-              display: flex;
-              gap: 1rem;
+              overflow-x: auto;
             `}
           >
-            <ButtonLink variant="outlined" to="/sales" size="compact">
-              {t("viewSalesPage")}
-            </ButtonLink>
-            <ButtonLink variant="outlined" to="/fulfillment" size="compact">
-              {t("viewFulfillmentPage")}
-            </ButtonLink>
-            <ButtonLink
-              to={`/${labelProfile?.urlSlug}`}
-              endIcon={<FaChevronRight />}
-              variant="link"
-              size="compact"
+            <Table
+              className={css`
+                a {
+                  white-space: nowrap;
+                }
+              `}
             >
-              {t("viewLabelPage")}
-            </ButtonLink>
-          </div>
-        </SpaceBetweenDiv>
-        <AddArtistToRoster refresh={refetch} />
-        <Table>
-          <thead>
-            <tr>
-              <th></th>
-              <th>{t("artist")}</th>
-              <th>{t("page")}</th>
-              <th>{t("manage")}</th>
-              {/* <th>{t("manage")}</th> */}
-              {/* <th>{t("canLabelAddReleases")}</th> */}
-              <th>{t("isArtistConfirmed")}</th>
-              <th>{t("isLabelConfirmed")}</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {relationships.map((relationship, idx) => (
-              <tr key={relationship.artist.id}>
-                <td>
-                  <img src={relationship.artist.avatar?.sizes?.[60]} />
-                </td>
-                <td>{relationship.artist.name}</td>
-                <td>
-                  <Link to={getArtistUrl(relationship.artist)}>
-                    {t("page")}
-                  </Link>
-                </td>
-                <td>
-                  {relationship.canLabelManageArtist ? (
-                    <>
-                      <Link to={getArtistManageUrl(relationship.artist.id)}>
-                        {t("manage")}
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>{t("artist")}</th>
+                  <th>{t("page")}</th>
+                  <th>{t("manage")}</th>
+                  {/* <th>{t("manage")}</th> */}
+                  {/* <th>{t("canLabelAddReleases")}</th> */}
+                  <th>{t("isArtistConfirmed")}</th>
+                  <th>{t("isLabelConfirmed")}</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {relationships.map((relationship, idx) => (
+                  <tr key={relationship.artist.id}>
+                    <td>
+                      <img src={relationship.artist.avatar?.sizes?.[60]} />
+                    </td>
+                    <td>{relationship.artist.name}</td>
+                    <td>
+                      <Link to={getArtistUrl(relationship.artist)}>
+                        {t("page")}
                       </Link>
-                    </>
-                  ) : (
-                    t("askArtist")
-                  )}
-                </td>
-                {/* <td>
+                    </td>
+                    <td>
+                      {relationship.canLabelManageArtist ? (
+                        <>
+                          <Link to={getArtistManageUrl(relationship.artist.id)}>
+                            {t("manage")}
+                          </Link>
+                        </>
+                      ) : (
+                        t("askArtist")
+                      )}
+                    </td>
+                    {/* <td>
                 {relationship.canLabelAddReleases ? (
                   <MdCheckBox />
                 ) : (
                   t("askArtist")
                 )}
               </td> */}
-                <td>
-                  {relationship.isArtistApproved ? (
-                    <MdCheckBox />
-                  ) : (
-                    t("askArtist")
-                  )}
-                </td>
-                <td>
-                  <Toggle
-                    toggled={relationship.isLabelApproved}
-                    onClick={() => {
-                      const newValue = !fields[idx].isLabelApproved;
-                      setValue(
-                        `relationships.${idx}.isLabelApproved`,
-                        newValue
-                      );
-                      handleConfirm(fields[idx].artistId, newValue);
-                    }}
-                    label={t("showOnPage")}
-                  />
-                </td>
-                <td>
-                  {relationship.canLabelManageArtist && (
-                    <>
-                      <NewAlbumButton artist={relationship.artist} />
-                    </>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
-      </ProfileSection>
+                    <td>
+                      {relationship.isArtistApproved ? (
+                        <MdCheckBox />
+                      ) : (
+                        t("askArtist")
+                      )}
+                    </td>
+                    <td>
+                      <Toggle
+                        toggled={relationship.isLabelApproved}
+                        onClick={() => {
+                          const newValue = !fields[idx].isLabelApproved;
+                          setValue(
+                            `relationships.${idx}.isLabelApproved`,
+                            newValue
+                          );
+                          handleConfirm(fields[idx].artistId, newValue);
+                        }}
+                        label={t("showOnPage")}
+                      />
+                    </td>
+                    <td>
+                      {relationship.canLabelManageArtist && (
+                        <>
+                          <NewAlbumButton artist={relationship.artist} />
+                        </>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </div>
+        </ProfileSection>
+      </div>
     </WidthContainer>
   );
 };
