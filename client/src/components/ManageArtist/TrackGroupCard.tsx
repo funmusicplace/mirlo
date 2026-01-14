@@ -118,6 +118,7 @@ const TrackGroupCard: React.FC<{
 
           @media screen and (max-width: ${bp.small}px) {
             grid-template-columns: max(35%) max(65%);
+            margin-left: 0;
           }
           @media screen and (max-width: ${bp.medium}px) {
             font-size: var(--mi-font-size-small);

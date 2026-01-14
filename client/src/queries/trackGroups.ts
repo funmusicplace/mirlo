@@ -321,3 +321,104 @@ export function queryTrackGroupSupporters(
     queryFn: fetchTrackGroupSupporters,
   });
 }
+
+const fetchManagedRecommendedTrackGroups: QueryFunction<
+  { results: TrackGroup[] },
+  ["fetchManagedRecommendedTrackGroups", { trackGroupId: number }, ...any]
+> = ({ queryKey: [_, { trackGroupId }], signal }) => {
+  return api.get<{ results: TrackGroup[] }>(
+    `v1/manage/trackGroups/${trackGroupId}/recommendedTrackGroups`,
+    {
+      signal,
+    }
+  );
+};
+
+export function queryManagedRecommendedTrackGroups(trackGroupId: number) {
+  return queryOptions({
+    queryKey: [
+      "fetchManagedRecommendedTrackGroups",
+      { trackGroupId },
+      QUERY_KEY_TRACK_GROUPS,
+    ],
+    queryFn: fetchManagedRecommendedTrackGroups,
+    enabled: isFinite(trackGroupId),
+  });
+}
+
+const fetchPublicRecommendedTrackGroups: QueryFunction<
+  { results: TrackGroup[] },
+  ["fetchPublicRecommendedTrackGroups", { trackGroupId: number }, ...any]
+> = ({ queryKey: [_, { trackGroupId }], signal }) => {
+  return api.get<{ results: TrackGroup[] }>(
+    `v1/trackGroups/${trackGroupId}/recommendedTrackGroups`,
+    {
+      signal,
+    }
+  );
+};
+
+export function queryPublicRecommendedTrackGroups(trackGroupId: number) {
+  return queryOptions({
+    queryKey: [
+      "fetchPublicRecommendedTrackGroups",
+      { trackGroupId },
+      QUERY_KEY_TRACK_GROUPS,
+    ],
+    queryFn: fetchPublicRecommendedTrackGroups,
+    enabled: isFinite(trackGroupId),
+  });
+}
+
+async function addRecommendedTrackGroup(opts: {
+  trackGroupId: number;
+  recommendedTrackGroupId: number;
+}) {
+  return api.put(
+    `v1/manage/trackGroups/${opts.trackGroupId}/recommendedTrackGroups`,
+    {
+      recommendedTrackGroupId: opts.recommendedTrackGroupId,
+    }
+  );
+}
+
+export function useAddRecommendedTrackGroupMutation() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: addRecommendedTrackGroup,
+    async onSuccess(_, { trackGroupId }) {
+      await client.invalidateQueries({
+        queryKey: [
+          "fetchManagedRecommendedTrackGroups",
+          { trackGroupId },
+          QUERY_KEY_TRACK_GROUPS,
+        ],
+      });
+    },
+  });
+}
+
+async function removeRecommendedTrackGroup(opts: {
+  trackGroupId: number;
+  recommendedTrackGroupId: number;
+}) {
+  return api.del(
+    `v1/manage/trackGroups/${opts.trackGroupId}/recommendedTrackGroups?recommendedTrackGroupId=${opts.recommendedTrackGroupId}`
+  );
+}
+
+export function useRemoveRecommendedTrackGroupMutation() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: removeRecommendedTrackGroup,
+    async onSuccess(_, { trackGroupId }) {
+      await client.invalidateQueries({
+        queryKey: [
+          "fetchManagedRecommendedTrackGroups",
+          { trackGroupId },
+          QUERY_KEY_TRACK_GROUPS,
+        ],
+      });
+    },
+  });
+}

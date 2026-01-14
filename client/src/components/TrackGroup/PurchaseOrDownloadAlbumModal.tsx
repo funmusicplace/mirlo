@@ -101,7 +101,7 @@ const PurchaseOrDownloadAlbum: React.FC<{
           }
         `}
       >
-        {showPurchase && (
+        {showPurchase && !addToCollection && (
           <PurchaseAlbumModal
             trackGroup={trackGroup}
             track={track}

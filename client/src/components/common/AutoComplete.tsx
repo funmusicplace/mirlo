@@ -19,15 +19,12 @@ const SearchResultsDiv = styled.div`
   z-index: 999;
   word-break: break-word;
   color: var(--mi-normal-foreground-color);
-  margin-top: 0.5rem;
   border-radius: 5px;
   max-height: 400px;
   overflow-y: scroll;
 
   @media (max-width: ${bp.small}px) {
-    position: fixed;
     left: 0;
-    margin-top: 1rem;
   }
 
   @media (prefers-color-scheme: dark) {
@@ -276,7 +273,7 @@ const AutoComplete: React.FC<{
               <SearchResultList>
                 {searchResults.map((r, index) => {
                   return (
-                    <>
+                    <React.Fragment key={r.id}>
                       {r.firstInCategory && (
                         <div
                           className={css`
@@ -303,7 +300,7 @@ const AutoComplete: React.FC<{
                           </Button>
                         )}
                       </SearchResult>
-                    </>
+                    </React.Fragment>
                   );
                 })}
               </SearchResultList>

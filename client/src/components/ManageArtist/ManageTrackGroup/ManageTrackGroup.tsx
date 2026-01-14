@@ -19,6 +19,7 @@ import { ArtistButtonLink } from "components/Artist/ArtistButtons";
 import { MdOutlineDownloadForOffline } from "react-icons/md";
 import { getArtistManageUrl } from "utils/artist";
 import DownloadableContent from "../Merch/DownloadableContent";
+import RecommendedTrackGroups from "./AlbumFormComponents/RecommendedTrackGroups";
 
 export interface TrackGroupFormData {
   published: boolean;
@@ -155,6 +156,8 @@ const ManageTrackGroup: React.FC<{}> = () => {
         itemType="release"
       />
       <hr style={{ marginTop: "1rem", marginBottom: "1rem" }} />
+      <RecommendedTrackGroups trackGroupId={trackGroup.id} />
+
       <PublishButton trackGroup={trackGroup} reload={refetch} />
     </ManageSectionWrapper>
   );

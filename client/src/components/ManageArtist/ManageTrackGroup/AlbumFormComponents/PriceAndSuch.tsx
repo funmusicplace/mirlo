@@ -34,6 +34,7 @@ const PriceAndSuch: React.FC<{
 
   const preventAlbumPurchase = watch("isGettable", false);
   const isAlbumGettable = !preventAlbumPurchase;
+
   return (
     <FormSection>
       <h2>{t("priceAndSuch")}</h2>
@@ -84,18 +85,20 @@ const PriceAndSuch: React.FC<{
                     align-items: center;
                   `}
                 >
-                  <div
-                    className={css`
-                      width: 2rem;
-                      height: 89%;
-                      display: flex;
-                      align-items: center;
-                      justify-content: center;
-                      margin-bottom: 0.25rem;
-                    `}
-                  >
-                    {user?.currency && getCurrencySymbol(user?.currency)}
-                  </div>
+                  {user?.currency && (
+                    <div
+                      className={css`
+                        width: 2rem;
+                        height: 89%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        margin-bottom: 0.25rem;
+                      `}
+                    >
+                      {getCurrencySymbol(user?.currency)}
+                    </div>
+                  )}
                   <SavingInput
                     formKey="minPrice"
                     type="number"

@@ -155,6 +155,7 @@ export const UploadLabelWrapper = styled("label")`
 export const UploadField = styled(InputEl)`
   height: 100%;
   position: absolute;
+  border: none !important;
 
   transition: 0.25s opacity;
 

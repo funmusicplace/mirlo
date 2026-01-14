@@ -705,6 +705,8 @@ model TrackGroup {
   hideFromSearch                  Boolean                         @default(false)
   fundraiser                      Fundraiser?                     @relation(fields: [fundraiserId], references: [id])
   fundraiserId                    Int?
+  recommendedTrackGroups          RecommendedTrackGroup[]         @relation("trackGroupRecommendations")
+  recommendedByTrackGroups        RecommendedTrackGroup[]         @relation("recommendedByTrackGroups")
 
   @@unique([artistId, urlSlug])
 }
@@ -912,4 +914,15 @@ model MerchDownloadableContent {
   downloadableContent   DownloadableContent @relation(fields: [downloadableContentId], references: [id])
 
   @@unique([merchId, downloadableContentId])
+}
+
+model RecommendedTrackGroup {
+  id                       Int        @id @default(autoincrement())
+  trackGroupId             Int
+  trackGroup               TrackGroup @relation("trackGroupRecommendations", fields: [trackGroupId], references: [id])
+  recommendedTrackGroupId  Int
+  recommendedTrackGroup    TrackGroup @relation("recommendedByTrackGroups", fields: [recommendedTrackGroupId], references: [id])
+  createdAt                DateTime   @default(now())
+
+  @@unique([trackGroupId, recommendedTrackGroupId])
 }

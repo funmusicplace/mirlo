@@ -2,6 +2,7 @@ import React from "react";
 import { range } from "lodash";
 import styled from "@emotion/styled";
 import { css } from "@emotion/css";
+import { bp } from "../../constants";
 
 const Shine = styled("div")`
   animation: 0.75s shine linear infinite;
@@ -15,6 +16,10 @@ const Shine = styled("div")`
   );
   border-radius: 5px;
   background-size: 200% 100%;
+
+  @media (max-width: ${bp.small}px) {
+    margin: 1rem;
+  }
 
   @keyframes shine {
     to {

@@ -21,6 +21,7 @@ import styled from "@emotion/styled";
 import SupportArtistPopUp from "components/common/SupportArtistPopUp";
 import TrackGroupPills from "./TrackGroupPills";
 import TrackGroupEmbed from "./TrackGroupEmbed";
+import RecommendedAlbums from "./RecommendedAlbums";
 import { useAuthContext } from "state/AuthContext";
 import TrackGroupMerch from "./TrackGroupMerch";
 import { useQuery } from "@tanstack/react-query";
@@ -410,6 +411,7 @@ function TrackGroup() {
           >
             <TrackGroupPills tags={trackGroup.tags} />
           </div>
+          <RecommendedAlbums trackGroupId={trackGroup.id} artist={artist} />
           {trackGroup.artist && (
             <SupportArtistPopUp artist={trackGroup.artist} />
           )}
