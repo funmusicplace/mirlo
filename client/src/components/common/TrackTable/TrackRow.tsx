@@ -36,6 +36,9 @@ const TR = styled.tr<{
       ? `color: ${props.colors?.primary ?? "var(--mi-normal-foreground-color)"}; opacity: .6;`
       : ""}
 
+  display: flex;
+  align-items: start;
+
   &:hover {
     color: ${(props) =>
       props.colors?.background ??
@@ -197,10 +200,9 @@ const TrackRow: React.FC<{
             display: flex;
             flex-direction: row;
             flex-wrap: nowrap;
-            padding: 0.1rem;
             margin-bottom: 0rem;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
 
             @media screen and (max-width: ${bp.small}px) {
               flex-wrap: nowrap;
@@ -211,6 +213,7 @@ const TrackRow: React.FC<{
             className={css`
               overflow: hidden;
               text-overflow: ellipsis;
+              margin-right: 0.2rem;
 
               i {
                 opacity: 0.8;
