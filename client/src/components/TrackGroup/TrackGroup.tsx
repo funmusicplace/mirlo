@@ -330,11 +330,11 @@ function TrackGroup() {
                     <p
                       className={css`
                         padding: var(--mi-side-paddings-xsmall);
+                        padding-bottom: 1rem !important;
 
                         @media screen and (min-width: ${bp.medium}px) {
                           margin-left: 2.5rem;
                           margin-top: 1rem;
-                          padding: 0;
                         }
                       `}
                     >
