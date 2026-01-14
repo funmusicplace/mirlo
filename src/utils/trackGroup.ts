@@ -858,6 +858,7 @@ export const createOrUpdatePledge = async ({
         message: message,
         amount: Number(amount),
         stripeSetupIntentId: stripeSetupIntentId,
+        cancelledAt: null, // in case they are re-pledging after cancelling
       },
     });
 

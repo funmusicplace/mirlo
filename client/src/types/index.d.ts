@@ -489,6 +489,25 @@ interface Merch {
   downloadableContent?: MerchDownloadableContent[];
 }
 
+interface Fundraiser {
+  id: number;
+  isAllOrNothing: boolean;
+  goalAmount: number;
+  endDate: string;
+  trackGroups: TrackGroup[];
+}
+
+interface FundraiserPledge {
+  id: number;
+  userId: number;
+  fundraiserId: number;
+  amount: number;
+  createdAt: string;
+  cancelledAt: string | null;
+  paidAt: string | null;
+  user: User;
+}
+
 interface Label {
   id: number;
   name: string;

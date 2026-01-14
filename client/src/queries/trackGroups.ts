@@ -170,6 +170,25 @@ export function useUpdatePledgeMutation() {
   });
 }
 
+async function deletePledge({ fundraiserId }: { fundraiserId: number }) {
+  return api.del(`v1/fundraisers/${fundraiserId}/changePledge`);
+}
+
+export function useDeletePledgeMutation() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: deletePledge,
+    async onSuccess(_, {}) {
+      await client.invalidateQueries({
+        predicate: (query) =>
+          queryKeyIncludes(query, QUERY_KEY_TRACK_GROUPS) ||
+          queryKeyIncludes(query, QUERY_KEY_AUTH) ||
+          queryKeyIncludes(query, QUERY_KEY_SALES),
+      });
+    },
+  });
+}
+
 async function deleteTrackGroup(opts: {
   userId: number;
   trackGroupId: number;
@@ -186,6 +205,63 @@ export function useDeleteTrackGroupMutation() {
         predicate: (query) => queryKeyIncludes(query, QUERY_KEY_TRACK_GROUPS),
       });
     },
+  });
+}
+
+const fetchManagedFundraiser: QueryFunction<
+  Fundraiser,
+  ["fetchManagedFundraiser", { fundraiserId: number }, ...any]
+> = ({ queryKey: [_, { fundraiserId }], signal }) => {
+  return api
+    .get<{
+      result: Fundraiser;
+    }>(`v1/manage/fundraisers/${fundraiserId}`, { signal })
+    .then((r) => r.result);
+};
+
+export function queryManagedFundraiser(fundraiserId: number) {
+  return queryOptions({
+    queryKey: [
+      "fetchManagedFundraiser",
+      { fundraiserId },
+      QUERY_KEY_TRACK_GROUPS,
+    ],
+    queryFn: fetchManagedFundraiser,
+    enabled: isFinite(fundraiserId),
+  });
+}
+
+const fetchFundraiserPledges: QueryFunction<
+  { results: FundraiserPledge[]; total: number },
+  [
+    "fetchFundraiserPledges",
+    { fundraiserId: number; includeCancelled?: boolean },
+    ...any,
+  ]
+> = ({ queryKey: [_, { fundraiserId, includeCancelled }], signal }) => {
+  const params = new URLSearchParams();
+  if (includeCancelled) {
+    params.append("includeCancelled", "true");
+  }
+  return api.get(`v1/manage/fundraisers/${fundraiserId}/pledges?${params}`, {
+    signal,
+  });
+};
+
+export function queryFundraiserPledges(opts: {
+  fundraiserId: number;
+  includeCancelled?: boolean;
+}) {
+  return queryOptions({
+    queryKey: [
+      "fetchFundraiserPledges",
+      {
+        fundraiserId: opts.fundraiserId,
+        includeCancelled: opts.includeCancelled,
+      },
+      QUERY_KEY_TRACK_GROUPS,
+    ],
+    queryFn: fetchFundraiserPledges,
   });
 }
 

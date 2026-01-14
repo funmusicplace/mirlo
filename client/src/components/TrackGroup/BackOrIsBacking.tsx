@@ -21,7 +21,7 @@ const BackOrIsBacking: React.FC<{ trackGroup: TrackGroup; artist: Artist }> = ({
   const [paymentIntentAmount, setPaymentIntentAmount] = React.useState<
     number | null
   >(null);
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const setupIntent = searchParams.get("setup_intent");
 
@@ -40,6 +40,7 @@ const BackOrIsBacking: React.FC<{ trackGroup: TrackGroup; artist: Artist }> = ({
       }>(`stripe/setupIntentStatus?${params.toString()}`);
       setPaymentStatus(response.result.status);
       setPaymentIntentAmount(response.result.paymentIntentAmount);
+      setSearchParams({});
     } catch (e) {
       console.error("Error fetching setup intent status:", e);
     } finally {

@@ -50,6 +50,9 @@ const profile = async (req: Request, res: Response, next: NextFunction) => {
           },
         },
         pledges: {
+          where: {
+            cancelledAt: null,
+          },
           select: {
             amount: true,
             fundraiserId: true,

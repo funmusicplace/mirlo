@@ -71,7 +71,10 @@ const PaymentInputElement: React.FC<{
       {lessThanMin && (
         <small>
           {t("pleaseEnterMoreThan", {
-            minPrice: (minPrice ?? 100) / 100,
+            minPrice: moneyDisplay({
+              amount: (minPrice ?? 100) / 100,
+              currency,
+            }),
           })}
         </small>
       )}
