@@ -162,6 +162,9 @@ const FollowArtist: React.FC<{ artistId: number }> = ({ artistId }) => {
         onClick={onFollowClick}
         isLoading={isLoading}
         startIcon={isFollowing ? <FaMinus /> : <FaPlus />}
+        className={css`
+          font-size: 0.75em !important;
+        `}
       >
         {t(isFollowing ? "unfollow" : "follow")}
       </ArtistButton>

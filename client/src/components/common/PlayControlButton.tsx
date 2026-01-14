@@ -29,11 +29,13 @@ export const PlayControlButton: React.FC<{
           span {
             ${playerButton ? "font-size: 1.1rem !important; " : ""}
           }
-
-          svg {
-            ${playerButton ? "fill: lightgrey; " : ""}
+        }  
+        @media (prefers-color-scheme: dark) {
+          button {
+            svg {
+              ${playerButton ? "fill: lightgrey; " : ""}
+            }
           }
-        }
       `}
     >
       {!localIsPlaying && (

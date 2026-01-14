@@ -211,13 +211,20 @@ const ArtistHeaderSection: React.FC<{
                     <ArtistTitle artistAvatar={!!artistAvatar}>
                       {artist.name}
                     </ArtistTitle>
+                    <ArtistFormLocation
+                      isManage={!!isManage}
+                      artist={artist}
+                      onSubmit={handleSubmit}
+                    />{" "}
                     {artist.shortDescription && (
                       <div
                         className={css`
                           font-size: 1rem;
                           line-height: 1.2rem;
                           margin-top: 0.25rem;
+                          font-size: var(--mi-font-size-small) !important;
                           @media screen and (max-width: ${bp.medium}px) {
+                            display: none;
                             font-size: 0.9rem;
                             line-height: 1.1rem;
                           }
@@ -226,11 +233,6 @@ const ArtistHeaderSection: React.FC<{
                         {artist.shortDescription}
                       </div>
                     )}
-                    <ArtistFormLocation
-                      isManage={!!isManage}
-                      artist={artist}
-                      onSubmit={handleSubmit}
-                    />
                   </div>
                   <ArtistActions>
                     {!isManage && <FollowArtist artistId={artist.id} />}
@@ -238,7 +240,26 @@ const ArtistHeaderSection: React.FC<{
                 </ArtistTitleText>
               </SpaceBetweenDiv>
             </ArtistTitleWrapper>
-          </AvatarWrapper>
+          </AvatarWrapper>{" "}
+          {artist.shortDescription && (
+            <div
+              className={css`
+                font-size: 1rem;
+                line-height: 1.2rem;
+                margin-top: 0.25rem;
+                font-size: var(--mi-font-size-xsmall) !important;
+                display: none;
+                @media screen and (max-width: ${bp.medium}px) {
+                  display: flex;
+                  font-size: 0.9rem;
+                  line-height: 1.1rem;
+                  margin-bottom: 0.25rem;
+                }
+              `}
+            >
+              {artist.shortDescription}
+            </div>
+          )}
         </Header>
         {!artistAvatar && (
           <div

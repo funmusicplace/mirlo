@@ -144,6 +144,17 @@ const PostHeader: React.FC<{ post: Post }> = ({ post }) => {
                 `}
               >
                 <TipArtist artistId={post.artistId} />
+                {(ownedByUser || user?.isAdmin) && (
+                  <ButtonLink
+                    to={`/manage/artists/${post.artistId}/post/${post.id}`}
+                    startIcon={<FaPen />}
+                    className={css`
+                      margin-top: 1rem;
+                    `}
+                  >
+                    {t("edit")}
+                  </ButtonLink>
+                )}
               </div>
             </div>
           )}
@@ -169,16 +180,6 @@ const PostHeader: React.FC<{ post: Post }> = ({ post }) => {
               >
                 {post.title}
               </h1>
-              {(ownedByUser || user?.isAdmin) && (
-                <ButtonLink
-                  to={`/manage/artists/${post.artistId}/post/${post.id}`}
-                  variant="dashed"
-                  startIcon={<FaPen />}
-                  size="compact"
-                >
-                  {t("edit")}
-                </ButtonLink>
-              )}
             </div>
             {post.artist && (
               <SpaceBetweenDiv
