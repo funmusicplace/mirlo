@@ -86,7 +86,6 @@ const HeaderWrapper = styled.div<{
         ? `top: calc(var(--header-cover-sticky-height) - 25vw); 
            aspect-ratio: 4 / 1; 
            width: auto; 
-           height: var(--header-cover-sticky-height); 
            transition: top 0.4s ease-out;`
         : ""}
     ${(props) =>
