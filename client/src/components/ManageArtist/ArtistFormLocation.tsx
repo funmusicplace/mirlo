@@ -62,7 +62,7 @@ const ArtistFormLocation: React.FC<ArtistLocationProps> = ({
         {artist?.location && (
           <div
             className={css`
-              opacity: 0.7;
+              opacity: 0.5;
             `}
           >
             {artist?.location}
