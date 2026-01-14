@@ -1,12 +1,10 @@
 import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
-import { hashPassword, setTokens } from "./utils";
+import { setTokens } from "./utils";
 import { sendMail } from "../../jobs/send-mail";
 import { Job } from "bullmq";
 import logger from "../../logger";
 import { AppError } from "../../utils/error";
-import { subscribe } from "node:diagnostics_channel";
-import { subscribeUserToArtist } from "../../utils/artist";
 import { getClient } from "../../activityPub/utils";
 import { findOrCreateUserBasedOnEmail } from "../../utils/user";
 
@@ -130,6 +128,7 @@ const verifyEmail = async (req: Request, res: Response, next: NextFunction) => {
             host: process.env.API_DOMAIN,
             client: client.id,
             code: generatedCode,
+            contextSubject: req.body.contextSubject,
           },
         },
       } as Job);

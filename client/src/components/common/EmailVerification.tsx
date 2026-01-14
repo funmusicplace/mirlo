@@ -15,7 +15,12 @@ import { css } from "@emotion/css";
 const EmailVerification: React.FC<{
   setVerifiedEmail: (verifiedEmail: string) => void;
   smallText?: string;
-}> = ({ setVerifiedEmail, smallText = "emailVerificationInfo" }) => {
+  contextSubject?: string;
+}> = ({
+  setVerifiedEmail,
+  contextSubject,
+  smallText = "emailVerificationInfo",
+}) => {
   const snackbar = useSnackbar();
   const { user } = useAuthContext();
   const [code, setCode] = React.useState("");
@@ -30,7 +35,7 @@ const EmailVerification: React.FC<{
   const verifyEmail = React.useCallback(async () => {
     try {
       setIsloading(true);
-      await api.post("verify-email", { email });
+      await api.post("verify-email", { email, contextSubject });
       snackbar(t("emailVerificationSent"), { type: "success" });
       setWaitingForVerification(true);
     } catch (e) {
