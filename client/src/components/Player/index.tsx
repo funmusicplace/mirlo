@@ -123,14 +123,17 @@ const Player = () => {
             paddin-right: 0.5rem;
             font-size: var(--mi-font-size-small);
             justify-content: space-between;
-            a {
-              color: lightgrey;
-            }
 
             @media (max-width: ${bp.small}px) {
               font-size: var(--mi-font-size-xsmall);
               flex-grow: initial;
               justify-content: space-between;
+            }
+
+            @media (prefers-color-scheme: dark) {
+              a {
+                color: lightgrey;
+              }
             }
           `}
         >
@@ -169,13 +172,15 @@ const Player = () => {
                   display: flex;
                   align-items: center;
 
-                  button {
-                    color: lightgrey;
-                    border: solid 1px grey;
-                  }
-
                   @media (max-width: ${bp.small}px) {
                     display: none;
+                  }
+
+                  @media (prefers-color-scheme: dark) {
+                    button {
+                      color: lightgrey;
+                      border: solid 1px grey;
+                    }
                   }
                 `}
               >
@@ -185,9 +190,11 @@ const Player = () => {
               </span>
               <div
                 className={css`
-                  button {
-                    svg {
-                      fill: lightgrey;
+                  @media (prefers-color-scheme: dark) {
+                    button {
+                      svg {
+                        fill: lightgrey;
+                      }
                     }
                   }
                 `}
@@ -197,16 +204,30 @@ const Player = () => {
               <PlayControlButton playerButton />
               <div
                 className={css`
-                  button {
-                    svg {
-                      fill: lightgrey;
+                  @media (prefers-color-scheme: dark) {
+                    button {
+                      svg {
+                        fill: lightgrey;
+                      }
                     }
                   }
                 `}
               >
                 <NextButton />
               </div>
-              <VolumeControl setVolume={setVolume} volume={volume} />
+              <div
+                className={css`
+                  @media (prefers-color-scheme: dark) {
+                    button {
+                      svg {
+                        fill: lightgrey;
+                      }
+                    }
+                  }
+                `}
+              >
+                <VolumeControl setVolume={setVolume} volume={volume} />
+              </div>
             </ControlWrapper>
           </div>
         </div>
