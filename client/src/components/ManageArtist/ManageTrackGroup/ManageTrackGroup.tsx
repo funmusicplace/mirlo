@@ -103,6 +103,7 @@ const ManageTrackGroup: React.FC<{}> = () => {
                 flex: 100%;
                 justify-content: flex-end;
                 margin-top: 1rem;
+                flex-wrap: wrap;
               }
             `}
           >

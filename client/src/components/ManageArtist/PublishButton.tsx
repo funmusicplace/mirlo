@@ -123,6 +123,7 @@ const PublishButton: React.FC<{
       {!isPublished && artist && (
         <ArtistButtonLink
           to={getReleaseUrl(artist, trackGroup)}
+          wrap
           startIcon={<FaEye />}
           variant="dashed"
         >
@@ -131,6 +132,7 @@ const PublishButton: React.FC<{
       )}
       <ArtistButton
         startIcon={<FaLock />}
+        wrap
         isLoading={isPublishing}
         onClick={publishTrackGroup}
         disabled={isPublishing}

@@ -125,7 +125,6 @@ const DropdownMenu: React.FC<{
         variant={dashed ? "dashed" : "transparent"}
         aria-label={label}
         role="menu"
-        smallIcon={smallIcon}
         className={css`
           background: transparent !important;
 
@@ -138,7 +137,7 @@ const DropdownMenu: React.FC<{
               ? "width: 2rem !important; height: 2rem !important;"
               : ""}
             svg {
-              ${smallIcon ? "width: .3rem !important;" : ""}
+              ${smallIcon ? "width: .3rem !important; margin-left:1rem;" : ""}
             }
           }
         `}

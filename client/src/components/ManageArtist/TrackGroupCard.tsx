@@ -50,13 +50,14 @@ const TrackGroupCard: React.FC<{
       key={album.id}
       className={css`
         display: flex;
-        width: auto !important;
+        width: auto;
         flex-basis: 49%;
         flex-grow: 0;
-        padding: 0 2rem 0 0 !important;
+        padding: 0 2rem 0 0;
         align-items: center;
 
         @media screen and (max-width: ${bp.medium}px) {
+          flex-basis: 100%;
           font-size: var(--mi-font-size-small);
           grid-template-columns: max(40%) max(60%);
         }
@@ -91,6 +92,11 @@ const TrackGroupCard: React.FC<{
             src={album.cover?.sizes?.[300]}
             alt={album.title ?? "Untitled release"}
             size={150}
+            className={css`
+              @media screen and (max-width: ${bp.medium}px) {
+                display: none !important;
+              }
+            `}
           />
         </ArtistRouterLink>
       </div>
@@ -104,6 +110,23 @@ const TrackGroupCard: React.FC<{
           padding: 1rem;
           flex-grow: 1;
           background-color: var(--mi-darken-background-color);
+          font-size: var(--mi-font-size-xsmall);
+
+          @media screen and (max-width: ${bp.medium}px) {
+            grid-template-columns: max(40%) max(60%);
+          }
+
+          @media screen and (max-width: ${bp.small}px) {
+            grid-template-columns: max(35%) max(65%);
+          }
+          @media screen and (max-width: ${bp.medium}px) {
+            font-size: var(--mi-font-size-small);
+            grid-template-columns: max(40%) max(60%);
+          }
+
+          @media screen and (max-width: ${bp.small}px) {
+            grid-template-columns: max(35%) max(65%);
+          }
 
           > div > div {
             display: flex;
@@ -124,16 +147,31 @@ const TrackGroupCard: React.FC<{
             }
 
             > div {
-              justify-content: flex-start;
-              flex-wrap: wrap;
-
               &:not(:first-child) {
                 margin-top: 0.5rem;
+                flex-wrap: wrap;
               }
             }
           }
         `}
       >
+        {" "}
+        <ImageWithPlaceholder
+          src={album.cover?.sizes?.[300]}
+          alt={album.title ?? "Untitled release"}
+          size={150}
+          className={css`
+            display: none !important;
+            @media screen and (max-width: ${bp.medium}px) {
+              display: flex !important;
+              justify-content: flex-end;
+              width: 20%;
+              img {
+                aspect-ratio: 1 / 1 !important;
+              }
+            }
+          `}
+        />
         <div>
           <div>
             <strong>{trackGroupCardTranslation("title")}</strong>

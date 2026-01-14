@@ -123,6 +123,9 @@ const Player = () => {
             paddin-right: 0.5rem;
             font-size: var(--mi-font-size-small);
             justify-content: space-between;
+            a {
+              color: lightgrey;
+            }
 
             @media (max-width: ${bp.small}px) {
               font-size: var(--mi-font-size-xsmall);
@@ -166,6 +169,11 @@ const Player = () => {
                   display: flex;
                   align-items: center;
 
+                  button {
+                    color: lightgrey;
+                    border: solid 1px grey;
+                  }
+
                   @media (max-width: ${bp.small}px) {
                     display: none;
                   }
@@ -175,11 +183,27 @@ const Player = () => {
 
                 <ShuffleButton />
               </span>
-              <div>
+              <div
+                className={css`
+                  button {
+                    svg {
+                      fill: lightgrey;
+                    }
+                  }
+                `}
+              >
                 <PreviousButton />
               </div>
               <PlayControlButton playerButton />
-              <div>
+              <div
+                className={css`
+                  button {
+                    svg {
+                      fill: lightgrey;
+                    }
+                  }
+                `}
+              >
                 <NextButton />
               </div>
               <VolumeControl setVolume={setVolume} volume={volume} />

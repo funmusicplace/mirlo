@@ -58,6 +58,8 @@ const ManageArtistAlbums: React.FC<{}> = () => {
         <div
           className={css`
             display: flex;
+            flex-wrap: wrap;
+            gap: 0.2rem;
           `}
         >
           <SetEntireCataloguePrice />

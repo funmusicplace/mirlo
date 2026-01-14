@@ -115,6 +115,7 @@ export const AboutWrapper = styled.div<{
 export const CreditsWrapper = styled.div<{
   trackGroupCredits: boolean;
   trackGroupAbout: boolean;
+  showAboutInsteadOfTrackListing?: boolean;
 }>`
   font-size: var(--mi-font-size-small);
   opacity: 0.5;
@@ -124,10 +125,17 @@ export const CreditsWrapper = styled.div<{
   }
   ${(props) =>
     props.trackGroupCredits ? "border-left: 1px solid; " : "display: none;"}
+
   ${(props) =>
     props.trackGroupAbout
       ? "margin: 1.25rem 1.25rem; padding: 0.5rem 0rem 0.5rem 2rem;"
       : "margin: .25rem 0 1.25rem 0; border-left: none; padding: 0.5rem 0.25rem 0.5rem 0;"}
+
+  ${(props) =>
+    props.showAboutInsteadOfTrackListing
+      ? "border-left: 0px solid !important; padding-left: 0 !important; margin-left: 0 !important;"
+      : ""}
+
   @media screen and (max-width: ${bp.medium}px) {
     ${(props) => (props.trackGroupCredits ? "border-top: 1px solid;" : "")}
     max-width: 100%;
@@ -227,7 +235,15 @@ function TrackGroup() {
           `}
         >
           {!isPublished && (
-            <ArtistBox variant="warning">{t("notPublishedWarning")}</ArtistBox>
+            <div
+              className={css`
+                margin-top: 0.5rem;
+              `}
+            >
+              <ArtistBox variant="warning">
+                {t("notPublishedWarning")}
+              </ArtistBox>
+            </div>
           )}
           <Fundraiser />
           <div
@@ -267,7 +283,6 @@ function TrackGroup() {
                     size={600}
                   />
                 </ImageWrapper>
-
                 <UnderneathImage>
                   <ReleaseDate releaseDate={trackGroup.releaseDate} />
                   <div
@@ -295,14 +310,6 @@ function TrackGroup() {
                 {trackGroup.merch && trackGroup.merch.length > 0 && (
                   <TrackGroupMerch merch={trackGroup.merch} />
                 )}
-                {trackGroup.downloadableContent &&
-                  trackGroup.downloadableContent.length > 0 && (
-                    <ReleaseDownloadableContent
-                      trackGroup={trackGroup}
-                      artist={artist}
-                    />
-                  )}
-
                 <SmallScreenPlayWrapper>
                   <ClickToPlayTracks
                     trackIds={trackGroup.tracks.map((t) => t.id)}
@@ -364,6 +371,13 @@ function TrackGroup() {
                 </div>
               )}
             </div>
+            {trackGroup.downloadableContent &&
+              trackGroup.downloadableContent.length > 0 && (
+                <ReleaseDownloadableContent
+                  trackGroup={trackGroup}
+                  artist={artist}
+                />
+              )}
           </div>
           <TrackgroupInfosWrapper>
             {!showAboutInsteadOfTrackListing && trackGroupAbout && (
@@ -373,6 +387,7 @@ function TrackGroup() {
             )}
 
             <CreditsWrapper
+              showAboutInsteadOfTrackListing={showAboutInsteadOfTrackListing}
               trackGroupCredits={Boolean(trackGroupCredits)}
               trackGroupAbout={Boolean(trackGroupAbout)}
             >

@@ -34,7 +34,7 @@ function Thermometer({
 
   return (
     <div className="text-sm md:text-base">
-      <div className="flex items-center justify-between mb-1 relative w-full">
+      <div className="items-center justify-between mb-1 relative w-full pt-5">
         <div
           className={css`
             display: flex;
@@ -65,10 +65,8 @@ function Thermometer({
                 supporters: totalSupporters,
               }}
             />
-          </span>
-        </div>
-        <div className="flex items-center justify-end gap-1 w-2/3 md:w-1/2 lg:w-1/3">
-          <div className="">
+          </span>{" "}
+          <div className="ml-1">
             <Trans
               t={t}
               i18nKey="ofGoal"
@@ -83,7 +81,6 @@ function Thermometer({
               }}
             />
           </div>
-          <BackOrIsBacking artist={artist} trackGroup={trackGroup} />
         </div>
       </div>
       <div
@@ -124,6 +121,12 @@ function Thermometer({
           </span>
         )}
       </div>
+      <div
+        className={"w-full relative inline-flex pt-2 items-center justify-end"}
+      >
+        <BackOrIsBacking artist={artist} trackGroup={trackGroup} />
+      </div>
+
       {percent >= 100 && trackGroup.fundraiser?.isAllOrNothing && (
         <div className="mt-3">
           <AnnouncementWrapper artistColors={artist?.properties?.colors}>

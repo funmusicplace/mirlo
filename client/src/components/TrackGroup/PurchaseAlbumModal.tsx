@@ -10,6 +10,7 @@ import { FixedButton } from "components/common/FixedButton";
 import { useQuery } from "@tanstack/react-query";
 import { queryArtist } from "queries";
 import CurrencyCoinIcon from "components/common/CurrencyCoinIcon";
+import { bp } from "../../constants";
 
 const PurchaseAlbumModal: React.FC<{
   trackGroup: TrackGroup;
@@ -67,11 +68,26 @@ const PurchaseAlbumModal: React.FC<{
     <ArtistButton
       type="button"
       onClick={() => setIsPurchasingAlbum(true)}
+      variant="outlined"
       startIcon={
         collapse ? (
           <CurrencyCoinIcon currency={trackGroup.currency} />
         ) : undefined
       }
+      className={css`
+        font-size: 1rem !important;
+        padding-left: 2rem !important;
+        padding-right: 2rem !important;
+
+        .children {
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        @media screen and (max-width: ${bp.medium}px) {
+          width: 100%;
+        }
+      `}
     >
       {collapse ? "" : t(preOrderOrBuyText)}
     </ArtistButton>

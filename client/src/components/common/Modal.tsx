@@ -120,6 +120,7 @@ const close = css`
   background: none;
   cursor: pointer;
   line-height: 1.5rem;
+  height: 2rem !important;
   font-size: 1rem !important;
 
   &:hover,
