@@ -109,6 +109,16 @@ const BuyTrackGroup: React.FC<{
     !isValid ||
     (trackGroup.fundraiser?.isAllOrNothing && !consentToStoreData);
 
+  if (!stripeAccountStatus?.chargesEnabled) {
+    return (
+      <div>
+        {t("artistNotSetUp", {
+          artistName: trackGroup.artist?.name,
+        })}
+      </div>
+    );
+  }
+
   if (clientSecret && stripeAccountStatus?.stripeAccountId) {
     return (
       <EmbeddedStripeForm

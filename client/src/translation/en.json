@@ -192,6 +192,7 @@
   },
   "trackGroupCard": {
     "publishedAt": "Publish date:",
+    "artistNotSetUp": "{{ artistName }} has not set up their payment processor yet. Please check back later.",
     "weWillSendACodeToYourEmail": "We'll send a verification code to your email.",
     "loading": "Loading...",
     "backingThisProjectFor": "Backing for {{amount}}",
