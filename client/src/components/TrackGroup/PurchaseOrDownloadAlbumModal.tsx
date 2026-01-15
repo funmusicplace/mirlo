@@ -23,9 +23,6 @@ const PurchaseOrDownloadAlbum: React.FC<{
   const { data: artist } = useQuery(
     queryArtist({ artistSlug: trackGroup.artist.urlSlug })
   );
-  const { data: userStripeStatus } = useQuery(
-    queryUserStripeStatus(artist?.userId)
-  );
 
   const userId = user?.id;
   const trackGroupPurchases = user?.userTrackGroupPurchases;
@@ -82,14 +79,13 @@ const PurchaseOrDownloadAlbum: React.FC<{
 
   const isBeforeReleaseDate = new Date(trackGroup.releaseDate) > new Date();
 
-  const showPurchase = !isOwned && userStripeStatus?.chargesEnabled;
+  const showPurchase = !isOwned;
 
   const showDownload = isOwned && !isBeforeReleaseDate;
 
   const addToCollection =
     !isOwned &&
     userId &&
-    !userStripeStatus?.chargesEnabled &&
     (trackGroup.minPrice === 0 || trackGroup.minPrice === null);
 
   return (

@@ -5,10 +5,9 @@ import { useTranslation } from "react-i18next";
 import BuyTrackGroup from "components/TrackGroup/BuyTrackGroup";
 
 import { ArtistButton } from "components/Artist/ArtistButtons";
-import useArtistQuery from "utils/useArtistQuery";
 import { FixedButton } from "components/common/FixedButton";
 import { useQuery } from "@tanstack/react-query";
-import { queryArtist } from "queries";
+import { queryArtist, queryUserStripeStatus } from "queries";
 import CurrencyCoinIcon from "components/common/CurrencyCoinIcon";
 import { bp } from "../../constants";
 
