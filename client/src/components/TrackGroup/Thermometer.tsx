@@ -30,7 +30,11 @@ function Thermometer({
     },
   } = useQuery(queryTrackGroupSupporters(trackGroup.id));
 
-  const percent = Math.min(Math.floor(totalAmount / goal), 100);
+  const percent = Math.floor(totalAmount / goal);
+  const atMost100 = percent > 100 ? 100 : percent;
+  const atLeast1 = atMost100 < 1 ? 1 : atMost100;
+
+  const displayPercent = atLeast1;
 
   return (
     <div className="text-sm md:text-base">
@@ -101,7 +105,7 @@ function Thermometer({
               background-color: ${artist?.properties?.colors?.primary ??
               "var(--mi-primary-color)"};
               transition: all 0.5s;
-              width: ${percent}%;
+              width: ${displayPercent}%;
             `
           }
           aria-valuenow={totalAmount / 100}
@@ -109,15 +113,15 @@ function Thermometer({
           aria-valuemin={0}
           role="progressbar"
         >
-          {percent > 10 && (
+          {displayPercent > 10 && (
             <span className="invert font-bold whitespace-nowrap">
-              {percent.toFixed(0)} %
+              {displayPercent.toFixed(0)} %
             </span>
           )}
         </div>
-        {percent <= 10 && (
+        {displayPercent <= 10 && (
           <span className="pl-3 font-bold whitespace-nowrap">
-            {percent.toFixed(0)} %
+            {displayPercent.toFixed(0)} %
           </span>
         )}
       </div>
