@@ -98,7 +98,7 @@ const FundraisingGoal: React.FC<{
         <div className="flex gap-2">
           {fundraiser && (
             <Link
-              to={`/manage/artists/${artistId}/fundraiser/${fundraiser.id}/pledges`}
+              to={`/fundraiser/${fundraiser.id}/pledges`}
               className="flex items-center gap-1"
             >
               <Button type="button" startIcon={<FaEye />}>
