@@ -484,12 +484,8 @@ export const registerTrackPurchase = async ({
       data: {
         userId: Number(userId),
         trackId: Number(trackId),
-        pricePaid,
         message: message ?? null,
-        currencyPaid,
-        stripeSessionKey: paymentProcessorKey,
         singleDownloadToken: token,
-        platformCut: platformCut ?? null,
         transactionId: transaction.id,
       },
     });

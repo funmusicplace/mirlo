@@ -68,12 +68,6 @@ export const manageSubscriptionReceipt = async ({
     const created = await prisma.artistUserSubscriptionCharge.create({
       data: {
         artistUserSubscriptionId: artistUserSubscription.id,
-        stripeInvoiceId: processorPaymentReferenceId,
-        paymentProcessor,
-        amountPaid,
-        currency,
-        platformCut,
-        paymentProcessorFee,
         transactionId: transaction.id,
       },
     });

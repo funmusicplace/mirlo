@@ -77,16 +77,21 @@ describe("subscription", () => {
         paymentProcessorFee: 0.3,
       });
 
-      const charge = await prisma.artistUserSubscriptionCharge.findMany({
+      const charge = await prisma.userTransaction.findMany({
         where: {
-          stripeInvoiceId: invoiceId,
+          stripeId: invoiceId,
+        },
+        include: {
+          artistUserSubscriptionCharges: true,
         },
       });
 
       assert.equal(charge.length, 1);
-      assert.equal(charge[0].amountPaid, 10);
-      assert.equal(charge[0].paymentProcessor, "stripe");
-      assert.equal(charge[0].artistUserSubscriptionId, subscription.id);
+      assert.equal(charge[0].amount, 10);
+      assert.equal(
+        charge[0].artistUserSubscriptionCharges[0].artistUserSubscriptionId,
+        subscription.id
+      );
 
       assert.equal(stub.calledOnce, true);
       const data0 = stub.getCall(0).args[0].data;

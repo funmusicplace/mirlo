@@ -252,7 +252,6 @@ export const createUserTrackPurchase = async (
     data: {
       userId,
       trackId,
-      pricePaid: data?.amount ?? 1000,
       transactionId: transaction.id,
     },
   });

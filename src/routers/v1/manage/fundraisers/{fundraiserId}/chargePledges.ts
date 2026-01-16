@@ -77,7 +77,7 @@ export default function () {
           },
         });
 
-        const purchase = await prisma.userTrackGroupPurchase.create({
+        await prisma.userTrackGroupPurchase.create({
           data: {
             userId: pledge.userId,
             trackGroupId: trackGroup.id,

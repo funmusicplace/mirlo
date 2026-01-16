@@ -9,7 +9,7 @@ export default defineConfig({
     : "",
   title: "Mirlo",
   description:
-    "Documentation for an open source music sales and patronage platform.",
+    "Documentation for the open source music sales and patronage platform.",
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     nav: [
