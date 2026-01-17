@@ -22,6 +22,8 @@ const useAdminFilters = ({
     | "email"
     | "lastSubscription"
     | "allowMirloPromo"
+    | "search"
+    | "pledgeStatus"
   )[];
 }) => {
   const { register, handleSubmit } = useForm();
@@ -134,6 +136,23 @@ const useAdminFilters = ({
               <option value="">All</option>
               <option value="free">Free</option>
               <option value="paid">Paid</option>
+            </SelectEl>
+          </FormComponent>
+        )}
+        {fields.includes("search") && (
+          <FormComponent>
+            <label>Search</label>
+            <InputEl placeholder="Search..." {...register("search")} />
+          </FormComponent>
+        )}
+        {fields.includes("pledgeStatus") && (
+          <FormComponent>
+            <label>Pledge Status</label>
+            <SelectEl {...register("pledgeStatus")}>
+              <option value="">All</option>
+              <option value="paid">Paid</option>
+              <option value="pending">Pending</option>
+              <option value="cancelled">Cancelled</option>
             </SelectEl>
           </FormComponent>
         )}

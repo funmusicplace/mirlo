@@ -19,7 +19,6 @@ import { ArtistButton } from "components/Artist/ArtistButtons";
 const RecommendedTrackGroups: React.FC<{
   trackGroupId: number;
 }> = ({ trackGroupId }) => {
-  console.log("RecommendedTrackGroups render");
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const snackbar = useSnackbar();
   const [showSearch, setShowSearch] = React.useState(false);
@@ -103,8 +102,6 @@ const RecommendedTrackGroups: React.FC<{
       }
     );
   };
-
-  console.log("rec", results);
 
   return (
     <FormSection>

@@ -4,6 +4,7 @@ import { hashPassword } from "../src/routers/auth/utils";
 import { clients } from "./seeds/clients";
 import { artists } from "./seeds/artists";
 import { trackGroups } from "./seeds/trackGroups";
+import { fundraisers } from "./seeds/fundraisers";
 
 const prisma = new PrismaClient();
 
@@ -86,6 +87,21 @@ async function main() {
       console.log(`Created trackGroup with id: ${trackGroup.id}`);
     }
   }
+
+  for (const f of fundraisers) {
+    const find = await prisma.fundraiser.findFirst({
+      where: { name: f.name },
+    });
+    if (find) {
+      console.log(`Fundraiser with name ${f.name} already exists, skipping...`);
+      continue;
+    }
+    const fundraiser = await prisma.fundraiser.create({
+      data: f,
+    });
+    console.log(`Created fundraiser with id: ${fundraiser.id}`);
+  }
+
   console.log(`Seeding finished.`);
 }
 

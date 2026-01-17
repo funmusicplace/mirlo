@@ -464,6 +464,15 @@ const routes: RouteObject[] = [
                   return { Component };
                 },
               },
+              {
+                path: "fundraiser-pledges",
+                async lazy() {
+                  const { default: Component } = await import(
+                    "components/Admin/AdminFundraiserPledges"
+                  );
+                  return { Component };
+                },
+              },
             ],
           },
           {
