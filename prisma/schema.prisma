@@ -453,12 +453,6 @@ model ArtistUserSubscriptionCharge {
   id                       String                 @id @default(uuid()) @db.Uuid
   artistUserSubscriptionId Int
   artistUserSubscription   ArtistUserSubscription @relation(fields: [artistUserSubscriptionId], references: [id])
-  stripeInvoiceId          String? // Stripe Invoice Id
-  paymentProcessor         String
-  amountPaid               Int // in cents
-  paymentProcessorFee      Int? // in cents
-  platformCut              Int? // in cents
-  currency                 String
   createdAt                DateTime               @default(now())
   transactionId            String?
   transaction              UserTransaction?       @relation(fields: [transactionId], references: [id])
@@ -626,11 +620,7 @@ model UserTrackPurchase {
   user                User             @relation(fields: [userId], references: [id])
   trackId             Int
   track               Track            @relation(fields: [trackId], references: [id])
-  pricePaid           Int // in cents
-  platformCut         Int? // in cents
-  currencyPaid        String           @default("usd")
   datePurchased       DateTime         @default(now())
-  stripeSessionKey    String?
   singleDownloadToken String?
   message             String?
   transactionId       String?

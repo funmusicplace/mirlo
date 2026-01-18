@@ -117,9 +117,12 @@ describe("tracks/{id}/purchase", () => {
           userId: purchaser.id,
           trackId: track.id,
         },
+        include: {
+          transaction: true,
+        },
       });
       assert(purchase);
-      assert.equal(purchase.pricePaid, 0);
+      assert.equal(purchase.transaction?.amount, 0);
       assert.notEqual(purchase.singleDownloadToken, null);
     });
 

@@ -157,7 +157,6 @@ describe("playable", () => {
         data: {
           userId: purchaser.id,
           trackId: track.id,
-          pricePaid: 0,
         },
       });
 
@@ -195,7 +194,6 @@ describe("playable", () => {
         data: {
           userId: purchaser.id,
           trackId: track.id,
-          pricePaid: 0,
         },
       });
 

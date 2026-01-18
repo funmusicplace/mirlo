@@ -79,10 +79,7 @@ describe("send-out-monthly-income-report", () => {
     await prisma.artistUserSubscriptionCharge.create({
       data: {
         artistUserSubscriptionId: aus.id,
-        amountPaid: 5,
-        paymentProcessor: "stripe",
         createdAt: chargeDate,
-        currency: "usd",
         transactionId: transaction.id,
       },
     });
@@ -216,10 +213,7 @@ describe("send-out-monthly-income-report", () => {
     const charge = await prisma.artistUserSubscriptionCharge.create({
       data: {
         artistUserSubscriptionId: aus.id,
-        amountPaid: 5,
-        paymentProcessor: "stripe",
         createdAt: createdDate,
-        currency: "usd",
         transactionId: transaction.id,
       },
     });
@@ -268,16 +262,25 @@ describe("send-out-monthly-income-report", () => {
       },
     });
 
+    const date = faker.date.between({
+      from: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+      to: new Date(),
+    });
+
+    const transaction = await prisma.userTransaction.create({
+      data: {
+        currency: "usd",
+        userId: followerUser.id,
+        amount: 5,
+        createdAt: date,
+      },
+    });
+
     const charge = await prisma.artistUserSubscriptionCharge.create({
       data: {
         artistUserSubscriptionId: aus.id,
-        amountPaid: 5,
-        paymentProcessor: "stripe",
-        createdAt: faker.date.between({
-          from: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-          to: new Date(),
-        }),
-        currency: "usd",
+        createdAt: date,
+        transactionId: transaction.id,
       },
     });
 
@@ -405,10 +408,7 @@ describe("send-out-monthly-income-report", () => {
     await prisma.artistUserSubscriptionCharge.create({
       data: {
         artistUserSubscriptionId: aus.id,
-        amountPaid: 5,
-        paymentProcessor: "stripe",
         createdAt: createdDate,
-        currency: "usd",
         transactionId: transaction.id,
       },
     });

@@ -44,9 +44,6 @@ describe("users/{userId}/charges", () => {
 
       await prisma.artistUserSubscriptionCharge.create({
         data: {
-          amountPaid: 1000,
-          paymentProcessor: "stripe",
-          currency: "usd",
           artistUserSubscriptionId: artistUserSubscription.id,
         },
       });

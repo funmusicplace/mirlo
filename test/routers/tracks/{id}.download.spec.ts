@@ -96,7 +96,6 @@ describe("tracks/{id}/download", () => {
         data: {
           userId: purchaser.id,
           trackId: track.id,
-          pricePaid: 0,
           singleDownloadToken: randomUUID(),
         },
       });
@@ -131,11 +130,10 @@ describe("tracks/{id}/download", () => {
       });
       const downloadToken = randomUUID();
 
-      const purchase = await prisma.userTrackPurchase.create({
+      await prisma.userTrackPurchase.create({
         data: {
           userId: purchaser.id,
           trackId: track.id,
-          pricePaid: 0,
           singleDownloadToken: downloadToken,
         },
       });
@@ -167,7 +165,6 @@ describe("tracks/{id}/download", () => {
         data: {
           userId: purchaser.id,
           trackId: track.id,
-          pricePaid: 0,
           singleDownloadToken: randomUUID(),
         },
       });
@@ -204,7 +201,6 @@ describe("tracks/{id}/download", () => {
         data: {
           userId: purchaser.id,
           trackId: track.id,
-          pricePaid: 0,
           singleDownloadToken: downloadToken,
         },
       });
