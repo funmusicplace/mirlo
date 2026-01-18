@@ -1,10 +1,13 @@
 import prisma from "../prisma/prisma";
 import { Prisma } from "@mirlo/prisma/client";
 import { buildTokens, hashPassword } from "../src/routers/auth/utils";
+// @ts-ignore: Ignore import errors for github-slugger
+import { slug } from "github-slugger";
 
 export const clearTables = async () => {
   await prisma.$executeRaw`DELETE FROM "RecommendedTrackGroup";`;
   await prisma.$executeRaw`DELETE FROM "FundraiserPledge";`;
+  await prisma.$executeRaw`DELETE FROM "RecommendedTrackGroup";`;
   await prisma.$executeRaw`DELETE FROM "Fundraiser";`;
   await prisma.$executeRaw`DELETE FROM "ArtistLabel";`;
   await prisma.$executeRaw`DELETE FROM "ActivityPubArtistFollowers";`;
@@ -79,7 +82,7 @@ export const createArtist = async (
   const artist = await prisma.artist.create({
     data: {
       name: data?.name ?? "Test artist",
-      urlSlug: data?.urlSlug ?? "test-artist",
+      urlSlug: data?.urlSlug || (data?.name ? slug(data?.name) : "test-artist"),
       userId: userId,
       enabled: data?.enabled ?? true,
       subscriptionTiers: data?.subscriptionTiers,
@@ -100,7 +103,7 @@ export const createPost = async (
       title: data?.title ?? "Test title",
       artistId: artistId,
       isPublic: data?.isPublic ?? true,
-      urlSlug: data?.urlSlug ?? "test-post",
+      urlSlug: data?.urlSlug || (data?.title ? slug(data?.title) : "test-post"),
       content: data?.content ?? "The content",
       shouldSendEmail: data?.shouldSendEmail,
       isDraft: data?.isDraft ?? true,
@@ -131,11 +134,13 @@ export const createTrackGroup = async (
     tracks?: { title: string }[];
   } & Partial<Prisma.TrackGroupCreateArgs["data"]>
 ) => {
+  console.log("Creating trackGroup for:", data?.urlSlug);
   const tg = await prisma.trackGroup.create({
     data: {
       minPrice: data?.minPrice,
       title: data?.title ?? "Test trackGroup",
-      urlSlug: data?.urlSlug ?? "test-trackgroup",
+      urlSlug:
+        data?.urlSlug || (data?.title ? slug(data?.title) : "test-trackgroup"),
       artistId: artistId,
       published: data?.published ?? true,
       stripeProductKey: data?.stripeProductKey ?? null,
