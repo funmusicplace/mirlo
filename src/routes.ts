@@ -146,6 +146,7 @@ const routes = [
   "admin/invites/{id}",
   "admin/send-email",
   "admin/chargePledges",
+  "admin/bulkTrackUpload",
   "oembed",
   "flag",
 ];
