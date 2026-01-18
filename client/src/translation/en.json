@@ -1057,6 +1057,7 @@
     "save": "Save",
     "trackgroups": "Trackgroups (releases)",
     "tracks": "Tracks",
+    "bulkTrackUpload": "Bulk Upload Tracks",
     "callServerTasks": "Call server tasks",
     "whatTaskCall": "What task do you want to call on the server?",
     "submitServerTask": "Submit server task",
