@@ -1,4 +1,3 @@
-import { css } from "@emotion/css";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import Box from "../common/Box";
 import { Trans, useTranslation } from "react-i18next";
@@ -7,10 +6,16 @@ import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
 import { WidthWrapper } from "components/common/WidthContainer";
 
 import { useQuery } from "@tanstack/react-query";
-import { queryArtist, queryMerch, queryTrackGroup } from "queries";
+import {
+  queryArtist,
+  queryMerch,
+  queryTrackGroup,
+  queryPublicRecommendedTrackGroups,
+} from "queries";
 import { getMerchUrl, getReleaseUrl, getTrackUrl } from "utils/artist";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import MerchDownloadableContent from "components/Merch/MerchDownloadableContent";
+import RecommendedAlbums from "components/TrackGroup/RecommendedAlbums";
 
 function CheckoutComplete() {
   const { t } = useTranslation("translation", {
@@ -23,6 +28,7 @@ function CheckoutComplete() {
   const trackGroupId = searchParams.get("trackGroupId");
   const trackId = searchParams.get("trackId");
   const merchId = searchParams.get("merchId");
+
   const { data: trackGroup } = useQuery(
     queryTrackGroup({ albumSlug: trackGroupId })
   );
@@ -30,6 +36,7 @@ function CheckoutComplete() {
   const { data: artist, isLoading: isLoadingArtist } = useQuery(
     queryArtist({ artistSlug: artistId })
   );
+
   const { data: merch } = useQuery(
     queryMerch({
       artistId: artistId ?? "",
@@ -47,75 +54,23 @@ function CheckoutComplete() {
   const purchaseType = searchParams.get("purchaseType");
 
   return (
-    <WidthWrapper
-      variant="medium"
-      className={css`
-        margin-top: 4rem !important;
-        align-items: center;
-        text-align: center;
-
-        h1 {
-          margin-bottom: 1rem;
-        }
-
-        svg {
-          max-width: 200px;
-          margin: 0 auto;
-          display: block;
-        }
-      `}
-    >
-      <h1>
+    <WidthWrapper className="mt-16 flex flex-col md:items-start items-center md:text-left text-center">
+      <h2 className="md:mb-4 mt-6">
         {purchaseType === "follow"
           ? t("successfullyFollowedArtist")
           : t("purchaseComplete")}
-      </h1>
-      <div
-        className={css`
-          display: flex;
-
-          div:first-child {
-            flex-grow: 1;
-          }
-        `}
-      >
-        <div
-          className={css`
-            display: flex;
-
-            div:second-child {
-              flex-grow: 1;
-            }
-
-            img {
-              width: 100%;
-            }
-          `}
-        >
+      </h2>
+      <div className="flex w-full">
+        <div className="flex gap-4 w-full flex-col md:flex-row w-full items-center mt-6">
           {trackGroup && (
             <ImageWithPlaceholder
               src={trackGroup.cover?.sizes?.[300]}
               alt={trackGroup.title ?? ""}
               size={300}
+              className="md:w-80 mt-4 w-full"
             />
           )}
-          <div
-            className={css`
-              margin-left: 1rem;
-              display: flex;
-              flex-direction: column;
-
-              justify-content: flex-start;
-
-              .includes {
-                padding: 1.5rem 0.5rem;
-                border: 1px dashed ${artist.properties?.colors?.secondary};
-                ul {
-                  list-style: none;
-                }
-              }
-            `}
-          >
+          <div className="flex flex-col flex-grow items-center md:items-start">
             <span>
               {purchaseType === "trackGroup" && trackGroup && (
                 <Trans
@@ -160,10 +115,15 @@ function CheckoutComplete() {
               )}
               {purchaseType === "tip" && t("youveTippedArtist")}
             </span>
-            <Confetti />
+            <div className="w-40">
+              <Confetti />
+            </div>
           </div>
         </div>
       </div>
+      {purchaseType === "trackGroup" && trackGroup && (
+        <RecommendedAlbums trackGroupId={trackGroup.id} artist={artist} />
+      )}
     </WidthWrapper>
   );
 }

@@ -18,6 +18,7 @@ import styled from "@emotion/styled";
 import PriceAndSuch from "./PriceAndSuch";
 import FeatureFlag from "components/common/FeatureFlag";
 import FundraisingGoal from "./FundraisingGoal";
+import RecommendedTrackGroups from "./RecommendedTrackGroups";
 
 export const FormSection = styled.div`
   margin: 2rem 0;

@@ -13,6 +13,7 @@ const ImageContainer = styled.div`
     transition: opacity 0.25s;
     max-width: 100%;
     height: 100%;
+    width: 100%;
   }
 `;
 

@@ -146,9 +146,7 @@ const DownloadableContent: React.FC<{
 
         <UploadField
           type="file"
-          className={css`
-            width: 100%;
-          `}
+          className="w-full"
           id="downloadableContent"
           multiple
           onChange={(e) => handleFileChange(e.target.files)}

@@ -3,6 +3,7 @@ import { Prisma } from "@mirlo/prisma/client";
 import { buildTokens, hashPassword } from "../src/routers/auth/utils";
 
 export const clearTables = async () => {
+  await prisma.$executeRaw`DELETE FROM "RecommendedTrackGroup";`;
   await prisma.$executeRaw`DELETE FROM "FundraiserPledge";`;
   await prisma.$executeRaw`DELETE FROM "Fundraiser";`;
   await prisma.$executeRaw`DELETE FROM "ArtistLabel";`;

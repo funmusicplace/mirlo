@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import prisma from "@mirlo/prisma";
-import { findUserIdForURLSlug } from "../../../../utils/user";
 
 import {
   processSingleTrackGroup,
