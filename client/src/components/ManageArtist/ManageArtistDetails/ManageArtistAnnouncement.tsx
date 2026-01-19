@@ -31,7 +31,7 @@ export const AnnouncementWrapper: React.FC<{
     >
       <div
         className={css`
-          backdrop-filter: brightness(95%) grayscale(10%);
+          opacity: 0.9;
           padding: 1rem;
           margin-bottom: 0.5rem;
           > div {
