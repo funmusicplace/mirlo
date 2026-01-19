@@ -1,12 +1,25 @@
 import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
 import { moneyDisplay } from "components/common/Money";
-import { queryTrackGroupSupporters } from "queries";
+import {
+  queryPublicRecommendedTrackGroups,
+  queryTrackGroupSupporters,
+} from "queries";
 
 import { Trans, useTranslation } from "react-i18next";
 
 import BackOrIsBacking from "./BackOrIsBacking";
 import { AnnouncementWrapper } from "components/ManageArtist/ManageArtistDetails/ManageArtistAnnouncement";
+import { useSearchParams } from "react-router-dom";
+import Confetti from "components/common/Confetti";
+import LoadingBlocks from "components/Artist/LoadingBlocks";
+import ArtistRouterLink from "components/Artist/ArtistButtons";
+import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
+import { getReleaseUrl } from "utils/artist";
+import Button from "components/common/Button";
+import { FaShareAlt } from "react-icons/fa";
+import { useSnackbar } from "state/SnackbarContext";
+import ShareToSocials from "components/common/ShareToSocials";
 
 function Thermometer({
   goal,
@@ -28,7 +41,15 @@ function Thermometer({
       totalAmount: 0,
       totalSupporters: 0,
     },
+    isPending,
   } = useQuery(queryTrackGroupSupporters(trackGroup.id));
+
+  const { data: recommendedTrackGroups } = useQuery(
+    queryPublicRecommendedTrackGroups(trackGroup.id)
+  );
+
+  const [searchParams] = useSearchParams();
+  const hasJustPledged = searchParams.get("setup_intent") || false;
 
   const percent = Math.floor(totalAmount / goal);
   const atMost100 = percent > 100 ? 100 : percent;
@@ -36,9 +57,56 @@ function Thermometer({
 
   const displayPercent = atLeast1;
 
+  if (isPending) {
+    return <LoadingBlocks rows={2} />;
+  }
+
   return (
     <div className="text-sm md:text-base">
-      <div className="items-center justify-between mb-1 relative w-full pt-5">
+      <div className="mb-1 relative w-full pt-5">
+        {trackGroup.fundraiser?.isAllOrNothing && hasJustPledged && (
+          <div className="px-2 py-10 flex flex-col md:flex-row items-start gap-4 justify-between">
+            <div className="flex flex-row items-center">
+              <div className="w-15 mr-8">
+                <Confetti />
+              </div>
+              <div>
+                <h3>{t("thankYouForYourPledge")}</h3>
+                <p>{t("youWillBeChargedWhenItsFullyFunded")}</p>
+                <div className="mt-4">
+                  <ShareToSocials
+                    url={`${window.location.origin}${window.location.pathname}`}
+                    title={trackGroup.title ?? ""}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {recommendedTrackGroups?.results && (
+              <div className="m:self-end m:ml-20">
+                <h3>{t("youMightAlsoLike")}</h3>
+                <div className=" h-20">
+                  {recommendedTrackGroups?.results?.map((rec: TrackGroup) => (
+                    <ArtistRouterLink
+                      to={getReleaseUrl(rec.artist, rec)}
+                      key={rec.id}
+                      className="no-underline! text-inherit hover:opacity-80 transition-opacity"
+                    >
+                      <ImageWithPlaceholder
+                        src={rec.cover?.sizes?.[120]}
+                        alt={rec.title ?? ""}
+                        size={120}
+                      />
+                      <p className="mt-2 font-bold overflow-hidden text-ellipsis whitespace-nowrap">
+                        {rec.title}
+                      </p>
+                    </ArtistRouterLink>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
         <div
           className={css`
             display: flex;

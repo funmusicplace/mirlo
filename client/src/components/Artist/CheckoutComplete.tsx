@@ -6,12 +6,7 @@ import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
 import { WidthWrapper } from "components/common/WidthContainer";
 
 import { useQuery } from "@tanstack/react-query";
-import {
-  queryArtist,
-  queryMerch,
-  queryTrackGroup,
-  queryPublicRecommendedTrackGroups,
-} from "queries";
+import { queryArtist, queryMerch, queryTrackGroup } from "queries";
 import { getMerchUrl, getReleaseUrl, getTrackUrl } from "utils/artist";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import MerchDownloadableContent from "components/Merch/MerchDownloadableContent";
