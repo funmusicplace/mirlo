@@ -18,6 +18,7 @@ import { FaArrowRight } from "react-icons/fa";
 import { useQuery } from "@tanstack/react-query";
 import { queryUserStripeStatus } from "queries";
 import PaymentInputElement from "./PaymentInputElement";
+import LoadingBlocks from "components/Artist/LoadingBlocks";
 
 interface FormData {
   chosenPrice: string;
@@ -43,7 +44,8 @@ const BuyTrackGroup: React.FC<{
     },
     reValidateMode: "onChange",
   });
-  const { data: stripeAccountStatus } = useQuery(
+  console.log("trackGroup", trackGroup.artist);
+  const { data: stripeAccountStatus, isPending } = useQuery(
     queryUserStripeStatus(trackGroup.artist?.userId ?? 0)
   );
   const { watch, handleSubmit, formState } = methods;
@@ -108,6 +110,14 @@ const BuyTrackGroup: React.FC<{
     lessThanMin ||
     !isValid ||
     (trackGroup.fundraiser?.isAllOrNothing && !consentToStoreData);
+
+  if (isPending) {
+    return (
+      <div className="p-4">
+        <LoadingBlocks height="3rem" margin="1rem" />
+      </div>
+    );
+  }
 
   if (!stripeAccountStatus?.chargesEnabled) {
     return (

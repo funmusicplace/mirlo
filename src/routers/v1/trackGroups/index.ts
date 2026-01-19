@@ -157,6 +157,7 @@ export default function () {
               name: true,
               urlSlug: true,
               id: true,
+              userId: true,
             },
           },
           fundraiser: true,
