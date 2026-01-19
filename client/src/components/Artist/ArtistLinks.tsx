@@ -53,8 +53,8 @@ const ArtistLinks: React.FC = () => {
       <div
         className={css`
           max-width: var(--mi-container-big);
-          margin: 3rem auto;
-          padding: 4rem 3rem;
+          margin: 0rem auto;
+          padding: 3rem;
           @media screen and (max-width: ${bp.medium}px) {
             width: 90%;
             padding: 2rem var(--mi-side-paddings-small);
@@ -153,6 +153,8 @@ const ArtistLinks: React.FC = () => {
                   width: 100% !important;
                   a {
                     width: 100% !important;
+                    text-wrap: auto;
+                    text-align: center;
                   }
                   a:hover {
                     background-color: var(
