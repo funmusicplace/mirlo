@@ -111,7 +111,7 @@ const BuyTrackGroup: React.FC<{
 
   if (!stripeAccountStatus?.chargesEnabled) {
     return (
-      <div>
+      <div className="p-4">
         {t("artistNotSetUp", {
           artistName: trackGroup.artist?.name,
         })}
