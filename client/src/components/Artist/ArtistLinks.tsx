@@ -38,15 +38,27 @@ const ArtistLinks: React.FC = () => {
 
   return (
     // <ArtistPageWrapper artistBanner={!!artistBanner}>
-    <div>
+    <div
+      className={css`
+        background-color: var(--mi-secondary-color) !important;
+        opacity: 0.98;
+
+        @media screen and (max-width: ${bp.medium}px) {
+          width: 100%;
+          padding: var(--mi-side-paddings-small);
+          margin: 0;
+        }
+      `}
+    >
       <div
         className={css`
-          max-width: 500px;
+          max-width: var(--mi-container-big);
           margin: 3rem auto;
           padding: 4rem 3rem;
-
           @media screen and (max-width: ${bp.medium}px) {
-            padding: 0 0 7.5rem 0 !important;
+            width: 90%;
+            padding: 2rem var(--mi-side-paddings-small);
+            margin: auto;
           }
         `}
       >
@@ -58,14 +70,22 @@ const ArtistLinks: React.FC = () => {
             div {
               margin-right: 1rem;
             }
+
+            @media screen and (max-width: ${bp.medium}px) {
+              div {
+                margin-right: 0.5rem;
+              }
+            }
           `}
         >
           {artistAvatar && (
-            <Avatar
-              avatar={
-                artistAvatar?.sizes?.[300] + `?${artistAvatar?.updatedAt}`
-              }
-            />
+            <div>
+              <Avatar
+                avatar={
+                  artistAvatar?.sizes?.[300] + `?${artistAvatar?.updatedAt}`
+                }
+              />
+            </div>
           )}
           <div
             className={css`
@@ -108,7 +128,7 @@ const ArtistLinks: React.FC = () => {
             li {
               border: 1px solid
                 ${colors?.primary ?? "var(--mi-darken-background-color)"};
-              margin: 0.5rem;
+              margin: 0.5rem 0;
 
               a {
                 padding: 1.6rem !important;
@@ -127,7 +147,20 @@ const ArtistLinks: React.FC = () => {
           {artist.linksJson?.map((l) => {
             const site = findOutsideSite(l);
             return (
-              <li key={l.url}>
+              <li
+                key={l.url}
+                className={css`
+                  width: 100% !important;
+                  a {
+                    width: 100% !important;
+                  }
+                  a:hover {
+                    background-color: var(
+                      --mi-darken-background-color
+                    ) !important;
+                  }
+                `}
+              >
                 <ArtistButtonAnchor
                   rel="me"
                   href={linkUrlHref(l.url, true)}
@@ -140,7 +173,16 @@ const ArtistLinks: React.FC = () => {
                     ${colors?.foreground ?? "var(--mi-foreground-color)"};
                   `}
                 >
-                  {linkUrlDisplay(l)}
+                  <div
+                    className={css`
+                      width: 100% !important;
+                      a {
+                        width: 100% !important;
+                      }
+                    `}
+                  >
+                    {linkUrlDisplay(l)}
+                  </div>
                 </ArtistButtonAnchor>
               </li>
             );
