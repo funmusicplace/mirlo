@@ -16,9 +16,7 @@ import ManageTags from "./ManageTags";
 import styled from "@emotion/styled";
 
 import PriceAndSuch from "./PriceAndSuch";
-import FeatureFlag from "components/common/FeatureFlag";
 import FundraisingGoal from "./FundraisingGoal";
-import RecommendedTrackGroups from "./RecommendedTrackGroups";
 
 export const FormSection = styled.div`
   margin: 2rem 0;
@@ -150,12 +148,10 @@ const AlbumFormContent: React.FC<{
           </FormComponent>
         </div>
       </FormSection>
-      <FeatureFlag featureFlag="fundraiser">
-        <FundraisingGoal
-          trackGroupId={existingObject.id}
-          fundraiser={existingObject.fundraiser}
-        />
-      </FeatureFlag>
+      <FundraisingGoal
+        trackGroupId={existingObject.id}
+        fundraiser={existingObject.fundraiser}
+      />
     </>
   );
 };

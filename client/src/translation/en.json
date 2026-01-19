@@ -985,6 +985,11 @@
     "amount": "Amount",
     "noSupportersYet": "No supporters yet, share your profile with others to grow your community."
   },
+  "share": {
+    "linkCopiedToClipboard": "Link copied to clipboard!",
+    "copied": "Copied!",
+    "copyLink": "Copy link"
+  },
   "subscriptionForm": {
     "supporters": "Manage supporters",
     "theMoneyBit": "The money bit",
@@ -1086,7 +1091,9 @@
     "untitled": "Untitled",
     "allOrNothingFullyFunded": "This project is fully funded! Backing it now means you'll contribute to its future success.",
     "by": "by",
-
+    "youWillBeChargedWhenItsFullyFunded": "You will be charged when it's fully funded.",
+    "thankYouForYourPledge": "Thank you for your pledge!",
+    "youMightAlsoLike": "You might also like:",
     "enterDownloadCode": "Enter download code",
     "yourEmail": "Your email:",
     "redeemCodeError": "Code not found or already used.",

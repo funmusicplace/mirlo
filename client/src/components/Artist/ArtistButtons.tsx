@@ -23,17 +23,17 @@ export const useGetArtistColors = () => {
 
 const ArtistRouterLink: React.FC<LinkProps> = (props) => {
   const { colors } = useGetArtistColors();
+  console.log("props", props.className, colors);
   return (
     <Link
       {...props}
-      className={
-        colors &&
-        css`
-          color: ${colors?.primary} !important;
-        ` +
-          " " +
-          props.className
-      }
+      className={`
+          ${props.className} ${
+            colors &&
+            css`
+              color: ${colors?.primary} !important;
+            `
+          }`}
     />
   );
 };
