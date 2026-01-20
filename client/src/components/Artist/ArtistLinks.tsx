@@ -40,7 +40,8 @@ const ArtistLinks: React.FC = () => {
     // <ArtistPageWrapper artistBanner={!!artistBanner}>
     <div
       className={css`
-        background-color: var(--mi-secondary-color) !important;
+        background-color: ${colors?.background ??
+        "var(--mi-normal-background-color)"};
         opacity: 0.98;
 
         @media screen and (max-width: ${bp.medium}px) {
