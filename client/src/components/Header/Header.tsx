@@ -238,6 +238,7 @@ const Header = () => {
               startIcon={<FaHandHoldingHeart />}
               className={css`
                 display: block;
+                ${artistId ? "display: none !important;" : ""}
                 margin-left: 0.75rem;
                 text-decoration: none;
                 text-align: center;
