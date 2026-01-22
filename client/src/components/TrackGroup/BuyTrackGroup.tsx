@@ -44,7 +44,6 @@ const BuyTrackGroup: React.FC<{
     },
     reValidateMode: "onChange",
   });
-  console.log("trackGroup", trackGroup.artist);
   const { data: stripeAccountStatus, isPending } = useQuery(
     queryUserStripeStatus(trackGroup.artist?.userId ?? 0)
   );

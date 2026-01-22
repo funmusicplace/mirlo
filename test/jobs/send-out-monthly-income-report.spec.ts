@@ -13,6 +13,12 @@ import sendOutMonthlyIncomeReport, {
 } from "../../src/jobs/send-out-monthy-income-report";
 import { faker } from "@faker-js/faker";
 
+const lastDayPreviousMonth = new Date(
+  new Date().getFullYear(),
+  new Date().getMonth(),
+  0
+);
+
 describe("send-out-monthly-income-report", () => {
   beforeEach(async () => {
     try {
@@ -125,8 +131,8 @@ describe("send-out-monthly-income-report", () => {
     const tip = await prisma.userArtistTip.create({
       data: {
         datePurchased: faker.date.recent({
-          days: 27,
-          refDate: new Date(new Date().setDate(1)),
+          days: 25,
+          refDate: lastDayPreviousMonth,
         }),
         userId: followerUser.id,
         artistId: artist.id,
@@ -393,7 +399,7 @@ describe("send-out-monthly-income-report", () => {
 
     const createdDate = faker.date.recent({
       days: 25,
-      refDate: new Date(new Date().setDate(0)),
+      refDate: lastDayPreviousMonth,
     });
 
     const transaction = await prisma.userTransaction.create({

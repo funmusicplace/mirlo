@@ -11,7 +11,6 @@ import Table from "components/common/Table";
 import { moneyDisplay } from "components/common/Money";
 import { formatDate } from "components/TrackGroup/ReleaseDate";
 import { Select } from "components/common/Select";
-import Button from "components/common/Button";
 import { getManageReleaseUrl, getReleaseUrl } from "utils/artist";
 
 const FundraiserPledges: React.FC = () => {

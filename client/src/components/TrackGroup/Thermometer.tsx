@@ -53,7 +53,7 @@ function Thermometer({
 
   const percent = Math.floor(totalAmount / goal);
   const atMost100 = percent > 100 ? 100 : percent;
-  const atLeast1 = atMost100 < 1 ? 1 : atMost100;
+  const atLeast1 = atMost100 < 1 && atMost100 !== 0 ? 1 : atMost100;
 
   const displayPercent = atLeast1;
 
