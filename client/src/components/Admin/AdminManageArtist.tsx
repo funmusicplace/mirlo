@@ -1,19 +1,31 @@
-import { css } from "@emotion/css";
 import Button from "components/common/Button";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import Table from "components/common/Table";
 import { Toggle } from "components/common/Toggle";
+import Modal from "components/common/Modal";
 import React from "react";
 import { FaArrowCircleLeft } from "react-icons/fa";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
+import { useTranslation } from "react-i18next";
+import { getArtistManageUrl } from "utils/artist";
+import TextArea from "components/common/TextArea";
 
 const AdminManageArtist = () => {
   const { id } = useParams();
   const [artist, setArtist] = React.useState<ArtistFromAdmin>();
   const snackbar = useSnackbar();
   const navigate = useNavigate();
+  const { t } = useTranslation("translation", { keyPrefix: "admin" });
+  const [showDisableModal, setShowDisableModal] = React.useState(false);
+  const [disableReason, setDisableReason] = React.useState("");
+  const [isSubmittingDisable, setIsSubmittingDisable] = React.useState(false);
+
+  const PREFILL_CONTENT_POLICY =
+    "Your artist account has been disabled due to a violation of our Content Policy regarding AI-generated content: http://mirlo.space/pages/content-policy" +
+    "\n\nThis determination was made after reviewing the artwork and/or music associated with your account. " +
+    "\n\nIf you believe this decision was made in error, you can contest it by emailing support@mirlo.space with evidence supporting your appeal.";
 
   const callback = React.useCallback(async () => {
     const response = await api.get<ArtistFromAdmin>(`admin/artists/${id}`);
@@ -21,16 +33,61 @@ const AdminManageArtist = () => {
   }, [id]);
 
   const onDeleteClick = React.useCallback(async () => {
-    if (
-      window.confirm(
-        `Are you sure you want to delete artist ${artist?.name}? This action cannot be undone.`
-      )
-    ) {
+    if (window.confirm(t("deleteArtistConfirm", { name: artist?.name }))) {
       await api.delete(`admin/artists/${id}`);
-      snackbar(`Artist ${artist?.name} deleted`, { type: "success" });
+      snackbar(t("artistDeleteSuccess", { name: artist?.name }), {
+        type: "success",
+      });
       navigate("/admin/artists");
     }
-  }, [id, artist?.name]);
+  }, [id, artist?.name, t]);
+
+  const handleDisableToggle = React.useCallback(
+    async (checked: boolean) => {
+      if (!checked) {
+        // Disabling the artist - show modal to get reason
+        setDisableReason("");
+        setShowDisableModal(true);
+      } else {
+        // Enabling the artist - no confirmation needed
+        await api.put(`admin/artists/${id}`, {
+          enabled: checked,
+        });
+        callback();
+        snackbar(t("artistEnableSuccess", { name: artist?.name }), {
+          type: "success",
+        });
+      }
+    },
+    [id, artist?.name, callback, snackbar, t]
+  );
+
+  const handleSubmitDisable = React.useCallback(async () => {
+    if (!disableReason.trim()) {
+      snackbar(t("disableReasonRequired"), {
+        type: "warning",
+      });
+      return;
+    }
+
+    try {
+      setIsSubmittingDisable(true);
+      await api.put(`admin/artists/${id}`, {
+        enabled: false,
+        disableReason: disableReason.trim(),
+      });
+      setShowDisableModal(false);
+      setDisableReason("");
+      callback();
+      snackbar(t("artistDisableSuccess", { name: artist?.name }), {
+        type: "success",
+      });
+    } catch (error) {
+      snackbar(t("failedToDisableArtist"));
+    } finally {
+      setIsSubmittingDisable(false);
+    }
+  }, [id, disableReason, artist?.name, callback, snackbar, t]);
 
   React.useEffect(() => {
     callback();
@@ -44,21 +101,18 @@ const AdminManageArtist = () => {
     <>
       <div>
         <SpaceBetweenDiv>
-          <div>
-            <h2
-              className={css`
-                display: flex;
-                align-items: center;
-                a {
-                  margin-right: 0.3rem;
-                }
-              `}
-            >
-              <Link to="/admin/users">
+          <div className="flex justify-between">
+            <h2 className="flex items-center">
+              <Link to="/admin/users" className="mr-1">
                 <FaArrowCircleLeft />
               </Link>
               Artist "{artist.name}"
             </h2>
+          </div>
+          <div>
+            <Link to={getArtistManageUrl(artist.id)}>
+              <Button>{t("manageArtist") ?? "Manage Artist"}</Button>
+            </Link>
           </div>
         </SpaceBetweenDiv>
         <div>
@@ -70,37 +124,71 @@ const AdminManageArtist = () => {
               </tr>
 
               <tr>
-                <td>is enabled?</td>
+                <td>{t("isEnabledLabel")}</td>
                 <td>
-                  <div
-                    className={css`
-                      display: flex;
-                      flex-direction: column;
-                    `}
-                  >
+                  <div className="flex flex-col">
                     <Toggle
                       toggled={artist.enabled}
                       label=""
-                      onClick={async (checked) => {
-                        await api.put(`admin/artists/${id}`, {
-                          enabled: checked,
-                        });
-                        callback();
-                      }}
+                      onClick={handleDisableToggle}
                     />
-                    <small>
-                      An artist who is enabled will have their music show up in
-                      search results. Their profile page will still be visible
-                      but only directly via URL.
-                    </small>
+                    <small>{t("artistEnabledDescription")}</small>
                   </div>
                 </td>
               </tr>
             </tbody>
           </Table>
-          <Button onClick={onDeleteClick}>Delete artist</Button>
+          <Button onClick={onDeleteClick}>{t("deleteArtist")}</Button>
         </div>
       </div>
+
+      <Modal
+        open={showDisableModal}
+        onClose={() => setShowDisableModal(false)}
+        title={t("disableArtistModal")}
+        size="small"
+      >
+        <div className="flex flex-col gap-4">
+          <p>{t("disableArtistDescription")}</p>
+
+          <TextArea
+            value={disableReason}
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+              setDisableReason(e.target.value)
+            }
+            placeholder={t("disableReasonPlaceholder")}
+            rows={6}
+          />
+
+          <div className="flex flex-col gap-2">
+            <Button
+              onClick={() => setDisableReason(PREFILL_CONTENT_POLICY)}
+              type="button"
+            >
+              {t("prefillContentPolicy")}
+            </Button>
+          </div>
+
+          <div className="flex gap-2 justify-end">
+            <Button
+              onClick={() => setShowDisableModal(false)}
+              type="button"
+              disabled={isSubmittingDisable}
+            >
+              {t("cancelButton")}
+            </Button>
+            <Button
+              onClick={handleSubmitDisable}
+              type="button"
+              disabled={isSubmittingDisable || !disableReason.trim()}
+            >
+              {isSubmittingDisable
+                ? t("disablingArtist")
+                : t("disableArtistButton")}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </>
   );
 };
