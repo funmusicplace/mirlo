@@ -11,6 +11,7 @@ import * as sendMail from "../../src/jobs/send-mail";
 
 import { manageSubscriptionReceipt } from "../../src/utils/subscription";
 import { ArtistSubscriptionReceiptEmailType } from "../../src/utils/handleFinishedTransactions";
+import * as sendMailQueueModule from "../../src/queues/send-mail-queue";
 
 describe("subscription", () => {
   beforeEach(async () => {
@@ -21,13 +22,17 @@ describe("subscription", () => {
     }
   });
 
-  afterEach(() => {
+  afterEach(async () => {
     sinon.restore();
+    await sendMailQueueModule.sendMailQueue.close();
+    await sendMailQueueModule.sendMailQueueEvents.close();
   });
 
   describe("manageSubscriptionReceipt", () => {
     it("should send out an email on receipt of a subscription charge", async () => {
-      const stub = sinon.spy(sendMail, "default");
+      const sendMailStub = sinon
+        .stub(sendMailQueueModule.sendMailQueue, "add")
+        .resolves({} as any);
 
       const { user: artistUser } = await createUser({
         email: "artist@artist.com",
@@ -68,13 +73,13 @@ describe("subscription", () => {
       });
 
       await manageSubscriptionReceipt({
-        paymentProcessor: "stripe",
         processorPaymentReferenceId: invoiceId,
         processorSubscriptionReferenceId: subscriptionKey,
         amountPaid: 10,
         currency: "usd",
         platformCut: 2,
         paymentProcessorFee: 0.3,
+        status: "COMPLETED",
       });
 
       const charge = await prisma.userTransaction.findMany({
@@ -93,8 +98,8 @@ describe("subscription", () => {
         subscription.id
       );
 
-      assert.equal(stub.calledOnce, true);
-      const data0 = stub.getCall(0).args[0].data;
+      assert.equal(sendMailStub.calledOnce, true);
+      const data0 = sendMailStub.getCall(0).args[1];
       assert.equal(data0.template, "artist-subscription-receipt");
       assert.equal(data0.message.to, "follower@follower.com");
       const locals = data0.locals as ArtistSubscriptionReceiptEmailType;

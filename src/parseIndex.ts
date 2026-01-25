@@ -319,7 +319,7 @@ const parseIndex = async (pathname: string) => {
           const coverString = tg.cover?.url.find((u) => u.includes("x600"));
           buildOpenGraphTags($, {
             title: track.title ?? "A track on Mirlo",
-            description: `A track by ${tg.artist.name}\nReleased ${tg.releaseDate}`,
+            description: `A track by ${tg.artist.name}\nReleased ${tg.releaseDate?.toISOString().split("T")[0]}`,
             url: `${client.applicationUrl}/${tg.artist?.urlSlug}/release/${tg.urlSlug}/tracks/${track.id}`,
             imageUrl: coverString
               ? generateFullStaticImageUrl(coverString, finalCoversBucket)
@@ -339,7 +339,7 @@ const parseIndex = async (pathname: string) => {
         buildOpenGraphTags($, {
           title: tg.title ?? "Mirlo Album",
           //Add artist, trackist, and blurb to description. I'm guessing that the blurb that appear's on an album's page is from tg.about but I don't actually know.
-          description: `An album by ${tg.artist.name}\nReleased ${tg.releaseDate}\n${tracklist}\n${tg.about}`,
+          description: `An album by ${tg.artist.name}\nReleased ${tg.releaseDate?.toISOString().split("T")[0]}\n${tracklist}\n${tg.about}`,
           url: `${client.applicationUrl}/${tg.artist?.urlSlug}/releases/${tg.urlSlug}`,
           imageUrl: coverString
             ? generateFullStaticImageUrl(coverString, finalCoversBucket)

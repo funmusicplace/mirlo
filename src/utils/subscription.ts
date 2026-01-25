@@ -4,6 +4,7 @@ import sendMail from "../jobs/send-mail";
 
 import { Job } from "bullmq";
 import { Artist } from "@mirlo/prisma/client";
+import { sendMailQueue } from "../queues/send-mail-queue";
 
 export type ArtistSubscriptionReceiptEmailType = {
   interval: "MONTH" | "YEAR";
@@ -23,21 +24,23 @@ export type ArtistSubscriptionReceiptEmailType = {
  * @param processorSubscriptionReferenceId
  */
 export const manageSubscriptionReceipt = async ({
-  paymentProcessor,
   processorPaymentReferenceId,
   processorSubscriptionReferenceId,
   amountPaid,
   currency,
   platformCut,
   paymentProcessorFee,
+  status,
+  urlParams,
 }: {
-  paymentProcessor: "stripe";
   processorPaymentReferenceId: string;
   processorSubscriptionReferenceId: string;
   amountPaid: number;
   currency: string;
   platformCut: number;
   paymentProcessorFee: number;
+  status: "FAILED" | "COMPLETED";
+  urlParams?: string;
 }) => {
   const artistUserSubscription = await prisma.artistUserSubscription.findFirst({
     where: {
@@ -62,7 +65,7 @@ export const manageSubscriptionReceipt = async ({
         platformCut,
         stripeId: processorPaymentReferenceId,
         stripeCut: paymentProcessorFee,
-        paymentStatus: "COMPLETED",
+        paymentStatus: status,
       },
     });
     const created = await prisma.artistUserSubscriptionCharge.create({
@@ -78,8 +81,8 @@ export const manageSubscriptionReceipt = async ({
     logger.info(
       `invoice.paid: ${processorPaymentReferenceId} found subscription, sending receipt`
     );
-    await sendMail<ArtistSubscriptionReceiptEmailType>({
-      data: {
+    if (status === "COMPLETED") {
+      await sendMailQueue.add("send-mail", {
         template: "artist-subscription-receipt",
         message: {
           to: artistUserSubscription.user.email,
@@ -91,7 +94,24 @@ export const manageSubscriptionReceipt = async ({
           host: process.env.API_DOMAIN,
           client: process.env.REACT_APP_CLIENT_DOMAIN,
         } as ArtistSubscriptionReceiptEmailType,
-      },
-    } as Job);
+      });
+    } else if (urlParams && status === "FAILED") {
+      await sendMailQueue.add("send-mail", {
+        template: "charge-failure",
+        message: {
+          to: artistUserSubscription.user.email,
+        },
+        locals: {
+          artist: artistUserSubscription.artistSubscriptionTier.artist,
+          email: encodeURIComponent(artistUserSubscription.user.email),
+          host: process.env.API_DOMAIN,
+          cardChargeContext: `your subscription to "${artistUserSubscription.artistSubscriptionTier.artist.name}'s ${artistUserSubscription.artistSubscriptionTier.name}" tier`,
+          currency: artistUserSubscription.currency,
+          pledgedAmountFormatted: artistUserSubscription.amount / 100,
+          client: process.env.REACT_APP_CLIENT_DOMAIN,
+          urlParams,
+        },
+      });
+    }
   }
 };

@@ -14,6 +14,7 @@ type Params = {
 export default function () {
   const operations = {
     POST: [userAuthenticated, trackGroupBelongsToLoggedInUser, POST],
+    DELETE: [userAuthenticated, trackGroupBelongsToLoggedInUser, DELETE],
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {
@@ -76,6 +77,81 @@ export default function () {
         schema: {
           $ref: "#/definitions/TrackGroup",
         },
+      },
+      default: {
+        description: "An error occurred",
+        schema: {
+          additionalProperties: true,
+        },
+      },
+    },
+  };
+
+  async function DELETE(req: Request, res: Response, next: NextFunction) {
+    const { trackGroupId } = req.params as unknown as Params;
+    try {
+      const trackGroup = await prisma.trackGroup.findFirst({
+        where: {
+          id: Number(trackGroupId),
+        },
+        include: {
+          fundraiser: true,
+        },
+      });
+
+      if (!trackGroup) {
+        throw new AppError({
+          httpCode: 404,
+          description: "Track group not found",
+        });
+      }
+
+      if (!trackGroup.fundraiser) {
+        throw new AppError({
+          httpCode: 404,
+          description: "Fundraiser not found",
+        });
+      }
+
+      // Check if there are any pledges
+      const pledgeCount = await prisma.fundraiserPledge.count({
+        where: {
+          fundraiserId: trackGroup.fundraiser.id,
+        },
+      });
+
+      if (pledgeCount > 0) {
+        throw new AppError({
+          httpCode: 400,
+          description: "Cannot delete a fundraiser with pledges",
+        });
+      }
+
+      await prisma.fundraiser.delete({
+        where: {
+          id: trackGroup.fundraiser.id,
+        },
+      });
+
+      res.json({ result: { success: true } });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  DELETE.apiDoc = {
+    summary: "Removes a fundraiser from a track group",
+    parameters: [
+      {
+        in: "path",
+        name: "trackGroupId",
+        required: true,
+        type: "string",
+      },
+    ],
+    responses: {
+      200: {
+        description: "Fundraiser deleted successfully",
       },
       default: {
         description: "An error occurred",

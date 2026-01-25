@@ -10,6 +10,7 @@ import {
   createTier,
   createUser,
 } from "../../../utils";
+import * as sendMailQueueModule from "../../../../src/queues/send-mail-queue";
 
 import { requestApp } from "../../utils";
 import { faker } from "@faker-js/faker";
@@ -21,6 +22,11 @@ describe("manage/artists/{artistId}/subscriptionTiers", () => {
     } catch (e) {
       console.error(e);
     }
+  });
+
+  afterEach(async () => {
+    await sendMailQueueModule.sendMailQueue.close();
+    await sendMailQueueModule.sendMailQueueEvents.close();
   });
 
   describe("POST", () => {

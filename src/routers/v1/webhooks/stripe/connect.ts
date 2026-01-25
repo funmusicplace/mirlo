@@ -3,6 +3,9 @@ import {
   handleAccountUpdate,
   handleCheckoutSession,
   handleInvoicePaid,
+  handleInvoicePaymentFailed,
+  handlePaymentIntentFailed,
+  handlePaymentIntentSucceeded,
   handleSetupIntentSucceeded,
   verifyStripeSignature,
 } from "../../../../utils/stripe";
@@ -56,6 +59,22 @@ export default function () {
           const invoice = event.data.object;
 
           handleInvoicePaid(invoice, event.account);
+          break;
+        case "invoice.payment_failed":
+          const failedInvoice = event.data.object;
+
+          handleInvoicePaymentFailed(failedInvoice, event.account);
+          break;
+
+        case "payment_intent.succeeded":
+          const paymentIntent = event.data.object;
+          handlePaymentIntentSucceeded(paymentIntent, event.account);
+          break;
+
+        case "payment_intent.payment_failed":
+          const failedPaymentIntent = event.data.object;
+
+          handlePaymentIntentFailed(failedPaymentIntent, event.account);
           break;
         case "account.updated":
           const accountUpdate = event.data.object;

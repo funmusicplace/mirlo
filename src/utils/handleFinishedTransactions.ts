@@ -1,15 +1,24 @@
 import Stripe from "stripe";
 import prisma from "@mirlo/prisma";
-import { Artist, MerchOption, TrackGroup, User } from "@mirlo/prisma/client";
+import {
+  Artist,
+  MerchOption,
+  TrackGroup,
+  User,
+  FundraiserPledge,
+  Fundraiser,
+} from "@mirlo/prisma/client";
 
 import { logger } from "../logger";
 import sendMail from "../jobs/send-mail";
 import { registerPurchase, registerTrackPurchase } from "./trackGroup";
 import { registerSubscription } from "./subscriptionTier";
 import { Job } from "bullmq";
-import stripe, { calculateAppFee, OPTION_JOINER } from "./stripe";
+import stripe, { OPTION_JOINER } from "./stripe";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { sendBasecampAMessage } from "./basecamp";
+import { calculateAppFee } from "./processingPayments";
+import { sendMailQueue } from "../queues/send-mail-queue";
 
 const getPaymentIntent = async (
   paymentIntentId: string,
@@ -1027,4 +1036,202 @@ export const handleSubscription = async (
   } catch (e) {
     logger.error(`Error creating subscription: ${e}`);
   }
+};
+
+export const handleFundraiserPledge = async (
+  pledge: FundraiserPledge & {
+    fundraiser: Fundraiser & { trackGroups: TrackGroup[] };
+  },
+  stripeId: string
+) => {
+  const transaction = await prisma.userTransaction.create({
+    data: {
+      userId: pledge.userId,
+      amount: pledge.amount,
+      currency: pledge.fundraiser.trackGroups[0].currency ?? "usd",
+      createdAt: new Date(),
+      paymentStatus: "PENDING",
+      stripeId,
+    },
+  });
+
+  logger.info(
+    `Updated pledge ${pledge.id} as paid and created transaction ${transaction.id}`
+  );
+};
+
+export const handleFundraiserPledgePaymentSuccess = async (
+  transactionId: string
+) => {
+  const transaction = await prisma.userTransaction.findFirst({
+    where: {
+      id: transactionId,
+    },
+    include: {
+      associatedPledge: {
+        include: { fundraiser: { include: { trackGroups: true } } },
+      },
+    },
+  });
+
+  if (!transaction) {
+    console.error(`Transaction ${transactionId} not found`);
+    return;
+  }
+
+  if (transaction.associatedPledge === null) {
+    console.error(`Transaction ${transactionId} has no associated pledge`);
+    return;
+  }
+
+  await prisma.userTransaction.update({
+    where: {
+      id: transaction.id,
+    },
+    data: {
+      paymentStatus: "COMPLETED",
+    },
+  });
+
+  const pledge = await prisma.fundraiserPledge.update({
+    where: {
+      id: transaction.associatedPledge.id,
+    },
+    data: {
+      paidAt: new Date(),
+      associatedTransactionId: transaction.id,
+    },
+    select: {
+      amount: true,
+      user: {
+        select: { email: true },
+      },
+      fundraiser: {
+        select: {
+          goalAmount: true,
+          trackGroups: {
+            select: {
+              title: true,
+              currency: true,
+              urlSlug: true,
+              artist: {
+                select: {
+                  name: true,
+                  urlSlug: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  await prisma.notification.create({
+    data: {
+      userId: transaction.associatedPledge.userId,
+      notificationType: "FUNDRAISER_PLEDGE_CHARGED",
+      content: `Your pledge of ${(transaction.amount / 100).toFixed(
+        2
+      )} ${transaction.currency.toUpperCase()} to the fundraiser "${
+        transaction.associatedPledge.fundraiser.name
+      }" has been successfully processed.`,
+      createdAt: new Date(),
+      trackGroupId: transaction.associatedPledge.fundraiser.trackGroups[0].id,
+    },
+  });
+
+  await Promise.all(
+    transaction.associatedPledge.fundraiser.trackGroups.map(async (tg) => {
+      if (transaction.associatedPledge === null) {
+        return;
+      }
+      await prisma.userTrackGroupPurchase.create({
+        data: {
+          userId: transaction.associatedPledge.userId,
+          trackGroupId: tg.id,
+          createdAt: new Date(),
+          userTransactionId: transaction.id,
+        },
+      });
+    })
+  );
+
+  await sendMailQueue.add("send-mail", {
+    template: "fundraiser-success",
+    message: {
+      to: pledge.user.email,
+    },
+    locals: {
+      artist: pledge.fundraiser.trackGroups[0].artist,
+      email: encodeURIComponent(pledge.user.email),
+      host: process.env.API_DOMAIN,
+      trackGroup: pledge.fundraiser.trackGroups[0],
+      currency: pledge.fundraiser.trackGroups[0].currency,
+      pledgedAmountFormatted: pledge.amount / 100,
+      fundraisingGoalFormatted: (pledge.fundraiser.goalAmount ?? 0) / 100,
+      client: process.env.REACT_APP_CLIENT_DOMAIN,
+    },
+  });
+};
+
+export const handleFundraiserPledgePaymentFailure = async (
+  transactionId: string,
+  urlParams: string
+) => {
+  const transaction = await prisma.userTransaction.findFirst({
+    where: {
+      id: transactionId,
+    },
+    include: {
+      associatedPledge: {
+        include: {
+          user: true,
+          fundraiser: {
+            include: { trackGroups: { include: { artist: true } } },
+          },
+        },
+      },
+    },
+  });
+
+  if (!transaction) {
+    console.error(
+      `handleFundraiserPledgePaymentFailure: Transaction ${transactionId} not found`
+    );
+    return;
+  }
+
+  if (!transaction.associatedPledge) {
+    console.error(
+      `handleFundraiserPledgePaymentFailure: Transaction ${transactionId} has no associated pledge`
+    );
+    return;
+  }
+
+  await prisma.userTransaction.update({
+    where: {
+      id: transaction.id,
+    },
+    data: {
+      paymentStatus: "FAILED",
+    },
+  });
+
+  await sendMailQueue.add("send-mail", {
+    template: "charge-failure",
+    message: {
+      to: transaction.associatedPledge.user.email,
+    },
+    locals: {
+      artist: transaction.associatedPledge.fundraiser.trackGroups[0].artist,
+      email: encodeURIComponent(transaction.associatedPledge?.user.email),
+      host: process.env.API_DOMAIN,
+      cardChargeContext: `your pledge to "${transaction.associatedPledge.fundraiser.trackGroups[0].artist.name}'s ${transaction.associatedPledge.fundraiser.trackGroups[0].title}" fundraiser`,
+      currency: transaction.associatedPledge.fundraiser.trackGroups[0].currency,
+      pledgedAmountFormatted: transaction.associatedPledge.amount / 100,
+      client: process.env.REACT_APP_CLIENT_DOMAIN,
+      urlParams,
+    },
+  });
 };

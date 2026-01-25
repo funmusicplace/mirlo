@@ -205,6 +205,15 @@ const routes: RouteObject[] = [
               return { Component };
             },
           },
+          {
+            path: "billing",
+            async lazy() {
+              const { default: Component } = await import(
+                "components/Profile/Billing"
+              );
+              return { Component };
+            },
+          },
         ],
       },
       {

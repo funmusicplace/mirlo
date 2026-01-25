@@ -12,11 +12,9 @@ import TrackGroupAdminMenu from "./TrackGroupAdminMenu";
 import React from "react";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import { useAuthContext } from "state/AuthContext";
-import FlagContent from "./FlagContent";
 import ArtistByLine from "./ArtistByLine";
 import { useQuery } from "@tanstack/react-query";
 import { queryArtist } from "queries";
-import { ArtistButtonLink } from "components/Artist/ArtistButtons";
 
 export const ItemViewTitle: React.FC<{
   title: string;

@@ -7,7 +7,7 @@ import {
 } from "../../../../auth/passport";
 import prisma from "@mirlo/prisma";
 
-import { createCheckoutSessionForSubscription } from "../../../../utils/stripe";
+import { createCheckoutSessionForSubscription } from "../../../../utils/stripe/sessions";
 import { deleteStripeSubscriptions } from "../../../../utils/artist";
 import logger from "../../../../logger";
 import { AppError } from "../../../../utils/error";
