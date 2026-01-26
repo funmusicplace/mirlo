@@ -1,0 +1,29 @@
+extends ../layout.pug
+
+block content
+    p Hi #{userName},
+    
+    p Your artist page "#{artistName}" has been disabled on Mirlo.
+    
+    if reason
+        strong Reason for disablement:
+        != reason
+    
+    p
+        strong What this means:
+    ul
+        li Your music will no longer appear in search results
+        li Your profile page will only be accessible via direct URL
+        li New purchases and subscriptions cannot be processed
+    
+    p
+        strong Next steps:
+    p If you believe this decision was made in error, you can appeal by contacting us at 
+        a(href=`mailto:${supportEmail}`) #{supportEmail}
+        | . Please include details about why you believe your account was disabled in error.
+    
+    p Our team will review your appeal and get back to you as soon as possible.
+    
+    p Best regards,
+    br
+    | The Mirlo Team
