@@ -766,6 +766,7 @@
     "defaultTrackMinPrice": "By default, tracks will have this minimum price.",
     "publishedAt": "Publication date",
     "downloadCodes": "Promo codes",
+    "chargePledgesSuccess": "Successfully charged all active pledges for this fundraiser.",
     "keyDetails": "Key details",
     "chargePledges": "Charge pledges now",
     "addFundraiser": "Add fundraiser",

@@ -5,7 +5,6 @@ import {
 } from "../../../../../auth/passport";
 import prisma from "@mirlo/prisma";
 import { chargePledgePayments } from "../../../../../utils/stripe";
-import { sendMailQueue } from "../../../../../queues/send-mail-queue";
 
 export default function () {
   const operations = {
@@ -57,51 +56,6 @@ export default function () {
         }
 
         await chargePledgePayments(pledge);
-
-        await prisma.fundraiserPledge.update({
-          where: {
-            id: pledge.id,
-          },
-          data: {
-            paidAt: new Date(),
-          },
-        });
-
-        const transaction = await prisma.userTransaction.create({
-          data: {
-            userId: pledge.userId,
-            amount: pledge.amount,
-            currency: trackGroup.currency ?? "usd",
-            createdAt: new Date(),
-            paymentStatus: "COMPLETED",
-          },
-        });
-
-        await prisma.userTrackGroupPurchase.create({
-          data: {
-            userId: pledge.userId,
-            trackGroupId: trackGroup.id,
-            createdAt: new Date(),
-            userTransactionId: transaction.id,
-          },
-        });
-
-        await sendMailQueue.add("send-mail", {
-          template: "fundraiser-success",
-          message: {
-            to: pledge.user.email,
-          },
-          locals: {
-            artist: trackGroup.artist,
-            email: encodeURIComponent(pledge.user.email),
-            host: process.env.API_DOMAIN,
-            trackGroup: trackGroup,
-            currency: trackGroup.currency,
-            pledgedAmountFormatted: pledge.amount / 100,
-            fundraisingGoalFormatted: (pledge.fundraiser.goalAmount ?? 0) / 100,
-            client: process.env.REACT_APP_CLIENT_DOMAIN,
-          },
-        });
       }
 
       return res.status(200).json({ success: true });

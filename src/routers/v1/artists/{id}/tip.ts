@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from "express";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import prisma from "@mirlo/prisma";
 
-import { createStripeCheckoutSessionForTip } from "../../../../utils/stripe";
+import { createStripeCheckoutSessionForTip } from "../../../../utils/stripe/sessions";
 import { subscribeUserToArtist } from "../../../../utils/artist";
 import { AppError } from "../../../../utils/error";
 

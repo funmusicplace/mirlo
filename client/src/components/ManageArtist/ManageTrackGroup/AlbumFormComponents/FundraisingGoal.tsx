@@ -7,12 +7,12 @@ import { useParams, Link } from "react-router-dom";
 import { FormSection } from "./AlbumFormContent";
 import { css } from "@emotion/css";
 import { useAuthContext } from "state/AuthContext";
-import Button from "components/common/Button";
+import Button, { ButtonLink } from "components/common/Button";
 import { queryManagedTrackGroup, queryTrackGroupSupporters } from "queries";
 import { useQuery } from "@tanstack/react-query";
 import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
-import { FaEye } from "react-icons/fa";
+import { FaEye, FaTrash } from "react-icons/fa";
 
 const FundraisingGoal: React.FC<{
   trackGroupId: number;
@@ -37,7 +37,7 @@ const FundraisingGoal: React.FC<{
   const isAllOrNothing = watch("isAllOrNothing");
 
   const {
-    data: { totalAmount } = {
+    data: { totalAmount, totalSupporters } = {
       results: [],
       total: 0,
       totalAmount: 0,
@@ -46,8 +46,9 @@ const FundraisingGoal: React.FC<{
   } = useQuery(queryTrackGroupSupporters(trackGroupId));
 
   const chargePledgesVisible =
-    (isAllOrNothing && totalAmount > 0 && Number(goal) < totalAmount) ||
-    (!isAllOrNothing && totalAmount > 0);
+    isAllOrNothing && totalAmount > 0 && Number(goal) < totalAmount;
+
+  const canRemoveFundraiser = totalSupporters === 0;
 
   const onChargePledges = async () => {
     try {
@@ -79,6 +80,27 @@ const FundraisingGoal: React.FC<{
     }
   };
 
+  const onRemoveFundraiser = async () => {
+    try {
+      setIsLoading(true);
+      if (!fundraiser) {
+        return;
+      }
+      await api.delete(`manage/trackGroups/${trackGroupId}/fundraiser`);
+      snackbar(t("fundraiserRemoved"), {
+        type: "success",
+      });
+      refetch();
+    } catch (e) {
+      console.error(e);
+      snackbar(t("fundraiserRemovalFailed"), {
+        type: "warning",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   if (!fundraiser) {
     return (
       <div>
@@ -96,15 +118,13 @@ const FundraisingGoal: React.FC<{
       <div className="flex justify-between items-center w-full">
         <h2>{t("fundraisingGoal")}</h2>
         <div className="flex gap-2">
-          {fundraiser && (
-            <Link
-              to={`/fundraiser/${fundraiser.id}/pledges`}
+          {fundraiser.isAllOrNothing && (
+            <ButtonLink
+              to={`/manage/fundraiser/${fundraiser.id}/pledges`}
               className="flex items-center gap-1"
             >
-              <Button type="button" startIcon={<FaEye />}>
-                {t("viewPledges", { defaultValue: "View pledges" })}
-              </Button>
-            </Link>
+              {t("viewPledges", { defaultValue: "View pledges" })}
+            </ButtonLink>
           )}
           {chargePledgesVisible && (
             <Button
@@ -113,6 +133,24 @@ const FundraisingGoal: React.FC<{
               isLoading={isLoading}
             >
               {t("chargePledges")}
+            </Button>
+          )}
+          {fundraiser && (
+            <Button
+              type="button"
+              onClick={onRemoveFundraiser}
+              isLoading={isLoading}
+              disabled={!canRemoveFundraiser}
+              title={
+                !canRemoveFundraiser
+                  ? t("cannotRemoveFundraiserWithPledges", {
+                      defaultValue: "Cannot remove fundraiser with pledges",
+                    })
+                  : ""
+              }
+              startIcon={<FaTrash />}
+            >
+              {t("removeFundraiser", { defaultValue: "Remove fundraiser" })}
             </Button>
           )}
         </div>

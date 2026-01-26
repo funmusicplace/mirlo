@@ -202,6 +202,12 @@ No!
 
 :::
 
+::: details Does Mirlo support 30-second snippets?
+
+No. We follow [Bandcamp's example on this](https://get.bandcamp.help/hc/en-us/articles/23020694021655-Does-Bandcamp-support-30-second-snippets).
+
+You can limit the amount of times a listener can listen to the entire song though. If you want to get creative about it, you could upload a preview of the song as a 30 second snippet, and then attach the full song to the same album, but list it as "only listenable when purchased".
+
 ## Technical details
 
 ::: details Are you open source?

@@ -412,10 +412,10 @@ const sendNotificationEmail = async () => {
     logger.error(e);
   } finally {
     logger.info(`sendNotificationEmail: closing queue`);
-
-    await sendMailQueue.close();
-    await sendMailQueueEvents.close();
   }
+
+  await sendMailQueue.close();
+  await sendMailQueueEvents.close();
 };
 
 export default sendNotificationEmail;

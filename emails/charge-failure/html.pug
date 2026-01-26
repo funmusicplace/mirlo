@@ -1,0 +1,11 @@
+extends ../layout.pug
+
+block content
+  p We're sorry to inform you that there was an issue charging your card #{amount} #{currency } for #{cardChargeContext}.
+
+  p To fix this, please update your payment information by visiting your 
+    a(href!=`${client}/profile/billing?${urlParams}`) billing settings
+    |  on Mirlo.
+  p Once your payment information is updated, we will automatically attempt to charge your card again.
+  hr
+  p Thank you for supporting artists on Mirlo!

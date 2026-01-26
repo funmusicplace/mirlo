@@ -206,6 +206,7 @@ enum NotificationType {
   USER_BOUGHT_YOUR_TRACK
   SYSTEM_MESSAGE
   LABEL_ADDED_ARTIST
+  FUNDRAISER_PLEDGE_CHARGED
 }
 
 model Post {
@@ -604,7 +605,7 @@ model UserTransaction {
   merchPurchases                MerchPurchase[]
   trackPurchases                UserTrackPurchase[]
   tips                          UserArtistTip[]
-  associatedPledges             FundraiserPledge?
+  associatedPledge              FundraiserPledge?
   artistUserSubscriptionCharges ArtistUserSubscriptionCharge[]
   paymentStatus                 PaymentStatus                  @default(PENDING)
 }
@@ -907,12 +908,12 @@ model MerchDownloadableContent {
 }
 
 model RecommendedTrackGroup {
-  id                       Int        @id @default(autoincrement())
-  trackGroupId             Int
-  trackGroup               TrackGroup @relation("trackGroupRecommendations", fields: [trackGroupId], references: [id])
-  recommendedTrackGroupId  Int
-  recommendedTrackGroup    TrackGroup @relation("recommendedByTrackGroups", fields: [recommendedTrackGroupId], references: [id])
-  createdAt                DateTime   @default(now())
+  id                      Int        @id @default(autoincrement())
+  trackGroupId            Int
+  trackGroup              TrackGroup @relation("trackGroupRecommendations", fields: [trackGroupId], references: [id])
+  recommendedTrackGroupId Int
+  recommendedTrackGroup   TrackGroup @relation("recommendedByTrackGroups", fields: [recommendedTrackGroupId], references: [id])
+  createdAt               DateTime   @default(now())
 
   @@unique([trackGroupId, recommendedTrackGroupId])
 }

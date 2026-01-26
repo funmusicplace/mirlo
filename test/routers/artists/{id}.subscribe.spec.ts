@@ -6,7 +6,6 @@ import { clearTables, createArtist, createUser } from "../../utils";
 import { describe, it } from "mocha";
 import { requestApp } from "../utils";
 import prisma from "@mirlo/prisma";
-import request from "supertest";
 
 let createTestData = async (stripeAccountId: string | null = "23") => {
   const { user: artistUser, accessToken: artistAccessToken } = await createUser(

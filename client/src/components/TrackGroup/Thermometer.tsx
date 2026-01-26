@@ -16,10 +16,9 @@ import LoadingBlocks from "components/Artist/LoadingBlocks";
 import ArtistRouterLink from "components/Artist/ArtistButtons";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import { getReleaseUrl } from "utils/artist";
-import Button from "components/common/Button";
-import { FaShareAlt } from "react-icons/fa";
-import { useSnackbar } from "state/SnackbarContext";
+
 import ShareToSocials from "components/common/ShareToSocials";
+import { useState } from "react";
 
 function Thermometer({
   goal,
@@ -49,7 +48,7 @@ function Thermometer({
   );
 
   const [searchParams] = useSearchParams();
-  const hasJustPledged = searchParams.get("setup_intent") || false;
+  const [hasJustPledged] = useState(searchParams.get("setup_intent") || false);
 
   const percent = Math.floor(totalAmount / goal);
   const atMost100 = percent > 100 ? 100 : percent;
@@ -58,7 +57,7 @@ function Thermometer({
   const displayPercent = atLeast1;
 
   if (isPending) {
-    return <LoadingBlocks rows={2} />;
+    return <LoadingBlocks rows={2} height="2rem" margin="0.5rem 0" />;
   }
 
   return (

@@ -1,0 +1,2 @@
+-- AlterEnum
+ALTER TYPE "NotificationType" ADD VALUE 'FUNDRAISER_PLEDGE_CHARGED';

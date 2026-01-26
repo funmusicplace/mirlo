@@ -17,7 +17,6 @@ import prisma from "@mirlo/prisma";
 import checkoutEndpoint from "../../src/routers/v1/checkout";
 import * as stripeUtils from "../../src/utils/stripe";
 import Stripe from "stripe";
-import purchase from "../../src/routers/v1/merch/{id}/purchase";
 
 describe("checkout", () => {
   beforeEach(async () => {
