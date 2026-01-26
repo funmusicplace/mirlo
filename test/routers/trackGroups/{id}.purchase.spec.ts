@@ -183,6 +183,13 @@ describe("trackGroups/{id}/purchase", () => {
             // return whatever
           });
 
+        sinon
+          .stub(stripeUtils.stripe.accounts, "retrieve")
+          // @ts-ignore
+          .callsFake(async (_params) => {
+            return { default_currency: "usd" };
+          });
+
         const { user } = await createUser({
           email: "artist@artist.com",
           stripeAccountId: "aRandomWord",
@@ -220,6 +227,12 @@ describe("trackGroups/{id}/purchase", () => {
           // @ts-ignore
           .callsFake(async (_params) => {
             // return whatever
+          });
+        sinon
+          .stub(stripeUtils.stripe.accounts, "retrieve")
+          // @ts-ignore
+          .callsFake(async (_params) => {
+            return { default_currency: "usd" };
           });
         const { user: artistUser } = await createUser({
           email: "artist@artist.com",

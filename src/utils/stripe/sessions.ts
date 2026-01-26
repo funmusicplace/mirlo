@@ -73,6 +73,8 @@ export const createStripeCheckoutSessionForTrackPurchase = async ({
     },
   });
 
+  const stripeAccount = await stripe.accounts.retrieve(stripeAccountId);
+
   const productKey = await createTrackStripeProduct(track, stripeAccountId);
 
   if (!productKey) {
@@ -82,7 +84,10 @@ export const createStripeCheckoutSessionForTrackPurchase = async ({
     });
   }
 
-  const currency = track.trackGroup.currency?.toLowerCase() ?? "usd";
+  const currency =
+    (stripeAccount.default_currency ||
+      track.trackGroup.currency?.toLowerCase()) ??
+    "usd";
 
   const session = await stripe.checkout.sessions.create(
     {
@@ -147,8 +152,10 @@ export const createStripeCheckoutSessionForCatalogue = async ({
       applicationName: "frontend",
     },
   });
-
-  const currency = artist.user.currency?.toLowerCase() ?? "usd";
+  const stripeAccount = await stripe.accounts.retrieve(stripeAccountId);
+  const currency =
+    (stripeAccount.default_currency || artist.user.currency?.toLowerCase()) ??
+    "usd";
 
   const cancelUrlParams = buildCheckoutCancelSearchParams({
     artistId: artist.id,
@@ -241,8 +248,11 @@ export const createStripeCheckoutSessionForPurchase = async ({
       httpCode: 500,
     });
   }
-
-  const currency = trackGroup.currency?.toLowerCase() ?? "usd";
+  const stripeAccount = await stripe.accounts.retrieve(stripeAccountId);
+  const currency =
+    stripeAccount.default_currency ??
+    trackGroup.currency?.toLowerCase() ??
+    "usd";
 
   const customer = await findOrCreateStripeCustomer(
     stripeAccountId,
@@ -459,7 +469,9 @@ export const createStripeCheckoutSessionForMerchPurchase = async ({
     });
   }
 
-  const currency = merch.currency?.toLowerCase() ?? "usd";
+  const stripeAccount = await stripe.accounts.retrieve(stripeAccountId);
+  const currency =
+    (stripeAccount.default_currency || merch.currency?.toLowerCase()) ?? "usd";
 
   const destinations = determineShipping(
     merch.shippingDestinations,
@@ -544,6 +556,9 @@ export const createStripeCheckoutSessionForTip = async ({
     clientId: client?.id,
   });
 
+  const stripeAccount = await stripe.accounts.retrieve(stripeAccountId);
+  currency = stripeAccount.default_currency || currency || "usd";
+
   const session = await stripe.checkout.sessions.create(
     {
       billing_address_collection: "auto",
@@ -623,6 +638,10 @@ export const createCheckoutSessionForSubscription = async ({
     clientId: client?.id,
   });
 
+  const stripeAccount = await stripe.accounts.retrieve(stripeAccountId);
+  const currency =
+    (stripeAccount.default_currency || tier.currency?.toLowerCase()) ?? "usd";
+
   const session = await stripe.checkout.sessions.create(
     {
       billing_address_collection: "auto",
@@ -634,7 +653,7 @@ export const createCheckoutSessionForSubscription = async ({
       customer_email: loggedInUser?.email || email,
       subscription_data: {
         application_fee_percent: await calculatePlatformPercent(
-          tier.currency,
+          currency,
           tier.platformPercent
         ),
       },
@@ -645,7 +664,7 @@ export const createCheckoutSessionForSubscription = async ({
             unit_amount: tier.allowVariable
               ? amount || (tier.minAmount ?? 0)
               : (tier.minAmount ?? 0),
-            currency: tier.currency ?? "USD",
+            currency: currency ?? "usd",
             product: productKey,
             recurring: {
               interval: tier.interval === "YEAR" ? "year" : "month",
