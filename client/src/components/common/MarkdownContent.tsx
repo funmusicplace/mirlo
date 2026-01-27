@@ -19,7 +19,7 @@ const BlackbirdTransformer = {
   getHTML(url: string) {
     const iframeUrl = url.replace("/s/", "/embed/");
 
-    return `<iframe src="${iframeUrl}" style="width:100%; height: 137px; border:0; border-radius: 4px; overflow:hidden;"></iframe>`;
+    return `<iframe src="${iframeUrl}" style="width:100%; height: 137px; border:0; border-radius: 4px; overflow:hidden;" sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"></iframe>`;
   },
 };
 
