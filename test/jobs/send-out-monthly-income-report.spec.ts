@@ -423,7 +423,7 @@ describe("send-out-monthly-income-report", () => {
       data: {
         datePurchased: faker.date.recent({
           days: 10,
-          refDate: new Date(new Date().setDate(1)),
+          refDate: lastDayPreviousMonth,
         }),
         userId: followerUser.id,
         artistId: artist2.id,

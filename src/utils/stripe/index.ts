@@ -556,6 +556,8 @@ export const chargePledgePayments = async (
 
   const stripeAccountId =
     pledge.fundraiser.trackGroups[0].artist.user.stripeAccountId;
+
+  const stripeAccount = await stripe.accounts.retrieve(stripeAccountId);
   try {
     logger.info(
       `Charging pledge payments for fundraiser ${pledge.fundraiser.id} and user ${pledge.userId}`
@@ -585,11 +587,16 @@ export const chargePledgePayments = async (
       logger.info(
         "Found stripe paymentMethodId: " + paymentMethods.data[0]?.id
       );
+      const currency =
+        (stripeAccount.default_currency ||
+          pledge.fundraiser.trackGroups[0].currency) ??
+        "usd";
+
       if (paymentMethods.data[0]?.id) {
         const paymentIntent = await stripe.paymentIntents.create(
           {
             amount: pledge.amount,
-            currency: pledge.fundraiser.trackGroups[0].currency ?? "usd",
+            currency: currency,
             // In the latest version of the API, specifying the `automatic_payment_methods` parameter is optional because Stripe enables its functionality by default.
             automatic_payment_methods: { enabled: true },
             customer: customerId,
@@ -599,7 +606,7 @@ export const chargePledgePayments = async (
             confirm: true,
             application_fee_amount: await calculateAppFee(
               pledge.amount,
-              pledge.fundraiser.trackGroups[0].currency ?? "usd",
+              currency,
               pledge.fundraiser.trackGroups[0].platformPercent
             ),
             metadata: {
