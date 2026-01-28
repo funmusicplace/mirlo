@@ -57,7 +57,6 @@ const ClickToPlayTracks: React.FC<{
     },
     dispatch,
   } = useGlobalStateContext();
-  const { user } = useAuthContext();
   const params = useParams();
 
   const playableTracks = React.useMemo(() => {
@@ -67,8 +66,6 @@ const ClickToPlayTracks: React.FC<{
   const { data: artist } = useQuery(
     queryArtist({ artistSlug: params.artistId ?? "" })
   );
-
-  const userId = user?.id;
 
   React.useEffect(() => {
     if (trackIds?.length) {

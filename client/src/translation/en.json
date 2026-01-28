@@ -1183,7 +1183,8 @@
     "chooseYourStarterTheme": "Choose your starter theme.",
     "youCanCustomizeThisLater": "You can customize this later.",
     "lightTheme": "Light",
-    "darkTheme": "Dark"
+    "darkTheme": "Dark",
+    "contentPolicyConfirmation": "I confirm that my content complies with Mirlo's <content>content policy</content>. I understand that <strong>AI-generated music or artwork</strong> is not permitted on Mirlo."
   },
   "manageTrackTable": {
     "titleColumn": "Title",

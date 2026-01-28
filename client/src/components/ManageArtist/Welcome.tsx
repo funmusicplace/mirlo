@@ -1,6 +1,7 @@
 import { Trans, useTranslation } from "react-i18next";
 import styled from "@emotion/styled";
 import FormComponent from "components/common/FormComponent";
+import FormCheckbox from "components/common/FormCheckbox";
 import { InputEl } from "components/common/Input";
 import { FormProvider, useForm } from "react-hook-form";
 import Button, { ButtonLink } from "components/common/Button";
@@ -9,7 +10,7 @@ import ArtistSlugInput from "../common/SlugInput";
 import api from "services/api";
 import { FaArrowRight } from "react-icons/fa";
 import { css } from "@emotion/css";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import useErrorHandler from "services/useErrorHandler";
 import { useAuthContext } from "state/AuthContext";
 
@@ -23,6 +24,7 @@ interface FormData {
   name: string;
   urlSlug: string;
   theme: string;
+  confirmContentPolicy: boolean;
 }
 
 const nextButtonText = (step: number, currentStepValue?: unknown) => {
@@ -59,6 +61,7 @@ const Welcome = () => {
     urlSlug: watch("urlSlug"),
     name: watch("name"),
     theme: watch("theme"),
+    confirmContentPolicy: watch("confirmContentPolicy"),
   };
   const localArtistLink = `/${localArtist?.urlSlug}`;
 
@@ -103,7 +106,9 @@ const Welcome = () => {
   const currentStepValue = getValues(steps[step] as keyof FormData);
 
   const isButtonDisabled =
-    !formState.isValid || vals[steps[step] as keyof FormData] === "";
+    !formState.isValid ||
+    vals[steps[step] as keyof FormData] === "" ||
+    !vals.confirmContentPolicy;
 
   return (
     <FormProvider {...methods}>
@@ -118,6 +123,29 @@ const Welcome = () => {
               placeholder={t("placeholderName") ?? ""}
             />
             <small>{t("youCanChangeThis")}</small>
+          </FormComponent>
+
+          <FormComponent>
+            <FormCheckbox
+              keyName="confirmContentPolicy"
+              description={
+                <span>
+                  <Trans
+                    i18nKey="contentPolicyConfirmation"
+                    t={t}
+                    components={{
+                      strong: <strong></strong>,
+                      content: (
+                        <Link
+                          to="https://mirlo.space/pages/content-policy"
+                          target="_blank"
+                        ></Link>
+                      ),
+                    }}
+                  />
+                </span>
+              }
+            />
           </FormComponent>
 
           {step > 0 && (
