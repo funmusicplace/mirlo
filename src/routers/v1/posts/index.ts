@@ -55,7 +55,12 @@ export default function () {
       const posts = await prisma.post.findMany({
         where,
         include: {
-          artist: true,
+          artist: {
+            where: {
+              enabled: true,
+              deletedAt: null,
+            },
+          },
           featuredImage: true,
           tracks: {
             orderBy: {
