@@ -1,0 +1,311 @@
+spec:
+  name: mirlo
+  region: nyc
+  services:
+    # Web API Server
+    - name: api
+      environment_slug: node
+      git:
+        branch: main
+        repo_clone_url: https://github.com/funmusicplace/mirlo
+      build_command: corepack enable && yarn install --immutable && yarn prisma:migrate:deploy && yarn client:build
+      run_command: yarn ts-node src/index.ts
+      http_port: 3000
+      health_check:
+        http_path: /health
+      instance_count: 1
+      instance_size_slug: basic-s
+      routes:
+        - path: /
+      envs:
+        - key: NODE_ENV
+          value: production
+          scope: RUN_TIME
+        - key: NODE_OPTIONS
+          value: --max-old-space-size=1512
+          scope: RUN_TIME
+        - key: SKIP_INSTALL_DEPS
+          value: "true"
+          scope: BUILD_TIME
+        - key: API_DOMAIN
+          value: ${APP_DOMAIN}
+          scope: RUN_TIME
+        - key: STATIC_MEDIA_HOST
+          value: https://${APP_DOMAIN}
+          scope: RUN_TIME
+        - key: REACT_APP_API_DOMAIN
+          value: https://${APP_DOMAIN}
+          scope: RUN_TIME
+        - key: DATABASE_URL
+          value: ${db.connection_string}
+          scope: RUN_TIME
+        - key: REDIS_HOST
+          value: ${redis.hostname}
+          scope: RUN_TIME
+        - key: REDIS_PORT
+          value: ${redis.port}
+          scope: RUN_TIME
+        - key: REDIS_PASSWORD
+          value: ${redis.password}
+          scope: RUN_TIME
+        - key: MINIO_HOST
+          value: ${minio.hostname}
+          scope: RUN_TIME
+        - key: MINIO_ROOT_USER
+          value: ${minio.username}
+          scope: RUN_TIME
+        - key: MINIO_ROOT_PASSWORD
+          value: ${minio.password}
+          scope: RUN_TIME
+        - key: MINIO_API_PORT
+          value: "9000"
+          scope: RUN_TIME
+        - key: JWT_SECRET
+          value: ${JWT_SECRET}
+          scope: RUN_TIME
+          type: SECRET
+        - key: REFRESH_TOKEN_SECRET
+          value: ${REFRESH_TOKEN_SECRET}
+          scope: RUN_TIME
+          type: SECRET
+        - key: STRIPE_KEY
+          value: ${STRIPE_KEY}
+          scope: RUN_TIME
+          type: SECRET
+        - key: SENDGRID_API_KEY
+          value: ${SENDGRID_API_KEY}
+          scope: RUN_TIME
+          type: SECRET
+
+    # Background Worker for async jobs
+    - name: background
+      environment_slug: node
+      git:
+        branch: main
+        repo_clone_url: https://github.com/funmusicplace/mirlo
+      build_command: corepack enable && yarn install --immutable && yarn prisma:migrate:deploy
+      run_command: yarn ts-node src/jobs/queue-worker.ts run
+      instance_count: 1
+      instance_size_slug: basic-s
+      envs:
+        - key: NODE_ENV
+          value: production
+          scope: RUN_TIME
+        - key: NODE_OPTIONS
+          value: --max-old-space-size=1512
+          scope: RUN_TIME
+        - key: SKIP_INSTALL_DEPS
+          value: "true"
+          scope: BUILD_TIME
+        - key: DATABASE_URL
+          value: ${db.connection_string}
+          scope: RUN_TIME
+        - key: REDIS_HOST
+          value: ${redis.hostname}
+          scope: RUN_TIME
+        - key: REDIS_PORT
+          value: ${redis.port}
+          scope: RUN_TIME
+        - key: REDIS_PASSWORD
+          value: ${redis.password}
+          scope: RUN_TIME
+        - key: MINIO_HOST
+          value: ${minio.hostname}
+          scope: RUN_TIME
+        - key: MINIO_ROOT_USER
+          value: ${minio.username}
+          scope: RUN_TIME
+        - key: MINIO_ROOT_PASSWORD
+          value: ${minio.password}
+          scope: RUN_TIME
+        - key: MINIO_API_PORT
+          value: "9000"
+          scope: RUN_TIME
+        - key: JWT_SECRET
+          value: ${JWT_SECRET}
+          scope: RUN_TIME
+          type: SECRET
+        - key: SENDGRID_API_KEY
+          value: ${SENDGRID_API_KEY}
+          scope: RUN_TIME
+          type: SECRET
+
+    # Cron job: every-minute-tasks
+    - name: every-minute-tasks
+      environment_slug: node
+      git:
+        branch: main
+        repo_clone_url: https://github.com/funmusicplace/mirlo
+      build_command: corepack enable && yarn install --immutable && yarn prisma:migrate:deploy
+      run_command: yarn ts-node src/jobs/every-minute-tasks.ts
+      instance_size_slug: basic-s
+      jobs:
+        - name: every-minute-tasks
+          kind: POST_DEPLOY_JOB
+      envs:
+        - key: NODE_ENV
+          value: production
+          scope: RUN_TIME
+        - key: NODE_OPTIONS
+          value: --max-old-space-size=512
+          scope: RUN_TIME
+        - key: SKIP_INSTALL_DEPS
+          value: "true"
+          scope: BUILD_TIME
+        - key: DATABASE_URL
+          value: ${db.connection_string}
+          scope: RUN_TIME
+        - key: REDIS_HOST
+          value: ${redis.hostname}
+          scope: RUN_TIME
+        - key: REDIS_PORT
+          value: ${redis.port}
+          scope: RUN_TIME
+        - key: REDIS_PASSWORD
+          value: ${redis.password}
+          scope: RUN_TIME
+        - key: MINIO_HOST
+          value: ${minio.hostname}
+          scope: RUN_TIME
+        - key: MINIO_ROOT_USER
+          value: ${minio.username}
+          scope: RUN_TIME
+        - key: MINIO_ROOT_PASSWORD
+          value: ${minio.password}
+          scope: RUN_TIME
+        - key: MINIO_API_PORT
+          value: "9000"
+          scope: RUN_TIME
+
+    # Cron job: every-day-tasks
+    - name: every-day-tasks
+      environment_slug: node
+      git:
+        branch: main
+        repo_clone_url: https://github.com/funmusicplace/mirlo
+      build_command: corepack enable && yarn install --immutable && yarn prisma:migrate:deploy
+      run_command: yarn ts-node src/jobs/every-day-tasks.ts
+      instance_size_slug: basic-s
+      jobs:
+        - name: every-day-tasks
+          kind: POST_DEPLOY_JOB
+      envs:
+        - key: NODE_ENV
+          value: production
+          scope: RUN_TIME
+        - key: NODE_OPTIONS
+          value: --max-old-space-size=512
+          scope: RUN_TIME
+        - key: SKIP_INSTALL_DEPS
+          value: "true"
+          scope: BUILD_TIME
+        - key: DATABASE_URL
+          value: ${db.connection_string}
+          scope: RUN_TIME
+        - key: REDIS_HOST
+          value: ${redis.hostname}
+          scope: RUN_TIME
+        - key: REDIS_PORT
+          value: ${redis.port}
+          scope: RUN_TIME
+        - key: REDIS_PASSWORD
+          value: ${redis.password}
+          scope: RUN_TIME
+        - key: MINIO_HOST
+          value: ${minio.hostname}
+          scope: RUN_TIME
+        - key: MINIO_ROOT_USER
+          value: ${minio.username}
+          scope: RUN_TIME
+        - key: MINIO_ROOT_PASSWORD
+          value: ${minio.password}
+          scope: RUN_TIME
+        - key: MINIO_API_PORT
+          value: "9000"
+          scope: RUN_TIME
+
+    # Cron job: every-month-tasks
+    - name: every-month-tasks
+      environment_slug: node
+      git:
+        branch: main
+        repo_clone_url: https://github.com/funmusicplace/mirlo
+      build_command: corepack enable && yarn install --immutable && yarn prisma:migrate:deploy
+      run_command: yarn ts-node src/jobs/every-month-tasks.ts
+      instance_size_slug: basic-s
+      jobs:
+        - name: every-month-tasks
+          kind: POST_DEPLOY_JOB
+      envs:
+        - key: NODE_ENV
+          value: production
+          scope: RUN_TIME
+        - key: NODE_OPTIONS
+          value: --max-old-space-size=512
+          scope: RUN_TIME
+        - key: SKIP_INSTALL_DEPS
+          value: "true"
+          scope: BUILD_TIME
+        - key: DATABASE_URL
+          value: ${db.connection_string}
+          scope: RUN_TIME
+        - key: REDIS_HOST
+          value: ${redis.hostname}
+          scope: RUN_TIME
+        - key: REDIS_PORT
+          value: ${redis.port}
+          scope: RUN_TIME
+        - key: REDIS_PASSWORD
+          value: ${redis.password}
+          scope: RUN_TIME
+        - key: MINIO_HOST
+          value: ${minio.hostname}
+          scope: RUN_TIME
+        - key: MINIO_ROOT_USER
+          value: ${minio.username}
+          scope: RUN_TIME
+        - key: MINIO_ROOT_PASSWORD
+          value: ${minio.password}
+          scope: RUN_TIME
+        - key: MINIO_API_PORT
+          value: "9000"
+          scope: RUN_TIME
+
+    # MinIO (S3-compatible object storage)
+    - name: minio
+      environment_slug: docker
+      image:
+        registry_type: REGISTRY_DOCKER_HUB
+        registry: library
+        repository: minio/minio
+        tag: latest
+      instance_count: 1
+      instance_size_slug: basic-s
+      run_command: server /data
+      http_port: 9001
+      envs:
+        - key: MINIO_ROOT_USER
+          value: minioadmin
+          scope: RUN_TIME
+        - key: MINIO_ROOT_PASSWORD
+          value: ${MINIO_ROOT_PASSWORD}
+          scope: RUN_TIME
+          type: SECRET
+      volumes:
+        - name: minio-data
+          mount_path: /data
+          filesystem_type: ext4
+          size_gib: 100
+
+  databases:
+    - engine: PG
+      name: db
+      version: "14"
+      production: true
+
+  redis:
+    - name: redis
+      version: "7"
+      production: true
+
+  static_sites: []
