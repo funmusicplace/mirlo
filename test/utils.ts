@@ -174,7 +174,7 @@ export const createMerch = async (
   artistId: number,
   data?: Partial<Prisma.MerchCreateArgs["data"]>
 ) => {
-  const tg = await prisma.merch.create({
+  const merch = await prisma.merch.create({
     data: {
       minPrice: data?.minPrice ?? 0,
       description: data?.description ?? "Test description",
@@ -183,10 +183,11 @@ export const createMerch = async (
       isPublic: false,
       title: data?.title ?? "Test trackGroup",
       artistId: artistId,
+      urlSlug: slug(data?.title ?? "test-merch"),
     },
   });
 
-  return tg;
+  return merch;
 };
 
 export const createTrack = async (
@@ -316,6 +317,19 @@ export const createFundraiserPledge = async (
     },
   });
   return pledge;
+};
+
+export const createSiteSettings = async (data?: Record<string, any>) => {
+  const settings = await prisma.settings.upsert({
+    where: { id: 1 },
+    update: {
+      settings: data || ({} as any),
+    },
+    create: {
+      settings: data || ({} as any),
+    },
+  });
+  return settings;
 };
 
 export default {

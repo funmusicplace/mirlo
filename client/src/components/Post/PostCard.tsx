@@ -44,12 +44,12 @@ const HalfTone: React.FC<{ color1?: string; color2?: string }> = ({
           background-image:
             radial-gradient(
               circle at center,
-              ${color2 || "var(--mi-pink)"} var(--stop1),
+              ${color2 || "var(--mi-primary-color)"} var(--stop1),
               transparent var(--stop2)
             ),
             radial-gradient(
               circle at center,
-              ${color2 || "var(--mi-pink)"} var(--stop1),
+              ${color2 || "var(--mi-primary-color)"} var(--stop1),
               transparent var(--stop2)
             );
           background-size: var(--bgSize) var(--bgSize);

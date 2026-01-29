@@ -7,7 +7,7 @@ const Announcement: React.FC = () => {
   return (
     <div
       className={css`
-        background: var(--mi-pink);
+        background: var(--mi-primary-color);
         color: white;
         padding: 1rem;
         border-radius: 5px;
@@ -19,7 +19,7 @@ const Announcement: React.FC = () => {
         gap: 1rem;
       `}
     >
-    Join the beta test for mirlo's upcoming iOS app!
+      Join the beta test for mirlo's upcoming iOS app!
       <ButtonAnchor
         variant="outlined"
         startIcon={<FaArrowRight />}

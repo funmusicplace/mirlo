@@ -59,7 +59,7 @@ export const LoopButton: React.FC = () => {
           color: ${looping ? "white !important" : "inherit"};
         }
         ${looping
-          ? `color: var(--mi-link-color) !important; 
+          ? `color: var(--mi-primary-color) !important; 
              `
           : ""}
       `}

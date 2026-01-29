@@ -7,7 +7,36 @@ declare global {
     };
     type Settings = {
       platformPercent: number;
-      instanceArtistId?: number;
+      defaultCurrency?: string;
+      stripe?: {
+        key?: string;
+        webhookSigningSecret?: string;
+        webhookConnectSigningSecret?: string;
+      };
+      sendgrid?: {
+        apiKey?: string;
+        fromEmail?: string;
+      };
+      s3?: {
+        keyId?: string;
+        applicationKey?: string;
+        keyName?: string;
+        endpoint?: string;
+        region?: string;
+      };
+      instanceCustomization?: {
+        title?: string;
+        supportEmail?: string;
+        artistId?: number;
+        purchaseEmail?: string;
+        showHeroOnHome?: boolean;
+        colors?: {
+          primary?: string;
+          secondary?: string;
+          background?: string;
+          foreground?: string;
+        };
+      };
     };
     type Properties = {
       colors?: {

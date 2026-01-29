@@ -2,7 +2,7 @@ import { css } from "@emotion/css";
 import { random, sample } from "lodash";
 
 const colors = [
-  "var(--mi-pink)",
+  "var(--mi-primary-color)",
   // "var(--mi-normal-background-color)",
   "#12AAE0",
   "#E0D412",
