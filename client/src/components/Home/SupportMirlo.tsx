@@ -20,7 +20,7 @@ const SupportMirlo = () => {
     <div
       className={css`
         width: 100%;
-        background-color: #be3455 !important;
+        background-color: var(--mi-primary-color) !important;
         color: var(--mi-white);
 
         @media screen and (max-width: ${bp.medium}px) {
@@ -35,8 +35,6 @@ const SupportMirlo = () => {
       <SplashWrapper
         className={css`
           padding: 4rem 0;
-
-          display: flex;
           min-height: auto !important;
 
           @media screen and (max-width: ${bp.medium}px) {

@@ -8,11 +8,9 @@ import { useAuthContext } from "state/AuthContext";
 import { FaArrowRight } from "react-icons/fa";
 import React from "react";
 import Parallax from "parallax-js";
-import { useQuery } from "@tanstack/react-query";
-import { querySetting } from "queries/settings";
 
 export const SplashWrapper = styled.div`
-  display: var(--mi-instance-show-hero-on-home, block);
+  display: var(--mi-instance-show-hero-on-home, flex);
   align-items: center;
   justify-content: center;
 

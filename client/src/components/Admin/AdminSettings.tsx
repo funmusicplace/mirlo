@@ -85,7 +85,14 @@ const AdminSettings = () => {
         showQueueDashboard: response.result.showQueueDashboard,
         platformPercent: response.result.settings?.platformPercent,
         instanceCustomization: {
-          ...response.result.settings?.instanceCustomization,
+          ...(response.result.settings?.instanceCustomization ?? {
+            colors: {
+              primary: "#be3455",
+              secondary: "#ffffff",
+              background: "#ffffff",
+              foreground: "#000000",
+            },
+          }),
         },
         stripe: {
           ...response.result.settings?.stripe,
