@@ -1,5 +1,6 @@
 import { css } from "@emotion/css";
 import Button from "components/common/Button";
+import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
 import Table from "components/common/Table";
 import TextArea from "components/common/TextArea";
@@ -10,26 +11,16 @@ import { useSnackbar } from "state/SnackbarContext";
 
 interface FormSettings {
   platformPercent: number;
-  instanceArtistId: number;
   terms: string;
   privacyPolicy: string;
   cookiePolicy: string;
   contentPolicy: string;
-  stripeKey?: string;
-  stripeWebhookSigningSecret?: string;
-  stripeWebhookConnectSigningSecret?: string;
+  instanceCustomization?: SettingsFromAPI["settings"]["instanceCustomization"];
+  stripe?: SettingsFromAPI["settings"]["stripe"];
   isClosedToPublicArtistSignup: boolean;
   showQueueDashboard: boolean;
-
-  sendgridApiKey?: string;
-  sendgridFromEmail?: string;
-
-  backblazeKeyId?: string;
-  backblazeApplicationKey?: string;
-  backblazeKeyName?: string;
-  backblazeEndpoint?: string;
-  backblazeRegion?: string;
-
+  sendgrid?: SettingsFromAPI["settings"]["sendgrid"];
+  s3?: SettingsFromAPI["settings"]["s3"];
   cloudflareTurnstileSecret?: string;
   defconLevel?: number;
 }
@@ -38,16 +29,35 @@ interface SettingsFromAPI {
   settings: {
     platformPercent: number;
     instanceArtistId: number;
-    stripeKey?: string;
-    stripeWebhookSigningSecret?: string;
-    stripeWebhookConnectSigningSecret?: string;
-    sendgridApiKey?: string;
-    sendgridFromEmail?: string;
-    backblazeKeyId?: string;
-    backblazeApplicationKey?: string;
-    backblazeKeyName?: string;
-    backblazeEndpoint?: string;
-    backblazeRegion?: string;
+    instanceCustomization?: {
+      colors?: {
+        primary?: string;
+        secondary?: string;
+        background?: string;
+        foreground?: string;
+      };
+      artistId?: number;
+      title?: string;
+      supportEmail?: string;
+      purchaseEmail?: string;
+      showHeroOnHome?: boolean;
+    };
+    stripe?: {
+      key?: string;
+      webhookSigningSecret?: string;
+      webhookConnectSigningSecret?: string;
+    };
+    sendgrid?: {
+      apiKey?: string;
+      fromEmail?: string;
+    };
+    s3?: {
+      keyId?: string;
+      applicationKey?: string;
+      keyName?: string;
+      endpoint?: string;
+      region?: string;
+    };
     cloudflareTurnstileSecret?: string;
   };
   terms: string;
@@ -74,20 +84,18 @@ const AdminSettings = () => {
           response.result.isClosedToPublicArtistSignup,
         showQueueDashboard: response.result.showQueueDashboard,
         platformPercent: response.result.settings?.platformPercent,
-        instanceArtistId: response.result.settings?.instanceArtistId,
-        stripeKey: response.result.settings?.stripeKey,
-        stripeWebhookSigningSecret:
-          response.result.settings?.stripeWebhookSigningSecret,
-        stripeWebhookConnectSigningSecret:
-          response.result.settings?.stripeWebhookConnectSigningSecret,
-        sendgridApiKey: response.result.settings?.sendgridApiKey,
-        sendgridFromEmail: response.result.settings?.sendgridFromEmail,
-        backblazeKeyId: response.result.settings?.backblazeKeyId,
-        backblazeApplicationKey:
-          response.result.settings?.backblazeApplicationKey,
-        backblazeKeyName: response.result.settings?.backblazeKeyName,
-        backblazeEndpoint: response.result.settings?.backblazeEndpoint,
-        backblazeRegion: response.result.settings?.backblazeRegion,
+        instanceCustomization: {
+          ...response.result.settings?.instanceCustomization,
+        },
+        stripe: {
+          ...response.result.settings?.stripe,
+        },
+        sendgrid: {
+          ...response.result.settings?.sendgrid,
+        },
+        s3: {
+          ...response.result.settings?.s3,
+        },
         cloudflareTurnstileSecret:
           response.result.settings?.cloudflareTurnstileSecret,
         terms: response.result.terms,
@@ -108,18 +116,18 @@ const AdminSettings = () => {
         await api.post("admin/settings", {
           settings: {
             platformPercent: data.platformPercent,
-            instanceArtistId: Number(data.instanceArtistId),
-            stripeKey: data.stripeKey,
-            stripeWebhookSigningSecret: data.stripeWebhookSigningSecret,
-            stripeWebhookConnectSigningSecret:
-              data.stripeWebhookConnectSigningSecret,
-            sendgridApiKey: data.sendgridApiKey,
-            sendgridFromEmail: data.sendgridFromEmail,
-            backblazeKeyId: data.backblazeKeyId,
-            backblazeApplicationKey: data.backblazeApplicationKey,
-            backblazeKeyName: data.backblazeKeyName,
-            backblazeEndpoint: data.backblazeEndpoint,
-            backblazeRegion: data.backblazeRegion,
+            instanceCustomization: {
+              ...data.instanceCustomization,
+            },
+            stripe: {
+              ...data.stripe,
+            },
+            sendgrid: {
+              ...data.sendgrid,
+            },
+            s3: {
+              ...data.s3,
+            },
             cloudflareTurnstileSecret: data.cloudflareTurnstileSecret,
           },
           terms: data.terms,
@@ -130,6 +138,7 @@ const AdminSettings = () => {
           contentPolicy: data.contentPolicy,
           defconLevel: Number(data.defconLevel),
         });
+        snackbar("Settings updated", { type: "success" });
       } catch (e) {
         console.error(e);
         snackbar("Oops something went wrong", { type: "warning" });
@@ -143,6 +152,9 @@ const AdminSettings = () => {
       <h3>Settings</h3>
       <form onSubmit={handleSubmit(updateSettings)}>
         <Table>
+          <tr>
+            <h3>General Settings</h3>
+          </tr>
           <tr>
             <td>Platform percent</td>
             <td>
@@ -180,10 +192,22 @@ const AdminSettings = () => {
             </td>
           </tr>
           <tr>
+            <td>Show hero on home</td>
+            <td>
+              <InputEl
+                {...register("instanceCustomization.showHeroOnHome")}
+                type="checkbox"
+                className={css`
+                  text-align: right;
+                `}
+              />
+            </td>
+          </tr>
+          <tr>
             <td>Instance artist ID</td>
             <td>
               <InputEl
-                {...register("instanceArtistId")}
+                {...register("instanceCustomization.artistId")}
                 type="number"
                 className={css`
                   text-align: right;
@@ -192,10 +216,60 @@ const AdminSettings = () => {
             </td>
           </tr>
           <tr>
+            <td>Colors</td>
+            <td>
+              <FormComponent>
+                <label>Primary Color</label>
+                <InputEl
+                  {...register("instanceCustomization.colors.primary")}
+                  type="color"
+                  className={css`
+                    text-align: right;
+                  `}
+                />
+              </FormComponent>
+              <FormComponent>
+                <label>Secondary Color</label>
+                <InputEl
+                  {...register("instanceCustomization.colors.secondary")}
+                  type="color"
+                  className={css`
+                    text-align: right;
+                  `}
+                />
+              </FormComponent>
+              <FormComponent>
+                <label>Foreground Color</label>
+                <InputEl
+                  {...register("instanceCustomization.colors.foreground")}
+                  type="color"
+                  className={css`
+                    text-align: right;
+                  `}
+                />
+              </FormComponent>
+              <FormComponent>
+                <label>Background Color</label>
+                <InputEl
+                  {...register("instanceCustomization.colors.background")}
+                  type="color"
+                  className={css`
+                    text-align: right;
+                  `}
+                />
+              </FormComponent>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <h3>Stripe Settings</h3>
+            </td>
+          </tr>
+          <tr>
             <td>stripeKey</td>
             <td>
               <InputEl
-                {...register("stripeKey")}
+                {...register("stripe.key")}
                 className={css`
                   text-align: right;
                 `}
@@ -203,10 +277,10 @@ const AdminSettings = () => {
             </td>
           </tr>
           <tr>
-            <td>stripeWebhookSigningSecret</td>
+            <td>webhookConnectSigningSecret</td>
             <td>
               <InputEl
-                {...register("stripeWebhookSigningSecret")}
+                {...register("stripe.webhookConnectSigningSecret")}
                 className={css`
                   text-align: right;
                 `}
@@ -214,10 +288,42 @@ const AdminSettings = () => {
             </td>
           </tr>
           <tr>
-            <td>sendgridApiKey</td>
+            <td>
+              <h3>SendGrid Settings</h3>
+            </td>
+          </tr>
+          <tr>
+            <td>apiKey</td>
             <td>
               <InputEl
-                {...register("sendgridFromEmail")}
+                {...register("sendgrid.apiKey")}
+                className={css`
+                  text-align: right;
+                `}
+              />
+            </td>
+          </tr>
+          <tr>
+            <td>fromEmail</td>
+            <td>
+              <InputEl
+                {...register("sendgrid.fromEmail")}
+                className={css`
+                  text-align: right;
+                `}
+              />
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <h3>S3 Settings</h3>
+            </td>
+          </tr>
+          <tr>
+            <td>keyId</td>
+            <td>
+              <InputEl
+                {...register("s3.keyId")}
                 className={css`
                   text-align: right;
                 `}
@@ -225,10 +331,10 @@ const AdminSettings = () => {
             </td>
           </tr>{" "}
           <tr>
-            <td>backblazeKeyId</td>
+            <td>applicationKey</td>
             <td>
               <InputEl
-                {...register("backblazeKeyId")}
+                {...register("s3.applicationKey")}
                 className={css`
                   text-align: right;
                 `}
@@ -236,21 +342,10 @@ const AdminSettings = () => {
             </td>
           </tr>{" "}
           <tr>
-            <td>backblazeApplicationKey</td>
+            <td>keyName</td>
             <td>
               <InputEl
-                {...register("backblazeApplicationKey")}
-                className={css`
-                  text-align: right;
-                `}
-              />
-            </td>
-          </tr>{" "}
-          <tr>
-            <td>backblazeKeyName</td>
-            <td>
-              <InputEl
-                {...register("backblazeKeyName")}
+                {...register("s3.keyName")}
                 className={css`
                   text-align: right;
                 `}
@@ -258,10 +353,10 @@ const AdminSettings = () => {
             </td>
           </tr>
           <tr>
-            <td>backblazeEndpoint</td>
+            <td>endpoint</td>
             <td>
               <InputEl
-                {...register("backblazeEndpoint")}
+                {...register("s3.endpoint")}
                 className={css`
                   text-align: right;
                 `}
@@ -269,10 +364,10 @@ const AdminSettings = () => {
             </td>
           </tr>
           <tr>
-            <td>backblazeRegion</td>
+            <td>region</td>
             <td>
               <InputEl
-                {...register("backblazeRegion")}
+                {...register("s3.region")}
                 className={css`
                   text-align: right;
                 `}
@@ -284,17 +379,6 @@ const AdminSettings = () => {
             <td>
               <InputEl
                 {...register("cloudflareTurnstileSecret")}
-                className={css`
-                  text-align: right;
-                `}
-              />
-            </td>
-          </tr>
-          <tr>
-            <td>backblazeRegion</td>
-            <td>
-              <InputEl
-                {...register("backblazeRegion")}
                 className={css`
                   text-align: right;
                 `}
@@ -323,6 +407,11 @@ const AdminSettings = () => {
             <td>Content Policy Markdown</td>
             <td>
               <TextArea {...register("contentPolicy")} rows={10} />
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <h3>Security</h3>
             </td>
           </tr>
           <tr>

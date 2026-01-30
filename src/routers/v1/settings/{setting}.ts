@@ -22,6 +22,12 @@ export default function () {
         "contentPolicy",
         "isClosedToPublicArtistSignup",
         "platformPercent",
+        "instanceCustomization.title",
+        "instanceCustomization.supportEmail",
+        "instanceCustomization.artistId",
+        "instanceCustomization.purchaseEmail",
+        "instanceCustomization.showHeroOnHome",
+        "instanceCustomization.colors",
       ];
 
       if (!okaySettings.includes(setting)) {
@@ -31,10 +37,24 @@ export default function () {
         });
       }
 
-      if (setting === "instanceArtist" && settings.settings?.instanceArtistId) {
+      if (setting.includes("instanceCustomization.")) {
+        const key = setting.split(".")[1];
+        return res.status(200).json({
+          result: settings.settings?.instanceCustomization
+            ? settings.settings.instanceCustomization[
+                key as keyof typeof settings.settings.instanceCustomization
+              ]
+            : undefined,
+        });
+      }
+
+      if (
+        setting === "instanceArtist" &&
+        settings.settings?.instanceCustomization?.artistId
+      ) {
         const artist = await prisma.artist.findFirst({
           where: {
-            id: settings.settings.instanceArtistId,
+            id: settings.settings.instanceCustomization?.artistId,
           },
         });
         return res.status(200).json({ result: artist });

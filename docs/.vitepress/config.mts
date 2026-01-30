@@ -43,8 +43,12 @@ export default defineConfig({
         ],
       },
       {
-        text: "For Developers",
+        text: "Developers: using the API",
         link: "/api",
+      },
+      {
+        text: "Hosting Mirlo",
+        link: "/hosting",
       },
       {
         text: "For Mirlo Maintainers",

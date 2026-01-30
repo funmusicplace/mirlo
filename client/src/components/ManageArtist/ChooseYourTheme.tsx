@@ -12,11 +12,11 @@ const ColorSquare = styled.span<{ color: string }>`
   background-color: ${(props) => props.color};
   border-radius: 0.2rem;
   margin-left: 0.5rem;
-  border: 1px solid var(--mi-lighter-background-color);
+  border: 1px solid var(--mi-lighten-background-color);
 `;
 
 const ColorLabel = styled.label`
-  background-color: 1px solid var(--mi-light-background-color);
+  background-color: 1px solid var(--mi-lighten-background-color);
   padding: 0.5rem;
   cursor: pointer;
 

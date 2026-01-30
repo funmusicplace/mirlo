@@ -13,6 +13,7 @@ import {
 } from "./utils/minio";
 import { Client } from "@mirlo/prisma/client";
 import { isNumber } from "lodash";
+import { getSiteSettings } from "./utils/settings";
 
 type Options = {
   title: string;
@@ -23,6 +24,7 @@ type Options = {
   isSong?: boolean;
   isPlayer?: string;
   rss?: string;
+  color?: string;
 };
 
 const determineType = (options: Options) => {
@@ -44,7 +46,16 @@ export const getTrackWidget = (client: Client, trackId: number) => {
 };
 
 const buildOpenGraphTags = ($: cheerio.CheerioAPI, options: Options) => {
-  const { title, description, url, imageUrl, rss, isAlbum, isPlayer } = options;
+  const {
+    title,
+    description,
+    url,
+    imageUrl,
+    rss,
+    isAlbum,
+    isPlayer,
+    color = "#be3455",
+  } = options;
   $("head").append(`
     <meta property="og:type" content="${determineType(options)}">
     <meta property="og:title" content="${title}">
@@ -57,6 +68,8 @@ const buildOpenGraphTags = ($: cheerio.CheerioAPI, options: Options) => {
 
     <meta property="og:image" content="${imageUrl ? imageUrl : "/android-chrome-512x512.png"}" />
     <meta name="twitter:image" content="${imageUrl ? imageUrl : "/android-chrome-512x512.png"}" />
+    <meta name="theme-color" content="${options.color}" />
+    <meta name="msapplication-TileColor" content="${options.color}" />
 
     ${rss ? `<link rel="alternate" type="application/rss+xml" href="${rss}" />` : ""}
     ${
@@ -83,28 +96,11 @@ const buildOpenGraphTags = ($: cheerio.CheerioAPI, options: Options) => {
 
 const mirloDefaultDescription = "Buy and sell music directly from musicians.";
 
-/**
- * FIXME: make this function a little more sane. Also write tests for it.
- * @param pathname
- * @returns
- */
-const parseIndex = async (pathname: string) => {
-  const fileLocation = path.join(
-    __dirname,
-    "..",
-    "client",
-    "dist",
-    "index.html" // We fetch the index.html file
-  );
-
+export const analyzePathAndGenerateHTML = async (
+  pathname: string,
+  $: cheerio.CheerioAPI
+) => {
   const route = pathname.split("/");
-  let buffer;
-  try {
-    buffer = await fs.readFileSync(fileLocation);
-  } catch (e) {
-    return "<html>No built client</html>";
-  }
-  const $ = cheerio.load(buffer);
 
   try {
     const client = await getClient();
@@ -118,26 +114,6 @@ const parseIndex = async (pathname: string) => {
         imageUrl: `${client.applicationUrl}/images/mirlo-typeface.png`,
         rss: `${process.env.API_DOMAIN}/v1/trackGroups?format=rss`,
       });
-    } else if (route[1] === "label") {
-      const label = await prisma.user.findFirst({
-        where: { urlSlug: route[2], isLabelAccount: true },
-        include: {
-          userAvatar: true,
-        },
-      });
-
-      const avatarString = label?.userAvatar?.url.find((u) =>
-        u.includes("x600")
-      );
-
-      buildOpenGraphTags($, {
-        title: label?.name ?? "A Label on Mirlo",
-        description: `A label on Mirlo`,
-        url: `${client.applicationUrl}${route.join("/")}`,
-        imageUrl: avatarString
-          ? generateFullStaticImageUrl(avatarString, finalUserAvatarBucket)
-          : undefined,
-      });
     }
 
     const artist = await prisma.artist.findFirst({
@@ -146,7 +122,6 @@ const parseIndex = async (pathname: string) => {
         avatar: true,
       },
     });
-
     const avatarString = artist?.avatar?.url.find((u) => u.includes("x600"));
     const avatarUrl = avatarString
       ? generateFullStaticImageUrl(avatarString, finalArtistAvatarBucket)
@@ -254,6 +229,7 @@ const parseIndex = async (pathname: string) => {
             },
           });
         }
+
         if (merch) {
           const coverString = merch.images?.[0]?.url.find((u) =>
             u.includes("x600")
@@ -271,7 +247,7 @@ const parseIndex = async (pathname: string) => {
           });
         } else {
           buildOpenGraphTags($, {
-            title: artistName,
+            title: `${artistName} merch`,
             description: `All merch by ${artistName} on Mirlo`,
             url: `${client.applicationUrl}/${artist?.urlSlug}/merch`,
             imageUrl: avatarUrl,
@@ -281,7 +257,7 @@ const parseIndex = async (pathname: string) => {
       } else {
         // it's about the artist in general
         buildOpenGraphTags($, {
-          title: artistName,
+          title: `${artistName} ${route[2]}`,
           description: `All ${route[2]} by ${artistName} on Mirlo`,
           url: `${client.applicationUrl}/${artist?.urlSlug}/${route[2]}`,
           imageUrl: avatarUrl,
@@ -373,6 +349,45 @@ const parseIndex = async (pathname: string) => {
     console.error("e", e);
   }
 
+  const settings = await getSiteSettings();
+
+  $("title").after(`
+    <style>
+    html {
+      --mi-instance-primary-color: ${settings.settings?.instanceCustomization?.colors?.primary ?? "#be3455"};
+      --mi-instance-secondary-color: ${settings.settings?.instanceCustomization?.colors?.secondary ?? "#ffffff"};
+      --mi-instance-background-color: ${settings.settings?.instanceCustomization?.colors?.background ?? "#ffffff"};
+      --mi-instance-foreground-color: ${settings.settings?.instanceCustomization?.colors?.foreground ?? "#000000"};
+      --mi-instance-show-hero-on-home: ${settings.settings?.instanceCustomization?.showHeroOnHome ? "block" : "none"};
+    }
+    </style>
+  `);
+
+  return $;
+};
+
+/**
+ * FIXME: make this function a little more sane. Also write tests for it.
+ * @param pathname
+ * @returns
+ */
+const parseIndex = async (pathname: string) => {
+  const fileLocation = path.join(
+    __dirname,
+    "..",
+    "client",
+    "dist",
+    "index.html" // We fetch the index.html file
+  );
+
+  let buffer;
+  try {
+    buffer = await fs.readFileSync(fileLocation);
+  } catch (e) {
+    return "<html>No built client</html>";
+  }
+  const $ = cheerio.load(buffer);
+  await analyzePathAndGenerateHTML(pathname, $);
   return $.html();
 };
 

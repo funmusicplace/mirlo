@@ -17,7 +17,7 @@ type TurnstileGlobal = {
 
 const containerStyles = css`
   width: 100%;
-  background-color: var(--mi-light-background-color);
+  background-color: var(--mi-lighten-background-color);
   display: flex;
   justify-content: center;
   padding: 4rem 1rem;

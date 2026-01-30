@@ -23,8 +23,8 @@ const Pill = styled.span<{ isHoverable?: boolean; variant?: "warning" }>`
       case "warning":
         return `
             background: repeating-linear-gradient(45deg, 
-              var(--mi-lighten-warning-background-color), 
-              var(--mi-lighten-warning-background-color) 10px, 
+              var(--mi-lighten-background-color), 
+              var(--mi-lighten-background-color) 10px, 
               var(--mi-normal-background-color) 10px, 
               var(--mi-normal-background-color) 20px);
             border: var(--mi-warning-background-color) 1px solid;

@@ -60,10 +60,10 @@ const {
   MINIO_HOST = "",
   MINIO_ROOT_USER = "",
   MINIO_ROOT_PASSWORD = "",
-  BACKBLAZE_KEY_ID = "",
-  BACKBLAZE_APP_KEY = "",
-  BACKBLAZE_ENDPOINT = "https://s3.us-east-005.backblazeb2.com",
-  BACKBBLAZE_REGION = "us-east-005",
+  S3_ACCESS_KEY_ID = "",
+  S3_SECRET_ACCESS_KEY = "",
+  S3_ENDPOINT = "https://s3.us-east-005.backblazeb2.com",
+  S3_REGION = "us-east-005",
   MINIO_API_PORT = 9000,
   NODE_ENV,
 } = process.env;
@@ -93,11 +93,11 @@ export const minioClient =
 export const backblazeClient =
   backendStorage === "backblaze"
     ? new S3Client({
-        region: BACKBBLAZE_REGION,
-        endpoint: BACKBLAZE_ENDPOINT,
+        region: S3_REGION,
+        endpoint: S3_ENDPOINT,
         credentials: {
-          accessKeyId: BACKBLAZE_KEY_ID,
-          secretAccessKey: BACKBLAZE_APP_KEY,
+          accessKeyId: S3_ACCESS_KEY_ID,
+          secretAccessKey: S3_SECRET_ACCESS_KEY,
         },
         responseChecksumValidation: "WHEN_REQUIRED",
         requestChecksumCalculation: "WHEN_REQUIRED",

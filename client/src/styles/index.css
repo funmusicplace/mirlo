@@ -156,14 +156,14 @@ a {
   transition:
     0.25s color,
     0.25s background-color;
-  color: var(--mi-link-color);
+  color: var(--mi-primary-color);
   text-decoration: underline;
   word-break: break-word;
 }
 
 @media (prefers-color-scheme: dark) {
   a {
-    color: var(--mi-pink);
+    color: var(--mi-primary-color);
   }
 }
 

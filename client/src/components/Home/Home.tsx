@@ -22,7 +22,7 @@ export const SectionHeader = styled.div<{ userId?: number }>`
     text-transform: uppercase;
     margin: var(--mi-side-paddings-xsmall);
     font-weight: normal;
-    color: var(--mi-pink);
+    color: var(--mi-primary-color);
     padding-bottom: 0 !important;
     display: inline-block;
   }

@@ -7,6 +7,9 @@ interface SettingsType extends Partial<Settings> {
 
 const defaultSettings = {
   platformPercent: 7,
+  instanceCustomization: {
+    showHeroOnHome: true,
+  },
 };
 
 export const getSiteSettings = async (): Promise<SettingsType> => {
@@ -16,6 +19,9 @@ export const getSiteSettings = async (): Promise<SettingsType> => {
       data: {
         settings: {
           platformPercent: 10,
+          instanceCustomization: {
+            showHeroOnHome: true,
+          },
         },
       },
     });
