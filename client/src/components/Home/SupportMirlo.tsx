@@ -35,8 +35,6 @@ const SupportMirlo = () => {
       <SplashWrapper
         className={css`
           padding: 4rem 0;
-
-          display: flex;
           min-height: auto !important;
 
           @media screen and (max-width: ${bp.medium}px) {

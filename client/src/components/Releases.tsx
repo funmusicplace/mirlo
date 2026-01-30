@@ -60,7 +60,6 @@ const Releases: React.FC<{ limit?: number }> = ({ limit = pageSize }) => {
     <div
       className={css`
         padding: 2rem 0;
-        background-color: var(--mi-white);
 
         @media screen and (max-width: ${bp.medium}px) {
           margin-bottom: 0rem;

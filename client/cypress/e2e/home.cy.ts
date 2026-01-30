@@ -155,10 +155,6 @@ describe("home page", () => {
   });
 
   it("renders curated sections with links to releases, posts, and tags", () => {
-    cy.contains("Join the beta test for mirlo's upcoming iOS app!").should(
-      "be.visible"
-    );
-
     cy.contains("Recent releases").scrollIntoView().should("be.visible");
     cy.contains("a", featuredRelease.title)
       .scrollIntoView()

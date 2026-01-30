@@ -358,7 +358,7 @@ export const analyzePathAndGenerateHTML = async (
       --mi-instance-secondary-color: ${settings.settings?.instanceCustomization?.colors?.secondary ?? "#ffffff"};
       --mi-instance-background-color: ${settings.settings?.instanceCustomization?.colors?.background ?? "#ffffff"};
       --mi-instance-foreground-color: ${settings.settings?.instanceCustomization?.colors?.foreground ?? "#000000"};
-      --mi-instance-show-hero-on-home: ${settings.settings?.instanceCustomization?.showHeroOnHome ? "block" : "none"};
+      --mi-instance-show-hero-on-home: ${settings.settings?.instanceCustomization?.showHeroOnHome ? "flex" : "none"};
     }
     </style>
   `);

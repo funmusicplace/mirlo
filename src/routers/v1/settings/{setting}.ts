@@ -10,8 +10,6 @@ export default function () {
 
   async function GET(req: Request, res: Response, next: NextFunction) {
     try {
-      const settings = await getSiteSettings();
-
       const { setting } = req.params;
 
       const okaySettings = [
@@ -36,7 +34,7 @@ export default function () {
           description: "Page not found",
         });
       }
-
+      const settings = await getSiteSettings();
       if (setting.includes("instanceCustomization.")) {
         const key = setting.split(".")[1];
         return res.status(200).json({
@@ -54,7 +52,7 @@ export default function () {
       ) {
         const artist = await prisma.artist.findFirst({
           where: {
-            id: settings.settings.instanceCustomization?.artistId,
+            id: Number(settings.settings.instanceCustomization?.artistId),
           },
         });
         return res.status(200).json({ result: artist });
