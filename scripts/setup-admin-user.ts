@@ -40,12 +40,14 @@ async function setupAdminUser() {
         password: hashedPassword,
         name,
         isAdmin: true,
+        emailConfirmationToken: null,
       },
       create: {
         email,
         password: hashedPassword,
         name,
         isAdmin: true,
+        emailConfirmationToken: null,
       },
     });
 

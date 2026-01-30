@@ -257,6 +257,15 @@ docker compose logs -f background
 docker compose logs pgsql | tail -100
 ```
 
+### Look inside docker
+
+```bash
+# Start an interactive shell in the container
+docker compose exec api bash
+# View a specific file
+docker compose exec api cat /path/to/file
+```
+
 ### Restart services:
 
 ```bash
@@ -264,13 +273,15 @@ docker compose restart api
 docker compose restart background
 ```
 
-### Update to latest version:
+### Update to latest version of Mirlo:
 
 ```bash
+cd /opt/mirlo
 git pull origin main
-docker compose pull
+docker compose build # This step can take a while
 docker compose up -d
 docker compose exec api yarn prisma:migrate:deploy
+docker compose exec api yarn client:build
 ```
 
 ### Backup database:
@@ -293,18 +304,6 @@ gunzip < backup.sql.gz | docker compose exec -T pgsql psql -U mirlo_user mirlo
 gunzip < backup.sql.gz | sudo -u postgres psql mirlo
 ```
 
-### Updating Mirlo
-
-**Docker:**
-
-```bash
-cd /opt/mirlo
-git pull origin main
-docker compose pull
-docker compose up -d
-docker compose exec api yarn prisma:migrate:deploy
-```
-
 ---
 
 ## Troubleshooting
@@ -318,9 +317,15 @@ docker compose exec api yarn prisma:migrate:deploy
 Verify connection string and credentials:
 
 ```bash
-# Docker
-docker compose exec api psql $DATABASE_URL
+# Docker - connect to the pgsql container directly
+docker compose exec pgsql psql -U mirlo_user nomads
 ```
+
+Once connected, you can query the database. Useful commands:
+
+- `\dt` - list all tables
+- `SELECT * FROM "User" LIMIT 5;` - query a table
+- `\q` - quit
 
 ### File upload failures
 
