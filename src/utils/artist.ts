@@ -447,6 +447,7 @@ export const singleInclude = (queryOptions?: {
             deletedAt: null,
           },
         },
+        fundraiser: true,
       },
     },
     tourDates: true,
